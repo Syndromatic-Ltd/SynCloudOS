@@ -1,0 +1,124 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.webspring-shelf {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  height: 361px;
+  overflow: hidden;
+  text-align: center;
+  background: transparent;
+}
+
+.webspring-shelf-texture {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: transparent;
+  opacity: 0;
+}
+
+.webspring-shelf-glow {
+  display: none;
+}
+
+.webspring-shelf-highlight {
+  display: none;
+}
+
+.webspring-news {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  top: 118px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 650px;
+  justify-content: center;
+  transform: translateX(-50%);
+}
+
+.webspring-news img {
+  width: 66px;
+  height: 66px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 7px rgba(0, 0, 0, 0.72));
+  transform: translateY(-16px);
+}
+
+.webspring-news-text {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+  text-align: center;
+}
+
+.webspring-news h2 {
+  margin: 0;
+  font-family: inherit;
+  font-size: 56px;
+  line-height: 0.94;
+  color: #fff;
+  white-space: nowrap;
+  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+}
+
+.webspring-news-date {
+  margin: 9px 0 0;
+  width: 100%;
+  color: #9ba7bd;
+  font-family: inherit;
+  font-size: 19px;
+  font-style: italic;
+  text-align: center;
+}
+
+.webspring-news-copy {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  top: 226px;
+  width: 700px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 19px;
+  line-height: 1.26;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.75);
+  transform: translateX(-50%);
+}
+
+.webspring-news-button {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.webspring-news-button:focus-visible {
+  outline: 3px solid rgba(134, 214, 255, 0.9);
+  outline-offset: 8px;
+  border-radius: 8px;
+}

@@ -1,0 +1,52 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.text-system-example { --ink: #173b35; --muted: #5a706a; color: var(--ink); background: #f1f5f1; font: 15px/1.5 system-ui, sans-serif; min-height: 100vh; padding: 32px; box-sizing: border-box; }
+.text-system-example * { box-sizing: border-box; }
+.text-system-example header { max-width: 760px; margin-bottom: 26px; }
+.text-system-example h1 { font-size: clamp(28px, 4vw, 42px); letter-spacing: -.035em; font-weight: 620; margin: 5px 0 8px; line-height: 1.12; }
+.text-system-example h2 { font-size: 16px; font-weight: 650; margin: 0; }
+.text-system-example p { margin: 8px 0; }
+.text-system-example .eyebrow { text-transform: uppercase; font-size: 11px; letter-spacing: .12em; font-weight: 650; }
+.example-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 0; border-top: 1px solid #b8ccc1; border-bottom: 1px solid #b8ccc1; }
+.text-system-example button { padding: 8px 12px; border: 1px solid #9bb7aa; border-radius: 4px; background: #fff; color: var(--ink); font: inherit; cursor: pointer; }
+.text-system-example button:hover { background: #e5eee8; }
+.text-system-example button:disabled { opacity: .45; cursor: default; }
+.text-system-example button:focus-visible, .text-system-example input:focus-visible { outline: 2px solid #176c58; outline-offset: 3px; }
+.size-control { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-right: 8px; }
+.size-control span { color: var(--muted); font-size: 12px; margin-left: 5px; }
+.size-control input { width: 60px; padding: 8px; border: 1px solid #9bb7aa; font: inherit; }
+.zoom-control { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.zoom-control input { width: 96px; accent-color: #176c58; }
+.zoom-control output { width: 42px; font-variant-numeric: tabular-nums; }
+.text-system-example .readiness { color: var(--muted); font-size: 12px; min-height: 20px; margin: 10px 0 20px; }
+.example-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; max-width: 1400px; }
+.text-pane { margin-bottom: 22px; position: relative; }
+.pane-label { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.pane-label button { font-size: 12px; padding: 5px 9px; }
+.shaped-boxes { overflow: auto; display: grid; gap: 12px; max-height: 520px; touch-action: pan-y; border-top: 1px solid #cbd8cf; padding-top: 12px; }
+.shaped-boxes svg { display: block; border: 0; outline: 1px solid #c8d7ce; flex-shrink: 0; cursor: text; }
+.pane-footnote { font-size: 11px; color: var(--muted); }
+.native-text-host { position: absolute; left: 0; top: 44px; width: 1px; height: 1px; }
+.native-text-host textarea { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; opacity: .01; resize: none; overflow: hidden; }
+.native-text-host:focus-within { outline: 2px solid #176c58; }
+.text-system-example aside { border-left: 2px solid #9dbcae; padding-left: 16px; max-width: 460px; color: var(--muted); font-size: 13px; }
+.text-system-example footer { border-top: 1px solid #b8ccc1; margin-top: 25px; padding-top: 12px; display: flex; gap: 24px; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
+@media (max-width: 760px) { .text-system-example { padding: 20px 16px; } .example-workspace { grid-template-columns: 1fr; } .zoom-control { margin-left: 0; } }

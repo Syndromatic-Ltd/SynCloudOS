@@ -1,0 +1,16 @@
+SynCloudOS
+Copyright 2026 Syndromatic Ltd.
+Designed by Kavish Krishnakumar in Manchester.
+
+LICENSING BOUNDARIES
+SynCloudOS framework: AGPL-3.0-or-later (root LICENSE).
+SynWare app authoring SDK source: Apache-2.0
+(src/SynCloudOS/AppSDK/LICENSE and NOTICE), except upstream generated helpers.
+The combined package includes both boundaries. Importing /sdk does not change
+the licence of framework implementation modules that it references.
+Third-party code and artwork retain their original notices and terms.
+
+THIRD-PARTY COMPONENTS
+See THIRD_PARTY.md and licenses/ for upstream notices and licence texts.
+The packaged distribution also includes notices for dependencies incorporated
+into its module graph and for bundled worker/WASM resources.

@@ -1,0 +1,117 @@
+[
+  {
+    "id": "resume-exact",
+    "domain": "docs",
+    "contentType": "article",
+    "title": "Résumé Builder",
+    "body": "Build a polished curriculum vitae with accessible templates.",
+    "keywords": ["career", "cv"],
+    "modifiedAt": 1700000000000,
+    "activation": { "version": 1, "kind": "named-route", "routeName": "docs.item", "parameters": { "id": "resume-exact" } },
+    "revision": "r1"
+  },
+  {
+    "id": "resume-body",
+    "domain": "docs",
+    "contentType": "article",
+    "title": "Career Toolkit",
+    "body": "A resume builder and cover letter guide.",
+    "modifiedAt": 1701000000000,
+    "activation": { "version": 1, "kind": "named-route", "routeName": "docs.item", "parameters": { "id": "resume-body" } },
+    "revision": "r1"
+  },
+  {
+    "id": "phrase-exact",
+    "domain": "notes",
+    "contentType": "note",
+    "title": "Neural Design Systems",
+    "body": "A practical neural design workflow for product teams.",
+    "modifiedAt": 1702000000000,
+    "activation": { "version": 1, "kind": "named-route", "routeName": "notes.item", "parameters": { "id": "phrase-exact" } },
+    "revision": "r1"
+  },
+  {
+    "id": "phrase-gap",
+    "domain": "notes",
+    "contentType": "note",
+    "title": "Neural Product Design",
+    "body": "Neural methods can support a design workflow.",
+    "modifiedAt": 1703000000000,
+    "activation": { "version": 1, "kind": "named-route", "routeName": "notes.item", "parameters": { "id": "phrase-gap" } },
+    "revision": "r1"
+  },
+  {
+    "id": "turkish-istanbul",
+    "domain": "travel",
+    "contentType": "guide",
+    "title": "İstanbul Rehberi",
+    "body": "Boğaz ve tarihi yarımada için şehir rehberi.",
+    "activation": { "version": 1, "kind": "named-route", "routeName": "travel.item", "parameters": { "id": "turkish-istanbul" } },
+    "revision": "r1"
+  },
+  {
+    "id": "turkish-isparta",
+    "domain": "travel",
+    "contentType": "guide",
+    "title": "Isparta Gülleri",
+    "body": "Isparta için yerel gezi notları.",
+    "activation": { "version": 1, "kind": "named-route", "routeName": "travel.item", "parameters": { "id": "turkish-isparta" } },
+    "revision": "r1"
+  },
+  {
+    "id": "german-street",
+    "domain": "travel",
+    "contentType": "guide",
+    "title": "Straße der Moderne",
+    "body": "Architektur entlang der Straße.",
+    "activation": { "version": 1, "kind": "named-route", "routeName": "travel.item", "parameters": { "id": "german-street" } },
+    "revision": "r1"
+  },
+  {
+    "id": "cjk-tokyo",
+    "domain": "travel",
+    "contentType": "guide",
+    "title": "東京旅行案内",
+    "body": "東京の建築と食文化を巡る旅行案内。",
+    "activation": { "version": 1, "kind": "named-route", "routeName": "travel.item", "parameters": { "id": "cjk-tokyo" } },
+    "revision": "r1"
+  },
+  {
+    "id": "rtl-arabic",
+    "domain": "travel",
+    "contentType": "guide",
+    "title": "دليل عمارة",
+    "body": "جولة في العمارة الحديثة والتاريخية.",
+    "activation": { "version": 1, "kind": "named-route", "routeName": "travel.item", "parameters": { "id": "rtl-arabic" } },
+    "revision": "r1"
+  },
+  {
+    "id": "combining-cafe",
+    "domain": "places",
+    "contentType": "place",
+    "title": "Café Lumière",
+    "body": "A quiet café beside the river.",
+    "activation": { "version": 1, "kind": "named-route", "routeName": "places.item", "parameters": { "id": "combining-cafe" } },
+    "revision": "r1"
+  },
+  {
+    "id": "private-secret",
+    "domain": "notes",
+    "contentType": "note",
+    "title": "Private Aurora Project",
+    "body": "Aurora roadmap draft.",
+    "visibility": "app-only",
+    "activation": { "version": 1, "kind": "named-route", "routeName": "notes.item", "parameters": { "id": "private-secret" } },
+    "revision": "r1"
+  },
+  {
+    "id": "public-aurora",
+    "domain": "portfolio",
+    "contentType": "project",
+    "title": "Aurora Lighting Study",
+    "body": "A public study of responsive light.",
+    "visibility": "eligible-donation",
+    "activation": { "version": 1, "kind": "named-route", "routeName": "portfolio.item", "parameters": { "id": "public-aurora" } },
+    "revision": "r1"
+  }
+]

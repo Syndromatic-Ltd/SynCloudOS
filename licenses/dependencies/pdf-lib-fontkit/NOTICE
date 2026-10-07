@@ -1,0 +1,7 @@
+@pdf-lib/fontkit 1.1.1
+Upstream: https://github.com/Hopding/fontkit
+Upstream package declares MIT in package.json and README.md.
+The upstream package and repository do not include a separate licence file.
+Author: Andrew Dillon. Contributor: Devon Govett.
+The MIT terms are reproduced in LICENSE for that declared licence.
+The embedded Node string-decoder notice is preserved in NOTICE.node.

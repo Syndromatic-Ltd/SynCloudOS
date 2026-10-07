@@ -1,0 +1,3 @@
+const attach = (target: Window, eventName: string, listener: EventListener) => target.addEventListener(eventName, listener);
+const detach = attach;
+detach(window, "keydown", () => undefined);

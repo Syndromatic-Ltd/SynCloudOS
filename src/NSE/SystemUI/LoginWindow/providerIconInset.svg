@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <filter id="provider-icon-inset" color-interpolation-filters="sRGB">
+    <feOffset in="SourceAlpha" dx="0" dy="1.25" result="lower-alpha" />
+    <feComposite in="SourceAlpha" in2="lower-alpha" operator="out" result="upper-inner-edge" />
+    <feFlood flood-color="black" flood-opacity="0.34" />
+    <feComposite in2="upper-inner-edge" operator="in" result="inset-shadow" />
+    <feMerge>
+      <feMergeNode in="SourceGraphic" />
+      <feMergeNode in="inset-shadow" />
+    </feMerge>
+  </filter>
+</svg>

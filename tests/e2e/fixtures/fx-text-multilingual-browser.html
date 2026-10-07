@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>FX-16/17 multilingual geometry</title>
+    <style>
+      html, body { margin: 0; min-height: 100%; background: #f4f1e9; color: #171717; font-family: system-ui, sans-serif; }
+      main { width: 920px; margin: 0 auto; padding: 36px; box-sizing: border-box; }
+      h1 { margin: 0 0 6px; font: 600 22px/1.2 system-ui, sans-serif; }
+      p { margin: 0 0 22px; color: #5d5a54; font-size: 13px; }
+      svg { display: block; width: 848px; height: 300px; background: #fff; border: 1px solid #cbc6bc; }
+      .label { font: 12px system-ui, sans-serif; fill: #777169; }
+      .semantic { display: inline-flex; gap: 8px; align-items: baseline; margin: 0 0 16px; padding: 7px 10px; background: #fff; border: 1px solid #cbc6bc; border-radius: 6px; }
+      .semantic-note { color: #777169; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>TextFX multilingual geometry</h1>
+      <p>Fixed-font HarfBuzz output: vertical Japanese, Arabic/Devanagari fallback, four-position ruby and RTL/vertical ruby.</p>
+      <div class="semantic" aria-label="Japanese base 日 with ruby before, after, inter-character and inline">
+        <span id="fx17-base">日</span><span class="semantic-note" aria-hidden="true">semantic base text; ruby remains annotation geometry</span>
+      </div>
+      <svg id="fx16-artwork" viewBox="0 0 760 240" aria-label="TextFX fixed-font specimen">
+        <text class="label" x="8" y="12">vertical</text>
+        <text class="label" x="120" y="72">fallback</text>
+        <text class="label" x="410" y="22">FX-17 ruby</text>
+        <text class="label" x="585" y="92">RTL ruby</text>
+        <text class="label" x="475" y="152">vertical ruby</text>
+      </svg>
+    </main>
+    <script type="module">
+      import { runFX16BrowserSpecimen } from "./fx-text-multilingual-browser.ts";
+      window.fx16Specimen = { state: "running" };
+      runFX16BrowserSpecimen().then(
+        result => { window.fx16Specimen = { state: "passed", result }; },
+        error => { window.fx16Specimen = { state: "failed", error: error instanceof Error ? (error.stack ?? error.message) : String(error) }; },
+      );
+    </script>
+  </body>
+</html>

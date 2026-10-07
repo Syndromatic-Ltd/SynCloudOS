@@ -1,0 +1,497 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+[data-nse-control="tab-view"] [role="tablist"]{display:flex;overflow:auto}[data-nse-control="accordion-view"] [role="region"]{padding:8px}
+
+/* NavigationFoundation owns controller geometry/retention; AppearanceAuthority projects only source-bound paint. */
+.nse-tab-bar-safe-area {
+  --nse-tab-safe-inline-inset: clamp(
+    10px,
+    calc((100% - var(--nse-tab-visible-minimum-width, 64px)) / 2),
+    20px
+  );
+  align-items: flex-end;
+  display: flex;
+  isolation: isolate;
+  justify-content: flex-start;
+  min-width: 0;
+  overflow: visible;
+  padding: 10px max(var(--nse-tab-safe-inline-inset), env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(var(--nse-tab-safe-inline-inset), env(safe-area-inset-left, 0px));
+  pointer-events: none;
+  position: relative;
+  z-index: 2;
+}
+
+/* Compact chrome is a shared overlay contract. Its owner keeps the retained
+   destination at full height; only the capsule accepts pointer input. */
+.nse-compact-bottom-chrome-owner {
+  --nse-compact-bottom-chrome-clearance: calc(92px + env(safe-area-inset-bottom, 0px));
+  position: relative;
+}
+
+.nse-compact-bottom-chrome-mount {
+  inset-block-end: 0;
+  inset-inline: 0;
+  overflow: visible;
+  pointer-events: none;
+  position: absolute;
+  z-index: 4;
+}
+
+/* The app identifies its real scroll owner; shared chrome contributes only a
+   trailing spacer, preserving the app's existing surface padding and paint. */
+.nse-compact-bottom-chrome-owner:has(> .nse-compact-bottom-chrome-mount)
+  [data-nse-navigation-scroll-surface="true"] {
+  scroll-padding-block-end: var(--nse-compact-bottom-chrome-clearance);
+}
+
+.nse-compact-bottom-chrome-owner:has(> .nse-compact-bottom-chrome-mount)
+  [data-nse-navigation-scroll-surface="true"]::after {
+  block-size: var(--nse-compact-bottom-chrome-clearance);
+  content: "";
+  display: block;
+  inline-size: 100%;
+  pointer-events: none;
+}
+
+/* The viewport belongs only to the visible chrome. Destination panels remain
+   siblings under the semantic host, so a constrained proof host can scroll
+   the five-item composition without clipping retained application content. */
+.nse-tab-bar-scroll-viewport {
+  align-items: flex-end;
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: flex-start;
+  min-inline-size: 0;
+  overflow: visible;
+  pointer-events: none;
+  scrollbar-width: none;
+}
+
+.nse-tab-bar-scroll-viewport::-webkit-scrollbar { display: none; }
+
+.nse-tab-bar {
+  align-items: stretch;
+  --nse-tab-bar-height: 72px;
+  --nse-tab-minimum-item-width: 64px;
+  block-size: var(--nse-tab-bar-height);
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  inline-size: min(100%, calc(var(--nse-tab-visible-count, 1) * 6.5rem));
+  isolation: isolate;
+  margin-inline: auto;
+  max-inline-size: min(100%, 32.5rem);
+  min-block-size: var(--nse-tab-bar-height);
+  min-inline-size: calc(var(--nse-tab-visible-count, 1) * var(--nse-tab-minimum-item-width));
+  overflow: visible;
+  padding: 0;
+  pointer-events: auto;
+  position: relative;
+  scrollbar-width: thin;
+}
+
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] {
+  --nse-tab-chrome-native-height: 72px;
+  --nse-tab-chrome-cap-diameter: 72px;
+  --nse-tab-chrome-cap-radius: 36px;
+  --nse-tab-bar-height: var(--nse-tab-chrome-native-height);
+}
+
+/* NSETabBar's own chrome variant owns a 72px capsule and vertical content
+   stack. This selector deliberately excludes ordinary grouped tool buttons:
+   their canonical 50px `gt` output remains independent. */
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button {
+  align-items: center;
+  block-size: var(--nse-tab-chrome-native-height);
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 4px;
+  height: var(--nse-tab-chrome-native-height);
+  justify-content: center;
+  min-block-size: var(--nse-tab-chrome-native-height);
+  min-height: var(--nse-tab-chrome-native-height);
+  /* Every visible compact tab remains a usable, independent hit target. The
+     scroll viewport, rather than a chrome segment, absorbs an unusually
+     narrow contained host. */
+  min-inline-size: var(--nse-tab-minimum-item-width);
+  overflow: visible;
+  padding: 0;
+  position: relative;
+  text-align: center;
+  line-height: normal;
+}
+
+.nse-tab-bar-tab,
+.nse-tab-bar-more-option {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border-color: transparent;
+  border-radius: 0;
+  border-style: solid;
+  box-shadow: none;
+  color: inherit;
+  display: inline-flex;
+  font: inherit;
+  gap: 0.375rem;
+  isolation: isolate;
+  justify-content: center;
+  min-block-size: 44px;
+  min-inline-size: 44px;
+  overflow: visible;
+  padding: 0.375rem 0.625rem;
+  position: relative;
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+.nse-tab-bar-tab {
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 3px;
+  min-block-size: var(--nse-tab-chrome-native-height, 50px);
+  min-inline-size: 0;
+}
+
+.nse-tab-bar-more-option {
+  flex-direction: row;
+}
+
+.nse-tab-bar-content,
+.nse-tab-bar-more-option > * { position: relative; z-index: 1; }
+
+.nse-tab-bar-content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  justify-content: center;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  pointer-events: none;
+}
+
+/* Every inert content stack retains the full dimensions of its equal semantic
+   hit target. Middle content centres here; the approved outer optical inset is
+   applied independently below without changing button or paint geometry. */
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]
+  > .nse-tab-bar-tab.nse-control-button > .nse-tab-bar-content {
+  block-size: 100%;
+  inline-size: 100%;
+  inset-block: 0;
+  inset-inline-start: 0;
+  max-inline-size: none;
+  position: absolute;
+}
+
+/* Pull only the two outer content stacks optically inward. Logical offsets
+   mirror the adjustment in RTL without changing paint or hit geometry. */
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]
+  > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"] > .nse-tab-bar-content {
+  inset-inline-start: 6px;
+}
+
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]
+  > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"] > .nse-tab-bar-content {
+  inset-inline-start: -6px;
+}
+
+/* The measured atomic vector start/body/end pieces belong to one inert,
+   full-segment paint layer, independent of the content stack's optical inset. */
+.nse-tab-bar-chrome-surface {
+  display: block;
+  pointer-events: none;
+}
+
+.nse-tab-bar-icon {
+  block-size: 1.125rem;
+  box-sizing: border-box;
+  flex: 0 0 1.125rem;
+  inline-size: 1.125rem;
+  transition: filter 120ms ease, opacity 120ms ease, transform 120ms ease;
+}
+
+.nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+  background: currentColor;
+  block-size: 20px;
+  flex-basis: 20px;
+  inline-size: 20px;
+  -webkit-mask: var(--nse-tab-icon-source) center / contain no-repeat;
+  mask: var(--nse-tab-icon-source) center / contain no-repeat;
+}
+
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] .nse-tab-bar-icon {
+  block-size: 24px;
+  flex: 0 0 24px;
+  inline-size: 24px;
+}
+
+/* The glyph layer is inert unless an appearance paints the icon as a ringed
+   glyph (Atmo tall tabs). Elsewhere the masked icon span above remains the
+   whole icon. */
+.nse-tab-bar-icon-glyph {
+  display: none;
+}
+
+/* Filter definitions only: takes no space and paints nothing itself. */
+.nse-tab-bar-icon-material {
+  block-size: 0;
+  inline-size: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+}
+
+.nse-tab-bar-icon[data-nse-tab-icon-ready="false"] {
+  align-items: center;
+  border: 1px dashed currentColor;
+  display: grid;
+  justify-content: center;
+  opacity: 0.72;
+}
+
+.nse-tab-bar-tab[data-nse-tab-visual-state="hover"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+.nse-tab-bar-more-option[data-nse-tab-visual-state="hover"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+  filter: brightness(1.1);
+}
+
+.nse-tab-bar-tab[data-nse-tab-visual-state="selected"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+.nse-tab-bar-tab[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+.nse-tab-bar-more-option[data-nse-tab-visual-state="selected"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+  filter: brightness(1.28);
+}
+
+.nse-tab-bar-tab[data-nse-tab-visual-state="pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+.nse-tab-bar-more-option[data-nse-tab-visual-state="pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+  transform: translateY(1px);
+}
+
+.nse-tab-bar-tab[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+  transform: translateY(1px) scale(0.94);
+}
+
+.nse-tab-bar-tab[data-nse-tab-visual-state="disabled"] .nse-tab-bar-icon,
+.nse-tab-bar-more-option[data-nse-tab-visual-state="disabled"] .nse-tab-bar-icon {
+  opacity: 0.42;
+}
+.nse-tab-bar-label {
+  font-size: 0.625rem;
+  line-height: 0.75rem;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] .nse-tab-bar-label {
+  font-size: 0.75rem;
+  line-height: 0.875rem;
+  max-inline-size: 100%;
+}
+.nse-tab-bar-badge { flex: 0 0 auto; }
+.nse-tab-bar-more { margin-inline-start: 0; }
+
+/* More is a retained hierarchy page, never a wrapping popup/listbox. It stays
+   in the existing shared vector stage rather than adding a local raster skin. */
+.nse-tab-bar-overflow-page {
+  background: transparent;
+  border: 0;
+  display: flex;
+  flex: 1 1 auto;
+  isolation: isolate;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+}
+
+.nse-tab-bar-overflow-page > * { position: relative; z-index: 1; }
+
+.nse-tab-bar-overflow-region {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.nse-tab-bar-overflow-metal-surface {
+  display: flex;
+  flex: 1 1 auto;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow: auto;
+  padding: 0.875rem;
+  padding-block-end: calc(0.875rem + var(--nse-compact-bottom-chrome-clearance, 0px));
+}
+
+.nse-tab-bar-overflow-group {
+  align-self: flex-start;
+  block-size: fit-content;
+  flex: 0 0 auto;
+  inline-size: min(100%, 38rem);
+  min-inline-size: 0;
+}
+
+.nse-tab-bar-overflow-option {
+  cursor: pointer;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.nse-tab-bar-overflow-option:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+
+.nse-tab-bar-panel[hidden] {
+  display: none;
+}
+
+/* App-owned content renderers still need one stable More IDREF. The empty
+   detail-state owner has no layout footprint; its root More page becomes the
+   normal flex surface while open. */
+.nse-tab-bar-more-panel[data-nse-tab-overflow-owned-panel="true"] {
+  display: contents;
+}
+
+.nse-tab-bar-more-panel[data-nse-tab-overflow-owned-panel="true"][data-nse-tab-overflow-page-open="true"] {
+  display: flex;
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.nse-navigation-destination-host {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nse-navigation-destination-host > .nse-tab-bar-panel {
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.nse-navigation-destination-host > .nse-tab-bar-panel:not([hidden]),
+.nse-tab-bar-more-stack:not([hidden]),
+.nse-tab-bar-more-stack > [data-nse-more-destination]:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+}
+
+.nse-tab-bar-more-stack:not([hidden]),
+.nse-tab-bar-more-stack > [data-nse-more-destination]:not([hidden]) {
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.nse-hierarchy-stack {
+  min-width: 0;
+}
+
+.nse-hierarchy-stack-current,
+.nse-hierarchy-stack-destinations {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (forced-colors: active) {
+  .nse-tab-bar::before {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+
+  .nse-tab-bar-tab:focus-visible,
+  .nse-tab-bar-more-option:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .nse-tab-bar::before {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nse-tab-bar *, .nse-tab-bar-overflow-page * { animation-duration: 0ms !important; transition-duration: 0ms !important; }
+}
+
+/* Icon tabs (NSETabView / NSETabGroup, tabStyle "icons"): a row of icons,
+   the chosen one in a recessed well; the theme paints the well. */
+.nse-icon-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.nse-icon-tab {
+  appearance: none;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  min-inline-size: 36px;
+  margin: 0;
+  padding: 3px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: default;
+}
+
+.nse-icon-tab [data-nse-part="tab-icon"] {
+  display: grid;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 28px;
+}
+
+.nse-icon-tab [data-nse-part="tab-icon"] > :is(svg, img) {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.nse-icon-tab [data-nse-part="tab-caption"] {
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.nse-icon-tab:disabled {
+  opacity: 0.45;
+}

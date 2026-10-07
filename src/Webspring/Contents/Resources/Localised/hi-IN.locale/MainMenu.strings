@@ -1,0 +1,7 @@
+/* SynCloudOS shell menu resource. Locale: hi-IN. */
+/* Generated from .workflow/syncloudos-localeservices-finishing-pass/generate-localised-catalogs.mjs. */
+"__translationCompleteness" = "complete";
+"window.title" = "Webspring";
+"webspring.label" = "Webspring";
+"actions.open" = "Webspring खोलें";
+"actions.close" = "बंद करें Webspring";

@@ -1,0 +1,208 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+[data-nse-overlay-provider] {
+  position: relative;
+}
+
+[data-nse-overlay-portal-host] {
+  position: relative;
+  z-index: var(--nse-overlay-z-index, 1000);
+  /* Webspring's application stage intentionally disables pointer events on
+     its shared 3D container, then enables each physical app frame. A portaled
+     overlay surface is a sibling of that frame, so it must opt back in explicitly
+     rather than inheriting a non-interactive presentation layer. */
+  pointer-events: auto;
+}
+
+[data-nse-control="overlay"][data-nse-part="surface"] {
+  max-inline-size: var(--nse-overlay-available-inline-size, 100%);
+  max-block-size: var(--nse-overlay-available-block-size, 100%);
+}
+
+/* A utility panel's content sits inset from its window edges, in a window
+   host and in a standalone host alike. */
+.nse-utility-panel-body {
+  box-sizing: border-box;
+  padding: 12px 14px 14px;
+}
+
+.nse-utility-panel-body[data-content-inset="none"] {
+  padding: 0;
+}
+
+/* A closing utility panel fades out, as a closing window dissolves. */
+.nse-utility-panel {
+  transition: opacity 160ms linear;
+}
+
+.nse-utility-panel[data-state="closing"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nse-utility-panel {
+    transition: none;
+  }
+}
+
+/* Laid out and placed, but not painted until its content has arrived. */
+[data-nse-control="overlay"][data-nse-part="surface"][data-nse-content-pending="true"] {
+  visibility: hidden;
+}
+
+.nse-overlay-popup {
+  box-sizing: border-box;
+  display: grid;
+  gap: 10px;
+  min-inline-size: min(16rem, calc(100vi - 16px));
+  max-inline-size: min(32rem, calc(100vi - 16px));
+  padding: 12px;
+  border-radius: 12px;
+  background: Canvas;
+  color: CanvasText;
+  outline: none;
+  /* Floating UI constrains this surface to the available visual-viewport
+     block size. Keep overflow inside the owned surface so a tall panel never
+     leaves its actions physically below the viewport. */
+  overflow: auto;
+}
+
+.nse-overlay-popup.nse-overlay-popup--application-menu,
+.nse-overlay-popup.nse-overlay-popup--content {
+  display: block;
+  min-inline-size: 0;
+  max-inline-size: none;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.nse-overlay-popup--application-menu > .nse-overlay-popup-content,
+.nse-overlay-popup--content > .nse-overlay-popup-content {
+  display: block;
+  overflow: visible;
+}
+
+.nse-overlay-popup[data-nse-overlay-kind="action-sheet"] {
+  position: fixed;
+  inset-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right));
+  inset-block-end: max(8px, env(safe-area-inset-bottom));
+  max-inline-size: none;
+}
+
+/* The sibling backdrop is deliberately not an overlay registration: pointer
+   capture reaches the provider, which dismisses only the current top branch. */
+.nse-overlay-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, CanvasText 18%, transparent);
+}
+
+.nse-overlay-popup-modal-host {
+  display: contents;
+}
+
+.nse-overlay-popup-title {
+  font-weight: 700;
+}
+
+.nse-overlay-popup-content {
+  display: grid;
+  gap: 8px;
+}
+
+.nse-overlay-listbox-option {
+  min-block-size: 32px;
+  text-align: start;
+}
+.nse-overlay-listbox {
+  display: grid;
+  min-inline-size: 0;
+  outline: none;
+}
+
+.nse-overlay-listbox-scroll {
+  max-block-size: min(360px, 60vi);
+  overflow: auto;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--nse-listbox-fade-top, 0px),
+    #000 calc(100% - var(--nse-listbox-fade-bottom, 0px)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--nse-listbox-fade-top, 0px),
+    #000 calc(100% - var(--nse-listbox-fade-bottom, 0px)),
+    transparent 100%
+  );
+}
+
+.nse-overlay-listbox-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.nse-overlay-listbox[data-fade-top="true"] .nse-overlay-listbox-scroll {
+  --nse-listbox-fade-top: 18px;
+}
+
+.nse-overlay-listbox[data-fade-bottom="true"] .nse-overlay-listbox-scroll {
+  --nse-listbox-fade-bottom: 18px;
+}
+
+.nse-overlay-listbox-scroll-content {
+  display: block;
+}
+
+.nse-overlay-listbox-option {
+  box-sizing: border-box;
+  display: block;
+  inline-size: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 8px 10px;
+  text-align: start;
+}
+
+.nse-overlay-listbox-option:focus-visible,
+.nse-overlay-listbox-option:hover:not(:disabled),
+.nse-overlay-listbox-option[aria-selected="true"] {
+  outline: none;
+  background: color-mix(in srgb, Highlight 18%, transparent);
+}
+
+/* A rule between groups of rows (1px plus 4px either side: the 9px the listbox allows). */
+.nse-overlay-listbox-separator {
+  block-size: 1px;
+  margin: 4px 0;
+  background: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+/* Commands under the values ("Show Fonts…") read as commands, not choices. */
+.nse-overlay-listbox-option[data-kind="action"] {
+  font-style: italic;
+}

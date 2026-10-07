@@ -1,0 +1,113 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.nse-toolbar {
+  /* Source metrics are handoff variables; the appearance asset layer supplies raster and
+     state recipes. This layer contributes only structural layout and semantics. */
+  --nse-toolbar-height: 59px;
+  --nse-toolbar-overflow-reserve: 20px;
+  --nse-toolbar-separator-inline-size: 2px;
+  --nse-toolbar-item-inline-margin: 10px;
+  display: flex;
+  align-items: center;
+  min-block-size: var(--nse-toolbar-height);
+  overflow: hidden;
+  isolation: isolate;
+  position: relative;
+}
+
+/* The paint layers are .nse-chrome-primitive (Appearance/NSEChromePrimitives).
+   These rules named a retired class, so the layers were caught by the
+   :not() below, made position: relative, and collapsed to nothing. */
+.nse-toolbar > .nse-chrome-primitive { z-index: 0; }
+.nse-toolbar > :not(.nse-chrome-primitive) { position: relative; z-index: 1; }
+
+.nse-toolbar[data-nse-toolbar-size-mode="small"] { --nse-toolbar-height: 46px; }
+.nse-toolbar[dir="rtl"] { flex-direction: row-reverse; }
+.nse-toolbar-item,
+.nse-toolbar-overflow-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-block-size: var(--nse-toolbar-height);
+  margin-inline: var(--nse-toolbar-item-inline-margin);
+  overflow: hidden;
+}
+
+/* A toolbar's chrome comes only from its resolved slot or shared primitive. */
+.nse-toolbar-item,
+.nse-toolbar-overflow-trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  isolation: isolate;
+  position: relative;
+}
+
+.nse-toolbar-item > .nse-chrome-primitive,
+.nse-toolbar-custom > .nse-chrome-primitive,
+.nse-toolbar-separator > .nse-chrome-primitive { z-index: 0; }
+.nse-toolbar-item > :not(.nse-chrome-primitive),
+.nse-toolbar-custom > :not(.nse-chrome-primitive) { position: relative; z-index: 1; }
+
+.nse-toolbar-item-label { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nse-toolbar-item-icon { display: inline-grid; place-items: center; }
+.nse-toolbar-space { flex: 0 0 auto; }
+.nse-toolbar-separator { flex: 0 0 var(--nse-toolbar-separator-inline-size); inline-size: var(--nse-toolbar-separator-inline-size); position: relative; }
+.nse-toolbar-custom { display: inline-flex; align-items: center; flex: 0 0 auto; isolation: isolate; overflow: hidden; position: relative; }
+.nse-toolbar-overflow-menu { display: inline-flex; flex: 0 0 var(--nse-toolbar-overflow-reserve); }
+.nse-toolbar-overflow-trigger { inline-size: var(--nse-toolbar-overflow-reserve); margin-inline: 0; }
+.nse-toolbar-overflow-trigger [data-nse-part="overflow-glyph"] { inline-size: 10px; block-size: 15px; }
+
+.nse-toolbar-validation-status { margin: 0; }
+.nse-toolbar-configuration-sheet { inline-size: min(34rem, 100%); max-inline-size: 100%; }
+.nse-toolbar-configuration-content { display: grid; gap: 12px; }
+.nse-toolbar-configuration-help { margin: 0; }
+.nse-toolbar-configuration-items { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.nse-toolbar-configuration-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; min-block-size: 44px; }
+.nse-toolbar-configuration-handle { inline-size: 20px; block-size: 26px; }
+.nse-toolbar-configuration-move-controls,
+.nse-toolbar-configuration-palette,
+.nse-toolbar-configuration-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.nse-toolbar-configuration-actions > span { flex: 1; }
+
+/* Grouped child controls are one continuous segmented surface. Appearances own
+   the segment paint, while NSE owns the invariant that segments stay joined. */
+.nse-control-toolbar[data-grouped="true"] {
+  gap: 0;
+}
+
+@media (forced-colors: active) {
+  .nse-toolbar-item:focus-visible,
+  .nse-toolbar-overflow-trigger:focus-visible,
+  .nse-toolbar-configuration-handle:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nse-toolbar *, .nse-toolbar-configuration-sheet * { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+}
+/* A view item that shows its label stacks the view over the caption, as AppKit does. */
+.nse-toolbar-custom[data-nse-toolbar-labelled="true"] { flex-direction: column; justify-content: center; gap: 3px; overflow: visible; }
+.nse-toolbar-custom-view { display: inline-flex; align-items: center; justify-content: center; max-inline-size: 100%; }

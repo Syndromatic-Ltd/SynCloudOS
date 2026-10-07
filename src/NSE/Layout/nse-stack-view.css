@@ -1,0 +1,149 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.nse-stack-view {
+  box-sizing: border-box;
+  display: flex;
+  min-inline-size: 0;
+  min-block-size: 0;
+  position: relative;
+}
+
+.nse-stack-view[data-orientation="horizontal"] {
+  flex-direction: row;
+}
+
+.nse-stack-view[data-orientation="vertical"] {
+  flex-direction: column;
+}
+
+.nse-stack-view[data-overflow-open="true"] {
+  z-index: 2;
+}
+
+.nse-stack-view-item {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  min-block-size: 0;
+  transition: inline-size 160ms ease, block-size 160ms ease, margin 160ms ease, opacity 160ms ease;
+}
+
+.nse-stack-view-item[data-stack-hidden="true"]:not([data-stack-overflow-action]) {
+  display: none;
+}
+
+.nse-stack-view[data-reduced-motion="true"] .nse-stack-view-item {
+  transition: none;
+}
+
+/* Stable portal hosts preserve React ownership while their DOM location moves
+ * between the normal stack and overflow presentation. They must not add a
+ * layout box in either surface. */
+.nse-stack-view-items,
+.nse-stack-view-item-host {
+  display: contents;
+}
+
+.nse-stack-view-retained-items {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nse-stack-view-item {
+    transition: none;
+  }
+}
+
+.nse-stack-view-overflow {
+  align-self: center;
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.nse-stack-view-overflow-trigger,
+.nse-stack-view-overflow-item {
+  font: inherit;
+}
+
+.nse-stack-view-overflow-trigger {
+  align-items: center;
+  background: transparent;
+  border: 1px solid currentColor;
+  box-sizing: border-box;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  inline-size: 100%;
+  justify-content: center;
+  block-size: 100%;
+  max-block-size: 100%;
+  max-inline-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.nse-stack-view-overflow-trigger:focus-visible,
+.nse-stack-view-overflow-item:focus-visible,
+.nse-stack-view-overflow-action :focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.nse-stack-view-overflow-menu {
+  background: Canvas;
+  border: 1px solid currentColor;
+  display: grid;
+  gap: 2px;
+  inset-block-start: calc(100% + 4px);
+  inset-inline-end: 0;
+  min-inline-size: max-content;
+  padding: 4px;
+  position: absolute;
+  z-index: 1;
+}
+
+.nse-stack-view-overflow-item {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  padding: 4px 8px;
+  text-align: start;
+  white-space: nowrap;
+}
+
+/* The real child action, including a function component's nested control,
+ * stays authoritative in this presentation. It is not a proxy button. */
+.nse-stack-view-overflow-action {
+  min-inline-size: 0;
+}
+
+.nse-stack-view-overflow-item[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.6;
+}
+
+@media (forced-colors: active) {
+  .nse-stack-view-overflow-menu,
+  .nse-stack-view-overflow-trigger {
+    forced-color-adjust: auto;
+  }
+}

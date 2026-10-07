@@ -1,0 +1,2 @@
+const register = window.addEventListener;
+register.call(window, "keydown", () => undefined);

@@ -1,0 +1,14 @@
+# Preserve upstream QR source and licence bytes, including blank-line whitespace.
+src/FX/ImageFX/vendor/qrcodegen.ts text eol=lf whitespace=-blank-at-eol
+src/FX/ImageFX/vendor/LICENSE.qrcodegen text eol=lf whitespace=-blank-at-eol
+
+# Preserve byte-exact TextFX upstream provenance on Windows checkouts.
+src/FX/TextFX/vendor/harfbuzzRuntime.mjs text eol=lf
+src/FX/TextFX/vendor/harfbuzzEmscripten.mjs text eol=lf
+src/FX/TextFX/vendor/LICENSE.harfbuzzjs text eol=lf whitespace=-blank-at-eol
+src/NSE/Themes/Atmo/Resources/atmo.css text eol=lf
+
+# Keep upstream licence copies byte-exact, including their original whitespace.
+licenses/qrcodegen-MIT.txt text eol=lf whitespace=-blank-at-eol
+licenses/ajv-MIT.txt text eol=lf whitespace=-blank-at-eof
+licenses/dependencies/pdf-lib-fontkit/LICENSE text eol=lf whitespace=-blank-at-eof

@@ -1,0 +1,2 @@
+const eventName = "key" + "down";
+globalThis.addEventListener(eventName, () => undefined);

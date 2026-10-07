@@ -1,0 +1,1 @@
+export const Allowed = () => <div onKeyDown={() => undefined} onKeyDownCapture={() => undefined} />;

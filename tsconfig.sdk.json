@@ -1,0 +1,42 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "strict": true,
+    "skipLibCheck": false,
+    "noEmit": false,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "types": [
+      "vite/client",
+      "emscripten"
+    ],
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": false,
+    "outDir": ".artifacts/synapp-sdk/declarations",
+    "rootDir": "src"
+  },
+  "include": [
+    "src/FX/*/public.ts",
+    "src/FX/AnimationFX/host.ts",
+    "src/FX/VideoFX/webm.ts",
+    "src/FX/**/*.d.ts",
+    "src/SynCloudOS/AppSDK/sdkPackageEntry.ts",
+    "src/SynCloudOS/AppSDK/testing/sdkPackageEntry.ts",
+    "src/SynCloudOS/Server/Auth/index.ts",
+    "src/SynCloudOS/Authentication/index.ts",
+    "src/Webspring/public.ts",
+    "src/SynCloudOS/AppSDK/Chronosphere/public.ts",
+    "src/SynCloudOSReact/browser.tsx",
+    "src/NSE/sdkPackageEntry.ts",
+    "src/NSE/public/**/*.ts",
+    "src/NSE/Themes/*/index.ts"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "package": "harfbuzzjs",
+  "version": "1.6.1",
+  "license": "MIT",
+  "upstream": "https://github.com/harfbuzz/harfbuzzjs",
+  "installedIndexSha256": "04ece1914c8720ad96257728119c1bf24088ee4ef3ab2a2ca688c9a4895d4e7e",
+  "installedEmscriptenSha256": "ba43463df44851fd58211ef8c19aa7956965390857727ae867b70dc7b3682de1",
+  "installedWasmSha256": "37777ced92a2ba10279c33e1dbacf08835ddcacc215b7fcb3131e558dd01ce71",
+  "browserRuntimeSha256": "fad274a11a5b19a4d5f73ed61e6fa7bf9f144b88c2aca346b1ea68abb423c333",
+  "browserEmscriptenSha256": "88113104888cacc78c49f28e8ebb54f7fdf98c855bdd009b36a9201ecd675d3a",
+  "licenseSha256": "5d09767b2cc476f08028b56d9384dc45061c5a3e90f9ad966e44addc8d26c8b1",
+  "adaptation": "The high-level wrapper redirects its internal Emscripten import and passes Vite's explicit harfbuzz.wasm URL through locateFile. The browser-only Emscripten copy removes the unreachable Node createRequire branch and the unreachable import.meta.url WASM fallback because this maintained wrapper always supplies locateFile. The MIT license is byte-identical."
+}

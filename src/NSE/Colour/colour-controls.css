@@ -1,0 +1,43 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* AppearanceAuthority review: well and wheel CSS are behavioural geometry, not source authority. */
+[data-nse-control="colour-well"] > button { min-inline-size: 92px; block-size: 28px; border: 1px solid ButtonBorder; padding: 3px 6px; display: inline-flex; align-items: center; gap: 6px; color: ButtonText; background: ButtonFace; }
+[data-nse-control="colour-well"] [data-nse-part="colour-sample"] { inline-size: 32px; block-size: 18px; border: 1px solid currentColor; box-shadow: inset 0 0 0 1px Canvas; }
+[data-nse-control="colour-well"] [data-nse-part="colour-value"] { font: 11px/1.2 ui-monospace, monospace; }
+[data-nse-control="colour-wheel"] > [role="slider"] { position: relative; inline-size: 132px; block-size: 132px; border: 1px solid CanvasText; border-radius: 50%; touch-action: none; background: conic-gradient(from 90deg, red, magenta, blue, cyan, lime, yellow, red); }
+[data-nse-control="colour-wheel"] [data-nse-part="wheel-surface"] { position: absolute; inset: 12%; border-radius: 50%; background: radial-gradient(circle at center, white, transparent 70%); pointer-events: none; }
+[data-nse-control="colour-wheel"] [data-nse-part="numeric"] { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; font-size: 10px; }
+[data-nse-control="colour-wheel"] [data-nse-part="numeric"] label { display: grid; gap: 2px; }
+[data-nse-control="colour-wheel"] [data-nse-part="numeric"] input { box-sizing: border-box; min-inline-size: 0; inline-size: 100%; }
+[data-nse-control="colour-swatches"] { display: grid; grid-template-columns: repeat(auto-fill, minmax(24px, 1fr)); gap: 4px; }
+[data-nse-control="colour-swatches"] [role="gridcell"] { inline-size: 24px; block-size: 24px; }
+[data-nse-control="colour-panel"] [data-nse-part="css-entry"] { display: grid; gap: 2px; }
+[data-nse-control="colour-panel"] [data-nse-part="css-entry"] input { box-sizing: border-box; inline-size: 100%; }
+[data-nse-control="colour-panel"] [data-nse-part="recent-colours"] { margin-block-start: 6px; }
+[data-nse-control="colour-panel"] [data-nse-part="actions"] { position: sticky; z-index: 1; inset-block-end: 0; display: flex; justify-content: end; gap: 8px; padding-block-start: 6px; background: Canvas; }
+@media (forced-colors: active) { [data-nse-control="colour-wheel"] > [role="slider"] { background: Canvas; } }
+[data-nse-control="colour-panel"] :is([data-nse-part="rows"], [data-nse-part="recent-colours"]) { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 6px 8px; }
+[data-nse-control="colour-panel"] [data-nse-part="comparison"] { display: grid; grid-template-columns: 1fr 1fr; min-block-size: 28px; border: 1px solid CanvasText; }
+[data-nse-control="colour-panel"] [data-nse-part="comparison"] > * { margin: 0; padding: 0; border: 0; background: var(--nse-colour-sample, Canvas); }
+[data-nse-control="colour-panel"] [data-nse-part="opacity"] { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+[data-nse-control="colour-sliders"] [data-nse-part="channel"] { display: grid; grid-template-columns: 1.5em minmax(0, 1fr) 4.5em; align-items: center; gap: 6px; }
+@media (forced-colors: active) { [data-nse-control="colour-panel"] [data-nse-part="comparison"] > * { forced-color-adjust: none; } }
+[data-nse-control="colour-sliders"] [data-nse-part="channel-name"] { display: none; }

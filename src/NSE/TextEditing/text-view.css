@@ -1,0 +1,108 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.nse-text-view .ProseMirror { display: flow-root; min-height: 4em; outline: none; white-space: pre-wrap; overflow-wrap: break-word; padding: .5em; }
+.nse-text-view .ProseMirror :is(p, h1, h2, h3, h4, h5, h6) { margin: 0 0 .5em; }
+.nse-text-view .ProseMirror :is(h1, h2, h3, h4, h5, h6) { font-weight: 700; line-height: 1.2; }
+.nse-text-view .ProseMirror h1 { font-size: 2em; }
+.nse-text-view .ProseMirror h2 { font-size: 1.5em; }
+.nse-text-view .ProseMirror h3 { font-size: 1.25em; }
+.nse-text-view .ProseMirror h4 { font-size: 1.1em; }
+.nse-text-view .ProseMirror :is(h5, h6) { font-size: 1em; }
+.nse-text-view .ProseMirror:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+
+/* NSTextList markers sit in the indent gutter. They are generated content, so
+   they are never selected, copied or counted as text. */
+.nse-text-view .ProseMirror [data-nse-list-marker] { position: relative; }
+.nse-text-view .ProseMirror [data-nse-list-marker]::before {
+  content: attr(data-nse-list-marker);
+  position: absolute;
+  inset-inline-start: var(--nse-list-gutter, 0px);
+  width: 1.75em;
+  padding-inline-end: .45em;
+  box-sizing: border-box;
+  text-align: end;
+  text-indent: 0;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  user-select: none;
+}
+
+.nse-text-view .nse-text-attachment { display: inline-block; border: 1px solid currentColor; padding: .1em .3em; }
+.nse-text-view .nse-text-attachment[data-display="image"] { border: 0; padding: 0; max-width: 100%; vertical-align: bottom; line-height: 0; }
+.nse-text-view .nse-text-attachment-box { position: relative; display: inline-block; max-width: 100%; vertical-align: bottom; }
+.nse-text-view .nse-text-attachment[data-display="image"] img { position: relative; z-index: 1; display: block; box-sizing: border-box; max-width: 100%; height: auto; }
+
+/* Text wrap (NSEAttachmentPlacement). Above and below takes the line to itself;
+   around floats to an edge and the following text wraps beside it, either at
+   its bounding box or along the outline of its opaque pixels (shape-outside). */
+.nse-text-view .nse-text-attachment[data-wrap="above-and-below"] { display: block; width: fit-content; margin-block: .25em .5em; }
+.nse-text-view .nse-text-attachment[data-wrap="above-and-below"][data-align="start"] { margin-inline: 0 auto; }
+.nse-text-view .nse-text-attachment[data-wrap="above-and-below"][data-align="centre"] { margin-inline: auto; }
+.nse-text-view .nse-text-attachment[data-wrap="above-and-below"][data-align="end"] { margin-inline: auto 0; }
+.nse-text-view .nse-text-attachment[data-wrap="around"] { max-width: 75%; margin-block: .2em var(--nse-attachment-spacing, 12px); }
+.nse-text-view .nse-text-attachment[data-wrap="around"][data-align="start"] { float: inline-start; margin-inline: 0 var(--nse-attachment-spacing, 12px); }
+.nse-text-view .nse-text-attachment[data-wrap="around"][data-align="end"] { float: inline-end; margin-inline: var(--nse-attachment-spacing, 12px) 0; }
+/* Shape fit: shape-margin keeps the gap along the outline, so the box margin goes. */
+.nse-text-view .nse-text-attachment[data-wrap="around"][data-text-fit="shape"] { margin-inline: 0; margin-block-end: 0; }
+
+/* Contact shadow: pools on the surface beneath. Curved shadow: the lower corners lift off the page. */
+.nse-text-view .nse-text-attachment-shadow { position: absolute; inset: 0; pointer-events: none; }
+.nse-text-view .nse-text-attachment-shadow:not([data-shadow]) { display: none; }
+.nse-text-view .nse-text-attachment-shadow[data-shadow="contact"] {
+  inset: auto 4% calc(-1 * var(--nse-shadow-offset, 0px) - var(--nse-shadow-blur, 20px) * .35) 4%;
+  height: calc(var(--nse-shadow-blur, 20px) * .7 + 4px);
+  background: radial-gradient(closest-side, var(--nse-shadow-colour, rgb(0 0 0 / .6)), transparent);
+  filter: blur(calc(var(--nse-shadow-blur, 20px) * .15));
+}
+.nse-text-view .nse-text-attachment-shadow[data-shadow="curved"]::before,
+.nse-text-view .nse-text-attachment-shadow[data-shadow="curved"]::after {
+  content: ""; position: absolute; bottom: 14px; width: 48%; height: 20%; max-height: 60px;
+  box-shadow: 0 calc(15px + var(--nse-shadow-offset, 0px)) calc(6px + var(--nse-shadow-blur, 10px)) var(--nse-shadow-colour, rgb(0 0 0 / .55));
+}
+.nse-text-view .nse-text-attachment-shadow[data-shadow="curved"]::before { left: 4%; transform: rotate(calc(-1 * var(--nse-shadow-curl, 1.6deg))); transform-origin: left bottom; }
+.nse-text-view .nse-text-attachment-shadow[data-shadow="curved"]::after { right: 4%; transform: rotate(var(--nse-shadow-curl, 1.6deg)); transform-origin: right bottom; }
+
+/* Selection, as Pages draws it: a hairline frame with square handles on its corners and edges.
+   A selected image drags to move; every handle resizes it in proportion. */
+.nse-text-view .nse-text-attachment[data-selected="true"] > .nse-text-attachment-box { outline: 1px solid var(--nse-text-attachment-selection, #4a8fe7); outline-offset: 0; }
+.nse-text-view .nse-text-attachment[data-selected="true"]:not([data-display="image"]) { outline: 2px solid Highlight; outline-offset: 2px; }
+.nse-text-view .ProseMirror[contenteditable="true"] .nse-text-attachment[data-display="image"] { cursor: grab; }
+.nse-text-view .nse-text-attachment[data-resizing="true"] { cursor: default; }
+.nse-text-view .ProseMirror[data-attachment-moving], .nse-text-view .ProseMirror[data-attachment-moving] .nse-text-attachment { cursor: grabbing; }
+.nse-text-view .ProseMirror[data-attachment-moving] .nse-text-attachment-handle { display: none; }
+.nse-text-view .nse-text-attachment[data-selected="true"][data-display="image"] { touch-action: none; }
+.nse-text-view .nse-text-attachment-handle {
+  position: absolute; z-index: 2; width: 8px; height: 8px; box-sizing: border-box;
+  border: 1px solid rgb(0 0 0 / .78); background: #fff; touch-action: none;
+  translate: -50% -50%;
+}
+.nse-text-view .nse-text-attachment-handle::after { content: ""; position: absolute; inset: -9px; }
+.nse-text-view .nse-text-attachment-handle[data-handle^="top"] { top: 0; }
+.nse-text-view .nse-text-attachment-handle[data-handle="start"], .nse-text-view .nse-text-attachment-handle[data-handle="end"] { top: 50%; }
+.nse-text-view .nse-text-attachment-handle[data-handle^="bottom"] { top: 100%; }
+.nse-text-view .nse-text-attachment-handle[data-handle$="start"] { inset-inline-start: 0; }
+.nse-text-view .nse-text-attachment-handle[data-handle="top"], .nse-text-view .nse-text-attachment-handle[data-handle="bottom"] { inset-inline-start: 50%; }
+.nse-text-view .nse-text-attachment-handle[data-handle$="end"] { inset-inline-start: 100%; }
+.nse-text-view .nse-text-attachment-handle:is([data-handle="top-start"], [data-handle="bottom-end"]) { cursor: nwse-resize; }
+.nse-text-view .nse-text-attachment-handle:is([data-handle="top-end"], [data-handle="bottom-start"]) { cursor: nesw-resize; }
+.nse-text-view .nse-text-attachment-handle:is([data-handle="top"], [data-handle="bottom"]) { cursor: ns-resize; }
+.nse-text-view .nse-text-attachment-handle:is([data-handle="start"], [data-handle="end"]) { cursor: ew-resize; }
+@media (pointer: coarse) { .nse-text-view .nse-text-attachment-handle { width: 12px; height: 12px; border-radius: 50%; } }

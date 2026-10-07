@@ -1,0 +1,79 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* Rule and predicate editors: the Mac's sentence layout (Match [all] of the
+   following conditions), one wrapping row per condition, built from stock NSE
+   pickers, fields and buttons so every theme paints them. Spacing is the
+   SDK's (nse-layout-defaults.css). */
+.nse-rule-editor,
+.nse-rule-group,
+.nse-rule-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nse-spacing-standard, 8px);
+  min-inline-size: 0;
+}
+
+.nse-rule-header,
+.nse-rule-footer,
+.nse-rule-row,
+.nse-predicate-editor[data-expression-kind="comparison"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--nse-spacing-standard, 8px);
+  min-inline-size: 0;
+}
+
+.nse-rule-phrase {
+  font-size: var(--nse-text-body-size, 14px);
+  white-space: nowrap;
+}
+
+/* The value takes the rest of the row, and wraps to its own line before it
+   gets too narrow to type in. */
+.nse-rule-row > .nse-rule-value,
+.nse-predicate-editor[data-expression-kind="comparison"] > .nse-rule-value {
+  flex: 1 1 10rem;
+  min-inline-size: 8rem;
+}
+
+.nse-rule-row[data-alternating] {
+  background: var(--nse-alternating-row-background, transparent);
+}
+
+/* A nested group indents under a quiet rule, as the Mac's compound rows do. */
+.nse-rule-group {
+  margin: 0;
+  padding: var(--nse-spacing-standard, 8px) 0 var(--nse-spacing-standard, 8px) var(--nse-spacing-group, 20px);
+  border: 0;
+  border-inline-start: 2px solid color-mix(in srgb, currentColor 14%, transparent);
+  min-inline-size: 0;
+}
+
+.nse-rule-error {
+  flex-basis: 100%;
+  font-size: var(--nse-text-footnote-size, 12px);
+  color: var(--nse-error-colour, #c0392b);
+}
+
+.nse-predicate-editor [aria-invalid="true"] {
+  outline: 1px solid var(--nse-error-colour, currentColor);
+}

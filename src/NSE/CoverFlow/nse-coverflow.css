@@ -1,0 +1,152 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* ============================================================================
+   NSECoverFlow — 3D cover-flow showcase strip.
+   A perspective stage of centre-facing + angled side panels with reflections.
+   All geometry is responsive (panel size tracks the well height; the fan offset
+   is a percentage of each panel's own width).
+   ========================================================================== */
+
+.nse-coverflow {
+  --nse-coverflow-bg:
+    radial-gradient(120% 90% at 50% 12%, rgba(40, 46, 54, 0.55), transparent 60%),
+    linear-gradient(180deg, #050608 0%, #0a0c10 52%, #000 100%);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  perspective: 1500px;
+  perspective-origin: 50% 42%;
+  background: var(--nse-coverflow-bg);
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
+  isolation: isolate;
+}
+
+.nse-coverflow:active {
+  cursor: grabbing;
+}
+
+.nse-coverflow:focus-visible {
+  outline: 2px solid rgba(140, 200, 245, 0.85);
+  outline-offset: -3px;
+}
+
+.nse-coverflow-stage {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.nse-coverflow-panel {
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  height: 62%;
+  aspect-ratio: 16 / 10;
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  transition: transform 440ms cubic-bezier(0.28, 0.62, 0.21, 1), opacity 440ms ease;
+  will-change: transform, opacity;
+  cursor: pointer;
+}
+
+.nse-coverflow-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #05070a;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 26px 50px rgba(0, 0, 0, 0.6);
+}
+
+.nse-coverflow-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  -webkit-user-drag: none;
+}
+
+/* Darkening veil that deepens with distance from centre (driven by --cf-shade). */
+.nse-coverflow-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(2, 4, 7, var(--cf-shade, 0));
+  transition: background 440ms ease;
+}
+
+.nse-coverflow-panel[data-active="true"] .nse-coverflow-card {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 34px 66px rgba(0, 0, 0, 0.66);
+}
+
+/* Reflection via -webkit-box-reflect (per the jh3y reference): a GPU-composited mirror with no
+   extra DOM. The mask is applied in the *flipped* reflection's own space, so the opaque stop must
+   sit at the CSS bottom to render brightest at the seam and fade away downward. The panel's 3D
+   transform carries the reflection, so it angles with each side panel. */
+.nse-coverflow[data-reflection="true"] .nse-coverflow-card {
+  -webkit-box-reflect: below 1px
+    linear-gradient(to bottom, rgba(255, 255, 255, 0) 0 46%, rgba(255, 255, 255, 0.5) 100%);
+}
+
+.nse-coverflow-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(8px, 2.4vh, 18px);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+  pointer-events: none;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+
+.nse-coverflow-caption-title {
+  font-family: inherit;
+  font-size: clamp(14px, 1.5vw, 18px);
+  font-weight: 800;
+  color: #fff;
+}
+
+.nse-coverflow-caption-sub {
+  font-family: inherit;
+  font-size: clamp(11px, 1.1vw, 13px);
+  color: rgba(220, 232, 244, 0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nse-coverflow-panel {
+    transition: none;
+  }
+}

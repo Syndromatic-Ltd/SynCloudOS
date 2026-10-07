@@ -1,0 +1,83 @@
+{
+  "name": "@syndromatic/syncloudos-source",
+  "private": true,
+  "version": "1.0.0-beta.1",
+  "description": "SynCloudOS framework source and package tooling",
+  "type": "module",
+  "scripts": {
+    "build": "npm run typecheck && npm run sdk:build",
+    "test": "vitest run",
+    "test:e2e": "node scripts/test-e2e-matrix.mjs",
+    "test:runtime": "vitest run tests/runtime",
+    "synware:create": "node scripts/synware/create-synware.mjs",
+    "synware:validate": "node scripts/synware/validate-synware.mjs",
+    "synware:audit": "node scripts/synware/audit-sdk-imports.mjs",
+    "synware:capabilities": "node scripts/synware/audit-capability-usage.mjs --check",
+    "sdk:build": "node scripts/synware/build-sdk.mjs",
+    "sdk:fx-pdf": "node scripts/synware/check-fx-pdf-consumer.mjs",
+    "sdk:fx-text": "node scripts/synware/check-fx-text-consumer.mjs",
+    "sdk:text-system": "node scripts/synware/check-text-system-consumer.mjs",
+    "sdk:fx-video": "node scripts/synware/check-fx-video-consumer.mjs",
+    "sdk:fx-video-encode": "node scripts/synware/check-fx-video-encode-consumer.mjs",
+    "sdk:omission": "node scripts/synware/check-omitted-products-consumer.mjs",
+    "fx:installed": "node scripts/fx/check-installed-twelve-fx.mjs --mode deterministic",
+    "fx:installed:browser": "node scripts/fx/check-installed-twelve-fx.mjs --mode browser --base /nested/product/",
+    "product:names": "node scripts/quality/check-product-name-hygiene.mjs",
+    "typecheck": "tsc -b --pretty false",
+    "boundaries:architecture": "node scripts/quality/architecture-boundaries.mjs",
+    "typecheck:contracts": "tsc -p tests/types/tsconfig.undo-contract.json --noEmit && tsc -p tests/fixtures/tsconfig.routing-ii-inference.json --noEmit && tsc -p tests/fixtures/tsconfig.expanded-fx-types.json --noEmit"
+  },
+  "dependencies": {
+    "@bwip-js/generic": "4.11.4",
+    "@floating-ui/dom": "^1.7.6",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "@tiptap/pm": "^3.24.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@zumer/snapdom": "^2.12.9",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "bidi-js": "1.1.0",
+    "framer-motion": "^12.23.24",
+    "harfbuzzjs": "1.6.1",
+    "linebreak": "1.1.0",
+    "oauth4webapi": "3.8.8",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "6.3.289",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "regenerator-runtime": "^0.14.1",
+    "unicode-script": "1.2.0",
+    "vite": "^7.1.7",
+    "woff2-encoder": "3.0.0-beta.1"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@types/emscripten": "1.41.6",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@zxing/library": "0.23.0",
+    "css-tree": "^3.2.1",
+    "jsdom": "^29.1.1",
+    "playwright": "1.61.0",
+    "sharp": "0.35.5",
+    "typescript": "^5.9.2",
+    "vitest": "^4.1.7"
+  },
+  "overrides": {
+    "sharp": "$sharp"
+  },
+  "license": "AGPL-3.0-or-later AND Apache-2.0",
+  "homepage": "https://github.com/Syndromatic-Ltd/SynCloudOS#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Syndromatic-Ltd/SynCloudOS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Syndromatic-Ltd/SynCloudOS/issues"
+  },
+  "author": "Syndromatic Ltd",
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

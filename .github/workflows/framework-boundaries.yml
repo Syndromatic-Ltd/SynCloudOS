@@ -1,0 +1,70 @@
+name: Framework quality
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install boundary-check dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ripgrep
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm audit
+      - run: npm run typecheck
+      - run: npm run typecheck:contracts
+      - run: npm run boundaries:architecture
+      - run: node scripts/fx/boundary-audit.mjs
+      - run: npm run sdk:build
+      - run: npm test -- --exclude tests/runtime/synapp-sdk-package.test.ts --exclude tests/runtime/managed-typography-packed-consumer.test.ts --exclude tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts --exclude 'tests/runtime/fx/packed-*.test.ts' --maxWorkers=1
+      - run: npm test -- tests/runtime/synapp-sdk-package.test.ts --maxWorkers=1
+      - run: npm run sdk:build
+      - run: npm test -- tests/runtime/managed-typography-packed-consumer.test.ts tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts --maxWorkers=1
+      - run: node --test tests/packaging/*.test.mjs
+      - run: npm run product:names
+      - run: npm run fx:installed
+      - name: Audit a generated consumer with scoped FX operations
+        run: |
+          node scripts/synware/create-synware.mjs .artifacts/capability-consumer/src/SynWare/ReleaseCheck.app com.example.releasecheck --fx media,video,midi,location,lumina
+          npm run synware:capabilities -- .artifacts/capability-consumer
+  browsers:
+    runs-on: ubuntu-latest
+    env:
+      FRAMEWORK_E2E_FIREFOX_HEADED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Provide graphics display and audio clock
+        run: |
+          sudo apt-get install --yes xvfb xauth libgl1-mesa-dri libegl-mesa0 pulseaudio pulseaudio-utils
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=syncloudos_test_audio
+          pactl set-default-sink syncloudos_test_audio
+          pactl info
+          pactl list short sinks
+      - run: npm run sdk:build
+      - run: xvfb-run -a npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-evidence
+          path: |
+            test-results/
+            .artifacts/expanded-fx/

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>FX-09 browser specimen</title>
+  </head>
+  <body>
+    <script type="module">
+      import { runFX09BrowserSpecimen } from "./fx-pdf-structure-browser.ts";
+      window.fx09Specimen = { state: "running" };
+      runFX09BrowserSpecimen().then(
+        result => { window.fx09Specimen = { state: "passed", result }; },
+        error => {
+          window.fx09Specimen = {
+            state: "failed",
+            error: error instanceof Error ? (error.stack ?? error.message) : String(error),
+          };
+        },
+      );
+    </script>
+  </body>
+</html>

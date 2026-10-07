@@ -1,0 +1,67 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.webspring-drag-proxy {
+  position: fixed;
+  z-index: 220;
+  display: grid;
+  width: 108px;
+  place-items: center;
+  gap: 7px;
+  color: rgba(238, 244, 255, 0.82);
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.05;
+  text-align: center;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.95);
+  pointer-events: none;
+  transform: translate(-50%, -52%) scale(1.08);
+  filter:
+    drop-shadow(0 18px 16px rgba(0,0,0,0.72))
+    drop-shadow(0 0 12px rgba(130,190,255,0.26));
+}
+
+.webspring-drag-proxy img {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+}
+
+.webspring-drag-proxy[data-mobile="true"] {
+  width: 92px;
+  transform: translate(-50%, -54%) scale(1.04);
+}
+
+.webspring-drag-proxy[data-mobile="true"] img {
+  width: 70px;
+  height: 70px;
+}
+
+.webspring-launch-dim {
+  position: fixed;
+  inset: 0;
+  z-index: 38;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(0,0,0,0.28), rgba(0,0,0,0.78) 68%),
+    rgba(0,0,0,0.46);
+}
+
+.webspring-reorder-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

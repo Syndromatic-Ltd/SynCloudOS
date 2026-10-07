@@ -1,0 +1,521 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.nse-container-row-group,
+.nse-container-pane,
+.nse-container-dialog,
+.nse-container-drawer,
+.nse-container-sliding-pane,
+.nse-container-sliding-view {
+  box-sizing: border-box;
+  min-inline-size: 0;
+}
+
+.nse-container-row-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nse-container-row-group.is-inset {
+  padding: 8px;
+}
+
+.nse-container-row-group-header,
+.nse-container-row-group-footer,
+.nse-container-pane-header,
+.nse-container-pane-footer,
+.nse-container-dialog-header,
+.nse-container-dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nse-container-row-group-header,
+.nse-container-pane-header,
+.nse-container-dialog-header {
+  justify-content: space-between;
+}
+
+.nse-container-row-group-header h3,
+.nse-container-pane-header h2,
+.nse-container-dialog-header h2 {
+  margin: 0;
+  font: inherit;
+  font-weight: 700;
+}
+
+.nse-container-row-group-header p,
+.nse-container-pane-subtitle,
+.nse-container-dialog-description {
+  margin: 0;
+  color: color-mix(in srgb, currentColor 66%, transparent);
+}
+
+.nse-container-row-group-body,
+.nse-container-pane-body,
+.nse-container-dialog-body {
+  min-inline-size: 0;
+}
+
+/* Row group: a "roundy" framed group whose rows are separated by thin guide-line rails. */
+.nse-container-row-group[data-rails="true"] .nse-container-row-group-body {
+  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+  border-radius: 10px;
+  overflow: hidden;
+  background: color-mix(in srgb, canvas 90%, transparent);
+}
+
+.nse-container-row-group[data-rails="true"] .nse-container-row-group-body > * {
+  padding: 10px 12px;
+}
+
+.nse-container-row-group[data-rails="true"] .nse-container-row-group-body > * + * {
+  border-top: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+
+/* Auto-wrapped rows (wrapRows): plain block rows whose hidden state collapses them (showRow/hideRow). */
+.nse-container-row-group-row {
+  display: block;
+  min-inline-size: 0;
+}
+
+.nse-container-row-group-row[hidden] {
+  display: none;
+}
+
+.nse-container-pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nse-spacing-related);
+  padding: var(--nse-content-margin);
+}
+
+.nse-container-pane[data-variant="plain"] {
+  padding: 0;
+}
+
+.nse-container-pane[data-variant="surface"],
+.nse-container-pane[data-variant="floating"] {
+  background: color-mix(in srgb, canvas 76%, white 8%);
+  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.nse-container-pane[data-variant="sidebar"],
+.nse-container-pane[data-variant="inspector"] {
+  background: color-mix(in srgb, canvas 82%, currentColor 4%);
+}
+
+.nse-container-pane-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nse-container-drawer {
+  position: relative;
+  inline-size: 100%;
+}
+
+.nse-container-drawer[hidden],
+.nse-container-sliding-pane[hidden] {
+  display: none;
+}
+
+.nse-container-divider-drawer {
+  display: grid;
+  gap: 6px;
+}
+
+/* Divider drawer open/close animation: the panel is a single grid row that animates between full
+   height (1fr) and collapsed (0fr); the inner wrapper clips so the content slides in/out smoothly. */
+.nse-container-divider-drawer-panel {
+  display: grid;
+  grid-template-rows: 1fr;
+  min-inline-size: 0;
+  transition: grid-template-rows 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.nse-container-divider-drawer[data-open="false"] .nse-container-divider-drawer-panel {
+  grid-template-rows: 0fr;
+}
+
+.nse-container-divider-drawer-panel-inner {
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nse-container-divider-drawer-panel {
+    transition: none;
+  }
+}
+
+.nse-container-sliding-pane {
+  --nse-sliding-pane-drag: 0px;
+  --nse-sliding-pane-peek: 0px;
+  inline-size: var(--nse-sliding-pane-size, 320px);
+  transition: transform 180ms ease, opacity 180ms ease;
+  touch-action: pan-y;
+}
+
+.nse-container-sliding-pane[data-dragging="true"] {
+  transition: none;
+}
+
+.nse-container-sliding-pane[data-placement="leading"][data-open="true"],
+.nse-container-sliding-pane[data-placement="trailing"][data-open="true"] {
+  transform: translateX(var(--nse-sliding-pane-drag));
+}
+
+.nse-container-sliding-pane[data-placement="top"][data-open="true"],
+.nse-container-sliding-pane[data-placement="bottom"][data-open="true"] {
+  transform: translateY(var(--nse-sliding-pane-drag));
+}
+
+.nse-container-sliding-pane[data-multi-view="true"] {
+  min-inline-size: min(var(--nse-sliding-pane-size, 320px), 100%);
+}
+
+.nse-container-sliding-pane[data-placement="leading"][data-open="false"] {
+  transform: translateX(calc(-100% + var(--nse-sliding-pane-peek)));
+}
+
+.nse-container-sliding-pane[data-placement="trailing"][data-open="false"] {
+  transform: translateX(calc(100% - var(--nse-sliding-pane-peek)));
+}
+
+.nse-container-sliding-pane[data-placement="top"][data-open="false"] {
+  transform: translateY(calc(-100% + var(--nse-sliding-pane-peek)));
+}
+
+.nse-container-sliding-pane[data-placement="bottom"][data-open="false"] {
+  transform: translateY(calc(100% - var(--nse-sliding-pane-peek)));
+}
+
+.nse-container-sliding-view {
+  display: grid;
+  gap: 8px;
+}
+
+.nse-container-sliding-view-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nse-container-sliding-view-viewport {
+  overflow: hidden;
+  min-inline-size: 0;
+}
+
+.nse-container-sliding-view-track {
+  display: flex;
+  transition: transform 220ms ease;
+}
+
+.nse-container-sliding-view[data-axis="vertical"] .nse-container-sliding-view-track {
+  flex-direction: column;
+}
+
+.nse-container-sliding-view-panel {
+  flex: 0 0 100%;
+  min-inline-size: 0;
+}
+
+.nse-container-dialog {
+  display: grid;
+  gap: var(--nse-spacing-related);
+  max-inline-size: min(520px, calc(100vw - 32px));
+  padding: var(--nse-content-margin);
+  background: color-mix(in srgb, canvas 88%, white 6%);
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  outline: none;
+}
+
+.nse-container-dialog[data-variant="sheet"] {
+  max-inline-size: min(680px, calc(100vw - 32px));
+}
+
+.nse-container-dialog[data-variant="confirm"] {
+  max-inline-size: min(440px, calc(100vw - 32px));
+}
+
+.nse-container-dialog-close,
+.nse-container-toast-dismiss {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 28px;
+  border: 0;
+  border-radius: 6px;
+  color: inherit;
+  background: transparent;
+}
+
+.nse-container-dialog-close:hover,
+.nse-container-toast-dismiss:hover {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.nse-container-dialog-actions {
+  justify-content: flex-end;
+}
+
+/* Container entrances keep the former modal/toaster choreography local to NSE containers. */
+@keyframes nse-container-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes nse-container-rise-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes nse-container-slide-in-top {
+  from { opacity: 0; transform: translateY(-18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes nse-container-slide-in-bottom {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+.nse-container-fade-in {
+  animation: nse-container-fade-in 0.18s ease both;
+}
+
+.nse-container-rise-in {
+  animation: nse-container-rise-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.nse-container-fly-in-top {
+  animation: nse-container-slide-in-top 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.nse-container-fly-in-bottom {
+  animation: nse-container-slide-in-bottom 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nse-container-fade-in,
+  .nse-container-rise-in,
+  .nse-container-fly-in-top,
+  .nse-container-fly-in-bottom {
+    animation: none;
+  }
+}
+
+/* Modal layer placement. */
+.nse-container-modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, black 34%, transparent);
+}
+
+.nse-container-modal-shell {
+  outline: none;
+}
+
+/* The action-sheet wrapper retains NSEDialog's semantic content while the
+   shared overlay surface owns the physical modal boundary and placement. */
+.nse-overlay-popup--action-sheet .nse-container-dialog {
+  max-inline-size: 100%;
+  border: 0;
+  background: transparent;
+}
+
+/* Inline (unscrimmed) ConfirmPrompt. */
+.nse-container-confirm-inline {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, canvas 88%, white 6%);
+}
+
+.nse-container-confirm-inline-title {
+  font-weight: 800;
+}
+
+.nse-container-confirm-inline-message {
+  margin: 0;
+  line-height: 1.4;
+  opacity: 0.85;
+}
+
+.nse-container-confirm-inline-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.nse-container-toaster {
+  position: fixed;
+  z-index: 3200;
+  display: grid;
+  gap: 8px;
+  max-inline-size: min(380px, calc(100vw - 24px));
+  pointer-events: none;
+}
+
+.nse-container-toaster[data-position^="top"] {
+  inset-block-start: 12px;
+}
+
+.nse-container-toaster[data-position^="bottom"] {
+  inset-block-end: 12px;
+}
+
+.nse-container-toaster[data-position$="leading"] {
+  inset-inline-start: 12px;
+}
+
+.nse-container-toaster[data-position$="center"] {
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+}
+
+.nse-container-toaster[data-position$="trailing"] {
+  inset-inline-end: 12px;
+}
+
+.nse-container-toast {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  color: inherit;
+  background: color-mix(in srgb, canvas 86%, white 8%);
+  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
+
+.nse-container-toast-copy {
+  display: grid;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.nse-container-toast[data-tone="success"] {
+  border-color: color-mix(in srgb, #1f9d62 42%, transparent);
+}
+
+.nse-container-toast[data-tone="warning"] {
+  border-color: color-mix(in srgb, #c79320 46%, transparent);
+}
+
+.nse-container-toast[data-tone="critical"] {
+  border-color: color-mix(in srgb, #c44b4b 52%, transparent);
+}
+
+/* --- NSESlidingPanes ------------- */
+.nse-container-sliding-panes {
+  position: relative;
+  overflow: hidden;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 220px;
+  border-radius: 12px;
+  background: rgba(20, 24, 30, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28);
+  touch-action: pan-y;
+}
+
+.nse-container-sliding-panes-track {
+  display: flex;
+  block-size: 100%;
+  inline-size: 100%;
+  /* In single-view mode the track translates; in multi-view the panes resize. */
+  transition: transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* During a live drag the track tracks the finger 1:1; the transition returns for the release settle. */
+.nse-container-sliding-panes[data-dragging="true"] .nse-container-sliding-panes-track {
+  transition: none;
+}
+
+.nse-container-sliding-pane-view {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.04));
+  box-shadow: -1px 0 0 rgba(0, 0, 0, 0.32), inset 1px 0 0 rgba(255, 255, 255, 0.05);
+  /* The slide: animate the flex sizing as selection changes. */
+  transition: flex-basis 0.42s cubic-bezier(0.22, 0.61, 0.36, 1), flex-grow 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.nse-container-sliding-pane-view[data-collapsed="true"] {
+  cursor: pointer;
+}
+
+.nse-container-sliding-pane-view[data-collapsed="true"]:focus-visible {
+  outline: 2px solid rgba(141, 211, 255, 0.95);
+  outline-offset: -2px;
+}
+
+.nse-container-sliding-pane-content {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow: auto;
+}
+
+/* A collapsed pane shows a thin peek strip: the underlying content is dimmed and a vertical
+   label hints that tapping expands it. */
+.nse-container-sliding-pane-view[data-collapsed="true"] .nse-container-sliding-pane-content {
+  pointer-events: none;
+  filter: saturate(0.7) brightness(0.82);
+}
+
+.nse-container-sliding-pane-peek {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, rgba(20, 24, 30, 0.08), rgba(20, 24, 30, 0.46));
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.35);
+}
+
+.nse-container-sliding-pane-peek-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+}
+
+.nse-container-sliding-panes[data-draggable="true"] .nse-container-sliding-pane-view[data-selected="true"] {
+  cursor: grab;
+}

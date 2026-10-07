@@ -1,0 +1,124 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* App-facing body for a system-owned source-list window: a resizable split above a seam'd metal
+   status bar. The top bar + seam are drawn by ApplicationStageView; this is the body. */
+
+.nse-source-list-scene {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.nse-source-list-scene-split {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.nse-source-list-scene-sidebar,
+.nse-source-list-scene-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.nse-source-list-scene-content {
+  position: relative;
+}
+
+.nse-source-list-scene-projection-content {
+  display: flex;
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.nse-source-list-scene-projection-content > .nse-navigation-destination-host {
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.nse-source-list-scene-status {
+  flex: 0 0 auto;
+}
+
+.nse-source-list-scene[data-navigation-compact="true"] > .nse-source-list-scene-split {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.nse-source-list-scene[data-navigation-compact="true"] > .nse-source-list-scene-split > :is(.nse-split-view-sidebar, .nse-split-view-resizer) {
+  display: none;
+}
+
+.nse-source-list-scene[data-navigation-compact="true"] > .nse-source-list-scene-split > .nse-split-view-main {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+/* Renderer-owned compact chrome; NavigationFoundation intentionally supplies no tab skin. */
+.nse-source-list-scene-projection-compact {
+  flex: 0 0 auto;
+}
+
+.nse-source-list-scene-projection-compact:not(.nse-compact-bottom-chrome-mount) {
+  overflow: hidden;
+}
+
+.nse-source-list-scene-projection {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.nse-source-list-scene-projection > .nse-source-list-scene {
+  flex: 1 1 auto;
+}
+
+/* Compact renderer changes chrome only. The source-list body and its content
+   host stay mounted so form, scroll, and focus identity survive transitions. */
+.nse-source-list-scene-projection[data-navigation-renderer="tabs"] .nse-source-list-scene-split,
+.nse-source-list-scene-projection[data-navigation-renderer="stack"] .nse-source-list-scene-split {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.nse-source-list-scene-projection[data-navigation-renderer="tabs"] .nse-split-view-sidebar,
+.nse-source-list-scene-projection[data-navigation-renderer="stack"] .nse-split-view-sidebar,
+.nse-source-list-scene-projection[data-navigation-renderer="tabs"] .nse-split-view-resizer,
+.nse-source-list-scene-projection[data-navigation-renderer="stack"] .nse-split-view-resizer {
+  display: none;
+}
+
+.nse-source-list-scene-projection[data-navigation-renderer="tabs"] .nse-split-view-main,
+.nse-source-list-scene-projection[data-navigation-renderer="stack"] .nse-split-view-main {
+  grid-column: 1;
+  grid-row: 1;
+}

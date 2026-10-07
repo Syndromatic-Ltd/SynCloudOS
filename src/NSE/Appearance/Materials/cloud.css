@@ -1,0 +1,41 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+:where(.atmo-cloud, .nse-material-cloud) {
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.98) 0, rgba(236, 243, 249, 0.92) 18%, rgba(194, 207, 220, 0.86) 48%, rgba(73, 88, 106, 0.74) 100%),
+    linear-gradient(90deg, rgba(21, 30, 44, 0.46), transparent 24%, transparent 76%, rgba(18, 27, 40, 0.48)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(132, 148, 168, 0.2));
+  background-size: cover, cover, cover;
+  background-position: center;
+}
+
+:where(.atmo-cloud, .nse-material-cloud)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.38;
+  mix-blend-mode: overlay;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 3px 3px;
+}

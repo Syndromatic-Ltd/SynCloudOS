@@ -1,0 +1,403 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.webspring-board {
+  --webspring-board-icon-size: clamp(54px, 15.5vw, 124px);
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  overflow-x: clip;
+  color: #fff;
+  background: #0b0d11;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.webspring-board-launcher {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 74svh;
+  padding: max(clamp(72px, 16.5svh, 180px), env(safe-area-inset-top)) max(clamp(12px, 4vw, 40px), env(safe-area-inset-right)) 0 max(clamp(12px, 4vw, 40px), env(safe-area-inset-left));
+  touch-action: pan-y pinch-zoom;
+  border-bottom: 2px solid rgba(230, 235, 244, .7);
+}
+
+.webspring-board-material {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #929eae url("/assets/webspring/brushed-metal-launcher.webp") center / 100% 100% no-repeat;
+  transform-origin: 50% 65%;
+  opacity: 1;
+  transition: opacity 420ms ease, transform 560ms cubic-bezier(.2, .82, .2, 1);
+  pointer-events: none;
+}
+
+.webspring-board[data-entrance-phase="waiting"] .webspring-board-material {
+  opacity: 0;
+  transform: translate3d(0, -24px, 0) scale(1.04);
+}
+
+.webspring-board[data-entrance-phase="holding"] .webspring-board-material {
+  opacity: 1;
+  transform: translate3d(0, -10px, 0) scale(1.025);
+}
+
+.webspring-board[data-entrance-phase="ready"] .webspring-board-material {
+  opacity: 1;
+  transform: none;
+}
+
+.webspring-board[data-launch-phase="launching"] .webspring-board-material,
+.webspring-board[data-launch-phase="covered"] .webspring-board-material {
+  transform: scale(1.06);
+}
+
+.webspring-board-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 3vw, 18px);
+  max-width: 100%;
+  color: #3c4557;
+  font-size: clamp(20px, 5vw, 32px);
+  text-shadow: 0 1px rgba(255, 255, 255, .7);
+}
+
+.webspring-board-logo {
+  width: clamp(190px, 51vw, 302px);
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.webspring-board-controls {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 4;
+}
+
+.webspring-board-controls:not(.is-editing):not(:focus-within) {
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.webspring-board-pages {
+  display: grid;
+  align-items: center;
+  flex: 1;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 920px;
+  padding: clamp(42px, 7svh, 84px) 0;
+}
+
+.webspring-board-page {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  row-gap: clamp(14px, 2.5svh, 28px);
+}
+
+.webspring-board-slot {
+  min-width: 0;
+}
+
+.webspring-board-icon {
+  appearance: none;
+  display: grid;
+  width: 100%;
+  justify-items: center;
+  align-content: start;
+  gap: clamp(10px, 1.8vw, 18px);
+  min-width: 0;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The icon and its label move together through the entrance and launch. */
+.webspring-board-icon-artwork {
+  display: grid;
+  justify-items: center;
+  gap: clamp(10px, 1.8vw, 18px);
+  width: 100%;
+  min-width: 0;
+  transform-origin: 50% calc(var(--webspring-board-icon-size) / 2);
+}
+
+.webspring-board-icon-well {
+  line-height: 0;
+}
+
+.webspring-board-icon:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 6px;
+}
+
+.webspring-board-icon-well {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--webspring-board-icon-size);
+  aspect-ratio: 1;
+}
+
+.webspring-board-icon-well img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .28)) drop-shadow(0 14px 10px rgba(9, 13, 21, .52));
+  transition: filter 140ms ease;
+}
+
+/* Artwork, initial and loading spinner share one cell: the spinner sits on
+   the icon, which dims beneath it in its own shape. */
+.webspring-board-icon-well > img,
+.webspring-board-icon-well > span[aria-hidden="true"],
+.webspring-board-icon-well > .nse-loading-spinner {
+  grid-area: 1 / 1;
+}
+
+.webspring-board-icon-well > .nse-loading-spinner {
+  z-index: 2;
+  place-self: center;
+}
+
+.webspring-board-icon-well[data-loading="true"] > img {
+  filter: brightness(.58) drop-shadow(0 2px 2px rgba(0, 0, 0, .28)) drop-shadow(0 14px 10px rgba(9, 13, 21, .52));
+}
+
+.webspring-board-icon:not(.is-editing, .is-disabled):active img {
+  filter: brightness(.8) drop-shadow(0 4px 5px rgba(9, 13, 21, .55));
+}
+
+.webspring-board-icon.is-disabled {
+  cursor: not-allowed;
+  filter: grayscale(.7);
+  opacity: .55;
+}
+
+.webspring-board-icon-label {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  color: #fff;
+  font-size: clamp(12px, 2.8vw, 16px);
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .9), 0 2px 5px rgba(0, 0, 0, .45);
+}
+
+.webspring-board-icon.is-dragging { opacity: .28; }
+
+/* Edit mode's wiggle: to -1.2deg and 1.2deg and back over 0.22 s, then a
+   0.08 s rest. */
+.webspring-board-icon.is-editing:not(.is-dragging) {
+  animation: webspring-board-icon-wiggle 300ms ease-in-out infinite;
+}
+
+@keyframes webspring-board-icon-wiggle {
+  0%, 73.33%, 100% { transform: rotate(0deg); }
+  24.44% { transform: rotate(-1.2deg); }
+  48.89% { transform: rotate(1.2deg); }
+}
+
+.webspring-board[data-reduced-motion="true"] .webspring-board-icon {
+  animation: none;
+}
+
+.webspring-board-page-controls {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 12px;
+}
+
+.webspring-board-page-controls button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.webspring-board-page-controls button::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .38);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+}
+
+.webspring-board-page-controls button[aria-current="page"]::after { background: #fff; }
+.webspring-board-page-controls button:focus-visible { outline: 2px solid #fff; }
+
+.webspring-board-journal {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  min-height: 26svh;
+  padding: clamp(28px, 4svh, 56px) max(24px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  background: #0b0d11 url("/assets/webspring/paper-backdrop.webp") center top / max(100%, 1000px) auto no-repeat;
+  box-shadow: inset 0 10px 16px -10px #000;
+  opacity: 1;
+  transform: none;
+  transition: opacity 420ms ease, transform 560ms cubic-bezier(.2, .82, .2, 1);
+}
+
+.webspring-board[data-entrance-phase="waiting"] .webspring-board-journal {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+}
+
+.webspring-board[data-entrance-phase="holding"] .webspring-board-journal {
+  opacity: 1;
+  transform: translate3d(0, 10px, 0);
+}
+
+.webspring-board[data-entrance-phase="ready"] .webspring-board-journal {
+  opacity: 1;
+  transform: none;
+}
+
+.webspring-board-paper-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url("/assets/webspring/glow.png") center top / 100% auto no-repeat;
+  opacity: .22;
+  mix-blend-mode: screen;
+}
+
+.webspring-board .webspring-shelf {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  width: 100%;
+  max-width: 700px;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.webspring-board .webspring-news {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  width: 100%;
+  transform: none;
+}
+
+.webspring-board .webspring-news img {
+  flex: 0 0 auto;
+  width: clamp(36px, 9vw, 56px);
+  height: auto;
+  transform: none;
+}
+
+.webspring-board .webspring-news h2 {
+  font-size: clamp(22px, 5.5vw, 36px);
+  line-height: 1.1;
+  white-space: normal;
+  text-wrap: balance;
+}
+
+.webspring-board .webspring-news-date {
+  margin-top: 6px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.webspring-board .webspring-news-copy {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  width: auto;
+  margin: 14px 0 0;
+  font-size: clamp(13px, 3vw, 16px);
+  line-height: 1.45;
+  transform: none;
+}
+
+body:has(.webspring-board) > .webspring-drag-proxy {
+  width: clamp(74px, 20vw, 160px);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 500;
+  filter: drop-shadow(0 18px 14px rgba(9, 13, 21, .6));
+}
+
+body:has(.webspring-board) > .webspring-drag-proxy img {
+  width: clamp(54px, 15.5vw, 124px);
+  height: auto;
+  aspect-ratio: 1;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webspring-board *,
+  .webspring-board *::before,
+  .webspring-board *::after {
+    animation-duration: .001ms !important;
+    transition-duration: .001ms !important;
+  }
+
+  .webspring-board .webspring-board-icon {
+    animation-name: none !important;
+  }
+
+  .webspring-board .webspring-board-material,
+  .webspring-board .webspring-board-journal {
+    transform: none !important;
+    transition-property: opacity !important;
+  }
+}
+
+.webspring-board[data-reduced-motion="true"] .webspring-board-material,
+.webspring-board[data-reduced-motion="true"] .webspring-board-journal {
+  transform: none !important;
+  transition: opacity .12s ease !important;
+}

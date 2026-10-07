@@ -1,0 +1,32 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* AppearanceAuthority review: calendar and clock CSS dimensions remain explicitly unresolved. */
+[data-nse-control="calendar"] { inline-size: 141px; min-block-size: 148px; }
+[data-nse-control="calendar"] [data-nse-part="header"] { min-block-size: 39px; }
+[data-nse-control="calendar"] [data-nse-part="day"] { inline-size: 20px; block-size: 18px; }
+[data-nse-control="clock"] [data-nse-part="face"] { inline-size: 122px; block-size: 123px; border-radius: 50%; position: relative; }
+[data-nse-control="clock"] [data-nse-part="face"] { border: 1px solid CanvasText; background: Canvas; box-sizing: border-box; }
+[data-nse-control="clock"] [data-nse-part$="hand"] { position: absolute; inset-inline-start: calc(50% - 1px); inset-block-end: 50%; inline-size: 2px; transform-origin: bottom; background: CanvasText; border-radius: 2px; }
+[data-nse-control="clock"] [data-nse-part="hour-hand"] { block-size: 32px; inline-size: 4px; inset-inline-start: calc(50% - 2px); }
+[data-nse-control="clock"] [data-nse-part="minute-hand"] { block-size: 46px; }
+[data-nse-control="clock"] [data-nse-part="second-hand"] { block-size: 50px; background: Highlight; }
+[data-nse-control="clock"] [data-nse-part="centre"] { position: absolute; inline-size: 8px; block-size: 8px; inset-inline-start: calc(50% - 4px); inset-block-start: calc(50% - 4px); border-radius: 50%; background: CanvasText; }
+@media (forced-colors: active) { [data-nse-control="clock"] [data-nse-part$="hand"], [data-nse-control="clock"] [data-nse-part="centre"] { forced-color-adjust: none; background: ButtonText; } }

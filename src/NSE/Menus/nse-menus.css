@@ -1,0 +1,140 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.nse-menu {
+  /* Semantic recipe hooks only; the appearance layer owns bitmap/9-slice assets. */
+  --nse-menu-row-min-block-size: 28px;
+  --nse-menu-row-inline-padding: 8px;
+  display: grid;
+  position: relative;
+  min-inline-size: 12rem;
+  padding: 4px;
+  border-radius: 8px;
+  background: Canvas;
+  color: CanvasText;
+}
+
+.nse-menu__surface-layer {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: none;
+  pointer-events: none;
+}
+
+.nse-menu > :not(.nse-menu__surface-layer) {
+  position: relative;
+  z-index: 1;
+}
+
+.nse-application-menu .nse-menu {
+  min-inline-size: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.nse-application-menu .nse-menu-item {
+  border-radius: 0;
+}
+
+.nse-menu-item {
+  display: grid;
+  grid-template-columns: 1.1rem 1.25rem minmax(0, 1fr) auto auto;
+  gap: 8px;
+  min-block-size: var(--nse-menu-row-min-block-size);
+  padding-inline: var(--nse-menu-row-inline-padding);
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+}
+
+.nse-menu-item:focus-visible,
+.nse-menu-item:hover {
+  outline: none;
+  background: Highlight;
+  color: HighlightText;
+}
+
+.nse-menu-item[data-nse-menu-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.nse-menu-state-column,
+.nse-menu-item-icon,
+.nse-menu-shortcut,
+.nse-menu-submenu-arrow {
+  align-self: center;
+}
+
+.nse-menu-state-column,
+.nse-menu-item-icon,
+.nse-menu-submenu-arrow { text-align: center; }
+.nse-menu-shortcut { color: color-mix(in srgb, currentColor 68%, transparent); font-variant-numeric: tabular-nums; }
+
+.nse-menu-separator {
+  block-size: 1px;
+  margin: 4px;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.nse-menu-bar { display: flex; align-items: center; gap: 2px; min-inline-size: 0; }
+/* Menu bar titles are text, not buttons: no native chrome in any theme. */
+.nse-menu-bar-item > button {
+  appearance: none;
+  margin: 0;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 4px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  line-height: 1.3;
+  white-space: nowrap;
+  cursor: default;
+}
+.nse-menu-bar-item > button[data-active="true"],
+.nse-menu-bar-item > button:hover { background: color-mix(in srgb, Highlight 18%, transparent); }
+.nse-menu-bar-item, .nse-popup-button, .nse-context-menu-host { position: relative; }
+.nse-menu-bar-item > .nse-menu, .nse-popup-button > .nse-menu { position: absolute; inset-block-start: 100%; inset-inline-start: 0; z-index: var(--nse-menu-z-index, 1100); }
+.nse-menu-submenu-arrow { justify-self: end; }
+
+@media (forced-colors: active) {
+  .nse-menu { border-color: CanvasText; }
+  .nse-menu-item:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
+}
+
+/* NSEPicker drives its button through NSEPushButton, which wraps children in
+   a label span. The picker lays its caption and disclosure arrow out as two
+   columns of the button itself, so that wrapper must not form a box. */
+.nse-control-picker-button > .nse-control-button-label {
+  display: contents;
+}
+
+/* State and disclosure are semantic cues, so the neutral sheet draws them;
+   an appearance replaces the glyphs with its own art. */
+.nse-menu-state-column[data-state="on"]::before { content: "\2713"; }
+.nse-menu-state-column[data-state="mixed"]::before { content: "\2013"; }
+.nse-menu-submenu-arrow::before { content: "\203A"; }
+.nse-menu-submenu-arrow[data-direction="rtl"]::before { content: "\2039"; }

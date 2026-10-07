@@ -1,0 +1,71 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.nse-table-view {
+  position: relative;
+  overflow: auto;
+  color: var(--nse-table-color, inherit);
+  background: var(--nse-table-background, transparent);
+}
+
+/* Rows and the header span the whole view even when the columns are
+   narrower, so a selected row's highlight reaches the far edge (NSTableView
+   fills past its last column). */
+.nse-table-view [data-nse-part="header"],
+.nse-table-view [data-nse-part="body"],
+.nse-table-view [data-nse-part="row"] {
+  min-inline-size: 100%;
+}
+
+.nse-table-view [data-nse-part="header"] {
+  z-index: 2;
+  background: var(--nse-table-header-background, transparent);
+}
+
+.nse-table-view [role="columnheader"],
+.nse-table-view [role="gridcell"] {
+  box-sizing: border-box;
+  overflow: hidden;
+  min-inline-size: 0;
+}
+
+.nse-table-view [data-nse-part="column-resize-handle"] {
+  min-inline-size: 16px;
+  min-block-size: 44px;
+  touch-action: none;
+}
+
+.nse-table-view-status {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+@media (forced-colors: active) {
+  .nse-table-view [data-nse-part="header"] {
+    background: Canvas;
+  }
+
+  .nse-table-view [data-selected="true"] {
+    outline: 1px solid Highlight;
+  }
+}

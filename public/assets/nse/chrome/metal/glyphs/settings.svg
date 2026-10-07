@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 84" width="84" height="84">
+  <!-- Settings gear, debossed into metal like return-to-webspring.png and user-info.png:
+       a 20% black fill, a dark inner edge along the top and a light lip below. -->
+  <defs>
+    <path id="gear" fill-rule="evenodd" d="M34.65 15.50 L35.32 7.64 L48.68 7.64 L49.35 15.50 L55.54 18.07 L61.57 12.98 L71.02 22.43 L65.93 28.46 L68.50 34.65 L76.36 35.32 L76.36 48.68 L68.50 49.35 L65.93 55.54 L71.02 61.57 L61.57 71.02 L55.54 65.93 L49.35 68.50 L48.68 76.36 L35.32 76.36 L34.65 68.50 L28.46 65.93 L22.43 71.02 L12.98 61.57 L18.07 55.54 L15.50 49.35 L7.64 48.68 L7.64 35.32 L15.50 34.65 L18.07 28.46 L12.98 22.43 L22.43 12.98 L28.46 18.07Z M42 30.5 A11.5 11.5 0 1 0 42 53.5 A11.5 11.5 0 1 0 42 30.5Z"/>
+    <clipPath id="inside"><use href="#gear"/></clipPath>
+  </defs>
+  <use href="#gear" fill="#fff" fill-opacity="0.42" transform="translate(0 1.6)"/>
+  <use href="#gear" fill="#000" fill-opacity="0.2"/>
+  <g clip-path="url(#inside)">
+    <use href="#gear" fill="none" stroke="#000" stroke-opacity="0.5" stroke-width="3.2" transform="translate(0 1.6)"/>
+  </g>
+</svg>

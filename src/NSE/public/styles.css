@@ -1,0 +1,62 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* SynWare SDK NSE structure and semantic hooks. Hosts select a concrete theme explicitly. */
+/* Layout margins, spacing and text roles first: every sheet below may use them. */
+@import "../Layout/nse-layout-defaults.css";
+@import "../Appearance/nse-appearance.css";
+@import "../Appearance/nse-chrome-primitives.css";
+@import "../Appearance/Materials/cloud.css";
+@import "../Appearance/Materials/glass.css";
+@import "../Appearance/Materials/linen.css";
+@import "../Appearance/Materials/metal.css";
+@import "../Colour/colour-controls.css";
+@import "../Components/components.css";
+@import "../Components/nsePreferencesToast.css";
+@import "../Components/nseSystemDialogs.css";
+@import "../Containers/nse-containers.css";
+@import "../Controls/Completion/nse-completion-controls.css";
+@import "../Controls/Fields/nse-field-extensions.css";
+@import "../Controls/Values/nse-value-controls.css";
+@import "../CoverFlow/nse-coverflow.css";
+@import "../DataViews/Browser/nse-browser.css";
+@import "../DataViews/Collection/nse-collection-view.css";
+@import "../DataViews/Outline/nse-outline-view.css";
+@import "../DataViews/RuleEditor/nse-rule-editor.css";
+@import "../DataViews/Table/nse-table-view.css";
+@import "../DateTime/Calendar/nse-calendar.css";
+@import "../DateTime/Pickers/nse-date-pickers.css";
+@import "../FilePanels/nse-file-panels.css";
+@import "../Navigation/SourceList/nse-sourcelist.css";
+@import "../Windows/Chrome/nse-chrome.css";
+@import "../Navigation/SourceList/nse-source-list-scene.css";
+@import "../Layout/nse-layout.css";
+@import "../Layout/nse-stack-view.css";
+@import "../List/nse-list.css";
+@import "../MediaPanels/nse-media-panels.css";
+@import "../Menus/nse-menus.css";
+@import "../Navigation/nse-navigation.css";
+@import "../Overlays/nse-overlays.css";
+@import "../Page/nse-page.css";
+@import "../Scroll/scroll.css";
+@import "../Toolbars/nse-toolbars.css";
+@import "../Tooltips/nse-tooltips.css";
+@import "../Typography/fonts.css";
+@import "../Windows/nse-windows.css";

@@ -1,0 +1,54 @@
+[
+  {
+    "file": "notosans-NotoSans[wdth,wght].ttf",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf",
+    "sha256": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
+  },
+  {
+    "file": "notosans-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosans/OFL.txt",
+    "sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a"
+  },
+  {
+    "file": "notosansarabic-NotoSansArabic[wdth,wght].ttf",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosansarabic/NotoSansArabic%5Bwdth%2Cwght%5D.ttf",
+    "sha256": "63111b5b2e074dd48cc67692e0a2726d86ee94c1c37fe8598257b7b4e87e869e"
+  },
+  {
+    "file": "notosansarabic-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosansarabic/OFL.txt",
+    "sha256": "07fc70bfeb985cc1a87a8587d0a0c80bab11c86c9dc3fd95b6f0cb332f983e96"
+  },
+  {
+    "file": "notosansdevanagari-NotoSansDevanagari[wdth,wght].ttf",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosansdevanagari/NotoSansDevanagari%5Bwdth%2Cwght%5D.ttf",
+    "sha256": "9ce7b04f60e363d8870e5997744cf85cf69d38a4d7d129d364d92a3b14b461d7"
+  },
+  {
+    "file": "notosansdevanagari-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosansdevanagari/OFL.txt",
+    "sha256": "a216f6f8d85c7228093e0ee5e258d9d377e6671f68acb4db1930b29583d0f331"
+  },
+  {
+    "file": "notosansjp-vertical-subset.ttf",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosansjp/NotoSansJP%5Bwght%5D.ttf",
+    "sourceSha256": "c2f3b4d463500a2ddcd3849cded1fceeb9fd6d1c32e6cbecd568453ba50fc68f",
+    "sha256": "ae3d6541c7b6ab1d82166853629bbbec31fc46db621d42a00127a171fa8ffb46",
+    "retainedUnicode": "0041,3001,3002,300C,300D,304B,306A,65E5,672C",
+    "retainedLayout": "all source OpenType layout features including vert/vrt2 and vhea/vmtx",
+    "subsetTool": "fonttools 4.64.0",
+    "subsetOptions": [
+      "--layout-features=*",
+      "--name-IDs=*",
+      "--name-legacy",
+      "--name-languages=*",
+      "--notdef-glyph",
+      "--recommended-glyphs"
+    ]
+  },
+  {
+    "file": "notosansjp-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosansjp/OFL.txt",
+    "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9"
+  }
+]

@@ -1,0 +1,360 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* ============================================================================
+   NSE default layout: margins, spacing and text roles every theme stands on.
+
+   An app built from stock NSE controls should be laid out well without app
+   CSS, the way UIKit and AppKit views come with layout margins and a standard
+   spacing. These are SDK defaults, not theme paint: a theme may retune the
+   values under its appearance selector, but must not remove them.
+   Everything is optional. Containers take layoutMargins="none" and
+   contentLayout="flow", and every rule here is wrapped in :where(), so any
+   app or theme rule wins without a specificity fight.
+
+   Vocabulary (Apple's, adapted; see docs/framework/nse/layout.md):
+     layout margin     the inset between a view's edge and its content
+     content margin    the inset inside a group box, tab view or pane
+     standard spacing  the gap between sibling controls (Apple's "standard")
+     related spacing   the gap between stacked groups of related controls
+     group spacing     the gap between unrelated groups or sections
+     tight spacing     a control and its satellite: a caption, help, a value
+     readable width    the widest a column of running text should be
+   ========================================================================= */
+
+:root {
+  /* The scale. Semantic tokens point here; apps may use it directly. */
+  --nse-space-1: 4px;
+  --nse-space-2: 8px;
+  --nse-space-3: 12px;
+  --nse-space-4: 16px;
+  --nse-space-5: 20px;
+  --nse-space-6: 24px;
+  --nse-space-7: 32px;
+  --nse-space-8: 40px;
+
+  /* Margins (AppKit: 20pt window edge, 14pt under a title or toolbar, 16pt
+     inside a box or tab view; UIKit: 16pt root margins on compact widths). */
+  --nse-layout-margin: var(--nse-space-5);
+  --nse-layout-margin-top: 14px;
+  --nse-layout-margin-compact: var(--nse-space-4);
+  --nse-content-margin: var(--nse-space-4);
+
+  /* Spacing between things. */
+  --nse-spacing-tight: var(--nse-space-1);
+  --nse-spacing-standard: var(--nse-space-2);
+  /* Controls side by side on one line (a row of push buttons). Themes whose
+     art bleeds to its edges widen it. */
+  --nse-spacing-inline: var(--nse-space-2);
+  --nse-spacing-related: var(--nse-space-3);
+  --nse-spacing-group: var(--nse-space-5);
+  --nse-form-label-spacing: var(--nse-space-2);
+  --nse-form-row-spacing: var(--nse-space-3);
+
+  --nse-readable-width: 42rem;
+
+  /* Text roles (SwiftUI's body / callout / footnote / caption / headline). */
+  --nse-text-body-size: 14px;
+  --nse-text-body-line: 1.45;
+  --nse-text-callout-size: 13px;
+  --nse-text-footnote-size: 12px;
+  --nse-text-caption-size: 11px;
+  --nse-text-headline-size: 15px;
+  --nse-text-headline-weight: 700;
+  --nse-text-label-size: 13px;
+  --nse-text-label-weight: 700;
+  --nse-text-secondary-opacity: 66%;
+}
+
+/* ----------------------------------------------------------------------------
+   Content stacks. A container's content lays out as a leading-aligned column
+   at standard spacing (SwiftUI's GroupBox, Form and Section do the same).
+   Controls keep their natural size; flexible views fill the column, as a
+   text field, slider or table fills its row in a Mac form.
+   ------------------------------------------------------------------------- */
+
+/* :not([hidden]): an author display beats the UA's [hidden] rule whatever its
+   specificity, and tab panels and drawers toggle with the hidden attribute. */
+:where([data-nse-content-layout="stack"]:not([hidden])) {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--nse-content-spacing, var(--nse-spacing-standard));
+  min-inline-size: 0;
+}
+
+:where([data-nse-content-layout="stack"]) > :where(
+  .nse-control-text-field,
+  .nse-control-input-box,
+  .nse-control-slider,
+  .nse-extended-progress-slider,
+  .nse-control-progress-bar,
+  .nse-control-progress-item,
+  hr.nse-control-divider,
+  .nse-control-divider:not(.nse-control-divider-toggle),
+  .nse-container-divider-drawer,
+  .nse-list,
+  .nse-list-swipeable,
+  .nse-control-list-item,
+  .nse-list-row,
+  .nse-container-row-group,
+  .nse-control-group-box,
+  .nse-container-pane,
+  .nse-container-drawer,
+  .nse-container-dialog,
+  .nse-control-rounded-box,
+  .nse-control-image-view,
+  .nse-editor,
+  .nse-toolbar,
+  .nse-menu-bar,
+  .nse-statusbar,
+  .nse-app-topbar-base,
+  .nse-control-page-header,
+  .nse-extended-header,
+  .nse-extended-prev-next-banner,
+  .nse-form,
+  .nse-layout-stack,
+  .nse-layout-inline,
+  .nse-layout-flex,
+  .nse-layout-fit,
+  [data-nse-content-layout],
+  [data-nse-control="search-field"],
+  [data-nse-control="secure-text-field"],
+  [data-nse-control="combo-box"],
+  [data-nse-control="token-field"],
+  [data-nse-control="progress-indicator"],
+  [data-nse-control="level-indicator"],
+  [data-nse-control="table-view"],
+  [data-nse-control="outline-view"],
+  [data-nse-control="browser"],
+  [data-nse-control="collection-view"],
+  [data-nse-control="rule-editor"],
+  [data-nse-control="predicate-editor"],
+  [data-nse-control="tab-view"],
+  [data-nse-control="accordion-view"],
+  [data-nse-control="scroll-view-frame"],
+  [data-nse-control="split-view"],
+  [data-nse-control="stack-view"],
+  [data-nse-control="ruler"],
+  [data-nse-fill="true"],
+  textarea
+) {
+  align-self: stretch;
+  min-inline-size: 0;
+}
+
+/* An app can pin any control to its natural size, or stretch any control. */
+:where([data-nse-content-layout="stack"]) > :where([data-nse-fill="false"]) {
+  align-self: flex-start;
+}
+
+/* Running text inside a content stack: no browser margins (the stack's gap is
+   the rhythm), body size, and never wider than a comfortable measure. */
+:where([data-nse-content-layout="stack"]) > :where(p, ul, ol, dl, blockquote, output, figure) {
+  margin: 0;
+  max-inline-size: var(--nse-readable-width);
+  font-size: var(--nse-text-body-size);
+  line-height: var(--nse-text-body-line);
+}
+
+:where([data-nse-content-layout="stack"]) > :where(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+}
+
+/* Rows run edge to edge with no gap between them, like the cells of a grouped
+   table section; their own hairlines and bevels are the separation. */
+:where([data-nse-content-layout="stack"][data-nse-content-rows="true"]),
+:where([data-nse-content-layout="stack"]):has(> :first-child:is(.nse-control-list-item, .nse-list-row, .nse-list-swipeable, .nse-virtual-list-row)) {
+  align-items: stretch;
+  gap: 0;
+}
+
+/* ----------------------------------------------------------------------------
+   Layout margins on containers that carry them through a custom property.
+   ------------------------------------------------------------------------- */
+
+:where([data-nse-layout-margins="standard"]) {
+  --nse-box-margin-top: var(--nse-content-margin);
+  --nse-box-margin-right: var(--nse-content-margin);
+  --nse-box-margin-bottom: var(--nse-content-margin);
+  --nse-box-margin-left: var(--nse-content-margin);
+}
+
+:where([data-nse-layout-margins="standard"]):has(> [data-nse-content-layout="stack"] > :first-child:is(.nse-control-list-item, .nse-list-row, .nse-list-swipeable, .nse-virtual-list-row)) {
+  --nse-box-margin-top: 0px;
+  --nse-box-margin-right: 0px;
+  --nse-box-margin-bottom: 0px;
+  --nse-box-margin-left: 0px;
+}
+
+:where([data-nse-layout-margins="none"]) {
+  --nse-box-margin-top: 0px;
+  --nse-box-margin-right: 0px;
+  --nse-box-margin-bottom: 0px;
+  --nse-box-margin-left: 0px;
+}
+
+/* ----------------------------------------------------------------------------
+   Stack alignment (UIStackView's .fill / .leading / .center / .trailing).
+   A leading stack behaves as a content stack: flexible views still fill.
+   ------------------------------------------------------------------------- */
+
+:where(.nse-layout-stack[data-alignment="leading"]) { align-items: flex-start; }
+:where(.nse-layout-stack[data-alignment="center"]) { align-items: center; }
+:where(.nse-layout-stack[data-alignment="trailing"]) { align-items: flex-end; }
+
+/* ----------------------------------------------------------------------------
+   Text roles (NSEText).
+   ------------------------------------------------------------------------- */
+
+:where(.nse-text) {
+  margin: 0;
+  font-size: var(--nse-text-body-size);
+  line-height: var(--nse-text-body-line);
+}
+
+:where(.nse-text[data-text-style="callout"]) { font-size: var(--nse-text-callout-size); }
+:where(.nse-text[data-text-style="footnote"]) { font-size: var(--nse-text-footnote-size); }
+:where(.nse-text[data-text-style="caption"]) { font-size: var(--nse-text-caption-size); line-height: 1.35; }
+:where(.nse-text[data-text-style="headline"]) { font-size: var(--nse-text-headline-size); font-weight: var(--nse-text-headline-weight); }
+:where(.nse-text[data-text-style="label"]) { font-size: var(--nse-text-label-size); font-weight: var(--nse-text-label-weight); }
+:where(.nse-text[data-tone="secondary"]) { color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent); }
+:where(.nse-text[data-numeric="true"]) { font-variant-numeric: tabular-nums; }
+:where(.nse-text[data-wrap="anywhere"]) { overflow-wrap: anywhere; }
+
+/* ----------------------------------------------------------------------------
+   Forms (NSEForm / NSEFormRow): AppKit's label column. Labels are trailing
+   aligned with their control's first baseline; controls lay out as a content
+   stack. Below the compact width the label sits above its control, as iOS
+   does.
+   ------------------------------------------------------------------------- */
+
+:where(.nse-form) {
+  min-inline-size: 0;
+  container-type: inline-size;
+  container-name: nse-form;
+}
+
+:where(.nse-form-grid) {
+  display: grid;
+  grid-template-columns: var(--nse-form-label-column, max-content) minmax(0, 1fr);
+  column-gap: var(--nse-form-label-spacing);
+  row-gap: var(--nse-form-row-spacing);
+  align-items: start;
+  min-inline-size: 0;
+}
+
+:where(.nse-form-row) {
+  display: contents;
+}
+
+:where(.nse-form-label) {
+  grid-column: 1;
+  justify-self: end;
+  text-align: end;
+  font-size: var(--nse-text-label-size);
+  font-weight: var(--nse-text-label-weight);
+  line-height: 1.3;
+  /* A label is centred on its control's first line, as a Mac form's are,
+     whatever the control: a checkbox's baseline is the foot of its box and a
+     slider has none, so baseline alignment cannot place them. The first
+     line's height is --nse-form-line, which each theme states for its
+     controls (a theme-neutral default here). */
+  margin-block-start: max(0px, calc((var(--nse-form-line, 32px) - 1lh) / 2));
+}
+
+:where(.nse-form-row[data-label-align="center"]) > :where(.nse-form-label) {
+  align-self: center;
+  margin-block-start: 0;
+}
+
+:where(.nse-form-row[data-label-align="top"]) > :where(.nse-form-label) {
+  margin-block-start: 0;
+}
+
+:where(.nse-form[data-label-alignment="leading"]) :where(.nse-form-label) {
+  justify-self: start;
+  text-align: start;
+}
+
+/* The control cell is a content stack (the component sets
+   data-nse-content-layout), so flexible controls fill the column and the
+   rest keep their natural size. */
+:where(.nse-form-control) {
+  grid-column: 2;
+  --nse-content-spacing: var(--nse-spacing-standard);
+}
+
+/* Several peer controls on one row: checkboxes of one setting, a field and
+   its unit, buttons. They wrap rather than overflow. */
+:where(.nse-form-row[data-nse-inline="true"]) > :where(.nse-form-control) {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--nse-spacing-inline);
+}
+
+:where(.nse-form-help) {
+  margin: calc(var(--nse-spacing-tight) - var(--nse-content-spacing, 0px)) 0 0;
+  max-inline-size: var(--nse-readable-width);
+  font-size: var(--nse-text-footnote-size);
+  line-height: 1.4;
+  color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent);
+}
+
+:where(.nse-form-row[data-nse-inline="true"]) > :where(.nse-form-control) > :where(.nse-form-help) {
+  flex-basis: 100%;
+}
+
+:where(.nse-form-row[data-nse-full-width="true"]) > :where(.nse-form-control) {
+  grid-column: 1 / -1;
+}
+
+:where(.nse-form-separator) {
+  grid-column: 1 / -1;
+  block-size: 1px;
+  /* The UA's auto inline margins shrink an hr to nothing in a grid. */
+  margin-block: calc(var(--nse-spacing-related) - var(--nse-form-row-spacing));
+  margin-inline: 0;
+  inline-size: 100%;
+  border: 0;
+  /* An engraved rule: a dark hairline over a light lip reads as a groove on
+     any surface, where one faint line vanishes on grey. */
+  background: color-mix(in srgb, currentColor 24%, transparent);
+  box-shadow: 0 1px 0 color-mix(in srgb, white 55%, transparent);
+}
+
+@container nse-form (max-width: 420px) {
+  :where(.nse-form-grid) {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--nse-spacing-standard);
+  }
+
+  :where(.nse-form-label) {
+    grid-column: 1;
+    justify-self: start;
+    text-align: start;
+    margin-block-start: var(--nse-spacing-standard);
+  }
+
+  :where(.nse-form-control) {
+    grid-column: 1;
+  }
+}

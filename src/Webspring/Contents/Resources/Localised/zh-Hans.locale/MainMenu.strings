@@ -1,0 +1,7 @@
+/* SynCloudOS shell menu resource. Locale: zh-Hans. */
+/* Generated from .workflow/syncloudos-localeservices-finishing-pass/generate-localised-catalogs.mjs. */
+"__translationCompleteness" = "complete";
+"window.title" = "Webspring";
+"webspring.label" = "Webspring";
+"actions.open" = "打开Webspring";
+"actions.close" = "关闭 Webspring";

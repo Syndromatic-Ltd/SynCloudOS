@@ -1,0 +1,146 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.nse-list {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  color: inherit;
+}
+
+.nse-list.is-inset {
+  padding: 6px;
+}
+
+.nse-list[data-density="compact"] {
+  gap: 2px;
+}
+
+.nse-list[data-density="comfortable"] {
+  gap: 4px;
+}
+
+.nse-list[data-density="spacious"] {
+  gap: 8px;
+}
+
+.nse-list[data-dividers="true"] .nse-list-row + .nse-list-row {
+  border-block-start: 1px solid color-mix(in srgb, currentColor 13%, transparent);
+}
+
+.nse-list-row {
+  outline: none;
+}
+
+.nse-list-row:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, #67a7ff 72%, white 18%);
+}
+
+.nse-list-swipeable {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.nse-list-swipeable.is-disabled {
+  touch-action: auto;
+}
+
+/* Each tray is exactly as wide as the swipe that reveals it, and shows only
+   while its side is revealed. */
+.nse-list-swipe-actions {
+  position: absolute;
+  inset-block: 0;
+  z-index: 0;
+  box-sizing: border-box;
+  inline-size: var(--nse-swipe-max, 96px);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  visibility: hidden;
+}
+
+.nse-list-swipeable[data-reveal-side="leading"] > .nse-list-swipe-actions-leading,
+.nse-list-swipeable[data-reveal-side="trailing"] > .nse-list-swipe-actions-trailing {
+  visibility: visible;
+}
+
+.nse-list-swipe-actions-leading {
+  inset-inline-start: 0;
+  justify-content: flex-start;
+}
+
+.nse-list-swipe-actions-trailing {
+  inset-inline-end: 0;
+  justify-content: flex-end;
+}
+
+.nse-list-swipe-action {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
+/* The content is the row's surface sliding over the trays, so it is opaque. */
+.nse-list-swipe-content {
+  position: relative;
+  z-index: 1;
+  background: var(--nse-list-swipe-surface, Canvas);
+  transform: translate3d(var(--nse-swipe-x, 0), 0, 0);
+  transition: transform 160ms ease;
+}
+
+.nse-list-swipeable[data-dragging="true"] .nse-list-swipe-content {
+  transition: none;
+}
+
+/* --- Virtualised scrolling list ------------------- */
+.nse-virtual-list {
+  box-sizing: border-box;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  min-inline-size: 0;
+  color: inherit;
+}
+
+/* Full-height spacer keeps the native scrollbar proportional to the whole list. */
+.nse-virtual-list-sizer {
+  position: relative;
+  width: 100%;
+}
+
+/* The live strip of rows, translated to the top of the rendered window. */
+.nse-virtual-list-window {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  will-change: transform;
+}
+
+.nse-virtual-list-row {
+  box-sizing: border-box;
+  overflow: hidden;
+}
+

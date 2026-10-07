@@ -1,0 +1,3 @@
+const remove = document.removeEventListener;
+const removal = ["keyup", () => undefined] as const;
+remove.apply(document, removal);

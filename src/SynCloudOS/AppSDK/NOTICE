@@ -1,0 +1,9 @@
+SynWare SDK
+Copyright 2026 Syndromatic Ltd.
+Designed by Kavish Krishnakumar in Manchester.
+
+The Syndromatic-authored source in this directory is licensed under Apache-2.0.
+Generated validator helpers retain their upstream licences; see the root NOTICE.
+This source licence does not relicense the SynCloudOS runtime, NSE, Atmo, FX,
+or other AGPL framework modules referenced by these interfaces or bundled
+in the combined @syndromatic/syncloudos distribution.

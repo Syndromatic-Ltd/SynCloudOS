@@ -1,0 +1,87 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.nse-layout-flex,
+.nse-layout-stack,
+.nse-layout-inline,
+.nse-layout-ordered {
+  box-sizing: border-box;
+}
+
+.nse-layout-stack-divider {
+  display: block;
+  block-size: 1px;
+  inline-size: 100%;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.nse-layout-inline.is-scrollable {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+}
+
+.nse-layout-fit {
+  box-sizing: border-box;
+  display: grid;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.nse-layout-fit.is-centered {
+  place-items: center;
+}
+
+.nse-layout-fit[data-mode="fill"] {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.nse-layout-fit[data-mode="contain"],
+.nse-layout-fit[data-mode="cover"] {
+  overflow: hidden;
+}
+
+.nse-layout-fit[data-mode="stretch"] {
+  justify-items: stretch;
+  align-items: stretch;
+}
+
+.nse-layout-fit[data-scroll="true"] {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.nse-layout-spacer {
+  display: block;
+  min-inline-size: 0;
+  min-block-size: 0;
+  pointer-events: none;
+}
+
+.nse-layout-ordered {
+  min-inline-size: 0;
+}
+
+.nse-layout-ordered-item {
+  display: contents;
+}
+

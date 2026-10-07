@@ -1,0 +1,134 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+[data-nse-control="search-field"] { display: inline-flex; min-block-size: 50px; }
+[data-nse-control="search-field"][data-size] { min-block-size: var(--nse-control-height, 26px); }
+[data-nse-control="secure-text-field"] { display: inline-flex; min-block-size: 29px; }
+
+/* Search-field structure is control mechanics. Appearance themes paint the frame. */
+.nse-control-search-field {
+  min-width: 0;
+}
+
+.nse-control-search-frame {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.nse-control-search-frame[data-affordance="hidden"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.nse-control-search-frame input[type="search"] {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.nse-control-search-frame input[type="search"]::-webkit-search-decoration,
+.nse-control-search-frame input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.nse-control-search-affordance {
+  display: block;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent center / contain no-repeat;
+  color: inherit;
+  font: inherit;
+}
+
+/* Checkbox structure belongs to the control, independent of the selected
+   appearance. Themes only paint the art surface and state-specific visuals. */
+.nse-control-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.nse-control-checkbox.is-disabled {
+  cursor: default;
+}
+
+.nse-control-checkbox-control {
+  position: relative;
+  display: inline-grid;
+  width: 33px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+}
+
+.nse-control-checkbox input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.nse-control-checkbox-art {
+  width: 33px;
+  height: 28px;
+}
+
+.nse-control-checkbox-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Secure field reveal: an eye, crossed while the text is showing. Drawn as a
+   mask in the control's ink so every theme gets a glyph, not a bullet. */
+[data-nse-control="secure-text-field"] [data-nse-part="reveal-glyph"] {
+  display: block;
+  inline-size: 18px;
+  block-size: 18px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+[data-nse-control="secure-text-field"] [data-nse-part="reveal"][data-revealed="true"] [data-nse-part="reveal-glyph"] {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3Cpath d='M3 15L15 3' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3Cpath d='M3 15L15 3' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+@media (forced-colors: active) {
+  [data-nse-control="secure-text-field"] [data-nse-part="reveal-glyph"] {
+    forced-color-adjust: none;
+    background: ButtonText;
+  }
+}

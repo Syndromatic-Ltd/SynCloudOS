@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "portableCases": {
+    "models.array-controller.selection-50000": {
+      "itemCount": 50000,
+      "maxArrangementRebuilds": 0,
+      "maxSelectionPublications": 1
+    },
+    "windows.manager.order-query-500": {
+      "windowCount": 500,
+      "maxFullRegistryScans": 0,
+      "maxQueryCandidateVisits": 5000,
+      "maxOrderPublications": 500
+    },
+    "overlays.menu-open-painted": {
+      "cycles": 100,
+      "maxProviderListenerSets": 1,
+      "maxValidateManyPerVisibleGeneration": 1,
+      "maxMenuPublications": 320,
+      "maxOverlayPublications": 240,
+      "maxLiveAutoUpdateObservers": 1
+    },
+    "colour-controls.wheel-preview-120": {
+      "previews": 120,
+      "maxCommits": 1,
+      "maxPublications": 122
+    },
+    "calendar-controls.month-change-100": {
+      "changes": 100,
+      "maxMountedDateCells": 42,
+      "maxDetachedNodes": 0
+    },
+    "completion-controls.stale-query": {
+      "queries": 2,
+      "maxPublishedOptions": 1
+    },
+    "scroll-controls.passive-coalescing": {
+      "events": 20,
+      "maxPassiveListeners": 1,
+      "rubberBandNonPassiveListeners": 2,
+      "maxPublications": 1
+    },
+    "progress-controls.reduced-motion": {
+      "maxAnimationCallbacks": 0
+    }
+  }
+}

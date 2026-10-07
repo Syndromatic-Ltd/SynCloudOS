@@ -1,0 +1,180 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* AppearanceAuthority review: circular-slider gradients and geometry are explicitly unresolved. */
+/* The metal knob is Atmo's material; other appearances paint the dial from their own slots. */
+[data-nse-control="circular-slider"] [data-nse-part="circular-body"] > .nse-metal-thumb{display:none}
+[data-nse-control="circular-slider"] [data-nse-part="circular-body"]{position:relative;display:inline-block;inline-size:34px;block-size:34px;border:1px solid currentColor;border-radius:50%;background:conic-gradient(from -90deg,color-mix(in srgb,currentColor 22%,transparent) var(--nse-circular-angle),transparent 0);touch-action:none}[data-nse-control="circular-slider"] [data-nse-part="circular-body"]:focus-visible{outline:2px solid Highlight;outline-offset:2px}[data-nse-control="circular-slider"] [data-nse-part="knob"]{position:absolute;inset-inline-start:50%;inset-block-start:50%;inline-size:2px;block-size:42%;border-radius:1px;background:currentColor;transform-origin:50% 100%;transform:translate(-50%,-100%) rotate(var(--nse-circular-angle))}[data-nse-control="stepper"] button{inline-size:19px;min-block-size:12px}[data-nse-control="level-indicator"]{min-block-size:18px}
+
+/* Linear-slider mechanics are appearance-neutral. Themes own only paint/resources
+   and may override these geometry tokens when their source artwork requires it. */
+.nse-control-slider {
+  --nse-control-slider-control-size: 50px;
+  --nse-control-slider-track-size: 7px;
+  --nse-control-slider-track-cap-size: 4px;
+  --nse-control-slider-thumb-size: 50px;
+  --nse-control-slider-thumb-visible-size: 28px;
+  --nse-control-slider-thumb-sheet-height: 100px;
+  display: grid;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.nse-control-slider-control {
+  position: relative;
+  display: block;
+  height: var(--nse-control-slider-control-size);
+  overflow: visible;
+  cursor: pointer;
+}
+
+/* Vertical: the whole control (track, fill, thumb and native input) is laid
+   out at the slider's length and turned -90° about its centre; margins give
+   it a vertical footprint (control-size wide, length tall). Pointer
+   hit-testing follows the transform, so dragging up raises the value;
+   ArrowUp/Down already step it. */
+.nse-control-slider[data-orientation="vertical"] {
+  --nse-control-slider-length: 160px;
+  min-width: 0;
+  justify-items: center;
+}
+
+.nse-control-slider[data-orientation="vertical"] > .nse-control-slider-control {
+  width: var(--nse-control-slider-length);
+  margin-block: calc((var(--nse-control-slider-length) - var(--nse-control-slider-control-size)) / 2);
+  margin-inline: calc((var(--nse-control-slider-control-size) - var(--nse-control-slider-length)) / 2);
+  transform: rotate(-90deg);
+}
+
+/* The thumb artwork turns back so it stays lit from above (highlight on
+   top, shade below) instead of lying on its side with the control. */
+.nse-control-slider[data-orientation="vertical"] .nse-control-slider-thumb-visual {
+  transform: translateX(calc(var(--nse-control-slider-thumb-size) / -2)) translateY(-50%) rotate(90deg);
+}
+
+.nse-control-slider-track {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--nse-control-slider-thumb-size) / 2);
+  right: calc(var(--nse-control-slider-thumb-size) / 2);
+  height: var(--nse-control-slider-track-size);
+  border-color: transparent;
+  border-style: solid;
+  border-width: 0 var(--nse-control-slider-track-cap-size);
+  transform: translateY(-50%);
+}
+
+.nse-control-slider-fill {
+  display: none;
+}
+
+.nse-control-slider-thumb-rail {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--nse-control-slider-thumb-size) / 2);
+  right: calc(var(--nse-control-slider-thumb-size) / 2);
+  z-index: 1;
+  height: 0;
+  overflow: visible;
+  transform: translateY(-50%);
+}
+
+.nse-control-slider input {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: var(--nse-control-slider-control-size);
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+}
+
+.nse-control-slider input::-webkit-slider-runnable-track {
+  height: var(--nse-control-slider-control-size);
+  background: transparent;
+}
+
+.nse-control-slider input::-webkit-slider-thumb {
+  width: var(--nse-control-slider-thumb-visible-size);
+  height: var(--nse-control-slider-control-size);
+  margin-top: 0;
+  border: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+}
+
+.nse-control-slider input::-moz-range-track {
+  height: var(--nse-control-slider-control-size);
+  background: transparent;
+}
+
+.nse-control-slider input::-moz-range-progress {
+  height: var(--nse-control-slider-track-size);
+  background: transparent;
+}
+
+.nse-control-slider input::-moz-range-thumb {
+  width: var(--nse-control-slider-thumb-visible-size);
+  height: var(--nse-control-slider-control-size);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.nse-control-slider-thumb-visual {
+  position: absolute;
+  top: 0;
+  left: var(--nse-control-slider-progress, 0%);
+  z-index: 1;
+  width: var(--nse-control-slider-thumb-size);
+  height: var(--nse-control-slider-control-size);
+  pointer-events: none;
+  transform: translateX(calc(var(--nse-control-slider-thumb-size) / -2)) translateY(-50%);
+}
+
+.nse-control-slider:has(input:disabled) .nse-control-slider-control,
+.nse-control-slider[data-state="read-only"] .nse-control-slider-control {
+  cursor: default;
+}
+
+/* AppearanceAuthority neutralises browser paint; authority remains the explicit slot record. */
+[data-nse-control="stepper"] > button,
+[data-nse-control="level-indicator"] > button,
+meter[data-nse-control="level-indicator"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+}
+
+meter[data-nse-control="level-indicator"]::-webkit-meter-bar,
+meter[data-nse-control="level-indicator"]::-webkit-meter-optimum-value,
+meter[data-nse-control="level-indicator"]::-webkit-meter-suboptimum-value,
+meter[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}

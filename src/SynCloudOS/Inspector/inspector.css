@@ -1,0 +1,32 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.syncloudos-inspector { min-inline-size: 0; max-inline-size: 100%; overflow-wrap: anywhere; }
+.syncloudos-inspector .nse-container-pane-body { min-inline-size: 0; }
+.syncloudos-inspector__actions,
+.syncloudos-inspector__navigation { display: flex; flex-wrap: wrap; gap: 0.5rem; min-inline-size: 0; }
+.syncloudos-inspector__navigation { margin-block: 1rem; }
+.syncloudos-inspector .nse-control-button { max-inline-size: 100%; }
+.syncloudos-inspector .nse-control-button-label { white-space: normal; overflow-wrap: anywhere; }
+.syncloudos-inspector__record { margin-block: 0.75rem; min-inline-size: 0; }
+.syncloudos-inspector__record:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+.syncloudos-inspector__record dd { margin-inline-start: 1rem; }
+.syncloudos-inspector__export { display: block; min-inline-size: 0; inline-size: 100%; margin-block: 1rem; }
+.syncloudos-inspector__export textarea { display: block; inline-size: 100%; min-block-size: 12rem; box-sizing: border-box; font: inherit; }

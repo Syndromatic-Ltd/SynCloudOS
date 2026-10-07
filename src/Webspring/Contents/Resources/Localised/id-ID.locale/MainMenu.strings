@@ -1,0 +1,7 @@
+/* SynCloudOS shell menu resource. Locale: id-ID. */
+/* Generated from .workflow/syncloudos-localeservices-finishing-pass/generate-localised-catalogs.mjs. */
+"__translationCompleteness" = "complete";
+"window.title" = "Webspring";
+"webspring.label" = "Webspring";
+"actions.open" = "Buka Webspring";
+"actions.close" = "Tutup Webspring";

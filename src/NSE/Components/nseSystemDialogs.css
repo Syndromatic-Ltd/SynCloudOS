@@ -1,0 +1,144 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* About and confirm dialogs.
+   The surface, the backdrop, the actions row and the type colours all come from
+   components.css (.nse-control-alert). Only what the About box adds on top lives
+   here: the icon-left layout and the legal type scale. */
+
+/* The About box's quieter type steps, in both appearances. */
+.nse-about-dialog {
+  --nse-about-tagline-text: rgba(255, 255, 255, 0.86);
+  --nse-about-version-text: rgba(255, 255, 255, 0.72);
+  --nse-about-legal-text: rgba(255, 255, 255, 0.56);
+  --nse-about-trademark-text: rgba(255, 255, 255, 0.44);
+  --nse-about-icon-shadow: rgba(0, 0, 0, 0.45);
+}
+
+.nse-about-dialog.is-light {
+  --nse-about-tagline-text: rgba(24, 35, 50, 0.86);
+  --nse-about-version-text: rgba(24, 35, 50, 0.72);
+  --nse-about-legal-text: rgba(24, 35, 50, 0.76);
+  --nse-about-trademark-text: rgba(24, 35, 50, 0.66);
+  --nse-about-icon-shadow: rgba(0, 0, 0, 0.24);
+}
+
+/* An About box carries far less than an error alert, so the 250px floor the
+   error surface needs would leave it half empty. */
+.nse-control-alert.nse-about-dialog {
+  width: min(520px, calc(100vw - 22px));
+  min-height: 0;
+}
+
+/* A confirm with no icon is one column, not an empty 116px gutter plus one. */
+.nse-system-alert-content.nse-confirm-content-textonly {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* `anywhere` is right for an error alert, which may carry an unbroken
+   identifier. A sentence should break between words. */
+.nse-confirm-content-textonly h2,
+.nse-confirm-content-textonly p {
+  overflow-wrap: break-word;
+}
+
+.nse-about-content {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  min-width: 0;
+  text-align: left;
+}
+
+/* Without an icon the copy takes the whole width, not the icon's column. */
+.nse-about-content.nse-about-content-textonly {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.nse-about-icon {
+  width: 96px;
+  height: 96px;
+  align-self: start;
+  object-fit: contain;
+  /* The icon is artwork, not chrome — it keeps its own shadow and must not pick
+     up the alert's engraved text-shadow treatment. */
+  filter: drop-shadow(0 6px 10px var(--nse-about-icon-shadow));
+}
+
+.nse-about-copy {
+  min-width: 0;
+}
+
+.nse-about-name {
+  margin: 0;
+  font-family: inherit;
+  font-size: 26px;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.nse-about-tagline {
+  margin: 6px 0 14px;
+  color: var(--nse-about-tagline-text);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.nse-about-version {
+  margin: 0 0 14px;
+  color: var(--nse-about-version-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Legal type is deliberately the quietest thing in the box: present, readable,
+   and never competing with the app's own name. */
+.nse-about-legal {
+  margin: 0;
+  color: var(--nse-about-legal-text);
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.nse-about-trademark {
+  margin-top: 6px;
+  color: var(--nse-about-trademark-text);
+}
+
+/* A one-button dialog should not stretch that button the full width of the
+   surface the way a three-action error alert does. */
+.nse-about-dialog .nse-alert-actions {
+  grid-template-columns: minmax(140px, 200px);
+  justify-content: end;
+}
+
+@media (max-width: 520px) {
+  .nse-about-content:not(.nse-about-content-textonly) {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .nse-about-icon {
+    width: 72px;
+    height: 72px;
+  }
+}

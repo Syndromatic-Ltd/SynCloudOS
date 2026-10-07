@@ -1,0 +1,395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://syncloudos.dev/schema/synapp-manifest-v1.schema.json",
+  "title": "SynWare manifest V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "version", "title"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+    },
+    "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "routes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/route" }
+    },
+    "presentations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["desktop", "tablet", "mobile"] }
+    },
+    "minimumViewport": { "$ref": "#/$defs/minimumViewport" },
+    "windowDefaults": { "$ref": "#/$defs/windowDefaults" },
+    "frame": { "$ref": "#/$defs/frame" },
+    "documentTypes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/documentType" }
+    },
+    "commands": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/command" }
+    },
+    "menus": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/menu" }
+    },
+    "applicationMenu": { "$ref": "#/$defs/applicationMenu" },
+    "services": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/service" }
+    },
+    "permissions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" }
+    },
+    "localeResources": { "$ref": "#/$defs/localeResources" },
+    "appearances": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/appearance" }
+    },
+    "lifecycle": { "$ref": "#/$defs/lifecycle" },
+    "background": { "$ref": "#/$defs/background" },
+    "runtime": { "$ref": "#/$defs/runtime" },
+    "migrationVersion": { "type": "integer", "minimum": 1 },
+    "webspring": { "$ref": "#/$defs/webspring" },
+    "webspringShell": { "$ref": "#/$defs/webspringShell" }
+  },
+  "$defs": {
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^/" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "primary": { "type": "boolean" },
+        "match": { "enum": ["exact", "prefix"] }
+      },
+      "not": {
+        "required": ["path", "match"],
+        "properties": {
+          "path": { "const": "/" },
+          "match": { "const": "prefix" }
+        }
+      }
+    },
+    "minimumViewport": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width": { "type": "integer", "minimum": 0 },
+        "height": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "windowDefaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "minimumWidth": { "type": "integer", "minimum": 1 },
+        "minimumHeight": { "type": "integer", "minimum": 1 },
+        "chrome": { "enum": ["system", "custom", "frameless"] },
+        "smoothSurface": {
+          "oneOf": [
+            { "const": "off" },
+            { "const": false },
+            { "type": "integer", "minimum": 0 },
+            { "type": "object", "additionalProperties": false, "properties": {
+              "radius": { "type": "number", "minimum": 0 },
+              "curve": { "enum": ["arc", "squircle", "superellipse", "clothoid"] },
+              "smoothing": { "type": "number", "minimum": 0, "maximum": 1 },
+              "exponent": { "type": "number", "exclusiveMinimum": 0 },
+              "preserveSmoothing": { "type": "boolean" },
+              "topLeft": { "type": "number", "minimum": 0 },
+              "topRight": { "type": "number", "minimum": 0 },
+              "bottomRight": { "type": "number", "minimum": 0 },
+              "bottomLeft": { "type": "number", "minimum": 0 },
+              "overflow": { "enum": ["hidden", "clip", "visible"] },
+              "physicality": { "oneOf": [
+                { "enum": ["default", "off"] },
+                { "type": "object", "additionalProperties": false, "properties": {
+                  "top": { "type": "object", "properties": {
+                    "offsetX": { "type": "number" },
+                    "offsetY": { "type": "number" },
+                    "blur": { "type": "number" },
+                    "spread": { "type": "number" },
+                    "color": { "type": "string" },
+                    "opacity": { "type": "number" }
+                  }, "required": ["offsetY", "color", "opacity"] },
+                  "bottom": { "type": "object", "properties": {
+                    "offsetX": { "type": "number" },
+                    "offsetY": { "type": "number" },
+                    "blur": { "type": "number" },
+                    "spread": { "type": "number" },
+                    "color": { "type": "string" },
+                    "opacity": { "type": "number" }
+                  }, "required": ["offsetY", "color", "opacity"] }
+                } }
+              ] }
+            } }
+          ]
+        },
+        "resizable": { "type": "boolean" },
+        "role": { "enum": ["standard", "panel", "modal", "sheet", "hud"] }
+      }
+    },
+    "frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "layout": { "enum": ["simple", "defacto"] },
+        "material": { "enum": ["standard", "metal"] },
+        "topBar": { "enum": ["standard", "custom", "none"] },
+        "presentationMotion": { "enum": ["host", "content"] },
+        "rightSlot": { "type": "string", "minLength": 1 },
+        "smoothSurface": {
+          "oneOf": [
+            { "const": "off" },
+            { "type": "object", "additionalProperties": false, "properties": { "radius": { "type": "number", "minimum": 0 } } }
+          ]
+        },
+        "sourceList": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "railLabel": { "type": "string", "minLength": 1 },
+            "minWidth": { "type": "number", "minimum": 0 },
+            "maxWidth": { "type": "number", "minimum": 0 },
+            "defaultWidth": { "type": "number", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "applicationMenu": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "trigger": { "const": "content" },
+        "preferences": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["commandId"],
+          "properties": {
+            "commandId": { "type": "string", "minLength": 1 },
+            "label": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "documentType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "extensions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9]+$" }
+        },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 256 }
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "menu": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "shortcut": { "type": "string", "minLength": 1, "maxLength": 64 }
+      }
+    },
+    "menu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "commandIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" }
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" },
+        "required": { "type": "boolean" },
+        "minimumVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$" }
+      }
+    },
+    "localeResources": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "base": { "type": "string", "minLength": 1 },
+        "bundles": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/localeBundle" }
+        }
+      }
+    },
+    "localeBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locale", "path"],
+      "properties": {
+        "locale": { "type": "string", "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*$" },
+        "path": { "type": "string", "minLength": 1 }
+      }
+    },
+    "appearance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "variant": { "enum": ["system", "neutral"] }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preload": { "type": "boolean" },
+        "suspend": { "type": "boolean" },
+        "resume": { "type": "boolean" },
+        "terminate": { "type": "boolean" }
+      }
+    },
+    "background": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "tasks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" }
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "disabled": { "type": "boolean" },
+        "disabledReason": { "type": "string" },
+        "bundleId": { "type": "string", "minLength": 1 },
+        "presentation": { "enum": ["appView", "windowedView", "systemSheet", "backgroundService"] },
+        "type": { "enum": ["internal", "system", "external"] },
+        "policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "public": { "type": "boolean" },
+            "requiresLogin": { "type": "boolean" },
+            "requiredCapabilities": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "requiredAccessClasses": { "type": "array", "uniqueItems": true, "items": { "enum": ["team", "external"] } }
+          }
+        },
+        "notifications": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "badgeCount": { "type": "integer", "minimum": 0 } }
+        }
+      }
+    },
+    "webspring": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "order": { "type": "integer", "minimum": 0 },
+        "icon": { "type": "string", "minLength": 1 },
+        "visible": { "type": "boolean" },
+        "featured": { "type": "boolean" },
+        "defaultSelected": { "type": "boolean" }
+      }
+    },
+    "localisedText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "fallback": { "type": "string", "minLength": 1, "maxLength": 1024 }
+      }
+    },
+    "resourceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource", "alternativeText"],
+      "properties": {
+        "resource": { "type": "string", "pattern": "^\\./Resources/(?!\\.\\.(?:/|$))(?!.*\/\\.\\.(?:/|$))[^\\\\]+$" },
+        "alternativeText": { "$ref": "#/$defs/localisedText" }
+      }
+    },
+    "webspringView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "presentations", "mode"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" },
+        "presentations": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["desktop", "tablet", "mobile"] }
+        },
+        "mode": { "enum": ["launcher", "persistent"] }
+      }
+    },
+    "webspringShell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["views", "defaults", "homeRoute", "branding"],
+      "properties": {
+        "views": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/webspringView" }
+        },
+        "defaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["desktop", "tablet", "mobile"],
+          "properties": {
+            "desktop": { "type": "string", "minLength": 1 },
+            "tablet": { "type": "string", "minLength": 1 },
+            "mobile": { "type": "string", "minLength": 1 }
+          }
+        },
+        "homeRoute": { "type": "string", "pattern": "^/(?!/)(?!.*//)(?!.*\\\\)[^\\\\]*$" },
+        "branding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name"],
+          "properties": {
+            "name": { "$ref": "#/$defs/localisedText" },
+            "logo": { "$ref": "#/$defs/resourceReference" },
+            "lightLogo": { "$ref": "#/$defs/resourceReference" },
+            "darkLogo": { "$ref": "#/$defs/resourceReference" },
+            "compactLogo": { "$ref": "#/$defs/resourceReference" }
+          }
+        }
+      }
+    }
+  }
+}

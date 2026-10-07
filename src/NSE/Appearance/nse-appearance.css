@@ -1,0 +1,313 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.nse-appearance-provider {
+  min-width: 0;
+}
+
+/* Native system colours used by stock containers follow the resolved NSE mode,
+   including appearance boundaries projected onto portals and window surfaces. */
+:where([data-nse-colour-scheme-resolved="light"]) { color-scheme: light; }
+:where([data-nse-colour-scheme-resolved="dark"]) { color-scheme: dark; }
+
+.nse-control-appearance-provider {
+  min-height: 100%;
+}
+
+.nse-control-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.nse-smooth-surface {
+  border-radius: var(--nse-smooth-surface-radius, 8px);
+  box-shadow: var(--nse-smooth-surface-shadow, none);
+}
+
+@media (max-width: 760px) {
+  .nse-smooth-surface {
+    --nse-smooth-surface-active-radius: var(--nse-smooth-surface-mobile-radius, var(--nse-smooth-surface-radius, 6px));
+  }
+}
+
+.nse-smooth-surface-focus-ring:focus-visible,
+.nse-smooth-surface-focus-within:focus-within,
+.nse-smooth-surface-focus-inset:focus-visible,
+.nse-smooth-surface-focus-inset:focus-within {
+  outline: 0;
+  box-shadow:
+    var(--nse-smooth-surface-shadow, none),
+    var(--nse-smooth-surface-focus-ring, 0 0 0 2px rgba(142, 212, 255, 0.76)) !important;
+}
+
+.nse-smooth-surface-focus-ring:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: var(--nse-smooth-surface-focus-offset, 2px);
+}
+
+.nse-smooth-surface-scroll-contained,
+.nse-smooth-surface-scroll-momentum,
+.nse-smooth-surface-scroll-panel {
+  overscroll-behavior: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nse-smooth-surface-performance-transform {
+    transform: none !important;
+    will-change: auto !important;
+  }
+}
+
+.nse-toolbar[data-nse-appearance-authority],
+.nse-toolbar-item[data-nse-appearance-authority],
+.nse-tab-bar[data-nse-appearance-authority],
+.nse-tab-bar-tab[data-nse-appearance-authority],
+.nse-tab-bar-more-option[data-nse-appearance-authority] {
+  isolation: isolate;
+  position: relative;
+}
+
+/* Transparency is an independent sensory axis. The material boundary owns the
+   flattening, so controls and SynWare do not invent local preference logic. */
+:where([data-nse-transparency="reduced"]):where(
+  .atmo-glass,
+  .nse-material-glass,
+  .nse-prefs-veil,
+  .nse-control-popup,
+  .nse-overlay-popup,
+  .nse-control-image-view-controls,
+  .nse-control-image-view-crop
+),
+:where([data-nse-transparency="reduced"]) :where(
+  .atmo-glass,
+  .nse-material-glass,
+  .nse-prefs-veil,
+  .nse-control-popup,
+  .nse-overlay-popup,
+  .nse-control-image-view-controls,
+  .nse-control-image-view-crop
+) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+:where([data-nse-transparency="reduced"]):where(.atmo-glass, .nse-material-glass),
+:where([data-nse-transparency="reduced"]) :where(.atmo-glass, .nse-material-glass) {
+  background-color: Canvas;
+  background-image: none;
+}
+
+/* High contrast is an authored product mode, separate from operating-system
+   forced colours. It deliberately strengthens edges, selected paint and focus. */
+:where([data-nse-contrast="high"]) {
+  --nse-contrast-canvas: #fff;
+  --nse-contrast-text: #000;
+  --nse-contrast-edge: #000;
+  --nse-contrast-accent: #004fd7;
+  --nse-contrast-accent-text: #fff;
+  --nse-contrast-disabled: #555;
+  color: var(--nse-contrast-text);
+}
+
+:where([data-nse-contrast="high"]) :where(
+  .nse-control-group-box,
+  .nse-control-rounded-box,
+  .nse-control-popup,
+  .nse-overlay-popup,
+  .nse-material-glass,
+  .nse-menu[data-nse-menu-variant="popup"],
+  .nse-window__surface,
+  [data-nse-control="colour-well"],
+  [data-nse-control="colour-wheel"],
+  input,
+  textarea,
+  select
+) {
+  border-color: var(--nse-contrast-edge) !important;
+  color: var(--nse-contrast-text);
+  box-shadow: 0 0 0 1px var(--nse-contrast-edge);
+}
+
+:where([data-nse-contrast="high"]) :where(.nse-menu-item:hover, .nse-menu-item:focus-visible, .nse-control-radio[data-selected="true"]) {
+  background-color: var(--nse-contrast-accent) !important;
+  color: var(--nse-contrast-accent-text) !important;
+}
+
+:where([data-nse-contrast="high"]) :where(button, input, [tabindex]):focus-visible,
+:where([data-nse-contrast="high"]) .nse-menu-item:focus-visible {
+  outline: 3px solid var(--nse-contrast-accent) !important;
+  outline-offset: 2px;
+}
+
+:where([data-nse-contrast="high"]) :where(.nse-control-checkbox-art, .nse-control-radio) {
+  border-color: var(--nse-contrast-edge) !important;
+  box-shadow: 0 0 0 1px var(--nse-contrast-edge);
+}
+
+:where([data-nse-contrast="high"]) :where(:disabled, [aria-disabled="true"], [data-disabled="true"]) {
+  color: var(--nse-contrast-disabled) !important;
+  opacity: 1 !important;
+  text-decoration: line-through;
+}
+
+/* Provider-forced and real forced-colour mode share the same raster-free
+   replacement contract. System colours preserve user palette authority. */
+:where([data-nse-contrast="forced"]) {
+  forced-color-adjust: auto;
+}
+
+:where([data-nse-contrast="forced"]):where(
+  .nse-control-group-box,
+  .nse-control-rounded-box,
+  .nse-control-popup,
+  .nse-overlay-popup,
+  .nse-material-glass,
+  .nse-menu[data-nse-menu-variant="popup"],
+  .nse-window-view
+),
+:where([data-nse-contrast="forced"]) :where(
+  .nse-control-group-box,
+  .nse-control-rounded-box,
+  .nse-control-popup,
+  .nse-overlay-popup,
+  .nse-material-glass,
+  .nse-menu[data-nse-menu-variant="popup"],
+  .nse-window__surface,
+  [data-nse-control="colour-well"],
+  [data-nse-control="colour-wheel"],
+  input,
+  textarea,
+  select
+) {
+  border: 1px solid CanvasText !important;
+  border-image: none !important;
+  background-color: Canvas !important;
+  background-image: none !important;
+  color: CanvasText !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+:where([data-nse-contrast="forced"]) :where(.nse-control-checkbox-art, .nse-control-radio) {
+  border: 2px solid CanvasText !important;
+  border-image: none !important;
+  background: Canvas !important;
+  box-shadow: none !important;
+}
+
+:where([data-nse-contrast="forced"]) :where(
+  .nse-menu[data-nse-menu-variant="popup"] .nse-menu-item:hover,
+  .nse-menu[data-nse-menu-variant="popup"] .nse-menu-item:focus-visible,
+  .nse-control-radio[data-selected="true"]
+) {
+  background: Highlight !important;
+  color: HighlightText !important;
+}
+
+:where([data-nse-contrast="forced"]) :where(button, input, [tabindex]):focus-visible,
+:where([data-nse-contrast="forced"]) .nse-menu[data-nse-menu-variant="popup"] .nse-menu-item:focus-visible {
+  outline: 2px solid Highlight !important;
+  outline-offset: 2px;
+}
+
+:where([data-nse-contrast="forced"]) :where(:disabled, [aria-disabled="true"], [data-disabled="true"]) {
+  border-color: GrayText !important;
+  color: GrayText !important;
+  opacity: 1 !important;
+}
+
+:where([data-nse-contrast="forced"]) :is([data-window-shadow-layer], [data-nse-nine-slice="menu-surface"]) {
+  display: none !important;
+}
+
+@media (forced-colors: active) {
+  :where([data-nse-appearance]) {
+    forced-color-adjust: auto;
+  }
+
+  :where([data-nse-appearance]):where(
+    .nse-control-group-box,
+    .nse-control-rounded-box,
+    .nse-control-popup,
+    .nse-overlay-popup,
+    .nse-material-glass,
+    .nse-menu[data-nse-menu-variant="popup"],
+    .nse-window-view
+  ),
+  :where([data-nse-appearance]) :where(
+    .nse-control-group-box,
+    .nse-control-rounded-box,
+    .nse-control-popup,
+    .nse-overlay-popup,
+    .nse-material-glass,
+    .nse-menu[data-nse-menu-variant="popup"],
+    .nse-window__surface,
+    [data-nse-control="colour-well"],
+    [data-nse-control="colour-wheel"],
+    input,
+    textarea,
+    select
+  ) {
+    border: 1px solid CanvasText !important;
+    border-image: none !important;
+    background-color: Canvas !important;
+    background-image: none !important;
+    color: CanvasText !important;
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
+  :where([data-nse-appearance]) :where(.nse-control-checkbox-art, .nse-control-radio) {
+    border: 2px solid CanvasText !important;
+    border-image: none !important;
+    background: Canvas !important;
+    box-shadow: none !important;
+  }
+
+  :where([data-nse-appearance]) :where(
+    .nse-menu[data-nse-menu-variant="popup"] .nse-menu-item:hover,
+    .nse-menu[data-nse-menu-variant="popup"] .nse-menu-item:focus-visible,
+    .nse-control-radio[data-selected="true"]
+  ) {
+    background: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  :where([data-nse-appearance]) :where(button, input, [tabindex]):focus-visible,
+  :where([data-nse-appearance]) .nse-menu[data-nse-menu-variant="popup"] .nse-menu-item:focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+  }
+
+  :where([data-nse-appearance]) :where(:disabled, [aria-disabled="true"], [data-disabled="true"]) {
+    border-color: GrayText !important;
+    color: GrayText !important;
+    opacity: 1 !important;
+  }
+
+  :is([data-window-shadow-layer], [data-nse-nine-slice="menu-surface"]) {
+    display: none !important;
+  }
+}

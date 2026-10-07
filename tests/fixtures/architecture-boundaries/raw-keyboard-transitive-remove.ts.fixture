@@ -1,0 +1,6 @@
+const globalTarget = globalThis;
+const install = globalTarget["addEventListener"];
+const uninstall = globalTarget.removeEventListener.bind(globalTarget);
+const keyboardEvent = "key" + "up";
+install(keyboardEvent, () => undefined);
+uninstall(keyboardEvent, () => undefined);

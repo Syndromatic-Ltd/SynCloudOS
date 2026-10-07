@@ -1,0 +1,1431 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+:root {
+  --webspring-material-duration: 160ms;
+  --webspring-material-ease: ease;
+  --webspring-selector-duration: 260ms;
+  --webspring-selector-ease: cubic-bezier(.2,.82,.2,1);
+  --webspring-hover-label-duration: 180ms;
+}
+
+.webspring-view-host,
+.webspring-entrance-surface {
+  display: contents;
+}
+
+.webspring-quickswitch {
+  --webspring-quickswitch-height: 114.5px;
+  --webspring-quickswitch-left-cap-width: 52.5px;
+  --webspring-quickswitch-right-cap-width: 50px;
+  --webspring-quickswitch-middle-width: 16px;
+  --webspring-quickswitch-icon-size: 72px;
+  --webspring-quickswitch-icon-gap: 14px;
+  --webspring-quickswitch-inner-padding: 28px;
+  /* How far a shell's icon effect may paint beyond its icon slot, including any scale it
+     animates to, without being clipped or making the row scroll. */
+  --webspring-quickswitch-effect-overflow: 56px;
+  /* The frame grows with its icons until it is this far from each screen edge. */
+  --webspring-quickswitch-screen-inset: 17px;
+  --webspring-quickswitch-min-width: 172px;
+  /* Set by the view: below 1 when overflow is "shrink" and the icons would pass the screen inset. */
+  --webspring-quickswitch-fit: 1;
+  --webspring-quickswitch-slot: calc(var(--webspring-quickswitch-icon-size) * var(--webspring-quickswitch-fit));
+  --webspring-quickswitch-slot-gap: calc(var(--webspring-quickswitch-icon-gap) * var(--webspring-quickswitch-fit));
+  position: fixed;
+  z-index: 145;
+  left: 50%;
+  top: 50%;
+  width: min(
+    calc(100vw - 2 * var(--webspring-quickswitch-screen-inset)),
+    max(
+      var(--webspring-quickswitch-min-width),
+      calc(
+        (var(--webspring-quickswitch-items) * var(--webspring-quickswitch-slot)) +
+        ((var(--webspring-quickswitch-items) - 1) * var(--webspring-quickswitch-slot-gap)) +
+        (var(--webspring-quickswitch-inner-padding) * 2)
+      )
+    )
+  );
+  height: var(--webspring-quickswitch-height);
+  color: #f8fbff;
+  pointer-events: auto;
+  transform-origin: center;
+  translate: -50% -50%;
+  isolation: isolate;
+}
+
+.webspring-quickswitch-strip {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  overflow: hidden;
+  pointer-events: none;
+  filter:
+    drop-shadow(0 18px 26px rgba(0, 0, 0, 0.58))
+    drop-shadow(0 4px 5px rgba(0, 0, 0, 0.74));
+}
+
+.webspring-quickswitch-cap,
+.webspring-quickswitch-middle {
+  display: block;
+  height: var(--webspring-quickswitch-height);
+  background-position: top left;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.webspring-quickswitch-cap-left {
+  width: var(--webspring-quickswitch-left-cap-width);
+  min-width: var(--webspring-quickswitch-left-cap-width);
+  background-image: url("/assets/webspring/quickswitch/control-tab-left.png");
+}
+
+.webspring-quickswitch-cap-right {
+  width: var(--webspring-quickswitch-right-cap-width);
+  min-width: var(--webspring-quickswitch-right-cap-width);
+  background-image: url("/assets/webspring/quickswitch/control-tab-right.png");
+}
+
+.webspring-quickswitch-middle {
+  flex: 1;
+  min-width: 0;
+  background-image: url("/assets/webspring/quickswitch/control-tab-middle.png");
+  background-repeat: repeat-x;
+  background-size: var(--webspring-quickswitch-middle-width) var(--webspring-quickswitch-height);
+}
+
+/* A scroller clips on both axes (overflow-y: visible computes to auto beside overflow-x: auto), and
+   anything painted past its edge becomes scrollable range. So the row reaches past the frame by the
+   effect allowance: effects paint inside its padding, where they are neither clipped nor scrollable,
+   and the row is hidden-overflow unless the icons themselves do not fit. The reach is invisible and passes
+   pointers through, so it never blocks the backdrop. */
+.webspring-quickswitch-items {
+  --webspring-quickswitch-reach-inline: max(0px, calc(var(--webspring-quickswitch-effect-overflow) - var(--webspring-quickswitch-inner-padding)));
+  --webspring-quickswitch-reach-block: max(0px, calc(var(--webspring-quickswitch-effect-overflow) - (var(--webspring-quickswitch-height) - var(--webspring-quickswitch-slot)) / 2));
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: safe center;
+  gap: var(--webspring-quickswitch-slot-gap);
+  box-sizing: border-box;
+  height: calc(100% + 2 * var(--webspring-quickswitch-reach-block));
+  margin: calc(-1 * var(--webspring-quickswitch-reach-block)) calc(-1 * var(--webspring-quickswitch-reach-inline));
+  padding: 0 calc(var(--webspring-quickswitch-inner-padding) + var(--webspring-quickswitch-reach-inline));
+  scroll-padding-inline: calc(var(--webspring-quickswitch-inner-padding) + var(--webspring-quickswitch-reach-inline));
+  overflow: hidden;
+  pointer-events: none;
+  scrollbar-width: none;
+}
+
+/* Only icons that do not fit make the row scrollable (the view measures the icon slots), and then
+   they fade out at the frame's inner edge rather than over the caps. */
+.webspring-quickswitch-items[data-overflowing="true"] {
+  overflow-x: auto;
+  --webspring-quickswitch-fade-start: var(--webspring-quickswitch-reach-inline);
+  --webspring-quickswitch-fade-end: calc(var(--webspring-quickswitch-reach-inline) + var(--webspring-quickswitch-inner-padding));
+  -webkit-mask-image: linear-gradient(to right,
+    transparent var(--webspring-quickswitch-fade-start), #000 var(--webspring-quickswitch-fade-end),
+    #000 calc(100% - var(--webspring-quickswitch-fade-end)), transparent calc(100% - var(--webspring-quickswitch-fade-start)));
+  mask-image: linear-gradient(to right,
+    transparent var(--webspring-quickswitch-fade-start), #000 var(--webspring-quickswitch-fade-end),
+    #000 calc(100% - var(--webspring-quickswitch-fade-end)), transparent calc(100% - var(--webspring-quickswitch-fade-start)));
+}
+
+.webspring-quickswitch-items::-webkit-scrollbar {
+  display: none;
+}
+
+.webspring-quickswitch-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--webspring-quickswitch-slot);
+  min-width: var(--webspring-quickswitch-slot);
+  height: var(--webspring-quickswitch-slot);
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  pointer-events: auto;
+}
+
+.webspring-quickswitch-item:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.webspring-quickswitch-item .nse-icon-well {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  overflow: visible;
+  justify-self: center;
+  align-self: center;
+  transform-origin: center;
+  transform: translate(-50%, calc(-50% - 3px)) scale(calc(0.94 * var(--webspring-quickswitch-fit)));
+  transition:
+    filter 220ms var(--webspring-material-ease),
+    transform 260ms var(--webspring-material-ease);
+}
+
+.webspring-quickswitch-item .nse-icon-well::before {
+  opacity: 0;
+}
+
+.webspring-quickswitch-item .webspring-icon-artwork {
+  position: relative;
+  z-index: 3;
+  width: 68px;
+  height: 68px;
+}
+
+.webspring-quickswitch-item .nse-loading-spinner,
+.webspring-quickswitch-item .nse-badge {
+  z-index: 5;
+}
+
+.webspring-quickswitch-item.is-selected .nse-icon-well {
+  filter:
+    drop-shadow(0 11px 12px rgba(0, 0, 0, 0.42))
+    drop-shadow(0 0 8px rgba(142, 224, 255, 0.24));
+  transform: translate(-50%, calc(-50% - 3px)) scale(var(--webspring-quickswitch-fit));
+}
+
+.webspring-quickswitch-item.is-selected .webspring-icon-artwork__image {
+  filter:
+    brightness(1.04)
+    saturate(1.08)
+    drop-shadow(0 0 5px rgba(94, 202, 255, 0.2));
+}
+
+.webspring-quickswitch-item.is-selected .webspring-icon-artwork__glow {
+  opacity: 0.62;
+  transform: scale(1.018);
+}
+
+.webspring-quickswitch-item:focus-visible .nse-icon-well {
+  outline: 2px solid rgba(174, 236, 255, 0.82);
+  outline-offset: 4px;
+}
+
+@media (max-width: 560px) {
+  .webspring-quickswitch {
+    --webspring-quickswitch-height: 94px;
+    --webspring-quickswitch-left-cap-width: 43px;
+    --webspring-quickswitch-right-cap-width: 41px;
+    --webspring-quickswitch-middle-width: 13px;
+    --webspring-quickswitch-icon-size: 59px;
+    --webspring-quickswitch-icon-gap: 11.5px;
+    --webspring-quickswitch-inner-padding: 23px;
+    --webspring-quickswitch-screen-inset: 1px;
+    --webspring-quickswitch-min-width: 210px;
+  }
+
+  .webspring-quickswitch-item .nse-icon-well {
+    transform: translate(-50%, calc(-50% - 3px)) scale(calc(0.83 * var(--webspring-quickswitch-fit)));
+  }
+
+  .webspring-quickswitch-item.is-selected .nse-icon-well {
+    transform: translate(-50%, calc(-50% - 3px)) scale(calc(0.88 * var(--webspring-quickswitch-fit)));
+  }
+}
+
+.syncloudos-notification-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  pointer-events: none;
+}
+
+.syncloudos-notification-live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.syncloudos-notification-banner-stage {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: 50%;
+  --syncloudos-notification-cube-height: 104px;
+  --syncloudos-notification-cube-depth: 104px;
+  --syncloudos-notification-cube-radius: 7px;
+  width: min(500px, calc(100vw - 28px));
+  height: var(--syncloudos-notification-cube-height);
+  pointer-events: auto;
+  perspective: 860px;
+  perspective-origin: 50% -24px;
+  transform: translateX(-50%);
+  transform-style: preserve-3d;
+  isolation: isolate;
+}
+
+.syncloudos-notification-banner-stage::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 58px;
+  height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0) 70%);
+  filter: blur(8px);
+  pointer-events: none;
+  transform: translateZ(calc(var(--syncloudos-notification-cube-depth) * -0.68));
+}
+
+.syncloudos-notification-banner-stage[data-slice-status="ready"] {
+  border-radius: var(--syncloudos-notification-cube-radius);
+}
+
+.syncloudos-notification-banner-stage[data-slice-status="capturing"] {
+  pointer-events: none;
+}
+
+.syncloudos-notification-stage-measure {
+  width: 100%;
+  height: var(--syncloudos-notification-cube-height);
+}
+
+.syncloudos-notification-cube-void {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--syncloudos-notification-cube-height);
+  z-index: 0;
+  border-radius: var(--syncloudos-notification-cube-radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 13%),
+    radial-gradient(ellipse at 50% 50%, rgba(16, 18, 22, 0.98), rgba(1, 2, 4, 0.98) 72%),
+    #000;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 8px 18px rgba(255, 255, 255, 0.03),
+    inset 0 -20px 34px rgba(0, 0, 0, 0.84),
+    0 6px 16px rgba(0, 0, 0, 0.38);
+  pointer-events: none;
+  opacity: 1;
+  transform: none;
+}
+
+.syncloudos-notification-cube {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.syncloudos-notification-cube-rotor {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: auto;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50% 0;
+  will-change: transform;
+}
+
+.syncloudos-notification-cube-face {
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  border-radius: var(--syncloudos-notification-cube-radius);
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+}
+
+.syncloudos-notification-banner-face {
+  top: 0;
+  z-index: 5;
+  height: var(--syncloudos-notification-cube-height);
+  overflow: visible;
+  transform: translateZ(calc(var(--syncloudos-notification-cube-depth) * 0.5));
+  transform-origin: 50% 50%;
+}
+
+.syncloudos-notification-banner {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: var(--syncloudos-notification-cube-height);
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: var(--syncloudos-notification-cube-radius);
+  color: #182232;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(217,226,235,0.91)),
+    url("/assets/textures/NSETileCotton.jpg") 0 0 / 260px auto repeat;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(24, 32, 42, 0.2),
+    0 18px 42px rgba(0, 0, 0, 0.42);
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+  will-change: opacity, filter;
+  /* The banner drags vertically; horizontal panning stays with the page. */
+  touch-action: pan-x;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.syncloudos-notification-screen-face {
+  top: 0;
+  z-index: 4;
+  height: var(--syncloudos-notification-cube-depth);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.32);
+  border-radius: var(--syncloudos-notification-cube-radius);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.24), rgba(0,0,0,0.04)),
+    rgba(42, 50, 58, 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -18px 24px rgba(0, 0, 0, 0.22),
+    0 12px 26px rgba(0, 0, 0, 0.36);
+  transform: rotateX(-90deg) translateZ(calc(var(--syncloudos-notification-cube-depth) * 0.5));
+  transform-origin: 50% 50%;
+  will-change: opacity, filter;
+}
+
+.syncloudos-notification-screen-face-image,
+.syncloudos-notification-screen-face-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  pointer-events: none;
+}
+
+.syncloudos-notification-screen-face-image {
+  object-fit: cover;
+  transform: translateZ(0.2px);
+}
+
+.syncloudos-notification-screen-face-fallback {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 46%, rgba(0,0,0,0.18)),
+    url("/assets/textures/NSETileCotton.jpg") 0 0 / 260px auto repeat,
+    #1b232e;
+}
+
+.syncloudos-notification-screen-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.24), rgba(255,255,255,0) 38%, rgba(0,0,0,0.08)),
+    linear-gradient(90deg, rgba(255,255,255,0.15), rgba(0,0,0,0) 42%, rgba(0,0,0,0.1));
+  pointer-events: none;
+}
+
+.syncloudos-notification-cube-under-face {
+  top: 0;
+  z-index: 3;
+  height: var(--syncloudos-notification-cube-depth);
+  border-radius: var(--syncloudos-notification-cube-radius);
+  background:
+    linear-gradient(180deg, rgba(20, 23, 27, 0.82), rgba(0, 0, 0, 0.92)),
+    #020202;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -26px 34px rgba(0, 0, 0, 0.64),
+    0 18px 30px rgba(0, 0, 0, 0.34);
+  pointer-events: none;
+  transform: rotateX(90deg) translateZ(calc(var(--syncloudos-notification-cube-depth) * 0.48));
+  transform-origin: 50% 50%;
+  will-change: opacity, filter;
+}
+
+.syncloudos-notification-cube-under-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 46%),
+    linear-gradient(90deg, rgba(255,255,255,0.1), rgba(0,0,0,0) 34%, rgba(0,0,0,0.22));
+  pointer-events: none;
+}
+
+.syncloudos-notification-banner.priority-timeSensitive,
+.syncloudos-notification-banner.priority-critical {
+  border-color: rgba(255, 224, 158, 0.74);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(83, 56, 11, 0.24),
+    0 20px 48px rgba(0, 0, 0, 0.48),
+    0 0 0 1px rgba(216, 164, 58, 0.24);
+}
+
+.syncloudos-notification-face-shade {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 30%, rgba(0,0,0,0.04)),
+    linear-gradient(90deg, rgba(255,255,255,0.23), rgba(0,0,0,0) 26%, rgba(0,0,0,0.12) 100%);
+  pointer-events: none;
+}
+
+.syncloudos-notification-banner-content {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+  padding: 9px 10px 6px;
+}
+
+.syncloudos-notification-app-icon-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.syncloudos-notification-icon {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.28));
+}
+
+.syncloudos-notification-copy {
+  min-width: 0;
+}
+
+.syncloudos-notification-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+  align-items: center;
+  min-width: 0;
+  color: #526175;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.syncloudos-notification-meta span {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.syncloudos-notification-copy h2 {
+  margin: 3px 0 1px;
+  overflow-wrap: anywhere;
+  color: #172232;
+  font-family: inherit;
+  font-size: 19px;
+  line-height: 1;
+}
+
+.syncloudos-notification-copy p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #2b3748;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.syncloudos-notification-banner-tools,
+.syncloudos-notification-centre-tools {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.syncloudos-notification-centre-tools button {
+  min-width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 999px;
+  color: #f6f8fb;
+  font-size: 12px;
+  font-weight: 900;
+  background: linear-gradient(180deg, rgba(78, 94, 112, 0.96), rgba(34, 44, 58, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 2px 5px rgba(0, 0, 0, 0.28);
+}
+
+.syncloudos-notification-close-button {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: url("./Contents/Resources/notification-delete-up.png") center / 34px 34px no-repeat;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.32));
+}
+
+.syncloudos-notification-close-button:active {
+  background-image: url("./Contents/Resources/notification-delete-down.png");
+}
+
+.syncloudos-notification-centre-tools button:hover {
+  filter: brightness(1.08);
+}
+
+.syncloudos-notification-app-icon-button:hover .syncloudos-notification-icon {
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.28)) brightness(1.08);
+}
+
+.syncloudos-notification-app-icon-button:focus-visible,
+.syncloudos-notification-close-button:focus-visible,
+.syncloudos-notification-action:focus-visible,
+.syncloudos-notification-clear:focus-visible,
+.syncloudos-notification-centre-tools button:focus-visible {
+  outline: 3px solid rgba(89, 154, 231, 0.72);
+  outline-offset: 3px;
+}
+
+.syncloudos-notification-close-button:hover {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.32)) brightness(1.08);
+}
+
+.syncloudos-notification-banner-actions,
+.syncloudos-notification-history-actions,
+.syncloudos-notification-detail-actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 0 10px 9px 60px;
+}
+
+.syncloudos-notification-action,
+.syncloudos-notification-clear,
+.syncloudos-notification-centre-tools button:first-child {
+  min-height: 30px;
+  min-width: 0;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 999px;
+  color: #f7f9fc;
+  font-size: 11px;
+  font-weight: 900;
+  background: linear-gradient(180deg, #5f7289, #26384f);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 2px 5px rgba(0, 0, 0, 0.24);
+}
+
+/* Press feedback: an action sinks while it is held, except under reduced motion. */
+.syncloudos-notification-action {
+  transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.syncloudos-notification-layer[data-reduced-motion="false"] .syncloudos-notification-action:active:not(:disabled) {
+  transform: translateY(1px) scale(0.965);
+}
+
+.syncloudos-notification-action.is-primary {
+  color: #172232;
+  background: linear-gradient(180deg, #ffffff, #cdd8e5);
+}
+
+.syncloudos-notification-action.is-destructive {
+  background: linear-gradient(180deg, #dd6a67, #8e252c);
+}
+
+.syncloudos-notification-action:disabled,
+.syncloudos-notification-clear:disabled,
+.syncloudos-notification-centre-tools button:disabled {
+  opacity: 0.48;
+  cursor: default;
+}
+
+.syncloudos-notification-centre {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  right: 18px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(820px, calc(100vw - 36px));
+  max-height: min(760px, calc(100vh - 36px));
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 8px;
+  color: #1b2738;
+  background:
+    linear-gradient(180deg, rgba(244,248,252,0.94), rgba(210,220,232,0.92)),
+    url("/assets/textures/NSETileCotton.jpg") 0 0 / 320px auto repeat;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 28px 70px rgba(0, 0, 0, 0.52);
+  pointer-events: auto;
+}
+
+.syncloudos-notification-centre-head {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 15px 16px;
+  color: #f6f8fb;
+  background:
+    linear-gradient(180deg, rgba(67, 82, 102, 0.96), rgba(27, 37, 52, 0.98)),
+    url("/assets/webspring/brushed-metal.webp") center / cover;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.syncloudos-notification-centre-head p {
+  margin: 0 0 2px;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.syncloudos-notification-centre-head h2 {
+  margin: 0;
+  font-family: inherit;
+  font-size: 31px;
+  line-height: 0.96;
+}
+
+.syncloudos-notification-centre-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(260px, 0.88fr);
+  gap: 0;
+  min-height: 0;
+}
+
+.syncloudos-notification-groups,
+.syncloudos-notification-detail {
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+}
+
+.syncloudos-notification-groups {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border-right: 1px solid rgba(71, 83, 98, 0.22);
+}
+
+.syncloudos-notification-group {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.syncloudos-notification-group-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+}
+
+.syncloudos-notification-group-toggle {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+}
+
+.syncloudos-notification-group-title,
+.syncloudos-notification-group-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.syncloudos-notification-group-title {
+  color: #192538;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.syncloudos-notification-group-meta {
+  color: #647287;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.syncloudos-notification-group-body {
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+  padding: 0 10px 10px;
+}
+
+.syncloudos-notification-history-item {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid rgba(90, 104, 122, 0.24);
+  border-radius: 8px;
+  background: rgba(244, 248, 252, 0.62);
+}
+
+.syncloudos-notification-history-item.is-selected {
+  border-color: rgba(83, 119, 158, 0.72);
+  box-shadow: 0 0 0 2px rgba(67, 124, 184, 0.18);
+}
+
+.syncloudos-notification-history-item.status-dismissed,
+.syncloudos-notification-history-item.status-acted,
+.syncloudos-notification-history-item.status-archived,
+.syncloudos-notification-history-item.status-expired {
+  opacity: 0.74;
+}
+
+.syncloudos-notification-history-main {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: center;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+}
+
+.syncloudos-notification-history-main img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.syncloudos-notification-history-main span,
+.syncloudos-notification-history-main strong,
+.syncloudos-notification-history-main small {
+  min-width: 0;
+}
+
+.syncloudos-notification-history-main span span,
+.syncloudos-notification-history-main strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.syncloudos-notification-history-main strong {
+  color: #1c293b;
+  font-size: 13px;
+}
+
+.syncloudos-notification-history-main span span,
+.syncloudos-notification-history-main small {
+  color: #667386;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.syncloudos-notification-history-actions,
+.syncloudos-notification-detail-actions {
+  padding: 0;
+}
+
+.syncloudos-notification-detail {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  color: #1a2636;
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.syncloudos-notification-detail-head {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.syncloudos-notification-detail-head img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.syncloudos-notification-detail-head p,
+.syncloudos-notification-detail h3,
+.syncloudos-notification-detail > p {
+  margin: 0;
+}
+
+.syncloudos-notification-detail-head p {
+  color: #647287;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.syncloudos-notification-detail h3 {
+  overflow-wrap: anywhere;
+  font-family: inherit;
+  font-size: 27px;
+  line-height: 1;
+}
+
+.syncloudos-notification-detail > p {
+  color: #344255;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.syncloudos-notification-detail dl {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.syncloudos-notification-detail dl div {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(78, 92, 111, 0.18);
+}
+
+.syncloudos-notification-detail dt,
+.syncloudos-notification-detail dd {
+  margin: 0;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.syncloudos-notification-detail dt {
+  color: #657287;
+}
+
+.syncloudos-notification-detail dd {
+  overflow: hidden;
+  color: #243145;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.syncloudos-notification-empty {
+  margin: 0;
+  color: #536276;
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .syncloudos-notification-banner-stage {
+    top: max(8px, env(safe-area-inset-top));
+    width: min(100vw - 16px, 520px);
+  }
+
+  .syncloudos-notification-banner-content {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .syncloudos-notification-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .syncloudos-notification-copy h2 {
+    font-size: 19px;
+  }
+
+  .syncloudos-notification-banner-actions {
+    padding: 0 10px 10px 61px;
+  }
+
+  .syncloudos-notification-centre {
+    top: max(8px, env(safe-area-inset-top));
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-height: calc(100vh - 16px);
+  }
+
+  .syncloudos-notification-centre-head {
+    align-items: start;
+    padding: 12px;
+  }
+
+  .syncloudos-notification-centre-head h2 {
+    font-size: 25px;
+  }
+
+  .syncloudos-notification-centre-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .syncloudos-notification-groups {
+    border-right: 0;
+    border-bottom: 1px solid rgba(71, 83, 98, 0.22);
+    max-height: 54vh;
+  }
+
+  .syncloudos-notification-detail {
+    max-height: 32vh;
+  }
+}
+
+.webspring-apps-container {
+  position: fixed;
+  inset: 0;
+  z-index: 42;
+  pointer-events: none;
+  perspective: 640px;
+  perspective-origin: 50% calc(18vh + 68vh);
+}
+
+/* The apps container is the single shared 3D stage during a MultiSwitch:
+   both planes' rotateY/z must resolve against this one perspective so
+   they read as two surfaces in the same space. Frames must therefore
+   keep transform-style: preserve-3d *and* overflow: visible (any other
+   overflow forces a flattened transform-style per spec). */
+/* No instant background here: the fading backdrop div darkens the stage
+   so the switch eases into 3D instead of snapping to black. The outgoing
+   plane is still full-bleed for the first frames, so nothing flashes. */
+.webspring-apps-container[data-multiswitching="true"] {
+  overflow: hidden;
+  perspective: 1300px;
+  perspective-origin: 50% 46%;
+}
+
+.webspring-multiswitch-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(130% 100% at 50% 40%, #11151c 0%, #070a0e 55%, #000 100%);
+}
+
+.webspring-windowed-app-frame {
+  position: absolute;
+  left: max(32px, 12vw);
+  right: max(32px, 12vw);
+  top: 18vh;
+  width: auto;
+  max-height: 68vh;
+  pointer-events: auto;
+  transform-style: preserve-3d;
+  transform-origin: center bottom;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.webspring-windowed-app-frame-scale {
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.syncloudos-startup-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #020407;
+  pointer-events: auto;
+}
+
+.syncloudos-startup-material,
+.syncloudos-startup-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.syncloudos-startup-material {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.38)),
+    url("/assets/textures/NSETileCotton.jpg") 0 0 / 320px auto repeat,
+    #07090d;
+  opacity: 0;
+}
+
+.syncloudos-startup-spotlight {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,0.36) 0, rgba(225,236,250,0.2) 18%, rgba(38,47,62,0.1) 42%, rgba(0,0,0,0.62) 77%),
+    radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.78), rgba(0,0,0,0) 54%);
+  mix-blend-mode: screen;
+}
+
+.syncloudos-startup-spinner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.05), rgba(0,0,0,0) 68%);
+}
+
+.webspring-window-loading {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  color: #263448;
+}
+
+.webspring-app-menu-surface {
+  display: grid;
+  gap: 0;
+}
+
+.webspring-app-menu-disabled-reason {
+  max-inline-size: 18rem;
+  margin: 0;
+  padding: 0 12px 8px;
+  color: color-mix(in srgb, CanvasText 72%, transparent);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.webspring-app-view-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 112;
+  pointer-events: auto;
+  overflow: hidden;
+  background: #000;
+}
+
+.webspring-view[data-launch-phase="launching"] .webspring-app-view-frame,
+.webspring-board[data-launch-phase="launching"] .webspring-app-view-frame {
+  background: transparent;
+  animation: webspring-launch-frame-blackout 360ms 300ms linear both;
+}
+
+/* On the Board the wallpaper stays visible while the app grows out of its
+   icon, and darkens only as the zoom lands. */
+.webspring-board[data-launch-phase="launching"] .webspring-app-view-frame {
+  animation-duration: 180ms;
+  animation-delay: 380ms;
+}
+
+@keyframes webspring-launch-frame-blackout {
+  from { background-color: rgba(0, 0, 0, 0); }
+  to { background-color: #000; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webspring-view[data-launch-phase="launching"] .webspring-app-view-frame,
+  .webspring-board[data-launch-phase="launching"] .webspring-app-view-frame {
+    animation-duration: 120ms;
+    animation-delay: 0ms;
+  }
+}
+
+/* No per-frame perspective here: each plane inherits the apps-container
+   stage above. overflow: visible keeps preserve-3d effective and lets the
+   plane's cast shadow render outside its scaled-down surface. */
+.webspring-app-view-frame[data-multiswitch-role] {
+  overflow: visible;
+  transform-style: preserve-3d;
+  background: transparent;
+}
+
+.webspring-app-view-frame[data-multiswitch-role="outgoing"] {
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+
+.webspring-app-view-frame[data-multiswitch-role="incoming"] {
+  transform-origin: 50% 50%;
+}
+
+.webspring-app-view-surface {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #1e1b17;
+  background: #111;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity, filter;
+}
+
+.webspring-app-view-surface[data-multiswitch-role] {
+  backface-visibility: hidden;
+  box-shadow:
+    0 44px 96px rgba(0, 0, 0, 0.55),
+    0 10px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Centre origins: both planes scale/lean around their own centre so they
+   sit inset in the shared stage like the iOS reference, rather than
+   hugging an outer edge. */
+.webspring-app-view-surface[data-multiswitch-role="outgoing"] {
+  transform-origin: 50% 50%;
+}
+
+.webspring-app-view-surface[data-multiswitch-role="incoming"] {
+  transform-origin: 50% 50%;
+}
+
+.webspring-app-view-surface-generic {
+  position: absolute;
+  display: block;
+  isolation: isolate;
+  background: #000;
+}
+
+.webspring-app-view-body-surface {
+  position: absolute;
+  inset: 2px 0 0;
+  z-index: 0;
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  background-color: #d9d4c7;
+  background-image: url("/assets/textures/NSETileCotton.jpg");
+  background-position: top left;
+  background-repeat: repeat;
+  color: #1e1b17;
+  isolation: isolate;
+}
+
+/* A curling NSEPage stays beneath the frame chrome: the top bar reads as
+   fixed OS chrome the paper slides under (iOS Maps keeps the status bar
+   above the curl). Lifting the whole app body here instead makes the bar
+   vanish the instant the curl starts. */
+
+.webspring-app-view-surface-custom .webspring-app-view-body-surface {
+  background: #111;
+}
+
+.webspring-app-view-body-surface-off {
+  inset: 0;
+  overflow: hidden;
+  clip-path: none;
+  -webkit-clip-path: none;
+}
+
+/* Full-bleed apps fill the viewport and paint their own top edge (app-owned chrome or the standard
+   top bar), so the body surface must reach y=0. Without this, the base 2px top inset reveals the
+   #111 surface behind it as a black hairline directly above the app's top bar. */
+.webspring-app-view-surface[data-frame-layout="defacto"] .webspring-app-view-body-surface {
+  inset: 0;
+}
+
+.webspring-app-view-surface-custom {
+  background: #111;
+}
+
+.webspring-app-view-content {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  min-height: 100%;
+  padding: calc(var(--nse-app-topbar-height, 68px) + 28px) clamp(22px, 4vw, 48px) 46px;
+  overflow: auto;
+  perspective: 1100px;
+}
+
+.webspring-app-view-fullbleed-content {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Full-bleed apps that use the standard system top bar (e.g. About) paint their
+   own surface up to y=0 with the bar floating over them â€” they must NOT be inset
+   below the bar, or a dark gap opens between the bar and the app face and the
+   app's own bottom-anchored chrome (tab bar, page-curl) is shifted off. */
+.webspring-app-view-layout-defacto {
+  overflow: auto;
+}
+
+/* Source-list windows render the metal bar INSIDE the rounded body surface as a non-scrolling
+   header, so the smooth-surface squircle clips the bar's top corners to match the body's bottom
+   corners, and the content (sidebar + main + footer) sits below the bar instead of under it. */
+.webspring-app-view-body-surface-sourcelist {
+  display: flex;
+  flex-direction: column;
+}
+
+.webspring-app-view-body-surface-sourcelist > .nse-app-topbar {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.webspring-app-view-body-surface-sourcelist .webspring-app-view-fullbleed-content {
+  position: relative;
+  inset: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.webspring-app-view-content-card {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: clamp(22px, 3vw, 38px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  color: #172232;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(226, 234, 241, 0.72)),
+    rgba(244, 248, 252, 0.76);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 22px 46px rgba(36, 45, 55, 0.28);
+  backdrop-filter: blur(8px);
+  transform-origin: 50% 120%;
+  will-change: transform, opacity;
+}
+
+.webspring-app-overlay-destination {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.webspring-app-overlay-destination[data-multiswitch-role] {
+  transform-style: preserve-3d;
+}
+
+.webspring-app-overlay-plane {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+
+.webspring-app-overlay-plane[data-multiswitch-role] {
+  backface-visibility: hidden;
+}
+
+.webspring-loading-state {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  background-color: #1e2228;
+  background-image: var(--nse-loading-background-image);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, .9);
+}
+
+.webspring-loading-state-content {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.webspring-loading-state-content p { margin: 0; }
+
+.webspring-loading-state-content .nse-loading-spinner {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
+}
+
+.webspring-app-view-loading {
+  width: 100%;
+  min-height: 360px;
+  display: grid;
+  place-items: center;
+  color: #243449;
+}
+
+.webspring-app-view-loading.webspring-loading-state,
+.webspring-window-loading.webspring-loading-state {
+  min-height: 0;
+  color: #fff;
+}
+
+.webspring-app-watchdog-frame {
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 5vw, 46px);
+  color: #f2f6fb;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255,255,255,0.16), transparent 38%),
+    linear-gradient(180deg, #252a30, #0f1216);
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  .webspring-app-view-surface-generic .webspring-app-view-content {
+    padding: 78px clamp(16px, 5vw, 28px) 34px;
+  }
+
+  .webspring-app-view-surface-generic .webspring-app-view-content-card {
+    width: min(100%, 620px);
+    padding: clamp(18px, 5vw, 26px);
+  }
+
+}
+
+@media (max-width: 1180px) {
+  .webspring-windowed-app-frame {
+    left: max(18px, 5vw);
+    right: max(18px, 5vw);
+    top: 16vh;
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@syndromatic/syncloudos/sdk": [
+        "src/SynCloudOS/AppSDK/sdkPackageEntry.ts"
+      ],
+      "@syndromatic/syncloudos/sdk/testing": [
+        "src/SynCloudOS/AppSDK/testing/sdkPackageEntry.ts"
+      ],
+      "@syndromatic/syncloudos/webspring": [
+        "src/Webspring/public.ts"
+      ],
+      "@syndromatic/syncloudos/chronosphere": [
+        "src/SynCloudOS/AppSDK/Chronosphere/public.ts"
+      ],
+      "@syndromatic/syncloudos/browser": [
+        "src/SynCloudOSReact/browser.tsx"
+      ],
+      "@syndromatic/syncloudos/nse": [
+        "src/NSE/sdkPackageEntry.ts"
+      ],
+      "@syndromatic/syncloudos/nse/controls": [
+        "src/NSE/public/controls.ts"
+      ],
+      "@syndromatic/syncloudos/nse/text": [
+        "src/NSE/public/text.ts"
+      ],
+      "@syndromatic/syncloudos/nse/content": [
+        "src/NSE/public/content.ts"
+      ],
+      "@syndromatic/syncloudos/nse/appearance": [
+        "src/NSE/public/appearance.ts"
+      ],
+      "@syndromatic/syncloudos/nse/themes/atmo": [
+        "src/NSE/Themes/Atmo/index.ts"
+      ],
+      "@syndromatic/syncloudos/nse/themes/atmo/styles.css": [
+        "src/NSE/Themes/Atmo/Resources/atmo.css"
+      ],
+      "@syndromatic/syncloudos/nse/scroll": [
+        "src/NSE/public/scroll.ts"
+      ],
+      "@syndromatic/syncloudos/nse/page": [
+        "src/NSE/public/page.ts"
+      ],
+      "@syndromatic/syncloudos/nse/layout": [
+        "src/NSE/public/layout.ts"
+      ],
+      "@syndromatic/syncloudos/nse/cover-flow": [
+        "src/NSE/public/cover-flow.ts"
+      ],
+      "@syndromatic/syncloudos/nse/system-ui": [
+        "src/NSE/public/system-ui.ts"
+      ],
+      "@syndromatic/syncloudos/fx/image": [
+        "./src/FX/ImageFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/graphics": [
+        "src/FX/GraphicsFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/audio": [
+        "src/FX/AudioFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/haptics": [
+        "src/FX/HapticsFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/motion": [
+        "src/FX/MotionFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/animation": [
+        "src/FX/AnimationFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/text": [
+        "src/FX/TextFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/media": [
+        "src/FX/MediaFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/video": [
+        "src/FX/VideoFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/midi": [
+        "src/FX/MIDIFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/location": [
+        "src/FX/LocationFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/lumina": [
+        "src/FX/LuminaFX/public.ts"
+      ]
+    },
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "src"
+  ]
+}

@@ -1,0 +1,4 @@
+const add = window.addEventListener.bind(window);
+const remove = document["removeEventListener"].bind(document);
+add("keydown", () => undefined);
+remove("keyup", () => undefined);

@@ -1,0 +1,7 @@
+/* SynCloudOS shell menu resource. Locale: ko-KR. */
+/* Generated from .workflow/syncloudos-localeservices-finishing-pass/generate-localised-catalogs.mjs. */
+"__translationCompleteness" = "complete";
+"window.title" = "Webspring";
+"webspring.label" = "Webspring";
+"actions.open" = "Webspring 열기";
+"actions.close" = "Webspring 종료";

@@ -1,0 +1,5 @@
+const invoke = Reflect.apply;
+const listen = globalThis.addEventListener;
+const args = ["keydown", () => undefined] as const;
+invoke(listen, globalThis, args);
+export {};

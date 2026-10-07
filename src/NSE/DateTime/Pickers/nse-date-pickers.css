@@ -1,0 +1,41 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+[data-nse-control="date-picker"] > input[type="text"] { min-block-size: 29px; }
+[data-nse-control="date-time-picker"], [data-nse-control="date-range-picker"] { display: grid; gap: 8px; }
+
+/*
+ * AppearanceAuthority removes UA chrome from the named leak slice. A surface only gains a
+ * visual recipe when its source decision resolves; these neutral declarations
+ * never stand in for an authority record.
+ */
+[data-nse-control="date-picker"] > input[type="text"],
+[data-nse-control="date-picker"] > button,
+[data-nse-control="date-time-picker"] input[type="text"],
+[data-nse-control="date-time-picker"] select,
+[data-nse-control="time-picker"] > button {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+}

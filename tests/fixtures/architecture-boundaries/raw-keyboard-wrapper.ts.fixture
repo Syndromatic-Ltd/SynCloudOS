@@ -1,0 +1,2 @@
+function listen(target: Window, eventName: string, listener: EventListener) { target.addEventListener(eventName, listener); }
+listen(window, "keyup", () => undefined);

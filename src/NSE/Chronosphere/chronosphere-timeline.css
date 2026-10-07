@@ -1,0 +1,172 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* The legacy class remains exclusively for the stage's entrance choreography.
+   Specificity keeps this ruler independent of chronosphere.css import order. */
+.chronosphere-rail.chronosphere-timeline {
+  position: absolute;
+  top: max(4%, env(safe-area-inset-top, 0px));
+  bottom: calc(clamp(76px, 14%, 112px) + env(safe-area-inset-bottom, 0px));
+  right: max(4px, env(safe-area-inset-right, 0px));
+  width: clamp(104px, 16vw, 184px);
+  z-index: 3;
+  min-height: 0;
+  color: #fff;
+  pointer-events: auto;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chronosphere-timeline[inert] { pointer-events: none; }
+
+.chronosphere-timeline-viewport {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 28%) transparent;
+  scroll-behavior: auto;
+}
+
+.chronosphere-timeline-track {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chronosphere-timeline-track::before {
+  content: ""; position: absolute; top: 0; bottom: 0; right: 6px; width: 11px; pointer-events: none;
+  background: repeating-linear-gradient(180deg, rgba(222, 237, 238, .36) 0 1px, transparent 1px 15px);
+}
+
+.chronosphere-timeline-tick {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.chronosphere-timeline-hit {
+  position: absolute;
+  right: 0;
+  top: 0;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-width: 24px;
+  min-height: 24px;
+  margin: 0;
+  padding: 0 3px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: rgb(255 255 255 / 64%);
+  font: inherit;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.chronosphere-timeline-label {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: right;
+  opacity: 0;
+  transform: scale(calc(1 + var(--timeline-magnify, 0) * 0.16));
+  transform-origin: right center;
+  text-shadow: 0 1px 3px #000, 0 0 7px rgb(0 0 0 / 75%);
+  pointer-events: none;
+}
+
+.chronosphere-timeline-mark {
+  flex: 0 0 auto;
+  width: calc(12px + var(--timeline-magnify, 0) * 19px);
+  height: 1px;
+  background: currentColor;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 75%);
+  pointer-events: none;
+}
+
+.chronosphere-timeline-tick[data-labelled="true"] .chronosphere-timeline-label { opacity: 0.82; }
+.chronosphere-timeline-tick[data-labelled="true"] .chronosphere-timeline-mark { width: calc(20px + var(--timeline-magnify, 0) * 19px); }
+.chronosphere-timeline-hit:hover,
+.chronosphere-timeline-hit:focus-visible,
+.chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-hit { color: #fff; }
+.chronosphere-timeline-hit:hover .chronosphere-timeline-label,
+.chronosphere-timeline-hit:focus-visible .chronosphere-timeline-label,
+.chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-label { opacity: 1; }
+
+.chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-mark {
+  width: calc(32px + var(--timeline-magnify, 0) * 14px);
+  height: 2px;
+  background: #fff;
+  box-shadow: 0 0 6px rgb(255 255 255 / 80%), 0 1px 3px #000;
+}
+
+.chronosphere-timeline-hit:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+  background: rgb(0 0 0 / 30%);
+}
+
+@media (max-width: 759px) {
+  /* On a phone the paper occupies the ruler's label column. Keep the marks,
+     and reveal dates only for the selected or directly explored version. */
+  .chronosphere-timeline-tick[data-labelled="true"]:not([data-active="true"]) .chronosphere-timeline-label { opacity: 0; }
+  .chronosphere-timeline-tick .chronosphere-timeline-hit:hover .chronosphere-timeline-label,
+  .chronosphere-timeline-tick .chronosphere-timeline-hit:focus-visible .chronosphere-timeline-label { opacity: 1; }
+  .chronosphere-timeline-label { background:rgba(3,10,13,.72); border-radius:3px; padding:1px 3px; }
+}
+
+@media (max-width: 480px) {
+  .chronosphere-rail.chronosphere-timeline { width: 128px; }
+  .chronosphere-timeline-label { font-size: 10px; }
+}
+
+@media (max-height: 420px) {
+  .chronosphere-rail.chronosphere-timeline {
+    top: max(4px, env(safe-area-inset-top, 0px));
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (forced-colors: active) {
+  .chronosphere-timeline-hit { color: ButtonText; }
+  .chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-hit { color: Highlight; }
+  .chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-mark { background: Highlight; }
+  .chronosphere-timeline-hit:focus-visible { outline-color: Highlight; }
+}

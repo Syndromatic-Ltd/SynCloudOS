@@ -1,0 +1,225 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* =============================================================================================
+   NSE source-list furniture: item, divider and divider-drawer grammar plus the metal material.
+
+   Two layers:
+   1. Appearance-agnostic STRUCTURE — the DividerDrawer caption rail (label -> line -> arrow ->
+      line-to-edge) and the captioned divider. The canonical Atmo vector seam is shared by the
+      neutral and metal compositions.
+   2. The METAL MATERIAL override, scoped to [data-nse-material="metal"] and keyed by the global
+      [data-mode] — the steel selection, embossed labels and blue section rail Software hand-rolled
+      as `sn-*`, now a reusable system material.
+   ============================================================================================= */
+
+:where(.nse-container-divider-drawer, .nse-control-divider-captioned) {
+  --nse-sourcelist-divider: var(--nse-atmo-divider);
+}
+
+/* --- DividerDrawer caption rail: label -> line -> arrow knob -> line-to-edge ------------------ */
+.nse-container-divider-drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  /* No right padding: the rail's line bleeds to the very edge (rows keep their own inset). */
+  padding: 7px 0 6px 12px;
+}
+
+.nse-container-divider-drawer-label {
+  flex: 0 0 auto;
+  margin-right: 9px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #3a8bcb;
+}
+
+/* The line uses the shared Atmo vector tokens so it matches the knob's baked line. */
+.nse-container-divider-drawer-line {
+  flex: 4 1 0;
+  align-self: center;
+  height: var(--nse-atmo-divider-arrow-line);
+  background: var(--nse-atmo-divider) left center / auto var(--nse-atmo-divider-arrow-line) repeat-x;
+}
+
+/* Continuation right of the knob: grows 1:4 so the knob keeps its right-of-centre seat while the
+   line carries on to the edge. */
+.nse-container-divider-drawer-line-end {
+  flex: 1 1 0;
+}
+
+.nse-container-divider-drawer-arrow.nse-control-divider[data-variant="arrow"] {
+  flex: 0 0 auto;
+  width: var(--nse-atmo-divider-arrow-width);
+  height: var(--nse-atmo-divider-arrow-size);
+  margin: 0;
+}
+
+/* --- Captioned divider --------------------------------- */
+.nse-control-divider-captioned {
+  display: flex;
+  align-items: center;
+  height: auto;
+  border: 0;
+  background: none;
+}
+.nse-control-divider-captioned .nse-control-divider-icon {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  background: center / contain no-repeat;
+}
+.nse-control-divider-captioned .nse-control-divider-caption {
+  flex: 0 0 auto;
+  margin-right: 9px;
+  font-weight: 700;
+  color: #3a8bcb;
+}
+.nse-control-divider-captioned .nse-control-divider-cap {
+  flex: 1 1 0;
+  height: 4px;
+  background: var(--nse-sourcelist-divider) left center / auto 4px repeat-x;
+}
+
+/* =============================================================================================
+   METAL MATERIAL — the steel source list (ported from Software's `sn-*`, keyed by global data-mode)
+   ============================================================================================= */
+
+:where([data-nse-material="metal"]) .nse-control-list-item {
+  cursor: pointer;
+  padding: 10px 12px;
+  color: #1b2733;
+}
+
+:where([data-nse-material="metal"]) .nse-control-list-item:focus-visible {
+  outline: 2px solid rgba(90, 150, 215, 0.85);
+  outline-offset: -2px;
+}
+
+/* Dark rail: row text + softened bevel so seams settle into the sidebar. */
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item {
+  color: #cdd9e6;
+  border-top-color: rgba(150, 180, 214, 0.14);
+  border-bottom-color: rgba(0, 0, 0, 0.22);
+}
+
+/* Embossed labels on unselected rows: raised in light, engraved in dark. */
+[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary {
+  color: #cdd9e6;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.78);
+}
+
+/* Selection: stock pale Onyx gloss in light; deeper steel gradient + engraved text in dark. */
+[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"], [data-pressed="true"], :active) {
+  background: linear-gradient(180deg, rgba(218, 235, 251, 0.85) 0%, rgba(197, 224, 249, 0.85) 100%);
+  /* Stated, not inherited. atmo-controls paints selected rows white for Heritage's
+     DARK selection; on this pale gloss that is invisible, and the material owns
+     both halves of the pair or neither. */
+  color: #1b2733;
+}
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"], [data-pressed="true"], :active) {
+  background: linear-gradient(180deg, #5c6f7f 0%, #233242 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+  color: #f1f6fb;
+}
+
+/* -----------------------------------------------------------------------------
+   Neutral group-box/list composition. This promotes the established
+   Preferences edge treatment into the shared NSE primitive rather than making
+   More (or any application) own a private list/card skin. The inner radius is
+   deliberately expressed as the group vector frame radius minus the real row
+   inset; selected, held, and focus paint all inherit the same row geometry. */
+.nse-control-group-box.nse-control-grouped-list {
+  --nse-grouped-list-frame-radius: 14px;
+  --nse-grouped-list-row-inset: 2px;
+  --nse-grouped-list-inner-radius: calc(var(--nse-grouped-list-frame-radius) - var(--nse-grouped-list-row-inset));
+}
+
+.nse-control-group-box.nse-control-grouped-list > .nse-control-group-inner > .nse-control-list-item {
+  border-radius: 0;
+  margin: 0;
+}
+
+.nse-control-group-box.nse-control-grouped-list > .nse-control-group-inner > .nse-control-list-item[data-nse-grouped-list-edge="first"] {
+  border-start-end-radius: var(--nse-grouped-list-inner-radius);
+  border-start-start-radius: var(--nse-grouped-list-inner-radius);
+}
+
+.nse-control-group-box.nse-control-grouped-list > .nse-control-group-inner > .nse-control-list-item[data-nse-grouped-list-edge="last"] {
+  border-end-end-radius: var(--nse-grouped-list-inner-radius);
+  border-end-start-radius: var(--nse-grouped-list-inner-radius);
+}
+
+.nse-control-group-box.nse-control-grouped-list > .nse-control-group-inner > .nse-control-list-item[data-nse-grouped-list-edge="only"] {
+  border-radius: var(--nse-grouped-list-inner-radius);
+}
+
+/* Keep the interaction outline inside the same silhouette as selected/held
+   paint, including under forced colours where the system owns its colour. */
+.nse-control-group-box.nse-control-grouped-list > .nse-control-group-inner > .nse-control-list-item:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Preferences derives its row seams from the adjacent NSEListItem bevels,
+   rather than placing a generic divider control between rows. Retaining the
+   canonical top/bottom borders gives one crisp internal joined bevel, omits
+   the outer first/last edges, and lets selected/held/focused row paint cover
+   exactly the same seam as every other Preferences-quality list. */
+
+/* Unselected secondary text on the DARK metal rail. The base is
+   rgba(42,55,70,.68) — a dark slate authored for a light rail, which on the dark
+   one leaves badges and counts almost invisible against the steel. Mirrors what
+   the row's primary line already does per mode just above. */
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-meta {
+  color: rgba(205, 217, 230, 0.62);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* The secondary line follows the selection it sits on. atmo-controls.css paints it
+   near-white on any selected row — right for Heritage's dark #555→#888 selection,
+   wrong on metal's PALE light-mode gloss, where it disappeared. Same failure the
+   Onyx lineage hit on 2026-07-29; it surfaced here once the vector layer stopped
+   overriding metal's selection (canonical Atmo). (0,4,0) so it clears
+   atmo-controls' (0,3,0). */
+[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta {
+  color: #5a6b7d;
+}
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta {
+  color: rgba(241, 246, 251, 0.72);
+}
+
+/* Section labels: blue, embossed to match the rows. */
+[data-mode="light"] :where([data-nse-material="metal"]) .nse-container-divider-drawer-label {
+  color: #2f6da6;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-container-divider-drawer-label {
+  color: #6fb2e6;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.7);
+}

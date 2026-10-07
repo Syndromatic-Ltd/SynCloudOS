@@ -1,0 +1,115 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* Chronosphere's grid view: every version at once on a dark, blurred glass over the app. */
+.chronosphere-grid {
+  --chronosphere-grid-ink: rgb(255 255 255 / 0.94);
+  --chronosphere-grid-muted: rgb(255 255 255 / 0.62);
+  --chronosphere-grid-accent: #4a8fe7;
+  position: absolute; inset: 0;
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  color: var(--chronosphere-grid-ink);
+  font: 13px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: radial-gradient(120% 90% at 50% 0%, rgb(58 64 76 / 0.86), rgb(16 18 22 / 0.94));
+  -webkit-backdrop-filter: blur(22px) saturate(1.2);
+  backdrop-filter: blur(22px) saturate(1.2);
+  opacity: 1;
+  transition: opacity 200ms ease-out;
+}
+.chronosphere-grid[data-stage="entering"], .chronosphere-grid[data-stage="leaving"] { opacity: 0; }
+.chronosphere-grid-tiles { transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.chronosphere-grid[data-stage="entering"] .chronosphere-grid-tiles { transform: scale(0.97) translateY(10px); }
+.chronosphere-grid[data-stage="leaving"] .chronosphere-grid-tiles { transform: scale(0.985); }
+
+.chronosphere-grid-bar {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px;
+  padding: max(12px, env(safe-area-inset-top)) 18px 12px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+}
+.chronosphere-grid-bar-end { justify-self: end; }
+.chronosphere-grid-title {
+  margin: 0; font-size: 15px; font-weight: 600; letter-spacing: 0.01em;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.5);
+  max-width: 50vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.chronosphere-grid-scroll { overflow: auto; outline: none; padding: 32px 24px 40px; scroll-padding: 32px; }
+.chronosphere-grid-tiles {
+  display: grid; justify-content: center; gap: 34px 28px;
+  grid-template-columns: repeat(auto-fill, var(--chronosphere-tile-width));
+  max-width: 1180px; margin: 0 auto;
+}
+
+.chronosphere-grid-tile { display: grid; gap: 4px; justify-items: center; text-align: center; cursor: default; user-select: none; }
+.chronosphere-grid-page {
+  position: relative; display: block; overflow: hidden;
+  width: var(--chronosphere-tile-width); height: var(--chronosphere-tile-height);
+  border-radius: var(--chronosphere-tile-radius);
+  background: #2a2d33;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1), 0 10px 22px rgb(0 0 0 / 0.45), 0 2px 5px rgb(0 0 0 / 0.35);
+  transition: box-shadow 140ms ease-out, transform 140ms ease-out;
+}
+.chronosphere-grid[data-material="paper"] .chronosphere-grid-page { background: #fff; border-radius: 0; box-shadow: 0 8px 18px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.4); }
+.chronosphere-grid-tile:hover .chronosphere-grid-page { transform: translateY(-2px); }
+.chronosphere-grid-tile[data-active="true"] .chronosphere-grid-page {
+  box-shadow: 0 0 0 3px var(--chronosphere-grid-accent), 0 0 0 5px rgb(74 143 231 / 0.28), 0 12px 26px rgb(0 0 0 / 0.5);
+}
+.chronosphere-grid-scroll:focus-visible .chronosphere-grid-tile[data-active="true"] .chronosphere-grid-page {
+  box-shadow: 0 0 0 3px var(--chronosphere-grid-accent), 0 0 0 7px rgb(74 143 231 / 0.45), 0 12px 26px rgb(0 0 0 / 0.5);
+}
+
+.chronosphere-grid-face { position: absolute; top: 0; left: 0; transform-origin: 0 0; pointer-events: none; }
+.chronosphere-grid-shot { position: absolute; inset: 0; background: center / cover no-repeat; }
+.chronosphere-grid-card {
+  position: absolute; inset: 0; display: grid; align-content: end; gap: 2px; padding: 14px; text-align: start;
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.02));
+}
+.chronosphere-grid-card-label { font-size: 11px; color: var(--chronosphere-grid-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.chronosphere-grid-card-title { font-size: 15px; font-weight: 600; }
+.chronosphere-grid-now {
+  position: absolute; top: 8px; inset-inline-end: 8px;
+  padding: 2px 8px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff;
+  background: linear-gradient(#5d9ff0, #2f74d0); box-shadow: 0 1px 2px rgb(0 0 0 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.35);
+}
+
+.chronosphere-grid-date { margin-top: 8px; font-weight: 600; font-variant-numeric: tabular-nums; text-shadow: 0 1px 1px rgb(0 0 0 / 0.5); }
+.chronosphere-grid-summary {
+  max-width: var(--chronosphere-tile-width); color: var(--chronosphere-grid-muted); font-size: 12px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.chronosphere-grid-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 18px max(12px, env(safe-area-inset-bottom));
+  border-top: 1px solid rgb(0 0 0 / 0.4);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
+}
+.chronosphere-grid-detail { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--chronosphere-grid-muted); }
+.chronosphere-grid-detail strong { color: var(--chronosphere-grid-ink); font-weight: 600; }
+
+@media (max-width: 520px) {
+  .chronosphere-grid-scroll { padding: 20px 12px 28px; }
+  .chronosphere-grid-tiles { gap: 24px 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chronosphere-grid, .chronosphere-grid-tiles, .chronosphere-grid-page { transition: none; }
+}

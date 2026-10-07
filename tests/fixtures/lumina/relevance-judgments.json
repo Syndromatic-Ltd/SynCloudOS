@@ -1,0 +1,8 @@
+{
+  "resume builder": ["resume-exact", "resume-body"],
+  "\"neural design\"": ["phrase-exact"],
+  "strasse": ["german-street"],
+  "東京": ["cjk-tokyo"],
+  "عمارة": ["rtl-arabic"],
+  "cafe": ["combining-cafe"]
+}

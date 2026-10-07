@@ -1,0 +1,33 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* The media panel lays out at the collection's measure; its window fits it. */
+.nse-media-panel-content { box-sizing: border-box; display: grid; gap: 12px; inline-size: 640px; max-inline-size: calc(100vw - 48px); padding: 14px 18px 18px; }
+.nse-media-panel-tabs { display: flex; justify-content: center; overflow-x: auto; }
+.nse-media-panel-search { inline-size: 100%; }
+.nse-media-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; max-block-size: min(54vh, 28rem); overflow: auto; }
+.nse-media-grid-item { box-sizing: border-box; display: grid; gap: 6px; block-size: 100%; min-block-size: 3.25rem; padding: 6px; border-radius: 6px; text-align: center; }
+.nse-media-grid-item[data-selected="true"] { outline: 2px solid currentColor; outline-offset: 2px; }
+.nse-media-grid-thumbnail { inline-size: 100%; block-size: 5rem; object-fit: cover; }
+.nse-media-grid-placeholder { display: grid; min-block-size: 5rem; place-items: center; border-radius: 4px; background: rgba(127, 127, 127, 0.14); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
+.nse-media-grid-name { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.nse-media-panel-preview { display: grid; gap: 0.15rem; }
+.nse-media-panel-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-block-start: 4px; }
+@media (max-width: 42rem) { .nse-media-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

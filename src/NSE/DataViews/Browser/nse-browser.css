@@ -1,0 +1,30 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.nse-browser { min-inline-size: 0; }
+.nse-browser-columns { display: flex; max-inline-size: 100%; overflow: auto; }
+.nse-browser-column-shell { display: flex; flex: 0 0 auto; min-block-size: 120px; }
+.nse-browser-column { flex: 1; min-inline-size: 0; }
+.nse-browser-column [role="listbox"] { block-size: min(360px, 100%); min-block-size: 120px; outline: none; overflow: auto; }
+.nse-browser-options { min-inline-size: 100%; position: relative; }
+.nse-browser-option { align-items: center; display: flex; inline-size: 100%; min-block-size: 23px; padding-inline: var(--nse-space-2, 8px); position: absolute; }
+.nse-browser-option[data-focused] { background: var(--nse-selection-background, Highlight); color: var(--nse-selection-foreground, HighlightText); }
+.nse-browser-resize { inline-size: 8px; min-inline-size: 8px; touch-action: none; }
+.nse-browser-back { min-block-size: 44px; }
