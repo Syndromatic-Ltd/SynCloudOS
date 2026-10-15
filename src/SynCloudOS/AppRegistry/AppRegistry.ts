@@ -789,7 +789,8 @@ const appRegistry = {
     const snapshot = RuntimeStore.getSnapshot();
     return getOrderedVisibleWebspringApps(
       Object.values(snapshot.appInfo),
-      snapshot.webspring.layout.preference.order
+      snapshot.webspring.layout.preference,
+      snapshot.webspring.layout.folderConfiguration
     );
   },
 

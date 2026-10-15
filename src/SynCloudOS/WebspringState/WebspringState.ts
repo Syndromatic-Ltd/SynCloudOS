@@ -20,14 +20,14 @@
 
 import {
   WEBSPRING_LAYOUT_PREFERENCE_KEY,
+  createWebspringFolderId,
   createWebspringLayoutPreference,
   getDesktopWebspringSlotForApp,
   getKeyboardReorderIndex,
-  getOrderedVisibleWebspringApps,
-  moveWebspringAppToIndex,
-  reconcileWebspringOrder,
-  resetWebspringOrder,
-  readWebspringLayoutPreference
+  moveWebspringEntryToIndex,
+  readWebspringLayoutPreference,
+  reconcileWebspringLayout,
+  type WebspringLayoutProjection,
 } from "./webspringStateProjection";
 import type {
   SynCloudOSPersistence,
@@ -35,7 +35,10 @@ import type {
   SynCloudOSWebspringStateController,
 } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeSnapshot } from "../Runtime/runtimeTypes";
-import type { SynCloudOSWebspringLayoutPreference } from "./webspringStateTypes";
+import type {
+  SynCloudOSWebspringFolderConfiguration,
+  SynCloudOSWebspringLayoutPreference,
+} from "./webspringStateTypes";
 
 type WebspringLaunchStageCompletion = (
   launchTransitionId: string,
@@ -66,6 +69,12 @@ interface WebspringStateDependencies {
   completeReturnRole?: WebspringReturnRoleCompletion;
 }
 
+/** A mutable copy of the reconciled layout that an action edits. */
+interface WorkingLayout {
+  order: string[];
+  folders: Record<string, string[]>;
+}
+
 export function createWebspringState(
   runtime: SynCloudOSRuntime,
   dependencies: WebspringStateDependencies = {},
@@ -75,33 +84,50 @@ const Persistence = dependencies.persistence ?? runtime.persistence;
 const RuntimeStore = runtime.store;
 let dragOriginalPreference: SynCloudOSWebspringLayoutPreference | null = null;
 
-function getVisibleApps(draft: RuntimeSnapshot) {
-  return Object.values(draft.appInfo).filter((app) => app.webspring.visible);
+function getProjection(draft: RuntimeSnapshot): WebspringLayoutProjection {
+  return reconcileWebspringLayout(
+    Object.values(draft.appInfo),
+    draft.webspring.layout.preference,
+    draft.webspring.layout.folderConfiguration,
+  );
 }
 
-function getWorkingOrder(draft: RuntimeSnapshot) {
-  return draft.webspring.layout.preference.order;
+function getWorkingLayout(projection: WebspringLayoutProjection): WorkingLayout {
+  return {
+    order: [...projection.order],
+    folders: Object.fromEntries(Object.entries(projection.folders).map(([id, apps]) => [id, [...apps]])),
+  };
 }
 
 function setWorkingPreference(
   draft: RuntimeSnapshot,
-  order: readonly string[],
-  source: SynCloudOSWebspringLayoutPreference["source"]
+  layout: WorkingLayout | null,
+  source: SynCloudOSWebspringLayoutPreference["source"],
 ) {
-  const preference = {
-    ...createWebspringLayoutPreference(getVisibleApps(draft), order, source),
-    board: { ...draft.webspring.layout.preference.board },
-  };
+  // Emptied folders drop out here: reconciliation omits folders without a visible member.
+  const preference = createWebspringLayoutPreference(
+    Object.values(draft.appInfo),
+    layout && {
+      order: layout.order,
+      folders: Object.fromEntries(Object.entries(layout.folders).map(([id, apps]) => [id, { apps }])),
+      source,
+    },
+    draft.webspring.layout.folderConfiguration,
+    source,
+    Date.now(),
+    draft.webspring.layout.preference.board,
+  );
   draft.webspring.layout.preference = preference;
   draft.webspring.layout.lastCommittedAt = source === "user" || source === "reset" ? preference.updatedAt : draft.webspring.layout.lastCommittedAt;
+  if (draft.webspring.openFolderId && !preference.folders[draft.webspring.openFolderId]) draft.webspring.openFolderId = null;
   return preference;
 }
 
 function syncSelector(draft: RuntimeSnapshot, appId: string | null) {
   const app = appId ? draft.appInfo[appId] : null;
-  const slot = getDesktopWebspringSlotForApp(getVisibleApps(draft), appId, getWorkingOrder(draft));
+  const slot = getDesktopWebspringSlotForApp(getProjection(draft), appId);
 
-  draft.webspring.activeIndicatorId = slot?.region === "dial" ? app?.id ?? null : null;
+  draft.webspring.activeIndicatorId = slot?.region === "dial" ? slot.id : null;
   draft.webspring.selectorAngle = slot?.angle ?? app?.webspring.selectorAngle ?? app?.webspring.dialPosition ?? 180;
   draft.webspring.selectorPosition = slot?.indicatorPosition ?? null;
 }
@@ -114,12 +140,46 @@ function persistPreference(preference: SynCloudOSWebspringLayoutPreference | nul
   });
 }
 
+function isDragging() {
+  return RuntimeStore.getSnapshot().webspring.layout.draggingItemId !== null;
+}
+
+function findContainer(layout: WorkingLayout, itemId: string) {
+  const folderId = Object.keys(layout.folders).find((id) => layout.folders[id].includes(itemId));
+  return folderId === undefined ? layout.order : layout.folders[folderId];
+}
+
+function removeFromFolders(layout: WorkingLayout, appId: string) {
+  for (const [folderId, apps] of Object.entries(layout.folders)) {
+    const index = apps.indexOf(appId);
+    if (index < 0) continue;
+    apps.splice(index, 1);
+    if (apps.length === 0) {
+      delete layout.folders[folderId];
+      layout.order = layout.order.filter((id) => id !== folderId);
+    }
+    return folderId;
+  }
+  return null;
+}
+
 function createWebspringTransitionId(kind: "return", appId: string | null) {
   return `webspring-${kind}-${appId ?? "none"}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 const webspringState = {
   runtimeId: runtime.runtimeId,
+  configureFolders(configuration: SynCloudOSWebspringFolderConfiguration) {
+    RuntimeStore.mutate((draft) => {
+      draft.webspring.layout.folderConfiguration = {
+        editable: configuration.editable,
+        initial: configuration.initial.map((folder) => ({ id: folder.id, order: folder.order, apps: [...folder.apps] })),
+      };
+      if (draft.webspring.openFolderId && !getProjection(draft).folders[draft.webspring.openFolderId]) draft.webspring.openFolderId = null;
+      syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
+    });
+  },
+
   hydrateLayoutPreference() {
     const stored = readWebspringLayoutPreference(Persistence).preference;
 
@@ -132,11 +192,12 @@ const webspringState = {
     return stored;
   },
 
-  hydrateLayoutOrder(appIds: string[]) {
+  hydrateLayoutOrder(order: string[]) {
     RuntimeStore.mutate((draft) => {
       draft.webspring.layout.preference = {
-        version: 3,
-        order: [...appIds],
+        version: 4,
+        order: [...order],
+        folders: {},
         board: { version: 1, pageSize: 20, dockSize: 4 },
         updatedAt: null,
         source: "seed"
@@ -162,30 +223,23 @@ const webspringState = {
       draft.webspring.focusedAppId = appId;
       draft.webspring.layout.keyboardAppId = appId;
       syncSelector(draft, appId);
-      if (appId) {
-        const apps = getOrderedVisibleWebspringApps(getVisibleApps(draft), getWorkingOrder(draft));
-        draft.webspring.focusIndex = apps.findIndex((app) => app.id === appId);
-      }
+      if (appId) draft.webspring.focusIndex = getProjection(draft).appOrder.indexOf(appId);
     });
     EventBus.publish("webspring.select", { appId }, appId ?? "none");
   },
 
-  enterEditMode(appId?: string | null) {
+  enterEditMode(itemId?: string | null) {
     RuntimeStore.mutate((draft) => {
-      const order = reconcileWebspringOrder(getVisibleApps(draft), getWorkingOrder(draft));
-      draft.webspring.layout.preference = {
-        ...createWebspringLayoutPreference(getVisibleApps(draft), order, "user"),
-        board: { ...draft.webspring.layout.preference.board },
-      };
+      setWorkingPreference(draft, getWorkingLayout(getProjection(draft)), "user");
       draft.webspring.layout.isEditing = true;
-      draft.webspring.layout.draggingAppId = appId ?? null;
-      draft.webspring.layout.dragOverAppId = null;
-      draft.webspring.layout.keyboardAppId = appId ?? draft.webspring.focusedAppId;
+      draft.webspring.layout.draggingItemId = itemId ?? null;
+      draft.webspring.layout.dropTargetId = null;
+      draft.webspring.layout.keyboardAppId = itemId ?? draft.webspring.focusedAppId;
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 650;
-      if (appId) draft.webspring.focusedAppId = appId;
-      syncSelector(draft, appId ?? draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
+      if (itemId) draft.webspring.focusedAppId = itemId;
+      syncSelector(draft, itemId ?? draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
     });
-    EventBus.publish("webspring.edit.begin", { appId: appId ?? null }, appId ?? "Webspring");
+    EventBus.publish("webspring.edit.begin", { itemId: itemId ?? null }, itemId ?? "Webspring");
   },
 
   exitEditMode(commit = true) {
@@ -193,15 +247,15 @@ const webspringState = {
 
     RuntimeStore.mutate((draft) => {
       if (commit) {
-        preference = setWorkingPreference(draft, getWorkingOrder(draft), "user");
+        preference = setWorkingPreference(draft, getWorkingLayout(getProjection(draft)), "user");
       } else {
-        const stored = readWebspringLayoutPreference(Persistence).preference;
-        draft.webspring.layout.preference = stored;
+        draft.webspring.layout.preference = readWebspringLayoutPreference(Persistence).preference;
+        if (draft.webspring.openFolderId && !getProjection(draft).folders[draft.webspring.openFolderId]) draft.webspring.openFolderId = null;
       }
 
       draft.webspring.layout.isEditing = false;
-      draft.webspring.layout.draggingAppId = null;
-      draft.webspring.layout.dragOverAppId = null;
+      draft.webspring.layout.draggingItemId = null;
+      draft.webspring.layout.dropTargetId = null;
       draft.webspring.layout.keyboardAppId = null;
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 260;
       syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
@@ -212,39 +266,31 @@ const webspringState = {
     EventBus.publish("webspring.edit.end", { commit }, "Webspring");
   },
 
-  beginDrag(appId: string) {
-    this.startDraggingApp(appId);
-  },
-
-  startDraggingApp(appId: string) {
+  beginDrag(itemId: string) {
     if (!dragOriginalPreference) dragOriginalPreference = structuredClone(RuntimeStore.getSnapshot().webspring.layout.preference);
     RuntimeStore.mutate((draft) => {
       draft.webspring.layout.isEditing = true;
-      draft.webspring.layout.draggingAppId = appId;
-      draft.webspring.layout.dragOverAppId = null;
-      draft.webspring.layout.keyboardAppId = appId;
+      draft.webspring.layout.draggingItemId = itemId;
+      draft.webspring.layout.dropTargetId = null;
+      draft.webspring.layout.keyboardAppId = itemId;
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 650;
-      draft.webspring.focusedAppId = appId;
+      draft.webspring.focusedAppId = itemId;
     });
-    EventBus.publish("webspring.reorder.drag.begin", { appId }, appId);
+    EventBus.publish("webspring.reorder.drag.begin", { itemId }, itemId);
   },
 
-  endDrag(commit = true) {
-    this.finishDraggingApp(commit);
-  },
-
-  finishDraggingApp(commit = true) {
+  finishDrag(commit = true) {
     let preference: SynCloudOSWebspringLayoutPreference | null = null;
 
     RuntimeStore.mutate((draft) => {
       if (commit) {
-        preference = setWorkingPreference(draft, getWorkingOrder(draft), "user");
+        preference = setWorkingPreference(draft, getWorkingLayout(getProjection(draft)), "user");
       } else if (dragOriginalPreference) {
         draft.webspring.layout.preference = dragOriginalPreference;
         syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
       }
-      draft.webspring.layout.draggingAppId = null;
-      draft.webspring.layout.dragOverAppId = null;
+      draft.webspring.layout.draggingItemId = null;
+      draft.webspring.layout.dropTargetId = null;
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 260;
     });
 
@@ -253,44 +299,156 @@ const webspringState = {
     EventBus.publish("webspring.reorder.drag.end", { commit }, "Webspring");
   },
 
-  reorderApp(appId: string, targetIndex: number, commit = true) {
+  moveItem(itemId: string, targetIndex: number, commit = false) {
     let preference: SynCloudOSWebspringLayoutPreference | null = null;
     let didMove = false;
 
     RuntimeStore.mutate((draft) => {
-      const currentOrder = reconcileWebspringOrder(getVisibleApps(draft), getWorkingOrder(draft));
-      const nextOrder = moveWebspringAppToIndex(currentOrder, appId, targetIndex);
-      didMove = nextOrder.join("\u0000") !== currentOrder.join("\u0000");
-      preference = setWorkingPreference(draft, nextOrder, "user");
+      const projection = getProjection(draft);
+      const folderId = projection.folderOfApp[itemId];
+      if (folderId !== undefined && !draft.webspring.layout.folderConfiguration.editable) return;
+      const layout = getWorkingLayout(projection);
+      const container = findContainer(layout, itemId);
+      if (!container.includes(itemId)) return;
+      const nextContainer = moveWebspringEntryToIndex(container, itemId, targetIndex);
+      didMove = nextContainer.join("\u0000") !== container.join("\u0000");
+      if (!didMove) return;
+      if (folderId === undefined) layout.order = nextContainer;
+      else layout.folders[folderId] = nextContainer;
+      preference = setWorkingPreference(draft, layout, "user");
+      draft.webspring.focusedAppId = itemId;
+      draft.webspring.layout.keyboardAppId = itemId;
+      draft.webspring.layout.launchSuppressedUntil = Date.now() + 450;
+      syncSelector(draft, itemId);
+    });
+
+    if (didMove && commit) persistPreference(preference);
+    if (didMove) EventBus.publish("webspring.reorder.commit", { itemId, targetIndex, commit }, itemId);
+    return didMove;
+  },
+
+  moveItemByKeyboard(itemId: string, key: string, columns?: number) {
+    const layout = getWorkingLayout(getProjection(RuntimeStore.getSnapshot()));
+    const targetIndex = getKeyboardReorderIndex(findContainer(layout, itemId), itemId, key, columns);
+
+    if (targetIndex < 0) return false;
+    return this.moveItem(itemId, targetIndex, false);
+  },
+
+  reorder(order: readonly string[]) {
+    let preference: SynCloudOSWebspringLayoutPreference | null = null;
+
+    RuntimeStore.mutate((draft) => {
+      const layout = getWorkingLayout(getProjection(draft));
+      if (order.length !== layout.order.length || new Set(order).size !== order.length || order.some((id) => !layout.order.includes(id))) return;
+      layout.order = [...order];
+      preference = setWorkingPreference(draft, layout, "user");
+      draft.webspring.layout.launchSuppressedUntil = Date.now() + 260;
+      syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
+    });
+
+    if (!preference) return false;
+    persistPreference(preference);
+    EventBus.publish("webspring.layout.commit", { order: [...order] }, "Webspring");
+    return true;
+  },
+
+  setDropTarget(itemId: string | null) {
+    RuntimeStore.mutate((draft) => {
+      const layout = draft.webspring.layout;
+      const draggingItemId = layout.draggingItemId;
+      const projection = getProjection(draft);
+      const accepted = itemId !== null &&
+        layout.folderConfiguration.editable &&
+        draggingItemId !== null &&
+        itemId !== draggingItemId &&
+        !projection.folders[draggingItemId] &&
+        projection.order.includes(itemId) &&
+        projection.folderOfApp[draggingItemId] !== itemId;
+      const next = accepted ? itemId : null;
+      if (layout.dropTargetId !== next) layout.dropTargetId = next;
+    });
+  },
+
+  dropOnItem(appId: string, targetItemId: string) {
+    let preference: SynCloudOSWebspringLayoutPreference | null = null;
+    let folderId: string | null = null;
+
+    RuntimeStore.mutate((draft) => {
+      if (!draft.webspring.layout.folderConfiguration.editable || appId === targetItemId) return;
+      const projection = getProjection(draft);
+      if (!projection.appOrder.includes(appId) || projection.folders[appId] || !projection.order.includes(targetItemId)) return;
+      if (projection.folderOfApp[appId] === targetItemId) return;
+      const layout = getWorkingLayout(projection);
+      removeFromFolders(layout, appId);
+      layout.order = layout.order.filter((id) => id !== appId);
+      const targetFolder = layout.folders[targetItemId];
+      if (targetFolder) {
+        targetFolder.push(appId);
+        folderId = targetItemId;
+      } else {
+        const index = layout.order.indexOf(targetItemId);
+        if (index < 0) return;
+        folderId = createWebspringFolderId();
+        layout.folders[folderId] = [targetItemId, appId];
+        layout.order.splice(index, 1, folderId);
+      }
+      preference = setWorkingPreference(draft, layout, "user");
+      draft.webspring.layout.dropTargetId = null;
+      draft.webspring.layout.launchSuppressedUntil = Date.now() + 450;
+      syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
+    });
+
+    if (!preference) return false;
+    if (!isDragging()) persistPreference(preference);
+    EventBus.publish("webspring.folder.drop", { appId, targetItemId, folderId }, appId);
+    return true;
+  },
+
+  moveAppOutOfFolder(appId: string, targetIndex: number) {
+    let preference: SynCloudOSWebspringLayoutPreference | null = null;
+
+    RuntimeStore.mutate((draft) => {
+      if (!draft.webspring.layout.folderConfiguration.editable) return;
+      const projection = getProjection(draft);
+      if (projection.folderOfApp[appId] === undefined) return;
+      const layout = getWorkingLayout(projection);
+      removeFromFolders(layout, appId);
+      layout.order.splice(Math.max(0, Math.min(targetIndex, layout.order.length)), 0, appId);
+      preference = setWorkingPreference(draft, layout, "user");
+      draft.webspring.layout.dropTargetId = null;
       draft.webspring.focusedAppId = appId;
       draft.webspring.layout.keyboardAppId = appId;
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 450;
       syncSelector(draft, appId);
     });
 
-    if (commit) persistPreference(preference);
-    if (didMove) EventBus.publish("webspring.reorder.commit", { appId, targetIndex, commit }, appId);
-    return didMove;
+    if (!preference) return false;
+    if (!isDragging()) persistPreference(preference);
+    EventBus.publish("webspring.folder.moveOut", { appId, targetIndex }, appId);
+    return true;
   },
 
-  reorderDraggedAppBefore(targetAppId: string, commit = false) {
-    const draggingAppId = RuntimeStore.getSnapshot().webspring.layout.draggingAppId;
-    if (!draggingAppId || draggingAppId === targetAppId) return false;
-
-    const snapshot = RuntimeStore.getSnapshot();
-    const targetIndex = reconcileWebspringOrder(getVisibleApps(snapshot), getWorkingOrder(snapshot)).indexOf(targetAppId);
-
-    if (targetIndex < 0) return false;
-    return this.reorderApp(draggingAppId, targetIndex, commit);
+  openFolder(folderId: string) {
+    let opened = false;
+    RuntimeStore.mutate((draft) => {
+      if (draft.webspring.layout.draggingItemId || draft.webspring.launchPhase !== "idle") return;
+      if (!getProjection(draft).folders[folderId]) return;
+      draft.webspring.openFolderId = folderId;
+      opened = true;
+    });
+    if (opened) EventBus.publish("webspring.folder.open", { folderId }, folderId);
+    return opened;
   },
 
-  moveEditingAppByKeyboard(appId: string, key: string, columns?: number) {
-    const snapshot = RuntimeStore.getSnapshot();
-    const order = reconcileWebspringOrder(getVisibleApps(snapshot), getWorkingOrder(snapshot));
-    const targetIndex = getKeyboardReorderIndex(order, appId, key, columns);
-
-    if (targetIndex < 0) return false;
-    return this.reorderApp(appId, targetIndex, false);
+  closeFolder() {
+    const folderId = RuntimeStore.getSnapshot().webspring.openFolderId;
+    if (!folderId) return;
+    RuntimeStore.mutate((draft) => {
+      draft.webspring.openFolderId = null;
+      draft.webspring.layout.dropTargetId = null;
+    });
+    EventBus.publish("webspring.folder.close", { folderId }, folderId);
   },
 
   commitLayoutOrder() {
@@ -298,7 +456,7 @@ const webspringState = {
     let committedOrder: string[] = [];
 
     RuntimeStore.mutate((draft) => {
-      preference = setWorkingPreference(draft, getWorkingOrder(draft), "user");
+      preference = setWorkingPreference(draft, getWorkingLayout(getProjection(draft)), "user");
       committedOrder = [...preference.order];
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 260;
       syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
@@ -310,8 +468,7 @@ const webspringState = {
 
   resetLayoutOrder() {
     RuntimeStore.mutate((draft) => {
-      const order = resetWebspringOrder(getVisibleApps(draft));
-      const preference = setWorkingPreference(draft, order, "reset");
+      const preference = setWorkingPreference(draft, null, "reset");
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 320;
       draft.webspring.focusIndex = -1;
       draft.webspring.layout.lastCommittedAt = preference.updatedAt;

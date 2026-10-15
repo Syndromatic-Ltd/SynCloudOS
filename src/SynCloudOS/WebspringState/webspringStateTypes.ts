@@ -18,23 +18,42 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const WEBSPRING_LAYOUT_PREFERENCE_VERSION = 3;
+export const WEBSPRING_LAYOUT_PREFERENCE_VERSION = 4;
 
 export type SynCloudOSWebspringLayoutPreferenceSource = "seed" | "persisted" | "user" | "reset";
 
 export interface SynCloudOSWebspringLayoutPreference {
   version: typeof WEBSPRING_LAYOUT_PREFERENCE_VERSION;
+  /** Top-level entry IDs: app IDs and folder IDs. */
   order: string[];
+  /** Folder ID to its ordered member app IDs. */
+  folders: Record<string, { apps: string[] }>;
   board: { version: 1; pageSize: number; dockSize: number };
   updatedAt: number | null;
   source: SynCloudOSWebspringLayoutPreferenceSource;
 }
 
+/** A folder the shell seeds; the runtime view of a manifest folder. */
+export interface SynCloudOSWebspringFolderDefinition {
+  readonly id: string;
+  readonly order: number;
+  readonly apps: readonly string[];
+}
+
+/** The shell's folder declaration, threaded into the runtime by the Webspring host. */
+export interface SynCloudOSWebspringFolderConfiguration {
+  readonly editable: boolean;
+  readonly initial: readonly SynCloudOSWebspringFolderDefinition[];
+}
+
 export interface SynCloudOSWebspringLayoutState {
   preference: SynCloudOSWebspringLayoutPreference;
+  folderConfiguration: SynCloudOSWebspringFolderConfiguration;
   isEditing: boolean;
-  draggingAppId: string | null;
-  dragOverAppId: string | null;
+  /** The app or folder being dragged. */
+  draggingItemId: string | null;
+  /** The entry a dragged app hovers over, to merge into a folder. */
+  dropTargetId: string | null;
   keyboardAppId: string | null;
   launchSuppressedUntil: number | null;
   lastCommittedAt: number | null;
@@ -42,6 +61,7 @@ export interface SynCloudOSWebspringLayoutState {
 
 export interface SynCloudOSWebspringState {
   hoveredAppId: string | null;
+  openFolderId: string | null;
   selectedAppId: string | null;
   focusedAppId: string | null;
   launchingAppId: string | null;

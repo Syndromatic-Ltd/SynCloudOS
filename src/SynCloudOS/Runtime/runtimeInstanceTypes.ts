@@ -193,6 +193,7 @@ import type { DocumentRecoveryStore } from "../Documents/DocumentRecoveryStore";
 import type { DocumentStorageAdapter } from "../Documents/Adapters/documentAdapterTypes";
 import type { DocumentType } from "../Documents/documentTypes";
 import type { DocumentAssetRuntimeBacking, DocumentAssetRuntimeCooperation } from "./DocumentAssetRuntimeIntegration";
+import type { SynCloudOSWebspringFolderConfiguration } from "../WebspringState/webspringStateTypes";
 
 declare const runtimeIdBrand: unique symbol;
 export type SynCloudOSRuntimeId = string & { readonly [runtimeIdBrand]: true };
@@ -742,19 +743,29 @@ export interface SynCloudOSErrorManager extends RuntimeOwnedService {
   toTechnicalReport(error: CapturedSynCloudOSError | null): string;
 }
 export interface SynCloudOSWebspringStateController extends RuntimeOwnedService {
+  /** Threads the shell's folder declaration into layout reconciliation. */
+  configureFolders(configuration: SynCloudOSWebspringFolderConfiguration): void;
   hydrateLayoutPreference(): unknown;
-  hydrateLayoutOrder(appIds: string[]): void;
+  /** Seeds the top-level order without persisting it. */
+  hydrateLayoutOrder(order: string[]): void;
   hoverApp(appId: string | null): void;
   selectApp(appId: string | null): void;
-  enterEditMode(appId?: string | null): void;
+  enterEditMode(itemId?: string | null): void;
   exitEditMode(commit?: boolean): void;
-  beginDrag(appId: string): void;
-  startDraggingApp(appId: string): void;
-  endDrag(commit?: boolean): void;
-  finishDraggingApp(commit?: boolean): void;
-  reorderApp(appId: string, targetIndex: number, commit?: boolean): boolean;
-  reorderDraggedAppBefore(targetAppId: string, commit?: boolean): boolean;
-  moveEditingAppByKeyboard(appId: string, key: string, columns?: number): boolean;
+  /** Starts dragging an app or a folder. */
+  beginDrag(itemId: string): void;
+  finishDrag(commit?: boolean): void;
+  /** Reorders within the container holding the item: the top level, or its folder. */
+  moveItem(itemId: string, targetIndex: number, commit?: boolean): boolean;
+  moveItemByKeyboard(itemId: string, key: string, columns?: number): boolean;
+  /** Replaces the top-level order; it must list every top-level entry exactly once. */
+  reorder(order: readonly string[]): boolean;
+  setDropTarget(itemId: string | null): void;
+  /** Merges an app into a folder, or with another app into a new folder. Editable folders only. */
+  dropOnItem(appId: string, targetItemId: string): boolean;
+  moveAppOutOfFolder(appId: string, targetIndex: number): boolean;
+  openFolder(folderId: string): boolean;
+  closeFolder(): void;
   commitLayoutOrder(): void;
   resetLayoutOrder(): void;
   setLoadingApp(appId: string | null, launchTransitionId?: string | null): void;

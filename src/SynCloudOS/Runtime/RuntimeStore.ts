@@ -210,6 +210,7 @@ function createInitialRuntimeSnapshot(runtimeId: string, seed: Partial<RuntimeSn
   },
   webspring: {
     hoveredAppId: null,
+    openFolderId: null,
     selectedAppId: null,
     focusedAppId: null,
     launchingAppId: null,
@@ -230,15 +231,17 @@ function createInitialRuntimeSnapshot(runtimeId: string, seed: Partial<RuntimeSn
     focusIndex: -1,
     layout: {
       preference: {
-        version: 3,
+        version: 4,
         order: [],
+        folders: {},
         board: { version: 1, pageSize: 20, dockSize: 4 },
         updatedAt: null,
         source: "seed"
       },
+      folderConfiguration: { editable: false, initial: [] },
       isEditing: false,
-      draggingAppId: null,
-      dragOverAppId: null,
+      draggingItemId: null,
+      dropTargetId: null,
       keyboardAppId: null,
       launchSuppressedUntil: null,
       lastCommittedAt: null

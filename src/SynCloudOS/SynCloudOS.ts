@@ -148,7 +148,25 @@ export type {
   UserNotificationState,
 } from "./NotificationCenter/notificationDeliveryTypes";
 export type { CapturedSynCloudOSError } from "./ErrorManager/errorTypes";
-export { getOrderedVisibleWebspringApps } from "./WebspringState/webspringStateProjection";
+export {
+  DESKTOP_DIAL_ITEM_LIMIT,
+  EMPTY_WEBSPRING_FOLDER_CONFIGURATION,
+  WEBSPRING_LAYOUT_PREFERENCE_KEY,
+  WEBSPRING_STAGE,
+  getDesktopDialAngles,
+  getDesktopWebspringSlots,
+  getDialPoint,
+  getKeyboardReorderIndex,
+  getOrderedVisibleWebspringApps,
+  reconcileWebspringLayout,
+} from "./WebspringState/webspringStateProjection";
+export type {
+  WebspringDesktopLayout,
+  WebspringDesktopSlot,
+  WebspringDesktopSlotRegion,
+  WebspringLayoutInput,
+  WebspringLayoutProjection,
+} from "./WebspringState/webspringStateProjection";
 export {
   WEBSPRING_MULTI_SWITCH_ROLES,
   WEBSPRING_PRESENTATION_ROLES,
@@ -182,6 +200,8 @@ export { useResolvedMode } from "./Appearance/useAppearance";
 export type { PreferencePaneDescriptor, PreferencePaneRegistry } from "./Preferences";
 export { WEBSPRING_LAYOUT_PREFERENCE_VERSION } from "./WebspringState/webspringStateTypes";
 export type {
+  SynCloudOSWebspringFolderConfiguration,
+  SynCloudOSWebspringFolderDefinition,
   SynCloudOSWebspringLayoutPreference,
   SynCloudOSWebspringLayoutPreferenceSource,
   SynCloudOSWebspringLayoutState,

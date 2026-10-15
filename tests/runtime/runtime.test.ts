@@ -211,7 +211,7 @@ describe("runtime controller, inspector, and transaction contracts", () => {
       runtime.webspring.enterEditMode("webspring-contract-one");
       expect(runtime.store.getSnapshot().webspring.layout.isEditing).toBe(true);
       expect(runtime.webspring.isLaunchSuppressed()).toBe(true);
-      expect(runtime.webspring.moveEditingAppByKeyboard("webspring-contract-one", "ArrowRight", 1)).toBe(true);
+      expect(runtime.webspring.moveItemByKeyboard("webspring-contract-one", "ArrowRight", 1)).toBe(true);
       expect(runtime.store.getSnapshot().webspring.layout.preference.order).toEqual([
         "webspring-contract-two",
         "webspring-contract-one",
@@ -221,8 +221,8 @@ describe("runtime controller, inspector, and transaction contracts", () => {
       const committedOrder = runtime.store.getSnapshot().webspring.layout.preference.order;
 
       runtime.webspring.enterEditMode("webspring-contract-one");
-      runtime.webspring.startDraggingApp("webspring-contract-one");
-      expect(runtime.webspring.reorderDraggedAppBefore("webspring-contract-two", false)).toBe(true);
+      runtime.webspring.beginDrag("webspring-contract-one");
+      expect(runtime.webspring.moveItem("webspring-contract-one", 0, false)).toBe(true);
       expect(runtime.store.getSnapshot().webspring.layout.preference.order).toEqual([
         "webspring-contract-one",
         "webspring-contract-two",
@@ -233,9 +233,9 @@ describe("runtime controller, inspector, and transaction contracts", () => {
         "webspring-contract-two",
       ]);
 
-      runtime.webspring.startDraggingApp("webspring-contract-two");
-      expect(runtime.webspring.reorderDraggedAppBefore("webspring-contract-one", false)).toBe(true);
-      runtime.webspring.finishDraggingApp(false);
+      runtime.webspring.beginDrag("webspring-contract-two");
+      expect(runtime.webspring.moveItem("webspring-contract-two", 0, false)).toBe(true);
+      runtime.webspring.finishDrag(false);
       expect(runtime.store.getSnapshot().webspring.layout.preference.order).toEqual([
         "webspring-contract-one",
         "webspring-contract-two",
