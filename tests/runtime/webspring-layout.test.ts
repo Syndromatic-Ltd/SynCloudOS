@@ -221,6 +221,19 @@ describe("Webspring folder reconciliation", () => {
     expect(projection.folders).toEqual({ "folder.tools": ["beta", "epsilon"] });
   });
 
+  it("treats app IDs that name Object.prototype members as ordinary IDs", () => {
+    const projection = reconcileWebspringLayout(
+      registerApps(["constructor", 1], ["toString", 2], ["alpha", 3]),
+      userLayout(["constructor", "folder.user-x"], { "folder.user-x": ["toString", "alpha"] }),
+      folders(true),
+    );
+
+    expect(projection.order).toEqual(["constructor", "folder.user-x"]);
+    expect(projection.appOrder).toEqual(["constructor", "toString", "alpha"]);
+    expect(projection.folderOfApp.constructor).toBeUndefined();
+    expect(projection.folderOfApp.toString).toBe("folder.user-x");
+  });
+
   it("omits folders whose members are all hidden", () => {
     const projection = reconcileWebspringLayout(
       registerApps(["alpha", 1], ["beta", 2, false]),
@@ -397,6 +410,23 @@ describe("WebspringState folder actions", () => {
     expect(layout(runtime).order).toEqual(["folder.tools", "alpha"]);
     expect(reconcileWebspringLayout(runtime.apps.getAllApps(), layout(runtime), runtime.store.getSnapshot().webspring.layout.folderConfiguration).folders)
       .toEqual({ "folder.tools": ["beta", "gamma"] });
+  });
+
+  it("merges into and out of an app whose ID names an Object.prototype member", () => {
+    window.localStorage.clear();
+    const runtime = createBrowserPersistenceRuntime();
+    runtime.apps.registerMany([createOrderedManifest("constructor", 1), createOrderedManifest("alpha", 2)]);
+    runtime.webspring.configureFolders(folders(true));
+    runtime.webspring.hydrateLayoutPreference();
+
+    expect(runtime.webspring.openFolder("constructor")).toBe(false);
+    expect(runtime.webspring.moveItem("constructor", 1)).toBe(true);
+    expect(runtime.webspring.dropOnItem("alpha", "constructor")).toBe(true);
+    const [folderId] = layout(runtime).order;
+    expect(layout(runtime).folders[folderId]).toEqual({ apps: ["constructor", "alpha"] });
+    expect(runtime.webspring.moveAppOutOfFolder("constructor", 0)).toBe(true);
+    expect(layout(runtime).order).toEqual(["constructor", folderId]);
+    expect(runtime.apps.getDisplayApps().map((app) => app.id)).toEqual(["constructor", "alpha"]);
   });
 
   it("opens one folder at a time, never during a drag", () => {

@@ -138,8 +138,9 @@ export function createEmptyWebspringLayoutPreference(): SynCloudOSWebspringLayou
 }
 
 function coerceFolders(value: unknown): Record<string, string[]> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) return {};
-  const folders: Record<string, string[]> = {};
+  // Keyed by stored IDs, so it has no prototype for an ID to collide with.
+  const folders: Record<string, string[]> = Object.create(null) as Record<string, string[]>;
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return folders;
   for (const [id, folder] of Object.entries(value)) {
     const folderId = id.trim();
     if (!folderId || typeof folder !== "object" || folder === null || !("apps" in folder) || !Array.isArray(folder.apps)) continue;
@@ -230,8 +231,9 @@ export function reconcileWebspringLayout(
       a.localeCompare(b));
   order.push(...missing);
 
-  const folders: Record<string, readonly string[]> = {};
-  const folderOfApp: Record<string, string> = {};
+  // Keyed by app and folder IDs, so neither has a prototype for an ID to collide with.
+  const folders: Record<string, readonly string[]> = Object.create(null) as Record<string, readonly string[]>;
+  const folderOfApp: Record<string, string> = Object.create(null) as Record<string, string>;
   for (const id of order) {
     const folderApps = members.get(id);
     if (!folderApps) continue;

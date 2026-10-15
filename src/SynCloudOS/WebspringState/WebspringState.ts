@@ -93,10 +93,10 @@ function getProjection(draft: RuntimeSnapshot): WebspringLayoutProjection {
 }
 
 function getWorkingLayout(projection: WebspringLayoutProjection): WorkingLayout {
-  return {
-    order: [...projection.order],
-    folders: Object.fromEntries(Object.entries(projection.folders).map(([id, apps]) => [id, [...apps]])),
-  };
+  // Actions index this by caller-supplied IDs, so it has no prototype for an ID to collide with.
+  const folders: Record<string, string[]> = Object.create(null) as Record<string, string[]>;
+  for (const [id, apps] of Object.entries(projection.folders)) folders[id] = [...apps];
+  return { order: [...projection.order], folders };
 }
 
 function setWorkingPreference(
@@ -119,7 +119,7 @@ function setWorkingPreference(
   );
   draft.webspring.layout.preference = preference;
   draft.webspring.layout.lastCommittedAt = source === "user" || source === "reset" ? preference.updatedAt : draft.webspring.layout.lastCommittedAt;
-  if (draft.webspring.openFolderId && !preference.folders[draft.webspring.openFolderId]) draft.webspring.openFolderId = null;
+  if (draft.webspring.openFolderId && !Object.hasOwn(preference.folders, draft.webspring.openFolderId)) draft.webspring.openFolderId = null;
   return preference;
 }
 
