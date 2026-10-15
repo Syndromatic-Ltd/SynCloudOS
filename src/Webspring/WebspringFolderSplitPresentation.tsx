@@ -61,6 +61,13 @@ type CaptureState =
   | { readonly status: "ready"; readonly canvas: HTMLCanvasElement }
   | { readonly status: "failed" };
 
+/** A settled capture of the stage as it was at `rect`. */
+type CaptureResult = { readonly rect: DOMRect } & Exclude<CaptureState, { status: "pending" }>;
+
+function sameRect(left: DOMRect, right: DOMRect) {
+  return left.x === right.x && left.y === right.y && left.width === right.width && left.height === right.height;
+}
+
 type SplitPhase = "preparing" | "closed" | "open" | "closing";
 
 function resolveOptions(options: WebspringFolderSplitOptions): ResolvedSplitOptions {
@@ -139,19 +146,39 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
   const scopeId = useId();
   const contentRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const [stageRect] = useState(() => visibleStageRect(stage));
-  const [capture, setCapture] = useState<CaptureState>({ status: "pending" });
+  const [stageRect, setStageRect] = useState(() => visibleStageRect(stage));
+  const [captureResult, setCaptureResult] = useState<CaptureResult | null>(null);
+  // A capture of the stage at another size no longer fits it.
+  const capture: CaptureState = captureResult?.rect === stageRect ? captureResult : { status: "pending" };
   const [phase, setPhase] = useState<SplitPhase>("preparing");
   const [contentHeight, setContentHeight] = useState(0);
   const closeTimer = useRef(0);
   const closed = useRef(false);
 
+  // The overlay, the panel's limits and the snapshot all follow the stage's visible rect.
+  useEffect(() => {
+    const view = stage.ownerDocument.defaultView;
+    const update = () => setStageRect((current) => {
+      const next = visibleStageRect(stage);
+      return sameRect(current, next) ? current : next;
+    });
+    update();
+    if (!view) return;
+    view.addEventListener("resize", update);
+    const observer = view.ResizeObserver ? new view.ResizeObserver(update) : null;
+    observer?.observe(stage);
+    return () => {
+      view.removeEventListener("resize", update);
+      observer?.disconnect();
+    };
+  }, [stage]);
+
   useEffect(() => {
     let cancelled = false;
     const scale = Math.min(2, stage.ownerDocument.defaultView?.devicePixelRatio ?? 1);
     captureStage(stage, stageRect, scale).then(
-      (canvas) => { if (!cancelled) setCapture({ status: "ready", canvas }); },
-      () => { if (!cancelled) setCapture({ status: "failed" }); },
+      (canvas) => { if (!cancelled) setCaptureResult({ rect: stageRect, status: "ready", canvas }); },
+      () => { if (!cancelled) setCaptureResult({ rect: stageRect, status: "failed" }); },
     );
     return () => { cancelled = true; };
   }, [stage, stageRect]);
@@ -168,20 +195,29 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
     return () => observer.disconnect();
   }, [stage]);
 
-  // Rest at the closed position for a frame once the snapshot is in, then split.
+  // The first capture settling, either way, shows the split at rest.
+  const settled = capture.status !== "pending";
   useEffect(() => {
-    if (capture.status === "pending" || phase !== "preparing") return;
-    setPhase("closed");
+    if (settled && phase === "preparing") setPhase("closed");
+  }, [phase, settled]);
+
+  // Rest closed for a frame so the parting transitions from there, then part.
+  useEffect(() => {
+    if (phase !== "closed") return;
     const view = stage.ownerDocument.defaultView;
+    if (!view) {
+      setPhase("open");
+      return;
+    }
     let second = 0;
-    const first = view?.requestAnimationFrame(() => {
-      second = view.requestAnimationFrame(() => setPhase("open"));
-    }) ?? 0;
+    const first = view.requestAnimationFrame(() => {
+      second = view.requestAnimationFrame(() => setPhase((current) => current === "closed" ? "open" : current));
+    });
     return () => {
-      view?.cancelAnimationFrame(first);
-      view?.cancelAnimationFrame(second);
+      view.cancelAnimationFrame(first);
+      view.cancelAnimationFrame(second);
     };
-  }, [capture.status, phase, stage]);
+  }, [phase, stage]);
 
   useEffect(() => {
     if (phase !== "open") return;

@@ -29,10 +29,14 @@
   opacity: 1;
 }
 
-/* Measured, not yet shown: the live stage stays in view while it is captured. */
+/* While the stage is captured it stays in view, but the transparent overlay
+   already takes its pointer input, and the panel is not yet focusable. */
 .webspring-folder-split[data-phase="preparing"] {
+  opacity: 0;
+}
+
+.webspring-folder-split[data-phase="preparing"] .webspring-folder-split-panel {
   visibility: hidden;
-  pointer-events: none;
 }
 
 .webspring-folder-split[data-motion="fade"] {

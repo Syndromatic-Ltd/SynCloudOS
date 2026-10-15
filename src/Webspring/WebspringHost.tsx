@@ -20,7 +20,7 @@
 
 import { Component, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ErrorInfo, type PropsWithChildren, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { useNSEDeferredDisposal } from "../NSE/NSE";
+import { NSEFocusPortProvider, useNSEDeferredDisposal } from "../NSE/NSE";
 import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
 import { useWebspringMotion } from "./Webspring.transitions";
 import { nseDeferredDisposalMicrotaskScheduler, useNSEFeedback } from "../NSE/hostComposition";
@@ -32,7 +32,7 @@ import type { AuthenticationInput, Presentation, WebspringDefinition, WebspringV
 import { SystemStartupLayer, type SystemStartupPhase } from "./SystemStartupLayer";
 import { ApplicationStageLayer } from "./ApplicationStageLayer";
 import { syncApplicationWindowContentRenderers, WindowContentRendererRegistry, WindowLayer, type ApplicationWindowRendererRegistrations } from "./WindowLayer";
-import { FocusScope, HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeSelector } from "../SynCloudOSReact";
+import { FocusScope, HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeNSEFocusPort, useRuntimeSelector } from "../SynCloudOSReact";
 import { presentationForSizeClass, WebspringController, type SynCloudOSShellResources } from "./WebspringController";
 import { WebspringQuickSwitchView } from "./WebspringQuickSwitchView";
 import { WebspringIconEffectProvider } from "./WebspringIconEffect";
@@ -169,6 +169,8 @@ export function WebspringHost({
   const returnTracks = shell.returnTracks[viewId] ?? defaultWebspringReturnTracks;
   const { completeTrack } = useWebspringReturnCompletion(snapshot.webspring.returnTransitionId, returnTracks);
   const viewActions = useMemo(() => controller ? Object.freeze({ ...controller.actions, completeReturnTrack: completeTrack }) : null, [completeTrack, controller]);
+  // Shell views' modal surfaces (an open folder) trap focus in the runtime's focus graph.
+  const viewFocusPort = useRuntimeNSEFocusPort("webspring");
   const View = (shell.components[viewId] ?? function MissingWebspringView(): never {
     throw new TypeError(`Webspring view ${viewId} is not registered.`);
   }) as WebspringViewComponent;
@@ -300,7 +302,9 @@ export function WebspringHost({
       fallbackViewId={fallbackViewId}
       onFallback={() => { if (fallbackViewId) setViewOverride({ presentation, id: fallbackViewId }); }}
     >
-      <View model={model} actions={viewActions} applicationOutlet={applicationOutlet} folderPresentation={shell.folderPresentation} />
+      <NSEFocusPortProvider port={viewFocusPort}>
+        <View model={model} actions={viewActions} applicationOutlet={applicationOutlet} folderPresentation={shell.folderPresentation} />
+      </NSEFocusPortProvider>
     </WebspringViewBoundary> : <section role="alert" className="webspring-view-recovery">
       <h1>Webspring host unavailable</h1>
       <p>{controllerOutcome.error?.message}</p>
