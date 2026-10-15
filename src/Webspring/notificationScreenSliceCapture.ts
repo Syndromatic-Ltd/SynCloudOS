@@ -198,30 +198,209 @@ function isFlowAtomicDisplay(style: CSSStyleDeclaration) {
  * element may derive its position from flow layout — pruned siblings would
  * reflow the survivors (a grid topbar collapses its centre segment into the
  * first column, sliding all visible chrome out of the strip). Every cloned
- * box is therefore pinned to its real viewport rect, relative to its nearest
+ * box is therefore pinned to its real layout box, relative to its nearest
  * pinned ancestor. This also bakes in scroll offsets, which cloneNode loses.
+ *
+ * A box's viewport rect includes its own transform (`transform` and the
+ * individual `translate`, `rotate` and `scale`). The clone keeps that
+ * transform, so it is pinned to the box before the transform, recovered from
+ * the rect and the transform about its origin.
  */
+interface CloneAffine {
+  readonly a: number;
+  readonly b: number;
+  readonly c: number;
+  readonly d: number;
+  readonly e: number;
+  readonly f: number;
+}
+
+const cloneIdentity: CloneAffine = Object.freeze({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 });
+const cloneEpsilon = 1e-6;
+
+function multiplyAffine(m: CloneAffine, n: CloneAffine): CloneAffine {
+  return {
+    a: m.a * n.a + m.c * n.b,
+    b: m.b * n.a + m.d * n.b,
+    c: m.a * n.c + m.c * n.d,
+    d: m.b * n.c + m.d * n.d,
+    e: m.a * n.e + m.c * n.f + m.e,
+    f: m.b * n.e + m.d * n.f + m.f,
+  };
+}
+
+function translationAffine(x: number, y: number): CloneAffine {
+  return { a: 1, b: 0, c: 0, d: 1, e: x, f: y };
+}
+
+function cssTokens(value: string) {
+  const trimmed = value.trim();
+  return trimmed && trimmed !== "none" ? trimmed.split(/\s+/u) : [];
+}
+
+function parseCloneLength(token: string, reference: number): number | null {
+  const amount = parseFloat(token);
+  if (!Number.isFinite(amount)) return null;
+  if (token.endsWith("%")) return reference * amount / 100;
+  return token.endsWith("px") || amount === 0 ? amount : null;
+}
+
+const cloneAngleUnits: Record<string, number> = { deg: Math.PI / 180, rad: 1, grad: Math.PI / 200, turn: Math.PI * 2 };
+
+function parseCloneAngle(token: string): number | null {
+  const unit = /[a-z]+$/u.exec(token)?.[0] ?? "";
+  const amount = parseFloat(token);
+  const factor = cloneAngleUnits[unit] ?? (amount === 0 ? 0 : undefined);
+  return factor === undefined || !Number.isFinite(amount) ? null : amount * factor;
+}
+
+/** `none`, or the matrix() and matrix3d() forms computed transforms take. */
+function parseCloneTransformList(value: string): CloneAffine | null {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "none") return cloneIdentity;
+  const match = /^(matrix|matrix3d)\(([^)]*)\)$/u.exec(trimmed);
+  if (!match) return null;
+  const values = match[2].split(",").map((part) => Number(part.trim()));
+  if (values.some((entry) => !Number.isFinite(entry))) return null;
+  if (match[1] === "matrix" && values.length === 6) {
+    const [a, b, c, d, e, f] = values;
+    return { a, b, c, d, e, f };
+  }
+  if (match[1] === "matrix3d" && values.length === 16) {
+    return { a: values[0], b: values[1], c: values[4], d: values[5], e: values[12], f: values[13] };
+  }
+  return null;
+}
+
+function parseCloneTranslate(value: string, width: number, height: number): CloneAffine | null {
+  const [x = "0px", y = "0px"] = cssTokens(value);
+  const tx = parseCloneLength(x, width);
+  const ty = parseCloneLength(y, height);
+  return tx === null || ty === null ? null : translationAffine(tx, ty);
+}
+
+/** A z rotation exactly; a rotation about x or y as its flattening. */
+function parseCloneRotate(value: string): CloneAffine | null {
+  const tokens = cssTokens(value);
+  if (tokens.length === 0) return cloneIdentity;
+  const angle = parseCloneAngle(tokens[tokens.length - 1]);
+  if (angle === null) return null;
+  const axis = tokens.slice(0, -1);
+  const [x, y, z] = axis.length === 1
+    ? [axis[0] === "x" ? 1 : 0, axis[0] === "y" ? 1 : 0, axis[0] === "z" ? 1 : 0]
+    : axis.length === 3 ? axis.map(Number) : [0, 0, 1];
+  if (![x, y, z].every(Number.isFinite)) return null;
+  if (Math.abs(x) < cloneEpsilon && Math.abs(y) < cloneEpsilon) {
+    const turn = z < 0 ? -angle : angle;
+    return { a: Math.cos(turn), b: Math.sin(turn), c: -Math.sin(turn), d: Math.cos(turn), e: 0, f: 0 };
+  }
+  const cos = Math.cos(angle);
+  return { a: Math.abs(y) > Math.abs(x) ? cos : 1, b: 0, c: 0, d: Math.abs(x) >= Math.abs(y) ? cos : 1, e: 0, f: 0 };
+}
+
+function parseCloneScale(value: string): CloneAffine | null {
+  const tokens = cssTokens(value);
+  if (tokens.length === 0) return cloneIdentity;
+  const factor = (token: string) => token.endsWith("%") ? parseFloat(token) / 100 : Number(token);
+  const sx = factor(tokens[0]);
+  const sy = tokens.length > 1 ? factor(tokens[1]) : sx;
+  return Number.isFinite(sx) && Number.isFinite(sy) ? { a: sx, b: 0, c: 0, d: sy, e: 0, f: 0 } : null;
+}
+
+const cloneOriginKeywords: Record<string, number> = { left: 0, top: 0, center: 0.5, right: 1, bottom: 1 };
+
+function parseCloneOrigin(value: string, width: number, height: number) {
+  const tokens = cssTokens(value);
+  const [x = "50%", y = "50%"] = tokens[0] === "top" || tokens[0] === "bottom" ? [tokens[1], tokens[0]] : tokens;
+  const resolve = (token: string, reference: number) => token in cloneOriginKeywords
+    ? cloneOriginKeywords[token] * reference
+    : parseCloneLength(token, reference);
+  const originX = resolve(x, width);
+  const originY = resolve(y, height);
+  return originX === null || originY === null ? null : { x: originX, y: originY };
+}
+
+/** The element's own transform in its local box: translate, rotate, scale, then transform, about the origin. */
+function cloneElementTransform(style: CSSStyleDeclaration, width: number, height: number): CloneAffine | null {
+  const translate = parseCloneTranslate(style.getPropertyValue("translate"), width, height);
+  const rotate = parseCloneRotate(style.getPropertyValue("rotate"));
+  const scale = parseCloneScale(style.getPropertyValue("scale"));
+  const transform = parseCloneTransformList(style.getPropertyValue("transform"));
+  const origin = parseCloneOrigin(style.getPropertyValue("transform-origin"), width, height);
+  if (!translate || !rotate || !scale || !transform || !origin) return null;
+  return [translate, rotate, scale, transform, translationAffine(-origin.x, -origin.y)]
+    .reduce(multiplyAffine, translationAffine(origin.x, origin.y));
+}
+
+interface NotificationCloneBox {
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
+  /** The transform scales, rotates or skews the box, so its children are not where their rects say. */
+  readonly reshaped: boolean;
+  /** Computed transform values to carry onto the clone; null when the transform could not be read. */
+  readonly transforms: Readonly<Record<"transform" | "translate" | "rotate" | "scale" | "transform-origin", string>> | null;
+}
+
+function notificationCloneBox(element: HTMLElement, rect: DOMRect, style: CSSStyleDeclaration): NotificationCloneBox {
+  // Size first from layout, then exactly from the rect when the transform only scales.
+  let width = element.offsetWidth || rect.width;
+  let height = element.offsetHeight || rect.height;
+  let matrix = cloneElementTransform(style, width, height);
+  if (matrix && Math.abs(matrix.b) < cloneEpsilon && Math.abs(matrix.c) < cloneEpsilon &&
+    Math.abs(matrix.a) > cloneEpsilon && Math.abs(matrix.d) > cloneEpsilon) {
+    width = rect.width / Math.abs(matrix.a);
+    height = rect.height / Math.abs(matrix.d);
+    matrix = cloneElementTransform(style, width, height);
+  }
+  if (!matrix) {
+    return { left: rect.left, top: rect.top, width: rect.width, height: rect.height, reshaped: false, transforms: null };
+  }
+  const corners = [[0, 0], [width, 0], [0, height], [width, height]]
+    .map(([x, y]) => ({ x: matrix.a * x + matrix.c * y + matrix.e, y: matrix.b * x + matrix.d * y + matrix.f }));
+  const reshaped = Math.abs(matrix.a - 1) > cloneEpsilon || Math.abs(matrix.d - 1) > cloneEpsilon ||
+    Math.abs(matrix.b) > cloneEpsilon || Math.abs(matrix.c) > cloneEpsilon;
+  const value = (property: string, fallback: string) => style.getPropertyValue(property).trim() || fallback;
+  return {
+    left: rect.left - Math.min(...corners.map((corner) => corner.x)),
+    top: rect.top - Math.min(...corners.map((corner) => corner.y)),
+    width,
+    height,
+    reshaped,
+    transforms: {
+      transform: value("transform", "none"),
+      translate: value("translate", "none"),
+      rotate: value("rotate", "none"),
+      scale: value("scale", "none"),
+      "transform-origin": value("transform-origin", "50% 50%"),
+    },
+  };
+}
+
 function pinNotificationCloneGeometry(
   clone: HTMLElement,
-  rect: DOMRect,
+  box: NotificationCloneBox,
   context: NotificationCapturePinContext
 ) {
   Object.assign(clone.style, {
     position: "absolute",
-    left: `${rect.left - context.left}px`,
-    top: `${rect.top - context.top}px`,
+    left: `${box.left - context.left}px`,
+    top: `${box.top - context.top}px`,
     right: "auto",
     bottom: "auto",
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
+    width: `${box.width}px`,
+    height: `${box.height}px`,
     minWidth: "0",
     minHeight: "0",
     maxWidth: "none",
     maxHeight: "none",
     margin: "0",
     boxSizing: "border-box",
-    transform: "none"
   });
+  // An unreadable transform is dropped whole, and the clone sits on the rect it drew.
+  const transforms = box.transforms ?? { transform: "none", translate: "none", rotate: "none", scale: "none", "transform-origin": "50% 50%" };
+  for (const [property, value] of Object.entries(transforms)) clone.style.setProperty(property, value);
 }
 
 function cloneNotificationCaptureSubtree(original: HTMLElement, ignoredSelectors: readonly string[]): HTMLElement | null {
@@ -271,10 +450,19 @@ function cloneNotificationCaptureElement(
     return null;
   }
 
+  const box = hasBox ? notificationCloneBox(original, originalRect, originalStyle) : null;
+  // Children of a scaled, rotated or skewed box are drawn through its
+  // transform: they are cloned with it in flow rather than pinned to their rects.
+  if (box?.reshaped) {
+    const subtree = cloneNotificationCaptureSubtree(original, ignoredSelectors);
+    if (subtree) pinNotificationCloneGeometry(subtree, box, pinContext);
+    return subtree;
+  }
+
   const clone = original.cloneNode(false) as HTMLElement;
   let childPinContext = pinContext;
-  if (hasBox) {
-    pinNotificationCloneGeometry(clone, originalRect, pinContext);
+  if (box) {
+    pinNotificationCloneGeometry(clone, box, pinContext);
     childPinContext = {
       left: originalRect.left + (parseFloat(originalStyle.borderLeftWidth) || 0),
       top: originalRect.top + (parseFloat(originalStyle.borderTopWidth) || 0)

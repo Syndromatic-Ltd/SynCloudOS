@@ -37,6 +37,28 @@ function getElement(root: ParentNode, selector: string) {
   return element as HTMLElement;
 }
 
+/** Computed values jsdom does not derive (matrices, individual transform properties). */
+function mockComputedStyles(overrides: Map<Element, Record<string, string>>) {
+  const real = window.getComputedStyle.bind(window);
+  vi.spyOn(window, "getComputedStyle").mockImplementation((element, pseudo) => {
+    const style = real(element, pseudo);
+    const values = overrides.get(element);
+    if (!values) return style;
+    return new Proxy(style, {
+      get(target, property) {
+        if (property === "getPropertyValue") return (name: string) => values[name] ?? target.getPropertyValue(name);
+        const value = Reflect.get(target, property, target);
+        return typeof value === "function" ? value.bind(target) : value;
+      },
+    });
+  });
+}
+
+function mockLayoutSize(element: HTMLElement, width: number, height: number) {
+  Object.defineProperty(element, "offsetWidth", { configurable: true, value: width });
+  Object.defineProperty(element, "offsetHeight", { configurable: true, value: height });
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
   window.localStorage.clear();
@@ -305,6 +327,58 @@ describe("notification screen-slice capture", () => {
 
     expect(clonedLine.textContent).toBe("Welcome to SynCloudOS today");
     expect(clonedAccent.style.position).not.toBe("absolute");
+
+    proxy.dispose();
+  });
+
+  it("keeps a rotated box's rotation and pins it to its box before the rotation", () => {
+    const root = document.createElement("main");
+    root.className = "webspring-view";
+    root.innerHTML = `<div class="dial-selector"><div class="dial-selector-tip">tip</div></div>`;
+    document.body.appendChild(root);
+    const selector = getElement(root, ".dial-selector");
+    const tip = getElement(root, ".dial-selector-tip");
+    mockRect(root, new DOMRect(0, 0, 1600, 900));
+    // A 20 x 10 arrow laid out at (100, 50), turned a quarter about its centre.
+    mockLayoutSize(selector, 20, 10);
+    mockRect(selector, new DOMRect(105, 45, 10, 20));
+    mockRect(tip, new DOMRect(105, 45, 10, 10));
+    mockComputedStyles(new Map([[selector, { transform: "matrix(0, 1, -1, 0, 0, 0)", "transform-origin": "10px 5px" }]]));
+
+    const proxy = createNotificationCaptureProxy(root, new DOMRect(0, 0, 500, 104));
+    const clonedSelector = getElement(proxy.element, ".dial-selector");
+
+    expect(clonedSelector.style).toMatchObject({ position: "absolute", left: "100px", top: "50px", width: "20px", height: "10px" });
+    expect(clonedSelector.style.transform).toMatch(/^matrix\(0,\s*1,\s*-1,\s*0,\s*0,\s*0\)$/u);
+    // Its content is drawn through the rotation, so it stays in flow inside it.
+    expect(getElement(proxy.element, ".dial-selector-tip").style.position).toBe("");
+
+    proxy.dispose();
+  });
+
+  it("applies a centring translate once, with children pinned inside the moved box", () => {
+    const root = document.createElement("main");
+    root.className = "webspring-view";
+    root.innerHTML = `<div class="dial-orb"><div class="dial-orb-mark">mark</div></div>`;
+    document.body.appendChild(root);
+    const orb = getElement(root, ".dial-orb");
+    const mark = getElement(root, ".dial-orb-mark");
+    mockRect(root, new DOMRect(0, 0, 1600, 900));
+    // A 40 x 40 orb laid out at (200, 30) and drawn with translate: -50% -50%.
+    mockRect(orb, new DOMRect(180, 10, 40, 40));
+    mockRect(mark, new DOMRect(185, 15, 10, 10));
+    mockComputedStyles(new Map([[orb, { translate: "-50% -50%" }]]));
+    const assigned = vi.spyOn(CSSStyleDeclaration.prototype, "setProperty");
+
+    const proxy = createNotificationCaptureProxy(root, new DOMRect(0, 0, 500, 104));
+    const clonedOrb = getElement(proxy.element, ".dial-orb");
+    const clonedMark = getElement(proxy.element, ".dial-orb-mark");
+
+    expect(clonedOrb.style).toMatchObject({ position: "absolute", left: "200px", top: "30px", width: "40px", height: "40px" });
+    expect(assigned).toHaveBeenCalledWith("translate", "-50% -50%");
+    expect(assigned).toHaveBeenCalledWith("transform", "none");
+    // 185 - 180: placed in the orb's translated frame, so the translate is not applied twice.
+    expect(clonedMark.style).toMatchObject({ position: "absolute", left: "5px", top: "5px" });
 
     proxy.dispose();
   });
