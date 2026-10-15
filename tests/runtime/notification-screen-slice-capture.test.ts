@@ -356,6 +356,28 @@ describe("notification screen-slice capture", () => {
     proxy.dispose();
   });
 
+  it("keeps the laid-out size of images cloned in flow, which have not loaded when captured", () => {
+    const root = document.createElement("main");
+    root.className = "webspring-view";
+    root.innerHTML = `<div class="dial-composition"><span class="dial-indicator"><img class="dial-indicator-image" src="/indicator.png" alt="" style="width: 17px; height: auto"></span></div>`;
+    document.body.appendChild(root);
+    const composition = getElement(root, ".dial-composition");
+    const image = getElement(root, ".dial-indicator-image");
+    mockRect(root, new DOMRect(0, 0, 1600, 900));
+    mockLayoutSize(composition, 400, 200);
+    mockRect(composition, new DOMRect(0, 0, 300, 150));
+    mockLayoutSize(image, 17, 19);
+    mockComputedStyles(new Map([[composition, { transform: "matrix(0.75, 0, 0, 0.75, 0, 0)", "transform-origin": "0px 0px" }]]));
+
+    const proxy = createNotificationCaptureProxy(root, new DOMRect(0, 0, 500, 104));
+    const clonedImage = getElement(proxy.element, ".dial-indicator-image");
+
+    expect(clonedImage.style).toMatchObject({ width: "17px", height: "19px", boxSizing: "border-box" });
+    expect(clonedImage.style.position).toBe("");
+
+    proxy.dispose();
+  });
+
   it("applies a centring translate once, with children pinned inside the moved box", () => {
     const root = document.createElement("main");
     root.className = "webspring-view";

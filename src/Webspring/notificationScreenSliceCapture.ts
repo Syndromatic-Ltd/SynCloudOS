@@ -403,9 +403,17 @@ function pinNotificationCloneGeometry(
   for (const [property, value] of Object.entries(transforms)) clone.style.setProperty(property, value);
 }
 
+/* Media whose size comes from content the clone has not loaded yet. */
+const notificationCloneMediaElements = new Set(["img", "video", "object", "embed"]);
+
 function cloneNotificationCaptureSubtree(original: HTMLElement, ignoredSelectors: readonly string[]): HTMLElement | null {
   if (shouldIgnoreNotificationCaptureElement(original, ignoredSelectors)) return null;
   const clone = original.cloneNode(false) as HTMLElement;
+  // A cloned image lays out at 0 x 0 (`height: auto`) until it loads, and the
+  // capture reads its size at once: it keeps the original's laid-out size.
+  if (notificationCloneMediaElements.has(original.localName)) {
+    Object.assign(clone.style, { width: `${original.offsetWidth}px`, height: `${original.offsetHeight}px`, boxSizing: "border-box" });
+  }
   for (const child of Array.from(original.childNodes)) {
     if (child instanceof HTMLElement) {
       const clonedChild = cloneNotificationCaptureSubtree(child, ignoredSelectors);
