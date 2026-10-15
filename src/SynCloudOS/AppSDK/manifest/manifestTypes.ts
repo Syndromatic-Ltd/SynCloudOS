@@ -195,6 +195,24 @@ export interface SynWareWebspringViewManifest {
   readonly mode: "launcher" | "persistent";
 }
 
+/** A folder the Webspring shell seeds on first run. */
+export interface SynWareWebspringFolderManifest {
+  /** `folder.` followed by a lowercase slug; unique, and never an app ID. */
+  readonly id: string;
+  readonly title: SynWareLocalisedText;
+  /** Sorted with the apps' `webspring.order`; on a tie folders come first, then IDs. */
+  readonly order: number;
+  /** Member app IDs in order. An app may belong to one folder only; unknown or
+   *  invisible IDs are skipped. */
+  readonly apps: readonly string[];
+}
+
+export interface SynWareWebspringFoldersManifest {
+  /** Whether visitors create, fill and empty folders by dragging. */
+  readonly editable: boolean;
+  readonly initial: readonly SynWareWebspringFolderManifest[];
+}
+
 export interface SynWareWebspringShellManifest {
   readonly views: readonly SynWareWebspringViewManifest[];
   readonly defaults: Readonly<Record<SynWarePresentation, string>>;
@@ -206,6 +224,8 @@ export interface SynWareWebspringShellManifest {
     readonly darkLogo?: SynWareResourceReference;
     readonly compactLogo?: SynWareResourceReference;
   };
+  /** Omitted means `{ editable: false, initial: [] }`. */
+  readonly folders?: SynWareWebspringFoldersManifest;
 }
 
 export interface SynWareManifestV1 {

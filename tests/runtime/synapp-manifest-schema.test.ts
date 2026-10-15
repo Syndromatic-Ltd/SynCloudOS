@@ -121,6 +121,49 @@ it("rejects unknown Webspring shell fields", () => {
   );
 });
 
+function webspringFolderManifest(folders: unknown) {
+  return {
+    schemaVersion: 1,
+    id: "com.syndromatic.webspring.folders",
+    version: "1.0.0",
+    title: "Webspring folders",
+    webspringShell: {
+      views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
+      defaults: { desktop: "website", tablet: "website", mobile: "website" },
+      homeRoute: "/",
+      branding: { name: { key: "site.name" } },
+      folders,
+    },
+  };
+}
+
+it("accepts Webspring folder declarations", () => {
+  expect(validateSynWareManifest(webspringFolderManifest({
+    editable: true,
+    initial: [{ id: "folder.experiments", title: { key: "folders.experiments", fallback: "Experiments" }, order: 40, apps: ["one", "two"] }],
+  })).ok).toBe(true);
+});
+
+it.each([
+  ["a folder ID outside the folder namespace", { id: "experiments", title: { key: "f" }, order: 1, apps: ["one"] }, "/webspringShell/folders/initial/0/id"],
+  ["a folder without apps", { id: "folder.empty", title: { key: "f" }, order: 1, apps: [] }, "/webspringShell/folders/initial/0/apps"],
+  ["a folder listing an app twice", { id: "folder.twice", title: { key: "f" }, order: 1, apps: ["one", "one"] }, "/webspringShell/folders/initial/0/apps"],
+  ["a fractional folder order", { id: "folder.half", title: { key: "f" }, order: 1.5, apps: ["one"] }, "/webspringShell/folders/initial/0/order"],
+  ["an unknown folder field", { id: "folder.extra", title: { key: "f" }, order: 1, apps: ["one"], icon: "x" }, "/webspringShell/folders/initial/0/icon"],
+])("rejects %s", (_label, folder, path) => {
+  const result = validateSynWareManifest(webspringFolderManifest({ editable: false, initial: [folder] }));
+
+  expect(result).toMatchObject({ ok: false });
+  expect(result.errors).toContainEqual(expect.objectContaining({ path }));
+});
+
+it("requires both Webspring folder fields", () => {
+  const result = validateSynWareManifest(webspringFolderManifest({ initial: [] }));
+
+  expect(result).toMatchObject({ ok: false });
+  expect(result.errors.map((error) => error.path)).toContainEqual(expect.stringMatching(/^\/webspringShell\/folders/u));
+});
+
 it.each(["./Resources/../escape.svg", "./Resources/icons/../../escape.svg"])(
   "rejects escaping Webspring branding resource %s",
   (resource) => {

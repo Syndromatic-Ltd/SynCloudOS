@@ -43,6 +43,8 @@ export type {
   SynWareRouteManifest,
   SynWareFrameManifest,
   SynWareServiceManifest,
+  SynWareWebspringFolderManifest,
+  SynWareWebspringFoldersManifest,
   SynWareWebspringManifest,
   SynWareWebspringShellManifest,
   SynWareWebspringViewManifest,

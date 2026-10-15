@@ -69,6 +69,8 @@ export type {
   SynWareRouteManifest,
   SynWareServiceManifest,
   SynWareRuntimeManifestContext,
+  SynWareWebspringFolderManifest,
+  SynWareWebspringFoldersManifest,
   SynWareWebspringManifest,
   SynWareWebspringShellManifest,
   SynWareWebspringViewManifest,

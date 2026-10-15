@@ -356,6 +356,34 @@
         "mode": { "enum": ["launcher", "persistent"] }
       }
     },
+    "webspringFolder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "order", "apps"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^folder\\.[a-z][a-z0-9-]*$" },
+        "title": { "$ref": "#/$defs/localisedText" },
+        "order": { "type": "integer", "minimum": 0 },
+        "apps": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "webspringFolders": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["editable", "initial"],
+      "properties": {
+        "editable": { "type": "boolean" },
+        "initial": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/webspringFolder" }
+        }
+      }
+    },
     "webspringShell": {
       "type": "object",
       "additionalProperties": false,
@@ -388,7 +416,8 @@
             "darkLogo": { "$ref": "#/$defs/resourceReference" },
             "compactLogo": { "$ref": "#/$defs/resourceReference" }
           }
-        }
+        },
+        "folders": { "$ref": "#/$defs/webspringFolders" }
       }
     }
   }
