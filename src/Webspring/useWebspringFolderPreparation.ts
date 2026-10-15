@@ -21,18 +21,35 @@
 import { useCallback, useEffect } from "react";
 import type { WebspringFolderPresentationComponent } from "./webspringTypes";
 
+export interface WebspringFolderPreparationOptions {
+  /**
+   * The view is at rest: no launch, editing, drag or open folder. While it is,
+   * the presentation keeps an opening prepared in the background, so a tap
+   * with no hover before it opens at once.
+   */
+  readonly atRest?: boolean;
+}
+
 /**
  * Readies a folder presentation to open over `stage`. While a stage is given
  * the presentation warms (the split presentation loads its capture engine at
- * idle). The returned function prepares an opening (the split presentation
- * snapshots the stage); call it from the folder control's pointerenter,
- * pointerdown and focus so the work is under way before the click lands.
- * Pass a null stage while the view shows no folders.
+ * idle), and while the view is also at rest it keeps an opening prepared (the
+ * split presentation keeps a current snapshot of the stage, retaken at idle
+ * after the stage changes). The returned function prepares for a reach; call
+ * it from the folder control's pointerenter, pointerdown and focus. Pass a
+ * null stage while the view shows no folders.
  */
-export function useWebspringFolderPreparation(presentation: WebspringFolderPresentationComponent, stage: HTMLElement | null): () => void {
+export function useWebspringFolderPreparation(
+  presentation: WebspringFolderPresentationComponent,
+  stage: HTMLElement | null,
+  { atRest = false }: WebspringFolderPreparationOptions = {},
+): () => void {
   useEffect(() => {
     if (stage) presentation.warm?.();
   }, [presentation, stage]);
+  useEffect(() => {
+    if (stage && atRest) return presentation.keepPrepared?.(stage);
+  }, [atRest, presentation, stage]);
   return useCallback(() => {
     if (stage) presentation.prepare?.(stage);
   }, [presentation, stage]);

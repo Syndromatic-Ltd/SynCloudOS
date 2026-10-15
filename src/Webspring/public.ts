@@ -30,6 +30,7 @@ export { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPr
 export type { WebspringFolderSplitOptions } from "./WebspringFolderSplitPresentation";
 export { WebspringFolderTile } from "./WebspringFolderTile";
 export { useWebspringFolderPreparation } from "./useWebspringFolderPreparation";
+export type { WebspringFolderPreparationOptions } from "./useWebspringFolderPreparation";
 export type { WebspringFolderTileProps } from "./WebspringFolderTile";
 export { WebspringIconArtwork } from "./WebspringIconArtwork";
 export type { WebspringIconArtworkProps } from "./WebspringIconArtwork";

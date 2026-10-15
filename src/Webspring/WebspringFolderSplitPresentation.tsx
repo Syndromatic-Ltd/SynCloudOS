@@ -20,14 +20,16 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { NSEFocusScope } from "../NSE/NSE";
+import { warmNotificationCaptureEngine } from "./notificationScreenSliceCapture";
 import {
-  captureScreenSlice,
-  clearNotificationCanvasMarks,
-  collectNotificationCanvasReplacements,
-  screenSliceIgnoredSelectors,
-  shouldUseNotificationSnapdomCapture,
-  warmNotificationCaptureEngine,
-} from "./notificationScreenSliceCapture";
+  captureStage,
+  keepStageSnapshot,
+  prepareStageSnapshot,
+  sameRect,
+  takeStageSnapshot,
+  visibleStageRect,
+  type StageSnapshot,
+} from "./webspringStageSnapshots";
 import type { WebspringFolderPresentationComponent, WebspringFolderPresentationProps } from "./webspringTypes";
 import "./WebspringFolderSplitPresentation.css";
 
@@ -56,10 +58,6 @@ interface ResolvedSplitOptions {
 const NOTCH_SIZE = 14;
 const SEAM_GAP = 6;
 const STAGE_MARGIN = 24;
-/** Snapshots stay sharp enough for a moving split without paying for full retina density. */
-const STAGE_CAPTURE_MAX_SCALE = 1.5;
-/** How long a prepared snapshot waits for its folder to open. */
-const PREPARED_CAPTURE_TTL_MS = 4000;
 
 type CaptureState =
   | { readonly status: "pending" }
@@ -68,10 +66,6 @@ type CaptureState =
 
 /** A settled capture of the stage as it was at `rect`. */
 type CaptureResult = { readonly rect: DOMRect } & Exclude<CaptureState, { status: "pending" }>;
-
-function sameRect(left: DOMRect, right: DOMRect) {
-  return left.x === right.x && left.y === right.y && left.width === right.width && left.height === right.height;
-}
 
 type SplitPhase = "preparing" | "closed" | "open" | "closing";
 
@@ -97,84 +91,6 @@ function resolveOptions(options: WebspringFolderSplitOptions): ResolvedSplitOpti
     edgeShadow,
     duration,
   });
-}
-
-/** The stage's visible rect in viewport coordinates. */
-function visibleStageRect(stage: HTMLElement) {
-  const rect = stage.getBoundingClientRect();
-  const view = stage.ownerDocument.defaultView;
-  const right = Math.min(rect.right, view?.innerWidth ?? rect.right);
-  const bottom = Math.min(rect.bottom, view?.innerHeight ?? rect.bottom);
-  const left = Math.max(rect.left, 0);
-  const top = Math.max(rect.top, 0);
-  return new DOMRect(left, top, Math.max(0, right - left), Math.max(0, bottom - top));
-}
-
-/* The capture keeps only what overlaps the stage's visible rect: off-screen content is pruned before it is drawn. */
-async function captureStage(stage: HTMLElement, strip: DOMRect, scale: number) {
-  if (!shouldUseNotificationSnapdomCapture() || strip.width < 1 || strip.height < 1) throw new Error("Screen capture is unavailable.");
-  // SnapDOM is loaded on first use, as for the notification banner, to keep it out of the entry chunk.
-  const { snapdom } = await import("@zumer/snapdom");
-  const replacements = collectNotificationCanvasReplacements(strip, screenSliceIgnoredSelectors);
-  try {
-    return await captureScreenSlice(snapdom, stage, replacements, scale, strip, screenSliceIgnoredSelectors);
-  } finally {
-    clearNotificationCanvasMarks();
-  }
-}
-
-function stageCaptureScale(stage: HTMLElement) {
-  return Math.min(STAGE_CAPTURE_MAX_SCALE, stage.ownerDocument.defaultView?.devicePixelRatio ?? 1);
-}
-
-/** A snapshot taken ahead of an opening, waiting for its folder to open. */
-interface PreparedCapture {
-  readonly rect: DOMRect;
-  readonly canvas: Promise<HTMLCanvasElement>;
-  readonly observer: MutationObserver;
-  stale: boolean;
-  release(): void;
-}
-
-const preparedCaptures = new WeakMap<HTMLElement, PreparedCapture>();
-
-/*
- * The stage is snapshotted as a folder is about to open. The snapshot goes
- * stale when the stage's content or text changes, when anything scrolls, when
- * the stage resizes or after a short wait; style-only changes are tolerated
- * for that short life. A failed snapshot is dropped so the next one retries.
- */
-function prepareStageCapture(stage: HTMLElement) {
-  const view = stage.ownerDocument.defaultView;
-  if (!view) return;
-  const rect = visibleStageRect(stage);
-  const current = preparedCaptures.get(stage);
-  if (current && !current.stale && sameRect(current.rect, rect)) return;
-  current?.release();
-  const markStale = () => { prepared.stale = true; };
-  const release = () => {
-    observer.disconnect();
-    view.removeEventListener("scroll", markStale, true);
-    view.clearTimeout(expiry);
-    if (preparedCaptures.get(stage) === prepared) preparedCaptures.delete(stage);
-  };
-  const observer = new view.MutationObserver(markStale);
-  const prepared: PreparedCapture = { rect, canvas: captureStage(stage, rect, stageCaptureScale(stage)), observer, stale: false, release };
-  const expiry = view.setTimeout(release, PREPARED_CAPTURE_TTL_MS);
-  observer.observe(stage, { childList: true, characterData: true, subtree: true });
-  view.addEventListener("scroll", markStale, true);
-  prepared.canvas.catch(release);
-  preparedCaptures.set(stage, prepared);
-}
-
-/** The prepared snapshot of `stage`, if one is still good for `rect`; it is used once. */
-function takePreparedStageCapture(stage: HTMLElement, rect: DOMRect) {
-  const prepared = preparedCaptures.get(stage);
-  if (!prepared) return null;
-  // Changes not yet delivered are the opening's own (its layer, the icon's expanded state).
-  prepared.observer.takeRecords();
-  prepared.release();
-  return prepared.stale || !sameRect(prepared.rect, rect) ? null : prepared;
 }
 
 /** One half of the snapshot: the rows from `from` to `to` (stage pixels). */
@@ -215,7 +131,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
   const closeTimer = useRef(0);
   const closed = useRef(false);
   // Taken once, so a remounted effect (StrictMode) keeps the prepared snapshot.
-  const prepared = useRef<Pick<PreparedCapture, "rect" | "canvas"> | null>(null);
+  const prepared = useRef<StageSnapshot | null>(null);
 
   // The overlay, the panel's limits and the snapshot all follow the stage's visible rect.
   useEffect(() => {
@@ -237,9 +153,9 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
 
   useEffect(() => {
     let cancelled = false;
-    prepared.current ??= takePreparedStageCapture(stage, stageRect);
+    prepared.current ??= takeStageSnapshot(stage, stageRect);
     const ready = prepared.current && sameRect(prepared.current.rect, stageRect) ? prepared.current.canvas : null;
-    (ready ?? captureStage(stage, stageRect, stageCaptureScale(stage))).then(
+    (ready ?? captureStage(stage, stageRect)).then(
       (canvas) => { if (!cancelled) setCaptureResult({ rect: stageRect, status: "ready", canvas }); },
       () => { if (!cancelled) setCaptureResult({ rect: stageRect, status: "failed" }); },
     );
@@ -409,12 +325,13 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
  * cell, and the halves part to reveal the folder's apps on an underlay. Reduced
  * motion crossfades instead. Without a snapshot the panel opens over a dimmed
  * backdrop. Escape, a tap on either half, or a tap on the folder icon closes it.
- * `prepare` snapshots the stage ahead of the opening and `warm` loads the
- * capture engine; views reach both through useWebspringFolderPreparation.
+ * `keepPrepared` keeps a snapshot of the stage ready while the view is at
+ * rest, `prepare` holds one as the user reaches for a folder, and `warm` loads
+ * the capture engine; views reach them through useWebspringFolderPreparation.
  */
 export function createWebspringFolderSplitPresentation(options: WebspringFolderSplitOptions = {}): WebspringFolderPresentationComponent {
   const resolved = resolveOptions(options);
   return Object.assign(function WebspringFolderSplitPresentation(props: WebspringFolderPresentationProps) {
     return <FolderSplit {...props} options={resolved} />;
-  }, { prepare: prepareStageCapture, warm: warmNotificationCaptureEngine });
+  }, { prepare: prepareStageSnapshot, keepPrepared: keepStageSnapshot, warm: warmNotificationCaptureEngine });
 }

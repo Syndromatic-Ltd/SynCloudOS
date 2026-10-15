@@ -105,6 +105,7 @@ describe("Webspring folder definition", () => {
     expect(defineFolders([], { folderPresentation: Presentation }).folderPresentation).toBe(Presentation);
     expect(() => defineFolders([], { folderPresentation: "split" })).toThrow(/folderPresentation.*React component/);
     expect(typeof defaults.folderPresentation.prepare).toBe("function");
+    expect(typeof defaults.folderPresentation.keepPrepared).toBe("function");
     expect(typeof defaults.folderPresentation.warm).toBe("function");
     expect(() => defineFolders([], { folderPresentation: Object.assign(() => null, { prepare: "soon" }) })).toThrow(/folderPresentation\.prepare must be a function/);
   });

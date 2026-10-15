@@ -105,21 +105,28 @@ export default defineWebspring({
 
 A custom presentation is a component receiving `WebspringFolderPresentationProps`: `folder`, `stage` (the element to present over), `anchor` (the rect of the folder's cell, icon and label), `reducedMotion`, `renderApp(app, index)` and `onClose`. Mark the panel holding the applications with `data-webspring-folder-panel`; the Board takes an application out of the folder when a drag leaves that element.
 
-A presentation may also carry two optional functions. `prepare(stage)` starts the work an opening needs before the folder opens; the split presentation snapshots the stage, keeps that snapshot until the stage's content changes, anything scrolls, the stage resizes or four seconds pass, and opens from it without capturing again. `warm()` loads what the presentation needs ahead of any folder; the split presentation loads its capture engine at idle.
+A presentation may also carry three optional functions. `prepare(stage)` starts the work an opening needs as the user reaches for a folder. `keepPrepared(stage)` keeps that work done ahead of any reach while the view is at rest, and returns the function that stops it. `warm()` loads what the presentation needs ahead of any folder.
 
 ### Preparing a folder to open
 
-The split can only begin once the stage is captured. A view prepares the opening as the user reaches for a folder, so the capture is ready (or under way) when the click lands:
+The split can only begin once the stage is captured, so the split presentation keeps a snapshot ready:
+
+- **At rest**, it keeps a current snapshot of the stage. Any change to the stage's content, text or attributes (other than ARIA state), any scroll and any resize make the snapshot stale; it is retaken at idle once the stage has been quiet for 300 ms, at most every two seconds, and never while a finite animation is running in the stage. Because that covers everything a view draws from its DOM, a background snapshot does not expire. A tap with no hover before it opens from this snapshot at once.
+- **On a reach** (hover, press or focus), it holds the current snapshot, or takes one if there is none. The press and the opening change the stage themselves, so a held snapshot ignores changes for four seconds; after that a changed snapshot is dropped and, at rest, retaken.
+
+A view drives this with one hook:
 
 ```tsx
 import { useWebspringFolderPreparation } from "@syndromatic/syncloudos/webspring";
 
-const prepareFolder = useWebspringFolderPreparation(folderPresentation, hasFolders ? stageElement : null);
+const prepareFolder = useWebspringFolderPreparation(folderPresentation, hasFolders ? stageElement : null, {
+  atRest: !launching && !editing && !dragging && !folderOpen,
+});
 
 <button onPointerEnter={prepareFolder} onPointerDown={prepareFolder} onFocus={prepareFolder} onClick={open}>…</button>
 ```
 
-The hook warms the presentation while it has a stage, and returns a stable function that calls `prepare` with that stage. Pass a null stage while the view shows no folders. The Board prepares on a folder's hover, press and focus.
+The hook warms the presentation while it has a stage, keeps an opening prepared while `atRest` is true, and returns a stable function that calls `prepare` with the stage. Pass a null stage while the view shows no folders. The Board is at rest when no launch, entrance, edit, drag or open folder is under way, and prepares on a folder's hover, press and focus.
 
 ## Branding
 

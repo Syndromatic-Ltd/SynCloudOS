@@ -227,11 +227,13 @@ export interface WebspringFolderPresentationProps {
 }
 export type WebspringFolderPresentationComponent = ComponentType<WebspringFolderPresentationProps> & {
   /**
-   * Starts the work an opening over `stage` needs before the folder opens (the
-   * split presentation snapshots the stage), so the opening can begin at once.
-   * Views call it through useWebspringFolderPreparation.
+   * Starts the work an opening over `stage` needs as the user reaches for a
+   * folder (the split presentation holds a snapshot of the stage), so the
+   * opening can begin at once. Views call it through useWebspringFolderPreparation.
    */
   readonly prepare?: (stage: HTMLElement) => void;
+  /** Keeps that work done ahead of any reach while the view is at rest; returns the function that stops. */
+  readonly keepPrepared?: (stage: HTMLElement) => () => void;
   /** Loads what the presentation needs, ahead of any folder; called once a view shows folders. */
   readonly warm?: () => void;
 };

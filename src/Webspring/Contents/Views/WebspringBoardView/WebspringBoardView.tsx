@@ -267,7 +267,9 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   const draggingApp = draggingItem?.kind === "app" ? draggingItem.app : model.apps.find((app) => app.id === draggingId) ?? null;
   const openFolder = model.items.find((item): item is WebspringFolderItem => item.kind === "folder" && item.id === model.folders.openFolderId) ?? null;
   const [folderAnchor, setFolderAnchor] = useState<DOMRectReadOnly | null>(null);
-  const prepareFolder = useWebspringFolderPreparation(FolderPresentation, model.items.some((item) => item.kind === "folder") ? stageElement : null);
+  const prepareFolder = useWebspringFolderPreparation(FolderPresentation, model.items.some((item) => item.kind === "folder") ? stageElement : null, {
+    atRest: model.launchPhase === "idle" && model.entrancePhase === "ready" && !model.layout.editing && !model.layout.draggingItemId && !model.folders.openFolderId,
+  });
   const activePage = Math.min(page, board.pages.length - 1);
   const launchDim = boardMotion.launchBackdropDim;
   const [iconExits, setIconExits] = useState<WebspringBoardLaunchExits | null>(null);

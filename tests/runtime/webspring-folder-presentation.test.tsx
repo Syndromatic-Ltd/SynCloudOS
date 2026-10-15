@@ -177,37 +177,80 @@ describe("Webspring folder split presentation", () => {
     expect(capture.strips).toHaveLength(1);
   });
 
-  it("captures afresh when the stage changed after it was prepared", async () => {
+  it("holds a reached-for snapshot through the press's own changes", async () => {
     Presentation.prepare!(stage);
     await waitFor(() => expect(capture.strips).toHaveLength(1));
+    stage.className = "is-pressed";
     stage.append(document.createElement("p"));
     await act(async () => undefined);
     Presentation.prepare!(stage);
-    await waitFor(() => expect(capture.strips).toHaveLength(2));
+
+    const { root } = renderSplit();
+    await opened(root);
+    expect(capture.strips).toHaveLength(1);
+  });
+
+  it("captures afresh when the stage was resized after it was prepared", async () => {
+    Presentation.prepare!(stage);
+    await waitFor(() => expect(capture.strips).toHaveLength(1));
 
     stageBox = new DOMRect(0, 0, 640, 600);
     const { root } = renderSplit();
     await opened(root);
-    expect(capture.strips.map((strip) => strip.width)).toEqual([800, 800, 640]);
+    expect(capture.strips.map((strip) => strip.width)).toEqual([800, 640]);
   });
 
-  it("warms the presentation for a view with folders and prepares on request", async () => {
+  it("keeps a snapshot ready at rest, retakes it once the stage settles after a change, and opens from it", async () => {
+    const stop = Presentation.keepPrepared!(stage);
+    await waitFor(() => expect(capture.strips).toHaveLength(1));
+
+    // A change makes it stale; nothing is retaken until the stage has been quiet.
+    stage.append(document.createElement("p"));
+    await act(async () => undefined);
+    expect(capture.strips).toHaveLength(1);
+    // ARIA state alone changes nothing drawn.
+    await waitFor(() => expect(capture.strips).toHaveLength(2), { timeout: 3000 });
+    stage.setAttribute("aria-busy", "true");
+    await act(async () => undefined);
+
+    const { root } = renderSplit();
+    await opened(root);
+    expect(root.dataset.capture).toBe("ready");
+    expect(capture.strips).toHaveLength(2);
+    stop();
+  });
+
+  it("warms the presentation for a view with folders, prepares at rest and on request", async () => {
     let prepare: () => void = () => undefined;
-    function View({ stageElement }: { stageElement: HTMLElement | null }) {
-      prepare = useWebspringFolderPreparation(Presentation, stageElement);
+    function View({ stageElement, atRest }: { stageElement: HTMLElement | null; atRest: boolean }) {
+      prepare = useWebspringFolderPreparation(Presentation, stageElement, { atRest });
       return null;
     }
-    const view = render(<View stageElement={null} />);
+    const view = render(<View stageElement={null} atRest />);
     prepare();
     expect(capture.warm).not.toHaveBeenCalled();
 
-    view.rerender(<View stageElement={stage} />);
+    view.rerender(<View stageElement={stage} atRest={false} />);
     expect(capture.warm).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      const { promise, resolve } = Promise.withResolvers<void>();
+      setTimeout(resolve, 400);
+      await promise;
+    });
+    expect(capture.strips).toHaveLength(0);
     prepare();
     await waitFor(() => expect(capture.strips).toHaveLength(1));
-    const { root } = renderSplit();
-    await opened(root);
+    const first = renderSplit();
+    await opened(first.root);
     expect(capture.strips).toHaveLength(1);
+    first.view.unmount();
+
+    // At rest, the next opening is prepared without any reach.
+    view.rerender(<View stageElement={stage} atRest />);
+    await waitFor(() => expect(capture.strips).toHaveLength(2));
+    const second = renderSplit();
+    await opened(second.root);
+    expect(capture.strips).toHaveLength(2);
   });
 
   it("closes on Escape once the halves have rejoined", async () => {
