@@ -60,6 +60,51 @@ Tap, pickup, movement and drop produce haptic feedback through HapticsFX on devi
 
 Icon reordering uses captured slot geometry for hit testing, so neighbours do not oscillate while they settle. The launcher owns pointer capture and releases it on pointer up, cancellation, leaving edit mode or unmount.
 
+## Folders
+
+A folder groups applications into one entry on the launcher. Declare folders in `webspringShell.folders`:
+
+```ts
+webspringShell: {
+  // ...
+  folders: {
+    editable: true,
+    initial: [
+      { id: "folder.experiments", title: { key: "folders.experiments", fallback: "Experiments" }, order: 40, apps: ["com.example.lab", "com.example.sketch"] },
+    ],
+  },
+},
+```
+
+- `id` starts with `folder.` and is unique. An application appears in at most one folder; `defineWebspring` rejects duplicates.
+- `order` places the folder among the applications' `webspring.order` values. On a tie the folder comes first.
+- `editable: true` lets visitors make folders by resting an application on another, add to a folder by resting on it, and take an application out by dragging it outside the open folder. A folder that loses its last application disappears. Folders visitors make are titled "Folder" (locale key `webspring.folder.untitled`).
+- `editable: false` keeps membership as declared. Visitors can still reorder top-level entries.
+
+An application that becomes visible later joins its declared folder if the visitor's layout still has that folder, and the top level otherwise. Folders whose applications are all hidden are not shown.
+
+The layout persists under the preference key `webspring.layout.v4` as `{ version: 4, order, folders: { [id]: { apps } }, board, updatedAt, source }`, where `order` lists top-level entries. Layouts stored under an earlier version are ignored.
+
+On the Board, tapping a folder opens it with the definition's `folderPresentation`. The default is the iOS 6 split: the stage is captured and parted below the folder icon, revealing the folder's applications on a linen underlay. Escape, or a tap on either half, closes it; reduced motion crossfades instead. Configure or replace it in the definition:
+
+```tsx
+import { createWebspringFolderSplitPresentation, defineWebspring, WebspringBoardView } from "@syndromatic/syncloudos/webspring";
+
+export default defineWebspring({
+  manifest,
+  components: { board: WebspringBoardView },
+  folderPresentation: createWebspringFolderSplitPresentation({
+    underlay: { image: "/assets/textures/linen.webp", size: "cover", colour: "#2b3038" },
+    panelHeight: "content", // or a height in pixels
+    notch: true,
+    edgeShadow: 0.55, // 0 to 1
+    duration: 0.42, // seconds
+  }),
+});
+```
+
+A custom presentation is a component receiving `WebspringFolderPresentationProps`: `folder`, `stage` (the element to present over), `anchor` (the folder icon's rect), `reducedMotion`, `renderApp(app, index)` and `onClose`. Mark the panel holding the applications with `data-webspring-folder-panel`; the Board takes an application out of the folder when a drag leaves that element.
+
 ## Branding
 
 Branding lives in `webspringShell.branding`. The host resolves the logo resource before the shell and sign-in gate mount. Light, dark and compact variants fall back to the primary logo, and then to the localised site name. A SynWare reads the same values from the session:
@@ -181,8 +226,12 @@ Application alerts resolve the registered AppIcon; site alerts use configured si
 The Board is one view. You can supply another component for a view identifier, and it receives `WebspringViewProps`:
 
 - `model` is an immutable snapshot. `model.entrancePhase` is `waiting`, `holding` or `ready`. `model.launchPhase` is `idle`, `staging`, `launching`, `covered` or `returning`. `model.presentationTraits` provides `width`, `height`, `reducedMotion` and `safeAreaInsets`, and `model.branding` holds the resolved branding.
-- `actions` is the command surface for the shell: application, home, reorder, editing, drag, authentication and content operations. A view that draws a launch or return transition reports completion with `completeLaunch(transitionId, appId)` and `completeReturnTrack("material" | "icons")`.
+- `model.items` lists the top-level entries in order: `{ kind: "app", id, app, dialPlacement }` or `{ kind: "folder", id, title, apps, badgeCount, dialPlacement }`. `model.apps` lists every visible application flat, folder members inline. `model.folders` holds `editable`, `openFolderId` and `dropTargetId`, and `model.layout.draggingItemId` names the app or folder being dragged.
+- `actions` is the command surface for the shell: application, home, reorder, editing, drag, folder, authentication and content operations. Reordering is `moveItem(itemId, index)` within the item's container (the top level, or its folder) and `moveItemByKeyboard(itemId, key, columns)`. Folders use `setDropTarget(itemId | null)` while an app hovers over an entry, `dropOnItem(appId, targetItemId)` to merge, `moveAppOutOfFolder(appId, index)`, `openFolder(folderId)` and `closeFolder()`. Drags run between `beginDrag(itemId)` and `finishDrag(commit)`; changes made during a drag persist when it commits and revert when it is cancelled. A view that draws a launch or return transition reports completion with `completeLaunch(transitionId, appId)` and `completeReturnTrack("material" | "icons")`.
 - `applicationOutlet` is a host-owned React node. Place it where the application should appear, and leave it as it is.
+- `folderPresentation` is the definition's folder presentation. Render it while `model.folders.openFolderId` is set.
+
+Elements a view hands to the drag hit-testing helpers carry `data-webspring-item-id` and `data-order-index`.
 
 A custom view owns its markup, styles and choreography. The host owns sessions, routing, application lifecycle, focus, overlays and cleanup, so a view never creates runtime sessions or reads host services. Use `model.presentationTraits.reducedMotion` to choose a static response when the user prefers less motion.
 
@@ -193,13 +242,14 @@ The pieces the Board is built from are public, so a custom launcher can share it
 | Export | Purpose |
 | --- | --- |
 | `WebspringLaunchDim`, `resolveWebspringLaunchDimMotion` | The dim drawn over the launcher while an application opens. |
-| `WebspringDragProxy`, `useWebspringDragProxyPosition` | The icon that follows the pointer while the user reorders apps. |
+| `WebspringDragProxy`, `useWebspringDragProxyPosition` | The icon or folder that follows the pointer while the user reorders. |
 | `captureWebspringDragReorderSlots`, `getWebspringDragReorderTargetFromPoint` | Hit testing for drag reordering against the slots the view draws. |
+| `WebspringFolderTile`, `createWebspringFolderSplitPresentation` | A folder's icon tile of its members, and the default folder presentation. |
 | `LowerContentShelfView` | The content shelf for the shell's declared sections. |
 | `WebspringIconArtwork`, `WebspringIconEffect` | An application's icon artwork, and the shell's declared icon effect. |
 | `resolveWebspringIconPresentation`, `webspringIconSprings`, `getWebspringRadialExitForIcon`, `useWebspringMotion` | Icon entrance, launch and return motion, standard and reduced. |
 | `getWebspringSelectorTransform`, `resolveWebspringOrbPresentation` | Selector and orb motion for a radial launcher. |
-| `WEBSPRING_STAGE`, `getDesktopWebspringLayout`, `getDialLayoutForApp`, `stagePointStyle` | The desktop stage geometry and per-app radial placement in `model.apps[].dialPlacement`. |
+| `WEBSPRING_STAGE`, `getDesktopWebspringLayout`, `stagePointStyle` | The desktop stage geometry. Each entry's radial placement is `model.items[].dialPlacement`: the first seven entries sit on the dial, the rest on the overflow shelf. |
 
 A radial launcher with an orb and selector can be built entirely from these exports.
 
