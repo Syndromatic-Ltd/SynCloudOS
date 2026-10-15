@@ -246,12 +246,12 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   const [stageElement, setStageElement] = useState<HTMLElement | null>(null);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
   const draggingItemIdRef = useRef<string | null>(model.layout.draggingItemId);
-  const dropTargetIdRef = useRef<string | null>(model.folders.dropTargetId);
   const suppressNextClick = useRef(false);
   const activeDragId = useRef<string | null>(model.layout.draggingItemId);
   const lastPageSwitchAt = useRef(0);
   const slotsRef = useRef<WebspringDragReorderSlots | undefined>(undefined);
-  const mergeHover = useRef<{ id: string; timer: number; view: Window } | null>(null);
+  /** The entry a dragged app rests on; `armed` once it has rested long enough to merge. */
+  const mergeHover = useRef<{ id: string; timer: number; view: Window; armed: boolean } | null>(null);
   const { point, setProxyElement, recordPoint, showProxy, hideProxy } = useWebspringDragProxyPosition();
   const draggingId = model.layout.draggingItemId;
   const draggingItem = model.items.find((item) => item.id === draggingId) ?? null;
@@ -268,42 +268,49 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   const previousOpenFolderId = useRef(model.folders.openFolderId);
   useEffect(() => setPage((value) => Math.min(value, board.pages.length - 1)), [board.pages.length]);
   draggingItemIdRef.current = model.layout.draggingItemId;
-  dropTargetIdRef.current = model.folders.dropTargetId;
-  const clearMergeHover = useCallback(() => {
-    if (!mergeHover.current) return;
-    mergeHover.current.view.clearTimeout(mergeHover.current.timer);
+  // Read through a ref so a new actions object never counts as a page change.
+  const setDropTargetRef = useRef(actions.setDropTarget);
+  setDropTargetRef.current = actions.setDropTarget;
+  /** Forgets the hovered merge candidate and withdraws the target it armed. */
+  const disarmMerge = useCallback(() => {
+    const hover = mergeHover.current;
+    if (!hover) return;
+    hover.view.clearTimeout(hover.timer);
     mergeHover.current = null;
+    if (hover.armed) setDropTargetRef.current(null);
   }, []);
   useEffect(() => () => {
-    clearMergeHover();
+    disarmMerge();
     if (draggingItemIdRef.current) actions.finishDrag(false);
     hideProxy();
-  }, [actions, clearMergeHover, hideProxy]);
+  }, [actions, disarmMerge, hideProxy]);
   useEffect(() => {
     if (model.layout.draggingItemId) return;
     activeDragId.current = null;
     slotsRef.current = undefined;
-    clearMergeHover();
+    disarmMerge();
     const pointerId = pointerStart.current?.pointerId;
     pointerStart.current = null;
     hideProxy();
     const root = boardElement.current;
     if (pointerId !== undefined && root?.hasPointerCapture?.(pointerId)) root.releasePointerCapture(pointerId);
-  }, [model.layout.draggingItemId, clearMergeHover, hideProxy]);
-  // A drag that leaves a folder, or turns the page, measures the top level afresh.
+  }, [model.layout.draggingItemId, disarmMerge, hideProxy]);
+  // A drag that leaves a folder, or turns the page, measures the top level
+  // afresh; a merge armed on the previous page no longer applies.
   useEffect(() => {
+    disarmMerge();
     if (activeDragId.current && boardElement.current) {
       slotsRef.current = captureWebspringDragReorderSlots(TOP_LEVEL_SELECTOR, boardElement.current);
     }
-  }, [activePage, model.folders.openFolderId]);
+  }, [activePage, model.folders.openFolderId, disarmMerge]);
   useEffect(() => {
     if (model.launchPhase === "returning" && (model.presentationTraits.reducedMotion || model.items.length === 0)) {
       actions.completeReturnTrack("material");
     }
   }, [actions, model.items.length, model.launchPhase, model.presentationTraits.reducedMotion]);
 
-  // The open folder's icon anchors its presentation; a folder opened elsewhere
-  // brings its page into view first.
+  // The open folder's icon anchors its presentation, measured again as the
+  // viewport resizes; a folder opened elsewhere brings its page into view first.
   useLayoutEffect(() => {
     const folderId = model.folders.openFolderId;
     if (!folderId) {
@@ -312,8 +319,11 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
     }
     const icon = boardElement.current?.querySelector<HTMLElement>(`.webspring-board-page [data-webspring-item-id="${folderId}"] .webspring-board-icon-well`);
     if (icon) {
-      setFolderAnchor(icon.getBoundingClientRect());
-      return;
+      const measure = () => setFolderAnchor(icon.getBoundingClientRect());
+      measure();
+      const view = icon.ownerDocument.defaultView;
+      view?.addEventListener("resize", measure);
+      return () => view?.removeEventListener("resize", measure);
     }
     const index = topLevelIds.indexOf(folderId);
     if (index >= 0) setPage(Math.floor(index / board.pageSize));
@@ -380,17 +390,20 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   function dragAtTopLevel(root: HTMLElement, dragId: string, at: { x: number; y: number }) {
     if (model.folders.editable && !draggingFolder) {
       const mergeId = getMergeTarget(slotsRef.current, model.items, at, dragId);
+      // A new candidate, or none, starts the rest over.
+      if (mergeHover.current?.id !== mergeId) disarmMerge();
       if (mergeId) {
         const view = root.ownerDocument.defaultView;
-        if (view && mergeHover.current?.id !== mergeId) {
-          clearMergeHover();
-          mergeHover.current = { id: mergeId, view, timer: view.setTimeout(() => actions.setDropTarget(mergeId), MERGE_HOVER_MS) };
+        if (view && !mergeHover.current) {
+          const hover = { id: mergeId, view, armed: false, timer: 0 };
+          hover.timer = view.setTimeout(() => {
+            if (mergeHover.current !== hover) return;
+            hover.armed = true;
+            actions.setDropTarget(mergeId);
+          }, MERGE_HOVER_MS);
+          mergeHover.current = hover;
         }
         return;
-      }
-      if (mergeHover.current) {
-        clearMergeHover();
-        if (dropTargetIdRef.current) actions.setDropTarget(null);
       }
     }
     const target = getWebspringDragReorderTargetFromPoint(TOP_LEVEL_SELECTOR, at, dragId, root, slotsRef.current);
@@ -416,11 +429,13 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
     const bounds = event.currentTarget.getBoundingClientRect();
     if (event.timeStamp - lastPageSwitchAt.current > 450) {
       if (event.clientX >= bounds.right - 48 && activePage < board.pages.length - 1) {
+        disarmMerge();
         setPage((value) => value + 1);
         lastPageSwitchAt.current = event.timeStamp;
         return;
       }
       if (event.clientX <= bounds.left + 48 && activePage > 0) {
+        disarmMerge();
         setPage((value) => value - 1);
         lastPageSwitchAt.current = event.timeStamp;
         return;
@@ -440,10 +455,11 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
         suppressNextClick.current = true;
       }
     }
-    clearMergeHover();
+    // Only the entry under the pointer, once armed, takes the drop.
+    const mergeId = mergeHover.current?.armed ? mergeHover.current.id : null;
+    disarmMerge();
     const dragId = activeDragId.current;
     if (dragId) {
-      const mergeId = dropTargetIdRef.current;
       const merged = commit && mergeId !== null && actions.dropOnItem(dragId, mergeId);
       actions.finishDrag(commit);
       if (merged) feedback?.trigger("success", { intensity: .45 });

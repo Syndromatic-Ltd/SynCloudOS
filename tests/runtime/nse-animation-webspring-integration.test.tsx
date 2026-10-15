@@ -19,7 +19,7 @@
  */
 
 // @vitest-environment jsdom
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { NSEAnimationEnvironmentProvider } from "@syndromatic/syncloudos/nse";
@@ -410,6 +410,7 @@ describe("Webspring owner-local choreography", () => {
     const dialog = screen.getByRole("dialog", { name: "Tools" });
     expect(dialog.hasAttribute("data-webspring-folder-panel")).toBe(true);
     expect(view.container.querySelector(".webspring-folder-split")?.getAttribute("data-capture")).toBe("failed");
+    await waitFor(() => expect(view.container.querySelector(".webspring-folder-split")?.getAttribute("data-phase")).toBe("open"));
     expect(screen.getByRole("button", { name: "Open Beta" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Open Gamma" })).toBeTruthy();
 
@@ -418,5 +419,58 @@ describe("Webspring owner-local choreography", () => {
     expect(runtime.store.getSnapshot().webspring.openFolderId).toBeNull();
     expect(screen.queryByRole("dialog")).toBeNull();
     view.unmount();
+  });
+
+  it("merges only into the entry the dragged app rests on long enough", async () => {
+    // Slots lie in a row, 100 px apart; the board is wide enough that no drag turns the page.
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+      if (this.dataset.webspringItemId && this.dataset.orderIndex !== undefined) return new DOMRect(Number(this.dataset.orderIndex) * 100, 0, 80, 96);
+      if (this.classList.contains("webspring-board")) return new DOMRect(-200, 0, 1400, 800);
+      return new DOMRect(0, 0, 0, 0);
+    });
+    try {
+      const runtime = createTestRuntime();
+      for (const id of ["alpha", "beta", "gamma"]) runtime.apps.registerBundle(createTestBundle({ id, route: `/${id}` }));
+      runtime.webspring.configureFolders({ editable: true, initial: [] });
+      const controller = new WebspringController(runtime, webspring, undefined);
+      function Board() {
+        const snapshot = React.useSyncExternalStore(runtime.store.subscribe, runtime.store.getSnapshot);
+        return <WebspringBoardView model={controller.model(snapshot, "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={webspring.folderPresentation} />;
+      }
+      const view = render(<SynCloudOSProvider runtime={runtime}><Board /></SynCloudOSProvider>);
+      const main = view.container.querySelector("main")!;
+      const rest = (ms: number) => act(async () => {
+        const { promise, resolve } = Promise.withResolvers<void>();
+        setTimeout(resolve, ms);
+        await promise;
+      });
+      const centreOf = (index: number) => ({ clientX: index * 100 + 40, clientY: 48 });
+      const order = () => runtime.store.getSnapshot().webspring.layout.preference;
+
+      fireEvent.click(within(view.container).getByRole("button", { name: "Reorder applications" }));
+      fireEvent.pointerDown(within(view.container).getByRole("button", { name: "Move Gamma" }), { pointerId: 3, isPrimary: true, button: 0, ...centreOf(2) });
+      fireEvent.pointerMove(main, { pointerId: 3, ...centreOf(0) });
+      await rest(400);
+      expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBe("alpha");
+
+      // Into Beta's centre: Alpha is no longer the target, and Beta has not yet armed.
+      fireEvent.pointerMove(main, { pointerId: 3, ...centreOf(1) });
+      expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBeNull();
+      fireEvent.pointerUp(main, { pointerId: 3, ...centreOf(1) });
+      expect(order().folders).toEqual({});
+      expect(order().order).toEqual(["alpha", "beta", "gamma"]);
+
+      fireEvent.pointerDown(within(view.container).getByRole("button", { name: "Move Gamma" }), { pointerId: 4, isPrimary: true, button: 0, ...centreOf(2) });
+      fireEvent.pointerMove(main, { pointerId: 4, ...centreOf(1) });
+      await rest(400);
+      expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBe("beta");
+      fireEvent.pointerUp(main, { pointerId: 4, ...centreOf(1) });
+      const [folderId] = order().order.filter((id) => id.startsWith("folder."));
+      expect(order().order).toEqual(["alpha", folderId]);
+      expect(order().folders[folderId]).toEqual({ apps: ["beta", "gamma"] });
+      view.unmount();
+    } finally {
+      vi.restoreAllMocks();
+    }
   });
 });
