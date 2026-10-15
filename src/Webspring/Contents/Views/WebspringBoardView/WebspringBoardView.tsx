@@ -19,26 +19,31 @@
  */
 
 import { WebspringLaunchDim } from "../../../WebspringLaunchDim";
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode, type TransitionEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode, type TransitionEvent } from "react";
 import { NSELayoutView, useNSEAnimationEnvironment, useNSEPresentation, type NSELayoutTransitionTiming } from "../../../../NSE/Animation";
 import { Badge, LoadingSpinner } from "../../../../NSE/NSE";
 import { useNSEFeedback } from "../../../../NSE/hostComposition";
 import { NSEPushButton, NSEToolbar } from "@syndromatic/syncloudos/nse/controls";
 import { MaterialProvider } from "../../../../NSE/Material";
+import { getKeyboardReorderIndex } from "../../../../SynCloudOS/SynCloudOS";
 import { LowerContentShelfView } from "../../../LowerContentShelfView";
 import { WebspringDragProxy, useWebspringDragProxyPosition } from "../../../WebspringDragProxy";
+import { WebspringFolderTile } from "../../../WebspringFolderTile";
 import { captureWebspringDragReorderSlots, getWebspringDragReorderTargetFromPoint, type WebspringDragReorderSlots } from "../../../webspringDragReorder";
-import { createWebspringBoardProjection, getKeyboardReorderIndex } from "../../../webspringLayout";
-import type { WebspringViewModel, WebspringViewProps } from "../../../webspringTypes";
+import { createWebspringBoardProjection } from "../../../webspringLayout";
+import type { WebspringApp, WebspringFolderItem, WebspringItem, WebspringViewModel, WebspringViewProps } from "../../../webspringTypes";
 import { resolveWebspringIconPresentation, type WebspringIconState, type WebspringRadialExit } from "../../../Webspring.transitions";
 import { createWebspringBoardLaunchExits, useWebspringBoardMotion, webspringBoardLaunchTiming, type WebspringBoardLaunchExits } from "./WebspringBoardView.transitions";
 import "../../../WebspringPresentation.css";
 import "./WebspringBoardView.css";
 
 const SWIPE_THRESHOLD = 44;
-type BoardApp = WebspringViewModel["apps"][number];
+/** How long a dragged app rests over an entry's centre before they merge. */
+const MERGE_HOVER_MS = 350;
+const TOP_LEVEL_SELECTOR = ".webspring-board-page [data-webspring-item-id]";
+const FOLDER_PANEL_SELECTOR = "[data-webspring-folder-panel]";
+const REORDER_KEYS = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
 export interface WebspringBoardConfiguration { readonly pageSize?: number }
-
 
 /** Where an icon is in the entrance and launch choreography. Only icons with
  * an exit (those on screen when an app opened) take part in a launch. */
@@ -70,42 +75,76 @@ function BoardIconArtwork({ index, total, state, exit, children }: {
   return <span ref={ref} className="webspring-board-icon-artwork" style={presentation.style}>{children}</span>;
 }
 
-function BoardIcon({ app, index, columns, model, exit, opening, actions, reorderMotion, onLongPress, onMoved }: {
-  app: BoardApp;
+interface BoardEntryProps {
+  /** Index within the entry's container: the top level, or its folder. */
   index: number;
+  /** The IDs in the entry's container, in order, for keyboard moves. */
+  containerIds: readonly string[];
   columns: number;
   model: WebspringViewModel;
   exit: WebspringRadialExit | undefined;
-  /** Tapped and loading, before the launch begins. */
-  opening: boolean;
   actions: WebspringViewProps["actions"];
   reorderMotion: NSELayoutTransitionTiming | null;
-  onLongPress(appId: string, pointerId: number): void;
-  onMoved(app: BoardApp, index: number): void;
-}) {
+  onLongPress(itemId: string, pointerId: number): void;
+  onMoved(title: string, index: number): void;
+}
+
+/** Press, long-press and keyboard handling shared by app and folder icons. */
+function useBoardEntryInteraction(itemId: string, title: string, disabled: boolean, { index, containerIds, columns, model, actions, onLongPress, onMoved }: BoardEntryProps) {
   const cancelLongPress = useRef<(() => void) | null>(null);
   const pressStart = useRef<{ x: number; y: number } | null>(null);
-  const clearTimer = () => {
+  const clearTimer = useCallback(() => {
     cancelLongPress.current?.();
     cancelLongPress.current = null;
-  };
-  useEffect(() => clearTimer, []);
-  const loading = opening || app.state === "loading" || app.state === "launching" || model.launchingAppId === app.id;
+  }, []);
+  useEffect(() => clearTimer, [clearTimer]);
   const editing = model.layout.editing;
-  const dragging = model.layout.draggingAppId === app.id;
-  const disabled = app.state === "disabled";
 
-  function handleKeyboard(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key === "Escape" && editing) {
+  return {
+    editing,
+    dragging: model.layout.draggingItemId === itemId,
+    dataProps: { "data-webspring-item-id": itemId, "data-order-index": index },
+    onKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+      if (event.key === "Escape" && editing) {
+        event.preventDefault();
+        actions.finishEditing(true);
+        return;
+      }
+      if (!editing || !REORDER_KEYS.includes(event.key)) return;
       event.preventDefault();
-      actions.finishEditing(true);
-      return;
-    }
-    if (!editing || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
-    event.preventDefault();
-    const targetIndex = getKeyboardReorderIndex(model.apps.map((candidate) => candidate.id), app.id, event.key, columns);
-    if (actions.moveAppByKeyboard(app.id, event.key, columns)) onMoved(app, targetIndex);
-  }
+      const targetIndex = getKeyboardReorderIndex(containerIds, itemId, event.key, columns);
+      if (actions.moveItemByKeyboard(itemId, event.key, columns)) onMoved(title, targetIndex);
+    },
+    onPointerDown(event: PointerEvent<HTMLButtonElement>) {
+      if (event.button > 0 || event.isPrimary === false || disabled) return;
+      pressStart.current = { x: event.clientX, y: event.clientY };
+      if (editing) {
+        actions.beginDrag(itemId);
+        onLongPress(itemId, event.pointerId);
+        return;
+      }
+      cancelLongPress.current = actions.scheduleLongPress(itemId, () => {
+        onLongPress(itemId, event.pointerId);
+      });
+    },
+    onPointerMove(event: PointerEvent<HTMLButtonElement>) {
+      const start = pressStart.current;
+      if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) clearTimer();
+    },
+    onPointerEnd() { pressStart.current = null; clearTimer(); },
+  };
+}
+
+function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
+  app: WebspringApp;
+  /** Tapped and loading, before the launch begins. */
+  opening: boolean;
+}) {
+  const { model, actions, exit, reorderMotion, index } = entry;
+  const disabled = app.state === "disabled";
+  const interaction = useBoardEntryInteraction(app.id, app.title, disabled, entry);
+  const loading = opening || app.state === "loading" || app.state === "launching" || model.launchingAppId === app.id;
+  const { editing, dragging } = interaction;
 
   // A slot springs to wherever an update lays it out (a new cell on reorder,
   // or the grid shifting); the dragged icon follows the pointer's proxy, so
@@ -113,8 +152,7 @@ function BoardIcon({ app, index, columns, model, exit, opening, actions, reorder
   return <NSELayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
     type="button"
     className={`webspring-board-icon ${editing ? "is-editing" : ""} ${dragging ? "is-dragging" : ""} ${disabled ? "is-disabled" : ""}`}
-    data-webspring-app-id={app.id}
-    data-order-index={index}
+    {...interaction.dataProps}
     aria-label={editing ? `Move ${app.title}` : `Open ${app.title}`}
     aria-pressed={editing ? dragging : undefined}
     disabled={disabled}
@@ -122,30 +160,16 @@ function BoardIcon({ app, index, columns, model, exit, opening, actions, reorder
     title={disabled ? app.disabledReason : undefined}
     onFocus={() => actions.prefetchApp(app.id, true)}
     onBlur={() => actions.prefetchApp(app.id, false)}
-    onPointerDown={(event) => {
-      if (event.button > 0 || event.isPrimary === false || disabled) return;
-      pressStart.current = { x: event.clientX, y: event.clientY };
-      if (editing) {
-        actions.beginDrag(app.id);
-        onLongPress(app.id, event.pointerId);
-        return;
-      }
-      cancelLongPress.current = actions.scheduleLongPress(app.id, () => {
-        onLongPress(app.id, event.pointerId);
-      });
-    }}
-    onPointerMove={(event) => {
-      const start = pressStart.current;
-      if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) clearTimer();
-    }}
-    onPointerUp={() => { pressStart.current = null; clearTimer(); }}
-    onPointerCancel={() => { pressStart.current = null; clearTimer(); }}
-    onLostPointerCapture={() => { pressStart.current = null; clearTimer(); }}
-    onKeyDown={handleKeyboard}
+    onPointerDown={interaction.onPointerDown}
+    onPointerMove={interaction.onPointerMove}
+    onPointerUp={interaction.onPointerEnd}
+    onPointerCancel={interaction.onPointerEnd}
+    onLostPointerCapture={interaction.onPointerEnd}
+    onKeyDown={interaction.onKeyDown}
     onClick={() => { if (!disabled && !editing) void actions.openApp(app.id, app.route); }}
   >
-    <BoardIconArtwork index={index} total={model.apps.length} state={boardIconState(model, exit)} exit={exit}>
-      <span className="webspring-board-icon-well" data-loading={loading ? "true" : undefined}>
+    <BoardIconArtwork index={index} total={model.items.length} state={boardIconState(model, exit)} exit={exit}>
+      <span className="webspring-board-icon-well" data-loading={loading ? "true" : undefined} data-drop-target={model.folders.dropTargetId === app.id ? "true" : undefined}>
         {app.iconUrl ? <img src={app.iconUrl} alt="" aria-hidden="true" draggable={false} /> : <span aria-hidden="true">{app.title.slice(0, 1)}</span>}
         {loading ? <LoadingSpinner label={`Loading ${app.title}`} variant="dark" /> : null}
         <Badge count={app.badgeCount} />
@@ -155,55 +179,153 @@ function BoardIcon({ app, index, columns, model, exit, opening, actions, reorder
   </button></NSELayoutView>;
 }
 
-function WebspringBoard({ model, actions, applicationOutlet, configuration }: WebspringViewProps & { configuration: WebspringBoardConfiguration }) {
+function BoardFolderIcon({ folder, onOpen, ...entry }: BoardEntryProps & {
+  folder: WebspringFolderItem;
+  onOpen(folder: WebspringFolderItem, well: HTMLElement): void;
+}) {
+  const { model, exit, reorderMotion, index } = entry;
+  const interaction = useBoardEntryInteraction(folder.id, folder.title, false, entry);
+  const wellRef = useRef<HTMLSpanElement>(null);
+  const { editing, dragging } = interaction;
+  const open = model.folders.openFolderId === folder.id;
+
+  return <NSELayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
+    type="button"
+    className={`webspring-board-icon is-folder ${editing ? "is-editing" : ""} ${dragging ? "is-dragging" : ""}`}
+    {...interaction.dataProps}
+    aria-label={editing ? `Move folder ${folder.title}` : `Open folder ${folder.title}`}
+    aria-pressed={editing ? dragging : undefined}
+    aria-haspopup="dialog"
+    aria-expanded={open}
+    onPointerDown={interaction.onPointerDown}
+    onPointerMove={interaction.onPointerMove}
+    onPointerUp={interaction.onPointerEnd}
+    onPointerCancel={interaction.onPointerEnd}
+    onLostPointerCapture={interaction.onPointerEnd}
+    onKeyDown={interaction.onKeyDown}
+    onClick={() => { if (wellRef.current) onOpen(folder, wellRef.current); }}
+  >
+    <BoardIconArtwork index={index} total={model.items.length} state={boardIconState(model, exit)} exit={exit}>
+      <span ref={wellRef} className="webspring-board-icon-well">
+        <WebspringFolderTile folder={folder} dropTarget={model.folders.dropTargetId === folder.id} />
+        <Badge count={folder.badgeCount} />
+      </span>
+      <span className="webspring-board-icon-label">{folder.title}</span>
+    </BoardIconArtwork>
+  </button></NSELayoutView>;
+}
+
+/** The top-level entry whose centre (the inner half of its slot) holds the point. */
+function getMergeTarget(
+  slots: WebspringDragReorderSlots | undefined,
+  items: readonly WebspringItem[],
+  point: { x: number; y: number },
+  draggingId: string,
+) {
+  for (const [index, rect] of slots ?? []) {
+    const item = items[index];
+    if (!item || item.id === draggingId) continue;
+    const insetX = rect.width / 4;
+    const insetY = rect.height / 4;
+    if (point.x >= rect.left + insetX && point.x <= rect.left + rect.width - insetX &&
+      point.y >= rect.top + insetY && point.y <= rect.top + rect.height - insetY) return item.id;
+  }
+  return null;
+}
+
+function WebspringBoard({ model, actions, applicationOutlet, folderPresentation: FolderPresentation, configuration }: WebspringViewProps & { configuration: WebspringBoardConfiguration }) {
   const feedback = useNSEFeedback();
   const boardMotion = useWebspringBoardMotion();
   const columns = 4;
   const pageSize = configuration.pageSize ?? (model.layout.board.pageSize === 20 ? columns * 4 : model.layout.board.pageSize);
-  const board = useMemo(() => createWebspringBoardProjection(model.apps, { pageSize, dockSize: 0 }), [model.apps, pageSize]);
+  const board = useMemo(() => createWebspringBoardProjection(model.items, { pageSize, dockSize: 0 }), [model.items, pageSize]);
+  const topLevelIds = useMemo(() => model.items.map((item) => item.id), [model.items]);
   const [page, setPage] = useState(0);
   const [announcement, setAnnouncement] = useState("");
   const boardElement = useRef<HTMLElement | null>(null);
+  const [stageElement, setStageElement] = useState<HTMLElement | null>(null);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
-  const draggingAppIdRef = useRef<string | null>(model.layout.draggingAppId);
+  const draggingItemIdRef = useRef<string | null>(model.layout.draggingItemId);
+  const dropTargetIdRef = useRef<string | null>(model.folders.dropTargetId);
   const suppressNextClick = useRef(false);
-  const activeDragId = useRef<string | null>(model.layout.draggingAppId);
+  const activeDragId = useRef<string | null>(model.layout.draggingItemId);
   const lastPageSwitchAt = useRef(0);
   const slotsRef = useRef<WebspringDragReorderSlots | undefined>(undefined);
+  const mergeHover = useRef<{ id: string; timer: number; view: Window } | null>(null);
   const { point, setProxyElement, recordPoint, showProxy, hideProxy } = useWebspringDragProxyPosition();
-  const draggingApp = model.apps.find((app) => app.id === model.layout.draggingAppId) ?? null;
+  const draggingId = model.layout.draggingItemId;
+  const draggingItem = model.items.find((item) => item.id === draggingId) ?? null;
+  const draggingFolder = draggingItem?.kind === "folder" ? draggingItem : null;
+  const draggingApp = draggingItem?.kind === "app" ? draggingItem.app : model.apps.find((app) => app.id === draggingId) ?? null;
+  const openFolder = model.items.find((item): item is WebspringFolderItem => item.kind === "folder" && item.id === model.folders.openFolderId) ?? null;
+  const [folderAnchor, setFolderAnchor] = useState<DOMRectReadOnly | null>(null);
   const activePage = Math.min(page, board.pages.length - 1);
   const launchDim = boardMotion.launchBackdropDim;
   const [iconExits, setIconExits] = useState<WebspringBoardLaunchExits | null>(null);
   // The tapped app shows its spinner at once, while its bundle loads.
   const [openingAppId, setOpeningAppId] = useState<string | null>(null);
   const previousLaunchPhase = useRef(model.launchPhase);
+  const previousOpenFolderId = useRef(model.folders.openFolderId);
   useEffect(() => setPage((value) => Math.min(value, board.pages.length - 1)), [board.pages.length]);
-  draggingAppIdRef.current = model.layout.draggingAppId;
+  draggingItemIdRef.current = model.layout.draggingItemId;
+  dropTargetIdRef.current = model.folders.dropTargetId;
+  const clearMergeHover = useCallback(() => {
+    if (!mergeHover.current) return;
+    mergeHover.current.view.clearTimeout(mergeHover.current.timer);
+    mergeHover.current = null;
+  }, []);
   useEffect(() => () => {
-    if (draggingAppIdRef.current) actions.finishDrag(false);
+    clearMergeHover();
+    if (draggingItemIdRef.current) actions.finishDrag(false);
     hideProxy();
-  }, [actions, hideProxy]);
+  }, [actions, clearMergeHover, hideProxy]);
   useEffect(() => {
-    if (model.layout.draggingAppId) return;
+    if (model.layout.draggingItemId) return;
     activeDragId.current = null;
     slotsRef.current = undefined;
+    clearMergeHover();
     const pointerId = pointerStart.current?.pointerId;
     pointerStart.current = null;
     hideProxy();
     const root = boardElement.current;
     if (pointerId !== undefined && root?.hasPointerCapture?.(pointerId)) root.releasePointerCapture(pointerId);
-  }, [model.layout.draggingAppId, hideProxy]);
+  }, [model.layout.draggingItemId, clearMergeHover, hideProxy]);
+  // A drag that leaves a folder, or turns the page, measures the top level afresh.
   useEffect(() => {
     if (activeDragId.current && boardElement.current) {
-      slotsRef.current = captureWebspringDragReorderSlots("[data-webspring-app-id]", boardElement.current);
+      slotsRef.current = captureWebspringDragReorderSlots(TOP_LEVEL_SELECTOR, boardElement.current);
     }
-  }, [activePage]);
+  }, [activePage, model.folders.openFolderId]);
   useEffect(() => {
-    if (model.launchPhase === "returning" && (model.presentationTraits.reducedMotion || model.apps.length === 0)) {
+    if (model.launchPhase === "returning" && (model.presentationTraits.reducedMotion || model.items.length === 0)) {
       actions.completeReturnTrack("material");
     }
-  }, [actions, model.apps.length, model.launchPhase, model.presentationTraits.reducedMotion]);
+  }, [actions, model.items.length, model.launchPhase, model.presentationTraits.reducedMotion]);
+
+  // The open folder's icon anchors its presentation; a folder opened elsewhere
+  // brings its page into view first.
+  useLayoutEffect(() => {
+    const folderId = model.folders.openFolderId;
+    if (!folderId) {
+      setFolderAnchor(null);
+      return;
+    }
+    const icon = boardElement.current?.querySelector<HTMLElement>(`.webspring-board-page [data-webspring-item-id="${folderId}"] .webspring-board-icon-well`);
+    if (icon) {
+      setFolderAnchor(icon.getBoundingClientRect());
+      return;
+    }
+    const index = topLevelIds.indexOf(folderId);
+    if (index >= 0) setPage(Math.floor(index / board.pageSize));
+  }, [board.pageSize, model.folders.openFolderId, topLevelIds, activePage]);
+
+  // Focus returns to a folder's icon when it closes, unless an app took over.
+  useEffect(() => {
+    const previous = previousOpenFolderId.current;
+    previousOpenFolderId.current = model.folders.openFolderId;
+    if (!previous || model.folders.openFolderId || model.launchPhase !== "idle" || activeDragId.current) return;
+    boardElement.current?.querySelector<HTMLElement>(`.webspring-board-page [data-webspring-item-id="${previous}"]`)?.focus({ preventScroll: true });
+  }, [model.folders.openFolderId, model.launchPhase]);
 
   useEffect(() => {
     const previous = previousLaunchPhase.current;
@@ -220,25 +342,77 @@ function WebspringBoard({ model, actions, applicationOutlet, configuration }: We
     return actions.scheduleLaunchCompletion(transitionId, appId, seconds * 1000);
   }, [actions, model.launchPhase, model.launchTransitionId, model.launchingAppId, model.presentationTraits.reducedMotion]);
 
-  const announceMove = useCallback((app: BoardApp, index: number) => {
+  const announceMove = useCallback((title: string, index: number) => {
     feedback?.trigger("selection", { intensity: .35 });
-    setAnnouncement(`${app.title} moved to position ${index + 1}.`);
+    setAnnouncement(`${title} moved to position ${index + 1}.`);
   }, [feedback]);
 
   function pointerDown(event: PointerEvent<HTMLElement>) {
     if (event.button > 0 || event.isPrimary === false || activeDragId.current) return;
     suppressNextClick.current = false;
     pointerStart.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
-    slotsRef.current = captureWebspringDragReorderSlots("[data-webspring-app-id]", event.currentTarget);
+    slotsRef.current = captureWebspringDragReorderSlots("[data-webspring-item-id]", event.currentTarget);
     recordPoint({ x: event.clientX, y: event.clientY }, Boolean(activeDragId.current));
+  }
+
+  /** Reorders inside the open folder; leaving its panel takes the app out to the top level. */
+  function dragInFolder(root: HTMLElement, dragId: string, folder: WebspringFolderItem, at: { x: number; y: number }) {
+    const panel = root.querySelector<HTMLElement>(FOLDER_PANEL_SELECTOR)?.getBoundingClientRect();
+    if (!panel || (at.x >= panel.left && at.x <= panel.right && at.y >= panel.top && at.y <= panel.bottom)) {
+      const target = getWebspringDragReorderTargetFromPoint(`${FOLDER_PANEL_SELECTOR} [data-webspring-item-id]`, at, dragId, root, slotsRef.current);
+      if (target && actions.moveItem(dragId, target.targetIndex, false)) {
+        const app = folder.apps.find((candidate) => candidate.id === dragId);
+        if (app) announceMove(app.title, target.targetIndex);
+      }
+      return;
+    }
+    if (!model.folders.editable) return;
+    const folderIndex = topLevelIds.indexOf(folder.id);
+    actions.closeFolder();
+    if (actions.moveAppOutOfFolder(dragId, folderIndex + 1)) {
+      const app = folder.apps.find((candidate) => candidate.id === dragId);
+      if (app) setAnnouncement(`${app.title} moved out of ${folder.title}.`);
+    }
+    slotsRef.current = undefined;
+  }
+
+  /** Over an entry's centre a dragged app waits to merge; elsewhere it reorders. */
+  function dragAtTopLevel(root: HTMLElement, dragId: string, at: { x: number; y: number }) {
+    if (model.folders.editable && !draggingFolder) {
+      const mergeId = getMergeTarget(slotsRef.current, model.items, at, dragId);
+      if (mergeId) {
+        const view = root.ownerDocument.defaultView;
+        if (view && mergeHover.current?.id !== mergeId) {
+          clearMergeHover();
+          mergeHover.current = { id: mergeId, view, timer: view.setTimeout(() => actions.setDropTarget(mergeId), MERGE_HOVER_MS) };
+        }
+        return;
+      }
+      if (mergeHover.current) {
+        clearMergeHover();
+        if (dropTargetIdRef.current) actions.setDropTarget(null);
+      }
+    }
+    const target = getWebspringDragReorderTargetFromPoint(TOP_LEVEL_SELECTOR, at, dragId, root, slotsRef.current);
+    if (target && actions.moveItem(dragId, target.targetIndex, false)) {
+      const item = model.items.find((candidate) => candidate.id === dragId);
+      const title = item ? item.kind === "app" ? item.app.title : item.title : null;
+      if (title) announceMove(title, target.targetIndex);
+    }
   }
 
   function pointerMove(event: PointerEvent<HTMLElement>) {
     if (event.pointerId !== pointerStart.current?.pointerId) return;
     recordPoint({ x: event.clientX, y: event.clientY }, Boolean(activeDragId.current));
-    const draggingId = activeDragId.current;
-    if (!draggingId) return;
+    const dragId = activeDragId.current;
+    if (!dragId) return;
     showProxy();
+    const at = { x: event.clientX, y: event.clientY };
+    const folder = openFolder?.apps.some((app) => app.id === dragId) ? openFolder : null;
+    if (folder) {
+      dragInFolder(event.currentTarget, dragId, folder, at);
+      return;
+    }
     const bounds = event.currentTarget.getBoundingClientRect();
     if (event.timeStamp - lastPageSwitchAt.current > 450) {
       if (event.clientX >= bounds.right - 48 && activePage < board.pages.length - 1) {
@@ -252,17 +426,7 @@ function WebspringBoard({ model, actions, applicationOutlet, configuration }: We
         return;
       }
     }
-    const target = getWebspringDragReorderTargetFromPoint(
-      ".webspring-board [data-webspring-app-id]",
-      { x: event.clientX, y: event.clientY },
-      draggingId,
-      event.currentTarget,
-      slotsRef.current,
-    );
-    if (target && actions.moveApp(draggingId, target.targetIndex, false)) {
-      const app = model.apps.find((candidate) => candidate.id === draggingId);
-      if (app) announceMove(app, target.targetIndex);
-    }
+    dragAtTopLevel(event.currentTarget, dragId, at);
   }
 
   function pointerEnd(event: PointerEvent<HTMLElement>, commit: boolean) {
@@ -276,9 +440,14 @@ function WebspringBoard({ model, actions, applicationOutlet, configuration }: We
         suppressNextClick.current = true;
       }
     }
-    if (activeDragId.current) {
+    clearMergeHover();
+    const dragId = activeDragId.current;
+    if (dragId) {
+      const mergeId = dropTargetIdRef.current;
+      const merged = commit && mergeId !== null && actions.dropOnItem(dragId, mergeId);
       actions.finishDrag(commit);
-      if (commit) feedback?.trigger("light", { intensity: .35 });
+      if (merged) feedback?.trigger("success", { intensity: .45 });
+      else if (commit) feedback?.trigger("light", { intensity: .35 });
       activeDragId.current = null;
       suppressNextClick.current = true;
     }
@@ -288,43 +457,69 @@ function WebspringBoard({ model, actions, applicationOutlet, configuration }: We
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   }
 
-  const renderIcon = (app: BoardApp, globalIndex: number) => <BoardIcon
+  const launchActions = useMemo(() => ({ ...actions, openApp: (appId: string, route?: string) => {
+    if (suppressNextClick.current) {
+      suppressNextClick.current = false;
+      return Promise.resolve({ status: "cancelled" as const });
+    }
+    feedback?.trigger("light", { intensity: .45 });
+    const root = boardElement.current;
+    if (root) setIconExits(createWebspringBoardLaunchExits(root));
+    setOpeningAppId(appId);
+    return actions.openApp(appId, route).then((result) => {
+      setOpeningAppId((current) => current === appId ? null : current);
+      if (result.status !== "completed") setIconExits(null);
+      return result;
+    });
+  } }), [actions, feedback]);
+
+  const beginPointerDrag = useCallback((itemId: string, pointerId: number) => {
+    boardElement.current?.setPointerCapture?.(pointerId);
+    activeDragId.current = itemId;
+    showProxy();
+    suppressNextClick.current = true;
+    feedback?.trigger("selection", { intensity: .5 });
+  }, [feedback, showProxy]);
+
+  const openFolderFromIcon = useCallback((folder: WebspringFolderItem, well: HTMLElement) => {
+    if (suppressNextClick.current) {
+      suppressNextClick.current = false;
+      return;
+    }
+    if (model.folders.openFolderId === folder.id) return;
+    setFolderAnchor(well.getBoundingClientRect());
+    if (actions.openFolder(folder.id)) feedback?.trigger("light", { intensity: .4 });
+  }, [actions, feedback, model.folders.openFolderId]);
+
+  const entryProps = (index: number, containerIds: readonly string[], exit: WebspringRadialExit | undefined): BoardEntryProps => ({
+    index,
+    containerIds,
+    columns,
+    model,
+    exit,
+    actions: launchActions,
+    reorderMotion: boardMotion.iconReorder,
+    onLongPress: beginPointerDrag,
+    onMoved: announceMove,
+  });
+
+  const renderEntry = (item: WebspringItem, globalIndex: number) => item.kind === "app"
+    ? <BoardIcon key={item.id} app={item.app} opening={openingAppId === item.id} {...entryProps(globalIndex, topLevelIds, iconExits?.get(item.id))} />
+    : <BoardFolderIcon key={item.id} folder={item} onOpen={openFolderFromIcon} {...entryProps(globalIndex, topLevelIds, iconExits?.get(item.id))} />;
+
+  const renderFolderApp = (app: WebspringApp, index: number) => <BoardIcon
     key={app.id}
     app={app}
-    index={globalIndex}
-    columns={columns}
-    model={model}
-    exit={iconExits?.get(app.id)}
     opening={openingAppId === app.id}
-    actions={{ ...actions, openApp: (appId, route) => {
-      if (suppressNextClick.current) {
-        suppressNextClick.current = false;
-        return Promise.resolve({ status: "cancelled" as const });
-      }
-      feedback?.trigger("light", { intensity: .45 });
-      const root = boardElement.current;
-      if (root) setIconExits(createWebspringBoardLaunchExits(root));
-      setOpeningAppId(appId);
-      return actions.openApp(appId, route).then((result) => {
-        setOpeningAppId((current) => current === appId ? null : current);
-        if (result.status !== "completed") setIconExits(null);
-        return result;
-      });
-    } }}
-    reorderMotion={boardMotion.iconReorder}
-    onLongPress={(appId, pointerId) => {
-      boardElement.current?.setPointerCapture?.(pointerId);
-      activeDragId.current = appId;
-      showProxy();
-      suppressNextClick.current = true;
-      feedback?.trigger("selection", { intensity: .5 });
-    }}
-    onMoved={announceMove}
+    {...entryProps(index, openFolder?.apps.map((member) => member.id) ?? [], undefined)}
   />;
 
   return <MaterialProvider>
     <main
-      ref={boardElement}
+      ref={(element) => {
+        boardElement.current = element;
+        setStageElement(element);
+      }}
       className="webspring-board"
       data-launch-phase={model.launchPhase}
       data-entrance-phase={model.entrancePhase}
@@ -335,7 +530,7 @@ function WebspringBoard({ model, actions, applicationOutlet, configuration }: We
       onPointerCancelCapture={(event) => pointerEnd(event, false)}
       onLostPointerCapture={(event) => { if (event.target === event.currentTarget) pointerEnd(event, false); }}
       onKeyDownCapture={(event) => {
-        if (!model.layout.editing && (event.key === "Enter" || event.key === " ")) suppressNextClick.current = false;
+        if (event.key === "Enter" || event.key === " ") suppressNextClick.current = false;
       }}
     >
       <section
@@ -357,14 +552,18 @@ function WebspringBoard({ model, actions, applicationOutlet, configuration }: We
         <NSEPushButton tone="dark" haptic="success" onClick={actions.resetOrder}>Reset</NSEPushButton>
       </NSEToolbar> : <NSEPushButton tone="dark" onClick={() => actions.beginEditing(null)} aria-describedby="webspring-board-keyboard-help">Reorder applications</NSEPushButton>}
         </div>
-      <p id="webspring-board-keyboard-help" className="webspring-reorder-announcement">Hold an application to reorder. Use arrow keys to move it. Press Escape when finished.</p>
+      <p id="webspring-board-keyboard-help" className="webspring-reorder-announcement">
+        {model.folders.editable
+          ? "Hold an application to reorder. Rest it on another application or a folder to group them. Use arrow keys to move it. Press Escape when finished."
+          : "Hold an application to reorder. Use arrow keys to move it. Press Escape when finished."}
+      </p>
       <section className="webspring-board-pages" aria-label="Applications">
         <div className="webspring-board-page" data-page={activePage}>
-          {board.pages[activePage]?.map((app, index) => renderIcon(app, activePage * board.pageSize + index))}
+          {board.pages[activePage]?.map((item, index) => renderEntry(item, activePage * board.pageSize + index))}
         </div>
       </section>
       {board.pages.length > 1 ? <nav className="webspring-board-page-controls" aria-label="Application pages">
-        {board.pages.map((_apps, index) => <button key={index} type="button" aria-label={`Show application page ${index + 1}`} aria-current={index === activePage ? "page" : undefined} onClick={() => setPage(index)} onPointerEnter={() => { if (model.layout.draggingAppId) setPage(index); }} />)}
+        {board.pages.map((_items, index) => <button key={index} type="button" aria-label={`Show application page ${index + 1}`} aria-current={index === activePage ? "page" : undefined} onClick={() => setPage(index)} onPointerEnter={() => { if (model.layout.draggingItemId) setPage(index); }} />)}
       </nav> : null}
       </section>
       <div className="webspring-board-journal">
@@ -379,9 +578,20 @@ function WebspringBoard({ model, actions, applicationOutlet, configuration }: We
           onOpenNotificationCentre={actions.openNotificationCentre}
         />
       </div>
+      {openFolder && folderAnchor && stageElement ? <div className="webspring-board-folder-layer" onPointerDownCapture={pointerDown}>
+        <FolderPresentation
+          key={openFolder.id}
+          folder={openFolder}
+          stage={stageElement}
+          anchor={folderAnchor}
+          reducedMotion={model.presentationTraits.reducedMotion}
+          renderApp={renderFolderApp}
+          onClose={actions.closeFolder}
+        />
+      </div> : null}
       <WebspringLaunchDim visible={model.launchPhase === "launching"} motion={launchDim} />
       {applicationOutlet}
-      <WebspringDragProxy app={draggingApp} point={point} mobile proxyRef={setProxyElement} />
+      <WebspringDragProxy app={draggingApp} folder={draggingFolder} point={point} mobile proxyRef={setProxyElement} />
       <span className="webspring-reorder-announcement" aria-live="polite">{announcement}</span>
     </main>
   </MaterialProvider>;

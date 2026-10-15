@@ -20,7 +20,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { WebspringViewModel } from "./webspringTypes";
+import { WebspringFolderTile } from "./WebspringFolderTile";
+import type { WebspringApp, WebspringFolderItem } from "./webspringTypes";
 import "./WebspringPresentation.css";
 
 export interface WebspringDragProxyPoint {
@@ -97,19 +98,25 @@ export function useWebspringDragProxyPosition() {
   };
 }
 
+/** The icon that follows the pointer while an app or a folder is dragged. */
 export function WebspringDragProxy({
-  app,
+  app = null,
+  folder = null,
   point,
   mobile = false,
   proxyRef
 }: {
-  app: WebspringViewModel["apps"][number] | null;
+  app?: WebspringApp | null;
+  folder?: WebspringFolderItem | null;
   point: WebspringDragProxyPoint | null;
   mobile?: boolean;
   proxyRef?: (element: HTMLDivElement | null) => void;
 }) {
-  if (!app || !point || typeof document === "undefined") return null;
-  const appName = app.title;
+  if (!point || typeof document === "undefined") return null;
+  const artwork = app
+    ? <img src={app.iconUrl ?? ""} alt="" draggable={false} />
+    : folder ? <span className="webspring-drag-proxy-folder"><WebspringFolderTile folder={folder} /></span> : null;
+  if (!artwork) return null;
 
   return createPortal((
     <div
@@ -119,8 +126,8 @@ export function WebspringDragProxy({
       aria-hidden="true"
       style={{ left: point.x, top: point.y }}
     >
-      <img src={app.iconUrl ?? ""} alt="" draggable={false} />
-      <span>{appName}</span>
+      {artwork}
+      <span>{app?.title ?? folder?.title}</span>
     </div>
   ), document.body);
 }

@@ -18,9 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { captureSynWareManifest } from "../SynCloudOS/AppSDK";
+import { captureSynWareManifest, type SynWareWebspringFoldersManifest } from "../SynCloudOS/AppSDK";
+import { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
 import type {
   WebspringContent,
+  WebspringFolderPresentationComponent,
   WebspringDefinition,
   WebspringDefinitionInput,
   WebspringManifest,
@@ -32,6 +34,9 @@ export const defaultWebspringReturnTracks = Object.freeze(["material", "icons"] 
 /** The launch zoom for a view that declares none: it waits for the launcher's
  * icons to clear, then accelerates out of the screen centre. */
 export const defaultWebspringLaunchZoom = Object.freeze({ delay: 0.72, duration: 0.68, easing: "accelerate" as const });
+
+/** The presentation used when a definition supplies none. */
+const defaultWebspringFolderPresentation = createWebspringFolderSplitPresentation();
 
 function dataProperty(object: object, key: string, required: boolean): unknown {
   const descriptor = Object.getOwnPropertyDescriptor(object, key);
@@ -99,6 +104,16 @@ function cloneData(value: unknown, label: string, ancestors = new WeakSet<object
   }
 }
 
+/** Functions, and the memo and forwardRef wrappers React renders as components. */
+function isReactComponent(component: unknown) {
+  if (typeof component === "function") return true;
+  if (typeof component !== "object" || component === null) return false;
+  const reactType = Object.getOwnPropertyDescriptor(component, "$$typeof");
+  return Boolean(reactType && "value" in reactType && (
+    reactType.value === Symbol.for("react.memo") || reactType.value === Symbol.for("react.forward_ref")
+  ));
+}
+
 function captureComponents(value: unknown): Readonly<Record<string, WebspringViewComponent>> {
   assertPlainObject(value, "Webspring components");
   const output: Record<string, WebspringViewComponent> = {};
@@ -109,15 +124,7 @@ function captureComponents(value: unknown): Readonly<Record<string, WebspringVie
       throw new TypeError(`Webspring component ${key} must be an enumerable data property, not an accessor.`);
     }
     const component = descriptor.value;
-    const reactType = typeof component === "object" && component !== null
-      ? Object.getOwnPropertyDescriptor(component, "$$typeof")
-      : undefined;
-    const supportedWrapper = reactType && "value" in reactType && (
-      reactType.value === Symbol.for("react.memo") || reactType.value === Symbol.for("react.forward_ref")
-    );
-    if (typeof component !== "function" && !supportedWrapper) {
-      throw new TypeError(`Webspring component ${key} must be a React component.`);
-    }
+    if (!isReactComponent(component)) throw new TypeError(`Webspring component ${key} must be a React component.`);
     Object.defineProperty(output, key, {
       value: component as WebspringViewComponent,
       enumerable: true,
@@ -192,6 +199,22 @@ function captureQuickSwitch(input: unknown): Readonly<WebspringQuickSwitchOption
   return Object.freeze(overflow === undefined ? {} : { overflow });
 }
 
+/** Rejects a folder declaration the reconciler could not honour. */
+function assertFolders(folders: SynWareWebspringFoldersManifest | undefined) {
+  if (!folders) return;
+  const folderIds = new Set<string>();
+  const owners = new Map<string, string>();
+  for (const folder of folders.initial) {
+    if (folderIds.has(folder.id)) throw new TypeError(`Webspring manifest contains duplicate folder ID ${folder.id}.`);
+    folderIds.add(folder.id);
+    for (const appId of folder.apps) {
+      const owner = owners.get(appId);
+      if (owner !== undefined) throw new TypeError(`Webspring app ${appId} is listed in folders ${owner} and ${folder.id}.`);
+      owners.set(appId, folder.id);
+    }
+  }
+}
+
 export function defineWebspring<const TManifest extends WebspringManifest>(
   input: WebspringDefinitionInput<TManifest>,
 ): WebspringDefinition<TManifest> {
@@ -202,6 +225,11 @@ export function defineWebspring<const TManifest extends WebspringManifest>(
   const iconEffectInput = dataProperty(input, "iconEffect", false);
   if (iconEffectInput !== undefined) captureComponents({ iconEffect: iconEffectInput });
   const quickSwitch = captureQuickSwitch(dataProperty(input, "quickSwitch", false));
+  const folderPresentationInput = dataProperty(input, "folderPresentation", false);
+  if (folderPresentationInput !== undefined && !isReactComponent(folderPresentationInput)) {
+    throw new TypeError("Webspring folderPresentation must be a React component.");
+  }
+  const folderPresentation = (folderPresentationInput ?? defaultWebspringFolderPresentation) as WebspringFolderPresentationComponent;
   const capturedManifest = captureSynWareManifest(manifestInput);
   if (!capturedManifest.ok) throw manifestError(capturedManifest.errors);
   if (!capturedManifest.value.webspringShell) throw new TypeError("A Webspring manifest requires manifest.webspringShell.");
@@ -217,6 +245,7 @@ export function defineWebspring<const TManifest extends WebspringManifest>(
   if (missing.length > 0) throw new TypeError(`Webspring components are missing declared view IDs: ${missing.join(", ")}.`);
   const extra = componentIds.filter((id) => !ids.has(id));
   if (extra.length > 0) throw new TypeError(`Webspring components contain extra undeclared view IDs: ${extra.join(", ")}.`);
+  assertFolders(capturedManifest.value.webspringShell.folders);
 
   for (const presentation of ["desktop", "tablet", "mobile"] as const) {
     const defaultId = capturedManifest.value.webspringShell.defaults[presentation];
@@ -234,6 +263,7 @@ export function defineWebspring<const TManifest extends WebspringManifest>(
     launchZooms: captureLaunchZooms(components),
     ...(iconEffectInput === undefined ? {} : { iconEffect: iconEffectInput as WebspringDefinition["iconEffect"] }),
     ...(quickSwitch === undefined ? {} : { quickSwitch }),
+    folderPresentation,
     ...(contentInput === undefined ? {} : { content: cloneData(contentInput, "Webspring content") as Readonly<WebspringContent> }),
   };
   return Object.freeze(definition);

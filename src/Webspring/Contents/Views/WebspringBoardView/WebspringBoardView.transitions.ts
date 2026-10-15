@@ -54,22 +54,24 @@ export const webspringBoardLaunchTiming = Object.freeze({
   iconExitScale: 2.4,
 });
 
-/** Each on-screen icon's exit while an app is open: out past the viewer, away
- * from the board's centre. The icons scatter along it as the app opens and
- * fly back in along it as the app closes. */
+/** Each on-screen entry's exit while an app is open: out past the viewer, away
+ * from the board's centre. The icons and folders scatter along it as the app
+ * opens and fly back in along it as the app closes. */
 export type WebspringBoardLaunchExits = ReadonlyMap<string, WebspringRadialExit>;
 
-/** Measures the icons on screen as an app opens. */
+/** Measures the entries on screen as an app opens. */
 export function createWebspringBoardLaunchExits(board: HTMLElement): WebspringBoardLaunchExits {
   const bounds = board.getBoundingClientRect();
   const centre = { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
   const growth = webspringBoardLaunchTiming.iconExitScale - 1;
   const exits = new Map<string, WebspringRadialExit>();
-  for (const icon of board.querySelectorAll<HTMLElement>(".webspring-board-page [data-webspring-app-id]")) {
+  for (const icon of board.querySelectorAll<HTMLElement>(".webspring-board-page [data-webspring-item-id]")) {
+    const itemId = icon.dataset.webspringItemId;
+    if (!itemId) continue;
     const well = icon.querySelector<HTMLElement>(".webspring-board-icon-well") ?? icon;
     const rect = well.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) continue;
-    exits.set(icon.dataset.webspringAppId!, Object.freeze({
+    exits.set(itemId, Object.freeze({
       x: Math.round((rect.left + rect.width / 2 - centre.x) * growth),
       y: Math.round((rect.top + rect.height / 2 - centre.y) * growth),
       scale: webspringBoardLaunchTiming.iconExitScale,

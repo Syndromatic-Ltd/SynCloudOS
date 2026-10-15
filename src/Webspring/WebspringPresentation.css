@@ -54,6 +54,22 @@
   height: 70px;
 }
 
+.webspring-drag-proxy-folder {
+  display: block;
+  width: 76px;
+  height: 76px;
+}
+
+.webspring-drag-proxy[data-mobile="true"] .webspring-drag-proxy-folder {
+  width: 70px;
+  height: 70px;
+}
+
+.webspring-drag-proxy .webspring-folder-tile-member img {
+  width: 100%;
+  height: 100%;
+}
+
 .webspring-launch-dim {
   position: fixed;
   inset: 0;

@@ -34,7 +34,6 @@ import { ApplicationStageLayer } from "./ApplicationStageLayer";
 import { syncApplicationWindowContentRenderers, WindowContentRendererRegistry, WindowLayer, type ApplicationWindowRendererRegistrations } from "./WindowLayer";
 import { FocusScope, HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeSelector } from "../SynCloudOSReact";
 import { presentationForSizeClass, WebspringController, type SynCloudOSShellResources } from "./WebspringController";
-import { createWebspringLayout } from "./webspringLayout";
 import { WebspringQuickSwitchView } from "./WebspringQuickSwitchView";
 import { WebspringIconEffectProvider } from "./WebspringIconEffect";
 import { SystemPanelsLayer } from "./SystemPanelsLayer";
@@ -47,7 +46,7 @@ import { WebspringLaunchZoomContext } from "./WebspringLaunchZoomContext";
 import { useWebspringEntrance } from "./useWebspringEntrance";
 import { scheduleWebspringIdlePrefetch } from "./webspringPrefetch";
 import { WebspringContentController, type WebspringContentSources } from "./webspringContent";
-import { WEBSPRING_PRESENTATION_ROLES } from "../SynCloudOS/SynCloudOS";
+import { EMPTY_WEBSPRING_FOLDER_CONFIGURATION, WEBSPRING_PRESENTATION_ROLES, getOrderedVisibleWebspringApps } from "../SynCloudOS/SynCloudOS";
 import "./WebspringHost.css";
 
 interface WebspringHostPresentationContextValue {
@@ -218,10 +217,11 @@ export function WebspringHost({
   const [notificationCentreRequest, setNotificationCentreRequest] = useState<{ key: number; notificationId?: string | null } | null>(null);
   const [quickSwitchOpen, setQuickSwitchOpen] = useState(false);
   const applicationMenuToggleRef = useRef<{ appId: string; toggle: () => void } | null>(null);
-  const layoutOrder = snapshot.webspring.layout.preference.order;
+  const layoutPreference = snapshot.webspring.layout.preference;
+  const folderConfiguration = snapshot.webspring.layout.folderConfiguration;
   const orderedApps = useMemo(
-    () => createWebspringLayout(Object.values(snapshot.appInfo), layoutOrder).orderedApps,
-    [snapshot.appInfo, layoutOrder],
+    () => getOrderedVisibleWebspringApps(Object.values(snapshot.appInfo), layoutPreference, folderConfiguration),
+    [snapshot.appInfo, layoutPreference, folderConfiguration],
   );
   const canUseQuickSwitch = !snapshot.webspring.layout.isEditing &&
     phase === "complete" && !gateRequested &&
@@ -248,7 +248,10 @@ export function WebspringHost({
     entry.toggle();
   }, [runtime]);
   useWebspringResponder({ onNotificationCentreRequest: requestNotificationCentre, onApplicationMenuToggle: requestApplicationMenuToggle });
-  useEffect(() => { runtime.webspring.hydrateLayoutPreference(); }, [runtime]);
+  useEffect(() => {
+    runtime.webspring.configureFolders(shell.manifest.webspringShell.folders ?? EMPTY_WEBSPRING_FOLDER_CONFIGURATION);
+    runtime.webspring.hydrateLayoutPreference();
+  }, [runtime, shell]);
   useEffect(() => {
     if (startupPhase === "complete" && snapshot.loginServices.isAuthorised) scheduleWebspringIdlePrefetch(runtime);
   }, [runtime, snapshot.loginServices.isAuthorised, startupPhase]);
@@ -297,7 +300,7 @@ export function WebspringHost({
       fallbackViewId={fallbackViewId}
       onFallback={() => { if (fallbackViewId) setViewOverride({ presentation, id: fallbackViewId }); }}
     >
-      <View model={model} actions={viewActions} applicationOutlet={applicationOutlet} />
+      <View model={model} actions={viewActions} applicationOutlet={applicationOutlet} folderPresentation={shell.folderPresentation} />
     </WebspringViewBoundary> : <section role="alert" className="webspring-view-recovery">
       <h1>Webspring host unavailable</h1>
       <p>{controllerOutcome.error?.message}</p>

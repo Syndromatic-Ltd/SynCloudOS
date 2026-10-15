@@ -177,21 +177,27 @@
   aspect-ratio: 1;
 }
 
-.webspring-board-icon-well img {
+.webspring-board-icon-well > img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .28)) drop-shadow(0 14px 10px rgba(9, 13, 21, .52));
-  transition: filter 140ms ease;
+  transition: filter 140ms ease, transform 180ms ease;
 }
 
 /* Artwork, initial and loading spinner share one cell: the spinner sits on
    the icon, which dims beneath it in its own shape. */
 .webspring-board-icon-well > img,
 .webspring-board-icon-well > span[aria-hidden="true"],
+.webspring-board-icon-well > .webspring-folder-tile,
 .webspring-board-icon-well > .nse-loading-spinner {
   grid-area: 1 / 1;
+}
+
+/* An app a dragged app rests on swells to take it in. */
+.webspring-board-icon-well[data-drop-target="true"] > img {
+  transform: scale(1.12);
 }
 
 .webspring-board-icon-well > .nse-loading-spinner {
@@ -203,7 +209,7 @@
   filter: brightness(.58) drop-shadow(0 2px 2px rgba(0, 0, 0, .28)) drop-shadow(0 14px 10px rgba(9, 13, 21, .52));
 }
 
-.webspring-board-icon:not(.is-editing, .is-disabled):active img {
+.webspring-board-icon:not(.is-editing, .is-disabled):active .webspring-board-icon-well > img {
   filter: brightness(.8) drop-shadow(0 4px 5px rgba(9, 13, 21, .55));
 }
 

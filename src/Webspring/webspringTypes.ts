@@ -79,6 +79,49 @@ export type AccountAction =
   | { readonly kind: "signIn"; readonly label: string }
   | { readonly kind: "account"; readonly label: string; readonly signOutLabel: string };
 
+/** Where an entry sits on the desktop stage. */
+export interface WebspringDialPlacement {
+  readonly angle: number | null;
+  readonly iconPosition: { readonly x: number; readonly y: number };
+  readonly indicatorPosition: { readonly x: number; readonly y: number } | null;
+  readonly labelPosition: { readonly x: number; readonly y: number };
+}
+
+export interface WebspringApp {
+  readonly id: string;
+  readonly title: string;
+  readonly iconUrl: string | null;
+  readonly route: string;
+  readonly selected: boolean;
+  readonly running: boolean;
+  readonly state: "registered" | "idle" | "loading" | "ready" | "launching" | "active" | "suspended" | "failed" | "closed" | "disabled";
+  readonly disabledReason?: string;
+  readonly badgeCount: number;
+  readonly accent: string;
+  readonly featured: boolean;
+  readonly selectorAngle: number;
+}
+
+export interface WebspringAppItem {
+  readonly kind: "app";
+  readonly id: string;
+  readonly app: WebspringApp;
+  readonly dialPlacement: WebspringDialPlacement;
+}
+
+export interface WebspringFolderItem {
+  readonly kind: "folder";
+  readonly id: string;
+  readonly title: string;
+  readonly apps: readonly WebspringApp[];
+  /** The members' badge counts, summed. */
+  readonly badgeCount: number;
+  readonly dialPlacement: WebspringDialPlacement;
+}
+
+/** A top-level Webspring entry: an app, or a folder of apps. */
+export type WebspringItem = WebspringAppItem | WebspringFolderItem;
+
 export interface WebspringViewModel {
   readonly presentation: Presentation;
   readonly activeAppId: string | null;
@@ -97,7 +140,8 @@ export interface WebspringViewModel {
   readonly launchPhase: "idle" | "staging" | "launching" | "covered" | "returning";
   readonly layout: {
     readonly editing: boolean;
-    readonly draggingAppId: string | null;
+    /** The app or folder being dragged. */
+    readonly draggingItemId: string | null;
     readonly board: { readonly version: 1; readonly pageSize: number; readonly dockSize: number };
   };
   readonly presentationTraits: {
@@ -106,26 +150,17 @@ export interface WebspringViewModel {
     readonly reducedMotion: boolean;
     readonly safeAreaInsets: { readonly blockStart: number; readonly inlineEnd: number; readonly blockEnd: number; readonly inlineStart: number };
   };
-  readonly apps: readonly {
-    readonly id: string;
-    readonly title: string;
-    readonly iconUrl: string | null;
-    readonly route: string;
-    readonly selected: boolean;
-    readonly running: boolean;
-    readonly state: "registered" | "idle" | "loading" | "ready" | "launching" | "active" | "suspended" | "failed" | "closed" | "disabled";
-    readonly disabledReason?: string;
-    readonly badgeCount: number;
-    readonly accent: string;
-    readonly featured: boolean;
-    readonly selectorAngle: number;
-    readonly dialPlacement: {
-      readonly angle: number | null;
-      readonly iconPosition: { readonly x: number; readonly y: number };
-      readonly indicatorPosition: { readonly x: number; readonly y: number } | null;
-      readonly labelPosition: { readonly x: number; readonly y: number };
-    };
-  }[];
+  /** Every visible app, flat, in display order; folder members appear inline. */
+  readonly apps: readonly WebspringApp[];
+  /** Top-level entries in order. The desktop dial holds the first seven. */
+  readonly items: readonly WebspringItem[];
+  readonly folders: {
+    /** Whether visitors may create, fill and empty folders by dragging. */
+    readonly editable: boolean;
+    readonly openFolderId: string | null;
+    /** The entry a dragged app hovers over to merge with. */
+    readonly dropTargetId: string | null;
+  };
   readonly sections: readonly { readonly id: string; readonly title: string; readonly empty: "hide" | "message"; readonly state: ContentState }[];
   readonly branding: {
     readonly name: string;
@@ -141,16 +176,29 @@ export interface WebspringViewModel {
 export interface WebspringActions {
   openApp(appId: string, route?: string): Promise<ActionResult>;
   returnHome(): Promise<ActionResult>;
-  reorder(appIds: readonly string[]): Promise<ActionResult>;
+  /** Replaces the top-level order; it must list every top-level entry exactly once. */
+  reorder(itemIds: readonly string[]): Promise<ActionResult>;
   previewApp(appId: string | null): void;
   prefetchApp(appId: string, active: boolean): void;
   beginEditing(appId?: string | null): void;
   scheduleLongPress(appId: string, onRecognised: () => void): () => void;
   finishEditing(commit?: boolean): void;
   resetOrder(): void;
-  moveApp(appId: string, targetIndex: number, commit?: boolean): boolean;
-  moveAppByKeyboard(appId: string, key: string, columns?: number): boolean;
-  beginDrag(appId: string): void;
+  /** Reorders within the container holding the item: the top level, or its folder. */
+  moveItem(itemId: string, targetIndex: number, commit?: boolean): boolean;
+  moveItemByKeyboard(itemId: string, key: string, columns?: number): boolean;
+  /** Hover feedback for a merge; ignored unless folders are editable. */
+  setDropTarget(itemId: string | null): void;
+  /** Drops an app on a top-level entry: onto an app it makes a folder of the two,
+   *  onto a folder it joins it. Editable folders only. */
+  dropOnItem(appId: string, targetItemId: string): boolean;
+  /** Moves an app from its folder to the top level; an emptied folder is deleted. */
+  moveAppOutOfFolder(appId: string, targetIndex: number): boolean;
+  /** Refused while an item is dragged or an app is launching. */
+  openFolder(folderId: string): boolean;
+  closeFolder(): void;
+  /** Starts dragging an app or a folder. */
+  beginDrag(itemId: string): void;
   finishDrag(commit?: boolean): void;
   completeLaunch(transitionId: string, appId: string): void;
   /**
@@ -165,10 +213,26 @@ export interface WebspringActions {
   refreshContent(): Promise<void>;
 }
 
+export interface WebspringFolderPresentationProps {
+  readonly folder: WebspringFolderItem;
+  /** The element that is snapshotted and split. */
+  readonly stage: HTMLElement;
+  /** The folder icon, in viewport coordinates. */
+  readonly anchor: DOMRectReadOnly;
+  readonly reducedMotion: boolean;
+  /** The view-styled icon for a member app inside the panel. */
+  renderApp(app: WebspringApp, index: number): ReactNode;
+  /** Called once the presentation has closed. */
+  onClose(): void;
+}
+export type WebspringFolderPresentationComponent = ComponentType<WebspringFolderPresentationProps>;
+
 export interface WebspringViewProps {
   readonly model: WebspringViewModel;
   readonly actions: WebspringActions;
   readonly applicationOutlet: ReactNode;
+  /** How the shell presents an open folder. */
+  readonly folderPresentation: WebspringFolderPresentationComponent;
 }
 
 export type WebspringViewComponent = (ComponentType<WebspringViewProps> | ExoticComponent<WebspringViewProps>) & {
@@ -211,6 +275,8 @@ export interface WebspringDefinitionInput<TManifest extends WebspringManifest = 
   readonly content?: WebspringContent;
   readonly iconEffect?: WebspringIconEffectComponent;
   readonly quickSwitch?: WebspringQuickSwitchOptions;
+  /** Defaults to `createWebspringFolderSplitPresentation()`. */
+  readonly folderPresentation?: WebspringFolderPresentationComponent;
 }
 
 export interface WebspringDefinition<TManifest extends WebspringManifest = WebspringManifest> {
@@ -223,4 +289,5 @@ export interface WebspringDefinition<TManifest extends WebspringManifest = Websp
   readonly content?: Readonly<WebspringContent>;
   readonly iconEffect?: WebspringIconEffectComponent;
   readonly quickSwitch?: Readonly<WebspringQuickSwitchOptions>;
+  readonly folderPresentation: WebspringFolderPresentationComponent;
 }

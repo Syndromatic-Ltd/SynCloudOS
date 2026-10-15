@@ -26,6 +26,10 @@ export type { WebspringBoardConfiguration } from "./Contents/Views/WebspringBoar
 export { LowerContentShelfView } from "./LowerContentShelfView";
 export { WebspringDragProxy, useWebspringDragProxyPosition } from "./WebspringDragProxy";
 export type { WebspringDragProxyPoint } from "./WebspringDragProxy";
+export { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
+export type { WebspringFolderSplitOptions } from "./WebspringFolderSplitPresentation";
+export { WebspringFolderTile } from "./WebspringFolderTile";
+export type { WebspringFolderTileProps } from "./WebspringFolderTile";
 export { WebspringIconArtwork } from "./WebspringIconArtwork";
 export type { WebspringIconArtworkProps } from "./WebspringIconArtwork";
 export { WebspringIconEffect } from "./WebspringIconEffect";
@@ -48,7 +52,7 @@ export type {
 } from "./Webspring.transitions";
 export { captureWebspringDragReorderSlots, getWebspringDragReorderTargetFromPoint } from "./webspringDragReorder";
 export type { WebspringDragReorderSlots } from "./webspringDragReorder";
-export { WEBSPRING_STAGE, getDesktopWebspringLayout, getDialLayoutForApp, stagePointStyle } from "./stage";
+export { WEBSPRING_STAGE, getDesktopWebspringLayout, stagePointStyle } from "./stage";
 export type { WebspringContentReadRequest, WebspringContentSource, WebspringContentSources } from "./webspringContent";
 export type {
   AccountAction,
@@ -63,11 +67,18 @@ export type {
   ResourceReference,
   ShellMode,
   WebspringActions,
+  WebspringApp,
+  WebspringAppItem,
   WebspringContent,
   WebspringDefinition,
   WebspringDefinitionInput,
+  WebspringDialPlacement,
+  WebspringFolderItem,
+  WebspringFolderPresentationComponent,
+  WebspringFolderPresentationProps,
   WebspringIconEffectComponent,
   WebspringIconEffectProps,
+  WebspringItem,
   WebspringManifest,
   WebspringQuickSwitchOptions,
   WebspringViewComponent,

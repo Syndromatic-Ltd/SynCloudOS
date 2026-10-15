@@ -226,7 +226,7 @@ describe("Webspring owner-local choreography", () => {
     const controller = new WebspringController(runtime, webspring, undefined);
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
-        <WebspringBoardView model={controller.model(snapshot, "mobile")} actions={controller.actions} applicationOutlet={null} />
+        <WebspringBoardView model={controller.model(snapshot, "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={webspring.folderPresentation} />
       </SynCloudOSProvider>,
     );
     for (const { finish } of [...presentations.played]) await finish();
@@ -350,22 +350,22 @@ describe("Webspring owner-local choreography", () => {
       runtime.apps.registerBundle(createTestBundle({ id: "beta", route: "/beta" }));
       const controller = new WebspringController(runtime, webspring, undefined);
       const view = render(<SynCloudOSProvider runtime={runtime}>
-        <WebspringBoardView model={controller.model(runtime.store.getSnapshot(), "mobile")} actions={controller.actions} applicationOutlet={null} />
+        <WebspringBoardView model={controller.model(runtime.store.getSnapshot(), "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={webspring.folderPresentation} />
       </SynCloudOSProvider>);
 
       fireEvent.pointerDown(screen.getByRole("button", { name: "Open Alpha" }), { pointerId: 7, isPrimary: true });
       act(() => vi.advanceTimersByTime(520));
-      expect(runtime.store.getSnapshot().webspring.layout).toMatchObject({ isEditing: true, draggingAppId: "alpha" });
+      expect(runtime.store.getSnapshot().webspring.layout).toMatchObject({ isEditing: true, draggingItemId: "alpha" });
 
       fireEvent.pointerCancel(view.container.querySelector("main")!, { pointerId: 7 });
-      expect(runtime.store.getSnapshot().webspring.layout.draggingAppId).toBeNull();
+      expect(runtime.store.getSnapshot().webspring.layout.draggingItemId).toBeNull();
       view.unmount();
 
       const cancellationRuntime = createTestRuntime();
       cancellationRuntime.apps.registerBundle(createTestBundle({ id: "cancel", route: "/cancel" }));
       const cancellationController = new WebspringController(cancellationRuntime, webspring, undefined);
       const pending = render(<SynCloudOSProvider runtime={cancellationRuntime}>
-        <WebspringBoardView model={cancellationController.model(cancellationRuntime.store.getSnapshot(), "mobile")} actions={cancellationController.actions} applicationOutlet={null} />
+        <WebspringBoardView model={cancellationController.model(cancellationRuntime.store.getSnapshot(), "mobile")} actions={cancellationController.actions} applicationOutlet={null} folderPresentation={webspring.folderPresentation} />
       </SynCloudOSProvider>);
       fireEvent.pointerDown(screen.getByRole("button", { name: "Open Cancel" }), { pointerId: 8, isPrimary: true });
       pending.unmount();
@@ -374,5 +374,49 @@ describe("Webspring owner-local choreography", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("opens a Board folder over the stage and closes it with Escape", async () => {
+    const folderShell = defineWebspring({
+      manifest: {
+        ...webspring.manifest,
+        webspringShell: {
+          ...webspring.manifest.webspringShell,
+          folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "folders.tools", fallback: "Tools" }, order: 0, apps: ["beta", "gamma"] }] },
+        },
+      },
+      components: { board: WebspringBoardView },
+    });
+    const runtime = createTestRuntime();
+    for (const id of ["alpha", "beta", "gamma"]) runtime.apps.registerBundle(createTestBundle({ id, route: `/${id}` }));
+    runtime.webspring.configureFolders(folderShell.manifest.webspringShell.folders!);
+    const controller = new WebspringController(runtime, folderShell, undefined);
+    const board = () => <SynCloudOSProvider runtime={runtime}>
+      <WebspringBoardView model={controller.model(runtime.store.getSnapshot(), "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={folderShell.folderPresentation} />
+    </SynCloudOSProvider>;
+    const view = render(board());
+    const settle = (ms: number) => act(async () => {
+      const { promise, resolve } = Promise.withResolvers<void>();
+      setTimeout(resolve, ms);
+      await promise;
+      view.rerender(board());
+    });
+
+    expect(screen.queryByRole("button", { name: "Open Beta" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Open folder Tools" }));
+    expect(runtime.store.getSnapshot().webspring.openFolderId).toBe("folder.tools");
+    await settle(80);
+
+    const dialog = screen.getByRole("dialog", { name: "Tools" });
+    expect(dialog.hasAttribute("data-webspring-folder-panel")).toBe(true);
+    expect(view.container.querySelector(".webspring-folder-split")?.getAttribute("data-capture")).toBe("failed");
+    expect(screen.getByRole("button", { name: "Open Beta" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Open Gamma" })).toBeTruthy();
+
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    await settle(600);
+    expect(runtime.store.getSnapshot().webspring.openFolderId).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    view.unmount();
   });
 });

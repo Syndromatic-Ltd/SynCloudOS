@@ -79,3 +79,44 @@ describe("Webspring return requirement capture", () => {
     expect(reads).toBe(0);
   });
 });
+
+describe("Webspring folder definition", () => {
+  type Folder = { id: `folder.${string}`; title: { key: string }; order: number; apps: string[] };
+  function defineFolders(initial: Folder[], extra: Record<string, unknown> = {}) {
+    return defineWebspring({
+      manifest: {
+        schemaVersion: 1, id: "test.folders", version: "1.0.0", title: "Folders",
+        webspringShell: {
+          views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
+          defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
+          branding: { name: { key: "site.name", fallback: "Fixture" } },
+          folders: { editable: true, initial },
+        },
+      },
+      components: { board: WebspringBoardView },
+      ...extra,
+    });
+  }
+
+  it("defaults to the split presentation and keeps a supplied one", () => {
+    const Presentation = () => null;
+    const defaults = defineFolders([{ id: "folder.tools", title: { key: "tools" }, order: 1, apps: ["one"] }]);
+    expect(typeof defaults.folderPresentation).toBe("function");
+    expect(defineFolders([], { folderPresentation: Presentation }).folderPresentation).toBe(Presentation);
+    expect(() => defineFolders([], { folderPresentation: "split" })).toThrow(/folderPresentation.*React component/);
+  });
+
+  it("rejects duplicate folder IDs", () => {
+    expect(() => defineFolders([
+      { id: "folder.tools", title: { key: "a" }, order: 1, apps: ["one"] },
+      { id: "folder.tools", title: { key: "b" }, order: 2, apps: ["two"] },
+    ])).toThrow("Webspring manifest contains duplicate folder ID folder.tools.");
+  });
+
+  it("rejects an app listed in two folders", () => {
+    expect(() => defineFolders([
+      { id: "folder.tools", title: { key: "a" }, order: 1, apps: ["one", "two"] },
+      { id: "folder.games", title: { key: "b" }, order: 2, apps: ["two"] },
+    ])).toThrow("Webspring app two is listed in folders folder.tools and folder.games.");
+  });
+});

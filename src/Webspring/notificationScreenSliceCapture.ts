@@ -30,7 +30,8 @@ const notificationCaptureRootSelectors = [
   ".webspring-view",
   ".webspring-board"
 ];
-const notificationCaptureIgnoredSelectors = [
+/** System overlays no screen slice ever shows. */
+export const screenSliceIgnoredSelectors: readonly string[] = Object.freeze([
   ".syncloudos-notification-layer",
   ".webspring-drag-proxy",
   ".syncloudos-startup-layer",
@@ -38,9 +39,13 @@ const notificationCaptureIgnoredSelectors = [
   ".webspring-status-layer",
   ".webspring-quickswitch",
   ".webspring-launch-dim",
+  ".webspring-folder-split"
+]);
+const notificationCaptureIgnoredSelectors: readonly string[] = Object.freeze([
+  ...screenSliceIgnoredSelectors,
   ".webspring-edit-controls",
   ".webspring-board-controls"
-];
+]);
 const notificationCaptureSurfaceSelectors = [
   ".webspring-material-stack",
   ".webspring-backdrop",
@@ -119,9 +124,12 @@ export function shouldUseNotificationSnapdomCapture() {
   }
 }
 
-export function shouldIgnoreNotificationCaptureElement(element: Element) {
+export function shouldIgnoreNotificationCaptureElement(
+  element: Element,
+  ignoredSelectors: readonly string[] = notificationCaptureIgnoredSelectors
+) {
   if (!(element instanceof HTMLElement)) return false;
-  return notificationCaptureIgnoredSelectors.some((selector) => Boolean(element.closest(selector)));
+  return ignoredSelectors.some((selector) => Boolean(element.closest(selector)));
 }
 
 function getNotificationCaptureRoot() {
@@ -144,7 +152,7 @@ function rectIntersectsStrip(bounds: DOMRect, strip: DOMRect) {
   );
 }
 
-function cloneNotificationCaptureRoot(root: HTMLElement, strip: DOMRect) {
+function cloneNotificationCaptureRoot(root: HTMLElement, strip: DOMRect, ignoredSelectors: readonly string[]) {
   const clone = root.cloneNode(false) as HTMLElement;
   const rootRect = root.getBoundingClientRect();
   const rootStyle = window.getComputedStyle(root);
@@ -155,7 +163,7 @@ function cloneNotificationCaptureRoot(root: HTMLElement, strip: DOMRect) {
   const descendantIntersectionCache = new WeakMap<HTMLElement, boolean>();
   for (const child of Array.from(root.children)) {
     if (!(child instanceof HTMLElement)) continue;
-    const clonedChild = cloneNotificationCaptureElement(child, strip, pinContext, descendantIntersectionCache);
+    const clonedChild = cloneNotificationCaptureElement(child, strip, pinContext, descendantIntersectionCache, ignoredSelectors);
     if (!clonedChild) continue;
     clone.appendChild(clonedChild);
   }
@@ -216,12 +224,12 @@ function pinNotificationCloneGeometry(
   });
 }
 
-function cloneNotificationCaptureSubtree(original: HTMLElement): HTMLElement | null {
-  if (shouldIgnoreNotificationCaptureElement(original)) return null;
+function cloneNotificationCaptureSubtree(original: HTMLElement, ignoredSelectors: readonly string[]): HTMLElement | null {
+  if (shouldIgnoreNotificationCaptureElement(original, ignoredSelectors)) return null;
   const clone = original.cloneNode(false) as HTMLElement;
   for (const child of Array.from(original.childNodes)) {
     if (child instanceof HTMLElement) {
-      const clonedChild = cloneNotificationCaptureSubtree(child);
+      const clonedChild = cloneNotificationCaptureSubtree(child, ignoredSelectors);
       if (clonedChild) clone.appendChild(clonedChild);
     } else {
       clone.appendChild(child.cloneNode(true));
@@ -235,9 +243,10 @@ function cloneNotificationCaptureElement(
   strip: DOMRect,
   pinContext: NotificationCapturePinContext,
   descendantIntersectionCache: WeakMap<HTMLElement, boolean>,
+  ignoredSelectors: readonly string[],
   parentIntersectsStrip = false
 ): HTMLElement | null {
-  if (shouldIgnoreNotificationCaptureElement(original)) return null;
+  if (shouldIgnoreNotificationCaptureElement(original, ignoredSelectors)) return null;
 
   const originalRect = original.getBoundingClientRect();
   const originalStyle = window.getComputedStyle(original);
@@ -246,12 +255,12 @@ function cloneNotificationCaptureElement(
   const isCaptureSurface = notificationCaptureSurfaceSelectors.some((selector) => original.matches(selector));
 
   if (parentIntersectsStrip && isFlowAtomicDisplay(originalStyle) && !isCaptureSurface) {
-    return cloneNotificationCaptureSubtree(original);
+    return cloneNotificationCaptureSubtree(original, ignoredSelectors);
   }
 
   const hasIntersectingDescendant =
     !intersectsStrip &&
-    hasNotificationCaptureDescendantInStrip(original, strip, descendantIntersectionCache);
+    hasNotificationCaptureDescendantInStrip(original, strip, descendantIntersectionCache, ignoredSelectors);
 
   if (
     !isCaptureSurface &&
@@ -285,6 +294,7 @@ function cloneNotificationCaptureElement(
         strip,
         childPinContext,
         descendantIntersectionCache,
+        ignoredSelectors,
         childrenSeeIntersectingParent
       );
       if (clonedChild) clone.appendChild(clonedChild);
@@ -299,20 +309,21 @@ function cloneNotificationCaptureElement(
 function hasNotificationCaptureDescendantInStrip(
   element: HTMLElement,
   strip: DOMRect,
-  cache: WeakMap<HTMLElement, boolean>
+  cache: WeakMap<HTMLElement, boolean>,
+  ignoredSelectors: readonly string[]
 ): boolean {
   const cached = cache.get(element);
   if (typeof cached === "boolean") return cached;
 
   for (const child of Array.from(element.children)) {
     if (!(child instanceof HTMLElement)) continue;
-    if (shouldIgnoreNotificationCaptureElement(child)) continue;
+    if (shouldIgnoreNotificationCaptureElement(child, ignoredSelectors)) continue;
     const bounds = child.getBoundingClientRect();
     if (bounds.width > 0 && bounds.height > 0 && rectIntersectsStrip(bounds, strip)) {
       cache.set(element, true);
       return true;
     }
-    if (hasNotificationCaptureDescendantInStrip(child, strip, cache)) {
+    if (hasNotificationCaptureDescendantInStrip(child, strip, cache, ignoredSelectors)) {
       cache.set(element, true);
       return true;
     }
@@ -329,12 +340,15 @@ function hasNotificationCaptureDescendantInStrip(
  * after prepareRenderedCanvasCapture redraws it; SnapDOM's clone plugin then swaps each
  * cloned canvas for an <img> of those fresh pixels.
  */
-export function collectNotificationCanvasReplacements(strip: DOMRect): NotificationCanvasReplacement[] {
+export function collectNotificationCanvasReplacements(
+  strip: DOMRect,
+  ignoredSelectors: readonly string[] = notificationCaptureIgnoredSelectors
+): NotificationCanvasReplacement[] {
   const replacements: NotificationCanvasReplacement[] = [];
   let index = 0;
   for (const canvas of document.querySelectorAll<HTMLCanvasElement>("canvas")) {
     if (canvas.width < 1 || canvas.height < 1) continue;
-    if (shouldIgnoreNotificationCaptureElement(canvas)) continue;
+    if (shouldIgnoreNotificationCaptureElement(canvas, ignoredSelectors)) continue;
     const bounds = canvas.getBoundingClientRect();
     if (bounds.width < 1 || bounds.height < 1 || !rectIntersectsStrip(bounds, strip)) continue;
     if (!prepareRenderedCanvasCapture(canvas)) continue;
@@ -447,11 +461,15 @@ function createNotificationCapturePlugin(canvasReplacements: NotificationCanvasR
   };
 }
 
-export function createNotificationCaptureProxy(root: HTMLElement, strip: DOMRect): NotificationCaptureProxy {
+export function createNotificationCaptureProxy(
+  root: HTMLElement,
+  strip: DOMRect,
+  ignoredSelectors: readonly string[] = notificationCaptureIgnoredSelectors
+): NotificationCaptureProxy {
   const rootRect = root.getBoundingClientRect();
   const ownerDocument = root.ownerDocument;
   const proxyViewport = ownerDocument.createElement("div");
-  const clonedRoot = cloneNotificationCaptureRoot(root, strip);
+  const clonedRoot = cloneNotificationCaptureRoot(root, strip, ignoredSelectors);
 
   proxyViewport.dataset.syncloudosNotificationCaptureProxy = "true";
   proxyViewport.setAttribute(notificationCaptureProxyAttr, "true");
@@ -498,7 +516,8 @@ export function createNotificationCaptureProxy(root: HTMLElement, strip: DOMRect
 
 function createNotificationCaptureOptions(
   canvasReplacements: NotificationCanvasReplacement[],
-  scale: number
+  scale: number,
+  ignoredSelectors: readonly string[]
 ): SnapdomOptions {
   return {
     cache: "auto",
@@ -507,7 +526,7 @@ function createNotificationCaptureOptions(
     // a fallback font and ellipsize; snapdom caches the embedded fonts.
     embedFonts: true,
     fast: true,
-    filter: (element) => !shouldIgnoreNotificationCaptureElement(element),
+    filter: (element) => !shouldIgnoreNotificationCaptureElement(element, ignoredSelectors),
     filterMode: "remove",
     outerShadows: false,
     placeholders: false,
@@ -517,21 +536,43 @@ function createNotificationCaptureOptions(
   };
 }
 
+/**
+ * Captures one viewport rect of `root` to a canvas. Live canvases inside the
+ * rect must already be collected with the same ignored selectors. This is the
+ * engine behind the notification banner's screen slice and the folder split.
+ */
+export async function captureScreenSlice(
+  snapdom: NotificationSnapdomCanvasCapture,
+  root: HTMLElement,
+  canvasReplacements: NotificationCanvasReplacement[],
+  scale: number,
+  strip: DOMRect,
+  ignoredSelectors: readonly string[]
+): Promise<HTMLCanvasElement> {
+  const proxy = createNotificationCaptureProxy(root, strip, ignoredSelectors);
+  try {
+    return await snapdom.toCanvas(proxy.element, createNotificationCaptureOptions(canvasReplacements, scale, ignoredSelectors));
+  } finally {
+    proxy.dispose();
+  }
+}
+
 export async function captureNotificationSource(
   snapdom: NotificationSnapdomCanvasCapture,
   canvasReplacements: NotificationCanvasReplacement[],
   scale: number,
   captureStrip: DOMRect
 ): Promise<NotificationCaptureSource> {
-  const root = getNotificationCaptureRoot();
-  const proxy = createNotificationCaptureProxy(root, captureStrip);
-  try {
-    const canvas = await snapdom.toCanvas(proxy.element, createNotificationCaptureOptions(canvasReplacements, scale));
-    return {
-      canvas,
-      rect: new DOMRect(captureStrip.left, captureStrip.top, captureStrip.width, captureStrip.height)
-    };
-  } finally {
-    proxy.dispose();
-  }
+  const canvas = await captureScreenSlice(
+    snapdom,
+    getNotificationCaptureRoot(),
+    canvasReplacements,
+    scale,
+    captureStrip,
+    notificationCaptureIgnoredSelectors
+  );
+  return {
+    canvas,
+    rect: new DOMRect(captureStrip.left, captureStrip.top, captureStrip.width, captureStrip.height)
+  };
 }
