@@ -29,6 +29,7 @@ export type { WebspringDragProxyPoint } from "./WebspringDragProxy";
 export { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
 export type { WebspringFolderSplitOptions } from "./WebspringFolderSplitPresentation";
 export { WebspringFolderTile } from "./WebspringFolderTile";
+export { useWebspringFolderPreparation } from "./useWebspringFolderPreparation";
 export type { WebspringFolderTileProps } from "./WebspringFolderTile";
 export { WebspringIconArtwork } from "./WebspringIconArtwork";
 export type { WebspringIconArtworkProps } from "./WebspringIconArtwork";

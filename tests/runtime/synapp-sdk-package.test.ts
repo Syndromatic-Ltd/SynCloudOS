@@ -318,6 +318,7 @@ assert.deepEqual(Object.keys(webspring), [
   "resolveWebspringOrbPresentation",
   "stagePointStyle",
   "useWebspringDragProxyPosition",
+  "useWebspringFolderPreparation",
   "useWebspringMotion",
   "webspringIconSprings",
 ]);

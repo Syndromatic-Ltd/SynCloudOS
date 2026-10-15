@@ -377,6 +377,13 @@ describe("Webspring owner-local choreography", () => {
   });
 
   it("opens a Board folder over the stage and closes it with Escape", async () => {
+    // The folder's cell (icon well and label) under a 400 x 700 board.
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+      if (this.classList.contains("webspring-board")) return new DOMRect(0, 0, 400, 700);
+      if (this.dataset.webspringItemId === "folder.tools") return new DOMRect(100, 100, 80, 110);
+      if (this.classList.contains("webspring-board-icon-well")) return new DOMRect(110, 100, 60, 60);
+      return new DOMRect(0, 0, 0, 0);
+    });
     const folderShell = defineWebspring({
       manifest: {
         ...webspring.manifest,
@@ -403,14 +410,19 @@ describe("Webspring owner-local choreography", () => {
     });
 
     expect(screen.queryByRole("button", { name: "Open Beta" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Open folder Tools" }));
+    const prepare = vi.spyOn(folderShell.folderPresentation, "prepare");
+    const folderButton = screen.getByRole("button", { name: "Open folder Tools" });
+    fireEvent.pointerEnter(folderButton);
+    expect(prepare).toHaveBeenCalledWith(view.container.querySelector("main"));
+    fireEvent.click(folderButton);
     expect(runtime.store.getSnapshot().webspring.openFolderId).toBe("folder.tools");
     await settle(80);
 
     const dialog = screen.getByRole("dialog", { name: "Tools" });
     expect(dialog.hasAttribute("data-webspring-folder-panel")).toBe(true);
-    expect(view.container.querySelector(".webspring-folder-split")?.getAttribute("data-capture")).toBe("failed");
-    await waitFor(() => expect(view.container.querySelector(".webspring-folder-split")?.getAttribute("data-phase")).toBe("open"));
+    // The seam runs below the label, 6 px under the cell.
+    expect(dialog.style.top).toBe("216px");
+    await waitFor(() => expect(view.container.querySelector(".webspring-folder-split")?.getAttribute("data-phase")).toBe("open"), { timeout: 5000 });
     expect(screen.getByRole("button", { name: "Open Beta" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Open Gamma" })).toBeTruthy();
 
@@ -419,6 +431,7 @@ describe("Webspring owner-local choreography", () => {
     expect(runtime.store.getSnapshot().webspring.openFolderId).toBeNull();
     expect(screen.queryByRole("dialog")).toBeNull();
     view.unmount();
+    vi.restoreAllMocks();
   });
 
   it("merges only into the entry the dragged app rests on long enough", async () => {

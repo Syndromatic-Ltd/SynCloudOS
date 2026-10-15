@@ -217,7 +217,7 @@ export interface WebspringFolderPresentationProps {
   readonly folder: WebspringFolderItem;
   /** The element that is snapshotted and split. */
   readonly stage: HTMLElement;
-  /** The folder icon, in viewport coordinates. */
+  /** The folder's whole cell (icon and label), in viewport coordinates. */
   readonly anchor: DOMRectReadOnly;
   readonly reducedMotion: boolean;
   /** The view-styled icon for a member app inside the panel. */
@@ -225,7 +225,16 @@ export interface WebspringFolderPresentationProps {
   /** Called once the presentation has closed. */
   onClose(): void;
 }
-export type WebspringFolderPresentationComponent = ComponentType<WebspringFolderPresentationProps>;
+export type WebspringFolderPresentationComponent = ComponentType<WebspringFolderPresentationProps> & {
+  /**
+   * Starts the work an opening over `stage` needs before the folder opens (the
+   * split presentation snapshots the stage), so the opening can begin at once.
+   * Views call it through useWebspringFolderPreparation.
+   */
+  readonly prepare?: (stage: HTMLElement) => void;
+  /** Loads what the presentation needs, ahead of any folder; called once a view shows folders. */
+  readonly warm?: () => void;
+};
 
 export interface WebspringViewProps {
   readonly model: WebspringViewModel;

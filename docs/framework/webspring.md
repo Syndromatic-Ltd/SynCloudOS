@@ -85,7 +85,7 @@ An application that becomes visible later joins its declared folder if the visit
 
 The layout persists under the preference key `webspring.layout.v4` as `{ version: 4, order, folders: { [id]: { apps } }, board, updatedAt, source }`, where `order` lists top-level entries. Layouts stored under an earlier version are ignored.
 
-On the Board, tapping a folder opens it with the definition's `folderPresentation`. The default is the iOS 6 split: the stage is captured and parted below the folder icon, revealing the folder's applications on a linen underlay. Escape, or a tap on either half, closes it; reduced motion crossfades instead. Configure or replace it in the definition:
+On the Board, tapping a folder opens it with the definition's `folderPresentation`. The default is the iOS 6 split: the stage is captured and parted below the folder's cell (its icon and label), revealing the folder's applications on a linen underlay. Escape, or a tap on either half, closes it; reduced motion crossfades instead. Configure or replace it in the definition:
 
 ```tsx
 import { createWebspringFolderSplitPresentation, defineWebspring, WebspringBoardView } from "@syndromatic/syncloudos/webspring";
@@ -103,7 +103,23 @@ export default defineWebspring({
 });
 ```
 
-A custom presentation is a component receiving `WebspringFolderPresentationProps`: `folder`, `stage` (the element to present over), `anchor` (the folder icon's rect), `reducedMotion`, `renderApp(app, index)` and `onClose`. Mark the panel holding the applications with `data-webspring-folder-panel`; the Board takes an application out of the folder when a drag leaves that element.
+A custom presentation is a component receiving `WebspringFolderPresentationProps`: `folder`, `stage` (the element to present over), `anchor` (the rect of the folder's cell, icon and label), `reducedMotion`, `renderApp(app, index)` and `onClose`. Mark the panel holding the applications with `data-webspring-folder-panel`; the Board takes an application out of the folder when a drag leaves that element.
+
+A presentation may also carry two optional functions. `prepare(stage)` starts the work an opening needs before the folder opens; the split presentation snapshots the stage, keeps that snapshot until the stage's content changes, anything scrolls, the stage resizes or four seconds pass, and opens from it without capturing again. `warm()` loads what the presentation needs ahead of any folder; the split presentation loads its capture engine at idle.
+
+### Preparing a folder to open
+
+The split can only begin once the stage is captured. A view prepares the opening as the user reaches for a folder, so the capture is ready (or under way) when the click lands:
+
+```tsx
+import { useWebspringFolderPreparation } from "@syndromatic/syncloudos/webspring";
+
+const prepareFolder = useWebspringFolderPreparation(folderPresentation, hasFolders ? stageElement : null);
+
+<button onPointerEnter={prepareFolder} onPointerDown={prepareFolder} onFocus={prepareFolder} onClick={open}>…</button>
+```
+
+The hook warms the presentation while it has a stage, and returns a stable function that calls `prepare` with that stage. Pass a null stage while the view shows no folders. The Board prepares on a folder's hover, press and focus.
 
 ## Branding
 
@@ -244,7 +260,7 @@ The pieces the Board is built from are public, so a custom launcher can share it
 | `WebspringLaunchDim`, `resolveWebspringLaunchDimMotion` | The dim drawn over the launcher while an application opens. |
 | `WebspringDragProxy`, `useWebspringDragProxyPosition` | The icon or folder that follows the pointer while the user reorders. |
 | `captureWebspringDragReorderSlots`, `getWebspringDragReorderTargetFromPoint` | Hit testing for drag reordering against the slots the view draws. |
-| `WebspringFolderTile`, `createWebspringFolderSplitPresentation` | A folder's icon tile of its members, and the default folder presentation. |
+| `WebspringFolderTile`, `createWebspringFolderSplitPresentation`, `useWebspringFolderPreparation` | A folder's icon tile of its members, the default folder presentation, and preparing a folder to open. |
 | `LowerContentShelfView` | The content shelf for the shell's declared sections. |
 | `WebspringIconArtwork`, `WebspringIconEffect` | An application's icon artwork, and the shell's declared icon effect. |
 | `resolveWebspringIconPresentation`, `webspringIconSprings`, `getWebspringRadialExitForIcon`, `useWebspringMotion` | Icon entrance, launch and return motion, standard and reduced. |

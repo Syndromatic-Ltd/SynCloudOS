@@ -19,6 +19,7 @@
  */
 
 import { WebspringLaunchDim } from "../../../WebspringLaunchDim";
+import { useWebspringFolderPreparation } from "../../../useWebspringFolderPreparation";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode, type TransitionEvent } from "react";
 import { NSELayoutView, useNSEAnimationEnvironment, useNSEPresentation, type NSELayoutTransitionTiming } from "../../../../NSE/Animation";
 import { Badge, LoadingSpinner } from "../../../../NSE/NSE";
@@ -179,14 +180,16 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
   </button></NSELayoutView>;
 }
 
-function BoardFolderIcon({ folder, onOpen, ...entry }: BoardEntryProps & {
+function BoardFolderIcon({ folder, onOpen, onPrepare, ...entry }: BoardEntryProps & {
   folder: WebspringFolderItem;
-  onOpen(folder: WebspringFolderItem, well: HTMLElement): void;
+  onOpen(folder: WebspringFolderItem, cell: HTMLElement): void;
+  /** Readies the opening as the folder is about to be opened. */
+  onPrepare(): void;
 }) {
   const { model, exit, reorderMotion, index } = entry;
   const interaction = useBoardEntryInteraction(folder.id, folder.title, false, entry);
-  const wellRef = useRef<HTMLSpanElement>(null);
   const { editing, dragging } = interaction;
+  const prepare = editing ? undefined : onPrepare;
   const open = model.folders.openFolderId === folder.id;
 
   return <NSELayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
@@ -197,16 +200,21 @@ function BoardFolderIcon({ folder, onOpen, ...entry }: BoardEntryProps & {
     aria-pressed={editing ? dragging : undefined}
     aria-haspopup="dialog"
     aria-expanded={open}
-    onPointerDown={interaction.onPointerDown}
+    onPointerEnter={prepare}
+    onFocus={prepare}
+    onPointerDown={(event) => {
+      prepare?.();
+      interaction.onPointerDown(event);
+    }}
     onPointerMove={interaction.onPointerMove}
     onPointerUp={interaction.onPointerEnd}
     onPointerCancel={interaction.onPointerEnd}
     onLostPointerCapture={interaction.onPointerEnd}
     onKeyDown={interaction.onKeyDown}
-    onClick={() => { if (wellRef.current) onOpen(folder, wellRef.current); }}
+    onClick={(event) => onOpen(folder, event.currentTarget)}
   >
     <BoardIconArtwork index={index} total={model.items.length} state={boardIconState(model, exit)} exit={exit}>
-      <span ref={wellRef} className="webspring-board-icon-well">
+      <span className="webspring-board-icon-well">
         <WebspringFolderTile folder={folder} dropTarget={model.folders.dropTargetId === folder.id} />
         <Badge count={folder.badgeCount} />
       </span>
@@ -259,6 +267,7 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   const draggingApp = draggingItem?.kind === "app" ? draggingItem.app : model.apps.find((app) => app.id === draggingId) ?? null;
   const openFolder = model.items.find((item): item is WebspringFolderItem => item.kind === "folder" && item.id === model.folders.openFolderId) ?? null;
   const [folderAnchor, setFolderAnchor] = useState<DOMRectReadOnly | null>(null);
+  const prepareFolder = useWebspringFolderPreparation(FolderPresentation, model.items.some((item) => item.kind === "folder") ? stageElement : null);
   const activePage = Math.min(page, board.pages.length - 1);
   const launchDim = boardMotion.launchBackdropDim;
   const [iconExits, setIconExits] = useState<WebspringBoardLaunchExits | null>(null);
@@ -309,19 +318,19 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
     }
   }, [actions, model.items.length, model.launchPhase, model.presentationTraits.reducedMotion]);
 
-  // The open folder's icon anchors its presentation, measured again as the
-  // viewport resizes; a folder opened elsewhere brings its page into view first.
+  // The open folder's cell (icon and label) anchors its presentation, measured
+  // again as the viewport resizes; a folder opened elsewhere brings its page into view first.
   useLayoutEffect(() => {
     const folderId = model.folders.openFolderId;
     if (!folderId) {
       setFolderAnchor(null);
       return;
     }
-    const icon = boardElement.current?.querySelector<HTMLElement>(`.webspring-board-page [data-webspring-item-id="${folderId}"] .webspring-board-icon-well`);
-    if (icon) {
-      const measure = () => setFolderAnchor(icon.getBoundingClientRect());
+    const cell = boardElement.current?.querySelector<HTMLElement>(`.webspring-board-page [data-webspring-item-id="${folderId}"]`);
+    if (cell) {
+      const measure = () => setFolderAnchor(cell.getBoundingClientRect());
       measure();
-      const view = icon.ownerDocument.defaultView;
+      const view = cell.ownerDocument.defaultView;
       view?.addEventListener("resize", measure);
       return () => view?.removeEventListener("resize", measure);
     }
@@ -497,13 +506,13 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
     feedback?.trigger("selection", { intensity: .5 });
   }, [feedback, showProxy]);
 
-  const openFolderFromIcon = useCallback((folder: WebspringFolderItem, well: HTMLElement) => {
+  const openFolderFromIcon = useCallback((folder: WebspringFolderItem, cell: HTMLElement) => {
     if (suppressNextClick.current) {
       suppressNextClick.current = false;
       return;
     }
     if (model.folders.openFolderId === folder.id) return;
-    setFolderAnchor(well.getBoundingClientRect());
+    setFolderAnchor(cell.getBoundingClientRect());
     if (actions.openFolder(folder.id)) feedback?.trigger("light", { intensity: .4 });
   }, [actions, feedback, model.folders.openFolderId]);
 
@@ -521,7 +530,7 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
 
   const renderEntry = (item: WebspringItem, globalIndex: number) => item.kind === "app"
     ? <BoardIcon key={item.id} app={item.app} opening={openingAppId === item.id} {...entryProps(globalIndex, topLevelIds, iconExits?.get(item.id))} />
-    : <BoardFolderIcon key={item.id} folder={item} onOpen={openFolderFromIcon} {...entryProps(globalIndex, topLevelIds, iconExits?.get(item.id))} />;
+    : <BoardFolderIcon key={item.id} folder={item} onOpen={openFolderFromIcon} onPrepare={prepareFolder} {...entryProps(globalIndex, topLevelIds, iconExits?.get(item.id))} />;
 
   const renderFolderApp = (app: WebspringApp, index: number) => <BoardIcon
     key={app.id}

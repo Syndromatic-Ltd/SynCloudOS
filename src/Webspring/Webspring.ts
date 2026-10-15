@@ -229,6 +229,10 @@ export function defineWebspring<const TManifest extends WebspringManifest>(
   if (folderPresentationInput !== undefined && !isReactComponent(folderPresentationInput)) {
     throw new TypeError("Webspring folderPresentation must be a React component.");
   }
+  for (const hook of ["prepare", "warm"]) {
+    const value: unknown = folderPresentationInput === undefined ? undefined : Reflect.get(Object(folderPresentationInput), hook);
+    if (value !== undefined && typeof value !== "function") throw new TypeError(`Webspring folderPresentation.${hook} must be a function.`);
+  }
   const folderPresentation = (folderPresentationInput ?? defaultWebspringFolderPresentation) as WebspringFolderPresentationComponent;
   const capturedManifest = captureSynWareManifest(manifestInput);
   if (!capturedManifest.ok) throw manifestError(capturedManifest.errors);

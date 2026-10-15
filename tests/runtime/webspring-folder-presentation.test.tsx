@@ -29,6 +29,7 @@ const capture = vi.hoisted(() => ({
   available: true,
   strips: [] as DOMRect[],
   hold: null as Promise<void> | null,
+  warm: vi.fn(),
 }));
 vi.mock("@zumer/snapdom", () => ({ snapdom: {} }));
 vi.mock("../../src/Webspring/notificationScreenSliceCapture", () => ({
@@ -36,6 +37,7 @@ vi.mock("../../src/Webspring/notificationScreenSliceCapture", () => ({
   shouldUseNotificationSnapdomCapture: () => capture.available,
   collectNotificationCanvasReplacements: () => [],
   clearNotificationCanvasMarks: () => undefined,
+  warmNotificationCaptureEngine: capture.warm,
   captureScreenSlice: async (_snapdom: unknown, _root: unknown, _replacements: unknown, _scale: number, strip: DOMRect) => {
     capture.strips.push(strip);
     await capture.hold;
@@ -47,6 +49,7 @@ vi.mock("../../src/Webspring/notificationScreenSliceCapture", () => ({
 }));
 
 const { createWebspringFolderSplitPresentation } = await import("../../src/Webspring/WebspringFolderSplitPresentation");
+const { useWebspringFolderPreparation } = await import("../../src/Webspring/useWebspringFolderPreparation");
 
 const folder = {
   kind: "folder",
@@ -64,6 +67,7 @@ beforeEach(() => {
   capture.available = true;
   capture.strips = [];
   capture.hold = null;
+  capture.warm.mockClear();
   stageBox = new DOMRect(0, 0, 800, 600);
   stage = document.createElement("div");
   stage.getBoundingClientRect = () => stageBox;
@@ -78,8 +82,9 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+const Presentation = createWebspringFolderSplitPresentation({ panelHeight: 240, duration: 0 });
+
 function renderSplit({ reducedMotion = false, onClose = vi.fn() } = {}) {
-  const Presentation = createWebspringFolderSplitPresentation({ panelHeight: 240, duration: 0 });
   const view = render(<Presentation
     folder={folder}
     stage={stage}
@@ -153,6 +158,56 @@ describe("Webspring folder split presentation", () => {
     const bottom = root.querySelectorAll<HTMLCanvasElement>(".webspring-folder-split-half")[1];
     expect(bottom.style).toMatchObject({ top: "186px", height: "514px", transform: "translate3d(0, 240px, 0)" });
     expect(root.dataset.phase).toBe("open");
+  });
+
+  it("opens from a snapshot prepared before the folder opened, without capturing again", async () => {
+    const { promise, resolve: release } = Promise.withResolvers<void>();
+    capture.hold = promise;
+    Presentation.prepare!(stage);
+    Presentation.prepare!(stage);
+    await waitFor(() => expect(capture.strips).toHaveLength(1));
+
+    // The click lands while the prepared capture is still under way.
+    const { root } = renderSplit();
+    expect(root.dataset.phase).toBe("preparing");
+    await act(async () => release());
+    await opened(root);
+
+    expect(root.dataset.capture).toBe("ready");
+    expect(capture.strips).toHaveLength(1);
+  });
+
+  it("captures afresh when the stage changed after it was prepared", async () => {
+    Presentation.prepare!(stage);
+    await waitFor(() => expect(capture.strips).toHaveLength(1));
+    stage.append(document.createElement("p"));
+    await act(async () => undefined);
+    Presentation.prepare!(stage);
+    await waitFor(() => expect(capture.strips).toHaveLength(2));
+
+    stageBox = new DOMRect(0, 0, 640, 600);
+    const { root } = renderSplit();
+    await opened(root);
+    expect(capture.strips.map((strip) => strip.width)).toEqual([800, 800, 640]);
+  });
+
+  it("warms the presentation for a view with folders and prepares on request", async () => {
+    let prepare: () => void = () => undefined;
+    function View({ stageElement }: { stageElement: HTMLElement | null }) {
+      prepare = useWebspringFolderPreparation(Presentation, stageElement);
+      return null;
+    }
+    const view = render(<View stageElement={null} />);
+    prepare();
+    expect(capture.warm).not.toHaveBeenCalled();
+
+    view.rerender(<View stageElement={stage} />);
+    expect(capture.warm).toHaveBeenCalledTimes(1);
+    prepare();
+    await waitFor(() => expect(capture.strips).toHaveLength(1));
+    const { root } = renderSplit();
+    await opened(root);
+    expect(capture.strips).toHaveLength(1);
   });
 
   it("closes on Escape once the halves have rejoined", async () => {
