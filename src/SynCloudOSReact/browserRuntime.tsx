@@ -513,7 +513,9 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
   const baseRuntimeConfig: SynCloudOSHostCompositionInput["runtimeConfig"] = {
     authenticationPolicy: authenticationPolicy ?? "disabled",
     presentationRolesForRoute: options.application ? () => [] : webspringPresentationRoles,
-    ...(options.persistenceNamespace === undefined ? {} : { persistenceNamespace: options.persistenceNamespace }),
+    ...(options.persistenceNamespace !== undefined
+      ? { persistenceNamespace: options.persistenceNamespace }
+      : options.application ? { persistenceNamespace: `SynCloudOS:application:${options.application.id}` } : {}),
     ...(options.policyProfile === undefined ? {} : { policyProfile: options.policyProfile }),
     ...(typeof options.authentication === "object"
       ? { identity: { sessionAdapter: options.authentication.service.sessionAdapter } }

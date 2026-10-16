@@ -161,6 +161,8 @@ the address bar. The bundle's entry route must be non-root (for example `/hello`
 the app releases its session and leaves no launcher or automatic relaunch;
 dispose and mount the host again to begin a fresh session. Suspension retains
 the session with its surface hidden and inert until the runtime activates it.
+Application preferences persist across host disposal and remount, scoped to
+the browser origin and the application's ID.
 
 Supply exactly one registered application, including contributions. `shell`,
 `shellResources`, and `contentSources` cannot accompany `application`.

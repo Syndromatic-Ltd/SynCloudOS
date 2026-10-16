@@ -22,7 +22,7 @@ const aborted = vi.fn();
 const executed = vi.fn();
 function Application() {
   const app = useSynWare();
-  useSynWareCommands([{ id: "com.example.application-host.probe", title: "Probe", execute: executed,
+  useSynWareCommands([{ id: `${app.appId}.probe`, title: "Probe", execute: executed,
     defaultKeyBindings: [{ key: "F8", modifiers: [], scope: "application", repeat: "ignore" }] }]);
   useEffect(() => {
     sessions.push(app);
@@ -102,6 +102,38 @@ describe("application-only browser host", () => {
     expect(second.runtime).not.toBe(first.runtime);
     expect(sessions.at(-1)?.signal.aborted).toBe(false);
     expect(second.element.querySelector('[data-testid="application"]')).not.toBeNull();
+  });
+  it("persists app preferences across disposal and a new runtime mount", async () => {
+    const first = await mount();
+    const app = sessions.at(-1)!;
+    expect(app.persistence.setPreference("volume", 0.7)).toBe(true);
+    expect(app.persistence.setPreference("quality", "high")).toBe(true);
+    await act(async () => { expect((await first.host.dispose()).status).toBe("disposed"); });
+    const second = await mount(first.element);
+    const restored = sessions.at(-1)!;
+    expect(second.runtime).not.toBe(first.runtime);
+    expect(restored.persistence.getPreference("volume", 0.2)).toBe(0.7);
+    expect(restored.persistence.getPreference("quality", "medium")).toBe("high");
+  });
+  it("does not inherit another application host's preferences", async () => {
+    const first = await mount();
+    expect(sessions.at(-1)!.persistence.setPreference("volume", 0.4)).toBe(true);
+    await act(async () => { await first.host.dispose(); });
+    const otherId = "com.example.other-host";
+    const other = createSynWare({ manifest: { ...bundle.manifest, id: otherId }, root: Application });
+    await mount(first.element, { bundles: [other], application: { id: otherId } });
+    expect(sessions.at(-1)!.appId).toBe(otherId);
+    expect(sessions.at(-1)!.persistence.getPreference("volume", 0.9)).toBe(0.9);
+    expect(sessions.at(-1)!.persistence.setPreference("volume", 0.8)).toBe(true);
+    await act(async () => { await mounts.at(-1)!.dispose(); });
+    await mount(first.element);
+    expect(sessions.at(-1)!.persistence.getPreference("volume", 0.9)).toBe(0.4);
+  });
+  it("preserves an explicit internal host persistence namespace", async () => {
+    const namespace = "tests:application-host-explicit";
+    await mount(element(), { persistenceNamespace: namespace });
+    expect(sessions.at(-1)!.persistence.setPreference("explicit", "saved")).toBe(true);
+    expect(window.localStorage.getItem(`${namespace}:${id}:explicit`)).toBe('"saved"');
   });
   it("routes keyboard commands through the real application responder", async () => {
     const { element: target } = await mount();
@@ -199,5 +231,6 @@ describe("application-only browser host", () => {
     await act(async () => { mounts.push(await mountSynCloudOS({ element: target, shell, authentication: "disabled" })); });
     expect(WebspringController).toHaveBeenCalled();
     expect(target.querySelector('[data-testid="shell"]')).not.toBeNull();
+    expect(vi.mocked(createSynCloudOS).mock.calls.at(-1)![0].persistenceNamespace).toBeUndefined();
   });
 });
