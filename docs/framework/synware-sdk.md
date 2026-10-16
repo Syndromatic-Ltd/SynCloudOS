@@ -4,6 +4,14 @@ A SynWare is an application bundle that runs on SynCloudOS, in the way a `.app` 
 
 For host-supplied font catalogues and imported fonts, use `useSynWareFonts()`. The [managed fonts guide](managed-fonts.md) shows one Node-safe declaration, early website CSS and preloads, app font pickers, and byte-backed TextFX acquisition.
 
+Production browser hosts choose either `mountSynCloudOS({ element, bundles, shell })`
+for Webspring or `mountSynCloudOS({ element, bundles, application: { id } })` for
+one fullscreen application without a shell. The modes are mutually exclusive.
+Application-only hosting uses a real SynWare session, requires exactly one
+registered app and disabled authentication, and does not relaunch a closed app.
+See [the application host setup](getting-started.md#fullscreen-application-without-a-shell)
+for Vite configuration, routing and disposal.
+
 ## Anatomy of a bundle
 
 ```text

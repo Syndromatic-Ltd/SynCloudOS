@@ -126,6 +126,50 @@ declares its own access policy.
 
 ## Mount the runtime
 
+### Fullscreen application without a shell
+
+For a site that runs exactly one application, configure Vite with
+`synCloudOS({ webspringEntry: false })` and select the registered app by ID:
+
+```tsx
+import "@syndromatic/syncloudos/nse/styles.css";
+import "@syndromatic/syncloudos/browser/styles.css";
+import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
+import { bundles } from "virtual:syncloudos/composition";
+
+const element = document.getElementById("root");
+if (!element) throw new Error("The page needs a #root element.");
+const host = await mountSynCloudOS({
+  element,
+  bundles,
+  application: { id: "com.example.hello" },
+});
+import.meta.hot?.dispose(() => host.dispose("hot reload"));
+```
+
+This mode mounts the real SynWare session directly in a viewport-filling
+application surface. It does not construct Webspring, a launcher, a top bar,
+or a primary floating window. It uses the registered app's route and lifecycle,
+and the same scoped SDK clients as a shell-hosted application. The host owns
+the fullscreen app-view presentation even if the bundle declares a windowed
+presentation. This fills the browser viewport; entering the browser's native
+Fullscreen API still requires a user gesture.
+
+The site root `/` opens the application's primary route without redirecting
+the address bar. The bundle's entry route must be non-root (for example `/hello`);
+`/` is reserved for the host alias. Declared nested application routes remain available. Closing
+the app releases its session and leaves no launcher or automatic relaunch;
+dispose and mount the host again to begin a fresh session. Suspension retains
+the session with its surface hidden and inert until the runtime activates it.
+
+Supply exactly one registered application, including contributions. `shell`,
+`shellResources`, and `contentSources` cannot accompany `application`.
+Authentication defaults to disabled in this mode; `optional` and `required`
+are rejected because application hosting does not provide a sign-in surface.
+Existing Webspring hosts retain their authentication and multi-app behavior.
+
+### Webspring shell
+
 `src/main.tsx` mounts SynCloudOS into a page element. Import the browser styles once so the shell and application stage have their layout.
 
 ```tsx
