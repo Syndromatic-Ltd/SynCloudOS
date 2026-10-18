@@ -20,8 +20,11 @@
 
 import { captureSynWareManifest, type SynWareWebspringFoldersManifest } from "../SynCloudOS/AppSDK";
 import { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
+import { defaultWebspringFolderAppearance, defaultWebspringFolderSmoothSurface } from "./WebspringFolderAppearance";
+import { nseSmoothSurfaceRadiusTokens } from "../NSE/SmoothSurface";
 import type {
   WebspringContent,
+  WebspringFolderAppearance,
   WebspringFolderPresentationComponent,
   WebspringDefinition,
   WebspringDefinitionInput,
@@ -199,6 +202,81 @@ function captureQuickSwitch(input: unknown): Readonly<WebspringQuickSwitchOption
   return Object.freeze(overflow === undefined ? {} : { overflow });
 }
 
+function assertKnownFields(input: Record<string, unknown>, label: string, known: readonly string[]) {
+  const extra = Object.keys(input).filter((key) => !known.includes(key));
+  if (extra.length > 0) throw new TypeError(`${label} has unknown fields: ${extra.join(", ")}.`);
+}
+
+const smoothSurfaceCurves: Record<string, true> = { arc: true, squircle: true, superellipse: true, clothoid: true };
+
+function captureFolderShape(input: unknown): WebspringFolderAppearance["shape"] {
+  const label = "Webspring folderAppearance.shape";
+  if (input === undefined) return defaultWebspringFolderAppearance.shape;
+  assertPlainObject(input, label);
+  const kind = dataProperty(input, "kind", false);
+  if (kind === "circle") {
+    assertKnownFields(input, label, ["kind"]);
+    return Object.freeze({ kind });
+  }
+  if (kind !== "roundedRect") throw new TypeError(`${label}.kind must be roundedRect or circle.`);
+  assertKnownFields(input, label, ["kind", "smoothSurface"]);
+  const surfaceInput = dataProperty(input, "smoothSurface", false);
+  const defaults = defaultWebspringFolderSmoothSurface;
+  if (surfaceInput === undefined) return Object.freeze({ kind, smoothSurface: defaults });
+  const surfaceLabel = `${label}.smoothSurface`;
+  assertPlainObject(surfaceInput, surfaceLabel);
+  assertKnownFields(surfaceInput, surfaceLabel, ["radius", "curve", "smoothing"]);
+  const field = (key: keyof typeof defaults): unknown => {
+    const value = dataProperty(surfaceInput, key, false);
+    return value === undefined ? defaults[key] : value;
+  };
+  const radius = field("radius");
+  const percentage = typeof radius === "string" && /^(?:\d+(?:\.\d+)?|\.\d+)%$/u.test(radius) ? Number.parseFloat(radius) : undefined;
+  if (!(percentage !== undefined && percentage <= 50) &&
+    !(typeof radius === "number" && Number.isFinite(radius) && radius >= 0) &&
+    !(typeof radius === "string" && Object.hasOwn(nseSmoothSurfaceRadiusTokens, radius))) {
+    throw new TypeError(`${surfaceLabel}.radius must be a percentage up to 50%, a non-negative number of pixels or an NSE radius token.`);
+  }
+  const curve = field("curve");
+  if (typeof curve !== "string" || !Object.hasOwn(smoothSurfaceCurves, curve)) {
+    throw new TypeError(`${surfaceLabel}.curve must be arc, squircle, superellipse or clothoid.`);
+  }
+  const smoothing = field("smoothing");
+  if (typeof smoothing !== "number" || !Number.isFinite(smoothing) || smoothing < 0 || smoothing > 1) {
+    throw new TypeError(`${surfaceLabel}.smoothing must be a number from 0 to 1.`);
+  }
+  return Object.freeze({
+    kind,
+    smoothSurface: Object.freeze({ radius, curve, smoothing } as typeof defaults),
+  });
+}
+
+function captureFolderFill(input: unknown): WebspringFolderAppearance["fill"] {
+  const label = "Webspring folderAppearance.fill";
+  if (input === undefined || input === "inset") return "inset";
+  if (typeof input !== "object" || input === null) throw new TypeError(`${label} must be inset or a texture.`);
+  assertPlainObject(input, label);
+  if (dataProperty(input, "kind", false) !== "texture") throw new TypeError(`${label} must be inset or a texture.`);
+  assertKnownFields(input, label, ["kind", "image", "size", "colour"]);
+  const text = (key: string, fallback?: string) => {
+    const value = dataProperty(input, key, false);
+    if (value === undefined && fallback !== undefined) return fallback;
+    if (typeof value !== "string" || value.trim() === "") throw new TypeError(`${label}.${key} must be a nonempty string.`);
+    return value;
+  };
+  return Object.freeze({ kind: "texture" as const, image: text("image"), size: text("size", "cover"), colour: text("colour", "transparent") });
+}
+
+function captureFolderAppearance(input: unknown): WebspringFolderAppearance {
+  if (input === undefined) return defaultWebspringFolderAppearance;
+  assertPlainObject(input, "Webspring folderAppearance");
+  assertKnownFields(input, "Webspring folderAppearance", ["shape", "fill"]);
+  return Object.freeze({
+    shape: captureFolderShape(dataProperty(input, "shape", false)),
+    fill: captureFolderFill(dataProperty(input, "fill", false)),
+  });
+}
+
 /** Rejects a folder declaration the reconciler could not honour. */
 function assertFolders(folders: SynWareWebspringFoldersManifest | undefined) {
   if (!folders) return;
@@ -234,6 +312,7 @@ export function defineWebspring<const TManifest extends WebspringManifest>(
     if (value !== undefined && typeof value !== "function") throw new TypeError(`Webspring folderPresentation.${hook} must be a function.`);
   }
   const folderPresentation = (folderPresentationInput ?? defaultWebspringFolderPresentation) as WebspringFolderPresentationComponent;
+  const folderAppearance = captureFolderAppearance(dataProperty(input, "folderAppearance", false));
   const capturedManifest = captureSynWareManifest(manifestInput);
   if (!capturedManifest.ok) throw manifestError(capturedManifest.errors);
   if (!capturedManifest.value.webspringShell) throw new TypeError("A Webspring manifest requires manifest.webspringShell.");
@@ -268,6 +347,7 @@ export function defineWebspring<const TManifest extends WebspringManifest>(
     ...(iconEffectInput === undefined ? {} : { iconEffect: iconEffectInput as WebspringDefinition["iconEffect"] }),
     ...(quickSwitch === undefined ? {} : { quickSwitch }),
     folderPresentation,
+    folderAppearance,
     ...(contentInput === undefined ? {} : { content: cloneData(contentInput, "Webspring content") as Readonly<WebspringContent> }),
   };
   return Object.freeze(definition);

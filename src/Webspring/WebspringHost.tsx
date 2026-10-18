@@ -36,6 +36,7 @@ import { FocusScope, HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeNS
 import { presentationForSizeClass, WebspringController, type SynCloudOSShellResources } from "./WebspringController";
 import { WebspringQuickSwitchView } from "./WebspringQuickSwitchView";
 import { WebspringIconEffectProvider } from "./WebspringIconEffect";
+import { WebspringFolderAppearanceProvider } from "./WebspringFolderAppearance";
 import { SystemPanelsLayer } from "./SystemPanelsLayer";
 import { NotificationCentrePresenter } from "./NotificationCentrePresenter";
 import { WebspringStatusLayer } from "./WebspringStatusLayer";
@@ -293,6 +294,7 @@ export function WebspringHost({
   if (model?.branding) lastBranding.current = model.branding;
 
   return <HostSiteBrandingProvider value={model?.branding ?? lastBranding.current}><MaterialProvider><WebspringIconEffectProvider component={shell.iconEffect}>
+    <WebspringFolderAppearanceProvider value={shell.folderAppearance}>
     <WebspringHostPresentationContext.Provider value={presentationContext}>
     <div className="webspring-view-host">
     {/* Keep entrance-owned inertness separate from the modal focus scope's sibling restoration. */}
@@ -351,5 +353,6 @@ export function WebspringHost({
     />
     <WebspringStatusLayer errors={snapshot.errors} />
     <SystemStartupLayer phase={phase} />
+    </WebspringFolderAppearanceProvider>
   </WebspringIconEffectProvider></MaterialProvider></HostSiteBrandingProvider>;
 }

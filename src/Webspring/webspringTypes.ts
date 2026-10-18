@@ -19,6 +19,7 @@
  */
 
 import type { ComponentType, ExoticComponent, ReactNode } from "react";
+import type { NSESmoothSurfaceCurve, NSESmoothSurfaceRadius } from "../NSE/SmoothSurface";
 import type {
   SynWareLocalisedText,
   SynWareManifestV1,
@@ -280,6 +281,55 @@ export interface WebspringQuickSwitchOptions {
   readonly overflow?: "shrink" | "scroll";
 }
 
+/** A corner radius: a percentage of the folder tile's shorter side (up to `"50%"`),
+ *  pixels, or an NSE radius token. A percentage keeps the shape as the tile scales. */
+export type WebspringFolderCornerRadius = `${number}%` | NSESmoothSurfaceRadius;
+
+/** A rounded-rectangle folder's corners, drawn with NSESmoothSurface geometry. */
+export interface WebspringFolderSmoothSurface {
+  /** Defaults to `"36%"`. */
+  readonly radius?: WebspringFolderCornerRadius;
+  /** Defaults to `squircle`. */
+  readonly curve?: NSESmoothSurfaceCurve;
+  /** From 0 to 1. Defaults to 0.6. */
+  readonly smoothing?: number;
+}
+
+/** The outline of a folder's icon. */
+export type WebspringFolderShape =
+  | { readonly kind: "roundedRect"; readonly smoothSurface?: WebspringFolderSmoothSurface }
+  | { readonly kind: "circle" };
+
+/** An image the folder's well is lined with. */
+export interface WebspringFolderTexture {
+  readonly kind: "texture";
+  /** The image URL. */
+  readonly image: string;
+  /** A CSS `background-size`. Defaults to `cover`. */
+  readonly size?: string;
+  /** A CSS colour beneath the image. Defaults to `transparent`. */
+  readonly colour?: string;
+}
+
+/** What lines the folder's well: `inset`, the dark translucent well, or a texture. */
+export type WebspringFolderFill = "inset" | WebspringFolderTexture;
+
+/** How every view draws a folder's icon. */
+export interface WebspringFolderAppearanceOptions {
+  /** Defaults to a `roundedRect` with the default smooth surface. */
+  readonly shape?: WebspringFolderShape;
+  /** Defaults to `inset`. */
+  readonly fill?: WebspringFolderFill;
+}
+
+/** A folder appearance with every default filled in. */
+export interface WebspringFolderAppearance {
+  readonly shape:
+    | { readonly kind: "roundedRect"; readonly smoothSurface: Readonly<Required<WebspringFolderSmoothSurface>> }
+    | { readonly kind: "circle" };
+  readonly fill: "inset" | Readonly<Required<WebspringFolderTexture>>;
+}
+
 export interface WebspringDefinitionInput<TManifest extends WebspringManifest = WebspringManifest> {
   readonly manifest: TManifest;
   readonly components: Readonly<Record<string, WebspringViewComponent>>;
@@ -288,6 +338,8 @@ export interface WebspringDefinitionInput<TManifest extends WebspringManifest = 
   readonly quickSwitch?: WebspringQuickSwitchOptions;
   /** Defaults to `createWebspringFolderSplitPresentation()`. */
   readonly folderPresentation?: WebspringFolderPresentationComponent;
+  /** How folder icons look in every view. Defaults to an inset rounded rectangle. */
+  readonly folderAppearance?: WebspringFolderAppearanceOptions;
 }
 
 export interface WebspringDefinition<TManifest extends WebspringManifest = WebspringManifest> {
@@ -301,4 +353,6 @@ export interface WebspringDefinition<TManifest extends WebspringManifest = Websp
   readonly iconEffect?: WebspringIconEffectComponent;
   readonly quickSwitch?: Readonly<WebspringQuickSwitchOptions>;
   readonly folderPresentation: WebspringFolderPresentationComponent;
+  /** The folder appearance, defaults filled in. */
+  readonly folderAppearance: WebspringFolderAppearance;
 }

@@ -29,6 +29,7 @@ export type { WebspringDragProxyPoint } from "./WebspringDragProxy";
 export { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
 export type { WebspringFolderSplitOptions } from "./WebspringFolderSplitPresentation";
 export { WebspringFolderTile } from "./WebspringFolderTile";
+export { useWebspringFolderAppearance } from "./WebspringFolderAppearance";
 export { useWebspringFolderPreparation } from "./useWebspringFolderPreparation";
 export type { WebspringFolderPreparationOptions } from "./useWebspringFolderPreparation";
 export type { WebspringFolderTileProps } from "./WebspringFolderTile";
@@ -75,9 +76,16 @@ export type {
   WebspringDefinition,
   WebspringDefinitionInput,
   WebspringDialPlacement,
+  WebspringFolderAppearance,
+  WebspringFolderAppearanceOptions,
+  WebspringFolderCornerRadius,
+  WebspringFolderFill,
   WebspringFolderItem,
   WebspringFolderPresentationComponent,
   WebspringFolderPresentationProps,
+  WebspringFolderShape,
+  WebspringFolderSmoothSurface,
+  WebspringFolderTexture,
   WebspringIconEffectComponent,
   WebspringIconEffectProps,
   WebspringItem,
