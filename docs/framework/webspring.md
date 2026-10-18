@@ -107,6 +107,29 @@ A custom presentation is a component receiving `WebspringFolderPresentationProps
 
 A presentation may also carry three optional functions. `prepare(stage)` starts the work an opening needs as the user reaches for a folder. `keepPrepared(stage)` keeps that work done ahead of any reach while the view is at rest, and returns the function that stops it. `warm()` loads what the presentation needs ahead of any folder.
 
+### Folder icons
+
+Every view draws a folder's icon in one appearance, set with `folderAppearance` in the definition. `WebspringFolderTile` reads it, so a custom view that renders the tile needs no styles of its own:
+
+```tsx
+export default defineWebspring({
+  manifest,
+  components: { board: WebspringBoardView },
+  folderAppearance: {
+    shape: { kind: "roundedRect", smoothSurface: { radius: "36%", curve: "squircle", smoothing: 0.6 } },
+    fill: { kind: "texture", image: "/assets/textures/cotton.jpg", size: "128px", colour: "#20242c" },
+  },
+});
+```
+
+- `shape` is `{ kind: "roundedRect", smoothSurface? }` or `{ kind: "circle" }`. A rounded rectangle is clipped to NSESmoothSurface geometry measured from the tile. `smoothSurface.radius` is a percentage of the tile's shorter side up to `"50%"` (which keeps the shape as the tile scales), pixels, or an NSE radius token. `curve` is `arc`, `squircle`, `superellipse` or `clothoid`, and `smoothing` runs from 0 to 1. The default is `{ kind: "roundedRect", smoothSurface: { radius: "36%", curve: "squircle", smoothing: 0.6 } }`.
+- `fill` is `"inset"`, the dark translucent well (the default), or `{ kind: "texture", image, size?, colour? }`: the image URL, a CSS `background-size` (default `cover`) and a CSS colour beneath it (default `transparent`).
+- Either fill is pressed into the surface: an inner shadow and a lower highlight inside the shape, and a light lip below it. While an application rests on the folder to join it, the tile grows and a ring follows the shape outside it. In a circle, the member icons are inset to fit inside it.
+
+`defineWebspring` throws a `TypeError` for an unknown field, shape or curve, a radius over `50%`, a smoothing outside 0 to 1, or a texture without an image. A view drawing folder-shaped artwork of its own, such as the well an application rests on before it makes a folder, reads the resolved appearance with `useWebspringFolderAppearance()`.
+
+The open folder's underlay is set separately, on the presentation.
+
 ### Preparing a folder to open
 
 The split can only begin once the stage is captured, so the split presentation keeps a snapshot ready:
@@ -268,6 +291,7 @@ The pieces the Board is built from are public, so a custom launcher can share it
 | `WebspringDragProxy`, `useWebspringDragProxyPosition` | The icon or folder that follows the pointer while the user reorders. |
 | `captureWebspringDragReorderSlots`, `getWebspringDragReorderTargetFromPoint` | Hit testing for drag reordering against the slots the view draws. |
 | `WebspringFolderTile`, `createWebspringFolderSplitPresentation`, `useWebspringFolderPreparation` | A folder's icon tile of its members, the default folder presentation, and preparing a folder to open. |
+| `useWebspringFolderAppearance` | The definition's folder appearance, for artwork that matches the folder tile. |
 | `LowerContentShelfView` | The content shelf for the shell's declared sections. |
 | `WebspringIconArtwork`, `WebspringIconEffect` | An application's icon artwork, and the shell's declared icon effect. |
 | `resolveWebspringIconPresentation`, `webspringIconSprings`, `getWebspringRadialExitForIcon`, `useWebspringMotion` | Icon entrance, launch and return motion, standard and reduced. |

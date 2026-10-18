@@ -33,11 +33,8 @@ afterEach(async () => {
   for (const runtime of runtimes.splice(0)) await runtime.dispose("webspring-folders-host-test");
 });
 
-it("traps focus in an open folder under the standard host and returns it to the folder", async () => {
-  const runtime = createTestRuntime({ initialBundles: ["alpha", "beta", "gamma"].map((id) => createTestBundle({ id, route: `/${id}` })) });
-  runtimes.push(runtime);
-  await runtime.boot({ initialPathname: "/" });
-  const shell = defineWebspring({
+function defineFoldersShell(extra: Record<string, unknown> = {}) {
+  return defineWebspring({
     manifest: {
       schemaVersion: 1, id: "fixture.folders-shell", version: "1.0.0", title: "Fixture",
       webspringShell: {
@@ -48,7 +45,32 @@ it("traps focus in an open folder under the standard host and returns it to the 
       },
     },
     components: { board: WebspringBoardView },
+    ...extra,
   });
+}
+
+async function bootFolders() {
+  const runtime = createTestRuntime({ initialBundles: ["alpha", "beta", "gamma"].map((id) => createTestBundle({ id, route: `/${id}` })) });
+  runtimes.push(runtime);
+  await runtime.boot({ initialPathname: "/" });
+  return runtime;
+}
+
+it("draws the Board's folder icons in the definition's folder appearance", async () => {
+  const runtime = await bootFolders();
+  const shell = defineFoldersShell({ folderAppearance: { shape: { kind: "circle" }, fill: { kind: "texture", image: "/cotton.jpg", size: "96px" } } });
+  render(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={shell} startupPhase="complete" /></SynCloudOSProvider>);
+
+  const tile = (await screen.findByRole("button", { name: "Open folder Tools" })).querySelector<HTMLElement>(".webspring-folder-tile")!;
+  expect(tile.dataset.shape).toBe("circle");
+  expect(tile.dataset.fill).toBe("texture");
+  expect(tile.style.getPropertyValue("--webspring-folder-tile-texture")).toBe('url("/cotton.jpg")');
+  expect(tile.style.getPropertyValue("--webspring-folder-tile-texture-size")).toBe("96px");
+});
+
+it("traps focus in an open folder under the standard host and returns it to the folder", async () => {
+  const runtime = await bootFolders();
+  const shell = defineFoldersShell();
   render(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={shell} startupPhase="complete" /></SynCloudOSProvider>);
 
   const folderButton = await screen.findByRole("button", { name: "Open folder Tools" });

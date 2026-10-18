@@ -110,6 +110,46 @@ describe("Webspring folder definition", () => {
     expect(() => defineFolders([], { folderPresentation: Object.assign(() => null, { prepare: "soon" }) })).toThrow(/folderPresentation\.prepare must be a function/);
   });
 
+  it("fills in the folder appearance's defaults and keeps a configured one", () => {
+    expect(defineFolders([]).folderAppearance).toEqual({
+      shape: { kind: "roundedRect", smoothSurface: { radius: "36%", curve: "squircle", smoothing: 0.6 } },
+      fill: "inset",
+    });
+    expect(defineFolders([], { folderAppearance: { shape: { kind: "roundedRect", smoothSurface: { radius: 14, curve: "arc" } } } }).folderAppearance).toEqual({
+      shape: { kind: "roundedRect", smoothSurface: { radius: 14, curve: "arc", smoothing: 0.6 } },
+      fill: "inset",
+    });
+    const textured = defineFolders([], { folderAppearance: { shape: { kind: "circle" }, fill: { kind: "texture", image: "/cotton.jpg" } } });
+    expect(textured.folderAppearance).toEqual({
+      shape: { kind: "circle" },
+      fill: { kind: "texture", image: "/cotton.jpg", size: "cover", colour: "transparent" },
+    });
+    expect(Object.isFrozen(textured.folderAppearance.fill)).toBe(true);
+    expect(defineFolders([], { folderAppearance: { shape: { kind: "roundedRect", smoothSurface: { radius: "xl" } } } })
+      .folderAppearance.shape).toMatchObject({ smoothSurface: { radius: "xl" } });
+  });
+
+  it.each([
+    [{ shape: { kind: "hexagon" } }, /shape\.kind must be roundedRect or circle/],
+    [{ shape: "circle" }, /shape must be a plain object/],
+    [{ shape: { kind: "circle", smoothSurface: {} } }, /shape has unknown fields: smoothSurface/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { radius: "60%" } } }, /radius must be a percentage up to 50%/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { radius: -2 } } }, /radius must be/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { radius: "huge" } } }, /radius must be/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { curve: "bezier" } } }, /curve must be arc, squircle, superellipse or clothoid/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { smoothing: 2 } } }, /smoothing must be a number from 0 to 1/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { radius: null } } }, /radius must be/],
+    [{ fill: "cotton" }, /fill must be inset or a texture/],
+    [{ fill: { kind: "texture" } }, /fill\.image must be a nonempty string/],
+    [{ fill: { kind: "texture", image: "/cotton.jpg", colour: "" } }, /fill\.colour must be a nonempty string/],
+    [{ fill: { kind: "texture", image: "/cotton.jpg", repeat: true } }, /fill has unknown fields: repeat/],
+    [{ outline: "none" }, /folderAppearance has unknown fields: outline/],
+    ["inset", /folderAppearance must be a plain object/],
+  ])("rejects the folder appearance %j", (folderAppearance, message) => {
+    expect(() => defineFolders([], { folderAppearance })).toThrow(TypeError);
+    expect(() => defineFolders([], { folderAppearance })).toThrow(message);
+  });
+
   it("rejects duplicate folder IDs", () => {
     expect(() => defineFolders([
       { id: "folder.tools", title: { key: "a" }, order: 1, apps: ["one"] },
