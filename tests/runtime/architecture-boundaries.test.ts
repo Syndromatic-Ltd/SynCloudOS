@@ -168,6 +168,20 @@ function createFixture() {
 }
 
 describe("architecture dependency boundaries", () => {
+  it("admits only the lifecycle runtime bridge from FX", () => {
+    const root = createFixture();
+    write(root, "src/SynCloudOS/fxRuntimeContracts.ts", "export const lifecycle = 1;\n");
+    write(root, "src/SynCloudOS/ErrorManager/lifecycleError.ts", "export const lifecycle = 1;\n");
+    write(root, "src/FX/Test/example.ts", 'import { lifecycle } from "../../SynCloudOS/fxRuntimeContracts";\n');
+    const candidate = fixturePolicy();
+    candidate.layers = structuredClone(policy.layers);
+    expect(validateImportEdges({ root, policy: candidate }).errors).toEqual([]);
+    write(root, "src/FX/Test/example.ts", 'import { lifecycle } from "../../SynCloudOS/ErrorManager/lifecycleError";\n');
+    expect(validateImportEdges({ root, policy: candidate }).errors).toEqual(expect.arrayContaining([
+      expect.stringContaining("fx must use a public runtime entrypoint"),
+    ]));
+  });
+
   it("keeps Chronosphere presentation independent of runtime and app context", () => {
     const root = createFixture();
     write(root, "src/NSE/Chronosphere/hostComposition.ts", "export const view = 1;\n");

@@ -207,7 +207,8 @@
         "src/FX/**"
       ],
       "mayImportLayers": [
-        "fx"
+        "fx",
+        "runtime"
       ],
       "mayImportEntrypoints": {
         "runtime": [
