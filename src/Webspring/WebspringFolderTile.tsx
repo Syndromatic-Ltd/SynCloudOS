@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useId, useLayoutEffect, useState, type CSSProperties } from "react";
+import { useLayoutEffect, useState, type CSSProperties } from "react";
 import { resolveWebspringFolderTileGeometry, useWebspringFolderAppearance } from "./WebspringFolderAppearance";
 import type { WebspringFolderItem } from "./webspringTypes";
 import "./WebspringFolderTile.css";
@@ -41,13 +41,17 @@ const BLEED = 32;
  * in SVG rather than with box shadows, which follow the box and not the clip:
  * the inner shadow and lower highlight are a frame around the shape, offset and
  * clipped with the well; the lip below, the drop-target ring and its shadow are
- * masked to outside the shape.
+ * clipped to outside the shape.
+ *
+ * Nothing refers to an SVG fragment (`url(#…)` masks, filters or clips): the
+ * stage snapshot behind an opening folder inlines every `url()` it computes,
+ * and one fragment reference costs it the stage's background images. Blurs are
+ * CSS filters and the outside clip is a CSS even-odd `path()`.
  */
 export function WebspringFolderTile({ folder, dropTarget = false, className }: WebspringFolderTileProps) {
   const appearance = useWebspringFolderAppearance();
   const [element, setElement] = useState<HTMLSpanElement | null>(null);
   const [size, setSize] = useState<{ readonly width: number; readonly height: number } | null>(null);
-  const id = `webspring-folder-tile-${useId().replace(/[^\w-]/gu, "")}`;
 
   useLayoutEffect(() => {
     if (!element) return undefined;
@@ -79,6 +83,9 @@ export function WebspringFolderTile({ folder, dropTarget = false, className }: W
   const frame = geometry && size
     ? `M ${-BLEED} ${-BLEED} H ${size.width + BLEED} V ${size.height + BLEED} H ${-BLEED} Z ${geometry.path}`
     : null;
+  const layer = size
+    ? { width: size.width, height: size.height, viewBox: `0 0 ${size.width} ${size.height}`, overflow: "visible" }
+    : null;
 
   return <span
     ref={setElement}
@@ -89,45 +96,18 @@ export function WebspringFolderTile({ folder, dropTarget = false, className }: W
     style={style}
     aria-hidden="true"
   >
-    {geometry && size ? <svg
-      className="webspring-folder-tile-rim"
-      width={size.width}
-      height={size.height}
-      viewBox={`0 0 ${size.width} ${size.height}`}
-      overflow="visible"
-    >
-      <defs>
-        <mask id={`${id}-outside`} maskUnits="userSpaceOnUse" x={-BLEED} y={-BLEED} width={size.width + 2 * BLEED} height={size.height + 2 * BLEED}>
-          <rect x={-BLEED} y={-BLEED} width={size.width + 2 * BLEED} height={size.height + 2 * BLEED} fill="#fff" />
-          <path d={geometry.path} fill="#000" />
-        </mask>
-        <filter id={`${id}-shadow`} filterUnits="userSpaceOnUse" x={-BLEED} y={-BLEED} width={size.width + 2 * BLEED} height={size.height + 2 * BLEED}>
-          <feGaussianBlur stdDeviation="9" />
-        </filter>
-      </defs>
-      <g mask={`url(#${id}-outside)`}>
-        <path className="webspring-folder-tile-lip" d={geometry.path} transform="translate(0 1)" />
-        <g className="webspring-folder-tile-ring">
-          <path className="webspring-folder-tile-ring-shadow" d={geometry.path} transform="translate(0 8)" filter={`url(#${id}-shadow)`} />
-          <path className="webspring-folder-tile-ring-stroke" d={geometry.path} fill="none" strokeWidth="6" />
-        </g>
-      </g>
-    </svg> : null}
+    {geometry && frame && layer ? <span className="webspring-folder-tile-rim" style={{ clipPath: `path(evenodd, "${frame}")` }}>
+      <svg className="webspring-folder-tile-lip" {...layer}><path d={geometry.path} transform="translate(0 1)" /></svg>
+      <span className="webspring-folder-tile-ring">
+        <svg className="webspring-folder-tile-ring-shadow" {...layer}><path d={geometry.path} transform="translate(0 8)" /></svg>
+        <svg className="webspring-folder-tile-ring-stroke" {...layer}><path d={geometry.path} strokeWidth="6" /></svg>
+      </span>
+    </span> : null}
     <span className="webspring-folder-tile-surface">
-      {frame && size ? <svg
-        className="webspring-folder-tile-shading"
-        width={size.width}
-        height={size.height}
-        viewBox={`0 0 ${size.width} ${size.height}`}
-      >
-        <defs>
-          <filter id={`${id}-inner`} filterUnits="userSpaceOnUse" x={-BLEED} y={-BLEED} width={size.width + 2 * BLEED} height={size.height + 2 * BLEED}>
-            <feGaussianBlur stdDeviation="2.5" />
-          </filter>
-        </defs>
-        <path className="webspring-folder-tile-inner-shadow" d={frame} fillRule="evenodd" transform="translate(0 2)" filter={`url(#${id}-inner)`} />
-        <path className="webspring-folder-tile-inner-highlight" d={frame} fillRule="evenodd" transform="translate(0 -1)" />
-      </svg> : null}
+      {frame && layer ? <>
+        <svg className="webspring-folder-tile-inner-shadow" {...layer}><path d={frame} fillRule="evenodd" transform="translate(0 2)" /></svg>
+        <svg className="webspring-folder-tile-inner-highlight" {...layer}><path d={frame} fillRule="evenodd" transform="translate(0 -1)" /></svg>
+      </> : null}
     </span>
     {folder.apps.slice(0, 9).map((app) => <span key={app.id} className="webspring-folder-tile-member">
       {app.iconUrl ? <img src={app.iconUrl} alt="" draggable={false} /> : <span>{app.title.slice(0, 1)}</span>}
