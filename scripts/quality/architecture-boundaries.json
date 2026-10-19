@@ -209,7 +209,11 @@
       "mayImportLayers": [
         "fx"
       ],
-      "mayImportEntrypoints": {}
+      "mayImportEntrypoints": {
+        "runtime": [
+          "src/SynCloudOS/fxRuntimeContracts.ts"
+        ]
+      }
     },
     {
       "id": "runtime-inspector",
