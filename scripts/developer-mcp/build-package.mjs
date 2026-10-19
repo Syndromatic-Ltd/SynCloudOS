@@ -18,13 +18,14 @@ export async function writeDeveloperSdkData({repositoryRoot,directory,commit,sou
 }
 export function writeDeveloperMcpPackage({repositoryRoot,directory,sdkVersion}) {
   const repository=JSON.parse(readFileSync(resolve(repositoryRoot,"package.json"),"utf8"));
-  cpSync(resolve(repositoryRoot,"scripts/developer-mcp"),resolve(directory,"scripts/developer-mcp"),{recursive:true,filter:path=>!path.endsWith("build-package.mjs")});
+  cpSync(resolve(repositoryRoot,"scripts/developer-mcp"),resolve(directory,"scripts/developer-mcp"),{recursive:true,filter:path=>!path.endsWith("build-package.mjs")&&!path.endsWith("PACKAGE_README.md")});
+  cpSync(resolve(repositoryRoot,"scripts/developer-mcp/PACKAGE_README.md"),resolve(directory,"README.md"));
   for (const file of ["validation-core.mjs","bundle-paths.mjs"]) {
     mkdirSync(resolve(directory,"scripts/synware"),{recursive:true});
     cpSync(resolve(repositoryRoot,"scripts/synware",file),resolve(directory,"scripts/synware",file));
   }
   for (const file of ["LICENSE","NOTICE"]) cpSync(resolve(repositoryRoot,file),resolve(directory,file));
-  const manifest={name:"@syndromatic/syncloudos-developer-mcp",version:sdkVersion,type:"module",description:"Offline, installed-SDK-matched SynCloudOS developer tools for MCP coding agents",license:repository.license,repository:repository.repository,engines:{node:">=22.12.0"},bin:{"syncloudos-mcp":"scripts/developer-mcp/server.mjs"},files:["scripts","LICENSE","NOTICE"],peerDependencies:{"@syndromatic/syncloudos":sdkVersion},dependencies:{"@modelcontextprotocol/sdk":repository.devDependencies["@modelcontextprotocol/sdk"],zod:repository.devDependencies.zod,typescript:repository.devDependencies.typescript,ajv:repository.dependencies.ajv}};
+  const manifest={name:"@syndromatic/syncloudos-developer-mcp",version:sdkVersion,type:"module",description:"Offline, installed-SDK-matched SynCloudOS developer tools for MCP coding agents",license:repository.license,repository:repository.repository,engines:{node:">=22.12.0"},bin:{"syncloudos-mcp":"scripts/developer-mcp/server.mjs"},files:["scripts","README.md","LICENSE","NOTICE"],peerDependencies:{"@syndromatic/syncloudos":sdkVersion},dependencies:{"@modelcontextprotocol/sdk":repository.devDependencies["@modelcontextprotocol/sdk"],zod:repository.devDependencies.zod,typescript:repository.devDependencies.typescript,ajv:repository.dependencies.ajv}};
   writeFileSync(resolve(directory,"package.json"),JSON.stringify(manifest,null,2)+"\n");
   return manifest;
 }

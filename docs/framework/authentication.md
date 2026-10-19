@@ -4,13 +4,24 @@ Authentication in SynCloudOS has two halves. A small browser service tracks the 
 
 ## Choose a policy
 
-The `authentication` option of `mountSynCloudOS` takes one of three shapes:
+The `authentication` option of `mountSynCloudOS` (type `AuthenticationInput`) takes a policy string or a configuration object:
 
 | Value | Behaviour |
 | --- | --- |
-| `"disabled"` | A public site. No authentication requests are made. |
-| `{ policy: "optional", service }` | Public content stays available, and the shell offers a Sign In action. |
+| `"disabled"` (the default) | A public site. No authentication service exists and no authentication requests are made. |
+| `"optional"` | The policy alone, with no service. The runtime applies the optional policy, but nothing can sign in: the shell's account action stays pending and the sign-in window reports "Authentication is not configured." |
+| `"required"` | The policy alone, with no service. The runtime applies the required policy and presents the sign-in window, which reports "Authentication is not configured." and cannot be completed. |
+| `{ policy: "optional", service }` | Public content stays available, and the shell offers a Sign In action backed by `service`. |
 | `{ policy: "required", service, loginComponent? }` | Protected content waits for a confirmed session. The shell keeps the requested route locally and presents the sign-in window until the session is authenticated. |
+
+The shorthand strings `"optional"` and `"required"` construct no authentication service, no `/auth/*` requests and no session. They suit a host that wants the policy applied before its backend exists. To let people actually sign in, pass the object form with a `service`, normally from `createHttpAuthentication` (below). `"disabled"` is the only string that needs no further setup.
+
+### Prerequisites
+
+- `"disabled"` needs no backend.
+- The object form with `createHttpAuthentication` needs a server that answers the same-origin `/auth/methods`, `/auth/session`, `/auth/start` and `/auth/logout` endpoints: use the [server handler](#server-handler) and an OIDC provider.
+- With `"disabled"` or `"optional"` (string or object), the primary bundle declares `runtime.policy.public` in its manifest, because it launches before anyone signs in.
+- With `"required"`, the sign-in window is presented before the primary application launches. The `application: { id }` host accepts the same `authentication` values as the Webspring shell; see [Getting started](getting-started.md#fullscreen-application-without-a-shell).
 
 The service reports one of `disabled`, `checking`, `anonymous`, `authenticating`, `authenticated`, `expired` and `error`. Disposing the host disposes the service you supplied.
 

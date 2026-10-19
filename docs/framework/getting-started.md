@@ -17,11 +17,27 @@ cd my-site
 npm install https://github.com/Syndromatic-Ltd/SynCloudOS/releases/download/v1.0.0-beta.1/syndromatic-syncloudos-1.0.0-beta.1.tgz
 ```
 
+The `react-ts` template supplies the rest of the toolchain. If you create the project another way, your `package.json` needs at least this set alongside the SynCloudOS archive:
+
+| Package | Kind | Supplied by the `react-ts` template |
+| --- | --- | --- |
+| `react`, `react-dom` | dependencies (the package's React peer dependency) | Yes |
+| `vite` | dev dependency | Yes |
+| `typescript` | dev dependency | Yes |
+| `@types/react`, `@types/react-dom` | dev dependencies | Yes |
+| `@vitejs/plugin-react` | dev dependency, optional (Fast Refresh and the React transform) | Yes |
+
+The SynCloudOS SDK does not depend on `@vitejs/plugin-react`; it comes from the template. Without it, drop the `react()` line from the Vite config below, and Vite's built-in esbuild compiles TSX but there is no Fast Refresh.
+
 SynCloudOS ships as one package, `@syndromatic/syncloudos`, with focused subpath entries such as `/sdk`, `/nse`, `/webspring` and `/fx/animation`. Every import in your project comes from one of those entries. The [package reference](overview.md#the-package) lists them all.
 
 For AI coding agents, install the matching [Developer MCP companion](developer-mcp.md). It reads this installed SDK's declarations and bundled documentation, validates your project and creates SynWare bundles without overwriting existing files.
 
 Read [Errors and outcomes](errors.md) for lifecycle diagnostics, stable codes and the source maps included in the SDK.
+
+### Restricted npm install policies
+
+Some npm configurations restrict dependency install scripts. A restricted policy can print a warning such as `1 package had install scripts blocked ... esbuild ... (postinstall: node install.js)`. This comes from your environment's npm policy and is not an SDK failure. Vite's dependency esbuild ships its platform binary as a separate package, and builds still work when that binary is installed; only esbuild's own postinstall verification and optimisation step is skipped. If a later build fails to start esbuild, approve the script for that package. With npm 12, `npm approve-scripts esbuild` records the approval (`npm approve-scripts --allow-scripts-pending` lists what is waiting). Other npm versions and package managers use different commands, so check your tool's documentation. Never loosen the policy for packages you do not trust.
 
 ## Add the Vite plugin
 
@@ -37,16 +53,18 @@ export default defineConfig({ plugins: [react(), synCloudOS()] });
 
 By default the plugin looks for bundles in `src/SynWare/*.app` and for the shell in `src/Webspring/Contents/index.tsx`. Pass `synCloudOS({ appsDirectory, webspringEntry })` to choose other locations, or `webspringEntry: false` to build an application-only composition without a shell.
 
-Add a declaration file so TypeScript knows the shape of the virtual module:
+Add a declaration file so TypeScript knows the shape of the virtual module. It is `src/syncloudos-composition.d.ts` here; any file TypeScript includes works:
 
 ```ts
 declare module "virtual:syncloudos/composition" {
   import type { MountSynCloudOSOptions } from "@syndromatic/syncloudos/browser";
   export const bundles: NonNullable<MountSynCloudOSOptions["bundles"]>;
-  export const shell: MountSynCloudOSOptions["shell"];
+  export const shell: NonNullable<MountSynCloudOSOptions["shell"]>;
   export const shellResources: MountSynCloudOSOptions["shellResources"];
 }
 ```
+
+This declaration types `shell` as the Webspring definition, so `mountSynCloudOS({ shell, shellResources, ... })` typechecks under strict TypeScript without a guard. It describes the default shell composition. With `webspringEntry: false`, or a shell entry with no default export, the generated module exports `shell` as `null`; in that case mount with `application: { id }` instead and do not import `shell` (see [Fullscreen application without a shell](#fullscreen-application-without-a-shell)).
 
 ## Define the shell
 
@@ -186,8 +204,7 @@ session with its surface hidden and inert until the runtime activates it.
 Application preferences persist across host disposal and remount, scoped to the
 browser origin and the application's ID.
 
-`authentication` accepts the same policies and authentication service object as
-the Webspring host, and presents the same system login window:
+`authentication` accepts the same values as the Webspring host (a policy string or a `{ policy, service }` object; see [Authentication](authentication.md#choose-a-policy)) and presents the same system login window:
 
 - `"disabled"` (the default) has no session. Preferences offer no account and
   the system never offers Log Out.
@@ -196,6 +213,8 @@ the Webspring host, and presents the same system login window:
   out. The application keeps its session across sign-in and cancel.
 - `"required"` presents the login window before the primary application
   launches, and again after Log Out.
+
+The shorthand strings `"optional"` and `"required"` apply the policy but construct no authentication service, so nobody can complete a sign-in. For a working sign-in, pass `{ policy: "optional" | "required", service }` with a service from `createHttpAuthentication` and the backend described in [Authentication](authentication.md#prerequisites).
 
 With `"disabled"` or `"optional"` the primary bundle must be public
 (`runtime.policy.public`), because it launches before anyone signs in.
@@ -214,6 +233,8 @@ import { bundles, shell, shellResources } from "virtual:syncloudos/composition";
 
 const element = document.getElementById("root");
 if (!element) throw new Error("The page needs a #root element.");
+
+// `shell` is the Webspring definition from the default shell entry; no guard is needed.
 
 const host = await mountSynCloudOS({
   element,
