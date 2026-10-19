@@ -4400,7 +4400,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
               : code === "CONNECTION_ERROR"
                 ? runtime.errors.createConnectionError(app, cause, errorContext, retry)
                 : runtime.errors.capture({ code: "APP_CONTENT_FAILED", title: "SynWare operation failed",
-                  message: errorContext.technicalMessage, source: errorContext.source,
+                  error: cause, source: errorContext.source,
                   appId: app.id, category: "app", context: { operation, scope: "app" } });
             if (code) {
               const ownerClosed = () => runtime.errors.dismiss(captured.id);

@@ -54,7 +54,7 @@ import { createSynCloudOS } from "../SynCloudOS/Runtime/createSynCloudOS";
 import type { RuntimeDisposalResult } from "../SynCloudOS/Runtime/disposalTypes";
 import type { SynCloudOSRuntime, SynCloudOSRuntimeConfig } from "../SynCloudOS/Runtime/runtimeInstanceTypes";
 import type { SynCloudOSPolicyProfile } from "../SynCloudOS/PolicyKit/policyTypes";
-import { createSynCloudOSFacade, toTechnicalReport } from "../SynCloudOS/SynCloudOS";
+import { createSynCloudOSFacade } from "../SynCloudOS/SynCloudOS";
 import type { AuthenticationInput, WebspringDefinition } from "../Webspring/webspringTypes";
 import type { SynCloudOSShellResources } from "../Webspring/WebspringController";
 import { getWebspringLocaleResourceLoader } from "../Webspring/webspringLocale";
@@ -304,7 +304,7 @@ function RootRecoveryBoundary({ runtime, options, fontCatalogue, children }: Pro
       const browserWindow = runtime.environment.browser.getWindow();
       return <FocusScope scopeId={`root-system-alert:${error.id}`} kind="modal" parentResponderId="runtime" trapFocus>
         <div className="syncloudos-root-error-shell"><NSEAlertBackdrop><SystemAlert
-          error={options.application ? applicationRecoveryError(error) : error} technicalReport={toTechnicalReport(error)} appearance={appearance}
+          error={options.application ? applicationRecoveryError(error) : error} appearance={appearance}
           onDismiss={() => browserWindow?.location.reload()} onReload={() => browserWindow?.location.reload()}
           onReturn={() => options.shell ? browserWindow?.location.assign("/") : browserWindow?.location.reload()}
           onOpenMailClient={(destination) => { browserWindow?.location.assign(destination); }}
@@ -419,7 +419,6 @@ async function beginBrowserMount(element: Element): Promise<BrowserMountAttempt>
 
 interface BootstrapRecovery {
   readonly error: CapturedSynCloudOSError;
-  readonly technicalReport: string;
   readonly branding: ResolvedSiteBranding;
   readonly appearance: "light" | "dark";
   readonly applicationIcon: string | null;
@@ -447,10 +446,7 @@ function captureBootstrapFailure(runtime: SynCloudOSRuntime, error: unknown, rou
   }
   return runtime.errors.capture({
     code: "UNKNOWN_RUNTIME_ERROR", title: "SynCloudOS could not start.",
-    message: "The browser host could not finish starting.",
-    technicalMessage: error instanceof Error ? error.message : String(error),
-    technicalDetails: error instanceof Error ? error.stack : String(error),
-    source: context.source, severity: "fatal", recoverable: false,
+    error, source: context.source, severity: "fatal", recoverable: false,
     suggestedActions: ["reload", "returnToWebspring"], context,
   });
 }
@@ -469,7 +465,7 @@ function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt,
   root.render(<HostSiteBrandingProvider value={recovery.branding}>
     <NSEAppearanceProvider appearance={appearance} colourScheme={recovery.appearance}>
       <div className="syncloudos-root-error-shell"><NSEAlertBackdrop>
-        <SystemAlert error={recovery.error} technicalReport={recovery.technicalReport}
+        <SystemAlert error={recovery.error}
           appearance={recovery.appearance} applicationIcon={recovery.applicationIcon}
           onDismiss={() => navigate(home)} onReturn={() => navigate(home)} onReload={() => navigate()}
           onOpenMailClient={(destination) => navigate(destination)} />
@@ -765,7 +761,7 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
       // retries through a fresh browser mount instead of invoking that owner.
       const { retry: _retry, ...capturedData } = captured;
       recovery = {
-        error: options.application ? applicationRecoveryError(capturedData) : capturedData, technicalReport: toTechnicalReport(captured),
+        error: options.application ? applicationRecoveryError(capturedData) : capturedData,
         branding: hostBranding(options, runtime),
         appearance: runtime.appearance.resolved(),
         applicationIcon: captured.appId ? runtime.store.getSnapshot().appInfo[captured.appId]?.icon.src ?? null : null,

@@ -45,7 +45,8 @@ describe("browser global watchdog adapter", () => {
     } as unknown as ErrorEvent);
     expect(runtime.store.getSnapshot().errors.at(-1)).toMatchObject({
       code: "GLOBAL_SCRIPT_ERROR",
-      technicalMessage: "isolated global failure",
+      exception: "Error",
+      message: "isolated global failure",
     });
     expect(other.store.getSnapshot().errors).toEqual([]);
 

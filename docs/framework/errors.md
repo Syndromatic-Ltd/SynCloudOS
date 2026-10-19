@@ -38,13 +38,44 @@ try {
 | `code: string` | Stable diagnostic identifier in the code table below. |
 | `resource: { kind: string; id?: string }` | Resource family and the caller-provided identity, where available. |
 | `operation: string` | Public operation that could not run. |
+| `access?: "call" \| "get" \| "set"` | How the operation was reached, when the resource records it. |
+| `problem?: string` | A resource-specific cause, when the disposal reason alone does not explain it. |
 | `disposal?: { reason: string; stack?: string }` | First recorded disposal reason and, in development, its stack. |
 | `creationStack?: string` | Development-only resource creation stack. |
 | `ownerStack?: string` | Development-only React owner stack, when React can supply one. |
 
-The message names the resource, operation, problem and suggested fix, ending with `[CODE]`. An unidentified resource omits the quoted id. Built-in disposal reasons are `explicit`, `owner-unmounted`, `owner-signal-aborted` and `application-closed`; some resources supply a more specific reason. Creation, disposal and React owner stacks are not captured in production.
+The message is one short factual sentence, such as `Cannot set AFXLayer.hidden after disposal.` or `Cannot call NSEArrayController.select() after disposal.` A resource that does not record how the operation was reached says `Cannot use …`. The code, resource identity, disposal reason and stacks are fields, not message text, and the remedy is the code's catalogue hint. Built-in disposal reasons are `explicit`, `owner-unmounted`, `owner-signal-aborted` and `application-closed`; some resources supply a more specific reason. Creation, disposal and React owner stacks are not captured in production.
 
 The first disposal wins, including when an owner signal aborts before a later explicit `dispose()`. A closed application needs a new resource when it opens again. Component-owned resources must not outlive their component. For NSE controllers use the managed hooks rather than `useMemo` plus effect cleanup: React StrictMode replays effect cleanup without unmounting the component. See [controller lifetimes](controllers.md#controller-lifetimes).
+
+## Error reports
+
+When a watchdog or the runtime captures an error, the alert and the copyable technical report share one structure. The alert title stays human, for example "Webspring stopped because of an error." for the root watchdog or "Notes stopped unexpectedly." for an application. Below it, a thrown error shows its summary:
+
+```text
+Exception: SynCloudOSLifecycleError
+Code: AFX_LAYER_DISPOSED
+Message: Cannot set AFXLayer.hidden after disposal.
+Caught by: SynCloudOS.RootWatchdog
+```
+
+- **Exception** is the thrown value's class name, such as `SynCloudOSLifecycleError` or `TypeError`. A thrown non-`Error` value reads `Non-Error value (string)` or similar.
+- **Code** is the error's one authoritative code (see below).
+- **Message** is the thrown error's own message.
+- **Caught by** names the boundary that caught the error. Where it originated is the stack in the technical details.
+
+A condition the framework reports itself, such as a connection error or an unknown route, shows its human message instead. Its code and **Reported by** line move into the technical details.
+
+The single **Technical details** disclosure holds everything else, and only what is known. It includes the lifecycle resource identity and disposal reason, the problem, the source location, the application, window and route, severity and recoverability, the catalogue hint and docs, and the stack. The thrown error's cause, the development-only disposal stack and the React component stack follow. Unknown fields are omitted rather than printed as `none`, and no text appears twice. The copyable report (`toTechnicalReport`, also in the Inspector's error report) is the title, the summary, the technical details and the capture time.
+
+### Code identity
+
+One error has one code:
+
+- A thrown value that carries a catalogue code keeps it. Every `SynCloudOSLifecycleError` does, as does any error whose `code` property is a catalogue code.
+- The capturing boundary's generic code applies only when the thrown value has no catalogue code. Examples are `UNKNOWN_RUNTIME_ERROR` at the root watchdog, `APP_CONTENT_FAILED` at an application watchdog, `APP_LAUNCH_FAILED`, `GLOBAL_SCRIPT_ERROR` and `UNHANDLED_PROMISE_REJECTION`.
+
+Branch on `captured.code` and `captured.exception`, never on message text. Code that captures through `runtime.errors.capture` passes the thrown value as `error`, and the same identity rule applies.
 
 ## Contracts kept unchanged
 

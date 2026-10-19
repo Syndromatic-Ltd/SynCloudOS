@@ -20,7 +20,8 @@
 
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import type { SynCloudOSAppInfo } from "../AppInfo/appInfoTypes";
-import type { CapturedSynCloudOSError } from "./errorTypes";
+import type { CapturedSynCloudOSError, SynCloudOSErrorPayload } from "./errorTypes";
+import { createCapturedError } from "./errorReport";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 
 type WatchdogScope = "root" | "app";
@@ -48,38 +49,40 @@ interface SynCloudOSWatchdogState {
   capturedError: CapturedSynCloudOSError | null;
 }
 
-function fallbackCapturedError(
-  error: unknown,
-  watchdogName: string,
-  scope: WatchdogScope,
-  now: number,
-  app?: SynCloudOSAppInfo | null,
-): CapturedSynCloudOSError {
-  const message = error instanceof Error && error.message ? error.message : String(error);
-  const details = error instanceof Error && error.stack ? error.stack : String(error);
-
+/** The capture a watchdog makes for `error`: identity comes from the thrown value. */
+function watchdogPayload(error: unknown, props: SynCloudOSWatchdogProps, componentStack?: string | null): SynCloudOSErrorPayload {
+  const root = props.scope === "root";
   return {
+    code: root ? "UNKNOWN_RUNTIME_ERROR" : "APP_CONTENT_FAILED",
+    title: root ? "Webspring stopped because of an error." : `${props.app?.displayName ?? "A SynWare"} stopped unexpectedly.`,
+    error,
+    appId: props.app?.id,
+    packageName: props.app?.packageName,
+    source: root ? "SynCloudOS.RootWatchdog" : "SynCloudOS.AppWatchdog",
+    severity: "fatal",
+    recoverable: false,
+    suggestedActions: root ? ["reload"] : ["returnToWebspring"],
+    category: root ? "watchdog" : "app",
+    context: {
+      watchdog: props.watchdogName,
+      ...(componentStack ? { componentStack } : {}),
+      ...(props.presentation?.kind === "window" ? { windowId: props.presentation.id } : {}),
+      ...(props.presentation ? { presentation: props.presentation.kind } : {}),
+    },
+  };
+}
+
+/** Shown when the runtime could not record the failure (or before it has):
+ * the same identity, formatted locally without runtime state. */
+function uncapturedError(error: unknown, props: SynCloudOSWatchdogProps, componentStack?: string | null): CapturedSynCloudOSError {
+  const now = props.runtime.environment.now();
+  const payload = watchdogPayload(error, props, componentStack);
+  return createCapturedError({ ...payload, context: { ...payload.context, captureStatus: "notCaptured" } }, {
     id: `uncaptured-watchdog-error-${now}`,
     at: now,
     timestamp: new Date(now).toISOString(),
-    code: scope === "root" ? "UNKNOWN_RUNTIME_ERROR" : "APP_CONTENT_FAILED",
-    title: scope === "root" ? "Webspring caught a runtime error." : `${app?.packageName ?? "A SynWare"} stopped unexpectedly.`,
-    message: scope === "root"
-      ? "SynCloudOS caught an unexpected rendering error before it could blank the screen."
-      : "An unexpected error has prevented this application from working properly.",
-    appId: app?.id,
-    packageName: app?.packageName,
-    technicalMessage: message,
-    technicalDetails: details,
-    source: "SynCloudOS.Watchdog",
-    severity: "fatal",
-    recoverable: false,
-    suggestedActions: scope === "root" ? ["reload"] : ["returnToWebspring"],
-    context: {
-      watchdog: watchdogName,
-      captureStatus: "renderFallbackBeforeCapture"
-    }
-  };
+    appDisplayName: props.app?.displayName,
+  });
 }
 
 export class SynCloudOSWatchdog extends Component<SynCloudOSWatchdogProps, SynCloudOSWatchdogState> {
@@ -99,39 +102,14 @@ export class SynCloudOSWatchdog extends Component<SynCloudOSWatchdogProps, SynCl
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch(error: unknown, errorInfo: ErrorInfo) {
     if (this.capturedErrorId) return;
-
-    const context = {
-      watchdog: this.props.watchdogName,
-      source: this.props.scope === "root" ? "SynCloudOS.RootWatchdog" : "SynCloudOS.AppWatchdog",
-      componentStack: errorInfo.componentStack,
-      appId: this.props.app?.id ?? null,
-      packageName: this.props.app?.packageName ?? null,
-      windowId: this.props.presentation?.kind === "window" ? this.props.presentation.id : null,
-      presentation: this.props.presentation?.kind ?? null
-    };
 
     let captured: CapturedSynCloudOSError;
     try {
-      captured = this.props.runtime.errors.capture({
-        code: this.props.scope === "root" ? "UNKNOWN_RUNTIME_ERROR" : "APP_CONTENT_FAILED",
-        title: this.props.scope === "root" ? "Webspring caught a runtime error." : `${this.props.app?.packageName ?? "A SynWare"} stopped unexpectedly.`,
-        message: this.props.scope === "root"
-          ? "SynCloudOS caught an unexpected rendering error before it could blank the screen."
-          : "An unexpected error has prevented this application from working properly.",
-        appId: this.props.app?.id,
-        packageName: this.props.app?.packageName,
-        technicalMessage: error.message,
-        technicalDetails: error.stack ?? errorInfo.componentStack ?? undefined,
-        source: context.source,
-        severity: "fatal",
-        recoverable: false,
-        suggestedActions: this.props.scope === "root" ? ["reload"] : ["returnToWebspring"],
-        context,
-      });
-    } catch (captureError) {
-      captured = fallbackCapturedError(captureError, this.props.watchdogName, this.props.scope, this.props.runtime.environment.now(), this.props.app);
+      captured = this.props.runtime.errors.capture(watchdogPayload(error, this.props, errorInfo.componentStack));
+    } catch {
+      captured = uncapturedError(error, this.props, errorInfo.componentStack);
     }
 
     this.capturedErrorId = captured.id;
@@ -154,13 +132,7 @@ export class SynCloudOSWatchdog extends Component<SynCloudOSWatchdogProps, SynCl
   private getDisplayError() {
     if (this.state.capturedError) return this.state.capturedError;
     if (!this.localFallbackError) {
-      this.localFallbackError = fallbackCapturedError(
-        this.state.rawError,
-        this.props.watchdogName,
-        this.props.scope,
-        this.props.runtime.environment.now(),
-        this.props.app,
-      );
+      this.localFallbackError = uncapturedError(this.state.rawError, this.props);
     }
     return this.localFallbackError;
   }

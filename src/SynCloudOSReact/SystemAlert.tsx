@@ -27,6 +27,7 @@ import cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
 import { synCloudOSLogoUrl as synCloudOSLogo } from "../SynCloudOS/Resources/frameworkAssets";
 import type { ResolvedSiteBranding } from "../SynCloudOS/SynCloudOS";
 import { useHostSiteBranding } from "./siteBrandingContext";
+import { errorSummary } from "../SynCloudOS/ErrorManager/errorReport";
 import "./system-alert.css";
 
 /** The disclosed technical report. Its scroll box wraps the text in a single
@@ -75,16 +76,18 @@ export function SystemAlertAssetCache() {
 
 /**
  * A view-shaped error payload deliberately does not import ErrorManager.
- * Runtime hosts own capture, redaction and richer technical reports; this
- * private recovery composition consumes their serialisable error outcome.
+ * Runtime hosts own capture and the technical details; this private recovery
+ * composition consumes their serialisable error outcome and shares only the
+ * pure summary formatter with the copyable report.
  */
 interface SystemAlertError {
   readonly code: string;
   readonly title: string;
   readonly message: string;
+  /** The thrown value's class name; present when the alert reports an exception. */
+  readonly exception?: string;
   readonly appId?: string;
   readonly packageName?: string;
-  readonly technicalMessage?: string;
   readonly technicalDetails?: string;
   readonly suggestedActions?: readonly string[];
   readonly retry?: () => void;
@@ -92,13 +95,6 @@ interface SystemAlertError {
   readonly category?: string;
   readonly source?: string;
   readonly context?: Readonly<Record<string, unknown>>;
-}
-
-function formatTechnicalDetails(error: SystemAlertError) {
-  return error.technicalDetails ?? error.technicalMessage ?? [
-    `Exception: ${error.code}`,
-    `Message: ${error.message}`,
-  ].join("\n");
 }
 
 function capturedRecoveryScope(error: SystemAlertError): "app" | "site" | "syncloudos" | null {
@@ -142,7 +138,6 @@ export function SystemAlert({
   onReturn,
   onReload,
   onOpenMailClient,
-  technicalReport,
   appearance = "dark",
   applicationIcon = null
 }: {
@@ -152,14 +147,19 @@ export function SystemAlert({
   onReload: () => void;
   /** Host-owned navigation capability; SystemAlert never takes browser-global authority. */
   onOpenMailClient?: (destination: string) => void;
-  /** Canonical runtime diagnostics, supplied by the host after redaction. */
-  technicalReport?: string;
   appearance?: "dark" | "light";
   /** Resolved AppIcon from the host's existing app registry, never a guessed resource URL. */
   applicationIcon?: string | null;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const details = useMemo(() => technicalReport ?? formatTechnicalDetails(error), [error, technicalReport]);
+  // An exception leads with its summary (Exception, Code, Message, Caught by);
+  // a reported condition leads with its message and keeps the rest disclosed.
+  const thrown = error.exception !== undefined;
+  const summary = useMemo(() => errorSummary(error), [error]);
+  const details = useMemo(() => [
+    thrown ? "" : summary.filter(([label]) => label !== "Message").map(([label, value]) => `${label}: ${value}`).join("\n"),
+    error.technicalDetails ?? "",
+  ].filter(Boolean).join("\n\n"), [error.technicalDetails, summary, thrown]);
   const actions = error.suggestedActions ?? ["returnToWebspring", "dismiss"];
   const isSessionMismatch = error.code === "UNRECOVERABLE_LOGIN_SESSION_MISMATCH";
   const isNotResponding = error.code === "APP_NOT_RESPONDING" || error.code === "SITE_NOT_RESPONDING";
@@ -181,7 +181,13 @@ export function SystemAlert({
         </div>
         <div className="nse-system-alert-copy">
           <h2 id={titleId}>{error.title}</h2>
-          <p id={messageId}>{error.message}</p>
+          {thrown ? (
+            <dl id={messageId} className="syncloudos-alert-summary">
+              {summary.map(([label, value]) => (
+                <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
+              ))}
+            </dl>
+          ) : <p id={messageId}>{error.message}</p>}
           <button
             type="button"
             className="nse-alert-disclosure"

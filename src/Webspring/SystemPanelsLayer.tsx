@@ -75,8 +75,7 @@ export function SystemPanelsLayer({ windowContentRegistry }: { readonly windowCo
       runtime.errors.capture({
         code: "APP_CONTENT_FAILED",
         title: "System panel could not be shown.",
-        message: "SynCloudOS could not present the requested system panel.",
-        technicalMessage: error instanceof Error ? error.message : String(error),
+        error,
         source: "Webspring.SystemPanelsLayer",
         context,
         severity: "error",

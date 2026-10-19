@@ -181,7 +181,7 @@ describe("WebspringStatusLayer recovery", () => {
       </SynCloudOSProvider>,
     );
 
-    await screen.findByRole("alertdialog", { name: "NSEControlGallery.app stopped unexpectedly." });
+    await screen.findByRole("alertdialog", { name: "NSE Control Gallery stopped unexpectedly." });
     fireEvent.click(screen.getByRole("button", { name: "Return to Webspring" }));
 
     await waitFor(() => expect(dispatchOutcome).toMatchObject({ status: "executed" }));

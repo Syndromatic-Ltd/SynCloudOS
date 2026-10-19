@@ -164,7 +164,7 @@ describe("browser bootstrap recovery", () => {
     expect(runtime.disposalState).toBe("disposed");
     const launchErrors = runtime.errors.getHistory().filter(error => error.code === "APP_LAUNCH_FAILED");
     expect(launchErrors).toHaveLength(1);
-    expect(launchErrors[0]?.technicalMessage).toContain(importFailure.message);
+    expect(`${launchErrors[0]?.message}\n${launchErrors[0]?.technicalDetails}`).toContain(importFailure.message);
     const alert = target.querySelector('[role="alertdialog"]');
     expect(alert?.textContent).toContain(launchErrors[0]!.title);
     await act(async () => { (alert!.querySelector("button") as HTMLButtonElement).click(); });

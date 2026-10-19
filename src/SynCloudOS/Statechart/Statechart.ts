@@ -454,8 +454,7 @@ const statechart = {
           ? ErrorManager.capture({
               code: "UNKNOWN_RUNTIME_ERROR",
               title: "SynCloudOS reported a runtime error.",
-              message: options.error.message,
-              technicalDetails: options.error.stack,
+              error: options.error,
               source: options.source ?? "SynCloudOS.Statechart.gotoState",
               context: options.context
             })
@@ -474,8 +473,8 @@ const statechart = {
         ErrorManager.capture({
           code: "UNKNOWN_RUNTIME_ERROR",
           title: "SynCloudOS could not complete a state transition.",
-          message: `Statechart failed while moving to ${stateName}.`,
-          technicalDetails: error instanceof Error ? error.stack ?? error.message : String(error),
+          error,
+          technicalMessage: `Statechart failed while moving to ${stateName}.`,
           source: "SynCloudOS.Statechart.gotoState",
           context: { stateName, options }
         });

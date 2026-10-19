@@ -112,3 +112,28 @@
     gap: 12px;
   }
 }
+
+/* An exception's summary: Exception, Code, Message, Caught by. */
+.syncloudos-alert-summary {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 2px 10px;
+  margin: 7px 0 9px;
+  font-size: 13px;
+  line-height: 1.38;
+  color: var(--nse-alert-body-text);
+}
+
+.syncloudos-alert-summary > div {
+  display: contents;
+}
+
+.syncloudos-alert-summary dt {
+  font-weight: 800;
+}
+
+.syncloudos-alert-summary dd {
+  margin: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}

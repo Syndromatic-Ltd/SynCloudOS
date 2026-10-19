@@ -98,8 +98,8 @@ export function SynWareWindowChromeBridge({
       runtime.errors.capture({
         code: "APP_CONTENT_FAILED",
         title: "Window command failed.",
-        message: `The custom titlebar could not ${commandId === "window.minimise" ? "minimise" : "zoom"} this window.`,
-        technicalMessage: error instanceof Error ? error.message : String(error),
+        error,
+        technicalMessage: `The custom titlebar could not ${commandId === "window.minimise" ? "minimise" : "zoom"} this window.`,
         severity: "error",
         recoverable: true,
         suggestedActions: [],
@@ -156,14 +156,15 @@ class WindowChromeFailureBoundary extends React.Component<{
 }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: unknown, errorInfo: React.ErrorInfo) {
     try {
       this.props.runtime.errors.capture({
         code: "APP_CONTENT_FAILED",
         title: "Window chrome failed.",
-        message: "The application's custom window chrome failed and the system titlebar was restored.",
-        technicalMessage: error.message,
-        technicalDetails: error.stack ?? errorInfo.componentStack ?? undefined,
+        error,
+        technicalMessage: "The application's custom window chrome failed and the system titlebar was restored.",
+        source: "Webspring.WindowChromeFailureBoundary",
+        context: { componentStack: errorInfo.componentStack },
         severity: "error",
         recoverable: true,
         suggestedActions: [],

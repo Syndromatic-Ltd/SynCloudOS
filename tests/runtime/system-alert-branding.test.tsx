@@ -29,7 +29,7 @@ import { SynCloudOSProvider } from "../../src/SynCloudOSReact/SynCloudOSProvider
 import { resolveSiteBranding } from "../../src/SynCloudOS/Branding/siteBranding";
 import { WebspringStatusLayer } from "../../src/Webspring/WebspringStatusLayer";
 import { createTestBundle, createTestRuntime } from "./helpers";
-import { createAssetLoadFailedError, createErrorManager } from "../../src/SynCloudOS/ErrorManager/ErrorManager";
+import { createErrorManager } from "../../src/SynCloudOS/ErrorManager/ErrorManager";
 
 afterEach(cleanup);
 
@@ -128,7 +128,7 @@ describe("private host recovery artwork", () => {
   it.each(["payload", "context"] as const)("uses app branding for an app resource failure identified in %s", (location) => {
     const runtime = createTestRuntime();
     const error = location === "context"
-      ? createAssetLoadFailedError(runtime.errors, { tagName: "IMG", src: "/app-asset.svg" }, { appId: "journal" })
+      ? runtime.errors.createAssetLoadFailedError({ tagName: "IMG", src: "/app-asset.svg" }, { appId: "journal" })
       : runtime.errors.capture({ code: "ASSET_LOAD_FAILED", title: "Resource failed", message: "Try again", category: "resource", appId: "journal", suggestedActions: ["dismiss"] });
     render(<HostSiteBrandingProvider value={branding}><SystemAlert error={error} applicationIcon={applicationIcon} {...callbacks} /></HostSiteBrandingProvider>);
     expect(artwork().dataset.alertIcon).toBe("app");
@@ -137,7 +137,7 @@ describe("private host recovery artwork", () => {
 
   it("keeps an unowned resource failure on supplied system artwork", () => {
     const runtime = createTestRuntime();
-    const error = createAssetLoadFailedError(runtime.errors, { tagName: "SCRIPT", src: "/runtime.js" });
+    const error = runtime.errors.createAssetLoadFailedError({ tagName: "SCRIPT", src: "/runtime.js" });
     render(<HostSiteBrandingProvider value={branding}><SystemAlert error={error} {...callbacks} /></HostSiteBrandingProvider>);
     expect(artwork().dataset.alertIcon).toBe("syncloudos");
     expect(logo()?.getAttribute("src")).toContain("SynCloudOSLogo.png");

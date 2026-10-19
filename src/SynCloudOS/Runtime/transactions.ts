@@ -345,8 +345,8 @@ export function createRuntimeTransactions(runtime: SynCloudOSRuntime) {
         runtime.errors.capture({
           code: "RUNTIME_TRANSACTION_FAILED",
           title: "SynCloudOS could not complete a runtime transaction.",
-          message: "A runtime command failed before it could finish.",
-          technicalDetails: `${current.id}: ${error instanceof Error ? error.message : String(error)}`,
+          error,
+          technicalMessage: `Transaction ${current.id} rolled back.`,
           context: { label: current.label, source: current.source },
         });
       }

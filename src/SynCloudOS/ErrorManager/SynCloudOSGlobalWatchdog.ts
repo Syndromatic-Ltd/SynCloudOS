@@ -61,7 +61,7 @@ function handleWindowError(event: Event) {
 
   const errorEvent = event as ErrorEvent;
   capturedGlobalErrors += 1;
-  ErrorManager.createGlobalScriptError(errorEvent.error ?? errorEvent.message ?? "Unknown global script error", {
+  ErrorManager.createGlobalScriptError(errorEvent.error, {
     colno: typeof errorEvent.colno === "number" ? errorEvent.colno : undefined,
     eventType: "error",
     filename: typeof errorEvent.filename === "string" ? errorEvent.filename : undefined,

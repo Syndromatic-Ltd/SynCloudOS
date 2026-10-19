@@ -182,7 +182,7 @@ export type {
 } from "./WebspringState/webspringContentTypes";
 export type { SynCloudOSMultiSwitchState } from "./ApplicationState/applicationStateTypes";
 export { AppPresentationErrorFallback, SynCloudOSWatchdog } from "./ErrorManager/SynCloudOSWatchdog";
-export { toTechnicalReport } from "./ErrorManager/ErrorManager";
+export { toTechnicalReport } from "./ErrorManager/errorReport";
 export { SynCloudOSLifecycleError } from "./ErrorManager/lifecycleError";
 export type {
   SynCloudOSLifecycleDisposal,

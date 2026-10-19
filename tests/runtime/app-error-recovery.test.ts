@@ -44,7 +44,8 @@ describe("mounted app error recovery", () => {
     const retry = vi.fn().mockRejectedValueOnce(new TypeError("Still unreachable")).mockResolvedValueOnce(undefined);
     errors.capture(new TypeError("Failed to fetch"), { operation: "notes.read", code: "CONNECTION_ERROR", retry });
     await runtime.errors.getLatest()?.retry?.();
-    expect(runtime.errors.getLatest()).toMatchObject({ code: "CONNECTION_ERROR", appId: "remote-notes", technicalMessage: "Still unreachable" });
+    expect(runtime.errors.getLatest()).toMatchObject({ code: "CONNECTION_ERROR", appId: "remote-notes" });
+    expect(runtime.errors.getLatest()?.technicalDetails).toContain("Detail: Still unreachable");
     await runtime.errors.getLatest()?.retry?.();
     expect(retry).toHaveBeenCalledTimes(2);
     expect(runtime.errors.getHistory()).toEqual([]);
@@ -72,7 +73,8 @@ describe("mounted app error recovery", () => {
     expect(runtime.errors.getHistory().some(error => error.id === original.id)).toBe(false);
     reject(new TypeError("Retry still unreachable"));
     await pending;
-    expect(runtime.errors.getLatest()).toMatchObject({ code: "CONNECTION_ERROR", appId: "remote-notes", technicalMessage: "Retry still unreachable" });
+    expect(runtime.errors.getLatest()).toMatchObject({ code: "CONNECTION_ERROR", appId: "remote-notes" });
+    expect(runtime.errors.getLatest()?.technicalDetails).toContain("Detail: Retry still unreachable");
   });
 
   it("does not start an obsolete retry after the alert is dismissed", async () => {

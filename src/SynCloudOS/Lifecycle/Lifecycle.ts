@@ -426,22 +426,18 @@ export function createLifecycle(
       const app = AppRegistry.getApp(appId);
       const expectedCancellation = signal?.aborted || runtime.signal.aborted || disposed;
       if (app && !expectedCancellation) {
-        const message = error instanceof Error && error.message ? error.message : String(error);
         ErrorManager.capture({
           code: "APP_LAUNCH_FAILED",
           title: `Webspring could not open ${app.packageName}.`,
-          message: "SynCloudOS could not load the requested content.",
+          error,
           appId: app.id,
           packageName: app.packageName,
-          technicalMessage: message,
-          technicalDetails: error instanceof Error ? error.stack ?? message : message,
           source,
           suggestedActions: ["returnToWebspring", "dismiss"],
           category: "app",
           context: {
             requestedAppId: app.id,
             requestedPackage: app.packageName,
-            cause: message,
           },
         });
       }
@@ -501,7 +497,7 @@ export function createLifecycle(
       message: error,
       appId,
       source: options.source ?? "SynCloudOS.Lifecycle.transition",
-      technicalDetails: result.code,
+      technicalMessage: `Policy result: ${result.code}`,
       context: { appId, to, stage, options, code: result.code },
     });
     return error;
@@ -1058,7 +1054,7 @@ export function createLifecycle(
           message: `SynCloudOS could not move ${appInfo.displayName} from ${from} to ${to}.`,
           appId,
           source: options.source ?? "SynCloudOS.Lifecycle.transition",
-          technicalDetails: options.reason ?? error,
+          technicalMessage: options.reason ?? error,
           context: { appId, from, to, options },
         });
         return { ok: false, error };

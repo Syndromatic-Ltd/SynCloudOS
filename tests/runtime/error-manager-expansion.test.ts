@@ -20,18 +20,18 @@
 
 import { describe, expect, it } from "vitest";
 import { createTestRuntime, createRuntimeHarness } from "./helpers";
-import { createAssetLoadFailedError, createGlobalScriptError, createUnhandledPromiseRejectionError, toTechnicalReport } from "../../src/SynCloudOS/ErrorManager/ErrorManager";
+import { toTechnicalReport } from "../../src/SynCloudOS/ErrorManager/errorReport";
 
 describe("ErrorManager expanded factories", () => {
   it("captures global script errors with browser and source diagnostics", async () => {
     const runtime = createTestRuntime();
     const { RuntimeController, SynCloudOS } = createRuntimeHarness(runtime);
 
-    const captured = createGlobalScriptError(SynCloudOS.ErrorManager, new Error("Global boom"), {
+    const captured = SynCloudOS.ErrorManager.createGlobalScriptError(new Error("Global boom"), {
       colno: 9,
       filename: "http://127.0.0.1:5173/src/main.tsx",
       lineno: 12
-    }, runtime.environment.browser);
+    });
 
     expect(captured).toMatchObject({
       category: "watchdog",
@@ -48,16 +48,25 @@ describe("ErrorManager expanded factories", () => {
     expect(RuntimeController.getSnapshot().errors.at(-1)?.id).toBe(captured.id);
   });
 
+  it("reports a script error without an error object as a condition", () => {
+    const { SynCloudOS } = createRuntimeHarness(createTestRuntime());
+    const captured = SynCloudOS.ErrorManager.createGlobalScriptError(null, { message: "Script error." });
+    expect(captured).toMatchObject({ code: "GLOBAL_SCRIPT_ERROR", message: "A browser-level script error escaped the runtime watchdogs." });
+    expect(captured).not.toHaveProperty("exception");
+    expect(captured.technicalDetails).toContain("Detail: Script error.");
+  });
+
   it("captures unhandled promise rejections and primitive reasons", async () => {
     const runtime = createTestRuntime();
     const { SynCloudOS } = createRuntimeHarness(runtime);
 
-    const captured = createUnhandledPromiseRejectionError(SynCloudOS.ErrorManager, "async primitive failure", {}, runtime.environment.browser);
+    const captured = SynCloudOS.ErrorManager.createUnhandledPromiseRejectionError("async primitive failure");
 
     expect(captured).toMatchObject({
       category: "watchdog",
       code: "UNHANDLED_PROMISE_REJECTION",
-      technicalMessage: "async primitive failure"
+      exception: "Non-Error value (string)",
+      message: "async primitive failure"
     });
     expect(captured.context?.eventType).toBe("unhandledrejection");
   });
@@ -66,10 +75,10 @@ describe("ErrorManager expanded factories", () => {
     const runtime = createTestRuntime();
     const { SynCloudOS } = createRuntimeHarness(runtime);
 
-    const captured = createAssetLoadFailedError(SynCloudOS.ErrorManager, {
+    const captured = SynCloudOS.ErrorManager.createAssetLoadFailedError({
       currentSrc: "/assets/missing-icon.png",
       tagName: "IMG"
-    }, {}, runtime.environment.browser);
+    });
 
     expect(captured).toMatchObject({
       category: "resource",
@@ -88,16 +97,16 @@ describe("ErrorManager expanded factories", () => {
     const runtime = createTestRuntime();
     const { RuntimeController, SynCloudOS } = createRuntimeHarness(runtime);
 
-    const first = createGlobalScriptError(SynCloudOS.ErrorManager, new Error("Repeated global error"), {
+    const first = SynCloudOS.ErrorManager.createGlobalScriptError(new Error("Repeated global error"), {
       filename: "same.js",
       lineno: 1,
       colno: 2
-    }, runtime.environment.browser);
-    const second = createGlobalScriptError(SynCloudOS.ErrorManager, new Error("Repeated global error"), {
+    });
+    const second = SynCloudOS.ErrorManager.createGlobalScriptError(new Error("Repeated global error"), {
       filename: "same.js",
       lineno: 1,
       colno: 2
-    }, runtime.environment.browser);
+    });
 
     expect(second.id).toBe(first.id);
     expect(RuntimeController.getSnapshot().errors.filter((error) => error.code === "GLOBAL_SCRIPT_ERROR")).toHaveLength(1);
@@ -107,17 +116,16 @@ describe("ErrorManager expanded factories", () => {
     const runtime = createTestRuntime();
     const { SynCloudOS } = createRuntimeHarness(runtime);
 
-    const captured = createGlobalScriptError(SynCloudOS.ErrorManager, new Error("Report context"), {
+    const captured = SynCloudOS.ErrorManager.createGlobalScriptError(new Error("Report context"), {
       colno: 4,
       eventType: "error",
       filename: "report.js",
       lineno: 3
-    }, runtime.environment.browser);
+    });
     const report = toTechnicalReport(captured);
 
-    expect(report).toContain("Watchdog: SynCloudOS GlobalWatchdog");
-    expect(report).toContain("Event type: error");
-    expect(report).toContain("Browser URL: http://127.0.0.1:5173/");
+    expect(report).toContain("Exception: Error\nCode: GLOBAL_SCRIPT_ERROR\nMessage: Report context\nCaught by: SynCloudOS.GlobalWatchdog.error");
+    expect(report).toContain("Page: http://127.0.0.1:5173/");
     expect(report).toContain("Source location: report.js:3:4");
   });
 });
