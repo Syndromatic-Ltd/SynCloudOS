@@ -27,7 +27,7 @@ import { NSETextField } from "../Controls/Fields/NSEFields";
 import { NSESearchField } from "../Controls/Fields/NSESearchField";
 import { NSECircularSlider } from "../Controls/Values/NSECircularSlider";
 import { NSESlider } from "../Controls/Values/NSESlider";
-import { NSEArrayController } from "../Controllers";
+import { useNSEArrayController } from "../Controllers";
 import { NSETable, type NSEDataViewAdapter, type NSETableColumn } from "../DataViews";
 import type { NSEFontFamily, NSEFontPreset } from "../Text/fontDescriptors";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../interactionLifecycle";
@@ -180,15 +180,13 @@ function FontPanelList({ title, label, items, selectedId, width, rows, headerHid
   onSelect(id: string): void;
 }) {
   const instanceId = useId().replace(/:/g, "");
-  const controller = useMemo(() => new NSEArrayController<FontListItem, string>({
+  // The controller lives as long as the list; content follows in the effect.
+  const controller = useNSEArrayController<FontListItem, string>({
     id: `font-panel-list-${instanceId}`,
     content: items,
     getId: (item) => item.id,
     selection: { mode: "single", allowsEmpty: true, preservesSelection: true },
-  // The controller lives as long as the list; content follows in the effect.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [instanceId]);
-  useNSEDeferredDisposal(controller, disposalScheduler);
+  });
   useEffect(() => {
     controller.setContent(items);
     controller.select(selectedId !== null && items.some((item) => item.id === selectedId) ? [selectedId] : []);

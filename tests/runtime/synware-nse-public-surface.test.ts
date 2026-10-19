@@ -48,6 +48,18 @@ describe("SynWare NSE public framework boundary", () => {
     ]));
   });
 
+  it("exports managed controller lifetimes and the lifecycle error contract without its internal record", () => {
+    const { names } = publicExports();
+    expect(names).toEqual(expect.arrayContaining([
+      "useNSEArrayController", "useNSETreeController", "NSEControllerOwnership", "NSEControllerDisposalReason",
+      "SynCloudOSLifecycleError", "SynCloudOSLifecycleErrorOptions", "SynCloudOSLifecycleResource",
+      "SynCloudOSLifecycleDisposal", "SynCloudOSLifecycleDisposalReason",
+    ]));
+    for (const internal of ["SynCloudOSLifecycleRecord", "declareSynCloudOSLifecycleSignal", "synCloudOSLifecycleSignalReason", "nseDeferredDisposalMicrotaskScheduler"]) {
+      expect(names).not.toContain(internal);
+    }
+  });
+
   it("supports Portfolio navigation and popup imports through the public framework entry", () => {
     const { names } = publicExports();
     expect(names).toEqual(expect.arrayContaining([

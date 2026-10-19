@@ -53,7 +53,15 @@ export type {
   DictionaryMutationResult, DictionaryControllerChange,
 } from "./Controllers/NSEDictionaryController";
 export { ControllerReadOnlyError, ControllerEditingStateError, UnknownControllerFieldError } from "./Controllers/NSEController";
-export type { ControllerValidationIssue, ControllerEditTransaction, ControllerCommitResult, ControllerUndoRegistration } from "./Controllers/NSEController";
+export type {
+  ControllerValidationIssue, ControllerEditTransaction, ControllerCommitResult, ControllerUndoRegistration,
+  NSEControllerDisposalReason, NSEControllerOwnership,
+} from "./Controllers/NSEController";
+export { useNSEArrayController, useNSETreeController } from "./Controllers/useNSEOwnedController";
+export { SynCloudOSLifecycleError } from "../SynCloudOS/nseRuntimeContracts";
+export type {
+  SynCloudOSLifecycleDisposal, SynCloudOSLifecycleDisposalReason, SynCloudOSLifecycleErrorOptions, SynCloudOSLifecycleResource,
+} from "../SynCloudOS/nseRuntimeContracts";
 export type { ArrayControllerSnapshot, ArrayControllerChange, ArrayControllerInsertion } from "./Controllers/NSEArrayController";
 export type { TreeControllerSnapshot, TreeControllerChange, TreeDestination } from "./Controllers/NSETreeController";
 

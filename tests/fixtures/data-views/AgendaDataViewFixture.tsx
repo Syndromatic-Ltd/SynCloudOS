@@ -18,11 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo } from "react";
 
-import { NSEArrayController } from "../../../src/NSE/Controllers";
+import { useNSEArrayController } from "../../../src/NSE/Controllers";
 import { NSECollectionView, NSETable, createListCollectionLayout, type NSEDataViewAdapter, type NSETableColumn } from "../../../src/NSE/DataViews";
-import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../../../src/NSE/NSE";
 
 export interface AgendaEvent { readonly id: string; readonly title: string; readonly start: string; readonly calendar: string }
 
@@ -30,18 +29,10 @@ export function createAgendaRows(events: readonly AgendaEvent[]): readonly Agend
   return Object.freeze([...events].sort((left, right) => left.start.localeCompare(right.start)).map((event) => Object.freeze({ ...event })));
 }
 
-const scheduler: NSEDisposalScheduler = {
-  setTimeout: (callback, delay) => globalThis.setTimeout(callback, delay),
-  clearTimeout: (handle) => globalThis.clearTimeout(handle as number),
-};
-
 export function AgendaDataViewFixture({ events, responsiveMode, onActivateEvent }: { readonly events: readonly AgendaEvent[]; readonly responsiveMode: "desktop" | "tablet" | "mobile"; readonly onActivateEvent?: (event: AgendaEvent) => void }) {
   const rows = useMemo(() => createAgendaRows(events), [events]);
-  const controllerRef = useRef<NSEArrayController<AgendaEvent, string> | null>(null);
-  if (!controllerRef.current) controllerRef.current = new NSEArrayController({ id: "example-agenda", content: rows, getId: (event) => event.id, selection: { mode: "single", allowsEmpty: true, preservesSelection: true } });
-  const controller = controllerRef.current;
+  const controller = useNSEArrayController<AgendaEvent, string>({ id: "example-agenda", content: rows, getId: (event) => event.id, selection: { mode: "single", allowsEmpty: true, preservesSelection: true } });
   useEffect(() => { controller.setContent(rows); }, [controller, rows]);
-  useNSEDeferredDisposal(controller, scheduler);
   const adapter = useMemo<NSEDataViewAdapter<AgendaEvent, string>>(() => ({ controller, idForItem: (event) => event.id, labelForItem: (event) => event.title }), [controller]);
   const columns = useMemo<readonly NSETableColumn<AgendaEvent, string, unknown>[]>(() => [
     { id: "time", title: "Time", value: (event) => new Date(event.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), width: { min: 72, ideal: 90, max: 140 } },

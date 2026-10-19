@@ -25,3 +25,4 @@ export * from "./NSEObjectController";
 export * from "./NSEPreferencesController";
 export * from "./NSETreeController";
 export * from "./useNSEController";
+export * from "./useNSEOwnedController";

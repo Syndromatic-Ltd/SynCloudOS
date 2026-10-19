@@ -18,11 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo } from "react";
 
-import { NSEArrayController, NSETreeController } from "../../../src/NSE/Controllers";
+import { useNSEArrayController, useNSETreeController } from "../../../src/NSE/Controllers";
 import { NSEOutline, NSETable, type NSEDataViewAdapter, type NSEDataViewState, type NSETableColumn } from "../../../src/NSE/DataViews";
-import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../../../src/NSE/NSE";
 
 export interface DiagnosticRecord {
   readonly id: string;
@@ -82,23 +81,12 @@ export function createDiagnosticsRows(records: readonly DiagnosticRecord[]): rea
   return Object.freeze(rows);
 }
 
-const scheduler: NSEDisposalScheduler = {
-  setTimeout: (callback, delay) => globalThis.setTimeout(callback, delay),
-  clearTimeout: (handle) => globalThis.clearTimeout(handle as number),
-};
-
 export function DiagnosticsDataViewFixture({ records, state = { kind: "ready" } }: { readonly records: readonly DiagnosticRecord[]; readonly state?: NSEDataViewState }) {
   const rows = useMemo(() => createDiagnosticsRows(records), [records]);
-  const treeRef = useRef<NSETreeController<DiagnosticRecord, string> | null>(null);
-  const tableRef = useRef<NSEArrayController<DiagnosticRow, string> | null>(null);
-  if (!treeRef.current) treeRef.current = new NSETreeController({ id: "diagnostics-tree", content: records, getId: (item) => item.id, getChildren: (item) => item.children, withChildren: (item, children) => ({ ...item, children }), clone: (item) => ({ ...item, children: item.children }), selection: { mode: "single", allowsEmpty: true } });
-  if (!tableRef.current) tableRef.current = new NSEArrayController({ id: "diagnostics-values", content: rows, getId: (row) => row.id, selection: { mode: "single", allowsEmpty: true, preservesSelection: true } });
-  const tree = treeRef.current;
-  const table = tableRef.current;
+  const tree = useNSETreeController<DiagnosticRecord, string>({ id: "diagnostics-tree", content: records, getId: (item) => item.id, getChildren: (item) => item.children, withChildren: (item, children) => ({ ...item, children }), clone: (item) => ({ ...item, children: item.children }), selection: { mode: "single", allowsEmpty: true } });
+  const table = useNSEArrayController<DiagnosticRow, string>({ id: "diagnostics-values", content: rows, getId: (row) => row.id, selection: { mode: "single", allowsEmpty: true, preservesSelection: true } });
   useEffect(() => { tree.setContent(records); }, [records, tree]);
   useEffect(() => { table.setContent(rows); }, [rows, table]);
-  useNSEDeferredDisposal(tree, scheduler);
-  useNSEDeferredDisposal(table, scheduler);
   const adapter = useMemo<NSEDataViewAdapter<DiagnosticRow, string>>(() => ({ controller: table, idForItem: (row) => row.id, labelForItem: (row) => row.label }), [table]);
   const columns = useMemo<readonly NSETableColumn<DiagnosticRow, string, unknown>[]>(() => [
     { id: "name", title: "Name", value: (row) => row.label, width: { min: 100, ideal: 180, max: 360 } },
