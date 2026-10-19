@@ -21,6 +21,7 @@
 // @vitest-environment jsdom
 
 import { expect, it } from "vitest";
+import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/fxRuntimeContracts";
 import { createSynWare } from "../../../src/SynCloudOS/AppSDK";
 import { createSynWareTestHost } from "../../../src/SynCloudOS/AppSDK/testing";
 import {
@@ -93,7 +94,7 @@ it("copies runtime-owned media blocks and keeps retained slices alive until thei
 
     await host.dispose();
     expect(slice.closed).toBe(true);
-    expect(() => bytesOf(slice)).toThrow(/closed|released|abort/i);
+    expect(() => bytesOf(slice)).toThrow(SynCloudOSLifecycleError);
   } finally {
     await host.dispose();
   }

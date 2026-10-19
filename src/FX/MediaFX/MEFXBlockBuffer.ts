@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/fxRuntimeContracts";
+
 export type MEFXBlockSegmentInput =
     | Uint8Array
     | Readonly<{
@@ -216,6 +218,7 @@ class BlockBacking {
 }
 
 export class MEFXBlockBuffer {
+    readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "MEFXBlockBuffer" });
     #backing: BlockBacking | null;
     readonly #offset: number;
     readonly #length: number;
@@ -254,7 +257,7 @@ export class MEFXBlockBuffer {
     copyTo(target: Uint8Array, options: MEFXBlockCopyOptions = {}): number {
         if (!(target instanceof Uint8Array))
             throw new TypeError("Media block copy target must be Uint8Array.");
-        const backing = this.#assertOpen();
+        const backing = this.#assertOpen("copyTo");
         const sourceOffset = checkedInteger(options.sourceOffset ?? 0, "Media block source offset", this.#length);
         const targetOffset = checkedInteger(options.targetOffset ?? 0, "Media block target offset", target.byteLength);
         const defaultLength = this.#length - sourceOffset;
@@ -268,7 +271,7 @@ export class MEFXBlockBuffer {
     }
 
     slice(start = 0, end = this.#length): MEFXBlockBuffer {
-        const backing = this.#assertOpen();
+        const backing = this.#assertOpen("slice");
         const checkedStart = checkedInteger(start, "Media block slice start", this.#length);
         const checkedEnd = checkedInteger(end, "Media block slice end", this.#length);
         if (checkedEnd < checkedStart)
@@ -301,7 +304,7 @@ export class MEFXBlockBuffer {
     transfer<T>(accept: (transferred: MEFXBlockBuffer) => T | PromiseLike<T>): T | Promise<T> {
         if (typeof accept !== "function")
             throw new TypeError("Media block transfer requires an admission function.");
-        this.#assertOpen();
+        this.#assertOpen("transfer");
         const transferred = this.slice();
         const transferredRuntimeHandle = runtimeHandles.get(transferred)?.handle;
         const assertRuntimeTransferLive = () => {
@@ -341,8 +344,10 @@ export class MEFXBlockBuffer {
         const backing = this.#backing;
         if (!backing)
             return;
-        this.#backing = null;
         const runtimeHandle = runtimeHandles.get(this);
+        const signal = runtimeHandle?.handle.signal;
+        this.#lifecycle.markDisposed(signal?.aborted ? synCloudOSLifecycleSignalReason(signal) : "explicit");
+        this.#backing = null;
         runtimeHandles.delete(this);
         runtimeOwners.delete(this);
         if (runtimeHandle) {
@@ -352,9 +357,9 @@ export class MEFXBlockBuffer {
         backing.release();
     }
 
-    #assertOpen(): BlockBacking {
+    #assertOpen(operation: string): BlockBacking {
         if (!this.#backing)
-            throw new Error("Media block buffer is closed.");
+            throw this.#lifecycle.error({ code: "MEFX_BLOCK_BUFFER_DISPOSED", operation: operation });
         return this.#backing;
     }
 }
