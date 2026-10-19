@@ -521,7 +521,9 @@
         "src/App.tsx",
         "src/SynCloudOSReact/browser.tsx",
         "src/SynCloudOSReact/browserRuntime.tsx",
-        "src/SynCloudOSReact/browserHostContributions.ts"
+        "src/SynCloudOSReact/browserHostContributions.ts",
+        "src/SynCloudOSReact/ApplicationHost.tsx",
+        "src/SynCloudOSReact/applicationHome.ts"
       ],
       "mayImportLayers": [
         "browser-host",
