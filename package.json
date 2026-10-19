@@ -14,6 +14,7 @@
     "synware:audit": "node scripts/synware/audit-sdk-imports.mjs",
     "synware:capabilities": "node scripts/synware/audit-capability-usage.mjs --check",
     "sdk:build": "node scripts/synware/build-sdk.mjs",
+    "sdk:developer-mcp": "node scripts/synware/check-developer-mcp-consumer.mjs",
     "sdk:fx-pdf": "node scripts/synware/check-fx-pdf-consumer.mjs",
     "sdk:fx-text": "node scripts/synware/check-fx-text-consumer.mjs",
     "sdk:text-system": "node scripts/synware/check-text-system-consumer.mjs",
@@ -51,6 +52,7 @@
     "woff2-encoder": "3.0.0-beta.1"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "@testing-library/react": "^16.3.2",
     "@types/emscripten": "1.41.6",
     "@types/node": "^24.0.0",
@@ -62,7 +64,8 @@
     "playwright": "1.61.0",
     "sharp": "0.35.5",
     "typescript": "^5.9.2",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.7",
+    "zod": "^3.25.76"
   },
   "overrides": {
     "sharp": "$sharp"

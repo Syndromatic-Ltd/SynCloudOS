@@ -182,6 +182,7 @@ Start with the [framework guide](docs/framework/README.md).
 | [Webspring](docs/framework/webspring.md) | The shell and launcher |
 | [Authentication](docs/framework/authentication.md) | Sign-in and roles |
 | [Testing a SynWare](docs/framework/testing-synware.md) | Deterministic tests |
+| [Developer MCP](docs/framework/developer-mcp.md) | Offline installed-SDK tools for Codex and Claude Code |
 
 ## Developing the framework
 

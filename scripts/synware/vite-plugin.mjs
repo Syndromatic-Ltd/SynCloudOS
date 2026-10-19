@@ -28,6 +28,7 @@ import {
 } from "node:fs";
 import { loadConfigFromFile } from "vite";
 import { captureFontDeclaration, fontDeclarationCSS } from "../../src/NSE/Typography/fontDeclaration.mjs";
+import { bundlePaths } from "./bundle-paths.mjs";
 import {
   dirname,
   extname,
@@ -304,12 +305,8 @@ function normaliseOptions(options) {
 function discover(root, options) {
   const appsDirectory = resolve(root, options.appsDirectory ?? defaultAppsDirectory);
   assertDirectory(appsDirectory, "the SynWare apps directory");
-  const appEntries = readEntries(appsDirectory, "the SynWare apps directory")
-    .filter((entry) => /\.app$/iu.test(entry.name));
-  assertUniqueCaseInsensitive(appEntries.map((entry) => entry.name), "SynWare app directories");
-
-  const bundles = appEntries.map((appEntry) => {
-    const appRoot = resolve(appsDirectory, appEntry.name);
+  const bundles = bundlePaths(root, options.appsDirectory ?? defaultAppsDirectory).map((appRoot) => {
+    const appEntry = { name: posix.basename(slash(appRoot)) };
     assertDirectory(appRoot, `the ${appEntry.name} app bundle`);
     const contentsDirectory = resolve(appRoot, "Contents");
     assertDirectory(contentsDirectory, `${appEntry.name} Contents`);

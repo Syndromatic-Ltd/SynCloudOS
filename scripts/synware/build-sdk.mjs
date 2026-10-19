@@ -42,6 +42,7 @@ import {
 } from "./sdk-package-manifest.mjs";
 import { sdkNeutralStyleModuleSource, sdkPackageStyles } from "./sdk-package-styles.mjs";
 import { assertPublicApiBoundaries } from "./public-api-boundaries.mjs";
+import { writeDeveloperSdkData, writeDeveloperMcpPackage } from "../developer-mcp/build-package.mjs";
 
 const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const outputRoot = resolve(repositoryRoot, ".artifacts/synapp-sdk");
@@ -372,6 +373,7 @@ async function main() {
   mkdirSync(resolve(typesDirectory, "NSE/Typography"), { recursive: true });
   for (const extension of ["mjs", "d.mts"]) cpSync(resolve(repositoryRoot, `src/NSE/Typography/fontDeclaration.${extension}`), resolve(typesDirectory, `NSE/Typography/fontDeclaration.${extension}`));
   writeFileSync(resolve(directory, "vite.mjs"), readFileSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.mjs"), "utf8").replace("../../src/NSE/Typography/fontDeclaration.mjs", "./types/NSE/Typography/fontDeclaration.mjs"));
+  cpSync(resolve(repositoryRoot, "scripts/synware/bundle-paths.mjs"), resolve(directory, "bundle-paths.mjs"));
   cpSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.d.mts"), resolve(typesDirectory, "vite.d.mts"));
   exports["./vite"] = { types: "./types/vite.d.mts", import: "./vite.mjs" };
   if (!existsSync(resolve(directory, "nse/styles.css"))) throw new Error("SynWare SDK did not emit its required NSE stylesheet.");
@@ -382,16 +384,22 @@ async function main() {
   // These libraries occur in emitted public declarations even when runtime code is bundled.
   const dependencies = Object.fromEntries(["@floating-ui/dom", "@tiptap/pm", "framer-motion", "harfbuzzjs", "oauth4webapi", "pdf-lib", "woff2-encoder"].map((name) => [name, repositoryManifest.dependencies[name]]));
   assertTwelveFxPackageExports(exports);
+  await writeDeveloperSdkData({ repositoryRoot, directory, commit, source });
   writePackage({ directory, name: synWarePackageName, exports, dependencies });
   const resources = fingerprintSdkFiles(directory, sdkDirectoryFiles(directory));
   const artifact = packPackage(directory);
+  const mcpDirectory = resolve(packageRoot, "syncloudos-developer-mcp");
+  const sdkVersion = JSON.parse(readFileSync(resolve(directory, "package.json"), "utf8")).version;
+  const mcpPackage = writeDeveloperMcpPackage({ repositoryRoot, directory: mcpDirectory, sdkVersion });
+  assertNoLeakage(mcpDirectory);
+  const developerMcp = { package: mcpPackage.name, version: sdkVersion, ...packPackage(mcpDirectory) };
   const entries = Object.fromEntries(Object.keys(synWareSdkEntries).map((name) => [
     `${synWarePackageName}/${name}`,
     { archive: artifact.archive, index: hashFile(resolve(directory, `${name}.js`)), types: hashFile(resolve(directory, `${name}.d.ts`)) },
   ]));
   assertSdkSourceUnchanged(source, captureSdkSourceFingerprint(repositoryRoot));
   if (commitHash() !== commit) throw new Error("SDK HEAD changed during build; no manifest published.");
-  const manifest = { schemaVersion: 2, commit, package: synWarePackageName, ...artifact, source, resources, entries };
+  const manifest = { schemaVersion: 2, commit, package: synWarePackageName, ...artifact, source, resources, entries, developerMcp };
   const pendingManifest = resolve(outputRoot, `build-manifest.${process.pid}.tmp`);
   writeFileSync(pendingManifest, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
   renameSync(pendingManifest, resolve(outputRoot, "build-manifest.json"));

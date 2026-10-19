@@ -19,6 +19,8 @@ npm install https://github.com/Syndromatic-Ltd/SynCloudOS/releases/download/v1.0
 
 SynCloudOS ships as one package, `@syndromatic/syncloudos`, with focused subpath entries such as `/sdk`, `/nse`, `/webspring` and `/fx/animation`. Every import in your project comes from one of those entries. The [package reference](overview.md#the-package) lists them all.
 
+For AI coding agents, install the matching [Developer MCP companion](developer-mcp.md). It reads this installed SDK's declarations and bundled documentation, validates your project and creates SynWare bundles without overwriting existing files.
+
 ## Add the Vite plugin
 
 The plugin finds your SynWare bundles and your shell, then exposes them as a virtual module.

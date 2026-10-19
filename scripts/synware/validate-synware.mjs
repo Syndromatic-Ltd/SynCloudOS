@@ -22,123 +22,39 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import Ajv2020 from "ajv/dist/2020.js";
-import ts from "typescript";
+import { createSynWareValidator, parseManifest } from "./validation-core.mjs";
+export { parseManifest };
 import { synWarePackageName, synWareSdkEntries, synWareSdkGeneratedStyles, synWareSdkStyles } from "./sdk-entries.mjs";
 import { auditSynWareImports } from "./audit-sdk-imports.mjs";
 
 const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const governedSynWareRoot = resolve(repositoryRoot, "src/SynWare");
 const schema = JSON.parse(readFileSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/manifest/synapp-manifest.schema.json"), "utf8"));
-const validateManifest = new Ajv2020({ allErrors: true, strict: false }).compile(schema);
-
-function unwrap(expression) {
-  return ts.isAsExpression(expression) || ts.isSatisfiesExpression(expression) || ts.isParenthesizedExpression(expression)
-    ? unwrap(expression.expression)
-    : expression;
-}
-
-function literalValue(expression, sourceFile, seen = new Set()) {
-  const node = unwrap(expression);
-  if (ts.isIdentifier(node)) {
-    if (seen.has(node.text)) throw new TypeError(`Manifest identifier "${node.text}" is recursive.`);
-    const declaration = sourceFile.statements
-      .flatMap((statement) => ts.isVariableStatement(statement) ? [...statement.declarationList.declarations] : [])
-      .find((candidate) => ts.isIdentifier(candidate.name) && candidate.name.text === node.text);
-    if (!declaration?.initializer) throw new TypeError(`Manifest identifier "${node.text}" must resolve to a static declaration.`);
-    const nextSeen = new Set(seen);
-    nextSeen.add(node.text);
-    return literalValue(declaration.initializer, sourceFile, nextSeen);
-  }
-  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
-  if (ts.isNumericLiteral(node)) return Number(node.text);
-  if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
-  if (node.kind === ts.SyntaxKind.FalseKeyword) return false;
-  if (node.kind === ts.SyntaxKind.NullKeyword) return null;
-  if (ts.isArrayLiteralExpression(node)) return node.elements.map((element) => {
-    if (ts.isSpreadElement(element)) throw new TypeError("Manifest arrays cannot use spread expressions.");
-    return literalValue(element, sourceFile, seen);
-  });
-  if (ts.isObjectLiteralExpression(node)) {
-    const value = {};
-    for (const property of node.properties) {
-      if (!ts.isPropertyAssignment(property) || !property.name) throw new TypeError("Manifest objects must contain only plain property assignments.");
-      const key = ts.isIdentifier(property.name) || ts.isStringLiteral(property.name) || ts.isNumericLiteral(property.name)
-        ? property.name.text
-        : null;
-      if (!key) throw new TypeError("Manifest property names must be static.");
-      value[key] = literalValue(property.initializer, sourceFile, seen);
-    }
-    return value;
-  }
-  throw new TypeError("Info.ts must export a static manifest literal.");
-}
-
-export function parseManifest(path) {
-  const sourceText = readFileSync(path, "utf8");
-  const source = ts.createSourceFile(path, sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
-  const assignment = source.statements.find(ts.isExportAssignment);
-  if (!assignment) throw new TypeError("Info.ts must use an export default manifest literal.");
-  return literalValue(assignment.expression, source);
-}
-
-export function validateImports(path) {
-  const sourceText = readFileSync(path, "utf8");
-  const source = ts.createSourceFile(path, sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  const imports = source.statements.filter(ts.isImportDeclaration).map((statement) => statement.moduleSpecifier.text);
-  const externalImports = imports.filter((specifier) => !specifier.startsWith("."));
-  const repositoryPackage = JSON.parse(readFileSync(resolve(repositoryRoot, "package.json"), "utf8"));
-  const reviewedApplicationDependencies = new Set(["react", "react-dom", "framer-motion"]);
-  const packageRoot = (specifier) => specifier.startsWith("@")
-    ? specifier.split("/").slice(0, 2).join("/")
-    : specifier.split("/", 1)[0];
-  const permitted = new Set([
-    "react",
-    "react/jsx-runtime",
-    "react/jsx-dev-runtime",
-    ...Object.keys(synWareSdkEntries).filter((entry) => entry !== "sdk/testing").map((entry) => `${synWarePackageName}/${entry}`),
+const validator = createSynWareValidator({
+  schema,
+  allowedImports: [
+    "react", "react/jsx-runtime", "react/jsx-dev-runtime",
+    ...Object.keys(synWareSdkEntries).filter(entry => entry !== "sdk/testing").map(entry => `${synWarePackageName}/${entry}`),
     `${synWarePackageName}/nse/styles.css`,
-    ...Object.keys(synWareSdkStyles).map((entry) => `${synWarePackageName}/${entry}`),
-    ...Object.keys(synWareSdkGeneratedStyles).map((entry) => `${synWarePackageName}/${entry}`),
-  ]);
-  const unsupported = externalImports.filter((specifier) => {
-    if (permitted.has(specifier)) return false;
-    const dependency = packageRoot(specifier);
-    return !reviewedApplicationDependencies.has(dependency) || !repositoryPackage.dependencies?.[dependency];
-  });
-  if (unsupported.length > 0) throw new TypeError(`Contents/index.tsx imports unsupported package(s): ${unsupported.join(", ")}.`);
-  if (/\.\.\/.*src\//u.test(sourceText) || /[A-Za-z]:\\/u.test(sourceText)) {
-    throw new TypeError("Contents/index.tsx must not include source-tree or absolute local paths.");
-  }
-}
+    ...Object.keys(synWareSdkStyles).map(entry => `${synWarePackageName}/${entry}`),
+    ...Object.keys(synWareSdkGeneratedStyles).map(entry => `${synWarePackageName}/${entry}`),
+  ],
+  dependencies: JSON.parse(readFileSync(resolve(repositoryRoot, "package.json"), "utf8")).dependencies,
+});
+export const validateImports = validator.validateImports;
 
 export function validateSynWareDirectory(targetArgument, boundaryAudit) {
   const target = resolve(targetArgument);
-  const manifestPath = resolve(target, "Contents/Info.ts");
-  const entryPath = resolve(target, "Contents/index.tsx");
-  const localePath = resolve(target, "Contents/Resources/Localised/Base.locale/Localisable.strings");
-  if (![manifestPath, entryPath, localePath].every(existsSync)) {
-    return {
-      directory: target,
-      id: null,
-      ok: false,
-      error: "A SynWare requires Contents/Info.ts, Contents/index.tsx, and a Base locale bundle.",
-    };
-  }
+  const result = validator.validateDirectory(target);
+  if (!result.ok) return result;
   try {
-    const manifest = parseManifest(manifestPath);
-    if (!validateManifest(manifest)) {
-      const errors = validateManifest.errors?.map((error) => `${error.instancePath || "/"} ${error.message ?? "is invalid"}`).join("; ") ?? "unknown schema failure";
-      throw new TypeError(`Manifest does not satisfy the checked-in V1 schema: ${errors}`);
-    }
-    validateImports(entryPath);
     if (target.startsWith(governedSynWareRoot + "/") || target.startsWith(governedSynWareRoot + "\\")) {
       const prefix = target.replaceAll("\\", "/") + "/";
       const violations = (boundaryAudit ?? auditSynWareImports(repositoryRoot)).internalImports.filter((violation) =>
         resolve(repositoryRoot, violation.file).replaceAll("\\", "/").startsWith(prefix));
       if (violations.length) throw new TypeError(violations.map((violation) => `${violation.location}: ${violation.reason}`).join("\n"));
     }
-    return { directory: target, id: manifest.id, ok: true, error: null };
+    return result;
   } catch (error) {
     return {
       directory: target,

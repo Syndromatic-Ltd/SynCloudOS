@@ -368,6 +368,7 @@ describe("SDK build public API boundaries", () => {
       "./sdk-package-manifest.mjs": { captureSdkSourceFingerprint },
       "./sdk-package-styles.mjs": {},
       "./public-api-boundaries.mjs": { assertPublicApiBoundaries },
+      "../developer-mcp/build-package.mjs": { writeDeveloperSdkData: buildWork, writeDeveloperMcpPackage: buildWork },
     };
     let stderr = "";
     const sandbox = {
