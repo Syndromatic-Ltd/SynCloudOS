@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../fxRuntimeContracts";
+
 import { ScopedMotionRecorder } from "./ScopedMotionRecorder";
 import {
   MFXAttitude,
@@ -60,6 +62,7 @@ export interface MFXMotionManagerOptions {
 
 /** A revocable, session-owned sensor client. Construction and subscriptions are passive. */
 export class ScopedMotionManager {
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "ScopedMotionManager" });
   #disposed = false;
   #consumers = new Set<Consumer>();
   #recorders = new Set<ScopedMotionRecorder>();
@@ -127,12 +130,12 @@ export class ScopedMotionManager {
     return this.#gyroInterval;
   }
   setAccelerometerUpdateInterval(seconds: number): void {
-    this.#assertLive();
+    this.#assertLive("setAccelerometerUpdateInterval");
     this.#validateInterval(seconds);
     this.#accelerometerInterval = seconds;
   }
   setGyroUpdateInterval(seconds: number): void {
-    this.#assertLive();
+    this.#assertLive("setGyroUpdateInterval");
     this.#validateInterval(seconds);
     this.#gyroInterval = seconds;
   }
@@ -144,7 +147,7 @@ export class ScopedMotionManager {
     return this.#cadence;
   }
   setDeviceMotionUpdateInterval(seconds: number): void {
-    this.#assertLive();
+    this.#assertLive("setDeviceMotionUpdateInterval");
     this.#validateInterval(seconds);
     this.#interval = seconds;
   }
@@ -154,15 +157,16 @@ export class ScopedMotionManager {
         "Motion cadence must be finite and positive, at most one hour.",
       );
   }
-  #assertLive(): void {
-    if (this.#disposed) throw new Error("Motion manager is disposed.");
+  #assertLive(operation: string): void {
+    if (this.#disposed) throw this.#lifecycle.error({ code: "MFX_MOTION_MANAGER_DISPOSED", operation: operation });
   }
   #subscribe(
+    operation: string,
     stream: Stream,
     deliver: Consumer["deliver"],
     signal?: AbortSignal,
   ): MFXMotionSubscription {
-    this.#assertLive();
+    this.#assertLive(operation);
     if (signal?.aborted) return Object.freeze({ dispose() {} });
     if (this.#consumers.size >= 128)
       throw new RangeError("Motion subscription limit reached.");
@@ -257,7 +261,7 @@ export class ScopedMotionManager {
     }>,
     handler: (sample: MFXDeviceMotion) => void,
   ): MFXMotionSubscription {
-    this.#assertLive();
+    this.#assertLive("startDeviceMotionUpdates");
     if (options.referenceFrame !== "relative")
       throw new Error(
         `Unsupported attitude reference frame: ${options.referenceFrame}.`,
@@ -266,6 +270,7 @@ export class ScopedMotionManager {
       lastMotion: number | null = null,
       prior: MFXAttitude | null = null;
     return this.#subscribe(
+      "startDeviceMotionUpdates",
       "deviceMotion",
       (raw) => {
         // Browser orientation and motion are independent event sources. One must not
@@ -308,6 +313,7 @@ export class ScopedMotionManager {
   ): MFXMotionSubscription {
     let last: number | null = null;
     return this.#subscribe(
+      "startAccelerometerUpdates",
       "accelerometer",
       (sample) => {
         if (
@@ -336,6 +342,7 @@ export class ScopedMotionManager {
   ): MFXMotionSubscription {
     let last: number | null = null;
     return this.#subscribe(
+      "startGyroUpdates",
       "gyroscope",
       (sample) => {
         if (
@@ -374,7 +381,7 @@ export class ScopedMotionManager {
     this.#gyroData = null;
   }
   resetReferenceFrame(): void {
-    this.#assertLive();
+    this.#assertLive("resetReferenceFrame");
     this.#reference = this.#rawAttitude;
     this.#latest = null;
   }
@@ -385,7 +392,7 @@ export class ScopedMotionManager {
       signal?: AbortSignal;
     }> = {},
   ): MFXMotionRecorder {
-    this.#assertLive();
+    this.#assertLive("createRecorder");
     const recorder = new ScopedMotionRecorder(
       options.maximumSamples,
       options.maximumAge,
@@ -426,7 +433,7 @@ export class ScopedMotionManager {
     return Object.freeze(facade);
   }
   async requestAuthorization(): Promise<MFXAvailability> {
-    this.#assertLive();
+    this.#assertLive("requestAuthorization");
     if (!this.#options.canRequestAuthorization)
       throw new Error("Explicit motion authorization capability is required.");
     const result = await this.#adapter.requestAuthorization();
@@ -434,6 +441,7 @@ export class ScopedMotionManager {
   }
   dispose(): void {
     if (this.#disposed) return;
+    this.#lifecycle.markDisposed(this.#options.signal?.aborted ? synCloudOSLifecycleSignalReason(this.#options.signal) : "explicit");
     this.#disposed = true;
     if (this.#abortListener)
       this.#options.signal?.removeEventListener("abort", this.#abortListener);
