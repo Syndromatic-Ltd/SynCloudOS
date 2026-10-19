@@ -74,6 +74,7 @@ function createDependencies() {
     booted: boolean;
     statechart: { currentState: string };
     loginServices: { isAuthorised: boolean };
+    lifecycle: Readonly<Record<string, string>>;
     application: {
       activeAppId: string | null;
       routePath: string;
@@ -84,6 +85,7 @@ function createDependencies() {
     booted: true,
     statechart: { currentState: "active.application.active" },
     loginServices: { isAuthorised: true },
+    lifecycle: {},
     application: {
       activeAppId: "software",
       routePath: "/software",
@@ -131,8 +133,8 @@ function createDependencies() {
     publishRouteOpen(payload: { browserHref: string; syncRoute: boolean; historyMode?: "push" | "replace" }) {
       routeOpenListeners.forEach((listener) => listener(payload));
     },
-    setSnapshot(next: RuntimeSnapshotStub) {
-      snapshot = next;
+    setSnapshot(next: Omit<RuntimeSnapshotStub, "lifecycle"> & Partial<Pick<RuntimeSnapshotStub, "lifecycle">>) {
+      snapshot = { lifecycle: snapshot.lifecycle, ...next };
       listeners.forEach((listener) => listener());
     }
   };
@@ -180,6 +182,31 @@ describe("BrowserRouteCoordinator", () => {
   afterEach(() => {
     installNavigation(undefined);
     vi.useRealTimers();
+  });
+
+  it.each([false, true])("only retires a closed app's browser route when the host home is Webspring (application home: %s)", async applicationHome => {
+    installNavigation(undefined);
+    const { dependencies, openRoute, setSnapshot } = createDependencies();
+    if (applicationHome) {
+      const resolveRoute = dependencies.resolveRoute;
+      dependencies.resolveRoute = pathname => pathname === "/"
+        ? { kind: "app", pathname: "/software", app: { id: "software" } }
+        : resolveRoute(pathname);
+    }
+    const coordinator = createBrowserRouteCoordinator(dependencies);
+    coordinator.start();
+    const length = window.history.length;
+    try {
+      setSnapshot({
+        booted: true, statechart: { currentState: "active.webspring" }, loginServices: { isAuthorised: true },
+        lifecycle: { software: "closed" },
+        application: { activeAppId: null, routePath: "/", multiSwitch: { status: "idle" } },
+      });
+      await Promise.resolve();
+      expect(window.location.pathname).toBe(applicationHome ? "/software" : "/");
+      expect(window.history.length).toBe(length);
+      expect(openRoute).not.toHaveBeenCalled();
+    } finally { coordinator.stop(); }
   });
 
   it("follows wrapped redirect chains and replaces the browser-selected push entry once", async () => {

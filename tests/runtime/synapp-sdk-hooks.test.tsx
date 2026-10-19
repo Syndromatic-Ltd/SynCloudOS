@@ -57,6 +57,7 @@ import {
   registerTestSynWare,
   unlockRuntime,
 } from "./helpers";
+import type { AppCloseResult, RuntimeOperationHandle } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
 
 const missingToken = defineSynWareServiceToken<{ readonly name: string }>({ id: "example.missing" });
 const queryGraph = defineSynWareRoutes({ id: "hooks.example", routes: [{
@@ -115,6 +116,33 @@ async function renderNamedRoute() {
     window.history.replaceState({}, "", priorHref);
   } };
 }
+
+it("closes a route-hosted app through the SDK without reissuing transfer scopes or retaining its URL", async () => {
+  const fixture = await renderNamedRoute();
+  try {
+    await act(async () => {
+      const close = fixture.context.lifecycle.closeSelf() as RuntimeOperationHandle<AppCloseResult>;
+      expect(await close.result).toMatchObject({ status: "completed", committed: true });
+    });
+    expect(fixture.runtime.lifecycle.getState("example")).toBe("closed");
+    expect(fixture.view.queryByTestId("query-view")).toBeNull();
+    expect(window.location.pathname).toBe("/");
+    expect(fixture.runtime.store.getSnapshot()).toMatchObject({
+      application: { activeAppId: null, currentAppId: null, routePath: "/" },
+      statechart: { currentState: "active.webspring" },
+    });
+    fixture.view.rerender(<SynCloudOSProvider runtime={fixture.runtime}>
+      <HostSiteBrandingProvider value={{ name: "Hooks", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Hooks" }}>
+        <SynWareRuntimeMount runtime={fixture.runtime} app={fixture.runtime.apps.getApp("example")!} responderId="application:example">
+          <span data-testid="closed-app-content">Closed app must not remount</span>
+        </SynWareRuntimeMount>
+      </HostSiteBrandingProvider>
+    </SynCloudOSProvider>);
+    expect(fixture.view.queryByTestId("closed-app-content")).toBeNull();
+  } finally {
+    await fixture.dispose();
+  }
+});
 
 function renderWithSynWare(
   runtime: ReturnType<typeof createTestRuntime>,

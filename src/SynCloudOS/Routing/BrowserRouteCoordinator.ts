@@ -47,6 +47,7 @@ interface BrowserRouteRuntimeSnapshot {
   booted: boolean;
   statechart: { currentState: string };
   loginServices: { isAuthorised: boolean };
+  lifecycle: Readonly<Record<string, string>>;
   application: {
     activeAppId: string | null;
     routePath: string;
@@ -307,6 +308,21 @@ export function createBrowserRouteCoordinator(
   const handleRuntimeChange = () => {
     persistActiveRoute();
     const snapshot = dependencies.getRuntimeSnapshot();
+    // A direct SDK/lifecycle close reconciles runtime presentation atomically,
+    // without a route.open operation. Retire the closed app's browser entry
+    // here too. Hosts whose "/" resolves to an application own their quit
+    // surface instead; sending them home would relaunch the closed primary.
+    const browserPath = dependencies.platform.getLocation().pathname;
+    const browserRoute = dependencies.resolveRoute(browserPath);
+    if (snapshot.application.activeAppId === null && snapshot.application.routePath === "/"
+      && snapshot.statechart.currentState === "active.webspring"
+      && browserRoute.kind === "app" && snapshot.lifecycle[browserRoute.app.id] === "closed"
+      && dependencies.resolveRoute("/").kind === "webspring") {
+      initialHref = null;
+      initialHrefDeferredForAuthorization = false;
+      handleRuntimeRouteOpen({ browserHref: "/", syncRoute: true, historyMode: "replace" });
+      return;
+    }
     if (!initialHref || !snapshot.booted) return;
     let initialUrl: URL;
     try {

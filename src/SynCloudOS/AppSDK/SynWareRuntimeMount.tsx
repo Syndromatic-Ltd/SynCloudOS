@@ -160,6 +160,13 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     lease.state.mount.dispose(new DOMException("Application mount lifecycle ended.", "AbortError"));
   }, [key, registrationAuthority]);
   useLayoutEffect(() => {
+    // Exit presentations may retain this React tree after the close commit,
+    // and a newly composed host can still contain the old app descriptor.
+    // Closed lifecycle authority is terminal: never mint a transfer scope.
+    if (runtime.lifecycle.getState(app.id) === "closed") {
+      setMounted(null);
+      return;
+    }
     if (!canonical) {
       // Ordered teardown deletes the registry entry (AppRegistry.unregister
       // removes appInfo and the lifecycle record together) while window hosts
