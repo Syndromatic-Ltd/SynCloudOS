@@ -42,6 +42,7 @@ describe("installed SDK stylesheet ownership", () => {
         plugins: [sdkPackageStyles({ themeNames: [], frameworkPublicDirectory: join(root, "public") })],
         build: { write: false, cssCodeSplit: true, assetsInlineLimit: 0,
           lib: { entry: { "nse/styles": neutralEntry }, formats: ["es"], fileName: (_format, name) => `${name}.js` },
+          rollupOptions: { output: { assetFileNames: "assets/[name]-[hash][extname]" } },
         },
       });
       const output = (Array.isArray(result) ? result[0] : result).output;
@@ -65,7 +66,7 @@ describe("installed SDK stylesheet ownership", () => {
       const consumed = (Array.isArray(consumer) ? consumer[0] : consumer).output;
       expect(consumed.filter(file => file.type === "asset" && file.fileName.endsWith(".css"))
         .map(file => String(file.source)).join("\n")).not.toContain("data:image/svg+xml");
-      expect(consumed.some(file => file.type === "asset" && file.fileName.endsWith(".svg"))).toBe(true);
+      expect(consumed.map(file => file.fileName)).toEqual(expect.arrayContaining([expect.stringMatching(/\.svg$/u)]));
     } finally { rmSync(root, { recursive: true, force: true }); }
   });
 
