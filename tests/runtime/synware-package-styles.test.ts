@@ -23,7 +23,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { build } from "vite";
 import { describe, expect, it } from "vitest";
-import { sdkNeutralStyleModuleSource, sdkPackageStyles } from "../../scripts/synware/sdk-package-styles.mjs";
+import { assertSdkNodeLoadableChunksImportNoCss, sdkNeutralStyleModuleSource, sdkNodeLoadableChunks, sdkPackageStyles } from "../../scripts/synware/sdk-package-styles.mjs";
 
 describe("installed SDK stylesheet ownership", () => {
 
@@ -132,6 +132,9 @@ describe("installed SDK stylesheet ownership", () => {
       expect(entry?.type === "chunk" && entry.code).toMatch(/import\s+["'][^"']+\.css["']/);
       const core = output.find((file) => file.fileName === "nse.js");
       expect(core?.type === "chunk" && core.code).not.toMatch(/import\s+["'][^"']+\.css["']/);
+      // Node loads the browser entry, so its CSS ships only through browser/styles.css.
+      const browserEntry = output.find((file) => file.fileName === "browser.js");
+      expect(browserEntry?.type === "chunk" && browserEntry.code).not.toMatch(/import\s+["'][^"']+\.css["']/);
       const neutral = output.find((file) => file.fileName === "nse/styles.css");
       expect(neutral?.type).toBe("asset");
       const rootCss = output.filter((file) => file.type === "asset" && file.fileName.endsWith(".css") && String(file.source).includes(".semantic"));
@@ -155,6 +158,41 @@ describe("installed SDK stylesheet ownership", () => {
       expect(nestedTexture?.type).toBe("asset");
       expect(rootCss[0]?.type === "asset" && String(rootCss[0].source))
         .toMatch(/url\(["']\.\/nested%20surface-[A-Za-z0-9_-]+\.png["']\)/u);
+    } finally { rmSync(root, { recursive: true, force: true }); }
+  });
+
+  it("keeps CSS imports out of every chunk Node reaches from a code entry", () => {
+    const chunk = (fileName: string, code: string, imports: string[] = [], isEntry = false) =>
+      ({ type: "chunk", fileName, code, imports, isEntry });
+    const output = {
+      "fx/media.js": chunk("fx/media.js", 'export * from "./chunks/shared.js";', ["chunks/shared.js"], true),
+      "chunks/shared.js": chunk("chunks/shared.js", 'export const shared = () => import("./shell.js");'),
+      "chunks/shell.js": chunk("chunks/shell.js", 'import "../assets/shell.css";\nexport const shell = true;'),
+      "nse/themes/sample.js": chunk("nse/themes/sample.js", 'import "../../assets/theme.css";\nexport * from "../chunks/shared.js";', ["chunks/shared.js"], true),
+    };
+    const themes = new Set(["nse/themes/sample.js"]);
+    expect([...sdkNodeLoadableChunks(output, themes)].sort()).toEqual(["chunks/shared.js", "fx/media.js"]);
+    expect(() => assertSdkNodeLoadableChunksImportNoCss(output, themes)).not.toThrow();
+
+    output["chunks/shared.js"].code = 'import "../assets/shared.css";\n' + output["chunks/shared.js"].code;
+    expect(() => assertSdkNodeLoadableChunksImportNoCss(output, themes)).toThrow(/chunks\/shared\.js/u);
+  });
+
+  it("fails the build when Node-loadable CSS is in no published stylesheet", async () => {
+    const root = mkdtempSync(join(tmpdir(), "synware-unpublished-styles-"));
+    try {
+      mkdirSync(join(root, "src"));
+      writeFileSync(join(root, "src/neutral.css"), '.semantic { display: flex; }');
+      writeFileSync(join(root, "src/orphan.css"), '.orphan { color: red; }');
+      const neutralEntry = join(root, "src/neutral-entry.js");
+      writeFileSync(neutralEntry, 'import "./neutral.css";');
+      writeFileSync(join(root, "src/media.js"), 'import "./orphan.css"; export const media = true;');
+      await expect(build({ root, configFile: false, logLevel: "silent", base: "./", publicDir: false,
+        plugins: [sdkPackageStyles({ themeNames: [], frameworkPublicDirectory: join(root, "public") })],
+        build: { write: false, cssCodeSplit: true,
+          lib: { entry: { "fx/media": join(root, "src/media.js"), "nse/styles": neutralEntry }, formats: ["es"], fileName: (_format, name) => `${name}.js` },
+        },
+      })).rejects.toThrow(/fx\/media\.js is Node-loadable but its CSS is in no published stylesheet/u);
     } finally { rmSync(root, { recursive: true, force: true }); }
   });
 });

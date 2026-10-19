@@ -128,6 +128,8 @@ test("CSS-only package emits browser runtime rules and relocatable artwork", asy
     assert.match(browser, /\.syncloudos-login-gate/);
     assert.match(browser, /\.syncloudos-login-backdrop/);
     assert.match(browser, /prefers-reduced-motion/);
+    // Node imports the browser entry; its runtime CSS reaches browsers only through browser/styles.css.
+    assert.doesNotMatch(output.get("browser.js").code, /import\s*["'][^"']+\.css["']/);
     cssAt("nse/styles.css");
   } finally {
     rmSync(directory, { recursive: true, force: true });

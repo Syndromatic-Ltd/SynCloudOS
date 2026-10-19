@@ -82,6 +82,38 @@ export function sdkNeutralStyleModuleSource(stylesheetPath, entryPath) {
   }).join("\n")}\n`;
 }
 
+const cssImportPattern = /(?:^|[;\n])\s*import\s*["'][^"']+\.css["']/u;
+
+/**
+ * Chunks Node loads when it imports an SDK entry: every chunk statically
+ * reachable from a code entry. Theme entries are the only entries that
+ * select styles by import, so they are excluded; dynamic imports are browser
+ * load boundaries and are not followed.
+ */
+export function sdkNodeLoadableChunks(output, themeEntryFiles) {
+  const loadable = new Set();
+  const pending = Object.values(output)
+    .filter((chunk) => chunk.type === "chunk" && chunk.isEntry && !themeEntryFiles.has(chunk.fileName))
+    .map((chunk) => chunk.fileName);
+  while (pending.length) {
+    const fileName = pending.pop();
+    const chunk = output[fileName];
+    if (loadable.has(fileName) || chunk?.type !== "chunk") continue;
+    loadable.add(fileName);
+    pending.push(...chunk.imports);
+  }
+  return loadable;
+}
+
+/** Fail the build when Node could reach a stylesheet import from a code entry. */
+export function assertSdkNodeLoadableChunksImportNoCss(output, themeEntryFiles) {
+  const offenders = [...sdkNodeLoadableChunks(output, themeEntryFiles)]
+    .filter((fileName) => cssImportPattern.test(output[fileName].code));
+  if (offenders.length) {
+    throw new Error(`SDK chunks reachable from Node-loadable entries must not import CSS: ${offenders.sort().join(", ")}.`);
+  }
+}
+
 /** Preserve per-module CSS ownership after Vite extracts library styles. */
 export function sdkPackageStyles({ themeNames, publicStyleEntries = {}, frameworkPublicDirectory = undefined }) {
   let publicDirectory;
@@ -121,12 +153,24 @@ export function sdkPackageStyles({ themeNames, publicStyleEntries = {}, framewor
           ...(chunk.viteMetadata?.importedCss ?? []),
         ])];
       };
+      const published = new Set();
       const publishStyles = (fileName, dependencies) => {
         const styles = [...new Set(dependencies)];
         if (styles.length === 0) throw new Error(`SDK stylesheet ${fileName} has no emitted inputs.`);
         if (output[fileName]) throw new Error(`SDK stylesheet collision at ${fileName}.`);
+        for (const style of styles) published.add(style);
         this.emitFile({ type: "asset", fileName, source: styles.map((dependency) =>
           `@import ${JSON.stringify(specifier(fileName, dependency))};`).join("\n") + "\n" });
+      };
+      const prependStyleImports = (chunk, styles) => {
+        if (!styles.length) return;
+        chunk.code = styles.map(css =>
+          `import ${JSON.stringify(specifier(chunk.fileName, css))};`).join("\n") + "\n" + chunk.code;
+        if (chunk.map) {
+          chunk.map.mappings = ";".repeat(styles.length) + chunk.map.mappings;
+          const mapAsset = output[`${chunk.fileName}.map`];
+          if (mapAsset?.type === "asset") mapAsset.source = chunk.map.toString();
+        }
       };
       const neutral = cssFor("nse/styles.js");
       if (neutral.length === 0) throw new Error("Expected the neutral NSE style entry to own emitted CSS.");
@@ -135,28 +179,35 @@ export function sdkPackageStyles({ themeNames, publicStyleEntries = {}, framewor
       for (const [fileName, entryName] of Object.entries(publicStyleEntries)) {
         publishStyles(fileName, cssFor(`${entryName}.js`));
       }
+      const themeEntryFiles = new Set(themeNames.map((name) => `${name}.js`));
       for (const name of themeNames) {
         const entryFile = `${name}.js`;
         const styles = cssFor(entryFile);
         publishStyles(`${name}/styles.css`, styles);
         const chunk = output[entryFile];
         if (chunk?.type !== "chunk") throw new Error(`SDK theme entry ${entryFile} was not emitted.`);
+        // Importing a theme selects its styles, including those of shared chunks.
+        prependStyleImports(chunk, styles);
       }
       // Vite library builds extract CSS without retaining its JS import.
-      // Restore ownership on every chunk, including optional dynamic entries,
-      // rather than flattening lazy shell/framework styles into browser CSS.
+      // Node loads code entries and their static graph, so that CSS reaches
+      // browsers only through the published stylesheets. Chunks behind a
+      // dynamic import (the Webspring shell App) load only in browsers and keep
+      // owning their CSS, so it is fetched when the shell is mounted.
+      const nodeLoadable = sdkNodeLoadableChunks(output, themeEntryFiles);
       for (const chunk of Object.values(output)) {
-        if (chunk.type !== "chunk") continue;
+        if (chunk.type !== "chunk" || themeEntryFiles.has(chunk.fileName)) continue;
         const styles = [...(chunk.viteMetadata?.importedCss ?? [])];
-        if (!styles.length) continue;
-        chunk.code = styles.map(css =>
-          `import ${JSON.stringify(specifier(chunk.fileName, css))};`).join("\n") + "\n" + chunk.code;
-        if (chunk.map) {
-          chunk.map.mappings = ";".repeat(styles.length) + chunk.map.mappings;
-          const mapAsset = output[`${chunk.fileName}.map`];
-          if (mapAsset?.type === "asset") mapAsset.source = chunk.map.toString();
+        if (!nodeLoadable.has(chunk.fileName)) {
+          prependStyleImports(chunk, styles);
+          continue;
+        }
+        const unpublished = styles.filter((style) => !published.has(style));
+        if (unpublished.length) {
+          throw new Error(`SDK chunk ${chunk.fileName} is Node-loadable but its CSS is in no published stylesheet: ${unpublished.join(", ")}.`);
         }
       }
+      assertSdkNodeLoadableChunksImportNoCss(output, themeEntryFiles);
     },
   };
 }
