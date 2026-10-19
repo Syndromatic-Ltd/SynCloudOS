@@ -193,7 +193,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
           {contentMenu ? <ApplicationMenuOverlayHost menuStore={menuStore} model={menuModel} controller={menuController}
             overlay={{ id: `application-host:app-menu-overlay:${applicationId}`, parentResponderId: responderId, placement: "block-end-inline-end" }}
             anchorTitle={appName} /> : null}
-          {contentMenu ? <ApplicationMenuTriggerBridge menuStore={menuStore} label={locale.t("userInfo.label", "User Info")}>
+          {contentMenu ? <ApplicationMenuTriggerBridge menuStore={menuStore} label={appName}>
             {entry}
           </ApplicationMenuTriggerBridge> : entry}
           </NSEWindowSurfaceBridgeProvider>

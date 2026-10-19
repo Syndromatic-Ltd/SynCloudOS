@@ -109,6 +109,12 @@ describe("developer MCP tools", () => {
     expect(parseManifest(resolve(project, result.createdPaths[0])).applicationMenu).toBeUndefined();
     expect(result.nextSteps.some((step: string) => step.includes("optional") && step.includes("required") && step.includes("applicationMenu"))).toBe(true);
   });
+  it("keeps the content-menu next step when explicit policy and presentation flags are given, but not for a windowed secondary", async () => {
+    const primary = await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true, requiresLogin: false }, presentation: "appView", contentApplicationMenu: false });
+    expect(primary.nextSteps.some((step: string) => step.includes('applicationMenu: { trigger: "content" }') && step.includes("useSynWareApplicationMenuTrigger"))).toBe(true);
+    const secondary = await scaffold({ projectRoot: project, id: "org.example.secondary", name: "Secondary", route: "/secondary", policy: { public: true }, presentation: "windowedView" });
+    expect(secondary.nextSteps.some((step: string) => step.includes("applicationMenu"))).toBe(false);
+  });
   it.each([
     ['authentication: "optional", application: { id: "org.example.primary" }', undefined],
     ['authentication: { policy: "required" }, application: { id: "org.example.primary", frame: "fullscreen" }', "windowedView"],
@@ -132,6 +138,18 @@ describe("developer MCP tools", () => {
     const result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.host.status).toBe("checked");
     expect(result.ok).toBe(true);
+  });
+  it("reads a top-level awaited mount whose unrelated options use shorthand properties", async () => {
+    await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary" });
+    put("src/main.tsx", `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; const element = document.body, bundles = []; const host = await mountSynCloudOS({ element, bundles, application: { id: "org.example.primary", frame: "fullscreen" }, authentication: "optional" });`);
+    const result = await validateProject({ projectRoot: project, typescript: false });
+    expect(result.host).toMatchObject({ status: "checked", authentication: "optional", application: { id: "org.example.primary", frame: "fullscreen" } });
+    expect(result.findings).toContainEqual(expect.objectContaining({ rule: "synware.application-menu" }));
+  });
+  it("leaves a shorthand authentication or application value unresolved", async () => {
+    await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary" });
+    put("src/main.tsx", `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; const authentication = "optional"; mountSynCloudOS({ application: { id: "org.example.primary" }, authentication });`);
+    expect((await validateProject({ projectRoot: project, typescript: false })).host.status).toBe("unresolved");
   });
   it.each([
     "mountSynCloudOS(options)",

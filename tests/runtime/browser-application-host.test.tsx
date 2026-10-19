@@ -75,7 +75,7 @@ function MenuApplication() {
   const menu = useSynWareApplicationMenuTrigger();
   return <>
     <Application />
-    <button data-testid="application-menu" ref={element => menu?.setAnchor(element)} aria-expanded={menu?.open ?? false}
+    <button data-testid="application-menu" data-menu-label={menu?.label} ref={element => menu?.setAnchor(element)} aria-expanded={menu?.open ?? false}
       disabled={!menu} onClick={() => menu?.toggle()}>Application menu</button>
   </>;
 }
@@ -324,6 +324,7 @@ describe("application-only browser host", () => {
     const session = sessions.at(-1)!;
     expect(runtime.apps.getApp(id)?.frame.topBar).toBe("none");
     expect(document.querySelector(".nse-login-window")).toBeNull();
+    expect(target.querySelector('[data-testid="application-menu"]')!.getAttribute("data-menu-label")).toBe("Application host");
     const menu = await openApplicationMenu(target);
     expect(within(menu).getByRole("menuitem", { name: "About Application host" })).not.toBeNull();
     expect(within(menu).getByRole("menuitem", { name: "Sign In" })).not.toBeNull();

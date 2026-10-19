@@ -117,8 +117,11 @@ export function applicationHostHints(root) {
     if (!expression || !ts.isObjectLiteralExpression(expression)) throw new Error("Mount options and application/authentication declarations must be inline object literals.");
     const values=new Map();
     for (const property of expression.properties) {
-      if (!ts.isPropertyAssignment(property) || !(ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) || values.has(property.name.text)) throw new Error("Spreads, computed/shorthand properties and duplicate keys prevent reliable host inspection.");
-      values.set(property.name.text,property.initializer);
+      const key=property.name && (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) ? property.name.text : null;
+      // Shorthand members (`{ element, bundles }`) are identifiers; they only fail if the host rule needs their value.
+      const initializer=ts.isPropertyAssignment(property) ? property.initializer : ts.isShorthandPropertyAssignment(property) ? property.name : null;
+      if (key===null || !initializer || values.has(key)) throw new Error("Spreads, computed properties and duplicate keys prevent reliable host inspection.");
+      values.set(key,initializer);
     }
     return values;
   }

@@ -110,7 +110,7 @@ export async function scaffold(input) {
   const nextSteps=[];
   if (input.policy?.public!==true) nextSteps.push('Before using this bundle as the primary application with authentication "disabled" or "optional", explicitly set runtime.policy.public to true. Do not make private applications public unless that access is intended.');
   if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "windowedView"; the default appView is for the primary application.');
-  if (!input.contentApplicationMenu) nextSteps.push('A fullscreen primary with authentication "optional" or "required" must declare applicationMenu: { trigger: "content" } and render a useSynWareApplicationMenuTrigger() button, so people can reach Preferences > Account, Sign In and Log Out. Pass contentApplicationMenu: true to scaffold both.');
+  if (!input.contentApplicationMenu && (input.presentation===undefined || input.presentation==="appView")) nextSteps.push('A fullscreen primary with authentication "optional" or "required" must declare applicationMenu: { trigger: "content" } and render a useSynWareApplicationMenuTrigger() button, so people can reach Preferences > Account, Sign In and Log Out. Pass contentApplicationMenu: true to scaffold both.');
   nextSteps.push("Review the generated manifest and run syncloudos.validate before registering the bundle.");
   return {createdPaths,nextSteps};
 }

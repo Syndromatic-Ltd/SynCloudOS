@@ -361,7 +361,7 @@ export function ApplicationStageView({
         <SourceListFrameProvider value={sourceListContext}>
           <ApplicationMenuTriggerBridge
             menuStore={appMenuStore}
-            label={locale.t("userInfo.label", "User Info")}
+            label={appName}
           >
           <QuickSwitchTriggerProvider port={quickSwitchTrigger}>
           <AppViewContent.Surface
