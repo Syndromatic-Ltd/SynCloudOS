@@ -21,7 +21,7 @@
 import "../SynCloudOS/styles/runtime.css";
 import { StrictMode, type PropsWithChildren } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { App } from "../App";
+import type { App as ShellApp } from "../App";
 import { ApplicationHost, applicationRecoveryError } from "./ApplicationHost";
 import { createApplicationHostHome, type ApplicationHostHome } from "./applicationHome";
 import { NSEAppearanceProvider, type NSEAppearanceDefinition } from "../NSE/Appearance";
@@ -322,6 +322,7 @@ function renderHost(
   fontCatalogue: SynWareFontCatalogue,
   appearance: NSEAppearanceDefinition,
   home: ApplicationHostHome | null,
+  Shell: typeof ShellApp | undefined,
 ): Root {
   const root = createRoot(element);
   root.render(
@@ -332,7 +333,7 @@ function renderHost(
             <RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
               <NSERubberBandProvider>{home
                 ? <ApplicationHost applicationId={home.primaryId} authentication={options.authentication ?? "disabled"} home={home} />
-                : <App shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} contentSources={contentSources} />}</NSERubberBandProvider>
+                : Shell && <Shell shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} contentSources={contentSources} />}</NSERubberBandProvider>
             </RootRecoveryBoundary>
           </RuntimeInputBoundary>
         </NSEAppearanceProvider>
@@ -629,11 +630,14 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
   }
   let initialPathname = `${environment.browser.getLocation().pathname}${environment.browser.getLocation().search}${environment.browser.getLocation().hash}`;
   try {
-    const shellLocaleResources = await getWebspringLocaleResourceLoader()();
-    if (shellLocaleResources) runtime.locale.registerBundleLocaleResources("webspring", shellLocaleResources);
-    if (options.shellResources?.localeResources) {
-      runtime.locale.registerBundleLocaleResources("webspring", options.shellResources.localeResources);
-    }
+    const loadShellLocale = getWebspringLocaleResourceLoader();
+    runtime.locale.registerBundleLocaleResourceLoader("webspring", async activeLocale => {
+      const resources = await loadShellLocale(activeLocale);
+      if (resources) runtime.locale.registerBundleLocaleResources("webspring", resources);
+      // Site-owned strings must retain precedence over built-in defaults,
+      // including after a language change reloads those defaults.
+      return options.shellResources?.localeResources;
+    });
     for (const contribution of prepared) {
       assertHostInstallLive(installSignal);
       const handle = createSynCloudOSHostInstallContext(
@@ -734,6 +738,10 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
       browserRoutes.start();
     }
     assertMountCurrent(options.element, attempt);
+    // Load the optional shell only for shell hosts; awaiting it keeps mounting
+    // and bootstrap recovery atomic without attaching launcher CSS to apps.
+    const Shell = options.shell ? (await import("../App")).App : undefined;
+    assertMountCurrent(options.element, attempt);
     root = renderHost(
       options.element,
       runtime,
@@ -742,6 +750,7 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
       fontCatalogue,
       options.appearance ?? atmoAppearance,
       home,
+      Shell,
     );
     if (!frameworkTestPath) await runtime.boot({ initialPathname });
     assertMountCurrent(options.element, attempt);
