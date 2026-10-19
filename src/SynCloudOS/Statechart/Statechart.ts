@@ -453,7 +453,8 @@ const statechart = {
         const error = options.error instanceof Error
           ? ErrorManager.capture({
               code: "UNKNOWN_RUNTIME_ERROR",
-              title: "SynCloudOS reported a runtime error.",
+              title: "SynCloudOS ran into a problem.",
+              message: "An unexpected error occurred. Some features may not work as expected.",
               error: options.error,
               source: options.source ?? "SynCloudOS.Statechart.gotoState",
               context: options.context
@@ -472,7 +473,8 @@ const statechart = {
       if (!RuntimeStore.getSnapshot().errors.length && !(error && typeof error === "object" && "code" in error)) {
         ErrorManager.capture({
           code: "UNKNOWN_RUNTIME_ERROR",
-          title: "SynCloudOS could not complete a state transition.",
+          title: "SynCloudOS could not finish that.",
+          message: "Something went wrong while switching screens. Please try again.",
           error,
           technicalMessage: `Statechart failed while moving to ${stateName}.`,
           source: "SynCloudOS.Statechart.gotoState",

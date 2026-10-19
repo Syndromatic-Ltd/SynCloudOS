@@ -44,13 +44,13 @@ export interface SynCloudOSErrorPayload {
   /** The condition's code. When `error` carries a catalogue code, that code
    * replaces this one: one error has exactly one authoritative code. */
   code: SynCloudOSErrorCode;
+  /** The plain, user-facing title the alert shows. */
   title: string;
-  /** What the person sees. Required unless `error` is supplied, in which case
-   * the thrown value's own message is used. */
-  message?: string;
+  /** The plain, user-facing sentence the alert shows under the title. Never
+   * the thrown value's message: that belongs in the technical details. */
+  message: string;
   /** The thrown value this capture reports. Its class name, catalogue code,
-   * message, stack, cause and lifecycle fields become the captured identity
-   * and technical details. */
+   * message, stack, cause and lifecycle fields go into the technical details. */
   error?: unknown;
   appId?: string;
   packageName?: string;
@@ -75,11 +75,13 @@ export interface SynCloudOSErrorPayload {
 export interface CapturedSynCloudOSError extends Omit<SynCloudOSErrorPayload, "code" | "message" | "error" | "technicalMessage"> {
   /** The one authoritative code: the thrown value's catalogue code when it has one, otherwise the condition's code. */
   code: string;
+  /** The user-facing sentence, as supplied by the capture. */
   message: string;
   /** The thrown value's class name (such as `SynCloudOSLifecycleError` or
    * `TypeError`); absent when no value was thrown. */
   exception?: string;
-  /** The complete technical details: everything not shown in the summary. */
+  /** Everything developer-facing: exception, code, the thrown message, who
+   * caught it, then context, hint, stacks. Shown only when disclosed. */
   technicalDetails?: string;
   runtimeId?: string;
   id: string;

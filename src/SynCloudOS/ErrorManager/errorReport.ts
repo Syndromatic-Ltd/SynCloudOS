@@ -40,7 +40,7 @@ function identifyThrown(value: unknown): ThrownIdentity {
   return { code, exception: value.name || "Error", message: value.message || "The error has no message." };
 }
 
-/** A stack without its leading `Name: message` header, which the summary already shows. */
+/** A stack without its leading `Name: message` header, which the Exception and Message lines already show. */
 function stackFrames(stack: unknown, header?: string): string {
   if (typeof stack !== "string") return "";
   let frames = stack;
@@ -95,6 +95,7 @@ function causeChain(thrown: unknown): string[] {
 function composeTechnicalDetails(
   payload: SynCloudOSErrorPayload,
   captured: Omit<CapturedSynCloudOSError, "technicalDetails">,
+  thrownMessage: string | undefined,
   appDisplayName: string | undefined,
 ): string {
   const context = captured.context ?? {};
@@ -102,6 +103,12 @@ function composeTechnicalDetails(
   const lifecycle = thrown instanceof SynCloudOSLifecycleError ? thrown : null;
   const appName = appDisplayName ?? captured.packageName;
   const catalogue = catalogueEntries.get(captured.code);
+  const identity = facts([
+    ["Exception", captured.exception],
+    ["Code", captured.code],
+    ["Message", thrownMessage],
+    [captured.exception === undefined ? "Reported by" : "Caught by", text(captured.source)],
+  ]);
   const head = facts([
     ["Detail", text(payload.technicalMessage)],
     ["Resource", lifecycle?.resource.id === undefined ? undefined : `${lifecycle.resource.kind} "${lifecycle.resource.id}"`],
@@ -118,6 +125,7 @@ function composeTechnicalDetails(
     ["Docs", catalogue?.docs],
   ]);
   return [
+    identity,
     head,
     text(payload.technicalDetails),
     section("Stack", isErrorLike(thrown) ? errorStack(thrown) : undefined),
@@ -128,10 +136,11 @@ function composeTechnicalDetails(
 }
 
 /**
- * Turns a capture request into the stored error. A thrown value's identity
- * wins: its catalogue code replaces the condition's generic code, its class
- * name is the exception and its message is the message. Everything else goes
- * into one technical-details text that omits unknown fields.
+ * Turns a capture request into the stored error. The title and message stay
+ * the capture's plain, user-facing text. A thrown value's identity leads the
+ * technical details: its class name is the exception, its catalogue code
+ * replaces the condition's generic code, and its message is listed there.
+ * Unknown fields are omitted.
  */
 export function createCapturedError(
   payload: SynCloudOSErrorPayload,
@@ -140,48 +149,27 @@ export function createCapturedError(
     readonly appDisplayName?: string;
   },
 ): CapturedSynCloudOSError {
-  const { error: _thrown, code, message, technicalMessage: _technicalMessage, technicalDetails: _technicalDetails, ...rest } = payload;
+  const { error: _thrown, code, technicalMessage: _technicalMessage, technicalDetails: _technicalDetails, ...rest } = payload;
   const identity = payload.error === undefined ? null : identifyThrown(payload.error);
   const captured: Omit<CapturedSynCloudOSError, "technicalDetails"> = {
     ...record.defaults,
     ...rest,
     code: identity?.code ?? code,
-    message: identity?.message ?? message ?? payload.title,
     ...(identity ? { exception: identity.exception } : {}),
     ...(record.runtimeId === undefined ? {} : { runtimeId: record.runtimeId }),
     id: record.id,
     at: record.at,
     timestamp: record.timestamp,
   };
-  return { ...captured, technicalDetails: composeTechnicalDetails(payload, captured, record.appDisplayName) };
+  return { ...captured, technicalDetails: composeTechnicalDetails(payload, captured, identity?.message, record.appDisplayName) };
 }
 
-/** The fields a summary needs; SystemAlert's view-shaped error satisfies it. */
-export interface ErrorSummarySource {
-  readonly code: string;
-  readonly message: string;
-  readonly exception?: string;
-  readonly source?: string;
-}
-
-/** The labelled summary shown above the technical details: Exception (for a
- * thrown value), Code, Message, and Caught by (or Reported by when nothing was thrown). */
-export function errorSummary(error: ErrorSummarySource): readonly (readonly [label: string, value: string])[] {
-  const thrown = error.exception !== undefined;
-  return [
-    ...(thrown ? [["Exception", error.exception!] as const] : []),
-    ["Code", error.code] as const,
-    ["Message", error.message] as const,
-    ...(error.source ? [[thrown ? "Caught by" : "Reported by", error.source] as const] : []),
-  ];
-}
-
-/** Pure formatter for a copyable report: title, summary, then the technical details. */
+/** Pure formatter for a copyable report: the alert's title and message, then the technical details. */
 export function toTechnicalReport(error: CapturedSynCloudOSError | null): string {
   if (!error) return "No SynCloudOS error has been captured.";
   return [
     error.title,
-    errorSummary(error).map(([label, value]) => `${label}: ${value}`).join("\n"),
+    error.message,
     error.technicalDetails,
     `Captured: ${error.timestamp}`,
   ].filter(Boolean).join("\n\n");

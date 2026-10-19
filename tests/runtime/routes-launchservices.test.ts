@@ -304,7 +304,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
             code: "APP_LAUNCH_FAILED",
             appId: "broken-route",
             packageName: "BrokenRoute.app",
-            title: "Webspring could not open BrokenRoute.app.",
+            title: "Webspring could not open Broken Route.",
+            message: "SynCloudOS could not load the requested content.",
           }),
         ]);
     } finally {

@@ -217,7 +217,8 @@ const errorManager = {
     }
     return this.capture({
       code: "APP_LAUNCH_FAILED",
-      title: `Webspring could not open ${app?.packageName ?? "that app"}.`,
+      title: `Webspring could not open ${app?.displayName ?? "that app"}.`,
+      message: "SynCloudOS could not load the requested content.",
       error,
       appId: app?.id,
       packageName: app?.packageName,
@@ -279,7 +280,8 @@ const errorManager = {
   createAppContentFailedError(app: ErrorApp | null, error: unknown, context: Record<string, unknown> = {}) {
     return this.capture({
       code: "APP_CONTENT_FAILED",
-      title: `${app?.displayName ?? "A SynWare"} stopped unexpectedly.`,
+      title: `${app?.displayName ?? "An application"} stopped unexpectedly.`,
+      message: "An unexpected error has prevented this application from working properly.",
       error,
       appId: app?.id,
       packageName: app?.packageName,
@@ -299,7 +301,8 @@ const errorManager = {
   createRuntimeRenderError(error: unknown, context: Record<string, unknown> = {}) {
     return this.capture({
       code: "UNKNOWN_RUNTIME_ERROR",
-      title: "Webspring stopped because of an error.",
+      title: "SynCloudOS stopped unexpectedly.",
+      message: "An unexpected error has prevented SynCloudOS from working properly.",
       error,
       source: String(context.source ?? "SynCloudOS.RootWatchdog"),
       severity: "fatal",
@@ -331,15 +334,15 @@ const errorManager = {
 
     return this.capture({
       code: "GLOBAL_SCRIPT_ERROR",
-      title: "SynCloudOS caught a global script error.",
+      title: "SynCloudOS ran into a problem.",
+      message: "An unexpected error occurred on this page. Reload to make sure everything works correctly.",
       ...(thrown ? { error } : {
-        message: "A browser-level script error escaped the runtime watchdogs.",
         technicalMessage: typeof context.message === "string" && context.message ? context.message : "The browser reported a script error without an error object.",
       }),
       source: String(context.source ?? "SynCloudOS.GlobalWatchdog.error"),
-      severity: "fatal",
-      recoverable: false,
-      suggestedActions: ["reload"],
+      severity: "error",
+      recoverable: true,
+      suggestedActions: ["reload", "dismiss"],
       fingerprint,
       category: "watchdog",
       context: {
@@ -363,15 +366,15 @@ const errorManager = {
 
     return this.capture({
       code: "UNHANDLED_PROMISE_REJECTION",
-      title: "SynCloudOS caught an unhandled promise rejection.",
+      title: "A background task failed.",
+      message: "Something running in the background stopped unexpectedly.",
       ...(reason === undefined ? {
-        message: "An asynchronous runtime operation failed without handling its rejection.",
         technicalMessage: "The promise rejected without a reason.",
       } : { error: reason }),
       source: String(context.source ?? "SynCloudOS.GlobalWatchdog.unhandledrejection"),
-      severity: "fatal",
-      recoverable: false,
-      suggestedActions: ["reload"],
+      severity: "error",
+      recoverable: true,
+      suggestedActions: ["retry", "dismiss"],
       fingerprint,
       category: "watchdog",
       context: {
@@ -396,7 +399,8 @@ const errorManager = {
 
     return this.capture({
       code: "RUNTIME_EVENT_LISTENER_FAILED",
-      title: "SynCloudOS caught a runtime event listener failure.",
+      title: "SynCloudOS ran into a problem.",
+      message: "A background task failed. SynCloudOS can keep running.",
       error,
       technicalDetails: [
         typeof context.eventType === "string" ? `Event: ${context.eventType}` : null,
@@ -428,13 +432,13 @@ const errorManager = {
 
     return this.capture({
       code: "ASSET_LOAD_FAILED",
-      title: "SynCloudOS could not load a visual asset.",
-      message: "A page resource failed to load. SynCloudOS can keep running, but part of the interface may be incomplete.",
+      title: "Some content could not be loaded.",
+      message: "Part of this page may be missing. Check your connection and try again.",
       technicalMessage: `${resource.resourceTag}${resource.resourceUrl ? ` ${resource.resourceUrl}` : ""}`,
       source: String(context.source ?? "SynCloudOS.GlobalWatchdog.resource"),
-      severity: "warning",
+      severity: "error",
       recoverable: true,
-      suggestedActions: ["dismiss"],
+      suggestedActions: ["retry", "dismiss"],
       fingerprint,
       category: "resource",
       context: {

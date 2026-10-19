@@ -74,7 +74,8 @@ export function SystemPanelsLayer({ windowContentRegistry }: { readonly windowCo
     reportError: (error: unknown, context: { readonly requestId: string; readonly operation: string }) => {
       runtime.errors.capture({
         code: "APP_CONTENT_FAILED",
-        title: "System panel could not be shown.",
+        title: "This panel could not be shown.",
+        message: "An unexpected error has prevented Webspring from opening this panel.",
         error,
         source: "Webspring.SystemPanelsLayer",
         context,

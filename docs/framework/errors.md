@@ -50,7 +50,9 @@ The first disposal wins, including when an owner signal aborts before a later ex
 
 ## Error reports
 
-When a watchdog or the runtime captures an error, the alert and the copyable technical report share one structure. The alert title stays human, for example "Webspring stopped because of an error." for the root watchdog or "Notes stopped unexpectedly." for an application. Below it, a thrown error shows its summary:
+An error alert has two layers. What everyone sees is plain language: a title and one sentence, such as "SynCloudOS stopped unexpectedly." with "An unexpected error has prevented SynCloudOS from working properly." for the root watchdog, or "Notes stopped unexpectedly." with "An unexpected error has prevented this application from working properly." for an application. Titles name an application by its display name. Codes, class names and thrown messages never appear in this layer.
+
+Everything developer-facing is inside the single **Technical details** disclosure. It opens with the error's identity:
 
 ```text
 Exception: SynCloudOSLifecycleError
@@ -62,11 +64,13 @@ Caught by: SynCloudOS.RootWatchdog
 - **Exception** is the thrown value's class name, such as `SynCloudOSLifecycleError` or `TypeError`. A thrown non-`Error` value reads `Non-Error value (string)` or similar.
 - **Code** is the error's one authoritative code (see below).
 - **Message** is the thrown error's own message.
-- **Caught by** names the boundary that caught the error. Where it originated is the stack in the technical details.
+- **Caught by** names the boundary that caught the error. Where it originated is the stack further down.
 
-A condition the framework reports itself, such as a connection error or an unknown route, shows its human message instead. Its code and **Reported by** line move into the technical details.
+A condition the framework reports itself, such as a connection error or an unknown route, has no Exception or Message line, and says **Reported by** instead of Caught by.
 
-The single **Technical details** disclosure holds everything else, and only what is known. It includes the lifecycle resource identity and disposal reason, the problem, the source location, the application, window and route, severity and recoverability, the catalogue hint and docs, and the stack. The thrown error's cause, the development-only disposal stack and the React component stack follow. Unknown fields are omitted rather than printed as `none`, and no text appears twice. The copyable report (`toTechnicalReport`, also in the Inspector's error report) is the title, the summary, the technical details and the capture time.
+The rest of the technical details follows, and only what is known: the condition's detail line, the lifecycle resource identity and disposal reason, the problem, the source location, the application, window and route, severity and recoverability, the catalogue hint and docs, and the stack. The thrown error's cause, the development-only disposal stack and the React component stack come last. Unknown fields are omitted rather than printed as `none`, and no text appears twice. The copyable report (`toTechnicalReport`, also in the Inspector's error report) is the title, the message, the technical details and the capture time.
+
+When you capture through `runtime.errors.capture`, supply a plain `title` and `message` for the person, and pass the thrown value as `error`; its identity goes into the technical details.
 
 ### Code identity
 
@@ -75,7 +79,7 @@ One error has one code:
 - A thrown value that carries a catalogue code keeps it. Every `SynCloudOSLifecycleError` does, as does any error whose `code` property is a catalogue code.
 - The capturing boundary's generic code applies only when the thrown value has no catalogue code. Examples are `UNKNOWN_RUNTIME_ERROR` at the root watchdog, `APP_CONTENT_FAILED` at an application watchdog, `APP_LAUNCH_FAILED`, `GLOBAL_SCRIPT_ERROR` and `UNHANDLED_PROMISE_REJECTION`.
 
-Branch on `captured.code` and `captured.exception`, never on message text. Code that captures through `runtime.errors.capture` passes the thrown value as `error`, and the same identity rule applies.
+Branch on `captured.code` and `captured.exception`, never on message text.
 
 ## Contracts kept unchanged
 

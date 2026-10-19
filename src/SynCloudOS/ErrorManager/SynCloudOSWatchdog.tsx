@@ -54,7 +54,10 @@ function watchdogPayload(error: unknown, props: SynCloudOSWatchdogProps, compone
   const root = props.scope === "root";
   return {
     code: root ? "UNKNOWN_RUNTIME_ERROR" : "APP_CONTENT_FAILED",
-    title: root ? "Webspring stopped because of an error." : `${props.app?.displayName ?? "A SynWare"} stopped unexpectedly.`,
+    title: root ? "SynCloudOS stopped unexpectedly." : `${props.app?.displayName ?? "An application"} stopped unexpectedly.`,
+    message: root
+      ? "An unexpected error has prevented SynCloudOS from working properly."
+      : "An unexpected error has prevented this application from working properly.",
     error,
     appId: props.app?.id,
     packageName: props.app?.packageName,

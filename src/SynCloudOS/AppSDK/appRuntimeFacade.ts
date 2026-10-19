@@ -4399,8 +4399,9 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
               ? runtime.errors.createNotRespondingError(app, errorContext, retry)
               : code === "CONNECTION_ERROR"
                 ? runtime.errors.createConnectionError(app, cause, errorContext, retry)
-                : runtime.errors.capture({ code: "APP_CONTENT_FAILED", title: "SynWare operation failed",
-                  error: cause, source: errorContext.source,
+                : runtime.errors.capture({ code: "APP_CONTENT_FAILED", title: `${app.displayName} could not complete that action.`,
+                  message: "An unexpected error prevented the action from finishing. Please try again.",
+                  error: cause, technicalMessage: `The ${operation} operation failed.`, source: errorContext.source,
                   appId: app.id, category: "app", context: { operation, scope: "app" } });
             if (code) {
               const ownerClosed = () => runtime.errors.dismiss(captured.id);

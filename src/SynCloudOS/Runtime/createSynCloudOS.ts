@@ -793,9 +793,10 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     observeListenerError: (error) => {
       errors.capture({
         code: "RUNTIME_TRANSACTION_FAILED",
-        title: "An undo-history observer failed.",
+        title: "Undo ran into a problem.",
+        message: "Your changes were kept, but Undo may not work for this action.",
         error,
-        technicalMessage: "A diagnostic undo-history observer failed; the history transaction remained active.",
+        technicalMessage: "An undo-history observer failed; the history transaction remained active.",
         source: "UndoManager.notify",
         category: "runtime",
         suggestedActions: ["dismiss"],

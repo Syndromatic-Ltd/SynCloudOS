@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
 import { resolveSystemAlertDetailsMotion } from "./SystemAlert.transitions";
 import { NSEPushButton, type NSEButtonTone } from "../NSE/public/controls";
@@ -27,7 +27,6 @@ import cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
 import { synCloudOSLogoUrl as synCloudOSLogo } from "../SynCloudOS/Resources/frameworkAssets";
 import type { ResolvedSiteBranding } from "../SynCloudOS/SynCloudOS";
 import { useHostSiteBranding } from "./siteBrandingContext";
-import { errorSummary } from "../SynCloudOS/ErrorManager/errorReport";
 import "./system-alert.css";
 
 /** The disclosed technical report. Its scroll box wraps the text in a single
@@ -77,15 +76,12 @@ export function SystemAlertAssetCache() {
 /**
  * A view-shaped error payload deliberately does not import ErrorManager.
  * Runtime hosts own capture and the technical details; this private recovery
- * composition consumes their serialisable error outcome and shares only the
- * pure summary formatter with the copyable report.
+ * composition shows the plain title and message, and discloses the details.
  */
 interface SystemAlertError {
   readonly code: string;
   readonly title: string;
   readonly message: string;
-  /** The thrown value's class name; present when the alert reports an exception. */
-  readonly exception?: string;
   readonly appId?: string;
   readonly packageName?: string;
   readonly technicalDetails?: string;
@@ -152,14 +148,7 @@ export function SystemAlert({
   applicationIcon?: string | null;
 }) {
   const [expanded, setExpanded] = useState(false);
-  // An exception leads with its summary (Exception, Code, Message, Caught by);
-  // a reported condition leads with its message and keeps the rest disclosed.
-  const thrown = error.exception !== undefined;
-  const summary = useMemo(() => errorSummary(error), [error]);
-  const details = useMemo(() => [
-    thrown ? "" : summary.filter(([label]) => label !== "Message").map(([label, value]) => `${label}: ${value}`).join("\n"),
-    error.technicalDetails ?? "",
-  ].filter(Boolean).join("\n\n"), [error.technicalDetails, summary, thrown]);
+  const details = error.technicalDetails ?? `Code: ${error.code}`;
   const actions = error.suggestedActions ?? ["returnToWebspring", "dismiss"];
   const isSessionMismatch = error.code === "UNRECOVERABLE_LOGIN_SESSION_MISMATCH";
   const isNotResponding = error.code === "APP_NOT_RESPONDING" || error.code === "SITE_NOT_RESPONDING";
@@ -181,13 +170,7 @@ export function SystemAlert({
         </div>
         <div className="nse-system-alert-copy">
           <h2 id={titleId}>{error.title}</h2>
-          {thrown ? (
-            <dl id={messageId} className="syncloudos-alert-summary">
-              {summary.map(([label, value]) => (
-                <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
-              ))}
-            </dl>
-          ) : <p id={messageId}>{error.message}</p>}
+          <p id={messageId}>{error.message}</p>
           <button
             type="button"
             className="nse-alert-disclosure"

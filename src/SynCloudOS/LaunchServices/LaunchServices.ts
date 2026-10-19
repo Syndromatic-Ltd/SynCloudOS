@@ -665,7 +665,7 @@ function isInitialRouteLaunch(options: SynCloudOSOpenAppOptions) {
 function captureDisabledLaunch(request: SynCloudOSLaunchRequestDetails, explanation: SynCloudOSLaunchExplanation) {
   return ErrorManager.capture({
     code: "APP_DISABLED",
-    title: `${request.app.packageName} is disabled.`,
+    title: `${request.app.displayName} is disabled.`,
     message: "SynCloudOS could not start the app because a required service is unavailable.",
     appId: request.appId,
     source: "SynCloudOS.LaunchServices.openApp",
@@ -680,7 +680,7 @@ function captureDisabledLaunch(request: SynCloudOSLaunchRequestDetails, explanat
 function captureLaunchInProgress(request: SynCloudOSLaunchRequestDetails, explanation: SynCloudOSLaunchExplanation) {
   return ErrorManager.capture({
     code: "APP_LAUNCH_FAILED",
-    title: `${request.app.packageName} could not launch.`,
+    title: `${request.app.displayName} could not launch.`,
     message: explanation.reason,
     appId: request.appId,
     source: "SynCloudOS.LaunchServices.openApp",
@@ -915,7 +915,7 @@ async function runLaunch(request: SynCloudOSLaunchRequestDetails) {
   if (!policy.allowed) {
     const captured = ErrorManager.capture({
       code: "APP_LAUNCH_FAILED",
-      title: `${app.packageName} was not authorised.`,
+      title: `${app.displayName} was not authorised.`,
       message: "SynCloudOS policy refused this launch request.",
       appId: request.appId,
       source: "SynCloudOS.LaunchServices.openApp",
@@ -1557,7 +1557,7 @@ const launchServices = {
       });
       ErrorManager.capture({
         code: "APP_LAUNCH_FAILED",
-        title: `${app.packageName} was not authorised.`,
+        title: `${app.displayName} was not authorised.`,
         message: explanation.reason,
         appId,
         source: "SynCloudOS.LaunchServices.openExternalApp",

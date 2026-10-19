@@ -36,9 +36,11 @@ describe("ErrorManager expanded factories", () => {
     expect(captured).toMatchObject({
       category: "watchdog",
       code: "GLOBAL_SCRIPT_ERROR",
-      recoverable: false,
-      severity: "fatal",
-      suggestedActions: ["reload"]
+      title: "SynCloudOS ran into a problem.",
+      message: "An unexpected error occurred on this page. Reload to make sure everything works correctly.",
+      recoverable: true,
+      severity: "error",
+      suggestedActions: ["reload", "dismiss"]
     });
     expect(captured.context).toMatchObject({
       eventType: "error",
@@ -51,9 +53,9 @@ describe("ErrorManager expanded factories", () => {
   it("reports a script error without an error object as a condition", () => {
     const { SynCloudOS } = createRuntimeHarness(createTestRuntime());
     const captured = SynCloudOS.ErrorManager.createGlobalScriptError(null, { message: "Script error." });
-    expect(captured).toMatchObject({ code: "GLOBAL_SCRIPT_ERROR", message: "A browser-level script error escaped the runtime watchdogs." });
+    expect(captured).toMatchObject({ code: "GLOBAL_SCRIPT_ERROR", message: "An unexpected error occurred on this page. Reload to make sure everything works correctly." });
     expect(captured).not.toHaveProperty("exception");
-    expect(captured.technicalDetails).toContain("Detail: Script error.");
+    expect(captured.technicalDetails?.startsWith("Code: GLOBAL_SCRIPT_ERROR\nReported by: SynCloudOS.GlobalWatchdog.error\n\nDetail: Script error.")).toBe(true);
   });
 
   it("captures unhandled promise rejections and primitive reasons", async () => {
@@ -66,8 +68,11 @@ describe("ErrorManager expanded factories", () => {
       category: "watchdog",
       code: "UNHANDLED_PROMISE_REJECTION",
       exception: "Non-Error value (string)",
-      message: "async primitive failure"
+      title: "A background task failed.",
+      message: "Something running in the background stopped unexpectedly.",
+      suggestedActions: ["retry", "dismiss"]
     });
+    expect(captured.technicalDetails).toContain("Message: async primitive failure");
     expect(captured.context?.eventType).toBe("unhandledrejection");
   });
 
@@ -84,8 +89,8 @@ describe("ErrorManager expanded factories", () => {
       category: "resource",
       code: "ASSET_LOAD_FAILED",
       recoverable: true,
-      severity: "warning",
-      suggestedActions: ["dismiss"]
+      severity: "error",
+      suggestedActions: ["retry", "dismiss"]
     });
     expect(captured.context).toMatchObject({
       resourceTag: "img",

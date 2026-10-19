@@ -428,7 +428,8 @@ export function createLifecycle(
       if (app && !expectedCancellation) {
         ErrorManager.capture({
           code: "APP_LAUNCH_FAILED",
-          title: `Webspring could not open ${app.packageName}.`,
+          title: `Webspring could not open ${app.displayName}.`,
+          message: "SynCloudOS could not load the requested content.",
           error,
           appId: app.id,
           packageName: app.packageName,
@@ -1062,7 +1063,7 @@ export function createLifecycle(
         EventBus.publish("lifecycle.transition.failed", { appId, from, to, error, options }, appInfo.packageName);
         ErrorManager.capture({
           code: "APP_LAUNCH_FAILED",
-          title: `${appInfo.packageName} refused a lifecycle transition.`,
+          title: `${appInfo.displayName} refused a lifecycle transition.`,
           message: `SynCloudOS could not move ${appInfo.displayName} from ${from} to ${to}.`,
           appId,
           source: options.source ?? "SynCloudOS.Lifecycle.transition",

@@ -20,10 +20,11 @@
 
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SynCloudOSWatchdog } from "../../src/SynCloudOS/ErrorManager/SynCloudOSWatchdog";
+import { SystemAlert } from "../../src/SynCloudOSReact/SystemAlert";
 import { createTestRuntime } from "./helpers";
 import { SynCloudOSLifecycleRecord } from "../../src/SynCloudOS/ErrorManager/lifecycleError";
 import type { CapturedSynCloudOSError } from "../../src/SynCloudOS/ErrorManager/errorTypes";
@@ -54,11 +55,16 @@ function expectLifecycleIdentity(captured: CapturedSynCloudOSError | undefined, 
   expect(captured).toMatchObject({
     code: "AFX_LAYER_DISPOSED",
     exception: "SynCloudOSLifecycleError",
-    message: "Cannot set AFXLayer.hidden after disposal.",
     source: caughtBy,
   });
+  expect(captured?.message).not.toContain("AFXLayer");
   expect(captured?.technicalDetails).not.toMatch(/\bnone\b/);
-  expect(captured?.technicalDetails).not.toContain("Cannot set AFXLayer.hidden after disposal.");
+  expect(captured?.technicalDetails?.startsWith([
+    "Exception: SynCloudOSLifecycleError",
+    "Code: AFX_LAYER_DISPOSED",
+    "Message: Cannot set AFXLayer.hidden after disposal.",
+    `Caught by: ${caughtBy}`,
+  ].join("\n"))).toBe(true);
   expect(captured?.technicalDetails).toContain("React component stack:");
 }
 
@@ -96,11 +102,11 @@ describe("SynCloudOSWatchdog component", () => {
       React.createElement(ThrowingChild)
     ));
 
-    expect(screen.getByText("Webspring stopped because of an error.")).toBeTruthy();
+    expect(screen.getByText("SynCloudOS stopped unexpectedly.")).toBeTruthy();
     expect(runtime.store.getSnapshot().errors.at(-1)).toMatchObject({
       code: "UNKNOWN_RUNTIME_ERROR",
       exception: "Error",
-      message: "render failed",
+      message: "An unexpected error has prevented SynCloudOS from working properly.",
       source: "SynCloudOS.RootWatchdog",
       context: { watchdog: "SynCloudOS root" }
     });
@@ -180,9 +186,9 @@ describe("SynCloudOSWatchdog component", () => {
     expect(runtime.store.getSnapshot().errors.at(-1)).toMatchObject({
       code: "UNKNOWN_RUNTIME_ERROR",
       exception: "Non-Error value (string)",
-      message: "plain failure",
       source: "SynCloudOS.RootWatchdog",
     });
+    expect(runtime.store.getSnapshot().errors.at(-1)?.technicalDetails).toContain("Message: plain failure");
     cleanup();
 
     render(React.createElement(
@@ -194,9 +200,10 @@ describe("SynCloudOSWatchdog component", () => {
     expect(captured).toMatchObject({
       code: "APP_CONTENT_FAILED",
       exception: "Non-Error value (string)",
-      message: "plain failure",
+      message: "An unexpected error has prevented this application from working properly.",
       source: "SynCloudOS.AppWatchdog",
     });
+    expect(captured?.technicalDetails).toContain("Message: plain failure");
     expect(captured?.technicalDetails).not.toMatch(/\bnone\b/);
   });
 
@@ -238,7 +245,28 @@ describe("SynCloudOSWatchdog component", () => {
       React.createElement(ThrowingChild)
     ));
 
-    expect(screen.getByText("Webspring stopped because of an error.")).toBeTruthy();
+    expect(screen.getByText("SynCloudOS stopped unexpectedly.")).toBeTruthy();
     expect(runtime.store.getSnapshot().errors).toEqual([]);
+  });
+
+  it("shows only plain text in the alert until the technical details are disclosed", () => {
+    render(React.createElement(
+      SynCloudOSWatchdog,
+      {
+        runtime,
+        scope: "root",
+        watchdogName: "SynCloudOS root",
+        fallback: (error) => error ? React.createElement(SystemAlert, { error, onDismiss() {}, onReturn() {}, onReload() {} }) : null,
+      },
+      React.createElement(DisposedLayerChild),
+    ));
+
+    const alert = screen.getByRole("alertdialog");
+    expect(alert.textContent).toContain("SynCloudOS stopped unexpectedly.");
+    expect(alert.textContent).toContain("An unexpected error has prevented SynCloudOS from working properly.");
+    expect(alert.textContent).not.toMatch(/Exception|AFX_LAYER_DISPOSED|AFXLayer|RootWatchdog/);
+
+    fireEvent.click(screen.getByRole("button", { name: "Technical details" }));
+    expect(alert.textContent).toContain("Exception: SynCloudOSLifecycleError\nCode: AFX_LAYER_DISPOSED\nMessage: Cannot set AFXLayer.hidden after disposal.\nCaught by: SynCloudOS.RootWatchdog");
   });
 });

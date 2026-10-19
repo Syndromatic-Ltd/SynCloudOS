@@ -446,6 +446,7 @@ function captureBootstrapFailure(runtime: SynCloudOSRuntime, error: unknown, rou
   }
   return runtime.errors.capture({
     code: "UNKNOWN_RUNTIME_ERROR", title: "SynCloudOS could not start.",
+    message: "Something prevented SynCloudOS from starting. Reload the page to try again.",
     error, source: context.source, severity: "fatal", recoverable: false,
     suggestedActions: ["reload", "returnToWebspring"], context,
   });
