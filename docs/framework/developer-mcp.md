@@ -87,15 +87,19 @@ Broad `application menu`, `settings`, `preferences` and `account` queries priori
 
 Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, typescript?: boolean }` (`typescript` defaults to `true`).
 
-Output: `{ ok: boolean, findings: [{ file, line, column?, rule, message }], bundles: [{ directory, id, ok, error }], typescript: { ran, exitCode } }`.
+Output: `{ ok: boolean, findings: [{ file, line, column?, rule, message }], bundles: [{ directory, id, ok, error }], typescript: { ran, exitCode }, host: { status: "checked" | "unresolved" | "not-found", reason?, file?, line?, application?: { id, frame } | null, authentication? } }`.
 
 Uses the **same static manifest parser, import checks and directory validator as the repository's `validate-synware.mjs`**, compiled against the installed SDK's manifest schema and exports. It does not evaluate `Info.ts`. It then invokes the consumer's installed TypeScript compiler with `--noEmit --pretty false`; missing TypeScript or compiler failure is a finding, never a passing check. Set `typescript: false` only when intentionally requesting manifest/bundle checks without project type checking. Schema/import findings currently identify the containing file at line 1; TypeScript findings preserve the compiler's line and column.
+
+For a directly imported `mountSynCloudOS` call with inline, literal host options, validation also reports `synware.application-menu` on a primary manifest missing `applicationMenu: { trigger: "content" }` when the app fills the page under `"optional"` or `"required"` authentication. This includes the default fullscreen frame and `frame: "declared"` with an `appView` presentation. A declared windowed primary or disabled authentication does not require this trigger.
+
+`host.status` makes the limits explicit: `"checked"` means a single direct top-level mount's relevant options were read safely; `"unresolved"` supplies a reason when computed options, spreads, duplicate properties, nested/ambiguous calls or an unavailable primary prevent that check. `"not-found"` means no directly imported mount was found. The scanner reads project TypeScript/JavaScript source, excluding dependency, hidden, generated (`dist`, `build`, `coverage`), test, script and `.app` directories. It recognises named imports (including aliases) and namespace imports from `@syndromatic/syncloudos/browser`, but does not execute code, follow re-exports or evaluate wrappers/control flow. No missing-trigger finding is guessed for unresolved hosts. This checks the manifest declaration, not whether a handwritten component actually renders its trigger button; verify that interaction in the running app.
 
 Validation does not run package scripts or builds. TypeScript checks may write the compiler's incremental cache if the consumer enables it. The source repository's additional governed-source boundary audit is not applied to independent consumers.
 
 ### `syncloudos.scaffold`
 
-Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, id: string, name: string, route: string, policy?: { public?: boolean, requiresLogin?: boolean, requiredCapabilities?: string[], requiredAccessClasses?: ("team" | "external")[] }, presentation?: "appView" | "windowedView" | "systemSheet" | "backgroundService" }`.
+Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, id: string, name: string, route: string, policy?: { public?: boolean, requiresLogin?: boolean, requiredCapabilities?: string[], requiredAccessClasses?: ("team" | "external")[] }, presentation?: "appView" | "windowedView" | "systemSheet" | "backgroundService", contentApplicationMenu?: boolean }`.
 
 Output: `{ createdPaths: string[], nextSteps: string[] }`.
 
@@ -103,7 +107,9 @@ Creates the existing SynWare bundle shape demonstrated by `examples/TextSystem.a
 
 `policy` maps directly to `runtime.policy`, and `presentation` to `runtime.presentation`. Both are checked against the installed manifest schema before any files are written. Omitting `policy` preserves the normal private/default access behaviour; scaffolding never silently grants public access. With host authentication `"disabled"` or `"optional"`, the **primary** application must explicitly declare `policy: { public: true }`. The returned `nextSteps` flags this requirement whenever public access has not been requested. Do not apply it to private applications indiscriminately.
 
-For example, scaffold a deliberate public primary with `{ id: "org.example.notes", name: "Notes", route: "/notes", policy: { public: true } }`. For a secondary windowed inspector, choose `presentation: "windowedView"` and declare only the access policy it actually needs. Omitting presentation also returns that windowed-secondary reminder; it is distinct from the desktop/tablet/mobile device presentations.
+For example, scaffold a deliberate public primary with `{ id: "org.example.notes", name: "Notes", route: "/notes", policy: { public: true }, contentApplicationMenu: true }`. `contentApplicationMenu: true` adds `applicationMenu: { trigger: "content" }` and a real `useSynWareApplicationMenuTrigger()` button in the root component, with its anchor, open state, accessible menu semantics and toggle connected. This is required for a fullscreen primary under `"optional"` or `"required"` authentication, so people can reach Preferences > Account, Sign In and Log Out. Omitting the option leaves the manifest and root without that menu and returns the requirement in `nextSteps`, even when public access was explicitly requested.
+
+For a secondary windowed inspector, choose `presentation: "windowedView"` and declare only the access policy it actually needs. Omitting presentation also returns that windowed-secondary reminder; it is distinct from the desktop/tablet/mobile device presentations.
 
 Names cannot contain path separators or Windows reserved device names. Targets must stay inside the project, cannot traverse symbolic links, and the entire target bundle must be absent. Existing bundles are never merged or overwritten. Review generated files and call `syncloudos.validate` before registering the app.
 

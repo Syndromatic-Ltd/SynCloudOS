@@ -8,7 +8,7 @@ import { dirname, relative, resolve } from "node:path";
 import { promisify } from "node:util";
 import Ajv2020 from "ajv/dist/2020.js";
 import { createSynWareValidator, parseManifest } from "../synware/validation-core.mjs";
-import { bundlePaths, inside, json, projectContext, sdkName, slash, viteHints } from "./project.mjs";
+import { applicationHostHints, bundlePaths, inside, json, projectContext, sdkName, slash, viteHints } from "./project.mjs";
 import { docSections, lookupSdk, similarity } from "./lookup.mjs";
 export { lookupSdk } from "./lookup.mjs";
 const run = promisify(execFile);
@@ -39,6 +39,19 @@ export async function validateProject(input={}) {
   try { bundles=bundlePaths(root,vite.options.appsDirectory).map(path=>validator.validateDirectory(path)); }
   catch (error) {findings.push({file:vite.options.appsDirectory ?? "src/SynWare",line:1,rule:"synware.structure",message:error.message});}
   findings.push(...bundles.flatMap(bundle=>bundle.findings.map(finding=>({...finding,file:slash(relative(root,finding.file))}))));
+  let host=applicationHostHints(root);
+  if (host.status==="checked" && host.application) {
+    const primaries=bundles.filter(bundle=>bundle.id===host.application.id);
+    if (primaries.length!==1 || !primaries[0].ok) host={...host,status:"unresolved",reason:"The primary bundle is missing, ambiguous or invalid; its application-menu requirement could not be assessed."};
+    else {
+      const file=resolve(primaries[0].directory,"Contents/Info.ts"), primary=parseManifest(file);
+      const fillsPage=host.application.frame==="fullscreen" || (primary.runtime?.presentation ?? "appView")==="appView";
+      if (fillsPage && host.authentication!=="disabled" && primary.applicationMenu?.trigger!=="content") findings.push({
+        file:slash(relative(root,file)),line:1,rule:"synware.application-menu",
+        message:`Primary application ${host.application.id} fills the page with ${host.authentication} authentication. Declare applicationMenu: { trigger: "content" } and render a useSynWareApplicationMenuTrigger() button so people can reach Preferences > Account, Sign In and Log Out.`,
+      });
+    }
+  }
   let typescript={ran:false,exitCode:null};
   if (input.typescript!==false) {
     let tsc;
@@ -59,7 +72,7 @@ export async function validateProject(input={}) {
       if (exitCode && findings.length===before) findings.push({file:"tsconfig.json",line:1,rule:"typescript.failed",message:output.trim() || "TypeScript process failed or timed out."});
     }
   }
-  return {ok:findings.length===0,findings,bundles:bundles.map(({findings,...bundle})=>bundle),typescript};
+  return {ok:findings.length===0,findings,bundles:bundles.map(({findings,...bundle})=>bundle),typescript,host};
 }
 export async function scaffold(input) {
   const context=projectContext(input.projectRoot),{root}=context, vite=optionsFor(context,input);
@@ -79,12 +92,16 @@ export async function scaffold(input) {
     ...(input.policy!==undefined ? {policy:input.policy} : {}),
     ...(input.presentation!==undefined ? {presentation:input.presentation} : {}),
   };
+  if (input.contentApplicationMenu!==undefined && typeof input.contentApplicationMenu!=="boolean") throw new Error("contentApplicationMenu must be a boolean.");
+  if (input.contentApplicationMenu) manifest.applicationMenu={trigger:"content"};
   const validateManifest=new Ajv2020({allErrors:true,strict:false}).compile(json(resolve(context.sdkRoot,"tooling/manifest.schema.json")));
   if (!validateManifest(manifest)) throw new Error("Scaffold manifest is invalid: "+validateManifest.errors.map(error=>(error.instancePath || "/")+" "+error.message).join("; "));
   const header="/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. All rights reserved.\n * Designed by Kavish Krishnakumar in Manchester.\n * SPDX-License-Identifier: AGPL-3.0-or-later\n */\n";
   const files={
     "Contents/Info.ts":header+"export default "+JSON.stringify(manifest,null,2)+" as const;\n",
-    "Contents/index.tsx":header+'import { createSynWare } from "@syndromatic/syncloudos/sdk";\nimport manifest from "./Info";\n\nfunction Root() { return <main><h1>{manifest.title}</h1></main>; }\n\nexport default createSynWare({ manifest, root: Root });\n',
+    "Contents/index.tsx":header+(input.contentApplicationMenu
+      ? 'import { createSynWare, useSynWareApplicationMenuTrigger } from "@syndromatic/syncloudos/sdk";\nimport manifest from "./Info";\n\nfunction Root() {\n  const menu = useSynWareApplicationMenuTrigger();\n  return <main>\n    <h1>{manifest.title}</h1>\n    <button type="button" ref={element => menu?.setAnchor(element)} disabled={!menu} aria-haspopup="menu" aria-expanded={menu?.open ?? false} onClick={() => menu?.toggle()}>{menu?.label ?? "Application menu"}</button>\n  </main>;\n}\n\nexport default createSynWare({ manifest, root: Root });\n'
+      : 'import { createSynWare } from "@syndromatic/syncloudos/sdk";\nimport manifest from "./Info";\n\nfunction Root() { return <main><h1>{manifest.title}</h1></main>; }\n\nexport default createSynWare({ manifest, root: Root });\n'),
     "Contents/Resources/Localised/Base.locale/Localisable.strings":'"app.title" = '+JSON.stringify(name)+';\n',
   };
   mkdirSync(target,{recursive:true});
@@ -93,6 +110,7 @@ export async function scaffold(input) {
   const nextSteps=[];
   if (input.policy?.public!==true) nextSteps.push('Before using this bundle as the primary application with authentication "disabled" or "optional", explicitly set runtime.policy.public to true. Do not make private applications public unless that access is intended.');
   if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "windowedView"; the default appView is for the primary application.');
+  if (!input.contentApplicationMenu) nextSteps.push('A fullscreen primary with authentication "optional" or "required" must declare applicationMenu: { trigger: "content" } and render a useSynWareApplicationMenuTrigger() button, so people can reach Preferences > Account, Sign In and Log Out. Pass contentApplicationMenu: true to scaffold both.');
   nextSteps.push("Review the generated manifest and run syncloudos.validate before registering the bundle.");
   return {createdPaths,nextSteps};
 }
