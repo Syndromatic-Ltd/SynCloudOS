@@ -212,6 +212,8 @@ session with its surface hidden and inert until the runtime activates it.
 Application preferences persist across host disposal and remount, scoped to the
 browser origin and the application's ID.
 
+An application can end its own session with `closeSelf()`. In a shell-hosted site this returns to Webspring at `/`; in an application-only host it shows the quit surface above, so the page offers **Reopen** instead.
+
 `authentication` accepts the same values as the Webspring host (a policy string or a `{ policy, service }` object; see [Authentication](authentication.md#choose-a-policy)) and presents the same system login window:
 
 - `"disabled"` (the default) has no session. Preferences offer no account and

@@ -23,6 +23,8 @@ The shorthand strings `"optional"` and `"required"` construct no authentication 
 - With `"disabled"` or `"optional"` (string or object), the primary bundle declares `runtime.policy.public` in its manifest, because it launches before anyone signs in.
 - With `"required"`, the sign-in window is presented before the primary application launches. The `application: { id }` host accepts the same `authentication` values as the Webspring shell; see [Getting started](getting-started.md#fullscreen-application-without-a-shell).
 
+In a single-application host the **Account** pane of Preferences, Sign In and Log Out live in the application menu. A primary that fills the page has no system top bar, so it must declare `applicationMenu: { trigger: "content" }` and render a button with `useSynWareApplicationMenuTrigger()`; with `"optional"` or `"required"` authentication, mounting rejects without it. See [Open the application menu from a fullscreen app](getting-started.md#open-the-application-menu-from-a-fullscreen-app).
+
 The service reports one of `disabled`, `checking`, `anonymous`, `authenticating`, `authenticated`, `expired` and `error`. Disposing the host disposes the service you supplied.
 
 ## Browser service
