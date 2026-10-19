@@ -30,6 +30,25 @@ it("admits only reviewed FX family artifacts", () => {
   }
 });
 
+it("admits separate source maps only beside reviewed JavaScript artifacts", () => {
+  expect(() => assertReviewedPackageFiles([
+    "sdk.js.map", "fx/graphics.js.map", "fx/video/webm.js.map",
+    "chunks/NSEAlert-transitions-abc123.js.map",
+    "assets/image-processing.worker-abc123.js.map",
+  ])).not.toThrow();
+  for (const file of ["fx/private.js.map", "assets/host.js.map", "sdk.js.map.map", "sdk.d.ts.map", "fx/../sdk.js.map"]) {
+    expect(() => assertReviewedPackageFiles([file])).toThrow();
+  }
+});
+
+it("builds separate SDK maps with embedded original sources", () => {
+  const source = readFileSync(resolve("scripts/synware/build-sdk.mjs"), "utf8");
+  expect(source).toMatch(/sourcemap:\s*true/u);
+  expect(source).toMatch(/sourcemapExcludeSources:\s*false/u);
+  expect(source).not.toMatch(/file\.endsWith\("\.map"\)\s*\|\|/u);
+  expect(source).toContain("map.sourcesContent");
+});
+
 it("keeps product content-service contracts out of the generic AppSDK entry", () => {
   const sdkEntry = readFileSync(resolve("src/SynCloudOS/AppSDK/sdkPackageEntry.ts"), "utf8");
   expect(sdkEntry).not.toMatch(/journal(?:Reader|Publisher|Content)|synCalCalendarServiceToken|SynCalCalendarService/u);

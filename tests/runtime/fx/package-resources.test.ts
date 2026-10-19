@@ -50,8 +50,12 @@ function fixture() {
   const packaged = join(output, "packages/syncloudos");
   const families = ["animation", "graphics", "image", "text", "audio", "haptics", "motion", "media", "video", "midi", "location", "lumina", "video/webm"];
   const exports = Object.fromEntries(families.map(f => [`./fx/${f}`, { import: `./fx/${f}.js`, types: `./fx/${f}.d.ts` }]));
-  const paths = ["package.json", "assets/image-processing.worker-proof.js", ...families.flatMap(f => [`fx/${f}.js`, `fx/${f}.d.ts`])];
-  for (const path of paths) write(packaged, path, path === "package.json" ? JSON.stringify({ name: "@syndromatic/syncloudos", version: "0.0.0-package-fixture", type: "module", exports }) : `// ${path}\n`);
+  const paths = ["package.json", "assets/image-processing.worker-proof.js", "assets/image-processing.worker-proof.js.map", ...families.flatMap(f => [`fx/${f}.js`, `fx/${f}.js.map`, `fx/${f}.d.ts`])];
+  for (const path of paths) write(packaged, path, path === "package.json"
+    ? JSON.stringify({ name: "@syndromatic/syncloudos", version: "0.0.0-package-fixture", type: "module", exports })
+    : path.endsWith(".map")
+      ? JSON.stringify({ version: 3, sources: ["original.ts"], sourcesContent: ["export const value = 1;"], names: [], mappings: "" })
+      : `// ${path}\n`);
   write(repository, "src/input.ts", "export const value = 1;\n");
   const bytes = Buffer.from("frozen archive bytes");
   const archiveSha256 = createHash("sha256").update(bytes).digest("hex");
@@ -102,6 +106,14 @@ describe("SDK source and resource fingerprints", () => {
     for (const path of ["../escape", "assets/../escape", "C:/escape", "assets\\escape", "/escape"]) {
       expect(() => contract.fingerprintSdkFiles(f.packaged, [path]), path).toThrow(/unsafe|relative/i);
     }
+  });
+
+  it("includes original-source maps in installed resource integrity", () => {
+    const f = fixture();
+    expect(f.manifest.resources.files.some((file: { path: string }) => file.path === "fx/graphics.js.map")).toBe(true);
+    expect(() => consumers.verifyInstalledSdkResources(f.packaged, f.manifest)).not.toThrow();
+    write(f.packaged, "fx/graphics.js.map", "{}");
+    expect(() => consumers.verifyInstalledSdkResources(f.packaged, f.manifest)).toThrow(/resource|fingerprint/i);
   });
 
   it("rejects a source mutation between build start and publication", () => {

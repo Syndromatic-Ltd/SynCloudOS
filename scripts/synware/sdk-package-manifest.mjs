@@ -143,6 +143,12 @@ export function assertReviewedPackageFiles(files) {
       throw new TypeError(`SDK package contains an unsafe file path: ${file}`);
     }
     if (file.startsWith("types/FrameworkTests/")) throw new TypeError(`SDK package contains a test fixture: ${file}`);
+    if (file.endsWith(".js.map")) {
+      // Reuse the reviewed JavaScript policy, rather than admitting arbitrary
+      // maps or introducing a second list that can drift from its artifacts.
+      assertReviewedPackageFiles([file.slice(0, -4)]);
+      continue;
+    }
     if (["LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "sdk/LICENSE", "sdk/NOTICE", "sdk/package.json", "licenses/dependencies.json"].includes(file)) continue;
     if (file === "bundle-paths.mjs" || /^tooling\/(?:manifest\.schema|error-catalogue|build-receipt)\.json$/u.test(file)) continue;
     if (/^docs\/framework\/(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.(?:md|json|png|webp|svg|jpg|jpeg|gif)$/u.test(file)) continue;

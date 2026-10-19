@@ -162,7 +162,7 @@ async function bundle({ entry, packageDirectory, themeNames }) {
       // shared NSE styles/chunks into multi-megabyte base64 blobs.
       assetsInlineLimit: 0,
       outDir: packageDirectory,
-      sourcemap: false,
+      sourcemap: true,
       cssCodeSplit: true,
       lib: {
         entry,
@@ -172,6 +172,7 @@ async function bundle({ entry, packageDirectory, themeNames }) {
       rollupOptions: {
         external: [/^harfbuzzjs(?:\/|$)/u, "oauth4webapi", "woff2-encoder/decompress", "react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime"],
         output: {
+          sourcemapExcludeSources: false,
           banner: "/*! SynCloudOS: AGPL-3.0-or-later; SynWare SDK source: Apache-2.0. See LICENSE, NOTICE and licenses/. */",
           // Keep the runtime entry itself in a stable chunk without pulling its
           // entire transitive dependency graph (including AppSDK/AJV) into
@@ -252,14 +253,24 @@ function assertNoLeakage(directory) {
     if (!/\.(?:js|mjs|ts|mts|css|json|md|map)$/u.test(file)) continue;
     const text = readFileSync(resolve(directory, file), "utf8");
     // PDF.js's Emscripten codec uses this fixed virtual filesystem home; it is not a build-machine path.
-    const pathScanText = /^assets\/(?:pdf\.worker\.min|pdf-document\.worker)-[A-Za-z0-9_-]+\.js$/u.test(file)
+    let pathScanText = /^assets\/(?:pdf\.worker\.min|pdf-document\.worker)-[A-Za-z0-9_-]+\.js$/u.test(file)
       ? text.replaceAll('HOME:"/home/web_user"', 'HOME:"<wasm-virtual-home>"')
       : text;
-    if (text.includes(repositoryRoot) || /(?:^|[^A-Za-z])(?:[A-Za-z]:\\|\/Users\/|\/home\/)/u.test(pathScanText)) {
-      throw new TypeError(`SDK package leaked an absolute local path in ${file}.`);
+    if (file.endsWith(".map")) {
+      const map = JSON.parse(text);
+      if (map.version !== 3 || !Array.isArray(map.sources) || !Array.isArray(map.sourcesContent)
+        || map.sources.length !== map.sourcesContent.length || map.sourcesContent.some(source => typeof source !== "string")) {
+        throw new TypeError(`SDK source map must embed its original sources: ${file}.`);
+      }
+      if ([map.sourceRoot ?? "", ...map.sources].some(path => typeof path !== "string" || /^(?:[A-Za-z]:[\\/]|[\\/])/u.test(path))) {
+        throw new TypeError(`SDK source map leaked an absolute local path in ${file}.`);
+      }
+      // Original source text can contain path examples. Only map metadata
+      // describes build inputs and must not expose a build-machine path.
+      pathScanText = JSON.stringify({ sourceRoot: map.sourceRoot, sources: map.sources });
     }
-    if (file.endsWith(".map") || text.includes("sourceMappingURL")) {
-      throw new TypeError(`SDK package leaked a source map in ${file}.`);
+    if (pathScanText.includes(repositoryRoot) || /(?:^|[^A-Za-z])(?:[A-Za-z]:\\|\/Users\/|\/home\/)/u.test(pathScanText)) {
+      throw new TypeError(`SDK package leaked an absolute local path in ${file}.`);
     }
   }
 }
