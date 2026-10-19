@@ -3,7 +3,6 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
-import { nseDeferredDisposalMicrotaskScheduler } from "../NSE/hostComposition";
 import { SynWareEntryRenderer } from "../Webspring/SynWareEntryRenderer";
 import { SystemUILayer } from "../Webspring/SystemUILayer";
 import { SystemPanelsLayer } from "../Webspring/SystemPanelsLayer";
@@ -31,14 +30,14 @@ export function ApplicationHost({ applicationId }: { readonly applicationId: str
   const mounted = app && (state === "active" || state === "suspended");
   const responderId = `application:${applicationId}`;
   const renderers = useMemo(() => new WindowContentRendererRegistry(), []);
-  useNSEDeferredDisposal(renderers, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(renderers);
   const overlayPort = useRuntimeNSEOverlayPort(responderId);
   const bridge = useMemo(() => createTransientWindowSurfaceBridge({
     runtime, renderers, physicalHostId: `application-host:${applicationId}`,
     owner: { workspaceId: "workspace:default", applicationId, applicationSessionId: applicationId },
     restoreFocus: anchor => overlayPort.restoreFocus(responderId, anchor),
   }), [applicationId, overlayPort, renderers, responderId, runtime]);
-  useNSEDeferredDisposal(bridge, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(bridge);
   const root = useRef<HTMLElement>(null);
   const undoOwner = useMemo(() => ({ kind: "application" as const, id: applicationId }), [applicationId]);
   useLayoutEffect(() => {
