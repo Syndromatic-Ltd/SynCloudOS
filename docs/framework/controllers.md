@@ -8,7 +8,7 @@ All controllers come from `@syndromatic/syncloudos/nse`.
 
 Every collection controller shares one contract:
 
-- You construct it with a stable `id` and dispose it with `dispose()` when its owner finishes.
+- You construct it with a stable `id`, and its owner disposes it when the owner finishes. [Controller lifetimes](#controller-lifetimes) describes the three kinds of owner.
 - `getSnapshot()` returns the current immutable snapshot, and `subscribe(listener)` reports changes and returns an unsubscribe function. `subscribeChanges(listener)` delivers each bounded change record.
 - Presentation operations such as selection, filtering, sorting and expansion apply immediately.
 - Content changes happen inside an edit transaction, which either commits or discards as a unit.
@@ -32,6 +32,80 @@ export function NoteCount({ controller }: { controller: NSEArrayController<Note,
   return <output>{snapshot.arranged.length} notes</output>;
 }
 ```
+
+## Controller lifetimes
+
+A controller lives exactly as long as its owner. Choose the owner by asking who needs the controller:
+
+| Owner | Create it with | Disposed when | Use it for |
+| --- | --- | --- | --- |
+| The module | `new NSEArrayController(...)` at module scope | Never | Shared, app-wide data that outlives every view, such as a catalogue every window reads. |
+| A component | `useNSEArrayController(options, deps)` or `useNSETreeController(options, deps)` | The component unmounts | Data that belongs to one mounted view, such as the rows of a sheet or a sidebar. |
+| The application session | `new NSEArrayController({ ..., ownerSignal: useSynWare().signal })` | The application session ends | Data several components of one running application share, created once per session. |
+
+### Component-owned controllers
+
+The hooks create the controller on the first render and dispose it when the component unmounts:
+
+```tsx
+import { useEffect } from "react";
+import { NSETable, useNSEArrayController, type NSETableColumn } from "@syndromatic/syncloudos/nse";
+
+interface Account {
+  readonly id: string;
+  readonly name: string;
+}
+
+const columns: readonly NSETableColumn<Account, string, unknown>[] = [
+  { id: "name", title: "Name", value: (account) => account.name, width: { min: 120, ideal: 220, max: 480 } },
+];
+
+export function AccountList({ accounts }: { accounts: readonly Account[] }) {
+  const controller = useNSEArrayController<Account, string>({
+    id: "open-account",
+    getId: (account) => account.id,
+    content: accounts,
+    selection: { mode: "single", allowsEmpty: true },
+  });
+  useEffect(() => { controller.setContent(accounts); }, [controller, accounts]);
+  return (
+    <NSETable
+      aria-label="Accounts"
+      adapter={{ controller, idForItem: (account) => account.id, labelForItem: (account) => account.name }}
+      columns={columns}
+    />
+  );
+}
+```
+
+The options are read only when a controller is created. Later renders keep the same controller, so update its content through the controller itself, as `setContent` does above. To replace the controller with a new one built from the current options, change `options.id`, `options.responderId` or an entry of the `deps` array. The previous controller is then disposed.
+
+Do not build a controller with `useMemo` and dispose it in a `useEffect` cleanup. React StrictMode runs every effect's cleanup and setup a second time while the component stays mounted, so that pattern disposes the controller the component is still showing, and the next click fails with `NSE_CONTROLLER_DISPOSED`. The hooks defer their release by a microtask, which StrictMode's replay cancels, and an unmounted component's controller is disposed with the reason `"owner-unmounted"`.
+
+### Session-owned controllers
+
+Every controller accepts `ownerSignal?: AbortSignal`. When the signal aborts, the controller disposes itself. Passing the application's `useSynWare().signal` ties the controller to the running application, so a controller the application never disposes is still released when its session ends: the application closes, its bundle is replaced or the runtime shuts down. The controller then records the reason `"application-closed"`. Any other signal records `"owner-signal-aborted"`. A signal that has already aborted is refused at construction with its abort reason.
+
+### Disposal state and errors
+
+`isDisposed` turns true as soon as disposal starts, and `disposalReason` reports why: `"explicit"` for `dispose()`, `"owner-unmounted"`, `"owner-signal-aborted"` or `"application-closed"`. `onDispose(listener)` calls the listener once with that reason and returns an unsubscribe function. On a controller that is already disposed it does nothing, so check `isDisposed` first.
+
+Calling an operation on a disposed controller throws `SynCloudOSLifecycleError`, which `@syndromatic/syncloudos/nse` exports:
+
+| Field | Value |
+| --- | --- |
+| `name` | `"SynCloudOSLifecycleError"` |
+| `code` | `"NSE_CONTROLLER_DISPOSED"` |
+| `resource` | `{ kind, id }`, for example `{ kind: "NSEArrayController", id: "open-account" }` |
+| `operation` | The method that was refused, such as `"select"` |
+| `disposal` | `{ reason, stack? }`; development builds record the stack that disposed the controller |
+| `creationStack`, `ownerStack` | Development builds only: where the controller was created, and the React component stack that created it (or, outside a render, the one that raised the error) |
+
+The message names the controller, the reason and a fix, and ends with the code, for example `NSEArrayController "open-account" was disposed by an explicit dispose() call, so select() cannot run. … [NSE_CONTROLLER_DISPOSED]`. Data views never let this error escape an event handler: a view whose controller is disposed turns inert, as the [data views guide](data-views.md#controller-lifetime) describes.
+
+### Other resources a component owns
+
+`useNSEDeferredDisposal(resource, scheduler?)` disposes any `{ dispose(): void }` value when its component unmounts, with the same StrictMode-safe deferral as the controller hooks. Use it for resources that have no managed hook, such as a navigation controller or a window surface bridge built with `useMemo`. The default scheduler releases the resource in a microtask. Pass an `NSEDisposalScheduler` only to release it on a different clock, such as a test's timers.
 
 ## Array controller
 

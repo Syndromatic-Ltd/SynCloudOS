@@ -37,6 +37,8 @@ export const adapter = {
 
 The controller handles the data. The [controllers guide](controllers.md) describes filtering, sorting, selection and edit transactions, and each of them reaches every view that uses the controller.
 
+A view keeps its state, such as keyboard focus and an edit in progress, for as long as `adapter.controller` stays the same. The adapter object itself may be new on every render, so an inline `adapter={{ controller, idForItem, labelForItem }}` is fine: the view reads `idForItem`, `labelForItem` and `isItemDisabled` from the latest adapter. It projects the items again only when `idForItem` or `isItemDisabled` is a different function, so define them outside the component, or memoise them, when the collection is large. Giving the view a different controller starts it afresh.
+
 ## Table
 
 `NSETable` shows items as rows with typed columns. A column says how to read its value, how wide it may be, and optionally how to format, sort, render and edit it.
@@ -92,6 +94,12 @@ export function EmptyTable() {
   return <NSETable<Track, string> adapter={adapter} columns={[]} state={{ kind: "empty", message: "No tracks yet." }} />;
 }
 ```
+
+## Controller lifetime
+
+A data view never owns its controller. The module, the component or the application session that created it does, as the [controllers guide](controllers.md#controller-lifetimes) describes. In a component, create the controller with `useNSEArrayController` or `useNSETreeController` so it survives React StrictMode and is disposed when the component unmounts.
+
+If the controller is disposed while a view still shows it, the view keeps its last rows on screen and turns inert. It presents the `disabled` state with the message "This content is no longer available.", sets `aria-disabled` on the view and its items, and leaves the tab order. Pointer and keyboard selection, activation, context menus and editing are ignored rather than thrown from an event handler, and development builds log one `console.warn` per view that starts with `[NSE_CONTROLLER_DISPOSED]` and names the controller and the reason it was disposed. Calling the controller's own methods still throws `SynCloudOSLifecycleError`. Give the view a live controller to make it interactive again.
 
 ## Outline
 
