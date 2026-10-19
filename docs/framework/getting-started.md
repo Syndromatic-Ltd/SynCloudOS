@@ -146,6 +146,14 @@ The example's `runtime.policy.public` allows anonymous launching. The host's
 authentication option configures its sign-in flow; each application's manifest
 declares its own access policy.
 
+## Bundle size
+
+The SDK archive contains every framework, worker, translation and artwork resource; its installed size is not the browser's initial download. Measure a production `vite build`, then a cold load with caching disabled. Report compressed transfers separately from emitted files, including lazy chunks.
+
+An application-only host shares the runtime, NSE controls and default Atmo appearance, but loads the Webspring host and its stylesheet only when mounted with a shell. Theme SVG paint is emitted as separate cacheable resources, so unused control states do not inflate the initial CSS download. Built-in translations load the active language, British English and base fallback; changing language loads its resources on demand.
+
+PDF, image, video and audio processing resources can still appear in build output without being requested at startup. Shell artwork can dominate a real shell's download; choose and measure your shell's textures separately. Large runtime/application-stage chunks can still trigger Vite's 500 kB warning: this is not a minimal React runtime, and increasing the warning threshold does not reduce downloads.
+
 ## Mount the runtime
 
 ### Fullscreen application without a shell
@@ -210,7 +218,9 @@ browser origin and the application's ID.
   the system never offers Log Out.
 - `"optional"` runs the application signed out. Preferences gain an **Account**
   pane that signs in through the login window, which can be cancelled, and logs
-  out. The application keeps its session across sign-in and cancel.
+  out. The application keeps its session across sign-in and cancel. A primary
+  that fills the page reaches that pane through its application menu; see
+  [Open the application menu from a fullscreen app](#open-the-application-menu-from-a-fullscreen-app).
 - `"required"` presents the login window before the primary application
   launches, and again after Log Out.
 
@@ -219,6 +229,76 @@ The shorthand strings `"optional"` and `"required"` apply the policy but constru
 With `"disabled"` or `"optional"` the primary bundle must be public
 (`runtime.policy.public`), because it launches before anyone signs in.
 `shell`, `shellResources` and `contentSources` cannot accompany `application`.
+
+#### Open the application menu from a fullscreen app
+
+A primary that fills the page (`frame: "fullscreen"`, or `"declared"` with an `appView` bundle) has no system top bar, so nothing on the page opens its application menu. The app declares `applicationMenu: { trigger: "content" }` in its manifest and renders a button driven by `useSynWareApplicationMenuTrigger()`:
+
+```ts
+// src/SynWare/Primary.app/Contents/Info.ts
+export default {
+  schemaVersion: 1,
+  id: "com.example.primary",
+  version: "1.0.0",
+  title: "Primary",
+  routes: [{ path: "/primary", primary: true }],
+  runtime: { policy: { public: true } },
+  // Fullscreen has no system top bar: the app opens the menu from its content.
+  applicationMenu: { trigger: "content" },
+} as const;
+```
+
+```tsx
+// src/SynWare/Primary.app/Contents/index.tsx
+import { createSynWare, useSynWareApplicationMenuTrigger } from "@syndromatic/syncloudos/sdk";
+import manifest from "./Info";
+
+function Root() {
+  const menu = useSynWareApplicationMenuTrigger();
+  return (
+    <main>
+      <button
+        ref={element => menu?.setAnchor(element)}
+        aria-haspopup="menu"
+        aria-expanded={menu?.open ?? false}
+        disabled={!menu}
+        onClick={() => menu?.toggle()}
+      >
+        {menu?.label ?? "Menu"}
+      </button>
+    </main>
+  );
+}
+
+export default createSynWare({ manifest, root: Root });
+```
+
+```ts
+// src/main.tsx
+import { createHttpAuthentication } from "@syndromatic/syncloudos/auth";
+
+await mountSynCloudOS({
+  element,
+  bundles,
+  application: { id: "com.example.primary", frame: "fullscreen" },
+  authentication: {
+    policy: "optional",
+    service: createHttpAuthentication({ navigate: destination => window.location.assign(destination), eventTarget: window }),
+  },
+});
+```
+
+The menu offers:
+
+- **About {app}**, plus the app's own preferences item when the manifest declares one under `applicationMenu.preferences`.
+- **Preferences**. The **Account** pane appears only when authentication is `"optional"` or `"required"`.
+- **Sign In**, when authentication is not disabled and nobody is signed in. It runs the login window.
+- **Log Out**, when someone is signed in and authentication is not disabled. It asks for confirmation first.
+- **Quit {app}**, which shows the quit page with **Reopen**.
+
+`mountSynCloudOS` rejects with a `TypeError` when the primary fills the page, authentication is `"optional"` or `"required"`, and the manifest lacks the content trigger. The message names what to add. With `"disabled"` authentication nothing is required; Preferences still opens with its keyboard shortcut.
+
+`useSynWareApplicationMenuTrigger()` returns `null` for a primary without the trigger and for secondary windowed apps, so guard for `null` as above. Sign In only completes with the object form of `authentication` and a backend; the bare `"optional"` and `"required"` strings construct no service (see [Authentication](authentication.md#choose-a-policy)).
 
 ### Webspring shell
 

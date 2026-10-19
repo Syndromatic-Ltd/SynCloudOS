@@ -228,6 +228,7 @@ export function createRuntimeLocaleServices(dependencies: RuntimeLocaleServiceDe
       const resolution = { ...createSynCloudOSLocaleResolution(localeCodeResolved, "stored", readTimeZone()), detectedLocale: detectBrowserLocale().detectedLocale };
       commitSnapshot(resolution, hydrated || this.isAvailable());
       events.publish("locale.changed", { activeLocale: resolution.activeLocale, requestedLocale: resolution.requestedLocale, source: resolution.source, serviceAvailable: this.isAvailable() }, "LocaleServices");
+      void this.loadBundleLocaleResources();
       return this.getSnapshot();
     },
     clearLocale() {
@@ -236,6 +237,7 @@ export function createRuntimeLocaleServices(dependencies: RuntimeLocaleServiceDe
       const resolution = resolveActiveLocale();
       commitSnapshot(resolution, hydrated || this.isAvailable());
       events.publish("locale.changed", { activeLocale: resolution.activeLocale, requestedLocale: resolution.requestedLocale, source: resolution.source, serviceAvailable: this.isAvailable() }, "LocaleServices");
+      void this.loadBundleLocaleResources();
       return this.getSnapshot();
     },
     formatDate(value, options) { return formatSynCloudOSDate(this.getActiveLocale(), value, options); },
@@ -261,24 +263,26 @@ export function createRuntimeLocaleServices(dependencies: RuntimeLocaleServiceDe
     registerBundleLocaleResourceLoader(appId, loader) {
       if (disposed) return { appId, registered: false };
       loaders.set(appId, loader);
-      loading.delete(appId);
+      for (const key of loading.keys()) if (key.startsWith(`${appId}:`)) loading.delete(key);
       return { appId, registered: true };
     },
     loadBundleLocaleResources(appIds) {
       const ids = appIds ?? [...loaders.keys()];
+      const activeLocale = locale.getActiveLocale();
       return Promise.all(ids.map((appId) => {
         const loader = loaders.get(appId);
         if (!loader || disposed) return Promise.resolve({ appId, registered: 0 });
-        const existing = loading.get(appId);
+        const key = `${appId}:${activeLocale}`;
+        const existing = loading.get(key);
         if (existing) return existing;
-        const promise = Promise.resolve(loader())
+        const promise = Promise.resolve(loader(activeLocale))
           .then((resources) => disposed || !resources ? { appId, registered: 0 } : locale.registerBundleLocaleResources(appId, resources))
           .catch((error) => {
             events.publish("locale.bundleResources.failed", { appId, error: error instanceof Error ? error.message : String(error) }, "LocaleServices");
             return { appId, registered: 0 };
           })
-          .finally(() => loading.delete(appId));
-        loading.set(appId, promise);
+          .finally(() => loading.delete(key));
+        loading.set(key, promise);
         return promise;
       }));
     },

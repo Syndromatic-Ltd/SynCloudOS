@@ -95,4 +95,4 @@ export interface SynCloudOSLocaleFormatFileSizeOptions {
 
 export type SynCloudOSLocaleBundleResourceFiles = Record<string, string | SynCloudOSTranslationMessages>;
 export type SynCloudOSLocaleBundleResourceInput = Record<string, SynCloudOSLocaleBundleResourceFiles>;
-export type SynCloudOSLocaleBundleResourceLoader = () => Promise<SynCloudOSLocaleBundleResourceInput | undefined>;
+export type SynCloudOSLocaleBundleResourceLoader = (locale: SynCloudOSLocaleCode) => Promise<SynCloudOSLocaleBundleResourceInput | undefined>;

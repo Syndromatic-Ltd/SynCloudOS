@@ -20,10 +20,11 @@
 
 import { useMemo } from "react";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
-import {
-  createLocaleServicesFacade,
-  type SynCloudOSLocaleBundleResourceInput,
-  type SynCloudOSTranslationParams
+import { createLocaleServicesFacade } from "../SynCloudOS/LocaleServices";
+import type {
+  SynCloudOSLocaleBundleResourceInput,
+  SynCloudOSTranslationParams,
+  SynCloudOSLocaleCode,
 } from "../SynCloudOS/LocaleServices";
 import { useLocaleServicesSnapshot, useKernelSynCloudOS } from "../SynCloudOSReact";
 
@@ -36,15 +37,17 @@ const webspringLocalisedResources = import.meta.glob<string>("./Contents/Resourc
 });
 async function collectWebspringLocaleResources(
   modules: Record<string, () => Promise<string>>,
-  prefix: string
+  prefix: string,
+  locale: SynCloudOSLocaleCode,
 ) {
   const resources: SynCloudOSLocaleBundleResourceInput = {};
 
   for (const [resourcePath, loadSource] of Object.entries(modules)) {
     if (!resourcePath.startsWith(prefix)) continue;
-    const source = await loadSource();
     const [folderName, fileName] = resourcePath.slice(prefix.length).split("/");
     if (!folderName || !fileName) continue;
+    if (!["Base.locale", "en-GB.locale", `${locale}.locale`].includes(folderName)) continue;
+    const source = await loadSource();
     resources[folderName] = {
       ...resources[folderName],
       [fileName]: source
@@ -58,9 +61,9 @@ export function getWebspringLocaleResourceLoader() {
   const localisedPrefix = "./Contents/Resources/Localised/";
   const hasLocalisedResources = Object.keys(webspringLocalisedResources).some((resourcePath) => resourcePath.startsWith(localisedPrefix));
 
-  return async () => {
+  return async (locale: SynCloudOSLocaleCode) => {
     const collectedLocalisedResources = hasLocalisedResources
-      ? await collectWebspringLocaleResources(webspringLocalisedResources, localisedPrefix)
+      ? await collectWebspringLocaleResources(webspringLocalisedResources, localisedPrefix, locale)
       : undefined;
     return collectedLocalisedResources;
   };

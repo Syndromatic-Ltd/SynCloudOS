@@ -60,6 +60,28 @@ async function loadLocaleRuntime() {
 }
 
 describe("LocaleServices runtime infrastructure", () => {
+  it("loads only the requested shell locale and British English fallback", async () => {
+    const { getWebspringLocaleResourceLoader } = await import("../../src/Webspring/webspringLocale");
+    const load = getWebspringLocaleResourceLoader();
+    const english = await load("en-GB");
+    expect(Object.keys(english ?? {}).sort()).toEqual(["Base.locale", "en-GB.locale"]);
+    const french = await load("fr-FR");
+    expect(Object.keys(french ?? {}).sort()).toEqual(["Base.locale", "en-GB.locale", "fr-FR.locale"]);
+  });
+
+  it("passes the active locale to bundle loaders and reloads when it changes", async () => {
+    setNavigatorLanguages(["en-GB"]);
+    const { LocaleServices } = await loadLocaleRuntime();
+    LocaleServices.hydrate();
+    const loader = vi.fn(async (_locale: string) => ({}));
+    LocaleServices.registerBundleLocaleResourceLoader("localised", loader);
+    await LocaleServices.loadBundleLocaleResources();
+    expect(loader).toHaveBeenLastCalledWith("en-GB");
+    LocaleServices.setLocale("fr-FR");
+    await LocaleServices.loadBundleLocaleResources();
+    expect(loader).toHaveBeenLastCalledWith("fr-FR");
+  });
+
   it("resolves localised site branding and registered logo variants without a product fallback", () => {
     const locale = { t: (key: string) => key === "site.name" ? "Example Site" : key };
     expect(resolveSiteBranding({

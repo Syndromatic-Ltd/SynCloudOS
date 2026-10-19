@@ -53,12 +53,12 @@ test("framework source does not fetch assets from the consumer origin root", () 
 test("all authored CSS asset URLs rewrite to existing framework-owned resources", () => {
   const plugin = sdkPackageStyles({ themeNames: [], frameworkPublicDirectory: resolve(root, "public") });
   plugin.configResolved({ publicDir: false });
-  const stripUrls = (source) => source.replace(/url\([^)]*\)/g, "url()");
+  const stripUrls = (source) => source.replace(/url\(\s*(?:"[^"]*"|'[^']*'|[^)]*)\s*\)/g, "url()");
   const stylesheets = areas.flatMap((area) => sources(resolve(root, "src", area), /\.css$/));
   let count = 0;
   for (const path of stylesheets) {
     const source = readFileSync(path, "utf8");
-    const rewritten = plugin.transform(source, path)?.code ?? source;
+    const rewritten = plugin.transform.call({ emitFile: () => "vector-resource" }, source, path)?.code ?? source;
     assert.equal(stripUrls(rewritten), stripUrls(source), `CSS declarations changed: ${path}`);
     for (const match of source.matchAll(/url\(\s*["']?(\/assets\/[^"'()]+)["']?\s*\)/g)) {
       count++;

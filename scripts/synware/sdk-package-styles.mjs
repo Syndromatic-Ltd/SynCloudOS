@@ -97,8 +97,16 @@ export function sdkPackageStyles({ themeNames, publicStyleEntries = {}, framewor
     },
     transform(source, id) {
       const sourcePath = id.split("?", 1)[0];
-      if (!sourcePath.endsWith(".css") || !source.includes("/assets/")) return null;
-      const rewritten = rewriteFrameworkAssetUrls(source, sourcePath, publicDirectory);
+      if (!sourcePath.endsWith(".css")) return null;
+      let rewritten = rewriteFrameworkAssetUrls(source, sourcePath, publicDirectory);
+      // Theme vectors are paint resources, not stylesheet text. Keeping them
+      // separate lets browsers fetch only the control states actually painted.
+      rewritten = rewritten.replace(/url\(\s*(["'])(data:image\/svg\+xml(?:;charset=utf-8)?,[\s\S]*?)\1\s*\)/gu,
+        (_match, _quote, dataUrl) => {
+          const svg = decodeURIComponent(dataUrl.slice(dataUrl.indexOf(",") + 1));
+          const reference = this.emitFile({ type: "asset", name: "nse-vector.svg", source: svg });
+          return `url("__VITE_ASSET__${reference}__")`;
+        });
       return rewritten === source ? null : { code: rewritten, map: null };
     },
     generateBundle(_options, output) {
@@ -132,8 +140,21 @@ export function sdkPackageStyles({ themeNames, publicStyleEntries = {}, framewor
         publishStyles(`${name}/styles.css`, styles);
         const chunk = output[entryFile];
         if (chunk?.type !== "chunk") throw new Error(`SDK theme entry ${entryFile} was not emitted.`);
-        const imports = styles.map((css) => `import ${JSON.stringify(specifier(chunk.fileName, css))};`);
-        if (imports.length) chunk.code = imports.join("\n") + "\n" + chunk.code;
+      }
+      // Vite library builds extract CSS without retaining its JS import.
+      // Restore ownership on every chunk, including optional dynamic entries,
+      // rather than flattening lazy shell/framework styles into browser CSS.
+      for (const chunk of Object.values(output)) {
+        if (chunk.type !== "chunk") continue;
+        const styles = [...(chunk.viteMetadata?.importedCss ?? [])];
+        if (!styles.length) continue;
+        chunk.code = styles.map(css =>
+          `import ${JSON.stringify(specifier(chunk.fileName, css))};`).join("\n") + "\n" + chunk.code;
+        if (chunk.map) {
+          chunk.map.mappings = ";".repeat(styles.length) + chunk.map.mappings;
+          const mapAsset = output[`${chunk.fileName}.map`];
+          if (mapAsset?.type === "asset") mapAsset.source = chunk.map.toString();
+        }
       }
     },
   };
