@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/fxRuntimeContracts";
 import type { HFXHapticLifecycleEvent, HFXHapticPlaybackConfiguration, HFXHapticObservation } from "./HFXHapticLifecycle";
 import type { HFXHapticPatternPlayer } from "./HFXHapticPatternPlayer";
 import type { AUFXAudioPCMBuffer } from "../AudioFX/AUFXAudioPCMBuffer";
@@ -72,6 +73,7 @@ export interface HFXHapticCapabilities {
   readonly reason: string | null;
 }
 export class HFXHapticEngine {
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "HFXHapticEngine" });
   #disposed = false;
   #disposing = false;
   #running = false;
@@ -82,18 +84,18 @@ export class HFXHapticEngine {
   #actuatorOwner: object | null = null;
   readonly #observers = new Set<(event: HFXHapticLifecycleEvent) => void>();
   observe(listener: (event: HFXHapticLifecycleEvent) => void): HFXHapticObservation {
-    this.assertActive(); if (typeof listener !== "function" || this.#observers.size >= 128) throw new RangeError("Invalid haptic observation or observer budget exceeded.");
+    this.#assertLive("observe"); if (typeof listener !== "function" || this.#observers.size >= 128) throw new RangeError("Invalid haptic observation or observer budget exceeded.");
     this.#observers.add(listener); return Object.freeze({ dispose: () => { this.#observers.delete(listener); } });
   }
   configurePlayback(configuration: HFXHapticPlaybackConfiguration) {
-    this.assertActive();
+    this.#assertLive("configurePlayback");
     for (const key of Object.keys(configuration)) if (!["audioOnly", "hapticsOnly", "autoShutdown"].includes(key) || typeof configuration[key as keyof HFXHapticPlaybackConfiguration] !== "boolean") throw new TypeError("Invalid session playback configuration.");
     const next = { ...this.#configuration, ...configuration }; if (next.audioOnly && next.hapticsOnly) throw new Error("Audio-only and haptics-only policies conflict."); this.#configuration = next; this.#port.setPatternPlayback?.(next);
   }
   #notify(event: HFXHapticLifecycleEvent) { const value = Object.freeze(event); for (const observer of [...this.#observers]) { try { observer(value); } catch { /* One observer cannot interrupt another or teardown. */ } } }
   #didStart() { if (this.#running) return; this.#running = true; this.#notify({ type: "started" }); }
   playerDidStart(player: HFXHapticAdvancedPatternPlayer) {
-    this.assertActive(); this.#activePlayers.add(player);
+    this.#assertLive("playerDidStart"); this.#activePlayers.add(player);
     try { this.#port.playerStart?.(player); }
     catch (error) { this.#activePlayers.delete(player); throw error; }
     if (this.#activePlayers.has(player)) this.#didStart();
@@ -150,9 +152,10 @@ export class HFXHapticEngine {
     }
     return Object.freeze({ state: this.#disposed ? "disposed" : supported ? "available" : "unavailable", timing: supported, amplitude, sharpness, audio: audioState === "available", audioState, dynamicParameters, fidelity, reason });
   }
-  assertActive() { if (this.#disposed) throw new Error("Haptic engine is disposed."); }
+  assertActive() { this.#assertLive("assertActive"); }
+  #assertLive(operation: string) { if (this.#disposed) throw this.#lifecycle.error({ code: "HFX_HAPTIC_ENGINE_DISPOSED", operation: operation }); }
   async trigger(request: HFXFeedbackRequest, options?: HFXFeedbackOptions) {
-    this.assertActive();
+    this.#assertLive("trigger");
     if (request !== false && request != null && !["success", "warning", "error", "light", "medium", "heavy", "soft", "rigid", "selection", "nudge", "buzz"].includes(request)) throw new TypeError("Unknown feedback preset.");
     const safe: { intensity?: number; audio?: HFXFeedbackOptions["audio"] } = {};
     if (options !== undefined) {
@@ -167,7 +170,7 @@ export class HFXHapticEngine {
     await this.#port.trigger(request, safe);
   }
   async registerAudioResource(buffer: AUFXAudioPCMBuffer, signal?: AbortSignal): Promise<HFXAudioResource> {
-    this.assertActive(); signal?.throwIfAborted();
+    this.#assertLive("registerAudioResource"); signal?.throwIfAborted();
     if (!this.#port.registerAudioResource || this.#resources.size + this.#pendingResources >= 64) throw new Error("Audio resources are unavailable or exceed the engine limit.");
     const owned = buffer.copy(), epoch = this.#resourceEpoch;
     this.#pendingResources++;
@@ -175,18 +178,18 @@ export class HFXHapticEngine {
     try { backendID = await this.#port.registerAudioResource(owned, signal); }
     finally { this.#pendingResources--; }
     if (epoch !== this.#resourceEpoch) { try { this.#port.unregisterAudioResource?.(backendID); } catch { this.#retiredResources.add(backendID); } throw new Error("Haptic engine reset during audio registration."); }
-    if (this.#disposed || signal?.aborted) { try { this.#port.unregisterAudioResource?.(backendID); } catch { this.#retiredResources.add(backendID); } signal?.throwIfAborted(); throw new Error("Haptic engine is disposed."); }
+    if (this.#disposed || signal?.aborted) { try { this.#port.unregisterAudioResource?.(backendID); } catch { this.#retiredResources.add(backendID); } signal?.throwIfAborted(); throw this.#lifecycle.error({ code: "HFX_HAPTIC_ENGINE_DISPOSED", operation: "registerAudioResource" }); }
     const resource = Object.freeze({ id: `hfx-resource:${this.#resourceNamespace}:${++this.#sequence}`, duration: owned.frameLength / owned.format.sampleRate });
     this.#resources.set(resource, backendID); return resource;
   }
   unregisterAudioResource(resource: HFXAudioResource) {
-    this.assertActive(); const backendID = this.#resources.get(resource);
+    this.#assertLive("unregisterAudioResource"); const backendID = this.#resources.get(resource);
     if (!backendID) throw new Error("Audio resource is not owned by this engine.");
     this.#port.unregisterAudioResource?.(backendID); this.#resources.delete(resource);
   }
   private audioResource(id: string) { const entry = [...this.#resources].find(([resource]) => resource.id === id); if (!entry) throw new Error("Audio resource is not registered with this engine."); return entry; }
-  #emit(event: HFXHapticEvent, delay: number, offset: number, rate: number, originalDuration: number | undefined, actuatorOwner: object) {
-    this.assertActive();
+  #emit(operation: string, event: HFXHapticEvent, delay: number, offset: number, rate: number, originalDuration: number | undefined, actuatorOwner: object) {
+    this.#assertLive(operation);
     const audioEvent = event.type === "audio" || event.type === "audioContinuous";
     if ((audioEvent && this.#configuration.hapticsOnly) || (!audioEvent && this.#configuration.audioOnly)) return;
     const send = (resolved: HFXHapticEvent) => {
@@ -202,13 +205,13 @@ export class HFXHapticEngine {
     else if (event.type === "audioContinuous") send(event);
     else if (this.#enabled) send(event);
   }
-  emit(event: HFXHapticEvent, delay = 0, offset = 0, rate = 1, originalDuration = event.duration) { this.#actuatorOwner = this.#directActuatorOwner; this.#emit(event, delay, offset, rate, originalDuration, this.#directActuatorOwner); }
+  emit(event: HFXHapticEvent, delay = 0, offset = 0, rate = 1, originalDuration = event.duration) { this.#actuatorOwner = this.#directActuatorOwner; this.#emit("emit", event, delay, offset, rate, originalDuration, this.#directActuatorOwner); }
   emitFromPlayer(player: HFXHapticAdvancedPatternPlayer, event: HFXHapticEvent, delay = 0, offset = 0, rate = 1, originalDuration = event.duration) {
     if (event.type !== "audio" && event.type !== "audioContinuous") this.#actuatorOwner = player;
-    this.#emit(event, delay, offset, rate, originalDuration, player);
+    this.#emit("emitFromPlayer", event, delay, offset, rate, originalDuration, player);
   }
   sendParameters(parameters: readonly HFXHapticDynamicParameter[], actuatorOwner?: object) {
-    this.assertActive(); if (!this.#port.parameters) throw new Error("Dynamic parameters are unavailable on this host.");
+    this.#assertLive("sendParameters"); if (!this.#port.parameters) throw new Error("Dynamic parameters are unavailable on this host.");
     if (parameters.length > 128) throw new RangeError("Dynamic parameter limit exceeded.");
     for (const parameter of parameters) if (!["intensity", "sharpness", "audioVolume", "audioPan", "audioPitch", "audioBrightness", "hapticAttackTime", "hapticDecayTime", "hapticReleaseTime", "audioAttackTime", "audioDecayTime", "audioReleaseTime"].includes(parameter.parameterID) || !Number.isFinite(parameter.value) || parameter.value < (["sharpness", "audioPan", "audioPitch", "audioBrightness", "hapticAttackTime", "hapticDecayTime", "hapticReleaseTime", "audioAttackTime", "audioDecayTime", "audioReleaseTime"].includes(parameter.parameterID) ? -1 : 0) || parameter.value > 1 || !Number.isFinite(parameter.relativeTime) || parameter.relativeTime < 0) throw new RangeError("Invalid dynamic parameter.");
     if (actuatorOwner) {
@@ -217,7 +220,7 @@ export class HFXHapticEngine {
     } else this.#port.parameters(parameters);
   }
   makeAdvancedPlayer(pattern: HFXHapticPattern) {
-    this.assertActive(); if (this.#players.size >= 128) throw new RangeError("Haptic player limit exceeded.");
+    this.#assertLive("makeAdvancedPlayer"); if (this.#players.size >= 128) throw new RangeError("Haptic player limit exceeded.");
     if (!this.#port.playerEvent) throw new Error("Custom haptic ports must implement playerEvent before creating players.");
     if (!this.#port.playerCancel) throw new Error("Custom haptic ports must implement playerCancel before creating players.");
     if (this.#port.parameters && !this.#port.playerParameters) throw new Error("Custom haptic ports that advertise dynamic parameters must implement playerParameters before creating players.");
@@ -225,16 +228,16 @@ export class HFXHapticEngine {
     const player = new HFXHapticAdvancedPatternPlayer(this, resolved); this.#players.add(player); return player;
   }
   releasePlayer(player: HFXHapticAdvancedPatternPlayer) { this.#players.delete(player); if (this.#actuatorOwner === player) this.#actuatorOwner = null; }
-  makePlayer(pattern: HFXHapticPattern): HFXHapticPatternPlayer { return this.makeAdvancedPlayer(pattern); }
+  makePlayer(pattern: HFXHapticPattern): HFXHapticPatternPlayer { this.#assertLive("makePlayer"); return this.makeAdvancedPlayer(pattern); }
   getVibrationEnabled() { return this.#enabled; }
-  setVibrationEnabled(enabled: boolean) { this.assertActive(); this.#enabled = enabled; this.#port.setVibrationEnabled?.(enabled);  }
-  setButtonSoundEnabled(enabled: boolean) { this.assertActive(); this.#port.setButtonSoundEnabled?.(enabled); }
+  setVibrationEnabled(enabled: boolean) { this.#assertLive("setVibrationEnabled"); this.#enabled = enabled; this.#port.setVibrationEnabled?.(enabled);  }
+  setButtonSoundEnabled(enabled: boolean) { this.#assertLive("setButtonSoundEnabled"); this.#port.setButtonSoundEnabled?.(enabled); }
   stopOutput(actuatorOwner?: object) { if (!this.#disposed) { if (actuatorOwner) this.#port.playerCancel?.(actuatorOwner); else this.#port.cancel(); if (actuatorOwner === undefined || this.#actuatorOwner === actuatorOwner) this.#actuatorOwner = null; } }
   cancel() { if (this.#disposed) return; for (const player of this.#players) player.stop(); this.#actuatorOwner = null; this.#port.cancel(); }
-  async start() { this.assertActive(); await this.#port.start?.(); this.assertActive(); this.#didStart(); }
+  async start() { this.#assertLive("start"); await this.#port.start?.(); this.#assertLive("start"); this.#didStart(); }
   stop() { this.#stop("requested"); }
   reset() {
-    this.assertActive(); this.#resourceEpoch++;
+    this.#assertLive("reset"); this.#resourceEpoch++;
     let failure: Readonly<{ error: unknown }> | undefined;
     const attempt = (action: () => void) => { try { action(); } catch (error) { failure ??= { error }; } };
     attempt(() => this.#stop("requested"));
@@ -246,7 +249,7 @@ export class HFXHapticEngine {
     if (failure) throw failure.error;
   }
   dispose() {
-    if (this.#disposed || this.#disposing) return; this.#disposing = true;
+    if (this.#disposed || this.#disposing) return; this.#lifecycle.markDisposed("explicit"); this.#disposing = true;
     try {
       try { this.#stop("disposed"); } catch { /* Backend cancellation cannot prevent revocation. */ } this.#disposed = true; this.#players.clear(); this.#activePlayers.clear(); this.#actuatorOwner = null; this.#observers.clear();
       for (const backendID of new Set([...this.#resources.values(), ...this.#retiredResources])) { try { this.#port.unregisterAudioResource?.(backendID); } catch { /* Release every remaining resource. */ } }
