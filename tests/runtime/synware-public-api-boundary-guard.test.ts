@@ -367,6 +367,7 @@ describe("SDK build public API boundaries", () => {
       "./sdk-entries.mjs": { synWareSdkEntries },
       "./sdk-package-manifest.mjs": { captureSdkSourceFingerprint },
       "./sdk-package-styles.mjs": {},
+      "./sdk-browser-dependencies.mjs": { sdkBrowserDependencies: buildWork },
       "./public-api-boundaries.mjs": { assertPublicApiBoundaries },
       "../developer-mcp/build-package.mjs": { writeDeveloperSdkData: buildWork, writeDeveloperMcpPackage: buildWork },
     };

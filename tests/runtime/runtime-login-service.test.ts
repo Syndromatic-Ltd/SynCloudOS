@@ -137,7 +137,7 @@ describe("instance-owned login service", () => {
       packageName: "PresentationProtected.app",
     });
     expect(runtime.errors.getLatest()?.technicalDetails).toContain(
-      "Requested app: presentation-protected (PresentationProtected.app)",
+      "App: Presentation Protected (presentation-protected)",
     );
     expect(runtime.errors.getLatest()?.technicalDetails).toContain("Statechart: active.webspring");
     expect(runtime.errors.getLatest()?.technicalDetails).toContain("Session authority: not authorised");
