@@ -251,7 +251,7 @@ The Vite plugin builds the virtual composition module from your shell and bundle
 
 ## Authentication
 
-Pass `"disabled"` for a public site. For server backed sign-in, pass `{ policy: "optional" | "required", service, loginComponent? }`. Optional mode keeps public content available and adds a Sign In control. Required mode holds protected shell content until the server confirms the session. Disabled mode makes no authentication requests. An app intended for anonymous launching declares `runtime.policy.public: true`. See [Authentication](authentication.md).
+Pass `"disabled"` for a public site. For server backed sign-in, pass `{ policy: "optional" | "required", service, loginComponent? }`. Optional mode keeps public content available and adds a Sign In control. Required mode holds protected shell content until the server confirms the session. Disabled mode makes no authentication requests and never offers Log Out. An app intended for anonymous launching declares `runtime.policy.public: true`. See [Authentication](authentication.md).
 
 When a gate is configured, the host presents the sign-in window after the icons settle, dims the launcher behind it and keeps the launcher inert until the window has left. Visits without a gate, and visits that are already authenticated, enter without interruption. A tab-local marker in session storage preserves only the held presentation across provider redirects. It stores no identity and grants no access.
 

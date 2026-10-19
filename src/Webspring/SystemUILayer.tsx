@@ -38,7 +38,7 @@ import { useAppearance, useLocaleServicesSnapshot, useResolvedMode, useRuntimeNS
 import { systemT as translateSystemText } from "./systemStrings";
 import type { SynCloudOSRuntime } from "../SynCloudOS/SynCloudOS";
 import { confirmReturnDecisionKeepWindows, confirmReturnDecisionQuit } from "./returnDecision";
-import { builtInPreferencePanes, type SystemPreferencePaneContext } from "./builtInPreferencePanes";
+import { accountPreferencePane, builtInPreferencePanes, type SystemPreferencePaneContext } from "./builtInPreferencePanes";
 
 function selectAppInfo(snapshot: RuntimeSnapshot) {
   return snapshot.appInfo;
@@ -174,14 +174,30 @@ function ReturnDecisionDialog({
   );
 }
 
+/** The session as the Account preference pane shows it, for hosts that offer sign-in. */
+export interface SystemUIAccount {
+  readonly signedIn: boolean;
+  /** The signed-in person's display name, when the session carries one. */
+  readonly name: string | null;
+  /** Presents the login window. */
+  readonly onSignIn: () => void;
+}
+
 /**
- * Renders the system surfaces once, at the root. Mounted by App so every app
- * gets Preferences, About and the log-out confirm without wiring any of them.
+ * Renders the system surfaces once, at the root. Mounted by every browser
+ * host so each app gets Preferences, About and the log-out confirm without
+ * wiring any of them. A host without authentication passes no `onLogOut`:
+ * it never offers Log Out. A host with sign-in passes `account` for the
+ * Account preference pane.
  *
  * The dialogs portal to document.body, so where this sits in the tree only
  * decides WHEN it renders, not where it appears.
  */
-export function SystemUILayer({ onLogOut, siteName = "this site" }: { onLogOut: () => boolean | void | Promise<boolean | void>; siteName?: string }) {
+export function SystemUILayer({ onLogOut, account, siteName = "this site" }: {
+  onLogOut?: () => boolean | void | Promise<boolean | void>;
+  account?: SystemUIAccount;
+  siteName?: string;
+}) {
   const feedback = useNSEFeedback();
 
   const runtime = useKernelSynCloudOS();
@@ -395,8 +411,36 @@ export function SystemUILayer({ onLogOut, siteName = "this site" }: { onLogOut: 
           </NSEGroupBox>
         </div>
       )
-    }
+    },
+    ...(account ? { account: {
+      id: "account",
+      label: systemT("preferences.account", "Account"),
+      meta: account.signedIn ? account.name ?? systemT("preferences.signedIn", "Signed In") : systemT("preferences.notSignedIn", "Not Signed In"),
+      render: () => (
+        <div className="nse-prefs-section">
+          <NSEGroupBox>
+            <NSEListItem
+              tapHighlight={false}
+              trailing={account.signedIn ? (
+                <NSEPushButton onClick={() => {
+                  runtime.systemUI.preferences.close();
+                  runtime.systemUI.session.requestLogOut();
+                }}>{systemT("session.logOut", "Log Out")}</NSEPushButton>
+              ) : (
+                <NSEPushButton onClick={() => {
+                  runtime.systemUI.preferences.close();
+                  account.onSignIn();
+                }}>{systemT("session.signIn", "Sign In")}</NSEPushButton>
+              )}
+            >
+              {account.signedIn ? account.name ?? systemT("preferences.signedIn", "Signed In") : systemT("preferences.notSignedIn", "Not Signed In")}
+            </NSEListItem>
+          </NSEGroupBox>
+        </div>
+      )
+    } } : {}),
   }), [
+    account,
     appearance,
     appearanceChoices,
     locale.activeLocale,
@@ -404,6 +448,7 @@ export function SystemUILayer({ onLogOut, siteName = "this site" }: { onLogOut: 
     locale.supportedLocales,
     motion,
     notificationApps,
+    runtime,
     settings,
     settingsService,
     supportsVibration
@@ -415,6 +460,16 @@ export function SystemUILayer({ onLogOut, siteName = "this site" }: { onLogOut: 
       for (const registration of registrations.reverse()) registration.dispose();
     };
   }, [runtime]);
+  const offersAccount = account !== undefined;
+  useLayoutEffect(() => {
+    if (!offersAccount) return;
+    const registration = registerSystemPreferencePane(runtime.preferencePanes, accountPreferencePane);
+    return () => registration.dispose();
+  }, [offersAccount, runtime]);
+  // Without authentication there is no session to end: decline the request.
+  useLayoutEffect(() => {
+    if (!onLogOut && ui.logOutOpen) runtime.systemUI.session.dismissLogOut();
+  }, [onLogOut, runtime, ui.logOutOpen]);
   const preferencePaneDescriptors = useSyncExternalStore(
     runtime.preferencePanes.subscribe,
     runtime.preferencePanes.getSnapshot,
@@ -491,7 +546,7 @@ export function SystemUILayer({ onLogOut, siteName = "this site" }: { onLogOut: 
           onDismiss={() => runtime.systemUI.about.close()}
         />
       ) : null}
-      <NSEConfirmDialog
+      {onLogOut ? <NSEConfirmDialog
         open={ui.logOutOpen}
         appearance={resolvedMode === "dark" ? "dark" : "light"}
         focusScopeId="system-ui:log-out"
@@ -511,7 +566,7 @@ export function SystemUILayer({ onLogOut, siteName = "this site" }: { onLogOut: 
           }
         }}
         onCancel={() => runtime.systemUI.session.dismissLogOut()}
-      />
+      /> : null}
 
       {returnDecision ? (
         <ReturnDecisionDialog

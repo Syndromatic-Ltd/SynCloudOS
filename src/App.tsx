@@ -85,6 +85,7 @@ export function App({ shell, shellResources, authentication, contentSources = em
     }
     return result.status === "executed";
   }, [runtime]);
+  const authenticationPolicy = (typeof authentication === "object" ? authentication.policy : authentication) ?? "disabled";
 
   if (frameworkTestPath?.startsWith("/__framework-tests/") && FrameworkTestHost) {
     const windowManagement = frameworkTestPath.startsWith("/__framework-tests/windows/management");
@@ -102,7 +103,7 @@ export function App({ shell, shellResources, authentication, contentSources = em
   return (
     <>
       <WebspringHost shell={shell} shellResources={shellResources} authentication={authentication} startupPhase={startupPhase} contentSources={contentSources} />
-      <SystemUILayer onLogOut={handleLogOut} siteName={siteName} />
+      <SystemUILayer onLogOut={authenticationPolicy === "disabled" ? undefined : handleLogOut} siteName={siteName} />
     </>
   );
 }

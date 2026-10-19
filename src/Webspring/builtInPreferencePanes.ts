@@ -27,9 +27,11 @@ export interface SystemPreferencePaneContext {
   readonly motion: NSEPreferencePane;
   readonly notifications: NSEPreferencePane;
   readonly language: NSEPreferencePane;
+  /** Present only where the host offers sign-in. */
+  readonly account?: NSEPreferencePane;
 }
 
-function descriptor<K extends keyof SystemPreferencePaneContext>(id: K, order: number): PreferencePaneDescriptor<SystemPreferencePaneContext, NSEPreferencePane> {
+function descriptor<K extends Exclude<keyof SystemPreferencePaneContext, "account">>(id: K, order: number): PreferencePaneDescriptor<SystemPreferencePaneContext, NSEPreferencePane> {
   return Object.freeze({
     id,
     bundleIdentifier: `com.syndromatic.syncloudos.preference.${id}.prefpane`,
@@ -45,3 +47,14 @@ export const builtInPreferencePanes = Object.freeze([
   descriptor("notifications", 400),
   descriptor("language", 500),
 ]);
+
+/** Sign in and out, for hosts whose authentication is not disabled. */
+export const accountPreferencePane: PreferencePaneDescriptor<SystemPreferencePaneContext, NSEPreferencePane> = Object.freeze({
+  id: "account",
+  bundleIdentifier: "com.syndromatic.syncloudos.preference.account.prefpane",
+  order: 50,
+  create(context: SystemPreferencePaneContext) {
+    if (!context.account) throw new Error("This host offers no sign-in.");
+    return context.account;
+  },
+});

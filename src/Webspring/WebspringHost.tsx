@@ -18,21 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ErrorInfo, type PropsWithChildren, type ReactNode } from "react";
+import { Component, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ErrorInfo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { NSEFocusPortProvider, useNSEDeferredDisposal } from "../NSE/NSE";
-import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
-import { useWebspringMotion } from "./Webspring.transitions";
+import { useNSEAnimationEnvironment } from "../NSE/Animation";
 import { useNSEFeedback } from "../NSE/hostComposition";
 import { MaterialProvider } from "../NSE/Material";
-import { LoginWindow } from "../NSE/SystemUI";
-import { LoginGatePresenter } from "../SynCloudOS/RootRuntime";
+import { HostLoginGate } from "./HostLoginGate";
 import type { RuntimeSnapshot } from "../SynCloudOS/SynCloudOS";
 import type { AuthenticationInput, Presentation, WebspringDefinition, WebspringViewComponent } from "./webspringTypes";
 import { SystemStartupLayer, type SystemStartupPhase } from "./SystemStartupLayer";
 import { ApplicationStageLayer } from "./ApplicationStageLayer";
 import { syncApplicationWindowContentRenderers, WindowContentRendererRegistry, WindowLayer, type ApplicationWindowRendererRegistrations } from "./WindowLayer";
-import { FocusScope, HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeNSEFocusPort, useRuntimeSelector } from "../SynCloudOSReact";
+import { HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeNSEFocusPort, useRuntimeSelector } from "../SynCloudOSReact";
 import { presentationForSizeClass, WebspringController, type SynCloudOSShellResources } from "./WebspringController";
 import { WebspringQuickSwitchView } from "./WebspringQuickSwitchView";
 import { WebspringIconEffectProvider } from "./WebspringIconEffect";
@@ -67,17 +65,6 @@ const WebspringHostPresentationContext = createContext<WebspringHostPresentation
 
 export function useWebspringHostPresentation() {
   return useContext(WebspringHostPresentationContext);
-}
-
-function LoginModalFocusScope({ children }: PropsWithChildren) {
-  return <FocusScope scopeId="system-ui:login" kind="modal" parentResponderId="runtime" modal trapFocus>{children}</FocusScope>;
-}
-
-/** Dims the shell behind the login window, presented through AnimationFX. */
-function LoginBackdrop() {
-  const backdropRef = useRef<HTMLDivElement>(null);
-  useNSEPresentation(backdropRef, useWebspringMotion().loginBackdropDim);
-  return <div ref={backdropRef} className="syncloudos-login-backdrop" aria-hidden="true" />;
 }
 
 function equalHostSnapshot(left: RuntimeSnapshot, right: RuntimeSnapshot) {
@@ -335,16 +322,11 @@ export function WebspringHost({
       openRequest={notificationCentreRequest}
       presentationReady={phase === "complete" && snapshot.loginServices.isAuthorised}
     />
-    <LoginGatePresenter
+    <HostLoginGate
       runtime={runtime}
       snapshot={snapshot}
-      LoginWindowComponent={typeof authentication === "object" && authentication.loginComponent ? authentication.loginComponent : LoginWindow}
-      ModalFocusScopeComponent={LoginModalFocusScope}
-      BackdropComponent={LoginBackdrop}
-      PresenceComponent={NSEPresence}
       title={model ? `Sign in to ${model.branding.name}` : undefined}
       branding={model?.branding}
-      cancelLabel={runtime.locale.t("authentication.cancel", "Cancel")}
       authentication={authentication}
       ready={loginReady}
       restoring={restoringLogin}
