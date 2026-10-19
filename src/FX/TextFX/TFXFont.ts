@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/fxRuntimeContracts";
+
 import type * as HarfBuzz from "harfbuzzjs";
 import { TFXFontDescriptor } from "./TFXFontDescriptor";
 import type { TFXGlyphInfo, TFXGlyphRun, TFXTextDirection } from "./TFXGlyphRun";
@@ -85,6 +87,7 @@ export function bindTFXFontDisposalOwner(font: TFXFont, owner: () => void): () =
 }
 
 export class TFXFont {
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "TFXFont" });
   readonly descriptor: TFXFontDescriptor;
   readonly familyName: string;
   /** The family a font menu groups this face under: the typographic family
@@ -164,18 +167,18 @@ export class TFXFont {
 
   supportsCodePoint(codePoint: number): boolean {
     if (!Number.isInteger(codePoint) || codePoint < 0 || codePoint > 0x10ffff) throw new RangeError("Invalid Unicode code point.");
-    return (this.#requireFont().nominalGlyph(codePoint) ?? 0) !== 0;
+    return (this.#requireFont("supportsCodePoint").nominalGlyph(codePoint) ?? 0) !== 0;
   }
 
   glyphPath(id: number): string {
     if (!Number.isSafeInteger(id) || id < 0) throw new RangeError("Invalid glyph index.");
-    return this.#requireFont().glyphToPath(id);
+    return this.#requireFont("glyphPath").glyphToPath(id);
   }
 
   /** Scaled font outline in typographic coordinates (positive Y points upward). */
   createPathForGlyph(id: number): GFXPath {
     if (!Number.isSafeInteger(id) || id < 0) throw new RangeError("Invalid glyph index.");
-    const commands: GFXPathCommand[] = this.#requireFont().glyphToJson(id).map(command => {
+    const commands: GFXPathCommand[] = this.#requireFont("createPathForGlyph").glyphToJson(id).map(command => {
       const values = command.values;
       switch (command.type) {
         case "M": return { kind: "move", point: { x: values[0], y: values[1] } };
@@ -193,13 +196,14 @@ export class TFXFont {
   /** Uses the canonical HarfBuzz backend to verify that a complete cluster shapes without .notdef. */
   supportsText(text: string): boolean {
     if (typeof text !== "string" || text.length === 0 || text.length > 256) throw new RangeError("Font coverage input must contain 1 to 256 UTF-16 units.");
+    this.#requireFont("supportsText");
     const shaped = this.shape(text);
     return shaped.glyphs.length > 0 && shaped.glyphs.every(glyph => glyph.id !== 0);
   }
 
   /** Opaque PDF export identity. The retained font program is never returned to callers. */
   pdfFontSubset(): GFXPDFFontSubset {
-    this.#requireFont();
+    this.#requireFont("pdfFontSubset");
     if (!this.#pdfSubset) {
       this.#pdfSubset = new GFXPDFFontSubset(this.#sourceBytes, {
         familyName: this.familyName,
@@ -210,7 +214,7 @@ export class TFXFont {
   }
 
   shape(text: string, options: Readonly<TFXFontShapeOptions> = {}): TFXGlyphRun {
-    const font = this.#requireFont();
+    const font = this.#requireFont("shape");
     if (typeof text !== "string" || text.length > 65536) throw new RangeError("A shaping run must contain at most 65536 UTF-16 units.");
     const hb = this.#backend!;
     const buffer = this.#buffer!;
@@ -270,6 +274,7 @@ export class TFXFont {
   }
 
   dispose(): void {
+    this.#lifecycle.markDisposed("explicit");
     const owner = disposalOwners.get(this);
     if (owner) {
       disposalOwners.delete(this);
@@ -280,8 +285,8 @@ export class TFXFont {
     this.#buffer = null;
     this.#backend = null;
   }
-  #requireFont(): HarfBuzz.Font {
-    if (!this.#font) throw new Error("Font is disposed.");
+  #requireFont(operation: string): HarfBuzz.Font {
+    if (!this.#font) throw this.#lifecycle.error({ code: "TFX_FONT_DISPOSED", operation: operation });
     return this.#font;
   }
 }
