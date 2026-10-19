@@ -131,5 +131,5 @@ it("does not permit listener-driven edits while disposing", () => {
   expect(controller.isEditing).toBe(false);
   expect(() =>
     controller.beginEditing({ id: "after-dispose", actionName: "After dispose" }),
-  ).toThrow(/disposed/i);
+  ).toThrow(expect.objectContaining({ code: "NSE_CONTROLLER_DISPOSED" }));
 });

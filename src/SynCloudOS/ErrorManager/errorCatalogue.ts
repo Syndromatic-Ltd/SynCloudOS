@@ -63,7 +63,7 @@ export const errorCatalogue: readonly ErrorCatalogueEntry[] = Object.freeze([
     code,
     title: `${resource} is no longer active`,
     cause: `An operation used ${resource} after disposal or after its owner ended.`,
-    fix: "Stop retaining the resource past its owner's lifetime. Create a new resource for the current owner and inspect the lifecycle error's disposal reason and development stacks.",
+    fix: "Stop using the resource once it is disposed, and do not keep it past its owner's lifetime; create a new one for the current owner. A dispose() in a useEffect cleanup also runs during React StrictMode's effect replay while the component stays mounted: let a managed hook or an owner signal own the resource instead. The error's disposal reason and development stacks show which owner ended it.",
     docs: "docs/framework/errors.md#lifecycle-errors",
     appliesTo: resource,
   })),

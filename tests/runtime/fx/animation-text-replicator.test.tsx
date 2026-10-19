@@ -154,7 +154,7 @@ describe("AnimationFX text and replication", () => {
     );
     expect(() => {
       layer.baselineOrigin = { x: 20, y: 30 };
-    }).toThrow(/disposed/);
+    }).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
     expect(layer.baselineOrigin.x).toBe(10);
     layer.dispose();
     expect(element.querySelector("svg")).toBeNull();

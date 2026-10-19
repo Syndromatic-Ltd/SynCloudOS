@@ -456,21 +456,21 @@ export class AFXLayer {
       throw error;
     }
   }
-  #assertLive(operation: string) {
-    if (this.#disposed) throw this.#lifecycle.error({ code: "AFX_LAYER_DISPOSED", operation: operation });
+  #assertLive(operation: string, access?: "call" | "set") {
+    if (this.#disposed) throw this.#lifecycle.error({ code: "AFX_LAYER_DISPOSED", operation, ...(access ? { access } : {}) });
   }
   get actions(): AFXLayerActionMap {
     return this.#actions;
   }
   set actions(value: AFXLayerActionMap) {
-    this.#assertLive("actions");
+    this.#assertLive("actions", "set");
     this.#actions = normaliseAFXLayerActions(value);
   }
   protected defaultActionForKey(_key: AFXLayerActionKey): AFXLayerAction | undefined {
     return undefined;
   }
   actionForKey(key: AFXLayerActionKey): AFXLayerAction | null {
-    this.#assertLive("actionForKey");
+    this.#assertLive("actionForKey", "call");
     if (
       ![
         "frame",
@@ -577,7 +577,7 @@ export class AFXLayer {
     });
   }
   set frame(value: GFXRect) {
-    this.#assertLive("frame");
+    this.#assertLive("frame", "set");
     const frame = normaliseRect(value);
     const previousFrame = this.frame;
     const previousBounds = this.#bounds;
@@ -601,7 +601,7 @@ export class AFXLayer {
     return this.#zPosition;
   }
   set zPosition(value: number) {
-    this.#assertLive("zPosition");
+    this.#assertLive("zPosition", "set");
     this.#zPosition = layerFinite(value, "zPosition");
     this.#display();
   }
@@ -609,7 +609,7 @@ export class AFXLayer {
     return this.#anchorPointZ;
   }
   set anchorPointZ(value: number) {
-    this.#assertLive("anchorPointZ");
+    this.#assertLive("anchorPointZ", "set");
     this.#anchorPointZ = layerFinite(value, "anchorPointZ");
     this.#display();
   }
@@ -617,7 +617,7 @@ export class AFXLayer {
     return this.#sublayerTransform;
   }
   set sublayerTransform(value: AFXTransform3D) {
-    this.#assertLive("sublayerTransform");
+    this.#assertLive("sublayerTransform", "set");
     if (!(value instanceof AFXTransform3D))
       throw new TypeError("Sublayer transform requires AFXTransform3D.");
     this.#applyImplicitAction(
@@ -632,7 +632,7 @@ export class AFXLayer {
     );
   }
   #setStyle<K extends keyof AFXLayerStyle>(key: K, value: AFXLayerStyle[K]) {
-    this.#assertLive(key);
+    this.#assertLive(key, "set");
     this.#style = Object.freeze({ ...this.#style, [key]: value });
     this.#display();
   }
@@ -739,7 +739,7 @@ export class AFXLayer {
     this.#setStyle("shadowOffset", normalisePoint(value));
   }
   set bounds(value: GFXRect) {
-    this.#assertLive("bounds");
+    this.#assertLive("bounds", "set");
     const previous = this.#bounds;
     this.#bounds = normaliseRect(value);
     delete this.#values.frame;
@@ -751,7 +751,7 @@ export class AFXLayer {
     return this.#position;
   }
   set position(value: GFXPoint) {
-    this.#assertLive("position");
+    this.#assertLive("position", "set");
     this.#position = normalisePoint(value);
     this.#display();
   }
@@ -759,7 +759,7 @@ export class AFXLayer {
     return this.#anchor;
   }
   set anchorPoint(value: GFXPoint) {
-    this.#assertLive("anchorPoint");
+    this.#assertLive("anchorPoint", "set");
     const next = normalisePoint(value);
     if (next.x < 0 || next.x > 1 || next.y < 0 || next.y > 1)
       throw new RangeError("Anchor point must be normalized.");
@@ -770,7 +770,7 @@ export class AFXLayer {
     return this.#opacity;
   }
   set opacity(value: number) {
-    this.#assertLive("opacity");
+    this.#assertLive("opacity", "set");
     if (!Number.isFinite(value) || value < 0 || value > 1)
       throw new RangeError("Layer opacity must be between zero and one.");
     this.#applyImplicitAction("opacity", this.#opacity, value, () => {
@@ -783,7 +783,7 @@ export class AFXLayer {
     return this.#transform;
   }
   set transform(value: AFXTransform3D) {
-    this.#assertLive("transform");
+    this.#assertLive("transform", "set");
     if (!(value instanceof AFXTransform3D))
       throw new TypeError("Layer transform requires AFXTransform3D.");
     this.#applyImplicitAction("transform", this.#transform.toCSS(), value.toCSS(), () => {
@@ -796,7 +796,7 @@ export class AFXLayer {
     return this.#clip;
   }
   set clipsToBounds(value: boolean) {
-    this.#assertLive("clipsToBounds");
+    this.#assertLive("clipsToBounds", "set");
     if (typeof value !== "boolean")
       throw new TypeError("Clipping must be boolean.");
     this.#clip = value;
@@ -808,7 +808,7 @@ export class AFXLayer {
       : this.#content?.kind === 'shader' ? this.#content.shader : null;
   }
   set contents(value: GFXImage | VFXFrame | IFXShader | null) {
-    this.#assertLive("contents");
+    this.#assertLive("contents", "set");
     if (value !== null && !(value instanceof GFXImage) && !(value instanceof VFXFrame) && !(value instanceof IFXShader))
       throw new TypeError('Layer contents require a GFXImage, VFXFrame or IFXShader.');
     if (value instanceof VFXFrame && value.closed)
@@ -819,7 +819,7 @@ export class AFXLayer {
   }
   get filters(): readonly IFXShader[] { return this.#filters; }
   set filters(value: readonly IFXShader[]) {
-    this.#assertLive("filters");
+    this.#assertLive("filters", "set");
     if (!Array.isArray(value) || value.length > 8 || !Array.from(value).every(shader => shader instanceof IFXShader))
       throw new TypeError('Layer filters require at most eight ImageFX shaders.');
     if (value.length && !this.#surface.supportsFilters)
@@ -830,7 +830,7 @@ export class AFXLayer {
   }
   get compositingFilter(): IFXFilter<'blend'> | null { return this.#compositingFilter; }
   set compositingFilter(value: IFXFilter<'blend'> | null) {
-    this.#assertLive("compositingFilter");
+    this.#assertLive("compositingFilter", "set");
     if (value !== null && (!(value instanceof IFXFilter) || value.name !== 'blend' ||
       (value.parameters.mode !== 'normal' && value.parameters.mode !== 'addition')))
       throw new DOMException('Unsupported layer compositing filter; use normal or addition blend.', 'NotSupportedError');
@@ -844,7 +844,7 @@ export class AFXLayer {
     return this.#contentsRect;
   }
   set contentsRect(value: GFXRect) {
-    this.#assertLive("contentsRect");
+    this.#assertLive("contentsRect", "set");
     const next = contentsRect(value), previous = this.#contentsRect;
     this.#contentsRect = next;
     try {
@@ -859,7 +859,7 @@ export class AFXLayer {
     return this.#contentsCenter;
   }
   set contentsCenter(value: GFXRect) {
-    this.#assertLive("contentsCenter");
+    this.#assertLive("contentsCenter", "set");
     const next = contentsCenter(value), previous = this.#contentsCenter;
     this.#contentsCenter = next;
     try {
@@ -874,7 +874,7 @@ export class AFXLayer {
     return this.#contentsGravity;
   }
   set contentsGravity(value: AFXContentsGravity) {
-    this.#assertLive("contentsGravity");
+    this.#assertLive("contentsGravity", "set");
     if (!contentsGravities.includes(value))
       throw new TypeError("Unsupported layer contents gravity.");
     const previous = this.#contentsGravity;
@@ -891,7 +891,7 @@ export class AFXLayer {
     return this.#autoresizingMask;
   }
   set autoresizingMask(value: readonly AFXAutoresizingMask[]) {
-    this.#assertLive("autoresizingMask");
+    this.#assertLive("autoresizingMask", "set");
     if (!Array.isArray(value) || value.length > autoresizingValues.length)
       throw new TypeError("Layer autoresizingMask must be a bounded array.");
     const descriptors = Object.getOwnPropertyDescriptors(value);
@@ -917,7 +917,7 @@ export class AFXLayer {
   }
   /** Render an owned layer subtree into an image at the current presentation time. */
   render(bounds: GFXRect, scale = 1, signal: AbortSignal = new AbortController().signal): Promise<GFXImage> {
-    this.#assertLive("render");
+    this.#assertLive("render", "call");
     const rect = normaliseRect(bounds);
     const snapshot = AFXCompositionSnapshot.capture(this, { bounds: rect, scale, time: this.#scheduler.now() });
     return snapshot.render({
@@ -1151,7 +1151,7 @@ export class AFXLayer {
     });
   }
   setNeedsDisplay(rect?: GFXRect) {
-    this.#assertLive("setNeedsDisplay");
+    this.#assertLive("setNeedsDisplay", "call");
     if (rect) normaliseRect(rect);
     this.#displayDirty = true;
     this.#scheduleInvalidation();
@@ -1160,15 +1160,15 @@ export class AFXLayer {
     return this.#displayDirty;
   }
   displayIfNeeded() {
-    this.#assertLive("displayIfNeeded");
+    this.#assertLive("displayIfNeeded", "call");
     if (this.#displayDirty) this.#display();
   }
   display() {
-    this.#assertLive("display");
+    this.#assertLive("display", "call");
     this.#display();
   }
   setNeedsLayout() {
-    this.#assertLive("setNeedsLayout");
+    this.#assertLive("setNeedsLayout", "call");
     this.#layoutDirty = true;
     this.#scheduleInvalidation();
   }
@@ -1176,12 +1176,12 @@ export class AFXLayer {
     return this.#layoutDirty;
   }
   layoutIfNeeded() {
-    this.#assertLive("layoutIfNeeded");
+    this.#assertLive("layoutIfNeeded", "call");
     if (this.#layoutDirty) this.layoutSublayers();
     for (const child of this.#children) child.layoutIfNeeded();
   }
   layoutSublayers() {
-    this.#assertLive("layoutSublayers");
+    this.#assertLive("layoutSublayers", "call");
     if (this.#layoutActive)
       throw new Error("Layer layout cannot recursively enter itself.");
     this.#layoutDirty = false;
@@ -1196,7 +1196,7 @@ export class AFXLayer {
     child: AFXLayer,
     options: AFXSublayerInsertionOptions = {},
   ) {
-    this.#assertLive("addSublayer");
+    this.#assertLive("addSublayer", "call");
     this.insertSublayer(child, this.#children.length, options);
   }
   #displayAnimationUpdate() {
@@ -1240,8 +1240,8 @@ export class AFXLayer {
     index: number,
     options: AFXSublayerInsertionOptions = {},
   ) {
-    this.#assertLive("insertSublayer");
-    child.#assertLive("insertSublayer");
+    this.#assertLive("insertSublayer", "call");
+    child.#assertLive("insertSublayer", "call");
     if (
       !options ||
       typeof options !== "object" ||
@@ -1335,7 +1335,7 @@ export class AFXLayer {
       for (const grandchild of child.#children) grandchild.#display();
   }
   replaceSublayer(previous: AFXLayer, next: AFXLayer) {
-    this.#assertLive("replaceSublayer");
+    this.#assertLive("replaceSublayer", "call");
     const index = this.#children.indexOf(previous);
     if (index < 0) throw new Error("The replaced layer is not a child.");
     if (previous === next) return;
@@ -1343,7 +1343,7 @@ export class AFXLayer {
     previous.removeFromSuperlayer();
   }
   removeFromSuperlayer() {
-    this.#assertLive("removeFromSuperlayer");
+    this.#assertLive("removeFromSuperlayer", "call");
     if (!this.#parent) return;
     this.#parent.#surface.detach(this.#surface);
     const siblings = this.#parent.#children;
@@ -1364,9 +1364,9 @@ export class AFXLayer {
     );
   }
   setMask(mask: AFXLayer | null) {
-    this.#assertLive("setMask");
+    this.#assertLive("setMask", "call");
     if (mask) {
-      mask.#assertLive("setMask");
+      mask.#assertLive("setMask", "call");
       if (
         mask.#parent ||
         (mask.#maskOwner && mask.#maskOwner !== this) ||
@@ -1421,13 +1421,13 @@ export class AFXLayer {
       : local;
   }
   convertPoint(point: AFXPoint3D, to: AFXLayer | null): AFXPoint3D {
-    this.#assertLive("convertPoint");
-    if (to) to.#assertLive("convertPoint");
+    this.#assertLive("convertPoint", "call");
+    if (to) to.#assertLive("convertPoint", "call");
     const world = this.#worldTransform().transformPoint(point);
     return to ? to.#worldTransform().inverse().transformPoint(world) : world;
   }
   convertRect(rect: GFXRect, to: AFXLayer | null): GFXRect {
-    this.#assertLive("convertRect");
+    this.#assertLive("convertRect", "call");
     const r = normaliseRect(rect);
     const points = [
       { x: r.x, y: r.y, z: 0 },
@@ -1453,7 +1453,7 @@ export class AFXLayer {
   }
   /** Model-space hit test; the point is expressed in this layer's superlayer coordinates. */
   hitTest(point: GFXPoint): AFXLayer | null {
-    this.#assertLive("hitTest");
+    this.#assertLive("hitTest", "call");
     if (this.hidden) return null;
     const p = normalisePoint(point);
     const world = this.#parent
@@ -1474,7 +1474,7 @@ export class AFXLayer {
   }
   /** Picks the displayed presentation tree while animations are in flight. */
   presentationHitTest(point: GFXPoint): AFXLayer | null {
-    this.#assertLive("presentationHitTest");
+    this.#assertLive("presentationHitTest", "call");
     const p = normalisePoint(point);
     const world = this.#parent
       ? this.#parent.#presentationWorldTransform().transformPoint({ ...p, z: 0 })
@@ -1515,7 +1515,7 @@ export class AFXLayer {
     input: AFXSampledAnimation,
     key?: string,
   ): AFXAnimationHandle {
-    this.#assertLive("addAnimation");
+    this.#assertLive("addAnimation", "call");
     const declaredKeyPath = input.keyPath;
     key ??= declaredKeyPath;
     const contentAnimation = declaredKeyPath === "path" || declaredKeyPath === "gradient";
@@ -1544,13 +1544,13 @@ export class AFXLayer {
     const animation = contentAnimation
       ? snapshotContentAnimation(candidate, declaredKeyPath, declaredTargetId)
       : candidate;
-    this.#assertLive("addAnimation");
+    this.#assertLive("addAnimation", "call");
     const duration = animation.animation.totalDuration;
     const terminal =
       animation.sample(duration) ?? animation.toRuntime().animations[0].to;
-    this.#assertLive("addAnimation");
+    this.#assertLive("addAnimation", "call");
     const initial = animation.sample(0);
-    this.#assertLive("addAnimation");
+    this.#assertLive("addAnimation", "call");
     if (declaredKeyPath === "transform" || declaredKeyPath === "sublayerTransform") {
       const definition = animation.toRuntime();
       for (const property of definition.animations)

@@ -60,8 +60,8 @@ describe("managed byte-backed font resolution",()=>{
       expect(hostLoader).toHaveBeenCalledTimes(1);
       expect(bundleLoader).toHaveBeenCalledTimes(1);
       mount.dispose();
-      expect(() => managed.font.shape("A")).toThrow(/disposed/);
-      expect(() => ordinary.font.shape("A")).toThrow(/disposed/);
+      expect(() => managed.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
+      expect(() => ordinary.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
     } finally { mount.dispose(); await runtime.dispose("test"); }
   });
   it("shares pending resource capacity with ordinary mount font registrations", async () => {
@@ -102,7 +102,7 @@ describe("managed byte-backed font resolution",()=>{
       expect(paths).toEqual(["Resources/Face.ttf","Resources/Face.ttf"]);
       expect(first.font.shape("office").glyphs.length).toBeLessThan(6);
       first.dispose(); expect(second.font.shape("A").glyphs).toHaveLength(1);
-      owner.abort(); expect(()=>second.font.shape("A")).toThrow(/disposed/);
+      owner.abort(); expect(()=>second.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
       await expect(access.loadFace("example.book",new TFXFontDescriptor({size:18}))).rejects.toMatchObject({name:"AbortError"});
     } finally {host.dispose();}
   });
@@ -112,7 +112,7 @@ describe("managed byte-backed font resolution",()=>{
     const imported=await library.addFonts([{name:"Imported.ttf",size:source.length,arrayBuffer:async()=>source.slice().buffer as ArrayBuffer}]);
     const manager=new NSEFontManager({families:declaration.families,library});
     const access=createSynWareFontAccess({manager,declaration},scope,owner.signal);
-    try { const registration=await access.loadFace(imported.added[0]!.id,new TFXFontDescriptor({size:14})); expect(registration.font.shape("A").glyphs).toHaveLength(1); owner.abort();expect(()=>registration.font.shape("A")).toThrow(/disposed/); }
+    try { const registration=await access.loadFace(imported.added[0]!.id,new TFXFontDescriptor({size:14})); expect(registration.font.shape("A").glyphs).toHaveLength(1); owner.abort();expect(()=>registration.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" })); }
     finally {host.dispose();}
   });
   it("aborts pending host loads promptly and cannot publish readiness after unmount",async()=>{

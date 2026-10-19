@@ -131,7 +131,6 @@ describe("controller lifetimes under React StrictMode", () => {
     expect(lifecycleError.operation).toBe("select");
     expect(lifecycleError.resource).toEqual({ kind: "NSEArrayController", id: "open-account" });
     expect(lifecycleError.disposal?.reason).toBe("explicit");
-    expect(lifecycleError.message).toContain("StrictMode");
   });
 
   it("keeps a hook-owned controller live through StrictMode and disposes it when the owner unmounts", async () => {
@@ -156,7 +155,7 @@ describe("controller lifetimes under React StrictMode", () => {
     try { owned.select(["isa"]); } catch (error) { thrown = error; }
     expect(thrown).toBeInstanceOf(SynCloudOSLifecycleError);
     expect((thrown as SynCloudOSLifecycleError).disposal?.reason).toBe("owner-unmounted");
-    expect((thrown as SynCloudOSLifecycleError).message).toContain("unmounted");
+    expect((thrown as SynCloudOSLifecycleError).code).toBe("NSE_CONTROLLER_DISPOSED");
   });
 
   it("replaces a hook-owned controller only when its id changes, disposing the previous one", async () => {

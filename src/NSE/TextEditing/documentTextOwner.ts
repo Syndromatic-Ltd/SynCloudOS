@@ -106,7 +106,7 @@ export function createNSEDocumentTextOwner<TModel>(supplied: NSEDocumentTextOwne
       if (document.id !== initial.id || document.state === "closed" || !Number.isSafeInteger(document.dirtyRevision) || document.dirtyRevision < snapshot.revision ||
         document.dirtyRevision === snapshot.revision && identity !== nativeIdentity) {
         dispose(document.state === "closed" ? "document-closed" : "document-revoked");
-        throw lifecycle.error({ code: "NSE_DOCUMENT_TEXT_OWNER_DISPOSED", operation, problem: "was revoked because the native document closed or its model identity changed without a current revision" });
+        throw lifecycle.error({ code: "NSE_DOCUMENT_TEXT_OWNER_DISPOSED", operation, problem: "The native document closed, or its model identity changed without a current revision." });
       }
       return { document, identity };
     } catch (error) { diagnose(error, "document-text-lifetime"); dispose("document-revoked"); throw error; }

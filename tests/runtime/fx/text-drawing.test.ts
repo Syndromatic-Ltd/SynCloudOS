@@ -39,5 +39,5 @@ it("draws the original shaped glyph outlines at baseline positions without resha
   expect(shifted.y - first.y).toBeCloseTo(10);
   expect(paths[0].embedding).toBe("allowed");
   font.dispose();
-  expect(() => TFXGlyphDrawing.pathsForLine(line)).toThrow(/disposed/);
+  expect(() => TFXGlyphDrawing.pathsForLine(line)).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
 });

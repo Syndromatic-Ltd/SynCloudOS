@@ -101,7 +101,7 @@ Calling an operation on a disposed controller throws `SynCloudOSLifecycleError`,
 | `disposal` | `{ reason, stack? }`; development builds record the stack that disposed the controller |
 | `creationStack`, `ownerStack` | Development builds only: where the controller was created, and the React component stack that created it (or, outside a render, the one that raised the error) |
 
-The message names the controller, the reason and a fix, and ends with the code, for example `NSEArrayController "open-account" was disposed by an explicit dispose() call, so select() cannot run. … [NSE_CONTROLLER_DISPOSED]`. Data views never let this error escape an event handler: a view whose controller is disposed turns inert, as the [data views guide](data-views.md#controller-lifetime) describes.
+The message states only what could not run, for example `Cannot call NSEArrayController.select() after disposal.` The code, resource identity and disposal reason are the fields above, and the remedy is the `NSE_CONTROLLER_DISPOSED` catalogue hint; see [error reports](errors.md#error-reports). Data views never let this error escape an event handler: a view whose controller is disposed turns inert, as the [data views guide](data-views.md#controller-lifetime) describes.
 
 ### Other resources a component owns
 

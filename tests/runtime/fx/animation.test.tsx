@@ -338,7 +338,7 @@ describe("AnimationFX deterministic core", () => {
     });
     expect(c.pending.size).toBe(0);
     expect(c.states.size).toBe(0);
-    expect(() => layer.addAnimation(basic())).toThrow(/disposed/);
+    expect(() => layer.addAnimation(basic())).toThrow(expect.objectContaining({ code: "AFX_LAYER_DISPOSED" }));
   });
   it("validates finite seconds and handles delay, repeats, autoreverse and fill", () => {
     expect(() => new AFXAnimation({ duration: NaN })).toThrow();

@@ -69,7 +69,7 @@ describe("NSE push button press lifetime", () => {
     const { getByRole, rerender } = render(<SystemAlert {...props} />);
     const button = getByRole("button", { name: "Reload Webspring" });
     pointer(button, "pointerdown");
-    rerender(<SystemAlert {...props} technicalReport="Updated diagnostic report" />);
+    rerender(<SystemAlert {...props} error={{ ...error, technicalDetails: "Updated diagnostic report" }} />);
     expect(getByRole("button", { name: "Reload Webspring" })).toBe(button);
     expect(button.getAttribute("data-press-active")).toBe("true");
     pointer(window, "pointercancel");

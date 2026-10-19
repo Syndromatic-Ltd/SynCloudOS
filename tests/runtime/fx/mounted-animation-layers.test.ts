@@ -111,7 +111,7 @@ it("binds an emitter layer through the mounted client and releases it with its o
   expect(layer.presentation.content).toMatchObject({ kind: "emitter", particles: [] });
   owner.abort();
   expect(element.querySelector("svg")).toBeNull();
-  expect(() => layer.stopEmitting()).toThrow(/disposed/i);
+  expect(() => layer.stopEmitting()).toThrow(expect.objectContaining({ code: "AFX_EMITTER_LAYER_DISPOSED" }));
   const nextOwner = new AbortController();
   const replacement = createMountedAnimationLayers(host, nextOwner.signal, () => {}).bindEmitterLayer(element);
   replacement.dispose();
@@ -144,7 +144,7 @@ it("binds a tiled layer, renders a scoped tile, and releases it with its owner",
   expect(element.querySelector('svg[data-afx-content="tiled"] image')).not.toBeNull();
   owner.abort();
   expect(element.querySelector("svg")).toBeNull();
-  expect(() => layer.invalidate()).toThrow(/disposed/i);
+  expect(() => layer.invalidate()).toThrow(expect.objectContaining({ code: "AFX_TILED_LAYER_DISPOSED" }));
   const nextOwner = new AbortController();
   const replacement = createMountedAnimationLayers(host, nextOwner.signal, () => {}).bindTiledLayer(element);
   replacement.dispose();

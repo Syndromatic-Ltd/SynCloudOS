@@ -58,7 +58,7 @@ describe("GraphicsFX pixel and geometry values", () => {
         const pattern = new GFXPattern(tile, { ...GFXIdentityTransform, tx: 1 });
         expect(pattern.sample({ x: 0.5, y: 0.5 }).components.g).toBe(1);
         surface.dispose();
-        expect(() => surface.makeImage()).toThrow(/disposed/);
+        expect(() => surface.makeImage()).toThrow(expect.objectContaining({ code: "GFX_BITMAP_CONTEXT_DISPOSED" }));
     });
     it("samples premultiplied gradient stops and explicit linear colour conversion", () => {
         const gradient = new GFXGradient([{ offset: 0, colour: GFXColour.rgba(1, 0, 0, 0) }, { offset: 1, colour: GFXColour.rgba(0, 0, 1, 1) }]);

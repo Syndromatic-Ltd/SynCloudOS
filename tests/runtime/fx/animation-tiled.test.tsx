@@ -181,7 +181,7 @@ describe("AnimationFX tiled rendering", () => {
     expect(clock.frames.size).toBe(0);
     expect(clock.states.size).toBe(0);
     expect(element.querySelector("svg")).toBeNull();
-    await expect(layer.waitForIdle()).rejects.toThrow(/disposed/i);
+    await expect(layer.waitForIdle()).rejects.toThrow(expect.objectContaining({ code: "AFX_TILED_LAYER_DISPOSED" }));
   });
 
   it("preflights finite viewport, tile, scale, visible-work and cache bounds", () => {

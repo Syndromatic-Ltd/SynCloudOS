@@ -123,7 +123,7 @@ it("creates a mounted bounded queue that is revoked with the app owner", async (
     await host.dispose();
     expect(queue.snapshot().disposed).toBe(true);
     const late = new MEFXBlockBuffer(new Uint8Array([7]));
-    await expect(queue.enqueue(late)).rejects.toThrow(/disposed|abort/i);
+    await expect(queue.enqueue(late)).rejects.toThrow(expect.objectContaining({ code: "MEFX_BUFFER_QUEUE_DISPOSED" }));
     expect(late.closed).toBe(false);
     late.close();
   } finally {

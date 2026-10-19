@@ -429,7 +429,7 @@ describe("HapticsFX feedback preservation", () => {
     const a = createRuntimeHapticsService(new AUFXSystemFeedbackBus(() => null), { navigator: { vibrate: first }, audio: "off" });
     const b = createRuntimeHapticsService(new AUFXSystemFeedbackBus(() => null), { navigator: { vibrate: second }, audio: "off" });
     await a.trigger("light"); expect(first).toHaveBeenCalledWith(expectedHapticPattern("light")); expect(second).not.toHaveBeenCalled();
-    a.dispose(); await expect(a.trigger("medium")).rejects.toThrow("disposed");
+    a.dispose(); await expect(a.trigger("medium")).rejects.toThrow(expect.objectContaining({ code: "HFX_HAPTIC_ENGINE_DISPOSED" }));
     await b.trigger("rigid"); expect(second).toHaveBeenCalledWith(expectedHapticPattern("rigid")); b.dispose();
   });
 });

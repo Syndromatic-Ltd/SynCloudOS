@@ -82,8 +82,8 @@ it('retains image content, particles and nested filters in subtree order with gr
   expect(() => { group.compositingFilter = new imageFX.IFXFilterRegistry().create('blend', { mode: 'multiply' }); }).toThrow(/unsupported/i);
   expect(group.compositingFilter?.parameters.mode).toBe('addition');
   renderer.dispose();
-  expect(() => { group.filters = []; }).toThrow(/disposed/);
-  expect(() => { group.compositingFilter = null; }).toThrow(/disposed/);
+  expect(() => { group.filters = []; }).toThrow(expect.objectContaining({ code: "AFX_LAYER_DISPOSED" }));
+  expect(() => { group.compositingFilter = null; }).toThrow(expect.objectContaining({ code: "AFX_LAYER_DISPOSED" }));
 });
 
 it.each(['filter', 'addition'] as const)('preserves descendant picking through nested %s groups and their projected bounds', mode => {

@@ -190,7 +190,7 @@ describe("AnimationFX seeded emitter layer", () => {
     expect(clock.frames.size).toBe(0);
     expect(clock.state.size).toBe(0);
     expect(element.querySelector("svg")).toBeNull();
-    expect(() => layer.startEmitting()).toThrow(/disposed/i);
+    expect(() => layer.startEmitting()).toThrow(expect.objectContaining({ code: "AFX_EMITTER_LAYER_DISPOSED" }));
   });
 
   it("rejects invalid cells and layer configuration before replacing rendered state", () => {

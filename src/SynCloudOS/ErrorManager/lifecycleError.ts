@@ -45,51 +45,56 @@ export interface SynCloudOSLifecycleErrorOptions {
   /** Stable machine-readable code, such as `"NSE_CONTROLLER_DISPOSED"`. */
   readonly code: string;
   readonly resource: SynCloudOSLifecycleResource;
-  /** The member that could not run, such as `"select"`. */
+  /** The member that could not run, such as `"select"` or `"hidden"`. */
   readonly operation: string;
-  /** Replaces the derived description of what is wrong with the resource. */
+  /** How the member was reached: a method call, a property read or a property
+   * write. Without it the message says the member could not be used. */
+  readonly access?: "call" | "get" | "set";
+  /** A sentence describing a resource-specific cause, when the disposal
+   * reason alone does not explain it. */
   readonly problem?: string;
-  /** Replaces the suggested fix derived from the disposal reason. */
-  readonly fix?: string;
   readonly disposal?: SynCloudOSLifecycleDisposal;
   readonly ownerStack?: string;
   readonly creationStack?: string;
 }
 
 const reasonDescriptions: Readonly<Record<SynCloudOSLifecycleDisposalReason, string>> = Object.freeze({
-  explicit: "by an explicit dispose() call",
-  "owner-unmounted": "because the component that owned it unmounted",
-  "owner-signal-aborted": "because its owner signal aborted",
-  "application-closed": "because the application session that owned it ended",
+  explicit: "an explicit dispose() call",
+  "owner-unmounted": "the component that owned it unmounted",
+  "owner-signal-aborted": "its owner signal aborted",
+  "application-closed": "the application session that owned it ended",
 });
 
-const reasonFixes: Readonly<Record<SynCloudOSLifecycleDisposalReason, string>> = Object.freeze({
-  explicit: "Stop using it once it is disposed, or create a new one. A dispose() in a useEffect cleanup also runs during React StrictMode's effect replay while the component stays mounted; let a managed hook own the resource instead.",
-  "owner-unmounted": "Do not keep a component-owned resource after its component unmounts; read it from the mounted component instead.",
-  "owner-signal-aborted": "Create a new one, or give it an owner signal that lives as long as you use it.",
-  "application-closed": "The application session has ended; create the resource again when the application opens.",
-});
-
-function isKnownReason(reason: string): reason is SynCloudOSLifecycleDisposalReason {
-  return Object.hasOwn(reasonDescriptions, reason);
+/** A readable description of a recorded disposal reason, for diagnostics. */
+export function describeSynCloudOSLifecycleDisposal(reason: string): string {
+  return Object.hasOwn(reasonDescriptions, reason)
+    ? reasonDescriptions[reason as SynCloudOSLifecycleDisposalReason]
+    : reason;
 }
 
-function describeProblem(disposal: SynCloudOSLifecycleDisposal | undefined): string {
-  if (!disposal) return "is not active";
-  return isKnownReason(disposal.reason)
-    ? `was disposed ${reasonDescriptions[disposal.reason]}`
-    : `was disposed (${disposal.reason})`;
+function describeAttempt(options: SynCloudOSLifecycleErrorOptions): string {
+  const member = `${options.resource.kind}.${options.operation}`;
+  switch (options.access) {
+    case "call": return `call ${member}()`;
+    case "get": return `read ${member}`;
+    case "set": return `set ${member}`;
+    default: return `use ${member}`;
+  }
 }
 
 /**
  * Thrown when code uses a framework resource outside its lifetime: after it
  * was disposed, or before its owner mounted. `code` is stable and safe to
- * branch on; the message explains the cause and suggests a fix.
+ * branch on. The message states only what could not run; the disposal reason,
+ * resource identity and stacks are structured fields, and the remediation is
+ * the code's catalogue entry.
  */
 export class SynCloudOSLifecycleError extends Error {
   readonly code: string;
   readonly resource: Readonly<SynCloudOSLifecycleResource>;
   readonly operation: string;
+  readonly access?: "call" | "get" | "set";
+  readonly problem?: string;
   readonly disposal?: Readonly<SynCloudOSLifecycleDisposal>;
   /** Development builds only: the React owner stack of the creating component. */
   readonly ownerStack?: string;
@@ -97,18 +102,13 @@ export class SynCloudOSLifecycleError extends Error {
   readonly creationStack?: string;
 
   constructor(options: SynCloudOSLifecycleErrorOptions) {
-    const subject = options.resource.id === undefined
-      ? options.resource.kind
-      : `${options.resource.kind} "${options.resource.id}"`;
-    const problem = options.problem ?? describeProblem(options.disposal);
-    const fix = options.fix ?? (options.disposal && isKnownReason(options.disposal.reason)
-      ? reasonFixes[options.disposal.reason]
-      : undefined);
-    super(`${subject} ${problem}, so ${options.operation}() cannot run.${fix ? ` ${fix}` : ""} [${options.code}]`);
+    super(`Cannot ${describeAttempt(options)} ${options.disposal ? "after disposal" : "while it is inactive"}.`);
     this.name = "SynCloudOSLifecycleError";
     this.code = options.code;
     this.resource = Object.freeze({ ...options.resource });
     this.operation = options.operation;
+    if (options.access !== undefined) this.access = options.access;
+    if (options.problem !== undefined) this.problem = options.problem;
     if (options.disposal) this.disposal = Object.freeze({ ...options.disposal });
     if (options.ownerStack !== undefined) this.ownerStack = options.ownerStack;
     if (options.creationStack !== undefined) this.creationStack = options.creationStack;
@@ -173,7 +173,7 @@ export class SynCloudOSLifecycleRecord {
     return true;
   }
 
-  error(options: { readonly code: string; readonly operation: string; readonly problem?: string; readonly fix?: string }): SynCloudOSLifecycleError {
+  error(options: Pick<SynCloudOSLifecycleErrorOptions, "code" | "operation" | "access" | "problem">): SynCloudOSLifecycleError {
     const ownerStack = this.ownerStack ?? developmentOwnerStack();
     return new SynCloudOSLifecycleError({
       ...options,

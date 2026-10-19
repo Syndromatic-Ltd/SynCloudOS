@@ -45,14 +45,14 @@ describe("TextFX scoped binary-font host", () => {
     expect(first.font.shape("office").glyphs.length).toBeLessThan("office".length);
     expect(caches.get("textfx.font.bytes")?.stats()).toMatchObject({ entries: 1, hits: 1, misses: 1 });
     first.dispose();
-    expect(() => first.font.shape("A")).toThrow(/disposed/i);
+    expect(() => first.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
     expect(second.font.shape("A").glyphs).toHaveLength(1);
     caches.prune({ reason: "memory-warning", targetWeight: 0 });
     expect(caches.get("textfx.font.bytes")?.stats()).toMatchObject({ entries: 0 });
     expect(second.font.shape("B").glyphs).toHaveLength(1);
 
     scope.dispose();
-    expect(() => second.font.shape("A")).toThrow(/disposed/i);
+    expect(() => second.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
     host.dispose();
   });
 
@@ -100,7 +100,7 @@ describe("TextFX scoped binary-font host", () => {
     const scope = host.createScope(owner.signal);
     const registration = await scope.registerFont(noto(), new TFXFontDescriptor({ size: 16 }));
     owner.abort(new DOMException("mount retired", "AbortError"));
-    expect(() => registration.font.shape("A")).toThrow(/disposed/i);
+    expect(() => registration.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
 
     const live = host.createScope(new AbortController().signal);
     const caller = new AbortController();
@@ -259,7 +259,7 @@ describe("TextFX scoped binary-font host", () => {
       expect(firstChanges).toHaveBeenCalledTimes(1);
       expect(secondChanges).toHaveBeenCalledTimes(1);
       first.dispose();
-      expect(() => firstFont.font.shape("A")).toThrow(/disposed/i);
+      expect(() => firstFont.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
       expect(secondFont.font.shape("A").glyphs).toHaveLength(1);
     } finally {
       first.dispose();

@@ -133,8 +133,6 @@ function validateTransaction(
   return Object.freeze({ ...transaction });
 }
 
-const explicitDisposalFix = "Stop using a controller once you dispose it, or create a new one. If a useEffect cleanup disposes it, React StrictMode's effect replay disposes it while the component stays mounted: create it with useNSEArrayController() or useNSETreeController() instead, which survive the replay.";
-
 export abstract class NSEController<TSnapshot, TChange> {
   readonly id: string;
   readonly responderId: string;
@@ -312,11 +310,7 @@ export abstract class NSEController<TSnapshot, TChange> {
   /** Throws a `SynCloudOSLifecycleError` (code `NSE_CONTROLLER_DISPOSED`) once disposal has begun. */
   protected assertActive(operation: string): void {
     if (this.#disposed || this.#disposing) {
-      throw this.#lifecycle.error({
-        code: "NSE_CONTROLLER_DISPOSED",
-        operation,
-        ...(this.#disposalReason === "explicit" ? { fix: explicitDisposalFix } : {}),
-      });
+      throw this.#lifecycle.error({ code: "NSE_CONTROLLER_DISPOSED", operation, access: "call" });
     }
   }
 

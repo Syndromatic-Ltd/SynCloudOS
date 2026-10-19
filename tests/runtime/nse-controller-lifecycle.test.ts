@@ -104,7 +104,7 @@ describe("NSE controller lifecycle", () => {
     expect(error.resource).toEqual({ kind: "NSEArrayController", id: "list" });
     expect(error.operation).toBe("select");
     expect(error.disposal?.reason).toBe("explicit");
-    expect(error.message).toMatch(/^NSEArrayController "list" was disposed .*, so select\(\) cannot run\. .* \[NSE_CONTROLLER_DISPOSED\]$/s);
+    expect(error.message).toBe("Cannot call NSEArrayController.select() after disposal.");
     expect(Object.isFrozen(error.resource)).toBe(true);
   });
 
