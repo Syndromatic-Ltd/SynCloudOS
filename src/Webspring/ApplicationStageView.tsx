@@ -26,7 +26,6 @@ import { WEBSPRING_MULTI_SWITCH_ROLES, WEBSPRING_PRESENTATION_ROLES, type Webspr
 import {
   NSEFocusPortProvider,
   NSEControlRuntimeProvider,
-  NSEApplicationMenu,
   NSEApplicationNavigationChromeController,
   NSEApplicationNavigationChromeProvider,
   NSEMenuController,
@@ -39,11 +38,12 @@ import {
   NSETopBar,
 } from "@syndromatic/syncloudos/nse/controls";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
-import { activateResponderHierarchy, ApplicationMenuTriggerProvider, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
+import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
 import { AppViewContent } from "./AppViewContent";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
+import { applicationMenuLabels, ApplicationMenuOverlayHost, ApplicationMenuTriggerBridge, createApplicationMenuStore, useApplicationMenuSnapshot, type ApplicationMenuStore } from "./applicationMenuPresentation";
 import { createWebspringAppMenuModel } from "./webspringAppMenu";
 import { useWebspringLocale } from "./webspringLocale";
 import type { ApplicationStagePresentation } from "./stage";
@@ -178,11 +178,7 @@ export function ApplicationStageView({
     ? { label: quickSwitchLabel, selected: quickSwitchOpen, onClick: () => { void runtime.commands.dispatch("webspring.quickSwitch.toggle", undefined, { source: "toolbar" }); } }
     : null;
   const standardBarTitle = sourceList ? (barTitle ?? appWindowTitle) : appWindowTitle;
-  const appMenuAboutLabel = /^about\b/i.test(appName)
-    ? locale.t("appMenu.aboutThisApp", "About This App")
-    : locale.t("appMenu.aboutApp", "About {app}", { app: appName });
-  const appMenuPreferencesLabel = locale.t("appMenu.preferences", "Preferences");
-  const appMenuLogOutLabel = locale.t("appMenu.logOut", "Log Out");
+  const appMenuLabels = useMemo(() => applicationMenuLabels(appName, locale.t), [appName, locale]);
   const appPreferences = app.applicationMenu?.preferences;
   const menuPresentationReady = !staged && !multiSwitchRole;
   const hasApplicationMenu = menuPresentationReady && (frame.rightSlot === "userInfo" || app.applicationMenu?.trigger === "content");
@@ -202,20 +198,13 @@ export function ApplicationStageView({
   }, [app.id, appMenuStore, menuPresentationReady, onApplicationMenuToggleRegister]);
   const appMenuModel = useMemo(() => createWebspringAppMenuModel({
     appId: app.id,
-    labels: {
-      label: appName,
-      // Avoid an "About About" menu item for About.app while preserving the
-      // regular app-specific label for every other retained SynWare.
-      about: appMenuAboutLabel,
-      preferences: appMenuPreferencesLabel,
-      logOut: appMenuLogOutLabel,
-    },
+    labels: appMenuLabels,
     appPreferences: appPreferences ? {
       commandId: appPreferences.commandId,
       label: appPreferences.label ?? locale.t("appMenu.appPreferences", "{app} Preferences…", { app: appName }),
     } : undefined,
     includeLogOut: sessionAuthorised,
-  }), [app.id, appMenuAboutLabel, appMenuLogOutLabel, appMenuPreferencesLabel, appName, appPreferences, locale, sessionAuthorised]);
+  }), [app.id, appMenuLabels, appName, appPreferences, locale, sessionAuthorised]);
   const appMenuRuntime = useRuntimeNSEMenuPort();
   const appMenuController = useMemo(
     () => new NSEMenuController({ model: appMenuModel, runtime: appMenuRuntime }),
@@ -432,45 +421,6 @@ export function ApplicationStageView({
   );
 }
 
-interface ApplicationMenuSnapshot {
-  readonly open: boolean;
-  readonly anchor: HTMLElement | null;
-}
-
-interface ApplicationMenuStore {
-  readonly getSnapshot: () => ApplicationMenuSnapshot;
-  readonly subscribe: (listener: () => void) => () => void;
-  readonly setAnchor: (element: HTMLElement | null) => void;
-  readonly setOpen: (open: boolean) => void;
-  readonly toggle: () => void;
-}
-
-function createApplicationMenuStore(): ApplicationMenuStore {
-  let snapshot: ApplicationMenuSnapshot = { open: false, anchor: null };
-  const listeners = new Set<() => void>();
-  const publish = (next: ApplicationMenuSnapshot) => {
-    if (next.open === snapshot.open && next.anchor === snapshot.anchor) return;
-    snapshot = next;
-    for (const listener of [...listeners]) listener();
-  };
-  return {
-    getSnapshot: () => snapshot,
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    setAnchor(element) {
-      publish({ ...snapshot, anchor: element });
-    },
-    setOpen(open) {
-      publish({ ...snapshot, open });
-    },
-    toggle() {
-      publish({ ...snapshot, open: !snapshot.open });
-    },
-  };
-}
-
 type TopBarProps = Parameters<typeof NSETopBar>[0];
 
 function ApplicationStageTopBar({
@@ -483,7 +433,7 @@ function ApplicationStageTopBar({
   readonly showUserInfo: boolean;
   readonly userInfoLabel: string;
 }) {
-  const menu = useSyncExternalStore(menuStore.subscribe, menuStore.getSnapshot, menuStore.getSnapshot);
+  const menu = useApplicationMenuSnapshot(menuStore);
   return (
     <NSETopBar
       {...props}
@@ -497,50 +447,4 @@ function ApplicationStageTopBar({
         }] : []}
     />
   );
-}
-
-function ApplicationMenuOverlayHost({
-  menuStore,
-  model,
-  controller,
-  overlay,
-  anchorTitle,
-}: {
-  readonly menuStore: ApplicationMenuStore;
-  readonly model: Parameters<typeof NSEApplicationMenu>[0]["model"];
-  readonly controller: Parameters<typeof NSEApplicationMenu>[0]["controller"];
-  readonly overlay: Parameters<typeof NSEApplicationMenu>[0]["overlay"];
-  readonly anchorTitle: string;
-}) {
-  const menu = useSyncExternalStore(menuStore.subscribe, menuStore.getSnapshot, menuStore.getSnapshot);
-  return (
-    <NSEApplicationMenu
-      model={model}
-      controller={controller}
-      overlay={overlay}
-      open={menu.open}
-      anchor={menu.anchor}
-      title={anchorTitle}
-      onOpenChange={(nextOpen) => menuStore.setOpen(nextOpen)}
-    />
-  );
-}
-
-function ApplicationMenuTriggerBridge({
-  menuStore,
-  label,
-  children,
-}: {
-  readonly menuStore: ApplicationMenuStore;
-  readonly label: string;
-  readonly children: ReactNode;
-}) {
-  const menu = useSyncExternalStore(menuStore.subscribe, menuStore.getSnapshot, menuStore.getSnapshot);
-  const port = useMemo(() => ({
-    label,
-    open: menu.open,
-    setAnchor: menuStore.setAnchor,
-    toggle: menuStore.toggle,
-  }), [label, menu.open, menuStore]);
-  return <ApplicationMenuTriggerProvider port={port}>{children}</ApplicationMenuTriggerProvider>;
 }

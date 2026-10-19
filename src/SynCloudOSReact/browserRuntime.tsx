@@ -97,7 +97,11 @@ interface BrowserHostOptions {
 
 /** How an application-only host presents its primary application:
  * `fullscreen` (the default) fills the page with the app's content and no
- * system top bar; `declared` keeps the manifest's presentation and frame. */
+ * system top bar; `declared` keeps the manifest's presentation and frame.
+ * A primary that fills the page under `optional` or `required` authentication
+ * must declare `applicationMenu: { trigger: "content" }` and open the menu
+ * from its content with `useSynWareApplicationMenuTrigger()`: that menu is the
+ * only way to reach Preferences > Account, Sign In and Log Out. */
 export type SynCloudOSApplicationFrameMode = "fullscreen" | "declared";
 
 /** A host chooses either its Webspring shell or one primary application. */
@@ -546,6 +550,11 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
         manifest: Object.freeze({ ...bundle.manifest, presentation: "appView" as const,
           frame: Object.freeze({ ...bundle.manifest.frame, layout: "defacto" as const, topBar: "none" as const, presentationMotion: "content" as const }),
         }) }));
+    }
+    const primary = initialBundles.find(bundle => bundle.manifest.id === primaryId)!.manifest;
+    if (authenticationPolicy !== undefined && authenticationPolicy !== "disabled"
+      && (primary.presentation ?? "appView") === "appView" && primary.applicationMenu?.trigger !== "content") {
+      throw new TypeError(`Application ${primaryId} fills the page with ${authenticationPolicy} sign-in but declares no content application-menu trigger. Declare applicationMenu: { trigger: "content" } and open the menu with useSynWareApplicationMenuTrigger(), so people can reach Preferences > Account, Sign In and Log Out.`);
     }
   }
   const config: SynCloudOSRuntimeConfig = {

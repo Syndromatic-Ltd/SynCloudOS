@@ -11,6 +11,7 @@ import { RouteOutlet } from "../../src/SynCloudOS/AppSDK/RouteOutlet";
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { mountSynCloudOS, type MountedSynCloudOSHost, type MountSynCloudOSOptions } from "../../src/SynCloudOSReact/browserRuntime";
 import { WebspringController } from "../../src/Webspring/WebspringController";
+import { useApplicationMenuTrigger as useSynWareApplicationMenuTrigger } from "../../src/SynCloudOSReact/ApplicationMenuTrigger";
 import { defineWebspring } from "../../src/Webspring/public";
 
 vi.mock("../../src/SynCloudOS/Runtime/createSynCloudOS", { spy: true });
@@ -69,7 +70,31 @@ const secondary = createSynWare({ manifest: {
   routes: [{ path: "/secondary", primary: true }],
   runtime: { presentation: "windowedView", policy: { public: true, requiresLogin: false } },
 }, root: Secondary });
-const privateBundle = createSynWare({ manifest: { ...bundle.manifest, runtime: { presentation: "windowedView" } }, root: Application });
+/** What a consumer writes: a content control that opens the host's application menu. */
+function MenuApplication() {
+  const menu = useSynWareApplicationMenuTrigger();
+  return <>
+    <Application />
+    <button data-testid="application-menu" ref={element => menu?.setAnchor(element)} aria-expanded={menu?.open ?? false}
+      disabled={!menu} onClick={() => menu?.toggle()}>Application menu</button>
+  </>;
+}
+const menuBundle = createSynWare({ manifest: { ...bundle.manifest, applicationMenu: { trigger: "content" } }, root: MenuApplication });
+const privateBundle = createSynWare({ manifest: { ...bundle.manifest, applicationMenu: { trigger: "content" }, runtime: { presentation: "windowedView" } }, root: MenuApplication });
+async function openApplicationMenu(target: HTMLElement) {
+  const trigger = target.querySelector<HTMLButtonElement>('[data-testid="application-menu"]')!;
+  expect(trigger.disabled).toBe(false);
+  // A chosen item closes the menu as its exit presentation ends.
+  await waitFor(() => expect(trigger.getAttribute("aria-expanded")).toBe("false"));
+  await act(async () => { fireEvent.click(trigger); });
+  expect(trigger.getAttribute("aria-expanded")).toBe("true");
+  return screen.findByRole("menu");
+}
+async function chooseMenuItem(name: string) {
+  const item = await screen.findByRole("menuitem", { name });
+  await waitFor(() => expect(item.getAttribute("aria-disabled")).not.toBe("true"));
+  await act(async () => { fireEvent.click(item); });
+}
 /** A browser authentication service whose single method signs in at once. */
 function authenticationService() {
   let session: { id: string; subjectId: string; state: "active"; claims: Readonly<Record<string, string>> } | null = null;
@@ -273,6 +298,12 @@ describe("application-only browser host", () => {
     })).rejects.toThrow(/non-root entry route/i);
     const reservedSecondary = createSynWare({ manifest: { ...secondary.manifest, routes: [{ path: "/", primary: true }] }, root: Secondary });
     await expect(mountSynCloudOS(applicationOptions(element(), { bundles: [bundle, reservedSecondary] }))).rejects.toThrow(/com\.example\.secondary.*non-root entry route/i);
+    // A page-filling primary with sign-in must offer the menu that reaches Account.
+    await expect(mountSynCloudOS(applicationOptions(element(), { authentication: { policy: "optional", service: authenticationService() } })))
+      .rejects.toThrow(/applicationMenu: \{ trigger: "content" \}/);
+    await expect(mountSynCloudOS(applicationOptions(element(), { authentication: { policy: "required", service: authenticationService() },
+      application: { id, frame: "declared" }, bundles: [createSynWare({ manifest: { ...bundle.manifest, runtime: { presentation: "appView" } }, root: Application })] })))
+      .rejects.toThrow(/applicationMenu: \{ trigger: "content" \}/);
   });
   it("presents the login window before the app launches when sign-in is required", async () => {
     const service = authenticationService();
@@ -287,42 +318,76 @@ describe("application-only browser host", () => {
     expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(true);
     await waitFor(() => expect(document.querySelector(".nse-login-window")).toBeNull());
   });
-  it("runs the app signed out under optional sign-in and offers sign-in and Log Out from Preferences", async () => {
+  it("gives a fullscreen primary that declares a content trigger the application menu, with Account under optional sign-in", async () => {
     const service = authenticationService();
-    const { runtime, element: target } = await mount(element(), { authentication: { policy: "optional", service } });
+    const { runtime, element: target } = await mount(element(), { bundles: [menuBundle], authentication: { policy: "optional", service } });
     const session = sessions.at(-1)!;
-    expect(target.querySelector('[data-testid="application"]')).not.toBeNull();
+    expect(runtime.apps.getApp(id)?.frame.topBar).toBe("none");
     expect(document.querySelector(".nse-login-window")).toBeNull();
-    await act(async () => { runtime.systemUI.preferences.open("account"); });
+    const menu = await openApplicationMenu(target);
+    expect(within(menu).getByRole("menuitem", { name: "About Application host" })).not.toBeNull();
+    expect(within(menu).getByRole("menuitem", { name: "Sign In" })).not.toBeNull();
+    expect(within(menu).getByRole("menuitem", { name: "Quit Application host" })).not.toBeNull();
+    expect(within(menu).queryByRole("menuitem", { name: "Log Out" })).toBeNull();
+    await chooseMenuItem("Preferences");
+    const preferences = await screen.findByRole("dialog", { name: "Preferences" });
+    await act(async () => { fireEvent.click(within(preferences).getByText("Account")); });
     expect(screen.getAllByText("Not Signed In").length).toBeGreaterThan(0);
-    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Sign In" })); });
+    await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Sign In" })); });
     // Signing in suspends the app behind the login window; cancelling resumes the same session.
     const cancel = await screen.findByRole("button", { name: "Cancel" });
+    expect(document.querySelector(".nse-login-window")).not.toBeNull();
     expect(runtime.lifecycle.getState(id)).toBe("suspended");
     await act(async () => { fireEvent.click(cancel); });
     await waitFor(() => expect(runtime.lifecycle.getState(id)).toBe("active"));
     expect(sessions.at(-1)).toBe(session);
     expect(session.signal.aborted).toBe(false);
-    await act(async () => { runtime.systemUI.preferences.open("account"); });
-    await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Sign In" })); });
-    const method = await screen.findByRole("button", { name: "Test" });
-    await act(async () => { fireEvent.click(method); });
+    await waitFor(() => expect(document.querySelector(".nse-login-window")).toBeNull());
+    // The menu's own Sign In starts the same login window flow.
+    await openApplicationMenu(target);
+    await chooseMenuItem("Sign In");
+    await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Test" })); });
     await waitFor(() => expect(runtime.lifecycle.getState(id)).toBe("active"));
     expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(true);
     expect(sessions.at(-1)).toBe(session);
-    await act(async () => { runtime.systemUI.preferences.open("account"); });
-    expect((await screen.findAllByText("Person")).length).toBeGreaterThan(0);
-    await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Log Out" })); });
+    await waitFor(() => expect(document.querySelector(".nse-login-window")).toBeNull());
+    const signedInMenu = await openApplicationMenu(target);
+    expect(within(signedInMenu).queryByRole("menuitem", { name: "Sign In" })).toBeNull();
+    await chooseMenuItem("Log Out");
     expect(await screen.findByRole("alertdialog", { name: /log out/i })).not.toBeNull();
   });
-  it("never offers Log Out when the host has no authentication", async () => {
-    const { runtime } = await mount();
+  it("offers Preferences and Quit but no Account, Sign In or Log Out when the host has no authentication", async () => {
+    const { runtime, element: target } = await mount(element(), { bundles: [menuBundle] });
+    const menu = await openApplicationMenu(target);
+    expect(within(menu).getByRole("menuitem", { name: "Preferences" })).not.toBeNull();
+    expect(within(menu).queryByRole("menuitem", { name: "Sign In" })).toBeNull();
+    expect(within(menu).queryByRole("menuitem", { name: "Log Out" })).toBeNull();
+    await chooseMenuItem("Preferences");
+    const preferences = await screen.findByRole("dialog", { name: "Preferences" });
+    expect(within(preferences).queryByText("Account")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Sign In" })).toBeNull();
+    await act(async () => { runtime.systemUI.preferences.close(); });
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Preferences" })).toBeNull());
+    await openApplicationMenu(target);
+    await chooseMenuItem("Quit Application host");
+    await waitFor(() => expect(runtime.lifecycle.getState(id)).toBe("closed"));
+    expect(screen.getByRole("main", { name: "Application host" })).not.toBeNull();
     await act(async () => { runtime.systemUI.session.requestLogOut(); });
     expect(screen.queryByRole("alertdialog", { name: /log out/i })).toBeNull();
     expect(runtime.systemUI.getSnapshot().logOutOpen).toBe(false);
-    await act(async () => { runtime.systemUI.preferences.open(); });
-    expect(screen.queryByText("Account")).toBeNull();
-    expect(screen.queryByRole("button", { name: "Sign In" })).toBeNull();
+  });
+  it("publishes no menu trigger to a primary that declares none, nor to secondary windows", async () => {
+    function Probe({ testId }: { testId: string }) {
+      const menu = useSynWareApplicationMenuTrigger();
+      return <output data-testid={testId}>{menu ? "port" : "none"}</output>;
+    }
+    const plain = createSynWare({ manifest: bundle.manifest, root: () => <Probe testId="primary-trigger" /> });
+    const windowed = createSynWare({ manifest: { ...secondary.manifest, applicationMenu: { trigger: "content" } }, root: () => <Probe testId="secondary-trigger" /> });
+    const { runtime } = await mount(element(), { bundles: [plain, windowed] });
+    expect(screen.getByTestId("primary-trigger").textContent).toBe("none");
+    await act(async () => { await runtime.routes.openRoute("/secondary").result; });
+    expect((await screen.findByTestId("secondary-trigger")).textContent).toBe("none");
+    expect(runtime.windows.list({ applicationId: secondaryId })).toHaveLength(1);
   });
   it("opens another registered application in a window over the primary and returns when it closes", async () => {
     const { runtime, element: target } = await mount(element(), { bundles: [bundle, secondary] });
