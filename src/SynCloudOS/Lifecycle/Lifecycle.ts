@@ -619,6 +619,18 @@ export function createLifecycle(
         };
       }
     });
+    // A direct close or suspend of the presented app (SDK closeSelf, quit) owns
+    // no enclosing statechart return, so the shell motion that Webspring
+    // would have been given by Statechart.returnToWebspring is driven here.
+    // Launch phases cannot outlive the app that produced them. Deep-linked
+    // apps never ran a launch (phase idle) and need no return motion.
+    if (statechartRecord && to !== "active") {
+      const phase = RuntimeStore.getSnapshot().webspring.launchPhase;
+      if (phase === "staging" || phase === "launching" || phase === "covered") {
+        if (app?.presentation === "appView" && app.frame.presentationMotion !== "content") runtime.webspringChoreography.beginReturn(appId);
+        else runtime.webspring.coverForApp(null);
+      }
+    }
     if (previousEvent) EventBus.publish("app.lifecycle", { runtimeId: runtime.runtimeId, ...previousEvent, stage: "suspend" }, previousEvent.appId);
     EventBus.publish("app.lifecycle", { runtimeId: runtime.runtimeId, ...event, stage }, appId);
     if (statechartRecord) EventBus.publish("statechart.transition.complete", statechartRecord, `${statechartRecord.from} -> ${statechartRecord.to}`);

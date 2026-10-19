@@ -760,6 +760,44 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     expect(RuntimeController.getSnapshot().webspring.launchPhase).toBe("covered");
   });
 
+  it("returns Webspring to idle when the covering app closes itself through lifecycle", async () => {
+    vi.useFakeTimers();
+    const { AppRegistry, Lifecycle, LoginServices, RouteManager, RuntimeController, Statechart, SynCloudOS, LaunchServices } = createRuntimeHarness(createTestRuntime());
+    AppRegistry.register(createTestBundle({ id: "studio", route: "/studio" }));
+    unlockRuntime(LoginServices);
+    Statechart.gotoState("active.webspring", { source: "test" });
+
+    RouteManager.openRoute("/studio");
+    await flushLaunchTimers();
+    expect(LaunchServices.completeLaunchCover(RuntimeController.getSnapshot().webspring.launchTransitionId ?? "", "studio")).toBe(true);
+    expect(RuntimeController.getSnapshot().webspring.launchPhase).toBe("covered");
+
+    await Lifecycle.close("studio").result;
+
+    const returning = RuntimeController.getSnapshot().webspring;
+    expect(returning).toMatchObject({ launchPhase: "returning", returningAppId: "studio", returnTransitionId: expect.any(String) });
+    expect(SynCloudOS.WebspringChoreography.completeReturnRole(returning.returnTransitionId!, "applicationExit")).toBe(true);
+    expect(SynCloudOS.WebspringChoreography.completeReturnRole(returning.returnTransitionId!, "shellReturn")).toBe(true);
+    expect(RuntimeController.getSnapshot().webspring).toMatchObject({ launchPhase: "idle", returningAppId: null, returnTransitionId: null, isAnimating: false });
+  });
+
+  it("returns a deep-linked app to an idle Webspring when closed by route back", async () => {
+    vi.useFakeTimers();
+    const runtime = createTestRuntime();
+    const { BootManager, RouteManager, RuntimeController } = createRuntimeHarness(runtime);
+    unlockRuntime(runtime);
+    BootManager.boot({ appBundles: [createTestBundle({ id: "studio", route: "/studio" })], initialPathname: "/studio" });
+    await flushLaunchTimers();
+    expect(RuntimeController.getSnapshot().application.activeAppId).toBe("studio");
+
+    RouteManager.openRoute("/");
+    await flushLaunchTimers();
+    await vi.advanceTimersByTimeAsync(choreographyTimings.webspringReturnFallbackMs);
+
+    expect(RuntimeController.getSnapshot().application.activeAppId).toBeNull();
+    expect(RuntimeController.getSnapshot().webspring).toMatchObject({ launchPhase: "idle", returningAppId: null, returnTransitionId: null, isAnimating: false });
+  });
+
   it("cancels an in-flight MultiSwitch transition before returning to Webspring", async () => {
     vi.useFakeTimers();
     const { AppRegistry, LoginServices, RouteManager, RuntimeController, Statechart, WindowManager } = createRuntimeHarness(createTestRuntime());
