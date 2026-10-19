@@ -42,7 +42,7 @@ export class AFXShapeLayer extends AFXLayer {
   });
   #set<K extends keyof AFXShapeContent>(key: K, value: AFXShapeContent[K]) {
     const next = Object.freeze({ ...this.#shape, [key]: value });
-    this.setLayerContent(next, key === "path" ? "path" : undefined);
+    this.setLayerContent(key, next, key === "path" ? "path" : undefined);
     this.#shape = next;
   }
   protected override supportsContentAnimation(keyPath: string) {

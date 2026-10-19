@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/fxRuntimeContracts";
 import type { GFXRect } from "../GraphicsFX/GFXGeometry";
 import type {
   AFXAnimationDefinition,
@@ -108,6 +109,7 @@ const emptyHandle: AFXAnimationHandle = Object.freeze({
 });
 /** An instance-local transaction stack; the supplied executor holds the rendering authority. */
 export class AFXTransaction {
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "AFXTransaction" });
   static begin(): void {
     const inherited = currentAFXTransactionActionContext();
     const context = Object.freeze({
@@ -191,7 +193,7 @@ export class AFXTransaction {
     this.#release = release;
   }
   run(options: AFXTransactionOptions, changes: () => void): AFXAnimationHandle {
-    if (this.#disposed) throw new Error("Transaction is disposed.");
+    if (this.#disposed) throw this.#lifecycle.error({ code: "AFX_TRANSACTION_DISPOSED", operation: "run" });
     const requested = afxAnimationDataRecord(
         options,
         "transaction options",
@@ -312,6 +314,7 @@ export class AFXTransaction {
   }
   dispose() {
     if (this.#disposed) return;
+    this.#lifecycle.markDisposed("explicit");
     this.#disposed = true;
     this.#release?.();
   }

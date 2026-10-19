@@ -68,7 +68,7 @@ export class AFXReplicatorLayer extends AFXLayer {
     this.#surface = surface;
     this.#scheduler = scheduler;
     try {
-      this.setReplication(this.#config);
+      this.setReplication("constructor", this.#config);
     } catch (error) {
       super.dispose();
       throw error;
@@ -82,7 +82,7 @@ export class AFXReplicatorLayer extends AFXLayer {
     });
     if (next.instanceDelay * Math.max(0, next.instanceCount - 1) > 4)
       throw new RangeError("Total replica delay must not exceed four seconds.");
-    this.setReplication(next);
+    this.setReplication(key, next);
     this.#running?.finish("interrupted");
     this.#config = next;
     this.#values = [];
@@ -223,7 +223,7 @@ export class AFXReplicatorLayer extends AFXLayer {
         ),
       );
       const config = Object.freeze({ ...this.#config, instances });
-      this.setReplication(config);
+      this.setReplication("playInstances", config);
       this.#config = config;
       this.#values = Object.freeze(values);
       this.#property = input.keyPath;

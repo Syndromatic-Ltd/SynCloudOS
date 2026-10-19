@@ -42,6 +42,6 @@ export class AFXParticleLayer extends AFXLayer {
         throw new RangeError('Particle geometry must be finite with nonnegative scale.');
       return Object.freeze({ ...p, position: Object.freeze({ ...p.position }) });
     });
-    this.setLayerContent(Object.freeze({ kind: 'emitter', particles: Object.freeze(owned) }));
+    this.setLayerContent("setParticles", Object.freeze({ kind: 'emitter', particles: Object.freeze(owned) }));
   }
 }

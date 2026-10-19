@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/fxRuntimeContracts";
 import {
   AFXLayer,
   type AFXFrameScheduler,
@@ -95,6 +96,7 @@ const emitterHierarchy = (roots: readonly AFXEmitterCell[]) => {
 
 /** Deterministic bounded particle projection with opt-in projective depth. */
 export class AFXEmitterLayer extends AFXLayer {
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "AFXEmitterLayer" });
   readonly #scheduler: AFXFrameScheduler;
   #cells: readonly AFXEmitterCell[] = Object.freeze([]);
   #position: GFXPoint = normalisePoint({ x: 0, y: 0 });
@@ -121,6 +123,7 @@ export class AFXEmitterLayer extends AFXLayer {
   #releaseState: (() => void) | null = null;
   #running = false;
   #disposed = false;
+  readonly #ownerSignal: AbortSignal | undefined;
   #spawnedThisFrame = 0;
 
   constructor(
@@ -129,10 +132,11 @@ export class AFXEmitterLayer extends AFXLayer {
     options: Readonly<{ signal?: AbortSignal }> = {},
   ) {
     super(surface, scheduler, options);
+    this.#ownerSignal = options.signal;
     this.#scheduler = scheduler;
     let pendingRelease: (() => void) | null = null;
     try {
-      this.setLayerContent(this.#content([]));
+      this.setLayerContent("constructor", this.#content([]));
       if (options.signal?.aborted || this.#disposed)
         throw new DOMException("Emitter owner aborted during construction.", "AbortError");
       pendingRelease = scheduler.subscribeState?.(() => this.#stateChanged()) ?? null;
@@ -153,13 +157,13 @@ export class AFXEmitterLayer extends AFXLayer {
     }
   }
 
-  #assertLive() {
-    if (this.#disposed) throw new Error("Emitter layer is disposed.");
+  #assertLive(operation: string) {
+    if (this.#disposed) throw this.#lifecycle.error({ code: "AFX_EMITTER_LAYER_DISPOSED", operation: operation });
   }
   #content(particles: readonly AFXEmitterParticle[]): AFXEmitterContent {
     return Object.freeze({ kind: "emitter", particles: Object.freeze([...particles]) });
   }
-  #reset(clear = true) {
+  #reset(operation: string, clear = true) {
     try { this.#cancelFrame?.(); } catch {}
     this.#cancelFrame = null;
     this.#randomState = this.#seed || 0x6d2b79f5;
@@ -171,16 +175,16 @@ export class AFXEmitterLayer extends AFXLayer {
     this.#childSchedules = [];
     if (clear) {
       this.#particles = [];
-      this.setLayerContent(this.#content([]));
+      this.setLayerContent(operation, this.#content([]));
     }
     this.#last = this.#scheduler.now();
     if (!Number.isFinite(this.#last))
       throw new RangeError("Emitter clock must be finite seconds.");
   }
-  #reconfigure() {
-    this.#assertLive();
+  #reconfigure(operation: string) {
+    this.#assertLive(operation);
     const active = this.#running;
-    this.#reset();
+    this.#reset(operation);
     if (active) this.#scheduleIfActive();
   }
   #random() {
@@ -400,7 +404,7 @@ export class AFXEmitterLayer extends AFXLayer {
       output.sort((a, b) => b.particle.born - a.particle.born || a.value.renderOrder - b.value.renderOrder || a.value.id - b.value.id);
     else if (this.#renderMode === "backToFront")
       output.sort((a, b) => a.value.zPosition - b.value.zPosition || a.value.renderOrder - b.value.renderOrder || a.value.id - b.value.id);
-    this.setLayerContent(this.#content(output.map(({ value }) => value)));
+    this.setLayerContent("startEmitting", this.#content(output.map(({ value }) => value)));
   }
   #tick = (now: number) => {
     this.#cancelFrame = null;
@@ -474,7 +478,7 @@ export class AFXEmitterLayer extends AFXLayer {
         const rate = cell.enabled ? cell.birthRate * this.#birthRate : 0;
         return rate > 0 ? this.#elapsed + 1 / rate : Number.POSITIVE_INFINITY;
       });
-      this.setLayerContent(this.#content([]));
+      this.setLayerContent("startEmitting", this.#content([]));
     }
     this.#last = now;
     this.#scheduleIfActive();
@@ -482,7 +486,7 @@ export class AFXEmitterLayer extends AFXLayer {
 
   get emitterCells() { return this.#cells; }
   set emitterCells(value: readonly AFXEmitterCell[]) {
-    this.#assertLive();
+    this.#assertLive("emitterCells");
     if (!Array.isArray(value) || value.some((cell) => !(cell instanceof AFXEmitterCell)))
       throw new TypeError("Emitter cells require at most 64 AFXEmitterCell values.");
     const hierarchy = emitterHierarchy(value);
@@ -494,85 +498,86 @@ export class AFXEmitterLayer extends AFXLayer {
     if (!Number.isSafeInteger(bytes) || bytes > 8 * 1024 * 1024)
       throw new RangeError("Emitter image resources exceed the 8 MiB projection resource budget.");
     this.#cells = Object.freeze([...value]);
-    this.#reconfigure();
+    this.#reconfigure("emitterCells");
   }
   get emitterPosition() { return this.#position; }
-  set emitterPosition(value: GFXPoint) { const next = normalisePoint(value); this.#assertLive(); this.#position = next; this.#reconfigure(); }
+  set emitterPosition(value: GFXPoint) { const next = normalisePoint(value); this.#assertLive("emitterPosition"); this.#position = next; this.#reconfigure("emitterPosition"); }
   get emitterSize() { return this.#size; }
   set emitterSize(value: GFXSize) {
     const next = normaliseSize(value);
     if (next.width < 0 || next.height < 0) throw new RangeError("Emitter size cannot be negative.");
-    this.#assertLive(); this.#size = next; this.#reconfigure();
+    this.#assertLive("emitterSize"); this.#size = next; this.#reconfigure("emitterSize");
   }
   get emitterShape() { return this.#shape; }
   set emitterShape(value: AFXEmitterShape) {
     if (!["point", "line", "rectangle", "circle"].includes(value)) throw new TypeError("Unsupported emitter shape.");
-    this.#assertLive(); this.#shape = value; this.#reconfigure();
+    this.#assertLive("emitterShape"); this.#shape = value; this.#reconfigure("emitterShape");
   }
   get emitterMode() { return this.#mode; }
   set emitterMode(value: AFXEmitterMode) {
     if (!["points", "volume", "surface", "outline"].includes(value)) throw new TypeError("Unsupported emitter mode.");
-    this.#assertLive(); this.#mode = value; this.#reconfigure();
+    this.#assertLive("emitterMode"); this.#mode = value; this.#reconfigure("emitterMode");
   }
   get projectionMode() { return this.#projectionMode; }
   set projectionMode(value: AFXEmitterProjectionMode) {
     if (!["planar", "projective"].includes(value))
       throw new TypeError("Unsupported emitter projection mode.");
-    this.#assertLive(); this.#projectionMode = value; this.#reconfigure();
+    this.#assertLive("projectionMode"); this.#projectionMode = value; this.#reconfigure("projectionMode");
   }
   get projectionTransform() { return this.#projectionTransform; }
   set projectionTransform(value: AFXTransform3D) {
     if (!(value instanceof AFXTransform3D))
       throw new TypeError("Emitter projection transform requires AFXTransform3D.");
-    this.#assertLive(); this.#projectionTransform = value; this.#reconfigure();
+    this.#assertLive("projectionTransform"); this.#projectionTransform = value; this.#reconfigure("projectionTransform");
   }
   get renderMode() { return this.#renderMode; }
   set renderMode(value: AFXEmitterRenderMode) {
     if (!["unordered", "oldestFirst", "oldestLast", "backToFront"].includes(value))
       throw new TypeError("Unsupported emitter render mode.");
-    this.#assertLive(); this.#renderMode = value; this.#reconfigure();
+    this.#assertLive("renderMode"); this.#renderMode = value; this.#reconfigure("renderMode");
   }
   get seed() { return this.#seed; }
   set seed(value: number) {
     if (!Number.isSafeInteger(value) || value < 0 || value > 0xffffffff) throw new RangeError("Emitter seed must be an unsigned 32-bit integer.");
-    this.#assertLive(); this.#seed = value; this.#reconfigure();
+    this.#assertLive("seed"); this.#seed = value; this.#reconfigure("seed");
   }
   get birthRate() { return this.#birthRate; }
-  set birthRate(value: number) { const next = finite(value, "Emitter birth rate", 0); if (next > 1_024) throw new RangeError("Emitter birth-rate multiplier exceeds 1024."); this.#assertLive(); this.#birthRate = next; this.#reconfigure(); }
+  set birthRate(value: number) { const next = finite(value, "Emitter birth rate", 0); if (next > 1_024) throw new RangeError("Emitter birth-rate multiplier exceeds 1024."); this.#assertLive("birthRate"); this.#birthRate = next; this.#reconfigure("birthRate"); }
   get lifetime() { return this.#lifetime; }
-  set lifetime(value: number) { const next = finite(value, "Emitter lifetime", 0); if (next > 16) throw new RangeError("Emitter lifetime multiplier exceeds 16."); this.#assertLive(); this.#lifetime = next; this.#reconfigure(); }
+  set lifetime(value: number) { const next = finite(value, "Emitter lifetime", 0); if (next > 16) throw new RangeError("Emitter lifetime multiplier exceeds 16."); this.#assertLive("lifetime"); this.#lifetime = next; this.#reconfigure("lifetime"); }
   get velocity() { return this.#velocity; }
-  set velocity(value: number) { const next = finite(value, "Emitter velocity"); if (Math.abs(next) > 1_024) throw new RangeError("Emitter velocity multiplier exceeds 1024."); this.#assertLive(); this.#velocity = next; this.#reconfigure(); }
+  set velocity(value: number) { const next = finite(value, "Emitter velocity"); if (Math.abs(next) > 1_024) throw new RangeError("Emitter velocity multiplier exceeds 1024."); this.#assertLive("velocity"); this.#velocity = next; this.#reconfigure("velocity"); }
   get scale() { return this.#scale; }
-  set scale(value: number) { const next = finite(value, "Emitter scale", 0); if (next > 1_024) throw new RangeError("Emitter scale multiplier exceeds 1024."); this.#assertLive(); this.#scale = next; this.#reconfigure(); }
+  set scale(value: number) { const next = finite(value, "Emitter scale", 0); if (next > 1_024) throw new RangeError("Emitter scale multiplier exceeds 1024."); this.#assertLive("scale"); this.#scale = next; this.#reconfigure("scale"); }
   get maxParticles() { return this.#maxParticles; }
   set maxParticles(value: number) {
     if (!Number.isInteger(value) || value < 0 || value > MAX_PARTICLES) throw new RangeError(`Maximum particles must be from zero to ${MAX_PARTICLES}.`);
-    this.#assertLive(); this.#maxParticles = value; this.#reconfigure();
+    this.#assertLive("maxParticles"); this.#maxParticles = value; this.#reconfigure("maxParticles");
   }
   get particleCount() { return this.#particles.length; }
   get isEmitting() { return this.#running; }
   get diagnostics() { return Object.freeze({ particleCount: this.#particles.length, spawnedThisFrame: this.#spawnedThisFrame, maximumParticles: this.#maxParticles, maximumSpawnPerFrame: MAX_SPAWN_PER_FRAME }); }
 
   startEmitting() {
-    this.#assertLive();
+    this.#assertLive("startEmitting");
     if (this.#running) return;
     this.#running = true;
-    this.#reset();
+    this.#reset("startEmitting");
     this.#scheduleIfActive();
   }
   stopEmitting() {
-    this.#assertLive();
+    this.#assertLive("stopEmitting");
     this.#running = false;
     try { this.#cancelFrame?.(); } catch {}
     this.#cancelFrame = null;
     this.#particles = [];
     this.#childSchedules = [];
     this.#nextBirths = this.#cells.map(() => Number.POSITIVE_INFINITY);
-    this.setLayerContent(this.#content([]));
+    this.setLayerContent("stopEmitting", this.#content([]));
   }
   override dispose() {
     if (this.#disposed) return;
+    this.#lifecycle.markDisposed(this.#ownerSignal?.aborted ? synCloudOSLifecycleSignalReason(this.#ownerSignal) : "explicit");
     this.#running = false;
     let releaseError: unknown;
     try { this.#cancelFrame?.(); } catch (error) { releaseError = error; }

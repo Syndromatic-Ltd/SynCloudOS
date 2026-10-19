@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/fxRuntimeContracts";
 import { AFXLayer, type AFXFrameScheduler, type AFXLayerSurface } from "./AFXLayer";
 import type { AFXTileContent, AFXTiledContent } from "./AFXLayerContent";
 import { intersectRects, normaliseRect, normaliseSize, type GFXRect, type GFXSize } from "../GraphicsFX/GFXGeometry";
@@ -58,6 +59,7 @@ const finite = (value: number, label: string, minimum: number, maximum: number) 
 
 /** Visible-region tiled projection with bounded asynchronous GFX/IFX rendering. */
 export class AFXTiledLayer extends AFXLayer {
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "AFXTiledLayer" });
   readonly #scheduler: AFXFrameScheduler;
   #drawTile: AFXTileDraw | null = null;
   #tileImageContext: IFXContext | null = null;
@@ -83,13 +85,15 @@ export class AFXTiledLayer extends AFXLayer {
   #waiters = new Set<IdleWaiter>();
   #lastError: unknown = null;
   #disposed = false;
+  readonly #ownerSignal: AbortSignal | undefined;
 
   constructor(surface: AFXLayerSurface, scheduler: AFXFrameScheduler, options: Readonly<{ signal?: AbortSignal }> = {}) {
     super(surface, scheduler, options);
+    this.#ownerSignal = options.signal;
     this.#scheduler = scheduler;
     let pendingRelease: (() => void) | null = null;
     try {
-      this.setLayerContent(this.#content([]));
+      this.setLayerContent("constructor", this.#content([]));
       if (options.signal?.aborted || this.#disposed)
         throw new DOMException("Tiled layer owner aborted during construction.", "AbortError");
       pendingRelease = scheduler.subscribeState?.(() => this.#stateChanged()) ?? null;
@@ -109,7 +113,7 @@ export class AFXTiledLayer extends AFXLayer {
       throw error;
     }
   }
-  #assertLive() { if (this.#disposed) throw new Error("Tiled layer is disposed."); }
+  #assertLive(operation: string) { if (this.#disposed) throw this.#lifecycle.error({ code: "AFX_TILED_LAYER_DISPOSED", operation: operation }); }
   #content(tiles: readonly AFXTileContent[]): AFXTiledContent {
     return Object.freeze({ kind: "tiled", tiles: Object.freeze([...tiles]) });
   }
@@ -273,7 +277,7 @@ export class AFXTiledLayer extends AFXLayer {
     const complete = currentTiles.length === current.length;
     const fallback = complete || !this.#visible ? [] : [...this.#cache.values()].filter((tile) => tile.level !== this.#currentLevel && !!intersectRects(tile.rect, this.#visible!));
     const fadeDuration = this.#scheduler.reducedMotion ? 0 : this.#fadeDuration;
-    this.setLayerContent(this.#content([...fallback, ...currentTiles].map(({ key, rect, image, scale, level }) => Object.freeze({ key, rect, image, scale, level, fadeDuration }))));
+    this.setLayerContent("setNeedsDisplay", this.#content([...fallback, ...currentTiles].map(({ key, rect, image, scale, level }) => Object.freeze({ key, rect, image, scale, level, fadeDuration }))));
   }
   #settleIdle() {
     if (this.#cancelFrame || this.#queue.length || this.#pending.size) return;
@@ -303,14 +307,14 @@ export class AFXTiledLayer extends AFXLayer {
 
   get drawTile() { return this.#drawTile; }
   set drawTile(value: AFXTileDraw | null) {
-    this.#assertLive();
+    this.#assertLive("drawTile");
     if (value !== null && typeof value !== "function") throw new TypeError("Tiled layer requires a drawing callback.");
     this.#drawTile = value;
     this.#reset(true);
   }
   get tileImageContext() { return this.#tileImageContext; }
   set tileImageContext(value: IFXContext | null) {
-    this.#assertLive();
+    this.#assertLive("tileImageContext");
     if (value !== null && !(value instanceof IFXContext)) throw new TypeError("Tile image context requires IFXContext.");
     this.#tileImageContext = value;
     this.#reset(true);
@@ -319,26 +323,26 @@ export class AFXTiledLayer extends AFXLayer {
   set tileSize(value: GFXSize) {
     const size = normaliseSize(value);
     if (size.width <= 0 || size.height <= 0 || size.width > MAX_TILE_DIMENSION || size.height > MAX_TILE_DIMENSION) throw new RangeError("Tile size is outside its bounded range.");
-    this.#assertLive(); this.#tileSize = size; this.#reset(true);
+    this.#assertLive("tileSize"); this.#tileSize = size; this.#reset(true);
   }
   get levelsOfDetail() { return this.#levelsOfDetail; }
   set levelsOfDetail(value: number) {
     if (!Number.isInteger(value) || value < 1 || value > 16) throw new RangeError("Levels of detail must be from 1 to 16.");
-    this.#assertLive(); this.#levelsOfDetail = value; this.#reset(false);
+    this.#assertLive("levelsOfDetail"); this.#levelsOfDetail = value; this.#reset(false);
   }
   get levelsOfDetailBias() { return this.#levelsOfDetailBias; }
   set levelsOfDetailBias(value: number) {
     if (!Number.isInteger(value) || value < 0 || value > 8) throw new RangeError("Levels-of-detail bias must be from 0 to 8.");
-    this.#assertLive(); this.#levelsOfDetailBias = value; this.#reset(false);
+    this.#assertLive("levelsOfDetailBias"); this.#levelsOfDetailBias = value; this.#reset(false);
   }
   get contentsScale() { return this.#contentsScale; }
-  set contentsScale(value: number) { const next = finite(value, "Contents scale", 0.25, 8); this.#assertLive(); this.#contentsScale = next; this.#reset(true); }
+  set contentsScale(value: number) { const next = finite(value, "Contents scale", 0.25, 8); this.#assertLive("contentsScale"); this.#contentsScale = next; this.#reset(true); }
   get fadeDuration() { return this.#fadeDuration; }
-  set fadeDuration(value: number) { const next = finite(value, "Tile fade duration", 0, 2); this.#assertLive(); this.#fadeDuration = next; this.#publish(); }
+  set fadeDuration(value: number) { const next = finite(value, "Tile fade duration", 0, 2); this.#assertLive("fadeDuration"); this.#fadeDuration = next; this.#publish(); }
   get maximumCacheBytes() { return this.#maximumCacheBytes; }
   set maximumCacheBytes(value: number) {
     if (!Number.isSafeInteger(value) || value < 1024 * 1024 || value > 64 * 1024 * 1024) throw new RangeError("Tile cache must be from 1 MiB to 64 MiB.");
-    this.#assertLive();
+    this.#assertLive("maximumCacheBytes");
     const previous = this.#maximumCacheBytes;
     this.#maximumCacheBytes = value;
     try { this.#visibleSpecs(); } catch (error) { this.#maximumCacheBytes = previous; throw error; }
@@ -355,7 +359,7 @@ export class AFXTiledLayer extends AFXLayer {
     this.#reset(true);
   }
   setVisibleRect(rect: GFXRect, zoomScale = 1) {
-    this.#assertLive();
+    this.#assertLive("setVisibleRect");
     const visible = normaliseRect(rect), zoom = finite(zoomScale, "Zoom scale", 1 / 256, 256);
     const previous = this.#visible, previousZoom = this.#zoomScale;
     this.#visible = intersectRects(visible, this.bounds);
@@ -364,7 +368,7 @@ export class AFXTiledLayer extends AFXLayer {
     this.#reset(false);
   }
   invalidate(rect: GFXRect = this.bounds) {
-    this.#assertLive();
+    this.#assertLive("invalidate");
     const dirty = normaliseRect(rect);
     this.#generation++;
     this.#cancelScheduled();
@@ -385,9 +389,9 @@ export class AFXTiledLayer extends AFXLayer {
     this.#publish();
     this.#schedule();
   }
-  override setNeedsDisplay(rect?: GFXRect) { this.invalidate(rect); }
+  override setNeedsDisplay(rect?: GFXRect) { this.#assertLive("setNeedsDisplay"); this.invalidate(rect); }
   waitForIdle(): Promise<void> {
-    if (this.#disposed) return Promise.reject(new Error("Tiled layer is disposed."));
+    if (this.#disposed) return Promise.reject(this.#lifecycle.error({ code: "AFX_TILED_LAYER_DISPOSED", operation: "waitForIdle" }));
     if (!this.#cancelFrame && !this.#queue.length && !this.#pending.size) {
       const error = this.#lastError; this.#lastError = null;
       return error ? Promise.reject(error) : Promise.resolve();
@@ -397,13 +401,14 @@ export class AFXTiledLayer extends AFXLayer {
   get diagnostics() { return Object.freeze({ visibleTiles: this.#visibleSpecs().length, queuedTiles: this.#queue.length, pendingTiles: this.#pending.size, cachedTiles: this.#cache.size, cacheBytes: this.#cacheBytes, trackedVersions: this.#versions.size, level: this.#currentLevel, maximumVisibleTiles: MAX_VISIBLE_TILES, maximumConcurrentRenders: MAX_CONCURRENT }); }
   override dispose() {
     if (this.#disposed) return;
+    this.#lifecycle.markDisposed(this.#ownerSignal?.aborted ? synCloudOSLifecycleSignalReason(this.#ownerSignal) : "explicit");
     this.#disposed = true;
     this.#cancelScheduled(); this.#cancelPending();
     let error: unknown;
     try { this.#releaseState?.(); } catch (caught) { error = caught; }
     this.#releaseState = null;
     this.#cache.clear(); this.#cacheBytes = 0; this.#versions.clear();
-    for (const waiter of this.#waiters) waiter.reject(new Error("Tiled layer is disposed."));
+    for (const waiter of this.#waiters) waiter.reject(this.#lifecycle.error({ code: "AFX_TILED_LAYER_DISPOSED", operation: "waitForIdle" }));
     this.#waiters.clear();
     try { super.dispose(); } catch (caught) { error ??= caught; }
     if (error) throw error;

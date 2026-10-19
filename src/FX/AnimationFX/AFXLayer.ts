@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/fxRuntimeContracts";
 import type { AFXReplication } from "./AFXReplication";
 import type { AFXLayerContent } from "./AFXLayerContent";
 import {
@@ -335,6 +336,7 @@ function snapshotContentAnimation(
 
 /** Projects immutable model/presentation snapshots onto an explicitly supplied surface. */
 export class AFXLayer {
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "AFXLayer" });
   readonly #surface: AFXLayerSurface;
   readonly #scheduler: AFXFrameScheduler;
   readonly #running = new Map<string, Running>();
@@ -454,21 +456,21 @@ export class AFXLayer {
       throw error;
     }
   }
-  #assertLive() {
-    if (this.#disposed) throw new Error("Layer is disposed.");
+  #assertLive(operation: string) {
+    if (this.#disposed) throw this.#lifecycle.error({ code: "AFX_LAYER_DISPOSED", operation: operation });
   }
   get actions(): AFXLayerActionMap {
     return this.#actions;
   }
   set actions(value: AFXLayerActionMap) {
-    this.#assertLive();
+    this.#assertLive("actions");
     this.#actions = normaliseAFXLayerActions(value);
   }
   protected defaultActionForKey(_key: AFXLayerActionKey): AFXLayerAction | undefined {
     return undefined;
   }
   actionForKey(key: AFXLayerActionKey): AFXLayerAction | null {
-    this.#assertLive();
+    this.#assertLive("actionForKey");
     if (
       ![
         "frame",
@@ -575,7 +577,7 @@ export class AFXLayer {
     });
   }
   set frame(value: GFXRect) {
-    this.#assertLive();
+    this.#assertLive("frame");
     const frame = normaliseRect(value);
     const previousFrame = this.frame;
     const previousBounds = this.#bounds;
@@ -599,7 +601,7 @@ export class AFXLayer {
     return this.#zPosition;
   }
   set zPosition(value: number) {
-    this.#assertLive();
+    this.#assertLive("zPosition");
     this.#zPosition = layerFinite(value, "zPosition");
     this.#display();
   }
@@ -607,7 +609,7 @@ export class AFXLayer {
     return this.#anchorPointZ;
   }
   set anchorPointZ(value: number) {
-    this.#assertLive();
+    this.#assertLive("anchorPointZ");
     this.#anchorPointZ = layerFinite(value, "anchorPointZ");
     this.#display();
   }
@@ -615,7 +617,7 @@ export class AFXLayer {
     return this.#sublayerTransform;
   }
   set sublayerTransform(value: AFXTransform3D) {
-    this.#assertLive();
+    this.#assertLive("sublayerTransform");
     if (!(value instanceof AFXTransform3D))
       throw new TypeError("Sublayer transform requires AFXTransform3D.");
     this.#applyImplicitAction(
@@ -630,7 +632,7 @@ export class AFXLayer {
     );
   }
   #setStyle<K extends keyof AFXLayerStyle>(key: K, value: AFXLayerStyle[K]) {
-    this.#assertLive();
+    this.#assertLive(key);
     this.#style = Object.freeze({ ...this.#style, [key]: value });
     this.#display();
   }
@@ -737,7 +739,7 @@ export class AFXLayer {
     this.#setStyle("shadowOffset", normalisePoint(value));
   }
   set bounds(value: GFXRect) {
-    this.#assertLive();
+    this.#assertLive("bounds");
     const previous = this.#bounds;
     this.#bounds = normaliseRect(value);
     delete this.#values.frame;
@@ -749,7 +751,7 @@ export class AFXLayer {
     return this.#position;
   }
   set position(value: GFXPoint) {
-    this.#assertLive();
+    this.#assertLive("position");
     this.#position = normalisePoint(value);
     this.#display();
   }
@@ -757,7 +759,7 @@ export class AFXLayer {
     return this.#anchor;
   }
   set anchorPoint(value: GFXPoint) {
-    this.#assertLive();
+    this.#assertLive("anchorPoint");
     const next = normalisePoint(value);
     if (next.x < 0 || next.x > 1 || next.y < 0 || next.y > 1)
       throw new RangeError("Anchor point must be normalized.");
@@ -768,7 +770,7 @@ export class AFXLayer {
     return this.#opacity;
   }
   set opacity(value: number) {
-    this.#assertLive();
+    this.#assertLive("opacity");
     if (!Number.isFinite(value) || value < 0 || value > 1)
       throw new RangeError("Layer opacity must be between zero and one.");
     this.#applyImplicitAction("opacity", this.#opacity, value, () => {
@@ -781,7 +783,7 @@ export class AFXLayer {
     return this.#transform;
   }
   set transform(value: AFXTransform3D) {
-    this.#assertLive();
+    this.#assertLive("transform");
     if (!(value instanceof AFXTransform3D))
       throw new TypeError("Layer transform requires AFXTransform3D.");
     this.#applyImplicitAction("transform", this.#transform.toCSS(), value.toCSS(), () => {
@@ -794,7 +796,7 @@ export class AFXLayer {
     return this.#clip;
   }
   set clipsToBounds(value: boolean) {
-    this.#assertLive();
+    this.#assertLive("clipsToBounds");
     if (typeof value !== "boolean")
       throw new TypeError("Clipping must be boolean.");
     this.#clip = value;
@@ -806,17 +808,18 @@ export class AFXLayer {
       : this.#content?.kind === 'shader' ? this.#content.shader : null;
   }
   set contents(value: GFXImage | VFXFrame | IFXShader | null) {
+    this.#assertLive("contents");
     if (value !== null && !(value instanceof GFXImage) && !(value instanceof VFXFrame) && !(value instanceof IFXShader))
       throw new TypeError('Layer contents require a GFXImage, VFXFrame or IFXShader.');
     if (value instanceof VFXFrame && value.closed)
       throw new DOMException("Layer contents require a live VFXFrame.", "InvalidStateError");
-    this.setLayerContent(value instanceof IFXShader ? Object.freeze({ kind: 'shader', shader: value }) : value instanceof VFXFrame
+    this.setLayerContent("contents", value instanceof IFXShader ? Object.freeze({ kind: 'shader', shader: value }) : value instanceof VFXFrame
       ? Object.freeze({ kind: "video", video: value })
       : value ? Object.freeze({ kind: "image", image: value }) : null);
   }
   get filters(): readonly IFXShader[] { return this.#filters; }
   set filters(value: readonly IFXShader[]) {
-    this.#assertLive();
+    this.#assertLive("filters");
     if (!Array.isArray(value) || value.length > 8 || !Array.from(value).every(shader => shader instanceof IFXShader))
       throw new TypeError('Layer filters require at most eight ImageFX shaders.');
     if (value.length && !this.#surface.supportsFilters)
@@ -827,7 +830,7 @@ export class AFXLayer {
   }
   get compositingFilter(): IFXFilter<'blend'> | null { return this.#compositingFilter; }
   set compositingFilter(value: IFXFilter<'blend'> | null) {
-    this.#assertLive();
+    this.#assertLive("compositingFilter");
     if (value !== null && (!(value instanceof IFXFilter) || value.name !== 'blend' ||
       (value.parameters.mode !== 'normal' && value.parameters.mode !== 'addition')))
       throw new DOMException('Unsupported layer compositing filter; use normal or addition blend.', 'NotSupportedError');
@@ -841,7 +844,7 @@ export class AFXLayer {
     return this.#contentsRect;
   }
   set contentsRect(value: GFXRect) {
-    this.#assertLive();
+    this.#assertLive("contentsRect");
     const next = contentsRect(value), previous = this.#contentsRect;
     this.#contentsRect = next;
     try {
@@ -856,7 +859,7 @@ export class AFXLayer {
     return this.#contentsCenter;
   }
   set contentsCenter(value: GFXRect) {
-    this.#assertLive();
+    this.#assertLive("contentsCenter");
     const next = contentsCenter(value), previous = this.#contentsCenter;
     this.#contentsCenter = next;
     try {
@@ -871,7 +874,7 @@ export class AFXLayer {
     return this.#contentsGravity;
   }
   set contentsGravity(value: AFXContentsGravity) {
-    this.#assertLive();
+    this.#assertLive("contentsGravity");
     if (!contentsGravities.includes(value))
       throw new TypeError("Unsupported layer contents gravity.");
     const previous = this.#contentsGravity;
@@ -888,7 +891,7 @@ export class AFXLayer {
     return this.#autoresizingMask;
   }
   set autoresizingMask(value: readonly AFXAutoresizingMask[]) {
-    this.#assertLive();
+    this.#assertLive("autoresizingMask");
     if (!Array.isArray(value) || value.length > autoresizingValues.length)
       throw new TypeError("Layer autoresizingMask must be a bounded array.");
     const descriptors = Object.getOwnPropertyDescriptors(value);
@@ -914,7 +917,7 @@ export class AFXLayer {
   }
   /** Render an owned layer subtree into an image at the current presentation time. */
   render(bounds: GFXRect, scale = 1, signal: AbortSignal = new AbortController().signal): Promise<GFXImage> {
-    this.#assertLive();
+    this.#assertLive("render");
     const rect = normaliseRect(bounds);
     const snapshot = AFXCompositionSnapshot.capture(this, { bounds: rect, scale, time: this.#scheduler.now() });
     return snapshot.render({
@@ -931,8 +934,8 @@ export class AFXLayer {
   animationForKey(key: string): AFXAnimationHandle | null {
     return this.#running.get(key)?.handle ?? null;
   }
-  protected setReplication(replication: AFXReplication | null) {
-    this.#assertLive();
+  protected setReplication(operation: string, replication: AFXReplication | null) {
+    this.#assertLive(operation);
     if (replication && !this.#surface.supportsReplication)
       throw new Error("This surface does not support replication.");
     const previous = this.#replication;
@@ -947,8 +950,8 @@ export class AFXLayer {
       throw error;
     }
   }
-  protected setLayerContent(content: AFXLayerContent | null, modelAnimationKey?: string) {
-    this.#assertLive();
+  protected setLayerContent(operation: string, content: AFXLayerContent | null, modelAnimationKey?: string) {
+    this.#assertLive(operation);
     if (content && !this.#surface.supportedContentKinds?.includes(content.kind))
       throw new Error(
         "This surface does not support the requested layer content.",
@@ -1148,7 +1151,7 @@ export class AFXLayer {
     });
   }
   setNeedsDisplay(rect?: GFXRect) {
-    this.#assertLive();
+    this.#assertLive("setNeedsDisplay");
     if (rect) normaliseRect(rect);
     this.#displayDirty = true;
     this.#scheduleInvalidation();
@@ -1157,15 +1160,15 @@ export class AFXLayer {
     return this.#displayDirty;
   }
   displayIfNeeded() {
-    this.#assertLive();
+    this.#assertLive("displayIfNeeded");
     if (this.#displayDirty) this.#display();
   }
   display() {
-    this.#assertLive();
+    this.#assertLive("display");
     this.#display();
   }
   setNeedsLayout() {
-    this.#assertLive();
+    this.#assertLive("setNeedsLayout");
     this.#layoutDirty = true;
     this.#scheduleInvalidation();
   }
@@ -1173,12 +1176,12 @@ export class AFXLayer {
     return this.#layoutDirty;
   }
   layoutIfNeeded() {
-    this.#assertLive();
+    this.#assertLive("layoutIfNeeded");
     if (this.#layoutDirty) this.layoutSublayers();
     for (const child of this.#children) child.layoutIfNeeded();
   }
   layoutSublayers() {
-    this.#assertLive();
+    this.#assertLive("layoutSublayers");
     if (this.#layoutActive)
       throw new Error("Layer layout cannot recursively enter itself.");
     this.#layoutDirty = false;
@@ -1193,6 +1196,7 @@ export class AFXLayer {
     child: AFXLayer,
     options: AFXSublayerInsertionOptions = {},
   ) {
+    this.#assertLive("addSublayer");
     this.insertSublayer(child, this.#children.length, options);
   }
   #displayAnimationUpdate() {
@@ -1236,8 +1240,8 @@ export class AFXLayer {
     index: number,
     options: AFXSublayerInsertionOptions = {},
   ) {
-    this.#assertLive();
-    child.#assertLive();
+    this.#assertLive("insertSublayer");
+    child.#assertLive("insertSublayer");
     if (
       !options ||
       typeof options !== "object" ||
@@ -1331,6 +1335,7 @@ export class AFXLayer {
       for (const grandchild of child.#children) grandchild.#display();
   }
   replaceSublayer(previous: AFXLayer, next: AFXLayer) {
+    this.#assertLive("replaceSublayer");
     const index = this.#children.indexOf(previous);
     if (index < 0) throw new Error("The replaced layer is not a child.");
     if (previous === next) return;
@@ -1338,7 +1343,7 @@ export class AFXLayer {
     previous.removeFromSuperlayer();
   }
   removeFromSuperlayer() {
-    this.#assertLive();
+    this.#assertLive("removeFromSuperlayer");
     if (!this.#parent) return;
     this.#parent.#surface.detach(this.#surface);
     const siblings = this.#parent.#children;
@@ -1359,9 +1364,9 @@ export class AFXLayer {
     );
   }
   setMask(mask: AFXLayer | null) {
-    this.#assertLive();
+    this.#assertLive("setMask");
     if (mask) {
-      mask.#assertLive();
+      mask.#assertLive("setMask");
       if (
         mask.#parent ||
         (mask.#maskOwner && mask.#maskOwner !== this) ||
@@ -1416,12 +1421,13 @@ export class AFXLayer {
       : local;
   }
   convertPoint(point: AFXPoint3D, to: AFXLayer | null): AFXPoint3D {
-    this.#assertLive();
-    if (to) to.#assertLive();
+    this.#assertLive("convertPoint");
+    if (to) to.#assertLive("convertPoint");
     const world = this.#worldTransform().transformPoint(point);
     return to ? to.#worldTransform().inverse().transformPoint(world) : world;
   }
   convertRect(rect: GFXRect, to: AFXLayer | null): GFXRect {
+    this.#assertLive("convertRect");
     const r = normaliseRect(rect);
     const points = [
       { x: r.x, y: r.y, z: 0 },
@@ -1447,7 +1453,7 @@ export class AFXLayer {
   }
   /** Model-space hit test; the point is expressed in this layer's superlayer coordinates. */
   hitTest(point: GFXPoint): AFXLayer | null {
-    this.#assertLive();
+    this.#assertLive("hitTest");
     if (this.hidden) return null;
     const p = normalisePoint(point);
     const world = this.#parent
@@ -1468,7 +1474,7 @@ export class AFXLayer {
   }
   /** Picks the displayed presentation tree while animations are in flight. */
   presentationHitTest(point: GFXPoint): AFXLayer | null {
-    this.#assertLive();
+    this.#assertLive("presentationHitTest");
     const p = normalisePoint(point);
     const world = this.#parent
       ? this.#parent.#presentationWorldTransform().transformPoint({ ...p, z: 0 })
@@ -1509,7 +1515,7 @@ export class AFXLayer {
     input: AFXSampledAnimation,
     key?: string,
   ): AFXAnimationHandle {
-    this.#assertLive();
+    this.#assertLive("addAnimation");
     const declaredKeyPath = input.keyPath;
     key ??= declaredKeyPath;
     const contentAnimation = declaredKeyPath === "path" || declaredKeyPath === "gradient";
@@ -1538,13 +1544,13 @@ export class AFXLayer {
     const animation = contentAnimation
       ? snapshotContentAnimation(candidate, declaredKeyPath, declaredTargetId)
       : candidate;
-    this.#assertLive();
+    this.#assertLive("addAnimation");
     const duration = animation.animation.totalDuration;
     const terminal =
       animation.sample(duration) ?? animation.toRuntime().animations[0].to;
-    this.#assertLive();
+    this.#assertLive("addAnimation");
     const initial = animation.sample(0);
-    this.#assertLive();
+    this.#assertLive("addAnimation");
     if (declaredKeyPath === "transform" || declaredKeyPath === "sublayerTransform") {
       const definition = animation.toRuntime();
       for (const property of definition.animations)
@@ -1786,6 +1792,7 @@ export class AFXLayer {
   }
   dispose() {
     if (this.#disposed) return;
+    this.#lifecycle.markDisposed(this.#signal?.aborted ? synCloudOSLifecycleSignalReason(this.#signal) : "explicit");
     this.#cancelInvalidation?.();
     this.#cancelInvalidation = null;
     this.removeAllAnimations();
