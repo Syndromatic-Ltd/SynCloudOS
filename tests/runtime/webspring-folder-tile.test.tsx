@@ -74,7 +74,9 @@ describe("WebspringFolderTile", () => {
       expect(shading.getAttribute("d")).toBe(`M -32 -32 H 92 V 92 H -32 Z ${path}`);
     }
     expect(tile.querySelectorAll(".webspring-folder-tile-surface path")).toHaveLength(2);
-    expect(tile.querySelector(".webspring-folder-tile-lip")!.getAttribute("d")).toBe(path);
+    expect(tile.querySelector(".webspring-folder-tile-lip path")!.getAttribute("d")).toBe(path);
+    // A fragment reference would make the stage snapshot drop its background images.
+    expect(tile.outerHTML).not.toMatch(/url\(#/u);
     expect(tile.querySelectorAll(".webspring-folder-tile-member img")).toHaveLength(2);
   });
 
@@ -91,7 +93,7 @@ describe("WebspringFolderTile", () => {
     expect(tile.dataset.shape).toBe("circle");
     expect(tile.dataset.fill).toBe("texture");
     expect(tile.style.getPropertyValue("--webspring-folder-tile-clip")).toBe("circle(closest-side)");
-    expect(tile.querySelector(".webspring-folder-tile-lip")!.getAttribute("d")).toBe("M 0 30 A 30 30 0 1 0 60 30 A 30 30 0 1 0 0 30 Z");
+    expect(tile.querySelector(".webspring-folder-tile-lip path")!.getAttribute("d")).toBe("M 0 30 A 30 30 0 1 0 60 30 A 30 30 0 1 0 0 30 Z");
     expect(tile.style.getPropertyValue("--webspring-folder-tile-texture")).toBe('url("/textures/\\22 cotton\\22 .jpg")');
     expect(tile.style.getPropertyValue("--webspring-folder-tile-texture-size")).toBe("128px");
     expect(tile.style.getPropertyValue("--webspring-folder-tile-texture-colour")).toBe("#20242c");
@@ -101,16 +103,15 @@ describe("WebspringFolderTile", () => {
     for (const appearance of [squircle, cottonCircle]) {
       const tile = renderTile(appearance, true);
       const outline = resolveWebspringFolderTileGeometry(appearance.shape, 60, 60).path;
-      const ring = tile.querySelector(".webspring-folder-tile-ring-stroke")!;
+      const ring = tile.querySelector(".webspring-folder-tile-ring-stroke path")!;
 
       expect(tile.dataset.dropTarget).toBe("true");
       expect(ring.getAttribute("d")).toBe(outline);
       expect(ring.getAttribute("stroke-width")).toBe("6");
-      // The ring and its shadow are masked to outside the outline.
-      const maskId = /^url\(#(.+)\)$/u.exec(ring.closest("[mask]")!.getAttribute("mask")!)![1];
-      const mask = tile.querySelector(`mask[id="${maskId}"]`)!;
-      expect(mask.querySelector("path")!.getAttribute("d")).toBe(outline);
-      expect(mask.querySelector("path")!.getAttribute("fill")).toBe("#000");
+      // The ring and its shadow are clipped to outside the outline by an even-odd frame.
+      const rim = ring.closest<HTMLElement>(".webspring-folder-tile-rim")!;
+      expect(rim.style.clipPath).toBe(`path(evenodd, "M -32 -32 H 92 V 92 H -32 Z ${outline}")`);
+      expect(tile.outerHTML).not.toMatch(/url\(#/u);
       cleanup();
     }
   });

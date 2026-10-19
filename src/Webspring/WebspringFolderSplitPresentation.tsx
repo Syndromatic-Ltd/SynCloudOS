@@ -48,7 +48,7 @@ export interface WebspringFolderSplitOptions {
 }
 
 interface ResolvedSplitOptions {
-  readonly underlay: { readonly image: string; readonly size: string; readonly colour: string };
+  readonly underlay: { readonly image: string | undefined; readonly size: string; readonly colour: string };
   readonly panelHeight: "content" | number;
   readonly notch: boolean;
   readonly edgeShadow: number;
@@ -82,7 +82,9 @@ function resolveOptions(options: WebspringFolderSplitOptions): ResolvedSplitOpti
   }
   return Object.freeze({
     underlay: Object.freeze({
-      image: underlay.image ?? "/assets/textures/linen.webp",
+      // Unset means the framework linen, which the stylesheet supplies so the
+      // package build can relocate it alongside the consumer's bundle.
+      image: underlay.image,
       size: underlay.size ?? "cover",
       colour: underlay.colour ?? "#2b3038",
     }),
@@ -256,7 +258,9 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
     height: `${height}px`,
     "--webspring-folder-duration": `${options.duration}s`,
     "--webspring-folder-edge-shadow": options.edgeShadow,
-    "--webspring-folder-underlay-image": options.underlay.image ? `url("${options.underlay.image}")` : "none",
+    ...(options.underlay.image === undefined ? {} : {
+      "--webspring-folder-underlay-image": options.underlay.image ? `url("${options.underlay.image}")` : "none",
+    }),
     "--webspring-folder-underlay-size": options.underlay.size,
     "--webspring-folder-underlay-colour": options.underlay.colour,
   } as CSSProperties;

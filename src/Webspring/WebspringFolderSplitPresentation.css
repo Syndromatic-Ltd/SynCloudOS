@@ -50,7 +50,7 @@
 .webspring-folder-split-backdrop,
 .webspring-folder-split-panel {
   background-color: var(--webspring-folder-underlay-colour);
-  background-image: var(--webspring-folder-underlay-image);
+  background-image: var(--webspring-folder-underlay-image, url("/assets/textures/linen.webp"));
   background-size: var(--webspring-folder-underlay-size);
   background-position: center;
 }
