@@ -19,7 +19,7 @@
  */
 
 import type { CommandDispatchResult, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
-import { commandValidationRequestKey } from "../../SynCloudOS/nseRuntimeContracts";
+import { commandValidationRequestKey, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/nseRuntimeContracts";
 import type {
   NSEToolbarConfiguration,
   NSEToolbarControllerOptions,
@@ -177,6 +177,7 @@ export class NSEToolbarController {
   readonly preferences;
   readonly runtime;
   readonly #catalogue: ReadonlyMap<string, NSEToolbarItem>;
+  readonly #lifecycle: SynCloudOSLifecycleRecord;
   readonly #listeners = new Set<() => void>();
   #snapshot: NSEToolbarSnapshot = initialSnapshot;
   #validation: AbortLease | null = null;
@@ -185,10 +186,14 @@ export class NSEToolbarController {
   #presentationGeneration: PresentationGeneration | null = null;
   #disposed = false;
   #preferenceUnsubscribe: (() => boolean) | null = null;
-  #runtimeAbort = () => this.dispose();
+  #runtimeAbort = () => {
+    this.#lifecycle.markDisposed(synCloudOSLifecycleSignalReason(this.runtime.signal));
+    this.dispose();
+  };
 
   constructor({ configuration, items, preferences, runtime }: NSEToolbarControllerOptions) {
     if (!configuration.identifier.trim()) throw new TypeError("NSE toolbar identifiers must not be empty.");
+    this.#lifecycle = new SynCloudOSLifecycleRecord({ kind: "NSEToolbarController", id: configuration.identifier });
     assertOwner(configuration.owner);
     if (!validDisplayMode(configuration.displayMode) || !validSizeMode(configuration.sizeMode)) {
       throw new TypeError(`NSE toolbar "${configuration.identifier}" has an invalid display or size mode.`);
@@ -231,7 +236,7 @@ export class NSEToolbarController {
       this.#publishProjection(false);
       void this.refresh();
     });
-    if (runtime.signal.aborted) this.dispose();
+    if (runtime.signal.aborted) this.#runtimeAbort();
     else runtime.signal.addEventListener("abort", this.#runtimeAbort, { once: true });
   }
 
@@ -244,7 +249,7 @@ export class NSEToolbarController {
   }
 
   setItemOrder(itemIds: readonly string[]): boolean {
-    this.#assertActive();
+    this.#assertActive("setItemOrder");
     this.#assertItemOrder(itemIds);
     const current = this.preferences.getSnapshot().value.itemIds;
     if (current.length === itemIds.length && current.every((item, index) => item === itemIds[index])) return false;
@@ -253,14 +258,14 @@ export class NSEToolbarController {
   }
 
   move(itemId: string, delta: -1 | 1): boolean {
-    this.#assertActive();
+    this.#assertActive("move");
     const ids = [...this.preferences.getSnapshot().value.itemIds];
     const from = ids.indexOf(itemId);
     return this.moveAt(from, delta);
   }
 
   moveAt(from: number, delta: -1 | 1): boolean {
-    this.#assertActive();
+    this.#assertActive("moveAt");
     const ids = [...this.preferences.getSnapshot().value.itemIds];
     if (!Number.isSafeInteger(from) || from < 0 || from >= ids.length) return false;
     const to = from + delta;
@@ -270,7 +275,7 @@ export class NSEToolbarController {
   }
 
   insert(itemId: string, index = this.preferences.getSnapshot().value.itemIds.length): boolean {
-    this.#assertActive();
+    this.#assertActive("insert");
     const ids = [...this.preferences.getSnapshot().value.itemIds];
     const boundedIndex = Math.max(0, Math.min(ids.length, Math.trunc(index)));
     ids.splice(boundedIndex, 0, itemId);
@@ -278,14 +283,14 @@ export class NSEToolbarController {
   }
 
   remove(itemId: string): boolean {
-    this.#assertActive();
+    this.#assertActive("remove");
     const ids = [...this.preferences.getSnapshot().value.itemIds];
     const index = ids.lastIndexOf(itemId);
     return this.removeAt(index);
   }
 
   removeAt(index: number): boolean {
-    this.#assertActive();
+    this.#assertActive("removeAt");
     const ids = [...this.preferences.getSnapshot().value.itemIds];
     if (!Number.isSafeInteger(index) || index < 0 || index >= ids.length) return false;
     ids.splice(index, 1);
@@ -293,24 +298,24 @@ export class NSEToolbarController {
   }
 
   setDisplayMode(displayMode: NSEToolbarPreferences["displayMode"]): boolean {
-    this.#assertActive();
+    this.#assertActive("setDisplayMode");
     if (!validDisplayMode(displayMode)) throw new TypeError("NSE toolbar display mode is invalid.");
     return this.preferences.set("displayMode", displayMode);
   }
 
   setSizeMode(sizeMode: NSEToolbarPreferences["sizeMode"]): boolean {
-    this.#assertActive();
+    this.#assertActive("setSizeMode");
     if (!validSizeMode(sizeMode)) throw new TypeError("NSE toolbar size mode is invalid.");
     return this.preferences.set("sizeMode", sizeMode);
   }
 
   reset(): boolean {
-    this.#assertActive();
+    this.#assertActive("reset");
     return this.preferences.reset(["itemIds", "displayMode", "sizeMode"]);
   }
 
   beginConfiguration(transaction: Parameters<typeof this.preferences.beginEditing>[0]): void {
-    this.#assertActive();
+    this.#assertActive("beginConfiguration");
     this.preferences.beginEditing(transaction);
   }
 
@@ -408,6 +413,7 @@ export class NSEToolbarController {
 
   dispose(): void {
     if (this.#disposed) return;
+    this.#lifecycle.markDisposed("explicit");
     this.#disposed = true;
     this.#generation += 1;
     this.#validation?.dispose();
@@ -482,8 +488,8 @@ export class NSEToolbarController {
     }
   }
 
-  #assertActive(): void {
-    if (this.#disposed) throw new Error(`NSE toolbar "${this.configuration.identifier}" is disposed.`);
+  #assertActive(operation: string): void {
+    if (this.#disposed) throw this.#lifecycle.error({ code: "NSE_TOOLBAR_CONTROLLER_DISPOSED", operation });
   }
 }
 

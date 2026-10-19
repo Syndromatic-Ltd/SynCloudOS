@@ -35,6 +35,7 @@ import {
   type NSEToolbarRuntimePort,
 } from "../../../src/NSE/Toolbars";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
+import { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 
 afterEach(() => {
   document.body.replaceChildren();
@@ -231,6 +232,23 @@ function hostedConfiguration(outcome: NSEWindowSurfaceDismissResult["outcome"] =
 }
 
 describe("NSEToolbarController", () => {
+  it.each(["explicit", "application-closed"] as const)("records %s disposal with toolbar identity and public operation", reason => {
+    const signal = new AbortController();
+    declareSynCloudOSLifecycleSignal(signal.signal, "application-closed");
+    const controller = createController({ runtime: runtime(vi.fn(), { signal: signal.signal }) });
+    if (reason === "explicit") controller.dispose(); else signal.abort();
+    controller.dispose(); signal.abort();
+    const actions: Record<string, () => unknown> = {
+      setItemOrder: () => controller.setItemOrder([]), move: () => controller.move("save", 1), moveAt: () => controller.moveAt(0, 1),
+      insert: () => controller.insert("save"), remove: () => controller.remove("save"), removeAt: () => controller.removeAt(0),
+      setDisplayMode: () => controller.setDisplayMode("icon-only"), setSizeMode: () => controller.setSizeMode("small"),
+      reset: () => controller.reset(), beginConfiguration: () => controller.beginConfiguration({ id: "late", actionName: "Configure Toolbar" }),
+    };
+    for (const [operation, action] of Object.entries(actions)) {
+      expect(action).toThrow(SynCloudOSLifecycleError);
+      expect(action).toThrow(expect.objectContaining({ code: "NSE_TOOLBAR_CONTROLLER_DISPOSED", operation, resource: { kind: "NSEToolbarController", id: configuration.identifier }, disposal: expect.objectContaining({ reason }) }));
+    }
+  });
   it("cancels a toolbar dispatch when the displayed command authority tuple is stale", async () => {
     let registryGeneration = 1;
     const validateMany = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
