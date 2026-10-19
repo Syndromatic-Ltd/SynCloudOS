@@ -23,7 +23,7 @@ import { createPortal } from "react-dom";
 import { NSEFocusPortProvider, useNSEDeferredDisposal } from "../NSE/NSE";
 import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
 import { useWebspringMotion } from "./Webspring.transitions";
-import { nseDeferredDisposalMicrotaskScheduler, useNSEFeedback } from "../NSE/hostComposition";
+import { useNSEFeedback } from "../NSE/hostComposition";
 import { MaterialProvider } from "../NSE/Material";
 import { LoginWindow } from "../NSE/SystemUI";
 import { LoginGatePresenter } from "../SynCloudOS/RootRuntime";
@@ -184,7 +184,7 @@ export function WebspringHost({
   useLayoutEffect(() => {
     syncApplicationWindowContentRenderers(registry, runtime, snapshot.appInfo, applicationRenderers);
   }, [applicationRenderers, registry, runtime, snapshot.appInfo]);
-  useNSEDeferredDisposal(registry, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(registry);
   const [outletContainer] = useState(() => {
     const document = runtime.environment.browser.getDocument();
     if (!document) throw new TypeError("WebspringHost requires a browser document.");

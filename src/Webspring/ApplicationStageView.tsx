@@ -34,7 +34,6 @@ import {
   NSEWindowSurfaceBridgeProvider,
   useNSEDeferredDisposal,
 } from "../NSE/NSE";
-import { nseDeferredDisposalMicrotaskScheduler } from "../NSE/hostComposition";
 import {
   NSEToolButton,
   NSETopBar,
@@ -135,7 +134,7 @@ export function ApplicationStageView({
   );
   const activeNavigationChrome = usesStandardTopBar ? navigationChromeSnapshot.active : null;
   const showsApplicationStageTopBar = usesStandardTopBar;
-  useNSEDeferredDisposal(navigationChromeController, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(navigationChromeController);
 
   // Source-list rail: the system owns the resizable sidebar width so the bar seam and the sidebar
   // (drawn by the app via NSESourceListScene) can never disagree. Honoured only with the standard bar.
@@ -224,7 +223,7 @@ export function ApplicationStageView({
   );
   // `useRuntimeNSEMenuPort` remains the canonical command bridge; the controller
   // is shell-owned, so StrictMode-safe disposal follows the shell microtask lifetime.
-  useNSEDeferredDisposal(appMenuController, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(appMenuController);
   const { reducedMotion } = useNSEAnimationEnvironment();
   const stageMotion = useApplicationStageMotion({
     role: multiSwitchRole,
@@ -322,7 +321,7 @@ export function ApplicationStageView({
     owner: { workspaceId: "workspace:default", applicationId: app.id, applicationSessionId: app.id },
     restoreFocus: (anchor) => nseOverlayPort.restoreFocus(applicationResponderId, anchor),
   }), [app.id, applicationResponderId, nseOverlayPort, runtime, stage.id, windowContentRegistry]);
-  useNSEDeferredDisposal(windowSurfaceBridge, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(windowSurfaceBridge);
   const stageWindowSurfaceBridge = useMemo(() => ({
     present: (request: Parameters<typeof windowSurfaceBridge.present>[0], content: Parameters<typeof windowSurfaceBridge.present>[1]) => (
       windowSurfaceBridge.present({ ...request, parentWindowControllerId: null }, content)

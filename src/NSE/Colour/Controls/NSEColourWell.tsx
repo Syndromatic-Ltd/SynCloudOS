@@ -26,7 +26,7 @@ import type { NSEEyeDropperAdapter } from "../Pickers/NSEEyeDropperAdapter";
 import type { NSEColourTransferAdapter } from "../Transfer";
 import { parseNSEColourTransfer, serialiseNSEColourTransfer } from "../Transfer";
 import { nseDragCommandIds, nseDragNoPayload, useNSEDragSource, useNSEDropTarget } from "../../Drag";
-import { nseDeferredDisposalMicrotaskScheduler, useNSEDeferredDisposal } from "../../interactionLifecycle";
+import { useNSEDeferredDisposal } from "../../interactionLifecycle";
 
 export interface NSEColourWellProps {
   readonly id?: string;
@@ -243,7 +243,7 @@ export function NSEColourWell(props: NSEColourWellProps) {
   // its effects (moved content replays them in development), which would
   // close the Colours panel under the user.
   const panelTarget = useMemo(() => ({ dispose: () => { releaseRef.current?.(); releaseRef.current = null; } }), []);
-  useNSEDeferredDisposal(panelTarget, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(panelTarget);
 
   useEffect(() => {
     const form = hiddenRef.current?.form;

@@ -32,7 +32,6 @@ export {
   NSEFeedbackProvider,
   useNSEFeedback,
 } from "./Feedback";
-export { nseDeferredDisposalMicrotaskScheduler } from "./interactionLifecycle";
 export { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin } from "./Focus/focusOrigin";
 
 export { NSEAlert } from "./Components/NSEAlert";

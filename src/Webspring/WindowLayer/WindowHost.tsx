@@ -35,7 +35,6 @@ import {
   type NSEWindowHost,
   useNSEDeferredDisposal,
 } from "../../NSE/NSE";
-import { nseDeferredDisposalMicrotaskScheduler } from "../../NSE/hostComposition";
 import {
   resolveWindowPresentation,
   type ScreenSnapshot,
@@ -167,7 +166,7 @@ export function WindowHost({
     ),
     dismiss: transientBridge.dismiss,
   } : null, [controller.id, transientBridge]);
-  useNSEDeferredDisposal(transientBridge, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(transientBridge);
   const moveHandleProps = useWindowMoveResize({
     manager,
     windowControllerId: controller.id,

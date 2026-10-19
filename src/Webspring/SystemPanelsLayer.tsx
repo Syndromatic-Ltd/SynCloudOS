@@ -29,7 +29,6 @@ import {
   useNSEDeferredDisposal,
   type NSEFontPanelCommandPort,
 } from "../NSE/NSE";
-import { nseDeferredDisposalMicrotaskScheduler } from "../NSE/hostComposition";
 import type { CommandPayloadSchema } from "../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS, useRuntimeNSEControlPort, useRuntimeNSEOverlayPort } from "../SynCloudOSReact";
 import { createTransientWindowSurfaceBridge, type WindowContentRendererRegistry } from "./WindowLayer";
@@ -63,7 +62,7 @@ export function SystemPanelsLayer({ windowContentRegistry }: { readonly windowCo
     physicalHostId: "system-panels",
     owner: { workspaceId: "workspace:default", applicationId: null, applicationSessionId: null },
   }), [runtime, windowContentRegistry]);
-  useNSEDeferredDisposal(bridge, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(bridge);
   // The panels are top-level system windows: they have no parent window
   // (a panel's own parent ID names nothing here), and a failure to present
   // one is reported rather than leaving a menu command that does nothing.
