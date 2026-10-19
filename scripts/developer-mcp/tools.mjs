@@ -6,9 +6,10 @@ import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, lstatSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { promisify } from "node:util";
+import Ajv2020 from "ajv/dist/2020.js";
 import { createSynWareValidator, parseManifest } from "../synware/validation-core.mjs";
 import { bundlePaths, inside, json, projectContext, sdkName, slash, viteHints } from "./project.mjs";
-import { similarity } from "./lookup.mjs";
+import { docSections, lookupSdk, similarity } from "./lookup.mjs";
 export { lookupSdk } from "./lookup.mjs";
 const run = promisify(execFile);
 function optionsFor(context, input) {
@@ -74,6 +75,12 @@ export async function scaffold(input) {
   }
   if (existsSync(target)) throw new Error("Bundle already exists; no files were changed.");
   const manifest={schemaVersion:1,id,version:"0.1.0",title:name,routes:[{path:route,primary:true}],presentations:["desktop","tablet","mobile"],localeResources:{base:"Resources/Localised/Base.locale/Localisable.strings"},webspring:{visible:true}};
+  if (input.policy!==undefined || input.presentation!==undefined) manifest.runtime={
+    ...(input.policy!==undefined ? {policy:input.policy} : {}),
+    ...(input.presentation!==undefined ? {presentation:input.presentation} : {}),
+  };
+  const validateManifest=new Ajv2020({allErrors:true,strict:false}).compile(json(resolve(context.sdkRoot,"tooling/manifest.schema.json")));
+  if (!validateManifest(manifest)) throw new Error("Scaffold manifest is invalid: "+validateManifest.errors.map(error=>(error.instancePath || "/")+" "+error.message).join("; "));
   const header="/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. All rights reserved.\n * Designed by Kavish Krishnakumar in Manchester.\n * SPDX-License-Identifier: AGPL-3.0-or-later\n */\n";
   const files={
     "Contents/Info.ts":header+"export default "+JSON.stringify(manifest,null,2)+" as const;\n",
@@ -83,17 +90,48 @@ export async function scaffold(input) {
   mkdirSync(target,{recursive:true});
   const createdPaths=[];
   for (const [path,text] of Object.entries(files)) {const file=resolve(target,path);mkdirSync(dirname(file),{recursive:true});writeFileSync(file,text,{flag:"wx"});createdPaths.push(slash(relative(root,file)));}
-  return {createdPaths};
+  const nextSteps=[];
+  if (input.policy?.public!==true) nextSteps.push('Before using this bundle as the primary application with authentication "disabled" or "optional", explicitly set runtime.policy.public to true. Do not make private applications public unless that access is intended.');
+  if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "windowedView"; the default appView is for the primary application.');
+  nextSteps.push("Review the generated manifest and run syncloudos.validate before registering the bundle.");
+  return {createdPaths,nextSteps};
 }
 export async function explainError({projectRoot,query,limit=5}) {
   const {sdkRoot,sdk}=projectContext(projectRoot);
   const catalogue=json(resolve(sdkRoot,"tooling/error-catalogue.json"));
   const normalized=query.toLowerCase(), words=new Set(normalized.match(/[a-z_]{3,}/gu) ?? []);
-  const matches=catalogue.map(entry=>{
+  const tokens=new Set(normalized.match(/[a-z0-9_]+/gu) ?? []);
+  const matches=catalogue.filter(entry=>tokens.has(entry.code.toLowerCase())).slice(0,limit).map(entry=>({...entry,score:2,docs:entry.docs ?? null}));
+  const relatedThreshold=0.3;
+  const sdkErrors=[];
+  const codes=[...new Set(query.match(/\bTS\d+\b/gu) ?? [])];
+  const npmWarning=/\bnpm\s+(?:warn(?:ing)?\b|notice\b)|\b(?:install|lifecycle) scripts? (?:were |was |had |are )?blocked\b/iu.test(query);
+  const suggestedLookups=[...new Set(query.match(/\b[A-Z][a-zA-Z0-9_]*(?:[a-z][A-Z]|[A-Z][a-z])[a-zA-Z0-9_]*\b/gu) ?? [])].filter(name=>!/^TS\d+$/u.test(name)).slice(0,10);
+  let classification={kind:"unclassified",catalogue:false,message:"No exact SynCloudOS catalogue code or exported SDK error class was identified. Related suggestions are not diagnoses."};
+  const nextSteps=[];
+  if (matches.length) {
+    classification={kind:"catalogue",catalogue:true,message:"Exact error-code tokens found in the installed SynCloudOS catalogue."};
+    nextSteps.push("Use the matching code's cause, fix and linked documentation; inspect the original exception and its structured diagnostics.");
+  } else if (codes.length) {
+    classification={kind:"typescript",catalogue:false,message:"TypeScript compiler diagnostics are outside the SynCloudOS runtime error-code catalogue.",codes};
+    nextSteps.push("Read the complete compiler diagnostic and compare the argument and expected types. Use syncloudos.lookup_sdk for SDK symbols named in the message, then run the consumer's TypeScript compiler again.");
+  } else if (npmWarning) {
+    classification={kind:"npm-warning",catalogue:false,message:"npm installation warnings are outside the SynCloudOS runtime error-code catalogue."};
+    nextSteps.push("Inspect npm's named package and warning. A blocked install script is not proof that installation or the SDK failed; approve only trusted scripts under your project's npm policy if their native tool is needed, then run the consumer build.");
+  } else {
+    for (const name of new Set(query.match(/\b[A-Za-z_$][\w$]*Error\b/gu) ?? [])) {
+      const found=await lookupSdk({projectRoot,query:name,limit:100});
+      sdkErrors.push(...found.symbols.filter(symbol=>symbol.name===name && /^(?:declare\s+)?(?:abstract\s+)?class\s/u.test(symbol.signature)).map(symbol=>({...symbol,docs:docSections(sdkRoot,name)})));
+    }
+    if (sdkErrors.length) {
+      classification={kind:"sdk-error",catalogue:false,message:"An exported SDK error class was identified in installed declarations, outside the global runtime code catalogue."};
+      nextSteps.push("Read the exported error declaration and linked domain documentation. Inspect its typed fields (such as reason) rather than interpreting it as an unrelated runtime catalogue code.");
+    } else nextSteps.push("Paste the canonical error code or exported SDK error class name, or use syncloudos.lookup_sdk for the API involved. Symptom-only similarity is not evidence of a particular failure.");
+  }
+  const related=classification.kind!=="unclassified" ? [] : catalogue.map(entry=>{
     const text=[entry.code,entry.title,entry.cause,entry.fix].join(" ").toLowerCase();
-    const exact=normalized.includes(entry.code.toLowerCase());
     const overlap=[...words].filter(word=>text.includes(word)).length/Math.max(words.size,1);
-    return {...entry,score:exact?2:Math.max(similarity(query,entry.code),similarity(query,entry.title),overlap),docs:entry.docs ?? null};
-  }).filter(entry=>entry.score>=0.3).sort((a,b)=>b.score-a.score).slice(0,limit);
-  return {version:sdk.version,matches};
+    return {...entry,score:Math.max(similarity(query,entry.code),similarity(query,entry.title),overlap),docs:entry.docs ?? null};
+  }).filter(entry=>entry.score>=relatedThreshold).sort((a,b)=>b.score-a.score).slice(0,limit);
+  return {version:sdk.version,classification,matches,sdkErrors,related,relatedThreshold,nextSteps,suggestedLookups};
 }

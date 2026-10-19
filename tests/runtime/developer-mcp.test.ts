@@ -8,6 +8,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { inspectProject, lookupSdk, validateProject, scaffold, explainError } from "../../scripts/developer-mcp/tools.mjs";
 import { errorCatalogue } from "../../src/SynCloudOS/ErrorManager/errorCatalogue";
+import { parseManifest } from "../../scripts/synware/validation-core.mjs";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { writeDeveloperMcpPackage, writeDeveloperSdkData } from "../../scripts/developer-mcp/build-package.mjs";
@@ -48,6 +49,37 @@ describe("developer MCP tools", () => {
     expect(result.docs[0].text).toContain("define an application");
     expect((await lookupSdk({ projectRoot: project, entry: "sdk", query: "noSuchUnrelatedSymbol" })).symbols).toEqual([]);
   });
+  it.each(["application menu", "settings", "preferences", "account"])("prioritises the public application-menu entry and example for %s", async query => {
+    put("node_modules/@syndromatic/syncloudos/sdk.d.ts", [
+      "export declare function useSynWareApplicationMenuTrigger(): { open(anchor: HTMLElement): void } | null;",
+      "export interface SynWareApplicationMenuManifest { trigger?: 'content'; preferences?: { commandId: string }; }",
+      "export interface NSEApplicationMenuProps { settings: unknown; }",
+      "export declare function getAccountAvailability(): boolean;",
+    ].join("\n"));
+    put("node_modules/@syndromatic/syncloudos/docs/framework/menu.md", '# Menus\n\n## Application menu and Preferences\n\nAccount opens through System Preferences. Declare applicationMenu: { trigger: "content" }.\n\n```tsx\nconst menu = useSynWareApplicationMenuTrigger();\n```\n');
+    put("node_modules/@syndromatic/syncloudos/docs/framework/low-level.md", "# Low-level settings and account\n\nNSEApplicationMenuProps configures menu props.\n");
+    const result = await lookupSdk({ projectRoot: project, query });
+    expect(result.symbols[0].name).toBe("useSynWareApplicationMenuTrigger");
+    expect(result.symbols[1].name).toBe("SynWareApplicationMenuManifest");
+    expect(result.docs[0].file).toBe("docs/framework/menu.md");
+    expect(result.docs[0].text).toContain("```tsx");
+  });
+  it("keeps access private by default and returns host-mode next steps", async () => {
+    const result = await scaffold({ projectRoot: project, id: "org.example.private", name: "Private", route: "/private" });
+    expect(parseManifest(resolve(project, result.createdPaths[0])).runtime?.policy?.public).toBeUndefined();
+    expect(result.nextSteps.length).toBeGreaterThan(0);
+  });
+  it.each([true, false])("preserves an explicit public=%s policy and windowed presentation", async isPublic => {
+    const policy = { public: isPublic, requiresLogin: !isPublic, requiredCapabilities: ["documents.read"], requiredAccessClasses: ["team"] };
+    const result = await scaffold({ projectRoot: project, id: "org.example.inspector", name: "Inspector", route: "/inspector", policy, presentation: "windowedView" });
+    expect(parseManifest(resolve(project, result.createdPaths[0])).runtime).toEqual({ policy, presentation: "windowedView" });
+    expect((await validateProject({ projectRoot: project, typescript: false })).ok).toBe(true);
+  });
+  it("rejects policy fields and presentations outside the installed manifest schema before writing", async () => {
+    await expect(scaffold({ projectRoot: project, id: "org.example.bad", name: "Bad", route: "/bad", policy: { access: "public" } })).rejects.toThrow();
+    await expect(scaffold({ projectRoot: project, id: "org.example.bad", name: "Bad", route: "/bad", presentation: "window" })).rejects.toThrow();
+    expect((await inspectProject({ projectRoot: project })).bundles).toEqual([]);
+  });
   it("scaffolds a valid app without overwriting any existing bundle", async () => {
     const result = await scaffold({ projectRoot: project, id: "org.example.notes", name: "Notes", route: "/notes" });
     expect(result.createdPaths).toContain("applications/Notes.app/Contents/Info.ts");
@@ -72,11 +104,49 @@ describe("developer MCP tools", () => {
     result = await validateProject({ projectRoot: project });
     expect(result.findings).toContainEqual({file:"src/broken.ts",line:3,column:7,rule:"TS2322",message:"Type 'number' is not assignable to type 'string'."});
   });
-  it("explains codes and pasted disposed-controller messages from the installed catalogue", async () => {
-    expect((await explainError({ projectRoot: project, query: "APP_NOT_FOUND" })).matches[0].code).toBe("APP_NOT_FOUND");
-    const result = await explainError({ projectRoot: project, query: 'Controller "open-account" is disposed.' });
-    expect(result.matches[0].code).toBe("NSE_CONTROLLER_DISPOSED");
-    expect(result.matches[0].fix).toContain("useNSEArrayController");
+  it.each(["[NSE_CONTROLLER_DISPOSED]", "AFX_LAYER_DISPOSED"])("explains exact code tokens in pasted messages: %s", async code => {
+    const result = await explainError({ projectRoot: project, query: `Resource is no longer available. ${code}` });
+    expect(result.matches[0].code).toBe(code.replace(/[[\]]/gu, ""));
+    expect(result.classification.kind).toBe("catalogue");
+    expect(result.related).toEqual([]);
+  });
+  it("keeps fuzzy symptoms separate from diagnoses and excludes partial code tokens", async () => {
+    const result = await explainError({ projectRoot: project, query: "optional authentication login session account UI missing" });
+    expect(result.matches).toEqual([]);
+    expect(result.classification.kind).toBe("unclassified");
+    expect(result.relatedThreshold).toBe(0.3);
+    expect(result.related.every((entry: {score:number}) => entry.score >= result.relatedThreshold)).toBe(true);
+    expect((await explainError({ projectRoot: project, query: "NOT_APP_NOT_FOUND_SUFFIX" })).matches).toEqual([]);
+    const disposed = await explainError({ projectRoot: project, query: 'Controller "open-account" is disposed.' });
+    expect(disposed.matches).toEqual([]);
+    expect(disposed.related.some((entry: {code:string}) => entry.code === "NSE_CONTROLLER_DISPOSED")).toBe(true);
+  });
+  it("recognises public SDK error classes through installed declaration re-exports", async () => {
+    put("node_modules/@syndromatic/syncloudos/sdk.d.ts", 'export { GFXColourParseError } from "./graphics.js";');
+    put("node_modules/@syndromatic/syncloudos/graphics.d.ts", '/** Invalid colour input. */\nexport declare class GFXColourParseError extends Error { readonly reason: string; }\ndeclare class PrivateParseError extends Error {}');
+    put("node_modules/@syndromatic/syncloudos/docs/framework/graphics.md", '# Graphics\n\n## Colour parsing\n\nCatch GFXColourParseError and inspect its reason.\n');
+    const result = await explainError({ projectRoot: project, query: 'GFXColourParseError: Cannot parse colour "definitely-not-a-colour": syntax.' });
+    expect(result.classification.kind).toBe("sdk-error");
+    expect(result.matches).toEqual([]);
+    expect(result.sdkErrors[0]).toMatchObject({ name: "GFXColourParseError", file: "graphics.d.ts" });
+    expect(result.sdkErrors[0].signature).toContain("extends Error");
+    expect(result.sdkErrors[0].docs[0].file).toBe("docs/framework/graphics.md");
+    expect((await explainError({ projectRoot: project, query: "PrivateParseError: invalid" })).sdkErrors).toEqual([]);
+  });
+  it("classifies TypeScript diagnostics outside the runtime catalogue with symbol lookup guidance", async () => {
+    const result = await explainError({ projectRoot: project, query: "src/main.tsx(9,36): error TS2345: Argument of type 'MountSynCloudOSOptions' is not assignable." });
+    expect(result.classification).toMatchObject({ kind: "typescript", catalogue: false, codes: ["TS2345"] });
+    expect(result.matches).toEqual([]);
+    expect(result.related).toEqual([]);
+    expect(result.suggestedLookups).toContain("MountSynCloudOSOptions");
+    expect(result.nextSteps.length).toBeGreaterThan(0);
+  });
+  it.each(["npm warn 1 package had install scripts blocked: esbuild", "npm WARN deprecated example@1.0.0"])("classifies npm warnings outside the runtime catalogue: %s", async query => {
+    const result = await explainError({ projectRoot: project, query });
+    expect(result.classification).toMatchObject({ kind: "npm-warning", catalogue: false });
+    expect(result.matches).toEqual([]);
+    expect(result.related).toEqual([]);
+    expect(result.nextSteps.length).toBeGreaterThan(0);
   });
   it("follows declaration re-exports without exposing private declarations", async () => {
     put("node_modules/@syndromatic/syncloudos/sdk.d.ts", 'export { publicFunction as renamedFunction } from "./inner.js";');

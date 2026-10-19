@@ -20,6 +20,8 @@ These paths stand for the actual filenames from that build manifest; the beta pa
 
 Only the companion depends on the official `@modelcontextprotocol/sdk`, TypeScript, Zod and the validator's Ajv runtime. Adding MCP does not add an MCP runtime dependency to the browser SDK. The SDK contains `docs/framework/`, `tooling/manifest.schema.json`, a generated `tooling/error-catalogue.json` and `tooling/build-receipt.json`. The receipt records the source commit and source fingerprint; the external build manifest additionally records archive integrity. No network access is needed for the tools once dependencies are installed.
 
+The companion package also ships its own `README.md` with the install, `--project` and client-configuration steps on this page. If `npm install` reports blocked install scripts for `esbuild`, see [Restricted npm install policies](getting-started.md#restricted-npm-install-policies).
+
 ## Configure a TOML-configured client
 
 For a coding agent that reads MCP servers from a TOML file, add this to its configuration file, replacing the two project paths with your absolute consumer-project path:
@@ -79,6 +81,8 @@ With neither `entry` nor `query`, output is `{ version, entries: string[] }`. Ot
 
 Use entry names such as `sdk`, `nse` or `fx/animation`. An entry without a query lists its exports. Queries fuzzy-match exported names, follow declaration re-exports and return declaration signatures, attached JSDoc and relevant sections of the installed framework docs. A low-confidence query can return no symbols; it does not invent an API. Returned documentation sections are capped at 6,000 characters each.
 
+Broad `application menu`, `settings`, `preferences` and `account` queries prioritise the public `useSynWareApplicationMenuTrigger` hook and `SynWareApplicationMenuManifest` before lower-level menu props or availability APIs. Documentation ranking favours the corresponding application-menu/Preferences sections and worked examples. Exact exported names still take precedence; equally relevant symbols from the main `sdk` entry rank before other entries.
+
 ### `syncloudos.validate`
 
 Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, typescript?: boolean }` (`typescript` defaults to `true`).
@@ -91,11 +95,15 @@ Validation does not run package scripts or builds. TypeScript checks may write t
 
 ### `syncloudos.scaffold`
 
-Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, id: string, name: string, route: string }`.
+Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, id: string, name: string, route: string, policy?: { public?: boolean, requiresLogin?: boolean, requiredCapabilities?: string[], requiredAccessClasses?: ("team" | "external")[] }, presentation?: "appView" | "windowedView" | "systemSheet" | "backgroundService" }`.
 
-Output: `{ createdPaths: string[] }`.
+Output: `{ createdPaths: string[], nextSteps: string[] }`.
 
 Creates the existing SynWare bundle shape demonstrated by `examples/TextSystem.app`: `Name.app/Contents/Info.ts`, `Contents/index.tsx` exporting a real `createSynWare` definition, and `Contents/Resources/Localised/Base.locale/Localisable.strings`. The app has the requested id, title and route and supports desktop/tablet/mobile presentations. It does not copy the Text System demo's private document model or font requirements into unrelated apps.
+
+`policy` maps directly to `runtime.policy`, and `presentation` to `runtime.presentation`. Both are checked against the installed manifest schema before any files are written. Omitting `policy` preserves the normal private/default access behaviour; scaffolding never silently grants public access. With host authentication `"disabled"` or `"optional"`, the **primary** application must explicitly declare `policy: { public: true }`. The returned `nextSteps` flags this requirement whenever public access has not been requested. Do not apply it to private applications indiscriminately.
+
+For example, scaffold a deliberate public primary with `{ id: "org.example.notes", name: "Notes", route: "/notes", policy: { public: true } }`. For a secondary windowed inspector, choose `presentation: "windowedView"` and declare only the access policy it actually needs. Omitting presentation also returns that windowed-secondary reminder; it is distinct from the desktop/tablet/mobile device presentations.
 
 Names cannot contain path separators or Windows reserved device names. Targets must stay inside the project, cannot traverse symbolic links, and the entire target bundle must be absent. Existing bundles are never merged or overwritten. Review generated files and call `syncloudos.validate` before registering the app.
 
@@ -103,9 +111,13 @@ Names cannot contain path separators or Windows reserved device names. Targets m
 
 Input: `{ projectRoot?: string, query: string, limit?: number }` (`limit` defaults to 5, range 1–20).
 
-Output: `{ version, matches: [{ code, title, cause, fix, docs, appliesTo?, score }] }`.
+Output: `{ version, classification: { kind, catalogue, message, codes? }, matches: [{ code, title, cause, fix, docs, appliesTo?, score }], sdkErrors: [{ entry, name, signature, jsDoc, file, score, docs }], related: [{ code, title, cause, fix, docs, appliesTo?, score }], relatedThreshold, nextSteps: string[], suggestedLookups: string[] }`.
 
-Accepts a stable error code or a pasted message. Exact code matches rank first; fuzzy message matches are suggestions, not evidence that a particular failure occurred. Documentation links are paths relative to the installed SDK package, with optional heading anchors.
+`matches` contains **only whole error-code tokens** found in the installed global catalogue, at score `2`. Both `[NSE_CONTROLLER_DISPOSED]` and bare `AFX_LAYER_DISPOSED` work inside a pasted message; a code embedded in a longer identifier is not an exact match. A message without its canonical code is not treated as a confirmed diagnosis.
+
+`classification.kind` is `catalogue`, `sdk-error`, `typescript`, `npm-warning` or `unclassified`. Exported SDK error classes such as `GFXColourParseError` are resolved through the installed public declarations and their re-exports; `sdkErrors` points to their signatures, typed fields and domain documentation. They need not have a global runtime code. `TS` diagnostics such as `TS2345` and npm warnings are explicitly outside that catalogue and receive tool-specific next steps. `suggestedLookups` lists symbol names from the input to try with `syncloudos.lookup_sdk`; it does not assert that those names are SDK exports.
+
+Only an `unclassified` query receives fuzzy `related` suggestions. Their documented minimum score is `relatedThreshold: 0.3`; this is a retrieval threshold, **not diagnostic confidence**. Even a high similarity is never promoted into `matches`. Empty results and unrelated symptoms must not be interpreted as a login-session or other runtime failure. Documentation links are relative to the installed SDK package, with optional heading anchors.
 
 ## Maintaining the error catalogue
 
@@ -119,4 +131,4 @@ After a stable build, run:
 node scripts/synware/check-developer-mcp-consumer.mjs
 ```
 
-The acceptance script installs both actual archives into a temporary independent project, starts the installed server over stdio, lists all five tools, inspects the installed build receipt, looks up `createSynWare` from installed declarations and docs, scaffolds an app and validates it with the consumer's `tsc --noEmit`, and explains a pasted controller-disposal message. It removes the temporary consumer afterward.
+The acceptance script installs both actual archives into a temporary independent project, starts the installed server over stdio, lists all five tools, inspects the installed build receipt, looks up `createSynWare` from installed declarations and docs, scaffolds an app and validates it with the consumer's `tsc --noEmit`, and explains the canonical controller-disposal code. It removes the temporary consumer afterward.

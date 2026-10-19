@@ -50,10 +50,10 @@ try {
   const checked=await call("validate");
   assert.equal(checked.ok,true,JSON.stringify(checked.findings));
   assert.equal(checked.typescript.ran,true);
-  const explained=await call("explain_error",{query:'Controller "open-account" is disposed.'});
+  const explained=await call("explain_error",{query:"NSE_CONTROLLER_DISPOSED"});
   assert.equal(explained.matches[0].code,"NSE_CONTROLLER_DISPOSED");
   assert.equal(stderr,"");
-  process.stdout.write(JSON.stringify({ok:true,sdkVersion:companion.version,tools:listed.tools.map(tool=>tool.name),archive:companion.archive,checks:["independent SDK tgz install","independent MCP tgz install","stdio listTools","inspect_project receipt","lookup_sdk installed declarations and docs","scaffold -> validate including tsc --noEmit","explain_error pasted message"]},null,2)+"\n");
+  process.stdout.write(JSON.stringify({ok:true,sdkVersion:companion.version,tools:listed.tools.map(tool=>tool.name),archive:companion.archive,checks:["independent SDK tgz install","independent MCP tgz install","stdio listTools","inspect_project receipt","lookup_sdk installed declarations and docs","scaffold -> validate including tsc --noEmit","explain_error canonical code"]},null,2)+"\n");
 } finally {
   await client?.close();
   rmSync(consumer.root,{recursive:true,force:true});

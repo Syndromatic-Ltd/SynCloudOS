@@ -41,6 +41,7 @@ import {
   captureSdkSourceFingerprint, createSdkPackageManifest, fingerprintSdkFiles, sdkDirectoryFiles,
 } from "./sdk-package-manifest.mjs";
 import { sdkNeutralStyleModuleSource, sdkPackageStyles } from "./sdk-package-styles.mjs";
+import { sdkBrowserDependencies } from "./sdk-browser-dependencies.mjs";
 import { assertPublicApiBoundaries } from "./public-api-boundaries.mjs";
 import { writeDeveloperSdkData, writeDeveloperMcpPackage } from "../developer-mcp/build-package.mjs";
 
@@ -123,7 +124,9 @@ function runDeclarationBuild() {
 }
 async function bundle({ entry, packageDirectory, themeNames }) {
   const escapedPackageName = synWarePackageName.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const browserDependencies = sdkBrowserDependencies(repositoryRoot);
   const publicAliases = [
+    ...browserDependencies.aliases,
     ...Object.entries(synWareSdkEntries).map(([name, source]) => ({
       find: new RegExp(`^${escapedPackageName}/${name}$`, "u"),
       replacement: resolve(repositoryRoot, source),
@@ -170,7 +173,7 @@ async function bundle({ entry, packageDirectory, themeNames }) {
         fileName: (_format, entryName) => `${entryName}.js`,
       },
       rollupOptions: {
-        external: [/^harfbuzzjs(?:\/|$)/u, "oauth4webapi", "woff2-encoder/decompress", "react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime"],
+        external: browserDependencies.external,
         output: {
           sourcemapExcludeSources: false,
           banner: "/*! SynCloudOS: AGPL-3.0-or-later; SynWare SDK source: Apache-2.0. See LICENSE, NOTICE and licenses/. */",

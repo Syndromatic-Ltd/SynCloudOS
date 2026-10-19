@@ -17,6 +17,18 @@ export function similarity(query, candidate) {
   }
   return 1-row[b.length]/Math.max(a.length,b.length,1);
 }
+function applicationMenuQuery(query) {
+  return /^(?:application[\s_-]*menu|(?:system\s+)?preferences|settings|account)$/iu.test(query?.trim() ?? "");
+}
+function symbolScore(query, name) {
+  if (query.toLowerCase()===name.toLowerCase()) return 2;
+  if (applicationMenuQuery(query)) {
+    const preferred=["useSynWareApplicationMenuTrigger","SynWareApplicationMenuManifest","SynWareApplicationMenuTriggerPort"];
+    const index=preferred.indexOf(name);
+    if (index!==-1) return 1.5-index*0.1;
+  }
+  return similarity(query,name);
+}
 export function docSections(sdkRoot, query, limit=5) {
   const docsRoot=resolve(sdkRoot,"docs/framework");
   if (!existsSync(docsRoot) || !query) return [];
@@ -30,7 +42,13 @@ export function docSections(sdkRoot, query, limit=5) {
         const sections=readFileSync(path,"utf8").split(/(?=^#{1,6} )/mu);
         for (const text of sections) {
           const lower=text.toLowerCase();
-          const score=words.filter(word=>lower.includes(word)).length;
+          let score=words.filter(word=>lower.includes(word)).length;
+          if (applicationMenuQuery(query) && lower.includes("usesynwareapplicationmenutrigger")) {
+            score+=10;
+            if (lower.includes("applicationmenu")) score+=2;
+            if (lower.includes("preferences")) score+=2;
+            if (text.includes("```")) score+=1;
+          }
           if (score) results.push({file:slash(relative(sdkRoot,path)),heading:text.split("\n")[0],text:text.slice(0,6000),score});
         }
       }
@@ -52,7 +70,7 @@ export async function lookupSdk({projectRoot,entry,query,limit=20}={}) {
     const source=program.getSourceFile(value.path),module=source && checker.getSymbolAtLocation(source);
     if (!module) continue;
     for (const exported of checker.getExportsOfModule(module)) {
-      const name=exported.getName(),score=query ? similarity(query,name) : 1;
+      const name=exported.getName(),score=query ? symbolScore(query,name) : 1;
       if (score<0.55) continue;
       const symbol=exported.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exported) : exported;
       const declarations=symbol.getDeclarations() ?? [];
@@ -62,6 +80,6 @@ export async function lookupSdk({projectRoot,entry,query,limit=20}={}) {
       symbols.push({entry:value.name,name,signature,jsDoc:[jsDoc,...tags].filter(Boolean).join("\n"),file:declarations[0] ? slash(relative(sdkRoot,declarations[0].getSourceFile().fileName)) : null,score});
     }
   }
-  const matches=symbols.sort((a,b)=>b.score-a.score || a.name.localeCompare(b.name)).slice(0,limit);
-  return {version:sdk.version,symbols:matches,docs:docSections(sdkRoot,matches[0]?.name ?? query ?? entry)};
+  const matches=symbols.sort((a,b)=>b.score-a.score || Number(b.entry==="sdk")-Number(a.entry==="sdk") || a.name.localeCompare(b.name)).slice(0,limit);
+  return {version:sdk.version,symbols:matches,docs:docSections(sdkRoot,applicationMenuQuery(query) ? query : matches[0]?.name ?? query ?? entry)};
 }
