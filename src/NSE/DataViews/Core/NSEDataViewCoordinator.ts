@@ -30,6 +30,7 @@ import type {
   NSEDataViewState,
 } from "./dataViewTypes";
 import { encodeNSEDataViewKey } from "./dataViewIdentity";
+import { dataViewDisposedControllerState, warnDisposedDataViewController } from "./disposedController";
 
 function immutableSet<T>(values: Iterable<T>): ReadonlySet<T> {
   const target = new Set(values);
@@ -62,10 +63,13 @@ export function createSelectionChange<TId extends NSEDataViewKey>(
 }
 
 export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
-  readonly #adapter: NSEDataViewAdapter<T, TId>;
+  #adapter: NSEDataViewAdapter<T, TId>;
   #options: NSEDataViewCoordinatorOptions<T, TId>;
   readonly #listeners = new Set<() => void>();
   readonly #unsubscribe: () => boolean;
+  readonly #unsubscribeDispose: () => boolean;
+  #controllerDisposed: boolean;
+  #warnedControllerDisposed = false;
   #activeId: TId | null;
   #editingId: TId | null = null;
   #cancelEditing: (() => void) | null = null;
@@ -84,6 +88,7 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
     this.#adapter = adapter;
     this.#options = options;
     this.#state = options.state ?? { kind: "ready" };
+    this.#controllerDisposed = adapter.controller.isDisposed;
     this.#activeId = null;
     this.#ensureProjection(adapter.controller.getSnapshot().arranged);
     const controllerFocus = adapter.controller.getSnapshot().selection.focusId;
@@ -91,6 +96,13 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
       ? controllerFocus
       : this.#enabledIdsCache[0] ?? null;
     this.#snapshot = this.#project();
+    this.#unsubscribeDispose = adapter.controller.onDispose(() => {
+      this.#controllerDisposed = true;
+      const failures: unknown[] = [];
+      try { this.cancelEditing(); } catch (error) { failures.push(error); }
+      try { this.#publish(); } catch (error) { failures.push(error); }
+      this.#throwFailures(failures, "Data-view controller disposal failed.");
+    });
     this.#unsubscribe = adapter.controller.subscribeChanges((change) => {
       const failures: unknown[] = [];
       const beforeSelection = this.#snapshot.selection;
@@ -115,6 +127,11 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
 
   getSnapshot = (): NSEDataViewSnapshot<T, TId> => this.#snapshot;
 
+  /** True once the controller is disposed; the view is then inert. */
+  get controllerDisposed(): boolean {
+    return this.#controllerDisposed;
+  }
+
   entryForId = (id: TId): NSEDataViewSnapshot<T, TId>["items"][number] | undefined => this.#entryById.get(id);
 
   indexForId = (id: TId): number => this.#indexById.get(id) ?? -1;
@@ -126,6 +143,27 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
 
   updateOptions(options: NSEDataViewCoordinatorOptions<T, TId>): void {
     this.#options = options;
+  }
+
+  /**
+   * Adopts a new adapter object for the same controller. Item callbacks are
+   * read from the latest adapter; items are projected again only when
+   * `idForItem` or `isItemDisabled` changed identity, and the snapshot keeps
+   * its identity when the projection did not change.
+   */
+  updateAdapter(adapter: NSEDataViewAdapter<T, TId>): void {
+    if (adapter.controller !== this.#adapter.controller) {
+      throw new TypeError("A data-view coordinator keeps the controller it was created with.");
+    }
+    const previous = this.#adapter;
+    this.#adapter = adapter;
+    if (previous.idForItem === adapter.idForItem && previous.isItemDisabled === adapter.isItemDisabled) return;
+    const items = this.#projectedItems;
+    this.#projectedArranged = null;
+    this.#reconcileActive();
+    if (this.#projectedItems === items) return;
+    this.#revision += 1;
+    this.#snapshot = this.#project();
   }
 
   setState(state: NSEDataViewState): void {
@@ -144,6 +182,7 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
   }
 
   setActive(id: TId): boolean {
+    if (this.#ignoresStaleEvent("focus movement")) return false;
     const entry = this.#entry(id);
     if (!entry || entry.disabled || !this.#allowsInteraction() || Object.is(this.#activeId, id)) return false;
     this.#activeId = id;
@@ -180,6 +219,7 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
   }
 
   select(id: TId, reason: NSEDataViewSelectionEvent<TId>["reason"], mode: "replace" | "toggle" | "range" = "replace"): boolean {
+    if (this.#ignoresStaleEvent("selection")) return false;
     const entry = this.#entry(id);
     if (!entry || entry.disabled || !this.#allowsInteraction() || this.#options.selectionMode === "none") return false;
     if (this.#options.delegate?.shouldSelect?.(id, entry.item) === false) return false;
@@ -200,6 +240,7 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
   }
 
   activate(id: TId = this.#activeId!): boolean {
+    if (this.#ignoresStaleEvent("activation")) return false;
     const entry = id === null ? null : this.#entry(id);
     if (!entry || entry.disabled || !this.#allowsInteraction()) return false;
     this.#options.delegate?.didActivate?.(entry.id, entry.item);
@@ -207,6 +248,7 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
   }
 
   requestContextMenu(id: TId, anchor: HTMLElement): boolean {
+    if (this.#ignoresStaleEvent("a context menu request")) return false;
     const entry = this.#entry(id);
     if (!entry || entry.disabled || !this.#allowsInteraction()) return false;
     this.#options.delegate?.didRequestContextMenu?.(id, anchor);
@@ -214,6 +256,7 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
   }
 
   beginEditing(id: TId, cancel: () => void): boolean {
+    if (this.#ignoresStaleEvent("editing")) return false;
     const entry = this.#entry(id);
     if (!entry || entry.disabled || this.#state.kind !== "ready") return false;
     if (this.#editingId !== null) this.cancelEditing();
@@ -246,12 +289,27 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
     let failure: unknown;
     try { this.cancelEditing(); } catch (error) { failure = error; }
     this.#unsubscribe();
+    this.#unsubscribeDispose();
     this.#listeners.clear();
     if (failure !== undefined) throw failure;
   }
 
   #allowsInteraction(): boolean {
     return this.#state.kind === "ready" || this.#state.kind === "read-only";
+  }
+
+  /**
+   * A disposed controller can no longer select or edit. Its view keeps its
+   * last rows but drops every interaction rather than throwing from an event
+   * handler, and development builds say why once per view.
+   */
+  #ignoresStaleEvent(interaction: string): boolean {
+    if (!this.#controllerDisposed) return false;
+    if (!this.#warnedControllerDisposed) {
+      this.#warnedControllerDisposed = true;
+      warnDisposedDataViewController(this.#adapter.controller, interaction);
+    }
+    return true;
   }
 
   #entry(id: TId) {
@@ -280,6 +338,8 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
         : Object.freeze({ id, item, index, indexPath: IndexPath.from(index), disabled });
     });
     this.#projectedArranged = arranged;
+    const current = this.#projectedItems;
+    if (items.length === current.length && items.every((entry, index) => entry === current[index])) return;
     this.#projectedItems = Object.freeze(items);
     this.#entryById = new Map(items.map((entry) => [entry.id, entry]));
     this.#indexById = new Map(items.map((entry) => [entry.id, entry.index]));
@@ -296,7 +356,7 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
       selection: controller.selection,
       activeId: this.#activeId,
       editingId: this.#editingId,
-      state: this.#state,
+      state: this.#controllerDisposed ? dataViewDisposedControllerState : this.#state,
       changeSet: controller.changeSet,
       sortDescriptors: controller.sortDescriptors,
     });

@@ -82,7 +82,7 @@ interface EditState<TId> {
 export function NSETable<T, TId extends string | number>({
   adapter,
   columns,
-  state = { kind: "ready" },
+  state: requestedState = { kind: "ready" },
   selectionMode = "multiple",
   allowsEmptySelection = true,
   rowHeight = 23,
@@ -121,6 +121,8 @@ export function NSETable<T, TId extends string | number>({
   const [activeColumn, setActiveColumn] = useState(0);
   const [edit, setEdit] = useState<EditState<TId> | null>(null);
   const [dragStatus, setDragStatus] = useState("");
+  const view = useNSEDataView(adapter, { selectionMode, state: requestedState, onSelectionChange });
+  const state = view.state;
   const allowsMutation = dataViewAllowsMutation(state);
   const dragHost = useNSEDataViewDragHost({
     binding: dragBinding,
@@ -132,7 +134,6 @@ export function NSETable<T, TId extends string | number>({
   });
   const editRequest = useRef<{ generation: number; controller: AbortController } | null>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
-  const view = useNSEDataView(adapter, { selectionMode, state, onSelectionChange });
   const tableHeaderAppearance = useNSEAppearanceSlot("table.header.normal.1x");
   const tableHeaderHoverAppearance = useNSEAppearanceSlot("table.header.hover.1x");
   const tableHeaderPressedAppearance = useNSEAppearanceSlot("table.header.pressed.1x");
@@ -169,10 +170,11 @@ export function NSETable<T, TId extends string | number>({
 
   useEffect(() => () => editRequest.current?.controller.abort(), []);
   useEffect(() => {
-    if (sortDescriptors) adapter.controller.setSortDescriptors(sortDescriptors);
+    // A disposed controller keeps its last rows on screen but accepts no changes.
+    if (sortDescriptors && !adapter.controller.isDisposed) adapter.controller.setSortDescriptors(sortDescriptors);
   }, [adapter.controller, sortDescriptors]);
   useEffect(() => {
-    if (!allowsEmptySelection && view.snapshot.selection.selectedIds.size === 0) {
+    if (!allowsEmptySelection && !adapter.controller.isDisposed && view.snapshot.selection.selectedIds.size === 0) {
       const first = view.snapshot.items.find(({ disabled }) => !disabled);
       if (first) adapter.controller.select([first.id]);
     }

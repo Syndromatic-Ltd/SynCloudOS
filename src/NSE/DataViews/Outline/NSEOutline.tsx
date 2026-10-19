@@ -19,6 +19,7 @@
  */
 
 import {
+  useCallback,
   useEffect,
   useId,
   useMemo,
@@ -31,6 +32,7 @@ import {
 } from "react";
 
 import { createSelectionChange, dataViewAllowsMutation, dataViewAllowsNavigation, dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, dataViewIsDisabled, encodeNSEDataViewKey } from "../Core";
+import { dataViewDisposedControllerState, warnDisposedDataViewController } from "../Core/disposedController";
 import { useNSEVirtualiser } from "../Virtualisation";
 import { useNSEDataViewDragHost } from "../../Drag";
 import { flattenVisibleTree } from "./flattenVisibleTree";
@@ -50,7 +52,7 @@ export function NSEOutline<T, TId extends string | number>({
   labelForItem,
   isExpandable,
   delegate,
-  state = { kind: "ready" },
+  state: requestedState = { kind: "ready" },
   selectionMode = "multiple",
   expandedIds,
   defaultExpandedIds,
@@ -70,6 +72,21 @@ export function NSEOutline<T, TId extends string | number>({
 }: NSEOutlineProps<T, TId>) {
   const instanceId = useId().replace(/:/g, "");
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
+  const subscribeToDisposal = useCallback((notify: () => void) => controller.onDispose(notify), [controller]);
+  const readDisposed = useCallback(() => controller.isDisposed, [controller]);
+  const controllerDisposed = useSyncExternalStore(subscribeToDisposal, readDisposed, readDisposed);
+  // A disposed controller keeps its last rows on screen; the outline turns
+  // disabled and drops interactions instead of letting the controller throw.
+  const state = controllerDisposed ? dataViewDisposedControllerState : requestedState;
+  const warnedDisposal = useRef(false);
+  const ignoresStaleEvent = (interaction: string) => {
+    if (!controllerDisposed) return false;
+    if (!warnedDisposal.current) {
+      warnedDisposal.current = true;
+      warnDisposedDataViewController(controller, interaction);
+    }
+    return true;
+  };
   const [attemptedLoads, setAttemptedLoads] = useState<ReadonlySet<TId>>(() => new Set());
   const rows = useMemo(() => flattenVisibleTree(
     snapshot.roots,
@@ -101,12 +118,13 @@ export function NSEOutline<T, TId extends string | number>({
   });
 
   useEffect(() => {
+    if (controller.isDisposed) return;
     for (const id of defaultExpandedIds ?? []) {
       if (!controller.getSnapshot().expandedIds.has(id)) controller.expand(id);
     }
   }, [controller, defaultExpandedIds]);
   useEffect(() => {
-    if (!expandedIds) return;
+    if (!expandedIds || controller.isDisposed) return;
     const current = controller.getSnapshot().expandedIds;
     for (const id of current) if (!expandedIds.has(id)) controller.collapse(id);
     for (const id of expandedIds) if (!current.has(id)) controller.expand(id);
@@ -147,7 +165,7 @@ export function NSEOutline<T, TId extends string | number>({
   };
 
   const select = (id: TId, reason: NSEOutlineSelectionEvent<TId>["reason"], mode: "replace" | "toggle" | "range" = "replace") => {
-    if (!allowsInteraction || selectionMode === "none") return;
+    if (ignoresStaleEvent("selection") || !allowsInteraction || selectionMode === "none") return;
     const before = controller.getSnapshot().selection;
     if (mode === "toggle" && selectionMode === "multiple") {
       const next = new Set(before.selectedIds);
@@ -163,7 +181,7 @@ export function NSEOutline<T, TId extends string | number>({
   };
 
   const expand = (row: NSEOutlineRow<T, TId>) => {
-    if (!allowsInteraction || !row.expandable || row.expanded || delegate?.shouldExpand?.(row.id, row.item) === false) return;
+    if (ignoresStaleEvent("expansion") || !allowsInteraction || !row.expandable || row.expanded || delegate?.shouldExpand?.(row.id, row.item) === false) return;
     controller.expand(row.id);
     onExpandedIdsChange?.(controller.getSnapshot().expandedIds);
     delegate?.didExpand?.(row.id, row.item);
@@ -171,6 +189,7 @@ export function NSEOutline<T, TId extends string | number>({
   };
 
   function loadRow(row: NSEOutlineRow<T, TId>): void {
+    if (controller.isDisposed) return;
     requests.current.get(row.id)?.abort();
     const request = new AbortController();
     requests.current.set(row.id, request);
@@ -184,7 +203,7 @@ export function NSEOutline<T, TId extends string | number>({
   }
 
   const collapse = (row: NSEOutlineRow<T, TId>) => {
-    if (!allowsInteraction || !row.expanded || delegate?.shouldCollapse?.(row.id, row.item) === false) return;
+    if (ignoresStaleEvent("collapse") || !allowsInteraction || !row.expanded || delegate?.shouldCollapse?.(row.id, row.item) === false) return;
     const selectedDescendant = rows.some((candidate) => isDescendant(candidate, row.id) && snapshot.selection.selectedIds.has(candidate.id));
     const activeDescendantRow = activeId === null ? undefined : rowFor(activeId);
     requests.current.get(row.id)?.abort();
@@ -209,7 +228,7 @@ export function NSEOutline<T, TId extends string | number>({
 
   const handleKey = (event: KeyboardEvent<HTMLDivElement>) => {
     if (dataViewEventIsComposing(event)) { onKeyDown?.(event); return; }
-    if (!allowsInteraction) { onKeyDown?.(event); return; }
+    if (!allowsInteraction) { ignoresStaleEvent("keyboard navigation"); onKeyDown?.(event); return; }
     const currentIndex = activeId === null ? -1 : rows.findIndex(({ id }) => Object.is(id, activeId));
     const current = rows[currentIndex];
     if (allowsMutation && dragBinding && dragEndpoint && event.altKey && event.key.toLowerCase() === "d" && current) {
@@ -314,6 +333,7 @@ export function NSEOutline<T, TId extends string | number>({
                 aria-setsize={row.setSize}
                 aria-expanded={row.expandable ? row.expanded : undefined}
                 aria-selected={selected}
+                aria-disabled={controllerDisposed || undefined}
                 data-nse-part="row"
                 data-state={selected ? "selected" : row.row % 2 === 0 ? "even" : "odd"}
                 data-kind={row.expandable ? "branch" : "leaf"}
@@ -325,11 +345,11 @@ export function NSEOutline<T, TId extends string | number>({
                 onDragEnd={dragHost.end}
                 style={rowStyle}
                 onClick={(event: MouseEvent) => {
-                  if (!allowsInteraction) return;
+                  if (ignoresStaleEvent("selection") || !allowsInteraction) return;
                   setActiveId(row.id);
                   select(row.id, "pointer", event.shiftKey ? "range" : event.ctrlKey || event.metaKey ? "toggle" : "replace");
                 }}
-                onDoubleClick={() => { if (allowsInteraction) delegate?.didActivate?.(row.id, row.item); }}
+                onDoubleClick={() => { if (!ignoresStaleEvent("activation") && allowsInteraction) delegate?.didActivate?.(row.id, row.item); }}
               >
                 {row.expandable ? (
                   <button

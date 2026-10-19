@@ -30,7 +30,7 @@ export function NSECollectionView<T, TId extends string | number>({
   adapter,
   layout,
   renderItem,
-  state = { kind: "ready" },
+  state: requestedState = { kind: "ready" },
   selectionMode = "multiple",
   pointerActivation = "double-click",
   viewportInlineSize = 640,
@@ -53,10 +53,11 @@ export function NSECollectionView<T, TId extends string | number>({
 }: NSECollectionViewProps<T, TId>) {
   const view = useNSEDataView(adapter, {
     selectionMode,
-    state,
+    state: requestedState,
     onSelectionChange,
     delegate: { didActivate: onActivate },
   });
+  const state = view.state;
   const layoutInput = useMemo(() => ({ count: view.snapshot.items.length, viewportInlineSize }), [view.snapshot.items.length, viewportInlineSize]);
   const columnCount = layout.columnCount(layoutInput);
   const rowCount = layout.rowCount(layoutInput);
