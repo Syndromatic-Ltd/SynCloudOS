@@ -124,9 +124,8 @@ function runDeclarationBuild() {
 }
 async function bundle({ entry, packageDirectory, themeNames }) {
   const escapedPackageName = synWarePackageName.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-  const browserDependencies = sdkBrowserDependencies(repositoryRoot);
+  const browserDependencies = sdkBrowserDependencies();
   const publicAliases = [
-    ...browserDependencies.aliases,
     ...Object.entries(synWareSdkEntries).map(([name, source]) => ({
       find: new RegExp(`^${escapedPackageName}/${name}$`, "u"),
       replacement: resolve(repositoryRoot, source),

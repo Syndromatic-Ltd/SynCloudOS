@@ -17,11 +17,10 @@ it("packages TextFX without a Node HarfBuzz import or browser compatibility warn
   const warnings: string[] = [];
   const logger = createLogger("silent");
   logger.warn = message => { warnings.push(message); };
-  const dependencies = sdkBrowserDependencies(root);
+  const dependencies = sdkBrowserDependencies();
   try {
     const packaged = await build({
       configFile: false, publicDir: false, customLogger: logger,
-      resolve: { alias: dependencies.aliases },
       build: {
         outDir: directory, minify: false, target: "esnext", copyPublicDir: false,
         lib: { entry: resolve(root, "src/FX/TextFX/TFXFont.ts"), formats: ["es"], fileName: "textfx" },

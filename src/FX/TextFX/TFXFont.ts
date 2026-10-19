@@ -39,11 +39,14 @@ const disposalOwners = new WeakMap<TFXFont, () => void>();
 const fontGraphemes = new Intl.Segmenter(undefined, { granularity: "grapheme" });
 
 let backendPromise: Promise<Backend> | null = null;
+// Node loads the native package at runtime. The computed specifier keeps it out
+// of every bundle graph, so browser builds never resolve its Node-only code.
+const nativeHarfBuzzSpecifier = "harfbuzzjs";
 
 function backend(): Promise<Backend> {
   if (backendPromise) return backendPromise;
   backendPromise = isNativeTFXFontBackendEnvironment()
-    ? import("harfbuzzjs")
+    ? import(/* @vite-ignore */ nativeHarfBuzzSpecifier) as Promise<Backend>
     : import("./vendor/harfbuzzRuntime.mjs");
   return backendPromise;
 }
