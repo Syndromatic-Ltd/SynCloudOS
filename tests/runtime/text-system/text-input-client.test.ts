@@ -23,6 +23,7 @@ import { attributedContent, paragraph, textRun, createInMemoryNSETextOwner } fro
 import { TextEditingSession } from "../../../src/NSE/TextEditing/TextEditingSession";
 import type { NSETextGeometryProvider, NSETextGeometryRevision } from "../../../src/NSE/TextLayout/textGeometryTypes";
 import { createNSETextPresentationTransforms } from "../../../src/NSE/TextLayout/textGeometryTransforms";
+import { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 
 async function clientClass() {
   const module = await import("../../../src/NSE/TextEditing/NSETextInputClient").catch(() => null);
@@ -50,6 +51,30 @@ function geometry(session: TextEditingSession) {
 }
 
 describe("custom text input client", () => {
+  it.each(["explicit", "application-closed"] as const)("records %s for both throwing disposed entry points", async reason => {
+    const Client = await clientClass(); const { owner, session } = fixture("abc");
+    const signal = new AbortController();
+    declareSynCloudOSLifecycleSignal(signal.signal, "application-closed");
+    const client = new Client({ session, signal: signal.signal });
+    if (reason === "explicit") client.dispose(); else signal.abort();
+    client.dispose(); session.dispose(); signal.abort();
+    for (const [operation, action] of Object.entries({ beginComposition: () => client.beginComposition(), attachInputHost: () => client.attachInputHost(() => null) })) {
+      expect(action).toThrow(SynCloudOSLifecycleError);
+      expect(action).toThrow(expect.objectContaining({ code: "NSE_TEXT_INPUT_CLIENT_DISPOSED", operation, disposal: expect.objectContaining({ reason }) }));
+    }
+    expect(client.insertText("late")).toEqual({ status: "ignored", reason: "disposed" });
+    owner.dispose();
+  });
+  it("preserves application closure through the session owner signal", async () => {
+    const Client = await clientClass(); const owner = createInMemoryNSETextOwner();
+    const signal = new AbortController();
+    declareSynCloudOSLifecycleSignal(signal.signal, "application-closed");
+    const session = new TextEditingSession({ id: "owned-input", owner, signal: signal.signal });
+    const client = new Client({ session }); signal.abort(); client.dispose();
+    expect(() => client.beginComposition()).toThrow(SynCloudOSLifecycleError);
+    expect(() => client.beginComposition()).toThrow(expect.objectContaining({ code: "NSE_TEXT_INPUT_CLIENT_DISPOSED", operation: "beginComposition", disposal: expect.objectContaining({ reason: "application-closed" }) }));
+    owner.dispose();
+  });
   it("honors empty explicit replacement and delegates one canonical edit to the session owner", async () => {
     const Client = await clientClass();
     const { owner, session } = fixture("abcd");

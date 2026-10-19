@@ -24,6 +24,7 @@ import { createNSEDocumentTextOwner } from "../../../src/NSE/TextEditing/documen
 import { TextEditingSession } from "../../../src/NSE/TextEditing/TextEditingSession";
 import { editDocumentFixture } from "../../fixtures/documentEditFixture";
 import type { DocumentType } from "../../../src/SynCloudOS/Documents/documentTypes";
+import { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 const content = (text: string) => attributedContent([paragraph([textRun(text)])]);
 type FlowModel = { main: ReturnType<typeof content>; note: string };
 const cleanups: Array<() => Promise<void>> = [];
@@ -36,6 +37,40 @@ function fixture() {
   return { ...result, port: { getSnapshot: () => document.snapshot(), subscribe: document.subscribe.bind(document), transact: document.transact.bind(document) } };
 }
 describe("document semantic text owners", () => {
+  it.each(["explicit", "application-closed"] as const)("records first %s disposal for each document owner operation", reason => {
+    const { port } = fixture(); const signal = new AbortController();
+    declareSynCloudOSLifecycleSignal(signal.signal, "application-closed");
+    const owner = createNSEDocumentTextOwner({ document: port, flowId: "main", readContent: model => model.main, writeContent: (model, next) => ({ ...model, main: next }), signal: signal.signal });
+    if (reason === "explicit") owner.dispose(); else signal.abort();
+    owner.dispose(); signal.abort();
+    for (const [operation, action] of Object.entries({ getSnapshot: () => owner.getSnapshot(), subscribe: () => owner.subscribe(() => {}), commit: () => owner.commit({ expectedRevision: 0, operations: [] }) })) {
+      expect(action).toThrow(SynCloudOSLifecycleError);
+      expect(action).toThrow(expect.objectContaining({ code: "NSE_DOCUMENT_TEXT_OWNER_DISPOSED", operation, disposal: expect.objectContaining({ reason }) }));
+    }
+  });
+  it("diagnoses already closed or aborted document owner creation", () => {
+    const { port } = fixture(); const signal = new AbortController();
+    declareSynCloudOSLifecycleSignal(signal.signal, "application-closed"); signal.abort();
+    const options = { document: port, flowId: "main", readContent: (model: Readonly<FlowModel>) => model.main, writeContent: (model: Readonly<FlowModel>, next: FlowModel["main"]) => ({ ...model, main: next }) };
+    for (const [reason, action] of Object.entries({
+      "application-closed": () => createNSEDocumentTextOwner({ ...options, signal: signal.signal }),
+      "document-closed": () => createNSEDocumentTextOwner({ ...options, document: { ...port, getSnapshot: () => ({ ...port.getSnapshot(), state: "closed" }) } }),
+    })) {
+      expect(action).toThrow(SynCloudOSLifecycleError);
+      expect(action).toThrow(expect.objectContaining({ code: "NSE_DOCUMENT_TEXT_OWNER_DISPOSED", operation: "createNSEDocumentTextOwner", disposal: expect.objectContaining({ reason }) }));
+    }
+  });
+  it("preserves a native DOMException while recording the resulting revocation", () => {
+    const { port } = fixture(); const failure = new DOMException("Native document access failed", "InvalidStateError");
+    let fail = false;
+    const owner = createNSEDocumentTextOwner({ document: { ...port, getSnapshot: () => { if (fail) throw failure; return port.getSnapshot(); } }, flowId: "main", readContent: model => model.main, writeContent: (model, next) => ({ ...model, main: next }) });
+    fail = true;
+    let observed: unknown;
+    try { owner.getSnapshot(); } catch (error) { observed = error; }
+    expect(observed).toBe(failure); expect(owner.signal.aborted).toBe(true);
+    expect(() => owner.getSnapshot()).toThrow(SynCloudOSLifecycleError);
+    expect(() => owner.getSnapshot()).toThrow(expect.objectContaining({ code: "NSE_DOCUMENT_TEXT_OWNER_DISPOSED", operation: "getSnapshot", disposal: expect.objectContaining({ reason: "document-revoked" }) }));
+  });
   it("refreshes an actual conflict-local adoption and preserves it on the next session edit", () => {
     const { document, port } = fixture();
     const owner = createNSEDocumentTextOwner({ document: port, flowId: "main", readContent: model => model.main, writeContent: (model, next) => ({ ...model, main: next }) });
@@ -65,7 +100,8 @@ describe("document semantic text owners", () => {
     const owner = createNSEDocumentTextOwner({ document: { ...port, getSnapshot: () => ({ ...document.snapshot(), model }) }, flowId: "main", readContent: model => model.main, writeContent: (model, next) => ({ ...model, main: next }) });
     const session = new TextEditingSession({ id: "bad-port", owner }); const target = session.captureTarget();
     model = { ...model, main: content("changed without revision") };
-    expect(() => owner.getSnapshot()).toThrow(/revision|revoked/i); expect(owner.signal?.aborted).toBe(true);
+    expect(() => owner.getSnapshot()).toThrow(SynCloudOSLifecycleError);
+    expect(() => owner.getSnapshot()).toThrow(expect.objectContaining({ code: "NSE_DOCUMENT_TEXT_OWNER_DISPOSED", operation: "getSnapshot", disposal: expect.objectContaining({ reason: "document-revoked" }) })); expect(owner.signal?.aborted).toBe(true);
     expect(session.resolveTarget(target)).toBeNull(); expect(document.model.main).toEqual(content("abc")); session.dispose();
   });
 

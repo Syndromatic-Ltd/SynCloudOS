@@ -21,6 +21,7 @@
 import { expect,it } from "vitest";
 import { createInMemoryNSETextOwner,plainNSETextContent } from "../../../src/NSE/Text";
 import { TextEditingSession } from "../../../src/NSE/TextEditing/TextEditingSession";
+import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 const api=await import("../../../src/NSE/TextEditing/textInspectorBinding").catch(()=>null);
 const setup=()=>{expect(api?.NSETextInspectorBinding).toBeTypeOf("function");const owner=createInMemoryNSETextOwner({content:plainNSETextContent("word")}),session=new TextEditingSession({id:"inspector",owner,documentId:"doc:one"});session.select(0,4);return {owner,session,binding:new api!.NSETextInspectorBinding({session,id:"size"})};};
 it("retains invalid drafts, previews without commits, and applies one validated field change with no local undo",async()=>{
@@ -43,4 +44,15 @@ it("revokes pending field validation immediately when its selection target chang
   const {owner,session,binding}=setup();binding.begin(20);let validationSignal:AbortSignal|undefined;
   const pending=binding.commit(()=>{throw new Error("cannot apply");},(value,signal)=>{validationSignal=signal;return new Promise(()=>{});});
   session.select(1);expect(validationSignal!.aborted).toBe(true);await expect(pending).rejects.toThrow(/stale|revoked/);expect(owner.getSnapshot().revision).toBe(0);expect(binding.controller.getSnapshot().draft).toEqual({value:20});
+});
+
+it("identifies disposed inspector operations and keeps the first disposal",async()=>{
+  const {owner,session,binding}=setup();binding.dispose();binding.dispose();
+  for(const [operation,action] of Object.entries({begin:()=>binding.begin(),setDraft:()=>binding.setDraft(12),preview:()=>binding.preview(12)})){
+    expect(action).toThrow(SynCloudOSLifecycleError);
+    expect(action).toThrow(expect.objectContaining({code:"NSE_TEXT_INSPECTOR_BINDING_DISPOSED",operation,resource:{kind:"NSETextInspectorBinding",id:"size"},disposal:expect.objectContaining({reason:"explicit"})}));
+  }
+  await expect(binding.commit(()=>{})).rejects.toBeInstanceOf(SynCloudOSLifecycleError);
+  await expect(binding.commit(()=>{})).rejects.toMatchObject({code:"NSE_TEXT_INSPECTOR_BINDING_DISPOSED",operation:"commit"});
+  session.dispose();owner.dispose();
 });

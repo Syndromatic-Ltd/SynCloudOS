@@ -20,7 +20,7 @@
 
 import { applyNSETextOperations, createNSETextSnapshot, NSETextChangeMap, type NSEAttributedContent, type NSETextOwner, type NSETextSnapshot, type NSETextChangeReceipt, type NSETextCommitRequest } from "../Text";
 import { translateBackendContent } from "./backends/backendChangeTranslator";
-import { canonicalDocumentJson } from "../../SynCloudOS/nseRuntimeContracts";
+import { canonicalDocumentJson, declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/nseRuntimeContracts";
 import type { DocumentEditOptions, DocumentEditResult } from "../../SynCloudOS/SynCloudOS";
 
 export interface NSETextDocumentPort<TModel> {
@@ -62,7 +62,11 @@ export function createNSEDocumentTextOwner<TModel>(supplied: NSEDocumentTextOwne
   const options = Object.freeze({ ...supplied });
   const generation = ownerGeneration++;
   const initial = options.document.getSnapshot();
-  if (initial.state === "closed" || options.signal?.aborted) throw new Error("Document text owner is revoked.");
+  const lifecycle = new SynCloudOSLifecycleRecord({ kind: "NSEDocumentTextOwner", id: initial.id });
+  if (initial.state === "closed" || options.signal?.aborted) {
+    lifecycle.markDisposed(initial.state === "closed" ? "document-closed" : synCloudOSLifecycleSignalReason(options.signal!));
+    throw lifecycle.error({ code: "NSE_DOCUMENT_TEXT_OWNER_DISPOSED", operation: "createNSEDocumentTextOwner" });
+  }
   let snapshot = createNSETextSnapshot(options.readContent(initial.model), options.flowId, initial.dirtyRevision, generation);
   let nativeIdentity = canonicalDocumentJson(initial.model, "document-text-model");
   let disposed = false, publishing = false, committing = false;
@@ -76,21 +80,36 @@ export function createNSEDocumentTextOwner<TModel>(supplied: NSEDocumentTextOwne
     errors.push(error);
     try { options.observeError?.(error, context); } catch (observerError) { errors.push(observerError); }
   };
-  const dispose = () => {
+  const dispose = (reason = "explicit") => {
     if (disposed) return;
+    lifecycle.markDisposed(reason);
     disposed = true;
     try { unsubscribe(); } catch (error) { diagnose(error, "document-text-unsubscribe"); }
-    listeners.clear(); options.signal?.removeEventListener("abort", dispose); lifetime.abort();
+    listeners.clear(); options.signal?.removeEventListener("abort", ownerAbort); lifetime.abort();
   };
-  const readDocument = () => {
-    if (disposed || options.signal?.aborted) throw new Error("Document text owner is revoked.");
+  const ownerAbort = () => {
+    const reason = synCloudOSLifecycleSignalReason(options.signal!);
+    declareSynCloudOSLifecycleSignal(lifetime.signal, reason);
+    dispose(reason);
+  };
+  const assertLive = (operation: string) => {
+    if (disposed || options.signal?.aborted) {
+      if (!disposed) ownerAbort();
+      throw lifecycle.error({ code: "NSE_DOCUMENT_TEXT_OWNER_DISPOSED", operation });
+    }
+  };
+  const readDocument = (operation: string) => {
+    assertLive(operation);
     try {
       const document = options.document.getSnapshot();
       const identity = canonicalDocumentJson(document.model, "document-text-model");
       if (document.id !== initial.id || document.state === "closed" || !Number.isSafeInteger(document.dirtyRevision) || document.dirtyRevision < snapshot.revision ||
-        document.dirtyRevision === snapshot.revision && identity !== nativeIdentity) throw new Error("Document text owner is revoked: native model identity changed without a current revision.");
+        document.dirtyRevision === snapshot.revision && identity !== nativeIdentity) {
+        dispose(document.state === "closed" ? "document-closed" : "document-revoked");
+        throw lifecycle.error({ code: "NSE_DOCUMENT_TEXT_OWNER_DISPOSED", operation, problem: "was revoked because the native document closed or its model identity changed without a current revision" });
+      }
       return { document, identity };
-    } catch (error) { diagnose(error, "document-text-lifetime"); dispose(); throw error; }
+    } catch (error) { diagnose(error, "document-text-lifetime"); dispose("document-revoked"); throw error; }
   };
   const makeReceipt = (before: NSETextSnapshot, actual: NSETextSnapshot): NSETextChangeReceipt => {
     const staged = pending?.prepared;
@@ -115,8 +134,8 @@ export function createNSEDocumentTextOwner<TModel>(supplied: NSEDocumentTextOwne
     } finally { publishing = false; }
     lastReceipt = Object.freeze({ ...receipt, observerErrors: Object.freeze(observerErrors) });
   };
-  const refresh = () => {
-    const { document, identity } = readDocument();
+  const refresh = (operation: string) => {
+    const { document, identity } = readDocument(operation);
     if (document.dirtyRevision === snapshot.revision) return;
     try {
       publish(createNSETextSnapshot(options.readContent(document.model), options.flowId, document.dirtyRevision, generation), identity);
@@ -128,25 +147,25 @@ export function createNSEDocumentTextOwner<TModel>(supplied: NSEDocumentTextOwne
         const actual = Object.freeze({ ...pending.verified, revision: document.dirtyRevision });
         publish(actual, identity, [error]);
       }
-      dispose();
+      dispose("document-revoked");
     }
   };
   unsubscribe = options.document.subscribe(() => {
     if (disposed) return;
-    try { refresh(); } catch { /* Lifetime diagnostics and revocation already recorded. */ }
+    try { refresh(committing ? "commit" : "subscribe"); } catch { /* Lifetime diagnostics and revocation already recorded. */ }
   });
-  options.signal?.addEventListener("abort", dispose, { once: true });
-  if (options.signal?.aborted) dispose();
+  options.signal?.addEventListener("abort", ownerAbort, { once: true });
+  if (options.signal?.aborted) ownerAbort();
   return Object.freeze({
     signal: lifetime.signal,
     get observerErrors() { return Object.freeze([...errors]); },
-    getSnapshot() { refresh(); if (disposed) throw new Error("Document text owner is revoked."); return snapshot; },
-    subscribe(listener: (receipt: NSETextChangeReceipt) => void) { refresh(); if (disposed) throw new Error("Document text owner is revoked."); listeners.add(listener); return () => { listeners.delete(listener); }; },
+    getSnapshot() { refresh("getSnapshot"); assertLive("getSnapshot"); return snapshot; },
+    subscribe(listener: (receipt: NSETextChangeReceipt) => void) { refresh("subscribe"); assertLive("subscribe"); listeners.add(listener); return () => { listeners.delete(listener); }; },
     commit(request: NSETextCommitRequest) {
-      refresh();
-      if (disposed) throw new Error("Document text owner is revoked.");
+      refresh("commit");
+      assertLive("commit");
       if (publishing || committing) throw new Error("Reentrant text commit during document publication or staging is forbidden.");
-      const { document } = readDocument();
+      const { document } = readDocument("commit");
       if (document.readOnly) throw new Error("Document text is read-only.");
       if (request.expectedRevision !== snapshot.revision || request.expectedGeneration !== undefined && request.expectedGeneration !== generation) throw new Error("Document text revision is stale.");
       const prepared = applyNSETextOperations(snapshot, request.operations);
@@ -162,7 +181,7 @@ export function createNSEDocumentTextOwner<TModel>(supplied: NSEDocumentTextOwne
           },
         });
         if (result.status === "rejected") throw result.error;
-        if (!lastReceipt && !disposed) { try { refresh(); } catch { /* An admitted edit cannot become a rejected edit. */ } }
+        if (!lastReceipt && !disposed) { try { refresh("commit"); } catch { /* An admitted edit cannot become a rejected edit. */ } }
         if (!lastReceipt) {
           const diagnostic = Object.assign(new Error("Native edit committed, but its text projection was revoked or unavailable."), { documentReceipt: result });
           diagnose(diagnostic, "document-text-postcommit");
@@ -173,11 +192,11 @@ export function createNSEDocumentTextOwner<TModel>(supplied: NSEDocumentTextOwne
             else actual = createNSETextSnapshot(options.readContent(current.model), options.flowId, current.dirtyRevision, generation);
           } catch (error) { diagnose(error, "document-text-postcommit-unavailable"); }
           lastReceipt = Object.freeze({ ...makeReceipt(prepared.before, actual), observerErrors: Object.freeze([...errors]) });
-          dispose();
+          dispose("document-revoked");
         }
         return lastReceipt;
       } finally { pending = null; committing = false; }
     },
-    dispose,
+    dispose: () => dispose(),
   });
 }

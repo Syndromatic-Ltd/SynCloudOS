@@ -24,6 +24,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "vitest";
 import { attributedContent, paragraph, textRun, attachmentRun, createInMemoryNSETextOwner } from "../../../src/NSE/Text";
 import { TextEditingSession } from "../../../src/NSE/TextEditing/TextEditingSession";
+import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 
 afterEach(cleanup);
 
@@ -217,7 +218,8 @@ describe("stable native custom-surface input host", () => {
     await act(async () => { await new Promise(resolve => setTimeout(resolve, 0)); });
     expect(client.getSnapshot().disposed).toBe(true);
     expect(session.getSnapshot().model.text).toBe("abcd"); expect(textarea.readOnly).toBe(true);
-    expect(() => client.attachInputHost(() => null)).toThrow(/disposed/); client.dispose();
+    expect(() => client.attachInputHost(() => null)).toThrow(SynCloudOSLifecycleError);
+    expect(() => client.attachInputHost(() => null)).toThrow(expect.objectContaining({ code: "NSE_TEXT_INPUT_CLIENT_DISPOSED", operation: "attachInputHost" })); client.dispose();
   });
   it("accepts a revision-fenced final composition input in a later native task after an empty end", async () => {
     const Client = await clientClass(), Host = await hostComponent(); const { owner, session } = fixture(); const client = new Client({ session });

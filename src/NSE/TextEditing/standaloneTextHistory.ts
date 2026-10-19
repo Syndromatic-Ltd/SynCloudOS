@@ -18,8 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createUndoManager } from "../../SynCloudOS/nseRuntimeContracts";
-import { defineSyncUndoAction } from "../../SynCloudOS/nseRuntimeContracts";
+import { createUndoManager, defineSyncUndoAction, SynCloudOSLifecycleRecord } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSRuntimeId } from "../../SynCloudOS/SynCloudOS";
 import { createInMemoryNSETextOwner, applyNSETextOperations, canonicalNSETextData, type NSETextCommitRequest, type NSETextOwner, type NSEInMemoryTextOwnerOptions } from "../Text";
 import { translateBackendContent } from "./backends/backendChangeTranslator";
@@ -34,21 +33,22 @@ export interface NSETextHistory {
 export function createUndoableNSETextOwner(options: NSEInMemoryTextOwnerOptions & { readonly maximumHistoryEntries?: number } = {}): NSETextOwner & { readonly history: NSETextHistory; dispose(): void } {
   const base = createInMemoryNSETextOwner(options);
   const manager = createUndoManager({ runtimeId: "standalone-text" as SynCloudOSRuntimeId, owner: { kind: "application", id: options.flowId ?? "text" }, maxEntries: options.maximumHistoryEntries ?? 100 });
+  const lifecycle = new SynCloudOSLifecycleRecord({kind:"NSETextHistoryOwner",...(options.flowId===undefined ? {} : {id:options.flowId})});
   let disposed = false, committing = false;
-  const assertLive = () => { if (disposed) throw new Error("Text history owner is disposed."); };
+  const assertLive = (operation:string) => { if (disposed) throw lifecycle.error({code:"NSE_TEXT_HISTORY_OWNER_DISPOSED",operation}); };
   const history: NSETextHistory = Object.freeze({
-    getSnapshot() { assertLive(); return Object.freeze({ canUndo: manager.canUndo, canRedo: manager.canRedo, undoTitle: manager.undoTitle, redoTitle: manager.redoTitle }); },
-    subscribe(listener: () => void) { assertLive(); return manager.subscribe(listener); },
-    async undo() { assertLive(); if (committing) throw new Error("Text edit admission is in progress."); return manager.undo(); },
-    async redo() { assertLive(); if (committing) throw new Error("Text edit admission is in progress."); return manager.redo(); },
+    getSnapshot() { assertLive("getSnapshot"); return Object.freeze({ canUndo: manager.canUndo, canRedo: manager.canRedo, undoTitle: manager.undoTitle, redoTitle: manager.redoTitle }); },
+    subscribe(listener: () => void) { assertLive("subscribe"); return manager.subscribe(listener); },
+    async undo() { assertLive("undo"); if (committing) throw new Error("Text edit admission is in progress."); return manager.undo(); },
+    async redo() { assertLive("redo"); if (committing) throw new Error("Text edit admission is in progress."); return manager.redo(); },
   });
   return Object.freeze({
     signal: base.signal,
     history,
-    getSnapshot: () => { assertLive(); return base.getSnapshot(); },
-    subscribe: base.subscribe,
+    getSnapshot: () => { assertLive("getSnapshot"); return base.getSnapshot(); },
+    subscribe(listener: Parameters<NSETextOwner["subscribe"]>[0]) { assertLive("subscribe"); return base.subscribe(listener); },
     commit(request: NSETextCommitRequest) {
-      assertLive();
+      assertLive("commit");
       if (options.editable === false) throw new Error("Text history owner is read-only.");
       if (committing || manager.isExecuting) throw new Error("Text history admission is reentrant.");
       const safe = canonicalNSETextData(request, "Text commit request", { maxDepth: 24, maxNodes: 100000, maxBytes: 4 * 1024 * 1024 });
@@ -69,6 +69,6 @@ export function createUndoableNSETextOwner(options: NSEInMemoryTextOwnerOptions 
         return base.commit(safe);
       } finally { committing = false; reservation.cancel(); }
     },
-    dispose() { if (disposed) return; disposed = true; manager.dispose(); base.dispose(); },
+    dispose() { if (disposed) return; lifecycle.markDisposed("explicit"); disposed = true; manager.dispose(); base.dispose(); },
   });
 }

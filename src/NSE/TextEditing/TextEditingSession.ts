@@ -26,6 +26,7 @@ import {
 } from "../Text";
 import { nseListLevelOperations, nseParagraphSpansInRange } from "./textStructureCommands";
 import type { NSETextEditingSessionOptions, NSETextSelectionTarget, NSETextSessionSnapshot, NSETextSessionSettlement } from "./textSessionTypes";
+import { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/nseRuntimeContracts";
 
 /** Per-view transient editing state. The supplied owner is the only content authority. */
 export class TextEditingSession {
@@ -33,6 +34,13 @@ export class TextEditingSession {
   readonly #listeners = new Set<() => void>();
   readonly #changes = new Map<number, NSETextChangeReceipt>();
   readonly #lifetime = new AbortController();
+  readonly #lifecycle: SynCloudOSLifecycleRecord;
+  readonly #ownerAbort = (event: Event): void => {
+    const reason = synCloudOSLifecycleSignalReason(event.target as AbortSignal);
+    this.#lifecycle.markDisposed(reason);
+    declareSynCloudOSLifecycleSignal(this.#lifetime.signal, reason);
+    this.dispose();
+  };
   #observerErrors: readonly unknown[] = Object.freeze([]);
   #snapshot: NSETextSessionSnapshot;
   #unsubscribe: () => void;
@@ -44,13 +52,18 @@ export class TextEditingSession {
   constructor(options: NSETextEditingSessionOptions) {
     if (!options.id.trim()) throw new TypeError("A text session requires a stable identity.");
     this.#options = options;
+    this.#lifecycle = new SynCloudOSLifecycleRecord({ kind: "TextEditingSession", id: options.id });
     const model = options.owner.getSnapshot();
     const selection = Object.freeze({ sessionId: options.id, ...(options.documentId ? { documentId: options.documentId } : {}), flowId: model.flowId, ownerGeneration: model.ownerGeneration, modelRevision: model.revision, selectionGeneration: 0, range: Object.freeze({ location: 0, length: 0 }), anchor: 0, focus: 0, affinity: "downstream" as const });
     this.#snapshot = Object.freeze({ model, selection, typingAttributes: this.#typingAt(model, 0), marked: null, editable: options.editable ?? true, disposed: false });
     this.#unsubscribe = options.owner.subscribe((receipt) => this.#accept(receipt));
-    options.signal?.addEventListener("abort", this.dispose, { once: true });
-    options.owner.signal?.addEventListener("abort", this.dispose, { once: true });
-    if (options.signal?.aborted || options.owner.signal?.aborted) this.dispose();
+    options.signal?.addEventListener("abort", this.#ownerAbort, { once: true });
+    options.owner.signal?.addEventListener("abort", this.#ownerAbort, { once: true });
+    const aborted = options.signal?.aborted ? options.signal : options.owner.signal?.aborted ? options.owner.signal : undefined;
+    if (aborted) {
+      const reason = synCloudOSLifecycleSignalReason(aborted);
+      this.#lifecycle.markDisposed(reason); declareSynCloudOSLifecycleSignal(this.#lifetime.signal, reason); this.dispose();
+    }
   }
 
   getSnapshot = (): NSETextSessionSnapshot => this.#snapshot;
@@ -75,7 +88,7 @@ export class TextEditingSession {
   }
 
   select(anchor: number, focus = anchor, affinity: "upstream" | "downstream" = "downstream"): void {
-    this.#assertLive();
+    this.#assertLive("select");
     if (![anchor, focus].every((value) => isNSEUTF16Boundary(this.#snapshot.model.text, value))) throw new RangeError("Selection is outside the text owner or splits a surrogate pair.");
     const previous = this.#snapshot.selection;
     if (anchor === previous.anchor && focus === previous.focus && affinity === previous.affinity) return;
@@ -88,7 +101,7 @@ export class TextEditingSession {
   /** Enter. An empty list item leaves its innermost list; otherwise the paragraph splits and the new one
    *  takes `nextParagraphAttributes`, or a copy without keys that do not carry across a split. */
   splitParagraph(range: NSETextRange = this.#snapshot.selection.range): NSETextChangeReceipt {
-    this.#assertEditable();
+    this.#assertEditable("splitParagraph");
     const model = this.#snapshot.model;
     const span = nseParagraphSpansInRange(model, { location: range.location, length: 0 })[0];
     if (!span) throw new RangeError("Split position is outside the text owner.");
@@ -110,19 +123,19 @@ export class TextEditingSession {
 
   /** Tab / Shift-Tab in a list: indent or outdent the items in the range. */
   changeListLevel(delta: 1 | -1, range: NSETextRange = this.#snapshot.selection.range): NSETextChangeReceipt | null {
-    this.#assertEditable();
+    this.#assertEditable("changeListLevel");
     const operations = nseListLevelOperations(this.#snapshot.model, range, delta);
     return operations.length ? this.commit(operations, undefined, { actionName: "Paragraph Formatting" }) : null;
   }
 
-  setEditable(editable: boolean): void { this.#assertLive(); this.#publish({ editable }); }
+  setEditable(editable: boolean): void { this.#assertLive("setEditable"); this.#publish({ editable }); }
   setTypingAttributes(attributes: NSEAttributedTextAttributes): void {
-    this.#assertEditable();
+    this.#assertEditable("setTypingAttributes");
     const validated = textRun("", attributes).attributes ?? Object.freeze({});
     this.#publish({ typingAttributes: validated });
   }
   commit(operations: readonly NSETextEditOperation[], target?: NSETextSelectionTarget, metadata?: { readonly actionName?: string; readonly coalescingKey?: string }): NSETextChangeReceipt {
-    this.#assertEditable();
+    this.#assertEditable("commit");
     if (this.#snapshot.marked && !this.#committingMarked) throw new Error("Finish or cancel composition before changing canonical text.");
     if (target && !this.resolveTarget(target)) throw new Error("Text target is stale or revoked.");
     const actionName = operations.some(operation => operation.kind === "replace") ? "Typing" : operations.some(operation => operation.kind === "paragraph-attributes") ? "Paragraph Formatting" : "Formatting";
@@ -132,13 +145,14 @@ export class TextEditingSession {
     return this.#options.owner.commit({ expectedRevision: this.#snapshot.model.revision, expectedGeneration: this.#snapshot.model.ownerGeneration, operations, actionName: metadata?.actionName ?? actionName, ...(coalescingKey ? { coalescingKey } : {}) });
   }
   async requestHistory(direction: "undo" | "redo"): Promise<unknown> {
-    this.#assertEditable();
+    this.#assertEditable("requestHistory");
     if (this.#snapshot.marked) throw new Error("Finish or cancel composition before undo or redo.");
     if (!this.#options.history) throw new Error("Text history is unavailable for this owner.");
     this.#typingRun = null;
     return this.#options.history[direction]();
   }
   insertText(text: string, range = this.#snapshot.selection.range): NSETextChangeReceipt {
+    this.#assertLive("insertText");
     const attributes = this.#snapshot.typingAttributes;
     const content = attributedContent(text.split("\n").map((line) => paragraph([textRun(line, attributes)])));
     const receipt = this.commit([{ kind: "replace", range, content }]);
@@ -149,6 +163,7 @@ export class TextEditingSession {
     const selected = this.#snapshot.selection.range;
     const range = selected.length ? selected : nseGraphemeDeletionRange(this.#snapshot.model.text, selected.location, direction);
     if (!range.length) return null;
+    this.#assertLive("delete");
     return this.insertText("", range);
   }
   applyAttributes(attributes: NSEAttributedTextAttributes, target = this.captureTarget()): NSETextChangeReceipt | null {
@@ -166,14 +181,14 @@ export class TextEditingSession {
     return this.commit([{ kind: "remove-attributes", range: resolved.range, keys }], target);
   }
   setMarkedText(text: string, range?: NSETextRange): void {
-    this.#assertEditable();
+    this.#assertEditable("setMarkedText");
     const previous = this.#snapshot.marked;
     const replacement = range ?? previous?.range ?? this.#snapshot.selection.range;
     if (!Number.isSafeInteger(replacement.location) || !Number.isSafeInteger(replacement.length) || replacement.location < 0 || replacement.length < 0 || replacement.location + replacement.length > this.#snapshot.model.text.length) throw new RangeError("Marked range is outside the owner.");
     this.#publish({ marked: Object.freeze({ text, range: Object.freeze({ ...replacement }), baseRevision: previous?.baseRevision ?? this.#snapshot.model.revision, conflict: previous?.conflict ?? false }) });
   }
   unmarkText(): NSETextChangeReceipt | null {
-    this.#assertLive();
+    this.#assertLive("unmarkText");
     const marked = this.#snapshot.marked;
     if (!marked) return null;
     if (marked.conflict || marked.baseRevision !== this.#snapshot.model.revision) throw new Error("Composition conflicts with newer canonical text; preserve or cancel the marked draft.");
@@ -181,7 +196,7 @@ export class TextEditingSession {
     try { const receipt = this.insertText(marked.text, marked.range); this.#publish({ marked: null }); return receipt; }
     finally { this.#committingMarked = false; }
   }
-  cancelMarkedText(): void { this.#assertLive(); this.#publish({ marked: null }); }
+  cancelMarkedText(): void { this.#assertLive("cancelMarkedText"); this.#publish({ marked: null }); }
   settleEditing(): NSETextSessionSettlement {
     if (this.#snapshot.disposed) return Object.freeze({ status: "revoked" });
     if (this.#snapshot.marked) return Object.freeze({ status: "refused", issues: Object.freeze([{ code: "text-composition-active", message: "Finish or cancel the current text composition." }]) });
@@ -189,7 +204,8 @@ export class TextEditingSession {
   }
   dispose = (): void => {
     if (this.#snapshot.disposed) return;
-    this.#unsubscribe(); this.#options.signal?.removeEventListener("abort", this.dispose); this.#options.owner.signal?.removeEventListener("abort", this.dispose); this.#changes.clear();
+    this.#lifecycle.markDisposed("explicit");
+    this.#unsubscribe(); this.#options.signal?.removeEventListener("abort", this.#ownerAbort); this.#options.owner.signal?.removeEventListener("abort", this.#ownerAbort); this.#changes.clear();
     this.#publish({ disposed: true, editable: false }); this.#lifetime.abort(); this.#listeners.clear();
   };
 
@@ -260,6 +276,6 @@ export class TextEditingSession {
     for (const listener of [...this.#listeners]) { if (this.#listeners.has(listener)) { try { listener(); } catch (error) { errors.push(error); } } }
     this.#observerErrors = Object.freeze(errors);
   }
-  #assertLive(): void { if (this.#snapshot.disposed || this.#options.signal?.aborted) throw new Error("Text session is revoked."); }
-  #assertEditable(): void { this.#assertLive(); if (!this.#snapshot.editable) throw new Error("Text session is read-only."); }
+  #assertLive(operation: string): void { if (this.#snapshot.disposed || this.#options.signal?.aborted) throw this.#lifecycle.error({ code: "NSE_TEXT_EDITING_SESSION_DISPOSED", operation }); }
+  #assertEditable(operation: string): void { this.#assertLive(operation); if (!this.#snapshot.editable) throw new Error("Text session is read-only."); }
 }

@@ -23,7 +23,28 @@ import { createUndoableNSETextOwner } from "../../../src/NSE/TextEditing/standal
 import { TextEditingSession } from "../../../src/NSE/TextEditing/TextEditingSession";
 import { attributedContent, paragraph, textRun } from "../../../src/NSE/Text";
 import { translateBackendContent } from "../../../src/NSE/TextEditing/backends/backendChangeTranslator";
+import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 describe("standalone text history", () => {
+  it("identifies disposed owner and history operations", async () => {
+    const owner = createUndoableNSETextOwner({ flowId: "history" });
+    owner.dispose(); owner.dispose();
+    const actions = {
+      getSnapshot: () => owner.getSnapshot(), subscribe: () => owner.subscribe(() => {}),
+      commit: () => owner.commit({ expectedRevision: 0, operations: [] }),
+    };
+    for (const [operation, action] of Object.entries(actions)) {
+      expect(action).toThrow(SynCloudOSLifecycleError);
+      expect(action).toThrow(expect.objectContaining({ code: "NSE_TEXT_HISTORY_OWNER_DISPOSED", operation, disposal: expect.objectContaining({ reason: "explicit" }) }));
+    }
+    for (const [operation, action] of Object.entries({ getSnapshot: () => owner.history.getSnapshot(), subscribe: () => owner.history.subscribe(() => {}) })) {
+      expect(action).toThrow(SynCloudOSLifecycleError);
+      expect(action).toThrow(expect.objectContaining({ code: "NSE_TEXT_HISTORY_OWNER_DISPOSED", operation }));
+    }
+    for (const operation of ["undo", "redo"] as const) {
+      await expect(owner.history[operation]()).rejects.toBeInstanceOf(SynCloudOSLifecycleError);
+      await expect(owner.history[operation]()).rejects.toMatchObject({ code: "NSE_TEXT_HISTORY_OWNER_DISPOSED", operation });
+    }
+  });
   it("replays structural paragraph changes even when flat text is identical", async () => {
     const hard = attributedContent([paragraph([textRun("one\ntwo")])]);
     const blocks = attributedContent([paragraph([textRun("one")]), paragraph([textRun("two")])]);
