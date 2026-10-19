@@ -105,7 +105,8 @@ export function sdkPackageStyles({ themeNames, publicStyleEntries = {}, framewor
         (_match, _quote, dataUrl) => {
           const svg = decodeURIComponent(dataUrl.slice(dataUrl.indexOf(",") + 1));
           const reference = this.emitFile({ type: "asset", name: "nse-vector.svg", source: svg });
-          return `url("__VITE_ASSET__${reference}__")`;
+          // Preserve this boundary through the consuming application's build too.
+          return `url("__VITE_ASSET__${reference}__?no-inline")`;
         });
       return rewritten === source ? null : { code: rewritten, map: null };
     },

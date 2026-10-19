@@ -20,7 +20,7 @@
 
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { build } from "vite";
 import { describe, expect, it } from "vitest";
 import { sdkNeutralStyleModuleSource, sdkPackageStyles } from "../../scripts/synware/sdk-package-styles.mjs";
@@ -50,6 +50,22 @@ describe("installed SDK stylesheet ownership", () => {
       const image = output.find(file => file.type === "asset" && file.fileName.endsWith(".svg"));
       expect(image?.type === "asset" && String(image.source)).toBe(svg);
       expect(css).toContain(image?.fileName.split("/").at(-1));
+      expect(css).toContain(".svg?no-inline");
+      for (const file of output) {
+        if (file.type !== "asset") continue;
+        const target = join(root, "package", file.fileName);
+        mkdirSync(dirname(target), { recursive: true });
+        writeFileSync(target, file.source);
+      }
+      writeFileSync(join(root, "consumer.js"), 'import "./package/nse/styles.css";');
+      const consumer = await build({
+        root, configFile: false, logLevel: "silent", publicDir: false,
+        build: { write: false, rollupOptions: { input: join(root, "consumer.js") } },
+      });
+      const consumed = (Array.isArray(consumer) ? consumer[0] : consumer).output;
+      expect(consumed.filter(file => file.type === "asset" && file.fileName.endsWith(".css"))
+        .map(file => String(file.source)).join("\n")).not.toContain("data:image/svg+xml");
+      expect(consumed.some(file => file.type === "asset" && file.fileName.endsWith(".svg"))).toBe(true);
     } finally { rmSync(root, { recursive: true, force: true }); }
   });
 
