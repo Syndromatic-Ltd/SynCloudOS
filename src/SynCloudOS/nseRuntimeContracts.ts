@@ -33,6 +33,13 @@ export { encodeOpaqueIdentity } from "./MediaPanels/opaqueIdentity";
 export { normalisePasteboardRepresentations } from "./Pasteboard/Pasteboard";
 export { normaliseRuntimeCursorDescriptor } from "./Pointer/TrackingRegionManager";
 export { saveFilePanelTarget } from "./FilePanels/FilePanelDocumentBridge";
+export { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "./ErrorManager/lifecycleError";
+export type {
+  SynCloudOSLifecycleDisposal,
+  SynCloudOSLifecycleDisposalReason,
+  SynCloudOSLifecycleErrorOptions,
+  SynCloudOSLifecycleResource,
+} from "./ErrorManager/lifecycleError";
 
 export { canonicalDocumentJson } from "./Documents/documentTypes";
 export { createUndoManager } from "./Undo/UndoManager";

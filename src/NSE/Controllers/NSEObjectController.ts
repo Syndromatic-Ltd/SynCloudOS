@@ -30,6 +30,7 @@ import {
   ControllerReadOnlyError,
   UnknownControllerFieldError,
   NSEController,
+  type NSEControllerOwnership,
   type ControllerCommitResult,
   type ControllerEditTransaction,
   type ControllerValidationIssue,
@@ -59,7 +60,7 @@ export interface ObjectControllerSnapshot<T extends object> {
   readonly issues: readonly ControllerValidationIssue[];
 }
 
-export interface ObjectControllerOptions<T extends object> {
+export interface ObjectControllerOptions<T extends object> extends NSEControllerOwnership {
   readonly id: string;
   readonly responderId?: string;
   readonly content: T;
@@ -102,7 +103,7 @@ export class NSEObjectController<T extends object> extends NSEController<
   #changedDuringEdit = false;
 
   constructor(options: ObjectControllerOptions<T>) {
-    super({ id: options.id, responderId: options.responderId });
+    super({ kind: "NSEObjectController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal });
     this.#fields = Object.freeze(
       Object.assign(Object.create(null), options.fields),
     ) as ObjectControllerFields<T>;
@@ -130,7 +131,7 @@ export class NSEObjectController<T extends object> extends NSEController<
   }
 
   setField<V>(fieldName: string, value: V): boolean {
-    this.assertActive();
+    this.assertActive("setField");
     const field = this.#requireField<V>(fieldName);
     const draft = this.#requireDraft();
     const issues = field.validate?.(value, draft) ?? [];
@@ -181,7 +182,7 @@ export class NSEObjectController<T extends object> extends NSEController<
   }
 
   commitEditing(): ControllerCommitResult {
-    this.assertActive();
+    this.assertActive("commitEditing");
     const transaction = this.editTransaction;
     const draft = this.#snapshot.draft;
     if (!transaction || draft === null) return { status: "not-editing" };

@@ -30,6 +30,7 @@ import {
   ControllerEditingStateError,
   ControllerReadOnlyError,
   NSEController,
+  type NSEControllerOwnership,
   type ControllerCommitResult,
   type ControllerEditTransaction,
   type ControllerValidationIssue,
@@ -43,7 +44,7 @@ export interface NSEDictionaryEntry<TValue> {
   readonly isExplicitlyIncluded: boolean;
 }
 
-export interface DictionaryControllerOptions<TValue> {
+export interface DictionaryControllerOptions<TValue> extends NSEControllerOwnership {
   readonly id: string;
   readonly responderId?: string;
   readonly content?: Readonly<Record<string, TValue>>;
@@ -196,7 +197,7 @@ export class NSEDictionaryController<TValue> extends NSEController<
   #changedDuringEdit = false;
 
   constructor(options: DictionaryControllerOptions<TValue>) {
-    super({ id: options.id, responderId: options.responderId });
+    super({ kind: "NSEDictionaryController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal });
     this.#clone = options.clone ?? structuredClone;
     this.#compareKeys = options.compareKeys ?? codePointCompare;
     this.#initialKey = options.initialKey ?? "key";
@@ -228,7 +229,7 @@ export class NSEDictionaryController<TValue> extends NSEController<
   getSnapshot = (): DictionaryControllerSnapshot<TValue> => this.#snapshot;
 
   setContentDictionary(content: Readonly<Record<string, TValue>>): void {
-    this.assertActive();
+    this.assertActive("setContentDictionary");
     if (this.editTransaction) {
       throw new ControllerEditingStateError(
         "Discard or commit the current edit before replacing content.",
@@ -238,21 +239,21 @@ export class NSEDictionaryController<TValue> extends NSEController<
   }
 
   setIncludedKeys(keys: readonly string[]): void {
-    this.assertActive();
+    this.assertActive("setIncludedKeys");
     const next = this.#normaliseKeys(keys);
     if (sameKeys(next, this.#snapshot.includedKeys)) return;
     this.#publishRows("included-keys", { includedKeys: next });
   }
 
   setExcludedKeys(keys: readonly string[]): void {
-    this.assertActive();
+    this.assertActive("setExcludedKeys");
     const next = this.#normaliseKeys(keys);
     if (sameKeys(next, this.#snapshot.excludedKeys)) return;
     this.#publishRows("excluded-keys", { excludedKeys: next });
   }
 
   setInitialEntry(key: string, value: TValue | (() => TValue)): void {
-    this.assertActive();
+    this.assertActive("setInitialEntry");
     validateKey(key);
     this.#initialKey = key;
     this.#initialValue = value;
@@ -272,7 +273,7 @@ export class NSEDictionaryController<TValue> extends NSEController<
   }
 
   insert(): string {
-    const draft = this.#requireDraft();
+    const draft = this.#requireDraft("insert");
     const unavailable = new Set([
       ...Object.keys(draft),
       ...this.#snapshot.includedKeys,
@@ -291,7 +292,7 @@ export class NSEDictionaryController<TValue> extends NSEController<
   }
 
   remove(keys: Iterable<string>): void {
-    const draft = this.#requireDraft();
+    const draft = this.#requireDraft("remove");
     const removing = [...new Set(keys)];
     if (removing.length === 0) return;
     const next = this.#mutableDictionary(draft);
@@ -308,7 +309,7 @@ export class NSEDictionaryController<TValue> extends NSEController<
   }
 
   renameKey(previousKey: string, key: string): DictionaryMutationResult {
-    const draft = this.#requireDraft();
+    const draft = this.#requireDraft("renameKey");
     const problem = keyProblem(key);
     if (problem) return { status: "invalid", key, message: problem };
     if (!Object.hasOwn(draft, previousKey)) {
@@ -343,7 +344,7 @@ export class NSEDictionaryController<TValue> extends NSEController<
   }
 
   setValue(key: string, value: TValue): DictionaryMutationResult {
-    const draft = this.#requireDraft();
+    const draft = this.#requireDraft("setValue");
     const problem = keyProblem(key);
     if (problem) return { status: "invalid", key, message: problem };
     const isIncluded = this.#snapshot.includedKeys.includes(key);
@@ -361,7 +362,7 @@ export class NSEDictionaryController<TValue> extends NSEController<
   }
 
   select(keys: Iterable<string>): boolean {
-    this.assertActive();
+    this.assertActive("select");
     const available = new Set(this.#snapshot.entries.map(({ key }) => key));
     const requested = [...keys];
     if (requested.some((key) => !available.has(key))) {
@@ -377,7 +378,7 @@ export class NSEDictionaryController<TValue> extends NSEController<
   }
 
   commitEditing(): ControllerCommitResult {
-    this.assertActive();
+    this.assertActive("commitEditing");
     const transaction = this.editTransaction;
     const draft = this.#snapshot.draftContent;
     if (!transaction || draft === null) return { status: "not-editing" };
@@ -599,8 +600,8 @@ export class NSEDictionaryController<TValue> extends NSEController<
     this.#publishRows("content", { draftContent, issues: [] });
   }
 
-  #requireDraft(): Readonly<Record<string, TValue>> {
-    this.assertActive();
+  #requireDraft(operation: string): Readonly<Record<string, TValue>> {
+    this.assertActive(operation);
     if (!this.#snapshot.editable) throw new ControllerReadOnlyError();
     if (!this.editTransaction || this.#snapshot.draftContent === null) {
       throw new ControllerEditingStateError(

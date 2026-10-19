@@ -25,6 +25,7 @@ import { registerMountedDocumentWorkflowProvider } from "./mountedDocumentWorkfl
 import { prepareMountedDocumentAssetEdit } from "./mountedDocumentAssetPreparation";
 import { DocumentAssetError } from "../Documents";
 import type { ApplicationDocument, DocumentEditOptions, DocumentEditResult } from "../Documents";
+import { declareSynCloudOSLifecycleSignal } from "../ErrorManager/lifecycleError";
 import type { DocumentEditAdmission } from "../HostServices/AppSDKHostServiceTypes";
 import type { DocumentEditingContext, DocumentEditingLifetimeOptions, DocumentEditingParticipant, DocumentEditingReason, DocumentEditingSettlementResult } from "../Documents";
 import { IFXImageResource } from "../../FX/ImageFX/IFXImageResource";
@@ -965,6 +966,9 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
   const signal = bundleGenerationFence
     ? AbortSignal.any([runtime.signal, mountSignal, bundleGenerationFence.signal])
     : mergeSignals(runtime.signal, controller.signal, transferMount.signal);
+  // Resources an application hands this signal as their owner record
+  // "application-closed" when the session ends.
+  declareSynCloudOSLifecycleSignal(signal, "application-closed");
   const hostFontLoader = options.hostFontResourceLoader;
   const fontResourceLoader: TFXPackagedFontResourceLoader | undefined = hostFontLoader
     ? async (path, resourceSignal) => {

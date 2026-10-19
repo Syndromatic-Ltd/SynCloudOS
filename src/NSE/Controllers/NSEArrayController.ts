@@ -34,6 +34,7 @@ import {
   ControllerEditingStateError,
   ControllerReadOnlyError,
   NSEController,
+  type NSEControllerOwnership,
   type ControllerCommitResult,
   type ControllerEditTransaction,
   type ControllerValidationIssue,
@@ -47,7 +48,7 @@ export interface ArrayControllerSelectionOptions {
   readonly selectsInsertedObjects?: boolean;
 }
 
-export interface ArrayControllerOptions<T, TId extends ItemIdentity> {
+export interface ArrayControllerOptions<T, TId extends ItemIdentity> extends NSEControllerOwnership {
   readonly id: string;
   readonly responderId?: string;
   readonly content?: readonly T[];
@@ -154,7 +155,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
   #changedDuringEdit = false;
 
   constructor(options: ArrayControllerOptions<T, TId>) {
-    super({ id: options.id, responderId: options.responderId });
+    super({ kind: "NSEArrayController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal });
     this.#getId = options.getId;
     this.#equals = options.equals ?? defaultEquals;
     this.#clone = options.clone ?? structuredClone;
@@ -192,7 +193,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
   getSnapshot = (): ArrayControllerSnapshot<T, TId> => this.#snapshot;
 
   setContent(content: readonly T[]): void {
-    this.assertActive();
+    this.assertActive("setContent");
     if (this.editTransaction) {
       throw new ControllerEditingStateError(
         "Discard or commit the current edit before replacing content.",
@@ -209,7 +210,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
   }
 
   setPredicate(predicate: Predicate<T> | null): void {
-    this.assertActive();
+    this.assertActive("setPredicate");
     if (this.#snapshot.predicate === predicate) return;
     this.#replaceArrangement("arrangement", this.#snapshot.content, {
       predicate,
@@ -218,7 +219,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
   }
 
   setSortDescriptors(descriptors: readonly SortComparator<T>[]): void {
-    this.assertActive();
+    this.assertActive("setSortDescriptors");
     const next = Object.freeze([...descriptors]);
     if (
       next.length === this.#snapshot.sortDescriptors.length &&
@@ -235,7 +236,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
   }
 
   select(ids: Iterable<TId>): boolean {
-    this.assertActive();
+    this.assertActive("select");
     const selectable = new Set(
       (this.#selectionOptions.preservesSelection
         ? this.#snapshot.content
@@ -252,23 +253,23 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
   }
 
   toggleSelection(id: TId): boolean {
-    this.#requireSelectable(id);
+    this.#requireSelectable("toggleSelection", id);
     return this.#publishSelection(this.#selection.toggle(id));
   }
 
   extendSelection(id: TId): boolean {
-    this.#requireSelectable(id);
+    this.#requireSelectable("extendSelection", id);
     return this.#publishSelection(
       this.#selection.extendRange(id, this.#snapshot.arranged.map(this.#getId)),
     );
   }
 
   selectNext(): boolean {
-    return this.#selectOffset(1);
+    return this.#selectOffset("selectNext", 1);
   }
 
   selectPrevious(): boolean {
-    return this.#selectOffset(-1);
+    return this.#selectOffset("selectPrevious", -1);
   }
 
   beginEditing(transaction: ControllerEditTransaction): void {
@@ -284,7 +285,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
   }
 
   insert(item: T, insertion: ArrayControllerInsertion<TId> = {}): void {
-    this.#requireEdit();
+    this.#requireEdit("insert");
     if (insertion.beforeId !== undefined && insertion.afterId !== undefined) {
       throw new TypeError("Insertions accept either beforeId or afterId, not both.");
     }
@@ -309,7 +310,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
   }
 
   remove(ids: Iterable<TId>): void {
-    this.#requireEdit();
+    this.#requireEdit("remove");
     const removing = new Set(ids);
     if (removing.size === 0) return;
     for (const id of removing) this.#indexOf(id);
@@ -344,7 +345,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
   }
 
   update(id: TId, updater: (item: T) => T): void {
-    this.#requireEdit();
+    this.#requireEdit("update");
     const index = this.#indexOf(id);
     const next = this.#owned(updater(this.#snapshot.content[index]!));
     if (this.#getId(next) !== id) {
@@ -357,7 +358,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
   }
 
   commitEditing(): ControllerCommitResult {
-    this.assertActive();
+    this.assertActive("commitEditing");
     const transaction = this.editTransaction;
     if (!transaction) return { status: "not-editing" };
     if (this.#snapshot.issues.length > 0) {
@@ -558,8 +559,8 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
     });
   }
 
-  #requireEdit(): void {
-    this.assertActive();
+  #requireEdit(operation: string): void {
+    this.assertActive(operation);
     if (!this.#snapshot.editable) throw new ControllerReadOnlyError();
     if (!this.editTransaction) {
       throw new ControllerEditingStateError(
@@ -576,15 +577,15 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
     return index;
   }
 
-  #requireSelectable(id: TId): void {
-    this.assertActive();
+  #requireSelectable(operation: string, id: TId): void {
+    this.assertActive(operation);
     if (!this.#snapshot.arranged.some((item) => this.#getId(item) === id)) {
       throw new RangeError("Unknown arranged item identity.");
     }
   }
 
-  #selectOffset(offset: -1 | 1): boolean {
-    this.assertActive();
+  #selectOffset(operation: string, offset: -1 | 1): boolean {
+    this.assertActive(operation);
     const ids = this.#snapshot.arranged.map(this.#getId);
     if (ids.length === 0) return false;
     const focus = this.#selection.getSnapshot().focusId;

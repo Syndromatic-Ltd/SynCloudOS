@@ -183,6 +183,13 @@ export type {
 export type { SynCloudOSMultiSwitchState } from "./ApplicationState/applicationStateTypes";
 export { AppPresentationErrorFallback, SynCloudOSWatchdog } from "./ErrorManager/SynCloudOSWatchdog";
 export { toTechnicalReport } from "./ErrorManager/ErrorManager";
+export { SynCloudOSLifecycleError } from "./ErrorManager/lifecycleError";
+export type {
+  SynCloudOSLifecycleDisposal,
+  SynCloudOSLifecycleDisposalReason,
+  SynCloudOSLifecycleErrorOptions,
+  SynCloudOSLifecycleResource,
+} from "./ErrorManager/lifecycleError";
 export type { SynCloudOSAppearance, SynCloudOSResolvedMode } from "./Appearance/appearanceService";
 export type { SynCloudOSSettings } from "./Settings/settingsService";
 export type { SynCloudOSRole } from "./PermissionManager/permissionTypes";

@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { act, fireEvent, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { NSEArrayController } from "../../src/NSE/Controllers";
 import { createSynWare } from "../../src/SynCloudOS/AppSDK/createSynWare";
 import { useSynWare } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { useSynWareCommands } from "../../src/SynCloudOS/AppSDK/hooks/useSynWareCommands";
@@ -19,6 +20,7 @@ const mounts: MountedSynCloudOSHost[] = [];
 const elements: HTMLElement[] = [];
 const sessions: ReturnType<typeof useSynWare>[] = [];
 const aborted = vi.fn();
+const sessionControllers: NSEArrayController<string, string>[] = [];
 const executed = vi.fn();
 function Application() {
   const app = useSynWare();
@@ -28,6 +30,9 @@ function Application() {
     sessions.push(app);
     app.signal.addEventListener("abort", aborted, { once: true });
   }, [app]);
+  // A session-owned controller the app never disposes itself.
+  const [accounts] = useState(() => new NSEArrayController<string, string>({ id: "session-accounts", content: ["current"], getId: (value) => value, ownerSignal: app.signal }));
+  useEffect(() => { sessionControllers.push(accounts); }, [accounts]);
   return <button data-testid="application" onClick={() => app.lifecycle.closeSelf()}>Close application</button>;
 }
 const bundle = createSynWare({ manifest: {
@@ -52,7 +57,7 @@ async function mount(target = element(), overrides: object = {}) {
 afterEach(async () => {
   for (const host of mounts.splice(0)) await act(async () => { await host.dispose("test-cleanup"); });
   for (const target of elements.splice(0)) target.remove();
-  sessions.length = 0; vi.clearAllMocks(); window.history.replaceState(null, "", "/");
+  sessions.length = 0; sessionControllers.length = 0; vi.clearAllMocks(); window.history.replaceState(null, "", "/");
 });
 describe("application-only browser host", () => {
   it("launches the real app fullscreen from / without a shell or primary window", async () => {
@@ -76,6 +81,8 @@ describe("application-only browser host", () => {
     expect(runtime.lifecycle.getState(id)).toBe("closed");
     expect(session.signal.aborted).toBe(true);
     expect(aborted).toHaveBeenCalled();
+    expect(sessionControllers.at(-1)?.isDisposed).toBe(true);
+    expect(sessionControllers.at(-1)?.disposalReason).toBe("application-closed");
     expect(target.querySelector('[data-testid="application"]')).toBeNull();
     await act(async () => { await Promise.resolve(); });
     expect(runtime.lifecycle.getState(id)).toBe("closed");

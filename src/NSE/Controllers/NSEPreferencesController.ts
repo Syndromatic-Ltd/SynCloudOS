@@ -22,6 +22,7 @@ import { defineSyncUndoAction } from "../../SynCloudOS/nseRuntimeContracts";
 import {
   ControllerEditingStateError,
   NSEController,
+  type NSEControllerOwnership,
   type ControllerCommitResult,
   type ControllerEditTransaction,
   type ControllerValidationIssue,
@@ -66,7 +67,7 @@ export interface PreferencesControllerChange<T extends object> {
   readonly keys: readonly (keyof T)[];
 }
 
-export interface PreferencesControllerOptions<T extends object> {
+export interface PreferencesControllerOptions<T extends object> extends NSEControllerOwnership {
   readonly namespace: string;
   readonly responderId?: string;
   readonly schema: PreferencesSchema<T>;
@@ -346,7 +347,7 @@ export class NSEPreferencesController<T extends object> extends NSEController<
   #draft: T | null = null;
 
   constructor(options: PreferencesControllerOptions<T>) {
-    super({ id: options.namespace, responderId: options.responderId });
+    super({ kind: "NSEPreferencesController", id: options.namespace, responderId: options.responderId, ownerSignal: options.ownerSignal });
     this.#namespace = options.namespace;
     this.#schema = options.schema;
     this.#adapter = options.adapter;
@@ -374,7 +375,7 @@ export class NSEPreferencesController<T extends object> extends NSEController<
   getSnapshot = (): PreferencesSnapshot<T> => this.#snapshot;
 
   set<K extends keyof T>(key: K, value: T[K]): boolean {
-    this.assertActive();
+    this.assertActive("set");
     if (!Object.hasOwn(this.#schema.fields, key)) {
       throw new PreferenceValidationError(String(key));
     }
@@ -392,7 +393,7 @@ export class NSEPreferencesController<T extends object> extends NSEController<
   reset(
     keys: readonly (keyof T)[] = this.#keys,
   ): boolean {
-    this.assertActive();
+    this.assertActive("reset");
     const requested = [...new Set(keys)];
     for (const key of requested) {
       if (!Object.hasOwn(this.#schema.fields, key)) {
@@ -419,7 +420,7 @@ export class NSEPreferencesController<T extends object> extends NSEController<
   }
 
   commitEditing(): ControllerCommitResult {
-    this.assertActive();
+    this.assertActive("commitEditing");
     const transaction = this.editTransaction;
     const draft = this.#draft;
     if (!transaction || !draft) return { status: "not-editing" };

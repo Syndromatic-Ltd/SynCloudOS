@@ -27,6 +27,26 @@ import type {
   UndoManager,
   UndoOwner,
 } from "../../SynCloudOS/SynCloudOS";
+import {
+  SynCloudOSLifecycleRecord,
+  synCloudOSLifecycleSignalReason,
+  type SynCloudOSLifecycleDisposalReason,
+} from "../../SynCloudOS/nseRuntimeContracts";
+
+/** Why a controller was disposed. `"explicit"` is a `dispose()` call. */
+export type NSEControllerDisposalReason = SynCloudOSLifecycleDisposalReason;
+
+/** Ownership options every controller accepts. */
+export interface NSEControllerOwnership {
+  /**
+   * Disposes the controller when it aborts. Pass `useSynWare().signal` to
+   * make the application session the owner: the controller is then disposed
+   * when the application closes, recording `"application-closed"`; any other
+   * signal records `"owner-signal-aborted"`. Construction throws the abort
+   * reason when the signal has already aborted.
+   */
+  readonly ownerSignal?: AbortSignal;
+}
 
 export interface ControllerValidationIssue {
   readonly code: string;
@@ -113,23 +133,41 @@ function validateTransaction(
   return Object.freeze({ ...transaction });
 }
 
+const explicitDisposalFix = "Stop using a controller once you dispose it, or create a new one. If a useEffect cleanup disposes it, React StrictMode's effect replay disposes it while the component stays mounted: create it with useNSEArrayController() or useNSETreeController() instead, which survive the replay.";
+
 export abstract class NSEController<TSnapshot, TChange> {
   readonly id: string;
   readonly responderId: string;
   readonly #listeners = new Set<() => void>();
   readonly #changeListeners = new Set<(change: TChange) => void>();
+  readonly #disposeListeners = new Set<(reason: NSEControllerDisposalReason) => void>();
+  readonly #lifecycle: SynCloudOSLifecycleRecord;
   #responderAttachment: ResponderRegistrationHandle | null = null;
+  #releaseOwnerSignal: (() => void) | null = null;
+  #disposalReason: NSEControllerDisposalReason | undefined;
   #disposed = false;
   #disposing = false;
   protected editTransaction: ControllerEditTransaction | null = null;
 
-  protected constructor(options: { readonly id: string; readonly responderId?: string }) {
+  protected constructor(options: NSEControllerOwnership & {
+    readonly kind: string;
+    readonly id: string;
+    readonly responderId?: string;
+  }) {
     if (!options.id.trim()) throw new TypeError("Controller id must not be empty.");
     if (options.responderId !== undefined && !options.responderId.trim()) {
       throw new TypeError("Controller responder id must not be empty.");
     }
+    options.ownerSignal?.throwIfAborted();
     this.id = options.id;
     this.responderId = options.responderId ?? `controller:${options.id}`;
+    this.#lifecycle = new SynCloudOSLifecycleRecord({ kind: options.kind, id: options.id });
+    const ownerSignal = options.ownerSignal;
+    if (ownerSignal) {
+      const release = () => this.#disposeFor(synCloudOSLifecycleSignalReason(ownerSignal));
+      ownerSignal.addEventListener("abort", release, { once: true });
+      this.#releaseOwnerSignal = () => ownerSignal.removeEventListener("abort", release);
+    }
   }
 
   abstract getSnapshot(): TSnapshot;
@@ -140,7 +178,7 @@ export abstract class NSEController<TSnapshot, TChange> {
   attachResponder(
     request: ControllerResponderAttachmentRequest,
   ): ControllerResponderAttachment {
-    this.assertActive();
+    this.assertActive("attachResponder");
     if (this.#responderAttachment) {
       throw new ControllerResponderAttachmentError(
         `Controller "${this.id}" already has a live responder attachment.`,
@@ -201,9 +239,42 @@ export abstract class NSEController<TSnapshot, TChange> {
     return this.editTransaction !== null;
   }
 
+  /** True from the moment disposal begins. Every imperative member then throws a `SynCloudOSLifecycleError`. */
+  get isDisposed(): boolean {
+    return this.#disposed || this.#disposing;
+  }
+
+  /** Why the controller was disposed, or `undefined` while it is live. */
+  get disposalReason(): NSEControllerDisposalReason | undefined {
+    return this.#disposalReason;
+  }
+
+  /**
+   * Calls `listener` once, with the reason, when the controller is disposed.
+   * Returns an unsubscribe function. Registering on a controller that is
+   * already disposed does nothing, so check `isDisposed` first.
+   */
+  onDispose = (listener: (reason: NSEControllerDisposalReason) => void): (() => boolean) => {
+    if (this.isDisposed) return () => false;
+    this.#disposeListeners.add(listener);
+    return () => this.#disposeListeners.delete(listener);
+  };
+
+  /** Releases the controller. Repeated calls do nothing. */
   dispose(): void {
+    this.#disposeFor("explicit");
+  }
+
+  /** Runs once when disposal completes, before disposal listeners. */
+  protected didDispose(): void {}
+
+  #disposeFor(reason: NSEControllerDisposalReason): void {
     if (this.#disposed || this.#disposing) return;
     this.#disposing = true;
+    this.#disposalReason = reason;
+    this.#lifecycle.markDisposed(reason);
+    this.#releaseOwnerSignal?.();
+    this.#releaseOwnerSignal = null;
     try {
       this.discardEditing();
     } finally {
@@ -214,12 +285,21 @@ export abstract class NSEController<TSnapshot, TChange> {
         this.#disposing = false;
         this.#listeners.clear();
         this.#changeListeners.clear();
+        const failures: unknown[] = [];
+        try { this.didDispose(); } catch (error) { failures.push(error); }
+        const disposeListeners = [...this.#disposeListeners];
+        this.#disposeListeners.clear();
+        for (const listener of disposeListeners) {
+          try { listener(reason); } catch (error) { failures.push(error); }
+        }
+        if (failures.length === 1) throw failures[0];
+        if (failures.length > 1) throw new AggregateError(failures, "Controller disposal observers failed.");
       }
     }
   }
 
   protected beginEditTransaction(transaction: ControllerEditTransaction): void {
-    this.assertActive();
+    this.assertActive("beginEditing");
     if (this.editTransaction) {
       if (this.editTransaction.id === transaction.id) return;
       throw new ControllerEditingStateError(
@@ -229,9 +309,14 @@ export abstract class NSEController<TSnapshot, TChange> {
     this.editTransaction = validateTransaction(transaction);
   }
 
-  protected assertActive(): void {
+  /** Throws a `SynCloudOSLifecycleError` (code `NSE_CONTROLLER_DISPOSED`) once disposal has begun. */
+  protected assertActive(operation: string): void {
     if (this.#disposed || this.#disposing) {
-      throw new Error(`Controller "${this.id}" is disposed.`);
+      throw this.#lifecycle.error({
+        code: "NSE_CONTROLLER_DISPOSED",
+        operation,
+        ...(this.#disposalReason === "explicit" ? { fix: explicitDisposalFix } : {}),
+      });
     }
   }
 

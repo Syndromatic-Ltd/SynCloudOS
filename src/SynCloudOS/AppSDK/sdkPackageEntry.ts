@@ -81,6 +81,13 @@ export { requestDocumentOutputPrint, createBrowserDocumentOutputPrintHost } from
 export type { MEFXClockLease, MEFXMediaClient } from "../../FX/MediaFX/MEFXMediaClient";
 export { defineSynWareServiceToken, SynWareServiceAcquisitionError } from "./serviceToken";
 export type { SynWareServiceToken, SynWareServiceTokenDefinition } from "./serviceToken";
+export { SynCloudOSLifecycleError } from "../ErrorManager/lifecycleError";
+export type {
+  SynCloudOSLifecycleDisposal,
+  SynCloudOSLifecycleDisposalReason,
+  SynCloudOSLifecycleErrorOptions,
+  SynCloudOSLifecycleResource,
+} from "../ErrorManager/lifecycleError";
 export type { ServiceTerminalClient, ServiceTerminalReceipt, ServiceTerminalRequest } from "../Documents";
 export { SynWareColourPanelProvider, type SynWareColourPanelProviderProps } from "./SynWareColourPanelProvider";
 export { createSynWareNSEDataViewDragBinding, type SynWareNSEDataViewDragOptions, type SynWareNSEDataViewDropProposal } from "./SynWareNSEDragAdapter";

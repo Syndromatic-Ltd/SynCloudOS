@@ -36,13 +36,14 @@ import {
   ControllerEditingStateError,
   ControllerReadOnlyError,
   NSEController,
+  type NSEControllerOwnership,
   type ControllerCommitResult,
   type ControllerEditTransaction,
   type ControllerValidationIssue,
 } from "./NSEController";
 import { hasImmutableValue, isImmutableValue, ownImmutable } from "./immutableValue";
 
-export interface TreeControllerOptions<T, TId extends ItemIdentity> {
+export interface TreeControllerOptions<T, TId extends ItemIdentity> extends NSEControllerOwnership {
   readonly id: string;
   readonly responderId?: string;
   readonly content?: readonly T[];
@@ -204,14 +205,13 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   >();
   #requestToken = 0;
   #contentGeneration = 0;
-  #treeDisposed = false;
   #committedContent: readonly T[];
   #selectionBeforeEdit: SelectionSnapshot<TId> | null = null;
   #changedDuringEdit = false;
   #snapshot: TreeControllerSnapshot<T, TId>;
 
   constructor(options: TreeControllerOptions<T, TId>) {
-    super({ id: options.id, responderId: options.responderId });
+    super({ kind: "NSETreeController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal });
     this.#getId = options.getId;
     this.#getChildren = options.getChildren;
     this.#withChildren = options.withChildren;
@@ -252,7 +252,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   }
 
   setContent(content: readonly T[]): void {
-    this.assertActive();
+    this.assertActive("setContent");
     if (this.editTransaction) {
       throw new ControllerEditingStateError(
         "Discard or commit the current edit before replacing tree content.",
@@ -267,7 +267,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   }
 
   setPredicate(predicate: Predicate<T> | null): void {
-    this.assertActive();
+    this.assertActive("setPredicate");
     if (this.#snapshot.predicate === predicate) return;
     this.#publishArrangement("arrangement", this.#snapshot.content, {
       predicate,
@@ -275,7 +275,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   }
 
   setSortDescriptors(descriptors: readonly SortComparator<T>[]): void {
-    this.assertActive();
+    this.assertActive("setSortDescriptors");
     const next = Object.freeze([...descriptors]);
     if (
       next.length === this.#snapshot.sortDescriptors.length &&
@@ -291,14 +291,14 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   }
 
   expand(id: TId): void {
-    this.#requireNode(id);
+    this.#requireNode("expand", id);
     if (this.#expanded.has(id)) return;
     this.#expanded.add(id);
     this.#publishExpansion();
   }
 
   collapse(id: TId): void {
-    this.assertActive();
+    this.assertActive("collapse");
     if (!this.#expanded.delete(id)) return;
     this.#publishExpansion();
   }
@@ -313,7 +313,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     signal?: AbortSignal,
     loader: ((item: T, signal: AbortSignal) => Promise<readonly T[]> | readonly T[]) | undefined = this.#loadChildren,
   ): Promise<void> {
-    this.assertActive();
+    this.assertActive("loadChildren");
     if (!loader) return;
     const located = this.#find(this.#snapshot.content, id);
     if (!located) throw new RangeError("Unknown stable tree identity.");
@@ -409,7 +409,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
           error instanceof Error ? error.message : "Child loading failed.",
         );
       }
-      if (!this.#treeDisposed) {
+      if (!this.isDisposed) {
         this.#publishArrangement("loading", this.#snapshot.content);
       }
     } finally {
@@ -418,7 +418,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   }
 
   select(ids: Iterable<TId>): boolean {
-    this.assertActive();
+    this.assertActive("select");
     const available = new Set(this.#allNodes(this.#snapshot.roots).map(({ id }) => id));
     const requested = [...ids];
     if (requested.some((id) => !available.has(id))) {
@@ -434,7 +434,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   }
 
   insert(item: T, destination: TreeDestination<TId>): void {
-    this.#requireEdit();
+    this.#requireEdit("insert");
     this.#validateDestination(this.#snapshot.content, destination);
     this.#validateForest([item]);
     const owned = this.#ownedItem(item);
@@ -447,7 +447,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   }
 
   remove(ids: Iterable<TId>): void {
-    this.#requireEdit();
+    this.#requireEdit("remove");
     const removing = new Set(ids);
     if (removing.size === 0) return;
     for (const id of removing) {
@@ -460,7 +460,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   }
 
   move(ids: Iterable<TId>, destination: TreeDestination<TId>): void {
-    this.#requireEdit();
+    this.#requireEdit("move");
     const requested = [...new Set(ids)];
     if (requested.length === 0) return;
     const locations = requested.map((id) => {
@@ -535,7 +535,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   }
 
   commitEditing(): ControllerCommitResult {
-    this.assertActive();
+    this.assertActive("commitEditing");
     const transaction = this.editTransaction;
     if (!transaction) return { status: "not-editing" };
     if (this.#snapshot.issues.length > 0) {
@@ -588,10 +588,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     });
   }
 
-  dispose(): void {
-    if (this.#treeDisposed) return;
-    this.#treeDisposed = true;
-    super.dispose();
+  protected override didDispose(): void {
     this.#invalidateChildLoads();
   }
 
@@ -821,8 +818,8 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     );
   }
 
-  #requireEdit(): void {
-    this.assertActive();
+  #requireEdit(operation: string): void {
+    this.assertActive(operation);
     if (!this.#snapshot.editable) throw new ControllerReadOnlyError();
     if (!this.editTransaction) {
       throw new ControllerEditingStateError(
@@ -831,8 +828,8 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     }
   }
 
-  #requireNode(id: TId): TreeNode<T, TId> {
-    this.assertActive();
+  #requireNode(operation: string, id: TId): TreeNode<T, TId> {
+    this.assertActive(operation);
     const node = this.node(id);
     if (!node) throw new RangeError("Unknown arranged tree identity.");
     return node;
@@ -1004,7 +1001,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   ): boolean {
     const current = this.#find(this.#snapshot.content, id);
     return (
-      !this.#treeDisposed &&
+      !this.isDisposed &&
       request.generation === this.#contentGeneration &&
       this.#requests.get(id)?.token === request.token &&
       current?.item === request.owner
@@ -1026,7 +1023,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     this.#loading.delete(id);
     this.#errors.delete(id);
     this.#requests.delete(id);
-    if (!this.#treeDisposed) {
+    if (!this.isDisposed) {
       this.#publishArrangement("loading", this.#snapshot.content);
     }
   }

@@ -316,7 +316,8 @@
           "src/SynCloudOS/Runtime/runtimeInstanceTypes.ts",
           "src/SynCloudOS/Documents/index.ts",
           "src/SynCloudOS/FilePanels/index.ts",
-          "src/SynCloudOS/AnimationFX/scopedAnimationFrames.ts"
+          "src/SynCloudOS/AnimationFX/scopedAnimationFrames.ts",
+          "src/SynCloudOS/ErrorManager/lifecycleError.ts"
         ],
         "react": [
           "src/SynCloudOSReact/index.ts",
@@ -380,7 +381,8 @@
           "src/SynCloudOS/Windows/index.ts",
           "src/SynCloudOS/Windows/windowTypes.ts",
           "src/SynCloudOS/FilePanels/index.ts",
-          "src/SynCloudOS/Resources/frameworkAssets.ts"
+          "src/SynCloudOS/Resources/frameworkAssets.ts",
+          "src/SynCloudOS/ErrorManager/lifecycleError.ts"
         ],
         "react": [
           "src/SynCloudOSReact/index.ts",
