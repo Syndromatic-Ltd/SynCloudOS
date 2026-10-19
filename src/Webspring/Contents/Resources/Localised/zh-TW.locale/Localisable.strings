@@ -7,6 +7,7 @@
 "apps.loading" = "正在載入 {app}";
 "apps.loadingPackage" = "正在載入 {packageName}";
 "apps.missingComponent" = "SynCloudOS 找不到 {packageName} 的元件。";
+"apps.reopen" = "重新開啟";
 "apps.reorderable" = "{app}，可重新排序";
 "notifications.actions" = "通知操作";
 "notifications.centreTitle" = "通知中心";

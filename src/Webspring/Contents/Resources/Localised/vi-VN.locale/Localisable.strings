@@ -7,6 +7,7 @@
 "apps.loading" = "Đang tải {app}";
 "apps.loadingPackage" = "Đang tải {packageName}";
 "apps.missingComponent" = "SynCloudOS không thể tìm thấy thành phần cho {packageName}.";
+"apps.reopen" = "Mở lại";
 "apps.reorderable" = "{app}, có thể sắp xếp lại";
 "notifications.actions" = "Hành động thông báo";
 "notifications.centreTitle" = "Trung tâm thông báo";

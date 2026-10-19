@@ -7,6 +7,7 @@
 "apps.loading" = "Загрузка {app}";
 "apps.loadingPackage" = "Загрузка {packageName}";
 "apps.missingComponent" = "SynCloudOS не удалось найти компонент для {packageName}.";
+"apps.reopen" = "Открыть снова";
 "apps.reorderable" = "{app}, возможность повторного заказа";
 "notifications.actions" = "Действия по оповещению";
 "notifications.centreTitle" = "Центр уведомлений";

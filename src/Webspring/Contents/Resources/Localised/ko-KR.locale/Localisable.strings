@@ -7,6 +7,7 @@
 "apps.loading" = "{app} 로드 중";
 "apps.loadingPackage" = "{packageName} 로드 중";
 "apps.missingComponent" = "SynCloudOS이 {packageName}에 대한 구성 요소를 찾을 수 없습니다.";
+"apps.reopen" = "다시 열기";
 "apps.reorderable" = "{app}, 재정렬 가능";
 "notifications.actions" = "알림 작업";
 "notifications.centreTitle" = "알림 센터";

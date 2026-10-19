@@ -7,6 +7,7 @@
 "apps.loading" = "लोड हो रहा है {app}";
 "apps.loadingPackage" = "लोड हो रहा है {packageName}";
 "apps.missingComponent" = "SynCloudOS को {packageName} के लिए कोई घटक नहीं मिल सका।";
+"apps.reopen" = "फिर से खोलें";
 "apps.reorderable" = "{app}, पुन: व्यवस्थित";
 "notifications.actions" = "अधिसूचना क्रियाएँ";
 "notifications.centreTitle" = "अधिसूचना केंद्र";

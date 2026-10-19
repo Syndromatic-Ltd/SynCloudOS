@@ -7,6 +7,7 @@
 "apps.loading" = "{app} लोड करत आहे";
 "apps.loadingPackage" = "{packageName} लोड करत आहे";
 "apps.missingComponent" = "SynCloudOS ला {packageName} साठी घटक सापडला नाही.";
+"apps.reopen" = "पुन्हा उघडा";
 "apps.reorderable" = "{app}, पुनर्क्रमण करण्यायोग्य";
 "notifications.actions" = "सूचना क्रिया";
 "notifications.centreTitle" = "सूचना केंद्र";

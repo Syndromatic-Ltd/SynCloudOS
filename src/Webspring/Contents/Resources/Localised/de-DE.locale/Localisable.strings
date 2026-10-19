@@ -7,6 +7,7 @@
 "apps.loading" = "Laden {app}";
 "apps.loadingPackage" = "Laden {packageName}";
 "apps.missingComponent" = "SynCloudOS konnte keine Komponente für {packageName} finden.";
+"apps.reopen" = "Erneut öffnen";
 "apps.reorderable" = "{app}, nachbestellbar";
 "notifications.actions" = "Benachrichtigungsaktionen";
 "notifications.centreTitle" = "Benachrichtigungscenter";

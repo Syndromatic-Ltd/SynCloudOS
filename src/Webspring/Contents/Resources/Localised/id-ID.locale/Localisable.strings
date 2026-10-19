@@ -7,6 +7,7 @@
 "apps.loading" = "Memuat {app}";
 "apps.loadingPackage" = "Memuat {packageName}";
 "apps.missingComponent" = "SynCloudOS tidak dapat menemukan komponen untuk {packageName}.";
+"apps.reopen" = "Buka Lagi";
 "apps.reorderable" = "{app}, dapat dipesan ulang";
 "notifications.actions" = "Tindakan pemberitahuan";
 "notifications.centreTitle" = "Pusat Pemberitahuan";

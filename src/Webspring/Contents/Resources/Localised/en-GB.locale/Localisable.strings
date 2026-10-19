@@ -7,6 +7,7 @@
 "apps.loading" = "Loading {app}";
 "apps.loadingPackage" = "Loading {packageName}";
 "apps.missingComponent" = "SynCloudOS could not find a component for {packageName}.";
+"apps.reopen" = "Reopen";
 "apps.reorderable" = "{app}, reorderable";
 "notifications.actions" = "Notification actions";
 "notifications.centreTitle" = "Notification Centre";

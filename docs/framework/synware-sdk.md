@@ -6,11 +6,13 @@ For host-supplied font catalogues and imported fonts, use `useSynWareFonts()`. T
 
 Production browser hosts choose either `mountSynCloudOS({ element, bundles, shell })`
 for Webspring or `mountSynCloudOS({ element, bundles, application: { id } })` for
-one fullscreen application without a shell. The modes are mutually exclusive.
-Application-only hosting uses a real SynWare session, requires exactly one
-registered app and disabled authentication, and does not relaunch a closed app.
-See [the application host setup](getting-started.md#fullscreen-application-without-a-shell)
-for Vite configuration, routing and disposal.
+one primary application without a shell. The modes are mutually exclusive.
+Application-only hosting uses a real SynWare session. The primary application
+fills the page (or keeps its declared frame with `frame: "declared"`); other
+registered bundles open from it in windows. It supports the same authentication
+policies as Webspring, and after the primary quits it offers Reopen instead of
+relaunching. See [the application host setup](getting-started.md#fullscreen-application-without-a-shell)
+for Vite configuration, routing, sign-in and disposal.
 
 ## Anatomy of a bundle
 

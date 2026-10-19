@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React, { useEffect, useState } from "react";
-import { act, fireEvent, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEArrayController } from "../../src/NSE/Controllers";
 import { createSynWare } from "../../src/SynCloudOS/AppSDK/createSynWare";
@@ -59,6 +59,44 @@ afterEach(async () => {
   for (const target of elements.splice(0)) target.remove();
   sessions.length = 0; sessionControllers.length = 0; vi.clearAllMocks(); window.history.replaceState(null, "", "/");
 });
+const secondaryId = "com.example.secondary";
+function Secondary() {
+  const app = useSynWare();
+  return <button data-testid="secondary" onClick={() => app.lifecycle.closeSelf()}>Quit secondary</button>;
+}
+const secondary = createSynWare({ manifest: {
+  schemaVersion: 1, id: secondaryId, version: "1.0.0", title: "Secondary",
+  routes: [{ path: "/secondary", primary: true }],
+  runtime: { presentation: "windowedView", policy: { public: true, requiresLogin: false } },
+}, root: Secondary });
+const privateBundle = createSynWare({ manifest: { ...bundle.manifest, runtime: { presentation: "windowedView" } }, root: Application });
+/** A browser authentication service whose single method signs in at once. */
+function authenticationService() {
+  let session: { id: string; subjectId: string; state: "active"; claims: Readonly<Record<string, string>> } | null = null;
+  const sessionListeners = new Set<(value: typeof session) => void>();
+  const listeners = new Set<() => void>();
+  let snapshot = { status: "anonymous", methods: [{ id: "test", label: "Test" }], profile: null as null | { subject: string; roles: string[]; name: string }, expiresAt: null, error: null };
+  const publish = () => { sessionListeners.forEach(listener => listener(session)); listeners.forEach(listener => listener()); };
+  return {
+    sessionAdapter: {
+      id: "test",
+      read: async () => session,
+      subscribe(listener: (value: typeof session) => void) { sessionListeners.add(listener); return () => { sessionListeners.delete(listener); }; },
+      end: async () => { session = null; snapshot = { ...snapshot, status: "anonymous", profile: null }; publish(); },
+      dispose: () => undefined,
+    },
+    getSnapshot: () => snapshot,
+    subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    refresh: async () => snapshot,
+    async signIn() {
+      session = { id: "session", subjectId: "person", state: "active", claims: { displayName: "Person" } };
+      snapshot = { ...snapshot, status: "authenticated", profile: { subject: "person", roles: [], name: "Person" } };
+      publish();
+    },
+    signOut: async () => undefined,
+    dispose: () => undefined,
+  };
+}
 describe("application-only browser host", () => {
   it("launches the real app fullscreen from / without a shell or primary window", async () => {
     window.history.replaceState(null, "", "/");
@@ -219,19 +257,128 @@ describe("application-only browser host", () => {
     expect(target.querySelector('[data-testid="application"]')).not.toBeNull();
     expect(WebspringController).not.toHaveBeenCalled();
   });
-  it("rejects missing, mixed, malformed, unknown and multiple-application modes", async () => {
+  it("rejects missing, mixed, malformed and unknown modes and bundles the host cannot present", async () => {
     expect(() => mountSynCloudOS({ element: element() } as MountSynCloudOSOptions)).toThrow(/shell.*application|application.*shell/i);
     expect(() => mountSynCloudOS(applicationOptions(element(), { shell }))).toThrow(/exactly one|mutually exclusive/i);
     expect(() => mountSynCloudOS(applicationOptions(element(), { application: { id: " " } }))).toThrow(/application.*id/i);
+    expect(() => mountSynCloudOS(applicationOptions(element(), { application: { id, frame: "windowed" } }))).toThrow(/application\.frame/);
     expect(() => mountSynCloudOS(applicationOptions(element(), { shellResources: {} }))).toThrow(/shell resources/i);
-    expect(() => mountSynCloudOS(applicationOptions(element(), { authentication: "required" }))).toThrow(/disabled authentication/i);
     await expect(mountSynCloudOS(applicationOptions(element(), { application: { id: "com.example.unknown" } }))).rejects.toThrow(/not registered|unknown application/i);
-    const other = createSynWare({ manifest: { schemaVersion: 1, id: "com.example.other", version: "1.0.0", title: "Other" }, root: () => null });
-    await expect(mountSynCloudOS(applicationOptions(element(), { bundles: [bundle, other] }))).rejects.toThrow(/exactly one|single application/i);
+    const fullscreenOther = createSynWare({ manifest: { schemaVersion: 1, id: "com.example.other", version: "1.0.0", title: "Other",
+      routes: [{ path: "/other", primary: true }] }, root: () => null });
+    await expect(mountSynCloudOS(applicationOptions(element(), { bundles: [bundle, fullscreenOther] }))).rejects.toThrow(/com\.example\.other.*appView/);
     const reserved = createSynWare({ manifest: { ...bundle.manifest, routes: [{ path: "/", primary: true }] }, root: Application });
     await expect(mountSynCloudOS(applicationOptions(element(), { bundles: [reserved] })).then(host => {
       mounts.push(host); return host;
     })).rejects.toThrow(/non-root entry route/i);
+    const reservedSecondary = createSynWare({ manifest: { ...secondary.manifest, routes: [{ path: "/", primary: true }] }, root: Secondary });
+    await expect(mountSynCloudOS(applicationOptions(element(), { bundles: [bundle, reservedSecondary] }))).rejects.toThrow(/com\.example\.secondary.*non-root entry route/i);
+  });
+  it("presents the login window before the app launches when sign-in is required", async () => {
+    const service = authenticationService();
+    const { runtime, element: target } = await mount(element(), { bundles: [privateBundle], authentication: { policy: "required", service } });
+    expect(document.querySelector(".nse-login-window")).not.toBeNull();
+    expect(target.querySelector('[data-testid="application"]')).toBeNull();
+    expect(runtime.lifecycle.getState(id)).toBe("registered");
+    expect(sessions).toHaveLength(0);
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Test" })); });
+    await waitFor(() => expect(target.querySelector('[data-testid="application"]')).not.toBeNull());
+    expect(runtime.lifecycle.getState(id)).toBe("active");
+    expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(true);
+    await waitFor(() => expect(document.querySelector(".nse-login-window")).toBeNull());
+  });
+  it("runs the app signed out under optional sign-in and offers sign-in and Log Out from Preferences", async () => {
+    const service = authenticationService();
+    const { runtime, element: target } = await mount(element(), { authentication: { policy: "optional", service } });
+    const session = sessions.at(-1)!;
+    expect(target.querySelector('[data-testid="application"]')).not.toBeNull();
+    expect(document.querySelector(".nse-login-window")).toBeNull();
+    await act(async () => { runtime.systemUI.preferences.open("account"); });
+    expect(screen.getAllByText("Not Signed In").length).toBeGreaterThan(0);
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Sign In" })); });
+    // Signing in suspends the app behind the login window; cancelling resumes the same session.
+    const cancel = await screen.findByRole("button", { name: "Cancel" });
+    expect(runtime.lifecycle.getState(id)).toBe("suspended");
+    await act(async () => { fireEvent.click(cancel); });
+    await waitFor(() => expect(runtime.lifecycle.getState(id)).toBe("active"));
+    expect(sessions.at(-1)).toBe(session);
+    expect(session.signal.aborted).toBe(false);
+    await act(async () => { runtime.systemUI.preferences.open("account"); });
+    await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Sign In" })); });
+    const method = await screen.findByRole("button", { name: "Test" });
+    await act(async () => { fireEvent.click(method); });
+    await waitFor(() => expect(runtime.lifecycle.getState(id)).toBe("active"));
+    expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(true);
+    expect(sessions.at(-1)).toBe(session);
+    await act(async () => { runtime.systemUI.preferences.open("account"); });
+    expect((await screen.findAllByText("Person")).length).toBeGreaterThan(0);
+    await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Log Out" })); });
+    expect(await screen.findByRole("alertdialog", { name: /log out/i })).not.toBeNull();
+  });
+  it("never offers Log Out when the host has no authentication", async () => {
+    const { runtime } = await mount();
+    await act(async () => { runtime.systemUI.session.requestLogOut(); });
+    expect(screen.queryByRole("alertdialog", { name: /log out/i })).toBeNull();
+    expect(runtime.systemUI.getSnapshot().logOutOpen).toBe(false);
+    await act(async () => { runtime.systemUI.preferences.open(); });
+    expect(screen.queryByText("Account")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Sign In" })).toBeNull();
+  });
+  it("opens another registered application in a window over the primary and returns when it closes", async () => {
+    const { runtime, element: target } = await mount(element(), { bundles: [bundle, secondary] });
+    const session = sessions.at(-1)!;
+    await act(async () => { expect((await session.navigation.openRoute("/secondary").result).committed).toBe(true); });
+    expect(document.querySelector('[data-testid="secondary"]')).not.toBeNull();
+    expect(runtime.windows.list({ applicationId: secondaryId })).toHaveLength(1);
+    expect(window.location.pathname).toBe("/secondary");
+    const primary = target.querySelector<HTMLElement>("[data-syncloudos-application-host]")!;
+    // The primary stays in view behind the window, at rest.
+    expect(primary.hidden).toBe(false);
+    expect(primary.hasAttribute("inert")).toBe(true);
+    expect(runtime.lifecycle.getState(id)).toBe("suspended");
+    const [secondaryWindow] = runtime.windows.list({ applicationId: secondaryId });
+    await act(async () => { await runtime.commands.dispatch("window.close", { windowControllerId: secondaryWindow!.id }, { source: "toolbar" }); });
+    await waitFor(() => expect(runtime.lifecycle.getState(id)).toBe("active"));
+    expect(document.querySelector('[data-testid="secondary"]')).toBeNull();
+    expect(primary.hasAttribute("inert")).toBe(false);
+    expect(sessions.at(-1)).toBe(session);
+    // A secondary that quits itself also hands the page back to the primary.
+    await act(async () => { await session.navigation.openRoute("/secondary").result; });
+    expect(runtime.lifecycle.getState(id)).toBe("suspended");
+    await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Quit secondary" })); });
+    await waitFor(() => expect(runtime.lifecycle.getState(id)).toBe("active"));
+    expect(runtime.lifecycle.getState(secondaryId)).toBe("closed");
+    expect(sessions.at(-1)).toBe(session);
+  });
+  it("fills the page by default and keeps the declared frame when asked", async () => {
+    const fullscreen = await mount();
+    expect(fullscreen.runtime.apps.getApp(id)?.presentation).toBe("appView");
+    expect(fullscreen.runtime.apps.getApp(id)?.frame.topBar).toBe("none");
+    await act(async () => { await fullscreen.host.dispose(); });
+    const declared = await mount(element(), { application: { id, frame: "declared" } });
+    expect(declared.runtime.apps.getApp(id)?.presentation).toBe("windowedView");
+    expect(declared.runtime.windows.list({ applicationId: id })).toHaveLength(1);
+    expect(declared.element.querySelector("[data-syncloudos-application-host]")).toBeNull();
+    expect(document.querySelector('[data-testid="application"]')).not.toBeNull();
+    expect(WebspringController).not.toHaveBeenCalled();
+  });
+  it("shows the app's quit surface and reopens a new session only when asked", async () => {
+    const { runtime, element: target } = await mount();
+    const first = sessions.at(-1)!;
+    await act(async () => { fireEvent.click(target.querySelector('[data-testid="application"]')!); });
+    const surface = screen.getByRole("main", { name: "Application host" });
+    expect(surface.querySelector("img")?.getAttribute("src")).toBe(runtime.apps.getApp(id)?.icon.src);
+    const reopen = within(surface).getByRole("button", { name: "Reopen" });
+    expect(document.activeElement).toBe(reopen);
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
+    expect(runtime.lifecycle.getState(id)).toBe("closed");
+    await act(async () => { fireEvent.click(reopen); });
+    await waitFor(() => expect(runtime.lifecycle.getState(id)).toBe("active"));
+    expect(target.querySelector('[data-testid="application"]')).not.toBeNull();
+    expect(screen.queryByRole("main", { name: "Application host" })).toBeNull();
+    expect(sessions.at(-1)).not.toBe(first);
+    expect(sessions.at(-1)!.signal.aborted).toBe(false);
+    expect(runtime.statechart.getCurrentState()).toBe("active.application.active");
   });
   it("preserves the existing shell host", async () => {
     const target = element();
@@ -239,5 +386,18 @@ describe("application-only browser host", () => {
     expect(WebspringController).toHaveBeenCalled();
     expect(target.querySelector('[data-testid="shell"]')).not.toBeNull();
     expect(vi.mocked(createSynCloudOS).mock.calls.at(-1)![0].persistenceNamespace).toBeUndefined();
+  });
+  it("never offers Log Out in a Webspring host without authentication", async () => {
+    await act(async () => { mounts.push(await mountSynCloudOS({ element: element(), shell, authentication: "disabled" })); });
+    const runtime = vi.mocked(createSynCloudOS).mock.results.at(-1)!.value;
+    await act(async () => { runtime.systemUI.session.requestLogOut(); });
+    expect(screen.queryByRole("alertdialog", { name: /log out/i })).toBeNull();
+    expect(runtime.systemUI.getSnapshot().logOutOpen).toBe(false);
+  });
+  it("confirms Log Out in a Webspring host with authentication", async () => {
+    await act(async () => { mounts.push(await mountSynCloudOS({ element: element(), shell, authentication: { policy: "optional", service: authenticationService() } as never })); });
+    const runtime = vi.mocked(createSynCloudOS).mock.results.at(-1)!.value;
+    await act(async () => { runtime.systemUI.session.requestLogOut(); });
+    expect(await screen.findByRole("alertdialog", { name: /log out/i })).not.toBeNull();
   });
 });

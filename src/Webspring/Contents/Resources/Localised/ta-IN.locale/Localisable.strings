@@ -7,6 +7,7 @@
 "apps.loading" = "ஏற்றுகிறது {app}";
 "apps.loadingPackage" = "ஏற்றுகிறது {packageName}";
 "apps.missingComponent" = "{packageName}க்கான கூறுகளை SynCloudOS கண்டுபிடிக்க முடியவில்லை.";
+"apps.reopen" = "மீண்டும் திற";
 "apps.reorderable" = "{app}, மறுவரிசைப்படுத்தக்கூடியது";
 "notifications.actions" = "அறிவிப்பு நடவடிக்கைகள்";
 "notifications.centreTitle" = "அறிவிப்பு மையம்";

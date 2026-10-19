@@ -7,6 +7,7 @@
 "apps.loading" = "Chargement de {app}";
 "apps.loadingPackage" = "Chargement de {packageName}";
 "apps.missingComponent" = "SynCloudOS n'a pas trouvé de composant pour {packageName}.";
+"apps.reopen" = "Rouvrir";
 "apps.reorderable" = "{app}, réorganisable";
 "notifications.actions" = "Actions de notification";
 "notifications.centreTitle" = "Centre de notifications";

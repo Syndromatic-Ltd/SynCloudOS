@@ -7,6 +7,7 @@
 "apps.loading" = "{app} をロードしています";
 "apps.loadingPackage" = "{packageName} をロードしています";
 "apps.missingComponent" = "SynCloudOS は {packageName} のコンポーネントを見つけられませんでした。";
+"apps.reopen" = "再度開く";
 "apps.reorderable" = "{app}、並べ替え可能";
 "notifications.actions" = "通知アクション";
 "notifications.centreTitle" = "通知センター";

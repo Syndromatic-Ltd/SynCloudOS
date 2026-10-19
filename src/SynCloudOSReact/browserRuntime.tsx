@@ -22,7 +22,8 @@ import "../SynCloudOS/styles/runtime.css";
 import { StrictMode, type PropsWithChildren } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { App } from "../App";
-import { ApplicationHost } from "./ApplicationHost";
+import { ApplicationHost, applicationRecoveryError } from "./ApplicationHost";
+import { createApplicationHostHome, type ApplicationHostHome } from "./applicationHome";
 import { NSEAppearanceProvider, type NSEAppearanceDefinition } from "../NSE/Appearance";
 import { atmoAppearance } from "../NSE/Themes/Atmo";
 import { NSERubberBandProvider } from "../NSE/Scroll";
@@ -94,12 +95,17 @@ interface BrowserHostOptions {
   readonly contributions?: readonly SynCloudOSHostContribution[];
 }
 
-/** A host chooses either its Webspring shell or one fullscreen application. */
+/** How an application-only host presents its primary application:
+ * `fullscreen` (the default) fills the page with the app's content and no
+ * system top bar; `declared` keeps the manifest's presentation and frame. */
+export type SynCloudOSApplicationFrameMode = "fullscreen" | "declared";
+
+/** A host chooses either its Webspring shell or one primary application. */
 export type MountSynCloudOSOptions = BrowserHostOptions & (
   | { readonly shell: WebspringDefinition; readonly application?: never;
       readonly shellResources?: SynCloudOSShellResources; readonly contentSources?: WebspringContentSources }
-  | { readonly application: Readonly<{ id: string }>; readonly shell?: never;
-      readonly shellResources?: never; readonly contentSources?: never; readonly authentication?: "disabled" }
+  | { readonly application: Readonly<{ id: string; frame?: SynCloudOSApplicationFrameMode }>; readonly shell?: never;
+      readonly shellResources?: never; readonly contentSources?: never }
 );
 
 export interface MountedSynCloudOSHost {
@@ -115,15 +121,15 @@ function validateHostMode(options: MountSynCloudOSOptions): void {
   if (options.application !== undefined) {
     const application = options.application;
     if (!application || typeof application !== "object" || Array.isArray(application)
-      || Object.keys(application).some(key => key !== "id")
+      || Object.keys(application).some(key => key !== "id" && key !== "frame")
       || typeof application.id !== "string" || application.id.trim() !== application.id || !application.id) {
       throw new TypeError("mountSynCloudOS application.id must be a non-empty application identifier.");
     }
+    if (application.frame !== undefined && application.frame !== "fullscreen" && application.frame !== "declared") {
+      throw new TypeError('mountSynCloudOS application.frame must be "fullscreen" or "declared".');
+    }
     if (options.shellResources !== undefined || options.contentSources !== undefined) {
       throw new TypeError("Application-only hosting cannot include Webspring shell resources or content sources.");
-    }
-    if (options.authentication !== undefined && options.authentication !== "disabled") {
-      throw new TypeError("Application-only hosting requires disabled authentication.");
     }
   }
 }
@@ -136,11 +142,6 @@ function hostBranding(options: MountSynCloudOSOptions, runtime: SynCloudOSRuntim
   return Object.freeze({ name, logoUrl: null, logoAlt: name, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null });
 }
 
-function applicationRecoveryError(error: CapturedSynCloudOSError): CapturedSynCloudOSError {
-  return { ...error, suggestedActions: [...new Set([
-    ...(error.suggestedActions ?? []).filter(action => action !== "returnToWebspring"), "reload" as const,
-  ])] };
-}
 
 function componentKeyFromPackageName(value: string): string {
   const compact = value
@@ -316,6 +317,7 @@ function renderHost(
   contentSources: WebspringContentSources,
   fontCatalogue: SynWareFontCatalogue,
   appearance: NSEAppearanceDefinition,
+  home: ApplicationHostHome | null,
 ): Root {
   const root = createRoot(element);
   root.render(
@@ -324,9 +326,9 @@ function renderHost(
         <NSEAppearanceProvider appearance={appearance} appearanceService={runtime.appearance}>
           <RuntimeInputBoundary>
             <RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
-              <NSERubberBandProvider>{options.shell
-                ? <App shell={options.shell} shellResources={options.shellResources} authentication={options.authentication} contentSources={contentSources} />
-                : <ApplicationHost applicationId={options.application!.id} />}</NSERubberBandProvider>
+              <NSERubberBandProvider>{home
+                ? <ApplicationHost applicationId={home.primaryId} authentication={options.authentication ?? "disabled"} home={home} />
+                : <App shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} contentSources={contentSources} />}</NSERubberBandProvider>
             </RootRecoveryBoundary>
           </RuntimeInputBoundary>
         </NSEAppearanceProvider>
@@ -527,14 +529,24 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
   });
   let initialBundles = composition.initialBundles;
   if (options.application) {
-    const selected = initialBundles.find(bundle => bundle.manifest.id === options.application!.id);
-    if (!selected) throw new TypeError(`Application ${options.application.id} is not registered in this host.`);
-    if (initialBundles.length !== 1) throw new TypeError("Application-only hosting requires exactly one registered application.");
-    if (selected.manifest.route === "/") throw new TypeError("Application-only hosting requires a non-root entry route; / is the host's application alias.");
-    initialBundles = [Object.freeze({ ...selected, manifest: Object.freeze({ ...selected.manifest,
-      presentation: "appView" as const,
-      frame: Object.freeze({ ...selected.manifest.frame, layout: "defacto" as const, topBar: "none" as const, presentationMotion: "content" as const }),
-    }) })];
+    const primaryId = options.application.id;
+    if (!initialBundles.some(bundle => bundle.manifest.id === primaryId)) {
+      throw new TypeError(`Application ${primaryId} is not registered in this host.`);
+    }
+    for (const bundle of initialBundles) {
+      if (bundle.manifest.route === "/") {
+        throw new TypeError(`Application ${bundle.manifest.id} needs a non-root entry route; / is the host's alias for ${primaryId}.`);
+      }
+      if (bundle.manifest.id !== primaryId && (bundle.manifest.presentation ?? "appView") === "appView") {
+        throw new TypeError(`Application ${bundle.manifest.id} declares the appView presentation; only the primary application fills an application-only host, so other applications must present in windows.`);
+      }
+    }
+    if ((options.application.frame ?? "fullscreen") === "fullscreen") {
+      initialBundles = initialBundles.map(bundle => bundle.manifest.id !== primaryId ? bundle : Object.freeze({ ...bundle,
+        manifest: Object.freeze({ ...bundle.manifest, presentation: "appView" as const,
+          frame: Object.freeze({ ...bundle.manifest.frame, layout: "defacto" as const, topBar: "none" as const, presentationMotion: "content" as const }),
+        }) }));
+    }
   }
   const config: SynCloudOSRuntimeConfig = {
     environment,
@@ -599,6 +611,13 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
     id: "browser-host",
     prepare: ({ reason }) => ({ status: "ready", commit: () => releaseHost(reason) }),
   });
+  const home = options.application ? createApplicationHostHome(runtime, options.application.id, authenticationPolicy === "required") : null;
+  if (home) {
+    runtime.registerDisposalParticipant({
+      id: "application-host-home",
+      prepare: () => ({ status: "ready", commit: () => home.dispose() }),
+    });
+  }
   let initialPathname = `${environment.browser.getLocation().pathname}${environment.browser.getLocation().search}${environment.browser.getLocation().hash}`;
   try {
     const shellLocaleResources = await getWebspringLocaleResourceLoader()();
@@ -713,6 +732,7 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
       Object.freeze({ ...contentSources }),
       fontCatalogue,
       options.appearance ?? atmoAppearance,
+      home,
     );
     if (!frameworkTestPath) await runtime.boot({ initialPathname });
     assertMountCurrent(options.element, attempt);

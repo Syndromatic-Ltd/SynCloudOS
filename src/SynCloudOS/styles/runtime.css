@@ -94,3 +94,29 @@ button {
     padding-top: 4px;
   }
 }
+
+/* An application-only host after its primary application quits. */
+.syncloudos-application-quit {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+}
+
+.syncloudos-application-quit-icon {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+
+.syncloudos-application-quit-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}

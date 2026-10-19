@@ -7,6 +7,7 @@
 "apps.loading" = "{app} yükleniyor";
 "apps.loadingPackage" = "{packageName} yükleniyor";
 "apps.missingComponent" = "SynCloudOS, {packageName} için bir bileşen bulamadı.";
+"apps.reopen" = "Yeniden aç";
 "apps.reorderable" = "{app}, yeniden sıralanabilir";
 "notifications.actions" = "Bildirim eylemleri";
 "notifications.centreTitle" = "Bildirim Merkezi";

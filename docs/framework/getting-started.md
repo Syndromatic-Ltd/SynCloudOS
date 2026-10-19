@@ -132,8 +132,8 @@ declares its own access policy.
 
 ### Fullscreen application without a shell
 
-For a site that runs exactly one application, configure Vite with
-`synCloudOS({ webspringEntry: false })` and select the registered app by ID:
+For a site built around one application, configure Vite with
+`synCloudOS({ webspringEntry: false })` and select the primary application by ID:
 
 ```tsx
 import "@syndromatic/syncloudos/nse/styles.css";
@@ -151,28 +151,55 @@ const host = await mountSynCloudOS({
 import.meta.hot?.dispose(() => host.dispose("hot reload"));
 ```
 
-This mode mounts the real SynWare session directly in a viewport-filling
-application surface. It does not construct Webspring, a launcher, a top bar,
-or a primary floating window. It uses the registered app's route and lifecycle,
-and the same scoped SDK clients as a shell-hosted application. The host owns
-the fullscreen app-view presentation even if the bundle declares a windowed
-presentation. This fills the browser viewport; entering the browser's native
-Fullscreen API still requires a user gesture.
+This mode mounts the real SynWare session directly. It does not construct
+Webspring, a launcher or the Webspring top bar. It uses the registered app's
+route and lifecycle, and the same scoped SDK clients as a shell-hosted
+application. Filling the browser viewport does not enter the browser's native
+Fullscreen API, which still requires a user gesture.
 
-The site root `/` opens the application's primary route without redirecting
-the address bar. The bundle's entry route must be non-root (for example `/hello`);
-`/` is reserved for the host alias. Declared nested application routes remain available. Closing
-the app releases its session and leaves no launcher or automatic relaunch;
-dispose and mount the host again to begin a fresh session. Suspension retains
-the session with its surface hidden and inert until the runtime activates it.
-Application preferences persist across host disposal and remount, scoped to
-the browser origin and the application's ID.
+`application.frame` chooses how the primary application presents:
 
-Supply exactly one registered application, including contributions. `shell`,
-`shellResources`, and `contentSources` cannot accompany `application`.
-Authentication defaults to disabled in this mode; `optional` and `required`
-are rejected because application hosting does not provide a sign-in surface.
-Existing Webspring hosts retain their authentication and multi-app behavior.
+- `"fullscreen"` (the default) fills the page with an app-view surface,
+  whatever presentation and frame the bundle declares.
+- `"declared"` keeps the bundle's own manifest. An `appView` bundle still
+  fills the page; a `windowedView` or `systemSheet` bundle presents in its
+  window, with the frame it declares.
+
+The site root `/` opens the primary application's entry route without
+redirecting the address bar. Every bundle's entry route must be non-root (for
+example `/hello`); `/` is reserved for that alias. Declared nested application
+routes remain available.
+
+Other registered bundles, including contributions, are secondary applications.
+The primary opens them like any route, for example with
+`app.navigation.openRoute("/inspector")`, and they present in windows over the
+primary. Secondary bundles must declare `windowedView`, `systemSheet` or
+`backgroundService`; only the primary fills the page, so mounting rejects a
+secondary `appView` bundle. While a secondary application is active the primary
+stays visible behind its windows but inert; the primary becomes active again
+when the secondary's last window closes or the secondary quits.
+
+When the primary application quits, its session is released and the page shows
+the app's icon and name with a **Reopen** button. The host never relaunches on
+its own; Reopen starts a new session in the same runtime. Suspension retains the
+session with its surface hidden and inert until the runtime activates it.
+Application preferences persist across host disposal and remount, scoped to the
+browser origin and the application's ID.
+
+`authentication` accepts the same policies and authentication service object as
+the Webspring host, and presents the same system login window:
+
+- `"disabled"` (the default) has no session. Preferences offer no account and
+  the system never offers Log Out.
+- `"optional"` runs the application signed out. Preferences gain an **Account**
+  pane that signs in through the login window, which can be cancelled, and logs
+  out. The application keeps its session across sign-in and cancel.
+- `"required"` presents the login window before the primary application
+  launches, and again after Log Out.
+
+With `"disabled"` or `"optional"` the primary bundle must be public
+(`runtime.policy.public`), because it launches before anyone signs in.
+`shell`, `shellResources` and `contentSources` cannot accompany `application`.
 
 ### Webspring shell
 
