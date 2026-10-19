@@ -41,7 +41,6 @@
 "quickswitch.open" = "Ouvrir QuickSwitch";
 "quickswitch.openedShortcut" = "{app}, ouvert, raccourci {shortcut}";
 "quickswitch.visibleApps" = "Applications Webspring visibles";
-"shelf.ariaLabel" = "Webspring actualités et statut";
 "webspring.additionalApps.ariaLabel" = "Applications Webspring supplémentaires";
 "webspring.apps.ariaLabel" = "Webspring applications";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

@@ -161,7 +161,7 @@ Data views render collections owned by a controller. They are virtualised, so a 
 | `NSEMenu`, `NSEMenuBar`, `NSEContextMenu`, `NSEPopup`, `NSEPopupList` | Menus of every kind, driven by `NSEMenuController`. |
 | `NSEApplicationMenu`, `NSEEditMenu`, `NSEHelpMenu` | Standard application menus. |
 | `NSEToolbar`, `NSEToolbarConfigurationSheet` | Toolbars with customisation, driven by `NSEToolbarController`. |
-| `NSEStatusBar`, `NSETopBar` | Status and title strips. The metal bar's `titlePlacement: "leading"` suits document windows: the app title (with its QuickSwitch action) beside the return control, the document in the middle. Items are `webspring`, `userInfo`, `settings` or `custom`. |
+| `NSEStatusBar`, `NSETopBar` | Status and title strips. The metal bar's `titlePlacement: "leading"` suits document windows: the app title (with its QuickSwitch action) beside the return control, the document in the middle. Items are `webspring`, `userInfo`, `settings` or `custom`. Every item glyph is a single-shape SVG drawn as a CSS mask over theme colours, so its normal, pressed and selected looks follow the theme for any icon: pass the SVG's URL as `icon` on any item, or omit it to get the built-in house (`webspring`), person (`userInfo`) or gear (`settings`). There is no separate selected icon. The metal bar's buttons are drawn in CSS (raised aluminium that presses in deeply, light and dark). |
 
 ## Panels and overlays
 

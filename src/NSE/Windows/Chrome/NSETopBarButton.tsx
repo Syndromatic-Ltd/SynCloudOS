@@ -19,6 +19,7 @@
  */
 
 import { useNSEFeedback } from "../../Feedback";
+import { resolveNSETopBarGlyphStyle } from "./nseTopBarStyles";
 import type { NSETopBarItem, NSETopBarItemPosition, NSETopBarStyleDefinition } from "./nseTopBarTypes";
 
 export function NSETopBarButton({
@@ -33,9 +34,7 @@ export function NSETopBarButton({
   const feedback = useNSEFeedback();
 
   const isSelected = Boolean(item.selected);
-  // A kind without art in this style (settings on Cumulus) draws the item's own icon.
-  const iconSet = (item.kind === "custom" ? undefined : styleDefinition.icons[item.kind])
-    ?? { normal: item.icon ?? "", selected: item.selectedIcon ?? item.icon ?? "" };
+  const glyphStyle = resolveNSETopBarGlyphStyle(item, styleDefinition.icons);
 
   return (
     <button
@@ -59,11 +58,10 @@ export function NSETopBarButton({
       <span className="nse-app-topbar-button-well" aria-hidden="true">
         <span className="nse-app-topbar-button-well-selected" />
       </span>
-      {iconSet?.normal ? (
-        <img className="nse-app-topbar-button-icon nse-app-topbar-button-icon-normal" src={iconSet.normal} alt="" aria-hidden="true" draggable={false} />
-      ) : null}
-      {iconSet?.selected ? (
-        <img className="nse-app-topbar-button-icon nse-app-topbar-button-icon-selected" src={iconSet.selected} alt="" aria-hidden="true" draggable={false} />
+      {glyphStyle ? (
+        <span className="nse-app-topbar-button-icon" style={glyphStyle} aria-hidden="true">
+          <span className="nse-app-topbar-glyph-shape" />
+        </span>
       ) : null}
     </button>
   );

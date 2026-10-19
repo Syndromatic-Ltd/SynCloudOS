@@ -96,7 +96,7 @@ export const ptPTTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "Contato",
   "system.notifications": "Notificações",
   "system.portfolio": "Portfólio",
-  "system.preferences": "Preferências",
+  "system.preferences": "Preferências do Sistema",
   "system.software": "Software",
   "system.webspring": "Webspring",
   "system.system": "Sistema",

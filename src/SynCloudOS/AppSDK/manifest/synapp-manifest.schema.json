@@ -147,11 +147,29 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "layout": { "enum": ["simple", "defacto"] },
         "material": { "enum": ["standard", "metal"] },
         "topBar": { "enum": ["standard", "custom", "none"] },
         "presentationMotion": { "enum": ["host", "content"] },
-        "rightSlot": { "type": "string", "minLength": 1 },
+        "rightSlot": {
+          "oneOf": [
+            { "enum": ["auto", "userInfo", "none"] },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["icon", "label"],
+              "properties": {
+                "icon": { "$ref": "#/$defs/resourceReference" },
+                "label": { "$ref": "#/$defs/localisedText" }
+              }
+            }
+          ]
+        },
+        "background": {
+          "oneOf": [
+            { "enum": ["system", "none"] },
+            { "$ref": "#/$defs/surface" }
+          ]
+        },
         "smoothSurface": {
           "oneOf": [
             { "const": "off" },
@@ -166,6 +184,62 @@
             "minWidth": { "type": "number", "minimum": 0 },
             "maxWidth": { "type": "number", "minimum": 0 },
             "defaultWidth": { "type": "number", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "colour": { "type": "string", "minLength": 1 },
+        "texture": {
+          "oneOf": [
+            { "const": "none" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["image"],
+              "properties": {
+                "image": { "type": "string", "minLength": 1 },
+                "size": { "type": "string", "minLength": 1 },
+                "repeat": { "type": "boolean" },
+                "position": { "type": "string", "minLength": 1 }
+              }
+            }
+          ]
+        },
+        "tint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["colour", "opacity"],
+          "properties": {
+            "colour": { "type": "string", "minLength": 1 },
+            "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "vignette": {
+          "oneOf": [
+            { "const": false },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "centre": { "type": "number", "minimum": 0, "maximum": 1 },
+                "edge": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            }
+          ]
+        },
+        "overlay": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["image"],
+          "properties": {
+            "image": { "type": "string", "minLength": 1 },
+            "size": { "type": "string", "minLength": 1 },
+            "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+            "blend": { "type": "string", "minLength": 1 }
           }
         }
       }
@@ -414,7 +488,8 @@
             "logo": { "$ref": "#/$defs/resourceReference" },
             "lightLogo": { "$ref": "#/$defs/resourceReference" },
             "darkLogo": { "$ref": "#/$defs/resourceReference" },
-            "compactLogo": { "$ref": "#/$defs/resourceReference" }
+            "compactLogo": { "$ref": "#/$defs/resourceReference" },
+            "homeIcon": { "$ref": "#/$defs/resourceReference" }
           }
         },
         "folders": { "$ref": "#/$defs/webspringFolders" }

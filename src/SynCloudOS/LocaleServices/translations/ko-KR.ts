@@ -96,7 +96,7 @@ export const koKRTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "연락처",
   "system.notifications": "알림",
   "system.portfolio": "포트폴리오",
-  "system.preferences": "환경설정",
+  "system.preferences": "시스템 환경설정",
   "system.software": "소프트웨어",
   "system.webspring": "Webspring",
   "system.system": "시스템",

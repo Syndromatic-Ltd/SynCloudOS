@@ -247,7 +247,6 @@ describe("AppRegistry and AppInfo registration preflight", () => {
     const appOwned = AppRegistry.register(createTestManifest({
       id: "app-owned-frame",
       frame: {
-        layout: "defacto",
         material: "metal",
         topBar: "custom"
       }
@@ -256,10 +255,10 @@ describe("AppRegistry and AppInfo registration preflight", () => {
     expect(standard).toMatchObject({
       presentation: "appView",
       frame: {
-        layout: "simple",
         material: "standard",
         topBar: "standard",
-        rightSlot: "userInfo",
+        rightSlot: "auto",
+        background: "system",
         smoothSurface: {
           radius: 31,
           curve: "squircle",
@@ -272,10 +271,10 @@ describe("AppRegistry and AppInfo registration preflight", () => {
     expect(appOwned).toMatchObject({
       presentation: "appView",
       frame: {
-        layout: "defacto",
         material: "metal",
         topBar: "custom",
-        rightSlot: "userInfo",
+        rightSlot: "auto",
+        background: "system",
         smoothSurface: {
           radius: 31,
           curve: "squircle",
@@ -310,12 +309,11 @@ describe("AppRegistry and AppInfo registration preflight", () => {
 
     const defaulted = AppRegistry.register(createTestManifest({
       id: "sourcelist-default",
-      frame: { layout: "defacto", material: "metal", topBar: "standard", sourceList: {} }
+      frame: { material: "metal", topBar: "standard", sourceList: {} }
     }));
     const custom = AppRegistry.register(createTestManifest({
       id: "sourcelist-custom",
       frame: {
-        layout: "defacto",
         material: "metal",
         topBar: "standard",
         sourceList: { railLabel: "  Software  ", minWidth: 240, maxWidth: 200, defaultWidth: 999 }
@@ -332,7 +330,7 @@ describe("AppRegistry and AppInfo registration preflight", () => {
 
     const appOwned = AppRegistry.register(createTestManifest({
       id: "sourcelist-custom-topbar",
-      frame: { layout: "defacto", material: "metal", topBar: "custom", sourceList: { defaultWidth: 300 } }
+      frame: { material: "metal", topBar: "custom", sourceList: { defaultWidth: 300 } }
     }));
 
     expect(appOwned?.frame.sourceList).toBeUndefined();
@@ -348,19 +346,20 @@ describe("AppRegistry and AppInfo registration preflight", () => {
     const registered = AppRegistry.register(createTestManifest({
       id: "invalid-frame",
       frame: {
-        layout: "floaty" as never,
         material: "panel" as never,
         topBar: "toolbar" as never,
-        presentationMotion: "automatic" as never
+        presentationMotion: "automatic" as never,
+        rightSlot: "bogus" as never,
+        background: 7 as never
       }
     }));
 
     expect(registered?.frame).toEqual({
-      layout: "simple",
       material: "standard",
       topBar: "standard",
       presentationMotion: "host",
-      rightSlot: "userInfo",
+      rightSlot: "auto",
+      background: "system",
       smoothSurface: {
         radius: 31,
         curve: "squircle",
@@ -371,12 +370,27 @@ describe("AppRegistry and AppInfo registration preflight", () => {
     });
     expect(AppRegistry.getRegistrationHistory().at(-1)?.warnings).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ code: "manifest.frame.layout.defaulted" }),
         expect.objectContaining({ code: "manifest.frame.material.defaulted" }),
         expect.objectContaining({ code: "manifest.frame.topBar.defaulted" }),
-        expect.objectContaining({ code: "manifest.frame.presentationMotion.defaulted" })
+        expect.objectContaining({ code: "manifest.frame.presentationMotion.defaulted" }),
+        expect.objectContaining({ code: "manifest.frame.rightSlot.defaulted" }),
+        expect.objectContaining({ code: "manifest.frame.background.defaulted" })
       ])
     );
+  });
+
+  it("keeps a custom right slot and a background surface, and drops the removed layout field", async () => {
+    const { AppRegistry } = createRuntimeHarness(createTestRuntime());
+    const rightSlot = { icon: "/assets/help.svg", label: { key: "help.label", fallback: "Help" } };
+    const background = { colour: "#223344", texture: "none" as const };
+    const registered = AppRegistry.register(createTestManifest({
+      id: "custom-frame",
+      frame: { rightSlot, background, layout: "simple" } as never
+    }));
+
+    expect(registered?.frame.rightSlot).toEqual(rightSlot);
+    expect(registered?.frame.background).toEqual(background);
+    expect(registered?.frame).not.toHaveProperty("layout");
   });
 
   it("reports optional services without disabling the app", async () => {

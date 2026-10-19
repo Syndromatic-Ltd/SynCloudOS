@@ -96,7 +96,7 @@ export const jaJPTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "お問い合わせ",
   "system.notifications": "通知",
   "system.portfolio": "ポートフォリオ",
-  "system.preferences": "設定",
+  "system.preferences": "システム設定",
   "system.software": "ソフトウェア",
   "system.webspring": "Webspring",
   "system.system": "システム",

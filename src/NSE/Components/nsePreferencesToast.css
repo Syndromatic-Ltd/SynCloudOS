@@ -20,6 +20,24 @@
 
 /* Preferences — a panel that rises into the centre of a dimmed, blurred desk. */
 
+/* A theme restyles this window through custom properties alone, set on the
+   theme root or on .nse-prefs-backdrop; the layout never changes. Each one
+   falls back to the value written beside it below, which is the light or dark
+   default depending on [data-mode], so a theme that wants different colours per
+   mode scopes its properties by [data-mode] too.
+
+   Surfaces:  --nse-prefs-panel-background, --nse-prefs-panel-shadow,
+              --nse-prefs-veil-background, --nse-prefs-veil-filter,
+              --nse-prefs-group-background (dark)
+   Header:    --nse-prefs-header-title-colour, --nse-prefs-header-title-shadow,
+              --nse-prefs-header-glyph-colour
+   Text:      --nse-prefs-row-colour (dark), --nse-prefs-meta-colour (dark),
+              --nse-prefs-note-colour, --nse-prefs-note-lead-colour,
+              --nse-prefs-empty-title-colour, --nse-prefs-empty-detail-colour,
+              --nse-prefs-chevron-colour, --nse-prefs-chevron-selected-colour
+   Selection: --nse-prefs-selection-background, --nse-prefs-selection-shadow,
+              --nse-prefs-selection-colour, --nse-prefs-selection-meta-colour (dark) */
+
 .nse-prefs-backdrop {
   position: fixed;
   inset: 0;
@@ -37,9 +55,9 @@
 .nse-prefs-veil {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.42);
-  -webkit-backdrop-filter: blur(7px) saturate(0.85);
-  backdrop-filter: blur(7px) saturate(0.85);
+  background: var(--nse-prefs-veil-background, rgba(0, 0, 0, 0.42));
+  -webkit-backdrop-filter: var(--nse-prefs-veil-filter, blur(7px) saturate(0.85));
+  backdrop-filter: var(--nse-prefs-veil-filter, blur(7px) saturate(0.85));
   pointer-events: none;
 }
 
@@ -55,10 +73,8 @@
   border-radius: var(--nse-atmo-page-header-radius, 14px);
   /* Centred, so it grows from its own middle. */
   transform-origin: 50% 50%;
-  background: linear-gradient(#f4f4f2, #e4e4e1);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.42),
-    0 22px 44px rgba(0, 0, 0, 0.46);
+  background: var(--nse-prefs-panel-background, linear-gradient(#f4f4f2, #e4e4e1));
+  box-shadow: var(--nse-prefs-panel-shadow, 0 0 0 1px rgba(0, 0, 0, 0.42), 0 22px 44px rgba(0, 0, 0, 0.46));
 }
 
 /* The header caps the toast, so it takes the toast's own radius on all four
@@ -70,8 +86,8 @@
 
 .nse-prefs-header.nse-control-page-header .nse-control-page-header-title {
   /* Light on the header plate, the way a popup states its own name. */
-  color: #f7f8f9;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55);
+  color: var(--nse-prefs-header-title-colour, #f7f8f9);
+  text-shadow: var(--nse-prefs-header-title-shadow, 0 -1px 0 rgba(0, 0, 0, 0.55));
 }
 
 /* The two titles cross inside one clipped box.
@@ -141,7 +157,7 @@
   margin: 0;
   display: grid;
   place-items: center;
-  color: #f4f6f8;
+  color: var(--nse-prefs-header-glyph-colour, #f4f6f8);
   filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.55));
   pointer-events: none;
 }
@@ -224,7 +240,7 @@
 
 .nse-prefs-chevron {
   width: 10px;
-  color: rgba(42, 55, 70, 0.42);
+  color: var(--nse-prefs-chevron-colour, rgba(42, 55, 70, 0.42));
   font-size: 20px;
   line-height: 1;
   text-align: center;
@@ -232,7 +248,7 @@
 
 .nse-prefs-list .nse-control-list-item[data-selected="true"] .nse-prefs-chevron,
 .nse-prefs-list .nse-control-list-item:active .nse-prefs-chevron {
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--nse-prefs-chevron-selected-colour, rgba(255, 255, 255, 0.72));
 }
 
 /* An empty group box is a bug that looks like a design. Say what would be here
@@ -246,7 +262,7 @@
 }
 
 .nse-prefs-empty-title {
-  color: rgba(42, 55, 70, 0.72);
+  color: var(--nse-prefs-empty-title-colour, rgba(42, 55, 70, 0.72));
   font-size: 15px;
   font-weight: 700;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
@@ -254,7 +270,7 @@
 
 .nse-prefs-empty-detail {
   max-width: 26ch;
-  color: rgba(42, 55, 70, 0.55);
+  color: var(--nse-prefs-empty-detail-colour, rgba(42, 55, 70, 0.55));
   font-size: 12px;
   line-height: 1.45;
 }
@@ -280,7 +296,7 @@
 .nse-prefs-pane .nse-prefs-note {
   margin: 12px auto 0;
   max-width: 32ch;
-  color: rgba(42, 55, 70, 0.62);
+  color: var(--nse-prefs-note-colour, rgba(42, 55, 70, 0.62));
   font-size: 12px;
   line-height: 1.45;
   text-align: center;
@@ -293,7 +309,7 @@
   max-width: none;
   margin: 2px 2px 8px;
   font-weight: 700;
-  color: rgba(42, 55, 70, 0.78);
+  color: var(--nse-prefs-note-lead-colour, rgba(42, 55, 70, 0.78));
   text-align: left;
 }
 
@@ -331,15 +347,12 @@
      inside a first, and the two crossed — matching in one band and separating in
      another, which is the "competing colours" that made the group box's edges
      impossible to find. One surface, one value. */
-  background: #262c34;
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.72),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 22px 44px rgba(0, 0, 0, 0.62);
+  background: var(--nse-prefs-panel-background, #262c34);
+  box-shadow: var(--nse-prefs-panel-shadow, 0 0 0 1px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 22px 44px rgba(0, 0, 0, 0.62));
 }
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-veil {
-  background: rgba(0, 0, 0, 0.56);
+  background: var(--nse-prefs-veil-background, rgba(0, 0, 0, 0.56));
 }
 
 /* The same plate as the light header, stop for stop and pixel for pixel — the
@@ -393,7 +406,7 @@
    its own engraved edge does the rest — no added shadow. */
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-group-box {
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--nse-prefs-group-background, rgba(255, 255, 255, 0.045));
 }
 
 /* Softened so they read as divisions within one plate rather than as more
@@ -404,7 +417,7 @@
 }
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-list-item {
-  color: #e7ecf2;
+  color: var(--nse-prefs-row-colour, #e7ecf2);
   border-top-color: rgba(255, 255, 255, 0.08);
   border-bottom-color: rgba(0, 0, 0, 0.52);
   /* Transparent on the ROOT list, where a row is the panel surface itself.
@@ -417,28 +430,28 @@
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-list-meta,
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-list .nse-control-list-meta {
-  color: rgba(190, 200, 212, 0.72);
+  color: var(--nse-prefs-meta-colour, rgba(190, 200, 212, 0.72));
 }
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-chevron {
-  color: rgba(190, 200, 212, 0.5);
+  color: var(--nse-prefs-chevron-colour, rgba(190, 200, 212, 0.5));
 }
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-prefs-note {
-  color: rgba(178, 188, 200, 0.66);
+  color: var(--nse-prefs-note-colour, rgba(178, 188, 200, 0.66));
 }
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-prefs-note-lead {
-  color: rgba(206, 214, 224, 0.82);
+  color: var(--nse-prefs-note-lead-colour, rgba(206, 214, 224, 0.82));
 }
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-empty-title {
-  color: rgba(224, 231, 240, 0.86);
+  color: var(--nse-prefs-empty-title-colour, rgba(224, 231, 240, 0.86));
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
 }
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-empty-detail {
-  color: rgba(178, 188, 200, 0.62);
+  color: var(--nse-prefs-empty-detail-colour, rgba(178, 188, 200, 0.62));
 }
 
 /* Selection and press, in dark.
@@ -453,19 +466,17 @@
    TODO.md. These clear both outright. */
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-group-inner .nse-control-list-item[data-selected="true"],
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-body .nse-prefs-pane .nse-control-list-item:not(.is-disabled):not([data-tap-highlight="false"]):active {
-  background: linear-gradient(180deg, #5c6f7f 0%, #233242 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
-  color: #f1f6fb;
+  background: var(--nse-prefs-selection-background, linear-gradient(180deg, #5c6f7f 0%, #233242 100%));
+  box-shadow: var(--nse-prefs-selection-shadow, inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.5));
+  color: var(--nse-prefs-selection-colour, #f1f6fb);
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45);
 }
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-control-list-meta {
-  color: rgba(241, 246, 251, 0.72);
+  color: var(--nse-prefs-selection-meta-colour, rgba(241, 246, 251, 0.72));
 }
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-prefs-chevron {
-  color: rgba(241, 246, 251, 0.7);
+  color: var(--nse-prefs-chevron-selected-colour, rgba(241, 246, 251, 0.7));
 }

@@ -18,5 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { createPreferencePaneRegistry } from "./preferencePaneRegistry";
-export type { PreferencePaneDescriptor, PreferencePaneRegistration, PreferencePaneRegistry } from "./preferencePaneRegistry";
+export { createPreferencePaneRegistry, registerPreferencePane } from "./preferencePaneRegistry";
+export type { PreferencePaneRegistration, PreferencePaneRegistry } from "./preferencePaneRegistry";
+export { definePreferencePane, isPreferencePaneDefinition, resolvePreferencePanes } from "./definePreferencePane";
+export type {
+  PreferencePaneDefinition,
+  PreferencePaneInput,
+  PreferencePaneText,
+  PreferencePaneViewProps,
+} from "./definePreferencePane";

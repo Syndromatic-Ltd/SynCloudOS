@@ -19,5 +19,5 @@ mountSynCloudOS({ element, shell, application: { id: "com.example.game" } });
 mountSynCloudOS({ element, application: { id: "com.example.game" }, shellResources: {} });
 // @ts-expect-error The application frame is either the full page or the app's declared frame.
 mountSynCloudOS({ element, application: { id: "com.example.game", frame: "windowed" } });
-// @ts-expect-error Content sources belong to Webspring.
+// @ts-expect-error Content sources are gone; widgets are declared with defineWebspring.
 mountSynCloudOS({ element, application: { id: "com.example.game" }, contentSources: {} });

@@ -18,23 +18,43 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSETopBarStyleDefinition } from "./nseTopBarTypes";
+import type { CSSProperties } from "react";
+import type { NSETopBarItem, NSETopBarStyleDefinition, NSETopBarVariant } from "./nseTopBarTypes";
 
-import { atmoCumulusGlyphs } from "./nseTopBarAssets";
+import { nseTopBarGlyphs } from "./nseTopBarAssets";
 
 const cumulus: NSETopBarStyleDefinition = {
-  height: 68,
-  icons: {
-    webspring: atmoCumulusGlyphs.webspring,
-    userInfo: atmoCumulusGlyphs.userInfo
-  }
+  icons: nseTopBarGlyphs
 };
 
 /**
- * Cumulus chrome metrics and item glyphs. The glass bar and its inset controls
+ * Cumulus chrome metrics and built-in item glyphs. The glass bar and its inset controls
  * are vector CSS material (`[data-variant="atmoCumulus"]` in nse-chrome.css);
  * the `atmoMetal` variant is likewise CSS-driven and has no definition here.
  */
 export const nseTopBarStyles = {
   atmoCumulus: cumulus
 } satisfies Record<"atmoCumulus", NSETopBarStyleDefinition>;
+
+/**
+ * A chrome variant's rendered height, as the CSS value to reserve above app content: the exact
+ * expression the bar itself uses, so the bar and the content below it can never disagree —
+ * including a host override of `--nse-app-topbar-height` and the compact breakpoint.
+ */
+export function nseTopBarHeightCssValue(variant: NSETopBarVariant): string {
+  const token = variant === "atmoMetal" ? "--nse-topbar-height-metal" : "--nse-topbar-height-cumulus";
+  return `var(--nse-app-topbar-height, var(${token}))`;
+}
+
+/**
+ * The inline style that points a glyph's mask at an SVG through `--nse-app-topbar-glyph`: the
+ * item's own `icon`, else its kind's built-in glyph. Undefined when neither exists (a `custom`
+ * item with no icon), so the caller renders no glyph rather than an unmasked block.
+ */
+export function resolveNSETopBarGlyphStyle(
+  item: Pick<NSETopBarItem, "kind" | "icon">,
+  icons: NSETopBarStyleDefinition["icons"] = nseTopBarGlyphs
+): CSSProperties | undefined {
+  const url = item.icon ?? (item.kind === "custom" ? undefined : icons[item.kind]);
+  return url ? ({ "--nse-app-topbar-glyph": `url(${JSON.stringify(url)})` } as CSSProperties) : undefined;
+}

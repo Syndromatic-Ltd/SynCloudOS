@@ -119,6 +119,8 @@ export function useWebspringLocale() {
     activeLocale: localeSnapshot.activeLocale,
     appAction: (app: SynCloudOSAppInfo, action: "open" | "close") => getLocalizedWebspringAppAction(app, action, services),
     appName: (app: SynCloudOSAppInfo, variant: "display" | "short" | "window" = "display") => getLocalizedWebspringAppName(app, variant, services),
+    /** Text the app declares for itself (such as its right-slot label), from the app's own strings. */
+    appText: (app: SynCloudOSAppInfo, key: string, fallback: string) => getLocalizedWebspringText(key, fallback, undefined, appNamespace(app.id), services),
     t: (key: string, fallback: string, params?: SynCloudOSTranslationParams) => getLocalizedWebspringText(key, fallback, params, webspringLocaleNamespace, services),
     tMenu: (key: string, fallback: string, params?: SynCloudOSTranslationParams) =>
       getLocalizedWebspringText(key, fallback, params, webspringMainMenuNamespace, services)

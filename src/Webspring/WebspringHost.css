@@ -1232,26 +1232,42 @@
 
 .webspring-app-view-body-surface {
   position: absolute;
-  inset: 2px 0 0;
+  inset: 0;
   z-index: 0;
   display: block;
   min-width: 0;
   min-height: 0;
-  background-color: #d9d4c7;
-  background-image: url("/assets/textures/NSETileCotton.jpg");
-  background-position: top left;
-  background-repeat: repeat;
-  color: #1e1b17;
+  color: var(--nse-app-foreground);
+  background-color: var(--nse-app-background);
   isolation: isolate;
 }
 
-/* A curling NSEPage stays beneath the frame chrome: the top bar reads as
-   fixed OS chrome the paper slides under (iOS Maps keeps the status bar
-   above the curl). Lifting the whole app body here instead makes the bar
-   vanish the instant the curl starts. */
+/* The app paints its own body. */
+.webspring-app-view-body-surface[data-frame-background="none"] {
+  background: none;
+}
 
-.webspring-app-view-surface-custom .webspring-app-view-body-surface {
-  background: #111;
+/* A developer surface: one rule per layer, read from the custom properties set on the element. */
+.webspring-app-view-body-surface[data-frame-background="surface"] {
+  background-color: var(--nse-app-surface-colour);
+  background-image: var(--nse-app-surface-image);
+  background-size: var(--nse-app-surface-size);
+  background-repeat: var(--nse-app-surface-repeat);
+  background-position: var(--nse-app-surface-position);
+}
+
+.webspring-app-view-body-surface[data-frame-background="surface"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--nse-app-surface-overlay-image);
+  background-size: var(--nse-app-surface-overlay-size);
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: var(--nse-app-surface-overlay-opacity);
+  mix-blend-mode: var(--nse-app-surface-overlay-blend);
 }
 
 .webspring-app-view-body-surface-off {
@@ -1261,42 +1277,21 @@
   -webkit-clip-path: none;
 }
 
-/* Full-bleed apps fill the viewport and paint their own top edge (app-owned chrome or the standard
-   top bar), so the body surface must reach y=0. Without this, the base 2px top inset reveals the
-   #111 surface behind it as a black hairline directly above the app's top bar. */
-.webspring-app-view-surface[data-frame-layout="defacto"] .webspring-app-view-body-surface {
-  inset: 0;
-}
-
-.webspring-app-view-surface-custom {
-  background: #111;
-}
-
-.webspring-app-view-content {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  min-height: 100%;
-  padding: calc(var(--nse-app-topbar-height, 68px) + 28px) clamp(22px, 4vw, 48px) 46px;
-  overflow: auto;
-  perspective: 1100px;
-}
-
 .webspring-app-view-fullbleed-content {
   position: absolute;
   inset: 0;
   z-index: 1;
   min-width: 0;
   min-height: 0;
-  overflow: hidden;
+  overflow: auto;
 }
 
-/* Full-bleed apps that use the standard system top bar (e.g. About) paint their
-   own surface up to y=0 with the bar floating over them â€” they must NOT be inset
-   below the bar, or a dark gap opens between the bar and the app face and the
-   app's own bottom-anchored chrome (tab bar, page-curl) is shifted off. */
-.webspring-app-view-layout-defacto {
-  overflow: auto;
+/* A standard top bar floats over the body, so the content starts below it the way a content view
+   starts below a title bar. The stage exposes the bar's own height (the property is 0px when there
+   is no standard bar), and the body still fills the whole frame behind it, so the app background
+   runs under the bar. The source-list rule below resets this for layouts that put the bar in flow. */
+.webspring-app-view-body-surface .webspring-app-view-fullbleed-content {
+  inset-block-start: var(--webspring-app-top-bar-height, 0px);
 }
 
 /* Source-list windows render the metal bar INSIDE the rounded body surface as a non-scrolling
@@ -1319,24 +1314,6 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
-}
-
-.webspring-app-view-content-card {
-  width: min(1120px, 100%);
-  margin: 0 auto;
-  padding: clamp(22px, 3vw, 38px);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 8px;
-  color: #172232;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(226, 234, 241, 0.72)),
-    rgba(244, 248, 252, 0.76);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.88),
-    0 22px 46px rgba(36, 45, 55, 0.28);
-  backdrop-filter: blur(8px);
-  transform-origin: 50% 120%;
-  will-change: transform, opacity;
 }
 
 .webspring-app-overlay-destination {
@@ -1408,18 +1385,6 @@
     radial-gradient(circle at 50% 22%, rgba(255,255,255,0.16), transparent 38%),
     linear-gradient(180deg, #252a30, #0f1216);
   pointer-events: none;
-}
-
-@media (max-width: 760px) {
-  .webspring-app-view-surface-generic .webspring-app-view-content {
-    padding: 78px clamp(16px, 5vw, 28px) 34px;
-  }
-
-  .webspring-app-view-surface-generic .webspring-app-view-content-card {
-    width: min(100%, 620px);
-    padding: clamp(18px, 5vw, 26px);
-  }
-
 }
 
 @media (max-width: 1180px) {

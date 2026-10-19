@@ -697,7 +697,7 @@
           "src/SynCloudOS/DocumentStore/index.ts",
           "src/SynCloudOS/Lifecycle/index.ts",
           "src/SynCloudOS/LocaleServices/index.ts",
-          "src/SynCloudOS/Preferences/systemPreferencePaneIssuer.ts",
+          "src/SynCloudOS/Preferences/index.ts",
           "src/SynCloudOS/PluginRegistry/index.ts",
           "src/SynCloudOS/PolicyKit/index.ts",
           "src/SynCloudOS/Resources/frameworkAssets.ts"

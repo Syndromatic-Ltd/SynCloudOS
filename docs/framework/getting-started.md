@@ -239,7 +239,7 @@ The shorthand strings `"optional"` and `"required"` apply the policy but constru
 
 With `"disabled"` or `"optional"` the primary bundle must be public
 (`runtime.policy.public`), because it launches before anyone signs in.
-`shell`, `shellResources` and `contentSources` cannot accompany `application`.
+`shell` and `shellResources` cannot accompany `application`.
 
 #### Open the application menu from a fullscreen app
 
@@ -301,8 +301,8 @@ await mountSynCloudOS({
 
 The menu offers:
 
-- **About {app}**, plus the app's own preferences item when the manifest declares one under `applicationMenu.preferences`.
-- **Preferences**. The **Account** pane appears only when authentication is `"optional"` or `"required"`.
+- **About {app}**, when the host supplies attribution for the app, plus the app's own preferences item when the manifest declares one under `applicationMenu.preferences`.
+- **System Preferences…**. The **Account** pane appears only when authentication is `"optional"` or `"required"`.
 - **Sign In**, when authentication is not disabled and nobody is signed in. It runs the login window.
 - **Log Out**, when someone is signed in and authentication is not disabled. It asks for confirmation first.
 - **Quit {app}**, which shows the quit page with **Reopen**.

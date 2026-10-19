@@ -44,7 +44,6 @@ import { defaultWebspringLaunchZoom, defaultWebspringReturnTracks } from "./Webs
 import { WebspringLaunchZoomContext } from "./WebspringLaunchZoomContext";
 import { useWebspringEntrance } from "./useWebspringEntrance";
 import { scheduleWebspringIdlePrefetch } from "./webspringPrefetch";
-import { WebspringContentController, type WebspringContentSources } from "./webspringContent";
 import { EMPTY_WEBSPRING_FOLDER_CONFIGURATION, WEBSPRING_PRESENTATION_ROLES, getOrderedVisibleWebspringApps } from "../SynCloudOS/SynCloudOS";
 import "./WebspringHost.css";
 
@@ -53,7 +52,6 @@ interface WebspringHostPresentationContextValue {
   readonly requestNotificationCentre: (notificationId?: string) => void;
 }
 
-const emptyContentSources: WebspringContentSources = Object.freeze({});
 const emptyAuthenticationSnapshot = Object.freeze({ status: "disabled" as const, methods: Object.freeze([]), profile: null, expiresAt: null, error: null });
 const emptyAuthenticationGetter = () => emptyAuthenticationSnapshot;
 const emptySubscribe = () => () => undefined;
@@ -117,13 +115,11 @@ export function WebspringHost({
   shellResources,
   authentication = "disabled",
   startupPhase,
-  contentSources = emptyContentSources,
 }: {
   readonly shell: WebspringDefinition;
   readonly shellResources?: SynCloudOSShellResources;
   readonly authentication?: AuthenticationInput;
   readonly startupPhase?: SystemStartupPhase;
-  readonly contentSources?: WebspringContentSources;
 }) {
   const runtime = useKernelSynCloudOS();
   const snapshot = useRuntimeSelector((state) => state, equalHostSnapshot);
@@ -132,25 +128,13 @@ export function WebspringHost({
   const authenticationService = typeof authentication === "object" ? authentication.service : null;
   useSyncExternalStore(authenticationService?.subscribe ?? emptySubscribe, authenticationService?.getSnapshot ?? emptyAuthenticationGetter, authenticationService?.getSnapshot ?? emptyAuthenticationGetter);
   const [controllerRetry, setControllerRetry] = useState(0);
-  const contentController = useMemo(() => new WebspringContentController(shell.content, contentSources), [contentSources, shell]);
-  const contentSections = useSyncExternalStore(contentController.subscribe, contentController.getSnapshot, contentController.getSnapshot);
-  useEffect(() => {
-    contentController.start();
-    const browserWindow = runtime.environment.browser.getWindow();
-    const refresh = () => { void contentController.refresh(); };
-    browserWindow?.addEventListener("focus", refresh);
-    return () => {
-      browserWindow?.removeEventListener("focus", refresh);
-      contentController.dispose();
-    };
-  }, [contentController, runtime]);
   const controllerOutcome = useMemo(() => {
     try {
-      return { controller: new WebspringController(runtime, shell, shellResources, authentication, contentController), error: null };
+      return { controller: new WebspringController(runtime, shell, shellResources, authentication), error: null };
     } catch (error) {
       return { controller: null, error: error instanceof Error ? error : new Error("Webspring host configuration failed.") };
     }
-  }, [authentication, contentController, controllerRetry, runtime, shell, shellResources]);
+  }, [authentication, controllerRetry, runtime, shell, shellResources]);
   const controller = controllerOutcome.controller;
   const [viewOverride, setViewOverride] = useState<{ presentation: Presentation; id: string } | null>(null);
   const viewId = viewOverride?.presentation === presentation ? viewOverride.id : controller?.viewId(presentation) ?? "configuration-error";
@@ -203,7 +187,7 @@ export function WebspringHost({
     setLoginContinuation(false);
     onLoginExited();
   }, [gateRequested, onLoginExited, setLoginContinuation]);
-  const model = controller?.model(runtime.store.getSnapshot(), presentation, contentSections, entrancePhase) ?? null;
+  const model = controller?.model(runtime.store.getSnapshot(), presentation, entrancePhase) ?? null;
   const [notificationCentreRequest, setNotificationCentreRequest] = useState<{ key: number; notificationId?: string | null } | null>(null);
   const [quickSwitchOpen, setQuickSwitchOpen] = useState(false);
   const applicationMenuToggleRef = useRef<{ appId: string; toggle: () => void } | null>(null);

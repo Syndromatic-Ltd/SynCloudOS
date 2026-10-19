@@ -52,7 +52,7 @@ export type {
   SynCloudOSAppWindowManifest,
   SynCloudOSStagePoint,
 } from "./AppRegistry/appRegistryTypes";
-export type { SynCloudOSAppFrameSmoothSurfaceManifest } from "./AppRegistry/appRegistryTypes";
+export type { SynCloudOSAppFrameBackground, SynCloudOSAppFrameRightSlot, SynCloudOSAppFrameSmoothSurfaceManifest } from "./AppRegistry/appRegistryTypes";
 export type { SynCloudOSAppAccessPolicy } from "./PolicyKit/policyTypes";
 export type { SynCloudOSPolicySubject } from "./PolicyKit/policyTypes";
 export type { SynCloudOSPolicyProfile, SynCloudOSPolicyProfileSession, SynCloudOSPolicySubjectGrant } from "./PolicyKit/policyTypes";
@@ -174,12 +174,6 @@ export {
   webspringPresentationRoles,
 } from "./WebspringState/webspringPresentation";
 export type { WebspringMultiSwitchRole, WebspringReturnRole } from "./WebspringState/webspringPresentation";
-export type {
-  WebspringContentItem,
-  WebspringContentReadRequest,
-  WebspringContentSource,
-  WebspringContentSources,
-} from "./WebspringState/webspringContentTypes";
 export type { SynCloudOSMultiSwitchState } from "./ApplicationState/applicationStateTypes";
 export { AppPresentationErrorFallback, SynCloudOSWatchdog } from "./ErrorManager/SynCloudOSWatchdog";
 export { toTechnicalReport } from "./ErrorManager/errorReport";
@@ -204,7 +198,7 @@ export type {
 } from "./LocaleServices/localeTypes";
 export { DocumentError, DocumentNotFoundError } from "./Documents/DocumentErrors";
 export { useResolvedMode } from "./Appearance/useAppearance";
-export type { PreferencePaneDescriptor, PreferencePaneRegistry } from "./Preferences";
+export type { PreferencePaneDefinition, PreferencePaneRegistry, PreferencePaneViewProps } from "./Preferences";
 export { WEBSPRING_LAYOUT_PREFERENCE_VERSION } from "./WebspringState/webspringStateTypes";
 export type {
   SynCloudOSWebspringFolderConfiguration,

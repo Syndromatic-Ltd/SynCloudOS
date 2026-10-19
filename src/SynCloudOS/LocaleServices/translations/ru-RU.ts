@@ -96,7 +96,7 @@ export const ruRUTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "Контакт",
   "system.notifications": "Уведомления",
   "system.portfolio": "Портфолио",
-  "system.preferences": "Предпочтения",
+  "system.preferences": "Системные настройки",
   "system.software": "Программное обеспечение",
   "system.webspring": "Webspring",
   "system.system": "Система",

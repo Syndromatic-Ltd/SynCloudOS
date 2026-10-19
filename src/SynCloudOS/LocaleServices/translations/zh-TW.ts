@@ -96,7 +96,7 @@ export const zhTWTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "聯絡方式",
   "system.notifications": "通知",
   "system.portfolio": "投資組合",
-  "system.preferences": "偏好設定",
+  "system.preferences": "系統偏好設定",
   "system.software": "軟體",
   "system.webspring": "Webspring",
   "system.system": "系統",

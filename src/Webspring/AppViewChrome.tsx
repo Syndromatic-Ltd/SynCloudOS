@@ -20,6 +20,7 @@
 
 import { useCallback, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
 import { useNSEPresenceExiting, useNSEPresentation } from "../NSE/Animation";
+import { nseTopBarHeightCssValue } from "../NSE/Windows/Chrome/nseTopBarStyles";
 import type { SynCloudOSAppFrameManifest } from "../SynCloudOS/SynCloudOS";
 import type { ApplicationStagePartMotion } from "./ApplicationStage.transitions";
 
@@ -128,17 +129,23 @@ function Surface({
   const surfaceClass = isStandardFrame(frame)
     ? "webspring-app-view-surface-generic"
     : "webspring-app-view-surface-custom";
+  // The content sits below a standard bar, the way a content view sits below a title bar, and the
+  // app's own background still fills the whole frame behind it. The reserved band is the bar's
+  // own height token (nse-chrome.css), so the two can never disagree; a custom or absent bar
+  // leaves the whole frame to the app.
+  const topBarHeight = frame.topBar === "standard"
+    ? nseTopBarHeightCssValue(frame.material === "metal" ? "atmoMetal" : "atmoCumulus")
+    : "0px";
 
   return (
     <div
       ref={surfaceRef}
       className={`webspring-app-view-surface ${surfaceClass}`}
-      data-frame-layout={frame.layout}
       data-frame-material={frame.material}
       data-frame-top-bar={frame.topBar}
       data-nse-material={frame.material}
       data-multiswitch-role={multiSwitchRole ?? undefined}
-      style={presentation?.motion.style}
+      style={{ ...presentation?.motion.style, "--webspring-app-top-bar-height": topBarHeight } as CSSProperties}
     >
       {children}
     </div>

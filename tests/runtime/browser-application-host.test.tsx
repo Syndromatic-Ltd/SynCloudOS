@@ -326,12 +326,12 @@ describe("application-only browser host", () => {
     expect(document.querySelector(".nse-login-window")).toBeNull();
     expect(target.querySelector('[data-testid="application-menu"]')!.getAttribute("data-menu-label")).toBe("Application host");
     const menu = await openApplicationMenu(target);
-    expect(within(menu).getByRole("menuitem", { name: "About Application host" })).not.toBeNull();
+    expect(within(menu).queryByRole("menuitem", { name: /^About/ })).toBeNull();
     expect(within(menu).getByRole("menuitem", { name: "Sign In" })).not.toBeNull();
     expect(within(menu).getByRole("menuitem", { name: "Quit Application host" })).not.toBeNull();
     expect(within(menu).queryByRole("menuitem", { name: "Log Out" })).toBeNull();
-    await chooseMenuItem("Preferences");
-    const preferences = await screen.findByRole("dialog", { name: "Preferences" });
+    await chooseMenuItem("System Preferences…");
+    const preferences = await screen.findByRole("dialog", { name: "System Preferences" });
     await act(async () => { fireEvent.click(within(preferences).getByText("Account")); });
     expect(screen.getAllByText("Not Signed In").length).toBeGreaterThan(0);
     await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Sign In" })); });
@@ -357,18 +357,18 @@ describe("application-only browser host", () => {
     await chooseMenuItem("Log Out");
     expect(await screen.findByRole("alertdialog", { name: /log out/i })).not.toBeNull();
   });
-  it("offers Preferences and Quit but no Account, Sign In or Log Out when the host has no authentication", async () => {
+  it("offers System Preferences and Quit but no Account, Sign In or Log Out when the host has no authentication", async () => {
     const { runtime, element: target } = await mount(element(), { bundles: [menuBundle] });
     const menu = await openApplicationMenu(target);
-    expect(within(menu).getByRole("menuitem", { name: "Preferences" })).not.toBeNull();
+    expect(within(menu).getByRole("menuitem", { name: "System Preferences…" })).not.toBeNull();
     expect(within(menu).queryByRole("menuitem", { name: "Sign In" })).toBeNull();
     expect(within(menu).queryByRole("menuitem", { name: "Log Out" })).toBeNull();
-    await chooseMenuItem("Preferences");
-    const preferences = await screen.findByRole("dialog", { name: "Preferences" });
+    await chooseMenuItem("System Preferences…");
+    const preferences = await screen.findByRole("dialog", { name: "System Preferences" });
     expect(within(preferences).queryByText("Account")).toBeNull();
     expect(screen.queryByRole("button", { name: "Sign In" })).toBeNull();
     await act(async () => { runtime.systemUI.preferences.close(); });
-    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Preferences" })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "System Preferences" })).toBeNull());
     await openApplicationMenu(target);
     await chooseMenuItem("Quit Application host");
     await waitFor(() => expect(runtime.lifecycle.getState(id)).toBe("closed"));

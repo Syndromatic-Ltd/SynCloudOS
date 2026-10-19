@@ -18,10 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * System-shell-only preference-pane issuer.
- *
- * This exact entrypoint is available to the trusted shell boundary and is not
- * re-exported from Preferences, SynCloudOS, or AppSDK.
- */
-export { registerSystemPreferencePane } from "./preferencePaneRegistry";
+import { Component, type ReactNode } from "react";
+
+/** Contains a throwing pane (or row) so one failure never takes down System Preferences. */
+export class PreferencePaneBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}

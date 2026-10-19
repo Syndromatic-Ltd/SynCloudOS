@@ -47,7 +47,7 @@ function Content() {
 }
 const definition = createSynWare({
   manifest: { schemaVersion: 1, id: "stage-overlay-app", version: "1.0.0", title: "Stage Overlay", permissions: ["app.open.public"],
-    frame: { layout: "defacto", topBar: "none", presentationMotion: contentOwned ? "content" : "host" } },
+    frame: { topBar: "none", presentationMotion: contentOwned ? "content" : "host" } },
   root: Content,
 });
 const app = runtime.apps.register(createSynWareBundle(definition))!;

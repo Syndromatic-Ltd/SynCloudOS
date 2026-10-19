@@ -43,7 +43,7 @@ describe("NSETopBar document window placement", () => {
     expect(container.querySelector("[data-title-placement]")?.getAttribute("data-title-placement")).toBe("leading");
     fireEvent.click(screen.getByRole("button", { name: "Switch apps" }));
     expect(toggle).toHaveBeenCalledOnce();
-    expect(container.querySelector(".nse-app-topbar-metal-pill-glyph-settings")).not.toBeNull();
+    expect(container.querySelectorAll(".nse-app-topbar-metal-pill-glyph")).toHaveLength(2);
   });
 
   it("keeps the centred title by default", () => {
@@ -54,6 +54,7 @@ describe("NSETopBar document window placement", () => {
 
   it("draws a settings item on the Cumulus bar from its own icon", () => {
     const { container } = render(<NSETopBar title="App" trailingItems={[{ kind: "settings", label: "Settings", icon: "/gear.svg" }]} />);
-    expect(container.querySelector("img[src='/gear.svg']")).not.toBeNull();
+    const glyph = container.querySelector<HTMLElement>(".nse-app-topbar-button-icon")!;
+    expect(glyph.style.getPropertyValue("--nse-app-topbar-glyph")).toBe('url("/gear.svg")');
   });
 });

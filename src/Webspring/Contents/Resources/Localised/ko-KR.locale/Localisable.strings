@@ -41,7 +41,6 @@
 "quickswitch.open" = "퀵스위치 열기";
 "quickswitch.openedShortcut" = "{app}, 열림, {shortcut} 바로가기";
 "quickswitch.visibleApps" = "Webspring 앱 표시";
-"shelf.ariaLabel" = "Webspring 뉴스 및 상태";
 "webspring.additionalApps.ariaLabel" = "추가 Webspring 앱";
 "webspring.apps.ariaLabel" = "Webspring 앱";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

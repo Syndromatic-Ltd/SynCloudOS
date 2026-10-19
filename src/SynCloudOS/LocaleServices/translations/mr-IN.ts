@@ -96,7 +96,7 @@ export const mrINTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "संपर्क करा",
   "system.notifications": "सूचना",
   "system.portfolio": "पोर्टफोलिओ",
-  "system.preferences": "प्राधान्ये",
+  "system.preferences": "सिस्टम प्राधान्ये",
   "system.software": "सॉफ्टवेअर",
   "system.webspring": "Webspring",
   "system.system": "प्रणाली",

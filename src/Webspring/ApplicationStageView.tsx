@@ -38,12 +38,12 @@ import {
   NSETopBar,
 } from "@syndromatic/syncloudos/nse/controls";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
-import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
+import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
 import { AppViewContent } from "./AppViewContent";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
-import { applicationMenuLabels, ApplicationMenuOverlayHost, ApplicationMenuTriggerBridge, createApplicationMenuStore, useApplicationMenuSnapshot, type ApplicationMenuStore } from "./applicationMenuPresentation";
+import { applicationDeclaresAbout, applicationMenuLabels, ApplicationMenuOverlayHost, ApplicationMenuTriggerBridge, createApplicationMenuStore, menuOpensSystemPreferencesDirectly, useApplicationMenuSnapshot, type ApplicationMenuStore } from "./applicationMenuPresentation";
 import { createWebspringAppMenuModel } from "./webspringAppMenu";
 import { useWebspringLocale } from "./webspringLocale";
 import type { ApplicationStagePresentation } from "./stage";
@@ -125,7 +125,7 @@ export function ApplicationStageView({
   }, []);
   const resolvedMode = useResolvedMode();
   const usesStandardTopBar = frame.topBar === "standard";
-  const usesContentCard = frame.layout === "simple";
+  const siteBranding = useHostSiteBranding();
   const navigationChromeController = useMemo(() => new NSEApplicationNavigationChromeController(), [stage.id]);
   const navigationChromeSnapshot = useSyncExternalStore(
     navigationChromeController.subscribe,
@@ -179,9 +179,9 @@ export function ApplicationStageView({
     : null;
   const standardBarTitle = sourceList ? (barTitle ?? appWindowTitle) : appWindowTitle;
   const appMenuLabels = useMemo(() => applicationMenuLabels(appName, locale.t), [appName, locale]);
+  const appDeclaresAbout = applicationDeclaresAbout(app.about);
   const appPreferences = app.applicationMenu?.preferences;
   const menuPresentationReady = !staged && !multiSwitchRole;
-  const hasApplicationMenu = menuPresentationReady && (frame.rightSlot === "userInfo" || app.applicationMenu?.trigger === "content");
   const quickSwitchTrigger = useMemo(() => (
     stage.isFocused && menuPresentationReady && onQuickSwitchRequest
       ? Object.freeze({
@@ -191,11 +191,6 @@ export function ApplicationStageView({
         })
       : null
   ), [menuPresentationReady, onQuickSwitchRequest, quickSwitchLabel, quickSwitchOpen, stage.isFocused]);
-  useEffect(() => {
-    if (!onApplicationMenuToggleRegister) return undefined;
-    const unregister = onApplicationMenuToggleRegister(app.id, appMenuStore.toggle, menuPresentationReady);
-    return unregister;
-  }, [app.id, appMenuStore, menuPresentationReady, onApplicationMenuToggleRegister]);
   const appMenuModel = useMemo(() => createWebspringAppMenuModel({
     appId: app.id,
     labels: appMenuLabels,
@@ -203,8 +198,29 @@ export function ApplicationStageView({
       commandId: appPreferences.commandId,
       label: appPreferences.label ?? locale.t("appMenu.appPreferences", "{app} Preferences…", { app: appName }),
     } : undefined,
+    includeAbout: appDeclaresAbout,
     includeLogOut: sessionAuthorised,
-  }), [app.id, appMenuLabels, appName, appPreferences, locale, sessionAuthorised]);
+  }), [app.id, appDeclaresAbout, appMenuLabels, appName, appPreferences, locale, sessionAuthorised]);
+  // With only System Preferences to offer, the control opens it instead of a one-item menu.
+  const opensPreferencesDirectly = menuOpensSystemPreferencesDirectly(appMenuModel);
+  const openSystemPreferences = useCallback(() => {
+    void runtime.commands.dispatch("system.showPreferences", undefined, { source: "toolbar" });
+  }, [runtime]);
+  const activateMenu = opensPreferencesDirectly ? openSystemPreferences : appMenuStore.toggle;
+  const hasRightSlot = usesStandardTopBar && frame.rightSlot !== "none";
+  const hasApplicationMenu = menuPresentationReady && !opensPreferencesDirectly && (hasRightSlot || app.applicationMenu?.trigger === "content");
+  useEffect(() => {
+    if (!onApplicationMenuToggleRegister) return undefined;
+    const unregister = onApplicationMenuToggleRegister(app.id, activateMenu, menuPresentationReady);
+    return unregister;
+  }, [activateMenu, app.id, menuPresentationReady, onApplicationMenuToggleRegister]);
+  const rightSlot = useMemo<RightSlotControl | null>(() => {
+    if (!hasRightSlot || frame.rightSlot === "none") return null;
+    const common = { opensMenu: !opensPreferencesDirectly, onActivate: activateMenu };
+    if (frame.rightSlot === "userInfo") return { ...common, kind: "userInfo", label: locale.t("userInfo.label", "User Info") };
+    if (frame.rightSlot === "auto") return { ...common, kind: "settings", label: locale.t("settings.label", "Settings") };
+    return { ...common, kind: "custom", label: locale.appText(app, frame.rightSlot.label.key, frame.rightSlot.label.fallback ?? frame.rightSlot.label.key), icon: frame.rightSlot.icon };
+  }, [activateMenu, app, frame.rightSlot, hasRightSlot, locale, opensPreferencesDirectly]);
   const appMenuRuntime = useRuntimeNSEMenuPort();
   const appMenuController = useMemo(
     () => new NSEMenuController({ model: appMenuModel, runtime: appMenuRuntime }),
@@ -230,8 +246,7 @@ export function ApplicationStageView({
   const standardTopBar = showsApplicationStageTopBar ? (
     <ApplicationStageTopBar
       menuStore={appMenuStore}
-      showUserInfo={frame.rightSlot === "userInfo"}
-      userInfoLabel={locale.t("userInfo.label", "User Info")}
+      rightSlot={rightSlot}
       title={activeNavigationChrome?.title ?? standardBarTitle}
       variant={frame.material === "metal" ? "atmoMetal" : "atmoCumulus"}
       scheme={resolvedMode}
@@ -240,6 +255,7 @@ export function ApplicationStageView({
       leadingItems={[{
         kind: "webspring",
         label: returnToWebspringLabel,
+        ...(siteBranding?.homeIconUrl ? { icon: siteBranding.homeIconUrl } : {}),
         selected: false,
         onClick: () => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }
       }]}
@@ -276,8 +292,7 @@ export function ApplicationStageView({
   }, [completePresentation, reducedMotion, frame.presentationMotion]);
   const isLoading = !isMultiSwitching && (lifecycle === "loading" || lifecycle === "launching");
   // The frame reports each MultiSwitch role once its slide lands; the surface
-  // (or, in the simple layout, the content card) settles the application
-  // enter once the launch presentation lands.
+  // settles the application enter once the launch presentation lands.
   const rootPresentation = useMemo<AppViewPresentation>(() => ({
     motion: stageMotion.root,
     onPresented: (state) => {
@@ -286,16 +301,12 @@ export function ApplicationStageView({
       onMultiSwitchAnimationComplete?.(multiSwitchId, state);
     },
   }), [completePresentation, multiSwitchId, onMultiSwitchAnimationComplete, stageMotion.root]);
-  const settlesOnPresented = useCallback((owner: "surface" | "card") => (state: string) => {
-    if (state === "presented" && !reducedMotion && (owner === "card") === usesContentCard) completePresentation();
-  }, [completePresentation, reducedMotion, usesContentCard]);
+  const settlesOnPresented = useCallback((state: string) => {
+    if (state === "presented" && !reducedMotion) completePresentation();
+  }, [completePresentation, reducedMotion]);
   const surfacePresentation = useMemo<AppViewPresentation>(
-    () => ({ motion: stageMotion.surface, onPresented: settlesOnPresented("surface") }),
+    () => ({ motion: stageMotion.surface, onPresented: settlesOnPresented }),
     [settlesOnPresented, stageMotion.surface],
-  );
-  const cardPresentation = useMemo<AppViewPresentation>(
-    () => ({ motion: stageMotion.card, onPresented: settlesOnPresented("card") }),
-    [settlesOnPresented, stageMotion.card],
   );
 
   const applicationUndoOwner = useMemo(() => ({ kind: "application" as const, id: app.id }), [app.id]);
@@ -362,45 +373,30 @@ export function ApplicationStageView({
           <ApplicationMenuTriggerBridge
             menuStore={appMenuStore}
             label={appName}
+            onActivate={opensPreferencesDirectly ? openSystemPreferences : undefined}
           >
           <QuickSwitchTriggerProvider port={quickSwitchTrigger}>
           <AppViewContent.Surface
             smoothSurface={frame.smoothSurface}
+            background={frame.background}
             sourceList={Boolean(sourceList)}
             header={sourceList ? standardTopBar : undefined}
           >
-            {usesContentCard ? (
-              <AppViewContent.Main label={appName}>
-                <AppViewContent.Card presentation={cardPresentation}>
-                  <SynWareEntryRenderer
-                    runtime={runtime}
-                    app={app}
-                    responderId={applicationResponderId}
-                    isLoading={isLoading}
-                    loadingClassName="webspring-app-view-loading"
-                    loadingLabel={loadingLabel}
-                    loadingPackageLabel={loadingPackageLabel}
-                    missingComponentLabel={missingComponentLabel}
-                  />
-                </AppViewContent.Card>
-              </AppViewContent.Main>
-            ) : (
-              <div
-                className="webspring-app-view-fullbleed-content webspring-app-view-layout-defacto"
-                aria-label={appName}
-              >
-                <SynWareEntryRenderer
-                  runtime={runtime}
-                  app={app}
-                  responderId={applicationResponderId}
-                  isLoading={isLoading}
-                  loadingClassName="webspring-app-view-loading"
-                  loadingLabel={loadingLabel}
-                  loadingPackageLabel={loadingPackageLabel}
-                  missingComponentLabel={missingComponentLabel}
-                />
-              </div>
-            )}
+            <div
+              className="webspring-app-view-fullbleed-content"
+              aria-label={appName}
+            >
+              <SynWareEntryRenderer
+                runtime={runtime}
+                app={app}
+                responderId={applicationResponderId}
+                isLoading={isLoading}
+                loadingClassName="webspring-app-view-loading"
+                loadingLabel={loadingLabel}
+                loadingPackageLabel={loadingPackageLabel}
+                missingComponentLabel={missingComponentLabel}
+              />
+            </div>
           </AppViewContent.Surface>
           </QuickSwitchTriggerProvider>
           </ApplicationMenuTriggerBridge>
@@ -423,27 +419,36 @@ export function ApplicationStageView({
 
 type TopBarProps = Parameters<typeof NSETopBar>[0];
 
+/** The standard bar's right-hand control: what it draws and what it does when pressed. */
+interface RightSlotControl {
+  readonly kind: "settings" | "userInfo" | "custom";
+  readonly label: string;
+  readonly icon?: string;
+  /** The control opens the application menu; otherwise it opens System Preferences itself. */
+  readonly opensMenu: boolean;
+  readonly onActivate: () => void;
+}
+
 function ApplicationStageTopBar({
   menuStore,
-  showUserInfo,
-  userInfoLabel,
+  rightSlot,
   ...props
 }: Pick<TopBarProps, "title" | "variant" | "scheme" | "rail" | "titleAction" | "leadingItems" | "leading" | "trailing" | "center"> & {
   readonly menuStore: ApplicationMenuStore;
-  readonly showUserInfo: boolean;
-  readonly userInfoLabel: string;
+  readonly rightSlot: RightSlotControl | null;
 }) {
   const menu = useApplicationMenuSnapshot(menuStore);
   return (
     <NSETopBar
       {...props}
-      trailingItems={showUserInfo && props.trailing === undefined ? [{
-          kind: "userInfo",
-          label: userInfoLabel,
-          selected: menu.open,
-          opensMenu: true,
+      trailingItems={rightSlot && props.trailing === undefined ? [{
+          kind: rightSlot.kind,
+          label: rightSlot.label,
+          ...(rightSlot.icon ? { icon: rightSlot.icon } : {}),
+          selected: rightSlot.opensMenu && menu.open,
+          opensMenu: rightSlot.opensMenu,
           onElementChange: menuStore.setAnchor,
-          onClick: menuStore.toggle,
+          onClick: rightSlot.onActivate,
         }] : []}
     />
   );

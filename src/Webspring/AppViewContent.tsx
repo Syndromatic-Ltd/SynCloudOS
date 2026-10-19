@@ -18,15 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRef, type ReactNode } from "react";
-import { useNSEPresentation } from "../NSE/Animation";
-import type { AppViewPresentation } from "./AppViewChrome";
+import type { ReactNode } from "react";
 import {
   NSESmoothSurface,
   nseSmoothSurfaceDefaultPhysicality,
   type NSESmoothSurfaceRequest
 } from "../NSE/SmoothSurface";
-import type { SynCloudOSAppFrameSmoothSurfaceManifest } from "../SynCloudOS/SynCloudOS";
+import type { SynCloudOSAppFrameBackground, SynCloudOSAppFrameSmoothSurfaceManifest } from "../SynCloudOS/SynCloudOS";
+import { webspringSurfaceStyle } from "./webspringSurface";
 
 function appFrameSmoothSurfaceToNSE(
   smoothSurface: SynCloudOSAppFrameSmoothSurfaceManifest
@@ -60,11 +59,14 @@ function appFrameSmoothSurfaceToNSE(
 
 function Surface({
   smoothSurface,
+  background,
   header,
   sourceList = false,
   children
 }: {
   smoothSurface: SynCloudOSAppFrameSmoothSurfaceManifest;
+  /** What fills the body behind the content: the system light or dark background, nothing, or a surface. */
+  background: SynCloudOSAppFrameBackground;
   /** Rendered as a non-scrolling header inside the rounded surface (source-list windows), so the
    *  smooth-surface clip rounds the bar's top corners to match the body's bottom corners. */
   header?: ReactNode;
@@ -75,10 +77,14 @@ function Surface({
   const className = sourceList
     ? "webspring-app-view-body-surface webspring-app-view-body-surface-sourcelist"
     : "webspring-app-view-body-surface";
+  const paint = {
+    "data-frame-background": typeof background === "string" ? background : "surface",
+    ...(typeof background === "string" ? {} : { style: webspringSurfaceStyle(background, "--nse-app-surface") }),
+  };
 
   if (!request) {
     return (
-      <div className={`${className} webspring-app-view-body-surface-off`}>
+      <div className={`${className} webspring-app-view-body-surface-off`} {...paint}>
         {header}
         {children}
       </div>
@@ -90,6 +96,7 @@ function Surface({
       className={className}
       smoothSurface={request}
       autoEffects={false}
+      {...paint}
     >
       {header}
       {children}
@@ -97,47 +104,6 @@ function Surface({
   );
 }
 
-function Main({
-  label,
-  children
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <main className="webspring-app-view-content" aria-label={label}>
-      {children}
-    </main>
-  );
-}
-
-function Card({
-  children,
-  presentation
-}: {
-  children: ReactNode;
-  presentation?: AppViewPresentation;
-}) {
-  const cardRef = useRef<HTMLElement>(null);
-  useNSEPresentation(cardRef, {
-    state: presentation?.motion.state,
-    enter: presentation?.motion.enter ?? null,
-    exit: presentation?.motion.exit ?? null,
-    onPresented: presentation?.onPresented,
-  });
-  return (
-    <section
-      ref={cardRef}
-      className="webspring-app-view-content-card"
-      style={presentation?.motion.style}
-    >
-      {children}
-    </section>
-  );
-}
-
 export const AppViewContent = {
   Surface,
-  Main,
-  Card
 };

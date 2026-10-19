@@ -49,7 +49,7 @@ describe("stage presentation", () => {
   it.each([null, "incoming", "outgoing"] as const)("keeps content-owned %s presentations free of host motion", role => {
     for (const staged of [true, false]) {
       const motion = resolveApplicationStageMotion({ reducedMotion: false, role, staged, launching: true, presentationMotion: "content" });
-      for (const part of [motion.root, motion.surface, motion.card]) {
+      for (const part of [motion.root, motion.surface]) {
         expect(part.enter).toBeNull();
         expect(part.exit).toBeNull();
         expect(part.style.transform).toBeUndefined();
@@ -69,7 +69,6 @@ describe("stage presentation", () => {
     // Leaving an incoming MultiSwitch role does not replay the launch.
     expect(resolved(presented.surface.enter, "incoming")).toBeNull();
     expect(resolved(presented.root.enter, "incoming")).toBeNull();
-    expect(resolved(presented.card.enter, "switching")).toBeNull();
     const launching = resolveApplicationStageMotion({ reducedMotion: false, role: null, staged: false, launching: true });
     expect(resolved(launching.surface.enter, null)).toMatchObject({ delay: 0.72 });
   });
@@ -110,7 +109,6 @@ describe("stage presentation", () => {
     expect(endpoints(resolved(incoming.surface.enter, null))).toEqual({
       transform: ["translate3d(0px, 0px, -260px) scale(0.86) rotateY(-22deg)", "none"],
     });
-    expect(incoming.card).toMatchObject({ state: "switching", enter: null });
   });
 
   it("uses opacity-only variants under reduced motion", () => {
@@ -152,7 +150,7 @@ class Presentations implements RuntimeAnimationAdapterFactory {
 }
 
 describe("mounted content presentation", () => {
-  it.each(["defacto", "simple"] as const)("keeps %s staged until presentation, settles without host motion, and exits once", async layout => {
+  it("keeps content staged until presentation, settles without host motion, and exits once", async () => {
     const presentations = new Presentations();
     const runtime = authoriseTestRuntime(createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), animation: presentations } }));
     let overlay: ReturnType<typeof useNSEOverlayProvider> | undefined;
@@ -161,7 +159,7 @@ describe("mounted content presentation", () => {
       return <div data-content="true">{overlay.portalHost ? createPortal(<div data-viewport-overlay="true" />, overlay.portalHost) : null}</div>;
     }
     const app = registerTestSynWare(runtime, createSynWare({
-      manifest: { schemaVersion: 1, id: "content-plane", version: "1.0.0", title: "Content Plane", frame: { layout, topBar: "none", presentationMotion: "content" } },
+      manifest: { schemaVersion: 1, id: "content-plane", version: "1.0.0", title: "Content Plane", frame: { topBar: "none", presentationMotion: "content" } },
       root: Content,
     }));
     await runtime.bundles.loadBundle(app.id);
@@ -217,7 +215,7 @@ describe("stage overlay ownership", () => {
       return overlay.portalHost ? createPortal(<button data-viewport-overlay="true">Overlay action</button>, overlay.portalHost) : null;
     }
     const app = registerTestSynWare(runtime, createSynWare({
-      manifest: { schemaVersion: 1, id: "overlay-owner", version: "1.0.0", title: "Overlay Owner", frame: { layout: "defacto", topBar: "none" } },
+      manifest: { schemaVersion: 1, id: "overlay-owner", version: "1.0.0", title: "Overlay Owner", frame: { topBar: "none" } },
       root: Content,
     }));
     await runtime.bundles.loadBundle(app.id);

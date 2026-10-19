@@ -5,12 +5,13 @@ import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { NSEMenuController, NSEOverlayProvider, NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
 import { NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
 import { SynWareEntryRenderer } from "../Webspring/SynWareEntryRenderer";
-import { SystemUILayer, type SystemUIAccount } from "../Webspring/SystemUILayer";
+import { SystemUILayer } from "../Webspring/SystemUILayer";
+import type { SystemUIAccount } from "../Webspring/Preferences/systemAccount";
 import { SystemPanelsLayer } from "../Webspring/SystemPanelsLayer";
 import { HostLoginGate } from "../Webspring/HostLoginGate";
 import { useWebspringLocale } from "../Webspring/webspringLocale";
 import { createTransientWindowSurfaceBridge, syncApplicationWindowContentRenderers, WindowContentRendererRegistry, WindowLayer, type ApplicationWindowRendererRegistrations } from "../Webspring/WindowLayer";
-import { applicationMenuLabels, ApplicationMenuOverlayHost, ApplicationMenuTriggerBridge, createApplicationMenuStore } from "../Webspring/applicationMenuPresentation";
+import { applicationDeclaresAbout, applicationMenuLabels, ApplicationMenuOverlayHost, ApplicationMenuTriggerBridge, createApplicationMenuStore } from "../Webspring/applicationMenuPresentation";
 import { createWebspringAppMenuModel } from "../Webspring/webspringAppMenu";
 import { SynCloudOSWatchdog } from "../SynCloudOS/ErrorManager/SynCloudOSWatchdog";
 import type { CapturedSynCloudOSError } from "../SynCloudOS/ErrorManager/errorTypes";
@@ -144,6 +145,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
   useEffect(() => { if (!presented) menuStore.setOpen(false); }, [menuStore, presented]);
   const menuLabels = useMemo(() => applicationMenuLabels(appName, locale.t), [appName, locale]);
   const appPreferences = app?.applicationMenu?.preferences;
+  const declaresAbout = applicationDeclaresAbout(app?.about);
   const menuModel = useMemo(() => createWebspringAppMenuModel({
     appId: applicationId,
     labels: menuLabels,
@@ -151,6 +153,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
       commandId: appPreferences.commandId,
       label: appPreferences.label ?? locale.t("appMenu.appPreferences", "{app} Preferences…", { app: appName }),
     } : undefined,
+    includeAbout: declaresAbout,
     includeLogOut: authenticationPolicy !== "disabled" && signedIn,
     extensions: [
       ...(authenticationPolicy !== "disabled" && !signedIn ? [{ id: "session", entries: [
@@ -162,7 +165,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
         { kind: "command" as const, id: "quit", commandId: applicationHostCommands.quit, labelOverride: locale.t("appMenu.quit", "Quit {app}", { app: appName }) },
       ] },
     ],
-  }), [appName, appPreferences, applicationId, authenticationPolicy, locale, menuLabels, signedIn]);
+  }), [appName, appPreferences, applicationId, authenticationPolicy, declaresAbout, locale, menuLabels, signedIn]);
   const menuPort = useRuntimeNSEMenuPort();
   const menuController = useMemo(() => new NSEMenuController({ model: menuModel, runtime: menuPort }), [menuModel, menuPort]);
   useNSEDeferredDisposal(menuController);

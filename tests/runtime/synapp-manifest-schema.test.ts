@@ -48,6 +48,46 @@ it.each([
   expect(result.errors).toContainEqual(expect.objectContaining({ path, code: "type" }));
 });
 
+const frameFixture = (frame: unknown) => ({ schemaVersion: 1, id: "fixture.frame", version: "1.0.0", title: "Frame", frame });
+const helpIcon = { resource: "./Resources/help.svg", alternativeText: { key: "help.alt", fallback: "Help" } };
+
+it.each([
+  { rightSlot: "auto", background: "system" },
+  { rightSlot: "userInfo", background: "none" },
+  { rightSlot: "none" },
+  { rightSlot: { icon: helpIcon, label: { key: "help.label", fallback: "Help" } } },
+  { background: { colour: "#223344", texture: { image: "/assets/grain.png", size: "256px" }, tint: { colour: "#4a6fa5", opacity: 0.1 }, vignette: { edge: 0.5 } } },
+])("accepts the frame declaration %j", (frame) => {
+  expect(validateSynWareManifest(frameFixture(frame)).ok).toBe(true);
+});
+
+it.each([
+  { frame: { layout: "simple" }, path: "/frame/layout", code: "unknown-key" },
+  { frame: { layout: "defacto" }, path: "/frame/layout", code: "unknown-key" },
+])("rejects the removed frame.layout field ($frame.layout)", ({ frame, path, code }) => {
+  expect(validateSynWareManifest(frameFixture(frame)).errors).toContainEqual(expect.objectContaining({ path, code }));
+});
+
+it.each([
+  { rightSlot: "gear" },
+  { rightSlot: { icon: helpIcon } },
+  { background: "cotton" },
+])("rejects the invalid frame declaration %j", (frame) => {
+  expect(validateSynWareManifest(frameFixture(frame)).ok).toBe(false);
+});
+
+it("accepts a Webspring shell home icon beside the logo", () => {
+  expect(validateSynWareManifest({
+    schemaVersion: 1, id: "com.syndromatic.webspring.home", version: "1.0.0", title: "Webspring home icon",
+    webspringShell: {
+      views: [{ id: "website", presentations: ["desktop"], mode: "launcher" }],
+      defaults: { desktop: "website", tablet: "website", mobile: "website" },
+      homeRoute: "/",
+      branding: { name: { key: "site.name" }, homeIcon: { resource: "./Resources/Home.svg", alternativeText: { key: "site.homeAlt" } } },
+    },
+  }).ok).toBe(true);
+});
+
 it("accepts a complete versioned manifest", () => {
   expect(validateSynWareManifest({
     schemaVersion: 1,

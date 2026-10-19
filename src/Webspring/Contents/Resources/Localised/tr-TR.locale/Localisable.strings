@@ -41,7 +41,6 @@
 "quickswitch.open" = "QuickSwitch'i açın";
 "quickswitch.openedShortcut" = "{app}, açıldı, {shortcut} kısayolu";
 "quickswitch.visibleApps" = "Görünür Webspring uygulamalar";
-"shelf.ariaLabel" = "Webspring haberler ve durum";
 "webspring.additionalApps.ariaLabel" = "Ek Webspring uygulamalar";
 "webspring.apps.ariaLabel" = "Webspring uygulamalar";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

@@ -19,11 +19,15 @@
  */
 
 export { defineWebspring } from "./Webspring";
+export { definePreferencePane } from "../SynCloudOS/Preferences";
+export type { PreferencePaneDefinition, PreferencePaneInput, PreferencePaneText, PreferencePaneViewProps } from "../SynCloudOS/Preferences";
 export { WebspringBoardView, createWebspringBoardView } from "./Contents/Views/WebspringBoardView/WebspringBoardView";
 export type { WebspringBoardConfiguration } from "./Contents/Views/WebspringBoardView/WebspringBoardView";
 
 // The pieces a site's own launcher view is built from, as the Board is.
-export { LowerContentShelfView } from "./LowerContentShelfView";
+export { WebspringWidgetShelf } from "./WebspringWidgetShelf";
+export { WebspringSurface, webspringSurfaceStyle } from "./webspringSurface";
+export { defineWidget } from "./webspringWidget";
 export { WebspringDragProxy, useWebspringDragProxyPosition } from "./WebspringDragProxy";
 export type { WebspringDragProxyPoint } from "./WebspringDragProxy";
 export { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
@@ -56,15 +60,14 @@ export type {
 export { captureWebspringDragReorderSlots, getWebspringDragReorderTargetFromPoint } from "./webspringDragReorder";
 export type { WebspringDragReorderSlots } from "./webspringDragReorder";
 export { WEBSPRING_STAGE, getDesktopWebspringLayout, stagePointStyle } from "./stage";
-export type { WebspringContentReadRequest, WebspringContentSource, WebspringContentSources } from "./webspringContent";
 export type {
   AccountAction,
   ActionResult,
   AuthenticationPolicy,
   AuthenticationConfiguration,
   AuthenticationInput,
-  ContentItem,
-  ContentState,
+  WebspringBackground,
+  WebspringBackgroundInput,
   LocalisedText,
   Presentation,
   ResourceReference,
@@ -72,7 +75,6 @@ export type {
   WebspringActions,
   WebspringApp,
   WebspringAppItem,
-  WebspringContent,
   WebspringDefinition,
   WebspringDefinitionInput,
   WebspringDialPlacement,
@@ -90,10 +92,16 @@ export type {
   WebspringIconEffectProps,
   WebspringItem,
   WebspringManifest,
+  WebspringPreferences,
+  WebspringPreferencesOptions,
   WebspringQuickSwitchOptions,
   WebspringViewComponent,
   WebspringLaunchZoom,
   WebspringViewDeclaration,
   WebspringViewModel,
+  WebspringWidget,
+  WebspringWidgetEntry,
+  WebspringWidgetInput,
+  WebspringWidgetViewProps,
   WebspringViewProps,
 } from "./webspringTypes";

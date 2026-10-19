@@ -27,6 +27,17 @@
 :where([data-nse-colour-scheme-resolved="light"]) { color-scheme: light; }
 :where([data-nse-colour-scheme-resolved="dark"]) { color-scheme: dark; }
 
+/* The plain app background and its text, switched by the resolved light or dark mode. Light follows the
+   aluminium metal family and dark the blue-hued one; a theme may redefine them. */
+:where([data-nse-colour-scheme-resolved="light"]) {
+  --nse-app-background: #d9dbde;
+  --nse-app-foreground: #2a2f36;
+}
+:where([data-nse-colour-scheme-resolved="dark"]) {
+  --nse-app-background: #1b222c;
+  --nse-app-foreground: #dde3ea;
+}
+
 .nse-control-appearance-provider {
   min-height: 100%;
 }

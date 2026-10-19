@@ -96,7 +96,7 @@ export const esESTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "Contacto",
   "system.notifications": "Notificaciones",
   "system.portfolio": "Portafolio",
-  "system.preferences": "Preferencias",
+  "system.preferences": "Preferencias del Sistema",
   "system.software": "Software",
   "system.webspring": "Webspring",
   "system.system": "Sistema",

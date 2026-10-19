@@ -96,7 +96,7 @@ export const nlNLTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "Contacteer",
   "system.notifications": "Meldingen",
   "system.portfolio": "Portefeuille",
-  "system.preferences": "Voorkeuren",
+  "system.preferences": "Systeemvoorkeuren",
   "system.software": "Software",
   "system.webspring": "Webspring",
   "system.system": "Systeem",

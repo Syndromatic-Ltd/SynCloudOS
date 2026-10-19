@@ -96,7 +96,7 @@ export const trTRTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "İletişim",
   "system.notifications": "Bildirimler",
   "system.portfolio": "Portföy",
-  "system.preferences": "Tercihler",
+  "system.preferences": "Sistem Tercihleri",
   "system.software": "Yazılım",
   "system.webspring": "Webspring",
   "system.system": "Sistem",

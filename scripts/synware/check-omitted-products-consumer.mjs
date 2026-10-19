@@ -151,7 +151,7 @@ export default { plugins: [{ name: "record-independent-inputs", generateBundle()
         const value = window.consumer;
         const routes = [];
         for (const id of ids) routes.push({ id, result: await value.actions.openApp(id) });
-        return { apps: value.model.apps.map(app => app.id), services: value.services, documentTypes: value.documentTypes, lumina: value.lumina, sections: value.model.sections.map(section => section.id), routes };
+        return { apps: value.model.apps.map(app => app.id), services: value.services, documentTypes: value.documentTypes, lumina: value.lumina, widgets: value.model.widgets.map(entry => entry.widget.id), routes };
       }, productIds);
       assert.deepEqual(result.apps, ["org.example.probe"]);
       assert(Object.values(result.services).every(available => available === false));

@@ -96,7 +96,7 @@ export const zhHansTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "联系方式",
   "system.notifications": "通知",
   "system.portfolio": "投资组合",
-  "system.preferences": "偏好设置",
+  "system.preferences": "系统偏好设置",
   "system.software": "软件",
   "system.webspring": "Webspring",
   "system.system": "系统",

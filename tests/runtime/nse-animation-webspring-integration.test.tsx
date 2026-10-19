@@ -265,53 +265,14 @@ describe("Webspring owner-local choreography", () => {
     view.unmount();
   });
 
-  it("keeps application entry pending until the terminal content-card animation completes", async () => {
-    const { runtime, presentations } = runtimeWithStagePresentations();
-    runtime.apps.registerBundle(createTestBundle({ id: "animated-entry", route: "/animated-entry" }));
-    const app = runtime.apps.getApp("animated-entry");
-    expect(app).toBeTruthy();
-    expect(app!.frame.layout).toBe("simple");
-    const settlement = runtime.presentationSettlements.begin({
-      operationId: "operation:animated-entry",
-      roles: ["application-enter"],
-      timeoutMs: 1_000,
-    });
-    const view = render(
-      <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageView
-          windowContentRegistry={new WindowContentRendererRegistry()}
-          stage={{ id: "application-stage:animated-entry", appId: "animated-entry", title: app!.window.title, isFocused: true, zIndex: 1 }}
-          app={app!}
-          lifecycle="active"
-          presentationSettlementId={settlement.id}
-        />
-      </SynCloudOSProvider>,
-    );
-
-    await presentations.finish(".webspring-app-view-frame");
-    await presentations.finish(".webspring-app-view-surface");
-    expect(runtime.presentationSettlements.inspect(settlement.id)).toMatchObject({
-      status: "pending",
-      completedRoles: [],
-    });
-
-    const card = presentations.played.find(({ request }) => (request.target as Element).matches(".webspring-app-view-content-card"))!;
-    expect(card.request).toMatchObject({ delay: 0.78, duration: 0.72, fill: "backwards" });
-    await presentations.finish(".webspring-app-view-content-card");
-    expect(runtime.presentationSettlements.inspect(settlement.id)).toEqual({ status: "settled" });
-    view.unmount();
-  });
-
-  it("settles defacto application entry from the app surface animation", async () => {
+  it("settles application entry from the app surface animation, with no content card", async () => {
     const { runtime, presentations } = runtimeWithStagePresentations();
     runtime.apps.registerBundle(createTestBundle({
       id: "defacto-entry",
       route: "/defacto-entry",
-      frame: { layout: "defacto" },
     }));
     const app = runtime.apps.getApp("defacto-entry");
     expect(app).toBeTruthy();
-    expect(app!.frame.layout).toBe("defacto");
     const settlement = runtime.presentationSettlements.begin({
       operationId: "operation:defacto-entry",
       roles: ["application-enter"],
@@ -339,6 +300,7 @@ describe("Webspring owner-local choreography", () => {
     expect(surface.request).toMatchObject({ duration: 0.68, fill: "backwards" });
     await presentations.finish(".webspring-app-view-surface");
     expect(runtime.presentationSettlements.inspect(settlement.id)).toEqual({ status: "settled" });
+    expect(view.container.querySelector(".webspring-app-view-content-card")).toBeNull();
     view.unmount();
   });
 

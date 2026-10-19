@@ -27,11 +27,11 @@ import type {
   SynWareResourceReference,
   SynWareWebspringShellManifest,
 } from "../SynCloudOS/AppSDK";
+import type { PreferencePaneDefinition } from "../SynCloudOS/Preferences";
 import type {
   AuthenticationConfiguration as RuntimeAuthenticationConfiguration,
   AuthenticationInput as RuntimeAuthenticationInput,
   AuthenticationPolicy as RuntimeAuthenticationPolicy,
-  WebspringContentItem,
 } from "../SynCloudOS/SynCloudOS";
 
 export type Presentation = SynWarePresentation;
@@ -51,21 +51,89 @@ export type ActionResult =
   | { readonly status: "cancelled" }
   | { readonly status: "failed"; readonly message: string };
 
-export type ContentItem = WebspringContentItem;
+/** A painted area: colour, texture, tint, spotlight and an overlay, drawn in that order. */
+export interface WebspringSurface {
+  /** The base colour, beneath the texture. Defaults to transparent. */
+  readonly colour?: string;
+  /** An image under the tint; `"none"` (or omitted) draws none. */
+  readonly texture?: {
+    readonly image: string;
+    /** A CSS `background-size`. Defaults to `auto`. */
+    readonly size?: string;
+    /** Tile the image. Defaults to `true`; `false` draws it once. */
+    readonly repeat?: boolean;
+    /** A CSS `background-position`. Defaults to `0 0` when tiled and `center` otherwise. */
+    readonly position?: string;
+  } | "none";
+  /** A wash of colour over the texture. `opacity` is from 0 to 1. */
+  readonly tint?: { readonly colour: string; readonly opacity: number };
+  /** A spotlight: a lighter centre (`centre`, white) and darkened edges (`edge`, black), each from 0 to 1.
+   *  `false` draws none. */
+  readonly vignette?: { readonly centre?: number; readonly edge?: number } | false;
+  /** An image over everything else, such as a glow. `opacity` defaults to 1 and `blend` to `normal`. */
+  readonly overlay?: {
+    readonly image: string;
+    readonly size?: string;
+    readonly opacity?: number;
+    readonly blend?: string;
+  };
+}
 
-export type ContentState =
-  | { readonly status: "loading" }
-  | { readonly status: "ready"; readonly items: readonly ContentItem[] }
-  | { readonly status: "unavailable" | "error"; readonly message: LocalisedText };
+/** The Board's two painted areas. `shelf` is drawn only when the definition has widgets. */
+export interface WebspringBackgroundInput {
+  readonly launcher: WebspringSurface;
+  readonly shelf?: WebspringSurface;
+}
 
-export interface WebspringContent {
-  readonly sections: readonly {
-    readonly id: string;
-    readonly title: LocalisedText;
-    readonly sourceId: string;
-    readonly limit: number;
-    readonly empty: "hide" | "message";
-  }[];
+/** A background with every default filled in. */
+export interface WebspringBackground {
+  readonly launcher: WebspringSurface;
+  readonly shelf: WebspringSurface;
+}
+
+/** What a widget's `view` receives once its data has loaded. */
+export interface WebspringWidgetViewProps<TData> {
+  readonly data: TData;
+  /** Loads the data again; the widget shows its loading state until it settles. */
+  readonly refresh: () => void;
+}
+
+export interface WebspringWidgetInput<TData> {
+  readonly id: string;
+  /** Plain text, or a localised string looked up in the app's own strings. */
+  readonly title: LocalisedText | string;
+  /** A resource path to the widget's icon, such as `./Resources/news.svg`. */
+  readonly icon?: string;
+  /** Fetches the widget's data. `signal` aborts on unmount, Retry, refresh and timeout. */
+  readonly load: (signal: AbortSignal) => Promise<TData> | TData;
+  readonly view: ComponentType<WebspringWidgetViewProps<TData>>;
+  /** What an empty result shows: nothing, or a message. */
+  readonly whenEmpty: "hide" | { readonly message: string };
+  /** Defaults to treating an empty array, `null` and `undefined` as empty. */
+  readonly isEmpty?: (data: TData) => boolean;
+  /** Milliseconds a load may take before it counts as failed. Defaults to 10 000. */
+  readonly timeout?: number;
+}
+
+/** A widget declared with `defineWidget`, defaults filled in. */
+export interface WebspringWidget {
+  readonly id: string;
+  readonly title: LocalisedText;
+  readonly icon?: string;
+  readonly load: (signal: AbortSignal) => Promise<unknown>;
+  readonly view: ComponentType<WebspringWidgetViewProps<unknown>>;
+  readonly whenEmpty: "hide" | { readonly message: LocalisedText };
+  readonly isEmpty: (data: unknown) => boolean;
+  readonly timeout: number;
+}
+
+/** A widget as a view shows it: its text and icon resolved. */
+export interface WebspringWidgetEntry {
+  readonly widget: WebspringWidget;
+  readonly title: string;
+  readonly iconUrl: string | null;
+  /** The text shown when the widget is empty and `whenEmpty` is a message. */
+  readonly emptyMessage: string | null;
 }
 
 export interface WebspringViewDeclaration {
@@ -162,7 +230,9 @@ export interface WebspringViewModel {
     /** The entry a dragged app hovers over to merge with. */
     readonly dropTargetId: string | null;
   };
-  readonly sections: readonly { readonly id: string; readonly title: string; readonly empty: "hide" | "message"; readonly state: ContentState }[];
+  /** The widgets the Board shows beneath its icons, in order. Empty when none are declared. */
+  readonly widgets: readonly WebspringWidgetEntry[];
+  readonly background: WebspringBackground;
   readonly branding: {
     readonly name: string;
     readonly logoUrl: string | null;
@@ -211,7 +281,6 @@ export interface WebspringActions {
   openNotificationCentre(notificationId?: string): void;
   requestSignIn(): Promise<ActionResult>;
   requestSignOut(): Promise<ActionResult>;
-  refreshContent(): Promise<void>;
 }
 
 export interface WebspringFolderPresentationProps {
@@ -330,16 +399,32 @@ export interface WebspringFolderAppearance {
   readonly fill: "inset" | Readonly<Required<WebspringFolderTexture>>;
 }
 
+export interface WebspringPreferencesOptions {
+  /** Panes made with `definePreferencePane`. A pane with a built-in's id replaces it. */
+  readonly panes?: readonly PreferencePaneDefinition[];
+  /** Built-in pane ids to remove: appearance, sounds, motion, notifications, language, account. */
+  readonly hide?: readonly string[];
+}
+
+export interface WebspringPreferences {
+  readonly panes: readonly PreferencePaneDefinition[];
+  readonly hide: readonly string[];
+}
+
 export interface WebspringDefinitionInput<TManifest extends WebspringManifest = WebspringManifest> {
   readonly manifest: TManifest;
   readonly components: Readonly<Record<string, WebspringViewComponent>>;
-  readonly content?: WebspringContent;
+  readonly widgets?: readonly WebspringWidget[];
+  /** Paints the Board. Defaults to a tinted cotton texture with a spotlight. */
+  readonly background?: WebspringBackgroundInput;
   readonly iconEffect?: WebspringIconEffectComponent;
   readonly quickSwitch?: WebspringQuickSwitchOptions;
   /** Defaults to `createWebspringFolderSplitPresentation()`. */
   readonly folderPresentation?: WebspringFolderPresentationComponent;
   /** How folder icons look in every view. Defaults to an inset rounded rectangle. */
   readonly folderAppearance?: WebspringFolderAppearanceOptions;
+  /** Adds panes to System Preferences and hides built-in ones. */
+  readonly preferences?: WebspringPreferencesOptions;
 }
 
 export interface WebspringDefinition<TManifest extends WebspringManifest = WebspringManifest> {
@@ -349,10 +434,13 @@ export interface WebspringDefinition<TManifest extends WebspringManifest = Websp
   readonly returnTracks: Readonly<Record<string, readonly ("material" | "icons")[]>>;
   /** Launch zooms captured from each registered view component, defaults filled in. */
   readonly launchZooms: Readonly<Record<string, Readonly<Required<WebspringLaunchZoom>>>>;
-  readonly content?: Readonly<WebspringContent>;
+  readonly widgets: readonly WebspringWidget[];
+  readonly background: Readonly<WebspringBackground>;
   readonly iconEffect?: WebspringIconEffectComponent;
   readonly quickSwitch?: Readonly<WebspringQuickSwitchOptions>;
   readonly folderPresentation: WebspringFolderPresentationComponent;
   /** The folder appearance, defaults filled in. */
   readonly folderAppearance: WebspringFolderAppearance;
+  /** System Preferences: the developer's panes and the built-ins to hide. */
+  readonly preferences: WebspringPreferences;
 }

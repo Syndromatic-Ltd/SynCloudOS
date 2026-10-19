@@ -19,13 +19,12 @@
  */
 
 .webspring-board {
-  --webspring-board-icon-size: clamp(54px, 15.5vw, 124px);
   position: relative;
   isolation: isolate;
   min-height: 100dvh;
   overflow-x: clip;
   color: #fff;
-  background: #0b0d11;
+  background: var(--webspring-launcher-colour);
   font-family: inherit;
   font-weight: 500;
 }
@@ -37,21 +36,38 @@
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  min-height: 74svh;
+  /* The icons are fitted to this height, so the widget shelf, when there is one, starts below the fold. */
+  min-height: 100svh;
   padding: max(clamp(72px, 16.5svh, 180px), env(safe-area-inset-top)) max(clamp(12px, 4vw, 40px), env(safe-area-inset-right)) 0 max(clamp(12px, 4vw, 40px), env(safe-area-inset-left));
   touch-action: pan-y pinch-zoom;
-  border-bottom: 2px solid rgba(230, 235, 244, .7);
 }
 
 .webspring-board-material {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: #929eae url("/assets/webspring/brushed-metal-launcher.webp") center / 100% 100% no-repeat;
+  /* The launcher surface, from the --webspring-launcher-* properties the Board sets from `background.launcher`. */
+  background-color: var(--webspring-launcher-colour);
+  background-image: var(--webspring-launcher-image);
+  background-size: var(--webspring-launcher-size);
+  background-repeat: var(--webspring-launcher-repeat);
+  background-position: var(--webspring-launcher-position);
   transform-origin: 50% 65%;
   opacity: 1;
   transition: opacity 420ms ease, transform 560ms cubic-bezier(.2, .82, .2, 1);
   pointer-events: none;
+}
+
+.webspring-board-material::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--webspring-launcher-overlay-image);
+  background-size: var(--webspring-launcher-overlay-size);
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: var(--webspring-launcher-overlay-opacity);
+  mix-blend-mode: var(--webspring-launcher-overlay-blend);
 }
 
 .webspring-board[data-entrance-phase="waiting"] .webspring-board-material {
@@ -106,21 +122,43 @@
   clip-path: inset(50%);
 }
 
+/* The pages are a size container: the icon size is the smaller of what the width allows and
+   what the height allows, so a whole page of icons is visible without scrolling.
+     width term  = width / (columns × 1.5)
+     height term = (height − 14.8px × rows + 4px) / (1.64 × rows − 0.2)
+   Each row is the icon, a gap of .14 icon, a two-line label (.3 icon + 10.8px) and a row gap
+   (.2 icon + 4px), which makes 1.64 icon + 14.8px a row; the last row has no row gap.
+   The result is held between 54px and 180px. */
 .webspring-board-pages {
+  --webspring-board-columns: 4;
+  --webspring-board-rows: 4;
+  --webspring-board-icon-size: clamp(
+    54px,
+    min(
+      calc(100cqi / (var(--webspring-board-columns) * 1.5)),
+      calc((100cqh - 14.8px * var(--webspring-board-rows) + 4px) / (1.64 * var(--webspring-board-rows) - .2))
+    ),
+    180px
+  );
   display: grid;
   align-items: center;
-  flex: 1;
+  justify-items: center;
+  flex: 1 1 0;
   box-sizing: border-box;
   width: 100%;
-  max-width: 920px;
-  padding: clamp(42px, 7svh, 84px) 0;
+  /* At the smallest icon size, so a short window scrolls rather than overlaps. */
+  min-height: calc(var(--webspring-board-rows) * 103.36px - 14.8px);
+  container-type: size;
 }
 
 .webspring-board-page {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--webspring-board-columns), minmax(0, 1fr));
   align-items: start;
-  row-gap: clamp(14px, 2.5svh, 28px);
+  align-content: center;
+  /* The grid is as wide as its icons need: columns × 1.5 icons. */
+  width: min(100%, calc(var(--webspring-board-icon-size) * 1.5 * var(--webspring-board-columns)));
+  row-gap: calc(var(--webspring-board-icon-size) * .2 + 4px);
 }
 
 .webspring-board-slot {
@@ -133,7 +171,7 @@
   width: 100%;
   justify-items: center;
   align-content: start;
-  gap: clamp(10px, 1.8vw, 18px);
+  gap: calc(var(--webspring-board-icon-size) * .14);
   min-width: 0;
   margin: 0;
   padding: 0 2px;
@@ -154,7 +192,7 @@
 .webspring-board-icon-artwork {
   display: grid;
   justify-items: center;
-  gap: clamp(10px, 1.8vw, 18px);
+  gap: calc(var(--webspring-board-icon-size) * .14);
   width: 100%;
   min-width: 0;
   transform-origin: 50% calc(var(--webspring-board-icon-size) / 2);
@@ -224,12 +262,19 @@
   z-index: 1;
   max-width: 100%;
   color: #fff;
-  font-size: clamp(12px, 2.8vw, 16px);
+  /* Grows with the icon: 12px at the smallest, 18px from about 108px up. */
+  font-size: min(calc(var(--webspring-board-icon-size) * .125 + 4.5px), 18px);
   font-weight: 400;
   line-height: 1.2;
   text-align: center;
   text-wrap: balance;
   overflow-wrap: anywhere;
+  /* Two lines at most, so a row is never taller than the size the icon was fitted to. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
   text-shadow: 0 1px 2px rgba(0, 0, 0, .9), 0 2px 5px rgba(0, 0, 0, .45);
 }
 
@@ -280,96 +325,35 @@
 .webspring-board-page-controls button[aria-current="page"]::after { background: #fff; }
 .webspring-board-page-controls button:focus-visible { outline: 2px solid #fff; }
 
-.webspring-board-journal {
-  position: relative;
-  isolation: isolate;
-  box-sizing: border-box;
+/* The widget shelf (see WebspringWidgetShelf.css) rises into place after the icons. */
+.webspring-board .webspring-widget-shelf {
   min-height: 26svh;
-  padding: clamp(28px, 4svh, 56px) max(24px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
-  background: #0b0d11 url("/assets/webspring/paper-backdrop.webp") center top / max(100%, 1000px) auto no-repeat;
-  box-shadow: inset 0 10px 16px -10px #000;
+  border-top: 2px solid rgba(230, 235, 244, .7);
   opacity: 1;
   transform: none;
   transition: opacity 420ms ease, transform 560ms cubic-bezier(.2, .82, .2, 1);
 }
 
-.webspring-board[data-entrance-phase="waiting"] .webspring-board-journal {
+.webspring-board[data-entrance-phase="waiting"] .webspring-widget-shelf {
   opacity: 0;
   transform: translate3d(0, 24px, 0);
 }
 
-.webspring-board[data-entrance-phase="holding"] .webspring-board-journal {
+.webspring-board[data-entrance-phase="holding"] .webspring-widget-shelf {
   opacity: 1;
   transform: translate3d(0, 10px, 0);
 }
 
-.webspring-board[data-entrance-phase="ready"] .webspring-board-journal {
+.webspring-board[data-entrance-phase="ready"] .webspring-widget-shelf {
   opacity: 1;
   transform: none;
 }
 
-.webspring-board-paper-glow {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: url("/assets/webspring/glow.png") center top / 100% auto no-repeat;
-  opacity: .22;
-  mix-blend-mode: screen;
-}
-
-.webspring-board .webspring-shelf {
-  position: relative;
-  inset: auto;
-  z-index: auto;
-  width: 100%;
-  max-width: 700px;
-  height: auto;
-  margin: 0 auto;
-  overflow: visible;
-}
-
-.webspring-board .webspring-news {
-  position: relative;
-  inset: auto;
-  z-index: auto;
-  width: 100%;
-  transform: none;
-}
-
-.webspring-board .webspring-news img {
-  flex: 0 0 auto;
-  width: clamp(36px, 9vw, 56px);
-  height: auto;
-  transform: none;
-}
-
-.webspring-board .webspring-news h2 {
-  font-size: clamp(22px, 5.5vw, 36px);
-  line-height: 1.1;
-  white-space: normal;
-  text-wrap: balance;
-}
-
-.webspring-board .webspring-news-date {
-  margin-top: 6px;
-  font-family: inherit;
-  font-size: 14px;
-}
-
-.webspring-board .webspring-news-copy {
-  position: relative;
-  inset: auto;
-  z-index: auto;
-  width: auto;
-  margin: 14px 0 0;
-  font-size: clamp(13px, 3vw, 16px);
-  line-height: 1.45;
-  transform: none;
-}
-
+/* The icon that follows the pointer matches the icon it was lifted from: the Board sets
+   --webspring-drag-proxy-icon-size to that icon's measured size. 76px applies to icons it cannot measure. */
 body:has(.webspring-board) > .webspring-drag-proxy {
-  width: clamp(74px, 20vw, 160px);
+  --webspring-drag-proxy-icon-size: 76px;
+  width: calc(var(--webspring-drag-proxy-icon-size) * 1.3);
   color: #fff;
   font-family: inherit;
   font-weight: 500;
@@ -377,7 +361,7 @@ body:has(.webspring-board) > .webspring-drag-proxy {
 }
 
 body:has(.webspring-board) > .webspring-drag-proxy img {
-  width: clamp(54px, 15.5vw, 124px);
+  width: var(--webspring-drag-proxy-icon-size);
   height: auto;
   aspect-ratio: 1;
   filter: none;
@@ -396,14 +380,14 @@ body:has(.webspring-board) > .webspring-drag-proxy img {
   }
 
   .webspring-board .webspring-board-material,
-  .webspring-board .webspring-board-journal {
+  .webspring-board .webspring-widget-shelf {
     transform: none !important;
     transition-property: opacity !important;
   }
 }
 
 .webspring-board[data-reduced-motion="true"] .webspring-board-material,
-.webspring-board[data-reduced-motion="true"] .webspring-board-journal {
+.webspring-board[data-reduced-motion="true"] .webspring-widget-shelf {
   transform: none !important;
   transition: opacity .12s ease !important;
 }

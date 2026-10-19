@@ -47,6 +47,8 @@ import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
 export interface NSEPreferencePane {
   id: string;
   label: ReactNode;
+  /** Artwork beside the label on the list row. */
+  icon?: ReactNode;
   /** Secondary line on the list row — usually the current value. */
   meta?: ReactNode;
   /**
@@ -312,6 +314,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                       {panes.map((pane) => (
                         <NSEListItem
                           key={pane.id}
+                          leading={pane.icon}
                           meta={pane.meta}
                           trailing={(
                             <span className="nse-prefs-row-tail">

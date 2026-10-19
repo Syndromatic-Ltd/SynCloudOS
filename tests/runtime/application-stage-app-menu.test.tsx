@@ -67,14 +67,15 @@ function createAppInfo(topBar: "standard" | "custom" | "none" = "standard"): Syn
     shortName: "Test",
     packageName: "com.test.app",
     frame: {
-      layout: "defacto",
       material: "standard",
       rightSlot: "userInfo",
+      background: "system",
       smoothSurface: "off",
       sourceList: undefined,
       topBar
     },
     icon: { src: "/test.png" },
+    about: { version: "1.0.0", copyright: "© Test", trademark: "", tagline: "A test app" },
     isDisabled: false,
     notifications: { badgeCount: 0, showsNotifications: false },
     presentation: "appView",
@@ -476,7 +477,7 @@ describe("ApplicationStageView app menu", () => {
     fireEvent.click(screen.getByRole("button", { name: "User Info" }));
 
     expect(await screen.findByRole("menuitem", { name: "About Test App" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "Preferences" })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "System Preferences…" })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: "Log Out" })).toBeTruthy();
     expect(document.querySelector('[data-nse-overlay-kind="menu"]')?.getAttribute("data-placement")).toBe("viewport-block-start-inline-end");
     expect(document.querySelector('[data-nse-application-menu="true"]')).toBeTruthy();

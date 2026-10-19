@@ -41,7 +41,11 @@
 "quickswitch.open" = "Open QuickSwitch";
 "quickswitch.openedShortcut" = "{app}, opened, {shortcut} shortcut";
 "quickswitch.visibleApps" = "Visible Webspring apps";
-"shelf.ariaLabel" = "Webspring news and status";
+"widgets.ariaLabel" = "Widgets";
+"widgets.error" = "This could not be loaded.";
+"widgets.loading" = "Loading…";
+"widgets.retry" = "Retry";
+"widgets.timeout" = "This is taking too long to load.";
 "webspring.additionalApps.ariaLabel" = "Additional Webspring apps";
 "webspring.apps.ariaLabel" = "Webspring apps";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

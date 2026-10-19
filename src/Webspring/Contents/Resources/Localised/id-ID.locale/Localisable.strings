@@ -41,7 +41,6 @@
 "quickswitch.open" = "Buka QuickSwitch";
 "quickswitch.openedShortcut" = "{app}, dibuka, {shortcut} pintasan";
 "quickswitch.visibleApps" = "Aplikasi Webspring yang terlihat";
-"shelf.ariaLabel" = "Webspring berita dan status";
 "webspring.additionalApps.ariaLabel" = "Aplikasi Webspring tambahan";
 "webspring.apps.ariaLabel" = "Webspring aplikasi";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

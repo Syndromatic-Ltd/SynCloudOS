@@ -41,7 +41,6 @@
 "quickswitch.open" = "開啟快速切換";
 "quickswitch.openedShortcut" = "{app}，已打開，{shortcut} 捷徑";
 "quickswitch.visibleApps" = "可見 Webspring 應用程式";
-"shelf.ariaLabel" = "Webspring 新聞和狀態";
 "webspring.additionalApps.ariaLabel" = "其他 Webspring 應用程式";
 "webspring.apps.ariaLabel" = "Webspring 應用程式";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

@@ -22,7 +22,6 @@ import { useCallback, useEffect, useMemo, useState, type ComponentType } from "r
 import { WebspringHost } from "./Webspring/WebspringHost";
 import type { SynCloudOSShellResources } from "./Webspring/WebspringController";
 import type { AuthenticationInput, WebspringDefinition } from "./Webspring/webspringTypes";
-import type { WebspringContentSources } from "./Webspring/webspringContent";
 import { WindowContentRendererRegistry, WindowLayer } from "./Webspring/WindowLayer";
 import type { SystemStartupPhase } from "./Webspring/SystemStartupLayer";
 import { useRuntimeSelector, useKernelSynCloudOS } from "./SynCloudOSReact";
@@ -39,13 +38,10 @@ function selectRuntimePresentationReady(snapshot: import("./SynCloudOS/Runtime/r
   return snapshot.booted || snapshot.statechart.currentState !== "booting";
 }
 
-const emptyContentSources: WebspringContentSources = Object.freeze({});
-
-export function App({ shell, shellResources, authentication, contentSources = emptyContentSources }: {
+export function App({ shell, shellResources, authentication }: {
   readonly shell: WebspringDefinition;
   readonly shellResources?: SynCloudOSShellResources;
   readonly authentication?: AuthenticationInput;
-  readonly contentSources?: WebspringContentSources;
 }) {
   const runtime = useKernelSynCloudOS();
   const frameworkWindowRenderers = useMemo(() => new WindowContentRendererRegistry(), []);
@@ -102,8 +98,8 @@ export function App({ shell, shellResources, authentication, contentSources = em
 
   return (
     <>
-      <WebspringHost shell={shell} shellResources={shellResources} authentication={authentication} startupPhase={startupPhase} contentSources={contentSources} />
-      <SystemUILayer onLogOut={authenticationPolicy === "disabled" ? undefined : handleLogOut} siteName={siteName} />
+      <WebspringHost shell={shell} shellResources={shellResources} authentication={authentication} startupPhase={startupPhase} />
+      <SystemUILayer onLogOut={authenticationPolicy === "disabled" ? undefined : handleLogOut} preferences={shell.preferences} siteName={siteName} />
     </>
   );
 }

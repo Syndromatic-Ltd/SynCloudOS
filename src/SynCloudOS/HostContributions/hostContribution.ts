@@ -57,7 +57,6 @@ import type {
   SynCloudOSPolicySubjectGrant,
   SynCloudOSRoleCapabilityRegistrationInput,
 } from "../PolicyKit/policyTypes";
-import type { WebspringContentSource, WebspringContentSources } from "../WebspringState/webspringContentTypes";
 import type { SynCloudOSIdentityUser } from "../Identity/identityTypes";
 import type { LUFXQuery, LUFXQueryDescriptor } from "../../FX/LuminaFX/LUFXQuery";
 import type { LUFXQueryExecutionOptions, LUFXQueryResultPage } from "../../FX/LuminaFX/LUFXQueryPlanner";
@@ -184,10 +183,6 @@ export interface SynCloudOSHostEventInstallPort {
   subscribe(type: string, listener: (event: unknown) => void): SynCloudOSHostContributionCleanup;
 }
 
-export interface SynCloudOSHostWebspringInstallPort {
-  registerContentSource(id: string, source: WebspringContentSource): SynCloudOSHostContributionCleanup;
-}
-
 export interface SynCloudOSHostPolicyInstallPort {
   declare(input: { readonly appId: string; readonly policy: SynCloudOSAppAccessPolicy }): void;
   registerRoleCapabilities(input: SynCloudOSRoleCapabilityRegistrationInput): SynCloudOSHostContributionCleanup;
@@ -246,7 +241,6 @@ export interface SynCloudOSHostInstallContext {
   readonly documents: SynCloudOSHostDocumentInstallPort;
   readonly seed: SynCloudOSHostSeedPort;
   readonly events: SynCloudOSHostEventInstallPort;
-  readonly webspring: SynCloudOSHostWebspringInstallPort;
   readonly policy: SynCloudOSHostPolicyInstallPort;
   readonly lumina: SynCloudOSHostLuminaInstallPort;
   readonly bootNotifications: SynCloudOSHostBootNotificationInstallPort;
@@ -786,7 +780,6 @@ interface HostInstallContextHandle {
 export function createSynCloudOSHostInstallContext(
   prepared: PreparedSynCloudOSHostContribution,
   runtime: SynCloudOSRuntime,
-  contentSources: Record<string, WebspringContentSource>,
   resources: Readonly<Record<string, string>> = {},
   signal: AbortSignal = runtime.signal,
 ): HostInstallContextHandle {
@@ -1018,21 +1011,6 @@ export function createSynCloudOSHostInstallContext(
       return track(unsubscribe);
     },
   });
-  const webspring = Object.freeze<SynCloudOSHostWebspringInstallPort>({
-    registerContentSource(id, source) {
-      assertLive(signal);
-      if (typeof id !== "string" || !id.trim()) throw new TypeError("Webspring content source IDs must not be empty.");
-      if (!source || typeof source !== "object" || typeof source.read !== "function") throw new TypeError(`Webspring content source ${id} requires a read function.`);
-      if (Object.prototype.hasOwnProperty.call(contentSources, id)) throw new TypeError(`Duplicate Webspring content source ${id}.`);
-      Object.defineProperty(contentSources, id, { configurable: true, enumerable: true, writable: true, value: source });
-      let disposed = false;
-      return track(() => {
-        if (disposed) return;
-        disposed = true;
-        if (contentSources[id] === source) delete contentSources[id];
-      });
-    },
-  });
   const policy = Object.freeze<SynCloudOSHostPolicyInstallPort>({
     declare(input) {
       assertLive(signal);
@@ -1173,7 +1151,6 @@ export function createSynCloudOSHostInstallContext(
     documents: Object.freeze({ registerType, registerAdapter, registerDocumentStoreAdapter }),
     seed: Object.freeze(seed),
     events,
-    webspring,
     policy,
     lumina,
     bootNotifications: bootPort,
@@ -1216,5 +1193,3 @@ export function createSynCloudOSHostInstallContext(
     },
   });
 }
-
-export type { WebspringContentSources };

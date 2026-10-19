@@ -20,15 +20,17 @@
 
 import "./audioHapticsPane.css";
 import { useSyncExternalStore } from "react";
-import { NSEGroupBox, NSEListItem, NSESlider, NSEToggleButton } from "../NSE/public/controls";
-import { useNSEFeedback } from "../NSE/hostComposition";
-import { useKernelSynCloudOS, useRuntimeSelector } from "../SynCloudOSReact";
-import type { RuntimeSnapshot } from "../SynCloudOS/SynCloudOS";
+import { NSEGroupBox, NSEListItem, NSESlider, NSEToggleButton } from "../../../NSE/public/controls";
+import { useNSEFeedback } from "../../../NSE/hostComposition";
+import { useKernelSynCloudOS, useRuntimeSelector } from "../../../SynCloudOSReact";
+import type { RuntimeSnapshot } from "../../../SynCloudOS/SynCloudOS";
+import { useSystemText } from "../useSystemText";
 
 const volumeDetents = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 const selectApps = (snapshot: RuntimeSnapshot) => snapshot.appInfo;
 
-export function AudioHapticsPane({ systemT }: { readonly systemT: (key: string, fallback: string) => string }) {
+export function AudioHapticsPane() {
+  const systemT = useSystemText();
   const feedback = useNSEFeedback();
 
   const runtime = useKernelSynCloudOS();

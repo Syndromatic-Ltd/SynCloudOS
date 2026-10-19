@@ -22,13 +22,17 @@ import { captureSynWareManifest, type SynWareWebspringFoldersManifest } from "..
 import { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
 import { defaultWebspringFolderAppearance, defaultWebspringFolderSmoothSurface } from "./WebspringFolderAppearance";
 import { nseSmoothSurfaceRadiusTokens } from "../NSE/SmoothSurface";
+import { captureWebspringBackground } from "./webspringSurface";
+import { isDefinedWebspringWidget } from "./webspringWidget";
+import { isPreferencePaneDefinition, type PreferencePaneDefinition } from "../SynCloudOS/Preferences";
 import type {
-  WebspringContent,
+  WebspringWidget,
   WebspringFolderAppearance,
   WebspringFolderPresentationComponent,
   WebspringDefinition,
   WebspringDefinitionInput,
   WebspringManifest,
+  WebspringPreferences,
   WebspringQuickSwitchOptions,
   WebspringViewComponent,
 } from "./webspringTypes";
@@ -293,13 +297,53 @@ function assertFolders(folders: SynWareWebspringFoldersManifest | undefined) {
   }
 }
 
+/** The widgets a definition declares, in order; each must come from `defineWidget` and ids must be unique. */
+function captureWidgets(input: unknown): readonly WebspringWidget[] {
+  if (input === undefined) return Object.freeze([]);
+  if (!Array.isArray(input)) throw new TypeError("Webspring widgets must be an array.");
+  const ids = new Set<string>();
+  for (const widget of input) {
+    if (!isDefinedWebspringWidget(widget)) throw new TypeError("Webspring widgets must be created with defineWidget.");
+    if (ids.has(widget.id)) throw new TypeError(`Webspring widgets contain duplicate ID ${widget.id}.`);
+    ids.add(widget.id);
+  }
+  return Object.freeze([...input] as WebspringWidget[]);
+}
+
+/** The System Preferences panes a definition adds and the built-ins it hides. */
+function capturePreferences(input: unknown): WebspringPreferences {
+  if (input === undefined) return Object.freeze({ panes: Object.freeze([]), hide: Object.freeze([]) });
+  assertPlainObject(input, "Webspring preferences");
+  assertKnownFields(input, "Webspring preferences", ["panes", "hide"]);
+  const panesInput = dataProperty(input, "panes", false);
+  const hideInput = dataProperty(input, "hide", false);
+  if (panesInput !== undefined && !Array.isArray(panesInput)) throw new TypeError("Webspring preferences.panes must be an array.");
+  if (hideInput !== undefined && !Array.isArray(hideInput)) throw new TypeError("Webspring preferences.hide must be an array.");
+  const panes: PreferencePaneDefinition[] = [];
+  const ids = new Set<string>();
+  for (const pane of panesInput ?? []) {
+    if (!isPreferencePaneDefinition(pane)) throw new TypeError("Webspring preferences.panes must be created with definePreferencePane.");
+    if (ids.has(pane.id)) throw new TypeError(`Webspring preferences.panes contain duplicate ID ${pane.id}.`);
+    ids.add(pane.id);
+    panes.push(pane);
+  }
+  const hide: string[] = [];
+  for (const id of hideInput ?? []) {
+    if (typeof id !== "string" || !id.trim()) throw new TypeError("Webspring preferences.hide must list pane ids as non-empty strings.");
+    hide.push(id.trim());
+  }
+  return Object.freeze({ panes: Object.freeze(panes), hide: Object.freeze(hide) });
+}
+
 export function defineWebspring<const TManifest extends WebspringManifest>(
   input: WebspringDefinitionInput<TManifest>,
 ): WebspringDefinition<TManifest> {
   assertPlainObject(input, "Webspring definition");
   const manifestInput = dataProperty(input, "manifest", true);
   const componentsInput = dataProperty(input, "components", true);
-  const contentInput = dataProperty(input, "content", false);
+  const widgets = captureWidgets(dataProperty(input, "widgets", false));
+  const background = captureWebspringBackground(dataProperty(input, "background", false));
+  const preferences = capturePreferences(dataProperty(input, "preferences", false));
   const iconEffectInput = dataProperty(input, "iconEffect", false);
   if (iconEffectInput !== undefined) captureComponents({ iconEffect: iconEffectInput });
   const quickSwitch = captureQuickSwitch(dataProperty(input, "quickSwitch", false));
@@ -348,7 +392,9 @@ export function defineWebspring<const TManifest extends WebspringManifest>(
     ...(quickSwitch === undefined ? {} : { quickSwitch }),
     folderPresentation,
     folderAppearance,
-    ...(contentInput === undefined ? {} : { content: cloneData(contentInput, "Webspring content") as Readonly<WebspringContent> }),
+    widgets,
+    background,
+    preferences,
   };
   return Object.freeze(definition);
 }

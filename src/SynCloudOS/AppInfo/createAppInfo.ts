@@ -21,8 +21,9 @@
 import { selectionCircleUrl, selectorArrowUrl, timeMachineShadowUrl, spinnerUrl } from "../Resources/frameworkAssets";
 import {
   normalizeSynCloudOSAppPresentation,
-  type SynCloudOSAppFrameLayout,
+  type SynCloudOSAppFrameBackground,
   type SynCloudOSAppFrameManifest,
+  type SynCloudOSAppFrameRightSlot,
   type SynCloudOSAppFrameMaterial,
   type SynCloudOSAppFrameSmoothSurfaceManifest,
   type SynCloudOSAppFrameSourceList,
@@ -47,7 +48,6 @@ import type {
 const appTypes: SynCloudOSAppType[] = ["internal", "external", "system"];
 const presentations: SynCloudOSAppPresentation[] = ["appView", "windowedView", "systemSheet", "backgroundService"];
 const windowChromeInputs = ["custom", "frameless", "system"];
-const frameLayouts: SynCloudOSAppFrameLayout[] = ["defacto", "simple"];
 const frameMaterials: SynCloudOSAppFrameMaterial[] = ["standard", "metal"];
 const frameTopBars: SynCloudOSAppFrameTopBar[] = ["standard", "custom", "none"];
 const framePresentationMotions = ["host", "content"] as const;
@@ -60,11 +60,11 @@ const defaultFrameSmoothSurface = {
   overflow: "hidden"
 } as const satisfies SynCloudOSAppFrameSmoothSurfaceManifest;
 const defaultStandardFrame: SynCloudOSAppFrameManifest = {
-  layout: "simple",
   material: "standard",
   topBar: "standard",
   presentationMotion: "host",
-  rightSlot: "userInfo",
+  rightSlot: "auto",
+  background: "system",
   smoothSurface: defaultFrameSmoothSurface
 };
 const defaultFrameSourceList = {
@@ -235,12 +235,32 @@ function normaliseFrameSmoothSurface(
   return Object.keys(output).length === 0 ? defaultFrameSmoothSurface : output;
 }
 
-function normaliseFrameRightSlot(frame: Record<string, unknown>, notes: SynCloudOSAppInfoNormalisationNote[]): string {
+function isValidRightSlot(value: unknown): value is SynCloudOSAppFrameRightSlot {
+  if (value === "auto" || value === "userInfo" || value === "none") return true;
+  return isRecord(value)
+    && isNonEmptyString(value.icon)
+    && isRecord(value.label)
+    && isNonEmptyString(value.label.key);
+}
+
+function normaliseFrameRightSlot(frame: Record<string, unknown>, notes: SynCloudOSAppInfoNormalisationNote[]): SynCloudOSAppFrameRightSlot {
   if (!("rightSlot" in frame)) return defaultStandardFrame.rightSlot;
   const value = frame.rightSlot;
-  if (isNonEmptyString(value)) return value.trim();
-  note(notes, "frame.rightSlot", value, defaultStandardFrame.rightSlot, "Invalid frame rightSlot values use the default user-info affordance.");
+  if (isValidRightSlot(value)) return value;
+  note(notes, "frame.rightSlot", value, defaultStandardFrame.rightSlot, "Invalid frame rightSlot values use the automatic gear affordance.");
   return defaultStandardFrame.rightSlot;
+}
+
+function isValidBackground(value: unknown): value is SynCloudOSAppFrameBackground {
+  return value === "system" || value === "none" || isRecord(value);
+}
+
+function normaliseFrameBackground(frame: Record<string, unknown>, notes: SynCloudOSAppInfoNormalisationNote[]): SynCloudOSAppFrameBackground {
+  if (!("background" in frame)) return defaultStandardFrame.background;
+  const value = frame.background;
+  if (isValidBackground(value)) return value;
+  note(notes, "frame.background", value, defaultStandardFrame.background, "Invalid frame background values use the system app background.");
+  return defaultStandardFrame.background;
 }
 
 function normaliseSourceListWidth(
@@ -304,11 +324,11 @@ function normaliseFrame(frame: unknown, notes: SynCloudOSAppInfoNormalisationNot
   const sourceList = normaliseFrameSourceList(record, topBar, notes);
 
   return {
-    layout: normaliseFrameField(record, "layout", frameLayouts, defaultStandardFrame.layout, notes),
     material: normaliseFrameField(record, "material", frameMaterials, defaultStandardFrame.material, notes),
     topBar,
     presentationMotion: normaliseFrameField(record, "presentationMotion", framePresentationMotions, "host", notes),
     rightSlot: normaliseFrameRightSlot(record, notes),
+    background: normaliseFrameBackground(record, notes),
     smoothSurface: normaliseFrameSmoothSurface(record.smoothSurface, notes),
     ...(sourceList ? { sourceList } : {})
   };
@@ -486,17 +506,17 @@ export function validateAppManifest(manifest: unknown): SynCloudOSAppInfoValidat
     if (!frame) {
       addIssue(issues, "warning", "manifest.frame.defaulted", "frame", "frame must be an object and will default to the standard app-view composition.");
     } else {
-      if (frame.layout !== undefined && !frameLayouts.includes(frame.layout as SynCloudOSAppFrameLayout)) {
-        addIssue(issues, "warning", "manifest.frame.layout.defaulted", "frame.layout", "frame.layout is unknown and will default to simple.");
-      }
       if (frame.material !== undefined && !frameMaterials.includes(frame.material as SynCloudOSAppFrameMaterial)) {
         addIssue(issues, "warning", "manifest.frame.material.defaulted", "frame.material", "frame.material is unknown and will default to standard.");
       }
       if (frame.topBar !== undefined && !frameTopBars.includes(frame.topBar as SynCloudOSAppFrameTopBar)) {
         addIssue(issues, "warning", "manifest.frame.topBar.defaulted", "frame.topBar", "frame.topBar is unknown and will default to standard.");
       }
-      if (frame.rightSlot !== undefined && typeof frame.rightSlot !== "string") {
-        addIssue(issues, "warning", "manifest.frame.rightSlot.defaulted", "frame.rightSlot", "frame.rightSlot must be a registry-key string and will default to userInfo.");
+      if (frame.rightSlot !== undefined && !isValidRightSlot(frame.rightSlot)) {
+        addIssue(issues, "warning", "manifest.frame.rightSlot.defaulted", "frame.rightSlot", "frame.rightSlot must be auto, userInfo, none or { icon, label } and will default to auto.");
+      }
+      if (frame.background !== undefined && !isValidBackground(frame.background)) {
+        addIssue(issues, "warning", "manifest.frame.background.defaulted", "frame.background", "frame.background must be system, none or a surface object and will default to system.");
       }
       if (frame.presentationMotion !== undefined && !framePresentationMotions.includes(frame.presentationMotion as "host" | "content")) {
         addIssue(issues, "warning", "manifest.frame.presentationMotion.defaulted", "frame.presentationMotion", "frame.presentationMotion must be host or content and will default to host.");

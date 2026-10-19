@@ -18,14 +18,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* Rendered bar heights, one place per chrome variant. The bar reads its own token, and a host can
+   pass the same value on to anything that must reserve the bar's band (Webspring exposes it to app
+   content), so the bar and its surroundings can never disagree — including the compact breakpoint
+   below. */
+:root {
+  --nse-topbar-height-cumulus: 68px;
+  --nse-topbar-height-metal: 56px;
+}
+
 .nse-app-topbar {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: 8;
-  height: var(--nse-app-topbar-height, 68px);
-  min-height: var(--nse-app-topbar-height, 68px);
+  height: var(--nse-app-topbar-height, var(--nse-topbar-height-cumulus));
+  min-height: var(--nse-app-topbar-height, var(--nse-topbar-height-cumulus));
   color: #f4f7fb;
   user-select: none;
 }
@@ -105,7 +114,7 @@
   display: grid;
   grid-template-columns: minmax(116px, 15vw) minmax(0, 1fr) minmax(116px, 15vw);
   align-items: center;
-  height: 68px;
+  height: var(--nse-app-topbar-height, var(--nse-topbar-height-cumulus));
   padding: 0;
 }
 
@@ -277,7 +286,27 @@
   transform: translate3d(0, 0, 0);
 }
 
+/* Every top-bar glyph is one solid-shape SVG used as a CSS mask over a themed fill, so the
+   normal, pressed and selected looks come from colour tokens for any icon. The element that
+   carries the mask is clipped by it, so the shadow filters live on its wrapper. */
+.nse-app-topbar-glyph-shape {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--nse-app-topbar-glyph-fill, currentColor);
+  -webkit-mask-image: var(--nse-app-topbar-glyph);
+  mask-image: var(--nse-app-topbar-glyph);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
 .nse-app-topbar-button {
+  --nse-app-topbar-glyph-fill: linear-gradient(180deg, rgb(247 249 252 / 94%) 0%, rgb(188 196 207 / 90%) 100%);
+  --nse-app-topbar-glyph-shadow: drop-shadow(0 1px 1px rgb(0 0 0 / 55%));
   position: relative;
   display: grid;
   width: 108px;
@@ -373,9 +402,9 @@
   grid-area: 1 / 1;
   width: 32px;
   height: 32px;
-  object-fit: contain;
   pointer-events: none;
   transform: translateY(-2px);
+  filter: var(--nse-app-topbar-glyph-shadow);
 }
 
 .nse-app-topbar-button[data-position="right"] .nse-app-topbar-button-icon {
@@ -383,27 +412,25 @@
   height: 32.5px;
 }
 
-.nse-app-topbar-button-icon-selected {
-  opacity: 0;
+/* Held and selected: the blue glass fills the well and the glyph lights up. */
+.nse-app-topbar-button[data-selected="true"],
+.nse-app-topbar-button:active:not(:disabled) {
+  --nse-app-topbar-glyph-fill: linear-gradient(180deg, #ffffff 0%, #dcebf8 100%);
+  --nse-app-topbar-glyph-shadow: drop-shadow(0 1px 1px rgb(0 22 48 / 62%));
 }
 
 .nse-app-topbar-button[data-selected="true"] .nse-app-topbar-button-well-selected,
-.nse-app-topbar-button:active:not(:disabled) .nse-app-topbar-button-well-selected,
-.nse-app-topbar-button[data-selected="true"] .nse-app-topbar-button-icon-selected,
-.nse-app-topbar-button:active .nse-app-topbar-button-icon-selected {
+.nse-app-topbar-button:active:not(:disabled) .nse-app-topbar-button-well-selected {
   opacity: 1;
 }
 
-.nse-app-topbar-button[data-selected="true"] .nse-app-topbar-button-icon-normal,
-.nse-app-topbar-button:active .nse-app-topbar-button-icon-normal {
-  opacity: 0;
-}
-
 @media (max-width: 760px) {
+  :root {
+    --nse-topbar-height-cumulus: 56px;
+  }
+
   .nse-app-topbar {
     --nse-app-topbar-glass-height: 52px;
-    height: 56px;
-    min-height: 56px;
   }
 
   .nse-app-topbar::before {
@@ -414,7 +441,6 @@
 
   .nse-app-topbar-content {
     grid-template-columns: 90px minmax(0, 1fr) 90px;
-    height: 56px;
   }
 
   .nse-app-topbar-slot-left {
@@ -505,8 +531,8 @@
 /* ===========================================================================
    atmoMetal — reusable brushed-metal source-list chrome.
    A rail cell (sidebar-aligned) and a main cell meet at the source-list seam, with
-   film grain, raised/cast seam shadows, spliced curve/endcap/middle PNGs, and metal
-   pill buttons. Atmo ships light + dark chrome (Onyx is a separate theme, not a dark
+   film grain, raised/cast seam shadows, spliced curve/endcap/middle PNGs, and CSS-drawn
+   aluminium pill buttons. Atmo ships light + dark chrome (Onyx is a separate theme, not a dark
    mode), selected by [data-mode]. NSE owns the assets under /assets/nse/chrome/metal.
    Adapted from the hand-spliced Software.app chrome into a first-party NSE variant.
    =========================================================================== */
@@ -516,10 +542,17 @@
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/light/header-middle.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/light/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/light/header-endcap-right.png");
-  --nse-metal-pill: url("/assets/nse/chrome/metal/light/topbar-button.png");
-  --nse-metal-glyph-return: url("/assets/nse/chrome/metal/glyphs/return-to-webspring.png");
-  --nse-metal-glyph-userinfo: url("/assets/nse/chrome/metal/glyphs/user-info.png");
-  --nse-metal-glyph-settings: url("/assets/nse/chrome/metal/glyphs/settings.svg");
+  /* Pill button: raised aluminium, and the deep inset press (darker gradient running the
+     other way, soft inner shadows, outer lip kept). The glyph is a mask over --nse-metal-glyph-fill. */
+  --nse-metal-pill-fill: linear-gradient(180deg, #fdfdfe 0%, #eceef1 46%, #d6dae0 54%, #e2e5ea 100%);
+  --nse-metal-pill-edge: rgb(78 88 100 / 70%);
+  --nse-metal-pill-shadow: 0 1px 0 rgb(255 255 255 / 80%), inset 0 1px 0 rgb(255 255 255 / 95%), inset 0 -2px 3px rgb(96 106 118 / 30%);
+  --nse-metal-pill-fill-pressed: linear-gradient(180deg, #a7aeb8 0%, #bfc5cd 55%, #cdd2d9 100%);
+  --nse-metal-pill-shadow-pressed: 0 1px 0 rgb(255 255 255 / 80%), inset 0 2px 4px rgb(36 44 56 / 48%), inset 0 0 2px rgb(36 44 56 / 42%);
+  --nse-metal-glyph-fill: linear-gradient(180deg, #4c5560 0%, #727c88 100%);
+  --nse-metal-glyph-fill-pressed: linear-gradient(180deg, #5a636e 0%, #7c8692 100%);
+  --nse-metal-glyph-shadow: drop-shadow(0 1px 0 rgb(255 255 255 / 85%)) drop-shadow(0 -1px 0 rgb(24 32 42 / 40%));
+  --nse-metal-glyph-shadow-pressed: drop-shadow(0 1px 0 rgb(255 255 255 / 55%)) drop-shadow(0 -1px 0 rgb(24 32 42 / 28%));
 
   --nse-metal-title: #2b333c;
   --nse-metal-text-emboss: 0 1px 0 rgba(255, 255, 255, 0.75);
@@ -533,8 +566,8 @@
   z-index: 5;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  height: 56px;
-  min-height: 56px;
+  height: var(--nse-app-topbar-height, var(--nse-topbar-height-metal));
+  min-height: var(--nse-app-topbar-height, var(--nse-topbar-height-metal));
   color: var(--nse-metal-title);
   isolation: isolate;
   overflow: hidden;
@@ -556,7 +589,15 @@
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/dark/header-middle.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/dark/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/dark/header-endcap-right.png");
-  --nse-metal-pill: url("/assets/nse/chrome/metal/dark/topbar-button.png");
+  --nse-metal-pill-fill: linear-gradient(180deg, #666d78 0%, #4a5059 46%, #3a3f47 54%, #444a53 100%);
+  --nse-metal-pill-edge: rgb(4 6 8 / 85%);
+  --nse-metal-pill-shadow: 0 1px 0 rgb(255 255 255 / 14%), inset 0 1px 0 rgb(255 255 255 / 30%), inset 0 -2px 3px rgb(0 0 0 / 38%);
+  --nse-metal-pill-fill-pressed: linear-gradient(180deg, #1b1e23 0%, #272b32 55%, #30353c 100%);
+  --nse-metal-pill-shadow-pressed: 0 1px 0 rgb(255 255 255 / 14%), inset 0 2px 4px rgb(0 0 0 / 72%), inset 0 0 2px rgb(0 0 0 / 62%);
+  --nse-metal-glyph-fill: linear-gradient(180deg, #f1f4f8 0%, #b3bcc8 100%);
+  --nse-metal-glyph-fill-pressed: linear-gradient(180deg, #d9dfe7 0%, #98a2af 100%);
+  --nse-metal-glyph-shadow: drop-shadow(0 -1px 0 rgb(0 0 0 / 70%)) drop-shadow(0 1px 0 rgb(255 255 255 / 10%));
+  --nse-metal-glyph-shadow-pressed: drop-shadow(0 -1px 0 rgb(0 0 0 / 80%));
   --nse-metal-title: #f1f4f8;
   --nse-metal-text-emboss: 0 -1px 0 rgba(0, 0, 0, 0.78), 0 -1px 2px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.05);
   --nse-metal-cast-shadow: rgba(0, 0, 0, 0.52);
@@ -689,44 +730,37 @@
 .nse-app-topbar-metal-pill-shell {
   position: absolute;
   inset: 0;
-  background: var(--nse-metal-pill) center / 100% 100% no-repeat;
-  transition: transform 90ms ease;
+  box-sizing: border-box;
+  border: 1px solid var(--nse-metal-pill-edge);
+  border-radius: 17px;
+  background: var(--nse-metal-pill-fill);
+  box-shadow: var(--nse-metal-pill-shadow);
+  transition: box-shadow 90ms ease;
 }
 
-.nse-app-topbar-metal-pill:active .nse-app-topbar-metal-pill-shell {
-  transform: scaleY(-1);
+.nse-app-topbar-metal-pill:is(:active:not(:disabled), [aria-expanded="true"], [data-selected="true"]) .nse-app-topbar-metal-pill-shell {
+  background: var(--nse-metal-pill-fill-pressed);
+  box-shadow: var(--nse-metal-pill-shadow-pressed);
 }
 
+/* The glyph wrapper carries the emboss as drop-shadow filters (the mask clips anything painted
+   on the masked element itself); the shape inside is filled by --nse-metal-glyph-fill. */
 .nse-app-topbar-metal-pill-glyph {
+  --nse-app-topbar-glyph-fill: var(--nse-metal-glyph-fill);
   position: absolute;
   top: 50%;
   left: 50%;
   width: 22px;
   height: 22px;
   transform: translate(-50%, -50%);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
+  filter: var(--nse-metal-glyph-shadow);
+  pointer-events: none;
 }
 
-.nse-app-topbar-metal-pill-glyph-return {
-  background-image: var(--nse-metal-glyph-return);
-}
-
-.nse-app-topbar-metal-pill-glyph-userinfo {
-  width: 24px;
-  height: 24px;
-  background-image: var(--nse-metal-glyph-userinfo);
-}
-
-.nse-app-topbar-metal-pill-glyph-settings {
-  width: 23px;
-  height: 23px;
-  background-image: var(--nse-metal-glyph-settings);
-}
-
-.nse-app-topbar-metal-pill-glyph-custom {
-  background-image: var(--nse-app-topbar-metal-pill-glyph);
+.nse-app-topbar-metal-pill:is(:active:not(:disabled), [aria-expanded="true"], [data-selected="true"]) .nse-app-topbar-metal-pill-glyph {
+  --nse-app-topbar-glyph-fill: var(--nse-metal-glyph-fill-pressed);
+  transform: translate(-50%, calc(-50% + 1px));
+  filter: var(--nse-metal-glyph-shadow-pressed);
 }
 
 /* A document window's title: the app's name beside its return control, the document in the

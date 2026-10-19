@@ -33,7 +33,6 @@ import {
 import { AppInfo } from "../SynCloudOS/SynCloudOS";
 import { cancelWebspringAppPrefetch, scheduleWebspringAppPrefetch } from "./webspringPrefetch";
 import type { NSEFontFamily } from "../NSE/NSE";
-import type { WebspringContentController, WebspringContentSectionSnapshot } from "./webspringContent";
 import type {
   ActionResult,
   AuthenticationInput,
@@ -45,6 +44,7 @@ import type {
   WebspringDialPlacement,
   WebspringItem,
   WebspringViewModel,
+  WebspringWidgetEntry,
 } from "./webspringTypes";
 
 export interface SynCloudOSShellResources {
@@ -86,7 +86,6 @@ export class WebspringController {
     readonly shell: WebspringDefinition,
     private readonly resources: SynCloudOSShellResources | undefined,
     readonly authentication: AuthenticationInput = "disabled",
-    private readonly contentController?: Pick<WebspringContentController, "refresh">,
   ) {
     this.assertHomeConfiguration();
     const actions: WebspringActions = {
@@ -140,7 +139,6 @@ export class WebspringController {
       openNotificationCentre: (notificationId) => { void this.runtime.commands.dispatch("webspring.notificationCentre.open", notificationId ? { notificationId } : undefined); },
       requestSignIn: this.requestSignIn.bind(this),
       requestSignOut: this.requestSignOut.bind(this),
-      refreshContent: async () => { await this.contentController?.refresh(); },
     };
     this.actions = Object.freeze(actions);
   }
@@ -168,10 +166,17 @@ export class WebspringController {
     return this.shell.manifest.webspringShell.views.find((view) => view.id !== failedViewId && view.presentations.includes(presentation))?.id ?? null;
   }
 
-  model(snapshot: RuntimeSnapshot, presentation: Presentation, contentSections: readonly WebspringContentSectionSnapshot[] = [], entrancePhase: WebspringViewModel["entrancePhase"] = "ready"): WebspringViewModel {
+  model(snapshot: RuntimeSnapshot, presentation: Presentation, entrancePhase: WebspringViewModel["entrancePhase"] = "ready"): WebspringViewModel {
     const declaration = this.shell.manifest.webspringShell;
     const resourceUrls = this.resources?.resourceUrls ?? {};
     const branding = resolveSiteBranding(declaration.branding, resourceUrls, this.runtime.locale, this.shell.manifest.id);
+    const resolveText = (text: LocalisedText) => resolveSiteBranding({ name: text }, {}, this.runtime.locale, this.shell.manifest.id).name;
+    const widgets = Object.freeze(this.shell.widgets.map((widget): WebspringWidgetEntry => Object.freeze({
+      widget,
+      title: resolveText(widget.title),
+      iconUrl: widget.icon ? resourceUrls[widget.icon] ?? null : null,
+      emptyMessage: widget.whenEmpty === "hide" ? null : resolveText(widget.whenEmpty.message),
+    })));
     const traits = this.runtime.presentationTraits.getSnapshot();
     const projection = reconcileWebspringLayout(
       Object.values(snapshot.appInfo),
@@ -244,12 +249,8 @@ export class WebspringController {
         openFolderId: snapshot.webspring.openFolderId,
         dropTargetId: snapshot.webspring.layout.dropTargetId,
       }),
-      sections: Object.freeze(contentSections.map((section) => Object.freeze({
-        id: section.id,
-        title: resolveSiteBranding({ name: section.title }, {}, this.runtime.locale, this.shell.manifest.id).name,
-        empty: section.empty,
-        state: section.state,
-      }))),
+      widgets,
+      background: this.shell.background,
       branding,
       account: Object.freeze(this.accountAction()),
     });

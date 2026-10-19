@@ -18,24 +18,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface WebspringContentItem {
-  readonly id: string;
-  readonly title: string;
-  readonly excerpt?: string;
-  readonly publishedAt?: string;
-  readonly image?: { readonly url: string; readonly alternativeText: string };
-  readonly destination: { readonly appId: string; readonly route: string };
+import { createContext, useContext } from "react";
+
+/** The session as the Account preference pane shows it, for hosts that offer sign-in. */
+export interface SystemUIAccount {
+  readonly signedIn: boolean;
+  /** The signed-in person's display name, when the session carries one. */
+  readonly name: string | null;
+  /** Presents the login window. */
+  readonly onSignIn: () => void;
 }
 
-export interface WebspringContentReadRequest {
-  readonly limit: number;
-  readonly signal: AbortSignal;
-}
+/** Provided by the system UI layer around System Preferences when the host offers sign-in. */
+export const SystemUIAccountContext = createContext<SystemUIAccount | null>(null);
 
-export interface WebspringContentSource {
-  read(request: WebspringContentReadRequest): Promise<readonly WebspringContentItem[]>;
-  subscribe?(listener: () => void): () => void;
-  resolveImage?(resource: string): string | null;
+export function useSystemUIAccount(): SystemUIAccount {
+  const account = useContext(SystemUIAccountContext);
+  if (!account) throw new Error("This host offers no sign-in.");
+  return account;
 }
-
-export type WebspringContentSources = Readonly<Record<string, WebspringContentSource>>;

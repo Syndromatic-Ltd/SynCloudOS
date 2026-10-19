@@ -47,7 +47,6 @@ The options are:
 | `bundles` | The SynWare bundles to register. Each is a definition or a discovered descriptor. The [Vite plugin](getting-started.md#add-the-vite-plugin) generates the list for you. |
 | `shell` | The [Webspring](webspring.md) definition. |
 | `shellResources` | Icons, strings and other resources for the shell. |
-| `contentSources` | Content providers for shell views that display external data. |
 | `authentication` | `"disabled"` for open sites, or an [authentication configuration](authentication.md). |
 | `policyProfile` | Your host's role taxonomy. See [Policy](#policy). |
 | `contributions` | Host contributions, described below. |

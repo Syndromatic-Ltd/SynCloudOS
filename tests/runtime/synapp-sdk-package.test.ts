@@ -27,7 +27,7 @@ import { pathToFileURL } from "node:url";
 import ts from "typescript";
 import { forwardRef, memo } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { defineWebspring, type WebspringViewProps } from "../../src/Webspring/public";
+import { defineWebspring, defineWidget, type WebspringViewProps } from "../../src/Webspring/public";
 
 const repositoryRoot = process.cwd();
 const temporaryDirectories: string[] = [];
@@ -161,11 +161,13 @@ describe("portable SynWare SDK packages", () => {
     expect(componentCalls).toBe(0);
     expect(Object.isFrozen(definition)).toBe(true);
     expect(Object.isFrozen(definition.manifest.webspringShell.views)).toBe(true);
-    const content = { sections: [{ id: "news", title: { key: "news.title" }, sourceId: "news", limit: 2, empty: "hide" as const }] };
-    const contentDefinition = defineWebspring({ manifest, components: { website: WebsiteView }, content });
-    content.sections[0].id = "changed-after-capture";
-    expect(contentDefinition.content?.sections[0].id).toBe("news");
-    expect(Object.isFrozen(contentDefinition.content?.sections)).toBe(true);
+    const news = defineWidget({ id: "news", title: "News", load: () => [], view: () => null, whenEmpty: "hide" });
+    const widgets = [news];
+    const widgetDefinition = defineWebspring({ manifest, components: { website: WebsiteView }, widgets });
+    widgets.length = 0;
+    expect(widgetDefinition.widgets).toEqual([news]);
+    expect(Object.isFrozen(widgetDefinition.widgets)).toBe(true);
+    expect("content" in widgetDefinition).toBe(false);
     const MemoWebsiteView = memo(WebsiteView);
     const ForwardWebsiteView = forwardRef<HTMLElement, WebspringViewProps>(() => null);
     expect(defineWebspring({ manifest, components: { website: MemoWebsiteView } }).components.website).toBe(MemoWebsiteView);
@@ -297,7 +299,6 @@ assert.equal(typeof nse.NSEStackView, "function");
 assert.equal(nse.NSEStackView, layout.NSEStackView);
 assert.equal(nse.NSEAppearanceProvider, appearance.NSEAppearanceProvider);
 assert.deepEqual(Object.keys(webspring), [
-  "LowerContentShelfView",
   "WEBSPRING_STAGE",
   "WebspringBoardView",
   "WebspringDragProxy",
@@ -305,10 +306,14 @@ assert.deepEqual(Object.keys(webspring), [
   "WebspringIconArtwork",
   "WebspringIconEffect",
   "WebspringLaunchDim",
+  "WebspringSurface",
+  "WebspringWidgetShelf",
   "captureWebspringDragReorderSlots",
   "createWebspringBoardView",
   "createWebspringFolderSplitPresentation",
+  "definePreferencePane",
   "defineWebspring",
+  "defineWidget",
   "getDesktopWebspringLayout",
   "getWebspringDragReorderTargetFromPoint",
   "getWebspringRadialExitForIcon",
@@ -322,6 +327,7 @@ assert.deepEqual(Object.keys(webspring), [
   "useWebspringFolderPreparation",
   "useWebspringMotion",
   "webspringIconSprings",
+  "webspringSurfaceStyle",
 ]);
 assert.deepEqual(Object.keys(browser), [
   "BrowserImageProcessingWorker",
@@ -381,7 +387,7 @@ import {
   type SynWareFakeWebContentOperation,
   type SynWareTestDisposalReport,
 } from "@syndromatic/syncloudos/sdk/testing";
-import { defineWebspring, type LocalisedText, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
+import { WebspringWidgetShelf, defineWebspring, defineWidget, type LocalisedText, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
 import { createRoot } from "react-dom/client";
 import {
@@ -506,9 +512,16 @@ function ExternalFixture() {
   </NSEStackView>;
 }
 
+const news = defineWidget({
+  id: "news",
+  title: "News",
+  load: async () => ["Public content"],
+  view: ({ data }) => <ul>{data.map((title) => <li key={title}>{title}</li>)}</ul>,
+  whenEmpty: "hide",
+});
+
 function WebsiteView({ model, applicationOutlet }: WebspringViewProps) {
-  const items = model.sections.flatMap((section) => section.state.status === "ready" ? section.state.items : []);
-  return <main data-logo={model.branding.logoUrl ?? ""}>{model.apps.map(({ id }) => <span key={id}>{id}</span>)}{items.map((item) => <span key={item.id}>{item.title}</span>)}{applicationOutlet}</main>;
+  return <main data-logo={model.branding.logoUrl ?? ""}>{model.apps.map(({ id }) => <span key={id}>{id}</span>)}{model.widgets.length > 0 ? <WebspringWidgetShelf entries={model.widgets} surface={model.background.shelf} /> : null}{applicationOutlet}</main>;
 }
 
 const siteName: LocalisedText = { key: "site.name", fallback: "Example" };
@@ -526,7 +539,7 @@ export const webspring = defineWebspring({
     },
   },
   components: { website: WebsiteView },
-  content: { sections: [{ id: "news", title: { key: "news", fallback: "News" }, sourceId: "news", limit: 2, empty: "hide" }] },
+  widgets: [news],
 });
 export const app = createSynWare({ manifest, root: ExternalFixture });
 export const contactApp = createSynWare({
@@ -543,7 +556,7 @@ export const contactApp = createSynWare({
   root: () => <p>Contact</p>,
 });
 export function mountFixture(element: Element) {
-  return mountSynCloudOS({ element, bundles: [app, contactApp], shell: webspring, shellResources: { resourceUrls: { "./Resources/SiteLogo.svg": "/site-logo.svg" }, fontResourceUrls: { "./Resources/Site.woff2": "/site.woff2" } }, contentSources: { news: { read: async () => [{ id: "public-news", title: "Public content", destination: { appId: "com.example.external.fixture", route: "/external" } }] } } });
+  return mountSynCloudOS({ element, bundles: [app, contactApp], shell: webspring, shellResources: { resourceUrls: { "./Resources/SiteLogo.svg": "/site-logo.svg" }, fontResourceUrls: { "./Resources/Site.woff2": "/site.woff2" } } });
 }
 export function mountFixtureWithoutContact(element: Element) {
   return mountSynCloudOS({ element, bundles: [app], shell: webspring, shellResources: { resourceUrls: { "./Resources/SiteLogo.svg": "/site-logo.svg" } } });

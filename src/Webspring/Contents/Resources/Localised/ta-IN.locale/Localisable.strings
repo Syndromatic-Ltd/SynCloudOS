@@ -41,7 +41,6 @@
 "quickswitch.open" = "QuickSwitch ஐத் திறக்கவும்";
 "quickswitch.openedShortcut" = "{app}, திறக்கப்பட்டது, {shortcut} குறுக்குவழி";
 "quickswitch.visibleApps" = "Webspring பயன்பாடுகள் தெரியும்";
-"shelf.ariaLabel" = "Webspring செய்தி மற்றும் நிலை";
 "webspring.additionalApps.ariaLabel" = "கூடுதல் Webspring பயன்பாடுகள்";
 "webspring.apps.ariaLabel" = "Webspring பயன்பாடுகள்";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

@@ -41,7 +41,6 @@
 "quickswitch.open" = "Mở QuickSwitch";
 "quickswitch.openedShortcut" = "{app}, đã mở, phím tắt {shortcut}";
 "quickswitch.visibleApps" = "Ứng dụng Webspring hiển thị";
-"shelf.ariaLabel" = "Webspring tin tức và trạng thái";
 "webspring.additionalApps.ariaLabel" = "Ứng dụng Webspring bổ sung";
 "webspring.apps.ariaLabel" = "Webspring ứng dụng";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

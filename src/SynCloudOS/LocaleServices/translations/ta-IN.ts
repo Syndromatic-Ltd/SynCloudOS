@@ -96,7 +96,7 @@ export const taINTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "தொடர்பு கொள்ளவும்",
   "system.notifications": "அறிவிப்புகள்",
   "system.portfolio": "போர்ட்ஃபோலியோ",
-  "system.preferences": "விருப்பங்கள்",
+  "system.preferences": "கணினி விருப்பங்கள்",
   "system.software": "மென்பொருள்",
   "system.webspring": "Webspring",
   "system.system": "அமைப்பு",

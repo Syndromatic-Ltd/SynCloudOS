@@ -50,7 +50,7 @@ const notificationCaptureSurfaceSelectors = [
   ".webspring-material-stack",
   ".webspring-backdrop",
   ".webspring-board-material",
-  ".webspring-board-journal"
+  ".webspring-widget-shelf"
 ];
 
 export interface NotificationCanvasReplacement {

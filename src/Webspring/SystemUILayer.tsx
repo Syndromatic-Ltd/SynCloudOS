@@ -18,44 +18,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AudioHapticsPane } from "./AudioHapticsPane";
-import { Component, useEffect, useId, useLayoutEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { NSEAlert, NSEAlertBackdrop, NSEFocusPortProvider, NSEFocusScope } from "../NSE/NSE";
-import {
-  NSEGroupBox,
-  NSEListItem,
-  NSEPushButton,
-  NSEToggleButton,
-} from "@syndromatic/syncloudos/nse/controls";
+import { NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
 import { useNSEFeedback } from "../NSE/hostComposition";
-import { NSEAboutDialog, NSEConfirmDialog, NSEPreferencesToast, type NSEPreferencePane } from "../NSE/SystemUI";
+import { NSEAboutDialog, NSEConfirmDialog, NSEPreferencesToast } from "../NSE/SystemUI";
 import type { RuntimeSnapshot, SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
-import { createLocaleServicesFacade } from "../SynCloudOS/SynCloudOS";
-import { registerSystemPreferencePane } from "../SynCloudOS/Preferences/systemPreferencePaneIssuer";
-import type { SynCloudOSTranslationParams } from "../SynCloudOS/LocaleServices";
-import { useAppearance, useLocaleServicesSnapshot, useResolvedMode, useRuntimeNSEFocusPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
-import { systemT as translateSystemText } from "./systemStrings";
+import { useAppearance, useResolvedMode, useRuntimeNSEFocusPort, useRuntimeSelector, useKernelSynCloudOS, useSettings } from "../SynCloudOSReact";
 import type { SynCloudOSRuntime } from "../SynCloudOS/SynCloudOS";
 import { confirmReturnDecisionKeepWindows, confirmReturnDecisionQuit } from "./returnDecision";
-import { accountPreferencePane, builtInPreferencePanes, type SystemPreferencePaneContext } from "./builtInPreferencePanes";
+import { SystemUIAccountContext, type SystemUIAccount } from "./Preferences/systemAccount";
+import { useSystemPreferencePanes } from "./Preferences/useSystemPreferencePanes";
+import type { WebspringPreferencesOptions } from "./webspringTypes";
+import { useSystemText } from "./Preferences/useSystemText";
 
 function selectAppInfo(snapshot: RuntimeSnapshot) {
   return snapshot.appInfo;
-}
-
-class PreferencePaneRenderBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  render() {
-    return this.state.failed
-      ? <p className="nse-prefs-note">{this.props.fallback}</p>
-      : this.props.children;
-  }
-}
-
-function PreferencePaneContent({ render }: { render: () => ReactNode }) {
-  return render();
 }
 
 function ReturnDecisionDialog({
@@ -174,28 +153,21 @@ function ReturnDecisionDialog({
   );
 }
 
-/** The session as the Account preference pane shows it, for hosts that offer sign-in. */
-export interface SystemUIAccount {
-  readonly signedIn: boolean;
-  /** The signed-in person's display name, when the session carries one. */
-  readonly name: string | null;
-  /** Presents the login window. */
-  readonly onSignIn: () => void;
-}
-
 /**
  * Renders the system surfaces once, at the root. Mounted by every browser
  * host so each app gets Preferences, About and the log-out confirm without
  * wiring any of them. A host without authentication passes no `onLogOut`:
  * it never offers Log Out. A host with sign-in passes `account` for the
- * Account preference pane.
+ * Account preference pane. `preferences` adds panes to System Preferences
+ * and hides built-in ones.
  *
  * The dialogs portal to document.body, so where this sits in the tree only
  * decides WHEN it renders, not where it appears.
  */
-export function SystemUILayer({ onLogOut, account, siteName = "this site" }: {
+export function SystemUILayer({ onLogOut, account, preferences, siteName = "this site" }: {
   onLogOut?: () => boolean | void | Promise<boolean | void>;
   account?: SystemUIAccount;
+  preferences?: WebspringPreferencesOptions;
   siteName?: string;
 }) {
   const feedback = useNSEFeedback();
@@ -208,295 +180,24 @@ export function SystemUILayer({ onLogOut, account, siteName = "this site" }: {
   );
   const appearance = useAppearance();
   const resolvedMode = useResolvedMode();
-  const settingsService = runtime.settings;
-  const settings = useSyncExternalStore(settingsService.subscribe, settingsService.get, settingsService.get);
-  const locale = useLocaleServicesSnapshot();
-  const localeServices = useMemo(() => createLocaleServicesFacade(runtime), [runtime]);
-  const systemT = useMemo(() => (
-    key: string,
-    fallback: string,
-    params?: SynCloudOSTranslationParams,
-  ) => translateSystemText(key, fallback, params, localeServices), [locale.activeLocale, locale.dictionaryVersion, localeServices]);
+  const settings = useSettings();
+  const systemT = useSystemText();
   const nseFocusPort = useRuntimeNSEFocusPort("webspring");
-
-  const supportsVibration = feedback?.isSupported && settingsService.supportsVibration();
-  const motion = settings.motion === "reduced" ? "reduced" : "standard";
 
   useEffect(() => {
     feedback?.setButtonSoundEnabled(settings.soundEnabled);
     feedback?.setVibrationEnabled(settings.vibrationEnabled);
   }, [settings.soundEnabled, settings.masterVolume, settings.vibrationEnabled]);
 
-  const appearanceChoices = useMemo(() => ([
-    { value: "light" as const, label: systemT("preferences.light", "Light") },
-    { value: "dark" as const, label: systemT("preferences.dark", "Dark") },
-    { value: "auto" as const, label: systemT("preferences.auto", "Auto") }
-  ]), [locale.activeLocale, locale.dictionaryVersion]);
-
-  // Read LIVE off the runtime rather than snapshotted once.
-  //
-  // This layer mounts at the root during boot, before a single app has
-  // registered, so a useMemo with no deps captured an empty registry and kept it
-  // — the pane then reported "0/0" and showed an empty group box for the rest of
-  // the session. Selecting from the store re-renders when apps arrive.
+  // Read LIVE off the runtime rather than snapshotted once: this layer mounts
+  // at the root during boot, before a single app has registered.
   const appInfo = useRuntimeSelector(selectAppInfo);
-  const notificationApps = useMemo(
-    () => Object.values(appInfo).filter(
-      (app) => app.webspring?.visible !== false && app.notifications?.showsNotifications !== false
-    ),
-    [appInfo]
-  );
 
-  const paneContext = useMemo<SystemPreferencePaneContext>(() => ({
-    appearance: {
-      id: "appearance",
-      label: systemT("preferences.appearance", "Appearance"),
-      meta: appearanceChoices.find((choice) => choice.value === appearance)?.label ?? appearance,
-      render: () => (
-        <div className="nse-prefs-section">
-          <NSEGroupBox>
-            {appearanceChoices.map((choice) => (
-              <NSEListItem
-                key={choice.value}
-                selected={appearance === choice.value}
-                onClick={() => runtime.appearance.set(choice.value)}
-              >
-                {choice.label}
-              </NSEListItem>
-            ))}
-          </NSEGroupBox>
-          <p className="nse-prefs-note">
-            {systemT("preferences.autoNote", "Auto follows the system setting on this device.")}
-          </p>
-        </div>
-      )
-    },
-    sounds: {
-      id: "sounds",
-      label: systemT("preferences.audioHaptics", "Audio & Haptics"),
-      meta: settings.soundEnabled ? systemT("preferences.on", "On") : systemT("preferences.off", "Off"),
-      // Same master switch as Notifications: the commonest thing anyone wants
-      // from this pane is silence, and it should not need a trip inside.
-      accessory: (
-        <NSEToggleButton
-          checked={settings.soundEnabled}
-          onCheckedChange={(value) => settingsService.set("soundEnabled", value)}
-          aria-label={systemT("preferences.audioEnabled", "Audio enabled")}
-        />
-      ),
-      render: () => <AudioHapticsPane systemT={systemT} />
-    },
-    motion: {
-      id: "motion",
-      label: systemT("preferences.motion", "Motion"),
-      meta: motion === "reduced"
-        ? systemT("preferences.reduced", "Reduced")
-        : systemT("preferences.standard", "Standard"),
-      render: () => (
-        <div className="nse-prefs-section">
-          <NSEGroupBox>
-            {([
-              { value: "standard" as const, label: systemT("preferences.standard", "Standard") },
-              { value: "reduced" as const, label: systemT("preferences.reduced", "Reduced") }
-            ]).map((choice) => (
-              <NSEListItem
-                key={choice.value}
-                selected={motion === choice.value}
-                onClick={() => settingsService.set("motion", choice.value)}
-              >
-                {choice.label}
-              </NSEListItem>
-            ))}
-          </NSEGroupBox>
-          <p className="nse-prefs-note">
-            {systemT("preferences.motionNote", "Reduced motion replaces slides and zooms with a simple fade.")}
-          </p>
-        </div>
-      )
-    },
-    notifications: {
-      id: "notifications",
-      label: systemT("system.notifications", "Notifications"),
-      meta: !settings.notificationsEnabled
-        ? systemT("preferences.off", "Off")
-        : notificationApps.length === 0
-          ? systemT("preferences.none", "None")
-          : systemT("preferences.countOfTotal", "{count} of {total}", {
-            count: notificationApps.filter((app) => settingsService.notificationsAllowed(app.id)).length,
-            total: notificationApps.length
-          }),
-      // The master switch rides the root row, so notifications can be silenced
-      // without opening the pane at all.
-      accessory: (
-        <NSEToggleButton
-          checked={settings.notificationsEnabled}
-          onCheckedChange={(value) => settingsService.set("notificationsEnabled", value)}
-          aria-label={systemT("preferences.allNotifications", "All notifications")}
-        />
-      ),
-      render: () => (
-        <div className="nse-prefs-section" data-muted={settings.notificationsEnabled ? undefined : "true"}>
-          {notificationApps.length === 0 ? (
-            // Nothing installed asks to notify. An empty group box would read as
-            // a rendering fault rather than an answer.
-            <div className="nse-prefs-empty">
-              <span className="nse-prefs-empty-title">
-                {systemT("preferences.noNotificationApps", "No Apps Yet")}
-              </span>
-              <span className="nse-prefs-empty-detail">
-                {systemT(
-                  "preferences.noNotificationAppsDetail",
-                  "Apps that can send you notifications will appear here."
-                )}
-              </span>
-            </div>
-          ) : (
-            <>
-              <p className="nse-prefs-note nse-prefs-note-lead">
-                {systemT("preferences.notificationsLead", "View notifications from:")}
-              </p>
-              <NSEGroupBox>
-                {notificationApps.map((app) => (
-                  <NSEListItem
-                    key={app.id}
-                    tapHighlight={false}
-                    leading={<img className="nse-prefs-app-icon" src={app.icon.src} alt="" aria-hidden="true" />}
-                    trailing={(
-                      <NSEToggleButton
-                        // Each app's OWN choice, not the resolved answer: with
-                        // the master off these would all read false and turning
-                        // it back on would look like it had wiped them.
-                        checked={settingsService.appNotificationsAllowed(app.id)}
-                        disabled={!settings.notificationsEnabled}
-                        onCheckedChange={(value) => settingsService.setNotificationsAllowed(app.id, value)}
-                        aria-label={app.displayName}
-                      />
-                    )}
-                  >
-                    {app.displayName}
-                  </NSEListItem>
-                ))}
-              </NSEGroupBox>
-              {settings.notificationsEnabled ? null : (
-                <p className="nse-prefs-note">
-                  {systemT(
-                    "preferences.notificationsAllOffNote",
-                    "All notifications are turned off. Turn them on to choose per app."
-                  )}
-                </p>
-              )}
-            </>
-          )}
-        </div>
-      )
-    },
-    language: {
-      id: "language",
-      label: systemT("preferences.language", "Language"),
-      meta: locale.supportedLocales.find((entry: { code: string; englishName: string; nativeName?: string }) => entry.code === locale.activeLocale)?.nativeName
-        ?? locale.activeLocale,
-      render: () => (
-        <div className="nse-prefs-section">
-          <NSEGroupBox>
-            {locale.supportedLocales.map((entry: { code: string; englishName: string; nativeName?: string }) => (
-              <NSEListItem
-                key={entry.code}
-                selected={entry.code === locale.activeLocale}
-                meta={entry.code}
-                onClick={() => runtime.locale.setLocale(entry.code)}
-              >
-                {entry.nativeName || entry.englishName}
-              </NSEListItem>
-            ))}
-          </NSEGroupBox>
-        </div>
-      )
-    },
-    ...(account ? { account: {
-      id: "account",
-      label: systemT("preferences.account", "Account"),
-      meta: account.signedIn ? account.name ?? systemT("preferences.signedIn", "Signed In") : systemT("preferences.notSignedIn", "Not Signed In"),
-      render: () => (
-        <div className="nse-prefs-section">
-          <NSEGroupBox>
-            <NSEListItem
-              tapHighlight={false}
-              trailing={account.signedIn ? (
-                <NSEPushButton onClick={() => {
-                  runtime.systemUI.preferences.close();
-                  runtime.systemUI.session.requestLogOut();
-                }}>{systemT("session.logOut", "Log Out")}</NSEPushButton>
-              ) : (
-                <NSEPushButton onClick={() => {
-                  runtime.systemUI.preferences.close();
-                  account.onSignIn();
-                }}>{systemT("session.signIn", "Sign In")}</NSEPushButton>
-              )}
-            >
-              {account.signedIn ? account.name ?? systemT("preferences.signedIn", "Signed In") : systemT("preferences.notSignedIn", "Not Signed In")}
-            </NSEListItem>
-          </NSEGroupBox>
-        </div>
-      )
-    } } : {}),
-  }), [
-    account,
-    appearance,
-    appearanceChoices,
-    locale.activeLocale,
-    locale.dictionaryVersion,
-    locale.supportedLocales,
-    motion,
-    notificationApps,
-    runtime,
-    settings,
-    settingsService,
-    supportsVibration
-  ]);
-
-  useLayoutEffect(() => {
-    const registrations = builtInPreferencePanes.map((descriptor) => registerSystemPreferencePane(runtime.preferencePanes, descriptor));
-    return () => {
-      for (const registration of registrations.reverse()) registration.dispose();
-    };
-  }, [runtime]);
-  const offersAccount = account !== undefined;
-  useLayoutEffect(() => {
-    if (!offersAccount) return;
-    const registration = registerSystemPreferencePane(runtime.preferencePanes, accountPreferencePane);
-    return () => registration.dispose();
-  }, [offersAccount, runtime]);
   // Without authentication there is no session to end: decline the request.
   useLayoutEffect(() => {
     if (!onLogOut && ui.logOutOpen) runtime.systemUI.session.dismissLogOut();
   }, [onLogOut, runtime, ui.logOutOpen]);
-  const preferencePaneDescriptors = useSyncExternalStore(
-    runtime.preferencePanes.subscribe,
-    runtime.preferencePanes.getSnapshot,
-    runtime.preferencePanes.getSnapshot,
-  );
-  const panes = useMemo(() => {
-    return preferencePaneDescriptors.map((descriptor) => {
-      try {
-        const pane = descriptor.create(paneContext) as NSEPreferencePane;
-        return {
-          ...pane,
-          render: () => (
-            <PreferencePaneRenderBoundary fallback={systemT("preferences.paneUnavailable", "This preference pane could not be loaded.")}>
-              <PreferencePaneContent render={pane.render} />
-            </PreferencePaneRenderBoundary>
-          ),
-        };
-      } catch {
-        return {
-          id: descriptor.id,
-          label: descriptor.id,
-          meta: systemT("preferences.unavailable", "Unavailable"),
-          render: () => <p className="nse-prefs-note">{systemT("preferences.paneUnavailable", "This preference pane could not be loaded.")}</p>,
-        } satisfies NSEPreferencePane;
-      }
-    });
-  }, [paneContext, preferencePaneDescriptors, systemT]);
+  const panes = useSystemPreferencePanes({ offersAccount: account !== undefined, preferences });
 
   const aboutApp = ui.aboutAppId ? appInfo[ui.aboutAppId] ?? null : null;
   const returnDecision = ui.returnDecision;
@@ -509,18 +210,20 @@ export function SystemUILayer({ onLogOut, account, siteName = "this site" }: {
   const returnKeepLabel = systemT("navigation.returnDecisionKeepWindows", "Keep Windows");
   return (
     <NSEFocusPortProvider port={nseFocusPort}>
-      <NSEPreferencesToast
-        open={ui.preferencesPane !== null}
-        focusScopeId="system-ui:preferences"
-        initialPane={ui.preferencesPane || undefined}
-        title={systemT("system.preferences", "Preferences")}
-        panes={panes}
-        backLabel={systemT("common.back", "Back")}
-        appearance={appearance}
-        resolvedMode={resolvedMode}
-        runtimeOwner={runtime.runtimeId}
-        onClose={() => runtime.systemUI.preferences.close()}
-      />
+      <SystemUIAccountContext.Provider value={account ?? null}>
+        <NSEPreferencesToast
+          open={ui.preferencesPane !== null}
+          focusScopeId="system-ui:preferences"
+          initialPane={ui.preferencesPane || undefined}
+          title={systemT("system.preferences", "System Preferences")}
+          panes={panes}
+          backLabel={systemT("common.back", "Back")}
+          appearance={appearance}
+          resolvedMode={resolvedMode}
+          runtimeOwner={runtime.runtimeId}
+          onClose={() => runtime.systemUI.preferences.close()}
+        />
+      </SystemUIAccountContext.Provider>
       {aboutApp ? (
         <NSEAboutDialog
           open

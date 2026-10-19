@@ -18,43 +18,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEPreferencePane } from "../NSE/SystemUI";
-import type { PreferencePaneDescriptor } from "../SynCloudOS/SynCloudOS";
+import type { PreferencePaneDefinition } from "../SynCloudOS/Preferences";
+import appearance from "./Preferences/Appearance.prefPane";
+import sounds from "./Preferences/Sounds.prefPane";
+import motion from "./Preferences/Motion.prefPane";
+import notifications from "./Preferences/Notifications.prefPane";
+import language from "./Preferences/Language.prefPane";
+import account from "./Preferences/Account.prefPane";
 
-export interface SystemPreferencePaneContext {
-  readonly appearance: NSEPreferencePane;
-  readonly sounds: NSEPreferencePane;
-  readonly motion: NSEPreferencePane;
-  readonly notifications: NSEPreferencePane;
-  readonly language: NSEPreferencePane;
-  /** Present only where the host offers sign-in. */
-  readonly account?: NSEPreferencePane;
-}
-
-function descriptor<K extends Exclude<keyof SystemPreferencePaneContext, "account">>(id: K, order: number): PreferencePaneDescriptor<SystemPreferencePaneContext, NSEPreferencePane> {
-  return Object.freeze({
-    id,
-    bundleIdentifier: `com.syndromatic.syncloudos.preference.${id}.prefpane`,
-    order,
-    create(context: SystemPreferencePaneContext) { return context[id]; },
-  });
-}
-
-export const builtInPreferencePanes = Object.freeze([
-  descriptor("appearance", 100),
-  descriptor("sounds", 200),
-  descriptor("motion", 300),
-  descriptor("notifications", 400),
-  descriptor("language", 500),
+/** The panes every host lists, in their default order. */
+export const builtInPreferencePanes: readonly PreferencePaneDefinition[] = Object.freeze([
+  appearance,
+  sounds,
+  motion,
+  notifications,
+  language,
 ]);
 
 /** Sign in and out, for hosts whose authentication is not disabled. */
-export const accountPreferencePane: PreferencePaneDescriptor<SystemPreferencePaneContext, NSEPreferencePane> = Object.freeze({
-  id: "account",
-  bundleIdentifier: "com.syndromatic.syncloudos.preference.account.prefpane",
-  order: 50,
-  create(context: SystemPreferencePaneContext) {
-    if (!context.account) throw new Error("This host offers no sign-in.");
-    return context.account;
-  },
-});
+export const accountPreferencePane: PreferencePaneDefinition = account;

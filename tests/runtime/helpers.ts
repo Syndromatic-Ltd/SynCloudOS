@@ -60,7 +60,6 @@ import {
   type SynWareTrustedPrivilege,
 } from "../../src/SynCloudOS/BundleLoader/trustedBundleProvenance";
 import type { SynWareDefinition } from "../../src/SynCloudOS/AppSDK/appDefinitionTypes";
-import type { WebspringContentSource } from "../../src/Webspring/webspringContent";
 import { InMemoryDocumentAdapter } from "../../src/SynCloudOS/Documents/Adapters/InMemoryDocumentAdapter";
 
 type TestManifestOverrides = Partial<
@@ -526,7 +525,6 @@ export async function installTestHostContributions(
   resources: Readonly<Record<string, string>> = {},
 ): Promise<TestHostContributionsInstallation> {
   const prepared = await prepareSynCloudOSHostContributions(contributions, runtime.environment);
-  const contentSources: Record<string, WebspringContentSource> = Object.create(null) as Record<string, WebspringContentSource>;
   const installed: Array<{
     readonly context: SynCloudOSHostInstallContext;
     readonly runBootNotifications(): Promise<void>;
@@ -544,7 +542,7 @@ export async function installTestHostContributions(
           throw new Error(`Test host contribution bundle ${appId} could not be registered.`);
         }
       }
-      const handle = createSynCloudOSHostInstallContext(contribution, runtime, contentSources, resources);
+      const handle = createSynCloudOSHostInstallContext(contribution, runtime, resources);
       let contributionCleanup: (() => void | Promise<void>) | undefined;
       try {
         for (const adapter of contribution.applicationDocuments?.initialAdapters ?? []) {

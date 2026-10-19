@@ -1,0 +1,96 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* The shelf's surface comes from the --webspring-shelf-* properties the component sets
+   from `background.shelf`: one rule per layer. */
+.webspring-widget-shelf {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  padding: clamp(28px, 4svh, 56px) max(24px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  color: #fff;
+  background-color: var(--webspring-shelf-colour);
+  background-image: var(--webspring-shelf-image);
+  background-size: var(--webspring-shelf-size);
+  background-repeat: var(--webspring-shelf-repeat);
+  background-position: var(--webspring-shelf-position);
+  box-shadow: inset 0 10px 16px -10px #000;
+}
+
+.webspring-widget-shelf-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--webspring-shelf-overlay-image);
+  background-size: var(--webspring-shelf-overlay-size);
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: var(--webspring-shelf-overlay-opacity);
+  mix-blend-mode: var(--webspring-shelf-overlay-blend);
+}
+
+.webspring-widget-list {
+  display: grid;
+  gap: clamp(24px, 4svh, 44px);
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.webspring-widget {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.webspring-widget-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.webspring-widget-header img {
+  flex: 0 0 auto;
+  width: clamp(32px, 8vw, 48px);
+  height: auto;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .6));
+}
+
+.webspring-widget-header h2 {
+  margin: 0;
+  font-family: inherit;
+  font-size: clamp(20px, 5vw, 30px);
+  line-height: 1.1;
+  text-wrap: balance;
+  text-shadow: 0 3px 5px rgba(0, 0, 0, .8);
+}
+
+.webspring-widget-status {
+  margin: 0;
+  color: rgba(255, 255, 255, .82);
+  font-size: clamp(13px, 3vw, 16px);
+  line-height: 1.45;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, .75);
+}
+
+.webspring-widget > .nse-push-button {
+  justify-self: start;
+}

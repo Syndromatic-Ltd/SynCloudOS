@@ -96,7 +96,7 @@ export const idIDTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "Kontak",
   "system.notifications": "Pemberitahuan",
   "system.portfolio": "Portofolio",
-  "system.preferences": "Preferensi",
+  "system.preferences": "Preferensi Sistem",
   "system.software": "Perangkat lunak",
   "system.webspring": "Webspring",
   "system.system": "Sistem",

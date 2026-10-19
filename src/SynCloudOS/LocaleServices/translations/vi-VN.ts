@@ -96,7 +96,7 @@ export const viVNTranslations: SynCloudOSTranslationMessages = {
   "system.contact": "Liên hệ",
   "system.notifications": "Thông báo",
   "system.portfolio": "danh mục đầu tư",
-  "system.preferences": "Tùy chọn",
+  "system.preferences": "Tùy chọn Hệ thống",
   "system.software": "Phần mềm",
   "system.webspring": "Webspring",
   "system.system": "Hệ thống",

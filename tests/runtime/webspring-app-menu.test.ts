@@ -21,7 +21,7 @@
 import { describe, expect, it } from "vitest";
 import { createWebspringAppMenuModel } from "../../src/Webspring/webspringAppMenu";
 
-const labels = { label: "SynCal", about: "About SynCal", preferences: "Preferences", logOut: "Log Out" };
+const labels = { label: "SynCal", about: "About SynCal", preferences: "System Preferences…", logOut: "Log Out" };
 
 describe("Webspring application menu model", () => {
   it("always exposes system Preferences and omits an app placeholder", () => {
@@ -41,7 +41,7 @@ describe("Webspring application menu model", () => {
     expect(commands.map((entry) => [entry.id, entry.commandId, entry.labelOverride])).toEqual([
       ["about", "application.showAbout", "About SynCal"],
       ["app-preferences", "syncal.showPreferences", "SynCal Preferences…"],
-      ["preferences", "system.showPreferences", "Preferences"],
+      ["preferences", "system.showPreferences", "System Preferences…"],
       ["log-out", "session.requestLogOut", "Log Out"],
     ]);
   });
@@ -49,5 +49,25 @@ describe("Webspring application menu model", () => {
   it("omits the session separator and logout action for an anonymous public app", () => {
     const model = createWebspringAppMenuModel({ appId: "public", labels, includeLogOut: false });
     expect(model.entries.map((entry) => entry.id)).toEqual(["about", "preferences"]);
+  });
+
+  it.each([
+    { includeAbout: true, appPreferences: true, includeLogOut: true, expected: ["about", "app-preferences", "preferences", "session-divider", "log-out"] },
+    { includeAbout: true, appPreferences: true, includeLogOut: false, expected: ["about", "app-preferences", "preferences"] },
+    { includeAbout: true, appPreferences: false, includeLogOut: true, expected: ["about", "preferences", "session-divider", "log-out"] },
+    { includeAbout: true, appPreferences: false, includeLogOut: false, expected: ["about", "preferences"] },
+    { includeAbout: false, appPreferences: true, includeLogOut: true, expected: ["app-preferences", "preferences", "session-divider", "log-out"] },
+    { includeAbout: false, appPreferences: true, includeLogOut: false, expected: ["app-preferences", "preferences"] },
+    { includeAbout: false, appPreferences: false, includeLogOut: true, expected: ["preferences", "session-divider", "log-out"] },
+    { includeAbout: false, appPreferences: false, includeLogOut: false, expected: ["preferences"] },
+  ])("lists $expected when about is $includeAbout, app preferences $appPreferences and sign-in $includeLogOut", ({ includeAbout, appPreferences, includeLogOut, expected }) => {
+    const model = createWebspringAppMenuModel({
+      appId: "matrix",
+      labels,
+      includeAbout,
+      includeLogOut,
+      appPreferences: appPreferences ? { commandId: "matrix.showPreferences", label: "Matrix Preferences…" } : undefined,
+    });
+    expect(model.entries.map((entry) => entry.id)).toEqual(expected);
   });
 });

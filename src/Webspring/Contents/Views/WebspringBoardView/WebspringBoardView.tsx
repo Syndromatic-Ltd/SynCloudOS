@@ -20,14 +20,15 @@
 
 import { WebspringLaunchDim } from "../../../WebspringLaunchDim";
 import { useWebspringFolderPreparation } from "../../../useWebspringFolderPreparation";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode, type TransitionEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode, type TransitionEvent } from "react";
 import { NSELayoutView, useNSEAnimationEnvironment, useNSEPresentation, type NSELayoutTransitionTiming } from "../../../../NSE/Animation";
 import { Badge, LoadingSpinner } from "../../../../NSE/NSE";
 import { useNSEFeedback } from "../../../../NSE/hostComposition";
 import { NSEPushButton, NSEToolbar } from "@syndromatic/syncloudos/nse/controls";
 import { MaterialProvider } from "../../../../NSE/Material";
 import { getKeyboardReorderIndex } from "../../../../SynCloudOS/SynCloudOS";
-import { LowerContentShelfView } from "../../../LowerContentShelfView";
+import { WebspringWidgetShelf } from "../../../WebspringWidgetShelf";
+import { webspringSurfaceStyle } from "../../../webspringSurface";
 import { WebspringDragProxy, useWebspringDragProxyPosition } from "../../../WebspringDragProxy";
 import { WebspringFolderTile } from "../../../WebspringFolderTile";
 import { captureWebspringDragReorderSlots, getWebspringDragReorderTargetFromPoint, type WebspringDragReorderSlots } from "../../../webspringDragReorder";
@@ -247,6 +248,9 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   const columns = 4;
   const pageSize = configuration.pageSize ?? (model.layout.board.pageSize === 20 ? columns * 4 : model.layout.board.pageSize);
   const board = useMemo(() => createWebspringBoardProjection(model.items, { pageSize, dockSize: 0 }), [model.items, pageSize]);
+  const rows = Math.max(1, Math.ceil(pageSize / columns));
+  const launcherStyle = useMemo(() => webspringSurfaceStyle(model.background.launcher, "--webspring-launcher"), [model.background.launcher]);
+  const pagesStyle = { "--webspring-board-columns": String(columns), "--webspring-board-rows": String(rows) } as CSSProperties;
   const topLevelIds = useMemo(() => model.items.map((item) => item.id), [model.items]);
   const [page, setPage] = useState(0);
   const [announcement, setAnnouncement] = useState("");
@@ -265,6 +269,12 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   const draggingItem = model.items.find((item) => item.id === draggingId) ?? null;
   const draggingFolder = draggingItem?.kind === "folder" ? draggingItem : null;
   const draggingApp = draggingItem?.kind === "app" ? draggingItem.app : model.apps.find((app) => app.id === draggingId) ?? null;
+  // The dragged icon is drawn at the size of the one it came from, which the Board fits to the screen.
+  const dragProxyRef = useCallback((element: HTMLDivElement | null) => {
+    setProxyElement(element);
+    const well = draggingId ? boardElement.current?.querySelector<HTMLElement>(`[data-webspring-item-id="${draggingId}"] .webspring-board-icon-well`) : null;
+    if (element && well) element.style.setProperty("--webspring-drag-proxy-icon-size", `${well.getBoundingClientRect().width}px`);
+  }, [draggingId, setProxyElement]);
   const openFolder = model.items.find((item): item is WebspringFolderItem => item.kind === "folder" && item.id === model.folders.openFolderId) ?? null;
   const [folderAnchor, setFolderAnchor] = useState<DOMRectReadOnly | null>(null);
   const prepareFolder = useWebspringFolderPreparation(FolderPresentation, model.items.some((item) => item.kind === "folder") ? stageElement : null, {
@@ -548,6 +558,7 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
         setStageElement(element);
       }}
       className="webspring-board"
+      style={launcherStyle}
       data-launch-phase={model.launchPhase}
       data-entrance-phase={model.entrancePhase}
       data-layout-editing={model.layout.editing ? "true" : "false"}
@@ -584,7 +595,7 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
           ? "Hold an application to reorder. Rest it on another application or a folder to group them. Use arrow keys to move it. Press Escape when finished."
           : "Hold an application to reorder. Use arrow keys to move it. Press Escape when finished."}
       </p>
-      <section className="webspring-board-pages" aria-label="Applications">
+      <section className="webspring-board-pages" style={pagesStyle} aria-label="Applications">
         <div className="webspring-board-page" data-page={activePage}>
           {board.pages[activePage]?.map((item, index) => renderEntry(item, activePage * board.pageSize + index))}
         </div>
@@ -593,18 +604,7 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
         {board.pages.map((_items, index) => <button key={index} type="button" aria-label={`Show application page ${index + 1}`} aria-current={index === activePage ? "page" : undefined} onClick={() => setPage(index)} onPointerEnter={() => { if (model.layout.draggingItemId) setPage(index); }} />)}
       </nav> : null}
       </section>
-      <div className="webspring-board-journal">
-        <div className="webspring-board-paper-glow" aria-hidden="true" />
-        <LowerContentShelfView
-          selectedApp={null}
-          mode="news"
-          notification={null}
-          sections={model.sections}
-          onOpenContent={actions.openApp}
-          onRefreshContent={actions.refreshContent}
-          onOpenNotificationCentre={actions.openNotificationCentre}
-        />
-      </div>
+      {model.widgets.length > 0 ? <WebspringWidgetShelf entries={model.widgets} surface={model.background.shelf} /> : null}
       {openFolder && folderAnchor && stageElement ? <div className="webspring-board-folder-layer" onPointerDownCapture={pointerDown}>
         <FolderPresentation
           key={openFolder.id}
@@ -618,7 +618,7 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
       </div> : null}
       <WebspringLaunchDim visible={model.launchPhase === "launching"} motion={launchDim} />
       {applicationOutlet}
-      <WebspringDragProxy app={draggingApp} folder={draggingFolder} point={point} mobile proxyRef={setProxyElement} />
+      <WebspringDragProxy app={draggingApp} folder={draggingFolder} point={point} mobile proxyRef={dragProxyRef} />
       <span className="webspring-reorder-announcement" aria-live="polite">{announcement}</span>
     </main>
   </MaterialProvider>;

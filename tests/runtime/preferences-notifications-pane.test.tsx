@@ -22,12 +22,13 @@
 
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import * as React from "react";
+import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SystemUILayer } from "../../src/Webspring/SystemUILayer";
 import { RuntimeInputBoundary, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 
 import { createTestRuntime, registerTestSynWare } from "./helpers";
-import { registerSystemPreferencePane } from "../../src/SynCloudOS/Preferences/preferencePaneRegistry";
+import { definePreferencePane } from "../../src/SynCloudOS/Preferences";
 
 /**
  * The empty Notifications pane, which is otherwise unreachable in the running
@@ -41,13 +42,13 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function renderSystemUI(pane = "", prepare?: (runtime: ReturnType<typeof createTestRuntime>) => void) {
+function renderSystemUI(pane = "", prepare?: (runtime: ReturnType<typeof createTestRuntime>) => void, preferences?: ComponentProps<typeof SystemUILayer>["preferences"]) {
   const runtime = createTestRuntime();
   prepare?.(runtime);
   runtime.systemUI.preferences.open(pane);
   return render(
     <SynCloudOSProvider runtime={runtime}>
-      <RuntimeInputBoundary><SystemUILayer onLogOut={() => {}} /></RuntimeInputBoundary>
+      <RuntimeInputBoundary><SystemUILayer onLogOut={() => {}} preferences={preferences} /></RuntimeInputBoundary>
     </SynCloudOSProvider>
   );
 }
@@ -118,22 +119,12 @@ describe("Notifications pane with nothing to list", () => {
     expect(row?.textContent).not.toContain("0/0");
   });
 
-  it("contains a throwing registered pane without taking down System Preferences", () => {
+  it("contains a throwing developer pane without taking down System Preferences", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    renderSystemUI("broken", (runtime) => {
-      registerSystemPreferencePane(runtime.preferencePanes, {
-        id: "broken",
-        bundleIdentifier: "com.syndromatic.syncloudos.preference.broken.prefpane",
-        order: 50,
-        create: () => ({
-          id: "broken",
-          label: "Broken",
-          render: () => { throw new Error("pane render failed"); },
-        }),
-      });
-    });
+    const Broken = () => { throw new Error("pane render failed"); };
+    renderSystemUI("broken", undefined, { panes: [definePreferencePane({ id: "broken", title: "Broken", order: 50, view: Broken })] });
 
-    expect(screen.getByRole("dialog", { name: "Preferences" })).toBeTruthy();
+    expect(screen.getByRole("dialog", { name: "System Preferences" })).toBeTruthy();
     expect(screen.getByText("This preference pane could not be loaded.")).toBeTruthy();
     consoleError.mockRestore();
   });
@@ -144,7 +135,7 @@ describe("Notifications pane with nothing to list", () => {
       runtime = candidate;
       runtime.appearance.set("light");
     });
-    const toast = screen.getByRole("dialog", { name: "Preferences" });
+    const toast = screen.getByRole("dialog", { name: "System Preferences" });
     expect(getComputedStyle(toast).backgroundColor).not.toBe("rgb(38, 44, 52)");
 
     await act(async () => { runtime.appearance.set("dark"); });
@@ -154,10 +145,10 @@ describe("Notifications pane with nothing to list", () => {
   it("updates open system Preferences from the owning runtime locale and keeps native language names", async () => {
     let runtime!: ReturnType<typeof createTestRuntime>;
     renderSystemUI("", (candidate) => { runtime = candidate; });
-    expect(screen.getByRole("dialog", { name: "Preferences" })).toBeTruthy();
+    expect(screen.getByRole("dialog", { name: "System Preferences" })).toBeTruthy();
 
     await act(async () => { runtime.locale.setLocale("fr-FR"); });
-    expect(screen.getByRole("dialog", { name: "Préférences" })).toBeTruthy();
+    expect(screen.getByRole("dialog", { name: "Préférences Système" })).toBeTruthy();
     expect(screen.getByText("Apparence")).toBeTruthy();
     expect(screen.getByText("Langue")).toBeTruthy();
 

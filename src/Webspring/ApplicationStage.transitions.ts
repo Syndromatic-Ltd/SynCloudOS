@@ -49,8 +49,6 @@ export interface ApplicationStageMotion {
   readonly root: ApplicationStagePartMotion;
   /** The window surface: the launch zoom, and its plane during a MultiSwitch. */
   readonly surface: ApplicationStagePartMotion;
-  /** The simple layout's content card. */
-  readonly card: ApplicationStagePartMotion;
   readonly navigationBack: NSEPresentationSpec | null;
   readonly navigationTitle: NSEPresentationSpec | null;
 }
@@ -67,7 +65,7 @@ export interface ApplicationStageMotionInput {
   readonly presentationMotion?: "host" | "content";
 }
 
-const { standard: material, emphasized, accelerate } = NSEAnimationDefaults.easing;
+const { standard: material, accelerate } = NSEAnimationDefaults.easing;
 const reducedFade = NSEAnimationDefaults.durationSeconds.reducedFade;
 const bezier = (x1: number, y1: number, x2: number, y2: number): AFXAnimationTiming =>
   Object.freeze({ kind: "cubic-bezier", x1, y1, x2, y2 });
@@ -124,10 +122,6 @@ const outgoingRootPose: NSETransformComponents = { x: -118 };
 const outgoingRoot = spec(multiSwitchDuration, multiSwitchEase, [transformTrack([{}, outgoingRootPose], { unit: "vw" })]);
 const incomingRoot = spec(multiSwitchDuration, multiSwitchEase, [transformTrack([{ x: 118 }, {}], { unit: "vw" })]);
 
-const cardPose: NSETransformComponents = { y: 132, rotate: -9, scale: 0.965 };
-const reducedCardPose: NSETransformComponents = { y: 14 };
-const cardOrigin = "50% 120%";
-
 const modelOpacity = (style: CSSProperties) => typeof style.opacity === "number" ? style.opacity : 1;
 
 /** The stage's presentations for one app view in one role. Timings match the
@@ -137,7 +131,7 @@ const defaultLaunchZoom = Object.freeze({ delay: 0.72, duration: 0.68, easing: "
 export function resolveApplicationStageMotion({ reducedMotion, role, staged, launching, launchZoom = defaultLaunchZoom, presentationMotion = "host" }: ApplicationStageMotionInput): ApplicationStageMotion {
   if (presentationMotion === "content") {
     const part: ApplicationStagePartMotion = { state: staged ? "staged" : "presented", style: staged ? { opacity: 0 } : {}, enter: null, exit: null };
-    return { root: { ...part, state: staged ? "staged" : role ?? "presented" }, surface: part, card: part, navigationBack: null, navigationTitle: null };
+    return { root: { ...part, state: staged ? "staged" : role ?? "presented" }, surface: part, navigationBack: null, navigationTitle: null };
   }
   const root = ((): Omit<ApplicationStagePartMotion, "exit"> => {
     if (role === "incoming") return {
@@ -179,18 +173,6 @@ export function resolveApplicationStageMotion({ reducedMotion, role, staged, lau
   const surfaceOpacity = modelOpacity(surface.style);
   const surfaceScale = role === null && staged && !reducedMotion ? 0.04 : 1;
 
-  const card = ((): Omit<ApplicationStagePartMotion, "exit"> => {
-    if (role) return { state: "switching", style: { transformOrigin: cardOrigin }, enter: null };
-    const pose = reducedMotion ? reducedCardPose : cardPose;
-    if (staged) return { state: "staged", style: { transformOrigin: cardOrigin, opacity: 0, transform: nseTransformStyle(pose) }, enter: null };
-    return {
-      state: "presented", style: { transformOrigin: cardOrigin },
-      enter: onPresentation(reducedMotion
-        ? spec(0.16, material, [opacityTrack([0, 1]), transformTrack([pose, {}])])
-        : spec(0.72, emphasized, [opacityTrack([0, 1]), transformTrack([pose, {}])], 0.78)),
-    };
-  })();
-
   const switching = role !== null;
   return {
     root: {
@@ -211,7 +193,6 @@ export function resolveApplicationStageMotion({ reducedMotion, role, staged, lau
               transformTrack([{ scale: surfaceScale }, { scale: 0 }]),
             ]),
     },
-    card: { ...card, exit: null },
     navigationBack: reducedMotion ? null : spec(0.18, material, [opacityTrack([0, 1]), transformTrack([{ x: -8 }, {}])]),
     navigationTitle: reducedMotion ? null : spec(0.18, material, [opacityTrack([0, 1]), transformTrack([{ x: 8 }, {}])]),
   };

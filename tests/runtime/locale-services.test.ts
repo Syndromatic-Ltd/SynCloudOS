@@ -98,6 +98,7 @@ describe("LocaleServices runtime infrastructure", () => {
       lightLogoUrl: "/assets/logo.svg",
       darkLogoUrl: "/assets/logo-dark.svg",
       compactLogoUrl: "/assets/logo.svg",
+      homeIconUrl: null,
     });
     expect(() => resolveSiteBranding({
       name: { key: "site.name", fallback: "Example" },

@@ -27,6 +27,8 @@ import type {
   SynCloudOSAppInfoValidationReport
 } from "../AppInfo/appInfoTypes";
 import type {
+  SynWareFrameBackgroundManifest,
+  SynWareLocalisedText,
   SynCloudOSAppFrameSmoothSurfaceCurve,
   SynCloudOSAppFrameSmoothSurfaceManifest,
   SynCloudOSAppFrameSmoothSurfacePhysicality,
@@ -40,7 +42,12 @@ export type {
 
 export type SynCloudOSAppType = "internal" | "external" | "system";
 export type SynCloudOSAppPresentation = "appView" | "windowedView" | "systemSheet" | "backgroundService";
-export type SynCloudOSAppFrameLayout = "defacto" | "simple";
+/** The right-slot control with its icon resolved to a URL. `"auto"` is a gear, `"userInfo"` a person, `"none"` nothing. */
+export type SynCloudOSAppFrameRightSlot = "auto" | "userInfo" | "none" | {
+  readonly icon: string;
+  readonly label: SynWareLocalisedText;
+};
+export type SynCloudOSAppFrameBackground = SynWareFrameBackgroundManifest;
 export type SynCloudOSAppFrameMaterial = "standard" | "metal";
 export type SynCloudOSAppFrameTopBar = "standard" | "custom" | "none";
 export type SynCloudOSWindowChrome = "system" | "custom" | "frameless";
@@ -113,8 +120,7 @@ export interface SynCloudOSAppWindowManifest {
  * Optional source-list window primitive. When present (and `topBar:"standard"`), the system frame
  * draws a sidebar-aligned rail seam in the top bar/status bar and owns a resizable sidebar width.
  * The app supplies only sidebar + main content via `NSESourceListScene`; it never re-implements the
- * bar, the seam, the resizer, or QuickSwitch. A source-list window is a `defacto` app with a
- * system-owned rail — NOT a third `layout` value.
+ * bar, the seam, the resizer, or QuickSwitch.
  */
 export interface SynCloudOSAppFrameSourceList {
   /** Rail wordmark. Defaults to the app's short name (resolved through the locale layer) so an app
@@ -130,16 +136,16 @@ export interface SynCloudOSAppFrameSourceList {
 }
 
 export interface SynCloudOSAppFrameManifest {
-  /** Body presentation: `defacto` = full-bleed (app paints its own surface), `simple` = inset card. */
-  layout: SynCloudOSAppFrameLayout;
   /** Chrome skin. Drives the standard top bar's look. `metal` is light/dark-aware. */
   material: SynCloudOSAppFrameMaterial;
   /** Top-bar behaviour. `standard` ⟹ system chrome, `custom` ⟹ app-owned chrome (may draw no bar), `none` ⟹ no bar + runtime return. */
   topBar: SynCloudOSAppFrameTopBar;
   /** Host launch/return motion, or motion completed by the application's content. */
   presentationMotion?: "host" | "content";
-  /** RightSlotRegistry key for the standard bar's right affordance. `"none"` = empty. Honoured only when `topBar:"standard"`. */
-  rightSlot: string;
+  /** The standard bar's right-hand control. Honoured only when `topBar:"standard"`. */
+  rightSlot: SynCloudOSAppFrameRightSlot;
+  /** What fills the body behind the content. */
+  background: SynCloudOSAppFrameBackground;
   smoothSurface: SynCloudOSAppFrameSmoothSurfaceManifest;
   /** System-owned source-list rail. Honoured only when `topBar:"standard"`; otherwise dropped. */
   sourceList?: SynCloudOSAppFrameSourceList;

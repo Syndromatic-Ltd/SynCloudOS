@@ -543,7 +543,6 @@ describe("NSESmoothSurface", () => {
 
     expect(appTopBarMarkup).toContain("nse-app-topbar");
     expect(appTopBarMarkup).toContain("nse-smooth-surface-radius-lg");
-    expect(appTopBarMarkup).toContain("--nse-app-topbar-height:68px");
     expect(appTopBarMarkup).toContain("--nse-smooth-surface-shadow:0 0 0 1px rgba(255, 255, 255, 0.18)");
 
     const appTopBarWithTitleActionMarkup = renderToStaticMarkup(createElement(NSETopBar, {

@@ -19,13 +19,7 @@
  */
 
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
-
-export interface PreferencePaneDescriptor<THost = unknown, TPresentation = unknown> {
-  readonly id: string;
-  readonly bundleIdentifier: string;
-  readonly order: number;
-  create(host: THost): TPresentation;
-}
+import { isPreferencePaneDefinition, type PreferencePaneDefinition } from "./definePreferencePane";
 
 export interface PreferencePaneRegistration {
   readonly id: string;
@@ -34,41 +28,21 @@ export interface PreferencePaneRegistration {
 
 export interface PreferencePaneRegistry {
   readonly runtimeId: SynCloudOSRuntimeId;
-  getSnapshot(): readonly PreferencePaneDescriptor[];
+  getSnapshot(): readonly PreferencePaneDefinition[];
   subscribe(listener: () => void): () => void;
   dispose(): void;
 }
 
-const systemRegistrars = new WeakMap<PreferencePaneRegistry, (descriptor: PreferencePaneDescriptor) => PreferencePaneRegistration>();
-
-function prepareDescriptor(descriptor: PreferencePaneDescriptor): Readonly<PreferencePaneDescriptor> {
-  if (typeof descriptor !== "object" || descriptor === null) throw new TypeError("Preference pane descriptors must be data-only objects.");
-  const read = (key: keyof PreferencePaneDescriptor) => {
-    const own = Object.getOwnPropertyDescriptor(descriptor, key);
-    if (!own || !("value" in own)) throw new TypeError("Preference pane descriptors must use own data properties.");
-    return own.value;
-  };
-  const rawId = read("id"), rawBundleIdentifier = read("bundleIdentifier"), order = read("order"), create = read("create");
-  if (typeof rawId !== "string" || typeof rawBundleIdentifier !== "string") throw new TypeError("Preference pane identifiers must be strings.");
-  const id = rawId.trim();
-  const bundleIdentifier = rawBundleIdentifier.trim();
-  if (!id) throw new TypeError("Preference pane IDs must not be empty.");
-  if (!/^com\.syndromatic\.syncloudos\.preference\.[a-z0-9]+(?:[.-][a-z0-9]+)*\.prefpane$/i.test(bundleIdentifier)) {
-    throw new TypeError(`Preference pane ${id} requires a system-owned .prefpane bundle identifier.`);
-  }
-  if (typeof order !== "number" || !Number.isFinite(order)) throw new TypeError(`Preference pane ${id} requires a finite order.`);
-  if (typeof create !== "function") throw new TypeError(`Preference pane ${id} requires a presentation factory.`);
-  return Object.freeze({ id, bundleIdentifier, order, create });
-}
+const registrars = new WeakMap<PreferencePaneRegistry, (definition: PreferencePaneDefinition) => PreferencePaneRegistration>();
 
 export function createPreferencePaneRegistry(runtimeId: SynCloudOSRuntimeId): PreferencePaneRegistry {
-  const registrations = new Map<string, { token: object; descriptor: Readonly<PreferencePaneDescriptor> }>();
+  const registrations = new Map<string, { token: object; definition: PreferencePaneDefinition }>();
   const listeners = new Set<() => void>();
-  let snapshot: readonly PreferencePaneDescriptor[] = Object.freeze([]);
+  let snapshot: readonly PreferencePaneDefinition[] = Object.freeze([]);
   let disposed = false;
   const publish = () => {
     snapshot = Object.freeze([...registrations.values()]
-      .map(({ descriptor }) => descriptor)
+      .map(({ definition }) => definition)
       .sort((left, right) => left.order - right.order || left.id.localeCompare(right.id)));
     for (const listener of [...listeners]) listener();
   };
@@ -87,37 +61,37 @@ export function createPreferencePaneRegistry(runtimeId: SynCloudOSRuntimeId): Pr
       snapshot = Object.freeze([]);
       for (const listener of [...listeners]) listener();
       listeners.clear();
-      systemRegistrars.delete(registry);
+      registrars.delete(registry);
     },
   };
-  systemRegistrars.set(registry, (input) => {
-      if (disposed) throw new Error(`Preference pane registry ${runtimeId} is disposed.`);
-      const descriptor = prepareDescriptor(input);
-      if (registrations.has(descriptor.id)) throw new Error(`Preference pane ${descriptor.id} is already registered.`);
-      if ([...registrations.values()].some(({ descriptor: registered }) => registered.bundleIdentifier === descriptor.bundleIdentifier)) {
-        throw new Error(`Preference pane bundle identifier ${descriptor.bundleIdentifier} is already registered.`);
-      }
-      const token = {};
-      registrations.set(descriptor.id, { token, descriptor });
-      publish();
-      let active = true;
-      return Object.freeze({
-        id: descriptor.id,
-        dispose() {
-          if (!active) return;
-          active = false;
-          if (registrations.get(descriptor.id)?.token !== token) return;
-          registrations.delete(descriptor.id);
-          if (!disposed) publish();
-        },
-      });
+  registrars.set(registry, (definition) => {
+    if (disposed) throw new Error(`Preference pane registry ${runtimeId} is disposed.`);
+    if (!isPreferencePaneDefinition(definition)) throw new TypeError("Preference panes must be created with definePreferencePane.");
+    if (registrations.has(definition.id)) throw new Error(`Preference pane ${definition.id} is already registered.`);
+    const token = {};
+    registrations.set(definition.id, { token, definition });
+    publish();
+    let active = true;
+    return Object.freeze({
+      id: definition.id,
+      dispose() {
+        if (!active) return;
+        active = false;
+        if (registrations.get(definition.id)?.token !== token) return;
+        registrations.delete(definition.id);
+        if (!disposed) publish();
+      },
     });
+  });
   return registry;
 }
 
-/** Internal system-shell boundary. This function is deliberately absent from public barrels. */
-export function registerSystemPreferencePane(registry: PreferencePaneRegistry, descriptor: PreferencePaneDescriptor): PreferencePaneRegistration {
-  const register = systemRegistrars.get(registry);
+/**
+ * Lists a pane in the runtime's System Preferences. A pane id is listed once
+ * per runtime, and a disposed or foreign registry refuses the registration.
+ */
+export function registerPreferencePane(registry: PreferencePaneRegistry, definition: PreferencePaneDefinition): PreferencePaneRegistration {
+  const register = registrars.get(registry);
   if (!register) throw new Error(`Preference pane registry ${registry.runtimeId} is disposed or foreign.`);
-  return register(descriptor);
+  return register(definition);
 }

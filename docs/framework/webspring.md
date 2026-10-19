@@ -169,7 +169,7 @@ export function AppHeader() {
 }
 ```
 
-`branding` is immutable and has the shape `{ name, logoUrl, lightLogoUrl, darkLogoUrl, compactLogoUrl, logoAlt }`. Declare `branding.compactLogo` when a small mark suits the sign-in placard better than the full lockup.
+`branding` is immutable and has the shape `{ name, logoUrl, lightLogoUrl, darkLogoUrl, compactLogoUrl, logoAlt }`. Declare `branding.compactLogo` when a small mark suits the sign-in placard better than the full lockup. Declare `branding.homeIcon` (a single-shape SVG) to draw the top bar's "return to Webspring" button; the theme colours it in its normal, pressed and selected states. Without it the button shows a generic house.
 
 Host recovery alerts distinguish application, site and framework ownership.
 Application failures use the registered icon resolved from the app's resources
@@ -182,49 +182,82 @@ app or site logo receives caution alone. No precomposed error artwork is needed.
 This recovery presentation belongs to the browser host. Applications compose
 their own alerts with the existing `NSEAlert` content slot and controls.
 
-## Content on the Board
+## Background and size of the Board
 
-A shell can show content beside the icons, such as a list of recent posts. Declare sections in the definition and provide a source for each one at mount time.
+Left alone, the Board is a tinted cotton texture with a spotlight: lighter in the centre, darker at the edges. `background` changes it. `launcher` paints the icon area; `shelf` paints the widget area and is drawn only when the definition has widgets.
 
 ```tsx
-import { defineWebspring, WebspringBoardView } from "@syndromatic/syncloudos/webspring";
+import { defineWebspring, WebspringBoardView, WebspringSurface } from "@syndromatic/syncloudos/webspring";
 import manifest from "./Info";
 
 export default defineWebspring({
   manifest,
   components: { board: WebspringBoardView },
-  content: {
-    sections: [
-      {
-        id: "latest",
-        title: { key: "site.latest", fallback: "Latest" },
-        sourceId: "public-posts",
-        limit: 6,
-        empty: "message",
-      },
-    ],
+  background: {
+    launcher: { ...WebspringSurface.cotton(), tint: { colour: "#7a4a4a", opacity: 0.12 } },
+    shelf: WebspringSurface.plain("#0b0d11"),
   },
 });
 ```
 
-A source implements `WebspringContentSource`. It receives `{ limit, signal }`, returns items that carry display text, an optional image reference and a destination of `{ appId, route }`, and may resolve its own image references.
+A `WebspringSurface` is a plain object. Every field is optional:
+
+| Field | Meaning |
+| --- | --- |
+| `colour` | The base colour, under the texture. |
+| `texture` | `{ image, size?, repeat?, position? }`, or `"none"`. The image tiles unless `repeat` is `false`. |
+| `tint` | `{ colour, opacity }`: a wash over the texture. |
+| `vignette` | `{ centre?, edge? }`: a spotlight. `centre` lightens the middle with white and `edge` darkens the rim with black, each from 0 to 1. `false` draws none. |
+| `overlay` | `{ image, size?, opacity?, blend? }`: an image over everything else, such as a glow. |
+
+`WebspringSurface.cotton()` is the default. `WebspringSurface.plain(colour)` is a flat colour. Spread a preset to change one field. The Board sets the surface as CSS custom properties (`--webspring-launcher-*` and `--webspring-shelf-*`), so a theme can still override them. The framework ships no other Board artwork: supply your own images for a metal or paper look.
+
+The Board scales to the screen. An icon is the largest size that still lets a whole page (four columns by the page's rows) fit without scrolling: the smaller of what the width and the height allow, held between 54 and 180 CSS pixels. On a phone the width decides; on a desktop the height does.
+
+## Widgets on the Board
+
+A widget is a titled panel below the icons that loads its own data, such as a list of recent posts. Declare it with `defineWidget` and list it in the definition. With no widgets there is no shelf at all.
 
 ```tsx
-import type { ContentItem, WebspringContentSource } from "@syndromatic/syncloudos/webspring";
+import { defineWebspring, defineWidget, WebspringBoardView, type WebspringWidgetViewProps } from "@syndromatic/syncloudos/webspring";
+import manifest from "./Info";
 
-export const publicPosts: WebspringContentSource = {
-  async read({ limit, signal }) {
-    const response = await fetch(`/api/public-posts?limit=${limit}`, { credentials: "same-origin", signal });
+interface Post { readonly id: string; readonly title: string }
+
+function LatestView({ data, refresh }: WebspringWidgetViewProps<readonly Post[]>) {
+  return <>
+    <ul>{data.map((post) => <li key={post.id}>{post.title}</li>)}</ul>
+    <button type="button" onClick={refresh}>Refresh</button>
+  </>;
+}
+
+const latest = defineWidget({
+  id: "latest",
+  title: { key: "site.latest", fallback: "Latest" },
+  icon: "./Resources/news.svg",
+  load: async (signal) => {
+    const response = await fetch("/api/public-posts?limit=6", { credentials: "same-origin", signal });
     if (!response.ok) throw new Error(`Public posts request failed: ${response.status}`);
-    return (await response.json()) as readonly ContentItem[];
+    return (await response.json()) as readonly Post[];
   },
-  resolveImage(resource) {
-    return resource.startsWith("/media/") ? resource : null;
-  },
-};
+  view: LatestView,
+  whenEmpty: "hide",
+});
+
+export default defineWebspring({
+  manifest,
+  components: { board: WebspringBoardView },
+  widgets: [latest],
+});
 ```
 
-The source, or the endpoint behind it, decides what is public. Filter drafts, future dated items and deleted records there. Register sources by identifier in `contentSources` when you mount the host. A section whose source is missing follows its `empty` setting, which chooses between hiding the section and showing a message.
+- `load(signal)` returns the data, of any shape. The framework owns the promise. The signal aborts when the Board unmounts, when the person retries or the widget refreshes, and when the load times out.
+- `view` is a React component that receives `{ data, refresh }` once the load has succeeded. A view that throws shows the error state; the rest of the Board is untouched.
+- `whenEmpty` is `"hide"` (the widget disappears, and so does the shelf if every widget is hidden) or `{ message }` (the message shows in its place). Empty means an empty array, `null` or `undefined`; `isEmpty(data)` replaces that rule.
+- The framework draws the other states. While loading it shows a placeholder. A rejected load shows an error with **Retry**. A load that has not settled after `timeout` milliseconds (10 000 by default) is aborted and shows a timeout error with **Retry**, so a widget can never stay on "Loading…".
+- `title` is a string, or `{ key, fallback }` looked up in the app's strings. `icon` is a resource path, resolved through the shell's resources.
+
+The endpoint behind `load` decides what is public. Filter drafts, future dated items and deleted records there.
 
 ## Mount the shell
 
@@ -233,14 +266,12 @@ Mount the shell through the browser host, as the [runtime guide](runtime.md#moun
 ```tsx
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
 import { bundles, shell, shellResources } from "virtual:syncloudos/composition";
-import { publicPosts } from "./publicPosts";
 
 const host = await mountSynCloudOS({
   element: document.getElementById("root")!,
   bundles,
   shell,
   shellResources,
-  contentSources: { "public-posts": publicPosts },
   authentication: "disabled",
 });
 
@@ -254,6 +285,42 @@ The Vite plugin builds the virtual composition module from your shell and bundle
 Pass `"disabled"` for a public site. For server backed sign-in, pass `{ policy: "optional" | "required", service, loginComponent? }`. Optional mode keeps public content available and adds a Sign In control. Required mode holds protected shell content until the server confirms the session. Disabled mode makes no authentication requests and never offers Log Out. An app intended for anonymous launching declares `runtime.policy.public: true`. See [Authentication](authentication.md).
 
 When a gate is configured, the host presents the sign-in window after the icons settle, dims the launcher behind it and keeps the launcher inert until the window has left. Visits without a gate, and visits that are already authenticated, enter without interruption. A tab-local marker in session storage preserves only the held presentation across provider redirects. It stores no identity and grants no access.
+
+## System Preferences
+
+System Preferences is a list of panes. The framework ships six, each one a module of its own: **Account** (only when sign-in is on), **Appearance**, **Audio & Haptics** (`sounds`), **Motion**, **Notifications** and **Language**. Add your own with `definePreferencePane`, and list them in the shell definition.
+
+```tsx
+import { defineWebspring, definePreferencePane, type PreferencePaneViewProps } from "@syndromatic/syncloudos/webspring";
+import billingIcon from "./Resources/billing.svg";
+
+function BillingPane({ settings, appearance, locale }: PreferencePaneViewProps) {
+  return <p className="nse-prefs-note">{locale.activeLocale}, {appearance}</p>;
+}
+
+const billing = definePreferencePane({
+  id: "billing",
+  title: { key: "billing.title", fallback: "Billing" },
+  icon: billingIcon,
+  order: 600,
+  view: BillingPane,
+});
+
+export default defineWebspring({
+  manifest,
+  components: { board: WebspringBoardView },
+  preferences: { panes: [billing], hide: ["sounds"] },
+});
+```
+
+- `view` is a React component. It receives `settings` (the person's current settings), `appearance` (`"light"`, `"dark"` or `"auto"`) and `locale` (the active locale and the supported ones). It re-renders when any of them changes.
+- `title` is a string, or `{ key, fallback }` looked up in the system dictionary. `icon` is your artwork, a URL (import the SVG), shown beside the title in the list.
+- Panes list in ascending `order`, ties broken by `id`. The built-ins sit at 50 (Account), 100 (Appearance), 200, 300, 400 and 500 (Language).
+- Optional `summary` (the line under the title, usually the current value) and `accessory` (a control on the list row, such as a master switch) are React components that receive the same props.
+- `hide` removes built-in panes by `id`: `appearance`, `sounds`, `motion`, `notifications`, `language`, `account`. A developer pane with a built-in's `id` replaces that built-in instead. `hide` never removes a developer pane.
+- A pane that throws shows "This preference pane could not be loaded." in its place, and System Preferences stays open. A summary that throws shows "Unavailable"; a throwing accessory is dropped.
+
+Themes restyle the window through custom properties alone (`--nse-prefs-panel-background`, `--nse-prefs-selection-background` and the rest, listed at the top of `nsePreferencesToast.css`); the sidebar list layout is the same in every theme. Use the `nse-prefs-section`, `nse-prefs-note` and `nse-prefs-empty` classes and the NSE controls inside a pane so it follows the theme.
 
 ## Recovery alerts
 
@@ -273,7 +340,7 @@ The Board is one view. You can supply another component for a view identifier, a
 
 - `model` is an immutable snapshot. `model.entrancePhase` is `waiting`, `holding` or `ready`. `model.launchPhase` is `idle`, `staging`, `launching`, `covered` or `returning`. `model.presentationTraits` provides `width`, `height`, `reducedMotion` and `safeAreaInsets`, and `model.branding` holds the resolved branding.
 - `model.items` lists the top-level entries in order: `{ kind: "app", id, app, dialPlacement }` or `{ kind: "folder", id, title, apps, badgeCount, dialPlacement }`. `model.apps` lists every visible application flat, folder members inline. `model.folders` holds `editable`, `openFolderId` and `dropTargetId`, and `model.layout.draggingItemId` names the app or folder being dragged.
-- `actions` is the command surface for the shell: application, home, reorder, editing, drag, folder, authentication and content operations. Reordering is `moveItem(itemId, index)` within the item's container (the top level, or its folder) and `moveItemByKeyboard(itemId, key, columns)`. Folders use `setDropTarget(itemId | null)` while an app hovers over an entry, `dropOnItem(appId, targetItemId)` to merge, `moveAppOutOfFolder(appId, index)`, `openFolder(folderId)` and `closeFolder()`. Drags run between `beginDrag(itemId)` and `finishDrag(commit)`; changes made during a drag persist when it commits and revert when it is cancelled. A view that draws a launch or return transition reports completion with `completeLaunch(transitionId, appId)` and `completeReturnTrack("material" | "icons")`.
+- `actions` is the command surface for the shell: application, home, reorder, editing, drag, folder and authentication operations. Reordering is `moveItem(itemId, index)` within the item's container (the top level, or its folder) and `moveItemByKeyboard(itemId, key, columns)`. Folders use `setDropTarget(itemId | null)` while an app hovers over an entry, `dropOnItem(appId, targetItemId)` to merge, `moveAppOutOfFolder(appId, index)`, `openFolder(folderId)` and `closeFolder()`. Drags run between `beginDrag(itemId)` and `finishDrag(commit)`; changes made during a drag persist when it commits and revert when it is cancelled. A view that draws a launch or return transition reports completion with `completeLaunch(transitionId, appId)` and `completeReturnTrack("material" | "icons")`.
 - `applicationOutlet` is a host-owned React node. Place it where the application should appear, and leave it as it is.
 - `folderPresentation` is the definition's folder presentation. Render it while `model.folders.openFolderId` is set.
 
@@ -292,7 +359,8 @@ The pieces the Board is built from are public, so a custom launcher can share it
 | `captureWebspringDragReorderSlots`, `getWebspringDragReorderTargetFromPoint` | Hit testing for drag reordering against the slots the view draws. |
 | `WebspringFolderTile`, `createWebspringFolderSplitPresentation`, `useWebspringFolderPreparation` | A folder's icon tile of its members, the default folder presentation, and preparing a folder to open. |
 | `useWebspringFolderAppearance` | The definition's folder appearance, for artwork that matches the folder tile. |
-| `LowerContentShelfView` | The content shelf for the shell's declared sections. |
+| `WebspringWidgetShelf`, `defineWidget` | The widget shelf for `model.widgets`: it loads each widget and draws its loading, empty, error and timeout states. |
+| `WebspringSurface`, `webspringSurfaceStyle` | The surface presets, and the CSS custom properties that paint a surface. `model.background` holds the resolved launcher and shelf surfaces. |
 | `WebspringIconArtwork`, `WebspringIconEffect` | An application's icon artwork, and the shell's declared icon effect. |
 | `resolveWebspringIconPresentation`, `webspringIconSprings`, `getWebspringRadialExitForIcon`, `useWebspringMotion` | Icon entrance, launch and return motion, standard and reduced. |
 | `getWebspringSelectorTransform`, `resolveWebspringOrbPresentation` | Selector and orb motion for a radial launcher. |

@@ -70,10 +70,10 @@ describe("Webspring window host", () => {
       environment,
       initialBundles: [createTestBundle({
         id: "diagnostics", route: "/diagnostics", presentation: "appView",
-        frame: { layout: "defacto", material: "standard", topBar: "standard", smoothSurface: "off" },
+        frame: { material: "standard", topBar: "standard", smoothSurface: "off" },
       }, { loadModule }), createTestBundle({
         id: "contact", route: "/contact", presentation: "appView",
-        frame: { layout: "defacto", material: "standard", topBar: "standard", smoothSurface: "off" },
+        frame: { material: "standard", topBar: "standard", smoothSurface: "off" },
       })],
     }));
     await runtime.boot({ initialPathname: "/diagnostics" });
