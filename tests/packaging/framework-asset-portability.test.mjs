@@ -58,13 +58,21 @@ test("all authored CSS asset URLs rewrite to existing framework-owned resources"
   let count = 0;
   for (const path of stylesheets) {
     const source = readFileSync(path, "utf8");
-    const rewritten = plugin.transform.call({ emitFile: () => "vector-resource" }, source, path)?.code ?? source;
+    const rewritten = plugin.transform.call({ emitFile: (asset) => {
+      assert.equal(asset.type, "asset");
+      assert.match(asset.source, /^<svg\b/u);
+      return "vector-resource";
+    } }, source, path)?.code ?? source;
     assert.equal(stripUrls(rewritten), stripUrls(source), `CSS declarations changed: ${path}`);
     for (const match of source.matchAll(/url\(\s*["']?(\/assets\/[^"'()]+)["']?\s*\)/g)) {
       count++;
       assert.ok(!/url\(\s*["']?\/assets\//.test(rewritten), `unrewritten asset: ${path}: ${match[1]}`);
     }
     for (const match of rewritten.matchAll(/url\(\s*["']?([^"'()]+\?no-inline)["']?\s*\)/g)) {
+      if (match[1].startsWith("__VITE_ASSET__")) {
+        assert.equal(match[1], "__VITE_ASSET__vector-resource__?no-inline");
+        continue;
+      }
       const asset = fileURLToPath(new URL(match[1], pathToFileURL(path)));
       assert.ok(readFileSync(asset).length > 0, `missing or empty package resource: ${asset}`);
     }

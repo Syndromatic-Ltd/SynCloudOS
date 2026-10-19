@@ -150,9 +150,18 @@ declares its own access policy.
 
 The SDK archive contains every framework, worker, translation and artwork resource; its installed size is not the browser's initial download. Measure a production `vite build`, then a cold load with caching disabled. Report compressed transfers separately from emitted files, including lazy chunks.
 
-An application-only host shares the runtime, NSE controls and default Atmo appearance, but loads the Webspring host and its stylesheet only when mounted with a shell. Theme SVG paint is emitted as separate cacheable resources, so unused control states do not inflate the initial CSS download. Built-in translations load the active language, British English and base fallback; changing language loads its resources on demand.
+An application-only host shares the runtime, NSE controls and default Atmo appearance, but loads the Webspring host and its stylesheet only when mounted with a shell. Theme SVG paint is emitted as separate cacheable resources, with `?no-inline` retained so consumer builds do not embed it again; unused control states do not inflate the initial CSS download. Built-in translations load the active language, British English and base fallback; changing language loads its resources on demand.
 
 PDF, image, video and audio processing resources can still appear in build output without being requested at startup. Shell artwork can dominate a real shell's download; choose and measure your shell's textures separately. Large runtime/application-stage chunks can still trigger Vite's 500 kB warning: this is not a minimal React runtime, and increasing the warning threshold does not reduce downloads.
+
+Reference production consumers measured on 19 October 2026 illustrate the remaining cost, not a fixed budget. Sizes below are decimal MB/kB; CSS gzip uses level 9, while cold transfer is Chromium's measured HTTP transfer size (including the document and headers), with caching disabled.
+
+| Host | Initially requested CSS, raw / gzip | Cold requests | Cold transfer |
+| --- | --- | --- | --- |
+| Application-only | 1.061 MB / 175 kB | 14 | 1.127 MB |
+| Webspring shell | 1.131 MB / 196 kB | 23 | 6.075 MB |
+
+The application-only load requested no shell textures, PDF/image/video workers or unrelated language/menu chunks. Those resources remain available in the emitted build for later use; externalising SVG paint also increases the emitted asset count rather than removing artwork.
 
 ## Mount the runtime
 
