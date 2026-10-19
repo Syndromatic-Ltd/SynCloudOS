@@ -21,6 +21,8 @@ SynCloudOS ships as one package, `@syndromatic/syncloudos`, with focused subpath
 
 For AI coding agents, install the matching [Developer MCP companion](developer-mcp.md). It reads this installed SDK's declarations and bundled documentation, validates your project and creates SynWare bundles without overwriting existing files.
 
+Read [Errors and outcomes](errors.md) for lifecycle diagnostics, stable codes and the source maps included in the SDK.
+
 ## Add the Vite plugin
 
 The plugin finds your SynWare bundles and your shell, then exposes them as a virtual module.

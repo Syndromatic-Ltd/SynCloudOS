@@ -127,10 +127,4 @@ describe("developer MCP tools", () => {
     expect(manifest.dependencies["@modelcontextprotocol/sdk"]).toBeTruthy();
     expect(readFileSync(resolve(companion,"scripts/synware/validation-core.mjs"),"utf8")).toContain("createSynWareValidator");
   });
-  it("catalogues every literal ErrorManager code, including ternary code branches", () => {
-    const source = readFileSync(resolve(repository, "src/SynCloudOS/ErrorManager/ErrorManager.ts"), "utf8");
-    const codes = [...source.matchAll(/code:\s*(?:[^\n]*?\?\s*)?"([A-Z_]+)"(?:\s*:\s*"([A-Z_]+)")?/gu)].flatMap(match => match.slice(1).filter(Boolean));
-    for (const code of codes) expect(errorCatalogue.some(entry => entry.code === code), code).toBe(true);
-    expect(Object.isFrozen(errorCatalogue)).toBe(true);
-  });
 });

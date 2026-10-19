@@ -309,7 +309,7 @@ The engine authority that an application receives. It exposes playback and inspe
 | `makeAdvancedPlayer(pattern)` | `(pattern: HFXHapticPattern) => HFXHapticAdvancedPatternPlayer` | Creates a player with pause, seek, looping, rate and mute. |
 | `dispose()` | `() => void` | Ends the session: emits `stopped` with reason `"disposed"` if it was running, cancels output, releases audio resources and drops observers. Idempotent. |
 
-After disposal, `trigger`, `start`, `reset`, `observe`, `configurePlayback`, the player factories and the resource methods throw `Error("Haptic engine is disposed.")`. `stop()` and `dispose()` do nothing. `isSupported` is `false` and `capabilities.state` is `"disposed"`.
+After disposal, `trigger`, `start`, `reset`, `observe`, `configurePlayback`, the player factories and the resource methods throw `SynCloudOSLifecycleError` with code `HFX_HAPTIC_ENGINE_DISPOSED`. Branch on the type and code, not the message; see [Errors and outcomes](../errors.md). `stop()` and `dispose()` do nothing. `isSupported` is `false` and `capabilities.state` is `"disposed"`.
 
 `makeAdvancedPlayer` (and `makePlayer`) throw in these cases.
 
@@ -380,12 +380,12 @@ new HFXHapticAdvancedPatternPlayer(engine: HFXHapticEngine, pattern: HFXHapticPa
 | `playbackRate` | `number` | Speed multiplier, default 1. Must be above 0 and at most 4, or the setter throws `RangeError("Invalid playback rate.")`. Setting it while playing pauses and resumes from the current position. |
 | `isMuted` | `boolean` | Default `false`. Setting `true` cancels current output immediately and suppresses events and parameter updates. The timeline keeps running, so unmuting rejoins playback in time. |
 | `completionHandler` | `((reason: "completed" \| "cancelled" \| "error") => void) \| undefined` | Called once when playback ends. `"completed"` means the pattern reached its end, `"cancelled"` means `stop()` or `dispose()`, and `"error"` means the host failed to play an event or parameter. Exceptions from the handler are swallowed. |
-| `start(delay?)` | `(delay?: number) => void` | Starts playback after `delay` seconds (default 0) from the current start offset, which is the start of the pattern unless you called `seek` or `pause`. Calling it on a running player cancels pending output and schedules playback again from that offset. Throws `RangeError("Invalid player timing.")` for a negative or non-finite delay, `Error("Haptic player is disposed.")` after disposal, and `Error("Haptic engine is disposed.")` after the session ends. |
+| `start(delay?)` | `(delay?: number) => void` | Starts playback after `delay` seconds (default 0) from the current start offset, which is the start of the pattern unless you called `seek` or `pause`. Calling it on a running player cancels pending output and schedules playback again from that offset. Throws `RangeError("Invalid player timing.")` for a negative or non-finite delay, and `SynCloudOSLifecycleError` with code `HFX_HAPTIC_ADVANCED_PATTERN_PLAYER_DISPOSED` after player disposal or `HFX_HAPTIC_ENGINE_DISPOSED` when checking an ended engine. |
 | `stop()` | `() => void` | Ends playback, resets the offset to the start, cancels output and calls `completionHandler("cancelled")`. It does nothing on a player that is not in a started state. |
 | `pause()` | `() => void` | Records the current position, cancels pending output and scheduled parameter changes, and holds the position. It does not call `completionHandler`. The session treats a paused player as active, so it does not report `players-finished`. Does nothing when the player is not running. |
 | `resume()` | `() => void` | Continues from the paused position. On a stopped or never-started player it starts playback. |
 | `seek(offset)` | `(offset: number) => void` | Moves the start offset to `offset` seconds. Must be finite and within 0 to `pattern.duration`, or it throws `RangeError("Invalid seek offset.")`. On a running player playback restarts from there. On an idle player the next `start()` begins there. Continuous and audio events that span the offset resume part-way through. |
-| `sendParameters(parameters)` | `(parameters: readonly HFXHapticDynamicParameter[]) => void` | Applies parameter changes. A `relativeTime` of 0 applies the change immediately. A value you send stays in force, overriding the pattern's curves for that parameter, until you dispose the player. A positive `relativeTime` schedules the change that many seconds from now, in real time (the playback rate does not scale it). Scheduled changes are cancelled when the player stops, pauses, seeks or restarts. Throws `RangeError` when the list has more than 128 entries or an entry is invalid, `Error("Dynamic parameters are unavailable on this host.")` when the host cannot change parameters live, and `Error("Haptic player is disposed.")` after disposal. Values you send override the pattern's curves for the same parameter. |
+| `sendParameters(parameters)` | `(parameters: readonly HFXHapticDynamicParameter[]) => void` | Applies parameter changes. A `relativeTime` of 0 applies the change immediately. A value you send stays in force, overriding the pattern's curves for that parameter, until you dispose the player. A positive `relativeTime` schedules the change that many seconds from now, in real time (the playback rate does not scale it). Scheduled changes are cancelled when the player stops, pauses, seeks or restarts. Throws `RangeError` when the list has more than 128 entries or an entry is invalid, `Error("Dynamic parameters are unavailable on this host.")` when the host cannot change parameters live, and `SynCloudOSLifecycleError` with code `HFX_HAPTIC_ADVANCED_PATTERN_PLAYER_DISPOSED` after disposal. Values you send override the pattern's curves for the same parameter. |
 | `dispose()` | `() => void` | Stops the player (calling `completionHandler("cancelled")` if it was playing), clears parameter overrides and releases the player from the session. Idempotent. Every later call to `start` or `sendParameters` throws. |
 
 Timing behaviour to rely on:
@@ -585,7 +585,7 @@ A frozen handle to audio that a session holds.
 - It takes a copy of the buffer, so later edits to your `AUFXAudioPCMBuffer` do not affect the resource. The buffer must contain at least one frame, so set `frameLength` before you register it.
 - A session holds up to 64 resources. Registering beyond that, or on a host without audio support, rejects with an `Error`. The browser host also limits the total retained audio and rejects a registration that exceeds it with a `RangeError`.
 - If the signal is already aborted, or aborts during registration, the promise rejects with the signal's reason and the host releases the audio.
-- If `reset()` runs during registration, or the session is disposed, the promise rejects with an `Error` and the host releases the audio.
+- If `reset()` runs during registration, the promise rejects with an `Error`. If the session ends during registration, it rejects with `SynCloudOSLifecycleError` (`HFX_HAPTIC_ENGINE_DISPOSED`), unless an earlier cancellation or reset takes precedence. The host releases the audio in each case.
 - Call `unregisterAudioResource(resource)` when you no longer need the sound. `reset()` and `dispose()` release every remaining resource.
 - Playback of an audio event fails with `completionHandler("error")` when its resource has been unregistered, so keep a resource registered for as long as any player that uses it can run.
 
@@ -679,7 +679,7 @@ The browser host reports the following. Vibration reaches the device only where 
 | Browser with the Vibration API | `state: "available"`, `timing` `"approximate"`, `amplitude` and `sharpness` `false`, `fidelity.amplitude` `"timing-approximation"`, `fidelity.sharpness` `"unavailable"`, and `dynamicParameters` `true` with `"timing-approximation"` fidelity. |
 | Browser without the Vibration API | `state: "unavailable"`, `isSupported` `false`, with the reason "Haptic actuator is unavailable; audio playback remains available." when audio can play. |
 | Component not yet mounted | `state: "unavailable"`, with the reason "The component haptic owner is not mounted." |
-| Disposed session | `state: "disposed"`, with the reason "Haptic engine is disposed." |
+| Disposed session | `state: "disposed"`, with the status reason "Haptic engine is disposed." (not a thrown-error message contract) |
 
 Where haptic hardware is missing, NSE controls that request feedback fall back to audio through the same engines. In your own code, do the same: check `isSupported` and provide an equivalent visual or audible cue.
 
@@ -780,7 +780,7 @@ Session members that the engine also has: `currentTime`, `isSupported`, `capabil
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
-| `assertActive()` | `() => void` | Throws `Error("Haptic engine is disposed.")` after disposal. |
+| `assertActive()` | `() => void` | Throws `SynCloudOSLifecycleError` with code `HFX_HAPTIC_ENGINE_DISPOSED` after disposal. |
 | `emit(event, delay?, offset?, rate?, originalDuration?)` | `(event: HFXHapticEvent, delay?: number, offset?: number, rate?: number, originalDuration?: number) => void` | Sends one event straight to the port outside any player. Delay and offset are in seconds and rate defaults to 1. Applies the audio-only, haptics-only and vibration switches. Throws when the port has no `event` operation. |
 | `emitFromPlayer(player, event, delay?, offset?, rate?, originalDuration?)` | `(player: HFXHapticAdvancedPatternPlayer, event: HFXHapticEvent, ...) => void` | Sends an event on behalf of a player, through the port's `playerEvent`. Players call this. For an `audio` event it swaps the resource `id` for the port's own identifier. |
 | `sendParameters(parameters, actuatorOwner?)` | `(parameters: readonly HFXHapticDynamicParameter[], actuatorOwner?: object) => void` | Validates up to 128 parameters and forwards them, to the player's owner when one is given. Throws `RangeError` for an invalid parameter or more than 128, and `Error` when the port has no `parameters` operation. |
@@ -864,7 +864,7 @@ export const events = recordPattern(new HFXHapticPattern([{ type: "transient", r
 | --- | --- |
 | Manifest lacks `haptics.play` | The hook throws a `SecurityError` `DOMException` while the component mounts. |
 | Action called before the component mounts | Throws `Error("The component haptic owner is not mounted.")`. `stop()` and `dispose()` do nothing. |
-| Action called on a disposed session | Throws `Error("Haptic engine is disposed.")`. `stop()` and `dispose()` do nothing. |
+| Action called on a disposed session | Throws `SynCloudOSLifecycleError` with code `HFX_HAPTIC_ENGINE_DISPOSED`. `stop()` and `dispose()` do nothing. |
 | Device has no haptic hardware | `isSupported` is `false`. Presets and pattern haptic events do nothing, and audio events still play when audio is available. |
 | Sharpness or amplitude requested on a host that lacks them | The value is accepted and ignored, and `capabilities.reason` says so. |
 | `trigger` given an invalid preset, option key or option value | Rejects with `TypeError` or `RangeError` as described in the presets section. |

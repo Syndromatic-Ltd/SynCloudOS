@@ -726,7 +726,8 @@ export function Beep() {
 | Situation | Error |
 | --- | --- |
 | A value outside its documented range, a graph limit exceeded, an index out of bounds | `RangeError` |
-| A cycle, a duplicate connection, a node from another engine, an engine that is disposed, rendering or already running | `Error` |
+| A cycle, a duplicate connection, a node from another engine, an engine rendering or already running | `Error` |
+| A disposed audio engine, audio file or player node | `SynCloudOSLifecycleError`, respectively `AUFX_AUDIO_ENGINE_DISPOSED`, `AUFX_AUDIO_FILE_DISPOSED` or `AUFX_AUDIO_PLAYER_NODE_DISPOSED`; see [Errors and outcomes](../errors.md) |
 | A wrong argument type, unsupported WAV encoding | `TypeError` |
 | A missing permission or a capture handle from another application | `DOMException` named `SecurityError` |
 | The user refused the microphone | `DOMException` named `NotAllowedError` |

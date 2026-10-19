@@ -200,10 +200,10 @@ Subscriptions are passive. Starting one never triggers a permission prompt. If t
 | `accelerometerUpdateInterval` | `readonly number` | Minimum seconds between accelerometer samples. Defaults to 1/60. |
 | `gyroUpdateInterval` | `readonly number` | Minimum seconds between gyro samples. Defaults to 1/60. |
 | `observedUpdateInterval` | `readonly number \| null` | Seconds between the last two delivered device-motion samples. `null` until two samples have arrived and after the last device-motion subscription ends. It reports what the host actually delivers, which can be slower than the interval you asked for. |
-| `setDeviceMotionUpdateInterval(seconds)` | `(seconds: number) => void` | Sets the minimum spacing. Throws `RangeError` unless `seconds` is finite, greater than 0 and at most 3600. Throws `Error` when the manager is disposed. Takes effect on the next sample. |
+| `setDeviceMotionUpdateInterval(seconds)` | `(seconds: number) => void` | Sets the minimum spacing. Throws `RangeError` unless `seconds` is finite, greater than 0 and at most 3600. Throws `SynCloudOSLifecycleError` with code `MFX_MOTION_MANAGER_DISPOSED` when the manager is disposed. Takes effect on the next sample. |
 | `setAccelerometerUpdateInterval(seconds)` | `(seconds: number) => void` | As above, for the accelerometer. |
 | `setGyroUpdateInterval(seconds)` | `(seconds: number) => void` | As above, for the gyroscope. |
-| `startDeviceMotionUpdates(options, handler)` | `(options: Readonly<{ referenceFrame: MFXAttitudeReferenceFrame; signal?: AbortSignal }>, handler: (sample: MFXDeviceMotion) => void) => MFXMotionSubscription` | Subscribes to device motion. Throws `Error` for any `referenceFrame` other than `"relative"`, and when the manager is disposed. |
+| `startDeviceMotionUpdates(options, handler)` | `(options: Readonly<{ referenceFrame: MFXAttitudeReferenceFrame; signal?: AbortSignal }>, handler: (sample: MFXDeviceMotion) => void) => MFXMotionSubscription` | Subscribes to device motion. Throws `Error` for any `referenceFrame` other than `"relative"`, and `SynCloudOSLifecycleError` with code `MFX_MOTION_MANAGER_DISPOSED` when the manager is disposed. |
 | `startAccelerometerUpdates(handler, signal?)` | `(handler: (sample: MFXAccelerometerData) => void, signal?: AbortSignal) => MFXMotionSubscription` | Subscribes to accelerometer readings. |
 | `startGyroUpdates(handler, signal?)` | `(handler: (sample: MFXGyroData) => void, signal?: AbortSignal) => MFXMotionSubscription` | Subscribes to gyroscope readings. |
 | `stopDeviceMotionUpdates()` | `() => void` | Disposes every device-motion subscription and every recorder on this manager, and clears `deviceMotion`. |
@@ -481,7 +481,7 @@ Some browsers, such as Safari on iOS, ask the user for motion access through an 
 
 Behaviour of the returned promise:
 
-- It rejects with `Error` when the manifest lacks `motion.requestAuthorization`, and when the manager is disposed.
+- It rejects with `Error` when the manifest lacks `motion.requestAuthorization`, and with `SynCloudOSLifecycleError` (`MFX_MOTION_MANAGER_DISPOSED`) when the manager is disposed. See [Errors and outcomes](../errors.md).
 - It rejects with `Error` when the browser reports no active user gesture. Call it synchronously from a click, tap or key handler.
 - It resolves with the availability after the browser's prompt: `"available"` when the user allows access, `"denied"` when they decline. On a browser that has no prompt it resolves with the current state.
 - Calls made while a request is pending share the same request.

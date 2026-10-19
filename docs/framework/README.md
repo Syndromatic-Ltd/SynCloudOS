@@ -9,6 +9,7 @@ SynCloudOS is an application framework for the web, in the tradition of Cocoa. T
 | [Getting started](getting-started.md) | Build a site with a launcher and one application |
 | [Overview](overview.md) | See how the layers fit together and which package entries exist |
 | [Developer MCP](developer-mcp.md) | Give Codex and Claude Code version-matched offline SDK tools |
+| [Errors and outcomes](errors.md) | Handle typed outcomes, lifecycle diagnostics and stable error codes |
 
 ## Building applications
 
