@@ -20,9 +20,9 @@ These paths stand for the actual filenames from that build manifest; the beta pa
 
 Only the companion depends on the official `@modelcontextprotocol/sdk`, TypeScript, Zod and the validator's Ajv runtime. Adding MCP does not add an MCP runtime dependency to the browser SDK. The SDK contains `docs/framework/`, `tooling/manifest.schema.json`, a generated `tooling/error-catalogue.json` and `tooling/build-receipt.json`. The receipt records the source commit and source fingerprint; the external build manifest additionally records archive integrity. No network access is needed for the tools once dependencies are installed.
 
-## Configure Codex
+## Configure a TOML-configured client
 
-Add this to `~/.codex/config.toml`, replacing the two project paths with your absolute consumer-project path:
+For a coding agent that reads MCP servers from a TOML file, add this to its configuration file, replacing the two project paths with your absolute consumer-project path:
 
 ```toml
 [mcp_servers.syncloudos]
@@ -36,9 +36,9 @@ On Windows, forward slashes work in these paths (`C:/Projects/my-site/...`). Usi
 npx --no-install syncloudos-mcp --project /absolute/project
 ```
 
-## Configure Claude Code
+## Configure a `.mcp.json` client
 
-Create `.mcp.json` in your consumer project:
+For a coding agent that reads project-scoped `.mcp.json`, create it in your consumer project:
 
 ```json
 {
