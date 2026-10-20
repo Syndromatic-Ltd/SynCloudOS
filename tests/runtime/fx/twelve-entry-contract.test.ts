@@ -45,16 +45,20 @@ describe("literal twelve-family package contract", () => {
     }
   });
 
-  it("rejects a missing family, an invented family, and a private package route", () => {
+  it("rejects a missing family, an invented family, and a private package route, but accepts only the SynCloudOS root entry", () => {
     expect(contract.assertTwelveFxPackageExports).toBeTypeOf("function");
     const exports = Object.fromEntries(families.map(family => [`./fx/${family}`, { import: `./fx/${family}.js`, types: `./fx/${family}.d.ts` }]));
     exports["./fx/video/webm"] = { import: "./fx/video/webm.js", types: "./fx/video/webm.d.ts" };
     expect(() => contract.assertTwelveFxPackageExports(exports)).not.toThrow();
     const { "./fx/lumina": _omitted, ...missing } = exports;
     expect(() => contract.assertTwelveFxPackageExports(missing)).toThrow(/twelve|lumina/i);
-    for (const key of ["./fx/private", "./types/internal", "./src/runtime", "./sdk/internal/runtime", "./*", "."]) {
+    for (const key of ["./fx/private", "./types/internal", "./src/runtime", "./sdk/internal/runtime", "./*"]) {
       expect(() => contract.assertTwelveFxPackageExports({ ...exports, [key]: "./host.js" }), key).toThrow();
     }
     expect(() => contract.assertTwelveFxPackageExports({ ...exports, "./fx/media": { import: "../host.js", types: "./fx/media.d.ts" } })).toThrow();
+    const root = { import: "./index.js", types: "./index.d.ts" };
+    expect(() => contract.assertTwelveFxPackageExports({ ...exports, ".": root })).not.toThrow();
+    expect(() => contract.assertTwelveFxPackageExports({ ...exports, ".": { import: "./src/index.js", types: "./index.d.ts" } })).toThrow();
+    expect(() => contract.assertTwelveFxPackageExports({ ...exports, ".": "./host.js" })).toThrow();
   });
 });

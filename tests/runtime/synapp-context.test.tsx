@@ -30,7 +30,7 @@ import {
   defineSynWareRoutes,
   defineSynWareServiceToken,
   routeQuery,
-  useSynWare,
+  useSCOS,
 } from "../../src/SynCloudOS/AppSDK";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeMount";
@@ -63,8 +63,8 @@ function createTestAppContext(runtimeId: string, appId: string) {
 }
 
 function Probe() {
-  const app = useSynWare();
-  return <output>{`${app.appId}:${app.runtimeInfo.id}`}</output>;
+  const app = useSCOS();
+  return <output>{`${app.app.id}:${app.runtimeInfo.id}`}</output>;
 }
 
 it("resolves the nearest app and runtime instance", () => {
@@ -195,9 +195,9 @@ it("creates one stable explicit context for a mounted app session", () => {
   const contexts: unknown[] = [];
 
   function MountedProbe() {
-    const context = useSynWare();
+    const context = useSCOS();
     contexts.push(context);
-    return <output>{`${context.appId}:${context.runtimeInfo.id}`}</output>;
+    return <output>{`${context.app.id}:${context.runtimeInfo.id}`}</output>;
   }
 
   const view = render(
@@ -248,7 +248,7 @@ it("creates one stable explicit context for a mounted app session", () => {
   );
   expect(contexts).toHaveLength(4);
   expect(contexts[3]).not.toBe(contexts[0]);
-  expect((contexts[3] as ReturnType<typeof useSynWare>).branding.name).toBe("Changed context fixture");
+  expect((contexts[3] as ReturnType<typeof useSCOS>).branding.name).toBe("Changed context fixture");
 
   view.unmount();
   responder.dispose({ cascade: true });

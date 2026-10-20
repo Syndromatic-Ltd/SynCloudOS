@@ -27,7 +27,7 @@ import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoType
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
 import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
-import { useSynWareApplicationMenuTrigger } from "../../src/SynCloudOS/AppSDK";
+import { useApplicationMenuTrigger } from "../../src/SynCloudOS/AppSDK";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime } from "./helpers";
 
 vi.mock("../../src/Webspring/webspringLocale", () => ({
@@ -222,7 +222,7 @@ describe("the default app look", () => {
 
 describe("applicationMenu.trigger content", () => {
   function ContentTrigger() {
-    const menu = useSynWareApplicationMenuTrigger();
+    const menu = useApplicationMenuTrigger();
     return <button type="button" ref={(element) => menu?.setAnchor(element)} onClick={() => menu?.toggle()}>Open the app menu</button>;
   }
   const loadModule = async () => ({ default: ContentTrigger });

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEPreferencesController, PreferencePersistenceError } from "../../Controllers";
+import { NSEPreferencesController, PreferencePersistenceError, type NSEControllerOwnership } from "../../Controllers";
 import { GFXColour } from "../../../FX/GraphicsFX/public";
 
 export interface NSEColourPanelPreferences {
@@ -46,8 +46,10 @@ const validPalette = (maximum: number) => (value: unknown): value is readonly st
 export function createNSEColourPanelPreferences(
   persistence: NSEColourPanelPreferencePersistence,
   namespace = "nse.colour-panel.palette",
+  ownership: NSEControllerOwnership = {},
 ): NSEColourPanelPreferencesController {
   return new NSEPreferencesController<NSEColourPanelPreferences>({
+    ...ownership,
     namespace,
     schema: {
       version: 1,

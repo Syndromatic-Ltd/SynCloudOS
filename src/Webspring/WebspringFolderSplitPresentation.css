@@ -10,7 +10,7 @@
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
@@ -18,25 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* The split lies over the stage it snapshotted: an underlay, the folder's
-   panel, and the two halves of the snapshot that part to reveal it. */
+/* The split lies over the stage it copied: an underlay, the folder's panel,
+   and two clones of the stage that part to reveal it. */
 .webspring-folder-split {
   --webspring-folder-easing: cubic-bezier(.3, .72, .18, 1);
+  /* Icons behind an open folder, from the iOS 6 reference. */
+  --webspring-folder-backdrop-icon-opacity: .22;
+  --webspring-folder-backdrop-icon-saturation: .35;
   position: fixed;
   z-index: 40;
   overflow: hidden;
   isolation: isolate;
   opacity: 1;
-}
-
-/* While the stage is captured it stays in view, but the transparent overlay
-   already takes its pointer input, and the panel is not yet focusable. */
-.webspring-folder-split[data-phase="preparing"] {
-  opacity: 0;
-}
-
-.webspring-folder-split[data-phase="preparing"] .webspring-folder-split-panel {
-  visibility: hidden;
 }
 
 .webspring-folder-split[data-motion="fade"] {
@@ -61,11 +54,6 @@
   z-index: 0;
 }
 
-/* Without a snapshot the panel overlays the live stage, which is dimmed. */
-.webspring-folder-split[data-capture="failed"] .webspring-folder-split-backdrop {
-  background: rgba(4, 6, 10, 0.55);
-}
-
 .webspring-folder-split-panel {
   position: absolute;
   left: 0;
@@ -76,13 +64,6 @@
   box-shadow:
     inset 0 16px 18px -12px rgba(0, 0, 0, var(--webspring-folder-edge-shadow)),
     inset 0 -16px 18px -12px rgba(0, 0, 0, var(--webspring-folder-edge-shadow));
-}
-
-.webspring-folder-split[data-capture="failed"] .webspring-folder-split-panel {
-  box-shadow:
-    inset 0 16px 18px -12px rgba(0, 0, 0, var(--webspring-folder-edge-shadow)),
-    inset 0 -16px 18px -12px rgba(0, 0, 0, var(--webspring-folder-edge-shadow)),
-    0 18px 40px rgba(0, 0, 0, 0.5);
 }
 
 .webspring-folder-split-content {
@@ -119,16 +100,79 @@
   z-index: 2;
   display: block;
   width: 100%;
+  overflow: hidden;
   cursor: pointer;
-  transition:
-    transform var(--webspring-folder-duration) var(--webspring-folder-easing),
-    clip-path var(--webspring-folder-duration) var(--webspring-folder-easing);
+  transition: transform var(--webspring-folder-duration) var(--webspring-folder-easing);
 }
 
+/* The lit seam and its shadow sit in a wrapper whose clip is on the clone, so
+   both follow the straight seam and the triangle's two edges, deepest at the
+   tip where the edges meet. They draw with the parting and fade as the halves
+   rejoin, so the stage reads as unbroken while the folder is shut. */
+.webspring-folder-split-half.is-top {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0)) drop-shadow(0 3px 7px rgba(0, 0, 0, 0));
+  transition:
+    transform var(--webspring-folder-duration) var(--webspring-folder-easing),
+    filter var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+.webspring-folder-split[data-phase="open"] .webspring-folder-split-half.is-top {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .3)) drop-shadow(0 3px 7px rgba(0, 0, 0, .85));
+}
+
+/* The bottom seam: a light line on its top edge and the shadow it casts above
+   it. The bottom half covers the triangle at rest, so both are drawn only once
+   the halves have parted. */
 .webspring-folder-split-half.is-bottom {
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transition:
+    transform var(--webspring-folder-duration) var(--webspring-folder-easing),
+    box-shadow var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+.webspring-folder-split-half.is-bottom::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3);
+  opacity: 0;
+  transition: opacity var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+.webspring-folder-split[data-phase="open"] .webspring-folder-split-half.is-bottom {
   box-shadow: 0 -2px 8px rgba(0, 0, 0, calc(var(--webspring-folder-edge-shadow) * 0.6));
 }
 
-.webspring-folder-split[data-motion="fade"] .webspring-folder-split-half {
+.webspring-folder-split[data-phase="open"] .webspring-folder-split-half.is-bottom::after {
+  opacity: 1;
+}
+
+/* Each clone is the stage at its own size, shifted by the depth of the half. */
+.webspring-folder-split-clone-host {
+  position: absolute;
+  left: 0;
+  width: 100%;
+}
+
+/* Every icon in a clone is backdrop except the opened folder's own, which is
+   marked as the anchor. The fade runs with the split and reverses on close. */
+.webspring-folder-split-clone [data-webspring-folder-backdrop="backdrop"] {
+  transition:
+    opacity var(--webspring-folder-duration) var(--webspring-folder-easing),
+    filter var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+.webspring-folder-split[data-motion="split"][data-phase="open"] .webspring-folder-split-clone [data-webspring-folder-backdrop="backdrop"],
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-clone [data-webspring-folder-backdrop="backdrop"] {
+  opacity: var(--webspring-folder-backdrop-icon-opacity);
+  filter: saturate(var(--webspring-folder-backdrop-icon-saturation));
+}
+
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-half,
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-half.is-top,
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-half.is-bottom,
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-half.is-bottom::after,
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-clone [data-webspring-folder-backdrop="backdrop"] {
   transition: none;
 }

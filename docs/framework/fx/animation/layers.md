@@ -11,7 +11,7 @@ import { AFXLayer, AFXShapeLayer, AFXTransform3D } from "@syndromatic/syncloudos
 | | |
 | --- | --- |
 | Analogue | `CALayer`, `CAShapeLayer`, `CAGradientLayer`, `CATextLayer`, `CATransform3D`, `CALayerDelegate` |
-| Obtained from | `useSynWareAnimations().bindLayer(element)` and the other `bind*` methods |
+| Obtained from | `useAnimations().bindLayer(element)` and the other `bind*` methods |
 | Model and presentation | `layer.model` holds what you set, `layer.presentation` holds what is on screen now |
 | Limits | 256 layers in one composition, 64 live layers and renderers per session |
 
@@ -46,11 +46,16 @@ The property getters (`layer.transform`, `layer.frame` and the rest) return the 
 
 ## AFXLayer
 
-```text
-new AFXLayer(surface: AFXLayerSurface, scheduler: AFXFrameScheduler, options?: { signal?: AbortSignal })
+```ts
+const layer = new AFXLayer();
+view.layer.addSublayer(layer);
 ```
 
-The constructor takes a rendering surface and a frame scheduler, which a host supplies. See `sdk/animation-host` for those types if you build a host. In an application you receive a layer from the session, and this page describes it from that side.
+`new AFXLayer()` creates a detached layer. Adding it below an attached layer adopts that parent's
+surface and scheduler; layers added beneath a detached parent stay detached until that parent is
+attached. Writes made before attachment are applied when the layer joins the tree. Applications
+usually start from `NSEViewController.view.layer`. Hosts that provide a surface and scheduler create
+a root with `createAFXLayer(surface, scheduler)` from `sdk/animation-host`.
 
 ### Geometry
 

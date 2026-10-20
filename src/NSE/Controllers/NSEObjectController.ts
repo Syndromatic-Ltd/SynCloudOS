@@ -103,7 +103,7 @@ export class NSEObjectController<T extends object> extends NSEController<
   #changedDuringEdit = false;
 
   constructor(options: ObjectControllerOptions<T>) {
-    super({ kind: "NSEObjectController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal });
+    super({ kind: "NSEObjectController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal, owner: options.owner });
     this.#fields = Object.freeze(
       Object.assign(Object.create(null), options.fields),
     ) as ObjectControllerFields<T>;

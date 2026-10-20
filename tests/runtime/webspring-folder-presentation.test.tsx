@@ -10,7 +10,7 @@
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
@@ -23,33 +23,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebspringFolderItem } from "../../src/Webspring/webspringTypes";
-
-// The stage capture itself is SnapDOM's; these tests drive its outcome.
-const capture = vi.hoisted(() => ({
-  available: true,
-  strips: [] as DOMRect[],
-  hold: null as Promise<void> | null,
-  warm: vi.fn(),
-}));
-vi.mock("@zumer/snapdom", () => ({ snapdom: {} }));
-vi.mock("../../src/Webspring/notificationScreenSliceCapture", () => ({
-  screenSliceIgnoredSelectors: [],
-  shouldUseNotificationSnapdomCapture: () => capture.available,
-  collectNotificationCanvasReplacements: () => [],
-  clearNotificationCanvasMarks: () => undefined,
-  warmNotificationCaptureEngine: capture.warm,
-  captureScreenSlice: async (_snapdom: unknown, _root: unknown, _replacements: unknown, _scale: number, strip: DOMRect) => {
-    capture.strips.push(strip);
-    await capture.hold;
-    const canvas = document.createElement("canvas");
-    canvas.width = strip.width;
-    canvas.height = strip.height;
-    return canvas;
-  },
-}));
-
-const { createWebspringFolderSplitPresentation } = await import("../../src/Webspring/WebspringFolderSplitPresentation");
-const { useWebspringFolderPreparation } = await import("../../src/Webspring/useWebspringFolderPreparation");
+import { createWebspringFolderSplitPresentation } from "../../src/Webspring/WebspringFolderSplitPresentation";
 
 const folder = {
   kind: "folder",
@@ -61,17 +35,38 @@ const folder = {
 
 let stageBox = new DOMRect(0, 0, 800, 600);
 let stage: HTMLElement;
+let layer: HTMLElement;
 const drawImage = vi.fn();
 
+function buildStage() {
+  const element = document.createElement("main");
+  element.className = "webspring-board";
+  element.innerHTML = [
+    '<section class="webspring-board-launcher">',
+    '<div class="webspring-board-page">',
+    '<button type="button" class="webspring-board-icon" data-webspring-item-id="app.alpha" data-order-index="0">',
+    '<span class="webspring-board-icon-well"><span aria-hidden="true">A</span></span>',
+    '<span class="webspring-board-icon-label">Alpha</span>',
+    "</button>",
+    '<button type="button" class="webspring-board-icon is-folder" data-webspring-item-id="folder.tools" data-order-index="1">',
+    '<span class="webspring-board-icon-well"><canvas width="8" height="8"></canvas></span>',
+    '<span class="webspring-board-icon-label">Tools</span>',
+    "</button>",
+    "</div>",
+    '<p id="webspring-board-keyboard-help">Hold an application to reorder.</p>',
+    '<div class="webspring-board-folder-layer"></div>',
+    "</section>",
+    '<div class="webspring-drag-proxy">proxy</div>',
+  ].join("");
+  element.getBoundingClientRect = () => stageBox;
+  return element;
+}
+
 beforeEach(() => {
-  capture.available = true;
-  capture.strips = [];
-  capture.hold = null;
-  capture.warm.mockClear();
   stageBox = new DOMRect(0, 0, 800, 600);
-  stage = document.createElement("div");
-  stage.getBoundingClientRect = () => stageBox;
+  stage = buildStage();
   document.body.append(stage);
+  layer = stage.querySelector<HTMLElement>(".webspring-board-folder-layer")!;
   drawImage.mockClear();
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(() => ({ drawImage }) as unknown as CanvasRenderingContext2D);
 });
@@ -79,186 +74,147 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   stage.remove();
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
 const Presentation = createWebspringFolderSplitPresentation({ panelHeight: 240, duration: 0 });
 
-function renderSplit({ reducedMotion = false, onClose = vi.fn() } = {}) {
-  const view = render(<Presentation
+function renderSplit({ reducedMotion = false, onClose = vi.fn(), Split = Presentation } = {}) {
+  const view = render(<Split
     folder={folder}
     stage={stage}
     anchor={new DOMRect(100, 100, 80, 80)}
     reducedMotion={reducedMotion}
     renderApp={(app) => <button type="button">{`Open ${app.title}`}</button>}
     onClose={onClose}
-  />);
+  />, { container: layer });
   const root = view.container.querySelector<HTMLElement>(".webspring-folder-split")!;
   return { view, root, onClose };
 }
 
 const opened = (root: HTMLElement) => waitFor(() => expect(root.dataset.phase).toBe("open"));
+const cloneOf = (root: HTMLElement, half: "is-top" | "is-bottom") =>
+  root.querySelector<HTMLElement>(`.webspring-folder-split-half.${half} .webspring-folder-split-clone`)!;
 
 describe("Webspring folder split presentation", () => {
-  it("parts the captured stage below the folder icon and opens", async () => {
+  it("copies the stage into both halves as it mounts, with no capture to wait for", () => {
+    const { root } = renderSplit();
+
+    // The split never sits waiting for anything: it is at rest in the same
+    // pass that mounts it, with both halves already filled.
+    expect(root.dataset.phase).toBe("closed");
+    expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(2);
+    expect(root.dataset.capture).toBeUndefined();
+  });
+
+  it("draws the stage's canvases across into each copy and drops what belongs to the split", async () => {
     const { root } = renderSplit();
     await opened(root);
 
-    expect(root.dataset).toMatchObject({ capture: "ready", motion: "split" });
-    const [top, bottom] = root.querySelectorAll<HTMLCanvasElement>(".webspring-folder-split-half");
-    // The seam sits 6 px below the icon; the 240 px panel fits beneath it.
-    expect(top.style).toMatchObject({ top: "0px", height: "186px", transform: "translate3d(0, 0px, 0)" });
-    expect(bottom.style).toMatchObject({ top: "186px", height: "414px", transform: "translate3d(0, 240px, 0)" });
+    const source = stage.querySelector("canvas")!;
+    for (const half of ["is-top", "is-bottom"] as const) {
+      const clone = cloneOf(root, half);
+      expect(clone.querySelector("canvas")!.width).toBe(8);
+      expect(clone.querySelector(".webspring-folder-split")).toBeNull();
+      expect(clone.querySelector(".webspring-drag-proxy")).toBeNull();
+      expect(clone.querySelector("[id]")).toBeNull();
+      expect(clone.getAttribute("aria-hidden")).toBe("true");
+      expect(clone.style.pointerEvents).toBe("none");
+    }
+    expect(drawImage).toHaveBeenCalledWith(source, 0, 0);
+  });
+
+  it("lines its copy up with a stage whose edge is off screen", () => {
+    stageBox = new DOMRect(-20, -30, 800, 600);
+    const { root } = renderSplit();
+
+    // The split covers what the stage shows; the copy keeps the stage's own
+    // origin so its pixels stay where the viewer saw them.
+    expect(root.style).toMatchObject({ left: "0px", top: "0px", width: "780px", height: "570px" });
+    for (const half of ["is-top", "is-bottom"] as const) {
+      expect(cloneOf(root, half).style).toMatchObject({ left: "-20px", top: "-30px", width: "800px", height: "600px" });
+    }
+  });
+
+  it("fades every icon but the opened folder's own", async () => {
+    const { root } = renderSplit();
+    await opened(root);
+
+    for (const half of ["is-top", "is-bottom"] as const) {
+      const clone = cloneOf(root, half);
+      expect(clone.querySelector('[data-webspring-item-id="folder.tools"]')!.getAttribute("data-webspring-folder-backdrop")).toBe("anchor");
+      expect(clone.querySelector('[data-webspring-item-id="app.alpha"]')!.getAttribute("data-webspring-folder-backdrop")).toBe("backdrop");
+    }
+  });
+
+  it("parts below the folder's cell and holds the triangle covered until the halves move", async () => {
+    const { root } = renderSplit();
+    const [top, bottom] = root.querySelectorAll<HTMLElement>(".webspring-folder-split-half");
+
+    // The seam sits 6 px below the cell; the bottom half reaches 14 px above it
+    // at rest, covering the triangle.
+    expect(top.style.height).toBe("200px");
+    expect(bottom.style.top).toBe("172px");
+    expect(bottom.style.transform).toBe("");
     expect(screen.getByRole("dialog", { name: "Tools" }).style).toMatchObject({ top: "186px", height: "240px" });
-    expect(drawImage).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 0, 0, 800, 186, 0, 0, 800, 186);
-    expect(drawImage).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 0, 186, 800, 414, 0, 0, 800, 414);
+
+    await opened(root);
+    // The 240 px panel fits, so the top half stays and the bottom half moves
+    // down by the panel's height plus the triangle depth it covered.
+    expect(top.style.transform).toBe("translate3d(0, 0px, 0)");
+    expect(bottom.style.transform).toBe("translate3d(0, 254px, 0)");
     await waitFor(() => expect(document.activeElement?.textContent).toBe("Open Beta"));
   });
 
-  it("opens over a dimmed backdrop when the stage cannot be captured", async () => {
-    capture.available = false;
-    const { root } = renderSplit();
-    await opened(root);
-
-    expect(root.dataset).toMatchObject({ capture: "failed", motion: "fade" });
-    expect(root.querySelectorAll(".webspring-folder-split-half")).toHaveLength(0);
-    expect(screen.getByRole("dialog", { name: "Tools" }).style.height).toBe("240px");
-  });
-
-  it("crossfades for reduced motion", async () => {
+  it("crossfades instead of parting for reduced motion", async () => {
     const { root } = renderSplit({ reducedMotion: true });
     await opened(root);
 
-    expect(root.dataset).toMatchObject({ capture: "ready", motion: "fade" });
+    expect(root.dataset.motion).toBe("fade");
+    expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(2);
   });
 
-  it("covers the live stage while it is captured, and a tap there cancels", async () => {
-    const { promise, resolve: release } = Promise.withResolvers<void>();
-    capture.hold = promise;
-    const { root, onClose } = renderSplit();
-
-    expect(root.dataset.phase).toBe("preparing");
-    expect(root.style).toMatchObject({ left: "0px", top: "0px", width: "800px", height: "600px" });
-    fireEvent.click(root.querySelector(".webspring-folder-split-backdrop")!);
-    expect(onClose).toHaveBeenCalledTimes(1);
-    await act(async () => release());
-  });
-
-  it("recaptures and lays out again when the stage resizes", async () => {
+  it("lays out again when the stage resizes, keeping one copy per half", async () => {
     const { root } = renderSplit();
     await opened(root);
-    expect(capture.strips.map((strip) => strip.width)).toEqual([800]);
 
     stageBox = new DOMRect(0, 0, 900, 700);
     await act(async () => { window.dispatchEvent(new Event("resize")); });
 
-    await waitFor(() => expect(capture.strips.map((strip) => strip.width)).toEqual([800, 900]));
-    await waitFor(() => expect(root.dataset.capture).toBe("ready"));
-    expect(root.style).toMatchObject({ width: "900px", height: "700px" });
-    const bottom = root.querySelectorAll<HTMLCanvasElement>(".webspring-folder-split-half")[1];
-    expect(bottom.style).toMatchObject({ top: "186px", height: "514px", transform: "translate3d(0, 240px, 0)" });
+    await waitFor(() => expect(root.style.width).toBe("900px"));
+    expect(root.style.height).toBe("700px");
+    expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(2);
+    for (const half of ["is-top", "is-bottom"] as const) {
+      expect(cloneOf(root, half).style).toMatchObject({ width: "900px", height: "700px" });
+    }
+    const [top, bottom] = root.querySelectorAll<HTMLElement>(".webspring-folder-split-half");
+    expect(top.style.height).toBe("200px");
+    expect(bottom.style.top).toBe("172px");
     expect(root.dataset.phase).toBe("open");
   });
 
-  it("opens from a snapshot prepared before the folder opened, without capturing again", async () => {
-    const { promise, resolve: release } = Promise.withResolvers<void>();
-    capture.hold = promise;
-    Presentation.prepare!(stage);
-    Presentation.prepare!(stage);
-    await waitFor(() => expect(capture.strips).toHaveLength(1));
-
-    // The click lands while the prepared capture is still under way.
-    const { root } = renderSplit();
-    expect(root.dataset.phase).toBe("preparing");
-    await act(async () => release());
+  it("closes on Escape, telling the view once the halves have rejoined", async () => {
+    const { root, onClose } = renderSplit({ Split: createWebspringFolderSplitPresentation({ panelHeight: 240, duration: 0.3 }) });
     await opened(root);
 
-    expect(root.dataset.capture).toBe("ready");
-    expect(capture.strips).toHaveLength(1);
+    vi.useFakeTimers();
+    fireEvent.keyDown(screen.getByRole("dialog", { name: "Tools" }), { key: "Escape" });
+    expect(root.dataset.phase).toBe("closing");
+    act(() => vi.advanceTimersByTime(359));
+    expect(onClose).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(1));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("holds a reached-for snapshot through the press's own changes", async () => {
-    Presentation.prepare!(stage);
-    await waitFor(() => expect(capture.strips).toHaveLength(1));
-    stage.className = "is-pressed";
-    stage.append(document.createElement("p"));
-    await act(async () => undefined);
-    Presentation.prepare!(stage);
-
-    const { root } = renderSplit();
-    await opened(root);
-    expect(capture.strips).toHaveLength(1);
-  });
-
-  it("captures afresh when the stage was resized after it was prepared", async () => {
-    Presentation.prepare!(stage);
-    await waitFor(() => expect(capture.strips).toHaveLength(1));
-
-    stageBox = new DOMRect(0, 0, 640, 600);
-    const { root } = renderSplit();
-    await opened(root);
-    expect(capture.strips.map((strip) => strip.width)).toEqual([800, 640]);
-  });
-
-  it("keeps a snapshot ready at rest, retakes it once the stage settles after a change, and opens from it", async () => {
-    const stop = Presentation.keepPrepared!(stage);
-    await waitFor(() => expect(capture.strips).toHaveLength(1));
-
-    // A change makes it stale; nothing is retaken until the stage has been quiet.
-    stage.append(document.createElement("p"));
-    await act(async () => undefined);
-    expect(capture.strips).toHaveLength(1);
-    // ARIA state alone changes nothing drawn.
-    await waitFor(() => expect(capture.strips).toHaveLength(2), { timeout: 3000 });
-    stage.setAttribute("aria-busy", "true");
-    await act(async () => undefined);
-
-    const { root } = renderSplit();
-    await opened(root);
-    expect(root.dataset.capture).toBe("ready");
-    expect(capture.strips).toHaveLength(2);
-    stop();
-  });
-
-  it("warms the presentation for a view with folders, prepares at rest and on request", async () => {
-    let prepare: () => void = () => undefined;
-    function View({ stageElement, atRest }: { stageElement: HTMLElement | null; atRest: boolean }) {
-      prepare = useWebspringFolderPreparation(Presentation, stageElement, { atRest });
-      return null;
-    }
-    const view = render(<View stageElement={null} atRest />);
-    prepare();
-    expect(capture.warm).not.toHaveBeenCalled();
-
-    view.rerender(<View stageElement={stage} atRest={false} />);
-    expect(capture.warm).toHaveBeenCalledTimes(1);
-    await act(async () => {
-      const { promise, resolve } = Promise.withResolvers<void>();
-      setTimeout(resolve, 400);
-      await promise;
-    });
-    expect(capture.strips).toHaveLength(0);
-    prepare();
-    await waitFor(() => expect(capture.strips).toHaveLength(1));
-    const first = renderSplit();
-    await opened(first.root);
-    expect(capture.strips).toHaveLength(1);
-    first.view.unmount();
-
-    // At rest, the next opening is prepared without any reach.
-    view.rerender(<View stageElement={stage} atRest />);
-    await waitFor(() => expect(capture.strips).toHaveLength(2));
-    const second = renderSplit();
-    await opened(second.root);
-    expect(capture.strips).toHaveLength(2);
-  });
-
-  it("closes on Escape once the halves have rejoined", async () => {
+  it("closes when either half or the underlay is tapped, once", async () => {
     const { root, onClose } = renderSplit();
     await opened(root);
 
-    fireEvent.keyDown(screen.getByRole("dialog", { name: "Tools" }), { key: "Escape" });
-    expect(root.dataset.phase).toBe("closing");
+    fireEvent.click(root.querySelector(".webspring-folder-split-half.is-top")!);
+    fireEvent.click(root.querySelector(".webspring-folder-split-half.is-bottom")!);
+    fireEvent.click(root.querySelector(".webspring-folder-split-backdrop")!);
+
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });
 });

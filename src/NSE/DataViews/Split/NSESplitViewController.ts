@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEViewController } from "../../Application/NSEViewController";
 import type { NSEPreferencesController } from "../../Controllers";
 import type {
   NSESplitPane,
@@ -139,13 +140,12 @@ export function distributeNSESplitSizes(
   return { sizes, collapsedIds: collapsed };
 }
 
-export class NSESplitViewController {
+export class NSESplitViewController extends NSEViewController<NSESplitViewSnapshot> {
   readonly id: string;
   readonly #orientation: "horizontal" | "vertical";
   readonly #panes: readonly NSESplitPane[];
   readonly #paneById: ReadonlyMap<string, NSESplitPane>;
   readonly #preferences?: NSEPreferencesController<NSESplitViewPreferences>;
-  readonly #listeners = new Set<() => void>();
   #availableIds: ReadonlySet<string>;
   #requestedSizes: Map<string, number>;
   #explicitlyCollapsed: Set<string>;
@@ -157,6 +157,7 @@ export class NSESplitViewController {
   #snapshot: NSESplitViewSnapshot;
 
   constructor(options: NSESplitViewControllerOptions) {
+    super(options);
     if (!options.id.trim()) throw new TypeError("Split view id must not be empty.");
     if (options.panes.length === 0) throw new TypeError("Split views require at least one pane.");
     this.id = options.id;
@@ -184,18 +185,12 @@ export class NSESplitViewController {
     }
     this.#ensureSurvivor();
     this.#snapshot = this.#solve(true);
+    this.getSnapshot = () => this.#snapshot;
   }
 
   get snapshot(): NSESplitViewSnapshot {
     return this.#snapshot;
   }
-
-  getSnapshot = (): NSESplitViewSnapshot => this.#snapshot;
-
-  subscribe = (listener: () => void): (() => boolean) => {
-    this.#listeners.add(listener);
-    return () => this.#listeners.delete(listener);
-  };
 
   resize(availableSize: number): void {
     if (!Number.isFinite(availableSize) || availableSize < 0) {
@@ -346,7 +341,7 @@ export class NSESplitViewController {
     this.#revision += 1;
     this.#snapshot = this.#solve();
     if (persist) this.#persist();
-    for (const listener of this.#listeners) listener();
+    this.notifyObservers();
   }
 
   #persist(): void {

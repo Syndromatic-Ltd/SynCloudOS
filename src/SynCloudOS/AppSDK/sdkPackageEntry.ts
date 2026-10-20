@@ -22,8 +22,9 @@
  * in-repository compatibility barrel: external SynWare receive authoring and
  * session capabilities, never a runtime/store/manager escape hatch.
  */
-export { useSynWare } from "./SynWareContext";
-export { useSynWareFonts } from "./fontAccess";
+export { SCOS, useSCOS, createAppSCOS, SCOSError } from "./scos";
+export type { SCOSFacade, SCOSApplicationInfo, SCOSPreferences, SCOSStrings, SCOSErrorCode, SynCloudOSAlertRequest, SynCloudOSAlertButton, SynCloudOSAlertButtonRole } from "./scos";
+export { useFonts } from "./fontAccess";
 export type { SynWareFontAccess } from "./fontAccess";
 export { createSynWareNSETextOwner, bindSynWareNSETextEditingSession } from "./SynWareTextAdapter";
 export type { SynWareNSETextOwnerOptions } from "./SynWareTextAdapter";
@@ -92,15 +93,15 @@ export type { ServiceTerminalClient, ServiceTerminalReceipt, ServiceTerminalRequ
 export { SynWareColourPanelProvider, type SynWareColourPanelProviderProps } from "./SynWareColourPanelProvider";
 export { createSynWareNSEDataViewDragBinding, type SynWareNSEDataViewDragOptions, type SynWareNSEDataViewDropProposal } from "./SynWareNSEDragAdapter";
 export { createSynWareNSEDragCommandPort, createSynWareNSEFontPanelCommandPort } from "./SynWareNSECommandAdapter";
-export { createSynWareNSETextLayoutPort, useSynWareNSEViewAnimator } from "./SynWareNSEMediaAdapters";
+export { createSynWareNSETextLayoutPort, useNSEViewAnimator } from "./SynWareNSEMediaAdapters";
 export type { TFXTextGeometryCapabilities, TFXTextLayoutResult } from "../../FX/TextFX/textLayoutTypes";
-export { useSynWareNSEMenuPort } from "./SynWareNSEMenuPort";
+export { useNSEMenuPort } from "./SynWareNSEMenuPort";
 export { ResponderScope, type ResponderScopeProps } from "../../SynCloudOSReact/ResponderScope";
-export { useApplicationMenuTrigger as useSynWareApplicationMenuTrigger } from "../../SynCloudOSReact/ApplicationMenuTrigger";
+export { useApplicationMenuTrigger } from "../../SynCloudOSReact/ApplicationMenuTrigger";
 export type { ApplicationMenuTriggerPort as SynWareApplicationMenuTriggerPort } from "../../SynCloudOSReact/ApplicationMenuTrigger";
-export { useQuickSwitchTrigger as useSynWareQuickSwitchTrigger } from "../../SynCloudOSReact/QuickSwitchTrigger";
+export { useQuickSwitchTrigger } from "../../SynCloudOSReact/QuickSwitchTrigger";
 export type { QuickSwitchTriggerPort as SynWareQuickSwitchTriggerPort } from "../../SynCloudOSReact/QuickSwitchTrigger";
-export { createSynWare, SynWareManifestValidationError } from "./createSynWare";
+export { SynWareManifestValidationError } from "./createSynWare";
 export { defineSynWareRoutes } from "./defineSynWareRoutes";
 export type {
   SynCloudOSRouteInfo,
@@ -142,8 +143,8 @@ export type {
   SynWareCommandManifest,
   SynWareDocumentTypeManifest,
   SynWareLifecycleManifest,
-  SynWareLocaleBundleManifest,
-  SynWareLocaleResourcesManifest,
+  SynWareApplicationAvailability,
+  SynWareManifestOverrides,
   SynWareLocalisedText,
   SynWareManifestIssue,
   SynWareManifestValidation,
@@ -238,7 +239,7 @@ export type {
   SynWareOwnedProjectionRequest,
   SynWareOwnedProjectionResult,
 } from "./appDefinitionTypes";
-export { useSynWareWindowChrome } from "./windowChromeContexts";
+export { useWindowChrome } from "./windowChromeContexts";
 export { TFXFontDescriptor, type TFXFontDescriptorOptions } from "../../FX/TextFX/TFXFontDescriptor";
 export type { TFXFontReadinessChange, TFXFontRegistration, TFXFontResourceMimeType } from "../../FX/TextFX/textLayoutTypes";
 export type {
@@ -286,49 +287,49 @@ export type {
   AppTrustedDiagnosticsClient,
 } from "./appTrustedClientTypes";
 export {
-  useSynWareAnimations,
-  useSynWareAppearance,
-  useSynWareConnectivity,
-  useSynWareColourPanel,
-  useSynWareCommands,
-  useSynWareDocument,
-  useSynWareDrag,
-  useSynWareErrors,
-  useSynWareEvents,
-  useSynWareExternalActions,
-  useSynWareIdentity,
-  useSynWareIdentitySnapshot,
-  useSynWareFilePanels,
-  useSynWareImages,
-  useSynWareLifecycle,
-  useSynWareMediaQueries,
-  useSynWareMediaQuery,
-  useSynWareNotifications,
-  useSynWarePasteboard,
-  useSynWarePersistence,
-  useSynWareRouteData,
-  useSynWareRouter,
-  useSynWareRouteState,
-  useSynWareScheduler,
-  useSynWareService,
-  useSynWareSettingsAvailability,
-  useSynWareSettingsAvailabilitySnapshot,
-  useSynWareShare,
-  useSynWareAudio,
-  useSynWareMotion,
-  useSynWareMedia,
-  useSynWareVideo,
-  useSynWareLocation,
-  useSynWareMIDI,
-  useSynWareLumina,
-  useSynWareHaptics,
-  useSynWareTextLayout,
-  useSynWareTracking,
-  useSynWareTrustedClient,
-  useSynWareWebContent,
-  useSynWareWindow,
-  useSynWareWorkArea,
-  useSynWareWorkAreaSnapshot,
+  useAnimations,
+  useAppearance,
+  useConnectivity,
+  useColourPanel,
+  useCommands,
+  useDocument,
+  useDrag,
+  useErrors,
+  useEvents,
+  useExternalActions,
+  useIdentity,
+  useIdentitySnapshot,
+  useFilePanels,
+  useImages,
+  useLifecycle,
+  useMediaQueries,
+  useMediaQuery,
+  useNotifications,
+  usePasteboard,
+  usePersistence,
+  useRouteData,
+  useRouter,
+  useRouteState,
+  useScheduler,
+  useService,
+  useSettingsAvailability,
+  useSettingsAvailabilitySnapshot,
+  useShare,
+  useAudio,
+  useMotion,
+  useMedia,
+  useVideo,
+  useLocation,
+  useMIDI,
+  useLumina,
+  useHaptics,
+  useTextLayout,
+  useTracking,
+  useTrustedClient,
+  useWebContent,
+  useWindow,
+  useWorkArea,
+  useWorkAreaSnapshot,
 } from "./hooks";
 export type {
   SynWareAppearanceState,
@@ -341,4 +342,11 @@ export type {
   SynWareWindowState,
 } from "./hooks";
 
-export { useSynWareLocalisedStrings, translateSynWareText, getSynWareNamespace } from "./useSynWareLocalisedStrings";
+export { useStrings, translateSynWareText, getSynWareNamespace } from "./useStrings";
+export { action } from "./actions";
+export type { NSEActionMethod, NSEActionOptions } from "./actions";
+export { NSEViewControllerView } from "./applicationHosting";
+export type { NSEViewControllerViewProps } from "./applicationHosting";
+// Called by the code the dev server appends to application modules, and by the host that runs them.
+export { acceptApplicationHotUpdate, currentClass, registerApplicationHotModule, trackLiveApplicationObject } from "./applicationHotReload";
+export type { ApplicationHotContext, ApplicationHotModuleRecord, LiveApplicationObject } from "./applicationHotReload";

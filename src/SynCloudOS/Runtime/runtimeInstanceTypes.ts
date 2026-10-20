@@ -108,6 +108,7 @@ import type { SynCloudOSInspectorService } from "../Inspector/Inspector";
 import type { RuntimeCacheRegistry } from "../Cache/cacheTypes";
 import type { IdentitySessionAdapter, IdentitySessionService } from "../Identity/identitySessionTypes";
 import type { SystemUIService } from "../SystemUI/systemUIService";
+import type { SynCloudOSAlertCenter } from "../SystemUI/alertCenter";
 import type { SynCloudOSSettingsService } from "../Settings/settingsService";
 import type { SynCloudOSAppearanceService } from "../Appearance/appearanceService";
 import type { UndoManagerRegistry } from "../Undo";
@@ -764,7 +765,8 @@ export interface SynCloudOSWebspringStateController extends RuntimeOwnedService 
   /** Merges an app into a folder, or with another app into a new folder. Editable folders only. */
   dropOnItem(appId: string, targetItemId: string): boolean;
   moveAppOutOfFolder(appId: string, targetIndex: number): boolean;
-  openFolder(folderId: string): boolean;
+  /** Opens a folder. A drag may open one only when it sprang it open itself. */
+  openFolder(folderId: string, options?: { readonly duringDrag?: boolean }): boolean;
   closeFolder(): void;
   commitLayoutOrder(): void;
   resetLayoutOrder(): void;
@@ -1034,6 +1036,7 @@ export interface SynCloudOSRuntime {
   readonly locale: SynCloudOSLocaleServices;
   readonly inspector: SynCloudOSInspector;
   readonly errors: SynCloudOSErrorManager;
+  readonly alerts: SynCloudOSAlertCenter;
   readonly webspring: SynCloudOSWebspringStateController;
   readonly systemUI: SystemUIService;
   readonly preferencePanes: PreferencePaneRegistry;

@@ -40,7 +40,7 @@ import { LFXCoordinate, LFXLocation, lfxCourseRadiansFromDegrees } from "@syndro
 import { MIFXEncoder, MIFXParser, MIFXProtocolConversion, MIFXScheduler, MIFXUniversalPacket } from "@syndromatic/syncloudos/fx/midi";
 import { MEFXTime } from "@syndromatic/syncloudos/fx/media";
 import { AUFXAudioFormat, AUFXAudioPCMBuffer } from "@syndromatic/syncloudos/fx/audio";
-import { createSynWare } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { createDeterministicRuntimeEnvironment, createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
 import { JSDOM } from "jsdom";
 
@@ -216,7 +216,7 @@ import type { LFXAccuracy, LFXAuthorizationStatus, LFXLocationDescriptor, LFXLoc
 import { MIFXEncoder, MIFXParser, MIFXProtocolConversion, MIFXScheduler, MIFXUniversalPacket } from "@syndromatic/syncloudos/fx/midi";
 import type { MIFXAccess, MIFXCapabilities, MIFXClient, MIFXMessage, MIFXParserEvent, MIFXParserOptions, MIFXProtocolConversionResult } from "@syndromatic/syncloudos/fx/midi";
 import { MEFXTime } from "@syndromatic/syncloudos/fx/media";
-import { useSynWareLocation, useSynWareMIDI } from "@syndromatic/syncloudos/sdk";
+import { useLocation, useMIDI } from "@syndromatic/syncloudos/sdk";
 import { createDeterministicRuntimeEnvironment } from "@syndromatic/syncloudos/sdk/testing";
 
 const coordinate = new LFXCoordinate(0, 0);
@@ -235,8 +235,8 @@ const desired: LFXAccuracy = "high";
 const authorization: LFXAuthorizationStatus = "unknown";
 const request: LFXLocationRequestOptions = { accuracy: desired, maximumAgeSeconds: 2, timeoutSeconds: 5 };
 const watchOptions: LFXLocationWatchOptions = { accuracy: desired, maximumAgeSeconds: 2, minimumIntervalSeconds: 0 };
-const hook: () => LFXLocationManager = useSynWareLocation;
-const midiHook: () => MIFXAccess = useSynWareMIDI;
+const hook: () => LFXLocationManager = useLocation;
+const midiHook: () => MIFXAccess = useMIDI;
 const midiCapabilities: MIFXCapabilities = {
   apiAvailable: false,
   transportProtocol: "midi1",

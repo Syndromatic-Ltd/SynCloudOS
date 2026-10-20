@@ -22,7 +22,7 @@ import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../.
 import {
   AFXLayer,
   type AFXFrameScheduler,
-  type AFXLayerSurface,
+  type AFXLayerPorts,
 } from "./AFXLayer";
 import { AFXEmitterCell } from "./AFXEmitterCell";
 import { AFXTransform3D } from "./AFXTransform3D";
@@ -97,7 +97,7 @@ const emitterHierarchy = (roots: readonly AFXEmitterCell[]) => {
 /** Deterministic bounded particle projection with opt-in projective depth. */
 export class AFXEmitterLayer extends AFXLayer {
   readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "AFXEmitterLayer" });
-  readonly #scheduler: AFXFrameScheduler;
+  #scheduler: AFXFrameScheduler | null = null;
   #cells: readonly AFXEmitterCell[] = Object.freeze([]);
   #position: GFXPoint = normalisePoint({ x: 0, y: 0 });
   #size: GFXSize = normaliseSize({ width: 0, height: 0 });
@@ -123,38 +123,22 @@ export class AFXEmitterLayer extends AFXLayer {
   #releaseState: (() => void) | null = null;
   #running = false;
   #disposed = false;
-  readonly #ownerSignal: AbortSignal | undefined;
+  #ownerSignal: AbortSignal | undefined;
   #spawnedThisFrame = 0;
 
-  constructor(
-    surface: AFXLayerSurface,
-    scheduler: AFXFrameScheduler,
-    options: Readonly<{ signal?: AbortSignal }> = {},
-  ) {
-    super(surface, scheduler, options);
-    this.#ownerSignal = options.signal;
-    this.#scheduler = scheduler;
-    let pendingRelease: (() => void) | null = null;
-    try {
-      this.setLayerContent("constructor", this.#content([]));
-      if (options.signal?.aborted || this.#disposed)
-        throw new DOMException("Emitter owner aborted during construction.", "AbortError");
-      pendingRelease = scheduler.subscribeState?.(() => this.#stateChanged()) ?? null;
-      if (options.signal?.aborted || this.#disposed) {
-        try { pendingRelease?.(); } catch {}
-        pendingRelease = null;
-        throw new DOMException("Emitter owner aborted during construction.", "AbortError");
-      }
-      this.#releaseState = pendingRelease;
-      pendingRelease = null;
-    } catch (error) {
-      try { pendingRelease?.(); } catch {}
-      if (!this.#disposed) {
-        this.#disposed = true;
-        super.dispose();
-      }
-      throw error;
-    }
+  constructor() {
+    super();
+    this.setLayerContent("constructor", this.#content([]));
+  }
+  protected override layerDidAttach(ports: AFXLayerPorts): void {
+    super.layerDidAttach(ports);
+    this.#ownerSignal = ports.signal;
+    this.#scheduler = ports.scheduler;
+    this.#releaseState = ports.scheduler.subscribeState?.(() => this.#stateChanged()) ?? null;
+    this.#last = ports.scheduler.now();
+    if (!Number.isFinite(this.#last))
+      throw new RangeError("Emitter clock must be finite seconds.");
+    this.#scheduleIfActive();
   }
 
   #assertLive(operation: string) {
@@ -177,7 +161,7 @@ export class AFXEmitterLayer extends AFXLayer {
       this.#particles = [];
       this.setLayerContent(operation, this.#content([]));
     }
-    this.#last = this.#scheduler.now();
+    this.#last = this.#scheduler?.now() ?? 0;
     if (!Number.isFinite(this.#last))
       throw new RangeError("Emitter clock must be finite seconds.");
   }
@@ -408,7 +392,7 @@ export class AFXEmitterLayer extends AFXLayer {
   }
   #tick = (now: number) => {
     this.#cancelFrame = null;
-    if (!this.#running || this.#scheduler.suspended || this.#scheduler.reducedMotion) return;
+    if (!this.#running || !this.#scheduler || this.#scheduler.suspended || this.#scheduler.reducedMotion) return;
     if (!Number.isFinite(now) || now < this.#last) {
       this.stopEmitting();
       return;
@@ -457,13 +441,14 @@ export class AFXEmitterLayer extends AFXLayer {
     if (
       !this.#running ||
       this.#cancelFrame ||
+      !this.#scheduler ||
       this.#scheduler.suspended ||
       this.#scheduler.reducedMotion
     ) return;
     this.#cancelFrame = this.#scheduler.requestFrame(this.#tick);
   }
   #stateChanged() {
-    if (!this.#running) return;
+    if (!this.#running || !this.#scheduler) return;
     this.#cancelFrame?.();
     this.#cancelFrame = null;
     const now = this.#scheduler.now();

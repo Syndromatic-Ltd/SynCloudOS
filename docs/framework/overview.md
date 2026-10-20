@@ -40,7 +40,7 @@ The same handful of rules holds across every layer, so learning one area teaches
 
 **The host owns the runtime.** Your application never holds the runtime, a store or a registry. It receives clients: small objects that expose one capability each, such as commands, documents, windows or audio. This keeps applications portable between hosts and lets the host enforce policy.
 
-**Missing capabilities are values.** When you look up a service through `useSynWareService`, an absent or denied service comes back as `{ available: false, client: null, denial }`. Check `available` and render the matching state.
+**Missing capabilities are values.** When you look up a service through `useService`, an absent or denied service comes back as `{ available: false, client: null, denial }`. Check `available` and render the matching state.
 
 **Work is cancellable.** Long operations accept an `AbortSignal`. The mounted session carries one signal that aborts when the application closes, so passing `app.signal` to your own async work releases it correctly.
 
@@ -48,9 +48,9 @@ The same handful of rules holds across every layer, so learning one area teaches
 
 **Values are immutable.** Snapshots, geometry, colours and controller state are frozen. You change state by asking the owner and reading the next snapshot.
 
-**Naming carries meaning.** Each FX framework uses a short prefix: `AFX`, `GFX`, `IFX`, `TFX`, `AUFX`, `HFX`, `MFX`, `MEFX`, `VFX`, `MIFX`, `LFX` and `LUFX`. NSE types start with `NSE`. SDK hooks start with `useSynWare`.
+**Naming carries meaning.** Each FX framework uses a short prefix: `AFX`, `GFX`, `IFX`, `TFX`, `AUFX`, `HFX`, `MFX`, `MEFX`, `VFX`, `MIFX`, `LFX` and `LUFX`. NSE types start with `NSE`. SDK hooks use capability names such as `useStrings` and `useAppearance`.
 
-**Presentation adapts to the host.** Every SynWare declares which presentations it supports: `desktop`, `tablet` or `mobile`. The host chooses the presentation, and your application reads the traits of its current surface (size class, safe areas, pointer type, reduced motion and more) through `useSynWare().presentation`.
+**Presentation adapts to the host.** Every SynWare declares which presentations it supports: `desktop`, `tablet` or `mobile`. The host chooses the presentation, and your application reads the traits of its current surface (size class, safe areas, pointer type, reduced motion and more) through `useSCOS().presentation`.
 
 **Accessibility is part of the contract.** Every pointer interaction has a keyboard path and a touch path. Controls expose labels, roles and focus behaviour, and they follow the reduced motion, reduced transparency and forced colours settings.
 
@@ -62,8 +62,9 @@ Everything ships in one package, `@syndromatic/syncloudos`. It uses explicit sub
 
 | Entry | Contents |
 | --- | --- |
-| `sdk` | `createSynWare`, `useSynWare`, the scoped hooks, routing, manifest validation, document and command types |
-| `sdk/testing` | A deterministic test host and denial-first fakes |
+| package root | `SCOS`, `useSCOS`, reactive hooks, `define*` declarations, application classes and app SDK types |
+| `sdk` | Scoped clients and hooks, routing, manifest validation, document and command types |
+| `sdk/testing` | `createSynWare`, a deterministic test host and denial-first fakes |
 | `sdk/animation-host` | Scheduler and surface types for custom AnimationFX render hosts |
 | `nse` | The complete NSE surface: controls, controllers, data views, colour, layout and appearance |
 | `nse/controls` | The control and chrome subset for focused imports |

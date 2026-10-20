@@ -26,7 +26,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   createSynWare,
-  useSynWareWindowChrome,
+  useWindowChrome,
   type AppWindowChromeProps,
 } from "../../src/SynCloudOS/AppSDK";
 import * as AppSDKBarrel from "../../src/SynCloudOS/AppSDK";
@@ -70,7 +70,7 @@ const HookChromeApp = createSynWare({
 });
 
 function HookChromeProbe({ props }: { props: AppWindowChromeProps }) {
-  hookLog.push(useSynWareWindowChrome());
+  hookLog.push(useWindowChrome());
   return (
     <div data-testid="hook-chrome">
       <h2 id={props.titleId}>{props.title}</h2>
@@ -220,7 +220,7 @@ describe("custom chrome host integration", () => {
     // fixture apps above, which type their chrome against
     // AppWindowChromeProps). Type-only exports leave no runtime trace, so
     // their presence is proven by this file compiling.
-    expect(typeof AppSDKBarrel.useSynWareWindowChrome).toBe("function");
+    expect(typeof AppSDKBarrel.useWindowChrome).toBe("function");
     expect(typeof AppSDKBarrel.createSynWare).toBe("function");
   });
   it("binds chrome actions to the mounting window with no target parameter", async () => {

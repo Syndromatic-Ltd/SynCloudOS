@@ -20,7 +20,7 @@ These paths stand for the actual filenames from that build manifest; the beta pa
 
 Only the companion depends on the official `@modelcontextprotocol/sdk`, TypeScript, Zod and the validator's Ajv runtime. Adding MCP does not add an MCP runtime dependency to the browser SDK. The SDK contains `docs/framework/`, `tooling/manifest.schema.json`, a generated `tooling/error-catalogue.json` and `tooling/build-receipt.json`. The receipt records the source commit and source fingerprint; the external build manifest additionally records archive integrity. No network access is needed for the tools once dependencies are installed.
 
-The companion package also ships its own `README.md` with the install, `--project` and client-configuration steps on this page. If `npm install` reports blocked install scripts for `esbuild`, see [Restricted npm install policies](getting-started.md#restricted-npm-install-policies).
+The companion package also ships its own `README.md` with the install, `--project` and client-configuration steps on this page. If `npm install` reports blocked install scripts for `esbuild`, see [Install in Getting started](getting-started.md#install).
 
 ## Configure a TOML-configured client
 
@@ -81,7 +81,7 @@ With neither `entry` nor `query`, output is `{ version, entries: string[] }`. Ot
 
 Use entry names such as `sdk`, `nse` or `fx/animation`. An entry without a query lists its exports. Queries fuzzy-match exported names, follow declaration re-exports and return declaration signatures, attached JSDoc and relevant sections of the installed framework docs. A low-confidence query can return no symbols; it does not invent an API. Returned documentation sections are capped at 6,000 characters each.
 
-Broad `application menu`, `settings`, `preferences` and `account` queries prioritise the public `useSynWareApplicationMenuTrigger` hook and `SynWareApplicationMenuManifest` before lower-level menu props or availability APIs. Documentation ranking favours the corresponding application-menu/Preferences sections and worked examples. Exact exported names still take precedence; equally relevant symbols from the main `sdk` entry rank before other entries.
+Broad `application menu`, `settings`, `preferences` and `account` queries prioritise the public `useApplicationMenuTrigger` hook and `SynWareApplicationMenuManifest` before lower-level menu props or availability APIs. Documentation ranking favours the corresponding application-menu/Preferences sections and worked examples. Exact exported names still take precedence; equally relevant symbols from the main `sdk` entry rank before other entries.
 
 ### `syncloudos.validate`
 
@@ -99,15 +99,15 @@ Validation does not run package scripts or builds. TypeScript checks may write t
 
 ### `syncloudos.scaffold`
 
-Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, id: string, name: string, route: string, policy?: { public?: boolean, requiresLogin?: boolean, requiredCapabilities?: string[], requiredAccessClasses?: ("team" | "external")[] }, presentation?: "appView" | "windowedView" | "systemSheet" | "backgroundService", contentApplicationMenu?: boolean }`.
+Input: `{ projectRoot?, appsDirectory?, preferencesDirectory?, widgetsDirectory?, integrationsDirectory?, webspringEntry?, kind?: "application" | "preferencePane" | "widget" | "integration", id?, name, route?, owners?, policy?, presentation?, contentApplicationMenu? }`. `kind` defaults to `"application"`; integrations require nonempty owner IDs.
 
 Output: `{ createdPaths: string[], nextSteps: string[] }`.
 
-Creates the existing SynWare bundle shape demonstrated by `examples/TextSystem.app`: `Name.app/Contents/Info.ts`, `Contents/index.tsx` exporting a real `createSynWare` definition, and `Contents/Resources/Localised/Base.locale/Localisable.strings`. The app has the requested id, title and route and supports desktop/tablet/mobile presentations. It does not copy the Text System demo's private document model or font requirements into unrelated apps.
+Creates a conventional project folder: `Name.app/Contents/index.tsx` default-exports a component, optional `Info.ts` contains overrides, and strings live in `Resources/Localised/Base.locale/`. Other kinds create `Name.prefPane/index.tsx`, `Name.widget/index.tsx` or `Name.integration.ts` with the corresponding `define*` declaration. Folder identity and package version are derived; explicit IDs and routes are preserved. It does not copy the Text System demo's private document model or font requirements.
 
 `policy` maps directly to `runtime.policy`, and `presentation` to `runtime.presentation`. Both are checked against the installed manifest schema before any files are written. Omitting `policy` preserves the normal private/default access behaviour; scaffolding never silently grants public access. With host authentication `"disabled"` or `"optional"`, the **primary** application must explicitly declare `policy: { public: true }`. The returned `nextSteps` flags this requirement whenever public access has not been requested. Do not apply it to private applications indiscriminately.
 
-For example, scaffold a deliberate public primary with `{ id: "org.example.notes", name: "Notes", route: "/notes", policy: { public: true }, contentApplicationMenu: true }`. `contentApplicationMenu: true` adds `applicationMenu: { trigger: "content" }` and a real `useSynWareApplicationMenuTrigger()` button in the root component, with its anchor, open state, accessible menu semantics and toggle connected. This is required for a fullscreen primary under `"optional"` or `"required"` authentication, so people can reach Preferences > Account, Sign In and Log Out. Omitting the option leaves the manifest and root without that menu and returns the requirement in `nextSteps`, even when public access was explicitly requested.
+For example, scaffold a deliberate public primary with `{ id: "org.example.notes", name: "Notes", route: "/notes", policy: { public: true }, contentApplicationMenu: true }`. `contentApplicationMenu: true` adds `applicationMenu: { trigger: "content" }` and a real `useApplicationMenuTrigger()` button in the root component, with its anchor, open state, accessible menu semantics and toggle connected. This is required for a fullscreen primary under `"optional"` or `"required"` authentication, so people can reach Preferences > Account, Sign In and Log Out. Omitting the option leaves the manifest and root without that menu and returns the requirement in `nextSteps`, even when public access was explicitly requested.
 
 For a secondary windowed inspector, choose `presentation: "windowedView"` and declare only the access policy it actually needs. Omitting presentation also returns that windowed-secondary reminder; it is distinct from the desktop/tablet/mobile device presentations.
 
@@ -137,4 +137,4 @@ After a stable build, run:
 node scripts/synware/check-developer-mcp-consumer.mjs
 ```
 
-The acceptance script installs both actual archives into a temporary independent project, starts the installed server over stdio, lists all five tools, inspects the installed build receipt, looks up `createSynWare` from installed declarations and docs, scaffolds an app and validates it with the consumer's `tsc --noEmit`, and explains the canonical controller-disposal code. It removes the temporary consumer afterward.
+The acceptance script installs both actual archives into a temporary independent project, starts the installed server over stdio, lists all five tools, inspects the installed build receipt, looks up `SynWareManifestOverrides` from installed declarations and docs, scaffolds an app and validates it with the consumer's `tsc --noEmit`, and explains the canonical controller-disposal code. It removes the temporary consumer afterward.

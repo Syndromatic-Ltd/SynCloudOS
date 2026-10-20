@@ -26,7 +26,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   SynWareProvider,
   defineSynWareServiceToken,
-  useSynWareService,
+  useService,
   type AppServiceClient,
   type SynWareContextValue,
 } from "../../src/SynCloudOS/AppSDK";
@@ -223,7 +223,7 @@ describe("typed service revocation and installed-lifetime semantics", () => {
     const value = Object.freeze({ ...base, services }) as SynWareContextValue;
 
     function Probe() {
-      const service = useSynWareService(catalogueToken);
+      const service = useService(catalogueToken);
       return <output>{service.available ? "available" : service.denial?.code ?? "missing"}</output>;
     }
 

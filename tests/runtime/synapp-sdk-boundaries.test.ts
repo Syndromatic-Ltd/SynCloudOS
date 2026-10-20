@@ -50,8 +50,7 @@ it("rejects a fabricated null root only in a first-party SynWare entry", async (
     mkdirSync(sdk, { recursive: true });
     writeFileSync(join(sdk, "sdkPackageEntry.ts"), "export const createSynWare = (definition) => definition;\n");
     writeFileSync(join(contents, "index.tsx"), [
-      'import { createSynWare } from "@syndromatic/syncloudos/sdk";',
-      'export default createSynWare({ manifest: { schemaVersion: 1, id: "placeholder", version: "1.0.0", title: "Placeholder" }, root: () => null });',
+      'export default function App() { return null; }',
     ].join("\n"));
 
     const audit = auditSynWareImports(root);

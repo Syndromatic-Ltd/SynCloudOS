@@ -56,7 +56,7 @@ export function SchemeLabel() {
 }
 ```
 
-Inside a SynWare, `useSynWareAppearance()` returns the requested appearance and the resolved mode, and it re-renders when either changes. The projection adds `data-nse-*` attributes on the boundary element (`data-mode` holds `light` or `dark`), so your own CSS can respond to the scheme with a plain selector:
+Inside a SynWare, `useAppearance()` returns the requested appearance and the resolved mode, and it re-renders when either changes. The projection adds `data-nse-*` attributes on the boundary element (`data-mode` holds `light` or `dark`), so your own CSS can respond to the scheme with a plain selector:
 
 ```css
 [data-mode="dark"] .note-surface {

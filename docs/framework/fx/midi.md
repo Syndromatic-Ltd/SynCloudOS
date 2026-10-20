@@ -20,7 +20,7 @@ import { MIFXEncoder, MIFXParser } from "@syndromatic/syncloudos/fx/midi";
 | --- | --- |
 | Prefix | `MIFX` |
 | Entry | `@syndromatic/syncloudos/fx/midi` |
-| Hook | `useSynWareMIDI`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useMIDI`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | `midi.access` for devices, and `midi.sysex` in addition for system exclusive access |
 | Analogue | Core MIDI (`MIDIClientRef`, `MIDIEndpointRef`, `MIDIEventList`, UMP conversion) |
 
@@ -191,7 +191,7 @@ console.log(message, losses);
 
 ### `MIFXClient` and `MIFXAccess`
 
-`useSynWareMIDI()` returns an `MIFXAccess` for your component. Mounting it creates a passive owner and requests nothing from the browser. Only `requestAuthorization()` prompts the user. The underlying `MIFXClient` (`createAccess(signal?)`) belongs to the session.
+`useMIDI()` returns an `MIFXAccess` for your component. Mounting it creates a passive owner and requests nothing from the browser. Only `requestAuthorization()` prompts the user. The underlying `MIFXClient` (`createAccess(signal?)`) belongs to the session.
 
 | Method | Type or signature | Description |
 | --- | --- | --- |
@@ -239,10 +239,10 @@ Before the component mounts, the hook's `getCapabilities()` reports `apiAvailabl
 ```tsx
 import { useEffect, useState } from "react";
 import { MIFXEncoder, MIFXParser, type MIFXEndpointSnapshot } from "@syndromatic/syncloudos/fx/midi";
-import { useSynWareMIDI } from "@syndromatic/syncloudos/sdk";
+import { useMIDI } from "@syndromatic/syncloudos/sdk";
 
 export function Keyboard() {
-  const midi = useSynWareMIDI();
+  const midi = useMIDI();
   const [state, setState] = useState("Not authorised");
   const [endpoints, setEndpoints] = useState<readonly MIFXEndpointSnapshot[]>([]);
   const [lastNote, setLastNote] = useState<number | null>(null);
@@ -321,7 +321,7 @@ new MIFXScheduler(options: MIFXSchedulerOptions)
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `clock` | `MEFXClock` | required | The clock that target times refer to, usually a timebase from `useSynWareMedia().createTimebase()`. |
+| `clock` | `MEFXClock` | required | The clock that target times refer to, usually a timebase from `useMedia().createTimebase()`. |
 | `output` | `MIFXOutputLease` | required | Where events are sent. |
 | `ownerSignal` | `AbortSignal` | none | When it aborts, queued events are cancelled and the scheduler is disposed. |
 | `maximumQueuedEvents` | `number` | 256 | The most pending events, an integer from 1 to 65,536. |
@@ -340,11 +340,11 @@ new MIFXScheduler(options: MIFXSchedulerOptions)
 import { useEffect } from "react";
 import { MEFXTime } from "@syndromatic/syncloudos/fx/media";
 import { MIFXEncoder, MIFXScheduler } from "@syndromatic/syncloudos/fx/midi";
-import { useSynWareMedia, useSynWareMIDI } from "@syndromatic/syncloudos/sdk";
+import { useMedia, useMIDI } from "@syndromatic/syncloudos/sdk";
 
 export function Arpeggio() {
-  const midi = useSynWareMIDI();
-  const media = useSynWareMedia();
+  const midi = useMIDI();
+  const media = useMedia();
 
   useEffect(() => {
     const controller = new AbortController();

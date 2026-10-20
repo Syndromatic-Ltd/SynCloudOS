@@ -32,21 +32,18 @@ import {
   synCloudOSLifecycleSignalReason,
   type SynCloudOSLifecycleDisposalReason,
 } from "../../SynCloudOS/nseRuntimeContracts";
+import { resolveOwnership, type NSEControllerOwnershipOptions } from "./ownership";
 
 /** Why a controller was disposed. `"explicit"` is a `dispose()` call. */
 export type NSEControllerDisposalReason = SynCloudOSLifecycleDisposalReason;
 
-/** Ownership options every controller accepts. */
-export interface NSEControllerOwnership {
-  /**
-   * Disposes the controller when it aborts. Pass `useSynWare().signal` to
-   * make the application session the owner: the controller is then disposed
-   * when the application closes, recording `"application-closed"`; any other
-   * signal records `"owner-signal-aborted"`. Construction throws the abort
-   * reason when the signal has already aborted.
-   */
-  readonly ownerSignal?: AbortSignal;
-}
+/**
+ * Ownership options every controller accepts: `ownerSignal` or `owner`. With
+ * neither, a controller created while an application, window controller or
+ * view controller is being constructed is owned by it. See
+ * {@link NSEControllerOwnershipOptions}.
+ */
+export type NSEControllerOwnership = NSEControllerOwnershipOptions;
 
 export interface ControllerValidationIssue {
   readonly code: string;
@@ -156,11 +153,11 @@ export abstract class NSEController<TSnapshot, TChange> {
     if (options.responderId !== undefined && !options.responderId.trim()) {
       throw new TypeError("Controller responder id must not be empty.");
     }
-    options.ownerSignal?.throwIfAborted();
+    const ownerSignal = resolveOwnership(options, { kind: options.kind, id: options.id }).signal;
+    ownerSignal?.throwIfAborted();
     this.id = options.id;
     this.responderId = options.responderId ?? `controller:${options.id}`;
     this.#lifecycle = new SynCloudOSLifecycleRecord({ kind: options.kind, id: options.id });
-    const ownerSignal = options.ownerSignal;
     if (ownerSignal) {
       const release = () => this.#disposeFor(synCloudOSLifecycleSignalReason(ownerSignal));
       ownerSignal.addEventListener("abort", release, { once: true });

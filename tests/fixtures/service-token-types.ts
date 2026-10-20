@@ -20,7 +20,7 @@
 
 import {
   defineSynWareServiceToken,
-  useSynWareService,
+  useService,
   type AppServiceClient,
   type SynWareContextValue,
 } from "../../src/SynCloudOS/AppSDK/sdkPackageEntry";
@@ -53,7 +53,7 @@ required.search("air");
 const optional = services.optional(token);
 if (optional.available && optional.client) optional.client.search("justice");
 
-const hooked = useSynWareService(token);
+const hooked = useService(token);
 if (hooked.available && hooked.client) hooked.client.search("daft punk");
 
 // @ts-expect-error inferred SearchClient has no count method.
@@ -70,7 +70,7 @@ services.require(token.id);
 // @ts-expect-error Optional acquisition accepts a token, not its string ID.
 services.optional(token.id);
 // @ts-expect-error The hook accepts authentic typed tokens, never string IDs.
-useSynWareService("com.syndromatic.search");
+useService("com.syndromatic.search");
 // @ts-expect-error Service subscriptions use the same token identity.
 services.subscribe("com.syndromatic.search", () => undefined);
 declare const app: SynWareContextValue;

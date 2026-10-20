@@ -26,7 +26,9 @@ export type SynCloudOSLifecycleDisposalReason =
   | "explicit"
   | "owner-unmounted"
   | "owner-signal-aborted"
-  | "application-closed";
+  | "application-closed"
+  | "window-closed"
+  | "removed-from-parent";
 
 export interface SynCloudOSLifecycleResource {
   /** The resource family, such as `"NSEArrayController"`. */
@@ -49,7 +51,7 @@ export interface SynCloudOSLifecycleErrorOptions {
   readonly operation: string;
   /** How the member was reached: a method call, a property read or a property
    * write. Without it the message says the member could not be used. */
-  readonly access?: "call" | "get" | "set";
+  readonly access?: "call" | "get" | "set" | "construct";
   /** A sentence describing a resource-specific cause, when the disposal
    * reason alone does not explain it. */
   readonly problem?: string;
@@ -63,6 +65,8 @@ const reasonDescriptions: Readonly<Record<SynCloudOSLifecycleDisposalReason, str
   "owner-unmounted": "the component that owned it unmounted",
   "owner-signal-aborted": "its owner signal aborted",
   "application-closed": "the application session that owned it ended",
+  "window-closed": "the window that owned it closed",
+  "removed-from-parent": "its parent removed it",
 });
 
 /** A readable description of a recorded disposal reason, for diagnostics. */
@@ -78,6 +82,7 @@ function describeAttempt(options: SynCloudOSLifecycleErrorOptions): string {
     case "call": return `call ${member}()`;
     case "get": return `read ${member}`;
     case "set": return `set ${member}`;
+    case "construct": return `create ${options.resource.kind}${options.resource.id === undefined ? "" : ` "${options.resource.id}"`}`;
     default: return `use ${member}`;
   }
 }
@@ -93,7 +98,7 @@ export class SynCloudOSLifecycleError extends Error {
   readonly code: string;
   readonly resource: Readonly<SynCloudOSLifecycleResource>;
   readonly operation: string;
-  readonly access?: "call" | "get" | "set";
+  readonly access?: "call" | "get" | "set" | "construct";
   readonly problem?: string;
   readonly disposal?: Readonly<SynCloudOSLifecycleDisposal>;
   /** Development builds only: the React owner stack of the creating component. */
@@ -102,7 +107,9 @@ export class SynCloudOSLifecycleError extends Error {
   readonly creationStack?: string;
 
   constructor(options: SynCloudOSLifecycleErrorOptions) {
-    super(`Cannot ${describeAttempt(options)} ${options.disposal ? "after disposal" : "while it is inactive"}.`);
+    super(options.access === "construct"
+      ? `Cannot ${describeAttempt(options)} outside an owner.`
+      : `Cannot ${describeAttempt(options)} ${options.disposal ? "after disposal" : "while it is inactive"}.`);
     this.name = "SynCloudOSLifecycleError";
     this.code = options.code;
     this.resource = Object.freeze({ ...options.resource });

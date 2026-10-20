@@ -85,7 +85,7 @@ An application that becomes visible later joins its declared folder if the visit
 
 The layout persists under the preference key `webspring.layout.v4` as `{ version: 4, order, folders: { [id]: { apps } }, board, updatedAt, source }`, where `order` lists top-level entries. Layouts stored under an earlier version are ignored.
 
-On the Board, tapping a folder opens it with the definition's `folderPresentation`. The default is the iOS 6 split: the stage is captured and parted below the folder's cell (its icon and label), revealing the folder's applications on a linen underlay. Escape, or a tap on either half, closes it; reduced motion crossfades instead. Configure or replace it in the definition:
+On the Board, tapping a folder opens it with the definition's `folderPresentation`. The default is the iOS 6 split: the stage is copied and parted below the folder's cell (its icon and label), revealing the folder's applications on a linen underlay. Escape, or a tap on either half, closes it; reduced motion crossfades instead. Configure or replace it in the definition:
 
 ```tsx
 import { createWebspringFolderSplitPresentation, defineWebspring, WebspringBoardView } from "@syndromatic/syncloudos/webspring";
@@ -104,8 +104,6 @@ export default defineWebspring({
 ```
 
 A custom presentation is a component receiving `WebspringFolderPresentationProps`: `folder`, `stage` (the element to present over), `anchor` (the rect of the folder's cell, icon and label), `reducedMotion`, `renderApp(app, index)` and `onClose`. Mark the panel holding the applications with `data-webspring-folder-panel`; the Board takes an application out of the folder when a drag leaves that element.
-
-A presentation may also carry three optional functions. `prepare(stage)` starts the work an opening needs as the user reaches for a folder. `keepPrepared(stage)` keeps that work done ahead of any reach while the view is at rest, and returns the function that stops it. `warm()` loads what the presentation needs ahead of any folder.
 
 ### Folder icons
 
@@ -130,36 +128,39 @@ export default defineWebspring({
 
 The open folder's underlay is set separately, on the presentation.
 
-### Preparing a folder to open
+### How the split opens
 
-The split can only begin once the stage is captured, so the split presentation keeps a snapshot ready:
+The split presentation copies the stage's DOM into each half, so it captures nothing and opens without a wait. A copy carries no pixels of its own, so canvases in the stage are drawn across into it; the split's own overlays are left out, every `id` is dropped, and the copy takes no pointer input and is not announced.
 
-- **At rest**, it keeps a current snapshot of the stage. Any change to the stage's content, text or attributes (other than ARIA state), any scroll and any resize make the snapshot stale; it is retaken at idle once the stage has been quiet for 300 ms, at most every two seconds, and never while a finite animation is running in the stage. Because that covers everything a view draws from its DOM, a background snapshot does not expire. A tap with no hover before it opens from this snapshot at once.
-- **On a reach** (hover, press or focus), it holds the current snapshot, or takes one if there is none. The press and the opening change the stage themselves, so a held snapshot ignores changes for four seconds; after that a changed snapshot is dropped and, at rest, retaken.
+Clones keep the stage's full dimensions when its edge is outside the viewport, and are rebuilt when its visible rectangle changes. They are inert as well as hidden from assistive technology; modal focus traversal skips hidden and inert subtrees, so Tab and Shift+Tab stay among the folder's real application controls and never enter either copy.
 
-A view drives this with one hook:
+Every icon in a copy is marked with `data-webspring-folder-backdrop`: `backdrop` for the icons and labels that fade back as the halves part, and `anchor` for the opened folder's own icon, which stays at full strength. A view names its icons with `data-webspring-item-id`, as the Board and the dial do, for the presentation to tell them apart. Styles read these properties on `.webspring-folder-split`:
 
-```tsx
-import { useWebspringFolderPreparation } from "@syndromatic/syncloudos/webspring";
+| Property | Default | Meaning |
+|---|---|---|
+| `--webspring-folder-backdrop-icon-opacity` | `0.22` | Opacity of the icons and labels behind an open folder. |
+| `--webspring-folder-backdrop-icon-saturation` | `0.35` | Saturation of those icons; the wallpaper is untouched. |
+| `--webspring-folder-edge-shadow` | `0.55` | Strength of the seam shadows, from the `edgeShadow` option. |
+| `--webspring-folder-duration` | `0.42s` | How long the halves take to part or rejoin, from the `duration` option. |
+| `--webspring-folder-easing` | `cubic-bezier(.3, .72, .18, 1)` | Shared timing curve for the split, icon fade and seams. |
 
-const prepareFolder = useWebspringFolderPreparation(folderPresentation, hasFolders ? stageElement : null, {
-  atRest: !launching && !editing && !dragging && !folderOpen,
-});
+The fade runs with the halves and reverses as they rejoin.
 
-<button onPointerEnter={prepareFolder} onPointerDown={prepareFolder} onFocus={prepareFolder} onClick={open}>…</button>
-```
+The triangle is part of the top seam from the first frame, fixed at 14 px deep rather than grown: the stage above the seam dips 14 px into the linen below the folder's cell, with `notch` off meaning a straight seam. At rest the bottom half reaches those 14 px above the seam, so it covers the triangle and the stage reads as unbroken; opening moves the bottom half down, uncovering the triangle first, and closing brings it back over the triangle until it sinks into the bottom seam. The lit seam and its shadow follow the straight edge and the triangle's two edges, deepest at the tip, because the clip sits inside the wrapper that casts them; the bottom seam carries its own light line above the panel's shadow, drawn once the halves have parted. Everything is a CSS filter: no SVG filter references.
 
-The hook warms the presentation while it has a stage, keeps an opening prepared while `atRest` is true, and returns a stable function that calls `prepare` with the stage. Pass a null stage while the view shows no folders. The Board is at rest when no launch, entrance, edit, drag or open folder is under way, and prepares on a folder's hover, press and focus.
+The top wrapper uses `drop-shadow(0 1px 0 rgba(255,255,255,.3)) drop-shadow(0 3px 7px rgba(0,0,0,.85))`. The bottom edge uses `inset 0 1px 0 rgba(255,255,255,.3)`, with an outer shadow of `0 -2px 8px rgba(0,0,0,.33)` at the default `edgeShadow`. The triangle's base is 28 px wide, and the seam starts 6 px below the folder cell. The bottom half paints above the top half so it covers the fixed triangle when shut.
+
+With reduced motion the halves do not move; the presentation crossfades between the closed and open states and draws the seams and triangle where they sit.
 
 ## Branding
 
 Branding lives in `webspringShell.branding`. The host resolves the logo resource before the shell and sign-in gate mount. Light, dark and compact variants fall back to the primary logo, and then to the localised site name. A SynWare reads the same values from the session:
 
 ```tsx
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 
 export function AppHeader() {
-  const { branding } = useSynWare();
+  const { branding } = useSCOS();
   return (
     <header>
       {branding.logoUrl ? <img src={branding.logoUrl} alt={branding.logoAlt} /> : null}
@@ -265,20 +266,16 @@ Mount the shell through the browser host, as the [runtime guide](runtime.md#moun
 
 ```tsx
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { bundles, shell, shellResources } from "virtual:syncloudos/composition";
 
 const host = await mountSynCloudOS({
   element: document.getElementById("root")!,
-  bundles,
-  shell,
-  shellResources,
   authentication: "disabled",
 });
 
 await host.dispose("application shutdown");
 ```
 
-The Vite plugin builds the virtual composition module from your shell and bundles. By default it looks in `src/SynWare/*.app` and `src/Webspring/Contents/index.tsx`. `synCloudOS({ appsDirectory, webspringEntry })` chooses other locations, and `webspringEntry: false` produces a composition of applications alone. Discovery requires each bundle to have `Contents/Info.ts` and `Contents/index.tsx`. It rejects symbolic links, duplicate paths and resources that escape the bundle, and it watches for bundles added or removed while the dev server runs.
+The Vite plugin discovers `src/SynWare/*.app`, `src/Preferences/*.prefPane`, `src/Widgets/*.widget`, `src/Integrations/*.integration.ts` and the optional shell in `src/Webspring/Contents/index.tsx`. It injects that project into `mountSynCloudOS` automatically. Only `Contents/index.tsx` is required for an application; `Info.ts` contains optional overrides. Directory options and `webspringEntry: false` customise discovery. It rejects symbolic links and path/resource collisions, and watches additions and removals. See [Project structure](project-structure.md).
 
 ## Authentication
 
@@ -328,7 +325,7 @@ The host distinguishes failed communication from a missed response deadline. `CO
 
 HTTP authentication bounds the request and response body together to 15 seconds by default. Set `requestTimeoutMs` on `createHttpAuthentication` to choose another deadline. Its recovery alert offers a real session refresh, and a successful refresh clears that alert. Passive browser reconnection revalidates session reads without overtaking a pending logout or replaying sign-in and sign-out writes.
 
-Applications report remote failures through their existing `useSynWare().errors.capture` client. Pass `code: "CONNECTION_ERROR"` for a known transport failure, or `code: "APP_NOT_RESPONDING"` with `timeoutMs` for a deadline. A `TimeoutError` is recognised as a deadline automatically. Supply `retry` only when there is an actual operation to repeat; a retry failure is reported again, and closing the mounted owner prevents late results from creating alerts. Ordinary programming errors, including arbitrary `TypeError` instances outside the HTTP response reader, are not inferred to be network failures.
+Applications report remote failures through their existing `useSCOS().errors.capture` client. Pass `code: "CONNECTION_ERROR"` for a known transport failure, or `code: "APP_NOT_RESPONDING"` with `timeoutMs` for a deadline. A `TimeoutError` is recognised as a deadline automatically. Supply `retry` only when there is an actual operation to repeat; a retry failure is reported again, and closing the mounted owner prevents late results from creating alerts. Ordinary programming errors, including arbitrary `TypeError` instances outside the HTTP response reader, are not inferred to be network failures.
 
 The browser host also runs a private worker heartbeat while the document is visible, with a 10 second threshold. A shared main-thread stall belongs to the site because the event loop cannot establish which application caused it. The worker can observe the stall independently, but the page can display its alert only after the main thread resumes; a permanently blocked page cannot render its own recovery UI. Hidden or suspended pages reset the probe. Where a worker cannot run, a supported long-task observer reports completed stalls.
 
@@ -346,6 +343,17 @@ The Board is one view. You can supply another component for a view identifier, a
 
 Elements a view hands to the drag hit-testing helpers carry `data-webspring-item-id` and `data-order-index`.
 
+A drag arbitrates from the dragged icon's centre, not the pointer. `useWebspringDragProxyPosition` keeps the grab offset, so the icon's centre is what rests on a target. `createWebspringDragArbiter` times the rests and reports them to the view through four commands: `reorder(index)`, `merge(targetId | null)` for the drop well, `springOpen(folderId)` and `leavePanel(folderId)`. A custom view calls `update(centre, view)` on each pointer move with the centre and its container's entries, `clear()` when its layout changes under the drag, and `end()` on release, which reports the drop well, the folder and the index the release falls on. The rules are:
+
+- Reorder: once the icon has rested 150 ms on the slot whose artwork is nearest its centre, it moves there. When that nearest slot is its own, nothing moves. Leaving and returning restarts the wait.
+- Merge: an app whose centre rests over another app's artwork for 350 ms arms a drop well (`setDropTarget`). The label is not part of the target. Releasing on the well calls `dropOnItem`.
+- Folder: a folder's artwork, with a 20 % margin around it, takes an app after 200 ms on it, as a drop well.
+- Spring: an app whose centre has been on a folder for 800 ms opens it under the drag, with `openFolder(folderId, { duringDrag: true })`, and the drop well gives way to the panel. The drag continues inside the panel.
+- Panel: the folder stays open while the centre is inside its panel or in the band between the folder's cell and the panel's top edge. Crossing the panel's edge calls `leavePanel`, once per departure; a member that leaves first moves out with `moveAppOutOfFolder`. Only a member reorders inside its panel. An app from the Board is held there until release and joins at the nearest member's slot.
+- Folders never merge. Where the folders are fixed (`editable: false`), an app does not merge, so no drop well or spring-open arises.
+
+`captureWebspringDragArtworkRects` measures the artwork zones the rules test against.
+
 A custom view owns its markup, styles and choreography. The host owns sessions, routing, application lifecycle, focus, overlays and cleanup, so a view never creates runtime sessions or reads host services. Use `model.presentationTraits.reducedMotion` to choose a static response when the user prefers less motion.
 
 A view declares which return tracks it reports by setting `returnTracks` on the component, for example `Object.assign(MyLauncher, { returnTracks: ["material", "icons"] as const })`. A view that declares none is expected to report both.
@@ -355,9 +363,10 @@ The pieces the Board is built from are public, so a custom launcher can share it
 | Export | Purpose |
 | --- | --- |
 | `WebspringLaunchDim`, `resolveWebspringLaunchDimMotion` | The dim drawn over the launcher while an application opens. |
-| `WebspringDragProxy`, `useWebspringDragProxyPosition` | The icon or folder that follows the pointer while the user reorders. |
+| `WebspringDragProxy`, `useWebspringDragProxyPosition`, `getWebspringDragGrabOffset` | The icon or folder that follows the pointer while the user reorders, keeping the grab offset from the icon's centre. |
+| `createWebspringDragArbiter`, `captureWebspringDragArtworkRects` | The Board's drag rules: artwork hit zones, rests, folder spring-open and the panel boundary. |
 | `captureWebspringDragReorderSlots`, `getWebspringDragReorderTargetFromPoint` | Hit testing for drag reordering against the slots the view draws. |
-| `WebspringFolderTile`, `createWebspringFolderSplitPresentation`, `useWebspringFolderPreparation` | A folder's icon tile of its members, the default folder presentation, and preparing a folder to open. |
+| `WebspringFolderTile`, `createWebspringFolderSplitPresentation` | A folder's icon tile of its members, and the default folder presentation. |
 | `useWebspringFolderAppearance` | The definition's folder appearance, for artwork that matches the folder tile. |
 | `WebspringWidgetShelf`, `defineWidget` | The widget shelf for `model.widgets`: it loads each widget and draws its loading, empty, error and timeout states. |
 | `WebspringSurface`, `webspringSurfaceStyle` | The surface presets, and the CSS custom properties that paint a surface. `model.background` holds the resolved launcher and shelf surfaces. |

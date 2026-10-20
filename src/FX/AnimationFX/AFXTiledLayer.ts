@@ -19,7 +19,7 @@
  */
 
 import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/fxRuntimeContracts";
-import { AFXLayer, type AFXFrameScheduler, type AFXLayerSurface } from "./AFXLayer";
+import { AFXLayer, type AFXFrameScheduler, type AFXLayerPorts } from "./AFXLayer";
 import type { AFXTileContent, AFXTiledContent } from "./AFXLayerContent";
 import { intersectRects, normaliseRect, normaliseSize, type GFXRect, type GFXSize } from "../GraphicsFX/GFXGeometry";
 import { GFXImage } from "../GraphicsFX/GFXImage";
@@ -60,7 +60,7 @@ const finite = (value: number, label: string, minimum: number, maximum: number) 
 /** Visible-region tiled projection with bounded asynchronous GFX/IFX rendering. */
 export class AFXTiledLayer extends AFXLayer {
   readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "AFXTiledLayer" });
-  readonly #scheduler: AFXFrameScheduler;
+  #scheduler: AFXFrameScheduler | null = null;
   #drawTile: AFXTileDraw | null = null;
   #tileImageContext: IFXContext | null = null;
   #activeDraws = 0;
@@ -85,33 +85,17 @@ export class AFXTiledLayer extends AFXLayer {
   #waiters = new Set<IdleWaiter>();
   #lastError: unknown = null;
   #disposed = false;
-  readonly #ownerSignal: AbortSignal | undefined;
+  #ownerSignal: AbortSignal | undefined;
 
-  constructor(surface: AFXLayerSurface, scheduler: AFXFrameScheduler, options: Readonly<{ signal?: AbortSignal }> = {}) {
-    super(surface, scheduler, options);
-    this.#ownerSignal = options.signal;
-    this.#scheduler = scheduler;
-    let pendingRelease: (() => void) | null = null;
-    try {
-      this.setLayerContent("constructor", this.#content([]));
-      if (options.signal?.aborted || this.#disposed)
-        throw new DOMException("Tiled layer owner aborted during construction.", "AbortError");
-      pendingRelease = scheduler.subscribeState?.(() => this.#stateChanged()) ?? null;
-      if (options.signal?.aborted || this.#disposed) {
-        try { pendingRelease?.(); } catch {}
-        pendingRelease = null;
-        throw new DOMException("Tiled layer owner aborted during construction.", "AbortError");
-      }
-      this.#releaseState = pendingRelease;
-      pendingRelease = null;
-    } catch (error) {
-      try { pendingRelease?.(); } catch {}
-      if (!this.#disposed) {
-        this.#disposed = true;
-        try { super.dispose(); } catch {}
-      }
-      throw error;
-    }
+  constructor() {
+    super();
+    this.setLayerContent("constructor", this.#content([]));
+  }
+  protected override layerDidAttach(ports: AFXLayerPorts): void {
+    super.layerDidAttach(ports);
+    this.#ownerSignal = ports.signal;
+    this.#scheduler = ports.scheduler;
+    this.#releaseState = ports.scheduler.subscribeState?.(() => this.#stateChanged()) ?? null;
   }
   #assertLive(operation: string) { if (this.#disposed) throw this.#lifecycle.error({ code: "AFX_TILED_LAYER_DISPOSED", operation: operation }); }
   #content(tiles: readonly AFXTileContent[]): AFXTiledContent {
@@ -176,7 +160,7 @@ export class AFXTiledLayer extends AFXLayer {
     this.#queue = [];
   }
   #schedule() {
-    if (this.#disposed || this.#cancelFrame || this.#scheduler.suspended || !this.#drawTile || !this.#visible) {
+    if (this.#disposed || this.#cancelFrame || !this.#scheduler || this.#scheduler.suspended || !this.#drawTile || !this.#visible) {
       this.#settleIdle();
       return;
     }
@@ -197,7 +181,7 @@ export class AFXTiledLayer extends AFXLayer {
     this.#publish();
   }
   #drain() {
-    if (this.#scheduler.suspended || !this.#drawTile) { this.#settleIdle(); return; }
+    if (!this.#scheduler || this.#scheduler.suspended || !this.#drawTile) { this.#settleIdle(); return; }
     while (this.#activeDraws < MAX_CONCURRENT && this.#queue.length) {
       const spec = this.#queue.shift()!;
       if ((this.#versions.get(spec.key) ?? 0) !== spec.version) continue;
@@ -276,7 +260,7 @@ export class AFXTiledLayer extends AFXLayer {
     });
     const complete = currentTiles.length === current.length;
     const fallback = complete || !this.#visible ? [] : [...this.#cache.values()].filter((tile) => tile.level !== this.#currentLevel && !!intersectRects(tile.rect, this.#visible!));
-    const fadeDuration = this.#scheduler.reducedMotion ? 0 : this.#fadeDuration;
+    const fadeDuration = this.#scheduler?.reducedMotion ? 0 : this.#fadeDuration;
     this.setLayerContent("setNeedsDisplay", this.#content([...fallback, ...currentTiles].map(({ key, rect, image, scale, level }) => Object.freeze({ key, rect, image, scale, level, fadeDuration }))));
   }
   #settleIdle() {
@@ -298,7 +282,7 @@ export class AFXTiledLayer extends AFXLayer {
   }
   #stateChanged() {
     if (this.#disposed) return;
-    if (this.#scheduler.suspended) {
+    if (this.#scheduler?.suspended) {
       this.#cancelScheduled();
       this.#cancelPending();
       this.#settleIdle();

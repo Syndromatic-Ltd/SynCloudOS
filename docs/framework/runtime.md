@@ -26,13 +26,9 @@ import "@syndromatic/syncloudos/nse/styles.css";
 import "@syndromatic/syncloudos/browser/styles.css";
 import "@syndromatic/syncloudos/webspring/styles.css";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { bundles, shell, shellResources } from "virtual:syncloudos/composition";
 
 const host = await mountSynCloudOS({
   element: document.getElementById("root")!,
-  bundles,
-  shell,
-  shellResources,
   authentication: "disabled",
 });
 
@@ -44,7 +40,8 @@ The options are:
 | Option | Purpose |
 | --- | --- |
 | `element` | The page element that receives the shell. |
-| `bundles` | The SynWare bundles to register. Each is a definition or a discovered descriptor. The [Vite plugin](getting-started.md#add-the-vite-plugin) generates the list for you. |
+| `composition` | Explicit project composition for hosts without the Vite plugin. The plugin injects its discovered project when this is omitted. |
+| `bundles` | The SynWare bundles to register. Each is a definition or a discovered descriptor. The [Vite plugin](getting-started.md#enable-folder-discovery) generates the list for you. |
 | `shell` | The [Webspring](webspring.md) definition. |
 | `shellResources` | Icons, strings and other resources for the shell. |
 | `authentication` | `"disabled"` for open sites, or an [authentication configuration](authentication.md). |

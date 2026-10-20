@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
 import { NSENavigationStackController } from "./NSENavigationStackController";
 import type {
   NSENavigationDestination,
@@ -27,7 +28,7 @@ import type {
   NSETabBarRestorationSnapshot,
 } from "./navigationTypes";
 
-export interface NSETabBarControllerOptions<TContent = unknown> {
+export interface NSETabBarControllerOptions<TContent = unknown> extends NSEViewControllerOptions {
   readonly id: string;
   readonly destinations: readonly NSENavigationDestination<TContent>[];
   /** Explicit source-list grouping. Omit to derive stable groups from `groupId`. */
@@ -164,25 +165,7 @@ function awaitAbortable<T>(value: Promise<T>, signal: AbortSignal): Promise<T> {
 
 /** A semantic tab owner. Physical tab bars and source-list projections consume
  * this controller; it never infers destinations from panes or visual tabs. */
-export interface NSETabBarController<TContent = unknown> {
-  getSnapshot(): NSETabBarControllerSnapshot;
-  subscribe(listener: () => void): () => void;
-  getDestination(destinationId: string): NSENavigationDestination<TContent> | null;
-  getContent(destinationId: string): TContent | null;
-  select(destinationId: string, options?: NSENavigationSelectionOptions): Promise<void>;
-  /** Pushes the semantic More destination without selecting a hidden peer. */
-  openOverflow(options?: NSENavigationSelectionOptions): Promise<void>;
-  /** Returns an open More page to the retained tab root. */
-  closeOverflow(): void;
-  restore(snapshot: NSETabBarRestorationSnapshot): void;
-  /** Replaces the copy of existing destinations and sections, as a localised
-   * UITabBarItem title changes in place. Identity, order, selection,
-   * restoration and cached content are untouched. */
-  retitle(titles: NSETabBarTitles): void;
-  dispose(): void;
-}
-
-export class NSETabBarController<TContent = unknown> {
+export class NSETabBarController<TContent = unknown> extends NSEViewController<NSETabBarControllerSnapshot> {
   readonly id: string;
   readonly moreStack: NSENavigationStackController | null;
   #destinations: readonly NSENavigationDestination<TContent>[];
@@ -193,17 +176,16 @@ export class NSETabBarController<TContent = unknown> {
   readonly #directDestinationIds: readonly string[];
   readonly #overflowDestinationIds: readonly string[];
   readonly #onSelect: NSETabBarControllerOptions<TContent>["onSelect"];
-  readonly #listeners = new Set<() => void>();
   readonly #contentByDestinationId = new Map<string, TContent>();
   #selectedDestinationId: string;
   #revision = 0;
   #snapshot: NSETabBarControllerSnapshot;
-  #disposed = false;
   #pending: AbortController | null = null;
   #intentRevision = 0;
   #unsubscribeMore: (() => void) | null = null;
 
   constructor(options: NSETabBarControllerOptions<TContent>) {
+    super(options);
     this.id = requireId(options.id, "Tab bar controller id");
     if (options.destinations.length === 0) throw new TypeError("Tab bar controllers require at least one destination.");
     const destinations = options.destinations.map(freezeDestination);
@@ -246,29 +228,18 @@ export class NSETabBarController<TContent = unknown> {
         // can push that destination and give shared stage chrome an honest
         // Back-to-More transition.
         destinationIds: [overflowRootDestinationId, moreDestinationId, ...this.#overflowDestinationIds],
+        owner: this,
       });
     this.#unsubscribeMore = this.moreStack?.subscribe(() => {
-      if (!this.#disposed) this.#publish();
+      if (!this.isDisposed) this.#publish();
     }) ?? null;
     this.#snapshot = this.#makeSnapshot();
+    this.getSnapshot = () => this.#snapshot;
   }
-
-  getSnapshot = (): NSETabBarControllerSnapshot => this.#snapshot;
 
   get destinations(): readonly NSENavigationDestination<TContent>[] { return this.#destinations; }
 
   get sections(): readonly NSENavigationSection[] { return this.#sections; }
-
-  subscribe(listener: () => void): () => void {
-    if (this.#disposed) return () => undefined;
-    this.#listeners.add(listener);
-    let active = true;
-    return () => {
-      if (!active) return;
-      active = false;
-      this.#listeners.delete(listener);
-    };
-  }
 
   getDestination(destinationId: string): NSENavigationDestination<TContent> | null {
     if (destinationId === overflowRootDestinationId) return this.#overflowRootDestination;
@@ -301,7 +272,7 @@ export class NSETabBarController<TContent = unknown> {
       && this.moreStack?.getSnapshot().currentDestinationId === moreDestinationId;
     try {
       await awaitAbortable(Promise.resolve(this.#onSelect?.(destination, { signal, source: options.source })), signal);
-      if (this.#disposed || this.#intentRevision !== intentRevision || this.#pending !== operation || signal.aborted) {
+      if (this.isDisposed || this.#intentRevision !== intentRevision || this.#pending !== operation || signal.aborted) {
         throw abortError(signal.reason);
       }
       if (pushesFromMore && this.moreStack?.getSnapshot().currentDestinationId === moreDestinationId) {
@@ -309,7 +280,7 @@ export class NSETabBarController<TContent = unknown> {
       } else {
         this.moreStack?.popToRoot();
       }
-      if (this.#disposed || this.#intentRevision !== intentRevision || this.#pending !== operation || signal.aborted) {
+      if (this.isDisposed || this.#intentRevision !== intentRevision || this.#pending !== operation || signal.aborted) {
         throw abortError(signal.reason);
       }
       this.#selectedDestinationId = destinationId;
@@ -319,6 +290,7 @@ export class NSETabBarController<TContent = unknown> {
     }
   }
 
+  /** Pushes the semantic More destination without selecting a hidden peer. */
   async openOverflow(options: NSENavigationSelectionOptions = {}): Promise<void> {
     this.#assertLive();
     const intentRevision = this.#beginIntent();
@@ -332,7 +304,7 @@ export class NSETabBarController<TContent = unknown> {
     try {
       this.moreStack.popToRoot();
       await this.moreStack.push(moreDestinationId, { signal });
-      if (this.#disposed || this.#intentRevision !== intentRevision || this.#pending !== operation || signal.aborted) {
+      if (this.isDisposed || this.#intentRevision !== intentRevision || this.#pending !== operation || signal.aborted) {
         throw abortError(signal.reason);
       }
     } finally {
@@ -340,6 +312,7 @@ export class NSETabBarController<TContent = unknown> {
     }
   }
 
+  /** Returns an open More page to the retained tab root. */
   closeOverflow(): void {
     this.#assertLive();
     this.#invalidatePendingIntent();
@@ -375,6 +348,9 @@ export class NSETabBarController<TContent = unknown> {
     this.#publish();
   }
 
+  /** Replaces the copy of existing destinations and sections, as a localised
+   * UITabBarItem title changes in place. Identity, order, selection,
+   * restoration and cached content are untouched. */
   retitle(titles: NSETabBarTitles): void {
     this.#assertLive();
     const destinationTitles = titles.destinations ?? {};
@@ -413,14 +389,10 @@ export class NSETabBarController<TContent = unknown> {
     this.#publish();
   }
 
-  dispose(): void {
-    if (this.#disposed) return;
+  protected override didDispose(): void {
     this.#invalidatePendingIntent();
-    this.#disposed = true;
     this.#unsubscribeMore?.();
     this.#unsubscribeMore = null;
-    this.moreStack?.dispose();
-    this.#listeners.clear();
   }
 
   #isSelectable(destinationId: string): boolean {
@@ -428,7 +400,7 @@ export class NSETabBarController<TContent = unknown> {
   }
 
   #assertLive(): void {
-    if (this.#disposed) throw abortError();
+    if (this.isDisposed) throw abortError();
   }
 
   #beginIntent(): number {
@@ -460,10 +432,10 @@ export class NSETabBarController<TContent = unknown> {
   }
 
   #publish(): void {
-    if (this.#disposed) return;
+    if (this.isDisposed) return;
     this.#revision += 1;
     this.#snapshot = this.#makeSnapshot();
-    for (const listener of [...this.#listeners]) listener();
+    this.notifyObservers();
   }
 }
 

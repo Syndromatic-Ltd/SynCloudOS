@@ -429,10 +429,13 @@ const webspringState = {
     return true;
   },
 
-  openFolder(folderId: string) {
+  /** Opens a folder. While an item is dragged only the drag itself may open one,
+   *  when an app rests on it long enough for the folder to spring open. */
+  openFolder(folderId: string, options?: { readonly duringDrag?: boolean }) {
     let opened = false;
     RuntimeStore.mutate((draft) => {
-      if (draft.webspring.layout.draggingItemId || draft.webspring.launchPhase !== "idle") return;
+      if (draft.webspring.layout.draggingItemId && options?.duringDrag !== true) return;
+      if (draft.webspring.launchPhase !== "idle") return;
       if (!getProjection(draft).folders[folderId]) return;
       draft.webspring.openFolderId = folderId;
       opened = true;

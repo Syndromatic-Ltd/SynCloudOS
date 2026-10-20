@@ -19,13 +19,16 @@
  */
 
 import { synWareSdkEntries, synWarePackageName } from "./scripts/synware/sdk-entries.mjs";
+import { decoratorEsbuildOptions } from "./scripts/synware/decorators.mjs";
 import { defineConfig } from "vitest/config";
 import { resolve } from "node:path";
 
 export default defineConfig({
+  // Standard decorators (`@action`, `@observable accessor`) are lowered by esbuild; Node cannot parse them.
+  esbuild: { ...decoratorEsbuildOptions },
   resolve: {
     alias: [
-        ...Object.entries(synWareSdkEntries).map(([entry, source]) => ({ find: new RegExp("^" + synWarePackageName + "/" + entry + "$"), replacement: resolve(import.meta.dirname, source) })),
+        ...Object.entries(synWareSdkEntries).map(([entry, source]) => ({ find: new RegExp("^" + synWarePackageName + (entry === "index" ? "" : "/" + entry) + "$"), replacement: resolve(import.meta.dirname, source) })),
         { find: "@syndromatic/syncloudos/nse/styles.css", replacement: resolve(import.meta.dirname, "src/NSE/public/styles.css") },
       ],
   },

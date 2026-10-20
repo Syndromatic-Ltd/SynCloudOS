@@ -21,6 +21,7 @@
 import { useId, useMemo, useRef, useState, type KeyboardEvent, type MutableRefObject } from "react";
 import { NSEListboxPopup, useOptionalNSEOverlayProvider } from "../../Overlays";
 import { useNSEControlCommand } from "../Core";
+import { useNSEActionBinding } from "../Core/useNSEControlAction";
 import type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection } from "./valueControlTypes";
 
 interface SegmentButtonProps {
@@ -35,15 +36,16 @@ interface SegmentButtonProps {
 }
 
 function SegmentButton({ item, selected, tabIndex, disabled, readOnly, refs, onActivate, onKeyDown }: SegmentButtonProps) {
-  const binding = useMemo(() => item.commandId ? { id: item.commandId, payload: item.commandPayload } : undefined, [item.commandId, item.commandPayload]);
+  const actionBinding = useNSEActionBinding(item.action, item.actionPayload);
+  const binding = useMemo(() => item.commandId ? { id: item.commandId, payload: item.commandPayload } : actionBinding, [actionBinding, item.commandId, item.commandPayload]);
   const command = useNSEControlCommand(binding);
-  const commandEnabled = !item.commandId || Boolean(command.presentation?.enabled && !command.presentation.denied && !command.presentation.hidden && !command.presentation.stale);
+  const commandEnabled = !binding || Boolean(command.presentation?.enabled && !command.presentation.denied && !command.presentation.hidden && !command.presentation.stale);
   const activate = () => {
     if (disabled || readOnly) return;
-    if (!item.commandId) { onActivate(); return; }
+    if (!binding) { onActivate(); return; }
     void command.dispatch().then((result) => { if (result?.status === "executed") onActivate(); });
   };
-  return <button type="button" ref={(node) => { if (node) refs.current.set(item.id, node); else refs.current.delete(item.id); }} tabIndex={tabIndex} aria-label={item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)} title={typeof item.label === "string" ? undefined : item.accessibleLabel} aria-pressed={selected} aria-readonly={readOnly || undefined} disabled={disabled || item.disabled || !commandEnabled} data-command-id={item.commandId} onKeyDown={onKeyDown} onClick={activate}>{item.label}</button>;
+  return <button type="button" ref={(node) => { if (node) refs.current.set(item.id, node); else refs.current.delete(item.id); }} tabIndex={tabIndex} aria-label={item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)} title={typeof item.label === "string" ? undefined : item.accessibleLabel} aria-pressed={selected} aria-readonly={readOnly || undefined} disabled={disabled || item.disabled || !commandEnabled} data-command-id={binding?.id} onKeyDown={onKeyDown} onClick={activate}>{item.label}</button>;
 }
 
 export function NSESegmentedControl(props: NSESegmentedControlProps) {

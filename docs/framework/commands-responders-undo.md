@@ -4,13 +4,13 @@ Desktop applications route user intent through a shared vocabulary: a menu item,
 
 ## Commands
 
-A command has an identifier, a title, an `execute` function and, when useful, a `validate` function, key bindings and an undo policy. You declare commands with `useSynWareCommands`, which registers them on mount and removes them on unmount.
+A command has an identifier, a title, an `execute` function and, when useful, a `validate` function, key bindings and an undo policy. You declare commands with `useCommands`, which registers them on mount and removes them on unmount.
 
 ```tsx
-import { useSynWareCommands } from "@syndromatic/syncloudos/sdk";
+import { useCommands } from "@syndromatic/syncloudos/sdk";
 
 export function useNoteCommands(notes: { add(): string; remove(id: string): void; count: number }) {
-  return useSynWareCommands([
+  return useCommands([
     {
       id: "com.example.notes.add",
       title: { key: "notes.add", fallback: "Add Note" },
@@ -69,10 +69,10 @@ Every mounted application has a responder, and controls inside it may add their 
 `app.responders` exposes the chain to your code:
 
 ```tsx
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 
 export function useEditorFocus() {
-  const { responders } = useSynWare();
+  const { responders } = useSCOS();
   return {
     focusEditor: () => responders.requestFocus("com.example.notes.editor"),
     focused: () => responders.getFocusedResponderId(),
@@ -81,6 +81,31 @@ export function useEditorFocus() {
 ```
 
 A dispatch that reaches no responder returns an unhandled result. It never throws, and the calling control shows the command as unavailable.
+
+## Actions on class-based applications
+
+An application written as classes (see [Applications](applications.md)) declares commands as methods. `@action` registers a command on the object that owns the method, so the object becomes a responder: an `NSEApplication`, an `NSEWindowController` or an `NSEViewController`.
+
+```ts
+import { NSEWindowController, action } from "@syndromatic/syncloudos";
+
+class NotesWindowController extends NSEWindowController<NotesApp> {
+  @action newNote() { this.app.notes.add(createNote()); }
+  validateNewNote() { return !this.app.readOnly; }
+
+  @action rename(payload: { title: string }) { this.app.notes.selection.title = payload.title; }
+  @action("document.save") save() { return this.app.save(); }
+}
+```
+
+- The command ID is the method name, scoped to the application (`newNote` becomes `<appId>.newNote`). `@action("document.save")` answers a standard command ID instead, so the standard menu items and key bindings reach it. `@action({ id, title, payload })` also sets the menu title and a payload schema.
+- `validate<Name>()`, found by name (`validateNewNote` for `newNote`), supplies `validate`. It returns a boolean or a validation object (`{ enabled, state, title, hidden, disabledReason }`) and may be asynchronous.
+- A method takes at most one parameter, the payload. A method with no parameter rejects a payload; otherwise pass a `payload` schema to check one.
+- Controls and menu items send actions by name: `<NSEPushButton action="newNote" />`, `<NSEToolButton action="newNote" />`, `NSESegmentedControl` items with `action`, and menu items `{ action: "newNote" }`. The payload goes in `actionPayload` on a control or item, and `payload` on a menu item. A name containing a dot, such as `document.save`, is taken as written. Each control enables, disables and shows state from the action's validation, so one `validateNewNote()` greys out the menu item and every button.
+- Dispatch walks the responder chain: the focused view controller answers first, then its window controller, then the application. The first object that declares the action runs it.
+- Replacing a class during development (hot reload) re-reads its actions and validation without re-registering the application.
+
+`useCommands` stays the way to declare commands in a function-component application.
 
 ## Key bindings
 
@@ -91,10 +116,10 @@ A dispatch that reaches no responder returns an unhandled result. It never throw
 Undo histories belong to an owner, either the application or one document. Get or create the history for an owner, then register an action that knows how to reverse and reapply a change.
 
 ```tsx
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 
 export function useRenameWithUndo(documentId: string, setTitle: (title: string) => void) {
-  const { undo } = useSynWare();
+  const { undo } = useSCOS();
   const owner = { kind: "document", id: documentId } as const;
   const history = undo.get(owner) ?? undo.create(owner);
 

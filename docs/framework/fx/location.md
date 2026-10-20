@@ -2,7 +2,7 @@
 
 LocationFX (`LFX`) is the web-native analogue of Core Location. It answers where the device is, how sure the host is about that answer, and whether the user has allowed the question to be asked. Positions are immutable values, requests take an `AbortSignal`, and every source of updates has an explicit owner that you dispose.
 
-The framework has two halves. The value types (`LFXCoordinate`, `LFXLocation`) are plain library code that you can construct, compare and test anywhere, including in a unit test with no browser. The manager types (`LFXLocationManager`, `LFXLocationWatch`, `LFXLocationClient`) describe a service that the mounted SynWare session provides. You reach the service through `useSynWareLocation()`, and the host applies your manifest permissions, its own policy and the browser's Geolocation prompt before any fix reaches you.
+The framework has two halves. The value types (`LFXCoordinate`, `LFXLocation`) are plain library code that you can construct, compare and test anywhere, including in a unit test with no browser. The manager types (`LFXLocationManager`, `LFXLocationWatch`, `LFXLocationClient`) describe a service that the mounted SynWare session provides. You reach the service through `useLocation()`, and the host applies your manifest permissions, its own policy and the browser's Geolocation prompt before any fix reaches you.
 
 LocationFX covers foreground positioning: one-shot fixes and continuous updates while your application is visible and active. It reports the facilities that native Core Location offers and the web does not (background delivery, region monitoring, visits and similar) through `LFXNativeOnlyCapabilities`, so your code can decide what to offer instead of discovering the gap at runtime.
 
@@ -16,9 +16,9 @@ import { LFXCoordinate, LFXLocation } from "@syndromatic/syncloudos/fx/location"
 | --- | --- |
 | Prefix | `LFX` |
 | Entry | `@syndromatic/syncloudos/fx/location` |
-| Hook | `useSynWareLocation()` from `@syndromatic/syncloudos/sdk`, returning an `LFXLocationManager` |
+| Hook | `useLocation()` from `@syndromatic/syncloudos/sdk`, returning an `LFXLocationManager` |
 | Manifest permissions | `location.read` (create the manager, read authorisation status), `location.request` (request fixes, start watches) |
-| Session client | `LFXLocationClient`, available as `useSynWare().location` |
+| Session client | `LFXLocationClient`, available as `useSCOS().location` |
 | Apple analogue | Core Location (`CLLocationManager`, `CLLocation`, `CLLocationCoordinate2D`) |
 | Runs in | Value types: any JavaScript environment. Manager: the mounted session, on a secure (HTTPS) page |
 
@@ -220,7 +220,7 @@ Reading the status never starts a positioning source and never triggers the brow
 
 ### `LFXLocationManager`
 
-An `LFXLocationManager` is a mount-scoped foreground location service. Creating one is passive: it does not prompt, start a watch or read the device. The manager owns everything you start through it. Disposing the manager cancels its pending requests and ends its watches. In a component you receive one from `useSynWareLocation()` and never create or dispose it yourself.
+An `LFXLocationManager` is a mount-scoped foreground location service. Creating one is passive: it does not prompt, start a watch or read the device. The manager owns everything you start through it. Disposing the manager cancels its pending requests and ends its watches. In a component you receive one from `useLocation()` and never create or dispose it yourself.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -273,7 +273,7 @@ Several watches can run at once. The host shares one positioning source across a
 
 ```tsx
 import { useCallback, useRef, useState } from "react";
-import { useSynWareLocation } from "@syndromatic/syncloudos/sdk";
+import { useLocation } from "@syndromatic/syncloudos/sdk";
 import type { LFXAuthorizationStatus, LFXLocation } from "@syndromatic/syncloudos/fx/location";
 
 function explain(error: unknown): string {
@@ -291,7 +291,7 @@ function explain(error: unknown): string {
 }
 
 export function LocateButton() {
-  const location = useSynWareLocation();
+  const location = useLocation();
   const pending = useRef<AbortController | null>(null);
   const [status, setStatus] = useState<LFXAuthorizationStatus>("unknown");
   const [fix, setFix] = useState<LFXLocation | null>(null);
@@ -346,11 +346,11 @@ A watch belongs to the component that starts it. Start it in an effect, tie it t
 
 ```tsx
 import { useEffect, useState } from "react";
-import { useSynWareLocation } from "@syndromatic/syncloudos/sdk";
+import { useLocation } from "@syndromatic/syncloudos/sdk";
 import type { LFXLocation, LFXLocationWatch } from "@syndromatic/syncloudos/fx/location";
 
 export function LiveTrack({ tracking }: { readonly tracking: boolean }) {
-  const location = useSynWareLocation();
+  const location = useLocation();
   const [latest, setLatest] = useState<LFXLocation | null>(null);
   const [trail, setTrail] = useState<readonly LFXLocation[]>([]);
   const [note, setNote] = useState<string | null>(null);
@@ -404,10 +404,10 @@ The `AbortController` in this example covers the gap between starting the status
 
 ## The SynWare hook
 
-### `useSynWareLocation`
+### `useLocation`
 
 ```text
-useSynWareLocation(): LFXLocationManager
+useLocation(): LFXLocationManager
 ```
 
 The hook returns a stable, frozen manager facade for the component. It creates the underlying manager when the component mounts (in a layout effect) and disposes it when the component unmounts, so you never call `dispose()` on it. The facade has the same four members as `LFXLocationManager`, with these differences:
@@ -428,7 +428,7 @@ See the [SynWare manifest](../synware-manifest.md) for where `permissions` sits 
 
 ### `LFXLocationClient`
 
-The client is the session-level factory behind the hook. It is available as `useSynWare().location` when you need a manager whose lifetime you control yourself, for example a manager shared by several components, or one bound to a task rather than a mount. Most components use the hook instead.
+The client is the session-level factory behind the hook. It is available as `useSCOS().location` when you need a manager whose lifetime you control yourself, for example a manager shared by several components, or one bound to a task rather than a mount. Most components use the hook instead.
 
 ```text
 createManager(signal?: AbortSignal): LFXLocationManager
@@ -440,11 +440,11 @@ createManager(signal?: AbortSignal): LFXLocationManager
 
 ```tsx
 import { useEffect, useState } from "react";
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 import type { LFXLocation, LFXLocationManager } from "@syndromatic/syncloudos/fx/location";
 
 export function useSharedFix(): LFXLocation | null {
-  const { location } = useSynWare();
+  const { location } = useSCOS();
   const [fix, setFix] = useState<LFXLocation | null>(null);
 
   useEffect(() => {
@@ -581,7 +581,7 @@ Edge cases worth planning for:
 | Object | Owner | Ends when |
 | --- | --- | --- |
 | `LFXCoordinate`, `LFXLocation` | Garbage collection | Nothing to dispose. |
-| Manager from `useSynWareLocation()` | The component | The component unmounts. |
+| Manager from `useLocation()` | The component | The component unmounts. |
 | Manager from `createManager(signal)` | You | You call `dispose()`, `signal` aborts, or the application unmounts or closes. |
 | `current()` request | The manager and the request `signal` | It settles, the `signal` aborts or the manager is disposed. |
 | `LFXLocationWatch` | The manager and the watch `signal` | You call `dispose()`, `signal` aborts, the manager is disposed or the application closes. |

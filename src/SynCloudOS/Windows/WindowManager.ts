@@ -65,6 +65,7 @@ import {
   type WindowClosePreparationToken,
   type WindowClosePreparedNode,
   type WindowCloseRequest,
+  type WindowCloseGuard,
   type WindowCloseResult,
   type WindowBounds,
   type WindowBoundsChangeReason,
@@ -149,6 +150,7 @@ export class InvalidWindowClosePreparationError extends Error {
 export class WindowManager {
   readonly runtimeId: SynCloudOSRuntimeId;
   readonly #controllers = new Map<string, WindowController>();
+  readonly #closeGuards = new Map<string, WindowCloseGuard>();
   readonly #applicationClosePreparations = new Map<string, LiveApplicationClosePreparation>();
   readonly #listeners = new Set<() => void>();
   readonly #order: string[] = [];
@@ -309,6 +311,11 @@ export class WindowManager {
       webspringResponderId: "webspring",
       runtimeResponderId: "runtime",
       observeError: (error, phase) => this.#reportError(error, `window-controller:${phase}`),
+      delegate: {
+        shouldClose: (closeRequest) => this.#closeGuards.get(id)?.shouldClose(closeRequest) ?? true,
+        willClose: (closeRequest) => this.#closeGuards.get(id)?.willClose?.(closeRequest),
+        didClose: () => { this.#closeGuards.delete(id); },
+      },
     });
     this.#controllers.set(id, controller);
     this.#controllerAuthorities.set(id, ++this.#authorityGeneration);
@@ -1041,6 +1048,18 @@ export class WindowManager {
       .filter((controller) => this.#matches(controller.record, query))
       .sort((left, right) => left.record.zIndex - right.record.zIndex);
     return Object.freeze(controllers);
+  }
+
+  /**
+   * Lets the owner of a window's content veto its close and learn it is
+   * closing. Returns the function that removes the guard.
+   */
+  registerCloseGuard(windowControllerId: string, guard: WindowCloseGuard): () => void {
+    this.select(windowControllerId);
+    this.#closeGuards.set(windowControllerId, guard);
+    return () => {
+      if (this.#closeGuards.get(windowControllerId) === guard) this.#closeGuards.delete(windowControllerId);
+    };
   }
 
   select(windowControllerId: string): WindowController {

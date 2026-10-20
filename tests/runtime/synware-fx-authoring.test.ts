@@ -47,7 +47,7 @@ const fx: Record<string, unknown> = { animation, graphics, image, text, audio, h
 function temporary() { const root = mkdtempSync(join(tmpdir(), "synware-fx-authoring-")); roots.push(root); return root; }
 function generate(options: string[] = []) {
   const root = temporary(), app = join(root, "src/SynWare/Example.app");
-  execFileSync(process.execPath, [generator, app, "com.example.fx", ...options]);
+  execFileSync(process.execPath, [generator, app, ...options]);
   return { root, app };
 }
 function load(path: string, overrides: Record<string, unknown> = {}): any {
@@ -72,8 +72,8 @@ it("keeps the default permission-free and rejects unknown recipes/options before
   expect(load(join(app, "Contents/Info.ts")).default.permissions).toBeUndefined();
   expect(existsSync(join(app, "Contents/recipes"))).toBe(false);
   for (const options of [["--fx", "unknown"], ["--fx"], ["--fxx", "media"], ["--fx", "video", "unexpected"]]) {
-    const target = join(temporary(), "invalid");
-    expect(spawnSync(process.execPath, [generator, target, "com.example.fx", ...options]).status).toBe(1);
+    const target = join(temporary(), "Invalid.app");
+    expect(spawnSync(process.execPath, [generator, target, ...options]).status).toBe(1);
     expect(existsSync(target)).toBe(false);
   }
 });
@@ -118,10 +118,10 @@ it("does no device work on render and shows explicit action failures rather than
   const states: unknown[] = [];
   const definition = load(join(app, "Contents/index.tsx"), {
     "react": { useState: () => ["Ready", (value: unknown) => states.push(value)] }, "react/jsx-runtime": jsx,
-    "@syndromatic/syncloudos/sdk": { createSynWare: (value: unknown) => value, useSynWare: () => ({appId:"com.example.fx"}), useSynWareVideo: () => ({capabilities:{camera:true},requestCamera}) },
+    "@syndromatic/syncloudos": { SCOS: { app: { id: "example", title: "Example" } }, useVideo: () => ({capabilities:{camera:true},requestCamera}) },
     "@syndromatic/syncloudos/nse": { NSEStackView: "div", NSEStackItem: "div" }, "@syndromatic/syncloudos/nse/styles.css": {},
   }).default;
-  const tree = definition.root();
+  const tree = definition();
   expect(requestCamera).not.toHaveBeenCalled();
   const buttons: any[] = [];
   function visit(node: any) { if (!node || typeof node !== "object") return; if (node.type === "button") buttons.push(node); for (const child of [node.props?.children].flat()) visit(child); }

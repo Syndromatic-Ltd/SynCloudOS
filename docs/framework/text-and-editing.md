@@ -109,13 +109,13 @@ Ranges use UTF-16 offsets; surrogate interiors are rejected. User deletion/movem
 
 Font choices belong to the host. A manager has no built-in family catalogue: supply family metadata when constructing it, or offer fonts registered in its font library. The framework packages no site font files, and its chrome inherits the host's typography. Portable font descriptors retain requested intent; font acquisition and resolution use the caller's resources.
 
-[Managed fonts](managed-fonts.md) capture resources, stable named faces and semantic UI roles in one declaration. Mounted apps access that manager with `useSynWareFonts()`; ordinary resolvers receive it explicitly. Imported-library snapshot changes refresh reader callbacks, while unknown or not-yet-installed selections retain fallback behavior. Catalogue metadata alone does not provide ready glyph data.
+[Managed fonts](managed-fonts.md) capture resources, stable named faces and semantic UI roles in one declaration. Mounted apps access that manager with `useFonts()`; ordinary resolvers receive it explicitly. Imported-library snapshot changes refresh reader callbacks, while unknown or not-yet-installed selections retain fallback behavior. Catalogue metadata alone does not provide ready glyph data.
 
 `NSELayoutManager` retains browser logical measurement and scoped invalidation. Shaped geometry uses explicit TextFX projections and supplied containers/exclusions. Their capability declarations distinguish logical DOM measurement from shaped glyph/caret geometry; they do not imply DOM/PDF pixel equality.
 
 ## Web content
 
-`NSEWebContentView` hosts external web content in a sandboxed frame. `useSynWareWebContent()` returns a client whose `createSession(request)` opens a session with a declared navigation policy. Pass the session to the view as its `session` prop.
+`NSEWebContentView` hosts external web content in a sandboxed frame. `useWebContent()` returns a client whose `createSession(request)` opens a session with a declared navigation policy. Pass the session to the view as its `session` prop.
 
 A session reports a snapshot with its `title`, its `state` (`loading`, `ready`, `suspended`, `failed` or `closed`), the frame's source, the expected origin and the sandbox in force. It offers `navigate`, `postMessage` and `openExternal`, each of which resolves to whether the host allowed it, and `dispose` to release the frame.
 

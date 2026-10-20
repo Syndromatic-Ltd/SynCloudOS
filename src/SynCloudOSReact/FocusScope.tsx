@@ -33,25 +33,27 @@ function belongsToRuntime(element: HTMLElement, runtimeId: string): boolean {
   return element.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner === runtimeId;
 }
 
+function isAvailableFocusTarget(element: HTMLElement, runtimeId: string): boolean {
+  return belongsToRuntime(element, runtimeId) &&
+    !element.hasAttribute("disabled") &&
+    !element.closest("[inert], [aria-hidden='true']");
+}
+
 /** Surface chrome (a window's title-bar controls) is tabbable but never the
  * first responder a scope picks; it is the fallback when nothing else is. */
 const focusChromeSelector = "[data-syncloudos-focus-chrome]";
 
 function focusableTarget(root: HTMLElement, runtimeId: string): HTMLElement | null {
-  if (root.matches(focusableSelector) && belongsToRuntime(root, runtimeId)) return root;
+  if (root.matches(focusableSelector) && isAvailableFocusTarget(root, runtimeId)) return root;
   const candidates = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
-    .filter((target) => belongsToRuntime(target, runtimeId));
+    .filter((target) => isAvailableFocusTarget(target, runtimeId));
   return candidates.find((target) => !target.closest(focusChromeSelector)) ?? candidates[0] ?? null;
 }
 
 function focusableTargets(root: HTMLElement, runtimeId: string): HTMLElement[] {
   const targets = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector));
   if (root.matches(focusableSelector)) targets.unshift(root);
-  return targets.filter((target) => (
-    belongsToRuntime(target, runtimeId) &&
-    !target.hasAttribute("disabled") &&
-    target.getAttribute("aria-hidden") !== "true"
-  ));
+  return targets.filter((target) => isAvailableFocusTarget(target, runtimeId));
 }
 
 function scopeRoot(document: Document | null, runtimeId: string, scopeId: string): HTMLElement | null {

@@ -21,7 +21,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { AFXAnimation } from "../../../src/FX/AnimationFX/AFXAnimation";
 import { AFXBasicAnimation } from "../../../src/FX/AnimationFX/AFXBasicAnimation";
-import { AFXLayer } from "../../../src/FX/AnimationFX/AFXLayer";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
 import { createBrowserAFXFrameScheduler } from "../../../src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter";
 
 function browserClock() {
@@ -61,7 +61,7 @@ function browserClock() {
 }
 
 function animatedLayer(clock: ReturnType<typeof browserClock>) {
-  const layer = new AFXLayer({
+  const layer = createAFXLayer({
     supportedProperties: ["opacity"],
     apply() {},
     attach() {},

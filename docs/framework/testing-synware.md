@@ -5,8 +5,8 @@
 ## A first test
 
 ```tsx
-import { createSynWare, useSynWareCommands } from "@syndromatic/syncloudos/sdk";
-import { createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
+import { useCommands } from "@syndromatic/syncloudos/sdk";
+import { createSynWare, createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
 
 const Notes = createSynWare({
   manifest: {
@@ -17,7 +17,7 @@ const Notes = createSynWare({
     routes: [{ path: "/notes", primary: true }],
   },
   root() {
-    useSynWareCommands([{ id: "com.example.notes.add", title: "Add Note", execute: () => undefined }]);
+    useCommands([{ id: "com.example.notes.add", title: "Add Note", execute: () => undefined }]);
     return <button type="button">Add Note</button>;
   },
 });
@@ -46,7 +46,7 @@ Pass the `document` your test environment provides, such as the one from jsdom o
 | `resources` | Lists live resources so a test can assert that teardown released them. |
 | `navigation` | Opens a route the way the shell would. |
 | `settlement` | `settled({ timeoutMs })` waits until pending work such as loaders, transitions and tracked promises has finished. |
-| `appContext` | The same session object your components receive from `useSynWare()`. |
+| `appContext` | The low-level mounted context behind the facade returned by `useSCOS()`. |
 | `adapters` | Fakes for storage, clipboard, drag, windows, location, MIDI, video and the other host capabilities. |
 
 `createSynWareTestHost` accepts `app`, `document`, `container`, `now`, `permissions`, `locale`, `timeZone`, `branding`, `strictMode`, `documentTypes` and `surface` (`"stage"` or `"window"`). Set `strictMode: true` to render under React StrictMode and catch effects that fail to clean up. Supply native `DocumentType` codecs through trusted `documentTypes` provision; an application's manifest declares the types it may use but does not install their codecs.

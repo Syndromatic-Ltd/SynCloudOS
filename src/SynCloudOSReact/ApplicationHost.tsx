@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
+import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
 import { NSEMenuController, NSEOverlayProvider, NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
 import { NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
 import { SynWareEntryRenderer } from "../Webspring/SynWareEntryRenderer";
@@ -73,7 +74,7 @@ export interface ApplicationHostProps {
  * registered application presents in windows over it. A page-filling primary
  * has no system top bar, so it opens its application menu (About, Preferences,
  * Sign In or Log Out, Quit) from its own content through
- * `useSynWareApplicationMenuTrigger()`, after declaring
+ * `useApplicationMenuTrigger()`, after declaring
  * `applicationMenu: { trigger: "content" }`. */
 export function ApplicationHost({ applicationId, authentication, home }: ApplicationHostProps) {
   const runtime = useKernelSynCloudOS();
@@ -216,6 +217,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
       branding={branding ?? undefined}
       authentication={authentication}
     />
+    <SCOSAlertPresenter center={runtime.alerts} appearance={appearance} />
     {error ? <FocusScope asChild key={error.id} scopeId={`application-host-error:${error.id}`} kind="modal" parentResponderId="runtime" trapFocus>
       <NSEAlertBackdrop onSafeDismiss={error.recoverable === false ? undefined : () => runtime.errors.dismiss(error.id)}>
         <SystemAlert error={error} appearance={appearance} applicationIcon={app?.icon.src ?? null}

@@ -39,6 +39,7 @@ import { createBootManager } from "../BootManager/BootManager";
 import { createWebspringChoreography } from "../Choreography/WebspringChoreography";
 import { createSynCloudOSGlobalWatchdog } from "../ErrorManager/SynCloudOSGlobalWatchdog";
 import { createErrorManager } from "../ErrorManager/ErrorManager";
+import { createSynCloudOSAlertCenter } from "../SystemUI/alertCenter";
 import { createInspector } from "../Inspector/Inspector";
 import { createLaunchServices } from "../LaunchServices/LaunchServices";
 import { createLifecycle } from "../Lifecycle/Lifecycle";
@@ -242,6 +243,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   let identity!: SynCloudOSIdentityService;
   let login!: SynCloudOSRuntime["login"];
   let errors!: SynCloudOSRuntime["errors"];
+  let alerts!: SynCloudOSRuntime["alerts"];
   let appManager!: SynCloudOSRuntime["appManager"];
   let lifecycle!: SynCloudOSRuntime["lifecycle"];
   let statechart!: SynCloudOSRuntime["statechart"];
@@ -368,6 +370,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     get locale() { return locale; },
     get inspector() { return inspector; },
     get errors() { return errors; },
+    get alerts() { return alerts; },
     get webspring() { return webspring; },
     get systemUI() { return systemUI; },
     get preferencePanes() { return preferencePanes; },
@@ -688,6 +691,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     responsiveModeManager.unobserve();
   };
   systemUI = createSystemUIService(runtimeId);
+  alerts = createSynCloudOSAlertCenter({ createId: () => `alert-${runtimeId}-${config.environment.randomUUID()}` });
   preferencePanes = createPreferencePaneRegistry(runtimeId);
   const linkExternalSignal = <T,>(handle: RuntimeOperationHandle<T>, signal?: AbortSignal) => {
     if (!signal) return handle;
@@ -1432,6 +1436,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     alwaysReady("runtime:webspring", () => webspring.dispose()),
     alwaysReady("runtime:webspring-choreography", () => webspringChoreography.dispose()),
     alwaysReady("runtime:errors", () => errors.dispose()),
+    alwaysReady("runtime:alerts", () => alerts.dispose()),
     alwaysReady("runtime:inspector", () => inspector.dispose()),
     alwaysReady("runtime:locale", () => locale.dispose()),
     alwaysReady("runtime:notifications", () => notifications.dispose()),

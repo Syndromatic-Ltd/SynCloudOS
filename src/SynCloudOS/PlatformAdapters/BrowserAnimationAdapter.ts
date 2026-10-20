@@ -798,6 +798,7 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
   #mask: BrowserAnimationLayerSurface | null = null;
   #maskRelease: (() => void) | null = null;
   #disposed = false;
+  #ownsElement = false;
   constructor(element: HTMLElement) {
     if (!element || !element.style || !element.ownerDocument)
       throw new TypeError("Layer surface requires a real DOM element.");
@@ -825,6 +826,13 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     )
       return Object.freeze({ state: "unsupported" as const, reason: "unmanaged-dom-background-image" });
     return Object.freeze({ state: "portable-owned" as const });
+  }
+  /** Allocates the projection for a detached layer added under this one: a new element owned by the surface and removed with it. */
+  createSublayerSurface(): AFXLayerSurface {
+    if (this.#disposed) throw new DOMException("The layer surface is disposed.", "InvalidStateError");
+    const surface = new BrowserAnimationLayerSurface(this.#element.ownerDocument.createElement("div"));
+    surface.#ownsElement = true;
+    return surface;
   }
   startCompositorAnimation(input: AFXLayerCompositorRequest): AFXLayerCompositorPlayback | null {
     const snapshot = this.#snapshot;
@@ -1461,7 +1469,8 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     this.#contentElement = null;
     this.#replicationElement?.remove();
     this.#replicationElement = null;
-    if (this.#originalStyle === null) this.#element.removeAttribute("style");
+    if (this.#ownsElement) this.#element.remove();
+    else if (this.#originalStyle === null) this.#element.removeAttribute("style");
     else this.#element.setAttribute("style", this.#originalStyle);
   }
 }

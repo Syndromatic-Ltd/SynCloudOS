@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEPreferencesController, PreferencePersistenceError } from "../../Controllers";
+import { NSEPreferencesController, PreferencePersistenceError, type NSEControllerOwnership } from "../../Controllers";
 
 export interface NSESearchRecent { readonly id: string; readonly query: string; readonly usedAt: number }
 export interface NSESearchPreferences { readonly recents: readonly NSESearchRecent[] }
@@ -52,8 +52,9 @@ const validRecentList = (value: unknown): value is readonly NSESearchRecent[] =>
   } catch { return false; }
 };
 
-export function createNSESearchFieldPreferences(persistence: NSESearchPreferencePersistence, namespace = "nse.search-field.recents"): NSEPreferencesController<NSESearchPreferences> {
+export function createNSESearchFieldPreferences(persistence: NSESearchPreferencePersistence, namespace = "nse.search-field.recents", ownership: NSEControllerOwnership = {}): NSEPreferencesController<NSESearchPreferences> {
   return new NSEPreferencesController<NSESearchPreferences>({
+    ...ownership,
     namespace,
     schema: { version: 1, defaults: Object.freeze({ recents: Object.freeze([]) }), fields: { recents: { validate: validRecentList } }, migrations: Object.freeze([]) },
     adapter: {

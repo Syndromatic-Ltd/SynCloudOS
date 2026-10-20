@@ -54,11 +54,11 @@ declare module "virtual:syncloudos/typography" {
 Mounted apps obtain the host's manager through AppSDK, without importing shell-private configuration:
 
 ```tsx
-import { useSynWareFonts } from "@syndromatic/syncloudos/sdk";
+import { useFonts } from "@syndromatic/syncloudos/sdk";
 import { NSEFontPanel, type NSEFontPanelProps } from "@syndromatic/syncloudos/nse";
 
 function FontPicker(props: Omit<NSEFontPanelProps, "manager">) {
-  const { manager } = useSynWareFonts();
+  const { manager } = useFonts();
   return <NSEFontPanel {...props} manager={manager} />;
 }
 ```
@@ -77,8 +77,8 @@ This lets a UI alias cap its strongest face at Bold while the document catalogue
 Catalogue availability is metadata, not ready glyph data. For byte-backed document layout or output, use the active mount's supported font access:
 
 ```ts
-import { TFXFontDescriptor, useSynWareFonts } from "@syndromatic/syncloudos/sdk";
-const fonts = useSynWareFonts();
+import { TFXFontDescriptor, useFonts } from "@syndromatic/syncloudos/sdk";
+const fonts = useFonts();
 const registration = await fonts.loadFace(savedFaceId, new TFXFontDescriptor({ size: 18 }), signal);
 // Use registration.font through the existing TextFX/NSE layout contracts.
 registration.dispose();

@@ -27,7 +27,7 @@ import { AFXBasicAnimation, AFXAnimation } from "@syndromatic/syncloudos/fx/anim
 | --- | --- |
 | Prefix | `AFX` |
 | Entry | `@syndromatic/syncloudos/fx/animation` |
-| Hook | `useSynWareAnimations`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useAnimations`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None |
 | Analogue | Core Animation (`CALayer`, `CAAnimation`, `CABasicAnimation`, `CAKeyframeAnimation`, `CASpringAnimation`, `CAAnimationGroup`, `CATransaction`, `CAMediaTimingFunction`, `CATransform3D`, `CAShapeLayer`, `CAGradientLayer`, `CATextLayer`, `CAReplicatorLayer`, `CAEmitterLayer`, `CATiledLayer`) |
 
@@ -324,7 +324,7 @@ Inside `run`'s `changes` callback, call `animator(target)` with an `AFXAnimatabl
 
 ## In a SynWare
 
-`useSynWareAnimations()` returns the session's animation client. The session owns every layer and renderer it hands out and releases them when the application closes, and you can dispose of any earlier.
+`useAnimations()` returns the session's animation client. The session owns every layer and renderer it hands out and releases them when the application closes, and you can dispose of any earlier.
 
 | Method | Returns | Description |
 | --- | --- | --- |
@@ -342,10 +342,10 @@ Inside `run`'s `changes` callback, call `animator(target)` with an `AFXAnimatabl
 ```tsx
 import { useEffect, useRef } from "react";
 import { AFXAnimation, AFXBasicAnimation, AFXTransform3D } from "@syndromatic/syncloudos/fx/animation";
-import { useSynWareAnimations } from "@syndromatic/syncloudos/sdk";
+import { useAnimations } from "@syndromatic/syncloudos/sdk";
 
 export function SlideIn({ children }: { children: React.ReactNode }) {
-  const animations = useSynWareAnimations();
+  const animations = useAnimations();
   const element = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -25,7 +25,8 @@ import type { MountedSynWareRuntime } from "./appRuntimeFacade";
 import { createMountedSynWareRuntime } from "./appRuntimeFacade";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import { createSynWareContextValue } from "./createSynWareContextValue";
-import { SynWareProvider, useSynWare } from "./SynWareContext";
+import { SynWareProvider } from "./SynWareContext";
+import { useSCOS } from "./scos/useSCOS";
 import { createFontCatalogueResourceLoader, useFontCatalogue } from "./fontAccess";
 import { createSynWareNSEAnimations } from "./SynWareNSEMediaAdapters";
 import { NSEAnimationEnvironmentProvider, NSEPresenceBoundary, type NSEAnimator } from "../../NSE/Animation";
@@ -96,7 +97,7 @@ function MountedAppPresentationBoundary({
   // NSE presentations inside the app animate as the app, through its own
   // AnimationFX client, never with the shell's authority, and never hold the
   // shell's own presence exits (a closing window's settlement).
-  const appClient = useSynWare();
+  const appClient = useSCOS();
   const appAnimations = appClient.animations;
   const animationState = useMemo(() => createRuntimeAnimationState(kernelRuntime, runtime.signal, () => {
     const state = kernelRuntime.lifecycle.getState(runtime.app.id);

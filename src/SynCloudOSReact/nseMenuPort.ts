@@ -19,6 +19,7 @@
  */
 
 import { useContext, useMemo } from "react";
+import { nseActionCommandId } from "../NSE/Controls/Core/actionCommandId";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext } from "./runtimeContext";
 
 /**
@@ -41,6 +42,7 @@ export function useRuntimeNSEMenuPort() {
         setTimeout: appRuntime.platform.setTimeout.bind(appRuntime.platform),
         clearTimeout: appRuntime.platform.clearTimeout.bind(appRuntime.platform),
       },
+      resolveAction: (action: string) => nseActionCommandId(appRuntime.app.id, action),
     };
     if (!kernelRuntime) throw new Error("useRuntimeNSEMenuPort must be used within SynCloudOSProvider or a mounted SynWare.");
     return {

@@ -29,7 +29,7 @@ export default defineConfig({
   root: resolve(import.meta.dirname, "../.."),
   resolve: { alias: [
     ...Object.entries(synWareSdkEntries).map(([entry, source]) => ({
-      find: new RegExp("^" + synWarePackageName + "/" + entry + "$"), replacement: resolve(import.meta.dirname, "../..", source),
+      find: new RegExp("^" + synWarePackageName + (entry === "index" ? "" : "/" + entry) + "$"), replacement: resolve(import.meta.dirname, "../..", source),
     })),
     // sdk:build assembles these public host styles with their module-relative assets.
     ...Object.keys(synWareSdkGeneratedStyles).map(entry => ({

@@ -20,6 +20,7 @@
 
 import type { ReactNode } from "react";
 
+import type { NSEViewControllerOptions } from "../../Application/NSEViewController";
 import type { NSEPreferencesController } from "../../Controllers";
 import type { SynCloudOSResponsiveState } from "../../../SynCloudOS/SynCloudOS";
 
@@ -53,7 +54,7 @@ export interface NSESplitViewPreferences {
   readonly activePaneId: string | null;
 }
 
-export interface NSESplitViewControllerOptions {
+export interface NSESplitViewControllerOptions extends NSEViewControllerOptions {
   readonly id: string;
   readonly orientation: "horizontal" | "vertical";
   readonly panes: readonly NSESplitPane[];

@@ -18,6 +18,7 @@
  */
 
 /** Reviewed testing-only public package graph. */
+export { createSynWare } from "../createSynWare";
 export {
   createDeterministicRuntimeEnvironment,
   createDeterministicScheduler,

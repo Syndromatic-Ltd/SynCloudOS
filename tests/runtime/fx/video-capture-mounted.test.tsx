@@ -24,7 +24,7 @@ import React from "react";
 import { expect, it, vi } from "vitest";
 import { createSynWare } from "../../../src/SynCloudOS/AppSDK";
 import { createSynWareTestHost } from "../../../src/SynCloudOS/AppSDK/testing";
-import { useSynWareVideo } from "../../../src/SynCloudOS/AppSDK/hooks/useSynWareVideo";
+import { useVideo } from "../../../src/SynCloudOS/AppSDK/hooks/useVideo";
 import type { VFXCaptureSession } from "../../../src/FX/VideoFX/public";
 import { createMountedVideoClient } from "../../../src/SynCloudOS/AppSDK/mountedVideoClient";
 import { VideoCaptureService } from "../../../src/SynCloudOS/VideoFX/VideoCaptureService";
@@ -102,10 +102,10 @@ it("fails closed before the test video backend when the manifest omits capture a
   await host.dispose();
 });
 
-it("makes useSynWareVideo component-scoped and tears it down on unmount without prompting on mount", async () => {
+it("makes useVideo component-scoped and tears it down on unmount without prompting on mount", async () => {
   let facade: VFXCaptureSession | null = null;
   function Probe() {
-    facade = useSynWareVideo();
+    facade = useVideo();
     return <div>Hook probe</div>;
   }
   const HookProbe = createSynWare({

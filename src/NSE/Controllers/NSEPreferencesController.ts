@@ -347,7 +347,7 @@ export class NSEPreferencesController<T extends object> extends NSEController<
   #draft: T | null = null;
 
   constructor(options: PreferencesControllerOptions<T>) {
-    super({ kind: "NSEPreferencesController", id: options.namespace, responderId: options.responderId, ownerSignal: options.ownerSignal });
+    super({ kind: "NSEPreferencesController", id: options.namespace, responderId: options.responderId, ownerSignal: options.ownerSignal, owner: options.owner });
     this.#namespace = options.namespace;
     this.#schema = options.schema;
     this.#adapter = options.adapter;

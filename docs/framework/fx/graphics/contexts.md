@@ -121,7 +121,7 @@ GFXContext.recording({ size, identifiers, scale? })
 | Option | Description |
 | --- | --- |
 | `size` | The logical `GFXSize` of the drawing. |
-| `identifiers` | An identifier issuer that gives every gradient, pattern, clip and shadow definition in the output a unique ID. Applications get one from `useSynWareImages().createGraphicsIdentifierIssuer()`, which keeps the IDs unique and stops working when your application closes. |
+| `identifiers` | An identifier issuer that gives every gradient, pattern, clip and shadow definition in the output a unique ID. Applications get one from `useImages().createGraphicsIdentifierIssuer()`, which keeps the IDs unique and stops working when your application closes. |
 | `scale` | The device scale, above 0 and at most 8. Used by the point conversion methods. |
 
 Unlike the bitmap context, the recording context keeps a full graphics state with fill and stroke paints (defaults are opaque black), so you set paint once and draw several times.
@@ -168,10 +168,10 @@ Every command carries a `GFXCommandState`, an immutable snapshot of the whole gr
 ```tsx
 import { useEffect, useState } from "react";
 import { GFXColour, GFXContext, GFXGradient, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
-import { useSynWareImages } from "@syndromatic/syncloudos/sdk";
+import { useImages } from "@syndromatic/syncloudos/sdk";
 
 export function Badge() {
-  const images = useSynWareImages();
+  const images = useImages();
   const [svg, setSvg] = useState<string>("");
 
   useEffect(() => {

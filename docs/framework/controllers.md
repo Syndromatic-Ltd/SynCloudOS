@@ -33,6 +33,17 @@ export function NoteCount({ controller }: { controller: NSEArrayController<Note,
 }
 ```
 
+`useObserve(controller)` does the same in one line and returns the controller, so a view can read it directly. It works for every controller here, for `NSEObject`s and for application, window and view controllers (see [Observable properties](applications.md#observable-properties)):
+
+```tsx
+import { useObserve, type NSEArrayController } from "@syndromatic/syncloudos/nse";
+
+export function NoteTitles({ controller }: { controller: NSEArrayController<Note, string> }) {
+  const notes = useObserve(controller).getSnapshot().arranged;
+  return <ul>{notes.map((note) => <li key={note.id}>{note.title}</li>)}</ul>;
+}
+```
+
 ## Controller lifetimes
 
 A controller lives exactly as long as its owner. Choose the owner by asking who needs the controller:
@@ -41,7 +52,7 @@ A controller lives exactly as long as its owner. Choose the owner by asking who 
 | --- | --- | --- | --- |
 | The module | `new NSEArrayController(...)` at module scope | Never | Shared, app-wide data that outlives every view, such as a catalogue every window reads. |
 | A component | `useNSEArrayController(options, deps)` or `useNSETreeController(options, deps)` | The component unmounts | Data that belongs to one mounted view, such as the rows of a sheet or a sidebar. |
-| The application session | `new NSEArrayController({ ..., ownerSignal: useSynWare().signal })` | The application session ends | Data several components of one running application share, created once per session. |
+| The application session | `new NSEArrayController({ ..., ownerSignal: useSCOS().signal })` | The application session ends | Data several components of one running application share, created once per session. |
 
 ### Component-owned controllers
 
@@ -84,7 +95,7 @@ Do not build a controller with `useMemo` and dispose it in a `useEffect` cleanup
 
 ### Session-owned controllers
 
-Every controller accepts `ownerSignal?: AbortSignal`. When the signal aborts, the controller disposes itself. Passing the application's `useSynWare().signal` ties the controller to the running application, so a controller the application never disposes is still released when its session ends: the application closes, its bundle is replaced or the runtime shuts down. The controller then records the reason `"application-closed"`. Any other signal records `"owner-signal-aborted"`. A signal that has already aborted is refused at construction with its abort reason.
+Every controller accepts `ownerSignal?: AbortSignal`. When the signal aborts, the controller disposes itself. Passing the application's `useSCOS().signal` ties the controller to the running application, so a controller the application never disposes is still released when its session ends: the application closes, its bundle is replaced or the runtime shuts down. The controller then records the reason `"application-closed"`. Any other signal records `"owner-signal-aborted"`. A signal that has already aborted is refused at construction with its abort reason.
 
 ### Disposal state and errors
 
@@ -231,7 +242,7 @@ preferences.set("theme", "dark");
 
 The schema gives each field a default and a validator, plus a version and a contiguous chain of migrations. On load, the controller repairs invalid fields and writes migrated data forward. A record written by a newer schema version is left untouched, so an older build never overwrites data it cannot read. Outside an edit, `set` and `reset` write immediately. Inside an edit they change a draft, and the commit writes once and can register one undo action. The adapter is synchronous by contract.
 
-Applications reach per-application settings through `useSynWare().persistence`, which needs no controller. Use the preferences controller when you want schemas, migrations and undoable settings panes.
+Applications reach per-application settings through `useSCOS().persistence`, which needs no controller. Use the preferences controller when you want schemas, migrations and undoable settings panes.
 
 ## Where to go next
 

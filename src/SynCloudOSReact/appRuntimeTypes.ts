@@ -164,6 +164,22 @@ export interface SynWareOpenDocumentWindowRequest {
   readonly mobilePolicy?: SynWareOwnedWindowSnapshot["mobilePolicy"];
 }
 
+export interface SynWareOpenWindowRequest {
+  readonly title: string;
+  /** Identifies the window across reloads; unique within the application. */
+  readonly restorationKey: string;
+  readonly preferredBounds?: SynWareWindowBounds;
+}
+
+export type SynWareWindowCloseReason = "control" | "command" | "parent-close" | "application-quit" | "runtime-dispose";
+
+export interface SynWareWindowCloseGuard {
+  /** Asked before the window closes. Return `false` to keep it open. */
+  shouldClose(reason: SynWareWindowCloseReason): boolean | Promise<boolean>;
+  /** The close was allowed and is being committed. */
+  willClose?(reason: SynWareWindowCloseReason): void;
+}
+
 export type SynWareWindowCloseResult =
   | Readonly<{ outcome: "closed"; windowId: string }>
   | Readonly<{ outcome: "cancelled"; windowId: string }>
@@ -176,7 +192,14 @@ export interface SynWareWindowPort {
   getSnapshot(): SynWareWindowSnapshot;
   subscribe(listener: () => void): () => void;
   openDocumentWindow(request: SynWareOpenDocumentWindowRequest): Promise<SynWareOwnedWindowSnapshot>;
+  /** Opens another window of the application that is not tied to a document. */
+  openWindow(request: SynWareOpenWindowRequest): Promise<SynWareOwnedWindowSnapshot>;
+  /** Lets the window's content veto its close and learn it is closing. Returns the function that removes the guard. */
+  registerCloseGuard(windowId: string, guard: SynWareWindowCloseGuard): () => void;
   focus(windowId: string): SynWareOwnedWindowSnapshot;
+  minimise(windowId: string): void;
+  zoom(windowId: string): void;
+  setTitle(windowId: string, title: string): void;
   close(windowId: string): Promise<SynWareWindowCloseResult>;
 }
 
@@ -485,7 +508,10 @@ export interface SynWareRuntime {
   /** Immutable identity of the mounted kernel runtime. This is separate from
    * redacted Diagnostics report identities. */
   readonly id: string;
-  readonly app: Readonly<Pick<SynCloudOSAppInfo, "id" | "name" | "shortName" | "packageName" | "route">>;
+  readonly app: Readonly<Pick<SynCloudOSAppInfo, "id" | "name" | "shortName" | "packageName" | "route" | "displayName">> & {
+    /** The SynWare manifest version the mounted bundle declared. */
+    readonly version: string;
+  };
   /** The mounted responder root for this presentation generation. It is an
    * owned identity, not a kernel responder graph capability. */
   readonly responderId: string;

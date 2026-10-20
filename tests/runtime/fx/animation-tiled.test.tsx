@@ -27,6 +27,7 @@ import { GFXImage } from "../../../src/FX/GraphicsFX/GFXImage";
 import { IFXContext } from "../../../src/FX/ImageFX/IFXContext";
 import { IFXImage } from "../../../src/FX/ImageFX/IFXImage";
 import { BrowserAnimationLayerSurface } from "../../../src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
 
 class TileClock implements AFXFrameScheduler {
   time = 0;
@@ -64,7 +65,7 @@ const image = (width: number, height: number, red = 255) => new GFXImage({
 
 function mounted(clock = new TileClock(), signal?: AbortSignal) {
   const element = document.createElement("div");
-  const layer = new AFXTiledLayer(new BrowserAnimationLayerSurface(element), clock, { signal });
+  const layer = createAFXLayer(AFXTiledLayer, new BrowserAnimationLayerSurface(element), clock, { signal });
   layer.frame = { x: 0, y: 0, width: 40, height: 30 };
   layer.tileSize = { width: 10, height: 10 };
   return { clock, element, layer };
@@ -280,7 +281,7 @@ describe("AnimationFX tiled rendering", () => {
       requestFrame: () => () => {},
       subscribeState: () => () => disposing.dispose(),
     };
-    disposing = new AFXTiledLayer(surface, scheduler);
+    disposing = createAFXLayer(AFXTiledLayer, surface, scheduler);
     expect(() => disposing.dispose()).not.toThrow();
     expect(disposals).toBe(1);
   });

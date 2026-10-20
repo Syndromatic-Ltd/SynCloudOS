@@ -20,7 +20,7 @@ export function writeDeveloperMcpPackage({repositoryRoot,directory,sdkVersion}) 
   const repository=JSON.parse(readFileSync(resolve(repositoryRoot,"package.json"),"utf8"));
   cpSync(resolve(repositoryRoot,"scripts/developer-mcp"),resolve(directory,"scripts/developer-mcp"),{recursive:true,filter:path=>!path.endsWith("build-package.mjs")&&!path.endsWith("PACKAGE_README.md")});
   cpSync(resolve(repositoryRoot,"scripts/developer-mcp/PACKAGE_README.md"),resolve(directory,"README.md"));
-  for (const file of ["validation-core.mjs","bundle-paths.mjs"]) {
+  for (const file of ["validation-core.mjs","manifest-source.mjs","bundle-paths.mjs","project-derivation.mjs","create-synware.mjs"]) {
     mkdirSync(resolve(directory,"scripts/synware"),{recursive:true});
     cpSync(resolve(repositoryRoot,"scripts/synware",file),resolve(directory,"scripts/synware",file));
   }

@@ -18,9 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
+import { createSynWare, createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
 import type { NSETextInputClient, NSETextRange } from "@syndromatic/syncloudos/nse/text";
 import { createTextSystemExampleApp, textSystemDocumentType, type TextSystemExampleAppOptions } from "../../../examples/TextSystem.app/Contents";
+import manifest from "../../../examples/TextSystem.app/Contents/Info";
 import type { ExampleViewId } from "../../../examples/TextSystem.app/Contents/model";
 import type { TextSystemExample, TextSystemExampleSnapshot, ExampleAssetLease, ExampleObjectTarget } from "../../../examples/TextSystem.app/Contents/example";
 import fontURL from "../../fixtures/fx/fonts/notosans-NotoSans[wdth,wght].ttf?url";
@@ -103,7 +104,7 @@ const appOptions: TextSystemExampleAppOptions = {
     resolveFreshReady?.();
   },
 };
-const app = createTextSystemExampleApp(appOptions);
+const app = createSynWare({ manifest, root: createTextSystemExampleApp(appOptions) });
 // Document type registration is a trusted host option, separate from the app's declaration.
 const testHost = createSynWareTestHost({ app, document, container: document.getElementById("root")!, strictMode: false, documentTypes: [textSystemDocumentType] });
 host = testHost;

@@ -211,7 +211,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
   #snapshot: TreeControllerSnapshot<T, TId>;
 
   constructor(options: TreeControllerOptions<T, TId>) {
-    super({ kind: "NSETreeController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal });
+    super({ kind: "NSETreeController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal, owner: options.owner });
     this.#getId = options.getId;
     this.#getChildren = options.getChildren;
     this.#withChildren = options.withChildren;

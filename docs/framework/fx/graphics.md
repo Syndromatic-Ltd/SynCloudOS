@@ -22,7 +22,7 @@ import { GFXColour, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
 | --- | --- |
 | Prefix | `GFX` |
 | Entry | `@syndromatic/syncloudos/fx/graphics` |
-| Hook | None. GraphicsFX is a library. The session supplies the identifier issuer that `GFXContext` needs, through `useSynWareImages().createGraphicsIdentifierIssuer()`. |
+| Hook | None. GraphicsFX is a library. The session supplies the identifier issuer that `GFXContext` needs, through `useImages().createGraphicsIdentifierIssuer()`. |
 | Permissions | None |
 | Analogue | Quartz 2D (`CGPath`, `CGColor`, `CGColorSpace`, `CGImage`, `CGGradient`, `CGShading`, `CGPattern`, `CGContext`, `CGLayer`, `CGPDFDocument`) |
 

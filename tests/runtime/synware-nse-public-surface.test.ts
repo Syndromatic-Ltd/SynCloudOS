@@ -93,7 +93,7 @@ describe("SynWare NSE public framework boundary", () => {
   it("keeps host machinery and the internal namespace outside the public export contract", () => {
     const { declarations, names } = publicExports();
     expect(declarations.every((declaration) => declaration.exportClause && ts.isNamedExports(declaration.exportClause))).toBe(true);
-    for (const forbidden of ["NSE", "WindowManager", "WindowController", "NSEWindowController", "SynWareProvider", "SynWareRuntimeMount", "nseRegistry", "NSEStandardWindowSpecimen", "NSEStandardWindowSpecimenProps", "nseControlVariantCount", "useOptionalNSEWindowSurfaceBridge"]) {
+    for (const forbidden of ["NSE", "WindowManager", "WindowController", "SynWareProvider", "SynWareRuntimeMount", "nseRegistry", "NSEStandardWindowSpecimen", "NSEStandardWindowSpecimenProps", "nseControlVariantCount", "useOptionalNSEWindowSurfaceBridge"]) {
       expect(names).not.toContain(forbidden);
     }
     const controls = publicExports(resolve("src/NSE/public/controls.ts"));

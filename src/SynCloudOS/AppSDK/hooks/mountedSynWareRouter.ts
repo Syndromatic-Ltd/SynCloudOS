@@ -26,7 +26,7 @@ import type {
 } from "../../Routing/appSdkRoutePort";
 import type { SynCloudOSRouteTransitionHandle, SynCloudOSRouteTransitionResult } from "../../Routing/appSdkRoutePort";
 import type { AppNavigationClient } from "../appClientTypes";
-import type { SynWareRouter, SynWareRouterPreloadOptions, SynWareRouterSnapshot } from "./useSynWareRouter";
+import type { SynWareRouter, SynWareRouterPreloadOptions, SynWareRouterSnapshot } from "./useRouter";
 
 export interface MountedSynWareRouterOptions<
   TRoutes extends readonly SynWareRouteDefinition[],

@@ -31,7 +31,7 @@ import {
   WindowLayer,
 } from "../../../Webspring/WindowLayer";
 import { createSynWare, createSynWareBundle } from "../createSynWare";
-import { useSynWare } from "../SynWareContext";
+import { useSynWareContext } from "../SynWareContext";
 import type { SynWareContextValue } from "../appContextTypes";
 import type { CreateWindowRequest } from "../../Windows";
 import { createDeterministicRuntimeEnvironment } from "./fakeAdapters";
@@ -156,7 +156,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
   const appDefinition = createSynWare({
     manifest: manifest.manifest,
     root: function SynWareTestRoot() {
-      context = useSynWare();
+      context = useSynWareContext();
       return <AppRoot />;
     },
     ...(options.app.migrations === undefined ? {} : { migrations: options.app.migrations }),

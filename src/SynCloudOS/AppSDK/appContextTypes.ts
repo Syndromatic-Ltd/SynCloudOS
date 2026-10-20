@@ -42,6 +42,7 @@ import type {
   AppWindowClient,
 } from "./appClientTypes";
 import type {
+  AppAlertClient,
   AppAnimationClient,
   AppConnectivityClient,
   AppErrorClient,
@@ -50,6 +51,7 @@ import type {
   AppIdentityClient,
   AppFilePanelClient,
   AppImageClient,
+  AppLauncherClient,
   AppMediaQueryClient,
   AppNotificationClient,
   AppPersistenceClient,
@@ -86,6 +88,11 @@ export interface SynWareContextValue {
   readonly runtimeInfo: SynWareRuntimeInfo;
   readonly branding: SynWareSiteBranding;
   readonly appId: string;
+  /** Static identity beyond the ID: the version the app declared and the
+   * display title error messages and `SCOS.app` use. */
+  readonly appInfo: Readonly<{ readonly id: string; readonly version: string; readonly title: string }>;
+  /** Catalogue lookups for `SCOS.open` when the caller names an app ID. */
+  readonly launcher: AppLauncherClient;
   /** The mount's own responder identity; no foreign responder lookup is
    * exposed through this presentation-scoped value. */
   readonly responderId: string;
@@ -112,6 +119,7 @@ export interface SynWareContextValue {
   readonly identity: AppIdentityClient;
   readonly notifications: AppNotificationClient;
   readonly errors: AppErrorClient;
+  readonly alerts: AppAlertClient;
   readonly externalActions: AppExternalActionClient;
   readonly share: AppShareClient;
   readonly workArea: AppWorkAreaClient;

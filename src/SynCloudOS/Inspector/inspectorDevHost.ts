@@ -25,7 +25,7 @@ import { createInspectorOwnerSources, type InspectorRouteInspectionPort } from "
 import { createInspectorProjection } from "./inspectorProjection";
 import type { InspectorClient, InspectorSource } from "./inspectorTypes";
 import type { InspectorLocalization } from "./inspectorLocalization";
-import { translateSynWareText } from "../AppSDK/useSynWareLocalisedStrings";
+import { translateSynWareText } from "../AppSDK/useStrings";
 
 export interface InspectorDevHostOptions {
   readonly enabled: boolean;

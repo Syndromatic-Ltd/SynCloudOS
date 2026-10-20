@@ -103,42 +103,39 @@ and its component is `index.tsx`:
 
 ```tsx
 import "@syndromatic/syncloudos/nse/styles.css";
-import { createSynWare, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { SCOS } from "@syndromatic/syncloudos";
 import { NSEStackItem, NSEStackView } from "@syndromatic/syncloudos/nse";
-import manifest from "./Info";
 
-function Hello() {
-  const app = useSynWare();
+export default function Hello() {
   return (
     <NSEStackView aria-label="Hello" orientation="vertical" spacing={12}>
       <NSEStackItem id="greeting" visibilityPriority={100}>
-        <p>Hello from {app.appId}.</p>
+        <p>Hello from {SCOS.app.id}.</p>
       </NSEStackItem>
     </NSEStackView>
   );
 }
 
-export default createSynWare({ manifest, root: Hello });
 ```
 
 The [getting started guide](docs/framework/getting-started.md) adds the Webspring shell definition and the `main.tsx` that mounts everything, and finishes with a running Board launcher.
 
 ## Working with the session
 
-A mounted SynWare receives narrow clients, never the runtime or its registries. `useSynWare()` gives the application its identity, branding and presentation traits, and dedicated hooks give each capability:
+A mounted SynWare receives narrow clients, never the runtime or its registries. Inside an app folder, `SCOS` is bound to that app even after `await` or in timers. Shared React components call `useSCOS()` to select the nearest app provider; reactive hooks subscribe to changing values:
 
 | Area | Hooks |
 | --- | --- |
-| Commands, undo and focus | `useSynWareCommands`, `ResponderScope` |
-| Documents and persistence | `useSynWareDocument`, `useSynWarePersistence` |
-| Windows and chrome | `useSynWareWindow`, `useSynWareWindowChrome`, `useSynWareWorkArea` |
-| Navigation | `useSynWareRouter`, `useSynWareRouteState`, `useSynWareRouteData` |
-| Pasteboard and drag | `useSynWarePasteboard`, `useSynWareDrag`, `useSynWareShare` |
-| Notifications and lifecycle | `useSynWareNotifications`, `useSynWareLifecycle`, `useSynWareEvents`, `useSynWareErrors` |
-| Appearance and locale | `useSynWareAppearance`, `useSynWareColourPanel`, `useSynWareLocalisedStrings`, `useSynWareMediaQuery` |
-| Identity and services | `useSynWareIdentity`, `useSynWareService`, `useSynWareTrustedClient` |
-| Media and devices | `useSynWareAnimations`, `useSynWareImages`, `useSynWareTextLayout`, `useSynWareAudio`, `useSynWareHaptics`, `useSynWareMotion`, `useSynWareMedia`, `useSynWareVideo`, `useSynWareMIDI`, `useSynWareLocation`, `useSynWareLumina` |
-| Web content | `useSynWareWebContent` |
+| Commands, undo and focus | `useCommands`, `ResponderScope` |
+| Documents and persistence | `useDocument`, `usePersistence` |
+| Windows and chrome | `useWindow`, `useWindowChrome`, `useWorkArea` |
+| Navigation | `useRouter`, `useRouteState`, `useRouteData` |
+| Pasteboard and drag | `usePasteboard`, `useDrag`, `useShare` |
+| Notifications and lifecycle | `useNotifications`, `useLifecycle`, `useEvents`, `useErrors` |
+| Appearance and locale | `useAppearance`, `useColourPanel`, `useStrings`, `useMediaQuery` |
+| Identity and services | `useIdentity`, `useService`, `useTrustedClient` |
+| Media and devices | `useAnimations`, `useImages`, `useTextLayout`, `useAudio`, `useHaptics`, `useMotion`, `useMedia`, `useVideo`, `useMIDI`, `useLocation`, `useLumina` |
+| Web content | `useWebContent` |
 
 An absent or denied service returns `{ available: false, client: null, denial }` instead of throwing, so an application renders the matching state.
 

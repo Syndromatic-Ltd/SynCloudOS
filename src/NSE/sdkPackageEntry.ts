@@ -57,6 +57,8 @@ export type {
   ControllerValidationIssue, ControllerEditTransaction, ControllerCommitResult, ControllerUndoRegistration,
   NSEControllerDisposalReason, NSEControllerOwnership,
 } from "./Controllers/NSEController";
+export { nseUnowned } from "./Controllers/ownership";
+export type { NSEOwner, NSEControllerOwnershipOptions } from "./Controllers/ownership";
 export { useNSEArrayController, useNSETreeController } from "./Controllers/useNSEOwnedController";
 export { SynCloudOSLifecycleError } from "../SynCloudOS/nseRuntimeContracts";
 export type {
@@ -963,3 +965,14 @@ export type {
   NSEVirtualRowState,
   NSEVirtualWindow,
 } from "./List/NSEVirtualList";
+
+export { NSEObject, observable, observe, useObserve } from "./Objects";
+export type { NSEObservable } from "./Objects";
+export { NSEApplication, NSEWindowController, NSEViewController } from "./Application";
+export type {
+  NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,
+  NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowCloseOutcome,
+  NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
+} from "./Application";
+export { NSEActionScopeProvider } from "./Controls/Core/useNSEControlAction";
+export type { NSEActionScopeProviderProps } from "./Controls/Core/useNSEControlAction";

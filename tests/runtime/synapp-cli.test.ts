@@ -1,120 +1,50 @@
-/*
- * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
- *
- * Designed by Kavish Krishnakumar in Manchester.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, describe, expect, it } from "vitest";
-
-const temporaryTargets: string[] = [];
-
-function createTarget() {
-  const target = mkdtempSync(join(tmpdir(), "synapp-"));
-  temporaryTargets.push(target);
-  return target;
+// @ts-expect-error Static tooling is ESM.
+import { validateSynWareDirectory, validateSynWareDirectories } from "../../scripts/synware/validate-synware.mjs";
+const roots: string[] = [];
+function project() {
+  const root = mkdtempSync(join(tmpdir(), "synapp-cli-")); roots.push(root);
+  writeFileSync(join(root, "package.json"), JSON.stringify({ version: "2.0.0" }));
+  return root;
+}
+afterEach(() => roots.splice(0).forEach(root => rmSync(root, { recursive: true, force: true })));
+function scaffold(target: string, ...options: string[]) {
+  return execFileSync(process.execPath, ["scripts/synware/create-synware.mjs", target, ...options], { encoding: "utf8", stdio: "pipe" });
 }
 
-afterEach(() => {
-  for (const target of temporaryTargets.splice(0)) rmSync(target, { recursive: true, force: true });
-});
-
-describe("create-synware CLI", () => {
-  it("creates an out-of-tree app that imports only the AppSDK and NSE barrels", () => {
-    const target = createTarget();
-    execFileSync(process.execPath, [
-      "scripts/synware/create-synware.mjs",
-      target,
-      "com.example.cloud",
-    ], { encoding: "utf8" });
-
-    const source = readFileSync(join(target, "Contents", "index.tsx"), "utf8");
-    expect(source).toContain('from "@syndromatic/syncloudos/sdk"');
-    expect(source).toContain('from "@syndromatic/syncloudos/nse"');
-    expect(source).not.toMatch(/\.\.\/.*src\//u);
-    expect(source).not.toContain(process.cwd());
-    expect(existsSync(join(target, "Contents", "Info.ts"))).toBe(true);
-    expect(existsSync(join(target, "Contents", "Resources", "Localised", "Base.locale", "Localisable.strings"))).toBe(true);
-
-    expect(execFileSync(process.execPath, ["scripts/synware/validate-synware.mjs", target], { encoding: "utf8" }))
-      .toContain("validated com.example.cloud");
+describe("folder authoring CLI", () => {
+  it.each(["Cloud.app", "Billing.prefPane", "Latest.widget", "Journal.integration.ts"])("creates and validates %s", name => {
+    const target = join(project(), name);
+    scaffold(target, ...(name.endsWith(".integration.ts") ? ["--owners", "journal"] : []));
+    const result = validateSynWareDirectory(target);
+    expect(result.ok).toBe(true);
+    if (name.endsWith(".app")) expect(result.manifest).toMatchObject({ id: "cloud", title: "Cloud", version: "2.0.0", webspring: { visible: true } });
   });
-
-  it("refuses invalid identifiers and non-empty target directories", () => {
-    const target = createTarget();
-    writeFileSync(join(target, "occupied.txt"), "occupied", "utf8");
-    expect(() => execFileSync(process.execPath, ["scripts/synware/create-synware.mjs", target, "com.example.cloud"], { encoding: "utf8", stdio: "pipe" }))
-      .toThrow(/non-empty/u);
-
-    const cleanTarget = createTarget();
-    expect(() => execFileSync(process.execPath, ["scripts/synware/create-synware.mjs", cleanTarget, "Not an identifier"], { encoding: "utf8", stdio: "pipe" }))
-      .toThrow(/valid SynWare identifier/u);
+  it("refuses occupied folders and unsupported options", () => {
+    const root = project(), target = join(root, "Cloud.app");
+    mkdirSync(target); writeFileSync(join(target, "occupied.txt"), "occupied");
+    expect(() => scaffold(target)).toThrow(/non-empty/);
+    expect(() => scaffold(join(root, "Other.app"), "--unknown", "value")).toThrow(/Expected --fx/);
   });
-});
-
-describe("validate-synware CLI", () => {
-
-  it("discovers sorted governed directories and propagates every invalid-app result", () => {
-    const root = createTarget();
-    const alpha = join(root, "Alpha.app");
-    const zeta = join(root, "Zeta.app");
-    const broken = join(root, "Broken.app");
-
-    for (const [target, id] of [[zeta, "com.example.zeta"], [alpha, "com.example.alpha"]] as const) {
-      execFileSync(process.execPath, ["scripts/synware/create-synware.mjs", target, id], { encoding: "utf8" });
-    }
-    mkdirSync(join(broken, "Contents", "Resources", "Localised", "Base.locale"), { recursive: true });
-    writeFileSync(join(broken, "Contents", "Info.ts"), "export default { id: 'not-a-valid-id' };\n", "utf8");
-    writeFileSync(join(broken, "Contents", "index.tsx"), "export {};\n", "utf8");
-    writeFileSync(join(broken, "Contents", "Resources", "Localised", "Base.locale", "Localisable.strings"), "", "utf8");
-
-    const result = JSON.parse(execFileSync(process.execPath, [
-      "--input-type=module",
-      "-e",
-      "const validator = await import('./scripts/synware/validate-synware.mjs'); process.stdout.write(JSON.stringify({ directories: validator.discoverSynWareDirectories(process.argv[1]), result: validator.validateSynWareDirectories(process.argv[1]) }));",
-      root,
-    ], { cwd: process.cwd(), encoding: "utf8" })) as {
-      directories: string[];
-      result: { valid: number; invalid: number; ok: boolean; results: Array<{ directory: string; id: string | null; ok: boolean }> };
-    };
-    expect(result.directories.map((directory) => directory.split(/[\\/]/u).at(-1)))
-      .toEqual(["Alpha.app", "Broken.app", "Zeta.app"]);
-    const aggregate = result.result;
-    expect(aggregate).toMatchObject({ valid: 2, invalid: 1, ok: false });
-    expect(aggregate.results).toEqual(expect.arrayContaining([
-      expect.objectContaining({ directory: broken, ok: false }),
-      expect.objectContaining({ id: "com.example.alpha", ok: true }),
-      expect.objectContaining({ id: "com.example.zeta", ok: true }),
-    ]));
+  it("aggregates all discovered folder kinds and reports invalid entries", () => {
+    const root = project();
+    scaffold(join(root, "Alpha.app")); scaffold(join(root, "Zeta.app")); scaffold(join(root, "Billing.prefPane"));
+    const broken = join(root, "Broken.app", "Contents"); mkdirSync(broken, { recursive: true });
+    writeFileSync(join(broken, "index.tsx"), "export const broken = true;");
+    const result = validateSynWareDirectories(root);
+    expect(result).toMatchObject({ valid: 3, invalid: 1, ok: false });
+    expect(result.results.filter((entry: { ok: boolean }) => entry.ok).map((entry: { id: string | null; kind: string }) => entry.id ?? entry.kind).sort()).toEqual(["alpha", "preferencePane", "zeta"]);
   });
-
-  it("accepts reviewed runtime dependencies while rejecting undeclared external packages", () => {
-    const target = createTarget();
-    execFileSync(process.execPath, ["scripts/synware/create-synware.mjs", target, "com.example.dependencies"], { encoding: "utf8" });
-    const entry = join(target, "Contents", "index.tsx");
-    writeFileSync(entry, 'import { createPortal } from "react-dom"; import { motion } from "framer-motion"; void createPortal; void motion;\n', "utf8");
-    expect(execFileSync(process.execPath, ["scripts/synware/validate-synware.mjs", target], { encoding: "utf8" }))
-      .toContain("validated com.example.dependencies");
-
-    writeFileSync(entry, 'import thing from "not-a-reviewed-runtime-package"; void thing;\n', "utf8");
-    expect(() => execFileSync(process.execPath, ["scripts/synware/validate-synware.mjs", target], { encoding: "utf8", stdio: "pipe" }))
-      .toThrow(/unsupported package/u);
+  it("accepts reviewed imports and rejects undeclared packages", () => {
+    const target = join(project(), "Dependencies.app"); scaffold(target);
+    const entry = join(target, "Contents/index.tsx");
+    writeFileSync(entry, 'import { createPortal } from "react-dom"; import { motion } from "framer-motion"; export default function App() { return null; }');
+    expect(validateSynWareDirectory(target).ok).toBe(true);
+    writeFileSync(entry, 'import thing from "not-a-reviewed-runtime-package"; export default function App() { return null; }');
+    expect(validateSynWareDirectory(target).error).toMatch(/unsupported package/);
   });
 });

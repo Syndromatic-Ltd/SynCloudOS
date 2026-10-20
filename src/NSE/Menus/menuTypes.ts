@@ -60,6 +60,28 @@ export type NSEMenuEntry =
   | { readonly kind: "separator"; readonly id: string }
   | { readonly kind: "custom"; readonly id: string; readonly label: ReactNode; readonly render: () => ReactNode };
 
+/**
+ * A command entry named by an action (`{ action: "newNote" }`) instead of a
+ * command ID. The menu's runtime port turns the name into the command ID of the
+ * application that declared the action.
+ */
+export interface NSEMenuActionEntry {
+  readonly kind: "command";
+  readonly id: string;
+  readonly action: string;
+  readonly payload?: unknown;
+  readonly labelOverride?: ReactNode;
+  readonly iconOverride?: ReactNode;
+  readonly shortcutOverride?: string;
+  readonly selectionKind?: "checkbox" | "radio";
+}
+
+/** An entry as authored: command entries may name an action instead of a command ID. */
+export type NSEMenuEntryInput =
+  | Exclude<NSEMenuEntry, { readonly kind: "submenu" }>
+  | NSEMenuActionEntry
+  | (Omit<Extract<NSEMenuEntry, { readonly kind: "submenu" }>, "entries"> & { readonly entries: readonly NSEMenuEntryInput[] });
+
 export interface NSEMenuItemDefinition {
   readonly value: string;
   readonly label: ReactNode;
@@ -76,7 +98,7 @@ export interface NSEMenuItemDefinition {
 export interface NSEMenuModel {
   readonly id: string;
   readonly label: string;
-  readonly entries: readonly NSEMenuEntry[];
+  readonly entries: readonly NSEMenuEntryInput[];
   /**
    * Optional contributions are inserted deterministically by their stable
    * section ID and weight. They are a presentation extension point only: all
@@ -85,9 +107,9 @@ export interface NSEMenuModel {
   readonly sections?: readonly NSEMenuSection[];
 }
 
-export interface NSEMenuSection {
+export interface NSEMenuSection<TEntry = NSEMenuEntryInput> {
   readonly id: string;
-  readonly entries: readonly NSEMenuEntry[];
+  readonly entries: readonly TEntry[];
   readonly weight?: number;
   readonly beforeId?: string;
   readonly afterId?: string;
@@ -134,6 +156,8 @@ export interface NSEMenuRuntimePort {
   readonly keyBindings?: Pick<KeyBindingManager, "claimKeyboardEvent" | "handleKeyboardEvent">;
   /** Optional injected scheduler for submenu aim delay. No ambient timer use. */
   readonly scheduler?: NSEMenuScheduler;
+  /** Turns an action name into the command ID of the application that declared it. Required for menus with `{ action }` entries. */
+  readonly resolveAction?: (action: string) => CommandId;
 }
 
 export type NSEMenuPresentedEntry =

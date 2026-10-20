@@ -63,6 +63,7 @@ import type {
   AFXAnimationSettlement,
 } from "./animationTypes";
 
+import { afxAdoptLayerPorts } from "./layerAdoption";
 export interface AFXFrameScheduler {
   now(): number;
   requestFrame(callback: (timestamp: number) => void): () => void;
@@ -121,11 +122,23 @@ export interface AFXLayerSurface {
   replicationCapability?(): Readonly<{ projectiveDepth: boolean }>;
   compositionCapability?(): AFXLayerCompositionCapability;
   startCompositorAnimation?(input: AFXLayerCompositorRequest): AFXLayerCompositorPlayback | null;
+  /**
+   * Allocates the projection port for a layer that joins this surface without
+   * one, which is how `parent.addSublayer(new AFXLayer())` adopts a detached
+   * layer. Surfaces that cannot allocate nested projections omit it.
+   */
+  createSublayerSurface?(): AFXLayerSurface;
   apply(snapshot: AFXLayerSnapshot, presentationTime?: number): void;
   attach(child: AFXLayerSurface, index?: number): void;
   detach(child: AFXLayerSurface): void;
   setMask(mask: AFXLayerSurface | null): void;
   dispose(): void;
+}
+/** The rendering ports a layer borrows from the surface tree it is projected into. */
+export interface AFXLayerPorts {
+  readonly surface: AFXLayerSurface;
+  readonly scheduler: AFXFrameScheduler;
+  readonly signal?: AbortSignal;
 }
 export interface AFXLayerCompositorRequest {
   readonly property: "opacity" | "transform";
@@ -334,11 +347,33 @@ function snapshotContentAnimation(
   });
 }
 
+/**
+ * Stands in for the rendering surface of a layer that has not joined a surface
+ * tree yet. Property writes are kept on the layer itself and projected when it
+ * attaches, so every projection call here has nothing to do.
+ */
+const detachedSurface: AFXLayerSurface = Object.freeze({
+  supportsFilters: true,
+  supportsReplication: true,
+  supportedProperties: Object.freeze([] as string[]),
+  supportedContentKinds: Object.freeze(["shader", "shape", "gradient", "image", "video", "text", "emitter", "tiled"] as const),
+  apply() {},
+  attach() {},
+  detach() {},
+  setMask() {},
+  dispose() {},
+});
+const detachedScheduler: AFXFrameScheduler = Object.freeze({
+  now: () => 0,
+  requestFrame: () => () => {},
+  reducedMotion: false,
+  suspended: false,
+});
 /** Projects immutable model/presentation snapshots onto an explicitly supplied surface. */
 export class AFXLayer {
   readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "AFXLayer" });
-  readonly #surface: AFXLayerSurface;
-  readonly #scheduler: AFXFrameScheduler;
+  #surface: AFXLayerSurface = detachedSurface;
+  #scheduler: AFXFrameScheduler = detachedScheduler;
   readonly #running = new Map<string, Running>();
   readonly #children: AFXLayer[] = [];
   /** Frozen view of #children, rebuilt only after the children change. */
@@ -358,8 +393,9 @@ export class AFXLayer {
   #cancelAnimationFrame: (() => void) | null = null;
   #animationFrameBatch = false;
   #animationFrameDisplayPending = false;
-  #unsubscribe: () => void;
-  readonly #signal: AbortSignal | undefined;
+  #unsubscribe: () => void = () => {};
+  #signal: AbortSignal | undefined = undefined;
+  #detached = true;
   readonly #abort = () => this.dispose();
   #bounds: GFXRect = normaliseRect({ x: 0, y: 0, width: 0, height: 0 });
   #position: GFXPoint = normalisePoint({ x: 0, y: 0 });
@@ -391,12 +427,79 @@ export class AFXLayer {
   #anchorPointZ = 0;
   #sublayerTransform = new AFXTransform3D();
   delegate: AFXLayerDelegate | null = null;
-  constructor(
-    surface: AFXLayerSurface,
-    scheduler: AFXFrameScheduler,
-    options: Readonly<{ signal?: AbortSignal }> = {},
-  ) {
-    if (options.signal?.aborted)
+  constructor() {}
+  /**
+   * Joins the surface tree `ports` belong to. A detached layer takes its
+   * surface and scheduler from the layer it is added to (`addSublayer`); hosts
+   * that build their own surface tree use `createAFXLayer` instead.
+   */
+  [afxAdoptLayerPorts](ports: AFXLayerPorts): void {
+    this.#adopt(ports);
+  }
+  /** False until the layer joins a surface tree (by `addSublayer` below an attached layer, or a host's `createAFXLayer`). */
+  get isAttached(): boolean {
+    return !this.#detached;
+  }
+  /** Called once, after the layer attached to a surface: the point where a subclass starts work that needs the surface or scheduler. */
+  protected layerDidAttach(_ports: AFXLayerPorts): void {}
+  #assertAttached(operation: string) {
+    if (this.#detached)
+      throw new DOMException(
+        `${operation} needs a rendering surface: add the layer to an attached layer with addSublayer first.`,
+        "InvalidStateError",
+      );
+  }
+  #childPorts(): AFXLayerPorts {
+    const surface = this.#surface.createSublayerSurface?.();
+    if (!surface)
+      throw new TypeError(
+        "This rendering surface cannot adopt detached layers; build the layer with the host's createAFXLayer().",
+      );
+    return { surface, scheduler: this.#scheduler, ...(this.#signal ? { signal: this.#signal } : {}) };
+  }
+  #adoptChild(child: AFXLayer) {
+    const ports = this.#childPorts();
+    try {
+      child.#adopt(ports);
+    } catch (error) {
+      if (child.#detached) {
+        try {
+          ports.surface.dispose();
+        } catch {
+          /* Preserve the adoption error. */
+        }
+      }
+      throw error;
+    }
+  }
+  #adoptSublayer(child: AFXLayer) {
+    if (child.#detached === this.#detached) return;
+    if (this.#detached)
+      throw new Error(
+        "An attached layer cannot join a detached layer; add the detached layer to a parent first.",
+      );
+    this.#adoptChild(child);
+  }
+  #assertAdoptable(surface: AFXLayerSurface) {
+    if ((this.#filters.length || this.#compositingFilter) && !surface.supportsFilters)
+      throw new DOMException("This layer surface does not support image filters.", "NotSupportedError");
+    if (this.#replication && !surface.supportsReplication)
+      throw new Error("This surface does not support replication.");
+    if (this.#content && !surface.supportedContentKinds?.includes(this.#content.kind))
+      throw new Error("This surface does not support the requested layer content.");
+    if ((this.#children.length || this.#mask) && !surface.createSublayerSurface)
+      throw new TypeError(
+        "This rendering surface cannot adopt detached layers; build the layer with the host's createAFXLayer().",
+      );
+    for (const child of this.#children) child.#assertAdoptable(surface);
+    if (this.#mask) this.#mask.#assertAdoptable(surface);
+  }
+  #adopt(ports: AFXLayerPorts) {
+    this.#assertLive("attach", "call");
+    if (!this.#detached)
+      throw new DOMException("The layer is already attached to a surface.", "InvalidStateError");
+    const { surface, scheduler, signal } = (ports ?? {}) as Partial<AFXLayerPorts>;
+    if (signal?.aborted)
       throw new DOMException("Layer owner is already aborted.", "AbortError");
     if (
       !surface ||
@@ -416,42 +519,41 @@ export class AFXLayer {
       typeof scheduler.requestFrame !== "function"
     )
       throw new TypeError("Layer requires a frame scheduler.");
+    this.#assertAdoptable(surface);
     this.#surface = surface;
     this.#scheduler = scheduler;
-    this.#signal = options.signal;
-    this.#unsubscribe = () => {};
+    this.#signal = signal;
+    this.#detached = false;
     try {
       this.#display();
-      if (this.#signal?.aborted)
-        throw new DOMException(
-          "Layer owner aborted during construction.",
-          "AbortError",
-        );
+      if (signal?.aborted)
+        throw new DOMException("Layer owner aborted during construction.", "AbortError");
       this.#unsubscribe =
         scheduler.subscribeState?.(() => {
           if (scheduler.suspended || scheduler.reducedMotion)
             for (const running of [...this.#running.values()])
               running.finish("completed");
         }) ?? (() => {});
-      if (this.#signal?.aborted)
-        throw new DOMException(
-          "Layer owner aborted during construction.",
-          "AbortError",
-        );
-      this.#signal?.addEventListener("abort", this.#abort, { once: true });
-    } catch (error) {
-      // Do not dispatch subclass disposal before its private fields initialize.
-      this.#disposed = true;
-      this.#signal?.removeEventListener("abort", this.#abort);
-      try {
-        this.#unsubscribe();
-      } catch {
-        /* Preserve the construction error. */
+      if (signal?.aborted)
+        throw new DOMException("Layer owner aborted during construction.", "AbortError");
+      signal?.addEventListener("abort", this.#abort, { once: true });
+      let index = 0;
+      for (const child of this.#children) {
+        this.#adoptChild(child);
+        surface.attach(child.#surface, index++);
       }
+      if (this.#mask) {
+        this.#adoptChild(this.#mask);
+        surface.setMask(this.#mask.#surface);
+      }
+      this.layerDidAttach({ surface, scheduler, ...(signal ? { signal } : {}) });
+      if (this.#layoutDirty || this.#displayDirty) this.#scheduleInvalidation();
+    } catch (error) {
+      // A layer that fails to attach is disposed, as a layer that failed to construct was.
       try {
-        surface.dispose();
+        this.dispose();
       } catch {
-        /* Preserve the construction error. */
+        /* Preserve the attach error. */
       }
       throw error;
     }
@@ -504,7 +606,7 @@ export class AFXLayer {
     mutate: () => void,
   ) {
     const transaction = currentAFXTransactionActionContext();
-    const action = this.actionForKey(key);
+    const action = this.#detached ? null : this.actionForKey(key);
     const animation = action
       ? new AFXBasicAnimation({
           targetId: this.#actionTargetId,
@@ -912,12 +1014,17 @@ export class AFXLayer {
   get mask(): AFXLayer | null {
     return this.#mask;
   }
+  /** What the attached surface preserves when it replicates this layer; undefined while detached. */
+  protected get surfaceReplicationCapability(): Readonly<{ projectiveDepth: boolean }> | undefined {
+    return this.#detached ? undefined : this.#surface.replicationCapability?.();
+  }
   get compositionCapability(): AFXLayerCompositionCapability {
     return this.#surface.compositionCapability?.() ?? Object.freeze({ state: "portable-owned" });
   }
   /** Render an owned layer subtree into an image at the current presentation time. */
   render(bounds: GFXRect, scale = 1, signal: AbortSignal = new AbortController().signal): Promise<GFXImage> {
     this.#assertLive("render", "call");
+    this.#assertAttached("render");
     const rect = normaliseRect(bounds);
     const snapshot = AFXCompositionSnapshot.capture(this, { bounds: rect, scale, time: this.#scheduler.now() });
     return snapshot.render({
@@ -1123,7 +1230,7 @@ export class AFXLayer {
     });
   }
   #display() {
-    if (this.#disposed) return;
+    if (this.#disposed || this.#detached) return;
     if (captureAFXTransactionDisplay(this, () => this.#display())) return;
     this.#displayDirty = false;
     try {
@@ -1142,7 +1249,7 @@ export class AFXLayer {
     }
   }
   #scheduleInvalidation() {
-    if (this.#cancelInvalidation) return;
+    if (this.#cancelInvalidation || this.#detached) return;
     this.#cancelInvalidation = this.#scheduler.requestFrame(() => {
       this.#cancelInvalidation = null;
       if (this.#disposed) return;
@@ -1308,6 +1415,7 @@ export class AFXLayer {
       index,
       this.#children.length - (child.#parent === this ? 1 : 0),
     );
+    this.#adoptSublayer(child);
     this.#surface.attach(child.#surface, finalIndex);
     if (child.#parent) {
       const siblings = child.#parent.#children;
@@ -1374,6 +1482,7 @@ export class AFXLayer {
       )
         throw new Error("Mask must be an independent acyclic projection.");
     }
+    if (mask) this.#adoptSublayer(mask);
     this.#surface.setMask(mask ? mask.#surface : null);
     if (this.#mask) this.#mask.#maskOwner = null;
     this.#mask = mask;
@@ -1516,6 +1625,7 @@ export class AFXLayer {
     key?: string,
   ): AFXAnimationHandle {
     this.#assertLive("addAnimation", "call");
+    this.#assertAttached("addAnimation");
     const declaredKeyPath = input.keyPath;
     key ??= declaredKeyPath;
     const contentAnimation = declaredKeyPath === "path" || declaredKeyPath === "gradient";

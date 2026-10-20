@@ -285,6 +285,28 @@ describe("focus scopes", () => {
     expect(background.hasAttribute("aria-hidden")).toBe(false);
   });
 
+  it.each(["inert", "aria-hidden"] as const)("excludes controls beneath %s ancestors from modal focus and Tab wrapping", async (hidden) => {
+    const runtime = createTestRuntime();
+    const attributes = hidden === "inert" ? { inert: true } : { "aria-hidden": true as const };
+    render(
+      <SynCloudOSProvider runtime={runtime}>
+        <FocusScope scopeId="modal:hidden-content" kind="modal" parentResponderId="runtime">
+          <div {...attributes}><button>Hidden first</button></div>
+          <button>Visible first</button><button>Visible last</button>
+          <div {...attributes}><button>Hidden last</button></div>
+        </FocusScope>
+      </SynCloudOSProvider>,
+    );
+    const first = screen.getByRole("button", { name: "Visible first" });
+    const last = screen.getByRole("button", { name: "Visible last" });
+    await waitFor(() => expect(document.activeElement).toBe(first));
+    last.focus();
+    fireEvent.keyDown(last, { key: "Tab" });
+    expect(document.activeElement).toBe(first);
+    fireEvent.keyDown(first, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(last);
+  });
+
   it("releases modal-owned undo state without deleting a pre-existing owner", async () => {
     const runtime = createTestRuntime();
     runtime.responders.register({ id: "app", kind: "application", parentId: "runtime", scopeId: "root" });

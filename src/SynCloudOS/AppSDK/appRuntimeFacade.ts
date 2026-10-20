@@ -1330,11 +1330,73 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       if (!ownsWindow(opened.record)) throw securityError("The opened window lost caller ownership.");
       return projectWindow(opened.record);
     },
+    async openWindow(request) {
+      assertLive();
+      const fields = requestRecord(request);
+      const title = canonicalRequestText(fields.title, "title");
+      const restorationKey = `application.${app.id}.window.${canonicalRequestText(fields.restorationKey, "restorationKey")}`;
+      const existing = runtime.windows.list({
+        workspaceId: callerWindowIdentity.workspaceId,
+        applicationId: app.id,
+        applicationSessionId: callerWindowIdentity.applicationSessionId,
+      }).find(({ record }) => record.restorationKey === restorationKey && record.state !== "closed");
+      if (existing) {
+        if (existing.record.state === "minimised") runtime.windows.restore(existing.id);
+        else runtime.windows.makeKey(existing.id);
+        return projectWindow(runtime.windows.select(existing.id).record);
+      }
+      const created = runtime.windows.create({
+        workspaceId: callerWindowIdentity.workspaceId,
+        applicationId: app.id,
+        applicationSessionId: callerWindowIdentity.applicationSessionId,
+        documentId: null,
+        documentAssociationRole: null,
+        representedDocument: null,
+        toolbar: null,
+        role: "standard",
+        style: app.window.style,
+        chromeMode: app.window.chrome,
+        smoothSurface: app.window.smoothSurface,
+        title,
+        content: { rendererId: "application", parameters: { appId: app.id } },
+        bounds: canonicalBounds(fields.preferredBounds, app.window.defaultBounds),
+        minimumSize: app.window.minimumSize,
+        maximumSize: null,
+        level: "normal",
+        parentWindowControllerId: null,
+        anchor: null,
+        pinned: false,
+        mobilePolicy: app.window.mobilePolicy,
+        restorationKey,
+      });
+      const opened = await runTestControl("windows", "window.open", signal, () => runtime.windows.open(created.id));
+      assertLive();
+      if (!ownsWindow(opened.record)) throw securityError("The opened window lost caller ownership.");
+      return projectWindow(opened.record);
+    },
+    registerCloseGuard(id, guard) {
+      const candidate = ownedWindow(id);
+      if (!guard || typeof guard.shouldClose !== "function") throw new TypeError("A close guard requires shouldClose.");
+      return cleanupOnAbort(runtime.windows.registerCloseGuard(candidate.id, {
+        shouldClose: (request) => guard.shouldClose(request.reason),
+        willClose: (request) => guard.willClose?.(request.reason),
+      }));
+    },
     focus(id) {
       const candidate = ownedWindow(id);
       if (candidate.record.state === "minimised") runtime.windows.restore(candidate.id);
       else runtime.windows.makeKey(candidate.id);
       return projectWindow(runtime.windows.select(candidate.id).record);
+    },
+    minimise(id) {
+      runtime.windows.minimise(ownedWindow(id).id);
+    },
+    zoom(id) {
+      runtime.windows.zoom(ownedWindow(id).id);
+    },
+    setTitle(id, title) {
+      const candidate = ownedWindow(id);
+      runtime.windows.updatePresentation(candidate.id, { title: canonicalRequestText(title, "title"), anchor: candidate.record.anchor });
     },
     async close(id) {
       const candidate = ownedWindow(id);
@@ -2401,7 +2463,15 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const safeColourPanelCommandIds = new Set([
       "colour-panel.show", "colour-panel.hide", "colour-panel.choose-picker", "colour-panel.copy", "colour-panel.paste", "colour-panel.commit", "colour-panel.cancel",
     ]);
+    // Standard commands an application's own objects may answer (`@action("document.save")`).
+    // They are resolved along the responder chain like any command, so an app can only
+    // answer them for its own responders, ahead of the runtime's default handling.
+    const answerableStandardCommandIds = new Set([
+      "document.save", "document.save-as", "document.revert", "document.close", "document.show-versions",
+      "window.close", "window.minimise", "window.zoom",
+    ]);
     const isSafeAppCommandId = (commandId: string): boolean => safeEditorCommandIds.has(commandId)
+      || answerableStandardCommandIds.has(commandId)
       || commandId === "document.new" || commandId === "document.open"
       || safeColourPanelCommandIds.has(commandId)
       || commandId === "nse.drag.begin"
@@ -3560,7 +3630,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     let cachedRuntimeAttachmentReadinessGeneration = textAttachmentGeneration;
     appRuntime = frozen<SynWareRuntime>({
       id: runtime.runtimeId,
-      app: Object.freeze({ id: app.id, name: app.name, shortName: app.shortName, packageName: app.packageName, route: app.route }),
+      app: Object.freeze({
+        id: app.id, name: app.name, shortName: app.shortName, packageName: app.packageName, route: app.route,
+        displayName: app.displayName,
+        version: runtime.bundles.getBundle(app.id)?.synWareManifest?.version ?? "",
+      }),
       responderId,
       signal,
       state,
@@ -4416,6 +4490,25 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
             }
           }
           captureRecovery(error);
+        },
+      }),
+      alerts: Object.freeze({
+        present(request: Parameters<MountedAppEnvironmentClients["alerts"]["present"]>[0], callerSignal?: AbortSignal) {
+          assertLive();
+          // The mount's own signal dismisses its alerts when the app closes.
+          const operationSignal = callerSignal ? AbortSignal.any([signal, callerSignal]) : signal;
+          return runtime.alerts.present(request, { ownerAppId: app.id, signal: operationSignal });
+        },
+      }),
+      launcher: Object.freeze({
+        routeFor(appId: string) {
+          assertLive();
+          return appRuntime.catalog.getApp(appId)?.route ?? null;
+        },
+        titleFor(appId: string) {
+          assertLive();
+          const target = appRuntime.catalog.getApp(appId);
+          return target ? target.displayName || target.name : null;
         },
       }),
       externalActions: Object.freeze({

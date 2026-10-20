@@ -25,7 +25,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { GFXImage } from "../../../src/FX/GraphicsFX/GFXImage";
 
 const host = vi.hoisted(() => ({ app: {} as Record<string, any>, reducedMotion: false, portalHost: null as HTMLElement | null, vortexMounts: [] as object[] }));
-vi.mock("../../../src/SynCloudOS/AppSDK/SynWareContext", () => ({ useSynWare: () => host.app }));
+vi.mock("../../../src/SynCloudOS/AppSDK/scos/useSCOS", () => ({ useSCOS: () => host.app }));
 vi.mock("../../../src/NSE/Overlays/NSEOverlayProvider", () => ({ useNSEOverlayProvider: () => ({ portalHost: host.portalHost }) }));
 vi.mock("../../../src/NSE/Animation/NSEAnimationEnvironment", () => ({ useNSEAnimationEnvironment: () => ({ reducedMotion: host.reducedMotion }) }));
 vi.mock("../../../src/NSE/Focus/NSEFocusPort", () => ({ NSEFocusScope: ({ children }: { children: React.ReactNode }) => children }));

@@ -20,7 +20,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { NSEPane, NSEPushButton, NSEInputBox } from "../../NSE/public/inspector-controls";
-import { translateSynWareText } from "../AppSDK/useSynWareLocalisedStrings";
+import { translateSynWareText } from "../AppSDK/useStrings";
 import type { InspectorLocalization } from "./inspectorLocalization";
 import "./inspector.css";
 import { inspectorPanels, type InspectorClient, type InspectorLink, type InspectorPanel, type InspectorSnapshot } from "./inspectorTypes";

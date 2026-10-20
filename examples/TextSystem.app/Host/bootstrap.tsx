@@ -26,6 +26,7 @@ import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudo
 import type { AppDocumentLocation } from "@syndromatic/syncloudos/sdk";
 import { createTextSystemExampleApp, textSystemDocumentType, type TextSystemExampleAppOptions } from "../Contents";
 import type { TextSystemExampleModel } from "../Contents/model";
+import manifest from "../Contents/Info";
 
 /** Trusted PRIVATE host bootstrap. Application files never import browser, raw runtime, stores or adapters. */
 export function createExamplePersistenceHost(options: { readonly databaseName: string; readonly indexedDB: IDBFactory }) {
@@ -62,7 +63,8 @@ export function createExamplePersistenceHost(options: { readonly databaseName: s
       const app = createTextSystemExampleApp({ ...appOptions, nativeDestination: nativeLocation, ...(reopen ? { openLocation: nativeLocation } : {}) });
       // Browser routing starts from the browser location. This host-only launch selects the declared app route.
       history.replaceState(history.state, "", "/examples/text-system");
-      const host = await mountSynCloudOS({ element, bundles: [app], shell, contributions: [contribution], authentication: "disabled" }); hostsMounted++; runtimeIds.push(runtimeId);
+      const composition = { bundles: [{ manifest, modulePath: "./TextSystem.app/Contents/index.tsx", loadModule: async () => ({ default: app }) }], preferences: [], widgets: [], contributions: [contribution], shell, shellResources: {} };
+      const host = await mountSynCloudOS({ element, composition, authentication: "disabled" }); hostsMounted++; runtimeIds.push(runtimeId);
       return host;
     },
   };

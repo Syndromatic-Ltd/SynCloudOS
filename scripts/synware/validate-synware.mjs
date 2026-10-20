@@ -22,7 +22,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createSynWareValidator, parseManifest } from "./validation-core.mjs";
+import { createSynWareValidator, discoverProjectFolders, parseManifest } from "./validation-core.mjs";
 export { parseManifest };
 import { synWarePackageName, synWareSdkEntries, synWareSdkGeneratedStyles, synWareSdkStyles } from "./sdk-entries.mjs";
 import { auditSynWareImports } from "./audit-sdk-imports.mjs";
@@ -33,8 +33,9 @@ const schema = JSON.parse(readFileSync(resolve(repositoryRoot, "src/SynCloudOS/A
 const validator = createSynWareValidator({
   schema,
   allowedImports: [
+    synWarePackageName,
     "react", "react/jsx-runtime", "react/jsx-dev-runtime",
-    ...Object.keys(synWareSdkEntries).filter(entry => entry !== "sdk/testing").map(entry => `${synWarePackageName}/${entry}`),
+    ...Object.keys(synWareSdkEntries).filter(entry => entry !== "sdk/testing" && entry !== "index").map(entry => `${synWarePackageName}/${entry}`),
     `${synWarePackageName}/nse/styles.css`,
     ...Object.keys(synWareSdkStyles).map(entry => `${synWarePackageName}/${entry}`),
     ...Object.keys(synWareSdkGeneratedStyles).map(entry => `${synWarePackageName}/${entry}`),
@@ -66,12 +67,7 @@ export function validateSynWareDirectory(targetArgument, boundaryAudit) {
 }
 
 export function discoverSynWareDirectories(root = governedSynWareRoot) {
-  const resolvedRoot = resolve(root);
-  if (!existsSync(resolvedRoot)) return [];
-  return readdirSync(resolvedRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && entry.name.endsWith(".app"))
-    .map((entry) => resolve(resolvedRoot, entry.name))
-    .sort((left, right) => left.localeCompare(right));
+  return discoverProjectFolders(root);
 }
 
 function resultSortKey(result) {

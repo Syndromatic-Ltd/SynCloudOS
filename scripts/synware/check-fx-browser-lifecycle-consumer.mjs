@@ -72,11 +72,11 @@ const installedBrowserLifecycleProbeSource = `import { useEffect, useRef, useSta
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
 import {
   createSynWare,
-  useSynWareAnimations,
-  useSynWareHaptics,
-  useSynWareLocation,
-  useSynWareMIDI,
-  useSynWareMotion,
+  useAnimations,
+  useHaptics,
+  useLocation,
+  useMIDI,
+  useMotion,
 } from "@syndromatic/syncloudos/sdk";
 import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
 
@@ -84,11 +84,11 @@ declare global { interface Window { installedFxLifecycle: any; } }
 window.installedFxLifecycle = { hostReady: false, probeReady: false, interactionDone: false, unmounted: false, afterUnmountReady: false };
 
 function LifecycleProbe() {
-  const animations = useSynWareAnimations();
-  const haptics = useSynWareHaptics();
-  const motion = useSynWareMotion();
-  const midi = useSynWareMIDI();
-  const location = useSynWareLocation();
+  const animations = useAnimations();
+  const haptics = useHaptics();
+  const motion = useMotion();
+  const midi = useMIDI();
+  const location = useLocation();
   const targetRef = useRef<HTMLDivElement>(null);
   const compositorRef = useRef<HTMLDivElement>(null);
   const watchRef = useRef<{ dispose(): void } | null>(null);

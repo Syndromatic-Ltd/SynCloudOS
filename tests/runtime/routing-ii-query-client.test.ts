@@ -20,8 +20,8 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { defineSynWareRoutes } from "../../src/SynCloudOS/AppSDK/defineSynWareRoutes";
-import { createMountedSynWareRouteState } from "../../src/SynCloudOS/AppSDK/hooks/useSynWareRouteState";
-import type { SynWareRouter } from "../../src/SynCloudOS/AppSDK/hooks/useSynWareRouter";
+import { createMountedSynWareRouteState } from "../../src/SynCloudOS/AppSDK/hooks/useRouteState";
+import type { SynWareRouter } from "../../src/SynCloudOS/AppSDK/hooks/useRouter";
 import { QueryValidationError, routeQuery } from "../../src/SynCloudOS/Routing/routeQuery";
 
 function fixture(href = "/library/item/air?q=old&page=3&tab=details#selection") {

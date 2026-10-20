@@ -29,6 +29,7 @@
     "src/FX/VideoFX/webm.ts",
     "src/FX/**/*.d.ts",
     "src/SynCloudOS/AppSDK/sdkPackageEntry.ts",
+    "src/SynCloudOS/AppSDK/rootPackageEntry.ts",
     "src/SynCloudOS/AppSDK/testing/sdkPackageEntry.ts",
     "src/SynCloudOS/Server/Auth/index.ts",
     "src/SynCloudOS/Authentication/index.ts",

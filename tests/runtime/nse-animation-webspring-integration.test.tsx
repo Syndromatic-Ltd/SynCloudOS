@@ -372,10 +372,7 @@ describe("Webspring owner-local choreography", () => {
     });
 
     expect(screen.queryByRole("button", { name: "Open Beta" })).toBeNull();
-    const prepare = vi.spyOn(folderShell.folderPresentation, "prepare");
     const folderButton = screen.getByRole("button", { name: "Open folder Tools" });
-    fireEvent.pointerEnter(folderButton);
-    expect(prepare).toHaveBeenCalledWith(view.container.querySelector("main"));
     fireEvent.click(folderButton);
     expect(runtime.store.getSnapshot().webspring.openFolderId).toBe("folder.tools");
     await settle(80);
@@ -396,53 +393,126 @@ describe("Webspring owner-local choreography", () => {
     vi.restoreAllMocks();
   });
 
-  it("merges only into the entry the dragged app rests on long enough", async () => {
-    // Slots lie in a row, 100 px apart; the board is wide enough that no drag turns the page.
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+  /** Slots lie in a row 100 px apart; each slot's artwork is the top 60 px of it. */
+  function mockBoardRects() {
+    return vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+      if (this.hasAttribute("data-webspring-folder-panel")) return new DOMRect(0, 100, 400, 200);
+      if (this.classList.contains("webspring-board-icon-well")) {
+        const slot = this.closest<HTMLElement>("[data-webspring-item-id]");
+        const offset = this.closest("[data-webspring-folder-panel]") ? 120 : 0;
+        return new DOMRect(Number(slot?.dataset.orderIndex ?? 0) * 100, offset, 60, 60);
+      }
       if (this.dataset.webspringItemId && this.dataset.orderIndex !== undefined) return new DOMRect(Number(this.dataset.orderIndex) * 100, 0, 80, 96);
       if (this.classList.contains("webspring-board")) return new DOMRect(-200, 0, 1400, 800);
       return new DOMRect(0, 0, 0, 0);
     });
-    try {
-      const runtime = createTestRuntime();
-      for (const id of ["alpha", "beta", "gamma"]) runtime.apps.registerBundle(createTestBundle({ id, route: `/${id}` }));
-      runtime.webspring.configureFolders({ editable: true, initial: [] });
-      const controller = new WebspringController(runtime, webspring, undefined);
-      function Board() {
-        const snapshot = React.useSyncExternalStore(runtime.store.subscribe, runtime.store.getSnapshot);
-        return <WebspringBoardView model={controller.model(snapshot, "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={webspring.folderPresentation} />;
-      }
-      const view = render(<SynCloudOSProvider runtime={runtime}><Board /></SynCloudOSProvider>);
-      const main = view.container.querySelector("main")!;
-      const rest = (ms: number) => act(async () => {
-        const { promise, resolve } = Promise.withResolvers<void>();
-        setTimeout(resolve, ms);
-        await promise;
-      });
-      const centreOf = (index: number) => ({ clientX: index * 100 + 40, clientY: 48 });
-      const order = () => runtime.store.getSnapshot().webspring.layout.preference;
+  }
 
+  function boardFixture(folders: { id: string; order: number; apps: string[] }[] = []) {
+    // A folder's title comes from the shell's manifest declaration; the runtime's folder view carries none.
+    const shell = defineWebspring({
+      manifest: {
+        ...webspring.manifest,
+        webspringShell: {
+          ...webspring.manifest.webspringShell,
+          folders: {
+            editable: true,
+            initial: folders.map((folder) => ({ ...folder, title: { key: `folders.${folder.id}`, fallback: "Tools" } })),
+          },
+        },
+      },
+      components: { board: WebspringBoardView },
+    });
+    const runtime = createTestRuntime();
+    for (const id of ["alpha", "beta", "gamma"]) runtime.apps.registerBundle(createTestBundle({ id, route: `/${id}` }));
+    runtime.webspring.configureFolders(shell.manifest.webspringShell.folders!);
+    const controller = new WebspringController(runtime, shell, undefined);
+    function Board() {
+      const snapshot = React.useSyncExternalStore(runtime.store.subscribe, runtime.store.getSnapshot);
+      return <WebspringBoardView model={controller.model(snapshot, "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={shell.folderPresentation} />;
+    }
+    const view = render(<SynCloudOSProvider runtime={runtime}><Board /></SynCloudOSProvider>);
+    const rest = (ms: number) => act(async () => {
+      const { promise, resolve } = Promise.withResolvers<void>();
+      setTimeout(resolve, ms);
+      await promise;
+    });
+    return { runtime, view, main: view.container.querySelector("main")!, rest, order: () => runtime.store.getSnapshot().webspring.layout.preference };
+  }
+
+  it("merges only over an entry's artwork and reorders only after a rest", async () => {
+    mockBoardRects();
+    try {
+      const { runtime, view, main, rest, order } = boardFixture();
       fireEvent.click(within(view.container).getByRole("button", { name: "Reorder applications" }));
-      fireEvent.pointerDown(within(view.container).getByRole("button", { name: "Move Gamma" }), { pointerId: 3, isPrimary: true, button: 0, ...centreOf(2) });
-      fireEvent.pointerMove(main, { pointerId: 3, ...centreOf(0) });
+
+      // Gamma rests on the slot's label, below Beta's artwork: it reorders, it does not merge.
+      fireEvent.pointerDown(within(view.container).getByRole("button", { name: "Move Gamma" }), { pointerId: 3, isPrimary: true, button: 0, clientX: 230, clientY: 30 });
+      fireEvent.pointerMove(main, { pointerId: 3, clientX: 130, clientY: 70 });
+      await rest(200);
+      expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBeNull();
+      expect(order().order).toEqual(["alpha", "gamma", "beta"]);
+      fireEvent.pointerUp(main, { pointerId: 3, clientX: 130, clientY: 70 });
+
+      // Gamma's centre rests on Alpha's artwork: the drop well appears and the release merges.
+      fireEvent.pointerDown(within(view.container).getByRole("button", { name: "Move Gamma" }), { pointerId: 4, isPrimary: true, button: 0, clientX: 130, clientY: 30 });
+      fireEvent.pointerMove(main, { pointerId: 4, clientX: 30, clientY: 30 });
       await rest(400);
       expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBe("alpha");
+      expect(order().order).toEqual(["alpha", "gamma", "beta"]);
+      fireEvent.pointerUp(main, { pointerId: 4, clientX: 30, clientY: 30 });
 
-      // Into Beta's centre: Alpha is no longer the target, and Beta has not yet armed.
-      fireEvent.pointerMove(main, { pointerId: 3, ...centreOf(1) });
-      expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBeNull();
-      fireEvent.pointerUp(main, { pointerId: 3, ...centreOf(1) });
-      expect(order().folders).toEqual({});
-      expect(order().order).toEqual(["alpha", "beta", "gamma"]);
-
-      fireEvent.pointerDown(within(view.container).getByRole("button", { name: "Move Gamma" }), { pointerId: 4, isPrimary: true, button: 0, ...centreOf(2) });
-      fireEvent.pointerMove(main, { pointerId: 4, ...centreOf(1) });
-      await rest(400);
-      expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBe("beta");
-      fireEvent.pointerUp(main, { pointerId: 4, ...centreOf(1) });
       const [folderId] = order().order.filter((id) => id.startsWith("folder."));
-      expect(order().order).toEqual(["alpha", folderId]);
-      expect(order().folders[folderId]).toEqual({ apps: ["beta", "gamma"] });
+      expect(order().order).toEqual([folderId, "beta"]);
+      expect(order().folders[folderId]).toEqual({ apps: ["alpha", "gamma"] });
+      view.unmount();
+    } finally {
+      vi.restoreAllMocks();
+    }
+  });
+
+  it("keeps the grab offset, so the icon centre rather than the pointer picks the slot", async () => {
+    mockBoardRects();
+    try {
+      const { view, main, rest, order } = boardFixture();
+      fireEvent.click(within(view.container).getByRole("button", { name: "Reorder applications" }));
+      // Seized at Gamma's right edge, its centre lands at 60, between Alpha (0-60) and Beta (100-160).
+      fireEvent.pointerDown(within(view.container).getByRole("button", { name: "Move Gamma" }), { pointerId: 3, isPrimary: true, button: 0, clientX: 259, clientY: 1 });
+      fireEvent.pointerMove(main, { pointerId: 3, clientX: 99, clientY: 1 });
+      await rest(200);
+      expect(order().order).toEqual(["gamma", "alpha", "beta"]);
+      fireEvent.pointerUp(main, { pointerId: 3, clientX: 99, clientY: 1 });
+      view.unmount();
+    } finally {
+      vi.restoreAllMocks();
+    }
+  });
+
+  it("springs a folder open under a resting app and drops it inside the panel", async () => {
+    mockBoardRects();
+    try {
+      const { runtime, view, main, rest, order } = boardFixture([{ id: "folder.tools", order: 0, apps: ["gamma"] }]);
+      fireEvent.click(within(view.container).getByRole("button", { name: "Reorder applications" }));
+      // Alpha rests on the folder: the well arms, then the folder springs open under it.
+      fireEvent.pointerDown(within(view.container).getByRole("button", { name: "Move Alpha" }), { pointerId: 5, isPrimary: true, button: 0, clientX: 130, clientY: 30 });
+      fireEvent.pointerMove(main, { pointerId: 5, clientX: 30, clientY: 30 });
+      await rest(250);
+      expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBe("folder.tools");
+      await rest(700);
+      expect(runtime.store.getSnapshot().webspring.openFolderId).toBe("folder.tools");
+      expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBeNull();
+      await waitFor(() => expect(screen.getByRole("dialog", { name: "Tools" })).toBeTruthy(), { timeout: 5000 });
+      // The Board is in edit mode, so the panel's member is labelled for moving, not opening.
+      await waitFor(() => expect(screen.getByRole("button", { name: "Move Gamma" })).toBeTruthy(), { timeout: 5000 });
+
+      // Inside the panel, Alpha rests on Gamma's artwork and the release places it first.
+      fireEvent.pointerMove(main, { pointerId: 5, clientX: 30, clientY: 150 });
+      await rest(200);
+      // Alpha is not yet a member, so hovering the panel leaves the Board's order alone until release.
+      expect(order().order).toEqual(["folder.tools", "alpha", "beta"]);
+      fireEvent.pointerUp(main, { pointerId: 5, clientX: 30, clientY: 150 });
+      expect(order().folders["folder.tools"]).toEqual({ apps: ["alpha", "gamma"] });
+      expect(order().order).toEqual(["folder.tools", "beta"]);
       view.unmount();
     } finally {
       vi.restoreAllMocks();

@@ -30,9 +30,9 @@ import { defineSynWareRoutes } from "../../src/SynCloudOS/AppSDK/defineSynWareRo
 import {
   RouteOutlet,
   SynWareRouteSessionProvider,
-  useSynWareRoutePresentation,
+  useRoutePresentation,
 } from "../../src/SynCloudOS/AppSDK/RouteOutlet";
-import { useSynWareRouteData } from "../../src/SynCloudOS/AppSDK/hooks/useSynWareRouteData";
+import { useRouteData } from "../../src/SynCloudOS/AppSDK/hooks/useRouteData";
 import { createAppRouteSession } from "../../src/SynCloudOS/Routing/AppRouteSession";
 import { createRouteModuleLoader } from "../../src/SynCloudOS/Routing/RouteModuleLoader";
 import { getRuntimeSettlement } from "../../src/SynCloudOS/Testing/runtimeSettlement";
@@ -42,9 +42,9 @@ import { createTestRuntime, registerTestSynWare } from "./helpers";
 const dataProbeGraph = defineSynWareRoutes({ id: "route-data-types", routes: [{ name: "music", path: "" }] });
 // Compile-only public inference probes; executed by the focused TypeScript check.
 function useRouteDataTypeProbe() {
-  const node = useSynWareRouteData(dataProbeGraph, "music");
+  const node = useRouteData(dataProbeGraph, "music");
   // @ts-expect-error A data view is bound to names declared by its graph.
-  useSynWareRouteData(dataProbeGraph, "foreign");
+  useRouteData(dataProbeGraph, "foreign");
   if (node?.state === "loading") {
     // @ts-expect-error Loading is not fabricated ready data.
     node.data;
@@ -94,7 +94,7 @@ function fixture(options: {
   };
   const Artist = () => {
     useEffect(() => { artistMount(); }, []);
-    const node = useSynWareRouteData(routeGraph, "music.artist.album");
+    const node = useRouteData(routeGraph, "music.artist.album");
     return <section data-testid="artist">Artist<output data-testid="album-state">{node?.state ?? "absent"}</output><RouteOutlet /></section>;
   };
   const Album = ({ routeData }: { routeData?: unknown }) => {
@@ -349,7 +349,7 @@ describe("Routing II React outlets", () => {
     const route = routeGraph.recognize("/music");
     if (route.kind !== "match") throw new Error("fixture route missing");
     await session.commit(route, { operationId: "absolute-url" });
-    const Url = () => <output data-testid="absolute">{useSynWareRoutePresentation().absoluteUrl?.("/music#player")}</output>;
+    const Url = () => <output data-testid="absolute">{useRoutePresentation().absoluteUrl?.("/music#player")}</output>;
     render(<SynWareRouteSessionProvider graph={routeGraph} session={session} absoluteUrl={href => `https://music.example${href}`}><Url /><RouteOutlet /></SynWareRouteSessionProvider>);
     expect(screen.getByTestId("absolute").textContent).toBe("https://music.example/music#player");
     session.dispose();

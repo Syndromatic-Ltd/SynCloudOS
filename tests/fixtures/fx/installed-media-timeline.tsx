@@ -22,7 +22,8 @@ import "@syndromatic/syncloudos/nse/styles.css";
 import "@syndromatic/syncloudos/browser/styles.css";
 import "@syndromatic/syncloudos/webspring/styles.css";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createSynWare, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import * as audio from "@syndromatic/syncloudos/fx/audio";
 import { GFXColour, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
 import { IFXFilterRegistry } from "@syndromatic/syncloudos/fx/image";
@@ -45,7 +46,7 @@ function makeFrame(pts: media.MEFXTime) {
 }
 
 function Probe() {
-  const app = useSynWare();
+  const app = useSCOS();
   const run = async () => {
     window.fxMediaTimeline = { ready: false, stage: "capabilities" };
     if (typeof AudioContext !== "function" || typeof AudioWorkletNode !== "function") {

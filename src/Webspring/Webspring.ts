@@ -45,6 +45,9 @@ export const defaultWebspringLaunchZoom = Object.freeze({ delay: 0.72, duration:
 /** The presentation used when a definition supplies none. */
 const defaultWebspringFolderPresentation = createWebspringFolderSplitPresentation();
 
+/** Definitions created by `defineWebspring`, before or after discovery added folders to them. */
+const definedDefinitions = new WeakSet<object>();
+
 function dataProperty(object: object, key: string, required: boolean): unknown {
   const descriptor = Object.getOwnPropertyDescriptor(object, key);
   if (!descriptor) {
@@ -351,10 +354,6 @@ export function defineWebspring<const TManifest extends WebspringManifest>(
   if (folderPresentationInput !== undefined && !isReactComponent(folderPresentationInput)) {
     throw new TypeError("Webspring folderPresentation must be a React component.");
   }
-  for (const hook of ["prepare", "keepPrepared", "warm"]) {
-    const value: unknown = folderPresentationInput === undefined ? undefined : Reflect.get(Object(folderPresentationInput), hook);
-    if (value !== undefined && typeof value !== "function") throw new TypeError(`Webspring folderPresentation.${hook} must be a function.`);
-  }
   const folderPresentation = (folderPresentationInput ?? defaultWebspringFolderPresentation) as WebspringFolderPresentationComponent;
   const folderAppearance = captureFolderAppearance(dataProperty(input, "folderAppearance", false));
   const capturedManifest = captureSynWareManifest(manifestInput);
@@ -396,5 +395,41 @@ export function defineWebspring<const TManifest extends WebspringManifest>(
     background,
     preferences,
   };
-  return Object.freeze(definition);
+  const captured = Object.freeze(definition);
+  definedDefinitions.add(captured);
+  return captured;
+}
+
+/** Whether `value` came from `defineWebspring`. */
+export function isDefinedWebspring(value: unknown): value is WebspringDefinition {
+  return typeof value === "object" && value !== null && definedDefinitions.has(value);
+}
+
+/**
+ * Adds the preference panes and widgets a project declares in its own folders
+ * (`src/Preferences/*.prefPane`, `src/Widgets/*.widget`) to the shell it
+ * declares. Declared panes keep their places; discovered panes follow in the
+ * order the project derived them.
+ */
+export function withDiscoveredWebspringItems<TManifest extends WebspringManifest>(
+  definition: WebspringDefinition<TManifest>,
+  items: Readonly<{ preferences: readonly PreferencePaneDefinition[]; widgets: readonly WebspringWidget[] }>,
+): WebspringDefinition<TManifest> {
+  if (!isDefinedWebspring(definition)) throw new TypeError("A Webspring definition must be created with defineWebspring.");
+  if (typeof items !== "object" || items === null || !Array.isArray(items.preferences) || !Array.isArray(items.widgets)) {
+    throw new TypeError("Discovered Webspring items must list preference panes and widgets.");
+  }
+  const panes = [...definition.preferences.panes];
+  const paneIds = new Set(panes.map((pane) => pane.id));
+  for (const pane of items.preferences) {
+    if (!isPreferencePaneDefinition(pane)) throw new TypeError("Discovered preference panes must be created with definePreferencePane.");
+    if (paneIds.has(pane.id)) throw new TypeError(`Preference pane ${pane.id} is declared both by defineWebspring and by a project folder.`);
+    paneIds.add(pane.id);
+    panes.push(pane);
+  }
+  return Object.freeze({
+    ...definition,
+    widgets: captureWidgets([...definition.widgets, ...items.widgets]),
+    preferences: Object.freeze({ panes: Object.freeze(panes), hide: definition.preferences.hide }),
+  });
 }

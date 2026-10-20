@@ -19,7 +19,8 @@
 
 import { useMemo } from "react";
 import type { NSEMenuRuntimePort } from "../../NSE/Menus";
-import { useSynWare } from "./SynWareContext";
+import { nseActionCommandId } from "../../NSE/Controls/Core/actionCommandId";
+import { useSCOS } from "./scos/useSCOS"
 import type { AppClientHandle } from "./appClientTypes";
 import type { CommandDispatchResult } from "../SynCloudOS";
 
@@ -28,8 +29,8 @@ import type { CommandDispatchResult } from "../SynCloudOS";
  * control contract. The adapter deliberately has no key-binding or responder
  * manager escape hatch: those remain host-owned when a menu is presented.
  */
-export function useSynWareNSEMenuPort(): NSEMenuRuntimePort {
-  const app = useSynWare();
+export function useNSEMenuPort(): NSEMenuRuntimePort {
+  const app = useSCOS();
   return useMemo<NSEMenuRuntimePort>(() => ({
     signal: app.signal,
     commands: {
@@ -44,5 +45,6 @@ export function useSynWareNSEMenuPort(): NSEMenuRuntimePort {
         (handle as AppClientHandle).dispose();
       },
     },
-  }), [app.commands, app.scheduler, app.signal]);
+    resolveAction: (action) => nseActionCommandId(app.app.id, action),
+  }), [app.app.id, app.commands, app.scheduler, app.signal]);
 }

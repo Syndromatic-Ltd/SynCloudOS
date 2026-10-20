@@ -20,7 +20,7 @@
 
 import {
   AFXLayer,
-  type AFXLayerSurface,
+  type AFXLayerPorts,
   type AFXFrameScheduler,
 } from "./AFXLayer";
 import { AFXTransform3D } from "./AFXTransform3D";
@@ -40,8 +40,8 @@ import type {
 let nextReplicaPlayback = 0;
 /** Bounded visual replication; supplied instance animations use actual measured seconds. */
 export class AFXReplicatorLayer extends AFXLayer {
-  readonly #surface: AFXLayerSurface;
-  readonly #scheduler: AFXFrameScheduler;
+  /** Set when the layer attaches; instance playback needs it and refuses to run before. */
+  #scheduler!: AFXFrameScheduler;
   #config: AFXReplication = Object.freeze({
     projectionMode: "planar",
     instanceCount: 1,
@@ -59,20 +59,15 @@ export class AFXReplicatorLayer extends AFXLayer {
   #running: {
     finish: (state: AFXAnimationSettlement["state"]) => void;
   } | null = null;
-  constructor(
-    surface: AFXLayerSurface,
-    scheduler: AFXFrameScheduler,
-    options: Readonly<{ signal?: AbortSignal }> = {},
-  ) {
-    super(surface, scheduler, options);
-    this.#surface = surface;
-    this.#scheduler = scheduler;
-    try {
-      this.setReplication("constructor", this.#config);
-    } catch (error) {
-      super.dispose();
-      throw error;
-    }
+  constructor() {
+    super();
+    this.setReplication("constructor", this.#config);
+  }
+  protected override layerDidAttach(ports: AFXLayerPorts): void {
+    super.layerDidAttach(ports);
+    this.#scheduler = ports.scheduler;
+    if (this.#config.projectionMode === "projective" && this.surfaceReplicationCapability?.projectiveDepth !== true)
+      throw new Error("This replication surface does not preserve projective depth.");
   }
   #set<K extends keyof AFXReplication>(key: K, value: AFXReplication[K]) {
     const next = Object.freeze({
@@ -111,7 +106,8 @@ export class AFXReplicatorLayer extends AFXLayer {
       throw new TypeError("Unsupported replication projection mode.");
     if (
       value === "projective" &&
-      this.#surface.replicationCapability?.().projectiveDepth !== true
+      this.isAttached &&
+      this.surfaceReplicationCapability?.projectiveDepth !== true
     )
       throw new Error("This replication surface does not preserve projective depth.");
     this.#set("projectionMode", value);
@@ -156,11 +152,16 @@ export class AFXReplicatorLayer extends AFXLayer {
   get preservesDepth() {
     return (
       this.#config.projectionMode === "projective" &&
-      this.#surface.replicationCapability?.().projectiveDepth === true
+      this.surfaceReplicationCapability?.projectiveDepth === true
     );
   }
   /** Animates each generated instance while child presentation history remains independently delayed. */
   playInstances(input: AFXSampledAnimation): AFXAnimationHandle {
+    if (!this.isAttached)
+      throw new DOMException(
+        "playInstances needs a rendering surface: add the layer to an attached layer with addSublayer first.",
+        "InvalidStateError",
+      );
     if (!["opacity", "transform"].includes(input.keyPath))
       throw new TypeError("Instance playback supports opacity and transform.");
     const count = this.instanceCount,

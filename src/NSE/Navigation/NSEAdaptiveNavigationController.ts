@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
 import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
 import { NSENavigationStackController } from "./NSENavigationStackController";
 import { NSETabBarController } from "./NSETabBarController";
@@ -28,7 +29,7 @@ import type {
   NSEAdaptiveNavigationSnapshot,
 } from "./navigationTypes";
 
-export interface NSEAdaptiveNavigationControllerOptions<TContent = unknown> {
+export interface NSEAdaptiveNavigationControllerOptions<TContent = unknown> extends NSEViewControllerOptions {
   readonly id: string;
   readonly model: NSEAdaptiveNavigationModel;
   readonly presentation?: NSEAdaptiveNavigationPresentation;
@@ -101,28 +102,20 @@ function freezeSnapshot(input: NSEAdaptiveNavigationSnapshot): NSEAdaptiveNaviga
 
 /** Chooses a renderer policy from canonical traits while retaining semantic
  * controllers and their content objects across every transition. */
-export interface NSEAdaptiveNavigationController {
-  getSnapshot(): NSEAdaptiveNavigationSnapshot;
-  subscribe(listener: () => void): () => void;
-  setTraits(traits: SynCloudOSPresentationTraits): void;
-  dispose(): void;
-}
-
-export class NSEAdaptiveNavigationController<TContent = unknown> {
+export class NSEAdaptiveNavigationController<TContent = unknown> extends NSEViewController<NSEAdaptiveNavigationSnapshot> {
   readonly id: string;
   readonly model: NSEAdaptiveNavigationModel;
   readonly presentation: NSEAdaptiveNavigationPresentation;
   readonly tabController: NSETabBarController<TContent>;
   readonly stackController: NSENavigationStackController | null;
-  readonly #listeners = new Set<() => void>();
   readonly #unsubscribeTab: () => void;
   readonly #unsubscribeStack: (() => void) | null;
   #traits: SynCloudOSPresentationTraits;
   #snapshot: NSEAdaptiveNavigationSnapshot;
   #revision = 0;
-  #disposed = false;
 
   constructor(options: NSEAdaptiveNavigationControllerOptions<TContent>) {
+    super(options);
     this.id = requireId(options.id);
     this.model = options.model;
     this.presentation = options.presentation ?? "adaptive";
@@ -147,33 +140,18 @@ export class NSEAdaptiveNavigationController<TContent = unknown> {
     this.#snapshot = this.#makeSnapshot();
     this.#unsubscribeTab = this.tabController.subscribe(() => this.#publish());
     this.#unsubscribeStack = this.stackController?.subscribe(() => this.#publish()) ?? null;
-  }
-
-  getSnapshot = (): NSEAdaptiveNavigationSnapshot => this.#snapshot;
-
-  subscribe(listener: () => void): () => void {
-    if (this.#disposed) return () => undefined;
-    this.#listeners.add(listener);
-    let active = true;
-    return () => {
-      if (!active) return;
-      active = false;
-      this.#listeners.delete(listener);
-    };
+    this.getSnapshot = () => this.#snapshot;
   }
 
   setTraits(traits: SynCloudOSPresentationTraits): void {
-    if (this.#disposed || sameTraits(this.#traits, traits)) return;
+    if (this.isDisposed || sameTraits(this.#traits, traits)) return;
     this.#traits = cloneTraits(traits);
     this.#publish();
   }
 
-  dispose(): void {
-    if (this.#disposed) return;
-    this.#disposed = true;
+  protected override didDispose(): void {
     this.#unsubscribeTab();
     this.#unsubscribeStack?.();
-    this.#listeners.clear();
   }
 
   #makeSnapshot(): NSEAdaptiveNavigationSnapshot {
@@ -191,9 +169,9 @@ export class NSEAdaptiveNavigationController<TContent = unknown> {
   }
 
   #publish(): void {
-    if (this.#disposed) return;
+    if (this.isDisposed) return;
     this.#revision += 1;
     this.#snapshot = this.#makeSnapshot();
-    for (const listener of [...this.#listeners]) listener();
+    this.notifyObservers();
   }
 }

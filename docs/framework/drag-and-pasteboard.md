@@ -6,7 +6,7 @@ Both clients belong to the session, so an application only ever transfers conten
 
 ## Pasteboards
 
-`useSynWarePasteboard()` returns the pasteboards your application can use:
+`usePasteboard()` returns the pasteboards your application can use:
 
 | Pasteboard | Purpose |
 | --- | --- |
@@ -18,10 +18,10 @@ Both clients belong to the session, so an application only ever transfers conten
 Each pasteboard offers `write(values)`, `read(types)`, `readFirst(types)`, `snapshot()` and `clear()`. Reads take the types you understand, in order of preference. Every operation accepts an `AbortSignal`, and `changeCount` increases with each write so you can tell whether the content changed since you last looked.
 
 ```tsx
-import { useSynWarePasteboard } from "@syndromatic/syncloudos/sdk";
+import { usePasteboard } from "@syndromatic/syncloudos/sdk";
 
 export function CopyTitle({ title }: { title: string }) {
-  const pasteboards = useSynWarePasteboard();
+  const pasteboards = usePasteboard();
 
   async function copy() {
     await pasteboards.system.write([{ type: "text/plain", value: title }]);
@@ -46,13 +46,13 @@ Write several representations of the same content, richest first, for example an
 
 ## Drag sessions
 
-`useSynWareDrag()` returns the drag client. A drag moves between **endpoints**, each identified by an application, a window and a responder. `endpoint()` creates one for the current responder.
+`useDrag()` returns the drag client. A drag moves between **endpoints**, each identified by an application, a window and a responder. `endpoint()` creates one for the current responder.
 
 ```tsx
-import { useSynWareDrag } from "@syndromatic/syncloudos/sdk";
+import { useDrag } from "@syndromatic/syncloudos/sdk";
 
 export function useNoteDrag() {
-  const drag = useSynWareDrag();
+  const drag = useDrag();
 
   return {
     start(noteId: string) {

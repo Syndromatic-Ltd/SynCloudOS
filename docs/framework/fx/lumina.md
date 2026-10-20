@@ -2,7 +2,7 @@
 
 LuminaFX (`LUFX`) is the web-native analogue of Core Spotlight. It builds a searchable index of your application's content on the device and answers queries with ranked results, using tokenisation and text folding that respect the user's language. Every item carries a durable route identity, so choosing a result takes the user back to the place it came from.
 
-The framework has two halves. The value types (`LUFXSearchableItem`, `LUFXQuery`, the tokenizer, the ranker version constants) validate their input strictly and run anywhere JavaScript runs, so you can build and test items and queries in a unit test without a host. The index itself belongs to the mounted session: `useSynWareLumina()` returns a client whose `createIndex()` hands your component a private, durable index owned by your application. The host captures the application identity when it mounts your SynWare, so no API takes an owner or application ID, and one application can never read another's index.
+The framework has two halves. The value types (`LUFXSearchableItem`, `LUFXQuery`, the tokenizer, the ranker version constants) validate their input strictly and run anywhere JavaScript runs, so you can build and test items and queries in a unit test without a host. The index itself belongs to the mounted session: `useLumina()` returns a client whose `createIndex()` hands your component a private, durable index owned by your application. The host captures the application identity when it mounts your SynWare, so no API takes an owner or application ID, and one application can never read another's index.
 
 Everything stays on the device. Nothing in the framework sends item text to a network service.
 
@@ -16,7 +16,7 @@ import { LUFXQuery, LUFXSearchableItem } from "@syndromatic/syncloudos/fx/lumina
 | --- | --- |
 | Prefix | `LUFX` |
 | Entry | `@syndromatic/syncloudos/fx/lumina` |
-| Hook | `useSynWareLumina`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useLumina`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | `lumina.index` to write items, `lumina.query` to read, query and suggest |
 | Analogue | Core Spotlight (`CSSearchableItem`, `CSSearchableIndex`, `CSSearchQuery`) |
 
@@ -40,10 +40,10 @@ An application declares the permissions it needs, acquires an index, writes item
 ```tsx
 import { useState } from "react";
 import { LUFXSearchableItem, createLUFXActivation } from "@syndromatic/syncloudos/fx/lumina";
-import { useSynWareLumina } from "@syndromatic/syncloudos/sdk";
+import { useLumina } from "@syndromatic/syncloudos/sdk";
 
 export function IndexAndSearch() {
-  const lumina = useSynWareLumina();
+  const lumina = useLumina();
   const [titles, setTitles] = useState<string[]>([]);
 
   async function run() {
@@ -233,7 +233,7 @@ export const summary = `${query.limit} results at most, locale ${query.locale}`;
 
 ### `LUFXIndexClient`
 
-What `useSynWareLumina()` returns.
+What `useLumina()` returns.
 
 | Member | Description |
 | --- | --- |

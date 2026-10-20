@@ -91,10 +91,10 @@ describe("first-party SynWare capability authority audit", () => {
     const root = fixtureRoot("mounted-hooks");
     write(root, "src/SynWare/Example.app/Contents/Info.ts", 'export default { id: "example" };\n');
     write(root, "src/SynWare/Example.app/Contents/index.ts", [
-      'import { useSynWare as useApp, useSynWareNSEMenuPort } from "@syndromatic/syncloudos/sdk";',
+      'import { useSCOS as useApp, useNSEMenuPort } from "@syndromatic/syncloudos/sdk";',
       'export function Example() {',
       '  const app = useApp();',
-      '  const menus = useSynWareNSEMenuPort();',
+      '  const menus = useNSEMenuPort();',
       '  const window = { bounds: { width: 500 }, id: "owned" };',
       '  app.scheduler.setTimeout(() => {}, 0);',
       '  menus.scheduler!.clearTimeout(null);',

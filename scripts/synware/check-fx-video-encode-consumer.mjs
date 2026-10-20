@@ -55,7 +55,8 @@ function staticServer(directory) {
 
 const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createSynWare, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { IFXFilterRegistry } from "@syndromatic/syncloudos/fx/image";
 import { MEFXSampleTimingInfo, MEFXTime } from "@syndromatic/syncloudos/fx/media";
 import {
@@ -132,7 +133,7 @@ async function externalPlayer(bytes: Uint8Array) {
 }
 
 function Probe() {
-  const app = useSynWare();
+  const app = useSCOS();
   useEffect(() => {
     void (async () => {
       const encoderConfig = { codec: "vp8", codedWidth: 16, codedHeight: 16, bitrate: 120_000, framerate: 30 } as const;

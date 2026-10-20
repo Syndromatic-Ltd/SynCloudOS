@@ -616,6 +616,12 @@ export interface AppWindowClient {
   subscribe(listener: () => void): () => void;
   openDocumentWindow(request: AppOpenDocumentWindowRequest): Promise<AppOwnedWindowSnapshot>;
   focus(windowId: string): AppOwnedWindowSnapshot;
+  /** Minimises an owned window. Does nothing for a window that is not minimisable. */
+  minimise(windowId: string): void;
+  /** Toggles an owned window between its zoomed and normal size. */
+  zoom(windowId: string): void;
+  /** Renames an owned window. */
+  setTitle(windowId: string, title: string): void;
   close(windowId: string): Promise<AppWindowCloseResult>;
 }
 

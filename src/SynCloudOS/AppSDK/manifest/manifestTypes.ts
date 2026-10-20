@@ -170,10 +170,16 @@ export interface SynWareLocaleBundleManifest {
   readonly path: string;
 }
 
-export interface SynWareLocaleResourcesManifest {
-  readonly base?: string;
-  readonly bundles?: readonly SynWareLocaleBundleManifest[];
-}
+/**
+ * `development`: the development server and development builds serve it;
+ * production builds leave it out. Omitted: every build serves it.
+ */
+export type SynWareApplicationAvailability = "development";
+
+/** Every V1 manifest field is optional in `Contents/Info.ts`: what it omits is
+ * derived from the folder name, the project's `package.json` version and the
+ * files in `Contents/Resources`. */
+export type SynWareManifestOverrides = Partial<SynWareManifestV1>;
 
 export interface SynWareAppearanceManifest {
   readonly id: string;
@@ -288,7 +294,8 @@ export interface SynWareManifestV1 {
   readonly applicationMenu?: SynWareApplicationMenuManifest;
   readonly services?: readonly SynWareServiceManifest[];
   readonly permissions?: readonly string[];
-  readonly localeResources?: SynWareLocaleResourcesManifest;
+  /** Whether the build serves this application in development only. */
+  readonly availability?: SynWareApplicationAvailability;
   readonly appearances?: readonly SynWareAppearanceManifest[];
   readonly lifecycle?: SynWareLifecycleManifest;
   readonly background?: SynWareBackgroundManifest;

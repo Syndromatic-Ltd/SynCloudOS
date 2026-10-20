@@ -26,7 +26,8 @@ import { DocumentController, InMemoryDocumentAdapter } from "../../src/SynCloudO
 import { createDocumentTestDependencies } from "../fixtures/documentTestDependencies";
 import { noteType, type NoteDocumentModel } from "../fixtures/noteDocumentType";
 import { createRenderRevisionSettlement } from "../../src/SynCloudOS/Testing/RenderRevisionSettlement";
-import { AFXAnimation, AFXBasicAnimation, AFXLayer, type AFXFrameScheduler } from "../../src/FX/AnimationFX/public";
+import { AFXAnimation, AFXBasicAnimation, type AFXFrameScheduler } from "../../src/FX/AnimationFX/public";
+import { createAFXLayer } from "../../src/FX/AnimationFX/host";
 import { BrowserAnimationLayerSurface } from "../../src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter";
 import { createOperationCoordinator } from "../../src/SynCloudOS/Operations/OperationCoordinator";
 import { createPresentationSettlementCoordinator } from "../../src/SynCloudOS/Operations/PresentationSettlementCoordinator";
@@ -78,7 +79,7 @@ describe("framework finite-work settlement", () => {
     const scheduler: AFXFrameScheduler = { now: () => now, reducedMotion: false, suspended: false,
       requestFrame(callback) { frames.add(callback); return () => { frames.delete(callback); }; } };
     const element = document.createElement("div");
-    const layer = new AFXLayer(new BrowserAnimationLayerSurface(element), scheduler);
+    const layer = createAFXLayer(new BrowserAnimationLayerSurface(element), scheduler);
     const handle = layer.addAnimation(new AFXBasicAnimation({ targetId: "panel", keyPath: "opacity", from: 0, to: 1,
       animation: new AFXAnimation({ duration: 1, timing: "linear" }) }));
     const tracked = testing.track("explicit AFX completion", handle.finished);
@@ -369,7 +370,7 @@ describe("framework finite-work settlement", () => {
       requestFrame(callback) { frames.add(callback); return () => { frames.delete(callback); }; },
     };
     const animatedElement = document.createElement("div");
-    const layer = new AFXLayer(new BrowserAnimationLayerSurface(animatedElement), scheduler);
+    const layer = createAFXLayer(new BrowserAnimationLayerSurface(animatedElement), scheduler);
     const animation = layer.addAnimation(new AFXBasicAnimation({
       targetId: "test03-panel",
       keyPath: "opacity",

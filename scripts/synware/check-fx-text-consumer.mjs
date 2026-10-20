@@ -52,7 +52,8 @@ function staticServer(directory) {
 
 const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createSynWare, TFXFontDescriptor, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { TFXFontDescriptor, useSCOS } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { TFXAttributedString, TFXFontCollection, TFXTypesetter, TFX_VERTICAL_ORIENTATION_UNICODE_VERSION, tfxVerticalOrientationForGrapheme } from "@syndromatic/syncloudos/fx/text";
 import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
 declare global { interface Window { fxText: any; } }
@@ -65,7 +66,7 @@ async function bytes(path: string) {
 }
 
 function Probe() {
-  const app = useSynWare();
+  const app = useSCOS();
   useEffect(() => {
     void (async () => {
       const readiness: Array<{ state: string; generation: number; registrationId: string }> = [];

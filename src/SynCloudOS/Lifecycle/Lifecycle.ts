@@ -60,6 +60,8 @@ import type {
   SynCloudOSLifecycleTransitionOptions,
   SynCloudOSLifecycleTransitionResult,
 } from "./lifecycleTypes";
+import { SynCloudOSLifecycleVeto } from "./lifecycleTypes";
+import { applicationLifecycleFor } from "./applicationLifecycleHooks";
 
 type LifecycleErrorManager = Pick<SynCloudOSErrorManager, "capture" | "createAppNotFoundError">;
 type LifecycleBundleLoader = Pick<SynCloudOSBundleLoader, "getBundle" | "getLoadedBundle" | "loadBundle">;
@@ -305,6 +307,7 @@ export function createLifecycle(
 
   function resolveLifecycleHook<TPayload>(
     bundle: TrustedSynWareBundle,
+    appId: string,
     stage: SynCloudOSLifecycleStage,
     phase: "will" | "did",
   ): {
@@ -323,7 +326,12 @@ export function createLifecycle(
 
     const hookName = namedHookByStage[stage]?.[phase];
     const namedHook = hookName && bundle.lifecycleHooks ? bundle.lifecycleHooks[hookName] : undefined;
-    if (!hookName || !isNamedLifecycleHook(namedHook)) return null;
+    if (!hookName || !isNamedLifecycleHook(namedHook)) {
+      // An application written as an NSEApplication class carries its hooks on the root component of its definition.
+      const root = (bundle.synWareDefinition ?? BundleLoader.getLoadedBundle(appId)?.definition)?.root;
+      const applicationHook = applicationLifecycleFor(root)?.hookFor(stage, phase);
+      return applicationHook ? { invoke: (context) => applicationHook(context) } : null;
+    }
     return {
       hookName,
       invoke: (context) => namedHook({
@@ -344,7 +352,7 @@ export function createLifecycle(
   ): Promise<void> {
     const bundle = BundleLoader.getBundle(appId);
     if (!bundle) return;
-    const candidate = resolveLifecycleHook<TPayload>(bundle, stage, phase);
+    const candidate = resolveLifecycleHook<TPayload>(bundle, appId, stage, phase);
     if (!candidate) return;
     const startedAt = runtime.environment.now();
     const context: SynCloudOSLifecycleHookContext<TPayload> = {
@@ -378,6 +386,25 @@ export function createLifecycle(
         reason,
       });
     } catch (error) {
+      if (error instanceof SynCloudOSLifecycleVeto) {
+        const vetoedAt = runtime.environment.now();
+        recordLifecycleOperation({
+          runtimeId: runtime.runtimeId,
+          appId,
+          packageName: bundle.manifest.packageName,
+          operationId: operation.operationId,
+          correlationId: operation.correlationId,
+          stage,
+          phase,
+          startedAt,
+          endedAt: vetoedAt,
+          durationMs: Math.max(0, vetoedAt - startedAt),
+          outcome: "cancelled",
+          reason,
+          error: error.message,
+        });
+        operation.cancel(error.message);
+      }
       const endedAt = runtime.environment.now();
       const cancelled = operation.signal.aborted;
       recordLifecycleOperation({

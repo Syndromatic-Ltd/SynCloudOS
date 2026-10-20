@@ -19,7 +19,7 @@
 
 import type { AFXAnimationHandle } from "../../FX/AnimationFX/animationTypes";
 import { useMemo } from "react";
-import { useNSEViewAnimator } from "../../NSE/Animation";
+import { useNSEViewAnimator as useNSEAnimatorFor } from "../../NSE/Animation";
 import { attributedContent, attributedContentLayoutText, paragraph, parseAttributedContent, type NSEAttributedAttachmentRun, type NSEAttributedContent } from "../../NSE/public/content";
 import type {
   
@@ -27,7 +27,7 @@ import type {
   RuntimeAnimationService,
   TFXTextLayoutService,
 } from "../SynCloudOS";
-import { useSynWare } from "./SynWareContext";
+import { useSCOS } from "./scos/useSCOS"
 import type { AppAnimationClient, AppAnimationOwner, AppTextLayoutClient } from "./appEnvironmentClientTypes";
 import { NSEAttachmentProjection, type NSEProjectedAttachmentSource } from "../../NSE/public/text-layout";
 
@@ -97,16 +97,16 @@ export function createSynWareNSETextLayoutPort(
 /** Public hook for NSE animation controls. It keeps raw owner leases and
  * animation handles inside the adapter while applications receive an NSE view
  * animator bound to their own AppSDK animation client. */
-export function useSynWareNSEViewAnimator(input: {
+export function useNSEViewAnimator(input: {
   readonly viewId: string;
   readonly target: object;
   readonly targetId: string;
 }) {
-  const app = useSynWare();
+  const app = useSCOS();
   const animations = useMemo(() => createSynWareNSEAnimations(app.animations), [app.animations]);
-  return useNSEViewAnimator({
+  return useNSEAnimatorFor({
     animations,
-    owner: { appId: app.appId, viewId: input.viewId },
+    owner: { appId: app.app.id, viewId: input.viewId },
     target: input.target,
     targetId: input.targetId,
   });

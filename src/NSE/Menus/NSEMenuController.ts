@@ -24,6 +24,7 @@ import type {
   NSEMenuControllerOptions,
   NSEMenuDismissReason,
   NSEMenuEntry,
+  NSEMenuEntryInput,
   NSEMenuKeyEquivalent,
   NSEMenuKeyEquivalentClaim,
   NSEMenuKeyEquivalentResult,
@@ -72,7 +73,7 @@ function findSubmenu(entries: readonly NSEMenuEntry[], id: string): Extract<NSEM
   return null;
 }
 
-function stableSections(sections: readonly NSEMenuSection[]): readonly NSEMenuSection[] {
+function stableSections<TSection extends { readonly id: string; readonly weight?: number }>(sections: readonly TSection[]): readonly TSection[] {
   return [...sections].sort((left, right) => {
     const weight = (left.weight ?? 0) - (right.weight ?? 0);
     return weight === 0 ? left.id.localeCompare(right.id) : weight;
@@ -84,10 +85,10 @@ function stableSections(sections: readonly NSEMenuSection[]): readonly NSEMenuSe
  * defined result (append), rather than making ordering depend on registration
  * timing. `beforeId` wins when both anchors are supplied.
  */
-export function orderMenuEntries(
-  baseEntries: readonly NSEMenuEntry[],
-  sections: readonly NSEMenuSection[] = [],
-): readonly NSEMenuEntry[] {
+export function orderMenuEntries<TEntry extends { readonly id: string }>(
+  baseEntries: readonly TEntry[],
+  sections: readonly NSEMenuSection<TEntry>[] = [],
+): readonly TEntry[] {
   const ordered = [...baseEntries];
   for (const section of stableSections(sections)) {
     const before = section.beforeId ? ordered.findIndex((entry) => entry.id === section.beforeId) : -1;
@@ -96,6 +97,24 @@ export function orderMenuEntries(
     ordered.splice(at, 0, ...section.entries);
   }
   return ordered;
+}
+
+/** Replaces every `{ action }` entry with the command entry for that action's command ID. */
+function resolveMenuEntries(
+  entries: readonly NSEMenuEntryInput[],
+  resolveAction: NSEMenuControllerOptions["runtime"]["resolveAction"],
+): readonly NSEMenuEntry[] {
+  return entries.map((entry): NSEMenuEntry => {
+    if (entry.kind === "submenu") return { ...entry, entries: resolveMenuEntries(entry.entries, resolveAction) };
+    if (entry.kind === "command" && "action" in entry) {
+      if (!resolveAction) {
+        throw new TypeError(`The menu entry "${entry.id}" names the action "${entry.action}", but this menu has no application to resolve it. Show the menu inside an application's views.`);
+      }
+      const { action, ...rest } = entry;
+      return { ...rest, commandId: resolveAction(action) };
+    }
+    return entry;
+  });
 }
 
 function assertUniqueEntries(entries: readonly NSEMenuEntry[], branchId: string): void {
@@ -181,6 +200,7 @@ export class NSEMenuController {
   #pendingSubmenu: { readonly handle: unknown; resolve(): void } | null = null;
   #generation = 0;
   #presentationGeneration: PresentationGeneration | null = null;
+  #rootEntries: readonly NSEMenuEntry[] = [];
   #branchEntries: readonly NSEMenuEntry[] = [];
   #branchId = "";
   #branchStack: BranchFrame[] = [];
@@ -198,8 +218,10 @@ export class NSEMenuController {
       }
       sectionIds.add(section.id);
     }
-    const rootEntries = orderMenuEntries(model.entries, model.sections);
+    const resolvedSections = (model.sections ?? []).map((section) => ({ ...section, entries: resolveMenuEntries(section.entries, runtime.resolveAction) }));
+    const rootEntries = orderMenuEntries(resolveMenuEntries(model.entries, runtime.resolveAction), resolvedSections);
     assertUniqueEntries(rootEntries, model.id);
+    this.#rootEntries = rootEntries;
     this.model = model;
     this.runtime = runtime;
     if (runtime.signal.aborted) this.#runtimeAbort();
@@ -217,7 +239,7 @@ export class NSEMenuController {
     if (this.#disposed || this.runtime.signal.aborted) return;
     this.#cancelPendingSubmenu();
     this.#branchStack = [];
-    await this.#openBranch(this.model.id, orderMenuEntries(this.model.entries, this.model.sections), []);
+    await this.#openBranch(this.model.id, this.#rootEntries, []);
   }
 
   async openSubmenu(id: string, delayMs = 0): Promise<void> {

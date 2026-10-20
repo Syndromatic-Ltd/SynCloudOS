@@ -25,7 +25,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEMenuController } from "../../src/NSE/Menus/NSEMenuController";
 import type { NSEMenuRuntimePort } from "../../src/NSE/Menus/menuTypes";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
-import { useSynWareNSEMenuPort } from "../../src/SynCloudOS/AppSDK/SynWareNSEMenuPort";
+import { useNSEMenuPort } from "../../src/SynCloudOS/AppSDK/SynWareNSEMenuPort";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { commandValidationRequestKey } from "../../src/SynCloudOS/Commands/commandTypes";
 import { createTestRuntime, mountTestSynWareRuntime, registerTestSynWare } from "./helpers";
@@ -53,7 +53,7 @@ function fixture() {
   const context = createSynWareContextValue(mount.runtime);
   let port!: NSEMenuRuntimePort;
   function Probe() {
-    port = useSynWareNSEMenuPort();
+    port = useNSEMenuPort();
     return null;
   }
   render(<SynWareProvider value={context}><Probe /></SynWareProvider>);

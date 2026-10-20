@@ -4,14 +4,14 @@ import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEArrayController } from "../../src/NSE/Controllers";
 import { createSynWare } from "../../src/SynCloudOS/AppSDK/createSynWare";
-import { useSynWare } from "../../src/SynCloudOS/AppSDK/SynWareContext";
-import { useSynWareCommands } from "../../src/SynCloudOS/AppSDK/hooks/useSynWareCommands";
+import { useSCOS } from "../../src/SynCloudOS/AppSDK/scos/useSCOS"
+import { useCommands } from "../../src/SynCloudOS/AppSDK/hooks/useCommands";
 import { defineSynWareRoutes } from "../../src/SynCloudOS/AppSDK/defineSynWareRoutes";
 import { RouteOutlet } from "../../src/SynCloudOS/AppSDK/RouteOutlet";
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { mountSynCloudOS, type MountedSynCloudOSHost, type MountSynCloudOSOptions } from "../../src/SynCloudOSReact/browserRuntime";
 import { WebspringController } from "../../src/Webspring/WebspringController";
-import { useApplicationMenuTrigger as useSynWareApplicationMenuTrigger } from "../../src/SynCloudOSReact/ApplicationMenuTrigger";
+import { useApplicationMenuTrigger as useApplicationMenuTrigger } from "../../src/SynCloudOSReact/ApplicationMenuTrigger";
 import { defineWebspring } from "../../src/Webspring/public";
 
 vi.mock("../../src/SynCloudOS/Runtime/createSynCloudOS", { spy: true });
@@ -19,13 +19,13 @@ vi.mock("../../src/Webspring/WebspringController", { spy: true });
 const id = "com.example.application-host";
 const mounts: MountedSynCloudOSHost[] = [];
 const elements: HTMLElement[] = [];
-const sessions: ReturnType<typeof useSynWare>[] = [];
+const sessions: ReturnType<typeof useSCOS>[] = [];
 const aborted = vi.fn();
 const sessionControllers: NSEArrayController<string, string>[] = [];
 const executed = vi.fn();
 function Application() {
-  const app = useSynWare();
-  useSynWareCommands([{ id: `${app.appId}.probe`, title: "Probe", execute: executed,
+  const app = useSCOS();
+  useCommands([{ id: `${app.app.id}.probe`, title: "Probe", execute: executed,
     defaultKeyBindings: [{ key: "F8", modifiers: [], scope: "application", repeat: "ignore" }] }]);
   useEffect(() => {
     sessions.push(app);
@@ -62,7 +62,7 @@ afterEach(async () => {
 });
 const secondaryId = "com.example.secondary";
 function Secondary() {
-  const app = useSynWare();
+  const app = useSCOS();
   return <button data-testid="secondary" onClick={() => app.lifecycle.closeSelf()}>Quit secondary</button>;
 }
 const secondary = createSynWare({ manifest: {
@@ -72,7 +72,7 @@ const secondary = createSynWare({ manifest: {
 }, root: Secondary });
 /** What a consumer writes: a content control that opens the host's application menu. */
 function MenuApplication() {
-  const menu = useSynWareApplicationMenuTrigger();
+  const menu = useApplicationMenuTrigger();
   return <>
     <Application />
     <button data-testid="application-menu" data-menu-label={menu?.label} ref={element => menu?.setAnchor(element)} aria-expanded={menu?.open ?? false}
@@ -134,7 +134,7 @@ describe("application-only browser host", () => {
     expect(runtime.lifecycle.getState(id)).toBe("active");
     expect(runtime.apps.getApp(id)?.presentation).toBe("appView");
     expect(runtime.windows.list({ applicationId: id })).toHaveLength(0);
-    expect(sessions.at(-1)?.appId).toBe(id);
+    expect(sessions.at(-1)?.app.id).toBe(id);
     expect(runtime.focus.getActiveAnchors().applicationResponderId).toBe(`application:${id}`);
   });
   it("closes without respawning and releases its mounted session", async () => {
@@ -192,7 +192,7 @@ describe("application-only browser host", () => {
     const otherId = "com.example.other-host";
     const other = createSynWare({ manifest: { ...bundle.manifest, id: otherId }, root: Application });
     await mount(first.element, { bundles: [other], application: { id: otherId } });
-    expect(sessions.at(-1)!.appId).toBe(otherId);
+    expect(sessions.at(-1)!.app.id).toBe(otherId);
     expect(sessions.at(-1)!.persistence.getPreference("volume", 0.9)).toBe(0.9);
     expect(sessions.at(-1)!.persistence.setPreference("volume", 0.8)).toBe(true);
     await act(async () => { await mounts.at(-1)!.dispose(); });
@@ -379,7 +379,7 @@ describe("application-only browser host", () => {
   });
   it("publishes no menu trigger to a primary that declares none, nor to secondary windows", async () => {
     function Probe({ testId }: { testId: string }) {
-      const menu = useSynWareApplicationMenuTrigger();
+      const menu = useApplicationMenuTrigger();
       return <output data-testid={testId}>{menu ? "port" : "none"}</output>;
     }
     const plain = createSynWare({ manifest: bundle.manifest, root: () => <Probe testId="primary-trigger" /> });

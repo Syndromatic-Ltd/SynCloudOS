@@ -29,6 +29,7 @@ import type { VFXVideoClient } from "../../FX/VideoFX/public";
 import type { LUFXIndexClient } from "../../FX/LuminaFX/public";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import type {
+  AppAlertClient,
   AppAnimationClient,
   AppConnectivityClient,
   AppErrorClient,
@@ -36,6 +37,7 @@ import type {
   AppExternalActionClient,
   AppIdentityClient,
   AppFilePanelClient, AppImageClient,
+  AppLauncherClient,
   AppMediaQueryClient,
   AppNotificationClient,
   AppPersistenceClient,
@@ -58,6 +60,8 @@ export interface MountedAppEnvironmentClients {
   readonly identity: AppIdentityClient;
   readonly notifications: AppNotificationClient;
   readonly errors: AppErrorClient;
+  readonly alerts: AppAlertClient;
+  readonly launcher: AppLauncherClient;
   readonly externalActions: AppExternalActionClient;
   readonly share: AppShareClient;
   readonly workArea: AppWorkAreaClient;

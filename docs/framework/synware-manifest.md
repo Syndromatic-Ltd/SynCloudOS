@@ -1,6 +1,6 @@
 # SynWare manifest
 
-Every SynWare declares itself in `Contents/Info.ts`. The manifest tells the host what the application is called, where it lives, which presentations it supports, what it may use, and how its window should look. The host validates the manifest before it registers the application.
+An application's optional `Contents/Info.ts` supplies `SynWareManifestOverrides`. Folder discovery fills its schema version, ID, title, package version, icon and locale files before validating the complete manifest. See [Project structure](project-structure.md). The example includes explicit identity overrides:
 
 ```ts
 export default {
@@ -14,7 +14,6 @@ export default {
   frame: { material: "standard", topBar: "standard", rightSlot: "auto", background: "system" },
   documentTypes: [{ id: "com.example.notes.note", extensions: ["note"], displayName: "Note" }],
   permissions: ["app.open.public"],
-  localeResources: { base: "Resources/Localised/Base.locale/Localisable.strings" },
   webspring: { visible: true, order: 1, icon: "./Resources/icon.png" },
 } as const;
 ```
@@ -27,10 +26,11 @@ The schema rejects unknown keys. A typo in a field name surfaces as a validation
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `schemaVersion` | `1` | Required. |
-| `id` | string | Required. Starts with a lowercase letter and continues with letters, digits, dots and hyphens, for example `com.example.notes`. |
-| `version` | string | Required. Semantic version such as `1.0.0` or `1.2.0-beta.1`. |
-| `title` | string | Required. Up to 256 characters. |
+| `schemaVersion` | `1` | Derived as `1`. |
+| `id` | string | Derived from the folder in kebab case. Override it to preserve an existing persistence identity. |
+| `version` | string | Derived from the project's package version; an explicit semantic version overrides it. |
+| `title` | string | Derived by splitting the folder name into words. |
+| `availability` | `"development"` | Optional. Excludes the application from production builds. |
 | `migrationVersion` | integer | Optional. Marks the data schema revision your `migrations` handle. |
 
 ## Routes and presentations
@@ -74,7 +74,7 @@ With `topBar: "standard"`, the stage sets `--webspring-app-top-bar-height` on yo
 | Field | Notes |
 | --- | --- |
 | `documentTypes` | Each entry has an `id` and optionally `extensions` (letters and digits only) and `displayName`. Declare a type here before you open documents of that type. |
-| `commands` | Static command declarations with `id`, `title`, and optionally `menu` and `shortcut`. Register behaviour at runtime with `useSynWareCommands`. |
+| `commands` | Static command declarations with `id`, `title`, and optionally `menu` and `shortcut`. Register behaviour at runtime with `useCommands`. |
 | `menus` | Menu declarations with `id`, `title` and the `commandIds` they list. |
 | `applicationMenu` | Optional `trigger: "content"` and a `preferences` entry with a `commandId` and optional `label`. |
 
@@ -87,7 +87,7 @@ The right-slot control opens the application menu. Each item appears only when i
 3. **System Preferences…**, always.
 4. **Log Out**, after a separator, when sign-in is on and the user is signed in.
 
-When System Preferences is the only item, the control opens it directly and no menu appears. An app that declares `applicationMenu.trigger: "content"` gets the same menu, and the same direct opening, from `useSynWareApplicationMenuTrigger()`.
+When System Preferences is the only item, the control opens it directly and no menu appears. An app that declares `applicationMenu.trigger: "content"` gets the same menu, and the same direct opening, from `useApplicationMenuTrigger()`.
 
 ## Capabilities and services
 
@@ -99,7 +99,7 @@ When System Preferences is the only item, the control opens it directly and no m
 
 | Field | Notes |
 | --- | --- |
-| `localeResources` | `base` points at the base strings file. `bundles` lists further locales as `{ locale, path }` pairs. |
+| Localised files | Every `Resources/Localised/<locale>.locale/*.strings` file is discovered. `localeResources` is no longer a manifest field. |
 | `appearances` | Declares the appearances the application supports: `{ id, variant }` where `variant` is `"atmo"` or `"neutral"`. |
 
 ## Lifecycle and background work
@@ -141,7 +141,7 @@ Shells declare `webspringShell` instead. Its optional `folders` block, `{ editab
 
 ## Validate a manifest
 
-`validateSynWareManifest` checks a value against the schema and returns either the frozen manifest or a list of issues. `createSynWare` runs the same check and throws `SynWareManifestValidationError` when the manifest is invalid.
+`validateSynWareManifest` checks a complete manifest against the schema and returns either the frozen manifest or a list of issues. Folder tooling resolves overrides first; the runtime rejects invalid complete manifests with `SynWareManifestValidationError`.
 
 ```ts
 import { validateSynWareManifest } from "@syndromatic/syncloudos/sdk";

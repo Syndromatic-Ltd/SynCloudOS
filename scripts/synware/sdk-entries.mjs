@@ -20,6 +20,7 @@
 
 /** Canonical SynWare SDK public entry points. No source-tree wildcard aliases. */
 export const synWareSdkEntries = Object.freeze({
+  "index": "src/SynCloudOS/AppSDK/rootPackageEntry.ts",
   "fx/animation": "src/FX/AnimationFX/public.ts",
   "sdk/animation-host": "src/FX/AnimationFX/host.ts",
   "fx/image": "src/FX/ImageFX/public.ts",

@@ -86,12 +86,17 @@ it("traps focus in an open folder under the standard host and returns it to the 
   const launcher = document.querySelector<HTMLElement>(".webspring-board-launcher")!;
   expect(launcher.closest("[aria-hidden='true']")).not.toBeNull();
   expect(dialog.closest("[aria-hidden='true']")).toBeNull();
+  const clonedFocusEvents: Event[] = [];
+  const clones = dialog.parentElement!.querySelectorAll<HTMLElement>(".webspring-folder-split-clone");
+  expect(clones).toHaveLength(2);
+  clones.forEach((clone) => clone.addEventListener("focusin", (event) => clonedFocusEvents.push(event)));
 
   gamma.focus();
   fireEvent.keyDown(gamma, { key: "Tab" });
   expect(document.activeElement).toBe(beta);
   fireEvent.keyDown(beta, { key: "Tab", shiftKey: true });
   expect(document.activeElement).toBe(gamma);
+  expect(clonedFocusEvents).toHaveLength(0);
   // Focus that escapes is drawn back in.
   act(() => folderButton.focus());
   expect(dialog.contains(document.activeElement)).toBe(true);

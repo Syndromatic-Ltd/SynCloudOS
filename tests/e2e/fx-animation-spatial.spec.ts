@@ -23,10 +23,11 @@ import { expect, test } from "playwright/test";
 test("AnimationFX spatial history and projective depth execute in real browsers", async ({ page }, testInfo) => {
   await page.goto("/tests/e2e/fixtures/fx-animation-spatial-browser.html");
   const result = await page.evaluate(async () => {
-    const [animation, browser, graphics] = await Promise.all([
+    const [animation, browser, graphics, host] = await Promise.all([
       import("/src/FX/AnimationFX/public.ts"),
       import("/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts"),
       import("/src/FX/GraphicsFX/public.ts"),
+      import("/src/FX/AnimationFX/host.ts"),
     ]);
     let now = 0;
     const frames = new Set<(time: number) => void>();
@@ -52,7 +53,8 @@ test("AnimationFX spatial history and projective depth execute in real browsers"
     };
 
     const replicatorElement = document.querySelector<HTMLElement>("#replicator")!;
-    const replicator = new animation.AFXReplicatorLayer(
+    const replicator = host.createAFXLayer(
+      animation.AFXReplicatorLayer,
       new browser.BrowserAnimationLayerSurface(replicatorElement),
       scheduler,
     );
@@ -64,11 +66,7 @@ test("AnimationFX spatial history and projective depth execute in real browsers"
       .multiply(animation.AFXTransform3D.translation(64, 4, 18))
       .multiply(animation.AFXTransform3D.rotation(0.22, 0, 1, 0));
 
-    const childElement = document.createElement("div");
-    const child = new animation.AFXShapeLayer(
-      new browser.BrowserAnimationLayerSurface(childElement),
-      scheduler,
-    );
+    const child = new animation.AFXShapeLayer();
     child.frame = { x: 16, y: 26, width: 52, height: 52 };
     child.path = graphics.GFXPath.rect({ x: 0, y: 0, width: 52, height: 52 });
     child.fillColour = graphics.GFXColour.rgba(0.95, 0.35, 0.22, 1);
@@ -95,7 +93,8 @@ test("AnimationFX spatial history and projective depth execute in real browsers"
     });
 
     const emitterElement = document.querySelector<HTMLElement>("#emitter")!;
-    const emitter = new animation.AFXEmitterLayer(
+    const emitter = host.createAFXLayer(
+      animation.AFXEmitterLayer,
       new browser.BrowserAnimationLayerSurface(emitterElement),
       scheduler,
     );

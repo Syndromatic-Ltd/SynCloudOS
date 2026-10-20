@@ -7,6 +7,7 @@ import { createRequire } from "node:module";
 import { dirname, resolve, relative, isAbsolute } from "node:path";
 import ts from "typescript";
 export const sdkName = "@syndromatic/syncloudos";
+export const discoveryKeys = ["appsDirectory", "preferencesDirectory", "widgetsDirectory", "integrationsDirectory", "webspringEntry"];
 export { bundlePaths } from "../synware/bundle-paths.mjs";
 export const json = path => JSON.parse(readFileSync(path,"utf8"));
 export const slash = path => path.replaceAll("\\","/");
@@ -60,17 +61,17 @@ export function viteHints(root, overrides = {}) {
     }
     function visit(node) {
       if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && names.has(node.expression.text)) {
-        if (pluginPresent) unresolved.push("appsDirectory", "webspringEntry");
+        if (pluginPresent) unresolved.push(...discoveryKeys);
         pluginPresent = true;
         const argument = node.arguments[0];
-        if (argument && !ts.isObjectLiteralExpression(argument)) unresolved.push("appsDirectory", "webspringEntry");
+        if (argument && !ts.isObjectLiteralExpression(argument)) unresolved.push(...discoveryKeys);
         if (argument && ts.isObjectLiteralExpression(argument)) for (const property of argument.properties) {
           if (ts.isSpreadAssignment(property) || (property.name && ts.isComputedPropertyName(property.name))) {
-            unresolved.push("appsDirectory", "webspringEntry");
+            unresolved.push(...discoveryKeys);
             continue;
           }
           const key = property.name && (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) ? property.name.text : null;
-          if (!["appsDirectory","webspringEntry"].includes(key)) continue;
+          if (!discoveryKeys.includes(key)) continue;
           if (ts.isPropertyAssignment(property) && ts.isStringLiteral(property.initializer)) options[key] = property.initializer.text;
           else if (ts.isPropertyAssignment(property) && key === "webspringEntry" && property.initializer.kind === ts.SyntaxKind.FalseKeyword) options[key] = false;
           else unresolved.push(key);

@@ -53,7 +53,8 @@ function staticServer(directory) {
 
 const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createSynWare, defineSynWareServiceToken, useSynWare, useSynWareLumina } from "@syndromatic/syncloudos/sdk";
+import { defineSynWareServiceToken, useSCOS, useLumina } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { LUFXSearchableItem } from "@syndromatic/syncloudos/fx/lumina";
 import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
 import "@syndromatic/syncloudos/nse/styles.css";
@@ -62,8 +63,8 @@ window.consumer = { ready: false };
 const journalProbeToken = defineSynWareServiceToken<unknown>({ id: "journal.content", minimumVersion: "2.0.0", contractVersion: "journal.content.v2" });
 const synCalProbeToken = defineSynWareServiceToken<unknown>({ id: "syncal.calendar", minimumVersion: "1.0.0", contractVersion: "syncal.calendar.v1" });
 function Probe() {
-  const app = useSynWare();
-  const lumina = useSynWareLumina();
+  const app = useSCOS();
+  const lumina = useLumina();
   useEffect(() => {
     void (async () => {
       const index = lumina.createIndex();

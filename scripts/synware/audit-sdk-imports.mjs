@@ -298,8 +298,8 @@ function auditImports(context, files) {
       }
 
       if (reference.specifier === synWarePackageName || reference.specifier.startsWith(synWarePackageName + "/")) {
-        const entry = reference.specifier.slice(synWarePackageName.length + 1);
-        if (entry === "sdk/testing" || (entry !== "nse/styles.css" && !Object.hasOwn(synWareSdkEntries, entry) && !Object.hasOwn(synWareSdkStyles, entry) && !Object.hasOwn(synWareSdkGeneratedStyles, entry))) {
+        const entry = reference.specifier === synWarePackageName ? "index" : reference.specifier.slice(synWarePackageName.length + 1);
+        if (entry === "sdk/testing" || entry === "index" && reference.specifier !== synWarePackageName || (entry !== "nse/styles.css" && !Object.hasOwn(synWareSdkEntries, entry) && !Object.hasOwn(synWareSdkStyles, entry) && !Object.hasOwn(synWareSdkGeneratedStyles, entry))) {
           violations.push(importViolation(context, sourcePath, reference, "Unsupported production SynWare SDK entry point"));
           continue;
         }
@@ -340,7 +340,7 @@ function auditImports(context, files) {
         continue;
       }
       const publicEntry = Object.entries(synWareSdkEntries).find(([entry, source]) =>
-        reference.specifier === synWarePackageName + "/" + entry &&
+        reference.specifier === (entry === "index" ? synWarePackageName : synWarePackageName + "/" + entry) &&
         canonicalPath(target) === canonicalPath(resolve(context.repositoryRoot, source)));
       if (publicEntry && publicEntry[0] !== "sdk/testing") continue;
       if (!sourceIsHostIntegration && !isWithin(context.synWareRoot, target) && !normalise(target).includes("/node_modules/")) {
@@ -377,14 +377,10 @@ function manifestPropertyNames(source, sourcePath) {
 
 function auditManifests(context, files) {
   const legacy = [];
-  const unversioned = [];
   const undeclaredCapabilities = [];
   for (const path of files.filter((file) => normalise(file).endsWith("/Info.ts"))) {
     const source = readFileSync(path, "utf8");
     const file = relativeSource(context.repositoryRoot, path);
-    if (!/\bschemaVersion\s*:\s*1\b/u.test(source) || !/\bversion\s*:/u.test(source)) {
-      unversioned.push({ file, reason: "manifest must declare schemaVersion 1 and a semantic version" });
-    }
     for (const properties of manifestPropertyNames(source, path)) {
       for (const key of legacyManifestKeys) {
         if (properties.has(key)) legacy.push({ file, key, reason: "legacy manifest key" });
@@ -392,15 +388,11 @@ function auditManifests(context, files) {
     }
     if (/\bservices\s*:\s*\[\s*\]/u.test(source)) undeclaredCapabilities.push({ file, reason: "services must declare requested capabilities" });
   }
-  return { legacy, unversioned, undeclaredCapabilities };
+  return { legacy, undeclaredCapabilities };
 }
 
-/** Generic SDK definitions may intentionally use a callable null root in
- * fixtures or headless consumers. First-party visual entries are different:
- * a literal null root is a fabricated placeholder and must never reach the
- * active SynWare inventory. Keep this syntactic guard deliberately local to
- * default createSynWare entry declarations rather than changing generic
- * definition validation. */
+/** First-party visual entries cannot be callable null placeholders. Headless
+ * SDK test definitions remain valid; this guard covers only project entries. */
 function auditFabricatedRoots(context, files) {
   const fabricatedRoots = [];
   const isEntry = (path) => /\/Contents\/index\.tsx?$/iu.test(normalise(path));
@@ -433,27 +425,20 @@ function auditFabricatedRoots(context, files) {
       const resolved = roots.get(node.text);
       return resolved ? rootIsFabricated(resolved, seen) : false;
     };
-    const visit = (node) => {
-      if (ts.isExportAssignment(node) && !node.isExportEquals && ts.isCallExpression(node.expression) &&
-        ts.isIdentifier(node.expression.expression) && node.expression.expression.text === "createSynWare") {
-        const definition = node.expression.arguments[0];
-        if (definition && ts.isObjectLiteralExpression(definition)) {
-          const root = definition.properties.find((property) => ts.isPropertyAssignment(property) && propertyName(property) === "root");
-          if (root && ts.isPropertyAssignment(root) && rootIsFabricated(root.initializer)) {
-            const position = file.getLineAndCharacterOfPosition(root.initializer.getStart(file));
-            fabricatedRoots.push({
-              file: relativeSource(context.repositoryRoot, path),
-              location: `${relativeSource(context.repositoryRoot, path)}:${position.line + 1}:${position.character + 1}`,
-              line: position.line + 1,
-              column: position.character + 1,
-              reason: "first-party createSynWare entry has a fabricated null root",
-            });
-          }
-        }
+    for (const node of file.statements) {
+      const root = ts.isExportAssignment(node) && !node.isExportEquals ? node.expression
+        : ts.isFunctionDeclaration(node) && node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword) ? node : null;
+      if (root && rootIsFabricated(root)) {
+        const position = file.getLineAndCharacterOfPosition(root.getStart(file));
+        fabricatedRoots.push({
+          file: relativeSource(context.repositoryRoot, path),
+          location: `${relativeSource(context.repositoryRoot, path)}:${position.line + 1}:${position.character + 1}`,
+          line: position.line + 1,
+          column: position.character + 1,
+          reason: "first-party application entry has a fabricated null root",
+        });
       }
-      ts.forEachChild(node, visit);
-    };
-    visit(file);
+    }
   }
   return fabricatedRoots;
 }
@@ -504,7 +489,6 @@ export function auditSynWareImports(root = repositoryRoot) {
   return Object.freeze({
     internalImports: Object.freeze(auditImports(context, files)),
     legacyManifestKeys: Object.freeze(manifests.legacy),
-    unversionedManifests: Object.freeze(manifests.unversioned),
     undeclaredCapabilities: Object.freeze([...manifests.undeclaredCapabilities, ...auditSynWareFXCapabilities(root).fxViolations]),
     fabricatedRoots: Object.freeze(auditFabricatedRoots(context, files)),
   });
@@ -521,7 +505,6 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
   const violations = [
     ...audit.internalImports,
     ...audit.legacyManifestKeys,
-    ...audit.unversionedManifests,
     ...audit.undeclaredCapabilities,
     ...audit.fabricatedRoots,
   ];

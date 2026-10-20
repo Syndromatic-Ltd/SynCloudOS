@@ -28,6 +28,7 @@ import {
 } from "./AFXLayer";
 import { AFXReplicatorLayer } from "./AFXReplicatorLayer";
 import { AFXParticleLayer } from './AFXParticleLayer';
+import { createAFXLayer } from "./host";
 import { AFXTransform3D } from "./AFXTransform3D";
 import { VFXFrame } from "../VideoFX/VFXFrame";
 import { batchAFXFrameScheduler } from './AFXFrameBatch';
@@ -130,6 +131,7 @@ class RendererLayerSurface implements AFXLayerSurface {
   readonly supportsReplication = true;
   get snapshot(): AFXLayerSnapshot | null { return this.#snapshot; }
   replicationCapability() { return Object.freeze({ projectiveDepth: true }); }
+  createSublayerSurface(): AFXLayerSurface { return new RendererLayerSurface(this.invalidate); }
   apply(snapshot: AFXLayerSnapshot): void { this.#snapshot = snapshot; this.invalidate(); }
   attach(): void { this.invalidate(); }
   detach(): void { this.invalidate(); }
@@ -194,7 +196,7 @@ export class AFXRenderer {
       throw new TypeError("Layer renderer onRenderError must be a function.");
     this.#onRenderError = options.onRenderError;
     const rootSurface = new RendererLayerSurface(() => this.#invalidate());
-    this.layer = new AFXLayer(rootSurface, this.#scheduler);
+    this.layer = createAFXLayer(rootSurface, this.#scheduler);
     this.#surfaces.set(this.layer, rootSurface);
     this.#ready = true;
     this.#unsubscribeTarget = this.#renderer.subscribeInvalidation?.(() => this.#invalidate());
@@ -209,7 +211,7 @@ export class AFXRenderer {
     if (parent && parent !== this.layer && !this.#isDescendant(parent))
       throw new TypeError("Layer renderer parent must belong to this scene.");
     const surface = new RendererLayerSurface(() => this.#invalidate());
-    const layer = new AFXLayer(surface, this.#scheduler);
+    const layer = createAFXLayer(surface, this.#scheduler);
     this.#surfaces.set(layer, surface);
     this.#ownedLayers.add(layer);
     try { parent?.addSublayer(layer); }
@@ -222,7 +224,7 @@ export class AFXRenderer {
     if (parent && parent !== this.layer && !this.#isDescendant(parent))
       throw new TypeError("Layer renderer parent must belong to this scene.");
     const surface = new RendererLayerSurface(() => this.#invalidate());
-    const layer = new AFXReplicatorLayer(surface, this.#scheduler);
+    const layer = createAFXLayer(AFXReplicatorLayer, surface, this.#scheduler);
     this.#surfaces.set(layer, surface);
     this.#ownedLayers.add(layer);
     try { parent?.addSublayer(layer); }
@@ -235,7 +237,7 @@ export class AFXRenderer {
     if (parent && parent !== this.layer && !this.#isDescendant(parent))
       throw new TypeError('Layer renderer parent must belong to this scene.');
     const surface = new RendererLayerSurface(() => this.#invalidate());
-    const layer = new AFXParticleLayer(surface, this.#scheduler);
+    const layer = createAFXLayer(AFXParticleLayer, surface, this.#scheduler);
     this.#surfaces.set(layer, surface); this.#ownedLayers.add(layer);
     try { parent?.addSublayer(layer); }
     catch (error) { layer.dispose(); throw error; }

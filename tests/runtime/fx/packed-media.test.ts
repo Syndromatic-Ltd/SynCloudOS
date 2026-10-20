@@ -37,7 +37,7 @@ it("executes and typechecks MediaFX from an independently installed SDK archive"
   writeFileSync(join(consumer.root, "specimen.mjs"), `
 import assert from "node:assert/strict";
 import { MEFXBlockBuffer, MEFXBufferQueue, MEFXFormatDescription, MEFXSampleBuffer, MEFXSampleTimingInfo, MEFXTime, MEFXTimeRange, MEFXTimeMapping, MEFXTimebase } from "@syndromatic/syncloudos/fx/media";
-import { createSynWare } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { createDeterministicRuntimeEnvironment, createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
 import { JSDOM } from "jsdom";
 const third = MEFXTime.finite(1n, 3);
@@ -196,7 +196,7 @@ console.log("MediaFX installed operations passed");
 import { MEFXBlockBuffer, MEFXBufferQueue, MEFXFormatDescription, MEFXSampleBuffer, MEFXSampleTimingInfo, MEFXTime, MEFXTimeRange, MEFXTimeMapping, MEFXTimebase } from "@syndromatic/syncloudos/fx/media";
 import type { MEFXBlockSegmentInput, MEFXBufferQueueOptions, MEFXBufferQueueSnapshot, MEFXClock, MEFXClockReading, MEFXComparison, MEFXFormatDescriptionInit, MEFXRounding, MEFXSampleBufferInit, MEFXTimeJSON, MEFXTimebaseSnapshot } from "@syndromatic/syncloudos/fx/media";
 import type { MEFXMediaClient } from "@syndromatic/syncloudos/sdk";
-import { useSynWareMedia } from "@syndromatic/syncloudos/sdk";
+import { useMedia } from "@syndromatic/syncloudos/sdk";
 import { createDeterministicRuntimeEnvironment } from "@syndromatic/syncloudos/sdk/testing";
 const rounding: MEFXRounding = "nearest-even";
 const time = MEFXTime.finite(1n, 3).convertScale(600, rounding);
@@ -231,7 +231,7 @@ void queueSnapshot;
 queue.dispose();
 declare const mediaClient: MEFXMediaClient;
 mediaClient.copyBlock(new Uint8Array([1])).close();
-void useSynWareMedia;
+void useMedia;
 const deterministic = createDeterministicRuntimeEnvironment();
 deterministic.mediaClock.advanceSeconds(1);
 void snapshot;

@@ -28,7 +28,8 @@ it("executes scoped VideoFX capture from an independently installed SDK archive"
   writeFileSync(join(consumer.root, "capture.mjs"), `
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
-import { createSynWare, useSynWareVideo } from "@syndromatic/syncloudos/sdk";
+import { useVideo } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
 
 const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { url: "http://syncloudos.test/" });
@@ -64,7 +65,7 @@ assert.equal(selected.height, 720);
 assert.deepEqual(host.adapters.video.calls().map((call) => call.operation), ["video.camera"]);
 session.dispose();
 await host.dispose();
-assert.equal(typeof useSynWareVideo, "function");
+assert.equal(typeof useVideo, "function");
 console.log("installed VideoFX scoped capture passed");
 `);
   const jsdomVersion = JSON.parse(readFileSync(join(process.cwd(), "node_modules/jsdom/package.json"), "utf8")).version as string;
@@ -72,12 +73,12 @@ console.log("installed VideoFX scoped capture passed");
   expect(runNode(["capture.mjs"], consumer.root)).toContain("installed VideoFX scoped capture passed");
 
   writeFileSync(join(consumer.root, "capture.ts"), `
-import { useSynWareVideo } from "@syndromatic/syncloudos/sdk";
+import { useVideo } from "@syndromatic/syncloudos/sdk";
 import type { VFXCaptureSession, VFXVideoClient } from "@syndromatic/syncloudos/fx/video";
 declare const client: VFXVideoClient;
 const session: VFXCaptureSession = client.createCaptureSession();
 void session;
-void useSynWareVideo;
+void useVideo;
 `);
   writeFileSync(join(consumer.root, "tsconfig.json"), JSON.stringify({
     compilerOptions: {

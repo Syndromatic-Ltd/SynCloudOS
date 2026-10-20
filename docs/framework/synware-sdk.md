@@ -2,7 +2,7 @@
 
 A SynWare is an application bundle that runs on SynCloudOS, in the way a `.app` bundle runs on Mac OS X. The bundle carries a manifest, a root component and its resources. The host loads the bundle, validates the manifest and mounts the component inside a session. The SDK, imported from `@syndromatic/syncloudos/sdk`, is everything a bundle needs from the platform.
 
-For host-supplied font catalogues and imported fonts, use `useSynWareFonts()`. The [managed fonts guide](managed-fonts.md) shows one Node-safe declaration, early website CSS and preloads, app font pickers, and byte-backed TextFX acquisition.
+For host-supplied font catalogues and imported fonts, use `useFonts()`. The [managed fonts guide](managed-fonts.md) shows one Node-safe declaration, early website CSS and preloads, app font pickers, and byte-backed TextFX acquisition.
 
 Production browser hosts choose either `mountSynCloudOS({ element, bundles, shell })`
 for Webspring or `mountSynCloudOS({ element, bundles, application: { id } })` for
@@ -11,7 +11,7 @@ Application-only hosting uses a real SynWare session. The primary application
 fills the page (or keeps its declared frame with `frame: "declared"`); other
 registered bundles open from it in windows. It supports the same authentication
 policies as Webspring, and after the primary quits it offers Reopen instead of
-relaunching. See [the application host setup](getting-started.md#fullscreen-application-without-a-shell)
+relaunching. See [the application host setup](getting-started.md#mount-one-application)
 for Vite configuration, routing, sign-in and disposal.
 
 ## Anatomy of a bundle
@@ -19,8 +19,8 @@ for Vite configuration, routing, sign-in and disposal.
 ```text
 Notes.app/
 └── Contents/
-    ├── Info.ts                 the manifest
-    ├── index.tsx               createSynWare(...) as the default export
+    ├── Info.ts                 optional manifest overrides
+    ├── index.tsx               component or NSEApplication default export
     └── Resources/
         ├── icon.png
         └── Localised/
@@ -28,63 +28,112 @@ Notes.app/
                 └── Localisable.strings
 ```
 
-`Info.ts` holds the [manifest](synware-manifest.md). `index.tsx` combines the manifest with your React components and exports the result as its default export. [Getting started](getting-started.md) builds the smallest working bundle.
+`Info.ts` optionally overrides the [derived manifest](project-structure.md#application-manifests). `index.tsx` default-exports your application component or `NSEApplication` subclass. [Getting started](getting-started.md) builds the smallest working bundle.
 
 ## Define the application
 
-`createSynWare` takes a definition and returns the module the host loads.
+Default-export a component. The plugin derives its manifest from the folder and optional `Info.ts`; the loader constructs the application definition.
 
 ```tsx
 import "@syndromatic/syncloudos/nse/styles.css";
-import { createSynWare, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { SCOS } from "@syndromatic/syncloudos";
 import { NSEStackItem, NSEStackView } from "@syndromatic/syncloudos/nse";
-import manifest from "./Info";
 
-function Notes() {
-  const app = useSynWare();
+export default function Notes() {
   return (
     <NSEStackView aria-label="Notes" orientation="vertical" spacing={12}>
       <NSEStackItem id="heading" visibilityPriority={100}>
-        <h1>{app.locale.t("notes.title")}</h1>
+        <h1>{SCOS.strings.t("notes.title", "Notes")}</h1>
       </NSEStackItem>
     </NSEStackView>
   );
 }
 
-export default createSynWare({ manifest, root: Notes });
 ```
 
-The definition accepts these members:
+Optional named exports customise the application:
 
 | Member | Purpose |
 | --- | --- |
-| `manifest` | The manifest object. `createSynWare` validates it and throws `SynWareManifestValidationError` when it is invalid. |
-| `root` | The component the host mounts. It renders inside the session. |
+| default export | The component or application class the host mounts inside the session. |
 | `routes` | A route graph from `defineSynWareRoutes`, for applications with several screens. |
 | `migrations` | Data migrations, each with `fromVersion`, `toVersion` and a `migrate(value, { signal })` function. |
 | `windowChrome` | A component that draws the title bar when `windowDefaults.chrome` is `"custom"`. |
 | `createBackgroundHandler` | A factory for the handler that runs the background tasks the manifest declares. |
+| `rematerialiseOwnedDocument` | Restores an app-owned document projection when rematerialising it. |
 
-## The session
+`createSynWare` is not a production authoring export. Test hosts may import it from `sdk/testing` when constructing definitions explicitly.
 
-The host mounts your root component inside a session. `useSynWare()` returns the session object, which holds one client for each capability the platform offers.
+## SCOS
+
+Inside a `<Name>.app` folder, import `SCOS` from `@syndromatic/syncloudos`. The project
+plugin binds that import to the app's manifest ID. Each operation resolves its running
+session at call time, including after `await`, in timers and after a remount.
+
+```ts
+import { SCOS } from "@syndromatic/syncloudos";
+
+SCOS.preferences.set("theme", "paper");
+const theme = SCOS.preferences.get("theme", "plain");
+SCOS.preferences.remove("theme");
+await SCOS.open("journal"); // catalogue ID, or an absolute route
+const choice = await SCOS.alert({
+  title: "Discard changes?",
+  message: "Your unsaved changes will be lost.",
+  buttons: [
+    { id: "discard", label: "Discard", role: "destructive" },
+    { id: "cancel", label: "Cancel", role: "cancel" },
+  ],
+});
+if (choice === "discard") SCOS.close();
+```
+
+`SCOS.app` contains `id`, `version` and `title`. The facade also exposes the mounted
+clients: windows, documents, undo, commands, persistence, notifications, appearance,
+locale, strings, scheduler, navigation, pasteboards, services and sharing. Other scoped
+clients remain available for existing capability hooks; FX types stay separate imports,
+not a namespace under `SCOS`. `preferences.get/set/remove` uses the same store as
+`persistence.getPreference/setPreference/removePreference`.
+
+Alerts are queued by the kernel and presented by the host through `NSEAlert`. Each call
+returns its own promise resolving to the chosen button ID. Omitting buttons gives an
+`ok` button. Escape, safe dismissal, caller abort and closing the owner resolve to its
+cancel button (or the last button if none is marked cancel). Closing an app also cancels
+its queued alerts. `close()` requests the existing lifecycle close; it does not bypass
+close guards.
+
+Shared React components outside app folders call `useSCOS()`, which selects the nearest
+app provider even if several runtimes mount the same app. Hooks such as `useStrings()`
+and `useAppearance()` remain the way to subscribe to changing values; reading `SCOS`
+does not subscribe a component.
+
+| Error | Meaning and correction |
+| --- | --- |
+| `SCOS_APP_NOT_RUNNING` | Start the app before using its bound facade. |
+| `SCOS_AMBIGUOUS_SESSION` | Several runtimes mount that app; select the provider with `useSCOS()`. |
+| `SCOS_UNBOUND` | The error names the calling file. Move the import into an app folder or use `useSCOS()` in a shared component. |
+| `SCOS_APP_NOT_FOUND` | `open()` cannot find that app ID; check the catalogue ID or pass an absolute route. |
+
+### Shared components
+
+The host mounts your root component inside a session. `useSCOS()` returns its scoped facade:
 
 ```tsx
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos";
 
 export function SessionTour() {
-  const app = useSynWare();
+  const app = useSCOS();
 
-  app.appId;          // "com.example.notes"
-app.signal;         // aborts when the application closes
-app.presentation;   // traits of the current surface
-app.commands;       // dispatch and validate commands
-app.documents;      // documents and their resources
-app.windows;        // windows this application owns
-app.undo;           // undo histories
-app.locale;         // formatting and translation
-app.persistence;    // per-application preferences
-app.services;       // optional host services
+  app.app.id;         // "com.example.notes"
+  app.signal;         // aborts when the application closes
+  app.presentation;   // traits of the current surface
+  app.commands;       // dispatch and validate commands
+  app.documents;      // documents and their resources
+  app.windows;        // windows this application owns
+  app.undo;           // undo histories
+  app.locale;         // formatting and translation
+  app.preferences;    // per-application preferences
+  app.services;       // optional host services
   return null;
 }
 ```
@@ -97,27 +146,27 @@ Hooks give each client a React shape, subscribing to changes and releasing resou
 
 | Area | Hooks |
 | --- | --- |
-| Session | `useSynWare`, `useSynWareLifecycle`, `useSynWareEvents`, `useSynWareErrors` |
-| Commands | `useSynWareCommands`, `useSynWareApplicationMenuTrigger`, `useSynWareQuickSwitchTrigger` |
-| Documents and windows | `useSynWareDocument`, `useSynWareWindow`, `useSynWareWindowChrome`, `useSynWareWorkArea`, `useSynWareWorkAreaSnapshot` |
-| Routing | `useSynWareRouter`, `useSynWareRouteData`, `useSynWareRouteState` |
-| Data and identity | `useSynWarePersistence`, `useSynWareIdentity`, `useSynWareIdentitySnapshot`, `useSynWareScheduler` |
-| Environment | `useSynWareMediaQuery`, `useSynWareMediaQueries`, `useSynWareConnectivity`, `useSynWareAppearance`, `useSynWareSettingsAvailability` |
-| Outward actions | `useSynWareNotifications`, `useSynWareShare`, `useSynWareExternalActions`, `useSynWarePasteboard`, `useSynWareDrag` |
-| Text and colour | `useSynWareLocalisedStrings`, `useSynWareTextLayout`, `useSynWareColourPanel` |
-| FX | `useSynWareAnimations`, `useSynWareImages`, `useSynWareAudio`, `useSynWareHaptics`, `useSynWareMotion`, `useSynWareMedia`, `useSynWareVideo`, `useSynWareMIDI`, `useSynWareLocation`, `useSynWareLumina` |
-| Web content | `useSynWareWebContent` |
-| Host services | `useSynWareService` |
+| Session | `useSCOS`, `useLifecycle`, `useEvents`, `useErrors` |
+| Commands | `useCommands`, `useApplicationMenuTrigger`, `useQuickSwitchTrigger` |
+| Documents and windows | `useDocument`, `useWindow`, `useWindowChrome`, `useWorkArea`, `useWorkAreaSnapshot` |
+| Routing | `useRouter`, `useRouteData`, `useRouteState` |
+| Data and identity | `usePersistence`, `useIdentity`, `useIdentitySnapshot`, `useScheduler` |
+| Environment | `useMediaQuery`, `useMediaQueries`, `useConnectivity`, `useAppearance`, `useSettingsAvailability` |
+| Outward actions | `useNotifications`, `useShare`, `useExternalActions`, `usePasteboard`, `useDrag` |
+| Text and colour | `useStrings`, `useTextLayout`, `useColourPanel` |
+| FX | `useAnimations`, `useImages`, `useAudio`, `useHaptics`, `useMotion`, `useMedia`, `useVideo`, `useMIDI`, `useLocation`, `useLumina` |
+| Web content | `useWebContent` |
+| Host services | `useService` |
 
 ## Commands
 
 Commands turn user intent into named, validated operations. A menu item, a key binding and a toolbar button can all dispatch the same command, and each one enables and disables together because they share the command's `validate` function.
 
 ```tsx
-import { useSynWare, useSynWareCommands } from "@syndromatic/syncloudos/sdk";
+import { useSCOS, useCommands } from "@syndromatic/syncloudos/sdk";
 
 function NotesCommands({ onAdd, canAdd }: { onAdd(): void; canAdd: boolean }) {
-  const commands = useSynWareCommands([
+  const commands = useCommands([
     {
       id: "com.example.notes.add",
       title: { key: "notes.add", fallback: "Add Note" },
@@ -131,14 +180,14 @@ function NotesCommands({ onAdd, canAdd }: { onAdd(): void; canAdd: boolean }) {
 }
 ```
 
-`useSynWareCommands` registers the definitions when the component mounts and removes them when it unmounts. A command may also carry an `undo` policy that registers an undo action for each execution. The [commands, responders and undo guide](commands-responders-undo.md) describes dispatch, validation, key bindings and undo in full.
+`useCommands` registers the definitions when the component mounts and removes them when it unmounts. A command may also carry an `undo` policy that registers an undo action for each execution. The [commands, responders and undo guide](commands-responders-undo.md) describes dispatch, validation, key bindings and undo in full.
 
 ## Services
 
-Some capabilities come from the host and vary between deployments. A service token names one of them. `useSynWareService` returns a result object instead of throwing, so your interface can handle a missing service directly.
+Some capabilities come from the host and vary between deployments. A service token names one of them. `useService` returns a result object instead of throwing, so your interface can handle a missing service directly.
 
 ```tsx
-import { defineSynWareServiceToken, useSynWareService } from "@syndromatic/syncloudos/sdk";
+import { defineSynWareServiceToken, useService } from "@syndromatic/syncloudos/sdk";
 
 interface ExportClient {
   exportAsPdf(id: string): Promise<Blob>;
@@ -147,7 +196,7 @@ interface ExportClient {
 const exportToken = defineSynWareServiceToken<ExportClient>({ id: "com.example.export" });
 
 function ExportButton({ id }: { id: string }) {
-  const service = useSynWareService(exportToken);
+  const service = useService(exportToken);
   if (!service.available) return <p>{service.denial?.message}</p>;
   return <button onClick={() => void service.client?.exportAsPdf(id)}>Export</button>;
 }
@@ -157,14 +206,13 @@ function ExportButton({ id }: { id: string }) {
 
 ## Routes
 
-An application with one screen needs only `root`. An application with several screens describes them as a route graph.
+An application with one screen needs only its default component. An application with several screens describes them as a named route graph.
 
 ```tsx
-import { createSynWare, defineSynWareRoutes, RouteOutlet, useSynWareRouter } from "@syndromatic/syncloudos/sdk";
-import manifest from "./Info";
+import { defineSynWareRoutes, RouteOutlet, useRouter } from "@syndromatic/syncloudos/sdk";
 
 function NoteList() {
-  const router = useSynWareRouter(routes);
+  const router = useRouter(routes);
   return <button onClick={() => router.transitionTo({ name: "note", params: { id: "welcome" } })}>Open</button>;
 }
 
@@ -172,7 +220,7 @@ function NoteDetail() {
   return <p>A note.</p>;
 }
 
-const routes = defineSynWareRoutes({
+export const routes = defineSynWareRoutes({
   id: "com.example.notes.routes",
   routes: [
     { name: "list", path: "notes", component: NoteList },
@@ -180,12 +228,12 @@ const routes = defineSynWareRoutes({
   ],
 });
 
-export default createSynWare({ manifest, root: RouteOutlet, routes });
+export default RouteOutlet;
 ```
 
 Route names and path parameters are typed. Calling `router.transitionTo({ name: "note" })` without `id` is a compile error. Each route can also declare:
 
-- `load`, an asynchronous loader whose result reaches the component through `useSynWareRouteData`
+- `load`, an asynchronous loader whose result reaches the component through `useRouteData`
 - `lazy`, a dynamic import for code splitting
 - `query`, a schema built with `routeQuery` for typed search parameters
 - `beforeEnter` and `beforeLeave`, guards that can redirect or cancel a transition
@@ -194,13 +242,13 @@ Route names and path parameters are typed. Calling `router.transitionTo({ name: 
 
 ## Localisation
 
-Strings live in `Resources/Localised/<locale>.locale/Localisable.strings`, and the manifest's `localeResources` field points at them. `app.locale.t(key)` returns the string for the active locale and falls back to the base locale. The same client formats dates, times, numbers, file sizes, relative times and lists with `Intl`, so an application follows the user's locale without further work.
+Strings live in `Resources/Localised/<locale>.locale/*.strings`; discovery supplies every file without a manifest field. `SCOS.strings.t(key, fallback)` returns the string for the active locale with its fallback. The locale client also formats dates, times, numbers, file sizes, relative times and lists with `Intl`.
 
 ```tsx
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 
 export function Summary() {
-  const { locale } = useSynWare();
+  const { locale } = useSCOS();
   return (
     <p>
       {locale.t("notes.count", { count: 3 })} {locale.formatDate(Date.now(), { dateStyle: "medium" })}{" "}
@@ -215,10 +263,10 @@ export function Summary() {
 `app.persistence` stores small preferences under your application's identity, so two bundles never see each other's keys.
 
 ```tsx
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 
 export function useSortPreference() {
-  const { persistence } = useSynWare();
+  const { persistence } = useSCOS();
   return {
     sort: persistence.getPreference("sort", "modified"),
     setSort: (value: string) => persistence.setPreference("sort", value),

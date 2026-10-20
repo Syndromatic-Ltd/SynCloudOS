@@ -38,7 +38,7 @@ describe("Chronosphere presentation ownership", () => {
         const file = join(directory, entry.name);
         if (entry.isDirectory()) visit(file);
         else if (/\.tsx?$/.test(file)) {
-          expect(readFileSync(file, "utf8"), file).not.toMatch(/useSynWare|AppSDK\//);
+          expect(readFileSync(file, "utf8"), file).not.toMatch(/useSCOS|AppSDK\//);
         }
       }
     };

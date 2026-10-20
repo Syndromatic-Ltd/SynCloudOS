@@ -265,8 +265,9 @@ export interface WebspringActions {
   dropOnItem(appId: string, targetItemId: string): boolean;
   /** Moves an app from its folder to the top level; an emptied folder is deleted. */
   moveAppOutOfFolder(appId: string, targetIndex: number): boolean;
-  /** Refused while an item is dragged or an app is launching. */
-  openFolder(folderId: string): boolean;
+  /** Refused while an app is launching; during a drag only when the drag passes
+   *  `duringDrag`, which is how a folder springs open under a resting app. */
+  openFolder(folderId: string, options?: { readonly duringDrag?: boolean }): boolean;
   closeFolder(): void;
   /** Starts dragging an app or a folder. */
   beginDrag(itemId: string): void;
@@ -285,7 +286,7 @@ export interface WebspringActions {
 
 export interface WebspringFolderPresentationProps {
   readonly folder: WebspringFolderItem;
-  /** The element that is snapshotted and split. */
+  /** The element that is copied and split. */
   readonly stage: HTMLElement;
   /** The folder's whole cell (icon and label), in viewport coordinates. */
   readonly anchor: DOMRectReadOnly;
@@ -295,18 +296,7 @@ export interface WebspringFolderPresentationProps {
   /** Called once the presentation has closed. */
   onClose(): void;
 }
-export type WebspringFolderPresentationComponent = ComponentType<WebspringFolderPresentationProps> & {
-  /**
-   * Starts the work an opening over `stage` needs as the user reaches for a
-   * folder (the split presentation holds a snapshot of the stage), so the
-   * opening can begin at once. Views call it through useWebspringFolderPreparation.
-   */
-  readonly prepare?: (stage: HTMLElement) => void;
-  /** Keeps that work done ahead of any reach while the view is at rest; returns the function that stops. */
-  readonly keepPrepared?: (stage: HTMLElement) => () => void;
-  /** Loads what the presentation needs, ahead of any folder; called once a view shows folders. */
-  readonly warm?: () => void;
-};
+export type WebspringFolderPresentationComponent = ComponentType<WebspringFolderPresentationProps>;
 
 export interface WebspringViewProps {
   readonly model: WebspringViewModel;

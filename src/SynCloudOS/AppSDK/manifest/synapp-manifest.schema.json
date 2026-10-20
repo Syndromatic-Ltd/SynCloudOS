@@ -50,7 +50,7 @@
       "uniqueItems": true,
       "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" }
     },
-    "localeResources": { "$ref": "#/$defs/localeResources" },
+    "availability": { "enum": ["development"] },
     "appearances": {
       "type": "array",
       "items": { "$ref": "#/$defs/appearance" }
@@ -307,26 +307,6 @@
         "id": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" },
         "required": { "type": "boolean" },
         "minimumVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$" }
-      }
-    },
-    "localeResources": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "base": { "type": "string", "minLength": 1 },
-        "bundles": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/localeBundle" }
-        }
-      }
-    },
-    "localeBundle": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["locale", "path"],
-      "properties": {
-        "locale": { "type": "string", "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*$" },
-        "path": { "type": "string", "minLength": 1 }
       }
     },
     "appearance": {

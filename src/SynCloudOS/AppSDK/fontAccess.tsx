@@ -21,7 +21,7 @@ import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, ty
 import { NSEFontManager, type FontDeclaration } from "../../NSE/Typography";
 import type { TFXFontClient, TFXFontRegistration, TFXPackagedFontResourceLoader } from "../../FX/TextFX/textLayoutTypes";
 import type { TFXFontDescriptor } from "../../FX/TextFX/TFXFontDescriptor";
-import { useSynWare } from "./SynWareContext";
+import { useSCOS } from "./scos/useSCOS"
 
 /** Host composition input, kept private to framework composition. */
 export interface SynWareFontCatalogue {
@@ -76,7 +76,7 @@ function waitFor<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   });
 }
 
-/** Internal composition: app code receives useSynWareFonts(), never the host loader. */
+/** Internal composition: app code receives useFonts(), never the host loader. */
 export function createSynWareFontAccess(catalogue: SynWareFontCatalogue, client: Pick<TFXFontClient, "registerFont" | "registerFontResource">, owner: AbortSignal): SynWareFontAccess {
   return Object.freeze({ manager: catalogue.manager,
     async loadFace(id: string, descriptor: TFXFontDescriptor, caller?: AbortSignal) {
@@ -99,8 +99,8 @@ export function createSynWareFontAccess(catalogue: SynWareFontCatalogue, client:
 }
 
 /** Font metadata and byte-backed registration for the active SynWare mount. */
-export function useSynWareFonts(): SynWareFontAccess {
-  const mount = useSynWare();
+export function useFonts(): SynWareFontAccess {
+  const mount = useSCOS();
   const catalogue = useFontCatalogue();
   const library = catalogue.manager.library;
   useSyncExternalStore(library?.subscribe ?? noSubscription, library?.getSnapshot ?? emptySnapshot, library?.getSnapshot ?? emptySnapshot);

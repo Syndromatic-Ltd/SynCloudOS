@@ -28,7 +28,7 @@ const hostEntries = new Set(["browser", "sdk/animation-host"]);
 const privateHostNames = new Set([
   "SourceListFrameProvider", "SourceListFrameContextValue", "useSourceListFrame",
   "NSEWindowSurfaceRequest", "NSEWindowSurfaceDismissResult", "NSEWindowSurfaceErrorContext",
-  "useOptionalNSEWindowSurfaceBridge", "WindowManager", "WindowController", "NSEWindowController",
+  "useOptionalNSEWindowSurfaceBridge", "WindowManager", "WindowController",
   "nseRegistry",
 ]);
 const defaultRepositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");

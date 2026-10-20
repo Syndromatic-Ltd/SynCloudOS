@@ -19,7 +19,6 @@
  */
 
 import { WebspringLaunchDim } from "../../../WebspringLaunchDim";
-import { useWebspringFolderPreparation } from "../../../useWebspringFolderPreparation";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode, type TransitionEvent } from "react";
 import { NSELayoutView, useNSEAnimationEnvironment, useNSEPresentation, type NSELayoutTransitionTiming } from "../../../../NSE/Animation";
 import { Badge, LoadingSpinner } from "../../../../NSE/NSE";
@@ -31,7 +30,8 @@ import { WebspringWidgetShelf } from "../../../WebspringWidgetShelf";
 import { webspringSurfaceStyle } from "../../../webspringSurface";
 import { WebspringDragProxy, useWebspringDragProxyPosition } from "../../../WebspringDragProxy";
 import { WebspringFolderTile } from "../../../WebspringFolderTile";
-import { captureWebspringDragReorderSlots, getWebspringDragReorderTargetFromPoint, type WebspringDragReorderSlots } from "../../../webspringDragReorder";
+import { captureWebspringDragArtworkRects, type WebspringDragReorderSlots } from "../../../webspringDragReorder";
+import { createWebspringDragArbiter, type WebspringDragArbiter, type WebspringDragEntry, type WebspringDragHandlers, type WebspringDragRect, type WebspringDragView } from "../../../webspringDragArbiter";
 import { createWebspringBoardProjection } from "../../../webspringLayout";
 import type { WebspringApp, WebspringFolderItem, WebspringItem, WebspringViewModel, WebspringViewProps } from "../../../webspringTypes";
 import { resolveWebspringIconPresentation, type WebspringIconState, type WebspringRadialExit } from "../../../Webspring.transitions";
@@ -40,10 +40,10 @@ import "../../../WebspringPresentation.css";
 import "./WebspringBoardView.css";
 
 const SWIPE_THRESHOLD = 44;
-/** How long a dragged app rests over an entry's centre before they merge. */
-const MERGE_HOVER_MS = 350;
 const TOP_LEVEL_SELECTOR = ".webspring-board-page [data-webspring-item-id]";
 const FOLDER_PANEL_SELECTOR = "[data-webspring-folder-panel]";
+const ARTWORK_SELECTOR = ".webspring-board-icon-well";
+const FOLDER_MEMBER_SELECTOR = `${FOLDER_PANEL_SELECTOR} [data-webspring-item-id]`;
 const REORDER_KEYS = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
 export interface WebspringBoardConfiguration { readonly pageSize?: number }
 
@@ -181,16 +181,13 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
   </button></NSELayoutView>;
 }
 
-function BoardFolderIcon({ folder, onOpen, onPrepare, ...entry }: BoardEntryProps & {
+function BoardFolderIcon({ folder, onOpen, ...entry }: BoardEntryProps & {
   folder: WebspringFolderItem;
   onOpen(folder: WebspringFolderItem, cell: HTMLElement): void;
-  /** Readies the opening as the folder is about to be opened. */
-  onPrepare(): void;
 }) {
   const { model, exit, reorderMotion, index } = entry;
   const interaction = useBoardEntryInteraction(folder.id, folder.title, false, entry);
   const { editing, dragging } = interaction;
-  const prepare = editing ? undefined : onPrepare;
   const open = model.folders.openFolderId === folder.id;
 
   return <NSELayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
@@ -201,12 +198,7 @@ function BoardFolderIcon({ folder, onOpen, onPrepare, ...entry }: BoardEntryProp
     aria-pressed={editing ? dragging : undefined}
     aria-haspopup="dialog"
     aria-expanded={open}
-    onPointerEnter={prepare}
-    onFocus={prepare}
-    onPointerDown={(event) => {
-      prepare?.();
-      interaction.onPointerDown(event);
-    }}
+    onPointerDown={interaction.onPointerDown}
     onPointerMove={interaction.onPointerMove}
     onPointerUp={interaction.onPointerEnd}
     onPointerCancel={interaction.onPointerEnd}
@@ -224,22 +216,21 @@ function BoardFolderIcon({ folder, onOpen, onPrepare, ...entry }: BoardEntryProp
   </button></NSELayoutView>;
 }
 
-/** The top-level entry whose centre (the inner half of its slot) holds the point. */
-function getMergeTarget(
-  slots: WebspringDragReorderSlots | undefined,
-  items: readonly WebspringItem[],
-  point: { x: number; y: number },
-  draggingId: string,
-) {
-  for (const [index, rect] of slots ?? []) {
-    const item = items[index];
-    if (!item || item.id === draggingId) continue;
-    const insetX = rect.width / 4;
-    const insetY = rect.height / 4;
-    if (point.x >= rect.left + insetX && point.x <= rect.left + rect.width - insetX &&
-      point.y >= rect.top + insetY && point.y <= rect.top + rect.height - insetY) return item.id;
-  }
-  return null;
+/** The entries a drag arbitrates over: each visible icon's artwork rect without
+ *  its label, cached by slot while the layout springs between moves. */
+function readDragEntries(
+  root: ParentNode,
+  selector: string,
+  artworkRects: WebspringDragReorderSlots | undefined,
+  kindOf: (id: string) => "app" | "folder"
+): WebspringDragEntry[] {
+  return Array.from(root.querySelectorAll<HTMLElement>(selector), (element) => {
+    const id = element.dataset.webspringItemId ?? "";
+    const index = Number(element.dataset.orderIndex);
+    const artwork = artworkRects?.get(index) ??
+      (element.querySelector<HTMLElement>(ARTWORK_SELECTOR) ?? element).getBoundingClientRect();
+    return { id, index, kind: kindOf(id), artwork };
+  });
 }
 
 function WebspringBoard({ model, actions, applicationOutlet, folderPresentation: FolderPresentation, configuration }: WebspringViewProps & { configuration: WebspringBoardConfiguration }) {
@@ -261,10 +252,16 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   const suppressNextClick = useRef(false);
   const activeDragId = useRef<string | null>(model.layout.draggingItemId);
   const lastPageSwitchAt = useRef(0);
-  const slotsRef = useRef<WebspringDragReorderSlots | undefined>(undefined);
-  /** The entry a dragged app rests on; `armed` once it has rested long enough to merge. */
-  const mergeHover = useRef<{ id: string; timer: number; view: Window; armed: boolean } | null>(null);
-  const { point, setProxyElement, recordPoint, showProxy, hideProxy } = useWebspringDragProxyPosition();
+  /** Artwork rects by slot, measured at the grab and held while icons spring between slots. */
+  const boardArtwork = useRef<WebspringDragReorderSlots | undefined>(undefined);
+  const panelArtwork = useRef<WebspringDragReorderSlots | undefined>(undefined);
+  /** The one arbiter timing this drag's rests; null between drags. */
+  const dragArbiter = useRef<WebspringDragArbiter | null>(null);
+  /** The open folder's cell on the Board, linking its icon to its panel while a drag is inside. */
+  const folderOrigin = useRef<WebspringDragRect | null>(null);
+  /** The current render's drag handlers, read by the arbiter's rests. */
+  const dragHandlers = useRef<WebspringDragHandlers | null>(null);
+  const { point, beginGrab, setProxyElement, recordPoint, showProxy, hideProxy } = useWebspringDragProxyPosition();
   const draggingId = model.layout.draggingItemId;
   const draggingItem = model.items.find((item) => item.id === draggingId) ?? null;
   const draggingFolder = draggingItem?.kind === "folder" ? draggingItem : null;
@@ -277,9 +274,6 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   }, [draggingId, setProxyElement]);
   const openFolder = model.items.find((item): item is WebspringFolderItem => item.kind === "folder" && item.id === model.folders.openFolderId) ?? null;
   const [folderAnchor, setFolderAnchor] = useState<DOMRectReadOnly | null>(null);
-  const prepareFolder = useWebspringFolderPreparation(FolderPresentation, model.items.some((item) => item.kind === "folder") ? stageElement : null, {
-    atRest: model.launchPhase === "idle" && model.entrancePhase === "ready" && !model.layout.editing && !model.layout.draggingItemId && !model.folders.openFolderId,
-  });
   const activePage = Math.min(page, board.pages.length - 1);
   const launchDim = boardMotion.launchBackdropDim;
   const [iconExits, setIconExits] = useState<WebspringBoardLaunchExits | null>(null);
@@ -289,41 +283,36 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   const previousOpenFolderId = useRef(model.folders.openFolderId);
   useEffect(() => setPage((value) => Math.min(value, board.pages.length - 1)), [board.pages.length]);
   draggingItemIdRef.current = model.layout.draggingItemId;
-  // Read through a ref so a new actions object never counts as a page change.
-  const setDropTargetRef = useRef(actions.setDropTarget);
-  setDropTargetRef.current = actions.setDropTarget;
-  /** Forgets the hovered merge candidate and withdraws the target it armed. */
-  const disarmMerge = useCallback(() => {
-    const hover = mergeHover.current;
-    if (!hover) return;
-    hover.view.clearTimeout(hover.timer);
-    mergeHover.current = null;
-    if (hover.armed) setDropTargetRef.current(null);
-  }, []);
   useEffect(() => () => {
-    disarmMerge();
+    dragArbiter.current?.clear();
     if (draggingItemIdRef.current) actions.finishDrag(false);
     hideProxy();
-  }, [actions, disarmMerge, hideProxy]);
+  }, [actions, hideProxy]);
   useEffect(() => {
     if (model.layout.draggingItemId) return;
     activeDragId.current = null;
-    slotsRef.current = undefined;
-    disarmMerge();
+    boardArtwork.current = undefined;
+    panelArtwork.current = undefined;
+    folderOrigin.current = null;
+    dragArbiter.current?.clear();
+    dragArbiter.current = null;
     const pointerId = pointerStart.current?.pointerId;
     pointerStart.current = null;
     hideProxy();
     const root = boardElement.current;
     if (pointerId !== undefined && root?.hasPointerCapture?.(pointerId)) root.releasePointerCapture(pointerId);
-  }, [model.layout.draggingItemId, disarmMerge, hideProxy]);
-  // A drag that leaves a folder, or turns the page, measures the top level
-  // afresh; a merge armed on the previous page no longer applies.
+  }, [model.layout.draggingItemId, hideProxy]);
+  // A drag that leaves a folder, or turns the page, measures the container
+  // afresh; rests started on the previous one no longer apply.
   useEffect(() => {
-    disarmMerge();
-    if (activeDragId.current && boardElement.current) {
-      slotsRef.current = captureWebspringDragReorderSlots(TOP_LEVEL_SELECTOR, boardElement.current);
-    }
-  }, [activePage, model.folders.openFolderId, disarmMerge]);
+    dragArbiter.current?.clear();
+    if (!activeDragId.current || !boardElement.current) return;
+    boardArtwork.current = captureWebspringDragArtworkRects(TOP_LEVEL_SELECTOR, ARTWORK_SELECTOR, boardElement.current);
+    panelArtwork.current = model.folders.openFolderId
+      ? captureWebspringDragArtworkRects(FOLDER_MEMBER_SELECTOR, ARTWORK_SELECTOR, boardElement.current)
+      : undefined;
+    if (!model.folders.openFolderId) folderOrigin.current = null;
+  }, [activePage, model.folders.openFolderId]);
   useEffect(() => {
     if (model.launchPhase === "returning" && (model.presentationTraits.reducedMotion || model.items.length === 0)) {
       actions.completeReturnTrack("material");
@@ -378,91 +367,95 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
     setAnnouncement(`${title} moved to position ${index + 1}.`);
   }, [feedback]);
 
+  // The current render's commands for the drag's rests: the arbiter holds the
+  // timers while these read the latest model and actions.
+  dragHandlers.current = {
+    reorder(index) {
+      const dragId = activeDragId.current;
+      if (!dragId || !actions.moveItem(dragId, index, false)) return;
+      const member = openFolder?.apps.find((app) => app.id === dragId);
+      const item = model.items.find((candidate) => candidate.id === dragId);
+      const title = member?.title ?? (item ? item.kind === "app" ? item.app.title : item.title : null);
+      if (title) announceMove(title, index);
+    },
+    merge(targetId) {
+      actions.setDropTarget(targetId);
+    },
+    springOpen(folderId) {
+      const index = model.items.findIndex((item) => item.id === folderId);
+      folderOrigin.current = index >= 0 ? boardArtwork.current?.get(index) ?? null : null;
+      actions.openFolder(folderId, { duringDrag: true });
+    },
+    leavePanel() {
+      const dragId = activeDragId.current;
+      // A member dragged past the edge returns to the top level where it left the folder.
+      if (dragId && openFolder?.apps.some((app) => app.id === dragId) && model.folders.editable) {
+        if (actions.moveAppOutOfFolder(dragId, topLevelIds.indexOf(openFolder.id) + 1)) {
+          const app = openFolder.apps.find((candidate) => candidate.id === dragId);
+          if (app) setAnnouncement(`${app.title} moved out of ${openFolder.title}.`);
+        }
+      }
+      actions.closeFolder();
+    }
+  };
+
+  /** Where the icon's centre is: the open folder's panel, or the Board's page. */
+  function readDragView(root: HTMLElement): WebspringDragView {
+    if (openFolder) {
+      if (!panelArtwork.current?.size) {
+        panelArtwork.current = captureWebspringDragArtworkRects(FOLDER_MEMBER_SELECTOR, ARTWORK_SELECTOR, root);
+      }
+      return {
+        container: "folder",
+        folderId: openFolder.id,
+        panel: root.querySelector<HTMLElement>(FOLDER_PANEL_SELECTOR)?.getBoundingClientRect() ?? null,
+        origin: folderOrigin.current,
+        entries: readDragEntries(root, FOLDER_MEMBER_SELECTOR, panelArtwork.current, () => "app")
+      };
+    }
+    const folderIds = new Set(model.items.filter((item) => item.kind === "folder").map((item) => item.id));
+    return {
+      container: "board",
+      entries: readDragEntries(root, TOP_LEVEL_SELECTOR, boardArtwork.current, (id) => folderIds.has(id) ? "folder" : "app")
+    };
+  }
+
   function pointerDown(event: PointerEvent<HTMLElement>) {
     if (event.button > 0 || event.isPrimary === false || activeDragId.current) return;
     suppressNextClick.current = false;
     pointerStart.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
-    slotsRef.current = captureWebspringDragReorderSlots("[data-webspring-item-id]", event.currentTarget);
+    // The icon keeps its grab offset, so its centre follows the pointer instead of jumping to it.
+    const entry = (event.target as Element | null)?.closest<HTMLElement>("[data-webspring-item-id]") ?? null;
+    beginGrab(
+      { x: event.clientX, y: event.clientY },
+      entry?.querySelector<HTMLElement>(ARTWORK_SELECTOR)?.getBoundingClientRect() ?? null
+    );
     recordPoint({ x: event.clientX, y: event.clientY }, Boolean(activeDragId.current));
-  }
-
-  /** Reorders inside the open folder; leaving its panel takes the app out to the top level. */
-  function dragInFolder(root: HTMLElement, dragId: string, folder: WebspringFolderItem, at: { x: number; y: number }) {
-    const panel = root.querySelector<HTMLElement>(FOLDER_PANEL_SELECTOR)?.getBoundingClientRect();
-    if (!panel || (at.x >= panel.left && at.x <= panel.right && at.y >= panel.top && at.y <= panel.bottom)) {
-      const target = getWebspringDragReorderTargetFromPoint(`${FOLDER_PANEL_SELECTOR} [data-webspring-item-id]`, at, dragId, root, slotsRef.current);
-      if (target && actions.moveItem(dragId, target.targetIndex, false)) {
-        const app = folder.apps.find((candidate) => candidate.id === dragId);
-        if (app) announceMove(app.title, target.targetIndex);
-      }
-      return;
-    }
-    if (!model.folders.editable) return;
-    const folderIndex = topLevelIds.indexOf(folder.id);
-    actions.closeFolder();
-    if (actions.moveAppOutOfFolder(dragId, folderIndex + 1)) {
-      const app = folder.apps.find((candidate) => candidate.id === dragId);
-      if (app) setAnnouncement(`${app.title} moved out of ${folder.title}.`);
-    }
-    slotsRef.current = undefined;
-  }
-
-  /** Over an entry's centre a dragged app waits to merge; elsewhere it reorders. */
-  function dragAtTopLevel(root: HTMLElement, dragId: string, at: { x: number; y: number }) {
-    if (model.folders.editable && !draggingFolder) {
-      const mergeId = getMergeTarget(slotsRef.current, model.items, at, dragId);
-      // A new candidate, or none, starts the rest over.
-      if (mergeHover.current?.id !== mergeId) disarmMerge();
-      if (mergeId) {
-        const view = root.ownerDocument.defaultView;
-        if (view && !mergeHover.current) {
-          const hover = { id: mergeId, view, armed: false, timer: 0 };
-          hover.timer = view.setTimeout(() => {
-            if (mergeHover.current !== hover) return;
-            hover.armed = true;
-            actions.setDropTarget(mergeId);
-          }, MERGE_HOVER_MS);
-          mergeHover.current = hover;
-        }
-        return;
-      }
-    }
-    const target = getWebspringDragReorderTargetFromPoint(TOP_LEVEL_SELECTOR, at, dragId, root, slotsRef.current);
-    if (target && actions.moveItem(dragId, target.targetIndex, false)) {
-      const item = model.items.find((candidate) => candidate.id === dragId);
-      const title = item ? item.kind === "app" ? item.app.title : item.title : null;
-      if (title) announceMove(title, target.targetIndex);
-    }
   }
 
   function pointerMove(event: PointerEvent<HTMLElement>) {
     if (event.pointerId !== pointerStart.current?.pointerId) return;
-    recordPoint({ x: event.clientX, y: event.clientY }, Boolean(activeDragId.current));
     const dragId = activeDragId.current;
+    const hitPoint = recordPoint({ x: event.clientX, y: event.clientY }, Boolean(dragId));
     if (!dragId) return;
     showProxy();
-    const at = { x: event.clientX, y: event.clientY };
-    const folder = openFolder?.apps.some((app) => app.id === dragId) ? openFolder : null;
-    if (folder) {
-      dragInFolder(event.currentTarget, dragId, folder, at);
-      return;
-    }
-    const bounds = event.currentTarget.getBoundingClientRect();
-    if (event.timeStamp - lastPageSwitchAt.current > 450) {
+    const root = event.currentTarget;
+    const bounds = root.getBoundingClientRect();
+    if (!openFolder && event.timeStamp - lastPageSwitchAt.current > 450) {
       if (event.clientX >= bounds.right - 48 && activePage < board.pages.length - 1) {
-        disarmMerge();
+        dragArbiter.current?.clear();
         setPage((value) => value + 1);
         lastPageSwitchAt.current = event.timeStamp;
         return;
       }
       if (event.clientX <= bounds.left + 48 && activePage > 0) {
-        disarmMerge();
+        dragArbiter.current?.clear();
         setPage((value) => value - 1);
         lastPageSwitchAt.current = event.timeStamp;
         return;
       }
     }
-    dragAtTopLevel(event.currentTarget, dragId, at);
+    dragArbiter.current?.update(hitPoint, readDragView(root));
   }
 
   function pointerEnd(event: PointerEvent<HTMLElement>, commit: boolean) {
@@ -476,20 +469,29 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
         suppressNextClick.current = true;
       }
     }
-    // Only the entry under the pointer, once armed, takes the drop.
-    const mergeId = mergeHover.current?.armed ? mergeHover.current.id : null;
-    disarmMerge();
     const dragId = activeDragId.current;
     if (dragId) {
-      const merged = commit && mergeId !== null && actions.dropOnItem(dragId, mergeId);
+      const result = dragArbiter.current?.end() ?? { mergeTargetId: null, folderId: null, dropIndex: null };
+      dragArbiter.current = null;
+      const dropFolder = result.folderId
+        ? model.items.find((item): item is WebspringFolderItem => item.kind === "folder" && item.id === result.folderId) ?? null
+        : null;
+      const member = dropFolder?.apps.some((app) => app.id === dragId) ?? false;
+      let joined = false;
+      // A release inside a folder joins it, unless the app was already one of its members.
+      if (commit && result.mergeTargetId) joined = actions.dropOnItem(dragId, result.mergeTargetId);
+      else if (commit && dropFolder && !member) joined = actions.dropOnItem(dragId, dropFolder.id);
+      if (commit && result.dropIndex !== null && (joined || member)) actions.moveItem(dragId, result.dropIndex, false);
       actions.finishDrag(commit);
-      if (merged) feedback?.trigger("success", { intensity: .45 });
+      if (joined) feedback?.trigger("success", { intensity: .45 });
       else if (commit) feedback?.trigger("light", { intensity: .35 });
       activeDragId.current = null;
       suppressNextClick.current = true;
     }
     pointerStart.current = null;
-    slotsRef.current = undefined;
+    boardArtwork.current = undefined;
+    panelArtwork.current = undefined;
+    folderOrigin.current = null;
     hideProxy();
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   }
@@ -513,10 +515,26 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   const beginPointerDrag = useCallback((itemId: string, pointerId: number) => {
     boardElement.current?.setPointerCapture?.(pointerId);
     activeDragId.current = itemId;
+    const root = boardElement.current;
+    boardArtwork.current = root ? captureWebspringDragArtworkRects(TOP_LEVEL_SELECTOR, ARTWORK_SELECTOR, root) : undefined;
+    panelArtwork.current = root ? captureWebspringDragArtworkRects(FOLDER_MEMBER_SELECTOR, ARTWORK_SELECTOR, root) : undefined;
+    const folderIndex = openFolder ? model.items.findIndex((item) => item.id === openFolder.id) : -1;
+    folderOrigin.current = folderIndex >= 0 ? boardArtwork.current?.get(folderIndex) ?? null : null;
+    const kind = model.items.find((item) => item.id === itemId)?.kind ?? "app";
+    dragArbiter.current = createWebspringDragArbiter({
+      itemId,
+      kind,
+      // Folders never merge, and a view with fixed folders has nothing to merge into.
+      canMerge: model.folders.editable && kind === "app",
+      reorder: (index) => dragHandlers.current?.reorder(index),
+      merge: (targetId) => dragHandlers.current?.merge(targetId),
+      springOpen: (folderId) => dragHandlers.current?.springOpen(folderId),
+      leavePanel: (folderId) => dragHandlers.current?.leavePanel(folderId)
+    });
     showProxy();
     suppressNextClick.current = true;
     feedback?.trigger("selection", { intensity: .5 });
-  }, [feedback, showProxy]);
+  }, [feedback, model.folders.editable, model.items, showProxy]);
 
   const openFolderFromIcon = useCallback((folder: WebspringFolderItem, cell: HTMLElement) => {
     if (suppressNextClick.current) {
@@ -542,7 +560,7 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
 
   const renderEntry = (item: WebspringItem, globalIndex: number) => item.kind === "app"
     ? <BoardIcon key={item.id} app={item.app} opening={openingAppId === item.id} {...entryProps(globalIndex, topLevelIds, iconExits?.get(item.id))} />
-    : <BoardFolderIcon key={item.id} folder={item} onOpen={openFolderFromIcon} onPrepare={prepareFolder} {...entryProps(globalIndex, topLevelIds, iconExits?.get(item.id))} />;
+    : <BoardFolderIcon key={item.id} folder={item} onOpen={openFolderFromIcon} {...entryProps(globalIndex, topLevelIds, iconExits?.get(item.id))} />;
 
   const renderFolderApp = (app: WebspringApp, index: number) => <BoardIcon
     key={app.id}

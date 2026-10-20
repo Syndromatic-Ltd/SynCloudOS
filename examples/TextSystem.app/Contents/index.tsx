@@ -18,13 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from "react";
-import { createSynWare, useSynWare, type AppDocumentLocation } from "@syndromatic/syncloudos/sdk";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useSCOS, type AppDocumentLocation } from "@syndromatic/syncloudos";
 import type { NSETextInputClient } from "@syndromatic/syncloudos/nse/text";
 import { createTextSystemExample, type TextSystemExample } from "./example";
 import { TextSystemExampleView } from "./view";
 import type { ExampleViewId } from "./model";
-import manifest from "./Info";
 export { textSystemDocumentType } from "./model";
 export { createTextSystemExample } from "./example";
 export interface TextSystemExampleAppOptions {
@@ -36,10 +35,19 @@ export interface TextSystemExampleAppOptions {
   readonly openLocation?: AppDocumentLocation;
   readonly nativeDestination?: AppDocumentLocation;
 }
-/** A runnable SynWare definition whose model/codec stay private to this example. */
+const ExampleOptions = createContext<TextSystemExampleAppOptions | null>(null);
+
+/** The host injects licensed font bytes without putting host authority in app code. */
 export function createTextSystemExampleApp(options: TextSystemExampleAppOptions) {
-  function Root() {
-    const app = useSynWare(), documents = app.documents.workspaceDocuments;
+  return function ConfiguredTextSystemApp() {
+    return <ExampleOptions value={options}><TextSystemApp /></ExampleOptions>;
+  };
+}
+
+export default function TextSystemApp() {
+    const options = useContext(ExampleOptions);
+    if (!options) throw new Error("The Text System host must provide its licensed font loader through createTextSystemExampleApp.");
+    const app = useSCOS(), documents = app.documents.workspaceDocuments;
     const [example, setExample] = useState<TextSystemExample | null>(null), [error, setError] = useState<string | null>(null);
     useEffect(() => {
       const controller = new AbortController(), signal = AbortSignal.any([controller.signal, app.signal]);
@@ -54,6 +62,4 @@ export function createTextSystemExampleApp(options: TextSystemExampleAppOptions)
       return () => { controller.abort(); current?.dispose(); };
     }, [documents, app.signal]);
     return example ? <TextSystemExampleView example={example} onInputClient={options.onInputClient} /> : <main className="text-system-example"><h1>Text System</h1><p role="status">{error ?? "Loading the example font and canonical document…"}</p></main>;
-  }
-  return createSynWare({ manifest, root: Root });
 }

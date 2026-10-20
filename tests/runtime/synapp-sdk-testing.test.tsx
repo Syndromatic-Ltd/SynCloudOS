@@ -22,7 +22,7 @@
 
 import React from "react";
 import { expect, it, vi } from "vitest";
-import { defineSynWareServiceToken, createSynWare, useSynWare, useSynWareCommands } from "../../src/SynCloudOS/AppSDK";
+import { defineSynWareServiceToken, createSynWare, useSCOS, useCommands } from "../../src/SynCloudOS/AppSDK";
 import {
   createDeniedFakeServiceClient,
   createDeterministicScheduler,
@@ -39,7 +39,7 @@ const ExampleApp = createSynWare({
     routes: [{ path: "/testing-example", primary: true }],
   },
   root() {
-    useSynWareCommands([{ id: "com.syndromatic.testing-example.refresh", title: "Refresh", execute: () => undefined }]);
+    useCommands([{ id: "com.syndromatic.testing-example.refresh", title: "Refresh", execute: () => undefined }]);
     return <button type="button">New document</button>;
   },
 });
@@ -54,7 +54,7 @@ const MountedControlApp = createSynWare({
     services: [{ id: "webspring.runtime", required: false }],
   },
   root() {
-    const { services, pasteboards, drag, documents } = useSynWare();
+    const { services, pasteboards, drag, documents } = useSCOS();
     const [result, setResult] = React.useState("idle");
     const run = (label: string, action: () => void | Promise<void>) => {
       void Promise.resolve().then(action).then(

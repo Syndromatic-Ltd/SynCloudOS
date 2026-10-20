@@ -6,6 +6,9 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@syndromatic/syncloudos": [
+        "src/SynCloudOS/AppSDK/rootPackageEntry.ts"
+      ],
       "@syndromatic/syncloudos/sdk": [
         "src/SynCloudOS/AppSDK/sdkPackageEntry.ts"
       ],

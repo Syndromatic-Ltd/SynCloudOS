@@ -460,7 +460,7 @@
         "app-sdk": [
           "src/SynCloudOS/AppSDK/index.ts",
           "src/SynCloudOS/AppAuthoring/index.ts",
-          "src/SynCloudOS/AppSDK/useSynWareLocalisedStrings.ts"
+          "src/SynCloudOS/AppSDK/useStrings.ts"
         ],
         "react": [
           "src/SynCloudOSReact/index.ts"

@@ -117,7 +117,7 @@ export class WebspringController {
       setDropTarget: (itemId) => this.runtime.webspring.setDropTarget(itemId),
       dropOnItem: (appId, targetItemId) => this.runtime.webspring.dropOnItem(appId, targetItemId),
       moveAppOutOfFolder: (appId, targetIndex) => this.runtime.webspring.moveAppOutOfFolder(appId, targetIndex),
-      openFolder: (folderId) => this.runtime.webspring.openFolder(folderId),
+      openFolder: (folderId, options) => this.runtime.webspring.openFolder(folderId, options),
       closeFolder: () => this.runtime.webspring.closeFolder(),
       beginDrag: (itemId) => this.runtime.webspring.beginDrag(itemId),
       finishDrag: (commit = true) => this.runtime.webspring.finishDrag(commit),

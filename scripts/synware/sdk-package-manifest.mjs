@@ -38,6 +38,10 @@ export function assertTwelveFxPackageExports(exports) {
   assert.deepEqual(exports["./fx/video/webm"],
     { types: "./fx/video/webm.d.ts", import: "./fx/video/webm.js" }, "Invalid WebM extension targets.");
   for (const key of Object.keys(exports)) {
+    if (key === ".") {
+      assert.deepEqual(exports["."], { types: "./index.d.ts", import: "./index.js" }, "The root export must be the SynCloudOS package entry.");
+      continue;
+    }
     assert(key.startsWith("./") && !key.includes("*") && !/\/(?:src|types|internal|private)(?:\/|$)/u.test(key), `Private SDK export is forbidden: ${key}`);
     assertSdkRelativePath(key.slice(2));
   }
@@ -150,7 +154,7 @@ export function assertReviewedPackageFiles(files) {
       continue;
     }
     if (["LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "sdk/LICENSE", "sdk/NOTICE", "sdk/package.json", "licenses/dependencies.json"].includes(file)) continue;
-    if (file === "bundle-paths.mjs" || /^tooling\/(?:manifest\.schema|error-catalogue|build-receipt)\.json$/u.test(file)) continue;
+    if (["index.js","index.d.ts","app-module-source.mjs","project-derivation.mjs","manifest-source.mjs","manifest-validator.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","bundle-paths.mjs"].includes(file) || /^tooling\/(?:manifest\.schema|error-catalogue|build-receipt)\.json$/u.test(file)) continue;
     if (/^docs\/framework\/(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.(?:md|json|png|webp|svg|jpg|jpeg|gif)$/u.test(file)) continue;
     if (/^licenses\/(?:dependencies\/)?[A-Za-z0-9._-]+\/(?:(?:MIT|APACHE|BSD)[.-])?(?:LICENSE|LICENCE|COPYING|NOTICE)(?:[.-][A-Za-z0-9._-]+)?$/iu.test(file)) continue;
     if (/^licenses\/[A-Za-z0-9._-]+\.(?:txt|md)$/u.test(file)) continue;

@@ -28,20 +28,20 @@ import {
   createSynWare,
   defineSynWareRoutes,
   defineSynWareServiceToken,
-  useSynWare,
-  useSynWareRouteState,
-  useSynWareAppearance,
-  useSynWareColourPanel,
-  useSynWareCommands,
-  useSynWareDocument,
-  useSynWareDrag,
-  useSynWareLifecycle,
-  useSynWarePersistence,
-  useSynWarePasteboard,
-  useSynWareService,
-  useSynWareAudio,
-  useSynWareTrustedClient,
-  useSynWareWindow,
+  useSCOS,
+  useRouteState,
+  useAppearance,
+  useColourPanel,
+  useCommands,
+  useDocument,
+  useDrag,
+  useLifecycle,
+  usePersistence,
+  usePasteboard,
+  useService,
+  useAudio,
+  useTrustedClient,
+  useWindow,
 } from "../../src/SynCloudOS/AppSDK";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeMount";
@@ -84,11 +84,11 @@ async function renderNamedRoute() {
     root: () => null, routes: queryGraph,
   }));
   expect(await runtime.routes.openRoute("/example?view=folders").result).toMatchObject({ status: "completed" });
-  let context!: ReturnType<typeof useSynWare>;
-  let query!: ReturnType<typeof useSynWareRouteState<typeof queryGraph.routes, "example">>;
+  let context!: ReturnType<typeof useSCOS>;
+  let query!: ReturnType<typeof useRouteState<typeof queryGraph.routes, "example">>;
   function Probe() {
-    context = useSynWare();
-    query = useSynWareRouteState(queryGraph, "example");
+    context = useSCOS();
+    query = useRouteState(queryGraph, "example");
     const state = React.useSyncExternalStore(query.subscribe, query.getQuery, query.getQuery);
     return <output data-testid="query-view">{state.view}</output>;
   }
@@ -175,7 +175,7 @@ function renderWithSynWare(
 it("removes app commands when the declaring component unmounts", async () => {
   const runtime = createTestRuntime();
   const view = renderWithSynWare(runtime, () => {
-    useSynWareCommands([{ id: "example.refresh", title: "Refresh", execute: () => undefined }]);
+    useCommands([{ id: "example.refresh", title: "Refresh", execute: () => undefined }]);
     return null;
   });
 
@@ -194,7 +194,7 @@ it("keeps an inline declaration structurally stable while using its current hand
   const first = vi.fn();
   const second = vi.fn();
   function Probe({ handler }: { readonly handler: () => void }) {
-    useSynWareCommands([{ id: "example.refresh", title: "Refresh", execute: () => handler() }]);
+    useCommands([{ id: "example.refresh", title: "Refresh", execute: () => handler() }]);
     return null;
   }
   const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "example", version: "1.0.0", title: "Example" });
@@ -232,7 +232,7 @@ it("keeps one command registration through the StrictMode effect probe", () => {
   const mounted = mountTestSynWareRuntime(runtime, app.id);
   const context = createSynWareContextValue(mounted.runtime);
   function Probe() {
-    useSynWareCommands([{ id: "example.refresh", title: "Refresh", execute: () => undefined }]);
+    useCommands([{ id: "example.refresh", title: "Refresh", execute: () => undefined }]);
     return null;
   }
 
@@ -253,25 +253,25 @@ it("keeps one command registration through the StrictMode effect probe", () => {
 it("returns only app-scoped clients and immutable presentation snapshots", () => {
   const runtime = createTestRuntime();
   let observed!: {
-    context: ReturnType<typeof useSynWare>;
-    commands: ReturnType<typeof useSynWareCommands>;
-    documents: ReturnType<typeof useSynWareDocument>;
-    lifecycle: ReturnType<typeof useSynWareLifecycle>;
-    window: ReturnType<typeof useSynWareWindow>;
-    service: ReturnType<typeof useSynWareService>;
+    context: ReturnType<typeof useSCOS>;
+    commands: ReturnType<typeof useCommands>;
+    documents: ReturnType<typeof useDocument>;
+    lifecycle: ReturnType<typeof useLifecycle>;
+    window: ReturnType<typeof useWindow>;
+    service: ReturnType<typeof useService>;
   };
   const view = renderWithSynWare(runtime, () => {
-    const context = useSynWare();
-    const commands = useSynWareCommands([]);
-    const lifecycle = useSynWareLifecycle();
-    const documents = useSynWareDocument();
-    const window = useSynWareWindow();
-    const service = useSynWareService(missingToken);
-    const pasteboards = useSynWarePasteboard();
-    const drag = useSynWareDrag();
-    const colourPanel = useSynWareColourPanel();
-    const audio = useSynWareAudio();
-    const appearance = useSynWareAppearance();
+    const context = useSCOS();
+    const commands = useCommands([]);
+    const lifecycle = useLifecycle();
+    const documents = useDocument();
+    const window = useWindow();
+    const service = useService(missingToken);
+    const pasteboards = usePasteboard();
+    const drag = useDrag();
+    const colourPanel = useColourPanel();
+    const audio = useAudio();
+    const appearance = useAppearance();
     observed = { context, commands, documents, lifecycle, window, service };
     return <output>{[
       typeof lifecycle.closeSelf,
@@ -290,7 +290,7 @@ it("returns only app-scoped clients and immutable presentation snapshots", () =>
   });
 
   expect(view.getByText("function:function:open:false:example:function:false:function:function:function:function:light")).toBeTruthy();
-  expect(observed.context).toBe(view.context);
+  expect(observed.context.app).toEqual(view.context.appInfo);
   expect(observed.context).not.toHaveProperty("runtime");
   expect(observed.commands).toBe(view.context.commands);
   expect(observed.documents).toBe(view.context.documents);
@@ -303,7 +303,7 @@ it("returns only app-scoped clients and immutable presentation snapshots", () =>
 it("persists an app preference through the focused persistence hook", () => {
   const runtime = createTestRuntime();
   const view = renderWithSynWare(runtime, () => {
-    const persistence = useSynWarePersistence();
+    const persistence = usePersistence();
     return <button onClick={() => persistence.setPreference("hook-value", "present")}>Save preference</button>;
   });
 
@@ -395,9 +395,9 @@ it("isolates a retained named query from foreign state and revokes mutation on u
 
 it("exposes the stable trusted-client collection while ordinary apps remain fail-closed", () => {
   const runtime = createTestRuntime();
-  let trusted: ReturnType<typeof useSynWareTrustedClient> | null = null;
+  let trusted: ReturnType<typeof useTrustedClient> | null = null;
   const view = renderWithSynWare(runtime, () => {
-    trusted = useSynWareTrustedClient();
+    trusted = useTrustedClient();
     return <output>{typeof trusted.diagnostics}</output>;
   });
 

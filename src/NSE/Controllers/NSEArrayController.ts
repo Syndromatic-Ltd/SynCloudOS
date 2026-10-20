@@ -155,7 +155,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
   #changedDuringEdit = false;
 
   constructor(options: ArrayControllerOptions<T, TId>) {
-    super({ kind: "NSEArrayController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal });
+    super({ kind: "NSEArrayController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal, owner: options.owner });
     this.#getId = options.getId;
     this.#equals = options.equals ?? defaultEquals;
     this.#clone = options.clone ?? structuredClone;

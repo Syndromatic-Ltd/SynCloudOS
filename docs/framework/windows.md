@@ -43,13 +43,13 @@ A panel can become key, which makes it the target of keyboard commands, without 
 
 ## Observe your windows
 
-`useSynWareWindow()` returns the window client and a live snapshot of the windows your application owns.
+`useWindow()` returns the window client and a live snapshot of the windows your application owns.
 
 ```tsx
-import { useSynWareWindow } from "@syndromatic/syncloudos/sdk";
+import { useWindow } from "@syndromatic/syncloudos/sdk";
 
 export function WindowStatus() {
-  const { client, snapshot } = useSynWareWindow();
+  const { client, snapshot } = useWindow();
   return (
     <p>
       {snapshot.owned.length} window(s) open. Key window:{" "}
@@ -65,10 +65,10 @@ The snapshot's `state` is `"open"` or `"closed"`, `current` is the window that h
 ## Open a window for a document
 
 ```tsx
-import { useSynWareWindow } from "@syndromatic/syncloudos/sdk";
+import { useWindow } from "@syndromatic/syncloudos/sdk";
 
 export function useOpenNoteWindow() {
-  const { client } = useSynWareWindow();
+  const { client } = useWindow();
   return (documentId: string) =>
     client.openDocumentWindow({
       documentId,
@@ -95,12 +95,11 @@ On a phone or a narrow tablet the host presents each window according to its `mo
 
 ## Custom title bars
 
-Set `windowDefaults.chrome` to `"custom"` and supply a `windowChrome` component in the definition to draw the title bar yourself. The component receives the window's state and actions.
+Set `windowDefaults.chrome` to `"custom"` and export a named `windowChrome` component from the application entry to draw the title bar yourself. The component receives the window's state and actions.
 
 ```tsx
 import type { PointerEvent } from "react";
-import { createSynWare, type AppWindowChromeProps } from "@syndromatic/syncloudos/sdk";
-import manifest from "./Info";
+import type { AppWindowChromeProps } from "@syndromatic/syncloudos/sdk";
 
 function Chrome(props: AppWindowChromeProps) {
   const move = props.createMoveRegionProps();
@@ -125,7 +124,8 @@ function Chrome(props: AppWindowChromeProps) {
   );
 }
 
-export default createSynWare({ manifest, root: () => null, windowChrome: Chrome });
+export const windowChrome = Chrome;
+export default function App() { return <main>Application content</main>; }
 ```
 
 `createMoveRegionProps()` returns the pointer handler that drags the window. The handler takes a plain structural event, so a React component forwards the fields it needs, as the example shows. Use `"frameless"` when the application draws no title bar at all. Give every custom control a label and a touch target of at least 44 by 44 CSS pixels, even when the painted glyph is smaller.

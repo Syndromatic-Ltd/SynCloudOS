@@ -127,7 +127,7 @@ async function bundle({ entry, packageDirectory, themeNames }) {
   const browserDependencies = sdkBrowserDependencies();
   const publicAliases = [
     ...Object.entries(synWareSdkEntries).map(([name, source]) => ({
-      find: new RegExp(`^${escapedPackageName}/${name}$`, "u"),
+      find: new RegExp(`^${escapedPackageName}${name === "index" ? "" : "/" + name}$`, "u"),
       replacement: resolve(repositoryRoot, source),
     })),
     ...Object.entries(synWareSdkStyles).map(([name, source]) => ({
@@ -293,7 +293,7 @@ function writePackage({ directory, name, exports, dependencies = undefined }) {
   for (const file of ["LICENSE", "NOTICE", "package.json"]) {
     cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK", file), resolve(directory, "sdk", file));
   }
-  writeFileSync(resolve(directory, "README.md"), `# SynCloudOS\n\nSynCloudOS 1.0 Public Beta, the web application framework for TypeScript and React 19.\n\nInstall ${name}; import app capabilities from ${name}/sdk and NSE from ${name}/nse or its documented framework entry points. Import ${name}/nse/styles.css once for portable NSE controls. Browser hosts that call mountSynCloudOS must also import ${name}/browser/styles.css for application-stage layout/chrome. Use mountSynCloudOS({ element, bundles, application: { id, frame } }) for one primary application without Webspring, or provide shell for the existing Webspring host. The application and shell modes are mutually exclusive. Configure Vite with synCloudOS({ webspringEntry: false }) for application mode. The primary fills the page (frame "fullscreen", the default) or keeps its manifest's presentation (frame "declared"); other registered bundles must present in windows and open from the primary through their routes. Every bundle declares a non-root entry route; the host maps / to the primary's route without redirecting. Authentication accepts the same policies and service object as Webspring: "required" presents the system login window before the primary launches, "optional" offers sign-in and Log Out in Preferences > Account, and "disabled" never offers Log Out. When the primary quits the host shows its icon, name and a Reopen button that starts a new session; it never relaunches on its own. Webspring hosts additionally import ${name}/webspring/styles.css for the Board launcher and shell views. All entry points share one module graph, including React contexts.\n\nFramework-owned resources referenced by public package entries are emitted with the package and remain module-relative when a consumer bundles them. Concrete NSE themes remain explicit imports, so consumers ship only the theme resources they select.\n`, "utf8");
+  writeFileSync(resolve(directory, "README.md"), `# SynCloudOS\n\nSynCloudOS 1.0 Public Beta, the web application framework for TypeScript and React 19.\n\nInstall ${name}; import SCOS, useSCOS, reactive hooks and folder declarations from ${name}, and NSE from ${name}/nse or its focused entries. An application folder default-exports its component or NSEApplication subclass. Info.ts is optional overrides; identity, package version, icon and locale files are derived. The synCloudOS() Vite plugin discovers applications, preference panes, widgets, integrations and the optional Webspring shell, then supplies the project to mountSynCloudOS automatically. See docs/framework/project-structure.md and docs/framework/getting-started.md.\n\nImport ${name}/nse/styles.css once for portable NSE controls, and ${name}/browser/styles.css for browser hosting. Use mountSynCloudOS({ element, application: { id, frame } }) with synCloudOS({ webspringEntry: false }) for an application-only host; omit application to use the discovered shell. An explicit composition supports hosts without the discovery plugin; importing browser does not require a virtual module. Application and shell modes are mutually exclusive. The primary fills the page (frame \"fullscreen\", the default) or keeps its manifest presentation (frame \"declared\"); secondary apps present in windows. Authenticated fullscreen primaries declare applicationMenu.trigger: \"content\" and render a useApplicationMenuTrigger() button so users can reach Preferences and Account. Private applications stay private unless their manifest explicitly requests public access. Webspring hosts additionally import ${name}/webspring/styles.css. All entries share one module graph, including React contexts.\n\nFramework-owned resources remain module-relative when a consumer bundles them. Concrete NSE themes are explicit imports. SDK testing helpers, including createSynWare, live at ${name}/sdk/testing, not the production authoring entry.\n`, "utf8");
   const files = packageFiles(directory);
   assertReviewedPackageFiles(files);
   const repositoryManifest = JSON.parse(readFileSync(resolve(repositoryRoot, "package.json"), "utf8"));
@@ -378,15 +378,20 @@ async function main() {
     const depth = name.split("/").length - 1;
     const prefix = depth ? "../".repeat(depth) : "./";
     writeFileSync(resolve(directory, declaration), `export * from "${prefix}types/${source.replace(/^src\//u, "").replace(/\.tsx?$/u, ".js")}";\n`, "utf8");
-    exports[`./${name}`] = { types: `./${declaration}`, import: `./${name}.js` };
+    exports[name === "index" ? "." : `./${name}`] = { types: `./${declaration}`, import: `./${name}.js` };
   }
   exports["./nse/styles.css"] = "./nse/styles.css";
   for (const name of Object.keys(synWareSdkStyles)) exports[`./${name}`] = `./${name}`;
   for (const name of Object.keys(synWareSdkGeneratedStyles)) exports[`./${name}`] = `./${name}`;
   mkdirSync(resolve(typesDirectory, "NSE/Typography"), { recursive: true });
   for (const extension of ["mjs", "d.mts"]) cpSync(resolve(repositoryRoot, `src/NSE/Typography/fontDeclaration.${extension}`), resolve(typesDirectory, `NSE/Typography/fontDeclaration.${extension}`));
-  writeFileSync(resolve(directory, "vite.mjs"), readFileSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.mjs"), "utf8").replace("../../src/NSE/Typography/fontDeclaration.mjs", "./types/NSE/Typography/fontDeclaration.mjs"));
-  cpSync(resolve(repositoryRoot, "scripts/synware/bundle-paths.mjs"), resolve(directory, "bundle-paths.mjs"));
+  writeFileSync(resolve(directory, "vite.mjs"), readFileSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.mjs"), "utf8")
+    .replace("../../src/NSE/Typography/fontDeclaration.mjs", "./types/NSE/Typography/fontDeclaration.mjs")
+    .replace("../../src/SynCloudOS/AppSDK/scos/appModuleSource.mjs", "./app-module-source.mjs")
+    .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs"));
+  for (const file of ["bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs"]) cpSync(resolve(repositoryRoot, "scripts/synware", file), resolve(directory, file));
+  cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/scos/appModuleSource.mjs"), resolve(directory, "app-module-source.mjs"));
+  cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs"), resolve(directory, "manifest-validator.mjs"));
   cpSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.d.mts"), resolve(typesDirectory, "vite.d.mts"));
   exports["./vite"] = { types: "./types/vite.d.mts", import: "./vite.mjs" };
   if (!existsSync(resolve(directory, "nse/styles.css"))) throw new Error("SynWare SDK did not emit its required NSE stylesheet.");
@@ -396,6 +401,7 @@ async function main() {
   const repositoryManifest = JSON.parse(readFileSync(resolve(repositoryRoot, "package.json"), "utf8"));
   // These libraries occur in emitted public declarations even when runtime code is bundled.
   const dependencies = Object.fromEntries(["@floating-ui/dom", "@tiptap/pm", "framer-motion", "harfbuzzjs", "oauth4webapi", "pdf-lib", "woff2-encoder"].map((name) => [name, repositoryManifest.dependencies[name]]));
+  dependencies.typescript = repositoryManifest.devDependencies.typescript;
   assertTwelveFxPackageExports(exports);
   await writeDeveloperSdkData({ repositoryRoot, directory, commit, source });
   writePackage({ directory, name: synWarePackageName, exports, dependencies });
@@ -407,7 +413,7 @@ async function main() {
   assertNoLeakage(mcpDirectory);
   const developerMcp = { package: mcpPackage.name, version: sdkVersion, ...packPackage(mcpDirectory) };
   const entries = Object.fromEntries(Object.keys(synWareSdkEntries).map((name) => [
-    `${synWarePackageName}/${name}`,
+    name === "index" ? synWarePackageName : `${synWarePackageName}/${name}`,
     { archive: artifact.archive, index: hashFile(resolve(directory, `${name}.js`)), types: hashFile(resolve(directory, `${name}.d.ts`)) },
   ]));
   assertSdkSourceUnchanged(source, captureSdkSourceFingerprint(repositoryRoot));

@@ -252,7 +252,7 @@ export async function showGrid(layer: AFXTiledLayer, visible: { x: number; y: nu
 
 Draws a tree of layers to a canvas as textured rectangles. It suits scenes with many images, video frames and particles, where element layers would be heavy. The renderer owns the layers it creates, keeps a presentation snapshot of each, and submits the scene to the canvas on the next frame after anything changes.
 
-You create one with `useSynWareAnimations().createRenderer(canvas, options?, signal?)`. The canvas draws through WebGL 2 with a 2D canvas fallback. A canvas takes one renderer at a time, and the renderer counts towards the session's live layer limit.
+You create one with `useAnimations().createRenderer(canvas, options?, signal?)`. The canvas draws through WebGL 2 with a 2D canvas fallback. A canvas takes one renderer at a time, and the renderer counts towards the session's live layer limit.
 
 | Member | Description |
 | --- | --- |

@@ -55,7 +55,8 @@ function staticServer(directory) {
 
 const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createSynWare, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { MEFXSampleTimingInfo, MEFXTime } from "@syndromatic/syncloudos/fx/media";
 import { VFXEncodedChunk } from "@syndromatic/syncloudos/fx/video";
 import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
@@ -98,7 +99,7 @@ async function encodeFixture(): Promise<EncodedFixture> {
 }
 
 function Probe() {
-  const app = useSynWare();
+  const app = useSCOS();
   useEffect(() => {
     void (async () => {
       const decoderConfig = { codec: "vp8", codedWidth: 16, codedHeight: 16 } as const;

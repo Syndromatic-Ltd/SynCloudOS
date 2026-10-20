@@ -20,6 +20,7 @@
 
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
 import {
   AFXAnimation,
   AFXBasicAnimation,
@@ -127,9 +128,10 @@ describe("AnimationFX deterministic core", () => {
     const surface = () => ({
       supportedProperties: ["frame", "opacity", "transform"],
       apply() {}, attach() {}, detach() {}, setMask() {}, dispose() {},
+      createSublayerSurface: surface,
     });
-    const parent = new AFXLayer(surface(), scheduler);
-    const child = new AFXLayer(surface(), scheduler);
+    const parent = createAFXLayer(surface(), scheduler);
+    const child = new AFXLayer();
     parent.frame = { x: 0, y: 0, width: 200, height: 100 };
     child.frame = { x: 80, y: 10, width: 40, height: 40 };
     child.transform = AFXTransform3D.rotation(Math.PI / 3, 0, 1, 0);
@@ -243,7 +245,7 @@ describe("AnimationFX deterministic core", () => {
   it("coalesces display/layout invalidation, preserves model snapshots and cancels pending work on dispose", () => {
     const c = clock(),
       element = document.createElement("div"),
-      layer = new AFXLayer(
+      layer = createAFXLayer(
         new BrowserAnimationLayerSurface(element),
         c.scheduler,
       );
@@ -274,7 +276,7 @@ describe("AnimationFX deterministic core", () => {
     const element = document.createElement("div");
     document.body.append(element);
     Object.defineProperty(element, "animate", { value: vi.fn(() => { throw new DOMException("Unsupported timing", "NotSupportedError"); }) });
-    const layer = new AFXLayer(new BrowserAnimationLayerSurface(element), c.scheduler);
+    const layer = createAFXLayer(new BrowserAnimationLayerSurface(element), c.scheduler);
     const handle = layer.addAnimation(basic());
     expect(element.animate).toHaveBeenCalledTimes(1);
     expect(c.pending.size).toBe(1);
@@ -296,7 +298,7 @@ describe("AnimationFX deterministic core", () => {
       pause() {}, play() {},
       addEventListener() {}, removeEventListener() {},
     })) });
-    const layer = new AFXLayer(new BrowserAnimationLayerSurface(element), c.scheduler);
+    const layer = createAFXLayer(new BrowserAnimationLayerSurface(element), c.scheduler);
     const handle = layer.addAnimation(new AFXBasicAnimation({
       targetId: "reprojection", keyPath: "transform",
       from: "matrix(1,0,0,1,0,0)", to: "matrix(1,0,0,1,100,0)",
@@ -326,7 +328,7 @@ describe("AnimationFX deterministic core", () => {
   it("releases layer frame and state subscriptions when its owner aborts", async () => {
     const controller = new AbortController(),
       c = clock(),
-      layer = new AFXLayer(
+      layer = createAFXLayer(
         new BrowserAnimationLayerSurface(document.createElement("div")),
         c.scheduler,
         { signal: controller.signal },
@@ -440,21 +442,11 @@ describe("AnimationFX deterministic core", () => {
   it("projects layer geometry/tree/mask on real DOM elements and restores owned styles", () => {
     const c = clock(),
       parent = document.createElement("div"),
-      child = document.createElement("div"),
-      mask = document.createElement("div");
+      child = document.createElement("div");
     parent.style.color = "red";
-    const layer = new AFXLayer(
-        new BrowserAnimationLayerSurface(parent),
-        c.scheduler,
-      ),
-      sublayer = new AFXLayer(
-        new BrowserAnimationLayerSurface(child),
-        c.scheduler,
-      ),
-      maskLayer = new AFXLayer(
-        new BrowserAnimationLayerSurface(mask),
-        c.scheduler,
-      );
+    const layer = createAFXLayer(new BrowserAnimationLayerSurface(parent), c.scheduler);
+    const sublayer = createAFXLayer(new BrowserAnimationLayerSurface(child), c.scheduler);
+    const maskLayer = new AFXLayer();
     layer.bounds = { x: 0, y: 0, width: 100, height: 80 };
     layer.position = { x: 50, y: 40 };
     layer.clipsToBounds = true;
@@ -484,8 +476,8 @@ describe("AnimationFX deterministic core", () => {
   });
   it("picks an animated child at its displayed presentation position", () => {
     const c = clock();
-    const parent = new AFXLayer(new BrowserAnimationLayerSurface(document.createElement("div")), c.scheduler);
-    const child = new AFXLayer(new BrowserAnimationLayerSurface(document.createElement("div")), c.scheduler);
+    const parent = createAFXLayer(new BrowserAnimationLayerSurface(document.createElement("div")), c.scheduler);
+    const child = new AFXLayer();
     parent.frame = { x: 0, y: 0, width: 200, height: 100 };
     child.frame = { x: 100, y: 0, width: 20, height: 20 };
     parent.addSublayer(child);
@@ -504,11 +496,11 @@ describe("AnimationFX deterministic core", () => {
     const c = clock(),
       parent = document.createElement("div"),
       child = document.createElement("div");
-    const layer = new AFXLayer(
+    const layer = createAFXLayer(
         new BrowserAnimationLayerSurface(parent),
         c.scheduler,
       ),
-      sublayer = new AFXLayer(
+      sublayer = createAFXLayer(
         new BrowserAnimationLayerSurface(child),
         c.scheduler,
       );
@@ -573,25 +565,11 @@ describe("AnimationFX deterministic core", () => {
   it("preserves displayed geometry when reparented across transformed superlayers", () => {
     const c = clock();
     const rootElement = document.createElement("div");
-    const leftElement = document.createElement("div");
-    const rightElement = document.createElement("div");
     const childElement = document.createElement("div");
-    const root = new AFXLayer(
-      new BrowserAnimationLayerSurface(rootElement),
-      c.scheduler,
-    );
-    const left = new AFXLayer(
-      new BrowserAnimationLayerSurface(leftElement),
-      c.scheduler,
-    );
-    const right = new AFXLayer(
-      new BrowserAnimationLayerSurface(rightElement),
-      c.scheduler,
-    );
-    const child = new AFXLayer(
-      new BrowserAnimationLayerSurface(childElement),
-      c.scheduler,
-    );
+    const root = createAFXLayer(new BrowserAnimationLayerSurface(rootElement), c.scheduler);
+    const left = new AFXLayer();
+    const right = new AFXLayer();
+    const child = createAFXLayer(new BrowserAnimationLayerSurface(childElement), c.scheduler);
 
     root.frame = { x: 30, y: 20, width: 800, height: 500 };
     root.transform = AFXTransform3D.rotation(Math.PI / 18);
@@ -620,25 +598,11 @@ describe("AnimationFX deterministic core", () => {
   it("rebases an active animation's exact displayed handoff while reparenting", async () => {
     const c = clock();
     const rootElement = document.createElement("div");
-    const leftElement = document.createElement("div");
-    const rightElement = document.createElement("div");
     const childElement = document.createElement("div");
-    const root = new AFXLayer(
-      new BrowserAnimationLayerSurface(rootElement),
-      c.scheduler,
-    );
-    const left = new AFXLayer(
-      new BrowserAnimationLayerSurface(leftElement),
-      c.scheduler,
-    );
-    const right = new AFXLayer(
-      new BrowserAnimationLayerSurface(rightElement),
-      c.scheduler,
-    );
-    const child = new AFXLayer(
-      new BrowserAnimationLayerSurface(childElement),
-      c.scheduler,
-    );
+    const root = createAFXLayer(new BrowserAnimationLayerSurface(rootElement), c.scheduler);
+    const left = new AFXLayer();
+    const right = new AFXLayer();
+    const child = createAFXLayer(new BrowserAnimationLayerSurface(childElement), c.scheduler);
     root.frame = { x: 0, y: 0, width: 900, height: 600 };
     left.frame = { x: 60, y: 90, width: 320, height: 240 };
     left.sublayerTransform = AFXTransform3D.rotation(Math.PI / 16, 0, 1, 0);
@@ -675,7 +639,7 @@ describe("AnimationFX deterministic core", () => {
   it("retargets visible presentation, pauses, seeks and settles interruption exactly once", async () => {
     const c = clock(),
       element = document.createElement("div"),
-      layer = new AFXLayer(
+      layer = createAFXLayer(
         new BrowserAnimationLayerSurface(element),
         c.scheduler,
       );
@@ -706,7 +670,7 @@ describe("AnimationFX deterministic core", () => {
   it("retargets keyframe and spring replacements from the actual visible state", async () => {
     const c = clock(),
       element = document.createElement("div");
-    const layer = new AFXLayer(
+    const layer = createAFXLayer(
       new BrowserAnimationLayerSurface(element),
       c.scheduler,
     );
@@ -747,7 +711,7 @@ describe("AnimationFX deterministic core", () => {
   });
   it("settles reduced or hidden documents without pretending a fixed cadence", async () => {
     const c = clock(),
-      layer = new AFXLayer(
+      layer = createAFXLayer(
         new BrowserAnimationLayerSurface(document.createElement("div")),
         c.scheduler,
       );
@@ -799,7 +763,7 @@ describe("AnimationFX deterministic core", () => {
   });
   it("inherits disabled actions and observes terminal transaction completion", async () => {
     const c = clock(),
-      layer = new AFXLayer(
+      layer = createAFXLayer(
         new BrowserAnimationLayerSurface(document.createElement("div")),
         c.scheduler,
       ),
@@ -838,7 +802,7 @@ describe("AnimationFX deterministic core", () => {
   });
   it("groups preserve sampled durations and cancellation settlement", async () => {
     const c = clock(),
-      layer = new AFXLayer(
+      layer = createAFXLayer(
         new BrowserAnimationLayerSurface(document.createElement("div")),
         c.scheduler,
       ),

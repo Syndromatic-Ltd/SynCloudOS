@@ -7,13 +7,15 @@ import { existsSync, mkdirSync, lstatSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { promisify } from "node:util";
 import Ajv2020 from "ajv/dist/2020.js";
-import { createSynWareValidator, parseManifest } from "../synware/validation-core.mjs";
-import { applicationHostHints, bundlePaths, inside, json, projectContext, sdkName, slash, viteHints } from "./project.mjs";
+import { createSynWareValidator, deriveManifestForFolder, discoverProjectFolders } from "../synware/validation-core.mjs";
+import { deriveSynWareManifest, kebabCase } from "../synware/project-derivation.mjs";
+import { scaffoldProjectFiles } from "../synware/create-synware.mjs";
+import { applicationHostHints, bundlePaths, discoveryKeys, inside, json, projectContext, sdkName, slash, viteHints } from "./project.mjs";
 import { docSections, lookupSdk, similarity } from "./lookup.mjs";
 export { lookupSdk } from "./lookup.mjs";
 const run = promisify(execFile);
 function optionsFor(context, input) {
-  const hints = viteHints(context.root,Object.fromEntries(["appsDirectory","webspringEntry"].filter(key=>input[key]!==undefined).map(key=>[key,input[key]])));
+  const hints = viteHints(context.root,Object.fromEntries(discoveryKeys.filter(key=>input[key]!==undefined).map(key=>[key,input[key]])));
   if (hints.unresolved.some(key=>input[key]===undefined)) throw new Error("Computed Vite options cannot be inspected safely; pass appsDirectory/webspringEntry explicitly. Unresolved: "+hints.unresolved.join(", "));
   if (hints.options.appsDirectory === "" || hints.options.webspringEntry === "") throw new Error("Vite directory and shell paths must not be empty.");
   return hints;
@@ -24,19 +26,27 @@ export async function inspectProject(input={}) {
   const bundles=bundlePaths(root,vite.options.appsDirectory).map(path=>{
     const info=resolve(path,"Contents/Info.ts"), entry=resolve(path,"Contents/index.tsx");
     let id=null,error=null;
-    try { id=parseManifest(info).id; } catch (failure) {error=failure.message;}
-    return {directory:slash(relative(root,path)),id,manifest:existsSync(info),entry:existsSync(entry),error};
+    let resolvedManifest = null;
+    try { resolvedManifest=deriveManifestForFolder(path); id=resolvedManifest.id; } catch (failure) {error=failure.message;}
+    return {directory:slash(relative(root,path)),id,manifest:existsSync(info),resolvedManifest,entry:existsSync(entry),error};
   });
   const shellPath=resolve(root,vite.options.webspringEntry || "src/Webspring/Contents/index.tsx");
+  const folders = ["preferencesDirectory", "widgetsDirectory", "integrationsDirectory"].flatMap((key, index) =>
+    discoverProjectFolders(resolve(root, vite.options[key] ?? ["src/Preferences", "src/Widgets", "src/Integrations"][index]))
+      .map(path => ({ directory: slash(relative(root, path)), kind: path.endsWith(".prefPane") ? "preferencePane" : path.endsWith(".widget") ? "widget" : "integration" })));
   const receipt=resolve(sdkRoot,"tooling/build-receipt.json");
-  return {projectRoot:root,sdk:{version:sdk.version,path:sdkRoot,buildReceipt:existsSync(receipt)?json(receipt):null},vite,bundles,shell:{enabled:vite.options.webspringEntry!==false,path:slash(relative(root,shellPath)),exists:existsSync(shellPath)},dependencies:manifest.dependencies ?? {},devDependencies:manifest.devDependencies ?? {}};
+  return {projectRoot:root,sdk:{version:sdk.version,path:sdkRoot,buildReceipt:existsSync(receipt)?json(receipt):null},vite,bundles,folders,shell:{enabled:vite.options.webspringEntry!==false,path:slash(relative(root,shellPath)),exists:existsSync(shellPath)},dependencies:manifest.dependencies ?? {},devDependencies:manifest.devDependencies ?? {}};
 }
 export async function validateProject(input={}) {
   const context=projectContext(input.projectRoot),{root,sdkRoot,sdk,manifest}=context;
   const vite=optionsFor(context,input), findings=[];
   const validator=createSynWareValidator({schema:json(resolve(sdkRoot,"tooling/manifest.schema.json")),allowedImports:["react","react/jsx-runtime","react/jsx-dev-runtime",...Object.keys(sdk.exports ?? {}).filter(key=>key!=="./sdk/testing").map(key=>sdkName+key.slice(1))],dependencies:{...manifest.dependencies,...manifest.devDependencies}});
   let bundles=[];
-  try { bundles=bundlePaths(root,vite.options.appsDirectory).map(path=>validator.validateDirectory(path)); }
+  try {
+    const paths = bundlePaths(root,vite.options.appsDirectory);
+    for (const [key, fallback] of [["preferencesDirectory","src/Preferences"],["widgetsDirectory","src/Widgets"],["integrationsDirectory","src/Integrations"]]) paths.push(...discoverProjectFolders(resolve(root,vite.options[key] ?? fallback)));
+    bundles=paths.map(path=>validator.validateDirectory(path));
+  }
   catch (error) {findings.push({file:vite.options.appsDirectory ?? "src/SynWare",line:1,rule:"synware.structure",message:error.message});}
   findings.push(...bundles.flatMap(bundle=>bundle.findings.map(finding=>({...finding,file:slash(relative(root,finding.file))}))));
   let host=applicationHostHints(root);
@@ -44,11 +54,11 @@ export async function validateProject(input={}) {
     const primaries=bundles.filter(bundle=>bundle.id===host.application.id);
     if (primaries.length!==1 || !primaries[0].ok) host={...host,status:"unresolved",reason:"The primary bundle is missing, ambiguous or invalid; its application-menu requirement could not be assessed."};
     else {
-      const file=resolve(primaries[0].directory,"Contents/Info.ts"), primary=parseManifest(file);
+      const file=resolve(primaries[0].directory,"Contents/Info.ts"), primary=primaries[0].manifest;
       const fillsPage=host.application.frame==="fullscreen" || (primary.runtime?.presentation ?? "appView")==="appView";
       if (fillsPage && host.authentication!=="disabled" && primary.applicationMenu?.trigger!=="content") findings.push({
         file:slash(relative(root,file)),line:1,rule:"synware.application-menu",
-        message:`Primary application ${host.application.id} fills the page with ${host.authentication} authentication. Declare applicationMenu: { trigger: "content" } and render a useSynWareApplicationMenuTrigger() button so people can reach Preferences > Account, Sign In and Log Out.`,
+        message:`Primary application ${host.application.id} fills the page with ${host.authentication} authentication. Declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button so people can reach Preferences > Account, Sign In and Log Out.`,
       });
     }
   }
@@ -76,18 +86,24 @@ export async function validateProject(input={}) {
 }
 export async function scaffold(input) {
   const context=projectContext(input.projectRoot),{root}=context, vite=optionsFor(context,input);
-  const {id,name,route}=input;
-  if (!/^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)+$/u.test(id ?? "")) throw new Error("Use a reverse-domain application id.");
+  const {name,route,kind = "application"}=input;
+  const id = input.id ?? kebabCase(name);
+  if (!/^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/u.test(id ?? "")) throw new Error("Use a valid application ID.");
   if (!name || !/^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u.test(name) || /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/iu.test(name)) throw new Error("Name must be a safe bundle name, not a path.");
-  if (!route || !route.startsWith("/") || route.startsWith("//") || /[?#\s]/u.test(route)) throw new Error("Route must be an absolute application pathname.");
-  const target=resolve(root,vite.options.appsDirectory ?? "src/SynWare",name+".app");
+  if (route !== undefined && (!route.startsWith("/") || route.startsWith("//") || /[?#\s]/u.test(route))) throw new Error("Route must be an absolute application pathname.");
+  const location = { application: [vite.options.appsDirectory ?? "src/SynWare", ".app"], preferencePane: [vite.options.preferencesDirectory ?? "src/Preferences", ".prefPane"], widget: [vite.options.widgetsDirectory ?? "src/Widgets", ".widget"], integration: [vite.options.integrationsDirectory ?? "src/Integrations", ".integration.ts"] }[kind];
+  if (!location) throw new Error(`Unknown project folder kind: ${kind}.`);
+  const target=resolve(root,location[0],name+location[1]);
   if (!inside(root,target)) throw new Error("Scaffold target must stay within the project.");
   for (let current=target;inside(root,current);current=dirname(current)) {
     if (existsSync(current) && lstatSync(current).isSymbolicLink()) throw new Error("Scaffolding through a symbolic link is forbidden.");
     if (current===root) break;
   }
   if (existsSync(target)) throw new Error("Bundle already exists; no files were changed.");
-  const manifest={schemaVersion:1,id,version:"0.1.0",title:name,routes:[{path:route,primary:true}],presentations:["desktop","tablet","mobile"],localeResources:{base:"Resources/Localised/Base.locale/Localisable.strings"},webspring:{visible:true}};
+  const overrides={webspring:{visible:true}};
+  if (input.id !== undefined) overrides.id = id;
+  if (route !== undefined) overrides.routes = [{path:route,primary:true}];
+  const manifest=overrides;
   if (input.policy!==undefined || input.presentation!==undefined) manifest.runtime={
     ...(input.policy!==undefined ? {policy:input.policy} : {}),
     ...(input.presentation!==undefined ? {presentation:input.presentation} : {}),
@@ -95,22 +111,22 @@ export async function scaffold(input) {
   if (input.contentApplicationMenu!==undefined && typeof input.contentApplicationMenu!=="boolean") throw new Error("contentApplicationMenu must be a boolean.");
   if (input.contentApplicationMenu) manifest.applicationMenu={trigger:"content"};
   const validateManifest=new Ajv2020({allErrors:true,strict:false}).compile(json(resolve(context.sdkRoot,"tooling/manifest.schema.json")));
-  if (!validateManifest(manifest)) throw new Error("Scaffold manifest is invalid: "+validateManifest.errors.map(error=>(error.instancePath || "/")+" "+error.message).join("; "));
+  if (kind === "application" && !validateManifest(deriveSynWareManifest({folderName:name+".app",packageVersion:context.manifest.version,overrides:manifest}))) throw new Error("Scaffold manifest is invalid: "+validateManifest.errors.map(error=>(error.instancePath || "/")+" "+error.message).join("; "));
   const header="/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. All rights reserved.\n * Designed by Kavish Krishnakumar in Manchester.\n * SPDX-License-Identifier: AGPL-3.0-or-later\n */\n";
-  const files={
-    "Contents/Info.ts":header+"export default "+JSON.stringify(manifest,null,2)+" as const;\n",
-    "Contents/index.tsx":header+(input.contentApplicationMenu
-      ? 'import { createSynWare, useSynWareApplicationMenuTrigger } from "@syndromatic/syncloudos/sdk";\nimport manifest from "./Info";\n\nfunction Root() {\n  const menu = useSynWareApplicationMenuTrigger();\n  return <main>\n    <h1>{manifest.title}</h1>\n    <button type="button" ref={element => menu?.setAnchor(element)} disabled={!menu} aria-haspopup="menu" aria-expanded={menu?.open ?? false} onClick={() => menu?.toggle()}>{menu?.label ?? "Application menu"}</button>\n  </main>;\n}\n\nexport default createSynWare({ manifest, root: Root });\n'
-      : 'import { createSynWare } from "@syndromatic/syncloudos/sdk";\nimport manifest from "./Info";\n\nfunction Root() { return <main><h1>{manifest.title}</h1></main>; }\n\nexport default createSynWare({ manifest, root: Root });\n'),
-    "Contents/Resources/Localised/Base.locale/Localisable.strings":'"app.title" = '+JSON.stringify(name)+';\n',
-  };
-  mkdirSync(target,{recursive:true});
+  const files=Object.fromEntries(scaffoldProjectFiles({kind,name,id,owners:input.owners}));
+  if (kind === "application") {
+    files["Contents/Info.ts"]=header+"// Optional manifest overrides; omitted fields come from the folder and package.json.\nexport default "+JSON.stringify(manifest,null,2)+" as const;\n";
+    files["Contents/index.tsx"]=header+(input.contentApplicationMenu
+      ? 'import { SCOS, useApplicationMenuTrigger } from "@syndromatic/syncloudos";\n\nexport default function Root() {\n  const menu = useApplicationMenuTrigger();\n  return <main><h1>{SCOS.app.title}</h1><button type="button" ref={element => menu?.setAnchor(element)} disabled={!menu} aria-haspopup="menu" aria-expanded={menu?.open ?? false} onClick={() => menu?.toggle()}>{menu?.label ?? "Application menu"}</button></main>;\n}\n'
+      : 'import { SCOS } from "@syndromatic/syncloudos";\n\nexport default function Root() { return <main><h1>{SCOS.app.title}</h1></main>; }\n');
+  }
+  if (kind !== "integration") mkdirSync(target,{recursive:true});
   const createdPaths=[];
-  for (const [path,text] of Object.entries(files)) {const file=resolve(target,path);mkdirSync(dirname(file),{recursive:true});writeFileSync(file,text,{flag:"wx"});createdPaths.push(slash(relative(root,file)));}
+  for (const [path,text] of Object.entries(files)) {const file=path ? resolve(target,path) : target;mkdirSync(dirname(file),{recursive:true});writeFileSync(file,text,{flag:"wx"});createdPaths.push(slash(relative(root,file)));}
   const nextSteps=[];
   if (input.policy?.public!==true) nextSteps.push('Before using this bundle as the primary application with authentication "disabled" or "optional", explicitly set runtime.policy.public to true. Do not make private applications public unless that access is intended.');
   if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "windowedView"; the default appView is for the primary application.');
-  if (!input.contentApplicationMenu && (input.presentation===undefined || input.presentation==="appView")) nextSteps.push('A fullscreen primary with authentication "optional" or "required" must declare applicationMenu: { trigger: "content" } and render a useSynWareApplicationMenuTrigger() button, so people can reach Preferences > Account, Sign In and Log Out. Pass contentApplicationMenu: true to scaffold both.');
+  if (!input.contentApplicationMenu && (input.presentation===undefined || input.presentation==="appView")) nextSteps.push('A fullscreen primary with authentication "optional" or "required" must declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button, so people can reach Preferences > Account, Sign In and Log Out. Pass contentApplicationMenu: true to scaffold both.');
   nextSteps.push("Review the generated manifest and run syncloudos.validate before registering the bundle.");
   return {createdPaths,nextSteps};
 }

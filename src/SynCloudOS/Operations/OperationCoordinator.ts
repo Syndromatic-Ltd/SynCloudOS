@@ -181,6 +181,10 @@ export function createOperationCoordinator(options: OperationCoordinatorOptions)
           ? controller.signal.reason
           : new OperationCancelled(cancelReason, timedOut);
       },
+      cancel(reason = "cancelled") {
+        cancel(reason);
+        throw new OperationCancelled(reason);
+      },
     };
 
     const cancel = (reason = "cancelled") => {

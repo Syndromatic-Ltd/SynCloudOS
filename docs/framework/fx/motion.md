@@ -2,7 +2,7 @@
 
 MotionFX (`MFX`) is the web-native analogue of Core Motion. It gives an application the orientation and movement of the device it runs on: an attitude (yaw, pitch and roll), rotation rate, gravity, user acceleration and raw accelerometer and gyroscope readings. An interface can use these values to respond when the user tilts or shakes a phone, or to shade a surface as the device turns.
 
-The framework has two halves. The value types are a plain library: `MFXAttitude` is an immutable orientation with quaternion, rotation matrix and Euler-angle views, and the sample types describe what a sensor reported at one instant. The device access is a scoped client that only a mounted SynWare can reach. `useSynWareMotion()` returns a motion manager owned by the component, and `useSynWare().motion.createManager()` returns one you own directly. The host enforces the manifest permissions, shares one set of browser listeners between every session, pauses delivery when the page is hidden and releases everything when the application closes.
+The framework has two halves. The value types are a plain library: `MFXAttitude` is an immutable orientation with quaternion, rotation matrix and Euler-angle views, and the sample types describe what a sensor reported at one instant. The device access is a scoped client that only a mounted SynWare can reach. `useMotion()` returns a motion manager owned by the component, and `useSCOS().motion.createManager()` returns one you own directly. The host enforces the manifest permissions, shares one set of browser listeners between every session, pauses delivery when the page is hidden and releases everything when the application closes.
 
 MotionFX solves the parts of sensor work that browsers leave to each application. It gives orientation a single right-handed convention with explicit units, keeps quaternion signs continuous so attitudes do not flip, throttles delivery to a cadence you choose, keeps bounded history for gesture detection, and reports availability as data. A desktop without sensors, a hidden tab, a device that needs a permission gesture and a user who declined all produce a capability record rather than a silent failure.
 
@@ -12,8 +12,8 @@ MotionFX solves the parts of sensor work that browsers leave to each application
 | --- | --- |
 | Prefix | `MFX` |
 | Entry | `@syndromatic/syncloudos/fx/motion` |
-| Hook | `useSynWareMotion()` from `@syndromatic/syncloudos/sdk` |
-| Client | `useSynWare().motion` (`MFXMotionClient`) |
+| Hook | `useMotion()` from `@syndromatic/syncloudos/sdk` |
+| Client | `useSCOS().motion` (`MFXMotionClient`) |
 | Permissions | `motion.read` to create a manager and receive samples. `motion.requestAuthorization` in addition to call `requestAuthorization()`. |
 | Analogue | Core Motion (`CMMotionManager`, `CMDeviceMotion`, `CMAttitude`) |
 
@@ -176,7 +176,7 @@ Each stream delivers a sample only when the source has the channel it needs. A h
 
 ### `MFXMotionClient`
 
-The factory a mounted session exposes as `useSynWare().motion`. It creates managers that belong to that session.
+The factory a mounted session exposes as `useSCOS().motion`. It creates managers that belong to that session.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -298,11 +298,11 @@ export function recordShake(manager: MFXMotionManager, signal: AbortSignal): Sha
 
 ### In a component
 
-`useSynWareMotion()` is the usual entry. It returns a stable `MFXMotionManager` whose lifetime follows the component. The host manager is acquired after React commits and disposed when the component unmounts.
+`useMotion()` is the usual entry. It returns a stable `MFXMotionManager` whose lifetime follows the component. The host manager is acquired after React commits and disposed when the component unmounts.
 
 ```tsx
 import { useEffect, useState } from "react";
-import { useSynWareMotion } from "@syndromatic/syncloudos/sdk";
+import { useMotion } from "@syndromatic/syncloudos/sdk";
 
 interface Tilt {
   readonly roll: number;
@@ -310,7 +310,7 @@ interface Tilt {
 }
 
 export function TiltReadout() {
-  const motion = useSynWareMotion();
+  const motion = useMotion();
   const [tilt, setTilt] = useState<Tilt | null>(null);
 
   useEffect(() => {
@@ -344,7 +344,7 @@ In React strict mode the component mounts, unmounts and mounts again. The hook a
 
 ### Outside React
 
-`useSynWare().motion.createManager()` creates a manager you own. Pass an `AbortSignal` to tie its life to your own cancellation. The session disposes any manager still alive when the application closes.
+`useSCOS().motion.createManager()` creates a manager you own. Pass an `AbortSignal` to tie its life to your own cancellation. The session disposes any manager still alive when the application closes.
 
 ```ts
 import type { MFXMotionClient } from "@syndromatic/syncloudos/fx/motion";
@@ -423,7 +423,7 @@ Design for empty data in every case. A desktop, a hidden tab, a device waiting f
 
 ```tsx
 import { useEffect, useState } from "react";
-import { useSynWareMotion } from "@syndromatic/syncloudos/sdk";
+import { useMotion } from "@syndromatic/syncloudos/sdk";
 import type { MFXCapability } from "@syndromatic/syncloudos/fx/motion";
 
 function describe(capability: MFXCapability): string {
@@ -446,7 +446,7 @@ function describe(capability: MFXCapability): string {
 }
 
 export function MotionStatus() {
-  const motion = useSynWareMotion();
+  const motion = useMotion();
   const [message, setMessage] = useState("Checking motion support.");
 
   useEffect(() => {
@@ -490,11 +490,11 @@ Behaviour of the returned promise:
 
 ```tsx
 import { useEffect, useState } from "react";
-import { useSynWareMotion } from "@syndromatic/syncloudos/sdk";
+import { useMotion } from "@syndromatic/syncloudos/sdk";
 import type { MFXAvailability } from "@syndromatic/syncloudos/fx/motion";
 
 export function EnableMotionButton() {
-  const motion = useSynWareMotion();
+  const motion = useMotion();
   const [state, setState] = useState<MFXAvailability | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
 
@@ -583,7 +583,7 @@ export function startSafely(
 
 | Object | Ends when |
 | --- | --- |
-| Manager from `useSynWareMotion()` | The component unmounts, or the session closes. Its `dispose()` also ends it. |
+| Manager from `useMotion()` | The component unmounts, or the session closes. Its `dispose()` also ends it. |
 | Manager from `createManager(signal)` | You call `dispose()`, `signal` aborts or the session closes. |
 | Subscription | You call `dispose()`, its own `signal` aborts, the matching `stop...Updates()` runs, or the manager ends. |
 | Recorder | You call `dispose()`, its `signal` aborts, `stopDeviceMotionUpdates()` runs, or the manager ends. |

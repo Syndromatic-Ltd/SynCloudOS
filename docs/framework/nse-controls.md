@@ -124,7 +124,7 @@ Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSEList`, `NSES
 | `NSEDatePicker`, `NSETimePicker`, `NSEDateTimePicker`, `NSEDateRangePicker` | Locale aware date and time entry with full keyboard support. |
 | `NSECalendarView`, `NSEClockView` | Calendar and clock presentations. |
 | `NSEColourWell`, `NSEColourSwatches`, `NSEColourSliderPicker`, `NSEColourWheelPicker` | Colour selection controls. |
-| `NSEColourPanel` | The shared colour panel. Applications reach it through `useSynWareColourPanel`. |
+| `NSEColourPanel` | The shared colour panel. Applications reach it through `useColourPanel`. |
 
 ## Containers and layout
 

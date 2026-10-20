@@ -20,6 +20,7 @@
 
 import { expect, it } from "vitest";
 import { AFXLayer, type AFXLayerSurface } from "../../../src/FX/AnimationFX/AFXLayer";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
 import { AFXEmitterLayer } from "../../../src/FX/AnimationFX/AFXEmitterLayer";
 import { AFXTiledLayer } from "../../../src/FX/AnimationFX/AFXTiledLayer";
 import { AFXTransaction } from "../../../src/FX/AnimationFX/AFXTransaction";
@@ -58,14 +59,14 @@ function diagnostic(action: () => unknown, code: string, operation: string, reas
 }
 
 it("identifies disposed layer families and the public operation", async () => {
-  const layer = new AFXLayer(surface(), scheduler);
+  const layer = createAFXLayer(surface(), scheduler);
   layer.dispose();
   diagnostic(() => { layer.opacity = 0.5; }, "AFX_LAYER_DISPOSED", "opacity");
   diagnostic(() => { layer.hidden = true; }, "AFX_LAYER_DISPOSED", "hidden");
-  const emitter = new AFXEmitterLayer(surface(), scheduler);
+  const emitter = createAFXLayer(AFXEmitterLayer, surface(), scheduler);
   emitter.dispose();
   diagnostic(() => emitter.startEmitting(), "AFX_EMITTER_LAYER_DISPOSED", "startEmitting");
-  const tiled = new AFXTiledLayer(surface(), scheduler);
+  const tiled = createAFXLayer(AFXTiledLayer, surface(), scheduler);
   tiled.dispose();
   diagnostic(() => tiled.invalidate(), "AFX_TILED_LAYER_DISPOSED", "invalidate");
   await expect(tiled.waitForIdle()).rejects.toBeInstanceOf(SynCloudOSLifecycleError);
@@ -76,19 +77,19 @@ it("identifies disposed layer families and the public operation", async () => {
 });
 
 it("reports subclass public operations rather than inherited content and replication helpers", () => {
-  const shape = new AFXShapeLayer(surface(), scheduler);
+  const shape = createAFXLayer(AFXShapeLayer, surface(), scheduler);
   shape.dispose();
   diagnostic(() => { shape.strokeEnd = 0.5; }, "AFX_LAYER_DISPOSED", "strokeEnd");
-  const gradient = new AFXGradientLayer(surface(), scheduler);
+  const gradient = createAFXLayer(AFXGradientLayer, surface(), scheduler);
   gradient.dispose();
   diagnostic(() => { gradient.colours = [GFXColour.grayscale(0)]; }, "AFX_LAYER_DISPOSED", "colours");
-  const replicator = new AFXReplicatorLayer(surface(), scheduler);
+  const replicator = createAFXLayer(AFXReplicatorLayer, surface(), scheduler);
   replicator.dispose();
   diagnostic(() => { replicator.instanceCount = 2; }, "AFX_LAYER_DISPOSED", "instanceCount");
-  const particles = new AFXParticleLayer(surface(), scheduler);
+  const particles = createAFXLayer(AFXParticleLayer, surface(), scheduler);
   particles.dispose();
   diagnostic(() => particles.setParticles([]), "AFX_LAYER_DISPOSED", "setParticles");
-  const text = new AFXTextLayer(surface(), scheduler);
+  const text = createAFXLayer(AFXTextLayer, surface(), scheduler);
   text.dispose();
   diagnostic(() => { text.baselineOrigin = { x: 0, y: 0 }; }, "AFX_LAYER_DISPOSED", "baselineOrigin");
 });
@@ -97,17 +98,17 @@ it("retains declared layer abort causes and the first explicit disposal", () => 
   for (const Layer of [AFXLayer, AFXEmitterLayer, AFXTiledLayer]) {
     const owner = new AbortController();
     declareSynCloudOSLifecycleSignal(owner.signal, "application-closed");
-    const layer = new Layer(surface(), scheduler, { signal: owner.signal });
+    const layer = createAFXLayer(Layer, surface(), scheduler, { signal: owner.signal });
     owner.abort();
     diagnostic(() => { layer.opacity = 0.5; }, "AFX_LAYER_DISPOSED", "opacity", "application-closed");
     if (layer instanceof AFXEmitterLayer) diagnostic(() => layer.startEmitting(), "AFX_EMITTER_LAYER_DISPOSED", "startEmitting", "application-closed");
     if (layer instanceof AFXTiledLayer) diagnostic(() => layer.invalidate(), "AFX_TILED_LAYER_DISPOSED", "invalidate", "application-closed");
   }
   const owner = new AbortController();
-  const layer = new AFXLayer(surface(), scheduler, { signal: owner.signal });
+  const layer = createAFXLayer(surface(), scheduler, { signal: owner.signal });
   layer.dispose(); owner.abort(); layer.dispose();
   diagnostic(() => layer.display(), "AFX_LAYER_DISPOSED", "display");
-  expect(() => new AFXLayer(surface(), scheduler, { signal: owner.signal })).toThrow(DOMException);
+  expect(() => createAFXLayer(surface(), scheduler, { signal: owner.signal })).toThrow(DOMException);
 });
 
 it("identifies closed audio files, players and engines", async () => {

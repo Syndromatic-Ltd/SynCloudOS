@@ -18,12 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
 import type {
   NSENavigationStackRestorationSnapshot,
   NSENavigationStackSnapshot,
 } from "./navigationTypes";
 
-export interface NSENavigationStackControllerOptions {
+export interface NSENavigationStackControllerOptions extends NSEViewControllerOptions {
   readonly id: string;
   readonly rootDestinationId?: string | null;
   readonly destinationIds: readonly string[];
@@ -65,31 +66,19 @@ function freezeSnapshot(input: Omit<NSENavigationStackSnapshot, "path"> & { read
 }
 
 /** Owns hierarchy path semantics only; it never creates or replaces content. */
-export interface NSENavigationStackController {
-  getSnapshot(): NSENavigationStackSnapshot;
-  subscribe(listener: () => void): () => void;
-  hasDestination(destinationId: string): boolean;
-  push(destinationId: string, options?: { readonly signal?: AbortSignal }): Promise<void>;
-  pop(): void;
-  popToRoot(): void;
-  restore(snapshot: NSENavigationStackRestorationSnapshot): void;
-  dispose(): void;
-}
-
-export class NSENavigationStackController {
+export class NSENavigationStackController extends NSEViewController<NSENavigationStackSnapshot> {
   readonly id: string;
   readonly #destinationIds: ReadonlySet<string>;
   readonly #rootDestinationId: string | null;
   readonly #onPush: NSENavigationStackControllerOptions["onPush"];
-  readonly #listeners = new Set<() => void>();
   #path: readonly string[] = Object.freeze([]);
   #snapshot: NSENavigationStackSnapshot;
   #revision = 0;
-  #disposed = false;
   #pending: AbortController | null = null;
   #intentRevision = 0;
 
   constructor(options: NSENavigationStackControllerOptions) {
+    super(options);
     this.id = requireId(options.id, "Navigation stack id");
     const ids = options.destinationIds.map((id) => requireId(id, "Navigation destination id"));
     if (new Set(ids).size !== ids.length) throw new TypeError("Navigation stack destination ids must be unique.");
@@ -102,23 +91,11 @@ export class NSENavigationStackController {
     }
     this.#onPush = options.onPush;
     this.#snapshot = this.#makeSnapshot();
+    this.getSnapshot = () => this.#snapshot;
   }
-
-  getSnapshot = (): NSENavigationStackSnapshot => this.#snapshot;
 
   hasDestination(destinationId: string): boolean {
     return this.#destinationIds.has(destinationId);
-  }
-
-  subscribe(listener: () => void): () => void {
-    if (this.#disposed) return () => undefined;
-    this.#listeners.add(listener);
-    let active = true;
-    return () => {
-      if (!active) return;
-      active = false;
-      this.#listeners.delete(listener);
-    };
   }
 
   async push(destinationId: string, options: { readonly signal?: AbortSignal } = {}): Promise<void> {
@@ -133,7 +110,7 @@ export class NSENavigationStackController {
     const signal = options.signal ? AbortSignal.any([operation.signal, options.signal]) : operation.signal;
     try {
       await awaitAbortable(Promise.resolve(this.#onPush?.(id, { signal })), signal);
-      if (this.#disposed || this.#intentRevision !== intentRevision || this.#pending !== operation || signal.aborted) {
+      if (this.isDisposed || this.#intentRevision !== intentRevision || this.#pending !== operation || signal.aborted) {
         throw abortError(signal.reason);
       }
       this.#path = Object.freeze([...this.#path, id]);
@@ -145,14 +122,14 @@ export class NSENavigationStackController {
 
   pop(): void {
     this.#invalidatePendingIntent();
-    if (this.#disposed || this.#path.length === 0) return;
+    if (this.isDisposed || this.#path.length === 0) return;
     this.#path = Object.freeze(this.#path.slice(0, -1));
     this.#publish();
   }
 
   popToRoot(): void {
     this.#invalidatePendingIntent();
-    if (this.#disposed || this.#path.length === 0) return;
+    if (this.isDisposed || this.#path.length === 0) return;
     this.#path = Object.freeze([]);
     this.#publish();
   }
@@ -169,15 +146,12 @@ export class NSENavigationStackController {
     this.#publish();
   }
 
-  dispose(): void {
-    if (this.#disposed) return;
+  protected override didDispose(): void {
     this.#invalidatePendingIntent();
-    this.#disposed = true;
-    this.#listeners.clear();
   }
 
   #assertLive(): void {
-    if (this.#disposed) throw abortError();
+    if (this.isDisposed) throw abortError();
   }
 
   #beginIntent(): number {
@@ -208,9 +182,9 @@ export class NSENavigationStackController {
   }
 
   #publish(): void {
-    if (this.#disposed) return;
+    if (this.isDisposed) return;
     this.#revision += 1;
     this.#snapshot = this.#makeSnapshot();
-    for (const listener of [...this.#listeners]) listener();
+    this.notifyObservers();
   }
 }

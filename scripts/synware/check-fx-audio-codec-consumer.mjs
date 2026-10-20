@@ -59,7 +59,8 @@ function staticServer(directory) {
 
 const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createSynWare, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { AUFXAudioChunkStream, AUFXAudioFormat, AUFXAudioPCMBuffer, AUFXClockObservation } from "@syndromatic/syncloudos/fx/audio";
 import { VFXContainerReader } from "@syndromatic/syncloudos/fx/video";
 import { VFXWebMContainerBackend } from "@syndromatic/syncloudos/fx/video/webm";
@@ -68,7 +69,7 @@ import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudo
 declare global { interface Window { fxAudioCodec: any; } }
 window.fxAudioCodec = { ready: false };
 function Probe() {
-  const app = useSynWare();
+  const app = useSCOS();
   useEffect(() => { void (async () => {
     const opened = await app.audio.openFile({ source: "/tone.wav", processingFormat: new AUFXAudioFormat(48_000, 1) });
     let imported;

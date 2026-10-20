@@ -59,7 +59,8 @@ function staticServer(directory) {
 
 const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createSynWare, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
 declare global { interface Window { fxImageMetadata: any; } }
 window.fxImageMetadata = { ready: false };
@@ -190,7 +191,7 @@ function gifFixture() {
   return bytes;
 }
 function Probe() {
-  const app = useSynWare();
+  const app = useSCOS();
   useEffect(() => { void (async () => {
     const resource = app.images.load({ source: { kind: "bytes", mimeType: "image/jpeg", bytes: await fixture() }, accessibleLabel: "Metadata probe" });
     try {

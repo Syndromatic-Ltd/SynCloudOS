@@ -38,7 +38,7 @@ function fixture(source: string, permissions: string[] = [], helpers: Record<str
 afterEach(() => { for (const root of roots.splice(0)) { expect(root.startsWith(join(tmpdir(), "synware-fx-capabilities-"))).toBe(true); rmSync(root, { recursive: true, force: true }); } });
 
 it("enforces imported scoped client operations through aliases, destructuring and local helpers", () => {
-  const root = fixture(`import { useSynWare as useApp, useSynWareMIDI as useMIDI } from "@syndromatic/syncloudos/sdk";
+  const root = fixture(`import { useSCOS as useApp, useMIDI } from "@syndromatic/syncloudos/sdk";
 import { locate } from "./helper";
 export function Root() {
   const { location, lumina, video } = useApp();
@@ -60,11 +60,11 @@ export function Root() {
 
 it("accepts declared use and records actual operations, but ignores imports, comments and shadowed names", () => {
   const root = fixture(`import * as SDK from "@syndromatic/syncloudos/sdk";
-import { useSynWareMIDI } from "@syndromatic/syncloudos/sdk";
+import { useMIDI } from "@syndromatic/syncloudos/sdk";
 import { MEFXTime } from "@syndromatic/syncloudos/fx/media";
-function fake(useSynWareMIDI: () => any) { useSynWareMIDI().requestAuthorization({sysex:true}); }
-// SDK.useSynWare().lumina.createIndex().delete("x", "y");
-export function Root() { const manager = SDK.useSynWareLocation(); return manager.current(); }
+function fake(useMIDI: () => any) { useMIDI().requestAuthorization({sysex:true}); }
+// SDK.useSCOS().lumina.createIndex().delete("x", "y");
+export function Root() { const manager = SDK.useLocation(); return manager.current(); }
 void MEFXTime;`, ["location.read", "location.request"]);
   const audit = auditSynWareCapabilityUsage(root);
   expect(audit.fxViolations).toEqual([]);
@@ -73,9 +73,9 @@ void MEFXTime;`, ["location.read", "location.request"]);
 });
 
 it("rejects indeterminate permissions and computed authority while allowing passive MIDI inspection and pure values", () => {
-  const root = fixture(`import { useSynWare, useSynWareMIDI } from "@syndromatic/syncloudos/sdk";
+  const root = fixture(`import { useSCOS, useMIDI } from "@syndromatic/syncloudos/sdk";
 const key = unknownKey();
-export function Root() { const app = useSynWare(); app[key](); const midi = useSynWareMIDI(); midi.getCapabilities(); midi.requestAuthorization(options); }`);
+export function Root() { const app = useSCOS(); app[key](); const midi = useMIDI(); midi.getCapabilities(); midi.requestAuthorization(options); }`);
   const audit = auditSynWareCapabilityUsage(root);
   expect(audit.fxViolations.some((record: any) => record.reason.includes("computed"))).toBe(true);
   expect(audit.fxViolations.some((record: any) => record.missing.includes("midi.sysex"))).toBe(true);
@@ -86,8 +86,8 @@ it("follows lazy production helpers and re-exported hooks, and fails unresolved 
   const root = fixture(`import { locate } from "./bridge";
 export const action = () => locate().current();
 void import("./lazy");`, [], {
-    "bridge.ts": 'export { useSynWareLocation as locate } from "@syndromatic/syncloudos/sdk";',
-    "lazy.ts": 'import { useSynWareVideo } from "@syndromatic/syncloudos/sdk"; useSynWareVideo().requestCamera();',
+    "bridge.ts": 'export { useLocation as locate } from "@syndromatic/syncloudos/sdk";',
+    "lazy.ts": 'import { useVideo } from "@syndromatic/syncloudos/sdk"; useVideo().requestCamera();',
     "Info.ts": 'const permissions = getPermissions(); export default {id:"com.example.fx",permissions};',
   });
   const violations = auditSynWareCapabilityUsage(root).fxViolations;
@@ -99,25 +99,25 @@ void import("./lazy");`, [], {
 it("tracks literal dynamic SDK imports and namespace helper re-exports", () => {
   const root = fixture(`import * as hooks from "./bridge";
 export async function Root() {
-  const { useSynWareVideo: useVideo } = await import("@syndromatic/syncloudos/sdk");
+  const { useVideo } = await import("@syndromatic/syncloudos/sdk");
   useVideo().requestCamera();
   hooks.locate().current();
-}`, [], { "bridge.ts": 'export { useSynWareLocation as locate } from "@syndromatic/syncloudos/sdk";' });
+}`, [], { "bridge.ts": 'export { useLocation as locate } from "@syndromatic/syncloudos/sdk";' });
   const violations = auditSynWareCapabilityUsage(root).fxViolations;
   expect(violations.some((record: any) => record.missing.includes("video.capture.camera"))).toBe(true);
   expect(violations.some((record: any) => record.missing.includes("location.request"))).toBe(true);
 });
 
 it("check mode is read-only and allows a single declared Lumina acquisition permission", () => {
-  const root = fixture('import {useSynWareLumina} from "@syndromatic/syncloudos/sdk"; useSynWareLumina().createIndex().query({text:"x"});', ["lumina.query"]);
+  const root = fixture('import {useLumina} from "@syndromatic/syncloudos/sdk"; useLumina().createIndex().query({text:"x"});', ["lumina.query"]);
   expect(auditSynWareCapabilityUsage(root).fxViolations).toEqual([]);
   expect(main([root, "--check"], { stdout: { write() {} }, stderr: { write() {} } })).toBe(0);
   expect(existsSync(join(root, "docs"))).toBe(false);
 });
 
 it("does not require capture or MIDI authorization for passive inspection, and keeps SysEx opt-in", () => {
-  const root = fixture(`import {useSynWareVideo, useSynWareMIDI} from "@syndromatic/syncloudos/sdk";
-useSynWareVideo().enumerateDevices(); useSynWareMIDI().getEndpoints();
-useSynWareMIDI().requestAuthorization({sysex:false});`, ["midi.access"]);
+  const root = fixture(`import {useVideo, useMIDI} from "@syndromatic/syncloudos/sdk";
+useVideo().enumerateDevices(); useMIDI().getEndpoints();
+useMIDI().requestAuthorization({sysex:false});`, ["midi.access"]);
   expect(auditSynWareCapabilityUsage(root).fxViolations).toEqual([]);
 });

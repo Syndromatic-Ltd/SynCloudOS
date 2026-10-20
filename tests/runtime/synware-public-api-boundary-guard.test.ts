@@ -90,7 +90,7 @@ describe("SDK build public API boundaries", () => {
     "SourceListFrameProvider", "SourceListFrameContextValue", "useSourceListFrame",
     "NSEWindowSurfaceBridge", "NSEWindowSurfaceBridgeProvider", "NSEWindowSurfaceRequest",
     "NSEWindowSurfaceDismissResult", "NSEWindowSurfaceErrorContext", "useOptionalNSEWindowSurfaceBridge",
-    "WindowManager", "WindowController", "NSEWindowController", "SynWareProvider", "SynWareProviderProps",
+    "WindowManager", "WindowController", "SynWareProvider", "SynWareProviderProps",
     "SynWareRuntimeMount", "SynWareRuntimeMountProps", "nseRegistry",
     "SystemAlert", "SystemAlertAssetCache", "NSESystemAlert", "NSESystemAlertError",
   ])("rejects an aliased type export of %s from an ordinary entry", async (name) => {

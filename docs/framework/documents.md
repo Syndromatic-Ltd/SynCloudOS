@@ -2,7 +2,7 @@
 
 A document is a live editing session for content the user owns. It keeps a stable identity while its storage location, saved version and windows change, and it tracks whether it has unsaved changes. The runtime supplies the mechanics: autosave, recovery after a crash, version history, conflict detection and undo. Your application supplies the model.
 
-SynWare reach documents through `useSynWareDocument()`, which returns a client scoped to your application. The client exposes the document mechanics under `workspaceDocuments`.
+SynWare reach documents through `useDocument()`, which returns a client scoped to your application. The client exposes the document mechanics under `workspaceDocuments`.
 
 ## Declare a document type
 
@@ -29,7 +29,7 @@ A document model is plain JSON: objects, dense arrays, strings, finite numbers, 
 ## Create, open and edit
 
 ```tsx
-import { useSynWareDocument } from "@syndromatic/syncloudos/sdk";
+import { useDocument } from "@syndromatic/syncloudos/sdk";
 
 interface Note {
   readonly title: string;
@@ -39,7 +39,7 @@ interface Note {
 const typeId = "com.example.notes.note";
 
 export function useNoteActions() {
-  const { workspaceDocuments } = useSynWareDocument();
+  const { workspaceDocuments } = useDocument();
 
   return {
     async create() {
@@ -128,7 +128,7 @@ Binary content such as images and audio lives beside the model as document resou
 
 ## Documents and windows
 
-A document can appear in one or more windows. `useSynWareWindow().client.openDocumentWindow({ documentId, title, restorationKey })` opens one. The [windows guide](windows.md) covers presentation, restoration and close behaviour.
+A document can appear in one or more windows. `useWindow().client.openDocumentWindow({ documentId, title, restorationKey })` opens one. The [windows guide](windows.md) covers presentation, restoration and close behaviour.
 
 ## Accessibility
 

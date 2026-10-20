@@ -26,11 +26,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoTypes";
 import { useResolvedMode as useScopedResolvedMode } from "../../src/SynCloudOS/Appearance/useAppearance";
 import { clearOwnedResponderAnchor, SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { useSynWare, useSynWareQuickSwitchTrigger } from "../../src/SynCloudOS/AppSDK";
+import { useSCOS, useQuickSwitchTrigger } from "../../src/SynCloudOS/AppSDK";
 import { createInMemoryNSETextOwner, plainNSETextContent, NSETextCommands, NSETextView, TextEditingSession } from "@syndromatic/syncloudos/nse/text";
 import { NSEHierarchyStack, NSENavigationStackController, NSETabBarController } from "../../src/NSE/Navigation";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../../src/NSE/NSE";
-import { createSynWare, ResponderScope, useSynWareLocalisedStrings } from "@syndromatic/syncloudos/sdk";
+import { ResponderScope, useStrings } from "@syndromatic/syncloudos/sdk";
+import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
+import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
 import { NSESidebar, NSESourceListScene } from "../../src/NSE/Navigation/SourceList";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRuntimeEnvironment, mountTestSynWareRuntime } from "./helpers";
@@ -152,7 +155,7 @@ function ApplicationStageHierarchyFixture() {
 }
 
 function CustomQuickSwitchTitleFixture() {
-  const quickSwitch = useSynWareQuickSwitchTrigger();
+  const quickSwitch = useQuickSwitchTrigger();
   if (!quickSwitch) return <p>QuickSwitch unavailable</p>;
   return (
     <button
@@ -370,7 +373,7 @@ describe("ApplicationStageView app menu", () => {
     const runtime = createTestRuntime();
     let liveSession: TextEditingSession | undefined;
     function LiveTextConsumer() {
-      const app = useSynWare();
+      const app = useSCOS();
       const [text] = React.useState(() => {
         const owner = createInMemoryNSETextOwner({ content: plainNSETextContent("Live") });
         const session = new TextEditingSession({ id: "session:live", documentId: "document:live", owner });
@@ -522,7 +525,7 @@ describe("ApplicationStageView app menu", () => {
     expect(frame?.parentElement?.dataset.syncloudosResponderId).toBeUndefined();
   });
 
-  it("mounts the registered-owner clients only through useSynWare, without a runtime render prop", async () => {
+  it("mounts the registered-owner clients only through useSCOS, without a runtime render prop", async () => {
     const runtime = authoriseTestRuntime(createTestRuntime());
     let receivedProps: Record<string, unknown> | null = null;
     let contextRuntime: Record<string, unknown> | null = null;
@@ -532,7 +535,7 @@ describe("ApplicationStageView app menu", () => {
         loadModule: async () => ({
           default: (props: Record<string, unknown>) => {
             receivedProps = props;
-            const app = useSynWare();
+            const app = useSCOS();
             contextRuntime = app as unknown as Record<string, unknown>;
             return <button type="button" onClick={() => {
               void app.pasteboards.find
@@ -600,7 +603,7 @@ describe("ApplicationStageView app menu", () => {
     runtime.apps.registerBundle(createTestBundle(
       { id: "test-app", route: "/test" },
       { loadModule: async () => ({ default: () => {
-        current = useSynWare() as unknown as ScopedFacade;
+        current = useSCOS() as unknown as ScopedFacade;
         return <p>Mounted generation</p>;
       } }) },
     ));
@@ -656,9 +659,9 @@ describe("ApplicationStageView app menu", () => {
       {
         loadModule: async () => ({
           default: () => {
-            const app = useSynWare();
+            const app = useSCOS();
             captured = app as unknown as ScopedFacade;
-            const locale = useSynWareLocalisedStrings("test-app", app.locale);
+            const locale = useStrings();
             const mode = app.appearance.resolved();
             return <p>{locale.t("title", "Mounted title")} {mode}</p>;
           },
@@ -689,17 +692,18 @@ describe("ApplicationStageView app menu", () => {
     const runtime = authoriseTestRuntime(createTestRuntime());
     runtime.apps.registerBundle(createTestBundle({ id: "test-app", route: "/test" }));
     const mount = mountTestSynWareRuntime(runtime, "test-app");
+    const context = createSynWareContextValue(mount.runtime);
 
     function OutgoingPresentation() {
       const [revision, setRevision] = React.useState(0);
-      const locale = useSynWareLocalisedStrings("test-app", mount.runtime.locale);
+      const locale = useStrings();
       const mode = useScopedResolvedMode(mount.runtime);
       return <button type="button" onClick={() => setRevision((value) => value + 1)}>
         {locale.t("title", "Mounted title")} {mode} {revision}
       </button>;
     }
 
-    render(<OutgoingPresentation />);
+    render(<SynWareProvider value={context}><OutgoingPresentation /></SynWareProvider>);
     const refresh = screen.getByRole("button", { name: /Mounted title light 0/ });
     const snapshotAtRevocation = mount.runtime.state.getSnapshot();
     mount.dispose(new DOMException("Application stage entered its visual exit.", "AbortError"));

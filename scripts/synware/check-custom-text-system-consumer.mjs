@@ -32,7 +32,7 @@ const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)))
 const receiptPath = join(repositoryRoot, ".artifacts/synapp-sdk/custom-text-system-consumer.json");
 const applicationEntries = Object.freeze(["sdk", "sdk/testing", "nse/text", "fx/text", "fx/graphics"]);
 const publicEntries = Object.freeze([...applicationEntries, "browser", "webspring"]);
-const externalImports = new Set(["react", "react-dom/client", "react/jsx-runtime", ...applicationEntries.map(entry => `@syndromatic/syncloudos/${entry}`)]);
+const externalImports = new Set(["react", "react-dom/client", "react/jsx-runtime", "@syndromatic/syncloudos", ...applicationEntries.map(entry => `@syndromatic/syncloudos/${entry}`)]);
 const hostImports = new Set(["@syndromatic/syncloudos/browser", "@syndromatic/syncloudos/webspring", "@syndromatic/syncloudos/browser/styles.css"]);
 const exampleFiles = ["Info.ts", "model.ts", "layout.ts", "example.ts", "image.ts", "view.tsx", "index.tsx", "style.css"];
 const hostFile = "examples/TextSystem.app/Host/bootstrap.tsx";
@@ -91,7 +91,7 @@ function replaceFixtureContract(source, before, after, expected = 1) {
 
 /** Copy the real browser fixture; instrument only private test output and a later canonical edit. */
 export function createCustomTextSystemFixtureSource(source) {
-  source = replaceFixtureContract(source, "../../../examples/TextSystem.app/Contents", "./example/Contents", 3);
+  source = replaceFixtureContract(source, "../../../examples/TextSystem.app/Contents", "./example/Contents", 4);
   source = replaceFixtureContract(source, "../../../examples/TextSystem.app/Host/bootstrap", "./example/Host/bootstrap", 2);
   source = replaceFixtureContract(source, "../../fixtures/fx/fonts/" + fontFile + "?url", "./assets/ExampleFont.ttf?url");
   source = replaceFixtureContract(source, "const output = await prepared.output.exportPDF();",

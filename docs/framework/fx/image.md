@@ -25,7 +25,7 @@ import { IFXImage } from "@syndromatic/syncloudos/fx/image";
 | --- | --- |
 | Prefix | `IFX` |
 | Entry | `@syndromatic/syncloudos/fx/image` |
-| Hook | `useSynWareImages`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useImages`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None declared in the manifest. The session checks decode and export policy for each image. |
 | Analogue | Core Image (`CIImage`, `CIFilter`, `CIContext`, `CIKernel`, `CIDetector`, `CIRAWFilter`) |
 
@@ -292,7 +292,7 @@ export async function paintDab(accumulator: IFXImageAccumulator, context: IFXCon
 
 ### `IFXImageResource`
 
-A decoded image that the session owns. Inside a SynWare, `useSynWareImages().load(request)` returns one. The request names a `source` and can set `accessibleLabel`, `renderingMode`, `tintColour`, `capInsets` and `resizingMode`.
+A decoded image that the session owns. Inside a SynWare, `useImages().load(request)` returns one. The request names a `source` and can set `accessibleLabel`, `renderingMode`, `tintColour`, `capInsets` and `resizingMode`.
 
 A source is one of:
 
@@ -331,10 +331,10 @@ The session checks export policy, CORS cleanliness and mount lifetime before it 
 ```tsx
 import { useEffect, useRef } from "react";
 import { IFXContext, IFXFilter } from "@syndromatic/syncloudos/fx/image";
-import { useSynWareImages } from "@syndromatic/syncloudos/sdk";
+import { useImages } from "@syndromatic/syncloudos/sdk";
 
 export function Vignette({ path }: { path: string }) {
-  const images = useSynWareImages();
+  const images = useImages();
   const canvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

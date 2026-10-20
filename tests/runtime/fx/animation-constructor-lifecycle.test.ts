@@ -19,11 +19,8 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import {
-  AFXLayer,
-  type AFXFrameScheduler,
-  type AFXLayerSurface,
-} from "../../../src/FX/AnimationFX/AFXLayer";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
+import type { AFXFrameScheduler, AFXLayerSurface } from "../../../src/FX/AnimationFX/AFXLayer";
 import { AFXReplicatorLayer } from "../../../src/FX/AnimationFX/AFXReplicatorLayer";
 function fixture() {
   const surface: AFXLayerSurface = {
@@ -51,7 +48,7 @@ describe("layer construction ownership", () => {
     scheduler.subscribeState = vi.fn(() => () => {});
     expect(
       () =>
-        new AFXReplicatorLayer(surface, scheduler, { signal: owner.signal }),
+        createAFXLayer(AFXReplicatorLayer, surface, scheduler, { signal: owner.signal }),
     ).toThrow(/aborted/);
     expect(surface.dispose).toHaveBeenCalledOnce();
     expect(scheduler.subscribeState).not.toHaveBeenCalled();
@@ -65,7 +62,7 @@ describe("layer construction ownership", () => {
       return release;
     };
     expect(
-      () => new AFXLayer(surface, scheduler, { signal: owner.signal }),
+      () => createAFXLayer(surface, scheduler, { signal: owner.signal }),
     ).toThrow(/aborted/);
     expect(release).toHaveBeenCalledOnce();
     expect(surface.dispose).toHaveBeenCalledOnce();
@@ -78,7 +75,7 @@ describe("layer construction ownership", () => {
     surface.dispose = vi.fn(() => {
       throw new Error("cleanup failure");
     });
-    expect(() => new AFXLayer(surface, scheduler)).toThrow("setup failure");
+    expect(() => createAFXLayer(surface, scheduler)).toThrow("setup failure");
     expect(surface.dispose).toHaveBeenCalledOnce();
   });
 });

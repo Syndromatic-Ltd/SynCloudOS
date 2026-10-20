@@ -82,7 +82,7 @@ export function applicationDeclaresAbout(about: SynCloudOSAppAboutManifest | und
 /** True when System Preferences is the menu's only command, so its control opens System Preferences itself. */
 export function menuOpensSystemPreferencesDirectly(model: NSEMenuModel): boolean {
   const commandIds = [...model.entries, ...(model.sections ?? []).flatMap((section) => section.entries)]
-    .flatMap((entry) => entry.kind === "command" ? [entry.commandId] : []);
+    .flatMap((entry) => entry.kind === "command" && "commandId" in entry ? [entry.commandId] : []);
   return commandIds.length === 1 && commandIds[0] === "system.showPreferences";
 }
 
@@ -129,7 +129,7 @@ export function ApplicationMenuOverlayHost({
   );
 }
 
-/** Publishes the menu to `useSynWareApplicationMenuTrigger()` so an app that
+/** Publishes the menu to `useApplicationMenuTrigger()` so an app that
  * declares `applicationMenu.trigger: "content"` can open it from its own control.
  * `onActivate` replaces the toggle when the menu has nothing to show but System
  * Preferences, which the control then opens directly. */

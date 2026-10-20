@@ -22,6 +22,7 @@
 import { describe, expect, it } from "vitest";
 import { AFXEmitterCell } from "../../../src/FX/AnimationFX/AFXEmitterCell";
 import { AFXEmitterLayer } from "../../../src/FX/AnimationFX/AFXEmitterLayer";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
 import type { AFXFrameScheduler } from "../../../src/FX/AnimationFX/AFXLayer";
 import type { AFXLayerSnapshot, AFXLayerSurface } from "../../../src/FX/AnimationFX/AFXLayer";
 import { GFXColour } from "../../../src/FX/GraphicsFX/GFXColour";
@@ -65,11 +66,7 @@ const pixel = new GFXImage({
 
 function mounted(clock = new FrameClock(), signal?: AbortSignal) {
   const element = document.createElement("div");
-  const layer = new AFXEmitterLayer(
-    new BrowserAnimationLayerSurface(element),
-    clock,
-    { signal },
-  );
+  const layer = createAFXLayer(AFXEmitterLayer, new BrowserAnimationLayerSurface(element), clock, { signal });
   layer.frame = { x: 0, y: 0, width: 100, height: 100 };
   return { clock, element, layer };
 }
@@ -232,7 +229,7 @@ describe("AnimationFX seeded emitter layer", () => {
 
   it("rolls back synchronous aborts and completes teardown when host releases throw", () => {
     const controller = new AbortController();
-    let surfaceDisposals = 0, subscriptionReleases = 0;
+    let surfaceDisposals = 0, subscriptions = 0, subscriptionReleases = 0;
     const surface: AFXLayerSurface = {
       supportedProperties: [],
       supportedContentKinds: ["emitter"],
@@ -245,11 +242,12 @@ describe("AnimationFX seeded emitter layer", () => {
     const synchronousClock: AFXFrameScheduler = {
       now: () => 0, reducedMotion: false, suspended: false,
       requestFrame: () => () => {},
-      subscribeState: () => () => { subscriptionReleases++; },
+      subscribeState: () => { subscriptions++; return () => { subscriptionReleases++; }; },
     };
-    expect(() => new AFXEmitterLayer(surface, synchronousClock, { signal: controller.signal })).toThrow(/aborted/);
+    expect(() => createAFXLayer(AFXEmitterLayer, surface, synchronousClock, { signal: controller.signal })).toThrow(/aborted/);
     expect(surfaceDisposals).toBe(1);
-    expect(subscriptionReleases).toBe(1);
+    // Whatever the attach order, every state subscription taken before the abort is released.
+    expect(subscriptionReleases).toBe(subscriptions);
 
     const liveSurface: AFXLayerSurface = {
       supportedProperties: [], supportedContentKinds: ["emitter"],
@@ -261,11 +259,11 @@ describe("AnimationFX seeded emitter layer", () => {
       requestFrame: () => () => { throw new Error("cancel failure"); },
       subscribeState: () => () => { subscriptionReleases++; throw new Error("unsubscribe failure"); },
     };
-    const live = new AFXEmitterLayer(liveSurface, releaseClock);
+    const live = createAFXLayer(AFXEmitterLayer, liveSurface, releaseClock);
     live.emitterCells = [new AFXEmitterCell({ contents: pixel, birthRate: 1, lifetime: 1 })];
     live.startEmitting();
     expect(() => live.dispose()).toThrow(/cancel failure|unsubscribe failure/);
-    expect(subscriptionReleases).toBe(3);
+    expect(subscriptionReleases).toBe(subscriptions + 2);
     expect(surfaceDisposals).toBe(2);
   });
 

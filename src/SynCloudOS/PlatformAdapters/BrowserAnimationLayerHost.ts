@@ -19,6 +19,7 @@
  */
 
 import { AFXLayer, type AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
+import { createAFXLayer } from "../../FX/AnimationFX/host";
 import { AFXShapeLayer } from "../../FX/AnimationFX/AFXShapeLayer";
 import { AFXGradientLayer } from "../../FX/AnimationFX/AFXGradientLayer";
 import { AFXTextLayer } from "../../FX/AnimationFX/AFXTextLayer";
@@ -84,7 +85,7 @@ export function createBrowserAnimationLayerHost(document: Document, scheduler: A
       boundElements.add(target);
       let layer: AFXLayer | undefined;
       try {
-        layer = new constructors[kind](surface, scheduler, { signal });
+        layer = createAFXLayer(constructors[kind], surface, scheduler, { signal });
         signal.throwIfAborted();
       }
       catch (error) {

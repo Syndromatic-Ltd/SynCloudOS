@@ -31,10 +31,10 @@ import { MotionService } from "../../../src/SynCloudOS/MotionFX/MotionService";
 import { motionFixture } from "./motion-fixture";
 
 const context = vi.hoisted(() => ({ client: null as MFXMotionClient | null }));
-vi.mock("../../../src/SynCloudOS/AppSDK/SynWareContext", () => ({
-  useSynWare: () => ({ motion: context.client }),
+vi.mock("../../../src/SynCloudOS/AppSDK/scos/useSCOS", () => ({
+  useSCOS: () => ({ motion: context.client }),
 }));
-import { useSynWareMotion } from "../../../src/SynCloudOS/AppSDK/hooks/useSynWareMotion";
+import { useMotion } from "../../../src/SynCloudOS/AppSDK/hooks/useMotion";
 afterEach(cleanup);
 
 it("survives StrictMode replay with one committed owner and releases it on unmount", () => {
@@ -44,7 +44,7 @@ it("survives StrictMode replay with one committed owner and releases it on unmou
   context.client = { createManager };
   let facade!: MFXMotionManager;
   function Probe() {
-    facade = useSynWareMotion();
+    facade = useMotion();
     useEffect(() => {
       const subscription = facade.startDeviceMotionUpdates(
         { referenceFrame: "relative" },
@@ -75,7 +75,7 @@ it("does not acquire host owners for a render abandoned by Suspense", () => {
   context.client = { createManager };
   const pending = new Promise<never>(() => {});
   function Pending() {
-    useSynWareMotion();
+    useMotion();
     throw pending;
   }
   const view = render(

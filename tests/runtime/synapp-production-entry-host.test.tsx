@@ -25,7 +25,7 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { describe, expect, it, vi } from "vitest";
 import { createSynWare, createSynWareBundle } from "../../src/SynCloudOS/AppSDK/createSynWare";
-import { useSynWare } from "../../src/SynCloudOS/AppSDK/SynWareContext";
+import { useSCOS } from "../../src/SynCloudOS/AppSDK/scos/useSCOS"
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
 import { SynWareEntryRenderer } from "../../src/Webspring/SynWareEntryRenderer";
@@ -71,17 +71,20 @@ describe("production SynWare definition entries", () => {
     expect(root).not.toHaveBeenCalled();
   });
 
-  it("rejects a component default before it can become a host entry", async () => {
+  it("builds a component default from the registered manifest without rendering it during loading", async () => {
     const app = definition("com.syndromatic.component-default");
     const runtime = createTestRuntime({ id: "runtime:component-default" });
-    runtime.apps.register({
-      ...createSynWareBundle(app),
-      loadModule: async () => ({ default: () => null }),
-    });
-
-    await expect(runtime.bundles.loadBundle(app.manifest.id)).rejects.toMatchObject({
-      code: "BUNDLE_INVALID_MODULE",
-    });
+    const component = vi.fn(() => <p>Notes</p>);
+    try {
+      runtime.apps.register({
+        ...createSynWareBundle(app),
+        loadModule: async () => ({ default: component }),
+      });
+      const loaded = await runtime.bundles.loadBundle(app.manifest.id);
+      expect(loaded.definition?.manifest).toEqual(app.manifest);
+      expect(loaded.definition?.root).toBeTypeOf("function");
+      expect(component).not.toHaveBeenCalled();
+    } finally { await runtime.dispose("test"); }
   });
 
   it("rejects a non-enumerable module default before inspecting a definition", async () => {
@@ -247,7 +250,7 @@ describe("production SynWare definition entries", () => {
 
   it("renders a loaded definition through the shared provider-owned entry renderer", async () => {
     const app = definition("com.syndromatic.shared-entry-renderer", function Root() {
-      return <output>{useSynWare().appId}</output>;
+      return <output>{useSCOS().app.id}</output>;
     });
     const runtime = createTestRuntime({ id: "runtime:shared-entry-renderer" });
     runtime.apps.register({

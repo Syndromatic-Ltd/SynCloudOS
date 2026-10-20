@@ -34,6 +34,6 @@ export function AppWindowChromePropsProvider({ value, children }: {
  * system-chrome windows, and frameless windows never receive chrome props.
  * The providing context and slot plumbing are host internals; applications
  * only ever see this hook and the props value. */
-export function useSynWareWindowChrome(): AppWindowChromeProps | null {
+export function useWindowChrome(): AppWindowChromeProps | null {
   return useContext(AppWindowChromePropsContext);
 }

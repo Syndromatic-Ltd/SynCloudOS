@@ -22,6 +22,8 @@ import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 import type { HFXFeedbackPresetName, HFXFeedbackRequest } from "../../Feedback";
 import { NSESpinner } from "../../Progress/NSEProgress";
 import { classes, resolveNSEControlHaptic, sizedControlStyle, useNSEControlFeedback } from "../Core/nseControlsShared";
+import { useNSEControlCommand } from "../Core/useNSEControlCommand";
+import { useNSEActionBinding } from "../Core/useNSEControlAction";
 import { useNSEButtonPress } from "./useNSEButtonPress";
 
 export type NSEButtonTone = "medium" | "light" | "dark" | "affirmative" | "negative";
@@ -49,6 +51,14 @@ export interface NSEPushButtonProps extends ButtonHTMLAttributes<HTMLButtonEleme
   controlSize?: "regular" | "small";
   /** An explicit band height in CSS pixels; overrides controlSize. The face scales with it. */
   height?: number;
+  /**
+   * The action this button sends, by name (`action="newNote"`). The command is
+   * validated along the responder chain: the button is disabled while the action
+   * is unavailable, lit while it reports state "on", and hidden when it is hidden.
+   */
+  action?: string;
+  /** The single payload the action receives. */
+  actionPayload?: unknown;
 }
 
 export const NSEPushButton = forwardRef<HTMLButtonElement, NSEPushButtonProps>(function NSEPushButton(
@@ -64,6 +74,8 @@ export const NSEPushButton = forwardRef<HTMLButtonElement, NSEPushButtonProps>(f
     haptic,
     controlSize,
     height,
+    action,
+    actionPayload,
     children,
     className = "",
     style,
@@ -80,9 +92,16 @@ export const NSEPushButton = forwardRef<HTMLButtonElement, NSEPushButtonProps>(f
   ref
 ) {
   const { triggerNSEControlHapticForEvent } = useNSEControlFeedback();
+  const actionBinding = useNSEActionBinding(action, actionPayload);
+  const actionCommand = useNSEControlCommand(actionBinding);
+  const actionPresentation = actionCommand.presentation;
+  const actionAvailable = actionBinding === undefined || Boolean(
+    actionPresentation?.enabled && !actionPresentation.denied && !actionPresentation.hidden && !actionPresentation.stale,
+  );
 
-  const isDisabled = Boolean(disabled || loading);
+  const isDisabled = Boolean(disabled || loading || !actionAvailable);
   const press = useNSEButtonPress(isDisabled);
+  if (actionPresentation?.hidden) return null;
 
   return (
     <button
@@ -91,7 +110,7 @@ export const NSEPushButton = forwardRef<HTMLButtonElement, NSEPushButtonProps>(f
       type={type}
       data-tone={tone}
       data-selected={selected || active ? "true" : "false"}
-      data-pressed={pressed ? "true" : "false"}
+      data-pressed={pressed || actionPresentation?.state === "on" ? "true" : "false"}
       data-press-active={press.active ? "true" : "false"}
       data-loading={loading ? "true" : "false"}
       data-size={height !== undefined ? "custom" : controlSize === "small" ? "small" : undefined}
@@ -106,6 +125,7 @@ export const NSEPushButton = forwardRef<HTMLButtonElement, NSEPushButtonProps>(f
       onClick={(event) => {
         if (!press.allowsClick(event.detail)) { event.preventDefault(); event.stopPropagation(); return; }
         onClick?.(event);
+        if (actionBinding) void actionCommand.dispatch();
         triggerNSEControlHapticForEvent(resolveNSEControlHaptic(haptic, NSE_BUTTON_TONE_HAPTICS[tone]), event, !isDisabled);
       }}
       {...props}

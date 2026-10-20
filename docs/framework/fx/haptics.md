@@ -4,7 +4,7 @@ HapticsFX (`HFX`) is the web-native analogue of Core Haptics. It describes tacti
 
 Feedback gets a portable description that designers can author, store and exchange, including the AHAP interchange format that Core Haptics uses. Playback gets a controllable transport with pause, seek, looping, rate and dynamic parameter changes. Applications get an honest capability report, because browsers differ widely: many have no vibration hardware, and where the Vibration API exists it offers timed pulses without amplitude control.
 
-HapticsFX runs in two places. The value types (`HFXHapticPattern`, `HFXHapticParameterCurve`, `HFXHapticPatternCodec` and the plain interfaces) are a library that runs anywhere JavaScript runs, including tests and workers. Playback goes through the mounted SynWare session: `useSynWareHaptics()` returns an `HFXHapticSession` that the host creates for your component, so the host can enforce permissions, honour the user's feedback settings and release everything when the component unmounts.
+HapticsFX runs in two places. The value types (`HFXHapticPattern`, `HFXHapticParameterCurve`, `HFXHapticPatternCodec` and the plain interfaces) are a library that runs anywhere JavaScript runs, including tests and workers. Playback goes through the mounted SynWare session: `useHaptics()` returns an `HFXHapticSession` that the host creates for your component, so the host can enforce permissions, honour the user's feedback settings and release everything when the component unmounts.
 
 ```ts
 import { HFXHapticPattern } from "@syndromatic/syncloudos/fx/haptics";
@@ -16,7 +16,7 @@ import { HFXHapticPattern } from "@syndromatic/syncloudos/fx/haptics";
 | --- | --- |
 | Prefix | `HFX` |
 | Entry | `@syndromatic/syncloudos/fx/haptics` |
-| Hook | `useSynWareHaptics`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useHaptics`, from `@syndromatic/syncloudos/sdk` |
 | Permission | `haptics.play` in the manifest `permissions` list |
 | Analogue | Core Haptics (`CHHapticEngine`, `CHHapticPattern`, `CHHapticAdvancedPatternPlayer`, AHAP) |
 
@@ -39,10 +39,10 @@ Presets are the simplest way to give feedback. `trigger()` accepts one of eleven
 
 ```tsx
 import { useState } from "react";
-import { useSynWareHaptics } from "@syndromatic/syncloudos/sdk";
+import { useHaptics } from "@syndromatic/syncloudos/sdk";
 
 export function SaveButton() {
-  const haptics = useSynWareHaptics();
+  const haptics = useHaptics();
   const [saved, setSaved] = useState(false);
 
   const onClick = async () => {
@@ -110,13 +110,13 @@ The audio modes behave as follows in the browser host. All of them stay silent w
 ### Preset feedback with options
 
 ```tsx
-import { useSynWareHaptics } from "@syndromatic/syncloudos/sdk";
+import { useHaptics } from "@syndromatic/syncloudos/sdk";
 import type { HFXFeedbackOptions, HFXFeedbackPresetName } from "@syndromatic/syncloudos/fx/haptics";
 
 const quiet: HFXFeedbackOptions = { intensity: 0.4, audio: "off" };
 
 export function Stepper() {
-  const haptics = useSynWareHaptics();
+  const haptics = useHaptics();
 
   const tick = (name: HFXFeedbackPresetName) => {
     haptics.trigger(name, quiet).catch((error: unknown) => {
@@ -282,7 +282,7 @@ console.log(swell.curves[1]?.valueAt(0)); // 0 (held before the first point)
 
 ### `HFXHapticClient`
 
-The mounted application's authority for creating engines. Applications rarely use it directly, because `useSynWareHaptics()` creates and disposes an engine for each component.
+The mounted application's authority for creating engines. Applications rarely use it directly, because `useHaptics()` creates and disposes an engine for each component.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -290,7 +290,7 @@ The mounted application's authority for creating engines. Applications rarely us
 
 ### `HFXHapticSession`
 
-The engine authority that an application receives. It exposes playback and inspection and leaves out host policy such as the user's vibration and button sound switches, which the host applies to every session for you. A session is a live resource: dispose it when you are done. The session that `useSynWareHaptics()` returns is disposed for you when the component unmounts.
+The engine authority that an application receives. It exposes playback and inspection and leaves out host policy such as the user's vibration and button sound switches, which the host applies to every session for you. A session is a live resource: dispose it when you are done. The session that `useHaptics()` returns is disposed for you when the component unmounts.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -321,7 +321,7 @@ After disposal, `trigger`, `start`, `reset`, `observe`, `configurePlayback`, the
 
 ### The session in a component
 
-`useSynWareHaptics()` creates the session after the component commits (in a layout effect), never asks the browser for any permission, and disposes it on unmount. Each component that calls the hook owns its own session.
+`useHaptics()` creates the session after the component commits (in a layout effect), never asks the browser for any permission, and disposes it on unmount. Each component that calls the hook owns its own session.
 
 Before the session exists, the object the hook returns is safe to read. `isSupported` is `false`, `currentTime` is 0, and `capabilities` reports `state: "unavailable"` with the reason "The component haptic owner is not mounted." Calling an action such as `trigger` before mount throws that message as an `Error`. `stop()` and `dispose()` do nothing. Create players and observe events inside effects and handlers, which run after mount.
 
@@ -329,10 +329,10 @@ The next example checks capabilities and falls back to a visual cue.
 
 ```tsx
 import { useEffect, useState } from "react";
-import { useSynWareHaptics } from "@syndromatic/syncloudos/sdk";
+import { useHaptics } from "@syndromatic/syncloudos/sdk";
 
 export function ConnectionBadge({ online }: { online: boolean }) {
-  const haptics = useSynWareHaptics();
+  const haptics = useHaptics();
   const [canVibrate, setCanVibrate] = useState(false);
 
   useEffect(() => {
@@ -422,7 +422,7 @@ The handler disposes the player after it reports. Disposing a finished player is
 
 ```tsx
 import { useEffect, useRef, useState } from "react";
-import { useSynWareHaptics } from "@syndromatic/syncloudos/sdk";
+import { useHaptics } from "@syndromatic/syncloudos/sdk";
 import { HFXHapticParameterCurve, HFXHapticPattern } from "@syndromatic/syncloudos/fx/haptics";
 import type { HFXHapticAdvancedPatternPlayer } from "@syndromatic/syncloudos/fx/haptics";
 
@@ -435,7 +435,7 @@ const pattern = new HFXHapticPattern(
 );
 
 export function PatternDeck() {
-  const haptics = useSynWareHaptics();
+  const haptics = useHaptics();
   const player = useRef<HFXHapticAdvancedPatternPlayer | null>(null);
   const [state, setState] = useState("idle");
 
@@ -532,14 +532,14 @@ Observers run in registration order. An exception thrown by one observer is swal
 
 ```tsx
 import { useEffect, useState } from "react";
-import { useSynWareHaptics } from "@syndromatic/syncloudos/sdk";
+import { useHaptics } from "@syndromatic/syncloudos/sdk";
 import { HFXHapticPattern } from "@syndromatic/syncloudos/fx/haptics";
 import type { HFXHapticLifecycleEvent } from "@syndromatic/syncloudos/fx/haptics";
 
 const pulse = new HFXHapticPattern([{ type: "continuous", relativeTime: 0, duration: 0.3, intensity: 0.7 }]);
 
 export function PulseStatus() {
-  const haptics = useSynWareHaptics();
+  const haptics = useHaptics();
   const [log, setLog] = useState<string[]>([]);
 
   useEffect(() => {
@@ -685,7 +685,7 @@ Where haptic hardware is missing, NSE controls that request feedback fall back t
 
 ### Permissions and denial
 
-Declare `haptics.play` in the manifest `permissions` list. The permission is checked when a session is created, which happens after the component mounts. Without it, `createEngine` throws a `DOMException` with name `SecurityError` and the message "SynWare capability haptics.play must be declared." Because `useSynWareHaptics()` creates its session in a layout effect, the exception surfaces as a render error at mount, so declare the permission before you ship a component that uses the hook. If the application is closing, session creation rethrows the owner's abort reason instead.
+Declare `haptics.play` in the manifest `permissions` list. The permission is checked when a session is created, which happens after the component mounts. Without it, `createEngine` throws a `DOMException` with name `SecurityError` and the message "SynWare capability haptics.play must be declared." Because `useHaptics()` creates its session in a layout effect, the exception surfaces as a render error at mount, so declare the permission before you ship a component that uses the hook. If the application is closing, session creation rethrows the owner's abort reason instead.
 
 The hook never prompts the user. The user's vibration and button sound switches, and the browser's audio policy, remain in force for every session. A pattern never turns on feedback that the user has turned off.
 
@@ -877,7 +877,7 @@ export const events = recordPattern(new HFXHapticPattern([{ type: "transient", r
 
 ## Lifetimes and disposal
 
-- A session belongs to the component that called `useSynWareHaptics()`. The hook disposes it on unmount, and the host disposes any session that outlives its application.
+- A session belongs to the component that called `useHaptics()`. The hook disposes it on unmount, and the host disposes any session that outlives its application.
 - Dispose each player you create when you finish with it. A session holds at most 128 players, and a disposed player is released immediately.
 - A player's `completionHandler` runs once per run. `pause()` does not count as an end.
 - `session.stop()` cancels output and leaves players usable. `session.reset()` also invalidates audio resources. `session.dispose()` ends everything, and the session cannot be used again.

@@ -25,7 +25,7 @@ import * as React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { WindowPresentation } from "../../src/SynCloudOS/Windows";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { useSynWare } from "../../src/SynCloudOS/AppSDK";
+import { useSCOS } from "../../src/SynCloudOS/AppSDK";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
 import { createApplicationWindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 import { standardWindow } from "../fixtures/windowTestDependencies";
@@ -34,7 +34,7 @@ import { createTestBundle, createTestRuntime } from "./helpers";
 afterEach(cleanup);
 
 describe("ApplicationWindowContent scoped app runtime", () => {
-  it("does not expose kernel controls through mounted props or the useSynWare client", async () => {
+  it("does not expose kernel controls through mounted props or the useSCOS client", async () => {
     const runtime = createTestRuntime();
     let receivedProps: Record<string, unknown> | null = null;
     let appClient: Record<string, unknown> | null = null;
@@ -45,7 +45,7 @@ describe("ApplicationWindowContent scoped app runtime", () => {
         loadModule: async () => ({
           default: (props: Record<string, unknown>) => {
             receivedProps = props;
-            const app = useSynWare();
+            const app = useSCOS();
             appClient = app as unknown as Record<string, unknown>;
             missingDocument = app.documents.workspaceDocuments.getDocument("document:missing");
             return <p>Scoped window application</p>;

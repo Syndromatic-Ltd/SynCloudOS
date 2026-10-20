@@ -26,7 +26,7 @@ import { GFXImage } from "../../../src/FX/GraphicsFX/GFXImage";
 
 const host = vi.hoisted(() => ({ environment: {} as Record<string, unknown>, app: {} as Record<string, unknown> }));
 vi.mock("../../../src/NSE/Animation/NSEAnimationEnvironment", () => ({ useNSEAnimationEnvironment: () => host.environment }));
-vi.mock("../../../src/SynCloudOS/AppSDK/SynWareContext", () => ({ useSynWare: () => host.app }));
+vi.mock("../../../src/SynCloudOS/AppSDK/scos/useSCOS", () => ({ useSCOS: () => host.app }));
 vi.mock("../../../src/FX/ImageFX/IFXShader", () => ({
   IFXShader: class Shader {
     constructor(readonly source: string, readonly uniforms: Record<string, { type: string; value: number | readonly number[] }> = {}) {}

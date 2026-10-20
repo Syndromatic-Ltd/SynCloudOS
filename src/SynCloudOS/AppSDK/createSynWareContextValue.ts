@@ -35,6 +35,7 @@ import type {
   AppWindowSnapshot,
 } from "./appClientTypes";
 import type { SynWareContextValue, SynWareRuntimeInfo } from "./appContextTypes";
+import { registerSCOSAppSession } from "./scos/scosSessionRegistry";
 
 function runtimeIdFor(runtime: SynWareRuntime): string {
   if (!runtime.id) throw new Error("Mounted SynWare facade did not provide a runtime identity.");
@@ -193,6 +194,9 @@ function windowClientFor(runtime: SynWareRuntime, sessionId: string): AppWindowC
     },
     openDocumentWindow: runtime.windows.openDocumentWindow,
     focus: runtime.windows.focus,
+    minimise: runtime.windows.minimise,
+    zoom: runtime.windows.zoom,
+    setTitle: runtime.windows.setTitle,
     close: runtime.windows.close,
   });
 }
@@ -337,10 +341,16 @@ function audioClientFor(runtime: SynWareRuntime): AUFXAudioClient {
 export function createSynWareContextValue(runtime: SynWareRuntime, branding: SynWareContextValue["branding"] = Object.freeze({ name: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "" })): SynWareContextValue {
   const sessionId = `${runtime.app.id}:${runtime.responderId}`;
   const environment = getMountedAppEnvironmentClients(runtime);
-  return Object.freeze({
+  const context: SynWareContextValue = Object.freeze({
     runtimeInfo: runtimeInfoFor(runtime),
     branding,
     appId: runtime.app.id,
+    appInfo: Object.freeze({
+      id: runtime.app.id,
+      version: runtime.app.version,
+      title: runtime.app.displayName || runtime.app.name,
+    }),
+    launcher: environment.launcher,
     responderId: runtime.responderId,
     sessionId,
     signal: runtime.signal,
@@ -365,6 +375,7 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
     identity: environment.identity,
     notifications: environment.notifications,
     errors: environment.errors,
+    alerts: environment.alerts,
     externalActions: environment.externalActions,
     share: environment.share,
     workArea: environment.workArea,
@@ -386,4 +397,8 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
     webContent: environment.webContent,
     trusted: environment.trusted,
   });
+  const unregister = registerSCOSAppSession({ appId: context.appId, ...context.appInfo, context });
+  runtime.signal.addEventListener("abort", unregister, { once: true });
+  if (runtime.signal.aborted) unregister();
+  return context;
 }

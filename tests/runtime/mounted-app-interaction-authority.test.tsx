@@ -23,7 +23,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { useSynWare, type SynWareContextValue } from "../../src/SynCloudOS/AppSDK";
+import { useSCOS, type SCOSFacade } from "../../src/SynCloudOS/AppSDK";
 import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeMount";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
@@ -69,7 +69,7 @@ function registerApp(runtime: ReturnType<typeof createTestRuntime>, id = "hostil
 }
 
 function MountedProbe({ commandExecuted }: { readonly commandExecuted: () => void }) {
-  const app = useSynWare();
+  const app = useSCOS();
   const rawContext = React.useContext(SynCloudOSRuntimeContext);
   let rawHook: unknown = null;
   try {
@@ -77,12 +77,12 @@ function MountedProbe({ commandExecuted }: { readonly commandExecuted: () => voi
   } catch (error) {
     rawHook = error;
   }
-  const overlay = useRuntimeNSEOverlayPort(`application:${app.appId}`);
+  const overlay = useRuntimeNSEOverlayPort(`application:${app.app.id}`);
   const menu = useRuntimeNSEMenuPort();
   useCommandRegistration({
-    id: `${app.appId}.probe`,
-    responderId: `control:${app.appId}`,
-    title: { key: `${app.appId}.probe`, fallback: "Probe command" },
+    id: `${app.app.id}.probe`,
+    responderId: `control:${app.app.id}`,
+    title: { key: `${app.app.id}.probe`, fallback: "Probe command" },
     payload: noPayload,
     scope: "focused",
     defaultKeyBindings: [],
@@ -92,19 +92,19 @@ function MountedProbe({ commandExecuted }: { readonly commandExecuted: () => voi
   });
   return (
     <ResponderScope
-      responderId={`control:${app.appId}`}
+      responderId={`control:${app.app.id}`}
       kind="control"
-      parentResponderId={`application:${app.appId}`}
-      scopeId={`control:${app.appId}`}
+      parentResponderId={`application:${app.app.id}`}
+      scopeId={`control:${app.app.id}`}
     >
       <FocusScope
-        scopeId={`focus:${app.appId}`}
+        scopeId={`focus:${app.app.id}`}
         kind="modal"
-        parentResponderId={`control:${app.appId}`}
+        parentResponderId={`control:${app.app.id}`}
         modal
         trapFocus
       >
-        <button type="button" onClick={() => { void menu.commands.dispatch(`${app.appId}.probe`); }}>
+        <button type="button" onClick={() => { void menu.commands.dispatch(`${app.app.id}.probe`); }}>
           App scoped command
         </button>
         <output
@@ -122,10 +122,10 @@ function MountedProbe({ commandExecuted }: { readonly commandExecuted: () => voi
 }
 
 function GenerationProbe({ onGeneration, label = "Replacement generation" }: {
-  readonly onGeneration: (context: SynWareContextValue) => void;
+  readonly onGeneration: (context: SCOSFacade) => void;
   readonly label?: string;
 }) {
-  const context = useSynWare();
+  const context = useSCOS();
   React.useLayoutEffect(() => { onGeneration(context); }, [context, onGeneration]);
   return <p>{label}</p>;
 }
@@ -134,20 +134,20 @@ function CanonicalDocumentChildProbe({ documentId, onComplete }: {
   readonly documentId: string;
   readonly onComplete: () => void;
 }) {
-  const app = useSynWare();
+  const app = useSCOS();
   const responderId = `document:${documentId}:editor:body`;
   const execute = React.useCallback(() => undefined, []);
   const declaration = React.useMemo(() => ({
-    id: `${app.appId}.document-child-probe`,
+    id: `${app.app.id}.document-child-probe`,
     responderId,
-    title: { key: `${app.appId}.document-child-probe`, fallback: "Document child probe" },
+    title: { key: `${app.app.id}.document-child-probe`, fallback: "Document child probe" },
     payload: noPayload,
     scope: "focused" as const,
     defaultKeyBindings: [],
     undo: { kind: "none" as const },
     validate: () => ({ enabled: true }),
     execute,
-  }), [app.appId, execute, responderId]);
+  }), [app.app.id, execute, responderId]);
   useCommandRegistration(declaration);
   return (
     <ResponderScope
@@ -480,7 +480,7 @@ describe("mounted application context and interaction authority", () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
     const app = registerApp(runtime, "replace-app");
-    const generations: SynWareContextValue[] = [];
+    const generations: SCOSFacade[] = [];
     const frame = (key: string) => (
       <React.StrictMode>
         <SynCloudOSProvider runtime={runtime}>
@@ -587,7 +587,7 @@ describe("mounted application context and interaction authority", () => {
     runtimes.push(runtime);
     const id = "window-replace-app";
     const windowId = "window-replace-app";
-    const generations: SynWareContextValue[] = [];
+    const generations: SCOSFacade[] = [];
     const bundle = (route: string, label: string) => createTestBundle({ id, route }, {
       loadModule: async () => ({
         default: () => <GenerationProbe label={label} onGeneration={(context) => { generations.push(context); }} />,

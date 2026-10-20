@@ -228,7 +228,7 @@ describe("portable SynWare SDK packages", () => {
     expect(packageManifest.exports["./vite"]).toEqual({ types: "./types/vite.d.mts", import: "./vite.mjs" });
     expect(Object.keys(packageManifest.exports).every((key) => !key.includes("*"))).toBe(true);
     expect(packageManifest.exports["./nse/animation"]).toBeUndefined();
-    expect(packageManifest.exports["."]).toBeUndefined();
+    expect(packageManifest.exports["."]).toEqual({ types: "./index.d.ts", import: "./index.js" });
     expect(directoryFiles(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos"))
       .filter((path) => /^chunks\/(?:FrameworkTestHost|inspectorDev(?:Entry|Host))-/u.test(path))).toEqual([]);
     const emittedRouterDeclaration = readFileSync(join(
@@ -241,7 +241,7 @@ describe("portable SynWare SDK packages", () => {
       "SynCloudOS",
       "AppSDK",
       "hooks",
-      "useSynWareRouter.d.ts",
+      "useRouter.d.ts",
     ), "utf8");
     expect(emittedRouterDeclaration).not.toMatch(/AppRouteSession|MountedSynWareRouter|createMountedSynWareRouter/u);
     const emittedSdkDeclaration = readFileSync(join(
@@ -299,6 +299,11 @@ assert.equal(typeof nse.NSEStackView, "function");
 assert.equal(nse.NSEStackView, layout.NSEStackView);
 assert.equal(nse.NSEAppearanceProvider, appearance.NSEAppearanceProvider);
 assert.deepEqual(Object.keys(webspring), [
+  "WEBSPRING_DRAG_FOLDER_CATCH_MARGIN",
+  "WEBSPRING_DRAG_FOLDER_REST_MS",
+  "WEBSPRING_DRAG_MERGE_REST_MS",
+  "WEBSPRING_DRAG_REORDER_REST_MS",
+  "WEBSPRING_DRAG_SPRING_OPEN_MS",
   "WEBSPRING_STAGE",
   "WebspringBoardView",
   "WebspringDragProxy",
@@ -308,26 +313,36 @@ assert.deepEqual(Object.keys(webspring), [
   "WebspringLaunchDim",
   "WebspringSurface",
   "WebspringWidgetShelf",
+  "captureWebspringDragArtworkRects",
   "captureWebspringDragReorderSlots",
+  "createIntegrationContribution",
   "createWebspringBoardView",
+  "createWebspringDragArbiter",
   "createWebspringFolderSplitPresentation",
+  "defineIntegration",
   "definePreferencePane",
   "defineWebspring",
   "defineWidget",
   "getDesktopWebspringLayout",
+  "getWebspringDragGrabOffset",
   "getWebspringDragReorderTargetFromPoint",
   "getWebspringRadialExitForIcon",
   "getWebspringSelectorTransform",
+  "integrationOwners",
+  "isDefinedWebspring",
+  "isDefinedWebspringWidget",
+  "isIntegrationDefinition",
+  "isPreferencePaneDefinition",
   "resolveWebspringIconPresentation",
   "resolveWebspringLaunchDimMotion",
   "resolveWebspringOrbPresentation",
   "stagePointStyle",
   "useWebspringDragProxyPosition",
   "useWebspringFolderAppearance",
-  "useWebspringFolderPreparation",
   "useWebspringMotion",
   "webspringIconSprings",
   "webspringSurfaceStyle",
+  "withDiscoveredWebspringItems",
 ]);
 assert.deepEqual(Object.keys(browser), [
   "BrowserImageProcessingWorker",
@@ -369,19 +384,19 @@ for (const privatePath of ["nse/NSE", "nse/private", "sdk/internal/runtime", "ty
     const sourceDirectory = join(fixture, "src");
     mkdirSync(sourceDirectory, { recursive: true });
     writeFileSync(join(sourceDirectory, "index.tsx"), `import {
-  createSynWare,
-  useSynWare,
-  useSynWareCommands,
-  useSynWareDocument,
-  useSynWarePersistence,
-  useSynWareScheduler,
-  useSynWareService,
+  useSCOS,
+  useCommands,
+  useDocument,
+  usePersistence,
+  useScheduler,
+  useService,
   defineSynWareServiceToken,
-  useSynWareTrustedClient,
-  useSynWareWindow,
+  useTrustedClient,
+  useWindow,
 } from "@syndromatic/syncloudos/sdk";
 import {
   createDeterministicScheduler,
+  createSynWare,
   createFakeCapabilityPort,
   createSynWareTestHost,
   type SynWareFakeWebContentOperation,
@@ -446,15 +461,15 @@ const manifest = {
 const externalSearchToken = defineSynWareServiceToken({ id: "com.example.external.search" });
 
 function ExternalFixture() {
-  const app = useSynWare();
+  const app = useSCOS();
   if ("resolve" in app.services || "routeState" in app) throw new Error("Retired public API leaked into the installed SDK.");
-  const persistence = useSynWarePersistence();
-  const scheduler = useSynWareScheduler();
-  const documents = useSynWareDocument();
-  const window = useSynWareWindow();
-  const trusted = useSynWareTrustedClient();
-  const service = useSynWareService(externalSearchToken);
-  useSynWareCommands([{
+  const persistence = usePersistence();
+  const scheduler = useScheduler();
+  const documents = useDocument();
+  const window = useWindow();
+  const trusted = useTrustedClient();
+  const service = useService(externalSearchToken);
+  useCommands([{
     id: "com.example.external.fixture.save",
     title: "Save",
     payload: { description: "No payload", parse: (value) => value === undefined ? { ok: true, value } : { ok: false, issues: ["No payload"] } },
@@ -564,7 +579,7 @@ export function mountFixtureWithoutContact(element: Element) {
 export const testHost = createSynWareTestHost({ app });
 export const disposal: Promise<SynWareTestDisposalReport> = testHost.dispose();
 function BrandingProbe() {
-  const app = useSynWare();
+  const app = useSCOS();
   return <output data-branding-name={app.branding.name}>{app.branding.name}</output>;
 }
 const brandingProbeApp = createSynWare({
@@ -602,7 +617,7 @@ interface ImportMeta { glob(pattern: string, options: { eager: true; query?: str
     if (externalCompile.status !== 0) {
       throw new Error(`External package fixture failed to compile:\n${externalCompile.stdout}\n${externalCompile.stderr}`);
     }
-    writeFileSync(join(sourceDirectory, "retired-manifest.ts"), `import { createSynWare } from "@syndromatic/syncloudos/sdk";
+    writeFileSync(join(sourceDirectory, "retired-manifest.ts"), `import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 
 createSynWare({
   manifest: {
@@ -767,7 +782,7 @@ createSynWare({
       "src/SynCloudOSReact/index.ts",
     ];
     for (const path of publicBarrels) {
-      expect(readFileSync(join(repositoryRoot, path), "utf8")).not.toMatch(/\buseSynWareRuntime\b/u);
+      expect(readFileSync(join(repositoryRoot, path), "utf8")).not.toMatch(/\buseSynWare(?!Context\b)[A-Z]/u);
     }
 
   });

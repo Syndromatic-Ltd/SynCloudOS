@@ -17,61 +17,61 @@
  * limitations under the License.
  */
 
-export { useSynWareLifecycle } from "./useSynWareLifecycle";
-export { useSynWareCommands } from "./useSynWareCommands";
-export type { SynWareCommandDefinition } from "./useSynWareCommands";
-export { useSynWareDocument } from "./useSynWareDocument";
-export { useSynWareWindow } from "./useSynWareWindow";
-export type { SynWareWindowState } from "./useSynWareWindow";
-export { useSynWareService } from "./useSynWareService";
-export { useSynWarePasteboard } from "./useSynWarePasteboard";
-export { useSynWareDrag } from "./useSynWareDrag";
-export { useSynWareColourPanel } from "./useSynWareColourPanel";
-export type { SynWareColourPanelState } from "./useSynWareColourPanel";
-export { useSynWareAudio } from "./useSynWareAudio";
-export { useSynWareTrustedClient } from "./useSynWareTrustedClient";
-export { useSynWareAppearance } from "./useSynWareAppearance";
-export type { SynWareAppearanceState } from "./useSynWareAppearance";
+export { useLifecycle } from "./useLifecycle";
+export { useCommands } from "./useCommands";
+export type { SynWareCommandDefinition } from "./useCommands";
+export { useDocument } from "./useDocument";
+export { useWindow } from "./useWindow";
+export type { SynWareWindowState } from "./useWindow";
+export { useService } from "./useService";
+export { usePasteboard } from "./usePasteboard";
+export { useDrag } from "./useDrag";
+export { useColourPanel } from "./useColourPanel";
+export type { SynWareColourPanelState } from "./useColourPanel";
+export { useAudio } from "./useAudio";
+export { useTrustedClient } from "./useTrustedClient";
+export { useAppearance } from "./useAppearance";
+export type { SynWareAppearanceState } from "./useAppearance";
 export {
-  useSynWareAnimations,
-  useSynWareConnectivity,
-  useSynWareErrors,
-  useSynWareEvents,
-  useSynWareExternalActions,
-  useSynWareIdentity,
-  useSynWareIdentitySnapshot,
-  useSynWareFilePanels,
-  useSynWareImages,
-  useSynWareMediaQueries,
-  useSynWareMediaQuery,
-  useSynWareNotifications,
-  useSynWarePersistence,
-  useSynWareScheduler,
-  useSynWareSettingsAvailability,
-  useSynWareSettingsAvailabilitySnapshot,
-  useSynWareShare,
-  useSynWareTextLayout,
-  useSynWareTracking,
-  useSynWareWebContent,
-  useSynWareWorkArea,
-  useSynWareWorkAreaSnapshot,
-} from "./useSynWareEnvironment";
+  useAnimations,
+  useConnectivity,
+  useErrors,
+  useEvents,
+  useExternalActions,
+  useIdentity,
+  useIdentitySnapshot,
+  useFilePanels,
+  useImages,
+  useMediaQueries,
+  useMediaQuery,
+  useNotifications,
+  usePersistence,
+  useScheduler,
+  useSettingsAvailability,
+  useSettingsAvailabilitySnapshot,
+  useShare,
+  useTextLayout,
+  useTracking,
+  useWebContent,
+  useWorkArea,
+  useWorkAreaSnapshot,
+} from "./environmentHooks";
 
-export { useSynWareMotion } from "./useSynWareMotion";
+export { useMotion } from "./useMotion";
 
-export { useSynWareMedia } from "./useSynWareMedia";
+export { useMedia } from "./useMedia";
 
-export { useSynWareVideo } from "./useSynWareVideo";
+export { useVideo } from "./useVideo";
 
-export { useSynWareLocation } from "./useSynWareLocation";
+export { useLocation } from "./useLocation";
 
-export { useSynWareMIDI } from "./useSynWareMIDI";
+export { useMIDI } from "./useMIDI";
 
-export { useSynWareLumina } from "./useSynWareLumina";
+export { useLumina } from "./useLumina";
 
-export { useSynWareHaptics } from "./useSynWareHaptics";
-export { useSynWareRouteData } from "./useSynWareRouteData";
-export { useSynWareRouter } from "./useSynWareRouter";
-export { useSynWareRouteState } from "./useSynWareRouteState";
-export type { SynWareRouteStateClient } from "./useSynWareRouteState";
-export type { SynWareRouter, SynWareRouterPreloadOptions, SynWareRouterSnapshot } from "./useSynWareRouter";
+export { useHaptics } from "./useHaptics";
+export { useRouteData } from "./useRouteData";
+export { useRouter } from "./useRouter";
+export { useRouteState } from "./useRouteState";
+export type { SynWareRouteStateClient } from "./useRouteState";
+export type { SynWareRouter, SynWareRouterPreloadOptions, SynWareRouterSnapshot } from "./useRouter";

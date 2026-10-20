@@ -25,7 +25,7 @@ import { HostSiteBrandingProvider, ResponderScope, SynCloudOSProvider } from "..
 import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeMount";
-import { useSynWare } from "../../src/SynCloudOS/AppSDK/SynWareContext";
+import { useSCOS } from "../../src/SynCloudOS/AppSDK/scos/useSCOS"
 import { SynCloudOSWatchdog } from "../../src/SynCloudOS/ErrorManager/SynCloudOSWatchdog";
 import type { DocumentCloseReviewer, DocumentType } from "../../src/SynCloudOS/Documents";
 import { InMemoryDocumentAdapter } from "../../src/SynCloudOS/Documents/Adapters";
@@ -98,7 +98,7 @@ describe("window mount transfer re-mint", () => {
     let latestSignal: AbortSignal | null = null;
 
     function BrandingProbe() {
-      const context = useSynWare();
+      const context = useSCOS();
       context.drag.endpoint();
       initialSignal ??= context.signal;
       latestSignal = context.signal;
@@ -148,7 +148,7 @@ describe("window mount transfer re-mint", () => {
     let firstSignal: AbortSignal | null = null;
     let latestSignal: AbortSignal | null = null;
     function LifecycleProbe({ tick }: { readonly tick: number }) {
-      const context = useSynWare();
+      const context = useSCOS();
       context.drag.endpoint();
       firstSignal ??= context.signal;
       latestSignal = context.signal;
@@ -198,7 +198,7 @@ describe("window mount transfer re-mint", () => {
     if (!app) throw new Error("The strict-app fixture did not register.");
 
     function LiveCapabilityProbe() {
-      const context = useSynWare();
+      const context = useSCOS();
       context.drag.endpoint();
       return <span>strict live content</span>;
     }
@@ -246,7 +246,7 @@ describe("window mount transfer re-mint", () => {
     let initialSignal: AbortSignal | null = null;
     let latestSignal: AbortSignal | null = null;
     function LiveCapabilityProbe() {
-      const context = useSynWare();
+      const context = useSCOS();
       context.drag.endpoint();
       initialSignal ??= context.signal;
       latestSignal = context.signal;
@@ -314,7 +314,7 @@ describe("window mount transfer re-mint", () => {
     };
     function LiveCapabilityProbe({ label }: { readonly label: string }) {
       React.useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
-      const context = useSynWare();
+      const context = useSCOS();
       context.drag.endpoint();
       return <span>{label}</span>;
     }

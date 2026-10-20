@@ -20,7 +20,7 @@ import { VFXVideoFormat, VFXPixelBuffer } from "@syndromatic/syncloudos/fx/video
 | --- | --- |
 | Prefix | `VFX` |
 | Entries | `@syndromatic/syncloudos/fx/video` and `@syndromatic/syncloudos/fx/video/webm` |
-| Hooks | `useSynWareVideo` for capture, and `useSynWare().video` for decoding, encoding, processing and presentation |
+| Hooks | `useVideo` for capture, and `useSCOS().video` for decoding, encoding, processing and presentation |
 | Permissions | `video.capture.camera` and `video.capture.display` for capture. Decoding, encoding and processing need none. |
 | Analogue | Video Toolbox (`VTDecompressionSession`, `VTCompressionSession`), AVFoundation capture and asset writing, Core Video (`CVPixelBuffer`, `CVPixelBufferPool`) |
 
@@ -224,11 +224,11 @@ A failure in the backend, in `output` or a pending-output overflow moves the dec
 
 ```tsx
 import { useEffect, useRef } from "react";
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 import { VFXEncodedChunk, type VFXFrame } from "@syndromatic/syncloudos/fx/video";
 
 export function useVP8Decoder(onFrame: (frame: VFXFrame) => void) {
-  const app = useSynWare();
+  const app = useSCOS();
   const decoder = useRef<ReturnType<typeof app.video.createDecoder> | null>(null);
 
   useEffect(() => {
@@ -295,11 +295,11 @@ The options mirror the decoder's. `output` receives each `VFXEncodedChunk` and a
 `VFXEncoderSession` and `VFXMountedEncoderOptions` are the session forms. `VFXEncoderBackend`, `VFXEncoderBackendCallbacks`, `VFXEncoderCapabilityProbe`, `VFXEncoderState`, `VFXEncoderLatencyMode`, `VFXEncoderAlphaMode`, `VFXEncoderHardwareAcceleration`, `VFXEncoderFrameOptions`, `VFXEncoderDecoderConfig`, `VFXEncoderOutputMetadata` and `VFXEncoderOptions` describe the plug points.
 
 ```tsx
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 import type { VFXEncodedChunk, VFXFrame } from "@syndromatic/syncloudos/fx/video";
 
 export function useRecorder() {
-  const app = useSynWare();
+  const app = useSCOS();
 
   return async function record(frames: AsyncIterable<VFXFrame>, onChunk: (chunk: VFXEncodedChunk) => void) {
     const capability = await app.video.queryEncoder({
@@ -497,11 +497,11 @@ Media-only coordinators have their own session scope, so several independently c
 
 ```tsx
 import { useEffect, useRef } from "react";
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 import type { VFXFrame } from "@syndromatic/syncloudos/fx/video";
 
 export function VideoView({ frames }: { frames: AsyncIterable<VFXFrame> }) {
-  const app = useSynWare();
+  const app = useSCOS();
   const canvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -552,7 +552,7 @@ export function VideoView({ frames }: { frames: AsyncIterable<VFXFrame> }) {
 
 ## Capture
 
-`useSynWareVideo()` returns a `VFXCaptureSession` bound to your component. Mounting it requests nothing. The camera and display prompts appear only from `requestCamera()` and `requestDisplay()`.
+`useVideo()` returns a `VFXCaptureSession` bound to your component. Mounting it requests nothing. The camera and display prompts appear only from `requestCamera()` and `requestDisplay()`.
 
 | Member | Description |
 | --- | --- |
@@ -571,10 +571,10 @@ A refusal by the user or by policy moves the session to `"denied"` and rejects t
 
 ```tsx
 import { useEffect, useState } from "react";
-import { useSynWareVideo } from "@syndromatic/syncloudos/sdk";
+import { useVideo } from "@syndromatic/syncloudos/sdk";
 
 export function CameraButton() {
-  const video = useSynWareVideo();
+  const video = useVideo();
   const [status, setStatus] = useState("Idle");
 
   useEffect(() => video.subscribe(() => setStatus(video.state)), [video]);
@@ -608,11 +608,11 @@ export default {
 
 ## The session client
 
-`useSynWare().video` is the full `VFXVideoClient`. All of its resources are owned by your application and released when it closes.
+`useSCOS().video` is the full `VFXVideoClient`. All of its resources are owned by your application and released when it closes.
 
 | Method | Returns | Description |
 | --- | --- | --- |
-| `createCaptureSession(signal?)` | `VFXCaptureSession` | A capture session. `useSynWareVideo()` wraps one for a component. |
+| `createCaptureSession(signal?)` | `VFXCaptureSession` | A capture session. `useVideo()` wraps one for a component. |
 | `queryDecoder(input, signal?)` | `Promise<VFXDecoderCapability>` | Asks the host whether it can decode a configuration. |
 | `createDecoder(options, signal?)` | `VFXDecoderSession` | A decoder with WebCodecs behind it. |
 | `queryEncoder(input, signal?)` | `Promise<VFXEncoderCapability>` | Asks whether the host can encode a configuration. |

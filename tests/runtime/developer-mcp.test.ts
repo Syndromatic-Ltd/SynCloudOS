@@ -14,17 +14,19 @@ import { parseManifest } from "../../scripts/synware/validation-core.mjs";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { writeDeveloperMcpPackage, writeDeveloperSdkData } from "../../scripts/developer-mcp/build-package.mjs";
+import { discoverSynWareProject } from "../../scripts/synware/vite-plugin.mjs";
 
 const repository = resolve(import.meta.dirname, "../..");
 let project: string;
 function put(path: string, text: string) { const file = resolve(project, path); mkdirSync(resolve(file, ".."), { recursive: true }); writeFileSync(file, text); }
 beforeEach(() => {
   project = mkdtempSync(resolve(tmpdir(), "syncloudos-mcp-test-"));
-  put("package.json", JSON.stringify({ name: "consumer", dependencies: { "@syndromatic/syncloudos": "1.0.0-beta.1" } }));
+  put("package.json", JSON.stringify({ name: "consumer", version: "2.3.4", dependencies: { "@syndromatic/syncloudos": "1.0.0-beta.1" } }));
   put("vite.config.ts", 'import { synCloudOS } from "@syndromatic/syncloudos/vite"; export default {plugins:[synCloudOS({appsDirectory:"applications",webspringEntry:false})]};');
-  put("node_modules/@syndromatic/syncloudos/package.json", JSON.stringify({ name: "@syndromatic/syncloudos", version: "1.0.0-beta.1", exports: { "./sdk": { types: "./sdk.d.ts" } } }));
+  put("node_modules/@syndromatic/syncloudos/package.json", JSON.stringify({ name: "@syndromatic/syncloudos", version: "1.0.0-beta.1", exports: { ".": { types: "./index.d.ts" }, "./sdk": { types: "./sdk.d.ts" } } }));
   const sdk = resolve(project, "node_modules/@syndromatic/syncloudos");
   cpSync(resolve(repository, "tests/fixtures/developer-mcp/sdk.d.ts"), resolve(sdk, "sdk.d.ts"));
+  put("node_modules/@syndromatic/syncloudos/index.d.ts", "export declare const SCOS: { app: { title: string } };\n");
   mkdirSync(resolve(sdk, "tooling"));
   cpSync(resolve(repository, "src/SynCloudOS/AppSDK/manifest/synapp-manifest.schema.json"), resolve(sdk, "tooling/manifest.schema.json"));
   put("node_modules/@syndromatic/syncloudos/tooling/error-catalogue.json", JSON.stringify(errorCatalogue));
@@ -42,6 +44,21 @@ describe("developer MCP tools", () => {
     expect(result.vite.options.appsDirectory).toBe("applications");
     expect(result.shell.enabled).toBe(false);
   });
+  it("derives an Info.ts-less application consistently with the plugin and validator", async () => {
+    put("applications/NSEControlGallery.app/Contents/index.tsx", "export default function Gallery() { return null; }");
+    const inspected = await inspectProject({ projectRoot: project });
+    expect(inspected.bundles[0].resolvedManifest).toMatchObject({ id: "nse-control-gallery", title: "NSE Control Gallery", version: "2.3.4" });
+    const validated = await validateProject({ projectRoot: project, typescript: false });
+    expect(validated.ok).toBe(true);
+    expect(validated.bundles[0].manifest).toEqual(inspected.bundles[0].resolvedManifest);
+    const plugin = discoverSynWareProject(project, { appsDirectory: "applications", webspringEntry: false });
+    expect(plugin.bundles[0].manifest).toEqual(inspected.bundles[0].resolvedManifest);
+  });
+  it.each(["preferencePane", "widget", "integration"])("scaffolds and validates %s", async kind => {
+    await scaffold({ projectRoot: project, name: "Latest", kind, owners: ["notes"] });
+    expect((await inspectProject({ projectRoot: project })).folders).toHaveLength(1);
+    expect((await validateProject({ projectRoot: project, typescript: false })).ok).toBe(true);
+  });
   it("lists entries and returns signatures, JSDoc and relevant offline sections", async () => {
     expect((await lookupSdk({ projectRoot: project })).entries).toContain("sdk");
     const result = await lookupSdk({ projectRoot: project, entry: "sdk", query: "createSynWre" });
@@ -53,15 +70,15 @@ describe("developer MCP tools", () => {
   });
   it.each(["application menu", "settings", "preferences", "account"])("prioritises the public application-menu entry and example for %s", async query => {
     put("node_modules/@syndromatic/syncloudos/sdk.d.ts", [
-      "export declare function useSynWareApplicationMenuTrigger(): { open(anchor: HTMLElement): void } | null;",
+      "export declare function useApplicationMenuTrigger(): { open(anchor: HTMLElement): void } | null;",
       "export interface SynWareApplicationMenuManifest { trigger?: 'content'; preferences?: { commandId: string }; }",
       "export interface NSEApplicationMenuProps { settings: unknown; }",
       "export declare function getAccountAvailability(): boolean;",
     ].join("\n"));
-    put("node_modules/@syndromatic/syncloudos/docs/framework/menu.md", '# Menus\n\n## Application menu and Preferences\n\nAccount opens through System Preferences. Declare applicationMenu: { trigger: "content" }.\n\n```tsx\nconst menu = useSynWareApplicationMenuTrigger();\n```\n');
+    put("node_modules/@syndromatic/syncloudos/docs/framework/menu.md", '# Menus\n\n## Application menu and Preferences\n\nAccount opens through System Preferences. Declare applicationMenu: { trigger: "content" }.\n\n```tsx\nconst menu = useApplicationMenuTrigger();\n```\n');
     put("node_modules/@syndromatic/syncloudos/docs/framework/low-level.md", "# Low-level settings and account\n\nNSEApplicationMenuProps configures menu props.\n");
     const result = await lookupSdk({ projectRoot: project, query });
-    expect(result.symbols[0].name).toBe("useSynWareApplicationMenuTrigger");
+    expect(result.symbols[0].name).toBe("useApplicationMenuTrigger");
     expect(result.symbols[1].name).toBe("SynWareApplicationMenuManifest");
     expect(result.docs[0].file).toBe("docs/framework/menu.md");
     expect(result.docs[0].text).toContain("```tsx");
@@ -91,10 +108,10 @@ describe("developer MCP tools", () => {
     let toggles = 0;
     let port: { setAnchor(element: unknown): void; toggle(): void; label: string; open: boolean } | null = { setAnchor: element => { anchors.push(element); }, toggle: () => { toggles++; }, label: "Application menu", open: true };
     type GeneratedButton = { type: string; props: { disabled: boolean; ref(element: unknown): void; onClick(): void } };
-    const module: { exports: { default?: { root(): { props: { children: GeneratedButton[] } } } } } = { exports: {} };
+    const module: { exports: { default?: () => { props: { children: GeneratedButton[] } } } } = { exports: {} };
     const require = createRequire(import.meta.url);
-    new Function("require", "module", "exports", code)((name: string) => name === "@syndromatic/syncloudos/sdk" ? { createSynWare: (options: unknown) => options, useSynWareApplicationMenuTrigger: () => port } : name === "./Info" ? { default: manifest } : require(name), module, module.exports);
-    const root = module.exports.default!.root;
+    new Function("require", "module", "exports", code)((name: string) => name === "@syndromatic/syncloudos" ? { SCOS: { app: { title: "Primary" } }, useApplicationMenuTrigger: () => port } : require(name), module, module.exports);
+    const root = module.exports.default!;
     const button = root().props.children.find(child => child.type === "button")!;
     expect(button.props).toMatchObject({ disabled: false, "aria-haspopup": "menu", "aria-expanded": true, children: "Application menu" });
     button.props.ref("anchor");
@@ -111,7 +128,7 @@ describe("developer MCP tools", () => {
   });
   it("keeps the content-menu next step when explicit policy and presentation flags are given, but not for a windowed secondary", async () => {
     const primary = await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true, requiresLogin: false }, presentation: "appView", contentApplicationMenu: false });
-    expect(primary.nextSteps.some((step: string) => step.includes('applicationMenu: { trigger: "content" }') && step.includes("useSynWareApplicationMenuTrigger"))).toBe(true);
+    expect(primary.nextSteps.some((step: string) => step.includes('applicationMenu: { trigger: "content" }') && step.includes("useApplicationMenuTrigger"))).toBe(true);
     const secondary = await scaffold({ projectRoot: project, id: "org.example.secondary", name: "Secondary", route: "/secondary", policy: { public: true }, presentation: "windowedView" });
     expect(secondary.nextSteps.some((step: string) => step.includes("applicationMenu"))).toBe(false);
   });
@@ -188,7 +205,7 @@ describe("developer MCP tools", () => {
   });
   it("reports manifest, missing bundle entry and TypeScript findings structurally", async () => {
     await scaffold({ projectRoot: project, id: "org.example.notes", name: "Notes", route: "/notes" });
-    put("applications/Notes.app/Contents/Info.ts", 'export default {schemaVersion:1,id:"invalid"};');
+    put("applications/Notes.app/Contents/Info.ts", 'export default {id:"INVALID ID"};');
     let result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.ok).toBe(false);
     expect(result.findings[0]).toMatchObject({ rule: "synware.manifest", line: expect.any(Number), file: expect.stringContaining("Info.ts") });
@@ -275,7 +292,7 @@ describe("developer MCP tools", () => {
       await client.connect(transport);
       const listed = await client.listTools();
       expect(listed.tools.map(tool=>tool.name)).toHaveLength(5);
-      expect(listed.tools.find(tool=>tool.name==="syncloudos.scaffold")?.inputSchema.required).toEqual(["id","name","route"]);
+      expect(listed.tools.find(tool=>tool.name==="syncloudos.scaffold")?.inputSchema.required).toEqual(["name"]);
       expect(listed.tools.find(tool=>tool.name==="syncloudos.scaffold")?.inputSchema.properties?.contentApplicationMenu).toMatchObject({ type: "boolean" });
       const scaffolded = await client.callTool({ name: "syncloudos.scaffold", arguments: { id: "org.example.menu", name: "Menu", route: "/menu", contentApplicationMenu: true } });
       expect(scaffolded.isError).not.toBe(true);

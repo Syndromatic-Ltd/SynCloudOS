@@ -197,7 +197,7 @@ export class NSEDictionaryController<TValue> extends NSEController<
   #changedDuringEdit = false;
 
   constructor(options: DictionaryControllerOptions<TValue>) {
-    super({ kind: "NSEDictionaryController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal });
+    super({ kind: "NSEDictionaryController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal, owner: options.owner });
     this.#clone = options.clone ?? structuredClone;
     this.#compareKeys = options.compareKeys ?? codePointCompare;
     this.#initialKey = options.initialKey ?? "key";

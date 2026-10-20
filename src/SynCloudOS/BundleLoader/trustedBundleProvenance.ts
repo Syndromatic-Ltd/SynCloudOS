@@ -26,6 +26,11 @@ export type SynWareTrustedPrivilege = string;
 export interface SynWareTrustedBundleProvenance {
   readonly sourceKey: string;
   readonly privileges: ReadonlySet<SynWareTrustedPrivilege>;
+  /** A bundle the project itself declares. Its manifest capabilities are its
+   * grant, so every privileged surface a capability unlocks is available to
+   * it; a bundle from outside the project holds only the privileges the host
+   * named. */
+  readonly firstParty: boolean;
 }
 
 /** Host/test minting accepts a short iterable and always seals it into the
@@ -81,6 +86,23 @@ function createTrustedProvenance(
   return Object.freeze({
     sourceKey: input.sourceKey,
     privileges: readonlyPrivilegeSet(privileges),
+    firstParty: false,
+    [trustedBundleProvenanceBrand]: true as const,
+    registeredAppId: bundle.manifest.id,
+  });
+}
+
+function createProjectProvenance(
+  bundle: TrustedSynWareBundle,
+  sourceKey: string,
+): BrandedTrustedBundleProvenance {
+  if (typeof sourceKey !== "string" || sourceKey.trim().length === 0) {
+    throw new TypeError("Project bundle provenance requires a non-empty source key.");
+  }
+  return Object.freeze({
+    sourceKey: sourceKey.trim(),
+    privileges: readonlyPrivilegeSet([]),
+    firstParty: true,
     [trustedBundleProvenanceBrand]: true as const,
     registeredAppId: bundle.manifest.id,
   });
@@ -103,6 +125,21 @@ export function trustSynWareBundleForCanonicalHost<TBundle extends TrustedSynWar
 ): TBundle {
   assertCanonicalTrustedBundleCandidate(bundle);
   trustedBundleProvenanceByBundle.set(bundle, createTrustedProvenance(bundle, provenance));
+  return bundle;
+}
+
+/**
+ * Marks a bundle the project's own folders declare, such as every application
+ * the Vite plugin discovers under `src/SynWare`. The project is the host's own
+ * source, so no separate trusted-source table names it: each privileged call
+ * still requires the capability the app declares in `Info.ts` `permissions`.
+ */
+export function trustSynWareBundleForProject<TBundle extends TrustedSynWareBundle>(
+  bundle: TBundle,
+  sourceKey: string,
+): TBundle {
+  assertCanonicalTrustedBundleCandidate(bundle);
+  trustedBundleProvenanceByBundle.set(bundle, createProjectProvenance(bundle, sourceKey));
   return bundle;
 }
 
@@ -146,7 +183,7 @@ export function requireTrustedBundlePrivilege(
   const bundle = runtime.bundles.getBundle(appId);
   const provenance = getTrustedSynWareBundleProvenance(bundle);
   if (!bundle || bundle.manifest.id !== appId || bundle.synWareManifest?.id !== appId ||
-      !provenance || !provenance.privileges.has(privilege)) {
+      !provenance || (!provenance.firstParty && !provenance.privileges.has(privilege))) {
     throw new DOMException(`SynWare ${appId} does not hold host-owned trusted provenance for ${privilege}.`, "SecurityError");
   }
   if (!bundle.synWareManifest?.permissions?.includes(capability)) {

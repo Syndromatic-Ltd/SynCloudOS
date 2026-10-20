@@ -43,10 +43,9 @@ const BLEED = 32;
  * clipped with the well; the lip below, the drop-target ring and its shadow are
  * clipped to outside the shape.
  *
- * Nothing refers to an SVG fragment (`url(#…)` masks, filters or clips): the
- * stage snapshot behind an opening folder inlines every `url()` it computes,
- * and one fragment reference costs it the stage's background images. Blurs are
- * CSS filters and the outside clip is a CSS even-odd `path()`.
+ * Nothing refers to an SVG fragment (`url(#…)` masks, filters or clips), so the
+ * artwork also survives notification capture, which inlines computed URLs.
+ * Blurs are CSS filters and the outside clip is a CSS even-odd `path()`.
  */
 export function WebspringFolderTile({ folder, dropTarget = false, className }: WebspringFolderTileProps) {
   const appearance = useWebspringFolderAppearance();

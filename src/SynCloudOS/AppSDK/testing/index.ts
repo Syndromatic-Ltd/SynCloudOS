@@ -18,6 +18,7 @@
  */
 
 export { createSynWareTestHost } from "./createSynWareTestHost";
+export { createSynWare } from "../createSynWare";
 export { createSynWareTesting } from "./createSynWareTesting";
 export type {
   CreateSynWareTestingOptions,

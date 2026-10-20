@@ -39,6 +39,7 @@ import {
 import { GFXPath } from "../../../src/FX/GraphicsFX/GFXPath";
 import { GFXColour } from "../../../src/FX/GraphicsFX/GFXColour";
 import { BrowserAnimationLayerSurface } from "../../../src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
 function clock() {
   let now = 0,
     hidden = false;
@@ -79,15 +80,15 @@ function clock() {
     },
   };
 }
-function source(scheduler: AFXFrameScheduler) {
-  const element = document.createElement("div"),
-    layer = new AFXShapeLayer(
-      new BrowserAnimationLayerSurface(element),
-      scheduler,
-    );
+function configureShape(layer: AFXShapeLayer) {
   layer.frame = { x: 0, y: 0, width: 10, height: 10 };
   layer.path = GFXPath.rect({ x: 0, y: 0, width: 10, height: 10 });
   layer.fillColour = GFXColour.parse("white");
+  return layer;
+}
+function source(scheduler: AFXFrameScheduler) {
+  const element = document.createElement("div");
+  const layer = configureShape(createAFXLayer(AFXShapeLayer, new BrowserAnimationLayerSurface(element), scheduler));
   return { element, layer };
 }
 async function pixels(svg: SVGSVGElement, width: number, height: number) {
@@ -127,7 +128,8 @@ describe("AnimationFX text and replication", () => {
       ).createLine(0, 6),
       c = clock(),
       element = document.createElement("div"),
-      layer = new AFXTextLayer(
+      layer = createAFXLayer(
+        AFXTextLayer,
         new BrowserAnimationLayerSurface(element),
         c.scheduler,
       );
@@ -162,7 +164,8 @@ describe("AnimationFX text and replication", () => {
   it("renders transformed tinted instances, nested replication and count-zero output with a bounded expansion", async () => {
     const c = clock(),
       element = document.createElement("div"),
-      replica = new AFXReplicatorLayer(
+      replica = createAFXLayer(
+        AFXReplicatorLayer,
         new BrowserAnimationLayerSurface(element),
         c.scheduler,
       ),
@@ -185,7 +188,8 @@ describe("AnimationFX text and replication", () => {
     expect(image.pixel(28, 4)[3]).toBeCloseTo(128, 0);
     expect(child.element.style.opacity).toBe("0");
     const outerElement = document.createElement("div"),
-      outer = new AFXReplicatorLayer(
+      outer = createAFXLayer(
+        AFXReplicatorLayer,
         new BrowserAnimationLayerSurface(outerElement),
         c.scheduler,
       );
@@ -219,7 +223,8 @@ describe("AnimationFX text and replication", () => {
   it("uses measured instance delays with pause/seek and drains every frame/state listener at completion", async () => {
     const c = clock(),
       element = document.createElement("div"),
-      replica = new AFXReplicatorLayer(
+      replica = createAFXLayer(
+        AFXReplicatorLayer,
         new BrowserAnimationLayerSurface(element),
         c.scheduler,
       );
@@ -227,7 +232,7 @@ describe("AnimationFX text and replication", () => {
     replica.instanceCount = 3;
     replica.instanceTransform = AFXTransform3D.translation(12, 0);
     replica.instanceDelay = 0.2;
-    replica.addSublayer(source(c.scheduler).layer);
+    replica.addSublayer(configureShape(new AFXShapeLayer()));
     const animation = new AFXBasicAnimation({
       targetId: "replicas",
       keyPath: "opacity",
@@ -269,14 +274,15 @@ describe("AnimationFX text and replication", () => {
   it("settles hidden instance work, rejects unsupported depth and does not clone unmanaged controls", async () => {
     const c = clock(),
       element = document.createElement("div"),
-      replica = new AFXReplicatorLayer(
+      replica = createAFXLayer(
+        AFXReplicatorLayer,
         new BrowserAnimationLayerSurface(element),
         c.scheduler,
       );
     replica.instanceCount = 2;
     replica.instanceDelay = 0.2;
-    const child = source(c.scheduler);
-    replica.addSublayer(child.layer);
+    const child = configureShape(new AFXShapeLayer());
+    replica.addSublayer(child);
     const handle = replica.playInstances(
       new AFXBasicAnimation({
         targetId: "test",
@@ -296,7 +302,8 @@ describe("AnimationFX text and replication", () => {
       replica.instanceTransform = AFXTransform3D.rotation(0.5, 1, 0, 0);
     }).toThrow(/affine/);
     replica.dispose();
-    const other = new AFXReplicatorLayer(
+    const other = createAFXLayer(
+        AFXReplicatorLayer,
         new BrowserAnimationLayerSurface(document.createElement("div")),
         c.scheduler,
       ),
@@ -310,16 +317,18 @@ describe("AnimationFX text and replication", () => {
   it("rolls back an attachment exceeding the expanded replica budget", () => {
     const c = clock();
     const element = document.createElement("div");
-    const outer = new AFXReplicatorLayer(
+    const outer = createAFXLayer(
+      AFXReplicatorLayer,
       new BrowserAnimationLayerSurface(element),
       c.scheduler,
     );
     const innerElement = document.createElement("div");
-    const inner = new AFXReplicatorLayer(
+    const inner = createAFXLayer(
+      AFXReplicatorLayer,
       new BrowserAnimationLayerSurface(innerElement),
       c.scheduler,
     );
-    inner.addSublayer(source(c.scheduler).layer);
+    inner.addSublayer(configureShape(new AFXShapeLayer()));
     outer.instanceCount = 64;
     inner.instanceCount = 64;
     expect(() => outer.addSublayer(inner)).toThrow(/1024/);

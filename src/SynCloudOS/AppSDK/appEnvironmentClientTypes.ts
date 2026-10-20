@@ -18,6 +18,7 @@
  */
 
 import type { FilePanelReference, FilePanelReleaseReason, FilePanelResult, FilePanelSaveTarget, OpenPanelRequest, SavePanelRequest } from "../FilePanels";
+import type { SynCloudOSAlertRequest } from "../SystemUI/alertCenter";
 import type { IFXImageResource } from "../../FX/ImageFX/IFXImageResource";
 import type { TFXFontClient, TFXTextGeometryCapabilities } from "../../FX/TextFX/textLayoutTypes";
 import type { AppClientHandle } from "./appClientTypes";
@@ -79,6 +80,20 @@ export interface AppErrorClient {
     /** Retry the failed operation. The mounted owner fences late outcomes. */
     retry?: () => void | Promise<void>;
   }>): void;
+}
+
+/** Alerts are system-modal: one shows at a time and the rest wait in order.
+ * A safe dismissal, the caller's abort signal or the app closing resolves to
+ * the cancel button instead of rejecting, so callers never need a catch. */
+export interface AppAlertClient {
+  present(request: SynCloudOSAlertRequest, signal?: AbortSignal): Promise<string>;
+}
+
+/** Read-only catalogue lookups for opening another registered app by ID
+ * instead of by route. Launching stays with the navigation client. */
+export interface AppLauncherClient {
+  routeFor(appId: string): string | null;
+  titleFor(appId: string): string | null;
 }
 
 export interface AppExternalActionClient {

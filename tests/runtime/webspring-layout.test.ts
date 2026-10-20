@@ -429,12 +429,17 @@ describe("WebspringState folder actions", () => {
     expect(runtime.apps.getDisplayApps().map((app) => app.id)).toEqual(["constructor", "alpha"]);
   });
 
-  it("opens one folder at a time, never during a drag", () => {
+  it("opens one folder at a time, and during a drag only when the drag asks", () => {
     const runtime = createFolderRuntime(folders(true, ["folder.tools", 2, ["beta", "gamma"]]));
 
     expect(runtime.webspring.openFolder("alpha")).toBe(false);
     runtime.webspring.beginDrag("alpha");
     expect(runtime.webspring.openFolder("folder.tools")).toBe(false);
+    expect(runtime.store.getSnapshot().webspring.openFolderId).toBeNull();
+    // The spring-open under a resting app is the one drag that may open a folder.
+    expect(runtime.webspring.openFolder("folder.tools", { duringDrag: true })).toBe(true);
+    expect(runtime.store.getSnapshot().webspring.openFolderId).toBe("folder.tools");
+    runtime.webspring.closeFolder();
     runtime.webspring.finishDrag(false);
     expect(runtime.webspring.openFolder("folder.tools")).toBe(true);
     expect(runtime.store.getSnapshot().webspring.openFolderId).toBe("folder.tools");

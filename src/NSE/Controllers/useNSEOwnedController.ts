@@ -96,7 +96,7 @@ function useOwnedController<TController extends { readonly isDisposed: boolean }
  * with `setContent()`.
  */
 export function useNSEArrayController<T, TId extends ItemIdentity>(
-  options: Omit<ArrayControllerOptions<T, TId>, "ownerSignal">,
+  options: Omit<ArrayControllerOptions<T, TId>, "ownerSignal" | "owner">,
   deps: DependencyList = [],
 ): NSEArrayController<T, TId> {
   return useOwnedController(
@@ -110,7 +110,7 @@ export function useNSEArrayController<T, TId extends ItemIdentity>(
  * same lifetime and replacement rules as {@link useNSEArrayController}.
  */
 export function useNSETreeController<T, TId extends ItemIdentity>(
-  options: Omit<TreeControllerOptions<T, TId>, "ownerSignal">,
+  options: Omit<TreeControllerOptions<T, TId>, "ownerSignal" | "owner">,
   deps: DependencyList = [],
 ): NSETreeController<T, TId> {
   return useOwnedController(
