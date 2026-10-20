@@ -24,6 +24,7 @@ import type { TFXFontClient, TFXTextGeometryCapabilities } from "../../FX/TextFX
 import type { AppClientHandle } from "./appClientTypes";
 import type { TFXRunDelegateReadinessChange, TFXRunDelegateRequest } from "../../FX/TextFX/textLayoutTypes";
 import type { TFXRunDelegate } from "../../FX/TextFX/TFXRunDelegate";
+import type { AFXLayer } from "../../FX/AnimationFX/AFXLayer";
 
 /** Persistence is automatically partitioned by the mounted application
  * identity. A session receives only its own preference operations. */
@@ -181,7 +182,8 @@ export interface AppAnimationHandle extends AppClientHandle {
 
 export interface AppAnimationClient {
   createRenderer(target: object, options?: Pick<import("../../FX/AnimationFX/AFXRenderer").AFXRendererOptions, "maximumQuads" | "onRenderError">, signal?: AbortSignal): import("../../FX/AnimationFX/AFXRenderer").AFXRenderer;
-  bindLayer(target: object, signal?: AbortSignal): import("../../FX/AnimationFX/AFXLayer").AFXLayer;
+  /** Native view backing layers use CSS layout; explicit bindings own their frame by default. */
+  bindLayer(target: object, signal?: AbortSignal, options?: Readonly<{ layout: "css" }>): AFXLayer;
   bindShapeLayer(target: object, signal?: AbortSignal): import("../../FX/AnimationFX/AFXShapeLayer").AFXShapeLayer;
   bindGradientLayer(target: object, signal?: AbortSignal): import("../../FX/AnimationFX/AFXGradientLayer").AFXGradientLayer;
   bindTextLayer(target: object, signal?: AbortSignal): import("../../FX/AnimationFX/AFXTextLayer").AFXTextLayer;

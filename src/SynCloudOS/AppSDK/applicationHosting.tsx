@@ -20,6 +20,7 @@
 
 import {
   useContext,
+  useId,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -79,12 +80,13 @@ interface ControllerResponderProps {
 
 function ControllerResponder({ appRuntime, target, kind, host, children }: ControllerResponderProps) {
   const hierarchy = useResponderHierarchy();
+  const bindingId = useId();
   const kernel = useContext(SynCloudOSRuntimeContext);
   const parentId = hierarchy.responderId ?? appRuntime.responderId;
   const overlayScopeId = useNSEOverlayFocusScope();
   const scopeId = overlayScopeId ?? kernel?.responders.get(parentId)?.scopeId ?? parentId;
   const appId = appRuntime.app.bundleIdentifier;
-  const responderId = `${kind}:${appId}:${identityOf(target)}`;
+  const responderId = `${kind}:${appId}:${identityOf(target)}:${bindingId}`;
   useLayoutEffect(() => {
     const binding = bindActionResponder(target, { appId, commands: appRuntime.commands }, responderId);
     return () => { binding.dispose(); };
@@ -151,9 +153,18 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
     const detach = controller[nseAttachView]({
       element,
       traits,
-      ...(animations ? { bindLayer: (target: object, signal?: AbortSignal) => animations.bindLayer(target, signal) } : {}),
+      ...(animations ? { bindLayer: (target: object, signal?: AbortSignal) => animations.bindLayer(target, signal, { layout: "css" }) } : {}),
       ...(fx ? { fx } : {}),
     });
+    // Content can arrive after the key stage has focused its empty frame.
+    // Transfer only that existing handoff, never an editor or portalled focus.
+    const active = element.ownerDocument.activeElement;
+    if (active instanceof HTMLElement && active.dataset.syncloudosResponderId?.startsWith("application:")
+      && active.contains(element) && active.querySelector("[data-nse-view-controller]") === element
+      && !element.closest("[inert]")) {
+      const target = active.querySelector<HTMLElement>("[data-nse-initial-focus]") ?? element;
+      target.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
+    }
     return () => {
       detach();
       untrack?.();
@@ -181,7 +192,7 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
   const View = viewComponentOf(controller);
   if (!View) throw new TypeError(`${controller.constructor.name} has no static view; declare \`static view = SomeComponent\`.`);
   const frame = (
-    <div ref={frameRef} className={className} data-nse-view-controller="" style={controller.parent ? undefined : FRAME_STYLE}>
+    <div ref={frameRef} tabIndex={-1} className={className} data-nse-view-controller="" style={controller.parent ? undefined : FRAME_STYLE}>
       <View controller={controller} />
     </div>
   );

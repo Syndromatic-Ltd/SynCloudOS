@@ -11,11 +11,11 @@ import { AFXLayer, AFXShapeLayer, AFXTransform3D } from "@syndromatic/syncloudos
 | | |
 | --- | --- |
 | Analogue | `CALayer`, `CAShapeLayer`, `CAGradientLayer`, `CATextLayer`, `CATransform3D`, `CALayerDelegate` |
-| Obtained from | `useAnimations().bindLayer(element)` and the other `bind*` methods |
+| Obtained from | `NSEViewController.view.layer`, `new AFXLayer()` added to an attached layer, or the session's `bind*` methods |
 | Model and presentation | `layer.model` holds what you set, `layer.presentation` holds what is on screen now |
 | Limits | 256 layers in one composition, 64 live layers and renderers per session |
 
-An application rarely constructs a layer. `bindLayer(element)` returns an `AFXLayer` wired to a page element, and `createRenderer(canvas)` returns a renderer whose `makeLayer()`, `makeReplicatorLayer()` and `makeParticleLayer()` create layers that draw to a canvas. Both hand back the same classes, so the layer API on this page applies to either. The two surfaces differ in what they can show:
+Native view controllers start from `view.layer` and add layers constructed with `new AFXLayer()` or its subclasses. `bindLayer(element)` explicitly binds an `AFXLayer` to a page element, and `createRenderer(canvas)` returns a renderer whose `makeLayer()`, `makeReplicatorLayer()` and `makeParticleLayer()` create layers that draw to a canvas. These return the same layer classes, so the layer API on this page applies to each. The surfaces differ in what they can show:
 
 | | Bound to an element | Owned by a renderer |
 | --- | --- | --- |
@@ -56,6 +56,13 @@ surface and scheduler; layers added beneath a detached parent stay detached unti
 attached. Writes made before attachment are applied when the layer joins the tree. Applications
 usually start from `NSEViewController.view.layer`. Hosts that provide a surface and scheduler create
 a root with `createAFXLayer(surface, scheduler)` from `sdk/animation-host`.
+
+The native view's backing layer keeps the managed outlet's CSS position and dimensions. Its bounds
+follow the outlet's layout and resize automatically, including sublayer autoresizing masks; opacity
+and transforms still run through AnimationFX. Size the outlet with `NSEViewControllerView`'s
+`className`, rather than assigning a frame to the backing layer. Unmounting the view disposes its
+backing layer, sublayers and resize observation. Explicit `bindLayer(element)` retains layer-owned
+frame geometry by default.
 
 ### Geometry
 

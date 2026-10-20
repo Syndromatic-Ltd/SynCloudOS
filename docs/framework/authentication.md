@@ -25,6 +25,8 @@ The shorthand strings `"optional"` and `"required"` construct no authentication 
 
 In a single-application host the **Account** pane of Preferences, Sign In and Log Out live in the application menu. A primary that fills the page has no system top bar, so it must declare `applicationMenu: { trigger: "content" }` and render a button with `useApplicationMenuTrigger()`; with `"optional"` or `"required"` authentication, mounting rejects without it. See [Mount one application in Getting started](getting-started.md#mount-one-application).
 
+Optional sign-in offers **Cancel**, including when no authentication service is configured. Cancelling returns to the presentation that requested sign-in: the Board remains on the Board, while a single-application host resumes its existing application session, route and content. It does not create or authorise a session. Required sign-in has no Cancel action.
+
 The service reports one of `disabled`, `checking`, `anonymous`, `authenticating`, `authenticated`, `expired` and `error`. Disposing the host disposes the service you supplied.
 
 ## Browser service

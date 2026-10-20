@@ -3,6 +3,7 @@ import * as React from "react";
 import { afterEach, expect, it } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
+import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { createSynWareTestHost } from "../../src/SynCloudOS/AppSDK/testing/createSynWareTestHost";
 import { createAppSCOS } from "../../src/SynCloudOS/AppSDK/scos/scosFacade";
 import type { SynWareTestHost } from "../../src/SynCloudOS/AppSDK/testing/testHostTypes";
@@ -107,4 +108,35 @@ it.each(["stage", "window"] as const)("routes native Escape events through the p
   target.dispatchEvent(afterDisposal);
   expect(afterDisposal.defaultPrevented).toBe(false);
   expect(application.cancellations).toBe(1);
+});
+
+it.each([false, true])("makes the class content view the initial stage responder without a forced control focus (late content: %s)", async lateContent => {
+  class Content extends NSEViewController {
+    static override view = () => <p>View-owned keyboard actions</p>;
+    cancellations = 0;
+    @action({ keyBindings: [{ key: "Escape", modifiers: [], scope: "application", repeat: "ignore", allowInEditable: true }] })
+    cancel() { this.cancellations += 1; }
+  }
+  const content = new Content();
+  class MainWindow extends NSEWindowController {
+    static override view = () => <p>Preparing content</p>;
+    override windowDidLoad() { if (!lateContent) this.contentViewController = content; }
+  }
+  class Application extends NSEApplication { static override mainWindow = MainWindow; }
+  const host = createSynWareTestHost({
+    application: Application,
+    manifest: { schemaVersion: 1, bundleIdentifier: "com.example.initial-view-responder", displayName: "View responder", version: "1.0.0" },
+    document,
+    surface: "stage",
+  });
+  hosts.push(host);
+  await host.render();
+  if (lateContent) {
+    await act(async () => { host.application!.windows[0].contentViewController = content; });
+  }
+  await waitFor(() => expect(document.activeElement).toBe(content.view.element));
+  const escape = new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true });
+  await act(async () => { document.activeElement!.dispatchEvent(escape); });
+  expect(escape.defaultPrevented).toBe(true);
+  await waitFor(() => expect(content.cancellations).toBe(1));
 });

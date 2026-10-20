@@ -799,10 +799,12 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
   #maskRelease: (() => void) | null = null;
   #disposed = false;
   #ownsElement = false;
-  constructor(element: HTMLElement) {
+  readonly #layout: "layer" | "css";
+  constructor(element: HTMLElement, layout: "layer" | "css" = "layer") {
     if (!element || !element.style || !element.ownerDocument)
       throw new TypeError("Layer surface requires a real DOM element.");
     this.#element = element;
+    this.#layout = layout;
     this.#originalStyle = element.getAttribute("style");
   }
   replicationCapability() {
@@ -897,11 +899,13 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     this.#snapshot = snapshot;
     const { bounds, position, anchorPoint, transform, values } = snapshot;
     const style = this.#element.style;
-    style.position = "absolute";
-    style.left = "0px";
-    style.top = "0px";
-    style.width = `${bounds.width}px`;
-    style.height = `${bounds.height}px`;
+    if (this.#layout === "layer") {
+      style.position = "absolute";
+      style.left = "0px";
+      style.top = "0px";
+      style.width = `${bounds.width}px`;
+      style.height = `${bounds.height}px`;
+    }
     style.transformOrigin = "0 0";
     style.opacity = String(snapshot.opacity);
     style.transform = snapshot.inheritedTransform
@@ -942,7 +946,7 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     style.borderStyle = "solid";
     style.borderWidth = `${snapshot.style.borderWidth}px`;
     style.borderColor = snapshot.style.borderColour?.toCSS() ?? "transparent";
-    style.boxSizing = "border-box";
+    if (this.#layout === "layer") style.boxSizing = "border-box";
     const corners = snapshot.style.maskedCorners;
     style.borderTopLeftRadius = `${corners.includes("top-left") ? snapshot.style.cornerRadius : 0}px`;
     style.borderTopRightRadius = `${corners.includes("top-right") ? snapshot.style.cornerRadius : 0}px`;

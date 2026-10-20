@@ -6,6 +6,8 @@ import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { AFXLayer } from "../../src/FX/AnimationFX/AFXLayer";
+import { AFXTransform3D } from "../../src/FX/AnimationFX/AFXTransform3D";
+import { GFXColour } from "../../src/FX/GraphicsFX/GFXColour";
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppSDK/applicationHosting";
 import { NSEAnimationEnvironmentProvider } from "../../src/NSE/Animation";
 import { render } from "@testing-library/react";
@@ -166,6 +168,89 @@ describe("view.layer", () => {
     await screen.findByText("Drawing content");
 
     expect(drawn.isAttached).toBe(true);
+  });
+
+  it("keeps a native backing layer inside its CSS-sized outlet across FX writes, resize, and unmount", async () => {
+    let width = 320;
+    let height = 150;
+    const observed = new Map<ResizeObserver, { callback: ResizeObserverCallback; observer: ResizeObserver }>();
+    const disconnected = new Set<ResizeObserver>();
+    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains("native-fx-stage") ? width : 0;
+    });
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains("native-fx-stage") ? height : 0;
+    });
+    vi.stubGlobal("ResizeObserver", class {
+      constructor(readonly callback: ResizeObserverCallback) {}
+      observe(_target: Element) {
+        const observer = this as unknown as ResizeObserver;
+        observed.set(observer, { callback: this.callback, observer });
+      }
+      unobserve() {}
+      disconnect() { disconnected.add(this as unknown as ResizeObserver); }
+    });
+    let controller!: Stage;
+    let backing!: AFXLayer;
+    const orb = new AFXLayer();
+    orb.frame = { x: 20, y: 30, width: 40, height: 40 };
+    orb.backgroundColour = GFXColour.parse("red");
+    orb.autoresizingMask = ["width", "height"];
+    class Stage extends NSEViewController {
+      static override view = () => <span>Native FX stage</span>;
+      constructor() { super(); controller = this; }
+      viewDidLoad() { backing = this.view.layer; backing.addSublayer(orb); }
+    }
+    class Parent extends NSEViewController {
+      readonly stage = this.addChild(Stage);
+      static override view = ({ controller }: { controller: Parent }) => <>
+        <style>{".native-fx-stage { position: relative; width: 320px; height: 150px; }"}</style>
+        <h2>Before the stage</h2>
+        <NSEViewControllerView controller={controller.stage} className="native-fx-stage" />
+      </>;
+    }
+    try {
+      const { windows } = await openContent(Parent);
+      const outlet = controller.view.element;
+      expect(window.getComputedStyle(outlet).position).toBe("relative");
+      expect(window.getComputedStyle(outlet).height).toBe("150px");
+      expect(outlet.style.position).toBe("");
+      expect(outlet.style.left).toBe("");
+      expect(outlet.style.top).toBe("");
+      expect(outlet.style.width).toBe("");
+      expect(outlet.style.height).toBe("");
+      expect(backing.bounds).toMatchObject({ width, height });
+      const projection = outlet.lastElementChild as HTMLElement;
+      expect(projection).not.toBe(screen.getByText("Native FX stage"));
+      expect(projection.parentElement).toBe(outlet);
+      expect(projection.style.width).toBe("40px");
+      expect(projection.style.backgroundColor).toBe("rgb(255, 0, 0)");
+      backing.opacity = 0.6;
+      backing.transform = AFXTransform3D.translation(7, 9);
+      orb.opacity = 0.4;
+      expect(outlet.style.opacity).toBe("0.6");
+      expect(AFXTransform3D.fromCSS(outlet.style.transform).toAffine()).toMatchObject({ tx: 7, ty: 9 });
+      expect(projection.style.opacity).toBe("0.4");
+      width = 480;
+      height = 210;
+      act(() => {
+        for (const { callback, observer } of observed.values()) callback([], observer);
+      });
+      expect(backing.bounds).toMatchObject({ width, height });
+      expect(orb.frame).toEqual({ x: 20, y: 30, width: 200, height: 100 });
+      expect(projection.style.width).toBe("200px");
+      expect(projection.style.height).toBe("100px");
+      expect(outlet.style.height).toBe("");
+      windows.unmount();
+      await settle();
+      expect(outlet.contains(projection)).toBe(false);
+      expect(() => { orb.opacity = 1; }).toThrowError(expect.objectContaining({ code: "AFX_LAYER_DISPOSED" }));
+      expect(outlet.getAttribute("style")).toBeNull();
+      for (const { observer } of observed.values()) expect(disconnected.has(observer)).toBe(true);
+    } finally {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    }
   });
 
   it("gives a view that mounts again a layer bound to its new element", async () => {

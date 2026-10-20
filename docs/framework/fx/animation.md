@@ -328,7 +328,7 @@ Inside `run`'s `changes` callback, call `animator(target)` with an `AFXAnimatabl
 
 | Method | Returns | Description |
 | --- | --- | --- |
-| `bindLayer(element, signal?)` | `AFXLayer` | Binds a layer to a page element. Each element takes one binding. The layer's properties write to the element's style, and disposing the layer restores the original inline style. |
+| `bindLayer(element, signal?, options?)` | `AFXLayer` | Binds a layer to a page element. Each element takes one binding. The layer owns frame geometry by default; `{ layout: "css" }` instead measures the element's CSS size without replacing its position or dimensions. Native `view.layer` selects CSS layout automatically. Disposing restores the original inline style. |
 | `bindShapeLayer(element, signal?)` | `AFXShapeLayer` | A layer that draws a `GFXPath`. |
 | `bindGradientLayer(element, signal?)` | `AFXGradientLayer` | A layer that draws a `GFXGradient`. |
 | `bindTextLayer(element, signal?)` | `AFXTextLayer` | A layer that draws a shaped line of text. |

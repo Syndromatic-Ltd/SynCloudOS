@@ -406,7 +406,7 @@ function NSECommandMenuSurface({
             data-nse-menu-disabled={!entry.enabled ? "true" : undefined}
             data-nse-menu-command={entry.kind === "command" ? entry.commandId : undefined}
             tabIndex={activeId === entry.id ? 0 : -1}
-            title={entry.disabledReason}
+            title={!entry.enabled ? entry.disabledReason : undefined}
             onFocus={() => setActiveId(entry.id)}
             onPointerEnter={() => entry.kind === "submenu" && activate(entry, true)}
             onPointerLeave={() => controller.cancelPendingSubmenu()}

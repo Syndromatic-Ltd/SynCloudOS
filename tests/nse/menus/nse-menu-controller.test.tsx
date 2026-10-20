@@ -156,6 +156,29 @@ describe("NSEMenuController", () => {
     expect((screen.getByRole("menuitem", { name: "Go to today" }) as HTMLButtonElement).disabled).toBe(false);
   });
 
+  it("shows an unavailable-reason tooltip only while the command is disabled", async () => {
+    const validateMany = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
+      requests.map((request) => [request.key, {
+        ...presentation(request.commandId, { enabled: request.commandId !== "text.align" }),
+        disabledReason: "Alignment is unavailable.",
+      }]),
+    ));
+    const controller = new NSEMenuController({ model, runtime: runtime(validateMany) });
+    const view = render(<NSEMenu model={model} controller={controller} open />);
+    try {
+      const bold = await screen.findByRole("menuitem", { name: "Bold" });
+      await waitFor(() => expect(bold.hasAttribute("disabled")).toBe(false));
+      expect(bold.getAttribute("title")).toBeNull();
+      fireEvent.click(screen.getByRole("menuitem", { name: "Alignment" }));
+      const alignment = await screen.findByRole("menuitem", { name: "Align Left" });
+      await waitFor(() => expect(alignment.hasAttribute("disabled")).toBe(true));
+      expect(alignment.getAttribute("title")).toBeTruthy();
+    } finally {
+      view.unmount();
+      controller.dispose();
+    }
+  });
+
   it("cancels a displayed command when its command registry or responder generation is replaced", async () => {
     let registryGeneration = 4;
     let responderGeneration = 9;

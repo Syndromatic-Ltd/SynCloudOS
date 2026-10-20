@@ -74,7 +74,12 @@ export function selectApplicationStageAppIds({
   readonly returnTransitionId: string | null;
 }): readonly string[] {
   if (multiSwitch?.status === "switching") {
-    return [...new Set([multiSwitch.fromAppId, multiSwitch.toAppId].filter((id): id is string => Boolean(id)))];
+    const appIds: string[] = [];
+    if (multiSwitch.fromAppId) appIds.push(multiSwitch.fromAppId);
+    if (multiSwitch.toAppId && normalizeBundleIdentifier(multiSwitch.toAppId) !== normalizeBundleIdentifier(multiSwitch.fromAppId)) {
+      appIds.push(multiSwitch.toAppId);
+    }
+    return appIds;
   }
   // Removing the live child starts NSEPresence's owned exit. Keeping a
   // returning app mounted would make applicationExit depend on the return that
@@ -125,8 +130,8 @@ export function ApplicationStageLayer({
         const app = apps[normalizeBundleIdentifier(appId)];
         if (!app || app.presentation !== "appView") return null;
         return {
-          id: `application-stage:${appId}`,
-          appId,
+          id: `application-stage:${app.bundleIdentifier}`,
+          appId: app.bundleIdentifier,
           title: app.window.title,
           isFocused: normalizeBundleIdentifier(appId) === normalizeBundleIdentifier(activeAppId),
           zIndex: index + 1,
@@ -150,7 +155,9 @@ export function ApplicationStageLayer({
     );
   }, [hasMultiSwitch, multiSwitch, presentations]);
   const applicationStageBlocked = windowSnapshot.applicationStageBlocked ||
-    presentations.some(({ appId }) => windowSnapshot.blockedApplicationIds.includes(appId));
+    presentations.some(({ appId }) => windowSnapshot.blockedApplicationIds.some(
+      blockedAppId => normalizeBundleIdentifier(blockedAppId) === normalizeBundleIdentifier(appId),
+    ));
 
   useEffect(() => {
     completedReturnTransitionRef.current = null;
@@ -218,7 +225,7 @@ export function ApplicationStageLayer({
       <NSEPresence>{hasMultiSwitch ? <MultiSwitchBackdrop /> : null}</NSEPresence>
       <NSEPresence onExitComplete={handleWindowExitComplete}>
         {presentations.map((presentation) => {
-          const app = apps[presentation.appId];
+          const app = apps[normalizeBundleIdentifier(presentation.appId)];
           if (!app) return null;
           return (
             <ApplicationStageHost

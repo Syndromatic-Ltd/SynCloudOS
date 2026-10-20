@@ -58,6 +58,8 @@ The Board shows the icons of every application whose manifest sets `webspring.vi
 
 Tap, pickup, movement and drop produce haptic feedback through HapticsFX on devices that support it, and honour the user's feedback settings. Reduced motion places icons immediately instead of animating them.
 
+Application-stage selection is case-insensitive, whether an app opens from a Board icon or a direct route. The stage keeps the identifier spelling declared in `Info.ts`; selecting the same app with different identifier case does not replace its native main view or discard its input and focus.
+
 Icon reordering uses captured slot geometry for hit testing, so neighbours do not oscillate while they settle. The launcher owns pointer capture and releases it on pointer up, cancellation, leaving edit mode or unmount.
 
 ## Folders

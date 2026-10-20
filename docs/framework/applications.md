@@ -106,6 +106,10 @@ of the mounted application (`motion`, `location`, `haptics`, `midi`, `media`, `v
 without a hook; each is created on first read and released with the controller. `removeFromParent()`
 disposes a child.
 
+`view.layer` backs the existing managed outlet without replacing its CSS position or dimensions.
+Its bounds follow the outlet's untransformed layout size. Add AFX sublayers in `viewDidLoad`;
+opacity and transforms remain animation-owned, and unmounting releases the backing layer.
+
 ```tsx
 import { NSEViewController, NSEViewControllerView } from "@syndromatic/syncloudos";
 import { AFXShapeLayer } from "@syndromatic/syncloudos/fx/animation";
@@ -134,6 +138,10 @@ Child outlets impose no inline display mode, width or height: the parent can lay
 as flex or grid items, or leave their height intrinsic inside a scroll area. For example,
 `.workspace-sidebar-region { display: flex; flex-direction: column; min-height: 0; }`
 lets the parent own the region's layout. Root window frames retain their fill layout.
+
+The presented key stage selects its managed root view as the initial responder, unless content
+declares a `data-nse-initial-focus` target. An existing editor or portalled focus is preserved.
+Content arriving after the empty stage receives focus inherits that handoff without a timer.
 
 `viewWillLayout()` and `viewDidLayout()` run after the view's DOM commits and when its frame resizes.
 Read `this.view.element` in these callbacks rather than calling controller layout methods from a React effect.
@@ -226,6 +234,11 @@ class NotesWindowController extends NSEWindowController<NotesApp> {
 ```
 
 Controls and menus send the action by name; the responder chain does the rest: the focused view controller answers first, then its window controller, then the application.
+
+Application actions are available from the main surface and every owned secondary window without
+authored controller or responder IDs. Closing a secondary window removes that window's action
+bindings, not the application actions available in the remaining windows; reopening creates a new
+window controller.
 
 ```tsx
 <NSEPushButton action="newNote">New Note</NSEPushButton>

@@ -386,6 +386,94 @@ describe("application-only browser host", () => {
     await chooseMenuItem("Log Out");
     expect(await screen.findByRole("alertdialog", { name: /log out/i })).not.toBeNull();
   });
+  it("restores the same interactive fullscreen app after cancelling optional sign-in without a service", async () => {
+    const mixedId = "com.example.SingleWorkspace";
+    let presses = 0;
+    function Workspace() {
+      return <><MenuApplication /><input aria-label="Workspace draft" defaultValue="Original draft" />
+        <button onClick={() => { presses += 1; }}>Edit workspace</button></>;
+    }
+    const workspace = createSynWare({ manifest: {
+      ...menuBundle.manifest, bundleIdentifier: mixedId,
+    }, root: Workspace });
+    const { runtime, element: target } = await mount(element(), {
+      bundles: [workspace], application: { bundleIdentifier: mixedId }, authentication: "optional",
+    });
+    const session = sessions.at(-1)!;
+    const section = target.querySelector<HTMLElement>("[data-syncloudos-application-host]")!;
+    const draft = screen.getByRole("textbox", { name: "Workspace draft" }) as HTMLInputElement;
+    fireEvent.change(draft, { target: { value: "Unsaved workspace" } });
+    const path = window.location.pathname;
+    await openApplicationMenu(target);
+    await chooseMenuItem("Sign In");
+    expect(await screen.findByText("Authentication is not configured.")).not.toBeNull();
+    expect(runtime.lifecycle.getState(mixedId)).toBe("suspended");
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Cancel" })); });
+    await waitFor(() => expect(document.querySelector(".syncloudos-login-gate")).toBeNull());
+    await waitFor(() => expect(section.hasAttribute("inert")).toBe(false));
+    expect(section.inert).not.toBe(true);
+    expect(section.hidden).toBe(false);
+    expect(runtime.lifecycle.getState(mixedId)).toBe("active");
+    expect(runtime.statechart.getCurrentState()).toBe("active.application.active");
+    expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(false);
+    expect(sessions.at(-1)).toBe(session);
+    expect(session.signal.aborted).toBe(false);
+    expect(screen.getByRole("textbox", { name: "Workspace draft" })).toBe(draft);
+    expect(draft.value).toBe("Unsaved workspace");
+    expect(window.location.pathname).toBe(path);
+    expect(section.contains(document.activeElement)).toBe(true);
+    expect(runtime.focus.getActiveAnchors().applicationResponderId).toBe(`application:${mixedId}`);
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Edit workspace" })); });
+    expect(presses).toBe(1);
+    await act(async () => { fireEvent.keyDown(document.activeElement!, { key: "F8", code: "F8" }); });
+    await waitFor(() => expect(executed).toHaveBeenCalledTimes(1));
+    await openApplicationMenu(target);
+    await chooseMenuItem("Sign In");
+    expect(await screen.findByText("Authentication is not configured.")).not.toBeNull();
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Cancel" })); });
+    await waitFor(() => expect(section.hasAttribute("inert")).toBe(false));
+    await waitFor(() => expect(document.querySelector(".syncloudos-login-gate")).toBeNull());
+    expect(section.inert).not.toBe(true);
+    expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(false);
+  });
+
+  it("retains the nested route, query, fragment and live route content after optional sign-in cancellation", async () => {
+    const graph = defineSynWareRoutes({ id: "sign-in-return-routes", routes: [
+      { name: "home", path: "", component: () => <p>Home</p> },
+      { name: "detail", path: "detail", component: () => <input aria-label="Route draft" defaultValue="Route content" /> },
+    ] });
+    const routed = createSynWare({
+      manifest: { ...menuBundle.manifest, routes: [{ path: "/application", primary: true, match: "prefix" }] },
+      root: () => <><MenuApplication /><RouteOutlet /></>, routes: graph,
+    });
+    window.history.replaceState(null, "", "/application/detail?view=preview#selection");
+    const { runtime, element: target } = await mount(element(), { bundles: [routed], authentication: "optional" });
+    const href = window.location.href;
+    const route = runtime.routes.routeGraph.current()!;
+    const draft = screen.getByRole("textbox", { name: "Route draft" }) as HTMLInputElement;
+    fireEvent.change(draft, { target: { value: "Unsaved route content" } });
+    await openApplicationMenu(target);
+    await chooseMenuItem("Sign In");
+    await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Cancel" })); });
+    await waitFor(() => expect(document.querySelector(".syncloudos-login-gate")).toBeNull());
+    await waitFor(() => expect(runtime.lifecycle.getState(id)).toBe("active"));
+    expect(runtime.routes.routeGraph.current()).toMatchObject({ pathname: route.pathname, search: route.search, hash: route.hash });
+    expect(window.location.href).toBe(href);
+    expect(screen.getByRole("textbox", { name: "Route draft" })).toBe(draft);
+    expect(draft.value).toBe("Unsaved route content");
+    expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(false);
+  });
+
+  it("only gives disabled native menu items an unavailable-reason tooltip", async () => {
+    const { element: target } = await mount(element(), { bundles: [menuBundle], authentication: "optional" });
+    const menu = await openApplicationMenu(target);
+    for (const name of ["System Preferences…", "Sign In", "Quit Application host"]) {
+      const item = within(menu).getByRole("menuitem", { name });
+      await waitFor(() => expect(item.getAttribute("aria-disabled")).not.toBe("true"));
+      expect(item.getAttribute("title")).toBeNull();
+    }
+  });
+
   it("offers System Preferences and Quit but no Account, Sign In or Log Out when the host has no authentication", async () => {
     const { runtime, element: target } = await mount(element(), { bundles: [menuBundle] });
     const menu = await openApplicationMenu(target);

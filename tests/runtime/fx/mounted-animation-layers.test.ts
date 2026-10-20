@@ -37,6 +37,24 @@ const emitterPixel = new GFXImage({
   data: new Uint8Array([255, 255, 255, 255]),
 });
 
+it("keeps explicit bindLayer frame ownership and restores authored CSS when released", () => {
+  const host = createBrowserAnimationLayerHost(document, { now: () => 0, requestFrame: () => () => {}, reducedMotion: true, suspended: false });
+  const owner = new AbortController();
+  const client = createMountedAnimationLayers(host, owner.signal, () => owner.signal.throwIfAborted());
+  const element = document.createElement("div");
+  element.style.cssText = "position: relative; width: 320px; height: 150px";
+  const original = element.getAttribute("style");
+  const layer = client.bindLayer(element);
+  layer.frame = { x: 20, y: 30, width: 80, height: 60 };
+  expect(element.style.position).toBe("absolute");
+  expect(element.style.left).toBe("0px");
+  expect(element.style.top).toBe("0px");
+  expect(element.style.width).toBe("80px");
+  expect(element.style.height).toBe("60px");
+  owner.abort();
+  expect(element.getAttribute("style")).toBe(original);
+});
+
 it("binds one video-wall canvas through mounted AnimationFX authority and releases it on abort", () => {
   const host = createBrowserAnimationLayerHost(document, { now: () => 0, requestFrame: () => () => {}, reducedMotion: false, suspended: false });
   const owner = new AbortController();

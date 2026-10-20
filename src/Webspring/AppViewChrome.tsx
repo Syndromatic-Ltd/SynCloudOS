@@ -95,7 +95,10 @@ function Root({
       const owner = frame.dataset.syncloudosRuntimeOwner;
       if (!owner || active.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner !== owner) return;
     }
-    frame.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
+    const target = frame.querySelector<HTMLElement>("[data-nse-initial-focus]")
+      ?? frame.querySelector<HTMLElement>("[data-nse-view-controller]")
+      ?? frame;
+    target.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
   }, [inactive, keyWindow]);
   return (
     <div

@@ -76,8 +76,16 @@ export function ResponderScope({ responderId, kind, parentResponderId, scopeId, 
     const registration = registerMountedAppResponder(appRuntime, { id: responderId, kind, parentId: resolvedParentResponderId, scopeId, undoOwner, diagnosticsLabel });
     return () => { registration.dispose({ cascade: true }); };
   }, [appRuntime, responderId, kind, resolvedParentResponderId, scopeId, undoOwner, disabled, diagnosticsLabel]);
-  const handleFocusCapture = (_event: FocusEvent<HTMLElement>) => {
-    if (disabled || !(kind === "application" || kind === "window" || kind === "document")) return;
+  const handleFocusCapture = (event: FocusEvent<HTMLElement>) => {
+    if (disabled) return;
+    if (kind === "view") {
+      // A plain descendant belongs to this view; an independently registered
+      // control or child view keeps its own first-responder authority.
+      if (event.target.closest("[data-syncloudos-responder-id]") !== event.currentTarget || appRuntime?.signal.aborted) return;
+      runtime.focus.requestFocus(responderId);
+      return;
+    }
+    if (!(kind === "application" || kind === "window" || kind === "document")) return;
     if (appRuntime) appRuntime.focus.requestFocus(responderId);
     else activateResponderHierarchy(kernelRuntime!, hierarchy);
   };
