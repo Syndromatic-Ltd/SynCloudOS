@@ -24,6 +24,7 @@ import type { SynCloudOSAppInfo, SynCloudOSAppInfoValidationReport } from "../Ap
 import type { TrustedSynWareBundle } from "../BundleLoader/bundleTypes";
 import { preserveTrustedSynWareBundleProvenance } from "../BundleLoader/trustedBundleProvenance";
 import { getNormalizedRouteKey, inspectExternalRouteSafety } from "../Routing/routeNormalization";
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { getOrderedVisibleWebspringApps } from "../WebspringState/webspringStateProjection";
 import type {
   SynCloudOSAppManifest,
@@ -200,7 +201,7 @@ function createCollisionIssue(
       field,
       value,
       normalizedValue,
-      existingAppId: existing.id,
+      existingAppId: existing.bundleIdentifier,
       existingPackageName: existing.packageName
     }
   };
@@ -208,7 +209,7 @@ function createCollisionIssue(
 
 function createValidationPreflightReport(input: unknown, validation: SynCloudOSAppInfoValidationReport): SynCloudOSAppRegistrationPreflightReport {
   const manifest = getManifestCandidate(input);
-  const appId = getStringField(manifest, "id");
+  const appId = getStringField(manifest, "bundleIdentifier");
   const packageName = getStringField(manifest, "packageName");
   const route = getStringField(manifest, "route");
   const routeKey = route ? getNormalizedRouteKey(route) : null;
@@ -217,11 +218,11 @@ function createValidationPreflightReport(input: unknown, validation: SynCloudOSA
   return {
     id: createReportId(appId),
     at: Date.now(),
-    action: appId && RuntimeStore.getSnapshot().appInfo[appId] ? "update" : "register",
+    action: appId && RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(appId)] ? "update" : "register",
     ok: validation.ok,
     appId,
     packageName,
-    bundleId: getStringField(manifest, "bundleId"),
+    bundleIdentifier: getStringField(manifest, "bundleIdentifier"),
     route,
     normalizedRoute: routeKey?.pathname ?? null,
     routeKey: routeKey?.key ?? null,
@@ -242,7 +243,7 @@ function createValidationPreflightReport(input: unknown, validation: SynCloudOSA
 
 function createNormalisationFailurePreflightReport(input: unknown, message: string): SynCloudOSAppRegistrationPreflightReport {
   const manifest = getManifestCandidate(input);
-  const appId = getStringField(manifest, "id");
+  const appId = getStringField(manifest, "bundleIdentifier");
   const packageName = getStringField(manifest, "packageName");
   const route = getStringField(manifest, "route");
   const routeKey = route ? getNormalizedRouteKey(route) : null;
@@ -257,11 +258,11 @@ function createNormalisationFailurePreflightReport(input: unknown, message: stri
   return {
     id: createReportId(appId),
     at: Date.now(),
-    action: appId && RuntimeStore.getSnapshot().appInfo[appId] ? "update" : "register",
+    action: appId && RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(appId)] ? "update" : "register",
     ok: false,
     appId,
     packageName,
-    bundleId: getStringField(manifest, "bundleId"),
+    bundleIdentifier: getStringField(manifest, "bundleIdentifier"),
     route,
     normalizedRoute: routeKey?.pathname ?? null,
     routeKey: routeKey?.key ?? null,
@@ -285,7 +286,7 @@ function createRegistryPreflightReport(
 ): SynCloudOSAppRegistrationPreflightReport {
   const { info, validation, normalisationNotes, explanation } = result;
   const snapshot = RuntimeStore.getSnapshot();
-  const previousInfo = snapshot.appInfo[info.id] ?? null;
+  const previousInfo = snapshot.appInfo[normalizeBundleIdentifier(info.bundleIdentifier)] ?? null;
   const routeKey = getNormalizedRouteKey(info.route);
   const issues = validation.warnings.map(appInfoIssueToRegistrationIssue);
   const collisions: SynCloudOSAppRegistrationPreflightReport["collisions"] = [];
@@ -296,19 +297,19 @@ function createRegistryPreflightReport(
     issues.push(issue);
   };
 
-  const bundleCollision = apps.find((app) => app.id !== info.id && normalizeIdentityValue(app.bundleId) === normalizeIdentityValue(info.bundleId));
+  const bundleCollision = apps.find((app) => app.bundleIdentifier !== info.bundleIdentifier && normalizeBundleIdentifier(app.bundleIdentifier) === normalizeBundleIdentifier(info.bundleIdentifier));
   if (bundleCollision) {
     addCollision(createCollisionIssue(
       "fatal",
-      "bundleId",
-      info.bundleId,
-      normalizeIdentityValue(info.bundleId),
+      "bundleIdentifier",
+      info.bundleIdentifier,
+      normalizeBundleIdentifier(info.bundleIdentifier),
       bundleCollision,
-      `Bundle id "${info.bundleId}" is already registered by ${bundleCollision.packageName}.`
+      `Bundle id "${info.bundleIdentifier}" is already registered by ${bundleCollision.packageName}.`
     ));
   }
 
-  const packageCollision = apps.find((app) => app.id !== info.id && normalizeIdentityValue(app.packageName) === normalizeIdentityValue(info.packageName));
+  const packageCollision = apps.find((app) => app.bundleIdentifier !== info.bundleIdentifier && normalizeIdentityValue(app.packageName) === normalizeIdentityValue(info.packageName));
   if (packageCollision) {
     addCollision(createCollisionIssue(
       "fatal",
@@ -316,13 +317,13 @@ function createRegistryPreflightReport(
       info.packageName,
       normalizeIdentityValue(info.packageName),
       packageCollision,
-      `Package name "${info.packageName}" is already registered by ${packageCollision.id}.`
+      `Package name "${info.packageName}" is already registered by ${packageCollision.bundleIdentifier}.`
     ));
   }
 
   const infoClaims = getStaticRouteClaims(info);
   const routeCollision = routeKey.key
-    ? apps.find((app) => app.id !== info.id && getStaticRouteClaims(app)
+    ? apps.find((app) => app.bundleIdentifier !== info.bundleIdentifier && getStaticRouteClaims(app)
       .some((existingClaim) => infoClaims.some((candidateClaim) => claimsOverlap(existingClaim, candidateClaim))))
     : null;
   if (routeCollision) {
@@ -336,7 +337,7 @@ function createRegistryPreflightReport(
     ));
   }
 
-  const componentCollision = apps.find((app) => app.id !== info.id && app.componentKey === info.componentKey);
+  const componentCollision = apps.find((app) => app.bundleIdentifier !== info.bundleIdentifier && app.componentKey === info.componentKey);
   if (componentCollision) {
     addCollision(createCollisionIssue(
       "fatal",
@@ -367,13 +368,13 @@ function createRegistryPreflightReport(
   const warnings = issues.filter((issue) => issue.severity === "warning");
 
   return {
-    id: createReportId(info.id),
+    id: createReportId(info.bundleIdentifier),
     at: Date.now(),
     action: previousInfo ? "update" : "register",
     ok: fatalIssues.length === 0,
-    appId: info.id,
+    appId: info.bundleIdentifier,
     packageName: info.packageName,
-    bundleId: info.bundleId,
+    bundleIdentifier: info.bundleIdentifier,
     route: info.route,
     normalizedRoute: routeKey.pathname,
     routeKey: routeKey.key,
@@ -382,9 +383,9 @@ function createRegistryPreflightReport(
     componentKey: info.componentKey,
     previousApp: previousInfo
       ? {
-        appId: previousInfo.id,
+        appId: previousInfo.bundleIdentifier,
         packageName: previousInfo.packageName,
-        bundleId: previousInfo.bundleId,
+        bundleIdentifier: previousInfo.bundleIdentifier,
         route: previousInfo.route,
         componentKey: previousInfo.componentKey
       }
@@ -431,7 +432,7 @@ function historyFromReport(
     result,
     at: Date.now(),
     reason,
-    bundleId: report.bundleId ?? undefined,
+    bundleIdentifier: report.bundleIdentifier ?? undefined,
     route: report.route ?? undefined,
     normalizedRoute: report.normalizedRoute,
     routeKey: report.routeKey,
@@ -463,7 +464,7 @@ function captureRegistrationFailure(
   report?: SynCloudOSAppRegistrationPreflightReport
 ) {
   const manifest = getManifestCandidate(input);
-  const appId = report?.appId ?? (isRecord(manifest) && typeof manifest.id === "string" ? manifest.id : undefined);
+  const appId = report?.appId ?? (isRecord(manifest) && typeof manifest.bundleIdentifier === "string" ? manifest.bundleIdentifier : undefined);
   const packageName = report?.packageName ?? (isRecord(manifest) && typeof manifest.packageName === "string" ? manifest.packageName : undefined);
 
   if (report) {
@@ -545,7 +546,8 @@ const appRegistry = {
     }
 
     const { info, explanation } = result;
-    const applicationMutation = runtime.windows.captureApplicationMutation(info.id);
+    const key = normalizeBundleIdentifier(info.bundleIdentifier);
+    const applicationMutation = runtime.windows.captureApplicationMutation(info.bundleIdentifier);
     const requiredReport = dependencies.serviceRegistry.getServiceReport(info.requiredServices);
     info.serviceStatus = Object.fromEntries(requiredReport.items.map((item: { serviceId: string; available: boolean }) => [item.serviceId, item.available]));
     info.hasAccessToRequiredServices = requiredReport.ok;
@@ -561,10 +563,10 @@ const appRegistry = {
 
     const bundle = createBundleFromInput(input, info);
     const previousSnapshot = RuntimeStore.getSnapshot();
-    const previousInfo = previousSnapshot.appInfo[info.id] ?? null;
-    const previousBundleState = BundleLoader.captureBundleRegistrationState(info.id);
+    const previousInfo = previousSnapshot.appInfo[normalizeBundleIdentifier(info.bundleIdentifier)] ?? null;
+    const previousBundleState = BundleLoader.captureBundleRegistrationState(info.bundleIdentifier);
     const previousBundle = previousBundleState.bundle as TrustedSynWareBundle | null;
-    const previousManager = AppManagerController.getManagerForApp(info.id);
+    const previousManager = AppManagerController.getManagerForApp(info.bundleIdentifier);
     const hadManager = previousManager !== null;
 
     void BundleLoader.invokeLifecycleHookForBundle(bundle, "applicationWillRegister", {
@@ -585,31 +587,31 @@ const appRegistry = {
       });
 
       context.mutate((draft: any) => {
-        const previousLifecycle = draft.lifecycle[info.id];
+        const previousLifecycle = draft.lifecycle[key];
         const nextLifecycle = info.isDisabled ? "disabled" : previousLifecycle === "disabled" ? "registered" : previousLifecycle ?? "registered";
-        const previousRecord = draft.managers[info.id] ?? null;
+        const previousRecord = draft.managers[key] ?? null;
 
-        draft.rawApps[info.id] = registeredBundle!.manifest;
-        draft.appInfo[info.id] = info;
-        draft.lifecycle[info.id] = nextLifecycle;
-        draft.managers[info.id] = manager.createRecord(previousRecord, nextLifecycle);
+        draft.rawApps[key] = registeredBundle!.manifest;
+        draft.appInfo[key] = info;
+        draft.lifecycle[key] = nextLifecycle;
+        draft.managers[key] = manager.createRecord(previousRecord, nextLifecycle);
         draft.webspring.lastRefreshAt = Date.now();
         if (info.webspring.defaultSelected || !draft.webspring.selectedAppId) {
-          draft.webspring.selectedAppId = info.id;
+          draft.webspring.selectedAppId = info.bundleIdentifier;
         }
       });
       // Advance before runtime.transaction.commit can publish the completed
       // store snapshot. Re-entrant observers therefore see one generation.
-      runtime.windows.advanceApplicationSessionEpoch(info.id);
+      runtime.windows.advanceApplicationSessionEpoch(info.bundleIdentifier);
       return info;
     }, {
-      label: previousInfo ? `AppRegistry.update:${info.id}` : `AppRegistry.register:${info.id}`,
+      label: previousInfo ? `AppRegistry.update:${info.bundleIdentifier}` : `AppRegistry.register:${info.bundleIdentifier}`,
       source: "SynCloudOS.AppRegistry.register"
     }) as SynCloudOSAppInfo | undefined;
 
     if (!registeredInfo || !registeredBundle) {
       BundleLoader.restoreBundleRegistrationState(previousBundleState);
-      AppManagerController.restoreManagerForApp(info.id, previousManager);
+      AppManagerController.restoreManagerForApp(info.bundleIdentifier, previousManager);
       return null;
     }
     BundleLoader.publishBundleRegistration(registeredBundle, previousBundle !== null);
@@ -622,13 +624,13 @@ const appRegistry = {
 
     recordRegistrationReport(preflight);
     publishRegistrationWarnings(preflight);
-    void BundleLoader.invokeLifecycleHook(info.id, previousInfo ? "applicationDidUpdate" : "applicationDidRegister", {
+    void BundleLoader.invokeLifecycleHook(info.bundleIdentifier, previousInfo ? "applicationDidUpdate" : "applicationDidRegister", {
       reason: previousInfo ? "AppRegistry.register update" : "AppRegistry.register"
     });
     EventBus.publish(previousInfo ? "app.register.update" : "app.register", {
-      appId: info.id,
+      appId: info.bundleIdentifier,
       packageName: info.packageName,
-      bundleId: info.bundleId,
+      bundleIdentifier: info.bundleIdentifier,
       replacedManager: hadManager,
       explanation,
       preflight,
@@ -682,7 +684,7 @@ const appRegistry = {
   },
 
   explain(input: SynCloudOSAppManifest | SynCloudOSAppInfo) {
-    const current = isRecord(input) && typeof input.id === "string" ? RuntimeStore.getSnapshot().appInfo[input.id] : null;
+    const current = isRecord(input) && typeof input.bundleIdentifier === "string" ? RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(input.bundleIdentifier)] : null;
     if (current) return AppInfo.explain(current);
     return AppInfo.normalise(input as SynCloudOSAppManifest).explanation;
   },
@@ -705,6 +707,8 @@ const appRegistry = {
   },
 
   async unregister(appId: string) {
+    const key = normalizeBundleIdentifier(appId);
+    appId = this.getApp(appId)?.bundleIdentifier ?? appId;
     const authority = runtime.windows.beginApplicationClose(appId);
     try {
       const bundle = BundleLoader.getBundle(appId);
@@ -728,15 +732,15 @@ const appRegistry = {
 
       const removedBundle = RuntimeController.transaction((context: any) => {
         context.mutate((draft: any) => {
-          delete draft.rawApps[appId];
-          delete draft.appInfo[appId];
-          delete draft.lifecycle[appId];
-          delete draft.managers[appId];
+          delete draft.rawApps[key];
+          delete draft.appInfo[key];
+          delete draft.lifecycle[key];
+          delete draft.managers[key];
           draft.webspring.lastRefreshAt = Date.now();
-          if (draft.application.currentAppId === appId) draft.application.currentAppId = null;
-          if (draft.application.activeAppId === appId) draft.application.activeAppId = null;
-          draft.application.openAppIds = draft.application.openAppIds.filter((id: string) => id !== appId);
-          if (draft.webspring.selectedAppId === appId) draft.webspring.selectedAppId = null;
+          if (normalizeBundleIdentifier(draft.application.currentAppId) === key) draft.application.currentAppId = null;
+          if (normalizeBundleIdentifier(draft.application.activeAppId) === key) draft.application.activeAppId = null;
+          draft.application.openAppIds = draft.application.openAppIds.filter((id: string) => normalizeBundleIdentifier(id) !== key);
+          if (normalizeBundleIdentifier(draft.webspring.selectedAppId) === key) draft.webspring.selectedAppId = null;
         });
         AppManagerController.removeManagerForApp(appId);
         return BundleLoader.unregisterBundle(appId);
@@ -756,7 +760,7 @@ const appRegistry = {
         result: "removed",
         at: Date.now(),
         reason: "App unregistered.",
-        bundleId: removedBundle?.manifest.bundleId,
+        bundleIdentifier: removedBundle?.manifest.bundleIdentifier,
         route: removedBundle?.manifest.route,
         normalizedRoute: removedBundle ? getNormalizedRouteKey(removedBundle.manifest.route).pathname : null,
         routeKey: removedBundle ? getNormalizedRouteKey(removedBundle.manifest.route).key : null,
@@ -770,7 +774,7 @@ const appRegistry = {
   },
 
   getApp(appId: string) {
-    return RuntimeStore.getSnapshot().appInfo[appId] ?? null;
+    return RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(appId)] ?? null;
   },
 
   getApps() {
@@ -797,11 +801,11 @@ const appRegistry = {
   refreshDisplayApps() {
     RuntimeStore.mutate((draft) => {
       draft.webspring.lastRefreshAt = Date.now();
-      if (draft.webspring.selectedAppId && !draft.appInfo[draft.webspring.selectedAppId]?.webspring.visible) {
+      if (draft.webspring.selectedAppId && !draft.appInfo[normalizeBundleIdentifier(draft.webspring.selectedAppId)]?.webspring.visible) {
         draft.webspring.selectedAppId = null;
       }
     });
-    EventBus.publish("webspring.refresh", { displayApps: this.getDisplayApps().map((app) => app.id) }, "Webspring");
+    EventBus.publish("webspring.refresh", { displayApps: this.getDisplayApps().map((app) => app.bundleIdentifier) }, "Webspring");
     return this.getDisplayApps();
   },
 

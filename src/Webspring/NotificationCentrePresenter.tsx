@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { newsIconUrl } from "../SynCloudOS/Resources/frameworkAssets";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";
 import {
@@ -68,11 +69,11 @@ function isActiveNotification(notification: SynCloudOSNotification) {
 }
 
 function getAppName(notification: SynCloudOSNotification, apps: Record<string, SynCloudOSAppInfo>) {
-  return notification.appId ? apps[notification.appId]?.displayName ?? notification.appId : "SynCloudOS";
+  return notification.appId ? apps[normalizeBundleIdentifier(notification.appId)]?.displayName ?? notification.appId : "SynCloudOS";
 }
 
 function getNotificationIcon(notification: SynCloudOSNotification, apps: Record<string, SynCloudOSAppInfo>) {
-  return notification.icon ?? (notification.appId ? apps[notification.appId]?.icon.src : undefined) ?? defaultIcon;
+  return notification.icon ?? (notification.appId ? apps[normalizeBundleIdentifier(notification.appId)]?.icon.src : undefined) ?? defaultIcon;
 }
 
 function formatNotificationTime(timestamp: number, locale: string) {

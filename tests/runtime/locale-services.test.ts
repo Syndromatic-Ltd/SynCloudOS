@@ -198,7 +198,7 @@ describe("LocaleServices runtime infrastructure", () => {
 
   it("does not make locale a hard app service and survives hydrate failure during boot", async () => {
     const { AppRegistry, BootManager, LocaleServices, RuntimeController, ServiceRegistry } = await loadLocaleRuntime();
-    AppRegistry.register(createTestManifest({ id: "locale-optional-app" }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.locale-optional-app" }));
     const originalHydrate = LocaleServices.hydrate;
     LocaleServices.hydrate = (() => {
       throw new Error("locale offline");
@@ -213,7 +213,7 @@ describe("LocaleServices runtime infrastructure", () => {
       serviceAvailable: false
     });
     expect(ServiceRegistry.getServiceReport(["webspring", "routing", "windowing"]).ok).toBe(true);
-    expect(RuntimeController.getSnapshot().appInfo["locale-optional-app"].requiredServices).not.toContain("locale");
+    expect(RuntimeController.getSnapshot().appInfo["com.example.locale-optional-app"].requiredServices).not.toContain("locale");
   });
 
   it("falls back through translations and interpolates parameters", async () => {

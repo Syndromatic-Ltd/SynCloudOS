@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { normalizeRoutePath } from "../Routing/routeNormalization";
 import { createBrowserRoutePlatform } from "../PlatformAdapters/BrowserRoutePlatform";
 import { createRuntimeRouteGraphOwner, RuntimeRouteRedirect } from "../Routing/RuntimeRouteGraphOwner";
@@ -181,7 +182,7 @@ export function createRouteManager(
       correlationId: handle.correlationId,
       ...(operation?.parentCorrelationId ? { parentCorrelationId: operation.parentCorrelationId } : {}),
       ...(successorId ? { successorId } : {}),
-      ...(resolution.kind === "app" ? { appId: resolution.app.id } : {}),
+      ...(resolution.kind === "app" ? { appId: resolution.app.bundleIdentifier } : {}),
       outcome: transitionOutcome(result, successorId),
       phase: operation?.phase ?? fallbackPhase,
       committed: result.committed,
@@ -374,7 +375,7 @@ export function createRouteManager(
       requestedPath: resolution.requestedPath,
       pathname: resolution.pathname,
       kind: resolution.kind,
-      appId: resolution.kind === "app" || resolution.kind === "external" ? resolution.app.id : undefined,
+      appId: resolution.kind === "app" || resolution.kind === "external" ? resolution.app.bundleIdentifier : undefined,
       packageName: resolution.kind === "app" || resolution.kind === "external" ? resolution.app.packageName : undefined,
       href: resolution.kind === "external" ? resolution.href : undefined,
       canonicalHref: resolution.kind === "external" ? resolution.canonicalHref : resolution.normalized.canonicalHref ?? undefined,
@@ -491,7 +492,7 @@ export function createRouteManager(
       };
       const onLaunchEvent = (event: { readonly payload?: unknown }, eventType: "complete" | "failed" | "cancelled") => {
         const details = readLaunchTerminalDetails(event.payload);
-        if (!details || details.appId !== appId || expectedRequestId === null || details.requestId !== expectedRequestId) return;
+        if (!details || normalizeBundleIdentifier(details.appId) !== normalizeBundleIdentifier(appId) || expectedRequestId === null || details.requestId !== expectedRequestId) return;
         if (eventType === "complete") {
           complete();
           return;
@@ -544,7 +545,7 @@ export function createRouteManager(
     if (app) {
       const captured = ErrorManager.createAppLaunchFailedError(
         app,
-        new Error(`Statechart could not enter ${target} for ${app.id}.`),
+        new Error(`Statechart could not enter ${target} for ${app.bundleIdentifier}.`),
         { source: "SynCloudOS.RouteManager.openRoute", route: app.route },
       );
       throw captured;
@@ -584,7 +585,7 @@ export function createRouteManager(
         ) {
           ErrorManager.createLoginSessionMismatchError(resolution.app, {
             source: "SynCloudOS.RouteManager.openRoute",
-            requestedAppId: resolution.app.id,
+            requestedAppId: resolution.app.bundleIdentifier,
             route: resolution.pathname,
             siteName: typeof options.context?.siteName === "string"
               ? options.context.siteName
@@ -598,7 +599,7 @@ export function createRouteManager(
           reason: policy.reason,
         };
       }
-      return Lifecycle.validateAccess(resolution.app.id, "launch");
+      return Lifecycle.validateAccess(resolution.app.bundleIdentifier, "launch");
     };
 
     const assertAppRouteAccess = () => {
@@ -612,11 +613,11 @@ export function createRouteManager(
 
     const isMountedRouteStateSelfNavigation = () => {
       if (resolution.kind !== "app") return false;
-      if (source !== `app:${resolution.app.id}:route-state`) return false;
+      if (source !== `app:${resolution.app.bundleIdentifier}:route-state`) return false;
       const location = runtime.environment.browser.getLocation();
       return (
         location.pathname === resolution.pathname
-        && AppRegistry.getAppForRoute(location.pathname)?.id === resolution.app.id
+        && normalizeBundleIdentifier(AppRegistry.getAppForRoute(location.pathname)?.bundleIdentifier) === normalizeBundleIdentifier(resolution.app.bundleIdentifier)
       );
     };
 
@@ -652,7 +653,7 @@ export function createRouteManager(
         async (context) => {
           if (resolution.kind === "app") {
             try {
-              await BundleLoader.loadBundle(resolution.app.id, { signal: context.signal });
+              await BundleLoader.loadBundle(resolution.app.bundleIdentifier, { signal: context.signal });
             } catch (error) {
               // Route opening owns this preload. A failure here happens before
               // Lifecycle.launch can run its equivalent recovery capture, so
@@ -673,7 +674,7 @@ export function createRouteManager(
             ? `${resolution.pathname}${resolution.normalized.search}${resolution.normalized.hash}`
             : resolution.normalized.href;
           try {
-            prepared = await graphs.prepare(resolution.kind === "app" ? resolution.app.id : null,
+            prepared = await graphs.prepare(resolution.kind === "app" ? resolution.app.bundleIdentifier : null,
               graphHref, context.signal, source.startsWith("app:"), options.context?.routeRetry === true);
           } catch (error) {
             if (!context.signal.aborted && !runtime.signal.aborted && error instanceof Error && error.name === "TimeoutError") {
@@ -700,8 +701,8 @@ export function createRouteManager(
           resolution.kind === "app" &&
           (
             (
-              before.application.activeAppId === resolution.app.id &&
-              Lifecycle.getState(resolution.app.id) === "active"
+              normalizeBundleIdentifier(before.application.activeAppId) === normalizeBundleIdentifier(resolution.app.bundleIdentifier) &&
+              Lifecycle.getState(resolution.app.bundleIdentifier) === "active"
             )
             || mountedRouteStateOwnsBrowserPath
           ),
@@ -724,7 +725,7 @@ export function createRouteManager(
           requestedPath,
           pathname: resolution.pathname,
           kind: resolution.kind,
-          appId: resolution.kind === "app" ? resolution.app.id : undefined,
+          appId: resolution.kind === "app" ? resolution.app.bundleIdentifier : undefined,
           ...(presentation ? { presentationSettlementId: presentation.id } : {}),
         };
         const lifecycle = {
@@ -757,11 +758,11 @@ export function createRouteManager(
             graphs.commit(prepared?.destination ?? null);
             RuntimeStore.mutate(draft => { draft.application.routePath = resolution.pathname; });
           } else if (resolution.kind === "app") {
-            const launchWait = createLaunchTerminalWait(resolution.app.id, context.signal);
+            const launchWait = createLaunchTerminalWait(resolution.app.bundleIdentifier, context.signal);
             try {
               transitionOrThrow(
                 Statechart.gotoState("active.application", {
-                  appId: resolution.app.id,
+                  appId: resolution.app.bundleIdentifier,
                   pathname: resolution.pathname,
                   source: statechartSource,
                   focus: true,
@@ -817,7 +818,7 @@ export function createRouteManager(
             requestedPath,
             pathname: resolution.pathname,
             kind: resolution.kind,
-            appId: resolution.kind === "app" ? resolution.app.id : undefined,
+            appId: resolution.kind === "app" ? resolution.app.bundleIdentifier : undefined,
             ...(presentation ? { presentationSettlementId: presentation.id } : {}),
             browserHref: resolution.normalized.href,
             syncRoute: options.syncRoute !== false,
@@ -829,7 +830,7 @@ export function createRouteManager(
       },
       effects: [{ onError: "stop", run: async context => {
         if (resolution.kind === "app" && prepared?.destination) {
-          await mountedRoutes.settle(resolution.app.id, { route: prepared.destination.route, operationId: context.operationId, signal: context.signal }, requiresMountedRoute);
+          await mountedRoutes.settle(resolution.app.bundleIdentifier, { route: prepared.destination.route, operationId: context.operationId, signal: context.signal }, requiresMountedRoute);
         }
       } }],
     });
@@ -905,7 +906,7 @@ export function createRouteManager(
       return AppRegistry.getAllApps().map((app) => {
         const normalized = normalizeRuntimeRoute(app.route);
         return {
-          appId: app.id,
+          appId: app.bundleIdentifier,
           packageName: app.packageName,
           route: app.route,
           normalizedRoute: normalized.pathname,

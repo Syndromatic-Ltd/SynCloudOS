@@ -230,12 +230,12 @@ describe("projection documents", () => {
     const document = await controller.newProjectionDocument({
       documentId: "projection-pinned",
       typeId: noteType.id,
-      applicationId: "pin-app",
+      applicationId: "com.example.pin-app",
       initialModel: { title: "Published", body: "Read only" },
     });
     // A mount holds an owner lease; a window associates; suspend releases
     // the lease while the window stays open.
-    const lease = controller.acquireDocumentReferenceLease(document.id, "pin-app", "owner");
+    const lease = controller.acquireDocumentReferenceLease(document.id, "com.example.pin-app", "owner");
     controller.associateWindow(document.id, { windowControllerId: "pin-window", role: "secondary" });
     // releaseDocumentReferenceLease awaits the full deferred cleanup pass,
     // so the surviving document proves the window pin — no sleep needed.
@@ -251,12 +251,12 @@ describe("projection documents", () => {
     const document = await controller.newProjectionDocument({
       documentId: "projection-serial",
       typeId: noteType.id,
-      applicationId: "pin-app",
+      applicationId: "com.example.pin-app",
       initialModel: { title: "Published", body: "Read only" },
     });
     const prepareSpy = vi.spyOn(document, "prepareToClose");
-    const first = controller.acquireDocumentReferenceLease(document.id, "pin-app", "owner");
-    const second = controller.acquireDocumentReferenceLease(document.id, "pin-app", "owner");
+    const first = controller.acquireDocumentReferenceLease(document.id, "com.example.pin-app", "owner");
+    const second = controller.acquireDocumentReferenceLease(document.id, "com.example.pin-app", "owner");
     // Both releases race: the second joins the in-flight cleanup instead of
     // starting its own — the canonical document prepares for close exactly once.
     await Promise.all([
@@ -273,10 +273,10 @@ describe("projection documents", () => {
     const document = await controller.newProjectionDocument({
       documentId: "projection-terminal",
       typeId: noteType.id,
-      applicationId: "pin-app",
+      applicationId: "com.example.pin-app",
       initialModel: { title: "Published", body: "Read only" },
     });
-    const lease = controller.acquireDocumentReferenceLease(document.id, "pin-app", "owner");
+    const lease = controller.acquireDocumentReferenceLease(document.id, "com.example.pin-app", "owner");
     const terminalToken = document.beginTerminalReconciliation(documentAdoptionAuthority);
     try {
       await controller.releaseDocumentReferenceLease(lease, { closeIfFinalOwner: true });
@@ -286,7 +286,7 @@ describe("projection documents", () => {
       await document.endTerminalReconciliation(terminalToken, documentAdoptionAuthority);
     }
     // A fresh release after the lease ends proceeds to close.
-    const second = controller.acquireDocumentReferenceLease(document.id, "pin-app", "owner");
+    const second = controller.acquireDocumentReferenceLease(document.id, "com.example.pin-app", "owner");
     await controller.releaseDocumentReferenceLease(second, { closeIfFinalOwner: true });
     expect(controller.getDocument(document.id)).toBeNull();
   });

@@ -39,7 +39,7 @@ describe("NotificationCenter runtime foundations", () => {
     const { AppRegistry, RuntimeController, ServiceRegistry, SynCloudOS } = createRuntimeHarness(createTestRuntime());
     ServiceRegistry.ensureDefaults();
     AppRegistry.register(createTestManifest({
-      id: "journal",
+      bundleIdentifier: "com.example.journal",
       route: "/journal",
       requiredServices: ["webspring", "notifications"],
       notifications: { showsNotifications: true, badgeCount: 0 }
@@ -49,7 +49,7 @@ describe("NotificationCenter runtime foundations", () => {
       kind: "publishing",
       title: "Post published",
       message: "Your release note is now live.",
-      appId: "journal",
+      appId: "com.example.journal",
       priority: "timeSensitive",
       requiresAction: true,
       badgeCount: 3,
@@ -74,20 +74,20 @@ describe("NotificationCenter runtime foundations", () => {
     expect(presenter.liveRegionText).toBe("Post published. Your release note is now live.");
     expect(presenter.queue[0]).toMatchObject({ position: 0, channel: "banner", interruptible: false });
     expect(presenter.groups[0]).toMatchObject({
-      appId: "journal",
+      appId: "com.example.journal",
       kind: "publishing",
       threadKey: "release-note",
       unreadCount: 1
     });
-    expect(presenter.badges.byAppId.journal).toMatchObject({ count: 3, notificationIds: [notification?.id] });
-    expect(RuntimeController.getSnapshot().appInfo.journal.notifications.badgeCount).toBe(3);
+    expect(presenter.badges.byAppId["com.example.journal"]).toMatchObject({ count: 3, notificationIds: [notification?.id] });
+    expect(RuntimeController.getSnapshot().appInfo["com.example.journal"].notifications.badgeCount).toBe(3);
   });
 
   it("dismisses active notifications into history and derives app badges from notification state", async () => {
     const { AppRegistry, RuntimeController, ServiceRegistry, SynCloudOS } = createRuntimeHarness(createTestRuntime());
     ServiceRegistry.ensureDefaults();
     AppRegistry.register(createTestManifest({
-      id: "journal",
+      bundleIdentifier: "com.example.journal",
       route: "/journal",
       requiredServices: ["webspring", "notifications"],
       notifications: { showsNotifications: true, badgeCount: 0 }
@@ -97,26 +97,26 @@ describe("NotificationCenter runtime foundations", () => {
       kind: "app",
       title: "First",
       message: "One unread note.",
-      appId: "journal"
+      appId: "com.example.journal"
     });
     const second = SynCloudOS.NotificationCenter.post({
       kind: "app",
       title: "Second",
       message: "Another unread note.",
-      appId: "journal"
+      appId: "com.example.journal"
     });
 
     expect(SynCloudOS.NotificationCenter.latest()?.id).toBe(second?.id);
-    expect(RuntimeController.getSnapshot().appInfo.journal.notifications.badgeCount).toBe(2);
+    expect(RuntimeController.getSnapshot().appInfo["com.example.journal"].notifications.badgeCount).toBe(2);
 
     const dismissedSecond = SynCloudOS.NotificationCenter.dismiss(second?.id ?? "");
     expect(dismissedSecond).toMatchObject({ id: second?.id, status: "dismissed" });
     expect(SynCloudOS.NotificationCenter.latest()?.id).toBe(first?.id);
-    expect(RuntimeController.getSnapshot().appInfo.journal.notifications.badgeCount).toBe(1);
+    expect(RuntimeController.getSnapshot().appInfo["com.example.journal"].notifications.badgeCount).toBe(1);
 
     SynCloudOS.NotificationCenter.dismiss(first?.id ?? "");
     expect(SynCloudOS.NotificationCenter.latest()).toBeNull();
-    expect(RuntimeController.getSnapshot().appInfo.journal.notifications.badgeCount).toBe(0);
+    expect(RuntimeController.getSnapshot().appInfo["com.example.journal"].notifications.badgeCount).toBe(0);
     expect(SynCloudOS.NotificationCenter.getHistory().map((item) => item.status)).toEqual([
       "dismissed",
       "dismissed"
@@ -130,14 +130,14 @@ describe("NotificationCenter runtime foundations", () => {
       kind: "progress",
       title: "Syncing",
       message: "Uploading 1 item.",
-      appId: "journal",
+      appId: "com.example.journal",
       coalesceKey: "journal-sync"
     });
     const secondProgress = SynCloudOS.NotificationCenter.post({
       kind: "progress",
       title: "Syncing",
       message: "Uploading 2 items.",
-      appId: "journal",
+      appId: "com.example.journal",
       coalesceKey: "journal-sync"
     });
 
@@ -211,7 +211,7 @@ describe("NotificationCenter runtime foundations", () => {
     const { AppRegistry, RuntimeController, ServiceRegistry, SynCloudOS } = createRuntimeHarness(createTestRuntime());
     ServiceRegistry.ensureDefaults();
     AppRegistry.register(createTestManifest({
-      id: "journal",
+      bundleIdentifier: "com.example.journal",
       route: "/journal",
       requiredServices: ["webspring", "notifications"],
       notifications: { showsNotifications: true, badgeCount: 0 }
@@ -221,14 +221,14 @@ describe("NotificationCenter runtime foundations", () => {
       kind: "app",
       title: "Visible",
       message: "This one should use the banner queue.",
-      appId: "journal",
+      appId: "com.example.journal",
       groupKey: "journal:thread"
     });
     const silent = SynCloudOS.NotificationCenter.post({
       kind: "backgroundTask",
       title: "Quiet sync",
       message: "This should only appear in Notification Centre.",
-      appId: "journal",
+      appId: "com.example.journal",
       silent: true,
       groupKey: "journal:thread"
     });
@@ -247,7 +247,7 @@ describe("NotificationCenter runtime foundations", () => {
       unreadCount: 0,
       banner: null
     });
-    expect(RuntimeController.getSnapshot().appInfo.journal.notifications.badgeCount).toBe(0);
+    expect(RuntimeController.getSnapshot().appInfo["com.example.journal"].notifications.badgeCount).toBe(0);
   });
 
   it("can enforce PolicyKit denial for unprivileged notification posting", async () => {

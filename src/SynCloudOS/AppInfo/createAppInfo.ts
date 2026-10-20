@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { selectionCircleUrl, selectorArrowUrl, timeMachineShadowUrl, spinnerUrl } from "../Resources/frameworkAssets";
 import {
   normalizeSynCloudOSAppPresentation,
@@ -379,7 +380,7 @@ function normaliseWindow(
     record.mobilePolicy === "hidden" ? record.mobilePolicy : "fullscreen";
   const restorationKey = isNonEmptyString(record.restorationKey)
     ? cleanString(record.restorationKey)
-    : `application.${appId}.primary`;
+    : `application.${normalizeBundleIdentifier(appId)}.primary`;
   note(notes, "window.defaultBounds", record.defaultBounds, defaultBounds, "Window bounds default to a finite CSS-pixel rectangle.");
   note(notes, "window.minimumSize", record.minimumSize, minimumSize, "Window minimum size defaults from the legacy size fields.");
   note(notes, "window.style", record.style, style, "Window style defaults from resizability.");
@@ -418,7 +419,7 @@ function normaliseWindowChrome(
 
 function createValidationReport(manifest: unknown, issues: SynCloudOSAppInfoIssue[]): SynCloudOSAppInfoValidationReport {
   const record = isRecord(manifest) ? manifest : {};
-  const manifestId = isNonEmptyString(record.id) ? record.id.trim() : null;
+  const manifestId = isNonEmptyString(record.bundleIdentifier) ? record.bundleIdentifier.trim() : null;
   const packageName = isNonEmptyString(record.packageName) ? record.packageName.trim() : null;
   const errors = issues.filter((issue) => issue.severity === "error");
   const warnings = issues.filter((issue) => issue.severity === "warning");
@@ -447,10 +448,10 @@ export function validateAppManifest(manifest: unknown): SynCloudOSAppInfoValidat
   }
 
   const requiredIdentityFields = [
-    "id",
+    "bundleIdentifier",
+    "version",
     "name",
     "packageName",
-    "bundleId",
     "displayName",
     "shortName",
     "description",
@@ -461,6 +462,17 @@ export function validateAppManifest(manifest: unknown): SynCloudOSAppInfoValidat
       addIssue(issues, "error", `manifest.${field}.required`, field, `${field} must be a non-empty string.`);
     }
   });
+  for (const field of ["id", "title", "bundleId"]) {
+    if (Object.hasOwn(manifest, field)) {
+      addIssue(issues, "error", `manifest.${field}.unsupported`, field, `${field} is not an application identity field; use bundleIdentifier and displayName.`);
+    }
+  }
+  if (typeof manifest.bundleIdentifier === "string" && !/^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+){2,}$/.test(manifest.bundleIdentifier)) {
+    addIssue(issues, "error", "manifest.bundleIdentifier.invalid", "bundleIdentifier", "bundleIdentifier must be a reverse-DNS identifier with at least two dots.");
+  }
+  if (isRecord(manifest.about) && Object.hasOwn(manifest.about, "version")) {
+    addIssue(issues, "error", "manifest.about.version.unsupported", "about.version", "Declare the application version only in version.");
+  }
 
   if (!isNonEmptyString(manifest.route)) {
     addIssue(issues, "warning", "manifest.route.defaulted", "route", "route is empty and will be normalised from the app id.");
@@ -634,10 +646,9 @@ export function validateAppManifest(manifest: unknown): SynCloudOSAppInfoValidat
 }
 
 function normaliseManifest(manifest: SynCloudOSAppManifest, notes: SynCloudOSAppInfoNormalisationNote[]): NormalisedSynCloudOSAppManifest {
-  const id = cleanString(manifest.id);
+  const id = cleanString(manifest.bundleIdentifier);
   const name = cleanString(manifest.name);
   const packageName = cleanString(manifest.packageName);
-  const bundleId = cleanString(manifest.bundleId);
   const displayName = cleanString(manifest.displayName);
   const shortName = cleanString(manifest.shortName);
   const description = cleanString(manifest.description);
@@ -654,10 +665,10 @@ function normaliseManifest(manifest: SynCloudOSAppManifest, notes: SynCloudOSApp
 
   return {
     ...manifest,
-    id,
+    bundleIdentifier: id,
+    version: cleanString(manifest.version),
     name,
     packageName,
-    bundleId,
     displayName,
     shortName,
     description,
@@ -711,9 +722,8 @@ export function explainAppInfo(appInfo: SynCloudOSAppInfo): SynCloudOSAppInfoExp
   ];
 
   return {
-    appId: appInfo.id,
     packageName: appInfo.packageName,
-    bundleId: appInfo.bundleId,
+    bundleIdentifier: appInfo.bundleIdentifier,
     displayName: appInfo.displayName,
     route: appInfo.route,
     path: appInfo.path,

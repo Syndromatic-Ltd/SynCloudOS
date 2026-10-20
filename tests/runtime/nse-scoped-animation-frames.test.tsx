@@ -67,14 +67,14 @@ function presentation(owner: "shell" | "mounted") {
   const host = frameHost();
   const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), animationFrames: host.frames } });
   runtimes.push(runtime);
-  registerTestSynWare(runtime, { schemaVersion: 1, id: "frame-probe", version: "1.0.0", title: "Frame Probe", routes: [{ path: "/frame-probe", primary: true }] });
-  const app = runtime.apps.getApp("frame-probe")!;
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.frame-probe", version: "1.0.0", displayName: "Frame Probe", routes: [{ path: "/frame-probe", primary: true }] });
+  const app = runtime.apps.getApp("com.example.frame-probe")!;
   let frames: AFXFrameScheduler | null = null;
   let environment: ReturnType<typeof useNSEAnimationEnvironment> | undefined;
   function Probe() { environment = useNSEAnimationEnvironment(); frames = environment.frames; return null; }
   const branding = { name: "Frame tests", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null };
   const view = render(<SynCloudOSProvider runtime={runtime}><HostSiteBrandingProvider value={branding}>
-    {owner === "shell" ? <Probe /> : <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.id}`}><Probe /></SynWareRuntimeMount>}
+    {owner === "shell" ? <Probe /> : <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.bundleIdentifier}`}><Probe /></SynWareRuntimeMount>}
   </HostSiteBrandingProvider></SynCloudOSProvider>);
   if (!frames) throw new Error("Presentation did not receive its frame source.");
   return { runtime, host, frames: frames as AFXFrameScheduler, app, view, get environment() { return environment!; } };
@@ -161,10 +161,10 @@ it("only suspends the mounted frame source whose lifecycle changes", () => {
   const release = frames.subscribeState!(changed);
   act(() => runtime.store.mutate(draft => { draft.lifecycle.other = "suspended"; }));
   expect(changed).not.toHaveBeenCalled();
-  act(() => runtime.store.mutate(draft => { draft.lifecycle[app.id] = "suspended"; }));
+  act(() => runtime.store.mutate(draft => { draft.lifecycle[app.bundleIdentifier] = "suspended"; }));
   expect(frames.suspended).toBe(true);
   expect(changed).toHaveBeenCalledTimes(1);
-  act(() => runtime.store.mutate(draft => { draft.lifecycle[app.id] = "closed"; }));
+  act(() => runtime.store.mutate(draft => { draft.lifecycle[app.bundleIdentifier] = "closed"; }));
   expect(changed).toHaveBeenCalledTimes(1);
   release();
 });

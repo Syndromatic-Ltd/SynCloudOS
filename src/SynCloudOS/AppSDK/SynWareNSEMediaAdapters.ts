@@ -106,7 +106,7 @@ export function useNSEViewAnimator(input: {
   const animations = useMemo(() => createSynWareNSEAnimations(app.animations), [app.animations]);
   return useNSEAnimatorFor({
     animations,
-    owner: { appId: app.app.id, viewId: input.viewId },
+    owner: { appId: app.app.bundleIdentifier, viewId: input.viewId },
     target: input.target,
     targetId: input.targetId,
   });

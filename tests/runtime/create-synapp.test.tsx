@@ -29,9 +29,9 @@ it("validates and deeply freezes a declarative app definition", () => {
   const definition = createSynWare({
     manifest: {
       schemaVersion: 1,
-      id: "com.syndromatic.example",
+      bundleIdentifier: "com.syndromatic.example",
       version: "1.0.0",
-      title: "Example",
+      displayName: "Example",
       commands: [{ id: "example.refresh", title: "Refresh" }],
     },
     root: Root,
@@ -43,7 +43,7 @@ it("validates and deeply freezes a declarative app definition", () => {
   expect(definition).not.toHaveProperty("runtime");
   expect(definition).not.toHaveProperty("registration");
   expect(() => {
-    (definition.manifest as { title: string }).title = "Changed";
+    (definition.manifest as { displayName: string }).displayName = "Changed";
   }).toThrow(TypeError);
 });
 
@@ -51,9 +51,9 @@ it("rejects an invalid definition without registering globally", () => {
   expect(() => createSynWare({
     manifest: {
       schemaVersion: 1,
-      id: "com.syndromatic.invalid",
+      bundleIdentifier: "com.syndromatic.invalid",
       version: "1.0.0",
-      title: "Invalid",
+      displayName: "Invalid",
       legacyShell: {},
     },
     root: Root,
@@ -65,9 +65,9 @@ it("creates separate registration bundles for two runtime sessions", () => {
   const definition = createSynWare({
     manifest: {
       schemaVersion: 1,
-      id: "com.syndromatic.two-sessions",
+      bundleIdentifier: "com.syndromatic.two-sessions",
       version: "1.0.0",
-      title: "Two Sessions",
+      displayName: "Two Sessions",
       routes: [{ path: "/two-sessions", primary: true }],
     },
     root: Root,
@@ -78,9 +78,9 @@ it("creates separate registration bundles for two runtime sessions", () => {
   const first = firstRuntime.apps.register(createSynWareBundle(definition));
   const second = secondRuntime.apps.register(createSynWareBundle(definition));
 
-  expect(first?.id).toBe("com.syndromatic.two-sessions");
-  expect(second?.id).toBe("com.syndromatic.two-sessions");
-  expect(firstRuntime.apps.getApp(definition.manifest.id)).not.toBe(secondRuntime.apps.getApp(definition.manifest.id));
+  expect(first?.bundleIdentifier).toBe("com.syndromatic.two-sessions");
+  expect(second?.bundleIdentifier).toBe("com.syndromatic.two-sessions");
+  expect(firstRuntime.apps.getApp(definition.manifest.bundleIdentifier)).not.toBe(secondRuntime.apps.getApp(definition.manifest.bundleIdentifier));
 });
 
 it("rejects accessor-backed definitions before validation can observe a different manifest", () => {
@@ -92,9 +92,9 @@ it("rejects accessor-backed definitions before validation can observe a differen
       reads += 1;
       return {
         schemaVersion: 1,
-        id: reads === 1 ? "com.syndromatic.accessor-first" : "com.syndromatic.accessor-second",
+        bundleIdentifier: reads === 1 ? "com.syndromatic.accessor-first" : "com.syndromatic.accessor-second",
         version: "1.0.0",
-        title: "Accessor-backed declaration",
+        displayName: "Accessor-backed declaration",
       };
     },
   });
@@ -111,7 +111,7 @@ it("does not dereference accessor-backed direct registrations while reporting a 
     enumerable: true,
     get() {
       reads += 1;
-      return { schemaVersion: 1, id: "com.syndromatic.unsafe", version: "1.0.0", title: "Unsafe" };
+      return { schemaVersion: 1, bundleIdentifier: "com.syndromatic.unsafe", version: "1.0.0", displayName: "Unsafe" };
     },
   });
 
@@ -124,9 +124,9 @@ it("keeps the complete V1 definition and declaration immutable through bundle re
   const source = {
     manifest: {
       schemaVersion: 1,
-      id: "com.syndromatic.complete-declaration",
+      bundleIdentifier: "com.syndromatic.complete-declaration",
       version: "1.2.3",
-      title: "Complete declaration",
+      displayName: "Complete declaration",
       routes: [{ path: "/complete", title: "Complete", primary: true }],
       presentations: ["desktop", "tablet", "mobile"],
       minimumViewport: { width: 640, height: 480 },
@@ -150,16 +150,16 @@ it("keeps the complete V1 definition and declaration immutable through bundle re
   const bundle = createSynWareBundle(definition);
   const runtime = createTestRuntime({ id: "runtime:synapp:complete" });
 
-  source.manifest.title = "Mutated author declaration";
+  source.manifest.displayName = "Mutated author declaration";
   expect(definition).not.toBe(source);
-  expect(definition.manifest.title).toBe("Complete declaration");
+  expect(definition.manifest.displayName).toBe("Complete declaration");
   expect(Object.isFrozen(definition.migrations)).toBe(true);
   expect(bundle.synWareDefinition).toBe(definition);
   expect(bundle.synWareManifest).toBe(definition.manifest);
-  expect(runtime.apps.register(bundle)?.id).toBe(definition.manifest.id);
-  expect(runtime.bundles.getBundle(definition.manifest.id)?.synWareDefinition).toBe(definition);
-  expect(runtime.bundles.getBundle(definition.manifest.id)?.synWareManifest).toEqual(definition.manifest);
-  expect(Object.isFrozen(runtime.bundles.getBundle(definition.manifest.id)?.synWareManifest)).toBe(true);
+  expect(runtime.apps.register(bundle)?.bundleIdentifier).toBe(definition.manifest.bundleIdentifier);
+  expect(runtime.bundles.getBundle(definition.manifest.bundleIdentifier)?.synWareDefinition).toBe(definition);
+  expect(runtime.bundles.getBundle(definition.manifest.bundleIdentifier)?.synWareManifest).toEqual(definition.manifest);
+  expect(Object.isFrozen(runtime.bundles.getBundle(definition.manifest.bundleIdentifier)?.synWareManifest)).toBe(true);
 });
 
 it("rejects direct V1 registration that does not pass the shared schema", () => {
@@ -167,9 +167,9 @@ it("rejects direct V1 registration that does not pass the shared schema", () => 
   const malformed = {
     manifest: {
       schemaVersion: 1,
-      id: "com.syndromatic.invalid-direct",
+      bundleIdentifier: "com.syndromatic.invalid-direct",
       version: "1.0.0",
-      title: "Invalid direct registration",
+      displayName: "Invalid direct registration",
       retiredManifestKey: true,
     },
   };

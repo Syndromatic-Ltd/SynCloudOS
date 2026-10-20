@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo } from "../AppInfo/appInfoTypes";
 import type { SynCloudOSStagePoint } from "../AppRegistry/appRegistryTypes";
 import {
@@ -27,7 +28,7 @@ import {
   type SynCloudOSWebspringLayoutPreferenceSource,
 } from "./webspringStateTypes";
 
-export const WEBSPRING_LAYOUT_PREFERENCE_KEY = "webspring.layout.v4";
+export const WEBSPRING_LAYOUT_PREFERENCE_KEY = "webspring.layout.v5";
 /** The dial holds the first seven top-level entries; the rest overflow to the shelf. */
 export const DESKTOP_DIAL_ITEM_LIMIT = 7;
 const DEFAULT_BOARD_PREFERENCE: SynCloudOSWebspringLayoutPreference["board"] = Object.freeze({ version: 1, pageSize: 20, dockSize: 4 });
@@ -108,7 +109,7 @@ function uniqueIds(order: readonly unknown[] | null | undefined) {
   const ids: string[] = [];
   (order ?? []).forEach((value) => {
     if (typeof value !== "string") return;
-    const id = value.trim();
+    const id = normalizeBundleIdentifier(value.trim());
     if (!id || seen.has(id)) return;
     seen.add(id);
     ids.push(id);
@@ -185,11 +186,11 @@ export function reconcileWebspringLayout(
   preference: WebspringLayoutInput | null | undefined,
   configuration: SynCloudOSWebspringFolderConfiguration,
 ): WebspringLayoutProjection {
-  const visibleApps = new Map(apps.filter(isVisibleWebspringApp).map((app) => [app.id, app]));
+  const visibleApps = new Map(apps.filter(isVisibleWebspringApp).map((app) => [normalizeBundleIdentifier(app.bundleIdentifier), app]));
   const manifestFolderOrder = new Map(configuration.initial.map((folder) => [folder.id, folder.order]));
   const manifestFolderOfApp = new Map<string, string>();
   for (const folder of configuration.initial) {
-    for (const appId of folder.apps) if (!manifestFolderOfApp.has(appId)) manifestFolderOfApp.set(appId, folder.id);
+    for (const appId of folder.apps) if (!manifestFolderOfApp.has(normalizeBundleIdentifier(appId))) manifestFolderOfApp.set(normalizeBundleIdentifier(appId), folder.id);
   }
   const membershipFromManifest = !configuration.editable || !preference ||
     preference.source === "seed" || preference.source === "reset";
@@ -205,14 +206,14 @@ export function reconcileWebspringLayout(
   const folderSequence = [...requested.filter((id) => sourceFolders.has(id)), ...sourceFolders.keys()];
   for (const folderId of folderSequence) {
     if (members.has(folderId)) continue;
-    const folderApps = uniqueIds(sourceFolders.get(folderId)).filter((appId) => visibleApps.has(appId) && !placed.has(appId));
+    const folderApps = uniqueIds(sourceFolders.get(folderId)).filter((appId) => visibleApps.has(normalizeBundleIdentifier(appId)) && !placed.has(normalizeBundleIdentifier(appId)));
     folderApps.forEach((appId) => placed.add(appId));
     members.set(folderId, folderApps);
   }
 
-  const missingApps = [...visibleApps.keys()].filter((appId) => !placed.has(appId) && !requested.includes(appId));
+  const missingApps = [...visibleApps.keys()].filter((appId) => !placed.has(normalizeBundleIdentifier(appId)) && !requested.includes(appId));
   for (const appId of missingApps) {
-    const folderId = manifestFolderOfApp.get(appId);
+    const folderId = manifestFolderOfApp.get(normalizeBundleIdentifier(appId));
     const folder = folderId === undefined ? undefined : members.get(folderId);
     if (!folder) continue;
     folder.push(appId);
@@ -267,8 +268,8 @@ export function getOrderedVisibleWebspringApps(
   layout: WebspringLayoutInput | null | undefined,
   configuration: SynCloudOSWebspringFolderConfiguration,
 ) {
-  const appMap = new Map(apps.map((app) => [app.id, app]));
-  return reconcileWebspringLayout(apps, layout, configuration).appOrder.map((appId) => appMap.get(appId)!);
+  const appMap = new Map(apps.map((app) => [normalizeBundleIdentifier(app.bundleIdentifier), app]));
+  return reconcileWebspringLayout(apps, layout, configuration).appOrder.map((appId) => appMap.get(normalizeBundleIdentifier(appId))!);
 }
 
 /** A new user folder ID: `folder.user-<base36 time><4 random>`. */
@@ -279,7 +280,7 @@ export function createWebspringFolderId(now = Date.now(), random = Math.random) 
 
 export function moveWebspringEntryToIndex(order: readonly string[], id: string, toIndex: number) {
   const nextOrder = uniqueIds(order);
-  const fromIndex = nextOrder.indexOf(id);
+  const fromIndex = nextOrder.indexOf(normalizeBundleIdentifier(id));
   if (fromIndex === -1) return nextOrder;
   const [entry] = nextOrder.splice(fromIndex, 1);
   const clampedIndex = Math.max(0, Math.min(toIndex, nextOrder.length));
@@ -293,7 +294,7 @@ export function getKeyboardReorderIndex(
   key: string,
   columns = 5,
 ) {
-  const currentIndex = order.indexOf(id);
+  const currentIndex = order.findIndex(entry => normalizeBundleIdentifier(entry) === normalizeBundleIdentifier(id));
   if (currentIndex === -1) return -1;
   const deltaByKey: Record<string, number> = {
     ArrowLeft: -1,
@@ -370,7 +371,8 @@ export function getDesktopWebspringSlots(order: readonly string[]): WebspringDes
 /** The slot of the top-level entry holding an app: the app itself, or its folder. */
 export function getDesktopWebspringSlotForApp(projection: WebspringLayoutProjection, appId: string | null | undefined) {
   if (!appId) return null;
-  const entryId = projection.folderOfApp[appId] ?? appId;
+  const key = normalizeBundleIdentifier(appId);
+  const entryId = projection.folderOfApp[key] ?? key;
   return getDesktopWebspringSlots(projection.order).slots.find((slot) => slot.id === entryId) ?? null;
 }
 

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { NSEPresence, useNSEPresentation, type NSEPresentationSpec } from "../NSE/Animation";
 import { ApplicationStageHost } from "./ApplicationStageHost";
@@ -54,8 +55,8 @@ function getMultiSwitchRole(
   appId: string,
 ): WebspringMultiSwitchRole | null {
   if (!multiSwitch || multiSwitch.status !== "switching") return null;
-  if (multiSwitch.fromAppId === appId) return WEBSPRING_MULTI_SWITCH_ROLES[1];
-  if (multiSwitch.toAppId === appId) return WEBSPRING_MULTI_SWITCH_ROLES[0];
+  if (normalizeBundleIdentifier(multiSwitch.fromAppId) === normalizeBundleIdentifier(appId)) return WEBSPRING_MULTI_SWITCH_ROLES[1];
+  if (normalizeBundleIdentifier(multiSwitch.toAppId) === normalizeBundleIdentifier(appId)) return WEBSPRING_MULTI_SWITCH_ROLES[0];
   return null;
 }
 
@@ -121,13 +122,13 @@ export function ApplicationStageLayer({
     const appIds = selectApplicationStageAppIds({ activeAppId, multiSwitch, returnTransitionId });
     return appIds
       .map((appId, index) => {
-        const app = apps[appId];
+        const app = apps[normalizeBundleIdentifier(appId)];
         if (!app || app.presentation !== "appView") return null;
         return {
           id: `application-stage:${appId}`,
           appId,
           title: app.window.title,
-          isFocused: appId === activeAppId,
+          isFocused: normalizeBundleIdentifier(appId) === normalizeBundleIdentifier(activeAppId),
           zIndex: index + 1,
         } satisfies ApplicationStagePresentation;
       })
@@ -225,10 +226,10 @@ export function ApplicationStageLayer({
               key={presentation.id}
               stage={presentation}
               app={app}
-              lifecycle={lifecycle[app.id] ?? "registered"}
+              lifecycle={lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] ?? "registered"}
               multiSwitchId={multiSwitchId}
-              multiSwitchRole={getMultiSwitchRole(multiSwitch, app.id)}
-              staged={stagingAppId === app.id}
+              multiSwitchRole={getMultiSwitchRole(multiSwitch, app.bundleIdentifier)}
+              staged={normalizeBundleIdentifier(stagingAppId) === normalizeBundleIdentifier(app.bundleIdentifier)}
               launchTransitionId={launchTransitionId}
               presentationSettlementId={presentationSettlementId}
               quickSwitchOpen={quickSwitchOpen}

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useEffect, useId, useLayoutEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { NSEAlert, NSEAlertBackdrop, NSEFocusPortProvider, NSEFocusScope } from "../NSE/NSE";
@@ -67,7 +68,7 @@ function ReturnDecisionDialog({
     }
   };
   const currentGenerationIsLive = () => appIdentity !== null && runtime.apps.getApp(appId) === appIdentity &&
-    runtime.store.getSnapshot().application.activeAppId === appId;
+    normalizeBundleIdentifier(runtime.store.getSnapshot().application.activeAppId) === normalizeBundleIdentifier(appId);
 
   if (typeof document === "undefined") return null;
 
@@ -199,9 +200,9 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
   }, [onLogOut, runtime, ui.logOutOpen]);
   const panes = useSystemPreferencePanes({ offersAccount: account !== undefined, preferences });
 
-  const aboutApp = ui.aboutAppId ? appInfo[ui.aboutAppId] ?? null : null;
+  const aboutApp = ui.aboutAppId ? appInfo[normalizeBundleIdentifier(ui.aboutAppId)] ?? null : null;
   const returnDecision = ui.returnDecision;
-  const returnAppName = returnDecision ? appInfo[returnDecision.appId]?.displayName ?? returnDecision.appId : "";
+  const returnAppName = returnDecision ? appInfo[normalizeBundleIdentifier(returnDecision.appId)]?.displayName ?? returnDecision.appId : "";
   const returnTitle = returnDecision
     ? systemT("navigation.returnDecisionTitle", "Do you want to quit {AppName}?", { AppName: returnAppName })
     : "";
@@ -228,16 +229,16 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
         <NSEAboutDialog
           open
           appearance={resolvedMode === "dark" ? "dark" : "light"}
-          focusScopeId={`system-ui:about:${aboutApp.id}`}
+          focusScopeId={`system-ui:about:${normalizeBundleIdentifier(aboutApp.bundleIdentifier)}`}
           info={{
             name: aboutApp.displayName,
             iconSrc: aboutApp.icon.src,
             // The system renders the About box, so the system dictionary owns
             // its prose. Info.ts stays the English source and the fallback.
             tagline: aboutApp.about.tagline
-              ? systemT(`about.tagline.${aboutApp.id}`, aboutApp.about.tagline)
+              ? systemT(`about.tagline.${normalizeBundleIdentifier(aboutApp.bundleIdentifier)}`, aboutApp.about.tagline)
               : undefined,
-            version: aboutApp.about.version,
+            version: aboutApp.version,
             build: aboutApp.about.build,
             copyright: aboutApp.about.copyright,
             trademark: aboutApp.about.trademark
@@ -275,7 +276,7 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
         <ReturnDecisionDialog
           runtime={runtime}
           appId={returnDecision.appId}
-          appIdentity={appInfo[returnDecision.appId] ?? null}
+          appIdentity={appInfo[normalizeBundleIdentifier(returnDecision.appId)] ?? null}
           decisionIdentity={returnDecision}
           title={returnTitle}
           message={returnMessage}

@@ -25,7 +25,7 @@ const labels = { label: "SynCal", about: "About SynCal", preferences: "System Pr
 
 describe("Webspring application menu model", () => {
   it("always exposes system Preferences and omits an app placeholder", () => {
-    const model = createWebspringAppMenuModel({ appId: "plain", labels });
+    const model = createWebspringAppMenuModel({ appId: "com.example.plain", labels });
     const commands = model.entries.filter((entry) => entry.kind === "command");
     expect(commands.map((entry) => entry.id)).toEqual(["about", "preferences", "log-out"]);
     expect(commands.find((entry) => entry.id === "preferences")).toMatchObject({ commandId: "system.showPreferences" });
@@ -33,7 +33,7 @@ describe("Webspring application menu model", () => {
 
   it("keeps app-owned and system Preferences as independent commands", () => {
     const model = createWebspringAppMenuModel({
-      appId: "syncal",
+      appId: "com.example.syncal",
       labels,
       appPreferences: { commandId: "syncal.showPreferences", label: "SynCal Preferences…" },
     });
@@ -47,7 +47,7 @@ describe("Webspring application menu model", () => {
   });
 
   it("omits the session separator and logout action for an anonymous public app", () => {
-    const model = createWebspringAppMenuModel({ appId: "public", labels, includeLogOut: false });
+    const model = createWebspringAppMenuModel({ appId: "com.example.public", labels, includeLogOut: false });
     expect(model.entries.map((entry) => entry.id)).toEqual(["about", "preferences"]);
   });
 
@@ -62,7 +62,7 @@ describe("Webspring application menu model", () => {
     { includeAbout: false, appPreferences: false, includeLogOut: false, expected: ["preferences"] },
   ])("lists $expected when about is $includeAbout, app preferences $appPreferences and sign-in $includeLogOut", ({ includeAbout, appPreferences, includeLogOut, expected }) => {
     const model = createWebspringAppMenuModel({
-      appId: "matrix",
+      appId: "com.example.matrix",
       labels,
       includeAbout,
       includeLogOut,

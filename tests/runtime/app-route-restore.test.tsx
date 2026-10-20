@@ -28,7 +28,7 @@ import { defineWebspring, type WebspringViewProps } from "../../src/Webspring/pu
 
 const shell = defineWebspring({
   manifest: {
-    schemaVersion: 1, id: "com.example.webspring.route-test", version: "1.0.0", title: "Route test",
+    schemaVersion: 1, bundleIdentifier: "com.example.webspring.route-test", version: "1.0.0", displayName: "Route test",
     webspringShell: {
       views: [{ id: "route", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
       defaults: { desktop: "route", tablet: "route", mobile: "route" },

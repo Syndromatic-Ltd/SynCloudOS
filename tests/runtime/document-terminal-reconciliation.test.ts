@@ -53,9 +53,9 @@ const runtimes: Array<ReturnType<typeof createTestRuntime>> = [];
 
 const terminalManifest = {
   schemaVersion: 1,
-  id: "terminal-owner",
+  bundleIdentifier: "com.example.terminal-owner",
   version: "1.0.0",
-  title: "Document terminal fixture",
+  displayName: "Document terminal fixture",
   routes: [{ path: "/terminal-owner", primary: true }],
   permissions: ["journal.publisher.open"],
   services: [{ id: "terminal-owner.provider", required: true }],
@@ -73,8 +73,8 @@ function noteType(id: string): DocumentType<Note> {
     schemaVersion: 1,
     extensions: [],
     mimeTypes: [],
-    creatingApplicationId: "terminal-owner",
-    openingApplicationIds: ["terminal-owner"],
+    creatingApplicationId: "com.example.terminal-owner",
+    openingApplicationIds: ["com.example.terminal-owner"],
     capabilities: { versions: true, conflicts: true },
     autosave: { mode: "debounced", delayMs: 500 },
     create: () => ({ value: "initial" }),
@@ -123,7 +123,7 @@ function fixture(adapter: DocumentStorageAdapter) {
     if (!service.available || !operations) throw new Error("The mounted provider did not resolve.");
     return operations;
   };
-  const mounted = mountTestSynWareRuntime(runtime, "terminal-owner");
+  const mounted = mountTestSynWareRuntime(runtime, "com.example.terminal-owner");
   const reserveReconciliation = async (documentId: string) => {
     const lease = serviceTerminalOperations(mounted).reserve({
       documentId,
@@ -398,7 +398,7 @@ describe("Document terminal reconciliation lease", () => {
     const windowController = runtime.windows.create({
       id: "terminal-owner-close-window",
       workspaceId: "main",
-      applicationId: "terminal-owner",
+      applicationId: "com.example.terminal-owner",
       applicationSessionId: "session:terminal-owner",
       documentId: document.id,
       documentAssociationRole: "primary",
@@ -407,7 +407,7 @@ describe("Document terminal reconciliation lease", () => {
       role: "standard",
       style: ["titled", "closable", "minimisable", "resizable", "zoomable"],
       title: "Document terminal document",
-      content: { rendererId: "application", parameters: { appId: "terminal-owner" } },
+      content: { rendererId: "application", parameters: { appId: "com.example.terminal-owner" } },
       bounds: { x: 80, y: 60, width: 800, height: 600 },
       minimumSize: { width: 320, height: 240 },
       maximumSize: null,
@@ -549,7 +549,7 @@ describe("Document terminal reconciliation lease", () => {
     lease.synchronise<Note>(() => ({ value: "accepted" }));
 
     await mounted.runtime.workspaceDocuments.releaseDocument(document.id);
-    expect(runtime.documents.hasActiveDocumentOwnerLease(document.id, "terminal-owner")).toBe(false);
+    expect(runtime.documents.hasActiveDocumentOwnerLease(document.id, "com.example.terminal-owner")).toBe(false);
     expect(runtime.documents.getDocument(document.id)?.snapshot()).toMatchObject({ state: "dirty", model: { value: "accepted" } });
     expect(writes).toHaveLength(0);
     await lease.release();
@@ -685,7 +685,7 @@ describe("Document terminal reconciliation lease", () => {
     expect(releaseProviderLock).not.toHaveBeenCalled();
     expect(() => lease.snapshot()).toThrow();
 
-    const replacement = mountTestSynWareRuntime(runtime, "terminal-owner", "application:terminal-owner:replacement");
+    const replacement = mountTestSynWareRuntime(runtime, "com.example.terminal-owner", "application:com.example.terminal-owner:replacement");
     replacement.runtime.workspaceDocuments.retainDocument<Note>(document.id);
     const recovery = serviceTerminalOperations(replacement).claim<Note, Note>();
     if (!recovery) throw new Error("The replacement mount must claim the unresolved operation.");
@@ -750,7 +750,7 @@ describe("Document terminal reconciliation lease", () => {
       model: { value: "accepted" },
     });
     mounted.dispose();
-    const replacement = mountTestSynWareRuntime(runtime, "terminal-owner", "application:terminal-owner:bundle-recovery");
+    const replacement = mountTestSynWareRuntime(runtime, "com.example.terminal-owner", "application:com.example.terminal-owner:bundle-recovery");
     replacement.runtime.workspaceDocuments.retainDocument<Note>(document.id);
     const recovery = serviceTerminalOperations(replacement).claim<Note, Note>();
     if (!recovery) throw new Error("The replacement bundle must reclaim the unresolved operation.");
@@ -812,7 +812,7 @@ describe("Document terminal reconciliation lease", () => {
       state: "dirty",
       model: { value: "accepted" },
     });
-    const replacement = mountTestSynWareRuntime(runtime, "terminal-owner", "application:terminal-owner:mount-recovery");
+    const replacement = mountTestSynWareRuntime(runtime, "com.example.terminal-owner", "application:com.example.terminal-owner:mount-recovery");
     replacement.runtime.workspaceDocuments.retainDocument<Note>(document.id);
     const recovery = serviceTerminalOperations(replacement).claim<Note, Note>();
     if (!recovery) throw new Error("The replacement mount must reclaim the unresolved operation.");

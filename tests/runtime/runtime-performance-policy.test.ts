@@ -152,9 +152,9 @@ describe("runtime performance policy", () => {
 
     const warned = createTestRuntime({
       environment: { ...createTestRuntimeEnvironment(), deviceMemoryGiB: 8, logicalProcessorCount: 8 },
-      initialBundles: [createTestBundle({ id: "memory-app" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.memory-app" })],
     });
-    await warned.lifecycle.dispatch("memoryWarning", "memory-app", { pressure: "high" }).result;
+    await warned.lifecycle.dispatch("memoryWarning", "com.example.memory-app", { pressure: "high" }).result;
     expect(warned.performancePolicy.snapshot()).toMatchObject({ tier: "constrained", reasons: ["memory-pressure"] });
     expect(warned.jobs.snapshot().concurrency).toBe(1);
 

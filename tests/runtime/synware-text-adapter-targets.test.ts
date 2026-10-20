@@ -34,8 +34,8 @@ async function fixture() {
   const runtime = createTestRuntime({ environment: createTestRuntimeEnvironment(), applicationDocuments: { initialTypes: [noteType] } });
   runtime.documents.registerCloseReviewer({ review: async () => "discard" });
   cleanups.push(async () => { await runtime.dispose("review complete"); });
-  registerTestSynWare(runtime, { schemaVersion: 1, id: "review-owner", version: "1.0.0", title: "Review", documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
-  const mounted = mountTestSynWareRuntime(runtime, "review-owner");
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.review-owner", version: "1.0.0", displayName: "Review", documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
+  const mounted = mountTestSynWareRuntime(runtime, "com.example.review-owner");
   cleanups.push(() => mounted.dispose("review complete"));
   const app = createSynWareContextValue(mounted.runtime);
   const documents = app.documents.workspaceDocuments;

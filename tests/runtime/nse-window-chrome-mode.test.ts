@@ -141,16 +141,16 @@ describe("window chrome mode records", () => {
     const runtime = createTestRuntime({ id: "runtime:chrome-sheet" });
     registerTestSynWare(runtime, {
       schemaVersion: 1,
-      id: "sheet-chrome-app",
+      bundleIdentifier: "com.example.sheet-chrome-app",
       version: "1.0.0",
-      title: "Sheet Chrome App",
+      displayName: "Sheet Chrome App",
       routes: [{ path: "/sheet-chrome-app", primary: true }],
       runtime: { presentation: "systemSheet" },
       windowDefaults: { chrome: "custom" },
     });
-    const mounted = mountTestSynWareRuntime(runtime, "sheet-chrome-app");
+    const mounted = mountTestSynWareRuntime(runtime, "com.example.sheet-chrome-app");
     const context = createSynWareContextValue(mounted.runtime);
-    const controller = await runtime.windows.openApplicationWindow("sheet-chrome-app");
+    const controller = await runtime.windows.openApplicationWindow("com.example.sheet-chrome-app");
     if (!controller) throw new Error("The systemSheet fixture window did not open.");
     expect(controller.record.chromeMode).toBe("system");
     expect(controller.record.smoothSurface).toEqual(defaultWindowSmoothSurface);
@@ -160,7 +160,7 @@ describe("window chrome mode records", () => {
   });
 
   it("rejects the removed atmo manifest chrome instead of silently migrating it", () => {
-    const manifest = createTestManifest({ id: "chrome-migrate-app", window: { chrome: "atmo" as unknown as "system" } }) as SynCloudOSAppManifest;
+    const manifest = createTestManifest({ bundleIdentifier: "com.example.chrome-migrate-app", window: { chrome: "atmo" as unknown as "system" } }) as SynCloudOSAppManifest;
     expect(() => normaliseAppInfo(manifest)).toThrow(/window\.chrome.*system, custom, or frameless/iu);
   });
 });

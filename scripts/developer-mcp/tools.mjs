@@ -7,9 +7,10 @@ import { existsSync, mkdirSync, lstatSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { promisify } from "node:util";
 import Ajv2020 from "ajv/dist/2020.js";
-import { createSynWareValidator, deriveManifestForFolder, discoverProjectFolders } from "../synware/validation-core.mjs";
-import { deriveSynWareManifest, kebabCase } from "../synware/project-derivation.mjs";
-import { scaffoldProjectFiles } from "../synware/create-synware.mjs";
+import { createSynWareValidator, deriveManifestForFolder, discoverProjectFolders, rejectDuplicateBundleIdentifiers } from "../synware/validation-core.mjs";
+import { deriveSynWareManifest, kebabCase, titleFromFolderName, assertUniqueBundleIdentifiers } from "../synware/project-derivation.mjs";
+import { scaffoldProjectFiles, scaffoldBundleIdentifier } from "../synware/create-synware.mjs";
+import { normalizeBundleIdentifier } from "../../src/SynCloudOS/Identity/bundleIdentifier.mjs";
 import { applicationHostHints, bundlePaths, discoveryKeys, inside, json, projectContext, sdkName, slash, viteHints } from "./project.mjs";
 import { docSections, lookupSdk, similarity } from "./lookup.mjs";
 export { lookupSdk } from "./lookup.mjs";
@@ -25,11 +26,12 @@ export async function inspectProject(input={}) {
   const vite=optionsFor(context,input);
   const bundles=bundlePaths(root,vite.options.appsDirectory).map(path=>{
     const info=resolve(path,"Contents/Info.ts"), entry=resolve(path,"Contents/index.tsx");
-    let id=null,error=null;
+    let bundleIdentifier=null,displayName=null,error=null;
     let resolvedManifest = null;
-    try { resolvedManifest=deriveManifestForFolder(path); id=resolvedManifest.id; } catch (failure) {error=failure.message;}
-    return {directory:slash(relative(root,path)),id,manifest:existsSync(info),resolvedManifest,entry:existsSync(entry),error};
+    try { resolvedManifest=deriveManifestForFolder(path); bundleIdentifier=resolvedManifest.bundleIdentifier; displayName=resolvedManifest.displayName; } catch (failure) {error=failure.message;}
+    return {directory:slash(relative(root,path)),bundleIdentifier,displayName,manifest:existsSync(info),resolvedManifest,entry:existsSync(entry),error};
   });
+  assertUniqueBundleIdentifiers(bundles.filter(bundle=>bundle.resolvedManifest).map(bundle=>({...bundle,manifest:bundle.resolvedManifest})));
   const shellPath=resolve(root,vite.options.webspringEntry || "src/Webspring/Contents/index.tsx");
   const folders = ["preferencesDirectory", "widgetsDirectory", "integrationsDirectory"].flatMap((key, index) =>
     discoverProjectFolders(resolve(root, vite.options[key] ?? ["src/Preferences", "src/Widgets", "src/Integrations"][index]))
@@ -45,20 +47,20 @@ export async function validateProject(input={}) {
   try {
     const paths = bundlePaths(root,vite.options.appsDirectory);
     for (const [key, fallback] of [["preferencesDirectory","src/Preferences"],["widgetsDirectory","src/Widgets"],["integrationsDirectory","src/Integrations"]]) paths.push(...discoverProjectFolders(resolve(root,vite.options[key] ?? fallback)));
-    bundles=paths.map(path=>validator.validateDirectory(path));
+    bundles=rejectDuplicateBundleIdentifiers(paths.map(path=>validator.validateDirectory(path)));
   }
   catch (error) {findings.push({file:vite.options.appsDirectory ?? "src/SynWare",line:1,rule:"synware.structure",message:error.message});}
   findings.push(...bundles.flatMap(bundle=>bundle.findings.map(finding=>({...finding,file:slash(relative(root,finding.file))}))));
   let host=applicationHostHints(root);
   if (host.status==="checked" && host.application) {
-    const primaries=bundles.filter(bundle=>bundle.id===host.application.id);
+    const primaries=bundles.filter(bundle=>bundle.bundleIdentifier && normalizeBundleIdentifier(bundle.bundleIdentifier)===normalizeBundleIdentifier(host.application.bundleIdentifier));
     if (primaries.length!==1 || !primaries[0].ok) host={...host,status:"unresolved",reason:"The primary bundle is missing, ambiguous or invalid; its application-menu requirement could not be assessed."};
     else {
       const file=resolve(primaries[0].directory,"Contents/Info.ts"), primary=primaries[0].manifest;
       const fillsPage=host.application.frame==="fullscreen" || (primary.runtime?.presentation ?? "appView")==="appView";
       if (fillsPage && host.authentication!=="disabled" && primary.applicationMenu?.trigger!=="content") findings.push({
         file:slash(relative(root,file)),line:1,rule:"synware.application-menu",
-        message:`Primary application ${host.application.id} fills the page with ${host.authentication} authentication. Declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button so people can reach Preferences > Account, Sign In and Log Out.`,
+        message:`Primary application ${host.application.bundleIdentifier} fills the page with ${host.authentication} authentication. Declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button so people can reach Preferences > Account, Sign In and Log Out.`,
       });
     }
   }
@@ -88,7 +90,9 @@ export async function scaffold(input) {
   const context=projectContext(input.projectRoot),{root}=context, vite=optionsFor(context,input);
   const {name,route,kind = "application"}=input;
   const id = input.id ?? kebabCase(name);
-  if (!/^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/u.test(id ?? "")) throw new Error("Use a valid application ID.");
+  if (kind !== "application" && !/^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/u.test(id ?? "")) throw new Error("Use a valid contribution ID.");
+  if (kind === "application" && input.id !== undefined) throw new Error("Applications declare bundleIdentifier, not id.");
+  const bundleIdentifier = kind === "application" ? input.bundleIdentifier ?? scaffoldBundleIdentifier(name,input.organisation) : null;
   if (!name || !/^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u.test(name) || /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/iu.test(name)) throw new Error("Name must be a safe bundle name, not a path.");
   if (route !== undefined && (!route.startsWith("/") || route.startsWith("//") || /[?#\s]/u.test(route))) throw new Error("Route must be an absolute application pathname.");
   const location = { application: [vite.options.appsDirectory ?? "src/SynWare", ".app"], preferencePane: [vite.options.preferencesDirectory ?? "src/Preferences", ".prefPane"], widget: [vite.options.widgetsDirectory ?? "src/Widgets", ".widget"], integration: [vite.options.integrationsDirectory ?? "src/Integrations", ".integration.ts"] }[kind];
@@ -100,10 +104,8 @@ export async function scaffold(input) {
     if (current===root) break;
   }
   if (existsSync(target)) throw new Error("Bundle already exists; no files were changed.");
-  const overrides={webspring:{visible:true}};
-  if (input.id !== undefined) overrides.id = id;
-  if (route !== undefined) overrides.routes = [{path:route,primary:true}];
-  const manifest=overrides;
+  const manifest={bundleIdentifier,displayName:titleFromFolderName(name),version:"1.0.0",webspring:{visible:true}};
+  if (route !== undefined) manifest.routes = [{path:route,primary:true}];
   if (input.policy!==undefined || input.presentation!==undefined) manifest.runtime={
     ...(input.policy!==undefined ? {policy:input.policy} : {}),
     ...(input.presentation!==undefined ? {presentation:input.presentation} : {}),
@@ -111,14 +113,14 @@ export async function scaffold(input) {
   if (input.contentApplicationMenu!==undefined && typeof input.contentApplicationMenu!=="boolean") throw new Error("contentApplicationMenu must be a boolean.");
   if (input.contentApplicationMenu) manifest.applicationMenu={trigger:"content"};
   const validateManifest=new Ajv2020({allErrors:true,strict:false}).compile(json(resolve(context.sdkRoot,"tooling/manifest.schema.json")));
-  if (kind === "application" && !validateManifest(deriveSynWareManifest({folderName:name+".app",packageVersion:context.manifest.version,overrides:manifest}))) throw new Error("Scaffold manifest is invalid: "+validateManifest.errors.map(error=>(error.instancePath || "/")+" "+error.message).join("; "));
+  if (kind === "application" && !validateManifest(deriveSynWareManifest({folderName:name+".app",info:manifest}))) throw new Error("Scaffold manifest is invalid: "+validateManifest.errors.map(error=>(error.instancePath || "/")+" "+error.message).join("; "));
   const header="/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. All rights reserved.\n * Designed by Kavish Krishnakumar in Manchester.\n * SPDX-License-Identifier: AGPL-3.0-or-later\n */\n";
-  const files=Object.fromEntries(scaffoldProjectFiles({kind,name,id,owners:input.owners}));
+  const files=Object.fromEntries(scaffoldProjectFiles({kind,name,id,bundleIdentifier,organisation:input.organisation,owners:input.owners}));
   if (kind === "application") {
-    files["Contents/Info.ts"]=header+"// Optional manifest overrides; omitted fields come from the folder and package.json.\nexport default "+JSON.stringify(manifest,null,2)+" as const;\n";
+    files["Contents/Info.ts"]=header+"export default "+JSON.stringify(manifest,null,2)+" as const;\n";
     files["Contents/index.tsx"]=header+(input.contentApplicationMenu
-      ? 'import { SCOS, useApplicationMenuTrigger } from "@syndromatic/syncloudos";\n\nexport default function Root() {\n  const menu = useApplicationMenuTrigger();\n  return <main><h1>{SCOS.app.title}</h1><button type="button" ref={element => menu?.setAnchor(element)} disabled={!menu} aria-haspopup="menu" aria-expanded={menu?.open ?? false} onClick={() => menu?.toggle()}>{menu?.label ?? "Application menu"}</button></main>;\n}\n'
-      : 'import { SCOS } from "@syndromatic/syncloudos";\n\nexport default function Root() { return <main><h1>{SCOS.app.title}</h1></main>; }\n');
+      ? 'import { SCOS, useApplicationMenuTrigger } from "@syndromatic/syncloudos";\n\nexport default function Root() {\n  const menu = useApplicationMenuTrigger();\n  return <main><h1>{SCOS.app.displayName}</h1><button type="button" ref={element => menu?.setAnchor(element)} disabled={!menu} aria-haspopup="menu" aria-expanded={menu?.open ?? false} onClick={() => menu?.toggle()}>{menu?.label ?? "Application menu"}</button></main>;\n}\n'
+      : 'import { SCOS } from "@syndromatic/syncloudos";\n\nexport default function Root() { return <main><h1>{SCOS.app.displayName}</h1></main>; }\n');
   }
   if (kind !== "integration") mkdirSync(target,{recursive:true});
   const createdPaths=[];

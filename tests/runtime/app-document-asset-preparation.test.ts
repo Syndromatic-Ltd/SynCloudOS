@@ -44,7 +44,7 @@ async function fixture(backed = true) {
   };
   const store = { ...createInMemoryDocumentAssetStore({ hash }) };
   cleanups.push(() => store.dispose());
-  const scopeForDocument = (documentId: string) => ({ authorizationId: "prepared-owner", documentId });
+  const scopeForDocument = (documentId: string) => ({ authorizationId: "com.example.prepared-owner", documentId });
   const runtime = createTestRuntime({ environment: createTestRuntimeEnvironment(), applicationDocuments: {
     initialTypes: [type], ...(backed ? { assetBacking: { store, scopeForDocument, manifest: {
       scopeForLocation: () => scopeForDocument("prepared-document"), enumerateReferences: (content: unknown) => (content as Model).assets,
@@ -53,12 +53,12 @@ async function fixture(backed = true) {
   runtime.documents.registerCloseReviewer({ review: async () => "discard" });
   cleanups.push(async () => { await runtime.dispose("test"); });
   const mount = (id: string) => {
-    registerTestSynWare(runtime, { schemaVersion: 1, id, version: "1.0.0", title: id, routes: [{ path: `/${id}`, primary: true }], documentTypes: [{ id: type.id, displayName: type.displayName }] });
+    registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: id, routes: [{ path: `/${id.split(".").at(-1)}`, primary: true }], documentTypes: [{ id: type.id, displayName: type.displayName }] });
     const mounted = mountTestSynWareRuntime(runtime, id);
     cleanups.push(() => mounted.dispose("test"));
     return { mounted, ...createSynWareContextValue(mounted.runtime).documents };
   };
-  const app = mount("prepared-owner"), foreign = mount("prepared-foreign");
+  const app = mount("com.example.prepared-owner"), foreign = mount("com.example.prepared-foreign");
   const document = await app.workspaceDocuments.newDocument<Model>({ documentId: "prepared-document", typeId: type.id });
   const canonical = runtime.documents.getDocument(document.id)!;
   const persist = async () => {
@@ -118,8 +118,8 @@ describe("scoped SDK asset model preparation", () => {
     const retain = vi.spyOn(store, "retain");
     expect(() => foreign.documentResources.prepareEdit(document.id, document.model, document.model)).toThrow(/owner lease|application/i);
     const responderId = "application:prepared-owner:observer";
-    runtime.responders.register({ id: responderId, kind: "view", parentId: "application:prepared-owner", scopeId: responderId });
-    const observer = mountTestSynWareRuntime(runtime, "prepared-owner", responderId);
+    runtime.responders.register({ id: responderId, kind: "view", parentId: "application:com.example.prepared-owner", scopeId: responderId });
+    const observer = mountTestSynWareRuntime(runtime, "com.example.prepared-owner", responderId);
     cleanups.push(() => observer.dispose("test"));
     const client = createSynWareContextValue(observer.runtime).documents;
     client.workspaceDocuments.getDocument(document.id);

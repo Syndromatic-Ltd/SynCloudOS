@@ -105,11 +105,11 @@ function Website({ model, actions, applicationOutlet }: WebspringViewProps) {
   useEffect(() => { window.consumer.model = model; window.consumer.actions = actions; }, [model, actions]);
   return <main><button id="open" onClick={() => { void actions.openApp("org.example.probe"); }}>Open probe</button>{applicationOutlet}</main>;
 }
-const shell = defineWebspring({ manifest: { schemaVersion: 1, id: "org.example.shell", version: "1.0.0", title: "Independent shell", webspringShell: {
+const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.shell", version: "1.0.0", displayName: "Independent shell", webspringShell: {
   views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
   defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "Independent" } }
 }}, components: { website: Website } });
-const app = createSynWare({ manifest: { schemaVersion: 1, id: "org.example.probe", version: "1.0.0", title: "Probe", runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/probe", primary: true }], permissions: ["lumina.index", "lumina.query"], services: [{ id: "journal.content", required: false }, { id: "syncal.calendar", required: false }], webspring: { visible: true, order: 1 } }, root: Probe });
+const app = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.probe", version: "1.0.0", displayName: "Probe", runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/probe", primary: true }], permissions: ["lumina.index", "lumina.query"], services: [{ id: "journal.content", required: false }, { id: "syncal.calendar", required: false }], webspring: { visible: true, order: 1 } }, root: Probe });
 const element = document.getElementById("root")!;
 mountSynCloudOS({ element, bundles: [app], shell, authentication: "disabled" }).then(host => { window.consumer.dispose = () => host.dispose("consumer verification"); }).catch(error => { window.consumer.error = String(error); });
 `;
@@ -152,7 +152,7 @@ export default { plugins: [{ name: "record-independent-inputs", generateBundle()
         const value = window.consumer;
         const routes = [];
         for (const id of ids) routes.push({ id, result: await value.actions.openApp(id) });
-        return { apps: value.model.apps.map(app => app.id), services: value.services, documentTypes: value.documentTypes, lumina: value.lumina, widgets: value.model.widgets.map(entry => entry.widget.id), routes };
+        return { apps: value.model.apps.map(app => app.bundleIdentifier), services: value.services, documentTypes: value.documentTypes, lumina: value.lumina, widgets: value.model.widgets.map(entry => entry.widget.id), routes };
       }, productIds);
       assert.deepEqual(result.apps, ["org.example.probe"]);
       assert(Object.values(result.services).every(available => available === false));

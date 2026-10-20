@@ -33,9 +33,9 @@ afterEach(async () => {
   await Promise.all(runtimes.splice(0).map((runtime) => runtime.dispose("test cleanup")));
 });
 
-function fixture(id = "repair-app") {
+function fixture(id = "com.example.repair-app") {
   const runtime = createTestRuntime({
-    initialBundles: [createTestBundle({ id, route: `/${id}` })],
+    initialBundles: [createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` })],
   });
   runtimes.push(runtime);
   const app = runtime.apps.getApp(id)!;
@@ -43,7 +43,7 @@ function fixture(id = "repair-app") {
   return { runtime, app };
 }
 
-function mountFixture(id = "repair-app") {
+function mountFixture(id = "com.example.repair-app") {
   const value = fixture(id);
   const firstResponder = `application:${id}:first`;
   const secondResponder = `application:${id}:second`;
@@ -77,7 +77,7 @@ describe("mounted document ownership fences", () => {
   it("does not expose mounted workspace document type registration", () => {
     const { runtime, app } = fixture();
     runtime.documents.registerType(documentType("repair-app.host-type"));
-    const responderId = "application:repair-app";
+    const responderId = "application:com.example.repair-app";
     const mount = createMountedSynWareRuntime({ runtime, app, responderId });
     const workspace = mount.runtime.workspaceDocuments as unknown as Record<string, unknown>;
     expect(workspace.registerType).toBeUndefined();
@@ -134,7 +134,7 @@ describe("mounted document ownership fences", () => {
     expect(runtime.documents.getDocument(document.id)).toBe(raw);
     expect(second.runtime.workspaceDocuments.getDocument(document.id)).toMatchObject({
       id: document.id,
-      applicationId: "repair-app",
+      applicationId: "com.example.repair-app",
       state: "clean",
     });
   });
@@ -143,8 +143,8 @@ describe("mounted document ownership fences", () => {
     const { first, runtime } = mountFixture();
     const execute = vi.fn((context: { readonly payload: { readonly appId: string } }) => context.payload.appId);
     first.runtime.commands.register({
-      id: "repair-app.snapshot",
-      responderId: "application:repair-app:first",
+      id: "com.example.repair-app.snapshot",
+      responderId: "application:com.example.repair-app:first",
       title: { key: "repair.snapshot", fallback: "Snapshot" },
       payload: { description: "owned app", parse: (value: unknown) => ({ ok: true as const, value: value as { appId: string } }) },
       defaultKeyBindings: [],
@@ -156,21 +156,21 @@ describe("mounted document ownership fences", () => {
     const payload = {} as { appId: string };
     Object.defineProperty(payload, "appId", {
       enumerable: true,
-      get: () => reads++ === 0 ? "repair-app" : "victim-app",
+      get: () => reads++ === 0 ? "com.example.repair-app" : "com.example.victim-app",
     });
-    await expect(first.runtime.commands.dispatch("repair-app.snapshot", payload)).rejects.toThrow(/accessor-free|payload|security/i);
+    await expect(first.runtime.commands.dispatch("com.example.repair-app.snapshot", payload)).rejects.toThrow(/accessor-free|payload|security/i);
     expect(execute).not.toHaveBeenCalled();
     expect(reads).toBe(0);
-    runtime.apps.registerBundle(createTestBundle({ id: "victim-app", route: "/victim" }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.victim-app", route: "/victim" }));
     first.dispose();
   });
 
   it("binds a prepared acceptance to its original detached payload snapshot", async () => {
-    const { first } = mountFixture("acceptance-app");
+    const { first } = mountFixture("com.example.acceptance-app");
     const values: string[] = [];
     first.runtime.commands.register({
-      id: "acceptance-app.snapshot",
-      responderId: "application:acceptance-app:first",
+      id: "com.example.acceptance-app.snapshot",
+      responderId: "application:com.example.acceptance-app:first",
       title: { key: "acceptance.snapshot", fallback: "Snapshot" },
       payload: { description: "snapshot", parse: (value: unknown) => ({ ok: true as const, value: value as { readonly value: string } }) },
       defaultKeyBindings: [],
@@ -180,19 +180,19 @@ describe("mounted document ownership fences", () => {
       execute: (context) => { values.push(context.payload.value); return context.payload.value; },
     });
     const payload = { value: "before" };
-    const prepared = first.runtime.commands.prepareDispatch("acceptance-app.snapshot", payload);
+    const prepared = first.runtime.commands.prepareDispatch("com.example.acceptance-app.snapshot", payload);
     expect(prepared).toMatchObject({ status: "accepted" });
     if (prepared instanceof Promise || prepared.status !== "accepted") throw new Error("Expected synchronous command acceptance.");
     payload.value = "after";
-    await expect(first.runtime.commands.dispatch("acceptance-app.snapshot", payload, { acceptance: prepared.acceptance }))
+    await expect(first.runtime.commands.dispatch("com.example.acceptance-app.snapshot", payload, { acceptance: prepared.acceptance }))
       .resolves.toMatchObject({ status: "executed", value: "before" });
     expect(values).toEqual(["before"]);
     first.dispose();
   });
 
   it("retires mounted transfer resources when the application closes", async () => {
-    const { runtime, app } = fixture("mounted-transfer-app");
-    const responderId = "application:mounted-transfer-app";
+    const { runtime, app } = fixture("com.example.mounted-transfer-app");
+    const responderId = "application:com.example.mounted-transfer-app";
     const mount = runtime.transfers.mountApp(app, { responderId });
     const scope = mount.scope;
     const endpoint = scope.drag.endpoint();
@@ -202,7 +202,7 @@ describe("mounted document ownership fences", () => {
       operations: ["copy"],
     });
     expect(runtime.drag.snapshot().active?.id).toBe(session.id);
-    await runtime.lifecycle.close(app.id, { reason: "test" }).result;
+    await runtime.lifecycle.close(app.bundleIdentifier, { reason: "test" }).result;
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(runtime.drag.snapshot().active).toBeNull();
     expect(mount.signal.aborted).toBe(true);
@@ -210,7 +210,7 @@ describe("mounted document ownership fences", () => {
   });
 
   it("reports only truthful scoped web diagnostics", () => {
-    const { runtime, app } = fixture("diagnostic-app");
+    const { runtime, app } = fixture("com.example.diagnostic-app");
     const fakeWeb = {
       runtimeId: runtime.runtimeId,
       createSession: vi.fn(),
@@ -223,7 +223,7 @@ describe("mounted document ownership fences", () => {
       dispose: vi.fn(),
     } as unknown as RuntimeWebContentService;
     runtime.transfers.bindWebContent(fakeWeb);
-    const mount = runtime.transfers.mountApp(app, { responderId: "application:diagnostic-app" });
+    const mount = runtime.transfers.mountApp(app, { responderId: "application:com.example.diagnostic-app" });
     const scope = mount.scope;
     expect(scope.webContent.diagnostics()).toEqual({ sessionCount: 0, pendingOperationCount: 0 });
     mount.dispose();
@@ -231,17 +231,17 @@ describe("mounted document ownership fences", () => {
 
   it("gives application undo only a revocable mounted lease", () => {
     const { runtime, first } = mountFixture();
-    const manager = first.runtime.undo.get({ kind: "application", id: "repair-app" }) as unknown as Record<string, unknown>;
+    const manager = first.runtime.undo.get({ kind: "application", id: "com.example.repair-app" }) as unknown as Record<string, unknown>;
     expect(manager.clear).toBeUndefined();
     expect(manager.dispose).toBeUndefined();
     expect(manager.inspect).toBeUndefined();
     first.dispose("undo lease revoked");
     expect(() => manager.canUndo).toThrow(/revoked|abort|capability/i);
-    expect(runtime.undo.get({ kind: "application", id: "repair-app" })).not.toBeNull();
+    expect(runtime.undo.get({ kind: "application", id: "com.example.repair-app" })).not.toBeNull();
   });
 
   it("does not adopt a late Save As write after the mounted admission is revoked", async () => {
-    const { runtime, first } = mountFixture("save-as-app");
+    const { runtime, first } = mountFixture("com.example.save-as-app");
     runtime.documents.registerType(documentType("save-as-app.note"));
     const document = await first.runtime.workspaceDocuments.newDocument({ typeId: "save-as-app.note", initialModel: { value: "draft" } });
     const destination = { kind: "remote" as const, url: "https://p10.invalid/late-save" };
@@ -277,13 +277,13 @@ describe("mounted document ownership fences", () => {
   });
 
   it("does not register mounted command undo after a non-cooperative execute resolves", async () => {
-    const { runtime, first } = mountFixture("command-undo-app");
+    const { runtime, first } = mountFixture("com.example.command-undo-app");
     let release!: (value: string) => void;
     const execute = new Promise<string>((resolve) => { release = resolve; });
     const undo = vi.fn();
     first.runtime.commands.register({
-      id: "command-undo-app.late",
-      responderId: "application:command-undo-app:first",
+      id: "com.example.command-undo-app.late",
+      responderId: "application:com.example.command-undo-app:first",
       title: { key: "late", fallback: "Late" },
       payload: { description: "none", parse: (value: unknown) => value === undefined ? { ok: true as const, value: undefined } : { ok: false as const, issues: ["payload"] } },
       defaultKeyBindings: [],
@@ -291,18 +291,18 @@ describe("mounted document ownership fences", () => {
       undo: { kind: "register", createAction: () => ({ name: "late", undo, redo: vi.fn() }) },
       execute: () => execute,
     });
-    const dispatch = runtime.commands.dispatch("command-undo-app.late", undefined, { responderId: "application:command-undo-app:first" });
+    const dispatch = runtime.commands.dispatch("com.example.command-undo-app.late", undefined, { responderId: "application:com.example.command-undo-app:first" });
     first.dispose("late command revoked");
     release("late");
     await dispatch;
-    const manager = runtime.undo.get({ kind: "application", id: "command-undo-app" });
+    const manager = runtime.undo.get({ kind: "application", id: "com.example.command-undo-app" });
     expect(manager?.canUndo).toBe(false);
     await manager?.undo();
     expect(undo).not.toHaveBeenCalled();
   });
 
   it("rejects reconstructed document-resource descriptors before image decode", async () => {
-    const { runtime, first } = mountFixture("image-resource-app");
+    const { runtime, first } = mountFixture("com.example.image-resource-app");
     runtime.documents.registerType(documentType("image-resource-app.note"));
     const document = await first.runtime.workspaceDocuments.newDocument({ typeId: "image-resource-app.note", initialModel: { value: "image" } });
     const bytes = new Uint8Array([137, 80, 78, 71]);

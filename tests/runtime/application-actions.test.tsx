@@ -16,7 +16,7 @@ import type { MountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRunti
 import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
 import { createTestRuntime, mountTestSynWareRuntime, registerTestSynWare } from "./helpers";
 
-const appId = "notes";
+const appId = "com.example.notes";
 
 class Recorder extends NSEObject {
   readonly calls: string[] = [];
@@ -58,7 +58,7 @@ afterEach(async () => {
 function fixture() {
   const runtime = createTestRuntime();
   runtimes.push(runtime);
-  registerTestSynWare(runtime, { schemaVersion: 1, id: appId, version: "1.0.0", title: "Notes" });
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: appId, version: "1.0.0", displayName: "Notes" });
   const mount = mountTestSynWareRuntime(runtime, appId);
   mounts.push(mount);
   runtime.responders.register({ id: responderIds.window, kind: "window", parentId: responderIds.app, scopeId: responderIds.window });
@@ -83,11 +83,11 @@ describe("actions along the responder chain", () => {
     const { app, window, view, focus, dispatch } = fixture();
 
     focus("view");
-    await expect(dispatch("notes.shared")).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch("com.example.notes.shared")).resolves.toMatchObject({ status: "executed" });
     focus("window");
-    await expect(dispatch("notes.shared")).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch("com.example.notes.shared")).resolves.toMatchObject({ status: "executed" });
     focus("app");
-    await expect(dispatch("notes.shared")).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch("com.example.notes.shared")).resolves.toMatchObject({ status: "executed" });
 
     expect(view.calls).toEqual(["view.shared"]);
     expect(window.calls).toEqual(["window.shared"]);
@@ -97,7 +97,7 @@ describe("actions along the responder chain", () => {
   it("reaches an action declared higher in the chain from a focused view", async () => {
     const { app, focus, dispatch } = fixture();
     focus("view");
-    await expect(dispatch("notes.newNote")).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch("com.example.notes.newNote")).resolves.toMatchObject({ status: "executed" });
     expect(app.calls).toEqual(["app.newNote"]);
   });
 
@@ -121,25 +121,25 @@ describe("actions along the responder chain", () => {
   it("passes the payload and rejects one the method does not take", async () => {
     const { app, view, focus, dispatch } = fixture();
     focus("view");
-    await expect(dispatch("notes.rename", { title: "Receipts" })).resolves.toMatchObject({ status: "executed" });
-    await expect(dispatch("notes.slow", 4)).resolves.toMatchObject({ status: "executed" });
-    await expect(dispatch("notes.reload", { unexpected: true })).resolves.toMatchObject({ status: "invalid-payload" });
+    await expect(dispatch("com.example.notes.rename", { title: "Receipts" })).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch("com.example.notes.slow", 4)).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch("com.example.notes.reload", { unexpected: true })).resolves.toMatchObject({ status: "invalid-payload" });
     expect(view.calls).toEqual(["view.rename:Receipts", "view.slow:4"]);
     focus("app");
-    await expect(dispatch("notes.newNote", { unexpected: true })).resolves.toMatchObject({ status: "invalid-payload" });
+    await expect(dispatch("com.example.notes.newNote", { unexpected: true })).resolves.toMatchObject({ status: "invalid-payload" });
     expect(app.calls).toEqual([]);
   });
 
   it("refuses to run an action whose validation says it is unavailable", async () => {
     const { app, view, focus, dispatch } = fixture();
     focus("view");
-    await expect(dispatch("notes.reload")).resolves.toMatchObject({ status: "disabled", reason: "Nothing to reload." });
+    await expect(dispatch("com.example.notes.reload")).resolves.toMatchObject({ status: "disabled", reason: "Nothing to reload." });
     expect(view.calls).toEqual([]);
 
     app.readOnly = true;
-    await expect(dispatch("notes.newNote")).resolves.toMatchObject({ status: "disabled" });
+    await expect(dispatch("com.example.notes.newNote")).resolves.toMatchObject({ status: "disabled" });
     app.readOnly = false;
-    await expect(dispatch("notes.newNote")).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch("com.example.notes.newNote")).resolves.toMatchObject({ status: "executed" });
     expect(app.calls).toEqual(["app.newNote"]);
   });
 
@@ -147,18 +147,18 @@ describe("actions along the responder chain", () => {
     const { runtime, context, host, focus, dispatch } = fixture();
     class Clash extends Recorder {
       @action shared() { this.calls.push("clash.shared"); }
-      @action("notes.shared") other() { this.calls.push("clash.other"); }
+      @action("com.example.notes.shared") other() { this.calls.push("clash.other"); }
     }
-    expect(() => bindActionResponder(new Clash(), host, responderIds.app)).toThrow(/both answer notes\.shared/);
+    expect(() => bindActionResponder(new Clash(), host, responderIds.app)).toThrow(/both answer com\.example\.notes\.shared/);
 
     class Extra extends Recorder { @action extra() { this.calls.push("extra"); } }
     const extra = new Extra();
     const binding = bindActionResponder(extra, host, responderIds.window);
     focus("window");
-    await expect(dispatch("notes.extra")).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch("com.example.notes.extra")).resolves.toMatchObject({ status: "executed" });
     binding.dispose();
     binding.dispose();
-    expect(runtime.commands.getDeclarations().some((declaration) => declaration.id === "notes.extra")).toBe(false);
+    expect(runtime.commands.getDeclarations().some((declaration) => declaration.id === "com.example.notes.extra")).toBe(false);
     expect(context.commands.getPresentationGeneration().registryGeneration).toBeGreaterThan(0);
   });
 
@@ -174,8 +174,8 @@ describe("actions along the responder chain", () => {
     Object.setPrototypeOf(panel, PanelV2.prototype);
     refreshActionBindings(panel);
     focus("window");
-    await expect(dispatch("notes.first")).resolves.toMatchObject({ status: "executed" });
-    await expect(dispatch("notes.second")).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch("com.example.notes.first")).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch("com.example.notes.second")).resolves.toMatchObject({ status: "executed" });
     expect(panel.calls).toEqual(["first v2", "second v2"]);
     expect(actionNames(panel)).toEqual(["first", "second"]);
   });

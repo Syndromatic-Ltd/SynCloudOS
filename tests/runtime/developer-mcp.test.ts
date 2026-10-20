@@ -26,7 +26,7 @@ beforeEach(() => {
   put("node_modules/@syndromatic/syncloudos/package.json", JSON.stringify({ name: "@syndromatic/syncloudos", version: "1.0.0-beta.1", exports: { ".": { types: "./index.d.ts" }, "./sdk": { types: "./sdk.d.ts" } } }));
   const sdk = resolve(project, "node_modules/@syndromatic/syncloudos");
   cpSync(resolve(repository, "tests/fixtures/developer-mcp/sdk.d.ts"), resolve(sdk, "sdk.d.ts"));
-  put("node_modules/@syndromatic/syncloudos/index.d.ts", "export declare const SCOS: { app: { title: string } };\n");
+  put("node_modules/@syndromatic/syncloudos/index.d.ts", "export declare const SCOS: { app: { bundleIdentifier: string; displayName: string; version: string } };\n");
   mkdirSync(resolve(sdk, "tooling"));
   cpSync(resolve(repository, "src/SynCloudOS/AppSDK/manifest/synapp-manifest.schema.json"), resolve(sdk, "tooling/manifest.schema.json"));
   put("node_modules/@syndromatic/syncloudos/tooling/error-catalogue.json", JSON.stringify(errorCatalogue));
@@ -44,10 +44,11 @@ describe("developer MCP tools", () => {
     expect(result.vite.options.appsDirectory).toBe("applications");
     expect(result.shell.enabled).toBe(false);
   });
-  it("derives an Info.ts-less application consistently with the plugin and validator", async () => {
+  it("resolves explicit Info.ts consistently with the plugin and validator", async () => {
     put("applications/NSEControlGallery.app/Contents/index.tsx", "export default function Gallery() { return null; }");
+    put("applications/NSEControlGallery.app/Contents/Info.ts", 'export default { bundleIdentifier: "com.example.NSEControlGallery", displayName: "NSE Control Gallery", version: "1.0.0" };');
     const inspected = await inspectProject({ projectRoot: project });
-    expect(inspected.bundles[0].resolvedManifest).toMatchObject({ id: "nse-control-gallery", title: "NSE Control Gallery", version: "2.3.4" });
+    expect(inspected.bundles[0].resolvedManifest).toMatchObject({ bundleIdentifier: "com.example.NSEControlGallery", displayName: "NSE Control Gallery", version: "1.0.0", schemaVersion: 1 });
     const validated = await validateProject({ projectRoot: project, typescript: false });
     expect(validated.ok).toBe(true);
     expect(validated.bundles[0].manifest).toEqual(inspected.bundles[0].resolvedManifest);
@@ -55,7 +56,7 @@ describe("developer MCP tools", () => {
     expect(plugin.bundles[0].manifest).toEqual(inspected.bundles[0].resolvedManifest);
   });
   it.each(["preferencePane", "widget", "integration"])("scaffolds and validates %s", async kind => {
-    await scaffold({ projectRoot: project, name: "Latest", kind, owners: ["notes"] });
+    await scaffold({ projectRoot: project, name: "Latest", kind, owners: ["com.example.notes"] });
     expect((await inspectProject({ projectRoot: project })).folders).toHaveLength(1);
     expect((await validateProject({ projectRoot: project, typescript: false })).ok).toBe(true);
   });
@@ -84,23 +85,23 @@ describe("developer MCP tools", () => {
     expect(result.docs[0].text).toContain("```tsx");
   });
   it("keeps access private by default and returns host-mode next steps", async () => {
-    const result = await scaffold({ projectRoot: project, id: "org.example.private", name: "Private", route: "/private" });
+    const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.private", name: "Private", route: "/private" });
     expect(parseManifest(resolve(project, result.createdPaths[0])).runtime?.policy?.public).toBeUndefined();
     expect(result.nextSteps.length).toBeGreaterThan(0);
   });
   it.each([true, false])("preserves an explicit public=%s policy and windowed presentation", async isPublic => {
     const policy = { public: isPublic, requiresLogin: !isPublic, requiredCapabilities: ["documents.read"], requiredAccessClasses: ["team"] };
-    const result = await scaffold({ projectRoot: project, id: "org.example.inspector", name: "Inspector", route: "/inspector", policy, presentation: "windowedView" });
+    const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.inspector", name: "Inspector", route: "/inspector", policy, presentation: "windowedView" });
     expect(parseManifest(resolve(project, result.createdPaths[0])).runtime).toEqual({ policy, presentation: "windowedView" });
     expect((await validateProject({ projectRoot: project, typescript: false })).ok).toBe(true);
   });
   it("rejects policy fields and presentations outside the installed manifest schema before writing", async () => {
-    await expect(scaffold({ projectRoot: project, id: "org.example.bad", name: "Bad", route: "/bad", policy: { access: "public" } })).rejects.toThrow();
-    await expect(scaffold({ projectRoot: project, id: "org.example.bad", name: "Bad", route: "/bad", presentation: "window" })).rejects.toThrow();
+    await expect(scaffold({ projectRoot: project, bundleIdentifier: "org.example.bad", name: "Bad", route: "/bad", policy: { access: "public" } })).rejects.toThrow();
+    await expect(scaffold({ projectRoot: project, bundleIdentifier: "org.example.bad", name: "Bad", route: "/bad", presentation: "window" })).rejects.toThrow();
     expect((await inspectProject({ projectRoot: project })).bundles).toEqual([]);
   });
   it("scaffolds a working content application-menu button only when explicitly requested", async () => {
-    const result = await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true }, contentApplicationMenu: true });
+    const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true }, contentApplicationMenu: true });
     const manifest = parseManifest(resolve(project, result.createdPaths[0]));
     expect(manifest.applicationMenu).toEqual({ trigger: "content" });
     const code = ts.transpileModule(readFileSync(resolve(project, "applications/Primary.app/Contents/index.tsx"), "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
@@ -110,7 +111,7 @@ describe("developer MCP tools", () => {
     type GeneratedButton = { type: string; props: { disabled: boolean; ref(element: unknown): void; onClick(): void } };
     const module: { exports: { default?: () => { props: { children: GeneratedButton[] } } } } = { exports: {} };
     const require = createRequire(import.meta.url);
-    new Function("require", "module", "exports", code)((name: string) => name === "@syndromatic/syncloudos" ? { SCOS: { app: { title: "Primary" } }, useApplicationMenuTrigger: () => port } : require(name), module, module.exports);
+    new Function("require", "module", "exports", code)((name: string) => name === "@syndromatic/syncloudos" ? { SCOS: { app: { bundleIdentifier: "org.example.primary", displayName: "Primary", version: "1.0.0" } }, useApplicationMenuTrigger: () => port } : require(name), module, module.exports);
     const root = module.exports.default!;
     const button = root().props.children.find(child => child.type === "button")!;
     expect(button.props).toMatchObject({ disabled: false, "aria-haspopup": "menu", "aria-expanded": true, children: "Application menu" });
@@ -122,22 +123,22 @@ describe("developer MCP tools", () => {
     expect(root().props.children.find(child => child.type === "button")!.props.disabled).toBe(true);
   });
   it("keeps public scaffolds without a content menu explicit about authenticated fullscreen hosting", async () => {
-    const result = await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true } });
+    const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true } });
     expect(parseManifest(resolve(project, result.createdPaths[0])).applicationMenu).toBeUndefined();
     expect(result.nextSteps.some((step: string) => step.includes("optional") && step.includes("required") && step.includes("applicationMenu"))).toBe(true);
   });
   it("keeps the content-menu next step when explicit policy and presentation flags are given, but not for a windowed secondary", async () => {
-    const primary = await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true, requiresLogin: false }, presentation: "appView", contentApplicationMenu: false });
+    const primary = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true, requiresLogin: false }, presentation: "appView", contentApplicationMenu: false });
     expect(primary.nextSteps.some((step: string) => step.includes('applicationMenu: { trigger: "content" }') && step.includes("useApplicationMenuTrigger"))).toBe(true);
-    const secondary = await scaffold({ projectRoot: project, id: "org.example.secondary", name: "Secondary", route: "/secondary", policy: { public: true }, presentation: "windowedView" });
+    const secondary = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.secondary", name: "Secondary", route: "/secondary", policy: { public: true }, presentation: "windowedView" });
     expect(secondary.nextSteps.some((step: string) => step.includes("applicationMenu"))).toBe(false);
   });
   it.each([
-    ['authentication: "optional", application: { id: "org.example.primary" }', undefined],
-    ['authentication: { policy: "required" }, application: { id: "org.example.primary", frame: "fullscreen" }', "windowedView"],
-    ['authentication: "required", application: { id: "org.example.primary", frame: "declared" }', "appView"],
+    ["authentication: \"optional\", application: { bundleIdentifier: \"org.example.primary\" }", undefined],
+    ["authentication: { policy: \"required\" }, application: { bundleIdentifier: \"org.example.primary\", frame: \"fullscreen\" }", "windowedView"],
+    ["authentication: \"required\", application: { bundleIdentifier: \"org.example.primary\", frame: \"declared\" }", "appView"],
   ])("finds a missing content-menu declaration in a literal primary mount: %s", async (options, presentation) => {
-    await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary", presentation });
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", presentation });
     put("src/main.tsx", `import { mountSynCloudOS as mount } from "@syndromatic/syncloudos/browser"; mount({ ${options} });`);
     const result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.host.status).toBe("checked");
@@ -145,67 +146,67 @@ describe("developer MCP tools", () => {
     expect(result.ok).toBe(false);
   });
   it.each([
-    ['authentication: "disabled", application: { id: "org.example.primary" }', undefined, false],
-    ['application: { id: "org.example.primary" }', undefined, false],
-    ['authentication: "optional", application: { id: "org.example.primary", frame: "declared" }', "windowedView", false],
-    ['authentication: "required", application: { id: "org.example.primary" }', undefined, true],
+    ["authentication: \"disabled\", application: { bundleIdentifier: \"org.example.primary\" }", undefined, false],
+    ["application: { bundleIdentifier: \"org.example.primary\" }", undefined, false],
+    ["authentication: \"optional\", application: { bundleIdentifier: \"org.example.primary\", frame: \"declared\" }", "windowedView", false],
+    ["authentication: \"required\", application: { bundleIdentifier: \"org.example.primary\" }", undefined, true],
   ])("does not flag supported literal host configurations: %s", async (options, presentation, contentApplicationMenu) => {
-    await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary", presentation, contentApplicationMenu });
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", presentation, contentApplicationMenu });
     put("src/main.tsx", `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; mountSynCloudOS({ ${options} });`);
     const result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.host.status).toBe("checked");
     expect(result.ok).toBe(true);
   });
   it("reads a top-level awaited mount whose unrelated options use shorthand properties", async () => {
-    await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary" });
-    put("src/main.tsx", `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; const element = document.body, bundles = []; const host = await mountSynCloudOS({ element, bundles, application: { id: "org.example.primary", frame: "fullscreen" }, authentication: "optional" });`);
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary" });
+    put("src/main.tsx", "import { mountSynCloudOS } from \"@syndromatic/syncloudos/browser\"; const element = document.body, bundles = []; const host = await mountSynCloudOS({ element, bundles, application: { bundleIdentifier: \"org.example.primary\", frame: \"fullscreen\" }, authentication: \"optional\" });");
     const result = await validateProject({ projectRoot: project, typescript: false });
-    expect(result.host).toMatchObject({ status: "checked", authentication: "optional", application: { id: "org.example.primary", frame: "fullscreen" } });
+    expect(result.host).toMatchObject({ status: "checked", authentication: "optional", application: { bundleIdentifier: "org.example.primary", frame: "fullscreen" } });
     expect(result.findings).toContainEqual(expect.objectContaining({ rule: "synware.application-menu" }));
   });
   it("leaves a shorthand authentication or application value unresolved", async () => {
-    await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary" });
-    put("src/main.tsx", `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; const authentication = "optional"; mountSynCloudOS({ application: { id: "org.example.primary" }, authentication });`);
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary" });
+    put("src/main.tsx", "import { mountSynCloudOS } from \"@syndromatic/syncloudos/browser\"; const authentication = \"optional\"; mountSynCloudOS({ application: { bundleIdentifier: \"org.example.primary\" }, authentication });");
     expect((await validateProject({ projectRoot: project, typescript: false })).host.status).toBe("unresolved");
   });
   it.each([
     "mountSynCloudOS(options)",
-    'mountSynCloudOS({ ...options, application: { id: "org.example.primary" }, authentication: "optional" })',
-    'mountSynCloudOS({ application: { id: primaryId }, authentication: "optional" })',
-    'mountSynCloudOS({ application: { id: "org.example.primary" }, authentication: auth })',
-    'mountSynCloudOS({ application: { id: "org.example.primary", frame: frameMode }, authentication: "optional" })',
-    'mountSynCloudOS({ application: { id: "org.example.primary", ...application }, authentication: "optional" })',
-    'mountSynCloudOS({ application: { id: "org.example.primary" }, authentication: { ...auth, policy: "optional" } })',
-    'mountSynCloudOS({ application: { id: "org.example.primary" }, authentication: "disabled", authentication: auth })',
-    'function start(mountSynCloudOS) { mountSynCloudOS({ application: { id: "org.example.primary" }, authentication: "optional" }); }',
+    "mountSynCloudOS({ ...options, application: { bundleIdentifier: \"org.example.primary\" }, authentication: \"optional\" })",
+    "mountSynCloudOS({ application: { bundleIdentifier: primaryId }, authentication: \"optional\" })",
+    "mountSynCloudOS({ application: { bundleIdentifier: \"org.example.primary\" }, authentication: auth })",
+    "mountSynCloudOS({ application: { bundleIdentifier: \"org.example.primary\", frame: frameMode }, authentication: \"optional\" })",
+    "mountSynCloudOS({ application: { bundleIdentifier: \"org.example.primary\", ...application }, authentication: \"optional\" })",
+    "mountSynCloudOS({ application: { bundleIdentifier: \"org.example.primary\" }, authentication: { ...auth, policy: \"optional\" } })",
+    "mountSynCloudOS({ application: { bundleIdentifier: \"org.example.primary\" }, authentication: \"disabled\", authentication: auth })",
+    "function start(mountSynCloudOS) { mountSynCloudOS({ application: { bundleIdentifier: \"org.example.primary\" }, authentication: \"optional\" }); }",
   ])("does not guess computed host configuration: %s", async call => {
-    await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary" });
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary" });
     put("src/main.tsx", `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; ${call};`);
     const result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.host.status).toBe("unresolved");
     expect(result.findings).toEqual([]);
   });
   it("leaves ambiguous mounts unresolved and ignores unrelated similarly named functions", async () => {
-    await scaffold({ projectRoot: project, id: "org.example.primary", name: "Primary", route: "/primary" });
-    put("src/main.tsx", 'import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; mountSynCloudOS({ application: { id: "org.example.primary" }, authentication: "optional" }); mountSynCloudOS({ shell });');
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary" });
+    put("src/main.tsx", "import { mountSynCloudOS } from \"@syndromatic/syncloudos/browser\"; mountSynCloudOS({ application: { bundleIdentifier: \"org.example.primary\" }, authentication: \"optional\" }); mountSynCloudOS({ shell });");
     expect((await validateProject({ projectRoot: project, typescript: false })).host.status).toBe("unresolved");
-    put("src/main.tsx", 'function mountSynCloudOS(options: unknown) {} mountSynCloudOS({ application: { id: "org.example.primary" }, authentication: "optional" });');
+    put("src/main.tsx", "function mountSynCloudOS(options: unknown) {} mountSynCloudOS({ application: { bundleIdentifier: \"org.example.primary\" }, authentication: \"optional\" });");
     const result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.host.status).toBe("not-found");
     expect(result.findings).toEqual([]);
   });
   it("scaffolds a valid app without overwriting any existing bundle", async () => {
-    const result = await scaffold({ projectRoot: project, id: "org.example.notes", name: "Notes", route: "/notes" });
+    const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.notes", name: "Notes", route: "/notes" });
     expect(result.createdPaths).toContain("applications/Notes.app/Contents/Info.ts");
     const checked = await validateProject({ projectRoot: project, typescript: false });
     expect(checked.ok).toBe(true);
-    expect((await inspectProject({ projectRoot: project })).bundles[0].id).toBe("org.example.notes");
-    await expect(scaffold({ projectRoot: project, id: "org.example.notes", name: "Notes", route: "/notes" })).rejects.toThrow(/exist/i);
-    await expect(scaffold({ projectRoot: project, id: "org.example.bad", name: "../Escape", route: "/bad" })).rejects.toThrow();
+    expect((await inspectProject({ projectRoot: project })).bundles[0].bundleIdentifier).toBe("org.example.notes");
+    await expect(scaffold({ projectRoot: project, bundleIdentifier: "org.example.notes", name: "Notes", route: "/notes" })).rejects.toThrow(/exist/i);
+    await expect(scaffold({ projectRoot: project, bundleIdentifier: "org.example.bad", name: "../Escape", route: "/bad" })).rejects.toThrow();
   });
   it("reports manifest, missing bundle entry and TypeScript findings structurally", async () => {
-    await scaffold({ projectRoot: project, id: "org.example.notes", name: "Notes", route: "/notes" });
-    put("applications/Notes.app/Contents/Info.ts", 'export default {id:"INVALID ID"};');
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.notes", name: "Notes", route: "/notes" });
+    put("applications/Notes.app/Contents/Info.ts", 'export default { bundleIdentifier: "INVALID ID", displayName: "Notes", version: "1.0.0" };');
     let result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.ok).toBe(false);
     expect(result.findings[0]).toMatchObject({ rule: "synware.manifest", line: expect.any(Number), file: expect.stringContaining("Info.ts") });
@@ -278,7 +279,7 @@ describe("developer MCP tools", () => {
     await expect(inspectProject({projectRoot:project})).rejects.toThrow(/requires installed SDK/);
   });
   it("reports unsupported imports and a missing project compiler without passing", async () => {
-    await scaffold({projectRoot:project,id:"org.example.notes",name:"Notes",route:"/notes"});
+    await scaffold({projectRoot:project,bundleIdentifier:"org.example.notes",name:"Notes",route:"/notes"});
     put("applications/Notes.app/Contents/index.tsx", 'import secret from "framework/private"; export default secret;');
     const result = await validateProject({projectRoot:project});
     expect(result.ok).toBe(false);
@@ -294,7 +295,7 @@ describe("developer MCP tools", () => {
       expect(listed.tools.map(tool=>tool.name)).toHaveLength(5);
       expect(listed.tools.find(tool=>tool.name==="syncloudos.scaffold")?.inputSchema.required).toEqual(["name"]);
       expect(listed.tools.find(tool=>tool.name==="syncloudos.scaffold")?.inputSchema.properties?.contentApplicationMenu).toMatchObject({ type: "boolean" });
-      const scaffolded = await client.callTool({ name: "syncloudos.scaffold", arguments: { id: "org.example.menu", name: "Menu", route: "/menu", contentApplicationMenu: true } });
+      const scaffolded = await client.callTool({ name: "syncloudos.scaffold", arguments: { bundleIdentifier: "org.example.menu", name: "Menu", route: "/menu", contentApplicationMenu: true } });
       expect(scaffolded.isError).not.toBe(true);
       expect(parseManifest(resolve(project, "applications/Menu.app/Contents/Info.ts")).applicationMenu).toEqual({ trigger: "content" });
       const response = await client.callTool({name:"syncloudos.inspect_project",arguments:{}});

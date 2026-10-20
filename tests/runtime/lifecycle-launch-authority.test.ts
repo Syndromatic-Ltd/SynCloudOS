@@ -26,11 +26,11 @@ import { createRuntimeHarness, createTestBundle, createTestRuntime } from "./hel
 describe("lifecycle launch and activation authority", () => {
   it("enforces authorisation and launch policy for direct lifecycle launch and activation", async () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "restricted", route: "/restricted" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.restricted", route: "/restricted" })],
     });
-    const loadModule = vi.spyOn(runtime.bundles.getBundle("restricted")!, "loadModule");
+    const loadModule = vi.spyOn(runtime.bundles.getBundle("com.example.restricted")!, "loadModule");
 
-    await expect(runtime.lifecycle.launch("restricted", { reason: "locked" }).result).resolves.toMatchObject({
+    await expect(runtime.lifecycle.launch("com.example.restricted", { reason: "locked" }).result).resolves.toMatchObject({
       status: "failed",
       committed: false,
       error: { code: "lifecycle-unauthorised" },
@@ -39,18 +39,18 @@ describe("lifecycle launch and activation authority", () => {
 
     runtime.store.mutate((draft) => {
       draft.loginServices.isAuthorised = true;
-      draft.lifecycle.restricted = "suspended";
+      draft.lifecycle["com.example.restricted"] = "suspended";
     });
     runtime.policy.registerPolicy("deny-restricted", (request, decision) =>
-      request.app?.id === "restricted" ? { ...decision, allowed: false, decision: "deny" } : decision,
+      request.app?.bundleIdentifier === "com.example.restricted" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
 
-    await expect(runtime.lifecycle.activate("restricted", { reason: "policy" }).result).resolves.toMatchObject({
+    await expect(runtime.lifecycle.activate("com.example.restricted", { reason: "policy" }).result).resolves.toMatchObject({
       status: "failed",
       committed: false,
       error: { code: "lifecycle-denied" },
     });
-    await expect(runtime.lifecycle.launch("restricted", { reason: "policy" }).result).resolves.toMatchObject({
+    await expect(runtime.lifecycle.launch("com.example.restricted", { reason: "policy" }).result).resolves.toMatchObject({
       status: "failed",
       committed: false,
       error: { code: "lifecycle-denied" },
@@ -61,58 +61,58 @@ describe("lifecycle launch and activation authority", () => {
 
   it("does not let the public AppManager launch path bypass canonical lifecycle access", async () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "facade-restricted", route: "/facade-restricted" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.facade-restricted", route: "/facade-restricted" })],
     });
     const { AppManagerController } = createRuntimeHarness(runtime);
-    const manager = AppManagerController.getManagerForApp("facade-restricted");
-    const loadModule = vi.spyOn(runtime.bundles.getBundle("facade-restricted")!, "loadModule");
+    const manager = AppManagerController.getManagerForApp("com.example.facade-restricted");
+    const loadModule = vi.spyOn(runtime.bundles.getBundle("com.example.facade-restricted")!, "loadModule");
 
     await expect(manager.getReady()).rejects.toThrow(/authorised|required/i);
     await expect(manager.launch()).rejects.toThrow(/authorised|required/i);
     expect(loadModule).not.toHaveBeenCalled();
     expect(runtime.store.getSnapshot()).toMatchObject({
-      lifecycle: { "facade-restricted": "registered" },
+      lifecycle: { "com.example.facade-restricted": "registered" },
       application: { activeAppId: null },
     });
 
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     runtime.policy.registerPolicy("deny-facade", (request, decision) =>
-      request.app?.id === "facade-restricted" ? { ...decision, allowed: false, decision: "deny" } : decision,
+      request.app?.bundleIdentifier === "com.example.facade-restricted" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
 
     await expect(manager.launch()).rejects.toThrow(/policy denied/i);
     expect(runtime.store.getSnapshot()).toMatchObject({
-      lifecycle: { "facade-restricted": "registered" },
+      lifecycle: { "com.example.facade-restricted": "registered" },
       application: { activeAppId: null },
     });
 
-    runtime.store.mutate((draft) => { draft.lifecycle["facade-restricted"] = "ready"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.facade-restricted"] = "ready"; });
     expect(manager.resume("registered-policy")).toBe(false);
     expect(runtime.store.getSnapshot().application.activeAppId).toBeNull();
   });
 
   it("does not let Lifecycle.transition activate a prepared app without lifecycle access", () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "lifecycle-facade", route: "/lifecycle-facade" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.lifecycle-facade", route: "/lifecycle-facade" })],
     });
 
-    expect(runtime.lifecycle.transition("lifecycle-facade", "loading", { source: "test" })).toMatchObject({ ok: true });
-    expect(runtime.lifecycle.transition("lifecycle-facade", "ready", { source: "test" })).toMatchObject({ ok: true });
-    expect(runtime.lifecycle.transition("lifecycle-facade", "active", { source: "test" })).toMatchObject({
+    expect(runtime.lifecycle.transition("com.example.lifecycle-facade", "loading", { source: "test" })).toMatchObject({ ok: true });
+    expect(runtime.lifecycle.transition("com.example.lifecycle-facade", "ready", { source: "test" })).toMatchObject({ ok: true });
+    expect(runtime.lifecycle.transition("com.example.lifecycle-facade", "active", { source: "test" })).toMatchObject({
       ok: false,
       error: expect.stringMatching(/authorised|required/i),
     });
-    expect(runtime.store.getSnapshot().lifecycle["lifecycle-facade"]).toBe("ready");
+    expect(runtime.store.getSnapshot().lifecycle["com.example.lifecycle-facade"]).toBe("ready");
 
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     runtime.policy.registerPolicy("deny-transition", (request, decision) =>
-      request.app?.id === "lifecycle-facade" ? { ...decision, allowed: false, decision: "deny" } : decision,
+      request.app?.bundleIdentifier === "com.example.lifecycle-facade" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
-    expect(runtime.lifecycle.transition("lifecycle-facade", "active", { source: "test" })).toMatchObject({
+    expect(runtime.lifecycle.transition("com.example.lifecycle-facade", "active", { source: "test" })).toMatchObject({
       ok: false,
       error: expect.stringMatching(/policy denied/i),
     });
-    expect(runtime.store.getSnapshot().lifecycle["lifecycle-facade"]).toBe("ready");
+    expect(runtime.store.getSnapshot().lifecycle["com.example.lifecycle-facade"]).toBe("ready");
   });
 
   it("does not commit a cancelled lazy bundle or its module lifecycle hooks", async () => {
@@ -120,7 +120,7 @@ describe("lifecycle launch and activation authority", () => {
     const moduleHook = vi.fn();
     const pendingLoad = new Promise<void>((resolve) => { releaseLoad = resolve; });
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "lazy-cancel" }, {
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.lazy-cancel" }, {
         loadModule: async () => {
           await pendingLoad;
           return {
@@ -132,21 +132,21 @@ describe("lifecycle launch and activation authority", () => {
     });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
 
-    const handle = runtime.lifecycle.launch("lazy-cancel", { reason: "cancel-before-commit" });
+    const handle = runtime.lifecycle.launch("com.example.lazy-cancel", { reason: "cancel-before-commit" });
     await Promise.resolve();
     handle.cancel("user-cancelled");
     releaseLoad();
 
     await expect(handle.result).resolves.toMatchObject({ status: "cancelled", committed: false });
     await Promise.resolve();
-    expect(runtime.bundles.getLoadedBundle("lazy-cancel")).toBeNull();
-    expect(runtime.bundles.getLifecycleHook("lazy-cancel", "applicationWillLaunch")).toBeNull();
+    expect(runtime.bundles.getLoadedBundle("com.example.lazy-cancel")).toBeNull();
+    expect(runtime.bundles.getLifecycleHook("com.example.lazy-cancel", "applicationWillLaunch")).toBeNull();
     expect(moduleHook).not.toHaveBeenCalled();
   });
 
   it("rejects unsafe, cross-origin, and malformed public route inputs without coercing them into internal routes", async () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "portfolio", route: "/portfolio" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.portfolio", route: "/portfolio" })],
     });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
 
@@ -179,7 +179,7 @@ describe("lifecycle launch and activation authority", () => {
 
   it("turns an uncoercible public route value into a typed failure without throwing", async () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "portfolio", route: "/portfolio" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.portfolio", route: "/portfolio" })],
     });
     const hostileInput = {
       [Symbol.toPrimitive]() {
@@ -286,14 +286,14 @@ describe("lifecycle launch and activation authority", () => {
     let releaseSuspend!: () => void;
     const runtime = createTestRuntime({
       initialBundles: [
-        createTestBundle({ id: "current", route: "/current" }, {
+        createTestBundle({ bundleIdentifier: "com.example.current", route: "/current" }, {
           lifecycleHooks: {
             suspend: {
               will: () => new Promise<void>((resolve) => { releaseSuspend = resolve; }),
             },
           } as never,
         }),
-        createTestBundle({ id: "next", route: "/next" }),
+        createTestBundle({ bundleIdentifier: "com.example.next", route: "/next" }),
       ],
     });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });

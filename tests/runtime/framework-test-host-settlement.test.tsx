@@ -34,7 +34,7 @@ function deferred<T>() {
 const hosts: SynWareTestHost[] = [];
 afterEach(async () => { for (const host of hosts.splice(0)) await host.dispose(); });
 function app(root: () => React.ReactNode = () => <button>Ready</button>) {
-  return createSynWare({ manifest: { schemaVersion: 1, id: "settlement.host", title: "Settlement Host", version: "1.0.0",
+  return createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.settlement.host", displayName: "Settlement Host", version: "1.0.0",
     routes: [{ path: "/settlement-host", primary: true }] }, root });
 }
 

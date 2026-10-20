@@ -9,9 +9,9 @@ The manifest's `windowDefaults` block sets the first window the host creates for
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.notes",
+  bundleIdentifier: "com.example.notes",
   version: "1.0.0",
-  title: "Notes",
+  displayName: "Notes",
   windowDefaults: {
     title: "Notes",
     width: 920,

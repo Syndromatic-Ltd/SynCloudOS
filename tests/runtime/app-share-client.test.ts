@@ -44,13 +44,13 @@ function createFixture(nativeShare?: (request: ShareData) => Promise<void>, perm
   activeRuntimes.push(runtime);
   registerTestSynWare(runtime, {
     schemaVersion: 1,
-    id: "share-reader",
+    bundleIdentifier: "com.example.share-reader",
     version: "1.0.0",
-    title: "Share reader",
+    displayName: "Share reader",
     routes: [{ path: "/share-reader", primary: true }],
     permissions,
   });
-  const mounted = mountTestSynWareRuntime(runtime, "share-reader");
+  const mounted = mountTestSynWareRuntime(runtime, "com.example.share-reader");
   activeMounts.push(mounted);
   return createSynWareContextValue(mounted.runtime).share;
 }

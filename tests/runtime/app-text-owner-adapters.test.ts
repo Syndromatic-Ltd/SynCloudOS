@@ -41,13 +41,13 @@ async function fixture() {
   runtime.documents.registerCloseReviewer({ review: async () => "discard" });
   cleanups.push(async () => { await runtime.dispose("test"); });
   const mount = (id: string) => {
-    registerTestSynWare(runtime, { schemaVersion: 1, id, version: "1.0.0", title: id, routes: [{ path: `/${id}`, primary: true }], documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
+    registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: id, routes: [{ path: `/${id.split(".").at(-1)}`, primary: true }], documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
     const mounted = mountTestSynWareRuntime(runtime, id);
     cleanups.push(() => mounted.dispose("test"));
     return { mounted, documents: createSynWareContextValue(mounted.runtime).documents.workspaceDocuments };
   };
-  const app = mount("adapter-owner");
-  const foreign = mount("adapter-foreign");
+  const app = mount("com.example.adapter-owner");
+  const foreign = mount("com.example.adapter-foreign");
   const location = { kind: "memory" as const, namespace: "sdk-text-adapters", key: "note" };
   const document = await app.documents.newDocument<NoteDocumentModel>({ typeId: noteType.id, location, initialModel: { title: "Native title", body: "Hello" } });
   const owner = createSynWareNSETextOwner<NoteDocumentModel>({

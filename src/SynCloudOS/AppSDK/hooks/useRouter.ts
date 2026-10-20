@@ -70,7 +70,7 @@ export function useRouter<
   return useMemo(() => createMountedSynWareRouter({
     graph: selectedGraph,
     mountedGraph: presentation.graph,
-    appId: app.app.id,
+    appId: app.app.bundleIdentifier,
     sessionId: app.sessionId,
     signal: app.signal,
     session: presentation.session,
@@ -82,5 +82,5 @@ export function useRouter<
       return app.navigation.openRoute(href, options);
     },
     preloadRoute: (href, options) => presentation.preload ? presentation.preload(href, options) : Promise.reject(new DOMException("Route preloading requires a mounted host.", "InvalidStateError")),
-  }), [app.app.id, app.sessionId, app.navigation, app.signal, presentation, selectedGraph]);
+  }), [app.app.bundleIdentifier, app.sessionId, app.navigation, app.signal, presentation, selectedGraph]);
 }

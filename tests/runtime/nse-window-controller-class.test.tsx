@@ -187,7 +187,7 @@ describe("NSEWindowController closing", () => {
       };
       applicationShouldTerminate() { events.push("applicationShouldTerminate"); return true; }
     }
-    const host = createClassApplicationHost(QuittingApp, "quitting-app");
+    const host = createClassApplicationHost(QuittingApp, "com.example.quitting-app");
     hosts.push(host);
     await host.launch();
     host.mountWindows();
@@ -212,7 +212,7 @@ describe("NSEWindowController closing", () => {
       };
       applicationShouldTerminate() { return false; }
     }
-    const host = createClassApplicationHost(VetoingApp, "vetoing-app");
+    const host = createClassApplicationHost(VetoingApp, "com.example.vetoing-app");
     hosts.push(host);
     await host.launch();
     host.mountWindows();
@@ -239,7 +239,7 @@ describe("opening more windows", () => {
       };
       constructor() { super(); app = this; }
     }
-    const host = createClassApplicationHost(MultiWindowApp, "multi-window-app");
+    const host = createClassApplicationHost(MultiWindowApp, "com.example.multi-window-app");
     hosts.push(host);
     await host.launch();
     host.mountWindows();

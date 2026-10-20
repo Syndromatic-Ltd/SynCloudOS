@@ -49,8 +49,8 @@ function ThrowingApp() {
 
 function CrashedAppPresentation({ runtime }: { runtime: SynCloudOSRuntime }) {
   const activeAppId = useRuntimeSelector((snapshot) => snapshot.application.activeAppId);
-  if (activeAppId !== "nse-control-gallery") return null;
-  const app = runtime.apps.getApp("nse-control-gallery")!;
+  if (activeAppId !== "com.example.nse-control-gallery") return null;
+  const app = runtime.apps.getApp("com.example.nse-control-gallery")!;
   return (
     <SynCloudOSWatchdog
       runtime={runtime}
@@ -78,9 +78,9 @@ describe("WebspringStatusLayer recovery", () => {
   it("resolves the AppIcon when an app deadline arrives after an initially empty error history", () => {
     const runtime = createTestRuntime();
     activeRuntimes.push(runtime);
-    runtime.apps.registerBundle(createTestBundle({ id: "notes", displayName: "Notes", icon: { src: "/Notes.app/Contents/Resources/AppIcon.png" } }));
+    runtime.apps.registerBundle(createTestBundle({ version: "1.0.0", bundleIdentifier: "com.example.notes", displayName: "Notes", icon: { src: "/Notes.app/Contents/Resources/AppIcon.png" } }));
     render(<SynCloudOSProvider runtime={runtime}><ConnectedStatusLayer /></SynCloudOSProvider>);
-    act(() => runtime.errors.createNotRespondingError(runtime.apps.getApp("notes")!, { reason: "request-timeout" }));
+    act(() => runtime.errors.createNotRespondingError(runtime.apps.getApp("com.example.notes")!, { reason: "request-timeout" }));
     const dialog = screen.getByRole("alertdialog", { name: "Notes has stopped responding." });
     expect(dialog.querySelector("[data-alert-logo]")?.getAttribute("src")).toBe("/Notes.app/Contents/Resources/AppIcon.png");
   });
@@ -154,8 +154,8 @@ describe("WebspringStatusLayer recovery", () => {
   it("returns a crashed application to Webspring and clears its fatal dialog", async () => {
     const runtime = authoriseTestRuntime(createTestRuntime());
     activeRuntimes.push(runtime);
-    runtime.apps.registerBundle(createTestBundle({
-      id: "nse-control-gallery",
+    runtime.apps.registerBundle(createTestBundle({ version: "1.0.0",
+      bundleIdentifier: "com.example.nse-control-gallery",
       packageName: "NSEControlGallery.app",
       displayName: "NSE Control Gallery",
       route: "/__syncloudos/nse-gallery",
@@ -200,8 +200,8 @@ describe("WebspringStatusLayer recovery", () => {
     const runtime = createTestRuntime();
     activeRuntimes.push(runtime);
     vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const app = {
-      id: "nse-control-gallery",
+    const app = { version: "1.0.0",
+      bundleIdentifier: "com.example.nse-control-gallery",
       packageName: "NSEControlGallery.app",
       displayName: "NSE Control Gallery",
     } as never;

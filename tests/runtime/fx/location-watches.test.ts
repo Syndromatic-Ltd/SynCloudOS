@@ -177,9 +177,9 @@ describe("LocationFX shared foreground watches", () => {
     const a1: number[] = [];
     const a2: number[] = [];
     const b: number[] = [];
-    const managerA1 = watchManager(serviceA, { appId: "app.a" });
-    const managerA2 = watchManager(serviceA, { appId: "app.other" });
-    const managerB = watchManager(serviceB, { appId: "app.a" });
+    const managerA1 = watchManager(serviceA, { appId: "com.example.app.a" });
+    const managerA2 = watchManager(serviceA, { appId: "com.example.app.other" });
+    const managerB = watchManager(serviceB, { appId: "com.example.app.a" });
     managerA1.watch({}, (location) => a1.push(location.receivedAtMonotonicSeconds));
     managerA2.watch({}, (location) => a2.push(location.receivedAtMonotonicSeconds));
     managerB.watch({}, (location) => b.push(location.receivedAtMonotonicSeconds));
@@ -192,7 +192,7 @@ describe("LocationFX shared foreground watches", () => {
     expect(a2).toEqual([30]);
     expect(b).toEqual([40]);
 
-    (serviceA as unknown as { closeOwner(appId: string): void }).closeOwner("app.a");
+    (serviceA as unknown as { closeOwner(appId: string): void }).closeOwner("com.example.app.a");
     expect(hostA.watches[0]?.dispose).not.toHaveBeenCalled();
     hostA.watches[0]?.emit(fix(3, 31));
     expect(a1).toEqual([30]);

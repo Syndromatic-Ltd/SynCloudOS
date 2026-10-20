@@ -29,7 +29,7 @@ export interface SynCloudOSViteOptions {
   widgetsDirectory?: string;
   /** Host contributions; defaults to src/Integrations. */
   integrationsDirectory?: string;
-  /** Application IDs included in this build; otherwise SYNCLOUDOS_APPLICATIONS or all. */
+  /** Bundle identifiers included in this build (case-insensitive); otherwise SYNCLOUDOS_APPLICATIONS or all. */
   applications?: readonly string[] | string;
   /** Site-owned Webspring definition, or false for a host without a shell. */
   webspringEntry?: string | false;

@@ -19,10 +19,17 @@ function scaffold(target: string, ...options: string[]) {
 describe("folder authoring CLI", () => {
   it.each(["Cloud.app", "Billing.prefPane", "Latest.widget", "Journal.integration.ts"])("creates and validates %s", name => {
     const target = join(project(), name);
-    scaffold(target, ...(name.endsWith(".integration.ts") ? ["--owners", "journal"] : []));
+    scaffold(target, ...(name.endsWith(".integration.ts") ? ["--owners", "com.example.journal"] : []));
     const result = validateSynWareDirectory(target);
     expect(result.ok).toBe(true);
-    if (name.endsWith(".app")) expect(result.manifest).toMatchObject({ id: "cloud", title: "Cloud", version: "2.0.0", webspring: { visible: true } });
+    if (name.endsWith(".app")) expect(result.manifest).toMatchObject({ bundleIdentifier: "com.example.cloud", displayName: "Cloud", version: "1.0.0", webspring: { visible: true } });
+  });
+  it("scaffolds explicit identity and version independently of the project package", () => {
+    const target = join(project(), "JournalPublisher.app");
+    scaffold(target, "--organisation", "org.Example");
+    const result = validateSynWareDirectory(target);
+    expect(result.ok).toBe(true);
+    expect(result.manifest).toMatchObject({ bundleIdentifier: "org.Example.journalpublisher", displayName: "Journal Publisher", version: "1.0.0", schemaVersion: 1 });
   });
   it("refuses occupied folders and unsupported options", () => {
     const root = project(), target = join(root, "Cloud.app");
@@ -37,7 +44,7 @@ describe("folder authoring CLI", () => {
     writeFileSync(join(broken, "index.tsx"), "export const broken = true;");
     const result = validateSynWareDirectories(root);
     expect(result).toMatchObject({ valid: 3, invalid: 1, ok: false });
-    expect(result.results.filter((entry: { ok: boolean }) => entry.ok).map((entry: { id: string | null; kind: string }) => entry.id ?? entry.kind).sort()).toEqual(["alpha", "preferencePane", "zeta"]);
+    expect(result.results.filter((entry: { ok: boolean }) => entry.ok).map((entry: { bundleIdentifier?: string | null; kind: string }) => entry.bundleIdentifier ?? entry.kind).sort()).toEqual(["com.example.alpha", "com.example.zeta", "preferencePane"]);
   });
   it("accepts reviewed imports and rejects undeclared packages", () => {
     const target = join(project(), "Dependencies.app"); scaffold(target);

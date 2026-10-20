@@ -86,7 +86,7 @@ export function createSynWareDefinitionFromApplicationClass(
   rejectDuplicate("migrations", AppClass.migrations, named.migrations);
   const handlesBackgroundTasks = typeof AppClass.prototype.handleBackgroundTask === "function";
   rejectDuplicate("background handling", handlesBackgroundTasks ? true : undefined, named.createBackgroundHandler);
-  const source: ApplicationSessionSource = { AppClass, appName: manifest.title, strictOwnership: true };
+  const source: ApplicationSessionSource = { AppClass, appName: manifest.displayName, strictOwnership: true };
   const root = createApplicationRoot(source);
   registerApplicationLifecycle(root, createApplicationLifecycle(source));
   return assembleDefinition(manifest, root, {
@@ -95,7 +95,7 @@ export function createSynWareDefinitionFromApplicationClass(
     windowChrome: named.windowChrome,
     rematerialiseOwnedDocument: named.rematerialiseOwnedDocument,
     createBackgroundHandler: handlesBackgroundTasks
-      ? () => ({ handle: (taskId, context) => runApplicationBackgroundTask(source, manifest.id, taskId, context) })
+      ? () => ({ handle: (taskId, context) => runApplicationBackgroundTask(source, manifest.bundleIdentifier, taskId, context) })
       : named.createBackgroundHandler,
   });
 }
@@ -120,7 +120,7 @@ export function createSynWareDefinitionFromComponent(
   class ComponentApplication extends NSEApplication {
     static override mainWindow = ComponentWindowController;
   }
-  const source: ApplicationSessionSource = { AppClass: ComponentApplication, appName: manifest.title, strictOwnership: false };
+  const source: ApplicationSessionSource = { AppClass: ComponentApplication, appName: manifest.displayName, strictOwnership: false };
   const root = createApplicationRoot(source);
   registerApplicationLifecycle(root, createApplicationLifecycle(source));
   return assembleDefinition(manifest, root, named);

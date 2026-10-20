@@ -18,12 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import type { CapturedSynCloudOSError, SynCloudOSErrorPayload } from "./errorTypes";
 import type { SynCloudOSRuntimeEventListenerFailure } from "../EventBus/EventBus";
 import { createCapturedError, toTechnicalReport } from "./errorReport";
 
-type ErrorApp = { readonly id: string; readonly packageName: string; readonly displayName: string };
+type ErrorApp = { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string };
 
 export function createErrorManager(runtime: SynCloudOSRuntime, dependencies: { loginServices: any }) {
 const RuntimeStore = runtime.store;
@@ -36,7 +37,7 @@ const recentErrorFingerprints = new Map<string, { id: string; at: number }>();
 
 function packageList(appIds: string[]) {
   const apps = RuntimeStore.getSnapshot().appInfo;
-  return appIds.map((appId) => apps[appId]?.packageName ?? appId);
+  return appIds.map((appId) => apps[normalizeBundleIdentifier(appId)]?.packageName ?? appId);
 }
 
 /** Name and message for fingerprints and timeout classification only; the
@@ -121,7 +122,7 @@ const errorManager = {
     if (duplicate) return duplicate;
 
     const snapshot = RuntimeStore.getSnapshot();
-    const app = payload.appId ? snapshot.appInfo[payload.appId] : null;
+    const app = payload.appId ? snapshot.appInfo[normalizeBundleIdentifier(payload.appId)] : null;
     const captured = createCapturedError({
       ...payload,
       context: {
@@ -220,7 +221,7 @@ const errorManager = {
       title: `Webspring could not open ${app?.displayName ?? "that app"}.`,
       message: "SynCloudOS could not load the requested content.",
       error,
-      appId: app?.id,
+      appId: app?.bundleIdentifier,
       packageName: app?.packageName,
       source: String(context.source ?? "SynCloudOS.LaunchServices.openApp"),
       suggestedActions: ["returnToWebspring", "dismiss"],
@@ -241,7 +242,7 @@ const errorManager = {
       code: app ? "APP_NOT_RESPONDING" : "SITE_NOT_RESPONDING",
       title: `${app?.displayName ?? siteName} has stopped responding.`,
       message,
-      appId: app?.id,
+      appId: app?.bundleIdentifier,
       packageName: app?.packageName,
       category: app ? "app" : "watchdog",
       severity: "warning",
@@ -262,7 +263,7 @@ const errorManager = {
       message: context.reason === "offline"
         ? "Your browser reports that it is offline. Check your connection and try again."
         : "Could not connect to the server. Check your connection and try again.",
-      appId: app?.id,
+      appId: app?.bundleIdentifier,
       packageName: app?.packageName,
       category: app ? "app" : "resource",
       severity: "warning",
@@ -283,7 +284,7 @@ const errorManager = {
       title: `${app?.displayName ?? "An application"} stopped unexpectedly.`,
       message: "An unexpected error has prevented this application from working properly.",
       error,
-      appId: app?.id,
+      appId: app?.bundleIdentifier,
       packageName: app?.packageName,
       source: String(context.source ?? "SynCloudOS.AppWatchdog"),
       severity: "fatal",
@@ -483,7 +484,7 @@ const errorManager = {
       code: "UNRECOVERABLE_LOGIN_SESSION_MISMATCH",
       title: `${siteName} has unexpectedly stopped.`,
       message: "An unexpected error has prevented this application from working properly.",
-      appId: app?.id,
+      appId: app?.bundleIdentifier,
       packageName: app?.packageName,
       technicalMessage: reason,
       technicalDetails: [
@@ -496,7 +497,7 @@ const errorManager = {
       suggestedActions: ["reload", "dismiss"],
       category: "runtime",
       context: {
-        requestedAppId: app?.id ?? context.requestedAppId ?? "unknown",
+        requestedAppId: app?.bundleIdentifier ?? context.requestedAppId ?? "unknown",
         requestedPackage: app?.packageName ?? null,
         currentStatechartState: snapshot.statechart.currentState,
         reason

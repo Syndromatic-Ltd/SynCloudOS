@@ -279,9 +279,9 @@ function Website({ actions, applicationOutlet }: WebspringViewProps) {
 const shell = defineWebspring({
   manifest: {
     schemaVersion: 1,
-    id: "org.example.vfx03-shell",
+    bundleIdentifier: "org.example.vfx03-shell",
     version: "1.0.0",
-    title: "VFX-03 shell",
+    displayName: "VFX-03 shell",
     webspringShell: {
       views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
       defaults: { desktop: "website", tablet: "website", mobile: "website" },
@@ -295,9 +295,9 @@ const shell = defineWebspring({
 const app = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "org.example.vfx03",
+    bundleIdentifier: "org.example.vfx03",
     version: "1.0.0",
-    title: "VFX-03 Probe",
+    displayName: "VFX-03 Probe",
     runtime: { policy: { public: true } },
     presentations: ["desktop", "tablet", "mobile"],
     routes: [{ path: "/vfx03", primary: true }],

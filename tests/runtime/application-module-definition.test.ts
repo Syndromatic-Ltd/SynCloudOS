@@ -4,7 +4,7 @@ import { captureLazySynWareDefinition } from "../../src/SynCloudOS/BundleLoader/
 import { createSynWare, createSynWareBundle } from "../../src/SynCloudOS/AppSDK/createSynWare";
 import type { SynWareManifestV1 } from "../../src/SynCloudOS/AppSDK/manifest";
 
-const manifest: SynWareManifestV1 = { schemaVersion: 1, id: "notes", title: "Notes", version: "1.0.0" };
+const manifest: SynWareManifestV1 = { schemaVersion: 1, bundleIdentifier: "com.example.notes", displayName: "Notes", version: "1.0.0" };
 const bundle = createSynWareBundle(createSynWare({ manifest, root: () => null }));
 
 describe("application entry modules", () => {

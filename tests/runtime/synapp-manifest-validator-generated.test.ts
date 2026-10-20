@@ -35,11 +35,17 @@ it("validates exactly as a runtime compile of the schema with the same options",
   const ajv = new Ajv2020({ allErrors: true, allowUnionTypes: false, strict: true, validateFormats: true });
   addFormats(ajv);
   const compiled = ajv.compile(schema);
-  const base = { schemaVersion: 1, id: "com.syndromatic.example", version: "1.0.0", title: "Example" };
+  const base = { schemaVersion: 1, bundleIdentifier: "com.syndromatic.example", version: "1.0.0", displayName: "Example" };
   const cases: unknown[] = [
-    { schemaVersion: 1, id: "fixture.window", version: "2.0.0", title: "Window fixture", runtime: { presentation: "windowedView" }, permissions: ["diagnostics.view"] },
-    { schemaVersion: 1, id: "fixture.routes", version: "1.2.3", title: "Routes fixture", routes: [{ path: "/fixture", primary: true }], services: [{ id: "catalogue", required: true }] },
+    { schemaVersion: 1, bundleIdentifier: "com.example.fixture.window", version: "2.0.0", displayName: "Window fixture", runtime: { presentation: "windowedView" }, permissions: ["diagnostics.view"] },
+    { schemaVersion: 1, bundleIdentifier: "com.example.fixture.routes", version: "1.2.3", displayName: "Routes fixture", routes: [{ path: "/fixture", primary: true }], services: [{ id: "catalogue", required: true }] },
     base,
+    { ...base, bundleIdentifier: "Com.Example.Mixed-Case42" },
+    { ...base, bundleIdentifier: "example.notes" },
+    { ...base, bundleIdentifier: "com.example.bad_name" },
+    { ...base, bundleIdentifier: undefined },
+    { ...base, displayName: undefined },
+    { ...base, version: undefined },
     {},
     { ...base, version: "one" },
     { ...base, unknownKey: true },
@@ -48,7 +54,7 @@ it("validates exactly as a runtime compile of the schema with the same options",
     { ...base, frame: { layout: "nope", material: 1 } },
     { ...base, webspring: { order: -1, icon: 7 } },
     { ...base, localeResources: { base: "", bundles: [{ locale: "x", path: 1 }] } },
-    { ...base, title: "" },
+    { ...base, displayName: "" },
   ];
   for (const value of cases) {
     const copy = structuredClone(value);

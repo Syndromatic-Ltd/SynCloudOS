@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../../../../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { WebspringLaunchDim } from "../../../WebspringLaunchDim";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode, type TransitionEvent } from "react";
 import { NSELayoutView, useNSEAnimationEnvironment, useNSEPresentation, type NSELayoutTransitionTiming } from "../../../../NSE/Animation";
@@ -144,8 +145,8 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
 }) {
   const { model, actions, exit, reorderMotion, index } = entry;
   const disabled = app.state === "disabled";
-  const interaction = useBoardEntryInteraction(app.id, app.title, disabled, entry);
-  const loading = opening || app.state === "loading" || app.state === "launching" || model.launchingAppId === app.id;
+  const interaction = useBoardEntryInteraction(normalizeBundleIdentifier(app.bundleIdentifier), app.displayName, disabled, entry);
+  const loading = opening || app.state === "loading" || app.state === "launching" || normalizeBundleIdentifier(model.launchingAppId) === normalizeBundleIdentifier(app.bundleIdentifier);
   const { editing, dragging } = interaction;
 
   // A slot springs to wherever an update lays it out (a new cell on reorder,
@@ -155,28 +156,28 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
     type="button"
     className={`webspring-board-icon ${editing ? "is-editing" : ""} ${dragging ? "is-dragging" : ""} ${disabled ? "is-disabled" : ""}`}
     {...interaction.dataProps}
-    aria-label={editing ? `Move ${app.title}` : `Open ${app.title}`}
+    aria-label={editing ? `Move ${app.displayName}` : `Open ${app.displayName}`}
     aria-pressed={editing ? dragging : undefined}
     disabled={disabled}
     aria-description={disabled ? app.disabledReason : undefined}
     title={disabled ? app.disabledReason : undefined}
-    onFocus={() => actions.prefetchApp(app.id, true)}
-    onBlur={() => actions.prefetchApp(app.id, false)}
+    onFocus={() => actions.prefetchApp(app.bundleIdentifier, true)}
+    onBlur={() => actions.prefetchApp(app.bundleIdentifier, false)}
     onPointerDown={interaction.onPointerDown}
     onPointerMove={interaction.onPointerMove}
     onPointerUp={interaction.onPointerEnd}
     onPointerCancel={interaction.onPointerEnd}
     onLostPointerCapture={interaction.onPointerEnd}
     onKeyDown={interaction.onKeyDown}
-    onClick={() => { if (!disabled && !editing) void actions.openApp(app.id, app.route); }}
+    onClick={() => { if (!disabled && !editing) void actions.openApp(app.bundleIdentifier, app.route); }}
   >
     <BoardIconArtwork index={index} total={model.items.length} state={boardIconState(model, exit)} exit={exit}>
-      <span className="webspring-board-icon-well" data-loading={loading ? "true" : undefined} data-drop-target={model.folders.dropTargetId === app.id ? "true" : undefined}>
-        {app.iconUrl ? <img src={app.iconUrl} alt="" aria-hidden="true" draggable={false} /> : <span aria-hidden="true">{app.title.slice(0, 1)}</span>}
-        {loading ? <LoadingSpinner label={`Loading ${app.title}`} variant="dark" /> : null}
+      <span className="webspring-board-icon-well" data-loading={loading ? "true" : undefined} data-drop-target={normalizeBundleIdentifier(model.folders.dropTargetId) === normalizeBundleIdentifier(app.bundleIdentifier) ? "true" : undefined}>
+        {app.iconUrl ? <img src={app.iconUrl} alt="" aria-hidden="true" draggable={false} /> : <span aria-hidden="true">{app.displayName.slice(0, 1)}</span>}
+        {loading ? <LoadingSpinner label={`Loading ${app.displayName}`} variant="dark" /> : null}
         <Badge count={app.badgeCount} />
       </span>
-      <span className="webspring-board-icon-label">{app.title}</span>
+      <span className="webspring-board-icon-label">{app.displayName}</span>
     </BoardIconArtwork>
   </button></NSELayoutView>;
 }
@@ -265,7 +266,7 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   const draggingId = model.layout.draggingItemId;
   const draggingItem = model.items.find((item) => item.id === draggingId) ?? null;
   const draggingFolder = draggingItem?.kind === "folder" ? draggingItem : null;
-  const draggingApp = draggingItem?.kind === "app" ? draggingItem.app : model.apps.find((app) => app.id === draggingId) ?? null;
+  const draggingApp = draggingItem?.kind === "app" ? draggingItem.app : model.apps.find((app) => normalizeBundleIdentifier(app.bundleIdentifier) === normalizeBundleIdentifier(draggingId)) ?? null;
   // The dragged icon is drawn at the size of the one it came from, which the Board fits to the screen.
   const dragProxyRef = useCallback((element: HTMLDivElement | null) => {
     setProxyElement(element);
@@ -373,9 +374,9 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
     reorder(index) {
       const dragId = activeDragId.current;
       if (!dragId || !actions.moveItem(dragId, index, false)) return;
-      const member = openFolder?.apps.find((app) => app.id === dragId);
+      const member = openFolder?.apps.find((app) => normalizeBundleIdentifier(app.bundleIdentifier) === normalizeBundleIdentifier(dragId));
       const item = model.items.find((candidate) => candidate.id === dragId);
-      const title = member?.title ?? (item ? item.kind === "app" ? item.app.title : item.title : null);
+      const title = member?.displayName ?? (item ? item.kind === "app" ? item.app.displayName : item.title : null);
       if (title) announceMove(title, index);
     },
     merge(targetId) {
@@ -389,10 +390,10 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
     leavePanel() {
       const dragId = activeDragId.current;
       // A member dragged past the edge returns to the top level where it left the folder.
-      if (dragId && openFolder?.apps.some((app) => app.id === dragId) && model.folders.editable) {
+      if (dragId && openFolder?.apps.some((app) => normalizeBundleIdentifier(app.bundleIdentifier) === normalizeBundleIdentifier(dragId)) && model.folders.editable) {
         if (actions.moveAppOutOfFolder(dragId, topLevelIds.indexOf(openFolder.id) + 1)) {
-          const app = openFolder.apps.find((candidate) => candidate.id === dragId);
-          if (app) setAnnouncement(`${app.title} moved out of ${openFolder.title}.`);
+          const app = openFolder.apps.find((candidate) => normalizeBundleIdentifier(candidate.bundleIdentifier) === normalizeBundleIdentifier(dragId));
+          if (app) setAnnouncement(`${app.displayName} moved out of ${openFolder.title}.`);
         }
       }
       actions.closeFolder();
@@ -476,7 +477,7 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
       const dropFolder = result.folderId
         ? model.items.find((item): item is WebspringFolderItem => item.kind === "folder" && item.id === result.folderId) ?? null
         : null;
-      const member = dropFolder?.apps.some((app) => app.id === dragId) ?? false;
+      const member = dropFolder?.apps.some((app) => normalizeBundleIdentifier(app.bundleIdentifier) === normalizeBundleIdentifier(dragId)) ?? false;
       let joined = false;
       // A release inside a folder joins it, unless the app was already one of its members.
       if (commit && result.mergeTargetId) joined = actions.dropOnItem(dragId, result.mergeTargetId);
@@ -559,14 +560,14 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   });
 
   const renderEntry = (item: WebspringItem, globalIndex: number) => item.kind === "app"
-    ? <BoardIcon key={item.id} app={item.app} opening={openingAppId === item.id} {...entryProps(globalIndex, topLevelIds, iconExits?.get(item.id))} />
+    ? <BoardIcon key={item.id} app={item.app} opening={normalizeBundleIdentifier(openingAppId) === item.id} {...entryProps(globalIndex, topLevelIds, iconExits?.get(item.id))} />
     : <BoardFolderIcon key={item.id} folder={item} onOpen={openFolderFromIcon} {...entryProps(globalIndex, topLevelIds, iconExits?.get(item.id))} />;
 
   const renderFolderApp = (app: WebspringApp, index: number) => <BoardIcon
-    key={app.id}
+    key={app.bundleIdentifier}
     app={app}
-    opening={openingAppId === app.id}
-    {...entryProps(index, openFolder?.apps.map((member) => member.id) ?? [], undefined)}
+    opening={normalizeBundleIdentifier(openingAppId) === normalizeBundleIdentifier(app.bundleIdentifier)}
+    {...entryProps(index, openFolder?.apps.map((member) => normalizeBundleIdentifier(member.bundleIdentifier)) ?? [], undefined)}
   />;
 
   return <MaterialProvider>

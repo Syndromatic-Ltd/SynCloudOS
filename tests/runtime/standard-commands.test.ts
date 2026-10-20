@@ -59,10 +59,10 @@ describe("standard runtime commands", () => {
   it("opens apps and keeps system Preferences independent from app capabilities", async () => {
     const runtime = createTestRuntime();
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
-    runtime.apps.registerBundle(createTestBundle({ id: "command-app", route: "/command-app" }));
-    await expect(runtime.commands.dispatch("workspace.openApp", { appId: "command-app" })).resolves.toMatchObject({ status: "executed" });
-    await expect(runtime.commands.dispatch("application.showAbout", { appId: "command-app" })).resolves.toMatchObject({ status: "executed" });
-    expect(runtime.systemUI.getSnapshot().aboutAppId).toBe("command-app");
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.command-app", route: "/command-app" }));
+    await expect(runtime.commands.dispatch("workspace.openApp", { appId: "com.example.command-app" })).resolves.toMatchObject({ status: "executed" });
+    await expect(runtime.commands.dispatch("application.showAbout", { appId: "com.example.command-app" })).resolves.toMatchObject({ status: "executed" });
+    expect(runtime.systemUI.getSnapshot().aboutAppId).toBe("com.example.command-app");
     await expect(runtime.commands.validate("system.showPreferences")).resolves.toMatchObject({ enabled: true });
     await expect(runtime.commands.dispatch("system.showPreferences")).resolves.toMatchObject({ status: "executed" });
     expect(runtime.systemUI.getSnapshot().preferencesPane).toBe("");
@@ -71,7 +71,7 @@ describe("standard runtime commands", () => {
 
   it("propagates rejected nested route results from workspace commands", async () => {
     const runtime = createTestRuntime();
-    runtime.apps.registerBundle(createTestBundle({ id: "nested-route", route: "/nested-route" }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.nested-route", route: "/nested-route" }));
     const failedRoute: OperationHandle<never> = {
       operationId: "route:failed",
       correlationId: "route:failed",
@@ -86,7 +86,7 @@ describe("standard runtime commands", () => {
     };
     vi.spyOn(runtime.routes, "openRoute").mockReturnValue(failedRoute);
 
-    await expect(runtime.commands.dispatch("workspace.openApp", { appId: "nested-route" })).resolves.toMatchObject({
+    await expect(runtime.commands.dispatch("workspace.openApp", { appId: "com.example.nested-route" })).resolves.toMatchObject({
       status: "failed",
       error: { code: "route-denied" },
     });
@@ -98,7 +98,7 @@ describe("standard runtime commands", () => {
 
   it("propagates command cancellation into composed route operations", async () => {
     const runtime = createTestRuntime();
-    runtime.apps.registerBundle(createTestBundle({ id: "cancelled-route", route: "/cancelled-route" }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.cancelled-route", route: "/cancelled-route" }));
     let nestedSignal: AbortSignal | undefined;
     vi.spyOn(runtime.routes, "openRoute").mockImplementation((_pathname, options = {}) => {
       nestedSignal = options.signal;
@@ -117,14 +117,14 @@ describe("standard runtime commands", () => {
       };
     });
     const controller = new AbortController();
-    const dispatch = runtime.commands.dispatch("workspace.openApp", { appId: "cancelled-route" }, { signal: controller.signal });
+    const dispatch = runtime.commands.dispatch("workspace.openApp", { appId: "com.example.cancelled-route" }, { signal: controller.signal });
     await vi.waitFor(() => expect(nestedSignal).toBeDefined());
 
     controller.abort(new Error("Outer command cancelled."));
 
     await expect(dispatch).resolves.toMatchObject({ status: "cancelled" });
     expect(nestedSignal?.aborted).toBe(true);
-    expect(runtime.store.getSnapshot().application.activeAppId).not.toBe("cancelled-route");
+    expect(runtime.store.getSnapshot().application.activeAppId).not.toBe("com.example.cancelled-route");
   });
 
   it("propagates confirmed log-out cancellation and prevents a late session lock", async () => {

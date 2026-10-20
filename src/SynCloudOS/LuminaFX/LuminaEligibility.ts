@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { LUFXSearchableItem } from "../../FX/LuminaFX/LUFXSearchableItem";
 import type { SynCloudOSPolicySubject } from "../PolicyKit/policyTypes";
 import type { LuminaEligibilityRestriction } from "./luminaEligibilityRestriction";
@@ -64,11 +65,11 @@ function checkedIdentifier(value: string, label: string): string {
 }
 
 function projectionKey(ownerAppId: string, domain: string): string {
-  return `${ownerAppId}\u0000${domain}`;
+  return `${normalizeBundleIdentifier(ownerAppId)}\u0000${domain}`;
 }
 
 function itemKey(ownerAppId: string, domain: string, itemId: string): string {
-  return `${ownerAppId}\u0000${domain}\u0000${itemId}`;
+  return `${normalizeBundleIdentifier(ownerAppId)}\u0000${domain}\u0000${itemId}`;
 }
 
 export function luminaSubjectFingerprint(subject: SynCloudOSPolicySubject): string {
@@ -119,7 +120,7 @@ export class LuminaEligibilityRegistry {
       if (this.#projections.get(key) !== projection) return;
       this.#projections.delete(key);
       for (const [entryKey, entry] of this.#eligibleItems) {
-        if (entry.ownerAppId === projection.ownerAppId && entry.domain === projection.domain) {
+        if (normalizeBundleIdentifier(entry.ownerAppId) === normalizeBundleIdentifier(projection.ownerAppId) && entry.domain === projection.domain) {
           this.#eligibleItems.delete(entryKey);
           this.#temporalStates.delete(entryKey);
         }
@@ -181,30 +182,35 @@ export class LuminaEligibilityRegistry {
   restrictionFor(ownerAppId: string): LuminaEligibilityRestriction {
     const routes: (readonly [string, string])[] = [];
     for (const projection of this.#projections.values()) {
-      if (projection.ownerAppId === ownerAppId) routes.push(Object.freeze([projection.domain, projection.routeName] as const));
+      if (normalizeBundleIdentifier(projection.ownerAppId) === normalizeBundleIdentifier(ownerAppId)) routes.push(Object.freeze([projection.domain, projection.routeName] as const));
     }
     const items: (readonly [string, string, string])[] = [];
     for (const record of this.#eligibleItems.values()) {
-      if (record.ownerAppId !== ownerAppId || !this.#isTemporallyActive(record)) continue;
+      if (normalizeBundleIdentifier(record.ownerAppId) !== normalizeBundleIdentifier(ownerAppId) || !this.#isTemporallyActive(record)) continue;
       items.push(Object.freeze([record.domain, record.itemId, record.revision] as const));
     }
     return Object.freeze({ items: Object.freeze(items), routes: Object.freeze(routes) });
   }
 
   owners(): readonly string[] {
-    return Object.freeze([...new Set([...this.#projections.values()].map((projection) => projection.ownerAppId))].sort());
+    const authored = new Map<string, string>();
+    for (const { ownerAppId } of this.#projections.values()) {
+      const key = normalizeBundleIdentifier(ownerAppId);
+      if (!authored.has(key)) authored.set(key, ownerAppId);
+    }
+    return Object.freeze([...authored.values()].sort());
   }
 
   eraseOwner(ownerAppId: string): number {
     const owner = checkedIdentifier(ownerAppId, "Lumina owner application ID");
     let changed = false;
     for (const [key, projection] of this.#projections) {
-      if (projection.ownerAppId !== owner) continue;
+      if (normalizeBundleIdentifier(projection.ownerAppId) !== normalizeBundleIdentifier(owner)) continue;
       this.#projections.delete(key);
       changed = true;
     }
     for (const [key, record] of this.#eligibleItems) {
-      if (record.ownerAppId !== owner) continue;
+      if (normalizeBundleIdentifier(record.ownerAppId) !== normalizeBundleIdentifier(owner)) continue;
       this.#eligibleItems.delete(key);
       this.#temporalStates.delete(key);
       changed = true;

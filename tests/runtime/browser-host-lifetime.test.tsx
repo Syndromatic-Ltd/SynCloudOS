@@ -38,9 +38,9 @@ vi.mock("../../src/App", () => ({ App: () => <div data-testid="mounted-browser-h
 const shell = defineWebspring({
   manifest: {
     schemaVersion: 1,
-    id: "com.example.lifetime-shell",
+    bundleIdentifier: "com.example.lifetime-shell",
     version: "1.0.0",
-    title: "Lifetime shell",
+    displayName: "Lifetime shell",
     webspringShell: {
       views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
       defaults: { desktop: "site", tablet: "site", mobile: "site" },

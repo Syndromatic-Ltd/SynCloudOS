@@ -179,10 +179,10 @@ export interface SynCloudOSAppSeoManifest {
 }
 
 /**
- * What the About box shows. Mirrors the Info.plist keys macOS's standard About
- * panel reads, so the mapping stays obvious to anyone coming from a .app bundle:
+ * Legal attribution and build details for the standard About panel. The
+ * user-facing version is the manifest's required top-level `version`
+ * (CFBundleShortVersionString), never a separate About override.
  *
- *   version   → CFBundleShortVersionString  (the user-facing "Version 1.0")
  *   build     → CFBundleVersion             (shown in parentheses after it)
  *   copyright → NSHumanReadableCopyright
  *   name/icon → CFBundleName / CFBundleIconFile, already on the manifest
@@ -192,7 +192,6 @@ export interface SynCloudOSAppSeoManifest {
  * carries the same trademark line and a one-line statement of what it is.
  */
 export interface SynCloudOSAppAboutManifest {
-  version: string;
   build?: string;
   copyright: string;
   trademark: string;
@@ -205,10 +204,10 @@ export interface SynCloudOSAppRouteClaim {
 }
 
 export interface SynCloudOSAppManifest {
-  id: string;
+  bundleIdentifier: string;
+  version: string;
   name: string;
   packageName: string;
-  bundleId: string;
   displayName: string;
   shortName: string;
   description: string;
@@ -243,7 +242,7 @@ export type SynCloudOSAppRegistryMap = Record<string, SynCloudOSAppManifest>;
 export type SynCloudOSAppRegistrationAction = "register" | "update" | "unregister" | "failed";
 export type SynCloudOSAppRegistrationIssueSeverity = "fatal" | "warning";
 export type SynCloudOSAppRegistrationRouteMatchMode = "path" | "href" | "none";
-export type SynCloudOSAppRegistrationCollisionField = "bundleId" | "packageName" | "route" | "componentKey";
+export type SynCloudOSAppRegistrationCollisionField = "bundleIdentifier" | "packageName" | "route" | "componentKey";
 
 export interface SynCloudOSAppRegistrationCollision {
   field: SynCloudOSAppRegistrationCollisionField;
@@ -271,7 +270,7 @@ export interface SynCloudOSAppRegistrationPreflightReport {
   ok: boolean;
   appId: string | null;
   packageName: string | null;
-  bundleId: string | null;
+  bundleIdentifier: string | null;
   route: string | null;
   normalizedRoute: string | null;
   routeKey: string | null;
@@ -281,7 +280,7 @@ export interface SynCloudOSAppRegistrationPreflightReport {
   previousApp: {
     appId: string;
     packageName: string;
-    bundleId: string;
+    bundleIdentifier: string;
     route: string;
     componentKey: string;
   } | null;
@@ -303,7 +302,7 @@ export interface SynCloudOSAppRegistrationHistoryRecord {
   result: "accepted" | "rejected" | "removed";
   at: number;
   reason?: string;
-  bundleId?: string;
+  bundleIdentifier?: string;
   route?: string;
   normalizedRoute?: string | null;
   routeKey?: string | null;

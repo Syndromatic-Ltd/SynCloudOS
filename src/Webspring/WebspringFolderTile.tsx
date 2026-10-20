@@ -108,8 +108,8 @@ export function WebspringFolderTile({ folder, dropTarget = false, className }: W
         <svg className="webspring-folder-tile-inner-highlight" {...layer}><path d={frame} fillRule="evenodd" transform="translate(0 -1)" /></svg>
       </> : null}
     </span>
-    {folder.apps.slice(0, 9).map((app) => <span key={app.id} className="webspring-folder-tile-member">
-      {app.iconUrl ? <img src={app.iconUrl} alt="" draggable={false} /> : <span>{app.title.slice(0, 1)}</span>}
+    {folder.apps.slice(0, 9).map((app) => <span key={app.bundleIdentifier} className="webspring-folder-tile-member">
+      {app.iconUrl ? <img src={app.iconUrl} alt="" draggable={false} /> : <span>{app.displayName.slice(0, 1)}</span>}
     </span>)}
   </span>;
 }

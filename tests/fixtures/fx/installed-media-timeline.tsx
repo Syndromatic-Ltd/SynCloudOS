@@ -117,11 +117,11 @@ function Website({ actions, applicationOutlet }: WebspringViewProps) {
 }
 
 const shell = defineWebspring({
-  manifest: { schemaVersion: 1, id: "org.example.vfx06-shell", version: "1.0.0", title: "VFX-06 shell", webspringShell: { views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }], defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "VFX-06" } } } },
+  manifest: { schemaVersion: 1, bundleIdentifier: "org.example.vfx06-shell", version: "1.0.0", displayName: "VFX-06 shell", webspringShell: { views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }], defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "VFX-06" } } } },
   components: { website: Website },
 });
 const app = createSynWare({
-  manifest: { schemaVersion: 1, id: "org.example.vfx06", version: "1.0.0", title: "VFX-06 Probe", permissions: ["audio.play"], runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/vfx06", primary: true }], webspring: { visible: true, order: 1 } },
+  manifest: { schemaVersion: 1, bundleIdentifier: "org.example.vfx06", version: "1.0.0", displayName: "VFX-06 Probe", permissions: ["audio.play"], runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/vfx06", primary: true }], webspring: { visible: true, order: 1 } },
   root: Probe,
 });
 mountSynCloudOS({ element: document.getElementById("root")!, bundles: [app], shell, authentication: "disabled" })

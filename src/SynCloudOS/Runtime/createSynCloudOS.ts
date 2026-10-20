@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { createAudioGraphHostService } from "../AudioFX/AudioGraphHostService";
 import { MotionService } from "../MotionFX/MotionService";
 import { LocationService } from "../LocationFX/LocationService";
@@ -474,8 +475,8 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
       : app.window.role;
     return {
       workspaceId: "workspace-main",
-      applicationId: app.id,
-      applicationSessionId: app.id,
+      applicationId: app.bundleIdentifier,
+      applicationSessionId: app.bundleIdentifier,
       documentId: null,
       documentAssociationRole: null,
       representedDocument: null,
@@ -485,7 +486,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
       chromeMode: app.presentation === "systemSheet" ? "system" : app.window.chrome,
       smoothSurface: app.window.smoothSurface,
       title: app.window.title,
-      content: { rendererId: "application", parameters: { appId: app.id } },
+      content: { rendererId: "application", parameters: { appId: app.bundleIdentifier } },
       bounds: app.window.defaultBounds,
       minimumSize: app.window.minimumSize,
       maximumSize: null,
@@ -870,7 +871,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
         ? parameterRecord.appId
         : "unknown";
       return {
-        mountKey: `application:${appId}`,
+        mountKey: `application:${normalizeBundleIdentifier(appId)}`,
         responderId: `window-content:${windowControllerId}`,
         async load({ signal }) { signal.throwIfAborted(); },
         async prepareClose() {
@@ -1138,7 +1139,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     resolveEndpoint: transfers.resolveDragEndpoint,
     authorise: (request, signal) => {
       signal.throwIfAborted();
-      const crossApplication = request.source.appId !== request.destination.appId;
+      const crossApplication = normalizeBundleIdentifier(request.source.appId) !== normalizeBundleIdentifier(request.destination.appId);
       const supported = request.representationTypes.length > 0 && request.representationTypes.every((type) =>
         type === "text/plain" || type === "text/html" || type === "text/uri-list" ||
         type === "text/rtf" || type === "application/x-syncloudos-colour" ||
@@ -1553,10 +1554,10 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
         locale.hydrate();
         const localeLoaderAppIds: string[] = [];
         for (const bundle of bundles.getBundles()) {
-          if (bundle.localeResources) locale.registerBundleLocaleResources(bundle.manifest.id, bundle.localeResources);
+          if (bundle.localeResources) locale.registerBundleLocaleResources(bundle.manifest.bundleIdentifier, bundle.localeResources);
           if (bundle.localeResourceLoader) {
-            locale.registerBundleLocaleResourceLoader(bundle.manifest.id, bundle.localeResourceLoader);
-            localeLoaderAppIds.push(bundle.manifest.id);
+            locale.registerBundleLocaleResourceLoader(bundle.manifest.bundleIdentifier, bundle.localeResourceLoader);
+            localeLoaderAppIds.push(bundle.manifest.bundleIdentifier);
           }
         }
         if (localeLoaderAppIds.length > 0) await locale.loadBundleLocaleResources(localeLoaderAppIds);

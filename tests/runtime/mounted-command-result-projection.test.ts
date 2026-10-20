@@ -31,7 +31,7 @@ afterEach(async () => {
   await Promise.all(runtimes.splice(0).map((runtime) => runtime.dispose("test cleanup")));
 });
 
-function fixture(id = "repair-5-command", proxyBrandProbe: "host" | "omit" = "host") {
+function fixture(id = "com.example.repair-5-command", proxyBrandProbe: "host" | "omit" = "host") {
   const environment = createTestRuntimeEnvironment({ proxyBrandProbe });
   if (proxyBrandProbe === "omit") {
     expect("isNativeProxy" in environment).toBe(false);
@@ -39,7 +39,7 @@ function fixture(id = "repair-5-command", proxyBrandProbe: "host" | "omit" = "ho
   }
   const runtime = createTestRuntime({
     environment,
-    initialBundles: [createTestBundle({ id, route: `/${id}` })],
+    initialBundles: [createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` })],
   });
   runtimes.push(runtime);
   const app = runtime.apps.getApp(id)!;
@@ -63,11 +63,11 @@ const noPayload = {
 
 describe("mounted command result projection", () => {
   it("keeps an ordinary object result synchronous when the browser has no Proxy probe", async () => {
-    const { app, responderId, runtime } = fixture("repair-5-command-sync-object", "omit");
+    const { app, responderId, runtime } = fixture("com.example.repair-5-command-sync-object", "omit");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const source = { nested: { value: "ordinary" } };
     mounted.runtime.commands.register({
-      id: "repair-5-command-sync-object.sync-object",
+      id: "com.example.repair-5-command-sync-object.sync-object",
       responderId,
       title: { key: "repair-5-command.sync-object", fallback: "Synchronous object" },
       payload: noPayload,
@@ -80,7 +80,7 @@ describe("mounted command result projection", () => {
       },
     });
 
-    const result = await mounted.runtime.commands.dispatch("repair-5-command-sync-object.sync-object");
+    const result = await mounted.runtime.commands.dispatch("com.example.repair-5-command-sync-object.sync-object");
 
     expect(result).toMatchObject({ status: "executed", value: source });
     if (result.status !== "executed") throw new Error("The ordinary object command did not execute.");
@@ -90,13 +90,13 @@ describe("mounted command result projection", () => {
   });
 
   it("assimilates a custom execution thenable before detached projection without a native Proxy probe", async () => {
-    const { app, responderId, runtime } = fixture("repair-5-command-custom-thenable", "omit");
+    const { app, responderId, runtime } = fixture("com.example.repair-5-command-custom-thenable", "omit");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const then = vi.fn((resolve: (value: { readonly kind: string }) => void) => {
       resolve({ kind: "custom-settlement" });
     });
     mounted.runtime.commands.register({
-      id: "repair-5-command-custom-thenable.custom-thenable",
+      id: "com.example.repair-5-command-custom-thenable.custom-thenable",
       responderId,
       title: { key: "repair-5-command.custom-thenable", fallback: "Custom thenable" },
       payload: noPayload,
@@ -106,13 +106,13 @@ describe("mounted command result projection", () => {
       execute: () => ({ then }) as unknown as { readonly kind: string },
     });
 
-    await expect(mounted.runtime.commands.dispatch("repair-5-command-custom-thenable.custom-thenable"))
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-5-command-custom-thenable.custom-thenable"))
       .resolves.toMatchObject({ status: "executed", value: { kind: "custom-settlement" } });
     expect(then).toHaveBeenCalledOnce();
   });
 
   it("assimilates a Promise from a foreign JSDOM realm without a native Proxy probe", async () => {
-    const { app, responderId, runtime } = fixture("repair-5-command-foreign-promise", "omit");
+    const { app, responderId, runtime } = fixture("com.example.repair-5-command-foreign-promise", "omit");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const realm = new JSDOM("", { runScripts: "outside-only" });
     try {
@@ -120,7 +120,7 @@ describe("mounted command result projection", () => {
       expect(realm.window.Promise).not.toBe(Promise);
       expect(foreign).not.toBeInstanceOf(Promise);
       mounted.runtime.commands.register({
-        id: "repair-5-command-foreign-promise.foreign-promise",
+        id: "com.example.repair-5-command-foreign-promise.foreign-promise",
         responderId,
         title: { key: "repair-5-command.foreign-promise", fallback: "Foreign Promise" },
         payload: noPayload,
@@ -130,7 +130,7 @@ describe("mounted command result projection", () => {
         execute: () => foreign as unknown as string,
       });
 
-      await expect(mounted.runtime.commands.dispatch("repair-5-command-foreign-promise.foreign-promise"))
+      await expect(mounted.runtime.commands.dispatch("com.example.repair-5-command-foreign-promise.foreign-promise"))
         .resolves.toMatchObject({ status: "executed", value: "foreign-settlement" });
     } finally {
       realm.window.close();
@@ -138,7 +138,7 @@ describe("mounted command result projection", () => {
   });
 
   it("registers browser-safe undo and redo callbacks without reflecting over function properties", async () => {
-    const id = "repair-5-command-browser-history";
+    const id = "com.example.repair-5-command-browser-history";
     const { app, responderId, runtime } = fixture(id, "omit");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const history = mounted.runtime.undo.get({ kind: "application", id });
@@ -172,7 +172,7 @@ describe("mounted command result projection", () => {
       ownKeys: reflectionTrap,
     });
     mounted.runtime.commands.register({
-      id: "repair-5-command-browser-history.browser-history",
+      id: "com.example.repair-5-command-browser-history.browser-history",
       responderId,
       title: { key: "repair-5-command.browser-history", fallback: "Browser history" },
       payload: noPayload,
@@ -190,7 +190,7 @@ describe("mounted command result projection", () => {
       execute: () => { model = "after"; return "after"; },
     });
 
-    await expect(mounted.runtime.commands.dispatch("repair-5-command-browser-history.browser-history"))
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-5-command-browser-history.browser-history"))
       .resolves.toMatchObject({ status: "executed", value: "after" });
     expect(history.canUndo).toBe(true);
     await expect(history.undo()).resolves.toMatchObject({ status: "completed" });
@@ -203,7 +203,7 @@ describe("mounted command result projection", () => {
   });
 
   it("uses the declared Proxy-function inverse after mount revocation and reports cancellation only after restoration", async () => {
-    const { app, responderId, runtime } = fixture("repair-5-command-proxy-inverse", "omit");
+    const { app, responderId, runtime } = fixture("com.example.repair-5-command-proxy-inverse", "omit");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     let model = "before";
     let inverseCalls = 0;
@@ -224,7 +224,7 @@ describe("mounted command result projection", () => {
     const started = new Promise<void>((resolve) => { entered = resolve; });
 
     mounted.runtime.commands.register({
-      id: "repair-5-command-proxy-inverse.compensate-revoked",
+      id: "com.example.repair-5-command-proxy-inverse.compensate-revoked",
       responderId,
       title: { key: "repair-5-command.compensate-revoked", fallback: "Compensate revoked" },
       payload: noPayload,
@@ -247,7 +247,7 @@ describe("mounted command result projection", () => {
       },
     });
 
-    const pending = mounted.runtime.commands.dispatch("repair-5-command-proxy-inverse.compensate-revoked");
+    const pending = mounted.runtime.commands.dispatch("com.example.repair-5-command-proxy-inverse.compensate-revoked");
     await started;
     mounted.dispose("revoke while command is gated");
     release();
@@ -259,7 +259,7 @@ describe("mounted command result projection", () => {
   });
 
   it("reports unknown after a revoked command's failing inverse was actually invoked", async () => {
-    const { app, responderId, runtime } = fixture("repair-5-command-failing-inverse", "omit");
+    const { app, responderId, runtime } = fixture("com.example.repair-5-command-failing-inverse", "omit");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     let model = "before";
     let inverseCalls = 0;
@@ -269,7 +269,7 @@ describe("mounted command result projection", () => {
     const started = new Promise<void>((resolve) => { entered = resolve; });
 
     mounted.runtime.commands.register({
-      id: "repair-5-command-failing-inverse.inverse-failure",
+      id: "com.example.repair-5-command-failing-inverse.inverse-failure",
       responderId,
       title: { key: "repair-5-command.inverse-failure", fallback: "Inverse failure" },
       payload: noPayload,
@@ -292,7 +292,7 @@ describe("mounted command result projection", () => {
       },
     });
 
-    const pending = mounted.runtime.commands.dispatch("repair-5-command-failing-inverse.inverse-failure");
+    const pending = mounted.runtime.commands.dispatch("com.example.repair-5-command-failing-inverse.inverse-failure");
     await started;
     mounted.dispose("revoke while an inverse cannot settle");
     release();
@@ -303,12 +303,12 @@ describe("mounted command result projection", () => {
   });
 
   it("contains a hostile then getter inside the command outcome fence", async () => {
-    const { app, responderId, runtime } = fixture("repair-5-command-hostile-then", "omit");
+    const { app, responderId, runtime } = fixture("com.example.repair-5-command-hostile-then", "omit");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     let model = "before";
     let getterCalls = 0;
     mounted.runtime.commands.register({
-      id: "repair-5-command-hostile-then.hostile-then",
+      id: "com.example.repair-5-command-hostile-then.hostile-then",
       responderId,
       title: { key: "repair-5-command.hostile-then", fallback: "Hostile then getter" },
       payload: noPayload,
@@ -328,7 +328,7 @@ describe("mounted command result projection", () => {
       },
     });
 
-    const result = await mounted.runtime.commands.dispatch("repair-5-command-hostile-then.hostile-then");
+    const result = await mounted.runtime.commands.dispatch("com.example.repair-5-command-hostile-then.hostile-then");
 
     expect(result.status).toBe("unknown");
     expect(result.status).not.toBe("executed");
@@ -338,10 +338,10 @@ describe("mounted command result projection", () => {
   });
 
   it("assimilates a mounted validation thenable instead of projecting its then member", async () => {
-    const { app, responderId, runtime } = fixture("repair-5-command-thenable-validation", "omit");
+    const { app, responderId, runtime } = fixture("com.example.repair-5-command-thenable-validation", "omit");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     mounted.runtime.commands.register({
-      id: "repair-5-command-thenable-validation.thenable-validation",
+      id: "com.example.repair-5-command-thenable-validation.thenable-validation",
       responderId,
       title: { key: "repair-5-command.thenable-validation", fallback: "Thenable validation" },
       payload: noPayload,
@@ -356,7 +356,7 @@ describe("mounted command result projection", () => {
       execute: () => "unused",
     });
 
-    await expect(mounted.runtime.commands.validate("repair-5-command-thenable-validation.thenable-validation"))
+    await expect(mounted.runtime.commands.validate("com.example.repair-5-command-thenable-validation.thenable-validation"))
       .resolves.toMatchObject({ enabled: true, title: "Thenable result" });
   });
 
@@ -365,7 +365,7 @@ describe("mounted command result projection", () => {
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const validate = vi.fn(() => ({ enabled: true }));
     mounted.runtime.commands.register({
-      id: "repair-5-command.validation-keys",
+      id: "com.example.repair-5-command.validation-keys",
       responderId,
       title: { key: "repair-5-command.validation-keys", fallback: "Validation keys" },
       payload: noPayload,
@@ -377,11 +377,11 @@ describe("mounted command result projection", () => {
     });
 
     await expect(mounted.runtime.commands.validateMany([
-      { key: " ", commandId: "repair-5-command.validation-keys" },
+      { key: " ", commandId: "com.example.repair-5-command.validation-keys" },
     ] as never)).rejects.toMatchObject({ code: "empty-key", requestIndex: 0 });
     await expect(mounted.runtime.commands.validateMany([
-      { key: "same", commandId: "repair-5-command.validation-keys" },
-      { key: "same", commandId: "repair-5-command.validation-keys" },
+      { key: "same", commandId: "com.example.repair-5-command.validation-keys" },
+      { key: "same", commandId: "com.example.repair-5-command.validation-keys" },
     ] as never)).rejects.toMatchObject({ code: "duplicate-key", requestIndex: 1 });
     expect(validate).not.toHaveBeenCalled();
   });
@@ -410,7 +410,7 @@ describe("mounted command result projection", () => {
     let value: unknown = invalid[0];
     let phase: "validate" | "execute" = "validate";
     mounted.runtime.commands.register({
-      id: "repair-5-command.output-graphs",
+      id: "com.example.repair-5-command.output-graphs",
       responderId,
       title: { key: "repair-5-command.output-graphs", fallback: "Output graphs" },
       payload: noPayload,
@@ -424,9 +424,9 @@ describe("mounted command result projection", () => {
     for (const output of invalid) {
       value = output;
       phase = "validate";
-      await expect(mounted.runtime.commands.validate("repair-5-command.output-graphs")).rejects.toThrow(/callback|command|depth|node|byte|proxy|detached|cycle/i);
+      await expect(mounted.runtime.commands.validate("com.example.repair-5-command.output-graphs")).rejects.toThrow(/callback|command|depth|node|byte|proxy|detached|cycle/i);
       phase = "execute";
-      await expect(mounted.runtime.commands.dispatch("repair-5-command.output-graphs")).resolves.toMatchObject({ status: "failed" });
+      await expect(mounted.runtime.commands.dispatch("com.example.repair-5-command.output-graphs")).resolves.toMatchObject({ status: "failed" });
     }
     expect(proxyReads).toBe(0);
   });
@@ -446,7 +446,7 @@ describe("mounted command result projection", () => {
       getOwnPropertyDescriptor(target, key) { reads += 1; return Reflect.getOwnPropertyDescriptor(target, key); },
     });
     mounted.runtime.commands.register({
-      id: "repair-5-command.undo-output",
+      id: "com.example.repair-5-command.undo-output",
       responderId,
       title: { key: "repair-5-command.undo-output", fallback: "Undo output" },
       payload: noPayload,
@@ -456,7 +456,7 @@ describe("mounted command result projection", () => {
       execute: () => "mutated",
     });
 
-    await expect(mounted.runtime.commands.dispatch("repair-5-command.undo-output"))
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-5-command.undo-output"))
       .resolves.toMatchObject({ status: "failed", error: { code: "command-outcome-unknown" } });
     expect(reads).toBe(0);
   });

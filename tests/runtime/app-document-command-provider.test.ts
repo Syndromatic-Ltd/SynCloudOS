@@ -33,10 +33,10 @@ function fixture() {
   const runtime = createTestRuntime({ id: "runtime:sdk-document-provider", environment, applicationDocuments: { initialTypes: [noteType], initialAdapters: [adapter] } });
   runtime.documents.registerCloseReviewer({ review: async () => "discard" });
   cleanups.push(async () => { await runtime.dispose("test"); });
-  registerTestSynWare(runtime, { schemaVersion: 1, id: "provider-owner", version: "1.0.0", title: "Provider owner", routes: [{ path: "/provider", primary: true }], documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
-  const mounted = mountTestSynWareRuntime(runtime, "provider-owner");
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.provider-owner", version: "1.0.0", displayName: "Provider owner", routes: [{ path: "/provider", primary: true }], documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
+  const mounted = mountTestSynWareRuntime(runtime, "com.example.provider-owner");
   cleanups.push(() => mounted.dispose("test"));
-  runtime.focus.setActiveAnchors({ applicationResponderId: "application:provider-owner" });
+  runtime.focus.setActiveAnchors({ applicationResponderId: "application:com.example.provider-owner" });
   const context = createSynWareContextValue(mounted.runtime);
   return { runtime, adapter, mounted, context, documents: context.documents.workspaceDocuments };
 }
@@ -53,11 +53,11 @@ describe("application document command providers", () => {
     const { runtime, documents, context } = fixture();
     const chooseNewDocument = vi.fn(async () => ({ typeId: noteType.id, initialModel: { title: "App default", body: "App model" } }));
     documents.registerWorkflowProvider({ chooseNewDocument });
-    await expect(context.commands.validate("document.new")).resolves.toMatchObject({ enabled: true, responderId: "application:provider-owner" });
+    await expect(context.commands.validate("document.new")).resolves.toMatchObject({ enabled: true, responderId: "application:com.example.provider-owner" });
     expect(chooseNewDocument).not.toHaveBeenCalled();
     const result = await context.commands.dispatch<{ status: string; value: unknown }>("document.new");
     expect(result.status, JSON.stringify(result)).toBe("executed");
-    expect(result).toMatchObject({ value: { applicationId: "provider-owner", model: { body: "App model" } } });
+    expect(result).toMatchObject({ value: { applicationId: "com.example.provider-owner", model: { body: "App model" } } });
     expect(runtime.documents.openDocuments).toHaveLength(1);
     expect(documents.getUndoManager(runtime.documents.activeDocumentId!)).not.toBeNull();
     await vi.waitFor(() => expect(runtime.focus.getActiveAnchors().documentResponderId).toBe(`document:${runtime.documents.activeDocumentId}`));
@@ -71,10 +71,10 @@ describe("application document command providers", () => {
     const chooseNewDocument = vi.fn(async () => ({ typeId: noteType.id }));
     documents.registerWorkflowProvider({ chooseNewDocument, chooseOpenDocument });
     await documents.newDocument({ typeId: noteType.id });
-    await expect(runtime.commands.validate("document.open")).resolves.toMatchObject({ enabled: true, responderId: "application:provider-owner" });
+    await expect(runtime.commands.validate("document.open")).resolves.toMatchObject({ enabled: true, responderId: "application:com.example.provider-owner" });
     expect(chooseOpenDocument).not.toHaveBeenCalled();
-    await expect(runtime.commands.dispatch("document.open")).resolves.toMatchObject({ status: "executed", responderId: "application:provider-owner", value: { model: { body: "Open me" } } });
-    await expect(runtime.commands.dispatch("document.new")).resolves.toMatchObject({ status: "executed", responderId: "application:provider-owner" });
+    await expect(runtime.commands.dispatch("document.open")).resolves.toMatchObject({ status: "executed", responderId: "application:com.example.provider-owner", value: { model: { body: "Open me" } } });
+    await expect(runtime.commands.dispatch("document.new")).resolves.toMatchObject({ status: "executed", responderId: "application:com.example.provider-owner" });
     expect(chooseNewDocument).toHaveBeenCalledOnce();
     expect(documents.getDocument(runtime.documents.activeDocumentId!)).not.toBeNull();
   });
@@ -148,17 +148,17 @@ describe("application document command providers", () => {
   it("does not require the application responder to predate its canonical document", async () => {
     const { runtime } = fixture();
     // Simulate a host-restored document whose owning application mounts later.
-    runtime.responders.remove("application:provider-owner");
-    const document = await runtime.documents.newDocument({ typeId: noteType.id, applicationId: "provider-owner" });
-    runtime.responders.register({ id: "application:provider-owner", kind: "application", parentId: "runtime", scopeId: "application:provider-owner" });
-    const replacement = mountTestSynWareRuntime(runtime, "provider-owner");
+    runtime.responders.remove("application:com.example.provider-owner");
+    const document = await runtime.documents.newDocument({ typeId: noteType.id, applicationId: "com.example.provider-owner" });
+    runtime.responders.register({ id: "application:com.example.provider-owner", kind: "application", parentId: "runtime", scopeId: "application:com.example.provider-owner" });
+    const replacement = mountTestSynWareRuntime(runtime, "com.example.provider-owner");
     cleanups.push(() => replacement.dispose("test"));
     const documents = createSynWareContextValue(replacement.runtime).documents.workspaceDocuments;
     documents.retainDocument(document.id);
     const chooseNewDocument = vi.fn(async () => ({ typeId: noteType.id }));
     documents.registerWorkflowProvider({ chooseNewDocument });
-    await expect(runtime.commands.validate("document.new")).resolves.toMatchObject({ enabled: true, responderId: "application:provider-owner" });
-    await expect(runtime.commands.dispatch("document.new")).resolves.toMatchObject({ status: "executed", responderId: "application:provider-owner" });
+    await expect(runtime.commands.validate("document.new")).resolves.toMatchObject({ enabled: true, responderId: "application:com.example.provider-owner" });
+    await expect(runtime.commands.dispatch("document.new")).resolves.toMatchObject({ status: "executed", responderId: "application:com.example.provider-owner" });
     expect(chooseNewDocument).toHaveBeenCalledOnce();
   });
 });

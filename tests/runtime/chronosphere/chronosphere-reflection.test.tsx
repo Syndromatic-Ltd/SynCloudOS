@@ -264,8 +264,8 @@ it("loads captured PNG bytes through the mounted app image client and real resou
   const adapter = { decode, readPixels: vi.fn(async () => image), export: vi.fn(async () => png), dispose: vi.fn() };
   Object.defineProperty(environment, "images", { value: { acquire: () => ({ adapter, release: () => adapter.dispose() }) } });
   const runtime = createTestRuntime({ id: "runtime:reflection", environment });
-  const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "reflection-consumer", version: "1.0.0", title: "Reflection" });
-  const mount = mountTestSynWareRuntime(runtime, app.id);
+  const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.reflection-consumer", version: "1.0.0", displayName: "Reflection" });
+  const mount = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
   host.app = { images: createSynWareContextValue(mount.runtime).images };
   try {
     await show("mounted");

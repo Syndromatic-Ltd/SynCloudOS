@@ -309,7 +309,7 @@ function isDeveloperDisplayAction(request: SynCloudOSPolicyRequest) {
 }
 
 function resourceForRequest(request: SynCloudOSPolicyRequest) {
-  return request.app?.id ?? request.route ?? request.href ?? request.action;
+  return request.app?.bundleIdentifier ?? request.route ?? request.href ?? request.action;
 }
 
 function summariseContextValue(value: unknown): string | number | boolean | null {
@@ -338,7 +338,7 @@ function summariseOrigin(request: SynCloudOSPolicyRequest, resource?: string): S
     origin: request.origin,
     source: request.source,
     resource,
-    appId: request.app?.id,
+    appId: request.app?.bundleIdentifier,
     route: request.route,
     href: request.href
   };
@@ -475,7 +475,7 @@ function baseDecision(
     subjectRole: subject.role,
     subjectId: subject.user?.id,
     resource,
-    appId: request.app?.id,
+    appId: request.app?.bundleIdentifier,
     route: request.route,
     href: request.href,
     at: Date.now(),
@@ -509,7 +509,7 @@ function decide(
   const subject = getSubject(request, registrations);
   const policy = appPolicy(request.app);
   const app = request.app ?? null;
-  const bundlePermissions = request.bundlePermissions ?? (app?.id ? BundleLoader.getBundle(app.id)?.permissions ?? [] : []);
+  const bundlePermissions = request.bundlePermissions ?? (app?.bundleIdentifier ? BundleLoader.getBundle(app.bundleIdentifier)?.permissions ?? [] : []);
   const requiredCapabilities = unique([
     ...(request.requiredCapabilities ?? []),
     ...(policy.requiredCapabilities ?? [])

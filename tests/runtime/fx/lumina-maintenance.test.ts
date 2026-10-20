@@ -35,7 +35,7 @@ import { createTestRuntime, createTestRuntimeEnvironment } from "../helpers";
 function item(id: string, revision = "r1") {
   return new LUFXSearchableItem({
     id,
-    domain: "notes",
+    domain: "com.example.notes",
     contentType: "note",
     title: `Title ${id}`,
     activation: { version: 1, kind: "named-route", routeName: "notes.item", parameters: { id } },
@@ -168,7 +168,7 @@ describe("Lumina index maintenance", () => {
     };
     const indexes = new LuminaIndexService(factory);
     const eligibility = new LuminaEligibilityRegistry(() => 1_000);
-    eligibility.registerProjection({ ownerAppId: "notes", domain: "notes", destinationAppId: "notes", routeName: "notes.item" });
+    eligibility.registerProjection({ ownerAppId: "com.example.notes", domain: "com.example.notes", destinationAppId: "com.example.notes", routeName: "notes.item" });
     const subject: SynCloudOSPolicySubject = { user: { id: "tester", displayName: "Tester" }, role: "user", capabilities: [], isAuthenticated: true };
     const host = new LUFXHostService({
       runtimeId: "runtime",
@@ -183,15 +183,15 @@ describe("Lumina index maintenance", () => {
     });
     const clear = vi.fn();
     host.createDonationCoordinator({
-      ownerAppId: "notes",
-      domain: "notes",
+      ownerAppId: "com.example.notes",
+      domain: "com.example.notes",
       checkpointStore: { load: () => null, save: () => {}, clear },
       readSource: async () => [],
       project: () => { throw new Error("not used"); },
       now: () => 1_000,
     });
 
-    await host.eraseOwner("notes");
+    await host.eraseOwner("com.example.notes");
 
     expect(clear).toHaveBeenCalledTimes(1);
     expect(eligibility.owners()).toEqual([]);
@@ -221,10 +221,10 @@ describe("Lumina index maintenance", () => {
       } satisfies LuminaIndexBackendFactory,
     };
     const runtime = createTestRuntime({ id: "lumina-uninstall", environment });
-    runtime.store.mutate((draft) => { draft.lifecycle.notes = "active"; });
-    runtime.store.mutate((draft) => { delete draft.lifecycle.notes; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.notes"] = "active"; });
+    runtime.store.mutate((draft) => { delete draft.lifecycle["com.example.notes"]; });
 
-    await vi.waitFor(() => expect(erasedOwners).toEqual(["notes"]));
+    await vi.waitFor(() => expect(erasedOwners).toEqual(["com.example.notes"]));
     await runtime.dispose({ reason: "test complete", inFlight: "cancel" });
   });
 });

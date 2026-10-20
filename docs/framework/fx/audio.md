@@ -634,9 +634,9 @@ The manifest for this component declares both permissions it may use:
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.memo",
+  bundleIdentifier: "com.example.memo",
   version: "1.0.0",
-  title: "Voice Memo",
+  displayName: "Voice Memo",
   routes: [{ path: "/memo", primary: true }],
   permissions: ["audio.record"],
 } as const;

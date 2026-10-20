@@ -28,16 +28,14 @@
  * page.
  */
 
+import { normalizeBundleIdentifier } from "../../src/SynCloudOS/Identity/bundleIdentifier.mjs";
+
 const appSuffixPattern = /\.app$/iu;
 const preferencePaneSuffixPattern = /\.prefpane$/iu;
 const widgetSuffixPattern = /\.widget$/iu;
 const integrationSuffixPattern = /\.integration\.tsx?$/iu;
 const resourceIcons = Object.freeze(["./Resources/AppIcon.svg", "./Resources/AppIcon.png"]);
 
-/** `Notes.app` -> `Notes`; every other folder name is returned unchanged. */
-export function folderBaseName(folderName) {
-  return String(folderName).replace(appSuffixPattern, "");
-}
 
 export function isApplicationFolderName(name) {
   return appSuffixPattern.test(String(name));
@@ -111,38 +109,22 @@ function isPlainObject(value) {
 }
 
 /**
- * Resolve the complete V1 manifest for a bundle folder: the folder name and
- * the project's package version fill every field `Info.ts` may omit.
- *
- * @param {Readonly<{
- *   folderName: string,
- *   packageVersion?: string,
- *   overrides?: Record<string, unknown>,
- *   resourceUrls?: Readonly<Record<string, string>>,
- * }>} input
+ * Resolve a bundle's explicit Info identity and discovered plumbing.
+ * @param {Readonly<{folderName: string, info: Record<string, unknown>, resourceUrls?: Readonly<Record<string, string>>}>} input
  */
 export function deriveSynWareManifest(input) {
-  const { folderName, packageVersion, overrides = {}, resourceUrls } = input ?? {};
+  const { folderName, info, resourceUrls } = input ?? {};
   if (typeof folderName !== "string" || !folderName.trim()) throw new TypeError("A SynWare manifest needs its bundle folder name.");
-  if (!isPlainObject(overrides)) throw new TypeError(`${folderName} Info.ts must default-export a plain object of manifest overrides.`);
-  const versionFromProject = overrides.version === undefined || overrides.version === null;
-  if (versionFromProject && (typeof packageVersion !== "string" || !packageVersion.trim())) throw new TypeError(`The project package.json has no version for ${folderName}.`);
-  if (Object.hasOwn(overrides, "localeResources")) {
+  if (!isPlainObject(info)) throw new TypeError(`${folderName}/Contents/Info.ts is required and must default-export a plain manifest object.`);
+  for (const key of ["bundleIdentifier", "displayName", "version"]) {
+    if (typeof info[key] !== "string" || !info[key].trim()) throw new TypeError(`${folderName}/Contents/Info.ts requires ${key}.`);
+  }
+  if (Object.hasOwn(info, "localeResources")) {
     throw new TypeError(`${folderName} Info.ts must not declare localeResources; every Resources/Localised/<locale>.locale/*.strings file is discovered.`);
   }
-  const baseName = folderBaseName(folderName);
-  const derivedId = kebabCase(baseName);
-  if (!derivedId) throw new TypeError(`SynCloudOS could not derive an application ID from ${folderName}.`);
-  const derivedTitle = titleFromFolderName(baseName) || derivedId;
-  const webspringInput = isPlainObject(overrides.webspring) ? overrides.webspring : undefined;
+  const webspringInput = isPlainObject(info.webspring) ? info.webspring : undefined;
   const icon = webspringInput?.icon ?? applicationIconResource(resourceUrls);
-  const manifest = {
-    ...overrides,
-    schemaVersion: 1,
-    id: overrides.id ?? derivedId,
-    version: overrides.version ?? packageVersion,
-    title: overrides.title ?? derivedTitle,
-  };
+  const manifest = { ...info, schemaVersion: Object.hasOwn(info, "schemaVersion") ? info.schemaVersion : 1 };
   const webspring = { ...(icon === undefined ? {} : { icon }), ...(webspringInput ?? {}) };
   if (Object.keys(webspring).length > 0) manifest.webspring = webspring;
   else delete manifest.webspring;
@@ -159,15 +141,23 @@ export function parseApplicationSelection(value, label = "applications") {
   for (const id of list) {
     if (typeof id !== "string" || !id.trim()) throw new TypeError(`SynCloudOS ${label} must list non-empty application IDs.`);
     const trimmed = id.trim();
-    if (seen.has(trimmed)) throw new TypeError(`SynCloudOS ${label} lists ${trimmed} twice.`);
-    seen.add(trimmed);
+    const key = normalizeBundleIdentifier(trimmed);
+    if (seen.has(key)) throw new TypeError(`SynCloudOS ${label} lists ${trimmed} twice.`);
+    seen.add(key);
     selected.push(trimmed);
   }
   return Object.freeze(selected);
 }
 
-function knownIds(bundles) {
-  return [...new Set(bundles.map((bundle) => bundle?.manifest?.id).filter((id) => typeof id === "string"))];
+/** Reject duplicate identities before selection, including case-only duplicates. */
+export function assertUniqueBundleIdentifiers(bundles) {
+  const seen = new Map();
+  for (const bundle of bundles) {
+    const identifier = bundle.manifest.bundleIdentifier;
+    const key = normalizeBundleIdentifier(identifier);
+    if (seen.has(key)) throw new TypeError(`Duplicate bundleIdentifier ${identifier} in ${bundle.name ?? bundle.directory ?? "application"}; already declared by ${seen.get(key)}.`);
+    seen.set(key, bundle.name ?? bundle.directory ?? identifier);
+  }
 }
 
 /**
@@ -176,14 +166,16 @@ function knownIds(bundles) {
  */
 export function selectProjectBundles(bundles, options = {}) {
   const { applications = null, development = true } = options;
-  const known = knownIds(bundles);
+  assertUniqueBundleIdentifiers(bundles);
+  const known = bundles.map(bundle => bundle.manifest.bundleIdentifier);
+  const knownKeys = new Set(known.map(normalizeBundleIdentifier));
   if (applications) {
-    const unknown = applications.filter((id) => !known.includes(id));
+    const unknown = applications.filter((id) => !knownKeys.has(normalizeBundleIdentifier(id)));
     if (unknown.length > 0) {
-      throw new TypeError(`SynCloudOS does not know application ID(s) ${unknown.join(", ")}. This project provides: ${known.join(", ")}.`);
+      throw new TypeError(`SynCloudOS does not know bundleIdentifier(s) ${unknown.join(", ")}. This project provides: ${known.join(", ")}.`);
     }
-    const selected = new Set(applications);
-    bundles = bundles.filter((bundle) => selected.has(bundle.manifest.id));
+    const selected = new Set(applications.map(normalizeBundleIdentifier));
+    bundles = bundles.filter((bundle) => selected.has(normalizeBundleIdentifier(bundle.manifest.bundleIdentifier)));
   }
   if (development) return Object.freeze([...bundles]);
   return Object.freeze(bundles.filter((bundle) => bundle.manifest.availability !== "development"));
@@ -192,9 +184,9 @@ export function selectProjectBundles(bundles, options = {}) {
 /** Integrations whose owners are all excluded are dropped with the applications they extend. */
 export function selectProjectIntegrations(integrations, applications = null) {
   if (!applications) return Object.freeze([...integrations]);
-  const selected = new Set(applications);
+  const selected = new Set(applications.map(normalizeBundleIdentifier));
   return Object.freeze(integrations.filter((integration) => {
     const owners = integration?.owners;
-    return Array.isArray(owners) && owners.some((owner) => selected.has(owner));
+    return Array.isArray(owners) && owners.some((owner) => selected.has(normalizeBundleIdentifier(owner)));
   }));
 }

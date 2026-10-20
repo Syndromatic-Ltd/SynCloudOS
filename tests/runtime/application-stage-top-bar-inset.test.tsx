@@ -48,13 +48,14 @@ const branding = Object.freeze({
 
 function createAppInfo(frame: Record<string, unknown>): SynCloudOSAppInfo {
   return {
-    id: "test-app",
+    bundleIdentifier: "com.example.test-app",
     displayName: "Test App",
     shortName: "Test",
     packageName: "com.test.app",
     frame: { material: "standard", topBar: "standard", rightSlot: "auto", background: "system", smoothSurface: "off", ...frame },
     icon: { src: "/test.png" },
-    about: { version: "1.0.0", copyright: "", trademark: "" },
+    version: "1.0.0",
+    about: { copyright: "", trademark: "" },
     isDisabled: false,
     notifications: { badgeCount: 0, showsNotifications: false },
     presentation: "appView",
@@ -65,7 +66,7 @@ function createAppInfo(frame: Record<string, unknown>): SynCloudOSAppInfo {
 
 function renderStage(frame: Record<string, unknown>) {
   const runtime: SynCloudOSRuntime = createTestRuntime();
-  runtime.apps.registerBundle(createTestBundle({ id: "test-app", displayName: "Test App", route: "/test" }));
+  runtime.apps.registerBundle(createTestBundle({ version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" }));
   runtime.statechart.gotoState("active.application.active");
   render(
     <SynCloudOSProvider runtime={runtime}>
@@ -73,7 +74,7 @@ function renderStage(frame: Record<string, unknown>) {
         <ApplicationStageView
           app={createAppInfo(frame)}
           lifecycle="ready"
-          stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>

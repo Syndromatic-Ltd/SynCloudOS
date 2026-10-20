@@ -112,8 +112,8 @@ describe("ImageFX existing decoded lease integration", () => {
         new DataView(profile.buffer).setUint32(0, 132);
         profile.set([97, 99, 115, 112], 36);
         decode.mockResolvedValueOnce(Object.freeze({ src: "blob:mounted-metadata", intrinsicSize: { width: 1, height: 1 }, density: 1, byteLength: 132, corsClean: true, sourceOrientation: 6, sourceICCProfile: profile, release: vi.fn() }));
-        const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "image-consumer", version: "1.0.0", title: "Images" });
-        const mount = mountTestSynWareRuntime(runtime, app.id);
+        const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.image-consumer", version: "1.0.0", displayName: "Images" });
+        const mount = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
         try {
             const client = createSynWareContextValue(mount.runtime);
             const resource = client.images.load({ source: request.source, accessibleLabel: "Green" });
@@ -150,8 +150,8 @@ describe("ImageFX existing decoded lease integration", () => {
     });
     it("exports a mounted image through the canonical policy and revokes export with its mount", async () => {
         const { runtime, authorise } = setup();
-        const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "image-export-consumer", version: "1.0.0", title: "Image export" });
-        const mount = mountTestSynWareRuntime(runtime, app.id);
+        const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.image-export-consumer", version: "1.0.0", displayName: "Image export" });
+        const mount = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
         try {
             const resource = createSynWareContextValue(mount.runtime).images.load({ source: request.source, accessibleLabel: "Green" });
             await resource.ready;
@@ -164,8 +164,8 @@ describe("ImageFX existing decoded lease integration", () => {
     it("denies mounted export before calling the encoder", async () => {
         const encoder = vi.fn(async () => new Uint8Array([1]));
         const { runtime } = setup(undefined, true, false, encoder);
-        const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "image-export-denied", version: "1.0.0", title: "Image export denied" });
-        const mount = mountTestSynWareRuntime(runtime, app.id);
+        const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.image-export-denied", version: "1.0.0", displayName: "Image export denied" });
+        const mount = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
         try {
             const resource = createSynWareContextValue(mount.runtime).images.load({ source: request.source, accessibleLabel: "Green" });
             await resource.ready;
@@ -177,8 +177,8 @@ describe("ImageFX existing decoded lease integration", () => {
         let finish!: (bytes: Uint8Array) => void;
         const encoder = vi.fn(() => new Promise<Uint8Array>(resolve => { finish = resolve; }));
         const { runtime } = setup(undefined, true, true, encoder);
-        const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "image-export-late", version: "1.0.0", title: "Image export late" });
-        const mount = mountTestSynWareRuntime(runtime, app.id);
+        const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.image-export-late", version: "1.0.0", displayName: "Image export late" });
+        const mount = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
         try {
             const resource = createSynWareContextValue(mount.runtime).images.load({ source: request.source, accessibleLabel: "Green" });
             await resource.ready;

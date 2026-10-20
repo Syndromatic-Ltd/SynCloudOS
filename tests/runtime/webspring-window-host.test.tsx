@@ -40,11 +40,11 @@ function WebspringTestHost({ runtime, children, onNotificationCentreRequest, onA
   return <>{children}</>;
 }
 
-function createWindowedTestRuntime(appId = "diagnostics") {
+function createWindowedTestRuntime(appId = "com.example.diagnostics") {
   const runtime = authoriseTestRuntime(createTestRuntime({ id: `runtime:webspring-window:${appId}` }));
   runtime.apps.registerBundle(createTestBundle({
-    id: appId,
-    route: `/${appId}`,
+    bundleIdentifier: appId,
+    route: `/${appId.split(".").at(-1)}`,
     presentation: "windowedView",
   }));
   return runtime;
@@ -69,10 +69,10 @@ describe("Webspring window host", () => {
       id: "runtime:webspring-persistent-outlet",
       environment,
       initialBundles: [createTestBundle({
-        id: "diagnostics", route: "/diagnostics", presentation: "appView",
+        bundleIdentifier: "com.example.diagnostics", route: "/diagnostics", presentation: "appView",
         frame: { material: "standard", topBar: "standard", smoothSurface: "off" },
       }, { loadModule }), createTestBundle({
-        id: "contact", route: "/contact", presentation: "appView",
+        bundleIdentifier: "com.example.contact", route: "/contact", presentation: "appView",
         frame: { material: "standard", topBar: "standard", smoothSurface: "off" },
       })],
     }));
@@ -81,15 +81,15 @@ describe("Webspring window host", () => {
     let connectedActions: WebspringActions | null = null;
     function ConnectedView({ model, actions, applicationOutlet }: WebspringViewProps) {
       connectedActions = actions;
-      return <main data-testid="connected-view" data-app-order={model.apps.map((app) => app.id).join(",")}>{applicationOutlet}</main>;
+      return <main data-testid="connected-view" data-app-order={model.apps.map((app) => app.bundleIdentifier).join(",")}>{applicationOutlet}</main>;
     }
     function MobileView({ model, actions, applicationOutlet }: WebspringViewProps) {
       connectedActions = actions;
-      return <main data-testid="mobile-view" data-app-order={model.apps.map((app) => app.id).join(",")}>{applicationOutlet}</main>;
+      return <main data-testid="mobile-view" data-app-order={model.apps.map((app) => app.bundleIdentifier).join(",")}>{applicationOutlet}</main>;
     }
     function ThrowingView(): never { throw new Error("fixture view failed"); }
     const manifest = {
-      schemaVersion: 1, id: "com.example.webspring.host", version: "1.0.0", title: "Host fixture",
+      schemaVersion: 1, bundleIdentifier: "com.example.webspring.host", version: "1.0.0", displayName: "Host fixture",
       webspringShell: {
         views: [
           { id: "connected", presentations: ["desktop", "tablet"], mode: "persistent" },
@@ -136,7 +136,7 @@ describe("Webspring window host", () => {
 
     mounted.rerender(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={throwingShell} /></SynCloudOSProvider>);
     expect((await screen.findByRole("alert")).textContent).toContain("fixture view failed");
-    expect(runtime.store.getSnapshot().application.activeAppId).toBe("diagnostics");
+    expect(runtime.store.getSnapshot().application.activeAppId).toBe("com.example.diagnostics");
     expect(loadModule).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole("button", { name: "Use fallback view" }));
@@ -144,26 +144,26 @@ describe("Webspring window host", () => {
     expect(applicationAfter).toBe(applicationBefore);
     expect(appMounts).toBe(1);
     expect(document.querySelectorAll(".webspring-application-outlet-host")).toHaveLength(1);
-    const reordered = await connectedActions!.reorder(["contact", "diagnostics"]);
+    const reordered = await connectedActions!.reorder(["com.example.contact", "com.example.diagnostics"]);
     expect(reordered.status).toBe("completed");
-    expect((await screen.findByTestId("mobile-view")).getAttribute("data-app-order")).toBe("contact,diagnostics");
+    expect((await screen.findByTestId("mobile-view")).getAttribute("data-app-order")).toBe("com.example.contact,com.example.diagnostics");
     mounted.rerender(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={invalidLauncherShell} /></SynCloudOSProvider>);
     expect((await screen.findByRole("alert")).textContent).toContain("must resolve to the shell");
     expect(appMounts).toBe(1);
     mounted.rerender(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={connectedShell} /></SynCloudOSProvider>);
     expect(await screen.findByTestId("stateful-application")).toBe(applicationBefore);
-    const invalidRoute = await connectedActions!.openApp("diagnostics", "/contact");
+    const invalidRoute = await connectedActions!.openApp("com.example.diagnostics", "/contact");
     expect(invalidRoute.status).toBe("failed");
-    expect(runtime.store.getSnapshot().application.activeAppId).toBe("diagnostics");
-    const contactRoute = await connectedActions!.openApp("contact");
+    expect(runtime.store.getSnapshot().application.activeAppId).toBe("com.example.diagnostics");
+    const contactRoute = await connectedActions!.openApp("com.example.contact");
     expect(contactRoute.status).toBe("completed");
-    expect(runtime.store.getSnapshot().application).toMatchObject({ activeAppId: "contact", routePath: "/contact" });
+    expect(runtime.store.getSnapshot().application).toMatchObject({ activeAppId: "com.example.contact", routePath: "/contact" });
     await runtime.dispose("persistent-outlet-test");
   });
 
 
   it("treats close-window and return-to-webspring as distinct commands", async () => {
-    const runtime = createWindowedTestRuntime("diagnostics");
+    const runtime = createWindowedTestRuntime("com.example.diagnostics");
     const notificationRequests: Array<string | undefined> = [];
     let applicationMenuToggles = 0;
     render(

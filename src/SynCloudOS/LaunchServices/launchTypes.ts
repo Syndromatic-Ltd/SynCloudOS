@@ -191,7 +191,7 @@ export interface SynCloudOSLaunchExplanation {
   code: SynCloudOSLaunchDecisionCode;
   reason: string;
   blockers: string[];
-  app: Pick<SynCloudOSAppInfo, "id" | "packageName" | "displayName" | "type" | "presentation" | "route"> | null;
+  app: Pick<SynCloudOSAppInfo, "bundleIdentifier" | "packageName" | "displayName" | "type" | "presentation" | "route"> | null;
   lifecycleState: SynCloudOSAppLifecycleState | null;
   serviceReport: SynCloudOSServiceReport | null;
   loginServices: Pick<SynCloudOSLoginSessionSnapshot, "isAuthorised" | "status" | "lastFailureReason">;
@@ -214,7 +214,7 @@ export interface SynCloudOSExternalAppExplanation {
   code: SynCloudOSExternalAppDecisionCode;
   reason: string;
   blockers: string[];
-  app: Pick<SynCloudOSAppInfo, "id" | "packageName" | "displayName" | "type" | "route"> | null;
+  app: Pick<SynCloudOSAppInfo, "bundleIdentifier" | "packageName" | "displayName" | "type" | "route"> | null;
   href: string | null;
   canonicalHref: string | null;
   isSafeProtocol: boolean;

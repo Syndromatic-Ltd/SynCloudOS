@@ -40,7 +40,7 @@ describe("ApplicationWindowContent scoped app runtime", () => {
     let appClient: Record<string, unknown> | null = null;
     let missingDocument: unknown = undefined;
     runtime.apps.registerBundle(createTestBundle(
-      { id: "test-app", route: "/test" },
+      { bundleIdentifier: "com.example.test-app", route: "/test" },
       {
         loadModule: async () => ({
           default: (props: Record<string, unknown>) => {
@@ -53,18 +53,18 @@ describe("ApplicationWindowContent scoped app runtime", () => {
         }),
       },
     ));
-    runtime.responders.register({ id: "application:test-app", kind: "application", parentId: "workspace", scopeId: "application:test-app" });
+    runtime.responders.register({ id: "application:com.example.test-app", kind: "application", parentId: "workspace", scopeId: "application:com.example.test-app" });
     const window = runtime.windows.create(standardWindow("window:test-app", {
-      applicationId: "test-app",
-      applicationSessionId: "test-app",
-      content: { rendererId: "application", parameters: { appId: "test-app" } },
+      applicationId: "com.example.test-app",
+      applicationSessionId: "com.example.test-app",
+      content: { rendererId: "application", parameters: { appId: "com.example.test-app" } },
       restorationKey: "application-window-runtime-facade.test-app",
     }));
     await runtime.windows.open(window.id);
-    await runtime.bundles.loadBundle("test-app");
-    const registry = createApplicationWindowContentRendererRegistry(runtime, { "test-app": runtime.apps.getApp("test-app")! });
-    const content = registry.render("application:test-app", {
-      mountKey: "application:test-app",
+    await runtime.bundles.loadBundle("com.example.test-app");
+    const registry = createApplicationWindowContentRendererRegistry(runtime, { "com.example.test-app": runtime.apps.getApp("com.example.test-app")! });
+    const content = registry.render("application:com.example.test-app", {
+      mountKey: "application:com.example.test-app",
       presentation: {} as WindowPresentation,
       window: window.record,
     });

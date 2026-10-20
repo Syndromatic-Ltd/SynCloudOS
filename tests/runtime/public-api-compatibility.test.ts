@@ -42,15 +42,15 @@ describe("SynCloudOS public API compatibility", () => {
     });
 
     const app = SynCloudOS.AppRegistry.register(createTestManifest({
-      id: "compat-api",
+      bundleIdentifier: "com.example.compat-api",
       route: "/compat-api"
     }));
 
-    expect(app).toMatchObject({ id: "compat-api" });
-    expect(SynCloudOS.AppManager.initializeAppManagers().map((manager) => manager.appId)).toContain("compat-api");
+    expect(app).toMatchObject({ bundleIdentifier: "com.example.compat-api" });
+    expect(SynCloudOS.AppManager.initializeAppManagers().map((manager) => manager.bundleIdentifier)).toContain("com.example.compat-api");
 
-    SynCloudOS.WebspringState.selectApp("compat-api");
-    expect(RuntimeController.getSnapshot().webspring.selectedAppId).toBe("compat-api");
+    SynCloudOS.WebspringState.selectApp("com.example.compat-api");
+    expect(RuntimeController.getSnapshot().webspring.selectedAppId).toBe("com.example.compat-api");
     expect(SynCloudOS).not.toHaveProperty("Spring" + "boardState");
   });
 
@@ -88,27 +88,27 @@ describe("SynCloudOS public API compatibility", () => {
   it("projects the one runtime-owned service graph through both facade directions", async () => {
     const runtime = createTestRuntime();
     const facade = createSynCloudOSFacade(runtime);
-    const facadeBundle = createTestBundle({ id: "facade-owned", route: "/facade-owned" });
-    const runtimeBundle = createTestBundle({ id: "runtime-owned", route: "/runtime-owned" });
+    const facadeBundle = createTestBundle({ bundleIdentifier: "com.example.facade-owned", route: "/facade-owned" });
+    const runtimeBundle = createTestBundle({ bundleIdentifier: "com.example.runtime-owned", route: "/runtime-owned" });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     for (const id of ["webspring", "routing", "windowing"]) {
       runtime.services.register({ id, availability: "available" });
     }
 
     facade.AppRegistry.registerBundle(facadeBundle);
-    await facade.BundleLoader.loadBundle("facade-owned");
-    expect(runtime.apps.getApp("facade-owned")).toMatchObject({ id: "facade-owned" });
-    expect(runtime.bundles.getBundle("facade-owned")).toMatchObject({ manifest: { id: "facade-owned" } });
-    expect(facade.BundleLoader.getBundle("facade-owned")).toBe(runtime.bundles.getBundle("facade-owned"));
-    expect(runtime.bundles.getLoadedBundle("facade-owned")).not.toBeNull();
+    await facade.BundleLoader.loadBundle("com.example.facade-owned");
+    expect(runtime.apps.getApp("com.example.facade-owned")).toMatchObject({ bundleIdentifier: "com.example.facade-owned" });
+    expect(runtime.bundles.getBundle("com.example.facade-owned")).toMatchObject({ manifest: { bundleIdentifier: "com.example.facade-owned" } });
+    expect(facade.BundleLoader.getBundle("com.example.facade-owned")).toBe(runtime.bundles.getBundle("com.example.facade-owned"));
+    expect(runtime.bundles.getLoadedBundle("com.example.facade-owned")).not.toBeNull();
     await expect(runtime.routes.openRoute("/facade-owned", { source: "cross-seam", syncRoute: false }).result)
-      .resolves.toMatchObject({ status: "completed", value: { appId: "facade-owned" } });
+      .resolves.toMatchObject({ status: "completed", value: { appId: "com.example.facade-owned" } });
 
     runtime.apps.registerBundle(runtimeBundle);
-    expect(facade.AppRegistry.getApp("runtime-owned")).toMatchObject({ id: "runtime-owned" });
-    expect(facade.BundleLoader.getBundle("runtime-owned")).toBe(runtime.bundles.getBundle("runtime-owned"));
-    await facade.BundleLoader.loadBundle("runtime-owned");
-    expect(runtime.bundles.getLoadedBundle("runtime-owned")).not.toBeNull();
+    expect(facade.AppRegistry.getApp("com.example.runtime-owned")).toMatchObject({ bundleIdentifier: "com.example.runtime-owned" });
+    expect(facade.BundleLoader.getBundle("com.example.runtime-owned")).toBe(runtime.bundles.getBundle("com.example.runtime-owned"));
+    await facade.BundleLoader.loadBundle("com.example.runtime-owned");
+    expect(runtime.bundles.getLoadedBundle("com.example.runtime-owned")).not.toBeNull();
 
     expect(facade.EventBus).toBe(runtime.events);
     expect(facade.Statechart).toBe(runtime.statechart);
@@ -158,10 +158,10 @@ describe("SynCloudOS public API compatibility", () => {
     expect(second).not.toBe(first);
     expect(second.BootManager).not.toBe(first.BootManager);
 
-    first.AppRegistry.register(createTestManifest({ id: "first-only", route: "/first-only" }));
-    expect(firstRuntime.apps.getApp("first-only")).not.toBeNull();
-    expect(secondRuntime.apps.getApp("first-only")).toBeNull();
-    expect(second.AppRegistry.getApp("first-only")).toBeNull();
+    first.AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.first-only", route: "/first-only" }));
+    expect(firstRuntime.apps.getApp("com.example.first-only")).not.toBeNull();
+    expect(secondRuntime.apps.getApp("com.example.first-only")).toBeNull();
+    expect(second.AppRegistry.getApp("com.example.first-only")).toBeNull();
   });
 
   it("does not construct classic stateful services inside the runtime facade", () => {

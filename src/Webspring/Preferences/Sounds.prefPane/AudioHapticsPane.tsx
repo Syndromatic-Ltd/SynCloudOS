@@ -57,8 +57,8 @@ export function AudioHapticsPane() {
     {rows.length > 0 ? <NSEGroupBox label={systemT("preferences.applications", "Applications")}>
       {rows.map((session) => {
         const app = apps[session.appId];
-        return <NSEListItem key={app.id} tapHighlight={false} leading={<img className="nse-prefs-app-icon" src={app.icon.src} alt="" aria-hidden="true" />}>
-          {volumeSlider(app.displayName, session.volume, (value) => runtime.audio.setAppVolume(app.id, value))}
+        return <NSEListItem key={app.bundleIdentifier} tapHighlight={false} leading={<img className="nse-prefs-app-icon" src={app.icon.src} alt="" aria-hidden="true" />}>
+          {volumeSlider(app.displayName, session.volume, (value) => runtime.audio.setAppVolume(app.bundleIdentifier, value))}
         </NSEListItem>;
       })}
     </NSEGroupBox> : null}

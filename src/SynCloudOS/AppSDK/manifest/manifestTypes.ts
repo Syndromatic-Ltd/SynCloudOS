@@ -176,10 +176,9 @@ export interface SynWareLocaleBundleManifest {
  */
 export type SynWareApplicationAvailability = "development";
 
-/** Every V1 manifest field is optional in `Contents/Info.ts`: what it omits is
- * derived from the folder name, the project's `package.json` version and the
- * files in `Contents/Resources`. */
-export type SynWareManifestOverrides = Partial<SynWareManifestV1>;
+/** The app's Info.plist: identity is explicit; optional plumbing is discovered. */
+export type SynWareInfo = Pick<SynWareManifestV1, "bundleIdentifier" | "displayName" | "version">
+  & Partial<Omit<SynWareManifestV1, "bundleIdentifier" | "displayName" | "version">>;
 
 export interface SynWareAppearanceManifest {
   readonly id: string;
@@ -207,7 +206,6 @@ export interface SynWareRuntimeManifest {
   /** Keep the app registered while blocking launch and module preloading. */
   readonly disabled?: boolean;
   readonly disabledReason?: string;
-  readonly bundleId?: string;
   readonly presentation?: "appView" | "windowedView" | "systemSheet" | "backgroundService";
   readonly type?: "internal" | "system" | "external";
   readonly policy?: {
@@ -280,9 +278,9 @@ export interface SynWareWebspringShellManifest {
 
 export interface SynWareManifestV1 {
   readonly schemaVersion: 1;
-  readonly id: string;
+  readonly bundleIdentifier: string;
   readonly version: string;
-  readonly title: string;
+  readonly displayName: string;
   readonly routes?: readonly SynWareRouteManifest[];
   readonly presentations?: readonly SynWarePresentation[];
   readonly minimumViewport?: SynWareMinimumViewportManifest;

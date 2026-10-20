@@ -23,7 +23,7 @@ import { InMemoryDocumentAdapter, type DocumentType } from "../../src/SynCloudOS
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import { createTestBundle, createTestRuntime, createTestRuntimeEnvironment } from "./helpers";
 
-const appId = "mounted-admission-owner";
+const appId = "com.example.mounted-admission-owner";
 const typeId = "tests.mounted-admission";
 const runtimes: ReturnType<typeof createTestRuntime>[] = [];
 const noteType: DocumentType<{ value: string }> = {
@@ -49,7 +49,7 @@ function deferred<T>() {
 function fixture() {
   const environment = createTestRuntimeEnvironment();
   const adapter = new InMemoryDocumentAdapter(environment);
-  const runtime = createTestRuntime({ environment, applicationDocuments: { initialAdapters: [adapter] }, initialBundles: [createTestBundle({ id: appId, route: `/${appId}` })] });
+  const runtime = createTestRuntime({ environment, applicationDocuments: { initialAdapters: [adapter] }, initialBundles: [createTestBundle({ bundleIdentifier: appId, route: `/${appId}` })] });
   runtimes.push(runtime);
   runtime.documents.registerType(noteType);
   runtime.documents.registerCloseReviewer({ review: async () => "discard" });
@@ -300,7 +300,7 @@ describe("mounted document admission", () => {
     const unsubscribe = f.runtime.documents.subscribe(() => {
       if (!operation.published() || revoked) return;
       revoked = true;
-      f.runtime.bundles.registerBundle(createTestBundle({ id: appId, route: `/${appId}` }), { publish: true });
+      f.runtime.bundles.registerBundle(createTestBundle({ bundleIdentifier: appId, route: `/${appId}` }), { publish: true });
     });
     await expect(operation.invoke()).rejects.toMatchObject({ name: "AbortError" });
     unsubscribe();
@@ -327,8 +327,8 @@ describe("mounted document admission", () => {
     })]);
     await reading.promise;
     if (revocation === "mount") f.first.dispose("adapter read pending");
-    else if (revocation === "bundle") f.runtime.bundles.registerBundle(createTestBundle({ id: appId, route: `/${appId}` }), { publish: true });
-    else f.runtime.apps.registerBundle(createTestBundle({ id: appId, route: `/${appId}` }));
+    else if (revocation === "bundle") f.runtime.bundles.registerBundle(createTestBundle({ bundleIdentifier: appId, route: `/${appId}` }), { publish: true });
+    else f.runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: appId, route: `/${appId}` }));
     const hostSignalAborted = operationSignal?.aborted;
     resume.resolve();
     expect((await pending)[0]?.status).toBe("rejected");

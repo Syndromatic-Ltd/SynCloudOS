@@ -121,7 +121,7 @@ export interface SynWareNavigationPort {
 }
 
 export interface SynWareCatalogPort {
-  getApp(appId: string): Readonly<Pick<SynCloudOSAppInfo, "id" | "name" | "shortName" | "packageName" | "route" | "displayName">> | null;
+  getApp(appId: string): Readonly<Pick<SynCloudOSAppInfo, "bundleIdentifier" | "version" | "name" | "shortName" | "packageName" | "route" | "displayName">> | null;
 }
 
 export interface SynWareLifecyclePort {
@@ -508,10 +508,7 @@ export interface SynWareRuntime {
   /** Immutable identity of the mounted kernel runtime. This is separate from
    * redacted Diagnostics report identities. */
   readonly id: string;
-  readonly app: Readonly<Pick<SynCloudOSAppInfo, "id" | "name" | "shortName" | "packageName" | "route" | "displayName">> & {
-    /** The SynWare manifest version the mounted bundle declared. */
-    readonly version: string;
-  };
+  readonly app: Readonly<Pick<SynCloudOSAppInfo, "bundleIdentifier" | "version" | "name" | "shortName" | "packageName" | "route" | "displayName">>;
   /** The mounted responder root for this presentation generation. It is an
    * owned identity, not a kernel responder graph capability. */
   readonly responderId: string;

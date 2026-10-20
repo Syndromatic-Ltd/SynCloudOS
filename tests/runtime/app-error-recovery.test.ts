@@ -26,8 +26,8 @@ const cleanups: Array<() => unknown | Promise<unknown>> = [];
 afterEach(async () => { for (const cleanup of cleanups.splice(0).reverse()) await cleanup(); });
 function fixture() {
   const runtime = createTestRuntime();
-  registerTestSynWare(runtime, { schemaVersion: 1, id: "remote-notes", version: "1.0.0", title: "Remote Notes" });
-  const mount = mountTestSynWareRuntime(runtime, "remote-notes");
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.remote-notes", version: "1.0.0", displayName: "Remote Notes" });
+  const mount = mountTestSynWareRuntime(runtime, "com.example.remote-notes");
   cleanups.push(() => runtime.dispose({ reason: "app error test", inFlight: "cancel" }), () => mount.dispose("app error test"));
   return { runtime, mount, errors: createSynWareContextValue(mount.runtime).errors };
 }
@@ -36,7 +36,7 @@ describe("mounted app error recovery", () => {
   it("reports a remote app deadline with immutable application ownership", () => {
     const { runtime, errors } = fixture();
     errors.capture(new DOMException("Server deadline", "TimeoutError"), { operation: "notes.read", code: "APP_NOT_RESPONDING", timeoutMs: 5000 });
-    expect(runtime.errors.getLatest()).toMatchObject({ code: "APP_NOT_RESPONDING", appId: "remote-notes", title: "Remote Notes has stopped responding.", context: { scope: "app", durationMs: 5000 } });
+    expect(runtime.errors.getLatest()).toMatchObject({ code: "APP_NOT_RESPONDING", appId: "com.example.remote-notes", title: "Remote Notes has stopped responding.", context: { scope: "app", durationMs: 5000 } });
   });
 
   it("runs the real retry, reports another failure, and dismisses the recovered error", async () => {
@@ -44,7 +44,7 @@ describe("mounted app error recovery", () => {
     const retry = vi.fn().mockRejectedValueOnce(new TypeError("Still unreachable")).mockResolvedValueOnce(undefined);
     errors.capture(new TypeError("Failed to fetch"), { operation: "notes.read", code: "CONNECTION_ERROR", retry });
     await runtime.errors.getLatest()?.retry?.();
-    expect(runtime.errors.getLatest()).toMatchObject({ code: "CONNECTION_ERROR", appId: "remote-notes" });
+    expect(runtime.errors.getLatest()).toMatchObject({ code: "CONNECTION_ERROR", appId: "com.example.remote-notes" });
     expect(runtime.errors.getLatest()?.technicalDetails).toContain("Detail: Still unreachable");
     await runtime.errors.getLatest()?.retry?.();
     expect(retry).toHaveBeenCalledTimes(2);
@@ -73,7 +73,7 @@ describe("mounted app error recovery", () => {
     expect(runtime.errors.getHistory().some(error => error.id === original.id)).toBe(false);
     reject(new TypeError("Retry still unreachable"));
     await pending;
-    expect(runtime.errors.getLatest()).toMatchObject({ code: "CONNECTION_ERROR", appId: "remote-notes" });
+    expect(runtime.errors.getLatest()).toMatchObject({ code: "CONNECTION_ERROR", appId: "com.example.remote-notes" });
     expect(runtime.errors.getLatest()?.technicalDetails).toContain("Detail: Retry still unreachable");
   });
 
@@ -90,6 +90,6 @@ describe("mounted app error recovery", () => {
   it("does not mistake an arbitrary TypeError for a connection failure", () => {
     const { runtime, errors } = fixture();
     errors.capture(new TypeError("Cannot read property"), { operation: "notes.format" });
-    expect(runtime.errors.getLatest()).toMatchObject({ code: "APP_CONTENT_FAILED", category: "app", appId: "remote-notes" });
+    expect(runtime.errors.getLatest()).toMatchObject({ code: "APP_CONTENT_FAILED", category: "app", appId: "com.example.remote-notes" });
   });
 });

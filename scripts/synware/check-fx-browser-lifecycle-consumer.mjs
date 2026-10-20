@@ -71,13 +71,13 @@ function staticServer(directory, base) {
 const installedBrowserLifecycleProbeSource = `import { useEffect, useRef, useState } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
 import {
-  createSynWare,
   useAnimations,
   useHaptics,
   useLocation,
   useMIDI,
   useMotion,
 } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
 
 declare global { interface Window { installedFxLifecycle: any; } }
@@ -208,7 +208,7 @@ function Website({ actions, applicationOutlet }: WebspringViewProps) {
 
 const shell = defineWebspring({
   manifest: {
-    schemaVersion: 1, id: "org.example.fx-browser-shell", version: "1.0.0", title: "FX Browser Shell",
+    schemaVersion: 1, bundleIdentifier: "org.example.fx-browser-shell", version: "1.0.0", displayName: "FX Browser Shell",
     webspringShell: {
       views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
       defaults: { desktop: "website", tablet: "website", mobile: "website" },
@@ -221,9 +221,9 @@ const shell = defineWebspring({
 const app = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "org.example.fx-browser-lifecycle",
+    bundleIdentifier: "org.example.fx-browser-lifecycle",
     version: "1.0.0",
-    title: "Installed FX Browser Lifecycle",
+    displayName: "Installed FX Browser Lifecycle",
     runtime: { policy: { public: true } },
     presentations: ["desktop", "tablet", "mobile"],
     routes: [{ path: "/fx-browser-lifecycle", primary: true }],

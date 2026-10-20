@@ -29,7 +29,7 @@ it("mounts the private Inspector from the canonical SynWare host with real settl
   const source = readFileSync("src/SynCloudOS/AppSDK/SynWareRuntimeMount.tsx", "utf8");
   expect(source).toContain('import { DevInspectorRegion } from "../../SynCloudOSReact/DevInspectorRegion"');
   expect(source).toContain("getRuntimeSettlement(runtime)");
-  expect(source).toContain("runtime.routes.mountedRoutes.current(app.id)");
+  expect(source).toContain("runtime.routes.mountedRoutes.current(app.bundleIdentifier)");
   expect(source).toContain("routeSession.getSnapshot()");
   expect(source).toContain("settlement={inspectorSettlement}");
   expect(source).toContain("routes={inspectorRoutes}");

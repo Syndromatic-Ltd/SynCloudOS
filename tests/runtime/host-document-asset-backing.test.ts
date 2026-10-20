@@ -298,7 +298,7 @@ describe("host document asset backing", () => {
       applicationDocuments: { assetBacking, initialTypes: [noteType] },
     }));
     const shell = defineWebspring({
-      manifest: { schemaVersion: 1, id: `com.example.assets-${ownership}`, version: "1.0.0", title: "Assets",
+      manifest: { schemaVersion: 1, bundleIdentifier: `com.example.assets-${ownership}`, version: "1.0.0", displayName: "Assets",
         webspringShell: { views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
           defaults: { desktop: "site", tablet: "site", mobile: "site" }, homeRoute: "/", branding: { name: { key: "site.name", fallback: "Assets" } } } },
       components: { site: () => null },

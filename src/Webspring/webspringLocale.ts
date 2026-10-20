@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useMemo } from "react";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { createLocaleServicesFacade } from "../SynCloudOS/LocaleServices";
@@ -89,17 +90,17 @@ export function getLocalizedWebspringText(
 }
 
 function appNamespace(appId: string) {
-  return `synapps.${appId}`;
+  return `synapps.${normalizeBundleIdentifier(appId)}`;
 }
 
 function appMainMenuNamespace(appId: string) {
-  return `synapps.${appId}.mainMenu`;
+  return `synapps.${normalizeBundleIdentifier(appId)}.mainMenu`;
 }
 
 export function getLocalizedWebspringAppName(app: SynCloudOSAppInfo, variant: "display" | "short" | "window" = "display", services?: ReturnType<typeof createLocaleServicesFacade>) {
   const key = variant === "short" ? "app.shortName" : variant === "window" ? "app.windowTitle" : "app.title";
   const fallback = variant === "short" ? app.shortName : variant === "window" ? app.window.title : app.displayName;
-  const translated = services?.t(key, undefined, appNamespace(app.id)) ?? key;
+  const translated = services?.t(key, undefined, appNamespace(app.bundleIdentifier)) ?? key;
   return translated === key ? fallback : translated;
 }
 
@@ -107,7 +108,7 @@ export function getLocalizedWebspringAppAction(app: SynCloudOSAppInfo, action: "
   const appName = getLocalizedWebspringAppName(app, "display", services);
   const fallback = action === "open" ? `Open ${appName}` : `Close ${appName}`;
   const key = action === "open" ? "actions.open" : "actions.close";
-  const translated = services?.t(key, undefined, appMainMenuNamespace(app.id)) ?? key;
+  const translated = services?.t(key, undefined, appMainMenuNamespace(app.bundleIdentifier)) ?? key;
   return translated === key ? fallback : translated;
 }
 
@@ -120,7 +121,7 @@ export function useWebspringLocale() {
     appAction: (app: SynCloudOSAppInfo, action: "open" | "close") => getLocalizedWebspringAppAction(app, action, services),
     appName: (app: SynCloudOSAppInfo, variant: "display" | "short" | "window" = "display") => getLocalizedWebspringAppName(app, variant, services),
     /** Text the app declares for itself (such as its right-slot label), from the app's own strings. */
-    appText: (app: SynCloudOSAppInfo, key: string, fallback: string) => getLocalizedWebspringText(key, fallback, undefined, appNamespace(app.id), services),
+    appText: (app: SynCloudOSAppInfo, key: string, fallback: string) => getLocalizedWebspringText(key, fallback, undefined, appNamespace(app.bundleIdentifier), services),
     t: (key: string, fallback: string, params?: SynCloudOSTranslationParams) => getLocalizedWebspringText(key, fallback, params, webspringLocaleNamespace, services),
     tMenu: (key: string, fallback: string, params?: SynCloudOSTranslationParams) =>
       getLocalizedWebspringText(key, fallback, params, webspringMainMenuNamespace, services)

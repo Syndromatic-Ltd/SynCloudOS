@@ -27,7 +27,7 @@ import "../../src/NSE/public/styles.css";
 if (location.pathname.startsWith("/__framework-tests/")) {
   const shell = defineWebspring({
     manifest: {
-      schemaVersion: 1, id: "tests.framework-shell", version: "1.0.0", title: "Framework fixtures",
+      schemaVersion: 1, bundleIdentifier: "com.example.tests.framework-shell", version: "1.0.0", displayName: "Framework fixtures",
       webspringShell: {
         views: [{ id: "fixture", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
         defaults: { desktop: "fixture", tablet: "fixture", mobile: "fixture" },

@@ -52,7 +52,7 @@ function NotificationsSummary({ settings }: PreferencePaneViewProps) {
   if (!settings.notificationsEnabled) return <>{t("preferences.off", "Off")}</>;
   if (apps.length === 0) return <>{t("preferences.none", "None")}</>;
   return <>{t("preferences.countOfTotal", "{count} of {total}", {
-    count: apps.filter((app) => runtime.settings.notificationsAllowed(app.id)).length,
+    count: apps.filter((app) => runtime.settings.notificationsAllowed(app.bundleIdentifier)).length,
     total: apps.length,
   })}</>;
 }
@@ -99,7 +99,7 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
           <NSEGroupBox>
             {apps.map((app) => (
               <NSEListItem
-                key={app.id}
+                key={app.bundleIdentifier}
                 tapHighlight={false}
                 leading={<img className="nse-prefs-app-icon" src={app.icon.src} alt="" aria-hidden="true" />}
                 trailing={(
@@ -107,9 +107,9 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
                     // Each app's OWN choice, not the resolved answer: with
                     // the master off these would all read false and turning
                     // it back on would look like it had wiped them.
-                    checked={runtime.settings.appNotificationsAllowed(app.id)}
+                    checked={runtime.settings.appNotificationsAllowed(app.bundleIdentifier)}
                     disabled={!settings.notificationsEnabled}
-                    onCheckedChange={(value) => runtime.settings.setNotificationsAllowed(app.id, value)}
+                    onCheckedChange={(value) => runtime.settings.setNotificationsAllowed(app.bundleIdentifier, value)}
                     aria-label={app.displayName}
                   />
                 )}

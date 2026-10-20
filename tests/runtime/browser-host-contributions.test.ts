@@ -32,9 +32,9 @@ const environment = {} as SynCloudOSRuntimeEnvironment;
 
 describe("browser host contributions", () => {
   it("exposes Lumina privileged authority only through contribution-owned application scope", async () => {
-    const publisher = createTestBundle({ id: "lumina-publisher" });
-    const reader = createTestBundle({ id: "lumina-reader" });
-    const foreign = createTestBundle({ id: "lumina-foreign" });
+    const publisher = createTestBundle({ bundleIdentifier: "com.example.lumina-publisher" });
+    const reader = createTestBundle({ bundleIdentifier: "com.example.lumina-reader" });
+    const foreign = createTestBundle({ bundleIdentifier: "com.example.lumina-foreign" });
     const runtime = createTestRuntime({ initialBundles: [publisher, reader, foreign] });
     const contribution = createSynCloudOSHostContribution("lumina-owner", "tests/lumina-owner", () => ({
       initialBundles: [publisher, reader],
@@ -45,30 +45,30 @@ describe("browser host contributions", () => {
       expect((runtime as any).luminaHost).toBeDefined();
       expect((handle.context as any).lumina).toBeDefined();
       expect(() => (handle.context as any).lumina.registerDomain({
-        ownerAppId: "lumina-foreign",
+        ownerAppId: "com.example.lumina-foreign",
         domain: "journal.entry",
-        destinationAppId: "lumina-reader",
+        destinationAppId: "com.example.lumina-reader",
         routeName: "journal.entry",
         resolve: () => ({ pathname: "/lumina-reader" }),
       })).toThrowError(expect.objectContaining({ name: "SecurityError" }));
       expect(() => (handle.context as any).lumina.registerDomain({
-        ownerAppId: "lumina-publisher",
+        ownerAppId: "com.example.lumina-publisher",
         domain: "journal.entry",
-        destinationAppId: "lumina-foreign",
+        destinationAppId: "com.example.lumina-foreign",
         routeName: "journal.entry",
         resolve: () => ({ pathname: "/lumina-foreign" }),
       })).toThrowError(expect.objectContaining({ name: "SecurityError" }));
 
       const unregister = (handle.context as any).lumina.registerDomain({
-        ownerAppId: "lumina-publisher",
+        ownerAppId: "com.example.lumina-publisher",
         domain: "journal.entry",
-        destinationAppId: "lumina-reader",
+        destinationAppId: "com.example.lumina-reader",
         routeName: "journal.entry",
         resolve: ({ item }: any) => ({ pathname: `/lumina-reader?item=${encodeURIComponent(item.id)}` }),
       });
       expect(typeof unregister).toBe("function");
       expect((handle.context as any).lumina.setEligibility({
-        ownerAppId: "lumina-publisher",
+        ownerAppId: "com.example.lumina-publisher",
         domain: "journal.entry",
         itemId: "entry-one",
         revision: "r1",
@@ -82,21 +82,21 @@ describe("browser host contributions", () => {
   });
 
   it("reads absent seeds without exposing another contribution's documents", async () => {
-    const ownBundle = createTestBundle({ id: "seed-owner" });
-    const otherBundle = createTestBundle({ id: "other-owner" });
+    const ownBundle = createTestBundle({ bundleIdentifier: "com.example.seed-owner" });
+    const otherBundle = createTestBundle({ bundleIdentifier: "com.example.other-owner" });
     const ownKind = { kind: "fixture.seed", version: 1, displayName: "Seed", permissions: { saveDraft: { public: true }, getDraft: { public: true } } };
     const runtime = createTestRuntime({ initialBundles: [ownBundle, otherBundle], trustedDocumentKinds: [ownKind] });
     const contributions = [ownBundle, otherBundle].map((bundle) => createSynCloudOSHostContribution(
-      bundle.manifest.id, `tests/${bundle.manifest.id}`, () => ({ initialBundles: [bundle], trustedDocumentKinds: [ownKind] }),
+      bundle.manifest.bundleIdentifier, `tests/${bundle.manifest.bundleIdentifier}`, () => ({ initialBundles: [bundle], trustedDocumentKinds: [ownKind] }),
     ));
     const prepared = await prepareSynCloudOSHostContributions(contributions, runtime.environment);
     const own = createSynCloudOSHostInstallContext(prepared[0]!, runtime, {});
     const other = createSynCloudOSHostInstallContext(prepared[1]!, runtime, {});
     try {
       await expect(own.context.seed.getDraft("absent-seed")).resolves.toBeNull();
-      const foreign = await other.context.seed.saveDraft({ id: "foreign-seed", kind: ownKind.kind, applicationId: "other-owner", body: {} });
+      const foreign = await other.context.seed.saveDraft({ id: "foreign-seed", kind: ownKind.kind, applicationId: "com.example.other-owner", body: {} });
       await expect(own.context.seed.getDraft(foreign.id)).rejects.toMatchObject({ name: "SecurityError" });
-      await expect(own.context.seed.saveDraft({ id: foreign.id, kind: ownKind.kind, applicationId: "seed-owner", body: {} })).rejects.toMatchObject({ name: "SecurityError" });
+      await expect(own.context.seed.saveDraft({ id: foreign.id, kind: ownKind.kind, applicationId: "com.example.seed-owner", body: {} })).rejects.toMatchObject({ name: "SecurityError" });
       await own.cleanup();
       await expect(own.context.seed.getDraft("absent-seed")).rejects.toMatchObject({ name: "AbortError" });
     } finally {

@@ -31,12 +31,12 @@ afterEach(async () => {
 function fixture() {
   const runtime = authoriseTestRuntime(createTestRuntime({
     id: "p10:repair-4-transfer",
-    initialBundles: [createTestBundle({ id: "source", route: "/source" })],
+    initialBundles: [createTestBundle({ bundleIdentifier: "com.example.source", route: "/source" })],
   }));
   runtimes.push(runtime);
-  const app = runtime.apps.getApp("source")!;
-  const root = "application:source";
-  const sibling = "application:source:sibling";
+  const app = runtime.apps.getApp("com.example.source")!;
+  const root = "application:com.example.source";
+  const sibling = "application:com.example.source:sibling";
   runtime.responders.register({ id: root, kind: "application", parentId: "workspace", scopeId: root });
   runtime.responders.register({ id: sibling, kind: "view", parentId: root, scopeId: sibling });
   return { runtime, app, root, sibling };
@@ -47,17 +47,17 @@ describe("transfer mount lifetime", () => {
     const { runtime, app, root, sibling } = fixture();
     const first = runtime.transfers.mountApp(app, { responderId: root });
     const second = runtime.transfers.mountApp(app, { responderId: sibling });
-    const board = first.scope.pasteboards.named("app:source");
+    const board = first.scope.pasteboards.named("app:com.example.source");
 
     await board.write([{ type: "text/plain", value: "survives first mount" }]);
     first.dispose();
-    await expect(second.scope.pasteboards.named("app:source").snapshot()).resolves.toEqual([
+    await expect(second.scope.pasteboards.named("app:com.example.source").snapshot()).resolves.toEqual([
       { type: "text/plain", value: "survives first mount" },
     ]);
 
     second.dispose();
     const reopened = runtime.transfers.mountApp(app, { responderId: root });
-    await expect(reopened.scope.pasteboards.named("app:source").snapshot()).resolves.toEqual([]);
+    await expect(reopened.scope.pasteboards.named("app:com.example.source").snapshot()).resolves.toEqual([]);
     reopened.dispose();
   });
 
@@ -71,8 +71,8 @@ describe("transfer mount lifetime", () => {
     });
     expect(runtime.drag.snapshot().active?.id).toBe(session.id);
 
-    await runtime.lifecycle.launch(app.id, { reason: "transfer lifecycle setup" }).result;
-    await runtime.lifecycle.close(app.id, { reason: "transfer lifecycle test" }).result;
+    await runtime.lifecycle.launch(app.bundleIdentifier, { reason: "transfer lifecycle setup" }).result;
+    await runtime.lifecycle.close(app.bundleIdentifier, { reason: "transfer lifecycle test" }).result;
     expect(runtime.drag.snapshot().active).toBeNull();
     await expect(mount.scope.pasteboards.find.write([{ type: "text/plain", value: "stale" }]))
       .rejects.toMatchObject({ name: "SecurityError" });
@@ -96,14 +96,14 @@ describe("transfer mount lifetime", () => {
       },
     });
     const control = getPasteboardRuntimeControl(registry);
-    const context = { appId: "source", responderId: "application:source" };
+    const context = { appId: "com.example.source", responderId: "application:com.example.source" };
     const first = control.issueLease(context, () => context, { ownsPrivateBoard: true });
-    await control.forLease(first).named("app:source").write([{ type: "text/plain", value: "old generation" }]);
+    await control.forLease(first).named("app:com.example.source").write([{ type: "text/plain", value: "old generation" }]);
 
     const clearing = control.clearLease(first);
     await clearEntered;
     const reopened = control.issueLease(context, () => context, { ownsPrivateBoard: true });
-    const board = control.forLease(reopened).named("app:source");
+    const board = control.forLease(reopened).named("app:com.example.source");
     await expect(board.snapshot()).resolves.toEqual([]);
     await expect(board.readFirst(["text/plain"])).resolves.toBeNull();
     await board.write([{ type: "text/plain", value: "new generation" }]);
@@ -133,12 +133,12 @@ describe("transfer mount lifetime", () => {
       },
     });
     const control = getPasteboardRuntimeControl(registry);
-    const context = { appId: "source", responderId: "application:source" };
+    const context = { appId: "com.example.source", responderId: "application:com.example.source" };
     const first = control.issueLease(context, () => context, { ownsPrivateBoard: true });
     let clearing: Promise<void> | undefined;
     let reopened: ReturnType<typeof control.issueLease> | undefined;
     let staleProviderCalls = 0;
-    const board = control.forLease(first).named("app:source");
+    const board = control.forLease(first).named("app:com.example.source");
     await board.write([
       {
         type: "text/plain",

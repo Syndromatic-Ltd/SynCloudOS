@@ -231,7 +231,7 @@ function createInitialRuntimeSnapshot(runtimeId: string, seed: Partial<RuntimeSn
     focusIndex: -1,
     layout: {
       preference: {
-        version: 4,
+        version: 5,
         order: [],
         folders: {},
         board: { version: 1, pageSize: 20, dockSize: 4 },

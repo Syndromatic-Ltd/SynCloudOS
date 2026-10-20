@@ -44,7 +44,7 @@ const branding = resolveSiteBranding({
   "./Resources/site-dark.svg": "/configured-site-dark.svg",
 }, { t: (key) => key }, "example.webspring");
 
-const appError = { code: "APP_CONTENT_FAILED", title: "Stopped", message: "Try again", appId: "journal", packageName: "Journal.app" };
+const appError = { code: "APP_CONTENT_FAILED", title: "Stopped", message: "Try again", appId: "com.example.journal", packageName: "Journal.app" };
 const applicationIcon = "/resolved-app-resources/AppIcon.png";
 const callbacks = { onDismiss() {}, onReturn() {}, onReload() {} };
 const artwork = () => screen.getByRole("alertdialog").querySelector<HTMLElement>("[data-alert-icon]")!;
@@ -53,10 +53,10 @@ const badge = () => artwork().querySelector<HTMLImageElement>("[data-alert-cauti
 
 describe("private host recovery artwork", () => {
   it("uses the current system artwork and its sizing for an app without a declared icon", () => {
-    const manifest = projectRuntimeManifest({ schemaVersion: 1, id: "chronosphere", title: "Chronosphere", version: "1.0.0" }, {
+    const manifest = projectRuntimeManifest({ schemaVersion: 1, bundleIdentifier: "com.example.chronosphere", displayName: "Chronosphere", version: "1.0.0" }, {
       appRoot: "./Chronosphere.app", packageName: "Chronosphere.app", path: "Chronosphere.app/", componentKey: "Chronosphere",
     });
-    render(<SystemAlert error={{ ...appError, appId: manifest.id }} applicationIcon={manifest.icon.src} {...callbacks} />);
+    render(<SystemAlert error={{ ...appError, appId: manifest.bundleIdentifier }} applicationIcon={manifest.icon.src} {...callbacks} />);
     expect(artwork().dataset.alertIcon).toBe("app");
     expect(logo()?.getAttribute("src")).toContain("SynCloudOSLogo.png");
     expect(logo()?.getAttribute("data-alert-logo")).toBe("syncloudos");
@@ -113,7 +113,7 @@ describe("private host recovery artwork", () => {
   it("brands the existing runtime session-authority failure as site recovery", () => {
       const runtime = createTestRuntime();
       const manager = createErrorManager(runtime, { loginServices: { getSnapshot: () => ({ isAuthorised: false }) } });
-      const error = manager.createLoginSessionMismatchError({ id: "journal", displayName: "Journal", packageName: "Journal.app" }, { siteName: branding.name });
+      const error = manager.createLoginSessionMismatchError({ version: "1.0.0", bundleIdentifier: "com.example.journal", displayName: "Journal", packageName: "Journal.app" }, { siteName: branding.name });
       const rendered = render(<HostSiteBrandingProvider value={branding}><SystemAlert error={error} applicationIcon={applicationIcon} {...callbacks} /></HostSiteBrandingProvider>);
       expect(error.category).toBe("runtime");
       expect(error.title).toBe("Example Site has unexpectedly stopped.");
@@ -128,8 +128,8 @@ describe("private host recovery artwork", () => {
   it.each(["payload", "context"] as const)("uses app branding for an app resource failure identified in %s", (location) => {
     const runtime = createTestRuntime();
     const error = location === "context"
-      ? runtime.errors.createAssetLoadFailedError({ tagName: "IMG", src: "/app-asset.svg" }, { appId: "journal" })
-      : runtime.errors.capture({ code: "ASSET_LOAD_FAILED", title: "Resource failed", message: "Try again", category: "resource", appId: "journal", suggestedActions: ["dismiss"] });
+      ? runtime.errors.createAssetLoadFailedError({ tagName: "IMG", src: "/app-asset.svg" }, { appId: "com.example.journal" })
+      : runtime.errors.capture({ code: "ASSET_LOAD_FAILED", title: "Resource failed", message: "Try again", category: "resource", appId: "com.example.journal", suggestedActions: ["dismiss"] });
     render(<HostSiteBrandingProvider value={branding}><SystemAlert error={error} applicationIcon={applicationIcon} {...callbacks} /></HostSiteBrandingProvider>);
     expect(artwork().dataset.alertIcon).toBe("app");
     expect(logo()?.getAttribute("src")).toBe(applicationIcon);
@@ -168,10 +168,10 @@ describe("private host recovery artwork", () => {
 
   it.each(["payload", "context"] as const)("resolves the AppIcon through the host registry for an app id in %s", (location) => {
     const runtime = createTestRuntime();
-    runtime.apps.registerBundle(createTestBundle({ id: "journal", icon: { src: applicationIcon } }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.journal", icon: { src: applicationIcon } }));
     const captured = runtime.errors.capture(location === "payload"
       ? { ...appError, category: "app" }
-      : { code: "ASSET_LOAD_FAILED", title: "Resource failed", message: "Try again", category: "resource", context: { appId: "journal" } });
+      : { code: "ASSET_LOAD_FAILED", title: "Resource failed", message: "Try again", category: "resource", context: { appId: "com.example.journal" } });
     render(<SynCloudOSProvider runtime={runtime}><HostSiteBrandingProvider value={branding}><WebspringStatusLayer errors={[captured]} /></HostSiteBrandingProvider></SynCloudOSProvider>);
     expect(artwork().dataset.alertIcon).toBe("app");
     expect(logo()?.getAttribute("src")).toBe(applicationIcon);

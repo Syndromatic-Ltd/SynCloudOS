@@ -18,6 +18,7 @@
  */
 
 import { useInsertionEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo, SynCloudOSRuntime } from "../SynCloudOS";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort } from "../../SynCloudOSReact";
 import { NSEControlRuntimeProvider, NSEFocusPortProvider, NSEOverlayProvider, NSEConformanceEvidenceProvider, type NSEConformanceEvidencePort } from "../../NSE/NSE";
@@ -76,13 +77,13 @@ function MountedAppPresentationBoundary({
   readonly kernelRuntime: SynCloudOSRuntime;
   readonly children: ReactNode;
 }) {
-  const focusPort = useRuntimeNSEFocusPort(`application:${runtime.app.id}`);
-  const overlayPort = useRuntimeNSEOverlayPort(`application:${runtime.app.id}`);
+  const focusPort = useRuntimeNSEFocusPort(`application:${runtime.app.bundleIdentifier}`);
+  const overlayPort = useRuntimeNSEOverlayPort(`application:${runtime.app.bundleIdentifier}`);
   const controlPort = useRuntimeNSEControlPort();
   const trusted = getMountedAppEnvironmentClients(runtime).trusted;
   const conformance = trusted.conformance;
   const conformanceEvidencePort = useMemo<NSEConformanceEvidencePort | null>(() => {
-    if (!conformance || !hasTrustedBundlePrivilege(kernelRuntime, runtime.app.id, "conformance", "diagnostics.view")) return null;
+    if (!conformance || !hasTrustedBundlePrivilege(kernelRuntime, runtime.app.bundleIdentifier, "conformance", "diagnostics.view")) return null;
     return Object.freeze({
       registerAppearanceFact: (fact: Parameters<NSEConformanceEvidencePort["registerAppearanceFact"]>[0]) => {
         const handle = conformance.registerAppearanceFact(fact);
@@ -93,14 +94,14 @@ function MountedAppPresentationBoundary({
         return () => { void handle.dispose(); };
       },
     });
-  }, [conformance, kernelRuntime, runtime.app.id]);
+  }, [conformance, kernelRuntime, runtime.app.bundleIdentifier]);
   // NSE presentations inside the app animate as the app, through its own
   // AnimationFX client, never with the shell's authority, and never hold the
   // shell's own presence exits (a closing window's settlement).
   const appClient = useSCOS();
   const appAnimations = appClient.animations;
   const animationState = useMemo(() => createRuntimeAnimationState(kernelRuntime, runtime.signal, () => {
-    const state = kernelRuntime.lifecycle.getState(runtime.app.id);
+    const state = kernelRuntime.lifecycle.getState(runtime.app.bundleIdentifier);
     return state === "suspended" || state === "closed";
   }), [kernelRuntime, runtime]);
   const reducedMotion = useSyncExternalStore(animationState.subscribe, animationState.getReducedMotion, animationState.getReducedMotion);
@@ -113,13 +114,13 @@ function MountedAppPresentationBoundary({
   }), [appClient.scheduler, animationState, runtime]);
   const animator = useMemo<NSEAnimator>(() => Object.freeze({
     animations: createSynWareNSEAnimations(appAnimations),
-    ownerAppId: runtime.app.id,
-  }), [appAnimations, runtime.app.id]);
+    ownerAppId: runtime.app.bundleIdentifier,
+  }), [appAnimations, runtime.app.bundleIdentifier]);
   return (
     <NSEPresenceBoundary>
     <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator} layers={appAnimations} frames={appFrames}>
     <NSEConformanceEvidenceProvider port={conformanceEvidencePort}>
-      <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.id}`}>
+      <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
         <NSEControlRuntimeProvider port={controlPort}>
           <NSEFocusPortProvider port={focusPort}>{children}</NSEFocusPortProvider>
         </NSEControlRuntimeProvider>
@@ -142,7 +143,7 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
   const branding = useHostSiteBranding();
   const fontCatalogue = useFontCatalogue();
   const hostFontResourceLoader = useMemo(() => createFontCatalogueResourceLoader(fontCatalogue), [fontCatalogue]);
-  const key = `${runtime.runtimeId}\u0000${app.id}\u0000${responderId}\u0000${windowControllerId ?? ""}`;
+  const key = `${runtime.runtimeId}\u0000${app.bundleIdentifier}\u0000${responderId}\u0000${windowControllerId ?? ""}`;
   const [mounted, setMounted] = useState<MountedState | null>(null);
   const mountedLeaseRef = useRef<MountedLease | null>(null);
   // Transfer mounts can be retired out from under a live tree — notably when
@@ -151,8 +152,8 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
   // dead facade would throw ("overlay authority is no longer live") on its
   // next render; instead the mount re-mints a fresh transfer generation.
   const [transferGeneration, setTransferGeneration] = useState(0);
-  const canonical = runtime.apps.getApp(app.id);
-  const registrationAuthority = runtime.appManager.getManagerForApp(app.id);
+  const canonical = runtime.apps.getApp(app.bundleIdentifier);
+  const registrationAuthority = runtime.appManager.getManagerForApp(app.bundleIdentifier);
   useInsertionEffect(() => () => {
     const lease = mountedLeaseRef.current;
     if (!lease || lease.state.key !== key || lease.state.registrationAuthority !== registrationAuthority) return;
@@ -164,7 +165,7 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     // Exit presentations may retain this React tree after the close commit,
     // and a newly composed host can still contain the old app descriptor.
     // Closed lifecycle authority is terminal: never mint a transfer scope.
-    if (runtime.lifecycle.getState(app.id) === "closed") {
+    if (runtime.lifecycle.getState(app.bundleIdentifier) === "closed") {
       setMounted(null);
       return;
     }
@@ -177,22 +178,22 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
       // app manager record was removed atomically with AppInfo; lifecycle
       // state alone is insufficient because suspended/idle/failed Keep
       // Windows mounts are all legitimate live mounts.
-      const lifecycleState = runtime.lifecycle.getState(app.id);
+      const lifecycleState = runtime.lifecycle.getState(app.bundleIdentifier);
       const tearingDown = runtime.disposalState !== "running"
         || lifecycleState === "closed"
-        || runtime.store.getSnapshot().managers[app.id] === undefined;
+        || runtime.store.getSnapshot().managers[normalizeBundleIdentifier(app.bundleIdentifier)] === undefined;
       if (tearingDown) {
         setMounted(null);
         return;
       }
-      throw new DOMException(`Application ${app.id} is no longer registered.`, "SecurityError");
+      throw new DOMException(`Application ${app.bundleIdentifier} is no longer registered.`, "SecurityError");
     }
     if (!registrationAuthority) {
       if (runtime.disposalState !== "running") {
         setMounted(null);
         return;
       }
-      throw new DOMException(`Application ${app.id} has no registration authority.`, "SecurityError");
+      throw new DOMException(`Application ${app.bundleIdentifier} has no registration authority.`, "SecurityError");
     }
     let lease = mountedLeaseRef.current;
     if (lease && lease.state.hostFontResourceLoader !== hostFontResourceLoader) {
@@ -221,7 +222,7 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
         // Only an authoritative teardown may turn a failed re-mint into an
         // empty tree. A live registration/window with a retired transfer must
         // surface the error instead of hiding responder or registry corruption.
-        const lifecycleState = runtime.lifecycle.getState(app.id);
+        const lifecycleState = runtime.lifecycle.getState(app.bundleIdentifier);
         const windowGone = windowControllerId !== undefined && !runtime.windows.list().some(({ id }) => id === windowControllerId);
         const authoritativeTeardown = runtime.disposalState !== "running" || lifecycleState === "closed" || windowGone;
         if (transferGeneration > 0 && authoritativeTeardown) {
@@ -258,31 +259,31 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     return () => {
       mount.runtime.signal.removeEventListener("abort", handleExternalAbort);
     };
-  }, [app.id, canonical, hostFontResourceLoader, key, registrationAuthority, responderId, runtime, transferGeneration, windowControllerId]);
+  }, [app.bundleIdentifier, canonical, hostFontResourceLoader, key, registrationAuthority, responderId, runtime, transferGeneration, windowControllerId]);
 
   const context = useMemo(() => {
     if (!mounted || !branding) return null;
     return Object.freeze({ ...mounted.contextBase, branding });
   }, [branding, mounted]);
 
-  const loadedDefinition = runtime.bundles.getLoadedBundle(app.id)?.definition
-    ?? runtime.bundles.getBundle(app.id)?.synWareDefinition
+  const loadedDefinition = runtime.bundles.getLoadedBundle(app.bundleIdentifier)?.definition
+    ?? runtime.bundles.getBundle(app.bundleIdentifier)?.synWareDefinition
     ?? null;
   const routeGraph = loadedDefinition?.routes ?? null;
   const trackRouteSessionCleanup = (session: ReturnType<typeof createAppRouteSession>) => {
     const receipt = session.getCleanupReceipt();
     if (!receipt) return;
-    trackRuntimeSettlement(runtime, receipt, { owner: "route-session", kind: "cleanup", label: app.id });
+    trackRuntimeSettlement(runtime, receipt, { owner: "route-session", kind: "cleanup", label: app.bundleIdentifier });
   };
   const routeSession = useMemo(() => {
     if (!mounted || !context || !routeGraph) return null;
-    let bundleIdentity = runtime.bundles.getBundle(app.id);
+    let bundleIdentity = runtime.bundles.getBundle(app.bundleIdentifier);
     let bundleGeneration = 0;
     let session: ReturnType<typeof createAppRouteSession> | null = null;
     const created = createAppRouteSession({
       graph: routeGraph,
       getBundleGeneration() {
-        const next = runtime.bundles.getBundle(app.id);
+        const next = runtime.bundles.getBundle(app.bundleIdentifier);
         if (next !== bundleIdentity) {
           bundleIdentity = next;
           bundleGeneration += 1;
@@ -303,15 +304,15 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
           identity(); updated(); removed();
         };
       },
-      createLoaderServices: ({ signal }) => createRouteServiceScope(runtime, app.id, signal, "mounted"),
-      resolveRouteDefinition: (definition, signal) => runtime.routes.routeGraph.resolveDefinition(app.id, definition, signal),
+      createLoaderServices: ({ signal }) => createRouteServiceScope(runtime, app.bundleIdentifier, signal, "mounted"),
+      resolveRouteDefinition: (definition, signal) => runtime.routes.routeGraph.resolveDefinition(app.bundleIdentifier, definition, signal),
       routeDataTimeoutMs: 15_000,
       setTimeout: runtime.environment.setTimeout,
       clearTimeout: runtime.environment.clearTimeout,
     });
     session = created;
     return created;
-  }, [app.id, context, mounted, routeGraph, runtime]);
+  }, [app.bundleIdentifier, context, mounted, routeGraph, runtime]);
   const routeParticipant = useMemo(() => routeSession && context ? createMountedRouteParticipant({
     session: routeSession,
     signal: context.signal,
@@ -323,7 +324,7 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     if (!routeSession) return;
     routeSession.dispose();
     trackRouteSessionCleanup(routeSession);
-  }, [routeSession, runtime, app.id]);
+  }, [routeSession, runtime, app.bundleIdentifier]);
   useLayoutEffect(() => {
     if (!routeParticipant || !context) return;
     const revoke = () => {
@@ -333,21 +334,21 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     };
     context.signal.addEventListener("abort", revoke, { once: true });
     if (context.signal.aborted) revoke();
-    const release = runtime.routes.mountedRoutes.attach(app.id, routeParticipant);
-    const current = runtime.routes.mountedRoutes.current(app.id);
+    const release = runtime.routes.mountedRoutes.attach(app.bundleIdentifier, routeParticipant);
+    const current = runtime.routes.mountedRoutes.current(app.bundleIdentifier);
     // A headless route may have committed before its view attached. It still
     // carries the canonical operation id; reattachment is deduplicated.
     if (current && !current.signal.aborted) void routeParticipant.loadAndRender(current).catch(() => undefined);
     return () => { release(); context.signal.removeEventListener("abort", revoke); };
-  }, [app.id, context, routeParticipant, routeSession, runtime]);
+  }, [app.bundleIdentifier, context, routeParticipant, routeSession, runtime]);
   const preloadRoute = useMemo(() => async (href: string, options: { readonly data?: boolean; readonly signal?: AbortSignal }) => {
     if (!routeGraph || !context) throw new DOMException("Route mount is unavailable.", "InvalidStateError");
     const signal = options.signal ? AbortSignal.any([context.signal, options.signal]) : context.signal;
     signal.throwIfAborted();
     const route = routeGraph.recognize(href);
     if (route.kind !== "match") throw new Error("route-not-found");
-    return runtime.routes.routeGraph.preload(app.id, href, signal, { data: options.data === true });
-  }, [app.id, routeGraph, context, runtime]);
+    return runtime.routes.routeGraph.preload(app.bundleIdentifier, href, signal, { data: options.data === true });
+  }, [app.bundleIdentifier, routeGraph, context, runtime]);
 
   const routeAuthority = useMemo(() => () => Object.freeze({
     operationId: runtime.routes.getCurrentOperationId(),
@@ -365,25 +366,26 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     if (!context || !routeSession) return;
     const route = routeSession.getSnapshot().route;
     if (!route) return;
-    runtime.routes.routeGraph.invalidateModules(app.id);
+    runtime.routes.routeGraph.invalidateModules(app.bundleIdentifier);
     context.navigation.openRoute(`${route.pathname}${route.search}${route.hash}`, { historyMode: "replace", context: { routeRetry: true } });
-  }, [app.id, context, routeSession, runtime]);
+  }, [app.bundleIdentifier, context, routeSession, runtime]);
 
+  const hasDiagnostics = runtime.bundles.getBundle(app.bundleIdentifier)?.permissions?.includes("diagnostics.view") ?? false;
   const inspectorSettlement = useMemo(() => {
-    if (!import.meta.env.DEV || app.id !== "diagnostics") return undefined;
+    if (!import.meta.env.DEV || !hasDiagnostics) return undefined;
     return getRuntimeSettlement(runtime);
-  }, [app.id, runtime]);
+  }, [hasDiagnostics, runtime]);
   const inspectorRoutes = useMemo<InspectorRouteInspectionPort | undefined>(() => {
-    if (!import.meta.env.DEV || app.id !== "diagnostics" || !routeGraph || !routeSession) return undefined;
+    if (!import.meta.env.DEV || !hasDiagnostics || !routeGraph || !routeSession) return undefined;
     return Object.freeze({
       runtimeId: runtime.runtimeId,
       read() {
         const snapshot = routeSession.getSnapshot();
-        const mountedRequest = runtime.routes.mountedRoutes.current(app.id);
+        const mountedRequest = runtime.routes.mountedRoutes.current(app.bundleIdentifier);
         const operationId = mountedRequest?.operationId ?? runtime.routes.getCurrentOperationId();
         const graphs = runtime.apps.getAllApps().flatMap((candidate) => {
-          const graph = runtime.bundles.getLoadedBundle(candidate.id)?.definition.routes;
-          return graph ? [Object.freeze({ id: graph.id, appId: candidate.id, routes: graph.routes })] : [];
+          const graph = runtime.bundles.getLoadedBundle(candidate.bundleIdentifier)?.definition.routes;
+          return graph ? [Object.freeze({ id: graph.id, appId: candidate.bundleIdentifier, routes: graph.routes })] : [];
         });
         const modules = snapshot.route?.branch.flatMap((name) => {
           const declared = routeGraph.getRoute(name);
@@ -398,8 +400,8 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
                 ? "error"
                 : "idle";
           return [Object.freeze({
-            id: `${app.id}:module:${name}`,
-            appId: app.id,
+            id: `${app.bundleIdentifier}:module:${name}`,
+            appId: app.bundleIdentifier,
             operationId,
             status,
             revision: node?.revision ?? snapshot.revision,
@@ -411,7 +413,7 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
             latestOperationId: runtime.routes.getCurrentOperationId(),
           }),
           graphs: Object.freeze(graphs),
-          sessions: Object.freeze([Object.freeze({ appId: app.id, operationId, snapshot })]),
+          sessions: Object.freeze([Object.freeze({ appId: app.bundleIdentifier, operationId, snapshot })]),
           transitions: runtime.routes.inspectTransitions(),
           modules: Object.freeze(modules),
         });
@@ -432,7 +434,7 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
         return () => removers.forEach((remove) => remove());
       },
     });
-  }, [app.id, routeGraph, routeSession, runtime]);
+  }, [app.bundleIdentifier, hasDiagnostics, routeGraph, routeSession, runtime]);
 
   if (!branding) throw new Error("A mounted SynWare requires resolved site branding.");
 
@@ -445,14 +447,14 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
         </SynWareRouteSessionProvider>
       )
     : children;
-  const presentedChildren = import.meta.env.DEV && app.id === "diagnostics"
+  const presentedChildren = import.meta.env.DEV && hasDiagnostics
     ? (
         <div data-syncloudos-dev-inspector-host style={{ display: "grid", blockSize: "100%", minBlockSize: 0, gridTemplateRows: "minmax(0, 1fr) minmax(14rem, 42%)", overflow: "hidden" }}>
           <div style={{ minBlockSize: 0, overflow: "auto" }}>{mountedChildren}</div>
           <div style={{ minBlockSize: 0, overflow: "auto" }}>
             <DevInspectorRegion
               runtime={runtime}
-              appId={app.id}
+              appId={app.bundleIdentifier}
               mountSignal={context.signal}
               enabled={true}
               settlement={inspectorSettlement}

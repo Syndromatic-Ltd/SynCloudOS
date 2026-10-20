@@ -37,7 +37,7 @@ export function createExamplePersistenceHost(options: { readonly databaseName: s
   let storesCreated = 0, storesDisposed = 0, hostsMounted = 0;
   const runtimeIds: string[] = [];
   function Outlet({ applicationOutlet }: WebspringViewProps) { return <>{applicationOutlet}</>; }
-  const shell = defineWebspring({ manifest: { schemaVersion: 1, id: "com.syncloudos.examples.text-system-shell", version: "0.1.0", title: "Example host",
+  const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: "com.syncloudos.examples.text-system-shell", version: "0.1.0", displayName: "Example host",
     webspringShell: { views: [{ id: "example", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
       defaults: { desktop: "example", tablet: "example", mobile: "example" }, homeRoute: "/",
       branding: { name: { key: "example.host", fallback: "Text System example" } } } }, components: { example: Outlet } });

@@ -119,11 +119,11 @@ function Probe() {
 function Website({ actions, applicationOutlet }: WebspringViewProps) {
   return <main><button id="open" onClick={() => { void actions.openApp("org.example.fx16"); }}>Open FX-16 probe</button>{applicationOutlet}</main>;
 }
-const shell = defineWebspring({ manifest: { schemaVersion: 1, id: "org.example.fx16-shell", version: "1.0.0", title: "FX-16 shell", webspringShell: {
+const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.fx16-shell", version: "1.0.0", displayName: "FX-16 shell", webspringShell: {
   views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
   defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "FX-16" } },
 }}, components: { website: Website } });
-const app = createSynWare({ manifest: { schemaVersion: 1, id: "org.example.fx16", version: "1.0.0", title: "FX-16 Probe", runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/fx16", primary: true }], webspring: { visible: true, order: 1 } }, root: Probe });
+const app = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.fx16", version: "1.0.0", displayName: "FX-16 Probe", runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/fx16", primary: true }], webspring: { visible: true, order: 1 } }, root: Probe });
 const element = document.getElementById("root")!;
 mountSynCloudOS({ element, bundles: [app], shell, authentication: "disabled" }).then(host => { window.fxText.dispose = () => host.dispose("FX-16 consumer verification"); }).catch(error => { window.fxText = { ready: false, error: String(error) }; });
 `;

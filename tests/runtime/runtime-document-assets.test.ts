@@ -138,8 +138,8 @@ describe("runtime document asset integration", () => {
   });
   it("forwards configured capabilities through the admitted SDK without exposing the store", async () => {
     const f = fixture();
-    registerTestSynWare(f.runtime, { schemaVersion: 1, id: "asset-app", title: "Asset app", version: "1.0.0", routes: [{ path: "/assets", primary: true }], documentTypes: [{ id: type.id, displayName: type.displayName }] });
-    const mounted = mountTestSynWareRuntime(f.runtime, "asset-app");
+    registerTestSynWare(f.runtime, { schemaVersion: 1, bundleIdentifier: "com.example.asset-app", displayName: "Asset app", version: "1.0.0", routes: [{ path: "/assets", primary: true }], documentTypes: [{ id: type.id, displayName: type.displayName }] });
+    const mounted = mountTestSynWareRuntime(f.runtime, "com.example.asset-app");
     try {
       const context = createSynWareContextValue(mounted.runtime);
       const document = await context.documents.workspaceDocuments.newDocument({ typeId: type.id });

@@ -45,9 +45,9 @@ type MountedMediaProbe = Readonly<{
 const MediaProbe = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.media-probe",
+    bundleIdentifier: "com.syndromatic.media-probe",
     version: "1.0.0",
-    title: "Media Probe",
+    displayName: "Media Probe",
     routes: [{ path: "/media-probe", primary: true }],
     permissions: [],
   },

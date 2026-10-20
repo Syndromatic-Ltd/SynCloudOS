@@ -25,7 +25,7 @@ const sessionControllers: NSEArrayController<string, string>[] = [];
 const executed = vi.fn();
 function Application() {
   const app = useSCOS();
-  useCommands([{ id: `${app.app.id}.probe`, title: "Probe", execute: executed,
+  useCommands([{ id: `${app.app.bundleIdentifier}.probe`, title: "Probe", execute: executed,
     defaultKeyBindings: [{ key: "F8", modifiers: [], scope: "application", repeat: "ignore" }] }]);
   useEffect(() => {
     sessions.push(app);
@@ -37,17 +37,17 @@ function Application() {
   return <button data-testid="application" onClick={() => app.lifecycle.closeSelf()}>Close application</button>;
 }
 const bundle = createSynWare({ manifest: {
-  schemaVersion: 1, id, version: "1.0.0", title: "Application host",
+  schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: "Application host",
   routes: [{ path: "/application", primary: true }],
   runtime: { presentation: "windowedView", policy: { public: true, requiresLogin: false } },
 }, root: Application });
 const shell = defineWebspring({ manifest: {
-  schemaVersion: 1, id: "com.example.application-shell", version: "1.0.0", title: "Shell",
+  schemaVersion: 1, bundleIdentifier: "com.example.application-shell", version: "1.0.0", displayName: "Shell",
   webspringShell: { views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }], defaults: { desktop: "site", tablet: "site", mobile: "site" }, homeRoute: "/", branding: { name: { key: "site.name", fallback: "Shell" } } },
 }, components: { site: () => <div data-testid="shell">Shell</div> } });
 function element() { const value = document.createElement("div"); document.body.append(value); elements.push(value); return value; }
 function applicationOptions(target: Element, overrides: object = {}) {
-  return { element: target, bundles: [bundle], application: { id }, authentication: "disabled", ...overrides } as unknown as MountSynCloudOSOptions;
+  return { element: target, bundles: [bundle], application: { bundleIdentifier: id }, authentication: "disabled", ...overrides } as unknown as MountSynCloudOSOptions;
 }
 async function mount(target = element(), overrides: object = {}) {
   let host!: MountedSynCloudOSHost;
@@ -66,7 +66,7 @@ function Secondary() {
   return <button data-testid="secondary" onClick={() => app.lifecycle.closeSelf()}>Quit secondary</button>;
 }
 const secondary = createSynWare({ manifest: {
-  schemaVersion: 1, id: secondaryId, version: "1.0.0", title: "Secondary",
+  schemaVersion: 1, bundleIdentifier: secondaryId, version: "1.0.0", displayName: "Secondary",
   routes: [{ path: "/secondary", primary: true }],
   runtime: { presentation: "windowedView", policy: { public: true, requiresLogin: false } },
 }, root: Secondary });
@@ -134,7 +134,7 @@ describe("application-only browser host", () => {
     expect(runtime.lifecycle.getState(id)).toBe("active");
     expect(runtime.apps.getApp(id)?.presentation).toBe("appView");
     expect(runtime.windows.list({ applicationId: id })).toHaveLength(0);
-    expect(sessions.at(-1)?.app.id).toBe(id);
+    expect(sessions.at(-1)?.app.bundleIdentifier).toBe(id);
     expect(runtime.focus.getActiveAnchors().applicationResponderId).toBe(`application:${id}`);
   });
   it("closes without respawning and releases its mounted session", async () => {
@@ -190,9 +190,9 @@ describe("application-only browser host", () => {
     expect(sessions.at(-1)!.persistence.setPreference("volume", 0.4)).toBe(true);
     await act(async () => { await first.host.dispose(); });
     const otherId = "com.example.other-host";
-    const other = createSynWare({ manifest: { ...bundle.manifest, id: otherId }, root: Application });
-    await mount(first.element, { bundles: [other], application: { id: otherId } });
-    expect(sessions.at(-1)!.app.id).toBe(otherId);
+    const other = createSynWare({ manifest: { ...bundle.manifest, bundleIdentifier: otherId }, root: Application });
+    await mount(first.element, { bundles: [other], application: { bundleIdentifier: otherId } });
+    expect(sessions.at(-1)!.app.bundleIdentifier).toBe(otherId);
     expect(sessions.at(-1)!.persistence.getPreference("volume", 0.9)).toBe(0.9);
     expect(sessions.at(-1)!.persistence.setPreference("volume", 0.8)).toBe(true);
     await act(async () => { await mounts.at(-1)!.dispose(); });
@@ -285,11 +285,11 @@ describe("application-only browser host", () => {
   it("rejects missing, mixed, malformed and unknown modes and bundles the host cannot present", async () => {
     expect(() => mountSynCloudOS({ element: element() } as MountSynCloudOSOptions)).toThrow(/shell.*application|application.*shell/i);
     expect(() => mountSynCloudOS(applicationOptions(element(), { shell }))).toThrow(/exactly one|mutually exclusive/i);
-    expect(() => mountSynCloudOS(applicationOptions(element(), { application: { id: " " } }))).toThrow(/application.*id/i);
-    expect(() => mountSynCloudOS(applicationOptions(element(), { application: { id, frame: "windowed" } }))).toThrow(/application\.frame/);
+    expect(() => mountSynCloudOS(applicationOptions(element(), { application: { bundleIdentifier: " " } }))).toThrow(/application.*id/i);
+    expect(() => mountSynCloudOS(applicationOptions(element(), { application: { bundleIdentifier: id, frame: "windowed" } }))).toThrow(/application\.frame/);
     expect(() => mountSynCloudOS(applicationOptions(element(), { shellResources: {} }))).toThrow(/shell resources/i);
-    await expect(mountSynCloudOS(applicationOptions(element(), { application: { id: "com.example.unknown" } }))).rejects.toThrow(/not registered|unknown application/i);
-    const fullscreenOther = createSynWare({ manifest: { schemaVersion: 1, id: "com.example.other", version: "1.0.0", title: "Other",
+    await expect(mountSynCloudOS(applicationOptions(element(), { application: { bundleIdentifier: "com.example.unknown" } }))).rejects.toThrow(/not registered|unknown application/i);
+    const fullscreenOther = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.other", version: "1.0.0", displayName: "Other",
       routes: [{ path: "/other", primary: true }] }, root: () => null });
     await expect(mountSynCloudOS(applicationOptions(element(), { bundles: [bundle, fullscreenOther] }))).rejects.toThrow(/com\.example\.other.*appView/);
     const reserved = createSynWare({ manifest: { ...bundle.manifest, routes: [{ path: "/", primary: true }] }, root: Application });
@@ -302,7 +302,7 @@ describe("application-only browser host", () => {
     await expect(mountSynCloudOS(applicationOptions(element(), { authentication: { policy: "optional", service: authenticationService() } })))
       .rejects.toThrow(/applicationMenu: \{ trigger: "content" \}/);
     await expect(mountSynCloudOS(applicationOptions(element(), { authentication: { policy: "required", service: authenticationService() },
-      application: { id, frame: "declared" }, bundles: [createSynWare({ manifest: { ...bundle.manifest, runtime: { presentation: "appView" } }, root: Application })] })))
+      application: { bundleIdentifier: id, frame: "declared" }, bundles: [createSynWare({ manifest: { ...bundle.manifest, runtime: { presentation: "appView" } }, root: Application })] })))
       .rejects.toThrow(/applicationMenu: \{ trigger: "content" \}/);
   });
   it("presents the login window before the app launches when sign-in is required", async () => {
@@ -421,7 +421,7 @@ describe("application-only browser host", () => {
     expect(fullscreen.runtime.apps.getApp(id)?.presentation).toBe("appView");
     expect(fullscreen.runtime.apps.getApp(id)?.frame.topBar).toBe("none");
     await act(async () => { await fullscreen.host.dispose(); });
-    const declared = await mount(element(), { application: { id, frame: "declared" } });
+    const declared = await mount(element(), { application: { bundleIdentifier: id, frame: "declared" } });
     expect(declared.runtime.apps.getApp(id)?.presentation).toBe("windowedView");
     expect(declared.runtime.windows.list({ applicationId: id })).toHaveLength(1);
     expect(declared.element.querySelector("[data-syncloudos-application-host]")).toBeNull();

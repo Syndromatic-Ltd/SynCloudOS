@@ -57,8 +57,8 @@ function createAuthorisedTransferRuntime(
   const runtime = authoriseTestRuntime(createTestRuntime({
     ...options,
     initialBundles: options.initialBundles ?? [
-      createTestBundle({ id: "studio", route: "/studio" }),
-      createTestBundle({ id: "publisher", route: "/publisher" }),
+      createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" }),
+      createTestBundle({ bundleIdentifier: "com.example.publisher", route: "/publisher" }),
     ],
   }));
   if (accessClass === "team") {
@@ -67,7 +67,7 @@ function createAuthorisedTransferRuntime(
   return runtime;
 }
 
-function scopedDrag(runtime: ReturnType<typeof createTestRuntime>, appId = "studio") {
+function scopedDrag(runtime: ReturnType<typeof createTestRuntime>, appId = "com.example.studio") {
   const applicationResponderId = `application:${appId}`;
   if (!runtime.responders.get(applicationResponderId)) {
     runtime.responders.register({ id: applicationResponderId, kind: "application", parentId: "workspace", scopeId: applicationResponderId });
@@ -247,7 +247,7 @@ describe("NSE colour transfer", () => {
     fireNativeDrop(screen.getByRole("button", { name: "Keyboard target" }), fallback, 0);
     await waitFor(() => expect(screen.getByRole("button", { name: "Keyboard target" }).textContent).toContain("#ff0000"));
     expect(policy).toHaveBeenCalledWith(expect.objectContaining({
-      source: expect.objectContaining({ appId: "studio" }),
+      source: expect.objectContaining({ appId: "com.example.studio" }),
       representationTypes: ["text/plain"],
       capability: "transfer.same-application",
     }), expect.any(AbortSignal));
@@ -265,9 +265,9 @@ describe("NSE colour transfer", () => {
     </SynCloudOSProvider>);
     await waitFor(() => expect(runtime.commands.inspect().registrations.filter(({ commandId }) => commandId === "nse.drag.begin")).toHaveLength(2));
 
-    runtime.focus.requestFocus("studio:command-source:responder");
+    runtime.focus.requestFocus("com.example.studio:command-source:responder");
     await expect(runtime.commands.dispatch("nse.drag.begin")).resolves.toMatchObject({ status: "executed", value: true });
-    runtime.focus.requestFocus("studio:command-target:responder");
+    runtime.focus.requestFocus("com.example.studio:command-target:responder");
     await expect(runtime.commands.dispatch("nse.drag.drop")).resolves.toMatchObject({ status: "executed", value: true });
     await waitFor(() => expect(screen.getByRole("button", { name: "Command target" }).textContent).toContain("#224466"));
 
@@ -280,14 +280,14 @@ describe("NSE colour transfer", () => {
   it("announces a policy-denied keyboard colour drop and leaves the session idle", async () => {
     const runtime = createTestRuntime({ id: "runtime:colour-keyboard-denied" });
     runtime.policy.registerPolicy("deny-studio", (request, decision) =>
-      request.app?.id === "studio" ? { ...decision, allowed: false, decision: "deny" } : decision,
+      request.app?.bundleIdentifier === "com.example.studio" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
     render(<SynCloudOSProvider runtime={runtime}>
       <NSEColourPanelProvider
         service={runtime.colourPanel}
         drag={{
           manager: runtime.drag,
-          endpoint: { appId: "studio", windowId: "main", responderId: "colour-panel" },
+          endpoint: { appId: "com.example.studio", windowId: "main", responderId: "colour-panel" },
         }}
       >
         <NSEColourWell id="denied-source" aria-label="Denied source" defaultValue={GFXColour.parse("#224466")} />
@@ -331,7 +331,7 @@ describe("NSE colour transfer", () => {
     fireNativeDrop(screen.getByRole("button", { name: "Claimed target" }), transfer, 0);
     fireEvent.dragEnd(source, { dataTransfer: transfer });
     await waitFor(() => expect(policyEntered).toHaveBeenCalled());
-    expect(drag.manager.snapshot().active?.source).toMatchObject({ appId: "studio" });
+    expect(drag.manager.snapshot().active?.source).toMatchObject({ appId: "com.example.studio" });
     releasePolicy(true);
     await waitFor(() => expect(screen.getByRole("button", { name: "Claimed target" }).textContent).toContain("#224466"));
   });
@@ -373,7 +373,7 @@ describe("NSE colour transfer", () => {
           options={{ undoManager: undo }}
           drag={{
             manager: first.drag,
-            endpoint: { appId: "studio", windowId: "main", responderId: "colour-panel" },
+            endpoint: { appId: "com.example.studio", windowId: "main", responderId: "colour-panel" },
           }}
         >
           <NSEColourWell aria-label="Mismatched colour" defaultValue={GFXColour.parse("#000000")} onValueChange={change} />
@@ -403,7 +403,7 @@ describe("NSE data-view transfer hosts", () => {
       adapter={transferAdapter()}
       columns={[{ id: "label", title: "Label", value: (item: TransferItem) => item.label, width: { min: 80, ideal: 120, max: 200 } }]}
       dragBinding={drag.binding}
-      dragEndpoint={{ appId: "gallery", windowId: "main", responderId: "table" }}
+      dragEndpoint={{ appId: "com.example.gallery", windowId: "main", responderId: "table" }}
       onValidateDrop={validate}
       onAcceptDrop={accept}
     />);
@@ -425,7 +425,7 @@ describe("NSE data-view transfer hosts", () => {
       adapter={transferAdapter()}
       columns={[{ id: "label", title: "Label", value: (item: TransferItem) => item.label, width: { min: 80, ideal: 120, max: 200 } }]}
       dragBinding={drag.binding}
-      dragEndpoint={{ appId: "gallery", windowId: "main", responderId: "table-command-responder" }}
+      dragEndpoint={{ appId: "com.example.gallery", windowId: "main", responderId: "table-command-responder" }}
       commands={runtime.commands}
       responderId="table-command-responder"
       onAcceptDrop={accept}
@@ -443,7 +443,7 @@ describe("NSE data-view transfer hosts", () => {
       columns={[{ id: "label", title: "Label", value: (item: TransferItem) => item.label, width: { min: 80, ideal: 120, max: 200 } }]}
       state={{ kind: "read-only", message: "Read only" }}
       dragBinding={drag.binding}
-      dragEndpoint={{ appId: "gallery", windowId: "main", responderId: "table-command-responder" }}
+      dragEndpoint={{ appId: "com.example.gallery", windowId: "main", responderId: "table-command-responder" }}
       commands={runtime.commands}
       responderId="table-command-responder"
     />);
@@ -461,7 +461,7 @@ describe("NSE data-view transfer hosts", () => {
       layout={createListCollectionLayout(32)}
       renderItem={({ item }: { item: TransferItem }) => <span>{item.label}</span>}
       dragBinding={drag.binding}
-      dragEndpoint={{ appId: "gallery", windowId: "main", responderId: "collection" }}
+      dragEndpoint={{ appId: "com.example.gallery", windowId: "main", responderId: "collection" }}
       onValidateDrop={validate}
       onAcceptDrop={accept}
     />);
@@ -479,8 +479,8 @@ describe("NSE data-view transfer hosts", () => {
       { id: "runtime:data-view-cross-host", dragAuthorisation: { authorise: policy } },
       "team",
     );
-    const sourceDrag = scopedDrag(runtime, "studio");
-    const targetDrag = scopedDrag(runtime, "publisher");
+    const sourceDrag = scopedDrag(runtime, "com.example.studio");
+    const targetDrag = scopedDrag(runtime, "com.example.publisher");
     const source = transferAdapter();
     const target = transferAdapter();
     source.controller.select(["one"]);
@@ -525,8 +525,8 @@ describe("NSE data-view transfer hosts", () => {
       ids: ["one"], targetId: "two", insertionIndex: 2, operation: "below",
     })));
     expect(policy).toHaveBeenCalledWith(expect.objectContaining({
-      source: expect.objectContaining({ appId: "studio", responderId: "studio:source-table" }),
-      destination: expect.objectContaining({ appId: "publisher", responderId: "publisher:target-collection" }),
+      source: expect.objectContaining({ appId: "com.example.studio", responderId: "com.example.studio:source-table" }),
+      destination: expect.objectContaining({ appId: "com.example.publisher", responderId: "com.example.publisher:target-collection" }),
     }), expect.any(AbortSignal));
 
     validateAllowed = false;
@@ -672,7 +672,7 @@ describe("NSE data-view transfer hosts", () => {
           columns={[{ id: "label", title: "Label", value: (item: TransferItem) => item.label, width: { min: 80, ideal: 120, max: 200 } }]}
           state={state}
           dragBinding={tableDrag.binding}
-          dragEndpoint={{ appId: "gallery", windowId: "main", responderId: "table" }}
+          dragEndpoint={{ appId: "com.example.gallery", windowId: "main", responderId: "table" }}
         />
         <NSECollectionView
           aria-label={`State collection ${kind}`}
@@ -681,7 +681,7 @@ describe("NSE data-view transfer hosts", () => {
           renderItem={({ item }: { item: TransferItem }) => <span>{item.label}</span>}
           state={state}
           dragBinding={collectionDrag.binding}
-          dragEndpoint={{ appId: "gallery", windowId: "main", responderId: "collection" }}
+          dragEndpoint={{ appId: "com.example.gallery", windowId: "main", responderId: "collection" }}
         />
         <NSEOutline
           aria-label={`State outline ${kind}`}
@@ -691,7 +691,7 @@ describe("NSE data-view transfer hosts", () => {
           labelForItem={({ label }) => label}
           state={state}
           dragBinding={outlineDrag.binding}
-          dragEndpoint={{ appId: "gallery", windowId: "main", responderId: "outline" }}
+          dragEndpoint={{ appId: "com.example.gallery", windowId: "main", responderId: "outline" }}
         />
       </>);
       for (const host of [

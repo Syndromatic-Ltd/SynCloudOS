@@ -26,7 +26,7 @@ import { defineWebspring } from "../../src/Webspring/Webspring";
 import { WebspringIconEffect, WebspringIconEffectProvider } from "../../src/Webspring/WebspringIconEffect";
 
 const manifest = {
-  schemaVersion: 1, id: "test.icon-decoration", version: "1.0.0", title: "Decoration",
+  schemaVersion: 1, bundleIdentifier: "com.example.test.icon-decoration", version: "1.0.0", displayName: "Decoration",
   webspringShell: { views: [{ id: "custom", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
     defaults: { desktop: "custom", tablet: "custom", mobile: "custom" }, homeRoute: "/",
     branding: { name: { key: "name", fallback: "Decoration" } } },

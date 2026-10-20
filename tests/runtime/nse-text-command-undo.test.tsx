@@ -40,7 +40,7 @@ describe("current text owner command history", () => {
     const f = await fixture();
     render(<NSETextView session={f.session} label="Note" />);
     f.runtime.focus.requestFocus(f.responderId);
-    expect(f.runtime.responders.resolveChain().map(item => item.id)).toContain("application:current-text-tests");
+    expect(f.runtime.responders.resolveChain().map(item => item.id)).toContain("application:com.example.current-text-tests");
     await f.runtime.commands.dispatch("text.selectAll");
     await expect(f.runtime.commands.dispatch("text.insert", "One two")).resolves.toMatchObject({ status: "executed", responderId: f.responderId });
     expect(f.history.canUndo).toBe(true);

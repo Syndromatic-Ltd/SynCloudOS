@@ -83,9 +83,9 @@ function runtimeWithStagePresentations() {
 const webspring = defineWebspring({
   manifest: {
     schemaVersion: 1,
-    id: "com.example.board",
+    bundleIdentifier: "com.example.board",
     version: "1.0.0",
-    title: "Board fixture",
+    displayName: "Board fixture",
     webspringShell: {
       views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
       defaults: { desktop: "board", tablet: "board", mobile: "board" },
@@ -133,9 +133,9 @@ describe("Webspring owner-local choreography", () => {
   });
   it("reports both real MultiSwitch roles once and leaves settlement with LaunchServices", () => {
     const runtime = createTestRuntime();
-    runtime.apps.registerBundle(createTestBundle({ id: "from", route: "/from" }));
-    runtime.apps.registerBundle(createTestBundle({ id: "to", route: "/to" }));
-    const apps = Object.fromEntries(runtime.apps.getAllApps().map((app) => [app.id, app]));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.from", route: "/from" }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.to", route: "/to" }));
+    const apps = Object.fromEntries(runtime.apps.getAllApps().map((app) => [app.bundleIdentifier, app]));
     const complete = vi.spyOn(runtime.launchServices, "completeMultiSwitch").mockReturnValue(true);
     const switchId = "switch:animation";
     const view = render(
@@ -144,12 +144,12 @@ describe("Webspring owner-local choreography", () => {
           windowContentRegistry={new WindowContentRendererRegistry()}
           apps={apps}
           lifecycle={{ from: "suspended", to: "active" }}
-          activeAppId="to"
+          activeAppId="com.example.to"
           multiSwitch={{
             id: switchId,
             status: "switching",
-            fromAppId: "from",
-            toAppId: "to",
+            fromAppId: "com.example.from",
+            toAppId: "com.example.to",
             fromRoute: "/from",
             toRoute: "/to",
             source: "keyboard",
@@ -171,8 +171,8 @@ describe("Webspring owner-local choreography", () => {
 
   it("reports the real application-exit role to Webspring once, when the stage exit settles", () => {
     const runtime = createTestRuntime();
-    runtime.apps.registerBundle(createTestBundle({ id: "leaving", route: "/leaving" }));
-    const apps = Object.fromEntries(runtime.apps.getAllApps().map((app) => [app.id, app]));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.leaving", route: "/leaving" }));
+    const apps = Object.fromEntries(runtime.apps.getAllApps().map((app) => [app.bundleIdentifier, app]));
     const complete = vi.spyOn(runtime.webspring, "completeReturnRole").mockReturnValue(true);
     const stage = (returnTransitionId: string | null) => (
       <SynCloudOSProvider runtime={runtime}>
@@ -180,7 +180,7 @@ describe("Webspring owner-local choreography", () => {
           windowContentRegistry={new WindowContentRendererRegistry()}
           apps={apps}
           lifecycle={{ leaving: "active" }}
-          activeAppId="leaving"
+          activeAppId="com.example.leaving"
           returnTransitionId={returnTransitionId}
         />
       </SynCloudOSProvider>
@@ -196,7 +196,7 @@ describe("Webspring owner-local choreography", () => {
   });
 
   function launchingSnapshot(runtime: ReturnType<typeof createTestRuntime>, appIds: readonly string[], launchTransitionId: string) {
-    for (const id of appIds) runtime.apps.registerBundle(createTestBundle({ id, route: `/${id}` }));
+    for (const id of appIds) runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` }));
     const base = runtime.store.getSnapshot();
     return {
       ...base,
@@ -208,7 +208,7 @@ describe("Webspring owner-local choreography", () => {
 
   it("covers a launch when a site's own launcher reports its exit settled", () => {
     const runtime = createTestRuntime();
-    const snapshot = launchingSnapshot(runtime, ["first", "second", "third"], "launch:custom");
+    const snapshot = launchingSnapshot(runtime, ["com.example.first", "com.example.second", "com.example.third"], "launch:custom");
     const complete = vi.spyOn(runtime.webspring, "completeLaunchCover").mockReturnValue(true);
     const controller = new WebspringController(runtime, webspring, undefined);
     const model = controller.model(snapshot, "desktop");
@@ -216,12 +216,12 @@ describe("Webspring owner-local choreography", () => {
     // its icons out) reports it settled through its actions.
     controller.actions.completeLaunch(model.launchTransitionId!, model.launchingAppId!);
     expect(complete).toHaveBeenCalledTimes(1);
-    expect(complete).toHaveBeenCalledWith("launch:custom", "first");
+    expect(complete).toHaveBeenCalledWith("launch:custom", "com.example.first");
   });
 
   it("leaves a Board launch's cover to the runtime: the Board has no launcher exit of its own", async () => {
     const { runtime, presentations } = runtimeWithStagePresentations();
-    const snapshot = launchingSnapshot(runtime, ["first", "second"], "launch:board");
+    const snapshot = launchingSnapshot(runtime, ["com.example.first", "com.example.second"], "launch:board");
     const complete = vi.spyOn(runtime.webspring, "completeLaunchCover").mockReturnValue(true);
     const controller = new WebspringController(runtime, webspring, undefined);
     const view = render(
@@ -237,8 +237,8 @@ describe("Webspring owner-local choreography", () => {
   it("completes reduced app entry immediately without bypassing the launch-cover gate", () => {
     const runtime = createTestRuntime();
     runtime.settings.set("motion", "reduced");
-    runtime.apps.registerBundle(createTestBundle({ id: "reduced-entry", route: "/reduced-entry" }));
-    const app = runtime.apps.getApp("reduced-entry");
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.reduced-entry", route: "/reduced-entry" }));
+    const app = runtime.apps.getApp("com.example.reduced-entry");
     expect(app).toBeTruthy();
     const settlement = runtime.presentationSettlements.begin({
       operationId: "operation:reduced-entry",
@@ -249,7 +249,7 @@ describe("Webspring owner-local choreography", () => {
       <SynCloudOSProvider runtime={runtime}>
         <ApplicationStageView
           windowContentRegistry={new WindowContentRendererRegistry()}
-          stage={{ id: "application-stage:reduced-entry", appId: "reduced-entry", title: app!.window.title, isFocused: true, zIndex: 1 }}
+          stage={{ id: "application-stage:com.example.reduced-entry", appId: "com.example.reduced-entry", title: app!.window.title, isFocused: true, zIndex: 1 }}
           app={app!}
           lifecycle="active"
           presentationSettlementId={settlement.id}
@@ -268,10 +268,10 @@ describe("Webspring owner-local choreography", () => {
   it("settles application entry from the app surface animation, with no content card", async () => {
     const { runtime, presentations } = runtimeWithStagePresentations();
     runtime.apps.registerBundle(createTestBundle({
-      id: "defacto-entry",
+      bundleIdentifier: "com.example.defacto-entry",
       route: "/defacto-entry",
     }));
-    const app = runtime.apps.getApp("defacto-entry");
+    const app = runtime.apps.getApp("com.example.defacto-entry");
     expect(app).toBeTruthy();
     const settlement = runtime.presentationSettlements.begin({
       operationId: "operation:defacto-entry",
@@ -282,7 +282,7 @@ describe("Webspring owner-local choreography", () => {
       <SynCloudOSProvider runtime={runtime}>
         <ApplicationStageView
           windowContentRegistry={new WindowContentRendererRegistry()}
-          stage={{ id: "application-stage:defacto-entry", appId: "defacto-entry", title: app!.window.title, isFocused: true, zIndex: 1 }}
+          stage={{ id: "application-stage:com.example.defacto-entry", appId: "com.example.defacto-entry", title: app!.window.title, isFocused: true, zIndex: 1 }}
           app={app!}
           lifecycle="active"
           presentationSettlementId={settlement.id}
@@ -308,8 +308,8 @@ describe("Webspring owner-local choreography", () => {
     vi.useFakeTimers();
     try {
       const runtime = createTestRuntime();
-      runtime.apps.registerBundle(createTestBundle({ id: "alpha", route: "/alpha" }));
-      runtime.apps.registerBundle(createTestBundle({ id: "beta", route: "/beta" }));
+      runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.alpha", route: "/alpha" }));
+      runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.beta", route: "/beta" }));
       const controller = new WebspringController(runtime, webspring, undefined);
       const view = render(<SynCloudOSProvider runtime={runtime}>
         <WebspringBoardView model={controller.model(runtime.store.getSnapshot(), "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={webspring.folderPresentation} />
@@ -317,14 +317,14 @@ describe("Webspring owner-local choreography", () => {
 
       fireEvent.pointerDown(screen.getByRole("button", { name: "Open Alpha" }), { pointerId: 7, isPrimary: true });
       act(() => vi.advanceTimersByTime(520));
-      expect(runtime.store.getSnapshot().webspring.layout).toMatchObject({ isEditing: true, draggingItemId: "alpha" });
+      expect(runtime.store.getSnapshot().webspring.layout).toMatchObject({ isEditing: true, draggingItemId: "com.example.alpha" });
 
       fireEvent.pointerCancel(view.container.querySelector("main")!, { pointerId: 7 });
       expect(runtime.store.getSnapshot().webspring.layout.draggingItemId).toBeNull();
       view.unmount();
 
       const cancellationRuntime = createTestRuntime();
-      cancellationRuntime.apps.registerBundle(createTestBundle({ id: "cancel", route: "/cancel" }));
+      cancellationRuntime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.cancel", route: "/cancel" }));
       const cancellationController = new WebspringController(cancellationRuntime, webspring, undefined);
       const pending = render(<SynCloudOSProvider runtime={cancellationRuntime}>
         <WebspringBoardView model={cancellationController.model(cancellationRuntime.store.getSnapshot(), "mobile")} actions={cancellationController.actions} applicationOutlet={null} folderPresentation={webspring.folderPresentation} />
@@ -351,13 +351,13 @@ describe("Webspring owner-local choreography", () => {
         ...webspring.manifest,
         webspringShell: {
           ...webspring.manifest.webspringShell,
-          folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "folders.tools", fallback: "Tools" }, order: 0, apps: ["beta", "gamma"] }] },
+          folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "folders.tools", fallback: "Tools" }, order: 0, apps: ["com.example.beta", "com.example.gamma"] }] },
         },
       },
       components: { board: WebspringBoardView },
     });
     const runtime = createTestRuntime();
-    for (const id of ["alpha", "beta", "gamma"]) runtime.apps.registerBundle(createTestBundle({ id, route: `/${id}` }));
+    for (const id of ["com.example.alpha", "com.example.beta", "com.example.gamma"]) runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` }));
     runtime.webspring.configureFolders(folderShell.manifest.webspringShell.folders!);
     const controller = new WebspringController(runtime, folderShell, undefined);
     const board = () => <SynCloudOSProvider runtime={runtime}>
@@ -424,7 +424,7 @@ describe("Webspring owner-local choreography", () => {
       components: { board: WebspringBoardView },
     });
     const runtime = createTestRuntime();
-    for (const id of ["alpha", "beta", "gamma"]) runtime.apps.registerBundle(createTestBundle({ id, route: `/${id}` }));
+    for (const id of ["com.example.alpha", "com.example.beta", "com.example.gamma"]) runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` }));
     runtime.webspring.configureFolders(shell.manifest.webspringShell.folders!);
     const controller = new WebspringController(runtime, shell, undefined);
     function Board() {
@@ -451,20 +451,20 @@ describe("Webspring owner-local choreography", () => {
       fireEvent.pointerMove(main, { pointerId: 3, clientX: 130, clientY: 70 });
       await rest(200);
       expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBeNull();
-      expect(order().order).toEqual(["alpha", "gamma", "beta"]);
+      expect(order().order).toEqual(["com.example.alpha", "com.example.gamma", "com.example.beta"]);
       fireEvent.pointerUp(main, { pointerId: 3, clientX: 130, clientY: 70 });
 
       // Gamma's centre rests on Alpha's artwork: the drop well appears and the release merges.
       fireEvent.pointerDown(within(view.container).getByRole("button", { name: "Move Gamma" }), { pointerId: 4, isPrimary: true, button: 0, clientX: 130, clientY: 30 });
       fireEvent.pointerMove(main, { pointerId: 4, clientX: 30, clientY: 30 });
       await rest(400);
-      expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBe("alpha");
-      expect(order().order).toEqual(["alpha", "gamma", "beta"]);
+      expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBe("com.example.alpha");
+      expect(order().order).toEqual(["com.example.alpha", "com.example.gamma", "com.example.beta"]);
       fireEvent.pointerUp(main, { pointerId: 4, clientX: 30, clientY: 30 });
 
       const [folderId] = order().order.filter((id) => id.startsWith("folder."));
-      expect(order().order).toEqual([folderId, "beta"]);
-      expect(order().folders[folderId]).toEqual({ apps: ["alpha", "gamma"] });
+      expect(order().order).toEqual([folderId, "com.example.beta"]);
+      expect(order().folders[folderId]).toEqual({ apps: ["com.example.alpha", "com.example.gamma"] });
       view.unmount();
     } finally {
       vi.restoreAllMocks();
@@ -480,7 +480,7 @@ describe("Webspring owner-local choreography", () => {
       fireEvent.pointerDown(within(view.container).getByRole("button", { name: "Move Gamma" }), { pointerId: 3, isPrimary: true, button: 0, clientX: 259, clientY: 1 });
       fireEvent.pointerMove(main, { pointerId: 3, clientX: 99, clientY: 1 });
       await rest(200);
-      expect(order().order).toEqual(["gamma", "alpha", "beta"]);
+      expect(order().order).toEqual(["com.example.gamma", "com.example.alpha", "com.example.beta"]);
       fireEvent.pointerUp(main, { pointerId: 3, clientX: 99, clientY: 1 });
       view.unmount();
     } finally {
@@ -491,7 +491,7 @@ describe("Webspring owner-local choreography", () => {
   it("springs a folder open under a resting app and drops it inside the panel", async () => {
     mockBoardRects();
     try {
-      const { runtime, view, main, rest, order } = boardFixture([{ id: "folder.tools", order: 0, apps: ["gamma"] }]);
+      const { runtime, view, main, rest, order } = boardFixture([{ id: "folder.tools", order: 0, apps: ["com.example.gamma"] }]);
       fireEvent.click(within(view.container).getByRole("button", { name: "Reorder applications" }));
       // Alpha rests on the folder: the well arms, then the folder springs open under it.
       fireEvent.pointerDown(within(view.container).getByRole("button", { name: "Move Alpha" }), { pointerId: 5, isPrimary: true, button: 0, clientX: 130, clientY: 30 });
@@ -509,10 +509,10 @@ describe("Webspring owner-local choreography", () => {
       fireEvent.pointerMove(main, { pointerId: 5, clientX: 30, clientY: 150 });
       await rest(200);
       // Alpha is not yet a member, so hovering the panel leaves the Board's order alone until release.
-      expect(order().order).toEqual(["folder.tools", "alpha", "beta"]);
+      expect(order().order).toEqual(["folder.tools", "com.example.alpha", "com.example.beta"]);
       fireEvent.pointerUp(main, { pointerId: 5, clientX: 30, clientY: 150 });
-      expect(order().folders["folder.tools"]).toEqual({ apps: ["alpha", "gamma"] });
-      expect(order().order).toEqual(["folder.tools", "beta"]);
+      expect(order().folders["folder.tools"]).toEqual({ apps: ["com.example.alpha", "com.example.gamma"] });
+      expect(order().order).toEqual(["folder.tools", "com.example.beta"]);
       view.unmount();
     } finally {
       vi.restoreAllMocks();

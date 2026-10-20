@@ -35,7 +35,7 @@ function literalValue(expression, sourceFile, seen = new Set()) {
 export function parseManifest(path) {
   const source = ts.createSourceFile(path, readFileSync(path, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   const assignment = source.statements.find(ts.isExportAssignment);
-  if (!assignment) throw new TypeError("Info.ts must use an export default manifest overrides object.");
+  if (!assignment) throw new TypeError(`${path} must use an export default manifest object.`);
   return literalValue(assignment.expression, source);
 }
 

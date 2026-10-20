@@ -125,7 +125,7 @@ This table lists every stable uppercase diagnostic code in the offline catalogue
 | `SCOS_APP_NOT_RUNNING` | The app bound to `SCOS` has no running session. |
 | `SCOS_AMBIGUOUS_SESSION` | Several runtimes mount the same app; select one with `useSCOS()`. |
 | `SCOS_UNBOUND` | The calling file has no app binding; use `SCOS` in an app folder or `useSCOS()` in a shared component. |
-| `SCOS_APP_NOT_FOUND` | `SCOS.open` could not find the requested app ID in the catalogue. |
+| `SCOS_APP_NOT_FOUND` | `SCOS.open` could not find the requested bundle identifier or route in the catalogue. |
 | `APP_DISABLED` | A required application service or capability is unavailable. |
 | `POLICYKIT_AUTHORISE_THROWN` | Launch authorisation callback threw. |
 | `RUNTIME_TRANSACTION_FAILED` | Runtime command or transaction observer threw. |

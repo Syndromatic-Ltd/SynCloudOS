@@ -39,10 +39,10 @@ import { getRuntimeSettlement } from "../../src/SynCloudOS/Testing/runtimeSettle
 import type { SynWareRouteLazyModule } from "../../src/SynCloudOS/Routing/appRouteTypes";
 import { createTestRuntime, registerTestSynWare } from "./helpers";
 
-const dataProbeGraph = defineSynWareRoutes({ id: "route-data-types", routes: [{ name: "music", path: "" }] });
+const dataProbeGraph = defineSynWareRoutes({ id: "route-data-types", routes: [{ name: "com.example.music", path: "" }] });
 // Compile-only public inference probes; executed by the focused TypeScript check.
 function useRouteDataTypeProbe() {
-  const node = useRouteData(dataProbeGraph, "music");
+  const node = useRouteData(dataProbeGraph, "com.example.music");
   // @ts-expect-error A data view is bound to names declared by its graph.
   useRouteData(dataProbeGraph, "foreign");
   if (node?.state === "loading") {
@@ -121,7 +121,7 @@ function fixture(options: {
   const routeGraph = defineSynWareRoutes({
     id: "routing.outlets",
     routes: [{
-      name: "music",
+      name: "com.example.music",
       path: "",
       component: Music,
       errorComponent: ParentError,
@@ -146,7 +146,7 @@ function fixture(options: {
         }],
       }],
     }],
-  } as const).bind("/music", "music");
+  } as const).bind("/music", "com.example.music");
   const modules = createRouteModuleLoader({ getBundleGeneration: () => 1 });
   const session = createAppRouteSession({
     graph: routeGraph,
@@ -478,7 +478,7 @@ describe("Routing II React outlets", () => {
     const graph = defineSynWareRoutes({
       id: "routing.mounted.outlet",
       routes: [{
-        name: "music",
+        name: "com.example.music",
         path: "",
         children: [{
           name: "music.artist",
@@ -490,9 +490,9 @@ describe("Routing II React outlets", () => {
     const definition = createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "music",
+        bundleIdentifier: "com.example.music",
         version: "1.0.0",
-        title: "Music",
+        displayName: "Music",
         routes: [{ path: "/music", match: "prefix", primary: true }],
       },
       root: () => <RouteOutlet />,
@@ -513,7 +513,7 @@ describe("Routing II React outlets", () => {
 
     const view = render(
       <HostSiteBrandingProvider value={branding}>
-        <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:music">
+        <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.music">
           <RouteOutlet />
         </SynWareRuntimeMount>
       </HostSiteBrandingProvider>,
@@ -532,13 +532,13 @@ describe("Routing II React outlets", () => {
     const cleanupGate = deferred<void>();
     const dispose = vi.fn(() => { cleaning.resolve(); return cleanupGate.promise; });
     const graph = defineSynWareRoutes({ id: "routing.mounted.cleanup", routes: [{
-      name: "music",
+      name: "com.example.music",
       path: "",
       load: () => ({ dispose }),
       component: () => <div data-testid="mounted-cleanup-route">Mounted cleanup route</div>,
     }] });
     const definition = createSynWare({
-      manifest: { schemaVersion: 1, id: "music", version: "1.0.0", title: "Music",
+      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music",
         routes: [{ path: "/music", match: "prefix", primary: true }] },
       root: () => <RouteOutlet />,
       routes: graph,
@@ -552,7 +552,7 @@ describe("Routing II React outlets", () => {
       await expect(runtime.routes.openRoute("/music").result).resolves.toMatchObject({ status: "completed", committed: true });
       view = render(
         <HostSiteBrandingProvider value={{ name: "Routing cleanup host", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
-          <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:music"><RouteOutlet /></SynWareRuntimeMount>
+          <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.music"><RouteOutlet /></SynWareRuntimeMount>
         </HostSiteBrandingProvider>,
       );
       expect(await screen.findByTestId("mounted-cleanup-route")).not.toBeNull();
@@ -560,7 +560,7 @@ describe("Routing II React outlets", () => {
       await cleaning.promise;
       expect(dispose).toHaveBeenCalledOnce();
       expect(registry.getState().pending).toEqual(expect.arrayContaining([
-        expect.objectContaining({ owner: "route-session", kind: "cleanup", label: "music" }),
+        expect.objectContaining({ owner: "route-session", kind: "cleanup", label: "com.example.music" }),
       ]));
       let settled = false;
       const receipt = registry.settled({ timeoutMs: 1000 }).then(result => { settled = true; return result; });
@@ -586,11 +586,11 @@ describe("Routing II React outlets", () => {
     const childLoad = vi.fn(() => { if (failed) throw new Error("album unavailable"); return "album restored"; });
     const mounts = vi.fn();
     const Music = () => { useEffect(() => { mounts(); }, []); return <section data-testid="retry-player"><RouteOutlet /></section>; };
-    const graph = defineSynWareRoutes({ id: "mounted.retry", routes: [{ name: "music", path: "", component: Music, beforeEnter: parentGuard,
+    const graph = defineSynWareRoutes({ id: "mounted.retry", routes: [{ name: "com.example.music", path: "", component: Music, beforeEnter: parentGuard,
       errorComponent: ({ error, retry }) => <div role="alert">{String(error)}<button onClick={retry}>Retry route</button></div>,
       children: [{ name: "album", path: "album/:id", load: childLoad, component: ({ routeData }) => <div data-testid="retry-album">{String(routeData)}</div> }],
     }] });
-    const definition = createSynWare({ manifest: { schemaVersion: 1, id: "music", version: "1.0.0", title: "Music",
+    const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music",
       routes: [{ path: "/music", match: "prefix", primary: true }], services: [{ id: "routing", required: true }], permissions: ["app.open.public"] },
       root: () => <RouteOutlet />, routes: graph });
     const app = registerTestSynWare(runtime, definition);
@@ -602,7 +602,7 @@ describe("Routing II React outlets", () => {
       await first.result;
       view = render(
         <HostSiteBrandingProvider value={{ name: "Music", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
-          <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:music"><RouteOutlet /></SynWareRuntimeMount>
+          <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.music"><RouteOutlet /></SynWareRuntimeMount>
         </HostSiteBrandingProvider>,
       );
       expect((await screen.findByRole("alert")).textContent).toContain("album unavailable");

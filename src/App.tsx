@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { getSynWareNamespace } from "./SynCloudOS/AppSDK/useStrings";
 import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
 import { WebspringHost } from "./Webspring/WebspringHost";
 import type { SynCloudOSShellResources } from "./Webspring/WebspringController";
@@ -56,7 +57,7 @@ export function App({ shell, shellResources, authentication }: {
   const localeVersion = useRuntimeSelector((snapshot) => snapshot.localeServices.dictionaryVersion);
   const siteNameKey = shell.manifest.webspringShell.branding.name.key;
   const siteName = useMemo(() => {
-    const translated = runtime.locale.t(siteNameKey, undefined, shell.manifest.id);
+    const translated = runtime.locale.t(siteNameKey, undefined, getSynWareNamespace(shell.manifest.bundleIdentifier));
     return translated === siteNameKey ? shell.manifest.webspringShell.branding.name.fallback ?? siteNameKey : translated;
   }, [localeVersion, runtime, shell, siteNameKey]);
   const [startupPhase, setStartupPhase] = useState<SystemStartupPhase>("booting");

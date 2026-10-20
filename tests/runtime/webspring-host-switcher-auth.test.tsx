@@ -35,7 +35,7 @@ afterEach(async () => {
 });
 const shell = defineWebspring({
   manifest: {
-    schemaVersion: 1, id: "test.switcher-host", version: "1.0.0", title: "Switcher host",
+    schemaVersion: 1, bundleIdentifier: "com.example.test.switcher-host", version: "1.0.0", displayName: "Switcher host",
     webspringShell: {
       views: [{ id: "main", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
       defaults: { desktop: "main", tablet: "main", mobile: "main" }, homeRoute: "/",
@@ -46,8 +46,8 @@ const shell = defineWebspring({
 });
 async function mountHost(authentication: "disabled" | "optional" | "required", startupPhase?: "complete", initialPathname = authentication === "required" ? "/" : "/alpha") {
   const runtime = createTestRuntime({ authenticationPolicy: authentication, initialBundles: [
-    createTestBundle({ id: "alpha", route: "/alpha", policy: { public: true } }),
-    createTestBundle({ id: "beta", route: "/beta", policy: { public: true } }),
+    createTestBundle({ bundleIdentifier: "com.example.alpha", route: "/alpha", policy: { public: true } }),
+    createTestBundle({ bundleIdentifier: "com.example.beta", route: "/beta", policy: { public: true } }),
   ] });
   runtimes.push(runtime);
   await runtime.boot({ initialPathname });
@@ -70,9 +70,9 @@ describe("WebspringHost anonymous switcher availability", () => {
       fireEvent.click(await screen.findByRole("button", { name: "Open QuickSwitch" }));
       expect(await screen.findByRole("dialog", { name: "QuickSwitch" })).toBeTruthy();
       fireEvent.click(screen.getByRole("option", { name: /^Beta,/ }));
-      await waitFor(() => expect(runtime.store.getSnapshot().application.activeAppId).toBe("beta"));
+      await waitFor(() => expect(runtime.store.getSnapshot().application.activeAppId).toBe("com.example.beta"));
       expect(transitions).toEqual(expect.arrayContaining([expect.objectContaining({
-        status: "switching", fromAppId: "alpha", toAppId: "beta",
+        status: "switching", fromAppId: "com.example.alpha", toAppId: "com.example.beta",
       })]));
       expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(false);
     } finally { unsubscribe(); }

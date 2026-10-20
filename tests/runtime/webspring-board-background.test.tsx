@@ -36,9 +36,9 @@ function defineBoard(options: Options = {}) {
   return defineWebspring({
     manifest: {
       schemaVersion: 1,
-      id: "com.example.background",
+      bundleIdentifier: "com.example.background",
       version: "1.0.0",
-      title: "Background fixture",
+      displayName: "Background fixture",
       webspringShell: {
         views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
         defaults: { desktop: "board", tablet: "board", mobile: "board" },

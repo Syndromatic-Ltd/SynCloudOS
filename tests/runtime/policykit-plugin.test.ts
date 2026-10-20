@@ -46,7 +46,7 @@ describe("PolicyKit evaluation and PluginRegistry policy contracts", () => {
     const { PolicyKit } = createRuntimeHarness(createTestRuntime());
     const publicSubject = createSubject("public", ["app.open.public"], false);
     const protectedApp = createTestManifest({
-      id: "protected-trace-app",
+      bundleIdentifier: "com.example.protected-trace-app",
       policy: {
         requiresLogin: true,
         requiredRoles: ["employee"],
@@ -87,7 +87,7 @@ describe("PolicyKit evaluation and PluginRegistry policy contracts", () => {
       originSummary: {
         origin: "test",
         source: "policykit-plugin.test",
-        appId: "protected-trace-app"
+        appId: "com.example.protected-trace-app"
       },
       contextSummary: {
         values: {
@@ -143,7 +143,7 @@ describe("PolicyKit evaluation and PluginRegistry policy contracts", () => {
   it("enforces required access classes independently of capabilities", async () => {
     const { PolicyKit } = createRuntimeHarness(createTestRuntime());
     const protectedApp = createTestManifest({
-      id: "team-gallery",
+      bundleIdentifier: "com.example.team-gallery",
       type: "system",
       policy: {
         requiresLogin: true,

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../../SynCloudOS/Identity/bundleIdentifier.mjs";
 import React, { useEffect, useRef } from "react";
 import {
   AppPresentationErrorFallback,
@@ -43,7 +44,7 @@ function ApplicationWindowContent({
   readonly zIndex: number;
 }) {
   const locale = useWebspringLocale();
-  const lifecycle = useRuntimeSelector((snapshot) => snapshot.lifecycle[app.id] ?? "registered");
+  const lifecycle = useRuntimeSelector((snapshot) => snapshot.lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] ?? "registered");
   const presentationSettlementId = useRuntimeSelector((snapshot) => snapshot.webspring.presentationSettlementId);
   const completedSettlementRef = useRef<string | null>(null);
   const loading = lifecycle === "loading" || lifecycle === "launching";
@@ -62,7 +63,7 @@ function ApplicationWindowContent({
       scope="app"
       app={app}
       presentation={{ id: windowControllerId, kind: "window", zIndex }}
-      resetKey={`${windowControllerId}:${app.id}`}
+      resetKey={`${windowControllerId}:${app.bundleIdentifier}`}
       fallback={() => (
         <AppPresentationErrorFallback
           app={app}
@@ -115,13 +116,14 @@ export function syncApplicationWindowContentRenderers(
     registrations.delete(id);
   }
   for (const app of Object.values(apps)) {
-    const current = registrations.get(app.id);
+    const key = normalizeBundleIdentifier(app.bundleIdentifier);
+    const current = registrations.get(key);
     if (current?.app === app) continue;
     if (current) {
       current.handle.update(renderer(app));
-      registrations.set(app.id, { app, handle: current.handle });
+      registrations.set(key, { app, handle: current.handle });
     } else {
-      registrations.set(app.id, { app, handle: registry.register(`application:${app.id}`, renderer(app)) });
+      registrations.set(key, { app, handle: registry.register(`application:${key}`, renderer(app)) });
     }
   }
 }
@@ -132,7 +134,7 @@ export function createApplicationWindowContentRendererRegistry(
 ): WindowContentRendererRegistry {
   const registry = new WindowContentRendererRegistry();
   for (const app of Object.values(apps)) {
-    registry.register(`application:${app.id}`, ({ window }) => (
+    registry.register(`application:${normalizeBundleIdentifier(app.bundleIdentifier)}`, ({ window }) => (
       <ApplicationWindowContent
         runtime={runtime}
         app={app}

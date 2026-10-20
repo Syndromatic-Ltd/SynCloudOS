@@ -38,13 +38,13 @@ export interface ClassApplicationHost {
  * its windows through the production window content renderer, so a test sees
  * the lifecycle, the window guards and the controllers' views as a host does.
  */
-export function createClassApplicationHost(AppClass: NSEApplicationClass | ComponentType, appId = "classes-app"): ClassApplicationHost {
+export function createClassApplicationHost(AppClass: NSEApplicationClass | ComponentType, appId = "com.example.classes-app"): ClassApplicationHost {
   const animationLayers = createBrowserAnimationLayerHost(document, { now: () => 0, requestFrame: () => () => {}, reducedMotion: true, suspended: false });
   const runtime = authoriseTestRuntime(createTestRuntime({
     id: `runtime:${appId}:${++hostSequence}`,
     environment: { ...createTestRuntimeEnvironment(), animationLayers },
   }));
-  const manifest: SynWareManifestV1 = { schemaVersion: 1, id: appId, version: "1.0.0", title: "Class application" };
+  const manifest: SynWareManifestV1 = { schemaVersion: 1, bundleIdentifier: appId, version: "1.0.0", displayName: "Class application" };
   registerTestSynWare(
     runtime,
     isNSEApplicationClass(AppClass)

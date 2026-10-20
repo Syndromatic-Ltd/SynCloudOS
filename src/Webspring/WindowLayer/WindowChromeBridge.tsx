@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../../SynCloudOS/Identity/bundleIdentifier.mjs";
 import React, { useEffect, useMemo, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { createWindowPointerGesture, resolveWindowPresentation, type SynCloudOSRuntime } from "../../SynCloudOS/SynCloudOS";
@@ -160,7 +161,7 @@ class WindowChromeFailureBoundary extends React.Component<{
   componentDidCatch(error: unknown, errorInfo: React.ErrorInfo) {
     try {
       const { applicationId, runtime } = this.props;
-      const appName = applicationId ? runtime.store.getSnapshot().appInfo[applicationId]?.displayName : undefined;
+      const appName = applicationId ? runtime.store.getSnapshot().appInfo[normalizeBundleIdentifier(applicationId)]?.displayName : undefined;
       runtime.errors.capture({
         code: "APP_CONTENT_FAILED",
         title: "Window controls were reset.",

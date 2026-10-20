@@ -76,10 +76,10 @@ describe("NSEApplication lifecycle", () => {
     class IdentifiedApp extends NSEApplication {
       constructor() { super(); instance = this; }
     }
-    const { launch, runtime, appId } = host(IdentifiedApp, "identified-app");
+    const { launch, runtime, appId } = host(IdentifiedApp, "com.example.identified-app");
     await launch();
 
-    expect(instance?.id).toBe("identified-app");
+    expect(instance?.id).toBe("com.example.identified-app");
     expect(instance?.windows).toEqual([]);
     expect(applicationSessionFor({ runtimeId: runtime.runtimeId, appId })?.app).toBe(instance);
   });
@@ -148,7 +148,7 @@ describe("NSEApplication lifecycle", () => {
 describe("function-component application", () => {
   it("launches as a single-window application showing the component", async () => {
     function Notes() { return <p>Notes component</p>; }
-    const created = host(Notes, "shortcut-app");
+    const created = host(Notes, "com.example.shortcut-app");
     const { runtime, appId } = created;
 
     await expect(created.launch()).resolves.toMatchObject({ status: "completed", committed: true });
@@ -172,7 +172,7 @@ describe("window controllers of an application", () => {
     class WindowedApp extends NSEApplication {
       static override mainWindow = MainWindow;
     }
-    const created = host(WindowedApp, "windowed-app");
+    const created = host(WindowedApp, "com.example.windowed-app");
     await created.launch();
     created.mountWindows();
     await created.openMainWindow();

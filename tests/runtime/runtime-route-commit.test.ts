@@ -48,7 +48,7 @@ describe("canonical route commit authority", () => {
     let entered = false;
     let hookSignal: AbortSignal | undefined;
     const did = vi.fn();
-    const runtime = fixture([createTestBundle({ id: "held-window", presentation: "windowedView" }, {
+    const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.held-window", presentation: "windowedView" }, {
       lifecycleHooks: { launch: {
         will: ({ signal }) => new Promise<void>((resolve) => {
           entered = true;
@@ -73,7 +73,7 @@ describe("canonical route commit authority", () => {
   });
 
   it("commits one full browser href at the route boundary without an intermediate app-base entry", async () => {
-    const runtime = fixture([createTestBundle({ id: "history-owner" })]);
+    const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.history-owner" })]);
     const syncRoute = vi.spyOn(runtime.environment.routeSynchronization, "syncRoute");
     const published: Array<{ browserHref?: unknown; syncRoute?: unknown; historyMode?: unknown }> = [];
     const unsubscribe = runtime.events.subscribe("route.open", (event) => {
@@ -96,7 +96,7 @@ describe("canonical route commit authority", () => {
   });
 
   it("runs a host precommit guard before a route can publish application state", async () => {
-    const runtime = fixture([createTestBundle({ id: "guarded-route" })]);
+    const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.guarded-route" })]);
     const hostBeforeCommit = vi.fn(() => {
       throw new DOMException("revoked before commit", "AbortError");
     });
@@ -112,8 +112,8 @@ describe("canonical route commit authority", () => {
   });
 
   it("does not let mounted application navigation inject the host precommit guard", () => {
-    const runtime = fixture([createTestBundle({ id: "mounted-route-owner" })]);
-    const mounted = mountTestSynWareRuntime(runtime, "mounted-route-owner");
+    const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.mounted-route-owner" })]);
+    const mounted = mountTestSynWareRuntime(runtime, "com.example.mounted-route-owner");
     const openRoute = vi.spyOn(runtime.routes, "openRoute");
     const injected = vi.fn();
 
@@ -128,7 +128,7 @@ describe("canonical route commit authority", () => {
 
   it("retains a committed route when cancelled during its did hook", async () => {
     let entered = false;
-    const runtime = fixture([createTestBundle({ id: "committed-reader" }, {
+    const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.committed-reader" }, {
       lifecycleHooks: { launch: { did: ({ signal }) => new Promise<void>((resolve) => {
         entered = true;
         signal.addEventListener("abort", () => resolve(), { once: true });
@@ -139,12 +139,12 @@ describe("canonical route commit authority", () => {
     expect(runtime.store.getSnapshot().application.routePath).toBe("/committed-reader");
     route.cancel("cancel post-commit work");
     await expect(route.result).resolves.toMatchObject({ status: "completed", committed: true, postCommit: "cancelled" });
-    expect(runtime.store.getSnapshot().lifecycle["committed-reader"]).toBe("active");
+    expect(runtime.store.getSnapshot().lifecycle["com.example.committed-reader"]).toBe("active");
     expect(runtime.store.getSnapshot().application.routePath).toBe("/committed-reader");
   });
 
   it("marks a root route committed before suspension or root state becomes observable", async () => {
-    const runtime = fixture([createTestBundle({ id: "root-reader" })]);
+    const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.root-reader" })]);
     await runtime.routes.openRoute("/root-reader", { syncRoute: false }).result;
     const observations: boolean[] = [];
     const release = runtime.store.subscribe(() => {
@@ -156,12 +156,12 @@ describe("canonical route commit authority", () => {
     release();
     expect(observations.length).toBeGreaterThan(0);
     expect(observations).not.toContain(false);
-    expect(runtime.store.getSnapshot().webspring).toMatchObject({ launchPhase: "returning", returningAppId: "root-reader" });
+    expect(runtime.store.getSnapshot().webspring).toMatchObject({ launchPhase: "returning", returningAppId: "com.example.root-reader" });
   });
 
   it("settles the root statechart when cancelled during a committed suspension's did hook", async () => {
     let entered = false;
-    const runtime = fixture([createTestBundle({ id: "root-did" }, {
+    const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.root-did" }, {
       lifecycleHooks: { suspend: { did: ({ signal }) => new Promise<void>((resolve) => {
         entered = true;
         signal.addEventListener("abort", () => resolve(), { once: true });
@@ -175,13 +175,13 @@ describe("canonical route commit authority", () => {
     expect(runtime.store.getSnapshot()).toMatchObject({
       application: { activeAppId: null, routePath: "/" },
       statechart: { currentState: "active.webspring", isTransitioning: false },
-      lifecycle: { "root-did": "suspended" },
+      lifecycle: { "com.example.root-did": "suspended" },
     });
   });
 
   it("does not let a superseded direct return commit over a newer statechart transition", async () => {
     let releaseHook!: () => void;
-    const runtime = fixture([createTestBundle({ id: "stale-return" }, {
+    const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.stale-return" }, {
       lifecycleHooks: { suspend: { will: () => new Promise<void>((resolve) => { releaseHook = resolve; }) } },
     })]);
     await runtime.routes.openRoute("/stale-return", { syncRoute: false }).result;
@@ -191,15 +191,15 @@ describe("canonical route commit authority", () => {
     releaseHook();
     await returning;
     expect(runtime.store.getSnapshot()).toMatchObject({
-      application: { activeAppId: "stale-return", routePath: "/stale-return" },
+      application: { activeAppId: "com.example.stale-return", routePath: "/stale-return" },
       statechart: { currentState: "active.error", isTransitioning: false },
-      lifecycle: { "stale-return": "active" },
+      lifecycle: { "com.example.stale-return": "active" },
     });
   });
 
   it("allows a replacement route to the same app without accepting the cancelled launch's terminal event", async () => {
     let entries = 0;
-    const runtime = fixture([createTestBundle({ id: "replacement" }, {
+    const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.replacement" }, {
       lifecycleHooks: { launch: { will: ({ signal }) => {
         entries += 1;
         if (entries > 1) return;
@@ -211,7 +211,7 @@ describe("canonical route commit authority", () => {
     const second = runtime.routes.openRoute("/replacement?request=second", { syncRoute: false });
     await expect(first.result).resolves.toMatchObject({ status: "cancelled", committed: false });
     await expect(second.result).resolves.toMatchObject({ status: "completed", committed: true });
-    expect(runtime.store.getSnapshot().application.activeAppId).toBe("replacement");
+    expect(runtime.store.getSnapshot().application.activeAppId).toBe("com.example.replacement");
     expect(runtime.errors.getHistory().filter((entry) => entry.code === "APP_LAUNCH_FAILED")).toEqual([]);
   });
 });

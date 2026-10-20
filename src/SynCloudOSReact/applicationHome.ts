@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import type { SynCloudOSOpenRouteHandle } from "../SynCloudOS/RouteManager/routeTypes";
 import type { SynCloudOSRuntime } from "../SynCloudOS/Runtime/runtimeInstanceTypes";
 import type { SynCloudOSStateTransitionRecord } from "../SynCloudOS/Statechart/statechartTypes";
@@ -70,16 +71,16 @@ export function createApplicationHostHome(runtime: SynCloudOSRuntime, primaryId:
   let observedWindows: { readonly appId: string; readonly count: number } | null = null;
   const unsubscribeWindows = runtime.windows.subscribe(() => {
     const activeAppId = runtime.store.getSnapshot().application.activeAppId;
-    if (!activeAppId || activeAppId === primaryId) {
+    if (!activeAppId || normalizeBundleIdentifier(activeAppId) === normalizeBundleIdentifier(primaryId)) {
       observedWindows = null;
       return;
     }
     const count = runtime.windows.list({ applicationId: activeAppId }).length;
-    const previous = observedWindows?.appId === activeAppId ? observedWindows.count : 0;
+    const previous = observedWindows && normalizeBundleIdentifier(observedWindows.appId) === normalizeBundleIdentifier(activeAppId) ? observedWindows.count : 0;
     observedWindows = { appId: activeAppId, count };
     if (previous > 0 && count === 0 && runtime.lifecycle.getState(primaryId) === "suspended") {
       queueMicrotask(() => {
-        if (!disposed && runtime.store.getSnapshot().application.activeAppId === activeAppId) void open().result.catch(() => undefined);
+        if (!disposed && normalizeBundleIdentifier(runtime.store.getSnapshot().application.activeAppId) === normalizeBundleIdentifier(activeAppId)) void open().result.catch(() => undefined);
       });
     }
   });

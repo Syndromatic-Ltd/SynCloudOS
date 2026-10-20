@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   SynCloudOSOpenRouteOptions,
   SynCloudOSOpenRouteResult,
@@ -39,7 +40,7 @@ export type CoordinatedRouteResolution =
   | {
       kind: "app";
       pathname: string;
-      app: { id: string; policy?: Readonly<{ public?: boolean; requiresLogin?: boolean }> };
+      app: { bundleIdentifier: string; policy?: Readonly<{ public?: boolean; requiresLogin?: boolean }> };
     }
   | { kind: "external" | "notFound"; pathname: string };
 
@@ -140,7 +141,7 @@ function isRuntimeAtRoute(
   if (resolution.kind === "app") {
     return (
       snapshot.application.routePath === resolution.pathname &&
-      snapshot.application.activeAppId === resolution.app.id
+      normalizeBundleIdentifier(snapshot.application.activeAppId) === normalizeBundleIdentifier(resolution.app.bundleIdentifier)
     );
   }
   return false;
@@ -245,7 +246,7 @@ export function createBrowserRouteCoordinator(
     );
     if (
       resolution.kind === "app" &&
-      resolution.app.id === snapshot.application.activeAppId
+      normalizeBundleIdentifier(resolution.app.bundleIdentifier) === normalizeBundleIdentifier(snapshot.application.activeAppId)
     ) {
       dependencies.platform.setSessionItem(lastActiveAppRouteKey, resolution.pathname);
     } else if (snapshot.application.routePath === "/") {
@@ -316,7 +317,7 @@ export function createBrowserRouteCoordinator(
     const browserRoute = dependencies.resolveRoute(browserPath);
     if (snapshot.application.activeAppId === null && snapshot.application.routePath === "/"
       && snapshot.statechart.currentState === "active.webspring"
-      && browserRoute.kind === "app" && snapshot.lifecycle[browserRoute.app.id] === "closed"
+      && browserRoute.kind === "app" && snapshot.lifecycle[normalizeBundleIdentifier(browserRoute.app.bundleIdentifier)] === "closed"
       && dependencies.resolveRoute("/").kind === "webspring") {
       initialHref = null;
       initialHrefDeferredForAuthorization = false;

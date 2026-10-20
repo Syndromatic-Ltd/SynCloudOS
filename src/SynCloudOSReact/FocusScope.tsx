@@ -269,7 +269,7 @@ export function FocusScope(props: FocusScopeProps) {
   const appRuntime = useContext(SynWareRuntimeContext);
   const kernelRuntime = useContext(SynCloudOSRuntimeContext);
   if (appRuntime) {
-    return <AppFocusScope runtime={appRuntime} runtimeId={`app:${appRuntime.app.id}`} options={props}>{props.children}</AppFocusScope>;
+    return <AppFocusScope runtime={appRuntime} runtimeId={`app:${appRuntime.app.bundleIdentifier}`} options={props}>{props.children}</AppFocusScope>;
   }
   if (!kernelRuntime) throw new Error("FocusScope must be used within SynCloudOSProvider or a mounted SynWare.");
   return <KernelFocusScope {...props} />;

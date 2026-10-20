@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   CreatePasteboardRegistryOptions,
   LazyPasteboardRepresentation,
@@ -587,7 +588,7 @@ export class Pasteboard implements PasteboardContract {
 
 function validateName(name: PasteboardName): PasteboardName {
   if (name === "system" || name === "drag" || name === "find") return name;
-  if (typeof name === "string" && /^app:[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u.test(name)) return name;
+  if (typeof name === "string" && /^app:[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u.test(name)) return `app:${normalizeBundleIdentifier(name.slice(4))}`;
   throw new TypeError("Pasteboard names must be system, drag, find or a bounded app identity.");
 }
 
@@ -650,7 +651,7 @@ export function createPasteboardRegistry(options: CreatePasteboardRegistryOption
     const current = record.validate();
     if (!current) throw securityDenied(operation);
     const access = normaliseAccessContext(current);
-    if (access.appId !== record.context.appId || access.windowControllerId !== record.context.windowControllerId || access.responderId !== record.context.responderId) {
+    if (normalizeBundleIdentifier(access.appId) !== normalizeBundleIdentifier(record.context.appId) || access.windowControllerId !== record.context.windowControllerId || access.responderId !== record.context.responderId) {
       throw securityDenied(operation);
     }
     return record.context;
@@ -753,7 +754,7 @@ export function createPasteboardRegistry(options: CreatePasteboardRegistryOption
         // Application-private boards are a runtime-owned namespace. A live
         // lease for app B can never even acquire a handle for app A's board,
         // so snapshot and clear cannot become cross-owner mutations.
-        if (boardName.startsWith("app:") && (!record.ownsPrivateBoard || boardName !== `app:${record.context.appId}`)) {
+        if (boardName.startsWith("app:") && (!record.ownsPrivateBoard || boardName !== `app:${normalizeBundleIdentifier(record.context.appId)}`)) {
           throw securityDenied("read");
         }
         return handleFor(named(boardName), lease);
@@ -789,7 +790,7 @@ export function createPasteboardRegistry(options: CreatePasteboardRegistryOption
       const ownsPrivateBoard = leaseOptions.ownsPrivateBoard === true;
       let privateBoardGeneration: number | undefined;
       if (ownsPrivateBoard) {
-        const name = `app:${access.appId}` as PasteboardName;
+        const name = `app:${normalizeBundleIdentifier(access.appId)}` as PasteboardName;
         const claims = privateBoardClaims.get(name) ?? new Set<object>();
         privateBoardGeneration = claims.size === 0
           ? advancePrivateBoardGeneration(name)
@@ -811,7 +812,7 @@ export function createPasteboardRegistry(options: CreatePasteboardRegistryOption
       const record = lease && typeof lease === "object" ? leases.get(lease as object) : undefined;
       if (!record || disposed) return;
       if (!record.ownsPrivateBoard) return;
-      const name = `app:${record.context.appId}` as PasteboardName;
+      const name = `app:${normalizeBundleIdentifier(record.context.appId)}` as PasteboardName;
       const claims = privateBoardClaims.get(name);
       if (!claims || !claims.delete(lease as object)) return;
       if (claims.size > 0) return;

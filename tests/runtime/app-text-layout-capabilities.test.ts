@@ -31,8 +31,8 @@ afterEach(async () => { for (const cleanup of cleanups.splice(0).reverse()) awai
 function fixture() {
   const runtime = createTestRuntime({ environment: createTestRuntimeEnvironment() });
   cleanups.push(async () => { await runtime.dispose("capability forwarding test"); });
-  registerTestSynWare(runtime, { schemaVersion: 1, id: "geometry-owner", version: "1.0.0", title: "Geometry owner", routes: [{ path: "/geometry-owner", primary: true }] });
-  const mounted = mountTestSynWareRuntime(runtime, "geometry-owner");
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.geometry-owner", version: "1.0.0", displayName: "Geometry owner", routes: [{ path: "/geometry-owner", primary: true }] });
+  const mounted = mountTestSynWareRuntime(runtime, "com.example.geometry-owner");
   cleanups.push(() => mounted.dispose("capability forwarding test"));
   const client = createSynWareContextValue(mounted.runtime).textLayout;
   return { runtime, mounted, client };

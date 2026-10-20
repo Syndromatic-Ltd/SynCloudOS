@@ -45,11 +45,11 @@ function fixture() {
   const runtime = createTestRuntime();
   runtimes.push(runtime);
   const app = registerTestSynWare(runtime, {
-    schemaVersion: 1, id: "menu-revision", version: "1.0.0", title: "Menu revision",
+    schemaVersion: 1, bundleIdentifier: "com.example.menu-revision", version: "1.0.0", displayName: "Menu revision",
   });
-  const mount = mountTestSynWareRuntime(runtime, app.id);
+  const mount = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
   mounts.push(mount);
-  runtime.focus.requestFocus(`application:${app.id}`);
+  runtime.focus.requestFocus(`application:${app.bundleIdentifier}`);
   const context = createSynWareContextValue(mount.runtime);
   let port!: NSEMenuRuntimePort;
   function Probe() {
@@ -59,7 +59,7 @@ function fixture() {
   render(<SynWareProvider value={context}><Probe /></SynWareProvider>);
   const execute = vi.fn();
   const register = (title = "Original", handler = execute) => context.commands.register({
-    id: "menu-revision.action", responderId: context.responderId,
+    id: "com.example.menu-revision.action", responderId: context.responderId,
     title: { key: "menu-revision.action", fallback: title },
     payload: {
       description: "none",
@@ -71,7 +71,7 @@ function fixture() {
   });
   const registration = register();
   const controller = new NSEMenuController({
-    model: { id: "actions", entries: [{ kind: "command", id: "action", commandId: "menu-revision.action" }] },
+    model: { id: "actions", entries: [{ kind: "command", id: "action", commandId: "com.example.menu-revision.action" }] },
     runtime: port,
   });
   controllers.push(controller);
@@ -91,7 +91,7 @@ describe("scoped SynWare menu revision evidence", () => {
     expect(Object.isFrozen(initial)).toBe(true);
     registration.dispose();
     expect(port.commands.getPresentationGeneration().registryGeneration).toBeGreaterThan(initial.registryGeneration);
-    runtime.responders.register({ id: "menu-revision:child", kind: "control", parentId: "application:menu-revision", scopeId: "application:menu-revision" });
+    runtime.responders.register({ id: "menu-revision:child", kind: "control", parentId: "application:com.example.menu-revision", scopeId: "application:com.example.menu-revision" });
     expect(port.commands.getPresentationGeneration().responderGeneration).toBeGreaterThan(initial.responderGeneration);
     expect(initial.registryGeneration).toBeLessThan(port.commands.getPresentationGeneration().registryGeneration);
     expect(initial.responderGeneration).toBeLessThan(port.commands.getPresentationGeneration().responderGeneration);
@@ -132,7 +132,7 @@ describe("scoped SynWare menu revision evidence", () => {
     const { runtime, controller, execute } = fixture();
     await controller.open();
     const generation = runtime.responders.generation;
-    runtime.responders.register({ id: "menu-revision:child", kind: "control", parentId: "application:menu-revision", scopeId: "application:menu-revision" });
+    runtime.responders.register({ id: "menu-revision:child", kind: "control", parentId: "application:com.example.menu-revision", scopeId: "application:com.example.menu-revision" });
     expect(runtime.responders.generation).toBeGreaterThan(generation);
 
     await expect(controller.dispatch("action")).resolves.toMatchObject({
@@ -177,8 +177,8 @@ describe("scoped SynWare menu revision evidence", () => {
     const readSource = vi.fn(() => "menu");
     const options = Object.defineProperty({}, "source", { enumerable: true, get: readSource });
     const pending = Promise.resolve().then(() => operation === "validateMany"
-      ? port.commands.validateMany([{ key: commandValidationRequestKey("action"), commandId: "menu-revision.action" }], options)
-      : port.commands[operation]("menu-revision.action", undefined, options));
+      ? port.commands.validateMany([{ key: commandValidationRequestKey("action"), commandId: "com.example.menu-revision.action" }], options)
+      : port.commands[operation]("com.example.menu-revision.action", undefined, options));
 
     await expect(pending).rejects.toMatchObject({ name: "SecurityError" });
     expect(readSource).not.toHaveBeenCalled();

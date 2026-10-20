@@ -61,8 +61,8 @@ function createProjectionPersistence(canonical: unknown = null) {
 
 function createOrderedManifest(id: string, order: number, visible = true) {
   return createTestManifest({
-    id,
-    route: `/${id}`,
+    bundleIdentifier: id,
+    route: `/${id.split(".").at(-1)}`,
     webspring: {
       visible,
       order,
@@ -94,13 +94,13 @@ const persisted = (order: string[]): WebspringLayoutInput => ({ order, folders: 
 
 describe("Webspring layout helpers", () => {
   it("seeds order from visible manifest order and reconciles persisted preferences", () => {
-    const apps = registerApps(["alpha", 20], ["beta", 5], ["hidden", 1, false], ["gamma", 30]);
+    const apps = registerApps(["com.example.alpha", 20], ["com.example.beta", 5], ["com.example.hidden", 1, false], ["com.example.gamma", 30]);
 
-    expect(reconcileWebspringLayout(apps, null, EMPTY_WEBSPRING_FOLDER_CONFIGURATION).order).toEqual(["beta", "alpha", "gamma"]);
-    expect(reconcileWebspringLayout(apps, persisted(["missing", "gamma", "gamma", "beta"]), EMPTY_WEBSPRING_FOLDER_CONFIGURATION).order).toEqual([
-      "gamma",
-      "beta",
-      "alpha"
+    expect(reconcileWebspringLayout(apps, null, EMPTY_WEBSPRING_FOLDER_CONFIGURATION).order).toEqual(["com.example.beta", "com.example.alpha", "com.example.gamma"]);
+    expect(reconcileWebspringLayout(apps, persisted(["com.example.missing", "com.example.gamma", "com.example.gamma", "com.example.beta"]), EMPTY_WEBSPRING_FOLDER_CONFIGURATION).order).toEqual([
+      "com.example.gamma",
+      "com.example.beta",
+      "com.example.alpha"
     ]);
   });
 
@@ -118,11 +118,11 @@ describe("Webspring layout helpers", () => {
   });
 
   it("moves entries by pointer index and keyboard grid intent", () => {
-    const order = ["alpha", "beta", "gamma", "delta"];
+    const order = ["com.example.alpha", "com.example.beta", "com.example.gamma", "com.example.delta"];
 
-    expect(moveWebspringEntryToIndex(order, "alpha", 2)).toEqual(["beta", "gamma", "alpha", "delta"]);
-    expect(getKeyboardReorderIndex(order, "alpha", "ArrowDown", 2)).toBe(2);
-    expect(getKeyboardReorderIndex(order, "delta", "End", 2)).toBe(3);
+    expect(moveWebspringEntryToIndex(order, "com.example.alpha", 2)).toEqual(["com.example.beta", "com.example.gamma", "com.example.alpha", "com.example.delta"]);
+    expect(getKeyboardReorderIndex(order, "com.example.alpha", "ArrowDown", 2)).toBe(2);
+    expect(getKeyboardReorderIndex(order, "com.example.delta", "End", 2)).toBe(3);
   });
 
   it("names user folders in the folder namespace", () => {
@@ -135,113 +135,115 @@ describe("Webspring layout helpers", () => {
     const projection = createWebspringBoardProjection(apps, { dockSize: 3, pageSize: 4 });
 
     expect(projection.version).toBe(WEBSPRING_BOARD_PROJECTION_VERSION);
-    expect(projection.dock.map((app) => app.id)).toEqual(["app-1", "app-2", "app-3"]);
-    expect(projection.pages.map((page) => page.map((app) => app.id))).toEqual([
+    expect(projection.dock.map((item) => item.id)).toEqual(["app-1", "app-2", "app-3"]);
+    expect(projection.pages.map((page) => page.map((item) => item.id))).toEqual([
       ["app-4", "app-5", "app-6", "app-7"],
       ["app-8", "app-9", "app-10", "app-11"],
     ]);
-    expect(projection.order).toEqual(apps.map((app) => app.id));
+    expect(projection.order).toEqual(apps.map((item) => item.id));
   });
 
   it("targets the nearest Webspring slot during pointer drag", () => {
     const candidates = [
-      { itemId: "alpha", index: 0, rect: { left: 0, top: 0, width: 80, height: 96 } },
-      { itemId: "beta", index: 1, rect: { left: 96, top: 0, width: 80, height: 96 } },
-      { itemId: "gamma", index: 2, rect: { left: 192, top: 0, width: 80, height: 96 } }
+      { itemId: "com.example.alpha", index: 0, rect: { left: 0, top: 0, width: 80, height: 96 } },
+      { itemId: "com.example.beta", index: 1, rect: { left: 96, top: 0, width: 80, height: 96 } },
+      { itemId: "com.example.gamma", index: 2, rect: { left: 192, top: 0, width: 80, height: 96 } }
     ];
 
-    expect(getWebspringDragReorderTarget(candidates, { x: 40, y: 48 }, "alpha")).toBeNull();
-    expect(getWebspringDragReorderTarget(candidates, { x: 132, y: 48 }, "alpha")).toEqual({
-      itemId: "beta",
+    expect(getWebspringDragReorderTarget(candidates, { x: 40, y: 48 }, "com.example.alpha")).toBeNull();
+    expect(getWebspringDragReorderTarget(candidates, { x: 132, y: 48 }, "com.example.alpha")).toEqual({
+      itemId: "com.example.beta",
       targetIndex: 1
     });
-    expect(getWebspringDragReorderTarget(candidates, { x: 232, y: 48 }, "alpha")).toEqual({
-      itemId: "gamma",
+    expect(getWebspringDragReorderTarget(candidates, { x: 232, y: 48 }, "com.example.alpha")).toEqual({
+      itemId: "com.example.gamma",
       targetIndex: 2
     });
   });
 });
 
 describe("Webspring folder reconciliation", () => {
-  const apps = () => registerApps(["alpha", 1], ["beta", 2], ["gamma", 3], ["delta", 4]);
-  const tools = folders(true, ["folder.tools", 2, ["beta", "delta"]]);
+  const apps = () => registerApps(["com.example.alpha", 1], ["com.example.beta", 2], ["com.example.gamma", 3], ["com.example.delta", 4]);
+  const tools = folders(true, ["folder.tools", 2, ["com.example.beta", "com.example.delta"]]);
 
   it("seeds manifest folders among the apps by order, folders first on a tie", () => {
     const projection = reconcileWebspringLayout(apps(), null, tools);
 
     expect(projection).toEqual({
-      order: ["alpha", "folder.tools", "gamma"],
-      folders: { "folder.tools": ["beta", "delta"] },
-      appOrder: ["alpha", "beta", "delta", "gamma"],
-      folderOfApp: { beta: "folder.tools", delta: "folder.tools" },
+      order: ["com.example.alpha", "folder.tools", "com.example.gamma"],
+      folders: { "folder.tools": ["com.example.beta", "com.example.delta"] },
+      appOrder: ["com.example.alpha", "com.example.beta", "com.example.delta", "com.example.gamma"],
+      folderOfApp: { "com.example.beta": "folder.tools", "com.example.delta": "folder.tools" },
     });
-    expect(reconcileWebspringLayout(apps(), null, folders(true, ["folder.tools", 1, ["beta"]])).order)
-      .toEqual(["folder.tools", "alpha", "gamma", "delta"]);
+    expect(reconcileWebspringLayout(apps(), null, folders(true, ["folder.tools", 1, ["com.example.beta"]])).order)
+      .toEqual(["folder.tools", "com.example.alpha", "com.example.gamma", "com.example.delta"]);
   });
 
   it("takes editable membership from a visitor's layout", () => {
     const projection = reconcileWebspringLayout(apps(), userLayout(
-      ["gamma", "folder.user-x", "alpha"],
-      { "folder.user-x": ["alpha", "beta"], "folder.tools": ["delta"] },
+      ["com.example.gamma", "folder.user-x", "com.example.alpha"],
+      { "folder.user-x": ["com.example.alpha", "com.example.beta"], "folder.tools": ["com.example.delta"] },
     ), tools);
 
-    expect(projection.order).toEqual(["gamma", "folder.user-x", "folder.tools"]);
-    expect(projection.folders).toEqual({ "folder.user-x": ["alpha", "beta"], "folder.tools": ["delta"] });
+    expect(projection.order).toEqual(["com.example.gamma", "folder.user-x", "folder.tools"]);
+    expect(projection.folders).toEqual({ "folder.user-x": ["com.example.alpha", "com.example.beta"], "folder.tools": ["com.example.delta"] });
   });
 
   it("keeps fixed membership from the manifest and only the order from a visitor", () => {
-    const fixed = folders(false, ["folder.tools", 2, ["beta", "delta"]]);
+    const fixed = folders(false, ["folder.tools", 2, ["com.example.beta", "com.example.delta"]]);
     const projection = reconcileWebspringLayout(apps(), userLayout(
-      ["gamma", "folder.tools", "alpha"],
-      { "folder.user-x": ["alpha", "gamma"] },
+      ["com.example.gamma", "folder.tools", "com.example.alpha"],
+      { "folder.user-x": ["com.example.alpha", "com.example.gamma"] },
     ), fixed);
 
-    expect(projection.order).toEqual(["gamma", "folder.tools", "alpha"]);
-    expect(projection.folders).toEqual({ "folder.tools": ["beta", "delta"] });
+    expect(projection.order).toEqual(["com.example.gamma", "folder.tools", "com.example.alpha"]);
+    expect(projection.folders).toEqual({ "folder.tools": ["com.example.beta", "com.example.delta"] });
   });
 
   it("gives an app listed twice to the first folder in display order and drops emptied folders", () => {
     const projection = reconcileWebspringLayout(apps(), userLayout(
-      ["folder.b", "folder.a", "alpha", "delta"],
-      { "folder.a": ["beta"], "folder.b": ["beta", "gamma"] },
+      ["folder.b", "folder.a", "com.example.alpha", "com.example.delta"],
+      { "folder.a": ["com.example.beta"], "folder.b": ["com.example.beta", "com.example.gamma"] },
     ), folders(true));
 
-    expect(projection.order).toEqual(["folder.b", "alpha", "delta"]);
-    expect(projection.folders).toEqual({ "folder.b": ["beta", "gamma"] });
+    expect(projection.order).toEqual(["folder.b", "com.example.alpha", "com.example.delta"]);
+    expect(projection.folders).toEqual({ "folder.b": ["com.example.beta", "com.example.gamma"] });
   });
 
   it("places new apps in their surviving manifest folder, otherwise at the top level", () => {
     const projection = reconcileWebspringLayout(
-      registerApps(["alpha", 1], ["beta", 2], ["gamma", 3], ["epsilon", 0], ["zeta", 5]),
-      userLayout(["alpha", "folder.tools", "gamma"], { "folder.tools": ["beta"] }),
-      folders(true, ["folder.tools", 2, ["beta", "epsilon"]], ["folder.gone", 6, ["zeta"]]),
+      registerApps(["com.example.alpha", 1], ["com.example.beta", 2], ["com.example.gamma", 3], ["com.example.epsilon", 0], ["com.example.zeta", 5]),
+      userLayout(["com.example.alpha", "folder.tools", "com.example.gamma"], { "folder.tools": ["com.example.beta"] }),
+      folders(true, ["folder.tools", 2, ["com.example.beta", "com.example.epsilon"]], ["folder.gone", 6, ["com.example.zeta"]]),
     );
 
-    expect(projection.order).toEqual(["alpha", "folder.tools", "gamma", "zeta"]);
-    expect(projection.folders).toEqual({ "folder.tools": ["beta", "epsilon"] });
+    expect(projection.order).toEqual(["com.example.alpha", "folder.tools", "com.example.gamma", "com.example.zeta"]);
+    expect(projection.folders).toEqual({ "folder.tools": ["com.example.beta", "com.example.epsilon"] });
   });
 
-  it("treats app IDs that name Object.prototype members as ordinary IDs", () => {
+  it("treats folder IDs that name Object.prototype members as ordinary IDs", () => {
     const projection = reconcileWebspringLayout(
-      registerApps(["constructor", 1], ["toString", 2], ["alpha", 3]),
-      userLayout(["constructor", "folder.user-x"], { "folder.user-x": ["toString", "alpha"] }),
+      registerApps(["com.example.constructor", 1], ["com.example.alpha", 2], ["com.example.beta", 3]),
+      userLayout(["com.example.constructor", "toString"], { toString: ["com.example.alpha", "com.example.beta"] }),
       folders(true),
     );
 
-    expect(projection.order).toEqual(["constructor", "folder.user-x"]);
-    expect(projection.appOrder).toEqual(["constructor", "toString", "alpha"]);
+    expect(projection.order).toEqual(["com.example.constructor", "toString"]);
+    expect(projection.appOrder).toEqual(["com.example.constructor", "com.example.alpha", "com.example.beta"]);
+    expect(projection.folders.toString).toEqual(["com.example.alpha", "com.example.beta"]);
+    expect(projection.folderOfApp["com.example.alpha"]).toBe("toString");
     expect(projection.folderOfApp.constructor).toBeUndefined();
-    expect(projection.folderOfApp.toString).toBe("folder.user-x");
+    expect(projection.folderOfApp.toString).toBeUndefined();
   });
 
   it("omits folders whose members are all hidden", () => {
     const projection = reconcileWebspringLayout(
-      registerApps(["alpha", 1], ["beta", 2, false]),
+      registerApps(["com.example.alpha", 1], ["com.example.beta", 2, false]),
       null,
-      folders(true, ["folder.hidden", 1, ["beta"]]),
+      folders(true, ["folder.hidden", 1, ["com.example.beta"]]),
     );
 
-    expect(projection.order).toEqual(["alpha"]);
+    expect(projection.order).toEqual(["com.example.alpha"]);
     expect(projection.folders).toEqual({});
   });
 });
@@ -251,74 +253,74 @@ describe("WebspringState layout preference persistence", () => {
     const { AppRegistry, RuntimeController, SynCloudOS } = createRuntimeHarness(createBrowserPersistenceRuntime());
     const { WebspringState } = SynCloudOS;
     AppRegistry.registerMany([
-      createOrderedManifest("alpha", 1),
-      createOrderedManifest("beta", 2),
-      createOrderedManifest("gamma", 3)
+      createOrderedManifest("com.example.alpha", 1),
+      createOrderedManifest("com.example.beta", 2),
+      createOrderedManifest("com.example.gamma", 3)
     ]);
 
     WebspringState.hydrateLayoutPreference();
     WebspringState.resetLayoutOrder();
-    WebspringState.enterEditMode("gamma");
-    WebspringState.beginDrag("gamma");
+    WebspringState.enterEditMode("com.example.gamma");
+    WebspringState.beginDrag("com.example.gamma");
 
     expect(RuntimeController.getSnapshot().webspring.layout).toMatchObject({
       isEditing: true,
-      draggingItemId: "gamma"
+      draggingItemId: "com.example.gamma"
     });
     expect("layoutOrder" in RuntimeController.getSnapshot().webspring).toBe(false);
     expect("editMode" in RuntimeController.getSnapshot().webspring).toBe(false);
     expect("draggingItemId" in RuntimeController.getSnapshot().webspring).toBe(false);
     expect(WebspringState.isLaunchSuppressed()).toBe(true);
 
-    expect(WebspringState.moveItem("gamma", 0, false)).toBe(true);
-    expect(AppRegistry.getDisplayApps().map((app) => app.id)).toEqual(["gamma", "alpha", "beta"]);
+    expect(WebspringState.moveItem("com.example.gamma", 0, false)).toBe(true);
+    expect(AppRegistry.getDisplayApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.gamma", "com.example.alpha", "com.example.beta"]);
     WebspringState.finishDrag(false);
-    expect(RuntimeController.getSnapshot().webspring.layout.preference.order).toEqual(["alpha", "beta", "gamma"]);
-    expect(AppRegistry.getDisplayApps().map((app) => app.id)).toEqual(["alpha", "beta", "gamma"]);
+    expect(RuntimeController.getSnapshot().webspring.layout.preference.order).toEqual(["com.example.alpha", "com.example.beta", "com.example.gamma"]);
+    expect(AppRegistry.getDisplayApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.alpha", "com.example.beta", "com.example.gamma"]);
     expect(window.localStorage.getItem(`SynCloudOS4:${WEBSPRING_LAYOUT_PREFERENCE_KEY}`)).toBeNull();
 
-    WebspringState.beginDrag("gamma");
-    expect(WebspringState.moveItem("gamma", 0, false)).toBe(true);
+    WebspringState.beginDrag("com.example.gamma");
+    expect(WebspringState.moveItem("com.example.gamma", 0, false)).toBe(true);
     WebspringState.finishDrag(true);
-    expect(AppRegistry.getDisplayApps().map((app) => app.id)).toEqual(["gamma", "alpha", "beta"]);
-    expect(window.localStorage.getItem(`SynCloudOS4:${WEBSPRING_LAYOUT_PREFERENCE_KEY}`)).toContain("gamma");
+    expect(AppRegistry.getDisplayApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.gamma", "com.example.alpha", "com.example.beta"]);
+    expect(window.localStorage.getItem(`SynCloudOS4:${WEBSPRING_LAYOUT_PREFERENCE_KEY}`)).toContain("com.example.gamma");
 
     WebspringState.resetLayoutOrder();
 
-    expect(AppRegistry.getDisplayApps().map((app) => app.id)).toEqual(["alpha", "beta", "gamma"]);
+    expect(AppRegistry.getDisplayApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.alpha", "com.example.beta", "com.example.gamma"]);
     expect(window.localStorage.getItem(`SynCloudOS4:${WEBSPRING_LAYOUT_PREFERENCE_KEY}`)).toBeNull();
   });
 
   it("finishes an active drag when edit mode closes without leaking its rollback into the next drag", () => {
     const runtime = createBrowserPersistenceRuntime();
     runtime.apps.registerMany([
-      createOrderedManifest("alpha", 1),
-      createOrderedManifest("beta", 2),
-      createOrderedManifest("gamma", 3),
+      createOrderedManifest("com.example.alpha", 1),
+      createOrderedManifest("com.example.beta", 2),
+      createOrderedManifest("com.example.gamma", 3),
     ]);
     runtime.webspring.resetLayoutOrder();
-    runtime.webspring.beginDrag("gamma");
-    runtime.webspring.moveItem("gamma", 0, false);
+    runtime.webspring.beginDrag("com.example.gamma");
+    runtime.webspring.moveItem("com.example.gamma", 0, false);
     runtime.webspring.exitEditMode(true);
     expect(runtime.store.getSnapshot().webspring.layout).toMatchObject({ isEditing: false, draggingItemId: null });
-    runtime.webspring.beginDrag("alpha");
-    runtime.webspring.moveItem("alpha", 0, false);
+    runtime.webspring.beginDrag("com.example.alpha");
+    runtime.webspring.moveItem("com.example.alpha", 0, false);
     runtime.webspring.finishDrag(false);
-    expect(runtime.apps.getDisplayApps().map((app) => app.id)).toEqual(["gamma", "alpha", "beta"]);
+    expect(runtime.apps.getDisplayApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.gamma", "com.example.alpha", "com.example.beta"]);
     runtime.webspring.hydrateLayoutPreference();
-    expect(runtime.apps.getDisplayApps().map((app) => app.id)).toEqual(["gamma", "alpha", "beta"]);
+    expect(runtime.apps.getDisplayApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.gamma", "com.example.alpha", "com.example.beta"]);
   });
 
   it("refuses a top-level reorder that is not a permutation of the entries", () => {
     const runtime = createBrowserPersistenceRuntime();
-    runtime.apps.registerMany([createOrderedManifest("alpha", 1), createOrderedManifest("beta", 2)]);
+    runtime.apps.registerMany([createOrderedManifest("com.example.alpha", 1), createOrderedManifest("com.example.beta", 2)]);
     runtime.webspring.resetLayoutOrder();
 
-    expect(runtime.webspring.reorder(["alpha"])).toBe(false);
-    expect(runtime.webspring.reorder(["alpha", "alpha"])).toBe(false);
-    expect(runtime.webspring.reorder(["beta", "alpha"])).toBe(true);
-    expect(runtime.apps.getDisplayApps().map((app) => app.id)).toEqual(["beta", "alpha"]);
-    expect(window.localStorage.getItem(`SynCloudOS4:${WEBSPRING_LAYOUT_PREFERENCE_KEY}`)).toContain("\"order\":[\"beta\",\"alpha\"]");
+    expect(runtime.webspring.reorder(["com.example.alpha"])).toBe(false);
+    expect(runtime.webspring.reorder(["com.example.alpha", "com.example.alpha"])).toBe(false);
+    expect(runtime.webspring.reorder(["com.example.beta", "com.example.alpha"])).toBe(true);
+    expect(runtime.apps.getDisplayApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.beta", "com.example.alpha"]);
+    expect(window.localStorage.getItem(`SynCloudOS4:${WEBSPRING_LAYOUT_PREFERENCE_KEY}`)).toContain("\"order\":[\"com.example.beta\",\"com.example.alpha\"]");
   });
 });
 
@@ -327,9 +329,9 @@ describe("WebspringState folder actions", () => {
     window.localStorage.clear();
     const runtime = createBrowserPersistenceRuntime();
     runtime.apps.registerMany([
-      createOrderedManifest("alpha", 1),
-      createOrderedManifest("beta", 2),
-      createOrderedManifest("gamma", 3),
+      createOrderedManifest("com.example.alpha", 1),
+      createOrderedManifest("com.example.beta", 2),
+      createOrderedManifest("com.example.gamma", 3),
     ]);
     runtime.webspring.configureFolders(configuration);
     runtime.webspring.hydrateLayoutPreference();
@@ -341,24 +343,24 @@ describe("WebspringState folder actions", () => {
   it("creates a folder by dropping an app on an app, then adds, moves out and deletes when emptied", () => {
     const runtime = createFolderRuntime(folders(true));
 
-    expect(runtime.webspring.dropOnItem("gamma", "alpha")).toBe(true);
+    expect(runtime.webspring.dropOnItem("com.example.gamma", "com.example.alpha")).toBe(true);
     const [folderId] = layout(runtime).order;
     expect(folderId).toMatch(/^folder\.user-/u);
-    expect(layout(runtime)).toMatchObject({ order: [folderId, "beta"], folders: { [folderId]: { apps: ["alpha", "gamma"] } } });
+    expect(layout(runtime)).toMatchObject({ order: [folderId, "com.example.beta"], folders: { [folderId]: { apps: ["com.example.alpha", "com.example.gamma"] } } });
     expect(stored()).toContain(folderId);
 
-    expect(runtime.webspring.dropOnItem("beta", folderId)).toBe(true);
-    expect(layout(runtime)).toMatchObject({ order: [folderId], folders: { [folderId]: { apps: ["alpha", "gamma", "beta"] } } });
-    expect(runtime.apps.getDisplayApps().map((app) => app.id)).toEqual(["alpha", "gamma", "beta"]);
+    expect(runtime.webspring.dropOnItem("com.example.beta", folderId)).toBe(true);
+    expect(layout(runtime)).toMatchObject({ order: [folderId], folders: { [folderId]: { apps: ["com.example.alpha", "com.example.gamma", "com.example.beta"] } } });
+    expect(runtime.apps.getDisplayApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.alpha", "com.example.gamma", "com.example.beta"]);
 
     expect(runtime.webspring.openFolder(folderId)).toBe(true);
-    expect(runtime.webspring.moveAppOutOfFolder("alpha", 1)).toBe(true);
-    expect(layout(runtime)).toMatchObject({ order: [folderId, "alpha"], folders: { [folderId]: { apps: ["gamma", "beta"] } } });
+    expect(runtime.webspring.moveAppOutOfFolder("com.example.alpha", 1)).toBe(true);
+    expect(layout(runtime)).toMatchObject({ order: [folderId, "com.example.alpha"], folders: { [folderId]: { apps: ["com.example.gamma", "com.example.beta"] } } });
     expect(runtime.store.getSnapshot().webspring.openFolderId).toBe(folderId);
 
-    runtime.webspring.moveAppOutOfFolder("gamma", 0);
-    runtime.webspring.moveAppOutOfFolder("beta", 0);
-    expect(layout(runtime).order).toEqual(["beta", "gamma", "alpha"]);
+    runtime.webspring.moveAppOutOfFolder("com.example.gamma", 0);
+    runtime.webspring.moveAppOutOfFolder("com.example.beta", 0);
+    expect(layout(runtime).order).toEqual(["com.example.beta", "com.example.gamma", "com.example.alpha"]);
     expect(layout(runtime).folders).toEqual({});
     expect(runtime.store.getSnapshot().webspring.openFolderId).toBeNull();
     expect(stored()).not.toContain(folderId);
@@ -366,74 +368,74 @@ describe("WebspringState folder actions", () => {
 
   it("merges on drop during a drag and commits or reverts with the drag", () => {
     const runtime = createFolderRuntime(folders(true));
-    runtime.webspring.enterEditMode("gamma");
-    runtime.webspring.beginDrag("gamma");
-    runtime.webspring.setDropTarget("alpha");
-    expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBe("alpha");
+    runtime.webspring.enterEditMode("com.example.gamma");
+    runtime.webspring.beginDrag("com.example.gamma");
+    runtime.webspring.setDropTarget("com.example.alpha");
+    expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBe("com.example.alpha");
 
-    expect(runtime.webspring.dropOnItem("gamma", "alpha")).toBe(true);
+    expect(runtime.webspring.dropOnItem("com.example.gamma", "com.example.alpha")).toBe(true);
     expect(stored()).toBeNull();
     runtime.webspring.finishDrag(false);
-    expect(layout(runtime).order).toEqual(["alpha", "beta", "gamma"]);
+    expect(layout(runtime).order).toEqual(["com.example.alpha", "com.example.beta", "com.example.gamma"]);
 
-    runtime.webspring.beginDrag("gamma");
-    runtime.webspring.dropOnItem("gamma", "alpha");
+    runtime.webspring.beginDrag("com.example.gamma");
+    runtime.webspring.dropOnItem("com.example.gamma", "com.example.alpha");
     runtime.webspring.finishDrag(true);
     expect(runtime.store.getSnapshot().webspring.layout).toMatchObject({ draggingItemId: null, dropTargetId: null });
-    expect(Object.values(layout(runtime).folders)).toEqual([{ apps: ["alpha", "gamma"] }]);
-    expect(stored()).toContain("\"apps\":[\"alpha\",\"gamma\"]");
+    expect(Object.values(layout(runtime).folders)).toEqual([{ apps: ["com.example.alpha", "com.example.gamma"] }]);
+    expect(stored()).toContain("\"apps\":[\"com.example.alpha\",\"com.example.gamma\"]");
   });
 
   it("does not merge folders or accept a dragged folder as a drop", () => {
-    const runtime = createFolderRuntime(folders(true, ["folder.tools", 2, ["beta", "gamma"]]));
+    const runtime = createFolderRuntime(folders(true, ["folder.tools", 2, ["com.example.beta", "com.example.gamma"]]));
     runtime.webspring.beginDrag("folder.tools");
-    runtime.webspring.setDropTarget("alpha");
+    runtime.webspring.setDropTarget("com.example.alpha");
 
     expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBeNull();
-    expect(runtime.webspring.dropOnItem("folder.tools", "alpha")).toBe(false);
+    expect(runtime.webspring.dropOnItem("folder.tools", "com.example.alpha")).toBe(false);
     expect(runtime.webspring.moveItem("folder.tools", 0)).toBe(true);
     runtime.webspring.finishDrag(true);
-    expect(layout(runtime).order).toEqual(["folder.tools", "alpha"]);
+    expect(layout(runtime).order).toEqual(["folder.tools", "com.example.alpha"]);
   });
 
   it("refuses membership changes when folders are fixed", () => {
-    const runtime = createFolderRuntime(folders(false, ["folder.tools", 2, ["beta", "gamma"]]));
+    const runtime = createFolderRuntime(folders(false, ["folder.tools", 2, ["com.example.beta", "com.example.gamma"]]));
 
-    expect(runtime.webspring.dropOnItem("alpha", "folder.tools")).toBe(false);
-    expect(runtime.webspring.moveAppOutOfFolder("beta", 0)).toBe(false);
-    expect(runtime.webspring.moveItem("gamma", 0)).toBe(false);
-    runtime.webspring.beginDrag("alpha");
+    expect(runtime.webspring.dropOnItem("com.example.alpha", "folder.tools")).toBe(false);
+    expect(runtime.webspring.moveAppOutOfFolder("com.example.beta", 0)).toBe(false);
+    expect(runtime.webspring.moveItem("com.example.gamma", 0)).toBe(false);
+    runtime.webspring.beginDrag("com.example.alpha");
     runtime.webspring.setDropTarget("folder.tools");
     expect(runtime.store.getSnapshot().webspring.layout.dropTargetId).toBeNull();
-    expect(runtime.webspring.moveItem("alpha", 1)).toBe(true);
+    expect(runtime.webspring.moveItem("com.example.alpha", 1)).toBe(true);
     runtime.webspring.finishDrag(true);
-    expect(layout(runtime).order).toEqual(["folder.tools", "alpha"]);
+    expect(layout(runtime).order).toEqual(["folder.tools", "com.example.alpha"]);
     expect(reconcileWebspringLayout(runtime.apps.getAllApps(), layout(runtime), runtime.store.getSnapshot().webspring.layout.folderConfiguration).folders)
-      .toEqual({ "folder.tools": ["beta", "gamma"] });
+      .toEqual({ "folder.tools": ["com.example.beta", "com.example.gamma"] });
   });
 
   it("merges into and out of an app whose ID names an Object.prototype member", () => {
     window.localStorage.clear();
     const runtime = createBrowserPersistenceRuntime();
-    runtime.apps.registerMany([createOrderedManifest("constructor", 1), createOrderedManifest("alpha", 2)]);
+    runtime.apps.registerMany([createOrderedManifest("com.example.constructor", 1), createOrderedManifest("com.example.alpha", 2)]);
     runtime.webspring.configureFolders(folders(true));
     runtime.webspring.hydrateLayoutPreference();
 
-    expect(runtime.webspring.openFolder("constructor")).toBe(false);
-    expect(runtime.webspring.moveItem("constructor", 1)).toBe(true);
-    expect(runtime.webspring.dropOnItem("alpha", "constructor")).toBe(true);
+    expect(runtime.webspring.openFolder("com.example.constructor")).toBe(false);
+    expect(runtime.webspring.moveItem("com.example.constructor", 1)).toBe(true);
+    expect(runtime.webspring.dropOnItem("com.example.alpha", "com.example.constructor")).toBe(true);
     const [folderId] = layout(runtime).order;
-    expect(layout(runtime).folders[folderId]).toEqual({ apps: ["constructor", "alpha"] });
-    expect(runtime.webspring.moveAppOutOfFolder("constructor", 0)).toBe(true);
-    expect(layout(runtime).order).toEqual(["constructor", folderId]);
-    expect(runtime.apps.getDisplayApps().map((app) => app.id)).toEqual(["constructor", "alpha"]);
+    expect(layout(runtime).folders[folderId]).toEqual({ apps: ["com.example.constructor", "com.example.alpha"] });
+    expect(runtime.webspring.moveAppOutOfFolder("com.example.constructor", 0)).toBe(true);
+    expect(layout(runtime).order).toEqual(["com.example.constructor", folderId]);
+    expect(runtime.apps.getDisplayApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.constructor", "com.example.alpha"]);
   });
 
   it("opens one folder at a time, and during a drag only when the drag asks", () => {
-    const runtime = createFolderRuntime(folders(true, ["folder.tools", 2, ["beta", "gamma"]]));
+    const runtime = createFolderRuntime(folders(true, ["folder.tools", 2, ["com.example.beta", "com.example.gamma"]]));
 
-    expect(runtime.webspring.openFolder("alpha")).toBe(false);
-    runtime.webspring.beginDrag("alpha");
+    expect(runtime.webspring.openFolder("com.example.alpha")).toBe(false);
+    runtime.webspring.beginDrag("com.example.alpha");
     expect(runtime.webspring.openFolder("folder.tools")).toBe(false);
     expect(runtime.store.getSnapshot().webspring.openFolderId).toBeNull();
     // The spring-open under a resting app is the one drag that may open a folder.
@@ -449,11 +451,25 @@ describe("WebspringState folder actions", () => {
 });
 
 describe("Webspring canonical layout preference projection", () => {
-  it("reads and validates a canonical v4 value without changing board settings", () => {
+  it("resets old identifier layouts instead of reading or migrating the v4 key", () => {
+    const keys: string[] = [];
+    const old = { version: 4, order: ["gamma", "alpha"], folders: {}, board: { version: 1, pageSize: 12, dockSize: 5 }, updatedAt: 20, source: "persisted" };
+    const persistence: WebspringLayoutPersistence = {
+      getPreference<T>(key: string, fallback: T) {
+        keys.push(key);
+        return key === "webspring.layout.v4" ? old as T : fallback;
+      },
+    };
+    expect(WEBSPRING_LAYOUT_PREFERENCE_KEY).toBe("webspring.layout.v5");
+    expect(readWebspringLayoutPreference(persistence)).toMatchObject({ source: "seed", preference: { version: 5, order: [], folders: {} } });
+    expect(keys).toEqual(["webspring.layout.v5"]);
+    expect(old.order).toEqual(["gamma", "alpha"]);
+  });
+  it("reads and validates a canonical v5 value without changing board settings", () => {
     const fake = createProjectionPersistence({
-      version: 4,
-      order: ["gamma", "gamma", "alpha", ""],
-      folders: { "folder.user-a": { apps: ["beta", "beta"] }, "": { apps: ["x"] }, broken: ["x"] },
+      version: 5,
+      order: ["com.example.gamma", "com.example.gamma", "com.example.alpha", ""],
+      folders: { "folder.user-a": { apps: ["com.example.beta", "com.example.beta"] }, "": { apps: ["x"] }, broken: ["x"] },
       board: { version: 1, pageSize: 12, dockSize: 5 },
       updatedAt: 20,
       source: "persisted"
@@ -464,9 +480,9 @@ describe("Webspring canonical layout preference projection", () => {
     expect(result).toMatchObject({
       source: "webspring",
       preference: {
-        version: 4,
-        order: ["gamma", "alpha"],
-        folders: { "folder.user-a": { apps: ["beta"] } },
+        version: 5,
+        order: ["com.example.gamma", "com.example.alpha"],
+        folders: { "folder.user-a": { apps: ["com.example.beta"] } },
         board: { version: 1, pageSize: 12, dockSize: 5 },
         updatedAt: 20,
         source: "persisted"
@@ -476,7 +492,7 @@ describe("Webspring canonical layout preference projection", () => {
     expect(fake.keys).toEqual([WEBSPRING_LAYOUT_PREFERENCE_KEY]);
   });
 
-  it("seeds an empty v4 preference when canonical storage is absent", () => {
+  it("seeds an empty v5 preference when canonical storage is absent", () => {
     const fake = createProjectionPersistence();
 
     const result = readWebspringLayoutPreference(fake.persistence);
@@ -484,7 +500,7 @@ describe("Webspring canonical layout preference projection", () => {
     expect(result).toEqual({
       source: "seed",
       preference: {
-        version: 4,
+        version: 5,
         order: [],
         folders: {},
         board: { version: 1, pageSize: 20, dockSize: 4 },
@@ -497,7 +513,8 @@ describe("Webspring canonical layout preference projection", () => {
 
   it.each([
     ["malformed data", ["duplicate", "duplicate"]],
-    ["another version", { version: 3, order: ["gamma"], board: { version: 1, pageSize: 12, dockSize: 5 }, updatedAt: 20, source: "persisted" }],
+    ["another version", { version: 3, order: ["com.example.gamma"], board: { version: 1, pageSize: 12, dockSize: 5 }, updatedAt: 20, source: "persisted" }],
+    ["previous identity layout", { version: 4, order: ["gamma", "alpha"], folders: {}, board: { version: 1, pageSize: 12, dockSize: 5 }, updatedAt: 20, source: "persisted" }],
   ])("ignores %s without writing a replacement", (_label, value) => {
     const fake = createProjectionPersistence(value);
 
@@ -506,7 +523,7 @@ describe("Webspring canonical layout preference projection", () => {
     expect(result).toEqual({
       source: "webspring",
       preference: {
-        version: 4,
+        version: 5,
         order: [],
         folders: {},
         board: { version: 1, pageSize: 20, dockSize: 4 },
@@ -517,10 +534,10 @@ describe("Webspring canonical layout preference projection", () => {
     expect(fake.keys).toEqual([WEBSPRING_LAYOUT_PREFERENCE_KEY]);
   });
 
-  it("hydrates canonical v4 preferences through runtime state repeatedly", () => {
+  it("hydrates canonical v5 preferences through runtime state repeatedly", () => {
     window.localStorage.setItem(`SynCloudOS4:${WEBSPRING_LAYOUT_PREFERENCE_KEY}`, JSON.stringify({
-      version: 4,
-      order: ["gamma", "alpha"],
+      version: 5,
+      order: ["com.example.gamma", "com.example.alpha"],
       folders: {},
       board: { version: 1, pageSize: 12, dockSize: 5 },
       updatedAt: 20,
@@ -528,22 +545,22 @@ describe("Webspring canonical layout preference projection", () => {
     }));
     const { AppRegistry, SynCloudOS } = createRuntimeHarness(createBrowserPersistenceRuntime());
     AppRegistry.registerMany([
-      createOrderedManifest("alpha", 1),
-      createOrderedManifest("gamma", 2)
+      createOrderedManifest("com.example.alpha", 1),
+      createOrderedManifest("com.example.gamma", 2)
     ]);
 
     const first = SynCloudOS.WebspringState.hydrateLayoutPreference();
     const second = SynCloudOS.WebspringState.hydrateLayoutPreference();
 
     expect(first).toMatchObject({
-      version: 4,
-      order: ["gamma", "alpha"],
+      version: 5,
+      order: ["com.example.gamma", "com.example.alpha"],
       board: { version: 1, pageSize: 12, dockSize: 5 },
       updatedAt: 20,
       source: "persisted"
     });
     expect(second).toEqual(first);
-    expect(AppRegistry.getDisplayApps().map((app) => app.id)).toEqual(["gamma", "alpha"]);
-    expect(window.localStorage.getItem(`SynCloudOS4:${WEBSPRING_LAYOUT_PREFERENCE_KEY}`)).toContain('"version":4');
+    expect(AppRegistry.getDisplayApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.gamma", "com.example.alpha"]);
+    expect(window.localStorage.getItem(`SynCloudOS4:${WEBSPRING_LAYOUT_PREFERENCE_KEY}`)).toContain("\"version\":5");
   });
 });

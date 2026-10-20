@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { getSynWareNamespace } from "../SynCloudOS/AppSDK/useStrings";
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import {
   WEBSPRING_PRESENTATION_ROLES,
   getDesktopWebspringSlots,
@@ -169,8 +171,9 @@ export class WebspringController {
   model(snapshot: RuntimeSnapshot, presentation: Presentation, entrancePhase: WebspringViewModel["entrancePhase"] = "ready"): WebspringViewModel {
     const declaration = this.shell.manifest.webspringShell;
     const resourceUrls = this.resources?.resourceUrls ?? {};
-    const branding = resolveSiteBranding(declaration.branding, resourceUrls, this.runtime.locale, this.shell.manifest.id);
-    const resolveText = (text: LocalisedText) => resolveSiteBranding({ name: text }, {}, this.runtime.locale, this.shell.manifest.id).name;
+    const namespace = getSynWareNamespace(this.shell.manifest.bundleIdentifier);
+    const branding = resolveSiteBranding(declaration.branding, resourceUrls, this.runtime.locale, namespace);
+    const resolveText = (text: LocalisedText) => resolveSiteBranding({ name: text }, {}, this.runtime.locale, namespace).name;
     const widgets = Object.freeze(this.shell.widgets.map((widget): WebspringWidgetEntry => Object.freeze({
       widget,
       title: resolveText(widget.title),
@@ -184,16 +187,16 @@ export class WebspringController {
       snapshot.webspring.layout.folderConfiguration,
     );
     const appsById = new Map(projection.appOrder.map((appId) => {
-      const app = snapshot.appInfo[appId]!;
+      const app = snapshot.appInfo[normalizeBundleIdentifier(appId)]!;
       const viewApp: WebspringApp = Object.freeze({
-        id: app.id,
-        title: app.displayName,
+        bundleIdentifier: app.bundleIdentifier,
+        displayName: app.displayName,
         iconUrl: app.icon.src || null,
         route: app.route,
-        selected: snapshot.application.activeAppId === app.id,
-        running: snapshot.application.openAppIds.includes(app.id),
-        state: app.isDisabled ? "disabled" as const : snapshot.lifecycle[app.id] ?? "registered",
-        disabledReason: app.isDisabled || snapshot.lifecycle[app.id] === "disabled" ? AppInfo.explain(app).reason : undefined,
+        selected: normalizeBundleIdentifier(snapshot.application.activeAppId) === normalizeBundleIdentifier(app.bundleIdentifier),
+        running: snapshot.application.openAppIds.some(id => normalizeBundleIdentifier(id) === normalizeBundleIdentifier(app.bundleIdentifier)),
+        state: app.isDisabled ? "disabled" as const : snapshot.lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] ?? "registered",
+        disabledReason: app.isDisabled || snapshot.lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] === "disabled" ? AppInfo.explain(app).reason : undefined,
         badgeCount: app.notifications.badgeCount ?? 0,
         accent: app.webspring.accent ?? "#eaf6ff",
         featured: Boolean(app.webspring.featured),
@@ -205,7 +208,7 @@ export class WebspringController {
     const items = getDesktopWebspringSlots(projection.order).slots.map((slot): WebspringItem => {
       const members = projection.folders[slot.id];
       if (!members) return Object.freeze({ kind: "app", id: slot.id, app: appsById.get(slot.id)!, dialPlacement: dialPlacement(slot) });
-      const apps = Object.freeze(members.map((appId) => appsById.get(appId)!));
+      const apps = Object.freeze(members.map((appId) => appsById.get(normalizeBundleIdentifier(appId))!));
       return Object.freeze({
         kind: "folder",
         id: slot.id,
@@ -258,7 +261,7 @@ export class WebspringController {
   /** A manifest folder's localised title; folders visitors make share one system title. */
   private folderTitle(title: LocalisedText | undefined) {
     const text = title ?? { key: "webspring.folder.untitled", fallback: "Folder" };
-    const namespace = title ? this.shell.manifest.id : undefined;
+    const namespace = title ? getSynWareNamespace(this.shell.manifest.bundleIdentifier) : undefined;
     const translated = this.runtime.locale.t(text.key, undefined, namespace);
     return translated === text.key ? text.fallback ?? text.key : translated;
   }
@@ -285,7 +288,7 @@ export class WebspringController {
     };
     if (route !== undefined) {
       const resolution = this.runtime.routes.resolveRoute(route) as SynCloudOSRouteResolution;
-      if (resolution.kind !== "app" || resolution.app.id !== appId) {
+      if (resolution.kind !== "app" || normalizeBundleIdentifier(resolution.app.bundleIdentifier) !== normalizeBundleIdentifier(appId)) {
         return { status: "failed", message: `Route ${route} is outside ${appId}'s declared authority.` };
       }
       const result = await this.runtime.routes.openRoute(route, { source: "webspring-controller", context }).result;

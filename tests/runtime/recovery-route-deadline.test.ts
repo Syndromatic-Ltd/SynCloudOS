@@ -27,8 +27,8 @@ const runtimes: ReturnType<typeof createTestRuntime>[] = [];
 afterEach(async () => { for (const runtime of runtimes.splice(0)) await runtime.dispose({ reason: "deadline test", inFlight: "cancel" }); });
 function fixture() {
   let entered = false;
-  const routes = defineSynWareRoutes({ id: "remote.notes", routes: [{ name: "notes", path: "", beforeEnter: () => { entered = true; return new Promise<void>(() => {}); } }] } as const);
-  const definition = createSynWare({ manifest: { schemaVersion: 1, id: "notes", version: "1.0.0", title: "Notes", routes: [{ path: "/notes", primary: true }], permissions: ["app.open.public"] }, root: () => null, routes });
+  const routes = defineSynWareRoutes({ id: "remote.notes", routes: [{ name: "com.example.notes", path: "", beforeEnter: () => { entered = true; return new Promise<void>(() => {}); } }] } as const);
+  const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.notes", version: "1.0.0", displayName: "Notes", routes: [{ path: "/notes", primary: true }], permissions: ["app.open.public"] }, root: () => null, routes });
   const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)], lifecycleHookTimeoutMs: 100 });
   runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
   runtimes.push(runtime);
@@ -39,7 +39,7 @@ describe("canonical route deadline recovery", () => {
     const { runtime } = fixture();
     const result = await runtime.routes.openRoute("/notes", { syncRoute: false }).result;
     expect(result).toMatchObject({ status: "failed", committed: false });
-    expect(runtime.errors.getLatest()).toMatchObject({ code: "APP_NOT_RESPONDING", appId: "notes", context: { phase: "route-preparation", reason: "operation-timeout" } });
+    expect(runtime.errors.getLatest()).toMatchObject({ code: "APP_NOT_RESPONDING", appId: "com.example.notes", context: { phase: "route-preparation", reason: "operation-timeout" } });
     expect(runtime.store.getSnapshot().application.routePath).toBe("/");
   });
   it("does not report user cancellation as an app timeout", async () => {

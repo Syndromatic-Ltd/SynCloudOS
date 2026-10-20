@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import {
   type SynCloudOSLocaleBundleResourceInput,
   type SynCloudOSTranslationMessages
@@ -69,7 +70,8 @@ function namespaceSegmentFromFile(fileName: string) {
 
 function namespaceForFile(appId: string, fileName: string) {
   const segment = namespaceSegmentFromFile(fileName);
-  return segment ? `synapps.${appId}.${segment}` : `synapps.${appId}`;
+  const identifier = normalizeBundleIdentifier(appId);
+  return segment ? `synapps.${identifier}.${segment}` : `synapps.${identifier}`;
 }
 
 function folderLocale(folderName: string) {

@@ -87,7 +87,7 @@ function createDependencies() {
     loginServices: { isAuthorised: true },
     lifecycle: {},
     application: {
-      activeAppId: "software",
+      activeAppId: "com.example.software",
       routePath: "/software",
       multiSwitch: { status: "idle" }
     }
@@ -114,9 +114,9 @@ function createDependencies() {
     },
     resolveRoute: (pathname) => {
       if (pathname === "/") return { kind: "webspring", pathname };
-      if (pathname === "/software") return { kind: "app", pathname, app: { id: "software" } };
-      if (pathname === "/studio") return { kind: "app", pathname, app: { id: "studio" } };
-      if (pathname === "/public") return { kind: "app", pathname, app: { id: "public", policy: { public: true, requiresLogin: false } } };
+      if (pathname === "/software") return { kind: "app", pathname, app: { bundleIdentifier: "com.example.software" } };
+      if (pathname === "/studio") return { kind: "app", pathname, app: { bundleIdentifier: "com.example.studio" } };
+      if (pathname === "/public") return { kind: "app", pathname, app: { bundleIdentifier: "com.example.public", policy: { public: true, requiresLogin: false } } };
       return { kind: "notFound", pathname };
     },
     openRoute,
@@ -190,7 +190,7 @@ describe("BrowserRouteCoordinator", () => {
     if (applicationHome) {
       const resolveRoute = dependencies.resolveRoute;
       dependencies.resolveRoute = pathname => pathname === "/"
-        ? { kind: "app", pathname: "/software", app: { id: "software" } }
+        ? { kind: "app", pathname: "/software", app: { bundleIdentifier: "com.example.software" } }
         : resolveRoute(pathname);
     }
     const coordinator = createBrowserRouteCoordinator(dependencies);
@@ -199,7 +199,7 @@ describe("BrowserRouteCoordinator", () => {
     try {
       setSnapshot({
         booted: true, statechart: { currentState: "active.webspring" }, loginServices: { isAuthorised: true },
-        lifecycle: { software: "closed" },
+        lifecycle: { "com.example.software": "closed" },
         application: { activeAppId: null, routePath: "/", multiSwitch: { status: "idle" } },
       });
       await Promise.resolve();
@@ -356,11 +356,11 @@ describe("BrowserRouteCoordinator", () => {
   it("joins the real RouteManager guard redirect and its pending canonical successor without reopening", async () => {
     const navigation = new FakeNavigation(); installNavigation(navigation);
     const entered = deferred<void>(); const allow = deferred<{ outcome: "allow" }>();
-    const routes = defineSynWareRoutes({ id: "browser.redirects", routes: [{ name: "studio", path: "", children: [
+    const routes = defineSynWareRoutes({ id: "browser.redirects", routes: [{ name: "com.example.studio", path: "", children: [
       { name: "studio.old", path: "old", beforeEnter: () => ({ outcome: "redirect", target: { name: "studio.current" } }) },
       { name: "studio.current", path: "current", beforeEnter: () => { entered.resolve(); return allow.promise; } },
     ] }] });
-    const definition = createSynWare({ manifest: { schemaVersion: 1, id: "studio", title: "Studio", version: "1.0.0",
+    const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.studio", displayName: "Studio", version: "1.0.0",
       routes: [{ path: "/studio", primary: true, match: "prefix" }], permissions: ["app.open.public"] }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     const { RuntimeController, Statechart } = createRuntimeHarness(runtime);
@@ -432,7 +432,7 @@ describe("BrowserRouteCoordinator", () => {
       statechart: { currentState: "active.application.active" },
       loginServices: { isAuthorised: true },
       application: {
-        activeAppId: "studio",
+        activeAppId: "com.example.studio",
         routePath: "/studio",
         multiSwitch: { status: "idle" }
       }
@@ -565,7 +565,7 @@ describe("BrowserRouteCoordinator", () => {
       statechart: { currentState: "active.application.active" },
       loginServices: { isAuthorised: true },
       application: {
-        activeAppId: "studio",
+        activeAppId: "com.example.studio",
         routePath: "/studio",
         multiSwitch: { status: "switching" }
       }
@@ -578,7 +578,7 @@ describe("BrowserRouteCoordinator", () => {
       statechart: { currentState: "active.application.active" },
       loginServices: { isAuthorised: true },
       application: {
-        activeAppId: "studio",
+        activeAppId: "com.example.studio",
         routePath: "/studio",
         multiSwitch: { status: "idle" }
       }
@@ -618,7 +618,7 @@ describe("BrowserRouteCoordinator", () => {
       booted: true,
       statechart: { currentState: "active.application.active" },
       loginServices: { isAuthorised: true },
-      application: { activeAppId: "studio", routePath: "/studio", multiSwitch: { status: "idle" } },
+      application: { activeAppId: "com.example.studio", routePath: "/studio", multiSwitch: { status: "idle" } },
     });
     let settled = false;
     void Promise.resolve(handled).then(() => { settled = true; });
@@ -765,8 +765,8 @@ describe("BrowserRouteCoordinator", () => {
     const runtime = createTestRuntime();
     const { AppRegistry, RouteManager, RuntimeController, RuntimeStore, Statechart, run } = createRuntimeHarness(runtime);
     AppRegistry.registerMany([
-      createTestBundle({ id: "software", route: "/software" }),
-      createTestBundle({ id: "studio", route: "/studio" })
+      createTestBundle({ bundleIdentifier: "com.example.software", route: "/software" }),
+      createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })
     ]);
     unlockRuntime(runtime);
     RuntimeController.markBooted();
@@ -798,8 +798,8 @@ describe("BrowserRouteCoordinator", () => {
     await flushMultiSwitchLaunch();
     expect(RuntimeController.getSnapshot().application.multiSwitch).toMatchObject({
       status: "switching",
-      fromAppId: "software",
-      toAppId: "studio",
+      fromAppId: "com.example.software",
+      toAppId: "com.example.studio",
       fromRoute: "/software",
       toRoute: "/studio",
       source: "route"
@@ -816,8 +816,8 @@ describe("BrowserRouteCoordinator", () => {
     const runtime = createTestRuntime();
     const { AppRegistry, LaunchServices, RouteManager, RuntimeController, RuntimeStore, Statechart, run } = createRuntimeHarness(runtime);
     AppRegistry.registerMany([
-      createTestBundle({ id: "software", route: "/software" }),
-      createTestBundle({ id: "studio", route: "/studio" })
+      createTestBundle({ bundleIdentifier: "com.example.software", route: "/software" }),
+      createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })
     ]);
     unlockRuntime(runtime);
     RuntimeController.markBooted();
@@ -847,8 +847,8 @@ describe("BrowserRouteCoordinator", () => {
 
     expect(RuntimeController.getSnapshot().application.multiSwitch).toMatchObject({
       status: "switching",
-      fromAppId: "software",
-      toAppId: "studio",
+      fromAppId: "com.example.software",
+      toAppId: "com.example.studio",
       source: "route"
     });
     await vi.advanceTimersByTimeAsync(900);
@@ -864,8 +864,8 @@ describe("BrowserRouteCoordinator", () => {
 
     expect(RuntimeController.getSnapshot().application.multiSwitch).toMatchObject({
       status: "switching",
-      fromAppId: "studio",
-      toAppId: "software",
+      fromAppId: "com.example.studio",
+      toAppId: "com.example.software",
       source: "route"
     });
     expect(LaunchServices.getHistory().filter((record: { action: string }) => record.action === "multiswitch.begin")).toHaveLength(2);
@@ -1118,7 +1118,7 @@ describe("BrowserRouteCoordinator", () => {
       booted: true,
       statechart: { currentState: "active.application.active" },
       loginServices: { isAuthorised: true },
-      application: { activeAppId: "studio", routePath: "/studio", multiSwitch: { status: "idle" } },
+      application: { activeAppId: "com.example.studio", routePath: "/studio", multiSwitch: { status: "idle" } },
     });
 
     await expect(event.interceptOptions?.handler()).resolves.toBeUndefined();
@@ -1294,7 +1294,7 @@ describe("BrowserRouteCoordinator", () => {
       statechart: { currentState: "active.application.active" },
       loginServices: { isAuthorised: true },
       application: {
-        activeAppId: "studio",
+        activeAppId: "com.example.studio",
         routePath: "/studio",
         multiSwitch: { status: "idle" }
       }

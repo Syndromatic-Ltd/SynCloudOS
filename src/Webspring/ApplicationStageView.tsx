@@ -192,7 +192,7 @@ export function ApplicationStageView({
       : null
   ), [menuPresentationReady, onQuickSwitchRequest, quickSwitchLabel, quickSwitchOpen, stage.isFocused]);
   const appMenuModel = useMemo(() => createWebspringAppMenuModel({
-    appId: app.id,
+    appId: app.bundleIdentifier,
     labels: appMenuLabels,
     appPreferences: appPreferences ? {
       commandId: appPreferences.commandId,
@@ -200,7 +200,7 @@ export function ApplicationStageView({
     } : undefined,
     includeAbout: appDeclaresAbout,
     includeLogOut: sessionAuthorised,
-  }), [app.id, appDeclaresAbout, appMenuLabels, appName, appPreferences, locale, sessionAuthorised]);
+  }), [app.bundleIdentifier, appDeclaresAbout, appMenuLabels, appName, appPreferences, locale, sessionAuthorised]);
   // With only System Preferences to offer, the control opens it instead of a one-item menu.
   const opensPreferencesDirectly = menuOpensSystemPreferencesDirectly(appMenuModel);
   const openSystemPreferences = useCallback(() => {
@@ -211,9 +211,9 @@ export function ApplicationStageView({
   const hasApplicationMenu = menuPresentationReady && !opensPreferencesDirectly && (hasRightSlot || app.applicationMenu?.trigger === "content");
   useEffect(() => {
     if (!onApplicationMenuToggleRegister) return undefined;
-    const unregister = onApplicationMenuToggleRegister(app.id, activateMenu, menuPresentationReady);
+    const unregister = onApplicationMenuToggleRegister(app.bundleIdentifier, activateMenu, menuPresentationReady);
     return unregister;
-  }, [activateMenu, app.id, menuPresentationReady, onApplicationMenuToggleRegister]);
+  }, [activateMenu, app.bundleIdentifier, menuPresentationReady, onApplicationMenuToggleRegister]);
   const rightSlot = useMemo<RightSlotControl | null>(() => {
     if (!hasRightSlot || frame.rightSlot === "none") return null;
     const common = { opensMenu: !opensPreferencesDirectly, onActivate: activateMenu };
@@ -309,8 +309,8 @@ export function ApplicationStageView({
     [settlesOnPresented, stageMotion.surface],
   );
 
-  const applicationUndoOwner = useMemo(() => ({ kind: "application" as const, id: app.id }), [app.id]);
-  const applicationResponderId = `application:${app.id}`;
+  const applicationUndoOwner = useMemo(() => ({ kind: "application" as const, id: app.bundleIdentifier }), [app.bundleIdentifier]);
+  const applicationResponderId = `application:${app.bundleIdentifier}`;
   const nseFocusPort = useRuntimeNSEFocusPort(applicationResponderId);
   const nseOverlayPort = useRuntimeNSEOverlayPort(applicationResponderId);
   const nseControlPort = useRuntimeNSEControlPort();
@@ -318,9 +318,9 @@ export function ApplicationStageView({
     runtime,
     renderers: windowContentRegistry,
     physicalHostId: `application-stage:${stage.id}`,
-    owner: { workspaceId: "workspace:default", applicationId: app.id, applicationSessionId: app.id },
+    owner: { workspaceId: "workspace:default", applicationId: app.bundleIdentifier, applicationSessionId: app.bundleIdentifier },
     restoreFocus: (anchor) => nseOverlayPort.restoreFocus(applicationResponderId, anchor),
-  }), [app.id, applicationResponderId, nseOverlayPort, runtime, stage.id, windowContentRegistry]);
+  }), [app.bundleIdentifier, applicationResponderId, nseOverlayPort, runtime, stage.id, windowContentRegistry]);
   useNSEDeferredDisposal(windowSurfaceBridge);
   const stageWindowSurfaceBridge = useMemo(() => ({
     present: (request: Parameters<typeof windowSurfaceBridge.present>[0], content: Parameters<typeof windowSurfaceBridge.present>[1]) => (

@@ -170,7 +170,7 @@ describe("defineWebspring preferences", () => {
   function define(preferences?: unknown) {
     return defineWebspring({
       manifest: {
-        schemaVersion: 1, id: "test.preferences", version: "1.0.0", title: "Preferences",
+        schemaVersion: 1, bundleIdentifier: "com.example.test.preferences", version: "1.0.0", displayName: "Preferences",
         webspringShell: {
           views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
           defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",

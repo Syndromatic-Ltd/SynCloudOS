@@ -70,11 +70,11 @@ function policyKitFor(profile: SynCloudOSPolicyProfile | undefined, session: Ses
 }
 
 const membersApp = createTestManifest({
-  id: "members-room",
+  bundleIdentifier: "com.example.members-room",
   policy: { requiresLogin: true, requiredRoles: ["member"] },
 });
 const staffApp = createTestManifest({
-  id: "staff-room",
+  bundleIdentifier: "com.example.staff-room",
   policy: { requiresLogin: true, requiredRoles: ["employee"] },
 });
 

@@ -35,7 +35,7 @@ describe("authoritative drag-board teardown", () => {
     const lifetime = new AbortController();
     const boards = createPasteboardRegistry({ runtimeId: "repair-5-drag" as never, signal: lifetime.signal });
     const sourceToken = Object.freeze({});
-    const endpoint = Object.freeze({ appId: "source", windowId: "source-window", responderId: "source-responder" });
+    const endpoint = Object.freeze({ appId: "com.example.source", windowId: "source-window", responderId: "source-responder" });
     let sourceLive = true;
     let releaseDelayedClear!: () => void;
     const delayedClear = new Promise<void>((resolve) => { releaseDelayedClear = resolve; });
@@ -88,8 +88,8 @@ describe("authoritative drag-board teardown", () => {
   });
 
   it("clears the shared drag board when an actual transfer mount retires before a same-app mount publishes again", async () => {
-    const appId = "repair-5-drag-mounted";
-    const runtime = authoriseTestRuntime(createTestRuntime({ initialBundles: [createTestBundle({ id: appId, route: `/${appId}` })] }));
+    const appId = "com.example.repair-5-drag-mounted";
+    const runtime = authoriseTestRuntime(createTestRuntime({ initialBundles: [createTestBundle({ bundleIdentifier: appId, route: `/${appId}` })] }));
     const responderId = `application:${appId}`;
     runtime.responders.register({ id: responderId, kind: "application", parentId: "workspace", scopeId: responderId });
     const app = runtime.apps.getApp(appId)!;

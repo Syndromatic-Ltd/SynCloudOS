@@ -98,7 +98,7 @@ class NotesWindowController extends NSEWindowController<NotesApp> {
 }
 ```
 
-- The command ID is the method name, scoped to the application (`newNote` becomes `<appId>.newNote`). `@action("document.save")` answers a standard command ID instead, so the standard menu items and key bindings reach it. `@action({ id, title, payload })` also sets the menu title and a payload schema.
+- The command ID is the method name, scoped to the bundle identifier (`newNote` becomes `<bundleIdentifier>.newNote`). `@action("document.save")` answers a standard command ID instead, so the standard menu items and key bindings reach it. `@action({ id, title, payload })` also sets the menu title and a payload schema.
 - `validate<Name>()`, found by name (`validateNewNote` for `newNote`), supplies `validate`. It returns a boolean or a validation object (`{ enabled, state, title, hidden, disabledReason }`) and may be asynchronous.
 - A method takes at most one parameter, the payload. A method with no parameter rejects a payload; otherwise pass a `payload` schema to check one.
 - Controls and menu items send actions by name: `<NSEPushButton action="newNote" />`, `<NSEToolButton action="newNote" />`, `NSESegmentedControl` items with `action`, and menu items `{ action: "newNote" }`. The payload goes in `actionPayload` on a control or item, and `payload` on a menu item. A name containing a dot, such as `document.save`, is taken as written. Each control enables, disables and shows state from the action's validation, so one `validateNewNote()` greys out the menu item and every button.

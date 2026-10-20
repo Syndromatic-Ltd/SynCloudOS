@@ -52,7 +52,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
   const modal = options.modal ?? options.kind === "modal";
   const trapFocus = options.trapFocus ?? modal;
   useLayoutEffect(() => {
-    const parentResponderId = options.parentResponderId ?? `application:${runtime.app.id}`;
+    const parentResponderId = options.parentResponderId ?? `application:${runtime.app.bundleIdentifier}`;
     const handle = runtime.focus.openScope({
       id: options.scopeId,
       kind: options.kind,

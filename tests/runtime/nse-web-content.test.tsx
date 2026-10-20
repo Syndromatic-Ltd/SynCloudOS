@@ -102,7 +102,7 @@ function runtimeWithWebContent(authorisation: { authorise: (request: never, sign
 }
 
 const remoteRequest = (overrides: Record<string, unknown> = {}) => ({
-  appId: "reference", applicationSessionId: "reference:session", ownerId: "reference:view", title: "Reference",
+  appId: "com.example.reference", applicationSessionId: "reference:session", ownerId: "reference:view", title: "Reference",
   source: { kind: "url", url: "https://reference.example/start" }, capabilities: ["same-origin"],
   decodeMessage: (payload: unknown) => payload, ...overrides,
 });
@@ -147,12 +147,12 @@ describe("runtime-owned web content", () => {
     const runtime = authoriseTestRuntime(createTestRuntime({
       id: "runtime:web:scoped-owner",
       environment: { ...environment, webContent: factory },
-      initialBundles: [createTestBundle({ id: "scoped-owner", route: "/scoped-owner" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.scoped-owner", route: "/scoped-owner" })],
       webContentAuthorisation: { authorise: () => true },
     }));
     const request = {
-      applicationSessionId: "application:scoped-owner",
-      ownerId: "application:scoped-owner",
+      applicationSessionId: "application:com.example.scoped-owner",
+      ownerId: "application:com.example.scoped-owner",
       title: "Scoped owner",
       source: { kind: "url" as const, url: "https://reference.example/start" },
       capabilities: ["same-origin" as const],
@@ -161,18 +161,18 @@ describe("runtime-owned web content", () => {
 
     await expect(runtime.webContent.createSession({
       ...request,
-      appId: "scoped-owner",
+      appId: "com.example.scoped-owner",
       ownerLease: Object.freeze({}),
     } as never)).rejects.toMatchObject({ name: "SecurityError" });
     expect(factory.adapters[0]!.prepares).toHaveLength(0);
 
-    const responderId = "application:scoped-owner";
+    const responderId = "application:com.example.scoped-owner";
     runtime.responders.register({ id: responderId, kind: "application", parentId: "workspace", scopeId: responderId });
-    const mount = runtime.transfers.mountApp(runtime.apps.getApp("scoped-owner")!, { responderId });
+    const mount = runtime.transfers.mountApp(runtime.apps.getApp("com.example.scoped-owner")!, { responderId });
     const scope = mount.scope;
     await expect(scope.webContent.createSession({
       ...request,
-      appId: "forged-owner",
+      appId: "com.example.forged-owner",
     } as never)).rejects.toThrow(/unsupported|descriptor|scope/i);
     const scopedRequest = {
       title: request.title,
@@ -484,11 +484,11 @@ describe("runtime-owned web content", () => {
   it("suspends and closes app-owned sessions through runtime lifecycle and releases every adapter resource", async () => {
     const { runtime, factory, adapter } = runtimeWithWebContent();
     const session = await runtime.webContent.createSession(remoteRequest({ source: { kind: "html", html: "<p>Safe</p>" }, capabilities: [] }) as never);
-    runtime.store.mutate((draft) => { draft.lifecycle.reference = "suspended"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.reference"] = "suspended"; });
     expect(session.getSnapshot().state).toBe("suspended");
-    runtime.store.mutate((draft) => { draft.lifecycle.reference = "active"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.reference"] = "active"; });
     expect(session.getSnapshot().state).toBe("loading");
-    runtime.store.mutate((draft) => { draft.lifecycle.reference = "closed"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.reference"] = "closed"; });
     expect(session.getSnapshot().state).toBe("closed");
     expect(adapter.releases).toHaveLength(1);
     await runtime.dispose("test");
@@ -510,37 +510,37 @@ describe("runtime-owned web content", () => {
     const navigating = session.navigate({ kind: "url", url: "https://next.example/pending" });
     await vi.waitFor(() => expect(adapter.prepares).toHaveLength(2));
 
-    runtime.webContent.suspendOwner("reference");
+    runtime.webContent.suspendOwner("com.example.reference");
     expect(session.getSnapshot()).toMatchObject({ state: "suspended", navigationEpoch: committed.navigationEpoch, frameSource: committed.frameSource });
     await expect(navigating).rejects.toMatchObject({ name: "AbortError" });
     expect(session.getSnapshot().state).toBe("suspended");
 
-    runtime.webContent.resumeOwner("reference");
+    runtime.webContent.resumeOwner("com.example.reference");
     expect(session.getSnapshot()).toMatchObject({ state: "ready", navigationEpoch: committed.navigationEpoch, frameSource: committed.frameSource });
     gate.resolve();
     await vi.waitFor(() => expect(adapter.releases).toHaveLength(1));
     expect(session.getSnapshot().state).toBe("ready");
 
-    runtime.webContent.closeOwner("reference", "closed while suspended");
-    runtime.webContent.suspendOwner("reference");
-    runtime.webContent.resumeOwner("reference");
+    runtime.webContent.closeOwner("com.example.reference", "closed while suspended");
+    runtime.webContent.suspendOwner("com.example.reference");
+    runtime.webContent.resumeOwner("com.example.reference");
     expect(session.getSnapshot().state).toBe("closed");
   });
 
   it("remembers suspended and closed owner authority before a session is created", async () => {
     const { runtime } = runtimeWithWebContent();
-    runtime.store.mutate((draft) => { draft.lifecycle.reference = "suspended"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.reference"] = "suspended"; });
     const suspended = await runtime.webContent.createSession(remoteRequest() as never);
     expect(suspended.getSnapshot().state).toBe("suspended"); suspended.dispose();
-    runtime.store.mutate((draft) => { draft.lifecycle.reference = "closed"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.reference"] = "closed"; });
     await expect(runtime.webContent.createSession(remoteRequest() as never)).rejects.toMatchObject({ name: "AbortError" });
 
     const window = runtime.windows.create(standardWindow("already-closed-web-window", {
-      applicationId: "window-app", applicationSessionId: "window-app:session",
-      content: { rendererId: "application", parameters: { appId: "window-app" } },
+      applicationId: "com.example.window-app", applicationSessionId: "window-app:session",
+      content: { rendererId: "application", parameters: { appId: "com.example.window-app" } },
     }));
     await runtime.windows.open(window.id); await runtime.windows.requestClose(window.id, { reason: "command" });
-    await expect(runtime.webContent.createSession(remoteRequest({ appId: "window-app", applicationSessionId: "window-app:session",
+    await expect(runtime.webContent.createSession(remoteRequest({ appId: "com.example.window-app", applicationSessionId: "window-app:session",
       windowControllerId: window.id }) as never)).rejects.toMatchObject({ name: "AbortError" });
   });
 
@@ -720,8 +720,8 @@ describe("runtime-owned web content", () => {
   it("closes a session when its canonical window controller is removed", async () => {
     const { runtime, adapter } = runtimeWithWebContent();
     const window = runtime.windows.create(standardWindow("web-content-window", {
-      applicationId: "reference", applicationSessionId: "reference:session",
-      content: { rendererId: "application", parameters: { appId: "reference" } },
+      applicationId: "com.example.reference", applicationSessionId: "reference:session",
+      content: { rendererId: "application", parameters: { appId: "com.example.reference" } },
     }));
     await runtime.windows.open(window.id);
     const session = await runtime.webContent.createSession(remoteRequest({ windowControllerId: window.id }) as never);
@@ -749,12 +749,12 @@ describe("runtime-owned web content", () => {
     const runtime = authoriseTestRuntime(createTestRuntime({
       id: "runtime:web:source-bound-scope",
       environment: { ...environment, webContent: factory },
-      initialBundles: [createTestBundle({ id: "source-bound", route: "/source-bound" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.source-bound", route: "/source-bound" })],
       webContentAuthorisation: { authorise: () => true },
     }));
-    const responderId = "application:source-bound";
+    const responderId = "application:com.example.source-bound";
     runtime.responders.register({ id: responderId, kind: "application", parentId: "workspace", scopeId: responderId });
-    const mount = runtime.transfers.mountApp(runtime.apps.getApp("source-bound")!, { responderId });
+    const mount = runtime.transfers.mountApp(runtime.apps.getApp("com.example.source-bound")!, { responderId });
     const scopedRuntime = { webContent: mount.scope.webContent };
     const props = {
       runtime: scopedRuntime,

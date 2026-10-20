@@ -46,8 +46,8 @@ function disposedLayerError() {
 describe("ErrorManager watchdog captures", () => {
   it("captures app render failures without treating them as Webspring fatal errors", async () => {
     const { AppRegistry, RuntimeController, SynCloudOS } = createRuntimeHarness(createTestRuntime());
-    const app = AppRegistry.register(createTestManifest({
-      id: "memo-journal",
+    const app = AppRegistry.register(createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.memo-journal",
       packageName: "MemoJournal.app",
       displayName: "MemoJournal",
       route: "/memo-journal",
@@ -66,7 +66,7 @@ describe("ErrorManager watchdog captures", () => {
       title: `${app.displayName} stopped unexpectedly.`,
       message: "An unexpected error has prevented this application from working properly.",
       source: "SynCloudOS.AppWatchdog",
-      appId: "memo-journal",
+      appId: "com.example.memo-journal",
       packageName: "MemoJournal.app",
       recoverable: false,
       severity: "fatal",
@@ -103,7 +103,7 @@ describe("ErrorManager watchdog captures", () => {
 
   it("keeps a thrown lifecycle error's own code and class instead of the watchdog's generic code", () => {
     const { AppRegistry, SynCloudOS } = createRuntimeHarness(createTestRuntime());
-    const app = AppRegistry.register(createTestManifest({ id: "fx-demo", packageName: "FXDemo.app", displayName: "FX Demo", route: "/fx-demo", componentKey: "FXDemo" }));
+    const app = AppRegistry.register(createTestManifest({ version: "1.0.0", bundleIdentifier: "com.example.fx-demo", packageName: "FXDemo.app", displayName: "FX Demo", route: "/fx-demo", componentKey: "FXDemo" }));
 
     for (const captured of [
       SynCloudOS.ErrorManager.createRuntimeRenderError(disposedLayerError()),
@@ -152,7 +152,7 @@ describe("ErrorManager watchdog captures", () => {
   it("uses plain caution for app recovery without an app icon and system branding for root failures", () => {
     expect(getSystemAlertIcon(createCapturedError({
       code: "APP_CONTENT_FAILED",
-      appId: "journal-publisher",
+      appId: "com.example.journal-publisher",
       packageName: "JournalPublisher.app",
       suggestedActions: ["returnToWebspring"]
     }))).toMatchObject({

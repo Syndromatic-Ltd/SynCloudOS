@@ -39,7 +39,7 @@ export function createApplicationRoot(source: ApplicationSessionSource): Compone
     // A departing tree keeps rendering for a moment after the application closed; it must not start a new one.
     const session = appRuntime.signal.aborted
       ? null
-      : ensureApplicationSession({ runtimeId: appRuntime.id, appId: appRuntime.app.id }, source);
+      : ensureApplicationSession({ runtimeId: appRuntime.id, appId: appRuntime.app.bundleIdentifier }, source);
     useLayoutEffect(() => session?.attachMount(windows, kernel), [session, windows, kernel]);
     const controller = session?.controllerFor(snapshot.surface === "window" ? snapshot.current : null) ?? null;
     if (!session || !controller) return null;

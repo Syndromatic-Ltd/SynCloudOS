@@ -30,7 +30,7 @@ afterEach(async () => {
   await Promise.all(runtimes.splice(0).map((runtime) => runtime.dispose("test cleanup")));
 });
 
-function fixture(id = "repair-4-command", browserProxyFallback = false) {
+function fixture(id = "com.example.repair-4-command", browserProxyFallback = false) {
   const environment = createTestRuntimeEnvironment({
     proxyBrandProbe: browserProxyFallback ? "omit" : "host",
   });
@@ -39,7 +39,7 @@ function fixture(id = "repair-4-command", browserProxyFallback = false) {
     expect(Object.hasOwn(environment, "isNativeProxy")).toBe(false);
   }
   const runtime = createTestRuntime({
-    initialBundles: [createTestBundle({ id, route: `/${id}` })],
+    initialBundles: [createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` })],
     environment,
   });
   runtimes.push(runtime);
@@ -57,7 +57,7 @@ describe("mounted command payload authority", () => {
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const execute = vi.fn();
     mounted.runtime.commands.register({
-      id: "repair-4-command.proxy",
+      id: "com.example.repair-4-command.proxy",
       responderId,
       title: { key: "repair.proxy", fallback: "Proxy" },
       payload: { description: "payload", parse: (value: unknown) => ({ ok: true as const, value }) },
@@ -85,7 +85,7 @@ describe("mounted command payload authority", () => {
       },
     });
 
-    await expect(mounted.runtime.commands.dispatch("repair-4-command.proxy", payload)).rejects.toThrow(/proxy|native|detached|payload/i);
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-4-command.proxy", payload)).rejects.toThrow(/proxy|native|detached|payload/i);
     expect(reads).toBe(0);
     expect(ownKeys).toBe(0);
     expect(descriptorReads).toBe(0);
@@ -94,11 +94,11 @@ describe("mounted command payload authority", () => {
   });
 
   it("does not touch Proxy traps when a browser host fails closed for raw payloads", async () => {
-    const { app, responderId, runtime } = fixture("repair-4-command-browser-proxy", true);
+    const { app, responderId, runtime } = fixture("com.example.repair-4-command-browser-proxy", true);
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const execute = vi.fn();
     mounted.runtime.commands.register({
-      id: "repair-4-command-browser-proxy.browser-proxy",
+      id: "com.example.repair-4-command-browser-proxy.browser-proxy",
       responderId,
       title: { key: "repair.browser-proxy", fallback: "Browser Proxy" },
       payload: { description: "payload", parse: (value: unknown) => ({ ok: true as const, value }) },
@@ -120,7 +120,7 @@ describe("mounted command payload authority", () => {
       },
     });
 
-    await expect(mounted.runtime.commands.dispatch("repair-4-command-browser-proxy.browser-proxy", payload)).rejects.toThrow(/proxy|native|detached|payload/i);
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-4-command-browser-proxy.browser-proxy", payload)).rejects.toThrow(/proxy|native|detached|payload/i);
     expect(prototypeTraps).toBe(0);
     expect(keyTraps).toBe(0);
     expect(descriptorTraps).toBe(0);
@@ -129,11 +129,11 @@ describe("mounted command payload authority", () => {
   });
 
   it("does not evaluate an accessor when the browser host lacks a native Proxy probe", async () => {
-    const { app, responderId, runtime } = fixture("repair-4-command-browser-accessor", true);
+    const { app, responderId, runtime } = fixture("com.example.repair-4-command-browser-accessor", true);
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const execute = vi.fn();
     mounted.runtime.commands.register({
-      id: "repair-4-command-browser-accessor.accessor",
+      id: "com.example.repair-4-command-browser-accessor.accessor",
       responderId,
       title: { key: "repair.accessor", fallback: "Accessor" },
       payload: { description: "payload", parse: (value: unknown) => ({ ok: true as const, value }) },
@@ -148,7 +148,7 @@ describe("mounted command payload authority", () => {
       get() { getterCalls += 1; return "hostile"; },
     });
 
-    await expect(mounted.runtime.commands.dispatch("repair-4-command-browser-accessor.accessor", payload))
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-4-command-browser-accessor.accessor", payload))
       .rejects.toThrow(/payload|native|detached|runtime-created/i);
     expect(getterCalls).toBe(0);
     expect(execute).not.toHaveBeenCalled();
@@ -156,11 +156,11 @@ describe("mounted command payload authority", () => {
   });
 
   it("accepts an immutable payload created by the mounted runtime in a browser fallback", async () => {
-    const { app, responderId, runtime } = fixture("repair-4-command-browser-created", true);
+    const { app, responderId, runtime } = fixture("com.example.repair-4-command-browser-created", true);
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const execute = vi.fn();
     mounted.runtime.commands.register({
-      id: "repair-4-command-browser-created.created",
+      id: "com.example.repair-4-command-browser-created.created",
       responderId,
       title: { key: "repair.created", fallback: "Created" },
       payload: { description: "payload", parse: (value: unknown) => ({ ok: true as const, value }) },
@@ -171,7 +171,7 @@ describe("mounted command payload authority", () => {
     });
     const payload = mounted.runtime.commands.createPayload("locale", "fr-FR");
 
-    await expect(mounted.runtime.commands.dispatch("repair-4-command-browser-created.created", payload))
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-4-command-browser-created.created", payload))
       .resolves.toMatchObject({ status: "executed" });
     expect(execute).toHaveBeenCalledWith(expect.objectContaining({ payload: { locale: "fr-FR" } }));
     mounted.dispose();
@@ -186,7 +186,7 @@ describe("mounted command payload authority", () => {
     const gate = new Promise<void>((resolve) => { release = resolve; });
     let model = "before";
     runtime.commands.register({
-      id: "repair-4-command.late-none",
+      id: "com.example.repair-4-command.late-none",
       responderId,
       title: { key: "repair.late", fallback: "Late" },
       payload: { description: "none", parse: (value: unknown) => value === undefined ? { ok: true as const, value } : { ok: false as const, issues: ["No payload."] } },
@@ -201,24 +201,24 @@ describe("mounted command payload authority", () => {
       },
     });
 
-    const pending = runtime.commands.dispatch("repair-4-command.late-none", undefined, { responderId, isLive: () => live });
+    const pending = runtime.commands.dispatch("com.example.repair-4-command.late-none", undefined, { responderId, isLive: () => live });
     await started;
     live = false;
     release();
 
-    await expect(pending).resolves.toMatchObject({ status: "unknown", commandId: "repair-4-command.late-none" });
+    await expect(pending).resolves.toMatchObject({ status: "unknown", commandId: "com.example.repair-4-command.late-none" });
     expect(model).toBe("mutated");
   });
 
   it("does not invalidate an admitted async command when focus is idempotently reaffirmed", async () => {
-    const { responderId, runtime } = fixture("repair-4-command-idempotent-focus");
+    const { responderId, runtime } = fixture("com.example.repair-4-command-idempotent-focus");
     runtime.focus.requestFocus(responderId);
     let entered!: () => void;
     const started = new Promise<void>((resolve) => { entered = resolve; });
     let release!: () => void;
     const settled = new Promise<void>((resolve) => { release = resolve; });
     runtime.commands.register({
-      id: "repair-4-command.idempotent-focus",
+      id: "com.example.repair-4-command-idempotent-focus.idempotent-focus",
       responderId,
       title: { key: "repair.idempotent-focus", fallback: "Idempotent focus" },
       payload: { description: "none", parse: (value: unknown) => value === undefined ? { ok: true as const, value } : { ok: false as const, issues: ["No payload."] } },
@@ -232,7 +232,7 @@ describe("mounted command payload authority", () => {
       },
     });
 
-    const pending = runtime.commands.dispatch("repair-4-command.idempotent-focus", undefined, { responderId });
+    const pending = runtime.commands.dispatch("com.example.repair-4-command-idempotent-focus.idempotent-focus", undefined, { responderId });
     await started;
     runtime.focus.requestFocus(responderId);
     runtime.focus.setActiveAnchors(runtime.focus.getActiveAnchors());
@@ -242,7 +242,7 @@ describe("mounted command payload authority", () => {
   });
 
   it("fences a late non-native thenable exactly like a Promise-returning command", async () => {
-    const { responderId, runtime } = fixture("repair-4-command-thenable");
+    const { responderId, runtime } = fixture("com.example.repair-4-command-thenable");
     let live = true;
     let entered!: () => void;
     const started = new Promise<void>((resolve) => { entered = resolve; });
@@ -250,7 +250,7 @@ describe("mounted command payload authority", () => {
     const settled = new Promise<void>((resolve) => { release = resolve; });
     let model = "before";
     runtime.commands.register({
-      id: "repair-4-command.thenable",
+      id: "com.example.repair-4-command-thenable.thenable",
       responderId,
       title: { key: "repair.thenable", fallback: "Thenable" },
       payload: { description: "none", parse: (value: unknown) => value === undefined ? { ok: true as const, value } : { ok: false as const, issues: ["No payload."] } },
@@ -268,21 +268,21 @@ describe("mounted command payload authority", () => {
       },
     });
 
-    const pending = runtime.commands.dispatch("repair-4-command.thenable", undefined, { responderId, isLive: () => live });
+    const pending = runtime.commands.dispatch("com.example.repair-4-command-thenable.thenable", undefined, { responderId, isLive: () => live });
     await started;
     live = false;
     release();
 
-    await expect(pending).resolves.toMatchObject({ status: "unknown", commandId: "repair-4-command.thenable" });
+    await expect(pending).resolves.toMatchObject({ status: "unknown", commandId: "com.example.repair-4-command-thenable.thenable" });
     expect(model).toBe("mutated");
   });
 
   it("restores a command model when its undo factory fails but the declaration supplies a compensation", async () => {
-    const { responderId, runtime } = fixture("repair-4-command-compensated");
+    const { responderId, runtime } = fixture("com.example.repair-4-command-compensated");
     let model = "before";
     const compensate = vi.fn(() => { model = "before"; });
     runtime.commands.register({
-      id: "repair-4-command.compensated-factory",
+      id: "com.example.repair-4-command-compensated.compensated-factory",
       responderId,
       title: { key: "repair.compensated", fallback: "Compensated" },
       payload: { description: "none", parse: (value: unknown) => value === undefined ? { ok: true as const, value } : { ok: false as const, issues: ["No payload."] } },
@@ -296,17 +296,17 @@ describe("mounted command payload authority", () => {
       execute: () => { model = "mutated"; return "mutated"; },
     });
 
-    await expect(runtime.commands.dispatch("repair-4-command.compensated-factory", undefined, { responderId }))
+    await expect(runtime.commands.dispatch("com.example.repair-4-command-compensated.compensated-factory", undefined, { responderId }))
       .resolves.toMatchObject({ status: "failed" });
     expect(compensate).toHaveBeenCalledOnce();
     expect(model).toBe("before");
   });
 
   it("never reports factory failure after mutation as an executed command when no compensation exists", async () => {
-    const { responderId, runtime } = fixture("repair-4-command-unknown");
+    const { responderId, runtime } = fixture("com.example.repair-4-command-unknown");
     let model = "before";
     runtime.commands.register({
-      id: "repair-4-command.unknown-factory",
+      id: "com.example.repair-4-command-unknown.unknown-factory",
       responderId,
       title: { key: "repair.unknown", fallback: "Unknown" },
       payload: { description: "none", parse: (value: unknown) => value === undefined ? { ok: true as const, value } : { ok: false as const, issues: ["No payload."] } },
@@ -316,7 +316,7 @@ describe("mounted command payload authority", () => {
       execute: () => { model = "may-have-mutated"; return "mutated"; },
     });
 
-    await expect(runtime.commands.dispatch("repair-4-command.unknown-factory", undefined, { responderId }))
+    await expect(runtime.commands.dispatch("com.example.repair-4-command-unknown.unknown-factory", undefined, { responderId }))
       .resolves.toMatchObject({ status: "failed", error: { code: "command-outcome-unknown" } });
     expect(model).toBe("may-have-mutated");
   });

@@ -22,8 +22,12 @@ export function writeDeveloperMcpPackage({repositoryRoot,directory,sdkVersion}) 
   cpSync(resolve(repositoryRoot,"scripts/developer-mcp/PACKAGE_README.md"),resolve(directory,"README.md"));
   for (const file of ["validation-core.mjs","manifest-source.mjs","bundle-paths.mjs","project-derivation.mjs","create-synware.mjs"]) {
     mkdirSync(resolve(directory,"scripts/synware"),{recursive:true});
-    cpSync(resolve(repositoryRoot,"scripts/synware",file),resolve(directory,"scripts/synware",file));
+    writeFileSync(resolve(directory,"scripts/synware",file),readFileSync(resolve(repositoryRoot,"scripts/synware",file),"utf8")
+      .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs","./bundleIdentifier.mjs"));
   }
+  cpSync(resolve(repositoryRoot,"src/SynCloudOS/Identity/bundleIdentifier.mjs"),resolve(directory,"scripts/synware/bundleIdentifier.mjs"));
+  const toolsPath=resolve(directory,"scripts/developer-mcp/tools.mjs");
+  writeFileSync(toolsPath,readFileSync(toolsPath,"utf8").replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs","../synware/bundleIdentifier.mjs"));
   for (const file of ["LICENSE","NOTICE"]) cpSync(resolve(repositoryRoot,file),resolve(directory,file));
   const manifest={name:"@syndromatic/syncloudos-developer-mcp",version:sdkVersion,type:"module",description:"Offline, installed-SDK-matched SynCloudOS developer tools for MCP coding agents",license:repository.license,repository:repository.repository,engines:{node:">=22.12.0"},bin:{"syncloudos-mcp":"scripts/developer-mcp/server.mjs"},files:["scripts","README.md","LICENSE","NOTICE"],peerDependencies:{"@syndromatic/syncloudos":sdkVersion},dependencies:{"@modelcontextprotocol/sdk":repository.devDependencies["@modelcontextprotocol/sdk"],zod:repository.devDependencies.zod,typescript:repository.devDependencies.typescript,ajv:repository.dependencies.ajv}};
   writeFileSync(resolve(directory,"package.json"),JSON.stringify(manifest,null,2)+"\n");

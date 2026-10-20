@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   NSEApplication,
   NSEApplicationClass,
@@ -85,7 +86,7 @@ function constructApplication(source: ApplicationSessionSource, appId: string, c
 const sessions = new Map<string, ApplicationSession>();
 
 function keyOf({ runtimeId, appId }: ApplicationSessionIdentity): string {
-  return `${runtimeId}:${appId}`;
+  return `${runtimeId}:${normalizeBundleIdentifier(appId)}`;
 }
 
 let windowSequence = 0;
@@ -252,7 +253,7 @@ export class ApplicationSession {
     if (this.#disposed) throw new DOMException("The application is closed.", "InvalidStateError");
     const port = await this.#waitForPort();
     const key = `${++windowSequence}`;
-    const restorationKey = `application.${this.#identity.appId}.window.${key}`;
+    const restorationKey = `application.${normalizeBundleIdentifier(this.#identity.appId)}.window.${key}`;
     const controller = this.#construct(Controller);
     this.#pendingByRestorationKey.set(restorationKey, controller);
     try {

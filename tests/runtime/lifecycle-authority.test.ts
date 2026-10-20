@@ -35,54 +35,54 @@ describe("runtime lifecycle authority", () => {
   it("removes application and window undo owners on app unregistration without replacing a live app owner", async () => {
     const runtime = createTestRuntime();
     const { AppRegistry, AppManagerController, WindowManager } = createRuntimeHarness(runtime);
-    AppRegistry.register(createTestManifest({ id: "owned-app", presentation: "windowedView" }));
-    const owner = { kind: "application" as const, id: "owned-app" };
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.owned-app", presentation: "windowedView" }));
+    const owner = { kind: "application" as const, id: "com.example.owned-app" };
     const original = runtime.undo.get(owner);
     expect(original).not.toBeNull();
-    AppManagerController.createManagerForApp(runtime.apps.getApp("owned-app"));
+    AppManagerController.createManagerForApp(runtime.apps.getApp("com.example.owned-app"));
     expect(runtime.undo.get(owner)).toBe(original);
-    const window = await WindowManager.openApplicationWindow("owned-app");
+    const window = await WindowManager.openApplicationWindow("com.example.owned-app");
     expect(window).not.toBeNull();
     expect(runtime.undo.get({ kind: "window", id: window!.id })).not.toBeNull();
 
-    await AppRegistry.unregister("owned-app");
+    await AppRegistry.unregister("com.example.owned-app");
 
     expect(runtime.undo.get(owner)).toBeNull();
     expect(runtime.undo.get({ kind: "window", id: window!.id })).toBeNull();
   });
   it("delegates AppManager.transition to the canonical Lifecycle writer", async () => {
     const { AppRegistry, AppManagerController, Lifecycle, RuntimeController } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.register(createTestManifest({ id: "delegated-lifecycle" }));
-    const manager = AppManagerController.getManagerForApp("delegated-lifecycle");
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.delegated-lifecycle" }));
+    const manager = AppManagerController.getManagerForApp("com.example.delegated-lifecycle");
     const transition = vi.spyOn(Lifecycle, "transition");
 
     expect(manager?.transition("loading", "prepare")).toBe(true);
 
     expect(transition).toHaveBeenCalledTimes(1);
-    expect(transition).toHaveBeenCalledWith("delegated-lifecycle", "loading", {
+    expect(transition).toHaveBeenCalledWith("com.example.delegated-lifecycle", "loading", {
       reason: "prepare",
       source: "SynCloudOS.AppManager.transition"
     });
-    expect(RuntimeController.getSnapshot().lifecycle["delegated-lifecycle"]).toBe("loading");
+    expect(RuntimeController.getSnapshot().lifecycle["com.example.delegated-lifecycle"]).toBe("loading");
   });
 
   it("emits a single app lifecycle event per delegated transition", async () => {
     const { AppRegistry, AppManagerController, RuntimeController } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.register(createTestManifest({ id: "single-event-app" }));
-    const manager = AppManagerController.getManagerForApp("single-event-app");
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.single-event-app" }));
+    const manager = AppManagerController.getManagerForApp("com.example.single-event-app");
 
     expect(manager?.transition("loading", "prepare")).toBe(true);
 
     const snapshot = RuntimeController.getSnapshot();
-    const lifecycleEvents = snapshot.lifecycleEvents.filter((event) => event.appId === "single-event-app");
+    const lifecycleEvents = snapshot.lifecycleEvents.filter((event) => event.appId === "com.example.single-event-app");
     const runtimeEvents = RuntimeController.getEventHistory().filter(
-      (event) => event.type === "app.lifecycle.transition" && eventAppId(event.payload) === "single-event-app"
+      (event) => event.type === "app.lifecycle.transition" && eventAppId(event.payload) === "com.example.single-event-app"
     );
 
     expect(lifecycleEvents).toHaveLength(1);
     expect(runtimeEvents).toHaveLength(1);
     expect(runtimeEvents[0]?.payload).toMatchObject({
-      appId: "single-event-app",
+      appId: "com.example.single-event-app",
       from: "registered",
       to: "loading",
       reason: "prepare",
@@ -92,23 +92,23 @@ describe("runtime lifecycle authority", () => {
 
   it("rejects invalid transitions without writing lifecycle state or compatibility events", async () => {
     const { AppRegistry, AppManagerController, RuntimeController } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.register(createTestManifest({ id: "invalid-transition-app" }));
-    const manager = AppManagerController.getManagerForApp("invalid-transition-app");
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.invalid-transition-app" }));
+    const manager = AppManagerController.getManagerForApp("com.example.invalid-transition-app");
 
     expect(manager?.transition("active", "direct jump")).toBe(false);
 
     const snapshot = RuntimeController.getSnapshot();
-    expect(snapshot.lifecycle["invalid-transition-app"]).toBe("registered");
-    expect(snapshot.lifecycleEvents.filter((event) => event.appId === "invalid-transition-app")).toEqual([]);
+    expect(snapshot.lifecycle["com.example.invalid-transition-app"]).toBe("registered");
+    expect(snapshot.lifecycleEvents.filter((event) => event.appId === "com.example.invalid-transition-app")).toEqual([]);
     expect(
       RuntimeController.getEventHistory().filter(
-        (event) => event.type === "app.lifecycle.transition" && eventAppId(event.payload) === "invalid-transition-app"
+        (event) => event.type === "app.lifecycle.transition" && eventAppId(event.payload) === "com.example.invalid-transition-app"
       )
     ).toHaveLength(0);
     expect(RuntimeController.getEventHistory().filter((event) => event.type === "lifecycle.transition.failed")).toHaveLength(1);
     expect(snapshot.errors.at(-1)).toMatchObject({
       code: "APP_LAUNCH_FAILED",
-      appId: "invalid-transition-app",
+      appId: "com.example.invalid-transition-app",
       source: "SynCloudOS.AppManager.transition"
     });
   });
@@ -117,8 +117,8 @@ describe("runtime lifecycle authority", () => {
     const runtime = createTestRuntime();
     authoriseRuntime(runtime);
     const { AppRegistry, AppManagerController, RuntimeController } = createRuntimeHarness(runtime);
-    AppRegistry.register(createTestManifest({ id: "compatibility-app" }));
-    const manager = AppManagerController.getManagerForApp("compatibility-app");
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.compatibility-app" }));
+    const manager = AppManagerController.getManagerForApp("com.example.compatibility-app");
 
     expect(manager?.markReady()).toBe(false);
     expect(manager?.transition("loading", "prepare")).toBe(true);
@@ -127,7 +127,7 @@ describe("runtime lifecycle authority", () => {
     await vi.waitFor(() => expect(manager?.getState()).toBe("active"));
     expect(manager?.fail(new Error("boom"))).toBe(true);
 
-    expect(RuntimeController.getSnapshot().lifecycle["compatibility-app"]).toBe("failed");
+    expect(RuntimeController.getSnapshot().lifecycle["com.example.compatibility-app"]).toBe("failed");
   });
 
   it("uses current RuntimeStore AppInfo when stale managers explain and launch", async () => {
@@ -137,8 +137,8 @@ describe("runtime lifecycle authority", () => {
     const { AppRegistry, AppManagerController, ServiceRegistry } = createRuntimeHarness(runtime);
     ServiceRegistry.ensureDefaults();
     ServiceRegistry.stopService("windowing");
-    AppRegistry.registerBundle(createTestBundle({ id: "restored-service-app", requiredServices: ["windowing"] }));
-    const manager = AppManagerController.getManagerForApp("restored-service-app");
+    AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.restored-service-app", requiredServices: ["windowing"] }));
+    const manager = AppManagerController.getManagerForApp("com.example.restored-service-app");
 
     expect(manager?.explainLaunch()).toMatchObject({ canLaunch: false, disabled: true });
 

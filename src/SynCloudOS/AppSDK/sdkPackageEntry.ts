@@ -144,7 +144,7 @@ export type {
   SynWareDocumentTypeManifest,
   SynWareLifecycleManifest,
   SynWareApplicationAvailability,
-  SynWareManifestOverrides,
+  SynWareInfo,
   SynWareLocalisedText,
   SynWareManifestIssue,
   SynWareManifestValidation,

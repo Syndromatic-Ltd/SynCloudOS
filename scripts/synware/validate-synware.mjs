@@ -22,7 +22,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createSynWareValidator, discoverProjectFolders, parseManifest } from "./validation-core.mjs";
+import { createSynWareValidator, discoverProjectFolders, parseManifest, rejectDuplicateBundleIdentifiers } from "./validation-core.mjs";
 export { parseManifest };
 import { synWarePackageName, synWareSdkEntries, synWareSdkGeneratedStyles, synWareSdkStyles } from "./sdk-entries.mjs";
 import { auditSynWareImports } from "./audit-sdk-imports.mjs";
@@ -59,7 +59,7 @@ export function validateSynWareDirectory(targetArgument, boundaryAudit) {
   } catch (error) {
     return {
       directory: target,
-      id: null,
+      bundleIdentifier: null,
       ok: false,
       error: error instanceof Error ? error.message : String(error),
     };
@@ -71,7 +71,7 @@ export function discoverSynWareDirectories(root = governedSynWareRoot) {
 }
 
 function resultSortKey(result) {
-  return result.id ?? basename(result.directory);
+  return result.bundleIdentifier ?? basename(result.directory);
 }
 
 export function validateSynWareDirectories(root = governedSynWareRoot) {
@@ -79,6 +79,7 @@ export function validateSynWareDirectories(root = governedSynWareRoot) {
   const results = discoverSynWareDirectories(root)
     .map((directory) => validateSynWareDirectory(directory, boundaryAudit))
     .sort((left, right) => resultSortKey(left).localeCompare(resultSortKey(right)));
+  rejectDuplicateBundleIdentifiers(results);
   const valid = results.filter((result) => result.ok).length;
   const invalid = results.length - valid;
   return { root: resolve(root), results, valid, invalid, ok: invalid === 0 };
@@ -86,7 +87,7 @@ export function validateSynWareDirectories(root = governedSynWareRoot) {
 
 function writeResult(result, stdout, stderr, aggregate) {
   if (result.ok) {
-    stdout.write(`validated ${result.id}\n`);
+    stdout.write(`validated ${result.bundleIdentifier ?? basename(result.directory)}\n`);
     return;
   }
   const prefix = aggregate ? `invalid ${basename(result.directory)}: ` : "";

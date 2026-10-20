@@ -301,9 +301,9 @@ The manifest for this component declares the permission:
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.keys",
+  bundleIdentifier: "com.example.keys",
   version: "1.0.0",
-  title: "Keys",
+  displayName: "Keys",
   routes: [{ path: "/keys", primary: true }],
   permissions: ["midi.access"],
 } as const;

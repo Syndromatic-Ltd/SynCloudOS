@@ -32,7 +32,7 @@ function createNotification(overrides: Partial<SynCloudOSNotification> = {}): Sy
     category: "app",
     title: "Ready",
     message: "The test notification is ready.",
-    appId: "journal",
+    appId: "com.example.journal",
     createdAt,
     updatedAt: createdAt,
     status: "displayed",
@@ -53,7 +53,7 @@ function createNotification(overrides: Partial<SynCloudOSNotification> = {}): Sy
     actions: [],
     group: {
       key: "journal:app:general:2023-11-14",
-      appId: "journal",
+      appId: "com.example.journal",
       kind: "app",
       dateKey: "2023-11-14"
     },
@@ -102,7 +102,7 @@ describe("Webspring notification presenter model", () => {
       notificationId: actionable.id,
       actionId: "open",
       route: "/journal/release-note",
-      appId: "journal",
+      appId: "com.example.journal",
       shouldAct: true,
       shouldCloseCentre: true
     });
@@ -123,7 +123,7 @@ describe("Webspring notification presenter model", () => {
     });
     expect(createNotificationActionPlan(createNotification({ route: undefined, actions: [] }))).toMatchObject({
       kind: "openApp",
-      appId: "journal",
+      appId: "com.example.journal",
       shouldAct: false
     });
     expect(createNotificationActionPlan(createNotification({ appId: undefined, actions: [] }))).toMatchObject({

@@ -55,8 +55,8 @@ const remintDocumentType: DocumentType<RemintDocumentModel> = Object.freeze({
   schemaVersion: 1,
   extensions: Object.freeze([".mount-remint-test"]),
   mimeTypes: Object.freeze(["application/x-syncloudos-mount-remint-test"]),
-  creatingApplicationId: "window-owner",
-  openingApplicationIds: Object.freeze(["window-owner"]),
+  creatingApplicationId: "com.example.window-owner",
+  openingApplicationIds: Object.freeze(["com.example.window-owner"]),
   capabilities: Object.freeze({ versions: true, conflicts: true }),
   autosave: "disabled",
   create: () => Object.freeze({ version: 1, text: "Untitled" }),
@@ -83,13 +83,13 @@ describe("window mount transfer re-mint", () => {
     activeRuntimes.push(runtime);
     registerTestSynWare(runtime, {
       schemaVersion: 1,
-      id: "branding-app",
+      bundleIdentifier: "com.example.branding-app",
       version: "1.0.0",
-      title: "Branding App",
+      displayName: "Branding App",
       routes: [{ path: "/branding-app", primary: true }],
       windowDefaults: { title: "Branding App", width: 640, height: 480 },
     });
-    const app = runtime.apps.getApp("branding-app");
+    const app = runtime.apps.getApp("com.example.branding-app");
     if (!app) throw new Error("The branding-app fixture did not register.");
 
     const firstBranding = Object.freeze({ ...branding, name: "First host brand" });
@@ -108,7 +108,7 @@ describe("window mount transfer re-mint", () => {
     const tree = (siteBranding: typeof firstBranding) => (
       <HostSiteBrandingProvider value={siteBranding}>
         <SynCloudOSWatchdog runtime={runtime} watchdogName="branding update mount">
-          <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:branding-app">
+          <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.branding-app">
             <BrandingProbe />
           </SynWareRuntimeMount>
         </SynCloudOSWatchdog>
@@ -134,15 +134,15 @@ describe("window mount transfer re-mint", () => {
     activeRuntimes.push(runtime);
     registerTestSynWare(runtime, {
       schemaVersion: 1,
-      id: "lifecycle-app",
+      bundleIdentifier: "com.example.lifecycle-app",
       version: "1.0.0",
-      title: "Lifecycle App",
+      displayName: "Lifecycle App",
       routes: [{ path: "/lifecycle-app", primary: true }],
       windowDefaults: { title: "Lifecycle App", width: 640, height: 480 },
     });
-    const app = runtime.apps.getApp("lifecycle-app");
+    const app = runtime.apps.getApp("com.example.lifecycle-app");
     if (!app) throw new Error("The lifecycle-app fixture did not register.");
-    const manager = runtime.appManager.getManagerForApp(app.id);
+    const manager = runtime.appManager.getManagerForApp(app.bundleIdentifier);
     if (!manager) throw new Error("The lifecycle-app manager did not register.");
 
     let firstSignal: AbortSignal | null = null;
@@ -156,7 +156,7 @@ describe("window mount transfer re-mint", () => {
     }
     const frame = (tick: number) => (
       <SynCloudOSWatchdog runtime={runtime} watchdogName="lifecycle projection mount">
-        <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.id}`}>
+        <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.bundleIdentifier}`}>
           <LifecycleProbe tick={tick} />
         </SynWareRuntimeMount>
       </SynCloudOSWatchdog>
@@ -166,14 +166,14 @@ describe("window mount transfer re-mint", () => {
     await screen.findByText("Lifecycle live");
     const mountedSignal = firstSignal;
     if (!mountedSignal) throw new Error("The lifecycle-app mount did not expose its transfer signal.");
-    const beforeProjection = runtime.apps.getApp(app.id);
+    const beforeProjection = runtime.apps.getApp(app.bundleIdentifier);
 
     await act(async () => {
-      expect(runtime.lifecycle.transition(app.id, "loading", { source: "test" })).toMatchObject({ ok: true });
+      expect(runtime.lifecycle.transition(app.bundleIdentifier, "loading", { source: "test" })).toMatchObject({ ok: true });
     });
-    const afterProjection = runtime.apps.getApp(app.id);
+    const afterProjection = runtime.apps.getApp(app.bundleIdentifier);
     expect(afterProjection).not.toBe(beforeProjection);
-    expect(runtime.appManager.getManagerForApp(app.id)).toBe(manager);
+    expect(runtime.appManager.getManagerForApp(app.bundleIdentifier)).toBe(manager);
 
     view.rerender(frame(1));
     await screen.findByText("Lifecycle live");
@@ -188,13 +188,13 @@ describe("window mount transfer re-mint", () => {
     activeRuntimes.push(runtime);
     registerTestSynWare(runtime, {
       schemaVersion: 1,
-      id: "strict-app",
+      bundleIdentifier: "com.example.strict-app",
       version: "1.0.0",
-      title: "Strict App",
+      displayName: "Strict App",
       routes: [{ path: "/strict-app", primary: true }],
       windowDefaults: { title: "Strict App", width: 640, height: 480 },
     });
-    const app = runtime.apps.getApp("strict-app");
+    const app = runtime.apps.getApp("com.example.strict-app");
     if (!app) throw new Error("The strict-app fixture did not register.");
 
     function LiveCapabilityProbe() {
@@ -209,12 +209,12 @@ describe("window mount transfer re-mint", () => {
           <SynCloudOSProvider runtime={runtime}>
             <SynCloudOSWatchdog runtime={runtime} watchdogName="strict responder mount">
               <ResponderScope
-                responderId="application:strict-app"
+                responderId="application:com.example.strict-app"
                 kind="application"
                 parentResponderId="workspace"
-                scopeId="application:strict-app"
+                scopeId="application:com.example.strict-app"
               >
-                <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:strict-app">
+                <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.strict-app">
                   <LiveCapabilityProbe />
                 </SynWareRuntimeMount>
               </ResponderScope>
@@ -226,7 +226,7 @@ describe("window mount transfer re-mint", () => {
 
     await screen.findByText("strict live content");
     expect(view.queryByRole("alert")).toBeNull();
-    expect(runtime.responders.get("application:strict-app")).not.toBeNull();
+    expect(runtime.responders.get("application:com.example.strict-app")).not.toBeNull();
   });
 
   it("keeps one mounted transfer lease across a React presentation disconnect and reappearance", async () => {
@@ -234,13 +234,13 @@ describe("window mount transfer re-mint", () => {
     activeRuntimes.push(runtime);
     registerTestSynWare(runtime, {
       schemaVersion: 1,
-      id: "activity-app",
+      bundleIdentifier: "com.example.activity-app",
       version: "1.0.0",
-      title: "Activity App",
+      displayName: "Activity App",
       routes: [{ path: "/activity-app", primary: true }],
       windowDefaults: { title: "Activity App", width: 640, height: 480 },
     });
-    const app = runtime.apps.getApp("activity-app");
+    const app = runtime.apps.getApp("com.example.activity-app");
     if (!app) throw new Error("The activity-app fixture did not register.");
 
     let initialSignal: AbortSignal | null = null;
@@ -257,9 +257,9 @@ describe("window mount transfer re-mint", () => {
         <HostSiteBrandingProvider value={branding}>
           <SynCloudOSProvider runtime={runtime}>
             <SynCloudOSWatchdog runtime={runtime} watchdogName="presentation disconnect mount">
-              <ResponderScope responderId="application:activity-app" kind="application" parentResponderId="workspace" scopeId="application:activity-app">
+              <ResponderScope responderId="application:com.example.activity-app" kind="application" parentResponderId="workspace" scopeId="application:com.example.activity-app">
                 <React.Activity mode={mode}>
-                  <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:activity-app">
+                  <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.activity-app">
                     <LiveCapabilityProbe />
                   </SynWareRuntimeMount>
                 </React.Activity>
@@ -290,13 +290,13 @@ describe("window mount transfer re-mint", () => {
     activeRuntimes.push(runtime);
     registerTestSynWare(runtime, {
       schemaVersion: 1,
-      id: "replace-app",
+      bundleIdentifier: "com.example.replace-app",
       version: "1.0.0",
-      title: "Replace App",
+      displayName: "Replace App",
       routes: [{ path: "/replace-app", primary: true }],
       windowDefaults: { title: "Replace App", width: 640, height: 480 },
     });
-    const app = runtime.apps.getApp("replace-app");
+    const app = runtime.apps.getApp("com.example.replace-app");
     if (!app) throw new Error("The replace-app fixture did not register.");
 
     let version = 0;
@@ -321,7 +321,7 @@ describe("window mount transfer re-mint", () => {
 
     const view = render(
       <SynCloudOSWatchdog runtime={runtime} watchdogName="mount revocation boundary">
-        <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:replace-app">
+        <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.replace-app">
           <LiveCapabilityProbe label="Outgoing" />
         </SynWareRuntimeMount>
       </SynCloudOSWatchdog>,
@@ -331,10 +331,10 @@ describe("window mount transfer re-mint", () => {
     view.rerender(
       <SynCloudOSWatchdog runtime={runtime} watchdogName="mount revocation boundary">
         <>
-          <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:replace-app">
+          <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.replace-app">
             <LiveCapabilityProbe label="Outgoing" />
           </SynWareRuntimeMount>
-          <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:replace-app">
+          <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.replace-app">
             <LiveCapabilityProbe label="Incoming" />
           </SynWareRuntimeMount>
         </>
@@ -360,14 +360,14 @@ describe("window mount transfer re-mint", () => {
     activeRuntimes.push(runtime);
     registerTestSynWare(runtime, {
       schemaVersion: 1,
-      id: "window-owner",
+      bundleIdentifier: "com.example.window-owner",
       version: "1.0.0",
-      title: "Window Owner",
+      displayName: "Window Owner",
       routes: [{ path: "/window-owner", primary: true }],
       windowDefaults: { title: "Window Owner", width: 640, height: 480 },
       documentTypes: [{ id: remintDocumentType.id, displayName: remintDocumentType.displayName }],
     });
-    const mount = mountTestSynWareRuntime(runtime, "window-owner");
+    const mount = mountTestSynWareRuntime(runtime, "com.example.window-owner");
     activeMounts.push(mount);
     runtime.documents.registerCloseReviewer(discardCloseReviewer);
     const owner = createSynWareContextValue(mount.runtime);
@@ -383,7 +383,7 @@ describe("window mount transfer re-mint", () => {
       title: "Remint note",
       restorationKey: "remint-note",
     });
-    const app = runtime.apps.getApp("window-owner");
+    const app = runtime.apps.getApp("com.example.window-owner");
     if (!app) throw new Error("The window-owner fixture app did not register.");
 
     const Probe = ({ tick }: { tick: number }) => (

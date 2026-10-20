@@ -49,8 +49,8 @@ function createMemoryStorage(): Storage {
 function persistedApplicationDocument(id: string) {
   return {
     id,
-    applicationId: "journal-publisher",
-    ownership: { kind: "application" as const, applicationId: "journal-publisher" },
+    applicationId: "com.example.journal-publisher",
+    ownership: { kind: "application" as const, applicationId: "com.example.journal-publisher" },
     kind: "journal.post", version: 1, publishState: "draft" as const,
     createdAt: "2026-05-31T10:00:00.000Z", updatedAt: "2026-05-31T10:00:00.000Z",
   };
@@ -355,7 +355,7 @@ describe("SynCloudOS DocumentStore in-memory adapter", () => {
     ["schema V1", { schemaVersion: 1 }],
     ["unsupported schema", { schemaVersion: 3 }],
     ["ownerless record", { schemaVersion: 2, documents: [{ id: "ownerless", kind: "journal.post", version: 1, publishState: "draft", createdAt: "2026-05-31T10:00:00.000Z", updatedAt: "2026-05-31T10:00:00.000Z" }] }],
-    ["ambiguous application owner", { schemaVersion: 2, documents: [{ ...persistedApplicationDocument("ambiguous-owner"), applicationId: "foreign-app" }] }],
+    ["ambiguous application owner", { schemaVersion: 2, documents: [{ ...persistedApplicationDocument("ambiguous-owner"), applicationId: "com.example.foreign-app" }] }],
     ["revision ownership conflict", {
       schemaVersion: 2,
       documents: [persistedApplicationDocument("revision-conflict")],

@@ -46,10 +46,10 @@ describe("NSE data-view drag bridge", () => {
       onAcceptDrop: vi.fn(),
     });
 
-    binding.begin(["b", "a"], { appId: "gallery", windowId: "source", responderId: "table" });
+    binding.begin(["b", "a"], { appId: "com.example.gallery", windowId: "source", responderId: "table" });
     const accepted = await binding.drop(
       { targetId: "c", insertionIndex: 2, operation: "above" },
-      { appId: "publisher", windowId: "target", responderId: "collection" },
+      { appId: "com.example.publisher", windowId: "target", responderId: "collection" },
     );
 
     expect(accepted).toBe(false);
@@ -85,10 +85,10 @@ describe("NSE data-view drag bridge", () => {
       onAcceptDrop,
     });
 
-    binding.begin(["a"], { appId: "gallery", windowId: "source", responderId: "table" });
+    binding.begin(["a"], { appId: "com.example.gallery", windowId: "source", responderId: "table" });
     await expect(binding.drop(
       { targetId: "b", insertionIndex: 1 },
-      { appId: "publisher", windowId: "target", responderId: "collection" },
+      { appId: "com.example.publisher", windowId: "target", responderId: "collection" },
     )).resolves.toBe(true);
     expect(onAcceptDrop).toHaveBeenCalledTimes(1);
   });
@@ -104,7 +104,7 @@ describe("NSE data-view drag bridge", () => {
       restoreSelection: vi.fn(),
     });
 
-    expect(() => binding.begin(ids, { appId: "gallery", windowId: "source", responderId: "table" })).toThrow(/dense|data/i);
+    expect(() => binding.begin(ids, { appId: "com.example.gallery", windowId: "source", responderId: "table" })).toThrow(/dense|data/i);
     expect(getter).not.toHaveBeenCalled();
   });
 
@@ -123,17 +123,17 @@ describe("NSE data-view drag bridge", () => {
       captureSelection: () => ["source"],
       restoreSelection,
     });
-    binding.begin(["source"], { appId: "studio", windowId: "source", responderId: "row" });
+    binding.begin(["source"], { appId: "com.example.studio", windowId: "source", responderId: "row" });
 
     await expect(binding.drop(
       { targetId: "target", insertionIndex: 0 },
-      { appId: "publisher", windowId: "target", responderId: "item" },
+      { appId: "com.example.publisher", windowId: "target", responderId: "item" },
     )).rejects.toThrow("policy offline");
     expect(cancel).toHaveBeenCalledWith("session-cleanup", expect.stringMatching(/failed/i));
     expect(restoreSelection).toHaveBeenCalledWith(["source"]);
     await expect(binding.drop(
       { targetId: "target", insertionIndex: 0 },
-      { appId: "publisher", windowId: "target", responderId: "item" },
+      { appId: "com.example.publisher", windowId: "target", responderId: "item" },
     )).resolves.toBe(false);
   });
 
@@ -152,10 +152,10 @@ describe("NSE data-view drag bridge", () => {
       captureSelection: () => ["source"],
       restoreSelection: vi.fn(),
     });
-    binding.begin(["source"], { appId: "studio", windowId: "source", responderId: "row" });
+    binding.begin(["source"], { appId: "com.example.studio", windowId: "source", responderId: "row" });
     const update = binding.update(
       { targetId: "target", insertionIndex: 0 },
-      { appId: "publisher", windowId: "target", responderId: "item" },
+      { appId: "com.example.publisher", windowId: "target", responderId: "item" },
     );
     await Promise.resolve();
     owner.abort();

@@ -64,9 +64,9 @@ afterEach(async () => {
 function serviceManifest(appId: string, minimumVersion = "1.0.0") {
   return {
     schemaVersion: 1,
-    id: appId,
+    bundleIdentifier: appId,
     version: "1.0.0",
-    title: appId,
+    displayName: appId,
     services: [{ id: catalogueToken.id, required: true, minimumVersion }],
   } as const;
 }
@@ -201,8 +201,8 @@ function testingDriver() {
 
 describe("typed service revocation and installed-lifetime semantics", () => {
   it("publishes available -> denied -> available hook revisions and cleans its live subscription", async () => {
-    const { runtime, apps } = await installCatalogueFixture(["service-hook-app"]);
-    const mounted = mountTestSynWareRuntime(runtime, apps[0]!.id);
+    const { runtime, apps } = await installCatalogueFixture(["com.example.service-hook-app"]);
+    const mounted = mountTestSynWareRuntime(runtime, apps[0]!.bundleIdentifier);
     cleanups.push(() => mounted.dispose());
     const base = createSynWareContextValue(mounted.runtime);
     let activeSubscriptions = 0;
@@ -249,16 +249,16 @@ describe("typed service revocation and installed-lifetime semantics", () => {
   });
 
   it("isolates two app leases, aborts awaited work on unmount, and fences a late provider result", async () => {
-    const { runtime, apps, provider } = await installCatalogueFixture(["service-app-a", "service-app-b"]);
-    const first = mountTestSynWareRuntime(runtime, apps[0]!.id);
-    const second = mountTestSynWareRuntime(runtime, apps[1]!.id);
+    const { runtime, apps, provider } = await installCatalogueFixture(["com.example.service-app-a", "com.example.service-app-b"]);
+    const first = mountTestSynWareRuntime(runtime, apps[0]!.bundleIdentifier);
+    const second = mountTestSynWareRuntime(runtime, apps[1]!.bundleIdentifier);
     cleanups.push(() => first.dispose(), () => second.dispose());
     const firstClient = createSynWareContextValue(first.runtime).services.require(catalogueToken);
     const secondClient = createSynWareContextValue(second.runtime).services.require(catalogueToken);
     const { testing, registry } = testingDriver();
 
-    expect(firstClient.read()).toBe("service-app-a");
-    expect(secondClient.read()).toBe("service-app-b");
+    expect(firstClient.read()).toBe("com.example.service-app-a");
+    expect(secondClient.read()).toBe("com.example.service-app-b");
     expect(firstClient).not.toHaveProperty("register");
     expect(firstClient).not.toHaveProperty("unregister");
 
@@ -266,27 +266,27 @@ describe("typed service revocation and installed-lifetime semantics", () => {
     expect(registry.getState().pending).toEqual([
       expect.objectContaining({ owner: "app-waiter", label: "catalogue load" }),
     ]);
-    expect(provider.liveAbortListeners("service-app-a")).toBe(1);
+    expect(provider.liveAbortListeners("com.example.service-app-a")).toBe(1);
 
     first.dispose();
     await expect(tracked).rejects.toBeTruthy();
-    expect(provider.liveAbortListeners("service-app-a")).toBe(0);
+    expect(provider.liveAbortListeners("com.example.service-app-a")).toBe(0);
     await expect(testing.settled()).resolves.toMatchObject({ status: "settled", pending: [] });
     expect(registry.getState().recent.at(-1)).toMatchObject({ status: "failed", label: "catalogue load" });
     expect(() => firstClient.read()).toThrow();
-    expect(secondClient.read()).toBe("service-app-b");
+    expect(secondClient.read()).toBe("com.example.service-app-b");
 
-    provider.resolve("service-app-a", "late");
+    provider.resolve("com.example.service-app-a", "late");
     await Promise.resolve();
     expect(registry.getState().pending).toHaveLength(0);
   });
 
   it("never lets a token weaken the manifest minimum version", async () => {
     const { runtime, apps } = await installCatalogueFixture(
-      ["service-version-app"],
+      ["com.example.service-version-app"],
       { providerVersion: "2.5.0", minimumVersion: "3.0.0" },
     );
-    const mounted = mountTestSynWareRuntime(runtime, apps[0]!.id);
+    const mounted = mountTestSynWareRuntime(runtime, apps[0]!.bundleIdentifier);
     cleanups.push(() => mounted.dispose());
     const result = createSynWareContextValue(mounted.runtime).services.optional(catalogueToken);
     expect(result).toMatchObject({

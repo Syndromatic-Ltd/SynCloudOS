@@ -44,16 +44,16 @@ afterEach(async () => {
 
 function mountedDrag(authorise: NonNullable<NonNullable<Parameters<typeof createTestRuntime>[0]>["dragAuthorisation"]>["authorise"] = () => true) {
   const runtime = authoriseTestRuntime(createTestRuntime({
-    initialBundles: [createTestBundle({ id: "studio", route: "/studio" })],
+    initialBundles: [createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })],
     dragAuthorisation: { authorise },
   }));
   runtimes.push(runtime);
-  const responderId = "application:studio";
+  const responderId = "application:com.example.studio";
   runtime.responders.register({ id: responderId, kind: "application", parentId: "workspace", scopeId: responderId });
   for (const id of ["source", "target"]) {
     runtime.responders.register({ id: `studio:${id}`, kind: "control", parentId: responderId, scopeId: responderId });
   }
-  const mount = createMountedSynWareRuntime({ runtime, app: runtime.apps.getApp("studio")!, responderId });
+  const mount = createMountedSynWareRuntime({ runtime, app: runtime.apps.getApp("com.example.studio")!, responderId });
   mounts.push(mount);
   const app = createSynWareContextValue(mount.runtime);
   return { runtime, mount, app, source: app.drag.endpoint({ responderId: "studio:source" }), target: app.drag.endpoint({ responderId: "studio:target" }) };

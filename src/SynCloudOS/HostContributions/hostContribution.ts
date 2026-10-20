@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   SynCloudOSAppServiceDefinition,
   SynCloudOSAppServiceResolution,
@@ -566,10 +567,10 @@ function preparedRecord(value: PreparedSynCloudOSHostContribution): PreparedReco
 function bundleId(bundle: TrustedSynWareBundle): string {
   if (!bundle || typeof bundle !== "object") throw new TypeError("Host contribution bundles must be objects.");
   const manifest = bundle.synWareManifest ?? bundle.manifest;
-  if (!manifest || typeof manifest !== "object" || typeof manifest.id !== "string" || manifest.id.trim().length === 0) {
+  if (!manifest || typeof manifest !== "object" || typeof manifest.bundleIdentifier !== "string" || manifest.bundleIdentifier.trim().length === 0) {
     throw new TypeError("Host contribution bundles require a canonical manifest ID.");
   }
-  return manifest.id;
+  return normalizeBundleIdentifier(manifest.bundleIdentifier);
 }
 
 function kindId(kind: SynCloudOSDocumentKindMetadata): string {
@@ -851,11 +852,11 @@ export function createSynCloudOSHostInstallContext(
     contextStoreContext(operationSignal, record.source, seedSubject, "hostContribution", seedGrant);
   const seedKinds = new Set(prepared.trustedDocumentKinds.map((kind) => kind.kind));
   const seedApplications = new Set([
-    ...prepared.initialBundles.map((bundle) => bundle.manifest.id),
+    ...prepared.initialBundles.map((bundle) => bundle.manifest.bundleIdentifier),
     ...(prepared.applicationDocuments?.initialTypes ?? []).map((type) => type.creatingApplicationId).filter((id): id is string => typeof id === "string"),
-  ]);
+  ].map(normalizeBundleIdentifier));
   const inSeedScope = (document: Pick<SynCloudOSDocument, "kind" | "applicationId">) =>
-    seedKinds.has(document.kind) && (document.applicationId === undefined || seedApplications.has(document.applicationId));
+    seedKinds.has(document.kind) && (document.applicationId === undefined || seedApplications.has(normalizeBundleIdentifier(document.applicationId)));
   const scopedRecord = <T extends SynCloudOSDocument | null>(document: T): T => {
     if (document && !inSeedScope(document)) throw new DOMException("The document is outside this contribution's declared seed scope.", "SecurityError");
     return document;
@@ -1016,14 +1017,15 @@ export function createSynCloudOSHostInstallContext(
       assertLive(signal);
       if (!input || typeof input.appId !== "string" || !input.appId.trim()) throw new TypeError("Host policy declarations require an application ID.");
       if (!isRecord(input.policy)) throw new TypeError("Host policy declarations require a policy record.");
-      if (!prepared.initialBundles.some((bundle) => bundle.manifest.id === input.appId)) {
+      if (!prepared.initialBundles.some((bundle) => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === normalizeBundleIdentifier(input.appId))) {
         throw new DOMException("A contribution may declare policy only for its own applications.", "SecurityError");
       }
       const appId = input.appId;
       const declaration = structuredClone(input.policy);
-      const policyId = `host:${record.id}:${appId}`;
+      const policyId = `host:${record.id}:${normalizeBundleIdentifier(appId)}`;
       runtime.policy.registerPolicy(policyId, (request, decision) => {
-        if (!decision.allowed || (request.app?.id ?? request.context?.appId) !== appId) return decision;
+        const requestedAppId = request.app?.bundleIdentifier ?? request.context?.appId;
+        if (!decision.allowed || typeof requestedAppId !== "string" || normalizeBundleIdentifier(requestedAppId) !== normalizeBundleIdentifier(appId)) return decision;
         const app = request.app ?? runtime.apps.getApp(appId);
         if (!app) return decision;
         const declaredDecision = runtime.policy.evaluate({ ...request, app: { ...app, policy: declaration } }, { applyRegisteredPolicies: false });
@@ -1040,9 +1042,9 @@ export function createSynCloudOSHostInstallContext(
     },
     currentSubject,
   });
-  const luminaApplicationIds = new Set(prepared.initialBundles.map((bundle) => bundle.synWareManifest?.id ?? bundle.manifest.id));
+  const luminaApplicationIds = new Set(prepared.initialBundles.map((bundle) => normalizeBundleIdentifier(bundle.synWareManifest?.bundleIdentifier ?? bundle.manifest.bundleIdentifier)));
   const assertLuminaApplication = (appId: string, role: "owner" | "destination") => {
-    if (!luminaApplicationIds.has(appId)) {
+    if (!luminaApplicationIds.has(normalizeBundleIdentifier(appId))) {
       throw new DOMException(`A host contribution may use only its own Lumina ${role} application.`, "SecurityError");
     }
   };

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSRuntime } from "../SynCloudOS";
 import type {
   InspectorAdapterSummary,
@@ -448,7 +449,7 @@ function createRuntimeConformanceInspectorSource(runtime: SynCloudOSRuntime): Co
   return Object.freeze({
     read(limits: InspectorLimits): RawConformanceInspectorSnapshot {
       const state = runtime.store.cloneSnapshot();
-      const appRows = [...runtime.apps.getAllApps()].sort((left, right) => left.id.localeCompare(right.id));
+      const appRows = [...runtime.apps.getAllApps()].sort((left, right) => normalizeBundleIdentifier(left.bundleIdentifier).localeCompare(normalizeBundleIdentifier(right.bundleIdentifier)));
       const responderInspection = runtime.responders.inspect();
       const focusedResponderId = runtime.focus.inspect().focusedResponderId;
       const activeResponder = focusedResponderId
@@ -479,7 +480,7 @@ function createRuntimeConformanceInspectorSource(runtime: SynCloudOSRuntime): Co
       const keyBindingInspection = runtime.keyBindings.inspect();
       const colourPanel = runtime.colourPanel.getSnapshot();
       const dragSession = runtime.drag.snapshot().active;
-      const routeRows = appRows.map((app) => ({ id: app.id, kind: app.type, workspaceId: "webspring" }));
+      const routeRows = appRows.map((app) => ({ id: app.bundleIdentifier, kind: app.type, workspaceId: "webspring" }));
       const browserQueueRows = eventHistory
         .filter((event) => event.type === "route.open")
         .map((event) => ({ id: event.id, at: event.at, kind: "route.open" }));
@@ -492,7 +493,7 @@ function createRuntimeConformanceInspectorSource(runtime: SynCloudOSRuntime): Co
           source: "SynCloudOS.ConformanceInspector",
           requiredCapabilities: [capability],
         });
-        return { id: app.id, capability, status: decision.allowed ? "allowed" as const : "denied" as const };
+        return { id: app.bundleIdentifier, capability, status: decision.allowed ? "allowed" as const : "denied" as const };
       });
       const responderRows = [...responderInspection.registrations]
         .sort((left, right) => left.id.localeCompare(right.id))

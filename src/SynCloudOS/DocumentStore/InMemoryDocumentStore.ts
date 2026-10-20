@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest } from "../PolicyKit/policyTypes";
 import { canonicalDocumentJson } from "../Documents/documentTypes";
 import {
@@ -117,12 +118,12 @@ function applicationIdValue(value: unknown, label: string): string | undefined {
 }
 
 function ownershipKey(ownership: SynCloudOSDocumentOwnership): string {
-  return ownership.kind === "application" ? `application:${ownership.applicationId}` : "system";
+  return ownership.kind === "application" ? `application:${normalizeBundleIdentifier(ownership.applicationId)}` : "system";
 }
 function assertCanonicalDocumentOwnership(document: SynCloudOSDocument, label: string): void {
   assertCanonicalOwnership(document.ownership, `${label} ownership`);
   if (document.ownership.kind === "application") {
-    if (document.applicationId !== document.ownership.applicationId) {
+    if (normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(document.ownership.applicationId)) {
       throw new SynCloudOSDocumentStorePayloadError(`${label} application ownership does not match its application ID.`);
     }
     return;
@@ -145,27 +146,27 @@ function resolveDocumentOwnership(
   if (requested !== undefined) assertCanonicalOwnership(requested, "Document draft ownership");
 
   if (contextAppId) {
-    if (draftAppId !== undefined && draftAppId !== contextAppId) {
+    if (draftAppId !== undefined && normalizeBundleIdentifier(draftAppId) !== normalizeBundleIdentifier(contextAppId)) {
       throw new SynCloudOSDocumentStorePayloadError("Document draft application ownership conflicts with its write context.");
     }
-    if (requested && (requested.kind !== "application" || requested.applicationId !== contextAppId)) {
+    if (requested && (requested.kind !== "application" || normalizeBundleIdentifier(requested.applicationId) !== normalizeBundleIdentifier(contextAppId))) {
       throw new SynCloudOSDocumentStorePayloadError("Document draft ownership conflicts with its write context.");
     }
-    if (existingAppId !== undefined && existingAppId !== contextAppId) {
+    if (existingAppId !== undefined && normalizeBundleIdentifier(existingAppId) !== normalizeBundleIdentifier(contextAppId)) {
       throw new SynCloudOSDocumentStorePayloadError("Stored document application ownership conflicts with its write context.");
     }
-    if (current && ownershipKey(current) !== `application:${contextAppId}`) {
+    if (current && ownershipKey(current) !== `application:${normalizeBundleIdentifier(contextAppId)}`) {
       throw new SynCloudOSDocumentStorePayloadError("Stored document ownership conflicts with its write context.");
     }
-    return { kind: "application", applicationId: contextAppId };
+    return current?.kind === "application" ? current : { kind: "application", applicationId: contextAppId };
   }
 
   if (requested) {
     if (requested.kind === "application") {
-      if (draftAppId !== undefined && draftAppId !== requested.applicationId) {
+      if (draftAppId !== undefined && normalizeBundleIdentifier(draftAppId) !== normalizeBundleIdentifier(requested.applicationId)) {
         throw new SynCloudOSDocumentStorePayloadError("Document draft ownership does not match its application ID.");
       }
-      if (existingAppId !== undefined && existingAppId !== requested.applicationId) {
+      if (existingAppId !== undefined && normalizeBundleIdentifier(existingAppId) !== normalizeBundleIdentifier(requested.applicationId)) {
         throw new SynCloudOSDocumentStorePayloadError("Document draft ownership conflicts with the stored application ID.");
       }
     } else if (draftAppId !== undefined || existingAppId !== undefined) {
@@ -179,7 +180,7 @@ function resolveDocumentOwnership(
 
   if (current) {
     if (current.kind === "application") {
-      if ((draftAppId ?? existingAppId) !== undefined && (draftAppId ?? existingAppId) !== current.applicationId) {
+      if ((draftAppId ?? existingAppId) !== undefined && normalizeBundleIdentifier(draftAppId ?? existingAppId) !== normalizeBundleIdentifier(current.applicationId)) {
         throw new SynCloudOSDocumentStorePayloadError("Document draft ownership conflicts with the stored document.");
       }
     } else if (draftAppId !== undefined || existingAppId !== undefined) {
@@ -510,7 +511,7 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     this.authorise("listDrafts", query.kind, context);
     const documents = Array.from(this.documents.values())
       .filter((document) => !query.kind || document.kind === query.kind)
-      .filter((document) => !context.appId || document.applicationId === context.appId)
+      .filter((document) => !context.appId || normalizeBundleIdentifier(document.applicationId) === normalizeBundleIdentifier(context.appId))
       .filter((document) => !query.ownerId || document.ownerId === query.ownerId)
       .filter((document) => isDraftState(document, query))
       .sort(sortByUpdatedDescending);
@@ -522,7 +523,7 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     throwIfDocumentStoreAborted(context.signal);
     const document = this.documents.get(documentId) ?? null;
     this.authorise("getDraft", document?.kind, context, documentId);
-    if (!document || !isDraftState(document) || (context.appId && document.applicationId !== context.appId)) return null;
+    if (!document || !isDraftState(document) || (context.appId && normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(context.appId))) return null;
     return clonePlain(document);
   }
 
@@ -541,7 +542,7 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
       if (repeated.operation !== "saveDraft" || repeated.fingerprint !== fingerprint || !repeated.document) {
         throw new SynCloudOSDocumentStoreIdempotencyConflictError(options.idempotencyKey!);
       }
-      if (context.appId && repeated.document.applicationId !== context.appId) {
+      if (context.appId && normalizeBundleIdentifier(repeated.document.applicationId) !== normalizeBundleIdentifier(context.appId)) {
         throw new SynCloudOSDocumentStoreNotFoundError(repeated.document.id);
       }
       return clonePlain(repeated.document) as SynCloudOSDocument<TBody, TMetadata> & { readonly storageVersion: DocumentStoreVersion };
@@ -550,7 +551,7 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     const document = this.normaliseDraft(draft as DocumentDraftInput, context) as SynCloudOSDocument<TBody, TMetadata>;
     const migrated = this.applyMigrations(document as SynCloudOSDocument) as SynCloudOSDocument<TBody, TMetadata>;
     const current = this.documents.get(migrated.id) ?? null;
-    if (context.appId && current && current.applicationId !== context.appId) {
+    if (context.appId && current && normalizeBundleIdentifier(current.applicationId) !== normalizeBundleIdentifier(context.appId)) {
       throw new SynCloudOSDocumentStoreNotFoundError(migrated.id);
     }
     if (options.ifMatch === null && current) {
@@ -596,7 +597,7 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     const current = this.documents.get(documentId);
     const versions = this.draftVersions.get(documentId) ?? [];
     this.authorise("listDraftVersions", current?.kind ?? versions.at(-1)?.kind, context, documentId);
-    if (context.appId && (current?.applicationId !== context.appId || versions.some((document) => document.applicationId !== context.appId))) return Object.freeze([]);
+    if (context.appId && (normalizeBundleIdentifier(current?.applicationId) !== normalizeBundleIdentifier(context.appId) || versions.some((document) => normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(context.appId)))) return Object.freeze([]);
     return Object.freeze(versions.flatMap((document) => document.storageVersion ? [clonePlain(document.storageVersion)] : []));
   }
 
@@ -610,7 +611,7 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     const versions = this.draftVersions.get(documentId) ?? [];
     const record = versions.find((document) => document.storageVersion?.id === versionId) ?? null;
     this.authorise("readDraftVersion", record?.kind ?? this.documents.get(documentId)?.kind, context, documentId);
-    return record && (!context.appId || record.applicationId === context.appId) ? clonePlain(record) : null;
+    return record && (!context.appId || normalizeBundleIdentifier(record.applicationId) === normalizeBundleIdentifier(context.appId)) ? clonePlain(record) : null;
   }
 
   async deleteDraft(
@@ -629,7 +630,7 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     }
     const current = this.documents.get(documentId) ?? null;
     this.authorise("deleteDraft", current?.kind ?? this.draftVersions.get(documentId)?.at(-1)?.kind, context, documentId);
-    if (context.appId && current && current.applicationId !== context.appId) throw new SynCloudOSDocumentStoreNotFoundError(documentId);
+    if (context.appId && current && normalizeBundleIdentifier(current.applicationId) !== normalizeBundleIdentifier(context.appId)) throw new SynCloudOSDocumentStoreNotFoundError(documentId);
     if (options.ifMatch === null && current) {
       throw new SynCloudOSDocumentStoreVersionConflictError(documentId, null, clonePlain(current));
     }
@@ -652,7 +653,7 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     throwIfDocumentStoreAborted(context.signal);
     const document = this.getStoredDocumentOrThrow(documentId);
     this.authorise("createRevision", document.kind, context, documentId);
-    if (context.appId && document.applicationId !== context.appId) throw new SynCloudOSDocumentStoreNotFoundError(documentId);
+    if (context.appId && normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(context.appId)) throw new SynCloudOSDocumentStoreNotFoundError(documentId);
     const now = toIso(context.now);
     const revision: SynCloudOSDocumentRevision = {
       id: options.id ?? createId("document-revision"),
@@ -677,7 +678,7 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     throwIfDocumentStoreAborted(context.signal);
     const document = this.getStoredDocumentOrThrow(documentId);
     this.authorise("publish", document.kind, context, documentId);
-    if (context.appId && document.applicationId !== context.appId) throw new SynCloudOSDocumentStoreNotFoundError(documentId);
+    if (context.appId && normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(context.appId)) throw new SynCloudOSDocumentStoreNotFoundError(documentId);
     if (options.ifMatch !== undefined && options.ifMatch !== document.storageVersion?.etag) {
       throw new SynCloudOSDocumentStoreVersionConflictError(documentId, options.ifMatch, clonePlain(document));
     }
@@ -714,7 +715,7 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     throwIfDocumentStoreAborted(context.signal);
     const document = this.getStoredDocumentOrThrow(documentId);
     this.authorise("unpublish", document.kind, context, documentId);
-    if (context.appId && document.applicationId !== context.appId) throw new SynCloudOSDocumentStoreNotFoundError(documentId);
+    if (context.appId && normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(context.appId)) throw new SynCloudOSDocumentStoreNotFoundError(documentId);
     if (options.ifMatch !== undefined && options.ifMatch !== document.storageVersion?.etag) {
       throw new SynCloudOSDocumentStoreVersionConflictError(documentId, options.ifMatch, clonePlain(document));
     }
@@ -750,7 +751,7 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     throwIfDocumentStoreAborted(context.signal);
     const document = this.getStoredDocumentOrThrow(documentId);
     this.authorise("attachMedia", document.kind, context, documentId);
-    if (context.appId && document.applicationId !== context.appId) throw new SynCloudOSDocumentStoreNotFoundError(documentId);
+    if (context.appId && normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(context.appId)) throw new SynCloudOSDocumentStoreNotFoundError(documentId);
     const now = toIso(context.now);
     const existingMedia = document.media ?? [];
     const next: SynCloudOSDocument = {

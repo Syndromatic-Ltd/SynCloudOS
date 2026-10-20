@@ -17,31 +17,34 @@ src/
   Webspring/Contents/index.tsx
 ```
 
-Only `Contents/index.tsx` is required for an application. `Info.ts`, resources, other directory kinds and the shell are optional. Missing optional directories are fine. Each entry must have the correct default export; a missing or incorrect export reports the source folder and expected declaration. Discovery rejects symbolic links and case-colliding resources.
+Applications require both `Contents/index.tsx` and `Contents/Info.ts`. Resources, other directory kinds and the shell are optional. Missing optional directories are fine. Each entry must have the correct default export; a missing or incorrect export reports the source folder and expected declaration. Discovery rejects symbolic links and case-colliding resources.
 
 ## Application manifests
 
-`Info.ts` default-exports `SynWareManifestOverrides`, a partial `SynWareManifestV1`. The plugin, static validator and Developer MCP use the same derivation:
+`Info.ts` default-exports `SynWareInfo`: the app's Info.plist-style declaration, with explicit identity and version. The plugin, static validator and Developer MCP resolve the same manifest:
 
-| Field | Default |
+| Field | Rule |
 | --- | --- |
-| `schemaVersion` | `1` |
-| `id` | Folder name in kebab case: `JournalPublisher.app` → `journal-publisher`; `NSEControlGallery.app` → `nse-control-gallery` |
-| `title` | Split folder name: `Journal Publisher`, `NSE Control Gallery` |
-| `version` | Project `package.json` version |
-| `webspring.icon` | `Resources/AppIcon.svg`, then `AppIcon.png`, otherwise framework artwork |
+| `bundleIdentifier` | Required reverse-DNS identity with at least two dots; letters in either case, digits and hyphens in each segment |
+| `displayName` | Required public app name |
+| `version` | Required app version; no package fallback |
+| `schemaVersion` | Defaults to `1` |
+| `webspring.icon` | Explicit value, else `Resources/AppIcon.svg`, then `AppIcon.png`, otherwise framework artwork |
 
-Explicit overrides win, except schema version remains `1`. Keep an existing ID explicitly when its spelling differs from the derived ID: `AnimationFX.app` derives `animation-fx`, so an existing `animationfx` app must keep `id: "animationfx"` to retain its persistence identity.
+Identity case is preserved in manifests and public displays. Keys and comparisons are case-insensitive, so case-only duplicates are errors. The folder name is the bundle name only. Scaffolding pre-fills the required identity fields; discovery does not invent them.
 
 Every `Resources/Localised/<locale>.locale/*.strings` file is supplied to the locale service. `localeResources` is not a manifest field. Font resources and other artwork are also mapped by discovery.
 
 ```ts
-import type { SynWareManifestOverrides } from "@syndromatic/syncloudos/sdk";
+import type { SynWareInfo } from "@syndromatic/syncloudos/sdk";
 export default {
+  bundleIdentifier: "com.example.Diagnostics",
+  displayName: "Diagnostics",
+  version: "1.0.0",
   webspring: { visible: true },
   permissions: ["diagnostics.view"],
   availability: "development",
-} satisfies SynWareManifestOverrides;
+} satisfies SynWareInfo;
 ```
 
 Development-only applications are excluded from production builds. In-project apps are first-party and receive their requested permissions. External bundles keep the existing trusted-source allowlist path.
@@ -50,7 +53,7 @@ Development-only applications are excluded from production builds. In-project ap
 
 The default export is a React component or an `NSEApplication` subclass. Export optional `routes`, `migrations`, `windowChrome`, `rematerialiseOwnedDocument` and `createBackgroundHandler` beside it; the loader builds the captured definition from the complete derived manifest and these named exports. `createSynWare` is internal; `sdk/testing` retains it for test hosts without discovery.
 
-Imports of `@syndromatic/syncloudos` within `<Name>.app/**` resolve to `virtual:syncloudos/app/<id>`, with `SCOS` bound to the manifest ID. Shared React components use `useSCOS()` instead. See [Applications](applications.md).
+Imports of `@syndromatic/syncloudos` within `<Name>.app/**` resolve to `virtual:syncloudos/app/<bundleIdentifier>`, with `SCOS` bound to the canonical case-insensitive identity key. `SCOS.app` exposes the declared `bundleIdentifier`, `displayName` and `version`. Shared React components use `useSCOS()` instead. See [Applications](applications.md).
 
 ## Preference panes and widgets
 
@@ -66,7 +69,7 @@ Host contributions live in `src/Integrations/*.integration.ts`:
 import { defineIntegration } from "@syndromatic/syncloudos";
 
 export default defineIntegration({
-  owners: ["journal", "journal-publisher"],
+  owners: ["com.example.journal", "com.example.journal-publisher"],
   install(context) {
     return context.bootNotifications.register("journal-ready", () => {
       console.info("Journal integration ready");
@@ -86,11 +89,11 @@ synCloudOS({
   widgetsDirectory: "src/Widgets",
   integrationsDirectory: "src/Integrations",
   webspringEntry: "src/Webspring/Contents/index.tsx",
-  applications: ["journal", "journal-publisher"],
+  applications: ["com.example.journal", "com.example.journal-publisher"],
 });
 ```
 
-Use `webspringEntry: false` for application-only hosting. `applications` takes IDs, not folder names; a comma-separated string is also accepted. `SYNCLOUDOS_APPLICATIONS=journal,journal-publisher` provides the selection when the option is omitted. Unknown IDs are errors. An empty selection includes no applications.
+Use `webspringEntry: false` for application-only hosting. `applications` takes bundle identifiers, not folder names; a comma-separated string is also accepted. `SYNCLOUDOS_APPLICATIONS=com.example.journal,com.example.journal-publisher` provides the selection when the option is omitted. Matching is case-insensitive. Unknown identifiers are errors. An empty selection includes no applications.
 
 `virtual:syncloudos/project` exports `bundles`, `preferences`, `widgets`, `contributions`, `shell` and `shellResources`. The plugin's browser adapter injects this composition into `mountSynCloudOS()` by default; an explicit `composition` takes precedence. There is no static virtual-module dependency in the installed browser entry, so non-plugin hosts can supply their own composition. Folder additions and removals trigger rediscovery.
 
@@ -99,11 +102,13 @@ Use `webspringEntry: false` for application-only hosting. `applications` takes I
 From a framework checkout:
 
 ```bash
-node scripts/synware/create-synware.mjs src/SynWare/Notes.app
+node scripts/synware/create-synware.mjs src/SynWare/Notes.app --organisation com.example
 node scripts/synware/create-synware.mjs src/Preferences/Billing.prefPane
 node scripts/synware/create-synware.mjs src/Widgets/Latest.widget
-node scripts/synware/create-synware.mjs src/Integrations/Journal.integration.ts --owners journal
+node scripts/synware/create-synware.mjs src/Integrations/Journal.integration.ts --owners com.example.journal
 node scripts/synware/validate-synware.mjs src/SynWare/Notes.app
 ```
 
-Application scaffolds retain `Info.ts` with `webspring.visible` and a comment about optional overrides. The matching Developer MCP offers the same folder kinds through `scaffold({ kind, name, owners? })`; IDs and application routes are optional. `inspect_project` reports resolved application manifests and other discovered folder kinds, and `validate` applies the installed manifest schema and default-export checks before optional TypeScript validation. Static tooling does not execute project configuration or application code; computed Vite paths require explicit overrides.
+Application scaffolds write `Info.ts` with `bundleIdentifier`, `displayName`, `version: "1.0.0"` and `webspring.visible`. `--organisation` defaults to `com.example`; the lowercased folder name is appended (`JournalPublisher.app` → `com.example.journalpublisher`) and the display name splits words (`Journal Publisher`). The Developer MCP offers the same kinds through `scaffold({ kind, name, organisation?, bundleIdentifier?, owners? })`. `inspect_project` reports resolved manifests, and `validate` applies the installed schema and default-export checks before optional TypeScript validation. Static tooling does not execute project configuration or application code; computed Vite paths require explicit overrides.
+
+For an existing app, replace `id` and `runtime.bundleId` with `bundleIdentifier`, `title` with `displayName`, and `SynWareManifestOverrides` with `SynWareInfo`; write the app version explicitly. Saved app data and old launcher layouts are reset, not migrated. See the [identity migration table](synware-manifest.md#migration-from-the-previous-identity-fields).

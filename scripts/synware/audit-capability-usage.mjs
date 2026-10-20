@@ -191,9 +191,11 @@ function stableRecords(records) {
     left.target.localeCompare(right.target));
 }
 
-function manifestId(infoPath, fallback) {
+// The audit reports on apps whose Info.ts the validator would reject (e.g. computed permissions), so it
+// reads the identifier leniently instead of deriving the strict manifest.
+function manifestBundleIdentifier(infoPath, fallback) {
   if (!existsSync(infoPath)) return fallback;
-  const match = readFileSync(infoPath, "utf8").match(/\bid\s*:\s*["']([^"']+)["']/u);
+  const match = readFileSync(infoPath, "utf8").match(/\bbundleIdentifier\s*:\s*["']([^"']+)["']/u);
   return match?.[1] ?? fallback;
 }
 
@@ -244,7 +246,7 @@ function appRoots(root) {
         .map((extension) => resolve(appRoot, "Contents", `index${extension}`))
         .find((candidate) => existsSync(candidate));
       return {
-        id: manifestId(resolve(appRoot, "Contents", "Info.ts"), entry.name.slice(0, -4)),
+        id: manifestBundleIdentifier(resolve(appRoot, "Contents", "Info.ts"), entry.name.slice(0, -4)),
         entry: entryPath ?? resolve(appRoot, "Contents", "index.tsx"),
       };
     })

@@ -21,9 +21,33 @@
 import { expect, it } from "vitest";
 import { validateSynWareManifest } from "../../src/SynCloudOS/AppSDK";
 
+it.each(["bundleIdentifier", "displayName", "version"])("requires explicit %s", key => {
+  const manifest: Record<string, unknown> = { schemaVersion: 1, bundleIdentifier: "com.example.notes", displayName: "Notes", version: "1.0.0" };
+  delete manifest[key];
+  const result = validateSynWareManifest(manifest);
+  expect(result.ok).toBe(false);
+  expect(result.errors).toContainEqual(expect.objectContaining({ path: `/${key.split(".").at(-1)}` }));
+});
+
+it.each(["notes", "example.notes", "com.example.bad_name", "com..notes", ".com.example.notes", "com.example.notes.", "com.example.notes "])("rejects invalid bundle identifier %s", bundleIdentifier => {
+  const result = validateSynWareManifest({ schemaVersion: 1, bundleIdentifier, displayName: "Notes", version: "1.0.0" });
+  expect(result.ok).toBe(false);
+  expect(result.errors).toContainEqual(expect.objectContaining({ path: "/bundleIdentifier" }));
+});
+
+it("accepts and preserves mixed-case reverse-DNS identity", () => {
+  const manifest = { schemaVersion: 1, bundleIdentifier: "Com.Example.My-App42", displayName: "My App", version: "1.0.0" };
+  expect(validateSynWareManifest(manifest).ok).toBe(true);
+  expect(manifest.bundleIdentifier).toBe("Com.Example.My-App42");
+});
+
+it.each([{ id: "notes" }, { title: "Notes" }, { runtime: { bundleId: "com.example.notes" } }])("rejects removed identity aliases %j", legacy => {
+  expect(validateSynWareManifest({ schemaVersion: 1, bundleIdentifier: "com.example.notes", displayName: "Notes", version: "1.0.0", ...legacy }).ok).toBe(false);
+});
+
 it("accepts disabled runtime intent and the preload authoring key", () => {
   expect(validateSynWareManifest({
-    schemaVersion: 1, id: "fixture.preparing", version: "1.0.0", title: "Preparing",
+    schemaVersion: 1, bundleIdentifier: "com.example.fixture.preparing", version: "1.0.0", displayName: "Preparing",
     runtime: { disabled: true, disabledReason: "Being prepared." },
     lifecycle: { preload: true },
   }).ok).toBe(true);
@@ -31,7 +55,7 @@ it("accepts disabled runtime intent and the preload authoring key", () => {
 
 it.each([true, false])("rejects the legacy lifecycle launch key with value %s", (launch) => {
   const result = validateSynWareManifest({
-    schemaVersion: 1, id: "fixture.legacy", version: "1.0.0", title: "Legacy",
+    schemaVersion: 1, bundleIdentifier: "com.example.fixture.legacy", version: "1.0.0", displayName: "Legacy",
     lifecycle: { launch },
   });
   expect(result.errors).toContainEqual(expect.objectContaining({ path: "/lifecycle/launch", code: "unknown-key" }));
@@ -43,12 +67,12 @@ it.each([
   { lifecycle: { preload: "true" }, path: "/lifecycle/preload" },
 ])("rejects a mistyped declaration at $path", ({ path, ...declaration }) => {
   const result = validateSynWareManifest({
-    schemaVersion: 1, id: "fixture.invalid", version: "1.0.0", title: "Invalid", ...declaration,
+    schemaVersion: 1, bundleIdentifier: "com.example.fixture.invalid", version: "1.0.0", displayName: "Invalid", ...declaration,
   });
   expect(result.errors).toContainEqual(expect.objectContaining({ path, code: "type" }));
 });
 
-const frameFixture = (frame: unknown) => ({ schemaVersion: 1, id: "fixture.frame", version: "1.0.0", title: "Frame", frame });
+const frameFixture = (frame: unknown) => ({ schemaVersion: 1, bundleIdentifier: "com.example.fixture.frame", version: "1.0.0", displayName: "Frame", frame });
 const helpIcon = { resource: "./Resources/help.svg", alternativeText: { key: "help.alt", fallback: "Help" } };
 
 it.each([
@@ -78,7 +102,7 @@ it.each([
 
 it("accepts a Webspring shell home icon beside the logo", () => {
   expect(validateSynWareManifest({
-    schemaVersion: 1, id: "com.syndromatic.webspring.home", version: "1.0.0", title: "Webspring home icon",
+    schemaVersion: 1, bundleIdentifier: "com.syndromatic.webspring.home", version: "1.0.0", displayName: "Webspring home icon",
     webspringShell: {
       views: [{ id: "website", presentations: ["desktop"], mode: "launcher" }],
       defaults: { desktop: "website", tablet: "website", mobile: "website" },
@@ -91,9 +115,9 @@ it("accepts a Webspring shell home icon beside the logo", () => {
 it("accepts a complete versioned manifest", () => {
   expect(validateSynWareManifest({
     schemaVersion: 1,
-    id: "com.syndromatic.example",
+    bundleIdentifier: "com.syndromatic.example",
     version: "1.0.0",
-    title: "Example",
+    displayName: "Example",
     presentations: ["desktop", "mobile"],
     webspring: { order: 10, icon: "./Resources/AppIcon.png" },
   }).ok).toBe(true);
@@ -102,9 +126,9 @@ it("accepts a complete versioned manifest", () => {
 it("accepts a closed Webspring shell declaration without replacing app placement", () => {
   expect(validateSynWareManifest({
     schemaVersion: 1,
-    id: "com.syndromatic.webspring",
+    bundleIdentifier: "com.syndromatic.webspring",
     version: "1.0.0",
-    title: "Webspring",
+    displayName: "Webspring",
     webspring: { visible: true, order: 1 },
     webspringShell: {
       views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
@@ -126,9 +150,9 @@ it.each(["//outside.example", "https://outside.example", "/folder\\child", "/fol
   (homeRoute) => {
     const result = validateSynWareManifest({
       schemaVersion: 1,
-      id: "com.syndromatic.webspring.invalid-route",
+      bundleIdentifier: "com.syndromatic.webspring.invalid-route",
       version: "1.0.0",
-      title: "Webspring invalid route",
+      displayName: "Webspring invalid route",
       webspringShell: {
         views: [{ id: "website", presentations: ["desktop"], mode: "launcher" }],
         defaults: { desktop: "website", tablet: "website", mobile: "website" },
@@ -145,9 +169,9 @@ it.each(["//outside.example", "https://outside.example", "/folder\\child", "/fol
 it("rejects unknown Webspring shell fields", () => {
   const result = validateSynWareManifest({
     schemaVersion: 1,
-    id: "com.syndromatic.webspring.unknown",
+    bundleIdentifier: "com.syndromatic.webspring.unknown",
     version: "1.0.0",
-    title: "Webspring unknown field",
+    displayName: "Webspring unknown field",
     webspringShell: {
       views: [{ id: "website", presentations: ["desktop"], mode: "launcher", component: "./WebsiteView" }],
       defaults: { desktop: "website", tablet: "website", mobile: "website" },
@@ -164,9 +188,9 @@ it("rejects unknown Webspring shell fields", () => {
 function webspringFolderManifest(folders: unknown) {
   return {
     schemaVersion: 1,
-    id: "com.syndromatic.webspring.folders",
+    bundleIdentifier: "com.syndromatic.webspring.folders",
     version: "1.0.0",
-    title: "Webspring folders",
+    displayName: "Webspring folders",
     webspringShell: {
       views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
       defaults: { desktop: "website", tablet: "website", mobile: "website" },
@@ -209,9 +233,9 @@ it.each(["./Resources/../escape.svg", "./Resources/icons/../../escape.svg"])(
   (resource) => {
     const result = validateSynWareManifest({
       schemaVersion: 1,
-      id: "com.syndromatic.webspring.escape",
+      bundleIdentifier: "com.syndromatic.webspring.escape",
       version: "1.0.0",
-      title: "Webspring escaping resource",
+      displayName: "Webspring escaping resource",
       webspringShell: {
         views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
         defaults: { desktop: "website", tablet: "website", mobile: "website" },
@@ -230,9 +254,9 @@ it.each(["./Resources/../escape.svg", "./Resources/icons/../../escape.svg"])(
 it("rejects an unknown legacy manifest key", () => {
   const result = validateSynWareManifest({
     schemaVersion: 1,
-    id: "com.syndromatic.invalid",
+    bundleIdentifier: "com.syndromatic.invalid",
     version: "1.0.0",
-    title: "Invalid",
+    displayName: "Invalid",
     legacyShell: {},
   });
 
@@ -244,9 +268,9 @@ it("rejects an unknown legacy manifest key", () => {
 it("rejects unknown nested public-object fields", () => {
   const result = validateSynWareManifest({
     schemaVersion: 1,
-    id: "com.syndromatic.invalid-nested",
+    bundleIdentifier: "com.syndromatic.invalid-nested",
     version: "1.0.0",
-    title: "Invalid nested field",
+    displayName: "Invalid nested field",
     webspring: { order: 10, legacyOrder: 9 },
   });
 
@@ -258,9 +282,9 @@ it("rejects unknown nested public-object fields", () => {
 it("rejects non-enumerable fields at the public manifest boundary", () => {
   const manifest: Record<string, unknown> = {
     schemaVersion: 1,
-    id: "com.syndromatic.hidden-field",
+    bundleIdentifier: "com.syndromatic.hidden-field",
     version: "1.0.0",
-    title: "Hidden field",
+    displayName: "Hidden field",
   };
   Object.defineProperty(manifest, "legacyPayload", {
     configurable: true,
@@ -278,9 +302,9 @@ it("rejects non-enumerable fields at the public manifest boundary", () => {
 it("accepts the complete supported runtime access-class vocabulary", () => {
   expect(validateSynWareManifest({
     schemaVersion: 1,
-    id: "com.syndromatic.access-classes",
+    bundleIdentifier: "com.syndromatic.access-classes",
     version: "1.0.0",
-    title: "Access classes",
+    displayName: "Access classes",
     runtime: {
       policy: { requiredAccessClasses: ["team", "external"] },
     },
@@ -290,9 +314,9 @@ it("accepts the complete supported runtime access-class vocabulary", () => {
 it("rejects a runtime access class outside the authoritative type vocabulary", () => {
   const result = validateSynWareManifest({
     schemaVersion: 1,
-    id: "com.syndromatic.invalid-access-class",
+    bundleIdentifier: "com.syndromatic.invalid-access-class",
     version: "1.0.0",
-    title: "Invalid access class",
+    displayName: "Invalid access class",
     runtime: {
       policy: { requiredAccessClasses: ["partner"] },
     },
@@ -307,9 +331,9 @@ it("rejects a runtime access class outside the authoritative type vocabulary", (
 it("rejects deprecated Onyx as a production app appearance", () => {
   const result = validateSynWareManifest({
     schemaVersion: 1,
-    id: "com.syndromatic.deprecated-appearance",
+    bundleIdentifier: "com.syndromatic.deprecated-appearance",
     version: "1.0.0",
-    title: "Deprecated appearance",
+    displayName: "Deprecated appearance",
     appearances: [{ id: "invalid-appearance", variant: "custom-test" }],
   });
 

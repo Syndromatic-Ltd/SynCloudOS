@@ -27,7 +27,7 @@ import { defineWebspring } from "../../src/Webspring/public";
 import { useHostFontManager } from "../../src/SynCloudOSReact/hostFontsContext";
 import { defineFontDeclaration } from "../../src/NSE/Typography";
 vi.mock("../../src/App", () => ({ App: () => { const manager = useHostFontManager(); return <output>{manager.availableFamilies.map(family=>family.id).join(",")}</output>; } }));
-const shell = defineWebspring({ manifest:{ schemaVersion:1,id:"com.example.font-host",title:"Fonts",version:"1.0.0",webspringShell:{views:[{id:"site",presentations:["desktop","tablet","mobile"],mode:"persistent"}],defaults:{desktop:"site",tablet:"site",mobile:"site"},homeRoute:"/",branding:{name:{key:"site.name",fallback:"Fonts"}}} },components:{site:()=>null} });
+const shell = defineWebspring({ manifest:{ schemaVersion:1,bundleIdentifier:"com.example.font-host",displayName:"Fonts",version:"1.0.0",webspringShell:{views:[{id:"site",presentations:["desktop","tablet","mobile"],mode:"persistent"}],defaults:{desktop:"site",tablet:"site",mobile:"site"},homeRoute:"/",branding:{name:{key:"site.name",fallback:"Fonts"}}} },components:{site:()=>null} });
 const declaration = defineFontDeclaration({ resources:{regular:"Resources/Regular.woff2"},families:[{id:"managed",label:"Managed",defaultFaceId:"managed.regular",faces:[{id:"managed.regular",label:"Regular",browserFamily:"Managed",resource:"regular",weight:400,style:"normal"}]}] });
 it("mounts the catalogue from the managed declaration without an independent metadata list", async()=>{
   const element=document.createElement("div");document.body.append(element); window.history.replaceState(null,"","/");

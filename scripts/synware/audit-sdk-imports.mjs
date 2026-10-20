@@ -38,6 +38,8 @@ const legacyManifestKeys = new Set([
   "seo",
   "policy",
   "bundleId",
+  "id",
+  "title",
   "shortName",
   "description",
   "route",
@@ -367,7 +369,7 @@ function manifestPropertyNames(source, sourcePath) {
   const visit = (node) => {
     if (ts.isObjectLiteralExpression(node)) {
       const names = node.properties.map(propertyName).filter((name) => name !== null);
-      if (names.includes("schemaVersion")) manifests.push(new Set(names));
+      if (names.includes("schemaVersion") || names.includes("bundleIdentifier")) manifests.push(new Set(names));
     }
     ts.forEachChild(node, visit);
   };

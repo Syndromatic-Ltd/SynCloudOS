@@ -77,7 +77,7 @@ function ControllerResponder({ appRuntime, target, kind, host, children }: Contr
   const kernel = useContext(SynCloudOSRuntimeContext);
   const parentId = hierarchy.responderId ?? appRuntime.responderId;
   const scopeId = kernel?.responders.get(parentId)?.scopeId ?? parentId;
-  const appId = appRuntime.app.id;
+  const appId = appRuntime.app.bundleIdentifier;
   const responderId = `${kind}:${appId}:${identityOf(target)}`;
   useLayoutEffect(() => {
     const binding = bindActionResponder(target, { appId, commands: appRuntime.commands }, responderId);
@@ -133,7 +133,7 @@ export function NSEViewControllerView({ controller }: NSEViewControllerViewProps
   useLayoutEffect(() => {
     const element = frameRef.current;
     if (!element || controller.isDisposed) return;
-    const session = appRuntime ? applicationSessionFor({ runtimeId: appRuntime.id, appId: appRuntime.app.id }) : undefined;
+    const session = appRuntime ? applicationSessionFor({ runtimeId: appRuntime.id, appId: appRuntime.app.bundleIdentifier }) : undefined;
     const untrack = session ? trackLiveApplicationObject(controller, session.live) : undefined;
     const detach = controller[nseAttachView]({
       element,
@@ -235,7 +235,7 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
     ? <NSEViewControllerView controller={root} />
     : View ? <View controller={controller} /> : null;
   return (
-    <NSEActionScopeProvider appId={appRuntime.app.id}>
+    <NSEActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
       <NSEControllerResponder target={controller} kind="controller">{content}</NSEControllerResponder>
     </NSEActionScopeProvider>
   );

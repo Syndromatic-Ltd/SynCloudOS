@@ -88,9 +88,9 @@ The manifest for this component lists both permissions:
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.notes",
+  bundleIdentifier: "com.example.notes",
   version: "1.0.0",
-  title: "Notes",
+  displayName: "Notes",
   routes: [{ path: "/notes", primary: true }],
   permissions: ["lumina.index", "lumina.query"],
 } as const;

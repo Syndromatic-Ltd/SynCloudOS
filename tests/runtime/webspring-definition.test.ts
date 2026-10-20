@@ -25,7 +25,7 @@ import { createWebspringBoardView, defineWebspring, WebspringBoardView, type Web
 function defineView(component: WebspringViewComponent, id = "custom") {
   return defineWebspring({
     manifest: {
-      schemaVersion: 1, id: "test.return-definition", version: "1.0.0", title: "Return definition",
+      schemaVersion: 1, bundleIdentifier: "com.example.test.return-definition", version: "1.0.0", displayName: "Return definition",
       webspringShell: {
         views: [{ id, presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
         defaults: { desktop: id, tablet: id, mobile: id }, homeRoute: "/",
@@ -85,7 +85,7 @@ describe("Webspring folder definition", () => {
   function defineFolders(initial: Folder[], extra: Record<string, unknown> = {}) {
     return defineWebspring({
       manifest: {
-        schemaVersion: 1, id: "test.folders", version: "1.0.0", title: "Folders",
+        schemaVersion: 1, bundleIdentifier: "com.example.test.folders", version: "1.0.0", displayName: "Folders",
         webspringShell: {
           views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
           defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",

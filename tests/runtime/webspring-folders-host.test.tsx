@@ -36,12 +36,12 @@ afterEach(async () => {
 function defineFoldersShell(extra: Record<string, unknown> = {}) {
   return defineWebspring({
     manifest: {
-      schemaVersion: 1, id: "fixture.folders-shell", version: "1.0.0", title: "Fixture",
+      schemaVersion: 1, bundleIdentifier: "com.example.fixture.folders-shell", version: "1.0.0", displayName: "Fixture",
       webspringShell: {
         views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
         defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
         branding: { name: { key: "host.name", fallback: "Fixture" } },
-        folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "folders.tools", fallback: "Tools" }, order: 0, apps: ["beta", "gamma"] }] },
+        folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "folders.tools", fallback: "Tools" }, order: 0, apps: ["com.example.beta", "com.example.gamma"] }] },
       },
     },
     components: { board: WebspringBoardView },
@@ -50,7 +50,7 @@ function defineFoldersShell(extra: Record<string, unknown> = {}) {
 }
 
 async function bootFolders() {
-  const runtime = createTestRuntime({ initialBundles: ["alpha", "beta", "gamma"].map((id) => createTestBundle({ id, route: `/${id}` })) });
+  const runtime = createTestRuntime({ initialBundles: ["com.example.alpha", "com.example.beta", "com.example.gamma"].map((id) => createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` })) });
   runtimes.push(runtime);
   await runtime.boot({ initialPathname: "/" });
   return runtime;

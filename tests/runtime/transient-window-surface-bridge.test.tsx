@@ -38,7 +38,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:first-sheet",
-      owner: { workspaceId: "workspace:default", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace:default", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const request = {
       id: "gallery:toolbar-configuration",
@@ -58,8 +58,8 @@ describe("window-hosted transient surface bridge", () => {
     expect(runtime.windows.snapshot().windowControllerIds).toEqual([first]);
     expect(runtime.windows.select(first).record).toMatchObject({
       role: "sheet",
-      applicationId: "gallery",
-      applicationSessionId: "gallery",
+      applicationId: "com.example.gallery",
+      applicationSessionId: "com.example.gallery",
       parentWindowControllerId: null,
       state: "open",
     });
@@ -136,7 +136,7 @@ describe("window-hosted transient surface bridge", () => {
   it("hangs an untitled popover off its anchor, flipping above when only that fits", async () => {
     const runtime = createTestRuntime({ id: "runtime:p07-popover-placement" });
     const renderers = new WindowContentRendererRegistry();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:popover-placement", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:popover-placement", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
     const anchor = document.createElement("button");
     anchor.id = "popover-anchor";
     document.body.append(anchor);
@@ -170,8 +170,8 @@ describe("window-hosted transient surface bridge", () => {
     const secondRuntime = createTestRuntime({ id: "runtime:p07:second" });
     const firstRenderers = new WindowContentRendererRegistry();
     const secondRenderers = new WindowContentRendererRegistry();
-    const first = createTransientWindowSurfaceBridge({ runtime: firstRuntime, renderers: firstRenderers, physicalHostId: "stage:first", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
-    const second = createTransientWindowSurfaceBridge({ runtime: secondRuntime, renderers: secondRenderers, physicalHostId: "stage:second", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
+    const first = createTransientWindowSurfaceBridge({ runtime: firstRuntime, renderers: firstRenderers, physicalHostId: "stage:first", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const second = createTransientWindowSurfaceBridge({ runtime: secondRuntime, renderers: secondRenderers, physicalHostId: "stage:second", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
     const request = { id: "shared", role: "panel" as const, title: "Media", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } };
 
     await first.present(request, <p>First</p>);
@@ -194,7 +194,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:native-close",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const request = {
       id: "toolbar-configuration",
@@ -223,7 +223,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:refused-close",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const request = { id: "media", role: "panel" as const, title: "Media", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 500, height: 400 } };
     const windowControllerId = await bridge.present(request, <p>Media</p>);
@@ -253,7 +253,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:pending-dispose",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const pending = bridge.present({ id: "pending", role: "panel", title: "Pending", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } }, <p>Pending</p>);
     await Promise.resolve();
@@ -271,7 +271,7 @@ describe("window-hosted transient surface bridge", () => {
     const runtime = createTestRuntime({ id: "runtime:surface-hosts" });
     const renderers = new WindowContentRendererRegistry();
     const createForHost = createTransientWindowSurfaceBridge;
-    const owner = { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" };
+    const owner = { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" };
     const first = createForHost({ runtime, renderers, owner, physicalHostId: "stage:gallery" });
     const second = createForHost({ runtime, renderers, owner, physicalHostId: "window:gallery-main" });
     const request = { id: "shared", role: "panel" as const, title: "Media", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } };
@@ -297,7 +297,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:update",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const first = { id: "mutable", role: "panel" as const, title: "Media", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } };
     const windowControllerId = await bridge.present(first, <p>First content</p>);
@@ -321,7 +321,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:publication",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const firstAnchor = document.createElement("button");
     const secondAnchor = document.createElement("button");
@@ -350,7 +350,7 @@ describe("window-hosted transient surface bridge", () => {
     const runtime = createTestRuntime({ id: "runtime:surface-refused-reconfigure" });
     const renderers = new WindowContentRendererRegistry();
     const onDidClose = vi.fn();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:refused-reconfigure", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:refused-reconfigure", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
     const request = { id: "adaptive", role: "panel" as const, title: "Panel", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 }, onDidClose };
     const windowControllerId = await bridge.present(request, <p>Panel</p>);
     const originalClose = runtime.windows.requestClose.bind(runtime.windows);
@@ -368,7 +368,7 @@ describe("window-hosted transient surface bridge", () => {
   it("replays only the latest presentation requested while close is pending", async () => {
     const runtime = createTestRuntime({ id: "runtime:surface-latest-intent" });
     const renderers = new WindowContentRendererRegistry();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:latest-intent", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:latest-intent", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
     const request = { id: "latest", role: "panel" as const, title: "Initial", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } };
     await bridge.present(request, <p>Initial</p>);
     let continueClose!: () => void;
@@ -402,7 +402,7 @@ describe("window-hosted transient surface bridge", () => {
     const restored = vi.fn();
     const firstClosed = vi.fn();
     const secondClosed = vi.fn();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:generation-fence", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" }, restoreFocus: restored });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:generation-fence", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" }, restoreFocus: restored });
     const firstAnchor = document.createElement("button");
     const secondAnchor = document.createElement("button");
     document.body.append(firstAnchor, secondAnchor);
@@ -423,7 +423,7 @@ describe("window-hosted transient surface bridge", () => {
   it("recovers from a rejected manager close so a fresh dismissal can close the same owned window", async () => {
     const runtime = createTestRuntime({ id: "runtime:surface-close-retry" });
     const renderers = new WindowContentRendererRegistry();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:close-retry", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:close-retry", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
     const request = { id: "retry-close", role: "panel" as const, title: "Retry close", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } };
     const windowControllerId = await bridge.present(request, <p>Retry close</p>);
     const originalClose = runtime.windows.requestClose.bind(runtime.windows);
@@ -454,7 +454,7 @@ describe("window-hosted transient surface bridge", () => {
     });
     const renderers = new WindowContentRendererRegistry();
     const restored = vi.fn();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:latest-focus", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" }, restoreFocus: restored });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:latest-focus", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" }, restoreFocus: restored });
     const firstAnchor = document.createElement("button");
     const secondAnchor = document.createElement("button");
     document.body.append(firstAnchor, secondAnchor);
@@ -480,7 +480,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:hosted-providers",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const request = { id: "hosted", role: "panel" as const, title: "Hosted controls", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 500, height: 400 } };
     const windowControllerId = await bridge.present(request, <p>Loading</p>);

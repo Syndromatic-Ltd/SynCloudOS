@@ -46,12 +46,12 @@ function Content() {
   </div>, overlay.portalHost) : null;
 }
 const definition = createSynWare({
-  manifest: { schemaVersion: 1, id: "stage-overlay-app", version: "1.0.0", title: "Stage Overlay", permissions: ["app.open.public"],
-    frame: { topBar: "none", presentationMotion: contentOwned ? "content" : "host" } },
+  manifest: { schemaVersion: 1, bundleIdentifier: "com.example.stage-overlay-app", version: "1.0.0", displayName: "Stage Overlay", permissions: ["app.open.public"],
+      frame: { topBar: "none", presentationMotion: contentOwned ? "content" : "host" } },
   root: Content,
 });
 const app = runtime.apps.register(createSynWareBundle(definition))!;
-await runtime.bundles.loadBundle(app.id);
+await runtime.bundles.loadBundle(app.bundleIdentifier);
 const registry = new WindowContentRendererRegistry();
 function Fixture() {
   const [staged, setStaged] = useState(params.get("staged") === "true");
@@ -63,9 +63,9 @@ function Fixture() {
   return <SynCloudOSProvider runtime={runtime}>
     <HostSiteBrandingProvider value={{ name: "Stage", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Stage" }}>
       <div className="webspring-apps-container">
-        <NSEPresence initial={false} onExitComplete={() => { exits++; }}>{shown ? <ApplicationStageView key={app.id}
+        <NSEPresence initial={false} onExitComplete={() => { exits++; }}>{shown ? <ApplicationStageView key={app.bundleIdentifier}
           app={app} lifecycle="active" staged={staged} multiSwitchRole={role} windowContentRegistry={registry}
-          stage={{ id: "application-stage:overlay", appId: app.id, title: app.window.title, isFocused: true, zIndex: 2 }} /> : null}</NSEPresence>
+          stage={{ id: "application-stage:overlay", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }} /> : null}</NSEPresence>
       </div>
     </HostSiteBrandingProvider>
   </SynCloudOSProvider>;

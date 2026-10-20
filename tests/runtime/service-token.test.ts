@@ -47,9 +47,9 @@ function createMountedServiceFixture(options: {
   const definition = createSynWare({
     manifest: {
       schemaVersion: 1,
-      id: "service-token-app",
+      bundleIdentifier: "com.example.service-token-app",
       version: "1.0.0",
-      title: "Service token app",
+      displayName: "Service token app",
       services: options.declared === false ? [] : [{
         id: searchToken.id,
         required: true,
@@ -66,7 +66,7 @@ function createMountedServiceFixture(options: {
     contractVersion: options.contractVersion ?? "search.v1",
     createAppClient: () => Object.freeze<SearchClient>({ search: (query) => `result:${query}` }),
   });
-  const mounted = mountTestSynWareRuntime(runtime, app.id);
+  const mounted = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
   const context = createSynWareContextValue(mounted.runtime);
   return { runtime, mounted, context, services: context.services };
 }

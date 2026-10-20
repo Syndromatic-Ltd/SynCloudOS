@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
+
 /** Presentation-safe alert contracts. The presenter renders these values; no
  * kernel object crosses into application or host UI code. */
 export type SynCloudOSAlertButtonRole = "default" | "cancel" | "destructive";
@@ -169,7 +171,7 @@ export function createSynCloudOSAlertCenter(options: AlertCentreOptions = {}): S
     dismissOwnedBy(appId: string) {
       let dismissed = 0;
       for (const entry of [...entries]) {
-        if (entry.presentation.ownerAppId !== appId) continue;
+        if (normalizeBundleIdentifier(entry.presentation.ownerAppId) !== normalizeBundleIdentifier(appId)) continue;
         settle(entry, synCloudOSAlertDismissalButton(entry.presentation.buttons));
         dismissed += 1;
       }

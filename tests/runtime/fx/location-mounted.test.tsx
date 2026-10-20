@@ -29,9 +29,9 @@ import { LFXCoordinate, LFXLocation } from "../../../src/FX/LocationFX/public";
 const LocationProbe = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.location-probe",
+    bundleIdentifier: "com.syndromatic.location-probe",
     version: "1.0.0",
-    title: "Location Probe",
+    displayName: "Location Probe",
     routes: [{ path: "/location-probe", primary: true }],
     permissions: ["location.read", "location.request"],
   },
@@ -106,7 +106,7 @@ it("routes a mounted watch through lifecycle suspension, reauthorization and mou
   expect(host.settlement.getState().excluded).toContainEqual(expect.objectContaining({
     owner: "location",
     kind: "watch",
-    label: LocationProbe.manifest.id,
+    label: LocationProbe.manifest.bundleIdentifier,
   }));
   await expect(host.settlement.settled({ timeoutMs: 250 })).resolves.toMatchObject({
     status: "settled",
@@ -114,7 +114,7 @@ it("routes a mounted watch through lifecycle suspension, reauthorization and mou
       expect.objectContaining({
         owner: "location",
         kind: "watch",
-        label: LocationProbe.manifest.id,
+        label: LocationProbe.manifest.bundleIdentifier,
       }),
     ]),
   });
@@ -141,7 +141,7 @@ it("routes a mounted watch through lifecycle suspension, reauthorization and mou
   expect(host.settlement.getState().excluded).not.toContainEqual(expect.objectContaining({
     owner: "location",
     kind: "watch",
-    label: LocationProbe.manifest.id,
+    label: LocationProbe.manifest.bundleIdentifier,
   }));
   manager.dispose();
   const report = await host.dispose();

@@ -39,7 +39,7 @@ const type: DocumentType<Model> = {
 };
 const cleanups: Array<() => void | Promise<void>> = [];
 afterEach(async () => { for (const cleanup of cleanups.splice(0).reverse()) await cleanup(); });
-const scope = { authorizationId: "review-owner", documentId: "review-document" };
+const scope = { authorizationId: "com.example.review-owner", documentId: "review-document" };
 const location = { kind: "memory" as const, namespace: "review-integrated", key: "a" };
 const observe = (name: string, facts: unknown) => console.info("REVIEW-PROBE", name, JSON.stringify(facts));
 function deferred() {
@@ -63,7 +63,7 @@ async function fixture() {
   } });
   runtime.documents.registerCloseReviewer({ review: async () => "discard" });
   cleanups.push(async () => { await runtime.dispose("review"); });
-  registerTestSynWare(runtime, { schemaVersion: 1, id: scope.authorizationId, version: "1.0.0", title: "Review", routes: [{ path: "/review", primary: true }], documentTypes: [{ id: type.id, displayName: type.displayName }] });
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: scope.authorizationId, version: "1.0.0", displayName: "Review", routes: [{ path: "/review", primary: true }], documentTypes: [{ id: type.id, displayName: type.displayName }] });
   const mounted = mountTestSynWareRuntime(runtime, scope.authorizationId);
   cleanups.push(() => mounted.dispose("review"));
   const app = createSynWareContextValue(mounted.runtime).documents;

@@ -43,11 +43,11 @@ describe("managed byte-backed font resolution",()=>{
     const bundleLoader = vi.fn(async () => ({ bytes: readNotoSans(), mimeType: "font/ttf" as const }));
     const hostLoader = vi.fn(async () => ({ bytes: readNotoSans(), mimeType: "font/ttf" as const }));
     const catalogue = { manager: new NSEFontManager({ families: declaration.families, library: null }), declaration, loadResource: hostLoader };
-    const bundle = createTestBundle({ id: "managed-font-composition" }, { fontResourceLoader: bundleLoader });
+    const bundle = createTestBundle({ bundleIdentifier: "com.example.managed-font-composition" }, { fontResourceLoader: bundleLoader });
     const runtime = createTestRuntime({ initialBundles: [bundle] });
-    const responderId = `application:${bundle.manifest.id}`;
+    const responderId = `application:${bundle.manifest.bundleIdentifier}`;
     runtime.responders.register({ id: responderId, kind: "application", parentId: "runtime", scopeId: responderId });
-    const mount = createMountedSynWareRuntime({ runtime, app: runtime.apps.getApp(bundle.manifest.id)!, responderId, hostFontResourceLoader: createFontCatalogueResourceLoader(catalogue) });
+    const mount = createMountedSynWareRuntime({ runtime, app: runtime.apps.getApp(bundle.manifest.bundleIdentifier)!, responderId, hostFontResourceLoader: createFontCatalogueResourceLoader(catalogue) });
     const access = createSynWareFontAccess(catalogue, mount.runtime.textLayout, mount.runtime.signal);
     try {
       const managed = await access.loadFace("example.book", new TFXFontDescriptor({ size: 14 }));

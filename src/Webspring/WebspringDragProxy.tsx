@@ -160,7 +160,7 @@ export function WebspringDragProxy({
       style={{ left: point.x, top: point.y }}
     >
       {artwork}
-      <span>{app?.title ?? folder?.title}</span>
+      <span>{app?.displayName ?? folder?.title}</span>
     </div>
   ), document.body);
 }

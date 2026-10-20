@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { Component, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ErrorInfo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { NSEFocusPortProvider, useNSEDeferredDisposal } from "../NSE/NSE";
@@ -169,7 +170,7 @@ export function WebspringHost({
   const phase = startupPhase ?? "complete";
   const authenticationPolicy = typeof authentication === "object" ? authentication.policy : authentication;
   const gateRequested = authenticationPolicy !== "disabled" && snapshot.statechart.currentState === "locked.loginWindow";
-  const loginContinuationKey = `webspring:${shell.manifest.id}:${shell.manifest.webspringShell.homeRoute}:login-continuation`;
+  const loginContinuationKey = `webspring:${normalizeBundleIdentifier(shell.manifest.bundleIdentifier)}:${shell.manifest.webspringShell.homeRoute}:login-continuation`;
   const [resumeLogin] = useState(() => {
     try { return authenticationPolicy !== "disabled" && runtime.environment.sessionStorage?.getItem(loginContinuationKey) === "pending"; }
     catch { return false; }
@@ -210,7 +211,7 @@ export function WebspringHost({
     feedback?.trigger("selection");
   }, [canUseQuickSwitch, feedback]);
   const registerApplicationMenuToggle = useCallback((appId: string, toggle: () => void, ready: boolean) => {
-    if (ready && appId === runtime.store.getSnapshot().application.activeAppId) applicationMenuToggleRef.current = { appId, toggle };
+    if (ready && normalizeBundleIdentifier(appId) === normalizeBundleIdentifier(runtime.store.getSnapshot().application.activeAppId)) applicationMenuToggleRef.current = { appId, toggle };
     return () => {
       if (applicationMenuToggleRef.current?.toggle === toggle) applicationMenuToggleRef.current = null;
     };
@@ -218,7 +219,7 @@ export function WebspringHost({
   const requestApplicationMenuToggle = useCallback(() => {
     const entry = applicationMenuToggleRef.current;
     const current = runtime.store.getSnapshot();
-    if (!entry || entry.appId !== current.application.activeAppId || current.application.multiSwitch.status === "switching") return;
+    if (!entry || normalizeBundleIdentifier(entry.appId) !== normalizeBundleIdentifier(current.application.activeAppId) || current.application.multiSwitch.status === "switching") return;
     entry.toggle();
   }, [runtime]);
   useWebspringResponder({ onNotificationCentreRequest: requestNotificationCentre, onApplicationMenuToggle: requestApplicationMenuToggle });

@@ -41,7 +41,7 @@ function write(root: string, relativePath: string, source: string) {
 
 function capabilityFixture() {
   const root = fixtureRoot("fixture");
-  write(root, "src/SynWare/Example.app/Contents/Info.ts", 'export default { id: "example" };\n');
+  write(root, "src/SynWare/Example.app/Contents/Info.ts", 'export default { bundleIdentifier: "com.example.example", displayName: "Example", version: "1.0.0" };\n');
   write(root, "src/SynWare/Example.app/Contents/index.ts", [
     'import { inspectRuntime } from "./helpers";',
     'import "./styles.css";',
@@ -89,7 +89,7 @@ afterEach(() => {
 describe("first-party SynWare capability authority audit", () => {
   it("tracks imported mounted SDK hooks while excluding shadowed browser names", () => {
     const root = fixtureRoot("mounted-hooks");
-    write(root, "src/SynWare/Example.app/Contents/Info.ts", 'export default { id: "example" };\n');
+    write(root, "src/SynWare/Example.app/Contents/Info.ts", 'export default { bundleIdentifier: "com.example.example", displayName: "Example", version: "1.0.0" };\n');
     write(root, "src/SynWare/Example.app/Contents/index.ts", [
       'import { useSCOS as useApp, useNSEMenuPort } from "@syndromatic/syncloudos/sdk";',
       'export function Example() {',
@@ -125,6 +125,7 @@ describe("first-party SynWare capability authority audit", () => {
   it("fails the command on forbidden browser network access", () => {
     const root = fixtureRoot("forbidden");
     write(root, "src/SynWare/Example.app/Contents/index.ts", 'export function Example() { return fetch("/private"); }');
+    write(root, "src/SynWare/Example.app/Contents/Info.ts", 'export default { bundleIdentifier: "com.example.example", displayName: "Example", version: "1.0.0" };\n');
     const result = spawnSync(process.execPath, ["scripts/synware/audit-capability-usage.mjs", root, "--check"], { encoding: "utf8" });
     expect(result.status).toBe(1);
     expect(result.stderr).toContain('"disposition": "forbidden"');
@@ -136,7 +137,7 @@ describe("first-party SynWare capability authority audit", () => {
 
     expect(audit.apps).toEqual(expect.arrayContaining([
       expect.objectContaining({
-        app: "example",
+        app: "com.example.example",
         file: "src/SynWare/Example.app/Contents/index.ts",
         receiver: "runtime.persistence",
         member: "getPreference",
@@ -144,7 +145,7 @@ describe("first-party SynWare capability authority audit", () => {
         target: "preferences",
       }),
       expect.objectContaining({
-        app: "example",
+        app: "com.example.example",
         file: "src/SynWare/Example.app/Contents/helpers.ts",
         receiver: "runtime.presentation",
         member: "getSnapshot",
@@ -154,7 +155,7 @@ describe("first-party SynWare capability authority audit", () => {
     ]));
     expect(audit.passThroughs).toEqual(expect.arrayContaining([
       expect.objectContaining({
-        app: "example",
+        app: "com.example.example",
         receiver: "runtime",
         member: "pass-through",
         target: "inspectRuntime",
@@ -185,7 +186,7 @@ describe("first-party SynWare capability authority audit", () => {
 
   it("keeps unmapped authority visible and makes the command fail closed", () => {
     const root = fixtureRoot("unresolved");
-    write(root, "src/SynWare/Example.app/Contents/Info.ts", 'export default { id: "example" };\n');
+    write(root, "src/SynWare/Example.app/Contents/Info.ts", 'export default { bundleIdentifier: "com.example.example", displayName: "Example", version: "1.0.0" };\n');
     write(root, "src/SynWare/Example.app/Contents/index.ts", [
       "export function Example({ runtime }: { runtime: unknown }) {",
       "  return (runtime as any).experimental.launch();",
@@ -195,7 +196,7 @@ describe("first-party SynWare capability authority audit", () => {
 
     const audit = auditSynWareCapabilityUsage(root);
     expect(audit.unresolved).toEqual(expect.arrayContaining([
-      expect.objectContaining({ app: "example", receiver: "runtime.experimental", member: "launch" }),
+      expect.objectContaining({ app: "com.example.example", receiver: "runtime.experimental", member: "launch" }),
     ]));
 
     const command = spawnSync(process.execPath, ["scripts/synware/audit-capability-usage.mjs", root], {

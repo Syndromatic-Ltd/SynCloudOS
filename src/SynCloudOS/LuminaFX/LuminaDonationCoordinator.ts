@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { LUFXSearchableItem } from "../../FX/LuminaFX/LUFXSearchableItem";
 import type { LuminaIndexService } from "./LuminaIndexService";
 import type { LuminaEligibilityRegistry } from "./LuminaEligibility";
@@ -276,7 +277,7 @@ export class LuminaDonationCoordinator<TValue = unknown> {
   async #loadCheckpoint(): Promise<LuminaDonationCheckpoint> {
     const loaded = await this.#options.checkpointStore.load();
     if (!loaded) return this.#checkpoint({});
-    if (loaded.version !== 1 || loaded.ownerAppId !== this.#options.ownerAppId || loaded.domain !== this.#options.domain || !loaded.items || typeof loaded.items !== "object") {
+    if (loaded.version !== 1 || normalizeBundleIdentifier(loaded.ownerAppId) !== normalizeBundleIdentifier(this.#options.ownerAppId) || loaded.domain !== this.#options.domain || !loaded.items || typeof loaded.items !== "object") {
       throw new DOMException("Lumina donation checkpoint belongs to a different owner/domain or version.", "InvalidStateError");
     }
     return loaded;

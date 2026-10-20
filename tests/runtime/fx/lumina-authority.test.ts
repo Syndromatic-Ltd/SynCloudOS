@@ -143,7 +143,7 @@ function createHarness(backends: Record<string, SnapshotBackend>) {
     authorise: vi.fn(() => ({ allowed: policyAllowed })),
   };
   const routes = {
-    getAppForRoute: vi.fn((pathname: string) => pathname.startsWith("/journal") ? { id: "com.syndromatic.journal" } : null),
+    getAppForRoute: vi.fn((pathname: string) => pathname.startsWith("/journal") ? { bundleIdentifier: "com.syndromatic.journal" } : null),
     openRoute: vi.fn((pathname: string, options: any = {}) => {
       const controller = new AbortController();
       let cancelled = false;
@@ -186,7 +186,7 @@ function createHarness(backends: Record<string, SnapshotBackend>) {
     eligibility,
     policy,
     subscribeState(listener) { stateListener = listener; return () => { if (stateListener === listener) stateListener = null; }; },
-    apps: { getApp: (appId: string) => destinationInstalled && appId === "com.syndromatic.journal" ? { id: appId } : null },
+    apps: { getApp: (appId: string) => destinationInstalled && appId === "com.syndromatic.journal" ? { bundleIdentifier: appId } : null },
     routes,
     presentationSettlements,
     randomUUID: () => "activation-correlation",
@@ -577,7 +577,7 @@ it("integrates mounted app ownership, trusted donation, PolicyKit, RouteManager 
       return new SharedBackend(state);
     },
   };
-  const publisherBase = createTestBundle({ id: "lumina-real-publisher", route: "/lumina-real-publisher" });
+  const publisherBase = createTestBundle({ bundleIdentifier: "com.example.lumina-real-publisher", route: "/lumina-real-publisher" });
   const publisher = Object.freeze({
     ...publisherBase,
     permissions: Object.freeze(["app.open.public", "lumina.index", "lumina.query"]),
@@ -586,7 +586,7 @@ it("integrates mounted app ownership, trusted donation, PolicyKit, RouteManager 
       permissions: Object.freeze(["app.open.public", "lumina.index", "lumina.query"]),
     }),
   });
-  const reader = createTestBundle({ id: "lumina-real-reader", route: "/lumina-real-reader" });
+  const reader = createTestBundle({ bundleIdentifier: "com.example.lumina-real-reader", route: "/lumina-real-reader" });
   const environment = Object.freeze({ ...createTestRuntimeEnvironment(), luminaIndex });
   const runtime = createTestRuntime({
     environment,
@@ -603,19 +603,19 @@ it("integrates mounted app ownership, trusted donation, PolicyKit, RouteManager 
         capabilities: ["lumina.index", "lumina.query", "lumina.eligible-query"],
       });
       context.lumina.registerDomain({
-        ownerAppId: "lumina-real-publisher",
+        ownerAppId: "com.example.lumina-real-publisher",
         domain: "journal.entry",
-        destinationAppId: "lumina-real-reader",
+        destinationAppId: "com.example.lumina-real-reader",
         routeName: "journal.entry",
         resolve: ({ item }) => ({ pathname: `/lumina-real-reader?item=${encodeURIComponent(item.id)}` }),
       });
     },
   }));
   const installation = await installTestHostContributions(runtime, [contribution]);
-  const mounted = mountTestSynWareRuntime(runtime, "lumina-real-publisher");
+  const mounted = mountTestSynWareRuntime(runtime, "com.example.lumina-real-publisher");
   const index = createSynWareContextValue(mounted.runtime).lumina.createIndex();
   const readerMount = new AbortController();
-  const releaseReaderMount = runtime.routes.mountedRoutes.attach("lumina-real-reader", {
+  const releaseReaderMount = runtime.routes.mountedRoutes.attach("com.example.lumina-real-reader", {
     signal: readerMount.signal,
     loadAndRender: async () => undefined,
   });
@@ -623,7 +623,7 @@ it("integrates mounted app ownership, trusted donation, PolicyKit, RouteManager 
     const item = searchable("real-entry", "Runtime Integrated Journal Note");
     await index.upsert(item, "runtime-real-upsert");
     installation.contexts[0]!.lumina.setEligibility({
-      ownerAppId: "lumina-real-publisher",
+      ownerAppId: "com.example.lumina-real-publisher",
       domain: "journal.entry",
       itemId: item.id,
       revision: item.revision,
@@ -639,9 +639,9 @@ it("integrates mounted app ownership, trusted donation, PolicyKit, RouteManager 
     await expect(activation).resolves.toMatchObject({
       status: "activated",
       committed: true,
-      appId: "lumina-real-reader",
+      appId: "com.example.lumina-real-reader",
     });
-    expect(runtime.store.getSnapshot().application.activeAppId).toBe("lumina-real-reader");
+    expect(runtime.store.getSnapshot().application.activeAppId).toBe("com.example.lumina-real-reader");
   } finally {
     releaseReaderMount();
     readerMount.abort();

@@ -27,7 +27,7 @@ import {
 } from "../../src/SynCloudOS/AppSDK";
 
 const navigationOptions: AppNavigationOptions = { historyMode: "replace" };
-const navigationRoute: AppNavigationRoute = { pathname: "/music", kind: "app", appId: "music" };
+const navigationRoute: AppNavigationRoute = { pathname: "/music", kind: "app", appId: "com.example.music" };
 declare const navigationTransition: AppNavigationTransitionHandle;
 const navigationResult: Promise<AppNavigationTransitionResult> = navigationTransition.result;
 void navigationOptions;

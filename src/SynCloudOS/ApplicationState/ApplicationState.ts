@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import type { SynCloudOSMultiSwitchState } from "./applicationStateTypes";
 
@@ -40,6 +41,7 @@ const applicationState = {
   },
 
   setPendingApp(appId: string | null) {
+    if (appId) appId = RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(appId)]?.bundleIdentifier ?? appId;
     RuntimeStore.mutate((draft) => {
       draft.application.pendingAppId = appId;
       draft.application.launchingAppId = appId;
@@ -47,6 +49,7 @@ const applicationState = {
   },
 
   setActiveApp(appId: string | null) {
+    if (appId) appId = RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(appId)]?.bundleIdentifier ?? appId;
     RuntimeStore.mutate((draft) => {
       draft.application.previousAppId = draft.application.activeAppId;
       draft.application.activeAppId = appId;
@@ -64,8 +67,8 @@ const applicationState = {
       draft.application.multiSwitch = {
         id,
         status: "switching",
-        fromAppId: options.fromAppId,
-        toAppId: options.toAppId,
+        fromAppId: options.fromAppId ? RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(options.fromAppId)]?.bundleIdentifier ?? options.fromAppId : null,
+        toAppId: options.toAppId ? RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(options.toAppId)]?.bundleIdentifier ?? options.toAppId : null,
         fromRoute: options.fromRoute,
         toRoute: options.toRoute,
         source: options.source,
@@ -105,13 +108,15 @@ const applicationState = {
   },
 
   markSuspended(appId: string) {
+    appId = RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(appId)]?.bundleIdentifier ?? appId;
     RuntimeStore.mutate((draft) => {
       draft.application.suspendedAppIds = Array.from(new Set([...draft.application.suspendedAppIds, appId]));
-      draft.application.openAppIds = draft.application.openAppIds.filter((id) => id !== appId);
+      draft.application.openAppIds = draft.application.openAppIds.filter((id) => normalizeBundleIdentifier(id) !== normalizeBundleIdentifier(appId));
     });
   },
 
   markFailed(appId: string) {
+    appId = RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(appId)]?.bundleIdentifier ?? appId;
     RuntimeStore.mutate((draft) => {
       draft.application.failedAppIds = Array.from(new Set([...draft.application.failedAppIds, appId]));
     });

@@ -33,9 +33,9 @@ import {
 const ExampleApp = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.testing-example",
+    bundleIdentifier: "com.syndromatic.testing-example",
     version: "1.0.0",
-    title: "Testing Example",
+    displayName: "Testing Example",
     routes: [{ path: "/testing-example", primary: true }],
   },
   root() {
@@ -47,9 +47,9 @@ const ExampleApp = createSynWare({
 const MountedControlApp = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.testing-controls",
+    bundleIdentifier: "com.syndromatic.testing-controls",
     version: "1.0.0",
-    title: "Testing Controls",
+    displayName: "Testing Controls",
     routes: [{ path: "/testing-controls", primary: true }],
     services: [{ id: "webspring.runtime", required: false }],
   },

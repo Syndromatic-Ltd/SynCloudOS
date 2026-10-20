@@ -37,12 +37,12 @@ import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 afterEach(cleanup);
 
 function app(id: string, displayName: string, disabled = false) {
-  return {
-    id,
+  return { version: "1.0.0",
+    bundleIdentifier: id,
     displayName,
     shortName: displayName,
     packageName: `com.test.${id}`,
-    route: `/${id}`,
+    route: `/${id.split(".").at(-1)}`,
     icon: { src: `/icons/${id}.png` },
     notifications: { badgeCount: 0 },
     isDisabled: disabled,
@@ -109,7 +109,7 @@ describe("command, focus, undo, and overlay accessibility", () => {
     runtime.responders.register({ id: "quickswitch:trigger", kind: "control", parentId: "webspring", scopeId: "root" });
     runtime.focus.requestFocus("quickswitch:trigger");
     const onClose = vi.fn();
-    const apps = [app("about", "About"), app("archive", "Archive", true), app("studio", "Studio")];
+    const apps = [app("com.example.about", "About"), app("com.example.archive", "Archive", true), app("com.example.studio", "Studio")];
     const view = render(<SynCloudOSProvider runtime={runtime}>
       <WebspringQuickSwitchView open apps={apps} lifecycle={{ about: "registered", archive: "disabled", studio: "registered" }} openAppIds={[]} onClose={onClose} />
     </SynCloudOSProvider>);

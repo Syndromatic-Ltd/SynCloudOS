@@ -25,6 +25,13 @@ import { fileURLToPath } from "node:url";
 import { kebabCase, titleFromFolderName } from "./project-derivation.mjs";
 
 const APP_ID = /^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/;
+const BUNDLE_IDENTIFIER = /^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+){2,}$/u;
+
+export function scaffoldBundleIdentifier(name, organisation = "com.example") {
+  const identifier = `${organisation}.${String(name).toLowerCase()}`;
+  if (!BUNDLE_IDENTIFIER.test(identifier)) throw new TypeError("Use a reverse-DNS organisation and a folder name containing only letters, digits and hyphens.");
+  return identifier;
+}
 
 const fxRecipes = {
   animation: { imports: "AFXTimingFunction", body: 'return `Timing at halfway: ${new AFXTimingFunction("linear").sample(0.5)}`;', expected: "Timing at halfway: 0.5" },
@@ -50,14 +57,17 @@ function fail(message) {
   process.exitCode = 1;
 }
 
-export function scaffoldFiles(appId, selected = [], title = titleFromFolderName(appId)) {
+export function scaffoldFiles(bundleIdentifier, selected = [], title = titleFromFolderName(bundleIdentifier)) {
+  if (!BUNDLE_IDENTIFIER.test(bundleIdentifier)) throw new TypeError("Use a reverse-DNS bundleIdentifier with at least two dots.");
   const permissions = [...new Set(selected.flatMap(name => fxRecipes[name].permissions ?? []))];
   const hooks = selected.flatMap(name => fxRecipes[name].hook ? [fxRecipes[name].hook] : []);
   const functionName = name => `run${name[0].toUpperCase()}${name.slice(1)}`;
   const recipeImports = selected.map(name => `import { runRecipe as ${functionName(name)} } from "./recipes/${name}";`).join("\n");
   const files = new Map([
     ["Contents/Info.ts", `export default {
-  // The folder derives id, title, schemaVersion and the project's package version.
+  bundleIdentifier: ${JSON.stringify(bundleIdentifier)},
+  displayName: ${JSON.stringify(title)},
+  version: "1.0.0",
   webspring: { visible: true },
 ${permissions.length ? `  permissions: ${JSON.stringify(permissions)},\n` : ""}\
 } as const;
@@ -72,7 +82,7 @@ ${selected.length ? `  const [status, setStatus] = useState("Ready");\n${selecte
   return (
     <NSEStackView aria-label="${title} actions" orientation="vertical" spacing={12}>
       <NSEStackItem id="status" visibilityPriority={100}>
-        <p>{SCOS.app.title} is running as {SCOS.app.id}.</p>
+        <p>{SCOS.app.displayName} is running as {SCOS.app.bundleIdentifier}.</p>
       </NSEStackItem>
 ${selected.map(name => `      <NSEStackItem id="${name}" visibilityPriority={90}>\n        <button type="button" onClick={() => run(() => ${functionName(name)}(${fxRecipes[name].hook ? name : ""}))}>${fxRecipes[name].label ?? `Run ${name} example`}</button>\n      </NSEStackItem>`).join("\n")}
 ${selected.length ? '      <NSEStackItem id="result" visibilityPriority={100}><p role="status">{status}</p></NSEStackItem>\n' : ""}\
@@ -93,9 +103,9 @@ ${selected.length ? '      <NSEStackItem id="result" visibilityPriority={100}><p
 }
 
 /** The same folder templates are used by the CLI and developer MCP. */
-export function scaffoldProjectFiles({ kind = "application", name, id = kebabCase(name), owners = [] }) {
+export function scaffoldProjectFiles({ kind = "application", name, organisation = "com.example", bundleIdentifier, id = kebabCase(name), owners = [] }) {
   const title = titleFromFolderName(name);
-  if (kind === "application") return scaffoldFiles(id, [], title);
+  if (kind === "application") return scaffoldFiles(bundleIdentifier ?? scaffoldBundleIdentifier(name, organisation), [], title);
   if (kind === "preferencePane") return new Map([["index.tsx", `import { definePreferencePane } from "@syndromatic/syncloudos";\n\nexport default definePreferencePane({ id: ${JSON.stringify(id)}, title: ${JSON.stringify(title)}, order: 100, view: function Preferences() { return <p>${title}</p>; } });\n`]]);
   if (kind === "widget") return new Map([["index.tsx", `import { defineWidget } from "@syndromatic/syncloudos";\n\nexport default defineWidget({ id: ${JSON.stringify(id)}, title: ${JSON.stringify(title)}, load: async () => new Date().toLocaleDateString(), view: ({ data }) => <p>{data}</p>, whenEmpty: "hide" });\n`]]);
   if (kind === "integration") {
@@ -107,7 +117,7 @@ export function scaffoldProjectFiles({ kind = "application", name, id = kebabCas
 function main() {
   const [targetArgument, ...options] = process.argv.slice(2);
   if (!targetArgument) {
-    fail("Usage: create-synware <Name.app|Name.prefPane|Name.widget|Name.integration.ts> [--owners app-id,...] [--fx recipe,...]");
+    fail("Usage: create-synware <Name.app|Name.prefPane|Name.widget|Name.integration.ts> [--organisation com.example] [--owners bundle-identifier,...] [--fx recipe,...]");
     return;
   }
   if (!/\.(?:app|prefPane|widget|integration\.tsx?)$/u.test(targetArgument)) { fail("The target must name an .app, .prefPane, .widget or .integration.ts entry."); return; }
@@ -116,9 +126,11 @@ function main() {
   const appId = kebabCase(name);
   if (!APP_ID.test(appId)) { fail("Provide a valid application ID."); return; }
   let owners = [];
+  let organisation = "com.example";
   const selected = [];
   for (let index = 0; index < options.length; index += 2) {
     if (options[index] === "--owners" && options[index + 1]) { owners = options[index + 1].split(","); continue; }
+    if (options[index] === "--organisation" && options[index + 1]) { organisation = options[index + 1]; continue; }
     if (options[index] !== "--fx" || !options[index + 1]) { fail("Expected --fx followed by comma-separated recipe names."); return; }
     for (const name of options[index + 1].split(",")) {
       if (!Object.hasOwn(fxRecipes, name)) { fail(`Unknown FX recipe: ${name}. Available: ${Object.keys(fxRecipes).join(", ")}`); return; }
@@ -130,7 +142,7 @@ function main() {
     fail("Refusing to scaffold into a non-empty target directory.");
     return;
   }
-  const files = kind === "application" ? scaffoldFiles(appId, selected, titleFromFolderName(name)) : scaffoldProjectFiles({ kind, name, id: appId, owners });
+  const files = kind === "application" ? scaffoldFiles(scaffoldBundleIdentifier(name, organisation), selected, titleFromFolderName(name)) : scaffoldProjectFiles({ kind, name, id: appId, owners });
   if (kind !== "integration") mkdirSync(target, { recursive: true });
   for (const [relativePath, contents] of files) {
     const path = relativePath ? resolve(target, relativePath) : target;

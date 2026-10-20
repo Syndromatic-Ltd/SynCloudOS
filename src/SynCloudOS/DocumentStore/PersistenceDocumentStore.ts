@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { createPersistence } from "../Persistence/Persistence";
 import { canonicalDocumentJson } from "../Documents/documentTypes";
 import type { SynCloudOSPersistence, SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
@@ -139,7 +140,7 @@ function isOwnership(value: unknown): value is SynCloudOSDocumentOwnership {
 
 function ownershipKey(value: SynCloudOSDocument | SynCloudOSDocumentRevision): string {
   return value.ownership.kind === "application"
-    ? `application:${value.ownership.applicationId}`
+    ? `application:${normalizeBundleIdentifier(value.ownership.applicationId)}`
     : "system";
 }
 
@@ -166,7 +167,7 @@ function isDocument(value: unknown): value is SynCloudOSDocument {
     return false;
   }
   if (value.ownership.kind === "application") {
-    return value.applicationId === value.ownership.applicationId;
+    return typeof value.applicationId === "string" && normalizeBundleIdentifier(value.applicationId) === normalizeBundleIdentifier(value.ownership.applicationId);
   }
   return !Object.prototype.hasOwnProperty.call(value, "applicationId");
 }

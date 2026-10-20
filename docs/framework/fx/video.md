@@ -598,9 +598,9 @@ The manifest for a component that captures declares the permission:
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.camera",
+  bundleIdentifier: "com.example.camera",
   version: "1.0.0",
-  title: "Camera",
+  displayName: "Camera",
   routes: [{ path: "/camera", primary: true }],
   permissions: ["video.capture.camera"],
 } as const;

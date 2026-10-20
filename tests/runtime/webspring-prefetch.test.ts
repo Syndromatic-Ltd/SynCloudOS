@@ -39,9 +39,9 @@ describe("Webspring prefetch coordinator", () => {
     vi.useFakeTimers();
     const { runtime, prefetch } = await setupPrefetchRuntime();
     const loadModule = vi.fn(() => Promise.resolve({ default: () => null }));
-    runtime.apps.registerBundle(createTestBundle({ id: "hover-app", route: "/hover-app", policy: { public: true } }, { loadModule }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.hover-app", route: "/hover-app", policy: { public: true } }, { loadModule }));
 
-    prefetch.scheduleWebspringAppPrefetch(runtime, "hover-app");
+    prefetch.scheduleWebspringAppPrefetch(runtime, "com.example.hover-app");
     await vi.advanceTimersByTimeAsync(179);
 
     expect(loadModule).not.toHaveBeenCalled();
@@ -56,10 +56,10 @@ describe("Webspring prefetch coordinator", () => {
     vi.useFakeTimers();
     const { runtime, prefetch } = await setupPrefetchRuntime();
     const loadModule = vi.fn(() => Promise.resolve({ default: () => null }));
-    runtime.apps.registerBundle(createTestBundle({ id: "cancel-app", route: "/cancel-app", policy: { public: true } }, { loadModule }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.cancel-app", route: "/cancel-app", policy: { public: true } }, { loadModule }));
 
-    prefetch.scheduleWebspringAppPrefetch(runtime, "cancel-app");
-    prefetch.cancelWebspringAppPrefetch(runtime, "cancel-app");
+    prefetch.scheduleWebspringAppPrefetch(runtime, "com.example.cancel-app");
+    prefetch.cancelWebspringAppPrefetch(runtime, "com.example.cancel-app");
     await vi.advanceTimersByTimeAsync(240);
 
     expect(loadModule).not.toHaveBeenCalled();
@@ -72,9 +72,9 @@ describe("Webspring prefetch coordinator", () => {
     const firstLoad = vi.fn(() => Promise.resolve({ default: () => null }));
     const secondLoad = vi.fn(() => Promise.resolve({ default: () => null }));
     runtime.apps.registerMany([
-      createTestBundle({ id: "first-app", route: "/first-app", webspring: { order: 1 }, policy: { public: true } }, { loadModule: firstLoad }),
-      createTestBundle({ id: "second-app", route: "/second-app", webspring: { order: 2 }, policy: { public: true } }, { loadModule: secondLoad }),
-      createTestBundle({ id: "restored-app", route: "/restored-app", webspring: { order: 3 }, policy: { public: true } }, { loadModule: restoredLoad })
+      createTestBundle({ bundleIdentifier: "com.example.first-app", route: "/first-app", webspring: { order: 1 }, policy: { public: true } }, { loadModule: firstLoad }),
+      createTestBundle({ bundleIdentifier: "com.example.second-app", route: "/second-app", webspring: { order: 2 }, policy: { public: true } }, { loadModule: secondLoad }),
+      createTestBundle({ bundleIdentifier: "com.example.restored-app", route: "/restored-app", webspring: { order: 3 }, policy: { public: true } }, { loadModule: restoredLoad })
     ]);
     window.sessionStorage.setItem("syncloudos:last-active-app-route", "/restored-app");
 
@@ -95,9 +95,9 @@ describe("Webspring prefetch coordinator", () => {
     });
     const { runtime, prefetch } = await setupPrefetchRuntime();
     const loadModule = vi.fn(() => Promise.resolve({ default: () => null }));
-    runtime.apps.registerBundle(createTestBundle({ id: "save-data-app", route: "/save-data-app", policy: { public: true } }, { loadModule }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.save-data-app", route: "/save-data-app", policy: { public: true } }, { loadModule }));
 
-    prefetch.scheduleWebspringAppPrefetch(runtime, "save-data-app");
+    prefetch.scheduleWebspringAppPrefetch(runtime, "com.example.save-data-app");
     prefetch.scheduleWebspringIdlePrefetch(runtime);
     await vi.runAllTimersAsync();
 
@@ -115,15 +115,15 @@ describe("Webspring prefetch coordinator", () => {
     const externalLoad = vi.fn(() => Promise.resolve({ default: () => null }));
     const optOutLoad = vi.fn(() => Promise.resolve({ default: () => null }));
     runtime.apps.registerMany([
-      createTestBundle({ id: "disabled-app", route: "/disabled-app", requiredServices: ["windowing"], policy: { public: true } }, { loadModule: disabledLoad }),
-      createTestBundle({ id: "external-app", route: "/external-app", type: "external", policy: { public: true } }, { loadModule: externalLoad }),
-      createTestBundle({ id: "opt-out-app", route: "/opt-out-app", lifecycle: { preload: false }, policy: { public: true } }, { loadModule: optOutLoad })
+      createTestBundle({ bundleIdentifier: "com.example.disabled-app", route: "/disabled-app", requiredServices: ["windowing"], policy: { public: true } }, { loadModule: disabledLoad }),
+      createTestBundle({ bundleIdentifier: "com.example.external-app", route: "/external-app", type: "external", policy: { public: true } }, { loadModule: externalLoad }),
+      createTestBundle({ bundleIdentifier: "com.example.opt-out-app", route: "/opt-out-app", lifecycle: { preload: false }, policy: { public: true } }, { loadModule: optOutLoad })
     ]);
 
-    runtime.store.mutate((draft) => { draft.appInfo["disabled-app"].isDisabled = true; });
-    prefetch.scheduleWebspringAppPrefetch(runtime, "disabled-app");
-    prefetch.scheduleWebspringAppPrefetch(runtime, "external-app");
-    prefetch.scheduleWebspringAppPrefetch(runtime, "opt-out-app");
+    runtime.store.mutate((draft) => { draft.appInfo["com.example.disabled-app"].isDisabled = true; });
+    prefetch.scheduleWebspringAppPrefetch(runtime, "com.example.disabled-app");
+    prefetch.scheduleWebspringAppPrefetch(runtime, "com.example.external-app");
+    prefetch.scheduleWebspringAppPrefetch(runtime, "com.example.opt-out-app");
     await vi.runAllTimersAsync();
 
     expect(disabledLoad).not.toHaveBeenCalled();
@@ -140,13 +140,13 @@ describe("Webspring prefetch coordinator", () => {
     const { runtime, prefetch } = await setupPrefetchRuntime();
     const coldLoad = vi.fn(() => Promise.resolve({ default: () => null }));
     runtime.apps.registerBundle(createTestBundle({
-      id: "cold-app",
+      bundleIdentifier: "com.example.cold-app",
       route: "/cold-app",
       lifecycle: { preload: false },
       policy: { public: true }
     }, { loadModule: coldLoad }));
 
-    prefetch.scheduleWebspringAppPrefetch(runtime, "cold-app");
+    prefetch.scheduleWebspringAppPrefetch(runtime, "com.example.cold-app");
     prefetch.scheduleWebspringIdlePrefetch(runtime);
     await vi.runAllTimersAsync();
 
@@ -165,9 +165,9 @@ describe("Webspring prefetch coordinator", () => {
       layoutViewport: { getSnapshot: () => ({ width: 390, height: 844 }), subscribe: () => () => {} },
     } });
     const mobileLoad = vi.fn(() => Promise.resolve({ default: () => null }));
-    runtime.apps.registerBundle(createTestBundle({ id: "mobile-app", route: "/mobile-app", policy: { public: true } }, { loadModule: mobileLoad }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.mobile-app", route: "/mobile-app", policy: { public: true } }, { loadModule: mobileLoad }));
 
-    prefetch.scheduleWebspringAppPrefetch(runtime, "mobile-app");
+    prefetch.scheduleWebspringAppPrefetch(runtime, "com.example.mobile-app");
     prefetch.scheduleWebspringIdlePrefetch(runtime);
     await vi.runAllTimersAsync();
 
@@ -178,8 +178,8 @@ describe("Webspring prefetch coordinator", () => {
     vi.useFakeTimers();
     const { runtime, prefetch } = await setupPrefetchRuntime();
     const loadModule = vi.fn(() => Promise.resolve({ default: () => null }));
-    runtime.apps.registerBundle(createTestBundle({ id: "disposed-app", route: "/disposed-app", policy: { public: true } }, { loadModule }));
-    prefetch.scheduleWebspringAppPrefetch(runtime, "disposed-app");
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.disposed-app", route: "/disposed-app", policy: { public: true } }, { loadModule }));
+    prefetch.scheduleWebspringAppPrefetch(runtime, "com.example.disposed-app");
     prefetch.scheduleWebspringIdlePrefetch(runtime);
 
     await runtime.dispose("prefetch owner test");

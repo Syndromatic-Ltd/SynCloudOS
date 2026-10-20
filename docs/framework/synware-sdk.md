@@ -5,7 +5,7 @@ A SynWare is an application bundle that runs on SynCloudOS, in the way a `.app` 
 For host-supplied font catalogues and imported fonts, use `useFonts()`. The [managed fonts guide](managed-fonts.md) shows one Node-safe declaration, early website CSS and preloads, app font pickers, and byte-backed TextFX acquisition.
 
 Production browser hosts choose either `mountSynCloudOS({ element, bundles, shell })`
-for Webspring or `mountSynCloudOS({ element, bundles, application: { id } })` for
+for Webspring or `mountSynCloudOS({ element, bundles, application: { bundleIdentifier } })` for
 one primary application without a shell. The modes are mutually exclusive.
 Application-only hosting uses a real SynWare session. The primary application
 fills the page (or keeps its declared frame with `frame: "declared"`); other
@@ -19,7 +19,7 @@ for Vite configuration, routing, sign-in and disposal.
 ```text
 Notes.app/
 └── Contents/
-    ├── Info.ts                 optional manifest overrides
+    ├── Info.ts                 required identity, display name and version
     ├── index.tsx               component or NSEApplication default export
     └── Resources/
         ├── icon.png
@@ -28,11 +28,11 @@ Notes.app/
                 └── Localisable.strings
 ```
 
-`Info.ts` optionally overrides the [derived manifest](project-structure.md#application-manifests). `index.tsx` default-exports your application component or `NSEApplication` subclass. [Getting started](getting-started.md) builds the smallest working bundle.
+`Info.ts` declares the required `bundleIdentifier`, `displayName` and app `version`, typed as `SynWareInfo`. Discovery fills schema version, icon and locale resources only. `index.tsx` default-exports your application component or `NSEApplication` subclass. [Getting started](getting-started.md) builds the smallest working bundle.
 
 ## Define the application
 
-Default-export a component. The plugin derives its manifest from the folder and optional `Info.ts`; the loader constructs the application definition.
+Default-export a component. The plugin resolves its manifest from the required `Info.ts` and discovered resources; the loader constructs the application definition.
 
 ```tsx
 import "@syndromatic/syncloudos/nse/styles.css";
@@ -67,7 +67,7 @@ Optional named exports customise the application:
 ## SCOS
 
 Inside a `<Name>.app` folder, import `SCOS` from `@syndromatic/syncloudos`. The project
-plugin binds that import to the app's manifest ID. Each operation resolves its running
+plugin binds that import to the app's bundle identifier. Each operation resolves its running
 session at call time, including after `await`, in timers and after a remount.
 
 ```ts
@@ -76,7 +76,7 @@ import { SCOS } from "@syndromatic/syncloudos";
 SCOS.preferences.set("theme", "paper");
 const theme = SCOS.preferences.get("theme", "plain");
 SCOS.preferences.remove("theme");
-await SCOS.open("journal"); // catalogue ID, or an absolute route
+await SCOS.open("com.example.journal"); // bundle identifier, or an absolute route
 const choice = await SCOS.alert({
   title: "Discard changes?",
   message: "Your unsaved changes will be lost.",
@@ -88,7 +88,7 @@ const choice = await SCOS.alert({
 if (choice === "discard") SCOS.close();
 ```
 
-`SCOS.app` contains `id`, `version` and `title`. The facade also exposes the mounted
+`SCOS.app` contains `bundleIdentifier`, `displayName` and `version`. Identity case is preserved in public metadata, while lookup and storage keys are case-insensitive. The facade also exposes the mounted
 clients: windows, documents, undo, commands, persistence, notifications, appearance,
 locale, strings, scheduler, navigation, pasteboards, services and sharing. Other scoped
 clients remain available for existing capability hooks; FX types stay separate imports,
@@ -112,7 +112,7 @@ does not subscribe a component.
 | `SCOS_APP_NOT_RUNNING` | Start the app before using its bound facade. |
 | `SCOS_AMBIGUOUS_SESSION` | Several runtimes mount that app; select the provider with `useSCOS()`. |
 | `SCOS_UNBOUND` | The error names the calling file. Move the import into an app folder or use `useSCOS()` in a shared component. |
-| `SCOS_APP_NOT_FOUND` | `open()` cannot find that app ID; check the catalogue ID or pass an absolute route. |
+| `SCOS_APP_NOT_FOUND` | `open()` cannot find that bundle identifier; check the catalogue or pass an absolute route. |
 
 ### Shared components
 
@@ -124,7 +124,7 @@ import { useSCOS } from "@syndromatic/syncloudos";
 export function SessionTour() {
   const app = useSCOS();
 
-  app.app.id;         // "com.example.notes"
+  app.app.bundleIdentifier; // "com.example.notes"
   app.signal;         // aborts when the application closes
   app.presentation;   // traits of the current surface
   app.commands;       // dispatch and validate commands

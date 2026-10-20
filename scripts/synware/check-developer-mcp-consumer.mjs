@@ -41,11 +41,11 @@ try {
   assert.equal(inspected.sdk.buildReceipt.sourceSha256,consumer.sourceSha256);
   const entries=await call("lookup_sdk");
   assert(entries.entries.includes("sdk"));
-  const lookup=await call("lookup_sdk",{entry:"sdk",query:"SynWareManifestOverrides"});
-  assert.equal(lookup.symbols[0].name,"SynWareManifestOverrides");
-  assert(lookup.symbols[0].signature.includes("SynWareManifestOverrides"));
+  const lookup=await call("lookup_sdk",{entry:"sdk",query:"SynWareInfo"});
+  assert.equal(lookup.symbols[0].name,"SynWareInfo");
+  assert(lookup.symbols[0].signature.includes("SynWareInfo"));
   assert(lookup.docs.length>0,"Installed docs must be available offline.");
-  const created=await call("scaffold",{id:"org.example.hello",name:"Hello",route:"/hello"});
+  const created=await call("scaffold",{bundleIdentifier:"org.example.hello",name:"Hello",route:"/hello"});
   assert.equal(created.createdPaths.length,4);
   const checked=await call("validate");
   assert.equal(checked.ok,true,JSON.stringify(checked.findings));

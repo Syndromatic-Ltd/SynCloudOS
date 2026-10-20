@@ -45,6 +45,6 @@ export function useNSEMenuPort(): NSEMenuRuntimePort {
         (handle as AppClientHandle).dispose();
       },
     },
-    resolveAction: (action) => nseActionCommandId(app.app.id, action),
-  }), [app.app.id, app.commands, app.scheduler, app.signal]);
+    resolveAction: (action) => nseActionCommandId(app.app.bundleIdentifier, action),
+  }), [app.app.bundleIdentifier, app.commands, app.scheduler, app.signal]);
 }

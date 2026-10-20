@@ -19,9 +19,9 @@ Declare the shell in `src/Webspring/Contents/Info.ts`:
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.site",
+  bundleIdentifier: "com.example.site",
   version: "0.1.0",
-  title: "Example Site",
+  displayName: "Example Site",
   webspringShell: {
     views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
     defaults: { desktop: "board", tablet: "board", mobile: "board" },
@@ -83,7 +83,7 @@ webspringShell: {
 
 An application that becomes visible later joins its declared folder if the visitor's layout still has that folder, and the top level otherwise. Folders whose applications are all hidden are not shown.
 
-The layout persists under the preference key `webspring.layout.v4` as `{ version: 4, order, folders: { [id]: { apps } }, board, updatedAt, source }`, where `order` lists top-level entries. Layouts stored under an earlier version are ignored.
+The layout persists under the preference key `webspring.layout.v5` as `{ version: 5, order, folders: { [id]: { apps } }, board, updatedAt, source }`, where `order` lists top-level entry keys and `apps` contains canonical case-insensitive bundle identifier keys. Earlier layouts, including v4 with the old application identities, are ignored, not migrated.
 
 On the Board, tapping a folder opens it with the definition's `folderPresentation`. The default is the iOS 6 split: the stage is copied and parted below the folder's cell (its icon and label), revealing the folder's applications on a linen underlay. Escape, or a tap on either half, closes it; reduced motion crossfades instead. Configure or replace it in the definition:
 
@@ -275,7 +275,7 @@ const host = await mountSynCloudOS({
 await host.dispose("application shutdown");
 ```
 
-The Vite plugin discovers `src/SynWare/*.app`, `src/Preferences/*.prefPane`, `src/Widgets/*.widget`, `src/Integrations/*.integration.ts` and the optional shell in `src/Webspring/Contents/index.tsx`. It injects that project into `mountSynCloudOS` automatically. Only `Contents/index.tsx` is required for an application; `Info.ts` contains optional overrides. Directory options and `webspringEntry: false` customise discovery. It rejects symbolic links and path/resource collisions, and watches additions and removals. See [Project structure](project-structure.md).
+The Vite plugin discovers `src/SynWare/*.app`, `src/Preferences/*.prefPane`, `src/Widgets/*.widget`, `src/Integrations/*.integration.ts` and the optional shell in `src/Webspring/Contents/index.tsx`. It injects that project into `mountSynCloudOS` automatically. Each application requires `Contents/index.tsx` and `Info.ts` with explicit `bundleIdentifier`, `displayName` and `version`; only schema version, icon and locale resources are filled in. Directory options and `webspringEntry: false` customise discovery. It rejects symbolic links and path/resource collisions, and watches additions and removals.
 
 ## Authentication
 

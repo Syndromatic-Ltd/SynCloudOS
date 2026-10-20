@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   RuntimeBrowserPort,
   RuntimeOwnedService,
@@ -104,7 +105,7 @@ function interpolate(message: string, params?: SynCloudOSTranslationParams) {
 export function createRuntimeLocaleServices(dependencies: RuntimeLocaleServiceDependencies): RuntimeLocaleServices {
   const { runtimeId, store, events, services, persistence, browser, now } = dependencies;
   const registry = createSynCloudOSLocaleRegistry();
-  const loaders = new Map<string, SynCloudOSLocaleBundleResourceLoader>();
+  const loaders = new Map<string, { appId: string; load: SynCloudOSLocaleBundleResourceLoader }>();
   const loading = new Map<string, Promise<{ appId: string; registered: number }>>();
   let hydrated = false;
   let disposed = false;
@@ -262,20 +263,21 @@ export function createRuntimeLocaleServices(dependencies: RuntimeLocaleServiceDe
     },
     registerBundleLocaleResourceLoader(appId, loader) {
       if (disposed) return { appId, registered: false };
-      loaders.set(appId, loader);
-      for (const key of loading.keys()) if (key.startsWith(`${appId}:`)) loading.delete(key);
+      loaders.set(normalizeBundleIdentifier(appId), { appId, load: loader });
+      for (const key of loading.keys()) if (key.startsWith(`${normalizeBundleIdentifier(appId)}:`)) loading.delete(key);
       return { appId, registered: true };
     },
     loadBundleLocaleResources(appIds) {
-      const ids = appIds ?? [...loaders.keys()];
+      const ids = appIds ?? [...loaders.values()].map(({ appId }) => appId);
       const activeLocale = locale.getActiveLocale();
       return Promise.all(ids.map((appId) => {
-        const loader = loaders.get(appId);
-        if (!loader || disposed) return Promise.resolve({ appId, registered: 0 });
-        const key = `${appId}:${activeLocale}`;
+        const entry = loaders.get(normalizeBundleIdentifier(appId));
+        if (!entry || disposed) return Promise.resolve({ appId, registered: 0 });
+        appId = entry.appId;
+        const key = `${normalizeBundleIdentifier(appId)}:${activeLocale}`;
         const existing = loading.get(key);
         if (existing) return existing;
-        const promise = Promise.resolve(loader(activeLocale))
+        const promise = Promise.resolve(entry.load(activeLocale))
           .then((resources) => disposed || !resources ? { appId, registered: 0 } : locale.registerBundleLocaleResources(appId, resources))
           .catch((error) => {
             events.publish("locale.bundleResources.failed", { appId, error: error instanceof Error ? error.message : String(error) }, "LocaleServices");

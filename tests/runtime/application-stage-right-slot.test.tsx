@@ -57,13 +57,14 @@ interface AppOptions {
 
 function createAppInfo({ frame = {}, about = false, appPreferences = false, trigger }: AppOptions = {}): SynCloudOSAppInfo {
   return {
-    id: "test-app",
+    bundleIdentifier: "com.example.test-app",
     displayName: "Test App",
     shortName: "Test",
     packageName: "com.test.app",
     frame: { material: "standard", topBar: "standard", rightSlot: "auto", background: "system", smoothSurface: "off", ...frame },
     icon: { src: "/test.png" },
-    about: { version: "1.0.0", copyright: about ? "© Test" : "", trademark: "", ...(about ? { tagline: "A test app" } : {}) },
+    version: "1.0.0",
+    about: { copyright: about ? "© Test" : "", trademark: "", ...(about ? { tagline: "A test app" } : {}) },
     ...(appPreferences || trigger ? { applicationMenu: { ...(trigger ? { trigger } : {}), ...(appPreferences ? { preferences: { commandId: "test-app.preferences" } } : {}) } } : {}),
     isDisabled: false,
     notifications: { badgeCount: 0, showsNotifications: false },
@@ -76,7 +77,7 @@ function createAppInfo({ frame = {}, about = false, appPreferences = false, trig
 function prepareRuntime(options: AppOptions & { readonly signedIn?: boolean }) {
   const runtime = options.signedIn ? authoriseTestRuntime(createTestRuntime()) : createTestRuntime();
   runtime.apps.registerBundle(createTestBundle(
-    { id: "test-app", displayName: "Test App", route: "/test" },
+    { version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" },
     options.loadModule ? { loadModule: options.loadModule } : {},
   ));
   runtime.statechart.gotoState("active.application.active");
@@ -90,7 +91,7 @@ function mountStage(runtime: SynCloudOSRuntime, options: AppOptions, lifecycle: 
         <ApplicationStageView
           app={createAppInfo(options)}
           lifecycle={lifecycle}
-          stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>
@@ -105,7 +106,7 @@ function renderStage(options: AppOptions & { readonly signedIn?: boolean } = {})
 /** Renders with the app's module loaded, so its content (and any control it draws) is mounted. */
 async function renderLoadedStage(options: AppOptions & { readonly signedIn?: boolean }) {
   const runtime = prepareRuntime(options);
-  await runtime.bundles.loadBundle("test-app");
+  await runtime.bundles.loadBundle("com.example.test-app");
   return { runtime, ...mountStage(runtime, options, "active") };
 }
 

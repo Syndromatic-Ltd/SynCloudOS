@@ -50,10 +50,10 @@ export interface SCOSFacadeSource {
 }
 
 export interface SCOSApplicationInfo {
-  /** The manifest ID, not the folder name. */
-  readonly id: string;
+  /** The authored bundle identifier, not the folder name. */
+  readonly bundleIdentifier: string;
   readonly version: string;
-  readonly title: string;
+  readonly displayName: string;
 }
 
 /** Calls into the mounted app's preference slice. The values live in the same
@@ -85,8 +85,8 @@ export interface SCOSFacade extends Omit<SynWareContextValue, "appId" | "appInfo
   /** Shows a system alert and resolves with the chosen button id. A safe
    * dismissal or the app closing resolves to the cancel button. */
   alert(request: SynCloudOSAlertRequest, signal?: AbortSignal): Promise<string>;
-  /** Opens an app ID or an absolute route and resolves with the transition. */
-  open(appIdOrRoute: string, options?: Readonly<{ signal?: AbortSignal }>): Promise<AppNavigationTransitionResult>;
+  /** Opens a bundle identifier or an absolute route and resolves with the transition. */
+  open(bundleIdentifierOrRoute: string, options?: Readonly<{ signal?: AbortSignal }>): Promise<AppNavigationTransitionResult>;
   /** Closes the bound app. */
   close(options?: Readonly<Record<string, unknown>>): void;
   readonly windows: AppWindowClient;
@@ -146,12 +146,12 @@ function createFacade(source: () => SCOSFacadeSource): SCOSFacade {
     alert(request: SynCloudOSAlertRequest, signal?: AbortSignal) {
       return context().alerts.present(request, signal);
     },
-    async open(appIdOrRoute: string, options: Readonly<{ signal?: AbortSignal }> = {}) {
+    async open(bundleIdentifierOrRoute: string, options: Readonly<{ signal?: AbortSignal }> = {}) {
       const mount = context();
-      const target = String(appIdOrRoute ?? "").trim();
-      if (!target) throw new TypeError("SCOS.open needs an app ID or an absolute route.");
+      const target = String(bundleIdentifierOrRoute ?? "").trim();
+      if (!target) throw new TypeError("SCOS.open needs a bundleIdentifier or an absolute route.");
       const route = target.startsWith("/") ? target : mount.launcher.routeFor(target);
-      if (!route) throw new SCOSError({ code: "SCOS_APP_NOT_FOUND", message: `No application named "${target}" is registered. Check the app ID or pass an absolute route to SCOS.open().` });
+      if (!route) throw new SCOSError({ code: "SCOS_APP_NOT_FOUND", message: `No application named "${target}" is registered. Check the bundleIdentifier or pass an absolute route to SCOS.open().` });
       const handle = mount.navigation.openRoute(route, {
         source: "app",
         ...(options.signal ? { signal: options.signal } : {}),
@@ -214,7 +214,7 @@ function createFacade(source: () => SCOSFacadeSource): SCOSFacade {
 function sessionSource(session: () => SCOSAppSession): SCOSFacadeSource {
   const mount = session();
   return {
-    app: Object.freeze({ id: mount.appId, version: mount.version, title: mount.title }),
+    app: Object.freeze({ bundleIdentifier: mount.appId, version: mount.version, displayName: mount.displayName }),
     context: mount.context,
   };
 }

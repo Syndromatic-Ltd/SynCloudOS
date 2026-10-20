@@ -20,7 +20,7 @@
 import type { SynWareDefinition, SynWareBundleLoadContext } from "./appDefinitionTypes";
 import { captureSynWareManifest } from "./manifest";
 import { projectRuntimeManifest } from "./projectRuntimeManifest";
-import type { SynWareManifestIssue, SynWareManifestV1 } from "./manifest";
+import type { SynWareInfo, SynWareManifestIssue, SynWareManifestV1 } from "./manifest";
 import type { TrustedSynWareBundle } from "../SynCloudOS";
 import { bindSynWareRouteGraph, createAppRouteGraph, isSynWareRouteGraph } from "../Routing/appSdkRoutePort";
 import type { SynWareRouteDefinition, SynWareRouteGraph } from "../Routing/appSdkRoutePort";
@@ -30,7 +30,7 @@ const canonicalDefinitions = new WeakMap<object, Readonly<SynWareDefinition>>();
 
 /** Preserve a closed V1 declaration at authoring time as well as at the JSON
  * schema boundary. Generic constraints alone accept excess object keys. */
-type ClosedSynWareManifest<TManifest extends SynWareManifestV1> = TManifest & Record<Exclude<keyof TManifest, keyof SynWareManifestV1>, never>;
+type ClosedSynWareManifest<TManifest extends SynWareInfo> = TManifest & Record<Exclude<keyof TManifest, keyof SynWareManifestV1>, never>;
 
 function titleCase(value: string): string {
   return value
@@ -49,7 +49,7 @@ function completeBundleLoadContext(
   manifest: Readonly<SynWareManifestV1>,
   context: Partial<SynWareBundleLoadContext>,
 ): SynWareBundleLoadContext {
-  const packageName = context.packageName ?? `${componentKeyFromPackageName(manifest.id)}.app`;
+  const packageName = context.packageName ?? `${componentKeyFromPackageName(manifest.bundleIdentifier)}.app`;
   const appRoot = context.appRoot ?? `./${packageName}`;
   const path = context.path ?? `${packageName}/`;
   const componentKey = context.componentKey ?? componentKeyFromPackageName(packageName);
@@ -128,13 +128,13 @@ function captureDefinition(value: unknown): Readonly<SynWareDefinition> {
     throw new TypeError("SynWare routes must be created with defineSynWareRoutes().");
   }
   const primaryRoute = validation.value.routes?.find((route) => route.primary) ?? validation.value.routes?.[0];
-  const basePath = primaryRoute?.path ?? `/${validation.value.id}`;
+  const basePath = primaryRoute?.path ?? `/${validation.value.bundleIdentifier}`;
   const routeGraph = declaredRoutes === undefined
     ? createAppRouteGraph({
-        id: `${validation.value.id}.legacy-routes`,
-        routes: [{ name: validation.value.id, path: "", component: root as NonNullable<SynWareRouteDefinition["component"]> }],
-      }).bind(basePath, validation.value.id)
-    : bindSynWareRouteGraph(declaredRoutes as SynWareRouteGraph, basePath, validation.value.id);
+        id: `${validation.value.bundleIdentifier}.legacy-routes`,
+        routes: [{ name: validation.value.bundleIdentifier, path: "", component: root as NonNullable<SynWareRouteDefinition["component"]> }],
+      }).bind(basePath, validation.value.bundleIdentifier)
+    : bindSynWareRouteGraph(declaredRoutes as SynWareRouteGraph, basePath, validation.value.bundleIdentifier);
   const migrations = dataProperty(value, "migrations");
   if (migrations !== undefined && !Array.isArray(migrations)) {
     throw new TypeError("SynWare migrations must be an array when supplied.");
@@ -175,12 +175,12 @@ export function captureSynWareDefinition(value: unknown): Readonly<SynWareDefini
 /** Creates a declaration only. It never creates a runtime, reads the browser,
  * or registers globally; a host owns registration and session construction. */
 export function createSynWare<
-  const TManifest extends SynWareManifestV1,
+  const TManifest extends SynWareInfo,
   const TRoutes extends readonly SynWareRouteDefinition[] = readonly SynWareRouteDefinition[],
 >(
-  definition: SynWareDefinition<TManifest, TRoutes> & { readonly manifest: ClosedSynWareManifest<TManifest> },
-): Readonly<SynWareDefinition<TManifest, TRoutes>> {
-  return captureSynWareDefinition(definition) as Readonly<SynWareDefinition<TManifest, TRoutes>>;
+  definition: Omit<SynWareDefinition<SynWareManifestV1, TRoutes>, "manifest"> & { readonly manifest: ClosedSynWareManifest<TManifest> },
+): Readonly<SynWareDefinition<TManifest & { readonly schemaVersion: 1 }, TRoutes>> {
+  return captureSynWareDefinition(definition) as Readonly<SynWareDefinition<TManifest & { readonly schemaVersion: 1 }, TRoutes>>;
 }
 
 /** Explicit host-side adapter from the authoring declaration to the runtime

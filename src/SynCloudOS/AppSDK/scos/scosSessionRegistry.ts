@@ -19,13 +19,14 @@
 
 import type { SynWareContextValue } from "../appContextTypes";
 import { scosAmbiguousSessionError, scosAppNotRunningError } from "./scosErrors";
+import { normalizeBundleIdentifier } from "../../Identity/bundleIdentifier.mjs";
 
 /** One mounted app on the page. The facade resolves it at call time so a
  * timer, an awaited continuation or module-level code reaches the same app
  * the module was bound to, even after a remount replaced the session. */
 export interface SCOSAppSession {
   readonly appId: string;
-  readonly title: string;
+  readonly displayName: string;
   readonly version: string;
   readonly context: SynWareContextValue;
 }
@@ -37,24 +38,25 @@ const titlesByApp = new Map<string, string>();
  * sessions may share an app id (tests, several runtimes); React code binds by
  * context value, module-scope code reports the ambiguity instead of guessing. */
 export function registerSCOSAppSession(session: SCOSAppSession): () => void {
-  const siblings = sessionsByApp.get(session.appId) ?? [];
-  sessionsByApp.set(session.appId, [...siblings, session]);
-  titlesByApp.set(session.appId, session.title);
+  const key = normalizeBundleIdentifier(session.appId);
+  const siblings = sessionsByApp.get(key) ?? [];
+  sessionsByApp.set(key, [...siblings, session]);
+  titlesByApp.set(key, session.displayName);
   return () => {
-    const remaining = (sessionsByApp.get(session.appId) ?? []).filter((candidate) => candidate !== session);
-    if (remaining.length === 0) sessionsByApp.delete(session.appId);
-    else sessionsByApp.set(session.appId, remaining);
+    const remaining = (sessionsByApp.get(key) ?? []).filter((candidate) => candidate !== session);
+    if (remaining.length === 0) sessionsByApp.delete(key);
+    else sessionsByApp.set(key, remaining);
   };
 }
 
 export function scosSessionsForApp(appId: string): readonly SCOSAppSession[] {
-  return sessionsByApp.get(appId) ?? [];
+  return sessionsByApp.get(normalizeBundleIdentifier(appId)) ?? [];
 }
 
 
 export function resolveSCOSSession(appId: string, title?: string): SCOSAppSession {
   const sessions = scosSessionsForApp(appId).filter(session => !session.context.signal.aborted);
-  const displayTitle = title ?? sessions[0]?.title ?? titlesByApp.get(appId);
+  const displayTitle = title ?? sessions[0]?.displayName ?? titlesByApp.get(normalizeBundleIdentifier(appId));
   if (sessions.length === 0) throw scosAppNotRunningError(appId, displayTitle);
   const runtimes = new Set(sessions.map(session => session.context.runtimeInfo.id));
   if (runtimes.size > 1) throw scosAmbiguousSessionError(appId, displayTitle, runtimes.size);

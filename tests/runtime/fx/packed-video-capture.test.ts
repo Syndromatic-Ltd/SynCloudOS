@@ -25,49 +25,7 @@ import { createInstalledConsumer, runNode } from "../../../scripts/synware/insta
 
 it("executes scoped VideoFX capture from an independently installed SDK archive", () => {
   const consumer = createInstalledConsumer(process.cwd(), "synware-video-capture-packed-");
-  writeFileSync(join(consumer.root, "capture.mjs"), `
-import assert from "node:assert/strict";
-import { JSDOM } from "jsdom";
-import { useVideo } from "@syndromatic/syncloudos/sdk";
-import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
-import { createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
-
-const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { url: "http://syncloudos.test/" });
-dom.window.requestAnimationFrame = (callback) => dom.window.setTimeout(() => callback(Date.now()), 0);
-dom.window.cancelAnimationFrame = (handle) => dom.window.clearTimeout(handle);
-Object.defineProperty(globalThis, "window", { value: dom.window, configurable: true });
-Object.defineProperty(globalThis, "document", { value: dom.window.document, configurable: true });
-Object.defineProperty(globalThis, "navigator", { value: dom.window.navigator, configurable: true });
-Object.defineProperty(globalThis, "HTMLElement", { value: dom.window.HTMLElement, configurable: true });
-
-const app = createSynWare({
-  manifest: {
-    schemaVersion: 1,
-    id: "com.syndromatic.installed-video-capture",
-    version: "1.0.0",
-    title: "Installed Video Capture",
-    routes: [{ path: "/installed-video-capture", primary: true }],
-    permissions: ["video.capture.camera"],
-  },
-  root: () => null,
-});
-const host = createSynWareTestHost({ app, document: dom.window.document });
-host.adapters.video.allow();
-host.adapters.permissions.allow();
-host.adapters.policy.allow();
-await host.render();
-const session = host.appContext.video.createCaptureSession();
-assert.deepEqual(host.adapters.video.calls(), []);
-const selected = await session.requestCamera({ width: 4096, height: 2160, frameRate: 120 });
-assert.equal(selected.kind, "camera");
-assert.equal(selected.width, 1280);
-assert.equal(selected.height, 720);
-assert.deepEqual(host.adapters.video.calls().map((call) => call.operation), ["video.camera"]);
-session.dispose();
-await host.dispose();
-assert.equal(typeof useVideo, "function");
-console.log("installed VideoFX scoped capture passed");
-`);
+  writeFileSync(join(consumer.root, "capture.mjs"), "\nimport assert from \"node:assert/strict\";\nimport { JSDOM } from \"jsdom\";\nimport { useVideo } from \"@syndromatic/syncloudos/sdk\";\nimport { createSynWare } from \"@syndromatic/syncloudos/sdk/testing\";\nimport { createSynWareTestHost } from \"@syndromatic/syncloudos/sdk/testing\";\n\nconst dom = new JSDOM('<!doctype html><html><body><div id=\"root\"></div></body></html>', { url: \"http://syncloudos.test/\" });\ndom.window.requestAnimationFrame = (callback) => dom.window.setTimeout(() => callback(Date.now()), 0);\ndom.window.cancelAnimationFrame = (handle) => dom.window.clearTimeout(handle);\nObject.defineProperty(globalThis, \"window\", { value: dom.window, configurable: true });\nObject.defineProperty(globalThis, \"document\", { value: dom.window.document, configurable: true });\nObject.defineProperty(globalThis, \"navigator\", { value: dom.window.navigator, configurable: true });\nObject.defineProperty(globalThis, \"HTMLElement\", { value: dom.window.HTMLElement, configurable: true });\n\nconst app = createSynWare({\n  manifest: {\n    schemaVersion: 1,\n    bundleIdentifier: \"com.syndromatic.installed-video-capture\",\n    version: \"1.0.0\",\n    displayName: \"Installed Video Capture\",\n    routes: [{ path: \"/installed-video-capture\", primary: true }],\n    permissions: [\"video.capture.camera\"],\n  },\n  root: () => null,\n});\nconst host = createSynWareTestHost({ app, document: dom.window.document });\nhost.adapters.video.allow();\nhost.adapters.permissions.allow();\nhost.adapters.policy.allow();\nawait host.render();\nconst session = host.appContext.video.createCaptureSession();\nassert.deepEqual(host.adapters.video.calls(), []);\nconst selected = await session.requestCamera({ width: 4096, height: 2160, frameRate: 120 });\nassert.equal(selected.kind, \"camera\");\nassert.equal(selected.width, 1280);\nassert.equal(selected.height, 720);\nassert.deepEqual(host.adapters.video.calls().map((call) => call.operation), [\"video.camera\"]);\nsession.dispose();\nawait host.dispose();\nassert.equal(typeof useVideo, \"function\");\nconsole.log(\"installed VideoFX scoped capture passed\");\n");
   const jsdomVersion = JSON.parse(readFileSync(join(process.cwd(), "node_modules/jsdom/package.json"), "utf8")).version as string;
   runNode([consumer.npm, "install", "--prefer-offline", "--ignore-scripts", "--package-lock=false", "jsdom@" + jsdomVersion], consumer.root);
   expect(runNode(["capture.mjs"], consumer.root)).toContain("installed VideoFX scoped capture passed");

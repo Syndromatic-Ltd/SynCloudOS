@@ -39,7 +39,7 @@ describe("BootManager initial route", () => {
       pathname: "/software",
       expectedKind: "app",
       expectedState: "active.application.active",
-      expectedAppId: "software",
+      expectedAppId: "com.example.software",
       expectedRoutePath: "/software"
     }
   ])("cold-boots $pathname through the direct initialPathname authority", async ({
@@ -56,8 +56,8 @@ describe("BootManager initial route", () => {
 
     BootManager.boot({
       appBundles: [
-        createTestBundle({ id: "software", route: "/software" }),
-        createTestBundle({ id: "studio", route: "/studio" })
+        createTestBundle({ bundleIdentifier: "com.example.software", route: "/software" }),
+        createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })
       ],
       initialPathname: pathname
     });
@@ -89,14 +89,14 @@ describe("BootManager initial route", () => {
     unlockRuntime(runtime);
 
     BootManager.boot({
-      appBundles: [createTestBundle({ id: "studio", route: "/studio" })],
+      appBundles: [createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })],
       initialPathname: "/studio"
     });
     await flushLaunchTimers();
 
     const snapshot = RuntimeController.getSnapshot();
     expect(snapshot.application).toMatchObject({
-      activeAppId: "studio",
+      activeAppId: "com.example.studio",
       routePath: "/studio",
       multiSwitch: { status: "idle", fromAppId: null, toAppId: null }
     });
@@ -116,19 +116,19 @@ describe("BootManager initial route", () => {
 
     BootManager.boot({
       appBundles: [
-        createTestBundle({ id: "software", route: "/software" }),
-        createTestBundle({ id: "studio", route: "/studio" })
+        createTestBundle({ bundleIdentifier: "com.example.software", route: "/software" }),
+        createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })
       ],
       initialPathname: "/studio"
     });
     await flushLaunchTimers();
 
     expect(RuntimeController.getSnapshot().application).toMatchObject({
-      activeAppId: "studio",
+      activeAppId: "com.example.studio",
       previousAppId: null,
       routePath: "/studio"
     });
-    expect(LaunchServices.getHistory().filter((record) => record.appId === "software")).toEqual([]);
+    expect(LaunchServices.getHistory().filter((record) => record.appId === "com.example.software")).toEqual([]);
     expect(LaunchServices.getHistory().map((record) => record.action)).not.toContain("multiswitch.begin");
   });
 
@@ -138,11 +138,11 @@ describe("BootManager initial route", () => {
     const { BootManager, RuntimeController } = createRuntimeHarness(runtime);
     unlockRuntime(runtime);
 
-    BootManager.boot({ appBundles: [createTestBundle({ id: "studio", route: "/studio" })] });
+    BootManager.boot({ appBundles: [createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })] });
     await flushLaunchTimers();
 
     expect(RuntimeController.getSnapshot().application).toMatchObject({
-      activeAppId: "studio",
+      activeAppId: "com.example.studio",
       routePath: "/studio"
     });
   });
@@ -153,13 +153,13 @@ describe("BootManager initial route", () => {
     unlockRuntime(runtime);
 
     BootManager.boot({
-      appBundles: [createTestBundle({ id: "nse-control-gallery", route: "/nse-control-gallery" })],
-      initialPathname: "/__syncloudos/open/nse-control-gallery"
+      appBundles: [createTestBundle({ bundleIdentifier: "com.example.nse-control-gallery", route: "/nse-control-gallery" })],
+      initialPathname: "/__syncloudos/open/com.example.nse-control-gallery"
     });
     await flushLaunchTimers();
 
     expect(RuntimeController.getSnapshot().application).toMatchObject({
-      activeAppId: "nse-control-gallery",
+      activeAppId: "com.example.nse-control-gallery",
       routePath: "/nse-control-gallery"
     });
   });
@@ -168,16 +168,16 @@ describe("BootManager initial route", () => {
     const runtime = createTestRuntime();
     try {
       const { AppRegistry, LoginServices, RouteManager, RuntimeController, Statechart } = createRuntimeHarness(runtime);
-      AppRegistry.registerBundle(createTestBundle({ id: "statechart-reader", route: "/statechart-reader" }));
+      AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.statechart-reader", route: "/statechart-reader" }));
       unlockRuntime(LoginServices);
 
-      const opened = RouteManager.openRoute("/statechart-reader", { source: "statechart-reader", syncRoute: false });
+      const opened = RouteManager.openRoute("/statechart-reader", { source: "com.example.statechart-reader", syncRoute: false });
       await expect(opened.result).resolves.toMatchObject({
         status: "completed",
         committed: true,
         value: {
           kind: "app",
-          appId: "statechart-reader",
+          appId: "com.example.statechart-reader",
           pathname: "/statechart-reader",
         },
       });
@@ -195,7 +195,7 @@ describe("BootManager initial route", () => {
         },
         statechart: { currentState: "active.webspring" },
       });
-      expect(runtime.lifecycle.getState("statechart-reader")).toBe("suspended");
+      expect(runtime.lifecycle.getState("com.example.statechart-reader")).toBe("suspended");
       expect(Statechart.getPreviousState()).toBe("active.application.active");
       expect(Statechart.getHistory().length).toBeGreaterThan(historyBeforeReturn);
       expect(Statechart.getHistory().at(-1)).toMatchObject({
@@ -229,7 +229,7 @@ describe("BootManager initial route", () => {
       unlockRuntime(runtime);
 
       const first = BootManager.boot({
-        appBundles: [createTestBundle({ id: "boot-report", route: "/boot-report" })],
+        appBundles: [createTestBundle({ bundleIdentifier: "com.example.boot-report", route: "/boot-report" })],
         initialPathname: "/",
       });
       await flushLaunchTimers();
@@ -278,7 +278,7 @@ describe("BootManager initial route", () => {
 
   it("hydrates locale readiness and registers bundle resources during canonical runtime boot", async () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "localised-app" }, {
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.localised-app" }, {
         localeResources: {
           "Base.locale": { "Localisable.strings": '"headline" = "Base headline";' },
           "en.locale": { "Localisable.strings": '"headline" = "English headline";' },

@@ -37,12 +37,12 @@ function fixture() {
   runtime.documents.registerCloseReviewer({ review: async () => "discard" });
   cleanups.push(async () => { await runtime.dispose("test"); });
   const mount = (id: string) => {
-    registerTestSynWare(runtime, { schemaVersion: 1, id, version: "1.0.0", title: id, routes: [{ path: `/${id}`, primary: true }], documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
+    registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: id, routes: [{ path: `/${id.split(".").at(-1)}`, primary: true }], documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
     const mounted = mountTestSynWareRuntime(runtime, id);
     cleanups.push(() => mounted.dispose("test"));
     return { mounted, client: createSynWareContextValue(mounted.runtime).documents.workspaceDocuments };
   };
-  return { runtime, adapter, owner: mount("editing-owner"), foreign: mount("editing-foreign"), mount };
+  return { runtime, adapter, owner: mount("com.example.editing-owner"), foreign: mount("com.example.editing-foreign"), mount };
 }
 
 async function updateFixture() {
@@ -205,7 +205,7 @@ describe("admitted SDK document editing", () => {
     const document = await owner.client.newDocument({ typeId: noteType.id });
     expect(() => foreign.client.transactDocument(document.id, (model) => model, { expectedRevision: 0, actionName: "Spoof" })).toThrow(/owner lease/i);
     expect(() => foreign.client.registerEditingParticipant(document.id, { id: "spoof", settle: () => ({ status: "settled" }) })).toThrow(/owner lease/i);
-    const sibling = mount("editing-owner");
+    const sibling = mount("com.example.editing-owner");
     sibling.client.getDocument(document.id);
     expect(() => sibling.client.settleEditing(document.id, "save")).toThrow(/owner lease/i);
   });
@@ -267,8 +267,8 @@ describe("admitted SDK document editing", () => {
     const { owner, runtime } = fixture();
     const document = await owner.client.newDocument<NoteDocumentModel>({ typeId: noteType.id });
     const responderId = "application:editing-owner:second-view";
-    runtime.responders.register({ id: responderId, kind: "view", parentId: "application:editing-owner", scopeId: responderId });
-    const sibling = mountTestSynWareRuntime(runtime, "editing-owner", responderId);
+    runtime.responders.register({ id: responderId, kind: "view", parentId: "application:com.example.editing-owner", scopeId: responderId });
+    const sibling = mountTestSynWareRuntime(runtime, "com.example.editing-owner", responderId);
     cleanups.push(() => sibling.dispose("test"));
     const other = createSynWareContextValue(sibling.runtime).documents.workspaceDocuments;
     other.retainDocument(document.id);

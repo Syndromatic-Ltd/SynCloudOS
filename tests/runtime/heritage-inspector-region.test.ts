@@ -29,16 +29,16 @@ import * as region from "../../src/SynCloudOSReact/DevInspectorRegion";
 const { loadInspector } = vi.hoisted(() => ({ loadInspector: vi.fn() }));
 vi.mock("../../src/SynCloudOS/Inspector/inspectorDevEntry", () => ({ loadInspector }));
 const runtimes: ReturnType<typeof createTestRuntime>[] = [];
-function runtime(trusted = true) {
+function runtime(trusted = true, privileges: string[] = ["diagnostics"]) {
   const value = createTestRuntime(); runtimes.push(value);
-  if (trusted) registerTrustedTestSynWare(value, diagnosticsManifest, ["diagnostics"]);
+  if (trusted) registerTrustedTestSynWare(value, diagnosticsManifest, privileges);
   return value;
 }
 function session(label: string) {
   return { client: Object.freeze({}), View: () => createElement("p", null, label), dispose: vi.fn(), localization: undefined };
 }
 function props(value = runtime()) {
-  return { runtime: value, appId: "diagnostics", enabled: true, mountSignal: new AbortController().signal };
+  return { runtime: value, appId: "com.example.diagnostics", enabled: true, mountSignal: new AbortController().signal };
 }
 beforeEach(() => { loadInspector.mockReset(); });
 afterEach(async () => { cleanup(); for (const value of runtimes.splice(0)) await value.dispose(); });
@@ -53,6 +53,11 @@ describe("private Inspector host region", () => {
     await act(async () => {}); expect(loadInspector).not.toHaveBeenCalled();
     const abort = new AbortController(); abort.abort();
     mounted.rerender(createElement(region.DevInspectorRegion, { ...props(), mountSignal: abort.signal }));
+    await act(async () => {}); expect(loadInspector).not.toHaveBeenCalled();
+    expect(mounted.container.textContent).toBe("");
+  });
+  it("does not import the session for a trusted bundle that lacks the diagnostics privilege", async () => {
+    const mounted = render(createElement(region.DevInspectorRegion, props(runtime(true, ["conformance"]))));
     await act(async () => {}); expect(loadInspector).not.toHaveBeenCalled();
     expect(mounted.container.textContent).toBe("");
   });
@@ -95,7 +100,7 @@ describe("private Inspector host region", () => {
     loadInspector.mockImplementation(() => new Promise(done => { resolve = done; }));
     const mounted = render(createElement(region.DevInspectorRegion, request));
     await waitFor(() => expect(loadInspector).toHaveBeenCalledOnce());
-    await act(async () => { await request.runtime.apps.unregister("diagnostics"); });
+    await act(async () => { await request.runtime.apps.unregister("com.example.diagnostics"); });
     const late = session("revoked bundle"); await act(async () => { resolve(late); });
     expect(late.dispose).toHaveBeenCalledOnce(); expect(mounted.container.textContent).not.toContain("revoked bundle");
     loadInspector.mockRejectedValueOnce(new Error("SECRET_MODULE_LOCATION"));

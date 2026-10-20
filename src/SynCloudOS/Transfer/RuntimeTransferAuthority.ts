@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo } from "../AppInfo/appInfoTypes";
 import type { DragEndpoint, DragSessionManager, RuntimeDragEndpointAuthority } from "../Drag";
 import type { PasteboardAccessContext, PasteboardRegistry, PasteboardRegistryHandle } from "../Pasteboard";
@@ -217,7 +218,7 @@ export function createRuntimeTransferAuthority(options: {
     if (scope.context.windowControllerId) {
       try {
         const record = options.windows.select(scope.context.windowControllerId).record;
-        if (record.applicationId !== scope.context.appId || record.state === "closed") return false;
+        if (normalizeBundleIdentifier(record.applicationId) !== normalizeBundleIdentifier(scope.context.appId) || record.state === "closed") return false;
       } catch { return false; }
     }
     if (scope.context.responderId) {
@@ -257,7 +258,7 @@ export function createRuntimeTransferAuthority(options: {
     if (!scope.context.windowControllerId) return true;
     try {
       const record = options.windows.select(scope.context.windowControllerId).record;
-      return record.applicationId === scope.context.appId && record.state !== "closed";
+      return normalizeBundleIdentifier(record.applicationId) === normalizeBundleIdentifier(scope.context.appId) && record.state !== "closed";
     } catch { return false; }
   };
   const currentContext = (scope: ScopeRecord): PasteboardAccessContext | null => scopeLive(scope) ? scope.context : null;
@@ -411,7 +412,7 @@ export function createRuntimeTransferAuthority(options: {
     if (payload?.to !== "closed" || typeof payload.appId !== "string") return;
     for (const mount of [...activeMounts.values()]) {
       const scope = mountScopes.get(mount);
-      if (scope?.context.appId === payload.appId) revokeMount(mount);
+      if (normalizeBundleIdentifier(scope?.context.appId) === normalizeBundleIdentifier(payload.appId)) revokeMount(mount);
     }
   };
   // Modern lifecycle operations publish app.lifecycle while the compatibility
@@ -431,7 +432,7 @@ export function createRuntimeTransferAuthority(options: {
         const registrationAuthority = options.getRegistrationAuthority(payload.appId);
         for (const mount of [...activeMounts.values()]) {
           const scope = mountScopes.get(mount);
-          if (scope?.context.appId === payload.appId && (!canonical || registrationAuthority !== scope.registrationAuthority)) revokeMount(mount);
+          if (scope && normalizeBundleIdentifier(scope.context.appId) === normalizeBundleIdentifier(payload.appId) && (!canonical || registrationAuthority !== scope.registrationAuthority)) revokeMount(mount);
         }
       }))
     : [];
@@ -461,7 +462,7 @@ export function createRuntimeTransferAuthority(options: {
   });
 
   const createMount = (app: SynCloudOSAppInfo, scopeOptions: ReturnType<typeof transferScopeOptions>): ScopeMountRecord => {
-    const key = `${app.id}\u0000${scopeOptions.responderId}\u0000${scopeOptions.windowControllerId ?? ""}`;
+    const key = `${app.bundleIdentifier}\u0000${scopeOptions.responderId}\u0000${scopeOptions.windowControllerId ?? ""}`;
     const previous = activeMounts.get(key);
     if (previous) {
       revokeMount(
@@ -481,7 +482,7 @@ export function createRuntimeTransferAuthority(options: {
     mount: ScopeMountRecord,
   ): RuntimeAppTransferScope => {
     const { responderId, windowControllerId } = scopeOptions;
-    const context: ScopeRecord["context"] = Object.freeze({ appId: app.id, ...(windowControllerId ? { windowControllerId } : {}), responderId });
+    const context: ScopeRecord["context"] = Object.freeze({ appId: app.bundleIdentifier, ...(windowControllerId ? { windowControllerId } : {}), responderId });
     const resources: ScopeRecord["resources"] = { webSessions: new Set(), pendingWebSessions: new Set(), dragManager: null };
     const pasteboardLease = pasteboards.issueLease(context, () => {
       const current = mountScopes.get(mount);
@@ -491,7 +492,7 @@ export function createRuntimeTransferAuthority(options: {
       app,
       registrationAuthority,
       context,
-      applicationSessionId: `application:${app.id}`,
+      applicationSessionId: `application:${app.bundleIdentifier}`,
       ownerId: responderId,
       webLease: Object.freeze({}),
       pasteboardLease,
@@ -639,10 +640,10 @@ export function createRuntimeTransferAuthority(options: {
 
   const issueMount = (candidate: SynCloudOSAppInfo, suppliedScopeOptions: RuntimeAppTransferScopeOptions): RuntimeAppTransferMount => {
     const app = assertCanonicalApp(candidate);
-    const registrationAuthority = options.getRegistrationAuthority(app.id);
+    const registrationAuthority = options.getRegistrationAuthority(app.bundleIdentifier);
     if (!registrationAuthority) throw securityError("Transfer scopes require a live application registration authority.");
     const scopeOptions = transferScopeOptions(suppliedScopeOptions);
-    if (disposed || options.signal.aborted || options.lifecycle.getState(app.id) === "closed") {
+    if (disposed || options.signal.aborted || options.lifecycle.getState(app.bundleIdentifier) === "closed") {
       throw securityError("Transfer scopes cannot be issued to a closed application.");
     }
     const mount = createMount(app, scopeOptions);
@@ -674,7 +675,7 @@ export function createRuntimeTransferAuthority(options: {
     validateWebContentLease(lease, request) {
       const scope = lease && typeof lease === "object" ? webLeases.get(lease as object) : undefined;
       if (!scope || !scopeLive(scope)) return false;
-      return request.appId === scope.context.appId && request.applicationSessionId === scope.applicationSessionId && request.ownerId === scope.ownerId &&
+      return normalizeBundleIdentifier(request.appId) === normalizeBundleIdentifier(scope.context.appId) && request.applicationSessionId === scope.applicationSessionId && request.ownerId === scope.ownerId &&
         request.windowControllerId === scope.context.windowControllerId;
     },
     dispose() {

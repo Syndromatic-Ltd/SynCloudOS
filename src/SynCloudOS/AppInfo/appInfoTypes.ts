@@ -46,9 +46,8 @@ export interface SynCloudOSAppInfoNormalisationNote {
 }
 
 export interface SynCloudOSAppInfoExplanation {
-  appId: string;
   packageName: string;
-  bundleId: string;
+  bundleIdentifier: string;
   displayName: string;
   route: string;
   path: string;

@@ -18,12 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { ResponderGraph } from "../Responders/responderTypes";
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
 import { createUndoManager } from "./UndoManager";
 import type { UndoManagerCreateOptions, UndoManagerRegistry, UndoOwner } from "./undoTypes";
 
-const ownerKey = (owner: UndoOwner) => `${owner.kind}\u0000${owner.id}`;
+const ownerKey = (owner: UndoOwner) => `${owner.kind}\u0000${owner.kind === "application" ? normalizeBundleIdentifier(owner.id) : owner.id}`;
 
 export function createUndoManagerRegistry(options: {
   readonly runtimeId: SynCloudOSRuntimeId;

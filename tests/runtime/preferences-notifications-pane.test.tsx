@@ -60,9 +60,9 @@ describe("Notifications pane with nothing to list", () => {
     renderSystemUI("sounds", (value) => {
       runtime = value;
       vi.spyOn(runtime.haptics, "isSupported", "get").mockReturnValue(true);
-      registerTestSynWare(runtime, { schemaVersion: 1, id: "example", version: "1.0.0", title: "Example Player" });
+      registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.example", version: "1.0.0", displayName: "Example Player" });
       vi.spyOn(runtime.settings, "supportsVibration").mockReturnValue(true);
-      const snapshot = Object.freeze({ masterVolume: 0.65, enabled: true, applications: [{ appId: "example", volume: 0.37, sessionCount: 2 }] });
+      const snapshot = Object.freeze({ masterVolume: 0.65, enabled: true, applications: [{ appId: "com.example.example", volume: 0.37, sessionCount: 2 }] });
       vi.spyOn(runtime.audio, "getMixerSnapshot").mockReturnValue(snapshot);
     });
     expect(screen.getByText("Applications")).toBeTruthy();

@@ -157,7 +157,7 @@ function windowClientFor(runtime: SynWareRuntime, sessionId: string): AppWindowC
       ? source
       : { current: null, owned: Object.freeze([]) as AppWindowSnapshot["owned"], surface: source.surface };
     return Object.freeze({
-      appId: runtime.app.id,
+      appId: runtime.app.bundleIdentifier,
       sessionId,
       state,
       current: safeSource.current,
@@ -339,16 +339,16 @@ function audioClientFor(runtime: SynWareRuntime): AUFXAudioClient {
  * The facade is intentionally consumed only while constructing individually
  * whitelisted clients; it is never stored on, or reachable from, the result. */
 export function createSynWareContextValue(runtime: SynWareRuntime, branding: SynWareContextValue["branding"] = Object.freeze({ name: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "" })): SynWareContextValue {
-  const sessionId = `${runtime.app.id}:${runtime.responderId}`;
+  const sessionId = `${runtime.app.bundleIdentifier}:${runtime.responderId}`;
   const environment = getMountedAppEnvironmentClients(runtime);
   const context: SynWareContextValue = Object.freeze({
     runtimeInfo: runtimeInfoFor(runtime),
     branding,
-    appId: runtime.app.id,
+    appId: runtime.app.bundleIdentifier,
     appInfo: Object.freeze({
-      id: runtime.app.id,
+      bundleIdentifier: runtime.app.bundleIdentifier,
       version: runtime.app.version,
-      title: runtime.app.displayName || runtime.app.name,
+      displayName: runtime.app.displayName,
     }),
     launcher: environment.launcher,
     responderId: runtime.responderId,

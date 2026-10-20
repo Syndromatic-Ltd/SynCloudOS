@@ -24,7 +24,7 @@ import { createTestBundle, createTestRuntime } from "./helpers";
 describe("semantic and presentation runtime separation", () => {
   it("keeps same-active-app query navigation inside the mounted application stage", async () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "journal", route: "/journal" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.journal", route: "/journal" })],
     });
     await runtime.boot({ initialPathname: "/" });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
@@ -34,8 +34,8 @@ describe("semantic and presentation runtime separation", () => {
     }).result;
     if (initialOpen.status !== "completed") throw new Error("initial route operation did not complete");
     const initialLaunchId = runtime.store.getSnapshot().webspring.launchTransitionId!;
-    expect(runtime.webspring.completeLaunchStage(initialLaunchId, "journal")).toBe(true);
-    expect(runtime.webspring.completeLaunchCover(initialLaunchId, "journal")).toBe(true);
+    expect(runtime.webspring.completeLaunchStage(initialLaunchId, "com.example.journal")).toBe(true);
+    expect(runtime.webspring.completeLaunchCover(initialLaunchId, "com.example.journal")).toBe(true);
 
     const before = runtime.store.getSnapshot();
     const transitionCount = before.statechart.history.length;
@@ -46,7 +46,7 @@ describe("semantic and presentation runtime separation", () => {
     });
 
     const result = await runtime.routes.openRoute("/journal?view=notes", {
-      source: "app:journal",
+      source: "app:com.example.journal",
       syncRoute: true,
     }).result;
     unsubscribe();
@@ -57,11 +57,11 @@ describe("semantic and presentation runtime separation", () => {
     expect(runtime.presentationSettlements.inspectPending()).toHaveLength(pendingSettlements);
     expect(runtime.store.getSnapshot()).toMatchObject({
       application: {
-        activeAppId: "journal",
+        activeAppId: "com.example.journal",
         routePath: "/journal",
         lastLifecycleEvent: before.application.lastLifecycleEvent,
       },
-      lifecycle: { "journal": "active" },
+      lifecycle: { "com.example.journal": "active" },
       statechart: {
         currentState: "active.application.active",
         history: before.statechart.history,
@@ -77,7 +77,7 @@ describe("semantic and presentation runtime separation", () => {
     expect(routeEvents).toEqual([expect.objectContaining({
       requestedPath: "/journal?view=notes",
       pathname: "/journal",
-      appId: "journal",
+      appId: "com.example.journal",
       browserHref: "/journal?view=notes",
       syncRoute: true,
     })]);
@@ -85,7 +85,7 @@ describe("semantic and presentation runtime separation", () => {
 
   it("commits launch semantics while presentation remains unsettled", async () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "studio", route: "/studio" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })],
       presentationRolesForRoute: webspringPresentationRoles,
     });
     await runtime.boot({ initialPathname: "/" });
@@ -93,7 +93,7 @@ describe("semantic and presentation runtime separation", () => {
 
     const mountController = new AbortController();
     const loadAndRender = vi.fn(async () => undefined);
-    const releaseMount = runtime.routes.mountedRoutes.attach("studio", {
+    const releaseMount = runtime.routes.mountedRoutes.attach("com.example.studio", {
       signal: mountController.signal,
       loadAndRender,
     });
@@ -107,10 +107,10 @@ describe("semantic and presentation runtime separation", () => {
     expect(loadAndRender).toHaveBeenCalledTimes(1);
     if (result.status !== "completed") throw new Error("route operation did not complete");
     expect(runtime.store.getSnapshot()).toMatchObject({
-      application: { activeAppId: "studio", routePath: "/studio" },
+      application: { activeAppId: "com.example.studio", routePath: "/studio" },
       statechart: { currentState: "active.application.active" },
       webspring: {
-        launchingAppId: "studio",
+        launchingAppId: "com.example.studio",
         launchTransitionId: expect.any(String),
         launchPhase: "staging",
       },
@@ -118,12 +118,12 @@ describe("semantic and presentation runtime separation", () => {
     expect(runtime.presentationSettlements.inspect(result.value.presentationSettlementId!)).toMatchObject({ status: "pending" });
 
     const staged = runtime.store.getSnapshot();
-    expect(runtime.webspring.completeLaunchStage(staged.webspring.launchTransitionId!, "studio")).toBe(true);
+    expect(runtime.webspring.completeLaunchStage(staged.webspring.launchTransitionId!, "com.example.studio")).toBe(true);
     expect(runtime.store.getSnapshot()).toMatchObject({
-      application: { activeAppId: "studio", routePath: "/studio" },
-      lifecycle: { studio: "active" },
+      application: { activeAppId: "com.example.studio", routePath: "/studio" },
+      lifecycle: { "com.example.studio": "active" },
       statechart: { currentState: "active.application.active" },
-      webspring: { launchingAppId: "studio", launchPhase: "launching" },
+      webspring: { launchingAppId: "com.example.studio", launchPhase: "launching" },
     });
     releaseMount();
     mountController.abort();
@@ -131,14 +131,14 @@ describe("semantic and presentation runtime separation", () => {
 
   it("keeps semantic state stable when presentation roles are cancelled or never completed", async () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "reduced-motion", route: "/reduced-motion" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.reduced-motion", route: "/reduced-motion" })],
       presentationRolesForRoute: webspringPresentationRoles,
     });
     await runtime.boot({ initialPathname: "/" });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const mountController = new AbortController();
     const loadAndRender = vi.fn(async () => undefined);
-    const releaseMount = runtime.routes.mountedRoutes.attach("reduced-motion", {
+    const releaseMount = runtime.routes.mountedRoutes.attach("com.example.reduced-motion", {
       signal: mountController.signal,
       loadAndRender,
     });
@@ -151,7 +151,7 @@ describe("semantic and presentation runtime separation", () => {
     expect(pending.status).toBe("pending");
     const settlement = runtime.presentationSettlements.inspectPending(settlementId)[0] as { id: string };
     expect(settlement.id).toBe(settlementId);
-    expect(runtime.store.getSnapshot().lifecycle["reduced-motion"]).toBe("active");
+    expect(runtime.store.getSnapshot().lifecycle["com.example.reduced-motion"]).toBe("active");
     expect(runtime.store.getSnapshot().application.routePath).toBe("/reduced-motion");
     releaseMount();
     mountController.abort();

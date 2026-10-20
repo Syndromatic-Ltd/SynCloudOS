@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { LFXAuthorizationStatus } from "../../FX/LocationFX/LFXCapabilities";
 import type { LFXLocation } from "../../FX/LocationFX/LFXLocation";
 import type {
@@ -96,11 +97,11 @@ export class LocationService {
   }> = {}): LFXLocationManager {
     if (this.#disposed) throw new Error("Location service is disposed.");
     options.signal?.throwIfAborted();
-    if (options.appId && this.#closedOwners.has(options.appId))
+    if (options.appId && this.#closedOwners.has(normalizeBundleIdentifier(options.appId)))
       throw new DOMException("Location owner is closed.", "AbortError");
     const owner = new AbortController();
     const adapter = this.adapter;
-    const ownerKey = options.appId ?? `manager:${++this.#managerSequence}`;
+    const ownerKey = options.appId ? normalizeBundleIdentifier(options.appId) : `manager:${++this.#managerSequence}`;
     const revoke = () => owner.abort(options.signal?.reason ?? new DOMException("Location owner was revoked.", "AbortError"));
     options.signal?.addEventListener("abort", revoke, { once: true });
     let released = false;
@@ -170,16 +171,16 @@ export class LocationService {
 
   suspendOwner(appId: string): void {
     if (this.#disposed) return;
-    this.#watchCoordinator.suspendOwner(appId);
+    this.#watchCoordinator.suspendOwner(normalizeBundleIdentifier(appId));
   }
 
   async resumeOwner(appId: string): Promise<void> {
     if (this.#disposed) return;
-    this.#closedOwners.delete(appId);
+    this.#closedOwners.delete(normalizeBundleIdentifier(appId));
     const authorisers = [...this.#managers]
-      .filter(manager => manager.appId === appId && manager.reauthorise)
+      .filter(manager => normalizeBundleIdentifier(manager.appId) === normalizeBundleIdentifier(appId) && manager.reauthorise)
       .map(manager => manager.reauthorise!);
-    await this.#watchCoordinator.resumeOwner(appId, async () => {
+    await this.#watchCoordinator.resumeOwner(normalizeBundleIdentifier(appId), async () => {
       for (const authorise of authorisers)
         if (!(await authorise())) return false;
       return true;
@@ -188,10 +189,10 @@ export class LocationService {
 
   closeOwner(appId: string): void {
     if (this.#disposed) return;
-    this.#closedOwners.add(appId);
+    this.#closedOwners.add(normalizeBundleIdentifier(appId));
     for (const manager of [...this.#managers])
-      if (manager.appId === appId) manager.dispose();
-    this.#watchCoordinator.closeOwner(appId);
+      if (normalizeBundleIdentifier(manager.appId) === normalizeBundleIdentifier(appId)) manager.dispose();
+    this.#watchCoordinator.closeOwner(normalizeBundleIdentifier(appId));
   }
 
   dispose(): void {

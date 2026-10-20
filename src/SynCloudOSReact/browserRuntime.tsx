@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { getSynWareNamespace } from "../SynCloudOS/AppSDK/useStrings";
 import "../SynCloudOS/styles/runtime.css";
 import { StrictMode, type PropsWithChildren } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -39,6 +40,7 @@ import { useActiveLocale, useResolvedMode } from "./serviceHooks";
 import { resolveSiteBranding, type ResolvedSiteBranding } from "../SynCloudOS/Branding/siteBranding";
 import { exposeSynCloudOS } from "../SynCloudOS/Developer/exposeSynCloudOS";
 import { createSynWareBundle } from "../SynCloudOS/AppSDK/createSynWare";
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { captureSynWareManifest, projectRuntimeManifest, type SynWareManifestV1 } from "../SynCloudOS/AppSDK";
 import type { SynWareDefinition } from "../SynCloudOS/AppSDK/appDefinitionTypes";
 import { createRegisteredFontResourceLoader, fontResourceMimeTypeForPath } from "../SynCloudOS/BundleLoader/fontResourceLoader";
@@ -113,7 +115,7 @@ export type SynCloudOSApplicationFrameMode = "fullscreen" | "declared";
 export type MountSynCloudOSOptions = BrowserHostOptions & (
   | { readonly shell: WebspringDefinition; readonly application?: never;
       readonly shellResources?: SynCloudOSShellResources }
-  | { readonly application: Readonly<{ id: string; frame?: SynCloudOSApplicationFrameMode }>; readonly shell?: never;
+  | { readonly application: Readonly<{ bundleIdentifier: string; frame?: SynCloudOSApplicationFrameMode }>; readonly shell?: never;
       readonly shellResources?: never }
   | { readonly shell?: undefined; readonly application?: undefined;
       readonly shellResources?: SynCloudOSShellResources }
@@ -128,7 +130,7 @@ type InternalMountOptions = MountSynCloudOSOptions & { readonly persistenceNames
 /** The options after the project composition filled in what the host omitted. */
 interface ResolvedHostOptions extends BrowserHostOptions {
   readonly shell?: WebspringDefinition;
-  readonly application?: Readonly<{ id: string; frame?: SynCloudOSApplicationFrameMode }>;
+  readonly application?: Readonly<{ bundleIdentifier: string; frame?: SynCloudOSApplicationFrameMode }>;
   readonly shellResources?: SynCloudOSShellResources;
   readonly composition: SynCloudOSProjectComposition;
 }
@@ -140,9 +142,9 @@ function validateHostMode(options: MountSynCloudOSOptions): void {
   if (options.application !== undefined) {
     const application = options.application;
     if (!application || typeof application !== "object" || Array.isArray(application)
-      || Object.keys(application).some(key => key !== "id" && key !== "frame")
-      || typeof application.id !== "string" || application.id.trim() !== application.id || !application.id) {
-      throw new TypeError("mountSynCloudOS application.id must be a non-empty application identifier.");
+      || Object.keys(application).some(key => key !== "bundleIdentifier" && key !== "frame")
+      || typeof application.bundleIdentifier !== "string" || application.bundleIdentifier.trim() !== application.bundleIdentifier || !application.bundleIdentifier) {
+      throw new TypeError("mountSynCloudOS application.bundleIdentifier must be a non-empty application identifier.");
     }
     if (application.frame !== undefined && application.frame !== "fullscreen" && application.frame !== "declared") {
       throw new TypeError('mountSynCloudOS application.frame must be "fullscreen" or "declared".');
@@ -181,9 +183,9 @@ function resolveHostOptions(input: InternalMountOptions): ResolvedMountOptions {
 
 function hostBranding(options: ResolvedHostOptions, runtime: SynCloudOSRuntime): ResolvedSiteBranding {
   if (options.shell) return resolveSiteBranding(options.shell.manifest.webspringShell.branding,
-    options.shellResources?.resourceUrls ?? {}, runtime.locale, options.shell.manifest.id);
-  const app = runtime.apps.getApp(options.application!.id);
-  const name = app?.displayName ?? options.application!.id;
+    options.shellResources?.resourceUrls ?? {}, runtime.locale, getSynWareNamespace(options.shell.manifest.bundleIdentifier));
+  const app = runtime.apps.getApp(options.application!.bundleIdentifier);
+  const name = app?.displayName ?? options.application!.bundleIdentifier;
   return Object.freeze({ name, logoUrl: null, logoAlt: name, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null });
 }
 
@@ -270,14 +272,14 @@ function descriptorBundle(descriptor: SynCloudOSDiscoveredBundleDescriptor): Tru
   const declaredIcon = manifest.webspring?.icon;
   const icon = declaredIcon === undefined ? undefined : resourceUrls[declaredIcon];
   if (declaredIcon !== undefined && icon === undefined) {
-    throw new TypeError(`SynWare icon resource ${declaredIcon} is not registered for ${manifest.id}.`);
+    throw new TypeError(`SynWare icon resource ${declaredIcon} is not registered for ${manifest.bundleIdentifier}.`);
   }
   const projected = icon === undefined ? manifest : Object.freeze({
     ...manifest,
     webspring: Object.freeze({ ...manifest.webspring, icon }),
   });
-  const appRoot = `./${manifest.id}.app`;
-  const packageName = manifest.id;
+  const appRoot = `./${manifest.bundleIdentifier}.app`;
+  const packageName = manifest.bundleIdentifier;
   const runtimeManifest = projectRuntimeManifest(projected, {
     appRoot,
     packageName,
@@ -319,7 +321,7 @@ function browserBundles(
   });
   const ids = new Set<string>();
   for (const bundle of bundles) {
-    const id = bundle.synWareManifest?.id ?? bundle.manifest.id;
+    const id = normalizeBundleIdentifier(bundle.synWareManifest?.bundleIdentifier ?? bundle.manifest.bundleIdentifier);
     if (ids.has(id)) throw new TypeError(`Duplicate SynWare manifest ID ${id}.`);
     ids.add(id);
   }
@@ -476,7 +478,7 @@ function captureBootstrapFailure(runtime: SynCloudOSRuntime, error: unknown, rou
   // Route preload already captures the app's classified error and import cause.
   const latest = runtime.errors.getLatest();
   const resolution = runtime.routes.resolveRoute(route);
-  if (latest && resolution.kind === "app" && latest.appId === resolution.app.id
+  if (latest && resolution.kind === "app" && normalizeBundleIdentifier(latest.appId) === normalizeBundleIdentifier(resolution.app.bundleIdentifier)
     && latest.source === "SynCloudOS.RouteManager.openRoute"
     && (latest.context?.phase === "route-preload" || latest.context?.phase === "route-preparation")) {
     return latest;
@@ -554,7 +556,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     presentationRolesForRoute: options.application ? () => [] : webspringPresentationRoles,
     ...(options.persistenceNamespace !== undefined
       ? { persistenceNamespace: options.persistenceNamespace }
-      : options.application ? { persistenceNamespace: `SynCloudOS:application:${options.application.id}` } : {}),
+      : options.application ? { persistenceNamespace: `SynCloudOS:application:${normalizeBundleIdentifier(options.application.bundleIdentifier)}` } : {}),
     ...(options.policyProfile === undefined ? {} : { policyProfile: options.policyProfile }),
     ...(typeof options.authentication === "object"
       ? { identity: { sessionAdapter: options.authentication.service.sessionAdapter } }
@@ -566,25 +568,25 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
   });
   let initialBundles = composition.initialBundles;
   if (options.application) {
-    const primaryId = options.application.id;
-    if (!initialBundles.some(bundle => bundle.manifest.id === primaryId)) {
+    const primaryId = normalizeBundleIdentifier(options.application.bundleIdentifier);
+    if (!initialBundles.some(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId)) {
       throw new TypeError(`Application ${primaryId} is not registered in this host.`);
     }
     for (const bundle of initialBundles) {
       if (bundle.manifest.route === "/") {
-        throw new TypeError(`Application ${bundle.manifest.id} needs a non-root entry route; / is the host's alias for ${primaryId}.`);
+        throw new TypeError(`Application ${bundle.manifest.bundleIdentifier} needs a non-root entry route; / is the host's alias for ${primaryId}.`);
       }
-      if (bundle.manifest.id !== primaryId && (bundle.manifest.presentation ?? "appView") === "appView") {
-        throw new TypeError(`Application ${bundle.manifest.id} declares the appView presentation; only the primary application fills an application-only host, so other applications must present in windows.`);
+      if (normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId && (bundle.manifest.presentation ?? "appView") === "appView") {
+        throw new TypeError(`Application ${bundle.manifest.bundleIdentifier} declares the appView presentation; only the primary application fills an application-only host, so other applications must present in windows.`);
       }
     }
     if ((options.application.frame ?? "fullscreen") === "fullscreen") {
-      initialBundles = initialBundles.map(bundle => bundle.manifest.id !== primaryId ? bundle : Object.freeze({ ...bundle,
+      initialBundles = initialBundles.map(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId ? bundle : Object.freeze({ ...bundle,
         manifest: Object.freeze({ ...bundle.manifest, presentation: "appView" as const,
           frame: Object.freeze({ ...bundle.manifest.frame, topBar: "none" as const, presentationMotion: "content" as const }),
         }) }));
     }
-    const primary = initialBundles.find(bundle => bundle.manifest.id === primaryId)!.manifest;
+    const primary = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId)!.manifest;
     if (authenticationPolicy !== undefined && authenticationPolicy !== "disabled"
       && (primary.presentation ?? "appView") === "appView" && primary.applicationMenu?.trigger !== "content") {
       throw new TypeError(`Application ${primaryId} fills the page with ${authenticationPolicy} sign-in but declares no content application-menu trigger. Declare applicationMenu: { trigger: "content" } and open the menu with useApplicationMenuTrigger(), so people can reach Preferences > Account, Sign In and Log Out.`);
@@ -653,7 +655,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     id: "browser-host",
     prepare: ({ reason }) => ({ status: "ready", commit: () => releaseHost(reason) }),
   });
-  const home = options.application ? createApplicationHostHome(runtime, options.application.id, authenticationPolicy === "required") : null;
+  const home = options.application ? createApplicationHostHome(runtime, options.application.bundleIdentifier, authenticationPolicy === "required") : null;
   if (home) {
     runtime.registerDisposalParticipant({
       id: "application-host-home",
@@ -706,7 +708,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     });
     const isApplicationRoot = (href: string) => Boolean(options.application && /^\/(?:[?#]|$)/u.test(href));
     const applicationPath = (href: string) => isApplicationRoot(href)
-      ? `${runtime.apps.getApp(options.application!.id)!.route}${href.slice(1)}` : href;
+      ? `${runtime.apps.getApp(options.application!.bundleIdentifier)!.route}${href.slice(1)}` : href;
     const browserRoutes = createBrowserRouteCoordinator({
       platform: browserRoutePlatform,
       getRuntimeSnapshot: runtime.store.getSnapshot,
@@ -798,7 +800,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
         error: options.application ? applicationRecoveryError(capturedData) : capturedData,
         branding: hostBranding(options, runtime),
         appearance: runtime.appearance.resolved(),
-        applicationIcon: captured.appId ? runtime.store.getSnapshot().appInfo[captured.appId]?.icon.src ?? null : null,
+        applicationIcon: captured.appId ? runtime.store.getSnapshot().appInfo[normalizeBundleIdentifier(captured.appId)]?.icon.src ?? null : null,
         browserWindow: environment.browser.getWindow(),
       };
     }

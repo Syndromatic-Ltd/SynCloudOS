@@ -61,8 +61,8 @@ afterEach(async () => {
   await Promise.all(runtimes.splice(0).map((runtime) => runtime.dispose("test cleanup")));
 });
 
-function registerApp(runtime: ReturnType<typeof createTestRuntime>, id = "hostile-app", bundleOverrides: Parameters<typeof createTestBundle>[1] = {}) {
-  runtime.apps.registerBundle(createTestBundle({ id, route: `/${id}` }, bundleOverrides));
+function registerApp(runtime: ReturnType<typeof createTestRuntime>, id = "com.example.hostile-app", bundleOverrides: Parameters<typeof createTestBundle>[1] = {}) {
+  runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` }, bundleOverrides));
   const app = runtime.apps.getApp(id)!;
   runtime.responders.register({ id: `application:${id}`, kind: "application", parentId: "workspace", scopeId: `application:${id}` });
   return app;
@@ -77,12 +77,12 @@ function MountedProbe({ commandExecuted }: { readonly commandExecuted: () => voi
   } catch (error) {
     rawHook = error;
   }
-  const overlay = useRuntimeNSEOverlayPort(`application:${app.app.id}`);
+  const overlay = useRuntimeNSEOverlayPort(`application:${app.app.bundleIdentifier}`);
   const menu = useRuntimeNSEMenuPort();
   useCommandRegistration({
-    id: `${app.app.id}.probe`,
-    responderId: `control:${app.app.id}`,
-    title: { key: `${app.app.id}.probe`, fallback: "Probe command" },
+    id: `${app.app.bundleIdentifier}.probe`,
+    responderId: `control:${app.app.bundleIdentifier}`,
+    title: { key: `${app.app.bundleIdentifier}.probe`, fallback: "Probe command" },
     payload: noPayload,
     scope: "focused",
     defaultKeyBindings: [],
@@ -92,19 +92,19 @@ function MountedProbe({ commandExecuted }: { readonly commandExecuted: () => voi
   });
   return (
     <ResponderScope
-      responderId={`control:${app.app.id}`}
+      responderId={`control:${app.app.bundleIdentifier}`}
       kind="control"
-      parentResponderId={`application:${app.app.id}`}
-      scopeId={`control:${app.app.id}`}
+      parentResponderId={`application:${app.app.bundleIdentifier}`}
+      scopeId={`control:${app.app.bundleIdentifier}`}
     >
       <FocusScope
-        scopeId={`focus:${app.app.id}`}
+        scopeId={`focus:${app.app.bundleIdentifier}`}
         kind="modal"
-        parentResponderId={`control:${app.app.id}`}
+        parentResponderId={`control:${app.app.bundleIdentifier}`}
         modal
         trapFocus
       >
-        <button type="button" onClick={() => { void menu.commands.dispatch(`${app.app.id}.probe`); }}>
+        <button type="button" onClick={() => { void menu.commands.dispatch(`${app.app.bundleIdentifier}.probe`); }}>
           App scoped command
         </button>
         <output
@@ -138,16 +138,16 @@ function CanonicalDocumentChildProbe({ documentId, onComplete }: {
   const responderId = `document:${documentId}:editor:body`;
   const execute = React.useCallback(() => undefined, []);
   const declaration = React.useMemo(() => ({
-    id: `${app.app.id}.document-child-probe`,
+    id: `${app.app.bundleIdentifier}.document-child-probe`,
     responderId,
-    title: { key: `${app.app.id}.document-child-probe`, fallback: "Document child probe" },
+    title: { key: `${app.app.bundleIdentifier}.document-child-probe`, fallback: "Document child probe" },
     payload: noPayload,
     scope: "focused" as const,
     defaultKeyBindings: [],
     undo: { kind: "none" as const },
     validate: () => ({ enabled: true }),
     execute,
-  }), [app.app.id, execute, responderId]);
+  }), [app.app.bundleIdentifier, execute, responderId]);
   useCommandRegistration(declaration);
   return (
     <ResponderScope
@@ -172,13 +172,13 @@ describe("mounted application context and interaction authority", () => {
   it("preserves a child-owned ref when an app focus scope attaches asChild authority", async () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
-    const app = registerApp(runtime, "focus-ref-app");
+    const app = registerApp(runtime, "com.example.focus-ref-app");
     const childRef = vi.fn<(element: HTMLDivElement | null) => void>();
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={siteBranding}>
-        <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.id}`}>
-          <FocusScope asChild scopeId="focus:owned-ref" kind="menu" parentResponderId={`application:${app.id}`}>
+        <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.bundleIdentifier}`}>
+          <FocusScope asChild scopeId="focus:owned-ref" kind="menu" parentResponderId={`application:${app.bundleIdentifier}`}>
             <div ref={childRef} data-testid="focus-ref-host" />
           </FocusScope>
         </SynWareRuntimeMount>
@@ -196,8 +196,8 @@ describe("mounted application context and interaction authority", () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
     const app = registerApp(runtime);
-    runtime.apps.registerBundle(createTestBundle({ id: "victim-app", route: "/victim-app" }));
-    const mount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.id}` });
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.victim-app", route: "/victim-app" }));
+    const mount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.bundleIdentifier}` });
     const scoped = mount.runtime;
 
     const state = scoped.state.getSnapshot();
@@ -211,10 +211,10 @@ describe("mounted application context and interaction authority", () => {
     try { (presentation.contentBounds as { width: number }).width = originalWidth + 1; } catch { /* frozen projections reject mutation in strict mode */ }
     expect(scoped.presentation.getSnapshot().contentBounds.width).toBe(originalWidth);
 
-    const foreign = scoped.catalog.getApp("victim-app");
-    expect(foreign).toEqual(expect.objectContaining({ id: "victim-app" }));
-    try { (foreign as { id: string }).id = "hostile-app"; } catch { /* immutable public descriptor */ }
-    expect(scoped.catalog.getApp("victim-app")?.id).toBe("victim-app");
+    const foreign = scoped.catalog.getApp("com.example.victim-app");
+    expect(foreign).toEqual(expect.objectContaining({ bundleIdentifier: "com.example.victim-app" }));
+    try { (foreign as { bundleIdentifier: string }).bundleIdentifier = "com.example.hostile-app"; } catch { /* immutable public descriptor */ }
+    expect(scoped.catalog.getApp("com.example.victim-app")?.bundleIdentifier).toBe("com.example.victim-app");
     expect(Reflect.get(scoped.locale as object, "setLocale")).toBeUndefined();
     expect(Reflect.get(scoped.locale as object, "clearLocale")).toBeUndefined();
     expect(Reflect.get(scoped.workspaceDocuments as object, "hasAdapter")).toBeUndefined();
@@ -223,15 +223,15 @@ describe("mounted application context and interaction authority", () => {
 
     const received: unknown[] = [];
     const unsubscribe = scoped.events.subscribe("app.lifecycle", (event) => received.push(event));
-    runtime.events.publish("app.lifecycle", { appId: app.id, nested: { safe: true } });
-    runtime.events.publish("app.lifecycle", { appId: "victim-app", nested: { safe: false } });
+    runtime.events.publish("app.lifecycle", { appId: app.bundleIdentifier, nested: { safe: true } });
+    runtime.events.publish("app.lifecycle", { appId: "com.example.victim-app", nested: { safe: false } });
     unsubscribe();
     expect(received).toHaveLength(1);
     expect(Object.isFrozen(received[0])).toBe(true);
     expect(Object.isFrozen((received[0] as { payload: object }).payload)).toBe(true);
 
     const report = scoped.diagnostics.getReport() as Record<string, unknown>;
-    expect(report).toEqual(expect.objectContaining({ appId: app.id, responderId: `application:${app.id}`, live: true }));
+    expect(report).toEqual(expect.objectContaining({ appId: app.bundleIdentifier, responderId: `application:${app.bundleIdentifier}`, live: true }));
     expect(report.snapshot).toBeUndefined();
     expect(report.responders).toBeUndefined();
     const tombstone = scoped.state.getSnapshot();
@@ -244,16 +244,16 @@ describe("mounted application context and interaction authority", () => {
   it("routes commands through an owned responder lease and rejects global, foreign, and stale tuples", async () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
-    const app = registerApp(runtime, "command-app");
-    const victim = registerApp(runtime, "victim-app");
-    runtime.responders.register({ id: "control:command-app", kind: "control", parentId: `application:${app.id}`, scopeId: "command-app" });
-    runtime.responders.register({ id: "control:victim-app", kind: "control", parentId: `application:${victim.id}`, scopeId: "victim-app" });
-    const mount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.id}` });
+    const app = registerApp(runtime, "com.example.command-app");
+    const victim = registerApp(runtime, "com.example.victim-app");
+    runtime.responders.register({ id: "control:command-app", kind: "control", parentId: `application:${app.bundleIdentifier}`, scopeId: "com.example.command-app" });
+    runtime.responders.register({ id: "control:victim-app", kind: "control", parentId: `application:${victim.bundleIdentifier}`, scopeId: "com.example.victim-app" });
+    const mount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.bundleIdentifier}` });
     const execute = vi.fn();
     const registration = mount.runtime.commands.register({
-      id: "command-app.probe",
+      id: "com.example.command-app.probe",
       responderId: "control:command-app",
-      title: { key: "command-app.probe", fallback: "Probe" },
+      title: { key: "com.example.command-app.probe", fallback: "Probe" },
       payload: noPayload,
       scope: "focused",
       defaultKeyBindings: [],
@@ -277,23 +277,23 @@ describe("mounted application context and interaction authority", () => {
     await expect(mount.runtime.commands.validate("session.logOut")).resolves.toMatchObject({ denied: true, enabled: false });
     const presentations = await mount.runtime.commands.validateMany([
       { key: "logout", commandId: "session.logOut" },
-      { key: "own", commandId: "command-app.probe" },
+      { key: "own", commandId: "com.example.command-app.probe" },
     ]);
     expect(presentations.get("logout")).toEqual(expect.objectContaining({ denied: true }));
     expect(presentations.get("own")).toEqual(expect.objectContaining({ enabled: true, responderId: "control:command-app" }));
-    expect(() => mount.runtime.commands.prepareDispatch("command-app.probe", { appId: "victim-app" })).toThrow(/another application/i);
-    await expect(mount.runtime.commands.dispatch("command-app.probe")).resolves.toMatchObject({ status: "executed", responderId: "control:command-app" });
+    expect(() => mount.runtime.commands.prepareDispatch("com.example.command-app.probe", { appId: "com.example.victim-app" })).toThrow(/another application/i);
+    await expect(mount.runtime.commands.dispatch("com.example.command-app.probe")).resolves.toMatchObject({ status: "executed", responderId: "control:command-app" });
     expect(execute).toHaveBeenCalledTimes(1);
 
-    const prepared = mount.runtime.commands.prepareDispatch("command-app.probe");
+    const prepared = mount.runtime.commands.prepareDispatch("com.example.command-app.probe");
     expect(prepared).toMatchObject({ status: "accepted" });
     if (prepared instanceof Promise || prepared.status !== "accepted") throw new Error("Expected synchronous command acceptance.");
     mount.dispose("stale command tuple");
-    const replacement = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.id}` });
+    const replacement = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.bundleIdentifier}` });
     const replacementRegistration = replacement.runtime.commands.register({
-      id: "command-app.probe",
+      id: "com.example.command-app.probe",
       responderId: "control:command-app",
-      title: { key: "command-app.probe", fallback: "Probe" },
+      title: { key: "com.example.command-app.probe", fallback: "Probe" },
       payload: noPayload,
       scope: "focused",
       defaultKeyBindings: [],
@@ -301,7 +301,7 @@ describe("mounted application context and interaction authority", () => {
       validate: () => ({ enabled: true }),
       execute,
     });
-    await expect(replacement.runtime.commands.dispatch("command-app.probe", undefined, { acceptance: prepared.acceptance })).resolves.toMatchObject({ status: "cancelled" });
+    await expect(replacement.runtime.commands.dispatch("com.example.command-app.probe", undefined, { acceptance: prepared.acceptance })).resolves.toMatchObject({ status: "cancelled" });
     replacementRegistration.dispose();
     registration.dispose();
     replacement.dispose();
@@ -310,31 +310,31 @@ describe("mounted application context and interaction authority", () => {
   it("allows mounted command and focus authority beneath an app-owned canonical document while rejecting a foreign document tree", async () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
-    const app = registerApp(runtime, "document-child-owner");
-    const victim = registerApp(runtime, "document-child-victim");
+    const app = registerApp(runtime, "com.example.document-child-owner");
+    const victim = registerApp(runtime, "com.example.document-child-victim");
     runtime.documents.registerType(noteType);
     const ownedDocument = await runtime.documents.newDocument({
       documentId: "owned-canonical-document",
       typeId: noteType.id,
-      applicationId: app.id,
+      applicationId: app.bundleIdentifier,
     });
     const foreignDocument = await runtime.documents.newDocument({
       documentId: "foreign-canonical-document",
       typeId: noteType.id,
-      applicationId: victim.id,
+      applicationId: victim.bundleIdentifier,
     });
     // Canonical document -> owning application joins app workflow providers;
     // the document undo owner and foreign descendant fences remain distinct.
     expect(runtime.responders.get(`document:${ownedDocument.id}`)).toMatchObject({
       kind: "document",
-      parentId: `application:${app.id}`,
+      parentId: `application:${app.bundleIdentifier}`,
       scopeId: "root",
       undoOwner: { kind: "document", id: ownedDocument.id },
       diagnosticsLabel: `Document ${ownedDocument.id}`,
     });
     expect(runtime.responders.get(`document:${foreignDocument.id}`)).toMatchObject({
       kind: "document",
-      parentId: `application:${victim.id}`,
+      parentId: `application:${victim.bundleIdentifier}`,
       scopeId: "root",
       undoOwner: { kind: "document", id: foreignDocument.id },
       diagnosticsLabel: `Document ${foreignDocument.id}`,
@@ -344,7 +344,7 @@ describe("mounted application context and interaction authority", () => {
     render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={siteBranding}>
-          <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.id}`}>
+          <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.bundleIdentifier}`}>
             <CanonicalDocumentChildProbe documentId={ownedDocument.id} onComplete={completed} />
           </SynWareRuntimeMount>
         </HostSiteBrandingProvider>
@@ -366,10 +366,10 @@ describe("mounted application context and interaction authority", () => {
       scopeId: `document:${foreignDocument.id}`,
       undoOwner: { kind: "document", id: foreignDocument.id },
     });
-    const directMount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.id}` });
+    const directMount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.bundleIdentifier}` });
     runtime.focus.setActiveAnchors({
       ...runtime.focus.getActiveAnchors(),
-      applicationResponderId: `application:${app.id}`,
+      applicationResponderId: `application:${app.bundleIdentifier}`,
     });
     expect(() => directMount.runtime.focus.requestFocus(`document:${foreignDocument.id}:editor:body`)).toThrow(/owned responders/i);
     directMount.dispose("foreign canonical document descendant test");
@@ -379,12 +379,12 @@ describe("mounted application context and interaction authority", () => {
   it("keeps colour mutations bound to the issuing target lease across replacement and disposal", () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
-    const app = registerApp(runtime, "colour-app");
-    const victim = registerApp(runtime, "victim-app");
-    runtime.responders.register({ id: "colour:app", kind: "control", parentId: `application:${app.id}`, scopeId: "colour:app" });
-    runtime.responders.register({ id: "colour:victim", kind: "control", parentId: `application:${victim.id}`, scopeId: "colour:victim" });
-    const mount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.id}` });
-    const victimMount = createMountedSynWareRuntime({ runtime, app: victim, responderId: `application:${victim.id}` });
+    const app = registerApp(runtime, "com.example.colour-app");
+    const victim = registerApp(runtime, "com.example.victim-app");
+    runtime.responders.register({ id: "colour:app", kind: "control", parentId: `application:${app.bundleIdentifier}`, scopeId: "colour:app" });
+    runtime.responders.register({ id: "colour:victim", kind: "control", parentId: `application:${victim.bundleIdentifier}`, scopeId: "colour:victim" });
+    const mount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.bundleIdentifier}` });
+    const victimMount = createMountedSynWareRuntime({ runtime, app: victim, responderId: `application:${victim.bundleIdentifier}` });
     const appTarget = {
       id: "app-well",
       responderId: "colour:app",
@@ -423,12 +423,12 @@ describe("mounted application context and interaction authority", () => {
   it("keeps a departing colour panel's presentation read safe without exposing another app's target", () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
-    const app = registerApp(runtime, "outgoing-colour-app");
-    const victim = registerApp(runtime, "outgoing-colour-victim");
-    runtime.responders.register({ id: "colour:outgoing", kind: "control", parentId: `application:${app.id}`, scopeId: "colour:outgoing" });
-    runtime.responders.register({ id: "colour:outgoing-victim", kind: "control", parentId: `application:${victim.id}`, scopeId: "colour:outgoing-victim" });
-    const mount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.id}` });
-    const victimMount = createMountedSynWareRuntime({ runtime, app: victim, responderId: `application:${victim.id}` });
+    const app = registerApp(runtime, "com.example.outgoing-colour-app");
+    const victim = registerApp(runtime, "com.example.outgoing-colour-victim");
+    runtime.responders.register({ id: "colour:outgoing", kind: "control", parentId: `application:${app.bundleIdentifier}`, scopeId: "colour:outgoing" });
+    runtime.responders.register({ id: "colour:outgoing-victim", kind: "control", parentId: `application:${victim.bundleIdentifier}`, scopeId: "colour:outgoing-victim" });
+    const mount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.bundleIdentifier}` });
+    const victimMount = createMountedSynWareRuntime({ runtime, app: victim, responderId: `application:${victim.bundleIdentifier}` });
 
     mount.runtime.colourPanel.activateTarget({
       id: "outgoing-colour-well",
@@ -464,12 +464,12 @@ describe("mounted application context and interaction authority", () => {
   it("releases every animation owner through one idempotent mount-owned wrapper", () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
-    const app = registerApp(runtime, "animation-app");
-    const mount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.id}` });
+    const app = registerApp(runtime, "com.example.animation-app");
+    const mount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.bundleIdentifier}` });
     const rawRelease = vi.fn();
-    const rawLease = Object.freeze({ appId: app.id, viewId: "view", epoch: 1, release: rawRelease });
+    const rawLease = Object.freeze({ appId: app.bundleIdentifier, viewId: "view", epoch: 1, release: rawRelease });
     vi.spyOn(runtime.animations, "acquireOwner").mockReturnValue(rawLease as never);
-    const lease = mount.runtime.animations.acquireOwner({ appId: app.id, viewId: "view" });
+    const lease = mount.runtime.animations.acquireOwner({ appId: app.bundleIdentifier, viewId: "view" });
     lease.release("caller release");
     lease.release("caller release twice");
     mount.dispose("animation mount disposed");
@@ -479,13 +479,13 @@ describe("mounted application context and interaction authority", () => {
   it("drops the stale same-ID stage generation before rendering its replacement in StrictMode", async () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
-    const app = registerApp(runtime, "replace-app");
+    const app = registerApp(runtime, "com.example.replace-app");
     const generations: SCOSFacade[] = [];
     const frame = (key: string) => (
       <React.StrictMode>
         <SynCloudOSProvider runtime={runtime}>
           <HostSiteBrandingProvider value={siteBranding}>
-          <SynWareRuntimeMount key={key} runtime={runtime} app={app} responderId={`application:${app.id}`}>
+          <SynWareRuntimeMount key={key} runtime={runtime} app={app} responderId={`application:${app.bundleIdentifier}`}>
             <GenerationProbe onGeneration={(context) => { generations.push(context); }} />
           </SynWareRuntimeMount>
           </HostSiteBrandingProvider>
@@ -495,13 +495,13 @@ describe("mounted application context and interaction authority", () => {
     const view = render(frame("first"));
     await screen.findByText("Replacement generation");
     const stale = generations[0] ?? generations.at(-1)!;
-    runtime.apps.registerBundle(createTestBundle({ id: app.id, route: "/replace-app-next" }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: app.bundleIdentifier, route: "/replace-app-next" }));
     view.rerender(frame("replacement"));
     await waitFor(() => expect(generations.length).toBeGreaterThan(2));
     const fresh = generations.at(-1)!;
     expect(fresh).not.toBe(stale);
     expect(() => stale.drag.endpoint()).toThrow(/Runtime transfer authority is no longer live/);
-    expect(fresh.drag.endpoint()).toEqual(expect.objectContaining({ appId: app.id }));
+    expect(fresh.drag.endpoint()).toEqual(expect.objectContaining({ appId: app.bundleIdentifier }));
     view.unmount();
     expect(() => fresh.drag.endpoint()).toThrow(/Runtime transfer authority is no longer live/);
   });
@@ -520,7 +520,7 @@ describe("mounted application context and interaction authority", () => {
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={siteBranding}>
         <SystemProbe />
-        <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.id}`}>
+        <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.bundleIdentifier}`}>
           <MountedProbe commandExecuted={commandExecuted} />
         </SynWareRuntimeMount>
         </HostSiteBrandingProvider>
@@ -537,33 +537,33 @@ describe("mounted application context and interaction authority", () => {
     expect(boundary.dataset.overlayViewport).toBe("1440x900");
 
     fireEvent.focus(screen.getByRole("button", { name: "App scoped command" }));
-    expect(runtime.focus.getFocusedResponderId()).toBe(`control:${app.id}`);
+    expect(runtime.focus.getFocusedResponderId()).toBe(`control:${app.bundleIdentifier}`);
     expect(runtime.focus.inspect().scopes).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: `focus:${app.id}`, parentResponderId: `control:${app.id}`, modal: true, trapFocus: true }),
+      expect.objectContaining({ id: `focus:${app.bundleIdentifier}`, parentResponderId: `control:${app.bundleIdentifier}`, modal: true, trapFocus: true }),
     ]));
     fireEvent.click(screen.getByRole("button", { name: "App scoped command" }));
     await waitFor(() => expect(commandExecuted).toHaveBeenCalledTimes(1));
-    expect(runtime.responders.get(`control:${app.id}`)).toBeTruthy();
+    expect(runtime.responders.get(`control:${app.bundleIdentifier}`)).toBeTruthy();
   });
 
   it("keeps the genuine window mount on the app responder and overlay leases", async () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
     const commandExecuted = vi.fn();
-    const app = registerApp(runtime, "hostile-app", {
+    const app = registerApp(runtime, "com.example.hostile-app", {
       loadModule: async () => ({ default: () => <MountedProbe commandExecuted={commandExecuted} /> }),
     });
     const window = runtime.windows.create(standardWindow("window:hostile-app", {
-      applicationId: app.id,
-      applicationSessionId: app.id,
-      content: { rendererId: "application", parameters: { appId: app.id } },
+      applicationId: app.bundleIdentifier,
+      applicationSessionId: app.bundleIdentifier,
+      content: { rendererId: "application", parameters: { appId: app.bundleIdentifier } },
       restorationKey: "p10.window:hostile-app",
     }));
     await runtime.windows.open(window.id);
-    await runtime.bundles.loadBundle(app.id);
-    const registry = createApplicationWindowContentRendererRegistry(runtime, { [app.id]: runtime.apps.getApp(app.id)! });
-    const content = registry.render(`application:${app.id}`, {
-      mountKey: `application:${app.id}`,
+    await runtime.bundles.loadBundle(app.bundleIdentifier);
+    const registry = createApplicationWindowContentRendererRegistry(runtime, { [app.bundleIdentifier]: runtime.apps.getApp(app.bundleIdentifier)! });
+    const content = registry.render(`application:${app.bundleIdentifier}`, {
+      mountKey: `application:${app.bundleIdentifier}`,
       presentation: {} as WindowPresentation,
       window: window.record,
     });
@@ -576,19 +576,19 @@ describe("mounted application context and interaction authority", () => {
     expect(boundary.dataset.overlayDocument).toBe("real");
     expect(boundary.dataset.overlayWorkArea).toBe("1440x900");
     fireEvent.focus(screen.getByRole("button", { name: "App scoped command" }));
-    expect(runtime.focus.getFocusedResponderId()).toBe(`control:${app.id}`);
+    expect(runtime.focus.getFocusedResponderId()).toBe(`control:${app.bundleIdentifier}`);
     fireEvent.click(screen.getByRole("button", { name: "App scoped command" }));
     await waitFor(() => expect(commandExecuted).toHaveBeenCalledTimes(1));
-    expect(runtime.responders.get(`control:${app.id}`)).toBeTruthy();
+    expect(runtime.responders.get(`control:${app.bundleIdentifier}`)).toBeTruthy();
   });
 
   it("revokes a same-ID genuine-window generation before its replacement renders", async () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
-    const id = "window-replace-app";
-    const windowId = "window-replace-app";
+    const id = "com.example.window-replace-app";
+    const windowId = "com.example.window-replace-app";
     const generations: SCOSFacade[] = [];
-    const bundle = (route: string, label: string) => createTestBundle({ id, route }, {
+    const bundle = (route: string, label: string) => createTestBundle({ bundleIdentifier: id, route }, {
       loadModule: async () => ({
         default: () => <GenerationProbe label={label} onGeneration={(context) => { generations.push(context); }} />,
       }),

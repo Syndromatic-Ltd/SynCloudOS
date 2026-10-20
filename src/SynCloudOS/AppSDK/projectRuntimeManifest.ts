@@ -18,6 +18,7 @@
  */
 
 import { synCloudOSLogoUrl } from "../Resources/frameworkAssets";
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   SynCloudOSAppAboutManifest,
   SynCloudOSAppFrameManifest,
@@ -74,9 +75,8 @@ function projectFrame(
   return { ...rest, rightSlot: { icon, label: rightSlot.label } };
 }
 
-function projectAbout(version: string, about: SynWareRuntimeManifestContext["about"]): SynCloudOSAppAboutManifest {
+function projectAbout(about: SynWareRuntimeManifestContext["about"]): SynCloudOSAppAboutManifest {
   return {
-    version,
     copyright: about?.copyright ?? "",
     trademark: about?.trademark ?? "",
     ...(about?.tagline ? { tagline: about.tagline } : {}),
@@ -90,8 +90,8 @@ export function projectRuntimeManifest(
   manifest: Readonly<SynWareManifestV1>,
   context: SynWareRuntimeManifestContext,
 ): Readonly<SynCloudOSAppManifest> {
-  const id = cleanString(manifest.id);
-  const displayName = cleanString(manifest.title);
+  const id = cleanString(manifest.bundleIdentifier);
+  const displayName = cleanString(manifest.displayName);
   const defaults = manifest.windowDefaults ?? {};
   const presentation = manifest.runtime?.presentation
     ?? (defaults.role === "modal" || defaults.role === "sheet" ? "systemSheet" : "appView");
@@ -117,10 +117,10 @@ export function projectRuntimeManifest(
     : normaliseWindowSmoothSurface(defaults.smoothSurface === false ? "off" : defaults.smoothSurface) ?? "off";
 
   return Object.freeze<SynCloudOSAppManifest>({
-    id,
+    bundleIdentifier: id,
+    version: manifest.version,
     name: id,
     packageName: context.packageName,
-    bundleId: manifest.runtime?.bundleId ?? `com.syndromatic.syncloudos.${context.componentKey}`,
     displayName,
     shortName: displayName,
     description: `${displayName} SynWare.`,
@@ -160,7 +160,7 @@ export function projectRuntimeManifest(
         ...(defaults.resizable === false ? [] : ["resizable", "zoomable"]),
       ] as SynCloudOSAppManifest["window"]["style"],
       mobilePolicy: "fullscreen",
-      restorationKey: `application.${id}.primary`,
+      restorationKey: `application.${normalizeBundleIdentifier(id)}.primary`,
     },
     frame: projectFrame(manifest.frame, context.resourceUrls),
     applicationMenu: manifest.applicationMenu,
@@ -170,7 +170,7 @@ export function projectRuntimeManifest(
     },
     notifications: { showsNotifications, badgeCount: manifest.runtime?.notifications?.badgeCount ?? 0 },
     seo: { title: displayName, description: `${displayName} SynWare.` },
-    about: projectAbout(manifest.version, context.about),
+    about: projectAbout(context.about),
     ...(policy === undefined ? {} : { policy }),
   });
 }

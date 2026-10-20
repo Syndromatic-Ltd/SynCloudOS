@@ -114,11 +114,11 @@ function Probe() {
 function Website({ actions, applicationOutlet }: WebspringViewProps) {
   return <main><button id="open" onClick={() => { void actions.openApp("org.example.audio-codec"); }}>Open audio codec probe</button>{applicationOutlet}</main>;
 }
-const shell = defineWebspring({ manifest: { schemaVersion: 1, id: "org.example.audio-codec-shell", version: "1.0.0", title: "Audio codec shell",
+const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.audio-codec-shell", version: "1.0.0", displayName: "Audio codec shell",
   webspringShell: { views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
     defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "Audio codec" } } } },
   components: { website: Website } });
-const app = createSynWare({ manifest: { schemaVersion: 1, id: "org.example.audio-codec", version: "1.0.0", title: "Audio codec probe",
+const app = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.audio-codec", version: "1.0.0", displayName: "Audio codec probe",
   permissions: ["audio.play"], runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"],
   routes: [{ path: "/audio-codec", primary: true }], webspring: { visible: true, order: 1 } }, root: Probe });
 mountSynCloudOS({ element: document.getElementById("root")!, bundles: [app], shell, authentication: "disabled" })

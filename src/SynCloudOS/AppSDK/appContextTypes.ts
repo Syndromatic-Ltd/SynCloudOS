@@ -90,7 +90,7 @@ export interface SynWareContextValue {
   readonly appId: string;
   /** Static identity beyond the ID: the version the app declared and the
    * display title error messages and `SCOS.app` use. */
-  readonly appInfo: Readonly<{ readonly id: string; readonly version: string; readonly title: string }>;
+  readonly appInfo: Readonly<{ readonly bundleIdentifier: string; readonly version: string; readonly displayName: string }>;
   /** Catalogue lookups for `SCOS.open` when the caller names an app ID. */
   readonly launcher: AppLauncherClient;
   /** The mount's own responder identity; no foreign responder lookup is

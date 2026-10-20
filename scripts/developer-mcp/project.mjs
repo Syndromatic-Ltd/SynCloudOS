@@ -129,18 +129,18 @@ export function applicationHostHints(root) {
   function string(expression, fallback) {
     if (expression===undefined) return fallback;
     if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) return expression.text;
-    throw new Error("Application id, frame and authentication policy must be literal strings.");
+    throw new Error("Application bundleIdentifier, frame and authentication policy must be literal strings.");
   }
   try {
     if (node.arguments.length!==1) return unresolved("Mount must have exactly one inline options argument.");
     const options=properties(node.arguments[0]);
     if (!options.has("application")) return {status:"checked",...location,application:null};
     const application=properties(options.get("application"));
-    const id=string(application.get("id")), frame=string(application.get("frame"),"fullscreen");
-    if (!id || !["fullscreen","declared"].includes(frame)) return unresolved("Primary application id/frame is missing or invalid.");
+    const bundleIdentifier=string(application.get("bundleIdentifier")), frame=string(application.get("frame"),"fullscreen");
+    if (!bundleIdentifier || !["fullscreen","declared"].includes(frame)) return unresolved("Primary application bundleIdentifier/frame is missing or invalid.");
     const auth=options.get("authentication");
     const authentication=string(auth && ts.isObjectLiteralExpression(auth) ? properties(auth).get("policy") : auth,"disabled");
     if (!["disabled","optional","required"].includes(authentication)) return unresolved("Authentication policy is invalid.");
-    return {status:"checked",...location,application:{id,frame},authentication};
+    return {status:"checked",...location,application:{bundleIdentifier,frame},authentication};
   } catch (error) {return unresolved(error.message);}
 }

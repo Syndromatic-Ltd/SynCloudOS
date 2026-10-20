@@ -116,16 +116,16 @@ function registerBundleLocaleResources(appBundles: TrustedSynWareBundle[]) {
     try {
       bundleCount += 1;
       if (bundle.localeResources) {
-        const result = LocaleServices.registerBundleLocaleResources(bundle.manifest.id, bundle.localeResources);
+        const result = LocaleServices.registerBundleLocaleResources(bundle.manifest.bundleIdentifier, bundle.localeResources);
         registered += result.registered;
       }
       if (bundle.localeResourceLoader) {
-        LocaleServices.registerBundleLocaleResourceLoader(bundle.manifest.id, bundle.localeResourceLoader);
+        LocaleServices.registerBundleLocaleResourceLoader(bundle.manifest.bundleIdentifier, bundle.localeResourceLoader);
         lazyLoaders += 1;
       }
     } catch (error) {
       failures.push({
-        appId: bundle.manifest.id,
+        appId: bundle.manifest.bundleIdentifier,
         error: error instanceof Error ? error.message : String(error)
       });
     }

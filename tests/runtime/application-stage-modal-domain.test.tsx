@@ -30,7 +30,7 @@ import { createWindowTestDependencies, modalWindow } from "../fixtures/windowTes
 
 vi.mock("../../src/Webspring/ApplicationStageHost", () => ({
   ApplicationStageHost: ({ app }: { readonly app: SynCloudOSAppInfo }) => (
-    <div data-application-stage-host={app.id}>{app.displayName}</div>
+    <div data-application-stage-host={app.bundleIdentifier}>{app.displayName}</div>
   ),
 }));
 
@@ -41,19 +41,19 @@ describe("ApplicationStageLayer modal domain", () => {
     const fixture = createWindowTestDependencies();
     Object.defineProperty(fixture.runtime, "windows", { configurable: true, value: fixture.manager });
     const app = {
-      id: "com.syndromatic.Notes",
+      bundleIdentifier: "com.syndromatic.notes",
       displayName: "Notes",
       presentation: "appView",
       window: { title: "Notes" },
     } as SynCloudOSAppInfo;
-    const modal = fixture.manager.create(modalWindow("application-stage-modal"));
+    const modal = fixture.manager.create(modalWindow("application-stage-modal", null, { applicationId: "com.syndromatic.notes" }));
     await fixture.manager.open(modal.id);
     const view = render(
       <SynCloudOSProvider runtime={fixture.runtime}>
         <ApplicationStageLayer
-          apps={{ [app.id]: app }}
-          lifecycle={{ [app.id]: "active" }}
-          activeAppId={app.id}
+          apps={{ [app.bundleIdentifier]: app }}
+          lifecycle={{ [app.bundleIdentifier]: "active" }}
+          activeAppId={app.bundleIdentifier}
         />
       </SynCloudOSProvider>,
     );
@@ -71,7 +71,7 @@ describe("ApplicationStageLayer modal domain", () => {
     const fixture = createWindowTestDependencies();
     Object.defineProperty(fixture.runtime, "windows", { configurable: true, value: fixture.manager });
     const app = {
-      id: "com.syndromatic.Notes",
+      bundleIdentifier: "com.syndromatic.notes",
       displayName: "Notes",
       presentation: "appView",
       window: { title: "Notes" },
@@ -84,9 +84,9 @@ describe("ApplicationStageLayer modal domain", () => {
     const view = render(
       <SynCloudOSProvider runtime={fixture.runtime}>
         <ApplicationStageLayer
-          apps={{ [app.id]: app }}
-          lifecycle={{ [app.id]: "active" }}
-          activeAppId={app.id}
+          apps={{ [app.bundleIdentifier]: app }}
+          lifecycle={{ [app.bundleIdentifier]: "active" }}
+          activeAppId={app.bundleIdentifier}
         />
       </SynCloudOSProvider>,
     );

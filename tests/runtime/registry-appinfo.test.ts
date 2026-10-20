@@ -27,18 +27,17 @@ describe("AppRegistry and AppInfo registration preflight", () => {
   it("rejects fatal route collisions using normalized route keys without capturing runtime errors", async () => {
     const { AppRegistry, RuntimeController } = createRuntimeHarness(createTestRuntime());
 
-    AppRegistry.register(createTestManifest({ id: "alpha", route: "/alpha" }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.alpha", route: "/alpha" }));
     const rejected = AppRegistry.register(createTestManifest({
-      id: "alpha-copy",
+      bundleIdentifier: "com.example.alpha-copy",
       packageName: "AlphaCopy.app",
-      bundleId: "com.syndromatic.tests.alpha-copy",
       route: "/ALPHA/?preview=1#top"
     }));
 
     const latestHistory = AppRegistry.getRegistrationHistory().at(-1);
 
     expect(rejected).toBeNull();
-    expect(AppRegistry.getAllApps().map((app) => app.id)).toEqual(["alpha"]);
+    expect(AppRegistry.getAllApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.alpha"]);
     expect(latestHistory).toMatchObject({
       action: "failed",
       result: "rejected",
@@ -56,11 +55,10 @@ describe("AppRegistry and AppInfo registration preflight", () => {
   it("rejects duplicate component keys instead of preserving compatibility aliases", async () => {
     const { AppRegistry, RuntimeController } = createRuntimeHarness(createTestRuntime());
 
-    AppRegistry.register(createTestManifest({ id: "primary-component", componentKey: "SharedComponent" }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.primary-component", componentKey: "SharedComponent" }));
     const rejected = AppRegistry.register(createTestManifest({
-      id: "alias-component",
+      bundleIdentifier: "com.example.alias-component",
       packageName: "AliasComponent.app",
-      bundleId: "com.syndromatic.tests.alias-component",
       route: "/alias-component",
       componentKey: "SharedComponent"
     }));
@@ -79,9 +77,9 @@ describe("AppRegistry and AppInfo registration preflight", () => {
   it("projects a minimal V1 manifest into a standard app-view runtime manifest", async () => {
     const manifest = projectRuntimeManifest({
       schemaVersion: 1,
-      id: "hello-world",
+      bundleIdentifier: "com.example.hello-world",
       version: "1.0.0",
-      title: "Hello World",
+      displayName: "Hello World",
     }, {
       appRoot: "./HelloWorld.app",
       packageName: "HelloWorld.app",
@@ -89,12 +87,11 @@ describe("AppRegistry and AppInfo registration preflight", () => {
       componentKey: "HelloWorld",
     });
 
-    expect(manifest).toMatchObject({
-      id: "hello-world",
+    expect(manifest).toMatchObject({ version: "1.0.0",
+      bundleIdentifier: "com.example.hello-world",
       packageName: "HelloWorld.app",
-      bundleId: "com.syndromatic.syncloudos.HelloWorld",
       displayName: "Hello World",
-      route: "/hello-world",
+      route: "/com.example.hello-world",
       path: "HelloWorld.app/",
       componentKey: "HelloWorld",
       presentation: "appView",
@@ -121,13 +118,12 @@ describe("AppRegistry and AppInfo registration preflight", () => {
   it("derives V1 runtime identity and access from declarations after an app is renamed", () => {
     const manifest = projectRuntimeManifest({
       schemaVersion: 1,
-      id: "renamed-publisher",
+      bundleIdentifier: "com.example.renamed-publisher",
       version: "1.0.0",
-      title: "Renamed Publisher",
+      displayName: "Renamed Publisher",
       routes: [{ path: "/renamed-publisher", primary: true }],
       services: [{ id: "notifications", required: true }],
       runtime: {
-        bundleId: "com.syndromatic.app.renamed-publisher",
         presentation: "windowedView",
         policy: { requiresLogin: true, requiredCapabilities: ["journal.publisher.open"] },
         notifications: { badgeCount: 2 },
@@ -140,8 +136,7 @@ describe("AppRegistry and AppInfo registration preflight", () => {
     });
 
     expect(manifest).toMatchObject({
-      id: "renamed-publisher",
-      bundleId: "com.syndromatic.app.renamed-publisher",
+      bundleIdentifier: "com.example.renamed-publisher",
       presentation: "windowedView",
       policy: { requiresLogin: true, requiredCapabilities: ["journal.publisher.open"] },
       notifications: { showsNotifications: true, badgeCount: 2 },
@@ -151,9 +146,9 @@ describe("AppRegistry and AppInfo registration preflight", () => {
   it("rejects legacy atmo window chrome at the V1 manifest boundary", () => {
     const result = validateSynWareManifest({
       schemaVersion: 1,
-      id: "atmo-legacy",
+      bundleIdentifier: "com.example.atmo-legacy",
       version: "1.0.0",
-      title: "Atmo Legacy",
+      displayName: "Atmo Legacy",
       routes: [{ path: "/atmo-legacy", primary: true }],
       windowDefaults: {
         chrome: "atmo",
@@ -179,30 +174,29 @@ describe("AppRegistry and AppInfo registration preflight", () => {
     const { AppRegistry } = createRuntimeHarness(createTestRuntime());
 
     AppRegistry.register(createTestManifest({
-      id: "mixed-route",
+      bundleIdentifier: "com.example.mixed-route",
       route: "Mixed\\Route///?mode=edit#section"
     }));
 
-    expect(AppRegistry.getApp("mixed-route")?.route).toBe("/mixed/route");
-    expect(AppRegistry.getAppForRoute("/MIXED/route/?ignored=true#hash")?.id).toBe("mixed-route");
+    expect(AppRegistry.getApp("com.example.mixed-route")?.route).toBe("/mixed/route");
+    expect(AppRegistry.getAppForRoute("/MIXED/route/?ignored=true#hash")?.bundleIdentifier).toBe("com.example.mixed-route");
   });
 
   it("registers unsafe external routes disabled with warnings instead of ErrorManager noise", async () => {
     const { AppRegistry, RuntimeController } = createRuntimeHarness(createTestRuntime());
 
     const registered = AppRegistry.register(createTestManifest({
-      id: "unsafe-external",
+      bundleIdentifier: "com.example.unsafe-external",
       type: "external",
       route: "javascript:alert(1)",
       packageName: "UnsafeExternal.app",
-      bundleId: "com.syndromatic.tests.unsafe-external",
       requiredServices: ["externalLinking"]
     }));
 
     const latestHistory = AppRegistry.getRegistrationHistory().at(-1);
 
-    expect(registered).toMatchObject({ id: "unsafe-external", isDisabled: true });
-    expect(RuntimeController.getSnapshot().lifecycle["unsafe-external"]).toBe("disabled");
+    expect(registered).toMatchObject({ bundleIdentifier: "com.example.unsafe-external", isDisabled: true });
+    expect(RuntimeController.getSnapshot().lifecycle["com.example.unsafe-external"]).toBe("disabled");
     expect(latestHistory).toMatchObject({
       action: "register",
       result: "accepted",
@@ -217,35 +211,41 @@ describe("AppRegistry and AppInfo registration preflight", () => {
     const { AppRegistry } = createRuntimeHarness(createTestRuntime());
 
     AppRegistry.register(createTestManifest({
-      id: "identity-source",
-      packageName: "Identity.app",
-      bundleId: "com.syndromatic.tests.identity"
+      bundleIdentifier: "com.example.Identity",
+      packageName: "Identity.app"
     }));
 
     const report = AppRegistry.preflight(createTestManifest({
-      id: "identity-copy",
+      bundleIdentifier: "COM.EXAMPLE.IDENTITY",
       packageName: "identity.app",
-      bundleId: "COM.SYNDROMATIC.TESTS.IDENTITY",
       route: "/identity-copy"
     }));
 
     expect(report).toMatchObject({
       ok: false,
       fatalIssues: expect.arrayContaining([
-        expect.objectContaining({ code: "registry.bundleId.collision" }),
+        expect.objectContaining({ code: "registry.bundleIdentifier.collision", field: "bundleIdentifier" }),
         expect.objectContaining({ code: "registry.packageName.collision" })
       ])
     });
-    expect(AppRegistry.getAllApps().map((app) => app.id)).toEqual(["identity-source"]);
+    expect(AppRegistry.getAllApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.Identity"]);
+  });
+
+  it("preserves declared identity while differently-cased lookups resolve the same app", () => {
+    const { AppRegistry } = createRuntimeHarness(createTestRuntime());
+    const registered = AppRegistry.register(createTestManifest({ bundleIdentifier: "Com.Example.MixedCase", displayName: "Mixed Case" }));
+    expect(registered?.bundleIdentifier).toBe("Com.Example.MixedCase");
+    expect(AppRegistry.getApp("com.example.mixedcase")).toStrictEqual(registered);
+    expect(AppRegistry.getApp("COM.EXAMPLE.MIXEDCASE")).toStrictEqual(registered);
   });
 
 
   it("normalises app-view frame composition separately from presentation", async () => {
     const { AppRegistry } = createRuntimeHarness(createTestRuntime());
 
-    const standard = AppRegistry.register(createTestManifest({ id: "standard-frame" }));
+    const standard = AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.standard-frame" }));
     const appOwned = AppRegistry.register(createTestManifest({
-      id: "app-owned-frame",
+      bundleIdentifier: "com.example.app-owned-frame",
       frame: {
         material: "metal",
         topBar: "custom"
@@ -289,13 +289,13 @@ describe("AppRegistry and AppInfo registration preflight", () => {
   it("normalises app-view smooth surface defaults, opt-outs, and radius shorthand", async () => {
     const { AppRegistry } = createRuntimeHarness(createTestRuntime());
 
-    const defaulted = AppRegistry.register(createTestManifest({ id: "smooth-default" }));
+    const defaulted = AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.smooth-default" }));
     const disabled = AppRegistry.register(createTestManifest({
-      id: "smooth-disabled",
+      bundleIdentifier: "com.example.smooth-disabled",
       frame: { smoothSurface: "off" }
     }));
     const custom = AppRegistry.register(createTestManifest({
-      id: "smooth-custom",
+      bundleIdentifier: "com.example.smooth-custom",
       frame: { smoothSurface: 68 }
     }));
 
@@ -308,11 +308,11 @@ describe("AppRegistry and AppInfo registration preflight", () => {
     const { AppRegistry } = createRuntimeHarness(createTestRuntime());
 
     const defaulted = AppRegistry.register(createTestManifest({
-      id: "sourcelist-default",
+      bundleIdentifier: "com.example.sourcelist-default",
       frame: { material: "metal", topBar: "standard", sourceList: {} }
     }));
     const custom = AppRegistry.register(createTestManifest({
-      id: "sourcelist-custom",
+      bundleIdentifier: "com.example.sourcelist-custom",
       frame: {
         material: "metal",
         topBar: "standard",
@@ -329,7 +329,7 @@ describe("AppRegistry and AppInfo registration preflight", () => {
     const { AppRegistry } = createRuntimeHarness(createTestRuntime());
 
     const appOwned = AppRegistry.register(createTestManifest({
-      id: "sourcelist-custom-topbar",
+      bundleIdentifier: "com.example.sourcelist-custom-topbar",
       frame: { material: "metal", topBar: "custom", sourceList: { defaultWidth: 300 } }
     }));
 
@@ -344,7 +344,7 @@ describe("AppRegistry and AppInfo registration preflight", () => {
   it("keeps invalid frame fields as warnings and falls back to the standard frame", async () => {
     const { AppRegistry } = createRuntimeHarness(createTestRuntime());
     const registered = AppRegistry.register(createTestManifest({
-      id: "invalid-frame",
+      bundleIdentifier: "com.example.invalid-frame",
       frame: {
         material: "panel" as never,
         topBar: "toolbar" as never,
@@ -384,7 +384,7 @@ describe("AppRegistry and AppInfo registration preflight", () => {
     const rightSlot = { icon: "/assets/help.svg", label: { key: "help.label", fallback: "Help" } };
     const background = { colour: "#223344", texture: "none" as const };
     const registered = AppRegistry.register(createTestManifest({
-      id: "custom-frame",
+      bundleIdentifier: "com.example.custom-frame",
       frame: { rightSlot, background, layout: "simple" } as never
     }));
 
@@ -396,12 +396,12 @@ describe("AppRegistry and AppInfo registration preflight", () => {
   it("reports optional services without disabling the app", async () => {
     const { AppRegistry } = createRuntimeHarness(createTestRuntime());
     const registered = AppRegistry.register(createTestManifest({
-      id: "optional-service-app",
+      bundleIdentifier: "com.example.optional-service-app",
       optionalServices: ["missing.optional", "windowing"]
     }));
 
     expect(registered).toMatchObject({
-      id: "optional-service-app",
+      bundleIdentifier: "com.example.optional-service-app",
       isDisabled: false,
       optionalServiceStatus: {
         "missing.optional": false,

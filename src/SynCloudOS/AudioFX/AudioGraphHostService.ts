@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { AUFXAudioEngine } from "../../FX/AudioFX/AUFXAudioEngine";
 import type { AUFXAudioFormat } from "../../FX/AudioFX/AUFXAudioFormat";
 import type { AUFXAudioPlayerNode } from "../../FX/AudioFX/AUFXAudioPlayerNode";
@@ -101,7 +102,7 @@ export function createAudioGraphHostService(bus: AUFXSystemFeedbackBus, owner: A
     createTimelineTransport(engine: AUFXAudioEngine, options: Readonly<{ capability: object; appId?: string; players?: readonly AUFXAudioPlayerNode[]; signal?: AbortSignal }>) {
       if (disposed) throw new DOMException("Audio graph host is disposed.", "AbortError");
       const identity = engineOwners.get(engine);
-      if (!identity || identity.capability !== options.capability || identity.appId !== options.appId)
+      if (!identity || identity.capability !== options.capability || normalizeBundleIdentifier(identity.appId) !== normalizeBundleIdentifier(options.appId))
         throw new DOMException("Audio timeline requires this mount's engine capability.", "InvalidAccessError");
       return engine.createTimelineTransport(options.players, options.signal);
     },

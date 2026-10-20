@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import type { SynCloudOSRuntime } from "../SynCloudOS/SynCloudOS";
 
 const restoredRouteKey = "syncloudos:last-active-app-route";
@@ -81,13 +82,13 @@ function shouldSkipSpeculativePrefetch(runtime: SynCloudOSRuntime) {
 function canPrefetchApp(runtime: SynCloudOSRuntime, state: PrefetchState, appId: string) {
   const app = runtime.apps.getApp(appId);
   if (!app || app.isDisabled || app.type === "external" || app.lifecycle.preload !== true) return false;
-  return !runtime.bundles.getLoadedBundle(appId) && !state.prefetchedAppIds.has(appId);
+  return !runtime.bundles.getLoadedBundle(appId) && !state.prefetchedAppIds.has(normalizeBundleIdentifier(appId));
 }
 
 function enqueuePrefetch(runtime: SynCloudOSRuntime, state: PrefetchState, appId: string, reason: PrefetchReason) {
   if (!canPrefetchApp(runtime, state, appId)) return;
-  if (state.queuedPrefetches.some((item) => item.appId === appId) || state.activePrefetch) {
-    if (!state.queuedPrefetches.some((item) => item.appId === appId)) state.queuedPrefetches.push({ appId, reason });
+  if (state.queuedPrefetches.some((item) => normalizeBundleIdentifier(item.appId) === normalizeBundleIdentifier(appId)) || state.activePrefetch) {
+    if (!state.queuedPrefetches.some((item) => normalizeBundleIdentifier(item.appId) === normalizeBundleIdentifier(appId))) state.queuedPrefetches.push({ appId, reason });
     return;
   }
   state.queuedPrefetches.push({ appId, reason });
@@ -103,7 +104,7 @@ function drainPrefetchQueue(runtime: SynCloudOSRuntime, state: PrefetchState) {
     return;
   }
 
-  state.prefetchedAppIds.add(next.appId);
+  state.prefetchedAppIds.add(normalizeBundleIdentifier(next.appId));
   state.activePrefetch = runtime.bundles.loadBundle(next.appId);
   const finish = () => {
     state.activePrefetch = null;
@@ -116,8 +117,8 @@ function getRestoredRouteAppId(runtime: SynCloudOSRuntime) {
   if (typeof window === "undefined") return null;
   const restoredRoute = window.sessionStorage.getItem(restoredRouteKey);
   if (!restoredRoute) return null;
-  const route = runtime.routes.resolveRoute(restoredRoute) as { kind: string; app?: { id: string } };
-  return route.kind === "app" && route.app ? route.app.id : null;
+  const route = runtime.routes.resolveRoute(restoredRoute) as { kind: string; app?: { bundleIdentifier: string } };
+  return route.kind === "app" && route.app ? route.app.bundleIdentifier : null;
 }
 
 function requestIdle(callback: () => void) {
@@ -136,18 +137,18 @@ export function scheduleWebspringAppPrefetch(runtime: SynCloudOSRuntime, appId: 
   const state = stateFor(runtime);
   cancelWebspringAppPrefetch(runtime, appId);
   const timer = window.setTimeout(() => {
-    state.hoverTimers.delete(appId);
+    state.hoverTimers.delete(normalizeBundleIdentifier(appId));
     enqueuePrefetch(runtime, state, appId, "hover");
   }, hoverPrefetchDelayMs);
-  state.hoverTimers.set(appId, timer);
+  state.hoverTimers.set(normalizeBundleIdentifier(appId), timer);
 }
 
 export function cancelWebspringAppPrefetch(runtime: SynCloudOSRuntime, appId: string) {
   const state = stateFor(runtime);
-  const timer = state.hoverTimers.get(appId);
+  const timer = state.hoverTimers.get(normalizeBundleIdentifier(appId));
   if (timer === undefined || typeof window === "undefined") return;
   window.clearTimeout(timer);
-  state.hoverTimers.delete(appId);
+  state.hoverTimers.delete(normalizeBundleIdentifier(appId));
 }
 
 export function scheduleWebspringIdlePrefetch(runtime: SynCloudOSRuntime) {
@@ -157,9 +158,9 @@ export function scheduleWebspringIdlePrefetch(runtime: SynCloudOSRuntime) {
   requestIdle(() => {
     const candidates = [
       getRestoredRouteAppId(runtime),
-      ...runtime.apps.getDisplayApps().map((app) => app.id)
+      ...runtime.apps.getDisplayApps().map((app) => app.bundleIdentifier)
     ].filter((appId): appId is string => Boolean(appId));
-    const uniqueCandidates = Array.from(new Set(candidates));
+    const uniqueCandidates = Array.from(new Set(candidates.map(normalizeBundleIdentifier)));
     uniqueCandidates
       .filter((appId) => canPrefetchApp(runtime, state, appId))
       .slice(0, maxIdlePrefetchCount)

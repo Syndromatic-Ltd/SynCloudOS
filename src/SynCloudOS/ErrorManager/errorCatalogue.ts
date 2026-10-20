@@ -13,7 +13,7 @@ export interface ErrorCatalogueEntry {
   readonly appliesTo?: string;
 }
 export const errorCatalogue: readonly ErrorCatalogueEntry[] = Object.freeze([
-  {code:"APP_NOT_FOUND",title:"SynCloudOS could not find an app registered with that identifier",cause:"The requested app id is absent from the registered composition.",fix:"Check manifest.id and include the bundle in the host's bundles array.",docs:"docs/framework/getting-started.md"},
+  {code:"APP_NOT_FOUND",title:"SynCloudOS could not find an app registered with that identifier",cause:"The requested bundle identifier is absent from the registered composition.",fix:"Check manifest.bundleIdentifier and include the bundle in the host's bundles array.",docs:"docs/framework/getting-started.md"},
   {code:"ROUTE_NOT_FOUND",title:"SynCloudOS could not match the requested address to a registered SynWare",cause:"No registered manifest route matches the pathname.",fix:"Declare the route in Info.ts and register its bundle; check the host base path.",docs:"docs/framework/synware-sdk.md"},
   {code:"APP_LAUNCH_FAILED",title:"SynCloudOS could not load the requested content",cause:"Loading or starting the app rejected.",fix:"Inspect the original technical message, verify the app entry export and resolve failing imports or startup operations.",docs:"docs/framework/getting-started.md"},
   {code:"APP_NOT_RESPONDING",title:"Application has stopped responding",cause:"The app response deadline expired.",fix:"Inspect long synchronous work and unresolved startup operations; move expensive work off the main thread.",docs:"docs/framework/synware-sdk.md"},

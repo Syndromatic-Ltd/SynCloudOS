@@ -41,7 +41,7 @@ export function ResponderScope({ responderId, kind, parentResponderId, scopeId, 
   const kernelRuntime = useContext(SynCloudOSRuntimeContext);
   const runtime = appRuntime ?? kernelRuntime;
   if (!runtime) throw new Error("ResponderScope must be used within SynCloudOSProvider or a mounted SynWare.");
-  const runtimeId = appRuntime ? `app:${appRuntime.app.id}` : kernelRuntime!.runtimeId;
+  const runtimeId = appRuntime ? `app:${appRuntime.app.bundleIdentifier}` : kernelRuntime!.runtimeId;
   const parentHierarchy = useResponderHierarchy();
   const resolvedParentResponderId = parentResponderId ?? parentHierarchy.responderId ?? undefined;
   const hierarchy = useMemo(() => ({

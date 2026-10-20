@@ -92,7 +92,7 @@ describe("view controller lifecycle", () => {
     class StrictApp extends NSEApplication {
       static override mainWindow = StrictWindow;
     }
-    const host = createClassApplicationHost(StrictApp, "strict-view-app");
+    const host = createClassApplicationHost(StrictApp, "com.example.strict-view-app");
     hosts.push(host);
     await host.launch();
     host.mountWindows({ strict: true });

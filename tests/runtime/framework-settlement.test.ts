@@ -292,7 +292,7 @@ describe("framework finite-work settlement", () => {
     const routeGraph = defineSynWareRoutes({
       id: "test03.chain.routes",
       routes: [{
-        name: "music",
+        name: "com.example.music",
         path: "",
         component: Music,
         children: [{
@@ -310,9 +310,9 @@ describe("framework finite-work settlement", () => {
     registerTestSynWare(runtime, createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "journal",
+        bundleIdentifier: "com.example.journal",
         version: "1.0.0",
-        title: "Journal",
+        displayName: "Journal",
         routes: [{ path: "/journal", primary: true }],
         permissions: ["app.open.public"],
       },
@@ -321,9 +321,9 @@ describe("framework finite-work settlement", () => {
     const musicApp = registerTestSynWare(runtime, createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "music",
+        bundleIdentifier: "com.example.music",
         version: "1.0.0",
-        title: "Music",
+        displayName: "Music",
         routes: [{ path: "/music", match: "prefix", primary: true }],
         permissions: ["app.open.public"],
       },
@@ -352,7 +352,7 @@ describe("framework finite-work settlement", () => {
           id: "test03-chain-overlay",
           open,
           anchor: anchorRef.current,
-          parentResponderId: "application:music",
+          parentResponderId: "application:com.example.music",
           onOpenChange: (nextOpen: boolean) => setOpen(nextOpen),
         }, "Chain overlay"),
       );
@@ -394,23 +394,23 @@ describe("framework finite-work settlement", () => {
           SynCloudOSProvider,
           { runtime },
           createElement(ResponderScope, {
-            responderId: "application:music",
+            responderId: "application:com.example.music",
             kind: "application",
             parentResponderId: "runtime",
-            scopeId: "application:music",
+            scopeId: "application:com.example.music",
           }, createElement(
             HostSiteBrandingProvider,
             { value: branding },
             createElement(SynWareRuntimeMount, {
               runtime,
               app: musicApp,
-              responderId: "application:music",
+              responderId: "application:com.example.music",
             }, createElement(MountedSurface)),
           )),
         ));
       });
       await expect(runtime.routes.openRoute("/journal").result).resolves.toMatchObject({ status: "completed", committed: true });
-      expect(runtime.store.getSnapshot().application.activeAppId).toBe("journal");
+      expect(runtime.store.getSnapshot().application.activeAppId).toBe("com.example.journal");
 
       const route = runtime.routes.openRoute("/music/artist/air/album/cross");
       await Promise.resolve();
@@ -425,7 +425,7 @@ describe("framework finite-work settlement", () => {
       });
       await routeDataStarted.promise;
       const multiSwitch = runtime.store.getSnapshot().application.multiSwitch;
-      expect(multiSwitch).toMatchObject({ status: "switching", fromAppId: "journal", toAppId: "music" });
+      expect(multiSwitch).toMatchObject({ status: "switching", fromAppId: "com.example.journal", toAppId: "com.example.music" });
       expect(registry.getState().pending).toContainEqual(expect.objectContaining({
         id: multiSwitch.id,
         owner: "application",
@@ -816,9 +816,9 @@ describe("framework finite-work settlement", () => {
     registerTestSynWare(runtime, createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "journal",
+        bundleIdentifier: "com.example.journal",
         version: "1.0.0",
-        title: "Journal",
+        displayName: "Journal",
         routes: [{ path: "/journal", primary: true }],
         permissions: ["app.open.public"],
       },

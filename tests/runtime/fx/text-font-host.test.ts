@@ -245,9 +245,9 @@ describe("TextFX scoped binary-font host", () => {
 
   it("projects registration through isolated mounted text-layout clients and revokes with the mount", async () => {
     const runtime = createTestRuntime({ id: "runtime:tfx-mounted" });
-    const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "tfx-consumer", version: "1.0.0", title: "TFX consumer" });
-    const first = mountTestSynWareRuntime(runtime, app.id);
-    const second = mountTestSynWareRuntime(runtime, app.id, `application:${app.id}:second`);
+    const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.tfx-consumer", version: "1.0.0", displayName: "TFX consumer" });
+    const first = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
+    const second = mountTestSynWareRuntime(runtime, app.bundleIdentifier, `application:${app.bundleIdentifier}:second`);
     const firstChanges = vi.fn();
     const secondChanges = vi.fn();
     first.runtime.textLayout.subscribeFontReadiness(firstChanges);
@@ -270,8 +270,8 @@ describe("TextFX scoped binary-font host", () => {
 
   it("invalidates an NSE layout when its scoped font readiness changes", async () => {
     const runtime = createTestRuntime({ id: "runtime:tfx-invalidation" });
-    const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "tfx-layout", version: "1.0.0", title: "TFX layout" });
-    const mount = mountTestSynWareRuntime(runtime, app.id);
+    const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.tfx-layout", version: "1.0.0", displayName: "TFX layout" });
+    const mount = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
     const scoped = createSynWareNSETextLayoutPort(mount.runtime.textLayout);
     const manager = new NSELayoutManager({ service: {
       subscribeFontReadiness: scoped.subscribeFontReadiness.bind(scoped),

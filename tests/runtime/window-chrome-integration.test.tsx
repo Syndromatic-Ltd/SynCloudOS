@@ -55,9 +55,9 @@ const hookLog: Array<AppWindowChromeProps | null> = [];
 const HookChromeApp = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.hook-chrome",
+    bundleIdentifier: "com.syndromatic.hook-chrome",
     version: "1.0.0",
-    title: "Hook Chrome",
+    displayName: "Hook Chrome",
     routes: [{ path: "/hook-chrome", primary: true }],
     windowDefaults: { title: "Hook Chrome", chrome: "custom", smoothSurface: "off" },
   },
@@ -81,9 +81,9 @@ function HookChromeProbe({ props }: { props: AppWindowChromeProps }) {
 const CustomWithoutRendererApp = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.chrome-missing",
+    bundleIdentifier: "com.syndromatic.chrome-missing",
     version: "1.0.0",
-    title: "Chrome Missing",
+    displayName: "Chrome Missing",
     routes: [{ path: "/chrome-missing", primary: true }],
     windowDefaults: { title: "Chrome Missing", chrome: "custom", smoothSurface: "off" },
   },
@@ -95,9 +95,9 @@ const CustomWithoutRendererApp = createSynWare({
 const CrashingChromeApp = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.chrome-crash",
+    bundleIdentifier: "com.syndromatic.chrome-crash",
     version: "1.0.0",
-    title: "Chrome Crash",
+    displayName: "Chrome Crash",
     routes: [{ path: "/chrome-crash", primary: true }],
     windowDefaults: { title: "Chrome Crash", chrome: "custom", smoothSurface: "off" },
   },

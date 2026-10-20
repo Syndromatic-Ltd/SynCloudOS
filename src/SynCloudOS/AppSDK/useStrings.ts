@@ -18,6 +18,7 @@
  */
 
 import { useMemo, useSyncExternalStore } from "react";
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { AppLocaleClient } from "./appClientTypes";
 import type { SynCloudOSTranslationParams, SynCloudOSTranslationPrimitive } from "../LocaleServices/localeTypes";
 import { useSynWareContext } from "./SynWareContext";
@@ -32,7 +33,8 @@ function interpolateFallback(message: string, params?: SynCloudOSTranslationPara
 }
 
 export function getSynWareNamespace(appId: string, segment?: string) {
-  return segment ? `synapps.${appId}.${segment}` : `synapps.${appId}`;
+  const key = normalizeBundleIdentifier(appId);
+  return segment ? `synapps.${key}.${segment}` : `synapps.${key}`;
 }
 
 export function translateSynWareText(

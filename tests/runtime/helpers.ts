@@ -83,27 +83,27 @@ function titleCase(value: string) {
 }
 
 export function createTestManifest(overrides: TestManifestOverrides = {}): SynCloudOSAppManifest {
-  const id = overrides.id ?? "test-app";
-  const displayName = overrides.displayName ?? titleCase(id);
+  const bundleIdentifier = overrides.bundleIdentifier ?? "com.example.test-app";
+  const displayName = overrides.displayName ?? titleCase(bundleIdentifier.split(".").at(-1)!);
   const packageName = overrides.packageName ?? `${displayName.replace(/\s+/g, "")}.app`;
 
   return {
-    id,
-    name: overrides.name ?? id,
+    bundleIdentifier,
+    version: overrides.version ?? "1.0.0",
+    name: overrides.name ?? bundleIdentifier,
     packageName,
-    bundleId: overrides.bundleId ?? `com.syndromatic.tests.${id}`,
     displayName,
     shortName: overrides.shortName ?? displayName,
     description: overrides.description ?? `${displayName} test fixture.`,
     type: overrides.type ?? "internal",
-    route: overrides.route ?? `/${id}`,
+    route: overrides.route ?? `/${bundleIdentifier.split(".").at(-1)}`,
     path: overrides.path ?? `${packageName}/`,
     componentKey: overrides.componentKey ?? `${displayName.replace(/\s+/g, "")}Component`,
     presentation: overrides.presentation ?? "appView",
     requiredServices: overrides.requiredServices ?? ["webspring", "routing", "windowing"],
     optionalServices: overrides.optionalServices ?? [],
     icon: {
-      src: `/test-assets/icons/${id}.png`,
+      src: `/test-assets/icons/${bundleIdentifier}.png`,
       alt: `${displayName} icon`,
       ...overrides.icon
     },
@@ -150,9 +150,9 @@ export function createTestBundle(
     : createTestManifest(overrides);
   const testManifest = {
     schemaVersion: 1,
-    id: manifest.id,
-    version: "1.0.0",
-    title: manifest.displayName,
+    bundleIdentifier: manifest.bundleIdentifier,
+    version: manifest.version,
+    displayName: manifest.displayName,
     routes: [{ path: manifest.route, primary: true }],
     services: [...manifest.requiredServices, ...(manifest.optionalServices ?? [])].map((id) => ({
       id,
@@ -537,7 +537,7 @@ export async function installTestHostContributions(
   try {
     for (const contribution of prepared) {
       for (const bundle of contribution.initialBundles) {
-        const appId = bundle.synWareManifest?.id ?? bundle.manifest.id;
+        const appId = bundle.synWareManifest?.bundleIdentifier ?? bundle.manifest.bundleIdentifier;
         if (!runtime.bundles.getBundle(appId) && !runtime.apps.register(bundle)) {
           throw new Error(`Test host contribution bundle ${appId} could not be registered.`);
         }
@@ -601,7 +601,7 @@ export function registerTestSynWare(
   const manifest = isDefinition
     ? (definition as SynWareDefinition).manifest
     : definition as Readonly<SynWareManifestV1>;
-  const appId = manifest.id;
+  const appId = manifest.bundleIdentifier;
   const existing = runtime.apps.getApp(appId);
   if (existing) {
     
@@ -628,9 +628,9 @@ export function createTrustedTestSynWareBundle(
   appDefinition?: SynWareDefinition,
 ) {
   const definition = appDefinition ? createSynWare(appDefinition) : createSynWare({ manifest, root: () => null });
-  if (definition.manifest.id !== manifest.id) throw new Error("Trusted test definition must belong to its declared manifest.");
+  if (definition.manifest.bundleIdentifier !== manifest.bundleIdentifier) throw new Error("Trusted test definition must belong to its declared manifest.");
   return trustSynWareBundleForTest(createSynWareBundle(definition), {
-    sourceKey: `tests/runtime/${manifest.id}`,
+    sourceKey: `tests/runtime/${manifest.bundleIdentifier}`,
     privileges,
   });
 }
@@ -642,11 +642,11 @@ export function registerTrustedTestSynWare(
   privileges: readonly SynWareTrustedPrivilege[],
   appDefinition?: SynWareDefinition,
 ) {
-  const existing = runtime.apps.getApp(manifest.id);
+  const existing = runtime.apps.getApp(manifest.bundleIdentifier);
   if (existing) {
-    const provenance = runtime.bundles.getTrustedBundleProvenance(manifest.id);
+    const provenance = runtime.bundles.getTrustedBundleProvenance(manifest.bundleIdentifier);
     if (!provenance || privileges.some((privilege) => !provenance.privileges.has(privilege))) {
-      throw new Error(`Existing test application ${manifest.id} does not hold the requested trusted provenance.`);
+      throw new Error(`Existing test application ${manifest.bundleIdentifier} does not hold the requested trusted provenance.`);
     }
     return existing;
   }
@@ -654,9 +654,9 @@ export function registerTrustedTestSynWare(
   const { devOnly: _devOnly, route: _route, ...canonicalManifest } = candidate;
   const bundle = createTrustedTestSynWareBundle(canonicalManifest as SynWareManifestV1, privileges, appDefinition);
   const app = runtime.apps.register(bundle);
-  if (!app) throw new Error(`Trusted test application ${manifest.id} could not be registered.`);
-  if (!runtime.bundles.getTrustedBundleProvenance(manifest.id)) {
-    throw new Error(`Trusted test application ${manifest.id} lost its provenance during registration.`);
+  if (!app) throw new Error(`Trusted test application ${manifest.bundleIdentifier} could not be registered.`);
+  if (!runtime.bundles.getTrustedBundleProvenance(manifest.bundleIdentifier)) {
+    throw new Error(`Trusted test application ${manifest.bundleIdentifier} lost its provenance during registration.`);
   }
   return app;
 }

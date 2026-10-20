@@ -713,27 +713,27 @@ export interface SynCloudOSErrorManager extends RuntimeOwnedService {
   createAppNotFoundError(appId: string, context?: Record<string, unknown>): CapturedSynCloudOSError;
   createRouteNotFoundError(pathname: string, context?: Record<string, unknown>): CapturedSynCloudOSError;
   createAppLaunchFailedError(
-    app: { readonly id: string; readonly packageName: string; readonly displayName: string } | null,
+    app: { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string } | null,
     error: unknown,
     context?: Record<string, unknown>,
   ): CapturedSynCloudOSError;
   createNotRespondingError(
-    app: { readonly id: string; readonly packageName: string; readonly displayName: string } | null,
+    app: { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string } | null,
     context?: Record<string, unknown>,
     retry?: () => void,
   ): CapturedSynCloudOSError;
   createConnectionError(
-    app: { readonly id: string; readonly packageName: string; readonly displayName: string } | null,
+    app: { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string } | null,
     error: unknown,
     context?: Record<string, unknown>,
     retry?: () => void,
   ): CapturedSynCloudOSError;
   createLoginSessionMismatchError(
-    app: { readonly id: string; readonly packageName: string; readonly displayName: string } | null,
+    app: { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string } | null,
     context?: Record<string, unknown>,
   ): CapturedSynCloudOSError;
   createAppContentFailedError(
-    app: { readonly id: string; readonly packageName: string; readonly displayName: string } | null,
+    app: { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string } | null,
     error: unknown,
     context?: Record<string, unknown>,
   ): CapturedSynCloudOSError;

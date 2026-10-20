@@ -143,10 +143,11 @@ export function validateSynWareManifest(value: unknown): SynWareManifestValidati
       errors: Object.freeze([boundaryIssue]),
     });
   }
-  if (validate(value)) {
+  const manifest = Object.hasOwn(value, "schemaVersion") ? value : { ...value, schemaVersion: 1 };
+  if (validate(manifest)) {
     return Object.freeze({
       ok: true as const,
-      value: value as SynWareManifestV1,
+      value: manifest as SynWareManifestV1,
       errors: Object.freeze([]) as readonly [],
     });
   }

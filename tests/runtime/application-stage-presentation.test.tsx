@@ -159,17 +159,17 @@ describe("mounted content presentation", () => {
       return <div data-content="true">{overlay.portalHost ? createPortal(<div data-viewport-overlay="true" />, overlay.portalHost) : null}</div>;
     }
     const app = registerTestSynWare(runtime, createSynWare({
-      manifest: { schemaVersion: 1, id: "content-plane", version: "1.0.0", title: "Content Plane", frame: { topBar: "none", presentationMotion: "content" } },
+      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.content-plane", version: "1.0.0", displayName: "Content Plane", frame: { topBar: "none", presentationMotion: "content" } },
       root: Content,
     }));
-    await runtime.bundles.loadBundle(app.id);
+    await runtime.bundles.loadBundle(app.bundleIdentifier);
     const settlement = runtime.presentationSettlements.begin({ operationId: "content-enter", roles: ["application-enter"], timeoutMs: 10_000 });
     const exited = vi.fn();
     const registry = new WindowContentRendererRegistry();
     const fixture = (staged: boolean, shown = true) => <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={{ name: "Stage", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Stage" }}>
-        <NSEPresence onExitComplete={exited}>{shown ? <ApplicationStageView key={app.id} windowContentRegistry={registry}
-          stage={{ id: "application-stage:content-plane", appId: app.id, title: app.window.title, isFocused: true, zIndex: 2 }}
+        <NSEPresence onExitComplete={exited}>{shown ? <ApplicationStageView key={app.bundleIdentifier} windowContentRegistry={registry}
+          stage={{ id: "application-stage:com.example.content-plane", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }}
           app={app} lifecycle="active" staged={staged} presentationSettlementId={settlement.id} /> : null}</NSEPresence>
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>;
@@ -215,18 +215,18 @@ describe("stage overlay ownership", () => {
       return overlay.portalHost ? createPortal(<button data-viewport-overlay="true">Overlay action</button>, overlay.portalHost) : null;
     }
     const app = registerTestSynWare(runtime, createSynWare({
-      manifest: { schemaVersion: 1, id: "overlay-owner", version: "1.0.0", title: "Overlay Owner", frame: { topBar: "none" } },
+      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.overlay-owner", version: "1.0.0", displayName: "Overlay Owner", frame: { topBar: "none" } },
       root: Content,
     }));
-    await runtime.bundles.loadBundle(app.id);
+    await runtime.bundles.loadBundle(app.bundleIdentifier);
     const exited = vi.fn();
     const onRole = vi.fn();
     const registry = new WindowContentRendererRegistry();
     const view = (staged = false, role: "incoming" | "outgoing" | null = null, shown = true) => <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={{ name: "Stage", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Stage" }}>
-        <NSEPresence initial={false} onExitComplete={exited}>{shown ? <ApplicationStageView key={app.id}
+        <NSEPresence initial={false} onExitComplete={exited}>{shown ? <ApplicationStageView key={app.bundleIdentifier}
           windowContentRegistry={registry} app={app} lifecycle="active" staged={staged}
-          stage={{ id: "application-stage:overlay-owner", appId: app.id, title: app.window.title, isFocused: true, zIndex: 2 }}
+          stage={{ id: "application-stage:com.example.overlay-owner", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }}
           multiSwitchRole={role} multiSwitchId={role ? "overlay-switch" : null} onMultiSwitchAnimationComplete={onRole} /> : null}</NSEPresence>
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>;
@@ -304,8 +304,8 @@ describe("stage view MultiSwitch", () => {
   it("reports each role when its slide lands, and the incoming slide settles the presentation", async () => {
     const presentations = new Presentations();
     const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), animation: presentations } });
-    runtime.apps.registerBundle(createTestBundle({ id: "switched", route: "/switched" }));
-    const app = runtime.apps.getApp("switched")!;
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.switched", route: "/switched" }));
+    const app = runtime.apps.getApp("com.example.switched")!;
     const settlement = runtime.presentationSettlements.begin({
       operationId: "operation:switch", roles: ["application-enter", "webspring-shell-return"], timeoutMs: 1_000,
     });
@@ -314,7 +314,7 @@ describe("stage view MultiSwitch", () => {
       <SynCloudOSProvider runtime={runtime}>
         <ApplicationStageView
           windowContentRegistry={new WindowContentRendererRegistry()}
-          stage={{ id: "application-stage:switched", appId: "switched", title: app.window.title, isFocused: true, zIndex: 1 }}
+          stage={{ id: "application-stage:com.example.switched", appId: "com.example.switched", title: app.window.title, isFocused: true, zIndex: 1 }}
           app={app}
           lifecycle="active"
           multiSwitchId="switch:1"

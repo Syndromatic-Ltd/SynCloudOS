@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import {
   WEBSPRING_LAYOUT_PREFERENCE_KEY,
   createWebspringFolderId,
@@ -124,7 +125,7 @@ function setWorkingPreference(
 }
 
 function syncSelector(draft: RuntimeSnapshot, appId: string | null) {
-  const app = appId ? draft.appInfo[appId] : null;
+  const app = appId ? draft.appInfo[normalizeBundleIdentifier(appId)] : null;
   const slot = getDesktopWebspringSlotForApp(getProjection(draft), appId);
 
   draft.webspring.activeIndicatorId = slot?.region === "dial" ? slot.id : null;
@@ -193,9 +194,10 @@ const webspringState = {
   },
 
   hydrateLayoutOrder(order: string[]) {
+    order = order.map(normalizeBundleIdentifier);
     RuntimeStore.mutate((draft) => {
       draft.webspring.layout.preference = {
-        version: 4,
+        version: 5,
         order: [...order],
         folders: {},
         board: { version: 1, pageSize: 20, dockSize: 4 },
@@ -207,6 +209,7 @@ const webspringState = {
   },
 
   hoverApp(appId: string | null) {
+    if (appId) appId = runtime.apps.getApp(appId)?.bundleIdentifier ?? appId;
     RuntimeStore.mutate((draft) => {
       draft.webspring.hoveredAppId = appId;
       draft.webspring.previewAppId = appId;
@@ -218,23 +221,25 @@ const webspringState = {
   },
 
   selectApp(appId: string | null) {
+    if (appId) appId = runtime.apps.getApp(appId)?.bundleIdentifier ?? appId;
     RuntimeStore.mutate((draft) => {
       draft.webspring.selectedAppId = appId;
       draft.webspring.focusedAppId = appId;
-      draft.webspring.layout.keyboardAppId = appId;
+      draft.webspring.layout.keyboardAppId = normalizeBundleIdentifier(appId);
       syncSelector(draft, appId);
-      if (appId) draft.webspring.focusIndex = getProjection(draft).appOrder.indexOf(appId);
+      if (appId) draft.webspring.focusIndex = getProjection(draft).appOrder.indexOf(normalizeBundleIdentifier(appId));
     });
     EventBus.publish("webspring.select", { appId }, appId ?? "none");
   },
 
   enterEditMode(itemId?: string | null) {
+    itemId = normalizeBundleIdentifier(itemId);
     RuntimeStore.mutate((draft) => {
       setWorkingPreference(draft, getWorkingLayout(getProjection(draft)), "user");
       draft.webspring.layout.isEditing = true;
       draft.webspring.layout.draggingItemId = itemId ?? null;
       draft.webspring.layout.dropTargetId = null;
-      draft.webspring.layout.keyboardAppId = itemId ?? draft.webspring.focusedAppId;
+      draft.webspring.layout.keyboardAppId = itemId ?? normalizeBundleIdentifier(draft.webspring.focusedAppId);
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 650;
       if (itemId) draft.webspring.focusedAppId = itemId;
       syncSelector(draft, itemId ?? draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
@@ -267,6 +272,7 @@ const webspringState = {
   },
 
   beginDrag(itemId: string) {
+    itemId = normalizeBundleIdentifier(itemId);
     if (!dragOriginalPreference) dragOriginalPreference = structuredClone(RuntimeStore.getSnapshot().webspring.layout.preference);
     RuntimeStore.mutate((draft) => {
       draft.webspring.layout.isEditing = true;
@@ -300,6 +306,7 @@ const webspringState = {
   },
 
   moveItem(itemId: string, targetIndex: number, commit = false) {
+    itemId = normalizeBundleIdentifier(itemId);
     let preference: SynCloudOSWebspringLayoutPreference | null = null;
     let didMove = false;
 
@@ -328,6 +335,7 @@ const webspringState = {
   },
 
   moveItemByKeyboard(itemId: string, key: string, columns?: number) {
+    itemId = normalizeBundleIdentifier(itemId);
     const layout = getWorkingLayout(getProjection(RuntimeStore.getSnapshot()));
     const targetIndex = getKeyboardReorderIndex(findContainer(layout, itemId), itemId, key, columns);
 
@@ -336,6 +344,7 @@ const webspringState = {
   },
 
   reorder(order: readonly string[]) {
+    order = order.map(normalizeBundleIdentifier);
     let preference: SynCloudOSWebspringLayoutPreference | null = null;
 
     RuntimeStore.mutate((draft) => {
@@ -354,6 +363,7 @@ const webspringState = {
   },
 
   setDropTarget(itemId: string | null) {
+    itemId = normalizeBundleIdentifier(itemId);
     RuntimeStore.mutate((draft) => {
       const layout = draft.webspring.layout;
       const draggingItemId = layout.draggingItemId;
@@ -371,6 +381,8 @@ const webspringState = {
   },
 
   dropOnItem(appId: string, targetItemId: string) {
+    appId = normalizeBundleIdentifier(appId);
+    targetItemId = normalizeBundleIdentifier(targetItemId);
     let preference: SynCloudOSWebspringLayoutPreference | null = null;
     let folderId: string | null = null;
 
@@ -406,6 +418,7 @@ const webspringState = {
   },
 
   moveAppOutOfFolder(appId: string, targetIndex: number) {
+    appId = normalizeBundleIdentifier(appId);
     let preference: SynCloudOSWebspringLayoutPreference | null = null;
 
     RuntimeStore.mutate((draft) => {
@@ -418,7 +431,7 @@ const webspringState = {
       preference = setWorkingPreference(draft, layout, "user");
       draft.webspring.layout.dropTargetId = null;
       draft.webspring.focusedAppId = appId;
-      draft.webspring.layout.keyboardAppId = appId;
+      draft.webspring.layout.keyboardAppId = normalizeBundleIdentifier(appId);
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 450;
       syncSelector(draft, appId);
     });
@@ -487,6 +500,7 @@ const webspringState = {
   },
 
   setLoadingApp(appId: string | null, launchTransitionId: string | null = null) {
+    if (appId) appId = runtime.apps.getApp(appId)?.bundleIdentifier ?? appId;
     RuntimeStore.mutate((draft) => {
       if (!appId) {
         if (draft.webspring.launchPhase !== "staging") return;
@@ -511,6 +525,7 @@ const webspringState = {
   },
 
   setLaunching(appId: string | null, launchTransitionId: string | null = null) {
+    if (appId) appId = runtime.apps.getApp(appId)?.bundleIdentifier ?? appId;
     RuntimeStore.mutate((draft) => {
       draft.webspring.launchingAppId = appId;
       draft.webspring.launchTransitionId = appId ? launchTransitionId ?? draft.webspring.launchTransitionId : null;
@@ -524,6 +539,7 @@ const webspringState = {
   },
 
   coverForApp(appId: string | null, launchTransitionId: string | null = null) {
+    if (appId) appId = runtime.apps.getApp(appId)?.bundleIdentifier ?? appId;
     const contentMotion = appId !== null && runtime.apps.getApp(appId)?.frame.presentationMotion === "content";
     RuntimeStore.mutate((draft) => {
       if (
@@ -546,6 +562,7 @@ const webspringState = {
   },
 
   beginReturn(appId: string | null, returnTransitionId = createWebspringTransitionId("return", appId)) {
+    if (appId) appId = runtime.apps.getApp(appId)?.bundleIdentifier ?? appId;
     RuntimeStore.mutate((draft) => {
       draft.webspring.launchingAppId = null;
       draft.webspring.launchTransitionId = null;

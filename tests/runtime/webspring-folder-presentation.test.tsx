@@ -29,7 +29,7 @@ const folder = {
   kind: "folder",
   id: "folder.tools",
   title: "Tools",
-  apps: [{ id: "beta", title: "Beta" }, { id: "gamma", title: "Gamma" }],
+  apps: [{ bundleIdentifier: "com.example.beta", displayName: "Beta" }, { bundleIdentifier: "com.example.gamma", displayName: "Gamma" }],
   badgeCount: 0,
 } as unknown as WebspringFolderItem;
 
@@ -86,7 +86,7 @@ function renderSplit({ reducedMotion = false, onClose = vi.fn(), Split = Present
     stage={stage}
     anchor={new DOMRect(100, 100, 80, 80)}
     reducedMotion={reducedMotion}
-    renderApp={(app) => <button type="button">{`Open ${app.title}`}</button>}
+    renderApp={(app) => <button type="button">{`Open ${app.displayName}`}</button>}
     onClose={onClose}
   />, { container: layer });
   const root = view.container.querySelector<HTMLElement>(".webspring-folder-split")!;

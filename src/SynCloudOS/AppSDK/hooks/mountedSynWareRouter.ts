@@ -18,6 +18,7 @@
  */
 
 import type { AppRouteSession, AppRouteSessionSnapshot } from "../../Routing/appSdkRoutePort";
+import { normalizeBundleIdentifier } from "../../Identity/bundleIdentifier.mjs";
 import { isSynWareRouteGraph } from "../../Routing/appSdkRoutePort";
 import type {
   SynCloudOSRouteInfo,
@@ -65,7 +66,7 @@ function snapshotProjection(snapshot: AppRouteSessionSnapshot): SynWareRouterSna
 export function createMountedSynWareRouter<
   const TRoutes extends readonly SynWareRouteDefinition[],
 >(options: MountedSynWareRouterOptions<TRoutes>): SynWareRouter<TRoutes> {
-  if (!isSynWareRouteGraph(options.graph) || options.graph.routes !== options.mountedGraph.routes || options.mountedGraph.appId !== options.appId) {
+  if (!isSynWareRouteGraph(options.graph) || options.graph.routes !== options.mountedGraph.routes || normalizeBundleIdentifier(options.mountedGraph.appId) !== normalizeBundleIdentifier(options.appId)) {
     throw securityError("The requested router does not belong to this mounted route graph.");
   }
   let lastSnapshot = snapshotProjection(options.session.getSnapshot());
@@ -152,7 +153,7 @@ export function createMountedSynWareRouter<
     },
     isActive(target, activeOptions = {}) {
       const current = options.signal.aborted ? lastSnapshot.route : options.session.getSnapshot().route;
-      if (!current || current.graphId !== options.graph.id || current.appId !== options.appId) return false;
+      if (!current || current.graphId !== options.graph.id || normalizeBundleIdentifier(current.appId) !== normalizeBundleIdentifier(options.appId)) return false;
       const targetRecognition = graph.recognize(graph.urlFor(target));
       if (targetRecognition.kind !== "match") return false;
       if (activeOptions.exact ? current.name !== targetRecognition.name : !current.branch.includes(targetRecognition.name)) return false;

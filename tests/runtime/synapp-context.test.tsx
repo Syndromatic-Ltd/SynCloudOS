@@ -56,7 +56,7 @@ afterEach(() => {
 
 function createTestAppContext(runtimeId: string, appId: string) {
   const runtime = createTestRuntime({ id: runtimeId });
-  registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", id: appId, title: appId });
+  registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", bundleIdentifier: appId, displayName: appId });
   const mounted = mountTestSynWareRuntime(runtime, appId);
   mountedApps.push(mounted);
   return createSynWareContextValue(mounted.runtime);
@@ -64,12 +64,12 @@ function createTestAppContext(runtimeId: string, appId: string) {
 
 function Probe() {
   const app = useSCOS();
-  return <output>{`${app.app.id}:${app.runtimeInfo.id}`}</output>;
+  return <output>{`${app.app.bundleIdentifier}:${app.runtimeInfo.id}`}</output>;
 }
 
 it("resolves the nearest app and runtime instance", () => {
-  const outer = createTestAppContext("runtime:outer", "outer-app");
-  const inner = createTestAppContext("runtime:inner", "memo-journal");
+  const outer = createTestAppContext("runtime:outer", "com.example.outer-app");
+  const inner = createTestAppContext("runtime:inner", "com.example.memo-journal");
 
   render(
     <SynWareProvider value={outer}>
@@ -79,24 +79,24 @@ it("resolves the nearest app and runtime instance", () => {
     </SynWareProvider>,
   );
 
-  expect(screen.getByText("memo-journal:runtime:inner")).toBeTruthy();
+  expect(screen.getByText("com.example.memo-journal:runtime:inner")).toBeTruthy();
 });
 
 it("projects mounted outer navigation through the typed route transition result", async () => {
   const runtime = createTestRuntime({ id: "runtime:typed-navigation" });
-  registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", id: "navigation-source", title: "Navigation source" });
-  registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", id: "navigation-target", title: "Navigation target" });
+  registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", bundleIdentifier: "com.example.navigation-source", displayName: "Navigation source" });
+  registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", bundleIdentifier: "com.example.navigation-target", displayName: "Navigation target" });
   runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
-  const mounted = mountTestSynWareRuntime(runtime, "navigation-source");
+  const mounted = mountTestSynWareRuntime(runtime, "com.example.navigation-source");
   mountedApps.push(mounted);
   const context = createSynWareContextValue(mounted.runtime);
 
-  const transition = context.navigation.openRoute("/navigation-target", { source: "typed-navigation-test", syncRoute: false });
+  const transition = context.navigation.openRoute("/com.example.navigation-target", { source: "typed-navigation-test", syncRoute: false });
   await expect(transition.result).resolves.toMatchObject({
     outcome: "settled",
     committed: true,
     postCommit: "completed",
-    route: { pathname: "/navigation-target", kind: "app", appId: "navigation-target" },
+    route: { pathname: "/com.example.navigation-target", kind: "app", appId: "com.example.navigation-target" },
   });
   expect(transition).toEqual(expect.objectContaining({ retry: expect.any(Function), replace: expect.any(Function) }));
   await runtime.dispose("typed navigation test complete");
@@ -104,7 +104,7 @@ it("projects mounted outer navigation through the typed route transition result"
 
 it("projects canonical programmatic query and nested not-found failures as typed outer navigation outcomes", async () => {
   const runtime = createTestRuntime({ id: "runtime:typed-navigation-errors" });
-  registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", id: "navigation-source", title: "Navigation source" });
+  registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", bundleIdentifier: "com.example.navigation-source", displayName: "Navigation source" });
   const routes = defineSynWareRoutes({
     id: "navigation.query.target",
     routes: [{
@@ -117,9 +117,9 @@ it("projects canonical programmatic query and nested not-found failures as typed
   registerTestSynWare(runtime, createSynWare({
     manifest: {
       schemaVersion: 1,
-      id: "navigation-query-target",
+      bundleIdentifier: "com.example.navigation-query-target",
       version: "1.0.0",
-      title: "Navigation query target",
+      displayName: "Navigation query target",
       routes: [{ path: "/navigation-query", primary: true, match: "prefix" }],
       permissions: ["app.open.public"],
     },
@@ -127,7 +127,7 @@ it("projects canonical programmatic query and nested not-found failures as typed
     routes,
   }));
   runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
-  const mounted = mountTestSynWareRuntime(runtime, "navigation-source");
+  const mounted = mountTestSynWareRuntime(runtime, "com.example.navigation-source");
   mountedApps.push(mounted);
   const context = createSynWareContextValue(mounted.runtime);
 
@@ -145,7 +145,7 @@ it("projects canonical programmatic query and nested not-found failures as typed
 });
 
 it("does not expose the privileged runtime object to app code", () => {
-  const app = createTestAppContext("runtime:private", "memo-journal");
+  const app = createTestAppContext("runtime:private", "com.example.memo-journal");
 
   expect(app).not.toHaveProperty("runtime");
   expect(app.runtimeInfo).toEqual(expect.objectContaining({
@@ -158,14 +158,14 @@ it("does not expose the privileged runtime object to app code", () => {
   expect(app.drag).not.toHaveProperty("manager");
   expect(app.colourPanel).not.toHaveProperty("ownerToken");
   const runtime = createTestRuntime({ id: "runtime:outgoing-presentation" });
-  const outgoingApp = registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", id: "outgoing-presentation", title: "Outgoing presentation" });
+  const outgoingApp = registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", bundleIdentifier: "com.example.outgoing-presentation", displayName: "Outgoing presentation" });
   const responder = runtime.responders.register({
-    id: `application:${outgoingApp.id}`,
+    id: `application:${outgoingApp.bundleIdentifier}`,
     kind: "application",
     parentId: "runtime",
-    scopeId: `application:${outgoingApp.id}`,
+    scopeId: `application:${outgoingApp.bundleIdentifier}`,
   });
-  const mounted = mountTestSynWareRuntime(runtime, outgoingApp.id);
+  const mounted = mountTestSynWareRuntime(runtime, outgoingApp.bundleIdentifier);
   mountedApps.push(mounted);
   const context = createSynWareContextValue(mounted.runtime);
   const expected = {
@@ -185,36 +185,36 @@ it("does not expose the privileged runtime object to app code", () => {
 
 it("creates one stable explicit context for a mounted app session", () => {
   const runtime = createTestRuntime({ id: "runtime:mounted" });
-  const app = registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", id: "mounted-app", title: "Mounted App" });
+  const app = registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", bundleIdentifier: "com.example.mounted-app", displayName: "Mounted App" });
   const responder = runtime.responders.register({
-    id: "application:mounted-app",
+    id: "application:com.example.mounted-app",
     kind: "application",
     parentId: "workspace",
-    scopeId: "application:mounted-app",
+    scopeId: "application:com.example.mounted-app",
   });
   const contexts: unknown[] = [];
 
   function MountedProbe() {
     const context = useSCOS();
     contexts.push(context);
-    return <output>{`${context.app.id}:${context.runtimeInfo.id}`}</output>;
+    return <output>{`${context.app.bundleIdentifier}:${context.runtimeInfo.id}`}</output>;
   }
 
   const view = render(
     <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={siteBranding}>
-      <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:mounted-app">
+      <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.mounted-app">
         <MountedProbe />
       </SynWareRuntimeMount>
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>,
   );
 
-  expect(screen.getByText("mounted-app:runtime:mounted")).toBeTruthy();
+  expect(screen.getByText("com.example.mounted-app:runtime:mounted")).toBeTruthy();
   view.rerender(
     <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={siteBranding}>
-      <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:mounted-app">
+      <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.mounted-app">
         <MountedProbe />
       </SynWareRuntimeMount>
       </HostSiteBrandingProvider>
@@ -227,7 +227,7 @@ it("creates one stable explicit context for a mounted app session", () => {
   view.rerender(
     <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={equivalentBranding}>
-      <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:mounted-app">
+      <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.mounted-app">
         <MountedProbe />
       </SynWareRuntimeMount>
       </HostSiteBrandingProvider>
@@ -240,7 +240,7 @@ it("creates one stable explicit context for a mounted app session", () => {
   view.rerender(
     <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={changedBranding}>
-      <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:mounted-app">
+      <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.mounted-app">
         <MountedProbe />
       </SynWareRuntimeMount>
       </HostSiteBrandingProvider>
@@ -259,9 +259,9 @@ it("resolves only declared, host-provided app-scoped services and fails closed o
   const definition = createSynWare({
     manifest: {
       schemaVersion: 1,
-      id: "com.syndromatic.service-example",
+      bundleIdentifier: "com.syndromatic.service-example",
       version: "1.0.0",
-      title: "Service example",
+      displayName: "Service example",
       services: [{ id: "com.syndromatic.search", required: true, minimumVersion: "1.0.0" }],
       permissions: ["clipboard.read"],
     },
@@ -277,12 +277,12 @@ it("resolves only declared, host-provided app-scoped services and fails closed o
       return Object.freeze({ appId, permissions: Object.freeze([...permissions]), search: () => "ok" });
     },
   });
-  const mounted = mountTestSynWareRuntime(runtime, app.id);
+  const mounted = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
   const context = createSynWareContextValue(mounted.runtime);
 
   expect(context.services.optional(defineSynWareServiceToken<{ readonly appId: string; readonly permissions: readonly string[]; search(): string }>({ id: "com.syndromatic.search", minimumVersion: "1.0.0" }))).toEqual({
     available: true,
-    client: expect.objectContaining({ appId: app.id, permissions: ["clipboard.read"] }),
+    client: expect.objectContaining({ appId: app.bundleIdentifier, permissions: ["clipboard.read"] }),
     denial: null,
   });
   expect(context.services.optional(defineSynWareServiceToken({ id: "com.syndromatic.missing" }))).toEqual(expect.objectContaining({
@@ -296,7 +296,7 @@ it("resolves only declared, host-provided app-scoped services and fails closed o
     denial: expect.objectContaining({ code: "unavailable" }),
   }));
     runtime.policy.registerPolicy("deny-search", (request, decision) =>
-      request.app?.id === app.id ? { ...decision, allowed: false, decision: "deny" } : decision,
+      request.app?.bundleIdentifier === app.bundleIdentifier ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
   expect(context.services.optional(defineSynWareServiceToken({ id: "com.syndromatic.search" }))).toEqual(expect.objectContaining({
     available: false,
@@ -312,9 +312,9 @@ it("enforces full SemVer precedence and keeps the stricter caller requirement", 
   const definition = createSynWare({
     manifest: {
       schemaVersion: 1,
-      id: "com.syndromatic.semver-example",
+      bundleIdentifier: "com.syndromatic.semver-example",
       version: "1.0.0",
-      title: "SemVer example",
+      displayName: "SemVer example",
       services: [{ id: "com.syndromatic.semver-service", required: true, minimumVersion: "1.0.0-beta.1" }],
     },
     root: () => null,
@@ -326,7 +326,7 @@ it("enforces full SemVer precedence and keeps the stricter caller requirement", 
     version,
     createAppClient: () => Object.freeze({ version }),
   });
-  const mounted = mountTestSynWareRuntime(runtime, app.id);
+  const mounted = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
   const context = createSynWareContextValue(mounted.runtime);
 
   register("1.0.0-alpha.9");
@@ -349,9 +349,9 @@ it("keeps an enormous caller service minimum stricter at the mounted resolution 
   const definition = createSynWare({
     manifest: {
       schemaVersion: 1,
-      id: "com.syndromatic.exact-semver-service",
+      bundleIdentifier: "com.syndromatic.exact-semver-service",
       version: "1.0.0",
-      title: "Exact SemVer service",
+      displayName: "Exact SemVer service",
       services: [{ id: "com.syndromatic.exact-semver-provider", required: true, minimumVersion: lower }],
     },
     root: () => null,
@@ -363,7 +363,7 @@ it("keeps an enormous caller service minimum stricter at the mounted resolution 
     version: lower,
     createAppClient: () => Object.freeze({ version: lower }),
   });
-  const mounted = mountTestSynWareRuntime(runtime, app.id);
+  const mounted = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
   const context = createSynWareContextValue(mounted.runtime);
 
   expect(context.services.optional(defineSynWareServiceToken({ id: "com.syndromatic.exact-semver-provider", minimumVersion: lower }))).toMatchObject({
@@ -383,16 +383,16 @@ it("keeps an enormous caller service minimum stricter at the mounted resolution 
 it("keeps explicit mounted runtime identities exact for ordinary and Diagnostics apps", () => {
   const ordinaryRuntime = createTestRuntime({ id: "runtime:ordinary-identity" });
   const diagnosticsRuntime = createTestRuntime({ id: "runtime:diagnostics-identity" });
-  registerTestSynWare(ordinaryRuntime, { schemaVersion: 1, version: "1.0.0", id: "ordinary-identity", title: "Ordinary identity" });
+  registerTestSynWare(ordinaryRuntime, { schemaVersion: 1, version: "1.0.0", bundleIdentifier: "com.example.ordinary-identity", displayName: "Ordinary identity" });
   registerTestSynWare(diagnosticsRuntime, diagnosticsApp);
-  const ordinary = mountTestSynWareRuntime(ordinaryRuntime, "ordinary-identity");
-  const diagnostics = mountTestSynWareRuntime(diagnosticsRuntime, "diagnostics");
+  const ordinary = mountTestSynWareRuntime(ordinaryRuntime, "com.example.ordinary-identity");
+  const diagnostics = mountTestSynWareRuntime(diagnosticsRuntime, "com.example.diagnostics");
 
   expect(createSynWareContextValue(ordinary.runtime).runtimeInfo.id).toBe("runtime:ordinary-identity");
   expect(createSynWareContextValue(diagnostics.runtime).runtimeInfo.id).toBe("runtime:diagnostics-identity");
   expect(diagnostics.runtime.diagnostics.getReport()).toMatchObject({
     runtimeId: "runtime:diagnostics-identity",
-    appId: "diagnostics",
+    appId: "com.example.diagnostics",
   });
 
   ordinary.dispose();
@@ -402,15 +402,15 @@ it("keeps explicit mounted runtime identities exact for ordinary and Diagnostics
 it("projects app-namespaced environment clients without crossing runtime or app boundaries", () => {
   const firstRuntime = createTestRuntime({ id: "runtime:environment-first" });
   const secondRuntime = createTestRuntime({ id: "runtime:environment-second" });
-  const sharedDefinition = { schemaVersion: 1, version: "1.0.0", id: "environment-shared", title: "Environment Shared" } as const;
+  const sharedDefinition = { schemaVersion: 1, version: "1.0.0", bundleIdentifier: "com.example.environment-shared", displayName: "Environment Shared" } as const;
   registerTestSynWare(firstRuntime, sharedDefinition);
   registerTestSynWare(secondRuntime, sharedDefinition);
-  registerTestSynWare(firstRuntime, { schemaVersion: 1, version: "1.0.0", id: "environment-other", title: "Environment Other" });
+  registerTestSynWare(firstRuntime, { schemaVersion: 1, version: "1.0.0", bundleIdentifier: "com.example.environment-other", displayName: "Environment Other" });
 
-  const first = mountTestSynWareRuntime(firstRuntime, "environment-shared");
-  const sameAppSecondMount = mountTestSynWareRuntime(firstRuntime, "environment-shared", "application:environment-shared:second");
-  const otherApp = mountTestSynWareRuntime(firstRuntime, "environment-other");
-  const separateHost = mountTestSynWareRuntime(secondRuntime, "environment-shared");
+  const first = mountTestSynWareRuntime(firstRuntime, "com.example.environment-shared");
+  const sameAppSecondMount = mountTestSynWareRuntime(firstRuntime, "com.example.environment-shared", "application:com.example.environment-shared:second");
+  const otherApp = mountTestSynWareRuntime(firstRuntime, "com.example.environment-other");
+  const separateHost = mountTestSynWareRuntime(secondRuntime, "com.example.environment-shared");
   mountedApps.push(first, sameAppSecondMount, otherApp, separateHost);
 
   const firstContext = createSynWareContextValue(first.runtime);
@@ -435,8 +435,8 @@ it("cancels scheduler callbacks at mount disposal while retaining stable read-on
   vi.useFakeTimers();
   try {
     const runtime = createTestRuntime({ id: "runtime:environment-cancellation" });
-    registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", id: "environment-cancellation", title: "Environment cancellation" });
-    const mounted = mountTestSynWareRuntime(runtime, "environment-cancellation");
+    registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", bundleIdentifier: "com.example.environment-cancellation", displayName: "Environment cancellation" });
+    const mounted = mountTestSynWareRuntime(runtime, "com.example.environment-cancellation");
     const context = createSynWareContextValue(mounted.runtime);
     const callback = vi.fn();
 
@@ -469,8 +469,8 @@ it("cancels scheduler callbacks at mount disposal while retaining stable read-on
 
 it("fails closed for undeclared environment capabilities", async () => {
   const runtime = createTestRuntime({ id: "runtime:environment-denial" });
-  registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", id: "environment-denial", title: "Environment denial" });
-  const mounted = mountTestSynWareRuntime(runtime, "environment-denial");
+  registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", bundleIdentifier: "com.example.environment-denial", displayName: "Environment denial" });
+  const mounted = mountTestSynWareRuntime(runtime, "com.example.environment-denial");
   mountedApps.push(mounted);
   const context = createSynWareContextValue(mounted.runtime);
 
@@ -483,16 +483,16 @@ it("delivers declared notification actions only while their mounted client remai
   const definition = createSynWare({
     manifest: {
       schemaVersion: 1,
-      id: "com.syndromatic.environment-notification",
+      bundleIdentifier: "com.syndromatic.environment-notification",
       version: "1.0.0",
-      title: "Environment notification",
+      displayName: "Environment notification",
       permissions: ["notifications.post"],
     },
     root: () => null,
   });
   const app = runtime.apps.register(createSynWareBundle(definition));
   if (!app) throw new Error("The notification action app did not register.");
-  const mounted = mountTestSynWareRuntime(runtime, app.id);
+  const mounted = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
   const context = createSynWareContextValue(mounted.runtime);
   const listener = vi.fn();
   const unsubscribe = context.notifications.subscribeActions(listener);
@@ -502,7 +502,7 @@ it("delivers declared notification actions only while their mounted client remai
     body: "Mounted action delivery",
     actionIds: ["open"],
   });
-  const rawActionId = `${app.id}:application:${app.id}:open`;
+  const rawActionId = `${app.bundleIdentifier}:application:${app.bundleIdentifier}:open`;
 
   await expect(runtime.notifications.invokeAction(notificationId, rawActionId)).resolves.toMatchObject({ status: "completed" });
   expect(listener).toHaveBeenCalledWith({ notificationId, actionId: "open" });

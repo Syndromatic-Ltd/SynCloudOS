@@ -11,9 +11,9 @@ import { createSynWare, createSynWareTestHost } from "@syndromatic/syncloudos/sd
 const Notes = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.example.notes",
+    bundleIdentifier: "com.example.notes",
     version: "1.0.0",
-    title: "Notes",
+    displayName: "Notes",
     routes: [{ path: "/notes", primary: true }],
   },
   root() {

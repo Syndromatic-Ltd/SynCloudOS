@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { basename, dirname, resolve } from "node:path";
+import { basename, resolve } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
 import ts from "typescript";
 import { assertExpectedDefaultExport, parseManifest } from "./manifest-source.mjs";
@@ -14,20 +14,9 @@ import {
   isPreferencePaneFolderName,
   isWidgetFolderName,
 } from "./project-derivation.mjs";
+import { normalizeBundleIdentifier } from "../../src/SynCloudOS/Identity/bundleIdentifier.mjs";
 
 
-/** The nearest `package.json` above a project folder supplies the version every derived manifest uses. */
-export function projectVersionFor(target) {
-  for (let directory = resolve(target); ; directory = dirname(directory)) {
-    const manifestPath = resolve(directory, "package.json");
-    if (existsSync(manifestPath)) {
-      const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-      if (typeof manifest.version === "string" && manifest.version.trim()) return { root: directory, version: manifest.version };
-      throw new TypeError(`${manifestPath} has no version; it becomes every application's manifest version.`);
-    }
-    if (dirname(directory) === directory) throw new TypeError(`No package.json above ${target}; it supplies the project version.`);
-  }
-}
 
 
 /** The icon files an application folder supplies, as the resource paths a manifest names. */
@@ -42,13 +31,11 @@ function applicationResourceUrls(resourcesDirectory) {
 
 /** The complete manifest a folder derives, before any schema validation. */
 export function deriveManifestForFolder(target) {
-  const { version } = projectVersionFor(target);
   const infoPath = resolve(target, "Contents/Info.ts");
-  const overrides = existsSync(infoPath) ? parseManifest(infoPath) : {};
+  if (!existsSync(infoPath)) throw new TypeError(`${basename(resolve(target))}/Contents/Info.ts is required.`);
   return deriveSynWareManifest({
     folderName: basename(resolve(target)),
-    packageVersion: version,
-    overrides,
+    info: parseManifest(infoPath),
     resourceUrls: applicationResourceUrls(resolve(target, "Contents/Resources")),
   });
 }
@@ -97,7 +84,7 @@ export function createSynWareValidator({ schema, allowedImports, dependencies = 
     const findings = [];
     if (kind === null) {
       findings.push({file:resolvedTarget,line:1,rule:"synware.structure",message:"A SynCloudOS project folder name ends in .app, .prefPane, .widget or .integration.ts."});
-      return {directory:resolvedTarget,kind,id:null,manifest:null,ok:false,error:findings.map(finding => finding.message).join("; "),findings};
+      return {directory:resolvedTarget,kind,bundleIdentifier:null,manifest:null,ok:false,error:findings.map(finding => finding.message).join("; "),findings};
     }
     const entryPath = entryFor(resolvedTarget, kind);
     if (!existsSync(entryPath)) findings.push({file:entryPath,line:1,rule:"synware.structure",message:"Required SynCloudOS file is missing."});
@@ -119,9 +106,28 @@ export function createSynWareValidator({ schema, allowedImports, dependencies = 
         findings.push({file:entryPath,line:1,rule:"synware.structure",message:error.message});
       }
     }
-    return {directory:resolvedTarget,kind,id:manifest?.id ?? null,manifest,ok:findings.length === 0,error:findings.map(finding => finding.message).join("; ") || null,findings};
+    return {directory:resolvedTarget,kind,bundleIdentifier:manifest?.bundleIdentifier ?? null,manifest,ok:findings.length === 0,error:findings.map(finding => finding.message).join("; ") || null,findings};
   }
   return {validate,validateDirectory:validate,validateImports};
+}
+
+/** Cross-folder identity checks shared by CLI and developer MCP. */
+export function rejectDuplicateBundleIdentifiers(results) {
+  const seen = new Map();
+  for (const result of results) {
+    if (!result.bundleIdentifier) continue;
+    const key = normalizeBundleIdentifier(result.bundleIdentifier);
+    const previous = seen.get(key);
+    if (previous) {
+      const message = `Duplicate bundleIdentifier ${result.bundleIdentifier}: ${previous.directory} and ${result.directory}.`;
+      for (const duplicate of [previous, result]) {
+        duplicate.ok = false;
+        duplicate.findings.push({file:resolve(duplicate.directory,"Contents/Info.ts"),line:1,rule:"synware.manifest",message});
+        duplicate.error = duplicate.findings.map(finding => finding.message).join("; ");
+      }
+    } else seen.set(key, result);
+  }
+  return results;
 }
 
 /** Every project folder a directory contains, by kind. */

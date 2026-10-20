@@ -59,7 +59,7 @@ function watchdogPayload(error: unknown, props: SynCloudOSWatchdogProps, compone
       ? "An unexpected error has prevented SynCloudOS from working properly."
       : "An unexpected error has prevented this application from working properly.",
     error,
-    appId: props.app?.id,
+    appId: props.app?.bundleIdentifier,
     packageName: props.app?.packageName,
     source: root ? "SynCloudOS.RootWatchdog" : "SynCloudOS.AppWatchdog",
     severity: "fatal",

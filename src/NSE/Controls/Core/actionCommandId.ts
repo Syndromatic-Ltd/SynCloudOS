@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../../../SynCloudOS/Identity/bundleIdentifier.mjs";
 /**
  * The command ID an action name stands for. A bare name (`newNote`) belongs to
  * the application that declared it, so it becomes `<appId>.newNote`. A name
@@ -25,5 +26,5 @@
  */
 export function nseActionCommandId(appId: string, action: string): string {
   if (action.trim().length === 0) throw new TypeError("An action name must not be empty.");
-  return action.includes(".") ? action : `${appId}.${action}`;
+  return action.includes(".") ? action : `${normalizeBundleIdentifier(appId)}.${action}`;
 }

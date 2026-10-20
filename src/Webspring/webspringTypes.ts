@@ -157,8 +157,8 @@ export interface WebspringDialPlacement {
 }
 
 export interface WebspringApp {
-  readonly id: string;
-  readonly title: string;
+  readonly bundleIdentifier: string;
+  readonly displayName: string;
   readonly iconUrl: string | null;
   readonly route: string;
   readonly selected: boolean;
@@ -401,7 +401,7 @@ export interface WebspringPreferences {
   readonly hide: readonly string[];
 }
 
-export interface WebspringDefinitionInput<TManifest extends WebspringManifest = WebspringManifest> {
+export interface WebspringDefinitionInput<TManifest extends Omit<WebspringManifest, "schemaVersion"> & { readonly schemaVersion?: 1 } = WebspringManifest> {
   readonly manifest: TManifest;
   readonly components: Readonly<Record<string, WebspringViewComponent>>;
   readonly widgets?: readonly WebspringWidget[];

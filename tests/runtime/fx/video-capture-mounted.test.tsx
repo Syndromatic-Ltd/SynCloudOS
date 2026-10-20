@@ -32,9 +32,9 @@ import { VideoCaptureService } from "../../../src/SynCloudOS/VideoFX/VideoCaptur
 const CameraProbe = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.video-camera-probe",
+    bundleIdentifier: "com.syndromatic.video-camera-probe",
     version: "1.0.0",
-    title: "Video Camera Probe",
+    displayName: "Video Camera Probe",
     routes: [{ path: "/video-camera-probe", primary: true }],
     permissions: ["video.capture.camera"],
   },
@@ -46,9 +46,9 @@ const CameraProbe = createSynWare({
 const NoCaptureProbe = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.video-no-capability-probe",
+    bundleIdentifier: "com.syndromatic.video-no-capability-probe",
     version: "1.0.0",
-    title: "Video No Capability Probe",
+    displayName: "Video No Capability Probe",
     routes: [{ path: "/video-no-capability-probe", primary: true }],
   },
   root() {
@@ -111,9 +111,9 @@ it("makes useVideo component-scoped and tears it down on unmount without prompti
   const HookProbe = createSynWare({
     manifest: {
       schemaVersion: 1,
-      id: "com.syndromatic.video-hook-probe",
+      bundleIdentifier: "com.syndromatic.video-hook-probe",
       version: "1.0.0",
-      title: "Video Hook Probe",
+      displayName: "Video Hook Probe",
       routes: [{ path: "/video-hook-probe", primary: true }],
       permissions: ["video.capture.camera"],
     },

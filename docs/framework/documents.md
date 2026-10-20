@@ -11,9 +11,9 @@ List each kind of document your application edits in the manifest.
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.notes",
+  bundleIdentifier: "com.example.notes",
   version: "1.0.0",
-  title: "Notes",
+  displayName: "Notes",
   documentTypes: [
     { id: "com.example.notes.note", extensions: ["note"], displayName: "Note" },
   ],

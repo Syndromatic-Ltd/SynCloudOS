@@ -32,9 +32,9 @@ function routeBundle(
   return createSynWareBundle(createSynWare({
     manifest: {
       schemaVersion: 1,
-      id,
+      bundleIdentifier: id,
       version: "1.0.0",
-      title: id,
+      displayName: id,
       routes,
       permissions: ["app.open.public"],
     },
@@ -46,9 +46,9 @@ describe("Routing II static ownership", () => {
   it("validates exact/prefix claims and projects every static claim", () => {
     const validation = validateSynWareManifest({
       schemaVersion: 1,
-      id: "routing-claims",
+      bundleIdentifier: "com.example.routing-claims",
       version: "1.0.0",
-      title: "Routing claims",
+      displayName: "Routing claims",
       routes: [
         { path: "/music", primary: true, match: "prefix" },
         { path: "/listen", match: "exact" },
@@ -57,7 +57,7 @@ describe("Routing II static ownership", () => {
     });
 
     expect(validation).toMatchObject({ ok: true });
-    const bundle = routeBundle("routing-claims", [
+    const bundle = routeBundle("com.example.routing-claims", [
       { path: "/music", primary: true, match: "prefix" },
       { path: "/listen", match: "exact" },
       { path: "/library" },
@@ -73,20 +73,20 @@ describe("Routing II static ownership", () => {
 
   it("matches prefix claims only on path-segment boundaries", () => {
     const runtime = createTestRuntime();
-    runtime.apps.registerBundle(routeBundle("music-owner", [
+    runtime.apps.registerBundle(routeBundle("com.example.music-owner", [
       { path: "/music", primary: true, match: "prefix" },
       { path: "/listen", match: "exact" },
     ]));
 
-    expect(runtime.apps.getAppForRoute("/music")?.id).toBe("music-owner");
-    expect(runtime.apps.getAppForRoute("/music/artist/justice")?.id).toBe("music-owner");
-    expect(runtime.apps.getAppForRoute("/listen")?.id).toBe("music-owner");
+    expect(runtime.apps.getAppForRoute("/music")?.bundleIdentifier).toBe("com.example.music-owner");
+    expect(runtime.apps.getAppForRoute("/music/artist/justice")?.bundleIdentifier).toBe("com.example.music-owner");
+    expect(runtime.apps.getAppForRoute("/listen")?.bundleIdentifier).toBe("com.example.music-owner");
     expect(runtime.apps.getAppForRoute("/musicology")).toBeNull();
     expect(runtime.apps.getAppForRoute("/listen/artist")).toBeNull();
 
     expect(runtime.routes.resolveRoute("/music/artist/justice?view=albums#bio")).toMatchObject({
       kind: "app",
-      app: { id: "music-owner" },
+      app: { bundleIdentifier: "com.example.music-owner" },
       pathname: "/music/artist/justice",
     });
   });
@@ -94,15 +94,15 @@ describe("Routing II static ownership", () => {
   it("rejects overlapping foreign ownership atomically regardless of insertion order", () => {
     for (const reverse of [false, true]) {
       const runtime = createTestRuntime({ id: `runtime:route-owner-${reverse}` });
-      const broad = routeBundle("music-broad", [{ path: "/music", primary: true, match: "prefix" }]);
-      const nested = routeBundle("music-nested", [{ path: "/music/artist", primary: true, match: "exact" }]);
+      const broad = routeBundle("com.example.music-broad", [{ path: "/music", primary: true, match: "prefix" }]);
+      const nested = routeBundle("com.example.music-nested", [{ path: "/music/artist", primary: true, match: "exact" }]);
       const first = reverse ? nested : broad;
       const second = reverse ? broad : nested;
 
-      expect(runtime.apps.registerBundle(first)?.id).toBe(first.manifest.id);
+      expect(runtime.apps.registerBundle(first)?.bundleIdentifier).toBe(first.manifest.bundleIdentifier);
       expect(runtime.apps.registerBundle(second)).toBeNull();
       expect(runtime.apps.getAllApps()).toHaveLength(1);
-      expect(runtime.apps.getAppForRoute("/music/artist")?.id).toBe(first.manifest.id);
+      expect(runtime.apps.getAppForRoute("/music/artist")?.bundleIdentifier).toBe(first.manifest.bundleIdentifier);
       runtime.dispose();
     }
   });
@@ -112,28 +112,28 @@ describe("Routing II static ownership", () => {
     const loadModule = vi.fn(async () => ({ default: createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "music-loader",
+        bundleIdentifier: "com.example.music-loader",
         version: "1.0.0",
-        title: "Music loader",
+        displayName: "Music loader",
         routes: [{ path: "/music", primary: true, match: "prefix" }],
       },
       root: Root,
     }) }));
-    const bundle = routeBundle("music-loader", [{ path: "/music", primary: true, match: "prefix" }]);
+    const bundle = routeBundle("com.example.music-loader", [{ path: "/music", primary: true, match: "prefix" }]);
     runtime.apps.registerBundle(Object.freeze({ ...bundle, loadModule }));
-    runtime.apps.registerBundle(routeBundle("musicology", [{ path: "/musicology", primary: true }]));
+    runtime.apps.registerBundle(routeBundle("com.example.musicology", [{ path: "/musicology", primary: true }]));
 
-    expect(runtime.apps.getAppForRoute("/musicology")?.id).toBe("musicology");
-    expect(runtime.apps.getAppForRoute("/music/track/one")?.id).toBe("music-loader");
+    expect(runtime.apps.getAppForRoute("/musicology")?.bundleIdentifier).toBe("com.example.musicology");
+    expect(runtime.apps.getAppForRoute("/music/track/one")?.bundleIdentifier).toBe("com.example.music-loader");
     expect(loadModule).not.toHaveBeenCalled();
   });
 
   it("rejects a prefix claim for the reserved root", () => {
     const validation = validateSynWareManifest({
       schemaVersion: 1,
-      id: "root-owner",
+      bundleIdentifier: "com.example.root-owner",
       version: "1.0.0",
-      title: "Root owner",
+      displayName: "Root owner",
       routes: [{ path: "/", primary: true, match: "prefix" }],
     });
 

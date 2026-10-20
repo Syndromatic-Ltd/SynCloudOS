@@ -35,10 +35,10 @@ function definition(id: string, root = () => null) {
   return createSynWare({
     manifest: {
       schemaVersion: 1,
-      id,
+      bundleIdentifier: id,
       version: "1.0.0",
-      title: id,
-      routes: [{ path: `/${id}`, primary: true }],
+      displayName: id,
+      routes: [{ path: `/${id.split(".").at(-1)}`, primary: true }],
     },
     root,
   });
@@ -65,7 +65,7 @@ describe("production SynWare definition entries", () => {
       loadModule: async () => ({ default: app }),
     });
 
-    const loaded = await runtime.bundles.loadBundle(app.manifest.id);
+    const loaded = await runtime.bundles.loadBundle(app.manifest.bundleIdentifier);
 
     expect(loaded.definition).toBe(app);
     expect(root).not.toHaveBeenCalled();
@@ -80,7 +80,7 @@ describe("production SynWare definition entries", () => {
         ...createSynWareBundle(app),
         loadModule: async () => ({ default: component }),
       });
-      const loaded = await runtime.bundles.loadBundle(app.manifest.id);
+      const loaded = await runtime.bundles.loadBundle(app.manifest.bundleIdentifier);
       expect(loaded.definition?.manifest).toEqual(app.manifest);
       expect(loaded.definition?.root).toBeTypeOf("function");
       expect(component).not.toHaveBeenCalled();
@@ -100,7 +100,7 @@ describe("production SynWare definition entries", () => {
       loadModule: async () => hiddenDefault as never,
     });
 
-    await expect(runtime.bundles.loadBundle(app.manifest.id)).rejects.toMatchObject({
+    await expect(runtime.bundles.loadBundle(app.manifest.bundleIdentifier)).rejects.toMatchObject({
       code: "BUNDLE_INVALID_MODULE",
     });
   });
@@ -114,9 +114,9 @@ describe("production SynWare definition entries", () => {
       loadModule: async () => ({ default: imported }),
     });
 
-    await expect(runtime.bundles.loadBundle(registered.manifest.id)).rejects.toMatchObject({
+    await expect(runtime.bundles.loadBundle(registered.manifest.bundleIdentifier)).rejects.toMatchObject({
       code: "BUNDLE_INVALID_MODULE",
-      message: expect.stringMatching(/\/id/u),
+      message: expect.stringMatching(/\/bundleIdentifier/u),
     });
   });
 
@@ -124,9 +124,9 @@ describe("production SynWare definition entries", () => {
     const registered = createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "com.syndromatic.semantic-entry",
+        bundleIdentifier: "com.syndromatic.semantic-entry",
         version: "1.0.0",
-        title: "Semantic entry",
+        displayName: "Semantic entry",
         routes: [{ path: "/semantic-entry", primary: true }],
       },
       root: () => null,
@@ -134,9 +134,9 @@ describe("production SynWare definition entries", () => {
     const imported = createSynWare({
       manifest: {
         routes: [{ primary: true, path: "/semantic-entry" }],
-        title: "Semantic entry",
+        displayName: "Semantic entry",
         version: "1.0.0",
-        id: "com.syndromatic.semantic-entry",
+        bundleIdentifier: "com.syndromatic.semantic-entry",
         schemaVersion: 1,
       },
       root: () => null,
@@ -147,7 +147,7 @@ describe("production SynWare definition entries", () => {
       loadModule: async () => ({ default: imported }),
     });
 
-    await expect(runtime.bundles.loadBundle(registered.manifest.id)).resolves.toMatchObject({
+    await expect(runtime.bundles.loadBundle(registered.manifest.bundleIdentifier)).resolves.toMatchObject({
       definition: imported,
     });
   });
@@ -171,9 +171,9 @@ describe("production SynWare definition entries", () => {
     const app = createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "com.syndromatic.definition-lifecycle",
+        bundleIdentifier: "com.syndromatic.definition-lifecycle",
         version: "1.0.0",
-        title: "Definition lifecycle",
+        displayName: "Definition lifecycle",
         routes: [{ path: "/definition-lifecycle", primary: true }],
         migrationVersion: 2,
         background: { enabled: true, tasks: ["com.syndromatic.definition-lifecycle.refresh"] },
@@ -188,7 +188,7 @@ describe("production SynWare definition entries", () => {
       loadModule: async () => ({ default: app }),
     });
 
-    const loaded = await runtime.bundles.loadBundle(app.manifest.id);
+    const loaded = await runtime.bundles.loadBundle(app.manifest.bundleIdentifier);
 
     expect(loaded.definition).toBe(app);
     expect(migration.migrate).toHaveBeenCalledWith(undefined, expect.objectContaining({ signal: expect.any(AbortSignal) }));
@@ -208,9 +208,9 @@ describe("production SynWare definition entries", () => {
       const app = createSynWare({
         manifest: {
           schemaVersion: 1,
-          id: `com.syndromatic.definition-lifecycle-revocation-${revocation.replace(/[^a-z]+/gu, "-")}`,
+          bundleIdentifier: `com.syndromatic.definition-lifecycle-revocation-${revocation.replace(/[^a-z]+/gu, "-")}`,
           version: "1.0.0",
-          title: "Definition lifecycle revocation",
+          displayName: "Definition lifecycle revocation",
           routes: [{ path: "/definition-lifecycle-revocation", primary: true }],
           migrationVersion: 2,
         },
@@ -230,7 +230,7 @@ describe("production SynWare definition entries", () => {
         loadModule: async () => ({ default: app }),
       });
 
-      const loading = runtime.bundles.loadBundle(app.manifest.id);
+      const loading = runtime.bundles.loadBundle(app.manifest.bundleIdentifier);
       await vi.waitFor(() => expect(operationSignal).toBeDefined());
       if (revocation === "same-ID bundle replacement") {
         runtime.apps.register({
@@ -244,21 +244,21 @@ describe("production SynWare definition entries", () => {
       lifecycleGate.resolve(undefined);
 
       await expect(loading).rejects.toThrow(/abort|revoked|changed|replaced|disposed/i);
-      expect(runtime.bundles.getLoadedBundle(app.manifest.id)).toBeNull();
+      expect(runtime.bundles.getLoadedBundle(app.manifest.bundleIdentifier)).toBeNull();
     },
   );
 
   it("renders a loaded definition through the shared provider-owned entry renderer", async () => {
     const app = definition("com.syndromatic.shared-entry-renderer", function Root() {
-      return <output>{useSCOS().app.id}</output>;
+      return <output>{useSCOS().app.bundleIdentifier}</output>;
     });
     const runtime = createTestRuntime({ id: "runtime:shared-entry-renderer" });
     runtime.apps.register({
       ...createSynWareBundle(app),
       loadModule: async () => ({ default: app }),
     });
-    await runtime.bundles.loadBundle(app.manifest.id);
-    const registered = runtime.apps.getApp(app.manifest.id);
+    await runtime.bundles.loadBundle(app.manifest.bundleIdentifier);
+    const registered = runtime.apps.getApp(app.manifest.bundleIdentifier);
     if (!registered) throw new Error("The test app did not register.");
     const container = document.createElement("div");
     const root = createRoot(container);
@@ -270,7 +270,7 @@ describe("production SynWare definition entries", () => {
         <SynWareEntryRenderer
           runtime={runtime}
           app={registered}
-          responderId={`application:${registered.id}`}
+          responderId={`application:${registered.bundleIdentifier}`}
           isLoading={false}
           loadingClassName="test-loading"
           loadingLabel="Loading"
@@ -281,7 +281,7 @@ describe("production SynWare definition entries", () => {
       </SynCloudOSProvider>,
     ));
 
-    expect(container.querySelector("output")?.textContent).toBe(app.manifest.id);
+    expect(container.querySelector("output")?.textContent).toBe(app.manifest.bundleIdentifier);
     flushSync(() => root.unmount());
     await runtime.dispose("shared entry renderer test complete");
   });

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { CommandSystem } from "../Commands";
 import type {
   ApplicationSessionCloseLease,
@@ -336,13 +337,13 @@ export class WindowManager {
     operation: Promise<T>,
   ): Promise<T> {
     if (!ticket) return operation;
-    const admissions = this.#applicationWindowAdmissions.get(ticket.applicationId) ?? new Set<Promise<unknown>>();
-    this.#applicationWindowAdmissions.set(ticket.applicationId, admissions);
+    const admissions = this.#applicationWindowAdmissions.get(normalizeBundleIdentifier(ticket.applicationId)) ?? new Set<Promise<unknown>>();
+    this.#applicationWindowAdmissions.set(normalizeBundleIdentifier(ticket.applicationId), admissions);
     admissions.add(operation);
     void operation.finally(() => {
       admissions.delete(operation);
-      if (admissions.size === 0 && this.#applicationWindowAdmissions.get(ticket.applicationId) === admissions) {
-        this.#applicationWindowAdmissions.delete(ticket.applicationId);
+      if (admissions.size === 0 && this.#applicationWindowAdmissions.get(normalizeBundleIdentifier(ticket.applicationId)) === admissions) {
+        this.#applicationWindowAdmissions.delete(normalizeBundleIdentifier(ticket.applicationId));
       }
     }).catch(() => undefined);
     return operation;
@@ -497,9 +498,9 @@ export class WindowManager {
   ): Promise<ApplicationClosePreparation | null> {
     this.#assertMutable();
     if (!applicationId || applicationId !== applicationId.trim()) throw new TypeError("Application close IDs must be non-empty canonical identifiers.");
-    if (lease.applicationId !== applicationId) throw new Error("Application close authority belongs to another application.");
+    if (normalizeBundleIdentifier(lease.applicationId) !== normalizeBundleIdentifier(applicationId)) throw new Error("Application close authority belongs to another application.");
     this.validateApplicationCloseAuthority(lease);
-    const applicationControllers = [...this.#controllers.values()].filter(({ record }) => record.applicationId === applicationId);
+    const applicationControllers = [...this.#controllers.values()].filter(({ record }) => normalizeBundleIdentifier(record.applicationId) === normalizeBundleIdentifier(applicationId));
     const applicationControllerIds = Object.freeze(applicationControllers.map(({ id }) => id));
     const applicationIdSet = new Set(applicationControllerIds);
     const roots = Object.freeze(applicationControllers.filter(({ record }) => (
@@ -589,7 +590,7 @@ export class WindowManager {
       this.#applicationClosePreparations.delete(token.tokenId);
     }
     if (this.dependencies.documents.applicationDocumentIds(token.applicationId).length > 0 ||
-        [...this.#controllers.values()].some(({ record }) => record.applicationId === token.applicationId)) {
+        [...this.#controllers.values()].some(({ record }) => normalizeBundleIdentifier(record.applicationId) === normalizeBundleIdentifier(token.applicationId))) {
       throw new Error(`Application "${token.applicationId}" close left live membership.`);
     }
     return { outcome: "closed", windowControllerId: token.resultWindowControllerId };
@@ -1185,7 +1186,7 @@ export class WindowManager {
     const document = this.dependencies.documents.getDocument(documentId);
     const valid = Boolean(
       document &&
-      document.applicationId === applicationId &&
+      normalizeBundleIdentifier(document.applicationId) === normalizeBundleIdentifier(applicationId) &&
       document.id === documentId &&
       document.type.id === result.documentTypeId &&
       document.documentKind === "projection" &&
@@ -1257,7 +1258,7 @@ export class WindowManager {
       const existingId = this.#restorationKeys.get(source.restorationKey);
       if (existingId) {
         const existing = this.#controllers.get(existingId);
-        if (!existing || existing.record.applicationId !== source.applicationId ||
+        if (!existing || normalizeBundleIdentifier(existing.record.applicationId) !== normalizeBundleIdentifier(source.applicationId) ||
             existing.record.applicationSessionId !== source.applicationSessionId ||
             existing.record.documentId !== source.documentId ||
             existing.record.documentAssociationRole !== source.documentAssociationRole ||
@@ -1616,7 +1617,7 @@ export class WindowManager {
 
   #validateApplicationWindowMembership(applicationId: string, expectedIds: readonly string[]): void {
     const actual = [...this.#controllers.values()]
-      .filter(({ record }) => record.applicationId === applicationId)
+      .filter(({ record }) => normalizeBundleIdentifier(record.applicationId) === normalizeBundleIdentifier(applicationId))
       .map(({ id }) => id);
     const expected = new Set(expectedIds);
     if (actual.length !== expected.size || actual.some((id) => !expected.has(id))) {
@@ -2139,7 +2140,7 @@ export class WindowManager {
   #retainApplicationResponder(sessionId: string, applicationId: string): void {
     const existing = this.#applicationResponders.get(sessionId);
     if (existing) {
-      if (existing.applicationId !== applicationId) throw new Error("An application session cannot change application identity.");
+      if (normalizeBundleIdentifier(existing.applicationId) !== normalizeBundleIdentifier(applicationId)) throw new Error("An application session cannot change application identity.");
       existing.count += 1;
       return;
     }
@@ -2158,7 +2159,7 @@ export class WindowManager {
     });
     if (!this.dependencies.undo.get({ kind: "application", id: applicationId })) {
       this.dependencies.undo.create({ kind: "application", id: applicationId });
-      this.#ownedApplicationUndoIds.add(applicationId);
+      this.#ownedApplicationUndoIds.add(normalizeBundleIdentifier(applicationId));
     }
     this.#applicationResponders.set(sessionId, { handle, count: 1, applicationId });
   }
@@ -2170,8 +2171,8 @@ export class WindowManager {
     if (entry.count > 0) return;
     if (entry.handle) this.#tryCleanup("application-responder-dispose", () => entry.handle!.dispose({ cascade: true }));
     this.#applicationResponders.delete(sessionId);
-    const stillUsed = [...this.#applicationResponders.values()].some(({ applicationId }) => applicationId === entry.applicationId);
-    if (!stillUsed && this.#ownedApplicationUndoIds.delete(entry.applicationId)) {
+    const stillUsed = [...this.#applicationResponders.values()].some(({ applicationId }) => normalizeBundleIdentifier(applicationId) === normalizeBundleIdentifier(entry.applicationId));
+    if (!stillUsed && this.#ownedApplicationUndoIds.delete(normalizeBundleIdentifier(entry.applicationId))) {
       this.#tryCleanup("application-undo-dispose", () => {
         this.dependencies.undo.remove({ kind: "application", id: entry.applicationId });
       });
@@ -2180,7 +2181,7 @@ export class WindowManager {
 
   #addIndexes(record: WindowRecord): void {
     this.#setFor(this.#indexes.workspace, record.workspaceId).add(record.id);
-    if (record.applicationId) this.#setFor(this.#indexes.application, record.applicationId).add(record.id);
+    if (record.applicationId) this.#setFor(this.#indexes.application, normalizeBundleIdentifier(record.applicationId)).add(record.id);
     if (record.applicationSessionId) this.#setFor(this.#indexes.applicationSession, record.applicationSessionId).add(record.id);
     if (record.documentId) this.#setFor(this.#indexes.document, record.documentId).add(record.id);
     this.#setFor(this.#indexes.role, record.role).add(record.id);
@@ -2189,7 +2190,7 @@ export class WindowManager {
 
   #removeIndexes(record: WindowRecord): void {
     this.#deleteFrom(this.#indexes.workspace, record.workspaceId, record.id);
-    if (record.applicationId) this.#deleteFrom(this.#indexes.application, record.applicationId, record.id);
+    if (record.applicationId) this.#deleteFrom(this.#indexes.application, normalizeBundleIdentifier(record.applicationId), record.id);
     if (record.applicationSessionId) this.#deleteFrom(this.#indexes.applicationSession, record.applicationSessionId, record.id);
     if (record.documentId) this.#deleteFrom(this.#indexes.document, record.documentId, record.id);
     this.#deleteFrom(this.#indexes.role, record.role, record.id);
@@ -2199,7 +2200,7 @@ export class WindowManager {
   #indexedCandidates(query: WindowListQuery): Set<string> {
     const indexed: Array<Set<string>> = [];
     if (query.workspaceId !== undefined) indexed.push(this.#indexes.workspace.get(query.workspaceId) ?? new Set());
-    if (query.applicationId !== undefined) indexed.push(this.#indexes.application.get(query.applicationId) ?? new Set());
+    if (query.applicationId !== undefined) indexed.push(this.#indexes.application.get(normalizeBundleIdentifier(query.applicationId)) ?? new Set());
     if (query.applicationSessionId !== undefined) indexed.push(this.#indexes.applicationSession.get(query.applicationSessionId) ?? new Set());
     if (query.documentId !== undefined) indexed.push(this.#indexes.document.get(query.documentId) ?? new Set());
     if (query.role !== undefined) indexed.push(this.#indexes.role.get(query.role) ?? new Set());
@@ -2225,7 +2226,7 @@ export class WindowManager {
 
   #matches(record: WindowRecord, query: WindowListQuery): boolean {
     return (query.workspaceId === undefined || record.workspaceId === query.workspaceId) &&
-      (query.applicationId === undefined || record.applicationId === query.applicationId) &&
+      (query.applicationId === undefined || normalizeBundleIdentifier(record.applicationId) === normalizeBundleIdentifier(query.applicationId)) &&
       (query.applicationSessionId === undefined || record.applicationSessionId === query.applicationSessionId) &&
       (query.documentId === undefined || record.documentId === query.documentId) &&
       (query.role === undefined || record.role === query.role) &&

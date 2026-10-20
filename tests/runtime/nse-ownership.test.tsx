@@ -202,7 +202,7 @@ describe("controllers created outside construction", () => {
       made ??= newNotes("shortcut-notes");
       return <p>Shortcut content</p>;
     }
-    const host = createClassApplicationHost(Shortcut, "shortcut-ownership-app");
+    const host = createClassApplicationHost(Shortcut, "com.example.shortcut-ownership-app");
     hosts.push(host);
     await host.launch();
     host.mountWindows();
@@ -233,7 +233,7 @@ describe("StrictMode", () => {
       static override mainWindow = StrictWindow;
       readonly notes = newNotes("strict-app-notes");
     }
-    const host = await launched(StrictApp, "strict-app");
+    const host = await launched(StrictApp, "com.example.strict-app");
     host.mountWindows({ strict: true });
     await host.openMainWindow();
     await screen.findByText("Strict content");

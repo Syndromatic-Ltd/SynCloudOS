@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const WEBSPRING_LAYOUT_PREFERENCE_VERSION = 4;
+export const WEBSPRING_LAYOUT_PREFERENCE_VERSION = 5;
 
 export type SynCloudOSWebspringLayoutPreferenceSource = "seed" | "persisted" | "user" | "reset";
 

@@ -42,18 +42,18 @@ function authoriseRuntime(runtime: ReturnType<typeof createTestRuntime>) {
 describe("BundleLoader dynamic runtime contracts", () => {
   it("loads an eager SynWare definition without requiring a lazy module loader", async () => {
     const runtime = createTestRuntime();
-    const fixture = createTestBundle({ id: "eager-definition", route: "/eager-definition" });
+    const fixture = createTestBundle({ bundleIdentifier: "com.example.eager-definition", route: "/eager-definition" });
     const definition = createSynWare({
       manifest: fixture.synWareManifest!,
       root: () => null,
     });
     runtime.bundles.registerBundle(createSynWareBundle(definition));
 
-    await expect(runtime.bundles.loadBundle("eager-definition")).resolves.toMatchObject({
-      appId: "eager-definition",
+    await expect(runtime.bundles.loadBundle("com.example.eager-definition")).resolves.toMatchObject({
+      appId: "com.example.eager-definition",
       definition,
     });
-    expect(runtime.bundles.getBundleLoadState("eager-definition")).toBe("ready");
+    expect(runtime.bundles.getBundleLoadState("com.example.eager-definition")).toBe("ready");
     await runtime.dispose({ reason: "eager bundle test cleanup", inFlight: "cancel" });
   });
 
@@ -66,8 +66,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
     const moduleApplicationWillLaunch = vi.fn();
     const DynamicComponent = () => null;
     const loadModule = vi.fn(() => Promise.resolve({ default: DynamicComponent }));
-    const manifest = createTestManifest({
-      id: "dynamic-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.dynamic-bundle",
       displayName: "Dynamic Bundle",
       packageName: "DynamicBundle.app",
       route: "/dynamic-bundle",
@@ -90,49 +90,49 @@ describe("BundleLoader dynamic runtime contracts", () => {
     }));
 
     expect(registered).toMatchObject({
-      id: "dynamic-bundle",
+      bundleIdentifier: "com.example.dynamic-bundle",
       route: "/dynamic-bundle",
       componentKey: "DynamicBundleComponent"
     });
-    expect(BundleLoader.getBundle("dynamic-bundle")).toMatchObject({
+    expect(BundleLoader.getBundle("com.example.dynamic-bundle")).toMatchObject({
       componentKey: "DynamicBundleComponent",
       content: { screen: "v1" },
       assets: ["/test-assets/dynamic-bundle/hero.png"],
       permissions: ["app.open.public", "documents.read"],
       services: ["dynamic.service"],
-      manifest: expect.objectContaining({ id: "dynamic-bundle", packageName: "DynamicBundle.app" })
+      manifest: expect.objectContaining({ bundleIdentifier: "com.example.dynamic-bundle", packageName: "DynamicBundle.app" })
     });
     expect(RuntimeController.getSnapshot()).toMatchObject({
       rawApps: {
-        "dynamic-bundle": expect.objectContaining({ id: "dynamic-bundle" })
+        "com.example.dynamic-bundle": expect.objectContaining({ bundleIdentifier: "com.example.dynamic-bundle" })
       },
       appInfo: {
-        "dynamic-bundle": expect.objectContaining({ id: "dynamic-bundle" })
+        "com.example.dynamic-bundle": expect.objectContaining({ bundleIdentifier: "com.example.dynamic-bundle" })
       },
       managers: {
-        "dynamic-bundle": expect.objectContaining({ lifecycleState: "registered" })
+        "com.example.dynamic-bundle": expect.objectContaining({ lifecycleState: "registered" })
       }
     });
     expect(applicationWillRegister).toHaveBeenCalledWith({
-      appId: "dynamic-bundle",
+      appId: "com.example.dynamic-bundle",
       packageName: "DynamicBundle.app",
       reason: "AppRegistry.register"
     });
     expect(applicationDidRegister).toHaveBeenCalledWith({
-      appId: "dynamic-bundle",
+      appId: "com.example.dynamic-bundle",
       packageName: "DynamicBundle.app",
       reason: "AppRegistry.register"
     });
 
-    await expect(BundleLoader.loadBundle("dynamic-bundle")).resolves.toMatchObject({
-      appId: "dynamic-bundle",
+    await expect(BundleLoader.loadBundle("com.example.dynamic-bundle")).resolves.toMatchObject({
+      appId: "com.example.dynamic-bundle",
       packageName: "DynamicBundle.app",
       definition: expect.objectContaining({ root: DynamicComponent }),
     });
-    await BundleLoader.loadBundle("dynamic-bundle");
+    await BundleLoader.loadBundle("com.example.dynamic-bundle");
     expect(loadModule).toHaveBeenCalledTimes(1);
-    expect(BundleLoader.getBundleLoadState("dynamic-bundle")).toBe("ready");
-    expect(BundleLoader.getLifecycleHook("dynamic-bundle", "applicationWillLaunch")).toBe(moduleApplicationWillLaunch);
+    expect(BundleLoader.getBundleLoadState("com.example.dynamic-bundle")).toBe("ready");
+    expect(BundleLoader.getLifecycleHook("com.example.dynamic-bundle", "applicationWillLaunch")).toBe(moduleApplicationWillLaunch);
 
     const updatedManifest = createTestManifest({
       ...manifest,
@@ -153,7 +153,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       }
     }));
 
-    expect(BundleLoader.getBundle("dynamic-bundle")).toMatchObject({
+    expect(BundleLoader.getBundle("com.example.dynamic-bundle")).toMatchObject({
       componentKey: "DynamicBundleV2Component",
       content: { screen: "v2" },
       assets: ["/test-assets/dynamic-bundle/hero-v2.png"],
@@ -162,17 +162,17 @@ describe("BundleLoader dynamic runtime contracts", () => {
       manifest: expect.objectContaining({ route: "/dynamic-bundle/v2" })
     });
     expect(applicationWillUpdate).toHaveBeenCalledWith({
-      appId: "dynamic-bundle",
+      appId: "com.example.dynamic-bundle",
       packageName: "DynamicBundle.app",
       reason: "AppRegistry.register update"
     });
     expect(applicationDidUpdate).toHaveBeenCalledWith({
-      appId: "dynamic-bundle",
+      appId: "com.example.dynamic-bundle",
       packageName: "DynamicBundle.app",
       reason: "AppRegistry.register update"
     });
-    expect(BundleLoader.getLoadedBundle("dynamic-bundle")).toBeNull();
-    expect(BundleLoader.getBundleLoadState("dynamic-bundle")).toBe("unloaded");
+    expect(BundleLoader.getLoadedBundle("com.example.dynamic-bundle")).toBeNull();
+    expect(BundleLoader.getBundleLoadState("com.example.dynamic-bundle")).toBe("unloaded");
     expect(AppRegistry.getRegistrationHistory().map((record) => record.action)).toEqual(["register", "update"]);
     expect(RuntimeController.getEventHistory().map((event) => event.type)).toEqual(
       expect.arrayContaining(["bundle.register", "bundle.load.begin", "bundle.load.complete", "bundle.update", "app.register", "app.register.update"])
@@ -181,8 +181,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
 
   it("drops a stale definition completion after its bundle registration is replaced", async () => {
     const { AppRegistry, BundleLoader } = createRuntimeHarness(createTestRuntime());
-    const manifest = createTestManifest({
-      id: "stale-definition-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.stale-definition-bundle",
       displayName: "Stale Definition Bundle",
       packageName: "StaleDefinitionBundle.app",
       route: "/stale-definition-bundle",
@@ -196,7 +196,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       loadModule: () => staleModule.promise,
     });
 
-    const staleLoad = BundleLoader.loadBundle(manifest.id);
+    const staleLoad = BundleLoader.loadBundle(manifest.bundleIdentifier);
     const replacementBase = createTestBundle(manifest);
     const replacementDefinition = definitionFor(replacementBase);
     const replacementModule = deferred<SynCloudOSAppModule>();
@@ -207,14 +207,14 @@ describe("BundleLoader dynamic runtime contracts", () => {
       loadModule: replacementLoad,
     };
     AppRegistry.registerBundle(replacement);
-    const firstReplacementLoad = BundleLoader.loadBundle(manifest.id);
+    const firstReplacementLoad = BundleLoader.loadBundle(manifest.bundleIdentifier);
     expect(replacementLoad).toHaveBeenCalledTimes(1);
     staleModule.resolve({ default: firstDefinition });
     await expect(staleLoad).rejects.toThrow(/changed while its module was loading/u);
 
-    expect(BundleLoader.getLoadedBundle(manifest.id)).toBeNull();
-    expect(BundleLoader.getBundleLoadState(manifest.id)).toBe("loading");
-    const secondReplacementLoad = BundleLoader.loadBundle(manifest.id);
+    expect(BundleLoader.getLoadedBundle(manifest.bundleIdentifier)).toBeNull();
+    expect(BundleLoader.getBundleLoadState(manifest.bundleIdentifier)).toBe("loading");
+    const secondReplacementLoad = BundleLoader.loadBundle(manifest.bundleIdentifier);
     expect(replacementLoad).toHaveBeenCalledTimes(1);
     replacementModule.resolve({ default: replacementDefinition });
     await expect(firstReplacementLoad).resolves.toMatchObject({
@@ -226,8 +226,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
   it("cancels stale definition completion in the classic loader as well", async () => {
     const runtime = createTestRuntime({ id: "runtime:classic-stale-definition" });
     const loader = createBundleLoader(runtime);
-    const manifest = createTestManifest({
-      id: "classic-stale-definition-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.classic-stale-definition-bundle",
       displayName: "Classic Stale Definition Bundle",
       packageName: "ClassicStaleDefinitionBundle.app",
       route: "/classic-stale-definition-bundle",
@@ -241,7 +241,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       loadModule: () => staleModule.promise,
     });
 
-    const staleLoad = loader.loadBundle(manifest.id);
+    const staleLoad = loader.loadBundle(manifest.bundleIdentifier);
     const replacementBase = createTestBundle(manifest);
     const replacementDefinition = definitionFor(replacementBase);
     const replacement = {
@@ -253,17 +253,17 @@ describe("BundleLoader dynamic runtime contracts", () => {
     staleModule.resolve({ default: firstDefinition });
 
     await expect(staleLoad).rejects.toThrow(/changed while its module was loading/u);
-    expect(loader.getLoadedBundle(manifest.id)).toBeNull();
-    expect(loader.getBundleLoadState(manifest.id)).toBe("unloaded");
-    await expect(loader.loadBundle(manifest.id)).resolves.toMatchObject({
+    expect(loader.getLoadedBundle(manifest.bundleIdentifier)).toBeNull();
+    expect(loader.getBundleLoadState(manifest.bundleIdentifier)).toBe("unloaded");
+    await expect(loader.loadBundle(manifest.bundleIdentifier)).resolves.toMatchObject({
       definition: replacementDefinition,
     });
   });
 
   it("does not publish or retain a stale rejected import in the production inline loader", async () => {
     const runtime = createTestRuntime({ id: "runtime:inline-stale-rejection" });
-    const manifest = createTestManifest({
-      id: "inline-stale-rejection-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.inline-stale-rejection-bundle",
       displayName: "Inline stale rejection bundle",
       packageName: "InlineStaleRejection.app",
       route: "/inline-stale-rejection",
@@ -276,7 +276,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       synWareDefinition: originalDefinition,
       loadModule: () => staleModule.promise,
     });
-    const staleLoad = runtime.bundles.loadBundle(manifest.id);
+    const staleLoad = runtime.bundles.loadBundle(manifest.bundleIdentifier);
 
     const replacementBase = createTestBundle(manifest);
     const replacementDefinition = definitionFor(replacementBase);
@@ -286,12 +286,12 @@ describe("BundleLoader dynamic runtime contracts", () => {
       synWareDefinition: replacementDefinition,
       loadModule: () => replacementModule.promise,
     });
-    const replacementLoad = runtime.bundles.loadBundle(manifest.id);
+    const replacementLoad = runtime.bundles.loadBundle(manifest.bundleIdentifier);
     staleModule.reject(new Error("superseded inline import failed"));
 
     await expect(staleLoad).rejects.toMatchObject({ code: "BUNDLE_IMPORT_FAILED" });
-    expect(runtime.bundles.getBundleLoadState(manifest.id)).toBe("loading");
-    expect(runtime.bundles.getBundleLoadError(manifest.id)).toBeNull();
+    expect(runtime.bundles.getBundleLoadState(manifest.bundleIdentifier)).toBe("loading");
+    expect(runtime.bundles.getBundleLoadError(manifest.bundleIdentifier)).toBeNull();
     expect(runtime.events.getHistory().filter((event) => (
       event.type === "bundle.load.failed" && String((event.payload as { error?: unknown } | undefined)?.error).includes("superseded inline import failed")
     ))).toEqual([]);
@@ -303,8 +303,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
 
   it("keeps a production inline load generation alive when its first caller aborts", async () => {
     const runtime = createTestRuntime({ id: "runtime:inline-first-caller-abort" });
-    const manifest = createTestManifest({
-      id: "inline-first-caller-abort-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.inline-first-caller-abort-bundle",
       displayName: "Inline first caller abort bundle",
       packageName: "InlineFirstCallerAbort.app",
       route: "/inline-first-caller-abort",
@@ -319,8 +319,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
     });
 
     const firstCaller = new AbortController();
-    const firstLoad = runtime.bundles.loadBundle(manifest.id, { signal: firstCaller.signal });
-    const laterLoad = runtime.bundles.loadBundle(manifest.id);
+    const firstLoad = runtime.bundles.loadBundle(manifest.bundleIdentifier, { signal: firstCaller.signal });
+    const laterLoad = runtime.bundles.loadBundle(manifest.bundleIdentifier);
     const firstExpectation = expect(firstLoad).rejects.toMatchObject({ name: "AbortError" });
     const laterExpectation = expect(laterLoad).resolves.toMatchObject({ definition });
 
@@ -329,14 +329,14 @@ describe("BundleLoader dynamic runtime contracts", () => {
     module.resolve({ default: definition });
 
     await laterExpectation;
-    expect(runtime.bundles.getLoadedBundle(manifest.id)).toMatchObject({ definition });
+    expect(runtime.bundles.getLoadedBundle(manifest.bundleIdentifier)).toMatchObject({ definition });
     await runtime.dispose("inline first caller abort fixture complete");
   });
 
   it("cancels only a later production inline load caller", async () => {
     const runtime = createTestRuntime({ id: "runtime:inline-later-caller-abort" });
-    const manifest = createTestManifest({
-      id: "inline-later-caller-abort-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.inline-later-caller-abort-bundle",
       displayName: "Inline later caller abort bundle",
       packageName: "InlineLaterCallerAbort.app",
       route: "/inline-later-caller-abort",
@@ -350,9 +350,9 @@ describe("BundleLoader dynamic runtime contracts", () => {
       loadModule: () => module.promise,
     });
 
-    const firstLoad = runtime.bundles.loadBundle(manifest.id);
+    const firstLoad = runtime.bundles.loadBundle(manifest.bundleIdentifier);
     const laterCaller = new AbortController();
-    const laterLoad = runtime.bundles.loadBundle(manifest.id, { signal: laterCaller.signal });
+    const laterLoad = runtime.bundles.loadBundle(manifest.bundleIdentifier, { signal: laterCaller.signal });
     const firstExpectation = expect(firstLoad).resolves.toMatchObject({ definition });
     const laterExpectation = expect(laterLoad).rejects.toMatchObject({ name: "AbortError" });
 
@@ -360,14 +360,14 @@ describe("BundleLoader dynamic runtime contracts", () => {
     module.resolve({ default: definition });
 
     await Promise.all([firstExpectation, laterExpectation]);
-    expect(runtime.bundles.getLoadedBundle(manifest.id)).toMatchObject({ definition });
+    expect(runtime.bundles.getLoadedBundle(manifest.bundleIdentifier)).toMatchObject({ definition });
     await runtime.dispose("inline later caller abort fixture complete");
   });
 
   it("still revokes a production inline generation after runtime disposal", async () => {
     const runtime = createTestRuntime({ id: "runtime:inline-generation-dispose" });
-    const manifest = createTestManifest({
-      id: "inline-generation-dispose-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.inline-generation-dispose-bundle",
       displayName: "Inline generation disposal bundle",
       packageName: "InlineGenerationDispose.app",
       route: "/inline-generation-dispose",
@@ -381,8 +381,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
       loadModule: () => module.promise,
     });
 
-    const firstLoad = runtime.bundles.loadBundle(manifest.id);
-    const secondLoad = runtime.bundles.loadBundle(manifest.id);
+    const firstLoad = runtime.bundles.loadBundle(manifest.bundleIdentifier);
+    const secondLoad = runtime.bundles.loadBundle(manifest.bundleIdentifier);
     const firstExpectation = expect(firstLoad).rejects.toThrow(/changed|revoked|disposed/u);
     const secondExpectation = expect(secondLoad).rejects.toThrow(/changed|revoked|disposed/u);
 
@@ -390,14 +390,14 @@ describe("BundleLoader dynamic runtime contracts", () => {
     module.resolve({ default: definition });
 
     await Promise.all([firstExpectation, secondExpectation]);
-    expect(runtime.bundles.getLoadedBundle(manifest.id)).toBeNull();
+    expect(runtime.bundles.getLoadedBundle(manifest.bundleIdentifier)).toBeNull();
   });
 
   it("does not publish or retain a stale rejected import in the classic loader", async () => {
     const runtime = createTestRuntime({ id: "runtime:classic-stale-rejection" });
     const loader = createBundleLoader(runtime);
-    const manifest = createTestManifest({
-      id: "classic-stale-rejection-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.classic-stale-rejection-bundle",
       displayName: "Classic stale rejection bundle",
       packageName: "ClassicStaleRejection.app",
       route: "/classic-stale-rejection",
@@ -410,7 +410,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       synWareDefinition: originalDefinition,
       loadModule: () => staleModule.promise,
     });
-    const staleLoad = loader.loadBundle(manifest.id);
+    const staleLoad = loader.loadBundle(manifest.bundleIdentifier);
 
     const replacementBase = createTestBundle(manifest);
     const replacementDefinition = definitionFor(replacementBase);
@@ -420,12 +420,12 @@ describe("BundleLoader dynamic runtime contracts", () => {
       synWareDefinition: replacementDefinition,
       loadModule: () => replacementModule.promise,
     });
-    const replacementLoad = loader.loadBundle(manifest.id);
+    const replacementLoad = loader.loadBundle(manifest.bundleIdentifier);
     staleModule.reject(new Error("superseded classic import failed"));
 
     await expect(staleLoad).rejects.toMatchObject({ code: "BUNDLE_IMPORT_FAILED" });
-    expect(loader.getBundleLoadState(manifest.id)).toBe("loading");
-    expect(loader.getBundleLoadError(manifest.id)).toBeNull();
+    expect(loader.getBundleLoadState(manifest.bundleIdentifier)).toBe("loading");
+    expect(loader.getBundleLoadError(manifest.bundleIdentifier)).toBeNull();
     expect(runtime.events.getHistory().filter((event) => (
       event.type === "bundle.load.failed" && String((event.payload as { error?: unknown } | undefined)?.error).includes("superseded classic import failed")
     ))).toEqual([]);
@@ -438,8 +438,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
   it("cancels stale definition completion in the standalone loader factory as well", async () => {
     const runtime = createTestRuntime({ id: "runtime:factory-stale-definition" });
     const loader = createBundleLoader({ runtimeId: runtime.runtimeId, events: runtime.events });
-    const manifest = createTestManifest({
-      id: "factory-stale-definition-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.factory-stale-definition-bundle",
       displayName: "Factory Stale Definition Bundle",
       packageName: "FactoryStaleDefinitionBundle.app",
       route: "/factory-stale-definition-bundle",
@@ -453,7 +453,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       loadModule: () => staleModule.promise,
     });
 
-    const staleLoad = loader.loadBundle(manifest.id);
+    const staleLoad = loader.loadBundle(manifest.bundleIdentifier);
     const replacementBase = createTestBundle(manifest);
     const replacementDefinition = definitionFor(replacementBase);
     const replacementLoad = vi.fn(async () => ({ default: replacementDefinition }));
@@ -462,21 +462,21 @@ describe("BundleLoader dynamic runtime contracts", () => {
       synWareDefinition: replacementDefinition,
       loadModule: replacementLoad,
     });
-    const currentLoad = loader.loadBundle(manifest.id);
+    const currentLoad = loader.loadBundle(manifest.bundleIdentifier);
     expect(replacementLoad).toHaveBeenCalledTimes(1);
     staleModule.resolve({ default: firstDefinition });
 
     await expect(staleLoad).rejects.toThrow(/changed while its module was loading/u);
     await expect(currentLoad).resolves.toMatchObject({ definition: replacementDefinition });
-    expect(loader.getLoadedBundle(manifest.id)).toMatchObject({ definition: replacementDefinition });
+    expect(loader.getLoadedBundle(manifest.bundleIdentifier)).toMatchObject({ definition: replacementDefinition });
     await runtime.dispose("standalone factory stale-definition fixture finished");
   });
 
   it("keeps a standalone loader generation alive when its first caller aborts", async () => {
     const runtime = createTestRuntime({ id: "runtime:factory-first-caller-abort" });
     const loader = createBundleLoader({ runtimeId: runtime.runtimeId, events: runtime.events });
-    const manifest = createTestManifest({
-      id: "factory-first-caller-abort-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.factory-first-caller-abort-bundle",
       displayName: "Factory first caller abort bundle",
       packageName: "FactoryFirstCallerAbort.app",
       route: "/factory-first-caller-abort",
@@ -491,8 +491,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
     });
 
     const firstCaller = new AbortController();
-    const firstLoad = loader.loadBundle(manifest.id, { signal: firstCaller.signal });
-    const laterLoad = loader.loadBundle(manifest.id);
+    const firstLoad = loader.loadBundle(manifest.bundleIdentifier, { signal: firstCaller.signal });
+    const laterLoad = loader.loadBundle(manifest.bundleIdentifier);
     const firstExpectation = expect(firstLoad).rejects.toMatchObject({ name: "AbortError" });
     const laterExpectation = expect(laterLoad).resolves.toMatchObject({ definition });
 
@@ -501,15 +501,15 @@ describe("BundleLoader dynamic runtime contracts", () => {
     module.resolve({ default: definition });
 
     await laterExpectation;
-    expect(loader.getLoadedBundle(manifest.id)).toMatchObject({ definition });
+    expect(loader.getLoadedBundle(manifest.bundleIdentifier)).toMatchObject({ definition });
     loader.dispose();
   });
 
   it("cancels only a later standalone loader caller", async () => {
     const runtime = createTestRuntime({ id: "runtime:factory-later-caller-abort" });
     const loader = createBundleLoader({ runtimeId: runtime.runtimeId, events: runtime.events });
-    const manifest = createTestManifest({
-      id: "factory-later-caller-abort-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.factory-later-caller-abort-bundle",
       displayName: "Factory later caller abort bundle",
       packageName: "FactoryLaterCallerAbort.app",
       route: "/factory-later-caller-abort",
@@ -523,9 +523,9 @@ describe("BundleLoader dynamic runtime contracts", () => {
       loadModule: () => module.promise,
     });
 
-    const firstLoad = loader.loadBundle(manifest.id);
+    const firstLoad = loader.loadBundle(manifest.bundleIdentifier);
     const laterCaller = new AbortController();
-    const laterLoad = loader.loadBundle(manifest.id, { signal: laterCaller.signal });
+    const laterLoad = loader.loadBundle(manifest.bundleIdentifier, { signal: laterCaller.signal });
     const firstExpectation = expect(firstLoad).resolves.toMatchObject({ definition });
     const laterExpectation = expect(laterLoad).rejects.toMatchObject({ name: "AbortError" });
 
@@ -533,15 +533,15 @@ describe("BundleLoader dynamic runtime contracts", () => {
     module.resolve({ default: definition });
 
     await Promise.all([firstExpectation, laterExpectation]);
-    expect(loader.getLoadedBundle(manifest.id)).toMatchObject({ definition });
+    expect(loader.getLoadedBundle(manifest.bundleIdentifier)).toMatchObject({ definition });
     loader.dispose();
   });
 
   it("honours caller-local cancellation in the classic loader", async () => {
     const runtime = createTestRuntime({ id: "runtime:classic-caller-abort" });
     const loader = createBundleLoader(runtime);
-    const manifest = createTestManifest({
-      id: "classic-caller-abort-bundle",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.classic-caller-abort-bundle",
       displayName: "Classic caller abort bundle",
       packageName: "ClassicCallerAbort.app",
       route: "/classic-caller-abort",
@@ -556,8 +556,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
     });
 
     const cancelledCaller = new AbortController();
-    const cancelledLoad = loader.loadBundle(manifest.id, { signal: cancelledCaller.signal });
-    const survivingLoad = loader.loadBundle(manifest.id);
+    const cancelledLoad = loader.loadBundle(manifest.bundleIdentifier, { signal: cancelledCaller.signal });
+    const survivingLoad = loader.loadBundle(manifest.bundleIdentifier);
     const cancelledExpectation = expect(cancelledLoad).rejects.toMatchObject({ name: "AbortError" });
     const survivingExpectation = expect(survivingLoad).resolves.toMatchObject({ definition });
 
@@ -566,7 +566,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
     module.resolve({ default: definition });
 
     await survivingExpectation;
-    expect(loader.getLoadedBundle(manifest.id)).toMatchObject({ definition });
+    expect(loader.getLoadedBundle(manifest.bundleIdentifier)).toMatchObject({ definition });
     await runtime.dispose("classic caller abort fixture complete");
   });
 
@@ -576,8 +576,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
     authoriseRuntime(runtime);
     const { AppRegistry, AppManagerController, LaunchServices, PolicyKit, RuntimeController } = createRuntimeHarness(runtime);
     const hookOrder: string[] = [];
-    const manifest = createTestManifest({
-      id: "hooked-launch",
+    const manifest = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.hooked-launch",
       displayName: "Hooked Launch",
       packageName: "HookedLaunch.app",
       route: "/hooked-launch",
@@ -602,7 +602,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       }
     }));
 
-    const manager = LaunchServices.openApp("hooked-launch", { source: "developer" });
+    const manager = LaunchServices.openApp("com.example.hooked-launch", { source: "developer" });
     await flushLaunchTimers();
 
     expect(manager?.getState()).toBe("active");
@@ -612,7 +612,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
         expect.objectContaining({
           type: "bundle.lifecycle.failed",
           payload: expect.objectContaining({
-            appId: "hooked-launch",
+            appId: "com.example.hooked-launch",
             hookName: "applicationDidLaunch",
             error: "launch hook failed"
           })
@@ -620,8 +620,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
       ])
     );
 
-    AppManagerController.getManagerForApp("hooked-launch")?.suspend();
-    AppManagerController.getManagerForApp("hooked-launch")?.close();
+    AppManagerController.getManagerForApp("com.example.hooked-launch")?.suspend();
+    AppManagerController.getManagerForApp("com.example.hooked-launch")?.close();
 
     expect(hookOrder).toEqual([
       "willLaunch",
@@ -641,13 +641,13 @@ describe("BundleLoader dynamic runtime contracts", () => {
     ServiceRegistry.ensureDefaults();
     ServiceRegistry.stopService("windowing");
     AppRegistry.registerBundle(createTestBundle({
-      id: "preload-blocked",
+      bundleIdentifier: "com.example.preload-blocked",
       route: "/preload-blocked",
       requiredServices: ["windowing"],
       policy: { public: true }
     }));
 
-    const preload = await LaunchServices.preloadApp("preload-blocked", { source: "developer" });
+    const preload = await LaunchServices.preloadApp("com.example.preload-blocked", { source: "developer" });
 
     expect(preload).toBeNull();
     expect(WindowManager.list()).toEqual([]);
@@ -658,10 +658,10 @@ describe("BundleLoader dynamic runtime contracts", () => {
     });
     expect(LaunchServices.getHistory().at(-1)).toMatchObject({
       action: "preload.failed",
-      appId: "preload-blocked",
+      appId: "com.example.preload-blocked",
       code: expect.any(String)
     });
-    expect(RuntimeController.getSnapshot().lifecycle["preload-blocked"]).toBe("disabled");
+    expect(RuntimeController.getSnapshot().lifecycle["com.example.preload-blocked"]).toBe("disabled");
   });
 
   it("fails non-queued launches while another launch request is active", async () => {
@@ -671,28 +671,28 @@ describe("BundleLoader dynamic runtime contracts", () => {
     const { AppRegistry, LaunchServices, PolicyKit, RuntimeController } = createRuntimeHarness(runtime);
     PolicyKit.setAccessMode("public");
     AppRegistry.registerMany([
-      createTestBundle({ id: "active-launch", route: "/active-launch", policy: { public: true } }),
-      createTestBundle({ id: "no-queue-launch", route: "/no-queue-launch", policy: { public: true } })
+      createTestBundle({ bundleIdentifier: "com.example.active-launch", route: "/active-launch", policy: { public: true } }),
+      createTestBundle({ bundleIdentifier: "com.example.no-queue-launch", route: "/no-queue-launch", policy: { public: true } })
     ]);
 
-    const activeManager = LaunchServices.openApp("active-launch", { source: "developer" });
-    const rejectedManager = LaunchServices.openApp("no-queue-launch", { source: "developer", queue: false });
+    const activeManager = LaunchServices.openApp("com.example.active-launch", { source: "developer" });
+    const rejectedManager = LaunchServices.openApp("com.example.no-queue-launch", { source: "developer", queue: false });
 
     expect(activeManager).not.toBeNull();
     expect(rejectedManager).toBeNull();
     expect(LaunchServices.inspect()).toMatchObject({
-      active: expect.objectContaining({ appId: "active-launch" }),
+      active: expect.objectContaining({ appId: "com.example.active-launch" }),
       queued: [],
       deferred: []
     });
     expect(LaunchServices.getHistory().at(-1)).toMatchObject({
       action: "failed",
-      appId: "no-queue-launch",
+      appId: "com.example.no-queue-launch",
       code: "LAUNCH_IN_PROGRESS"
     });
     expect(RuntimeController.getSnapshot().errors.at(-1)).toMatchObject({
       code: "APP_LAUNCH_FAILED",
-      appId: "no-queue-launch"
+      appId: "com.example.no-queue-launch"
     });
 
     await flushLaunchTimers();

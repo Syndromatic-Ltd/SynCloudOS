@@ -27,7 +27,7 @@ import { choreographyTimings } from "../../src/FX/AnimationFX/choreographyTiming
 describe("RouteManager and LaunchServices route/launch contracts", () => {
   it("returns the public route-not-found failure for unregistered deep links", async () => {
     const { AppRegistry, RouteManager } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.register(createTestManifest({ id: "current-app", route: "/current-app" }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.current-app", route: "/current-app" }));
     const retiredRoutes = [
       "/about-classic",
       "/__syncloudos/atmo-refresh",
@@ -109,9 +109,9 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
   it("keeps internal routes path-based and cross-origin URLs href-based", async () => {
     const { AppRegistry, RouteManager } = createRuntimeHarness(createTestRuntime());
     AppRegistry.registerMany([
-      createTestManifest({ id: "portfolio", route: "/portfolio" }),
+      createTestManifest({ bundleIdentifier: "com.example.portfolio", route: "/portfolio" }),
       createTestManifest({
-        id: "external-portfolio",
+        bundleIdentifier: "com.example.external-portfolio",
         route: "https://docs.example.com/portfolio",
         type: "external"
       })
@@ -121,14 +121,14 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
       kind: "app",
       pathname: "/portfolio",
       matchMode: "path",
-      app: expect.objectContaining({ id: "portfolio" })
+      app: expect.objectContaining({ bundleIdentifier: "com.example.portfolio" })
     });
 
     expect(RouteManager.resolveRoute("http://127.0.0.1:5173/portfolio?from=test#intro")).toMatchObject({
       kind: "app",
       pathname: "/portfolio",
       matchMode: "path",
-      app: expect.objectContaining({ id: "portfolio" }),
+      app: expect.objectContaining({ bundleIdentifier: "com.example.portfolio" }),
       diagnostics: expect.objectContaining({ routeableInternally: true })
     });
 
@@ -137,7 +137,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
       pathname: "/portfolio",
       matchMode: "href",
       canonicalHref: "https://docs.example.com/portfolio",
-      app: expect.objectContaining({ id: "external-portfolio" }),
+      app: expect.objectContaining({ bundleIdentifier: "com.example.external-portfolio" }),
       diagnostics: expect.objectContaining({
         isCrossOrigin: true,
         routeableInternally: false,
@@ -158,7 +158,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
 
   it("does not normalize unsafe schemes into internal routes", async () => {
     const { AppRegistry, RouteManager } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.register(createTestManifest({ id: "portfolio", route: "/portfolio" }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.portfolio", route: "/portfolio" }));
 
     const resolution = RouteManager.resolveRoute("javascript:/portfolio");
 
@@ -179,13 +179,13 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
   it("adds route diagnostics without dropping existing route-table fields", async () => {
     const { AppRegistry, RouteManager } = createRuntimeHarness(createTestRuntime());
     AppRegistry.registerMany([
-      createTestManifest({ id: "studio", route: "/studio" }),
-      createTestManifest({ id: "github", route: "https://github.com/syndromatic", type: "external" })
+      createTestManifest({ bundleIdentifier: "com.example.studio", route: "/studio" }),
+      createTestManifest({ bundleIdentifier: "com.example.github", route: "https://github.com/syndromatic", type: "external" })
     ]);
 
     expect(RouteManager.getRouteTable()).toEqual([
       expect.objectContaining({
-        appId: "studio",
+        appId: "com.example.studio",
         packageName: "Studio.app",
         route: "/studio",
         normalizedRoute: "/studio",
@@ -196,7 +196,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
         diagnostics: expect.objectContaining({ matchMode: "path" })
       }),
       expect.objectContaining({
-        appId: "github",
+        appId: "com.example.github",
         packageName: "Github.app",
         route: "https://github.com/syndromatic",
         normalizedRoute: "/syndromatic",
@@ -213,18 +213,18 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     try {
       const { AppRegistry, RouteManager } = createRuntimeHarness(runtime);
       const historyBefore = AppRegistry.getRegistrationHistory().length;
-      const registered = AppRegistry.register(createTestManifest({ id: "route-reader", route: "/route-reader" }));
+      const registered = AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.route-reader", route: "/route-reader" }));
 
-      expect(registered).toMatchObject({ id: "route-reader", route: "/route-reader" });
+      expect(registered).toMatchObject({ bundleIdentifier: "com.example.route-reader", route: "/route-reader" });
       expect(AppRegistry.getRegistrationHistory()).toHaveLength(historyBefore + 1);
       expect(AppRegistry.getRegistrationHistory().at(-1)).toMatchObject({
-        appId: "route-reader",
+        appId: "com.example.route-reader",
         action: "register",
         result: "accepted",
         route: "/route-reader",
       });
-      expect(RouteManager.getAppForRoute("/route-reader")).toMatchObject({ id: "route-reader" });
-      expect(RouteManager.getRouteForApp("route-reader")).toBe("/route-reader");
+      expect(RouteManager.getAppForRoute("/route-reader")).toMatchObject({ bundleIdentifier: "com.example.route-reader" });
+      expect(RouteManager.getRouteForApp("com.example.route-reader")).toBe("/route-reader");
     } finally {
       try {
         await runtime.dispose({ reason: "route registration characterisation cleanup", inFlight: "cancel" });
@@ -239,7 +239,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     const runtime = createTestRuntime();
     try {
       const { AppRegistry, LoginServices, RouteManager } = createRuntimeHarness(runtime);
-      AppRegistry.registerBundle(createTestBundle({ id: "route-readers", route: "/route-readers" }));
+      AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.route-readers", route: "/route-readers" }));
       const requestedPath = "/ROUTE-READERS/?tab=overview#notes";
       const normalized = RouteManager.normalizeRoutePath(requestedPath);
 
@@ -249,16 +249,16 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
         hash: "#notes",
         matchMode: "path",
       });
-      expect(RouteManager.getRouteForApp("route-readers")).toBe("/route-readers");
+      expect(RouteManager.getRouteForApp("com.example.route-readers")).toBe("/route-readers");
 
       unlockRuntime(LoginServices);
-      const operation = RouteManager.openRoute(requestedPath, { source: "route-reader", syncRoute: false });
+      const operation = RouteManager.openRoute(requestedPath, { source: "com.example.route-reader", syncRoute: false });
       await expect(operation.result).resolves.toMatchObject({
         status: "completed",
         committed: true,
         value: {
           kind: "app",
-          appId: "route-readers",
+          appId: "com.example.route-readers",
           pathname: "/route-readers",
         },
       });
@@ -270,7 +270,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
           requestedPath,
           pathname: "/route-readers",
           kind: "app",
-          appId: "route-readers",
+          appId: "com.example.route-readers",
         }),
       ]);
       expect(RouteManager.getHistory(1)).toHaveLength(1);
@@ -290,7 +290,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     try {
       const { AppRegistry, LoginServices, RouteManager } = createRuntimeHarness(runtime);
       AppRegistry.registerBundle(createTestBundle(
-        { id: "broken-route", route: "/broken-route", policy: { public: true } },
+        { bundleIdentifier: "com.example.broken-route", route: "/broken-route", policy: { public: true } },
         { loadModule: async () => { throw new Error("fixture module unavailable"); } },
       ));
       unlockRuntime(LoginServices);
@@ -302,7 +302,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
         .toEqual([
           expect.objectContaining({
             code: "APP_LAUNCH_FAILED",
-            appId: "broken-route",
+            appId: "com.example.broken-route",
             packageName: "BrokenRoute.app",
             title: "Webspring could not open Broken Route.",
             message: "SynCloudOS could not load the requested content.",
@@ -317,18 +317,18 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     const runtime = createTestRuntime();
     try {
       const { AppRegistry, LaunchServices } = createRuntimeHarness(runtime);
-      AppRegistry.register(createTestManifest({ id: "queued-report", route: "/queued-report" }));
+      AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.queued-report", route: "/queued-report" }));
 
-      const queued = LaunchServices.queueLaunch("queued-report", { hold: true, source: "developer" });
-      expect(queued).toMatchObject({ appId: "queued-report" });
+      const queued = LaunchServices.queueLaunch("com.example.queued-report", { hold: true, source: "developer" });
+      expect(queued).toMatchObject({ appId: "com.example.queued-report" });
 
       const inspection = LaunchServices.inspect();
       expect(inspection).toMatchObject({
         active: null,
-        queued: [expect.objectContaining({ appId: "queued-report" })],
+        queued: [expect.objectContaining({ appId: "com.example.queued-report" })],
         deferred: [],
         history: expect.arrayContaining([
-          expect.objectContaining({ action: "queued", appId: "queued-report" }),
+          expect.objectContaining({ action: "queued", appId: "com.example.queued-report" }),
         ]),
       });
 
@@ -336,14 +336,14 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
       expect(report.launch).toMatchObject({
         queue: expect.objectContaining({
           active: null,
-          queued: [expect.objectContaining({ appId: "queued-report" })],
+          queued: [expect.objectContaining({ appId: "com.example.queued-report" })],
           deferred: [],
         }),
         active: null,
-        queued: [expect.objectContaining({ appId: "queued-report" })],
+        queued: [expect.objectContaining({ appId: "com.example.queued-report" })],
         deferred: [],
         history: expect.arrayContaining([
-          expect.objectContaining({ action: "queued", appId: "queued-report" }),
+          expect.objectContaining({ action: "queued", appId: "com.example.queued-report" }),
         ]),
         report: expect.objectContaining({
           active: null,
@@ -366,13 +366,13 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const { AppRegistry, LaunchServices, PolicyKit, WindowManager } = createRuntimeHarness(runtime);
     PolicyKit.setAccessMode("public");
-    AppRegistry.registerBundle(createTestBundle({ id: "queue-now", route: "/queue-now", policy: { public: true } }));
+    AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.queue-now", route: "/queue-now", policy: { public: true } }));
 
-    const queued = LaunchServices.queueLaunch("queue-now", { source: "developer" });
+    const queued = LaunchServices.queueLaunch("com.example.queue-now", { source: "developer" });
 
-    expect(queued).toMatchObject({ appId: "queue-now", attempt: 1 });
+    expect(queued).toMatchObject({ appId: "com.example.queue-now", attempt: 1 });
     expect(LaunchServices.inspect()).toMatchObject({
-      active: expect.objectContaining({ appId: "queue-now" }),
+      active: expect.objectContaining({ appId: "com.example.queue-now" }),
       queued: []
     });
 
@@ -386,32 +386,32 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
 
   it("holds queued launches when requested", async () => {
     const { AppRegistry, LaunchServices } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.register(createTestManifest({ id: "held-app", route: "/held-app", policy: { public: true } }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.held-app", route: "/held-app", policy: { public: true } }));
 
-    const queued = LaunchServices.queueLaunch("held-app", { hold: true, source: "developer" });
+    const queued = LaunchServices.queueLaunch("com.example.held-app", { hold: true, source: "developer" });
 
-    expect(queued).toMatchObject({ appId: "held-app", attempt: 1 });
+    expect(queued).toMatchObject({ appId: "com.example.held-app", attempt: 1 });
     expect(LaunchServices.inspect()).toMatchObject({
       active: null,
-      queued: [expect.objectContaining({ appId: "held-app" })]
+      queued: [expect.objectContaining({ appId: "com.example.held-app" })]
     });
   });
 
   it("explains external apps and records external launch history", async () => {
     const { AppRegistry, LaunchServices } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.register(createTestManifest({ id: "github", route: "https://github.com/syndromatic", type: "external" }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.github", route: "https://github.com/syndromatic", type: "external" }));
 
-    expect(LaunchServices.explainExternalApp("github")).toMatchObject({
+    expect(LaunchServices.explainExternalApp("com.example.github")).toMatchObject({
       canOpen: true,
       code: "READY",
       canonicalHref: "https://github.com/syndromatic"
     });
 
-    expect(LaunchServices.openExternalApp("github", { source: "route" })).toBe(true);
+    expect(LaunchServices.openExternalApp("com.example.github", { source: "route" })).toBe(true);
     expect(window.open).toHaveBeenCalledWith("https://github.com/syndromatic", "_blank", "noopener,noreferrer");
     expect(LaunchServices.getHistory().at(-1)).toMatchObject({
       action: "external.opened",
-      appId: "github",
+      appId: "com.example.github",
       href: "https://github.com/syndromatic"
     });
   });
@@ -421,9 +421,9 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     const { AppRegistry, LaunchServices, LoginServices, PolicyKit, WindowManager } = createRuntimeHarness(createTestRuntime());
     PolicyKit.setAccessMode("public");
     unlockRuntime(LoginServices);
-    AppRegistry.registerBundle(createTestBundle({ id: "preload-me", route: "/preload-me", policy: { public: true } }));
+    AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.preload-me", route: "/preload-me", policy: { public: true } }));
 
-    const preload = LaunchServices.preloadApp("preload-me", { source: "developer" });
+    const preload = LaunchServices.preloadApp("com.example.preload-me", { source: "developer" });
     await vi.advanceTimersByTimeAsync(80);
     const manager = await preload;
 
@@ -438,13 +438,13 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     vi.useFakeTimers();
     const { AppRegistry, LaunchServices, LoginServices, PolicyKit, WindowManager } = createRuntimeHarness(createTestRuntime());
     PolicyKit.setAccessMode("webspringVisibleAppProtected");
-    AppRegistry.registerBundle(createTestBundle({ id: "retry-me", route: "/retry-me" }));
+    AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.retry-me", route: "/retry-me" }));
 
-    expect(LaunchServices.openApp("retry-me", { source: "developer" })).toBeNull();
+    expect(LaunchServices.openApp("com.example.retry-me", { source: "developer" })).toBeNull();
     expect(LaunchServices.getHistory().map((record) => record.action)).toContain("failed");
 
     unlockRuntime(LoginServices);
-    const manager = LaunchServices.retryLaunch("retry-me", { source: "developer" });
+    const manager = LaunchServices.retryLaunch("com.example.retry-me", { source: "developer" });
     await flushLaunchTimers();
 
     expect(manager?.getState()).toBe("active");
@@ -458,8 +458,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     vi.useFakeTimers();
     const { AppRegistry, LaunchServices, LoginServices, RouteManager, RuntimeController, Statechart, WindowManager } = createRuntimeHarness(createTestRuntime());
     AppRegistry.registerMany([
-      createTestBundle({ id: "journal", route: "/journal" }),
-      createTestBundle({ id: "studio", route: "/studio" })
+      createTestBundle({ bundleIdentifier: "com.example.journal", route: "/journal" }),
+      createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })
     ]);
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "test" });
@@ -474,13 +474,13 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     const switchingSnapshot = RuntimeController.getSnapshot();
     expect(switchingSnapshot.application.multiSwitch).toMatchObject({
       status: "switching",
-      fromAppId: "journal",
-      toAppId: "studio",
+      fromAppId: "com.example.journal",
+      toAppId: "com.example.studio",
       fromRoute: "/journal",
       toRoute: "/studio",
       source: "route"
     });
-    expect(switchingSnapshot.application.activeAppId).toBe("studio");
+    expect(switchingSnapshot.application.activeAppId).toBe("com.example.studio");
     expect(WindowManager.list()).toEqual([]);
     expect(LaunchServices.getHistory().map((record) => record.action)).toContain("multiswitch.begin");
     expect(
@@ -492,11 +492,11 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     await vi.advanceTimersByTimeAsync(900);
     expect(RuntimeController.getSnapshot().application.multiSwitch).toMatchObject({
       status: "idle",
-      fromAppId: "journal",
-      toAppId: "studio"
+      fromAppId: "com.example.journal",
+      toAppId: "com.example.studio"
     });
     expect(WindowManager.list()).toEqual([]);
-    expect(AppRegistry.getApp("journal")).toBeTruthy();
+    expect(AppRegistry.getApp("com.example.journal")).toBeTruthy();
     expect(LaunchServices.getHistory().map((record) => record.action)).toContain("multiswitch.complete");
   });
 
@@ -504,8 +504,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     vi.useFakeTimers();
     const { AppRegistry, LoginServices, RouteManager, RuntimeController, Statechart } = createRuntimeHarness(createTestRuntime());
     AppRegistry.registerMany([
-      createTestBundle({ id: "journal", route: "/journal" }),
-      createTestBundle({ id: "studio", route: "/studio" }),
+      createTestBundle({ bundleIdentifier: "com.example.journal", route: "/journal" }),
+      createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" }),
     ]);
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "test" });
@@ -529,14 +529,14 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
       unsubscribe();
     }
 
-    const firstStudio = observed.find((snapshot) => snapshot.activeAppId === "studio");
+    const firstStudio = observed.find((snapshot) => snapshot.activeAppId === "com.example.studio");
     expect(firstStudio).toMatchObject({
-      activeAppId: "studio",
+      activeAppId: "com.example.studio",
       status: "switching",
-      fromAppId: "journal",
-      toAppId: "studio",
+      fromAppId: "com.example.journal",
+      toAppId: "com.example.studio",
     });
-    expect(observed.some((snapshot) => snapshot.activeAppId === "studio" && snapshot.status === "idle")).toBe(false);
+    expect(observed.some((snapshot) => snapshot.activeAppId === "com.example.studio" && snapshot.status === "idle")).toBe(false);
   });
 
   it("does not let the MultiSwitch watchdog settle before the first presentation frame", async () => {
@@ -549,8 +549,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     });
     const { AppRegistry, LoginServices, RouteManager, RuntimeController, Statechart } = createRuntimeHarness(createTestRuntime({ environment }));
     AppRegistry.registerMany([
-      createTestBundle({ id: "journal", route: "/journal" }),
-      createTestBundle({ id: "studio", route: "/studio" }),
+      createTestBundle({ bundleIdentifier: "com.example.journal", route: "/journal" }),
+      createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" }),
     ]);
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "test" });
@@ -562,8 +562,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
 
     expect(RuntimeController.getSnapshot().application.multiSwitch).toMatchObject({
       status: "switching",
-      fromAppId: "journal",
-      toAppId: "studio",
+      fromAppId: "com.example.journal",
+      toAppId: "com.example.studio",
     });
     await vi.advanceTimersByTimeAsync(choreographyTimings.multiSwitchSettleFallbackMs);
     expect(RuntimeController.getSnapshot().application.multiSwitch.status).toBe("switching");
@@ -588,21 +588,21 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     });
     const { AppRegistry, LaunchServices, LoginServices, RuntimeController, Statechart } = createRuntimeHarness(createTestRuntime({ environment }));
     AppRegistry.registerMany([
-      createTestBundle({ id: "journal", route: "/journal" }),
-      createTestBundle({ id: "studio", route: "/studio" }),
+      createTestBundle({ bundleIdentifier: "com.example.journal", route: "/journal" }),
+      createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" }),
     ]);
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "test" });
 
-    LaunchServices.openApp("journal", { source: "developer" });
+    LaunchServices.openApp("com.example.journal", { source: "developer" });
     await flushLaunchTimers();
-    LaunchServices.openApp("studio", { source: "developer" });
+    LaunchServices.openApp("com.example.studio", { source: "developer" });
     await flushMultiSwitchLaunch();
 
     expect(RuntimeController.getSnapshot().application.multiSwitch).toMatchObject({
       status: "switching",
-      fromAppId: "journal",
-      toAppId: "studio",
+      fromAppId: "com.example.journal",
+      toAppId: "com.example.studio",
     });
     await vi.advanceTimersByTimeAsync(choreographyTimings.multiSwitchSettleFallbackMs);
     expect(RuntimeController.getSnapshot().application.multiSwitch.status).toBe("switching");
@@ -613,8 +613,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     vi.useFakeTimers();
     const { AppRegistry, LaunchServices, LoginServices, RouteManager, RuntimeController, Statechart, WindowManager } = createRuntimeHarness(createTestRuntime());
     AppRegistry.registerMany([
-      createTestBundle({ id: "journal", route: "/journal" }),
-      createTestBundle({ id: "studio", route: "/studio" })
+      createTestBundle({ bundleIdentifier: "com.example.journal", route: "/journal" }),
+      createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })
     ]);
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "test" });
@@ -636,8 +636,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     expect(RuntimeController.getSnapshot().application.multiSwitch).toMatchObject({
       id: switchId,
       status: "idle",
-      fromAppId: "journal",
-      toAppId: "studio"
+      fromAppId: "com.example.journal",
+      toAppId: "com.example.studio"
     });
     expect(WindowManager.list()).toEqual([]);
   });
@@ -646,9 +646,9 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     vi.useFakeTimers();
     const { RuntimeController, SynCloudOS } = createRuntimeHarness(createTestRuntime());
 
-    const firstReturnId = SynCloudOS.WebspringChoreography.beginReturn("journal");
+    const firstReturnId = SynCloudOS.WebspringChoreography.beginReturn("com.example.journal");
     await vi.advanceTimersByTimeAsync(100);
-    const secondReturnId = SynCloudOS.WebspringChoreography.beginReturn("studio");
+    const secondReturnId = SynCloudOS.WebspringChoreography.beginReturn("com.example.studio");
 
     expect(firstReturnId).not.toBe(secondReturnId);
     expect(SynCloudOS.WebspringChoreography.completeReturnRole(firstReturnId, "applicationExit")).toBe(false);
@@ -657,7 +657,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
 
     expect(RuntimeController.getSnapshot().webspring).toMatchObject({
       launchPhase: "returning",
-      returningAppId: "studio",
+      returningAppId: "com.example.studio",
       returnTransitionId: secondReturnId
     });
 
@@ -672,7 +672,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
   it("returns to Webspring through the guarded fallback when no animation completion arrives", async () => {
     vi.useFakeTimers();
     const { AppRegistry, LoginServices, RouteManager, RuntimeController, Statechart, SynCloudOS, WindowManager } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.register(createTestBundle({ id: "journal", route: "/journal" }));
+    AppRegistry.register(createTestBundle({ bundleIdentifier: "com.example.journal", route: "/journal" }));
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "test" });
 
@@ -710,7 +710,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
   it("rearms a stranded Webspring return fallback after module reload", async () => {
     vi.useFakeTimers();
     const { RuntimeController, WebspringChoreography, SynCloudOS } = createRuntimeHarness(createTestRuntime());
-    const returnTransitionId = SynCloudOS.WebspringState.beginReturn("studio");
+    const returnTransitionId = SynCloudOS.WebspringState.beginReturn("com.example.studio");
 
     expect(RuntimeController.getSnapshot().webspring).toMatchObject({
       launchPhase: "returning",
@@ -730,7 +730,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
   it("guards launch cover completion by launch request id", async () => {
     vi.useFakeTimers();
     const { AppRegistry, LaunchServices, LoginServices, RouteManager, RuntimeController, Statechart } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.register(createTestBundle({ id: "studio", route: "/studio" }));
+    AppRegistry.register(createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" }));
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "test" });
 
@@ -740,17 +740,17 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     const launchTransitionId = RuntimeController.getSnapshot().webspring.launchTransitionId;
     expect(launchTransitionId).toEqual(expect.any(String));
     expect(RuntimeController.getSnapshot().webspring.launchPhase).toBe("launching");
-    expect(LaunchServices.completeLaunchCover("stale-launch", "studio")).toBe(false);
+    expect(LaunchServices.completeLaunchCover("stale-launch", "com.example.studio")).toBe(false);
     expect(RuntimeController.getSnapshot().webspring.launchPhase).toBe("launching");
 
-    expect(LaunchServices.completeLaunchCover(launchTransitionId ?? "", "studio")).toBe(true);
+    expect(LaunchServices.completeLaunchCover(launchTransitionId ?? "", "com.example.studio")).toBe(true);
     expect(RuntimeController.getSnapshot().webspring.launchPhase).toBe("covered");
   });
 
   it("covers launch through the fallback ceiling when no animation completion arrives", async () => {
     vi.useFakeTimers();
     const { AppRegistry, LoginServices, RouteManager, RuntimeController, Statechart } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.register(createTestBundle({ id: "portfolio", route: "/portfolio" }));
+    AppRegistry.register(createTestBundle({ bundleIdentifier: "com.example.portfolio", route: "/portfolio" }));
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "test" });
 
@@ -764,19 +764,19 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
   it("returns Webspring to idle when the covering app closes itself through lifecycle", async () => {
     vi.useFakeTimers();
     const { AppRegistry, Lifecycle, LoginServices, RouteManager, RuntimeController, Statechart, SynCloudOS, LaunchServices } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.register(createTestBundle({ id: "studio", route: "/studio" }));
+    AppRegistry.register(createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" }));
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "test" });
 
     RouteManager.openRoute("/studio");
     await flushLaunchTimers();
-    expect(LaunchServices.completeLaunchCover(RuntimeController.getSnapshot().webspring.launchTransitionId ?? "", "studio")).toBe(true);
+    expect(LaunchServices.completeLaunchCover(RuntimeController.getSnapshot().webspring.launchTransitionId ?? "", "com.example.studio")).toBe(true);
     expect(RuntimeController.getSnapshot().webspring.launchPhase).toBe("covered");
 
-    await Lifecycle.close("studio").result;
+    await Lifecycle.close("com.example.studio").result;
 
     const returning = RuntimeController.getSnapshot().webspring;
-    expect(returning).toMatchObject({ launchPhase: "returning", returningAppId: "studio", returnTransitionId: expect.any(String) });
+    expect(returning).toMatchObject({ launchPhase: "returning", returningAppId: "com.example.studio", returnTransitionId: expect.any(String) });
     expect(SynCloudOS.WebspringChoreography.completeReturnRole(returning.returnTransitionId!, "applicationExit")).toBe(true);
     expect(SynCloudOS.WebspringChoreography.completeReturnRole(returning.returnTransitionId!, "shellReturn")).toBe(true);
     expect(RuntimeController.getSnapshot().webspring).toMatchObject({ launchPhase: "idle", returningAppId: null, returnTransitionId: null, isAnimating: false });
@@ -787,9 +787,9 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     const runtime = createTestRuntime();
     const { BootManager, RouteManager, RuntimeController } = createRuntimeHarness(runtime);
     unlockRuntime(runtime);
-    BootManager.boot({ appBundles: [createTestBundle({ id: "studio", route: "/studio" })], initialPathname: "/studio" });
+    BootManager.boot({ appBundles: [createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })], initialPathname: "/studio" });
     await flushLaunchTimers();
-    expect(RuntimeController.getSnapshot().application.activeAppId).toBe("studio");
+    expect(RuntimeController.getSnapshot().application.activeAppId).toBe("com.example.studio");
 
     RouteManager.openRoute("/");
     await flushLaunchTimers();
@@ -803,8 +803,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     vi.useFakeTimers();
     const { AppRegistry, LoginServices, RouteManager, RuntimeController, Statechart, WindowManager } = createRuntimeHarness(createTestRuntime());
     AppRegistry.registerMany([
-      createTestBundle({ id: "journal", route: "/journal" }),
-      createTestBundle({ id: "publisher", route: "/publisher" })
+      createTestBundle({ bundleIdentifier: "com.example.journal", route: "/journal" }),
+      createTestBundle({ bundleIdentifier: "com.example.publisher", route: "/publisher" })
     ]);
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "test" });
@@ -817,8 +817,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
 
     expect(RuntimeController.getSnapshot().application.multiSwitch).toMatchObject({
       status: "switching",
-      fromAppId: "journal",
-      toAppId: "publisher"
+      fromAppId: "com.example.journal",
+      toAppId: "com.example.publisher"
     });
 
     await Statechart.gotoState("active.webspring", { source: "test.return" });
@@ -832,8 +832,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     expect(RuntimeController.getSnapshot().application.activeAppId).toBeNull();
     expect(RuntimeController.getSnapshot().application.routePath).toBe("/");
     expect(RuntimeController.getSnapshot().lifecycle).toMatchObject({
-      journal: "suspended",
-      publisher: "suspended"
+      "com.example.journal": "suspended",
+      "com.example.publisher": "suspended"
     });
     expect(WindowManager.list()).toEqual([]);
 
@@ -852,8 +852,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     vi.useFakeTimers();
     const { AppRegistry, LoginServices, RouteManager, RuntimeController, Statechart, WindowManager } = createRuntimeHarness(createTestRuntime());
     AppRegistry.registerMany([
-      createTestBundle({ id: "about", route: "/about" }),
-      createTestBundle({ id: "memo-journal", route: "/memo-journal", webspring: { visible: false } })
+      createTestBundle({ bundleIdentifier: "com.example.about", route: "/about" }),
+      createTestBundle({ bundleIdentifier: "com.example.memo-journal", route: "/memo-journal", webspring: { visible: false } })
     ]);
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "test" });
@@ -868,13 +868,13 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     const switchingSnapshot = RuntimeController.getSnapshot();
     expect(switchingSnapshot.application.multiSwitch).toMatchObject({
       status: "switching",
-      fromAppId: "about",
-      toAppId: "memo-journal",
+      fromAppId: "com.example.about",
+      toAppId: "com.example.memo-journal",
       fromRoute: "/about",
       toRoute: "/memo-journal",
       source: "route"
     });
-    expect(switchingSnapshot.application.activeAppId).toBe("memo-journal");
+    expect(switchingSnapshot.application.activeAppId).toBe("com.example.memo-journal");
     expect(switchingSnapshot.webspring.launchPhase).toBe("covered");
     expect(switchingSnapshot.webspring.launchingAppId).toBeNull();
     expect(WindowManager.list()).toEqual([]);
@@ -887,8 +887,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     await vi.advanceTimersByTimeAsync(900);
     expect(RuntimeController.getSnapshot().application.multiSwitch).toMatchObject({
       status: "idle",
-      fromAppId: "about",
-      toAppId: "memo-journal"
+      fromAppId: "com.example.about",
+      toAppId: "com.example.memo-journal"
     });
     expect(WindowManager.list()).toEqual([]);
   });

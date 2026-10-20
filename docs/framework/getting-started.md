@@ -1,6 +1,6 @@
 # Getting started
 
-SynCloudOS applications are folders. A project with `Hello.app/Contents/index.tsx` has a Hello application; no application list or handwritten composition is needed.
+SynCloudOS applications are folders. A project with `Hello.app/Contents/index.tsx` and `Contents/Info.ts` has a Hello application; no application list or handwritten composition is needed.
 
 ## Install
 
@@ -12,7 +12,7 @@ cd my-site
 npm install https://github.com/Syndromatic-Ltd/SynCloudOS/releases/download/v1.0.0-beta.1/syndromatic-syncloudos-1.0.0-beta.1.tgz
 ```
 
-The public beta is distributed as a release archive, not an npm registry release. From a framework checkout, `npm ci --ignore-scripts && npm run sdk:build` produces the corresponding archive in `.artifacts/synapp-sdk/archives/`. Install that archive when working against a local framework build. The Vite template supplies React, ReactDOM, TypeScript, their types, Vite and its React plugin. Keep a `version` in your project's `package.json`: it supplies each application's version.
+The public beta is distributed as a release archive, not an npm registry release. From a framework checkout, `npm ci --ignore-scripts && npm run sdk:build` produces the corresponding archive in `.artifacts/synapp-sdk/archives/`. Install that archive when working against a local framework build. The Vite template supplies React, ReactDOM, TypeScript, their types, Vite and its React plugin. Each application declares its own version in `Info.ts`; the project package version is not a fallback.
 
 If npm reports a blocked esbuild install script, inspect your local npm policy. It is not an SDK error. Approve only trusted scripts if the platform binary is missing; npm 12 provides `npm approve-scripts esbuild`.
 
@@ -40,25 +40,28 @@ import { NSEStackItem, NSEStackView } from "@syndromatic/syncloudos/nse";
 export default function Hello() {
   return <NSEStackView aria-label="Hello" orientation="vertical" spacing={12}>
     <NSEStackItem id="greeting" visibilityPriority={100}>
-      <p>Hello from {SCOS.app.title}.</p>
+      <p>Hello from {SCOS.app.displayName}.</p>
     </NSEStackItem>
   </NSEStackView>;
 }
 ```
 
-Its ID is `hello`, title is `Hello`, schema version is `1` and version comes from the project package. Add optional `Contents/Info.ts` for access policy and other overrides:
+Create the required `Contents/Info.ts` beside the entry point. Identity and version are explicit, as in an Info.plist; `schemaVersion` defaults to `1`:
 
 ```ts
-import type { SynWareManifestOverrides } from "@syndromatic/syncloudos/sdk";
+import type { SynWareInfo } from "@syndromatic/syncloudos/sdk";
 
 export default {
+  bundleIdentifier: "com.example.hello",
+  displayName: "Hello",
+  version: "1.0.0",
   runtime: { policy: { public: true } },
   routes: [{ path: "/hello", primary: true }],
   webspring: { visible: true },
-} satisfies SynWareManifestOverrides;
+} satisfies SynWareInfo;
 ```
 
-`public: true` deliberately admits anonymous launching. Omitted policy does not make an application public. Keep private applications private and configure authentication deliberately. Existing application IDs are persistence keys: preserve a non-derived ID explicitly when moving an existing app to this layout.
+`public: true` deliberately admits anonymous launching. Omitted policy does not make an application public. Keep private applications private and configure authentication deliberately. Bundle identifiers require at least two dots and letters (either case), digits or hyphens between them. Their case is preserved in public metadata, while lookups and storage keys are case-insensitive.
 
 Put `AppIcon.svg` (preferred) or `AppIcon.png` in `Contents/Resources/` for its icon. Put translations in `Contents/Resources/Localised/<locale>.locale/*.strings`; all are discovered, with no `localeResources` manifest field.
 
@@ -75,7 +78,7 @@ const element = document.getElementById("root");
 if (!element) throw new Error("The page needs a #root element.");
 const host = await mountSynCloudOS({
   element,
-  application: { id: "hello" },
+  application: { bundleIdentifier: "com.example.hello" },
   authentication: "disabled",
 });
 import.meta.hot?.dispose(() => host.dispose("hot reload"));
@@ -95,7 +98,7 @@ import { WebspringBoardView } from "@syndromatic/syncloudos/webspring";
 
 export default defineWebspring({
   manifest: {
-    schemaVersion: 1, id: "com.example.site", version: "0.1.0", title: "My Site",
+    schemaVersion: 1, bundleIdentifier: "com.example.site", version: "0.1.0", displayName: "My Site",
     webspringShell: {
       views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
       defaults: { desktop: "board", tablet: "board", mobile: "board" },
@@ -106,16 +109,16 @@ export default defineWebspring({
 });
 ```
 
-Use the default `synCloudOS()` options and mount with `{ element, authentication: "disabled" }`, without `application`. The discovered shell, applications, panes, widgets and integrations are supplied automatically. Shell and application-only modes are mutually exclusive. Shell manifests remain complete declarations; only application `Info.ts` files use folder-derived defaults.
+Use the default `synCloudOS()` options and mount with `{ element, authentication: "disabled" }`, without `application`. The discovered shell, applications, panes, widgets and integrations are supplied automatically. Shell and application-only modes are mutually exclusive. Shell and application manifests both require explicit bundle identity, display name and version.
 
 ## Use the platform
 
-Inside an application folder, `SCOS` is bound to that application's manifest ID, including after `await` and in timer callbacks:
+Inside an application folder, `SCOS` is bound to that application's bundle identifier, including after `await` and in timer callbacks:
 
 ```ts
 import { SCOS } from "@syndromatic/syncloudos";
 
-await SCOS.open("hello");
+await SCOS.open("com.example.hello"); // A route such as "/hello" works too.
 SCOS.scheduler.setTimeout(() => SCOS.close(), 2000);
 ```
 
@@ -126,6 +129,11 @@ Shared React components outside an application folder use `useSCOS()`. Reactive 
 Importing `@syndromatic/syncloudos/browser` does not require a virtual module. Pass `composition` explicitly when embedding the framework without the discovery plugin. A composition contains `bundles`, `preferences`, `widgets`, `contributions`, `shell` (or `null`) and `shellResources`. Each bundle contains its complete manifest, module path and lazy module loader. Its module default-exports the application component or `NSEApplication` subclass. The plugin builds exactly this shape for conventional projects.
 
 Externally supplied bundles retain the existing trusted-source allowlist boundary. In-project discovered applications receive their declared permissions; no first-party trusted-source table is needed.
+
+### Updating an existing application
+
+Replace manifest `id` and `runtime.bundleId` with the single `bundleIdentifier`; replace manifest `title` with `displayName` and `SynWareManifestOverrides` with `SynWareInfo`. Add an explicit app `version`, and update public app metadata and `application: { bundleIdentifier }` selectors. Window titles and unrelated entity IDs are unchanged. Old saved app data and Webspring layouts are reset, not migrated; no aliases are kept. The [migration table](synware-manifest.md#migration-from-the-previous-identity-fields) lists every identity change.
+
 
 ## Check and measure
 

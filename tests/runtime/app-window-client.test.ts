@@ -41,8 +41,8 @@ const windowDocumentType: DocumentType<WindowDocumentModel> = Object.freeze({
   schemaVersion: 1,
   extensions: Object.freeze([".secondary-window-test"]),
   mimeTypes: Object.freeze(["application/x-syncloudos-secondary-window-test"]),
-  creatingApplicationId: "window-owner",
-  openingApplicationIds: Object.freeze(["window-owner", "foreign-owner"]),
+  creatingApplicationId: "com.example.window-owner",
+  openingApplicationIds: Object.freeze(["com.example.window-owner", "com.example.foreign-owner"]),
   capabilities: Object.freeze({ versions: true, conflicts: true }),
   autosave: "disabled",
   create: () => Object.freeze({ version: 1, text: "Untitled" }),
@@ -79,9 +79,9 @@ function createFixture(options: {
   activeRuntimes.push(runtime);
   registerTestSynWare(runtime, {
     schemaVersion: 1,
-    id: "window-owner",
+    bundleIdentifier: "com.example.window-owner",
     version: "1.0.0",
-    title: "Window Owner",
+    displayName: "Window Owner",
     routes: [{ path: "/window-owner", primary: true }],
     windowDefaults: {
       title: "Window Owner",
@@ -95,14 +95,14 @@ function createFixture(options: {
   });
   registerTestSynWare(runtime, {
     schemaVersion: 1,
-    id: "foreign-owner",
+    bundleIdentifier: "com.example.foreign-owner",
     version: "1.0.0",
-    title: "Foreign Owner",
+    displayName: "Foreign Owner",
     routes: [{ path: "/foreign-owner", primary: true }],
     documentTypes: [{ id: windowDocumentType.id, displayName: windowDocumentType.displayName }],
   });
-  const ownerMount = mountTestSynWareRuntime(runtime, "window-owner");
-  const foreignMount = mountTestSynWareRuntime(runtime, "foreign-owner");
+  const ownerMount = mountTestSynWareRuntime(runtime, "com.example.window-owner");
+  const foreignMount = mountTestSynWareRuntime(runtime, "com.example.foreign-owner");
   activeMounts.push(ownerMount, foreignMount);
   return {
     runtime,
@@ -142,8 +142,8 @@ describe("mounted AppSDK secondary document windows", () => {
     const record = fixture.runtime.windows.select(opened.id).record;
     expect(record).toMatchObject({
       workspaceId: "workspace-main",
-      applicationId: "window-owner",
-      applicationSessionId: "window-owner",
+      applicationId: "com.example.window-owner",
+      applicationSessionId: "com.example.window-owner",
       documentId: document.id,
       documentAssociationRole: "secondary",
       representedDocument: null,
@@ -151,7 +151,7 @@ describe("mounted AppSDK secondary document windows", () => {
       role: "standard",
       style: ["titled", "closable", "minimisable", "resizable", "zoomable"],
       title: "Owned note",
-      content: { rendererId: "application", parameters: { appId: "window-owner" } },
+      content: { rendererId: "application", parameters: { appId: "com.example.window-owner" } },
       bounds: { x: 0, y: 600, width: 1440, height: 300 },
       minimumSize: { width: 400, height: 300 },
       maximumSize: null,
@@ -160,7 +160,7 @@ describe("mounted AppSDK secondary document windows", () => {
       anchor: null,
       pinned: false,
       mobilePolicy: "hidden",
-      restorationKey: "application.window-owner.document.note-one",
+      restorationKey: "application.com.example.window-owner.document.note-one",
     });
 
     await expect(fixture.owner.windows.openDocumentWindow({
@@ -199,7 +199,7 @@ describe("mounted AppSDK secondary document windows", () => {
     expect(fixture.owner.windows).not.toHaveProperty("select");
     expect(fixture.owner.windows).not.toHaveProperty("create");
 
-    const mountedAgain = fixture.runtime.apps.getApp("window-owner");
+    const mountedAgain = fixture.runtime.apps.getApp("com.example.window-owner");
     if (!mountedAgain) throw new Error("Window owner was not registered.");
     const secondaryMount = (await import("../../src/SynCloudOS/AppSDK/appRuntimeFacade")).createMountedSynWareRuntime({
       runtime: fixture.runtime,
@@ -221,7 +221,7 @@ describe("mounted AppSDK secondary document windows", () => {
       title: "Animated note",
       restorationKey: "animated-note",
     });
-    const app = fixture.runtime.apps.getApp("window-owner");
+    const app = fixture.runtime.apps.getApp("com.example.window-owner");
     if (!app) throw new Error("Window owner was not registered.");
     const secondaryMount = (await import("../../src/SynCloudOS/AppSDK/appRuntimeFacade")).createMountedSynWareRuntime({
       runtime: fixture.runtime,
@@ -244,7 +244,7 @@ describe("mounted AppSDK secondary document windows", () => {
     const opened = await fixture.owner.windows.openDocumentWindow({
       documentId: document.id, title: "Independent note", restorationKey: "independent-note",
     });
-    const app = fixture.runtime.apps.getApp("window-owner");
+    const app = fixture.runtime.apps.getApp("com.example.window-owner");
     if (!app) throw new Error("Window owner was not registered.");
     const secondaryMount = (await import("../../src/SynCloudOS/AppSDK/appRuntimeFacade")).createMountedSynWareRuntime({
       runtime: fixture.runtime, app, responderId: `window:${opened.id}:document-owner`, windowControllerId: opened.id,
@@ -281,7 +281,7 @@ describe("mounted AppSDK secondary document windows", () => {
     });
 
     expect(second.id).toBe(first.id);
-    expect(fixture.runtime.windows.list({ applicationId: "window-owner" })).toHaveLength(1);
+    expect(fixture.runtime.windows.list({ applicationId: "com.example.window-owner" })).toHaveLength(1);
     expect(fixture.runtime.windows.select(first.id).record.state).toBe("open");
     expect(fixture.runtime.windows.snapshot().keyWindowControllerId).toBe(first.id);
   });
@@ -364,7 +364,7 @@ describe("mounted AppSDK secondary document windows", () => {
     });
     expect(target.runtime.documents.getDocument(document.id)?.snapshot()).toMatchObject({
       id: document.id,
-      applicationId: "window-owner",
+      applicationId: "com.example.window-owner",
       model: { version: 1, text: "owner document" },
     });
 
@@ -380,8 +380,8 @@ describe("mounted AppSDK secondary document windows", () => {
     const restored = target.runtime.windows.select(opened.id).record;
     expect(restored).toMatchObject({
       workspaceId: "workspace-main",
-      applicationId: "window-owner",
-      applicationSessionId: "window-owner",
+      applicationId: "com.example.window-owner",
+      applicationSessionId: "com.example.window-owner",
       documentId: document.id,
       documentAssociationRole: "secondary",
       representedDocument: null,
@@ -389,7 +389,7 @@ describe("mounted AppSDK secondary document windows", () => {
       role: "standard",
       style: ["titled", "closable", "minimisable", "resizable", "zoomable"],
       title: "Restored projection",
-      content: { rendererId: "application", parameters: { appId: "window-owner" } },
+      content: { rendererId: "application", parameters: { appId: "com.example.window-owner" } },
       bounds: { x: 91, y: 73, width: 690, height: 510 },
       minimumSize: { width: 400, height: 300 },
       maximumSize: null,
@@ -398,7 +398,7 @@ describe("mounted AppSDK secondary document windows", () => {
       anchor: null,
       pinned: false,
       mobilePolicy: "sheet",
-      restorationKey: "application.window-owner.document.restored-projection",
+      restorationKey: "application.com.example.window-owner.document.restored-projection",
     });
     expect(target.runtime.documents.getDocument(document.id)?.windowAssociations).toEqual([
       { windowControllerId: opened.id, role: "secondary" },
@@ -409,7 +409,7 @@ describe("mounted AppSDK secondary document windows", () => {
     expect(target.foreign.windows.getSnapshot().owned).toEqual([]);
     expect(() => target.foreign.windows.focus(opened.id)).toThrow(expect.objectContaining({ name: "SecurityError" }));
 
-    const app = target.runtime.apps.getApp("window-owner");
+    const app = target.runtime.apps.getApp("com.example.window-owner");
     if (!app) throw new Error("Window owner was not registered in the restored runtime.");
     const secondaryMount = (await import("../../src/SynCloudOS/AppSDK/appRuntimeFacade")).createMountedSynWareRuntime({
       runtime: target.runtime,

@@ -31,8 +31,8 @@ afterEach(async () => {
   await Promise.all(runtimes.splice(0).map((runtime) => runtime.dispose("application undo client cleanup")));
 });
 
-function fixture(id = "app-undo-client") {
-  const runtime = createTestRuntime({ initialBundles: [createTestBundle({ id, route: `/${id}` })] });
+function fixture(id = "com.example.app-undo-client") {
+  const runtime = createTestRuntime({ initialBundles: [createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` })] });
   runtimes.push(runtime);
   const app = runtime.apps.getApp(id)!;
   const responderId = `application:${id}`;
@@ -49,7 +49,7 @@ describe("mounted application undo client", () => {
     const { app, responderId, runtime, siblingResponderId } = fixture();
     const first = createMountedSynWareRuntime({ runtime, app, responderId });
     const second = createMountedSynWareRuntime({ runtime, app, responderId: siblingResponderId });
-    const owner = { kind: "application" as const, id: app.id };
+    const owner = { kind: "application" as const, id: app.bundleIdentifier };
     const firstUndo = first.runtime.undo.create(owner, { maxEntries: 10 });
     const secondUndo = second.runtime.undo.get(owner)!;
     let value = 1;

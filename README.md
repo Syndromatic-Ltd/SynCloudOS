@@ -84,14 +84,14 @@ import { synCloudOS } from "@syndromatic/syncloudos/vite";
 export default defineConfig({ plugins: [react(), synCloudOS()] });
 ```
 
-A SynWare lives in `src/SynWare/Hello.app/Contents/`. Its manifest is `Info.ts`:
+A SynWare lives in `src/SynWare/Hello.app/Contents/`. Its required `Info.ts` declares the app's bundle identifier, display name and version explicitly:
 
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.hello",
+  bundleIdentifier: "com.example.hello",
   version: "0.1.0",
-  title: "Hello",
+  displayName: "Hello",
   routes: [{ path: "/hello", primary: true }],
   presentations: ["desktop", "tablet", "mobile"],
   runtime: { policy: { public: true } },
@@ -110,7 +110,7 @@ export default function Hello() {
   return (
     <NSEStackView aria-label="Hello" orientation="vertical" spacing={12}>
       <NSEStackItem id="greeting" visibilityPriority={100}>
-        <p>Hello from {SCOS.app.id}.</p>
+        <p>Hello from {SCOS.app.displayName}.</p>
       </NSEStackItem>
     </NSEStackView>
   );
@@ -119,6 +119,9 @@ export default function Hello() {
 ```
 
 The [getting started guide](docs/framework/getting-started.md) adds the Webspring shell definition and the `main.tsx` that mounts everything, and finishes with a running Board launcher.
+
+Bundle identifiers use reverse-DNS syntax with at least two dots. Declared case is preserved; lookups and storage keys are case-insensitive. The [identity migration table](docs/framework/synware-manifest.md#migration-from-the-previous-identity-fields) replaces the old `id` / `runtime.bundleId` and `title` fields with `bundleIdentifier` and `displayName`. Saved app data and old Webspring layouts are reset, not migrated.
+
 
 ## Working with the session
 

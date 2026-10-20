@@ -44,11 +44,11 @@ function item(id: string, options: { domain?: string; route?: string; revision?:
 function fixture() {
   let now = 1_000;
   const registry = new LuminaEligibilityRegistry(() => now);
-  registry.registerProjection({ ownerAppId: "journal", domain: "journal.entry", destinationAppId: "journal-reader", routeName: "journal.entry" });
-  registry.registerProjection({ ownerAppId: "journal", domain: "journal.note", destinationAppId: "journal-reader", routeName: "journal.note" });
-  registry.registerProjection({ ownerAppId: "other", domain: "journal.entry", destinationAppId: "other", routeName: "journal.entry" });
+  registry.registerProjection({ ownerAppId: "com.example.journal", domain: "journal.entry", destinationAppId: "journal-reader", routeName: "journal.entry" });
+  registry.registerProjection({ ownerAppId: "com.example.journal", domain: "journal.note", destinationAppId: "journal-reader", routeName: "journal.note" });
+  registry.registerProjection({ ownerAppId: "com.example.other", domain: "journal.entry", destinationAppId: "com.example.other", routeName: "journal.entry" });
   const eligible = (itemId: string, domain = "journal.entry", revision = "r1", window: { notBeforeMs?: number; notAfterMs?: number } = {}) =>
-    registry.setItem({ ownerAppId: "journal", domain, itemId, revision, eligible: true, ...window });
+    registry.setItem({ ownerAppId: "com.example.journal", domain, itemId, revision, eligible: true, ...window });
   eligible("current");
   eligible("note", "journal.note");
   eligible("stale-revision", "journal.entry", "r0");
@@ -57,7 +57,7 @@ function fixture() {
   eligible("future", "journal.entry", "r1", { notBeforeMs: 2_000 });
   eligible("expired", "journal.entry", "r1", { notAfterMs: 500 });
   eligible("window", "journal.entry", "r1", { notBeforeMs: 900, notAfterMs: 1_100 });
-  registry.setItem({ ownerAppId: "other", domain: "journal.entry", itemId: "other-owner", revision: "r1", eligible: true });
+  registry.setItem({ ownerAppId: "com.example.other", domain: "journal.entry", itemId: "other-owner", revision: "r1", eligible: true });
   const items = [
     item("current"),
     item("note", { domain: "journal.note", route: "journal.note" }),
@@ -79,19 +79,19 @@ describe("Lumina eligibility restrictions", () => {
     const { registry, items, advance } = fixture();
     for (const time of [1_000, 1_200, 2_500]) {
       advance(time);
-      const matches = luminaRestrictionMatcher(registry.restrictionFor("journal"));
-      const expected = items.filter((value) => registry.bindingFor("journal", value) !== null).map((value) => value.id);
+      const matches = luminaRestrictionMatcher(registry.restrictionFor("com.example.journal"));
+      const expected = items.filter((value) => registry.bindingFor("com.example.journal", value) !== null).map((value) => value.id);
       expect(items.filter(matches).map((value) => value.id)).toEqual(expected);
       expect(expected.length).toBeGreaterThan(0);
     }
     advance(1_000);
-    expect(items.filter(luminaRestrictionMatcher(registry.restrictionFor("journal"))).map((value) => value.id))
+    expect(items.filter(luminaRestrictionMatcher(registry.restrictionFor("com.example.journal"))).map((value) => value.id))
       .toEqual(["current", "note", "window"]);
   });
 
   it("are plain data that survive a structured clone", () => {
     const { registry, items } = fixture();
-    const restriction = registry.restrictionFor("journal");
+    const restriction = registry.restrictionFor("com.example.journal");
     const cloned = structuredClone(restriction);
     expect(items.filter(luminaRestrictionMatcher(cloned))).toEqual(items.filter(luminaRestrictionMatcher(restriction)));
   });
@@ -105,7 +105,7 @@ describe("restricted index queries", () => {
 
   it("filter and plan where the index lives when the backend can", async () => {
     const { registry, items } = fixture();
-    const restriction = registry.restrictionFor("journal");
+    const restriction = registry.restrictionFor("com.example.journal");
     const snapshot = vi.fn(async () => snapshotOf(items));
     const queryRestricted = vi.fn(async () => new LUFXQueryPlanner().execute(
       { state: "ready", schemaVersion: 1, checkpoint: { generation: 1, revision: items.length }, items: items.filter(luminaRestrictionMatcher(restriction)) },
@@ -113,7 +113,7 @@ describe("restricted index queries", () => {
     ));
     const backend = { mutate: vi.fn(), snapshot, dispose: vi.fn(), queryRestricted } as unknown as LUFXIndexBackend;
     const service = new LuminaIndexService({ create: () => backend });
-    const page = await service.queryRestricted("journal", { text: "Asterion", limit: 20 }, restriction, { signal: new AbortController().signal });
+    const page = await service.queryRestricted("com.example.journal", { text: "Asterion", limit: 20 }, restriction, { signal: new AbortController().signal });
     expect(snapshot).not.toHaveBeenCalled();
     expect(queryRestricted).toHaveBeenCalledWith(expect.objectContaining({ text: "Asterion", limit: 20 }), restriction, expect.anything());
     expect(page.results.map(({ item: value }) => value.id).sort()).toEqual(["current", "note", "window"]);
@@ -122,12 +122,12 @@ describe("restricted index queries", () => {
 
   it("filter a snapshot and plan locally otherwise, over the same items", async () => {
     const { registry, items } = fixture();
-    const restriction = registry.restrictionFor("journal");
+    const restriction = registry.restrictionFor("com.example.journal");
     const backend: LUFXIndexBackend = { mutate: vi.fn(), snapshot: async () => snapshotOf(items), dispose: vi.fn() };
     const service = new LuminaIndexService({ create: () => backend });
-    const page = await service.queryRestricted("journal", { text: "Asterion", limit: 20 }, restriction, { signal: new AbortController().signal });
+    const page = await service.queryRestricted("com.example.journal", { text: "Asterion", limit: 20 }, restriction, { signal: new AbortController().signal });
     const expected = new LUFXQueryPlanner().execute(
-      { ...snapshotOf(items), items: items.filter((value) => registry.bindingFor("journal", value) !== null) },
+      { ...snapshotOf(items), items: items.filter((value) => registry.bindingFor("com.example.journal", value) !== null) },
       { text: "Asterion", limit: 20 },
     );
     expect(page).toEqual(expected);
@@ -146,10 +146,10 @@ describe("restricted index queries", () => {
       terminate() {},
     };
     const { registry } = fixture();
-    const restriction = registry.restrictionFor("journal");
-    const backend = new WorkerLuminaIndexBackend(worker as unknown as Worker, "lumina", "journal");
+    const restriction = registry.restrictionFor("com.example.journal");
+    const backend = new WorkerLuminaIndexBackend(worker as unknown as Worker, "lumina", "com.example.journal");
     const pending = backend.queryRestricted({ text: "Asterion", limit: 5 } as never, restriction, { cursor: "c1" });
-    expect(posts[0]).toMatchObject({ operation: "query", ownerKey: "journal", query: { text: "Asterion" }, cursor: "c1", restriction });
+    expect(posts[0]).toMatchObject({ operation: "query", ownerKey: "com.example.journal", query: { text: "Asterion" }, cursor: "c1", restriction });
     const current = item("current");
     respond({ id: posts[0]!.id, ok: true, value: {
       checkpoint: { generation: 1, revision: 3 }, tokenizerVersion: "lufx-tokenizer-v1", rankerVersion: "lufx-lexical-v2",

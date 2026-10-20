@@ -18,9 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo, SynCloudOSAppLifecycleState } from "../SynCloudOS/SynCloudOS";
 
-export type WebspringQuickSwitchAppLike = Pick<SynCloudOSAppInfo, "id" | "displayName" | "shortName">;
+export type WebspringQuickSwitchAppLike = Pick<SynCloudOSAppInfo, "bundleIdentifier" | "displayName" | "shortName">;
 
 export interface WebspringQuickSwitchOpenStateInput {
   activeAppId?: string | null;
@@ -46,7 +47,7 @@ export function normalizeQuickSwitchKey(key: string | null | undefined) {
 }
 
 export function getQuickSwitchMnemonic(app: WebspringQuickSwitchAppLike) {
-  const source = app.shortName || app.displayName || app.id;
+  const source = app.shortName || app.displayName || app.bundleIdentifier;
   for (const character of source.toLocaleUpperCase()) {
     if (/^[A-Z0-9]$/.test(character)) return character;
   }
@@ -76,11 +77,11 @@ export function getQuickSwitchInitialIndex(
   const firstSelectableIndex = apps.findIndex(isSelectable);
   if (firstSelectableIndex < 0) return -1;
   const selectedIndex = selectedAppId
-    ? apps.findIndex((app, index) => app.id === selectedAppId && isSelectable(app, index))
+    ? apps.findIndex((app, index) => normalizeBundleIdentifier(app.bundleIdentifier) === normalizeBundleIdentifier(selectedAppId) && isSelectable(app, index))
     : -1;
   if (selectedIndex >= 0) return selectedIndex;
   const activeIndex = activeAppId
-    ? apps.findIndex((app, index) => app.id === activeAppId && isSelectable(app, index))
+    ? apps.findIndex((app, index) => normalizeBundleIdentifier(app.bundleIdentifier) === normalizeBundleIdentifier(activeAppId) && isSelectable(app, index))
     : -1;
   return activeIndex >= 0 ? activeIndex : firstSelectableIndex;
 }
@@ -129,9 +130,10 @@ export function selectQuickSwitchMnemonicIndex(
 }
 
 export function isQuickSwitchOpenedApp(appId: string, input: WebspringQuickSwitchOpenStateInput) {
-  if (input.activeAppId === appId) return true;
-  if (input.openAppIds?.includes(appId)) return true;
-  const state = input.lifecycle?.[appId];
+  const key = normalizeBundleIdentifier(appId);
+  if (normalizeBundleIdentifier(input.activeAppId) === key) return true;
+  if (input.openAppIds?.some(id => normalizeBundleIdentifier(id) === key)) return true;
+  const state = input.lifecycle?.[key];
   return state ? quickSwitchOpenLifecycleStates.has(state) : false;
 }
 

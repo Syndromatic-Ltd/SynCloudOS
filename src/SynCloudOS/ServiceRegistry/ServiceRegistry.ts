@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { ServiceTerminalOperations } from "../Documents/serviceTerminalOperations";
 import type {
   SynCloudOSServiceDefinition,
@@ -516,7 +517,7 @@ function createImpactReport(serviceId: string): SynCloudOSServiceImpactReport {
     if (!affected) return apps;
 
     apps.push({
-      appId: app.id,
+      appId: app.bundleIdentifier,
       packageName: app.packageName,
       displayName: app.displayName,
       requiredServices: app.requiredServices,
@@ -527,8 +528,8 @@ function createImpactReport(serviceId: string): SynCloudOSServiceImpactReport {
         app.isDisabled ||
         !app.hasAccessToRequiredServices ||
         !report.ok ||
-        snapshot.lifecycle[app.id] === "disabled" ||
-        Boolean(snapshot.managers[app.id]?.disabled),
+        snapshot.lifecycle[app.bundleIdentifier] === "disabled" ||
+        Boolean(snapshot.managers[app.bundleIdentifier]?.disabled),
       missing: report.missing,
       blockers: getServiceReportBlockerIds(report)
     });
@@ -577,7 +578,7 @@ function refreshAppServiceStatus() {
       const unsafeExternalRoute = app.type === "external" && !inspectExternalRouteSafety(app.route).safe;
       const nextDisabled = app.disabled === true || unsafeExternalRoute ||
         !hasAccessToRequiredServices || (app.isDisabled && !wasServiceDisabled);
-      draft.appInfo[appId] = {
+      draft.appInfo[normalizeBundleIdentifier(appId)] = {
         ...app,
         serviceStatus,
         optionalServiceStatus,
@@ -790,7 +791,7 @@ const serviceRegistry = {
     const appDependencies = Object.values(snapshot.appInfo).map((app) => {
       const report = createServiceReport(app.requiredServices);
       return {
-        appId: app.id,
+        appId: app.bundleIdentifier,
         packageName: app.packageName,
         requiredServices: app.requiredServices,
         ok: report.ok,
@@ -843,7 +844,7 @@ const serviceRegistry = {
       .map((candidate) => candidate.id);
     const appDependents = Object.values(snapshot.appInfo)
       .filter((app) => app.requiredServices.includes(serviceId))
-      .map((app) => ({ appId: app.id, packageName: app.packageName }));
+      .map((app) => ({ appId: app.bundleIdentifier, packageName: app.packageName }));
     const reasons = [
       service.reason ?? (service.available ? "Service is available with all dependencies satisfied." : "Service is not available."),
       dependents.length > 0 ? `Service is depended on by: ${dependents.join(", ")}.` : "No registered services depend on this service.",

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { captureSynWareManifest, type SynWareWebspringFoldersManifest } from "../SynCloudOS/AppSDK";
 import { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
 import { defaultWebspringFolderAppearance, defaultWebspringFolderSmoothSurface } from "./WebspringFolderAppearance";
@@ -293,9 +294,9 @@ function assertFolders(folders: SynWareWebspringFoldersManifest | undefined) {
     if (folderIds.has(folder.id)) throw new TypeError(`Webspring manifest contains duplicate folder ID ${folder.id}.`);
     folderIds.add(folder.id);
     for (const appId of folder.apps) {
-      const owner = owners.get(appId);
+      const owner = owners.get(normalizeBundleIdentifier(appId));
       if (owner !== undefined) throw new TypeError(`Webspring app ${appId} is listed in folders ${owner} and ${folder.id}.`);
-      owners.set(appId, folder.id);
+      owners.set(normalizeBundleIdentifier(appId), folder.id);
     }
   }
 }
@@ -338,9 +339,9 @@ function capturePreferences(input: unknown): WebspringPreferences {
   return Object.freeze({ panes: Object.freeze(panes), hide: Object.freeze(hide) });
 }
 
-export function defineWebspring<const TManifest extends WebspringManifest>(
+export function defineWebspring<const TManifest extends Omit<WebspringManifest, "schemaVersion"> & { readonly schemaVersion?: 1 }>(
   input: WebspringDefinitionInput<TManifest>,
-): WebspringDefinition<TManifest> {
+): WebspringDefinition<TManifest & { readonly schemaVersion: 1 }> {
   assertPlainObject(input, "Webspring definition");
   const manifestInput = dataProperty(input, "manifest", true);
   const componentsInput = dataProperty(input, "components", true);
@@ -383,7 +384,7 @@ export function defineWebspring<const TManifest extends WebspringManifest>(
   }
 
   const definition = {
-    manifest: capturedManifest.value as TManifest,
+    manifest: capturedManifest.value as TManifest & { readonly schemaVersion: 1 },
     components,
     returnTracks: captureReturnTracks(components),
     launchZooms: captureLaunchZooms(components),

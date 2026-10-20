@@ -128,7 +128,7 @@ describe("createSynCloudOS", () => {
     vi.useFakeTimers();
     const requestedPath = "/studio?folder=nse#selected";
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "studio", route: "/studio" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })],
     });
     unlockRuntime(runtime);
 
@@ -146,7 +146,7 @@ describe("createSynCloudOS", () => {
         pathname: "/studio",
       });
       expect(runtime.store.getSnapshot().application).toMatchObject({
-        activeAppId: "studio",
+        activeAppId: "com.example.studio",
         routePath: "/studio",
       });
     } finally {
@@ -160,7 +160,7 @@ describe("createSynCloudOS", () => {
     const routes = defineSynWareRoutes({
       id: "boot.redirect",
       routes: [{
-        name: "music",
+        name: "com.example.music",
         path: "",
         children: [
           { name: "music.index", index: true, redirect: { name: "music.home" } },
@@ -171,9 +171,9 @@ describe("createSynCloudOS", () => {
     const definition = createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "music",
+        bundleIdentifier: "com.example.music",
         version: "1.0.0",
-        title: "Music",
+        displayName: "Music",
         routes: [{ path: "/music", primary: true, match: "prefix" }],
         permissions: ["app.open.public"],
       },
@@ -194,12 +194,12 @@ describe("createSynCloudOS", () => {
         initialPathname: "/music",
       });
       expect(runtime.store.getSnapshot().application).toMatchObject({
-        activeAppId: "music",
+        activeAppId: "com.example.music",
         routePath: "/music/home",
       });
       expect(runtime.routes.inspectTransitions()).toEqual(expect.arrayContaining([
-        expect.objectContaining({ appId: "music", outcome: "redirected", committed: false }),
-        expect.objectContaining({ appId: "music", outcome: "settled", committed: true }),
+        expect.objectContaining({ appId: "com.example.music", outcome: "redirected", committed: false }),
+        expect.objectContaining({ appId: "com.example.music", outcome: "settled", committed: true }),
       ]));
     } finally {
       await runtime.dispose("redirect boot test");
@@ -212,7 +212,7 @@ describe("createSynCloudOS", () => {
     const routes = defineSynWareRoutes({
       id: "boot.guard-block",
       routes: [{
-        name: "music",
+        name: "com.example.music",
         path: "",
         children: [{
           name: "music.artist",
@@ -225,9 +225,9 @@ describe("createSynCloudOS", () => {
     const definition = createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "music",
+        bundleIdentifier: "com.example.music",
         version: "1.0.0",
-        title: "Music",
+        displayName: "Music",
         routes: [{ path: "/music", primary: true, match: "prefix" }],
         permissions: ["app.open.public"],
       },
@@ -253,7 +253,7 @@ describe("createSynCloudOS", () => {
         statechart: { currentState: "active.webspring" },
       });
       expect(runtime.routes.inspectTransitions()).toEqual(expect.arrayContaining([
-        expect.objectContaining({ appId: "music", outcome: "blocked", committed: false }),
+        expect.objectContaining({ appId: "com.example.music", outcome: "blocked", committed: false }),
       ]));
     } finally {
       await runtime.dispose("guard-blocked boot test");
@@ -267,26 +267,26 @@ describe("createSynCloudOS", () => {
 
     try {
       AppRegistry.registerMany([
-        createTestBundle({ id: "journal", route: "/journal" }),
-        createTestBundle({ id: "studio", route: "/studio" }),
+        createTestBundle({ bundleIdentifier: "com.example.journal", route: "/journal" }),
+        createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" }),
       ]);
       unlockRuntime(LoginServices);
       Statechart.gotoState("active.webspring", { source: "runtime-characterisation" });
 
-      const sourceManager = LaunchServices.openApp("journal", { source: "runtime-characterisation" });
+      const sourceManager = LaunchServices.openApp("com.example.journal", { source: "runtime-characterisation" });
       expect(sourceManager).not.toBeNull();
       await flushLaunchTimers();
-      expect(runtime.store.getSnapshot().application.activeAppId).toBe("journal");
+      expect(runtime.store.getSnapshot().application.activeAppId).toBe("com.example.journal");
 
-      const targetManager = LaunchServices.openApp("studio", { source: "runtime-characterisation" });
+      const targetManager = LaunchServices.openApp("com.example.studio", { source: "runtime-characterisation" });
       expect(targetManager).not.toBeNull();
       await flushMultiSwitchLaunch();
 
       const switching = runtime.store.getSnapshot().application.multiSwitch;
       expect(switching).toMatchObject({
         status: "switching",
-        fromAppId: "journal",
-        toAppId: "studio",
+        fromAppId: "com.example.journal",
+        toAppId: "com.example.studio",
         fromRoute: "/journal",
         toRoute: "/studio",
       });
@@ -311,14 +311,14 @@ describe("createSynCloudOS", () => {
     const { AppRegistry, LoginServices, Statechart } = createRuntimeHarness(runtime);
 
     try {
-      AppRegistry.registerBundle(createTestBundle({ id: "journal", route: "/journal" }));
+      AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.journal", route: "/journal" }));
       unlockRuntime(LoginServices);
       Statechart.gotoState("active.webspring", { source: "runtime-characterisation" });
 
       const launch = runtime.routes.openRoute("/journal", { source: "runtime-characterisation", syncRoute: false });
       await expect(launch.result).resolves.toMatchObject({ status: "completed", committed: true });
       await flushLaunchTimers();
-      expect(runtime.store.getSnapshot().application.activeAppId).toBe("journal");
+      expect(runtime.store.getSnapshot().application.activeAppId).toBe("com.example.journal");
 
       const returnOperation = runtime.routes.openRoute("/", { source: "runtime-characterisation-return", syncRoute: false });
       await expect(returnOperation.result).resolves.toMatchObject({ status: "completed", committed: true });
@@ -326,7 +326,7 @@ describe("createSynCloudOS", () => {
       const returning = runtime.store.getSnapshot().webspring;
       expect(returning).toMatchObject({
         launchPhase: "returning",
-        returningAppId: "journal",
+        returningAppId: "com.example.journal",
         returnTransitionId: expect.any(String),
         isAnimating: true,
       });
@@ -386,7 +386,7 @@ describe("createSynCloudOS", () => {
     let releaseBundle!: () => void;
     const heldBundle = new Promise<void>((resolve) => { releaseBundle = resolve; });
     const bundle = createTestBundle({
-      id: "studio",
+      bundleIdentifier: "com.example.studio",
       route: "/studio",
       loadModule: async () => {
         await heldBundle;
@@ -406,11 +406,11 @@ describe("createSynCloudOS", () => {
 
     await expect(route.result).resolves.toMatchObject({ status: "cancelled", committed: false });
     await expect(disposal).resolves.toMatchObject({ status: "disposed" });
-    expect(runtime.bundles.getLoadedBundle("studio")).toBeNull();
+    expect(runtime.bundles.getLoadedBundle("com.example.studio")).toBeNull();
     expect(runtime.errors.getHistory().filter((error) => error.code === "APP_LAUNCH_FAILED")).toEqual([]);
     expect(runtime.store.getSnapshot()).toMatchObject({
       application: { activeAppId: null, routePath: "/" },
-      lifecycle: { studio: "registered" },
+      lifecycle: { "com.example.studio": "registered" },
     });
     expect(runtime.windows.list()).toEqual([]);
   });
@@ -497,7 +497,7 @@ describe("createSynCloudOS", () => {
       expect(runtime.services.get("runtime-contract.client")).toBe(clientService);
 
       expect(runtime.services.resolveAppClient({
-        appId: "runtime-contract-consumer",
+        appId: "com.example.runtime-contract-consumer",
         serviceId: "runtime-contract.client",
         permissions: ["runtime.contract.read"],
         signal: runtime.signal,
@@ -505,10 +505,10 @@ describe("createSynCloudOS", () => {
         available: true,
         denied: false,
         version: "1.2.0",
-        client: { appId: "runtime-contract-consumer", live: true },
+        client: { appId: "com.example.runtime-contract-consumer", live: true },
       });
       expect(runtime.services.resolveAppClient({
-        appId: "runtime-contract-consumer",
+        appId: "com.example.runtime-contract-consumer",
         serviceId: "runtime-contract.client",
         permissions: [],
         signal: runtime.signal,
@@ -564,20 +564,20 @@ describe("createSynCloudOS", () => {
       });
 
       const app = AppRegistry.registerBundle(createTestBundle({
-        id: "runtime-contract-app",
+        bundleIdentifier: "com.example.runtime-contract-app",
         route: "/runtime-contract-app",
         requiredServices: [],
       }));
       if (!app) throw new Error("The runtime contract app did not register.");
-      expect(app).toMatchObject({ id: "runtime-contract-app", route: "/runtime-contract-app" });
-      expect(runtime.apps.getApp("runtime-contract-app")).toMatchObject({
-        id: "runtime-contract-app",
+      expect(app).toMatchObject({ bundleIdentifier: "com.example.runtime-contract-app", route: "/runtime-contract-app" });
+      expect(runtime.apps.getApp("com.example.runtime-contract-app")).toMatchObject({
+        bundleIdentifier: "com.example.runtime-contract-app",
         route: "/runtime-contract-app",
       });
-      expect(AppRegistry.getAppForRoute("/runtime-contract-app")).toMatchObject({ id: "runtime-contract-app" });
+      expect(AppRegistry.getAppForRoute("/runtime-contract-app")).toMatchObject({ bundleIdentifier: "com.example.runtime-contract-app" });
       expect(AppRegistry.getRegistrationHistory(1)).toEqual([
         expect.objectContaining({
-          appId: "runtime-contract-app",
+          appId: "com.example.runtime-contract-app",
           action: "register",
           result: "accepted",
         }),

@@ -28,7 +28,7 @@ it("does not grant a site's founder identity authority in a generic host", () =>
 });
 
 it("leaves application legal ownership to the host", () => {
-  const manifest = { schemaVersion: 1 as const, id: "org.example.app", version: "1.0.0", title: "Example" };
+  const manifest = { schemaVersion: 1 as const, bundleIdentifier: "org.example.app", version: "1.0.0", displayName: "Example" };
   const context = { appRoot: "./Example.app", packageName: "Example.app", path: "./Example.app/", componentKey: "Example" };
   expect(projectRuntimeManifest(manifest, context).about.copyright).toBe("");
   expect(projectRuntimeManifest(manifest, { ...context, about: { copyright: "Example Ltd", trademark: "Example" } }).about.copyright).toBe("Example Ltd");

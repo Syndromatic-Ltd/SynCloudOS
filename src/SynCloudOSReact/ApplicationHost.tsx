@@ -18,6 +18,7 @@ import { SynCloudOSWatchdog } from "../SynCloudOS/ErrorManager/SynCloudOSWatchdo
 import type { CapturedSynCloudOSError } from "../SynCloudOS/ErrorManager/errorTypes";
 import type { CommandPayloadSchema, CommandRegistration } from "../SynCloudOS/Commands/commandTypes";
 import type { AuthenticationInput } from "../SynCloudOS/Authentication/authenticationTypes";
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import type { RuntimeSnapshot } from "../SynCloudOS/Runtime/runtimeTypes";
 import type { ApplicationHostHome } from "./applicationHome";
 import { FocusScope } from "./FocusScope";
@@ -79,7 +80,7 @@ export interface ApplicationHostProps {
 export function ApplicationHost({ applicationId, authentication, home }: ApplicationHostProps) {
   const runtime = useKernelSynCloudOS();
   const appInfo = useRuntimeSelector(selectAppInfo);
-  const state = useRuntimeSelector(useCallback((snapshot: RuntimeSnapshot) => snapshot.lifecycle[applicationId], [applicationId]));
+  const state = useRuntimeSelector(useCallback((snapshot: RuntimeSnapshot) => snapshot.lifecycle[normalizeBundleIdentifier(applicationId)], [applicationId]));
   const activeAppId = useRuntimeSelector(selectActiveAppId);
   const routePath = useRuntimeSelector(selectRoutePath);
   const statechart = useRuntimeSelector(selectStatechart);
@@ -88,12 +89,12 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
   const appearance = useResolvedMode();
   const branding = useHostSiteBranding();
   const locale = useWebspringLocale();
-  const app = appInfo[applicationId];
+  const app = appInfo[normalizeBundleIdentifier(applicationId)];
   const appName = app ? locale.appName(app) : applicationId;
   // A primary declared as windowed (frame: "declared") presents in its window.
   const fillsPage = app?.presentation === "appView";
-  const presented = activeAppId === applicationId && state === "active";
-  const behindAnotherApplication = state === "suspended" && activeAppId !== null && activeAppId !== applicationId;
+  const presented = normalizeBundleIdentifier(activeAppId) === normalizeBundleIdentifier(applicationId) && state === "active";
+  const behindAnotherApplication = state === "suspended" && activeAppId !== null && normalizeBundleIdentifier(activeAppId) !== normalizeBundleIdentifier(applicationId);
   const mounted = fillsPage && (state === "active" || state === "suspended");
   const responderId = `application:${applicationId}`;
   const [renderers] = useState(() => new WindowContentRendererRegistry());

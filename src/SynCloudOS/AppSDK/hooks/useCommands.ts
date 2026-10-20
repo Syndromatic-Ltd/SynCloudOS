@@ -202,7 +202,7 @@ export function useCommands(definitions: readonly SynWareCommandDefinition[]): A
   current.current = next;
 
   const signature = structuralSignature(definitions);
-  const responderId = mountedResponderId(app.app.id, app.sessionId);
+  const responderId = mountedResponderId(app.app.bundleIdentifier, app.sessionId);
   const registrations = useMemo(
     () => createRegistrationDeclarations(definitions, responderId, current),
     // `signature` deliberately replaces array identity: equivalent inline

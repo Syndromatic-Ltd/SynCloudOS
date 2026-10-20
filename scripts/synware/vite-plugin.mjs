@@ -34,7 +34,9 @@ import { createApplicationToolchain } from "./application-toolchain.mjs";
 import { createScosAppModuleSource } from "../../src/SynCloudOS/AppSDK/scos/appModuleSource.mjs";
 import { assertExpectedDefaultExport, parseManifest } from "./manifest-source.mjs";
 import validateManifest from "../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs";
+import { normalizeBundleIdentifier } from "../../src/SynCloudOS/Identity/bundleIdentifier.mjs";
 import {
+  assertUniqueBundleIdentifiers,
   deriveSynWareManifest,
   integrationIdFromFileName,
   isIntegrationFileName,
@@ -360,7 +362,7 @@ function generateProjectModule(discovery) {
   body.push("const applications = " + (discovery.applications === null ? "null" : renderSourceList(discovery.applications)) + ";");
   body.push("export const bundles = selectProjectBundles(allBundles, { applications, development: import.meta.env.DEV });");
   body.push(`const definedIntegrations = [\n${integrationSources.join(",\n")}\n];`);
-  body.push("export const contributions = Object.freeze(selectProjectIntegrations(definedIntegrations, bundles.map(bundle => bundle.manifest.id)).map(({ id, path, definition }) => createIntegrationContribution(definition, { id, source: path })));");
+  body.push("export const contributions = Object.freeze(selectProjectIntegrations(definedIntegrations, bundles.map(bundle => bundle.manifest.bundleIdentifier)).map(({ id, path, definition }) => createIntegrationContribution(definition, { id, source: path })));");
 
   return `${imports.join("\n")}\n\n${body.join("\n")}\n`;
 }
@@ -390,19 +392,6 @@ function normaliseOptions(options) {
   });
 }
 
-function projectVersion(root) {
-  const manifestPath = resolve(root, "package.json");
-  let manifest;
-  try {
-    manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-  } catch (error) {
-    throw new Error(`SynCloudOS could not read the project version from ${displayPath(manifestPath)}.`, { cause: error });
-  }
-  if (typeof manifest.version !== "string" || !manifest.version.trim()) {
-    throw new Error(`SynCloudOS needs a version in ${displayPath(manifestPath)}; it becomes every application's manifest version.`);
-  }
-  return manifest.version;
-}
 
 /** Direct child folders of one kind: `Billing.prefPane`, `Latest.widget`. */
 function kindFolders(directory, matches, label, entryName, expected, options) {
@@ -437,25 +426,26 @@ function discover(root, options) {
     assertDirectory(contentsDirectory, `${name} Contents`);
     const infoPath = resolve(contentsDirectory, "Info.ts");
     const entryPath = resolve(contentsDirectory, "index.tsx");
-    if (existsSync(infoPath)) assertFile(infoPath, `${name} Info.ts`, appRoot);
+    assertFile(infoPath, `${name}/Contents/Info.ts (required)`, appRoot);
     assertFile(entryPath, `${name} entry`, appRoot);
     assertDefaultExport(entryPath, `${name}/Contents/index.tsx`, "a React component or an NSEApplication subclass");
     const resourcesDirectory = resolve(contentsDirectory, "Resources");
     const resources = scanResources(resourcesDirectory, `${name} Resources`);
     const appRelative = slash(relative(appsDirectory, entryPath));
-    const overrides = existsSync(infoPath) ? parseManifest(infoPath) : {};
-    const manifest = deriveSynWareManifest({ folderName: name, packageVersion: overrides?.version ?? projectVersion(root), overrides, resourceUrls: Object.fromEntries(resources.resourceUrls.map(({ key, file }) => [key, file])) });
+    const info = parseManifest(infoPath);
+    const manifest = deriveSynWareManifest({ folderName: name, info, resourceUrls: Object.fromEntries(resources.resourceUrls.map(({ key, file }) => [key, file])) });
     if (!validateManifest(manifest)) throw new TypeError(`${name}/Contents/Info.ts resolves to an invalid manifest: ${validateManifest.errors.map(error => `${error.instancePath || "/"} ${error.message}`).join("; ")}`);
     return Object.freeze({
       name,
-      id: manifest.id,
+      bundleIdentifier: manifest.bundleIdentifier,
       manifest,
-      infoPath: existsSync(infoPath) ? infoPath : null,
+      infoPath,
       entryPath,
       modulePath: `./${appRelative}`,
       resources,
     });
   }).sort((left, right) => left.modulePath.localeCompare(right.modulePath, "en"));
+  assertUniqueBundleIdentifiers(bundles);
 
   const preferences = kindFolders(
     options.preferencesDirectory === false ? null : resolve(root, options.preferencesDirectory ?? defaultPreferencesDirectory),
@@ -708,7 +698,7 @@ export function synCloudOS(options) {
       if (id.startsWith(appModulePrefix)) return `\0${id}`;
       if (id === "@syndromatic/syncloudos" && importer && !importer.startsWith("\0")) {
         const bundle = (discovery ?? refresh()).bundles.find(bundle => isPathInside(dirname(dirname(bundle.entryPath)), importer.split("?")[0]));
-        if (bundle) return `\0${appModulePrefix}${bundle.id}`;
+        if (bundle) return `\0${appModulePrefix}${normalizeBundleIdentifier(bundle.bundleIdentifier)}`;
       }
       return id === projectModuleId ? resolvedProjectModuleId : id === typographyModuleId ? resolvedTypographyModuleId : null;
     },

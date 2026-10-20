@@ -29,7 +29,7 @@ import { WebspringController } from "../../src/Webspring/WebspringController";
 import { defineWebspring } from "../../src/Webspring/Webspring";
 import { createTestBundle, createTestRuntime } from "./helpers";
 
-type LauncherApp = { readonly id: string; readonly title: string; readonly route: string };
+type LauncherApp = { readonly bundleIdentifier: string; readonly displayName: string; readonly route: string };
 
 /** A launcher's button at its plainest: it opens and previews its app through the actions it is given. */
 function LauncherButton({ app, onOpen, onHoverStart }: {
@@ -39,18 +39,18 @@ function LauncherButton({ app, onOpen, onHoverStart }: {
 }) {
   return createElement("button", {
     type: "button",
-    "aria-label": `Open ${app.title}`,
-    onClick: () => { void onOpen(app.id, app.route); },
-    onMouseEnter: () => onHoverStart?.(app.id),
-  }, app.title);
+    "aria-label": `Open ${app.displayName}`,
+    onClick: () => { void onOpen(app.bundleIdentifier, app.route); },
+    onMouseEnter: () => onHoverStart?.(app.bundleIdentifier),
+  }, app.displayName);
 }
 
 const webspring = defineWebspring({
   manifest: {
     schemaVersion: 1,
-    id: "com.example.multiple-roots",
+    bundleIdentifier: "com.example.multiple-roots",
     version: "1.0.0",
-    title: "Multiple roots fixture",
+    displayName: "Multiple roots fixture",
     webspringShell: {
       views: [{ id: "test", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
       defaults: { desktop: "test", tablet: "test", mobile: "test" },
@@ -136,8 +136,8 @@ describe("multiple runtime React roots", () => {
   it("routes Webspring button interactions to the nearest runtime", () => {
     const first = createTestRuntime({ id: "runtime:webspring:first" });
     const second = createTestRuntime({ id: "runtime:webspring:second" });
-    const firstApp = first.apps.registerBundle(createTestBundle({ id: "first-app" }));
-    const secondApp = second.apps.registerBundle(createTestBundle({ id: "second-app" }));
+    const firstApp = first.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.first-app" }));
+    const secondApp = second.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.second-app" }));
     expect(firstApp).not.toBeNull();
     expect(secondApp).not.toBeNull();
     const firstController = new WebspringController(first, webspring, undefined);
@@ -160,15 +160,15 @@ describe("multiple runtime React roots", () => {
 
     fireEvent.mouseEnter(screen.getByRole("button", { name: /Open First App/i }));
 
-    expect(first.webspring.getSnapshot().hoveredAppId).toBe("first-app");
+    expect(first.webspring.getSnapshot().hoveredAppId).toBe("com.example.first-app");
     expect(second.webspring.getSnapshot().hoveredAppId).toBeNull();
   });
 
   it("isolates Webspring routing, events, windows, settings, appearance, and system UI across two live roots", async () => {
     const first = createTestRuntime({ id: "runtime:webspring-actions:first" });
     const second = createTestRuntime({ id: "runtime:webspring-actions:second" });
-    const firstApp = first.apps.registerBundle(createTestBundle({ id: "first-actions", route: "/first-actions", presentation: "windowedView" }));
-    const secondApp = second.apps.registerBundle(createTestBundle({ id: "second-actions", route: "/second-actions", presentation: "windowedView" }));
+    const firstApp = first.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.first-actions", route: "/first-actions", presentation: "windowedView" }));
+    const secondApp = second.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.second-actions", route: "/second-actions", presentation: "windowedView" }));
     expect(firstApp).not.toBeNull();
     expect(secondApp).not.toBeNull();
     first.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
@@ -182,13 +182,13 @@ describe("multiple runtime React roots", () => {
       createElement(SynCloudOSProvider, { runtime: first },
         createElement(RuntimeInputBoundary, null,
           createElement(LauncherButton, { app: firstModelApp, onOpen: firstController.actions.openApp }),
-          createElement(RuntimeMutationControls, { appId: firstApp!.id }),
+          createElement(RuntimeMutationControls, { appId: firstApp!.bundleIdentifier }),
         ),
       ),
       createElement(SynCloudOSProvider, { runtime: second },
         createElement(RuntimeInputBoundary, null,
           createElement(LauncherButton, { app: secondModelApp, onOpen: secondController.actions.openApp }),
-          createElement(RuntimeMutationControls, { appId: secondApp!.id }),
+          createElement(RuntimeMutationControls, { appId: secondApp!.bundleIdentifier }),
         ),
       ),
     ));
@@ -199,7 +199,7 @@ describe("multiple runtime React roots", () => {
       expect(first.store.getSnapshot().application.routePath).toBe("/first-actions");
       expect(first.windows.list()).toHaveLength(1);
     });
-    fireEvent.click(screen.getByRole("button", { name: "Mutate first-actions" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mutate com.example.first-actions" }));
     expect(second.store.getSnapshot().application.routePath).toBe("/");
     expect(first.events.getHistory().some((event) => event.type === "test.root.action")).toBe(true);
     expect(second.events.getHistory().some((event) => event.type === "test.root.action")).toBe(false);

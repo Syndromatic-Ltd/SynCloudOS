@@ -332,7 +332,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
         <div ref={contentRef} className="webspring-folder-split-content">
           <h2 id={titleId} className="webspring-folder-split-title">{folder.title}</h2>
           <div className="webspring-folder-split-apps">
-            {folder.apps.map((app, index) => <div key={app.id} className="webspring-folder-split-cell">{renderApp(app, index)}</div>)}
+            {folder.apps.map((app, index) => <div key={app.bundleIdentifier} className="webspring-folder-split-cell">{renderApp(app, index)}</div>)}
           </div>
         </div>
       </div>

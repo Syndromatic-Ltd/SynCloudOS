@@ -1,13 +1,13 @@
 # SynWare manifest
 
-An application's optional `Contents/Info.ts` supplies `SynWareManifestOverrides`. Folder discovery fills its schema version, ID, title, package version, icon and locale files before validating the complete manifest. See [Project structure](project-structure.md). The example includes explicit identity overrides:
+Every application requires `Contents/Info.ts`, its Info.plist-style declaration typed as `SynWareInfo`. Write `bundleIdentifier`, `displayName` and `version` explicitly. Discovery fills only `schemaVersion`, the icon and locale resources before validating the complete manifest. The plugin, static validator and Developer MCP resolve the same declaration. See [Project structure](project-structure.md).
 
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.notes",
+  bundleIdentifier: "com.example.notes",
   version: "1.0.0",
-  title: "Notes",
+  displayName: "Notes",
   routes: [{ path: "/notes", primary: true }],
   presentations: ["desktop", "tablet", "mobile"],
   windowDefaults: { title: "Notes", width: 920, height: 680, minimumWidth: 360, minimumHeight: 460, resizable: true },
@@ -26,12 +26,33 @@ The schema rejects unknown keys. A typo in a field name surfaces as a validation
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `schemaVersion` | `1` | Derived as `1`. |
-| `id` | string | Derived from the folder in kebab case. Override it to preserve an existing persistence identity. |
-| `version` | string | Derived from the project's package version; an explicit semantic version overrides it. |
-| `title` | string | Derived by splitting the folder name into words. |
+| `schemaVersion` | `1` | Optional in `SynWareInfo`; discovery supplies `1`. |
+| `bundleIdentifier` | string | Required reverse-DNS identity with at least two dots. Each segment contains letters (either case), digits or hyphens. |
+| `version` | string | Required semantic version. Never inherited from `package.json`. |
+| `displayName` | string | Required public application name. Independent of `windowDefaults.title`. |
 | `availability` | `"development"` | Optional. Excludes the application from production builds. |
 | `migrationVersion` | integer | Optional. Marks the data schema revision your `migrations` handle. |
+
+Identifiers retain their declared case in manifests and public displays. Registry lookups, `SCOS.open`, duplicate detection and storage keys compare case-insensitively: `com.example.Notes` and `COM.EXAMPLE.notes` are the same identity and cannot be registered twice. The `.app` folder supplies the bundle name, not its identity.
+
+### Migration from the previous identity fields
+
+| Before | After |
+| --- | --- |
+| Manifest `id` and `runtime.bundleId` | One required top-level `bundleIdentifier`; remove both old fields |
+| Manifest `title` | Required `displayName` |
+| `SynWareManifestOverrides` | `SynWareInfo` |
+| Optional or identity-less `Info.ts` | Required `Info.ts` with explicit identity and version |
+| Version inherited from the project package | Explicit app `version` |
+| `SCOS.app.id` / `.title`, catalogue `id` / `title` | `bundleIdentifier` / `displayName` |
+| `application: { id }` | `application: { bundleIdentifier }` |
+| Runtime `AppInfo.id` / `.bundleId`, `AppManager.id` / `.appId` | `bundleIdentifier` |
+| Runtime `AppInfo.about.version` | Required top-level `AppInfo.version` |
+| `SCOS.open("notes")` | `SCOS.open("com.example.notes")` or `SCOS.open("/notes")` |
+| Old app persistence keys and Webspring layout v4 | Reset app storage under the new identity; Webspring layout v5 (`webspring.layout.v5`) |
+
+This is a clean cutover: saved data is reset, not migrated. There are no old-ID aliases or compatibility shims. Window, document, command, folder, pane and widget IDs and window/command titles are unchanged.
+
 
 ## Routes and presentations
 
@@ -119,7 +140,6 @@ Use `runtime.disabled: true` to keep an application registered while blocking ro
 | --- | --- |
 | `disabled` | Optional boolean, default `false`. Blocks loading and launch without changing `webspring.visible`. |
 | `disabledReason` | Optional explanation shown for a disabled application. It does not itself disable the application. |
-| `bundleId` | A stable identifier when it should differ from `id`. |
 | `presentation` | `"appView"`, `"windowedView"`, `"systemSheet"` or `"backgroundService"`. |
 | `type` | `"internal"`, `"system"` or `"external"`. |
 | `policy` | `public`, `requiresLogin`, `requiredCapabilities` and `requiredAccessClasses` (`"team"` or `"external"`). |
@@ -141,16 +161,16 @@ Shells declare `webspringShell` instead. Its optional `folders` block, `{ editab
 
 ## Validate a manifest
 
-`validateSynWareManifest` checks a complete manifest against the schema and returns either the frozen manifest or a list of issues. Folder tooling resolves overrides first; the runtime rejects invalid complete manifests with `SynWareManifestValidationError`.
+`validateSynWareManifest` checks a complete manifest against the schema and returns either the frozen manifest or a list of issues. Folder tooling resolves `SynWareInfo` first; the runtime rejects invalid complete manifests with `SynWareManifestValidationError`.
 
 ```ts
 import { validateSynWareManifest } from "@syndromatic/syncloudos/sdk";
 
 const result = validateSynWareManifest({
   schemaVersion: 1,
-  id: "com.example.notes",
+  bundleIdentifier: "com.example.notes",
   version: "1.0.0",
-  title: "Notes",
+  displayName: "Notes",
 });
 
 if (!result.ok) {
