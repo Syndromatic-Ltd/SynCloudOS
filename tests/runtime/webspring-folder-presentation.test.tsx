@@ -148,13 +148,20 @@ describe("Webspring folder split presentation", () => {
     }
   });
 
-  it("parts below the folder's cell and holds the triangle covered until the halves move", async () => {
+  it("reveals an upward underlay pointer through the upper seam, covered while shut", async () => {
     const { root } = renderSplit();
     const [top, bottom] = root.querySelectorAll<HTMLElement>(".webspring-folder-split-half");
 
-    // The seam sits 6 px below the cell; the bottom half reaches 14 px above it
-    // at rest, covering the triangle.
-    expect(top.style.height).toBe("200px");
+    // The top-stage cutout points up towards the folder's centre. The lower
+    // clone covers the entire cutout at rest, leaving no notch in the stage.
+    const topHost = top.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!;
+    const points = [...topHost.style.clipPath.matchAll(/(-?\d+)px (-?\d+)px/gu)]
+      .map(([, x, y]) => ({ x: Number(x), y: Number(y) }));
+    const [right, tip, left] = points;
+    expect([right, tip, left]).toEqual([{ x: 154, y: 186 }, { x: 140, y: 172 }, { x: 126, y: 186 }]);
+    expect(tip.x).toBe(100 + 80 / 2);
+    expect(tip.y).toBeLessThan(left.y);
+    expect(top.style.height).toBe("186px");
     expect(bottom.style.top).toBe("172px");
     expect(bottom.style.transform).toBe("");
     expect(screen.getByRole("dialog", { name: "Tools" }).style).toMatchObject({ top: "186px", height: "240px" });
@@ -164,7 +171,34 @@ describe("Webspring folder split presentation", () => {
     // down by the panel's height plus the triangle depth it covered.
     expect(top.style.transform).toBe("translate3d(0, 0px, 0)");
     expect(bottom.style.transform).toBe("translate3d(0, 254px, 0)");
+    expect(Number.parseFloat(bottom.style.top) + 254).toBe(186 + 240);
+    expect(topHost.style.clipPath).not.toMatch(/url\(#/u);
     await waitFor(() => expect(document.activeElement?.textContent).toBe("Open Beta"));
+  });
+
+  it("keeps the upward cutout attached to the upper seam when the panel shifts to fit", async () => {
+    stageBox = new DOMRect(0, 0, 800, 300);
+    const { root } = renderSplit();
+    await opened(root);
+    const [top, bottom] = root.querySelectorAll<HTMLElement>(".webspring-folder-split-half");
+    const panel = screen.getByRole("dialog", { name: "Tools" });
+    expect(panel.style).toMatchObject({ top: "60px", height: "240px" });
+    expect(top.style.transform).toBe("translate3d(0, -126px, 0)");
+    const clip = top.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!.style.clipPath;
+    const [, tip] = [...clip.matchAll(/(-?\d+)px (-?\d+)px/gu)];
+    expect(Number(tip[2]) - 126).toBe(Number.parseFloat(panel.style.top) - 14);
+    expect(bottom.style.transform).toBe("translate3d(0, 128px, 0)");
+    expect(Number.parseFloat(bottom.style.top) + 128).toBe(300);
+  });
+
+  it("uses a straight upper seam without a cutout when the pointer is disabled", async () => {
+    const { root } = renderSplit({ Split: createWebspringFolderSplitPresentation({ panelHeight: 240, duration: 0, notch: false }) });
+    const [top, bottom] = root.querySelectorAll<HTMLElement>(".webspring-folder-split-half");
+    expect(top.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!.style.clipPath).toBe("");
+    expect(top.style.height).toBe("186px");
+    expect(bottom.style.top).toBe("186px");
+    await opened(root);
+    expect(bottom.style.transform).toBe("translate3d(0, 240px, 0)");
   });
 
   it("crossfades instead of parting for reduced motion", async () => {
@@ -189,7 +223,7 @@ describe("Webspring folder split presentation", () => {
       expect(cloneOf(root, half).style).toMatchObject({ width: "900px", height: "700px" });
     }
     const [top, bottom] = root.querySelectorAll<HTMLElement>(".webspring-folder-split-half");
-    expect(top.style.height).toBe("200px");
+    expect(top.style.height).toBe("186px");
     expect(bottom.style.top).toBe("172px");
     expect(root.dataset.phase).toBe("open");
   });
@@ -201,6 +235,9 @@ describe("Webspring folder split presentation", () => {
     vi.useFakeTimers();
     fireEvent.keyDown(screen.getByRole("dialog", { name: "Tools" }), { key: "Escape" });
     expect(root.dataset.phase).toBe("closing");
+    const bottom = root.querySelector<HTMLElement>(".webspring-folder-split-half.is-bottom")!;
+    expect(bottom.style.top).toBe("172px");
+    expect(bottom.style.transform).toBe("");
     act(() => vi.advanceTimersByTime(359));
     expect(onClose).not.toHaveBeenCalled();
     act(() => vi.advanceTimersByTime(1));

@@ -57,6 +57,11 @@ real window controllers. It is `null` before launch, after close, and for functi
 `host.persistence` shares the app's own namespaced preference store, including values written
 before launch; it is not a separate test map.
 
+Both surfaces mount the production `RuntimeInputBoundary`. Focus an element in the rendered app
+and dispatch a bubbling, cancellable native `KeyboardEvent` to exercise declared key bindings and
+class actions through normal routing. Disposing the host removes that routing; no private key
+driver is needed.
+
 Supply typed service clients with `services: [[notesToken, notesClient]]`. These are registered
 through the ordinary app-service boundary, so the manifest must still declare the service and
 token version/contract checks still apply. Allow the service, permission and policy test adapters
@@ -64,6 +69,62 @@ with `host.adapters.services.allow()`, `host.adapters.permissions.allow()` and
 `host.adapters.policy.allow()` before a controller calls `SCOS.services.require(notesToken)`.
 Sensitive storage remains denied to the app until the test allows storage and credentials, even
 though the trusted host can seed preferences. A class launch callback failure rejects `host.render()`.
+
+## Portable action payloads
+
+Exercise class actions with normal control clicks or `useAction(...).perform(eventPayload)`,
+not by calling the action method directly. The test host keeps the production command boundary:
+an event callback does not make arbitrary objects safe. Without a host-native `isProxy` identity
+probe, raw records and arrays fail closed without evaluating their getters or proxy traps.
+Do not inject a proxy probe to make a portable test pass.
+
+Use primitives or construct immutable values through the running app's commands client:
+
+```tsx
+import { act, fireEvent, waitFor } from "@testing-library/react";
+import { expect } from "vitest";
+import { NSEApplication, NSEWindowController, action, useAction, useSCOS } from "@syndromatic/syncloudos";
+import { createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
+
+function NotesView() {
+  const scos = useSCOS();
+  const select = useAction("selectNote");
+  return <button onClick={() => {
+    void select.perform(scos.commands.createPayload("id", "note-1"));
+  }}>Select note</button>;
+}
+class NotesWindow extends NSEWindowController { static view = NotesView; }
+class NotesApp extends NSEApplication {
+  static mainWindow = NotesWindow;
+  selectedId = "";
+  @action selectNote(payload: { readonly id: string }) { this.selectedId = payload.id; }
+}
+
+export async function selectNote(document: Document) {
+  const host = createSynWareTestHost({
+    application: NotesApp,
+    manifest: { schemaVersion: 1, bundleIdentifier: "com.example.notes", displayName: "Notes", version: "1.0.0" },
+    document,
+  });
+  try {
+    const view = await host.render();
+    await act(async () => { fireEvent.click(view.getByRole("button", { name: "Select note" })); });
+    const application = host.application;
+    if (!(application instanceof NotesApp)) throw new Error("Notes application did not launch.");
+    await waitFor(() => expect(application.selectedId).toBe("note-1"));
+  } finally {
+    await host.dispose();
+  }
+}
+```
+
+The view uses `useSCOS()` so the example also works outside an app folder. For nested data,
+build each record with `commands.createPayload("id", id)` and each array with
+`commands.createPayloadArray(...)`,
+using the same mounted scope throughout. Builders reject duplicate/non-string keys, missing
+values and raw nested objects. Keep `File[]`, DOM nodes and transformation functions in outlets
+or domain callbacks, or send primitive descriptors instead. Serialising, cloning, spreading or
+enumerating unknown objects is not a supported payload conversion.
 
 ## Trusted diagnostics provision
 

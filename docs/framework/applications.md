@@ -222,20 +222,41 @@ Controls and menus send the action by name; the responder chain does the rest: t
 
 ```tsx
 <NSEPushButton action="newNote">New Note</NSEPushButton>
-<NSEPushButton action="rename" actionPayload={{ title: "Receipts" }}>Rename</NSEPushButton>
+<NSEPushButton action="rename" actionPayload={SCOS.commands.createPayload("title", "Receipts")}>Rename</NSEPushButton>
 ```
 
 A menu item is `{ kind: "command", id: "new", action: "newNote" }`. Every control and menu item that names the action follows its validation, so one `validateNewNote()` disables them all. [Commands, responders and undo](commands-responders-undo.md#actions-on-class-based-applications) lists the rules: payloads, validation results, standard command IDs and how names resolve.
+
+Actions use the ordinary command payload boundary; an action callback does not bypass it.
+Portable payloads are primitives or immutable values constructed by the mounted application's
+`SCOS.commands.createPayload("key", value, ...)` and `createPayloadArray(value, ...)`.
+Write known fields explicitly, and build nested records and arrays with the same mounted scope.
+Raw objects are supported only where the host supplies a native `isProxy` probe that proves their
+identity; without it, arbitrary objects fail closed before their properties are inspected.
+Builders reject duplicate or non-string keys, unpaired fields and raw nested objects. Keys must
+be bounded identifiers beginning with a letter. Do not serialise, clone, spread or enumerate an
+unknown object to try to make it an accepted command payload.
 
 `@action({ menuCategory: "edit", keyBindings: [{ key: "f", modifiers: ["primary"], scope: "application" }], allowReservedBrowserShortcut: true })`
 uses the same menu and keyboard rules as a command definition. `keyBindings` is a list of the usual
 key-binding declarations; browser-reserved shortcuts require the explicit opt-in.
 
+`NSEActionOptions<Payload>.title` also accepts the command title resolver:
+`({ payload, runtime }) => ({ key, fallback, values? })`. The payload has the action's declared
+type. Use `runtime.locale.t(...)` for a translated fallback; the command pipeline evaluates the
+resolver for each payload, and `validate<Name>()` can still override the presented title.
+
+```ts
+const headingAction: NSEActionOptions<{ readonly level: number }> = {
+  title: ({ payload }) => ({ key: "commands.heading", fallback: `Heading ${payload.level}` }),
+};
+```
+
 `useAction(name, payload?)` returns `{ perform, enabled, state }`, where `state` is `"off"`, `"on"` or
 `"mixed"`. Use it for custom links or artwork; it validates and dispatches through the responder chain:
 
 ```tsx
-const activation = useAction("openNote", { id: note.id });
+const activation = useAction("openNote", SCOS.commands.createPayload("id", note.id));
 return <a href={note.url} aria-disabled={!activation.enabled} onClick={event => {
   event.preventDefault();
   void activation.perform();
@@ -255,7 +276,9 @@ action's payload schema and `validate<Name>()`; it does not inherit the bound pa
 
 ```tsx
 const selection = useAction("selectNote");
-return <NoteList onSelectionChange={id => { void selection.perform({ id }); }} />;
+return <NoteList onSelectionChange={id => {
+  void selection.perform(SCOS.commands.createPayload("id", id));
+}} />;
 ```
 
 Segmented controls, popup/picker controls and cover-flow activation also accept `action` and
@@ -264,6 +287,21 @@ Without `actionPayload`, segmented controls and cover flow send the activated it
 send the chosen option's value, and a popup-button trigger sends its menu model's ID. Candidate
 choices are validated individually. An explicitly supplied payload, including `undefined`, overrides
 these defaults; use `actionPayload={undefined}` for a no-argument action.
+
+Prefer a primitive ID when that is all the action needs. For richer, known data, build each level:
+
+```tsx
+const notes = SCOS.commands.createPayloadArray(
+  SCOS.commands.createPayload("id", firstNote.id),
+  SCOS.commands.createPayload("id", secondNote.id),
+);
+const activation = useAction("openNotes", SCOS.commands.createPayload("notes", notes));
+```
+
+DOM nodes, `File` objects or `File[]`, and transformation functions are not command payloads.
+Keep those arguments in outlets or domain callbacks, or send a primitive descriptor that the
+owning controller resolves. Event-time `perform(...)` arguments follow the same rules as bound
+payloads and control `actionPayload` values.
 
 Omit `parentResponderId` on an `NSEPopup` rendered by a class controller. It inherits that
 controller's responder ancestry through its portal, so focused editor actions can fall back to the

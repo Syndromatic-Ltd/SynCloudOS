@@ -27,7 +27,7 @@ import type { KeyBindingDeclaration } from "../KeyBindings/keyBindingTypes";
 import { useSCOS } from "./scos/useSCOS";
 import { nseActionCommandId } from "../../NSE/Controls/Core/actionCommandId";
 import type { AppCommandClient } from "./appClientTypes";
-import type { SynWareCommandPayloadSchema, SynWareCommandTitle, SynWareCommandValidation } from "./appRuntimeTypes";
+import type { SynWareCommandDeclaration, SynWareCommandPayloadSchema, SynWareCommandValidation } from "./appRuntimeTypes";
 
 /** A method an action may decorate: at most one parameter, the payload. */
 export type NSEActionMethod<This, Payload> = (this: This, payload: Payload) => unknown;
@@ -36,8 +36,8 @@ export type NSEActionMethod<This, Payload> = (this: This, payload: Payload) => u
 export interface NSEActionOptions<Payload = unknown> {
   /** A standard command this action answers, such as `document.save`. Without it the command is `<appId>.<method name>`. */
   readonly id?: string;
-  /** The command's title in menus. Defaults to the method name in words (`newNote` is "New Note"). */
-  readonly title?: string | SynWareCommandTitle;
+  /** The command's static or payload-dependent localised title. Defaults to the method name in words (`newNote` is "New Note"). */
+  readonly title?: string | SynWareCommandDeclaration<Payload, unknown>["title"];
   /** The command menu category, for example `"file"` or `"edit"`. */
   readonly menuCategory?: string;
   /** Default keyboard bindings, with the same scope, platform and safety rules as commands. */
@@ -186,8 +186,8 @@ function toValidation(name: string, result: unknown): SynWareCommandValidation {
   throw new TypeError(`validate${capitalised(name)}() must return a boolean or a command validation with an "enabled" flag.`);
 }
 
-function titleFor(commandId: string, name: string, record: ActionRecord): SynWareCommandTitle {
-  if (typeof record.title === "object") return record.title;
+function titleFor(commandId: string, name: string, record: ActionRecord): SynWareCommandDeclaration<unknown, unknown>["title"] {
+  if (typeof record.title === "object" || typeof record.title === "function") return record.title;
   return Object.freeze({ key: `commands.${commandId}.title`, fallback: record.title ?? inWords(name) });
 }
 

@@ -45,9 +45,9 @@ interface ResolvedSplitOptions {
   readonly duration: number;
 }
 
-/** Half the base of the triangle where the stage above the seam dips into the panel. */
+/** Half the base of the underlay pointer cut out of the stage's upper seam. */
 const NOTCH_HALF_BASE = 14;
-/** How far that triangle reaches below the seam, fixed. The bottom half covers it at rest. */
+/** How far the pointer projects above the seam. The lower clone covers it at rest. */
 const TRIANGLE_DEPTH = 14;
 const SEAM_GAP = 6;
 const STAGE_MARGIN = 24;
@@ -285,16 +285,15 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
   // Reduced motion crossfades in place; otherwise the halves part and rejoin.
   const fade = reducedMotion;
   const parted = phase === "open" || (fade && phase === "closing");
-  // At rest the bottom half reaches the triangle's depth above the seam and
-  // sits above the top half, so it covers the triangle and the stage reads as
-  // unbroken; opening moves it down, uncovering the triangle first.
+  // At rest the lower clone overlaps the full upward cutout, making the stage
+  // unbroken. Opening moves that cover down to reveal the underlay tip first.
   const bottomTop = Math.max(0, seam - triangle);
   const bottomHeight = Math.max(0, height - bottomTop);
   const bottomShift = parted ? panelHeight - overflow + triangle : 0;
-  // Fixed depth, drawn from the first frame: the stage above the seam keeps a
-  // downward triangle in the middle, and only the bottom half's cover moves.
+  // The stage's lower edge cuts upwards, so the shared underlay projects
+  // towards the originating folder rather than the stage pointing into it.
   const topClip = triangle > 0
-    ? `polygon(0 0, 100% 0, 100% ${seam}px, ${notchX + NOTCH_HALF_BASE}px ${seam}px, ${notchX}px ${seam + triangle}px, ${notchX - NOTCH_HALF_BASE}px ${seam}px, 0 ${seam}px)`
+    ? `polygon(0 0, 100% 0, 100% ${seam}px, ${notchX + NOTCH_HALF_BASE}px ${seam}px, ${notchX}px ${seam - triangle}px, ${notchX - NOTCH_HALF_BASE}px ${seam}px, 0 ${seam}px)`
     : undefined;
 
   const style = {
@@ -339,7 +338,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
       <div
         className="webspring-folder-split-half is-top"
         style={{
-          height: `${seam + triangle}px`,
+          height: `${seam}px`,
           transform: parted ? `translate3d(0, ${-overflow}px, 0)` : undefined,
         }}
         aria-hidden="true"

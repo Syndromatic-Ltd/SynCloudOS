@@ -24,7 +24,7 @@ import type { TrustedSynWareBundle } from "../../BundleLoader/bundleTypes";
 import { trustSynWareBundleForTest } from "../../BundleLoader/trustedBundleProvenance";
 import { installHostDiagnosticsProvision } from "../../Testing/hostDiagnosticsProvision";
 import { createSynCloudOS } from "../../SynCloudOS";
-import { SynCloudOSProvider } from "../../../SynCloudOSReact";
+import { RuntimeInputBoundary, SynCloudOSProvider } from "../../../SynCloudOSReact";
 import { ApplicationStageView } from "../../../Webspring/ApplicationStageView";
 import { HostSiteBrandingProvider } from "../../../SynCloudOSReact";
 import {
@@ -438,6 +438,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
         const content = (
           <HostSiteBrandingProvider value={options.branding ?? Object.freeze({ name: "SynWare Test Host", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "" })}>
           <SynCloudOSProvider runtime={runtime}>
+          <RuntimeInputBoundary>
             {options.surface === "window" ? (
               <WindowLayer contentRegistry={windowContentRegistry} />
             ) : (
@@ -448,6 +449,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
                 lifecycle="ready"
               />
             )}
+          </RuntimeInputBoundary>
           </SynCloudOSProvider>
           </HostSiteBrandingProvider>
         );

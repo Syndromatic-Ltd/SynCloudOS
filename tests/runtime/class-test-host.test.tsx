@@ -9,7 +9,8 @@ import type { SynWareTestHost } from "../../src/SynCloudOS/AppSDK/testing/testHo
 import { defineSynWareServiceToken } from "../../src/SynCloudOS/AppSDK/serviceToken";
 import { defineSynWareRoutes } from "../../src/SynCloudOS/AppSDK/defineSynWareRoutes";
 import { routeQuery } from "../../src/SynCloudOS/Routing/routeQuery";
-import { act } from "@testing-library/react";
+import { act, waitFor, within } from "@testing-library/react";
+import { action } from "../../src/SynCloudOS/AppSDK/actions";
 const hosts: SynWareTestHost[] = [];
 afterEach(async () => { for (const host of hosts.splice(0)) await host.dispose(); });
 it("launches a real class app with running services and exposes its live window controllers and preferences", async () => {
@@ -74,4 +75,36 @@ it("pushes and replaces route queries from a controller and notifies subscribers
   expect(scos.fonts.manager).toBeTruthy();
   expect(scos.menus.runtime.resolveAction?.("refresh")).toBe("com.example.class-routes.refresh");
   remove();
+});
+
+it.each(["stage", "window"] as const)("routes native Escape events through the production input boundary and removes routing on disposal (%s)", async surface => {
+  class MainWindow extends NSEWindowController {
+    static override view = () => <button>Keyboard target</button>;
+  }
+  class Application extends NSEApplication {
+    static override mainWindow = MainWindow;
+    cancellations = 0;
+    @action({ keyBindings: [{ key: "Escape", modifiers: [], scope: "application", repeat: "ignore", allowInEditable: true }] })
+    cancel() { this.cancellations += 1; }
+  }
+  const host = createSynWareTestHost({
+    application: Application,
+    manifest: { schemaVersion: 1, bundleIdentifier: "com.example.class-keyboard", displayName: "Keyboard", version: "1.0.0" },
+    document,
+    surface,
+  });
+  hosts.push(host);
+  const view = await host.render();
+  const application = host.application as Application;
+  const target = within(view.container).getByRole("button", { name: "Keyboard target" }) as HTMLButtonElement;
+  await act(async () => { target.focus(); });
+  const escape = new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true });
+  await act(async () => { target.dispatchEvent(escape); });
+  expect(escape.defaultPrevented).toBe(true);
+  await waitFor(() => expect(application.cancellations).toBe(1));
+  await act(async () => { await host.dispose(); });
+  const afterDisposal = new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true });
+  target.dispatchEvent(afterDisposal);
+  expect(afterDisposal.defaultPrevented).toBe(false);
+  expect(application.cancellations).toBe(1);
 });

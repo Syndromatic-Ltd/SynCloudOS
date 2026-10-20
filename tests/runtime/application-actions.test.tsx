@@ -237,6 +237,37 @@ describe("actions along the responder chain", () => {
     binding.dispose();
     expect(runtime.keyBindings.resolve(event("j"), {})).toBeNull();
   });
+
+  it("presents payload-dependent localised action titles and preserves validator title overrides", async () => {
+    const { runtime, context, host, focus } = fixture();
+    const namespace = "action-title-boundary";
+    runtime.locale.registerTranslations(namespace, "en-GB", { publish: "Publish {name}", blocked: "Cannot publish {name}" });
+    runtime.locale.registerTranslations(namespace, "fr-FR", { publish: "Publier {name}", blocked: "Publication interdite : {name}" });
+    runtime.locale.setLocale("en-GB");
+    class Publisher extends Recorder {
+      @action<{ readonly name: string }>({
+        title: ({ payload, runtime: app }) => ({
+          key: "publish",
+          fallback: app.locale.t("publish", { name: payload.name }, namespace),
+        }),
+      })
+      publishSelection(payload: { readonly name: string }) { this.calls.push(payload.name); }
+      validatePublishSelection(payload: { readonly name: string }) {
+        return payload.name === "locked"
+          ? { enabled: false, title: { key: "blocked", fallback: context.locale.t("blocked", { name: payload.name }, namespace) } }
+          : { enabled: true };
+      }
+    }
+    const publisher = new Publisher();
+    const binding = bindActionResponder(publisher, host, responderIds.window);
+    focus("view");
+    await expect(context.commands.validate(`${appId}.publishSelection`, { name: "First" })).resolves.toMatchObject({ enabled: true, title: "Publish First" });
+    await expect(context.commands.validate(`${appId}.publishSelection`, { name: "Second" })).resolves.toMatchObject({ enabled: true, title: "Publish Second" });
+    runtime.locale.setLocale("fr-FR");
+    await expect(context.commands.validate(`${appId}.publishSelection`, { name: "Deuxième" })).resolves.toMatchObject({ enabled: true, title: "Publier Deuxième" });
+    await expect(context.commands.validate(`${appId}.publishSelection`, { name: "locked" })).resolves.toMatchObject({ enabled: false, title: "Publication interdite : locked" });
+    binding.dispose();
+  });
 });
 
 describe("actions in menus and controls", () => {

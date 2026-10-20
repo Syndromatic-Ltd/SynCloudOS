@@ -83,8 +83,9 @@ See [Applications](applications.md) for the complete class tree and ownership ru
 | `NSEViewController.viewWillLayout()` / `viewDidLayout()` | Called after DOM commits and on frame resize. `this.view.element.getBoundingClientRect()` reads the committed view. |
 | `NSEApplication.openWindow(Controller, options?)` | Returns `Promise<Controller>`; options include title, width, height, documentId, restorationKey, mobilePolicy and explicit/centred/cascaded preferredBounds. |
 | `SCOS.commands.subscribePresentation(listener)` | Returns a disposer; invalidates command presentation after registry, responder or focus changes and stops with the app scope. |
+| `SCOS.commands.createPayload("key", value, ...)` / `.createPayloadArray(value, ...)` | Construct immutable command records and arrays from primitives and nested values built by the same mounted scope. Use explicit known fields; arbitrary raw nested objects are rejected. |
 | `NSEApplication.windowControllers` | Static name-to-class declaration for cold restoration, such as `{ detachedNote: DetachedNoteWindow }`; recreated controllers receive their original `openingOptions`. |
-| `@action(options)` | Adds `menuCategory`, `keyBindings`, `allowReservedBrowserShortcut` to the title/id/payload declaration, with ordinary command semantics. |
+| `@action(options)` | `NSEActionOptions<Payload>.title` accepts a string, localised title record or the ordinary typed command title resolver; payload-dependent titles preserve validator overrides. `menuCategory`, `keyBindings` and `allowReservedBrowserShortcut` keep ordinary command semantics. |
 | `useAction(name, payload?)` | `{ perform(payload?: unknown): Promise<CommandDispatchResult \| null>, enabled, state }`; no argument uses the bound payload, while an event-time argument gets fresh validation through responders and `validateX`. NSE segmented, popup/picker and cover-flow controls accept `action`/`actionPayload`. |
 | `createSynWareTestHost({ application, manifest, services? })` | Launches a class app; `host.application.windows` exposes controllers. `services: [[token, client]]` registers real typed app clients. `host.persistence` is the app's preference store. |
 | `createSynWareTestHost({ diagnostics: provider })` | Host-only `AppTrustedDiagnosticsClient` provision, still requiring `diagnostics.view`; use `host.diagnostics.replace(provider)` or `.revoke()` to change authority and abort old work. |
@@ -99,6 +100,30 @@ late unowned construction in class applications throws `NSE_CONTROLLER_UNOWNED`.
 Text editing distinguishes its content authority, `textOwner`, from its lifecycle `owner`.
 Action controls and `useAction` follow registry, focus and observable responder changes. They retry
 stale asynchronous validation instead of leaving a control disabled after another view registers commands.
+
+### Portable action payloads
+
+`@action`, `useAction`, command dispatch and control `actionPayload` all retain the command
+security boundary. Use a primitive when possible, or construct a record in the running app:
+
+```tsx
+const openNote = useAction("openNote", SCOS.commands.createPayload("id", note.id));
+const selectNote = useAction("selectNote");
+return <NoteList onSelectionChange={id => {
+  void selectNote.perform(SCOS.commands.createPayload("id", id));
+}} />;
+```
+
+For nested data, pass `SCOS.commands.createPayloadArray(...)` and nested `createPayload(...)`
+results from the same mounted scope. Records take alternating string keys and values; keys must
+be unique identifiers beginning with a letter, and every key needs a value. Raw objects are
+supported only when the host supplies a native `isProxy` identity probe; browser hosts without
+that probe reject arbitrary objects without reading their properties. Builders are the portable
+contract, not an automatic object serialiser. Serialising, cloning, spreading or enumerating an
+unknown object does not establish its safety.
+
+DOM nodes, `File`/`File[]` and functions belong in outlets or domain callbacks, not command
+payloads. Alternatively, send a primitive descriptor for the owning controller to resolve.
 
 ## SCOS
 

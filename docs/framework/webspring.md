@@ -146,7 +146,14 @@ Every icon in a copy is marked with `data-webspring-folder-backdrop`: `backdrop`
 
 The fade runs with the halves and reverses as they rejoin.
 
-The triangle is part of the top seam from the first frame, fixed at 14 px deep rather than grown: the stage above the seam dips 14 px into the linen below the folder's cell, with `notch` off meaning a straight seam. At rest the bottom half reaches those 14 px above the seam, so it covers the triangle and the stage reads as unbroken; opening moves the bottom half down, uncovering the triangle first, and closing brings it back over the triangle until it sinks into the bottom seam. The lit seam and its shadow follow the straight edge and the triangle's two edges, deepest at the tip, because the clip sits inside the wrapper that casts them; the bottom seam carries its own light line above the panel's shadow, drawn once the halves have parted. Everything is a CSS filter: no SVG filter references.
+The folder underlay projects 14 px above the top seam towards the originating folder icon.
+The upper stage clone has an upward triangular cutout; one backdrop paints the pointer and panel
+without a texture break or a straight shadow across the pointer's base. With `notch` off the seam
+stays straight. At rest the bottom clone reaches 14 px above the seam and covers the cutout, so
+the closed stage has no visible notch. Opening uncovers the tip first; closing covers it again
+as the halves rejoin. The upper wrapper's CSS light and shadow follow the clipped contour along
+both pointer edges, and the bottom seam carries its own light line. No SVG fragment references
+are needed.
 
 The top wrapper uses `drop-shadow(0 1px 0 rgba(255,255,255,.3)) drop-shadow(0 3px 7px rgba(0,0,0,.85))`. The bottom edge uses `inset 0 1px 0 rgba(255,255,255,.3)`, with an outer shadow of `0 -2px 8px rgba(0,0,0,.33)` at the default `edgeShadow`. The triangle's base is 28 px wide, and the seam starts 6 px below the folder cell. The bottom half paints above the top half so it covers the fixed triangle when shut.
 

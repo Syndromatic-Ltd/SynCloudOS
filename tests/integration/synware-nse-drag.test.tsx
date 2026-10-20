@@ -20,16 +20,22 @@
 
 // @vitest-environment jsdom
 
-import React from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import React, { useState } from "react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GFXColour } from "../../src/FX/GraphicsFX/public";
 import { NSEColourWell } from "../../src/NSE/Colour/Controls/NSEColourWell";
+import { NSEObject, observable } from "../../src/NSE/Objects";
+import { RuntimeInputBoundary, SynCloudOSProvider } from "../../src/SynCloudOSReact";
+import { action, bindActionResponder, useAction } from "../../src/SynCloudOS/AppSDK/actions";
+import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { SynWareColourPanelProvider } from "../../src/SynCloudOS/AppSDK/SynWareColourPanelProvider";
 import { createSynWareNSEColourPanelDragPort, createSynWareNSEDataViewDragBinding } from "../../src/SynCloudOS/AppSDK/SynWareNSEDragAdapter";
 import type { AppDragOperation } from "../../src/SynCloudOS/AppSDK/appClientTypes";
+import type { SynWareContextValue } from "../../src/SynCloudOS/AppSDK/appContextTypes";
+import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime } from "../runtime/helpers";
 
 const runtimes: ReturnType<typeof createTestRuntime>[] = [];
@@ -224,5 +230,114 @@ describe("mounted AppDragClient colour drops", () => {
     expect(change).toHaveBeenCalledWith(GFXColour.parse("#224466"), "commit");
     expect(fixture.runtime.colourPanel.getSnapshot().recents).toHaveLength(1);
     expect(fixture.runtime.drag.snapshot().active).toBeNull();
+  });
+});
+
+interface ColourDragFixture {
+  readonly runtime: SynCloudOSRuntime;
+  readonly app: SynWareContextValue;
+}
+
+describe("mounted colour provider drag identity", () => {
+  function dragRegistrations(fixture: ColourDragFixture) {
+    return fixture.runtime.commands.inspect().registrations.filter(({ commandId, responderId }) =>
+      commandId.startsWith("nse.drag.") && responderId === "studio:source");
+  }
+
+  it("keeps colour-well registrations stable across subscribed editor renders and observable edits", async () => {
+    const fixture = mountedDrag();
+    class EditorActions extends NSEObject {
+      @observable accessor dirty = false;
+      @action save() { this.dirty = false; }
+      validateSave() { return this.dirty; }
+    }
+    const editor = new EditorActions();
+    const binding = bindActionResponder(editor, {
+      appId: "com.example.studio",
+      commands: fixture.app.commands,
+    }, "application:com.example.studio");
+    fixture.runtime.focus.requestFocus("studio:source");
+    const register = vi.spyOn(fixture.runtime.commands, "register");
+    let renders = 0;
+    function Editor({ revision }: { readonly revision: number }) {
+      // Bound the regression: an identity-driven registry feedback loop must
+      // fail here rather than leave the integration runner rendering forever.
+      if (++renders > 40) throw new Error("Colour editor registry feedback loop.");
+      const save = useAction("save");
+      const [title, setTitle] = useState("");
+      return <SynWareColourPanelProvider
+        service={fixture.app.colourPanel}
+        drag={fixture.app.drag}
+        commands={fixture.app.commands}
+        responderId="application:com.example.studio"
+      >
+        <input aria-label="Colour title" value={title} onChange={(event) => {
+          setTitle(event.currentTarget.value);
+          editor.dirty = true;
+        }} />
+        <button disabled={!save.enabled} onClick={() => { void save.perform(); }}>Save colour</button>
+        <output>{revision}</output>
+        <NSEColourWell id="source" responderId="studio:source" aria-label="Editor colour" defaultValue={GFXColour.parse("#224466")} />
+      </SynWareColourPanelProvider>;
+    }
+    const tree = (revision: number) => <SynCloudOSProvider runtime={fixture.runtime}>
+      <RuntimeInputBoundary><SynWareProvider value={fixture.app}><Editor revision={revision} /></SynWareProvider></RuntimeInputBoundary>
+    </SynCloudOSProvider>;
+    const view = render(tree(0));
+    const save = screen.getByRole("button", { name: "Save colour" }) as HTMLButtonElement;
+    await act(async () => { await Promise.resolve(); });
+    expect(save.disabled).toBe(true);
+    const initial = dragRegistrations(fixture);
+    expect(initial.map(({ commandId }) => commandId).sort()).toEqual(["nse.drag.begin", "nse.drag.cancel", "nse.drag.drop"]);
+    const registrationCount = register.mock.calls.length;
+    const initialRenders = renders;
+
+    for (let revision = 1; revision <= 3; revision += 1) {
+      view.rerender(tree(revision));
+      fireEvent.change(screen.getByRole("textbox", { name: "Colour title" }), { target: { value: `Colour ${revision}` } });
+      await waitFor(() => expect(save.disabled).toBe(false));
+      await act(async () => { fireEvent.click(save); });
+      await waitFor(() => expect(save.disabled).toBe(true));
+      expect(editor.dirty).toBe(false);
+      expect(dragRegistrations(fixture)).toEqual(initial);
+      expect(register).toHaveBeenCalledTimes(registrationCount);
+    }
+    expect(renders).toBeGreaterThan(initialRenders);
+    view.unmount();
+    expect(dragRegistrations(fixture)).toEqual([]);
+    binding.dispose();
+  });
+
+  it("replaces and cleans target registrations when mounted drag authority changes or is removed", async () => {
+    const first = mountedDrag();
+    const second = mountedDrag();
+    expect(second.app.colourPanel.authorityToken).not.toBe(first.app.colourPanel.authorityToken);
+    const tree = (fixture: ColourDragFixture, withDrag = true) => <SynWareColourPanelProvider
+      service={fixture.app.colourPanel}
+      drag={withDrag ? fixture.app.drag : undefined}
+      commands={fixture.app.commands}
+      responderId="application:com.example.studio"
+    >
+      <NSEColourWell id="source" responderId="studio:source" aria-label="Replacement colour" defaultValue={GFXColour.parse("#224466")} />
+    </SynWareColourPanelProvider>;
+    const view = render(tree(first));
+    expect(dragRegistrations(first)).toHaveLength(3);
+    expect(dragRegistrations(second)).toEqual([]);
+
+    view.rerender(tree(second));
+    expect(dragRegistrations(first)).toEqual([]);
+    const replacement = dragRegistrations(second);
+    expect(replacement).toHaveLength(3);
+    view.rerender(tree(second));
+    expect(dragRegistrations(second)).toEqual(replacement);
+
+    view.rerender(tree(second, false));
+    expect(dragRegistrations(second)).toEqual([]);
+    view.rerender(tree(second));
+    expect(dragRegistrations(second)).toHaveLength(3);
+    expect(dragRegistrations(second)).not.toEqual(replacement);
+    view.unmount();
+    expect(dragRegistrations(first)).toEqual([]);
+    expect(dragRegistrations(second)).toEqual([]);
   });
 });
