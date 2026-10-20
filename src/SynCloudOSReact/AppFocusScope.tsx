@@ -23,6 +23,7 @@ import type { FocusScopeKind } from "../SynCloudOS/SynCloudOS";
 import { SynWareRuntimeContext } from "./runtimeContext";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import { isWithinNSEFocusOrigin } from "../NSE/hostComposition";
+import { useResponderHierarchy } from "./responderHierarchy";
 
 export interface AppFocusScopeOptions {
   readonly scopeId: string;
@@ -51,8 +52,13 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
   }, [childRef]);
   const modal = options.modal ?? options.kind === "modal";
   const trapFocus = options.trapFocus ?? modal;
+  const hierarchy = useResponderHierarchy();
+  const parentResponderId = options.parentResponderId
+    ?? (hierarchy.runtimeId === `app:${runtime.app.bundleIdentifier}` ? hierarchy.responderId : null)
+    ?? `application:${runtime.app.bundleIdentifier}`;
   useLayoutEffect(() => {
-    const parentResponderId = options.parentResponderId ?? `application:${runtime.app.bundleIdentifier}`;
+    // Resolve the declared parent through the same mounted focus authority;
+    // inheriting a child controller never grants authority to another app.
     const handle = runtime.focus.openScope({
       id: options.scopeId,
       kind: options.kind,
@@ -115,7 +121,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       // logical close must not call back into a dead capability.
       if (!runtime.signal.aborted) handle.close({ restore: options.restoreFocus });
     };
-  }, [modal, options.kind, options.parentResponderId, options.parentScopeId, options.restoreFocus, options.scopeId, runtime, runtimeId, trapFocus]);
+  }, [modal, options.kind, options.parentScopeId, options.restoreFocus, options.scopeId, parentResponderId, runtime, runtimeId, trapFocus]);
 
   const host = <div ref={rootRef} data-syncloudos-runtime-owner={runtimeId} data-syncloudos-focus-scope={options.scopeId}>{children}</div>;
   if (!options.asChild) return host;

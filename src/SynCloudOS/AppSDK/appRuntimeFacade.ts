@@ -3790,24 +3790,30 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
             throw securityError("Application focus scopes may only descend from an owned mounted scope.");
           }
            if (scope.restoreResponderId !== undefined) ownResponder(scope.restoreResponderId);
+           const focused = runtime.focus.getFocusedResponderId();
+           const restoreResponderId = focused && ownedResponder(runtime, app.bundleIdentifier, focused)
+             ? focused : scope.parentResponderId;
            const handle = runtime.focus.openScope(scope);
            focusHandles.add(handle);
            focusScopeIds.add(handle.id);
-           focusRestorations.set(handle, scope.restoreResponderId ?? scope.parentResponderId ?? null);
+           focusRestorations.set(handle, scope.restoreResponderId ?? restoreResponderId);
            const closeOwned = (options?: { readonly restore?: boolean }) => {
              const shouldRestore = options?.restore !== false;
              const restoration = focusRestorations.get(handle) ?? null;
-             const canRestore = shouldRestore && focusRestorationLive && !disposed && !signal.aborted &&
-               runtime.apps.getApp(app.bundleIdentifier) === app && restoration !== null && ownedResponder(runtime, app.bundleIdentifier, restoration);
              let result: ReturnType<FocusScopeHandle["close"]>;
              try { result = handle.close({ restore: false }); }
              catch { result = { status: "missing", scopeId: handle.id, restoredResponderId: null }; }
              focusHandles.delete(handle);
              focusScopeIds.delete(handle.id);
              focusRestorations.delete(handle);
-             if (!canRestore) return result;
-             const focused = runtime.focus.requestFocus(restoration);
-             return result.status === "closed" && focused.status === "focused" ? { ...result, restoredResponderId: restoration } : result;
+             const canRestore = result.status === "closed" && shouldRestore && focusRestorationLive && !disposed && !signal.aborted &&
+               runtime.apps.getApp(app.bundleIdentifier) === app && restoration !== null;
+             const target = !canRestore ? null
+               : restoration !== null && ownedResponder(runtime, app.bundleIdentifier, restoration) && runtime.responders.isEnabled(restoration) ? restoration
+               : ownedResponder(runtime, app.bundleIdentifier, scope.parentResponderId) && runtime.responders.isEnabled(scope.parentResponderId) ? scope.parentResponderId : null;
+             if (target === null) return result;
+             const focused = runtime.focus.requestFocus(target);
+             return result.status === "closed" && focused.status === "focused" ? { ...result, restoredResponderId: target } : result;
            };
            const wrapped = Object.freeze({
              id: handle.id,

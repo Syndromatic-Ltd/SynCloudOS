@@ -149,6 +149,12 @@ For detachable windows pass `documentId`, `restorationKey`, `mobilePolicy` and
 restoration; read the original options from `openingOptions`.
 Replace interim test harnesses with `createSynWareTestHost({ application, manifest, services })`;
 inspect `host.application.windows` and use `host.persistence` to seed the app's actual preferences.
+Supply test codecs through `applicationDocuments.initialTypes`, replacing the former top-level
+test-host option. For shared-store documents use `applicationDocuments.install` to call
+`context.documents.registerDocumentStoreAdapter({ id, documentIdPrefix })` and seed through
+`context.seed`, listing each seed kind in `trustedDocumentKinds`. The installer runs before launch
+and its authority is revoked on disposal or failure; manifest `documentTypes` admission remains
+required. See [trusted document provision](testing-synware.md#trusted-document-provision).
 
 Hosts pass About attribution as `mountSynCloudOS({ about: { copyright, trademark, tagline } })`.
 Integrations construct recovery storage in `applicationDocuments: environment => ({ recoveryStore })`

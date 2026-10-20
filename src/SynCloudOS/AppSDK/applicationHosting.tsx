@@ -49,7 +49,6 @@ import { useNSEOverlayFocusScope } from "../../NSE/Overlays/useNSEOverlay";
 
 const FRAME_STYLE: CSSProperties = Object.freeze({ display: "block", width: "100%", height: "100%", minWidth: 0, minHeight: 0 });
 const CONTENTS_STYLE: CSSProperties = Object.freeze({ display: "contents" });
-const CHILD_FRAME_STYLE: CSSProperties = Object.freeze({ display: "block" });
 const noTraitSubscription = () => () => {};
 const noPresentation = () => null;
 
@@ -112,6 +111,8 @@ export function NSEControllerResponder({ target, kind, host = "contents", childr
 
 export interface NSEViewControllerViewProps {
   readonly controller: NSEViewController<unknown>;
+  /** Parent-owned layout styling on this controller's existing managed outlet. */
+  readonly className?: string;
 }
 
 /**
@@ -120,7 +121,7 @@ export interface NSEViewControllerViewProps {
  * disappears as the frame mounts and unmounts. Render child view controllers
  * with it from a parent's view.
  */
-export function NSEViewControllerView({ controller }: NSEViewControllerViewProps) {
+export function NSEViewControllerView({ controller, className }: NSEViewControllerViewProps) {
   useObserve(controller);
   const appRuntime = useContext(SynWareRuntimeContext);
   const context = useSynWareContext();
@@ -180,7 +181,7 @@ export function NSEViewControllerView({ controller }: NSEViewControllerViewProps
   const View = viewComponentOf(controller);
   if (!View) throw new TypeError(`${controller.constructor.name} has no static view; declare \`static view = SomeComponent\`.`);
   const frame = (
-    <div ref={frameRef} data-nse-view-controller="" style={controller.parent ? CHILD_FRAME_STYLE : FRAME_STYLE}>
+    <div ref={frameRef} className={className} data-nse-view-controller="" style={controller.parent ? undefined : FRAME_STYLE}>
       <View controller={controller} />
     </div>
   );

@@ -563,8 +563,8 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   const initialBundlesRegistered = Boolean(config.initialBundles?.length);
 
 
-  const browserLocks = config.environment.browser.getNavigator()?.locks;
-  const documentStoreLock: SynCloudOSDocumentStoreLock | undefined = browserLocks
+  const browserLocks = config.documentStoreLock ? undefined : config.environment.browser.getNavigator()?.locks;
+  const documentStoreLock: SynCloudOSDocumentStoreLock | undefined = config.documentStoreLock ?? (browserLocks
     ? {
         async request<T>(
           name: string,
@@ -578,7 +578,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
           );
         },
       }
-    : undefined;
+    : undefined);
   documentStore = createPersistenceDocumentStore({
     runtimeId,
     persistence,
@@ -586,6 +586,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     resolveUndo: () => undo,
     authorise: (request) => policy.authorise(request),
     conditionalWriteLock: documentStoreLock,
+    clock: () => new Date(config.environment.now()),
   });
   // Schema registration is a host bootstrap concern.  Mounted AppSDK
   // projections deliberately do not receive registerKind, so migrations and
@@ -1001,6 +1002,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     appManagerController: appManagerBridge,
     policyKit: policy,
     windows,
+    revokeApplicationMounts: (appId) => transfers.revokeApplicationMounts(appId),
     operations,
     caches,
     resources,

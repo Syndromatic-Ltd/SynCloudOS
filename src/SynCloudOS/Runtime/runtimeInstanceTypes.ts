@@ -164,7 +164,12 @@ import type { CommandSystem } from "../Commands/commandTypes";
 import type { ResponderGraph } from "../Responders/responderTypes";
 import type { FocusManager } from "../Focus/focusTypes";
 import type { KeyBindingManager } from "../KeyBindings/keyBindingTypes";
-import type { SynCloudOSDocumentKindMetadata, SynCloudOSDocumentStoreAdapter, SynCloudOSDocumentStoreTerminalMutationLease } from "../DocumentStore";
+import type {
+  SynCloudOSDocumentKindMetadata,
+  SynCloudOSDocumentStoreAdapter,
+  SynCloudOSDocumentStoreLock,
+  SynCloudOSDocumentStoreTerminalMutationLease,
+} from "../DocumentStore";
 import type { RuntimeNetworkHints, RuntimePerformancePolicy } from "../Performance/RuntimePerformancePolicy";
 import type {
   SynCloudOSPolicyDecision,
@@ -878,6 +883,9 @@ export interface SynCloudOSRuntimeConfig {
   /** Host-provisioned immutable document schemas. Mounted AppSDK code cannot
    * register or migrate kinds. */
   readonly trustedDocumentKinds?: readonly SynCloudOSDocumentKindMetadata[];
+  /** Host-owned lock shared by every writer to this backing persistence.
+   * Defaults to browser Web Locks; absent locks leave conditional writes unavailable. */
+  readonly documentStoreLock?: SynCloudOSDocumentStoreLock;
   readonly initialPathname?: string;
   readonly persistenceNamespace?: string;
   readonly windowPersistenceNamespace?: string;

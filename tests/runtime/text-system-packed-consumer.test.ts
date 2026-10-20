@@ -72,7 +72,6 @@ describe("independent custom text consumer preparation", () => {
     const source = createCustomTextSystemFixtureSource(fixture);
     expect(source).toContain('from "./example/Contents"');
     expect(source).toContain('from "./assets/ExampleFont.ttf?url"');
-    expect(source).toContain("documentTypes: [textSystemDocumentType]");
     expect(source).toContain("createSynWareTestHost");
     expect(source).toContain("window.customInstalledPDF");
     expect(source).toContain("window.customInstalledCaptureRace");

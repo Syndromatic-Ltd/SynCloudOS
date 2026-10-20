@@ -8,6 +8,7 @@ SynCloudOS is an application framework for the web, in the tradition of Cocoa. T
 | --- | --- |
 | [Getting started](getting-started.md) | Build a site with a launcher and one application |
 | [Overview](overview.md) | See how the layers fit together and which package entries exist |
+| [Beta.2 migration](migration-beta2.md) | Replace beta.1 identity, authoring, hook, ownership and shell APIs |
 | [Developer MCP](developer-mcp.md) | Give AI coding agents version-matched offline SDK tools |
 | [Errors and outcomes](errors.md) | Handle typed outcomes, lifecycle diagnostics and stable error codes |
 
@@ -15,6 +16,7 @@ SynCloudOS is an application framework for the web, in the tradition of Cocoa. T
 
 | Guide | Read it to |
 | --- | --- |
+| [Applications](applications.md) | Build application, window and view-controller classes with actions and observable state |
 | [SynWare SDK](synware-sdk.md) | Learn the bundle format, the session, hooks, services, routes and tooling |
 | [Manifest reference](synware-manifest.md) | Look up every `Info.ts` field |
 | [Commands, responders and undo](commands-responders-undo.md) | Route user intent to code, and reverse it |

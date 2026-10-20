@@ -23,6 +23,9 @@ import type { AppTrustedDiagnosticsClient } from "../appTrustedClientTypes";
 import type { NSEApplication, NSEApplicationClass } from "../../../NSE/Application/NSEApplication";
 import type { SynWareManifestV1 } from "../manifest/manifestTypes";
 import type { SynWareServiceToken } from "../runtimeContracts";
+import type { ApplicationDocumentRuntimeConfiguration } from "../../Runtime/runtimeInstanceTypes";
+import type { SynCloudOSDocumentKindMetadata } from "../../DocumentStore";
+import type { SynCloudOSHostContributionCleanup, SynCloudOSHostInstallContext } from "../../HostContributions/hostContribution";
 import type { PasteboardRepresentation } from "../../SynCloudOS";
 import type { LFXAuthorizationStatus, LFXLocation } from "../../../FX/LocationFX/public";
 import type { MIFXAuthorizationState } from "../../../FX/MIDIFX/public";
@@ -222,14 +225,28 @@ export interface SynWareTestNavigation {
   openRoute(pathname: string, options?: { readonly signal?: AbortSignal }): unknown;
 }
 
+/** Trusted host provision only; mounted applications never receive this port. */
+export type SynWareTestDocumentInstallContext = Pick<
+  SynCloudOSHostInstallContext,
+  "documents" | "seed" | "environment" | "signal"
+>;
+
+export interface SynWareTestApplicationDocumentsConfiguration extends ApplicationDocumentRuntimeConfiguration {
+  readonly trustedDocumentKinds?: readonly SynCloudOSDocumentKindMetadata[];
+  /** Runs before application launch, using the ordinary contribution-bound ports. */
+  readonly install?: (
+    context: SynWareTestDocumentInstallContext,
+  ) => void | SynCloudOSHostContributionCleanup | Promise<void | SynCloudOSHostContributionCleanup>;
+}
+
 export type CreateSynWareTestHostOptions = (
   | { readonly app: Readonly<SynWareDefinition>; readonly application?: never; readonly manifest?: never }
   | { readonly application: NSEApplicationClass; readonly manifest: SynWareManifestV1; readonly app?: never }
 ) & {
   /** Real app-scoped providers; manifest declarations and token contracts still apply. */
   readonly services?: readonly (readonly [SynWareServiceToken<unknown>, object])[];
-  /** Trusted test-host codec provision. The manifest still admits application use. */
-  readonly documentTypes?: readonly import("../../Documents/documentTypes").DocumentType<any, any>[];
+  /** Host-owned codecs, adapters and scoped shared-store seeding; manifest admission still applies. */
+  readonly applicationDocuments?: SynWareTestApplicationDocumentsConfiguration;
   /** Host-owned diagnostics only; the app must still declare diagnostics.view. */
   readonly diagnostics?: AppTrustedDiagnosticsClient;
   readonly branding?: import("../appContextTypes").SynWareSiteBranding;

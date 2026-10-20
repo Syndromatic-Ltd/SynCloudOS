@@ -106,7 +106,7 @@ const appOptions: TextSystemExampleAppOptions = {
 };
 const app = createSynWare({ manifest, root: createTextSystemExampleApp(appOptions) });
 // Document type registration is a trusted host option, separate from the app's declaration.
-const testHost = createSynWareTestHost({ app, document, container: document.getElementById("root")!, strictMode: false, documentTypes: [textSystemDocumentType] });
+const testHost = createSynWareTestHost({ app, document, container: document.getElementById("root")!, strictMode: false, applicationDocuments: { initialTypes: [textSystemDocumentType] } });
 host = testHost;
 void testHost.render().catch(error => { document.getElementById("fixture-error")!.textContent = String(error); });
 window.addEventListener("pagehide", () => { example?.dispose(); void host.dispose(); }, { once: true });

@@ -21,6 +21,7 @@
 import { useCallback, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
 import { useNSEPresenceExiting, useNSEPresentation } from "../NSE/Animation";
 import { nseTopBarHeightCssValue } from "../NSE/Windows/Chrome/nseTopBarStyles";
+import { isWithinNSEFocusOrigin } from "../NSE/Focus/focusOrigin";
 import type { SynCloudOSAppFrameManifest } from "../SynCloudOS/SynCloudOS";
 import type { ApplicationStagePartMotion } from "./ApplicationStage.transitions";
 
@@ -83,13 +84,17 @@ function Root({
   const exiting = useNSEPresenceExiting();
   const inactive = staged || multiSwitchRole === "outgoing" || exiting;
   useEffect(() => {
-    // A key window receives keyboard input. When the focused stage is
-    // presented (a staged frame is inert) and nothing in the document holds
-    // focus, focus the frame so the runtime routes keys to its application.
-    // Existing focus is never taken, and no keyboard focus ring is painted.
+    // Hand keyboard ownership from this runtime's launcher or previous stage
+    // to the presented key stage, without taking focus from its own editor,
+    // its portalled controls, or another runtime.
     if (inactive || !keyWindow) return;
     const frame = frameRef.current, document = frame?.ownerDocument, active = document?.activeElement;
-    if (!frame || (active && active !== document.body)) return;
+    if (!frame) return;
+    if (active && active !== document.body) {
+      if (isWithinNSEFocusOrigin(frame, active)) return;
+      const owner = frame.dataset.syncloudosRuntimeOwner;
+      if (!owner || active.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner !== owner) return;
+    }
     frame.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
   }, [inactive, keyWindow]);
   return (

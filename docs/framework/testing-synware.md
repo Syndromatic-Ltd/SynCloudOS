@@ -49,7 +49,7 @@ Pass the `document` your test environment provides, such as the one from jsdom o
 | `appContext` | The low-level mounted context behind the facade returned by `useSCOS()`. |
 | `adapters` | Fakes for storage, clipboard, drag, windows, location, MIDI, video and the other host capabilities. |
 
-`createSynWareTestHost` accepts `app`, `document`, `container`, `now`, `permissions`, `locale`, `timeZone`, `branding`, `strictMode`, `documentTypes` and `surface` (`"stage"` or `"window"`). Set `strictMode: true` to render under React StrictMode and catch effects that fail to clean up. Supply native `DocumentType` codecs through trusted `documentTypes` provision; an application's manifest declares the types it may use but does not install their codecs.
+`createSynWareTestHost` accepts `app`, `document`, `container`, `now`, `permissions`, `locale`, `timeZone`, `branding`, `strictMode`, `applicationDocuments` and `surface` (`"stage"` or `"window"`). Set `strictMode: true` to render under React StrictMode and catch effects that fail to clean up. Supply native `DocumentType` codecs through `applicationDocuments.initialTypes`; an application's manifest declares the types it may use but does not install their codecs.
 
 For a class application pass `{ application: NotesApp, manifest }` instead of `app`. After
 `await host.render()`, `host.application` is the live `NSEApplication` and `.windows` contains its
@@ -69,6 +69,96 @@ with `host.adapters.services.allow()`, `host.adapters.permissions.allow()` and
 `host.adapters.policy.allow()` before a controller calls `SCOS.services.require(notesToken)`.
 Sensitive storage remains denied to the app until the test allows storage and credentials, even
 though the trusted host can seed preferences. A class launch callback failure rejects `host.render()`.
+
+## Trusted document provision
+
+`applicationDocuments` is a `SynWareTestApplicationDocumentsConfiguration`, extending production
+`ApplicationDocumentRuntimeConfiguration`: `initialTypes`, `initialAdapters`, `recoveryStore` and
+`assetBacking` configure the real runtime. It also accepts `trustedDocumentKinds` and an optional
+`install` callback. There is no top-level test-host `documentTypes` option.
+
+Use the app's real codec and class, rather than injecting a document client into its constructor:
+
+```tsx
+import { createSynWareTestHost, type SynWareTestApplicationDocumentsConfiguration } from "@syndromatic/syncloudos/sdk/testing";
+import { NotesApp } from "./NotesApp";
+import { noteDocumentType } from "./NoteDocumentType";
+
+const applicationDocuments: SynWareTestApplicationDocumentsConfiguration = {
+  initialTypes: [noteDocumentType],
+  trustedDocumentKinds: [
+    { kind: "application.document", version: 1, displayName: "Application document" },
+  ],
+  async install({ documents, seed, signal }) {
+    documents.registerDocumentStoreAdapter({
+      id: "notes.documents",
+      documentIdPrefix: "notes:",
+    });
+    await seed.saveDraft({
+      id: "notes:first",
+      kind: "application.document",
+      version: 1,
+      ownership: { kind: "system" },
+      title: "First note",
+      publishState: "draft",
+      body: {
+        typeId: noteDocumentType.id,
+        schemaVersion: noteDocumentType.schemaVersion,
+        content: { title: "First note", body: "Seeded before launch" },
+        metadata: {},
+      },
+    }, { signal });
+  },
+};
+
+export async function renderSeededNotes(document: Document) {
+  const host = createSynWareTestHost({
+    application: NotesApp,
+    manifest: {
+      schemaVersion: 1,
+      bundleIdentifier: "com.example.notes",
+      displayName: "Notes",
+      version: "1.0.0",
+      documentTypes: [{ id: noteDocumentType.id, displayName: noteDocumentType.displayName }],
+      permissions: ["documentStore.drafts.read", "documentStore.draft.write"],
+    },
+    applicationDocuments,
+    document,
+  });
+  host.adapters.storage.local.allow();
+  try {
+    await host.render();
+  } finally {
+    await host.dispose();
+  }
+}
+```
+
+Here `noteDocumentType` encodes `{ title, body }`. The application opens
+`{ kind: "document-store", documentId: "notes:first" }` through its normal
+`SCOS.documents.workspaceDocuments` client. The registered adapter and `seed` use the same private
+runtime store; no raw runtime or app client is exposed.
+Allow the isolated backing storage before rendering when the test needs durable drafts
+or conditional saves. The host supplies real exclusive locking for that private store;
+denied storage does not become durable merely because a host seed returned a record.
+`DocumentStoreDocumentAdapter` envelopes use system ownership; their codec's
+application-owner declarations control application admission. Do not stamp an
+application ID on these internal envelopes. Application-specific kinds such as
+published notes retain their own declared application ownership.
+
+`SynWareTestDocumentInstallContext` contains only the production contribution-bound `documents`,
+`seed`, `environment` and `signal` ports. Installation finishes before application launch or render.
+Seed authority covers only explicitly listed `trustedDocumentKinds`, scoped to the app bundle and
+legitimate `initialTypes[].creatingApplicationId` owners; list `application.document` explicitly for
+adapter envelopes. This does not grant service authority or bypass manifest document-type admission,
+codec validation or app policy.
+The default draft policy still requires `documentStore.drafts.read` and
+`documentStore.draft.write` for application reads and saves. A successful host seed does
+not grant those application capabilities.
+
+An installer may return a synchronous or asynchronous cleanup. Disposal or failed creation aborts
+its signal, runs returned cleanup and revokes the context, including its adapter registrations and
+seed authority. Retaining a port does not extend its lifetime.
 
 ## Portable action payloads
 
@@ -213,15 +303,15 @@ Each adapter is a port with four modes. `allow()` lets operations succeed, `deny
 Fakes for sensitive capabilities, including the clipboard, storage and device access, start denied. A test opts in explicitly:
 
 ```tsx
-import type { createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
+import type { SynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
 
-export function admitDevices(host: ReturnType<typeof createSynWareTestHost>) {
+export function admitDevices(host: SynWareTestHost) {
   host.adapters.clipboard.allow();
   host.adapters.location.allow();
   host.adapters.location.setAuthorizationStatus("granted");
 }
 
-export function clipboardCalls(host: ReturnType<typeof createSynWareTestHost>) {
+export function clipboardCalls(host: SynWareTestHost) {
   return host.adapters.clipboard.calls();
 }
 ```
@@ -233,9 +323,9 @@ Testing the denied path matters as much as the allowed one. Leave a fake denied 
 Applications load routes, fetch data and animate transitions. `createSynWareTesting` wraps a host with a driver that waits for all of it:
 
 ```tsx
-import { createSynWareTesting, type createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
+import { createSynWareTesting, type SynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
 
-export async function openNotes(host: ReturnType<typeof createSynWareTestHost>) {
+export async function openNotes(host: SynWareTestHost) {
   const testing = createSynWareTesting(host);
   await testing.visit("/notes");
   await testing.settled({ timeoutMs: 2_000 });

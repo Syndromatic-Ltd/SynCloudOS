@@ -344,6 +344,7 @@ const runtimeScalarKeys = new Set<string>([
   "initialPathname",
   "persistenceNamespace",
   "windowPersistenceNamespace",
+  "documentStoreLock",
   "operationHistoryLimit",
   "jobs",
   "resourceSoftBudgetBytes",

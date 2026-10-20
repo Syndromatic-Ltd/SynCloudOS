@@ -51,11 +51,28 @@ The options are:
 
 `dispose(reason)` resolves with a report of the teardown. Disposal is idempotent, and the runtime aborts its signal first, so every registered task can stop before its resources are released. During hot module replacement, call `host.dispose()` from `import.meta.hot?.dispose`.
 
+Application close revokes mounted capability signals before observers see the terminal `closed` state. Revocation follows close approval; a refused close or suspension does not revoke the application's remaining mounts. An exit presentation may retain hidden content, but its old capabilities stay revoked. Reopening obtains fresh mounts.
+
 ## Ownership
 
 Each runtime owns its store, services, queues and registries. Two runtimes on one page share nothing, which makes tests and embedded previews straightforward. Applications never hold the runtime. They receive the session described in the [SDK guide](synware-sdk.md), which projects only the capabilities the application is entitled to.
 
 The host supplies the environment: viewport geometry, safe areas, input services, storage and the clock. Code inside the runtime reads those through injected adapters, so it behaves the same in a browser, a test host and an embedded frame.
+
+### Document-store locking
+
+Low-level hosts may supply `SynCloudOSRuntimeConfig.documentStoreLock`, using the
+existing `SynCloudOSDocumentStoreLock` contract. A trusted host contribution may
+supply the same field in its `runtimeConfig`. The supplied lock takes precedence
+over the browser Web Locks adapter and must coordinate **every writer sharing
+the backing persistence**, not merely one runtime instance. Conditional writes
+remain unavailable when neither lock is present; they never degrade to an
+unchecked write.
+
+The portable test host owns isolated persistence and a real per-name exclusive
+queue for that store. Its local queue is not a cross-context lock for a shared
+browser or server store.
+
 
 ## Policy
 

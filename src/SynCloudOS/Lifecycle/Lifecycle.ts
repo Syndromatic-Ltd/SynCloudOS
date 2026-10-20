@@ -83,6 +83,7 @@ export interface SynCloudOSLifecycleDependencies {
   readonly appManagerController: LifecycleAppManagerController;
   readonly policyKit: LifecyclePolicyKit;
   readonly windows: LifecycleWindowManager;
+  readonly revokeApplicationMounts: (appId: string) => void;
   readonly operations: LifecycleOperationCoordinator;
   readonly caches: LifecycleCacheRegistry;
   /** Aggregate resource relief for memory warnings. */
@@ -577,6 +578,9 @@ export function createLifecycle(
           ok: true,
         }
       : null;
+    // Retained exit trees can still observe state. Revoke their capabilities
+    // before publishing the terminal state or any close-time invalidations.
+    if (to === "closed") dependencies.revokeApplicationMounts(appId);
     RuntimeStore.mutate((draft: RuntimeSnapshot) => {
       if (previousEvent) {
         draft.lifecycle[normalizeBundleIdentifier(previousEvent.appId)] = "suspended";

@@ -41,6 +41,8 @@ import { normalizeBundleIdentifier } from "../../Identity/bundleIdentifier.mjs";
 import type { SynWareContextValue } from "../appContextTypes";
 import type { CreateWindowRequest } from "../../Windows";
 import { createDeterministicRuntimeEnvironment } from "./fakeAdapters";
+import { createHostDocumentProvision } from "./hostDocumentProvision";
+import { createIsolatedDocumentStoreLock } from "./isolatedDocumentStoreLock";
 import { getRuntimeSettlement, trackRuntimeSettlement, type SettlementWorkInput } from "../../Testing/appSdkTestingPort";
 import type {
   CreateSynWareTestHostOptions,
@@ -179,8 +181,17 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
       return createSynCloudOS({
         id: `runtime:synapp-test:${environment.clock.now()}:${bundle.manifest.bundleIdentifier}`,
         environment: environment.environment,
+        documentStoreLock: createIsolatedDocumentStoreLock(),
         initialPathname: bundle.manifest.route,
-        ...(options.documentTypes ? { applicationDocuments: { initialTypes: options.documentTypes } } : {}),
+        ...(options.applicationDocuments ? {
+          applicationDocuments: {
+            initialTypes: options.applicationDocuments.initialTypes,
+            initialAdapters: options.applicationDocuments.initialAdapters,
+            recoveryStore: options.applicationDocuments.recoveryStore,
+            assetBacking: options.applicationDocuments.assetBacking,
+          },
+          trustedDocumentKinds: options.applicationDocuments.trustedDocumentKinds,
+        } : {}),
         policyProfile: {
           id: "syncloudos.testing",
           anonymousRole: "public",
@@ -213,6 +224,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
     }
   })();
   const diagnosticsProvision = installHostDiagnosticsProvision(runtime, options.diagnostics);
+  const documentProvision = createHostDocumentProvision(runtime, bundle, options.applicationDocuments);
   for (const [token, client] of options.services ?? []) {
     runtime.services.registerService({ id: token.id, displayName: token.id, description: "Test-host service", availability: "available" });
     runtime.services.register({ id: token.id, version: token.minimumVersion ?? "1.0.0", contractVersion: token.contractVersion, createAppClient: () => client });
@@ -406,6 +418,8 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
         // routing. The portable host mounts the production stage directly, so
         // perform that same session refresh here before issuing app capabilities.
         try {
+          await documentProvision?.install(renderController.signal);
+          assertRenderLive(generation);
           await runtime.identity.session.refresh({ signal: renderController.signal });
         } catch (error) {
           if (disposed || generation !== renderGeneration || renderController.signal.aborted) {
@@ -487,6 +501,8 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
         unmount();
         applicationSessionFor({ runtimeId: runtime.runtimeId, appId: app.bundleIdentifier })?.dispose("explicit");
         windowContentRegistry.dispose();
+        let documentCleanupError: unknown;
+        try { await documentProvision?.dispose(); } catch (error) { documentCleanupError = error; }
         await runtime.dispose("SynWare test-host disposed.");
         // Inspect every host-owned resource only after the real runtime graph
         // finishes disposing and before the deterministic environment clears it.
@@ -502,6 +518,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
         environment.dispose();
         ownedResources.clear();
         if (ownsContainer && container?.parentElement) container.parentElement.removeChild(container);
+        if (documentCleanupError !== undefined) throw documentCleanupError;
         return report;
       })();
       return disposal;

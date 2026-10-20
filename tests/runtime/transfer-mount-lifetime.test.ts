@@ -72,10 +72,37 @@ describe("transfer mount lifetime", () => {
     expect(runtime.drag.snapshot().active?.id).toBe(session.id);
 
     await runtime.lifecycle.launch(app.bundleIdentifier, { reason: "transfer lifecycle setup" }).result;
+    let abortedAtClosedNotification: boolean | undefined;
+    const stopObserving = runtime.store.subscribe(() => {
+      if (abortedAtClosedNotification === undefined && runtime.lifecycle.getState(app.bundleIdentifier) === "closed") {
+        abortedAtClosedNotification = mount.signal.aborted;
+      }
+    });
     await runtime.lifecycle.close(app.bundleIdentifier, { reason: "transfer lifecycle test" }).result;
+    stopObserving();
+    expect(abortedAtClosedNotification).toBe(true);
     expect(runtime.drag.snapshot().active).toBeNull();
     await expect(mount.scope.pasteboards.find.write([{ type: "text/plain", value: "stale" }]))
       .rejects.toMatchObject({ name: "SecurityError" });
+  });
+
+  it("refuses replacement mounts issued from a closing mount's abort listener", async () => {
+    const { runtime, app, root, sibling } = fixture();
+    await runtime.lifecycle.launch(app.bundleIdentifier, { reason: "mount revocation setup" }).result;
+    const activeApp = runtime.apps.getApp(app.bundleIdentifier)!;
+    const mount = runtime.transfers.mountApp(activeApp, { responderId: root });
+    let remintError: unknown;
+    mount.signal.addEventListener("abort", () => {
+      try {
+        runtime.transfers.mountApp(activeApp, { responderId: sibling });
+      } catch (error) {
+        remintError = error;
+      }
+    }, { once: true });
+
+    const outcome = await runtime.lifecycle.close(app.bundleIdentifier, { reason: "mount revocation test" }).result;
+    expect(outcome).toMatchObject({ status: "completed", committed: true, postCommit: "completed" });
+    expect(remintError).toMatchObject({ name: "SecurityError" });
   });
 
   it("does not let a final old lease clear a reopened mount's private board while teardown awaits authorisation", async () => {

@@ -123,11 +123,18 @@ class WorkspaceController extends NSEViewController {
 }
 
 function WorkspaceView({ controller }: { readonly controller: WorkspaceController }) {
-  return <main><NSEViewControllerView controller={controller.sidebar} /></main>;
+  return <main className="workspace-layout">
+    <NSEViewControllerView controller={controller.sidebar} className="workspace-sidebar-region" />
+  </main>;
 }
 ```
 
-A child's frame imposes no width or height: its parent lays it out, including inside scroll areas.
+The optional `className` styles the existing managed outlet, without another wrapper.
+Child outlets impose no inline display mode, width or height: the parent can lay them out
+as flex or grid items, or leave their height intrinsic inside a scroll area. For example,
+`.workspace-sidebar-region { display: flex; flex-direction: column; min-height: 0; }`
+lets the parent own the region's layout. Root window frames retain their fill layout.
+
 `viewWillLayout()` and `viewDidLayout()` run after the view's DOM commits and when its frame resizes.
 Read `this.view.element` in these callbacks rather than calling controller layout methods from a React effect.
 
@@ -241,6 +248,8 @@ unknown object to try to make it an accepted command payload.
 uses the same menu and keyboard rules as a command definition. `keyBindings` is a list of the usual
 key-binding declarations; browser-reserved shortcuts require the explicit opt-in.
 
+When Webspring presents a key application stage, keyboard focus moves from that runtime's launcher or previous stage into the application. A focused control already inside the application, including its registered portals, keeps focus. Staged or non-key views do not claim focus, and another runtime's focus is left alone.
+
 `NSEActionOptions<Payload>.title` also accepts the command title resolver:
 `({ payload, runtime }) => ({ key, fallback, values? })`. The payload has the action's declared
 type. Use `runtime.locale.t(...)` for a translated fallback; the command pipeline evaluates the
@@ -307,6 +316,13 @@ Omit `parentResponderId` on an `NSEPopup` rendered by a class controller. It inh
 controller's responder ancestry through its portal, so focused editor actions can fall back to the
 parent controller's actions while the popup keeps its modal focus scope. Use an explicit parent
 only when you intend to change the popup's focus parent.
+
+`NSEFocusScope` also inherits the nearest mounted controller as its logical focus parent.
+A native input or action button inside a child controller's modal therefore resolves that
+child's actions before its ancestors. An explicit `parentResponderId` takes precedence;
+it still passes through the application's ordinary focus authority and cannot admit
+another application's responder. Closing the scope restores the prior live, enabled logical
+focus, falling back to its live, enabled owning parent if the prior responder was removed or disabled.
 
 `useCommands` stays the way to declare commands in a function-component application.
 

@@ -102,7 +102,7 @@ export type {
   SynCloudOSDocumentUnpublishOptions,
 } from "./DocumentStore/documentStoreTypes";
 export type { SynCloudOSDocument, SynCloudOSDocumentOwnership } from "./DocumentStore/documentStoreTypes";
-export type { SynCloudOSDocumentStoreTerminalMutationLease } from "./DocumentStore/PersistenceDocumentStore";
+export type { SynCloudOSDocumentStoreLock, SynCloudOSDocumentStoreTerminalMutationLease } from "./DocumentStore/PersistenceDocumentStore";
 export * from "./FilePanels";
 export * from "./MediaPanels";
 export * from "./Windows";
