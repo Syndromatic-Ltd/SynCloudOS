@@ -29,6 +29,9 @@ export interface NSEActionScope {
 
 const NSEActionScopeContext = createContext<NSEActionScope | null>(null);
 
+/** Internal responder ancestry for portal controls; it carries no runtime authority. */
+export const NSEActionResponderContext = createContext<string | undefined>(undefined);
+
 export interface NSEActionScopeProviderProps {
   readonly appId: string;
   readonly children: ReactNode;

@@ -27,11 +27,12 @@ import {
   type NSEOwner,
 } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
-import type { NSEApplication } from "./NSEApplication";
+import type { NSEApplication, NSEOpenWindowOptions } from "./NSEApplication";
 import { NSEObjectLifetime } from "./objectLifetime";
 import { nseAdoptViewController, type NSEViewComponent, type NSEViewController } from "./NSEViewController";
 
-export type NSEWindowControllerOptions = NSEControllerOwnershipOptions;
+export type NSEWindowControllerOptions = NSEControllerOwnershipOptions & NSEOpenWindowOptions;
+const defaultOpeningOptions: Readonly<NSEOpenWindowOptions> = Object.freeze({});
 
 /** What `window.close()` reports. */
 export type NSEWindowCloseOutcome = "closed" | "cancelled" | "refused";
@@ -87,6 +88,7 @@ export interface NSEWindowMount {
 /** What the framework hands a window controller it constructs. */
 export interface NSEWindowControllerContext {
   readonly app: NSEApplication;
+  readonly openingOptions?: NSEOpenWindowOptions;
 }
 
 /** The framework's view of a window controller. Not part of the public API. */
@@ -137,6 +139,10 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   #key = false;
   #pendingTitle: string | null = null;
   #contentViewController: NSEViewController<unknown> | null = null;
+  /** The options used to open or restore this controller, available in its constructor. */
+  get openingOptions(): Readonly<NSEOpenWindowOptions> {
+    return (this.#lifetime.context as NSEWindowControllerContext).openingOptions ?? defaultOpeningOptions;
+  }
 
   constructor(options: NSEWindowControllerOptions = {}) {
     super();

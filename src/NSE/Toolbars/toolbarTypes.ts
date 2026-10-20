@@ -19,6 +19,7 @@
  */
 
 import type { ReactNode } from "react";
+import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 import type {
   ControllerCommitResult,
   ControllerEditTransaction,
@@ -163,7 +164,7 @@ export interface NSEToolbarSnapshot {
   readonly diagnostic: "validation-failed" | null;
 }
 
-export interface NSEToolbarControllerOptions {
+export interface NSEToolbarControllerOptions extends NSEControllerOwnershipOptions {
   readonly configuration: NSEToolbarConfiguration;
   readonly items: readonly NSEToolbarItem[];
   /** The host constructs and owns this preference controller. */

@@ -103,6 +103,7 @@ class NotesWindowController extends NSEWindowController<NotesApp> {
 - A method takes at most one parameter, the payload. A method with no parameter rejects a payload; otherwise pass a `payload` schema to check one.
 - Controls and menu items send actions by name: `<NSEPushButton action="newNote" />`, `<NSEToolButton action="newNote" />`, `NSESegmentedControl` items with `action`, and menu items `{ action: "newNote" }`. The payload goes in `actionPayload` on a control or item, and `payload` on a menu item. A name containing a dot, such as `document.save`, is taken as written. Each control enables, disables and shows state from the action's validation, so one `validateNewNote()` greys out the menu item and every button.
 - Dispatch walks the responder chain: the focused view controller answers first, then its window controller, then the application. The first object that declares the action runs it.
+- `useAction` and action controls revalidate when logical focus, focus scopes or active responder anchors change, even if no command or responder is registered or removed. A newly mounted action control stays unavailable until its asynchronous validation result arrives; this also applies to actions in segmented-control overflow menus.
 - Replacing a class during development (hot reload) re-reads its actions and validation without re-registering the application.
 
 `useCommands` stays the way to declare commands in a function-component application.

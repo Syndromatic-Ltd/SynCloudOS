@@ -40,6 +40,9 @@ import type { SynCloudOSTranslationParams, SynCloudOSTranslationPrimitive } from
 import type { SynWareContextValue } from "../appContextTypes";
 import { resolveSCOSSession, type SCOSAppSession } from "./scosSessionRegistry";
 import { scosUnboundError, SCOSError } from "./scosErrors";
+import { controllerServicesFor, type SCOSRoutes } from "../controllerServices";
+import type { SynWareFontAccess } from "../fontAccess";
+import type { NSEMenuRuntimePort } from "../../../NSE/Menus";
 
 /** The parts of a mounted app `SCOS` is bound to, resolved on every call so a
  * timer, an awaited continuation or module-level code reaches the app the
@@ -104,6 +107,9 @@ export interface SCOSFacade extends Omit<SynWareContextValue, "appId" | "appInfo
   readonly pasteboards: AppPasteboardClient;
   readonly services: AppServiceClient;
   readonly share: AppShareClient;
+  readonly routes: SCOSRoutes;
+  readonly fonts: SynWareFontAccess;
+  readonly menus: Readonly<{ runtime: NSEMenuRuntimePort }>;
 }
 
 function stringsFor(context: () => SynWareContextValue): SCOSStrings {
@@ -176,6 +182,9 @@ function createFacade(source: () => SCOSFacadeSource): SCOSFacade {
     get pasteboards() { return context().pasteboards; },
     get services() { return context().services; },
     get share() { return context().share; },
+    get routes() { return controllerServicesFor(context()).routes; },
+    get fonts() { return controllerServicesFor(context()).fonts; },
+    get menus() { return controllerServicesFor(context()).menus; },
     get runtimeInfo() { return context().runtimeInfo; },
     get branding() { return context().branding; },
     get responderId() { return context().responderId; },
@@ -258,6 +267,9 @@ export const unboundSCOS: SCOSFacade = Object.freeze({
   get pasteboards() { return unboundMember("pasteboards"); },
   get services() { return unboundMember("services"); },
   get share() { return unboundMember("share"); },
+  get routes() { return unboundMember("routes"); },
+  get fonts() { return unboundMember("fonts"); },
+  get menus() { return unboundMember("menus"); },
   get runtimeInfo() { return unboundMember("runtimeInfo"); },
   get branding() { return unboundMember("branding"); },
   get responderId() { return unboundMember("responderId"); },

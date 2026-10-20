@@ -28,7 +28,7 @@ import { WebspringWidgetShelf } from "../../src/Webspring/WebspringWidgetShelf";
 import { WebspringSurface } from "../../src/Webspring/webspringSurface";
 import { WebspringWidgetController, defineWidget } from "../../src/Webspring/webspringWidget";
 import type { WebspringWidget, WebspringWidgetEntry, WebspringWidgetViewProps } from "../../src/Webspring/webspringTypes";
-import { createTestRuntime } from "./helpers";
+import { createTestBundle, createTestRuntime } from "./helpers";
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -203,6 +203,48 @@ describe("WebspringWidgetShelf", () => {
       </SynCloudOSProvider>,
     );
   }
+
+  it("opens a widget link through shell routing and reports an unknown route as failed", async () => {
+    const runtime = createTestRuntime({
+      authenticationPolicy: "disabled",
+      initialBundles: [createTestBundle({
+        bundleIdentifier: "com.example.widget-target", route: "/widget-target", policy: { public: true },
+      })],
+    });
+    runtimes.push(runtime);
+    await runtime.boot({ initialPathname: "/" });
+    expect(runtime.policy.getAccessMode()).toBe("mixed");
+    expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(false);
+    const results: unknown[] = [];
+    let navigation!: Promise<void>;
+    const widget = defineWidget({
+      id: "links", title: "Links", load: () => "Read the note", whenEmpty: "hide",
+      view: ({ data, navigate }: WebspringWidgetViewProps<string>) => <>
+        <a href="/widget-target" onClick={event => { event.preventDefault(); navigation = navigate("/widget-target").then(result => { results.push(result); }); }}>{data}</a>
+        <button onClick={() => { navigation = navigate("/missing-widget-target").then(result => { results.push(result); }); }}>Missing note</button>
+      </>,
+    });
+    render(<SynCloudOSProvider runtime={runtime}>
+      <WebspringWidgetShelf entries={[entryFor(widget)]} surface={WebspringSurface.plain("#101418")} />
+    </SynCloudOSProvider>);
+    await act(settle);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("link", { name: "Read the note" }));
+      await navigation;
+    });
+    expect(runtime.store.getSnapshot().application).toMatchObject({
+      activeAppId: "com.example.widget-target", routePath: "/widget-target",
+    });
+    expect(results).toEqual([{ status: "completed" }]);
+    expect(runtime.lifecycle.getState("com.example.widget-target")).toBe("active");
+    expect(runtime.statechart.getCurrentState()).toBe("active.application.active");
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Missing note" }));
+      await navigation;
+    });
+    expect(results[1]).toMatchObject({ status: "failed", message: expect.any(String) });
+    expect(runtime.store.getSnapshot().application.routePath).toBe("/widget-target");
+  });
 
   it("draws no shelf without widgets", async () => {
     const view = renderShelf([]);

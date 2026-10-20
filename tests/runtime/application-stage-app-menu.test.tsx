@@ -377,7 +377,7 @@ describe("ApplicationStageView app menu", () => {
       const app = useSCOS();
       const [text] = React.useState(() => {
         const owner = createInMemoryNSETextOwner({ content: plainNSETextContent("Live") });
-        const session = new TextEditingSession({ id: "session:live", documentId: "document:live", owner });
+        const session = new TextEditingSession({ id: "session:live", documentId: "document:live", textOwner: owner });
         return { owner, session, commands: new NSETextCommands({ session }) };
       });
       liveSession = text.session;

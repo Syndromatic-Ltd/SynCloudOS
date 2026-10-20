@@ -21,9 +21,9 @@ let project: string;
 function put(path: string, text: string) { const file = resolve(project, path); mkdirSync(resolve(file, ".."), { recursive: true }); writeFileSync(file, text); }
 beforeEach(() => {
   project = mkdtempSync(resolve(tmpdir(), "syncloudos-mcp-test-"));
-  put("package.json", JSON.stringify({ name: "consumer", version: "2.3.4", dependencies: { "@syndromatic/syncloudos": "1.0.0-beta.1" } }));
+  put("package.json", JSON.stringify({ name: "consumer", version: "2.3.4", dependencies: { "@syndromatic/syncloudos": "1.0.0-beta.2" } }));
   put("vite.config.ts", 'import { synCloudOS } from "@syndromatic/syncloudos/vite"; export default {plugins:[synCloudOS({appsDirectory:"applications",webspringEntry:false})]};');
-  put("node_modules/@syndromatic/syncloudos/package.json", JSON.stringify({ name: "@syndromatic/syncloudos", version: "1.0.0-beta.1", exports: { ".": { types: "./index.d.ts" }, "./sdk": { types: "./sdk.d.ts" } } }));
+  put("node_modules/@syndromatic/syncloudos/package.json", JSON.stringify({ name: "@syndromatic/syncloudos", version: "1.0.0-beta.2", exports: { ".": { types: "./index.d.ts" }, "./sdk": { types: "./sdk.d.ts" } } }));
   const sdk = resolve(project, "node_modules/@syndromatic/syncloudos");
   cpSync(resolve(repository, "tests/fixtures/developer-mcp/sdk.d.ts"), resolve(sdk, "sdk.d.ts"));
   put("node_modules/@syndromatic/syncloudos/index.d.ts", "export declare const SCOS: { app: { bundleIdentifier: string; displayName: string; version: string } };\n");
@@ -39,7 +39,7 @@ describe("developer MCP tools", () => {
     mkdirSync(resolve(project, "nested"));
     const result = await inspectProject({ projectRoot: resolve(project, "nested") });
     expect(result.projectRoot).toBe(project);
-    expect(result.sdk.version).toBe("1.0.0-beta.1");
+    expect(result.sdk.version).toBe("1.0.0-beta.2");
     expect(result.sdk.buildReceipt.commit).toBe("fixture");
     expect(result.vite.options.appsDirectory).toBe("applications");
     expect(result.shell.enabled).toBe(false);
@@ -300,7 +300,7 @@ describe("developer MCP tools", () => {
       expect(parseManifest(resolve(project, "applications/Menu.app/Contents/Info.ts")).applicationMenu).toEqual({ trigger: "content" });
       const response = await client.callTool({name:"syncloudos.inspect_project",arguments:{}});
       expect(response.isError).not.toBe(true);
-      expect(response.structuredContent).toMatchObject({sdk:{version:"1.0.0-beta.1"}});
+      expect(response.structuredContent).toMatchObject({sdk:{version:"1.0.0-beta.2"}});
     } finally {await client.close();}
   });
   it("assembles a lockstep companion and generates offline SDK data from framework sources", async () => {
@@ -310,8 +310,8 @@ describe("developer MCP tools", () => {
     expect(JSON.parse(readFileSync(resolve(sdk,"tooling/build-receipt.json"),"utf8"))).toMatchObject({commit:"fixture",sourceSha256:"fixture-source"});
     expect(readFileSync(resolve(sdk,"docs/framework/developer-mcp.md"),"utf8")).toContain("mcp_servers.syncloudos");
     const companion = resolve(project,"companion");
-    const manifest = writeDeveloperMcpPackage({repositoryRoot:repository,directory:companion,sdkVersion:"1.0.0-beta.1"});
-    expect(manifest.peerDependencies).toEqual({"@syndromatic/syncloudos":"1.0.0-beta.1"});
+    const manifest = writeDeveloperMcpPackage({repositoryRoot:repository,directory:companion,sdkVersion:"1.0.0-beta.2"});
+    expect(manifest.peerDependencies).toEqual({"@syndromatic/syncloudos":"1.0.0-beta.2"});
     expect(manifest.bin).toEqual({"syncloudos-mcp":"scripts/developer-mcp/server.mjs"});
     expect(manifest.dependencies["@modelcontextprotocol/sdk"]).toBeTruthy();
     expect(readFileSync(resolve(companion,"scripts/synware/validation-core.mjs"),"utf8")).toContain("createSynWareValidator");

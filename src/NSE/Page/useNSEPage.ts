@@ -28,6 +28,8 @@ import {
 } from "react";
 import { useNSEAnimationEnvironment } from "../Animation";
 import { useNSEFeedback } from "../Feedback";
+import { nseUnowned } from "../Controllers/ownership";
+import { useNSEDeferredDisposal } from "../interactionLifecycle";
 import { NSEPageController } from "./NSEPageController";
 import {
   clampNSEPageProgress,
@@ -187,6 +189,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
           : options.defaultProgress ?? restProgress
     );
     controllerRef.current = new NSEPageController({
+      owner: nseUnowned,
       progress: initialProgress,
       mode: options.mode ?? preset.mode,
       edge: options.edge ?? preset.edge,
@@ -196,6 +199,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
   }
 
   const controller = controllerRef.current;
+  useNSEDeferredDisposal(controller);
   const [snapshot, setSnapshot] = useState<NSEPageControllerSnapshot>(() => controller.getSnapshot());
   const snapshotRef = useRef(snapshot);
   const lastPhaseRef = useRef<NSEPagePhase>(snapshot.phase);

@@ -51,6 +51,100 @@ Pass the `document` your test environment provides, such as the one from jsdom o
 
 `createSynWareTestHost` accepts `app`, `document`, `container`, `now`, `permissions`, `locale`, `timeZone`, `branding`, `strictMode`, `documentTypes` and `surface` (`"stage"` or `"window"`). Set `strictMode: true` to render under React StrictMode and catch effects that fail to clean up. Supply native `DocumentType` codecs through trusted `documentTypes` provision; an application's manifest declares the types it may use but does not install their codecs.
 
+For a class application pass `{ application: NotesApp, manifest }` instead of `app`. After
+`await host.render()`, `host.application` is the live `NSEApplication` and `.windows` contains its
+real window controllers. It is `null` before launch, after close, and for function-component apps.
+`host.persistence` shares the app's own namespaced preference store, including values written
+before launch; it is not a separate test map.
+
+Supply typed service clients with `services: [[notesToken, notesClient]]`. These are registered
+through the ordinary app-service boundary, so the manifest must still declare the service and
+token version/contract checks still apply. Allow the service, permission and policy test adapters
+with `host.adapters.services.allow()`, `host.adapters.permissions.allow()` and
+`host.adapters.policy.allow()` before a controller calls `SCOS.services.require(notesToken)`.
+Sensitive storage remains denied to the app until the test allows storage and credentials, even
+though the trusted host can seed preferences. A class launch callback failure rejects `host.render()`.
+
+## Trusted diagnostics provision
+
+Use the diagnostics-specific host option to test a real class application that reads
+`SCOS.trusted.diagnostics`. Do not pass a diagnostics client into its constructor:
+the application must use its normal trusted-client boundary.
+
+```tsx
+const host = createSynWareTestHost({
+  application: DiagnosticsApp,
+  manifest: {
+    schemaVersion: 1,
+    bundleIdentifier: "com.example.diagnostics",
+    displayName: "Diagnostics",
+    version: "1.0.0",
+    permissions: ["diagnostics.view"],
+  },
+  document,
+  diagnostics: {
+    async refreshConformanceSnapshot({ signal } = {}) {
+      signal?.throwIfAborted();
+      return { checks: [] };
+    },
+    exportConformanceSnapshot(snapshot) {
+      return JSON.stringify(snapshot);
+    },
+  },
+});
+await host.render();
+host.diagnostics.revoke();
+host.diagnostics.replace(nextDiagnosticsProvider);
+await host.dispose();
+```
+
+`diagnostics` accepts an `AppTrustedDiagnosticsClient`: its operations are
+`refreshConformanceSnapshot({ signal? }?) => Promise<unknown>` and
+`exportConformanceSnapshot(snapshot) => unknown`. The host mints diagnostics-only
+provenance; the canonical application manifest must still declare `diagnostics.view`.
+Without either a live provider or that declaration, `SCOS.trusted.diagnostics` is absent.
+An initially unconfigured host may provide a client later with `host.diagnostics.replace(provider)`.
+Neither the provider setter nor the host object is available to the application.
+
+Replacement and revocation abort the previous provider's in-flight work. The signal
+passed to a provider also observes caller cancellation and the application's lifetime.
+A non-cooperative provider cannot publish a late result after its authority expires.
+Retained clients from an earlier provision reject further refreshes and exports, even
+after another provider is installed. Revocation never falls back to the runtime inspector.
+The framework revalidates action presentation on host replacement or revocation, so a
+`validateRefreshSnapshot()` that reads `SCOS.trusted.diagnostics` updates `useAction`
+availability without an application hook bridge. In React tests, make host changes
+inside `act()` before asserting the updated controls.
+
+## Media queries and controller traits
+
+Set host-owned media matches before rendering to choose the initial environment:
+
+```tsx
+host.mediaQueries.setMatches("(prefers-reduced-motion: reduce)", true);
+await host.render();
+```
+
+Rendering starts the ordinary responsive observer, so the initial match applies
+without advancing the clock. After rendering, change the query and advance the
+host's deterministic clock by one frame inside `act()`:
+
+```tsx
+await act(async () => {
+  host.mediaQueries.setMatches("(prefers-reduced-motion: reduce)", false);
+  host.clock.advance(16);
+});
+await waitFor(() => expect(panel.traitCollection.reducedMotion).toBe(false));
+```
+
+Matching runtime media-query subscriptions receive changes immediately, while
+the responsive observer publishes them on the next animation frame. `waitFor()`
+alone does not advance the host clock. The normal presentation bridge updates a
+mounted view controller's observable `traitCollection.reducedMotion`. Its view
+re-renders and `traitCollectionDidChange(previous)` receives the prior traits;
+tests need no internal controller symbols or manual trait injection. Setting an
+unchanged match does not emit another change.
+
 ## Fakes
 
 Each adapter is a port with four modes. `allow()` lets operations succeed, `deny(reason)` refuses them, `fail(error)` makes them throw and `interrupt(reason)` aborts them mid-flight. Every port records its calls, so a test can assert what the application asked for.

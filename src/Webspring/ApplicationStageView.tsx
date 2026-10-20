@@ -19,6 +19,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type Ref, type ReactNode } from "react";
+import { nseUnowned } from "../NSE/Controllers/ownership";
 import { useWebspringLaunchZoom } from "./WebspringLaunchZoomContext";
 import { useNSEAnimationEnvironment, useNSEPresenceExiting, useNSEPresentation, type NSEPresentationSpec } from "../NSE/Animation";
 import { useApplicationStageMotion } from "./ApplicationStage.transitions";
@@ -126,7 +127,7 @@ export function ApplicationStageView({
   const resolvedMode = useResolvedMode();
   const usesStandardTopBar = frame.topBar === "standard";
   const siteBranding = useHostSiteBranding();
-  const navigationChromeController = useMemo(() => new NSEApplicationNavigationChromeController(), [stage.id]);
+  const navigationChromeController = useMemo(() => new NSEApplicationNavigationChromeController({ owner: nseUnowned }), [stage.id]);
   const navigationChromeSnapshot = useSyncExternalStore(
     navigationChromeController.subscribe,
     navigationChromeController.getSnapshot,
@@ -223,7 +224,7 @@ export function ApplicationStageView({
   }, [activateMenu, app, frame.rightSlot, hasRightSlot, locale, opensPreferencesDirectly]);
   const appMenuRuntime = useRuntimeNSEMenuPort();
   const appMenuController = useMemo(
-    () => new NSEMenuController({ model: appMenuModel, runtime: appMenuRuntime }),
+    () => new NSEMenuController({ ownerSignal: appMenuRuntime.signal, model: appMenuModel, runtime: appMenuRuntime }),
     [appMenuModel, appMenuRuntime],
   );
   // `useRuntimeNSEMenuPort` remains the canonical command bridge; the controller

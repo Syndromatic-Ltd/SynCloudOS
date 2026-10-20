@@ -27,14 +27,16 @@ import {
 import { nseListLevelOperations, nseParagraphSpansInRange } from "./textStructureCommands";
 import type { NSETextEditingSessionOptions, NSETextSelectionTarget, NSETextSessionSnapshot, NSETextSessionSettlement } from "./textSessionTypes";
 import { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/nseRuntimeContracts";
+import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
 
-/** Per-view transient editing state. The supplied owner is the only content authority. */
+/** Per-view transient editing state. The supplied text owner is the only content authority. */
 export class TextEditingSession {
   readonly #options: NSETextEditingSessionOptions;
   readonly #listeners = new Set<() => void>();
   readonly #changes = new Map<number, NSETextChangeReceipt>();
   readonly #lifetime = new AbortController();
   readonly #lifecycle: SynCloudOSLifecycleRecord;
+  readonly #ownership: NSEControllerLifetime;
   readonly #ownerAbort = (event: Event): void => {
     const reason = synCloudOSLifecycleSignalReason(event.target as AbortSignal);
     this.#lifecycle.markDisposed(reason);
@@ -52,22 +54,28 @@ export class TextEditingSession {
   constructor(options: NSETextEditingSessionOptions) {
     if (!options.id.trim()) throw new TypeError("A text session requires a stable identity.");
     this.#options = options;
-    this.#lifecycle = new SynCloudOSLifecycleRecord({ kind: "TextEditingSession", id: options.id });
-    const model = options.owner.getSnapshot();
+    this.#ownership = new NSEControllerLifetime(options, { kind: "TextEditingSession", id: options.id });
+    this.#lifecycle = this.#ownership.record;
+    const model = options.textOwner.getSnapshot();
     const selection = Object.freeze({ sessionId: options.id, ...(options.documentId ? { documentId: options.documentId } : {}), flowId: model.flowId, ownerGeneration: model.ownerGeneration, modelRevision: model.revision, selectionGeneration: 0, range: Object.freeze({ location: 0, length: 0 }), anchor: 0, focus: 0, affinity: "downstream" as const });
     this.#snapshot = Object.freeze({ model, selection, typingAttributes: this.#typingAt(model, 0), marked: null, editable: options.editable ?? true, disposed: false });
-    this.#unsubscribe = options.owner.subscribe((receipt) => this.#accept(receipt));
+    this.#unsubscribe = options.textOwner.subscribe((receipt) => this.#accept(receipt));
     options.signal?.addEventListener("abort", this.#ownerAbort, { once: true });
-    options.owner.signal?.addEventListener("abort", this.#ownerAbort, { once: true });
-    const aborted = options.signal?.aborted ? options.signal : options.owner.signal?.aborted ? options.owner.signal : undefined;
+    options.textOwner.signal?.addEventListener("abort", this.#ownerAbort, { once: true });
+    const aborted = options.signal?.aborted ? options.signal : options.textOwner.signal?.aborted ? options.textOwner.signal : undefined;
     if (aborted) {
       const reason = synCloudOSLifecycleSignalReason(aborted);
       this.#lifecycle.markDisposed(reason); declareSynCloudOSLifecycleSignal(this.#lifetime.signal, reason); this.dispose();
     }
+    this.#ownership.bind((reason) => {
+      declareSynCloudOSLifecycleSignal(this.#lifetime.signal, reason);
+      this.dispose();
+    });
   }
 
   getSnapshot = (): NSETextSessionSnapshot => this.#snapshot;
   get signal(): AbortSignal { return this.#lifetime.signal; }
+  get isDisposed(): boolean { return this.#snapshot.disposed; }
   get observerErrors(): readonly unknown[] { return this.#observerErrors; }
   subscribe = (listener: () => void): (() => void) => { this.#listeners.add(listener); return () => this.#listeners.delete(listener); };
   captureTarget(): NSETextSelectionTarget { return this.#snapshot.selection; }
@@ -142,7 +150,7 @@ export class TextEditingSession {
     // Commits that name their own action are deliberate edits and end any typing run.
     if (metadata) this.#typingRun = null;
     const coalescingKey = metadata?.coalescingKey ?? (metadata ? undefined : this.#continueTypingRun(operations));
-    return this.#options.owner.commit({ expectedRevision: this.#snapshot.model.revision, expectedGeneration: this.#snapshot.model.ownerGeneration, operations, actionName: metadata?.actionName ?? actionName, ...(coalescingKey ? { coalescingKey } : {}) });
+    return this.#options.textOwner.commit({ expectedRevision: this.#snapshot.model.revision, expectedGeneration: this.#snapshot.model.ownerGeneration, operations, actionName: metadata?.actionName ?? actionName, ...(coalescingKey ? { coalescingKey } : {}) });
   }
   async requestHistory(direction: "undo" | "redo"): Promise<unknown> {
     this.#assertEditable("requestHistory");
@@ -205,7 +213,8 @@ export class TextEditingSession {
   dispose = (): void => {
     if (this.#snapshot.disposed) return;
     this.#lifecycle.markDisposed("explicit");
-    this.#unsubscribe(); this.#options.signal?.removeEventListener("abort", this.#ownerAbort); this.#options.owner.signal?.removeEventListener("abort", this.#ownerAbort); this.#changes.clear();
+    this.#ownership.dispose();
+    this.#unsubscribe(); this.#options.signal?.removeEventListener("abort", this.#ownerAbort); this.#options.textOwner.signal?.removeEventListener("abort", this.#ownerAbort); this.#changes.clear();
     this.#publish({ disposed: true, editable: false }); this.#lifetime.abort(); this.#listeners.clear();
   };
 

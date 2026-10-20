@@ -25,12 +25,18 @@ import { nseDisposeFor, type NSEOwnedObject, type NSEOwner } from "../Controller
 import { NSEObject } from "../Objects/NSEObject";
 import { NSEObjectLifetime } from "./objectLifetime";
 import type { NSEAnyWindowController, NSEWindowController, NSEWindowControllerClass } from "./NSEWindowController";
+import type { AppBounds, AppOwnedWindowSnapshot } from "../../SynCloudOS/AppSDK/appClientTypes";
 
 /** What `openWindow` accepts. */
 export interface NSEOpenWindowOptions {
   readonly title?: string;
   readonly width?: number;
   readonly height?: number;
+  readonly documentId?: string;
+  readonly restorationKey?: string;
+  readonly mobilePolicy?: AppOwnedWindowSnapshot["mobilePolicy"];
+  /** Explicit bounds, or placement using width/height and the current work area. */
+  readonly preferredBounds?: AppBounds | "centred" | "cascaded";
 }
 
 /** What the framework hands an application it constructs. */
@@ -44,6 +50,7 @@ export interface NSEApplicationContext {
 export interface NSEApplicationClass<TApplication extends NSEApplication = NSEApplication> {
   new (): TApplication;
   readonly mainWindow?: NSEWindowControllerClass;
+  readonly windowControllers?: Readonly<Record<string, NSEWindowControllerClass>>;
   readonly routes?: SynWareRouteGraph;
   readonly migrations?: readonly SynWareMigration[];
 }
@@ -71,6 +78,8 @@ export interface NSEApplicationClass<TApplication extends NSEApplication = NSEAp
 export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObject {
   /** The window controller the framework opens for the application's window. */
   static mainWindow?: NSEWindowControllerClass;
+  /** Stable names used to recreate secondary window controllers after a reload. */
+  static windowControllers?: Readonly<Record<string, NSEWindowControllerClass>>;
   /** Routes the application serves, declared as a route graph. */
   static routes?: SynWareRouteGraph;
   /** Versioned migrations of the application's persisted state. */

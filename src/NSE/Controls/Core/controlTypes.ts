@@ -73,6 +73,8 @@ export interface NSEControlRuntimePort {
   };
   readonly commands: {
     getPresentationGeneration(): { readonly registryGeneration: number; readonly responderGeneration: number };
+    /** Invalidates cached presentation after canonical focus or responder changes. */
+    subscribePresentation?(listener: () => void): () => void;
     validate(
       id: CommandId,
       payload?: unknown,

@@ -13,6 +13,8 @@ import * as webspring from "../../src/Webspring/public";
 import { definePreferencePane } from "../../src/SynCloudOS/Preferences";
 import type { SynCloudOSProjectComposition } from "../../src/SynCloudOSReact/projectComposition";
 import type { SynWareManifestV1 } from "../../src/SynCloudOS/AppSDK/manifest";
+import { createSynCloudOSHostInstallContext, prepareSynCloudOSHostContributions } from "../../src/SynCloudOS/HostContributions/hostContribution";
+import { createTestBundle, createTestRuntime } from "./helpers";
 
 const roots: string[] = [];
 afterEach(() => roots.splice(0).forEach(root => rmSync(root, { recursive: true, force: true })));
@@ -61,13 +63,58 @@ describe("folder-derived projects with explicit app identity", () => {
     f.put("src/Preferences/Billing.prefPane/index.tsx", "export default definePreferencePane({});", { default: pane });
     const widget = webspring.defineWidget({ id: "latest", title: "Latest", load: async () => "Latest", view: () => null, whenEmpty: "hide" });
     f.put("src/Widgets/Latest.widget/index.tsx", "export default defineWidget({});", { default: widget });
-    f.put("src/Integrations/Journal.integration.ts", "export default defineIntegration({});", { default: webspring.defineIntegration({ owners: ["com.example.nsecontrolgallery"], install() {} }) });
+    f.put("src/Integrations/Journal.integration.ts", "export default defineIntegration({});", { default: webspring.defineIntegration({ owners: ["Com.Example.NSEControlGallery"], install() {} }) });
     const project = f.project();
     expect(project.bundles[0].manifest).toMatchObject({ schemaVersion: 1, bundleIdentifier: "com.example.NSEControlGallery", displayName: "NSE Control Gallery", version: "1.2.0", webspring: { icon: "./Resources/AppIcon.svg" } });
     expect(project.bundles[0].localeResources).toEqual({ "Base.locale": { "Localisable.strings": '"hello" = "Hello";' } });
     expect(project.preferences).toEqual([pane]); expect(project.widgets).toEqual([widget]); expect(project.contributions).toHaveLength(1);
     expect(f.validate("NSEControlGallery").manifest).toEqual(project.bundles[0].manifest);
   });
+  it("grants generated integrations only their selected, case-insensitive application owners", async () => {
+    const f = fixture();
+    f.app("Publisher", { bundleIdentifier: "com.example.Publisher", displayName: "Publisher", version: "1.0.0" });
+    f.app("Reader", { bundleIdentifier: "com.example.Reader", displayName: "Reader", version: "1.0.0" });
+    f.app("Foreign", { bundleIdentifier: "com.example.Foreign", displayName: "Foreign", version: "1.0.0" });
+    const kind = { kind: "fixture.integration-seed", version: 1, displayName: "Seed", permissions: { saveDraft: { public: true } } };
+    const definition = webspring.defineIntegration({ owners: ["com.example.publisher", "com.example.reader"], trustedDocumentKinds: [kind] });
+    f.put("src/Integrations/Journal.integration.ts", "export default defineIntegration({});", { default: definition });
+    const project = f.project();
+    const runtime = createTestRuntime({ trustedDocumentKinds: [kind], initialBundles: project.bundles.map(bundle => createTestBundle({
+      bundleIdentifier: bundle.manifest.bundleIdentifier,
+      route: `/${bundle.manifest.bundleIdentifier.split(".").at(-1)!.toLowerCase()}`,
+    })) });
+    const [prepared] = await prepareSynCloudOSHostContributions(project.contributions, runtime.environment);
+    const handle = createSynCloudOSHostInstallContext(prepared!, runtime);
+    try {
+      const domain = {
+        ownerAppId: "com.example.publisher", domain: "journal.entry",
+        destinationAppId: "com.example.reader", routeName: "journal.entry",
+        resolve: () => ({ pathname: "/reader" }),
+      };
+      const unregister = handle.context.lumina.registerDomain(domain);
+      expect(handle.context.lumina.setEligibility({
+        ownerAppId: "com.example.publisher", domain: "journal.entry", itemId: "one", revision: "r1", eligible: true,
+      })).toBeGreaterThan(0);
+      expect(() => handle.context.lumina.registerDomain({ ...domain, ownerAppId: "com.example.foreign" }))
+        .toThrowError(expect.objectContaining({ name: "SecurityError" }));
+      expect(() => handle.context.lumina.registerDomain({ ...domain, destinationAppId: "com.example.foreign" }))
+        .toThrowError(expect.objectContaining({ name: "SecurityError" }));
+      expect(() => handle.context.policy.declare({ appId: "com.example.publisher", policy: { public: true } })).not.toThrow();
+      expect(() => handle.context.policy.declare({ appId: "com.example.foreign", policy: { public: true } }))
+        .toThrowError(expect.objectContaining({ name: "SecurityError" }));
+      await expect(handle.context.seed.saveDraft({
+        id: "owned-integration-seed", kind: kind.kind, applicationId: "com.example.publisher", body: {},
+      })).resolves.toMatchObject({ id: "owned-integration-seed" });
+      await expect(handle.context.seed.saveDraft({
+        id: "foreign-integration-seed", kind: kind.kind, applicationId: "com.example.foreign", body: {},
+      })).rejects.toMatchObject({ name: "SecurityError" });
+      unregister();
+    } finally {
+      await handle.cleanup();
+      await runtime.dispose();
+    }
+  });
+
   it("removes development applications and their integrations", () => {
     const f = fixture(); f.app("AnimationFX", { bundleIdentifier: "com.example.AnimationFX", displayName: "Effects", version: "5.0.0" });
     f.app("Diagnostics", { bundleIdentifier: "com.example.diagnostics", displayName: "Diagnostics", version: "1.0.0", availability: "development" });
@@ -111,4 +158,11 @@ describe("folder-derived projects with explicit app identity", () => {
     expect(await plugin.resolveId("@syndromatic/syncloudos", resolve(f.root, "src/SynWare/AnimationFX.app/Contents/view.tsx"))).toBe("\0virtual:syncloudos/app/com.example.animationfx");
     expect(await plugin.resolveId("@syndromatic/syncloudos", resolve(f.root, "src/shared.ts"))).toBeNull();
   });
+});
+
+it("preserves mixed-case integration owners while rejecting case-equivalent duplicates", () => {
+  const integration = webspring.defineIntegration({ owners: ["Com.Syndromatic.Notes"] });
+  expect(integration.owners).toEqual(["Com.Syndromatic.Notes"]);
+  expect(() => webspring.defineIntegration({ owners: ["Com.Syndromatic.Notes", "com.syndromatic.notes"] })).toThrow(/twice/u);
+  expect(() => webspring.defineIntegration({ owners: ["notes"] })).toThrow(/application IDs/u);
 });

@@ -76,7 +76,8 @@ export function useRuntimeNSEControlPort() {
     if (appRuntime) return {
       signal: appRuntime.signal,
       commands: {
-        getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }),
+        getPresentationGeneration: appRuntime.commands.getPresentationGeneration.bind(appRuntime.commands),
+        subscribePresentation: appRuntime.commands.subscribePresentation.bind(appRuntime.commands),
         validate: appRuntime.commands.validate.bind(appRuntime.commands),
         prepareDispatch: appRuntime.commands.prepareDispatch.bind(appRuntime.commands),
         dispatch: appRuntime.commands.dispatch.bind(appRuntime.commands),
@@ -94,6 +95,20 @@ export function useRuntimeNSEControlPort() {
           registryGeneration: kernelRuntime.commands.inspect().generation,
           responderGeneration: kernelRuntime.responders.generation,
         }),
+        subscribePresentation: (listener: () => void) => {
+          const notify = () => { if (!kernelRuntime.signal.aborted) listener(); };
+          const stopState = kernelRuntime.store.subscribe(notify);
+          const stopResponders = kernelRuntime.responders.subscribe(notify);
+          const stopCommands = kernelRuntime.commands.subscribe(notify);
+          const stop = () => {
+            stopState();
+            stopResponders();
+            stopCommands();
+            kernelRuntime.signal.removeEventListener("abort", stop);
+          };
+          kernelRuntime.signal.addEventListener("abort", stop, { once: true });
+          return stop;
+        },
         validate: kernelRuntime.commands.validate.bind(kernelRuntime.commands),
         prepareDispatch: kernelRuntime.commands.prepareDispatch.bind(kernelRuntime.commands),
         dispatch: kernelRuntime.commands.dispatch.bind(kernelRuntime.commands),

@@ -24,6 +24,7 @@ import type {
   PointerEvent as ReactPointerEvent,
   ReactNode
 } from "react";
+import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 
 export type NSEPagePresetName =
   | "nseSheet"
@@ -331,7 +332,7 @@ export interface NSEPageControllerSnapshot {
   updatedAt: number;
 }
 
-export interface NSEPageControllerOptions {
+export interface NSEPageControllerOptions extends NSEControllerOwnershipOptions {
   progress?: number;
   mode?: NSEPageMode;
   edge?: NSEPageEdge;

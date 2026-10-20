@@ -123,6 +123,35 @@ function authenticationService() {
   };
 }
 describe("application-only browser host", () => {
+  it.each(["definition", "discovered"] as const)("offers the host's About attribution for a %s bundle", async (kind) => {
+    const about = { copyright: "© 2026 Example Ltd.", trademark: "Example is a registered trademark.", tagline: "Made in Manchester." };
+    const overrides = kind === "definition" ? { bundles: [menuBundle] } : {
+      bundles: undefined,
+      composition: {
+        bundles: [{
+          manifest: menuBundle.manifest, modulePath: "./Application.app/Contents/index.tsx",
+          loadModule: async () => ({ default: menuBundle }),
+        }],
+        preferences: [], widgets: [], contributions: [], shell: null, shellResources: {},
+      },
+    };
+    const { element: target, runtime } = await mount(element(), { ...overrides, about });
+    expect(runtime.apps.getApp(id)?.about).toMatchObject(about);
+    await openApplicationMenu(target);
+    await chooseMenuItem("About Application host");
+    const dialog = await screen.findByRole("dialog", { name: "Application host" });
+    expect(dialog.textContent).toContain(about.copyright);
+    expect(dialog.textContent).toContain(about.trademark);
+    expect(dialog.textContent).toContain(about.tagline);
+    expect(dialog.textContent).toContain("1.0.0");
+  });
+
+  it("does not invent an About item when the host supplies no attribution", async () => {
+    const { element: target } = await mount(element(), { bundles: [menuBundle] });
+    await openApplicationMenu(target);
+    expect(screen.queryByRole("menuitem", { name: "About Application host" })).toBeNull();
+  });
+
   it("launches the real app fullscreen from / without a shell or primary window", async () => {
     window.history.replaceState(null, "", "/");
     const { element: target, runtime } = await mount();
@@ -466,4 +495,20 @@ describe("application-only browser host", () => {
     await act(async () => { runtime.systemUI.session.requestLogOut(); });
     expect(await screen.findByRole("alertdialog", { name: /log out/i })).not.toBeNull();
   });
+});
+
+it("keeps a discovered bundle's folder name independent from its case-insensitive identity", async () => {
+  const manifest = { ...bundle.manifest, bundleIdentifier: "org.Unrelated.PRODUCT" };
+  const discovered = createSynWare({ manifest, root: Application });
+  const { runtime } = await mount(element(), {
+    application: { bundleIdentifier: "ORG.unrelated.product" },
+    bundles: [{
+      manifest, modulePath: "./src/SynWare/Diagnostics.app/Contents/index.tsx",
+      loadModule: async () => ({ default: discovered }),
+    }],
+  });
+  const registered = runtime.bundles.getBundle("org.unrelated.PRODUCT")!;
+  expect(registered.manifest.bundleIdentifier).toBe("org.Unrelated.PRODUCT");
+  expect(registered.manifest.packageName).toBe("Diagnostics.app");
+  expect(registered.manifest.path).toBe("./src/SynWare/Diagnostics.app/");
 });

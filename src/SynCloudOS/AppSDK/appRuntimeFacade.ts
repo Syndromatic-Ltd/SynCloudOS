@@ -39,7 +39,7 @@ import { createMountedHapticsClient } from "./mountedHapticsClient";
 import type { AFXAnimationHandle } from "../../FX/AnimationFX/animationTypes";
 import type { TFXFontDescriptor } from "../../FX/TextFX/TFXFontDescriptor";
 import type { TFXFontReadinessChange, TFXRunDelegateReadinessChange, TFXRunDelegateRequest, TFXPackagedFontResourceLoader } from "../../FX/TextFX/textLayoutTypes";
-import { hostFontResourcePrefix } from "./fontAccess";
+import { createFontCatalogueResourceLoader, hostFontResourcePrefix, runtimeFontCatalogue } from "./fontAccess";
 import { TFXRunDelegate } from "../../FX/TextFX/TFXRunDelegate";
 import { createMountedGFXIdentifierIssuer } from "../../FX/GraphicsFX/identifierAuthority";
 import { createMountedMotionClient } from "./mountedMotionClient";
@@ -103,6 +103,7 @@ import {
   type SynWareTrustedPrivilege,
 } from "../BundleLoader/trustedBundleProvenance";
 import { createBundleGenerationFence } from "../BundleLoader/bundleGenerationFence";
+import { getHostDiagnosticsProvision, type HostDiagnosticsGrant } from "../Testing/hostDiagnosticsProvision";
 import { createAppPresentationClient } from "./appPresentationClient";
 import type { AppCommandClient, AppDocumentCloseOptions, AppWorkspaceDocumentsClient } from "./appClientTypes";
 import {
@@ -151,6 +152,7 @@ import type {
 import type { SynWareLocaleServicesSnapshot } from "../../SynCloudOSReact";
 import type {
   AppTrustedClient,
+  AppTrustedDiagnosticsClient,
   AppTrustedConformanceAccessibilityFinding,
   AppTrustedConformanceAppearanceFact,
 } from "./appTrustedClientTypes";
@@ -971,7 +973,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
   // Resources an application hands this signal as their owner record
   // "application-closed" when the session ends.
   declareSynCloudOSLifecycleSignal(signal, "application-closed");
-  const hostFontLoader = options.hostFontResourceLoader;
+  const hostFontLoader = options.hostFontResourceLoader ?? createFontCatalogueResourceLoader(runtimeFontCatalogue(runtime));
   const fontResourceLoader: TFXPackagedFontResourceLoader | undefined = hostFontLoader
     ? async (path, resourceSignal) => {
       if (path.startsWith(hostFontResourcePrefix)) return hostFontLoader(path, resourceSignal);
@@ -1337,6 +1339,8 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       const fields = requestRecord(request);
       const title = canonicalRequestText(fields.title, "title");
       const restorationKey = `application.${appKey}.window.${canonicalRequestText(fields.restorationKey, "restorationKey")}`;
+      const mobilePolicy = fields.mobilePolicy === undefined ? app.window.mobilePolicy : fields.mobilePolicy;
+      if (typeof mobilePolicy !== "string" || !mobilePolicies.has(mobilePolicy)) throw new TypeError("mobilePolicy must be a supported compact window policy.");
       const existing = runtime.windows.list({
         workspaceId: callerWindowIdentity.workspaceId,
         applicationId: app.bundleIdentifier,
@@ -1368,7 +1372,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         parentWindowControllerId: null,
         anchor: null,
         pinned: false,
-        mobilePolicy: app.window.mobilePolicy,
+        mobilePolicy: mobilePolicy as "fullscreen" | "sheet" | "popover-to-sheet" | "hidden",
         restorationKey,
       });
       const opened = await runTestControl("windows", "window.open", signal, () => runtime.windows.open(created.id));
@@ -1406,7 +1410,21 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         reason: "command",
         signal,
       }));
-      assertLive();
+      // Closing this mount's own window retires its transfer authority during
+      // the commit. That must not invalidate the already-committed receipt.
+      // Cancelled/refused closes and closes of other windows still require the
+      // full live mount; runtime, application and bundle replacements remain
+      // terminal even when this window successfully closed.
+      const committedOwnClose = result.outcome === "closed"
+        && result.windowControllerId === candidate.id
+        && candidate.id === windowControllerId
+        && candidate.record.state === "closed"
+        && !runtime.signal.aborted
+        && runtime.apps.getApp(app.bundleIdentifier) === app
+        && runtime.appManager.getManagerForApp(app.bundleIdentifier) === registrationAuthority
+        && runtime.bundles.getBundle(app.bundleIdentifier) === mountedBundle
+        && runtime.lifecycle.getState(app.bundleIdentifier) !== "closed";
+      if (!committedOwnClose) assertLive();
       if (result.outcome === "refused") {
         return Object.freeze({ outcome: "refused" as const, windowId: result.windowControllerId, reason: result.reason });
       }
@@ -2620,13 +2638,23 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         undoRegistrationLease,
       } as T & { responderId: string; scopeToken: object; signal: AbortSignal; isLive: () => boolean; undoRegistrationLease: UndoRegistrationLease };
     };
-    const commands = frozen<SynWareCommandPort & Pick<AppCommandClient, "getPresentationGeneration">>({
+    const commands = frozen<SynWareCommandPort>({
       getPresentationGeneration() {
         assertLive();
         return Object.freeze({
           registryGeneration: runtime.commands.inspect().generation,
-          responderGeneration: runtime.responders.generation,
+          responderGeneration: runtime.responders.generation + runtime.focus.getGeneration(),
         });
+      },
+      subscribePresentation(listener: () => void) {
+        assertLive();
+        const notify = () => { if (!signal.aborted) listener(); };
+        const removeState = runtime.store.subscribe(notify);
+        const removeResponders = runtime.responders.subscribe(notify);
+        const removeCommands = runtime.commands.subscribe(notify);
+        const removeFocus = runtime.focus.subscribe(notify);
+        const removeDiagnostics = getHostDiagnosticsProvision(runtime)?.subscribe(notify);
+        return cleanupOnAbort(() => { removeState(); removeResponders(); removeCommands(); removeFocus(); removeDiagnostics?.(); });
       },
       createPayload(...fields: readonly unknown[]) {
         assertLive();
@@ -3998,24 +4026,54 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       }
     };
 
+    const diagnosticsProvision = getHostDiagnosticsProvision(runtime);
+    let issuedDiagnostics: Readonly<{ grant: HostDiagnosticsGrant | undefined; client: AppTrustedDiagnosticsClient }> | undefined;
+    const createTrustedDiagnosticsClient = (grant: HostDiagnosticsGrant | undefined): AppTrustedDiagnosticsClient => {
+      const assertDiagnosticsLive = () => {
+        requireTrustedPrivilege("diagnostics", "diagnostics.view");
+        if (diagnosticsProvision && (!grant || diagnosticsProvision.current !== grant || grant.signal.aborted)) {
+          throw securityError("The host diagnostics provider was revoked or replaced.");
+        }
+      };
+      return Object.freeze({
+        async refreshConformanceSnapshot(options?: Readonly<{ signal?: AbortSignal }>) {
+          assertDiagnosticsLive();
+          const operationSignal = AbortSignal.any([
+            runtime.signal, signal,
+            ...(options?.signal ? [options.signal] : []),
+            ...(grant ? [grant.signal] : []),
+          ]);
+          if (operationSignal.aborted) throw abortError(operationSignal.reason);
+          return await awaitMounted(
+            grant
+              ? grant.client.refreshConformanceSnapshot({ signal: operationSignal })
+              : runtime.inspector.refreshConformanceSnapshot({ signal: operationSignal }),
+            operationSignal,
+            assertDiagnosticsLive,
+          );
+        },
+        exportConformanceSnapshot(snapshot: unknown) {
+          assertDiagnosticsLive();
+          return projected(grant
+            ? grant.client.exportConformanceSnapshot(snapshot)
+            : runtime.inspector.exportConformanceSnapshot(snapshot as ConformanceInspectorSnapshot));
+        },
+      });
+    };
     const trustedClients: AppTrustedClient = Object.freeze({
-      ...(hasTrustedBundlePrivilege(runtime, app.bundleIdentifier, "diagnostics", "diagnostics.view") ? {
-        diagnostics: Object.freeze({
-          async refreshConformanceSnapshot(options?: Readonly<{ signal?: AbortSignal }>) {
-            requireTrustedPrivilege("diagnostics", "diagnostics.view");
-            const operationSignal = mergeSignals(runtime.signal, signal, options?.signal);
-            return await awaitMounted(
-              runtime.inspector.refreshConformanceSnapshot({ ...options, signal: operationSignal }),
-              operationSignal,
-              () => requireTrustedPrivilege("diagnostics", "diagnostics.view"),
-            );
-          },
-          exportConformanceSnapshot(snapshot: unknown) {
-            requireTrustedPrivilege("diagnostics", "diagnostics.view");
-            return projected(runtime.inspector.exportConformanceSnapshot(snapshot as ConformanceInspectorSnapshot));
-          },
-        }),
-      } : {}),
+      get diagnostics() {
+        // Capability discovery is harmless after revocation; operations on an
+        // already-issued client still enforce assertDiagnosticsLive.
+        if (transferMount.signal.aborted || !canRefreshPresentation() ||
+          runtime.appManager.getManagerForApp(app.bundleIdentifier) !== registrationAuthority) return undefined;
+        if (!hasTrustedBundlePrivilege(runtime, app.bundleIdentifier, "diagnostics", "diagnostics.view")) return undefined;
+        const grant = diagnosticsProvision?.current;
+        if (diagnosticsProvision && !grant) return undefined;
+        if (!issuedDiagnostics || issuedDiagnostics.grant !== grant) {
+          issuedDiagnostics = Object.freeze({ grant, client: createTrustedDiagnosticsClient(grant) });
+        }
+        return issuedDiagnostics.client;
+      },
       ...(hasTrustedBundlePrivilege(runtime, app.bundleIdentifier, "conformance", "diagnostics.view") ? {
         conformance: (() => {
           const retainEvidence = (release: () => void): AppClientHandle => {

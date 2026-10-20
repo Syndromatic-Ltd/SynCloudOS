@@ -169,6 +169,7 @@ export interface SynWareOpenWindowRequest {
   /** Identifies the window across reloads; unique within the application. */
   readonly restorationKey: string;
   readonly preferredBounds?: SynWareWindowBounds;
+  readonly mobilePolicy?: SynWareOwnedWindowSnapshot["mobilePolicy"];
 }
 
 export type SynWareWindowCloseReason = "control" | "command" | "parent-close" | "application-quit" | "runtime-dispose";
@@ -395,6 +396,8 @@ export interface SynWareWorkspaceDocumentPort {
   closeDocument(documentId: string, options?: AppDocumentCloseOptions | Parameters<DocumentController["closeDocument"]>[1], signal?: AbortSignal): ReturnType<DocumentController["closeDocument"]>;
 }
 export interface SynWareCommandPort {
+  getPresentationGeneration(): Readonly<{ registryGeneration: number; responderGeneration: number }>;
+  subscribePresentation(listener: () => void): () => void;
   register(declaration: object): { readonly commandId: string; readonly responderId: string; dispose(): boolean };
   /** Creates an immutable object payload without reflecting on app-owned data.
    * Provide alternating bounded string keys and primitive, mounted-capability,

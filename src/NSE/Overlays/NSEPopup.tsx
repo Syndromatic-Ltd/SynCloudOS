@@ -21,6 +21,7 @@
 import {
   createElement,
   useCallback,
+  useContext,
   useEffect,
   useId,
   useMemo,
@@ -32,6 +33,7 @@ import {
 import { createPortal } from "react-dom";
 import { useNSEOverlay } from "./useNSEOverlay";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
+import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { useNSEAppearanceProjection } from "../Appearance";
 import type {
   NSELogicalPlacement,
@@ -56,7 +58,7 @@ export interface NSEPopupProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   readonly open?: boolean;
   readonly defaultOpen?: boolean;
   readonly anchor?: HTMLElement | null;
-  /** Standalone hosts supply a local parent responder when omitted. */
+  /** Defaults to the nearest class controller, then the branch's host responder. */
   readonly parentResponderId?: string;
   readonly parentId?: string | null;
   readonly parentScopeId?: string;
@@ -150,7 +152,8 @@ export function NSEPopup({
   const resolvedId = id ?? `nse-popup:${generatedId}`;
   const state = useNSEPopupState({ open, defaultOpen, onOpenChange });
   const { runtime, defaultParentResponderId } = useNSEOverlayProvider();
-  const resolvedParentResponderId = parentResponderId ?? defaultParentResponderId;
+  const nearestResponderId = useContext(NSEActionResponderContext);
+  const resolvedParentResponderId = parentResponderId ?? nearestResponderId ?? defaultParentResponderId;
   if (!resolvedParentResponderId) {
     throw new Error("NSEPopup requires parentResponderId or an NSEStandaloneControlHost.");
   }

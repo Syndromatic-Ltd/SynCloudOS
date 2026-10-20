@@ -19,6 +19,10 @@
 
 import type { SynWareContextValue } from "../appContextTypes";
 import type { SynWareDefinition } from "../appDefinitionTypes";
+import type { AppTrustedDiagnosticsClient } from "../appTrustedClientTypes";
+import type { NSEApplication, NSEApplicationClass } from "../../../NSE/Application/NSEApplication";
+import type { SynWareManifestV1 } from "../manifest/manifestTypes";
+import type { SynWareServiceToken } from "../runtimeContracts";
 import type { PasteboardRepresentation } from "../../SynCloudOS";
 import type { LFXAuthorizationStatus, LFXLocation } from "../../../FX/LocationFX/public";
 import type { MIFXAuthorizationState } from "../../../FX/MIDIFX/public";
@@ -218,10 +222,16 @@ export interface SynWareTestNavigation {
   openRoute(pathname: string, options?: { readonly signal?: AbortSignal }): unknown;
 }
 
-export interface CreateSynWareTestHostOptions {
-  readonly app: Readonly<SynWareDefinition>;
+export type CreateSynWareTestHostOptions = (
+  | { readonly app: Readonly<SynWareDefinition>; readonly application?: never; readonly manifest?: never }
+  | { readonly application: NSEApplicationClass; readonly manifest: SynWareManifestV1; readonly app?: never }
+) & {
+  /** Real app-scoped providers; manifest declarations and token contracts still apply. */
+  readonly services?: readonly (readonly [SynWareServiceToken<unknown>, object])[];
   /** Trusted test-host codec provision. The manifest still admits application use. */
   readonly documentTypes?: readonly import("../../Documents/documentTypes").DocumentType<any, any>[];
+  /** Host-owned diagnostics only; the app must still declare diagnostics.view. */
+  readonly diagnostics?: AppTrustedDiagnosticsClient;
   readonly branding?: import("../appContextTypes").SynWareSiteBranding;
   readonly now?: string | number | Date;
   readonly permissions?: readonly string[];
@@ -242,12 +252,22 @@ export interface CreateSynWareTestHostOptions {
 /** A deterministic, host-owned test seam. The runtime itself remains private;
  * only narrowly redacted diagnostics and controls are made observable. */
 export interface SynWareTestHost {
+  /** The launched class application, or null before launch and for function apps. */
+  readonly application: NSEApplication | null;
   readonly clock: SynWareTestClock;
   readonly mediaClock: SynWareTestMediaClock;
   readonly persistence: SynWareTestPersistence;
   readonly lifecycle: SynWareTestLifecycle;
   readonly documents: SynWareTestDocumentInspection;
   readonly commands: SynWareTestCommandInspection;
+  /** Never exposed to the application. Replacement expires previously issued clients. */
+  readonly diagnostics: Readonly<{
+    replace(provider: AppTrustedDiagnosticsClient): void;
+    revoke(): void;
+  }>;
+  readonly mediaQueries: Readonly<{
+    setMatches(query: string, matches: boolean): void;
+  }>;
   readonly adapters: SynWareTestAdapters;
   readonly resources: SynWareTestResources;
   readonly settlement: SynWareTestSettlement;

@@ -172,13 +172,13 @@ describe("SynCloudOS public API compatibility", () => {
   it("exposes the complete runtime-owned command, responder, focus, binding, and undo APIs", () => {
     const runtime = createTestRuntime();
     expect(Object.keys(runtime.commands).sort()).toEqual([
-      "dispatch", "dispose", "getDeclarations", "inspect", "prepareDispatch", "register", "runtimeId", "validate", "validateMany",
+      "dispatch", "dispose", "getDeclarations", "inspect", "prepareDispatch", "register", "runtimeId", "subscribe", "validate", "validateMany",
     ].sort());
     expect(Object.keys(runtime.responders).sort()).toEqual([
       "dispose", "generation", "get", "getGeneration", "has", "inspect", "isEnabled", "register", "remove", "resolveChain", "runtimeId",
     ].sort());
     expect(Object.keys(runtime.focus).sort()).toEqual([
-      "closeScope", "dispose", "getActiveAnchors", "getFocusedResponderId", "getGeneration", "handleRespondersRemoved", "inspect", "isScopeWithin", "openScope", "requestFocus", "runtimeId", "setActiveAnchors",
+      "closeScope", "dispose", "getActiveAnchors", "getFocusedResponderId", "getGeneration", "handleRespondersRemoved", "inspect", "isScopeWithin", "openScope", "requestFocus", "runtimeId", "setActiveAnchors", "subscribe",
     ].sort());
     expect(Object.keys(runtime.keyBindings).sort()).toEqual([
       "claimKeyboardEvent", "clearOverride", "dispose", "handleKeyboardEvent", "inspect", "inspectCollisions", "resolve", "setOverride",

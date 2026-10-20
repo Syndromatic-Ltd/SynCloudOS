@@ -24,6 +24,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ComponentType,
   type CSSProperties,
   type ReactElement,
@@ -31,10 +32,10 @@ import {
 } from "react";
 import type { NSEAnyWindowController, NSEWindowMount } from "../../NSE/Application/NSEWindowController";
 import { nseWindowInternals } from "../../NSE/Application/NSEWindowController";
-import { nseAttachView, type NSEViewController } from "../../NSE/Application/NSEViewController";
+import { nseAttachView, nseUpdateTraits, type NSEViewController } from "../../NSE/Application/NSEViewController";
 import { useObserve } from "../../NSE/Objects";
 import { nseDisposeFor } from "../../NSE/Controllers/ownership";
-import { NSEActionScopeProvider } from "../../NSE/Controls/Core/useNSEControlAction";
+import { NSEActionResponderContext, NSEActionScopeProvider } from "../../NSE/Controls/Core/useNSEControlAction";
 import { ResponderScope } from "../../SynCloudOSReact/ResponderScope";
 import { useResponderHierarchy } from "../../SynCloudOSReact/responderHierarchy";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact/runtimeContext";
@@ -43,9 +44,14 @@ import { useSynWareContext } from "./SynWareContext";
 import { bindActionResponder, hasActions } from "./actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
 import { applicationSessionFor } from "./applicationSession";
+import { useNSEAnimationEnvironment } from "../../NSE/Animation/NSEAnimationEnvironment";
+import { useNSEOverlayFocusScope } from "../../NSE/Overlays/useNSEOverlay";
 
 const FRAME_STYLE: CSSProperties = Object.freeze({ display: "block", width: "100%", height: "100%", minWidth: 0, minHeight: 0 });
 const CONTENTS_STYLE: CSSProperties = Object.freeze({ display: "contents" });
+const CHILD_FRAME_STYLE: CSSProperties = Object.freeze({ display: "block" });
+const noTraitSubscription = () => () => {};
+const noPresentation = () => null;
 
 const identities = new WeakMap<object, string>();
 let identitySequence = 0;
@@ -76,7 +82,8 @@ function ControllerResponder({ appRuntime, target, kind, host, children }: Contr
   const hierarchy = useResponderHierarchy();
   const kernel = useContext(SynCloudOSRuntimeContext);
   const parentId = hierarchy.responderId ?? appRuntime.responderId;
-  const scopeId = kernel?.responders.get(parentId)?.scopeId ?? parentId;
+  const overlayScopeId = useNSEOverlayFocusScope();
+  const scopeId = overlayScopeId ?? kernel?.responders.get(parentId)?.scopeId ?? parentId;
   const appId = appRuntime.app.bundleIdentifier;
   const responderId = `${kind}:${appId}:${identityOf(target)}`;
   useLayoutEffect(() => {
@@ -84,9 +91,11 @@ function ControllerResponder({ appRuntime, target, kind, host, children }: Contr
     return () => { binding.dispose(); };
   }, [appId, appRuntime.commands, responderId, target]);
   return (
-    <ResponderScope responderId={responderId} kind={kind} parentResponderId={parentId} scopeId={scopeId} asChild>
-      {host === "element" ? (children as ReactElement) : <div style={CONTENTS_STYLE}>{children}</div>}
-    </ResponderScope>
+    <NSEActionResponderContext.Provider value={responderId}>
+      <ResponderScope responderId={responderId} kind={kind} parentResponderId={parentId} scopeId={scopeId} asChild>
+        {host === "element" ? (children as ReactElement) : <div style={CONTENTS_STYLE}>{children}</div>}
+      </ResponderScope>
+    </NSEActionResponderContext.Provider>
   );
 }
 
@@ -115,6 +124,9 @@ export function NSEViewControllerView({ controller }: NSEViewControllerViewProps
   useObserve(controller);
   const appRuntime = useContext(SynWareRuntimeContext);
   const context = useSynWareContext();
+  const { reducedMotion } = useNSEAnimationEnvironment();
+  const presentation = useSyncExternalStore(context?.presentation.subscribe ?? noTraitSubscription, context?.presentation.getSnapshot ?? noPresentation, noPresentation);
+  const traits = useMemo(() => Object.freeze({ reducedMotion, presentation }), [reducedMotion, presentation]);
   const animations = context?.animations;
   const motion = context?.motion;
   const location = context?.location;
@@ -137,6 +149,7 @@ export function NSEViewControllerView({ controller }: NSEViewControllerViewProps
     const untrack = session ? trackLiveApplicationObject(controller, session.live) : undefined;
     const detach = controller[nseAttachView]({
       element,
+      traits,
       ...(animations ? { bindLayer: (target: object, signal?: AbortSignal) => animations.bindLayer(target, signal) } : {}),
       ...(fx ? { fx } : {}),
     });
@@ -145,11 +158,29 @@ export function NSEViewControllerView({ controller }: NSEViewControllerViewProps
       untrack?.();
     };
   }, [animations, appRuntime, controller, fx]);
+  useLayoutEffect(() => { controller[nseUpdateTraits](traits); }, [controller, traits]);
+  useLayoutEffect(() => {
+    if (controller.isDisposed || !frameRef.current) return;
+    controller.viewWillLayout();
+    controller.viewDidLayout();
+  });
+  useLayoutEffect(() => {
+    const element = frameRef.current;
+    const Observer = element?.ownerDocument.defaultView?.ResizeObserver;
+    if (!element || !Observer) return;
+    const observer = new Observer(() => {
+      if (controller.isDisposed || frameRef.current !== element) return;
+      controller.viewWillLayout();
+      controller.viewDidLayout();
+    });
+    observer.observe(element);
+    return () => { observer.disconnect(); };
+  }, [controller]);
   if (controller.isDisposed) return null;
   const View = viewComponentOf(controller);
   if (!View) throw new TypeError(`${controller.constructor.name} has no static view; declare \`static view = SomeComponent\`.`);
   const frame = (
-    <div ref={frameRef} data-nse-view-controller="" style={FRAME_STYLE}>
+    <div ref={frameRef} data-nse-view-controller="" style={controller.parent ? CHILD_FRAME_STYLE : FRAME_STYLE}>
       <View controller={controller} />
     </div>
   );

@@ -30,6 +30,7 @@ import {
 } from "react";
 import type { CommandDispatchResult, CommandPresentation } from "../../../SynCloudOS/SynCloudOS";
 import type { NSEControlCommandBinding, NSEControlRuntimePort } from "./controlTypes";
+import { subscribeNSEActionChanges } from "./actionChanges";
 
 const NSEControlRuntimeContext = createContext<NSEControlRuntimePort | null>(null);
 
@@ -52,6 +53,7 @@ export interface NSEControlCommandState<P> {
   readonly validating: boolean;
   readonly failure: NSEControlCommandFailure | null;
   refresh(): void;
+  /** No argument uses the bound payload; a supplied argument, including undefined, is freshly prepared. */
   dispatch(payload?: P): Promise<CommandDispatchResult<unknown> | null>;
 }
 
@@ -100,12 +102,10 @@ export function useNSEControlCommand<P>(
   const dispatchLease = useRef<AbortLease | null>(null);
   const presentationGeneration = useRef<{ readonly registryGeneration: number; readonly responderGeneration: number } | null>(null);
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback((): void => {
     validationLease.current?.dispose();
     validationLease.current = null;
     generation.current += 1;
-    dispatchLease.current?.dispose();
-    dispatchLease.current = null;
     const currentGeneration = generation.current;
     if (!binding || !port || port.signal.aborted) {
       setPresentation(null);
@@ -128,6 +128,7 @@ export function useNSEControlCommand<P>(
         || currentAuthority.responderGeneration !== authorityGeneration.responderGeneration) {
         setPresentation(null);
         presentationGeneration.current = null;
+        refresh();
         return;
       }
       presentationGeneration.current = authorityGeneration;
@@ -156,13 +157,19 @@ export function useNSEControlCommand<P>(
     };
   }, [refresh]);
 
-  const dispatch = useCallback(async (payload?: P): Promise<CommandDispatchResult<unknown> | null> => {
-    if (!binding || !port || port.signal.aborted || !presentation?.enabled || presentation.denied || presentation.hidden || presentation.stale) {
-      return null;
-    }
+  useEffect(() => binding ? subscribeNSEActionChanges(binding.id, refresh) : undefined, [binding, refresh]);
+  useEffect(() => binding && port && !port.signal.aborted ? port.commands.subscribePresentation?.(refresh) : undefined, [binding, port, refresh]);
+  const dispatch = useCallback(async function dispatch(payload?: P): Promise<CommandDispatchResult<unknown> | null> {
+    if (!binding || !port || port.signal.aborted) return null;
+    const hasPayload = arguments.length > 0;
     const currentAuthority = port.commands.getPresentationGeneration();
-    if (presentationGeneration.current?.registryGeneration !== currentAuthority.registryGeneration
-      || presentationGeneration.current.responderGeneration !== currentAuthority.responderGeneration) return null;
+    // Presentation describes only the bound payload. An event override needs its
+    // own canonical preparation, even when that bound payload is unavailable.
+    if (!hasPayload) {
+      if (!presentation?.enabled || presentation.denied || presentation.hidden || presentation.stale) return null;
+      if (presentationGeneration.current?.registryGeneration !== currentAuthority.registryGeneration
+        || presentationGeneration.current.responderGeneration !== currentAuthority.responderGeneration) return null;
+    }
     dispatchLease.current?.dispose();
     const lease = createAbortLease(port.signal);
     dispatchLease.current = lease;
@@ -170,7 +177,7 @@ export function useNSEControlCommand<P>(
     const acceptedAuthority = currentAuthority;
     setFailure(null);
     try {
-      const dispatchedPayload = payload === undefined ? binding.payload : payload;
+      const dispatchedPayload = hasPayload ? payload : binding.payload;
       const preparation = await port.commands.prepareDispatch(binding.id, dispatchedPayload, {
         signal: lease.signal,
         source: "api",
@@ -180,11 +187,13 @@ export function useNSEControlCommand<P>(
       if (lease.signal.aborted || dispatchLease.current !== lease || dispatchGeneration !== generation.current
         || latestAuthority.registryGeneration !== acceptedAuthority.registryGeneration
         || latestAuthority.responderGeneration !== acceptedAuthority.responderGeneration) return null;
-      return await port.commands.dispatch(binding.id, payload === undefined ? binding.payload : payload, {
+      const result = await port.commands.dispatch(binding.id, dispatchedPayload, {
         signal: lease.signal,
         source: "api",
         acceptance: preparation.acceptance,
       });
+      refresh();
+      return result;
     } catch {
       if (!lease.signal.aborted && dispatchLease.current === lease && dispatchGeneration === generation.current) {
         setFailure({ commandId: binding.id, stage: "dispatch" });
@@ -194,7 +203,7 @@ export function useNSEControlCommand<P>(
       if (dispatchLease.current === lease) dispatchLease.current = null;
       lease.dispose();
     }
-  }, [binding, port, presentation]);
+  }, [binding, port, presentation, refresh]);
 
   return useMemo(() => ({ presentation, validating, failure, refresh, dispatch }), [dispatch, failure, presentation, refresh, validating]);
 }

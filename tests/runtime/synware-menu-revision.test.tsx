@@ -86,7 +86,7 @@ describe("scoped SynWare menu revision evidence", () => {
     expect(Object.keys(initial).sort()).toEqual(["registryGeneration", "responderGeneration"]);
     expect(initial).toEqual({
       registryGeneration: runtime.commands.inspect().generation,
-      responderGeneration: runtime.responders.generation,
+      responderGeneration: runtime.responders.generation + runtime.focus.getGeneration(),
     });
     expect(Object.isFrozen(initial)).toBe(true);
     registration.dispose();

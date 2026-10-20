@@ -19,7 +19,7 @@
  */
 
 export const Config = {
-  version: "1.0.0-beta.1",
+  version: "1.0.0-beta.2",
   environment: import.meta.env.MODE,
   devMode: import.meta.env.DEV,
   assetBaseUrl: "/assets",

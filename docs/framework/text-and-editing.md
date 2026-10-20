@@ -17,7 +17,7 @@ export function NoteBody() {
   } | null>(null);
   useEffect(() => {
     const owner = createUndoableNSETextOwner({ flowId: "body" });
-    const session = new TextEditingSession({ id: "note-view", owner, history: owner.history });
+    const session = new TextEditingSession({ id: "note-view", textOwner: owner, history: owner.history });
     setBinding({ owner, session });
     return () => { session.dispose(); owner.dispose(); };
   }, []);
@@ -31,7 +31,7 @@ The bounded view supports paragraphs, inline attributes and semantic attachment 
 
 ### Sessions, commands and inspectors
 
-`TextEditingSession` (also exported as `NSETextEditingController`) keeps semantic selection, typing and composition state. Retained targets include document/flow identity, model revision, owner generation and selection lineage; asynchronous actions revalidate them after resource acquisition. Disposing an owner revokes its attached sessions.
+`TextEditingSession` (also exported as `NSETextEditingController`) keeps semantic selection, typing and composition state. Pass the content authority as `textOwner`; `owner: this` instead selects the controller's lifecycle owner, just as in other NSE controllers. Ambient construction ownership and `ownerSignal` also apply. Retained targets include document/flow identity, model revision, text-owner generation and selection lineage; asynchronous actions revalidate them after resource acquisition. Disposing either the text owner or lifecycle owner revokes the session.
 
 `NSETextCommands` supplies reusable insertion, deletion, clipboard, formatting and history intents. Clipboard interchange is bounded attributed JSON plus plain text; application-native fragments use application-private codecs. `NSETextInspectorBinding` uses the existing `NSEObjectController` for field drafts, then commits through the canonical text owner without another content undo registration. Typography adapters supply character, colour and paragraph-ruler actions; named styles and page margins remain application policy.
 
@@ -53,7 +53,7 @@ List markers are drawn by the view in the indent gutter. They are not characters
 
 ```ts
 const session = new TextEditingSession({
-  id: "post-body", owner, history,
+  id: "post-body", textOwner: owner, history,
   // A comment anchor does not grow when typing at its edge; a style id does not follow Enter.
   customAttributePolicies: { "journal.comment": { extendsWhenTyping: false }, "journal.style": { carriesAcrossParagraphSplit: false } },
   // Pages' "Following paragraph style": a heading is followed by body text.
@@ -80,7 +80,7 @@ In editable text a selected image shows eight handles, and dragging any of them 
 ```tsx
 // The application supplies its native model mapping.
 const owner = createSynWareNSETextOwner({ documents, documentId, flowId: "body", readContent: model => model.body, writeContent: (model, body) => ({ ...model, body }) });
-const session = new TextEditingSession({ id: "body-view", documentId, owner, history: documents.getUndoManager(documentId) });
+const session = new TextEditingSession({ id: "body-view", documentId, textOwner: owner, history: documents.getUndoManager(documentId) });
 const participant = bindSynWareNSETextEditingSession({ documents, documentId, session });
 // Dispose the participant/session/owner when this view's scope ends.
 ```

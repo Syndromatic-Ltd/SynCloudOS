@@ -35,7 +35,7 @@ import { HostSiteBrandingProvider } from "./siteBrandingContext";
 import { HostFontsProvider } from "./hostFontsContext";
 import { NSEFontManager } from "../NSE/Typography/NSEFontManager";
 import { captureFontDeclaration, type FontDeclaration } from "../NSE/Typography/fontDeclaration.mjs";
-import type { SynWareFontCatalogue } from "../SynCloudOS/AppSDK/fontAccess";
+import { runtimeFontCatalogue, type SynWareFontCatalogue } from "../SynCloudOS/AppSDK/fontAccess";
 import { useActiveLocale, useResolvedMode } from "./serviceHooks";
 import { resolveSiteBranding, type ResolvedSiteBranding } from "../SynCloudOS/Branding/siteBranding";
 import { exposeSynCloudOS } from "../SynCloudOS/Developer/exposeSynCloudOS";
@@ -43,6 +43,7 @@ import { createSynWareBundle } from "../SynCloudOS/AppSDK/createSynWare";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { captureSynWareManifest, projectRuntimeManifest, type SynWareManifestV1 } from "../SynCloudOS/AppSDK";
 import type { SynWareDefinition } from "../SynCloudOS/AppSDK/appDefinitionTypes";
+import type { SynWareRuntimeManifestContext } from "../SynCloudOS/AppSDK/manifest/manifestTypes";
 import { createRegisteredFontResourceLoader, fontResourceMimeTypeForPath } from "../SynCloudOS/BundleLoader/fontResourceLoader";
 import type { SynCloudOSAppModule, TrustedSynWareBundle } from "../SynCloudOS/BundleLoader/bundleTypes";
 import { trustSynWareBundleForProject } from "../SynCloudOS/BundleLoader/trustedBundleProvenance";
@@ -96,6 +97,9 @@ interface BrowserHostOptions {
    * Import the theme's stylesheet alongside it. Defaults to Atmo. */
   readonly appearance?: NSEAppearanceDefinition;
   readonly contributions?: readonly SynCloudOSHostContribution[];
+  /** Host-owned legal attribution for each application's standard About panel.
+   * Its display name and version remain the application's Info.ts identity. */
+  readonly about?: SynWareRuntimeManifestContext["about"];
   /** What the project's folders declare. Defaults to `virtual:syncloudos/project`,
    * which the Vite plugin generates; pass one to host a build without it. */
   readonly composition?: SynCloudOSProjectComposition;
@@ -262,7 +266,7 @@ function descriptorData(descriptor: object, key: string, required = false): unkn
   return property.value;
 }
 
-function descriptorBundle(descriptor: SynCloudOSDiscoveredBundleDescriptor): TrustedSynWareBundle {
+function descriptorBundle(descriptor: SynCloudOSDiscoveredBundleDescriptor, about: BrowserHostOptions["about"]): TrustedSynWareBundle {
   const modulePath = descriptorData(descriptor, "modulePath", true);
   const loadModule = descriptorData(descriptor, "loadModule", true);
   if (typeof modulePath !== "string" || !modulePath) throw new TypeError("A discovered bundle modulePath must be a non-empty string.");
@@ -278,9 +282,10 @@ function descriptorBundle(descriptor: SynCloudOSDiscoveredBundleDescriptor): Tru
     ...manifest,
     webspring: Object.freeze({ ...manifest.webspring, icon }),
   });
-  const appRoot = `./${manifest.bundleIdentifier}.app`;
-  const packageName = manifest.bundleIdentifier;
+  const appRoot = modulePath.replaceAll("\\", "/").replace(/\/Contents\/.*$/u, "");
+  const packageName = appRoot.slice(appRoot.lastIndexOf("/") + 1);
   const runtimeManifest = projectRuntimeManifest(projected, {
+    about,
     appRoot,
     packageName,
     path: `${appRoot}/`,
@@ -313,10 +318,11 @@ function isDiscoveredBundle(value: SynCloudOSBrowserBundle): value is SynCloudOS
 function browserBundles(
   inputs: readonly SynCloudOSBrowserBundle[],
   firstParty: boolean,
+  about: BrowserHostOptions["about"],
 ): readonly TrustedSynWareBundle[] {
   const bundles = inputs.map((input) => {
-    if (!isDiscoveredBundle(input)) return createSynWareBundle(input);
-    const bundle = descriptorBundle(input);
+    if (!isDiscoveredBundle(input)) return createSynWareBundle(input, { about });
+    const bundle = descriptorBundle(input, about);
     return firstParty ? trustSynWareBundleForProject(bundle, input.modulePath) : bundle;
   });
   const ids = new Set<string>();
@@ -564,7 +570,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
   };
   const composition = composeSynCloudOSHostContributions(prepared, {
     runtimeConfig: baseRuntimeConfig,
-    initialBundles: browserBundles(options.bundles ?? [], projectBundles),
+    initialBundles: browserBundles(options.bundles ?? [], projectBundles, options.about),
   });
   let initialBundles = composition.initialBundles;
   if (options.application) {
@@ -600,6 +606,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     ...(composition.applicationDocuments === undefined ? {} : { applicationDocuments: composition.applicationDocuments }),
   };
   const runtime = createSynCloudOS(config);
+  runtimeFontCatalogue(runtime, fontCatalogue);
   const disposeHost = (reason: string): Promise<RuntimeDisposalResult> => {
     const disposal = runtime.dispose({ reason, inFlight: "cancel" });
     void disposal.then(result => {

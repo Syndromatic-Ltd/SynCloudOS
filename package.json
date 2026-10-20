@@ -1,7 +1,7 @@
 {
   "name": "@syndromatic/syncloudos-source",
   "private": true,
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "SynCloudOS framework source and package tooling",
   "type": "module",
   "scripts": {

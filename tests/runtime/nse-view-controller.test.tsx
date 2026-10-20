@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { act, screen } from "@testing-library/react";
 import * as React from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { AFXLayer } from "../../src/FX/AnimationFX/AFXLayer";
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppSDK/applicationHosting";
+import { NSEAnimationEnvironmentProvider } from "../../src/NSE/Animation";
+import { render } from "@testing-library/react";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
 const hosts: ClassApplicationHost[] = [];
@@ -187,6 +189,67 @@ describe("view.layer", () => {
 });
 
 describe("child view controllers", () => {
+  it("calls layout hooks after DOM commits and frame resizes, and disconnects on unmount", async () => {
+    let resized: ResizeObserverCallback | undefined;
+    const disconnect = vi.fn();
+    const previous = window.ResizeObserver;
+    window.ResizeObserver = class {
+      constructor(callback: ResizeObserverCallback) { resized = callback; }
+      observe() {}
+      unobserve() {}
+      disconnect = disconnect;
+    } as unknown as typeof ResizeObserver;
+    const events: string[] = [];
+    class Measured extends NSEViewController {
+      static override view = () => <p>Measured content</p>;
+      override viewWillLayout() { events.push(`will:${this.view.element.textContent}`); }
+      override viewDidLayout() { events.push(`did:${this.view.element.textContent}`); }
+    }
+    const controller = new Measured({ owner: nseTestOwner() });
+    try {
+      const view = render(<NSEViewControllerView controller={controller} />);
+      expect(events).toEqual(["will:Measured content", "did:Measured content"]);
+      act(() => { resized!([], {} as ResizeObserver); });
+      expect(events).toHaveLength(4);
+      view.unmount();
+      await settle();
+      expect(disconnect).toHaveBeenCalledOnce();
+    } finally {
+      window.ResizeObserver = previous;
+      controller.dispose();
+    }
+  });
+  it("lets a scroll area's parent lay out the child's intrinsic height", async () => {
+    class Chapter extends NSEViewController {
+      static override view = () => <article style={{ height: 72 }}>Chapter</article>;
+    }
+    const parent = new NSEViewController({ owner: nseTestOwner() });
+    const child = parent.addChild(Chapter);
+    const view = render(<div style={{ overflow: "auto", height: 320 }}><NSEViewControllerView controller={child} /></div>);
+    const frame = screen.getByText("Chapter").parentElement!;
+    expect(frame.style.height).toBe("");
+    expect(frame.style.width).toBe("");
+    view.unmount();
+    await settle();
+    parent.dispose();
+  });
+
+  it("observes reduced-motion traits from the actual NSE animation environment", async () => {
+    const changes: boolean[] = [];
+    class Animated extends NSEViewController {
+      static override view = ({ controller }: { controller: Animated }) => <output>{String(controller.traitCollection.reducedMotion)}</output>;
+      override traitCollectionDidChange() { changes.push(this.traitCollection.reducedMotion); }
+    }
+    const controller = new Animated({ owner: nseTestOwner() });
+    const view = render(<NSEAnimationEnvironmentProvider reducedMotion={false}><NSEViewControllerView controller={controller} /></NSEAnimationEnvironmentProvider>);
+    expect(screen.getByText("false")).toBeTruthy();
+    view.rerender(<NSEAnimationEnvironmentProvider reducedMotion><NSEViewControllerView controller={controller} /></NSEAnimationEnvironmentProvider>);
+    expect(screen.getByText("true")).toBeTruthy();
+    expect(changes).toEqual([true]);
+    view.unmount();
+    await settle();
+    controller.dispose();
+  });
   it("adds a class or an instance as a child, and rejects a second parent and a cycle", () => {
     class Plain extends NSEViewController {}
     class Holder extends NSEViewController {

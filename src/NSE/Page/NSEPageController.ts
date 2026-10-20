@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
 import {
   clampNSEPageProgress,
   createNSEPageSnapshot
@@ -35,8 +36,10 @@ export class NSEPageController {
   private snapshot: NSEPageControllerSnapshot;
   private listeners = new Set<NSEPageControllerListener>();
   private nextTurnId = 1;
+  readonly #lifetime: NSEControllerLifetime;
 
   constructor(options: NSEPageControllerOptions = {}) {
+    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEPageController", id: "page" });
     this.snapshot = createNSEPageSnapshot({
       progress: options.progress,
       phase: options.phase,
@@ -45,9 +48,16 @@ export class NSEPageController {
       direction: options.direction ?? "forward",
       torn: options.torn
     });
+    this.#lifetime.bind(() => this.dispose());
   }
 
+  get isDisposed(): boolean { return this.#lifetime.isDisposed; }
+  dispose(): void {
+    if (!this.#lifetime.dispose()) return;
+    this.listeners.clear();
+  }
   subscribe(listener: NSEPageControllerListener) {
+    this.#lifetime.assertLive("subscribe");
     this.listeners.add(listener);
     listener(this.snapshot);
     return () => {
@@ -147,6 +157,7 @@ export class NSEPageController {
   }
 
   private commit(partial: Partial<NSEPageControllerSnapshot>) {
+    this.#lifetime.assertLive("commit");
     this.snapshot = {
       ...this.snapshot,
       ...partial,

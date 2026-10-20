@@ -33,6 +33,10 @@ Applications require both `Contents/index.tsx` and `Contents/Info.ts`. Resources
 
 Identity case is preserved in manifests and public displays. Keys and comparisons are case-insensitive, so case-only duplicates are errors. The folder name is the bundle name only. Scaffolding pre-fills the required identity fields; discovery does not invent them.
 
+For example, `Diagnostics.app` keeps `packageName: "Diagnostics.app"` even if its `Info.ts`
+declares `bundleIdentifier: "org.Example.READER"`. Discovery takes the package name and resource
+root from the source folder, while identity lookups compare the declared identifier without case.
+
 Every `Resources/Localised/<locale>.locale/*.strings` file is supplied to the locale service. `localeResources` is not a manifest field. Font resources and other artwork are also mapped by discovery.
 
 ```ts
@@ -80,6 +84,10 @@ export default defineIntegration({
 
 `install` receives the existing narrow host contribution context, not a raw runtime. Return a cleanup when registering resources. `runtimeConfig`, `trustedDocumentKinds` and `applicationDocuments` preparation declarations are supported on the integration definition. An integration is excluded when none of its owners are included in the build, including owners removed by development availability.
 
+Use the same reverse-DNS identifiers in `owners` as in `Info.ts`. An uppercase-leading identifier
+such as `Com.Syndromatic.Notes` is valid. The definition retains that spelling, but selection and
+duplicate detection ignore case; listing it alongside `com.syndromatic.notes` is an error.
+
 ## Plugin options
 
 ```ts
@@ -112,3 +120,39 @@ node scripts/synware/validate-synware.mjs src/SynWare/Notes.app
 Application scaffolds write `Info.ts` with `bundleIdentifier`, `displayName`, `version: "1.0.0"` and `webspring.visible`. `--organisation` defaults to `com.example`; the lowercased folder name is appended (`JournalPublisher.app` → `com.example.journalpublisher`) and the display name splits words (`Journal Publisher`). The Developer MCP offers the same kinds through `scaffold({ kind, name, organisation?, bundleIdentifier?, owners? })`. `inspect_project` reports resolved manifests, and `validate` applies the installed schema and default-export checks before optional TypeScript validation. Static tooling does not execute project configuration or application code; computed Vite paths require explicit overrides.
 
 For an existing app, replace `id` and `runtime.bundleId` with `bundleIdentifier`, `title` with `displayName`, and `SynWareManifestOverrides` with `SynWareInfo`; write the app version explicitly. Saved app data and old launcher layouts are reset, not migrated. See the [identity migration table](synware-manifest.md#migration-from-the-previous-identity-fields).
+
+The unpublished `1.0.0-beta.2` candidate requires this clean cutover. Remove the previous identity
+fields and application-specific React service bridges rather than keeping aliases or fallback
+readers. React function apps can keep the supported hooks; class apps use the controller APIs below.
+
+## Class-app migration
+
+Remove view-to-controller service bridges. Use `SCOS.routes.state(graph, name)`,
+`SCOS.routes.isActive(graph, target)` and `SCOS.routes.subscribe(listener)` instead of forwarding
+`useRouteState`/`useRouter` clients. Use `SCOS.fonts.manager` and `SCOS.menus.runtime` instead of
+passing `useFonts()` and `useNSEMenuPort()` values back from a view.
+
+Restore preferences in `applicationDidFinishLaunching`: `SCOS` is already running there.
+Move reduced-motion work to `traitCollectionDidChange(previous)` and read
+`this.traitCollection.reducedMotion`; content-bound values are in `traitCollection.presentation`.
+Move geometry-dependent controller work to `viewWillLayout`/`viewDidLayout`.
+Child view-controller frames no longer impose a percentage height or width; the parent owns layout.
+
+Move command shortcuts and menu categories to `@action` options. Bind segmented controls, pickers,
+popups and cover flow with `action`/`actionPayload`, or use `useAction(name, payload)` for custom
+links; do not call action methods from views. Pass `owner: this` when constructing controllers
+outside constructors. Text editing's content authority is `textOwner`; `owner` now means the same
+lifetime owner as in other NSE controllers.
+
+For detachable windows pass `documentId`, `restorationKey`, `mobilePolicy` and
+`preferredBounds` to `openWindow`. Declare stable names in `static windowControllers` for cold
+restoration; read the original options from `openingOptions`.
+Replace interim test harnesses with `createSynWareTestHost({ application, manifest, services })`;
+inspect `host.application.windows` and use `host.persistence` to seed the app's actual preferences.
+
+Hosts pass About attribution as `mountSynCloudOS({ about: { copyright, trademark, tagline } })`.
+Integrations construct recovery storage in `applicationDocuments: environment => ({ recoveryStore })`
+and use `context.environment` for adapter clocks/timers. Integration authority is restricted to its
+declared owner applications, compared case-insensitively, and is separate from registering bundles.
+Widget views use their `navigate(route)` prop after preventing a link's default navigation, rather
+than assigning `location` and reloading the page.

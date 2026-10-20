@@ -195,6 +195,7 @@ export function createCommandSystem(options: CreateCommandSystemOptions): Comman
       return { registrations: registry.inspect(), history: [...history], generation: registry.generation };
     },
     getDeclarations: () => registry.declarations(),
+    subscribe: (listener) => registry.subscribe(listener),
     dispose() {
       if (disposed) return;
       disposed = true;

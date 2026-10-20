@@ -3,7 +3,7 @@
 **Cocoa for the web.** SynCloudOS is a batteries-included application framework for TypeScript and React 19. It gives the browser what a desktop platform gives a native application: a runtime with a formal lifecycle, a responder chain and typed commands, undo, documents, a windowing system, a kit of controls and controllers, twelve media frameworks and an application bundle format.
 
 > [!NOTE]
-> **SynCloudOS 1.0 Public Beta** (`v1.0.0-beta.1`). The architecture and the public entry points are in place and covered by tests, but the API may still change before 1.0. Expect rough edges, and please [open an issue](https://github.com/Syndromatic-Ltd/SynCloudOS/issues) when you find one.
+> **SynCloudOS 1.0 Public Beta** (`v1.0.0-beta.2`, unpublished development candidate). The architecture and the public entry points are in place and covered by tests, but the API may still change before 1.0. Expect rough edges, and please [open an issue](https://github.com/Syndromatic-Ltd/SynCloudOS/issues) when you find one.
 
 ## Why it exists
 
@@ -54,20 +54,22 @@ The framework's authored APIs use TypeScript and build under strict type checkin
 
 You need Node.js 22.12 or later and npm.
 
-The beta is not published to the npm registry. Install the package archive attached to the [v1.0.0-beta.1 release](https://github.com/Syndromatic-Ltd/SynCloudOS/releases/tag/v1.0.0-beta.1):
+The beta is not published to the npm registry. The latest published archive is the [v1.0.0-beta.1 release](https://github.com/Syndromatic-Ltd/SynCloudOS/releases/tag/v1.0.0-beta.1); the beta.2 candidate must be built from source:
+
+Install the published beta.1 archive:
 
 ```bash
 npm install https://github.com/Syndromatic-Ltd/SynCloudOS/releases/download/v1.0.0-beta.1/syndromatic-syncloudos-1.0.0-beta.1.tgz
 ```
 
-or build the same archive from source:
+To build the beta.2 candidate from source:
 
 ```bash
 git clone https://github.com/Syndromatic-Ltd/SynCloudOS.git
 cd SynCloudOS
 npm ci --ignore-scripts
 npm run sdk:build
-# → .artifacts/synapp-sdk/archives/syndromatic-syncloudos-1.0.0-beta.1-<sha256>.tgz
+# → .artifacts/synapp-sdk/archives/syndromatic-syncloudos-1.0.0-beta.2-<sha256>.tgz
 ```
 
 and install it into your project with `npm install /path/to/that.tgz`. React 19 is a peer dependency.

@@ -1,11 +1,19 @@
 // @vitest-environment jsdom
-import { act, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { NSEApplication, type NSEApplicationClass } from "../../src/NSE/Application/NSEApplication";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
+import { applicationSessionFor, ensureApplicationSession } from "../../src/SynCloudOS/AppSDK/applicationSession";
+import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
+import { useSCOS } from "../../src/SynCloudOS/AppSDK/scos";
+import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
+import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
+import { createApplicationWindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
+import { createTestBundle } from "./helpers";
+import type { AppWorkspaceDocumentsClient } from "../../src/SynCloudOS/AppSDK/appClientTypes";
 
 const hosts: ClassApplicationHost[] = [];
 afterEach(async () => {
@@ -25,7 +33,126 @@ async function openApplication(Controller: NonNullable<NSEApplicationClass["main
   return { host, windowId, record: () => host.runtime.windows.select(windowId) };
 }
 
+function registerClassDocumentType(host: ClassApplicationHost) {
+  host.runtime.documents.registerType({
+    id: "tests.class-document", displayName: "Class document", schemaVersion: 1, extensions: [], mimeTypes: [],
+    capabilities: { versions: false, conflicts: false }, autosave: "disabled",
+    create: () => ({ value: "new" }), read: (value: { value: string }) => value, write: (value: { value: string }) => value,
+    validate: (value: unknown): value is { value: string } => Boolean(value && typeof value === "object" && "value" in value && typeof value.value === "string"),
+  });
+}
+
+async function openDocumentApplication(appId: string) {
+  let documents!: AppWorkspaceDocumentsClient;
+  class Main extends NSEWindowController {
+    static override view = function DocumentSource() {
+      documents = useSCOS().documents.workspaceDocuments;
+      return <p>Document source window</p>;
+    };
+  }
+  class Detached extends NSEWindowController {
+    static override view = () => <p>Detached document window</p>;
+  }
+  class Application extends NSEApplication {
+    static override mainWindow = Main;
+    static override windowControllers = { detached: Detached };
+  }
+  const host = createClassApplicationHost(Application, appId);
+  hosts.push(host);
+  await host.launch();
+  host.mountWindows();
+  const windowId = await host.openMainWindow();
+  const original = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId })!;
+  registerClassDocumentType(host);
+  await screen.findByText("Document source window");
+  const document = await documents.newDocument({
+    typeId: "tests.class-document",
+    location: { kind: "memory", namespace: appId, key: "note" },
+    initialModel: { value: "Note" },
+  });
+  await documents.saveDocument(document.id);
+  return { host, windowId, original, documents, document, Detached, Application };
+}
+
+describe("class application undo", () => {
+  it("routes normal stage Undo validation and dispatch to the application's recorded history", async () => {
+    let value = 1;
+    const appId = "com.example.stage-application-undo";
+    class Main extends NSEWindowController {
+      static override view = function UndoView() {
+        const scos = useSCOS();
+        return <button onClick={() => {
+          scos.undo.create({ kind: "application", id: appId }).register({
+            name: "Application change", asyncPolicy: "forbid",
+            undo: () => { value = 0; }, redo: () => { value = 1; },
+          });
+        }}>Record application change</button>;
+      };
+    }
+    class Application extends NSEApplication { static override mainWindow = Main; }
+    const host = createClassApplicationHost(Application, appId);
+    hosts.push(host);
+    // Exercise the production bootstrap registration, not the fixture's host-owned responder.
+    host.runtime.responders.remove(`application:${appId}`);
+    await host.launch();
+    const app = host.runtime.apps.getApp(appId)!;
+    const registry = createApplicationWindowContentRendererRegistry(host.runtime, { [appId]: app });
+    const view = render(<SynCloudOSProvider runtime={host.runtime}>
+      <HostSiteBrandingProvider value={{ name: "Class application host", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
+        <ApplicationStageView app={app} lifecycle="active" windowContentRegistry={registry}
+          stage={{ appId, id: `application-stage:${appId}`, title: app.window.title, isFocused: true, zIndex: 1 }} />
+      </HostSiteBrandingProvider>
+    </SynCloudOSProvider>);
+    const button = await screen.findByRole("button", { name: "Record application change" });
+    fireEvent.click(button);
+    act(() => { button.focus(); });
+
+    await expect(host.runtime.commands.validate("edit.undo")).resolves.toMatchObject({ enabled: true, title: "Undo Application change" });
+    await act(async () => {
+      await expect(host.runtime.commands.dispatch("edit.undo")).resolves.toMatchObject({ status: "executed" });
+    });
+    expect(value).toBe(0);
+    await expect(host.runtime.commands.validate("edit.redo")).resolves.toMatchObject({ enabled: true, title: "Redo Application change" });
+    view.unmount();
+  });
+});
+
 describe("NSEWindowController window", () => {
+  it("restores the named detached controller and its options instead of the main controller", async () => {
+    class Main extends NSEWindowController { static override view = () => <p>Main restoration window</p>; }
+    class Detached extends NSEWindowController { static override view = () => <p>Detached restoration window</p>; }
+    class Application extends NSEApplication {
+      static override mainWindow = Main;
+      static override windowControllers = { detached: Detached };
+    }
+    const host = createClassApplicationHost(Application, "com.example.controller-restoration");
+    hosts.push(host);
+    await host.launch();
+    host.mountWindows();
+    await host.openMainWindow();
+    const identity = { runtimeId: host.runtime.runtimeId, appId: host.appId };
+    const original = applicationSessionFor(identity)!;
+    const options = { title: "Detached note", restorationKey: "note-one", mobilePolicy: "hidden" as const, width: 640, height: 480, preferredBounds: "centred" as const };
+    let detached!: NSEWindowController;
+    await act(async () => { detached = await original.app.openWindow(Detached, options); });
+    await screen.findByText("Detached restoration window");
+    const id = detached.window.id!;
+    const frame = host.runtime.windows.select(id).record.bounds;
+    const area = host.runtime.environment.workArea.getSnapshot();
+    expect(frame.x).toBe(area.x + (area.width - frame.width) / 2);
+    expect(host.runtime.windows.select(id).record.mobilePolicy).toBe("hidden");
+    expect(detached.openingOptions).toEqual(options);
+    host.unmountWindows();
+    original.dispose("explicit");
+    const restored = ensureApplicationSession(identity, { AppClass: Application, appName: "Class application", strictOwnership: true });
+    restored.prepareServices(host.runtime);
+    host.mountWindows();
+    await screen.findByText("Detached restoration window");
+    const recreated = restored.app.windows.find(controller => controller.window.id === id)!;
+    expect(recreated).toBeInstanceOf(Detached);
+    expect(recreated).not.toBe(detached);
+    expect(recreated.openingOptions).toEqual(options);
+  });
   it("loads the window with its identity before the view renders, and reports key-window changes", async () => {
     const events: string[] = [];
     const keyEvents: string[] = [];
@@ -164,6 +291,44 @@ describe("NSEWindowController closing", () => {
     expect(controller.disposalReason).toBe("window-closed");
   });
 
+  it("reports its own committed close after the window capability is revoked", async () => {
+    let controller!: ClosingWindow;
+    class ClosingWindow extends NSEWindowController {
+      static override view = () => <p>Self-closing content</p>;
+      constructor() { super(); controller = this; }
+    }
+    const { host, windowId } = await openApplication(ClosingWindow);
+    await screen.findByText("Self-closing content");
+
+    await act(async () => { expect(await controller.window.close()).toBe("closed"); });
+
+    expect(host.runtime.windows.list().some(({ id }) => id === windowId)).toBe(false);
+    expect(controller.isDisposed).toBe(true);
+    expect(controller.disposalReason).toBe("window-closed");
+  });
+
+  it("rejects a pending close when its mount is revoked before the close commits", async () => {
+    let controller!: WaitingWindow;
+    let finishGuard!: (allow: boolean) => void;
+    class WaitingWindow extends NSEWindowController {
+      static override view = () => <p>Pending close content</p>;
+      constructor() { super(); controller = this; }
+      windowShouldClose() { return new Promise<boolean>((resolve) => { finishGuard = resolve; }); }
+    }
+    const { host, record } = await openApplication(WaitingWindow);
+    await screen.findByText("Pending close content");
+    const closing = controller.window.close();
+    const rejected = expect(closing).rejects.toMatchObject({ name: "AbortError" });
+    await waitFor(() => { expect(finishGuard).toBeTypeOf("function"); });
+
+    host.unmountWindows();
+    finishGuard(true);
+
+    await rejected;
+    expect(record().record.state).toBe("open");
+    expect(controller.isDisposed).toBe(false);
+  });
+
   it("reports a refused close through window.close()", async () => {
     let controller!: StubbornWindow;
     class StubbornWindow extends NSEWindowController {
@@ -228,6 +393,211 @@ describe("NSEWindowController closing", () => {
 });
 
 describe("opening more windows", () => {
+  it("keeps the stage source and two different class document owners live independently", async () => {
+    const appId = "com.example.class-stage-document-owners";
+    let documents!: AppWorkspaceDocumentsClient;
+    class Main extends NSEWindowController {
+      static override view = function StageDocumentSource() {
+        documents = useSCOS().documents.workspaceDocuments;
+        return <p>Stage document source</p>;
+      };
+    }
+    class Detached extends NSEWindowController {
+      static override view = () => <p>Independent detached document</p>;
+    }
+    class Application extends NSEApplication { static override mainWindow = Main; }
+    const host = createClassApplicationHost(Application, appId);
+    hosts.push(host);
+    registerClassDocumentType(host);
+    // The window-only fixture installs a host application responder. A real
+    // stage launch lets the session establish that responder before mounting.
+    host.runtime.responders.remove(`application:${appId}`);
+    await host.launch();
+    host.mountWindows();
+    const app = host.runtime.apps.getApp(appId)!;
+    const registry = createApplicationWindowContentRendererRegistry(host.runtime, { [appId]: app });
+    const view = render(<SynCloudOSProvider runtime={host.runtime}>
+      <HostSiteBrandingProvider value={{ name: "Class application host", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
+        <ApplicationStageView app={app} lifecycle="active" windowContentRegistry={registry}
+          stage={{ appId, id: `application-stage:${appId}`, title: app.window.title, isFocused: true, zIndex: 1 }} />
+      </HostSiteBrandingProvider>
+    </SynCloudOSProvider>);
+    await screen.findByText("Stage document source");
+    const original = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId })!;
+    expect(original.ownsApplicationResponder).toBe(true);
+    expect(host.runtime.responders.inspect().registrations.filter(
+      responder => responder.id === `application:${appId}`,
+    )).toHaveLength(1);
+    const firstDocument = await documents.newDocument({
+      typeId: "tests.class-document", location: { kind: "memory", namespace: appId, key: "first" }, initialModel: { value: "First" },
+    });
+    await documents.saveDocument(firstDocument.id);
+    let first!: NSEWindowController;
+    await act(async () => {
+      first = await original.app.openWindow(Detached, { documentId: firstDocument.id, restorationKey: "first" });
+    });
+    // A document facade must not supersede the stage's app/responder/window
+    // transfer identity: its original document port must still admit work.
+    await expect(documents.saveDocument(firstDocument.id)).resolves.toBeUndefined();
+    const secondDocument = await documents.newDocument({
+      typeId: "tests.class-document", location: { kind: "memory", namespace: appId, key: "second" }, initialModel: { value: "Second" },
+    });
+    await documents.saveDocument(secondDocument.id);
+    let second!: NSEWindowController;
+    let anotherFirst!: NSEWindowController;
+    await act(async () => {
+      second = await original.app.openWindow(Detached, { documentId: secondDocument.id, restorationKey: "second" });
+      anotherFirst = await original.app.openWindow(Detached, { documentId: firstDocument.id, restorationKey: "another-first" });
+    });
+    expect(host.runtime.windows.select(anotherFirst.window.id!).record.documentId).toBe(firstDocument.id);
+    expect(host.runtime.windows.select(second.window.id!).record.documentId).toBe(secondDocument.id);
+    const ownerResponders = () => host.runtime.responders.inspect().registrations.filter(
+      responder => responder.id.startsWith(`controller:${appId}:document-windows:`),
+    );
+    expect(ownerResponders()).toHaveLength(2);
+    await documents.releaseDocument(firstDocument.id);
+    await documents.releaseDocument(secondDocument.id);
+    await act(async () => {
+      await first.window.close();
+      await anotherFirst.window.close();
+    });
+    expect(ownerResponders()).toHaveLength(1);
+    expect(host.runtime.documents.hasActiveDocumentOwnerLease(secondDocument.id, appId)).toBe(true);
+    await act(async () => { await second.window.close(); });
+    await waitFor(() => {
+      expect(ownerResponders()).toHaveLength(0);
+      expect(host.runtime.documents.getDocument(firstDocument.id)).toBeNull();
+      expect(host.runtime.documents.getDocument(secondDocument.id)).toBeNull();
+    });
+    view.unmount();
+  });
+
+  it("retains another mount's document until the last class-controlled window closes", async () => {
+    const { host, windowId, original, documents, document, Detached } = await openDocumentApplication("com.example.class-document-owners");
+    const app = host.runtime.apps.getApp(host.appId)!;
+    const unowned = createMountedSynWareRuntime({ runtime: host.runtime, app, responderId: `application:${host.appId}` });
+    await expect(unowned.runtime.windows.openDocumentWindow({
+      documentId: document.id, title: "Not retained", restorationKey: "not-retained",
+    })).rejects.toMatchObject({ name: "SecurityError" });
+    unowned.dispose();
+    const options = { documentId: document.id, restorationKey: "detached-note", title: "Detached note", mobilePolicy: "hidden" as const, width: 620, height: 430, preferredBounds: "centred" as const };
+    let first!: NSEWindowController;
+    let second!: NSEWindowController;
+    await act(async () => {
+      [first, second] = await Promise.all([
+        original.app.openWindow(Detached, options),
+        original.app.openWindow(Detached, { ...options, restorationKey: "second-note" }),
+      ]);
+    });
+    expect(first.openingOptions).toEqual(options);
+    expect(host.runtime.windows.select(first.window.id!).record).toMatchObject({
+      documentId: document.id, documentAssociationRole: "secondary", title: options.title, mobilePolicy: "hidden",
+      bounds: { width: 620, height: 430 },
+    });
+    await documents.releaseDocument(document.id);
+    await act(async () => { await host.runtime.windows.requestClose(windowId, { reason: "command" }); });
+    expect(host.runtime.documents.hasActiveDocumentOwnerLease(document.id, host.appId)).toBe(true);
+
+    await act(async () => { await first.window.close(); });
+    expect(first.isDisposed).toBe(true);
+    expect(second.isDisposed).toBe(false);
+    expect(host.runtime.documents.hasActiveDocumentOwnerLease(document.id, host.appId)).toBe(true);
+    expect(host.runtime.documents.getDocument(document.id)).not.toBeNull();
+    await act(async () => { await second.window.close(); });
+    await waitFor(() => {
+      expect(host.runtime.documents.hasActiveDocumentOwnerLease(document.id, host.appId)).toBe(false);
+      expect(host.runtime.documents.getDocument(document.id)).toBeNull();
+    });
+  });
+
+  it("restores a named document controller with its options and a new application owner", async () => {
+    const { host, original, documents, document, Detached, Application } = await openDocumentApplication("com.example.class-document-restoration");
+    const options = { documentId: document.id, restorationKey: "restored-document", title: "Restored note", mobilePolicy: "hidden" as const };
+    let detached!: NSEWindowController;
+    await act(async () => { detached = await original.app.openWindow(Detached, options); });
+    const id = detached.window.id!;
+    await documents.releaseDocument(document.id);
+    host.unmountWindows();
+    original.dispose("explicit");
+    const restored = ensureApplicationSession({ runtimeId: host.runtime.runtimeId, appId: host.appId }, {
+      AppClass: Application, appName: "Class application", strictOwnership: true,
+    });
+    restored.prepareServices(host.runtime);
+    host.mountWindows();
+    await screen.findByText("Detached document window");
+    const controller = restored.app.windows.find(candidate => candidate.window.id === id)!;
+    expect(controller).toBeInstanceOf(Detached);
+    expect(controller.openingOptions).toEqual(options);
+    expect(host.runtime.windows.select(id).record.documentId).toBe(document.id);
+    expect(host.runtime.documents.hasActiveDocumentOwnerLease(document.id, host.appId)).toBe(true);
+    await act(async () => {
+      expect(await restored.app.openWindow(Detached, options)).toBe(controller);
+      await controller.window.close();
+    });
+    await waitFor(() => {
+      expect(host.runtime.documents.hasActiveDocumentOwnerLease(document.id, host.appId)).toBe(false);
+      expect(host.runtime.documents.getDocument(document.id)).toBeNull();
+    });
+  });
+
+  it.each([false, true])("rolls back failed document-window ownership without releasing another controller (existing: %s)", async (withExisting) => {
+    const { host, original, documents, document, Detached } = await openDocumentApplication(`com.example.class-document-failure-${withExisting}`);
+    let existing: NSEWindowController | undefined;
+    if (withExisting) {
+      await act(async () => {
+        existing = await original.app.openWindow(Detached, { documentId: document.id, restorationKey: "existing" });
+      });
+    }
+    const controllers = [...original.app.windows];
+    await expect(original.app.openWindow(Detached, {
+      documentId: document.id, restorationKey: "failed", mobilePolicy: "invalid" as never,
+    })).rejects.toThrow(/mobilePolicy/);
+    expect(original.app.windows).toEqual(controllers);
+    await documents.releaseDocument(document.id);
+    if (existing) {
+      expect(existing.isDisposed).toBe(false);
+      expect(host.runtime.documents.hasActiveDocumentOwnerLease(document.id, host.appId)).toBe(true);
+      await act(async () => { await existing!.window.close(); });
+    }
+    await waitFor(() => {
+      expect(host.runtime.documents.hasActiveDocumentOwnerLease(document.id, host.appId)).toBe(false);
+      expect(host.runtime.documents.getDocument(document.id)).toBeNull();
+    });
+  });
+
+  it("preserves the source facade's independent document owner when a class window closes", async () => {
+    const { host, original, documents, document, Detached } = await openDocumentApplication("com.example.class-document-independent-owner");
+    let detached!: NSEWindowController;
+    await act(async () => { detached = await original.app.openWindow(Detached, { documentId: document.id }); });
+    await act(async () => { await detached.window.close(); });
+    expect(host.runtime.documents.hasActiveDocumentOwnerLease(document.id, host.appId)).toBe(true);
+    await expect(documents.saveDocument(document.id)).resolves.toBeUndefined();
+    await documents.releaseDocument(document.id);
+    await waitFor(() => {
+      expect(host.runtime.documents.hasActiveDocumentOwnerLease(document.id, host.appId)).toBe(false);
+      expect(host.runtime.documents.getDocument(document.id)).toBeNull();
+    });
+  });
+
+  it("rejects documents belonging to another application without disturbing their owner", async () => {
+    const { host, original, Detached } = await openDocumentApplication("com.example.class-document-admission");
+    const foreignAppId = "com.example.foreign-document";
+    host.runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: foreignAppId, route: "/foreign-document" }));
+    const responderId = `application:${foreignAppId}`;
+    host.runtime.responders.register({ id: responderId, kind: "application", parentId: "workspace", scopeId: responderId });
+    const foreign = createMountedSynWareRuntime({ runtime: host.runtime, app: host.runtime.apps.getApp(foreignAppId)!, responderId });
+    try {
+      const document = await foreign.runtime.workspaceDocuments.newDocument({ typeId: "tests.class-document", initialModel: { value: "Foreign" } });
+      const controllers = [...original.app.windows];
+      await expect(original.app.openWindow(Detached, { documentId: document.id, restorationKey: "foreign" })).rejects.toMatchObject({ name: "SecurityError" });
+      expect(original.app.windows).toEqual(controllers);
+      expect(host.runtime.documents.hasActiveDocumentOwnerLease(document.id, host.appId)).toBe(false);
+      expect(host.runtime.documents.hasActiveDocumentOwnerLease(document.id, foreignAppId)).toBe(true);
+    } finally {
+      foreign.dispose();
+    }
+  });
+
   it("opens another window controller with openWindow and gives it its own view", async () => {
     let app!: MultiWindowApp;
     class InspectorWindow extends NSEWindowController {

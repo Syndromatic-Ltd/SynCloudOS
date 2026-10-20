@@ -80,7 +80,7 @@ export async function currentTextDocumentFixture(
     });
     owners.push(owner);
     const history = documents.getUndoManager(document.id);
-    const session = new TextEditingSession({ id: `text-view-${index}`, documentId: document.id, owner, history });
+    const session = new TextEditingSession({ id: `text-view-${index}`, documentId: document.id, textOwner: owner, history });
     sessions.push(session);
     const commands = new NSETextCommands({ session, clipboard: options.clipboard,
       signal: mounted.runtime.signal, historyPresentation: () => history,

@@ -14,6 +14,10 @@ policies as Webspring, and after the primary quits it offers Reopen instead of
 relaunching. See [the application host setup](getting-started.md#mount-one-application)
 for Vite configuration, routing, sign-in and disposal.
 
+The host may supply About attribution with `about: { copyright, trademark, tagline }`.
+The application's name and version still come from its own Info.ts; without attribution its
+About menu item is not shown.
+
 ## Anatomy of a bundle
 
 ```text
@@ -63,6 +67,38 @@ Optional named exports customise the application:
 | `rematerialiseOwnedDocument` | Restores an app-owned document projection when rematerialising it. |
 
 `createSynWare` is not a production authoring export. Test hosts may import it from `sdk/testing` when constructing definitions explicitly.
+
+## Class-app API reference
+
+See [Applications](applications.md) for the complete class tree and ownership rules.
+
+| API | Contract and example |
+| --- | --- |
+| `SCOS.routes.state(graph, name)` | Typed `{ getQuery, subscribe, pushQuery, replaceQuery, createUrl }`; `SCOS.routes.state(routes, "catalogue").pushQuery({ page: 2 })`. |
+| `SCOS.routes.isActive(graph, target, { exact? }?)` | Tests the canonical committed route; `SCOS.routes.isActive(routes, { name: "catalogue" })`. |
+| `SCOS.routes.subscribe(listener)` | Observes committed routing changes; returns a disposer. |
+| `SCOS.fonts` | The font-access client, including `.manager` and `.loadFace(...)`; the configured host catalogue is available during `applicationDidFinishLaunching` and stays the same when the view mounts. |
+| `SCOS.menus.runtime` | Scoped NSE menu runtime for controller construction; `new NSEToolbarController({ owner: this, configuration, items, preferences, runtime: SCOS.menus.runtime })`. |
+| `NSEViewController.traitCollection` | `{ reducedMotion, presentation }`; presentation is `SynCloudOSPresentationTraits` or `null`. Override `traitCollectionDidChange(previous)` to react. |
+| `NSEViewController.viewWillLayout()` / `viewDidLayout()` | Called after DOM commits and on frame resize. `this.view.element.getBoundingClientRect()` reads the committed view. |
+| `NSEApplication.openWindow(Controller, options?)` | Returns `Promise<Controller>`; options include title, width, height, documentId, restorationKey, mobilePolicy and explicit/centred/cascaded preferredBounds. |
+| `SCOS.commands.subscribePresentation(listener)` | Returns a disposer; invalidates command presentation after registry, responder or focus changes and stops with the app scope. |
+| `NSEApplication.windowControllers` | Static name-to-class declaration for cold restoration, such as `{ detachedNote: DetachedNoteWindow }`; recreated controllers receive their original `openingOptions`. |
+| `@action(options)` | Adds `menuCategory`, `keyBindings`, `allowReservedBrowserShortcut` to the title/id/payload declaration, with ordinary command semantics. |
+| `useAction(name, payload?)` | `{ perform(payload?: unknown): Promise<CommandDispatchResult \| null>, enabled, state }`; no argument uses the bound payload, while an event-time argument gets fresh validation through responders and `validateX`. NSE segmented, popup/picker and cover-flow controls accept `action`/`actionPayload`. |
+| `createSynWareTestHost({ application, manifest, services? })` | Launches a class app; `host.application.windows` exposes controllers. `services: [[token, client]]` registers real typed app clients. `host.persistence` is the app's preference store. |
+| `createSynWareTestHost({ diagnostics: provider })` | Host-only `AppTrustedDiagnosticsClient` provision, still requiring `diagnostics.view`; use `host.diagnostics.replace(provider)` or `.revoke()` to change authority and abort old work. |
+| `host.mediaQueries.setMatches(query, matches)` | Controls the test environment's real media queries. Set initial matches before rendering; for live frame-coalesced changes call `host.clock.advance(16)` inside `act`. |
+| `NSEPopup` | Omitting `parentResponderId` inherits the nearest class controller. Child controllers inside its portal join its focus scope, so modal focus containment and ancestor action lookup both hold. |
+| `SynWareIntegrationInput.applicationDocuments` | A configuration or `(environment) => configuration \| Promise<configuration>`; construct recovery storage with the injected environment. Installation receives scoped clock/timer ports as `context.environment`. |
+| `WebspringWidgetViewProps.navigate(route)` | `Promise<ActionResult>` from shell navigation. Prevent a link's default navigation, then call `navigate("/notes/latest")`. |
+
+`SCOS` is established before application launch callbacks, not by the first React render.
+Every controller accepts an ambient owner or `owner: this` and is disposed with that owner;
+late unowned construction in class applications throws `NSE_CONTROLLER_UNOWNED`.
+Text editing distinguishes its content authority, `textOwner`, from its lifecycle `owner`.
+Action controls and `useAction` follow registry, focus and observable responder changes. They retry
+stale asynchronous validation instead of leaving a control disabled after another view registers commands.
 
 ## SCOS
 

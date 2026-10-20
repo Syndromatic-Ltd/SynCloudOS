@@ -12,7 +12,7 @@ cd my-site
 npm install https://github.com/Syndromatic-Ltd/SynCloudOS/releases/download/v1.0.0-beta.1/syndromatic-syncloudos-1.0.0-beta.1.tgz
 ```
 
-The public beta is distributed as a release archive, not an npm registry release. From a framework checkout, `npm ci --ignore-scripts && npm run sdk:build` produces the corresponding archive in `.artifacts/synapp-sdk/archives/`. Install that archive when working against a local framework build. The Vite template supplies React, ReactDOM, TypeScript, their types, Vite and its React plugin. Each application declares its own version in `Info.ts`; the project package version is not a fallback.
+The public beta is distributed as a release archive, not an npm registry release. The link above is the published beta.1 archive; this checkout builds the unpublished `1.0.0-beta.2` candidate. From a framework checkout, `npm ci --ignore-scripts && npm run sdk:build` produces that candidate in `.artifacts/synapp-sdk/archives/`. Install the local archive when adopting the candidate. The Vite template supplies React, ReactDOM, TypeScript, their types, Vite and its React plugin. Each application declares its own version in `Info.ts`; the project package version is not a fallback.
 
 If npm reports a blocked esbuild install script, inspect your local npm policy. It is not an SDK error. Approve only trusted scripts if the platform binary is missing; npm 12 provides `npm approve-scripts esbuild`.
 

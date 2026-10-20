@@ -330,8 +330,12 @@ export function createLifecycle(
     if (!hookName || !isNamedLifecycleHook(namedHook)) {
       // An application written as an NSEApplication class carries its hooks on the root component of its definition.
       const root = (bundle.synWareDefinition ?? BundleLoader.getLoadedBundle(appId)?.definition)?.root;
-      const applicationHook = applicationLifecycleFor(root)?.hookFor(stage, phase);
-      return applicationHook ? { invoke: (context) => applicationHook(context) } : null;
+      const application = applicationLifecycleFor(root);
+      const applicationHook = application?.hookFor(stage, phase);
+      return applicationHook ? { invoke: (context) => {
+        application?.prepare?.(runtime, appId, stage);
+        return applicationHook(context);
+      } } : null;
     }
     return {
       hookName,

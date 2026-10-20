@@ -74,7 +74,7 @@ describe("document semantic text owners", () => {
   it("refreshes an actual conflict-local adoption and preserves it on the next session edit", () => {
     const { document, port } = fixture();
     const owner = createNSEDocumentTextOwner({ document: port, flowId: "main", readContent: model => model.main, writeContent: (model, next) => ({ ...model, main: next }) });
-    const session = new TextEditingSession({ id: "conflict", owner });
+    const session = new TextEditingSession({ id: "conflict", textOwner: owner });
     document.enterConflict({ base: null, localModel: { ...document.model, main: content("NEW") }, remote: null });
     expect(owner.getSnapshot().text).toBe("NEW"); expect(owner.getSnapshot().revision).toBe(1);
     session.select(3); session.insertText("!"); expect(createNSETextSnapshot(document.model.main).text).toBe("NEW!");
@@ -98,7 +98,7 @@ describe("document semantic text owners", () => {
   it("revokes on same-revision native model changes even when a violating port does not emit", () => {
     const { document, port } = fixture(); let model = document.model;
     const owner = createNSEDocumentTextOwner({ document: { ...port, getSnapshot: () => ({ ...document.snapshot(), model }) }, flowId: "main", readContent: model => model.main, writeContent: (model, next) => ({ ...model, main: next }) });
-    const session = new TextEditingSession({ id: "bad-port", owner }); const target = session.captureTarget();
+    const session = new TextEditingSession({ id: "bad-port", textOwner: owner }); const target = session.captureTarget();
     model = { ...model, main: content("changed without revision") };
     expect(() => owner.getSnapshot()).toThrow(SynCloudOSLifecycleError);
     expect(() => owner.getSnapshot()).toThrow(expect.objectContaining({ code: "NSE_DOCUMENT_TEXT_OWNER_DISPOSED", operation: "getSnapshot", disposal: expect.objectContaining({ reason: "document-revoked" }) })); expect(owner.signal?.aborted).toBe(true);
@@ -132,7 +132,7 @@ describe("document semantic text owners", () => {
     const port = { getSnapshot: () => document.snapshot(), subscribe: document.subscribe.bind(document), transact: document.transact.bind(document) };
     const main = createNSEDocumentTextOwner({ document: port, flowId: "main", readContent: model => model.main, writeContent: (model, next) => ({ ...model, main: next }) });
     const note = createNSEDocumentTextOwner({ document: port, flowId: "note", readContent: model => model.note, writeContent: (model, next) => ({ ...model, note: next }) });
-    const session = new TextEditingSession({ id: "main-view", owner: main, history: document.undoManager });
+    const session = new TextEditingSession({ id: "main-view", textOwner: main, history: document.undoManager });
     session.insertText("!");
     const committed = createNSETextSnapshot(document.snapshot().model.main);
     expect(committed.text).toBe("!main");

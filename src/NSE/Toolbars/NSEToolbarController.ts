@@ -20,6 +20,7 @@
 
 import type { CommandDispatchResult, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
 import { commandValidationRequestKey, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/nseRuntimeContracts";
+import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
 import type {
   NSEToolbarConfiguration,
   NSEToolbarControllerOptions,
@@ -178,6 +179,7 @@ export class NSEToolbarController {
   readonly runtime;
   readonly #catalogue: ReadonlyMap<string, NSEToolbarItem>;
   readonly #lifecycle: SynCloudOSLifecycleRecord;
+  readonly #ownership: NSEControllerLifetime;
   readonly #listeners = new Set<() => void>();
   #snapshot: NSEToolbarSnapshot = initialSnapshot;
   #validation: AbortLease | null = null;
@@ -191,9 +193,11 @@ export class NSEToolbarController {
     this.dispose();
   };
 
-  constructor({ configuration, items, preferences, runtime }: NSEToolbarControllerOptions) {
+  constructor(options: NSEToolbarControllerOptions) {
+    const { configuration, items, preferences, runtime } = options;
     if (!configuration.identifier.trim()) throw new TypeError("NSE toolbar identifiers must not be empty.");
-    this.#lifecycle = new SynCloudOSLifecycleRecord({ kind: "NSEToolbarController", id: configuration.identifier });
+    this.#ownership = new NSEControllerLifetime(options, { kind: "NSEToolbarController", id: configuration.identifier });
+    this.#lifecycle = this.#ownership.record;
     assertOwner(configuration.owner);
     if (!validDisplayMode(configuration.displayMode) || !validSizeMode(configuration.sizeMode)) {
       throw new TypeError(`NSE toolbar "${configuration.identifier}" has an invalid display or size mode.`);
@@ -238,9 +242,11 @@ export class NSEToolbarController {
     });
     if (runtime.signal.aborted) this.#runtimeAbort();
     else runtime.signal.addEventListener("abort", this.#runtimeAbort, { once: true });
+    this.#ownership.bind(() => this.dispose());
   }
 
   get snapshot(): NSEToolbarSnapshot { return this.#snapshot; }
+  get isDisposed(): boolean { return this.#disposed; }
 
   subscribe(listener: () => void): () => void {
     if (this.#disposed) return () => undefined;
@@ -415,6 +421,7 @@ export class NSEToolbarController {
     if (this.#disposed) return;
     this.#lifecycle.markDisposed("explicit");
     this.#disposed = true;
+    this.#ownership.dispose();
     this.#generation += 1;
     this.#validation?.dispose();
     this.#validation = null;

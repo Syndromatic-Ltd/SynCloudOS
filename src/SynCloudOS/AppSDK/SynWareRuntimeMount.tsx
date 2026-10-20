@@ -28,7 +28,7 @@ import type { SynWareRuntime } from "./appRuntimeTypes";
 import { createSynWareContextValue } from "./createSynWareContextValue";
 import { SynWareProvider } from "./SynWareContext";
 import { useSCOS } from "./scos/useSCOS";
-import { createFontCatalogueResourceLoader, useFontCatalogue } from "./fontAccess";
+import { createFontCatalogueResourceLoader, FontCatalogueProvider, useFontCatalogue } from "./fontAccess";
 import { createSynWareNSEAnimations } from "./SynWareNSEMediaAdapters";
 import { NSEAnimationEnvironmentProvider, NSEPresenceBoundary, type NSEAnimator } from "../../NSE/Animation";
 import type { SynWareContextValue } from "./appContextTypes";
@@ -42,6 +42,7 @@ import { DevInspectorRegion } from "../../SynCloudOSReact/DevInspectorRegion";
 import type { InspectorRouteInspectionPort } from "../Inspector/inspectorOwnerSources";
 import type { AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
 import { createRuntimeAnimationState, createScopedAnimationFrames } from "../AnimationFX/scopedAnimationFrames";
+import { installControllerServices } from "./controllerServices";
 
 // Host-only bridge entrypoint. This is deliberately not exported from the
 // public AppSDK package barrel: applications receive only the chrome hook.
@@ -141,7 +142,7 @@ function MountedAppPresentationBoundary({
  */
 export function SynWareRuntimeMount({ runtime, app, responderId, windowControllerId, children }: SynWareRuntimeMountProps) {
   const branding = useHostSiteBranding();
-  const fontCatalogue = useFontCatalogue();
+  const fontCatalogue = useFontCatalogue(runtime);
   const hostFontResourceLoader = useMemo(() => createFontCatalogueResourceLoader(fontCatalogue), [fontCatalogue]);
   const key = `${runtime.runtimeId}\u0000${app.bundleIdentifier}\u0000${responderId}\u0000${windowControllerId ?? ""}`;
   const [mounted, setMounted] = useState<MountedState | null>(null);
@@ -232,6 +233,7 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
         throw error;
       }
       const state = Object.freeze({ key, registrationAuthority, mount, hostFontResourceLoader, contextBase: createSynWareContextValue(mount.runtime) });
+      installControllerServices(state.contextBase, runtime, fontCatalogue);
       lease = { state, locallyDisposed: false };
       mountedLeaseRef.current = lease;
     }
@@ -468,9 +470,11 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     <SynCloudOSRuntimeContext.Provider value={null}>
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
         <SynWareProvider value={context}>
-          <MountedAppPresentationBoundary runtime={mounted.mount.runtime} kernelRuntime={runtime}>
-            {presentedChildren}
-          </MountedAppPresentationBoundary>
+          <FontCatalogueProvider catalogue={fontCatalogue}>
+            <MountedAppPresentationBoundary runtime={mounted.mount.runtime} kernelRuntime={runtime}>
+              {presentedChildren}
+            </MountedAppPresentationBoundary>
+          </FontCatalogueProvider>
         </SynWareProvider>
       </SynWareRuntimeContext.Provider>
     </SynCloudOSRuntimeContext.Provider>

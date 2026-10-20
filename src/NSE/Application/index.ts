@@ -36,5 +36,6 @@ export type {
   NSEViewComponent,
   NSEViewControllerClass,
   NSEViewControllerOptions,
+  NSETraitCollection,
 } from "./NSEViewController";
 export type { NSEViewControllerFX, NSEViewControllerFXClients } from "./viewControllerFX";

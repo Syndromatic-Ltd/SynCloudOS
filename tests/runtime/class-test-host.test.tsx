@@ -1,0 +1,77 @@
+// @vitest-environment jsdom
+import * as React from "react";
+import { afterEach, expect, it } from "vitest";
+import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
+import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
+import { createSynWareTestHost } from "../../src/SynCloudOS/AppSDK/testing/createSynWareTestHost";
+import { createAppSCOS } from "../../src/SynCloudOS/AppSDK/scos/scosFacade";
+import type { SynWareTestHost } from "../../src/SynCloudOS/AppSDK/testing/testHostTypes";
+import { defineSynWareServiceToken } from "../../src/SynCloudOS/AppSDK/serviceToken";
+import { defineSynWareRoutes } from "../../src/SynCloudOS/AppSDK/defineSynWareRoutes";
+import { routeQuery } from "../../src/SynCloudOS/Routing/routeQuery";
+import { act } from "@testing-library/react";
+const hosts: SynWareTestHost[] = [];
+afterEach(async () => { for (const host of hosts.splice(0)) await host.dispose(); });
+it("launches a real class app with running services and exposes its live window controllers and preferences", async () => {
+  const services = createAppSCOS("com.example.class-test-host");
+  class MainWindow extends NSEWindowController { static override view = () => <p>Class test window</p>; }
+  class Application extends NSEApplication {
+    static override mainWindow = MainWindow;
+    override applicationDidFinishLaunching() { services.preferences.set("launched", true); }
+  }
+  const host = createSynWareTestHost({ application: Application, manifest: { schemaVersion: 1, bundleIdentifier: "com.example.class-test-host", displayName: "Class test", version: "1.0.0", routes: [{ path: "/class-test", primary: true }] }, document });
+  hosts.push(host);
+  host.adapters.storage.local.allow();
+  host.adapters.credentials.allow();
+  host.persistence.setPreference("beforeLaunch", "kept");
+  const view = await host.render();
+  expect(view.container.textContent).toContain("Class test window");
+  expect(host.application).toBeInstanceOf(Application);
+  expect(host.application!.windows[0]).toBeInstanceOf(MainWindow);
+  expect(host.persistence.getPreference("launched")).toBe(true);
+  expect(services.preferences.get("beforeLaunch")).toBe("kept");
+  services.preferences.set("fromController", 42);
+  expect(host.persistence.entries()).toContainEqual({ key: "fromController", value: 42 });
+});
+
+it("provides declared typed services to controllers through the ordinary service boundary", async () => {
+  const token = defineSynWareServiceToken<{ read(): string }>({ id: "class.catalogue", contractVersion: "catalogue.v1", minimumVersion: "2.0.0" });
+  const scos = createAppSCOS("com.example.class-service");
+  class MainWindow extends NSEWindowController { static override view = () => <p>Service window</p>; }
+  class Application extends NSEApplication {
+    static override mainWindow = MainWindow;
+    result = "";
+    override applicationDidFinishLaunching() { this.result = scos.services.require(token).read(); }
+  }
+  const host = createSynWareTestHost({ application: Application, manifest: { schemaVersion: 1, bundleIdentifier: "com.example.class-service", displayName: "Service app", version: "1.0.0", services: [{ id: token.id, required: true, minimumVersion: "2.0.0" }] }, services: [[token, { read: () => "catalogue" }]], document });
+  hosts.push(host);
+  host.adapters.services.allow();
+  host.adapters.permissions.allow();
+  host.adapters.policy.allow();
+  await host.render();
+  expect((host.application as Application).result).toBe("catalogue");
+});
+
+it("pushes and replaces route queries from a controller and notifies subscribers", async () => {
+  const graph = defineSynWareRoutes({ id: "class.routes", routes: [{ name: "catalogue", path: "", query: { page: routeQuery.integer({ defaultValue: 1 }) } }] } as const);
+  const scos = createAppSCOS("com.example.class-routes");
+  class MainWindow extends NSEWindowController { static override view = () => <p>Route window</p>; }
+  class Application extends NSEApplication { static override mainWindow = MainWindow; static override routes = graph; }
+  const host = createSynWareTestHost({ application: Application, manifest: { schemaVersion: 1, bundleIdentifier: "com.example.class-routes", displayName: "Routes", version: "1.0.0", routes: [{ path: "/catalogue", primary: true, match: "prefix" }] }, document });
+  hosts.push(host);
+  host.adapters.navigation.allow();
+  await host.render();
+  const state = scos.routes.state(graph, "catalogue");
+  const seen: number[] = [];
+  const remove = state.subscribe(() => { seen.push(state.getQuery().page); });
+  await act(async () => { await scos.open("/catalogue"); });
+  await act(async () => { await state.pushQuery({ page: 2 }).result; });
+  expect(state.getQuery().page).toBe(2);
+  expect(seen).toContain(2);
+  expect(scos.routes.isActive(graph, { name: "catalogue" })).toBe(true);
+  await act(async () => { await state.replaceQuery({ page: 3 }).result; });
+  expect(state.getQuery().page).toBe(3);
+  expect(scos.fonts.manager).toBeTruthy();
+  expect(scos.menus.runtime.resolveAction?.("refresh")).toBe("com.example.class-routes.refresh");
+  remove();
+});

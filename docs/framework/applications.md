@@ -10,6 +10,9 @@ operation's timeout (`lifecycleHookTimeoutMs`, 5 seconds unless the host raises 
 `static migrations` declare what `createSynWare` took before, and a `handleBackgroundTask(taskId, { signal })`
 method handles background tasks.
 
+`SCOS` is running before the launch callbacks, including `applicationDidFinishLaunching`.
+Preferences, services, routes and secondary-window creation do not depend on a React view mounting.
+
 ```tsx
 import { NSEApplication, NSEWindowController, useObserve } from "@syndromatic/syncloudos";
 import { NSEArrayController } from "@syndromatic/syncloudos/nse";
@@ -70,6 +73,28 @@ application quit it is skipped: `applicationShouldTerminate` decides whether the
 `windowWillClose` runs when the close can no longer be stopped; `windowDidBecomeKey` and
 `windowDidResignKey` report key-window changes. A window controller opened for a document has `document`.
 
+`openWindow(Controller, options)` also accepts `documentId`, `restorationKey`, `mobilePolicy` and
+`preferredBounds`. Bounds are either `{ x, y, width, height }`, `"centred"` or `"cascaded"`; named
+placement uses `width`/`height` (or the app defaults) within the current work area. A document ID
+opens a secondary window for a live document owned by the app, with the usual document admission checks.
+The constructor receives the options, and `openingOptions` retains them.
+
+Name restorable secondary controllers on the application so a fresh launch can recreate the
+correct class, not another instance of the main controller:
+
+```ts
+class NotesApp extends NSEApplication {
+  static mainWindow = NotesWindow;
+  static windowControllers = { detachedNote: DetachedNoteWindow };
+  detach(documentId: string) {
+    return this.openWindow(DetachedNoteWindow, {
+      documentId, restorationKey: `note.${documentId}`, title: "Note",
+      width: 640, height: 480, preferredBounds: "centred", mobilePolicy: "sheet",
+    });
+  }
+}
+```
+
 ## View controllers
 
 `NSEViewController` manages a React view and owns child view controllers. `static view` receives
@@ -101,6 +126,32 @@ function WorkspaceView({ controller }: { readonly controller: WorkspaceControlle
   return <main><NSEViewControllerView controller={controller.sidebar} /></main>;
 }
 ```
+
+A child's frame imposes no width or height: its parent lays it out, including inside scroll areas.
+`viewWillLayout()` and `viewDidLayout()` run after the view's DOM commits and when its frame resizes.
+Read `this.view.element` in these callbacks rather than calling controller layout methods from a React effect.
+
+`traitCollection.reducedMotion` comes from the NSE animation environment, including inherited overrides.
+`traitCollection.presentation` is the content-bound `SynCloudOSPresentationTraits` snapshot, or `null`
+outside an application. Override `traitCollectionDidChange(previous)` to react; controller observers
+are notified too. For example, stop a decorative animation when `this.traitCollection.reducedMotion` is true.
+
+## Controller services
+
+Controllers use the same services as thin views, without passing clients back from hooks:
+
+```ts
+const page = SCOS.routes.state(routes, "catalogue");
+const stop = page.subscribe(() => this.refreshResults(page.getQuery()));
+page.pushQuery({ search: "Manchester" });       // replaceQuery updates the current history entry
+SCOS.routes.isActive(routes, { name: "catalogue" });
+const fonts = SCOS.fonts.manager;
+const toolbar = new NSEToolbarController({ owner: this, configuration, items, preferences, runtime: SCOS.menus.runtime });
+```
+
+`SCOS.routes.subscribe(listener)` observes committed routing changes. Query clients retain the
+route graph's inferred query types and use the same canonical navigation transaction as `useRouteState`.
+Keep subscription disposers on the owning controller and release them when it disappears or is disposed.
 
 ## Ownership
 
@@ -175,6 +226,49 @@ Controls and menus send the action by name; the responder chain does the rest: t
 ```
 
 A menu item is `{ kind: "command", id: "new", action: "newNote" }`. Every control and menu item that names the action follows its validation, so one `validateNewNote()` disables them all. [Commands, responders and undo](commands-responders-undo.md#actions-on-class-based-applications) lists the rules: payloads, validation results, standard command IDs and how names resolve.
+
+`@action({ menuCategory: "edit", keyBindings: [{ key: "f", modifiers: ["primary"], scope: "application" }], allowReservedBrowserShortcut: true })`
+uses the same menu and keyboard rules as a command definition. `keyBindings` is a list of the usual
+key-binding declarations; browser-reserved shortcuts require the explicit opt-in.
+
+`useAction(name, payload?)` returns `{ perform, enabled, state }`, where `state` is `"off"`, `"on"` or
+`"mixed"`. Use it for custom links or artwork; it validates and dispatches through the responder chain:
+
+```tsx
+const activation = useAction("openNote", { id: note.id });
+return <a href={note.url} aria-disabled={!activation.enabled} onClick={event => {
+  event.preventDefault();
+  void activation.perform();
+}}>{note.title}</a>;
+```
+
+`perform(payload?: unknown)` returns a promise of the canonical dispatch result, or `null` when
+preparation is rejected or cancelled. `perform()` uses the payload bound by `useAction`; supplying
+an argument overrides it, including `perform(undefined)`. Each supplied payload is parsed and
+validated afresh against the focused responder chain before execution. Pending preparation is
+rejected if command or responder authority changes, the application is disposed, or the hook unmounts.
+
+`enabled` and `state` always describe the bound payload, not a future event's value. For a selection,
+search or drop callback, call `perform(eventPayload)` directly: an unavailable bound `undefined`
+does not prevent a valid event payload from being prepared. The event payload must still pass the
+action's payload schema and `validate<Name>()`; it does not inherit the bound payload's acceptance.
+
+```tsx
+const selection = useAction("selectNote");
+return <NoteList onSelectionChange={id => { void selection.perform({ id }); }} />;
+```
+
+Segmented controls, popup/picker controls and cover-flow activation also accept `action` and
+`actionPayload`, with the same validation as push buttons. They do not call action methods directly.
+Without `actionPayload`, segmented controls and cover flow send the activated item's ID, pickers
+send the chosen option's value, and a popup-button trigger sends its menu model's ID. Candidate
+choices are validated individually. An explicitly supplied payload, including `undefined`, overrides
+these defaults; use `actionPayload={undefined}` for a no-argument action.
+
+Omit `parentResponderId` on an `NSEPopup` rendered by a class controller. It inherits that
+controller's responder ancestry through its portal, so focused editor actions can fall back to the
+parent controller's actions while the popup keeps its modal focus scope. Use an explicit parent
+only when you intend to change the popup's focus parent.
 
 `useCommands` stays the way to declare commands in a function-component application.
 

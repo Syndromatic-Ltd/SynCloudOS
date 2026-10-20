@@ -57,8 +57,8 @@ describe("standalone text history", () => {
   });
   it("uses the existing history manager without backend history or document runtime", async () => {
     const owner = createUndoableNSETextOwner({ flowId: "note" });
-    const first = new TextEditingSession({ id: "first", owner, history: owner.history });
-    const second = new TextEditingSession({ id: "second", owner, history: owner.history });
+    const first = new TextEditingSession({ id: "first", textOwner: owner, history: owner.history });
+    const second = new TextEditingSession({ id: "second", textOwner: owner, history: owner.history });
     first.insertText("hello"); second.select(5); second.insertText("!");
     expect(owner.history.getSnapshot()).toMatchObject({ canUndo: true, canRedo: false });
     await first.requestHistory("undo"); expect(owner.getSnapshot().text).toBe("hello");

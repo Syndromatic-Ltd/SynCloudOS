@@ -25,6 +25,8 @@ import type { NSEDragCommandPort } from "../../Drag";
 import type { NSEDragSessionPort } from "../../Drag/dragSessionPort";
 import { NSEColourPanelController } from "./NSEColourPanelController";
 import type { NSEColourPanelControllerOptions } from "./colourPanelTypes";
+import { nseUnowned } from "../../Controllers/ownership";
+import { useNSEDeferredDisposal } from "../../interactionLifecycle";
 
 export type NSEColourPanelServicePort = Pick<
   ColourPanelService,
@@ -57,7 +59,8 @@ export function NSEColourPanelProvider({ service, options, commands, responderId
   if (drag && service.ownerToken !== drag.manager.ownerToken) {
     throw new TypeError("NSE colour panel and drag authorities must belong to the same runtime.");
   }
-  const controller = useMemo(() => new NSEColourPanelController(service, options), [service, options?.preferences, options?.transferAdapter, options?.undoManager]);
+  const controller = useMemo(() => new NSEColourPanelController(service, { owner: nseUnowned, ...options }), [service, options?.owner, options?.ownerSignal, options?.preferences, options?.transferAdapter, options?.undoManager]);
+  useNSEDeferredDisposal(controller);
   const commandResponderId = responderId ?? "colour-panel";
   // The panel's commands (Show Colours, …) belong to the one shared panel: a
   // provider nested inside another over the same service leaves them there.

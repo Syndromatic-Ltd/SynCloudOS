@@ -113,6 +113,7 @@ export function NSEToolbarOverflowMenu({
   const requestOpen = useCallback((nextOpen: boolean) => {
     if (nextOpen && !menuController) {
       setMenuController(new NSEMenuController({
+        ownerSignal: controller.runtime.signal,
         model,
         runtime: {
           signal: controller.runtime.signal,

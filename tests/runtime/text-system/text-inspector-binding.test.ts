@@ -23,7 +23,7 @@ import { createInMemoryNSETextOwner,plainNSETextContent } from "../../../src/NSE
 import { TextEditingSession } from "../../../src/NSE/TextEditing/TextEditingSession";
 import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 const api=await import("../../../src/NSE/TextEditing/textInspectorBinding").catch(()=>null);
-const setup=()=>{expect(api?.NSETextInspectorBinding).toBeTypeOf("function");const owner=createInMemoryNSETextOwner({content:plainNSETextContent("word")}),session=new TextEditingSession({id:"inspector",owner,documentId:"doc:one"});session.select(0,4);return {owner,session,binding:new api!.NSETextInspectorBinding({session,id:"size"})};};
+const setup=()=>{expect(api?.NSETextInspectorBinding).toBeTypeOf("function");const owner=createInMemoryNSETextOwner({content:plainNSETextContent("word")}),session=new TextEditingSession({id:"inspector",textOwner:owner,documentId:"doc:one"});session.select(0,4);return {owner,session,binding:new api!.NSETextInspectorBinding({session,id:"size"})};};
 it("retains invalid drafts, previews without commits, and applies one validated field change with no local undo",async()=>{
   const {owner,session,binding}=setup();binding.begin(12);binding.preview(20);expect(owner.getSnapshot().revision).toBe(0);
   const invalid=await binding.commit(()=>{throw new Error("should not apply");},()=>[{code:"bad",message:"Bad size"}]);expect(invalid.status).toBe("invalid");expect(binding.controller.getSnapshot().draft).toEqual({value:20});expect(binding.controller.getSnapshot().issues[0]?.code).toBe("bad");

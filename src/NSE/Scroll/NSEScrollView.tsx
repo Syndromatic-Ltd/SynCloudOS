@@ -22,6 +22,7 @@ import { useEffect, useRef, useState, type CSSProperties, type HTMLAttributes, t
 import { useNSERubberBandScroll } from "./index";
 import { NSEScroller } from "./NSEScroller";
 import { NSEScrollViewController, type NSEScrollerPolicy, type NSEScrollInsets } from "./scrollTypes";
+import { nseUnowned } from "../Controllers/ownership";
 
 export interface NSEScrollViewGeometrySnapshot {
   readonly viewport: { readonly width: number; readonly height: number };
@@ -90,14 +91,14 @@ export function NSEScrollView({
   useEffect(() => {
     const host = scrollRef.current;
     if (!host) return;
-    const controller = new NSEScrollViewController(host, insetsRef.current);
+    const controller = new NSEScrollViewController(host, insetsRef.current, { owner: nseUnowned });
     controllerRef?.(controller);
     const disconnect = controller.connect(() => {
       callbacks.current.onScrollSnapshot?.();
       publishGeometry();
     });
     publishGeometry();
-    return () => { disconnect(); controllerRef?.(null); };
+    return () => { disconnect(); controller.dispose(); controllerRef?.(null); };
   }, []);
   useEffect(() => {
     const host = scrollRef.current;

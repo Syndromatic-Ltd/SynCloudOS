@@ -23,6 +23,7 @@ import { defineSyncUndoAction } from "../../../SynCloudOS/nseRuntimeContracts";
 import { GFXColour } from "../../../FX/GraphicsFX/public";
 import { parseNSEColourTransfer, serialiseNSEColourTransfer } from "../Transfer";
 import type { NSEColourChange, NSEColourPanelControllerOptions, NSEColourPanelSnapshot, NSEColourPicker, NSEColourTarget } from "./colourPanelTypes";
+import { NSEControllerLifetime } from "../../Controllers/controllerLifetime";
 
 type NSEColourPanelServicePort = Pick<
   ColourPanelService,
@@ -58,8 +59,11 @@ export class NSEColourPanelController {
   #applyingUndo = false;
   #serviceSnapshot: ReturnType<ColourPanelService["getSnapshot"]> | null = null;
   #facadeSnapshot: NSEColourPanelSnapshot | null = null;
+  readonly #lifetime: NSEControllerLifetime;
+  readonly #registrations = new Set<() => void>();
 
   constructor(runtime: Pick<SynCloudOSRuntime, "colourPanel"> | NSEColourPanelServicePort, options: NSEColourPanelControllerOptions = {}) {
+    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEColourPanelController", id: "colour-panel" });
     this.#service = "colourPanel" in runtime ? runtime.colourPanel : runtime;
     this.#undoManager = options.undoManager;
     this.#preferences = options.preferences;
@@ -69,15 +73,42 @@ export class NSEColourPanelController {
       this.#service.setSwatches(palette.swatches);
       for (const recent of [...palette.recents].reverse()) this.#service.addRecent(recent);
     }
+    this.#lifetime.bind(() => this.dispose());
   }
 
+  get isDisposed(): boolean { return this.#lifetime.isDisposed; }
+
+  dispose(): void {
+    if (!this.#lifetime.dispose()) return;
+    const failures: unknown[] = [];
+    for (const release of [...this.#registrations].reverse()) {
+      try { release(); } catch (error) { failures.push(error); }
+    }
+    this.#registrations.clear();
+    this.#pickers.clear();
+    this.#alphaTargets.clear();
+    this.#facadeSnapshot = null;
+    if (failures.length) throw new AggregateError(failures, "Colour panel registrations failed to dispose.");
+  }
+
+  #ownRelease(release: () => void): () => void {
+    let live = true;
+    const stop = () => {
+      if (!live) return;
+      live = false;
+      this.#registrations.delete(stop);
+      release();
+    };
+    this.#registrations.add(stop);
+    return stop;
+  }
   getSnapshot = (): NSEColourPanelSnapshot => {
     const snapshot = this.#service.getSnapshot();
     if (snapshot === this.#serviceSnapshot && this.#facadeSnapshot) return this.#facadeSnapshot;
     this.#serviceSnapshot = snapshot;
     this.#facadeSnapshot = Object.freeze({
       open: snapshot.open,
-      status: snapshot.status,
+      status: this.#lifetime.isDisposed ? "disposed" : snapshot.status,
       activeTargetId: snapshot.activeTargetId,
       activePickerId: snapshot.activePickerId,
       current: snapshot.currentCSS === null ? null : GFXColour.parse(snapshot.currentCSS),
@@ -90,7 +121,10 @@ export class NSEColourPanelController {
     return this.#facadeSnapshot;
   };
 
-  subscribe = (listener: () => void) => this.#service.subscribe(listener);
+  subscribe = (listener: () => void) => {
+    this.#lifetime.assertLive("subscribe");
+    return this.#ownRelease(this.#service.subscribe(listener));
+  };
 
   /** The one panel this controller drives: every controller in a runtime
    * shares it (the system's, and any an app mounts), as every NSColorPanel
@@ -98,6 +132,7 @@ export class NSEColourPanelController {
   get sharedPanelKey(): string { return this.#service.getSnapshot().runtimeId; }
 
   activateTarget(target: NSEColourTarget): () => void {
+    this.#lifetime.assertLive("activateTarget");
     const adapt = (change: ColourPanelServiceChange): NSEColourChange => Object.freeze({
       previous: GFXColour.parse(change.previousCSS),
       current: GFXColour.parse(change.currentCSS),
@@ -195,10 +230,10 @@ export class NSEColourPanelController {
       commit,
       cancel: (change) => target.cancel(adapt(change)),
     });
-    return () => {
+    return this.#ownRelease(() => {
       this.#alphaTargets.delete(target.id);
       release();
-    };
+    });
   }
 
   /** Whether the target edits opacity, so the panel shows it (NSColorPanel.showsAlpha). */
@@ -213,6 +248,7 @@ export class NSEColourPanelController {
   }
 
   registerPicker(picker: NSEColourPicker): () => void {
+    this.#lifetime.assertLive("registerPicker");
     if (this.#pickers.has(picker.id)) throw new Error(`Colour picker ${picker.id} is already registered.`);
     this.#pickers.set(picker.id, picker);
     const unregister = this.#service.registerPicker({
@@ -222,20 +258,22 @@ export class NSEColourPanelController {
       supportedSpaces: picker.supportedSpaces,
     });
     let registered = true;
-    return () => { if (!registered) return; registered = false; this.#pickers.delete(picker.id); unregister(); };
+    return this.#ownRelease(() => { if (!registered) return; registered = false; this.#pickers.delete(picker.id); unregister(); });
   }
 
   getPicker(id: string): NSEColourPicker | null { return this.#pickers.get(id) ?? null; }
   getPickers(): readonly NSEColourPicker[] { return Object.freeze([...this.#pickers.values()].sort((a, b) => a.order - b.order || a.id.localeCompare(b.id))); }
-  open(): void { this.#service.open(); }
-  close(reason: ColourPanelCloseReason): void { this.#service.close(reason); }
-  choosePicker(id: string): void { this.#service.choosePicker(id); }
-  preview(colour: GFXColour, reason: ColourPanelServiceChange["reason"]): void { this.#service.preview(colour.toCSS(), reason); }
+  open(): void { this.#lifetime.assertLive("open"); this.#service.open(); }
+  close(reason: ColourPanelCloseReason): void { this.#lifetime.assertLive("close"); this.#service.close(reason); }
+  choosePicker(id: string): void { this.#lifetime.assertLive("choosePicker"); this.#service.choosePicker(id); }
+  preview(colour: GFXColour, reason: ColourPanelServiceChange["reason"]): void { this.#lifetime.assertLive("preview"); this.#service.preview(colour.toCSS(), reason); }
   commit(colour: GFXColour, reason: ColourPanelServiceChange["reason"]): void {
+    this.#lifetime.assertLive("commit");
     this.#service.commit(colour.toCSS(), reason);
   }
-  cancel(reason: ColourPanelServiceChange["reason"]): void { this.#service.cancel(reason); }
+  cancel(reason: ColourPanelServiceChange["reason"]): void { this.#lifetime.assertLive("cancel"); this.#service.cancel(reason); }
   setSwatches(colours: readonly GFXColour[]): void {
+    this.#lifetime.assertLive("setSwatches");
     if (!Array.isArray(colours)) throw new TypeError("Colour swatches must be dense data-only arrays.");
     const values: string[] = [];
     for (let index = 0; index < colours.length; index += 1) {
@@ -256,6 +294,7 @@ export class NSEColourPanelController {
   }
 
   registerCommands(commands: Pick<CommandSystem, "register">, responderId: string): () => void {
+    this.#lifetime.assertLive("registerCommands");
     const none: CommandPayloadSchema<undefined> = {
       description: "No payload.",
       parse: (value) => value === undefined ? { ok: true, value: undefined } : { ok: false, issues: ["Payload is not accepted."] },
@@ -289,10 +328,10 @@ export class NSEColourPanelController {
       commands.register({ id: "colour-panel.cancel", responderId, title: { key: "colour.panel.cancel", fallback: "Cancel Colour" }, payload: none, defaultKeyBindings: [], scope: "runtime", undo: { kind: "none" }, validate: () => ({ enabled: Boolean(this.#service.getSnapshot().activeTargetId) }), execute: () => this.close("cancel") }),
     ];
     let live = true;
-    return () => {
+    return this.#ownRelease(() => {
       if (!live) return;
       live = false;
       for (const registration of [...registrations].reverse()) registration.dispose();
-    };
+    });
   }
 }

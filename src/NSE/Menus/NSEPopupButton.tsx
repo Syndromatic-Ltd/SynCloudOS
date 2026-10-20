@@ -20,13 +20,14 @@
 
 import { useId, useRef, useState } from "react";
 import { useOptionalNSEOverlayProvider } from "../Overlays";
-import { NSEPushButton, type NSEButtonTone } from "../Controls/Buttons/NSEButtons";
+import { NSEPushButton, type NSEButtonTone, type NSEPushButtonProps } from "../Controls/Buttons/NSEButtons";
 import { NSEMenu } from "./NSEMenu";
 import type { NSEMenuController } from "./NSEMenuController";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
 import type { NSEMenuModel, NSEMenuOverlayOptions } from "./menuTypes";
 
-export interface NSEPopupButtonProps {
+/** The trigger action receives the menu model's id unless actionPayload is explicitly supplied. */
+export interface NSEPopupButtonProps extends Pick<NSEPushButtonProps, "action" | "actionPayload" | "disabled"> {
   readonly label: string;
   readonly model: NSEMenuModel;
   readonly controller: NSEMenuController;
@@ -37,7 +38,8 @@ export interface NSEPopupButtonProps {
   readonly tone?: NSEButtonTone;
 }
 
-export function NSEPopupButton({ label, model, controller, overlay, direction = "ltr", tone = "medium" }: NSEPopupButtonProps) {
+export function NSEPopupButton(props: NSEPopupButtonProps) {
+  const { label, model, controller, overlay, direction = "ltr", tone = "medium", action, actionPayload, disabled } = props;
   const [open, setOpen] = useState(false);
   const [initialFocus, setInitialFocus] = useState<"first" | "last">("first");
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -53,6 +55,9 @@ export function NSEPopupButton({ label, model, controller, overlay, direction = 
         id={triggerId}
         ref={triggerRef}
         tone={tone}
+        action={action}
+        actionPayload={Object.prototype.hasOwnProperty.call(props, "actionPayload") ? actionPayload : model.id}
+        disabled={disabled}
         pressed={open}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -61,8 +66,11 @@ export function NSEPopupButton({ label, model, controller, overlay, direction = 
           setOpen((value) => !value);
         }}
         onKeyDown={(event) => {
-          if (event.nativeEvent.isComposing || event.getModifierState("AltGraph")) return;
-          if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+          if (event.defaultPrevented || event.currentTarget.disabled || event.nativeEvent.isComposing || event.getModifierState("AltGraph")) return;
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            if (!event.repeat) event.currentTarget.click();
+          } else if (event.key === "ArrowDown") {
             event.preventDefault();
             setInitialFocus("first");
             setOpen(true);

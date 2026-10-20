@@ -96,6 +96,8 @@ export interface WebspringWidgetViewProps<TData> {
   readonly data: TData;
   /** Loads the data again; the widget shows its loading state until it settles. */
   readonly refresh: () => void;
+  /** Opens a declared route through the shell, without leaving the host page. */
+  readonly navigate: (route: string) => Promise<ActionResult>;
 }
 
 export interface WebspringWidgetInput<TData> {

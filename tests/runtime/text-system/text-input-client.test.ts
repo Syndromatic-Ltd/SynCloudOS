@@ -32,7 +32,7 @@ async function clientClass() {
 }
 function fixture(text = "A😀é👨‍👩‍👧‍👦Z") {
   const owner = createInMemoryNSETextOwner({ flowId: "body", content: attributedContent([paragraph([textRun(text)])]) });
-  const session = new TextEditingSession({ id: "custom-input", owner });
+  const session = new TextEditingSession({ id: "custom-input", textOwner: owner });
   return { owner, session };
 }
 function geometry(session: TextEditingSession) {
@@ -69,7 +69,7 @@ describe("custom text input client", () => {
     const Client = await clientClass(); const owner = createInMemoryNSETextOwner();
     const signal = new AbortController();
     declareSynCloudOSLifecycleSignal(signal.signal, "application-closed");
-    const session = new TextEditingSession({ id: "owned-input", owner, signal: signal.signal });
+    const session = new TextEditingSession({ id: "owned-input", textOwner: owner, signal: signal.signal });
     const client = new Client({ session }); signal.abort(); client.dispose();
     expect(() => client.beginComposition()).toThrow(SynCloudOSLifecycleError);
     expect(() => client.beginComposition()).toThrow(expect.objectContaining({ code: "NSE_TEXT_INPUT_CLIENT_DISPOSED", operation: "beginComposition", disposal: expect.objectContaining({ reason: "application-closed" }) }));

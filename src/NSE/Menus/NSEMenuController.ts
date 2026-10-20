@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
 import type { CommandDispatchResult, CommandPresentation, CommandValidationRequest } from "../../SynCloudOS/SynCloudOS";
 import { commandValidationRequestKey } from "../../SynCloudOS/nseRuntimeContracts";
 import type {
@@ -193,6 +194,7 @@ function samePresentationGeneration(left: PresentationGeneration | null, right: 
 export class NSEMenuController {
   readonly model;
   readonly runtime;
+  readonly #ownership: NSEControllerLifetime;
   #snapshot: NSEMenuSnapshot = initialSnapshot;
   #listeners = new Set<() => void>();
   #validation: AbortLease | null = null;
@@ -205,10 +207,12 @@ export class NSEMenuController {
   #branchId = "";
   #branchStack: BranchFrame[] = [];
   #disposed = false;
-  #runtimeAbort = () => this.dismiss("programmatic");
+  #runtimeAbort = () => this.dispose();
 
-  constructor({ model, runtime }: NSEMenuControllerOptions) {
+  constructor(options: NSEMenuControllerOptions) {
+    const { model, runtime } = options;
     if (!model.id.trim()) throw new TypeError("NSE menu IDs must not be empty.");
+    this.#ownership = new NSEControllerLifetime(options, { kind: "NSEMenuController", id: model.id });
     const sectionIds = new Set<string>();
     for (const section of model.sections ?? []) {
       if (!section.id.trim()) throw new TypeError(`NSE menu section IDs must not be empty (${model.id}).`);
@@ -226,11 +230,14 @@ export class NSEMenuController {
     this.runtime = runtime;
     if (runtime.signal.aborted) this.#runtimeAbort();
     else runtime.signal.addEventListener("abort", this.#runtimeAbort, { once: true });
+    this.#ownership.bind(() => this.dispose());
   }
 
   get snapshot(): NSEMenuSnapshot { return this.#snapshot; }
+  get isDisposed(): boolean { return this.#disposed; }
 
   subscribe(listener: () => void): () => void {
+    if (this.#disposed) return () => undefined;
     this.#listeners.add(listener);
     return () => { this.#listeners.delete(listener); };
   }
@@ -383,6 +390,7 @@ export class NSEMenuController {
   dispose(): void {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#ownership.dispose();
     this.dismiss("programmatic");
     this.runtime.signal.removeEventListener("abort", this.#runtimeAbort);
     this.#listeners.clear();

@@ -362,7 +362,7 @@ function generateProjectModule(discovery) {
   body.push("const applications = " + (discovery.applications === null ? "null" : renderSourceList(discovery.applications)) + ";");
   body.push("export const bundles = selectProjectBundles(allBundles, { applications, development: import.meta.env.DEV });");
   body.push(`const definedIntegrations = [\n${integrationSources.join(",\n")}\n];`);
-  body.push("export const contributions = Object.freeze(selectProjectIntegrations(definedIntegrations, bundles.map(bundle => bundle.manifest.bundleIdentifier)).map(({ id, path, definition }) => createIntegrationContribution(definition, { id, source: path })));");
+  body.push("export const contributions = Object.freeze(selectProjectIntegrations(definedIntegrations, bundles.map(bundle => bundle.manifest.bundleIdentifier)).map(({ id, path, definition }) => createIntegrationContribution(definition, { id, source: path }, bundles)));");
 
   return `${imports.join("\n")}\n\n${body.join("\n")}\n`;
 }

@@ -21,6 +21,7 @@
 import type { ComponentType } from "react";
 import type { AFXLayer } from "../../FX/AnimationFX/AFXLayer";
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
+import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/AppSDK/appClientTypes";
 import {
   instantiateInOwnerScope,
   nseDisposeFor,
@@ -61,9 +62,19 @@ export interface NSEControllerView {
   readonly layer: AFXLayer;
 }
 
+/** The presentation environment of a controller's view. */
+export interface NSETraitCollection {
+  readonly reducedMotion: boolean;
+  readonly presentation: SynCloudOSPresentationTraits | null;
+}
+
+/** @internal Updates presentation traits without replaying appearance callbacks. */
+export const nseUpdateTraits: unique symbol = Symbol("nse.updateTraits");
+
 /** What the React host gives a view controller when its view mounts. */
 export interface NSEViewControllerBinding {
   readonly element: HTMLElement;
+  readonly traits?: NSETraitCollection;
   /** The mounted application's animation host; absent outside an application. */
   bindLayer?(target: object, signal?: AbortSignal): AFXLayer;
   /** The mounted application's FX clients; absent outside an application. */
@@ -112,6 +123,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #appeared = false;
   #pendingDetach: object | null = null;
   #fx: NSEViewControllerFX | null = null;
+  #traits: NSETraitCollection = Object.freeze({ reducedMotion: false, presentation: null });
 
   constructor(options: NSEViewControllerOptions = {}) {
     super();
@@ -132,6 +144,21 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   /** The view this controller manages. */
   get view(): NSEControllerView {
     return this.#view;
+  }
+
+  /** Current NSE animation and content-bound presentation traits. */
+  get traitCollection(): NSETraitCollection { return this.#traits; }
+
+  /** Called when traits change; observing this controller also observes traits. */
+  traitCollectionDidChange(_previous: NSETraitCollection): void {}
+
+  /** @internal Called by the presentation host. */
+  [nseUpdateTraits](traits: NSETraitCollection): void {
+    if (traits.reducedMotion === this.#traits.reducedMotion && traits.presentation === this.#traits.presentation) return;
+    const previous = this.#traits;
+    this.#traits = traits;
+    this.traitCollectionDidChange(previous);
+    this.notifyObservers();
   }
 
   /** Aborts when this controller is disposed; controllers created for it adopt it. */
@@ -190,6 +217,10 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   viewDidDisappear(): void {}
   /** Runs after the controller is disposed, before the controllers it owns are. */
   protected didDispose(): void {}
+  /** The committed view is about to lay out, initially and when its frame changes. */
+  viewWillLayout(): void {}
+  /** The committed view has laid out; its DOM geometry can be read. */
+  viewDidLayout(): void {}
 
   /**
    * Adds a child view controller owned by this one, disposed with it. Pass a
@@ -259,8 +290,8 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
       this.#pendingDetach = null;
       this.#rebind(binding);
     } else {
-      this.#rebind(binding);
       this.#mountSignal = new AbortController();
+      this.#rebind(binding);
       if (!this.#loaded) {
         this.#loaded = true;
         this.viewDidLoad();
@@ -281,6 +312,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #rebind(binding: NSEViewControllerBinding): void {
     if (this.#binding && this.#binding.element !== binding.element) this.#releaseLayer();
     this.#binding = binding;
+    if (binding.traits) this[nseUpdateTraits](binding.traits);
   }
 
   #flushDetach(): void {

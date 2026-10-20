@@ -45,7 +45,7 @@ const forbidden: React.ComponentProps<typeof NSETextView> = { editor: {} };
 void forbidden;
 declare global { interface Window { textSystem: { ready?:boolean; error?:string; text?:string; revision?:number; durable?:boolean; pdfBytes?:number; undo():Promise<unknown> } } }
 const owner = createUndoableNSETextOwner({ content: attributedContent([paragraph([textRun("Installed")])]) });
-const session = new TextEditingSession({ id: "installed", owner, history: owner.history });
+const session = new TextEditingSession({ id: "installed", textOwner: owner, history: owner.history });
 window.textSystem = { undo: () => session.requestHistory("undo") };
 session.subscribe(() => { const snapshot = session.getSnapshot(); window.textSystem.text = snapshot.model.text; window.textSystem.revision = snapshot.model.revision; });
 createRoot(document.getElementById("root")!).render(<NSETextView session={session} label="Installed text" />);

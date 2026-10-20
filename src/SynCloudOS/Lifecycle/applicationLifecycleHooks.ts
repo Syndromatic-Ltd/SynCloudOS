@@ -19,6 +19,7 @@
  */
 
 import type { SynCloudOSLifecycleHook, SynCloudOSLifecycleStage } from "./lifecycleTypes";
+import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 
 /**
  * The lifecycle behaviour of an application written as an `NSEApplication`
@@ -27,6 +28,8 @@ import type { SynCloudOSLifecycleHook, SynCloudOSLifecycleStage } from "./lifecy
  * bundle declaring hook maps of its own.
  */
 export interface ApplicationLifecycle {
+  /** Internal application-session services, established before lifecycle callbacks. */
+  prepare?(runtime: SynCloudOSRuntime, appId: string, stage: SynCloudOSLifecycleStage): void;
   /** The hook for `stage` and `phase`, or `null` when the application has none there. */
   hookFor(stage: SynCloudOSLifecycleStage, phase: "will" | "did"): SynCloudOSLifecycleHook | null;
 }

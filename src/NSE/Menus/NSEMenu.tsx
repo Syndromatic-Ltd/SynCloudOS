@@ -617,7 +617,7 @@ function NSEItemMenu({
       selectedRef.current?.(value);
     },
   ), [localMenu.records, resolvedParentResponderId, runtimeSource, selectionHaptic, triggerNSEControlHaptic]);
-  const controller = useMemo(() => new NSEMenuController({ model: localMenu.model, runtime: localRuntime }), [localMenu.model, localRuntime]);
+  const controller = useMemo(() => new NSEMenuController({ ownerSignal: localRuntime.signal, model: localMenu.model, runtime: localRuntime }), [localMenu.model, localRuntime]);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const [keyboardInitialFocus, setKeyboardInitialFocus] = useState<"first" | "last" | null>(null);
   const isOpen = open ?? uncontrolledOpen;

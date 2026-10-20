@@ -126,7 +126,7 @@ export function assertSdkFingerprint(value, label) {
 export function createSdkPackageManifest({ name, exports, files, peerDependencies, dependencies = undefined }) {
   return {
     name,
-    version: "1.0.0-beta.1",
+    version: "1.0.0-beta.2",
     private: false,
     type: "module",
     license: "AGPL-3.0-or-later AND Apache-2.0",

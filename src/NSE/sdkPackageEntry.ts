@@ -971,6 +971,7 @@ export type { NSEObservable } from "./Objects";
 export { NSEApplication, NSEWindowController, NSEViewController } from "./Application";
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,
+  NSETraitCollection,
   NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowCloseOutcome,
   NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
 } from "./Application";

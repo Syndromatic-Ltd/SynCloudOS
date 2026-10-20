@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
+
 export type NSEScrollerPolicy = "automatic" | "always" | "hidden";
 
 export interface NSEScrollInsets {
@@ -101,7 +104,20 @@ function cancel(frame: number) {
 }
 
 export class NSEScrollViewController {
-  constructor(readonly host: HTMLElement, readonly insets: NSEScrollInsets = ZERO_INSETS) {}
+  readonly #lifetime: NSEControllerLifetime;
+  readonly #connections = new Set<() => void>();
+
+  constructor(readonly host: HTMLElement, readonly insets: NSEScrollInsets = ZERO_INSETS, options: NSEControllerOwnershipOptions = {}) {
+    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEScrollViewController", id: host.id || "scroll-view" });
+    this.#lifetime.bind(() => this.dispose());
+  }
+
+  get isDisposed(): boolean { return this.#lifetime.isDisposed; }
+  dispose(): void {
+    if (!this.#lifetime.dispose()) return;
+    for (const disconnect of [...this.#connections]) disconnect();
+    this.#connections.clear();
+  }
 
   static claim(host: HTMLElement, owner: unknown): boolean {
     const current = claims.get(host);
@@ -115,6 +131,7 @@ export class NSEScrollViewController {
   }
 
   connect(observer: ScrollObserver): () => void {
+    this.#lifetime.assertLive("connect");
     let observation = observations.get(this.host);
     if (!observation) {
       const observers = new Set<ScrollObserver>();
@@ -138,9 +155,10 @@ export class NSEScrollViewController {
     observation.observers.add(observer);
 
     let active = true;
-    return () => {
+    const disconnect = () => {
       if (!active) return;
       active = false;
+      this.#connections.delete(disconnect);
       const current = observations.get(this.host);
       if (!current) return;
       current.observers.delete(observer);
@@ -149,9 +167,12 @@ export class NSEScrollViewController {
       if (current.frame !== 0) cancel(current.frame);
       observations.delete(this.host);
     };
+    this.#connections.add(disconnect);
+    return disconnect;
   }
 
   scrollRectToVisible(rect: NSEScrollRect, behavior: ScrollBehavior = "auto") {
+    this.#lifetime.assertLive("scrollRectToVisible");
     const target = computeScrollRectTarget({
       position: { left: this.host.scrollLeft, top: this.host.scrollTop },
       viewport: { width: this.host.clientWidth, height: this.host.clientHeight },

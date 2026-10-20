@@ -169,7 +169,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
     ],
   }), [appName, appPreferences, applicationId, authenticationPolicy, declaresAbout, locale, menuLabels, signedIn]);
   const menuPort = useRuntimeNSEMenuPort();
-  const menuController = useMemo(() => new NSEMenuController({ model: menuModel, runtime: menuPort }), [menuModel, menuPort]);
+  const menuController = useMemo(() => new NSEMenuController({ ownerSignal: menuPort.signal, model: menuModel, runtime: menuPort }), [menuModel, menuPort]);
   useNSEDeferredDisposal(menuController);
   const logOut = useCallback(async () => {
     const result = await runtime.commands.dispatch("session.logOut", undefined, { source: "system" });

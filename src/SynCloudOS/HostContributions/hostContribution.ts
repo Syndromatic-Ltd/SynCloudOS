@@ -95,6 +95,8 @@ type MutableApplicationDocumentConfiguration = {
 export interface SynCloudOSHostContributionPreparation {
   readonly runtimeConfig?: Readonly<SynCloudOSHostScalarRuntimeConfig>;
   readonly initialBundles?: readonly TrustedSynWareBundle[];
+  /** Already registered applications this contribution extends, without registering their bundles again. */
+  readonly applicationOwners?: readonly string[];
   readonly trustedDocumentKinds?: readonly SynCloudOSDocumentKindMetadata[];
   readonly applicationDocuments?: Readonly<Partial<ApplicationDocumentRuntimeConfiguration>>;
   readonly install?: (
@@ -114,6 +116,7 @@ export interface PreparedSynCloudOSHostContribution {
   readonly source: string;
   readonly runtimeConfig: Readonly<SynCloudOSHostScalarRuntimeConfig>;
   readonly initialBundles: readonly TrustedSynWareBundle[];
+  readonly applicationOwners: readonly string[];
   readonly trustedDocumentKinds: readonly SynCloudOSDocumentKindMetadata[];
   readonly applicationDocuments?: Readonly<Partial<ApplicationDocumentRuntimeConfiguration>>;
   readonly install?: (
@@ -238,6 +241,8 @@ export interface SynCloudOSHostInstallContext {
   readonly id: string;
   readonly source: string;
   readonly signal: AbortSignal;
+  /** Injected document-adapter clock and timers, scoped to this installation. */
+  readonly environment: Pick<SynCloudOSRuntimeEnvironment, "now" | "randomUUID" | "setTimeout" | "clearTimeout">;
   readonly services: SynCloudOSHostServiceInstallPort;
   readonly documents: SynCloudOSHostDocumentInstallPort;
   readonly seed: SynCloudOSHostSeedPort;
@@ -483,12 +488,15 @@ function cloneArray<T>(value: unknown, label: string): readonly T[] {
 
 function normalizePreparation(record: ContributionRecord, value: unknown): PreparedSynCloudOSHostContribution {
   assertPlainRecord(value, `Host contribution ${record.id} preparation`);
-  const allowed = new Set(["runtimeConfig", "initialBundles", "trustedDocumentKinds", "applicationDocuments", "install"]);
+  const allowed = new Set(["runtimeConfig", "initialBundles", "applicationOwners", "trustedDocumentKinds", "applicationDocuments", "install"]);
   for (const key of ownKeys(value, `Host contribution ${record.id} preparation`)) {
     if (!allowed.has(key)) throw new TypeError(`Host contribution ${record.id} preparation does not support ${key}.`);
   }
   const runtimeConfig = cloneReadonlyRecord(ownData(value, "runtimeConfig", `Host contribution ${record.id} preparation`), "Host contribution runtimeConfig", runtimeScalarKeys) as SynCloudOSHostScalarRuntimeConfig;
   const initialBundles = cloneArray<TrustedSynWareBundle>(ownData(value, "initialBundles", `Host contribution ${record.id} preparation`), "Host contribution initialBundles");
+  const applicationOwners = Object.freeze(cloneArray<string>(
+    ownData(value, "applicationOwners", `Host contribution ${record.id} preparation`), "Host contribution applicationOwners",
+  ).map(normalizeBundleIdentifier));
   const trustedDocumentKinds = cloneArray<SynCloudOSDocumentKindMetadata>(ownData(value, "trustedDocumentKinds", `Host contribution ${record.id} preparation`), "Host contribution trustedDocumentKinds");
   const applicationDocumentsValue = ownData(value, "applicationDocuments", `Host contribution ${record.id} preparation`);
   let applicationDocuments: Readonly<Partial<ApplicationDocumentRuntimeConfiguration>> | undefined;
@@ -515,6 +523,7 @@ function normalizePreparation(record: ContributionRecord, value: unknown): Prepa
     source: record.source,
     runtimeConfig,
     initialBundles,
+    applicationOwners,
     trustedDocumentKinds,
     ...(applicationDocuments === undefined ? {} : { applicationDocuments }),
     ...(install === undefined ? {} : { install: install as PreparedSynCloudOSHostContribution["install"] }),
@@ -850,9 +859,13 @@ export function createSynCloudOSHostInstallContext(
   track(() => { runtime.policy.revokeSubject(seedGrant); });
   const storeContext = (operationSignal: AbortSignal) =>
     contextStoreContext(operationSignal, record.source, seedSubject, "hostContribution", seedGrant);
+  const applicationOwners = new Set([
+    ...prepared.applicationOwners,
+    ...prepared.initialBundles.map(bundle => normalizeBundleIdentifier(bundle.synWareManifest?.bundleIdentifier ?? bundle.manifest.bundleIdentifier)),
+  ]);
   const seedKinds = new Set(prepared.trustedDocumentKinds.map((kind) => kind.kind));
   const seedApplications = new Set([
-    ...prepared.initialBundles.map((bundle) => bundle.manifest.bundleIdentifier),
+    ...applicationOwners,
     ...(prepared.applicationDocuments?.initialTypes ?? []).map((type) => type.creatingApplicationId).filter((id): id is string => typeof id === "string"),
   ].map(normalizeBundleIdentifier));
   const inSeedScope = (document: Pick<SynCloudOSDocument, "kind" | "applicationId">) =>
@@ -1017,7 +1030,7 @@ export function createSynCloudOSHostInstallContext(
       assertLive(signal);
       if (!input || typeof input.appId !== "string" || !input.appId.trim()) throw new TypeError("Host policy declarations require an application ID.");
       if (!isRecord(input.policy)) throw new TypeError("Host policy declarations require a policy record.");
-      if (!prepared.initialBundles.some((bundle) => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === normalizeBundleIdentifier(input.appId))) {
+      if (!applicationOwners.has(normalizeBundleIdentifier(input.appId))) {
         throw new DOMException("A contribution may declare policy only for its own applications.", "SecurityError");
       }
       const appId = input.appId;
@@ -1042,9 +1055,8 @@ export function createSynCloudOSHostInstallContext(
     },
     currentSubject,
   });
-  const luminaApplicationIds = new Set(prepared.initialBundles.map((bundle) => normalizeBundleIdentifier(bundle.synWareManifest?.bundleIdentifier ?? bundle.manifest.bundleIdentifier)));
   const assertLuminaApplication = (appId: string, role: "owner" | "destination") => {
-    if (!luminaApplicationIds.has(normalizeBundleIdentifier(appId))) {
+    if (!applicationOwners.has(normalizeBundleIdentifier(appId))) {
       throw new DOMException(`A host contribution may use only its own Lumina ${role} application.`, "SecurityError");
     }
   };
@@ -1145,10 +1157,32 @@ export function createSynCloudOSHostInstallContext(
       });
     },
   });
+  const timers = new Set<unknown>();
+  track(() => {
+    for (const timer of timers) runtime.environment.clearTimeout(timer);
+    timers.clear();
+  });
+  const environment = Object.freeze<SynCloudOSHostInstallContext["environment"]>({
+    now() { assertLive(signal); return runtime.environment.now(); },
+    randomUUID() { assertLive(signal); return runtime.environment.randomUUID(); },
+    setTimeout(callback, delayMs) {
+      assertLive(signal);
+      const timer = runtime.environment.setTimeout(() => {
+        timers.delete(timer);
+        if (!signal.aborted) callback();
+      }, delayMs);
+      timers.add(timer);
+      return timer;
+    },
+    clearTimeout(timer) {
+      if (timers.delete(timer)) runtime.environment.clearTimeout(timer);
+    },
+  });
   const context: SynCloudOSHostInstallContext = Object.freeze({
     id: record.id,
     source: record.source,
     signal,
+    environment,
     services,
     documents: Object.freeze({ registerType, registerAdapter, registerDocumentStoreAdapter }),
     seed: Object.freeze(seed),

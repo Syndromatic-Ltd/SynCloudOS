@@ -23,16 +23,24 @@ import type {
   SynCloudOSHostContributionPreparation,
 } from "../SynCloudOS/HostContributions/hostContribution";
 import { createSynCloudOSHostContribution } from "../SynCloudOS/HostContributions/hostContribution";
+import type { SynCloudOSRuntimeEnvironment } from "../SynCloudOS/Runtime/runtimeInstanceTypes";
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
+import { validateBundleIdentifier } from "../SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs";
 
 /** A host contribution a project declares as `src/Integrations/<Name>.integration.ts`. */
-export interface SynWareIntegrationInput extends Omit<SynCloudOSHostContributionPreparation, "initialBundles"> {
+export interface SynWareIntegrationInput extends Omit<SynCloudOSHostContributionPreparation, "initialBundles" | "applicationOwners" | "applicationDocuments"> {
   /** Application IDs this integration extends. A build that selects none of them drops the integration. */
   readonly owners: readonly string[];
+  /** A declaration, or a per-host factory for storage that needs the injected environment.
+   * The factory runs before runtime creation; it is never evaluated at module load. */
+  readonly applicationDocuments?: SynCloudOSHostContributionPreparation["applicationDocuments"] | (
+    (environment: SynCloudOSRuntimeEnvironment) =>
+      NonNullable<SynCloudOSHostContributionPreparation["applicationDocuments"]>
+      | Promise<NonNullable<SynCloudOSHostContributionPreparation["applicationDocuments"]>>
+  );
 }
 
-export interface SynWareIntegrationDefinition extends Omit<SynCloudOSHostContributionPreparation, "initialBundles"> {
-  readonly owners: readonly string[];
-}
+export interface SynWareIntegrationDefinition extends SynWareIntegrationInput {}
 
 export interface SynWareIntegrationDiscovered {
   /** Contribution ID, derived from the file name: `Journal.integration.ts` -> `journal`. */
@@ -41,18 +49,20 @@ export interface SynWareIntegrationDiscovered {
   readonly source: string;
 }
 
-const ownerPattern = /^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$/u;
 const defined = new WeakSet<object>();
 
 function captureOwners(input: unknown): readonly string[] {
   if (!Array.isArray(input)) throw new TypeError("defineIntegration owners must be an array of application IDs.");
   if (input.length === 0) throw new TypeError("defineIntegration needs at least one owner: the applications it extends.");
   const owners: string[] = [];
+  const keys = new Set<string>();
   for (const owner of input) {
-    if (typeof owner !== "string" || !ownerPattern.test(owner)) {
+    if (!validateBundleIdentifier(owner)) {
       throw new TypeError(`defineIntegration owners must be application IDs; ${String(owner)} is not one.`);
     }
-    if (owners.includes(owner)) throw new TypeError(`defineIntegration owners list ${owner} twice.`);
+    const key = normalizeBundleIdentifier(owner);
+    if (keys.has(key)) throw new TypeError(`defineIntegration owners list ${owner} twice.`);
+    keys.add(key);
     owners.push(owner);
   }
   return Object.freeze(owners);
@@ -73,7 +83,7 @@ function dataProperty(value: object, key: string): unknown {
  *
  * ```ts
  * export default defineIntegration({
- *   owners: ["journal", "journal-publisher"],
+ *   owners: ["com.example.journal", "com.example.journal-publisher"],
  *   install: (context) => context.documents.registerType(JournalNote),
  * });
  * ```
@@ -122,12 +132,23 @@ export function integrationOwners(value: unknown, source = "An integration modul
 export function createIntegrationContribution(
   definition: SynWareIntegrationDefinition,
   discovered: SynWareIntegrationDiscovered,
+  bundles: readonly { readonly manifest: { readonly bundleIdentifier: string } }[],
 ): SynCloudOSHostContribution {
   if (!isIntegrationDefinition(definition)) throw new TypeError(`${discovered.source} must default-export defineIntegration(...).`);
-  return createSynCloudOSHostContribution(discovered.id, discovered.source, () => Object.freeze({
-    ...(definition.runtimeConfig === undefined ? {} : { runtimeConfig: definition.runtimeConfig }),
-    ...(definition.trustedDocumentKinds === undefined ? {} : { trustedDocumentKinds: definition.trustedDocumentKinds }),
-    ...(definition.applicationDocuments === undefined ? {} : { applicationDocuments: definition.applicationDocuments }),
-    ...(definition.install === undefined ? {} : { install: definition.install }),
-  }));
+  const owners = new Set(definition.owners.map(normalizeBundleIdentifier));
+  const applicationOwners = Object.freeze(bundles
+    .map(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier))
+    .filter(id => owners.has(id)));
+  return createSynCloudOSHostContribution(discovered.id, discovered.source, async environment => {
+    const applicationDocuments = typeof definition.applicationDocuments === "function"
+      ? await definition.applicationDocuments(environment)
+      : definition.applicationDocuments;
+    return Object.freeze({
+      applicationOwners,
+      ...(definition.runtimeConfig === undefined ? {} : { runtimeConfig: definition.runtimeConfig }),
+      ...(definition.trustedDocumentKinds === undefined ? {} : { trustedDocumentKinds: definition.trustedDocumentKinds }),
+      ...(applicationDocuments === undefined ? {} : { applicationDocuments }),
+      ...(definition.install === undefined ? {} : { install: definition.install }),
+    });
+  });
 }

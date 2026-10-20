@@ -41,6 +41,10 @@ import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import type { ApplicationLifecycle } from "../Lifecycle/applicationLifecycleHooks";
 import { SynCloudOSLifecycleVeto, type SynCloudOSLifecycleHook } from "../Lifecycle/lifecycleTypes";
 import { currentClass, trackLiveApplicationObject, type LiveApplicationObject } from "./applicationHotReload";
+import { createMountedSynWareRuntime, type MountedSynWareRuntime } from "./appRuntimeFacade";
+import { createSynWareContextValue } from "./createSynWareContextValue";
+import { installControllerServices } from "./controllerServices";
+import type { ResponderRegistrationHandle } from "../Responders/responderTypes";
 
 /** How a class-based application is identified inside the runtime that launched it. */
 export interface ApplicationSessionIdentity {
@@ -64,6 +68,12 @@ interface ConstructedApplication {
   readonly app: NSEApplication;
   readonly scope: NSEOwnershipScope;
   readonly leave: () => void;
+}
+
+interface ControllerDocumentOwner {
+  readonly mount: MountedSynWareRuntime;
+  readonly responder: ResponderRegistrationHandle;
+  readonly controllers: Set<NSEAnyWindowController>;
 }
 
 function constructApplication(source: ApplicationSessionSource, appId: string, context: NSEApplicationContext): ConstructedApplication {
@@ -90,6 +100,7 @@ function keyOf({ runtimeId, appId }: ApplicationSessionIdentity): string {
 }
 
 let windowSequence = 0;
+const windowClasses = new WeakMap<NSEApplicationClass, Map<string, NSEWindowControllerClass>>();
 
 /**
  * One launched class-based application: its instance, its window controllers
@@ -107,12 +118,17 @@ export class ApplicationSession {
   readonly #controllers: NSEAnyWindowController[] = [];
   readonly #byWindowId = new Map<string, NSEAnyWindowController>();
   readonly #pendingByRestorationKey = new Map<string, NSEAnyWindowController>();
+  readonly #documentOwners = new Map<string, ControllerDocumentOwner>();
   readonly #ports = new Set<SynWareWindowPort>();
   readonly #portWaiters = new Set<() => void>();
   #kernel: SynCloudOSRuntime | null = null;
   #main: NSEAnyWindowController | null = null;
   #launchReported = false;
   #disposed = false;
+  #servicesMount: MountedSynWareRuntime | null = null;
+  #applicationResponder: ResponderRegistrationHandle | null = null;
+  #terminationOperationId: string | null = null;
+  #serviceResponder: ResponderRegistrationHandle | null = null;
   readonly live: LiveApplicationObject;
 
   constructor(identity: ApplicationSessionIdentity, source: ApplicationSessionSource) {
@@ -148,10 +164,36 @@ export class ApplicationSession {
     return this.#controllers;
   }
 
-  #construct(Controller: NSEWindowControllerClass): NSEAnyWindowController {
+  /** The application responder belongs to the application, not one of its views. */
+  get ownsApplicationResponder(): boolean { return this.#applicationResponder !== null; }
+
+  /** Establishes the same scoped services for headless lifecycle callbacks as for views. */
+  prepareServices(runtime: SynCloudOSRuntime): void {
+    if (this.#servicesMount || this.#disposed) return;
+    this.#kernel = runtime;
+    const appId = this.#identity.appId;
+    const applicationId = `application:${appId}`;
+    if (!runtime.responders.get(applicationId)) {
+      this.#applicationResponder = runtime.responders.register({
+        id: applicationId, kind: "application", parentId: "workspace", scopeId: applicationId,
+        undoOwner: { kind: "application", id: appId },
+      });
+    }
+    const responderId = `controller:${appId}:application-services`;
+    this.#serviceResponder = runtime.responders.register({ id: responderId, kind: "controller", parentId: applicationId, scopeId: applicationId });
+    const app = runtime.apps.getApp(appId);
+    if (!app) throw new TypeError(`The application ${appId} is not registered.`);
+    this.#servicesMount = createMountedSynWareRuntime({ runtime, app, responderId });
+    this.attachMount(this.#servicesMount.runtime.windows, runtime);
+    const context = createSynWareContextValue(this.#servicesMount.runtime);
+    installControllerServices(context, runtime);
+    runtime.signal.addEventListener("abort", () => { this.dispose("explicit"); }, { once: true });
+  }
+
+  #construct(Controller: NSEWindowControllerClass, options: NSEOpenWindowOptions = {}): NSEAnyWindowController {
     const scope = new NSEOwnershipScope("NSEWindowController", Controller.name);
-    const context: NSEWindowControllerContext = { app: this.app };
-    const controller = instantiateInOwnerScope(scope, () => new (currentClass(Controller))(), context);
+    const context: NSEWindowControllerContext = { app: this.app, openingOptions: Object.freeze({ ...options }) };
+    const controller = instantiateInOwnerScope(scope, () => new (currentClass(Controller))(options), context);
     const leaveApplication = this.#scope.adopt(controller);
     const untrack = trackLiveApplicationObject(controller, this.live);
     this.#controllers.push(controller);
@@ -186,18 +228,37 @@ export class ApplicationSession {
     const pending = current.restorationKey ? this.#pendingByRestorationKey.get(current.restorationKey) : undefined;
     let controller: NSEAnyWindowController | null | undefined = pending;
     if (pending) this.#pendingByRestorationKey.delete(current.restorationKey!);
-    else if (current.isMain) controller = this.#mainController();
     else {
-      // A document window the application opened itself: another window of the main kind.
-      const Controller = this.#source.AppClass.mainWindow;
-      controller = Controller ? this.#construct(Controller) : null;
+      const restored = current.restorationKey && this.#kernel?.persistence.getPreference<{ controller: string; options: NSEOpenWindowOptions } | null>(
+        `application-controller:${current.restorationKey}`, null);
+      if (restored) {
+        const Controller = this.#source.AppClass.windowControllers?.[restored.controller] ?? windowClasses.get(this.#source.AppClass)?.get(restored.controller);
+        if (!Controller) throw new TypeError(`Cannot restore window controller "${restored.controller}"; declare it in static windowControllers.`);
+        controller = this.#construct(Controller, restored.options);
+      } else if (current.isMain) controller = this.#mainController();
+      else {
+        const Controller = this.#source.AppClass.mainWindow;
+        controller = Controller ? this.#construct(Controller) : null;
+      }
     }
-    if (controller) this.#byWindowId.set(current.id, controller);
+    if (controller) {
+      try {
+        if (current.documentId) this.#retainControllerDocument(controller, current.documentId);
+        this.#byWindowId.set(current.id, controller);
+      } catch (error) {
+        controller[nseDisposeFor]("window-closed");
+        throw error;
+      }
+    }
     return controller ?? null;
   }
 
+  /** Keeps application-owned controllers alive until the accepted quit commits. */
+  beginTermination(operationId: string): void { this.#terminationOperationId = operationId; }
+
   /** Disposes the controllers of windows that are no longer open, with the reason `"window-closed"`. */
   pruneClosedWindows(owned: readonly SynWareOwnedWindowSnapshot[]): void {
+    if (this.#terminationOperationId && this.#kernel?.operations.inspectPending().some(operation => operation.operationId === this.#terminationOperationId)) return;
     const open = new Set(owned.map((window) => window.id));
     for (const [id, controller] of [...this.#byWindowId]) {
       if (open.has(id)) continue;
@@ -246,32 +307,98 @@ export class ApplicationSession {
     return this.app.ownerSignal;
   }
 
+  #retainControllerDocument(controller: NSEAnyWindowController, documentId: string): { port: SynWareWindowPort; release: () => void } {
+    let owner = this.#documentOwners.get(documentId);
+    if (!owner) {
+      const runtime = this.#kernel;
+      const app = runtime?.apps.getApp(this.#identity.appId);
+      if (!runtime || !app) throw new TypeError("Document windows require a registered application runtime.");
+      // A separate facade gives class controllers their own owner lease: closing
+      // their last window must not revoke a lifecycle callback's bootstrap lease.
+      // Transfer mounts are keyed by responder and window, so sharing an
+      // application responder would revoke the stage or another document.
+      const applicationId = `application:${this.#identity.appId}`;
+      const responderId = `controller:${this.#identity.appId}:document-windows:${runtime.environment.randomUUID()}`;
+      const responder = runtime.responders.register({ id: responderId, kind: "controller", parentId: applicationId, scopeId: applicationId });
+      try {
+        const mount = createMountedSynWareRuntime({ runtime, app, responderId });
+        owner = { mount, responder, controllers: new Set() };
+      } catch (error) {
+        responder.dispose({ cascade: true });
+        throw error;
+      }
+    }
+    try {
+      if (!owner.mount.runtime.workspaceDocuments.retainDocument(documentId)) {
+        throw new DOMException("Document windows require a live application-owned document.", "SecurityError");
+      }
+    } catch (error) {
+      if (owner.controllers.size === 0) {
+        try { owner.mount.dispose("Document window admission failed."); }
+        finally { owner.responder.dispose({ cascade: true }); }
+      }
+      throw error;
+    }
+    this.#documentOwners.set(documentId, owner);
+    if (owner.controllers.has(controller)) return { port: owner.mount.runtime.windows, release: () => {} };
+    owner.controllers.add(controller);
+    const retained = owner;
+    const release = () => {
+      if (!retained.controllers.delete(controller) || retained.controllers.size !== 0) return;
+      if (this.#documentOwners.get(documentId) === retained) this.#documentOwners.delete(documentId);
+      try { retained.mount.dispose("The last class-controlled document window closed."); }
+      finally { retained.responder.dispose({ cascade: true }); }
+    };
+    controller.onDispose(release);
+    return { port: owner.mount.runtime.windows, release };
+  }
+
   async openWindow<TController extends NSEAnyWindowController>(
     Controller: NSEWindowControllerClass<TController>,
     options: NSEOpenWindowOptions = {},
   ): Promise<TController> {
     if (this.#disposed) throw new DOMException("The application is closed.", "InvalidStateError");
     const port = await this.#waitForPort();
-    const key = `${++windowSequence}`;
-    const restorationKey = `application.${normalizeBundleIdentifier(this.#identity.appId)}.window.${key}`;
-    const controller = this.#construct(Controller);
+    const key = options.restorationKey ?? `${++windowSequence}`;
+    const restorationKey = `application.${normalizeBundleIdentifier(this.#identity.appId)}.${options.documentId ? "document" : "window"}.${key}`;
+    const existing = [...this.#byWindowId.values()].find(controller => controller.openingOptions.restorationKey === options.restorationKey && options.restorationKey !== undefined);
+    if (existing && !(existing instanceof currentClass(Controller))) throw new TypeError("The restoration key belongs to another window controller class.");
+    const classes = windowClasses.get(this.#source.AppClass) ?? new Map<string, NSEWindowControllerClass>();
+    windowClasses.set(this.#source.AppClass, classes);
+    const className = Object.entries(this.#source.AppClass.windowControllers ?? {}).find(([, registered]) => registered === Controller)?.[0] ?? Controller.name;
+    classes.set(className, Controller);
+    const controller = existing ?? this.#construct(Controller, options);
     this.#pendingByRestorationKey.set(restorationKey, controller);
+    let documentOwner: { port: SynWareWindowPort; release: () => void } | undefined;
     try {
-      const preferredBounds = options.width !== undefined && options.height !== undefined
-        ? { x: 96 + 32 * this.#controllers.length, y: 96 + 32 * this.#controllers.length, width: options.width, height: options.height }
-        : undefined;
-      const opened = await port.openWindow({
+      if (options.documentId) documentOwner = this.#retainControllerDocument(controller, options.documentId);
+      const area = this.#kernel?.environment.workArea.getSnapshot();
+      const defaults = this.#kernel?.apps.getApp(this.#identity.appId)?.window.defaultBounds;
+      const width = options.width ?? defaults?.width ?? 640;
+      const height = options.height ?? defaults?.height ?? 480;
+      const preferredBounds = typeof options.preferredBounds === "object" ? options.preferredBounds
+        : options.preferredBounds === "centred" && area
+          ? { x: area.x + (area.width - width) / 2, y: area.y + (area.height - height) / 2, width, height }
+          : options.preferredBounds || options.width !== undefined || options.height !== undefined
+            ? { x: (area?.x ?? 0) + 96 + 32 * this.#controllers.length, y: (area?.y ?? 0) + 96 + 32 * this.#controllers.length, width, height }
+            : undefined;
+      const request = {
         title: options.title ?? this.#source.appName,
         restorationKey: key,
         ...(preferredBounds ? { preferredBounds } : {}),
-      });
-      // The host may have mounted the window already and claimed the controller through its restoration key.
+        ...(options.mobilePolicy ? { mobilePolicy: options.mobilePolicy } : {}),
+      };
+      const opened = options.documentId
+        ? await documentOwner!.port.openDocumentWindow({ ...request, documentId: options.documentId })
+        : await port.openWindow(request);
+      if (!existing) this.#kernel?.persistence.setPreference(`application-controller:${restorationKey}`, { controller: className, options: controller.openingOptions });
       if (!this.#byWindowId.has(opened.id)) this.#byWindowId.set(opened.id, controller);
       this.#pendingByRestorationKey.delete(restorationKey);
       return controller as TController;
     } catch (error) {
       this.#pendingByRestorationKey.delete(restorationKey);
-      controller[nseDisposeFor]("window-closed");
+      documentOwner?.release();
+      if (!existing) controller[nseDisposeFor]("window-closed");
       throw error;
     }
   }
@@ -297,6 +424,12 @@ export class ApplicationSession {
       this.app[nseDisposeFor](reason);
     } finally {
       this.#leaveClassApplication();
+      this.#servicesMount?.dispose("The application closed.");
+      this.#servicesMount = null;
+      this.#serviceResponder?.dispose({ cascade: true });
+      this.#applicationResponder?.dispose({ cascade: true });
+      this.#serviceResponder = null;
+      this.#applicationResponder = null;
       this.#byWindowId.clear();
       this.#pendingByRestorationKey.clear();
     }
@@ -355,8 +488,9 @@ export function createApplicationLifecycle(source: ApplicationSessionSource): Ap
   const hooks: Readonly<Record<string, SynCloudOSLifecycleHook>> = {
     "launch:will": async (context) => {
       // A suspended application that resumes keeps its instance.
-      if (sessionOf(context)) return;
-      const session = ensureApplicationSession(context, source);
+      const existing = sessionOf(context);
+      if (existing?.launchReported) return;
+      const session = existing ?? ensureApplicationSession(context, source);
       await session.app.applicationWillFinishLaunching();
     },
     "launch:did": async (context) => {
@@ -377,6 +511,7 @@ export function createApplicationLifecycle(source: ApplicationSessionSource): Ap
       if ((await session.app.applicationShouldTerminate()) === false) {
         throw new SynCloudOSLifecycleVeto("close", `${source.appName} declined to terminate.`);
       }
+      session.beginTermination(context.operationId);
     },
     "close:did": async (context) => {
       const session = sessionOf(context);
@@ -389,6 +524,11 @@ export function createApplicationLifecycle(source: ApplicationSessionSource): Ap
     },
   };
   return {
+    prepare(runtime, appId, stage) {
+      const identity = { runtimeId: runtime.runtimeId, appId };
+      const session = stage === "launch" ? ensureApplicationSession(identity, source) : applicationSessionFor(identity);
+      session?.prepareServices(runtime);
+    },
     hookFor: (stage, phase) => hooks[`${stage}:${phase}`] ?? null,
   };
 }

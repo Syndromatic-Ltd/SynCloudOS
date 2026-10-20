@@ -19,6 +19,7 @@
  */
 
 import type { ReactNode } from "react";
+import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 import type {
   CommandDispatchOptions,
   CommandDispatchResult,
@@ -202,7 +203,7 @@ export interface NSEMenuSnapshot {
 
 export type NSEMenuDismissReason = "escape" | "selection" | "programmatic" | "parent-dismissed";
 
-export interface NSEMenuControllerOptions {
+export interface NSEMenuControllerOptions extends NSEControllerOwnershipOptions {
   readonly model: NSEMenuModel;
   readonly runtime: NSEMenuRuntimePort;
 }

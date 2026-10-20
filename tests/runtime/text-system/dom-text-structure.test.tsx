@@ -32,7 +32,7 @@ import { formatNSETextListMarker, nseTextListMarkers } from "../../../src/NSE/Te
 afterEach(cleanup);
 const mount = (content: ReturnType<typeof attributedContent>, resolver?: Parameters<typeof NSETextView>[0]["attachmentResolver"]) => {
   const owner = createInMemoryNSETextOwner({ content });
-  const session = new TextEditingSession({ id: "view", owner });
+  const session = new TextEditingSession({ id: "view", textOwner: owner });
   const view = render(<NSETextView session={session} label="Document" attachmentResolver={resolver} />);
   return { owner, session, view, textbox: screen.getByRole("textbox") };
 };
@@ -115,7 +115,7 @@ describe("text view structure", () => {
   it("draws a font face through the host's resolver and keeps explicit bold", () => {
     const content = attributedContent([paragraph([textRun("Face", { font: { familyId: "prelude-condensed", face: "prelude-condensed-light", size: 18 } }), textRun("Bold", { bold: true, font: { familyId: "prelude-condensed", face: "prelude-condensed-light" } })])]);
     const owner = createInMemoryNSETextOwner({ content });
-    const session = new TextEditingSession({ id: "fonts", owner });
+    const session = new TextEditingSession({ id: "fonts", textOwner: owner });
     render(<NSETextView session={session} label="Doc" fontResolver={font => font.face === "prelude-condensed-light" ? { family: '"Prelude Condensed", system-ui, sans-serif', weight: 300 } : null} />);
     const [face, bold] = [...screen.getByRole("textbox").querySelectorAll("span[data-nse-attributes]")] as HTMLElement[];
     expect(face!.style.fontFamily).toContain("Prelude Condensed");

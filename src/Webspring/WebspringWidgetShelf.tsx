@@ -18,13 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { Component, useCallback, useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
 import { useKernelSynCloudOS } from "../SynCloudOSReact";
 import { useWebspringLocale } from "./webspringLocale";
 import { webspringSurfaceStyle } from "./webspringSurface";
 import { WebspringWidgetController, type WebspringWidgetState } from "./webspringWidget";
-import type { WebspringSurface, WebspringWidgetEntry } from "./webspringTypes";
+import type { ActionResult, WebspringSurface, WebspringWidgetEntry } from "./webspringTypes";
 import "./WebspringWidgetShelf.css";
 
 /** The widgets of a shelf, kept as the same list while its members are unchanged. */
@@ -61,6 +61,12 @@ export function WebspringWidgetShelf({ entries, surface }: {
   const widgets = useMemo(() => stableEntries.map((entry) => entry.widget), [stableEntries]);
   const controller = useMemo(() => new WebspringWidgetController(widgets, runtime.environment), [runtime, widgets]);
   const states = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
+  const navigate = useCallback(async (route: string): Promise<ActionResult> => {
+    const result = await runtime.routes.openRoute(route, { source: "webspring-widget" }).result;
+    if (result.status === "completed") return { status: "completed" };
+    if (result.status === "cancelled") return { status: "cancelled" };
+    return { status: "failed", message: result.error.message };
+  }, [runtime]);
   useEffect(() => {
     controller.start();
     return () => controller.dispose();
@@ -91,7 +97,7 @@ export function WebspringWidgetShelf({ entries, surface }: {
     } else {
       const View = widget.view;
       body = <WidgetViewBoundary onFailure={failure("failed")}>
-        <View data={state.data} refresh={() => controller.refresh(widget.id)} />
+        <View data={state.data} refresh={() => controller.refresh(widget.id)} navigate={navigate} />
       </WidgetViewBoundary>;
     }
     return <section key={widget.id} className="webspring-widget" data-widget-id={widget.id} data-widget-state={state.status} aria-busy={state.status === "loading"} aria-labelledby={`webspring-widget-${widget.id}-title`}>

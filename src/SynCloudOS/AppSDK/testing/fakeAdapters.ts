@@ -396,6 +396,9 @@ export interface DeterministicRuntimeEnvironment {
   readonly environment: SynCloudOSRuntimeEnvironment;
   readonly clock: DeterministicScheduler;
   readonly mediaClock: SynWareTestMediaClock;
+  readonly mediaQueries: Readonly<{
+    setMatches(query: string, matches: boolean): void;
+  }>;
   readonly clipboard: FakeClipboardAdapter;
   readonly adapters: SynWareTestAdapters;
   /** The production runtime reads window persistence during construction.
@@ -626,7 +629,19 @@ export function createDeterministicRuntimeEnvironment(options: {
     x: 0, y: 0, width: 1440, height: 900, devicePixelRatio: 1,
     safeArea: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }),
   }));
-  const mediaQueries = new Set<RuntimeMediaQuery>();
+  const mediaQueries = new Map<RuntimeMediaQuery, Set<(matches: boolean) => void>>();
+  const mediaQueryMatches = new Map<string, boolean>();
+  const mediaQueryControl = Object.freeze({
+    setMatches(query: string, matches: boolean) {
+      if (mediaDisposed) throw abortError("The deterministic media queries are disposed.");
+      if ((mediaQueryMatches.get(query) ?? false) === matches) return;
+      mediaQueryMatches.set(query, matches);
+      for (const [media, subscribers] of [...mediaQueries]) {
+        if (media.media !== query) continue;
+        for (const listener of [...subscribers]) listener(matches);
+      }
+    },
+  });
   const browser = Object.freeze({
     getLocation() {
       return controls.browser.runSync("browser.location", () => {
@@ -702,7 +717,7 @@ export function createDeterministicRuntimeEnvironment(options: {
         const queryListeners = new Set<(matches: boolean) => void>();
         const match = Object.freeze({
           media: query,
-          matches: false,
+          get matches() { return mediaQueryMatches.get(query) ?? false; },
           subscribe(listener: (matches: boolean) => void) {
             return controls.media.runSync("media.subscribe", () => {
               queryListeners.add(listener);
@@ -711,7 +726,7 @@ export function createDeterministicRuntimeEnvironment(options: {
           },
           dispose() { queryListeners.clear(); mediaQueries.delete(match); },
         } satisfies RuntimeMediaQuery);
-        mediaQueries.add(match);
+        mediaQueries.set(match, queryListeners);
         return match;
       });
     },
@@ -733,6 +748,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     environment,
     clock,
     mediaClock,
+    mediaQueries: mediaQueryControl,
     clipboard,
     adapters,
     prepareRuntimeBootstrap() {
@@ -755,7 +771,8 @@ export function createDeterministicRuntimeEnvironment(options: {
     dispose() {
       mediaDisposed = true;
       clock.dispose();
-      for (const media of mediaQueries) media.dispose();
+      for (const media of mediaQueries.keys()) media.dispose();
+      mediaQueryMatches.clear();
       listeners.clear();
     },
   });

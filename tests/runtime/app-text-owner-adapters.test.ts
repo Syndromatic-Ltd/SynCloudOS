@@ -56,7 +56,7 @@ async function fixture() {
     writeContent: (model, next) => ({ ...model, body: createNSETextSnapshot(next).text }),
   });
   cleanups.push(() => owner.dispose());
-  const session = new TextEditingSession({ id: "body-session", documentId: document.id, owner, history: app.documents.getUndoManager(document.id) });
+  const session = new TextEditingSession({ id: "body-session", documentId: document.id, textOwner: owner, history: app.documents.getUndoManager(document.id) });
   cleanups.push(() => session.dispose());
   return { runtime, adapter, app, foreign, location, document, owner, session };
 }
@@ -78,7 +78,7 @@ describe("AppSDK text and output owner adapters with real mounted documents", ()
 
   it("observes another canonical SDK edit while per-view selections stay independent", async () => {
     const { app, document, owner, session } = await fixture();
-    const second = new TextEditingSession({ id: "other-view", documentId: document.id, owner });
+    const second = new TextEditingSession({ id: "other-view", documentId: document.id, textOwner: owner });
     cleanups.push(() => second.dispose());
     session.select(5);
     second.select(0);

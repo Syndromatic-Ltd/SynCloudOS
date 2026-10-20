@@ -33,7 +33,7 @@ afterEach(cleanup);
 const comment = { custom: { "journal.comment": "c1" } };
 const policies: NSETextEditingSessionOptions["customAttributePolicies"] = { "journal.comment": { extendsWhenTyping: false }, "journal.style": { carriesAcrossParagraphSplit: false } };
 const sessionFor = (content: NSEAttributedContent, options: Partial<NSETextEditingSessionOptions> = {}) =>
-  new TextEditingSession({ id: "s", owner: createInMemoryNSETextOwner({ content }), customAttributePolicies: policies, ...options });
+  new TextEditingSession({ id: "s", textOwner: createInMemoryNSETextOwner({ content }), customAttributePolicies: policies, ...options });
 const runs = (session: TextEditingSession, block = 0) => session.getSnapshot().model.attributedContent.blocks[block]!.runs.map(run => run.kind === "text" ? [run.text, run.attributes ?? null] : null);
 const bullet = (id = "l1"): NSETextList => ({ id, marker: "disc" });
 
@@ -81,7 +81,7 @@ describe("custom attribute editing policies", () => {
 
   it("indents and outdents list items through the text view's keys", () => {
     const owner = createInMemoryNSETextOwner({ content: attributedContent([paragraph([textRun("one")], { textLists: [bullet()] }), paragraph([textRun("two")], { textLists: [bullet()] })]) });
-    const session = new TextEditingSession({ id: "keys", owner });
+    const session = new TextEditingSession({ id: "keys", textOwner: owner });
     render(<NSETextView session={session} label="Doc" />);
     const textbox = screen.getByRole("textbox");
     const key = (init: KeyboardEventInit) => act(() => { textbox.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ...init })); });
@@ -107,7 +107,7 @@ describe("Typing undo runs", () => {
   const typed = (session: TextEditingSession, text: string) => { for (const character of text) session.insertText(character); };
   it("undoes characters typed in one place as one action, and breaks the run when the caret moves", async () => {
     const owner = createUndoableNSETextOwner({ content: plainNSETextContent("") });
-    const session = new TextEditingSession({ id: "typing-run", owner, history: owner.history });
+    const session = new TextEditingSession({ id: "typing-run", textOwner: owner, history: owner.history });
     typed(session, "Hello");
     session.select(0);
     typed(session, "Oh ");
@@ -122,7 +122,7 @@ describe("Typing undo runs", () => {
 
   it("groups backspaces into one deletion separate from the typing before it", async () => {
     const owner = createUndoableNSETextOwner({ content: plainNSETextContent("") });
-    const session = new TextEditingSession({ id: "deletion-run", owner, history: owner.history });
+    const session = new TextEditingSession({ id: "deletion-run", textOwner: owner, history: owner.history });
     typed(session, "Hello");
     for (let end = 5; end > 2; end--) session.commit([{ kind: "replace", range: { location: end - 1, length: 1 }, content: plainNSETextContent("") }]);
     expect(session.getSnapshot().model.text).toBe("He");

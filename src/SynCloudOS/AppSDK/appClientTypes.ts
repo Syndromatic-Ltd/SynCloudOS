@@ -95,6 +95,8 @@ export interface AppLifecycleClient {
 export interface AppCommandClient {
   /** Current command authority evidence, available only while this mount is live. */
   getPresentationGeneration(): Readonly<{ registryGeneration: number; responderGeneration: number }>;
+  /** Revalidates presentation when focus or responder authority changes. */
+  subscribePresentation(listener: () => void): () => void;
   register(declaration: object): AppClientHandle & Readonly<{ commandId: string; responderId: string }>;
   createPayload(...fields: readonly unknown[]): Readonly<Record<string, unknown>>;
   createPayloadArray(...values: readonly unknown[]): readonly unknown[];
@@ -106,7 +108,7 @@ export interface AppCommandClient {
     id: string, payload?: unknown,
     options?: Readonly<Record<string, unknown>> | Pick<CommandDispatchOptions, "source" | "correlationId" | "signal" | "acceptance">,
   ): CommandDispatchPreparation | Promise<CommandDispatchPreparation>;
-  validate(id: string, payload?: unknown, options?: Readonly<Record<string, unknown>>): Promise<AppCommandPresentation>;
+  validate(id: string, payload?: unknown, options?: Readonly<Record<string, unknown>> | Pick<CommandValidationOptions, "source" | "signal" | "generation">): Promise<AppCommandPresentation>;
   validateMany(
     requests: readonly Readonly<{ key: string; commandId: string; payload?: unknown }>[],
     options?: Readonly<Record<string, unknown>> | Pick<CommandValidationOptions, "source" | "signal" | "generation">,

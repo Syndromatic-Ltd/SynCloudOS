@@ -28,10 +28,55 @@ import { FocusScope, ResponderScope, RuntimeInputBoundary, SynCloudOSProvider } 
 import { createTestRuntime } from "./helpers";
 import { registerNSEFocusOrigin } from "../../src/NSE/Focus";
 import { registerNSEInspectorOrigin } from "../../src/NSE/Focus/focusOrigin";
+import type { FocusScopeHandle } from "../../src/SynCloudOS/Focus/focusTypes";
 
 afterEach(cleanup);
 
 describe("focus scopes", () => {
+  it("publishes focus authority changes and detaches disposed subscriptions", async () => {
+    const runtime = createTestRuntime();
+    runtime.responders.register({ id: "editor", kind: "control", parentId: "runtime", scopeId: "root" });
+    await Promise.resolve();
+    const changed = vi.fn();
+    const unsubscribe = runtime.focus.subscribe(changed);
+    const expectChange = async (change: () => void) => {
+      changed.mockClear();
+      const generation = runtime.focus.getGeneration();
+      change();
+      expect(runtime.focus.getGeneration()).toBeGreaterThan(generation);
+      expect(changed).not.toHaveBeenCalled();
+      await Promise.resolve();
+      expect(changed).toHaveBeenCalledOnce();
+    };
+    try {
+      expect(runtime.focus.requestFocus("missing")).toMatchObject({ status: "missing" });
+      await Promise.resolve();
+      expect(changed).not.toHaveBeenCalled();
+      await expectChange(() => { runtime.focus.requestFocus("editor"); });
+      await expectChange(() => { runtime.focus.setActiveAnchors({ runtimeResponderId: "runtime" }); });
+      let scope!: FocusScopeHandle;
+      await expectChange(() => {
+        scope = runtime.focus.openScope({ id: "panel", kind: "popover", parentResponderId: "editor", modal: false, trapFocus: false });
+      });
+      await expectChange(() => { scope.close(); });
+      await expectChange(() => { runtime.responders.remove("editor"); });
+      expect(runtime.focus.getFocusedResponderId()).toBe("runtime");
+      unsubscribe();
+      changed.mockClear();
+      runtime.focus.requestFocus("runtime");
+      await Promise.resolve();
+      expect(changed).not.toHaveBeenCalled();
+      runtime.focus.subscribe(changed);
+      runtime.focus.requestFocus("runtime");
+      runtime.focus.dispose();
+      await Promise.resolve();
+      expect(changed).not.toHaveBeenCalled();
+    } finally {
+      unsubscribe();
+      await runtime.dispose();
+    }
+  });
+
   it("returns a dismissed inspector menu to its picker instead of jumping to the owning app", async () => {
     const runtime = createTestRuntime();
     runtime.responders.register({ id: "app", kind: "application", parentId: "runtime", scopeId: "root" });

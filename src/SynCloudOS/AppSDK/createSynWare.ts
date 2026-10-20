@@ -54,6 +54,7 @@ function completeBundleLoadContext(
   const path = context.path ?? `${packageName}/`;
   const componentKey = context.componentKey ?? componentKeyFromPackageName(packageName);
   return {
+    ...(context.about === undefined ? {} : { about: context.about }),
     appRoot,
     packageName,
     path,

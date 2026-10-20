@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import type { AppRouteSession, AppRouteSessionSnapshot } from "../../Routing/appSdkRoutePort";
 import { normalizeBundleIdentifier } from "../../Identity/bundleIdentifier.mjs";
 import { isSynWareRouteGraph } from "../../Routing/appSdkRoutePort";
 import type {
@@ -37,7 +36,10 @@ export interface MountedSynWareRouterOptions<
   readonly appId: string;
   readonly sessionId: string;
   readonly signal: AbortSignal;
-  readonly session: AppRouteSession;
+  readonly session: {
+    getSnapshot(): SynWareRouterSnapshot;
+    subscribe(listener: () => void): () => void;
+  };
   getAuthoritySnapshot(): Readonly<{ operationId: string | null; authorizationGeneration: number }>;
   openRoute(href: string, options: Readonly<{ historyMode: "push" | "replace"; correlationId?: string; context?: Readonly<{ routeRetry: true }> }>): ReturnType<AppNavigationClient["openRoute"]>;
   preloadRoute(href: string, options: SynWareRouterPreloadOptions): Promise<unknown>;
@@ -55,7 +57,7 @@ function shallowParamValueEqual(left: unknown, right: unknown): boolean {
   return false;
 }
 
-function snapshotProjection(snapshot: AppRouteSessionSnapshot): SynWareRouterSnapshot {
+function snapshotProjection(snapshot: SynWareRouterSnapshot): SynWareRouterSnapshot {
   return Object.freeze({
     revision: snapshot.revision,
     status: snapshot.status,

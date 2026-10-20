@@ -23,6 +23,7 @@ import type { ResponderKind, UndoOwner } from "../SynCloudOS/SynCloudOS";
 import { registerMountedAppResponder } from "../SynCloudOS/SynCloudOS";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext } from "./runtimeContext";
 import { activateResponderHierarchy, clearOwnedResponderAnchor, ResponderHierarchyContext, useResponderHierarchy } from "./responderHierarchy";
+import { applicationSessionFor } from "../SynCloudOS/AppSDK/applicationSession";
 
 export interface ResponderScopeProps extends PropsWithChildren {
   readonly responderId: string;
@@ -58,6 +59,8 @@ export function ResponderScope({ responderId, kind, parentResponderId, scopeId, 
   // effect, including for portal descendants.
   useInsertionEffect(() => {
     if (disabled || appRuntime) return;
+    if (kind === "application" && responderId.startsWith("application:") &&
+      applicationSessionFor({ runtimeId: kernelRuntime!.runtimeId, appId: responderId.slice("application:".length) })?.ownsApplicationResponder) return;
     const registration = kernelRuntime!.responders.register({ id: responderId, kind, parentId: resolvedParentResponderId, scopeId, undoOwner, diagnosticsLabel });
     return () => {
       clearOwnedResponderAnchor(kernelRuntime!, kind, responderId);

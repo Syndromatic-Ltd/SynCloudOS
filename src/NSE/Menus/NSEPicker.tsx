@@ -18,13 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useId, useMemo, useRef, type HTMLAttributes, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type ReactNode } from "react";
 import { useNSEOverlayProvider } from "../Overlays";
 import { NSEListboxPopup, type NSEListboxOption } from "../Overlays/NSEListboxPopup";
 import type { NSEPopupPresentation } from "../Overlays/NSEPopup";
 import { NSEPushButton, type NSEPushButtonProps } from "../Controls/Buttons/NSEButtons";
 import { classes, sizedControlStyle, useControllableState, useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
 import type { NSEMenuOverlayOptions } from "./menuTypes";
+import { useNSEActionBinding } from "../Controls/Core/useNSEControlAction";
+import { useNSEControlCommand, type NSEControlCommandState } from "../Controls/Core/useNSEControlCommand";
 
 export interface NSEPickerOption {
   readonly value: string;
@@ -48,6 +50,10 @@ export interface NSEPickerProps extends Omit<HTMLAttributes<HTMLSpanElement>, "o
   readonly value?: string;
   readonly defaultValue?: string;
   readonly onValueChange?: (value: string) => void;
+  /** Sent along the responder chain after an option is chosen, not when the list opens. */
+  readonly action?: string;
+  /** Overrides the selected option's string value; an explicitly present `undefined` sends no payload. */
+  readonly actionPayload?: unknown;
   readonly label?: ReactNode;
   readonly labelHidden?: boolean;
   /** Spoken name when it should say more than the visible caption. */
@@ -69,38 +75,65 @@ export interface NSEPickerProps extends Omit<HTMLAttributes<HTMLSpanElement>, "o
   readonly width?: number | string;
 }
 
+function PickerActionBinding({ value, action, payload, onState }: {
+  readonly value: string;
+  readonly action: string;
+  readonly payload: unknown;
+  readonly onState: (value: string, state: NSEControlCommandState<unknown> | null) => void;
+}) {
+  const binding = useNSEActionBinding(action, payload);
+  const command = useNSEControlCommand(binding);
+  useEffect(() => {
+    onState(value, command);
+    return () => onState(value, null);
+  }, [command, onState, value]);
+  return null;
+}
+
 /**
  * Canonical picker trigger. The option list is always rendered by the shared
  * NSEListboxPopup/overlay stack; no picker-specific portal or focus engine is
  * created here.
  */
-export function NSEPicker({
-  options,
-  actions,
-  value,
-  defaultValue,
-  onValueChange,
-  label,
-  labelHidden = false,
-  accessibleLabel,
-  textAlign = "start",
-  popupAlign = "right",
-  pressHaptic = "soft",
-  snapHaptic = "selection",
-  smoothSurface,
-  listboxOverlay,
-  parentResponderId,
-  presentation,
-  disabled = false,
-  controlSize = "regular",
-  height,
-  width,
-  className,
-  id,
-  style,
-  ...htmlAttributes
-}: NSEPickerProps) {
+export function NSEPicker(props: NSEPickerProps) {
+  const {
+    options,
+    actions,
+    value,
+    defaultValue,
+    onValueChange,
+    action,
+    actionPayload,
+    label,
+    labelHidden = false,
+    accessibleLabel,
+    textAlign = "start",
+    popupAlign = "right",
+    pressHaptic = "soft",
+    snapHaptic = "selection",
+    smoothSurface,
+    listboxOverlay,
+    parentResponderId,
+    presentation,
+    disabled = false,
+    controlSize = "regular",
+    height,
+    width,
+    className,
+    id,
+    style,
+    ...htmlAttributes
+  } = props;
   const provider = useNSEOverlayProvider();
+  const hasActionPayload = Object.prototype.hasOwnProperty.call(props, "actionPayload");
+  const [optionActions, setOptionActions] = useState<ReadonlyMap<string, NSEControlCommandState<unknown>>>(() => new Map());
+  const receiveOptionAction = useCallback((value: string, command: NSEControlCommandState<unknown> | null) => {
+    setOptionActions((current) => {
+      const next = new Map(current);
+      if (command) next.set(value, command); else next.delete(value);
+      return next;
+    });
+  }, []);
   const generatedId = useId().replace(/:/g, "");
   const pickerId = id ?? `nse-picker:${generatedId}`;
   const buttonId = `${pickerId}-button`;
@@ -129,28 +162,42 @@ export function NSEPicker({
   });
   const anchorRef = useRef<HTMLButtonElement | null>(null);
   const selectedOption = options.find((option) => option.value === selectedValue) ?? options.find((option) => !option.disabled);
+  const actionPresentation = optionActions.get(selectedValue)?.presentation;
+  const actionAvailable = action === undefined || options.some((option) => {
+    const presentation = optionActions.get(option.value)?.presentation;
+    return !option.disabled && presentation?.enabled && !presentation.denied && !presentation.hidden && !presentation.stale;
+  }) || Boolean(actions?.some((item) => !item.disabled));
+  const actionHidden = action !== undefined && options.length > 0 && options.every((option) => optionActions.get(option.value)?.presentation?.hidden);
   const { triggerNSEControlHaptic } = useNSEControlFeedback();
   const listboxOptions = useMemo<readonly NSEListboxOption<string>[]>(() => [
-    ...options.map((option) => ({ id: option.value, label: option.label, value: option.value, disabled: option.disabled })),
+    ...options.filter((option) => action === undefined || !optionActions.get(option.value)?.presentation?.hidden).map((option) => {
+      const presentation = optionActions.get(option.value)?.presentation;
+      return { id: option.value, label: option.label, value: option.value, disabled: option.disabled || (action !== undefined && !(presentation?.enabled && !presentation.denied && !presentation.stale)) };
+    }),
     ...(actions ?? []).map((action, index) => ({ id: `nse-picker-action:${action.id}`, label: action.label, disabled: action.disabled, kind: "action" as const, separatorBefore: index === 0 && options.length > 0 })),
-  ], [actions, options]);
+  ], [action, actions, options, optionActions]);
   const requestOpen = useCallback((nextOpen: boolean) => {
     setOpen(nextOpen);
   }, [setOpen]);
   const select = useCallback((option: NSEListboxOption<string>) => {
-    if (option.disabled) return;
+    if (option.disabled || disabled || !actionAvailable) return;
     if (option.kind === "action") {
       actions?.find((action) => `nse-picker-action:${action.id}` === option.id)?.onSelect();
       return;
     }
     if (option.value === undefined) return;
-    setSelectedValue(option.value);
-    if (snapHaptic) void triggerNSEControlHaptic(snapHaptic);
-  }, [actions, setSelectedValue, snapHaptic, triggerNSEControlHaptic]);
+    const commit = () => {
+      setSelectedValue(option.value as string);
+      if (snapHaptic) void triggerNSEControlHaptic(snapHaptic);
+    };
+    if (action === undefined) commit();
+    else void optionActions.get(option.value)?.dispatch().then((result) => { if (result?.status === "executed") commit(); });
+  }, [action, actions, disabled, actionAvailable, optionActions, setSelectedValue, snapHaptic, triggerNSEControlHaptic]);
 
   return (
     <span
       id={id}
+      hidden={actionHidden || undefined}
       className={classes("nse-control-picker", className)}
       data-text-align={textAlign}
       data-popup-align={popupAlign}
@@ -159,6 +206,7 @@ export function NSEPicker({
       style={sizedControlStyle(style, height, width)}
       {...htmlAttributes}
     >
+      {action === undefined ? null : options.map((option) => <PickerActionBinding key={option.value} value={option.value} action={action} payload={hasActionPayload ? actionPayload : option.value} onState={receiveOptionAction} />)}
       {/* Name sources for aria-labelledby only are `hidden`: they still name
           the button and listbox, but are not read again as loose text. */}
       {label ? (
@@ -173,14 +221,15 @@ export function NSEPicker({
         ref={anchorRef}
         id={buttonId}
         className="nse-control-picker-button"
-        disabled={disabled}
+        disabled={disabled || !actionAvailable}
+        pressed={actionPresentation?.state === "on"}
         haptic={pressHaptic}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}
         aria-labelledby={`${pickerId}-accessible-label`}
         onKeyDown={(event) => {
-          if (event.defaultPrevented || event.nativeEvent.isComposing) return;
+          if (event.defaultPrevented || event.currentTarget.disabled || event.nativeEvent.isComposing) return;
           if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
             requestOpen(true);

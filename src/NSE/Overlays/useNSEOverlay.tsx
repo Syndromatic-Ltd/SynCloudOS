@@ -88,6 +88,11 @@ interface NSEOverlayParent {
 
 const NSEOverlayParentContext = createContext<NSEOverlayParent | null>(null);
 
+/** Internal focus membership for controllers rendered through an overlay portal. */
+export function useNSEOverlayFocusScope(): string | undefined {
+  return useContext(NSEOverlayParentContext)?.scopeId;
+}
+
 const interactiveScopeKinds: Readonly<Record<NSEOverlayKind, "menu" | "popover" | "sheet" | null>> = {
   menu: "menu",
   submenu: "menu",

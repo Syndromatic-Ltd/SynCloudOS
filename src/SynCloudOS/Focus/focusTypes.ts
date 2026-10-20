@@ -44,6 +44,8 @@ export interface FocusManager {
   getActiveAnchors(): ActiveResponderAnchors;
   getFocusedResponderId(): string | null;
   getGeneration(): number;
+  /** Observes focus, scope and anchor changes after the current mutation completes. */
+  subscribe(listener: () => void): () => void;
   inspect(): { readonly generation: number; readonly focusedResponderId: string | null; readonly scopes: readonly FocusScopeRegistration[]; readonly restorations: readonly { readonly scopeId: string; readonly responderId: string | null }[] };
   handleRespondersRemoved(ids: readonly string[]): void;
   dispose(): void;

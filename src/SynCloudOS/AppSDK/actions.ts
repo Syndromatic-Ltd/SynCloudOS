@@ -17,6 +17,14 @@
  * limitations under the License.
  */
 
+import { useMemo, useRef } from "react";
+import { observe } from "../../NSE/Objects/observable";
+import { publishNSEActionChange } from "../../NSE/Controls/Core/actionChanges";
+import { useNSEControlCommand } from "../../NSE/Controls/Core/useNSEControlCommand";
+import type { NSEControlRuntimePort } from "../../NSE/Controls/Core/controlTypes";
+import type { CommandDispatchResult } from "../Commands/commandTypes";
+import type { KeyBindingDeclaration } from "../KeyBindings/keyBindingTypes";
+import { useSCOS } from "./scos/useSCOS";
 import { nseActionCommandId } from "../../NSE/Controls/Core/actionCommandId";
 import type { AppCommandClient } from "./appClientTypes";
 import type { SynWareCommandPayloadSchema, SynWareCommandTitle, SynWareCommandValidation } from "./appRuntimeTypes";
@@ -30,17 +38,19 @@ export interface NSEActionOptions<Payload = unknown> {
   readonly id?: string;
   /** The command's title in menus. Defaults to the method name in words (`newNote` is "New Note"). */
   readonly title?: string | SynWareCommandTitle;
+  /** The command menu category, for example `"file"` or `"edit"`. */
+  readonly menuCategory?: string;
+  /** Default keyboard bindings, with the same scope, platform and safety rules as commands. */
+  readonly keyBindings?: readonly KeyBindingDeclaration[];
+  /** Explicitly permits a declared binding to replace a reserved primary browser shortcut. */
+  readonly allowReservedBrowserShortcut?: boolean;
   /** Checks and types the payload. Without it any payload is accepted, except that a method with no parameter accepts none. */
   readonly payload?: SynWareCommandPayloadSchema<Payload>;
 }
 
 type ActionDecoratorContext<This, Payload> = ClassMethodDecoratorContext<This, NSEActionMethod<This, Payload>>;
 
-interface ActionRecord {
-  readonly id: string | undefined;
-  readonly title: string | SynWareCommandTitle | undefined;
-  readonly payload: SynWareCommandPayloadSchema<unknown> | undefined;
-}
+type ActionRecord = NSEActionOptions<unknown>;
 
 /** The decorated method functions. Keyed by function so a class swapped in by hot reload is read the same way as the one it replaces. */
 const actionRecords = new WeakMap<object, ActionRecord>();
@@ -87,13 +97,17 @@ export function action<Payload>(options: NSEActionOptions<Payload>): <This exten
 ) => void;
 export function action(first: unknown, second?: unknown): unknown {
   if (typeof first === "function") {
-    declareAction({ id: undefined, title: undefined, payload: undefined }, first as NSEActionMethod<object, unknown>, second as ActionDecoratorContext<object, unknown>);
+    declareAction({}, first as NSEActionMethod<object, unknown>, second as ActionDecoratorContext<object, unknown>);
     return undefined;
   }
   if (typeof first === "string" || (typeof first === "object" && first !== null)) {
     const options: NSEActionOptions = typeof first === "string" ? { id: first } : first;
     if (options.id !== undefined && options.id.trim().length === 0) throw new TypeError("An action's command ID must not be empty.");
-    const record: ActionRecord = { id: options.id, title: options.title, payload: options.payload as SynWareCommandPayloadSchema<unknown> | undefined };
+    const record: ActionRecord = {
+      id: options.id, title: options.title, menuCategory: options.menuCategory,
+      keyBindings: options.keyBindings, allowReservedBrowserShortcut: options.allowReservedBrowserShortcut,
+      payload: options.payload as SynWareCommandPayloadSchema<unknown> | undefined,
+    };
     return (method: NSEActionMethod<object, unknown>, context: ActionDecoratorContext<object, unknown>) => { declareAction(record, method, context); };
   }
   throw new TypeError("@action takes a method, a standard command ID or options.");
@@ -187,12 +201,14 @@ function declarationFor(target: object, name: string, commandId: string, respond
     id: commandId,
     responderId,
     title: titleFor(commandId, name, record),
+    ...(record.menuCategory === undefined ? {} : { menuCategory: record.menuCategory }),
+    ...(record.allowReservedBrowserShortcut === undefined ? {} : { allowReservedBrowserShortcut: record.allowReservedBrowserShortcut }),
     payload: record.payload ?? Object.freeze({
       description: "The action's payload",
       // Read at dispatch, so a method hot reload swaps in with a parameter is not refused.
       parse: (value: unknown) => (method().length === 0 ? noPayload : anyPayload).parse(value),
     }),
-    defaultKeyBindings: [],
+    defaultKeyBindings: record.keyBindings ?? [],
     scope: "focused",
     undo: Object.freeze({ kind: "none" }),
     validate(context: { readonly payload: unknown }): SynWareCommandValidation | Promise<SynWareCommandValidation> {
@@ -218,12 +234,17 @@ function declarationFor(target: object, name: string, commandId: string, respond
  */
 export function bindActionResponder(target: object, host: NSEActionHost, responderId: string): NSEActionBinding {
   if (responderId.trim().length === 0) throw new TypeError("Actions need a responder to answer on.");
-  const registered = new Map<string, { readonly commandId: string; readonly handle: { dispose(): unknown } }>();
+  const registered = new Map<string, { readonly commandId: string; readonly record: ActionRecord; readonly handle: { dispose(): unknown } }>();
   let disposed = false;
 
+  const announceChanges = (): void => {
+    for (const { commandId } of registered.values()) publishNSEActionChange(commandId);
+  };
   const remove = (name: string): void => {
-    registered.get(name)?.handle.dispose();
+    const existing = registered.get(name);
+    existing?.handle.dispose();
     registered.delete(name);
+    if (existing) publishNSEActionChange(existing.commandId);
   };
 
   const sync = (): void => {
@@ -238,11 +259,13 @@ export function bindActionResponder(target: object, host: NSEActionHost, respond
       wanted.set(name, { commandId, record });
     }
     for (const [name, existing] of [...registered]) {
-      if (wanted.get(name)?.commandId !== existing.commandId) remove(name);
+      const next = wanted.get(name);
+      if (next?.commandId !== existing.commandId || next.record !== existing.record) remove(name);
     }
     for (const [name, { commandId, record }] of wanted) {
       if (registered.has(name)) continue;
-      registered.set(name, { commandId, handle: host.commands.register(declarationFor(target, name, commandId, responderId, record)) });
+      registered.set(name, { commandId, record, handle: host.commands.register(declarationFor(target, name, commandId, responderId, record)) });
+      publishNSEActionChange(commandId);
     }
   };
 
@@ -252,12 +275,14 @@ export function bindActionResponder(target: object, host: NSEActionHost, respond
     for (const name of [...registered.keys()]) remove(name);
     throw error;
   }
+  const stopObserving = observe(target, announceChanges);
 
   const binding: NSEActionBinding = {
     refresh: sync,
     dispose() {
       if (disposed) return;
       disposed = true;
+      stopObserving();
       for (const name of [...registered.keys()]) remove(name);
       liveBindings.get(target)?.delete(binding);
     },
@@ -271,4 +296,71 @@ export function bindActionResponder(target: object, host: NSEActionHost, respond
 /** Re-reads `target`'s actions after its class was replaced (hot reload). */
 export function refreshActionBindings(target: object): void {
   for (const binding of liveBindings.get(target) ?? []) binding.refresh();
+}
+
+/** The current canonical availability and check state of an action. */
+export interface NSEActionState {
+  readonly enabled: boolean;
+  readonly state: "off" | "on" | "mixed";
+  /** Uses the bound payload when omitted; a supplied payload, including undefined, is validated afresh. */
+  perform(payload?: unknown): Promise<CommandDispatchResult<unknown> | null>;
+}
+
+// Payloads passed by a component are commonly inline data objects. Keep equal
+// data stable across the validation hook's own renders, without coalescing
+// opaque objects or invoking accessors.
+function sameActionPayload(left: unknown, right: unknown, seen?: WeakMap<object, object>): boolean {
+  if (Object.is(left, right)) return true;
+  if (typeof left !== "object" || left === null || typeof right !== "object" || right === null) return false;
+  const prototype = Object.getPrototypeOf(left) as unknown;
+  if (prototype !== Object.getPrototypeOf(right) || (!Array.isArray(left) && prototype !== Object.prototype && prototype !== null)) return false;
+  const visited = seen ?? new WeakMap<object, object>();
+  if (visited.has(left)) return visited.get(left) === right;
+  visited.set(left, right);
+  const leftKeys = Reflect.ownKeys(left);
+  const rightKeys = Reflect.ownKeys(right);
+  if (leftKeys.length !== rightKeys.length) return false;
+  return leftKeys.every((key) => {
+    const a = Object.getOwnPropertyDescriptor(left, key);
+    const b = Object.getOwnPropertyDescriptor(right, key);
+    return Boolean(a && b && "value" in a && "value" in b && sameActionPayload(a.value, b.value, visited));
+  });
+}
+
+/**
+ * Observes and performs an action in the current mounted application.
+ * Bare names are app-scoped; dotted command IDs are used as written. Validation
+ * and execution use the focused responder chain, including `validate<Name>()`.
+ * Availability and state describe the bound payload. `perform(eventPayload)`
+ * prepares that payload independently, even if the bound payload is disabled;
+ * `perform()` uses the bound payload and `perform(undefined)` overrides it.
+ *
+ * ```tsx
+ * const save = useAction("document.save");
+ * return <button disabled={!save.enabled} onClick={() => void save.perform()}>Save</button>;
+ * ```
+ */
+export function useAction(name: string, payload?: unknown): NSEActionState {
+  const app = useSCOS();
+  const stablePayload = useRef(payload);
+  if (!sameActionPayload(stablePayload.current, payload)) stablePayload.current = payload;
+  const boundPayload = stablePayload.current;
+  const binding = useMemo(() => ({ id: nseActionCommandId(app.app.bundleIdentifier, name), payload: boundPayload }), [app.app.bundleIdentifier, name, boundPayload]);
+  const port = useMemo<NSEControlRuntimePort>(() => ({
+    signal: app.signal,
+    commands: {
+      getPresentationGeneration: () => app.commands.getPresentationGeneration(),
+      subscribePresentation: (listener) => app.commands.subscribePresentation(listener),
+      validate: (id, value, options) => app.commands.validate(id, value, options),
+      prepareDispatch: (id, value, options) => app.commands.prepareDispatch(id, value, options),
+      dispatch: (id, value, options) => app.commands.dispatch<CommandDispatchResult<unknown>>(id, value, options),
+    },
+  }), [app]);
+  const command = useNSEControlCommand(binding, port);
+  const presentation = command.presentation;
+  return useMemo(() => ({
+    perform: command.dispatch,
+    enabled: Boolean(presentation?.enabled && !presentation.denied && !presentation.hidden && !presentation.stale),
+    state: presentation?.state ?? "off",
+  }), [command.dispatch, presentation]);
 }

@@ -115,9 +115,9 @@ export async function createTextSystemExample(options: {
   };
   const history = documents.getUndoManager(document.id);
   const sessions = Object.freeze({
-    body: new TextEditingSession({ id: "example-body", documentId: document.id, owner: owners.body, history, signal }),
-    bodyMirror: new TextEditingSession({ id: "example-body-mirror", documentId: document.id, owner: owners.body, history, signal }),
-    caption: new TextEditingSession({ id: "example-caption", documentId: document.id, owner: owners.caption, history, signal }),
+    body: new TextEditingSession({ id: "example-body", documentId: document.id, textOwner: owners.body, history, ownerSignal: signal }),
+    bodyMirror: new TextEditingSession({ id: "example-body-mirror", documentId: document.id, textOwner: owners.body, history, ownerSignal: signal }),
+    caption: new TextEditingSession({ id: "example-caption", documentId: document.id, textOwner: owners.caption, history, ownerSignal: signal }),
   });
   const participants = Object.values(sessions).map(session => bindSynWareNSETextEditingSession({ documents, documentId: document.id, session, lifetime: { signal } }));
   const listeners = new Set<() => void>(), presentations = new Map<ExampleViewId, ExamplePresentationResolver>();

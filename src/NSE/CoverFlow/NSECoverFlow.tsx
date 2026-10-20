@@ -30,6 +30,8 @@ import {
   type PointerEvent as ReactPointerEvent,
   type WheelEvent as ReactWheelEvent
 } from "react";
+import { useNSEActionBinding } from "../Controls/Core/useNSEControlAction";
+import { useNSEControlCommand } from "../Controls/Core/useNSEControlCommand";
 
 export interface NSECoverFlowItem {
   /** Stable identity for the panel. */
@@ -42,6 +44,10 @@ export interface NSECoverFlowItem {
   caption?: string;
   /** Fired when the panel is the centre item and is activated (click / Enter). */
   onActivate?: () => void;
+  /** Sent when the centre panel is activated. Overrides the cover flow's default action. */
+  action?: string;
+  /** Defaults to this item's id; an explicitly present undefined sends no payload. */
+  actionPayload?: unknown;
 }
 
 export interface NSECoverFlowProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
@@ -52,6 +58,10 @@ export interface NSECoverFlowProps extends Omit<HTMLAttributes<HTMLDivElement>, 
   defaultActiveIndex?: number;
   /** Notified whenever the centre item changes. */
   onActiveChange?: (index: number) => void;
+  /** Default action for centre-panel activation by click, Enter or Space. */
+  action?: string;
+  /** Defaults to the active item's id; an item-specific action uses its own payload override. */
+  actionPayload?: unknown;
   /** Render mirrored reflections under each panel. Defaults to true. */
   reflection?: boolean;
   /** Show the floating label/caption for the centre item. Defaults to false. */
@@ -112,21 +122,24 @@ function panelTransform(offset: number) {
  * whose artwork is the ring index for that position; near the seam an item simply appears in two
  * slots at once and the depart/arrive pair cross-fades.
  */
-export function NSECoverFlow({
-  items,
-  activeIndex,
-  defaultActiveIndex,
-  onActiveChange,
-  reflection = true,
-  showLabels = false,
-  loop = false,
-  background,
-  className = "",
-  style,
-  onPointerDown,
-  onKeyDown,
-  ...rest
-}: NSECoverFlowProps) {
+export function NSECoverFlow(props: NSECoverFlowProps) {
+  const {
+    items,
+    activeIndex,
+    defaultActiveIndex,
+    onActiveChange,
+    action,
+    actionPayload,
+    reflection = true,
+    showLabels = false,
+    loop = false,
+    background,
+    className = "",
+    style,
+    onPointerDown,
+    onKeyDown,
+    ...rest
+  } = props;
   const isControlled = activeIndex !== undefined;
   const n = items.length;
   const labelId = useId();
@@ -147,6 +160,19 @@ export function NSECoverFlow({
   );
 
   const current = wrapIndex(centre);
+  const currentItem = items[current];
+  const itemHasAction = currentItem?.action !== undefined;
+  const payloadSource = itemHasAction ? currentItem : props;
+  const activationPayload = payloadSource && Object.prototype.hasOwnProperty.call(payloadSource, "actionPayload") ? (itemHasAction ? currentItem?.actionPayload : actionPayload) : currentItem?.id;
+  const actionBinding = useNSEActionBinding(currentItem?.action ?? action, activationPayload);
+  const actionCommand = useNSEControlCommand(actionBinding);
+  const actionPresentation = actionCommand.presentation;
+  const actionAvailable = !actionBinding || Boolean(actionPresentation?.enabled && !actionPresentation.denied && !actionPresentation.hidden && !actionPresentation.stale);
+  const activate = () => {
+    if (!actionAvailable) return;
+    currentItem?.onActivate?.();
+    if (actionBinding) void actionCommand.dispatch();
+  };
 
   // Controlled mode: keep the monotonic centre in step with the parent's item index, moving by the
   // shortest signed amount so a wrap still animates as a single step.
@@ -257,6 +283,7 @@ export function NSECoverFlow({
   // --- Keyboard -------------------------------------------------------------
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(event);
+    if (event.defaultPrevented || event.nativeEvent.isComposing) return;
     switch (event.key) {
       case "ArrowLeft":
         event.preventDefault();
@@ -277,7 +304,7 @@ export function NSECoverFlow({
       case "Enter":
       case " ":
         event.preventDefault();
-        items[current]?.onActivate?.();
+        activate();
         break;
       default:
         break;
@@ -292,7 +319,7 @@ export function NSECoverFlow({
       return;
     }
     if (position === centre) {
-      items[wrapIndex(position)]?.onActivate?.();
+      activate();
     } else {
       goTo(position);
     }
@@ -376,6 +403,8 @@ export function NSECoverFlow({
               data-active={active ? "true" : "false"}
               role={primary ? "option" : undefined}
               aria-selected={primary ? active : undefined}
+              aria-disabled={primary && active && !actionAvailable ? true : undefined}
+              data-action-state={active ? actionPresentation?.state : undefined}
               aria-hidden={primary ? undefined : "true"}
               aria-label={primary ? item.label : undefined}
               style={panelStyle}

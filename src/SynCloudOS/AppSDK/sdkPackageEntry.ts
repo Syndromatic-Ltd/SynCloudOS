@@ -341,10 +341,12 @@ export type {
   SynWareRouteStateClient,
   SynWareWindowState,
 } from "./hooks";
+export type { SynCloudOSPresentationTraits } from "./appClientTypes";
+export type { SCOSRoutes } from "./controllerServices";
 
 export { useStrings, translateSynWareText, getSynWareNamespace } from "./useStrings";
-export { action } from "./actions";
-export type { NSEActionMethod, NSEActionOptions } from "./actions";
+export { action, useAction } from "./actions";
+export type { NSEActionMethod, NSEActionOptions, NSEActionState } from "./actions";
 export { NSEViewControllerView } from "./applicationHosting";
 export type { NSEViewControllerViewProps } from "./applicationHosting";
 // Called by the code the dev server appends to application modules, and by the host that runs them.

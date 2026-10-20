@@ -35,7 +35,7 @@ async function clientClass() {
 }
 function fixture(text = "abcd") {
   const owner = createInMemoryNSETextOwner({ flowId: "body", content: attributedContent([paragraph([textRun(text)])]) });
-  return { owner, session: new TextEditingSession({ id: "ime-input", owner }) };
+  return { owner, session: new TextEditingSession({ id: "ime-input", textOwner: owner }) };
 }
 describe("custom input composition lifecycle", () => {
   it("replaces marked drafts repeatedly and commits reconversion once with a draft-local selection", async () => {
@@ -72,7 +72,7 @@ describe("custom input composition lifecycle", () => {
     expect(owner.getSnapshot().text).toContain("usable");
   });
   it("preserves a conflicted marked draft after an external overlapping canonical edit", async () => {
-    const Client = await clientClass(); const { owner, session } = fixture(); const other = new TextEditingSession({ id: "other", owner });
+    const Client = await clientClass(); const { owner, session } = fixture(); const other = new TextEditingSession({ id: "other", textOwner: owner });
     const client = new Client({ session }); client.setSelectedRange({ location: 1, length: 2 }); const token = client.beginComposition();
     client.setMarkedText("日本語", { composition: token });
     other.insertText("remote", { location: 1, length: 1 });
@@ -83,7 +83,7 @@ describe("custom input composition lifecycle", () => {
     client.cancelMarkedText(token); expect(session.getSnapshot().marked).toBeNull(); client.dispose();
   });
   it("remaps nonoverlapping external edits and preserves final committed content", async () => {
-    const Client = await clientClass(); const { owner, session } = fixture("abcdef"); const other = new TextEditingSession({ id: "other", owner });
+    const Client = await clientClass(); const { owner, session } = fixture("abcdef"); const other = new TextEditingSession({ id: "other", textOwner: owner });
     const client = new Client({ session }); client.setSelectedRange({ location: 3, length: 1 }); const token = client.beginComposition();
     client.setMarkedText("語", { composition: token }); other.insertText("Z", { location: 0, length: 0 });
     expect(client.unmarkText(token).status).toBe("applied"); expect(owner.getSnapshot().text).toBe("Zabc語ef"); client.dispose();
@@ -120,7 +120,7 @@ describe("stable native custom-surface input host", () => {
   it("keeps one accessible reading source and stable textarea across rerendered canvas/layout", async () => {
     const Client = await clientClass(), Host = await hostComponent();
     const owner = createInMemoryNSETextOwner({ content: attributedContent([paragraph([textRun("Read", { link: "https://example.test/read" }), attachmentRun({ id: "figure", kind: "image", source: { kind: "remote", url: "https://example.test/figure.png" }, alt: "Mountain photograph" })]), paragraph([textRun("Second paragraph")])]) });
-    const session = new TextEditingSession({ id: "accessible-host", owner }); const client = new Client({ session });
+    const session = new TextEditingSession({ id: "accessible-host", textOwner: owner }); const client = new Client({ session });
     const view = render(React.createElement(Host, { client, label: "Article" }, React.createElement("canvas", { "aria-label": "Duplicate drawn article" })));
     const textarea = screen.getByRole("textbox", { name: "Article" }) as HTMLTextAreaElement;
     expect(screen.getAllByRole("textbox")).toHaveLength(1);
@@ -236,7 +236,7 @@ describe("stable native custom-surface input host", () => {
   });
   it("rejects a later final native input when an external edit has invalidated its empty-end ticket", async () => {
     const Client = await clientClass(), Host = await hostComponent(); const { owner, session } = fixture(); const client = new Client({ session });
-    const other = new TextEditingSession({ id: "remote-input", owner });
+    const other = new TextEditingSession({ id: "remote-input", textOwner: owner });
     render(React.createElement(Host, { client, label: "Stale native end" })); const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
     fireEvent.compositionStart(textarea); fireEvent.compositionUpdate(textarea, { data: "draft" }); fireEvent.compositionEnd(textarea, { data: "" });
     await act(async () => { await new Promise(resolve => setTimeout(resolve, 0)); });
@@ -267,7 +267,7 @@ describe("stable native custom-surface input host", () => {
   });
   it("preserves a conflicted native marked draft for Escape recovery after rejected finalization", async () => {
     const Client = await clientClass(), Host = await hostComponent(); const { owner, session } = fixture(); const client = new Client({ session });
-    const other = new TextEditingSession({ id: "overlap", owner }); const failures: unknown[] = [];
+    const other = new TextEditingSession({ id: "overlap", textOwner: owner }); const failures: unknown[] = [];
     render(React.createElement(Host, { client, label: "Conflicted final text", onInputError: error => failures.push(error) })); const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
     act(() => client.setSelectedRange({ location: 1, length: 2 }));
     fireEvent.compositionStart(textarea); fireEvent.compositionUpdate(textarea, { data: "日本" });
