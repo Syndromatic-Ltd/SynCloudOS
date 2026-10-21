@@ -11,8 +11,14 @@ for (const theme of ["metro", "atmo"]) for (const appearance of ["light", "dark"
     await expect(page.getByText("1 created",{exact:true})).toBeVisible();
     await page.getByRole("tab", {name:"notes",exact:true}).click();
     const note=page.getByRole("textbox",{name:"Retained note"}); await note.fill("Keep my state");
-    await page.getByRole("tab", {name:"collection",exact:true}).click();
-    await page.getByRole("tab", {name:"notes",exact:true}).click();
+    // Panorama keeps the previous heading clipped offscreen. Navigate with
+    // its real previous/next affordances rather than clicking hidden geometry.
+    if (theme === "metro") await page.getByRole("button", {name:"Previous section",exact:true}).click();
+    else await page.getByRole("tab", {name:"collection",exact:true}).click();
+    await expect(page.getByRole("tab", {name:"collection",exact:true})).toHaveAttribute("aria-selected", "true");
+    if (theme === "metro") await page.getByRole("button", {name:"Next section",exact:true}).click();
+    else await page.getByRole("tab", {name:"notes",exact:true}).click();
+    await expect(page.getByRole("tab", {name:"notes",exact:true})).toHaveAttribute("aria-selected", "true");
     await expect(note).toHaveValue("Keep my state");
     await page.getByLabel("Theme",{exact:true}).selectOption(theme==="metro"?"atmo":"metro");
     await expect(note).toHaveValue("Keep my state");

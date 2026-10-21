@@ -129,7 +129,9 @@
   border-radius: 18px;
   background: transparent;
   color: #fff;
-  font-family: var(--font-ui, var(--nse-theme-font-body, var(--nse-theme-font-ui, inherit)));
+  /* Resolve theme/host roles at the provider; controls inherit the nearest
+     host override, including live font-family changes inside that boundary. */
+  font-family: inherit;
   font-size: 18px;
   font-weight: 800;
   line-height: var(--nse-atmo-control-h);
