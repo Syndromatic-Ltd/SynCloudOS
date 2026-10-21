@@ -29,6 +29,7 @@ import {
 import { fileURLToPath } from "node:url";
 import { loadConfigFromFile } from "vite";
 import { captureFontDeclaration, fontDeclarationCSS } from "../../src/NSE/Typography/fontDeclaration.mjs";
+import { discoverThemePackages, themeFontCSS } from "./theme-packages.mjs";
 import { bundlePaths } from "./bundle-paths.mjs";
 import { createApplicationToolchain } from "./application-toolchain.mjs";
 import { createScosAppModuleSource } from "../../src/SynCloudOS/AppSDK/scos/appModuleSource.mjs";
@@ -58,6 +59,7 @@ const appModulePrefix = "virtual:syncloudos/app/";
 const resolvedProjectModuleId = `\0${projectModuleId}`;
 const browserModuleId = "virtual:syncloudos/browser";
 const resolvedBrowserModuleId = `\0${browserModuleId}`;
+const themeFontModulePrefix = "virtual:syncloudos/theme-fonts/";
 const typographyModuleId = "virtual:syncloudos/typography";
 const resolvedTypographyModuleId = `\0${typographyModuleId}`;
 const defaultAppsDirectory = "src/SynWare";
@@ -305,6 +307,12 @@ function generateProjectModule(discovery) {
   imports.push(`import { selectProjectBundles, selectProjectIntegrations } from ${quote(toViteFileImport(derivationModulePath))};`);
   imports.push('import { createIntegrationContribution, integrationOwners, isDefinedWebspringWidget, isPreferencePaneDefinition, withDiscoveredWebspringItems } from "@syndromatic/syncloudos/webspring";');
 
+  if (discovery.themes.length) imports.push('import { defineNSETheme } from "@syndromatic/syncloudos/nse/theme";');
+  for (const theme of discovery.themes) {
+    imports.push(`import ${quote(toViteFileImport(theme.stylesheetPath))};`);
+    if (theme.fonts) imports.push(`import ${quote(`${themeFontModulePrefix}${theme.definition.id}.css`)};`);
+  }
+  body.push(`export const themes = Object.freeze([${discovery.themes.map(theme => `defineNSETheme(${quote(theme.definition)})`).join(",")}]);`);
   discovery.bundles.forEach((bundle) => {
     const resourceVariables = addUrlImports(bundle.resources.resourceUrls, "url", "resource");
     const localeVariables = addUrlImports(bundle.resources.localeResources, "raw", "locale");
@@ -372,10 +380,10 @@ function normaliseOptions(options) {
   if (!options || typeof options !== "object" || Array.isArray(options)) {
     throw new TypeError("synCloudOS options must be an object when provided.");
   }
-  for (const key of ["appsDirectory", "preferencesDirectory", "widgetsDirectory", "integrationsDirectory", "webspringEntry"]) {
+  for (const key of ["appsDirectory", "preferencesDirectory", "widgetsDirectory", "integrationsDirectory", "themesDirectory", "webspringEntry"]) {
     const value = options[key];
     if (value === undefined) continue;
-    if (key === "webspringEntry" && value === false) continue;
+    if ((key === "webspringEntry" || key === "themesDirectory") && value === false) continue;
     if (typeof value !== "string") throw new TypeError(`synCloudOS options.${key} must be a string when provided.`);
     if (value.length === 0) throw new TypeError(`synCloudOS options.${key} must not be empty.`);
   }
@@ -386,6 +394,7 @@ function normaliseOptions(options) {
     preferencesDirectory: options.preferencesDirectory,
     widgetsDirectory: options.widgetsDirectory,
     integrationsDirectory: options.integrationsDirectory,
+    themesDirectory: options.themesDirectory,
     webspringEntry: options.webspringEntry,
     typography: options.typography,
     applications,
@@ -484,7 +493,10 @@ function discover(root, options) {
     }
   }
 
+  const themesDirectory = options.themesDirectory === false ? null : resolve(root, options.themesDirectory ?? "src/Themes");
+  const themes = discoverThemePackages(themesDirectory);
   const watchRoots = [
+    ...(themesDirectory ? [themesDirectory] : []),
     appsDirectory,
     root,
     ...bundles.flatMap((bundle) => [dirname(bundle.entryPath), dirname(dirname(bundle.entryPath))]),
@@ -512,6 +524,7 @@ function discover(root, options) {
 
   const watchPaths = [
     ...watchRoots,
+    ...themes.flatMap(theme => theme.files),
     ...bundles.flatMap((bundle) => [bundle.entryPath, ...(bundle.infoPath === null ? [] : [bundle.infoPath]), ...bundle.resources.files]),
     ...preferences.flatMap((pane) => [pane.entryPath]),
     ...widgets.flatMap((widget) => [widget.entryPath]),
@@ -524,6 +537,7 @@ function discover(root, options) {
   assertUniqueCaseInsensitive(uniqueWatchPaths, "discovery watch paths");
   const discovery = {
     applications,
+    themes,
     bundles,
     preferences,
     widgets,
@@ -633,7 +647,7 @@ export function synCloudOS(options) {
   };
 
   const invalidateVirtualModule = () => {
-    for (const id of [resolvedProjectModuleId, resolvedTypographyModuleId]) {
+    for (const id of [resolvedProjectModuleId, resolvedTypographyModuleId, ...(discovery?.themes ?? []).filter(theme => theme.fonts).map(theme => `\0${themeFontModulePrefix}${theme.definition.id}.css`)]) {
       const moduleNode = server?.moduleGraph?.getModuleById(id);
       if (moduleNode) server.moduleGraph.invalidateModule(moduleNode);
     }
@@ -693,6 +707,7 @@ export function synCloudOS(options) {
     },
 
     resolveId(id, importer) {
+      if (id.startsWith(themeFontModulePrefix)) return `\0${id}`;
       if (id === browserModuleId) return resolvedBrowserModuleId;
       if (id === "@syndromatic/syncloudos/browser" && importer !== resolvedBrowserModuleId) return resolvedBrowserModuleId;
       if (id.startsWith(appModulePrefix)) return `\0${id}`;
@@ -704,6 +719,12 @@ export function synCloudOS(options) {
     },
 
     load(id) {
+      if (id.startsWith(`\0${themeFontModulePrefix}`)) {
+        const themeId = id.slice(themeFontModulePrefix.length + 1, -4);
+        const theme = (discovery ?? refresh()).themes.find(candidate => candidate.definition.id === themeId);
+        if (!theme?.fonts) throw new TypeError(`Unknown theme font declaration ${themeId}`);
+        return themeFontCSS(theme, Object.fromEntries(theme.fonts.resources.map(resource => [resource.id, `${toViteFileImport(resource.file)}?no-inline`])));
+      }
       if (id.startsWith(`\0${appModulePrefix}`)) return createScosAppModuleSource(id.slice(appModulePrefix.length + 1));
       if (id === resolvedBrowserModuleId) return 'export * from "@syndromatic/syncloudos/browser";\nimport { mountSynCloudOS as mount } from "@syndromatic/syncloudos/browser";\nimport * as project from "virtual:syncloudos/project";\nexport function mountSynCloudOS(options) { return mount({ ...options, composition: options.composition ?? project }); }';
       if (id === resolvedTypographyModuleId) return typographyCode();

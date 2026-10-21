@@ -46,7 +46,7 @@ export const nseRegistry = [
     name: "nse-top-bar",
     title: "NSETopBar",
     type: "primitive",
-    description: "Apple-inspired app chrome bar: the Cumulus slice variant and the reusable atmoMetal source-list chrome (rail+main seam, grain, light/dark, metal pills).",
+    description: "Theme-neutral application chrome with continuous and rail-aligned layouts.",
     files: [
       "src/NSE/Windows/Chrome/NSETopBar.tsx",
       "src/NSE/Windows/Chrome/NSETopBarButton.tsx",
@@ -54,7 +54,7 @@ export const nseRegistry = [
       "src/NSE/Windows/Chrome/nseTopBarStyles.ts",
       "src/NSE/Windows/Chrome/nse-chrome.css"
     ],
-    variants: ["atmoCumulus", "atmoMetal"]
+    variants: ["continuous", "rail-aligned"]
   },
   {
     name: "nse-sidebar",
@@ -214,7 +214,7 @@ export const nseRegistry = [
     title: "Atmo",
     type: "appearance",
     description: "Canonical first-party Atmo appearance for NSE controls.",
-    files: ["src/NSE/Themes/Atmo/index.ts", "src/NSE/Themes/Atmo/Resources/atmo.css"]
+    files: ["src/NSE/Themes/Atmo/index.ts", "src/Themes/Atmo.scostheme/Contents/styles.css"]
   }
 ] satisfies NSERegistryItem[];
 

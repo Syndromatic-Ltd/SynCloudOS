@@ -44,7 +44,7 @@
     },
     {
       "find": "@syndromatic/syncloudos/nse/themes/atmo/styles.css",
-      "replacement": "src/NSE/Themes/Atmo/Resources/atmo.css"
+      "replacement": "src/Themes/Atmo.scostheme/Contents/styles.css"
     },
     {
       "find": "@syndromatic/syncloudos/nse/text",
@@ -121,6 +121,22 @@
     {
       "find": "@syndromatic/syncloudos/fx/lumina",
       "replacement": "src/FX/LuminaFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos",
+      "replacement": "src/SynCloudOS/AppSDK/rootPackageEntry.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/nse/theme",
+      "replacement": "src/NSE/public/theme.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/nse/themes/metro",
+      "replacement": "src/NSE/Themes/Metro/index.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/nse/themes/metro/styles.css",
+      "replacement": "src/Themes/Metro.scostheme/Contents/styles.css"
     }
   ],
   "runtimeGlobalBoundary": {
@@ -553,7 +569,8 @@
         "nse",
         "app-sdk",
         "devtools",
-        "runtime-host-seams"
+        "runtime-host-seams",
+        "appearance"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -580,6 +597,9 @@
         ],
         "runtime-host-seams": [
           "src/SynCloudOS/HostServices/mountedAnimationLayers.ts"
+        ],
+        "appearance": [
+          "src/NSE/Appearance/NSEThemeDefinition.ts"
         ]
       }
     },
@@ -623,12 +643,16 @@
         "synapp-contract",
         "runtime-inspector",
         "adapters",
-        "app-sdk"
+        "app-sdk",
+        "appearance"
       ],
       "mayImportEntrypoints": {
         "app-sdk": [
           "src/SynCloudOS/AppSDK/createSynWare.ts",
           "src/SynCloudOS/AppSDK/runtimeContracts.ts"
+        ],
+        "appearance": [
+          "src/NSE/Appearance/NSEThemeDefinition.ts"
         ]
       }
     },
@@ -639,7 +663,13 @@
         "scripts/cappuccino/appearance/**",
         "src/NSE/Themes/**",
         "src/NSE/Themes/Atmo/**",
-        "src/Appearance/**"
+        "src/Appearance/**",
+        "src/Themes/Atmo.scostheme/Contents/Info.ts",
+        "src/Themes/Atmo.scostheme/Contents/Theme.json",
+        "src/Themes/Atmo.scostheme/Contents/Fonts.json",
+        "src/Themes/Metro.scostheme/Contents/Info.ts",
+        "src/Themes/Metro.scostheme/Contents/Theme.json",
+        "src/Themes/Metro.scostheme/Contents/Fonts.json"
       ],
       "mayImportLayers": [
         "appearance",

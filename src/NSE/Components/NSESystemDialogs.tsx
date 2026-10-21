@@ -26,12 +26,12 @@ import { NSEFocusScope } from "../Focus";
 import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
 import { NSEAlert } from "./NSEAlert";
 import { NSEAlertBackdrop } from "./NSEAlertBackdrop";
-import { useNSEAppearance } from "../Appearance";
+import { useNSEVisualEnvironment } from "../Appearance";
 
 /** A system dialog takes the host's light or dark appearance unless told otherwise. */
 function useSystemDialogAppearance(appearance: "dark" | "light" | undefined): "dark" | "light" {
-  const { resolvedColourScheme } = useNSEAppearance();
-  return appearance ?? (resolvedColourScheme === "dark" ? "dark" : "light");
+  const { resolvedAppearance } = useNSEVisualEnvironment();
+  return appearance ?? (resolvedAppearance === "dark" ? "dark" : "light");
 }
 
 /**

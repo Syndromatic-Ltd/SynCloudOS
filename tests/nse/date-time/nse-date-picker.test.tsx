@@ -329,12 +329,12 @@ describe("civil date/time pickers", () => {
     const datePicker = screen.getByRole("textbox", { name: "Date" }).closest('[data-nse-control="date-picker"]')!;
     const dateTimePicker = screen.getByRole("textbox", { name: "Appointment date and time" }).closest('[data-nse-control="date-time-picker"]')!;
     const timePicker = screen.getByRole("spinbutton", { name: "Minute" }).closest('[data-nse-control="time-picker"]')!;
-    expect(datePicker.getAttribute("data-nse-appearance-slot")).toBe("date-picker.select.normal.1x");
-    expect(dateTimePicker.getAttribute("data-nse-appearance-slot")).toBe("date-time-picker.select.normal.1x");
-    expect(timePicker.getAttribute("data-nse-appearance-slot")).toBe("time-picker.select.normal.1x");
+    expect(datePicker.getAttribute("data-nse-theme-slot")).toBe("date-picker.select.normal");
+    expect(dateTimePicker.getAttribute("data-nse-theme-slot")).toBe("date-time-picker.select.normal");
+    expect(timePicker.getAttribute("data-nse-theme-slot")).toBe("time-picker.select.normal");
     for (const control of [datePicker, dateTimePicker, timePicker]) {
-      expect(control.getAttribute("data-nse-appearance-authority")).toBeNull();
-      expect(control.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
+      expect(control.getAttribute("data-nse-theme-authority")).toBeNull();
+      expect(control.getAttribute("data-nse-theme-recipe-id")).toBeNull();
     }
     fireEvent.keyDown(screen.getByRole("spinbutton", { name: "Minute" }), { key: "ArrowUp" });
     expect(timeChange).toHaveBeenCalledWith({ hour: 13, minute: 6, second: 0 }, "commit");

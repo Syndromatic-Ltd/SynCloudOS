@@ -1,0 +1,72 @@
+{
+  "resources": {
+    "light": "Resources/Fonts/Selawik-Light.woff",
+    "regular": "Resources/Fonts/Selawik-Regular.woff",
+    "semibold": "Resources/Fonts/Selawik-Semibold.woff"
+  },
+  "families": [
+    {
+      "id": "selawik",
+      "label": "Selawik",
+      "defaultFaceId": "regular",
+      "fallback": [
+        "sans-serif"
+      ],
+      "faces": [
+        {
+          "id": "light",
+          "label": "Light",
+          "resource": "light",
+          "browserFamily": "Selawik",
+          "weight": 300,
+          "style": "normal",
+          "display": "swap"
+        },
+        {
+          "id": "regular",
+          "label": "Regular",
+          "resource": "regular",
+          "browserFamily": "Selawik",
+          "weight": 400,
+          "style": "normal",
+          "display": "swap"
+        },
+        {
+          "id": "semibold",
+          "label": "Semibold",
+          "resource": "semibold",
+          "browserFamily": "Selawik",
+          "weight": 600,
+          "style": "normal",
+          "display": "swap"
+        }
+      ]
+    }
+  ],
+  "roles": {
+    "ui": {
+      "family": "Selawik",
+      "fallback": [
+        "sans-serif"
+      ]
+    },
+    "body": {
+      "family": "Selawik",
+      "fallback": [
+        "sans-serif"
+      ]
+    },
+    "title": {
+      "family": "Selawik",
+      "fallback": [
+        "sans-serif"
+      ]
+    },
+    "label": {
+      "family": "Selawik",
+      "fallback": [
+        "sans-serif"
+      ]
+    }
+  }
+}

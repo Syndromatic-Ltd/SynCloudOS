@@ -20,13 +20,17 @@
 
 // @vitest-environment jsdom
 import React from "react";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render as baseRender, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { NSEAnimationDefaults, NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
 import { NSEAlert } from "../../src/NSE/Components/NSEAlert";
 import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
 import { SystemAlert } from "../../src/SynCloudOSReact/SystemAlert";
 import type { AFXAnimationDefinition, AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
+
+import { NSEThemeProvider } from "../../src/NSE/Appearance";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo/theme";
+function render(ui:React.ReactNode) { return baseRender(ui,{wrapper:({children}) => <NSEThemeProvider theme={atmoTheme}>{children}</NSEThemeProvider>}); }
 
 interface Played {
   readonly target: HTMLElement;

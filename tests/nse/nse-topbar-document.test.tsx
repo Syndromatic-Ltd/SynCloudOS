@@ -30,26 +30,26 @@ describe("NSETopBar document window placement", () => {
   it("sets the app title beside the return control and the document in the middle", () => {
     const toggle = vi.fn();
     const { container } = render(<NSETopBar
-      variant="atmoMetal" scheme="dark" title="Publisher" titlePlacement="leading"
+      variant="rail-aligned" scheme="dark" title="Publisher" titlePlacement="leading"
       titleAction={{ label: "Switch apps", onClick: toggle }}
       leadingItems={[{ kind: "webspring", label: "Return to Webspring" }]}
       trailingItems={[{ kind: "settings", label: "Settings" }]}
       center={<span>My post</span>}
     />);
-    const leading = container.querySelector(".nse-app-topbar-metal-leading")!;
+    const leading = container.querySelector(".nse-app-topbar-rail-aligned-leading")!;
     expect([...leading.children].map(child => child.tagName)).toEqual(["BUTTON", "H1"]);
-    expect(leading.querySelector(".nse-app-topbar-metal-leading-title")?.textContent).toBe("Publisher");
-    expect(container.querySelector(".nse-app-topbar-metal-centre")?.textContent).toBe("My post");
+    expect(leading.querySelector(".nse-app-topbar-rail-aligned-leading-title")?.textContent).toBe("Publisher");
+    expect(container.querySelector(".nse-app-topbar-rail-aligned-centre")?.textContent).toBe("My post");
     expect(container.querySelector("[data-title-placement]")?.getAttribute("data-title-placement")).toBe("leading");
     fireEvent.click(screen.getByRole("button", { name: "Switch apps" }));
     expect(toggle).toHaveBeenCalledOnce();
-    expect(container.querySelectorAll(".nse-app-topbar-metal-pill-glyph")).toHaveLength(2);
+    expect(container.querySelectorAll(".nse-app-topbar-rail-aligned-pill-glyph")).toHaveLength(2);
   });
 
   it("keeps the centred title by default", () => {
-    const { container } = render(<NSETopBar variant="atmoMetal" title="Software" />);
-    expect(container.querySelector(".nse-app-topbar-metal-leading-title")).toBeNull();
-    expect(container.querySelector("h1.nse-app-topbar-metal-title")?.textContent).toBe("Software");
+    const { container } = render(<NSETopBar variant="rail-aligned" title="Software" />);
+    expect(container.querySelector(".nse-app-topbar-rail-aligned-leading-title")).toBeNull();
+    expect(container.querySelector("h1.nse-app-topbar-rail-aligned-title")?.textContent).toBe("Software");
   });
 
   it("draws a settings item on the Cumulus bar from its own icon", () => {

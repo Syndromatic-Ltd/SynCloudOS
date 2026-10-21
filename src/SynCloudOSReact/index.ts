@@ -96,7 +96,7 @@ export type {
   SynWareWorkspaceDocumentPort,
 } from "./appRuntimeTypes";
 export { useRuntimeSelector, useRuntimeSnapshot } from "./runtimeHooks";
-export { useActiveLocale, useAppearance, useLocaleFormatter, useLocaleServicesSnapshot, useResolvedMode, useSettings } from "./serviceHooks";
+export { useActiveLocale, useAppearance, useLocaleFormatter, useLocaleServicesSnapshot, useResolvedAppearance, useSettings } from "./serviceHooks";
 export { useCommandDispatch, useCommandMenuItems, useCommandPresentation, useCommandRegistration } from "./commandHooks";
 export type { CommandMenuItem } from "./commandHooks";
 export { ApplicationMenuTriggerProvider, useApplicationMenuTrigger } from "./ApplicationMenuTrigger";

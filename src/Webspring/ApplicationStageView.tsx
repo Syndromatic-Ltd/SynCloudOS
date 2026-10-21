@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEVisualEnvironment, useNSEThemeProjection } from "../NSE/Appearance";
+
+
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type Ref, type ReactNode } from "react";
 import { nseUnowned } from "../NSE/Controllers/ownership";
 import { useWebspringLaunchZoom } from "./WebspringLaunchZoomContext";
@@ -39,7 +42,7 @@ import {
   NSETopBar,
 } from "@syndromatic/syncloudos/nse/controls";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
-import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
+import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedAppearance, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
 import { AppViewContent } from "./AppViewContent";
@@ -117,6 +120,8 @@ export function ApplicationStageView({
     { packageName: app.packageName }
   );
   const frame = app.frame;
+  const { theme } = useNSEVisualEnvironment();
+  const themeProjection = useNSEThemeProjection();
   const [overlayDestination, setOverlayDestination] = useState<HTMLDivElement | null>(null);
   const overlayRootRef = useRef<HTMLDivElement>(null);
   const overlayPlaneRef = useRef<HTMLDivElement>(null);
@@ -124,7 +129,7 @@ export function ApplicationStageView({
     overlayPlaneRef.current = element;
     setOverlayDestination(element);
   }, []);
-  const resolvedMode = useResolvedMode();
+  const resolvedMode = useResolvedAppearance();
   const usesStandardTopBar = frame.topBar === "standard";
   const siteBranding = useHostSiteBranding();
   const navigationChromeController = useMemo(() => new NSEApplicationNavigationChromeController({ owner: nseUnowned }), [stage.id]);
@@ -145,6 +150,7 @@ export function ApplicationStageView({
   const railDefault = sourceList?.defaultWidth ?? 264;
   const railLabel = sourceList?.railLabel ?? app.shortName;
   const [railWidth, setRailWidthState] = useState(railDefault);
+  const [panoramaActive, setPanoramaActive] = useState(false);
   const [barTitle, setBarTitle] = useState<string | null>(null);
   const appMenuStore = useMemo(createApplicationMenuStore, [stage.id]);
   const setRailWidth = useCallback(
@@ -168,7 +174,8 @@ export function ApplicationStageView({
             defaultWidth: railDefault,
             railLabel,
             scheme: resolvedMode,
-            setBarTitle
+            setBarTitle,
+            setPanoramaActive
           }
         : null,
     [sourceList, railWidth, setRailWidth, railMin, railMax, railDefault, railLabel, resolvedMode]
@@ -246,13 +253,14 @@ export function ApplicationStageView({
   useNSEPresentation(overlayPlaneRef, stageMotion.surface);
   const standardTopBar = showsApplicationStageTopBar ? (
     <ApplicationStageTopBar
+      panoramaCommands={panoramaActive}
       menuStore={appMenuStore}
       rightSlot={rightSlot}
-      title={activeNavigationChrome?.title ?? standardBarTitle}
-      variant={frame.material === "metal" ? "atmoMetal" : "atmoCumulus"}
+      title={panoramaActive ? "" : activeNavigationChrome?.title ?? standardBarTitle}
+      variant={theme.presentation.chrome}
       scheme={resolvedMode}
-      rail={sourceList && presentationTraits.horizontalSizeClass !== "compact" ? { width: railWidth, content: railLabel, titleAction: quickSwitchAction } : undefined}
-      titleAction={activeNavigationChrome ? null : sourceList && presentationTraits.horizontalSizeClass !== "compact" ? null : quickSwitchAction}
+      rail={!panoramaActive && sourceList && theme.presentation.chrome === "rail-aligned" && presentationTraits.horizontalSizeClass !== "compact" ? { width: railWidth, content: railLabel, titleAction: quickSwitchAction } : undefined}
+      titleAction={panoramaActive || activeNavigationChrome ? null : sourceList && theme.presentation.chrome === "rail-aligned" && presentationTraits.horizontalSizeClass !== "compact" ? null : quickSwitchAction}
       leadingItems={[{
         kind: "webspring",
         label: returnToWebspringLabel,
@@ -260,7 +268,7 @@ export function ApplicationStageView({
         selected: false,
         onClick: () => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }
       }]}
-      leading={activeNavigationChrome?.back ? (
+      leading={panoramaActive && !activeNavigationChrome?.back && quickSwitchAction ? <><button type="button" className="nse-panorama-switch-command" onClick={() => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }}>{returnToWebspringLabel}</button><button type="button" className="nse-panorama-switch-command" onClick={quickSwitchAction.onClick}>{quickSwitchLabel}</button></> : activeNavigationChrome?.back ? (
         <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
           <NSEToolButton
             className="webspring-application-navigation-back"
@@ -409,9 +417,9 @@ export function ApplicationStageView({
     </NSEApplicationNavigationChromeProvider>
     </NSEControlRuntimeProvider>
     </NSEWindowSurfaceBridgeProvider>
-    <div ref={overlayRootRef} className="webspring-app-overlay-destination" data-multiswitch-role={multiSwitchRole ?? undefined}
+    <div {...themeProjection} ref={overlayRootRef} className="webspring-app-overlay-destination" data-multiswitch-role={multiSwitchRole ?? undefined}
       inert={overlayInactive ? true : undefined} aria-hidden={overlayInactive ? true : undefined}
-      style={{ ...stageMotion.root.style, zIndex: stage.zIndex + 70, ...(staged ? { visibility: "hidden" as const } : {}) }}>
+      style={{ ...themeProjection.style, ...stageMotion.root.style, zIndex: stage.zIndex + 70, ...(staged ? { visibility: "hidden" as const } : {}) }}>
       <div ref={attachOverlayDestination} className="webspring-app-overlay-plane" data-multiswitch-role={multiSwitchRole ?? undefined} style={stageMotion.surface.style} />
     </div>
     </NSEOverlayProvider>
@@ -431,10 +439,12 @@ interface RightSlotControl {
 }
 
 function ApplicationStageTopBar({
+  panoramaCommands,
   menuStore,
   rightSlot,
   ...props
 }: Pick<TopBarProps, "title" | "variant" | "scheme" | "rail" | "titleAction" | "leadingItems" | "leading" | "trailing" | "center"> & {
+  readonly panoramaCommands?: boolean;
   readonly menuStore: ApplicationMenuStore;
   readonly rightSlot: RightSlotControl | null;
 }) {
@@ -442,6 +452,7 @@ function ApplicationStageTopBar({
   return (
     <NSETopBar
       {...props}
+      className={panoramaCommands ? "nse-panorama-command-bar" : undefined}
       trailingItems={rightSlot && props.trailing === undefined ? [{
           kind: rightSlot.kind,
           label: rightSlot.label,

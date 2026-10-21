@@ -26,7 +26,7 @@ import { NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
 import { useNSEFeedback } from "../NSE/hostComposition";
 import { NSEAboutDialog, NSEConfirmDialog, NSEPreferencesToast } from "../NSE/SystemUI";
 import type { RuntimeSnapshot, SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
-import { useAppearance, useResolvedMode, useRuntimeNSEFocusPort, useRuntimeSelector, useKernelSynCloudOS, useSettings } from "../SynCloudOSReact";
+import { useAppearance, useResolvedAppearance, useRuntimeNSEFocusPort, useRuntimeSelector, useKernelSynCloudOS, useSettings } from "../SynCloudOSReact";
 import type { SynCloudOSRuntime } from "../SynCloudOS/SynCloudOS";
 import { confirmReturnDecisionKeepWindows, confirmReturnDecisionQuit } from "./returnDecision";
 import { SystemUIAccountContext, type SystemUIAccount } from "./Preferences/systemAccount";
@@ -57,7 +57,7 @@ function ReturnDecisionDialog({
   readonly quitLabel: string;
   readonly keepLabel: string;
 }) {
-  const alertAppearance = useResolvedMode() === "dark" ? "dark" : "light";
+  const alertAppearance = useResolvedAppearance() === "dark" ? "dark" : "light";
   const titleId = useId();
   const messageId = useId();
   const [busy, setBusy] = useState(false);
@@ -180,7 +180,7 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
     runtime.systemUI.getSnapshot
   );
   const appearance = useAppearance();
-  const resolvedMode = useResolvedMode();
+  const resolvedMode = useResolvedAppearance();
   const settings = useSettings();
   const systemT = useSystemText();
   const nseFocusPort = useRuntimeNSEFocusPort("webspring");

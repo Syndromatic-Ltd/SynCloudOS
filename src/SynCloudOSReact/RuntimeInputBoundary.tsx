@@ -1,3 +1,4 @@
+import { useNSEThemeProjection } from "../NSE/hostComposition";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -19,14 +20,15 @@
  */
 
 import { useRef, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type PropsWithChildren } from "react";
-import { useAppearance, useResolvedMode } from "./serviceHooks";
+import { useAppearance, useResolvedAppearance } from "./serviceHooks";
 import { useKernelSynCloudOS } from "./SynCloudOSProvider";
 import { RuntimeInputProtocolProvider, createRuntimeInputProtocol, focusScopeFromEvent } from "./runtimeInputProtocol";
 
 export function RuntimeInputBoundary({ children }: PropsWithChildren) {
   const runtime = useKernelSynCloudOS();
+  const themeProjection = useNSEThemeProjection();
   const appearance = useAppearance();
-  const resolvedMode = useResolvedMode();
+  const resolvedMode = useResolvedAppearance();
   const lastAcceptedFocusTarget = useRef<HTMLElement | null>(null);
   const restoringBlockedFocus = useRef(false);
   const protocolRef = useRef<ReturnType<typeof createRuntimeInputProtocol> | null>(null);
@@ -74,6 +76,7 @@ export function RuntimeInputBoundary({ children }: PropsWithChildren) {
   return (
     <RuntimeInputProtocolProvider value={protocol}>
       <div
+        {...themeProjection}
         data-syncloudos-runtime-id={runtime.runtimeId}
         data-syncloudos-runtime-owner={runtime.runtimeId}
         data-syncloudos-runtime-root="true"

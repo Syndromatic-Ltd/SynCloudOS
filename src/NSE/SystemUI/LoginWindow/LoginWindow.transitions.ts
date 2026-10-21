@@ -65,6 +65,13 @@ const reduced: LoginWindowTransitions = Object.freeze({
   shake: spec(0.16, framerTween, [track("opacity", [1, 0.82, 1])]),
 });
 
-export function resolveLoginWindowTransitions(reducedMotion: boolean): LoginWindowTransitions {
-  return reducedMotion ? reduced : standard;
+export type LoginMotionPolicy = Readonly<{ kind: "none" | "fade" | "slide" | "swing"; durationMs: number; easing: "linear" | "ease-out" | "ease-in-out" | "decelerate" }>;
+export function resolveLoginWindowTransitions(reducedMotion: boolean, policy?: LoginMotionPolicy): LoginWindowTransitions {
+  if (!policy || policy.kind === "swing") return reducedMotion ? reduced : standard;
+  const duration = policy.kind === "none" ? 0 : Math.min(policy.durationMs / 1000, reducedMotion ? 0.14 : 1.5);
+  const timing: NSEPresentationSpec["timing"] = policy.easing === "decelerate" ? { kind: "cubic-bezier", x1: 0.1, y1: 0.9, x2: 0.2, y2: 1 } : policy.easing;
+  const slides = policy.kind === "slide" && !reducedMotion;
+  return { window: { enter: fade(0,1,Math.min(duration,0.17)), exit: fade(1,0,Math.min(duration,0.17)) },
+    enter: { enter: spec(duration,timing,[track("opacity",[0,1]), ...(slides ? [track("transform.y",[20,0])] : [])]), exit: spec(Math.min(duration,0.16),timing,[track("opacity",[1,0]), ...(slides ? [track("transform.y",[0,-12])] : [])]) },
+    shake: spec(Math.min(duration,0.16),timing,[track("opacity",[1,0.82,1])]) };
 }

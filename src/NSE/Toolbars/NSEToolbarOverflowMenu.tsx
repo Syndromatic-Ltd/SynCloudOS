@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type RefCallback } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../Appearance";
 import {
   NSEChromeBevel,
   NSEChromeGloss,
@@ -130,7 +130,7 @@ export function NSEToolbarOverflowMenu({
     setOpen(nextOpen);
   }, [controller.runtime, menuController, model]);
   const appearanceState: NSEChromeVisualState = pressed || open ? "pressed" : focused ? "focused" : hovered ? "hover" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("toolbar", "item", appearanceState));
+  const appearance = useNSEThemeRecipe(nseThemeSlot("toolbar", "item", appearanceState));
 
   return (
     <span className="nse-toolbar-overflow-menu">

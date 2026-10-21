@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEOverlayMotionPolicy } from "./useNSEOverlayMotionPolicy";
+
+
 import {
   createElement,
   useCallback,
@@ -34,7 +37,7 @@ import { createPortal } from "react-dom";
 import { useNSEOverlay } from "./useNSEOverlay";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
-import { useNSEAppearanceProjection } from "../Appearance";
+import { useNSEThemeProjection } from "../Appearance";
 import type {
   NSELogicalPlacement,
   NSEOverlayDismissReason,
@@ -136,7 +139,7 @@ export function NSEPopup({
   dismissOnOutside = true,
   dismissOnEscape = true,
   restoreFocus = true,
-  exitDuration = 0,
+  exitDuration: requestedExitDuration,
   chrome = "standard",
   keepPortalMounted = false,
   contentPending = false,
@@ -147,7 +150,9 @@ export function NSEPopup({
   role,
   ...htmlAttributes
 }: NSEPopupProps) {
-  const appearanceProjection = useNSEAppearanceProjection();
+  const themeProjection = useNSEThemeProjection();
+  const motion = useNSEOverlayMotionPolicy(requestedExitDuration);
+  const exitDuration = motion.duration;
   const generatedId = useId().replace(/:/g, "");
   const resolvedId = id ?? `nse-popup:${generatedId}`;
   const state = useNSEPopupState({ open, defaultOpen, onOpenChange });
@@ -158,7 +163,7 @@ export function NSEPopup({
     throw new Error("NSEPopup requires parentResponderId or an NSEStandaloneControlHost.");
   }
   const [mounted, setMounted] = useState(state.open);
-  const [closing, setClosing] = useState(false);
+  const closing = !state.open;
   const kind: NSEOverlayKind = overlayKind ?? (modal ? "action-sheet" : "popover");
   const resolvedPresentation = presentation ?? { mode: kind === "action-sheet" ? "sheet" as const : "anchored" as const };
   const isModal = kind === "action-sheet" || modal;
@@ -195,14 +200,11 @@ export function NSEPopup({
     if (exitDuration <= 0) return;
     if (state.open) {
       setMounted(true);
-      setClosing(false);
       return;
     }
     if (!mounted) return;
-    setClosing(true);
     const handle = runtime.environment.setTimeout(() => {
       setMounted(false);
-      setClosing(false);
     }, exitDuration);
     return () => runtime.environment.clearTimeout(handle);
   }, [exitDuration, mounted, runtime, state.open]);
@@ -221,9 +223,13 @@ export function NSEPopup({
     {
       ...htmlAttributes,
       ...overlay.surfaceProps,
-      ...appearanceProjection,
+      ...themeProjection,
       id: resolvedId,
       "data-state": closing ? "closing" : "open",
+      "data-nse-overlay-motion": motion.kind,
+      style: { ...themeProjection.style, ...htmlAttributes.style, "--nse-overlay-motion-duration": `${exitDuration}ms`, "--nse-overlay-motion-easing": motion.easing },
+      inert: closing ? true : undefined,
+      "aria-hidden": closing ? true : htmlAttributes["aria-hidden"],
       className: surfaceClassName,
       role: surfaceRole,
       "aria-modal": isModal ? true : undefined,
@@ -243,7 +249,11 @@ export function NSEPopup({
   const portalContents = isModal
     ? createElement(
       "div",
-      { className: "nse-overlay-popup-modal-host", ...appearanceProjection },
+      { ...themeProjection, className: "nse-overlay-popup-modal-host",
+        "data-state": closing ? "closing" : "open", "data-nse-overlay-motion": motion.kind,
+        inert: closing ? true : undefined, "aria-hidden": closing ? true : undefined,
+        style: { ...themeProjection.style, "--nse-overlay-motion-duration": `${exitDuration}ms`, "--nse-overlay-motion-easing": motion.easing },
+      },
       createElement("div", {
         className: "nse-overlay-popup-backdrop",
         "data-nse-part": "backdrop",

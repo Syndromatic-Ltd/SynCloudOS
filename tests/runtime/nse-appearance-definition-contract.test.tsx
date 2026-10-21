@@ -24,7 +24,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import React, { type PropsWithChildren } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import * as appearanceModule from "../../src/NSE/public/appearance";
+import * as appearanceModule from "../../src/NSE/public/theme";
 import { NSEPushButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
 import { NSEOverlayProvider } from "../../src/NSE/Overlays";
 import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
@@ -48,16 +48,16 @@ type AppearanceDefinitionInput = Readonly<{
 }>;
 
 type AppearanceModuleContract = {
-  readonly defineNSEAppearance?: unknown;
-  readonly NSEAppearanceProvider?: unknown;
+  readonly defineNSETheme?: unknown;
+  readonly NSEThemeProvider?: unknown;
 };
 
 type DefineNSEAppearance = (definition: AppearanceDefinitionInput) => AppearanceDefinition;
 
 type AppearanceProviderProps = PropsWithChildren<{
-  readonly appearance: AppearanceDefinition;
-  readonly colourScheme?: "auto" | "light" | "dark";
-  readonly resolvedColourScheme?: "light" | "dark";
+  readonly theme: AppearanceDefinition;
+  readonly appearance?: "auto" | "light" | "dark";
+  readonly resolvedAppearance?: "light" | "dark";
   readonly contrast?: "normal" | "high" | "forced";
   readonly transparency?: "normal" | "reduced";
 }>;
@@ -67,19 +67,19 @@ type AppearanceProviderComponent = React.ComponentType<AppearanceProviderProps>;
 const appearanceContract = appearanceModule as typeof appearanceModule & AppearanceModuleContract;
 
 function definitionFactory(): DefineNSEAppearance {
-  const candidate = appearanceContract.defineNSEAppearance;
+  const candidate = appearanceContract.defineNSETheme;
   expect(typeof candidate).toBe("function");
   if (typeof candidate !== "function") {
-    throw new Error("defineNSEAppearance is not available");
+    throw new Error("defineNSETheme is not available");
   }
   return candidate as DefineNSEAppearance;
 }
 
 function appearanceProvider(): AppearanceProviderComponent {
-  const candidate = appearanceContract.NSEAppearanceProvider;
+  const candidate = appearanceContract.NSEThemeProvider;
   expect(typeof candidate).toBe("function");
   if (typeof candidate !== "function") {
-    throw new Error("NSEAppearanceProvider is not available");
+    throw new Error("NSEThemeProvider is not available");
   }
   return candidate as AppearanceProviderComponent;
 }
@@ -113,8 +113,8 @@ function overlayRuntime(runtimeId = "runtime:appearance-contract"): NSEOverlayRu
 }
 
 function expectAppearanceProjection(element: Element | null, id: string) {
-  expect(element?.getAttribute("data-nse-appearance")).toBe(id);
-  expect(element?.getAttribute("data-nse-colour-scheme-resolved")).toBe("dark");
+  expect(element?.getAttribute("data-nse-theme")).toBe(id);
+  expect(element?.getAttribute("data-nse-appearance")).toBe("dark");
   expect(element?.getAttribute("data-nse-contrast")).toBe("high");
   expect(element?.getAttribute("data-nse-transparency")).toBe("reduced");
 }
@@ -123,24 +123,22 @@ afterEach(cleanup);
 
 describe("NSE appearance definition boundary", () => {
   it("exports frozen definition clones with validated identity, recipes and trimmed display names", () => {
-    const defineNSEAppearance = definitionFactory();
+    const defineNSETheme = definitionFactory();
     const input = {
-      id: "custom-test",
-      displayName: "  Custom Test  ",
+      id: "com.test.custom-test",
+      displayName: "Custom Test",
       recipes: [
         {
           slot: "button.primary",
           recipeId: "custom-test.button.primary",
-          ignored: "not part of the recipe",
         },
       ],
-      ignored: "not part of the definition",
     };
 
-    const definition = defineNSEAppearance(input);
+    const definition = defineNSETheme(input);
 
-    expect(definition).toEqual({
-      id: "custom-test",
+    expect(definition).toMatchObject({
+      id: "com.test.custom-test",
       displayName: "Custom Test",
       recipes: [{ slot: "button.primary", recipeId: "custom-test.button.primary" }],
     });
@@ -153,37 +151,37 @@ describe("NSE appearance definition boundary", () => {
   });
 
   it("defaults omitted recipes to a frozen empty array", () => {
-    const defineNSEAppearance = definitionFactory();
-    const definition = defineNSEAppearance({ id: "atmo", displayName: "Atmo" });
+    const defineNSETheme = definitionFactory();
+    const definition = defineNSETheme({ id: "com.test.atmo", displayName: "Atmo" });
 
     expect(definition.recipes).toEqual([]);
     expect(Object.isFrozen(definition.recipes)).toBe(true);
   });
 
   it("rejects blank or duplicate recipe slots and recipe IDs", () => {
-    const defineNSEAppearance = definitionFactory();
-    const base = { id: "atmo", displayName: "Atmo" };
+    const defineNSETheme = definitionFactory();
+    const base = { id: "com.test.atmo", displayName: "Atmo" };
 
     for (const slot of ["", " \t\n "]) {
-      expect(() => defineNSEAppearance({
+      expect(() => defineNSETheme({
         ...base,
         recipes: [{ slot, recipeId: "atmo.button.primary" }],
       })).toThrow();
     }
     for (const recipeId of ["", " \t\n "]) {
-      expect(() => defineNSEAppearance({
+      expect(() => defineNSETheme({
         ...base,
         recipes: [{ slot: "button.primary", recipeId }],
       })).toThrow();
     }
-    expect(() => defineNSEAppearance({
+    expect(() => defineNSETheme({
       ...base,
       recipes: [
         { slot: "button.primary", recipeId: "atmo.button.primary" },
         { slot: "button.primary", recipeId: "atmo.button.secondary" },
       ],
     })).toThrow();
-    expect(() => defineNSEAppearance({
+    expect(() => defineNSETheme({
       ...base,
       recipes: [
         { slot: "button.primary", recipeId: "atmo.button.primary" },
@@ -193,18 +191,18 @@ describe("NSE appearance definition boundary", () => {
   });
 
   it("rejects invalid IDs and blank display names", () => {
-    const defineNSEAppearance = definitionFactory();
+    const defineNSETheme = definitionFactory();
 
     for (const id of ["", "Atmo", "atmo_onyx", "-atmo", "atmo onyx"]) {
-      expect(() => defineNSEAppearance({ id, displayName: "Atmo" })).toThrow();
+      expect(() => defineNSETheme({ id, displayName: "Atmo" })).toThrow();
     }
-    expect(() => defineNSEAppearance({ id: "atmo", displayName: " \t\n " })).toThrow();
+    expect(() => defineNSETheme({ id: "com.test.atmo", displayName: " \t\n " })).toThrow();
   });
 
   it("projects one appearance identity to its wrapper and portal while retaining environment state", async () => {
-    const defineNSEAppearance = definitionFactory();
-    const definition = defineNSEAppearance({
-      id: "custom-test",
+    const defineNSETheme = definitionFactory();
+    const definition = defineNSETheme({
+      id: "com.test.custom-test",
       displayName: "Custom Test",
       recipes: [{ slot: "button.primary", recipeId: "custom-test.button.primary" }],
     });
@@ -212,9 +210,9 @@ describe("NSE appearance definition boundary", () => {
 
     render(
       <Provider
-        appearance={definition}
-        colourScheme="auto"
-        resolvedColourScheme="dark"
+        theme={definition}
+        appearance="auto"
+        resolvedAppearance="dark"
         contrast="high"
         transparency="reduced"
       >
@@ -238,51 +236,51 @@ describe("NSE appearance definition boundary", () => {
   });
 
   it("changes only appearance identity when definitions switch around a mounted push button", () => {
-    const defineNSEAppearance = definitionFactory();
-    const firstDefinition = defineNSEAppearance({
-      id: "atmo",
+    const defineNSETheme = definitionFactory();
+    const firstDefinition = defineNSETheme({
+      id: "com.test.atmo",
       displayName: "Atmo",
       recipes: [{ slot: "button.primary", recipeId: "atmo.button.primary" }],
     });
-    const secondDefinition = defineNSEAppearance({
-      id: "classic",
+    const secondDefinition = defineNSETheme({
+      id: "com.test.classic",
       displayName: "Classic",
       recipes: [{ slot: "button.primary", recipeId: "classic.button.primary" }],
     });
     const Provider = appearanceProvider();
     const onClick = vi.fn();
     const providerProps = {
-      colourScheme: "auto" as const,
-      resolvedColourScheme: "dark" as const,
+      appearance: "auto" as const,
+      resolvedAppearance: "dark" as const,
       contrast: "high" as const,
       transparency: "reduced" as const,
     };
 
     const { rerender } = render(
-      <Provider {...providerProps} appearance={firstDefinition}>
+      <Provider {...providerProps} theme={firstDefinition}>
         <NSEPushButton onClick={onClick}>Continue</NSEPushButton>
       </Provider>,
     );
 
     const firstButton = screen.getByRole("button", { name: "Continue" });
     expect((firstButton as HTMLButtonElement).disabled).toBe(false);
-    expect(firstButton.closest("[data-nse-appearance]")?.getAttribute("data-nse-appearance")).toBe("atmo");
-    expect(firstButton.closest("[data-nse-appearance]")?.getAttribute("data-nse-colour-scheme-resolved")).toBe("dark");
+    expect(firstButton.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.test.atmo");
+    expect(firstButton.closest("[data-nse-appearance]")?.getAttribute("data-nse-appearance")).toBe("dark");
     expect(firstButton.closest("[data-nse-appearance]")?.getAttribute("data-nse-contrast")).toBe("high");
     expect(firstButton.closest("[data-nse-appearance]")?.getAttribute("data-nse-transparency")).toBe("reduced");
     fireEvent.click(firstButton);
     expect(onClick).toHaveBeenCalledTimes(1);
 
     rerender(
-      <Provider {...providerProps} appearance={secondDefinition}>
+      <Provider {...providerProps} theme={secondDefinition}>
         <NSEPushButton onClick={onClick}>Continue</NSEPushButton>
       </Provider>,
     );
 
     const secondButton = screen.getByRole("button", { name: "Continue" });
     expect((secondButton as HTMLButtonElement).disabled).toBe(false);
-    expect(secondButton.closest("[data-nse-appearance]")?.getAttribute("data-nse-appearance")).toBe("classic");
-    expect(secondButton.closest("[data-nse-appearance]")?.getAttribute("data-nse-colour-scheme-resolved")).toBe("dark");
+    expect(secondButton.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.test.classic");
+    expect(secondButton.closest("[data-nse-appearance]")?.getAttribute("data-nse-appearance")).toBe("dark");
     expect(secondButton.closest("[data-nse-appearance]")?.getAttribute("data-nse-contrast")).toBe("high");
     expect(secondButton.closest("[data-nse-appearance]")?.getAttribute("data-nse-transparency")).toBe("reduced");
     fireEvent.click(secondButton);

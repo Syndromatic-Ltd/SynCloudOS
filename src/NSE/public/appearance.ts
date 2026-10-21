@@ -18,34 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** Supported SynWare SDK NSE appearance surface. Concrete themes are explicit subpaths. */
-export {
-  NSEAppearanceProvider,
-  useNSEAppearance,
-  useNSEAppearanceProjection,
-  useNSEAppearanceSlot,
-  resolveNSEAppearanceSlot,
-} from "../Appearance";
-export type { NSEAppearanceProviderProps } from "../Appearance";
-export {
-  defineNSEAppearance,
-} from "../Appearance";
-export type {
-  NSEAppearanceDataAttributes,
-  NSEAppearanceDefinition,
-  NSEAppearanceDefinitionInput,
-  NSEAppearanceRecipeDefinition,
-  NSEAppearanceSelection,
-  NSEAppearanceServicePort,
-  NSEChromeAppearance,
-  NSEColourScheme,
-  NSEContrast,
-  NSEResolvedAppearance,
-  NSEResolvedColourScheme,
-  NSEAppearanceSlotResolution,
-  NSETransparency,
-} from "../Appearance";
-
+/** Appearance is the independent requested/resolved light-dark axis. */
+export { useNSEAppearance } from "../Appearance";
+export type { NSEAppearance, NSEResolvedAppearance, NSEAppearanceState, NSEAppearanceServicePort, NSEContrast, NSETransparency } from "../Appearance";
 export { NSEMaterialLightingProvider } from "../Appearance/NSEMetalThumb";
 export { NSEMaterialLighting, staticNSEMaterialLight } from "../Appearance/NSEMaterialLighting";
 export type { NSEMaterialLight, NSEMaterialLightingPort } from "../Appearance/NSEMaterialLighting";

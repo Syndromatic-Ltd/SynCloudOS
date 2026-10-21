@@ -114,7 +114,12 @@ export function defineFontDeclaration(input) {
 }
 
 /** Generate all browser registrations and role variables from the captured data. */
-export function fontDeclarationCSS(declaration, urls) {
+export function fontDeclarationCSS(declaration, urls, options = {}) {
+  const settings = record(capture(options), ["scope", "rolePrefix"], "font CSS options");
+  const scope = settings.scope ?? ":root";
+  const rolePrefix = settings.rolePrefix ?? (scope === ":root" ? "--font-" : "--nse-theme-font-");
+  if (typeof scope !== "string" || !scope.trim() || scope !== scope.trim() || /[{};@\u0000-\u001f\u007f]/u.test(scope)) throw new TypeError("Invalid font CSS scope.");
+  if (typeof rolePrefix !== "string" || !/^--[a-z][a-z0-9-]*-$/u.test(rolePrefix)) throw new TypeError("Invalid font role prefix.");
   const faceById = new Map(declaration.faces.map(face => [face.id, face]));
   function rule(face, family) {
     const url = urls[face.resource];
@@ -126,10 +131,10 @@ export function fontDeclarationCSS(declaration, urls) {
   for (const alias of declaration.aliases) for (const faceId of alias.faces) rules.push(rule(faceById.get(faceId), alias.family));
   const variables = Object.entries(declaration.roles).map(([key, role]) => {
     const face = faceById.get(role.face);
-    return `  --font-${key}: ${stack(role.family ?? face.browserFamily, role.fallback ?? face?.fallback ?? [])};`;
+    return `  ${rolePrefix}${key}: ${stack(role.family ?? face.browserFamily, role.fallback ?? face?.fallback ?? [])};`;
   });
-  if (declaration.roles.ui) variables.push("  font-family: var(--font-ui);");
-  if (variables.length) rules.push(`:root {\n${variables.join("\n")}\n}`);
+  if (scope === ":root" && rolePrefix === "--font-" && declaration.roles.ui) variables.push("  font-family: var(--font-ui);");
+  if (variables.length) rules.push(`${scope} {\n${variables.join("\n")}\n}`);
   return rules.join("\n\n") + "\n";
 }
 

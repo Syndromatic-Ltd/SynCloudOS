@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useId, useRef, useState } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../../Appearance";
 import { NSEListboxPopup, useNSEOverlayProvider } from "../../Overlays";
 import type { NSEComboBoxProps } from "./completionTypes";
 
@@ -95,7 +95,7 @@ export function NSEComboBox<T>(props: NSEComboBoxProps<T>) {
   const activeOptionId = activeItem ? `${popupId}-option-${props.dataSource.idForItem(activeItem)}` : undefined;
   const options = items.map((item) => ({ id: props.dataSource.idForItem(item), label: props.dataSource.labelForItem(item), value: item }));
   const appearanceState = props.disabled ? "disabled" : focused ? "focused" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("combo-box", "well", appearanceState));
+  const appearance = useNSEThemeRecipe(nseThemeSlot("combo-box", "well", appearanceState));
   return (
     <span data-nse-control="combo-box" data-state={loading ? "loading" : items.length ? "ready" : "empty"} {...appearance.attributes}>
       <input

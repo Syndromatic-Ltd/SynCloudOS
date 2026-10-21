@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useNSEAppearance } from "./NSEAppearanceProvider";
-import type { NSEAppearanceSlotProjection } from "./appearanceProjection";
+import { useNSEVisualEnvironment } from "./NSEThemeProvider";
+import type { NSEThemeRecipeProjection } from "./themeProjection";
 import "./nse-chrome-primitives.css";
 
 export type NSEChromePrimitiveKind =
@@ -39,7 +39,7 @@ export type NSEChromeVisualState =
   | "focused"
   | "disabled";
 
-export type NSEChromeSlot = NSEAppearanceSlotProjection;
+export type NSEChromeSlot = NSEThemeRecipeProjection;
 
 export interface NSEChromePrimitiveProps {
   readonly slot: NSEChromeSlot;
@@ -69,7 +69,7 @@ export function NSEChromePrimitive({
   className,
   ...attributes
 }: NSEChromeLayerProps) {
-  const appearance = useNSEAppearance();
+  const appearance = useNSEVisualEnvironment();
   const active = slot.recipeId !== null;
   return (
     <span
@@ -77,7 +77,7 @@ export function NSEChromePrimitive({
       className={classes("nse-chrome-primitive", className)}
       aria-hidden="true"
       {...slot.attributes}
-      data-nse-chrome-appearance={appearance.appearance.id}
+      data-nse-theme={appearance.theme.id}
       data-nse-chrome-primitive={kind}
       data-nse-chrome-state={state}
       data-nse-chrome-active={active ? "true" : "false"}

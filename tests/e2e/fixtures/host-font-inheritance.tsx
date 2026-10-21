@@ -23,18 +23,19 @@ import { createRoot } from "react-dom/client";
 import { NSEPushButton } from "../../../src/NSE/Controls/Buttons/NSEButtons";
 import { NSETopBar } from "../../../src/NSE/Windows/Chrome/NSETopBar";
 import "../../../src/NSE/public/styles.css";
-import "../../../src/NSE/Themes/Atmo/Resources/atmo.css";
+import { atmoTheme } from "../../../src/NSE/Themes/Atmo";
+import { NSEThemeProvider } from "../../../src/NSE/Appearance";
 import "../../../src/SynCloudOS/styles/runtime.css";
 
 function HostTypography() {
   const [family, setFamily] = useState("monospace");
   const [clicks, setClicks] = useState(0);
   const inheritedRole = new URLSearchParams(window.location.search).has("root-role");
-  return <main data-nse-appearance="atmo" style={{ fontFamily: inheritedRole ? undefined : family, maxWidth: 640 }}>
-    <NSETopBar title="Host title" variant="atmoMetal" />
+  return <NSEThemeProvider theme={atmoTheme}><main style={{ fontFamily: inheritedRole ? undefined : family, maxWidth: 640 }}>
+    <NSETopBar title="Host title" variant="rail-aligned" />
     <NSEPushButton onClick={() => setClicks(value => value + 1)}>Host button</NSEPushButton>
     <button onClick={() => setFamily("serif")}>Change host font</button>
     <output aria-label="Clicks">{clicks}</output>
-  </main>;
+  </main></NSEThemeProvider>;
 }
 createRoot(document.getElementById("root")!).render(<HostTypography />);

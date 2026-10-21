@@ -29,12 +29,12 @@ const cumulus: NSETopBarStyleDefinition = {
 
 /**
  * Cumulus chrome metrics and built-in item glyphs. The glass bar and its inset controls
- * are vector CSS material (`[data-variant="atmoCumulus"]` in nse-chrome.css);
- * the `atmoMetal` variant is likewise CSS-driven and has no definition here.
+ * are vector CSS material (`[data-variant="continuous"]` in nse-chrome.css);
+ * the `rail-aligned` variant is likewise CSS-driven and has no definition here.
  */
 export const nseTopBarStyles = {
-  atmoCumulus: cumulus
-} satisfies Record<"atmoCumulus", NSETopBarStyleDefinition>;
+  continuous: cumulus
+} satisfies Record<"continuous", NSETopBarStyleDefinition>;
 
 /**
  * A chrome variant's rendered height, as the CSS value to reserve above app content: the exact
@@ -42,8 +42,8 @@ export const nseTopBarStyles = {
  * including a host override of `--nse-app-topbar-height` and the compact breakpoint.
  */
 export function nseTopBarHeightCssValue(variant: NSETopBarVariant): string {
-  const token = variant === "atmoMetal" ? "--nse-topbar-height-metal" : "--nse-topbar-height-cumulus";
-  return `var(--nse-app-topbar-height, var(${token}))`;
+  const token = variant === "rail-aligned" ? "--nse-topbar-height-rail-aligned" : "--nse-topbar-height-continuous";
+  return `var(--nse-app-topbar-height, var(${token}, 56px))`;
 }
 
 /**

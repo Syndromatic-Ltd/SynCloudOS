@@ -23,17 +23,26 @@ import * as React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSESidebar, NSESourceListScene, SourceListFrameProvider, type SourceListFrameContextValue } from "../../src/NSE/Navigation/SourceList";
-import { defineNSEAppearance, NSEAppearanceProvider } from "../../src/NSE/Appearance";
+import { defineNSETheme, NSEThemeProvider } from "../../src/NSE/Appearance";
 
 afterEach(cleanup);
 
 describe("source-list chrome ownership", () => {
+  it("inherits dark appearance for plain rails and respects an explicit scheme", () => {
+    const theme = defineNSETheme({ id: "test.sidebar-mode", displayName: "Mode" });
+    const fixture = (scheme?: "light" | "dark") => <NSEThemeProvider theme={theme} appearance="dark"><NSESidebar sections={[]} scheme={scheme} /></NSEThemeProvider>;
+    const view = render(fixture());
+    expect(view.container.querySelector(".nse-sidebar")?.getAttribute("data-mode")).toBe("dark");
+    view.rerender(fixture("light"));
+    expect(view.container.querySelector(".nse-sidebar")?.getAttribute("data-mode")).toBe("light");
+  });
+
   it("honours an explicit appearance override inside a differently themed frame", () => {
     const frame: SourceListFrameContextValue = { railWidth: 254, defaultWidth: 254, minWidth: 220, maxWidth: 320, setRailWidth: vi.fn(), railLabel: "Gallery", scheme: "dark", setBarTitle: vi.fn() };
     const view = render(<SourceListFrameProvider value={frame}>
-      <NSEAppearanceProvider appearance={defineNSEAppearance({ id: "atmo", displayName: "Atmo" })} colourScheme="light">
+      <NSEThemeProvider theme={defineNSETheme({ id: "test.chrome", displayName: "Atmo" })} appearance="light">
         <NSESourceListScene sidebar={<p>Rows</p>}><p>Light content</p></NSESourceListScene>
-      </NSEAppearanceProvider>
+      </NSEThemeProvider>
     </SourceListFrameProvider>);
     expect(view.container.querySelector('.nse-source-list-scene')?.getAttribute('data-mode')).toBe("light");
   });
@@ -80,7 +89,7 @@ describe("source-list chrome ownership", () => {
     expect(view.container.querySelectorAll("footer")).toHaveLength(1);
     const footer = view.container.querySelector<HTMLElement>(".nse-statusbar")!;
     expect(footer.style.getPropertyValue("--nse-app-topbar-rail")).toBe("254px");
-    expect(footer.querySelector(".nse-statusbar-metal-rail-content")?.textContent).toBe("25 sections");
+    expect(footer.querySelector(".nse-statusbar-rail-aligned-rail-content")?.textContent).toBe("25 sections");
     expect(setBarTitle).toHaveBeenCalledWith("Buttons");
     view.rerender(fixture(true, 254));
     expect(view.container.querySelector("footer")).toBeNull();

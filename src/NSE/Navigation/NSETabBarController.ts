@@ -173,8 +173,8 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
   readonly #destinationById: Map<string, NSENavigationDestination<TContent>>;
   readonly #overflowRootDestination: NSENavigationDestination<TContent>;
   readonly #moreDestination: NSENavigationDestination<TContent>;
-  readonly #directDestinationIds: readonly string[];
-  readonly #overflowDestinationIds: readonly string[];
+  #directDestinationIds: readonly string[];
+  #overflowDestinationIds: readonly string[];
   readonly #onSelect: NSETabBarControllerOptions<TContent>["onSelect"];
   readonly #contentByDestinationId = new Map<string, TContent>();
   #selectedDestinationId: string;
@@ -208,8 +208,8 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
       accessibleLabel: "More destinations",
       icon: Object.freeze({ kind: "template" as const, name: "more" }),
     });
-    const direct = destinations.length <= 5 ? destinations : destinations.slice(0, 4);
-    const overflow = destinations.length <= 5 ? [] : destinations.slice(4);
+    const direct = destinations;
+    const overflow: NSENavigationDestination<TContent>[] = [];
     this.#directDestinationIds = Object.freeze(direct.map(({ id }) => id));
     this.#overflowDestinationIds = Object.freeze(overflow.map(({ id }) => id));
     this.#onSelect = options.onSelect;
@@ -218,16 +218,14 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
       : destinations.find(({ disabled }) => !disabled)?.id;
     if (!initial) throw new TypeError("Tab bar controllers require at least one enabled destination.");
     this.#selectedDestinationId = initial;
-    this.moreStack = overflow.length === 0
-      ? null
-      : new NSENavigationStackController({
+    this.moreStack = new NSENavigationStackController({
         id: `${this.id}:more`,
         rootDestinationId: overflowRootDestinationId,
         // More is a real hierarchy, not a one-screen sentinel. Its declared
         // destinations include the actual overflow peers so selecting a row
         // can push that destination and give shared stage chrome an honest
         // Back-to-More transition.
-        destinationIds: [overflowRootDestinationId, moreDestinationId, ...this.#overflowDestinationIds],
+        destinationIds: [overflowRootDestinationId, moreDestinationId, ...ids],
         owner: this,
       });
     this.#unsubscribeMore = this.moreStack?.subscribe(() => {
@@ -235,6 +233,22 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
     }) ?? null;
     this.#snapshot = this.#makeSnapshot();
     this.getSnapshot = () => this.#snapshot;
+  }
+
+  /** Presentation chooses partitioning; selection and cached content stay semantic. */
+  setOverflowPolicy(policy: { readonly kind: "scroll" } | { readonly kind: "more"; readonly maximumVisibleItems: number }): void {
+    this.#assertLive();
+    if (policy.kind === "more" && (!Number.isInteger(policy.maximumVisibleItems) || policy.maximumVisibleItems < 2)) {
+      throw new RangeError("More navigation requires at least two visible items.");
+    }
+    const count = policy.kind === "more" && this.#destinations.length > policy.maximumVisibleItems
+      ? policy.maximumVisibleItems - 1 : this.#destinations.length;
+    const direct = this.#destinations.slice(0, count).map(({ id }) => id);
+    if (direct.length === this.#directDestinationIds.length) return;
+    this.#directDestinationIds = Object.freeze(direct);
+    this.#overflowDestinationIds = Object.freeze(this.#destinations.slice(count).map(({ id }) => id));
+    this.moreStack?.popToRoot();
+    this.#publish();
   }
 
   get destinations(): readonly NSENavigationDestination<TContent>[] { return this.#destinations; }
@@ -294,7 +308,7 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
   async openOverflow(options: NSENavigationSelectionOptions = {}): Promise<void> {
     this.#assertLive();
     const intentRevision = this.#beginIntent();
-    if (!this.moreStack) return;
+    if (!this.moreStack || this.#overflowDestinationIds.length === 0) return;
     if (this.moreStack.getSnapshot().currentDestinationId === moreDestinationId) return;
     const operation = new AbortController();
     this.#pending = operation;
@@ -326,7 +340,7 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
     const legacyOverflowDestinationId = [...legacyMorePath].reverse().find((id) => (
       this.#overflowDestinationIds.includes(id) && this.#isSelectable(id)
     )) ?? null;
-    const wantsOverflowPage = legacyMorePath.includes(moreDestinationId);
+    const wantsOverflowPage = this.#overflowDestinationIds.length > 0 && legacyMorePath.includes(moreDestinationId);
     const restoredOverflowDestinationId = wantsOverflowPage
       && legacyOverflowDestinationId !== null
       && legacyMorePath.lastIndexOf(legacyOverflowDestinationId) > legacyMorePath.lastIndexOf(moreDestinationId)

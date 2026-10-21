@@ -1,0 +1,108 @@
+/* Neutral fallback paint for controls whose structural CSS suppresses browser
+   visuals. No application-wide reset, font replacement or themed resources.
+   Native checkbox/radio painting preserves mixed and disabled system states. */
+@scope ([data-nse-theme="com.syndromatic.neutral"]) to ([data-nse-theme]:not([data-nse-theme="com.syndromatic.neutral"])) {
+  .nse-control-checkbox input:where(:scope, :scope *),
+  .nse-control-radio > input:where(:scope, :scope *) {
+    appearance: auto;
+    position: static;
+    inset: auto;
+    inline-size: 18px;
+    block-size: 18px;
+    margin: 0;
+    opacity: 1;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    flex: 0 0 auto;
+    cursor: inherit;
+  }
+  .nse-control-checkbox-art:where(:scope, :scope *) { display: none; }
+  .nse-control-radio-group:where(:scope, :scope *) { display: flex; flex-wrap: wrap; gap: 12px; }
+  .nse-control-radio:where(:scope, :scope *) { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .nse-control-checkbox[data-disabled="true"]:where(:scope, :scope *),
+  .nse-control-radio[data-disabled="true"]:where(:scope, :scope *) { color: GrayText; cursor: default; }
+
+  .nse-control-slider:where(:scope, :scope *) {
+    --nse-control-slider-control-size: 30px;
+    --nse-control-slider-track-size: 6px;
+    --nse-control-slider-track-cap-size: 0px;
+    --nse-control-slider-thumb-size: 20px;
+    --nse-control-slider-thumb-visible-size: 20px;
+  }
+  .nse-control-slider-track:where(:scope, :scope *) {
+    box-sizing: border-box;
+    border: 1px solid ButtonText;
+    border-radius: 3px;
+    background: ButtonFace;
+  }
+  .nse-control-slider-fill:where(:scope, :scope *) {
+    display: block;
+    inline-size: var(--nse-control-slider-progress, 0%);
+    block-size: 100%;
+    background: Highlight;
+  }
+  .nse-control-slider-thumb-visual:where(:scope, :scope *) {
+    box-sizing: border-box;
+    height: 20px;
+    border: 1px solid ButtonText;
+    border-radius: 50%;
+    background: Highlight;
+  }
+  .nse-control-slider-thumb-visual > .nse-metal-thumb:where(:scope, :scope *),
+  .nse-control-toggle-thumb > .nse-metal-thumb:where(:scope, :scope *) { display: none; }
+  .nse-control-slider[data-state="disabled"]:where(:scope, :scope *) { color: GrayText; }
+  .nse-control-slider[data-state="disabled"] .nse-control-slider-thumb-visual:where(:scope, :scope *),
+  .nse-control-slider[data-state="disabled"] .nse-control-slider-fill:where(:scope, :scope *) { background: GrayText; }
+  .nse-control-slider[data-state="disabled"] .nse-control-slider-track:where(:scope, :scope *) { border-color: GrayText; }
+
+  .nse-control-toggle:where(:scope, :scope *) {
+    position: relative;
+    display: inline-block;
+    box-sizing: border-box;
+    width: 88px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid ButtonText;
+    border-radius: 16px;
+    background: ButtonFace;
+    color: ButtonText;
+    cursor: pointer;
+    touch-action: pan-y;
+  }
+  .nse-control-toggle-track:where(:scope, :scope *) { position: absolute; inset: 3px; }
+  .nse-control-toggle-rail:where(:scope, :scope *) { display: none; }
+  .nse-control-toggle-thumb:where(:scope, :scope *) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 24px;
+    height: 24px;
+    box-sizing: border-box;
+    border: 1px solid ButtonText;
+    border-radius: 50%;
+    background: ButtonText;
+    transform: translateX(calc(var(--nse-control-toggle-ratio, 0) * 56px));
+  }
+  .nse-control-toggle-text:where(:scope, :scope *) { position: absolute; top: 0; line-height: 24px; }
+  .nse-control-toggle-text-on:where(:scope, :scope *) { left: 6px; opacity: var(--nse-control-toggle-ratio, 0); }
+  .nse-control-toggle-text-off:where(:scope, :scope *) { right: 6px; opacity: calc(1 - var(--nse-control-toggle-ratio, 0)); }
+  .nse-control-toggle[data-state="on"]:where(:scope, :scope *) { background: Highlight; color: HighlightText; }
+  .nse-control-toggle[data-state="on"] .nse-control-toggle-thumb:where(:scope, :scope *) { background: HighlightText; }
+  .nse-control-toggle:disabled:where(:scope, :scope *) { background: ButtonFace; color: GrayText; border-color: GrayText; cursor: default; }
+  .nse-control-toggle:disabled .nse-control-toggle-thumb:where(:scope, :scope *) { background: GrayText; border-color: GrayText; }
+
+  .nse-control-checkbox input:focus-visible:where(:scope, :scope *),
+  .nse-control-radio > input:focus-visible:where(:scope, :scope *),
+  .nse-control-toggle:focus-visible:where(:scope, :scope *),
+  .nse-control-slider:has(input:focus-visible) .nse-control-slider-control:where(:scope, :scope *) {
+    outline: 2px solid Highlight;
+    outline-offset: 3px;
+  }
+  @media (forced-colors: active) {
+    .nse-control-slider-fill:where(:scope, :scope *),
+    .nse-control-slider-thumb-visual:where(:scope, :scope *),
+    .nse-control-toggle:where(:scope, :scope *),
+    .nse-control-toggle-thumb:where(:scope, :scope *) { forced-color-adjust: none; }
+  }
+}

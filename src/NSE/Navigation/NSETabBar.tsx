@@ -33,10 +33,9 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import {
-  nseAppearanceSlot,
-  projectNSEAppearanceSlot,
-  useNSEAppearance,
-  type NSEAppearanceSlotProjection,
+  nseThemeSlot,
+  projectNSEThemeRecipe,
+  useNSEVisualEnvironment,
 } from "../Appearance";
 import {
   getNSETabBarPanelId,
@@ -53,6 +52,7 @@ import {
   type NSENavigationIcon,
   type NSENavigationPresentationState,
 } from "./navigationTypes";
+import { neutralPeerNavigation, type NSEPeerNavigationPresentation } from "./peerNavigationPresentation";
 import tabBarMoreIcon from "./nse-tab-bar-more.svg";
 
 const nseTabBarMoreIcon: NSENavigationIcon = Object.freeze({ kind: "vector", path: tabBarMoreIcon });
@@ -131,53 +131,45 @@ function tabChromeState(
 }
 
 function tabChromeMetadata(
-  slot: NSEAppearanceSlotProjection,
+  layered: boolean,
   segment: NSETabChromeSegment,
   state: NSETabChromeState,
 ) {
   return {
-    "data-nse-tab-chrome-family": slot.recipeId ? "grouped-toolbutton" : undefined,
-    "data-nse-tab-chrome-variant": slot.recipeId ? "tall" : undefined,
+    "data-nse-tab-chrome-family": layered ? "grouped-toolbutton" : undefined,
+    "data-nse-tab-chrome-variant": layered ? "tall" : undefined,
     "data-nse-tab-chrome-segment": segment,
     "data-nse-tab-chrome-state": state,
-    "data-nse-tab-chrome-active": slot.recipeId ? "true" : "false",
+    "data-nse-tab-chrome-active": layered ? "true" : "false",
   };
 }
 
-/**
- * The tall-chrome icon material, as the Atmo UserInfo glyph paints it: the
- * ring and glyph are 75% translucent, with a soft white rim just inside every
- * edge and a drop shadow that is knocked out from under the body (so the bar
- * shows through rather than the shadow). CSS masks can paint the body but not
- * an inner rim, so Atmo reaches this filter through `--nse-tab-icon-material`.
- */
-function NSETabIconMaterial({ id }: { readonly id: string }) {
-  return (
-    <svg className="nse-tab-bar-icon-material" aria-hidden="true" focusable="false" width="0" height="0">
-      <filter id={id} x="-20%" y="-20%" width="140%" height="150%" colorInterpolationFilters="sRGB">
-        <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 .78 0" result="body" />
-        <feGaussianBlur in="SourceAlpha" stdDeviation="0.75" result="soft" />
-        <feComposite in="SourceAlpha" in2="soft" operator="out" result="edge" />
-        <feFlood floodColor="#fff" floodOpacity="0.85" />
-        <feComposite in2="edge" operator="in" result="rim" />
-        <feGaussianBlur in="SourceAlpha" stdDeviation="1" />
-        <feOffset dy="1.2" result="drop" />
-        <feFlood floodColor="#000" floodOpacity="0.62" />
-        <feComposite in2="drop" operator="in" />
-        <feComposite in2="SourceAlpha" operator="out" result="shadow" />
-        <feMerge>
-          <feMergeNode in="shadow" />
-          <feMergeNode in="body" />
-          <feMergeNode in="rim" />
-        </feMerge>
-      </filter>
-    </svg>
-  );
+/** CSS timing sampled for scrollLeft, which WAAPI cannot animate directly. */
+function headerMotionProgress(progress: number, easing: string): number {
+  if (easing === "linear") return progress;
+  const [x1, y1, x2, y2] = easing === "decelerate" ? [.1, .9, .2, 1]
+    : easing === "ease-in-out" ? [.42, 0, .58, 1] : [0, 0, .58, 1];
+  const curve = (t: number, a: number, b: number) => 3 * (1 - t) ** 2 * t * a + 3 * (1 - t) * t ** 2 * b + t ** 3;
+  let low = 0, high = 1;
+  for (let i = 0; i < 16; i++) {
+    const mid = (low + high) / 2;
+    if (curve(mid, x1, x2) < progress) low = mid; else high = mid;
+  }
+  return curve((low + high) / 2, y1, y2);
+}
+
+/** Never scroll an ancestor (scrollIntoView can also jump the document). */
+function revealHeader(viewport: HTMLDivElement | null, tab: HTMLButtonElement | undefined) {
+  if (!viewport || !tab) return;
+  const outer = viewport.getBoundingClientRect(), inner = tab.getBoundingClientRect();
+  if (inner.left < outer.left) viewport.scrollLeft += inner.left - outer.left;
+  else if (inner.right > outer.right) viewport.scrollLeft += inner.right - outer.right;
 }
 
 export interface NSETabBarProps {
   /** The semantic owner. This renderer never creates or disposes it. */
   readonly controller: NSETabBarController<ReactNode>;
+  readonly presentation?: NSEPeerNavigationPresentation;
   readonly "aria-label": string;
   readonly className?: string;
   readonly dir?: "ltr" | "rtl";
@@ -198,14 +190,20 @@ export function NSETabBar({
   controller,
   "aria-label": ariaLabel,
   className,
-  dir = "ltr",
+  dir,
   reducedMotion = false,
   renderPanels = true,
   idScope,
+  presentation: explicitPresentation,
 }: NSETabBarProps) {
   const subscribe = useCallback((listener: () => void) => controller.subscribe(listener), [controller]);
   const snapshot = useSyncExternalStore(subscribe, controller.getSnapshot, controller.getSnapshot);
-  const appearance = useNSEAppearance();
+  const appearance = useNSEVisualEnvironment();
+  const presentation = explicitPresentation ?? appearance.theme?.presentation?.peerNavigation?.compact ?? neutralPeerNavigation;
+  const overflow = presentation.overflow;
+  useLayoutEffect(() => {
+    controller.setOverflowPolicy(overflow);
+  }, [controller, overflow.kind, overflow.kind === "more" ? overflow.maximumVisibleItems : 0]);
   const generatedIdScope = useId().replace(/:/g, "");
   const resolvedIdScope = idScope ?? generatedIdScope;
   const directDestinations = snapshot.directDestinationIds.flatMap((id) => {
@@ -226,6 +224,83 @@ export function NSETabBar({
   const [hoveredTabId, setHoveredTabId] = useState<string | null>(null);
   const [pressedTabId, setPressedTabId] = useState<string | null>(null);
   const tabRefs = useRef(new Map<string, HTMLButtonElement>());
+  const headerViewportRef = useRef<HTMLDivElement>(null);
+  const headerListRef = useRef<HTMLDivElement>(null);
+  const headerTailRef = useRef<HTMLSpanElement>(null);
+  const headerFrameRef = useRef<number | null>(null);
+  const previousHeaderId = useRef(snapshot.activeTabId);
+  const alignHeaderStart = presentation.selectedHeaderAlignment === "start" && overflow.kind === "scroll";
+  const headerMotion = appearance.theme?.presentation.motion?.peerNavigation;
+  const controlsKey = controls.join("\0");
+  const cancelHeaderMotion = useCallback(() => {
+    if (headerFrameRef.current !== null) cancelAnimationFrame(headerFrameRef.current);
+    headerFrameRef.current = null;
+  }, []);
+  useLayoutEffect(() => {
+    const viewport = headerViewportRef.current, list = headerListRef.current, tail = headerTailRef.current;
+    const changed = previousHeaderId.current !== snapshot.activeTabId;
+    previousHeaderId.current = snapshot.activeTabId;
+    if (!viewport || !list) return;
+    const media = typeof matchMedia === "function" ? matchMedia("(prefers-reduced-motion: reduce)") : null;
+    const align = (animate: boolean) => {
+      cancelHeaderMotion();
+      const tab = tabRefs.current.get(snapshot.activeTabId);
+      if (!tab) return;
+      if (!alignHeaderStart) {
+        revealHeader(viewport, tab);
+        return;
+      }
+      // Measure only the real labels, excluding our trailing scroll room.
+      // No clones or reordered tabs: focus, ids and retained panels stay stable.
+      const width = viewport.clientWidth;
+      const overflowing = list.scrollWidth > width + 1;
+      const last = list.lastElementChild as HTMLElement | null;
+      if (tail) tail.style.width = overflowing ? `${Math.max(0, width - (last?.getBoundingClientRect().width ?? width))}px` : "0px";
+      const rtl = (dir ?? getComputedStyle(viewport).direction) === "rtl";
+      const outer = viewport.getBoundingClientRect(), inner = tab.getBoundingClientRect();
+      const from = viewport.scrollLeft;
+      const target = overflowing ? from + (rtl ? inner.right - outer.right : inner.left - outer.left) : 0;
+      const duration = animate && !reducedMotion && !media?.matches && headerMotion?.kind !== "none" ? headerMotion?.durationMs ?? 0 : 0;
+      if (!duration || Math.abs(target - from) < .5) { viewport.scrollLeft = target; return; }
+      const started = performance.now();
+      const tick = (now: number) => {
+        const progress = Math.min(1, Math.max(0, (now - started) / duration));
+        viewport.scrollLeft = progress === 1 ? target : from + (target - from) * headerMotionProgress(progress, headerMotion?.easing ?? "ease-out");
+        if (progress < 1) headerFrameRef.current = requestAnimationFrame(tick);
+        else headerFrameRef.current = null;
+      };
+      headerFrameRef.current = requestAnimationFrame(tick);
+    };
+    align(changed);
+    const remeasure = () => align(false);
+    let measuredWidth = viewport.clientWidth, measuredContent = list.scrollWidth;
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(() => {
+      // The observer's initial delivery must not cancel a just-started selection.
+      if (measuredWidth === viewport.clientWidth && measuredContent === list.scrollWidth) return;
+      measuredWidth = viewport.clientWidth; measuredContent = list.scrollWidth;
+      remeasure();
+    }) : null;
+    observer?.observe(viewport); observer?.observe(list);
+    media?.addEventListener?.("change", remeasure);
+    return () => { cancelHeaderMotion(); observer?.disconnect(); media?.removeEventListener?.("change", remeasure); };
+  }, [snapshot.activeTabId, controlsKey, alignHeaderStart, dir, reducedMotion, headerMotion?.kind, headerMotion?.durationMs, headerMotion?.easing, cancelHeaderMotion]);
+  const detachedFocusedTab = useRef<HTMLButtonElement | null>(null);
+  const registerTab = useCallback((id: string, node: HTMLButtonElement | null) => {
+    if (node) { tabRefs.current.set(id, node); return; }
+    const previous = tabRefs.current.get(id);
+    if (previous && previous.ownerDocument.activeElement === previous) detachedFocusedTab.current = previous;
+    tabRefs.current.delete(id);
+  }, []);
+  useLayoutEffect(() => {
+    const previous = detachedFocusedTab.current;
+    detachedFocusedTab.current = null;
+    if (!previous || previous.isConnected) return;
+    const document = previous.ownerDocument;
+    if (document.activeElement !== document.body && document.activeElement !== document.documentElement) return;
+    const next = tabRefs.current.get(snapshot.activeTabId);
+    next?.focus({ preventScroll: true });
+    if (!alignHeaderStart) revealHeader(headerViewportRef.current, next);
+  });
 
   useEffect(() => {
     setFocusedTabId(snapshot.activeTabId);
@@ -249,14 +324,15 @@ export function NSETabBar({
 
   const focusControl = useCallback((controlId: string, source: string, activate: boolean) => {
     setFocusedTabId(controlId);
-    tabRefs.current.get(controlId)?.focus();
+    tabRefs.current.get(controlId)?.focus({ preventScroll: true });
+    if (!alignHeaderStart) revealHeader(headerViewportRef.current, tabRefs.current.get(controlId));
     if (!activate) return;
     if (controlId === NSETabBarMoreDestinationId) {
       openOverflow(source);
       return;
     }
     selectDestination(controlId, source);
-  }, [openOverflow, selectDestination]);
+  }, [openOverflow, selectDestination, alignHeaderStart]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, controlId: string) => {
     const enabledControls = controls.filter((id) => {
@@ -269,7 +345,8 @@ export function NSETabBar({
 
     if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
       event.preventDefault();
-      const forward = event.key === "ArrowRight" ? dir !== "rtl" : dir === "rtl";
+      const direction = dir ?? getComputedStyle(event.currentTarget).direction;
+      const forward = event.key === "ArrowRight" ? direction !== "rtl" : direction === "rtl";
       const target = nextForDelta(forward ? 1 : -1);
       if (target) focusControl(target, "keyboard", true);
       return;
@@ -312,16 +389,16 @@ export function NSETabBar({
   const moreSelected = snapshot.activeTabId === NSETabBarMoreDestinationId;
   const morePressed = pressedTabId === NSETabBarMoreDestinationId;
   const moreState = stateForTab(NSETabBarMoreDestinationId, moreSelected, false);
-  const moreAppearance = projectNSEAppearanceSlot(
-    nseAppearanceSlot("tab-bar", "tab", moreState),
+  const moreAppearance = projectNSEThemeRecipe(
+    nseThemeSlot("tab-bar", "tab", moreState),
     appearance,
   );
-  const moreLabelAppearance = projectNSEAppearanceSlot(
-    nseAppearanceSlot("tab-bar", "label", moreState),
+  const moreLabelAppearance = projectNSEThemeRecipe(
+    nseThemeSlot("tab-bar", "label", moreState),
     appearance,
   );
-  const moreIconAppearance = projectNSEAppearanceSlot(
-    nseAppearanceSlot("tab-bar", "icon", moreState),
+  const moreIconAppearance = projectNSEThemeRecipe(
+    nseThemeSlot("tab-bar", "icon", moreState),
     appearance,
   );
   const moreIcon = projectNSENavigationIcon(nseTabBarMoreIcon, moreState);
@@ -330,26 +407,30 @@ export function NSETabBar({
     ...directDestinations.map((destination) => {
       const selected = snapshot.activeTabId === destination.id;
       const state = stateForTab(destination.id, selected, Boolean(destination.disabled));
-      return projectNSEAppearanceSlot(nseAppearanceSlot("tab-bar", "tab", state), appearance);
+      return projectNSEThemeRecipe(nseThemeSlot("tab-bar", "tab", state), appearance);
     }),
     ...(overflowDestinations.length > 0 ? [moreAppearance] : []),
   ].filter((projection) => projection.recipeId === null)
     .map((projection) => projection.slot);
   const unresolvedChromeSlotList = [...new Set(unresolvedChromeSlots)];
-  const usesTallTabChrome = unresolvedChromeSlotList.length === 0;
+  const usesTallTabChrome = appearance.theme?.presentation?.tabStyle === "layered";
   const chromeStatus = unresolvedChromeSlotList.length > 0 ? "unresolved" : "resolved";
-  const iconMaterialId = `${resolvedIdScope.replace(/[^\w-]/g, "")}-nse-tab-icon-material`;
   const tabListStyle = {
     "--nse-tab-visible-count": controls.length,
     "--nse-tab-visible-minimum-width": `${controls.length * 64}px`,
-    ...(usesTallTabChrome ? { "--nse-tab-icon-material": `url("#${iconMaterialId}")` } : {}),
+    "--nse-navigation-bar-block-size": `${Math.max(44, appearance.theme?.presentation?.metrics?.navigation?.barBlockSize ?? 48)}px`,
+    "--nse-navigation-edge-gap": `${appearance.theme?.presentation?.metrics?.navigation?.edgeGap ?? 0}px`,
   } as CSSProperties;
 
   return (
     <>
-      <div
+      {presentation.kind !== "panorama" ? <div
         className={classes("nse-tab-bar-safe-area", className)}
         data-nse-tab-bar="true"
+        data-navigation-placement={presentation.placement}
+        data-navigation-flow={presentation.flow}
+        data-navigation-content={presentation.content}
+        data-navigation-overflow={overflow.kind}
         data-safe-area-wrapper="true"
         data-reduced-motion={reducedMotion ? "true" : "false"}
         data-nse-tab-chrome-status={chromeStatus}
@@ -357,15 +438,15 @@ export function NSETabBar({
         dir={dir}
         style={tabListStyle}
       >
-        {usesTallTabChrome ? <NSETabIconMaterial id={iconMaterialId} /> : null}
-        <div className="nse-tab-bar-scroll-viewport" data-nse-tab-scroll-viewport="true">
+        <div ref={headerViewportRef} className="nse-tab-bar-scroll-viewport" data-nse-tab-scroll-viewport="true" data-selected-header-alignment={presentation.selectedHeaderAlignment ?? "nearest"} onPointerDown={cancelHeaderMotion} onWheel={cancelHeaderMotion}>
         <div
+          ref={headerListRef}
           className={classes("nse-tab-bar", usesTallTabChrome && "nse-control-toolbar")}
           role="tablist"
           aria-label={ariaLabel}
           data-position={usesTallTabChrome ? "inline" : undefined}
           data-grouped={usesTallTabChrome ? "true" : undefined}
-          data-nse-tab-layout="floating-bottom"
+          data-nse-tab-layout={`${presentation.flow}-${presentation.placement}`}
           data-nse-tab-chrome-family={usesTallTabChrome ? "grouped-toolbutton" : undefined}
           data-nse-tab-chrome-variant={usesTallTabChrome ? "tall" : undefined}
           data-nse-tab-chrome-size={usesTallTabChrome ? "tall" : undefined}
@@ -376,27 +457,27 @@ export function NSETabBar({
           data-reduced-motion={reducedMotion ? "true" : "false"}
           data-nse-tab-chrome-status={chromeStatus}
           data-nse-tab-unresolved-chrome-slots={unresolvedChromeSlotList.join(",") || undefined}
-          style={tabListStyle}
+          style={alignHeaderStart ? { ...tabListStyle, flexShrink: 0 } : tabListStyle}
         >
         {directDestinations.map((destination, index) => {
           const selected = snapshot.activeTabId === destination.id;
           const pressed = pressedTabId === destination.id;
           const state = stateForTab(destination.id, selected, Boolean(destination.disabled));
-          const tabAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("tab-bar", "tab", state),
+          const tabAppearance = projectNSEThemeRecipe(
+            nseThemeSlot("tab-bar", "tab", state),
             appearance,
           );
-          const iconAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("tab-bar", "icon", state),
+          const iconAppearance = projectNSEThemeRecipe(
+            nseThemeSlot("tab-bar", "icon", state),
             appearance,
           );
-          const labelAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("tab-bar", "label", state),
+          const labelAppearance = projectNSEThemeRecipe(
+            nseThemeSlot("tab-bar", "label", state),
             appearance,
           );
           const badgeAppearance = destination.badge === undefined
             ? null
-            : projectNSEAppearanceSlot(nseAppearanceSlot("tab-bar", "badge", state), appearance);
+            : projectNSEThemeRecipe(nseThemeSlot("tab-bar", "badge", state), appearance);
           const icon = projectNSENavigationIcon(destination.icon, state);
           const iconStyle = tabIconStyle(destination.icon);
           const segment = tabChromeSegment(index, controls.length);
@@ -408,10 +489,7 @@ export function NSETabBar({
               type="button"
               role="tab"
               id={getNSETabBarTabId(resolvedIdScope, destination.id)}
-              ref={(node) => {
-                if (node) tabRefs.current.set(destination.id, node);
-                else tabRefs.current.delete(destination.id);
-              }}
+              ref={node => registerTab(destination.id, node)}
               aria-label={destination.accessibleLabel}
               aria-controls={getNSETabBarPanelId(resolvedIdScope, destination.id)}
               aria-selected={selected}
@@ -423,7 +501,7 @@ export function NSETabBar({
               data-nse-tab-destination={destination.id}
               data-nse-tab-presentation-state={state}
               data-nse-tab-visual-state={tabVisualState(state, selected, pressed)}
-              {...tabChromeMetadata(tabAppearance, segment, chromeState)}
+              {...tabChromeMetadata(usesTallTabChrome, segment, chromeState)}
               {...tabAppearance.attributes}
               onFocus={() => {
                 setFocusedTabId(destination.id);
@@ -478,12 +556,10 @@ export function NSETabBar({
             type="button"
             role="tab"
             id={getNSETabBarTabId(resolvedIdScope, NSETabBarMoreDestinationId)}
-            ref={(node) => {
-              if (node) tabRefs.current.set(NSETabBarMoreDestinationId, node);
-              else tabRefs.current.delete(NSETabBarMoreDestinationId);
-            }}
+            ref={node => registerTab(NSETabBarMoreDestinationId, node)}
             aria-label="More destinations"
-            aria-controls={morePanelId}
+            aria-controls={moreSelected && !overflowOpen
+              ? getNSETabBarPanelId(resolvedIdScope, snapshot.selectedDestinationId) : morePanelId}
             aria-expanded={overflowOpen}
             aria-selected={moreSelected}
             tabIndex={focusedTabId === NSETabBarMoreDestinationId ? 0 : -1}
@@ -492,7 +568,7 @@ export function NSETabBar({
             data-nse-tab-presentation-state={moreState}
             data-nse-tab-visual-state={tabVisualState(moreState, moreSelected, morePressed)}
             {...tabChromeMetadata(
-              moreAppearance,
+              usesTallTabChrome,
               tabChromeSegment(controls.length - 1, controls.length),
               tabChromeState(moreState, moreSelected, morePressed),
             )}
@@ -541,10 +617,11 @@ export function NSETabBar({
           </button>
         ) : null}
           </div>
+        {alignHeaderStart ? <span ref={headerTailRef} aria-hidden="true" data-nse-tab-scroll-tail="true" style={{ flex: "0 0 auto", width: 0, pointerEvents: "none" }} /> : null}
         </div>
-      </div>
+      </div> : null}
 
-      {renderPanels ? <NSENavigationDestinationHost controller={controller} idScope={resolvedIdScope} snapshot={snapshot} /> : null}
+      {renderPanels ? <NSENavigationDestinationHost panorama={presentation.kind === "panorama" ? { title: ariaLabel } : undefined} controller={controller} idScope={resolvedIdScope} snapshot={snapshot} reducedMotion={reducedMotion} dir={dir} /> : null}
     </>
   );
 }
@@ -576,7 +653,7 @@ export function NSETabBarOverflowList({
 }: NSETabBarOverflowListProps) {
   const subscribe = useCallback((listener: () => void) => controller.subscribe(listener), [controller]);
   const snapshot = useSyncExternalStore(subscribe, controller.getSnapshot, controller.getSnapshot);
-  const appearance = useNSEAppearance();
+  const appearance = useNSEVisualEnvironment();
   const generatedIdScope = useId().replace(/:/g, "");
   const resolvedIdScope = idScope ?? generatedIdScope;
   const overflowDestinations = snapshot.overflowDestinationIds.flatMap((id) => {
@@ -690,7 +767,7 @@ export function NSETabBarOverflowList({
     >
       <div className="nse-tab-bar-overflow-region" role="region" aria-label="More destinations">
         <NSEMetalSurface
-          mode={appearance.resolvedColourScheme}
+          mode={appearance.resolvedAppearance}
           className="nse-tab-bar-overflow-metal-surface"
           onScroll={(event) => {
             overflowScrollTopRef.current = event.currentTarget.scrollTop;

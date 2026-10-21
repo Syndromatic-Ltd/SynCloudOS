@@ -22,11 +22,11 @@ import { createPortal } from "react-dom";
 import { useState } from "react";
 import { useNSEOverlay, useNSEOverlayProvider } from "../Overlays";
 import type { NSETooltipProps } from "./tooltipTypes";
-import { useNSEAppearanceProjection } from "../Appearance";
+import { useNSEThemeProjection } from "../Appearance";
 
 /** A noninteractive overlay; focus stays on its anchor. */
 export function NSETooltip({ id, content, open, anchor, placement = "block-end-inline-start", onOpenChange }: NSETooltipProps) {
-  const appearanceProjection = useNSEAppearanceProjection();
+  const themeProjection = useNSEThemeProjection();
   if (!id.trim()) throw new TypeError("NSE tooltip IDs must not be empty.");
   const { runtime } = useNSEOverlayProvider();
   const [arrow, setArrow] = useState<HTMLSpanElement | null>(null);
@@ -48,7 +48,7 @@ export function NSETooltip({ id, content, open, anchor, placement = "block-end-i
   const surface = (
     <div
       {...overlay.surfaceProps}
-      {...appearanceProjection}
+      {...themeProjection}
       id={id}
       role="tooltip"
       className="nse-tooltip"

@@ -18,24 +18,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.nse-appearance-provider {
+.nse-theme-provider {
   min-width: 0;
+  font-family: var(--font-ui, var(--nse-theme-font-body, system-ui, sans-serif));
 }
 
 /* Native system colours used by stock containers follow the resolved NSE mode,
    including appearance boundaries projected onto portals and window surfaces. */
-:where([data-nse-colour-scheme-resolved="light"]) { color-scheme: light; }
-:where([data-nse-colour-scheme-resolved="dark"]) { color-scheme: dark; }
+:where([data-nse-appearance="light"]) { color-scheme: light; }
+:where([data-nse-appearance="dark"]) { color-scheme: dark; }
 
 /* The plain app background and its text, switched by the resolved light or dark mode. Light follows the
    aluminium metal family and dark the blue-hued one; a theme may redefine them. */
-:where([data-nse-colour-scheme-resolved="light"]) {
-  --nse-app-background: #d9dbde;
-  --nse-app-foreground: #2a2f36;
+:where([data-nse-appearance="light"]) {
+  --nse-app-background: Canvas;
+  --nse-app-foreground: CanvasText;
 }
-:where([data-nse-colour-scheme-resolved="dark"]) {
-  --nse-app-background: #1b222c;
-  --nse-app-foreground: #dde3ea;
+:where([data-nse-appearance="dark"]) {
+  --nse-app-background: Canvas;
+  --nse-app-foreground: CanvasText;
 }
 
 .nse-control-appearance-provider {
@@ -91,11 +92,11 @@
   }
 }
 
-.nse-toolbar[data-nse-appearance-authority],
-.nse-toolbar-item[data-nse-appearance-authority],
-.nse-tab-bar[data-nse-appearance-authority],
-.nse-tab-bar-tab[data-nse-appearance-authority],
-.nse-tab-bar-more-option[data-nse-appearance-authority] {
+.nse-toolbar[data-nse-theme-authority],
+.nse-toolbar-item[data-nse-theme-authority],
+.nse-tab-bar[data-nse-theme-authority],
+.nse-tab-bar-tab[data-nse-theme-authority],
+.nse-tab-bar-more-option[data-nse-theme-authority] {
   isolation: isolate;
   position: relative;
 }
@@ -321,4 +322,13 @@
   :is([data-window-shadow-layer], [data-nse-nine-slice="menu-surface"]) {
     display: none !important;
   }
+}
+
+/* Package font roles never leak across independent theme roots. */
+:where([data-nse-theme]) {
+  --nse-theme-font-ui: initial;
+  --nse-theme-font-body: initial;
+  --nse-theme-font-title: initial;
+  --nse-theme-font-label: initial;
+  --nse-theme-font-monospace: initial;
 }

@@ -1,3 +1,4 @@
+import type { NSEThemeDefinition } from "../../NSE/Appearance/NSEThemeDefinition";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -875,6 +876,7 @@ export interface ApplicationDocumentRuntimeConfiguration {
 }
 
 export interface SynCloudOSRuntimeConfig {
+  readonly theme?: NSEThemeDefinition;
   readonly id?: string;
   readonly environment: SynCloudOSRuntimeEnvironment;
   /** Runtime-owned browser adapters may be supplied independently of the environment bundle. */
@@ -1049,6 +1051,7 @@ export interface SynCloudOSRuntime {
   readonly systemUI: SystemUIService;
   readonly preferencePanes: PreferencePaneRegistry;
   readonly settings: SynCloudOSSettingsService;
+  readonly theme: NSEThemeDefinition;
   readonly appearance: SynCloudOSAppearanceService;
   readonly workspace: SynCloudOSWorkspaceController;
   readonly appManager: SynCloudOSAppManagerController;

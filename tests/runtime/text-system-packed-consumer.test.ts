@@ -26,6 +26,21 @@ import { assertCustomTextSystemSourceBoundary, createCustomTextSystemFixtureSour
 const files = ["src/main.tsx", "src/example/Contents/index.tsx", "src/example/Contents/model.ts", "src/example/Contents/style.css", "src/assets/ExampleFont.ttf"];
 const fixture = readFileSync("tests/e2e/fixtures/custom-text-surface.tsx", "utf8");
 describe("independent custom text consumer preparation", () => {
+  it.each(["nse/theme", "nse/themes/atmo"])("allows %s only in the trusted example host", entry => {
+    const source = `import "@syndromatic/syncloudos/${entry}";`;
+    const paths = [...files, "src/example/Host/bootstrap.tsx"];
+    expect(() => assertCustomTextSystemSourceBoundary(source, "src/example/Host/bootstrap.tsx", paths)).not.toThrow();
+    for (const path of ["src/main.tsx", "src/example/Contents/index.tsx"]) {
+      expect(() => assertCustomTextSystemSourceBoundary(source, path, paths)).toThrow();
+    }
+    expect(() => assertCustomTextSystemSourceBoundary(`import "@syndromatic/syncloudos/${entry}/internal";`, "src/example/Host/bootstrap.tsx", paths)).toThrow();
+  });
+  it("explicitly chooses replaceable Atmo for the stock-style example host", () => {
+    const source = readFileSync("examples/TextSystem.app/Host/bootstrap.tsx", "utf8");
+    expect(source).toContain('import { atmoTheme } from "@syndromatic/syncloudos/nse/themes/atmo"');
+    expect(source).toContain("theme: options.theme ?? atmoTheme");
+  });
+
   it("loads the required public browser stylesheet only in the trusted host bootstrap", () => {
     const paths = [...files, "src/example/Host/bootstrap.tsx"];
     const source = 'import "@syndromatic/syncloudos/browser/styles.css";';

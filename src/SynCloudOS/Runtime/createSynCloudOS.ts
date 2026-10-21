@@ -1,3 +1,4 @@
+import { defineNSETheme, neutralNSETheme } from "../../NSE/Appearance/NSEThemeDefinition";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -309,6 +310,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   let disposeBootSignal: (() => void) | null = null;
   let undo!: ReturnType<typeof createUndoManagerRegistry>;
   runtime = {
+    theme: defineNSETheme(config.theme ?? neutralNSETheme),
     runtimeId,
     environment: config.environment,
     signal: controller.signal,

@@ -23,7 +23,7 @@ import { createPortal } from "react-dom";
 import { NSEPanelView } from "../Windows/NSEPanelView";
 import { createCanonicalWindowRecord, freezeWindowRecord } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSRuntimeId, WindowPresentation, WindowRecord } from "../../SynCloudOS/SynCloudOS";
-import { useNSEAppearanceProjection } from "../Appearance";
+import { useNSEThemeProjection } from "../Appearance";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
 import { useOptionalNSEWindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
 import { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
@@ -186,7 +186,7 @@ function StandaloneUtilityPanel({ id, title, anchor, fitting, closing, onExited,
   onClose(): void;
 }) {
   const { portalHost, runtime } = useNSEOverlayProvider();
-  const appearanceProjection = useNSEAppearanceProjection();
+  const themeProjection = useNSEThemeProjection();
   const [frame, setFrame] = useState<Frame | null>(null);
   const drag = useRef<{ readonly pointerId: number; readonly originX: number; readonly originY: number; readonly frame: Frame } | null>(null);
   const surfaceRef = useRef<HTMLDivElement | null>(null);
@@ -294,7 +294,7 @@ function StandaloneUtilityPanel({ id, title, anchor, fitting, closing, onExited,
       data-nse-utility-panel={id}
       data-state={closing ? "closing" : "open"}
       inert={closing || undefined}
-      {...appearanceProjection}
+      {...themeProjection}
       style={{
         position: "fixed",
         left: frame?.x ?? 0,

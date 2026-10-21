@@ -18,38 +18,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEAppearanceDefinition } from "./NSEAppearanceDefinition";
-
+import type { NSEThemeDefinition } from "./NSEThemeDefinition";
 export type NSEChromeAppearance = "standard" | "metal" | "hud";
-export type NSEColourScheme = "auto" | "light" | "dark";
-export type NSEResolvedColourScheme = Exclude<NSEColourScheme, "auto">;
+export type NSEAppearance = "auto" | "light" | "dark";
+export type NSEResolvedAppearance = Exclude<NSEAppearance, "auto">;
+export interface NSEAppearanceState { readonly requested: NSEAppearance; readonly resolved: NSEResolvedAppearance; }
 export type NSEContrast = "normal" | "high" | "forced";
 export type NSETransparency = "normal" | "reduced";
-
 export interface NSEAppearanceServicePort {
-  readonly runtimeId: string;
-  get(): NSEColourScheme;
-  resolved(): NSEResolvedColourScheme;
-  subscribe(listener: () => void): () => void;
+  readonly runtimeId: string; get(): NSEAppearance; resolved(): NSEResolvedAppearance; subscribe(listener: () => void): () => void;
 }
-
 export interface NSEAppearanceSelection {
-  readonly appearance: NSEAppearanceDefinition;
-  readonly chrome: NSEChromeAppearance;
-  readonly requestedColourScheme: NSEColourScheme;
-  readonly resolvedColourScheme: NSEResolvedColourScheme;
-  readonly contrast: NSEContrast;
-  readonly transparency: NSETransparency;
+  readonly theme: NSEThemeDefinition;
+  readonly requestedAppearance: NSEAppearance; readonly resolvedAppearance: NSEResolvedAppearance;
+  readonly chrome: NSEChromeAppearance; readonly contrast: NSEContrast; readonly transparency: NSETransparency;
+  /** Ancestor token inventory used only to isolate nested boundaries and portals. */
+  readonly inheritedThemeTokenNames?: readonly string[];
 }
-
-export type NSEResolvedAppearance = NSEAppearanceSelection;
-
+export type NSEVisualEnvironment = NSEAppearanceSelection;
 export interface NSEAppearanceDataAttributes {
-  readonly "data-nse-appearance": string;
+  readonly "data-nse-theme": string;
+  readonly "data-nse-appearance": NSEResolvedAppearance;
+  readonly "data-nse-appearance-requested": NSEAppearance;
   readonly "data-nse-chrome": NSEChromeAppearance;
-  readonly "data-nse-colour-scheme-requested": NSEColourScheme;
-  readonly "data-nse-colour-scheme-resolved": NSEResolvedColourScheme;
   readonly "data-nse-contrast": NSEContrast;
   readonly "data-nse-transparency": NSETransparency;
-  readonly "data-mode": NSEResolvedColourScheme;
+  readonly "data-mode": NSEResolvedAppearance;
 }

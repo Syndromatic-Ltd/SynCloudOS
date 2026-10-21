@@ -25,7 +25,7 @@ import { FocusScope } from "./FocusScope";
 import { ResponderScope } from "./ResponderScope";
 import { useKernelSynCloudOS } from "./runtimeContext";
 import { useRuntimeSelector } from "./runtimeHooks";
-import { useResolvedMode } from "./serviceHooks";
+import { useResolvedAppearance } from "./serviceHooks";
 import { useHostSiteBranding } from "./siteBrandingContext";
 import { useRuntimeNSEOverlayPort } from "./nseFocusPort";
 import { useRuntimeNSEMenuPort } from "./nseMenuPort";
@@ -86,7 +86,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
   const statechart = useRuntimeSelector(selectStatechart);
   const loginServices = useRuntimeSelector(selectLoginServices);
   const latest = useRuntimeSelector(selectLatestError);
-  const appearance = useResolvedMode();
+  const appearance = useResolvedAppearance();
   const branding = useHostSiteBranding();
   const locale = useWebspringLocale();
   const app = appInfo[normalizeBundleIdentifier(applicationId)];

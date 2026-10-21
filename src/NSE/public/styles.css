@@ -60,3 +60,6 @@
 @import "../Tooltips/nse-tooltips.css";
 @import "../Typography/fonts.css";
 @import "../Windows/nse-windows.css";
+
+/* Minimal system fallback for the default neutral theme only. */
+@import "../Appearance/nse-neutral-controls.css";

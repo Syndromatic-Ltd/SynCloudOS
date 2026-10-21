@@ -32,9 +32,9 @@ import {
 import type { NSESmoothSurfaceRequest } from "../SmoothSurface";
 import { classes, getControlSmoothSurfaceProps } from "../Controls/Core/nseControlsShared";
 import {
-  nseAppearanceSlot,
-  projectNSEAppearanceSlot,
-  useNSEAppearance,
+  nseThemeSlot,
+  projectNSEThemeRecipe,
+  useNSEVisualEnvironment,
 } from "../Appearance";
 import {
   NSEChromeBevel,
@@ -178,9 +178,9 @@ function NSEConfiguredToolbar({
       itemRefs.current.get(last)?.focus({ preventScroll: true });
     }
   };
-  const appearance = useNSEAppearance();
-  const toolbarAppearance = projectNSEAppearanceSlot(
-    nseAppearanceSlot("toolbar", "surface", snapshot.diagnostic ? "disabled" : "normal"),
+  const appearance = useNSEVisualEnvironment();
+  const toolbarAppearance = projectNSEThemeRecipe(
+    nseThemeSlot("toolbar", "surface", snapshot.diagnostic ? "disabled" : "normal"),
     appearance,
   );
   const toolbarChromeState: NSEChromeVisualState = snapshot.diagnostic ? "disabled" : "normal";
@@ -226,15 +226,15 @@ function NSEConfiguredToolbar({
           return <span key={entry.instanceId} className="nse-toolbar-space" style={geometry} aria-hidden="true" data-nse-part={item.kind} data-appearance-recipe={`toolbar.${item.kind}`} />;
         }
         if (item.kind === "separator") {
-          const separatorAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("toolbar", "separator", "normal"),
+          const separatorAppearance = projectNSEThemeRecipe(
+            nseThemeSlot("toolbar", "separator", "normal"),
             appearance,
           );
           return <span key={entry.instanceId} className="nse-toolbar-separator" style={geometry} aria-hidden="true" data-nse-part="separator" {...separatorAppearance.attributes}><NSEChromeSeparator slot={separatorAppearance} state="normal" /></span>;
         }
         if (item.kind === "custom") {
-          const customAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("toolbar", "item", "normal"),
+          const customAppearance = projectNSEThemeRecipe(
+            nseThemeSlot("toolbar", "item", "normal"),
             appearance,
           );
           return (
@@ -260,8 +260,8 @@ function NSEConfiguredToolbar({
                 : hoveredItemId === entry.instanceId
                   ? "hover"
                   : "normal";
-        const itemAppearance = projectNSEAppearanceSlot(
-          nseAppearanceSlot("toolbar", "item", itemAppearanceState),
+        const itemAppearance = projectNSEThemeRecipe(
+          nseThemeSlot("toolbar", "item", itemAppearanceState),
           appearance,
         );
         return (

@@ -20,7 +20,7 @@
 
 import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../../Appearance";
 import { NSEMetalThumb } from "../../Appearance/NSEMetalThumb";
 import { NSESlider } from "./NSESlider";
 import type { NSECircularSliderProps } from "./valueControlTypes";
@@ -71,11 +71,11 @@ export function NSECircularSlider({ controlSize = "regular", valueText, ...props
   const progress = span === 0 ? 0 : (props.value - props.minimum) / span;
   const style = { "--nse-circular-angle": `${progress * 360}deg` } as CSSProperties;
   const appearanceState = props.disabled ? "disabled" : "normal";
-  const trackAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("circular-slider", "track", appearanceState),
+  const trackAppearance = useNSEThemeRecipe(
+    nseThemeSlot("circular-slider", "track", appearanceState),
   );
-  const knobAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("circular-slider", "knob", appearanceState),
+  const knobAppearance = useNSEThemeRecipe(
+    nseThemeSlot("circular-slider", "knob", appearanceState),
   );
 
   return <span data-nse-control="circular-slider" data-size={controlSize} data-state={props.disabled ? "disabled" : props.readOnly ? "read-only" : "ready"} {...trackAppearance.attributes} style={style}>

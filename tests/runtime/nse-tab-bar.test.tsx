@@ -19,15 +19,16 @@
  */
 
 // @vitest-environment jsdom
-import { defineNSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
+import { defineNSETheme } from "../../src/NSE/Appearance";
 
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import React, { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
-import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
+import { bottomPeerNavigation } from "../../src/NSE/Navigation/peerNavigationPresentation";
+import { NSEThemeProvider } from "../../src/NSE/Appearance";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo";
 import {
   NSEApplicationNavigationChromeController,
   NSEApplicationNavigationChromeProvider,
@@ -37,9 +38,9 @@ import {
   NSETabGroup,
 } from "../../src/NSE/Navigation";
 
-const customAppearance = defineNSEAppearance({ id: "custom-test", displayName: "Custom test", recipes: [
-  { slot: "toolbar.item.normal.1x", recipeId: "custom-test.toolbar.normal" },
-  { slot: "toolbar.item.selected.1x", recipeId: "custom-test.toolbar.selected" },
+const customAppearance = defineNSETheme({ id: "test.custom", displayName: "Custom test", recipes: [
+  { slot: "toolbar.item.normal", recipeId: "custom-test.toolbar.normal" },
+  { slot: "toolbar.item.selected", recipeId: "custom-test.toolbar.selected" },
 ] });
 
 afterEach(cleanup);
@@ -91,7 +92,7 @@ describe("NSETabBar", () => {
     [6, 4, 2],
   ])("keeps %i declared destinations as %i direct tabs and %i overflow destinations", (count, direct, overflow) => {
     const controller = new NSETabBarController<React.ReactNode>({ id: `tab-boundary-${count}`, destinations: destinations(count) });
-    const { unmount } = render(<NSETabBar controller={controller} aria-label="Boundary tabs" />);
+    const { unmount } = render(<NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Boundary tabs" />);
 
     expect(controller.getSnapshot().directDestinationIds).toHaveLength(direct);
     expect(controller.getSnapshot().overflowDestinationIds).toHaveLength(overflow);
@@ -111,7 +112,7 @@ describe("NSETabBar", () => {
     const chromeController = new NSEApplicationNavigationChromeController();
     const { unmount } = render(
       <NSEApplicationNavigationChromeProvider controller={chromeController}>
-        <NSETabBar controller={controller} aria-label="Primary destinations" idScope="overflow-page-tabs" />
+        <NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Primary destinations" idScope="overflow-page-tabs" />
         <NSETabBarOverflowList
           controller={controller}
           aria-label="Primary destinations"
@@ -184,14 +185,14 @@ describe("NSETabBar", () => {
     controller.dispose();
   });
 
-  it("keeps More aria-controls bound to one present tabpanel through root, list, detail, Back, and programmatic selection", async () => {
+  it("keeps More aria-controls bound to the current retained panel through root, list, detail, Back, and programmatic selection", async () => {
     const controller = new NSETabBarController<React.ReactNode>({
       id: "stable-more-panel-tabs",
       destinations: destinations(6),
     });
     const { unmount } = render(
       <>
-        <NSETabBar controller={controller} aria-label="Stable More panel" idScope="stable-more-panel" />
+        <NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Stable More panel" idScope="stable-more-panel" />
         <NSETabBarOverflowList controller={controller} aria-label="Stable More panel" idScope="stable-more-panel" />
       </>,
     );
@@ -208,9 +209,9 @@ describe("NSETabBar", () => {
     const controlledPanel = controlledId ? document.getElementById(controlledId) : null;
     const homePanel = screen.getByTestId("home-panel").closest<HTMLElement>("[role='tabpanel']");
     const expectStablePanel = (visibility: "visible" | "hidden") => {
-      expect(more.getAttribute("aria-controls")).toBe(controlledId);
-      const panel = controlledId ? document.getElementById(controlledId) : null;
-      expect(panel).toBe(controlledPanel);
+      const currentId = more.getAttribute("aria-controls");
+      const panel = currentId ? document.getElementById(currentId) : null;
+      if (currentId === controlledId) expect(panel).toBe(controlledPanel);
       expect(panel?.getAttribute("role")).toBe("tabpanel");
       if (visibility === "visible") {
         expect(panel?.hasAttribute("hidden")).toBe(false);
@@ -237,7 +238,7 @@ describe("NSETabBar", () => {
     fireEvent.click(within(overflow).getByRole("button", { name: "Activity destination" }));
     await waitFor(() => expect(controller.moreStack?.getSnapshot().path).toEqual(["__nse-more", "activity"]));
     const activity = document.querySelector<HTMLElement>('[data-nse-more-destination="activity"]');
-    expect(expectStablePanel("visible")?.contains(activity)).toBe(true);
+    expect(expectStablePanel("visible") === activity).toBe(true);
 
     controller.moreStack?.pop();
     const restoredOverflow = await screen.findByRole("region", { name: "More destinations" });
@@ -246,13 +247,11 @@ describe("NSETabBar", () => {
     controller.closeOverflow();
     await waitFor(() => expect(controller.moreStack?.getSnapshot().path).toEqual([]));
     expect(more.getAttribute("aria-selected")).toBe("true");
-    expect(expectStablePanel("visible")?.contains(activity)).toBe(true);
+    expect(expectStablePanel("visible") === activity).toBe(true);
 
     await controller.select("sharing", { source: "programmatic" });
     await waitFor(() => expect(controller.getSnapshot().selectedDestinationId).toBe("sharing"));
-    expect(expectStablePanel("visible")?.contains(
-      document.querySelector<HTMLElement>('[data-nse-more-destination="sharing"]'),
-    )).toBe(true);
+    expect(expectStablePanel("visible")).toBe(document.querySelector<HTMLElement>('[data-nse-more-destination="sharing"]'));
 
     unmount();
     controller.dispose();
@@ -265,7 +264,7 @@ describe("NSETabBar", () => {
     });
     const { unmount } = render(
       <>
-        <NSETabBar
+        <NSETabBar presentation={bottomPeerNavigation}
           controller={controller}
           aria-label="Owned More panel"
           idScope="owned-more-panel"
@@ -314,7 +313,7 @@ describe("NSETabBar", () => {
     const chromeController = new NSEApplicationNavigationChromeController();
     const { unmount } = render(
       <NSEApplicationNavigationChromeProvider controller={chromeController}>
-        <NSETabBar controller={controller} aria-label="Scroll restoration destinations" idScope="overflow-scroll-restoration-tabs" />
+        <NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Scroll restoration destinations" idScope="overflow-scroll-restoration-tabs" />
         <NSETabBarOverflowList
           controller={controller}
           aria-label="Scroll restoration destinations"
@@ -355,10 +354,10 @@ describe("NSETabBar", () => {
       destinations: destinations(7),
     });
     const { unmount } = render(
-      <NSEAppearanceProvider appearance={atmoAppearance} colourScheme={mode}>
-        <NSETabBar controller={controller} aria-label="Metal More destinations" idScope={`metal-overflow-${mode}`} />
+      <NSEThemeProvider theme={atmoTheme} appearance={mode}>
+        <NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Metal More destinations" idScope={`metal-overflow-${mode}`} />
         <NSETabBarOverflowList controller={controller} aria-label="Metal More destinations" idScope={`metal-overflow-${mode}`} />
-      </NSEAppearanceProvider>,
+      </NSEThemeProvider>,
     );
 
     fireEvent.click(screen.getByRole("tab", { name: "More destinations" }));
@@ -407,7 +406,7 @@ describe("NSETabBar", () => {
     });
     const { unmount } = render(
       <>
-        <NSETabBar controller={controller} aria-label="Primary destinations" dir="rtl" reducedMotion idScope="interaction-tabs" />
+        <NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Primary destinations" dir="rtl" reducedMotion idScope="interaction-tabs" />
         <NSETabBarOverflowList controller={controller} aria-label="Primary destinations" idScope="interaction-tabs" />
       </>,
     );
@@ -447,13 +446,13 @@ describe("NSETabBar", () => {
       id: "atmo-tab-skin",
       destinations: destinations(6, { disabled: "settings", badge: "library" }),
     });
-    const { unmount } = render(<NSEAppearanceProvider appearance={atmoAppearance}><NSETabBar controller={controller} aria-label="Atmo tab skin" /></NSEAppearanceProvider>);
+    const { unmount } = render(<NSEThemeProvider theme={atmoTheme}><NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Atmo tab skin" /></NSEThemeProvider>);
     const home = screen.getByRole("tab", { name: "Home destination" });
     const library = screen.getByRole("tab", { name: "Library destination" });
     const settings = screen.getByRole("tab", { name: "Settings destination" });
 
     const tabList = screen.getByRole("tablist", { name: "Atmo tab skin" });
-    expect(tabList.getAttribute("data-nse-tab-layout")).toBe("floating-bottom");
+    expect(tabList.getAttribute("data-nse-tab-layout")).toBe("overlay-block-end");
     expect(tabList.className).toContain("nse-control-toolbar");
     expect(tabList.getAttribute("data-grouped")).toBe("true");
     expect(tabList.getAttribute("data-nse-tab-chrome-active")).toBe("true");
@@ -461,14 +460,14 @@ describe("NSETabBar", () => {
     expect(tabList.getAttribute("data-nse-tab-chrome-variant")).toBe("tall");
     expect(tabList.getAttribute("data-nse-tab-chrome-size")).toBe("tall");
     expect(tabList.hasAttribute("data-nse-tab-vector-generator")).toBe(false);
-    expect(home.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.tab.selected.1x");
+    expect(home.getAttribute("data-nse-theme-slot")).toBe("tab-bar.tab.selected");
     expect(home.getAttribute("data-nse-appearance-authority")).toBeNull();
     expect(home.getAttribute("data-nse-tab-chrome-source-path")).toBeNull();
-    expect(home.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.selected.1x");
+    expect(home.getAttribute("data-nse-theme-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.selected.1x");
     expect(home.getAttribute("data-nse-tab-chrome-segment")).toBe("first");
     expect(home.getAttribute("data-nse-tab-chrome-state")).toBe("sel");
-    expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.icon.selected.1x");
-    expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
+    expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-theme-slot")).toBe("tab-bar.icon.selected");
+    expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-theme-recipe-id")).toBeNull();
     expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-tab-icon-source")).toBe("template:home");
     expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-tab-icon-ready")).toBe("false");
     expect(home.querySelectorAll(".nse-control-chrome-primitive")).toHaveLength(0);
@@ -492,17 +491,17 @@ describe("NSETabBar", () => {
     expect(navigationCss).toMatch(/\[data-nse-tab-chrome-segment="last"\] > \.nse-tab-bar-content \{\s*inset-inline-start: -6px;/u);
 
     fireEvent.pointerEnter(library);
-    expect(library.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.tab.hover.1x");
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.hover.1x");
+    expect(library.getAttribute("data-nse-theme-slot")).toBe("tab-bar.tab.hover");
+    expect(library.getAttribute("data-nse-theme-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.hover.1x");
     fireEvent.pointerDown(library);
-    expect(library.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.tab.pressed.1x");
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.pressed.1x");
+    expect(library.getAttribute("data-nse-theme-slot")).toBe("tab-bar.tab.pressed");
+    expect(library.getAttribute("data-nse-theme-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.pressed.1x");
     fireEvent.pointerUp(library);
     fireEvent.pointerLeave(library);
     fireEvent.focus(library);
-    expect(library.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.tab.focused.1x");
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.focused.1x");
-    expect(settings.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.disabled.1x");
+    expect(library.getAttribute("data-nse-theme-slot")).toBe("tab-bar.tab.focused");
+    expect(library.getAttribute("data-nse-theme-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.focused.1x");
+    expect(settings.getAttribute("data-nse-theme-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.disabled.1x");
 
     fireEvent.pointerDown(home);
     expect(home.getAttribute("data-nse-tab-presentation-state")).toBe("pressed");
@@ -522,7 +521,7 @@ describe("NSETabBar", () => {
         { id: "template", label: "Template", accessibleLabel: "Template destination", icon: { kind: "template", name: "template" } },
       ],
     });
-    const { unmount } = render(<NSETabBar controller={controller} aria-label="Vector tab icons" />);
+    const { unmount } = render(<NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Vector tab icons" />);
 
     const homeIcon = screen.getByRole("tab", { name: "Home destination" }).querySelector<HTMLElement>(".nse-tab-bar-icon");
     const templateIcon = screen.getByRole("tab", { name: "Template destination" }).querySelector<HTMLElement>(".nse-tab-bar-icon");
@@ -544,8 +543,8 @@ describe("NSETabBar", () => {
 
   it("switches explicit themes without replacing the controller, selected tab or focus", async () => {
     const controller = new NSETabBarController<React.ReactNode>({ id: "theme-switch-tabs", destinations: destinations(2) });
-    const fixture = (appearance: typeof atmoAppearance) => <NSEAppearanceProvider appearance={appearance}><NSETabBar controller={controller} aria-label="Theme tabs" /></NSEAppearanceProvider>;
-    const view = render(fixture(atmoAppearance));
+    const fixture = (appearance: typeof atmoTheme) => <NSEThemeProvider theme={appearance}><NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Theme tabs" /></NSEThemeProvider>;
+    const view = render(fixture(atmoTheme));
     const library = screen.getByRole("tab", { name: "Library destination" });
     fireEvent.click(library);
     await waitFor(() => expect(controller.getSnapshot().selectedDestinationId).toBe("library"));
@@ -554,11 +553,11 @@ describe("NSETabBar", () => {
     expect(screen.getByRole("tab", { name: "Library destination" })).toBe(library);
     expect(document.activeElement).toBe(library);
     expect(library.getAttribute("aria-selected")).toBe("true");
-    expect(library.closest("[data-nse-appearance]")?.getAttribute("data-nse-appearance")).toBe("custom-test");
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
-    view.rerender(fixture(atmoAppearance));
+    expect(library.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("test.custom");
+    expect(library.getAttribute("data-nse-theme-recipe-id")).toBeNull();
+    view.rerender(fixture(atmoTheme));
     expect(document.activeElement).toBe(library);
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.selected.1x");
+    expect(library.getAttribute("data-nse-theme-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.selected.1x");
     view.unmount(); controller.dispose();
   });
 
@@ -570,7 +569,7 @@ describe("NSETabBar", () => {
       destinations: destinations(2),
     });
     try {
-      const { unmount } = render(<NSEAppearanceProvider appearance={atmoAppearance}><NSETabBar controller={controller} aria-label="High density source gap" /></NSEAppearanceProvider>);
+      const { unmount } = render(<NSEThemeProvider theme={atmoTheme}><NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="High density source gap" /></NSEThemeProvider>);
       const tabBar = screen.getByRole("tablist", { name: "High density source gap" })
         .closest<HTMLElement>("[data-nse-tab-bar='true']");
       expect(tabBar).not.toBeNull();
@@ -588,12 +587,12 @@ describe("NSETabBar", () => {
 
   it("retains custom appearance selection and reachable interaction states without borrowing Atmo recipes", () => {
     const controller = new NSETabBarController<React.ReactNode>({ id: "custom-tabs", destinations: destinations(2) });
-    const view = render(<NSEAppearanceProvider appearance={customAppearance}><NSETabBar controller={controller} aria-label="custom appearance tabs" /></NSEAppearanceProvider>);
+    const view = render(<NSEThemeProvider theme={customAppearance}><NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="custom appearance tabs" /></NSEThemeProvider>);
     const library = screen.getByRole("tab", { name: "Library destination" });
     fireEvent.pointerEnter(library);
-    expect(library.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.tab.hover.1x");
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
-    expect(library.closest("[data-nse-appearance]")?.getAttribute("data-nse-appearance")).toBe("custom-test");
+    expect(library.getAttribute("data-nse-theme-slot")).toBe("tab-bar.tab.hover");
+    expect(library.getAttribute("data-nse-theme-recipe-id")).toBeNull();
+    expect(library.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("test.custom");
     expect(library.querySelector(".nse-tab-bar-label")?.textContent).toBe("Library");
     fireEvent.pointerDown(library);
     expect(library.getAttribute("data-nse-tab-presentation-state")).toBe("pressed");
@@ -606,7 +605,7 @@ describe("NSETabBar", () => {
     expect(css).toContain(".nse-tab-bar-label {");
     expect(css).toContain(".nse-tab-bar-badge {");
     const controller = new NSETabBarController<React.ReactNode>({ id: "neutral-tabs", destinations: destinations(2, { badge: "library" }) });
-    const view = render(<NSETabBar controller={controller} aria-label="Neutral tabs" />);
+    const view = render(<NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Neutral tabs" />);
     expect(screen.getByText("Library")).not.toBeNull();
     expect(screen.getByText("3").getAttribute("data-nse-tab-badge")).toBe("true");
     view.unmount(); controller.dispose();
@@ -619,7 +618,7 @@ describe("NSETabBar", () => {
     });
     const { unmount } = render(
       <>
-        <NSETabBar controller={controller} aria-label="More hierarchy destinations" idScope="more-hierarchy-tabs" />
+        <NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="More hierarchy destinations" idScope="more-hierarchy-tabs" />
         <NSETabBarOverflowList controller={controller} aria-label="More hierarchy destinations" idScope="more-hierarchy-tabs" />
       </>,
     );
@@ -656,7 +655,7 @@ describe("NSETabBar", () => {
     const chromeController = new NSEApplicationNavigationChromeController();
     const { unmount } = render(
       <NSEApplicationNavigationChromeProvider controller={chromeController}>
-        <NSETabBar controller={controller} aria-label="More keyboard activation focus" idScope="more-keyboard-activation-focus-tabs" />
+        <NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="More keyboard activation focus" idScope="more-keyboard-activation-focus-tabs" />
         <NSETabBarOverflowList
           controller={controller}
           aria-label="More keyboard activation focus"
@@ -710,7 +709,7 @@ describe("NSETabBar", () => {
     });
     const { unmount } = render(
       <>
-        <NSETabBar controller={controller} aria-label="Retained More destinations" idScope="retained-more-host-tabs" />
+        <NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Retained More destinations" idScope="retained-more-host-tabs" />
         <NSETabBarOverflowList controller={controller} aria-label="Retained More destinations" idScope="retained-more-host-tabs" />
       </>,
     );
@@ -758,7 +757,7 @@ describe("NSETabBar", () => {
         unsubscribe();
       };
     };
-    const { unmount } = render(<NSETabBar controller={controller} aria-label="Retained destinations" />);
+    const { unmount } = render(<NSETabBar presentation={bottomPeerNavigation} controller={controller} aria-label="Retained destinations" />);
 
     fireEvent.change(screen.getByRole("textbox", { name: "Draft" }), { target: { value: "retained draft" } });
     fireEvent.click(screen.getByRole("tab", { name: "Other" }));

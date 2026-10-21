@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { atmoTheme } from "../../src/NSE/Themes/Atmo/theme";
+
+
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
@@ -74,9 +77,9 @@ class StagePresentations implements RuntimeAnimationAdapterFactory {
   }
 }
 
-function runtimeWithStagePresentations() {
+function runtimeWithStagePresentations(theme = undefined as typeof atmoTheme | undefined) {
   const presentations = new StagePresentations();
-  const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), animation: presentations } });
+  const runtime = createTestRuntime({ theme, environment: { ...createTestRuntimeEnvironment(), animation: presentations } });
   return { runtime, presentations };
 }
 
@@ -234,9 +237,9 @@ describe("Webspring owner-local choreography", () => {
     view.unmount();
   });
 
-  it("completes reduced app entry immediately without bypassing the launch-cover gate", () => {
-    const runtime = createTestRuntime();
-    runtime.settings.set("motion", "reduced");
+  it.each(["standard", "reduced"] as const)("completes neutral %s app entry without bypassing the launch-cover gate", async (motion) => {
+    const { runtime, presentations } = runtimeWithStagePresentations();
+    runtime.settings.set("motion", motion);
     runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.reduced-entry", route: "/reduced-entry" }));
     const app = runtime.apps.getApp("com.example.reduced-entry");
     expect(app).toBeTruthy();
@@ -257,6 +260,10 @@ describe("Webspring owner-local choreography", () => {
       </SynCloudOSProvider>,
     );
 
+    if (motion === "standard") {
+      expect(presentations.played.some(({request}) => (request.target as Element).matches(".webspring-app-view-surface"))).toBe(false);
+      await act(async () => {});
+    }
     expect(runtime.presentationSettlements.inspect(settlement.id)).toMatchObject({
       status: "pending",
       completedRoles: ["application-enter"],
@@ -265,8 +272,8 @@ describe("Webspring owner-local choreography", () => {
     view.unmount();
   });
 
-  it("settles application entry from the app surface animation, with no content card", async () => {
-    const { runtime, presentations } = runtimeWithStagePresentations();
+  it("settles Atmo application entry from the app surface animation, with no content card", async () => {
+    const { runtime, presentations } = runtimeWithStagePresentations(atmoTheme);
     runtime.apps.registerBundle(createTestBundle({
       bundleIdentifier: "com.example.defacto-entry",
       route: "/defacto-entry",

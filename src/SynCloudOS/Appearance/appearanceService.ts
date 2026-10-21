@@ -25,12 +25,12 @@ import type {
 } from "../Runtime/runtimeInstanceTypes";
 
 export type SynCloudOSAppearance = "auto" | "light" | "dark";
-export type SynCloudOSResolvedMode = "light" | "dark";
+export type SynCloudOSResolvedAppearance = "light" | "dark";
 
 export interface SynCloudOSAppearanceService {
   readonly runtimeId: SynCloudOSRuntimeId;
   get(): SynCloudOSAppearance;
-  resolved(): SynCloudOSResolvedMode;
+  resolved(): SynCloudOSResolvedAppearance;
   set(value: SynCloudOSAppearance): void;
   subscribe(listener: () => void): () => void;
   dispose(): void;
@@ -91,6 +91,6 @@ export function createAppearanceService({
  * a JS asset map (e.g. `chrome[scheme]`) missing a mode — this guarantees a graceful fallback to a
  * defined mode rather than a blank/undefined render.
  */
-export function pickMode<T>(map: Partial<Record<SynCloudOSResolvedMode, T>>, mode: SynCloudOSResolvedMode): T {
+export function pickMode<T>(map: Partial<Record<SynCloudOSResolvedAppearance, T>>, mode: SynCloudOSResolvedAppearance): T {
   return (map[mode] ?? map.light ?? map.dark) as T;
 }

@@ -18,8 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { NSETabBarMoreDestinationId, NSETabBarController } from "./NSETabBarController";
+import { panoramaSlot, usePanoramaNavigation } from "./usePanoramaNavigation";
+import "./nse-panorama.css";
+import { usePeerNavigationMotion } from "./usePeerNavigationMotion";
 import type { NSETabBarControllerSnapshot } from "./navigationTypes";
 
 function idToken(value: string): string {
@@ -44,6 +47,10 @@ export interface NSENavigationDestinationHostProps {
   /** Reuse a surrounding renderer's subscription instead of creating another lease. */
   readonly snapshot?: NSETabBarControllerSnapshot;
   readonly className?: string;
+  readonly reducedMotion?: boolean;
+  readonly dir?: "ltr" | "rtl";
+  /** Framework-owned panoramic layers; never a theme executable renderer. */
+  readonly panorama?: { readonly title: string };
 }
 
 /**
@@ -56,6 +63,9 @@ export function NSENavigationDestinationHost({
   tabSemantics = true,
   snapshot: suppliedSnapshot,
   className,
+  reducedMotion = false,
+  dir,
+  panorama,
 }: NSENavigationDestinationHostProps) {
   const subscribe = useCallback((listener: () => void) => (
     suppliedSnapshot ? () => undefined : controller.subscribe(listener)
@@ -65,88 +75,114 @@ export function NSENavigationDestinationHost({
   const [visitedDestinationIds, setVisitedDestinationIds] = useState<ReadonlySet<string>>(
     () => new Set([snapshot.selectedDestinationId]),
   );
-  const directDestinations = snapshot.directDestinationIds.flatMap((id) => {
-    const destination = controller.getDestination(id);
-    return destination ? [destination] : [];
-  });
-  const overflowDestinations = snapshot.overflowDestinationIds.flatMap((id) => {
-    const destination = controller.getDestination(id);
-    return destination ? [destination] : [];
-  });
 
   useEffect(() => {
     setVisitedDestinationIds((previous) => {
+      if (panorama) {
+        if (controller.destinations.every(({ id }) => previous.has(id))) return previous;
+        return new Set([...previous, ...controller.destinations.map(({ id }) => id)]);
+      }
       if (previous.has(snapshot.selectedDestinationId)) return previous;
       return new Set([...previous, snapshot.selectedDestinationId]);
     });
-  }, [snapshot.selectedDestinationId]);
+  }, [snapshot.selectedDestinationId, !!panorama, controller]);
 
   const contentFor = (destinationId: string) => (
-    visitedDestinationIds.has(destinationId) || destinationId === snapshot.selectedDestinationId
+    panorama || visitedDestinationIds.has(destinationId) || destinationId === snapshot.selectedDestinationId
       ? controller.getContent(destinationId)
       : null
   );
   const morePanelId = getNSETabBarPanelId(idScope, NSETabBarMoreDestinationId);
   const overflowPageOpen = snapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
-  const moreSelected = snapshot.activeTabId === NSETabBarMoreDestinationId;
+  const host = useRef<HTMLDivElement>(null);
+  const panels = useRef(new Map<string, HTMLDivElement>());
+  const transition = usePeerNavigationMotion({ host, panels, selectedId: snapshot.selectedDestinationId,
+    destinationIds: controller.destinations.map(({ id }) => id), enabled: !panorama && tabSemantics && !overflowPageOpen, reducedMotion });
 
+  const panoramaMotion = usePanoramaNavigation({ host, ids: controller.destinations.map(({ id }) => id),
+    selectedId: snapshot.selectedDestinationId, enabled: !!panorama, reducedMotion, dir,
+    disabledIds: controller.destinations.filter(item => item.disabled).map(item => item.id),
+    select: id => controller.select(id, { source: "panorama" }) });
+  useEffect(() => {
+    if (!panorama || !host.current) return;
+    const focused = document.activeElement;
+    const outgoingPanel = focused instanceof Element ? focused.closest("[data-nse-tab-panel]") : null;
+    const focusInHeadings = host.current.querySelector(".nse-panorama-headings")?.contains(focused);
+    const focusInOutgoing = outgoingPanel && host.current.contains(outgoingPanel)
+      && outgoingPanel.getAttribute("data-nse-tab-panel") !== snapshot.selectedDestinationId;
+    if (!focusInHeadings && !focusInOutgoing) return;
+    host.current.querySelector<HTMLElement>('.nse-panorama-headings [aria-selected="true"]')?.focus();
+  }, [snapshot.selectedDestinationId, !!panorama]);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const titleWidth = titleRef.current?.scrollWidth ?? panoramaMotion.width;
+  const titleCycle = titleWidth + panoramaMotion.width;
+  const titleTravel = panoramaMotion.position * panoramaMotion.stride * .22;
+  // A single title leaves the clipping boundary before re-entering on the
+  // opposite edge. There is no repeated title strip and no copied app content.
+  const titleX = ((titleTravel + titleWidth) % titleCycle + titleCycle) % titleCycle - titleWidth;
   return (
-    <div className={["nse-navigation-destination-host", className].filter(Boolean).join(" ")} data-nse-navigation-destination-host="true">
-      {directDestinations.map((destination) => {
-        // More is a real peer tab whose root page temporarily replaces the
-        // selected destination panel. Keep destination content visited and
-        // retained, but let the active tab own which peer panel is visible.
-        const visible = snapshot.activeTabId === destination.id;
-        const panelId = getNSETabBarPanelId(idScope, destination.id);
-        const tabId = getNSETabBarTabId(idScope, destination.id);
+    <div className={["nse-navigation-destination-host", className].filter(Boolean).join(" ")} data-nse-navigation-destination-host="true" dir={dir} ref={host} data-nse-peer-transition={transition ? "running" : undefined}
+      data-nse-panorama={panorama ? "true" : undefined}
+      data-nse-panorama-count={panorama ? controller.destinations.length : undefined}
+      {...(panorama ? panoramaMotion.handlers : {})}
+      style={panorama ? { "--nse-panorama-background-offset": `${-panoramaMotion.position * panoramaMotion.stride * .45 * panoramaMotion.sign}px` } as CSSProperties : undefined}>
+      <div className="nse-panorama-background" aria-hidden="true" hidden={!panorama} />
+      <div className="nse-panorama-title-viewport" hidden={!panorama}>
+        <h1 className="nse-panorama-title" ref={titleRef} style={{ transform: `translateX(${-titleX * panoramaMotion.sign}px)` }}>{panorama?.title}</h1>
+      </div>
+      <nav className="nse-panorama-navigation" aria-label="Panorama sections" hidden={!panorama}>
+        <button type="button" aria-label="Previous section" disabled={controller.destinations.length < 2} onClick={() => panoramaMotion.move(-1)}>‹</button>
+        <span aria-live="polite">{controller.getDestination(snapshot.selectedDestinationId)?.label}</span>
+        <button type="button" aria-label="Next section" disabled={controller.destinations.length < 2} onClick={() => panoramaMotion.move(1)}>›</button>
+      </nav>
+      <div className="nse-panorama-headings" hidden={!panorama} role="tablist" aria-label="Sections">
+        {panorama && controller.destinations.map((destination, index) => <button
+          key={destination.id} type="button" role="tab" id={getNSETabBarTabId(idScope, destination.id)}
+          aria-controls={getNSETabBarPanelId(idScope, destination.id)} aria-selected={snapshot.selectedDestinationId === destination.id}
+          tabIndex={snapshot.selectedDestinationId === destination.id ? 0 : -1} disabled={destination.disabled}
+          className="nse-panorama-section-heading"
+          style={{ transform: `translateX(${(panoramaSlot(index, panoramaMotion.position, controller.destinations.length) - panoramaMotion.position) * panoramaMotion.stride * panoramaMotion.sign}px)` }}
+          onClick={() => { void controller.select(destination.id, { source: "panorama-heading" }).catch(() => undefined); }}
+          onKeyDown={event => {
+            if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+            event.preventDefault(); panoramaMotion.move((event.key === "ArrowRight" ? 1 : -1) * panoramaMotion.sign);
+          }}>{destination.label}</button>)}
+      </div>
+      {controller.destinations.map((destination) => {
+        const visible = snapshot.selectedDestinationId === destination.id && !overflowPageOpen;
+        const slot = panoramaSlot(controller.destinations.indexOf(destination), panoramaMotion.position, controller.destinations.length);
+        const isOverflow = snapshot.overflowDestinationIds.includes(destination.id);
         return (
           <div
             className="nse-tab-bar-panel"
             key={destination.id}
-            id={panelId}
-            role={tabSemantics ? "tabpanel" : undefined}
-            aria-labelledby={tabSemantics ? tabId : undefined}
+            id={getNSETabBarPanelId(idScope, destination.id)}
+            role={panorama || tabSemantics ? "tabpanel" : undefined}
+            aria-labelledby={panorama || tabSemantics ? getNSETabBarTabId(idScope, isOverflow ? NSETabBarMoreDestinationId : destination.id) : undefined}
             aria-hidden={!visible || undefined}
             inert={!visible}
-            hidden={!visible}
+            hidden={!panorama && !visible && transition?.from !== destination.id}
+            style={panorama ? { transform: `translateX(${(slot - panoramaMotion.position) * panoramaMotion.stride * panoramaMotion.sign}px)` } : undefined}
+            ref={node => { if (node) panels.current.set(destination.id, node); else panels.current.delete(destination.id); }}
+            data-nse-peer-motion={transition?.from === destination.id ? "exiting" : transition?.to === destination.id ? "entering" : undefined}
             data-nse-tab-panel={destination.id}
+            data-nse-more-destination={isOverflow ? destination.id : undefined}
           >
             {contentFor(destination.id)}
           </div>
         );
       })}
-
-      {overflowDestinations.length > 0 ? (
-        <div
-          className="nse-tab-bar-panel nse-tab-bar-more-panel"
-          id={morePanelId}
-          role={tabSemantics ? "tabpanel" : undefined}
-          aria-label={tabSemantics ? "More destinations" : undefined}
-          aria-labelledby={tabSemantics ? getNSETabBarTabId(idScope, NSETabBarMoreDestinationId) : undefined}
-          aria-hidden={!moreSelected || undefined}
-          inert={!moreSelected}
-          hidden={!moreSelected}
-          data-nse-tab-panel={NSETabBarMoreDestinationId}
-        >
-          <div
-            className="nse-tab-bar-more-stack"
-            aria-hidden={overflowPageOpen || undefined}
-            inert={overflowPageOpen}
-            hidden={overflowPageOpen}
-            data-nse-more-stack="true"
-          >
-            {overflowDestinations.map((destination) => {
-              const selected = snapshot.selectedDestinationId === destination.id;
-              const visible = selected && !overflowPageOpen;
-              return (
-                <div key={destination.id} hidden={!visible} aria-hidden={!visible || undefined} inert={!visible} data-nse-more-destination={destination.id}>
-                  {contentFor(destination.id)}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
+      <div
+        className="nse-tab-bar-panel nse-tab-bar-more-panel"
+        id={morePanelId}
+        role={tabSemantics ? "tabpanel" : undefined}
+        aria-label="More destinations"
+        aria-labelledby={tabSemantics && snapshot.overflowDestinationIds.length > 0 ? getNSETabBarTabId(idScope, NSETabBarMoreDestinationId) : undefined}
+        aria-hidden={!overflowPageOpen || undefined}
+        inert={!overflowPageOpen}
+        hidden={!overflowPageOpen}
+        data-nse-tab-panel={NSETabBarMoreDestinationId}
+      />
     </div>
   );
 }

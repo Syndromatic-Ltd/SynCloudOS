@@ -67,8 +67,13 @@ const backdropReduced: NSEAlertMotion = Object.freeze({
   exit: fade(1, 0, 0.08),
 });
 
-export function resolveNSEAlertMotion(reducedMotion: boolean): NSEAlertMotion {
-  return reducedMotion ? alertReduced : alertStandard;
+export type NSEOverlayMotionPolicy = Readonly<{ kind: "none" | "fade" | "slide" | "bounce"; durationMs: number; easing: "linear" | "ease-out" | "ease-in-out" | "decelerate" }>;
+export function resolveNSEAlertMotion(reducedMotion: boolean, policy?: NSEOverlayMotionPolicy): NSEAlertMotion {
+  if (!policy || policy.kind === "bounce") return reducedMotion ? alertReduced : alertStandard;
+  const duration = policy.kind === "none" ? 0 : Math.min(policy.durationMs / 1000, reducedMotion ? 0.14 : 1.5);
+  const timing: NSEPresentationSpec["timing"] = policy.easing === "decelerate" ? { kind: "cubic-bezier", x1: 0.1, y1: 0.9, x2: 0.2, y2: 1 } : policy.easing;
+  const slides = policy.kind === "slide" && !reducedMotion;
+  return { enter: { duration, timing, tracks: [{ keyPath:"opacity", values:[0,1] }, ...(slides ? [{ keyPath:"transform" as const, values:[{ y:24 },{}] }] : [])] }, exit: { duration:Math.min(duration,0.16), timing, tracks:[{ keyPath:"opacity",values:[1,0] }, ...(slides ? [{ keyPath:"transform" as const,values:[{},{ y:-12 }] }] : [])] } };
 }
 
 export function resolveNSEAlertBackdropMotion(reducedMotion: boolean): NSEAlertMotion {

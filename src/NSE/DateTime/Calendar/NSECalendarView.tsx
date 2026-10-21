@@ -19,7 +19,7 @@
  */
 
 import { useId, useMemo, useRef } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../../Appearance";
 import { addCalendarDays, addCalendarMonths, calendarWeekStart, civilToEpochDay, comparePlainDates, epochDayToCivil } from "../calendarArithmetic";
 import { plainDateToday } from "../dateTimeFormatting";
 import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";
@@ -74,7 +74,7 @@ export function NSECalendarView(props: NSECalendarViewProps) {
   }), [props.locale]);
   const localeDirection = (new Intl.Locale(props.locale) as Intl.Locale & { textInfo?: { direction: "ltr" | "rtl" } }).textInfo?.direction;
   const direction = props.dir ?? localeDirection ?? "ltr";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("calendar-view", "grid", "normal"));
+  const appearance = useNSEThemeRecipe(nseThemeSlot("calendar-view", "grid", "normal"));
   const weekdayLabels = Array.from({ length: 7 }, (_, index) => formatters.weekday.format((3 + ((start + index) % 7)) * 86_400_000));
   const navigate = (unit: NSECalendarNavigationUnit, direction: -1 | 1, reason: NSECalendarNavigationRequest["reason"]) => props.onVisibleMonthChange?.(monthBy(props.visibleMonth, unit, direction), { unit, direction, reason });
   const select = (date: NSEPlainDate, reason = "pointer") => {

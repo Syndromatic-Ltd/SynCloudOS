@@ -35,7 +35,7 @@ import {
   type NSETableColumn,
   type NSETableProps,
 } from "../../../src/NSE/DataViews/Table";
-import { NSEAppearanceProvider, type NSEAppearanceDefinition } from "../../../src/NSE/Appearance";
+import { NSEThemeProvider, type NSEThemeDefinition } from "../../../src/NSE/Appearance";
 import type { NSEDataViewAdapter } from "../../../src/NSE/DataViews/Core";
 
 interface Person {
@@ -95,7 +95,7 @@ function createAdapter(content: readonly Person[] = people) {
   return { adapter, controller };
 }
 
-function renderTable(overrides: Partial<NSETableProps<Person, string>> = {}, appearance?: NSEAppearanceDefinition) {
+function renderTable(overrides: Partial<NSETableProps<Person, string>> = {}, appearance?: NSEThemeDefinition) {
   const source = createAdapter();
   const result = render(
     <NSETable<Person, string>
@@ -105,7 +105,7 @@ function renderTable(overrides: Partial<NSETableProps<Person, string>> = {}, app
       viewportBlockSize={230}
       {...overrides}
     />,
-    { wrapper: appearance ? ({ children }) => <NSEAppearanceProvider appearance={appearance}>{children}</NSEAppearanceProvider> : undefined },
+    { wrapper: appearance ? ({ children }) => <NSEThemeProvider theme={appearance}>{children}</NSEThemeProvider> : undefined },
   );
   return { ...source, ...result };
 }
@@ -124,20 +124,20 @@ describe("NSETable", () => {
     expect(typesSource).not.toMatch(/\bNSETableAppearanceLoader\b/);
     expect(typesSource).not.toMatch(/\bappearanceLoader\s*\??:/);
     expect(barrelSource).not.toMatch(/\bNSETableAppearanceLoader\b/);
-    expect(tableSource).toContain('useNSEAppearanceSlot("table.header.normal.1x")');
-    expect(tableSource).toContain('useNSEAppearanceSlot("table.header.hover.1x")');
-    expect(tableSource).toContain('useNSEAppearanceSlot("table.header.pressed.1x")');
-    expect(tableSource).toContain('useNSEAppearanceSlot("table.header.hover-pressed.1x")');
-    expect(tableSource).toContain('useNSEAppearanceSlot("table.sort-glyph.ascending.1x")');
-    expect(tableSource).toContain('useNSEAppearanceSlot("table.sort-glyph.descending.1x")');
+    expect(tableSource).toContain('useNSEThemeRecipe("table.header.normal")');
+    expect(tableSource).toContain('useNSEThemeRecipe("table.header.hover")');
+    expect(tableSource).toContain('useNSEThemeRecipe("table.header.pressed")');
+    expect(tableSource).toContain('useNSEThemeRecipe("table.header.hover-pressed")');
+    expect(tableSource).toContain('useNSEThemeRecipe("table.sort-glyph.ascending")');
+    expect(tableSource).toContain('useNSEThemeRecipe("table.sort-glyph.descending")');
     expect(tableSource).not.toContain("Promise.resolve().then(appearanceLoader)");
   });
 
   it("leaves unselected theme recipes unresolved while preserving the usable grid", async () => {
     renderTable();
     const grid = screen.getByRole("grid", { name: "People" });
-    expect(grid.getAttribute("data-nse-appearance-slot")).toBe("table.header.normal.1x");
-    expect(grid.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
+    expect(grid.getAttribute("data-nse-theme-slot")).toBe("table.header.normal");
+    expect(grid.getAttribute("data-nse-theme-recipe-id")).toBeNull();
     expect(screen.getAllByRole("columnheader")).toHaveLength(2);
     fireEvent.click(screen.getByRole("button", { name: "Sort by Name" }));
     await waitFor(() => expect(screen.getByRole("columnheader", { name: /Name/ }).getAttribute("aria-sort")).toBe("ascending"));

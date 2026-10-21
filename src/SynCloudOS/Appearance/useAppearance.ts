@@ -19,17 +19,17 @@
  */
 
 import { useSyncExternalStore } from "react";
-import type { SynCloudOSAppearance, SynCloudOSResolvedMode } from "./appearanceService";
+import type { SynCloudOSAppearance, SynCloudOSResolvedAppearance } from "./appearanceService";
 
 interface AppearanceRuntime {
   appearance: {
     subscribe(listener: () => void): () => void;
     get(): SynCloudOSAppearance;
-    resolved(): SynCloudOSResolvedMode;
+    resolved(): SynCloudOSResolvedAppearance;
   };
 }
 
-export function useResolvedMode(runtime: AppearanceRuntime): SynCloudOSResolvedMode {
+export function useResolvedAppearance(runtime: AppearanceRuntime): SynCloudOSResolvedAppearance {
   return useSyncExternalStore(runtime.appearance.subscribe, runtime.appearance.resolved, () => "light");
 }
 

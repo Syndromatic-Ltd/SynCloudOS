@@ -25,7 +25,7 @@ import {
   type CSSProperties,
   type PropsWithChildren,
 } from "react";
-import { useNSEAppearance } from "./useNSEAppearance";
+import { useNSEVisualEnvironment } from "./useNSEVisualEnvironment";
 import {
   staticNSEMaterialLight,
   type NSEMaterialLightingPort,
@@ -47,7 +47,7 @@ export function NSEMaterialLightingProvider({
 }
 export function NSEMetalThumb({ disabled = false }: { disabled?: boolean }) {
   const lighting = useContext(LightingContext),
-    appearance = useNSEAppearance();
+    appearance = useNSEVisualEnvironment();
   const active =
     !disabled &&
     appearance.contrast !== "forced";

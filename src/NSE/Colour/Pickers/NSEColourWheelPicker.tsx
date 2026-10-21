@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../../Appearance";
 import { GFXColour } from "../../../FX/GraphicsFX/public";
 import { NSESlider } from "../../Controls/Values/NSESlider";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
@@ -112,7 +112,7 @@ export function NSEColourWheelPicker({ colour, disabled, fields = true, brightne
     // still runs "to right": black at the bottom, the full colour at the top.
     "--nse-colour-channel-track": `linear-gradient(to right, #000, ${GFXColour.hsva({ h: draft.hsva.h, s: draft.hsva.s, v: 1, a: 1 }).toCSS()})`,
   };
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("colour-wheel", "wheel", disabled ? "disabled" : "normal"));
+  const appearance = useNSEThemeRecipe(nseThemeSlot("colour-wheel", "wheel", disabled ? "disabled" : "normal"));
   return <div data-nse-control="colour-wheel" data-state={disabled ? "disabled" : "ready"} data-brightness={brightnessPlacement} {...appearance.attributes} style={wheelStyle}>
     <div role="slider" aria-label="Colour hue and saturation" aria-disabled={disabled || undefined} aria-valuemin={0} aria-valuemax={360} aria-valuenow={Math.round(draft.hsva.h)} tabIndex={disabled ? -1 : 0} {...appearance.attributes}
       onPointerDown={(event) => { if (disabled) return; activePointer.current = event.pointerId; pointerOpening.current = colour; pointerElement.current = event.currentTarget; event.currentTarget.setPointerCapture?.(event.pointerId); updateFromPointer(event.currentTarget, event.clientX, event.clientY); }}

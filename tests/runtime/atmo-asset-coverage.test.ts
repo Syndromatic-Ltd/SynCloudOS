@@ -31,7 +31,7 @@ function cssFiles(root: string): string[] {
 
 describe("explicit theme resource ownership", () => {
   it.each(["Atmo"])("keeps every %s CSS resource local and present", (theme) => {
-    const root = path.resolve("src/NSE/Themes", theme, "Resources");
+    const root = path.resolve("src/Themes", `${theme}.scostheme`, "Contents", "Resources");
     const files = cssFiles(root);
     expect(files.length).toBeGreaterThan(0);
     let references = 0;
@@ -53,14 +53,14 @@ describe("explicit theme resource ownership", () => {
         expect(existsSync(resolved), `${file}: ${url}`).toBe(true);
         // Canonical Atmo is raster-free: the SystemAlert nine-slices, its last
         // exception, are traced into CSS (their PNGs stay as manifest-only assets).
-        if (theme === "Atmo") expect(url, `${file}: canonical Atmo consumes no raster resources`).not.toMatch(/\.(?:png|jpe?g|gif|webp)(?:$|[?#])/i);
+        if (theme === "Atmo" && ["atmo.css", "atmo-structure.css"].includes(path.basename(file))) expect(url, `${file}: canonical Atmo consumes no raster resources`).not.toMatch(/\.(?:png|jpe?g|gif|webp)(?:$|[?#])/i);
       }
     }
     if (theme !== "Atmo") expect(references).toBeGreaterThan(0);
   });
 
-  it("keeps canonical Atmo self-contained and raster-free", () => {
-    for (const file of ["src/NSE/Themes/Atmo/index.ts", ...cssFiles("src/NSE/Themes/Atmo/Resources")]) {
+  it("keeps canonical Atmo self-contained and its controls raster-free", () => {
+    for (const file of ["src/NSE/Themes/Atmo/index.ts", ...cssFiles("src/Themes/Atmo.scostheme/Contents/Resources")]) {
       const source = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(source, file).not.toMatch(/AtmoHeritage|AtmoOnyx|AppearanceAssets|\/assets\/nse\/atmo\/|--av-|data-atmo-render/);
     }

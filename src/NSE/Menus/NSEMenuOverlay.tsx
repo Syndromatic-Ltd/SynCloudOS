@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEOverlayMotionPolicy } from "../Overlays/useNSEOverlayMotionPolicy";
+
+
 import { useCallback, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { NSEPopup, useNSEOverlayProvider } from "../Overlays";
 import type { NSEOverlayDismissReason } from "../Overlays";
@@ -87,6 +90,7 @@ export function NSEMenuOverlay({ overlay, controller, open, anchor, labelledBy, 
   if (open && rowsReady && !shown) setShown(true);
   if (!open && shown) setShown(false);
   const contentPending = open && !rowsReady && !shown;
+  const { duration: effectiveExitDuration } = useNSEOverlayMotionPolicy(exitDuration);
   const wasOpen = useRef(open);
   // NSEPopup intentionally removes its portal children on close. Dismiss the
   // semantic controller one layout phase earlier so the next presentation is a
@@ -107,10 +111,10 @@ export function NSEMenuOverlay({ overlay, controller, open, anchor, labelledBy, 
           const active = document.activeElement;
           if (active && active !== document.body && active !== document.documentElement) return;
           anchor.focus({ preventScroll: true });
-        }, Math.max(0, exitDuration ?? 0));
+        }, effectiveExitDuration);
       });
     }
-  }, [anchor, exitDuration, onOpenChange, restoreFocus]);
+  }, [anchor, effectiveExitDuration, onOpenChange, restoreFocus]);
 
   return (
     <NSEPopup

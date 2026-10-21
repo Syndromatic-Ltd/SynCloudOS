@@ -22,7 +22,7 @@ import { describe, expect, it } from "vitest";
 import * as typography from "../../src/NSE/Typography";
 
 // Namespace lookup makes the first red an assertion about the absent contract.
-const api = typography as unknown as { defineFontDeclaration(input: unknown): any; fontDeclarationCSS(declaration: any, urls: Record<string, string>): string };
+const api = typography as unknown as { defineFontDeclaration(input: unknown): any; fontDeclarationCSS(declaration: any, urls: Record<string, string>, options?: { scope?: string; rolePrefix?: string }): string };
 export const definition = () => ({
   resources: { book: "Resources/Fonts/Book.woff2", roman: "Resources/Fonts/Roman.woff2" },
   families: [{ id: "example", label: "Example", defaultFaceId: "example-book", fallback: ["system-ui", "sans-serif"], faces: [
@@ -71,4 +71,14 @@ describe("managed font declaration", () => {
     Object.defineProperty(input.families[0], "label", { enumerable: true, get() { reads++; return "Bad"; } });
     expect(() => api.defineFontDeclaration(input)).toThrow(TypeError); expect(reads).toBe(0);
   });
+});
+
+it("emits scoped theme font roles without replacing host font roles or root family", () => {
+  const fonts = api.defineFontDeclaration(definition());
+  const css = api.fontDeclarationCSS(fonts, { book: "/nested/book.woff2", roman: "/nested/roman.woff2" }, { scope: '[data-nse-theme="com.test.theme"]', rolePrefix: "--nse-theme-font-" });
+  expect(css).toContain('[data-nse-theme="com.test.theme"] {');
+  expect(css).toContain('--nse-theme-font-ui: "Example UI"');
+  expect(css).toContain('url("/nested/book.woff2")');
+  expect(css).not.toContain(":root"); expect(css).not.toContain("--font-ui"); expect(css).not.toContain("font-family: var(");
+  expect(() => api.fontDeclarationCSS(fonts, {}, {scope: "body {color:red}"})).toThrow(TypeError);
 });

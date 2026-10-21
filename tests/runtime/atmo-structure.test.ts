@@ -22,10 +22,10 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import * as cssTree from "css-tree";
 
-const structurePath = "src/NSE/Themes/Atmo/Resources/atmo-structure.css";
+const structurePath = "src/Themes/Atmo.scostheme/Contents/Resources/atmo-structure.css";
 const read = (path: string) => readFileSync(path, "utf8");
-const scope = ':where([data-nse-appearance="atmo"])';
-const tooltipScope = ':where([data-nse-appearance="atmo"], [data-nse-appearance="atmo"] *)';
+const scope = ':where([data-nse-theme="com.syndromatic.atmo"])';
+const tooltipScope = ':where([data-nse-theme="com.syndromatic.atmo"], [data-nse-theme="com.syndromatic.atmo"] *)';
 const tooltipSelector = `.nse-tooltip[data-nse-control="tooltip"]${tooltipScope}`;
 const tooltipArrowSelector = `.nse-tooltip${tooltipScope} > .nse-tooltip-arrow`;
 const compactSelector = (selector: string) => cssTree.generate(cssTree.parse(selector, { context: "selector" }));
@@ -43,7 +43,7 @@ function declarationsFor(selector: string, path = structurePath) {
 
 describe("Atmo control structure", () => {
   it("is imported ahead of the paint layer by the Atmo theme entry", () => {
-    const atmo = read("src/NSE/Themes/Atmo/index.ts");
+    const atmo = read("src/Themes/Atmo.scostheme/Contents/styles.css");
     expect(atmo.indexOf('"./Resources/atmo-structure.css"')).toBeGreaterThanOrEqual(0);
     expect(atmo.indexOf('"./Resources/atmo-structure.css"')).toBeLessThan(atmo.indexOf('"./Resources/atmo.css"'));
   });
@@ -86,18 +86,18 @@ describe("Atmo control structure", () => {
 
   it("frames the generic menu engine and listbox popups on their surfaces", () => {
     const structure = read(structurePath);
-    const atmo = read("src/NSE/Themes/Atmo/Resources/atmo.css");
+    const atmo = read("src/Themes/Atmo.scostheme/Contents/Resources/atmo.css");
     expect(structure).toContain(`.nse-overlay-popup${scope}:is(.nse-overlay-popup--menu, .nse-overlay-popup--submenu, .nse-overlay-popup--context-menu)`);
     expect(structure).toContain(`.nse-overlay-popup${scope}.nse-overlay-popup--listbox`);
     // The application menu carries its own surface; the generic frame skips it
     // so it is never drawn twice.
-    expect(atmo).toContain('.nse-overlay-popup[data-nse-appearance="atmo"]:is(.nse-overlay-popup--menu, .nse-overlay-popup--submenu, .nse-overlay-popup--context-menu):not(.nse-overlay-popup--application-menu)::after');
-    expect(atmo).toContain('.nse-overlay-popup[data-nse-appearance="atmo"].nse-overlay-popup--listbox::before');
+    expect(atmo).toContain('.nse-overlay-popup[data-nse-theme="com.syndromatic.atmo"]:is(.nse-overlay-popup--menu, .nse-overlay-popup--submenu, .nse-overlay-popup--context-menu):not(.nse-overlay-popup--application-menu)::after');
+    expect(atmo).toContain('.nse-overlay-popup[data-nse-theme="com.syndromatic.atmo"].nse-overlay-popup--listbox::before');
   });
 
   it("owns the popup panel, tooltip and popover-window families", () => {
     const structure = read(structurePath);
-    const atmo = read("src/NSE/Themes/Atmo/Resources/atmo.css");
+    const atmo = read("src/Themes/Atmo.scostheme/Contents/Resources/atmo.css");
     expect(structure).toContain(`.nse-overlay-popup${scope}:is(.nse-overlay-popup--popover, .nse-overlay-popup--action-sheet)`);
     expect(declarationsFor(`.nse-overlay-popup${scope}[data-nse-overlay-kind="action-sheet"][data-nse-presentation="sheet"]`)).toMatchObject({
       inset: "0", "inline-size": "fit-content", "block-size": "fit-content", margin: "auto",
@@ -106,10 +106,10 @@ describe("Atmo control structure", () => {
     expect(declarationsFor(tooltipArrowSelector)).toMatchObject({ position: "absolute", "inline-size": "9px", "block-size": "9px", transform: "rotate(45deg)" });
     for (const edge of ["block-end", "block-start"]) expect(structure).toContain(`.nse-window-view--popover[data-window-arrow-edge="${edge}"]::before`);
     for (const alignment of ["start", "center", "end"]) expect(structure).toContain(`.nse-window-view--popover[data-window-arrow-alignment="${alignment}"]::before`);
-    expect(atmo).toContain('.nse-overlay-popup[data-nse-appearance="atmo"]:is(.nse-overlay-popup--popover, .nse-overlay-popup--action-sheet)::before');
-    expect(declarationsFor('.nse-tooltip:is([data-nse-appearance="atmo"], [data-nse-appearance="atmo"] *)::before', "src/NSE/Themes/Atmo/Resources/atmo.css")).toMatchObject({
+    expect(atmo).toContain('.nse-overlay-popup[data-nse-theme="com.syndromatic.atmo"]:is(.nse-overlay-popup--popover, .nse-overlay-popup--action-sheet)::before');
+    expect(declarationsFor('.nse-tooltip:is([data-nse-theme="com.syndromatic.atmo"], [data-nse-theme="com.syndromatic.atmo"] *)::before', "src/Themes/Atmo.scostheme/Contents/Resources/atmo.css")).toMatchObject({
       content: '""', position: "absolute", inset: "0", "pointer-events": "none", "border-radius": "7px",
     });
-    expect(atmo).toContain('[data-nse-appearance="atmo"] .nse-window-view.nse-window-view--popover::before');
+    expect(atmo).toContain('[data-nse-theme="com.syndromatic.atmo"] .nse-window-view.nse-window-view--popover::before');
   });
 });

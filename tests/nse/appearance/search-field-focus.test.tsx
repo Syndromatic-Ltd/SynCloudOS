@@ -26,15 +26,23 @@ import * as cssTree from "css-tree";
 import { afterEach, describe, expect, it } from "vitest";
 import { NSESearchField, type NSESearchFieldProps } from "../../../src/NSE/Controls/Fields/NSESearchField";
 
-const atmoCss = readFileSync("src/NSE/Themes/Atmo/Resources/atmo.css", "utf8");
+const atmoCss = readFileSync("src/Themes/Atmo.scostheme/Contents/Resources/atmo.css", "utf8");
 const appearanceCss = readFileSync("src/NSE/Appearance/nse-appearance.css", "utf8");
 const fieldCss = readFileSync("src/NSE/Controls/Fields/nse-field-extensions.css", "utf8");
-const structureCss = readFileSync("src/NSE/Themes/Atmo/Resources/atmo-structure.css", "utf8");
+const structureCss = readFileSync("src/Themes/Atmo.scostheme/Contents/Resources/atmo-structure.css", "utf8");
 
 // Keep the real search selectors, declaration order and media conditions,
 // without mounting unrelated controls or the theme's large SVG data URLs.
 function searchPaint(css: string) {
+  // This single-theme paint test does not assert boundary isolation. JSDOM
+  // cannot apply @scope; real browser gallery coverage retains the actual scope.
   const ast = cssTree.parse(css);
+  cssTree.walk(ast, {
+    visit: "Atrule",
+    leave(node, item, list) {
+      if (node.name === "scope" && node.block) list.replace(item, node.block.children);
+    },
+  });
   cssTree.walk(ast, {
     visit: "Rule",
     enter(node, item, list) {
@@ -53,7 +61,7 @@ afterEach(cleanup);
 function mount(props: NSESearchFieldProps = {}, contrast = "normal") {
   const { container } = render(<>
     <style>{paint}</style>
-    <div data-nse-appearance="atmo" data-nse-contrast={contrast}>
+    <div data-nse-theme="com.syndromatic.atmo" data-nse-contrast={contrast}>
       <NSESearchField aria-label="Find" {...props} />
     </div>
     <button>Outside</button>

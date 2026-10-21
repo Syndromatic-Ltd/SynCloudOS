@@ -29,8 +29,8 @@ import type { NSETopBarItem, NSETopBarVariant } from "../../src/NSE/Windows/Chro
 afterEach(cleanup);
 
 const variants: Array<{ variant: NSETopBarVariant; glyph: string }> = [
-  { variant: "atmoCumulus", glyph: ".nse-app-topbar-button-icon" },
-  { variant: "atmoMetal", glyph: ".nse-app-topbar-metal-pill-glyph" }
+  { variant: "continuous", glyph: ".nse-app-topbar-button-icon" },
+  { variant: "rail-aligned", glyph: ".nse-app-topbar-rail-aligned-pill-glyph" }
 ];
 
 function maskOf(button: HTMLElement, glyphSelector: string): string | null {
@@ -50,7 +50,7 @@ describe.each(variants)("NSETopBar glyphs ($variant)", ({ variant, glyph }) => {
 
   it("falls back to the built-in house when a webspring item has no icon", () => {
     renderBar(variant, { kind: "webspring", label: "Home" });
-    const builtIn = nseTopBarStyles.atmoCumulus.icons.webspring!;
+    const builtIn = nseTopBarStyles.continuous.icons.webspring!;
     expect(builtIn).toEqual(expect.any(String));
     expect(maskOf(screen.getByRole("button", { name: "Home" }), glyph)).toBe(`url(${JSON.stringify(builtIn)})`);
   });

@@ -97,7 +97,7 @@ describe("the standard top bar's band above app content", () => {
     renderStage({ topBar: "standard", material: "standard" });
     const { bar, content, background } = stageElements();
 
-    expect(stageElements().root?.style.getPropertyValue("--webspring-app-top-bar-height")).toBe("var(--nse-app-topbar-height, var(--nse-topbar-height-cumulus))");
+    expect(stageElements().root?.style.getPropertyValue("--webspring-app-top-bar-height")).toBe("var(--nse-app-topbar-height, var(--nse-topbar-height-continuous, 56px))");
     expect(bar).not.toBeNull();
     expect(content).not.toBeNull();
     // The content sits in the body, which still fills the whole frame behind the floating bar.
@@ -106,10 +106,10 @@ describe("the standard top bar's band above app content", () => {
     expect(bar!.contains(content!)).toBe(false);
   });
 
-  it("reserves the metal bar height for a metal frame", () => {
+  it("uses the theme bar height independently of app material", () => {
     renderStage({ topBar: "standard", material: "metal" });
 
-    expect(stageElements().root?.style.getPropertyValue("--webspring-app-top-bar-height")).toBe("var(--nse-app-topbar-height, var(--nse-topbar-height-metal))");
+    expect(stageElements().root?.style.getPropertyValue("--webspring-app-top-bar-height")).toBe("var(--nse-app-topbar-height, var(--nse-topbar-height-continuous, 56px))");
     expect(stageElements().bar).not.toBeNull();
   });
 

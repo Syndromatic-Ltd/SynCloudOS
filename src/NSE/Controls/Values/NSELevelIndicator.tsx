@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../../Appearance";
 import type { NSELevelIndicatorProps } from "./valueControlTypes";
 
 function levelState(props: NSELevelIndicatorProps): "normal" | "warning" | "critical" {
@@ -35,11 +35,11 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
   const state = levelState(props);
   const trackState = props.disabled ? "disabled" : "normal";
   const segmentState = props.disabled ? "disabled" : state;
-  const trackAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("level-indicator", "track", trackState),
+  const trackAppearance = useNSEThemeRecipe(
+    nseThemeSlot("level-indicator", "track", trackState),
   );
-  const segmentAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("level-indicator", "segment", segmentState),
+  const segmentAppearance = useNSEThemeRecipe(
+    nseThemeSlot("level-indicator", "segment", segmentState),
   );
 
   if (props.mode === "rating") {

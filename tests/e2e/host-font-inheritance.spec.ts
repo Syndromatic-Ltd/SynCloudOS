@@ -22,7 +22,7 @@ import { test, expect } from "playwright/test";
 
 test("early UI role survives later runtime CSS and reaches root, body and chrome",async({page})=>{
   await page.goto("/tests/e2e/fixtures/host-font-inheritance.html?root-role");
-  const elements=[page.locator("html"),page.locator("body"),page.locator(".nse-app-topbar-metal-title"),page.getByRole("button",{name:"Host button",exact:true})];
+  const elements=[page.locator("html"),page.locator("body"),page.locator(".nse-app-topbar-rail-aligned-title"),page.getByRole("button",{name:"Host button",exact:true})];
   for(const element of elements)await expect(element).toHaveCSS("font-family","monospace");
   await page.evaluate(()=>document.documentElement.style.setProperty("--font-ui","serif"));
   for(const element of elements)await expect(element).toHaveCSS("font-family","serif");
@@ -36,7 +36,7 @@ test("framework chrome inherits supplied host typography and remains interactive
   page.on("pageerror", error => errors.push(error.message));
   page.on("request", request => { if (/\.(woff2?|ttf|otf)(?:\?|$)/.test(request.url())) fontRequests.push(request.url()); });
   await page.goto("/tests/e2e/fixtures/host-font-inheritance.html");
-  const title = page.locator(".nse-app-topbar-metal-title");
+  const title = page.locator(".nse-app-topbar-rail-aligned-title");
   const button = page.getByRole("button", { name: "Host button", exact: true });
   await expect(title).toHaveCSS("font-family", "monospace");
   await expect(button).toHaveCSS("font-family", "monospace");

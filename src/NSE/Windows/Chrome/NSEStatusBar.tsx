@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEVisualEnvironment } from "../../Appearance";
+
+
 import type { HTMLAttributes, ReactNode } from "react";
 import type { NSEChromeScheme, NSETopBarRail } from "./nseTopBarTypes";
 
@@ -27,17 +30,17 @@ function classes(...values: Array<string | false | null | undefined>) {
 
 type CSSVarStyle = HTMLAttributes<HTMLElement>["style"] & Record<`--${string}`, string>;
 
-export type NSEStatusBarVariant = "default" | "atmoMetal";
+export type NSEStatusBarVariant = "default" | "rail-aligned";
 
 export interface NSEStatusBarProps extends HTMLAttributes<HTMLElement> {
   leading?: ReactNode;
   trailing?: ReactNode;
   children?: ReactNode;
-  /** `atmoMetal` mirrors the metal top bar as a spliced footer; `default` is the compact strip. */
+  /** `rail-aligned` mirrors the metal top bar as a spliced footer; `default` is the compact strip. */
   variant?: NSEStatusBarVariant;
-  /** Chrome light/dark surface for the `atmoMetal` variant. */
+  /** Chrome light/dark surface for the `rail-aligned` variant. */
   scheme?: NSEChromeScheme;
-  /** Sidebar-aligned rail cell for the `atmoMetal` variant (source-list windows). */
+  /** Sidebar-aligned rail cell for the `rail-aligned` variant (source-list windows). */
   rail?: NSETopBarRail;
 }
 
@@ -45,14 +48,17 @@ export function NSEStatusBar({
   leading,
   trailing,
   children,
-  variant = "default",
-  scheme = "light",
+  variant: requestedVariant,
+  scheme: requestedScheme,
   rail,
   className = "",
   style,
   ...props
 }: NSEStatusBarProps) {
-  if (variant === "atmoMetal") {
+  const { theme, resolvedAppearance } = useNSEVisualEnvironment();
+  const variant = requestedVariant ?? (theme.presentation.chrome === "rail-aligned" ? "rail-aligned" : "default");
+  const scheme = requestedScheme ?? resolvedAppearance;
+  if (variant === "rail-aligned") {
     const railWidth = rail?.width;
     const footerStyle: CSSVarStyle | undefined = railWidth != null
       ? { ...(style as CSSVarStyle), "--nse-app-topbar-rail": typeof railWidth === "number" ? `${railWidth}px` : railWidth }
@@ -60,24 +66,24 @@ export function NSEStatusBar({
 
     return (
       <footer
-        className={classes("nse-statusbar", "nse-statusbar-metal", className)}
-        data-variant="atmoMetal"
+        className={classes("nse-statusbar", "nse-statusbar-rail-aligned", className)}
+        data-variant="rail-aligned"
         data-mode={scheme}
         data-has-rail={rail ? "true" : "false"}
         style={footerStyle}
         {...props}
       >
         {rail ? (
-          <div className="nse-statusbar-metal-rail">
-            <span className="nse-statusbar-metal-grain" aria-hidden="true" />
-            <span className="nse-statusbar-metal-rail-content">{rail.content}</span>
+          <div className="nse-statusbar-rail-aligned-rail">
+            <span className="nse-statusbar-rail-aligned-grain" aria-hidden="true" />
+            <span className="nse-statusbar-rail-aligned-rail-content">{rail.content}</span>
           </div>
         ) : null}
-        <div className="nse-statusbar-metal-main">
-          <span className="nse-statusbar-metal-grain" aria-hidden="true" />
-          <span className="nse-statusbar-metal-leading">{leading}</span>
-          <span className="nse-statusbar-metal-center">{children}</span>
-          <span className="nse-statusbar-metal-trailing">{trailing}</span>
+        <div className="nse-statusbar-rail-aligned-main">
+          <span className="nse-statusbar-rail-aligned-grain" aria-hidden="true" />
+          <span className="nse-statusbar-rail-aligned-leading">{leading}</span>
+          <span className="nse-statusbar-rail-aligned-center">{children}</span>
+          <span className="nse-statusbar-rail-aligned-trailing">{trailing}</span>
         </div>
       </footer>
     );

@@ -28,7 +28,7 @@ import { createTestBundle, createTestRuntime } from "./helpers";
 
 afterEach(cleanup);
 
-it.each(["webspring-app-view-loading", "webspring-window-loading"])("keeps %s white and centered in a short surface after the host CSS cascade", loadingClassName => {
+it.each(["webspring-app-view-loading", "webspring-window-loading"])("keeps %s neutral and centered in a short surface after the host CSS cascade", loadingClassName => {
   const css = readFileSync("src/Webspring/WebspringHost.css", "utf8");
   const style = document.createElement("style");
   // Load the actual competing rules in source order; unrelated host styles are
@@ -41,7 +41,7 @@ it.each(["webspring-app-view-loading", "webspring-window-loading"])("keeps %s wh
   try {
     const rendered = render(<div className={`${loadingClassName} webspring-loading-state`} />);
     const computed = getComputedStyle(rendered.container.firstElementChild!);
-    expect(computed.color).toBe("rgb(255, 255, 255)");
+    expect(computed.backgroundImage).not.toContain("Cotton");
     expect(computed.minHeight).toBe("0px");
     expect(computed.position).toBe("absolute");
     expect(computed.placeItems).toBe("center");
@@ -62,10 +62,11 @@ it.each(["webspring-app-view-loading", "webspring-window-loading"])("renders the
   expect(state.firstElementChild!.querySelector(".nse-loading-spinner")).not.toBeNull();
 });
 
-it("shares the existing cotton image through the neutral loading token", () => {
+it("keeps cotton in the Atmo package, not the neutral loading fallback", () => {
   const components = readFileSync("src/NSE/Components/components.css", "utf8");
   const host = readFileSync("src/Webspring/WebspringHost.css", "utf8");
-  expect(components).toMatch(/--nse-loading-background-image:\s*url\(["']?\/assets\/textures\/NSETileCotton\.jpg/);
-  expect(host).toMatch(/\.webspring-loading-state\s*\{[^}]*background-image:\s*var\(--nse-loading-background-image\)/);
-  expect(host).toMatch(/\.webspring-loading-state\s*\{[^}]*color:\s*#fff/);
+  const atmo = readFileSync("src/Themes/Atmo.scostheme/Contents/Resources/shell.css", "utf8");
+  expect(components).not.toContain("NSETileCotton");
+  expect(host).not.toContain("NSETileCotton");
+  expect(atmo).toContain("NSETileCotton");
 });

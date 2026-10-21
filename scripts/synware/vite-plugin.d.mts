@@ -23,6 +23,8 @@ import type { Plugin } from "vite";
 export interface SynCloudOSViteOptions {
   /** Site-owned directory containing .app bundles. Defaults to src/SynWare. */
   appsDirectory?: string;
+  /** Host-trusted static .scostheme packages; defaults to src/Themes. */
+  themesDirectory?: string | false;
   /** Folder-discovered preference panes; defaults to src/Preferences. */
   preferencesDirectory?: string;
   /** Folder-discovered widgets; defaults to src/Widgets. */

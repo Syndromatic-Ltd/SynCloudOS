@@ -154,13 +154,13 @@ export function computeNSEOverlayPosition({
         placement: logicalPlacementToFloatingPlacement(placement, direction),
         middleware: [
           offset(offsetValue),
-          flip({ fallbackAxisSideDirection: "start" }),
+          flip({ fallbackAxisSideDirection: "start", padding: collisionPadding }),
           shift({ padding: collisionPadding }),
           size({
             padding: collisionPadding,
             apply: ({ availableWidth, availableHeight, elements }) => {
-              elements.floating.style.setProperty("--nse-overlay-available-inline-size", `${availableWidth}px`);
-              elements.floating.style.setProperty("--nse-overlay-available-block-size", `${availableHeight}px`);
+              elements.floating.style.setProperty("--nse-overlay-available-inline-size", `${Math.max(0, availableWidth)}px`);
+              elements.floating.style.setProperty("--nse-overlay-available-block-size", `${Math.max(0, availableHeight)}px`);
             },
           }),
           ...(arrow ? [floatingArrow({ element: arrow })] : []),

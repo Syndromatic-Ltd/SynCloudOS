@@ -23,16 +23,16 @@ import React from "react";
 import { act, cleanup, render } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { defineNSEAppearance, NSEAppearanceProvider, type NSEAppearanceDefinition, type NSEContrast } from "@syndromatic/syncloudos/nse";
-import { atmoAppearance } from "@syndromatic/syncloudos/nse/themes/atmo";
+import { defineNSETheme, NSEThemeProvider, type NSEThemeDefinition, type NSEContrast } from "@syndromatic/syncloudos/nse";
+import { atmoTheme } from "@syndromatic/syncloudos/nse/themes/atmo";
 import { NSEMetalThumb, NSEMaterialLightingProvider } from "../../../src/NSE/Appearance/NSEMetalThumb";
 import { NSEMaterialLighting, staticNSEMaterialLight, type NSEMaterialLight } from "../../../src/NSE/Appearance/NSEMaterialLighting";
 import type { AFXFrameScheduler } from "../../../src/FX/AnimationFX/AFXLayer";
 import type { MFXMotionManager } from "../../../src/FX/MotionFX/MFXMotionManager";
 
 afterEach(cleanup);
-const custom = defineNSEAppearance({ id: "independent", displayName: "Independent" });
-const themes = [atmoAppearance, custom];
+const custom = defineNSETheme({ id: "test.independent", displayName: "Independent" });
+const themes = [atmoTheme, custom];
 
 function lightingPort() {
   const listeners = new Set<() => void>();
@@ -53,7 +53,7 @@ describe("explicit metal thumbs are independent of theme identity", () => {
   it.each([undefined, ...themes])("subscribes under $id, including the neutral default", (appearance) => {
     const light = lightingPort();
     const thumb = <NSEMaterialLightingProvider value={light}><NSEMetalThumb /></NSEMaterialLightingProvider>;
-    const view = render(appearance ? <NSEAppearanceProvider appearance={appearance}>{thumb}</NSEAppearanceProvider> : thumb);
+    const view = render(appearance ? <NSEThemeProvider theme={appearance}>{thumb}</NSEThemeProvider> : thumb);
     const element = view.container.querySelector<HTMLElement>(".nse-metal-thumb")!;
     expect(light.listeners.size).toBe(1);
     expect(element.dataset.lighting).toBe("reactive");
@@ -67,11 +67,11 @@ describe("explicit metal thumbs are independent of theme identity", () => {
 
   it("keeps the same subscription across themes, releasing it for disabled or forced colour controls", () => {
     const light = lightingPort();
-    const fixture = (appearance: NSEAppearanceDefinition, disabled = false, contrast: NSEContrast = "normal") =>
-      <NSEAppearanceProvider appearance={appearance} contrast={contrast}>
+    const fixture = (appearance: NSEThemeDefinition, disabled = false, contrast: NSEContrast = "normal") =>
+      <NSEThemeProvider theme={appearance} contrast={contrast}>
         <NSEMaterialLightingProvider value={light}><NSEMetalThumb disabled={disabled} /></NSEMaterialLightingProvider>
-      </NSEAppearanceProvider>;
-    const view = render(fixture(atmoAppearance));
+      </NSEThemeProvider>;
+    const view = render(fixture(atmoTheme));
     const element = view.container.querySelector(".nse-metal-thumb");
     for (const theme of themes) {
       view.rerender(fixture(theme));
@@ -98,7 +98,7 @@ describe("explicit metal thumbs are independent of theme identity", () => {
     style.textContent = css.split("\n").filter((line) => line.startsWith(":where(")).join("\n");
     document.head.append(style);
     try {
-      const view = render(<NSEAppearanceProvider appearance={appearance}><NSEMetalThumb /></NSEAppearanceProvider>);
+      const view = render(<NSEThemeProvider theme={appearance}><NSEMetalThumb /></NSEThemeProvider>);
       expect(getComputedStyle(view.container.querySelector(".nse-metal-thumb")!).display).not.toBe("none");
     } finally { style.remove(); }
   });
@@ -118,9 +118,9 @@ describe("explicit metal thumbs are independent of theme identity", () => {
       subscribeState(listener) { states.add(listener); return () => { states.delete(listener); }; },
     };
     const store = new NSEMaterialLighting(create, scheduler);
-    const view = render(<NSEAppearanceProvider appearance={custom}>
+    const view = render(<NSEThemeProvider theme={custom}>
       <NSEMaterialLightingProvider value={store}><NSEMetalThumb /></NSEMaterialLightingProvider>
-    </NSEAppearanceProvider>);
+    </NSEThemeProvider>);
     expect(states.size).toBe(1);
     expect(create).not.toHaveBeenCalled();
     act(() => { reduced = false; for (const listener of states) listener(); });

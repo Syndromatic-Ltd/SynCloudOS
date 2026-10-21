@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { NSEThemeDefinition } from "../NSE/Appearance/NSEThemeDefinition";
 import type { SynCloudOSLocaleBundleResourceInput } from "../SynCloudOS/LocaleServices/localeTypes";
 import type { PreferencePaneDefinition } from "../SynCloudOS/Preferences";
 import type { SynCloudOSHostContribution } from "./browserHostContributions";
@@ -42,6 +43,7 @@ export interface SynCloudOSDiscoveredBundleDescriptor {
  * Webspring shell. A host that builds without the Vite plugin passes its own.
  */
 export interface SynCloudOSProjectComposition {
+  readonly themes?: readonly NSEThemeDefinition[];
   readonly bundles: readonly SynCloudOSDiscoveredBundleDescriptor[];
   readonly preferences: readonly PreferencePaneDefinition[];
   readonly widgets: readonly WebspringWidget[];
@@ -55,6 +57,7 @@ export interface SynCloudOSProjectComposition {
 /** Hosts without the discovery plugin can supply a composition explicitly.
  * The plugin injects its project through its browser-entry adapter. */
 export const emptyProjectComposition: SynCloudOSProjectComposition = Object.freeze({
+  themes: Object.freeze([]),
   bundles: Object.freeze([]),
   preferences: Object.freeze([]),
   widgets: Object.freeze([]),
