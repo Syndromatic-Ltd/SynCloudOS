@@ -1,0 +1,52 @@
+/* Neutral panoramic composition. Theme packages supply typography and colour,
+   never controllers. The 5% next-content reveal adapts WP7's 24/480px peek. */
+.nse-navigation-destination-host[data-nse-panorama="true"] {
+  position: relative;
+  isolation: isolate;
+  container-type: inline-size;
+  touch-action: pan-y;
+  --nse-panorama-title-size: clamp(88px, 28cqw, 160px);
+  --nse-panorama-title-height: calc(var(--nse-panorama-title-size) * 1.2);
+}
+.nse-panorama-background { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: var(--nse-panorama-background, transparent); background-position-x: var(--nse-panorama-background-offset); }
+.nse-panorama-title-viewport { position: absolute; inset-block-start: 0; inset-inline: 0; block-size: var(--nse-panorama-title-height); overflow: hidden; pointer-events: none; }
+.nse-panorama-title { margin: 0; inline-size: max-content; padding-inline: 24px; font-size: var(--nse-panorama-title-size); font-weight: 200; line-height: 1.08; white-space: nowrap; letter-spacing: -.045em; }
+.nse-navigation-destination-host[data-nse-panorama="true"] > .nse-tab-bar-panel:not(.nse-tab-bar-more-panel) {
+  position: absolute; inset-block-start: var(--nse-panorama-title-height); inset-inline-start: 0;
+  inline-size: calc(95% - 24px); block-size: calc(100% - var(--nse-panorama-title-height));
+  padding-inline: 24px 12px; box-sizing: border-box; background: transparent;
+}
+.nse-panorama-section-heading { flex: 0 0 auto; margin: 0 0 16px; font-size: clamp(36px, 5vw, 64px); font-weight: 300; line-height: 1.1; white-space: nowrap; overflow: hidden; }
+.nse-panorama-section-heading button { all: unset; font: inherit; color: inherit; cursor: pointer; }
+.nse-panorama-section-heading button:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+.nse-panorama-navigation { position: absolute; z-index: 2; inset-inline-end: 12px; inset-block-start: 4px; display: flex; align-items: center; gap: 12px; font-size: 12px; }
+.nse-panorama-navigation button { border: 1px solid currentColor; background: transparent; color: inherit; border-radius: 50%; inline-size: 30px; block-size: 30px; font-size: 22px; line-height: 1; cursor: pointer; }
+.nse-panorama-navigation[hidden], .nse-panorama-title-viewport[hidden], .nse-panorama-background[hidden], .nse-panorama-section-heading[hidden] { display: none; }
+.nse-panorama-headings { position: absolute; inset-block-start: var(--nse-panorama-title-height); inset-inline: 0; block-size: 76px; overflow: hidden; }
+.nse-panorama-headings[hidden] { display: none; }
+.nse-panorama-headings > .nse-panorama-section-heading { position: absolute; inset-inline-start: 0; inline-size: calc(95% - 24px); text-align: start; padding-inline: 24px 12px; box-sizing: border-box; border: 0; background: transparent; color: inherit; cursor: pointer; }
+.nse-panorama-headings > .nse-panorama-section-heading:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+.nse-navigation-destination-host[data-nse-panorama="true"] > .nse-tab-bar-panel:not(.nse-tab-bar-more-panel) { inset-block-start: calc(var(--nse-panorama-title-height) + 76px); block-size: calc(100% - var(--nse-panorama-title-height) - 76px); }
+.nse-panorama-command-bar { background: transparent; border: 0; box-shadow: none; }
+.nse-panorama-switch-command { border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+
+.nse-navigation-destination-host[data-nse-panorama-count="1"] > .nse-tab-bar-panel:not(.nse-tab-bar-more-panel) { inline-size: 100%; }
+
+.nse-panorama-command-bar > .nse-app-topbar-base { display: none; }
+/* Reserve commands outside the title's letterforms. Section typography follows
+   the host width (54px at 480px), not the surrounding desktop browser width. */
+.nse-navigation-destination-host[data-nse-panorama="true"] {
+  --nse-panorama-command-height: 36px;
+  --nse-panorama-heading-size: clamp(32px, 11.25cqw, 64px);
+  --nse-panorama-heading-height: calc(var(--nse-panorama-heading-size) * 1.2 + 12px);
+}
+.nse-panorama-navigation { inset-block-start: 0; block-size: var(--nse-panorama-command-height); }
+.nse-panorama-title-viewport { inset-block-start: var(--nse-panorama-command-height); }
+.nse-panorama-headings { inset-block-start: calc(var(--nse-panorama-command-height) + var(--nse-panorama-title-height)); block-size: var(--nse-panorama-heading-height); }
+.nse-panorama-headings > .nse-panorama-section-heading { font-size: var(--nse-panorama-heading-size); }
+.nse-navigation-destination-host[data-nse-panorama="true"] > .nse-tab-bar-panel:not(.nse-tab-bar-more-panel) {
+  inset-block-start: calc(var(--nse-panorama-command-height) + var(--nse-panorama-title-height) + var(--nse-panorama-heading-height));
+  block-size: calc(100% - var(--nse-panorama-command-height) - var(--nse-panorama-title-height) - var(--nse-panorama-heading-height));
+}
+
+.nse-panorama-title-viewport, .nse-panorama-headings { user-select: none; }

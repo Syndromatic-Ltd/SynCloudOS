@@ -150,10 +150,14 @@ function sameVisualViewport(
     && left.offsetTop === right.offsetTop;
 }
 
+function isAvailableFocusTarget(element: HTMLElement | null): element is HTMLElement {
+  return !!element?.isConnected && !element.matches(":disabled") && !element.closest("[inert], [hidden], [aria-hidden='true']");
+}
+
 function focusableElements(root: HTMLElement): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(
     "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [contenteditable='true'], [tabindex]:not([tabindex='-1'])",
-  )).filter((element) => !element.hidden && element.getAttribute("aria-hidden") !== "true");
+  )).filter(isAvailableFocusTarget);
 }
 
 function responderMarker(element: EventTarget | null): string | null {
@@ -200,18 +204,18 @@ class LocalFocusAuthorityImpl implements LocalFocusAuthority {
 
   restoreFocus(responderId: string, anchor: HTMLElement | null): void {
     if (this.#disposed) return;
-    if (anchor?.isConnected) {
+    if (isAvailableFocusTarget(anchor)) {
       anchor.focus({ preventScroll: true });
       return;
     }
     const previous = this.#lastFocusedByResponder.get(responderId);
-    if (previous?.isConnected) {
+    if (previous && isAvailableFocusTarget(previous)) {
       previous.focus({ preventScroll: true });
       return;
     }
     const candidates = this.#document.querySelectorAll<HTMLElement>("[data-nse-responder-id], [data-syncloudos-responder-id]");
     for (const candidate of candidates) {
-      if (responderMarker(candidate) !== responderId) continue;
+      if (responderMarker(candidate) !== responderId || !isAvailableFocusTarget(candidate)) continue;
       candidate.focus({ preventScroll: true });
       return;
     }
@@ -235,12 +239,16 @@ class LocalFocusAuthorityImpl implements LocalFocusAuthority {
     }
     return () => {
       const current = this.#scopes.get(id);
-      if (!current) return;
+      if (current !== record) return;
       this.#scopes.delete(id);
       if (current.options.restoreFocus === false) return;
       const active = this.#document.activeElement;
-      if (active && current.root?.contains(active)) return;
-      if (current.previous?.isConnected) current.previous.focus({ preventScroll: true });
+      // Do not steal focus deliberately established outside the departing scope.
+      // Restore only stranded focus, never into a retained but closing surface.
+      if (active instanceof HTMLElement && active !== this.#document.body
+        && active !== this.#document.documentElement && !current.root?.contains(active)
+        && isAvailableFocusTarget(active)) return;
+      if (isAvailableFocusTarget(current.previous)) current.previous.focus({ preventScroll: true });
     };
   }
 
@@ -272,7 +280,8 @@ function StandaloneFocusScope({
       releaseRef.current?.();
       releaseRef.current = null;
     };
-  }, [authority, options]);
+  }, [authority, options.scopeId, options.kind, options.parentResponderId,
+    options.parentScopeId, options.modal, options.trapFocus, options.restoreFocus, options.asChild]);
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (!options.trapFocus || event.defaultPrevented || event.key !== "Tab") return;
     const root = rootRef.current;

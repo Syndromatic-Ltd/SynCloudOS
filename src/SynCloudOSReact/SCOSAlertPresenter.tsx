@@ -5,7 +5,7 @@ import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { NSEPushButton } from "../NSE/public/controls";
 import type { SynCloudOSAlertCenter } from "../SynCloudOS/SystemUI/alertCenter";
 import { FocusScope } from "./FocusScope";
-import { useResolvedMode } from "./serviceHooks";
+import { useResolvedAppearance } from "./serviceHooks";
 import "./system-alert.css";
 
 /** One presenter per host, sharing the kernel's ordered presentation queue. */
@@ -13,7 +13,7 @@ export function SCOSAlertPresenter({ center, appearance: requestedAppearance }: 
   readonly center: SynCloudOSAlertCenter;
   readonly appearance?: "dark" | "light";
 }) {
-  const resolvedAppearance = useResolvedMode();
+  const resolvedAppearance = useResolvedAppearance();
   const appearance = requestedAppearance ?? resolvedAppearance;
   const { current } = useSyncExternalStore(center.subscribe, center.getSnapshot, center.getSnapshot);
   const titleId = useId();

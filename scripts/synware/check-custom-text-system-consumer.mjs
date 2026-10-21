@@ -31,9 +31,9 @@ import { assertSdkSourceUnchanged, captureSdkSourceFingerprint } from "./sdk-pac
 const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const receiptPath = join(repositoryRoot, ".artifacts/synapp-sdk/custom-text-system-consumer.json");
 const applicationEntries = Object.freeze(["sdk", "sdk/testing", "nse/text", "fx/text", "fx/graphics"]);
-const publicEntries = Object.freeze([...applicationEntries, "browser", "webspring"]);
+const publicEntries = Object.freeze([...applicationEntries, "browser", "webspring", "nse/theme", "nse/themes/atmo"]);
 const externalImports = new Set(["react", "react-dom/client", "react/jsx-runtime", "@syndromatic/syncloudos", ...applicationEntries.map(entry => `@syndromatic/syncloudos/${entry}`)]);
-const hostImports = new Set(["@syndromatic/syncloudos/browser", "@syndromatic/syncloudos/webspring", "@syndromatic/syncloudos/browser/styles.css"]);
+const hostImports = new Set(["@syndromatic/syncloudos/browser", "@syndromatic/syncloudos/webspring", "@syndromatic/syncloudos/browser/styles.css", "@syndromatic/syncloudos/nse/theme", "@syndromatic/syncloudos/nse/themes/atmo"]);
 const exampleFiles = ["Info.ts", "model.ts", "layout.ts", "example.ts", "image.ts", "view.tsx", "index.tsx", "style.css"];
 const hostFile = "examples/TextSystem.app/Host/bootstrap.tsx";
 const fontDirectory = "tests/fixtures/fx/fonts/";

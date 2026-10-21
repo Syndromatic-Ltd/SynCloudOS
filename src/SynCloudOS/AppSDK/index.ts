@@ -161,7 +161,7 @@ export type { SynCloudOSPolicySubject } from "../SynCloudOS";
 export type { SynCloudOSRole } from "../SynCloudOS";
 export { createLocaleServicesFacade } from "../SynCloudOS";
 export type { SynCloudOSTranslationParams, SynCloudOSTranslationPrimitive } from "../SynCloudOS";
-export { useResolvedMode } from "../SynCloudOS";
+export { useResolvedAppearance } from "../SynCloudOS";
 export type {
   SynWareCommandAcceptance,
   SynWareCommandDeclaration as CommandDeclaration,

@@ -1,0 +1,4056 @@
+@scope ([data-nse-theme="com.syndromatic.atmo"]) to ([data-nse-theme]:not([data-nse-theme="com.syndromatic.atmo"])) {
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* Rendered bar heights, one place per chrome variant. The bar reads its own token, and a host can
+   pass the same value on to anything that must reserve the bar's band (Webspring exposes it to app
+   content), so the bar and its surroundings can never disagree — including the compact breakpoint
+   below. */
+:scope[data-nse-theme="com.syndromatic.atmo"] {
+  --nse-topbar-height-continuous: 68px;
+  --nse-topbar-height-rail-aligned: 56px;
+}
+
+.nse-app-topbar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 8;
+  height: var(--nse-app-topbar-height, var(--nse-topbar-height-continuous));
+  min-height: var(--nse-app-topbar-height, var(--nse-topbar-height-continuous));
+  color: #f4f7fb;
+  user-select: none;
+}
+
+.nse-app-topbar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 0;
+  height: 62px;
+  border-radius: 34px;
+  background: transparent;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(6px) saturate(1.25);
+  pointer-events: none;
+}
+
+.nse-app-topbar-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+}
+
+/* Cumulus glass. Vector material measured from the retired Atmo top-bar
+   slices: a dark rim, a wet specular band along the top edge, graphite
+   falling to black at the horizon line, and a faint lift towards the lower
+   lip. The capsule radius follows the bar height, so it is exact at any
+   width or pixel ratio. */
+.nse-app-topbar-base:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  z-index: 1;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: calc(var(--nse-app-topbar-glass-height, 62px) + 2px);
+  pointer-events: none;
+}
+
+.nse-app-topbar-base-surface:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border: 1px solid rgb(0 0 0 / 82%);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg,
+      rgb(186 186 186 / 90%) 0%,
+      rgb(152 152 152 / 86%) 2.5%,
+      rgb(122 122 122 / 82%) 5%,
+      rgb(98 98 98 / 80%) 8.5%,
+      rgb(90 90 90 / 80%) 12%,
+      rgb(52 52 52 / 79%) 30%,
+      rgb(16 16 16 / 77%) 48.5%,
+      rgb(0 0 0 / 77%) 50%,
+      rgb(2 2 2 / 76%) 58%,
+      rgb(26 26 26 / 75%) 80%,
+      rgb(46 46 46 / 74%) 97%,
+      rgb(58 58 58 / 75%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 30%),
+    inset 0 0 0 1px rgb(255 255 255 / 5%),
+    inset 0 -1px 0 rgb(255 255 255 / 9%);
+}
+
+/* A soft specular sheet over the upper half, clipped to the capsule. */
+.nse-app-topbar-base-surface:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::after {
+  content: "";
+  position: absolute;
+  inset: 1px 1px 50%;
+  border-radius: 999px 999px 40% 40% / 999px 999px 18% 18%;
+  background: linear-gradient(180deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 2%) 80%, rgb(255 255 255 / 0%));
+}
+
+.nse-app-topbar-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(116px, 15vw) minmax(0, 1fr) minmax(116px, 15vw);
+  align-items: center;
+  height: var(--nse-app-topbar-height, var(--nse-topbar-height-continuous));
+  padding: 0;
+}
+
+.nse-app-topbar-slot:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: flex;
+  align-items: center;
+}
+
+.nse-app-topbar-slot-left:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  justify-content: flex-start;
+  transform: translateX(-6px);
+}
+
+.nse-app-topbar-slot-right:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  justify-content: flex-end;
+  transform: translateX(6px);
+}
+
+.webspring-application-navigation-back-slot:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  place-items: center;
+}
+
+/* Same 50px circular end-cap geometry as the NSE Preferences Back control. */
+.nse-app-topbar-slot-left .webspring-application-navigation-back.nse-control-button.nse-extended-tool-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-app-topbar-rail-aligned-leading .webspring-application-navigation-back.nse-control-button.nse-extended-tool-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  width: 50px;
+  min-width: 50px;
+  height: 50px;
+  min-height: 50px;
+  padding: 0;
+  line-height: 50px;
+  overflow: visible;
+}
+
+.nse-app-topbar-slot-left .webspring-application-navigation-back .nse-control-button-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-app-topbar-rail-aligned-leading .webspring-application-navigation-back .nse-control-button-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0 -25px;
+  width: auto;
+  height: auto;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  color: #f4f6f8;
+  filter: drop-shadow(0 -1px 0 rgb(0 0 0 / 55%));
+  pointer-events: none;
+}
+
+.webspring-application-navigation-chrome-balance:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: block;
+  width: 50px;
+  height: 50px;
+  pointer-events: none;
+}
+
+.webspring-application-navigation-title:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nse-app-topbar-title:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  align-self: center;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #f6f8fb;
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.92),
+    0 1px 0 rgba(255, 255, 255, 0.16),
+    0 2px 4px rgba(0, 0, 0, 0.72);
+  font-size: 24px;
+  transform: translateY(-5px);
+}
+
+.nse-app-topbar-title-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, auto);
+  align-items: center;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 0 4px;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  text-shadow: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.nse-app-topbar-title-button:disabled:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  cursor: default;
+  opacity: 0.58;
+}
+
+.nse-app-topbar-title-button:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  outline: 2px solid rgba(134, 214, 255, 0.9);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+.nse-app-topbar-title-text:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nse-app-topbar-title-arrow:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin-left: 3px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  transform: translateY(1px);
+}
+
+.nse-app-topbar-title-arrow-glyph:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-image: var(--nse-app-topbar-title-arrow-image, none);
+  background-repeat: no-repeat;
+  background-size: 24px 48px;
+  filter:
+    drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.82))
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.12));
+  transition:
+    opacity 190ms ease,
+    transform 230ms ease;
+}
+
+.nse-app-topbar-title-arrow-right:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background-position: 0 0;
+  opacity: 0.9;
+  transform: translate3d(0, 0, 0);
+}
+
+.nse-app-topbar-title-arrow-down:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background-position: 0 -24px;
+  opacity: 0;
+  transform: translate3d(0, 7px, 0);
+}
+
+.nse-app-topbar-title-button[data-selected="true"] .nse-app-topbar-title-arrow-right:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  opacity: 0;
+  transform: translate3d(3px, -7px, 0);
+}
+
+.nse-app-topbar-title-button[data-selected="true"] .nse-app-topbar-title-arrow-down:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  opacity: 0.92;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Every top-bar glyph is one solid-shape SVG used as a CSS mask over a themed fill, so the
+   normal, pressed and selected looks come from colour tokens for any icon. The element that
+   carries the mask is clipped by it, so the shadow filters live on its wrapper. */
+.nse-app-topbar-glyph-shape:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--nse-app-topbar-glyph-fill, currentColor);
+  -webkit-mask-image: var(--nse-app-topbar-glyph);
+  mask-image: var(--nse-app-topbar-glyph);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.nse-app-topbar-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-app-topbar-glyph-fill: linear-gradient(180deg, rgb(247 249 252 / 94%) 0%, rgb(188 196 207 / 90%) 100%);
+  --nse-app-topbar-glyph-shadow: drop-shadow(0 1px 1px rgb(0 0 0 / 55%));
+  position: relative;
+  display: grid;
+  width: 108px;
+  height: 74px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  transform: translateY(-3.5px);
+}
+
+.nse-app-topbar-button:disabled:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  cursor: default;
+  opacity: 0.54;
+}
+
+.nse-app-topbar-button:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  outline: 2px solid rgba(134, 214, 255, 0.9);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+/* The inset tool button: a pill cut into the glass with a dark ring, a
+   glazed top lip and a faint lower lift, so the bar reads through it. Held
+   and selected states fill it with pressed-in blue glass. */
+.nse-app-topbar-button-well:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  top: var(--nse-app-topbar-well-top, 7px);
+  left: var(--nse-app-topbar-well-inline, 11px);
+  right: var(--nse-app-topbar-well-inline, 11px);
+  height: var(--nse-app-topbar-well-height, 53px);
+  box-sizing: border-box;
+  border: 1.5px solid rgb(0 0 0 / 82%);
+  border-radius: 999px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg,
+      rgb(255 255 255 / 44%) 0%,
+      rgb(250 250 250 / 30%) 4%,
+      rgb(240 240 240 / 15%) 9%,
+      rgb(215 215 215 / 9%) 15%,
+      rgb(140 140 140 / 7%) 38%,
+      rgb(50 50 50 / 5%) 49%,
+      rgb(0 0 0 / 5%) 50%,
+      rgb(0 0 0 / 3%) 76%,
+      rgb(200 200 200 / 2%) 100%);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 13%),
+    0 -1px 0 rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(90 90 90 / 60%),
+    inset 0 3px 5px rgb(0 0 0 / 28%),
+    inset 0 -1px 0 rgb(255 255 255 / 7%);
+  pointer-events: none;
+  transition: box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.nse-app-topbar-button:hover:not(:disabled) .nse-app-topbar-button-well:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background-color: rgb(255 255 255 / 5%);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 16%),
+    0 -1px 0 rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(110 110 110 / 60%),
+    inset 0 3px 5px rgb(0 0 0 / 22%),
+    inset 0 -1px 0 rgb(255 255 255 / 10%);
+}
+
+.nse-app-topbar-button-well-selected:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg,
+      rgb(26 47 66) 0%,
+      rgb(40 68 95) 5%,
+      rgb(52 90 125) 14%,
+      rgb(58 98 134) 26%,
+      rgb(70 114 153) 50%,
+      rgb(82 130 171) 74%,
+      rgb(91 143 187) 94%,
+      rgb(90 139 182) 100%);
+  box-shadow:
+    inset 0 2px 5px rgb(0 18 40 / 62%),
+    inset 0 -1px 0 rgb(170 214 255 / 35%);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.nse-app-topbar-button-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 2;
+  grid-area: 1 / 1;
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+  transform: translateY(-2px);
+  filter: var(--nse-app-topbar-glyph-shadow);
+}
+
+.nse-app-topbar-button[data-position="right"] .nse-app-topbar-button-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 35px;
+  height: 32.5px;
+}
+
+/* Held and selected: the blue glass fills the well and the glyph lights up. */
+.nse-app-topbar-button[data-selected="true"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-app-topbar-button:active:not(:disabled):where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-app-topbar-glyph-fill: linear-gradient(180deg, #ffffff 0%, #dcebf8 100%);
+  --nse-app-topbar-glyph-shadow: drop-shadow(0 1px 1px rgb(0 22 48 / 62%));
+}
+
+.nse-app-topbar-button[data-selected="true"] .nse-app-topbar-button-well-selected:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-app-topbar-button:active:not(:disabled) .nse-app-topbar-button-well-selected:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  opacity: 1;
+}
+
+@media (max-width: 760px) {
+  :scope[data-nse-theme="com.syndromatic.atmo"] {
+    --nse-topbar-height-continuous: 56px;
+  }
+
+  .nse-app-topbar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    --nse-app-topbar-glass-height: 52px;
+  }
+
+  .nse-app-topbar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::before {
+    height: 52px;
+    border-radius: 28px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.34);
+  }
+
+  .nse-app-topbar-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    grid-template-columns: 90px minmax(0, 1fr) 90px;
+  }
+
+  .nse-app-topbar-slot-left:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    transform: translateX(-4px);
+  }
+
+  .nse-app-topbar-slot-right:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    transform: translateX(4px);
+  }
+
+  .nse-app-topbar-title:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    font-size: clamp(17px, 5.4vw, 21px);
+    line-height: 1.08;
+    transform: translateY(-4px);
+  }
+
+  .nse-app-topbar-title-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    min-height: 30px;
+  }
+
+  .nse-app-topbar-title-arrow:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    width: 18px;
+    height: 18px;
+    margin-left: 1px;
+  }
+
+  .nse-app-topbar-title-arrow-glyph:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    background-size: 18px 36px;
+  }
+
+  .nse-app-topbar-title-arrow-down:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    background-position: 0 -18px;
+  }
+
+  .nse-app-topbar-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    width: 90px;
+    height: 60px;
+    transform: translateY(-3px);
+  }
+
+  .nse-app-topbar-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    --nse-app-topbar-well-top: 5.5px;
+    --nse-app-topbar-well-inline: 9.5px;
+    --nse-app-topbar-well-height: 43px;
+  }
+
+  .nse-app-topbar-button-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    width: 26px;
+    height: 26px;
+    transform: translateY(-1px);
+  }
+
+  .nse-app-topbar-button[data-position="right"] .nse-app-topbar-button-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    width: 28.5px;
+    height: 26.5px;
+  }
+}
+
+@media (max-width: 360px) {
+  .nse-app-topbar-title:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    font-size: clamp(14px, 4.4vw, 16px);
+  }
+
+  .nse-app-topbar-title-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    padding-inline: 2px;
+  }
+
+  .nse-app-topbar-title-arrow:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    width: 14px;
+    height: 14px;
+  }
+
+  .nse-app-topbar-title-arrow-glyph:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    background-size: 14px 28px;
+  }
+
+  .nse-app-topbar-title-arrow-down:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    background-position: 0 -14px;
+  }
+}
+
+/* Film grain shared by the metal chrome surfaces (top bar, source list, footer). */
+:scope[data-nse-theme="com.syndromatic.atmo"] {
+  --nse-metal-grain-tile: 56px 56px;
+  --nse-metal-grain: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4d5eXlzc3OLi4ubm5uVlZWPj4+NjY19fX2JiYl/f39ra2uRkZGZmZlpaWmXl5dvb29xcXGTk5NnZ2c8TV1mAAAAG3RSTlNAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAvEOwtAAAFVklEQVR4XpWWB67c2BUFb3g557T/hRo9/WUMZHlgr4Bg8Z4qQgQJlHI4A8SzFVrapvmTF9O7dmYRFZ60YiBhJRCgh1FYhiLAmdvX0CzTOpNE77ME0Zty/nWWzchDtiqrmQDeuv3powQ5ta2eN0FY0InkqDD73lT9c9lEzwUNqgFHs9VQce3TVClFCQrSTfOiYkVJQBmpbq2L6iZavPnAPcoU0dSw0SUTqz/GtrGuXfbyyBniKykOWQWGqwwMA7QiYAxi+IlPdqo+hYHnUt5ZPfnsHJyNiDtnpJyayNBkF6cWoYGAMY92U2hXHF/C1M8uP/ZtYdiuj26UdAdQQSXQErwSOMzt/XWRWAz5GuSBIkwG1H3FabJ2OsUOUhGC6tK4EMtJO0ttC6IBD3kM0ve0tJwMdSfjZo+EEISaeTr9P3wYrGjXqyC1krcKdhMpxEnt5JetoulscpyzhXN5FRpuPHvbeQaKxFAEB6EN+cYN6xD7RYGpXpNndMmZgM5Dcs3YSNFDHUo2LGfZuukSWyUYirJAdYbF3MfqEKmjM+I2EfhA94iG3L7uKrR+GdWD73ydlIB+6hgref1QTlmgmbM3/LeX5GI1Ux1RWpgxpLuZ2+I+IjzZ8wqE4nilvQdkUdfhzI5QDWy+kw5Wgg2pGpeEVeCCA7b85BO3F9DzxB3cdqvBzWcmzbyMiqhzuYqtHRVG2y4x+KOlnyqla8AoWWpuBoYRxzXrfKuILl6SfiWCbjxoZJUaCBj1CjH7GIaDbc9kqBY3W/Rgjda1iqQcOJu2WW+76pZC9QG7M00dffe9hNnseupFL53r8F7YHSwJWUKP2q+k7RdsxyOB11n0xtOvnW4irMMFNV4H0uqwS5ExsmP9AxbDTc9JwgneAT5vTiUSm1E7BSflSt3bfa1tv8Di3R8n3Af7MNWzs49hmauE2wP+ttrq+AsWpFG2awvsuOqbipWHgtuvuaAE+A1Z/7gC9hesnr+7wqCwG8c5yAg3AL1fm8T9AZtp/bbJGwl1pNrE7RuOX7PeMRUERVaPpEs+yqeoSmuOlokqw49pgomjLeh7icHNlG19yjs6XXOMedYm5xH2YxpV2tc0Ro2jJfxC50ApuxGob7lMsxfTbeUv07TyYxpeLucEH1gNd4IKH2LAg5TdVhlCafZvpskfncCfx8pOhJzd76bJWeYFnFciwcYfubRc12Ip/ppIhA1/mSZ/RxjFDrJC5xifFjJpY2Xl5zXdguFqYyTR1zSp1Y9p+tktDYYSNflcxI0iyO4TPBdlRcpeqjK/piF5bklq77VSEaA+z8qmJTFzIWiitbnzR794USKBUaT0NTEsVjZqLaFVqJoPN9ODG70IPbfBHKK+/q/AWR0tJzYHRULOa4MP+W/HfGadZUbfw177G7j/OGbIs8TahLyynl4X4RinF793Oz+BU0saXtUHrVBFT/DnA3ctNPoGbs4hRIjTok8i+algT1lTHi4SxFvONKNrgQFAq2/gFnWMXgwffgYMJpiKYkmW3tTg3ZQ9Jq+f8XN+A5eeUKHWvJWJ2sgJ1Sop+wwhqFVijqWaJhwtD8MNlSBeWNNWTa5Z5kPZw5+LbVT99wqTdx29lMUH4OIG/D86ruKEauBjvH5xy6um/Sfj7ei6UUVk4AIl3MyD4MSSTOFgSwsH/QJWaQ5as7ZcmgBZkzjjU1UrQ74ci1gWBCSGHtuV1H2mhSnO3Wp/3fEV5a+4wz//6qy8JxjZsmxxy5+4w9CDNJY09T072iKG0EnOS0arEYgXqYnXcYHwjTtUNAcMelOd4xpkoqiTYICWFq0JSiPfPDQdnt+4/wuqcXY47QILbgAAAABJRU5ErkJggg==");
+}
+
+/* ===========================================================================
+   rail-aligned — reusable brushed-metal source-list chrome.
+   A rail cell (sidebar-aligned) and a main cell meet at the source-list seam, with
+   film grain, raised/cast seam shadows, spliced curve/endcap/middle PNGs, and CSS-drawn
+   aluminium pill buttons. Atmo ships light + dark chrome (Onyx is a separate theme, not a dark
+   mode), selected by [data-mode]. NSE owns the assets under /assets/nse/chrome/metal.
+   Adapted from the hand-spliced Software.app chrome into a first-party NSE variant.
+   =========================================================================== */
+.nse-app-topbar-rail-aligned:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-metal-header-curve-l: url("./assets/chrome/metal/light/header-curve-left.png");
+  --nse-metal-header-curve-r: url("./assets/chrome/metal/light/header-curve-right.png");
+  --nse-metal-header-mid: url("./assets/chrome/metal/light/header-middle.png");
+  --nse-metal-header-endcap-l: url("./assets/chrome/metal/light/header-endcap-left.png");
+  --nse-metal-header-endcap-r: url("./assets/chrome/metal/light/header-endcap-right.png");
+  /* Pill button: raised aluminium, and the deep inset press (darker gradient running the
+     other way, soft inner shadows, outer lip kept). The glyph is a mask over --nse-metal-glyph-fill. */
+  --nse-metal-pill-fill: linear-gradient(180deg, #fdfdfe 0%, #eceef1 46%, #d6dae0 54%, #e2e5ea 100%);
+  --nse-metal-pill-edge: rgb(78 88 100 / 70%);
+  --nse-metal-pill-shadow: 0 1px 0 rgb(255 255 255 / 80%), inset 0 1px 0 rgb(255 255 255 / 95%), inset 0 -2px 3px rgb(96 106 118 / 30%);
+  --nse-metal-pill-fill-pressed: linear-gradient(180deg, #a7aeb8 0%, #bfc5cd 55%, #cdd2d9 100%);
+  --nse-metal-pill-shadow-pressed: 0 1px 0 rgb(255 255 255 / 80%), inset 0 2px 4px rgb(36 44 56 / 48%), inset 0 0 2px rgb(36 44 56 / 42%);
+  --nse-metal-glyph-fill: linear-gradient(180deg, #4c5560 0%, #727c88 100%);
+  --nse-metal-glyph-fill-pressed: linear-gradient(180deg, #5a636e 0%, #7c8692 100%);
+  --nse-metal-glyph-shadow: drop-shadow(0 1px 0 rgb(255 255 255 / 85%)) drop-shadow(0 -1px 0 rgb(24 32 42 / 40%));
+  --nse-metal-glyph-shadow-pressed: drop-shadow(0 1px 0 rgb(255 255 255 / 55%)) drop-shadow(0 -1px 0 rgb(24 32 42 / 28%));
+
+  --nse-metal-title: #2b333c;
+  --nse-metal-text-emboss: 0 1px 0 rgba(255, 255, 255, 0.75);
+  --nse-metal-cast-shadow: rgba(0, 0, 0, 0.26);
+  --nse-metal-content-shadow: rgba(0, 0, 0, 0.22);
+  --nse-metal-grain-opacity: 0.9;
+  --nse-metal-grain-blend: overlay;
+
+  position: relative;
+  inset: auto;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  height: var(--nse-app-topbar-height, var(--nse-topbar-height-rail-aligned));
+  min-height: var(--nse-app-topbar-height, var(--nse-topbar-height-rail-aligned));
+  color: var(--nse-metal-title);
+  isolation: isolate;
+  overflow: hidden;
+  box-shadow: 0 6px 11px -5px var(--nse-metal-cast-shadow);
+  backdrop-filter: none;
+}
+
+.nse-app-topbar-rail-aligned:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::before {
+  content: none;
+}
+
+.nse-app-topbar-rail-aligned[data-has-rail="true"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  grid-template-columns: var(--nse-app-topbar-rail, 264px) minmax(0, 1fr);
+}
+
+.nse-app-topbar-rail-aligned[data-mode="dark"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-metal-header-curve-l: url("./assets/chrome/metal/dark/header-curve-left.png");
+  --nse-metal-header-curve-r: url("./assets/chrome/metal/dark/header-curve-right.png");
+  --nse-metal-header-mid: url("./assets/chrome/metal/dark/header-middle.png");
+  --nse-metal-header-endcap-l: url("./assets/chrome/metal/dark/header-endcap-left.png");
+  --nse-metal-header-endcap-r: url("./assets/chrome/metal/dark/header-endcap-right.png");
+  --nse-metal-pill-fill: linear-gradient(180deg, #666d78 0%, #4a5059 46%, #3a3f47 54%, #444a53 100%);
+  --nse-metal-pill-edge: rgb(4 6 8 / 85%);
+  --nse-metal-pill-shadow: 0 1px 0 rgb(255 255 255 / 14%), inset 0 1px 0 rgb(255 255 255 / 30%), inset 0 -2px 3px rgb(0 0 0 / 38%);
+  --nse-metal-pill-fill-pressed: linear-gradient(180deg, #1b1e23 0%, #272b32 55%, #30353c 100%);
+  --nse-metal-pill-shadow-pressed: 0 1px 0 rgb(255 255 255 / 14%), inset 0 2px 4px rgb(0 0 0 / 72%), inset 0 0 2px rgb(0 0 0 / 62%);
+  --nse-metal-glyph-fill: linear-gradient(180deg, #f1f4f8 0%, #b3bcc8 100%);
+  --nse-metal-glyph-fill-pressed: linear-gradient(180deg, #d9dfe7 0%, #98a2af 100%);
+  --nse-metal-glyph-shadow: drop-shadow(0 -1px 0 rgb(0 0 0 / 70%)) drop-shadow(0 1px 0 rgb(255 255 255 / 10%));
+  --nse-metal-glyph-shadow-pressed: drop-shadow(0 -1px 0 rgb(0 0 0 / 80%));
+  --nse-metal-title: #f1f4f8;
+  --nse-metal-text-emboss: 0 -1px 0 rgba(0, 0, 0, 0.78), 0 -1px 2px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.05);
+  --nse-metal-cast-shadow: rgba(0, 0, 0, 0.52);
+  --nse-metal-content-shadow: rgba(0, 0, 0, 0.42);
+  --nse-metal-grain-opacity: 0.95;
+}
+
+.nse-app-topbar-rail-aligned-rail:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  background:
+    var(--nse-metal-header-curve-l) left top / auto 100% no-repeat,
+    var(--nse-metal-header-endcap-r) right top / auto 100% no-repeat,
+    var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+  box-shadow: inset -14px 0 18px -10px var(--nse-metal-content-shadow);
+}
+
+.nse-app-topbar-rail-aligned-main:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0 16px;
+  background:
+    var(--nse-metal-header-endcap-l) left top / auto 100% no-repeat,
+    var(--nse-metal-header-curve-r) right top / auto 100% no-repeat,
+    var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+}
+
+.nse-app-topbar-rail-aligned[data-has-rail="true"] .nse-app-topbar-rail-aligned-main:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  box-shadow: -10px 0 18px -6px var(--nse-metal-content-shadow);
+}
+
+/* Single bar (no rail): both ends rounded. */
+.nse-app-topbar-rail-aligned[data-has-rail="false"] .nse-app-topbar-rail-aligned-main:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background:
+    var(--nse-metal-header-curve-l) left top / auto 100% no-repeat,
+    var(--nse-metal-header-curve-r) right top / auto 100% no-repeat,
+    var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+}
+
+.nse-app-topbar-rail-aligned-grain:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: var(--nse-metal-grain) repeat;
+  background-size: var(--nse-metal-grain-tile);
+  opacity: var(--nse-metal-grain-opacity);
+  mix-blend-mode: var(--nse-metal-grain-blend);
+}
+
+.nse-app-topbar-rail-aligned-rail-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--nse-metal-title);
+  text-shadow: var(--nse-metal-text-emboss);
+}
+
+.nse-app-topbar-rail-aligned-title:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 4;
+  margin: 0;
+  max-width: 64%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--nse-metal-title);
+  text-shadow: var(--nse-metal-text-emboss);
+}
+
+.nse-app-topbar-rail-aligned .nse-app-topbar-title-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: var(--nse-metal-title);
+  text-shadow: var(--nse-metal-text-emboss);
+}
+
+.nse-app-topbar-rail-aligned-cluster:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateY(-50%);
+}
+
+.nse-app-topbar-rail-aligned-leading:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  left: 14px;
+}
+
+.nse-app-topbar-rail-aligned-trailing:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  right: 14px;
+}
+
+.nse-app-topbar-rail-aligned-pill:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  width: 56px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.nse-app-topbar-rail-aligned-pill:disabled:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.nse-app-topbar-rail-aligned-pill-shell:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--nse-metal-pill-edge);
+  border-radius: 17px;
+  background: var(--nse-metal-pill-fill);
+  box-shadow: var(--nse-metal-pill-shadow);
+  transition: box-shadow 90ms ease;
+}
+
+.nse-app-topbar-rail-aligned-pill:is(:active:not(:disabled), [aria-expanded="true"], [data-selected="true"]) .nse-app-topbar-rail-aligned-pill-shell:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background: var(--nse-metal-pill-fill-pressed);
+  box-shadow: var(--nse-metal-pill-shadow-pressed);
+}
+
+/* The glyph wrapper carries the emboss as drop-shadow filters (the mask clips anything painted
+   on the masked element itself); the shape inside is filled by --nse-metal-glyph-fill. */
+.nse-app-topbar-rail-aligned-pill-glyph:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-app-topbar-glyph-fill: var(--nse-metal-glyph-fill);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  filter: var(--nse-metal-glyph-shadow);
+  pointer-events: none;
+}
+
+.nse-app-topbar-rail-aligned-pill:is(:active:not(:disabled), [aria-expanded="true"], [data-selected="true"]) .nse-app-topbar-rail-aligned-pill-glyph:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-app-topbar-glyph-fill: var(--nse-metal-glyph-fill-pressed);
+  transform: translate(-50%, calc(-50% + 1px));
+  filter: var(--nse-metal-glyph-shadow-pressed);
+}
+
+/* A document window's title: the app's name beside its return control, the document in the
+   middle. In dark chrome the name glows white, as a lit sign on the metal. */
+.nse-app-topbar-rail-aligned-leading-title:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  max-width: none;
+  margin-inline-start: 6px;
+  overflow: visible;
+  font-size: 19px;
+  text-align: start;
+}
+/* The text still clips for its ellipsis, so its clip box reaches past the glyphs by
+   the glow's 16px radius; the equal negative margin keeps the layout unchanged. */
+.nse-app-topbar-rail-aligned-leading-title .nse-app-topbar-title-text:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  padding: 18px;
+  margin: -18px;
+}
+.nse-app-topbar-rail-aligned[data-mode="dark"] .nse-app-topbar-rail-aligned-leading-title:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-app-topbar-rail-aligned[data-mode="dark"] .nse-app-topbar-rail-aligned-leading-title .nse-app-topbar-title-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: #ffffff;
+  text-shadow:
+    0 0 1px rgba(255, 255, 255, 0.9),
+    0 0 7px rgba(255, 255, 255, 0.55),
+    0 0 16px rgba(196, 222, 255, 0.4),
+    0 -1px 0 rgba(0, 0, 0, 0.6);
+}
+.nse-app-topbar-rail-aligned-centre:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  max-width: 44%;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.nse-app-topbar-rail-aligned-pill:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  outline: 2px solid rgba(90, 150, 215, 0.85);
+  outline-offset: 2px;
+  border-radius: 18px;
+}
+
+@media (max-width: 767px) {
+  .nse-app-topbar-rail-aligned[data-has-rail="true"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .nse-app-topbar-rail-aligned[data-has-rail="true"] .nse-app-topbar-rail-aligned-rail:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    display: none;
+  }
+
+  .nse-app-topbar-rail-aligned[data-has-rail="true"] .nse-app-topbar-rail-aligned-main:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    box-shadow: none;
+    background:
+      var(--nse-metal-header-curve-l) left top / auto 100% no-repeat,
+      var(--nse-metal-header-curve-r) right top / auto 100% no-repeat,
+      var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nse-app-topbar-rail-aligned-pill-shell:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    transition: none;
+  }
+}
+
+.nse-app-frame:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  font-family: inherit;
+  isolation: isolate;
+}
+
+.nse-app-frame-body:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.nse-app-frame-topbar > .nse-app-topbar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  inset: auto;
+}
+
+.nse-app-frame-sidebar + .nse-app-frame-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-width: 0;
+}
+
+.nse-app-frame-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-app-frame-sidebar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-height: 0;
+  min-width: 0;
+}
+
+.nse-app-frame-statusbar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-width: 0;
+  min-height: 0;
+  height: var(--nse-app-frame-statusbar-size, auto);
+}
+
+.nse-app-frame-statusbar > .nse-statusbar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  height: 100%;
+}
+
+.nse-app-frame[data-variant="canvas"] .nse-app-frame-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  overflow: hidden;
+}
+
+.nse-app-frame[data-variant="document"] .nse-app-frame-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-app-frame[data-variant="standard"] .nse-app-frame-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  overflow: auto;
+}
+
+.nse-split-view:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--nse-split-sidebar, 280px) minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.nse-split-view[data-sidebar-position="trailing"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  grid-template-columns: minmax(0, 1fr) var(--nse-split-sidebar, 280px);
+}
+
+.nse-split-view-sidebar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-split-view-main:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-sidebar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-main:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-resizer:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.nse-split-view-resizer:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--nse-split-sidebar, 280px) - 4px);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 8px;
+  min-width: 8px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-resizer:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  left: auto;
+  right: calc(var(--nse-split-sidebar, 280px) - 4px);
+}
+
+.nse-split-view-resizer-grip:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 2px;
+  height: 100%;
+  background: rgba(72, 78, 86, 0.36);
+  box-shadow:
+    1px 0 0 rgba(255, 255, 255, 0.22),
+    -1px 0 0 rgba(0, 0, 0, 0.16);
+  opacity: 0.72;
+}
+
+.nse-split-view-resizer:hover .nse-split-view-resizer-grip:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-split-view-resizer:focus-visible .nse-split-view-resizer-grip:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-split-view[data-resizing="true"] .nse-split-view-resizer-grip:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background: rgba(80, 146, 222, 0.78);
+  opacity: 1;
+}
+
+.nse-split-view-resizer:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  outline: 2px solid rgba(134, 214, 255, 0.9);
+  outline-offset: -2px;
+}
+
+.nse-sidebar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  color: var(--nse-sidebar-text, #2a2f36);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0)),
+    var(--nse-sidebar-background, linear-gradient(180deg, #dfe0e2 0%, #cdcfd2 100%));
+  border-right: 1px solid var(--nse-sidebar-border, rgba(120, 126, 134, 0.7));
+}
+
+/* The raised main content area to the right casts a soft shadow back over the rail along the seam,
+   matching Software.app's sidebar. Painted as an overlay above the rows (positive z-index over the
+   non-positioned scroll content) so it falls on the items too, not just the rail background. */
+.nse-sidebar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 3;
+  width: 15px;
+  pointer-events: none;
+  background: linear-gradient(to left, var(--nse-sidebar-seam-shadow, rgba(0, 0, 0, 0.22)), transparent);
+}
+
+/* Deeper cast on the dark metal rail (mirrors Software's --sn-content-shadow light/dark split). */
+.nse-sidebar[data-mode="dark"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-sidebar-seam-shadow: rgba(0, 0, 0, 0.42);
+  --nse-sidebar-background: linear-gradient(180deg, #3a3d44 0%, #202227 100%);
+  --nse-sidebar-text: #dde3ea;
+  --nse-sidebar-border: rgba(8, 10, 12, 0.8);
+}
+
+/* The plain (floating, borderless) variant has no content seam to cast from. */
+.nse-sidebar[data-variant="plain"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::after {
+  content: none;
+}
+
+.nse-sidebar[data-variant="inspector"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-sidebar-background: linear-gradient(180deg, #eef0f2 0%, #d9dde1 100%);
+}
+
+.nse-sidebar[data-variant="plain"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-sidebar-background: transparent;
+  border-right: 0;
+}
+
+.nse-sidebar-scroll:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 10px 16px;
+  /* Source lists scroll without a visible scrollbar (momentum/drag only). */
+  scrollbar-width: none;
+}
+
+.nse-sidebar-scroll:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* A search/header slot shares the sidebar's continuous material and seam shadow.
+   Its in-flow height reserves the initial row position; sticky placement lets
+   rows pass underneath as the same scroll surface moves. Never paint another
+   metal rectangle here: the owning sidebar supplies the grain and gradient. */
+.nse-sidebar-header:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  padding: 4px 3px 18px;
+}
+
+.nse-sidebar-section + .nse-sidebar-section:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin-top: 10px;
+}
+
+/* Divider drawer open/close (same recipe as nse-containers.css): the items region is a single
+   grid row animating 1fr -> 0fr while the inner wrapper clips, so collapse slides instead of
+   snapping. Collapsed content is inert from NSESidebar, so it cannot take focus mid-transition. */
+.nse-sidebar-section-items:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.nse-sidebar-section[data-collapsed="true"] .nse-sidebar-section-items:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  grid-template-rows: 0fr;
+}
+.nse-sidebar-section-items-inner:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-block-size: 0;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nse-sidebar-section-items:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    transition: none;
+  }
+}
+
+.nse-sidebar-section-header:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: flex;
+  align-items: center;
+  min-height: 26px;
+  gap: 0;
+  padding: 0 0 0 8px;
+  /* Bleed the section divider line to the very right edge of the rail (cancel the nav's 10px right
+     padding); the section's rows keep their own inset. */
+  margin-right: -10px;
+}
+
+.nse-sidebar-section-label:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  flex: 0 0 auto;
+  margin-right: 9px;
+  color: var(--nse-sidebar-section-label, #3a78c2);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.58);
+}
+
+/* Flanking line segments either side of the arrow toggle. Drawn at the divider's natural height
+   (7px Heritage / 4px Onyx via the remapped var, rendered at `auto` not squished) and vertically
+   centred so they meet the knob's baked line as one continuous run: label → line → knob → line. */
+.nse-sidebar-section-header:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::after,
+.nse-sidebar-section-line:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  align-self: center;
+  height: var(--nse-atmo-divider-arrow-line);
+  min-width: 10px;
+  background: var(--nse-atmo-divider) left center / auto var(--nse-atmo-divider-arrow-line) repeat-x;
+}
+
+.nse-sidebar-section-line:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  flex: 4 1 0;
+}
+
+.nse-sidebar-section-header:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::after {
+  content: "";
+  flex: 1 1 0;
+}
+
+/* Sized off the shared arrow tokens so the knob shows its complete pill-cap and matches the standalone
+   divider (a narrower box clips the cap and the knob reads as a different size). */
+.nse-sidebar-section-toggle.nse-control-divider[data-variant="arrow"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  flex: 0 0 auto;
+  width: var(--nse-atmo-divider-arrow-width);
+  min-width: var(--nse-atmo-divider-arrow-width);
+  height: var(--nse-atmo-divider-arrow-size);
+  margin: 0;
+}
+
+.nse-sidebar-row.nse-control-list-item:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin: 0;
+  /* The −10px node bleed (below) pulls the row box out to both rail edges so its selection band
+     spans the full sidebar, like the section divider line. Re-add that inset as content padding so
+     the label still sits in line with the section header label instead of riding the edge. */
+  padding-inline: 18px;
+  cursor: pointer;
+}
+
+/* Bleed the animated items wrapper to both rail edges (cancel the scroll's 10px horizontal inset)
+   so selection bands span the full sidebar. The bleed lives on the wrapper — not the row nodes —
+   because the wrapper is the animation's overflow clip: a node-level bleed would be clipped away. */
+.nse-sidebar-section-items:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin-inline: -10px;
+}
+
+.nse-sidebar-item-node[data-level="1"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin-left: 12px;
+}
+
+.nse-sidebar-item-node[data-level="2"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin-left: 24px;
+}
+
+.nse-sidebar-row.nse-control-list-item:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  outline: 2px solid rgba(89, 150, 212, 0.86);
+  outline-offset: 1px;
+}
+
+/* One thin hairline per seam: the engine withholds the row bevel from :first-child/:last-child
+   (group-edge logic), but every sidebar row is the only child of its indentation node, so the
+   edges are re-derived from the wrapper nodes. Only the top border paints — a bottom border on
+   the row above would stack a second line into every seam. Light uses the engine value; the dark
+   metal dial-down mirrors nse-sourcelist.css. */
+.nse-sidebar-section-items .nse-sidebar-item-node:not(:first-child) .nse-sidebar-row.nse-control-list-item:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+}
+[data-mode="dark"] .nse-sidebar[data-surface="metal"] .nse-sidebar-section-items .nse-sidebar-item-node:not(:first-child) .nse-sidebar-row.nse-control-list-item:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  border-top-color: rgba(150, 180, 214, 0.14);
+}
+
+.nse-sidebar-item-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-sidebar-item-glyph:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+}
+
+.nse-sidebar-item-glyph:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.nse-sidebar-item-glyph-large:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 30px;
+  height: 30px;
+}
+
+.nse-sidebar-item-glyph-framed:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  border-radius: 7px;
+  background-color: rgba(255, 255, 255, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.76),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.nse-statusbar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  color: var(--nse-statusbar-text, #2b333c);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0)),
+    var(--nse-statusbar-background, linear-gradient(180deg, #d9dbde, #bfc3c8));
+  border-top: 1px solid rgba(70, 76, 84, 0.46);
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.62);
+}
+
+.nse-statusbar-leading:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  justify-self: start;
+  min-width: 0;
+}
+
+.nse-statusbar-center:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  justify-self: center;
+  min-width: 0;
+}
+
+.nse-statusbar-trailing:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  justify-self: end;
+  min-width: 0;
+}
+
+/* --- Metal source-list surface (sits under the rail-aligned chrome) -------------
+   NSEMetalSurface is the layout-neutral surface projection. It shares this
+   exact material rule with NSESidebar, but deliberately does not inherit its
+   desktop-only border/seam geometry. */
+:is(.nse-sidebar[data-surface="metal"], .nse-metal-surface):where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-sidebar-metal-bg: linear-gradient(180deg, #dfe0e2 0%, #cdcfd2 100%);
+  --nse-sidebar-metal-text: #2a2f36;
+  --nse-sidebar-metal-label: #3a78c2;
+  --nse-sidebar-metal-emboss: 0 1px 0 rgba(255, 255, 255, 0.75);
+  --nse-sidebar-metal-edge: rgba(120, 126, 134, 0.7);
+  --nse-sidebar-metal-content-shadow: rgba(0, 0, 0, 0.22);
+  --nse-sidebar-metal-grain-opacity: 0.9;
+  --nse-sidebar-metal-grain-blend: overlay;
+  --nse-sidebar-metal-line: rgba(75, 125, 180, 0.5);
+
+  color: var(--nse-sidebar-metal-text);
+  background:
+    var(--nse-metal-grain) 0 0 / var(--nse-metal-grain-tile) repeat,
+    var(--nse-sidebar-metal-bg);
+  background-blend-mode: var(--nse-sidebar-metal-grain-blend), normal;
+}
+
+.nse-sidebar[data-surface="metal"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  border-right: 1px solid var(--nse-sidebar-metal-edge);
+  box-shadow:
+    inset -14px 0 18px -10px var(--nse-sidebar-metal-content-shadow),
+    inset -1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+:is(.nse-sidebar[data-surface="metal"], .nse-metal-surface)[data-mode="dark"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-sidebar-metal-bg: linear-gradient(180deg, #3a3d44 0%, #202227 100%);
+  --nse-sidebar-metal-text: #dde3ea;
+  --nse-sidebar-metal-label: #6aa9e6;
+  --nse-sidebar-metal-emboss: 0 -1px 0 rgba(0, 0, 0, 0.78), 0 1px 0 rgba(255, 255, 255, 0.05);
+  --nse-sidebar-metal-edge: rgba(8, 10, 12, 0.8);
+  --nse-sidebar-metal-content-shadow: rgba(0, 0, 0, 0.42);
+  --nse-sidebar-metal-grain-opacity: 0.95;
+  --nse-sidebar-metal-line: rgba(106, 169, 230, 0.45);
+}
+
+.nse-metal-surface:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-block-size: 0;
+  min-inline-size: 0;
+  position: relative;
+}
+
+.nse-sidebar[data-surface="metal"] .nse-sidebar-section-label:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: var(--nse-sidebar-metal-label);
+  text-shadow: var(--nse-sidebar-metal-emboss);
+}
+
+/* No metal override for the section line: it must stay the SAME atmo-divider sprite line the arrow
+   knob's baked line and the right-hand ::after segment use, or the left run reads more transparent
+   (the old flat --nse-sidebar-metal-line was ~0.45 alpha vs the sprite's ~0.7) and breaks the
+   continuous line → knob → line. The sprite line already carries its own highlight, so no emboss. */
+
+/* Embossed row labels on the metal rail (selected rows keep their own appearance). */
+.nse-sidebar[data-surface="metal"] .nse-sidebar-row[data-selected="false"] .nse-control-list-primary:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: var(--nse-sidebar-metal-text);
+  text-shadow: var(--nse-sidebar-metal-emboss);
+}
+
+/* --- Metal footer status bar (mirror of the metal top bar) ------------------- */
+.nse-statusbar-rail-aligned:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-metal-footer-curve-l: url("./assets/chrome/metal/light/footer-curve-left.png");
+  --nse-metal-footer-curve-r: url("./assets/chrome/metal/light/footer-curve-right.png");
+  --nse-metal-header-endcap-l: url("./assets/chrome/metal/light/header-endcap-left.png");
+  --nse-metal-header-endcap-r: url("./assets/chrome/metal/light/header-endcap-right.png");
+  --nse-metal-header-mid: url("./assets/chrome/metal/light/header-middle.png");
+  --nse-metal-title: #2b333c;
+  --nse-metal-text-emboss: 0 1px 0 rgba(255, 255, 255, 0.75);
+  --nse-metal-cast-shadow: rgba(0, 0, 0, 0.26);
+  --nse-metal-content-shadow: rgba(0, 0, 0, 0.22);
+  --nse-metal-foot-text: #5b636c;
+  --nse-metal-grain-opacity: 0.9;
+  --nse-metal-grain-blend: overlay;
+
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 56px;
+  height: 56px;
+  padding: 0;
+  border-top: 0;
+  color: var(--nse-metal-title);
+  background: none;
+  isolation: isolate;
+  overflow: hidden;
+  box-shadow: 0 -6px 11px -5px var(--nse-metal-cast-shadow);
+  text-shadow: none;
+}
+
+.nse-statusbar-rail-aligned[data-has-rail="true"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  grid-template-columns: var(--nse-app-topbar-rail, 264px) minmax(0, 1fr);
+}
+
+.nse-statusbar-rail-aligned[data-mode="dark"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --nse-metal-footer-curve-l: url("./assets/chrome/metal/dark/footer-curve-left.png");
+  --nse-metal-footer-curve-r: url("./assets/chrome/metal/dark/footer-curve-right.png");
+  --nse-metal-header-endcap-l: url("./assets/chrome/metal/dark/header-endcap-left.png");
+  --nse-metal-header-endcap-r: url("./assets/chrome/metal/dark/header-endcap-right.png");
+  --nse-metal-header-mid: url("./assets/chrome/metal/dark/header-middle.png");
+  --nse-metal-title: #f1f4f8;
+  --nse-metal-text-emboss: 0 -1px 0 rgba(0, 0, 0, 0.78), 0 1px 0 rgba(255, 255, 255, 0.05);
+  --nse-metal-cast-shadow: rgba(0, 0, 0, 0.52);
+  --nse-metal-content-shadow: rgba(0, 0, 0, 0.42);
+  --nse-metal-foot-text: #a7afba;
+  --nse-metal-grain-opacity: 0.95;
+}
+
+.nse-statusbar-rail-aligned-rail:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: 100%;
+  padding: 0 14px;
+  background:
+    var(--nse-metal-footer-curve-l) left bottom / auto 100% no-repeat,
+    var(--nse-metal-header-endcap-r) right bottom / auto 100% no-repeat,
+    var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+  box-shadow: inset -14px 0 18px -10px var(--nse-metal-content-shadow);
+}
+
+.nse-statusbar-rail-aligned-main:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  min-width: 0;
+  height: 100%;
+  padding: 0 16px;
+  background:
+    var(--nse-metal-header-endcap-l) left bottom / auto 100% no-repeat,
+    var(--nse-metal-footer-curve-r) right bottom / auto 100% no-repeat,
+    var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+}
+
+.nse-statusbar-rail-aligned[data-has-rail="true"] .nse-statusbar-rail-aligned-main:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  box-shadow: -10px 0 18px -6px var(--nse-metal-content-shadow);
+}
+
+.nse-statusbar-rail-aligned[data-has-rail="false"] .nse-statusbar-rail-aligned-main:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background:
+    var(--nse-metal-footer-curve-l) left bottom / auto 100% no-repeat,
+    var(--nse-metal-footer-curve-r) right bottom / auto 100% no-repeat,
+    var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+}
+
+.nse-statusbar-rail-aligned-grain:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: var(--nse-metal-grain) repeat;
+  background-size: var(--nse-metal-grain-tile);
+  opacity: var(--nse-metal-grain-opacity);
+  mix-blend-mode: var(--nse-metal-grain-blend);
+}
+
+.nse-statusbar-rail-aligned-rail-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-statusbar-rail-aligned-leading:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-statusbar-rail-aligned-center:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-statusbar-rail-aligned-trailing:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 4;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--nse-metal-foot-text);
+  text-shadow: var(--nse-metal-text-emboss);
+}
+
+.nse-statusbar-rail-aligned-leading:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  justify-self: start;
+}
+
+.nse-statusbar-rail-aligned-center:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  justify-self: center;
+}
+
+.nse-statusbar-rail-aligned-trailing:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  justify-self: end;
+}
+
+@media (max-width: 767px) {
+  .nse-statusbar-rail-aligned[data-has-rail="true"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .nse-statusbar-rail-aligned[data-has-rail="true"] .nse-statusbar-rail-aligned-main:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    display: none;
+  }
+
+  .nse-statusbar-rail-aligned[data-has-rail="true"] .nse-statusbar-rail-aligned-rail:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    box-shadow: none;
+    background:
+      var(--nse-metal-footer-curve-l) left bottom / auto 100% no-repeat,
+      var(--nse-metal-footer-curve-r) right bottom / auto 100% no-repeat,
+      var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+  }
+}
+
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* The sign-in placard's metal, measured off the placard's source artwork.
+
+   The sweep is a pure conic gradient about one point: the ring mean is flat to
+   0.2 levels across the whole plate, so there is no radial component to model.
+   62 stops reproduce it to 1.17 levels out of 255.
+
+   --login-plate-sheen is the same stops read from the centre of a square, so a
+   second copy of the metal can rotate about the convergence point while the
+   placard swings in. The square is 199.93cqw: its inscribed radius is
+   99.97cqw and the plate's furthest corner from that point is
+   95.96cqw, so no rotation can uncover the plate and the
+   keyframes need no scale term. Sized in cqw, which is one percent of the plate
+   WIDTH vertically as well, because the placard is one drawing.
+
+   The bevel is what the placard's shape art adds over the bare texture: a lit-from-
+   the-top-left inner rim, ~3px at the art's 833px width, asymmetric by design
+   (top 0.639 / left 0.546 / bottom 0.161 / right 0.095 at the outermost row).
+   Widths are in cqw so the rim stays three art-pixels wide at any placard size,
+   and each layer carries only what the layers under it do not already supply.
+   It has to be painted ABOVE the metal and the turned texture — as an inset
+   shadow on the card it was covered by them and never reached the screen.
+
+   The texture is the placard's concentric source art — turned metal, noise smeared
+   along arcs — cropped to exactly the region the mockup laid over the plate.
+   That region was found by cross-correlating the mask against the finished art
+   over every offset: (147, 474) scores r=0.539, seventy-two standard
+   deviations clear of the field. It puts the turning centre at 48.62% / 19.79%
+   of the plate, on the metal's convergence point and under the mark, which is
+   where a machined face is turned from.
+
+   The composite metal x (0.83 + 0.219 x mask/255) is baked into the image, so the
+   layer is a plain multiply at full strength. Regressed against the mockup's own
+   pixels, it leaves 2.36 levels of residual where bare metal alone leaves 8.66. */
+.nse-login-window:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  --login-plate-aspect: 833 / 869;
+  --login-plate-radius: 8.1cqw;
+  --login-plate-metal: conic-gradient(from 0deg at 49.94% 21.52%,
+    #d6d6d6 0deg,
+    #dadada 7.25deg,
+    #d9d9d9 13.75deg,
+    #d4d4d4 18.25deg,
+    #c3c3c3 28.5deg,
+    #bfbfbf 33.75deg,
+    #c3c3c3 37.5deg,
+    #dedede 46.25deg,
+    #e0e0e0 48.25deg,
+    #e1e1e1 50deg,
+    #dedede 52.25deg,
+    #d9d9d9 54.25deg,
+    #bababa 62.5deg,
+    #b1b1b1 65.5deg,
+    #aeaeae 67.75deg,
+    #aeaeae 72.75deg,
+    #b1b1b1 77.25deg,
+    #bcbcbc 87deg,
+    #bfbfbf 91.75deg,
+    #bebebe 96.5deg,
+    #b8b8b8 106.5deg,
+    #b9b9b9 117deg,
+    #c3c3c3 121.75deg,
+    #e8e8e8 133.5deg,
+    #ededed 136.5deg,
+    #efefef 139.5deg,
+    #ebebeb 142.5deg,
+    #e3e3e3 145.5deg,
+    #d8d8d8 148.5deg,
+    #b6b6b6 156.25deg,
+    #aaaaaa 159.5deg,
+    #a3a3a3 162.75deg,
+    #a1a1a1 165.5deg,
+    #a3a3a3 170.25deg,
+    #a8a8a8 174.25deg,
+    #d1d1d1 194.25deg,
+    #dfdfdf 204.5deg,
+    #e2e2e2 207.75deg,
+    #e2e2e2 217.75deg,
+    #dfdfdf 222deg,
+    #d6d6d6 228.75deg,
+    #b8b8b8 246.25deg,
+    #b2b2b2 250.75deg,
+    #afafaf 255.75deg,
+    #b1b1b1 258.25deg,
+    #c0c0c0 263.5deg,
+    #c4c4c4 266.25deg,
+    #c1c1c1 269.75deg,
+    #afafaf 279.5deg,
+    #afafaf 299.25deg,
+    #b7b7b7 302.75deg,
+    #d7d7d7 311.25deg,
+    #dcdcdc 313.5deg,
+    #dddddd 315.5deg,
+    #dbdbdb 319deg,
+    #d6d6d6 322.75deg,
+    #bcbcbc 334.75deg,
+    #b6b6b6 338.5deg,
+    #b2b2b2 344.25deg,
+    #b8b8b8 348.25deg,
+    #d1d1d1 357.25deg,
+    #d6d6d6 360deg);
+  --login-plate-sheen: conic-gradient(from 0deg at 50% 50%,
+    #d6d6d6 0deg,
+    #dadada 7.25deg,
+    #d9d9d9 13.75deg,
+    #d4d4d4 18.25deg,
+    #c3c3c3 28.5deg,
+    #bfbfbf 33.75deg,
+    #c3c3c3 37.5deg,
+    #dedede 46.25deg,
+    #e0e0e0 48.25deg,
+    #e1e1e1 50deg,
+    #dedede 52.25deg,
+    #d9d9d9 54.25deg,
+    #bababa 62.5deg,
+    #b1b1b1 65.5deg,
+    #aeaeae 67.75deg,
+    #aeaeae 72.75deg,
+    #b1b1b1 77.25deg,
+    #bcbcbc 87deg,
+    #bfbfbf 91.75deg,
+    #bebebe 96.5deg,
+    #b8b8b8 106.5deg,
+    #b9b9b9 117deg,
+    #c3c3c3 121.75deg,
+    #e8e8e8 133.5deg,
+    #ededed 136.5deg,
+    #efefef 139.5deg,
+    #ebebeb 142.5deg,
+    #e3e3e3 145.5deg,
+    #d8d8d8 148.5deg,
+    #b6b6b6 156.25deg,
+    #aaaaaa 159.5deg,
+    #a3a3a3 162.75deg,
+    #a1a1a1 165.5deg,
+    #a3a3a3 170.25deg,
+    #a8a8a8 174.25deg,
+    #d1d1d1 194.25deg,
+    #dfdfdf 204.5deg,
+    #e2e2e2 207.75deg,
+    #e2e2e2 217.75deg,
+    #dfdfdf 222deg,
+    #d6d6d6 228.75deg,
+    #b8b8b8 246.25deg,
+    #b2b2b2 250.75deg,
+    #afafaf 255.75deg,
+    #b1b1b1 258.25deg,
+    #c0c0c0 263.5deg,
+    #c4c4c4 266.25deg,
+    #c1c1c1 269.75deg,
+    #afafaf 279.5deg,
+    #afafaf 299.25deg,
+    #b7b7b7 302.75deg,
+    #d7d7d7 311.25deg,
+    #dcdcdc 313.5deg,
+    #dddddd 315.5deg,
+    #dbdbdb 319deg,
+    #d6d6d6 322.75deg,
+    #bcbcbc 334.75deg,
+    #b6b6b6 338.5deg,
+    #b2b2b2 344.25deg,
+    #b8b8b8 348.25deg,
+    #d1d1d1 357.25deg,
+    #d6d6d6 360deg);
+  --login-sheen-size: 199.93cqw;
+  --login-sheen-left: -50.02cqw;
+  --login-sheen-top: -77.52cqw;
+  --login-plate-texture: url("./assets/atmo/shell/login-window/generated/plate-texture.webp");
+  --login-plate-bevel:
+    inset 0 0.120cqw 0 rgba(255,255,255,0.308),
+    inset 0 0.240cqw 0 rgba(255,255,255,0.379),
+    inset 0 0.360cqw 0 rgba(255,255,255,0.16),
+    inset 0.120cqw 0 0 rgba(255,255,255,0.361),
+    inset 0.240cqw 0 0 rgba(255,255,255,0.24),
+    inset 0.360cqw 0 0 rgba(255,255,255,0.066),
+    inset 0 -0.120cqw 0 rgba(255,255,255,0.161),
+    inset -0.120cqw 0 0 rgba(255,255,255,0.095);
+  --login-plate-shadow: 0 8.16cqw 21.85cqw rgba(0, 0, 0, 0.76);
+}
+/* === END GENERATED login plate === */
+
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* The sign-in placard.
+ *
+ * Every dimension below is in cqw — one percent of the login window's width,
+ * which is also the plate's width — so the whole thing is one drawing that
+ * scales, exactly like the mockup it was measured from. The metal itself
+ * comes from loginPlate.css.
+ *
+ * The plate is no longer a PNG. Its source art turned out to be a
+ * pure angle gradient — flat to 0.2 levels around every ring — so it is now a
+ * CSS conic gradient that rebuilds to 0.45 levels of the original and stays
+ * crisp at any size. What remains raster is the TURNING, because noise smeared
+ * along an arc is not a shape either: a 106KB crop of the original mask, taken
+ * from the offset cross-correlation proved the mockup used, with the affine
+ * composite baked in so the browser only has to multiply.
+ */
+
+.nse-login-window:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: relative;
+  z-index: 1;
+  container-type: inline-size;
+  /* Hardware geometry. The tack sits 5.05cqw down and the plate starts at
+     28.5cqw, which is where the mockup puts them: its plate top is 237px into
+     a file whose plate is 834px wide. */
+  --login-card-top: 28.5cqw;
+  --login-apex-y: 5.05cqw;
+  /* Grommets, measured by sliding the ring sprite over the
+     mockup's corner at every scale and offset. The left one matches at r=0.97,
+     five standard deviations clear of 108,647 other placements, at the sprite's
+     native 34px — so the size below is exact rather than fitted.
+
+     The mockup's two grommets are NOT symmetric: the left sits 31px in and the
+     right 27px, a 4px hand-nudge. Both are reproduced rather than averaged,
+     because matching the reference is the brief. Collapsing the two insets into
+     one is a one-line change if a symmetric placard is ever wanted instead. */
+  --login-eyelet-size: 4.08cqw;          /* 34px of 834 */
+  --login-eyelet-top: 3.24cqw;           /* 27px */
+  --login-eyelet-inset: 3.72cqw;         /* 31px, left */
+  --login-eyelet-inset-right: 3.12cqw;   /* 26px */
+  /* Where the ropes end: the sprite's own hole, not the middle of its canvas —
+     the ring art is drawn a shade off-centre, and anchoring on the canvas puts
+     the rope's end on the bezel instead of through it. */
+  --login-eyelet-center-x: 5.67cqw;
+  --login-eyelet-center-y: 5.17cqw;
+  --login-eyelet-center-x-right: 5.32cqw;
+  --login-hardware-depth: 2px;
+  --login-rope-drop: calc(var(--login-card-top) + var(--login-eyelet-center-y) - var(--login-apex-y));
+
+  /* Content rhythm, straight off the mockup — except the two control heights,
+     which are the system's. The mockup draws its well 117 art pixels tall and
+     its button pill 125, which at this placard's size is a 60px field and a
+     70px button against an OS that stands controls at 50 and 52. Matching the
+     art there made the placard's controls a third bigger than the same controls
+     anywhere else in the system, so these two follow --nse-atmo-bar-h and
+     --nse-atmo-control-h instead, at the width the placard settles to.
+
+     The mockup's proportion survives it: its button pill stands 8 art pixels
+     taller than its field, and 52 over 50 keeps the button the taller of the
+     two. */
+  --login-pad-x: 4.5cqw;
+  --login-field-height: 11.6cqw;   /* 50px = --nse-atmo-bar-h */
+  --login-field-radius: 2.08cqw;   /* the mockup's 0.18 of the field height */
+
+  /* How far the sheen swings against the placard's own swing. 2 is the specular
+     figure — a mirror turns a reflected ray twice as fast as its own face, and
+     the opposite way — and is what the keyframes are written in multiples of.
+     Raise it for more travel; it costs nothing, the square cannot be uncovered. */
+  --login-sheen-gain: 2;
+
+  width: min(430px, 60vw, calc((100vh - 28px) * 0.56));
+  min-width: 300px;
+  color: #2c3036;
+  perspective: 1500px;
+  transform-origin: 50% 11%;
+}
+
+/* ---------------------------------------------------------------- hardware */
+
+.nse-login-window-hang:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: 8;
+  width: 100%;
+  height: calc(var(--login-card-top) + 8cqw);
+  transform: translateX(-50%) translateZ(var(--login-hardware-depth));
+  pointer-events: none;
+}
+
+.nse-login-window-hang-flipper:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: absolute;
+  inset: 0;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  transform-origin: 50% var(--login-apex-y);
+}
+
+.nse-login-window-swing-stage:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  display: flow-root;
+  position: relative;
+  z-index: 2;
+  transform-origin: 50% var(--login-apex-y);
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.nse-login-window-rope-shadow:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: absolute;
+  left: 50%;
+  top: 18.4cqw;
+  width: 71cqw;
+  opacity: 0;
+  transform: translateX(-50%);
+  filter: blur(1px);
+}
+
+.nse-login-window-rope:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: absolute;
+  top: var(--login-apex-y);
+  z-index: 8;
+  width: calc(50cqw - var(--login-eyelet-center-x));
+  height: var(--login-rope-drop);
+  object-fit: fill;
+  filter:
+    drop-shadow(0 2px 1px rgba(255, 255, 255, 0.18))
+    drop-shadow(0 4px 3px rgba(0, 0, 0, 0.62));
+}
+
+.nse-login-window-rope-left:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { left: var(--login-eyelet-center-x); }
+.nse-login-window-rope-right:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  left: 50cqw;
+  /* Its own anchor, because the right grommet is not the left one mirrored. */
+  width: calc(50cqw - var(--login-eyelet-center-x-right));
+}
+
+.nse-login-window-top-tack:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: absolute;
+  left: 50%;
+  top: var(--login-apex-y);
+  z-index: 12;
+  width: 10.2cqw;
+  height: 10.2cqw;
+  transform: translate(-50%, -50%);
+}
+
+.nse-login-window-top-tack [data-login-decoration]:first-child:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *),
+.nse-login-window-top-tack [data-login-decoration]:last-child:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.nse-login-window-top-tack [data-login-decoration]:first-child:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  width: 10.2cqw;
+  height: 10.2cqw;
+  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.5));
+}
+
+.nse-login-window-top-tack [data-login-decoration]:last-child:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  width: 5.5cqw;
+  height: auto;
+}
+
+/* ------------------------------------------------------------------ plate */
+
+.nse-login-window-shake-stage:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: relative;
+  z-index: 4;
+  margin-top: var(--login-card-top);
+  transform-style: preserve-3d;
+}
+
+.nse-login-window-card-stage:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--login-plate-aspect);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  perspective: 1400px;
+}
+
+.nse-login-window-card-flipper:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: absolute;
+  inset: 0;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+}
+
+.nse-login-window-card:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: absolute;
+  inset: 0;
+  /* `hidden` still creates a programmatically scrollable box. Autofocusing the
+     provider action used to scroll this plate by 46.5px, moving every child up
+     over stationary metal. Keep the fallback, then use non-scrolling clipping
+     where supported so focus can never alter the drawing's internal origin. */
+  overflow: hidden;
+  overflow: clip;
+  border-radius: var(--login-plate-radius);
+  /* The measured sweep. A flat fallback sits under it so a browser that cannot
+     paint a conic gradient still gets metal rather than a hole. */
+  background: #c6c7c9 var(--login-plate-metal);
+  box-shadow: var(--login-plate-shadow);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  isolation: isolate;
+}
+
+/* The plate's cut edge. As an inset shadow on the card it was painted over by
+   .nse-login-window-texture — a child covering the full card with its own copy
+   of the sweep — so the measured highlight was in the stylesheet and never
+   reached the screen: the mockup's top row reads 223 against a 190 plate and
+   the app's read a flat 196.
+
+   It sits above that texture and BELOW the turned overlay, which is the
+   mockup's own order: the turning runs across the bevel like it runs across
+   the metal. Painted above it instead, the rim came out ten levels bright —
+   exactly the 0.945 the multiply takes out. */
+.nse-login-window-card:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  box-shadow: var(--login-plate-bevel);
+  pointer-events: none;
+}
+
+.nse-login-window-face-front:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { transform: rotateY(0deg) translateZ(0.1px); }
+.nse-login-window-face-back:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { transform: rotateY(180deg) translateZ(0.1px); }
+
+.nse-login-window-card-flipper.is-signin .nse-login-window-face-front:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *),
+.nse-login-window-card-flipper.is-recovery .nse-login-window-face-back:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  pointer-events: auto;
+}
+
+.nse-login-window-card-flipper.is-signin .nse-login-window-face-back:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *),
+.nse-login-window-card-flipper.is-recovery .nse-login-window-face-front:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  pointer-events: none;
+}
+
+/* The sheen: a second copy of the metal that turns about the convergence point
+   while the placard swings in on its ropes.
+
+   The placard enters with a damped pendulum — system.loginWindowEnter rocks it
+   -9, 6.5, -3.8, 1.9, -0.7, 0 over 1.18s — and the light in the room does not
+   rock with it. A specular highlight travels twice the surface angle and the
+   other way, so the sweep on the face counter-rotates at -2x the card's own
+   swing. That is the whole animation: the keyframes below ARE the enter
+   preset's angles, negated, times --login-sheen-gain. Change the swing and
+   these have to change with it.
+
+   It is not the plate's rectangle. This layer is a square centred on the
+   convergence point, --login-sheen-size across, generated so that its inscribed
+   circle already swallows the plate's furthest corner (96.97cqw of reach
+   against 95.96 needed). Rotating a plate-sized copy uncovers a corner; the old
+   fix scaled it up, which is invisible — a conic gradient is scale invariant
+   about its own origin — but leaves the browser magnifying a gradient it
+   rasterised at layout size. A square that cannot be uncovered needs no scale
+   term at all, so this rasterises once, at its own size, and only rotates. */
+.nse-login-window-texture:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: absolute;
+  left: var(--login-sheen-left);
+  top: var(--login-sheen-top);
+  /* Negative, along with the bevel, so that .nse-login-window-content can drop
+     its own z-index and stop being a stacking context — see the turned overlay
+     below, which the button has to escape. Both still paint above the card's
+     background, which is what a negative z-index child does. */
+  z-index: -2;
+  display: block;
+  width: var(--login-sheen-size);
+  height: var(--login-sheen-size);
+  background: var(--login-plate-sheen);
+  transform-origin: 50% 50%;
+  pointer-events: none;
+}
+
+/* Which sweep is running is chosen by the window's data-sheen, because a CSS
+   animation restarts only when its NAME changes. The two flip sweeps are named
+   for their direction, which is safe because the directions strictly alternate:
+   the recovery link only exists on the sign-in face and the return button only
+   on the recovery face, so the same flip can never fire twice in a row.
+
+   Both faces carry a texture layer and both get the same rule. The one turned
+   away is not on screen to disagree, and it needs to have moved by the time it
+   comes round. `both` holds the end value, which is what makes the pair chain. */
+.nse-login-window[data-sheen="enter"] .nse-login-window-texture:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  animation: com-syndromatic-atmo-login-window-metal-settle 1180ms cubic-bezier(0.2, 0.9, 0.18, 1) both;
+}
+
+.nse-login-window[data-sheen="flip-out"] .nse-login-window-texture:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  animation: com-syndromatic-atmo-login-window-metal-flip-out 500ms cubic-bezier(0.2, 0.9, 0.18, 1) both;
+}
+
+.nse-login-window[data-sheen="flip-back"] .nse-login-window-texture:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  animation: com-syndromatic-atmo-login-window-metal-flip-back 500ms cubic-bezier(0.2, 0.9, 0.18, 1) both;
+}
+
+/* The turned texture sits above the metal, the bevel and the wells — in the
+   mockup the white Syn ID field carries the same arcs the bare metal does,
+   because the mask was laid over the finished art rather than under it. The
+   amplitude says so: high-passed, the mockup's bare metal reads 2.02 and both
+   its fields 1.58.
+
+   The BUTTON is the exception, and it reads 0.28 — no turning at all. It was
+   pasted on after, which is also what a button is: separate hardware resting on
+   the plate, not part of the machined face. Multiplying it cost real tone —
+   with the overlay switched off the face renders 185..227 against the mockup's
+   178..234, and with it on, 179..214. So .nse-login-action escapes upward past
+   this layer, which is why the content wrapper above no longer sets a z-index.
+
+   It stretches with the plate rather than tiling, so the turning centre lands on
+   the metal's convergence point at every size: this is one image cropped to the
+   exact region the mockup used, not a repeat. The composite is baked in, so the
+   layer multiplies at full strength. */
+.nse-login-window-texture-turn:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  border-radius: inherit;
+  background: var(--login-plate-texture) 0 0 / 100% 100% no-repeat;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.nse-login-window-beta-ribbon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  /* Outside the card, so it can overhang the corner the way the mockup's does
+     rather than being sliced off by the plate's radius.
+
+     The overhang is 1.44cqw, not 0.36: sampled across the band at two rows the
+     mockup's ribbon sits nine plate-pixels further right, with the same slope
+     and the same run length, so it is the same art moved rather than resized.
+     The bounding boxes disagree on width only because the mockup's is clipped
+     by the plate edge at 832 and ours stopped short at 828. */
+  position: absolute;
+  top: -0.24cqw;
+  right: -1.44cqw;
+  z-index: 14;
+  width: 23.62cqw;
+  height: auto;
+  transform: translateZ(1px);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  filter: drop-shadow(0 0.35cqw 0.4cqw rgba(0, 0, 0, 0.34));
+  pointer-events: none;
+}
+
+.nse-login-window-ring:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: absolute;
+  top: var(--login-eyelet-top);
+  z-index: 16;
+  width: var(--login-eyelet-size);
+  height: var(--login-eyelet-size);
+  /* No backface-visibility here, unlike the ribbon: a grommet is a hole through
+     the plate, so it reads from either side, and hiding it left the ropes
+     ending in mid-air whenever the placard was flipped. */
+  transform: translateZ(1.2px);
+  filter: drop-shadow(0 0.25cqw 0.3cqw rgba(0, 0, 0, 0.42));
+}
+
+.nse-login-window-ring-left:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { left: var(--login-eyelet-inset); }
+.nse-login-window-ring-right:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { right: var(--login-eyelet-inset-right); }
+
+/* Dropping backface-visibility was not enough on its own. Once the placard
+   turns, translateZ(1.2px) is pointing AWAY from the viewer, so the grommets
+   land behind the plate and the card occludes them — the recovery face came
+   back with its ropes ending in mid-air. Pushing them the other way keeps them
+   in front from either side, which is what a hole through a plate does. The
+   ring art mirrors with the flip, and a grommet is round, so nothing shows. */
+.nse-login-window-card-flipper.is-recovery .nse-login-window-ring:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  transform: translateZ(-1.2px);
+}
+
+/* ---------------------------------------------------------------- content */
+
+.nse-login-window-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  position: relative;
+  /* Deliberately no z-index: that would make this a stacking context and trap
+     .nse-login-action below the turned overlay. Positioned with z-index auto it
+     still paints above the metal and bevel, which are negative. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  /* The mark's dark disc starts 8.9% of the plate's height down — measured the
+     same way on both plates, which is the only comparison that means anything
+     here: the disc's soft outer edge begins ~3% earlier and reading THAT off the
+     mockup is what briefly moved the whole mark up by three percent. */
+  padding: 8.66cqw var(--login-pad-x) 3.25cqw;
+}
+
+/* No opacity and no drop-shadows: the mark is already a translucent glaze —
+   a 30% black disc with white α25 highlights and black α80 shadows on the
+   strokes — so the metal shows through it on its own. Muting it, which is what
+   the old `opacity: .76` did, is what made it read as a grey sticker. */
+.nse-login-window-logo:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  width: 27.82cqw;
+  height: auto;
+  flex: 0 0 auto;
+  margin-bottom: 4.58cqw;
+}
+
+.nse-login-window h1:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *),
+.nse-login-recovery-content h2:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin: 0;
+  color: #555759;
+  font-family: inherit;
+  font-size: 4.04cqw;
+  font-weight: 600;
+  word-spacing: 0.52cqw;
+  line-height: 1.16;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Neither the mockup's title nor its mark is centred. The title's ink runs
+   205..927 in a plate spanning 147..979, three pixels right of the middle; the
+   mark's disc sits two right. Word gaps, glyph widths and the disc's width all
+   match to within two pixels, so those offsets are the whole difference — a
+   nudge in whatever drew the mockup, not a difference in the drawing. The
+   fields, measured the same way, are centred to within a pixel, so this is not
+   a shift of the plate rect.
+
+   Reproduced because matching the mockup is the brief. Delete these two rules
+   for a centred heading and mark. */
+.nse-login-window h1:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  transform: translateX(0.36cqw);
+}
+
+.nse-login-window-logo:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  transform: translateX(0.24cqw);
+}
+
+.nse-login-recovery-content h2:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  font-size: 3.6cqw;
+  white-space: normal;
+}
+
+.nse-login-form:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: flex;
+  position: relative;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  /* 3.02cqw was the mockup's own gap, back when the controls were the mockup's
+     size. Standing them at the system's freed 9.1cqw of plate — 2.4 from each
+     field and 4.3 from the button — and `margin-top: auto` on the action pools
+     every bit of it into one void above the button. So most of it is bought back
+     here and in the field separator below, which pushes nothing that is measured
+     against the art: the mark and the title keep their rows, and the fields were
+     never going to line up with a mockup that shows both at once. */
+  margin-top: 7.5cqw;
+
+  /* No uniform gap. The band between the password and the button is 33px of
+     bare metal in the mockup and the remember row plus the error line need 31 of
+     them, so every separator here is spent deliberately: a uniform gap put the
+     stack 3% over the plate's height and the button, pinned by margin-top:auto,
+     had nowhere left to go and overflowed the bottom edge. */
+  gap: 0;
+}
+
+/* Step two carries twice the stack — two wells, the remember row and the
+   recovery link — so it starts higher than step one, which has a single field
+   and would only widen its own gap by rising. Measured off the running page:
+   the password's bottom edge moves from 78.84cqw to 74.74, and those four go
+   into the row below it, which had 0.08cqw of clearance and looked it.
+
+   The step change is only a class swap, so the whole stack glides between the
+   two margins instead of cutting. The button does not move at either step —
+   it is pinned to the plate's bottom — so what the reader sees is the Syn ID
+   well rising and the password arriving under it. */
+.nse-login-form--password:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { margin-top: 3.4cqw; }
+
+.nse-login-form:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  transition: margin-top 420ms cubic-bezier(0.2, 0.9, 0.18, 1);
+}
+
+/* The password well and the row beneath it are new DOM at step two, so they
+   cannot glide from anywhere — they ease out from behind the Syn ID well
+   instead, which is where they would have come from. Slightly behind the
+   glide so the space is opening as they fill it. */
+.nse-login-form--password .nse-login-field + .nse-login-field:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-login-form--password .nse-login-form-row:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  animation: com-syndromatic-atmo-login-window-row-arrive 380ms cubic-bezier(0.2, 0.9, 0.18, 1) 90ms both;
+}
+
+@keyframes com-syndromatic-atmo-login-window-row-arrive {
+  from { opacity: 0; transform: translateY(-2cqw); }
+  to { opacity: 1; transform: none; }
+}
+
+.nse-login-field + .nse-login-field:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { margin-top: 2.4cqw; }
+
+/* ------------------------------------------------------------------ fields */
+
+.nse-login-field:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: block;
+  width: 100%;
+}
+
+.nse-login-field-label:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* The resting well is a hole in the metal, not a grey box: a 30% black wash
+   that lets the conic sweep read straight through it, which is what the mockup
+   does — its interior is the plate's own luminance times 0.70 at every point
+   across the width. Painting a flat grey there instead is what made the old
+   field look pasted on. */
+.nse-login-field input:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: block;
+  width: 100%;
+  height: var(--login-field-height);
+  padding: 0 4cqw;
+  border: 0;
+  border-radius: var(--login-field-radius);
+  color: #f2f4f6;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.29), rgba(0, 0, 0, 0.325));
+  box-shadow:
+    inset 0 0.2cqw 0.24cqw rgba(0, 0, 0, 0.42),
+    inset 0 -0.12cqw 0 rgba(255, 255, 255, 0.14),
+    0 0.3cqw 0 rgba(255, 255, 255, 0.72);
+  font-family: inherit;
+  font-size: 3.95cqw;   /* 17px, the system field frame's own size */
+  font-weight: 400;
+  line-height: var(--login-field-height);
+  outline: 0;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.nse-login-field input:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::placeholder {
+  color: rgba(255, 255, 255, 0.72);
+  opacity: 1;
+}
+
+/* Focus fills the well with light and rings it in the mockup's muted steel
+   blue — rgb(150,185,212), not the cyan the old sheet used. The inner shadow
+   at the top is deep and long (16px over an 834px plate) because the field is
+   read as pressed into the metal, not floated on it. */
+.nse-login-field input:focus:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-login-field input:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: #26292d;
+  background: #fbfbf9;
+  box-shadow:
+    inset 0 1.9cqw 1.9cqw -1.2cqw rgba(0, 0, 0, 0.52),
+    0 0 0 0.42cqw rgba(150, 185, 212, 0.95),
+    0 0 0 0.78cqw rgba(150, 185, 212, 0.34);
+  text-shadow: none;
+}
+
+.nse-login-field input:focus:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::placeholder {
+  color: rgba(60, 64, 70, 0.5);
+}
+
+.nse-login-field.is-invalid input:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  box-shadow:
+    inset 0 0.2cqw 0.24cqw rgba(0, 0, 0, 0.42),
+    0 0 0 0.24cqw rgba(196, 84, 84, 0.92);
+}
+
+.nse-login-field.is-invalid input:focus:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  box-shadow:
+    inset 0 1.9cqw 1.9cqw -1.2cqw rgba(0, 0, 0, 0.52),
+    0 0 0 0.24cqw rgba(196, 84, 84, 0.95),
+    0 0 0 0.5cqw rgba(196, 84, 84, 0.32);
+}
+
+/* The Syn ID, held above the password once it has been accepted. Same well,
+   but inert — it is a record of what was entered, not a control. */
+.nse-login-field--confirmed input:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: rgba(255, 255, 255, 0.82);
+  cursor: default;
+}
+
+/* ------------------------------------------------------------- form extras */
+
+/* The mockup has nothing between the password and the button, so this row has
+   to earn its place on bare metal rather than sit on it: engraved grey type at
+   the plate's own weight, no bright blue anywhere. */
+.nse-login-form-row:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  min-height: 0;
+  height: auto;
+  /* 0.08cqw sat this row hard against the password's shadow. The four cqw the
+     step-two stack gives up by starting higher land here and above the error
+     line, which is the whole point of moving it. */
+  margin-top: 2.6cqw;
+  padding: 0 1cqw;
+}
+
+.nse-checkbox:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.2cqw;
+  color: #55585b;
+  font-family: inherit;
+  font-size: 3.4cqw;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+}
+
+.nse-checkbox.is-disabled:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.nse-checkbox-control:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  display: inline-grid;
+  width: 5cqw;
+  height: 4.13cqw;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.nse-checkbox-control input:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.nse-checkbox-art:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.nse-checkbox-art img:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  width: 5cqw;
+  height: auto;
+  transition: opacity 160ms ease;
+}
+
+.nse-checkbox-art-checked:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { opacity: 0; }
+.nse-checkbox input:checked + .nse-checkbox-art .nse-checkbox-art-unchecked:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { opacity: 0; }
+.nse-checkbox input:checked + .nse-checkbox-art .nse-checkbox-art-checked:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { opacity: 1; }
+
+.nse-checkbox input:focus-visible + .nse-checkbox-art:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  outline: 2px solid rgba(134, 214, 255, 0.92);
+  outline-offset: 3px;
+  border-radius: 5px;
+}
+
+.nse-login-recovery-link:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  padding: 0;
+  border: 0;
+  color: #55585b;
+  background: transparent;
+  font-family: inherit;
+  font-size: 3.4cqw;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: rgba(85, 88, 91, 0.42);
+  text-underline-offset: 0.6cqw;
+  cursor: pointer;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.nse-login-recovery-link:hover:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { color: #3d4043; }
+
+.nse-login-recovery-link:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.nse-login-recovery-return:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  outline: 2px solid rgba(134, 214, 255, 0.9);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.nse-login-error:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-height: 2.7cqw;
+  margin: 1.4cqw 0 0;
+  color: #8e2424;
+  font-size: clamp(11px, 1.75cqw, 13px);
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.68);
+}
+
+.nse-login-welcome:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 3cqw;
+}
+
+.nse-login-welcome p:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin: 0;
+  color: rgba(45, 51, 59, 0.9);
+  font-size: clamp(14px, 2.4cqw, 19px);
+  font-weight: 700;
+  line-height: 1.32;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.nse-login-welcome p span:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { display: block; }
+
+.nse-login-window.is-login-step-welcome .nse-login-window-logo:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  margin-bottom: 3.2cqw;
+}
+
+/* ------------------------------------------------------------------ action */
+
+/* The mockup's Sign In button IS the Atmo light button: the sprite runs black
+   α90, a white α197 rim, then an interior ramping 185 -> 222 top to bottom, and
+   the mockup measures 100 / 227 / 178 -> 234. Same control, so it is used
+   rather than redrawn. */
+.nse-login-action:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  /* Above .nse-login-window-texture-turn. A button is hardware resting on the
+     plate, so the machining marks do not run across it — the mockup's button
+     face is smooth where its metal is not. */
+  z-index: 40;
+  width: 100%;
+  margin-top: auto;
+  margin-bottom: 0;
+}
+
+/* The one place the placard stops copying the mockup.
+
+   16.4cqw of band reproduced the mockup exactly — a 125-art-pixel pill against
+   its 712..836, measured to a pixel — but the mockup is a picture and this is an
+   operating system. At the width the placard settles to, that band is 70px,
+   where every other push button in the system stands 52. A control that is a
+   third bigger than the same control everywhere else does not read as emphasis,
+   it reads as a different toolkit.
+
+   So the band is --nse-atmo-control-h, expressed in cqw so it still scales with the
+   placard: 12.1cqw is 52px at 430. The label follows the system's 18px for the
+   same reason, in the same units.
+
+   Nothing else moves. The recipe's fixed-pixel geometry — 3px of clear space,
+   the 2px stroke, the 2px rim, 3px of baked shadow — is already correct at this
+   height, because 52px is the height it was drawn for. The old `top: -0.46cqw`
+   went with it: it existed to drag a 70px band up onto the mockup's row 712, and
+   with the band at its native size the pill lands where the flexbox puts it.
+
+   The corner radius needed no override either, which was worth checking rather
+   than assuming. Fitted off the mockup's own arcs, its pill is 45.6 art px round
+   on a 128px pill — 0.356 of its height. The recipe's 16px on a 46px pill is
+   0.348. Copying the mockup's radius across in absolute pixels would have
+   over-rounded a control less than half the size; copying its proportion means
+   changing nothing. */
+.nse-login-action > .nse-control-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  /* LoginWindow owns the provider row's structural layout.  Do not rely on
+     the active appearance stylesheet to make this a flex row: during a
+     production chunk/theme hand-off that stylesheet can briefly be absent,
+     which leaves the icon on the button's inline baseline and drops the label
+     toward the lower edge. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 12.1cqw;      /* 52px = --nse-atmo-control-h */
+  min-height: 0;
+  /* Inert under the vector skin, which sets border-style: none — but this is
+     the matching vector cap width, where the material's
+     caps are 17px of a 52px band. Now that the band is 52px, that is 3.95cqw. */
+  border-width: 0 3.95cqw;
+  color: #17191b;
+  font-size: 4.19cqw;   /* 18px, the system push-button label */
+  font-weight: 400;
+  line-height: 12.1cqw;
+}
+
+.nse-login-action > .nse-control-button .nse-control-button-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: inline-flex;
+  flex: 0 0 24px;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+}
+
+.nse-login-action > .nse-control-button .nse-control-button-label:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.nse-login-provider-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  /* Inset upper edge; white lower relief with a quarter-pixel soft edge. Preserve the original colours. */
+  filter:
+    url("./assets/providerIconInset.svg?no-inline#provider-icon-inset")
+    drop-shadow(0 1.25px 0.25px rgba(255, 255, 255, 0.8));
+}
+
+/* The mockup's Sign In button is not the Atmo light button. Read at two columns
+   whose plate differs by 17 levels, its face returns the SAME values both times
+   — so it is opaque, where the Atmo ink is 0.88 and picks up the metal behind
+   it. Opaque, its ramp runs 178 to 233; translucent over this plate the same
+   tone flattens to 189..219, and that missing 30 levels is the depth the
+   mockup's button has and ours did not. The bevel is likewise a flat 249 at
+   both columns rather than a 0.77 wash.
+
+   Only the tone changes. The geometry, the states and the markup are still the
+   standard NSEPushButton, and deleting this rule returns the placard to the
+   system light tone. The black stroke ring is already right — measured 0.426
+   and 0.432 against the tone's 0.44 — so it is left alone.
+
+   The selector carries the window class on purpose. The skin declares these on
+   `[data-nse-appearance="atmo"] .nse-control-button[data-tone="light"]`, which scores
+   0-3-0; a plain `.nse-login-action > .nse-control-button` is 0-2-0 and loses, so
+   an earlier version of this block was written, parsed, and silently ignored. */
+.nse-login-window .nse-login-action > .nse-control-button[data-tone="light"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+  --nse-atmo-btn-bevel: #f9f9f9;
+  --nse-atmo-btn-fill-a: #b2b2b2;
+  --nse-atmo-btn-fill-b: #e9e9e9;
+}
+
+/* The button's spinner, left the colour it was drawn.
+
+   NSEPushButton picks the opposite spinner tone to its own — a light button
+   asks for `data-tone="dark"` so the sprite stays legible — and the skin builds
+   that tone out of the light one with `invert(1) ... brightness(0.72)`. On a
+   button face that runs 178..234 the inversion lands somewhere near black, and
+   the placard gets a hard dark disc where the rest of it is machined grey.
+
+   The generated sprite is already greys 166..243 with dark ring work, which
+   reads perfectly well against this face, so the filter comes off and the
+   standard spinner shows through. Only here: on the toolbar and in dialogs the
+   dark tone is doing its job over paler chrome. */
+.nse-login-action .nse-control-spinner[data-tone="dark"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  filter: none;
+}
+
+.nse-login-recovery-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  justify-content: flex-start;
+  gap: 2cqw;
+  width: 100%;
+}
+
+.nse-login-recovery-content p:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  max-width: 440px;
+  margin: 0;
+  color: rgba(43, 49, 58, 0.78);
+  font-size: 3.1cqw;
+  line-height: 1.35;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.nse-login-action--recovery:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { margin: auto 0 0; }
+
+/* The enter preset's own swing, negated and amplified. Its six rotate values are
+   spread evenly across the duration by framer-motion, which is what these
+   percentages are; the easing is atmoEase, per segment, exactly as framer
+   applies it. The gain is why the sheen reads as a spin and not a wobble: at 2
+   the sweep opens 18deg one way and 13 the other, a 31deg travel across a face
+   whose gradient turns a full 360 in that same distance.
+
+   No opacity ramp. The card carries an identical static copy underneath, so
+   fading this one in cross-dissolves the same sweep against itself at two
+   different angles, and 18deg apart that reads as a double image rather than as
+   light. It is opaque from the first frame. */
+@keyframes com-syndromatic-atmo-login-window-metal-settle {
+  0% { transform: rotate(calc(var(--login-sheen-gain) * 9deg)); }
+  20% { transform: rotate(calc(var(--login-sheen-gain) * -6.5deg)); }
+  40% { transform: rotate(calc(var(--login-sheen-gain) * 3.8deg)); }
+  60% { transform: rotate(calc(var(--login-sheen-gain) * -1.9deg)); }
+  80% { transform: rotate(calc(var(--login-sheen-gain) * 0.7deg)); }
+  100% { transform: rotate(0deg); }
+}
+
+/* The flip sweep, which is a different KIND of motion from the one above and
+   must not borrow its shape.
+
+   The arrival oscillates because the placard is a pendulum: it hangs on two
+   ropes, overshoots, comes back, and damps out, and the sweep tracks that
+   because the card really does rock. A flip does not rock. It turns one way,
+   through 180 degrees, and stops — so the light crossing the face travels one
+   way and decelerates. An oscillating sweep on a monotonic rotation reads as a
+   bounce that nothing in the motion accounts for.
+
+   So these are monotonic and CHAINED: turning to recovery sweeps the metal out
+   and leaves it there, turning back sweeps it home. That is why the two are
+   picked by direction rather than by alternation — the flip out ends where the
+   flip back begins, and the placard resting on its far face rests with its
+   metal turned, which is what a card showing its other side would do.
+
+   The easing is the flip's own, so the light decelerates exactly as the card
+   does. Sixty-four degrees at the default gain: enough to read as a turn,
+   short of the full revolution that would land the sweep back where it started
+   and show nothing at all. */
+@keyframes com-syndromatic-atmo-login-window-metal-flip-out {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(calc(var(--login-sheen-gain) * -32deg)); }
+}
+
+@keyframes com-syndromatic-atmo-login-window-metal-flip-back {
+  from { transform: rotate(calc(var(--login-sheen-gain) * -32deg)); }
+  to { transform: rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Carries the window and the attribute on purpose. The sweep rules score
+     0-3-0 now that which animation runs is chosen by data-sheen, and a bare
+     `.nse-login-window-texture` is 0-1-0 — it would parse, sit here looking
+     correct, and lose every time. A media query adds nothing to specificity. */
+  .nse-login-window[data-sheen] .nse-login-window-texture:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+    animation: none;
+    transform: none;
+  }
+
+  /* The step-two glide and the rows that arrive with it. */
+  .nse-login-window .nse-login-form:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+    transition: none;
+  }
+
+  .nse-login-window .nse-login-form--password .nse-login-field + .nse-login-field:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *),
+  .nse-login-window .nse-login-form--password .nse-login-form-row:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .nse-login-window:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+    width: min(86vw, calc((100vh - 36px) * 0.56));
+    min-width: 284px;
+  }
+
+  /* The hardware keeps its translateZ here. This block used to restate the
+     transform as `translateX(-50%)` alone, which changes nothing about the
+     centring — the base rule already says that — and quietly drops the 2px of
+     lift that puts the rope and the tack IN FRONT of the plate.
+
+     z-index does not save it. The swing stage is `transform-style: preserve-3d`,
+     so its children are sorted by depth and the z-index: 8 on the hardware is
+     ignored; flattened onto the same plane as a card that carries its own 3D
+     transform, the ropes end up behind the metal and run under the top edge
+     instead of into the grommets. Restated in full so the Z cannot go missing
+     again if the centring is ever changed. */
+  .nse-login-window-hang:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) {
+    transform: translateX(-50%) translateZ(var(--login-hardware-depth));
+  }
+
+  /* The remember row stays on one line. Stacking it here cost a line the plate
+     does not have — the content stack is already full, `margin-top: auto` on the
+     button absorbs nothing, and the pill ran off the bottom edge.
+
+     It does not need to stack. Both labels are sized in cqw, so they are the
+     same fraction of the placard at 335px as at 430 and the row either fits at
+     every width or at none; it fits. Anything given a px floor here — the error
+     line has one — would break that, and would have to be checked at 284px, the
+     narrowest the placard goes. */
+}
+
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+:scope[data-nse-theme="com.syndromatic.atmo"] {
+  --webspring-material-duration: 160ms;
+  --webspring-material-ease: ease;
+  --webspring-selector-duration: 260ms;
+  --webspring-selector-ease: cubic-bezier(.2,.82,.2,1);
+  --webspring-hover-label-duration: 180ms;
+}
+
+.webspring-view-host:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.webspring-entrance-surface:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: contents;
+}
+
+.webspring-quickswitch:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --webspring-quickswitch-height: 114.5px;
+  --webspring-quickswitch-left-cap-width: 52.5px;
+  --webspring-quickswitch-right-cap-width: 50px;
+  --webspring-quickswitch-middle-width: 16px;
+  --webspring-quickswitch-icon-size: 72px;
+  --webspring-quickswitch-icon-gap: 14px;
+  --webspring-quickswitch-inner-padding: 28px;
+  /* How far a shell's icon effect may paint beyond its icon slot, including any scale it
+     animates to, without being clipped or making the row scroll. */
+  --webspring-quickswitch-effect-overflow: 56px;
+  /* The frame grows with its icons until it is this far from each screen edge. */
+  --webspring-quickswitch-screen-inset: 17px;
+  --webspring-quickswitch-min-width: 172px;
+  /* Set by the view: below 1 when overflow is "shrink" and the icons would pass the screen inset. */
+  --webspring-quickswitch-fit: 1;
+  --webspring-quickswitch-slot: calc(var(--webspring-quickswitch-icon-size) * var(--webspring-quickswitch-fit));
+  --webspring-quickswitch-slot-gap: calc(var(--webspring-quickswitch-icon-gap) * var(--webspring-quickswitch-fit));
+  position: fixed;
+  z-index: 145;
+  left: 50%;
+  top: 50%;
+  width: min(
+    calc(100vw - 2 * var(--webspring-quickswitch-screen-inset)),
+    max(
+      var(--webspring-quickswitch-min-width),
+      calc(
+        (var(--webspring-quickswitch-items) * var(--webspring-quickswitch-slot)) +
+        ((var(--webspring-quickswitch-items) - 1) * var(--webspring-quickswitch-slot-gap)) +
+        (var(--webspring-quickswitch-inner-padding) * 2)
+      )
+    )
+  );
+  height: var(--webspring-quickswitch-height);
+  color: #f8fbff;
+  pointer-events: auto;
+  transform-origin: center;
+  translate: -50% -50%;
+  isolation: isolate;
+}
+
+.webspring-quickswitch-strip:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  overflow: hidden;
+  pointer-events: none;
+  filter:
+    drop-shadow(0 18px 26px rgba(0, 0, 0, 0.58))
+    drop-shadow(0 4px 5px rgba(0, 0, 0, 0.74));
+}
+
+.webspring-quickswitch-cap:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.webspring-quickswitch-middle:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: block;
+  height: var(--webspring-quickswitch-height);
+  background-position: top left;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.webspring-quickswitch-cap-left:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: var(--webspring-quickswitch-left-cap-width);
+  min-width: var(--webspring-quickswitch-left-cap-width);
+  background-image: url("./assets/webspring/quickswitch/control-tab-left.png");
+}
+
+.webspring-quickswitch-cap-right:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: var(--webspring-quickswitch-right-cap-width);
+  min-width: var(--webspring-quickswitch-right-cap-width);
+  background-image: url("./assets/webspring/quickswitch/control-tab-right.png");
+}
+
+.webspring-quickswitch-middle:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  flex: 1;
+  min-width: 0;
+  background-image: url("./assets/webspring/quickswitch/control-tab-middle.png");
+  background-repeat: repeat-x;
+  background-size: var(--webspring-quickswitch-middle-width) var(--webspring-quickswitch-height);
+}
+
+/* A scroller clips on both axes (overflow-y: visible computes to auto beside overflow-x: auto), and
+   anything painted past its edge becomes scrollable range. So the row reaches past the frame by the
+   effect allowance: effects paint inside its padding, where they are neither clipped nor scrollable,
+   and the row is hidden-overflow unless the icons themselves do not fit. The reach is invisible and passes
+   pointers through, so it never blocks the backdrop. */
+.webspring-quickswitch-items:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  --webspring-quickswitch-reach-inline: max(0px, calc(var(--webspring-quickswitch-effect-overflow) - var(--webspring-quickswitch-inner-padding)));
+  --webspring-quickswitch-reach-block: max(0px, calc(var(--webspring-quickswitch-effect-overflow) - (var(--webspring-quickswitch-height) - var(--webspring-quickswitch-slot)) / 2));
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: safe center;
+  gap: var(--webspring-quickswitch-slot-gap);
+  box-sizing: border-box;
+  height: calc(100% + 2 * var(--webspring-quickswitch-reach-block));
+  margin: calc(-1 * var(--webspring-quickswitch-reach-block)) calc(-1 * var(--webspring-quickswitch-reach-inline));
+  padding: 0 calc(var(--webspring-quickswitch-inner-padding) + var(--webspring-quickswitch-reach-inline));
+  scroll-padding-inline: calc(var(--webspring-quickswitch-inner-padding) + var(--webspring-quickswitch-reach-inline));
+  overflow: hidden;
+  pointer-events: none;
+  scrollbar-width: none;
+}
+
+/* Only icons that do not fit make the row scrollable (the view measures the icon slots), and then
+   they fade out at the frame's inner edge rather than over the caps. */
+.webspring-quickswitch-items[data-overflowing="true"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  overflow-x: auto;
+  --webspring-quickswitch-fade-start: var(--webspring-quickswitch-reach-inline);
+  --webspring-quickswitch-fade-end: calc(var(--webspring-quickswitch-reach-inline) + var(--webspring-quickswitch-inner-padding));
+  -webkit-mask-image: linear-gradient(to right,
+    transparent var(--webspring-quickswitch-fade-start), #000 var(--webspring-quickswitch-fade-end),
+    #000 calc(100% - var(--webspring-quickswitch-fade-end)), transparent calc(100% - var(--webspring-quickswitch-fade-start)));
+  mask-image: linear-gradient(to right,
+    transparent var(--webspring-quickswitch-fade-start), #000 var(--webspring-quickswitch-fade-end),
+    #000 calc(100% - var(--webspring-quickswitch-fade-end)), transparent calc(100% - var(--webspring-quickswitch-fade-start)));
+}
+
+.webspring-quickswitch-items:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::-webkit-scrollbar {
+  display: none;
+}
+
+.webspring-quickswitch-item:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--webspring-quickswitch-slot);
+  min-width: var(--webspring-quickswitch-slot);
+  height: var(--webspring-quickswitch-slot);
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  pointer-events: auto;
+}
+
+.webspring-quickswitch-item:disabled:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.webspring-quickswitch-item .nse-icon-well:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  overflow: visible;
+  justify-self: center;
+  align-self: center;
+  transform-origin: center;
+  transform: translate(-50%, calc(-50% - 3px)) scale(calc(0.94 * var(--webspring-quickswitch-fit)));
+  transition:
+    filter 220ms var(--webspring-material-ease),
+    transform 260ms var(--webspring-material-ease);
+}
+
+.webspring-quickswitch-item .nse-icon-well:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::before {
+  opacity: 0;
+}
+
+.webspring-quickswitch-item .webspring-icon-artwork:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 3;
+  width: 68px;
+  height: 68px;
+}
+
+.webspring-quickswitch-item .nse-loading-spinner:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.webspring-quickswitch-item .nse-badge:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  z-index: 5;
+}
+
+.webspring-quickswitch-item.is-selected .nse-icon-well:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  filter:
+    drop-shadow(0 11px 12px rgba(0, 0, 0, 0.42))
+    drop-shadow(0 0 8px rgba(142, 224, 255, 0.24));
+  transform: translate(-50%, calc(-50% - 3px)) scale(var(--webspring-quickswitch-fit));
+}
+
+.webspring-quickswitch-item.is-selected .webspring-icon-artwork__image:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  filter:
+    brightness(1.04)
+    saturate(1.08)
+    drop-shadow(0 0 5px rgba(94, 202, 255, 0.2));
+}
+
+.webspring-quickswitch-item.is-selected .webspring-icon-artwork__glow:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  opacity: 0.62;
+  transform: scale(1.018);
+}
+
+.webspring-quickswitch-item:focus-visible .nse-icon-well:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  outline: 2px solid rgba(174, 236, 255, 0.82);
+  outline-offset: 4px;
+}
+
+@media (max-width: 560px) {
+  .webspring-quickswitch:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    --webspring-quickswitch-height: 94px;
+    --webspring-quickswitch-left-cap-width: 43px;
+    --webspring-quickswitch-right-cap-width: 41px;
+    --webspring-quickswitch-middle-width: 13px;
+    --webspring-quickswitch-icon-size: 59px;
+    --webspring-quickswitch-icon-gap: 11.5px;
+    --webspring-quickswitch-inner-padding: 23px;
+    --webspring-quickswitch-screen-inset: 1px;
+    --webspring-quickswitch-min-width: 210px;
+  }
+
+  .webspring-quickswitch-item .nse-icon-well:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    transform: translate(-50%, calc(-50% - 3px)) scale(calc(0.83 * var(--webspring-quickswitch-fit)));
+  }
+
+  .webspring-quickswitch-item.is-selected .nse-icon-well:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    transform: translate(-50%, calc(-50% - 3px)) scale(calc(0.88 * var(--webspring-quickswitch-fit)));
+  }
+}
+
+.syncloudos-notification-layer:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  pointer-events: none;
+}
+
+.syncloudos-notification-live-region:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.syncloudos-notification-banner-stage:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: 50%;
+  --syncloudos-notification-cube-height: 104px;
+  --syncloudos-notification-cube-depth: 104px;
+  --syncloudos-notification-cube-radius: 7px;
+  width: min(500px, calc(100vw - 28px));
+  height: var(--syncloudos-notification-cube-height);
+  pointer-events: auto;
+  perspective: 860px;
+  perspective-origin: 50% -24px;
+  transform: translateX(-50%);
+  transform-style: preserve-3d;
+  isolation: isolate;
+}
+
+.syncloudos-notification-banner-stage:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 58px;
+  height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0) 70%);
+  filter: blur(8px);
+  pointer-events: none;
+  transform: translateZ(calc(var(--syncloudos-notification-cube-depth) * -0.68));
+}
+
+.syncloudos-notification-banner-stage[data-slice-status="ready"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  border-radius: var(--syncloudos-notification-cube-radius);
+}
+
+.syncloudos-notification-banner-stage[data-slice-status="capturing"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  pointer-events: none;
+}
+
+.syncloudos-notification-stage-measure:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 100%;
+  height: var(--syncloudos-notification-cube-height);
+}
+
+.syncloudos-notification-cube-void:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--syncloudos-notification-cube-height);
+  z-index: 0;
+  border-radius: var(--syncloudos-notification-cube-radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 13%),
+    radial-gradient(ellipse at 50% 50%, rgba(16, 18, 22, 0.98), rgba(1, 2, 4, 0.98) 72%),
+    #000;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 8px 18px rgba(255, 255, 255, 0.03),
+    inset 0 -20px 34px rgba(0, 0, 0, 0.84),
+    0 6px 16px rgba(0, 0, 0, 0.38);
+  pointer-events: none;
+  opacity: 1;
+  transform: none;
+}
+
+.syncloudos-notification-cube:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.syncloudos-notification-cube-rotor:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: auto;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50% 0;
+  will-change: transform;
+}
+
+.syncloudos-notification-cube-face:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  border-radius: var(--syncloudos-notification-cube-radius);
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+}
+
+.syncloudos-notification-banner-face:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  top: 0;
+  z-index: 5;
+  height: var(--syncloudos-notification-cube-height);
+  overflow: visible;
+  transform: translateZ(calc(var(--syncloudos-notification-cube-depth) * 0.5));
+  transform-origin: 50% 50%;
+}
+
+.syncloudos-notification-banner:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: var(--syncloudos-notification-cube-height);
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: var(--syncloudos-notification-cube-radius);
+  color: #182232;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(217,226,235,0.91)),
+    url("./assets/textures/NSETileCotton.jpg") 0 0 / 260px auto repeat;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(24, 32, 42, 0.2),
+    0 18px 42px rgba(0, 0, 0, 0.42);
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+  will-change: opacity, filter;
+  /* The banner drags vertically; horizontal panning stays with the page. */
+  touch-action: pan-x;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.syncloudos-notification-screen-face:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  top: 0;
+  z-index: 4;
+  height: var(--syncloudos-notification-cube-depth);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.32);
+  border-radius: var(--syncloudos-notification-cube-radius);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.24), rgba(0,0,0,0.04)),
+    rgba(42, 50, 58, 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -18px 24px rgba(0, 0, 0, 0.22),
+    0 12px 26px rgba(0, 0, 0, 0.36);
+  transform: rotateX(-90deg) translateZ(calc(var(--syncloudos-notification-cube-depth) * 0.5));
+  transform-origin: 50% 50%;
+  will-change: opacity, filter;
+}
+
+.syncloudos-notification-screen-face-image:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-screen-face-fallback:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  pointer-events: none;
+}
+
+.syncloudos-notification-screen-face-image:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  object-fit: cover;
+  transform: translateZ(0.2px);
+}
+
+.syncloudos-notification-screen-face-fallback:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 46%, rgba(0,0,0,0.18)),
+    url("./assets/textures/NSETileCotton.jpg") 0 0 / 260px auto repeat,
+    #1b232e;
+}
+
+.syncloudos-notification-screen-face:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.24), rgba(255,255,255,0) 38%, rgba(0,0,0,0.08)),
+    linear-gradient(90deg, rgba(255,255,255,0.15), rgba(0,0,0,0) 42%, rgba(0,0,0,0.1));
+  pointer-events: none;
+}
+
+.syncloudos-notification-cube-under-face:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  top: 0;
+  z-index: 3;
+  height: var(--syncloudos-notification-cube-depth);
+  border-radius: var(--syncloudos-notification-cube-radius);
+  background:
+    linear-gradient(180deg, rgba(20, 23, 27, 0.82), rgba(0, 0, 0, 0.92)),
+    #020202;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -26px 34px rgba(0, 0, 0, 0.64),
+    0 18px 30px rgba(0, 0, 0, 0.34);
+  pointer-events: none;
+  transform: rotateX(90deg) translateZ(calc(var(--syncloudos-notification-cube-depth) * 0.48));
+  transform-origin: 50% 50%;
+  will-change: opacity, filter;
+}
+
+.syncloudos-notification-cube-under-glow:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 46%),
+    linear-gradient(90deg, rgba(255,255,255,0.1), rgba(0,0,0,0) 34%, rgba(0,0,0,0.22));
+  pointer-events: none;
+}
+
+.syncloudos-notification-banner.priority-timeSensitive:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-banner.priority-critical:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  border-color: rgba(255, 224, 158, 0.74);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(83, 56, 11, 0.24),
+    0 20px 48px rgba(0, 0, 0, 0.48),
+    0 0 0 1px rgba(216, 164, 58, 0.24);
+}
+
+.syncloudos-notification-face-shade:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 30%, rgba(0,0,0,0.04)),
+    linear-gradient(90deg, rgba(255,255,255,0.23), rgba(0,0,0,0) 26%, rgba(0,0,0,0.12) 100%);
+  pointer-events: none;
+}
+
+.syncloudos-notification-banner-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+  padding: 9px 10px 6px;
+}
+
+.syncloudos-notification-app-icon-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.syncloudos-notification-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.28));
+}
+
+.syncloudos-notification-copy:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-width: 0;
+}
+
+.syncloudos-notification-meta:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+  align-items: center;
+  min-width: 0;
+  color: #526175;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.syncloudos-notification-meta span:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.syncloudos-notification-copy h2:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin: 3px 0 1px;
+  overflow-wrap: anywhere;
+  color: #172232;
+  font-family: inherit;
+  font-size: 19px;
+  line-height: 1;
+}
+
+.syncloudos-notification-copy p:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #2b3748;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.syncloudos-notification-banner-tools:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-centre-tools:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.syncloudos-notification-centre-tools button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 999px;
+  color: #f6f8fb;
+  font-size: 12px;
+  font-weight: 900;
+  background: linear-gradient(180deg, rgba(78, 94, 112, 0.96), rgba(34, 44, 58, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 2px 5px rgba(0, 0, 0, 0.28);
+}
+
+.syncloudos-notification-close-button:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: url("./assets/webspring/notification-delete-up.png") center / 34px 34px no-repeat;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.32));
+}
+
+.syncloudos-notification-close-button:active:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background-image: url("./assets/webspring/notification-delete-down.png");
+}
+
+.syncloudos-notification-centre-tools button:hover:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  filter: brightness(1.08);
+}
+
+.syncloudos-notification-app-icon-button:hover .syncloudos-notification-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.28)) brightness(1.08);
+}
+
+.syncloudos-notification-app-icon-button:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-close-button:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-action:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-clear:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-centre-tools button:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  outline: 3px solid rgba(89, 154, 231, 0.72);
+  outline-offset: 3px;
+}
+
+.syncloudos-notification-close-button:hover:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.32)) brightness(1.08);
+}
+
+.syncloudos-notification-banner-actions:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-history-actions:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-detail-actions:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 0 10px 9px 60px;
+}
+
+.syncloudos-notification-action:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-clear:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-centre-tools button:first-child:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-height: 30px;
+  min-width: 0;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 999px;
+  color: #f7f9fc;
+  font-size: 11px;
+  font-weight: 900;
+  background: linear-gradient(180deg, #5f7289, #26384f);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 2px 5px rgba(0, 0, 0, 0.24);
+}
+
+/* Press feedback: an action sinks while it is held, except under reduced motion. */
+.syncloudos-notification-action:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.syncloudos-notification-layer[data-reduced-motion="false"] .syncloudos-notification-action:active:not(:disabled):where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  transform: translateY(1px) scale(0.965);
+}
+
+.syncloudos-notification-action.is-primary:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: #172232;
+  background: linear-gradient(180deg, #ffffff, #cdd8e5);
+}
+
+.syncloudos-notification-action.is-destructive:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background: linear-gradient(180deg, #dd6a67, #8e252c);
+}
+
+.syncloudos-notification-action:disabled:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-clear:disabled:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-centre-tools button:disabled:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  opacity: 0.48;
+  cursor: default;
+}
+
+.syncloudos-notification-centre:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  right: 18px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(820px, calc(100vw - 36px));
+  max-height: min(760px, calc(100vh - 36px));
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 8px;
+  color: #1b2738;
+  background:
+    linear-gradient(180deg, rgba(244,248,252,0.94), rgba(210,220,232,0.92)),
+    url("./assets/textures/NSETileCotton.jpg") 0 0 / 320px auto repeat;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 28px 70px rgba(0, 0, 0, 0.52);
+  pointer-events: auto;
+}
+
+.syncloudos-notification-centre-head:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 15px 16px;
+  color: #f6f8fb;
+  background:
+    linear-gradient(180deg, rgba(67, 82, 102, 0.96), rgba(27, 37, 52, 0.98)),
+    url("./assets/webspring/brushed-metal.webp") center / cover;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.syncloudos-notification-centre-head p:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin: 0 0 2px;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.syncloudos-notification-centre-head h2:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin: 0;
+  font-family: inherit;
+  font-size: 31px;
+  line-height: 0.96;
+}
+
+.syncloudos-notification-centre-layout:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(260px, 0.88fr);
+  gap: 0;
+  min-height: 0;
+}
+
+.syncloudos-notification-groups:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-detail:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+}
+
+.syncloudos-notification-groups:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border-right: 1px solid rgba(71, 83, 98, 0.22);
+}
+
+.syncloudos-notification-group:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.syncloudos-notification-group-head:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+}
+
+.syncloudos-notification-group-toggle:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+}
+
+.syncloudos-notification-group-title:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-group-meta:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.syncloudos-notification-group-title:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: #192538;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.syncloudos-notification-group-meta:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: #647287;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.syncloudos-notification-group-body:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+  padding: 0 10px 10px;
+}
+
+.syncloudos-notification-history-item:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid rgba(90, 104, 122, 0.24);
+  border-radius: 8px;
+  background: rgba(244, 248, 252, 0.62);
+}
+
+.syncloudos-notification-history-item.is-selected:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  border-color: rgba(83, 119, 158, 0.72);
+  box-shadow: 0 0 0 2px rgba(67, 124, 184, 0.18);
+}
+
+.syncloudos-notification-history-item.status-dismissed:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-history-item.status-acted:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-history-item.status-archived:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-history-item.status-expired:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  opacity: 0.74;
+}
+
+.syncloudos-notification-history-main:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: center;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+}
+
+.syncloudos-notification-history-main img:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.syncloudos-notification-history-main span:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-history-main strong:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-history-main small:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-width: 0;
+}
+
+.syncloudos-notification-history-main span span:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-history-main strong:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.syncloudos-notification-history-main strong:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: #1c293b;
+  font-size: 13px;
+}
+
+.syncloudos-notification-history-main span span:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-history-main small:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: #667386;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.syncloudos-notification-history-actions:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-detail-actions:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  padding: 0;
+}
+
+.syncloudos-notification-detail:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  color: #1a2636;
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.syncloudos-notification-detail-head:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.syncloudos-notification-detail-head img:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.syncloudos-notification-detail-head p:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-detail h3:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-detail > p:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin: 0;
+}
+
+.syncloudos-notification-detail-head p:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: #647287;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.syncloudos-notification-detail h3:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  overflow-wrap: anywhere;
+  font-family: inherit;
+  font-size: 27px;
+  line-height: 1;
+}
+
+.syncloudos-notification-detail > p:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: #344255;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.syncloudos-notification-detail dl:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.syncloudos-notification-detail dl div:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(78, 92, 111, 0.18);
+}
+
+.syncloudos-notification-detail dt:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-notification-detail dd:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin: 0;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.syncloudos-notification-detail dt:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  color: #657287;
+}
+
+.syncloudos-notification-detail dd:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  overflow: hidden;
+  color: #243145;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.syncloudos-notification-empty:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  margin: 0;
+  color: #536276;
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .syncloudos-notification-banner-stage:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    top: max(8px, env(safe-area-inset-top));
+    width: min(100vw - 16px, 520px);
+  }
+
+  .syncloudos-notification-banner-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .syncloudos-notification-icon:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    width: 38px;
+    height: 38px;
+  }
+
+  .syncloudos-notification-copy h2:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    font-size: 19px;
+  }
+
+  .syncloudos-notification-banner-actions:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    padding: 0 10px 10px 61px;
+  }
+
+  .syncloudos-notification-centre:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    top: max(8px, env(safe-area-inset-top));
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-height: calc(100vh - 16px);
+  }
+
+  .syncloudos-notification-centre-head:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    align-items: start;
+    padding: 12px;
+  }
+
+  .syncloudos-notification-centre-head h2:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    font-size: 25px;
+  }
+
+  .syncloudos-notification-centre-layout:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    grid-template-columns: 1fr;
+  }
+
+  .syncloudos-notification-groups:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    border-right: 0;
+    border-bottom: 1px solid rgba(71, 83, 98, 0.22);
+    max-height: 54vh;
+  }
+
+  .syncloudos-notification-detail:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    max-height: 32vh;
+  }
+}
+
+.webspring-apps-container:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: fixed;
+  inset: 0;
+  z-index: 42;
+  pointer-events: none;
+  perspective: 640px;
+  perspective-origin: 50% calc(18vh + 68vh);
+}
+
+/* The apps container is the single shared 3D stage during a MultiSwitch:
+   both planes' rotateY/z must resolve against this one perspective so
+   they read as two surfaces in the same space. Frames must therefore
+   keep transform-style: preserve-3d *and* overflow: visible (any other
+   overflow forces a flattened transform-style per spec). */
+/* No instant background here: the fading backdrop div darkens the stage
+   so the switch eases into 3D instead of snapping to black. The outgoing
+   plane is still full-bleed for the first frames, so nothing flashes. */
+.webspring-apps-container[data-multiswitching="true"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  overflow: hidden;
+  perspective: 1300px;
+  perspective-origin: 50% 46%;
+}
+
+.webspring-multiswitch-backdrop:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(130% 100% at 50% 40%, #11151c 0%, #070a0e 55%, #000 100%);
+}
+
+.webspring-windowed-app-frame:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  left: max(32px, 12vw);
+  right: max(32px, 12vw);
+  top: 18vh;
+  width: auto;
+  max-height: 68vh;
+  pointer-events: auto;
+  transform-style: preserve-3d;
+  transform-origin: center bottom;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.webspring-windowed-app-frame-scale:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.syncloudos-startup-layer:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #020407;
+  pointer-events: auto;
+}
+
+.syncloudos-startup-material:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.syncloudos-startup-spotlight:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.syncloudos-startup-material:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.38)),
+    url("./assets/textures/NSETileCotton.jpg") 0 0 / 320px auto repeat,
+    #07090d;
+  opacity: 0;
+}
+
+.syncloudos-startup-spotlight:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,0.36) 0, rgba(225,236,250,0.2) 18%, rgba(38,47,62,0.1) 42%, rgba(0,0,0,0.62) 77%),
+    radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.78), rgba(0,0,0,0) 54%);
+  mix-blend-mode: screen;
+}
+
+.syncloudos-startup-spinner:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.05), rgba(0,0,0,0) 68%);
+}
+
+.webspring-window-loading:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  color: #263448;
+}
+
+.webspring-app-menu-surface:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  gap: 0;
+}
+
+.webspring-app-menu-disabled-reason:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  max-inline-size: 18rem;
+  margin: 0;
+  padding: 0 12px 8px;
+  color: color-mix(in srgb, CanvasText 72%, transparent);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.webspring-app-view-frame:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  z-index: 112;
+  pointer-events: auto;
+  overflow: hidden;
+  background: #000;
+}
+
+.webspring-view[data-launch-phase="launching"] .webspring-app-view-frame:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.webspring-board[data-launch-phase="launching"] .webspring-app-view-frame:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background: transparent;
+  animation: com-syndromatic-atmo-webspring-launch-frame-blackout 360ms 300ms linear both;
+}
+
+/* On the Board the wallpaper stays visible while the app grows out of its
+   icon, and darkens only as the zoom lands. */
+.webspring-board[data-launch-phase="launching"] .webspring-app-view-frame:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  animation-duration: 180ms;
+  animation-delay: 380ms;
+}
+
+@keyframes com-syndromatic-atmo-webspring-launch-frame-blackout {
+  from { background-color: rgba(0, 0, 0, 0); }
+  to { background-color: #000; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webspring-view[data-launch-phase="launching"] .webspring-app-view-frame:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+  .webspring-board[data-launch-phase="launching"] .webspring-app-view-frame:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    animation-duration: 120ms;
+    animation-delay: 0ms;
+  }
+}
+
+/* No per-frame perspective here: each plane inherits the apps-container
+   stage above. overflow: visible keeps preserve-3d effective and lets the
+   plane's cast shadow render outside its scaled-down surface. */
+.webspring-app-view-frame[data-multiswitch-role]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  overflow: visible;
+  transform-style: preserve-3d;
+  background: transparent;
+}
+
+.webspring-app-view-frame[data-multiswitch-role="outgoing"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+
+.webspring-app-view-frame[data-multiswitch-role="incoming"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  transform-origin: 50% 50%;
+}
+
+.webspring-app-view-surface:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #1e1b17;
+  background: #111;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity, filter;
+}
+
+.webspring-app-view-surface[data-multiswitch-role]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  backface-visibility: hidden;
+  box-shadow:
+    0 44px 96px rgba(0, 0, 0, 0.55),
+    0 10px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Centre origins: both planes scale/lean around their own centre so they
+   sit inset in the shared stage like the iOS reference, rather than
+   hugging an outer edge. */
+.webspring-app-view-surface[data-multiswitch-role="outgoing"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  transform-origin: 50% 50%;
+}
+
+.webspring-app-view-surface[data-multiswitch-role="incoming"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  transform-origin: 50% 50%;
+}
+
+.webspring-app-view-surface-generic:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  display: block;
+  isolation: isolate;
+  background: #000;
+}
+
+.webspring-app-view-body-surface:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  color: var(--nse-app-foreground);
+  background-color: var(--nse-app-background);
+  isolation: isolate;
+}
+
+/* The app paints its own body. */
+.webspring-app-view-body-surface[data-frame-background="none"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background: none;
+}
+
+/* A developer surface: one rule per layer, read from the custom properties set on the element. */
+.webspring-app-view-body-surface[data-frame-background="surface"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background-color: var(--nse-app-surface-colour);
+  background-image: var(--nse-app-surface-image);
+  background-size: var(--nse-app-surface-size);
+  background-repeat: var(--nse-app-surface-repeat);
+  background-position: var(--nse-app-surface-position);
+}
+
+.webspring-app-view-body-surface[data-frame-background="surface"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--nse-app-surface-overlay-image);
+  background-size: var(--nse-app-surface-overlay-size);
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: var(--nse-app-surface-overlay-opacity);
+  mix-blend-mode: var(--nse-app-surface-overlay-blend);
+}
+
+.webspring-app-view-body-surface-off:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  inset: 0;
+  overflow: hidden;
+  clip-path: none;
+  -webkit-clip-path: none;
+}
+
+.webspring-app-view-fullbleed-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* A standard top bar floats over the body, so the content starts below it the way a content view
+   starts below a title bar. The stage exposes the bar's own height (the property is 0px when there
+   is no standard bar), and the body still fills the whole frame behind it, so the app background
+   runs under the bar. The source-list rule below resets this for layouts that put the bar in flow. */
+.webspring-app-view-body-surface .webspring-app-view-fullbleed-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  inset-block-start: var(--webspring-app-top-bar-height, 0px);
+}
+
+/* Source-list windows render the metal bar INSIDE the rounded body surface as a non-scrolling
+   header, so the smooth-surface squircle clips the bar's top corners to match the body's bottom
+   corners, and the content (sidebar + main + footer) sits below the bar instead of under it. */
+.webspring-app-view-body-surface-sourcelist:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: flex;
+  flex-direction: column;
+}
+
+.webspring-app-view-body-surface-sourcelist > .nse-app-topbar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.webspring-app-view-body-surface-sourcelist .webspring-app-view-fullbleed-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  inset: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.webspring-app-overlay-destination:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.webspring-app-overlay-destination[data-multiswitch-role]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  transform-style: preserve-3d;
+}
+
+.webspring-app-overlay-plane:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+
+.webspring-app-overlay-plane[data-multiswitch-role]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  backface-visibility: hidden;
+}
+
+.webspring-loading-state:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  background-color: #1e2228;
+  background-image: var(--nse-loading-background-image);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, .9);
+}
+
+.webspring-loading-state-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.webspring-loading-state-content p:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { margin: 0; }
+
+.webspring-loading-state-content .nse-loading-spinner:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
+}
+
+.webspring-app-view-loading:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 100%;
+  min-height: 360px;
+  display: grid;
+  place-items: center;
+  color: #243449;
+}
+
+.webspring-app-view-loading.webspring-loading-state:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *),
+.webspring-window-loading.webspring-loading-state:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  min-height: 0;
+  color: #fff;
+}
+
+.webspring-app-watchdog-frame:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 5vw, 46px);
+  color: #f2f6fb;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255,255,255,0.16), transparent 38%),
+    linear-gradient(180deg, #252a30, #0f1216);
+  pointer-events: none;
+}
+
+@media (max-width: 1180px) {
+  .webspring-windowed-app-frame:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+    left: max(18px, 5vw);
+    right: max(18px, 5vw);
+    top: 16vh;
+  }
+}
+
+.nse-login-window-card:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { padding:0; border:0; }
+.nse-login-window-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { gap:0; }
+.nse-login-window-logo:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { max-height:none; }
+[data-login-decoration="beta-ribbon"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/BETAbanner-topRight@2x.png") center / contain no-repeat; }
+[data-login-decoration="checkbox-checked"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/checkboxChecked@2x.png") center / contain no-repeat; }
+[data-login-decoration="checkbox-unchecked"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/checkboxUnchecked@2x.png") center / contain no-repeat; }
+[data-login-decoration="plate-texture"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/generated/plate-texture.webp") center / contain no-repeat; }
+[data-login-decoration="logo"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/EmbossedSynMarksmanLogoMetalFX.png") center / contain no-repeat; }
+[data-login-decoration="tack-transparent"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/HangElements/PinElements/TackTransparent.png") center / contain no-repeat; }
+[data-login-decoration="tack-white"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/HangElements/PinElements/TackWhite.png") center / contain no-repeat; }
+[data-login-decoration="ring-left"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/HangElements/RingEdge/left.png") center / contain no-repeat; }
+[data-login-decoration="ring-right"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/HangElements/RingEdge/right.png") center / contain no-repeat; }
+[data-login-decoration="rope-left"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/HangElements/Rope/RopeLeft.png") center / contain no-repeat; }
+[data-login-decoration="rope-right"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/HangElements/Rope/RopeRight.png") center / contain no-repeat; }
+[data-login-decoration="rope-shadow"]:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *):where(.nse-login-window--ornamented, .nse-login-window--ornamented *) { display:block; background:url("./assets/atmo/shell/login-window/HangElements/Rope/rope shadow MERGED.png") center / contain no-repeat; }
+
+
+/* Neutral fallback resets and theme-owned loading material. */
+:scope[data-nse-theme="com.syndromatic.atmo"] { --nse-loading-background-image: url("./assets/textures/NSETileCotton.jpg"); }
+:scope[data-nse-theme="com.syndromatic.atmo"] .nse-app-topbar, :scope[data-nse-theme="com.syndromatic.atmo"].nse-app-topbar { background: transparent; }
+:scope[data-nse-theme="com.syndromatic.atmo"] .nse-login-window--ornamented .nse-login-window-card { padding: 0; border: 0; }
+:scope[data-nse-theme="com.syndromatic.atmo"] .nse-login-window--ornamented .nse-login-window-content { gap: 0; }
+:scope[data-nse-theme="com.syndromatic.atmo"] .nse-login-window--ornamented .nse-login-window-logo { max-height: none; }
+:scope[data-nse-theme="com.syndromatic.atmo"] [data-login-decoration="tack-transparent"] { aspect-ratio: 85 / 85; }
+:scope[data-nse-theme="com.syndromatic.atmo"] [data-login-decoration="tack-white"] { aspect-ratio: 46 / 45; }
+:scope[data-nse-theme="com.syndromatic.atmo"] [data-login-decoration="rope-shadow"] { aspect-ratio: 583 / 208; }
+:scope[data-nse-theme="com.syndromatic.atmo"] [data-login-decoration="rope-left"] { aspect-ratio: 377 / 264; }
+:scope[data-nse-theme="com.syndromatic.atmo"] [data-login-decoration="rope-right"] { aspect-ratio: 375 / 264; }
+:scope[data-nse-theme="com.syndromatic.atmo"] [data-login-decoration="beta-ribbon"] { aspect-ratio: 197 / 169; }
+:scope[data-nse-theme="com.syndromatic.atmo"] [data-login-decoration="ring-left"] { aspect-ratio: 34 / 34; }
+:scope[data-nse-theme="com.syndromatic.atmo"] [data-login-decoration="ring-right"] { aspect-ratio: 34 / 34; }
+:scope[data-nse-theme="com.syndromatic.atmo"] [data-login-decoration="logo"] { aspect-ratio: 233 / 233; }
+
+/* Dark plain source-list rows must not inherit the light list-cell ink. */
+:scope[data-nse-theme="com.syndromatic.atmo"] .nse-sidebar[data-mode="dark"] .nse-sidebar-row.nse-control-list-item {
+  color: #e3e8ee;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 45%);
+}
+:scope[data-nse-theme="com.syndromatic.atmo"] .nse-sidebar[data-mode="dark"] .nse-sidebar-row.nse-control-list-item[data-selected="true"] {
+  color: #fff;
+  background: linear-gradient(180deg, #446c91, #2d5275);
+}
+/* Keep dark masked glyphs on an explicit foreground plane, without a filtered
+   intermediary that can lose the mask's paint during appearance switches. */
+:scope[data-nse-theme="com.syndromatic.atmo"] .nse-app-topbar-rail-aligned[data-mode="dark"] .nse-app-topbar-rail-aligned-pill-glyph {
+  z-index: 1;
+  filter: none;
+  --nse-app-topbar-glyph-fill: #edf3fc;
+}
+:scope[data-nse-theme="com.syndromatic.atmo"] .nse-app-topbar-glyph-shape { mask-mode: alpha; }
+}

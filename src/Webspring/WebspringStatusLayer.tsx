@@ -21,13 +21,13 @@
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { NSEPresence } from "../NSE/Animation";
 import { NSEAlertBackdrop } from "../NSE/NSE";
-import { SystemAlert, SystemAlertAssetCache, useResolvedMode } from "../SynCloudOSReact";
+import { SystemAlert, SystemAlertAssetCache, useResolvedAppearance } from "../SynCloudOSReact";
 import { FocusScope, useKernelSynCloudOS, useRuntimeSelector } from "../SynCloudOSReact";
 import type { CapturedSynCloudOSError } from "../SynCloudOS/SynCloudOS";
 
 export function WebspringStatusLayer({ errors }: { errors: CapturedSynCloudOSError[] }) {
   const runtime = useKernelSynCloudOS();
-  const appearance = useResolvedMode();
+  const appearance = useResolvedAppearance();
   const latest = errors[errors.length - 1] ?? null;
   const appId = latest?.appId ?? latest?.context?.appId;
   const applicationIcon = useRuntimeSelector((snapshot) => typeof appId === "string"

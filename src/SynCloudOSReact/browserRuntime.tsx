@@ -25,8 +25,8 @@ import { createRoot, type Root } from "react-dom/client";
 import type { App as ShellApp } from "../App";
 import { ApplicationHost, applicationRecoveryError } from "./ApplicationHost";
 import { createApplicationHostHome, type ApplicationHostHome } from "./applicationHome";
-import { NSEAppearanceProvider, type NSEAppearanceDefinition } from "../NSE/Appearance";
-import { atmoAppearance } from "../NSE/Themes/Atmo";
+import { NSEThemeProvider, type NSEThemeDefinition } from "../NSE/Appearance";
+import { resolveNSEHostTheme } from "./themeSelection";
 import { NSERubberBandProvider } from "../NSE/Scroll";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { SystemAlert } from "./SystemAlert";
@@ -36,7 +36,7 @@ import { HostFontsProvider } from "./hostFontsContext";
 import { NSEFontManager } from "../NSE/Typography/NSEFontManager";
 import { captureFontDeclaration, type FontDeclaration } from "../NSE/Typography/fontDeclaration.mjs";
 import { runtimeFontCatalogue, type SynWareFontCatalogue } from "../SynCloudOS/AppSDK/fontAccess";
-import { useActiveLocale, useResolvedMode } from "./serviceHooks";
+import { useActiveLocale, useResolvedAppearance } from "./serviceHooks";
 import { resolveSiteBranding, type ResolvedSiteBranding } from "../SynCloudOS/Branding/siteBranding";
 import { exposeSynCloudOS } from "../SynCloudOS/Developer/exposeSynCloudOS";
 import { createSynWareBundle } from "../SynCloudOS/AppSDK/createSynWare";
@@ -93,9 +93,9 @@ interface BrowserHostOptions {
   readonly authentication?: AuthenticationInput;
   /** This host's role taxonomy. Defaults to the built-in profile. */
   readonly policyProfile?: SynCloudOSPolicyProfile;
-  /** The NSE appearance (theme) that paints the shell, windows and controls.
-   * Import the theme's stylesheet alongside it. Defaults to Atmo. */
-  readonly appearance?: NSEAppearanceDefinition;
+  /** Host-owned theme identity, selected independently of light/dark Appearance. */
+  readonly theme?: NSEThemeDefinition | string;
+  readonly themes?: readonly NSEThemeDefinition[];
   readonly contributions?: readonly SynCloudOSHostContribution[];
   /** Host-owned legal attribution for each application's standard About panel.
    * Its display name and version remain the application's Info.ts identity. */
@@ -133,6 +133,7 @@ type InternalMountOptions = MountSynCloudOSOptions & { readonly persistenceNames
 
 /** The options after the project composition filled in what the host omitted. */
 interface ResolvedHostOptions extends BrowserHostOptions {
+  readonly theme: NSEThemeDefinition;
   readonly shell?: WebspringDefinition;
   readonly application?: Readonly<{ bundleIdentifier: string; frame?: SynCloudOSApplicationFrameMode }>;
   readonly shellResources?: SynCloudOSShellResources;
@@ -178,6 +179,7 @@ function resolveHostOptions(input: InternalMountOptions): ResolvedMountOptions {
   return {
     ...input,
     composition,
+    theme: resolveNSEHostTheme(input.theme, input.themes ?? composition.themes),
     bundles: input.bundles ?? composition.bundles,
     contributions: [...composition.contributions, ...(input.contributions ?? [])],
     ...(input.application === undefined && shell !== null ? { shell } : {}),
@@ -340,7 +342,7 @@ function RootRecoveryBoundary({ runtime, options, fontCatalogue, children }: Pro
   options: ResolvedHostOptions;
   fontCatalogue: SynWareFontCatalogue;
 }>) {
-  const appearance = useResolvedMode();
+  const appearance = useResolvedAppearance();
   useActiveLocale();
   const branding = hostBranding(options, runtime);
   return <HostSiteBrandingProvider value={branding}><HostFontsProvider catalogue={fontCatalogue}>
@@ -364,7 +366,7 @@ function renderHost(
   runtime: SynCloudOSRuntime,
   options: ResolvedHostOptions,
   fontCatalogue: SynWareFontCatalogue,
-  appearance: NSEAppearanceDefinition,
+  theme: NSEThemeDefinition,
   home: ApplicationHostHome | null,
   Shell: typeof ShellApp | undefined,
 ): Root {
@@ -372,7 +374,7 @@ function renderHost(
   root.render(
     <StrictMode>
       <SynCloudOSProvider runtime={runtime}>
-        <NSEAppearanceProvider appearance={appearance} appearanceService={runtime.appearance}>
+        <NSEThemeProvider theme={theme} appearanceService={runtime.appearance}>
           <RuntimeInputBoundary>
             <RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
               <NSERubberBandProvider>{home
@@ -381,7 +383,7 @@ function renderHost(
               {!home ? <SCOSAlertPresenter center={runtime.alerts} /> : null}
             </RootRecoveryBoundary>
           </RuntimeInputBoundary>
-        </NSEAppearanceProvider>
+        </NSEThemeProvider>
       </SynCloudOSProvider>
     </StrictMode>,
   );
@@ -497,7 +499,7 @@ function captureBootstrapFailure(runtime: SynCloudOSRuntime, error: unknown, rou
   });
 }
 
-function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt, recovery: BootstrapRecovery, home: string, appearance: NSEAppearanceDefinition) {
+function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt, recovery: BootstrapRecovery, home: string, theme: NSEThemeDefinition) {
   if (browserMountAttempts.get(element) !== attempt) return;
   const navigate = (destination?: string) => {
     if (browserMountAttempts.get(element) !== attempt) return;
@@ -509,14 +511,14 @@ function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt,
   // Only captured data and browser navigation survive teardown. The existing
   // NSE backdrop owns physical focus; no disposed kernel provider is retained.
   root.render(<HostSiteBrandingProvider value={recovery.branding}>
-    <NSEAppearanceProvider appearance={appearance} colourScheme={recovery.appearance}>
+    <NSEThemeProvider theme={theme} appearance={recovery.appearance}>
       <div className="syncloudos-root-error-shell"><NSEAlertBackdrop>
         <SystemAlert error={recovery.error}
           appearance={recovery.appearance} applicationIcon={recovery.applicationIcon}
           onDismiss={() => navigate(home)} onReturn={() => navigate(home)} onReload={() => navigate()}
           onOpenMailClient={(destination) => navigate(destination)} />
       </NSEAlertBackdrop></div>
-    </NSEAppearanceProvider>
+    </NSEThemeProvider>
   </HostSiteBrandingProvider>);
 }
 
@@ -601,6 +603,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
   const config: SynCloudOSRuntimeConfig = {
     environment,
     ...composition.runtimeConfig,
+    theme: options.theme,
     initialBundles,
     trustedDocumentKinds: composition.trustedDocumentKinds,
     ...(composition.applicationDocuments === undefined ? {} : { applicationDocuments: composition.applicationDocuments }),
@@ -787,7 +790,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
       runtime,
       options,
       fontCatalogue,
-      options.appearance ?? atmoAppearance,
+      options.theme,
       home,
       Shell,
     );
@@ -819,7 +822,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     }
     attempt.dispose = undefined;
     attempt.mounting = false;
-    if (recovery) renderBootstrapRecovery(options.element, attempt, recovery, options.deploymentBasePath ?? "/", options.appearance ?? atmoAppearance);
+    if (recovery) renderBootstrapRecovery(options.element, attempt, recovery, options.deploymentBasePath ?? "/", options.theme);
     else if (browserMountAttempts.get(options.element) === attempt) browserMountAttempts.delete(options.element);
     if (result.errors.length > 0) {
       throw new AggregateError([error, ...result.errors], "Browser host initialization and cleanup failed.", { cause: error });

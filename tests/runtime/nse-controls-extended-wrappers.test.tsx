@@ -25,8 +25,8 @@ installNSEScrollIntoViewFixture();
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
-import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
+import { NSEThemeProvider } from "../../src/NSE/Appearance";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo";
 import {
   NSEActivityButton,
   NSENotificationButton,
@@ -68,11 +68,11 @@ afterEach(() => {
 
 const presentation = createStaticPresentationPort({ width: 1024, height: 768 });
 function AppearanceHost({ children }: React.PropsWithChildren) {
-  return <NSEAppearanceProvider appearance={atmoAppearance}>
+  return <NSEThemeProvider theme={atmoTheme}>
     <NSEStandaloneControlHost document={document} window={window} presentation={presentation} parentResponderId="application:nse-control-gallery">
       {children}
     </NSEStandaloneControlHost>
-  </NSEAppearanceProvider>;
+  </NSEThemeProvider>;
 }
 function renderWithAppearance(children: React.ReactNode) {
   return render(children, { wrapper: AppearanceHost });

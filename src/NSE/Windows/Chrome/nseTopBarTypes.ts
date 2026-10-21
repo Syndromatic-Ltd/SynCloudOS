@@ -22,17 +22,16 @@ import type { CSSProperties, ReactNode } from "react";
 import type { HFXFeedbackRequest } from "../../Feedback";
 import type { NSESmoothSurfaceRequest } from "../../SmoothSurface";
 
-export type NSETopBarVariant = "atmoCumulus" | "atmoMetal";
+export type NSETopBarVariant = "continuous" | "rail-aligned";
 export type NSETopBarItemKind = "webspring" | "userInfo" | "settings" | "custom";
 export type NSETopBarItemPosition = "left" | "right";
-/** Chrome appearance for the metal variant. Atmo ships both light and dark chrome (Onyx is a
- *  separate theme, not a dark mode), so the metal bar follows the app's light/dark surface. */
+/** Resolved light/dark appearance of rail-aligned chrome. */
 export type NSEChromeScheme = "light" | "dark";
 
 /**
- * Optional sidebar-aligned rail cell for the metal variant. When provided, the bar splits into a
+ * Optional sidebar-aligned rail cell for the rail-aligned variant. When provided, the bar splits into a
  * rail segment (sized to the source list) and a main segment that meet at the sidebar seam, exactly
- * like a native source-list window. Omit it for a single, full-width metal bar.
+ * like a native source-list window. Omit it for a single, full-width bar.
  */
 export interface NSETopBarRail {
   width?: number | string;
@@ -75,9 +74,9 @@ export interface NSETopBarTitleAction {
 export interface NSETopBarProps {
   title: string;
   variant?: NSETopBarVariant;
-  /** Chrome light/dark surface for the `atmoMetal` variant. Ignored by `atmoCumulus`. */
+  /** Chrome light/dark surface for the `rail-aligned` variant. Ignored by `continuous`. */
   scheme?: NSEChromeScheme;
-  /** Sidebar-aligned rail cell for the `atmoMetal` variant (source-list windows). */
+  /** Sidebar-aligned rail cell for the `rail-aligned` variant (source-list windows). */
   rail?: NSETopBarRail;
   leadingItems?: NSETopBarItem[];
   trailingItems?: NSETopBarItem[];

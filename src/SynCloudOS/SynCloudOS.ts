@@ -184,7 +184,7 @@ export type {
   SynCloudOSLifecycleErrorOptions,
   SynCloudOSLifecycleResource,
 } from "./ErrorManager/lifecycleError";
-export type { SynCloudOSAppearance, SynCloudOSResolvedMode } from "./Appearance/appearanceService";
+export type { SynCloudOSAppearance, SynCloudOSResolvedAppearance } from "./Appearance/appearanceService";
 export type { SynCloudOSSettings } from "./Settings/settingsService";
 export type { SynCloudOSRole } from "./PermissionManager/permissionTypes";
 export { resolveSiteBranding } from "./Branding/siteBranding";
@@ -197,7 +197,7 @@ export type {
   SynCloudOSTranslationPrimitive,
 } from "./LocaleServices/localeTypes";
 export { DocumentError, DocumentNotFoundError } from "./Documents/DocumentErrors";
-export { useResolvedMode } from "./Appearance/useAppearance";
+export { useResolvedAppearance } from "./Appearance/useAppearance";
 export type { PreferencePaneDefinition, PreferencePaneRegistry, PreferencePaneViewProps } from "./Preferences";
 export { WEBSPRING_LAYOUT_PREFERENCE_VERSION } from "./WebspringState/webspringStateTypes";
 export type {

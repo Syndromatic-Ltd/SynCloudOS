@@ -18,8 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useEffect, useId, useSyncExternalStore, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import "./nse-source-list-scene.css";
+import { useNSEInheritedDirection } from "../useNSEInheritedDirection";
+import { bottomPeerNavigation, neutralPeerNavigation, type NSEPeerNavigationPresentation } from "../peerNavigationPresentation";
 import { NSEAdaptiveNavigationController } from "../NSEAdaptiveNavigationController";
 import { NSEHierarchyStack } from "../NSEHierarchyStack";
 import { NSENavigationDestinationHost } from "../NSENavigationDestinationHost";
@@ -30,7 +32,7 @@ import { NSESidebar, type NSESidebarSection, type NSESidebarSurface } from "./NS
 import { NSESplitView } from "../../DataViews/Split/NSESplitView";
 import { NSEStatusBar } from "../../Windows/Chrome/NSEStatusBar";
 import type { NSEChromeScheme } from "../../Windows/Chrome/nseTopBarTypes";
-import { useNSEAppearance } from "../../Appearance";
+import { useNSEVisualEnvironment } from "../../Appearance";
 import { useSourceListFrame, type SourceListFrameContextValue } from "./sourceListFrameContext";
 
 function classes(...values: Array<string | false | null | undefined>) {
@@ -47,6 +49,8 @@ export interface NSESourceListSceneStatus {
 }
 
 interface NSESourceListSceneSharedProps {
+  /** Omit to inherit the actual app direction, including runtime changes. */
+  dir?: "ltr" | "rtl";
   /** Dynamic centre title for the system bar (e.g. the active section). Falls back to the window title. */
   title?: string;
   /** Optional seam-aligned metal status bar content. Omit for no footer. */
@@ -81,9 +85,13 @@ export interface NSESourceListCompactHandoff {
  * existing split view at non-compact sizes.
  */
 export interface NSESourceListNavigationProjection {
+  /** Global application title for presentations such as Panorama. */
+  readonly title?: string;
   readonly controller: NSETabBarController<ReactNode>;
   readonly adaptiveController: NSEAdaptiveNavigationController<ReactNode>;
   readonly ariaLabel?: string;
+  /** Explicit app arrangement wins over theme defaults. */
+  readonly presentation?: NSEPeerNavigationPresentation;
   /** Material for the system-projected rail. Defaults to the plain surface. */
   readonly surface?: NSESidebarSurface;
   /** Colour scheme for the system-projected rail. Defaults to light. */
@@ -126,16 +134,20 @@ function NSESourceListSceneBody({
   contentClassName,
   resizeLabel = "Resize sidebar",
   compact = false,
+  dir,
 }: NSESourceListSceneBodyProps) {
-  const appearance = useNSEAppearance();
-  const scheme = appearance.requestedColourScheme === "auto"
-    ? frame?.scheme ?? appearance.resolvedColourScheme
-    : appearance.resolvedColourScheme;
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const direction = useNSEInheritedDirection(sceneRef, dir);
+  const appearance = useNSEVisualEnvironment();
+  const scheme = appearance.requestedAppearance === "auto"
+    ? frame?.scheme ?? appearance.resolvedAppearance
+    : appearance.resolvedAppearance;
   const statusRailWidth = frame?.railWidth ?? frame?.defaultWidth ?? 264;
 
   return (
-    <div className={classes("nse-source-list-scene", className)} data-mode={scheme} data-navigation-compact={compact ? "true" : "false"}>
+    <div ref={sceneRef} dir={dir} className={classes("nse-source-list-scene", className)} data-mode={scheme} data-navigation-compact={compact ? "true" : "false"}>
       <NSESplitView
+        dir={direction}
         className="nse-source-list-scene-split"
         sidebar={<div className={classes("nse-source-list-scene-sidebar", sidebarClassName)}>{sidebar}</div>}
         sidebarWidth={frame ? frame.railWidth : undefined}
@@ -150,7 +162,7 @@ function NSESourceListSceneBody({
       </NSESplitView>
       {!compact && status ? (
         <NSEStatusBar
-          variant="atmoMetal"
+          variant="rail-aligned"
           scheme={scheme}
           className="nse-source-list-scene-status"
           rail={{ width: statusRailWidth, content: status.rail }}
@@ -217,8 +229,40 @@ function NSESourceListNavigationScene({
     projection.adaptiveController.getSnapshot,
   );
   const contentHostId = useId().replace(/:/g, "");
+  const environment = useNSEVisualEnvironment();
+  const peerPresentation = projection.presentation
+    ?? (projection.adaptiveController.presentation === "bottom-tabs" ? bottomPeerNavigation
+      : environment.theme?.presentation?.peerNavigation?.[adaptiveSnapshot.traits.horizontalSizeClass === "compact" ? "compact" : "regular"])
+    ?? neutralPeerNavigation;
+  const renderer = adaptiveSnapshot.model === "peer"
+    ? peerPresentation.kind === "source-list" ? "source-list-content" : "tabs"
+    : adaptiveSnapshot.renderer;
+  const panoramaActive = renderer === "tabs" && peerPresentation.kind === "panorama";
+  const setPanoramaActive = frame?.setPanoramaActive;
+  useEffect(() => {
+    setPanoramaActive?.(panoramaActive);
+    return () => setPanoramaActive?.(false);
+  }, [panoramaActive, setPanoramaActive]);
+  const chromeRef = useRef<HTMLDivElement>(null);
+  const [measuredChromeSize, setMeasuredChromeSize] = useState(0);
+  const navigationMetrics = environment.theme?.presentation?.metrics?.navigation;
+  const chromeSize = measuredChromeSize || Math.max(44, navigationMetrics?.barBlockSize ?? 48) + 2 * (navigationMetrics?.edgeGap ?? 0);
+  useLayoutEffect(() => {
+    if (renderer !== "source-list-content" && !panoramaActive) return;
+    projection.controller.setOverflowPolicy({ kind: "scroll" });
+  }, [renderer, panoramaActive, projection.controller]);
+  useLayoutEffect(() => {
+    const node = chromeRef.current;
+    if (!node) return;
+    const update = () => setMeasuredChromeSize(node.getBoundingClientRect().height);
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [renderer, peerPresentation.placement, peerPresentation.flow]);
   const stackController = projection.adaptiveController.stackController;
-  const compact = adaptiveSnapshot.renderer === "tabs" || adaptiveSnapshot.renderer === "stack";
+  const compact = renderer === "tabs" || renderer === "stack";
   const overflowOpen = tabSnapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
 
   useEffect(() => {
@@ -254,20 +298,21 @@ function NSESourceListNavigationScene({
   );
 
   const handoff: NSESourceListCompactHandoff | null = compact ? {
-    renderer: adaptiveSnapshot.renderer as "tabs" | "stack",
+    renderer: renderer as "tabs" | "stack",
     selectedDestinationId: tabSnapshot.selectedDestinationId,
     snapshot: adaptiveSnapshot,
     controller: projection.controller,
   } : null;
-  const compactChrome = adaptiveSnapshot.renderer === "tabs" ? (
+  const compactChrome = renderer === "tabs" && peerPresentation.kind !== "panorama" ? (
     <NSETabBar
       controller={projection.controller}
+      presentation={peerPresentation}
       aria-label={projection.ariaLabel ?? "Navigation"}
       reducedMotion={adaptiveSnapshot.traits.reducedMotion}
       renderPanels={false}
       idScope={contentHostId}
     />
-  ) : adaptiveSnapshot.renderer === "stack" && stackController ? (
+  ) : renderer === "stack" && stackController ? (
     <NSEHierarchyStack
       controller={projection.controller}
       stackController={stackController}
@@ -279,7 +324,12 @@ function NSESourceListNavigationScene({
   return (
     <div
       className="nse-source-list-scene-projection nse-compact-bottom-chrome-owner"
-      data-navigation-renderer={adaptiveSnapshot.renderer}
+      data-navigation-kind={peerPresentation.kind}
+      data-navigation-renderer={renderer}
+      data-navigation-placement={peerPresentation.placement}
+      data-navigation-flow={peerPresentation.flow}
+      data-navigation-content={peerPresentation.content}
+      style={{ "--nse-compact-bottom-chrome-clearance": `${chromeSize}px` } as CSSProperties}
     >
       <NSESourceListSceneBody
         key="source-list-body"
@@ -292,10 +342,12 @@ function NSESourceListNavigationScene({
           <NSENavigationDestinationHost
             controller={projection.controller}
             idScope={contentHostId}
+            panorama={renderer === "tabs" && peerPresentation.kind === "panorama" ? { title: projection.title ?? frame?.railLabel ?? props.title ?? projection.ariaLabel ?? "" } : undefined}
             snapshot={tabSnapshot}
-            tabSemantics={adaptiveSnapshot.renderer === "tabs"}
+            tabSemantics={renderer === "tabs"}
+            reducedMotion={adaptiveSnapshot.traits.reducedMotion}
           />
-          {adaptiveSnapshot.renderer === "tabs" ? (
+          {renderer === "tabs" ? (
             <NSETabBarOverflowList
               controller={projection.controller}
               aria-label={projection.ariaLabel ?? "Navigation"}
@@ -305,15 +357,16 @@ function NSESourceListNavigationScene({
           ) : null}
         </div>
       </NSESourceListSceneBody>
-      {compact ? (
+      {compact && !panoramaActive ? (
         <div
           key="compact-chrome"
+          ref={chromeRef}
           className={classes(
             "nse-source-list-scene-projection-compact",
-            adaptiveSnapshot.renderer === "tabs" && "nse-compact-bottom-chrome-mount",
+            renderer === "tabs" && peerPresentation.flow === "overlay" && "nse-compact-bottom-chrome-mount",
           )}
           data-nse-source-list-compact-chrome="true"
-          data-nse-compact-bottom-chrome={adaptiveSnapshot.renderer === "tabs" ? "tabs-only" : "stack-only"}
+          data-nse-compact-bottom-chrome={renderer === "tabs" ? "tabs-only" : "stack-only"}
         >
           {compactChrome}
           {handoff ? projection.compactContent?.(handoff) : null}

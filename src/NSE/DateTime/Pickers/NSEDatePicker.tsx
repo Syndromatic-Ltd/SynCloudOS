@@ -25,7 +25,7 @@ import { formatPlainDate, parsePlainDate, plainDatePlaceholder, plainDateToday }
 import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";
 import { NSECalendarView } from "../Calendar";
 import { NSEChoiceControl } from "../../Menus/NSEChoiceControl";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../../Appearance";
 import type { NSEDatePickerEditorMode, NSEDatePickerField, NSEDatePickerProps } from "./datePickerTypes";
 
 export const serializePlainDate = (value: NSEPlainDate | null) => value ? `${String(value.year).padStart(4, "0")}-${String(value.month).padStart(2, "0")}-${String(value.day).padStart(2, "0")}` : "";
@@ -200,7 +200,7 @@ export function NSEDatePicker({
   const showCalendar = mode === "calendar";
   const titleId = `date-picker-title-${instanceId}`;
   const appearanceState = invalid ? "invalid" : disabled ? "disabled" : focused || open ? "focused" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("date-picker", "select", appearanceState));
+  const appearance = useNSEThemeRecipe(nseThemeSlot("date-picker", "select", appearanceState));
   return <span {...hostProps} data-nse-control="date-picker" data-state={invalid ? "invalid" : disabled ? "disabled" : readOnly ? "read-only" : open ? "open" : "ready"} {...appearance.attributes} onFocusCapture={(event) => { setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); onBlurCapture?.(event); }}>
     {mode === "automatic" ? <button ref={triggerRef} type="button" aria-label={`Choose ${label.toLocaleLowerCase()}`} aria-expanded={open} disabled={disabled || readOnly} onClick={() => { setCalendarDraft(current); setOpen(true); }}>▦</button> : null}
     {renderEditor ? renderEditor({ value: current, disabled: Boolean(disabled), readOnly: Boolean(readOnly), commit: commitEditor }) : segmentEditor ?? (!showCalendar ? <input data-nse-part="date-entry" aria-label={label} type="text" inputMode="numeric" placeholder={plainDatePlaceholder(locale)} value={draft} disabled={disabled} readOnly={readOnly} required={required} aria-invalid={invalid || undefined} onChange={(event) => { if (readOnly) return; setDraft(event.currentTarget.value); setInvalid(false); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); commitText(); } else if (event.key === "Escape") { if (invalid || draft !== (current ? formatPlainDate(current, locale) : "")) event.preventDefault(); setInvalid(false); setDraft(current ? formatPlainDate(current, locale) : ""); } }} onBlur={commitText} /> : null)}

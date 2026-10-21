@@ -20,7 +20,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { GFXColour } from "../../../FX/GraphicsFX/public";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../../Appearance";
 import { useNSEColourPanelController, useNSEColourPanelService, useOptionalNSEColourPanelCommands, useOptionalNSEColourPanelDrag, useOptionalNSEColourPanelResponderId } from "../ColourPanel/NSEColourPanelProvider";
 import type { NSEEyeDropperAdapter } from "../Pickers/NSEEyeDropperAdapter";
 import type { NSEColourTransferAdapter } from "../Transfer";
@@ -254,7 +254,7 @@ export function NSEColourWell(props: NSEColourWellProps) {
   }, [initial, props.value]);
 
   const appearanceState = props.disabled ? "disabled" : focused || panel.activeTargetId === id ? "focused" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("colour-well", "well", appearanceState));
+  const appearance = useNSEThemeRecipe(nseThemeSlot("colour-well", "well", appearanceState));
   return <span data-nse-control="colour-well" data-state={props.disabled ? "disabled" : panel.activeTargetId === id ? "active" : "normal"} {...appearance.attributes} onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
     <button {...dragSource} {...dropTarget} type="button" id={id} aria-label={props["aria-label"]} aria-pressed={panel.activeTargetId === id && panel.open} disabled={props.disabled} aria-readonly={props.readOnly || undefined} onClick={activate} onKeyDown={(event) => {
       if (runtimeDrag && event.altKey && event.key === "Enter") {

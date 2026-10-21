@@ -23,7 +23,7 @@ import { createPortal } from "react-dom";
 import { createNSEOverlayManager } from "./NSEOverlayManager";
 import { belongsToNearestNSEOverlayProvider, isWithinNSEOverlay, markNSEOverlayDocumentProviderActive, nseOverlayEventPath, retainNSEOverlayDocumentProvider } from "./overlayEventOwnership";
 import type { NSEOverlayDismissReason, NSEOverlayManager, NSEOverlayRegistration, NSEOverlayRuntimePort } from "./overlayTypes";
-import { useNSEAppearanceProjection } from "../Appearance";
+import { useNSEThemeProjection } from "../Appearance";
 import "./nse-overlays.css";
 
 export interface NSEOverlayProviderContextValue {
@@ -74,7 +74,7 @@ export function NSEOverlayProvider({
 }: NSEOverlayProviderProps) {
   const parent = useContext(NSEOverlayContext);
   const destination = portalContainer === undefined ? parent?.portalContainer : portalContainer;
-  const appearanceProjection = useNSEAppearanceProjection();
+  const themeProjection = useNSEThemeProjection();
   const managerRef = useRef<NSEOverlayManager | null>(null);
   if (!managerRef.current) managerRef.current = providedManager ?? createNSEOverlayManager();
   const manager = providedManager ?? managerRef.current;
@@ -200,7 +200,7 @@ export function NSEOverlayProvider({
   const portalHostNode = (
     <div
       ref={setPortalHost}
-      {...appearanceProjection}
+      {...themeProjection}
       // Mounted away from the provider element, the host carries the provider
       // marker itself so events from its overlays still resolve here.
       data-nse-overlay-provider={relocated ? providerId : undefined}

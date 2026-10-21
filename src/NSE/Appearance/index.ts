@@ -19,35 +19,48 @@
  */
 
 export {
-  NSEAppearanceProvider,
+  NSEThemeProvider,
+  neutralNSETheme,
+  useNSETheme,
   useNSEAppearance,
-  useNSEAppearanceProjection,
-  useNSEAppearanceSlot,
-  type NSEAppearanceProviderProps,
-} from "./NSEAppearanceProvider";
+  useNSEVisualEnvironment,
+  useNSEThemeProjection,
+  useNSEThemeRecipe,
+  type NSEThemeProviderProps,
+} from "./NSEThemeProvider";
 export {
-  defineNSEAppearance,
-  type NSEAppearanceDefinition,
-  type NSEAppearanceDefinitionInput,
-  type NSEAppearanceRecipeDefinition,
-} from "./NSEAppearanceDefinition";
+  defineNSETheme,
+  type NSEThemeDefinition,
+  type NSEThemeInfo,
+  type NSEThemeTokens,
+  type NSEThemeTokenMap,
+  type NSEThemeMetadata,
+  type NSEThemePresentation,
+  type NSEPeerNavigationPresentation,
+  type NSEThemePeerTransition,
+  type NSEThemeMotionEasing,
+  type NSEThemeDefinitionInput,
+  type NSEThemeRecipeDefinition,
+} from "./NSEThemeDefinition";
 export {
-  nseAppearanceSlot,
-  projectNSEAppearance,
-  projectNSEAppearanceSlot,
-  type NSEAppearanceSlotDescriptor,
-  type NSEAppearanceSlotProjection,
-} from "./appearanceProjection";
-export { resolveNSEAppearanceSlot, type NSEAppearanceSlotResolution } from "./appearanceSlotResolver";
+  nseThemeSlot,
+  projectNSETheme,
+  projectNSEThemeTokens,
+  projectNSEThemeRecipe,
+  type NSEThemeRecipeDescriptor,
+  type NSEThemeRecipeProjection,
+} from "./themeProjection";
+export { resolveNSEThemeRecipe, type NSEThemeRecipeResolution } from "./themeRecipeResolver";
 export type {
   NSEAppearanceDataAttributes,
   NSEAppearanceSelection,
   NSEAppearanceServicePort,
   NSEChromeAppearance,
-  NSEColourScheme,
+  NSEAppearance,
+  NSEAppearanceState,
   NSEContrast,
+  NSEVisualEnvironment,
   NSEResolvedAppearance,
-  NSEResolvedColourScheme,
   NSETransparency,
 } from "./nseAppearanceTypes";
 export {

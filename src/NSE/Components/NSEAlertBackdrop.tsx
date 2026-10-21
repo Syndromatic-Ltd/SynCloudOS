@@ -22,7 +22,7 @@ import { useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
 import "./components.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
 import { resolveNSEAlertBackdropMotion } from "./NSEAlert.transitions";
-import { useNSEAppearanceProjection } from "../Appearance";
+import { useNSEThemeProjection } from "../Appearance";
 import { resolveNSEFocusReturnTarget } from "../Focus";
 
 type InertHTMLElement = HTMLElement & { inert?: boolean };
@@ -46,7 +46,7 @@ export function NSEAlertBackdrop({
   "data-syncloudos-runtime-owner": runtimeOwner,
   "data-syncloudos-focus-scope": focusScope,
 }: NSEAlertBackdropProps) {
-  const appearanceProjection = useNSEAppearanceProjection();
+  const themeProjection = useNSEThemeProjection();
   const { reducedMotion } = useNSEAnimationEnvironment();
   const backdropRef = useRef<HTMLDivElement>(null);
   useNSEPresentation(backdropRef, resolveNSEAlertBackdropMotion(reducedMotion));
@@ -99,7 +99,7 @@ export function NSEAlertBackdrop({
       ref={backdropRef}
       className={["nse-control-alert-backdrop", className].filter(Boolean).join(" ")}
       tabIndex={-1}
-      {...appearanceProjection}
+      {...themeProjection}
       data-syncloudos-runtime-owner={runtimeOwner}
       data-syncloudos-focus-scope={focusScope}
       onKeyDownCapture={onKeyDownCapture}

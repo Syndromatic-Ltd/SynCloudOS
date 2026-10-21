@@ -31,7 +31,7 @@
    ============================================================================================= */
 
 :where(.nse-container-divider-drawer, .nse-control-divider-captioned) {
-  --nse-sourcelist-divider: var(--nse-atmo-divider);
+  --nse-sourcelist-divider: var(--nse-theme-divider, linear-gradient(currentColor, currentColor));
 }
 
 /* --- DividerDrawer caption rail: label -> line -> arrow knob -> line-to-edge ------------------ */
@@ -58,8 +58,8 @@
 .nse-container-divider-drawer-line {
   flex: 4 1 0;
   align-self: center;
-  height: var(--nse-atmo-divider-arrow-line);
-  background: var(--nse-atmo-divider) left center / auto var(--nse-atmo-divider-arrow-line) repeat-x;
+  height: var(--nse-theme-divider-line-size, 1px);
+  background: var(--nse-theme-divider, linear-gradient(currentColor, currentColor)) left center / auto var(--nse-theme-divider-line-size, 1px) repeat-x;
 }
 
 /* Continuation right of the knob: grows 1:4 so the knob keeps its right-of-centre seat while the
@@ -70,8 +70,8 @@
 
 .nse-container-divider-drawer-arrow.nse-control-divider[data-variant="arrow"] {
   flex: 0 0 auto;
-  width: var(--nse-atmo-divider-arrow-width);
-  height: var(--nse-atmo-divider-arrow-size);
+  width: var(--nse-theme-divider-arrow-width, 24px);
+  height: var(--nse-theme-divider-arrow-size, 24px);
   margin: 0;
 }
 

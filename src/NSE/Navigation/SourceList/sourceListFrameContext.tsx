@@ -29,6 +29,8 @@ import type { NSEChromeScheme } from "../../Windows/Chrome/nseTopBarTypes";
 export interface SourceListFrameContextValue {
   /** Current sidebar width in px (single source of truth — owned by the system frame). */
   railWidth: number;
+  /** A mounted scene, not a theme identity, requests command-only stage chrome. */
+  setPanoramaActive?: (active: boolean) => void;
   /** Set the sidebar width; `null` restores the responsive default. The frame clamps to bounds. */
   setRailWidth: (px: number | null) => void;
   minWidth: number;

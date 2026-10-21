@@ -96,26 +96,32 @@ export type { NSEControlValidation, NSEControlInteractionPhase, NSEControlValueP
 export { NSEDataViewCellContent } from "./DataViews/Core/NSEDataViewCellContent";
 
 export {
-  NSEAppearanceProvider,
-  defineNSEAppearance,
-  useNSEAppearanceProjection,
+  NSEThemeProvider,
+  defineNSETheme,
+  useNSETheme,
   useNSEAppearance,
-  useNSEAppearanceSlot,
-  resolveNSEAppearanceSlot,
+  useNSEThemeProjection,
+  useNSEVisualEnvironment,
+  useNSEThemeRecipe,
+  resolveNSEThemeRecipe,
 } from "./Appearance";
 export type {
-  NSEAppearanceProviderProps,
+  NSEThemeProviderProps,
+  NSEThemeInfo,
+  NSEThemePresentation,
+  NSEThemeTokens,
+  NSEAppearanceState,
   NSEAppearanceDataAttributes,
-  NSEAppearanceDefinition,
-  NSEAppearanceDefinitionInput,
-  NSEAppearanceRecipeDefinition,
+  NSEThemeDefinition,
+  NSEThemeDefinitionInput,
+  NSEThemeRecipeDefinition,
   NSEAppearanceSelection,
   NSEAppearanceServicePort,
   NSEChromeAppearance,
-  NSEColourScheme,
+  NSEAppearance,
   NSEContrast,
+  NSEVisualEnvironment,
   NSEResolvedAppearance,
-  NSEResolvedColourScheme,
   NSETransparency,
 } from "./Appearance";
 export {

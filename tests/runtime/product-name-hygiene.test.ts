@@ -25,6 +25,21 @@ import { describe, expect, it } from "vitest";
 import { scanProductNameHygiene, scanRetiredProductNames } from "../../scripts/quality/check-product-name-hygiene.mjs";
 
 describe("product-name hygiene", () => {
+  it("preserves only exact upstream legal notices in theme source and shipment", () => {
+    const root = mkdtempSync(join(tmpdir(), "product-name-theme-"));
+    const token = ["En", "yo"].join("");
+    try {
+      for (const prefix of ["src/Themes", ".artifacts/synapp-sdk/packages/syncloudos/themes", ".artifacts/synapp-sdk/packages/syncloudos/dist/themes"]) {
+        const directory = join(root, prefix, "Atmo.scostheme/Contents/Licences");
+        mkdirSync(directory, { recursive: true });
+        for (const name of ["ARTWORK.md", "THIRD_PARTY.md"]) writeFileSync(join(directory,name), `Required ${token} attribution`);
+        writeFileSync(join(directory,"unexpected.md"), token);
+      }
+      const diagnostics = scanRetiredProductNames(root);
+      expect(diagnostics).toHaveLength(3);
+      expect(diagnostics.every(value => value.includes("unexpected.md"))).toBe(true);
+    } finally { rmSync(root, { recursive: true, force: true }); }
+  });
   it("inspects the current built SDK directory", () => {
     const root = mkdtempSync(join(tmpdir(), "product-name-package-"));
     const token = ["Cla", "ude"].join("");

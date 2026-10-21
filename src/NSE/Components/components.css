@@ -19,7 +19,6 @@
  */
 
 :root {
-  --nse-loading-background-image: url('/assets/textures/NSETileCotton.jpg');
 }
 
 .nse-icon-well {
@@ -136,7 +135,7 @@
   position: relative;
   border-radius: 28px;
   overflow: hidden;
-  color: #111b28;
+
 }
 
 .nse-window:focus {
@@ -156,14 +155,11 @@
   padding: 7px;
   overflow: hidden;
   border-radius: 26px;
-  color: #f4f7fb;
-  background: transparent;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.34);
-  backdrop-filter: blur(6px) saturate(1.25);
-  text-shadow:
-    0 -1px 0 rgba(0, 0, 0, 0.92),
-    0 1px 0 rgba(255, 255, 255, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.72);
+
+
+
+
+
 }
 
 .nse-window-titlebar::before {
@@ -174,7 +170,7 @@
   top: 0;
   height: 52px;
   border-radius: inherit;
-  background: url("/assets/nse/atmo/chrome/topbar/TopBar-Middle-NonSelector@2x.png") left top / 8px 58px repeat-x;
+
   opacity: 0.92;
   pointer-events: none;
 }
@@ -204,8 +200,8 @@
   justify-self: start;
   padding: 0;
   border: 0;
-  color: #f4f7fb;
-  background: transparent;
+
+
   cursor: pointer;
   transform: translateY(2px);
 }
@@ -240,45 +236,45 @@
 .nse-window-close-selected-cap {
   width: 18px;
   min-width: 18px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+
+
+
 }
 
 .nse-window-close-selected-cap-left {
-  background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Left-Curve@2x.png");
+
 }
 
 .nse-window-close-selected-cap-right {
-  background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Right-Curve@2x.png");
+
 }
 
 .nse-window-close-selected-middle {
   flex: 1;
   min-width: 0;
-  background: url("/assets/nse/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Left-Middle@2x.png") top left / 8px 100% repeat-x;
+
 }
 
 .nse-window-close-cap {
   width: 20px;
   min-width: 20px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+
+
+
 }
 
 .nse-window-close-cap-left {
-  background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-LeftCurve-SELECTOR@2x.png");
+
 }
 
 .nse-window-close-cap-right {
-  background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-RightCurve-SELECTOR@2x.png");
+
 }
 
 .nse-window-close-middle {
   flex: 1;
   min-width: 0;
-  background: url("/assets/nse/atmo/chrome/topbar/TopBar-Middle-SELECTOR@2x.png") top left / 8px 100% repeat-x;
+
 }
 
 .nse-window-close:active .nse-window-close-selected-slices {
@@ -288,15 +284,12 @@
 .nse-window-close-glyph {
   position: relative;
   z-index: 2;
-  color: #f4f7fb;
+
   font-family: inherit;
   font-size: 20px;
   font-weight: 800;
   line-height: 1;
-  text-shadow:
-    0 -1px 0 rgba(0, 0, 0, 0.95),
-    0 1px 0 rgba(255, 255, 255, 0.18),
-    0 2px 4px rgba(0, 0, 0, 0.82);
+
   transform: translateY(0);
 }
 
@@ -312,10 +305,8 @@
   max-height: 68vh;
   padding: 76px 22px 22px;
   overflow: auto;
-  background:
-    linear-gradient(180deg, rgba(248, 251, 255, 0.92), rgba(221, 228, 236, 0.94)),
-    url("/assets/webspring/Panel.png");
-  background-size: cover;
+
+
 }
 
 .nse-control-alert-backdrop {
@@ -648,3 +639,5 @@
     margin-top: 12px;
   }
 }
+
+.nse-window-titlebar { color:CanvasText; background:Canvas; }

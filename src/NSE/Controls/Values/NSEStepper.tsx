@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../../Appearance";
 import { useOptionalNSEControlRuntimePort } from "../Core";
 import type { NSENumericValueContract, NSEStepperValueContract, NSEUndoManagerPort } from "./valueControlTypes";
 import { commitUndoableValue } from "./valueControlTransaction";
@@ -175,11 +175,11 @@ export function NSEStepper<T = number>(props: NSEStepperProps<T>) {
     if (hoveredPart === part) return "hover";
     return "normal";
   };
-  const incrementAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("stepper", "increment", appearanceStateFor("increment")),
+  const incrementAppearance = useNSEThemeRecipe(
+    nseThemeSlot("stepper", "increment", appearanceStateFor("increment")),
   );
-  const decrementAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("stepper", "decrement", appearanceStateFor("decrement")),
+  const decrementAppearance = useNSEThemeRecipe(
+    nseThemeSlot("stepper", "decrement", appearanceStateFor("decrement")),
   );
   const endPresentation = (part: "increment" | "decrement") => {
     setPressedPart((current) => current === part ? null : current);

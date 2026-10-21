@@ -21,7 +21,7 @@
 import { useRef } from "react";
 import { NSEChoiceControl } from "../../Menus/NSEChoiceControl";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../../Appearance";
 import { resolveZonedDateTime } from "../calendarArithmetic";
 import type { NSEPlainTime } from "../dateTimeTypes";
 import type { NSEClockViewProps } from "./calendarTypes";
@@ -50,7 +50,7 @@ export function NSEClockView({ value, date, timeZone, disambiguation = "reject",
   const hourRotation = (value.hour % 12) * 30 + value.minute * 0.5 + value.second / 120;
   const minuteRotation = value.minute * 6 + value.second * 0.1;
   const secondRotation = value.second * 6;
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("clock-view", "face", disabled ? "disabled" : "normal"));
+  const appearance = useNSEThemeRecipe(nseThemeSlot("clock-view", "face", disabled ? "disabled" : "normal"));
   return <section aria-label={props["aria-label"]} data-nse-control="clock" data-state={resolution.kind} data-disabled={disabled ? "true" : "false"} data-motion={props.reducedMotion ? "reduced" : "full"} {...appearance.attributes}>
     <div role="img" aria-label="Analogue clock" data-nse-part="face" tabIndex={disabled ? -1 : 0} {...appearance.attributes}
       onPointerDown={(event) => { if (disabled) return; const latest = timeFromPointer(event.currentTarget, event.clientX, event.clientY); pointer.current = { pointerId: event.pointerId, opening: value, latest }; event.currentTarget.setPointerCapture?.(event.pointerId); onValueChange(latest, "preview"); }}

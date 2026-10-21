@@ -21,7 +21,7 @@
 import { Children, isValidElement, useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import type { CommandDispatchAcceptance, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
 import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
-import { useNSEAppearanceProjection } from "../Appearance";
+import { useNSEThemeProjection } from "../Appearance";
 import { sizedControlStyle, useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
 import { NSEPushButton, type NSEButtonTone, type NSEPushButtonProps } from "../Controls/Buttons/NSEButtons";
 import { useNSEOverlayProvider } from "../Overlays";
@@ -160,7 +160,7 @@ function NSECommandMenuSurface({
   appearance = "default",
 }: NSECommandMenuProps) {
   const applicationAppearance = appearance === "application-menu";
-  const appearanceProjection = useNSEAppearanceProjection();
+  const themeProjection = useNSEThemeProjection();
   const subscribe = useCallback((listener: () => void) => controller.subscribe(listener), [controller]);
   const snapshot = useSyncExternalStore(subscribe, () => controller.snapshot, () => controller.snapshot);
   const portalPresentation = useNSEMenuOverlayPresentationScope();
@@ -357,7 +357,7 @@ function NSECommandMenuSurface({
       aria-busy={snapshot.validating || undefined}
       data-nse-menu-id={model.id}
       data-nse-menu-generation={snapshot.generation}
-      {...appearanceProjection}
+      {...themeProjection}
       data-nse-menu-variant={applicationAppearance ? "application-menu" : "popup"}
       dir={direction}
       onKeyDown={handleKeyDown}

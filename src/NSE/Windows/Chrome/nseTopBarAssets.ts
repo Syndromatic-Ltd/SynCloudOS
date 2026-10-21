@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
-import settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
-import userInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
+import home from "./Resources/TopBar/home.svg?url&no-inline";
+import settings from "./Resources/TopBar/settings.svg?url&no-inline";
+import userInfo from "./Resources/TopBar/user-info.svg?url&no-inline";
 
 /**
  * The bars and their buttons are painted in CSS (nse-chrome.css); the only assets are the

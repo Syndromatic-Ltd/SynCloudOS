@@ -297,7 +297,7 @@ assert.equal("AnimationFX" in appearance, false);
 assert.equal("useAnimationFX" in appearance, false);
 assert.equal(typeof nse.NSEStackView, "function");
 assert.equal(nse.NSEStackView, layout.NSEStackView);
-assert.equal(nse.NSEAppearanceProvider, appearance.NSEAppearanceProvider);
+assert.equal(nse.NSEThemeProvider, appearance.NSEThemeProvider);
 assert.deepEqual(Object.keys(webspring), [
   "WEBSPRING_DRAG_FOLDER_CATCH_MARGIN",
   "WEBSPRING_DRAG_FOLDER_REST_MS",

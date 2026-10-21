@@ -29,6 +29,10 @@ import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
 
+import { NSEThemeProvider } from "../../../src/NSE/Appearance/NSEThemeProvider";
+import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
+import { atmoTheme } from "../../../src/NSE/Themes/Atmo";
+
 installNSEScrollIntoViewFixture();
 afterEach(async () => { cleanup(); await act(async () => {}); vi.restoreAllMocks(); });
 const presentation = createStaticPresentationPort({ width: 1024, height: 768 });
@@ -44,6 +48,19 @@ function Probe({ publish }: { publish(context: NSEOverlayProviderContextValue): 
 }
 
 describe("standalone NSE host lifetime", () => {
+  it("projects declarative motion and closing inertness on modal backdrops too", async () => {
+    const fixture = (open: boolean) => <NSEThemeProvider theme={atmoTheme}><Host><NSEPopup id="backdrop-motion" open={open} modal><button>Modal content</button></NSEPopup></Host></NSEThemeProvider>;
+    const view = render(fixture(true));
+    const button = await screen.findByRole("button", { name: "Modal content" });
+    const host = button.closest<HTMLElement>(".nse-overlay-popup-modal-host")!;
+    expect(host.dataset.nseOverlayMotion).toBe("bounce");
+    expect(host.style.getPropertyValue("--nse-overlay-motion-duration")).toBe("580ms");
+    view.rerender(fixture(false));
+    expect(host.dataset.state).toBe("closing"); expect(host.hasAttribute("inert")).toBe(true);
+    expect(host.getAttribute("aria-hidden")).toBe("true");
+    expect(screen.queryByRole("button", { name: "Modal content" })).toBeNull();
+    await waitFor(() => expect(host.isConnected).toBe(false));
+  });
   it("keeps nested overlays and their authority across parent rerenders and Strict Mode replay", async () => {
     let authority: NSEOverlayProviderContextValue | undefined;
     const publish = (value: NSEOverlayProviderContextValue) => { authority = value; };
@@ -135,6 +152,33 @@ describe("standalone NSE host lifetime", () => {
 });
 
 describe("standalone picker and menu keyboard contracts", () => {
+  it.each([false, true])("does not restore focus into a closing Atmo picker before the next menu (reduced=%s)", async reduced => {
+    const chosen = vi.fn();
+    const fixture = (revision: number) => <NSEThemeProvider theme={atmoTheme}><NSEAnimationEnvironmentProvider reducedMotion={reduced}><Host>
+      <output>{revision}</output><NSEPicker label="Format" options={[{ value: "plain", label: "Plain" }, { value: "rich", label: "Rich" }]} />
+      <NSEMenu label="Next actions" onSelect={chosen} items={[{ value: "save", label: "Save now" }]} />
+    </Host></NSEAnimationEnvironmentProvider></NSEThemeProvider>;
+    const view = render(fixture(1));
+    fireEvent.click(screen.getByRole("button", { name: "Format Plain" }));
+    const rich = await screen.findByRole("option", { name: "Rich" });
+    const closingSurface = rich.closest<HTMLElement>(".nse-overlay-popup")!;
+    rich.focus(); fireEvent.click(rich);
+    expect(screen.queryByRole("option", { name: "Rich" })).toBeNull();
+    if (!reduced) {
+      expect(rich.isConnected).toBe(true);
+      expect(closingSurface.hasAttribute("inert")).toBe(true);
+      expect(closingSurface.getAttribute("aria-hidden")).toBe("true");
+    }
+    const next = screen.getByRole("button", { name: "Next actions" }); next.focus(); fireEvent.click(next);
+    const command = await screen.findByRole("menuitem", { name: "Save now" }); command.focus();
+    view.rerender(fixture(2));
+    expect(screen.getByRole("menuitem", { name: "Save now" })).toBe(command);
+    expect(document.activeElement).toBe(command);
+    await waitFor(() => expect(rich.isConnected).toBe(false));
+    expect(document.activeElement).toBe(command);
+    fireEvent.click(command); await waitFor(() => expect(chosen).toHaveBeenCalledWith("save"));
+  });
+
   it("retains an open menu branch and focus across an unrelated parent render", async () => {
     const items = [{ value: "file", label: "File", children: [{ value: "save", label: "Save document" }] }];
     const fixture = (revision: number) => <Host><output>{revision}</output><NSEMenu label="Document actions" items={items} /></Host>;

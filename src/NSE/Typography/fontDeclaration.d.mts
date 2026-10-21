@@ -43,6 +43,7 @@ export interface FontDeclaration {
   readonly roles: Readonly<Record<string, FontRoleDefinition>>; readonly preloadResources: readonly string[];
 }
 export function defineFontDeclaration(input: FontDeclarationDefinition): FontDeclaration;
-export function fontDeclarationCSS(declaration: FontDeclaration, urls: Readonly<Record<string, string>>): string;
+export interface FontDeclarationCSSOptions { readonly scope?: string; readonly rolePrefix?: string; }
+export function fontDeclarationCSS(declaration: FontDeclaration, urls: Readonly<Record<string, string>>, options?: FontDeclarationCSSOptions): string;
 /** Framework-private capture at the host/compiler boundary. */
 export function captureFontDeclaration(input: FontDeclaration): FontDeclaration;

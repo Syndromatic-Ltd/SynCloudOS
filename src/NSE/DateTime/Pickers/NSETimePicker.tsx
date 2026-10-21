@@ -22,7 +22,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode 
 import { NSEClockView } from "../Calendar";
 import type { NSEPlainDate, NSEPlainTime } from "../dateTimeTypes";
 import type { NSETimePickerEditorMode, NSETimePickerProps } from "./datePickerTypes";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../../Appearance";
 import { NSEPushButton } from "../../Controls/Buttons/NSEButtons";
 import { NSEStepper } from "../../Controls/Values/NSEStepper";
 import { NSEChoiceControl } from "../../Menus/NSEChoiceControl";
@@ -340,7 +340,7 @@ export function NSETimePicker({
     <NSEPushButton tone="light" disabled={disabled || readOnly} aria-label={`Set ${label.toLowerCase()}`} onClick={() => change(minimum, "commit")}>Set time</NSEPushButton>
   ));
   const appearanceState = disabled ? "disabled" : focused ? "focused" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("time-picker", "select", appearanceState));
+  const appearance = useNSEThemeRecipe(nseThemeSlot("time-picker", "select", appearanceState));
   return (
     <span {...hostProps} data-nse-control="time-picker" data-state={disabled ? "disabled" : current ? "ready" : "empty"} data-hour-mode={hourCycle === "h12" ? "12" : "24"} data-editor={editorMode} {...appearance.attributes} onFocusCapture={(event) => { setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); onBlurCapture?.(event); }}>
       {editor}

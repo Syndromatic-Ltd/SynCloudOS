@@ -46,7 +46,7 @@
         "src/NSE/Themes/Atmo/index.ts"
       ],
       "@syndromatic/syncloudos/nse/themes/atmo/styles.css": [
-        "src/NSE/Themes/Atmo/Resources/atmo.css"
+        "src/Themes/Atmo.scostheme/Contents/styles.css"
       ],
       "@syndromatic/syncloudos/nse/scroll": [
         "src/NSE/public/scroll.ts"
@@ -98,6 +98,15 @@
       ],
       "@syndromatic/syncloudos/fx/lumina": [
         "src/FX/LuminaFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/nse/theme": [
+        "src/NSE/public/theme.ts"
+      ],
+      "@syndromatic/syncloudos/nse/themes/metro": [
+        "src/NSE/Themes/Metro/index.ts"
+      ],
+      "@syndromatic/syncloudos/nse/themes/metro/styles.css": [
+        "src/Themes/Metro.scostheme/Contents/styles.css"
       ]
     }
   },

@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEVisualEnvironment } from "../NSE/Appearance";
+
+
 import { useMemo, type CSSProperties } from "react";
 import {
   NSEAnimationDefaults,
@@ -53,7 +56,9 @@ export interface ApplicationStageMotion {
   readonly navigationTitle: NSEPresentationSpec | null;
 }
 
+export type ApplicationStageShellMotion = Readonly<{ kind: "none" | "fade" | "slide" | "depth"; durationMs: number; easing: "linear" | "ease-out" | "ease-in-out" | "decelerate" }>;
 export interface ApplicationStageMotionInput {
+  readonly shellMotion?: ApplicationStageShellMotion;
   readonly reducedMotion: boolean;
   readonly role: ApplicationStageRole;
   /** Mounted and painted, but not yet presented. */
@@ -128,11 +133,35 @@ const modelOpacity = (style: CSSProperties) => typeof style.opacity === "number"
  * Framer definitions they replace. */
 const defaultLaunchZoom = Object.freeze({ delay: 0.72, duration: 0.68, easing: "accelerate" as const });
 
-export function resolveApplicationStageMotion({ reducedMotion, role, staged, launching, launchZoom = defaultLaunchZoom, presentationMotion = "host" }: ApplicationStageMotionInput): ApplicationStageMotion {
+function resolvePlanarApplicationStageMotion({ reducedMotion, role, staged, shellMotion }: ApplicationStageMotionInput & { shellMotion: ApplicationStageShellMotion }): ApplicationStageMotion {
+  const duration = shellMotion.kind === "none" ? 0 : reducedMotion ? Math.min(shellMotion.durationMs / 1000, 0.14) : shellMotion.durationMs / 1000;
+  const slides = shellMotion.kind === "slide" && !reducedMotion;
+  const timing = shellMotion.easing === "decelerate" ? bezier(0.1, 0.9, 0.2, 1) : shellMotion.easing;
+  const enterTracks = [opacityTrack([0, 1]), ...(slides ? [transformTrack([{ x: 32 }, {}])] : [])];
+  const outPose = slides ? { x: -32 } : {};
+  const root: ApplicationStagePartMotion = role === "outgoing"
+    ? { state: "outgoing", style: { opacity: 0, ...(slides ? { transform: nseTransformStyle(outPose) } : {}) }, enter: spec(duration, timing, [opacityTrack([1, 0]), ...(slides ? [transformTrack([{}, outPose])] : [])]), exit: fade(0, 0, 0, timing) }
+    : role === "incoming"
+      ? { state: "incoming", style: {}, enter: onMount(spec(duration, timing, enterTracks)), exit: fade(1, 0, Math.min(duration, 0.16), timing) }
+      : staged
+        ? { state: "staged", style: { opacity: 0 }, enter: null, exit: fade(0, 0, 0, timing) }
+        : { state: "presented", style: {}, enter: onPresentation(fade(0, 1, Math.min(duration, 0.17), timing)), exit: fade(1, 0, Math.min(duration, 0.17), timing) };
+  const surface: ApplicationStagePartMotion = role === "outgoing"
+    ? { state: "outgoing", style: { opacity: 0 }, enter: fade(1, 0, duration, timing), exit: fade(0, 0, 0, timing) }
+    : role === "incoming"
+      ? { state: "incoming", style: {}, enter: onMount(fade(0, 1, Math.min(duration, 0.17), timing)), exit: fade(1, 0, Math.min(duration, 0.17), timing) }
+      : staged
+        ? { state: "staged", style: { opacity: 0, ...(slides ? { transform: nseTransformStyle({ x: 32 }) } : {}) }, enter: null, exit: fade(0, 0, 0, timing) }
+        : { state: "presented", style: {}, enter: onPresentation(spec(duration, timing, enterTracks)), exit: spec(Math.min(duration, 0.2), timing, [opacityTrack([1, 0]), ...(slides ? [transformTrack([{}, { x: -20 }])] : [])]) };
+  return { root, surface, navigationBack: null, navigationTitle: null };
+}
+
+export function resolveApplicationStageMotion({ reducedMotion, role, staged, launching, launchZoom = defaultLaunchZoom, presentationMotion = "host", shellMotion }: ApplicationStageMotionInput): ApplicationStageMotion {
   if (presentationMotion === "content") {
     const part: ApplicationStagePartMotion = { state: staged ? "staged" : "presented", style: staged ? { opacity: 0 } : {}, enter: null, exit: null };
     return { root: { ...part, state: staged ? "staged" : role ?? "presented" }, surface: part, navigationBack: null, navigationTitle: null };
   }
+  if (shellMotion && shellMotion.kind !== "depth") return resolvePlanarApplicationStageMotion({ reducedMotion, role, staged, launching, shellMotion });
   const root = ((): Omit<ApplicationStagePartMotion, "exit"> => {
     if (role === "incoming") return {
       state: "incoming", style: {},
@@ -200,9 +229,11 @@ export function resolveApplicationStageMotion({ reducedMotion, role, staged, lau
 
 export function useApplicationStageMotion(input: Omit<ApplicationStageMotionInput, "reducedMotion">): ApplicationStageMotion {
   const { reducedMotion } = useNSEAnimationEnvironment();
+  const { theme } = useNSEVisualEnvironment();
+  const shellMotion = theme.presentation.motion?.shell ?? { kind: "none" as const, durationMs: 0, easing: "ease-out" as const };
   const { role, staged, launching, launchZoom, presentationMotion } = input;
   return useMemo(
-    () => resolveApplicationStageMotion({ reducedMotion, role, staged, launching, launchZoom, presentationMotion }),
-    [launching, launchZoom, reducedMotion, role, staged, presentationMotion],
+    () => resolveApplicationStageMotion({ reducedMotion, role, staged, launching, launchZoom, presentationMotion, shellMotion }),
+    [launching, launchZoom, reducedMotion, role, staged, presentationMotion, shellMotion],
   );
 }

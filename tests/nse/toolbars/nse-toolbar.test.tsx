@@ -622,8 +622,8 @@ describe("NSEToolbar presentation", () => {
 
     const toolbar = await screen.findByRole("toolbar", { name: "Appearance actions" });
     const save = await screen.findByRole("button", { name: "Save" });
-    expect(toolbar.getAttribute("data-nse-appearance-slot")).toBe("toolbar.surface.normal.1x");
-    expect(save.getAttribute("data-nse-appearance-slot")).toBe("toolbar.item.normal.1x");
+    expect(toolbar.getAttribute("data-nse-theme-slot")).toBe("toolbar.surface.normal");
+    expect(save.getAttribute("data-nse-theme-slot")).toBe("toolbar.item.normal");
     expect(controller.snapshot.itemIds).toEqual(configuration.defaultItemIds);
     fireEvent.click(save);
     await waitFor(() => expect(controller.runtime.commands.dispatch).toHaveBeenCalledWith(

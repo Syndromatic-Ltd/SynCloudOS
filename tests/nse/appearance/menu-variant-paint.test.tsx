@@ -24,9 +24,9 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import * as cssTree from "css-tree";
 import { afterEach, describe, expect, it } from "vitest";
-import { NSEAppearanceProvider, NSEMenu } from "@syndromatic/syncloudos/nse";
+import { NSEThemeProvider, NSEMenu } from "@syndromatic/syncloudos/nse";
 import { NSEStandaloneControlHost } from "@syndromatic/syncloudos/nse/controls";
-import { atmoAppearance } from "@syndromatic/syncloudos/nse/themes/atmo";
+import { atmoTheme } from "@syndromatic/syncloudos/nse/themes/atmo";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
 afterEach(cleanup);
@@ -47,18 +47,18 @@ function selectorsFor(file: string, property: string, value: string): string[] {
 }
 
 async function mountPopup(contrast: "normal" | "forced" = "normal") {
-  render(<NSEAppearanceProvider appearance={atmoAppearance} contrast={contrast}>
+  render(<NSEThemeProvider theme={atmoTheme} contrast={contrast}>
     <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>
       <NSEMenu label="Actions" defaultOpen items={[{ value: "save", label: "Save" }]} />
     </NSEStandaloneControlHost>
-  </NSEAppearanceProvider>);
+  </NSEThemeProvider>);
   return screen.findByRole("menu");
 }
 
 describe("popup variants retain their selected appearance", () => {
   it("keeps the selected theme ID and popup variant on the actual menu", async () => {
     const menu = await mountPopup();
-    expect(menu.getAttribute("data-nse-appearance")).toBe("atmo");
+    expect(menu.getAttribute("data-nse-theme")).toBe("com.syndromatic.atmo");
     expect(menu.getAttribute("data-nse-menu-variant")).toBe("popup");
   });
 

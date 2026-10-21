@@ -1,0 +1,153 @@
+{
+  "id": "com.syndromatic.metro",
+  "displayName": "Metro",
+  "recipes": [],
+  "tokens": {
+    "light": {},
+    "dark": {}
+  },
+  "presentation": {
+    "peerNavigation": {
+      "compact": {
+        "kind": "panorama",
+        "placement": "block-start",
+        "flow": "in-flow",
+        "content": "label",
+        "overflow": {
+          "kind": "scroll"
+        }
+      },
+      "regular": {
+        "kind": "panorama",
+        "placement": "block-start",
+        "flow": "in-flow",
+        "content": "label",
+        "overflow": {
+          "kind": "scroll"
+        }
+      }
+    },
+    "chrome": "continuous",
+    "login": "plain",
+    "tabStyle": "plain",
+    "metrics": {
+      "navigation": {
+        "barBlockSize": 60,
+        "edgeGap": 0
+      }
+    },
+    "motion": {
+      "peerNavigation": {
+        "kind": "slide",
+        "durationMs": 300,
+        "easing": "decelerate"
+      },
+      "login": {
+        "kind": "slide",
+        "durationMs": 180,
+        "easing": "decelerate"
+      },
+      "shell": {
+        "kind": "slide",
+        "durationMs": 240,
+        "easing": "decelerate"
+      },
+      "overlay": {
+        "kind": "slide",
+        "durationMs": 180,
+        "easing": "decelerate"
+      }
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "themeContractVersion": 1,
+    "supportedAppearances": [
+      "light",
+      "dark"
+    ],
+    "author": "Syndromatic Ltd."
+  },
+  "styleTokenNames": [
+    "--nse-alert-body-text",
+    "--nse-alert-details-fill",
+    "--nse-alert-details-rule",
+    "--nse-alert-details-text",
+    "--nse-alert-details-thumb",
+    "--nse-alert-link-text",
+    "--nse-app-background",
+    "--nse-app-foreground",
+    "--nse-app-topbar-glyph-fill",
+    "--nse-app-topbar-glyph-shadow",
+    "--nse-border",
+    "--nse-control-slider-control-size",
+    "--nse-control-slider-thumb-size",
+    "--nse-control-slider-thumb-visible-size",
+    "--nse-control-slider-track-cap-size",
+    "--nse-control-slider-track-size",
+    "--nse-focus-ring",
+    "--nse-grouped-list-frame-radius",
+    "--nse-grouped-list-row-inset",
+    "--nse-loading-background-image",
+    "--nse-menu-row-inline-padding",
+    "--nse-menu-row-min-block-size",
+    "--nse-metro-accent",
+    "--nse-metro-canvas",
+    "--nse-metro-control-height",
+    "--nse-metro-danger",
+    "--nse-metro-disabled",
+    "--nse-metro-disabled-surface",
+    "--nse-metro-edge",
+    "--nse-metro-field",
+    "--nse-metro-field-ink",
+    "--nse-metro-focus",
+    "--nse-metro-font",
+    "--nse-metro-hover",
+    "--nse-metro-ink",
+    "--nse-metro-motion-ease",
+    "--nse-metro-motion-feedback",
+    "--nse-metro-motion-press",
+    "--nse-metro-muted",
+    "--nse-metro-on-accent",
+    "--nse-metro-overlay-x",
+    "--nse-metro-overlay-y",
+    "--nse-metro-progress-diameter",
+    "--nse-metro-rule",
+    "--nse-metro-surface",
+    "--nse-metro-title-font",
+    "--nse-selection-background",
+    "--nse-selection-foreground",
+    "--nse-smooth-surface-mobile-radius",
+    "--nse-smooth-surface-radius",
+    "--nse-smooth-surface-shadow",
+    "--nse-surface",
+    "--nse-tab-bar-height",
+    "--nse-table-header-background",
+    "--nse-text-primary",
+    "--nse-text-secondary",
+    "--nse-theme-divider-arrow-size",
+    "--nse-theme-divider-arrow-width",
+    "--nse-theme-divider-line-size",
+    "--nse-theme-font-body",
+    "--nse-theme-font-label",
+    "--nse-theme-font-title",
+    "--nse-theme-font-ui",
+    "--nse-theme-panel-header-radius",
+    "--nse-toolbar-height",
+    "--nse-toolbar-item-inline-margin",
+    "--nse-toolbar-overflow-reserve",
+    "--nse-window-background",
+    "--nse-window-border",
+    "--nse-window-control-hit-target",
+    "--nse-window-divider",
+    "--nse-window-focus-ring",
+    "--nse-window-foreground",
+    "--nse-window-popover-shadow",
+    "--nse-window-radius",
+    "--nse-window-shadow",
+    "--nse-window-sheet-shadow",
+    "--nse-window-title-background",
+    "--nse-window-title-foreground",
+    "--nse-window-titlebar-height"
+  ]
+}

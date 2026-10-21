@@ -19,7 +19,7 @@
  */
 
 export { LoginWindow } from "./LoginWindow";
-export { loginWindowAssets } from "./loginWindowAssets";
+
 export type { LoginCheckboxProps } from "./LoginCheckbox";
 export type { LoginFieldProps } from "./LoginField";
 export type { LoginWindowProps } from "./LoginWindow";

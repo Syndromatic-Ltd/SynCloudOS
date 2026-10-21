@@ -19,24 +19,24 @@
  */
 
 // @vitest-environment jsdom
-import { defineNSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
+import { defineNSETheme } from "@syndromatic/syncloudos/nse/theme";
 import { installNSEScrollIntoViewFixture } from "../nse/fixtures/browser";
 installNSEScrollIntoViewFixture();
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
-import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
+import { NSEThemeProvider } from "../../src/NSE/Appearance";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo";
 import { NSEMenu, NSEPicker } from "../../src/NSE/Menus";
 import { NSELevelIndicator, NSEStepper } from "../../src/NSE/Controls/Values";
 import { NSEComboBox } from "../../src/NSE/Controls/Completion";
 import { NSEStandaloneControlHost, NSEPopup } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
-const customAppearance = defineNSEAppearance({ id: "custom-test", displayName: "Custom test", recipes: [
-  { slot: "toolbar.item.normal.1x", recipeId: "custom-test.toolbar.normal" },
-  { slot: "toolbar.item.selected.1x", recipeId: "custom-test.toolbar.selected" },
+const customAppearance = defineNSETheme({ id: "test.custom", displayName: "Custom test", recipes: [
+  { slot: "toolbar.item.normal", recipeId: "custom-test.toolbar.normal" },
+  { slot: "toolbar.item.selected", recipeId: "custom-test.toolbar.selected" },
 ] });
 
 afterEach(() => {
@@ -68,10 +68,10 @@ describe("NSE menu and picker interactions", () => {
     const meter = screen.getByRole("meter", { name: "Capacity" });
     const stepper = screen.getByRole("spinbutton", { name: "Quantity" });
     const combo = screen.getByRole("combobox", { name: "Search" });
-    expect(meter.getAttribute("data-nse-appearance-slot")).toBe("level-indicator.track.normal.1x");
-    expect(meter.querySelector('[data-nse-part="segment"]')?.getAttribute("data-nse-appearance-slot")).toBe("level-indicator.segment.warning.1x");
-    expect(stepper.getAttribute("data-nse-appearance-slot")).toBe("stepper.increment.normal.1x");
-    expect(combo.closest('[data-nse-control="combo-box"]')?.getAttribute("data-nse-appearance-slot")).toBe("combo-box.well.normal.1x");
+    expect(meter.getAttribute("data-nse-theme-slot")).toBe("level-indicator.track.normal");
+    expect(meter.querySelector('[data-nse-part="segment"]')?.getAttribute("data-nse-theme-slot")).toBe("level-indicator.segment.warning");
+    expect(stepper.getAttribute("data-nse-theme-slot")).toBe("stepper.increment.normal");
+    expect(combo.closest('[data-nse-control="combo-box"]')?.getAttribute("data-nse-theme-slot")).toBe("combo-box.well.normal");
     fireEvent.keyDown(stepper, { key: "ArrowUp" });
     expect(stepperChange).toHaveBeenCalledWith(3, "commit");
   });
@@ -81,7 +81,7 @@ describe("NSE menu and picker interactions", () => {
 
     render(
       <InteractionHost>
-        <NSEAppearanceProvider appearance={atmoAppearance}>
+        <NSEThemeProvider theme={atmoTheme}>
           <NSEPicker
             label="Density"
             value="balanced"
@@ -92,7 +92,7 @@ describe("NSE menu and picker interactions", () => {
             ]}
             onValueChange={onValueChange}
           />
-        </NSEAppearanceProvider>
+        </NSEThemeProvider>
       </InteractionHost>
     );
 
@@ -116,7 +116,7 @@ describe("NSE menu and picker interactions", () => {
 
     render(
       <InteractionHost>
-        <NSEAppearanceProvider appearance={customAppearance}>
+        <NSEThemeProvider theme={customAppearance}>
           <NSEMenu
             label="Actions"
             items={[
@@ -126,7 +126,7 @@ describe("NSE menu and picker interactions", () => {
             ]}
             onSelect={onSelect}
           />
-        </NSEAppearanceProvider>
+        </NSEThemeProvider>
       </InteractionHost>
     );
 
@@ -134,7 +134,7 @@ describe("NSE menu and picker interactions", () => {
     fireEvent.keyDown(trigger, { key: "ArrowDown" });
 
     const pin = await screen.findByRole("menuitemcheckbox", { name: "Pin Surface" });
-    expect(pin.closest("[data-nse-appearance]")?.getAttribute("data-nse-appearance")).toBe("custom-test");
+    expect(pin.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("test.custom");
     expect(pin.getAttribute("aria-checked")).toBe("true");
     await waitFor(() => expect(document.activeElement).toBe(pin));
 

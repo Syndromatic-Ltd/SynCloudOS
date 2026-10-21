@@ -19,4 +19,4 @@
  */
 
 export { defineFontDeclaration, fontDeclarationCSS } from "./fontDeclaration.mjs";
-export type { FontDeclaration, FontDeclarationDefinition, FontFaceDefinition, FontFamilyDefinition, FontRoleDefinition } from "./fontDeclaration.mjs";
+export type { FontDeclarationCSSOptions, FontDeclaration, FontDeclarationDefinition, FontFaceDefinition, FontFamilyDefinition, FontRoleDefinition } from "./fontDeclaration.mjs";

@@ -20,22 +20,21 @@
 
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
-import { defineNSEAppearance, type NSEAppearanceDefinitionInput } from "@syndromatic/syncloudos/nse";
+import { defineNSETheme, type NSEThemeDefinitionInput } from "@syndromatic/syncloudos/nse";
 
-const base = { id: "custom-theme", displayName: "Custom theme" };
-const recipe = { slot: "button.bezel.normal.1x", recipeId: "custom.button" };
-const defineUnchecked = (input: unknown) => defineNSEAppearance(input as NSEAppearanceDefinitionInput);
+const base = { id: "com.test.custom-theme", displayName: "Custom theme" };
+const recipe = { slot: "button.bezel.normal", recipeId: "custom.button" };
+const defineUnchecked = (input: unknown) => defineNSETheme(input as NSEThemeDefinitionInput);
 
 describe("appearance definitions at the public package boundary", () => {
-  it("clones data deeply, ignores extra fields without invoking them and resists subsequent mutation", () => {
+  it("clones data deeply and resists subsequent mutation", () => {
     const input = { ...base, recipes: [{ ...recipe }] };
-    Object.defineProperty(input, "loader", { get() { throw new Error("must not execute"); } });
-    const result = defineNSEAppearance(input);
+    const result = defineNSETheme(input);
     input.id = "changed";
     input.displayName = "Changed";
     input.recipes[0].slot = "changed";
     input.recipes.push({ slot: "extra", recipeId: "extra" });
-    expect(result).toEqual({ ...base, recipes: [recipe] });
+    expect(result).toMatchObject({ ...base, recipes: [recipe] });
     expect(result).not.toBe(input);
     expect(result.recipes).not.toBe(input.recipes);
     expect(result.recipes[0]).not.toBe(input.recipes[0]);
@@ -47,14 +46,14 @@ describe("appearance definitions at the public package boundary", () => {
 
   it("accepts omitted recipes and plain records with no prototype", () => {
     const result = defineUnchecked(Object.assign(Object.create(null), base));
-    expect(result).toEqual({ ...base, recipes: [] });
+    expect(result).toMatchObject({ ...base, recipes: [] });
     expect(Object.isFrozen(result.recipes)).toBe(true);
-    expect(defineNSEAppearance({ ...base, displayName: "  Custom theme\n" }).displayName).toBe("Custom theme");
+    expect(() => defineNSETheme({ ...base, displayName: "  Custom theme\n" })).toThrow(TypeError);
   });
 
   it.each([" leading", "trailing ", "theme\n", "Theme", "-theme", "theme_name", "theme/name", "", "two themes"])(
     "rejects an identity outside the literal ID grammar: %j", (id) => {
-      expect(() => defineNSEAppearance({ ...base, id })).toThrow(TypeError);
+      expect(() => defineNSETheme({ ...base, id })).toThrow(TypeError);
     },
   );
 

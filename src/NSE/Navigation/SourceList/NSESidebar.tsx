@@ -20,6 +20,7 @@
 
 import { useRef, useState, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import { NSEDivider, NSEListItem } from "../../Controls/Selection";
+import { useNSEVisualEnvironment } from "../../Appearance";
 import { useNSERubberBandScroll } from "../../Scroll";
 import type { NSEChromeScheme } from "../../Windows/Chrome/nseTopBarTypes";
 
@@ -201,7 +202,7 @@ export function NSESidebar({
   header,
   variant = "sourceList",
   surface = "plain",
-  scheme = "light",
+  scheme,
   sections,
   activeItemId = null,
   collapsedSectionIds,
@@ -211,6 +212,8 @@ export function NSESidebar({
   className = "",
   ...props
 }: NSESidebarProps) {
+  const appearance = useNSEVisualEnvironment();
+  const resolvedScheme = scheme ?? appearance.resolvedAppearance;
   const [internalCollapsedIds, setInternalCollapsedIds] = useState<readonly string[]>([]);
   const collapsedIds = collapsedSectionIds ?? internalCollapsedIds;
   const toggleSection = (section: NSESidebarSection) => {
@@ -228,7 +231,7 @@ export function NSESidebar({
       className={classes("nse-sidebar", className)}
       data-variant={variant}
       data-surface={surface}
-      data-mode={surface === "metal" ? scheme : undefined}
+      data-mode={resolvedScheme}
       {...props}
     >
       <nav className="nse-sidebar-scroll" ref={scrollRef} onKeyDown={handleSidebarKeyDown}>

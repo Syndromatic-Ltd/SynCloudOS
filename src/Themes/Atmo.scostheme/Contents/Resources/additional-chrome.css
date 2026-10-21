@@ -1,0 +1,350 @@
+@scope ([data-nse-theme="com.syndromatic.atmo"]) to ([data-nse-theme]:not([data-nse-theme="com.syndromatic.atmo"])) {
+.nse-window:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  color: #111b28;
+}
+
+.nse-window:focus:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  outline: none;
+}
+
+.nse-window-titlebar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr) 90px;
+  align-items: center;
+  height: 52px;
+  padding: 7px;
+  overflow: hidden;
+  border-radius: 26px;
+  color: #f4f7fb;
+  background: transparent;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(6px) saturate(1.25);
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.92),
+    0 1px 0 rgba(255, 255, 255, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.72);
+}
+
+.nse-window-titlebar:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 52px;
+  border-radius: inherit;
+  background: url("./assets/atmo/chrome/topbar/TopBar-Middle-NonSelector@2x.png") left top / 8px 58px repeat-x;
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.nse-window-titlebar h2:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  overflow: hidden;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translateY(2px);
+}
+
+.nse-window-close:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 68px;
+  height: 38px;
+  place-items: center;
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  color: #f4f7fb;
+  background: transparent;
+  cursor: pointer;
+  transform: translateY(2px);
+}
+
+.nse-window-close:focus-visible:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  outline: 2px solid rgba(134, 214, 255, 0.9);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+.nse-window-close-slices:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.nse-window-close-selected-slices:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: absolute;
+  inset: 1px;
+  z-index: 1;
+  display: flex;
+  overflow: hidden;
+  border-radius: 999px;
+  clip-path: inset(0 round 999px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nse-window-close-selected-cap:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 18px;
+  min-width: 18px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.nse-window-close-selected-cap-left:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background-image: url("./assets/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Left-Curve@2x.png");
+}
+
+.nse-window-close-selected-cap-right:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background-image: url("./assets/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Right-Curve@2x.png");
+}
+
+.nse-window-close-selected-middle:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  flex: 1;
+  min-width: 0;
+  background: url("./assets/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Left-Middle@2x.png") top left / 8px 100% repeat-x;
+}
+
+.nse-window-close-cap:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  width: 20px;
+  min-width: 20px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.nse-window-close-cap-left:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background-image: url("./assets/atmo/chrome/topbar/TopBar-LeftCurve-SELECTOR@2x.png");
+}
+
+.nse-window-close-cap-right:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  background-image: url("./assets/atmo/chrome/topbar/TopBar-RightCurve-SELECTOR@2x.png");
+}
+
+.nse-window-close-middle:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  flex: 1;
+  min-width: 0;
+  background: url("./assets/atmo/chrome/topbar/TopBar-Middle-SELECTOR@2x.png") top left / 8px 100% repeat-x;
+}
+
+.nse-window-close:active .nse-window-close-selected-slices:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  opacity: 1;
+}
+
+.nse-window-close-glyph:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 2;
+  color: #f4f7fb;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.95),
+    0 1px 0 rgba(255, 255, 255, 0.18),
+    0 2px 4px rgba(0, 0, 0, 0.82);
+  transform: translateY(0);
+}
+
+.nse-window-titlebar-spacer:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  position: relative;
+  z-index: 1;
+  width: 68px;
+  height: 38px;
+  justify-self: end;
+}
+
+.nse-window-content:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) {
+  max-height: 68vh;
+  padding: 76px 22px 22px;
+  overflow: auto;
+  background:
+    linear-gradient(180deg, rgba(248, 251, 255, 0.92), rgba(221, 228, 236, 0.94)),
+    url("./assets/webspring/Panel.png");
+  background-size: cover;
+}
+
+
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* Generated from measured login plate stops. Committed metal-thumb material. */
+.nse-metal-thumb:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { position:absolute; display:block; overflow:hidden; border-radius:50%; pointer-events:none; isolation:isolate; background:conic-gradient(from 0deg at 50% 50%,
+    #d6d6d6 0deg,
+    #dadada 7.25deg,
+    #d9d9d9 13.75deg,
+    #d4d4d4 18.25deg,
+    #c3c3c3 28.5deg,
+    #bfbfbf 33.75deg,
+    #c3c3c3 37.5deg,
+    #dedede 46.25deg,
+    #e0e0e0 48.25deg,
+    #e1e1e1 50deg,
+    #dedede 52.25deg,
+    #d9d9d9 54.25deg,
+    #bababa 62.5deg,
+    #b1b1b1 65.5deg,
+    #aeaeae 67.75deg,
+    #aeaeae 72.75deg,
+    #b1b1b1 77.25deg,
+    #bcbcbc 87deg,
+    #bfbfbf 91.75deg,
+    #bebebe 96.5deg,
+    #b8b8b8 106.5deg,
+    #b9b9b9 117deg,
+    #c3c3c3 121.75deg,
+    #e8e8e8 133.5deg,
+    #ededed 136.5deg,
+    #efefef 139.5deg,
+    #ebebeb 142.5deg,
+    #e3e3e3 145.5deg,
+    #d8d8d8 148.5deg,
+    #b6b6b6 156.25deg,
+    #aaaaaa 159.5deg,
+    #a3a3a3 162.75deg,
+    #a1a1a1 165.5deg,
+    #a3a3a3 170.25deg,
+    #a8a8a8 174.25deg,
+    #d1d1d1 194.25deg,
+    #dfdfdf 204.5deg,
+    #e2e2e2 207.75deg,
+    #e2e2e2 217.75deg,
+    #dfdfdf 222deg,
+    #d6d6d6 228.75deg,
+    #b8b8b8 246.25deg,
+    #b2b2b2 250.75deg,
+    #afafaf 255.75deg,
+    #b1b1b1 258.25deg,
+    #c0c0c0 263.5deg,
+    #c4c4c4 266.25deg,
+    #c1c1c1 269.75deg,
+    #afafaf 279.5deg,
+    #afafaf 299.25deg,
+    #b7b7b7 302.75deg,
+    #d7d7d7 311.25deg,
+    #dcdcdc 313.5deg,
+    #dddddd 315.5deg,
+    #dbdbdb 319deg,
+    #d6d6d6 322.75deg,
+    #bcbcbc 334.75deg,
+    #b6b6b6 338.5deg,
+    #b2b2b2 344.25deg,
+    #b8b8b8 348.25deg,
+    #d1d1d1 357.25deg,
+    #d6d6d6 360deg); }
+.nse-metal-thumb-sheen:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { position:absolute; inset:-25%; background:conic-gradient(from 0deg at 50% 50%,
+    #d6d6d6 0deg,
+    #dadada 7.25deg,
+    #d9d9d9 13.75deg,
+    #d4d4d4 18.25deg,
+    #c3c3c3 28.5deg,
+    #bfbfbf 33.75deg,
+    #c3c3c3 37.5deg,
+    #dedede 46.25deg,
+    #e0e0e0 48.25deg,
+    #e1e1e1 50deg,
+    #dedede 52.25deg,
+    #d9d9d9 54.25deg,
+    #bababa 62.5deg,
+    #b1b1b1 65.5deg,
+    #aeaeae 67.75deg,
+    #aeaeae 72.75deg,
+    #b1b1b1 77.25deg,
+    #bcbcbc 87deg,
+    #bfbfbf 91.75deg,
+    #bebebe 96.5deg,
+    #b8b8b8 106.5deg,
+    #b9b9b9 117deg,
+    #c3c3c3 121.75deg,
+    #e8e8e8 133.5deg,
+    #ededed 136.5deg,
+    #efefef 139.5deg,
+    #ebebeb 142.5deg,
+    #e3e3e3 145.5deg,
+    #d8d8d8 148.5deg,
+    #b6b6b6 156.25deg,
+    #aaaaaa 159.5deg,
+    #a3a3a3 162.75deg,
+    #a1a1a1 165.5deg,
+    #a3a3a3 170.25deg,
+    #a8a8a8 174.25deg,
+    #d1d1d1 194.25deg,
+    #dfdfdf 204.5deg,
+    #e2e2e2 207.75deg,
+    #e2e2e2 217.75deg,
+    #dfdfdf 222deg,
+    #d6d6d6 228.75deg,
+    #b8b8b8 246.25deg,
+    #b2b2b2 250.75deg,
+    #afafaf 255.75deg,
+    #b1b1b1 258.25deg,
+    #c0c0c0 263.5deg,
+    #c4c4c4 266.25deg,
+    #c1c1c1 269.75deg,
+    #afafaf 279.5deg,
+    #afafaf 299.25deg,
+    #b7b7b7 302.75deg,
+    #d7d7d7 311.25deg,
+    #dcdcdc 313.5deg,
+    #dddddd 315.5deg,
+    #dbdbdb 319deg,
+    #d6d6d6 322.75deg,
+    #bcbcbc 334.75deg,
+    #b6b6b6 338.5deg,
+    #b2b2b2 344.25deg,
+    #b8b8b8 348.25deg,
+    #d1d1d1 357.25deg,
+    #d6d6d6 360deg); transform:rotate(var(--nse-metal-angle,0rad)); opacity:0.6; }
+.nse-metal-thumb-texture:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { position:absolute; inset:0; background:url("./assets/atmo/shell/login-window/generated/plate-texture.webp") 50% 50% / 180px auto; mix-blend-mode:multiply; opacity:0.72; }
+.nse-metal-thumb-rim:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { position:absolute; inset:0; border-radius:inherit; box-shadow:inset 0 0.7px 0 rgba(255,255,255,.9), inset 0 -0.8px 1px rgba(0,0,0,.65), inset 0 0 0 0.6px rgba(0,0,0,.35); }
+.nse-control-slider[data-thumb-material="metal"] .nse-control-slider-thumb-visual:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { background-image:none; }
+.nse-control-slider-thumb-visual > .nse-metal-thumb:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { left:11.05px; top:11.25px; width:26.9px; height:26.9px; box-shadow:0 1px 2px rgba(0,0,0,.45); }
+.nse-control-toggle[data-thumb-material="metal"] .nse-control-toggle-thumb:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::before, .nse-control-toggle[data-thumb-material="metal"] .nse-control-toggle-thumb:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::after { display:none; }
+.nse-control-toggle-thumb > .nse-metal-thumb:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { left:1px; top:1px; width:30px; height:30px; box-shadow:0 1px 1px rgba(0,0,0,.5); }
+.nse-control-toggle:disabled .nse-metal-thumb:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { filter:grayscale(.35); opacity:.58; }
+/* Forced colours use the semantic control's accessible thumb instead. */
+:where([data-nse-contrast="forced"]) .nse-metal-thumb:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { display:none; }
+:where([data-nse-contrast="forced"]) .nse-control-slider[data-thumb-material="metal"] .nse-control-slider-thumb-visual:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { background-image:var(--nse-atmo-slider-thumb); }
+:where([data-nse-contrast="forced"]) .nse-control-toggle[data-thumb-material="metal"] .nse-control-toggle-thumb:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::before, :where([data-nse-contrast="forced"]) .nse-control-toggle[data-thumb-material="metal"] .nse-control-toggle-thumb:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *)::after { display:block; }
+@media(prefers-reduced-motion:reduce) { .nse-metal-thumb-sheen:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { transform:none; } }
+@media(forced-colors:active) { .nse-metal-thumb:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { background:ButtonFace; border:1px solid ButtonText; } .nse-metal-thumb > span:where(:scope[data-nse-theme="com.syndromatic.atmo"], :scope[data-nse-theme="com.syndromatic.atmo"] *) { display:none; } }
+
+}

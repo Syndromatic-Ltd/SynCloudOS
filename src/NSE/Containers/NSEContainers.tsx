@@ -36,7 +36,7 @@ import {
   type ReactNode
 } from "react";
 import { createPortal } from "react-dom";
-import { useNSEAppearanceProjection } from "../Appearance";
+import { useNSEThemeProjection } from "../Appearance";
 import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
 import { NSEActionSheet, useOptionalNSEOverlayProvider, type NSEActionSheetProps } from "../Overlays";
 import "../Navigation/SourceList/nse-sourcelist.css";
@@ -942,7 +942,7 @@ export function NSEModalDialog({
   interaction,
   ...props
 }: NSEModalDialogProps) {
-  const appearanceProjection = useNSEAppearanceProjection();
+  const themeProjection = useNSEThemeProjection();
   const overlayProvider = useOptionalNSEOverlayProvider();
   const focusScopeId = useId();
   const shellRef = useRef<HTMLDivElement>(null);
@@ -983,7 +983,7 @@ export function NSEModalDialog({
     <NSEFocusScope options={{ scopeId: `nse-modal-dialog:${focusScopeId}`, kind: "modal", modal, trapFocus: modal, asChild: true }}>
       <div
         className="nse-container-modal-layer nse-container-fade-in"
-        {...appearanceProjection}
+        {...themeProjection}
         onMouseDown={(event) => {
           if (dismissOnOutside && event.target === event.currentTarget) close();
         }}

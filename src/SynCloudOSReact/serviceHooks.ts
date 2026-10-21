@@ -19,11 +19,11 @@
  */
 
 import { useMemo, useSyncExternalStore } from "react";
-import { createLocaleServicesFacade, type SynCloudOSAppearance, type SynCloudOSResolvedMode, type SynCloudOSSettings } from "../SynCloudOS/SynCloudOS";
+import { createLocaleServicesFacade, type SynCloudOSAppearance, type SynCloudOSResolvedAppearance, type SynCloudOSSettings } from "../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "./SynCloudOSProvider";
 import { useRuntimeSelector } from "./runtimeHooks";
 
-export function useResolvedMode(): SynCloudOSResolvedMode {
+export function useResolvedAppearance(): SynCloudOSResolvedAppearance {
   const service = useKernelSynCloudOS().appearance;
   return useSyncExternalStore(service.subscribe, service.resolved, () => "light");
 }

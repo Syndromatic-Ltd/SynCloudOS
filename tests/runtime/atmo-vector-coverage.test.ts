@@ -22,7 +22,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-const VECTOR = "src/NSE/Themes/Atmo/Resources/atmo.css";
+const VECTOR = "src/Themes/Atmo.scostheme/Contents/Resources/atmo.css";
 
 /** Guards the committed Atmo vector material and accessible paint fallbacks. */
 describe("Atmo vector coverage", () => {
@@ -44,7 +44,7 @@ describe("Atmo vector coverage", () => {
       css.indexOf("/* End tall tab material. */"),
     );
 
-    expect(css).toContain("[data-nse-appearance=\"atmo\"] .nse-tab-bar.nse-control-toolbar[data-grouped=\"true\"][data-nse-tab-chrome-active=\"true\"][data-nse-tab-chrome-size=\"tall\"]");
+    expect(css).toContain("[data-nse-theme=\"com.syndromatic.atmo\"] .nse-tab-bar.nse-control-toolbar[data-grouped=\"true\"][data-nse-tab-chrome-active=\"true\"][data-nse-tab-chrome-size=\"tall\"]");
     for (const segment of ["first", "middle", "last", "only"]) {
       for (const state of ["up", "down", "sel", "seldown", "dis"]) {
         for (const piece of ["start", "body", "end"]) {
@@ -90,7 +90,7 @@ describe("Atmo vector coverage", () => {
     // The tab-only variant preserves the shared dark gt control's caption
     // paint rather than inheriting the unrelated light-radio tab-label token.
     expect(css).toContain(
-      "[data-nse-appearance=\"atmo\"] .nse-tab-bar.nse-control-toolbar[data-grouped=\"true\"][data-nse-tab-chrome-active=\"true\"][data-nse-tab-chrome-size=\"tall\"] > .nse-tab-bar-tab.nse-control-button > .nse-tab-bar-content > .nse-tab-bar-label {\n  color: inherit;\n}",
+      "[data-nse-theme=\"com.syndromatic.atmo\"] .nse-tab-bar.nse-control-toolbar[data-grouped=\"true\"][data-nse-tab-chrome-active=\"true\"][data-nse-tab-chrome-size=\"tall\"] > .nse-tab-bar-tab.nse-control-button > .nse-tab-bar-content > .nse-tab-bar-label {\n  color: inherit;\n}",
     );
   });
 

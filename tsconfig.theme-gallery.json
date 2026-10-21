@@ -1,0 +1,1 @@
+{"extends":"./tsconfig.app.json","compilerOptions":{"tsBuildInfoFile":"./node_modules/.tmp/tsconfig.theme-gallery.tsbuildinfo"},"include":["src","tests/e2e/fixtures/theme-gallery.tsx","tests/fixtures/presentationTraits.ts"]}

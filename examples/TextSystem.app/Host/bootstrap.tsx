@@ -19,6 +19,8 @@
  */
 
 import React from "react";
+import { atmoTheme } from "@syndromatic/syncloudos/nse/themes/atmo";
+import type { NSEThemeDefinition } from "@syndromatic/syncloudos/nse/theme";
 // Packaged browser JS extracts host CSS; loading the documented public stylesheet is a host responsibility.
 import "@syndromatic/syncloudos/browser/styles.css";
 import { mountSynCloudOS, createSynCloudOSHostContribution, InMemoryDocumentAdapter, createIndexedDBDocumentAssetStore } from "@syndromatic/syncloudos/browser";
@@ -29,7 +31,7 @@ import type { TextSystemExampleModel } from "../Contents/model";
 import manifest from "../Contents/Info";
 
 /** Trusted PRIVATE host bootstrap. Application files never import browser, raw runtime, stores or adapters. */
-export function createExamplePersistenceHost(options: { readonly databaseName: string; readonly indexedDB: IDBFactory }) {
+export function createExamplePersistenceHost(options: { readonly databaseName: string; readonly indexedDB: IDBFactory; readonly theme?: NSEThemeDefinition }) {
   const scope = Object.freeze({ authorizationId: "com.syncloudos.examples.text-system", documentId: "example-native" });
   const nativeLocation: AppDocumentLocation = Object.freeze({ kind: "memory", namespace: options.databaseName, key: scope.documentId });
   // This explicitly memory provider survives two host instances only through this host-owned handle.
@@ -64,7 +66,7 @@ export function createExamplePersistenceHost(options: { readonly databaseName: s
       // Browser routing starts from the browser location. This host-only launch selects the declared app route.
       history.replaceState(history.state, "", "/examples/text-system");
       const composition = { bundles: [{ manifest, modulePath: "./TextSystem.app/Contents/index.tsx", loadModule: async () => ({ default: app }) }], preferences: [], widgets: [], contributions: [contribution], shell, shellResources: {} };
-      const host = await mountSynCloudOS({ element, composition, authentication: "disabled" }); hostsMounted++; runtimeIds.push(runtimeId);
+      const host = await mountSynCloudOS({ element, composition, theme: options.theme ?? atmoTheme, authentication: "disabled" }); hostsMounted++; runtimeIds.push(runtimeId);
       return host;
     },
   };

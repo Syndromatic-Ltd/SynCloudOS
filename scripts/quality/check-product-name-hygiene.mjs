@@ -138,6 +138,7 @@ export function scanRetiredProductNames(root = repositoryRoot) {
     const relativePath = relative(root, file).replaceAll("\\", "/");
     // Required upstream attribution names are legal notices, not product names.
     if (/^\.artifacts\/synapp-sdk\/packages\/syncloudos\/(?:THIRD_PARTY|ARTWORK)\.md$/u.test(relativePath)) continue;
+    if (/^(?:src\/Themes|\.artifacts\/synapp-sdk\/packages\/syncloudos\/(?:dist\/)?themes)\/Atmo\.scostheme\/Contents\/Licences\/(?:THIRD_PARTY|ARTWORK)\.md$/u.test(relativePath)) continue;
     if (!textExtensions.has(extname(file).toLowerCase())) continue;
     readFileSync(file, "utf8").split(/\r?\n/u).forEach((line, lineIndex) => {
       retiredNamePattern.lastIndex = 0;

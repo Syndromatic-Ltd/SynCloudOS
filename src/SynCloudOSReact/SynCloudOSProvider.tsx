@@ -1,3 +1,4 @@
+import { NSEThemeProvider } from "../NSE/hostComposition";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -88,6 +89,7 @@ export function SynCloudOSProvider({
   }, [runtime, shellFrames]);
   return (
     <SynCloudOSRuntimeContext.Provider value={runtime}>
+      <NSEThemeProvider theme={runtime.theme} appearanceService={runtime.appearance} projectBoundary={false}>
       <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={shellAnimator} layers={shellLayers} frames={shellFrames}>
         <ResponderHierarchyContext.Provider
           value={{ runtimeId: runtime.runtimeId, responderId: null }}
@@ -99,6 +101,7 @@ export function SynCloudOSProvider({
           </NSEFeedbackProvider>
         </ResponderHierarchyContext.Provider>
       </NSEAnimationEnvironmentProvider>
+    </NSEThemeProvider>
     </SynCloudOSRuntimeContext.Provider>
   );
 }

@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEVisualEnvironment } from "../Appearance";
+
+
 import { useRef, type CSSProperties, type ReactNode } from "react";
 import "./components.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
@@ -32,7 +35,7 @@ import {
 export function NSEAlert({
   children,
   className = "",
-  appearance = "dark",
+  appearance: requestedAppearance,
   labelledBy,
   describedBy,
   role = "alertdialog",
@@ -52,7 +55,9 @@ export function NSEAlert({
 }) {
   const { reducedMotion } = useNSEAnimationEnvironment();
   const alertRef = useRef<HTMLDivElement>(null);
-  useNSEPresentation(alertRef, resolveNSEAlertMotion(reducedMotion));
+  const { theme, resolvedAppearance } = useNSEVisualEnvironment();
+  const appearance = requestedAppearance ?? resolvedAppearance;
+  useNSEPresentation(alertRef, resolveNSEAlertMotion(reducedMotion, theme.presentation.motion?.overlay ?? { kind: "none", durationMs: 0, easing: "ease-out" }));
   const surfaceProps = getOptionalNSESmoothSurfaceProps(
     smoothSurface,
     className,

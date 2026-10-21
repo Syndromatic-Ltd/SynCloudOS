@@ -37,3 +37,5 @@ export { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin } from "./Focus/foc
 export { NSEAlert } from "./Components/NSEAlert";
 export { SourceListFrameProvider } from "./Navigation/SourceList/sourceListFrameContext";
 export type { SourceListFrameContextValue } from "./Navigation/SourceList/sourceListFrameContext";
+
+export { NSEThemeProvider, useNSEThemeProjection } from "./Appearance/NSEThemeProvider";

@@ -70,7 +70,7 @@
   width: min(400px, calc(100vw - 24px));
   max-height: min(560px, calc(100vh - 24px));
   overflow: hidden;
-  border-radius: var(--nse-atmo-page-header-radius, 14px);
+  border-radius: var(--nse-theme-panel-header-radius, 14px);
   /* Centred, so it grows from its own middle. */
   transform-origin: 50% 50%;
   background: var(--nse-prefs-panel-background, linear-gradient(#f4f4f2, #e4e4e1));
@@ -81,7 +81,7 @@
    corners and the body is clipped beneath it. */
 .nse-prefs-header.nse-control-page-header {
   flex: 0 0 auto;
-  border-radius: var(--nse-atmo-page-header-radius, 14px) var(--nse-atmo-page-header-radius, 14px) 0 0;
+  border-radius: var(--nse-theme-panel-header-radius, 14px) var(--nse-theme-panel-header-radius, 14px) 0 0;
 }
 
 .nse-prefs-header.nse-control-page-header .nse-control-page-header-title {

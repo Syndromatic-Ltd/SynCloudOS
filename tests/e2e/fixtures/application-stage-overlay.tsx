@@ -21,6 +21,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
+import { atmoTheme } from "../../../src/NSE/Themes/Atmo";
 import { NSEPresence } from "../../../src/NSE/Animation";
 import { useNSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { createSynWare, createSynWareBundle } from "../../../src/SynCloudOS/AppSDK/createSynWare";
@@ -35,6 +36,8 @@ import "../../../src/Webspring/WebspringHost.css";
 const params = new URLSearchParams(location.search);
 const contentOwned = params.get("motion") === "content";
 const runtime = createSynCloudOS({
+  // Exercise the depth-motion contract explicitly; the neutral theme has no motion.
+  theme: atmoTheme,
   id: "stage-overlay-browser", environment: createBrowserRuntimeEnvironment(), authenticationPolicy: "disabled",
 });
 let clicks = 0;

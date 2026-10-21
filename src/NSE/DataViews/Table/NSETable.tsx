@@ -32,7 +32,7 @@ import { SortDescriptor } from "../../../SynCloudOS/Models";
 import { dataViewAllowsMutation, dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, encodeNSEDataViewKey, useNSEDataView } from "../Core";
 import { useNSEVirtualiser } from "../Virtualisation";
 import { nseDragCommandIds, nseDragNoPayload, useNSEDataViewDragHost } from "../../Drag";
-import { useNSEAppearanceSlot } from "../../Appearance";
+import { useNSEThemeRecipe } from "../../Appearance";
 import { NSETableCell } from "./NSETableCell";
 import { NSETableHeader } from "./NSETableHeader";
 import type {
@@ -134,12 +134,12 @@ export function NSETable<T, TId extends string | number>({
   });
   const editRequest = useRef<{ generation: number; controller: AbortController } | null>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
-  const tableHeaderAppearance = useNSEAppearanceSlot("table.header.normal.1x");
-  const tableHeaderHoverAppearance = useNSEAppearanceSlot("table.header.hover.1x");
-  const tableHeaderPressedAppearance = useNSEAppearanceSlot("table.header.pressed.1x");
-  const tableHeaderHoverPressedAppearance = useNSEAppearanceSlot("table.header.hover-pressed.1x");
-  const tableSortAscendingAppearance = useNSEAppearanceSlot("table.sort-glyph.ascending.1x");
-  const tableSortDescendingAppearance = useNSEAppearanceSlot("table.sort-glyph.descending.1x");
+  const tableHeaderAppearance = useNSEThemeRecipe("table.header.normal");
+  const tableHeaderHoverAppearance = useNSEThemeRecipe("table.header.hover");
+  const tableHeaderPressedAppearance = useNSEThemeRecipe("table.header.pressed");
+  const tableHeaderHoverPressedAppearance = useNSEThemeRecipe("table.header.hover-pressed");
+  const tableSortAscendingAppearance = useNSEThemeRecipe("table.sort-glyph.ascending");
+  const tableSortDescendingAppearance = useNSEThemeRecipe("table.sort-glyph.descending");
 
   const orderedColumns = useMemo(() => {
     const byId = new Map(columns.map((column) => [column.id, column]));

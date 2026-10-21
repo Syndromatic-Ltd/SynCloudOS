@@ -18,10 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEThemeProvider, defineNSETheme, neutralNSETheme } from "../../src/NSE/Appearance";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo/theme";
+
+
 // @vitest-environment jsdom
 import React from "react";
 import { createPortal } from "react-dom";
-import { act, cleanup, render } from "@testing-library/react";
+import { act, cleanup, render as baseRender } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { compileNSEPresentation, NSEPresence, type NSEPresentationEnter, type NSEPresentationSpec } from "../../src/NSE/Animation";
 import { useNSEOverlayProvider } from "../../src/NSE/Overlays";
@@ -37,6 +41,8 @@ import type {
   RuntimeAnimationPlayback,
   RuntimeAnimationRequest,
 } from "../../src/SynCloudOS/AnimationFX";
+
+function render(ui: React.ReactNode) { return baseRender(ui, { wrapper: ({ children }) => <NSEThemeProvider theme={atmoTheme}>{children}</NSEThemeProvider> }); }
 
 afterEach(cleanup);
 
@@ -152,7 +158,7 @@ class Presentations implements RuntimeAnimationAdapterFactory {
 describe("mounted content presentation", () => {
   it("keeps content staged until presentation, settles without host motion, and exits once", async () => {
     const presentations = new Presentations();
-    const runtime = authoriseTestRuntime(createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), animation: presentations } }));
+    const runtime = authoriseTestRuntime(createTestRuntime({ theme: atmoTheme, environment: { ...createTestRuntimeEnvironment(), animation: presentations } }));
     let overlay: ReturnType<typeof useNSEOverlayProvider> | undefined;
     function Content() {
       overlay = useNSEOverlayProvider();
@@ -209,7 +215,7 @@ describe("mounted content presentation", () => {
 describe("stage overlay ownership", () => {
   async function fixture() {
     const presentations = new Presentations();
-    const runtime = authoriseTestRuntime(createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), animation: presentations } }));
+    const runtime = authoriseTestRuntime(createTestRuntime({ theme: atmoTheme, environment: { ...createTestRuntimeEnvironment(), animation: presentations } }));
     function Content() {
       const overlay = useNSEOverlayProvider();
       return overlay.portalHost ? createPortal(<button data-viewport-overlay="true">Overlay action</button>, overlay.portalHost) : null;
@@ -301,9 +307,9 @@ describe("stage overlay ownership", () => {
 });
 
 describe("stage view MultiSwitch", () => {
-  it("reports each role when its slide lands, and the incoming slide settles the presentation", async () => {
+  it.each(["depth", "slide"] as const)("reports each %s role once when it lands and settles the presentation", async kind => {
     const presentations = new Presentations();
-    const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), animation: presentations } });
+    const runtime = createTestRuntime({ theme: kind === "depth" ? atmoTheme : defineNSETheme({ id:"test.planar-stage",displayName:"Planar",presentation:{...neutralNSETheme.presentation,motion:{shell:{kind:"slide",durationMs:240,easing:"decelerate"}}} }), environment: { ...createTestRuntimeEnvironment(), animation: presentations } });
     runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.switched", route: "/switched" }));
     const app = runtime.apps.getApp("com.example.switched")!;
     const settlement = runtime.presentationSettlements.begin({
@@ -326,7 +332,8 @@ describe("stage view MultiSwitch", () => {
     );
     const rendered = render(view("incoming"));
     const [slide] = presentations.of(".webspring-app-view-frame");
-    expect(slide!.request.animations[0]).toMatchObject({ keyPath: "transform", from: "translate(118vw, 0vw) scale(1)", to: "none" });
+    if (kind === "depth") expect(slide!.request.animations[0]).toMatchObject({ keyPath: "transform", from: "translate(118vw, 0vw) scale(1)", to: "none" });
+    else expect(slide.request.duration).toBe(.24);
     expect(onRole).not.toHaveBeenCalled();
     await slide!.finish();
     expect(onRole).toHaveBeenCalledWith("switch:1", "incoming");
@@ -336,10 +343,12 @@ describe("stage view MultiSwitch", () => {
     // surface recedes, holding its model pose once the presentation ends.
     rendered.rerender(view("outgoing"));
     const surface = rendered.container.querySelector<HTMLElement>(".webspring-app-view-surface")!;
-    expect(surface.style.transform).toBe("translate3d(0px, 0px, -260px) scale(0.86) rotateY(22deg)");
-    expect(surface.style.filter).toBe("brightness(0.4)");
+    if (kind === "depth") {
+      expect(surface.style.transform).toBe("translate3d(0px, 0px, -260px) scale(0.86) rotateY(22deg)");
+      expect(surface.style.filter).toBe("brightness(0.4)");
+    } else { expect(surface.style.transform).toBe(""); expect(surface.style.filter).toBe(""); }
     const out = presentations.of(".webspring-app-view-frame").at(-1)!;
-    expect(out.request.animations[0]).toMatchObject({ from: "none", to: "translate(-118vw, 0vw) scale(1)" });
+    if (kind === "depth") expect(out.request.animations[0]).toMatchObject({ from: "none", to: "translate(-118vw, 0vw) scale(1)" });
     await out.finish();
     expect(onRole).toHaveBeenLastCalledWith("switch:1", "outgoing");
     expect(onRole).toHaveBeenCalledTimes(2);

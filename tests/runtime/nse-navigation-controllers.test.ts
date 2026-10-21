@@ -22,12 +22,20 @@ import { describe, expect, it, vi } from "vitest";
 import {
   NSEAdaptiveNavigationController,
   NSENavigationStackController,
-  NSETabBarController,
+  NSETabBarController as SemanticTabController,
   NSETabBarMoreDestinationId,
   type NSENavigationDestination,
 } from "../../src/NSE/Navigation";
 import type { SynCloudOSPresentationTraits } from "../../src/SynCloudOS/SynCloudOS";
 import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
+
+// These hierarchy fixtures explicitly request a five-slot More presentation.
+class NSETabBarController<T = unknown> extends SemanticTabController<T> {
+  constructor(options: ConstructorParameters<typeof SemanticTabController<T>>[0]) {
+    super(options);
+    this.setOverflowPolicy({ kind: "more", maximumVisibleItems: 5 });
+  }
+}
 
 function traits(horizontalSizeClass: SynCloudOSPresentationTraits["horizontalSizeClass"]): SynCloudOSPresentationTraits {
   const width = horizontalSizeClass === "compact" ? 640 : horizontalSizeClass === "regular" ? 1024 : 1440;

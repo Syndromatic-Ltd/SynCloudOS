@@ -18,6 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEThemeProvider } from "../../src/NSE/Appearance";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo/theme";
+
+
 // @vitest-environment jsdom
 
 import { readFileSync } from "node:fs";
@@ -277,7 +281,7 @@ describe("NSE semantic contracts", () => {
       tabController: controller,
       traits: navigationTraits("wide"),
     });
-    render(<NSESourceListScene projection={{ controller, adaptiveController: adaptive, ariaLabel: "Overflow peer navigation" }} />);
+    render(<NSEThemeProvider theme={atmoTheme}><NSESourceListScene projection={{ controller, adaptiveController: adaptive, ariaLabel: "Overflow peer navigation" }} /></NSEThemeProvider>);
 
     adaptive.setTraits(navigationTraits("compact"));
     await waitFor(() => expect(screen.getByRole("tab", { name: "More destinations" })).toBeTruthy());
@@ -438,14 +442,14 @@ describe("NSE semantic contracts", () => {
   it("keeps the shared circular Back control geometry across Cumulus and Metal top bars", () => {
     const interfaceFxCss = readFileSync(resolve(process.cwd(), "src/NSE/Windows/Chrome/nse-chrome.css"), "utf8");
     expect(interfaceFxCss).toContain(".nse-app-topbar-slot-left .webspring-application-navigation-back.nse-control-button.nse-extended-tool-button");
-    expect(interfaceFxCss).toContain(".nse-app-topbar-metal-leading .webspring-application-navigation-back.nse-control-button.nse-extended-tool-button");
-    expect(interfaceFxCss).toContain(".nse-app-topbar-metal-leading .webspring-application-navigation-back .nse-control-button-icon");
+    expect(interfaceFxCss).toContain(".nse-app-topbar-rail-aligned-leading .webspring-application-navigation-back.nse-control-button.nse-extended-tool-button");
+    expect(interfaceFxCss).toContain(".nse-app-topbar-rail-aligned-leading .webspring-application-navigation-back .nse-control-button-icon");
   });
 
-  it("routes source-list seams through the canonical Atmo divider without a legacy raster fallback", () => {
+  it("routes source-list seams through the theme-neutral divider without a legacy raster fallback", () => {
     const sourceListCss = readFileSync(resolve(process.cwd(), "src/NSE/Navigation/SourceList/nse-sourcelist.css"), "utf8");
 
-    expect(sourceListCss).toMatch(/--nse-sourcelist-divider:\s*var\(--nse-atmo-divider\);/);
+    expect(sourceListCss).toMatch(/--nse-sourcelist-divider:\s*var\(--nse-theme-divider, linear-gradient\(currentColor, currentColor\)\);/);
     expect(sourceListCss).not.toMatch(/--nse-atmo-onyx-divider|\/assets\/nse\/atmo\/onyx|url\([^)]*\.png/i);
   });
 
@@ -471,7 +475,7 @@ describe("NSE semantic contracts", () => {
       expect(getNSERegistryItem(item.name)).toBe(item);
       expect(NSE.Registry.get(item.name)).toBe(item);
       expect(item.files.length).toBeGreaterThan(0);
-      expect(item.files.every((file) => file.startsWith("src/NSE/"))).toBe(true);
+      expect(item.files.every((file) => (file.startsWith("src/NSE/") || file.startsWith("src/Themes/")))).toBe(true);
     }
     expect(getNSERegistryItem("missing-nse-control")).toBeNull();
 
@@ -479,7 +483,7 @@ describe("NSE semantic contracts", () => {
     expect(registrySource).not.toMatch(/Atmo-Onyx|\bOnyx\b|atmo-onyx|AtmoRefresh\.app/u);
     expect(getNSERegistryItem("atmo")).toMatchObject({
       title: "Atmo",
-      files: ["src/NSE/Themes/Atmo/index.ts", "src/NSE/Themes/Atmo/Resources/atmo.css"],
+      files: ["src/NSE/Themes/Atmo/index.ts", "src/Themes/Atmo.scostheme/Contents/styles.css"],
     });
   });
 

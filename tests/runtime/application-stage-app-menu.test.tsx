@@ -18,13 +18,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEThemeProvider } from "../../src/NSE/Appearance";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo/theme";
+
+
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoTypes";
-import { useResolvedMode as useScopedResolvedMode } from "../../src/SynCloudOS/Appearance/useAppearance";
+import { useResolvedAppearance as useScopedResolvedMode } from "../../src/SynCloudOS/Appearance/useAppearance";
 import { clearOwnedResponderAnchor, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { useSCOS, useQuickSwitchTrigger } from "../../src/SynCloudOS/AppSDK";
 import { createInMemoryNSETextOwner, plainNSETextContent, NSETextCommands, NSETextView, TextEditingSession } from "@syndromatic/syncloudos/nse/text";
@@ -102,12 +106,12 @@ afterEach(() => {
 });
 
 function renderFrame(beforeRender?: (runtime: ReturnType<typeof createTestRuntime>) => void) {
-  const runtime = authoriseTestRuntime(createTestRuntime());
+  const runtime = authoriseTestRuntime(createTestRuntime({ theme: atmoTheme }));
   runtime.apps.registerBundle(createTestBundle({ version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" }));
   runtime.statechart.gotoState("active.application.active");
   beforeRender?.(runtime);
   render(
-    <SynCloudOSProvider runtime={runtime}>
+    <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={stageSiteBranding}>
       <ApplicationStageView
         app={createAppInfo()}
@@ -115,7 +119,7 @@ function renderFrame(beforeRender?: (runtime: ReturnType<typeof createTestRuntim
         stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
       />
       </HostSiteBrandingProvider>
-    </SynCloudOSProvider>
+    </SynCloudOSProvider></NSEThemeProvider>
   );
   return runtime;
 }
@@ -173,7 +177,7 @@ describe("ApplicationStageView app menu", () => {
   it("owns source-list identity, destination title and a single footer, and drops the top rail on compact displays", async () => {
     let viewport = { width: 1440, height: 900 };
     const listeners = new Set<(snapshot: typeof viewport) => void>();
-    const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), layoutViewport: { getSnapshot: () => viewport, subscribe: listener => { listeners.add(listener); return () => { listeners.delete(listener); }; } } } });
+    const runtime = createTestRuntime({ theme: atmoTheme, environment: { ...createTestRuntimeEnvironment(), layoutViewport: { getSnapshot: () => viewport, subscribe: listener => { listeners.add(listener); return () => { listeners.delete(listener); }; } } } });
     function SourceListFixture() {
       const traits = React.useSyncExternalStore(runtime.presentationTraits.subscribe, runtime.presentationTraits.getSnapshot, runtime.presentationTraits.getSnapshot);
       return <NSESourceListScene title="Buttons" compact={traits.horizontalSizeClass === "compact"} sidebar={<NSESidebar sections={[]} />} status={{ rail: "25 sections" }}><input aria-label="Live draft" defaultValue="Draft" /></NSESourceListScene>;
@@ -183,10 +187,10 @@ describe("ApplicationStageView app menu", () => {
     }));
     await runtime.bundles.loadBundle("com.example.test-app");
     const app = { ...createAppInfo(), frame: { ...createAppInfo().frame, material: "metal" as const, sourceList: { minWidth: 220, maxWidth: 320, defaultWidth: 254, railLabel: "NSE Gallery" } } };
-    const fixture = () => <SynCloudOSProvider runtime={runtime}><HostSiteBrandingProvider value={stageSiteBranding}><ApplicationStageView app={app} lifecycle="active" stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }} /></HostSiteBrandingProvider></SynCloudOSProvider>;
+    const fixture = () => <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}><HostSiteBrandingProvider value={stageSiteBranding}><ApplicationStageView app={app} lifecycle="active" stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }} /></HostSiteBrandingProvider></SynCloudOSProvider></NSEThemeProvider>;
     const view = render(fixture());
     await waitFor(() => expect(screen.getByRole("heading", { name: "Buttons" })).toBeTruthy());
-    expect(view.container.querySelector('.nse-app-topbar-metal-rail-content')?.textContent).toContain("NSE Gallery");
+    expect(view.container.querySelector('.nse-app-topbar-rail-aligned-rail-content')?.textContent).toContain("NSE Gallery");
     expect(view.container.querySelectorAll(".nse-app-topbar")).toHaveLength(1);
     expect(view.container.querySelectorAll("footer")).toHaveLength(1);
     const draft = screen.getByRole("textbox", { name: "Live draft" });
@@ -202,7 +206,7 @@ describe("ApplicationStageView app menu", () => {
     expect((draft as HTMLInputElement).value).toBe("Retained");
   });
   it("projects the shell-owned QuickSwitch action and subscribed open state into custom app chrome", async () => {
-    const runtime = createTestRuntime();
+    const runtime = createTestRuntime({ theme: atmoTheme });
     runtime.apps.registerBundle(createTestBundle(
       { version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" },
       { loadModule: async () => ({ default: CustomQuickSwitchTitleFixture }) },
@@ -212,7 +216,7 @@ describe("ApplicationStageView app menu", () => {
     const onQuickSwitchRequest = vi.fn();
     const frame = (open: boolean) => (
       <HostSiteBrandingProvider value={stageSiteBranding}>
-      <SynCloudOSProvider runtime={runtime}>
+      <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}>
         <ApplicationStageView
           app={createAppInfo("custom")}
           lifecycle="active"
@@ -220,7 +224,7 @@ describe("ApplicationStageView app menu", () => {
           onQuickSwitchRequest={onQuickSwitchRequest}
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
-      </SynCloudOSProvider>
+      </SynCloudOSProvider></NSEThemeProvider>
       </HostSiteBrandingProvider>
     );
     const view = render(frame(false));
@@ -236,7 +240,7 @@ describe("ApplicationStageView app menu", () => {
   });
 
   it("projects a pushed hierarchy into the one shared top bar and restores its source focus through Back", async () => {
-    const runtime = createTestRuntime();
+    const runtime = createTestRuntime({ theme: atmoTheme });
     runtime.apps.registerBundle(createTestBundle(
       { version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" },
       { loadModule: async () => ({ default: ApplicationStageHierarchyFixture }) },
@@ -245,7 +249,7 @@ describe("ApplicationStageView app menu", () => {
     runtime.statechart.gotoState("active.application.active");
 
     render(
-      <SynCloudOSProvider runtime={runtime}>
+      <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
         <ApplicationStageView
           app={createAppInfo()}
@@ -253,7 +257,7 @@ describe("ApplicationStageView app menu", () => {
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
-      </SynCloudOSProvider>,
+      </SynCloudOSProvider></NSEThemeProvider>,
     );
 
     const open = await screen.findByTestId("stage-open-library");
@@ -275,7 +279,7 @@ describe("ApplicationStageView app menu", () => {
   });
 
   it("keeps the shared hierarchy chrome controller live through StrictMode effect replay", async () => {
-    const runtime = createTestRuntime();
+    const runtime = createTestRuntime({ theme: atmoTheme });
     runtime.apps.registerBundle(createTestBundle(
       { version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" },
       { loadModule: async () => ({ default: ApplicationStageHierarchyFixture }) },
@@ -285,7 +289,7 @@ describe("ApplicationStageView app menu", () => {
 
     render(
       <React.StrictMode>
-        <SynCloudOSProvider runtime={runtime}>
+        <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}>
           <HostSiteBrandingProvider value={stageSiteBranding}>
           <ApplicationStageView
             app={createAppInfo()}
@@ -293,7 +297,7 @@ describe("ApplicationStageView app menu", () => {
             stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
           />
           </HostSiteBrandingProvider>
-        </SynCloudOSProvider>
+        </SynCloudOSProvider></NSEThemeProvider>
       </React.StrictMode>,
     );
 
@@ -303,7 +307,7 @@ describe("ApplicationStageView app menu", () => {
   });
 
   it.each(["custom", "none"] as const)("does not synthesise stage chrome for a %s-frame application claim", async (topBar) => {
-    const runtime = createTestRuntime();
+    const runtime = createTestRuntime({ theme: atmoTheme });
     runtime.apps.registerBundle(createTestBundle(
       { version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" },
       { loadModule: async () => ({ default: ApplicationStageHierarchyFixture }) },
@@ -312,7 +316,7 @@ describe("ApplicationStageView app menu", () => {
     runtime.statechart.gotoState("active.application.active");
 
     render(
-      <SynCloudOSProvider runtime={runtime}>
+      <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
         <ApplicationStageView
           app={createAppInfo(topBar)}
@@ -320,7 +324,7 @@ describe("ApplicationStageView app menu", () => {
           stage={{ appId: "com.example.test-app", id: `application-stage:test-app:${topBar}`, title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
-      </SynCloudOSProvider>,
+      </SynCloudOSProvider></NSEThemeProvider>,
     );
 
     fireEvent.click(await screen.findByTestId("stage-open-library"));
@@ -329,13 +333,13 @@ describe("ApplicationStageView app menu", () => {
   });
 
   it("does not prepaint an outgoing 3D pose when reduced motion is active", () => {
-    const runtime = createTestRuntime();
+    const runtime = createTestRuntime({ theme: atmoTheme });
     runtime.settings.set("motion", "reduced");
     runtime.apps.registerBundle(createTestBundle({ version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" }));
     runtime.statechart.gotoState("active.application.active");
 
     render(
-      <SynCloudOSProvider runtime={runtime}>
+      <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
         <ApplicationStageView
           app={createAppInfo()}
@@ -345,7 +349,7 @@ describe("ApplicationStageView app menu", () => {
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
-      </SynCloudOSProvider>,
+      </SynCloudOSProvider></NSEThemeProvider>,
     );
 
     const surface = document.querySelector<HTMLElement>('.webspring-app-view-surface[data-multiswitch-role="outgoing"]');
@@ -354,7 +358,7 @@ describe("ApplicationStageView app menu", () => {
   });
 
   it("does not invalidate focus state when an inactive responder releases an anchor", () => {
-    const runtime = createTestRuntime();
+    const runtime = createTestRuntime({ theme: atmoTheme });
     runtime.focus.setActiveAnchors({
       applicationResponderId: "application:active",
       windowResponderId: "window:active",
@@ -371,7 +375,7 @@ describe("ApplicationStageView app menu", () => {
   });
 
   it("owns the live control-document-window-application responder chain and clears stale anchors", async () => {
-    const runtime = createTestRuntime();
+    const runtime = createTestRuntime({ theme: atmoTheme });
     let liveSession: TextEditingSession | undefined;
     function LiveTextConsumer() {
       const app = useSCOS();
@@ -407,7 +411,7 @@ describe("ApplicationStageView app menu", () => {
     });
     await runtime.bundles.loadBundle("com.example.test-app");
     const frame = (stageId: string) => (
-      <SynCloudOSProvider runtime={runtime}>
+      <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
         <ApplicationStageView
           key={stageId}
@@ -416,7 +420,7 @@ describe("ApplicationStageView app menu", () => {
           stage={{ appId: "com.example.test-app", id: stageId, title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
-      </SynCloudOSProvider>
+      </SynCloudOSProvider></NSEThemeProvider>
     );
     const view = render(frame("window-one"));
     const editor = await screen.findByRole("textbox");
@@ -448,7 +452,7 @@ describe("ApplicationStageView app menu", () => {
     });
   });
   it("keeps the loaded app mounted when staging hands off to the launch animation", async () => {
-    const runtime = createTestRuntime();
+    const runtime = createTestRuntime({ theme: atmoTheme });
     runtime.apps.registerBundle(createTestBundle(
       { bundleIdentifier: "com.example.test-app", route: "/test" },
       { loadModule: async () => ({ default: () => <p>Loaded application</p> }) }
@@ -461,7 +465,7 @@ describe("ApplicationStageView app menu", () => {
     });
 
     render(
-      <SynCloudOSProvider runtime={runtime}>
+      <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
         <ApplicationStageView
           app={createAppInfo()}
@@ -469,7 +473,7 @@ describe("ApplicationStageView app menu", () => {
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
-      </SynCloudOSProvider>
+      </SynCloudOSProvider></NSEThemeProvider>
     );
 
     expect(screen.getByText("Loaded application")).toBeTruthy();
@@ -527,7 +531,7 @@ describe("ApplicationStageView app menu", () => {
   });
 
   it("mounts the registered-owner clients only through useSCOS, without a runtime render prop", async () => {
-    const runtime = authoriseTestRuntime(createTestRuntime());
+    const runtime = authoriseTestRuntime(createTestRuntime({ theme: atmoTheme }));
     let receivedProps: Record<string, unknown> | null = null;
     let contextRuntime: Record<string, unknown> | null = null;
     runtime.apps.registerBundle(createTestBundle(
@@ -549,7 +553,7 @@ describe("ApplicationStageView app menu", () => {
     await runtime.bundles.loadBundle("com.example.test-app");
 
     render(
-      <SynCloudOSProvider runtime={runtime}>
+      <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
         <ApplicationStageView
           app={createAppInfo()}
@@ -557,7 +561,7 @@ describe("ApplicationStageView app menu", () => {
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
-      </SynCloudOSProvider>,
+      </SynCloudOSProvider></NSEThemeProvider>,
     );
 
     await screen.findByRole("button", { name: "Write scoped pasteboard" });
@@ -596,7 +600,7 @@ describe("ApplicationStageView app menu", () => {
   });
 
   it("permanently revokes the StrictMode probe and replaced stage facade generations", async () => {
-    const runtime = authoriseTestRuntime(createTestRuntime());
+    const runtime = authoriseTestRuntime(createTestRuntime({ theme: atmoTheme }));
     type ScopedFacade = {
       readonly drag: { endpoint(): unknown };
     };
@@ -611,7 +615,7 @@ describe("ApplicationStageView app menu", () => {
     await runtime.bundles.loadBundle("com.example.test-app");
     const frame = (stageId: string) => (
       <React.StrictMode>
-        <SynCloudOSProvider runtime={runtime}>
+        <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}>
           <HostSiteBrandingProvider value={stageSiteBranding}>
           <ApplicationStageView
             key={stageId}
@@ -620,7 +624,7 @@ describe("ApplicationStageView app menu", () => {
             stage={{ appId: "com.example.test-app", id: stageId, title: "Test App", isFocused: true, zIndex: 10 }}
           />
           </HostSiteBrandingProvider>
-        </SynCloudOSProvider>
+        </SynCloudOSProvider></NSEThemeProvider>
       </React.StrictMode>
     );
     const view = render(frame("stage:first"));
@@ -640,7 +644,7 @@ describe("ApplicationStageView app menu", () => {
   });
 
   it("keeps read-only subscription snapshots renderable through stage teardown while revoking transfers", async () => {
-    const runtime = authoriseTestRuntime(createTestRuntime());
+    const runtime = authoriseTestRuntime(createTestRuntime({ theme: atmoTheme }));
     type ScopedFacade = {
       readonly drag: { endpoint(): unknown };
       readonly appearance: {
@@ -671,7 +675,7 @@ describe("ApplicationStageView app menu", () => {
     ));
     await runtime.bundles.loadBundle("com.example.test-app");
     const view = render(
-      <SynCloudOSProvider runtime={runtime}>
+      <NSEThemeProvider theme={atmoTheme}><SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
         <ApplicationStageView
           app={createAppInfo()}
@@ -679,7 +683,7 @@ describe("ApplicationStageView app menu", () => {
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
-      </SynCloudOSProvider>,
+      </SynCloudOSProvider></NSEThemeProvider>,
     );
 
     await screen.findByText(/Mounted title/);
@@ -690,7 +694,7 @@ describe("ApplicationStageView app menu", () => {
   });
 
   it("keeps cached presentation reads available to an outgoing render after its mount capability is revoked", () => {
-    const runtime = authoriseTestRuntime(createTestRuntime());
+    const runtime = authoriseTestRuntime(createTestRuntime({ theme: atmoTheme }));
     runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.test-app", route: "/test" }));
     const mount = mountTestSynWareRuntime(runtime, "com.example.test-app");
     const context = createSynWareContextValue(mount.runtime);

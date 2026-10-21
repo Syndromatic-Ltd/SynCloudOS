@@ -40,6 +40,7 @@ import {
   assertReviewedPackageFiles, assertSdkSourceUnchanged, assertTwelveFxPackageExports,
   captureSdkSourceFingerprint, createSdkPackageManifest, fingerprintSdkFiles, sdkDirectoryFiles,
 } from "./sdk-package-manifest.mjs";
+import { discoverThemePackages } from "./theme-packages.mjs";
 import { sdkNeutralStyleModuleSource, sdkPackageStyles } from "./sdk-package-styles.mjs";
 import { sdkBrowserDependencies } from "./sdk-browser-dependencies.mjs";
 import { assertPublicApiBoundaries } from "./public-api-boundaries.mjs";
@@ -362,6 +363,7 @@ async function main() {
   // One graph preserves React context identity. CSS is attached only to the
   // chunks that own it; importing NSE alone does not select any theme.
   await bundle({ entry: { ...frameworkEntries, "nse/styles": neutralStyleEntry }, packageDirectory: directory, themeNames: [...themeEntryNames] });
+  for (const theme of discoverThemePackages(resolve(repositoryRoot, "src/Themes"))) cpSync(theme.packagePath, resolve(directory, "themes", theme.name), { recursive: true });
   const typesDirectory = resolve(directory, "types");
   cpSync(declarationRoot, typesDirectory, {
     recursive: true,
@@ -389,11 +391,18 @@ async function main() {
     .replace("../../src/NSE/Typography/fontDeclaration.mjs", "./types/NSE/Typography/fontDeclaration.mjs")
     .replace("../../src/SynCloudOS/AppSDK/scos/appModuleSource.mjs", "./app-module-source.mjs")
     .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs")
-    .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
-  for (const file of ["bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs"]) {
+    .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
+      .replace("../../src/NSE/Appearance/themeDefinition.mjs", "./themeDefinition.mjs")
+      .replace("../../src/NSE/Typography/fontDeclaration.mjs", "./types/NSE/Typography/fontDeclaration.mjs"));
+  for (const file of ["bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","theme-packages.mjs"]) {
     writeFileSync(resolve(directory, file), readFileSync(resolve(repositoryRoot, "scripts/synware", file), "utf8")
-      .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
+      .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
+      .replace("../../src/NSE/Appearance/themeDefinition.mjs", "./themeDefinition.mjs")
+      .replace("../../src/NSE/Typography/fontDeclaration.mjs", "./types/NSE/Typography/fontDeclaration.mjs"));
   }
+  cpSync(resolve(repositoryRoot, "src/NSE/Appearance/themeDefinition.mjs"), resolve(directory, "themeDefinition.mjs"));
+  mkdirSync(resolve(typesDirectory, "NSE/Appearance"), { recursive: true });
+  for (const extension of ["mjs", "d.mts"]) cpSync(resolve(repositoryRoot, `src/NSE/Appearance/themeDefinition.${extension}`), resolve(typesDirectory, `NSE/Appearance/themeDefinition.${extension}`));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/Identity/bundleIdentifier.mjs"), resolve(directory, "bundleIdentifier.mjs"));
   mkdirSync(resolve(typesDirectory, "SynCloudOS/Identity"), { recursive: true });
   for (const extension of ["mjs", "d.mts"]) cpSync(resolve(repositoryRoot, `src/SynCloudOS/Identity/bundleIdentifier.${extension}`), resolve(typesDirectory, `SynCloudOS/Identity/bundleIdentifier.${extension}`));
@@ -408,6 +417,7 @@ async function main() {
   const repositoryManifest = JSON.parse(readFileSync(resolve(repositoryRoot, "package.json"), "utf8"));
   // These libraries occur in emitted public declarations even when runtime code is bundled.
   const dependencies = Object.fromEntries(["@floating-ui/dom", "@tiptap/pm", "framer-motion", "harfbuzzjs", "oauth4webapi", "pdf-lib", "woff2-encoder"].map((name) => [name, repositoryManifest.dependencies[name]]));
+  for (const name of ["postcss", "css-tree", "saxes"]) dependencies[name] = JSON.parse(readFileSync(resolve(repositoryRoot, `node_modules/${name}/package.json`), "utf8")).version;
   dependencies.typescript = repositoryManifest.devDependencies.typescript;
   assertTwelveFxPackageExports(exports);
   await writeDeveloperSdkData({ repositoryRoot, directory, commit, source });

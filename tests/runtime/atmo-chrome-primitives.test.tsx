@@ -19,25 +19,25 @@
  */
 
 // @vitest-environment jsdom
-import { defineNSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
+import { defineNSETheme } from "@syndromatic/syncloudos/nse/theme";
 import React from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  NSEAppearanceProvider, NSEChromeBevel, NSEChromeCap, NSEChromeGloss,
+  NSEThemeProvider, NSEChromeBevel, NSEChromeCap, NSEChromeGloss,
   NSEChromeInnerShadow, NSEChromeSeparator, NSEChromeSplice, NSEChromeSurface,
-  useNSEAppearanceSlot, type NSEAppearanceDefinition,
+  useNSEThemeRecipe, type NSEThemeDefinition,
 } from "../../src/NSE/Appearance";
-import { atmoAppearance } from "@syndromatic/syncloudos/nse/themes/atmo";
+import { atmoTheme } from "@syndromatic/syncloudos/nse/themes/atmo";
 
-const customAppearance = defineNSEAppearance({ id: "custom-test", displayName: "Custom test", recipes: [
-  { slot: "toolbar.item.normal.1x", recipeId: "custom-test.toolbar.normal" },
-  { slot: "toolbar.item.selected.1x", recipeId: "custom-test.toolbar.selected" },
+const customAppearance = defineNSETheme({ id: "com.test.custom-test", displayName: "Custom test", recipes: [
+  { slot: "toolbar.item.normal", recipeId: "custom-test.toolbar.normal" },
+  { slot: "toolbar.item.selected", recipeId: "custom-test.toolbar.selected" },
 ] });
 
 afterEach(cleanup);
-function Layers({ slotName = "toolbar.item.selected.1x" }: { slotName?: string }) {
-  const slot = useNSEAppearanceSlot(slotName);
+function Layers({ slotName = "toolbar.item.selected" }: { slotName?: string }) {
+  const slot = useNSEThemeRecipe(slotName);
   return <>
     <NSEChromeSurface data-testid="surface" slot={slot} state="selected" />
     <NSEChromeBevel data-testid="bevel" slot={slot} state="focused" />
@@ -51,12 +51,12 @@ function Layers({ slotName = "toolbar.item.selected.1x" }: { slotName?: string }
 
 describe("appearance-neutral chrome primitives", () => {
   it("projects inert semantic paint layers and keeps interaction state with the owner", () => {
-    render(<NSEAppearanceProvider appearance={atmoAppearance}><Layers /></NSEAppearanceProvider>);
+    render(<NSEThemeProvider theme={atmoTheme}><Layers /></NSEThemeProvider>);
     for (const id of ["surface", "bevel", "cap", "splice", "separator", "gloss", "inner-shadow"]) {
       const layer = screen.getByTestId(id);
       expect(layer.tagName).toBe("SPAN");
       expect(layer.getAttribute("aria-hidden")).toBe("true");
-      expect(layer.getAttribute("data-nse-appearance-slot")).toBe("toolbar.item.selected.1x");
+      expect(layer.getAttribute("data-nse-theme-slot")).toBe("toolbar.item.selected");
       expect(layer.getAttribute("data-nse-chrome-primitive")).toBe(id);
       expect(layer.getAttribute("data-nse-chrome-active")).toBe("true");
       expect(layer.getAttribute("tabindex")).toBeNull();
@@ -68,16 +68,16 @@ describe("appearance-neutral chrome primitives", () => {
   });
 
   it("updates the selected recipe in place and disables paint for an unresolved slot", () => {
-    const fixture = (appearance: NSEAppearanceDefinition, slotName?: string) =>
-      <NSEAppearanceProvider appearance={appearance}><Layers slotName={slotName} /></NSEAppearanceProvider>;
-    const view = render(fixture(atmoAppearance));
+    const fixture = (appearance: NSEThemeDefinition, slotName?: string) =>
+      <NSEThemeProvider theme={appearance}><Layers slotName={slotName} /></NSEThemeProvider>;
+    const view = render(fixture(atmoTheme));
     const layer = screen.getByTestId("surface");
     view.rerender(fixture(customAppearance));
     expect(screen.getByTestId("surface")).toBe(layer);
-    expect(layer.getAttribute("data-nse-chrome-appearance")).toBe("custom-test");
-    expect(layer.getAttribute("data-nse-appearance-recipe-id")).toBe("custom-test.toolbar.selected");
-    view.rerender(fixture(customAppearance, "tab-bar.tab.selected.1x"));
+    expect(layer.getAttribute("data-nse-theme")).toBe("com.test.custom-test");
+    expect(layer.getAttribute("data-nse-theme-recipe-id")).toBe("custom-test.toolbar.selected");
+    view.rerender(fixture(customAppearance, "tab-bar.tab.selected"));
     expect(layer.getAttribute("data-nse-chrome-active")).toBe("false");
-    expect(layer.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
+    expect(layer.getAttribute("data-nse-theme-recipe-id")).toBeNull();
   });
 });

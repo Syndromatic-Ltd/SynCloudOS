@@ -22,9 +22,8 @@ import { useSCOS } from "../scos/useSCOS"
 import type { AppAppearanceClient } from "../appClientTypes";
 
 export interface SynWareAppearanceState {
-  readonly client: AppAppearanceClient;
-  readonly appearance: ReturnType<AppAppearanceClient["get"]>;
-  readonly resolvedMode: ReturnType<AppAppearanceClient["resolved"]>;
+  readonly requested: ReturnType<AppAppearanceClient["get"]>;
+  readonly resolved: ReturnType<AppAppearanceClient["resolved"]>;
 }
 
 /** Observes the read-only appearance projection for the current app session. */
@@ -36,7 +35,7 @@ export function useAppearance(): SynWareAppearanceState {
   const appearance = useSyncExternalStore(subscribe, getAppearance, getAppearance);
   const resolvedMode = useSyncExternalStore(subscribe, getResolvedMode, getResolvedMode);
   return useMemo(
-    () => Object.freeze({ client: app.appearance, appearance, resolvedMode }),
+    () => Object.freeze({ requested: appearance, resolved: resolvedMode }),
     [app.appearance, appearance, resolvedMode],
   );
 }

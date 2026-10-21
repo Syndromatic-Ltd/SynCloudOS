@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEVisualEnvironment } from "../NSE/Appearance";
+
+
 import { useCallback, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
 import { useNSEPresenceExiting, useNSEPresentation } from "../NSE/Animation";
 import { nseTopBarHeightCssValue } from "../NSE/Windows/Chrome/nseTopBarStyles";
@@ -131,6 +134,7 @@ function Surface({
   presentation?: AppViewPresentation;
 }) {
   const surfaceRef = useRef<HTMLDivElement>(null);
+  const { theme } = useNSEVisualEnvironment();
   // A role change starts its presentation during layout, so the outgoing
   // plane shows its first 3D pose in the same frame its role changes.
   useStagePresentation(surfaceRef, presentation);
@@ -142,7 +146,7 @@ function Surface({
   // own height token (nse-chrome.css), so the two can never disagree; a custom or absent bar
   // leaves the whole frame to the app.
   const topBarHeight = frame.topBar === "standard"
-    ? nseTopBarHeightCssValue(frame.material === "metal" ? "atmoMetal" : "atmoCumulus")
+    ? nseTopBarHeightCssValue(theme.presentation.chrome)
     : "0px";
 
   return (

@@ -19,7 +19,7 @@
  */
 
 import type { HTMLAttributes, ReactNode } from "react";
-import type { NSEResolvedColourScheme } from "../Appearance/nseAppearanceTypes";
+import type { NSEResolvedAppearance } from "../Appearance/nseAppearanceTypes";
 import { classes } from "../Controls/Core/nseControlsShared";
 
 /**
@@ -29,7 +29,7 @@ import { classes } from "../Controls/Core/nseControlsShared";
  * geometry into a contained hierarchy page.
  */
 export interface NSEMetalSurfaceProps extends HTMLAttributes<HTMLDivElement> {
-  readonly mode: NSEResolvedColourScheme;
+  readonly mode: NSEResolvedAppearance;
   readonly children?: ReactNode;
 }
 

@@ -18,9 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEThemeProvider } from "../../src/NSE/Appearance";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo/theme";
+
+
 // @vitest-environment jsdom
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render as baseRender, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
 import type { AFXAnimationDefinition } from "../../src/FX/AnimationFX/animationTypes";
@@ -28,6 +32,7 @@ import { LoginWindow } from "../../src/NSE/SystemUI/LoginWindow";
 import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
 import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
 import type { HFXFeedbackRequest } from "../../src/FX/HapticsFX/HFXHapticEvent";
+function render(ui: React.ReactNode) { return baseRender(ui, { wrapper: ({ children }) => <NSEThemeProvider theme={atmoTheme}>{children}</NSEThemeProvider> }); }
 /** Records each presentation by the class of the element it plays on. */
 function recordingAnimator() {
   const played: Array<{ className: string; definition: AFXAnimationDefinition }> = [];

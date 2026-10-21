@@ -42,7 +42,7 @@
 /* Compact chrome is a shared overlay contract. Its owner keeps the retained
    destination at full height; only the capsule accepts pointer input. */
 .nse-compact-bottom-chrome-owner {
-  --nse-compact-bottom-chrome-clearance: calc(92px + env(safe-area-inset-bottom, 0px));
+  --nse-compact-bottom-chrome-clearance: calc(var(--nse-navigation-bar-block-size, 48px) + 2 * var(--nse-navigation-edge-gap, 0px) + env(safe-area-inset-bottom, 0px));
   position: relative;
 }
 
@@ -89,7 +89,7 @@
 
 .nse-tab-bar {
   align-items: stretch;
-  --nse-tab-bar-height: 72px;
+  --nse-tab-bar-height: max(44px, var(--nse-navigation-bar-block-size, 48px));
   --nse-tab-minimum-item-width: 64px;
   block-size: var(--nse-tab-bar-height);
   display: flex;
@@ -109,9 +109,9 @@
 }
 
 .nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] {
-  --nse-tab-chrome-native-height: 72px;
-  --nse-tab-chrome-cap-diameter: 72px;
-  --nse-tab-chrome-cap-radius: 36px;
+  --nse-tab-chrome-native-height: max(44px, var(--nse-navigation-bar-block-size, 48px));
+  --nse-tab-chrome-cap-diameter: var(--nse-tab-chrome-native-height);
+  --nse-tab-chrome-cap-radius: calc(var(--nse-tab-chrome-native-height) / 2);
   --nse-tab-bar-height: var(--nse-tab-chrome-native-height);
 }
 
@@ -253,15 +253,6 @@
   display: none;
 }
 
-/* Filter definitions only: takes no space and paints nothing itself. */
-.nse-tab-bar-icon-material {
-  block-size: 0;
-  inline-size: 0;
-  overflow: hidden;
-  pointer-events: none;
-  position: absolute;
-}
-
 .nse-tab-bar-icon[data-nse-tab-icon-ready="false"] {
   align-items: center;
   border: 1px dashed currentColor;
@@ -297,8 +288,8 @@
   opacity: 0.42;
 }
 .nse-tab-bar-label {
-  font-size: 0.625rem;
-  line-height: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25;
   min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -495,3 +486,32 @@
 .nse-icon-tab:disabled {
   opacity: 0.45;
 }
+
+/* Neutral geometry comes from validated presentation, never recipe presence. */
+.nse-tab-bar-safe-area {
+  padding-block: var(--nse-navigation-edge-gap, 0px);
+  padding-inline: max(var(--nse-navigation-edge-gap, 0px), env(safe-area-inset-left, 0px)) max(var(--nse-navigation-edge-gap, 0px), env(safe-area-inset-right, 0px));
+}
+.nse-tab-bar-safe-area[data-navigation-placement="block-end"] {
+  padding-block-end: calc(var(--nse-navigation-edge-gap, 0px) + env(safe-area-inset-bottom, 0px));
+}
+.nse-tab-bar-safe-area[data-navigation-placement="block-start"] {
+  padding-block-start: calc(var(--nse-navigation-edge-gap, 0px) + env(safe-area-inset-top, 0px));
+}
+.nse-tab-bar-safe-area .nse-tab-bar-scroll-viewport { overflow-x: auto; pointer-events: auto; }
+.nse-tab-bar-safe-area .nse-tab-bar {
+  --nse-tab-bar-height: max(44px, var(--nse-navigation-bar-block-size, 48px));
+  block-size: auto;
+}
+.nse-tab-bar-safe-area[data-navigation-overflow="scroll"] .nse-tab-bar {
+  inline-size: max-content; max-inline-size: none; min-inline-size: 100%; margin-inline: 0;
+}
+.nse-tab-bar-safe-area[data-navigation-overflow="scroll"] .nse-tab-bar-tab { flex: 0 0 auto; min-inline-size: 44px; padding-inline: 12px; }
+.nse-tab-bar-safe-area[data-navigation-content="label"] .nse-tab-bar-icon { display: none; }
+.nse-tab-bar-safe-area[data-navigation-content="label"] .nse-tab-bar-label { white-space: nowrap; max-inline-size: none; overflow: visible; }
+.nse-tab-bar-tab:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+
+/* Outgoing panes remain retained but inert, not duplicate accessibility trees. */
+.nse-navigation-destination-host[data-nse-peer-transition="running"] { position: relative; }
+.nse-navigation-destination-host > [data-nse-peer-motion="exiting"] { position: absolute; inset: 0; inline-size: 100%; pointer-events: none; }
+.nse-navigation-destination-host > [data-nse-peer-motion] { will-change: transform, opacity; }

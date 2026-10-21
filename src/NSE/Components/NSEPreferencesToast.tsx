@@ -31,7 +31,7 @@ import { NSEListItem } from "../Controls/Selection/NSEListItem";
 import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
 import { NSEPageHeader } from "../Windows/Chrome/NSEPageHeader";
 import { NSEToolButton } from "../Controls/Buttons/NSEButtonFamilies";
-import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
+import { projectNSETheme, useNSEVisualEnvironment } from "../Appearance";
 
 /**
  * Preferences, as a panel that glides up from the lower screen and settles in
@@ -152,13 +152,13 @@ function PreferencesPanel({ panelRef, ...attributes }: HTMLAttributes<HTMLDivEle
 
 
 export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialPane, backLabel, appearance, resolvedMode, runtimeOwner, onClose }: NSEPreferencesToastProps) {
-  const inheritedAppearance = useNSEAppearance();
-  const requestedAppearance = appearance ?? inheritedAppearance.requestedColourScheme;
-  const projectedMode = resolvedMode ?? inheritedAppearance.resolvedColourScheme;
-  const appearanceProjection = projectNSEAppearance({
+  const inheritedAppearance = useNSEVisualEnvironment();
+  const requestedAppearance = appearance ?? inheritedAppearance.requestedAppearance;
+  const projectedMode = resolvedMode ?? inheritedAppearance.resolvedAppearance;
+  const themeProjection = projectNSETheme({
     ...inheritedAppearance,
-    requestedColourScheme: requestedAppearance,
-    resolvedColourScheme: projectedMode,
+    requestedAppearance: requestedAppearance,
+    resolvedAppearance: projectedMode,
   });
   const dialogRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
@@ -242,7 +242,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
         <NSEFocusScope options={{ scopeId: focusScopeId ?? "nse-preferences-toast", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
           <div
             className="nse-prefs-backdrop"
-            {...appearanceProjection}
+            {...themeProjection}
             data-appearance={requestedAppearance}
             data-mode={projectedMode}
             data-syncloudos-runtime-owner={runtimeOwner}

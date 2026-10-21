@@ -122,3 +122,12 @@
   grid-column: 1;
   grid-row: 1;
 }
+
+/* Arrangement changes leave the destination host's DOM parent unchanged. */
+.nse-source-list-scene-projection[data-navigation-placement="block-start"] > .nse-source-list-scene-projection-compact { order: -1; }
+.nse-source-list-scene-projection[data-navigation-placement="block-start"] > .nse-compact-bottom-chrome-mount { inset-block-start: 0; inset-block-end: auto; }
+.nse-source-list-scene-projection[data-navigation-flow="in-flow"] > .nse-source-list-scene-projection-compact { position: relative; pointer-events: auto; }
+.nse-source-list-scene-projection[data-navigation-flow="overlay"][data-navigation-placement="block-start"] > .nse-source-list-scene { padding-block-start: var(--nse-compact-bottom-chrome-clearance); box-sizing: border-box; }
+.nse-source-list-scene-projection[data-navigation-flow="overlay"][data-navigation-placement="block-start"] [data-nse-navigation-scroll-surface="true"] { scroll-padding-block-end: 0; }
+.nse-source-list-scene-projection[data-navigation-flow="overlay"][data-navigation-placement="block-start"] [data-nse-navigation-scroll-surface="true"]::after { display: none; }
+.nse-source-list-scene-projection[data-navigation-renderer="source-list-content"][data-navigation-content="label"] .nse-sidebar-item-glyph { display: none; }

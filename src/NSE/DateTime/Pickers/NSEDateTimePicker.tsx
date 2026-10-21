@@ -29,7 +29,7 @@ import type { NSEDateTimePickerMode, NSEDateTimePickerProps, NSEDateTimePickerVa
 import { serializePlainDate } from "./NSEDatePicker";
 import { serializePlainTime } from "./NSETimePicker";
 import { createPickerTransaction, reducePickerTransaction } from "./pickerTransaction";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseThemeSlot, useNSEThemeRecipe } from "../../Appearance";
 import { NSEPushButton } from "../../Controls/Buttons/NSEButtons";
 
 const emptyValue = (timeZone: string): NSEDateTimePickerValue => ({
@@ -226,7 +226,7 @@ export function NSEDateTimePicker({ value, defaultValue = null, mode = "combined
   const titleId = `date-time-picker-title-${instanceId}`;
   const valueId = `date-time-picker-value-${instanceId}`;
   const appearanceState = error ? "invalid" : props.disabled ? "disabled" : focused || open ? "focused" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("date-time-picker", "select", appearanceState));
+  const appearance = useNSEThemeRecipe(nseThemeSlot("date-time-picker", "select", appearanceState));
   return <span data-nse-control="date-time-picker" data-state={error ? "invalid" : props.disabled ? "disabled" : props.readOnly ? "read-only" : current ? "ready" : "empty"} {...appearance.attributes} onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
     {mode === "automatic" ? <><button ref={triggerRef} type="button" aria-label={props["aria-label"]} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={props.disabled || props.readOnly} onClick={begin}><span id={valueId} data-nse-part="value">{current ? displayForValue(current, props.locale, hourCycle) : props["aria-label"]}</span></button><NSEPopover id={`date-time-picker-${instanceId}`} open={open} anchor={triggerRef.current} parentWindowControllerId="date-time-picker-window" presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next && open) cancel(); }}><section data-nse-part="calendar-sheet"><h2 id={titleId}>{props["aria-label"]}</h2>{editor}</section></NSEPopover></> : editor}
     {props.name ? <><input type="hidden" name={props.name} value={`${serializePlainDate(current?.date ?? null)}${current ? `T${serializePlainTime(current.time)}` : ""}`} /><input type="hidden" name={`${props.name}.timeZone`} value={current?.timeZone ?? ""} /><input type="hidden" name={`${props.name}.disambiguation`} value={current?.disambiguation ?? ""} /></> : null}
