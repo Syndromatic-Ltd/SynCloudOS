@@ -274,6 +274,32 @@ describe("state presentation", () => {
     expect(onPresented).not.toHaveBeenCalled();
   });
 
+  it("does not enter again when StrictMode replays a reordered view's effects", async () => {
+    const { animator, played } = controlledAnimator();
+    const onPresented = vi.fn();
+    const list = (order: readonly string[]) => (
+      <React.StrictMode>
+        <NSEAnimationEnvironmentProvider animator={animator}>
+          {order.map((id) => <Stateful key={id} state="shown" enter={fade(0, 1)} onPresented={onPresented} />)}
+        </NSEAnimationEnvironmentProvider>
+      </React.StrictMode>
+    );
+    const rendered = render(list(["a", "b", "c"]));
+    // The mount's own replay restarts an entrance still in flight: each view
+    // has exactly one running entrance.
+    const running = () => played.filter(({ handle }) => handle.state === "running");
+    expect(running()).toHaveLength(3);
+    for (const entry of running()) await entry.settle("completed");
+    expect(onPresented).toHaveBeenCalledTimes(3);
+    const entrances = played.length;
+
+    // Moving "c" to the front moves "a" and "b" in the DOM; StrictMode replays
+    // their effects, which is not a new appearance.
+    rendered.rerender(list(["c", "a", "b"]));
+    expect(played).toHaveLength(entrances);
+    expect(onPresented).toHaveBeenCalledTimes(3);
+  });
+
   it("presents at once without an animator", () => {
     const onPresented = vi.fn();
     const { rerender } = render(<Stateful state="a" enter={fade(0, 1)} onPresented={onPresented} />);
