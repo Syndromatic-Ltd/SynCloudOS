@@ -170,6 +170,13 @@ describe("Webspring folder split presentation", () => {
     // The piece carries its own copy, lined up with the stage it was cut from.
     expect(piece.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!.style).toMatchObject({ top: "-172px", left: "-126px" });
     expect(piece.querySelector(".webspring-folder-split-clone")).not.toBeNull();
+    // Each cut edge catches the light just inside its own half: a band that
+    // follows the upper edge around the cutout, and a line along the lower edge.
+    const topEdge = top.querySelector<HTMLElement>(".webspring-folder-split-edge")!;
+    expect(topEdge.style.clipPath).toBe(
+      "polygon(0 185px, 126px 185px, 140px 171px, 154px 185px, 100% 185px, 100% 186px, 154px 186px, 140px 172px, 126px 186px, 0 186px)",
+    );
+    expect(bottom.querySelector<HTMLElement>(".webspring-folder-split-edge")!.style).toMatchObject({ top: "14px", height: "1px" });
     expect(top.style.height).toBe("186px");
     expect(bottom.style.top).toBe("172px");
     expect(bottom.style.transform).toBe("");

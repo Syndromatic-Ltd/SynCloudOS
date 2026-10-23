@@ -50,6 +50,8 @@ const NOTCH_HALF_BASE = 14;
 /** How far the pointer projects above the seam. The lower half's matching tab fills it at rest. */
 const TRIANGLE_DEPTH = 14;
 const SEAM_GAP = 6;
+/** Depth of the light caught along each cut edge, inside the stage. */
+const EDGE_HIGHLIGHT = 1;
 const STAGE_MARGIN = 24;
 /** Marks an icon in a clone as the opened folder's own or as part of the backdrop. */
 const BACKDROP_ATTRIBUTE = "data-webspring-folder-backdrop";
@@ -309,6 +311,12 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
     : undefined;
   const bottomClip = triangle > 0 ? `polygon(0 ${seam}px, 100% ${seam}px, 100% 100%, 0 100%)` : undefined;
   const tabLeft = notchX - NOTCH_HALF_BASE;
+  // Each cut edge catches the light just inside the stage: a band along the
+  // upper edge, around the cutout, and a line along the lower straight edge.
+  const lit = seam - EDGE_HIGHLIGHT;
+  const topEdgeClip = triangle > 0
+    ? `polygon(0 ${lit}px, ${notchX - NOTCH_HALF_BASE}px ${lit}px, ${notchX}px ${lit - triangle}px, ${notchX + NOTCH_HALF_BASE}px ${lit}px, 100% ${lit}px, 100% ${seam}px, ${notchX + NOTCH_HALF_BASE}px ${seam}px, ${notchX}px ${seam - triangle}px, ${notchX - NOTCH_HALF_BASE}px ${seam}px, 0 ${seam}px)`
+    : `polygon(0 ${lit}px, 100% ${lit}px, 100% ${seam}px, 0 ${seam}px)`;
 
   const style = {
     left: `${stageRect.left}px`,
@@ -363,6 +371,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
           className="webspring-folder-split-clone-host"
           style={{ top: 0, height: `${height}px`, clipPath: topClip }}
         />
+        <div className="webspring-folder-split-edge is-top" style={{ clipPath: topEdgeClip }} />
       </div>
       <div
         className="webspring-folder-split-half is-bottom"
@@ -379,6 +388,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
           className="webspring-folder-split-clone-host"
           style={{ top: `${-bottomTop}px`, height: `${height}px`, clipPath: bottomClip }}
         />
+        <div className="webspring-folder-split-edge is-bottom" style={{ top: `${seam - bottomTop}px`, height: `${EDGE_HIGHLIGHT}px` }} />
         {triangle > 0 ? <div
           className="webspring-folder-split-tab"
           style={{ left: `${tabLeft}px`, width: `${NOTCH_HALF_BASE * 2}px`, height: `${triangle}px` }}
