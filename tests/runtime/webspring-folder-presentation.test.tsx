@@ -24,6 +24,8 @@ import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebspringFolderItem } from "../../src/Webspring/webspringTypes";
 import { createWebspringFolderSplitPresentation } from "../../src/Webspring/WebspringFolderSplitPresentation";
+import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
+import type { AFXAnimationDefinition, AFXAnimationHandle } from "../../src/FX/AnimationFX/animationTypes";
 
 const folder = {
   kind: "folder",
@@ -275,5 +277,46 @@ describe("Webspring folder split presentation", () => {
     fireEvent.click(root.querySelector(".webspring-folder-split-backdrop")!);
 
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  });
+  it("glides the folder's apps to their new places when they reorder", () => {
+    const moves: { readonly target: Element; readonly definition: AFXAnimationDefinition }[] = [];
+    const animator: NSEAnimator = {
+      ownerAppId: "syncloudos.system",
+      animations: {
+        acquireOwner: (owner) => Object.freeze({ ...owner, epoch: 1, release() {} }),
+        animate(target, definition) {
+          moves.push({ target: target as Element, definition: definition as AFXAnimationDefinition });
+          return { id: "move", finished: new Promise(() => {}), progress: 0, state: "running", cancel() {}, seek() {}, pause() {}, resume() {} } as AFXAnimationHandle;
+        },
+      } as NSEAnimator["animations"],
+    };
+    // jsdom does not lay out: each cell sits 100px right of the one before it.
+    const offsetLeft = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "offsetLeft")!;
+    Object.defineProperty(HTMLElement.prototype, "offsetLeft", {
+      configurable: true,
+      get(this: HTMLElement) { return this.classList.contains("webspring-folder-split-cell") ? [...this.parentElement!.children].indexOf(this) * 100 : 0; },
+    });
+    try {
+      const view = (apps: WebspringFolderItem["apps"], reducedMotion: boolean) => (
+        <NSEAnimationEnvironmentProvider animator={animator} reducedMotion={reducedMotion}>
+          <Presentation folder={{ ...folder, apps }} stage={stage} anchor={new DOMRect(100, 100, 80, 80)} reducedMotion={reducedMotion}
+            renderApp={(app) => <button type="button">{`Open ${app.displayName}`}</button>} onClose={vi.fn()} />
+        </NSEAnimationEnvironmentProvider>
+      );
+      const [beta, gamma] = folder.apps;
+      const rendered = render(view([beta!, gamma!], false), { container: layer });
+      expect(moves).toHaveLength(0);
+      rendered.rerender(view([gamma!, beta!], false));
+      const cellOf = (name: string) => screen.getByRole("button", { name: `Open ${name}` }).closest(".webspring-folder-split-cell");
+      expect(moves.find(({ target }) => target === cellOf("Gamma"))?.definition.animations[0]).toMatchObject({ keyPath: "transform", from: "translate(100px, 0px) scale(1)" });
+      expect(moves.find(({ target }) => target === cellOf("Beta"))?.definition.animations[0]).toMatchObject({ keyPath: "transform", from: "translate(-100px, 0px) scale(1)" });
+
+      // Reduced motion moves them at once.
+      rendered.rerender(view([beta!, gamma!], true));
+      rendered.rerender(view([gamma!, beta!], true));
+      expect(moves).toHaveLength(2);
+    } finally {
+      Object.defineProperty(HTMLElement.prototype, "offsetLeft", offsetLeft);
+    }
   });
 });

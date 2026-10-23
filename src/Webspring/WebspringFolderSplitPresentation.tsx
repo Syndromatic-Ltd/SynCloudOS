@@ -19,7 +19,9 @@
  */
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { NSELayoutView } from "../NSE/Animation";
 import { NSEFocusScope } from "../NSE/NSE";
+import { webspringIconSprings } from "./Webspring.transitions";
 import type { WebspringFolderPresentationComponent, WebspringFolderPresentationProps } from "./webspringTypes";
 import "./WebspringFolderSplitPresentation.css";
 
@@ -293,6 +295,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
   const notchX = Math.max(NOTCH_HALF_BASE, Math.min(stageRect.width - NOTCH_HALF_BASE, anchor.left + anchor.width / 2 - stageRect.left));
   // Reduced motion crossfades in place; otherwise the halves part and rejoin.
   const fade = reducedMotion;
+  const reorder = reducedMotion ? null : webspringIconSprings.reorder;
   const parted = phase === "open" || (fade && phase === "closing");
   // The halves fit together like jigsaw pieces: the upper edge has the pointer
   // cut out of it, and the piece of the stage that filled the cutout rides on
@@ -353,7 +356,8 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
         <div ref={contentRef} className="webspring-folder-split-content">
           <h2 id={titleId} className="webspring-folder-split-title">{folder.title}</h2>
           <div className="webspring-folder-split-apps">
-            {folder.apps.map((app, index) => <div key={app.bundleIdentifier} className="webspring-folder-split-cell">{renderApp(app, index)}</div>)}
+            {/* Apps spring to their new places as they reorder, as on the stage. */}
+            {folder.apps.map((app, index) => <NSELayoutView key={app.bundleIdentifier} className="webspring-folder-split-cell" layoutTransition={reorder}>{renderApp(app, index)}</NSELayoutView>)}
           </div>
         </div>
       </div>
