@@ -457,13 +457,19 @@ function readScreen(): RuntimeScreenSnapshot {
  */
 const unavailableBrowserSafeArea = Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 });
 
+/**
+ * Windows are laid out in the page, so the area they may occupy is the layout
+ * viewport. The screen's available rectangle is in desktop coordinates: a
+ * browser on a second monitor reports that monitor's origin, which would put
+ * every window beyond the page's right edge.
+ */
 function readWorkArea(): RuntimeWorkAreaSnapshot {
-  const screen = readScreen();
+  const viewport = readLayoutViewport();
   return {
-    x: screen.availableLeft,
-    y: screen.availableTop,
-    width: screen.availableWidth,
-    height: screen.availableHeight,
+    x: 0,
+    y: 0,
+    width: viewport.width,
+    height: viewport.height,
     devicePixelRatio: typeof window === "undefined" ? 1 : window.devicePixelRatio || 1,
     safeArea: unavailableBrowserSafeArea,
   };
