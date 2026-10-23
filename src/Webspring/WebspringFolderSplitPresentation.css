@@ -120,20 +120,39 @@
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .3)) drop-shadow(0 3px 7px rgba(0, 0, 0, .85));
 }
 
-/* The lower edge: a light line along its outline, tab included, and the
-   shadow it casts onto the underlay above it. Both follow the clipped clone
-   and are drawn only once the halves have parted. */
+/* The lower edge casts its shadow onto the underlay above it, following the
+   clipped clone, once the halves have parted. */
 .webspring-folder-split-half.is-bottom {
-  filter: drop-shadow(0 -1px 0 rgba(255, 255, 255, 0)) drop-shadow(0 -2px 6px rgba(0, 0, 0, 0));
+  filter: drop-shadow(0 -2px 6px rgba(0, 0, 0, 0));
   transition:
     transform var(--webspring-folder-duration) var(--webspring-folder-easing),
     filter var(--webspring-folder-duration) var(--webspring-folder-easing);
 }
 
 .webspring-folder-split[data-phase="open"] .webspring-folder-split-half.is-bottom {
-  filter:
-    drop-shadow(0 -1px 0 rgba(255, 255, 255, .3))
-    drop-shadow(0 -2px 6px rgba(0, 0, 0, calc(var(--webspring-folder-edge-shadow) * .6)));
+  filter: drop-shadow(0 -2px 6px rgba(0, 0, 0, calc(var(--webspring-folder-edge-shadow) * .6)));
+}
+
+/* The light each cut edge catches, just inside the stage, which makes the
+   halves read as cut from one sheet. Hidden at rest, so the shut stage shows
+   no line. */
+.webspring-folder-split-edge {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  background: rgba(255, 255, 255, .34);
+  opacity: 0;
+  transition: opacity var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+.webspring-folder-split-edge.is-top {
+  top: 0;
+  height: 100%;
+}
+
+.webspring-folder-split[data-phase="open"] .webspring-folder-split-edge {
+  opacity: 1;
 }
 
 /* The pointer's piece of the stage rides on the lower half in a window the
@@ -180,6 +199,7 @@
 .webspring-folder-split[data-motion="fade"] .webspring-folder-split-half.is-top,
 .webspring-folder-split[data-motion="fade"] .webspring-folder-split-half.is-bottom,
 .webspring-folder-split[data-motion="fade"] .webspring-folder-split-tab-piece,
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-edge,
 .webspring-folder-split[data-motion="fade"] .webspring-folder-split-clone [data-webspring-folder-backdrop="backdrop"] {
   transition: none;
 }
