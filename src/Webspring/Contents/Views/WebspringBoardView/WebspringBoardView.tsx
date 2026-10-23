@@ -275,6 +275,9 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
   }, [draggingId, setProxyElement]);
   const openFolder = model.items.find((item): item is WebspringFolderItem => item.kind === "folder" && item.id === model.folders.openFolderId) ?? null;
   const [folderAnchor, setFolderAnchor] = useState<DOMRectReadOnly | null>(null);
+  // The Board fits its icon size to the pages; a folder's apps sit outside
+  // them, so they are drawn at the size measured from the folder's own icon.
+  const [folderIconSize, setFolderIconSize] = useState<number | null>(null);
   const activePage = Math.min(page, board.pages.length - 1);
   const launchDim = boardMotion.launchBackdropDim;
   const [iconExits, setIconExits] = useState<WebspringBoardLaunchExits | null>(null);
@@ -330,7 +333,11 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
     }
     const cell = boardElement.current?.querySelector<HTMLElement>(`.webspring-board-page [data-webspring-item-id="${folderId}"]`);
     if (cell) {
-      const measure = () => setFolderAnchor(cell.getBoundingClientRect());
+      const measure = () => {
+        setFolderAnchor(cell.getBoundingClientRect());
+        const well = cell.querySelector<HTMLElement>(ARTWORK_SELECTOR);
+        setFolderIconSize(well ? well.offsetWidth : null);
+      };
       measure();
       const view = cell.ownerDocument.defaultView;
       view?.addEventListener("resize", measure);
@@ -624,7 +631,11 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
       </nav> : null}
       </section>
       {model.widgets.length > 0 ? <WebspringWidgetShelf entries={model.widgets} surface={model.background.shelf} /> : null}
-      {openFolder && folderAnchor && stageElement ? <div className="webspring-board-folder-layer" onPointerDownCapture={pointerDown}>
+      {openFolder && folderAnchor && stageElement ? <div
+        className="webspring-board-folder-layer"
+        style={folderIconSize ? { "--webspring-board-icon-size": `${folderIconSize}px` } as CSSProperties : undefined}
+        onPointerDownCapture={pointerDown}
+      >
         <FolderPresentation
           key={openFolder.id}
           folder={openFolder}

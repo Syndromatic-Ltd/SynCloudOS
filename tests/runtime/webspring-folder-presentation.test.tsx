@@ -104,7 +104,7 @@ describe("Webspring folder split presentation", () => {
     // The split never sits waiting for anything: it is at rest in the same
     // pass that mounts it, with both halves already filled.
     expect(root.dataset.phase).toBe("closed");
-    expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(2);
+    expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(3);
     expect(root.dataset.capture).toBeUndefined();
   });
 
@@ -152,15 +152,24 @@ describe("Webspring folder split presentation", () => {
     const { root } = renderSplit();
     const [top, bottom] = root.querySelectorAll<HTMLElement>(".webspring-folder-split-half");
 
-    // The top-stage cutout points up towards the folder's centre. The lower
-    // clone covers the entire cutout at rest, leaving no notch in the stage.
+    // The top-stage cutout points up towards the folder's centre. The piece of
+    // the stage that filled it rides on the lower half in a window the size of
+    // the cutout, so at rest it plugs the cutout and the straight edges meet.
     const topHost = top.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!;
-    const points = [...topHost.style.clipPath.matchAll(/(-?\d+)px (-?\d+)px/gu)]
-      .map(([, x, y]) => ({ x: Number(x), y: Number(y) }));
-    const [right, tip, left] = points;
+    const bottomHost = bottom.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!;
+    const pointsOf = (clip: string) => [...clip.matchAll(/(-?\d+)px (-?\d+)px/gu)].map(([, x, y]) => ({ x: Number(x), y: Number(y) }));
+    const [right, tip, left] = pointsOf(topHost.style.clipPath);
     expect([right, tip, left]).toEqual([{ x: 154, y: 186 }, { x: 140, y: 172 }, { x: 126, y: 186 }]);
     expect(tip.x).toBe(100 + 80 / 2);
     expect(tip.y).toBeLessThan(left.y);
+    expect(bottomHost.style.clipPath).toBe("polygon(0 186px, 100% 186px, 100% 100%, 0 100%)");
+    const tab = bottom.querySelector<HTMLElement>(".webspring-folder-split-tab")!;
+    const piece = tab.querySelector<HTMLElement>(".webspring-folder-split-tab-piece")!;
+    expect(tab.style).toMatchObject({ left: "126px", width: "28px", height: "14px" });
+    expect(piece.style.transform).toBe("");
+    // The piece carries its own copy, lined up with the stage it was cut from.
+    expect(piece.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!.style).toMatchObject({ top: "-172px", left: "-126px" });
+    expect(piece.querySelector(".webspring-folder-split-clone")).not.toBeNull();
     expect(top.style.height).toBe("186px");
     expect(bottom.style.top).toBe("172px");
     expect(bottom.style.transform).toBe("");
@@ -168,11 +177,14 @@ describe("Webspring folder split presentation", () => {
 
     await opened(root);
     // The 240 px panel fits, so the top half stays and the bottom half moves
-    // down by the panel's height plus the triangle depth it covered.
+    // down by the panel's height; its straight edge meets the panel's foot and
+    // the pointer's piece has sunk below that edge.
     expect(top.style.transform).toBe("translate3d(0, 0px, 0)");
-    expect(bottom.style.transform).toBe("translate3d(0, 254px, 0)");
-    expect(Number.parseFloat(bottom.style.top) + 254).toBe(186 + 240);
+    expect(bottom.style.transform).toBe("translate3d(0, 240px, 0)");
+    expect(Number.parseFloat(bottom.style.top) + 14 + 240).toBe(186 + 240);
+    expect(piece.style.transform).toBe("translate3d(0, 14px, 0)");
     expect(topHost.style.clipPath).not.toMatch(/url\(#/u);
+    expect(bottomHost.style.clipPath).not.toMatch(/url\(#/u);
     await waitFor(() => expect(document.activeElement?.textContent).toBe("Open Beta"));
   });
 
@@ -187,14 +199,17 @@ describe("Webspring folder split presentation", () => {
     const clip = top.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!.style.clipPath;
     const [, tip] = [...clip.matchAll(/(-?\d+)px (-?\d+)px/gu)];
     expect(Number(tip[2]) - 126).toBe(Number.parseFloat(panel.style.top) - 14);
-    expect(bottom.style.transform).toBe("translate3d(0, 128px, 0)");
-    expect(Number.parseFloat(bottom.style.top) + 128).toBe(300);
+    expect(bottom.style.transform).toBe("translate3d(0, 114px, 0)");
+    expect(Number.parseFloat(bottom.style.top) + 14 + 114).toBe(300);
   });
 
   it("uses a straight upper seam without a cutout when the pointer is disabled", async () => {
     const { root } = renderSplit({ Split: createWebspringFolderSplitPresentation({ panelHeight: 240, duration: 0, notch: false }) });
     const [top, bottom] = root.querySelectorAll<HTMLElement>(".webspring-folder-split-half");
     expect(top.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!.style.clipPath).toBe("");
+    expect(bottom.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!.style.clipPath).toBe("");
+    expect(bottom.querySelector(".webspring-folder-split-tab")).toBeNull();
+    expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(2);
     expect(top.style.height).toBe("186px");
     expect(bottom.style.top).toBe("186px");
     await opened(root);
@@ -206,10 +221,10 @@ describe("Webspring folder split presentation", () => {
     await opened(root);
 
     expect(root.dataset.motion).toBe("fade");
-    expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(2);
+    expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(3);
   });
 
-  it("lays out again when the stage resizes, keeping one copy per half", async () => {
+  it("lays out again when the stage resizes, keeping one copy per piece", async () => {
     const { root } = renderSplit();
     await opened(root);
 
@@ -218,7 +233,7 @@ describe("Webspring folder split presentation", () => {
 
     await waitFor(() => expect(root.style.width).toBe("900px"));
     expect(root.style.height).toBe("700px");
-    expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(2);
+    expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(3);
     for (const half of ["is-top", "is-bottom"] as const) {
       expect(cloneOf(root, half).style).toMatchObject({ width: "900px", height: "700px" });
     }

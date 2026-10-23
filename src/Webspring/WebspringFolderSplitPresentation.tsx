@@ -47,7 +47,7 @@ interface ResolvedSplitOptions {
 
 /** Half the base of the underlay pointer cut out of the stage's upper seam. */
 const NOTCH_HALF_BASE = 14;
-/** How far the pointer projects above the seam. The lower clone covers it at rest. */
+/** How far the pointer projects above the seam. The lower half's matching tab fills it at rest. */
 const TRIANGLE_DEPTH = 14;
 const SEAM_GAP = 6;
 const STAGE_MARGIN = 24;
@@ -162,6 +162,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
   const panelRef = useRef<HTMLDivElement>(null);
   const topHostRef = useRef<HTMLDivElement>(null);
   const bottomHostRef = useRef<HTMLDivElement>(null);
+  const tabHostRef = useRef<HTMLDivElement>(null);
   const [stageRect, setStageRect] = useState(() => visibleStageRect(stage));
   const [phase, setPhase] = useState<SplitPhase>("closed");
   const [contentHeight, setContentHeight] = useState(0);
@@ -190,21 +191,27 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
 
   // The split needs no capture: it copies the stage into each half in the same
   // pass that mounts them, which costs about 30 ms rather than a capture's wait.
-  // The second half copies the first, which already has the split dropped.
+  // The other copies are made from the first, which already has the split dropped.
   useLayoutEffect(() => {
     const top = topHostRef.current;
     const bottom = bottomHostRef.current;
     if (!top || !bottom) return;
     const prepared = cloneStage(stage, folder.id);
-    const second = prepared.cloneNode(true) as HTMLElement;
-    copyCanvasPixels(prepared.querySelectorAll("canvas"), second.querySelectorAll("canvas"));
+    const copy = () => {
+      const next = prepared.cloneNode(true) as HTMLElement;
+      copyCanvasPixels(prepared.querySelectorAll("canvas"), next.querySelectorAll("canvas"));
+      return next;
+    };
+    const tab = tabHostRef.current;
+    tab?.replaceChildren(copy());
+    bottom.replaceChildren(copy());
     top.replaceChildren(prepared);
-    bottom.replaceChildren(second);
     return () => {
       top.replaceChildren();
       bottom.replaceChildren();
+      tab?.replaceChildren();
     };
-  }, [folder.id, stage, stageRect]);
+  }, [folder.id, stage, stageRect, options.notch]);
 
   useLayoutEffect(() => {
     const content = contentRef.current;
@@ -285,16 +292,23 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
   // Reduced motion crossfades in place; otherwise the halves part and rejoin.
   const fade = reducedMotion;
   const parted = phase === "open" || (fade && phase === "closing");
-  // At rest the lower clone overlaps the full upward cutout, making the stage
-  // unbroken. Opening moves that cover down to reveal the underlay tip first.
+  // The halves fit together like jigsaw pieces: the upper edge has the pointer
+  // cut out of it, and the piece of the stage that filled the cutout rides on
+  // the lower half. Opening, that piece glides down with the lower half and
+  // sinks out of sight below its straight edge; closing, it rises back out of
+  // that edge and plugs the cutout as the straight edges meet. The lower
+  // half's box starts at the pointer's tip, and its own copy is cut straight
+  // along the seam, so no part of the stage is drawn twice.
   const bottomTop = Math.max(0, seam - triangle);
   const bottomHeight = Math.max(0, height - bottomTop);
-  const bottomShift = parted ? panelHeight - overflow + triangle : 0;
+  const bottomShift = parted ? panelHeight - overflow : 0;
   // The stage's lower edge cuts upwards, so the shared underlay projects
   // towards the originating folder rather than the stage pointing into it.
   const topClip = triangle > 0
     ? `polygon(0 0, 100% 0, 100% ${seam}px, ${notchX + NOTCH_HALF_BASE}px ${seam}px, ${notchX}px ${seam - triangle}px, ${notchX - NOTCH_HALF_BASE}px ${seam}px, 0 ${seam}px)`
     : undefined;
+  const bottomClip = triangle > 0 ? `polygon(0 ${seam}px, 100% ${seam}px, 100% 100%, 0 100%)` : undefined;
+  const tabLeft = notchX - NOTCH_HALF_BASE;
 
   const style = {
     left: `${stageRect.left}px`,
@@ -363,8 +377,23 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
         <div
           ref={bottomHostRef}
           className="webspring-folder-split-clone-host"
-          style={{ top: `${-bottomTop}px`, height: `${height}px` }}
+          style={{ top: `${-bottomTop}px`, height: `${height}px`, clipPath: bottomClip }}
         />
+        {triangle > 0 ? <div
+          className="webspring-folder-split-tab"
+          style={{ left: `${tabLeft}px`, width: `${NOTCH_HALF_BASE * 2}px`, height: `${triangle}px` }}
+        >
+          <div
+            className="webspring-folder-split-tab-piece"
+            style={{ transform: parted ? `translate3d(0, ${triangle}px, 0)` : undefined }}
+          >
+            <div
+              ref={tabHostRef}
+              className="webspring-folder-split-clone-host"
+              style={{ top: `${-bottomTop}px`, left: `${-tabLeft}px`, width: `${stageRect.width}px`, height: `${height}px` }}
+            />
+          </div>
+        </div> : null}
       </div>
     </div>
   </NSEFocusScope>;
@@ -375,7 +404,8 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
  * folder's cell to reveal the folder's apps on an underlay. The copy is a clone
  * of the stage's DOM, so there is nothing to capture and nothing to wait for;
  * every icon but the opened folder's own fades back as the halves part, and the
- * triangle in the top seam is fixed, covered by the bottom half until they part.
+ * triangle cut from the top seam is filled by a matching tab on the bottom half
+ * until they part.
  * Reduced motion crossfades instead. Escape, a tap on either half, or a tap on
  * the folder icon closes it.
  */
