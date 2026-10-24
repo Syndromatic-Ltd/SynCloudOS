@@ -18,9 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import "regenerator-runtime/runtime";
+import fontkit from "./fontkitRuntime";
 import { GFXPDFDocument, pdfAssertLive, pdfPageForEmbedding } from "./GFXPDFDocument";
-import fontkit from "@pdf-lib/fontkit";
 import { GFXColourProfile } from "../GFXColourProfile";
 import type { GFXRGBAComponents } from "../colourTypes";
 import type { GFXImageDescriptor } from "../GFXImage";

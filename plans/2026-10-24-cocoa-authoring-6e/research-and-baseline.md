@@ -6,6 +6,8 @@ Latest approved compiler decision: TypeScript 6.0.3 in both repositories and the
 
 The 6.0.3 migration removes baseUrl in favor of explicit relative path targets, declares app/example roots and environment-specific ambient types, and preserves SDK rootDir src. Production strict mode stays enabled. One deliberate untyped alias-cycle test fixture now explicitly selects its original non-strict mode because TypeScript 6 changes the default. An extra browser-host type fixture's stale rejection of folder discovery was reproduced under 5.9.3 before correction; it now accepts the established discovered-project mode while still rejecting a missing mount element and mutually exclusive modes. These are compiler/test-fixture changes, not new production APIs. Exact execution results and installed package provenance are retained in S's TypeScript 6 validation receipt.
 
+The clean packed-consumer gate exposed an additional TS2882: GFXPDFContext's public declaration carried the implementation-only regenerator-runtime side-effect import. The PDF font bootstrap now belongs to private `src/FX/GraphicsFX/pdf/fontkitRuntime.ts`, which initializes the same polyfill and supplies the same fontkit backend; the public PDF declaration no longer requires that implementation import. No ambient-module shim or disabled side-effect checking is used. PDF behavior and installed strict declaration checks cover the fix.
+
 ## What the original documents actually say
 
 The relevant originals are outside F, in the paired workspace's specs folder:
