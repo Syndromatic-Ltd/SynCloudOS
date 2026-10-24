@@ -4,7 +4,7 @@ Status: proposed design and executable implementation handoff, 24 October 2026. 
 
 Scope addition: native TypeScript 7, Bun, coordinated dependency/runtime security upgrades and substantial full-suite/runtime optimization are now included. The user's later immediate-maintenance instruction separately authorized updating the host Node installation and restarting the identified previews. That maintenance is complete; the API, app and repository toolchain changes remain proposed.
 
-Latest authorization: the user has now approved the remaining security fixes only. M00 remediation is in progress; broader upgrades remain on hold for discussion. The compiler remains TypeScript 5.9.3. [TypeScript decision discussion](typescript-decision.md) recommends stable 6.0.3 as the next step and an isolated 7.1 beta investigation; neither compiler change is approved or implemented yet. Baseline statements below record the original planning snapshot, not the current security-fix working diff.
+Latest authorization: security remediation was implemented with zero dependency-audit findings, and the user approved upgrading both repositories to **TypeScript 6.0.3**. That exact compiler version is the 6E baseline. [TypeScript decision](typescript-decision.md) records the approved choice; native TypeScript 7/API work is a deferred optional phase. Bun, build/renderer major upgrades, the authoring APIs and app migrations remain proposed until separately authorized. Historical hashes and test observations below belong to the original planning snapshot; current package provenance is recorded in S's vendor receipt and validation reports.
 
 ## Read in this order
 
@@ -36,13 +36,13 @@ S's `vendor/framework-receipt.json` identifies F's same commit. Its archive SHA-
 - Retain `@observable` and extend `@action`. Tasks and bindings use inspectable typed descriptors; there is no initial `@task`, `@undoable` or runtime type-reflection system.
 - Preserve all app identities, persisted keys and data formats, route names, document histories, authentication, PolicyKit decisions, control behavior, visuals and FX quality. No renderer replacement, app redesign, Enyo/Onyx additions or revived public editor API.
 - No deployment, publishing, push, release, external messages or memory updates are part of this plan.
-- Target Bun-managed repositories, native TypeScript 7, Vite 8, React 19.3 and Vitest 5 with compatible browser/Cloudflare tooling. Retain normal external SDK consumers and browser/workerd portability.
-- TypeScript 7.0 lacks the compiler API used by our tools. The complete port targets an API-bearing stable 7.x release; 7.1 is currently beta. Other security/performance work does not wait on that gate.
+- Use exact TypeScript 6.0.3 for the approved compiler baseline, preserving the JavaScript compiler API, strict production checking, standard decorators and TSX. Bun, Vite 8, React 19.3 and Vitest 5 remain proposed modernization steps. Retain normal external SDK consumers and browser/workerd portability.
+- TypeScript 7.0 lacks the compiler API used by our tools. A later native port requires an API-bearing stable 7.x release and a validated tooling port. It is optional deferred work, not a prerequisite for 6E authoring/app migration or test-performance acceptance.
 - Optimize complete validation through measured environment/import/build/install/scheduling costs. Preserve discovered cases, assertions, browser projects and visual/FX quality. Do not equate Bun package management with a bun:test rewrite.
 
 ## Implementation order and status
 
-The [modernization plan](modernization-implementation-plan.md) adds M00-M08: security baseline, inventory/measurement, Bun installs/provenance, native compiler/API, Vite/decorators, coordinated React/test/browser upgrades, test execution/cache ownership, bounded runtime/FX optimization, and final evidence. M00 precedes broad migration; M01 establishes comparable measurements; M02/M04/M05 support new authoring; M03's stable API gate and M08 must close before claiming complete modernization. P09 remains the installed authoring gate, not the whole tooling migration.
+The [modernization plan](modernization-implementation-plan.md) adds M00-M08: security baseline, inventory/measurement, Bun installs/provenance, compiler evolution, Vite/decorators, coordinated React/test/browser upgrades, test execution/cache ownership, bounded runtime/FX optimization, and final evidence. M03A is the approved TypeScript 6.0.3 stage; M03B is the deferred native port. M00 precedes broad migration; M01 establishes comparable measurements; M02/M04/M05 support new authoring. M03A and M08 apply to the current compiler decision; M03B is admitted only by a later decision. P09 remains the installed authoring gate.
 
 | Package | Deliverable | Prerequisite | Status |
 | --- | --- | --- | --- |
@@ -66,6 +66,8 @@ P13 is included because this request asks for the full application migration. Th
 
 ## Current evidence, not future acceptance
 
+The following focused results and original no-implementation statements are historical planning evidence. Later security work passed additional checks and rebuilt the installed package; TypeScript 6 execution evidence is retained with site validation reports. Do not mistake this original snapshot for current HEAD/receipt state.
+
 - Fresh framework run: four focused files, **94 tests passed** (ownership, controller lifecycle, view controllers, actions).
 - Fresh site run: Journal class and Publisher class files, **4 passed / 7 failed**, two failing files. The seven failures are prerequisites, not accepted migration outcomes.
 - No full test suite, production build, browser acceptance or device/GPU assessment was run for this planning task.
@@ -83,4 +85,4 @@ The implementation plan contains future verification commands. Their inclusion d
 
 Documentation review checks the Markdown documents and audit summary, local links, balanced fenced examples, final newlines/trailing whitespace, P00-P14/M00-M08 coverage and all eleven application sections. New source/test paths are labeled as planned creations; existing edit scopes are grounded in F/S. The review covers API names/lifetimes as well as native compiler access, decorator transforms, tool subprocesses, lock/provenance inputs and test completeness.
 
-F has only this planning package as untracked changes; S remains clean. Both HEADs and the installed receipt still match the pinned baseline. No source/test/config/package archive was modified and no implementation was committed. Host Node maintenance and HTTP preview checks are executed evidence; all future API/toolchain/app acceptance gates remain open.
+That original planning stage changed only this package. Later explicitly authorized security remediation and TypeScript 6.0.3 update source/config/compiler fixtures and rebuild the installed SDK; their current HEADs and receipt therefore differ from the original planning hashes. Validation reports distinguish those executed changes from the still-proposed API/app/major-upgrade gates. No application rewrite or new public authoring API is implemented by the compiler upgrade.

@@ -32,8 +32,10 @@ defineIntegration({
 declare const widget: WebspringWidgetViewProps<readonly string[]>;
 const navigation: Promise<ActionResult> = widget.navigate("/notes/one");
 void navigation;
-// @ts-expect-error A production host must choose a mode.
+// A folder-discovered host may use its generated project without an explicit mode.
 mountSynCloudOS({ element });
+// @ts-expect-error A folder-discovered host still requires a mount element.
+mountSynCloudOS({});
 // @ts-expect-error Application and shell are mutually exclusive.
 mountSynCloudOS({ element, shell, application: { bundleIdentifier: "com.example.game" } });
 // @ts-expect-error Shell resources cannot be attached to an application host.

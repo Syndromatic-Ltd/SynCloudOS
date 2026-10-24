@@ -1,11 +1,11 @@
 # 6E tooling, security and performance modernization
 
-Status: proposed design, researched 24 October 2026. This extends the [authoring design](design.md) and [application migration matrix](app-migration-matrix.md). Implement through the separate [modernization plan](modernization-implementation-plan.md). The original planning-only instruction still applies to repository changes. The user's later instruction specifically authorizes updating the host's installed Node immediately; that maintenance exception does not authorize dependency, API or application implementation.
+Status: modernization design, researched 24 October 2026. This extends the [authoring design](design.md) and [application migration matrix](app-migration-matrix.md). Security remediation and the exact TypeScript 6.0.3 upgrade have since been authorized; the broader upgrades, APIs and app migrations remain proposed. Implement admitted phases through the [modernization plan](modernization-implementation-plan.md). Native TypeScript 7/API porting is a deferred optional phase.
 
 ## 1. Decisions
 
 1. Make Bun the repository package manager and command entry point, with one committed `bun.lock` per repository. Preserve ordinary npm-installed SDK consumers as a supported distribution contract.
-2. Target the native TypeScript 7 compiler. Complete the compiler-API migration against a stable 7.x release that includes the new API, first announced in 7.1 beta. Do not silently replace `typescript` with 7.0 and break the shipped Vite plugin, audits or developer MCP.
+2. Use exact TypeScript 6.0.3 as the approved compiler baseline, retaining its JavaScript compiler API. Defer native TypeScript 7 to a separately admitted stable API-bearing release and validated tooling port. Do not replace `typescript` with 7.0 and break the shipped Vite plugin, audits or developer MCP.
 3. Upgrade the coordinated build/test stack: Vite 8, matching React plugin, Vitest 5, React/React DOM 19.3 and compatible Cloudflare tooling. Patch immediate security findings before waiting for the broader architectural migration.
 4. Optimize test execution from measured startup, import, environment, packaging and browser costs. Retain Vitest initially; a Bun package-manager migration does not require a `bun:test` rewrite.
 5. Preserve browser/worker portability, standard decorators, React module identity, SDK provenance, every application feature and all twelve FX products. Toolchain upgrades do not justify a browser-support or visual-quality downgrade.
@@ -14,17 +14,17 @@ This adds a tooling programme ahead of and alongside P00-P14. Existing authoring
 
 ## 2. Inspected baseline and candidate targets
 
-Both lockfiles currently resolve the shared versions below, despite different manifest ranges. These are lockfile observations, not estimates from package.json. The host initially resolved Node from `C:/Program Files/nodejs/node.exe`, version 24.15.0; Bun is installed at version 1.4.0. The paired checkouts are F/S as defined in [README](README.md).
+The original survey was followed by security remediation and the approved compiler upgrade. The current baseline and remaining candidates are below; the original machine-readable survey is historical evidence. The host initially used Node 24.15.0 and now uses patched 24.22.1; Bun remains 1.4.0. The paired checkouts are F/S as defined in [README](README.md).
 
 | Component | Current installed/locked baseline | Candidate exact version on research date | Decision |
 | --- | --- | --- | --- |
-| Node, maintenance/consumer runtime | host 24.15.0; CI requests major 22 | 24.22.1 LTS security release | Update host immediately under separate authorization; pin patched supported Node in future CI |
+| Node, maintenance/consumer runtime | host and CI 24.22.1 | 24.22.1 LTS security release | Patched runtime and supported security floors applied |
 | Bun | host 1.4.0; no repository Bun lock | 1.4.4 | Pin package manager after compatibility/install gates; do not upgrade host Bun during planning |
-| TypeScript | 5.9.3 | stable 7.0.2; 7.1 is beta | Native checking is available; complete tool migration requires stable API-bearing 7.x |
-| Vite | 7.3.6 | 8.3.5 | Coordinated build/plugin/decorator migration |
+| TypeScript | exact 6.0.3 | approved 6.0.3; native 7 deferred | Current compiler/API and 6E baseline; no beta or sidecar selected |
+| Vite | patched 7.3.7 | 8.3.5 | Major build/plugin/decorator migration remains proposed |
 | React and React DOM | 19.2.5 | both 19.3.1 | Keep exact renderer pair and one consumer React instance |
 | React Vite plugin | 5.2.0 | 6.1.2 | Match Vite 8 and replace the existing Babel hook contract |
-| Vitest | 4.1.11 | 5.0.5 | Retain suite semantics, explicitly review changed defaults |
+| Vitest | patched 4.1.12 | 5.0.5 | Major upgrade remains proposed; retain suite semantics and review defaults |
 | jsdom | 29.1.1 | 30.1.3 | DOM behavior review; do not replace with a lighter emulator merely for speed |
 | Playwright | 1.61.0 | 1.64.1 | Upgrade matching browser downloads and preserve seven framework matrix projects |
 | Cloudflare Vite plugin, S | 1.62.5 | 1.65.0 | Coordinate with Wrangler and actual workerd dependencies |
@@ -50,7 +50,9 @@ The [complete read-only registry survey](direct-dependencies-2026-10-24.json) co
 
 Other direct packages already match their registry latest tag on this date. `woff2-encoder` is an important exception to a naive latest policy: we intentionally have 3.0.0-beta.1 while its stable latest tag is 2.0.0. Review why the current encoder API/version is required and keep it if its functionality has no equivalent stable release; do not downgrade a working font pipeline just to match a tag. The same rule applies to any consciously selected prerelease. Dependency maturity and functionality are part of the review, alongside patch status.
 
-## 3. What TypeScript 7 changes for this project
+## 3. Approved TypeScript 6 baseline and deferred native compiler work
+
+TypeScript 6.0.3 is now selected and pinned in both repositories and propagated into generated SDK/MCP manifests. The compiler API remains the supported JavaScript API. Source/example path mappings use explicit relative targets without baseUrl; the app project has an explicit root and Vite/Emscripten ambient types, Node config explicitly selects Node types, and SDK declaration emission retains rootDir src. Production strict mode stays enabled. No ignoreDeprecations escape, wildcard ambient types, beta compiler or production dual-compiler alias is selected. The native research below describes a future optional phase and does not block the current authoring/app programme.
 
 ### App source and authoring syntax
 
@@ -92,9 +94,9 @@ This list is an inspected starting inventory, not permission to ignore further `
 
 The [7.1 beta announcement](https://devblogs.microsoft.com/typescript/announcing-typescript-7-1-beta/) exposes new purpose-specific API entries, including `typescript/sync`, `typescript/async`, `typescript/ast` and `typescript/fs`. Its API/program/snapshot objects require explicit disposal. The migration must rewrite calls and preserve native resource lifetimes; changing an import string is insufficient. Existing semantic symbol traversal, manifest rejection rules and capability analysis are security/functionality contracts.
 
-Selected end state: one native compiler version and a private tooling analysis module using the supported 7.x API, with per-operation/session disposal and snapshot invalidation. Syntax parsing remains non-executing; never evaluate Info.ts just to replace the parser. Persisted MCP indexes store serializable records, not native AST/program handles. Transpilation uses a reviewed existing transform path or the new supported API; CLI invocation uses the package's declared executable, with correct Windows process semantics.
+Deferred native end state: one native compiler version and a private tooling analysis module using the supported 7.x API, with per-operation/session disposal and snapshot invalidation. The selected 6.0.3 stage retains the existing API and JavaScript CLI. Syntax parsing remains non-executing; never evaluate Info.ts just to replace the parser. A future port must store serializable MCP records, dispose native handles and use correct declared executable/process semantics.
 
-Stable 7.0.2 cannot alone deliver that end state. Microsoft documents an official TypeScript 6 side-by-side package, but this plan does not select a permanent dual-compiler layer or pretend it is a completed native migration. Research/spike 7.1 beta separately; the normal cutover requires an API-bearing stable release and preserved feature results. If execution begins before that exists, Bun, security patches, Vite/React and test optimization can proceed independently. The TS7 completion gate remains open. A beta production dependency requires an explicit revision of this stable-release decision.
+Stable 7.0.2 cannot alone deliver the deferred native end state. Microsoft documents an official TypeScript 6 side-by-side package, but it is not selected here. A future native cutover requires an API-bearing stable release, preserved feature results and separate approval. That optional gate does not hold up the TypeScript 6.0.3 authoring, app or test-optimization work. A beta production dependency requires an explicit revision of the stable-release decision.
 
 Keep the public declaration syntax floor separate from the repository compiler version. Retain TypeScript 5.9 as the initial supported declaration-consumer floor if its existing contract tests pass; new public types must not gratuitously require 7.1 syntax. Test installed consumers at that floor and at the selected 7.x version. If retaining that floor proves impossible, document the exact type feature and seek a consumer-contract decision before raising it. That consumer test version is not a second framework compiler/API implementation.
 
@@ -122,7 +124,7 @@ Bun becomes the preferred repository tooling runtime only for commands that pass
 
 Retain Vitest 5 for the large suite initially. `bun test` is a different runner; `vi.mock`, hoisting, fake clocks, jsdom setup, class mocking, coverage and Vite plugin transforms need equivalent semantics before any runner migration. Merely changing the import to `bun:test` is not a performance project. A later bounded experiment may port independent pure utility tests if measured end-to-end savings exceed migration cost and case identity/coverage remain intact. It is not a prerequisite for Bun adoption.
 
-Use native `tsc` as the authoritative checker and declaration emitter after cutover. Current Bun also provides a separate `bun check` command; its existence does not remove the need to establish exact semantic/declaration parity. Do not run two whole checkers in the normal inner loop without a demonstrated reason.
+Use the selected TypeScript 6.0.3 `tsc` as the authoritative checker and declaration emitter. A later native compiler needs its own cutover evidence. Current Bun also provides `bun check`; its existence does not establish semantic/declaration parity. Do not run two whole checkers in the normal inner loop without a demonstrated reason.
 
 ## 5. Vite 8, decorators and React
 
@@ -178,7 +180,9 @@ Retain existing WebGL/canvas/video quality, text shaping, resolution/DPR, browse
 
 ## 8. Security and trust-store maintenance
 
-### Fresh read-only audit
+### Original read-only audit
+
+This subsection preserves the pre-remediation findings. M00 subsequently patched both dependency graphs to zero npm audit findings; its execution evidence is recorded with the site validation reports. TypeScript 6.0.3 is the next explicitly approved compiler stage, not an excuse to ignore the historical findings.
 
 `npm audit --json --ignore-scripts` was run in both checkouts on 24 October. Both exited 1 with findings; no `audit fix`, install or dependency mutation was performed.
 
@@ -205,4 +209,4 @@ Pin reviewed tools/runtimes and frozen dependency graphs; record upstream adviso
 
 ## 9. Completion criteria
 
-The programme is complete only when the selected Bun install/runtime contract, native compiler/API integration, coordinated build/test stack, vulnerability resolution, measured test improvement, eleven-app feature matrix and installed/browser/FX gates all have evidence. A tooling blocker must remain visible in the plan. Neither fewer tests nor an isolated benchmark nor a framework that only works from sibling source aliases satisfies this request.
+The admitted programme is complete only when its selected Bun install/runtime contract, TypeScript 6.0.3 checking/API integration, coordinated build/test stack, vulnerability resolution, measured test improvement, eleven-app feature matrix and installed/browser/FX gates all have evidence. The deferred native port is not an extra completion prerequisite unless separately admitted. Tooling blockers remain visible; fewer tests, isolated benchmarks and sibling source aliases do not satisfy these gates.
