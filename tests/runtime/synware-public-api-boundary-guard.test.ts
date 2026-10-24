@@ -43,9 +43,10 @@ function fixture(files: Record<string, string>, entries: Record<string, string> 
     moduleResolution: ts.ModuleResolutionKind.Bundler,
     noLib: true,
     types: [],
-    baseUrl: root,
+    // Untyped alias cycles are intentional specimens; preserve their non-strict fixture mode.
+    strict: false,
     paths: Object.fromEntries(Object.entries(entries).map(([entry, path]) => [
-      `@syndromatic/syncloudos/${entry}`, [path],
+      `@syndromatic/syncloudos/${entry}`, [resolve(root, path)],
     ])),
   };
   const host = ts.createCompilerHost(options);

@@ -2,20 +2,20 @@
 
 > **For agentic workers:** Use superpowers:executing-plans task by task after repository implementation is authorized. Delegate only if the user authorizes delegation. This is a planning handoff. The separately authorized host Node update is recorded below and does not authorize executing the remaining steps.
 
-**Goal:** Move webspring-folders onto a patched, reproducible Bun/native-TypeScript/Vite/React toolchain and substantially faster complete validation while preserving all SynWare apps, public package behavior and FX quality.
+**Goal:** Move webspring-folders onto a patched, reproducible TypeScript 6.0.3 baseline and admitted Bun/Vite/React modernization stages, with substantially faster complete validation and preserved apps/package/FX behavior. Native TypeScript 7 is an optional later phase.
 
-**Current authorization:** M00 security remediation only, granted after this plan was written. All broader dependency/runtime/compiler/API/app changes remain on hold. The [TypeScript discussion](typescript-decision.md) proposes stable 6.0.3 before native 7.x; it supersedes the assumption that an immediate full native cutover is selected, pending the user's decision. Existing M03 describes the later native port, not an authorized beta installation.
+**Current authorization:** M00 security remediation and M03A exact TypeScript 6.0.3 are approved. The [TypeScript decision](typescript-decision.md) is adopted. Other broad dependency/runtime/API/app changes remain on hold. M03B describes an optional deferred native port and is not a requirement for completing the current compiler or authoring/app migration stage.
 
 **Architecture:** Preserve the paired F/S repositories and installed SDK boundary. Modernize package/tool execution, compiler analysis and transforms with explicit compatibility gates. Partition and schedule existing tests by their real environment/resource ownership; cache only verified immutable artifacts. Run the authoring/migration programme through these gates.
 
-**Tech stack:** Candidate Bun 1.4.4; patched Node 24.22.1 LTS; stable native TypeScript 7.x with the supported API (7.0.2 is stable now, the required 7.1 API is currently beta); Vite 8.3.5, React/React DOM 19.3.1, React Vite plugin 6.1.2, Vitest 5.0.5, jsdom 30.1.3, Playwright 1.64.1; Cloudflare plugin 1.65.0/Wrangler 4.152.0 subject to transitive-security verification.
+**Tech stack:** Approved exact TypeScript 6.0.3; patched Node 24.22.1 LTS, Vite 7.3.7 and Vitest 4.1.12. Candidates requiring separate admission: Bun 1.4.4, Vite 8.3.5, React/React DOM 19.3.1, React plugin 6.1.2, Vitest 5.0.5, jsdom 30.1.3, Playwright 1.64.1, Cloudflare plugin 1.65.0/Wrangler 4.152.0. Native TypeScript 7/API work is deferred.
 
 ## Global constraints
 
 - F and S, pinned commits and receipt are in [README](README.md). Inspect both statuses and source drift before each package. Preserve unrelated user work.
 - Read the [modernization design](toolchain-modernization.md), [authoring plan](implementation-plan.md), [app matrix](app-migration-matrix.md) and saved [audit](dependency-audit-2026-10-24.json). The design supplies decisions and acceptance definitions below.
 - Version numbers are reviewed candidates as of 24 October, not an instruction to install moving latest tags. Revalidate official advisories/metadata and pin accepted versions when implementation starts.
-- No source/dependency changes are authorized during planning. Host Node maintenance is the explicit exception. No deployment, publish, push, merge or memory update.
+- Security remediation and exact TypeScript 6.0.3 are explicitly authorized exceptions to planning-only work. Other source/API/app/upgrade phases require separate admission. No deployment, publish, push, merge or memory update.
 - Preserve all application behavior, identities, routes, persistence and document histories, authorization, accessibility, browser support, high DPR, full FX quality and the installed package boundary.
 - No legacy decorator mode, public app helper, browser Bun global, source-linked SDK, shared mutable consumer install, silent test omission or unreviewed CA override.
 - Keep the original assertions, complete discovered-test manifests and existing skip reasons. Fix underlying failures rather than weakening gates. A benchmark containing failures is not acceptance evidence.
@@ -28,14 +28,15 @@ Immediate host Node security maintenance (done, verify evidence below)
 M00 dependency/runtime security triage -> P00 existing class-host repairs
 M01 inventory/measurement (can begin before P00; final comparisons require P00 green)
 M02 Bun installation/provenance -> M04 Vite/decorators -> M05 React/test stack
-M03 native compiler/API (independent; stable API release is a cutover gate)
+M03A stable TypeScript 6.0.3 -> current compiler/authoring baseline
+M03B optional native compiler/API (deferred; separate admission)
 M06 test topology/cache/scheduling -> M07 bounded tooling-runtime/FX performance
 P01-P08 authoring contracts, through M02/M04/M05 toolchain as available
 P09 installed authoring gate -> P10-P13 eleven application migrations
 M08 complete modernization evidence + P14 final cross-app acceptance
 ```
 
-M00 is not allowed to wait for a TypeScript 7.1 release. M03 need not block investigating or implementing the other modernization packages, but full TS7 completion cannot be claimed while its API gate is open. Any independent baseline patches are rerun through their affected tests before stacking another toolchain change. Keep each package reviewable; do not produce one untriageable dependency/API/app mega-diff.
+M00 and M03A do not wait for a TypeScript 7.1 release. M03B is deferred and does not block other admitted packages or current 6E completion. A native migration cannot be claimed while its own API gate is open. Rerun baseline patches through affected tests before stacking another toolchain change. Keep each package reviewable.
 
 ## Immediate maintenance evidence
 
@@ -118,7 +119,23 @@ bun run framework:sync -- 'C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Wor
 
 **Exit:** reproducible Bun-managed repositories, genuine installed consumers through both package managers, and no implicit npm-JavaScript/compiler path dependency. Build/packing remains single-writer.
 
-## M03. Complete native TypeScript checking, analysis and declarations
+## M03. Stable compiler baseline and optional native evolution
+
+### M03A. Approved TypeScript 6.0.3 baseline
+
+**Owns F/S:** exact package.json/compiler locks, existing tsconfigs and affected compiler fixtures. F also owns the 6E design/plan/decision files and getting-started compiler guidance. Existing SDK/MCP manifest generation propagates the source compiler dependency; no new public API is introduced.
+
+- [ ] Pin TypeScript 6.0.3 exactly in both repositories; retain the existing JavaScript compiler API and CLI. Keep security patches and renderer/build major versions unchanged.
+- [ ] Remove baseUrl from app/example/type-fixture configs and use explicit relative path targets. Preserve SDK rootDir src/declaration structure, explicit project roots and selected Vite/Emscripten/Node ambient environments. Keep production strict mode, browser target and all negative contract assertions.
+- [ ] Run app/node/SDK/example checking, existing type contracts, real compiler-API audit/MCP/toolchain suites and class/decorator ownership tests. Characterize fixture assumptions against the old compiler before classifying a failure as a 6 regression. No blanket suppression or weakened public boundary is acceptable.
+- [ ] Rebuild a committed, provenance-correct SDK/MCP pair, install it into S through framework:sync, and validate independent packed consumers under 6.0.3. Check the retained 5.9 declaration-consumer floor separately; that test compiler is not a production sidecar.
+- [ ] Run site checks/builds and preserve the known baseline failure inventory. Record audits, compiler versions, package receipt and results in site validation evidence. Update every active 6E document to the approved 6.0.3 baseline; retain original snapshots as historical evidence.
+
+**Exit:** exact 6.0.3 in framework/site/packed tooling, working compiler API and declaration consumers, preserved source/installed behavior, and current 6E decisions. Completion does not require a beta/native compiler or implementation of the proposed authoring APIs/apps.
+
+### M03B. Deferred native compiler/API port
+
+This optional phase requires a later decision; the following file scopes and gates apply only when it is admitted.
 
 **Modify F:** all tsconfig JSON files and generated configs; package.json; `scripts/synware/manifest-source.mjs`, `validation-core.mjs`, `audit-sdk-imports.mjs`, `audit-capability-usage.mjs`, `public-api-boundaries.mjs`, `check-custom-text-system-consumer.mjs`, `build-sdk.mjs`; `scripts/fx/boundary-audit.mjs`; `scripts/developer-mcp/project.mjs`, `lookup.mjs`, `build-package.mjs`; all discovered compiler API imports/CLI launch sites.
 **Create F:** private `scripts/tooling/typescript-analysis.mjs`, `tests/packaging/typescript-analysis.test.mjs`; type fixtures under `tests/fixtures/native-typescript/` for config resolution, semantic boundaries and declaration consumers.
@@ -221,9 +238,9 @@ bun run verify:all
 ## M08. Final evidence and handoff
 
 **Modify documentation:** existing framework and site developer guides, generated scaffolds, this planning status, accepted version/support policy and CI command reference. No external publication.
-**Consumes:** M00-M07, P00-P14, all eleven application ledgers. **Produces:** final exact-version/provenance/test/security/performance evidence and a truthful completion report.
+**Consumes:** admitted M00-M07 including M03A, P00-P14 and all eleven application ledgers. M03B is included only if separately admitted. **Produces:** final exact-version/provenance/test/security/performance evidence and a truthful completion report.
 
-- [ ] Recheck stable compiler API and every candidate version/advisory. Verify frozen Bun installs in clean Windows/Linux environments and npm/Bun external SDK consumers. Record Node/Bun/TypeScript/Vite/React/Vitest/jsdom/browser/workerd versions and package receipts.
+- [ ] Recheck selected stable TypeScript 6.0.3 and every admitted candidate version/advisory. Recheck a native API release only if M03B was admitted. Verify frozen Bun installs in clean Windows/Linux environments and npm/Bun external SDK consumers. Record Node/Bun/TypeScript/Vite/React/Vitest/jsdom/browser/workerd versions and package receipts.
 - [ ] Run complete `verify:all` once after final changes, with per-stage receipts, full discovery/union accounting and recorded skip reasons. Include installed types/runtime/resources, public/capability boundaries and all twelve FX products. Do not rerun expensive full gates without a changed input or unresolved concern.
 - [ ] Compare final and baseline performance with identical case/scenario sets and total build/install cost. Report median/worst observations, factors and remaining bottlenecks. Mark missed goals or stable-API/security blockers as open work.
 - [ ] Complete Journal/Publisher feature acceptance and the historically exempt app wave from the original matrix, preserving document/history, detachment, templates, editor/preview, commands and overlays. Obtain the original visual/FX human acceptance independently of automated pass counts.

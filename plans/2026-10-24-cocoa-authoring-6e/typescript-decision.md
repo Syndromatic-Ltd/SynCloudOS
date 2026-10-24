@@ -1,10 +1,10 @@
 # TypeScript 6 versus 7.1 beta
 
-Status: recommendation for discussion, 24 October 2026. The user authorized security fixes and explicitly paused broader upgrade decisions. Both repositories still use TypeScript 5.9.3; no compiler package, configuration or analysis API was migrated during remediation.
+Status: adopted decision, 24 October 2026. The user explicitly approved **TypeScript 6.0.3** for both repositories and inclusion in 6E. Both source manifests pin it exactly; configuration migration preserves the JavaScript compiler API. Security remediation preceded this step. Other upgrades, authoring APIs and app migrations remain proposed; native 7.x is deferred.
 
-## Recommendation
+## Approved decision
 
-Use stable TypeScript 6.0.3 as the next production/tooling step, after approval. Investigate 7.1 beta in an isolated, bounded compiler-tooling experiment. Move the complete framework to native 7.x when its API and our port have passed the installed-package and semantic checks. This revises the sequencing of the earlier native-only proposal while retaining its eventual direction.
+Use stable TypeScript 6.0.3 as the current production/tooling baseline. An isolated 7.1 beta investigation may be proposed separately; no beta is selected for production. Move to native 7.x only after a later decision and successful installed-package/semantic validation of the new API port. Native 7.x is not a prerequisite for the Cocoa authoring rewrite or application migrations.
 
 TypeScript 7.0 is useful for CLI checking and ordinary TSX/class applications. Its missing compiler API makes it an incomplete replacement for this repository's current TypeScript dependency. It is too broad to call the compiler unusable in general; our constraint is the framework's substantial tooling and distributed Vite/MCP integration.
 
@@ -12,7 +12,7 @@ TypeScript 7.0 is useful for CLI checking and ordinary TSX/class applications. I
 
 | Choice | Benefit | Cost and risk | Suggested role |
 | --- | --- | --- | --- |
-| Stable 6.0.3 | Keeps the JavaScript compiler API; prepares configuration/defaults for 7; least disruptive production upgrade | Does not deliver the native compiler's major speedup; configs, DOM types/inference and compiler consumers still require validation | Next stable step, subject to approval |
+| Stable 6.0.3 | Keeps the JavaScript compiler API; prepares configuration/defaults for 7; least disruptive production upgrade | Does not deliver the native compiler's major speedup; configs, DOM types/inference and compiler consumers still require validation | Approved baseline |
 | Stable 7.0.2 | Native checker, declaration emitter and editor performance | No old compiler API; current manifest parsing, semantic boundary/capability audits and MCP tooling cannot simply import it | Useful comparator; insufficient as the sole current framework compiler package |
 | 7.1.0 beta | Native speed and the new purpose-specific compiler API | Beta release plus a real API/lifetime port; two changing surfaces while we also rethink authoring | Isolated investigation, not the default production package |
 | 7.0 plus official TypeScript 6 sidecar | Native CLI with existing API tools temporarily retained | Two compiler versions, installation/package authority and semantic consistency to maintain | Available tradeoff; not the preferred default here |

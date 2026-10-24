@@ -2,6 +2,10 @@
 
 Research date: 24 October 2026. F and S mean the exact paired checkouts pinned in [README](README.md). All claims here distinguish inspected source, an executed test, a historical statement and a proposed contract.
 
+Latest approved compiler decision: TypeScript 6.0.3 in both repositories and the packed tooling dependency manifests. Security remediation preceded this step. The original 5.9/source hashes and earlier test timings below remain historical evidence; they are not the current compiler baseline. Native TypeScript 7/API work is a deferred optional phase, and no compiler decision authorizes the proposed APIs or app rewrites.
+
+The 6.0.3 migration removes baseUrl in favor of explicit relative path targets, declares app/example roots and environment-specific ambient types, and preserves SDK rootDir src. Production strict mode stays enabled. One deliberate untyped alias-cycle test fixture now explicitly selects its original non-strict mode because TypeScript 6 changes the default. An extra browser-host type fixture's stale rejection of folder discovery was reproduced under 5.9.3 before correction; it now accepts the established discovered-project mode while still rejecting a missing mount element and mutually exclusive modes. These are compiler/test-fixture changes, not new production APIs. Exact execution results and installed package provenance are retained in S's TypeScript 6 validation receipt.
+
 ## What the original documents actually say
 
 The relevant originals are outside F, in the paired workspace's specs folder:
