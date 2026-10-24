@@ -4,7 +4,7 @@ The SynCloudOS Developer MCP server gives AI coding agents local project inspect
 
 ## Install the matching companion
 
-Use Node.js 22.12 or later. Build the framework with `npm ci --ignore-scripts && npm run build`. The build writes two packages to `.artifacts/synapp-sdk/packages/` and two content-addressed `.tgz` archives to `.artifacts/synapp-sdk/archives/`:
+Use a patched Node.js release: 22.23.4+, 24.22.1+, or 26.12.1+ on its respective release line. Build the framework with `npm ci --ignore-scripts && npm run build`. The build writes two packages to `.artifacts/synapp-sdk/packages/` and two content-addressed `.tgz` archives to `.artifacts/synapp-sdk/archives/`:
 
 - `syncloudos`: `@syndromatic/syncloudos`, the application SDK.
 - `syncloudos-developer-mcp`: `@syndromatic/syncloudos-developer-mcp`, the developer server.

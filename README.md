@@ -52,7 +52,7 @@ The framework's authored APIs use TypeScript and build under strict type checkin
 
 ## Getting SynCloudOS
 
-You need Node.js 22.12 or later and npm.
+Use a patched Node.js release (22.23.4+, 24.22.1+, or 26.12.1+ on its respective release line) and npm. CI uses Node.js 24.22.1.
 
 The beta is not published to the npm registry. The latest published archive is the [v1.0.0-beta.1 release](https://github.com/Syndromatic-Ltd/SynCloudOS/releases/tag/v1.0.0-beta.1); the beta.2 candidate must be built from source:
 

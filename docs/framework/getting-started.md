@@ -4,7 +4,7 @@ SynCloudOS applications are folders. A project with `Hello.app/Contents/index.ts
 
 ## Install
 
-Use Node.js 22.12 or later, npm, TypeScript and React 19. Create a Vite React TypeScript project:
+Use a patched Node.js release (22.23.4+, 24.22.1+, or 26.12.1+ on its respective release line), npm, TypeScript and React 19. Create a Vite React TypeScript project:
 
 ```bash
 npm create vite@latest my-site -- --template react-ts
