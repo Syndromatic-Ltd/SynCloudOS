@@ -295,6 +295,11 @@ describe("developer MCP tools", () => {
       expect(listed.tools.map(tool=>tool.name)).toHaveLength(5);
       expect(listed.tools.find(tool=>tool.name==="syncloudos.scaffold")?.inputSchema.required).toEqual(["name"]);
       expect(listed.tools.find(tool=>tool.name==="syncloudos.scaffold")?.inputSchema.properties?.contentApplicationMenu).toMatchObject({ type: "boolean" });
+      const invalidLimit = await client.callTool({ name: "syncloudos.lookup_sdk", arguments: { limit: 101 } });
+      expect(invalidLimit.isError).toBe(true);
+      const invalidPolicy = await client.callTool({ name: "syncloudos.scaffold", arguments: { name: "Rejected", policy: { allowEverything: true } } });
+      expect(invalidPolicy.isError).toBe(true);
+      expect((await inspectProject({ projectRoot: project })).bundles).toHaveLength(0);
       const scaffolded = await client.callTool({ name: "syncloudos.scaffold", arguments: { bundleIdentifier: "org.example.menu", name: "Menu", route: "/menu", contentApplicationMenu: true } });
       expect(scaffolded.isError).not.toBe(true);
       expect(parseManifest(resolve(project, "applications/Menu.app/Contents/Info.ts")).applicationMenu).toEqual({ trigger: "content" });
