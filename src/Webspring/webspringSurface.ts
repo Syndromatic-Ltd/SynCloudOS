@@ -23,7 +23,7 @@ import type { WebspringBackground, WebspringSurface as WebspringSurfaceShape } f
 
 export type WebspringSurface = WebspringSurfaceShape;
 
-const cottonTexture = "/assets/textures/NSETileCotton.jpg";
+const cottonTexture = new URL("../../public/assets/textures/NSETileCotton.jpg?no-inline", import.meta.url).href;
 
 function cotton(): WebspringSurface {
   return {
