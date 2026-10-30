@@ -105,3 +105,5 @@ export { QuickSwitchTriggerProvider, useQuickSwitchTrigger } from "./QuickSwitch
 export { useHostFontManager } from "./hostFontsContext";
 export { SystemAlert, SystemAlertAssetCache } from "./SystemAlert";
 export type { QuickSwitchTriggerPort } from "./QuickSwitchTrigger";
+
+export type { SynWareWindowCloseGuard } from "./appRuntimeTypes";

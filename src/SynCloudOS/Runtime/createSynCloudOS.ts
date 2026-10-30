@@ -711,16 +711,20 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     sessionLogoutPending = true;
     routes?.cancelActiveOperations("session-logout");
     lifecycle.cancelActiveOperations("session-logout");
-    let activeAppId: string | null = null;
     let identityEnd: Promise<void> = Promise.resolve();
     const handle = operations.run<undefined, { runtimeId: SynCloudOSRuntimeId; reason: string }>({
       kind: "session.logout",
       input: undefined,
       supersedeKey: "session.logout",
       will: [async (context) => {
-        activeAppId = store.getSnapshot().application.activeAppId;
-        if (activeAppId && lifecycle.getState(activeAppId) === "active") {
-          await lifecycle.suspend(activeAppId, { reason, signal: context.signal }).result;
+        // Logout ends application lifetimes, including suspended applications.
+        // Retaining their controllers would reuse subscriptions/service handles
+        // whose mounted authority was revoked when the login gate took over.
+        const appIds = [...store.getSnapshot().application.openAppIds].reverse();
+        for (const appId of appIds) {
+          const closing = await lifecycle.close(appId, { reason, signal: context.signal }).result;
+          if (closing.status === "cancelled") context.cancel(closing.reason);
+          if (closing.status === "failed") throw new Error(closing.error.message);
         }
       }],
       commit: (context) => {
@@ -783,7 +787,20 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   commands = createCommandSystem({
     getRuntime: () => runtime,
     responderResolver: {
-      resolveResponderChain: (startId) => responders.resolveChain(startId),
+      resolveResponderChain: (startId) => {
+        const chain = responders.resolveChain(startId);
+        if (startId === undefined) return chain;
+        // A mounted action names its concrete responder. Active document/window
+        // anchors are fallback routes for untargeted commands, not dependencies
+        // of that explicit action (which may itself open or close a document).
+        const ancestors = new Set<string>();
+        let current: string | null = startId;
+        while (current && !ancestors.has(current)) {
+          ancestors.add(current);
+          current = responders.get(current)?.parentId ?? null;
+        }
+        return chain.filter(responder => ancestors.has(responder.id));
+      },
       getGeneration: () => responders.getGeneration() + focus.getGeneration(),
       getRegistrationToken: (responderId) => responders.getRegistrationToken(responderId),
     },

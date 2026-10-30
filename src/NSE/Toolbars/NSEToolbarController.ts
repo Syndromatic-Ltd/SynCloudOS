@@ -21,10 +21,12 @@
 import type { CommandDispatchResult, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
 import { commandValidationRequestKey, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/nseRuntimeContracts";
 import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import { nseActionReferenceName, type NSEActionPayloadCheck } from "../Controls/Core/actionReference";
 import type {
   NSEToolbarConfiguration,
   NSEToolbarControllerOptions,
   NSEToolbarItem,
+  NSEToolbarItemInput,
   NSEToolbarPreferences,
   NSEToolbarPresentedItem,
   NSEToolbarRefreshResult,
@@ -172,7 +174,7 @@ function presentationFor(
  * lease. Commands, preference persistence, responder hierarchy, undo, and
  * focus remain owned by the command, preference, and window authorities respectively.
  */
-export class NSEToolbarController {
+export class NSEToolbarController<const Items extends readonly NSEToolbarItemInput[] = readonly NSEToolbarItemInput[]> {
   readonly configuration: NSEToolbarConfiguration;
   readonly items: readonly NSEToolbarItem[];
   readonly preferences;
@@ -193,10 +195,19 @@ export class NSEToolbarController {
     this.dispose();
   };
 
-  constructor(options: NSEToolbarControllerOptions) {
-    const { configuration, items, preferences, runtime } = options;
+  constructor(options: Omit<NSEToolbarControllerOptions, "items"> & {
+    readonly items: Items & { readonly [K in keyof NoInfer<Items>]: Items[K] & NSEActionPayloadCheck<Items[K], "payload"> };
+  }) {
+    const { configuration, preferences, runtime } = options;
+    const items = options.items.map((item): NSEToolbarItem => {
+      if (item.kind !== "command" || !("action" in item)) return item;
+      if (Reflect.get(item, "commandId") !== undefined) throw new TypeError(`NSE toolbar item "${item.id}" cannot declare both action and commandId.`);
+      if (!runtime.resolveAction) throw new TypeError(`NSE toolbar item "${item.id}" requires an application to resolve its action.`);
+      const { action, ...rest } = item;
+      return { ...rest, commandId: runtime.resolveAction(typeof action === "string" ? action : nseActionReferenceName(action)) };
+    });
     if (!configuration.identifier.trim()) throw new TypeError("NSE toolbar identifiers must not be empty.");
-    this.#ownership = new NSEControllerLifetime(options, { kind: "NSEToolbarController", id: configuration.identifier });
+    this.#ownership = new NSEControllerLifetime(options, { kind: "NSEToolbarController", id: configuration.identifier }, runtime.signal);
     this.#lifecycle = this.#ownership.record;
     assertOwner(configuration.owner);
     if (!validDisplayMode(configuration.displayMode) || !validSizeMode(configuration.sizeMode)) {

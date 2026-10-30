@@ -105,7 +105,7 @@ export function ChronosphereReflection({ currentElement, selectedElement, settle
       let lastGeometry: number[] = [], lastSources = retained.current, lastFade = fade;
       let viewport = "";
       const progress = (start: number | undefined) => start === undefined || !frames || frames.reducedMotion
-        ? 1 : Math.min(1, Math.max(0, (frames.now() - start) / 180));
+        ? 1 : Math.min(1, Math.max(0, (frames.now() - start) / 0.18));
       const draw = (force = false) => {
         if (scene.disposed || controller.signal.aborted) return;
         const floor = host.getBoundingClientRect();
@@ -137,13 +137,17 @@ export function ChronosphereReflection({ currentElement, selectedElement, settle
           if (slot.replica.hidden || !source || !bounds || !fade) continue;
           slot.replica.opacity = samples[i]!.opacity;
           slot.replica.frame = { x: 0, y: 0, width, height };
-          // The first instance sits above the clipped floor. Its mirrored copy
-          // starts exactly at the floor's top, with the document's foot nearest it.
+          // Crop the visible foot at the document's measured scale. Resizing the
+          // whole image to the shelf height flattens every line of the page.
           const reflectionWidth = bounds.width / scaleX;
-          slot.document.frame = { x: (bounds.left - edgeStart) / scaleX, y: -height, width: reflectionWidth, height };
-          slot.document.contentsRect = { x: 0, y: 0, width: 1, height: 1 };
+          const naturalHeight = bounds.height / scaleX;
+          const reflectionHeight = Math.min(height, naturalHeight);
+          const fraction = reflectionHeight / naturalHeight;
+          // Mirroring places the cropped foot at the floor's contact edge.
+          slot.document.frame = { x: (bounds.left - edgeStart) / scaleX, y: -reflectionHeight, width: reflectionWidth, height: reflectionHeight };
+          slot.document.contentsRect = { x: 0, y: 1 - fraction, width: 1, height: fraction };
           slot.document.contents = source.image;
-          slot.mask.frame = { x: 0, y: 0, width: reflectionWidth, height };
+          slot.mask.frame = { x: 0, y: 0, width: reflectionWidth, height: reflectionHeight };
           slot.mask.contents = fade;
           slot.document.setMask(slot.mask);
         }

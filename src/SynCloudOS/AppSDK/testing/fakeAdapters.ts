@@ -30,6 +30,9 @@ import type {
   RuntimeTestCapabilityControls,
   SynCloudOSRuntimeEnvironment,
 } from "../../SynCloudOS";
+import { BrowserPointerAdapter } from "../../PlatformAdapters/BrowserPointerAdapter";
+import { createBrowserAnimationLayerHost } from "../../PlatformAdapters/BrowserAnimationLayerHost";
+import type { AFXFrameScheduler } from "../../../FX/AnimationFX/AFXLayer";
 import type {
   SynWareFakeAnimationOperation,
   SynWareFakeAudioOperation,
@@ -686,7 +689,25 @@ export function createDeterministicRuntimeEnvironment(options: {
       return Object.freeze({ requestedHref: href, browserHref, pathname: target.pathname, changed: true, replaced: replace, dispatchedPopState: dispatchPopState });
     },
   });
+  // Use the production DOM layer projection with the host's deterministic
+  // clock. Canvas/GPU capability stays truthful to the supplied document.
+  const animationOrigin=clock.now();
+  const animationFrames:AFXFrameScheduler=Object.freeze({
+    now:()=> (clock.now()-animationOrigin)/1000,
+    reducedMotion:false,
+    suspended:false,
+    requestFrame(callback:(time:number)=>void){
+      const handle=clock.requestAnimationFrame(time=>callback((time-animationOrigin)/1000));
+      return()=>clock.cancelAnimationFrame(handle);
+    },
+  });
   const environment = Object.freeze({
+    animationFrames,
+    animationLayers: options.document ? createBrowserAnimationLayerHost(options.document,animationFrames) : undefined,
+    pointer: options.document ? new BrowserPointerAdapter({
+      createResizeObserver: () => null,
+      createIntersectionObserver: () => null,
+    }) : undefined,
     navigation: null,
     testControls,
     browser,

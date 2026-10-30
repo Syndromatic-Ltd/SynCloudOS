@@ -1,3 +1,5 @@
+import { useNSEValueBinding } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -80,7 +82,11 @@ function SegmentButton({ item, selected, tabIndex, disabled, readOnly, refs, onA
   return <button type="button" ref={(node) => { if (node) refs.current.set(item.id, node); else refs.current.delete(item.id); }} tabIndex={tabIndex} aria-label={item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)} title={typeof item.label === "string" ? undefined : item.accessibleLabel} aria-pressed={selected || command.presentation?.state === "on"} aria-readonly={readOnly || undefined} disabled={disabled || item.disabled || !commandEnabled} hidden={command.presentation?.hidden} data-command-id={binding?.id} onKeyDown={onKeyDown} onClick={activate}>{item.label}</button>;
 }
 
-export function NSESegmentedControl(props: NSESegmentedControlProps) {
+export function NSESegmentedControl<Payload = unknown>(props: NSEBoundValueProps<NSESegmentedSelection,NSESegmentedControlProps<Payload>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'selection'|'onSelectionChange'>) {
+  return <NSESegmentedControlControl {...useNSEValueBinding<NSESegmentedSelection,NSESegmentedControlProps<Payload>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'selection'|'onSelectionChange'>(props,{value:'selection',change:'onSelectionChange',fallback:{mode:'select-one',selectedIds:new Set<string>(),allowsEmpty:true}})} />;
+}
+
+function NSESegmentedControlControl(props: NSESegmentedControlProps) {
   const instanceId = useId().replace(/:/g, "");
   const refs = useRef(new Map<string, HTMLButtonElement>());
   const menuRefs = useRef(new Map<string, HTMLButtonElement>());

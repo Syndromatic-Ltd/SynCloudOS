@@ -91,6 +91,13 @@ export type {
 } from "../ErrorManager/lifecycleError";
 export type { ServiceTerminalClient, ServiceTerminalReceipt, ServiceTerminalRequest } from "../Documents";
 export { SynWareColourPanelProvider, type SynWareColourPanelProviderProps } from "./SynWareColourPanelProvider";
+export { bind, createNSEBinding, useNSEBinding } from "../../NSE/sdkPackageEntry";
+export type { NSEBinding, NSEBindingValue, NSEBindingSnapshot, NSEBindingCommitResult, NSEBindingEdit, NSEBindingOwner, NSEBindingAdapter, NSEBoundValueProps, NSEBindingView, NSEWritableBindingKey } from "../../NSE/sdkPackageEntry";
+export { managedTask, NSETaskQueueFullError } from "../../NSE/sdkPackageEntry";
+export type { NSETaskLifetime, NSETaskSettlement, NSETaskContext, NSETaskRun, NSETaskSnapshot, NSEManagedTask, NSETaskOptions } from "../../NSE/sdkPackageEntry";
+export { outlet } from "../../NSE/sdkPackageEntry";
+export type { NSEViewOutlet, NSEOutletOptions } from "../../NSE/sdkPackageEntry";
+export type { NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "../../NSE/sdkPackageEntry";
 export { createSynWareNSEDataViewDragBinding, type SynWareNSEDataViewDragOptions, type SynWareNSEDataViewDropProposal } from "./SynWareNSEDragAdapter";
 export { createSynWareNSEDragCommandPort, createSynWareNSEFontPanelCommandPort } from "./SynWareNSECommandAdapter";
 export { createSynWareNSETextLayoutPort, useNSEViewAnimator } from "./SynWareNSEMediaAdapters";
@@ -346,9 +353,11 @@ export type { SCOSRoutes } from "./controllerServices";
 
 export { useStrings, translateSynWareText, getSynWareNamespace } from "./useStrings";
 export { action, useAction } from "./actions";
+export { actionRef } from "./actionReference";
+export type { NSEActionReference } from "./actionReference";
 export type { NSEActionMethod, NSEActionOptions, NSEActionState } from "./actions";
-export { NSEViewControllerView } from "./applicationHosting";
-export type { NSEViewControllerViewProps } from "./applicationHosting";
+export { NSEViewControllerView } from "../AppHosting/authoring";
+export type { NSEViewControllerViewProps } from "../AppHosting/authoring";
 // Called by the code the dev server appends to application modules, and by the host that runs them.
-export { acceptApplicationHotUpdate, currentClass, registerApplicationHotModule, trackLiveApplicationObject } from "./applicationHotReload";
-export type { ApplicationHotContext, ApplicationHotModuleRecord, LiveApplicationObject } from "./applicationHotReload";
+export { acceptApplicationHotUpdate, currentClass, registerApplicationHotModule, trackLiveApplicationObject } from "../AppHosting/authoring";
+export type { ApplicationHotContext, ApplicationHotModuleRecord, LiveApplicationObject } from "../AppHosting/authoring";

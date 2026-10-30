@@ -205,7 +205,7 @@ export type {
 export { useStrings, translateSynWareText, getSynWareNamespace } from "./useStrings";
 export { action, useAction, bindActionResponder, hasActions, actionNames, refreshActionBindings } from "./actions";
 export type { NSEActionBinding, NSEActionHost, NSEActionMethod, NSEActionOptions, NSEActionState } from "./actions";
-export { NSEViewControllerView } from "./applicationHosting";
-export type { NSEViewControllerViewProps } from "./applicationHosting";
+export { NSEViewControllerView } from "../AppHosting/authoring";
+export type { NSEViewControllerViewProps } from "../AppHosting/authoring";
 export type { SynCloudOSPresentationTraits } from "./appClientTypes";
 export type { SCOSRoutes } from "./controllerServices";

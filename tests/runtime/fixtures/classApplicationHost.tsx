@@ -2,8 +2,8 @@ import { act, render, type RenderResult } from "@testing-library/react";
 import * as React from "react";
 import { StrictMode, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
 import type { NSEApplicationClass } from "../../../src/NSE/Application/NSEApplication";
-import { createSynWareDefinitionFromApplicationClass, createSynWareDefinitionFromComponent, isNSEApplicationClass } from "../../../src/SynCloudOS/AppSDK/applicationClass";
-import { applicationSessionFor } from "../../../src/SynCloudOS/AppSDK/applicationSession";
+import { createSynWareDefinitionFromApplicationClass, createSynWareDefinitionFromComponent, isNSEApplicationClass } from "../../../src/SynCloudOS/AppHosting/applicationClass";
+import { applicationSessionFor } from "../../../src/SynCloudOS/AppHosting/applicationSession";
 import type { SynWareManifestV1 } from "../../../src/SynCloudOS/AppSDK/manifest/manifestTypes";
 import type { AppCloseResult, AppLaunchResult } from "../../../src/SynCloudOS/Lifecycle/lifecycleTypes";
 import type { RuntimeOperationHandle, SynCloudOSRuntime } from "../../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
@@ -51,7 +51,6 @@ export function createClassApplicationHost(AppClass: NSEApplicationClass | Compo
       ? createSynWareDefinitionFromApplicationClass(AppClass, manifest)
       : createSynWareDefinitionFromComponent(AppClass, manifest),
   );
-  runtime.responders.register({ id: `application:${appId}`, kind: "application", parentId: "workspace", scopeId: `application:${appId}` });
   const registry = createApplicationWindowContentRendererRegistry(runtime, { [appId]: runtime.apps.getApp(appId)! });
   let windowSequence = 0;
   const mounted: Array<{ unmount(): void }> = [];

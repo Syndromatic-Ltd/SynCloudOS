@@ -110,6 +110,34 @@ const emptyHandle: AFXAnimationHandle = Object.freeze({
 /** An instance-local transaction stack; the supplied executor holds the rendering authority. */
 export class AFXTransaction {
   readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "AFXTransaction" });
+  /** Synchronous scoped layer batching. Application model writes are not rolled back. */
+  static perform<R>(options: Pick<AFXTransactionOptions, "duration" | "delay" | "timing" | "disableActions">,
+    changes: () => R & (R extends PromiseLike<unknown> ? never : unknown)): void {
+    const requested = afxAnimationDataRecord(options, "layer transaction options") as typeof options;
+    if (typeof changes !== "function" || changes.constructor.name === "AsyncFunction") {
+      throw new TypeError("AFXTransaction.perform requires a synchronous callback.");
+    }
+    if (requested.disableActions !== undefined && typeof requested.disableActions !== "boolean") throw new TypeError("disableActions must be boolean.");
+    const inherited = currentAFXTransactionActionContext();
+    // Validate before begin, through the same numeric/timing contract as explicit animations.
+    const animation = new AFXAnimation({ duration: requested.duration ?? inherited?.duration ?? .25,
+      delay: requested.delay ?? inherited?.delay ?? 0, timing: requested.timing ?? inherited?.timing ?? "ease" });
+    this.begin();
+    this.#updateContext({ duration: animation.duration, delay: animation.delay, timing: animation.timing,
+      disableActions: requested.disableActions ?? inherited?.disableActions ?? false });
+    let failure: { readonly error: unknown } | undefined;
+    try {
+      const result: unknown = changes();
+      if (result && typeof (result as { then?: unknown }).then === "function") {
+        if (result instanceof Promise) void result.catch(() => {});
+        throw new TypeError("AFXTransaction.perform requires a synchronous callback.");
+      }
+    } catch (error) { failure = { error }; }
+    finally {
+      try { this.commit(); } catch (error) { failure ??= { error }; }
+    }
+    if (failure) throw failure.error;
+  }
   static begin(): void {
     const inherited = currentAFXTransactionActionContext();
     const context = Object.freeze({

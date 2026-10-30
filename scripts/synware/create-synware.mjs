@@ -57,8 +57,13 @@ function fail(message) {
   process.exitCode = 1;
 }
 
-export function scaffoldFiles(bundleIdentifier, selected = [], title = titleFromFolderName(bundleIdentifier)) {
+export function scaffoldFiles(bundleIdentifier, selected = [], title = titleFromFolderName(bundleIdentifier), authoring = "function") {
   if (!BUNDLE_IDENTIFIER.test(bundleIdentifier)) throw new TypeError("Use a reverse-DNS bundleIdentifier with at least two dots.");
+  if (!["function", "inline", "separate"].includes(authoring)) throw new TypeError("Authoring must be function, inline or separate.");
+  if (authoring !== "function") {
+    if (selected.length) throw new TypeError("FX recipe scaffolds use function authoring; compose their hook-based components from a class view explicitly.");
+    return scaffoldClassFiles(bundleIdentifier, title, authoring);
+  }
   const permissions = [...new Set(selected.flatMap(name => fxRecipes[name].permissions ?? []))];
   const hooks = selected.flatMap(name => fxRecipes[name].hook ? [fxRecipes[name].hook] : []);
   const functionName = name => `run${name[0].toUpperCase()}${name.slice(1)}`;
@@ -102,10 +107,58 @@ ${selected.length ? '      <NSEStackItem id="result" visibilityPriority={100}><p
   return files;
 }
 
+function scaffoldClassFiles(bundleIdentifier, title, authoring) {
+  const files = scaffoldFiles(bundleIdentifier, [], title);
+  const separate = authoring === "separate";
+  const view = `  return <section aria-label={${JSON.stringify(title)}}>
+    <NSESearchField aria-label="Search" binding={controller.queryBinding} />
+    <NSEPushButton action={controller.clearSearchAction}>Clear search</NSEPushButton>
+  </section>;`;
+  files.set("Contents/index.tsx", `import { NSEApplication, NSEViewController, observable, bind, action, actionRef, type NSEBinding } from "@syndromatic/syncloudos";
+${separate ? 'import { SearchView } from "./Views/SearchView";' : 'import { NSESearchField, NSEPushButton } from "@syndromatic/syncloudos/nse/controls";'}
+import "@syndromatic/syncloudos/nse/styles.css";
+
+export class SearchViewController extends NSEViewController {
+  @observable accessor query = "";
+  readonly queryBinding: NSEBinding<string> = bind<SearchViewController, "query">(this, "query");
+  readonly clearSearchAction = actionRef(SearchViewController, "clearSearch");
+  @action clearSearch() { this.query = ""; return this.query; }
+${separate ? '  static override view = SearchView;' : `  override renderView() {
+    const controller = this;
+${view}
+  }`}
+}
+
+export default class SynWareApplication extends NSEApplication {
+  static override mainViewController = SearchViewController;
+}
+`);
+  if (separate) files.set("Contents/Views/SearchView.tsx", `import { NSESearchField, NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
+import type { SearchViewController } from "../index";
+
+export function SearchView({ controller }: { readonly controller: SearchViewController }) {
+${view}
+}
+`);
+  files.set("Contents/__tests__/app.test.tsx", `// @vitest-environment jsdom
+import { expect, it } from "vitest";
+import { createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
+import Application from "../index";
+import info from "../Info";
+
+it("hosts the class application with its bound search field", async () => {
+  const host = createSynWareTestHost({ application: Application, manifest: { schemaVersion: 1, ...info }, document });
+  try { const view = await host.render(); expect(view.container.querySelector('input[aria-label="Search"]')).not.toBeNull(); }
+  finally { await host.dispose(); }
+});
+`);
+  return files;
+}
+
 /** The same folder templates are used by the CLI and developer MCP. */
-export function scaffoldProjectFiles({ kind = "application", name, organisation = "com.example", bundleIdentifier, id = kebabCase(name), owners = [] }) {
+export function scaffoldProjectFiles({ kind = "application", name, organisation = "com.example", bundleIdentifier, id = kebabCase(name), owners = [], authoring = "function" }) {
   const title = titleFromFolderName(name);
-  if (kind === "application") return scaffoldFiles(bundleIdentifier ?? scaffoldBundleIdentifier(name, organisation), [], title);
+  if (kind === "application") return scaffoldFiles(bundleIdentifier ?? scaffoldBundleIdentifier(name, organisation), [], title, authoring);
   if (kind === "preferencePane") return new Map([["index.tsx", `import { definePreferencePane } from "@syndromatic/syncloudos";\n\nexport default definePreferencePane({ id: ${JSON.stringify(id)}, title: ${JSON.stringify(title)}, order: 100, view: function Preferences() { return <p>${title}</p>; } });\n`]]);
   if (kind === "widget") return new Map([["index.tsx", `import { defineWidget } from "@syndromatic/syncloudos";\n\nexport default defineWidget({ id: ${JSON.stringify(id)}, title: ${JSON.stringify(title)}, load: async () => new Date().toLocaleDateString(), view: ({ data }) => <p>{data}</p>, whenEmpty: "hide" });\n`]]);
   if (kind === "integration") {
@@ -117,7 +170,7 @@ export function scaffoldProjectFiles({ kind = "application", name, organisation 
 function main() {
   const [targetArgument, ...options] = process.argv.slice(2);
   if (!targetArgument) {
-    fail("Usage: create-synware <Name.app|Name.prefPane|Name.widget|Name.integration.ts> [--organisation com.example] [--owners bundle-identifier,...] [--fx recipe,...]");
+    fail("Usage: create-synware <Name.app|Name.prefPane|Name.widget|Name.integration.ts> [--organisation com.example] [--owners bundle-identifier,...] [--fx recipe,...] [--authoring function|inline|separate]");
     return;
   }
   if (!/\.(?:app|prefPane|widget|integration\.tsx?)$/u.test(targetArgument)) { fail("The target must name an .app, .prefPane, .widget or .integration.ts entry."); return; }
@@ -127,10 +180,12 @@ function main() {
   if (!APP_ID.test(appId)) { fail("Provide a valid application ID."); return; }
   let owners = [];
   let organisation = "com.example";
+  let authoring = "function";
   const selected = [];
   for (let index = 0; index < options.length; index += 2) {
     if (options[index] === "--owners" && options[index + 1]) { owners = options[index + 1].split(","); continue; }
     if (options[index] === "--organisation" && options[index + 1]) { organisation = options[index + 1]; continue; }
+    if (options[index] === "--authoring" && ["function", "inline", "separate"].includes(options[index + 1])) { authoring = options[index + 1]; continue; }
     if (options[index] !== "--fx" || !options[index + 1]) { fail("Expected --fx followed by comma-separated recipe names."); return; }
     for (const name of options[index + 1].split(",")) {
       if (!Object.hasOwn(fxRecipes, name)) { fail(`Unknown FX recipe: ${name}. Available: ${Object.keys(fxRecipes).join(", ")}`); return; }
@@ -142,7 +197,9 @@ function main() {
     fail("Refusing to scaffold into a non-empty target directory.");
     return;
   }
-  const files = kind === "application" ? scaffoldFiles(scaffoldBundleIdentifier(name, organisation), selected, titleFromFolderName(name)) : scaffoldProjectFiles({ kind, name, id: appId, owners });
+  if (kind !== "application" && authoring !== "function") { fail("--authoring applies to .app scaffolds only."); return; }
+  if (authoring !== "function" && selected.length) { fail("--fx recipes use function authoring; compose hook-based recipe components in class views explicitly."); return; }
+  const files = kind === "application" ? scaffoldFiles(scaffoldBundleIdentifier(name, organisation), selected, titleFromFolderName(name), authoring) : scaffoldProjectFiles({ kind, name, id: appId, owners });
   if (kind !== "integration") mkdirSync(target, { recursive: true });
   for (const [relativePath, contents] of files) {
     const path = relativePath ? resolve(target, relativePath) : target;

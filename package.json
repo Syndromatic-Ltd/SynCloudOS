@@ -25,6 +25,7 @@
     "fx:installed:browser": "node scripts/fx/check-installed-twelve-fx.mjs --mode browser --base /nested/product/",
     "product:names": "node scripts/quality/check-product-name-hygiene.mjs",
     "typecheck": "tsc -b --pretty false",
+    "typecheck:authoring": "tsc -p tests/types/tsconfig.authoring-6e.json --noEmit",
     "boundaries:architecture": "node scripts/quality/architecture-boundaries.mjs",
     "typecheck:contracts": "tsc -p tests/types/tsconfig.undo-contract.json --noEmit && tsc -p tests/fixtures/tsconfig.routing-ii-inference.json --noEmit && tsc -p tests/fixtures/tsconfig.expanded-fx-types.json --noEmit"
   },

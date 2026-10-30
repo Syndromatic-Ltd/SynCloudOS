@@ -33,6 +33,9 @@ function normaliseExtension(extension: string): string {
 function validateDocumentType(type: DocumentType<unknown, unknown>): void {
   if (!TYPE_ID.test(type.id)) throw new TypeError("Document type IDs must use reverse-DNS syntax.");
   if (!type.displayName.trim()) throw new TypeError("Document type display names must not be empty.");
+  if (type.history && (typeof type.history.captureContent !== "function" || typeof type.history.restoreContent !== "function")) {
+    throw new TypeError("Document history requires captureContent and restoreContent callbacks.");
+  }
   if (!Number.isSafeInteger(type.schemaVersion) || type.schemaVersion <= 0) {
     throw new TypeError("Document schema versions must be positive safe integers.");
   }
@@ -78,6 +81,10 @@ function snapshotDocumentType(type: DocumentType<unknown, unknown>): DocumentTyp
     read: type.read,
     write: type.write,
     validate: type.validate,
+    ...(type.history ? { history: Object.freeze({
+      captureContent: type.history.captureContent,
+      restoreContent: type.history.restoreContent,
+    }) } : {}),
     ...(migrations ? { migrations } : {}),
   });
 }

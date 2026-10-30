@@ -19,7 +19,7 @@
  */
 
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
-import type { SynWareOwnedWindowSnapshot, SynWareWindowCloseGuard } from "../../SynCloudOSReact/appRuntimeTypes";
+import type { SynWareOwnedWindowSnapshot, SynWareWindowCloseGuard } from "../../SynCloudOS/nseRuntimeContracts";
 import {
   nseDisposeFor,
   type NSEControllerOwnershipOptions,
@@ -29,7 +29,8 @@ import {
 import { NSEObject } from "../Objects/NSEObject";
 import type { NSEApplication, NSEOpenWindowOptions } from "./NSEApplication";
 import { NSEObjectLifetime } from "./objectLifetime";
-import { nseAdoptViewController, type NSEViewComponent, type NSEViewController } from "./NSEViewController";
+import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
+import { nseAdoptViewController, validateNSEViewControllerClass, type NSEViewComponent, type NSEViewController, type NSEViewControllerClass } from "./NSEViewController";
 
 export type NSEWindowControllerOptions = NSEControllerOwnershipOptions & NSEOpenWindowOptions;
 const defaultOpeningOptions: Readonly<NSEOpenWindowOptions> = Object.freeze({});
@@ -68,6 +69,13 @@ export type NSEAnyWindowController = NSEWindowController<any>;
 export interface NSEWindowControllerClass<TController extends NSEAnyWindowController = NSEAnyWindowController> {
   new (options?: NSEWindowControllerOptions): TController;
   readonly view?: NSEViewComponent;
+  readonly contentViewControllerClass?: NSEViewControllerClass;
+}
+
+/** @internal Definition validation is also used for dynamically opened windows. */
+export function validateNSEWindowControllerClass(Controller: NSEWindowControllerClass): void {
+  if (Controller.view && Controller.contentViewControllerClass) throw new TypeError(`${Controller.name} declares both static view and contentViewControllerClass.`);
+  if (Controller.contentViewControllerClass) validateNSEViewControllerClass(Controller.contentViewControllerClass);
 }
 
 /** What the React host gives a window controller while its window is mounted. */
@@ -130,6 +138,8 @@ let windowControllerSequence = 0;
 export class NSEWindowController<TApp extends NSEApplication = NSEApplication> extends NSEObject implements NSEOwner, NSEOwnedObject {
   /** The component that renders this window's content. */
   static view?: NSEViewComponent;
+  /** The class constructed in a fresh scope for this window's initial root. */
+  static contentViewControllerClass?: NSEViewControllerClass;
 
   readonly #lifetime: NSEObjectLifetime;
   readonly #window: NSEWindow;
@@ -209,6 +219,8 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   /**
    * The window's root view controller, rendered instead of `static view`. The
    * window controller owns it: replacing it disposes the previous one.
+   * A root cannot also be a child or another window's root. Rejected ownership
+   * leaves the current content unchanged.
    */
   get contentViewController(): NSEViewController<unknown> | null {
     return this.#contentViewController;
@@ -218,10 +230,13 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
     this.#assertLive("contentViewController", "set");
     if (controller === this.#contentViewController) return;
     const previous = this.#contentViewController;
-    this.#contentViewController = controller;
     if (controller) controller[nseAdoptViewController](this.#lifetime.scope);
-    if (previous) previous[nseDisposeFor]("removed-from-parent");
-    this.notifyObservers();
+    this.#contentViewController = controller;
+    try {
+      if (previous) previous[nseDisposeFor]("removed-from-parent");
+    } finally {
+      this.notifyObservers();
+    }
   }
 
   /** Aborts when this window controller is disposed. */
@@ -231,6 +246,11 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
 
   get isDisposed(): boolean {
     return this.#lifetime.isDisposed;
+  }
+
+  /** Constructs and owns a disposable synchronously, including after await. */
+  own<T extends NSEDisposable>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
+    return ownNSEFactory(this, factory);
   }
 
   /** Why this window controller was disposed, or `undefined` while it is live. */
@@ -267,10 +287,15 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
 
   /** @internal Disposal entry used by owners; records `reason`. */
   [nseDisposeFor](reason: SynCloudOSLifecycleDisposalReason): void {
-    this.#lifetime.dispose(reason, () => {
-      this.#mount = null;
-      this.didDispose();
-    });
+    if (this.isDisposed) return;
+    try {
+      this.#lifetime.dispose(reason, () => {
+        this.#mount = null;
+        this.didDispose();
+      });
+    } finally {
+      this.notifyObservers();
+    }
   }
 
   /** @internal The framework's hook for the React host. */

@@ -69,9 +69,42 @@ the backing persistence**, not merely one runtime instance. Conditional writes
 remain unavailable when neither lock is present; they never degrade to an
 unchecked write.
 
+Large browser DocumentStore snapshots retain repeated image/media strings once
+in a private lossless string-table representation. Every document, revision,
+version and idempotency receipt is retained; public snapshot import/export stays
+at schema 2. Existing snapshots are read without migration or data deletion and
+compact automatically on the next successful write. The private storage envelope
+uses a higher schema discriminator so older writers refuse it rather than
+overwriting unfamiliar data. Reference expansion is bounded and malformed compact
+snapshots are rejected. Unique data can still exceed the browser's storage quota;
+that failure reports full/unavailable storage, not a missing lock, and does not
+replace the prior saved document.
+
 The portable test host owns isolated persistence and a real per-name exclusive
 queue for that store. Its local queue is not a cross-context lock for a shared
 browser or server store.
+
+### Editing published DocumentStore records
+
+An existing `saveDraft` call can retain publication when its input explicitly
+sets `publishState` to the same `"published"` or `"unlisted"` state as the current
+canonical record. This edits the live record with one mutation and one new
+storage version, without an intermediate draft or a second `publish` write.
+The operation requires both the existing draft-write authorization and the
+existing publish authorization, including the kind's publish permissions.
+Authorization denial leaves the record, version history and idempotency records
+unchanged and emits no save event.
+
+Publication is retained only for that explicit state match. A new record,
+a request to change between published and unlisted, or an omitted publication
+state continues to stage a draft; initial publication and publication-state
+changes use `publish`. Omitted `publishedAt` and `canonicalUrl` fields retain
+their existing values, while explicit input values replace them.
+
+The usual `ifMatch` and persistence-lock requirements apply to the single save.
+A stale ETag or rejected conditional persistence write preserves the previous
+published record. Hosts should use this save contract for live-content edits
+instead of composing a draft save followed by republishing.
 
 
 ## Policy

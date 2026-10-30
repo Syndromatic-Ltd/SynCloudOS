@@ -1,3 +1,5 @@
+import { useNSEValueBinding } from "../Controls/Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,14 +20,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type ReactNode } from "react";
+import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type ReactNode } from "react";
 import { useNSEOverlayProvider } from "../Overlays";
 import { NSEListboxPopup, type NSEListboxOption } from "../Overlays/NSEListboxPopup";
 import type { NSEPopupPresentation } from "../Overlays/NSEPopup";
 import { NSEPushButton, type NSEPushButtonProps } from "../Controls/Buttons/NSEButtons";
 import { classes, sizedControlStyle, useControllableState, useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
 import type { NSEMenuOverlayOptions } from "./menuTypes";
-import { useNSEActionBinding } from "../Controls/Core/useNSEControlAction";
+import { NSEActionResponderContext, useNSEActionBinding } from "../Controls/Core/useNSEControlAction";
+import type { NSEActionReference } from "../Controls/Core/actionReference";
+import type { NSEControlActionProps } from "../Controls/Core/controlTypes";
 import { useNSEControlCommand, type NSEControlCommandState } from "../Controls/Core/useNSEControlCommand";
 
 export interface NSEPickerOption {
@@ -43,7 +47,7 @@ export interface NSEPickerAction {
   readonly disabled?: boolean;
   readonly onSelect: () => void;
 }
-export interface NSEPickerProps extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange"> {
+export interface NSEPickerProps<Payload = unknown> extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange">, NSEControlActionProps<Payload> {
   readonly options: readonly NSEPickerOption[];
   /** Commands listed after the options, under a rule. */
   readonly actions?: readonly NSEPickerAction[];
@@ -51,9 +55,9 @@ export interface NSEPickerProps extends Omit<HTMLAttributes<HTMLSpanElement>, "o
   readonly defaultValue?: string;
   readonly onValueChange?: (value: string) => void;
   /** Sent along the responder chain after an option is chosen, not when the list opens. */
-  readonly action?: string;
+  readonly action?: string | NSEActionReference<Payload>;
   /** Overrides the selected option's string value; an explicitly present `undefined` sends no payload. */
-  readonly actionPayload?: unknown;
+  readonly actionPayload?: NoInfer<Payload>;
   readonly label?: ReactNode;
   readonly labelHidden?: boolean;
   /** Spoken name when it should say more than the visible caption. */
@@ -77,7 +81,7 @@ export interface NSEPickerProps extends Omit<HTMLAttributes<HTMLSpanElement>, "o
 
 function PickerActionBinding({ value, action, payload, onState }: {
   readonly value: string;
-  readonly action: string;
+  readonly action: string | NSEActionReference;
   readonly payload: unknown;
   readonly onState: (value: string, state: NSEControlCommandState<unknown> | null) => void;
 }) {
@@ -95,7 +99,11 @@ function PickerActionBinding({ value, action, payload, onState }: {
  * NSEListboxPopup/overlay stack; no picker-specific portal or focus engine is
  * created here.
  */
-export function NSEPicker(props: NSEPickerProps) {
+export function NSEPicker<Payload = unknown>(props: NSEBoundValueProps<string,NSEPickerProps<Payload>,'value'|'defaultValue'|'onValueChange'|'undoManager'>) {
+  return <NSEPickerControl {...useNSEValueBinding<string,NSEPickerProps<Payload>,'value'|'defaultValue'|'onValueChange'|'undoManager'>(props,{fallback:'',disableReadOnly:true})} />;
+}
+
+function NSEPickerControl(props: NSEPickerProps) {
   const {
     options,
     actions,
@@ -125,6 +133,7 @@ export function NSEPicker(props: NSEPickerProps) {
     ...htmlAttributes
   } = props;
   const provider = useNSEOverlayProvider();
+  const nearestResponderId = useContext(NSEActionResponderContext);
   const hasActionPayload = Object.prototype.hasOwnProperty.call(props, "actionPayload");
   const [optionActions, setOptionActions] = useState<ReadonlyMap<string, NSEControlCommandState<unknown>>>(() => new Map());
   const receiveOptionAction = useCallback((value: string, command: NSEControlCommandState<unknown> | null) => {
@@ -139,7 +148,7 @@ export function NSEPicker(props: NSEPickerProps) {
   const buttonId = `${pickerId}-button`;
   const listboxId = `${pickerId}-listbox`;
   const labelId = label ? `${pickerId}-label` : undefined;
-  const resolvedParentResponderId = parentResponderId ?? listboxOverlay?.parentResponderId ?? provider.defaultParentResponderId;
+  const resolvedParentResponderId = parentResponderId ?? listboxOverlay?.parentResponderId ?? nearestResponderId ?? provider.defaultParentResponderId;
   const resolvedOverlay = useMemo(() => {
     if (listboxOverlay) return listboxOverlay;
     if (!resolvedParentResponderId) return null;

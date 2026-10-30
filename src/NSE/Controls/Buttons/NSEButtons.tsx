@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode, type ReactElement, type RefAttributes } from "react";
+import type { NSEControlActionProps } from "../Core/controlTypes";
 import type { HFXFeedbackPresetName, HFXFeedbackRequest } from "../../Feedback";
 import { NSESpinner } from "../../Progress/NSEProgress";
 import { classes, resolveNSEControlHaptic, sizedControlStyle, useNSEControlFeedback } from "../Core/nseControlsShared";
@@ -37,7 +38,7 @@ const NSE_BUTTON_TONE_HAPTICS = {
   negative: "error"
 } as const satisfies Record<NSEButtonTone, HFXFeedbackPresetName>;
 
-export interface NSEPushButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface NSEPushButtonProps<Payload = unknown> extends ButtonHTMLAttributes<HTMLButtonElement>, NSEControlActionProps<Payload> {
   tone?: NSEButtonTone;
   selected?: boolean;
   active?: boolean;
@@ -56,12 +57,9 @@ export interface NSEPushButtonProps extends ButtonHTMLAttributes<HTMLButtonEleme
    * validated along the responder chain: the button is disabled while the action
    * is unavailable, lit while it reports state "on", and hidden when it is hidden.
    */
-  action?: string;
-  /** The single payload the action receives. */
-  actionPayload?: unknown;
 }
 
-export const NSEPushButton = forwardRef<HTMLButtonElement, NSEPushButtonProps>(function NSEPushButton(
+const NSEPushButtonControl = forwardRef<HTMLButtonElement, NSEPushButtonProps>(function NSEPushButton(
   {
     tone = "medium",
     selected = false,
@@ -138,21 +136,23 @@ export const NSEPushButton = forwardRef<HTMLButtonElement, NSEPushButtonProps>(f
   );
 });
 
-export interface NSEIconButtonProps extends Omit<NSEPushButtonProps, "icon" | "children"> {
+export const NSEPushButton = NSEPushButtonControl as <Payload = unknown>(props: NSEPushButtonProps<Payload> & RefAttributes<HTMLButtonElement>) => ReactElement | null;
+
+export interface NSEIconButtonProps<Payload = unknown> extends Omit<NSEPushButtonProps<Payload>, "icon" | "children"> {
   src?: string;
   icon?: ReactNode;
   label: string;
   showLabel?: boolean;
 }
 
-export function NSEIconButton({
+export function NSEIconButton<Payload = unknown>({
   src,
   icon,
   label,
   showLabel = false,
   className = "",
   ...props
-}: NSEIconButtonProps) {
+}: NSEIconButtonProps<Payload>) {
   const renderedIcon = icon ?? (src ? <img src={src} alt="" draggable={false} /> : null);
 
   return (

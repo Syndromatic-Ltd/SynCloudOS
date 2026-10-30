@@ -1,5 +1,7 @@
 # AnimationFX
 
+See [class authoring](../cocoa-authoring.md#outlets-and-animation) for mounted outlets, scoped layer transactions and managed renderer/frame lifetimes.
+
 Retained layers also present `IFXShader` image generators, filter their content and sublayer tree, and composite with normal or additive blending. See [image shaders in retained layers](image/shaders.md) for pass order, straight-alpha output, bounds, budgets and adapter support.
 
 AnimationFX (`AFX`) is the web-native analogue of Core Animation. It models visual content as a tree of layers, gives each layer geometry and appearance properties, and animates those properties over time with timing curves, keyframes and springs. Because it describes animation as data, every animation can be sampled at any moment, retargeted while it runs, paused, seeked, or played on a compositor thread when the browser allows.

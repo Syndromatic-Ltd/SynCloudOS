@@ -625,12 +625,31 @@ describe("NSEToolbar presentation", () => {
     expect(toolbar.getAttribute("data-nse-appearance-slot")).toBe("toolbar.surface.normal.1x");
     expect(save.getAttribute("data-nse-appearance-slot")).toBe("toolbar.item.normal.1x");
     expect(controller.snapshot.itemIds).toEqual(configuration.defaultItemIds);
+    const pointerDown = new MouseEvent("pointerdown", { bubbles: true, cancelable: true, button: 0 });
+    fireEvent(save, pointerDown);
+    expect(pointerDown.defaultPrevented).toBe(true);
     fireEvent.click(save);
     await waitFor(() => expect(controller.runtime.commands.dispatch).toHaveBeenCalledWith(
       "document.save",
       undefined,
       expect.objectContaining({ source: "toolbar" }),
     ));
+  });
+
+  it("revalidates a toolbar activation after keyboard focus changes command authority", async () => {
+    let responderGeneration = 0;
+    const port = runtime(vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
+      requests.map(request => [request.key, commandPresentation(request.commandId)]),
+    )));
+    port.commands.getPresentationGeneration = () => ({ registryGeneration: 0, responderGeneration });
+    const controller = createController({ runtime: port });
+    render(<OverlayHarness><NSEToolbar composition="configured" controller={controller} width={300}
+      interaction={{ overflowOverlayId: "toolbar-keyboard-activation", parentResponderId: "window:editor" }} /></OverlayHarness>);
+    const save = await screen.findByRole("button", { name: "Save" });
+    await waitFor(() => expect(save.disabled).toBe(false));
+    responderGeneration += 1;
+    fireEvent.click(save);
+    await waitFor(() => expect(port.commands.dispatch).toHaveBeenCalledWith("document.save", undefined, expect.objectContaining({ source: "toolbar" })));
   });
 
   it("uses Atmo chrome as inert paint layers while command and focus ownership stay with the toolbar", async () => {

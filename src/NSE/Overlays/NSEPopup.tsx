@@ -150,6 +150,7 @@ export function NSEPopup({
   const appearanceProjection = useNSEAppearanceProjection();
   const generatedId = useId().replace(/:/g, "");
   const resolvedId = id ?? `nse-popup:${generatedId}`;
+  const titleId = `nse-popup-title:${generatedId}`;
   const state = useNSEPopupState({ open, defaultOpen, onOpenChange });
   const { runtime, defaultParentResponderId } = useNSEOverlayProvider();
   const nearestResponderId = useContext(NSEActionResponderContext);
@@ -227,13 +228,13 @@ export function NSEPopup({
       className: surfaceClassName,
       role: surfaceRole,
       "aria-modal": isModal ? true : undefined,
-      "aria-labelledby": labelledBy,
+      "aria-labelledby": labelledBy ?? (title && !htmlAttributes["aria-label"] ? titleId : undefined),
       "aria-describedby": describedBy,
       "data-nse-overlay-kind": kind,
       "data-nse-presentation": resolvedPresentation.mode,
       tabIndex: htmlAttributes.tabIndex ?? -1,
     },
-    title ? createElement("div", { className: "nse-overlay-popup-title" }, title) : null,
+    title ? createElement("div", { id: titleId, className: "nse-overlay-popup-title" }, title) : null,
     createElement("div", { className: "nse-overlay-popup-content" }, children),
   );
 

@@ -497,7 +497,43 @@ function resolveModule({
   return target;
 }
 
-function moduleSpecifier(node) {
+// A literal module-scope const is a static loader contract, even when a bundler
+// must leave import(name) untouched. Resolve its real edge rather than exempting
+// that loader. Conservatively refuse the name if any other declaration shadows it.
+function staticModuleBindings(sourceFile) {
+  const candidates = new Map();
+  for (const statement of sourceFile.statements) {
+    if (!ts.isVariableStatement(statement) ||
+        !(statement.declarationList.flags & ts.NodeFlags.Const)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      if (ts.isIdentifier(declaration.name) && declaration.initializer &&
+          ts.isStringLiteralLike(declaration.initializer)) {
+        candidates.set(declaration.name.text, declaration);
+      }
+    }
+  }
+  function visit(node) {
+    if (ts.isIdentifier(node) && candidates.has(node.text)) {
+      const parent = node.parent;
+      const declaration = candidates.get(node.text);
+      const otherDeclaration = isDeclarationName(node) ||
+        ((ts.isImportSpecifier(parent) || ts.isImportClause(parent) ||
+          ts.isNamespaceImport(parent) || ts.isFunctionExpression(parent) ||
+          ts.isClassExpression(parent)) && parent.name === node);
+      if (otherDeclaration && node !== declaration.name) candidates.delete(node.text);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return new Map([...candidates].map(([name, declaration]) => [name, declaration.initializer.text]));
+}
+
+function staticModuleSpecifier(node, bindings) {
+  if (node && ts.isStringLiteralLike(node)) return node.text;
+  return node && ts.isIdentifier(node) ? bindings?.get(node.text) ?? null : null;
+}
+
+function moduleSpecifier(node, bindings) {
   if (
     (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
     node.moduleSpecifier &&
@@ -523,11 +559,10 @@ function moduleSpecifier(node) {
   if (
     ts.isCallExpression(node) &&
     node.arguments.length === 1 &&
-    ts.isStringLiteralLike(node.arguments[0]) &&
     (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
       (ts.isIdentifier(node.expression) && node.expression.text === "require"))
   ) {
-    return node.arguments[0].text;
+    return staticModuleSpecifier(node.arguments[0], bindings);
   }
   return null;
 }
@@ -647,6 +682,7 @@ function extractEdges({
     target,
     line,
     loader = null,
+    reexport = false,
   }) => {
     if (
       typeof target !== "string" ||
@@ -689,6 +725,7 @@ function extractEdges({
       target,
       line,
       loader,
+      reexport,
       sourceLayer: sourceLayer.id,
       targetLayer: targetClassification.layer.id,
     });
@@ -705,12 +742,13 @@ function extractEdges({
       true,
       sourcePath.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
     );
+    const moduleBindings = staticModuleBindings(sourceFile);
     function visit(node) {
       const kind = loaderKind(node, sourceFile);
       if (kind === "import" || kind === "require") {
         if (
           node.arguments.length !== 1 ||
-          !ts.isStringLiteralLike(node.arguments[0])
+          staticModuleSpecifier(node.arguments[0], moduleBindings) === null
         ) {
           const { line } = sourceFile.getLineAndCharacterOfPosition(
             node.getStart(sourceFile),
@@ -780,7 +818,7 @@ function extractEdges({
           }
         }
       }
-      const specifier = moduleSpecifier(node);
+      const specifier = moduleSpecifier(node, moduleBindings);
       if (specifier) {
         const target = resolveModule({
           root,
@@ -799,6 +837,7 @@ function extractEdges({
             target,
             line: line + 1,
             loader: kind,
+            reexport: ts.isExportDeclaration(node),
           });
         }
       }
@@ -1418,6 +1457,28 @@ function validatePolicy(policy, root) {
     }
   }
 
+  if (policy.internalEntrypoints !== undefined) {
+    if (!Array.isArray(policy.internalEntrypoints)) {
+      addError(errors, "internalEntrypoints must be an array");
+    } else {
+      const paths = new Set();
+      for (const entry of policy.internalEntrypoints) {
+        if (!entry || typeof entry.path !== "string" || GLOB_META.test(entry.path) ||
+            !/^src\/.+\.[cm]?[jt]sx?$/.test(entry.path) || paths.has(entry.path) ||
+            typeof entry.reason !== "string" || !entry.reason.trim() ||
+            !Array.isArray(entry.consumers) || entry.consumers.length === 0 ||
+            entry.consumers.some(consumer => !layerIds.has(consumer))) {
+          addError(errors, "internal entrypoints require a unique exact source path, reason and known consumer layers");
+          continue;
+        }
+        paths.add(entry.path);
+        if (policy.aliases.some(alias => alias.replacement === entry.path)) {
+          addError(errors, `internal entrypoint ${entry.path} cannot be a package alias`);
+        }
+      }
+    }
+  }
+
   if (
     policy.temporaryAllowlist !== undefined &&
     !Array.isArray(policy.temporaryAllowlist)
@@ -1501,6 +1562,13 @@ function edgeViolation(edge, policy) {
     sourceLayer.mayImportEntrypoints?.[edge.targetLayer];
   if (entrypoints && !entrypoints.includes(edge.target)) {
     return `${edge.sourceLayer} must use a public ${edge.targetLayer} entrypoint`;
+  }
+  const internal = policy.internalEntrypoints?.find(entry => entry.path === edge.target);
+  if (internal && !internal.consumers.includes(edge.sourceLayer)) {
+    return `${edge.sourceLayer} may not consume internal entrypoint ${edge.target}`;
+  }
+  if (internal && edge.reexport && policy.aliases?.some(alias => alias.replacement === edge.source)) {
+    return `package entry ${edge.source} may not re-export internal entrypoint ${edge.target}`;
   }
   return null;
 }

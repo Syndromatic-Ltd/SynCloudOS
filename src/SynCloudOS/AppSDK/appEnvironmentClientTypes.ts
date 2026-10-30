@@ -181,7 +181,8 @@ export interface AppAnimationHandle extends AppClientHandle {
 }
 
 export interface AppAnimationClient {
-  createRenderer(target: object, options?: Pick<import("../../FX/AnimationFX/AFXRenderer").AFXRendererOptions, "maximumQuads" | "onRenderError">, signal?: AbortSignal): import("../../FX/AnimationFX/AFXRenderer").AFXRenderer;
+  /** CSS layout leaves authored canvas dimensions intact and resizes only the backing bitmap. */
+  createRenderer(target: object, options?: Pick<import("../../FX/AnimationFX/AFXRenderer").AFXRendererOptions, "maximumQuads" | "onRenderError"> & Readonly<{ layout?: "css" }>, signal?: AbortSignal): import("../../FX/AnimationFX/AFXRenderer").AFXRenderer;
   /** Native view backing layers use CSS layout; explicit bindings own their frame by default. */
   bindLayer(target: object, signal?: AbortSignal, options?: Readonly<{ layout: "css" }>): AFXLayer;
   bindShapeLayer(target: object, signal?: AbortSignal): import("../../FX/AnimationFX/AFXShapeLayer").AFXShapeLayer;

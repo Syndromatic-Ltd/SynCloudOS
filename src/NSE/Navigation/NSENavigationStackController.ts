@@ -19,6 +19,9 @@
  */
 
 import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
+import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle";
+import { connectNSENavigationRestoration, type NSENavigationRestorationDescriptor } from "./navigationRestoration";
+import { observe } from "../Objects/observable";
 import type {
   NSENavigationStackRestorationSnapshot,
   NSENavigationStackSnapshot,
@@ -28,6 +31,7 @@ export interface NSENavigationStackControllerOptions extends NSEViewControllerOp
   readonly id: string;
   readonly rootDestinationId?: string | null;
   readonly destinationIds: readonly string[];
+  readonly restoration?: NSENavigationRestorationDescriptor<NSENavigationStackController, unknown>;
   readonly onPush?: (destinationId: string, options: { readonly signal: AbortSignal }) => void | Promise<void>;
 }
 
@@ -67,6 +71,8 @@ function freezeSnapshot(input: Omit<NSENavigationStackSnapshot, "path"> & { read
 
 /** Owns hierarchy path semantics only; it never creates or replaces content. */
 export class NSENavigationStackController extends NSEViewController<NSENavigationStackSnapshot> {
+  /** Semantic snapshots never publish a fabricated path change on disposal. */
+  override readonly subscribe = (listener: () => void): (() => void) => observe(this, () => { if (!this.isDisposed) listener(); });
   readonly id: string;
   readonly #destinationIds: ReadonlySet<string>;
   readonly #rootDestinationId: string | null;
@@ -92,6 +98,7 @@ export class NSENavigationStackController extends NSEViewController<NSENavigatio
     this.#onPush = options.onPush;
     this.#snapshot = this.#makeSnapshot();
     this.getSnapshot = () => this.#snapshot;
+    if (options.restoration) registerNSEAuthoringFinalizer(this, () => connectNSENavigationRestoration(this, options.restoration!), 15);
   }
 
   hasDestination(destinationId: string): boolean {

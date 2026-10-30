@@ -45,10 +45,11 @@ export function createBrowserAnimationLayerHost(document: Document, scheduler: A
       boundElements.add(target);
       let renderer: BrowserAFXCanvasRenderer | null = null;
       try {
-        renderer = new BrowserAFXCanvasRenderer(target);
+        const { layout, ...rendererOptions } = options;
+        renderer = new BrowserAFXCanvasRenderer(target, { layout });
         const layerRenderer = new AFXRenderer({
           target: renderer, scheduler, width: target.width, height: target.height,
-          ...options, signal,
+          ...rendererOptions, signal,
         });
         const dispose = layerRenderer.dispose.bind(layerRenderer);
         const canvasRenderer = renderer;
@@ -85,7 +86,7 @@ export function createBrowserAnimationLayerHost(document: Document, scheduler: A
       const surface = new BrowserAnimationLayerSurface(target, options?.layout);
       boundElements.add(target);
       let layer: AFXLayer | undefined;
-      let resizeObserver: ResizeObserver | undefined;
+      let resizeObserver: { observe(target: Element): void; disconnect(): void } | undefined;
       let disposed = false;
       try {
         layer = createAFXLayer(constructors[kind], surface, scheduler, { signal });

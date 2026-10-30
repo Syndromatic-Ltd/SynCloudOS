@@ -50,6 +50,12 @@ afterEach(() => {
 });
 
 describe("defineWidget", () => {
+  it("captures a finite discovery order and defaults it to zero", () => {
+    const input = { id: "ordered", title: "Ordered", load: () => [], view: () => null, whenEmpty: "hide" } as const;
+    expect(defineWidget(input).order).toBe(0);
+    expect(defineWidget({ ...input, order: -10 }).order).toBe(-10);
+    for (const order of [NaN, Infinity, -Infinity, "one"]) expect(() => defineWidget({ ...input, order: order as number })).toThrow(/order/i);
+  });
   it("fills in the title, the empty rule and a ten second time limit", () => {
     const widget = defineWidget({ id: "latest", title: "Latest", load: () => [] as readonly string[], view: Items, whenEmpty: "hide" });
     expect(widget.timeout).toBe(10_000);

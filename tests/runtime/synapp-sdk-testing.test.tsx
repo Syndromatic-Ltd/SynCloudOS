@@ -29,6 +29,27 @@ import {
   createFakeClipboardAdapter,
   createSynWareTestHost,
 } from "../../src/SynCloudOS/AppSDK/testing";
+import { createDeterministicRuntimeEnvironment } from "../../src/SynCloudOS/AppSDK/testing/fakeAdapters";
+
+it("tracks pointer and keyboard entry through the test host's supplied DOM and releases the bindings", () => {
+  const environment = createDeterministicRuntimeEnvironment({ document });
+  const pointer = environment.environment.pointer;
+  expect(pointer).toBeDefined();
+  const root = document.createElement("div"), button = document.createElement("button");
+  root.append(button); document.body.append(root);
+  const events: unknown[] = [];
+  const releaseRoot = pointer!.bindRoot(root, event => events.push(event));
+  const releaseRegion = pointer!.bindRegion(root, button, "test-region");
+  button.dispatchEvent(new MouseEvent("pointerover", { bubbles: true, clientX: 12, clientY: 18 }));
+  expect(events).toContainEqual(expect.objectContaining({ kind: "update", input: "pointer", x: 12, y: 18, regionPath: ["test-region"] }));
+  button.focus();
+  expect(events).toContainEqual(expect.objectContaining({ kind: "update", input: "keyboard", regionPath: ["test-region"] }));
+  releaseRegion(); releaseRoot();
+  const count = events.length;
+  button.dispatchEvent(new MouseEvent("pointerover", { bubbles: true }));
+  expect(events).toHaveLength(count);
+  root.remove(); environment.dispose();
+});
 
 const ExampleApp = createSynWare({
   manifest: {

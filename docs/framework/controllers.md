@@ -1,5 +1,7 @@
 # Controllers
 
+For class view ownership, value bindings, tasks and observation lifetimes, see [class authoring](cocoa-authoring.md).
+
 NSE follows the Cocoa split between views and controllers. A view draws and handles input. A controller owns the content, the selection and the editing rules, and it publishes immutable snapshots that any number of views can read. The controllers here cover collections, trees and preferences. The view controllers for navigation, tabs, toolbars, split views and menus are described with their views in the [control catalogue](nse-controls.md).
 
 All controllers come from `@syndromatic/syncloudos/nse`.

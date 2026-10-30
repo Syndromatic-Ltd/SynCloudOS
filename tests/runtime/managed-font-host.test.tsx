@@ -28,7 +28,7 @@ import { useHostFontManager } from "../../src/SynCloudOSReact/hostFontsContext";
 import { defineFontDeclaration, type NSEFontManager } from "../../src/NSE/Typography";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
-import { createSynWareDefinitionFromApplicationClass } from "../../src/SynCloudOS/AppSDK/applicationClass";
+import { createSynWareDefinitionFromApplicationClass } from "../../src/SynCloudOS/AppHosting/applicationClass";
 import { createAppSCOS } from "../../src/SynCloudOS/AppSDK/scos/scosFacade";
 import { useFonts } from "../../src/SynCloudOS/AppSDK/fontAccess";
 vi.mock("../../src/App", () => ({ App: () => { const manager = useHostFontManager(); return <output>{manager.availableFamilies.map(family=>family.id).join(",")}</output>; } }));

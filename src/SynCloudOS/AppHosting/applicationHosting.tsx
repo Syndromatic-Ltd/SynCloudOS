@@ -31,22 +31,23 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import type { NSEAnyWindowController, NSEWindowMount } from "../../NSE/Application/NSEWindowController";
-import { nseWindowInternals } from "../../NSE/Application/NSEWindowController";
-import { nseAttachView, nseUpdateTraits, type NSEViewController } from "../../NSE/Application/NSEViewController";
-import { useObserve } from "../../NSE/Objects";
-import { nseDisposeFor } from "../../NSE/Controllers/ownership";
-import { NSEActionResponderContext, NSEActionScopeProvider } from "../../NSE/Controls/Core/useNSEControlAction";
-import { ResponderScope } from "../../SynCloudOSReact/ResponderScope";
-import { useResponderHierarchy } from "../../SynCloudOSReact/responderHierarchy";
-import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact/runtimeContext";
-import type { SynWareRuntime } from "../../SynCloudOSReact/appRuntimeTypes";
-import { useSynWareContext } from "./SynWareContext";
-import { bindActionResponder, hasActions } from "./actions";
+import type { NSEAnyWindowController, NSEWindowMount } from "../../NSE/applicationHostInterop";
+import { nseWindowInternals } from "../../NSE/applicationHostInterop";
+import { nseAttachView, nseUpdateTraits, nseUpdateViewActivity, validateNSEViewControllerClass, type NSEViewController, type NSEViewControllerClass } from "../../NSE/applicationHostInterop";
+import { useObserve } from "../../NSE/applicationHostInterop";
+import { observableVersion, type NSEObservable } from "../../NSE/applicationHostInterop";
+import { nseDisposeFor } from "../../NSE/applicationHostInterop";
+import { NSEActionResponderContext, NSEActionScopeProvider } from "../../NSE/applicationHostInterop";
+import { ResponderScope } from "../../SynCloudOSReact";
+import { useResponderHierarchy } from "../../SynCloudOSReact";
+import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
+import type { SynWareRuntime } from "../../SynCloudOSReact";
+import { useSynWareContext } from "../AppSDK/SynWareContext";
+import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
 import { applicationSessionFor } from "./applicationSession";
-import { useNSEAnimationEnvironment } from "../../NSE/Animation/NSEAnimationEnvironment";
-import { useNSEOverlayFocusScope } from "../../NSE/Overlays/useNSEOverlay";
+import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/applicationHostInterop";
+import { useNSEOverlayFocusScope } from "../../NSE/applicationHostInterop";
 
 const FRAME_STYLE: CSSProperties = Object.freeze({ display: "block", width: "100%", height: "100%", minWidth: 0, minHeight: 0 });
 const CONTENTS_STYLE: CSSProperties = Object.freeze({ display: "contents" });
@@ -67,6 +68,44 @@ function identityOf(target: object): string {
 
 function viewComponentOf(controller: object): ComponentType<{ readonly controller: unknown }> | undefined {
   return (controller.constructor as { readonly view?: ComponentType<{ readonly controller: unknown }> }).view;
+}
+
+function InlineControllerView({ controller }: { readonly controller: NSEViewController<unknown> }): ReactNode {
+  return controller.renderView!();
+}
+
+/** One hook/store regardless of dependency count; subscriptions happen only at commit. */
+function createViewObservation(controller: NSEViewController<unknown>) {
+  type Entry = { readonly source: NSEObservable; readonly version: number; readonly snapshot: unknown; readonly disposed: boolean };
+  let cached: readonly Entry[] | undefined;
+  const sources = () => [...new Set<NSEObservable>([controller, ...(
+    (controller.constructor as NSEViewControllerClass).viewDependencies?.(controller) ?? []
+  ).filter((source): source is NSEObservable => source != null)])];
+  const getSnapshot = () => {
+    const next = sources().map(source => ({ source, version: observableVersion(source), snapshot: source.getSnapshot(), disposed: source === controller && controller.isDisposed }));
+    if (cached && cached.length === next.length && next.every((entry, index) => {
+      const old = cached![index];
+      return old.source === entry.source && old.version === entry.version && old.disposed === entry.disposed && Object.is(old.snapshot, entry.snapshot);
+    })) return cached;
+    cached = next;
+    return cached;
+  };
+  const subscribe = (listener: () => void) => {
+    const subscriptions = new Map<NSEObservable, () => void>();
+    const rebind = () => {
+      const current = new Set(sources());
+      for (const [source, stop] of subscriptions) if (!current.has(source)) { subscriptions.delete(source); stop(); }
+      for (const source of current) if (!subscriptions.has(source)) {
+        const stop = source.subscribe(changed);
+        subscriptions.set(source, typeof stop === "function" ? stop as () => void : () => {});
+      }
+    };
+    const changed = () => { rebind(); listener(); };
+    rebind();
+    const stopDispose = controller.onDispose(changed);
+    return () => { stopDispose(); for (const stop of subscriptions.values()) stop(); subscriptions.clear(); };
+  };
+  return { getSnapshot, subscribe };
 }
 
 interface ControllerResponderProps {
@@ -124,10 +163,14 @@ export interface NSEViewControllerViewProps {
  * with it from a parent's view.
  */
 export function NSEViewControllerView({ controller, className }: NSEViewControllerViewProps) {
-  useObserve(controller);
+  validateNSEViewControllerClass(controller.constructor as NSEViewControllerClass);
+  const observation = useMemo(() => createViewObservation(controller), [controller]);
+  useSyncExternalStore(observation.subscribe, observation.getSnapshot, observation.getSnapshot);
   const appRuntime = useContext(SynWareRuntimeContext);
+  const kernel = useContext(SynCloudOSRuntimeContext);
   const context = useSynWareContext();
-  const { reducedMotion } = useNSEAnimationEnvironment();
+  const { reducedMotion, frames } = useNSEAnimationEnvironment();
+  const viewActivity = useNSEViewActivitySource();
   const presentation = useSyncExternalStore(context?.presentation.subscribe ?? noTraitSubscription, context?.presentation.getSnapshot ?? noPresentation, noPresentation);
   const traits = useMemo(() => Object.freeze({ reducedMotion, presentation }), [reducedMotion, presentation]);
   const animations = context?.animations;
@@ -140,11 +183,18 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
   const lumina = context?.lumina;
   const fx = useMemo(
     () => (motion && location && haptics && midi && media && video && lumina
-      ? { motion, location, haptics, midi, media, video, lumina }
+      ? { motion, location, haptics, midi, media, video, lumina, ...(animations ? { animation: { client: animations, frames } } : {}) }
       : undefined),
-    [motion, location, haptics, midi, media, video, lumina],
+    [motion, location, haptics, midi, media, video, lumina, animations, frames],
   );
   const frameRef = useRef<HTMLDivElement | null>(null);
+  const effectiveActivity = () => {
+    const document = kernel?.environment.browser.getDocument() ?? frameRef.current?.ownerDocument;
+    const state = appRuntime && kernel ? kernel.lifecycle.getState(appRuntime.app.bundleIdentifier) : "active";
+    const windows = appRuntime?.windows.getSnapshot();
+    const presented = windows?.surface !== "window" || windows.current?.state !== "minimised";
+    return presented && state === "active" && !viewActivity?.getSuspended() && !document?.hidden && !frames?.suspended && !kernel?.environment.animationFrames?.suspended;
+  };
   useLayoutEffect(() => {
     const element = frameRef.current;
     if (!element || controller.isDisposed) return;
@@ -153,6 +203,7 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
     const detach = controller[nseAttachView]({
       element,
       traits,
+      active: effectiveActivity(),
       ...(animations ? { bindLayer: (target: object, signal?: AbortSignal) => animations.bindLayer(target, signal, { layout: "css" }) } : {}),
       ...(fx ? { fx } : {}),
     });
@@ -169,7 +220,24 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
       detach();
       untrack?.();
     };
-  }, [animations, appRuntime, controller, fx]);
+  }, [animations, appRuntime, controller, fx, kernel, frames, viewActivity]);
+  useLayoutEffect(() => {
+    if (controller.isDisposed) return;
+    const document = kernel?.environment.browser.getDocument() ?? frameRef.current?.ownerDocument;
+    const update = () => { if (!controller.isDisposed) controller[nseUpdateViewActivity](effectiveActivity()); };
+    const stopTransition = kernel && appRuntime ? kernel.store.subscribe(update) : undefined;
+    const stopWindows = appRuntime?.windows.subscribe(update);
+    const stopFrames = frames?.subscribeState?.(update);
+    const stopActivity = viewActivity?.subscribe(update);
+    const runtimeFrames = kernel?.environment.animationFrames;
+    const stopRuntimeFrames = runtimeFrames !== frames ? runtimeFrames?.subscribeState?.(update) : undefined;
+    document?.addEventListener("visibilitychange", update);
+    update();
+    return () => {
+      stopTransition?.(); stopWindows?.(); stopFrames?.(); stopActivity?.(); stopRuntimeFrames?.();
+      document?.removeEventListener("visibilitychange", update);
+    };
+  }, [appRuntime, controller, frames, kernel, viewActivity]);
   useLayoutEffect(() => { controller[nseUpdateTraits](traits); }, [controller, traits]);
   useLayoutEffect(() => {
     if (controller.isDisposed || !frameRef.current) return;
@@ -189,8 +257,8 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
     return () => { observer.disconnect(); };
   }, [controller]);
   if (controller.isDisposed) return null;
-  const View = viewComponentOf(controller);
-  if (!View) throw new TypeError(`${controller.constructor.name} has no static view; declare \`static view = SomeComponent\`.`);
+  const View = controller.renderView ? InlineControllerView : viewComponentOf(controller);
+  if (!View) throw new TypeError(`${controller.constructor.name} has no static view or renderView; declare one rendering form.`);
   const frame = (
     <div ref={frameRef} tabIndex={-1} className={className} data-nse-view-controller="" style={controller.parent ? undefined : FRAME_STYLE}>
       <View controller={controller} />

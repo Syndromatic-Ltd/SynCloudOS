@@ -19,6 +19,7 @@
  */
 
 import type { AwaitUndoAction, AutomaticUndoGroup, SyncUndoAction, UndoAction, UndoGroup, UndoGroupOptions, UndoManager, UndoManagerOptions, UndoRegistrationLease, UndoReservation, UndoRestorationSnapshot, UndoResult } from "./undoTypes";
+import { consumeUndoReplayRefusal } from "./undoReplayRefusal";
 
 interface RegistrationLeaseState { readonly token: object; live: boolean }
 
@@ -190,6 +191,7 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
           try {
             await invoke(action, inverse);
           } catch (compensationError) {
+            consumeUndoReplayRefusal(compensationError);
             compensationErrors.push(compensationError instanceof Error ? compensationError : new Error(String(compensationError)));
           }
         }
@@ -199,6 +201,7 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
             try {
               await restoration.restoration.restore(restoration.snapshot);
             } catch (compensationError) {
+              consumeUndoReplayRefusal(compensationError);
               compensationErrors.push(compensationError instanceof Error ? compensationError : new Error(String(compensationError)));
             }
           }
@@ -233,6 +236,7 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
           };
         }
       } catch (error) {
+        const unchangedRefusal = consumeUndoReplayRefusal(error);
         const primary = error instanceof Error ? error : new Error(String(error));
         const compensationErrors = await compensate();
         if (authorityWasLost() && compensationErrors.length === 0) {
@@ -253,8 +257,10 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
         // unknown partial effect.  Compensation restores every completed
         // sibling, then poisons the entry so cursor and model state are never
         // silently treated as safely retryable.
-        entry.poisoned = { direction, code, message: failure.message };
-        cleanKey = null;
+        if (!unchangedRefusal || compensationErrors.length > 0) {
+          entry.poisoned = { direction, code, message: failure.message };
+          cleanKey = null;
+        }
         lastFailure = { code, message: failure.message };
         return { status: "failed", direction, actionName: entry.name, code, error: failure };
       }

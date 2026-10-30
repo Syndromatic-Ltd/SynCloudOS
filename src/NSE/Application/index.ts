@@ -39,3 +39,6 @@ export type {
   NSETraitCollection,
 } from "./NSEViewController";
 export type { NSEViewControllerFX, NSEViewControllerFXClients } from "./viewControllerFX";
+export { outlet } from "./viewOutlet";
+export type { NSEViewOutlet, NSEOutletOptions } from "./viewOutlet";
+export type { NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "./managedAnimationRenderer";

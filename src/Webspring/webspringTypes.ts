@@ -102,6 +102,8 @@ export interface WebspringWidgetViewProps<TData> {
 
 export interface WebspringWidgetInput<TData> {
   readonly id: string;
+  /** Discovery position, ascending; ties sort by id. Explicit shell lists keep their authored order. Defaults to 0. */
+  readonly order?: number;
   /** Plain text, or a localised string looked up in the app's own strings. */
   readonly title: LocalisedText | string;
   /** A resource path to the widget's icon, such as `./Resources/news.svg`. */
@@ -120,6 +122,7 @@ export interface WebspringWidgetInput<TData> {
 /** A widget declared with `defineWidget`, defaults filled in. */
 export interface WebspringWidget {
   readonly id: string;
+  readonly order: number;
   readonly title: LocalisedText;
   readonly icon?: string;
   readonly load: (signal: AbortSignal) => Promise<unknown>;

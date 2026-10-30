@@ -159,14 +159,14 @@ export function VortexEffect({ active = true, eager = false, ariaLabel, decorati
       resize();
       const Observer = viewportHost.ownerDocument.defaultView?.ResizeObserver;
       if (Observer) { const observing = new Observer(resize); observing.observe(viewportHost); observer = observing; }
-      playback = observeEffectFrames(frames, (_time, delta, staticFrame) => {
+      playback = observeEffectFrames(frames, (_time, deltaSeconds, staticFrame) => {
         if (scene.disposed) return false;
         const staticNow = staticMotion || (reducedMotion !== "animate" && staticFrame);
         if (staticNow) { simulation.elapsed = recipe.staticTimeSeconds; opacity = activeRef.current ? 1 : 0; }
         else {
           simulation.setTravelImpulse(impulseRef.current);
-          simulation.advance(delta / 1000, width, height);
-          opacity += ((activeRef.current ? 1 : 0) - opacity) * Math.min(1, delta / Math.max(1, activeRef.current ? recipe.fadeInMs : recipe.fadeOutMs));
+          simulation.advance(deltaSeconds, width, height);
+          opacity += ((activeRef.current ? 1 : 0) - opacity) * Math.min(1, deltaSeconds * 1000 / Math.max(1, activeRef.current ? recipe.fadeInMs : recipe.fadeOutMs));
           if (!activeRef.current && opacity < 0.01) opacity = 0;
         }
         draw();

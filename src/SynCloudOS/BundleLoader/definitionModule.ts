@@ -24,7 +24,7 @@ import {
   createSynWareDefinitionFromApplicationClass,
   createSynWareDefinitionFromComponent,
   isNSEApplicationClass,
-} from "../AppSDK/applicationClass";
+} from "../AppHosting/runtimeEntry";
 import { findSynWareManifestDifference } from "../AppSDK/manifest/compareCanonicalManifests";
 import type { SynWareDefinition } from "../AppSDK/runtimeContracts";
 import type { TrustedSynWareBundle } from "./bundleTypes";

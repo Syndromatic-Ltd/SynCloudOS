@@ -21,6 +21,7 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { nseActionCommandId } from "./actionCommandId";
 import type { NSEControlCommandBinding } from "./controlTypes";
+import { nseActionReferenceName, type NSEActionReference } from "./actionReference";
 
 /** The application an `action` prop or menu item belongs to. */
 export interface NSEActionScope {
@@ -58,14 +59,15 @@ export function useOptionalNSEActionScope(): NSEActionScope | null {
  * focused view's controller answers first, then its window controller, then
  * the application.
  */
-export function useNSEActionBinding<P = undefined>(action: string | undefined, payload?: P): NSEControlCommandBinding<P | undefined> | undefined {
+export function useNSEActionBinding<P = undefined>(action: string | NSEActionReference | undefined, payload?: P): NSEControlCommandBinding<P | undefined> | undefined {
   const scope = useContext(NSEActionScopeContext);
   return useMemo(() => {
     if (action === undefined) return undefined;
-    if (action.includes(".")) return { id: action, payload };
+    const name = typeof action === "string" ? action : nseActionReferenceName(action);
+    if (name.includes(".")) return { id: name, payload };
     if (!scope) {
       throw new Error(`The action "${action}" has no application to belong to. Render the control inside a class-based application's view, or inside an NSEActionScopeProvider.`);
     }
-    return { id: nseActionCommandId(scope.appId, action), payload };
+    return { id: nseActionCommandId(scope.appId, name), payload };
   }, [action, payload, scope]);
 }

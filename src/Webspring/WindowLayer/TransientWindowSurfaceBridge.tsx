@@ -88,6 +88,7 @@ interface SurfaceEntry {
     readonly waiters: Array<{ resolve(value: string): void; reject(error: unknown): void }>;
   } | null;
   replayAttached: boolean;
+  anchorIdentity: SurfaceAnchorIdentity | null;
 }
 
 export class TransientWindowSurfaceBridgeDisposedError extends Error {
@@ -186,11 +187,45 @@ function keptOnScreen(bounds: WindowBounds, anchor: HTMLElement | null): WindowB
   return { ...bounds, x, y };
 }
 
-function serialisableAnchor(anchor: HTMLElement | null, fallbackId: string, placement: PopoverPlacement | null = null): WindowAnchor | null {
-  if (!anchor) return null;
+interface SurfaceAnchorIdentity {
+  readonly anchor: HTMLElement;
+  readonly id: string;
+  dispose(): void;
+}
+
+// A DOM anchor can be shared by independently owned surfaces. Its generated
+// identity lasts until the last surface releases it, including across hosts.
+const generatedAnchorIdentities = new WeakMap<HTMLElement, { readonly id: string; readonly previousId: string | null; users: number }>();
+
+function acquireAnchorIdentity(anchor: HTMLElement, fallbackId: string): SurfaceAnchorIdentity {
+  let identity = generatedAnchorIdentities.get(anchor);
+  if (!identity || anchor.id !== identity.id) {
+    if (anchor.id) return { anchor, id: anchor.id, dispose() {} };
+    identity = { id: fallbackId, previousId: anchor.getAttribute("id"), users: 0 };
+    anchor.id = identity.id;
+    generatedAnchorIdentities.set(anchor, identity);
+  }
+  const acquired = identity;
+  acquired.users++;
+  let live = true;
+  return { anchor, id: acquired.id, dispose() {
+    if (!live) return;
+    live = false;
+    if (--acquired.users > 0) return;
+    if (generatedAnchorIdentities.get(anchor) !== acquired) return;
+    generatedAnchorIdentities.delete(anchor);
+    if (anchor.id !== acquired.id) return;
+    if (acquired.previousId === null) anchor.removeAttribute("id");
+    else anchor.setAttribute("id", acquired.previousId);
+  } };
+}
+
+function serialisableAnchor(identity: SurfaceAnchorIdentity | null, placement: PopoverPlacement | null = null): WindowAnchor | null {
+  if (!identity) return null;
+  const { anchor, id } = identity;
   const rect = anchor.getBoundingClientRect();
   return Object.freeze({
-    id: anchor.id || fallbackId,
+    id,
     rect: Object.freeze({ x: rect.left, y: rect.top, width: rect.width, height: rect.height }),
     edge: placement?.edge ?? "block-end" as const,
     alignment: placement?.alignment ?? "start" as const,
@@ -236,6 +271,8 @@ export function createTransientWindowSurfaceBridge({
     entry.phase = "closed";
     entry.rendererRegistration.dispose();
     entriesByMountKey.delete(entry.mountKey);
+    entry.anchorIdentity?.dispose();
+    entry.anchorIdentity = null;
     if (entries.get(entry.requestId) === entry) entries.delete(entry.requestId);
     if (notify && !entry.suppressCloseNotification && !entry.closeNotified) {
       entry.closeNotified = true;
@@ -284,10 +321,19 @@ export function createTransientWindowSurfaceBridge({
     contentRegistration ??= runtime.windows.registerContentFactory(contentFactory);
   };
 
+  const updateAnchorIdentity = (entry: SurfaceEntry) => {
+    const anchor = entry.request.role === "popover" ? entry.request.anchor : null;
+    if (entry.anchorIdentity?.anchor === anchor && entry.anchorIdentity?.id === anchor?.id) return;
+    const previous = entry.anchorIdentity;
+    entry.anchorIdentity = anchor ? acquireAnchorIdentity(anchor, `${entry.mountKey}:anchor`) : null;
+    previous?.dispose();
+  };
+
   const applyMutableRequest = (entry: SurfaceEntry) => {
     if (entry.phase !== "open") return;
     const controller = runtime.windows.select(entry.windowControllerId);
     const request = entry.request;
+    updateAnchorIdentity(entry);
     const placement = request.role === "popover" ? popoverPlacement(request.anchor, request.bounds) : null;
     // An open content-sized panel (an inspector) is a window the user moves:
     // it keeps its position, follows only its content's size and is brought
@@ -304,7 +350,7 @@ export function createTransientWindowSurfaceBridge({
     }
     const latest = runtime.windows.select(entry.windowControllerId).record;
     const nextAnchor = request.role === "popover"
-      ? serialisableAnchor(request.anchor, `${rendererId}:${entry.requestId}:anchor`, placement)
+      ? serialisableAnchor(entry.anchorIdentity, placement)
       : null;
     if (latest.title !== request.title || JSON.stringify(latest.anchor) !== JSON.stringify(nextAnchor)) {
       runtime.windows.updatePresentation(entry.windowControllerId, { title: request.title, anchor: nextAnchor });
@@ -376,11 +422,13 @@ export function createTransientWindowSurfaceBridge({
       closePromise: null,
       queuedPresentation: null,
       replayAttached: false,
+      anchorIdentity: null,
     };
     entries.set(requestId, entry);
     entriesByMountKey.set(mountKey, entry);
     entry.opened = (async () => {
       try {
+        updateAnchorIdentity(entry);
         const placement = request.role === "popover" ? popoverPlacement(request.anchor, request.bounds) : null;
         runtime.windows.create({
           id: windowControllerId,
@@ -402,7 +450,7 @@ export function createTransientWindowSurfaceBridge({
           maximumSize: null,
           level: request.role === "panel" || request.role === "popover" ? "floating" : "modal",
           parentWindowControllerId: request.parentWindowControllerId,
-          anchor: request.role === "popover" ? serialisableAnchor(request.anchor, `${rendererId}:${requestId}:anchor`, placement) : null,
+          anchor: request.role === "popover" ? serialisableAnchor(entry.anchorIdentity, placement) : null,
           pinned: false,
           mobilePolicy: request.role === "popover" ? "popover-to-sheet" : "sheet",
           restorationKey: null,

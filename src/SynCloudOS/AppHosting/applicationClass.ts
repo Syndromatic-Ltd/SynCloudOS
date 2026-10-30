@@ -19,15 +19,16 @@
  */
 
 import { createElement, type ComponentType } from "react";
-import { NSEApplication, type NSEApplicationClass } from "../../NSE/Application/NSEApplication";
-import { NSEWindowController } from "../../NSE/Application/NSEWindowController";
-import type { SynWareRouteGraph } from "../Routing/appRouteTypes";
+import { NSEApplication, type NSEApplicationClass } from "../../NSE/applicationHostInterop";
+import { NSEWindowController, validateNSEWindowControllerClass } from "../../NSE/applicationHostInterop";
+import type { SynWareRouteGraph } from "../Routing/appSdkRoutePort";
 import { registerApplicationLifecycle } from "../Lifecycle/applicationLifecycleHooks";
-import type { SynWareDefinition, SynWareMigration } from "./appDefinitionTypes";
-import type { SynWareManifestV1 } from "./manifest/manifestTypes";
+import type { SynWareDefinition, SynWareMigration } from "../AppSDK/appDefinitionTypes";
+import type { SynWareManifestV1 } from "../AppSDK/manifest/manifestTypes";
 import { createApplicationRoot } from "./applicationRoot";
 import {
   createApplicationLifecycle,
+  applicationMainWindowClass,
   runApplicationBackgroundTask,
   type ApplicationSessionSource,
 } from "./applicationSession";
@@ -82,6 +83,7 @@ export function createSynWareDefinitionFromApplicationClass(
   named: SynWareModuleNamedExports = {},
 ): SynWareDefinition {
   if (!isNSEApplicationClass(AppClass)) throw new TypeError("The default export is not an NSEApplication class.");
+  validateApplicationControllerDeclarations(AppClass);
   rejectDuplicate("routes", AppClass.routes, named.routes);
   rejectDuplicate("migrations", AppClass.migrations, named.migrations);
   const handlesBackgroundTasks = typeof AppClass.prototype.handleBackgroundTask === "function";
@@ -98,6 +100,12 @@ export function createSynWareDefinitionFromApplicationClass(
       ? () => ({ handle: (taskId, context) => runApplicationBackgroundTask(source, manifest.bundleIdentifier, taskId, context) })
       : named.createBackgroundHandler,
   });
+}
+
+/** @internal Also used by HMR before changing live class lineages. */
+export function validateApplicationControllerDeclarations(AppClass: NSEApplicationClass): void {
+  applicationMainWindowClass(AppClass);
+  for (const Controller of Object.values(AppClass.windowControllers ?? {})) validateNSEWindowControllerClass(Controller);
 }
 
 /**

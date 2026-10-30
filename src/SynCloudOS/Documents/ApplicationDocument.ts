@@ -19,6 +19,7 @@
  */
 
 import { type UndoManager, type UndoReservation } from "../Undo";
+import { refuseUnchangedUndoReplay } from "../Undo/undoReplayRefusal";
 import { stageDocumentEdit } from "./DocumentEditTransaction";
 import { createDocumentEditHistoryAction } from "./documentEditHistory";
 import type { DocumentEditOptions, DocumentEditReceipt, DocumentEditResourceRetention, DocumentEditResult } from "./documentEditTypes";
@@ -191,6 +192,15 @@ function immutableClone<T>(value: T): T {
   return immutableDocumentValue(value);
 }
 
+class AsynchronousDocumentHistoryError extends DocumentSchemaError {}
+function synchronousHistoryValue<T>(value: T, typeId: string): T {
+  if (value && typeof (value as { then?: unknown }).then === "function") {
+    void Promise.resolve(value).catch(() => undefined);
+    throw new AsynchronousDocumentHistoryError(typeId, "Document history projections must be synchronous and pure.");
+  }
+  return value;
+}
+
 function asDocumentError(error: unknown): DocumentError {
   if (error instanceof DocumentError) return error;
   return new DocumentUnavailableError(
@@ -325,6 +335,7 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       throw new TypeError("Document application IDs must not be empty.");
     }
     if (!options.persistenceNamespace.trim()) throw new TypeError("Document persistence namespaces must not be empty.");
+    const initial = stageDocumentEdit(options.model, options.type, () => options.model);
     this.id = options.id;
     this.applicationId = options.applicationId?.trim() || null;
     this.type = options.type;
@@ -338,8 +349,8 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       : undefined;
     this.#location = options.location ? immutableClone(options.location) : null;
     this.#adapter = options.adapter;
-    this.#model = immutableClone(options.model);
-    this.#contentIdentity = this.#modelContentIdentity(this.#model);
+    this.#model = initial.model;
+    this.#contentIdentity = initial.contentIdentity;
     this.#savedContentIdentity = this.#contentIdentity;
     this.#documentKind = options.documentKind;
     this.#state = "clean";
@@ -574,6 +585,8 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       const staged = stageDocumentEdit(previous, this.type, transform, options.validateModel);
       const next = staged.model;
       const identity = staged.contentIdentity;
+      const beforeContent = this.#historyContentIdentity(previous);
+      const afterContent = this.#historyContentIdentity(next);
       const selection = options.selection ? immutableClone(options.selection) : undefined;
       revalidate();
       resourceChange = this.#resourceLifecycle?.stageChange(previous as Readonly<unknown>, next as Readonly<unknown>, { recordHistory: options.recordUndo !== false });
@@ -606,14 +619,15 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       if (reservation) {
         historyEntryId = reservation.commit(createDocumentEditHistoryAction({
           documentId: this.id, before: previous, after: next, options: { ...options, selection }, retention,
-          apply: (model) => this.#applyUndoModel(model), revision: () => this.#dirtyRevision,
+          apply: (model) => this.#applyUndoModel(model, model === previous ? beforeContent : afterContent), revision: () => this.#dirtyRevision,
           observeError: (error, context) => this.#reportCleanupError(error, context),
         }), options.coalescingKey ? {
           automaticGroup: { kind: "typing", key: options.coalescingKey, boundaryId: `document:${this.id}:${this.#editBoundary}` },
         } : undefined);
       } else {
-        // A non-history model adoption must not leave replay closures for an obsolete base.
-        this.undoManager.clear();
+        // Only a declared, unchanged authored projection can keep old entries.
+        // Replay merges their content with the live non-undoable metadata.
+        if (beforeContent === undefined || beforeContent !== afterContent) this.undoManager.clear();
         this.#editBoundary += 1;
       }
       admitted = true;
@@ -1604,10 +1618,51 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
     if (this.#closeGateToken && this.#closeGateToken !== closeToken) this.#assertCloseGateAllowsMutation();
   }
 
-  #applyUndoModel(model: TModel): void {
+  #historyContentIdentity(model: TModel): string | undefined {
+    const history = this.type.history;
+    if (!history) return undefined;
+    const content = synchronousHistoryValue(history.captureContent(model), this.type.id);
+    return canonicalDocumentJson(content, this.type.id);
+  }
+
+  #applyUndoModel(model: TModel, expectedContent?: string): void {
     this.#assertEditable();
-    const staged = stageDocumentEdit(this.#model, this.type, () => model);
-    this.#withResourceChange(staged.model, () => this.#applyChangedModel(staged.model, staged.contentIdentity));
+    const revision = this.#dirtyRevision, generation = this.#mutationGeneration;
+    const currentModel = this.#model, state = this.#state;
+    const revalidate = () => {
+      this.#assertWritable(this.#publicationProtected);
+      if (revision !== this.#dirtyRevision || generation !== this.#mutationGeneration) {
+        throw new DocumentUnavailableError("The document changed during history projection.", { retryable: false });
+      }
+    };
+    this.#editInProgress = true;
+    try {
+      let candidate = model;
+      try {
+        if (this.type.history) {
+          candidate = immutableDocumentValue(synchronousHistoryValue(this.type.history.restoreContent(model, currentModel), this.type.id), this.type.id);
+          if (this.#historyContentIdentity(candidate) !== expectedContent) {
+            throw new DocumentSchemaError(this.type.id, "Document history replay must restore the historical authored content.");
+          }
+        }
+        revalidate();
+      } catch (error) {
+        // This narrow proof ends before resource staging and publication.
+        // Unknown asynchronous effects and changed/revoked authority retain
+        // ordinary undo poisoning; only an unchanged synchronous preflight is retryable.
+        let unchanged = Boolean(this.type.history) && !(error instanceof AsynchronousDocumentHistoryError)
+          && this.#model === currentModel && this.#dirtyRevision === revision && this.#mutationGeneration === generation
+          && this.#state === state && !this.#publicationProtected && !this.#deferredClose
+          && !this.#closeGateToken && !this.#activeCloseTransaction && !this.#mutationAbortController.signal.aborted;
+        if (unchanged) { try { this.#assertWritable(); } catch { unchanged = false; } }
+        throw unchanged ? refuseUnchangedUndoReplay(error) : error;
+      }
+      // Writer/schema callbacks are outside the trusted projection proof. A
+      // misbehaving callback may have unknown effects even if the model stayed put.
+      const staged = stageDocumentEdit(currentModel, this.type, () => candidate);
+      revalidate();
+      this.#withResourceChange(staged.model, () => this.#applyChangedModel(staged.model, staged.contentIdentity), revalidate);
+    } finally { this.#finishPublication(); }
   }
 
   #withResourceChange(model: TModel, publish: () => void, beforePublication?: () => void): void {

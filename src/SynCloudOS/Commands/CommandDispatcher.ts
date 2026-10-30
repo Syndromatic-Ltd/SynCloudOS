@@ -33,6 +33,7 @@ import type {
 } from "./commandTypes";
 import { CommandUnknownOutcomeError, isCommandOperationResult } from "./commandTypes";
 import { CommandRegistry } from "./CommandRegistry";
+import { markHiddenCommandAcceptance } from "./acceptancePresentation";
 import type { ResponderResolution } from "../Responders/responderTypes";
 
 function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
@@ -139,18 +140,19 @@ export class CommandDispatcher {
       scopeId: resolved.responder.scopeId,
       payload: parsed.value,
     };
-    const finish = (validation: { enabled: boolean; denied?: boolean; disabledReason?: string }) => {
+    const finish = (validation: { enabled: boolean; denied?: boolean; hidden?: boolean; disabledReason?: string }) => {
       if (options.signal?.aborted
         || !this.isResolutionLive(id, resolved, options.responderId, responderGeneration)) {
         return { status: "cancelled", reason: "Command validation became stale." } as const;
       }
-      if (validation.denied || !validation.enabled) {
+      if (validation.denied || !validation.enabled || (validation.hidden && (options.source === "menu" || options.source === "toolbar"))) {
         return {
           status: validation.denied ? "denied" : "disabled",
           reason: validation.disabledReason ?? (validation.denied ? "This command is not permitted." : "This command is not currently available."),
         } as const;
       }
       const acceptance = { commandId: id, responderId: resolved.responder.id } as CommandDispatchAcceptance;
+      if (validation.hidden) markHiddenCommandAcceptance(acceptance);
       this.acceptances.set(acceptance, {
         id,
         payload,

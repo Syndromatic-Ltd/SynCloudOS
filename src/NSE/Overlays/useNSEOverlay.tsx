@@ -151,7 +151,12 @@ export function useNSEOverlay({
   const parentId = requestedParentId !== undefined ? requestedParentId : inherited?.overlayId ?? null;
   const parentScopeId = requestedParentScopeId ?? inherited?.scopeId;
   const parentRegistered = useSyncExternalStore(
-    manager.subscribe,
+    useCallback((listener: () => void) => manager.subscribe(() => {
+      // Owner abort can release the overlay graph during React's insertion
+      // cleanup. Preserve synchronous authority cleanup without repainting a
+      // tree whose presentation lease has already ended.
+      if (!runtime.signal.aborted) listener();
+    }), [manager, runtime]),
     () => parentId === null || manager.getRegistration(parentId) !== null,
     () => parentId === null,
   );
@@ -253,7 +258,9 @@ export function useNSEOverlay({
   // committed controlled state, so the scope's own teardown restoration is
   // not reclassified as a user focus-left dismissal of a closing surface.
   const managerDismiss = useEffectEvent((reason: NSEOverlayDismissReason) => {
-    if (!open) return;
+    // The manager also releases its records during owner teardown. That is
+    // authority cleanup, not a request for an obsolete UI to change state.
+    if (!open || runtime.signal.aborted) return;
     managerDismissedRef.current = true;
     if (restoreFocus && restoresOverlayFocus(reason)) {
       restoreFocusAfterClose();

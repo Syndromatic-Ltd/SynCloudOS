@@ -22,8 +22,19 @@ import { useEffect, useId, useRef, useState } from "react";
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import { NSEListboxPopup, useNSEOverlayProvider } from "../../Overlays";
 import type { NSEComboBoxProps } from "./completionTypes";
+import { useNSEValueBinding } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 
-export function NSEComboBox<T>(props: NSEComboBoxProps<T>) {
+/** A combo binding owns editable text; selected domain objects retain their own typed channel. */
+export function NSEComboBox<T>(props: NSEBoundValueProps<string,NSEComboBoxProps<T>,"inputValue"|"onInputValueChange"|"undoManager">) {
+  const resolved=useNSEValueBinding<string,NSEComboBoxProps<T>,"inputValue"|"onInputValueChange"|"undoManager">(props,{value:"inputValue",change:"onInputValueChange",fallback:""});
+  return <NSEComboBoxControl {...resolved} onValueChange={(value,reason)=>{
+    if(props.binding) resolved.onInputValueChange(reason==="completion" ? resolved.dataSource.labelForItem(value as T) : typeof value==="string"?value:"");
+    resolved.onValueChange(value,reason);
+  }} />;
+}
+
+function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
   useNSEOverlayProvider();
   const generatedId = useId().replace(/:/g, "");
   const inputRef = useRef<HTMLInputElement>(null);

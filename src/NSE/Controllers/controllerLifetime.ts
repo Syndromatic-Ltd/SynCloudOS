@@ -14,9 +14,9 @@ export class NSEControllerLifetime {
   #release: (() => void) | undefined;
   #disposed = false;
 
-  constructor(options: NSEControllerOwnershipOptions, resource: { readonly kind: string; readonly id: string }) {
+  constructor(options: NSEControllerOwnershipOptions, resource: { readonly kind: string; readonly id: string }, fallbackSignal?: AbortSignal) {
     this.record = new SynCloudOSLifecycleRecord(resource);
-    this.#signal = resolveOwnership(options, resource).signal;
+    this.#signal = resolveOwnership(options, resource, fallbackSignal).signal;
     this.#signal?.throwIfAborted();
   }
 

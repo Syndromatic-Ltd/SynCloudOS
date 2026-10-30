@@ -80,6 +80,18 @@ function presentation(owner: "shell" | "mounted") {
   return { runtime, host, frames: frames as AFXFrameScheduler, app, view, get environment() { return environment!; } };
 }
 
+it("uses the canonical monotonic seconds clock for mounted custom artwork", () => {
+  const { host, frames } = presentation("mounted");
+  const delivered = vi.fn();
+  expect(frames.now()).toBe(0);
+  const cancel = frames.requestFrame(delivered);
+  expect(host.pending.size).toBe(1);
+  act(() => { host.step(1.25); });
+  expect(frames.now()).toBe(1.25);
+  expect(delivered).toHaveBeenCalledExactlyOnceWith(1.25);
+  cancel();
+});
+
 describe.each(["shell", "mounted"] as const)("%s NSE frame state", owner => {
   it("ignores unrelated store, settings and unchanged host notifications", () => {
     const { runtime, host, frames } = presentation(owner);

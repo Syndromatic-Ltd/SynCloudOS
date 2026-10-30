@@ -17,6 +17,8 @@ SynCloudOS is an application framework for the web, in the tradition of Cocoa. T
 | Guide | Read it to |
 | --- | --- |
 | [Applications](applications.md) | Build application, window and view-controller classes with actions and observable state |
+| [Cocoa authoring](cocoa-authoring.md) | Connect class views, bindings, actions, tasks and managed outlets |
+| [Preferences and observations](authoring-preferences.md) | Declare persistent state, scoped observations and navigation restoration |
 | [SynWare SDK](synware-sdk.md) | Learn the bundle format, the session, hooks, services, routes and tooling |
 | [Manifest reference](synware-manifest.md) | Look up every `Info.ts` field |
 | [Commands, responders and undo](commands-responders-undo.md) | Route user intent to code, and reverse it |

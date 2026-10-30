@@ -1,20 +1,97 @@
 // @vitest-environment jsdom
 import React from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import { afterEach, expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { observable } from "../../src/NSE/Objects";
 import { NSEPushButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEPicker } from "../../src/NSE/Menus/NSEPicker";
+import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { action, useAction } from "../../src/SynCloudOS/AppSDK/actions";
 import { useCommands } from "../../src/SynCloudOS/AppSDK/hooks/useCommands";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 import { NSEPopup } from "../../src/NSE/Overlays/NSEPopup";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppSDK/applicationHosting";
+import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 
 const hosts: ClassApplicationHost[] = [];
-afterEach(async () => { for (const host of hosts.splice(0)) await host.dispose(); });
+afterEach(async () => { for (const host of hosts.splice(0)) await host.dispose(); vi.restoreAllMocks(); });
+
+it.each(["picker", "menu"] as const)("performs a custom %s callback while its nested popup restores focus", async kind => {
+  const errors = vi.spyOn(console, "error");
+  const values: string[] = [];
+  function View() {
+    const choose = useAction("choose");
+    const perform = (value: string) => { void choose.perform(value); };
+    return <NSEPopup defaultOpen modal title="Settings">{kind === "picker"
+      ? <NSEPicker label="Appearance" defaultValue="light" options={[{ value: "light", label: "Light" }, { value: "dark", label: "Dark" }]} onValueChange={perform} />
+      : <NSEMenu label="Appearance" items={[{ value: "dark", label: "Dark" }]} onSelect={perform} />}</NSEPopup>;
+  }
+  class MainWindow extends NSEWindowController {
+    static override view = View;
+    @action choose(value: string) { values.push(value); }
+  }
+  class Application extends NSEApplication { static override mainWindow = MainWindow; }
+  const host = createClassApplicationHost(Application, "com.example.popup-picker-callback");
+  hosts.push(host);
+  await act(async () => { await host.launch(); host.mountWindows(); await host.openMainWindow(); });
+  await act(async () => { fireEvent.click(await screen.findByRole("button", { name: kind === "picker" ? "Appearance Light" : "Appearance" })); });
+  await act(async () => { fireEvent.click(await screen.findByRole(kind === "picker" ? "option" : "menuitem", { name: "Dark" })); });
+  await waitFor(() => expect(values).toEqual(["dark"]));
+  await host.dispose();
+  hosts.splice(hosts.indexOf(host), 1);
+  expect(errors.mock.calls.some(args => args.some(value => String(value).includes("useInsertionEffect must not schedule updates")))).toBe(false);
+});
+
+it("revokes a disposed controller's actions immediately and removes its managed view", async () => {
+  let panel!: Panel;
+  class Panel extends NSEViewController {
+    static override view = () => <input aria-label="Disposed controller target" />;
+    calls = 0;
+    constructor() { super(); panel = this; }
+    @action ping() { this.calls++; }
+  }
+  class MainWindow extends NSEWindowController {
+    constructor() { super(); this.contentViewController = new Panel(); }
+  }
+  class Application extends NSEApplication { static override mainWindow = MainWindow; }
+  const host = createClassApplicationHost(Application, "com.example.disposed-actions");
+  hosts.push(host);
+  await host.launch(); host.mountWindows(); await host.openMainWindow();
+  const input = await screen.findByRole("textbox", { name: "Disposed controller target" });
+  fireEvent.focus(input);
+  await act(async () => {
+    panel.dispose();
+    expect((await host.runtime.commands.dispatch("com.example.disposed-actions.ping")).status).not.toBe("executed");
+  });
+  expect(panel.calls).toBe(0);
+  await waitFor(() => expect(screen.queryByRole("textbox", { name: "Disposed controller target" })).toBeNull());
+  expect((await host.runtime.commands.dispatch("com.example.disposed-actions.ping")).status).not.toBe("executed");
+});
+
+it("automatically revalidates window actions when application observable state changes", async () => {
+  let application!: Application;
+  class MainWindow extends NSEWindowController<Application> {
+    static override view = () => <NSEPushButton action="write">Write</NSEPushButton>;
+    @action write() {}
+    validateWrite() { return !this.app.readOnly; }
+  }
+  class Application extends NSEApplication {
+    static override mainWindow = MainWindow;
+    @observable accessor readOnly = false;
+    constructor() { super(); application = this; }
+  }
+  const host = createClassApplicationHost(Application, "com.example.app-state-actions");
+  hosts.push(host);
+  await host.launch(); host.mountWindows(); await host.openMainWindow();
+  const button = await screen.findByRole("button", { name: "Write" }) as HTMLButtonElement;
+  await waitFor(() => expect(button.disabled).toBe(false));
+  await act(async () => { application.readOnly = true; });
+  await waitFor(() => expect(button.disabled).toBe(true));
+  await act(async () => { application.readOnly = false; });
+  await waitFor(() => expect(button.disabled).toBe(false));
+});
 
 it("revalidates action buttons and useAction after a parent registers commands in a passive effect", async () => {
   let controller!: Panel;
@@ -95,6 +172,8 @@ it("revalidates sibling actions after an observable snapshot becomes available w
 });
 
 it("inherits class-controller ancestry for root and child actions inside a modal popup", async () => {
+  const errors = vi.spyOn(console, "error");
+  const dismissals: string[] = [];
   const calls: string[] = [];
   class Editor extends NSEViewController {
     static override view = () => <><input aria-label="Collection name" /><NSEPushButton action="saveCollection">Save collection</NSEPushButton></>;
@@ -104,7 +183,7 @@ it("inherits class-controller ancestry for root and child actions inside a modal
     readonly editor = this.addChild(Editor);
     static override view = ({ controller }: { readonly controller: Panel }) => <>
       <p>Library</p>
-      <NSEPopup defaultOpen modal title="Collection tools">
+      <NSEPopup defaultOpen modal title="Collection tools" onOpenChange={(_open, reason) => { dismissals.push(reason); }}>
         <NSEPushButton action="chooseCollection">Choose collection</NSEPushButton>
         <NSEViewControllerView controller={controller.editor} />
       </NSEPopup>
@@ -130,4 +209,7 @@ it("inherits class-controller ancestry for root and child actions inside a modal
   await waitFor(() => expect(calls).toEqual(["editor.save"]));
   await act(async () => { fireEvent.click(choose); });
   await waitFor(() => expect(calls).toEqual(["editor.save", "panel.choose"]));
+  await host.dispose();
+  hosts.splice(hosts.indexOf(host), 1);
+  expect(errors.mock.calls.some(args => args.some(value => String(value).includes("useInsertionEffect must not schedule updates"))), `Dismissals: ${dismissals.join(", ")}`).toBe(false);
 });

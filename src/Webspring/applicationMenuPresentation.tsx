@@ -20,7 +20,7 @@
 
 import { useMemo, useSyncExternalStore, type ReactNode } from "react";
 import { NSEApplicationMenu, type NSEMenuModel } from "../NSE/NSE";
-import { ApplicationMenuTriggerProvider } from "../SynCloudOSReact/ApplicationMenuTrigger";
+import { ApplicationMenuTriggerProvider } from "../SynCloudOSReact";
 import type { SynCloudOSAppAboutManifest } from "../SynCloudOS/SynCloudOS";
 import type { SynCloudOSTranslationParams } from "../SynCloudOS/LocaleServices";
 import type { WebspringAppMenuLabels } from "./webspringAppMenu";

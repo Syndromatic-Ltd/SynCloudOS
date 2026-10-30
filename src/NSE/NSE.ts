@@ -49,6 +49,8 @@ import * as NSEContainers from "./Containers";
 import * as NSEControllers from "./Controllers";
 export * from "./Controllers";
 export * from "./Objects";
+export * from "./Bindings";
+export * from "./Tasks";
 export * from "./Application";
 import * as NSEDataViews from "./DataViews";
 export * from "./DataViews";

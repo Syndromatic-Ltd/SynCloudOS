@@ -311,8 +311,9 @@ describe("application-only browser host", () => {
     expect(target.querySelector('[data-testid="application"]')).not.toBeNull();
     expect(WebspringController).not.toHaveBeenCalled();
   });
-  it("rejects missing, mixed, malformed and unknown modes and bundles the host cannot present", async () => {
-    expect(() => mountSynCloudOS({ element: element() } as MountSynCloudOSOptions)).toThrow(/shell.*application|application.*shell/i);
+  it("rejects a missing element, mixed, malformed and unknown modes and bundles the host cannot present", async () => {
+    // Omitting a mode now selects the neutral launcher; a mount target remains required.
+    expect(() => mountSynCloudOS({} as MountSynCloudOSOptions)).toThrow(/Element/i);
     expect(() => mountSynCloudOS(applicationOptions(element(), { shell }))).toThrow(/exactly one|mutually exclusive/i);
     expect(() => mountSynCloudOS(applicationOptions(element(), { application: { bundleIdentifier: " " } }))).toThrow(/application.*id/i);
     expect(() => mountSynCloudOS(applicationOptions(element(), { application: { bundleIdentifier: id, frame: "windowed" } }))).toThrow(/application\.frame/);

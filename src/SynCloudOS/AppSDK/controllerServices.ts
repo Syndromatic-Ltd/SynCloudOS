@@ -1,6 +1,6 @@
 import type { SynWareContextValue } from "./appContextTypes";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
-import type { SynWareNamedRouteTarget, SynWareRouteDefinition, SynWareRouteGraph, SynWareRouteNames, SynWareRouteQueryForName } from "../Routing/appRouteTypes";
+import type { SynWareNamedRouteTarget, SynWareRouteDefinition, SynWareRouteGraph, SynWareRouteNames, SynWareRouteQueryForName } from "../Routing/appSdkRoutePort";
 import { createMountedSynWareRouter } from "./hooks/mountedSynWareRouter";
 import type { SynWareRouterSnapshot } from "./hooks/useRouter";
 import { createMountedSynWareRouteState, type SynWareRouteStateClient } from "./hooks/useRouteState";

@@ -76,6 +76,7 @@ describe("ownership by structure", () => {
       readonly rows = newNotes("child-rows");
     }
     class ParentViewController extends NSEViewController {
+      static override view = () => null;
       readonly child = this.addChild(RowsViewController);
       constructor() { super(); parent = this; }
     }
@@ -107,6 +108,7 @@ describe("ownership by structure", () => {
       constructor(options = {}) { super(options); this.onDispose(record("child view controller")); this.rows.onDispose(record("child view controller's controller")); }
     }
     class RootViewController extends NSEViewController {
+      static override view = () => null;
       readonly child = this.addChild(ChildViewController);
       constructor() { super(); this.onDispose(record("root view controller")); }
     }

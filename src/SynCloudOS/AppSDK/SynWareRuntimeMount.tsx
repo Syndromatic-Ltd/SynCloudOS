@@ -43,6 +43,7 @@ import type { InspectorRouteInspectionPort } from "../Inspector/inspectorOwnerSo
 import type { AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
 import { createRuntimeAnimationState, createScopedAnimationFrames } from "../AnimationFX/scopedAnimationFrames";
 import { installControllerServices } from "./controllerServices";
+import { NSEViewActivityProvider } from "../../NSE/applicationHostInterop";
 
 // Host-only bridge entrypoint. This is deliberately not exported from the
 // public AppSDK package barrel: applications receive only the chrome hook.
@@ -106,19 +107,19 @@ function MountedAppPresentationBoundary({
     return state === "suspended" || state === "closed";
   }), [kernelRuntime, runtime]);
   const reducedMotion = useSyncExternalStore(animationState.subscribe, animationState.getReducedMotion, animationState.getReducedMotion);
-  const appFrames = useMemo<AFXFrameScheduler>(() => createScopedAnimationFrames(runtime.signal, animationState, {
-    now: () => appClient.scheduler.now(),
-    requestFrame(callback: (time: number) => void) {
-      const handle = appClient.scheduler.requestAnimationFrame(callback);
-      return () => { void handle.dispose(); };
-    },
-  }), [appClient.scheduler, animationState, runtime]);
+  const appFrames = useMemo<AFXFrameScheduler | null>(() => {
+    const timing = kernelRuntime.environment.animationFrames;
+    // AFX clocks use monotonic seconds. The public app scheduler uses wall
+    // milliseconds and native RAF timestamps, so it cannot be this clock.
+    return timing ? createScopedAnimationFrames(runtime.signal, animationState, timing) : null;
+  }, [animationState, kernelRuntime, runtime]);
   const animator = useMemo<NSEAnimator>(() => Object.freeze({
     animations: createSynWareNSEAnimations(appAnimations),
     ownerAppId: runtime.app.bundleIdentifier,
   }), [appAnimations, runtime.app.bundleIdentifier]);
   return (
     <NSEPresenceBoundary>
+    <NSEViewActivityProvider source={animationState}>
     <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator} layers={appAnimations} frames={appFrames}>
     <NSEConformanceEvidenceProvider port={conformanceEvidencePort}>
       <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
@@ -128,6 +129,7 @@ function MountedAppPresentationBoundary({
       </NSEOverlayProvider>
     </NSEConformanceEvidenceProvider>
     </NSEAnimationEnvironmentProvider>
+    </NSEViewActivityProvider>
     </NSEPresenceBoundary>
   );
 }

@@ -1,3 +1,5 @@
+import { useNSEValueBinding, type NSEValueBindingControlProps } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -50,7 +52,11 @@ function numericContract(options: NumericStepperOptions): NSEStepperValueContrac
   };
 }
 
-export function NSEStepper<T = number>(props: NSEStepperProps<T>) {
+export function NSEStepper<T = number>(props: NSEBoundValueProps<T, NSEStepperProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <NSEStepperControl {...useNSEValueBinding<T, NSEStepperProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0 as T,cancellable:true})} />;
+}
+
+function NSEStepperControl<T = number>(props: NSEStepperProps<T> & NSEValueBindingControlProps<T>) {
   const runtime = useOptionalNSEControlRuntimePort();
   const contract = (props.contract ?? numericContract(props as NumericStepperOptions)) as NSEStepperValueContract<T>;
   const propsRef = useRef(props);
@@ -185,6 +191,13 @@ export function NSEStepper<T = number>(props: NSEStepperProps<T>) {
     setPressedPart((current) => current === part ? null : current);
     finishHold();
   };
+  const cancelPresentation = (part: "increment" | "decrement") => {
+    if(!props.__nseBindingEditor){endPresentation(part);return;}
+    setPressedPart(current=>current===part?null:current);
+    if(!hold.current.active)return;
+    clearTimer();hold.current.active=false;hold.current.changed=false;
+    props.__nseBindingEditor.cancel();
+  };
 
   return (
     <span role="spinbutton" aria-label={props["aria-label"]} aria-valuenow={typeof props.value === "number" ? props.value : undefined} aria-valuetext={props.formatValue?.(props.value)} tabIndex={props.disabled ? -1 : 0} data-nse-control="stepper" data-state={props.disabled ? "disabled" : props.readOnly ? "read-only" : "ready"} data-size={props.size ?? "regular"} {...incrementAppearance.attributes} onKeyDown={(event) => {
@@ -194,8 +207,8 @@ export function NSEStepper<T = number>(props: NSEStepperProps<T>) {
       else if (event.key === "Home") { event.preventDefault(); setBoundary("minimum"); }
       else if (event.key === "End") { event.preventDefault(); setBoundary("maximum"); }
     }}>
-      <button type="button" aria-label={`Increment ${props["aria-label"]}`} data-nse-part="increment" tabIndex={-1} disabled={props.disabled} {...incrementAppearance.attributes} onFocus={() => setFocusedPart("increment")} onBlur={() => { setFocusedPart((current) => current === "increment" ? null : current); endPresentation("increment"); }} onPointerEnter={() => setHoveredPart("increment")} onPointerLeave={() => setHoveredPart((current) => current === "increment" ? null : current)} onPointerDown={(event) => { setPressedPart("increment"); startHold(1, event); }} onPointerUp={() => endPresentation("increment")} onPointerCancel={() => endPresentation("increment")} onLostPointerCapture={() => endPresentation("increment")} onClick={() => click(1)}>+</button>
-      <button type="button" aria-label={`Decrement ${props["aria-label"]}`} data-nse-part="decrement" tabIndex={-1} disabled={props.disabled} {...decrementAppearance.attributes} onFocus={() => setFocusedPart("decrement")} onBlur={() => { setFocusedPart((current) => current === "decrement" ? null : current); endPresentation("decrement"); }} onPointerEnter={() => setHoveredPart("decrement")} onPointerLeave={() => setHoveredPart((current) => current === "decrement" ? null : current)} onPointerDown={(event) => { setPressedPart("decrement"); startHold(-1, event); }} onPointerUp={() => endPresentation("decrement")} onPointerCancel={() => endPresentation("decrement")} onLostPointerCapture={() => endPresentation("decrement")} onClick={() => click(-1)}>−</button>
+      <button type="button" aria-label={`Increment ${props["aria-label"]}`} data-nse-part="increment" tabIndex={-1} disabled={props.disabled} {...incrementAppearance.attributes} onFocus={() => setFocusedPart("increment")} onBlur={() => { setFocusedPart((current) => current === "increment" ? null : current); endPresentation("increment"); }} onPointerEnter={() => setHoveredPart("increment")} onPointerLeave={() => setHoveredPart((current) => current === "increment" ? null : current)} onPointerDown={(event) => { setPressedPart("increment"); startHold(1, event); }} onPointerUp={() => endPresentation("increment")} onPointerCancel={() => cancelPresentation("increment")} onLostPointerCapture={() => cancelPresentation("increment")} onClick={() => click(1)}>+</button>
+      <button type="button" aria-label={`Decrement ${props["aria-label"]}`} data-nse-part="decrement" tabIndex={-1} disabled={props.disabled} {...decrementAppearance.attributes} onFocus={() => setFocusedPart("decrement")} onBlur={() => { setFocusedPart((current) => current === "decrement" ? null : current); endPresentation("decrement"); }} onPointerEnter={() => setHoveredPart("decrement")} onPointerLeave={() => setHoveredPart((current) => current === "decrement" ? null : current)} onPointerDown={(event) => { setPressedPart("decrement"); startHold(-1, event); }} onPointerUp={() => endPresentation("decrement")} onPointerCancel={() => cancelPresentation("decrement")} onLostPointerCapture={() => cancelPresentation("decrement")} onClick={() => click(-1)}>−</button>
       {props.name ? <input type="hidden" name={props.name} value={String(props.value)} /> : null}
     </span>
   );

@@ -57,6 +57,48 @@ function createTestIdentitySessionAdapter(initial: SessionRecord | null) {
 }
 
 describe("instance-owned identity session service", () => {
+  it("does not let an older read revoke a newly published login", async () => {
+    const adapter = createTestIdentitySessionAdapter(null);
+    let finish!: (value: SessionRecord | null) => void;
+    adapter.read = () => new Promise(resolve => { finish = resolve; });
+    const runtime = createTestRuntime({ identity: { sessionAdapter: adapter } });
+    const pending = runtime.identity.session.refresh();
+    adapter.publish({ id: "session:new", subjectId: "person:new", state: "active", claims: {} });
+    finish(null);
+    await expect(pending).resolves.toMatchObject({ id: "session:new" });
+    expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(true);
+    await runtime.dispose();
+  });
+
+  it("does not resurrect a session from an older overlapping refresh", async () => {
+    const value: SessionRecord = { id: "old", subjectId: "old", state: "active", claims: {} };
+    const adapter = createTestIdentitySessionAdapter(null);
+    const finish: Array<(value: SessionRecord | null) => void> = [];
+    adapter.read = () => new Promise(resolve => { finish.push(resolve); });
+    const runtime = createTestRuntime({ identity: { sessionAdapter: adapter } });
+    const older = runtime.identity.session.refresh();
+    const newer = runtime.identity.session.refresh();
+    finish[1]!(null);
+    await newer;
+    finish[0]!(value);
+    await expect(older).resolves.toBeNull();
+    expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(false);
+    await runtime.dispose();
+  });
+
+  it("does not let a delayed end clear a newer adapter-confirmed login", async () => {
+    const adapter = createTestIdentitySessionAdapter(null);
+    let finish!: () => void;
+    adapter.end = () => new Promise(resolve => { finish = resolve; });
+    const runtime = createTestRuntime({ identity: { sessionAdapter: adapter } });
+    const ending = runtime.identity.session.end({ reason: "old logout" });
+    adapter.publish({ id: "new", subjectId: "new", state: "active", claims: {} });
+    finish();
+    await ending;
+    expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(true);
+    await runtime.dispose();
+  });
+
   it("does not revoke route authority when a focus recheck reports the identical session", async () => {
     const value: SessionRecord = { id: "session:one", subjectId: "person:one", state: "active", claims: { role: "staff", enabled: true }, expiresAt: 5000 };
     const adapter = createTestIdentitySessionAdapter(value);

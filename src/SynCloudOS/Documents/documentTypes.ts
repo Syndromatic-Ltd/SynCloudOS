@@ -88,6 +88,16 @@ export interface DocumentType<TModel, TSerialized = TModel> {
   read(serialized: TSerialized, context: DocumentReadContext): TModel;
   write(model: TModel, context: DocumentWriteContext): TSerialized;
   validate(serialized: unknown): serialized is TSerialized;
+  /** Optional authored-content policy for models containing synchronization metadata.
+   * Callbacks are synchronous and pure; inputs are immutable. captureContent must
+   * return a JSON value (or fingerprint) which compares by canonical JSON identity.
+   * restoreContent merges historical authored content with current non-undoable
+   * metadata, returning a valid model with the historical content identity.
+   */
+  readonly history?: {
+    captureContent(model: Readonly<TModel>): unknown;
+    restoreContent(historical: Readonly<TModel>, current: Readonly<TModel>): TModel;
+  };
   readonly migrations?: Readonly<Record<number, DocumentMigration>>;
 }
 

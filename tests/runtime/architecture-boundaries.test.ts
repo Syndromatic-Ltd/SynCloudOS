@@ -168,6 +168,68 @@ function createFixture() {
 }
 
 describe("architecture dependency boundaries", () => {
+  it("routes host lifecycle protocols through the internal NSE interoperability entry", () => {
+    const root = createFixture();
+    write(root, "src/NSE/applicationHostInterop.ts", "export const protocol = 1;\n");
+    write(root, "src/NSE/Application/NSEWindowController.ts", "export const protocol = 1;\n");
+    write(root, "src/SynCloudOS/AppHosting/applicationSession.ts", 'import { protocol } from "../../NSE/applicationHostInterop";\n');
+    const candidate = { ...fixturePolicy(), layers: structuredClone(policy.layers) };
+    expect(validateImportEdges({ root, policy: candidate }).errors).toEqual([]);
+    write(root, "src/SynCloudOS/AppHosting/applicationSession.ts", 'import { protocol } from "../../NSE/Application/NSEWindowController";\n');
+    write(root, "src/SynWare/Foo.app/Contents/index.ts", 'import { protocol } from "../../../NSE/applicationHostInterop";\n');
+    expect(validateImportEdges({ root, policy: candidate }).errors).toEqual(expect.arrayContaining([
+      expect.stringContaining("app-sdk-host must use a public nse entrypoint"),
+      expect.stringContaining("synapps must use a public nse entrypoint"),
+    ]));
+  });
+
+  it("shares canonical bundle identity without granting manifest code runtime access", () => {
+    const root = createFixture();
+    write(root, "src/SynCloudOS/Identity/bundleIdentifier.d.mts", "export declare function normalizeBundleIdentifier(value: string): string;\n");
+    write(root, "src/SynCloudOS/Identity/bundleIdentifier.mjs", "export const normalizeBundleIdentifier = value => value.toLowerCase();\n");
+    write(root, "src/SynCloudOS/AppSDK/manifest/compare.ts", 'import { normalizeBundleIdentifier } from "../../Identity/bundleIdentifier.mjs";\n');
+    const candidate = { ...fixturePolicy(), layers: structuredClone(policy.layers) };
+    expect(validateImportEdges({ root, policy: candidate }).errors).toEqual([]);
+    write(root, "src/SynCloudOS/AppSDK/manifest/compare.ts", 'import { internal } from "../../internal";\n');
+    expect(validateImportEdges({ root, policy: candidate }).errors).toEqual([
+      expect.stringContaining("synapp-contract may not import runtime"),
+    ]);
+  });
+
+  it("enforces the declared internal entry consumers even if an import list is broadened", () => {
+    const root = createFixture();
+    write(root, "src/NSE/applicationHostInterop.ts", "export const protocol = 1;\n");
+    write(root, "src/SynWare/Foo.app/Contents/index.ts", 'import { protocol } from "../../../NSE/applicationHostInterop";\n');
+    const candidate = {
+      ...fixturePolicy(),
+      layers: structuredClone(policy.layers),
+      internalEntrypoints: structuredClone(policy.internalEntrypoints),
+    };
+    candidate.layers.find(layer => layer.id === "synapps")!.mayImportEntrypoints.nse!.push("src/NSE/applicationHostInterop.ts");
+    expect(validateImportEdges({ root, policy: candidate }).errors).toEqual([
+      expect.stringContaining("synapps may not consume internal entrypoint src/NSE/applicationHostInterop.ts"),
+    ]);
+  });
+
+  it("forbids re-exporting internal host protocols from a supported package entry", () => {
+    const root = createFixture();
+    write(root, "tsconfig.json", JSON.stringify({ compilerOptions: { paths: {
+      "@runtime/*": ["./src/SynCloudOS/*"],
+      "@public": ["./src/SynCloudOS/AppSDK/sdkPackageEntry.ts"],
+    } } }));
+    write(root, "src/NSE/applicationHostInterop.ts", "export const protocol = 1;\n");
+    write(root, "src/SynCloudOS/AppSDK/sdkPackageEntry.ts", 'export { protocol } from "../../NSE/applicationHostInterop";\n');
+    const candidate = {
+      ...fixturePolicy(),
+      layers: structuredClone(policy.layers),
+      internalEntrypoints: structuredClone(policy.internalEntrypoints),
+    };
+    candidate.aliases.push({ find: "@public", replacement: "src/SynCloudOS/AppSDK/sdkPackageEntry.ts" });
+    expect(validateImportEdges({ root, policy: candidate }).errors).toEqual([
+      expect.stringContaining("package entry src/SynCloudOS/AppSDK/sdkPackageEntry.ts may not re-export internal entrypoint"),
+    ]);
+  });
+
   it("admits only the lifecycle runtime bridge from FX", () => {
     const root = createFixture();
     write(root, "src/SynCloudOS/fxRuntimeContracts.ts", "export const lifecycle = 1;\n");
@@ -277,7 +339,7 @@ describe("architecture dependency boundaries", () => {
       root,
       "src/NSE/computed.ts",
       [
-        'const path = "../SynCloudOS/internal";',
+        'let path = "../SynCloudOS/internal";',
         "const dynamic = import(path);",
         "const common = require(path);",
         'const modules = import.meta.glob("../SynCloudOS/*.ts");',
@@ -298,6 +360,26 @@ describe("architecture dependency boundaries", () => {
         ),
       ]),
     );
+  });
+
+  it("resolves immutable module specifiers to their actual edges without accepting dynamic or shadowed names", () => {
+    const root = createFixture();
+    write(root, "src/NSE/static-loader.ts", [
+      'const native = "node:fs/promises";',
+      'const local = "../SynCloudOS/internal";',
+      'const builtin = import(native);',
+      'const forbidden = import(local);',
+    ].join("\n"));
+    expect(validateImportEdges({ root, policy: fixturePolicy() }).errors).toEqual([
+      expect.stringContaining("src/NSE/static-loader.ts:4 -> src/SynCloudOS/internal.ts"),
+    ]);
+    write(root, "src/NSE/static-loader.ts", [
+      'const native = "node:fs/promises";',
+      'function load(native: string) { return import(native); }',
+    ].join("\n"));
+    expect(validateImportEdges({ root, policy: fixturePolicy() }).errors).toEqual([
+      expect.stringContaining("src/NSE/static-loader.ts:2 non-static import is forbidden"),
+    ]);
   });
 
   it("requires every controlled source and resolved target to have one layer", () => {

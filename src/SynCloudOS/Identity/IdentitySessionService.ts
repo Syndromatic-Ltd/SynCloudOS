@@ -71,6 +71,9 @@ export function createAnonymousIdentitySessionAdapter(): IdentitySessionAdapter 
 export function createIdentitySessionService(options: IdentitySessionServiceOptions): IdentitySessionService {
   let snapshot: IdentitySessionSnapshot | null = null;
   let revision = 0;
+  // Async reads/end operations cannot overwrite a newer adapter notification
+  // or a later explicit operation, even when an adapter ignores cancellation.
+  let operationGeneration = 0;
   let disposed = false;
   const listeners = new Set<(value: IdentitySessionSnapshot | null) => void>();
   const publish = (value: IdentitySessionAdapterSnapshot | null) => {
@@ -86,7 +89,10 @@ export function createIdentitySessionService(options: IdentitySessionServiceOpti
     return next;
   };
   const unsubscribeAdapter = options.adapter.subscribe((value) => {
-    if (!disposed) publish(value);
+    if (!disposed) {
+      operationGeneration++;
+      publish(value);
+    }
   });
 
   return {
@@ -107,18 +113,20 @@ export function createIdentitySessionService(options: IdentitySessionServiceOpti
           ? request.signal.reason
           : new Error("identity session refresh cancelled");
       }
+      const current = ++operationGeneration;
       const value = await options.adapter.read(request.signal);
       if (disposed || request.signal?.aborted) {
         throw request.signal?.reason instanceof Error
           ? request.signal.reason
           : new Error("identity session refresh cancelled");
       }
-      return publish(value);
+      return current === operationGeneration ? publish(value) : cloneSnapshot(snapshot);
     },
     async end(request) {
       if (disposed) return;
+      const current = ++operationGeneration;
       await options.adapter.end(request);
-      if (!disposed) publish(null);
+      if (!disposed && current === operationGeneration) publish(null);
     },
     async dispose() {
       if (disposed) return;

@@ -77,7 +77,7 @@ import {
   type SynCloudOSDiscoveredBundleDescriptor,
   type SynCloudOSProjectComposition,
 } from "./projectComposition";
-import { withDiscoveredWebspringItems } from "../Webspring/Webspring";
+import { defineWebspring, withDiscoveredWebspringItems } from "../Webspring/Webspring";
 /** One application folder as the project discovered it; see projectComposition.ts. */
 export type { SynCloudOSDiscoveredBundleDescriptor, SynCloudOSProjectComposition } from "./projectComposition";
 
@@ -115,7 +115,7 @@ interface BrowserHostOptions {
 export type SynCloudOSApplicationFrameMode = "fullscreen" | "declared";
 
 /** A host chooses its Webspring shell, one primary application, or — with
- * neither — the shell its project declares. */
+ * neither — its project's shell or the neutral framework Board. */
 export type MountSynCloudOSOptions = BrowserHostOptions & (
   | { readonly shell: WebspringDefinition; readonly application?: never;
       readonly shellResources?: SynCloudOSShellResources }
@@ -172,9 +172,6 @@ function resolveHostOptions(input: InternalMountOptions): ResolvedMountOptions {
   const shell = declaredShell === undefined || declaredShell === composition.shell
     ? composition.shell
     : withDiscoveredWebspringItems(declaredShell, composition);
-  if (shell === null && input.application === undefined) {
-    throw new TypeError("mountSynCloudOS found no Webspring shell: this project declares none at src/Webspring/Contents/index.tsx. Pass a shell, or an application for an application-only host.");
-  }
   return {
     ...input,
     composition,
@@ -188,8 +185,8 @@ function resolveHostOptions(input: InternalMountOptions): ResolvedMountOptions {
 function hostBranding(options: ResolvedHostOptions, runtime: SynCloudOSRuntime): ResolvedSiteBranding {
   if (options.shell) return resolveSiteBranding(options.shell.manifest.webspringShell.branding,
     options.shellResources?.resourceUrls ?? {}, runtime.locale, getSynWareNamespace(options.shell.manifest.bundleIdentifier));
-  const app = runtime.apps.getApp(options.application!.bundleIdentifier);
-  const name = app?.displayName ?? options.application!.bundleIdentifier;
+  const app = options.application ? runtime.apps.getApp(options.application.bundleIdentifier) : undefined;
+  const name = app?.displayName ?? options.application?.bundleIdentifier ?? "SynCloudOS";
   return Object.freeze({ name, logoUrl: null, logoAlt: name, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null });
 }
 
@@ -671,6 +668,23 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
   }
   let initialPathname = `${environment.browser.getLocation().pathname}${environment.browser.getLocation().search}${environment.browser.getLocation().hash}`;
   try {
+    if (!options.shell && !options.application) {
+      // Resolve the actual Board after acquiring this mount's lifetime. Application-only
+      // hosts never load launcher assets; a replaced mount cannot publish a late Board.
+      const { WebspringBoardView } = await import("../Webspring/Contents/Views/WebspringBoardView/WebspringBoardView");
+      assertMountCurrent(options.element, attempt);
+      options = { ...options, shell: withDiscoveredWebspringItems(defineWebspring({
+        manifest: {
+          bundleIdentifier: "org.syncloudos.webspring", displayName: "SynCloudOS", version: "1.0.0",
+          webspringShell: {
+            views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
+            defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
+            branding: { name: { key: "site.name", fallback: "SynCloudOS" } },
+          },
+        },
+        components: { board: WebspringBoardView },
+      }), options.composition) };
+    }
     const loadShellLocale = getWebspringLocaleResourceLoader();
     runtime.locale.registerBundleLocaleResourceLoader("webspring", async activeLocale => {
       const resources = await loadShellLocale(activeLocale);

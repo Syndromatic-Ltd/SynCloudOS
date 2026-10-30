@@ -3,14 +3,27 @@ export * from "./sdkPackageEntry";
 export { SCOS, useSCOS } from "./scos";
 export { definePreferencePane } from "../Preferences";
 export { defineWidget, defineIntegration, defineWebspring } from "../../Webspring/public";
-export type { SynWareIntegrationInput, SynWareIntegrationDefinition } from "../../Webspring/webspringIntegration";
-export { NSEObject, observable, observe, useObserve } from "../../NSE/Objects";
-export type { NSEObservable } from "../../NSE/Objects";
-export { NSEActionScopeProvider } from "../../NSE/Controls/Core/useNSEControlAction";
-export type { NSEActionScopeProviderProps } from "../../NSE/Controls/Core/useNSEControlAction";
-export { NSEApplication, NSEWindowController, NSEViewController } from "../../NSE/Application";
+export type { SynWareIntegrationInput, SynWareIntegrationDefinition } from "../../Webspring/public";
+export { NSEObject, observable, observe, useObserve } from "../../NSE/sdkPackageEntry";
+export type { NSEObservable } from "../../NSE/sdkPackageEntry";
+export { preference } from "../../NSE/sdkPackageEntry";
+export type { NSEPreferenceDescriptor } from "../../NSE/sdkPackageEntry";
+export { observes } from "../../NSE/sdkPackageEntry";
+export type { NSEObservationOptions } from "../../NSE/sdkPackageEntry";
+export { createNSETabSelectionRestoration } from "../../NSE/sdkPackageEntry";
+export type { NSENavigationRestorationDescriptor } from "../../NSE/sdkPackageEntry";
+export { bind, createNSEBinding, useNSEBinding } from "../../NSE/sdkPackageEntry";
+export type { NSEBinding, NSEBindingValue, NSEBindingSnapshot, NSEBindingCommitResult, NSEBindingEdit, NSEBindingOwner, NSEBindingAdapter, NSEBoundValueProps, NSEBindingView, NSEWritableBindingKey } from "../../NSE/sdkPackageEntry";
+export { managedTask, NSETaskQueueFullError } from "../../NSE/sdkPackageEntry";
+export type { NSETaskLifetime, NSETaskSettlement, NSETaskContext, NSETaskRun, NSETaskSnapshot, NSEManagedTask, NSETaskOptions } from "../../NSE/sdkPackageEntry";
+export { NSEActionScopeProvider } from "../../NSE/sdkPackageEntry";
+export type { NSEActionScopeProviderProps } from "../../NSE/sdkPackageEntry";
+export { NSEApplication, NSEWindowController, NSEViewController } from "../../NSE/sdkPackageEntry";
+export { outlet } from "../../NSE/sdkPackageEntry";
+export type { NSEViewOutlet, NSEOutletOptions } from "../../NSE/sdkPackageEntry";
+export type { NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "../../NSE/sdkPackageEntry";
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,
   NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEViewControllerFX, NSEViewControllerFXClients,
   NSEWindow, NSEWindowCloseOutcome, NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
-} from "../../NSE/Application";
+} from "../../NSE/sdkPackageEntry";

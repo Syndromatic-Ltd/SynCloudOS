@@ -18,22 +18,24 @@
  */
 
 import { useMemo, useRef } from "react";
-import { observe } from "../../NSE/Objects/observable";
-import { publishNSEActionChange } from "../../NSE/Controls/Core/actionChanges";
-import { useNSEControlCommand } from "../../NSE/Controls/Core/useNSEControlCommand";
-import type { NSEControlRuntimePort } from "../../NSE/Controls/Core/controlTypes";
-import type { CommandDispatchResult } from "../Commands/commandTypes";
-import type { KeyBindingDeclaration } from "../KeyBindings/keyBindingTypes";
+import { observe } from "../../NSE/applicationHostInterop";
+import { getNSEObjectOwners } from "../../NSE/applicationHostInterop";
+import { publishNSEActionChange } from "../../NSE/applicationHostInterop";
+import { useNSEControlCommand } from "../../NSE/applicationHostInterop";
+import type { NSEControlRuntimePort } from "../../NSE/applicationHostInterop";
+import type { CommandDispatchResult } from "../SynCloudOS";
+import type { KeyBindingDeclaration } from "../SynCloudOS";
 import { useSCOS } from "./scos/useSCOS";
-import { nseActionCommandId } from "../../NSE/Controls/Core/actionCommandId";
+import { nseActionCommandId } from "../../NSE/applicationHostInterop";
 import type { AppCommandClient } from "./appClientTypes";
-import type { SynWareCommandDeclaration, SynWareCommandPayloadSchema, SynWareCommandValidation } from "./appRuntimeTypes";
+import type { SynWareCommandDeclaration, SynWareCommandPayloadSchema, SynWareCommandValidation, SynWareCommandUndoPolicy } from "./appRuntimeTypes";
+import { nseActionRecords, type NSEActionReference } from "./actionReference";
 
 /** A method an action may decorate: at most one parameter, the payload. */
-export type NSEActionMethod<This, Payload> = (this: This, payload: Payload) => unknown;
+export type NSEActionMethod<This, Payload, Result = unknown> = (this: This, payload: Payload) => Result | Promise<Result>;
 
 /** What `@action` accepts besides a bare standard-command ID. */
-export interface NSEActionOptions<Payload = unknown> {
+export interface NSEActionOptions<Payload = unknown, Result = unknown> {
   /** A standard command this action answers, such as `document.save`. Without it the command is `<appId>.<method name>`. */
   readonly id?: string;
   /** The command's static or payload-dependent localised title. Defaults to the method name in words (`newNote` is "New Note"). */
@@ -46,6 +48,8 @@ export interface NSEActionOptions<Payload = unknown> {
   readonly allowReservedBrowserShortcut?: boolean;
   /** Checks and types the payload. Without it any payload is accepted, except that a method with no parameter accepts none. */
   readonly payload?: SynWareCommandPayloadSchema<Payload>;
+  /** Optional canonical command undo; omit when the method already registers document/text undo. */
+  readonly undo?: SynWareCommandUndoPolicy<Payload, Result>;
 }
 
 type ActionDecoratorContext<This, Payload> = ClassMethodDecoratorContext<This, NSEActionMethod<This, Payload>>;
@@ -53,7 +57,7 @@ type ActionDecoratorContext<This, Payload> = ClassMethodDecoratorContext<This, N
 type ActionRecord = NSEActionOptions<unknown>;
 
 /** The decorated method functions. Keyed by function so a class swapped in by hot reload is read the same way as the one it replaces. */
-const actionRecords = new WeakMap<object, ActionRecord>();
+const actionRecords = nseActionRecords;
 
 function declareAction<This extends object, Payload>(
   record: ActionRecord,
@@ -91,9 +95,9 @@ export function action(id: string): <This extends object, Payload>(
   method: NSEActionMethod<This, Payload>,
   context: ActionDecoratorContext<This, Payload>,
 ) => void;
-export function action<Payload>(options: NSEActionOptions<Payload>): <This extends object>(
-  method: NSEActionMethod<This, Payload>,
-  context: ActionDecoratorContext<This, Payload>,
+export function action<Payload, Result = unknown>(options: NSEActionOptions<Payload, Result>): <This extends object>(
+  method: NSEActionMethod<This, Payload, Result>,
+  context: ClassMethodDecoratorContext<This, NSEActionMethod<This, Payload, Result>>,
 ) => void;
 export function action(first: unknown, second?: unknown): unknown {
   if (typeof first === "function") {
@@ -107,6 +111,7 @@ export function action(first: unknown, second?: unknown): unknown {
       id: options.id, title: options.title, menuCategory: options.menuCategory,
       keyBindings: options.keyBindings, allowReservedBrowserShortcut: options.allowReservedBrowserShortcut,
       payload: options.payload as SynWareCommandPayloadSchema<unknown> | undefined,
+      undo: options.undo,
     };
     return (method: NSEActionMethod<object, unknown>, context: ActionDecoratorContext<object, unknown>) => { declareAction(record, method, context); };
   }
@@ -191,7 +196,21 @@ function titleFor(commandId: string, name: string, record: ActionRecord): SynWar
   return Object.freeze({ key: `commands.${commandId}.title`, fallback: record.title ?? inWords(name) });
 }
 
-function declarationFor(target: object, name: string, commandId: string, responderId: string, record: ActionRecord): object {
+function validatorFor(target: object, name: string): ((payload: unknown) => unknown) | undefined {
+  const key = `validate${capitalised(name)}`;
+  if (!(key in target)) return undefined;
+  const candidate: unknown = Reflect.get(target, key);
+  if (typeof candidate !== "function") throw new TypeError(`${key} must be a method when declared.`);
+  return candidate as (payload: unknown) => unknown;
+}
+
+function acceptsPayload(method: Function): boolean {
+  // Function.length counts only required parameters before the first default,
+  // and ignores rest parameters. Distinguish an actually empty declaration.
+  return method.length > 0 || !/^[^(]*\(\s*(?:(?:\/\*[\s\S]*?\*\/|\/\/[^\r\n]*(?:\r?\n))\s*)*\)/u.test(Function.prototype.toString.call(method));
+}
+
+function declarationFor(target: object, name: string, commandId: string, responderId: string, record: ActionRecord, isLive: () => boolean): object {
   const method = (): ((payload?: unknown) => unknown) => {
     const candidate: unknown = Reflect.get(target, name);
     if (typeof candidate !== "function") throw new TypeError(`The action ${name} is no longer a method.`);
@@ -206,20 +225,21 @@ function declarationFor(target: object, name: string, commandId: string, respond
     payload: record.payload ?? Object.freeze({
       description: "The action's payload",
       // Read at dispatch, so a method hot reload swaps in with a parameter is not refused.
-      parse: (value: unknown) => (method().length === 0 ? noPayload : anyPayload).parse(value),
+      parse: (value: unknown) => (acceptsPayload(method()) ? anyPayload : noPayload).parse(value),
     }),
     defaultKeyBindings: record.keyBindings ?? [],
     scope: "focused",
-    undo: Object.freeze({ kind: "none" }),
+    undo: record.undo ?? Object.freeze({ kind: "none" }),
     validate(context: { readonly payload: unknown }): SynWareCommandValidation | Promise<SynWareCommandValidation> {
-      const validator: unknown = Reflect.get(target, `validate${capitalised(name)}`);
-      if (typeof validator !== "function") return { enabled: true };
+      if (!isLive()) return { enabled: false, disabledReason: "The action's controller was disposed." };
+      const validator = validatorFor(target, name);
+      if (!validator) return { enabled: true };
       const result: unknown = validator.call(target, context.payload);
       return isThenable(result) ? Promise.resolve(result).then((settled) => toValidation(name, settled)) : toValidation(name, result);
     },
-    execute(context: { readonly payload: unknown }): undefined | Promise<undefined> {
-      const result = method().call(target, context.payload);
-      return isThenable(result) ? Promise.resolve(result).then(() => undefined) : undefined;
+    execute(context: { readonly payload: unknown }): unknown {
+      if (!isLive()) throw new Error("The action's controller was disposed.");
+      return method().call(target, context.payload);
     },
   });
 }
@@ -236,6 +256,9 @@ export function bindActionResponder(target: object, host: NSEActionHost, respond
   if (responderId.trim().length === 0) throw new TypeError("Actions need a responder to answer on.");
   const registered = new Map<string, { readonly commandId: string; readonly record: ActionRecord; readonly handle: { dispose(): unknown } }>();
   let disposed = false;
+  const signal: AbortSignal | undefined = "ownerSignal" in target ? Reflect.get(target, "ownerSignal") as AbortSignal | undefined : undefined;
+  const isLive = () => !disposed && !signal?.aborted && !("isDisposed" in target && Reflect.get(target, "isDisposed") === true);
+  if (!isLive()) throw new TypeError("Cannot bind actions to a disposed controller.");
 
   const announceChanges = (): void => {
     for (const { commandId } of registered.values()) publishNSEActionChange(commandId);
@@ -247,11 +270,12 @@ export function bindActionResponder(target: object, host: NSEActionHost, respond
     if (existing) publishNSEActionChange(existing.commandId);
   };
 
-  const sync = (): void => {
+  const syncActions = (): void => {
     if (disposed) return;
     const wanted = new Map<string, { readonly commandId: string; readonly record: ActionRecord }>();
     const owners = new Map<string, string>();
     for (const [name, record] of collectActions(target)) {
+      validatorFor(target, name);
       const commandId = record.id ?? nseActionCommandId(host.appId, name);
       const owner = owners.get(commandId);
       if (owner !== undefined) throw new TypeError(`The actions ${owner} and ${name} both answer ${commandId}.`);
@@ -264,25 +288,29 @@ export function bindActionResponder(target: object, host: NSEActionHost, respond
     }
     for (const [name, { commandId, record }] of wanted) {
       if (registered.has(name)) continue;
-      registered.set(name, { commandId, record, handle: host.commands.register(declarationFor(target, name, commandId, responderId, record)) });
+      registered.set(name, { commandId, record, handle: host.commands.register(declarationFor(target, name, commandId, responderId, record, isLive)) });
       publishNSEActionChange(commandId);
     }
   };
 
-  try {
-    sync();
-  } catch (error) {
-    for (const name of [...registered.keys()]) remove(name);
-    throw error;
-  }
-  const stopObserving = observe(target, announceChanges);
+  const sync = (): void => {
+    try { syncActions(); }
+    catch (error) {
+      // A hot refresh has the same all-or-nothing contract as first binding.
+      for (const name of [...registered.keys()]) remove(name);
+      throw error;
+    }
+  };
+  sync();
+  const stopObserving = getNSEObjectOwners(target).map(owner => observe(owner, announceChanges));
 
   const binding: NSEActionBinding = {
     refresh: sync,
     dispose() {
       if (disposed) return;
       disposed = true;
-      stopObserving();
+      signal?.removeEventListener("abort", binding.dispose);
+      for (const stop of stopObserving) stop();
       for (const name of [...registered.keys()]) remove(name);
       liveBindings.get(target)?.delete(binding);
     },
@@ -290,6 +318,7 @@ export function bindActionResponder(target: object, host: NSEActionHost, respond
   const bindings = liveBindings.get(target) ?? new Set<NSEActionBinding>();
   bindings.add(binding);
   liveBindings.set(target, bindings);
+  signal?.addEventListener("abort", binding.dispose, { once: true });
   return binding;
 }
 
@@ -299,11 +328,11 @@ export function refreshActionBindings(target: object): void {
 }
 
 /** The current canonical availability and check state of an action. */
-export interface NSEActionState {
+export interface NSEActionState<Payload = unknown, Result = unknown> {
   readonly enabled: boolean;
   readonly state: "off" | "on" | "mixed";
   /** Uses the bound payload when omitted; a supplied payload, including undefined, is validated afresh. */
-  perform(payload?: unknown): Promise<CommandDispatchResult<unknown> | null>;
+  perform(payload?: Payload): Promise<CommandDispatchResult<Result> | null>;
 }
 
 // Payloads passed by a component are commonly inline data objects. Keep equal
@@ -340,7 +369,9 @@ function sameActionPayload(left: unknown, right: unknown, seen?: WeakMap<object,
  * return <button disabled={!save.enabled} onClick={() => void save.perform()}>Save</button>;
  * ```
  */
-export function useAction(name: string, payload?: unknown): NSEActionState {
+export function useAction<Payload, Result>(reference: NSEActionReference<Payload, Result>, payload?: NoInfer<Payload>): NSEActionState<Payload, Result>;
+export function useAction(name: string, payload?: unknown): NSEActionState;
+export function useAction(name: string | NSEActionReference, payload?: unknown): NSEActionState {
   const app = useSCOS();
   const stablePayload = useRef(payload);
   if (!sameActionPayload(stablePayload.current, payload)) stablePayload.current = payload;

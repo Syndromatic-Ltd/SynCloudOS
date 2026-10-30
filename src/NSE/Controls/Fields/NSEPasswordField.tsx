@@ -1,3 +1,5 @@
+import { useNSEValueBinding } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -26,6 +28,10 @@ export interface NSEPasswordFieldProps<T = string> extends Omit<NSETextFieldProp
   readonly hint?: string;
 }
 
-export function NSEPasswordField<T = string>({ hint, placeholder, className = "", autoCapitalize = "none", autoCorrect = "off", spellCheck = false, ...props }: NSEPasswordFieldProps<T>) {
+export function NSEPasswordField<T = string>(props: NSEBoundValueProps<T, NSEPasswordFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <NSEPasswordFieldControl {...useNSEValueBinding<T, NSEPasswordFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:'' as T})} />;
+}
+
+function NSEPasswordFieldControl<T = string>({ hint, placeholder, className = "", autoCapitalize = "none", autoCorrect = "off", spellCheck = false, ...props }: NSEPasswordFieldProps<T>) {
   return <NSETextField<T> {...props} className={classes("nse-extended-password-field", className)} type="password" placeholder={placeholder ?? hint} autoCapitalize={autoCapitalize} autoCorrect={autoCorrect} spellCheck={spellCheck} />;
 }

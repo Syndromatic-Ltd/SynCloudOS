@@ -31,6 +31,91 @@ import { WindowLayer } from "../../src/Webspring/WindowLayer/WindowLayer";
 import { createTestRuntime } from "./helpers";
 
 describe("window-hosted transient surface bridge", () => {
+  it("keeps a popover anchored to an ordinary idless element until that element is removed", async () => {
+    const runtime = createTestRuntime({ id: "runtime:idless-popover" });
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:idless", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const view = render(<SynCloudOSProvider runtime={runtime}>
+      <div data-syncloudos-runtime-owner={runtime.runtimeId}>
+        <button>Ordinary anchor</button><WindowLayer contentRegistry={renderers} />
+      </div>
+    </SynCloudOSProvider>);
+    const anchor = screen.getByRole("button", { name: "Ordinary anchor" });
+    const onDidClose = vi.fn();
+    let id = "";
+    await act(async () => {
+      id = await bridge.present({ id: "details", role: "popover", title: "Details", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 240, height: 150 }, onDidClose }, <p>Popover details</p>);
+    });
+    await act(async () => { anchor.after(document.createElement("span")); });
+    expect(runtime.windows.snapshot().windowControllerIds).toContain(id);
+    expect(onDidClose).not.toHaveBeenCalled();
+    await act(async () => { anchor.remove(); });
+    await waitFor(() => expect(runtime.windows.snapshot().windowControllerIds).not.toContain(id));
+    expect(onDidClose).toHaveBeenCalledTimes(1);
+    expect(anchor.hasAttribute("id")).toBe(false);
+    view.unmount(); bridge.dispose(); await runtime.dispose("test");
+  });
+
+  it("retains a shared anchor until its final surface closes and preserves a caller's replacement ID", async () => {
+    const runtime = createTestRuntime({ id: "runtime:shared-idless-anchor" });
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:shared-anchor", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const request = { role: "popover" as const, title: "Details", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 240, height: 150 } };
+    const first = await bridge.present({ ...request, id: "first" }, <p>First</p>);
+    const second = await bridge.present({ ...request, id: "second" }, <p>Second</p>);
+    expect(anchor.id).toBeTruthy();
+    expect(runtime.windows.select(first).record.anchor?.id).toBe(anchor.id);
+    expect(runtime.windows.select(second).record.anchor?.id).toBe(anchor.id);
+    await bridge.dismiss("first");
+    expect(anchor.id).toBe(runtime.windows.select(second).record.anchor?.id);
+    anchor.id = "caller-replacement";
+    await bridge.dismiss("second");
+    expect(anchor.id).toBe("caller-replacement");
+    anchor.remove(); bridge.dispose(); await runtime.dispose("test");
+  });
+
+  it("switches idless anchors without a stale removal observer closing the current popover", async () => {
+    const runtime = createTestRuntime({ id: "runtime:replacement-idless-anchor" });
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:replacement-anchor", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const view = render(<SynCloudOSProvider runtime={runtime}>
+      <div data-syncloudos-runtime-owner={runtime.runtimeId}>
+        <button>First anchor</button><button>Second anchor</button><WindowLayer contentRegistry={renderers} />
+      </div>
+    </SynCloudOSProvider>);
+    const first = screen.getByRole("button", { name: "First anchor" });
+    const second = screen.getByRole("button", { name: "Second anchor" });
+    const request = { id: "details", role: "popover" as const, title: "Details", parentWindowControllerId: null, bounds: { x: 0, y: 0, width: 240, height: 150 } };
+    let id = "";
+    await act(async () => { id = await bridge.present({ ...request, anchor: first }, <p>Details</p>); });
+    await act(async () => { await bridge.present({ ...request, anchor: second }, <p>Updated details</p>); });
+    expect(runtime.windows.snapshot().windowControllerIds).toContain(id);
+    expect(runtime.windows.select(id).record.anchor?.id).toBe(second.id);
+    expect(first.hasAttribute("id")).toBe(false);
+    await act(async () => { await bridge.dismiss(request.id); });
+    expect(second.hasAttribute("id")).toBe(false);
+    view.unmount(); bridge.dispose(); await runtime.dispose("test");
+  });
+
+  it("retains a replacement anchor lease when a render clears the same element's generated ID", async () => {
+    const runtime = createTestRuntime({ id: "runtime:renewed-idless-anchor" });
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:renewed-anchor", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const request = { id: "details", role: "popover" as const, title: "Details", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 240, height: 150 } };
+    const id = await bridge.present(request, <p>Details</p>);
+    anchor.removeAttribute("id");
+    await bridge.present(request, <p>Updated details</p>);
+    expect(anchor.id).toBeTruthy();
+    expect(runtime.windows.select(id).record.anchor?.id).toBe(anchor.id);
+    await bridge.dismiss(request.id);
+    expect(anchor.hasAttribute("id")).toBe(false);
+    anchor.remove(); bridge.dispose(); await runtime.dispose("test");
+  });
+
   it("creates one real window sheet for an application stage and cleans both renderer registries", async () => {
     const runtime = createTestRuntime({ id: "runtime:p07-surface" });
     const renderers = new WindowContentRendererRegistry();

@@ -78,8 +78,10 @@ export function NSEMenuOverlay({ overlay, controller, open, anchor, labelledBy, 
   // plate that then grows (and, near a viewport edge, flips). Later branches
   // (submenus) validate while the menu is already showing and stay painted.
   const subscribeController = useCallback(
-    (listener: () => void) => controller.subscribe?.(listener) ?? (() => undefined),
-    [controller],
+    (listener: () => void) => controller.subscribe?.(() => {
+      if (!runtime.signal.aborted) listener();
+    }) ?? (() => undefined),
+    [controller, runtime],
   );
   const branch = useSyncExternalStore(subscribeController, () => controller.snapshot, () => controller.snapshot);
   const rowsReady = !controller.subscribe || (branch.open && !branch.validating);

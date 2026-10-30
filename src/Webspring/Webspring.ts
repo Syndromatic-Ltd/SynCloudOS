@@ -410,7 +410,8 @@ export function isDefinedWebspring(value: unknown): value is WebspringDefinition
  * Adds the preference panes and widgets a project declares in its own folders
  * (`src/Preferences/*.prefPane`, `src/Widgets/*.widget`) to the shell it
  * declares. Declared panes keep their places; discovered panes follow in the
- * order the project derived them.
+ * order the project derived them. Explicit widgets keep their authored order;
+ * remaining discovered widgets follow by order, then id.
  */
 export function withDiscoveredWebspringItems<TManifest extends WebspringManifest>(
   definition: WebspringDefinition<TManifest>,
@@ -430,7 +431,9 @@ export function withDiscoveredWebspringItems<TManifest extends WebspringManifest
   }
   return Object.freeze({
     ...definition,
-    widgets: captureWidgets([...definition.widgets, ...items.widgets]),
+    widgets: captureWidgets([...definition.widgets, ...[...captureWidgets(items.widgets)]
+      .sort((left, right) => left.order - right.order || left.id.localeCompare(right.id))
+      .filter(widget => !definition.widgets.includes(widget))]),
     preferences: Object.freeze({ panes: Object.freeze(panes), hide: definition.preferences.hide }),
   });
 }

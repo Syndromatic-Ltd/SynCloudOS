@@ -50,6 +50,23 @@ const host = await mountSynCloudOS({
 
 ## Sign-in methods
 
+The authentication UI's `checking` or `authenticating` status describes a request, not a new
+identity decision. The last verified identity remains authoritative until the server replaces
+it, logout succeeds, or its existing expiry timer fires. Overlapping reads cannot overwrite a
+newer adapter notification. Identity changes reach the runtime before UI subscribers receive
+the completed authentication status.
+
+If `/auth/start` completes sign-in and returns the exact requested local return path, the client
+verifies `/auth/session` before navigating there. Browser Navigation API routing can retain the
+current document; successful sign-in must therefore update that runtime without relying on a
+reload. A missing or invalid session fails sign-in. External provider redirects retain their
+normal navigation flow, and passive browser rechecks cannot supersede a pending explicit sign-in.
+
+Explicit logout terminates all open applications, including suspended ones, through their
+normal lifecycle before locking the runtime and ending server identity. Termination vetoes or
+save failures stop logout while the login session is still authorised. A later login launches
+fresh application/controller resources instead of reusing subscriptions from revoked windows.
+
 You configure providers on the server. The server describes each one with an `AuthenticationMethod`: an `id`, the complete button `label` and an optional `iconUrl`, which must be root relative or HTTPS. `/auth/methods` publishes this description, and the sign-in window draws a button for each method without special cases for any provider.
 
 The handler supports one configured OIDC issuer, with client credentials and an admission policy that you supply. A provider that speaks only OAuth, without OIDC, needs a server adapter of its own beyond a new label and icon.

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { AppTrustedDiagnosticsClient } from "../AppSDK/appTrustedClientTypes";
+import type { AppTrustedDiagnosticsClient } from "../AppSDK/runtimeContracts";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 
 /** Internal host authority, never exported by either SDK entry point. Each

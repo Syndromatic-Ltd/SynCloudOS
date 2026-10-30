@@ -37,6 +37,23 @@ function identityAdapter() {
 }
 
 describe("instance-owned login service", () => {
+  it("ends both active and suspended applications before logout ends identity", async () => {
+    const adapter = identityAdapter();
+    const runtime = createTestRuntime({ identity: { sessionAdapter: adapter }, initialBundles: [
+      createTestBundle({ bundleIdentifier: "com.example.logout-one", route: "/logout-one" }),
+      createTestBundle({ bundleIdentifier: "com.example.logout-two", route: "/logout-two" }),
+    ] });
+    await runtime.boot({ initialPathname: "/logout-one" });
+    await runtime.routes.openRoute("/logout-two", { syncRoute: false }).result;
+    expect(runtime.lifecycle.getState("com.example.logout-one")).toBe("suspended");
+    expect((await runtime.logOut().result).status).toBe("completed");
+    expect(runtime.lifecycle.getState("com.example.logout-one")).toBe("closed");
+    expect(runtime.lifecycle.getState("com.example.logout-two")).toBe("closed");
+    expect(runtime.store.getSnapshot().application.openAppIds).toEqual([]);
+    expect(adapter.wasEnded()).toBe(true);
+    await runtime.dispose();
+  });
+
   it("lets an authentication-disabled runtime open an explicitly public app without a session", async () => {
     const runtime = createTestRuntime({
       authenticationPolicy: "disabled",
@@ -184,7 +201,7 @@ describe("instance-owned login service", () => {
     await expect(logout.result).resolves.toMatchObject({ status: "completed", committed: true });
     expect(runtime.store.getSnapshot()).toMatchObject({
       loginServices: { isAuthorised: false, status: "locked" },
-      lifecycle: { "com.example.current-app": "suspended", "com.example.delayed-app": "registered" },
+      lifecycle: { "com.example.current-app": "closed", "com.example.delayed-app": "registered" },
       application: { activeAppId: null, currentAppId: null, routePath: "/" },
       statechart: { currentState: "locked.loginWindow" },
     });

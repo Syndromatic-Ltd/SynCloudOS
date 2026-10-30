@@ -101,7 +101,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function renderFrame(beforeRender?: (runtime: ReturnType<typeof createTestRuntime>) => void) {
+function renderFrame(beforeRender?: (runtime: ReturnType<typeof createTestRuntime>) => void, appInfo = createAppInfo()) {
   const runtime = authoriseTestRuntime(createTestRuntime());
   runtime.apps.registerBundle(createTestBundle({ version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" }));
   runtime.statechart.gotoState("active.application.active");
@@ -110,7 +110,7 @@ function renderFrame(beforeRender?: (runtime: ReturnType<typeof createTestRuntim
     <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={stageSiteBranding}>
       <ApplicationStageView
-        app={createAppInfo()}
+        app={appInfo}
         lifecycle="ready"
         stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
       />
@@ -170,6 +170,24 @@ function CustomQuickSwitchTitleFixture() {
 }
 
 describe("ApplicationStageView app menu", () => {
+  it("keeps a class window's responder as the parent of its application menu", async () => {
+    const execute = vi.fn();
+    const runtime = renderFrame(runtime => {
+      runtime.responders.register({ id: "controller:menu-test", kind: "controller", parentId: "application:com.example.test-app", scopeId: "application:com.example.test-app" });
+      runtime.commands.register({
+        id: "com.example.test-app.settings", responderId: "controller:menu-test",
+        title: { key: "settings", fallback: "App Settings" }, payload: { description: "No payload", parse: () => ({ ok: true, value: undefined }) },
+        scope: "focused", defaultKeyBindings: [], undo: { kind: "none" }, validate: () => ({ enabled: true }), execute,
+      });
+    }, { ...createAppInfo(), applicationMenu: { preferences: { commandId: "com.example.test-app.settings", label: "App Settings" } } });
+    runtime.focus.requestFocus("controller:menu-test");
+    expect(runtime.focus.getFocusedResponderId()).toBe("controller:menu-test");
+    fireEvent.click(screen.getByRole("button", { name: "User Info" }));
+    const settings = await screen.findByRole("menuitem", { name: "App Settings" });
+    await waitFor(() => expect(settings.hasAttribute("disabled"), JSON.stringify(runtime.focus.inspect())).toBe(false));
+    fireEvent.click(settings);
+    await waitFor(() => expect(execute).toHaveBeenCalledOnce());
+  });
   it("owns source-list identity, destination title and a single footer, and drops the top rail on compact displays", async () => {
     let viewport = { width: 1440, height: 900 };
     const listeners = new Set<(snapshot: typeof viewport) => void>();

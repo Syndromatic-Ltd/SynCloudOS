@@ -1,7 +1,7 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import { useId, useSyncExternalStore } from "react";
 import { NSEAlert } from "../NSE/hostComposition";
-import { NSEAlertBackdrop } from "../NSE/SystemUI";
+import { NSEAlertBackdrop } from "../NSE/hostComposition";
 import { NSEPushButton } from "../NSE/public/controls";
 import type { SynCloudOSAlertCenter } from "../SynCloudOS/SystemUI/alertCenter";
 import { FocusScope } from "./FocusScope";

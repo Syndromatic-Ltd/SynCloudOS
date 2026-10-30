@@ -26,9 +26,13 @@ import type { MEFXMediaClient } from "../../FX/MediaFX/MEFXMediaClient";
 import type { MIFXAccess, MIFXClient } from "../../FX/MIDIFX/public";
 import type { MFXMotionClient, MFXMotionManager } from "../../FX/MotionFX/public";
 import type { VFXCaptureSession, VFXVideoClient } from "../../FX/VideoFX/public";
+import { manageNSEAnimationRenderer, type NSEManagedAnimationHost, type NSEManagedAFXRenderer, type NSEManagedAFXRendererOptions } from "./managedAnimationRenderer";
+import type { NSEViewController } from "./NSEViewController";
+import type { NSEViewOutlet } from "./viewOutlet";
 
 /** The FX clients of the mounted application, as the host hands them to a view controller. */
 export interface NSEViewControllerFXClients {
+  readonly animation?: NSEManagedAnimationHost;
   readonly motion: MFXMotionClient;
   readonly location: LFXLocationClient;
   readonly haptics: HFXHapticClient;
@@ -45,6 +49,9 @@ export interface NSEViewControllerFXClients {
  * location fix, a MIDI port, the camera) until the controller asks.
  */
 export interface NSEViewControllerFX {
+  readonly animation: {
+    manageRenderer(outlet: NSEViewOutlet<HTMLCanvasElement>, options?: NSEManagedAFXRendererOptions): NSEManagedAFXRenderer;
+  };
   /** Device motion and attitude (MotionFX). */
   readonly motion: MFXMotionManager;
   /** Foreground location (LocationFX). */
@@ -66,7 +73,7 @@ function boundTo(owner: AbortSignal, signal: AbortSignal | undefined): AbortSign
 }
 
 /** The FX services of one view controller, owned by `owner`. */
-export function createViewControllerFX(clients: NSEViewControllerFXClients, owner: AbortSignal): NSEViewControllerFX {
+export function createViewControllerFX(clients: NSEViewControllerFXClients, owner: AbortSignal, controller?: NSEViewController<unknown>): NSEViewControllerFX {
   let motion: MFXMotionManager | undefined;
   let location: LFXLocationManager | undefined;
   let haptics: HFXHapticSession | undefined;
@@ -81,6 +88,11 @@ export function createViewControllerFX(clients: NSEViewControllerFXClients, owne
       clients.media.createTimebase(options, boundTo(owner, signal)),
   }) as MEFXMediaClient;
   return Object.freeze({
+    animation: Object.freeze({ manageRenderer(outlet: NSEViewOutlet<HTMLCanvasElement>, options?: NSEManagedAFXRendererOptions) {
+      owner.throwIfAborted();
+      if (!controller) throw new TypeError("Managed animation renderers require a view controller.");
+      return manageNSEAnimationRenderer(controller, outlet, options);
+    } }),
     get motion() { return (motion ??= clients.motion.createManager(owner)); },
     get location() { return (location ??= clients.location.createManager(owner)); },
     get haptics() { return (haptics ??= clients.haptics.createEngine(owner)); },

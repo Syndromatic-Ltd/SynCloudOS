@@ -84,7 +84,13 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
     const MutationObserverPort = documentPort.defaultView?.MutationObserver;
     const observer = MutationObserverPort && transientAnchors.length > 0
       ? new MutationObserverPort(() => {
-          if (transientAnchors.some((anchorId) => !hasOwnedAnchor(ownerRoot, runtime.runtimeId, anchorId))) {
+          // The bridge may have replaced an anchor or closed its surface since
+          // this observer was installed. Inspect the current records so releasing
+          // an old generated identity cannot dismiss the replacement surface.
+          const currentAnchors = runtime.windows.list({ role: "popover" }).flatMap(({ record }) => (
+            !record.pinned && record.anchor ? [record.anchor.id] : []
+          ));
+          if (currentAnchors.some((anchorId) => !hasOwnedAnchor(ownerRoot, runtime.runtimeId, anchorId))) {
             void runtime.windows.dismissTransientWindows({ reason: "anchor-removed" }).catch(() => undefined);
           }
         })

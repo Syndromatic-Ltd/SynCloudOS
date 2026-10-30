@@ -1,3 +1,5 @@
+import { useNSEValueBinding } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -26,7 +28,11 @@ export interface NSERoundedInputProps extends NSETextFieldProps {
   hint?: string;
 }
 
-export function NSERoundedInput({
+export function NSERoundedInput(props: NSEBoundValueProps<string,NSERoundedInputProps,'value'|'defaultValue'|'onValueChange'|'undoManager'>) {
+  return <NSERoundedInputControl {...useNSEValueBinding<string,NSERoundedInputProps,'value'|'defaultValue'|'onValueChange'|'undoManager'>(props,{fallback:''})} />;
+}
+
+function NSERoundedInputControl({
   hint,
   placeholder,
   className = "",
@@ -45,7 +51,11 @@ export interface NSEToolInputProps extends NSETextFieldProps {
   hint?: string;
 }
 
-export function NSEToolInput({
+export function NSEToolInput(props: NSEBoundValueProps<string,NSEToolInputProps,'value'|'defaultValue'|'onValueChange'|'undoManager'>) {
+  return <NSEToolInputControl {...useNSEValueBinding<string,NSEToolInputProps,'value'|'defaultValue'|'onValueChange'|'undoManager'>(props,{fallback:''})} />;
+}
+
+function NSEToolInputControl({
   hint,
   placeholder,
   className = "",
