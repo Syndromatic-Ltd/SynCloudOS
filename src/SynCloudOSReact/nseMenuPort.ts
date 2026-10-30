@@ -19,7 +19,7 @@
  */
 
 import { useContext, useMemo } from "react";
-import { nseActionCommandId } from "../NSE/Controls/Core/actionCommandId";
+import { nseActionCommandId } from "../NSE/applicationHostInterop";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext } from "./runtimeContext";
 
 /**

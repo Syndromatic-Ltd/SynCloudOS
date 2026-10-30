@@ -18,14 +18,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { SynWareMigration } from "../../SynCloudOS/AppSDK/appDefinitionTypes";
-import type { SynWareRouteGraph } from "../../SynCloudOS/Routing/appRouteTypes";
+import type { SynWareMigration } from "../../SynCloudOS/nseRuntimeContracts";
+import type { SynWareRouteGraph } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
 import { nseDisposeFor, type NSEOwnedObject, type NSEOwner } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
 import { NSEObjectLifetime } from "./objectLifetime";
+import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
 import type { NSEAnyWindowController, NSEWindowController, NSEWindowControllerClass } from "./NSEWindowController";
-import type { AppBounds, AppOwnedWindowSnapshot } from "../../SynCloudOS/AppSDK/appClientTypes";
+import type { AppBounds, AppOwnedWindowSnapshot } from "../../SynCloudOS/nseRuntimeContracts";
+import type { NSEViewController, NSEViewControllerClass } from "./NSEViewController";
 
 /** What `openWindow` accepts. */
 export interface NSEOpenWindowOptions {
@@ -50,6 +52,7 @@ export interface NSEApplicationContext {
 export interface NSEApplicationClass<TApplication extends NSEApplication = NSEApplication> {
   new (): TApplication;
   readonly mainWindow?: NSEWindowControllerClass;
+  readonly mainViewController?: NSEViewControllerClass & (new () => NSEViewController<unknown>);
   readonly windowControllers?: Readonly<Record<string, NSEWindowControllerClass>>;
   readonly routes?: SynWareRouteGraph;
   readonly migrations?: readonly SynWareMigration[];
@@ -78,6 +81,8 @@ export interface NSEApplicationClass<TApplication extends NSEApplication = NSEAp
 export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObject {
   /** The window controller the framework opens for the application's window. */
   static mainWindow?: NSEWindowControllerClass;
+  /** A standard main window whose root is this view controller class. */
+  static mainViewController?: NSEViewControllerClass & (new () => NSEViewController<unknown>);
   /** Stable names used to recreate secondary window controllers after a reload. */
   static windowControllers?: Readonly<Record<string, NSEWindowControllerClass>>;
   /** Routes the application serves, declared as a route graph. */
@@ -112,6 +117,11 @@ export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObjec
 
   get isDisposed(): boolean {
     return this.#lifetime.isDisposed;
+  }
+
+  /** Constructs and owns a disposable synchronously, including after await. */
+  own<T extends NSEDisposable>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
+    return ownNSEFactory(this, factory);
   }
 
   /** Why the application was disposed, or `undefined` while it is running. */

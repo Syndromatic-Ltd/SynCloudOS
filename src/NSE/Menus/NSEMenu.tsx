@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Children, isValidElement, useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
+import { Children, isValidElement, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import type { CommandDispatchAcceptance, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
 import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
 import { useNSEAppearanceProjection } from "../Appearance";
@@ -26,7 +26,7 @@ import { sizedControlStyle, useNSEControlFeedback } from "../Controls/Core/nseCo
 import { NSEPushButton, type NSEButtonTone, type NSEPushButtonProps } from "../Controls/Buttons/NSEButtons";
 import { useNSEOverlayProvider } from "../Overlays";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
-import { NSEMenuController, type NSEMenuController as NSEMenuControllerType } from "./NSEMenuController";
+import { NSEMenuController, nseRefreshMenuPresentation, type NSEMenuController as NSEMenuControllerType } from "./NSEMenuController";
 import type {
   NSEMenuEntry,
   NSEMenuItemDefinition,
@@ -36,6 +36,7 @@ import type {
   NSEMenuRuntimePort,
 } from "./menuTypes";
 import { useNSEMenuOverlayPresentationScope } from "./menuPresentationContext";
+import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import "./nse-menus.css";
 
 function classNames(...values: readonly (string | false | null | undefined)[]): string {
@@ -161,7 +162,9 @@ function NSECommandMenuSurface({
 }: NSECommandMenuProps) {
   const applicationAppearance = appearance === "application-menu";
   const appearanceProjection = useNSEAppearanceProjection();
-  const subscribe = useCallback((listener: () => void) => controller.subscribe(listener), [controller]);
+  const subscribe = useCallback((listener: () => void) => controller.subscribe(() => {
+    if (!controller.runtime.signal.aborted) listener();
+  }), [controller]);
   const snapshot = useSyncExternalStore(subscribe, () => controller.snapshot, () => controller.snapshot);
   const portalPresentation = useNSEMenuOverlayPresentationScope();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -231,13 +234,34 @@ function NSECommandMenuSurface({
     itemRefs.current.get(activeId)?.focus({ preventScroll: true });
   }, [activeId, snapshot.generation, snapshot.open]);
 
-  const activate = (entry: NSEMenuPresentedEntry, delayed = false) => {
+  const activate = async (entry: NSEMenuPresentedEntry, delayed = false) => {
     if (entry.kind === "submenu") {
       if (!entry.enabled) return;
       void controller.openSubmenu(entry.id, delayed ? submenuDelayMs : 0);
       return;
     }
-    if (entry.kind === "command" && entry.enabled) void controller.dispatch(entry.id);
+    if (entry.kind !== "command" || !entry.enabled || !controller.snapshot.open || controller.snapshot.validating || controller.snapshot.generation !== snapshot.generation) return;
+    // Entering the menu and focusing a row changes responder authority after
+    // the branch was first painted. Re-present the selected branch through
+    // normal validation before activation; direct stale dispatch stays fenced.
+    // Retain the current branch's rows: removing the focused row would dismiss
+    // its overlay before this asynchronous validation can complete.
+    const path = [...snapshot.branchPath];
+    const branchOpening = controller[nseRefreshMenuPresentation]();
+    const generation = controller.snapshot.generation;
+    const ownsBranch = (expectedPath: readonly string[]) => controller.snapshot.open
+      && controller.snapshot.generation === generation
+      && controller.snapshot.branchPath.length === expectedPath.length
+      && controller.snapshot.branchPath.every((id, index) => id === expectedPath[index]);
+    await branchOpening;
+    if (!ownsBranch(path)) return;
+    const current = controller.snapshot.entries.find(candidate => candidate.id === entry.id);
+    if (current?.kind !== "command" || current.commandId !== entry.commandId || current.payload !== entry.payload
+      || current.presentation.responderId !== entry.presentation.responderId) {
+      controller.dismiss("programmatic");
+      return;
+    }
+    if (current.enabled && !current.hidden) await controller.dispatch(current.id);
   };
 
   const move = (delta: number) => {
@@ -592,6 +616,7 @@ function NSEItemMenu({
   ...htmlAttributes
 }: NSEItemMenuProps) {
   const provider = useNSEOverlayProvider();
+  const nearestResponderId = useContext(NSEActionResponderContext);
   const generatedId = useId().replace(/:/g, "");
   const triggerId = `nse-menu-trigger:${generatedId}`;
   const menuLabel = useEquivalentValue(label, sameNode);
@@ -607,7 +632,7 @@ function NSEItemMenu({
       clearTimeout: (handle: unknown) => provider.runtime.environment.clearTimeout(handle),
     },
   }), [provider.runtime]);
-  const resolvedParentResponderId = menuOverlay?.parentResponderId ?? parentResponderId ?? provider.defaultParentResponderId;
+  const resolvedParentResponderId = menuOverlay?.parentResponderId ?? parentResponderId ?? nearestResponderId ?? provider.defaultParentResponderId;
   const localRuntime = useMemo(() => createLocalItemMenuRuntime(
     runtimeSource,
     localMenu.records,

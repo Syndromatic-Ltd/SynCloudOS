@@ -19,7 +19,7 @@
  */
 
 import { useContext, useLayoutEffect, useSyncExternalStore, type ComponentType } from "react";
-import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact/runtimeContext";
+import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
 import { NSEControllerResponder, NSEWindowControllerView } from "./applicationHosting";
 import { ensureApplicationSession, type ApplicationSessionSource } from "./applicationSession";
 

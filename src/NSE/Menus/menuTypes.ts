@@ -19,6 +19,7 @@
  */
 
 import type { ReactNode } from "react";
+import type { NSEActionReference, NSEActionPayloadCheck } from "../Controls/Core/actionReference";
 import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 import type {
   CommandDispatchOptions,
@@ -66,11 +67,11 @@ export type NSEMenuEntry =
  * command ID. The menu's runtime port turns the name into the command ID of the
  * application that declared the action.
  */
-export interface NSEMenuActionEntry {
+export interface NSEMenuActionEntry<Payload = unknown> {
   readonly kind: "command";
   readonly id: string;
-  readonly action: string;
-  readonly payload?: unknown;
+  readonly action: string | NSEActionReference<Payload>;
+  readonly payload?: NoInfer<Payload>;
   readonly labelOverride?: ReactNode;
   readonly iconOverride?: ReactNode;
   readonly shortcutOverride?: string;
@@ -107,6 +108,19 @@ export interface NSEMenuModel {
    */
   readonly sections?: readonly NSEMenuSection[];
 }
+
+/** @internal Preserve payload correlation for each inferred authored entry, including submenus/sections. */
+type CheckedMenuEntries<Entries extends readonly NSEMenuEntryInput[]> = {
+  readonly [K in keyof Entries]: NSEMenuEntryInput extends Entries[K] ? Entries[K]
+    : Entries[K] & NSEActionPayloadCheck<Entries[K], "payload"> &
+      (Entries[K] extends { readonly entries: infer Children extends readonly NSEMenuEntryInput[] }
+        ? { readonly entries: CheckedMenuEntries<Children> } : unknown);
+};
+export type NSEMenuModelActionCheck<Model extends NSEMenuModel> = {
+  readonly entries: CheckedMenuEntries<Model["entries"]>;
+} & (Model extends { readonly sections: infer Sections extends readonly NSEMenuSection[] }
+  ? { readonly sections: { readonly [K in keyof Sections]: Sections[K] & { readonly entries: CheckedMenuEntries<Sections[K]["entries"]> } } }
+  : unknown);
 
 export interface NSEMenuSection<TEntry = NSEMenuEntryInput> {
   readonly id: string;

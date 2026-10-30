@@ -19,12 +19,14 @@
  */
 
 import { normalizeBundleIdentifier } from "../../../SynCloudOS/Identity/bundleIdentifier.mjs";
+import { nseActionReferenceName, type NSEActionReference } from "./actionReference";
 /**
  * The command ID an action name stands for. A bare name (`newNote`) belongs to
  * the application that declared it, so it becomes `<appId>.newNote`. A name
  * with a dot (`document.save`) is a standard command and is used as written.
  */
-export function nseActionCommandId(appId: string, action: string): string {
+export function nseActionCommandId(appId: string, action: string | NSEActionReference): string {
+  if (typeof action !== "string") action = nseActionReferenceName(action);
   if (action.trim().length === 0) throw new TypeError("An action name must not be empty.");
   return action.includes(".") ? action : `${normalizeBundleIdentifier(appId)}.${action}`;
 }

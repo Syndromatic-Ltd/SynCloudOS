@@ -57,6 +57,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
     ?? (hierarchy.runtimeId === `app:${runtime.app.bundleIdentifier}` ? hierarchy.responderId : null)
     ?? `application:${runtime.app.bundleIdentifier}`;
   useLayoutEffect(() => {
+    if (runtime.signal.aborted) return;
     // Resolve the declared parent through the same mounted focus authority;
     // inheriting a child controller never grants authority to another app.
     const handle = runtime.focus.openScope({
@@ -74,7 +75,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       .filter((element) => !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true");
     let redirectingFocus = false;
     const onFocus = (event: FocusEvent) => {
-      if (redirectingFocus || !trapFocus || !root || !(event.target instanceof Node) || isWithinNSEFocusOrigin(root, event.target)) return;
+      if (runtime.signal.aborted || redirectingFocus || !trapFocus || !root || !(event.target instanceof Node) || isWithinNSEFocusOrigin(root, event.target)) return;
       // A surface opened from inside this one (a listbox or popover portalled
       // out of the sheet) nests its scope here; focus entering it stays in.
       const targetScope = event.target instanceof Element
@@ -98,7 +99,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       }
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!trapFocus || event.key !== "Tab" || event.altKey || event.ctrlKey || event.metaKey || !root) return;
+      if (runtime.signal.aborted || !trapFocus || event.key !== "Tab" || event.altKey || event.ctrlKey || event.metaKey || !root) return;
       const targets = focusables();
       if (targets.length === 0) return;
       const current = doc?.activeElement instanceof HTMLElement ? targets.indexOf(doc.activeElement) : -1;
@@ -109,13 +110,19 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
     };
     if (trapFocus) doc?.addEventListener("focusin", onFocus, true);
     root?.addEventListener("keydown", onKeyDown, true);
+    const releaseDOMListeners = () => {
+      doc?.removeEventListener("focusin", onFocus, true);
+      root?.removeEventListener("keydown", onKeyDown, true);
+    };
+    runtime.signal.addEventListener("abort", releaseDOMListeners, { once: true });
     queueMicrotask(() => {
+      if (runtime.signal.aborted) return;
       if (root && doc?.activeElement && !isWithinNSEFocusOrigin(root, doc.activeElement)) focusables()[0]?.focus({ preventScroll: true });
     });
     return () => {
       redirectingFocus = false;
-      doc?.removeEventListener("focusin", onFocus, true);
-      root?.removeEventListener("keydown", onKeyDown, true);
+      runtime.signal.removeEventListener("abort", releaseDOMListeners);
+      releaseDOMListeners();
       // The mount owner aborts before React removes descendant scopes. The
       // app focus facade is intentionally revoked at that point, so its
       // logical close must not call back into a dead capability.

@@ -1,3 +1,5 @@
+import { useNSEValueBinding } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -23,7 +25,11 @@ import { NSEListboxPopup, useOptionalNSEOverlayProvider } from "../../Overlays";
 import { readNSEClipboardText, writeNSEClipboardText, writeNSEDragRepresentations } from "../../Drag";
 import type { NSETokenFieldProps, NSETokenValue } from "./completionTypes";
 
-export function NSETokenField<T, TId extends string | number>(props: NSETokenFieldProps<T, TId>) {
+export function NSETokenField<T, TId extends string | number>(props: NSEBoundValueProps<readonly NSETokenValue<TId,T>[],NSETokenFieldProps<T,TId>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'values'|'onValuesChange'|'onRequestReorder'>) {
+  return <NSETokenFieldControl {...useNSEValueBinding<readonly NSETokenValue<TId,T>[],NSETokenFieldProps<T,TId>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'values'|'onValuesChange'|'onRequestReorder'>(props,{value:'values',change:'onValuesChange',excludes:['onRequestReorder'],fallback:[]})} />;
+}
+
+function NSETokenFieldControl<T, TId extends string | number>(props: NSETokenFieldProps<T, TId>) {
   const [draft, setDraft] = useState("");
   const [focused, setFocused] = useState(-1);
   const [suggestions, setSuggestions] = useState<readonly NSETokenValue<TId, T>[]>([]);

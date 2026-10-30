@@ -9,7 +9,7 @@ import { NSEPushButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
 import { NSEFocusScope } from "../../src/NSE/Focus";
 import { observable } from "../../src/NSE/Objects";
 import { action } from "../../src/SynCloudOS/AppSDK/actions";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppSDK/applicationHosting";
+import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { useResponderHierarchy } from "../../src/SynCloudOSReact/responderHierarchy";
 import { ResponderScope } from "../../src/SynCloudOSReact/ResponderScope";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";

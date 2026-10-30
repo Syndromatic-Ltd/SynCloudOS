@@ -86,6 +86,58 @@ function fixture() {
 }
 
 describe("actions along the responder chain", () => {
+  it("rejects malformed validators at binding and fails closed after corruption", async () => {
+    const { host, focus, dispatch } = fixture();
+    class Broken extends Recorder {
+      @action danger() { this.calls.push("danger"); }
+      validateDanger: unknown = false;
+    }
+    const target = new Broken();
+    expect(() => bindActionResponder(target, host, responderIds.window)).toThrow(/validateDanger.*method/);
+    target.validateDanger = () => true;
+    const binding = bindActionResponder(target, host, responderIds.window);
+    target.validateDanger = false;
+    focus("window");
+    await expect(dispatch(`${appId}.danger`)).rejects.toThrow(/validateDanger.*method/);
+    expect(target.calls).toEqual([]);
+    binding.dispose();
+  });
+
+  it("clears all registrations when a hot refresh cannot register the complete action set", () => {
+    const { runtime, host } = fixture();
+    class Before extends Recorder { @action before() {} }
+    class After extends Recorder { @action fresh() {} @action collision() {} }
+    const target = new Before();
+    const register = host.commands.register.bind(host.commands);
+    const failingHost = { appId, commands: { register(declaration: object) {
+      if (Reflect.get(declaration, "id") === `${appId}.collision`) throw new Error("registration collision");
+      return register(declaration);
+    } } };
+    const binding = bindActionResponder(target, failingHost, responderIds.window);
+    Object.setPrototypeOf(target, After.prototype);
+    expect(() => binding.refresh()).toThrow("registration collision");
+    expect(runtime.commands.getDeclarations().filter(item => [`${appId}.before`, `${appId}.fresh`, `${appId}.collision`].includes(item.id))).toEqual([]);
+    binding.dispose();
+  });
+
+  it("accepts default and rest payload parameters while retaining parameterless payload rejection", async () => {
+    const { host, focus, dispatch } = fixture();
+    class Parameters extends Recorder {
+      @action renameDefault(payload = { title: "Untitled" }) { this.calls.push(payload.title); }
+      @action rest(...payload: number[]) { this.calls.push(String(payload[0])); }
+      @action empty(/* no payload */) { this.calls.push("empty"); }
+    }
+    const target = new Parameters();
+    const binding = bindActionResponder(target, host, responderIds.window);
+    focus("window");
+    await expect(dispatch(`${appId}.renameDefault`, { title: "Chosen" })).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch(`${appId}.renameDefault`)).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch(`${appId}.rest`, 7)).resolves.toMatchObject({ status: "executed" });
+    await expect(dispatch(`${appId}.empty`, 7)).resolves.toMatchObject({ status: "invalid-payload" });
+    expect(target.calls).toEqual(["Chosen", "Untitled", "7"]);
+    binding.dispose();
+  });
+
   it("resolves an action from the focused view, then its window, then the application", async () => {
     const { app, window, view, focus, dispatch } = fixture();
 
@@ -275,6 +327,46 @@ describe("actions in menus and controls", () => {
     onPort(useNSEMenuPort());
     return null;
   }
+
+  it("refuses a currently hidden action through a custom sender", async () => {
+    const { context, host, focus } = fixture();
+    class Hidden extends Recorder {
+      @action hiddenAction() { this.calls.push("hidden"); }
+      validateHiddenAction() { return { enabled: true, hidden: true }; }
+    }
+    const target = new Hidden();
+    const binding = bindActionResponder(target, host, responderIds.window);
+    focus("view");
+    const hook = renderHook(() => useAction("hiddenAction"), { wrapper: ({ children }) => <ControlsHost context={context}>{children}</ControlsHost> });
+    await act(async () => {});
+    expect(hook.result.current.enabled).toBe(false);
+    await act(async () => { await hook.result.current.perform(); });
+    expect(target.calls).toEqual([]);
+    binding.dispose();
+  });
+
+  it("refuses an action that becomes hidden during canonical preparation", async () => {
+    const { context, host, focus } = fixture();
+    let validations = 0;
+    class Hidden extends Recorder {
+      @action hiddenAction(value?: string) { this.calls.push(value ?? "hidden"); }
+      validateHiddenAction(value?: string) {
+        return { enabled: true, hidden: value === "event" && ++validations > 1 };
+      }
+    }
+    const target = new Hidden();
+    const binding = bindActionResponder(target, host, responderIds.window);
+    focus("view");
+    const hook = renderHook(() => useAction("hiddenAction"), { wrapper: ({ children }) => <ControlsHost context={context}>{children}</ControlsHost> });
+    await act(async () => {});
+    await act(async () => { await expect(hook.result.current.perform("event")).resolves.toBeNull(); });
+    expect(target.calls).toEqual([]);
+    // Hidden is a presentation policy, not a permission: direct API dispatch
+    // remains governed by enabled/denied and its ordinary authority checks.
+    await expect(context.commands.dispatch(`${appId}.hiddenAction`, "event")).resolves.toMatchObject({ status: "executed" });
+    expect(target.calls).toEqual(["event"]);
+    binding.dispose();
+  });
 
   it("disables a menu item whose action validates as unavailable", async () => {
     const { context, app, focus } = fixture();

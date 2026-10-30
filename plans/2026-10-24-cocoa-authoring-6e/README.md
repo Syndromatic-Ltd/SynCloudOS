@@ -1,5 +1,7 @@
 # 6E: Cocoa-style SynWare authoring and platform modernization
 
+Historical execution snapshot, 28 October 2026: the admitted authoring contracts and all eleven class migrations were implemented. Read [the archived implementation ledger](execution-status.md) for that packet's scope and acceptance limits, and [the authoring guide](../../docs/framework/cocoa-authoring.md) for the implemented developer experience. The proposal wording, checkout paths and package hashes below describe the original planning snapshot, not the current branch or installed SDK. Use the consuming site's checked-in `vendor/framework-receipt.json` for its exact framework dependency. Bun and native TypeScript 7 remain separate proposals.
+
 Status: proposed design and executable implementation handoff, 24 October 2026. No implementation is authorized by the creation of these documents. The user selected classes, decorators and bindings with TSX layout, requested a complete design and plan, and explicitly said not to implement yet.
 
 Scope addition: native TypeScript 7, Bun, coordinated dependency/runtime security upgrades and substantial full-suite/runtime optimization are now included. The user's later immediate-maintenance instruction separately authorized updating the host Node installation and restarting the identified previews. That maintenance is complete; the API, app and repository toolchain changes remain proposed.

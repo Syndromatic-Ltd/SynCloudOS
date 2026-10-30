@@ -22,7 +22,7 @@
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
 installNSEScrollIntoViewFixture();
 import React, { useMemo, useState } from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   NSEMenu,
@@ -45,6 +45,87 @@ const customAppearance = defineNSEAppearance({ id: "test-custom", displayName: "
 afterEach(() => {
   document.body.replaceChildren();
   vi.useRealTimers();
+});
+
+it("revalidates a visible menu activation after focus changes without dispatching stale presentations", async () => {
+  let responderGeneration = 1;
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => new Map(requests.map(request => [request.key, presentation(request.commandId)])));
+  const port = runtime(validateMany);
+  port.commands.getPresentationGeneration = () => ({ registryGeneration: 0, responderGeneration });
+  const controller = new NSEMenuController({ model, runtime: port });
+  render(<NSEMenu model={model} controller={controller} open />);
+  const button = await screen.findByRole("menuitem", { name: "Bold" });
+  responderGeneration++;
+  fireEvent.click(button);
+  await waitFor(() => expect(port.commands.dispatch).toHaveBeenCalledTimes(1));
+  expect(validateMany.mock.calls.length).toBeGreaterThan(1);
+  controller.dispose();
+});
+
+it("retains the selected submenu while revalidating its activation", async () => {
+  let responderGeneration = 1;
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => new Map(requests.map(request => [request.key, presentation(request.commandId)])));
+  const port = runtime(validateMany);
+  port.commands.getPresentationGeneration = () => ({ registryGeneration: 0, responderGeneration });
+  const controller = new NSEMenuController({ model, runtime: port });
+  render(<NSEMenu model={model} controller={controller} open />);
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Alignment" }));
+  const item = await screen.findByRole("menuitem", { name: "Align Left" });
+  responderGeneration++;
+  fireEvent.click(item);
+  await waitFor(() => expect(port.commands.dispatch).toHaveBeenCalledWith("text.align", { edge: "left" }, expect.anything()));
+  controller.dispose();
+});
+
+it("refuses a menu action that becomes disabled during activation revalidation", async () => {
+  let enabled = true;
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => new Map(requests.map(request => [request.key, presentation(request.commandId, { enabled })])));
+  const port = runtime(validateMany);
+  const controller = new NSEMenuController({ model, runtime: port });
+  render(<NSEMenu model={model} controller={controller} open />);
+  const item = await screen.findByRole("menuitem", { name: "Bold" });
+  enabled = false;
+  fireEvent.click(item);
+  await waitFor(() => expect(screen.getByRole("menuitem", { name: "Bold" }).getAttribute("aria-disabled")).toBe("true"));
+  expect(port.commands.dispatch).not.toHaveBeenCalled();
+  controller.dispose();
+});
+
+it("does not retarget the displayed menu command to another document's responder", async () => {
+  let responderId = "original-document";
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => new Map(requests.map(request => [request.key, { ...presentation(request.commandId), responderId }])));
+  const port = runtime(validateMany);
+  const controller = new NSEMenuController({ model, runtime: port });
+  render(<NSEMenu model={model} controller={controller} open />);
+  const item = await screen.findByRole("menuitem", { name: "Bold" });
+  responderId = "other-document";
+  fireEvent.click(item);
+  await waitFor(() => expect(controller.snapshot.open).toBe(false));
+  expect(port.commands.dispatch).not.toHaveBeenCalled();
+  controller.dispose();
+});
+
+it("does not carry a pending activation into a dismissed and reopened menu", async () => {
+  type Request = { key: string; commandId: string };
+  let finish!: (value: ReadonlyMap<string, ReturnType<typeof presentation>>) => void;
+  let pending: readonly Request[] = [];
+  let count = 0;
+  const projected = (requests: readonly Request[]) => new Map(requests.map(request => [request.key, presentation(request.commandId)]));
+  const validateMany = vi.fn(async (requests: readonly Request[]) => {
+    if (++count === 2) { pending = requests; return new Promise<ReadonlyMap<string, ReturnType<typeof presentation>>>(resolve => { finish = resolve; }); }
+    return projected(requests);
+  });
+  const port = runtime(validateMany);
+  const controller = new NSEMenuController({ model, runtime: port });
+  render(<NSEMenu model={model} controller={controller} open />);
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Bold" }));
+  await waitFor(() => expect(validateMany).toHaveBeenCalledTimes(2));
+  await act(async () => { controller.dismiss("escape"); await controller.open(); });
+  const reopened = controller.snapshot.generation;
+  await act(async () => { finish(projected(pending)); });
+  expect(port.commands.dispatch).not.toHaveBeenCalled();
+  expect(controller.snapshot).toMatchObject({ open: true, generation: reopened });
+  controller.dispose();
 });
 
 function presentation(commandId: string, overrides: Partial<{

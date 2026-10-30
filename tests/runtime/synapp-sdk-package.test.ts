@@ -397,7 +397,7 @@ interface ImportMeta { glob(pattern: string, options: { eager: true; query?: str
       throw new Error(`External package fixture failed to compile:\n${externalCompile.stdout}\n${externalCompile.stderr}`);
     }
     writeFileSync(join(sourceDirectory, "retired-manifest.ts"), "import { createSynWare } from \"@syndromatic/syncloudos/sdk/testing\";\n\ncreateSynWare({\n  manifest: {\n    schemaVersion: 1,\n    bundleIdentifier: \"com.example.retired\",\n    version: \"0.1.0\",\n    displayName: \"Retired manifest fixture\",\n    retiredManifestKey: true,\n  },\n  root: () => null,\n});\n", "utf8");
-    const retiredManifest = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--noEmit", "--target", "ES2022", "--module", "NodeNext", "--moduleResolution", "NodeNext", "--jsx", "react-jsx", "--strict", "--skipLibCheck", "false", "retired-manifest.ts"], { cwd: sourceDirectory, encoding: "utf8" });
+    const retiredManifest = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--ignoreConfig", "--noEmit", "--target", "ES2022", "--module", "NodeNext", "--moduleResolution", "NodeNext", "--jsx", "react-jsx", "--strict", "--skipLibCheck", "false", "retired-manifest.ts"], { cwd: sourceDirectory, encoding: "utf8" });
     expect(retiredManifest.status).not.toBe(0);
     expect(`${retiredManifest.stdout}${retiredManifest.stderr}`).toMatch(/retiredManifestKey|never/iu);
     writeFileSync(join(fixture, "vite.config.mjs"), `export default { build: { outDir: "dist", lib: { entry: { fixture: "src/index.tsx" }, formats: ["es"], fileName: (_format, entryName) => entryName + ".js" }, sourcemap: false } };\n`, "utf8");
@@ -443,18 +443,18 @@ interface ImportMeta { glob(pattern: string, options: { eager: true; query?: str
     expect(consoleError).not.toHaveBeenCalled();
     await mounted.dispose("external consumer test complete");
     const reduced = await consumer.mountFixtureWithoutContact(element);
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await waitForText(element, "com.example.external.fixture");
     expect(element.textContent).toContain("com.example.external.fixture");
     expect(element.textContent).not.toContain("com.example.contact");
     await reduced.dispose("external consumer remove test complete");
     element.remove();
 
     writeFileSync(join(sourceDirectory, "forbidden.ts"), 'import { runtime } from "@syndromatic/syncloudos/sdk/internal/runtime";\nexport { runtime };\n', "utf8");
-    const deepImport = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--noEmit", "--module", "NodeNext", "--moduleResolution", "NodeNext", "forbidden.ts"], { cwd: sourceDirectory, encoding: "utf8" });
+    const deepImport = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--ignoreConfig", "--noEmit", "--module", "NodeNext", "--moduleResolution", "NodeNext", "forbidden.ts"], { cwd: sourceDirectory, encoding: "utf8" });
     expect(deepImport.status).not.toBe(0);
     expect(`${deepImport.stdout}${deepImport.stderr}`).toMatch(/cannot find module|does not exist/iu);
     writeFileSync(join(sourceDirectory, "physical-internal.ts"), 'import type { RuntimeStore } from "@syndromatic/syncloudos/types/SynCloudOS/Runtime/RuntimeStore.js";\nexport type { RuntimeStore };\n', "utf8");
-    const physicalInternal = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--noEmit", "--module", "NodeNext", "--moduleResolution", "NodeNext", "physical-internal.ts"], { cwd: sourceDirectory, encoding: "utf8" });
+    const physicalInternal = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--ignoreConfig", "--noEmit", "--module", "NodeNext", "--moduleResolution", "NodeNext", "physical-internal.ts"], { cwd: sourceDirectory, encoding: "utf8" });
     expect(physicalInternal.status).not.toBe(0);
     expect(`${physicalInternal.stdout}${physicalInternal.stderr}`).toMatch(/cannot find module|does not exist/iu);
 
@@ -515,11 +515,12 @@ interface ImportMeta { glob(pattern: string, options: { eager: true; query?: str
 
   it("uses exact portable package aliases and keeps public client contracts host-free", () => {
     const expectedAliases = {
-      "@syndromatic/syncloudos/sdk": ["src/SynCloudOS/AppSDK/sdkPackageEntry.ts"],
-      "@syndromatic/syncloudos/sdk/testing": ["src/SynCloudOS/AppSDK/testing/sdkPackageEntry.ts"],
-      "@syndromatic/syncloudos/webspring": ["src/Webspring/public.ts"],
-      "@syndromatic/syncloudos/browser": ["src/SynCloudOSReact/browser.tsx"],
-      "@syndromatic/syncloudos/nse": ["src/NSE/sdkPackageEntry.ts"],
+      "@syndromatic/syncloudos": ["./src/SynCloudOS/AppSDK/rootPackageEntry.ts"],
+      "@syndromatic/syncloudos/sdk": ["./src/SynCloudOS/AppSDK/sdkPackageEntry.ts"],
+      "@syndromatic/syncloudos/sdk/testing": ["./src/SynCloudOS/AppSDK/testing/sdkPackageEntry.ts"],
+      "@syndromatic/syncloudos/webspring": ["./src/Webspring/public.ts"],
+      "@syndromatic/syncloudos/browser": ["./src/SynCloudOSReact/browser.tsx"],
+      "@syndromatic/syncloudos/nse": ["./src/NSE/sdkPackageEntry.ts"],
     };
     const appConfig = JSON.parse(readFileSync(join(repositoryRoot, "tsconfig.app.json"), "utf8"));
 

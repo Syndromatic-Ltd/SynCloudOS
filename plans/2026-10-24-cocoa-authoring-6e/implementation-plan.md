@@ -1,5 +1,7 @@
 # Cocoa-style SynWare Authoring Implementation Plan
 
+Execution authorized 28 October 2026 for the authoring contracts and all application waves. Earlier approval/exemption wording below records the planning snapshot and is no longer an implementation stop for P00-P14. Unrelated toolchain major upgrades remain separate. Check the execution ledger for actual verification; unchecked historical boxes are not current completion evidence.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task by task after explicit implementation approval. Subagent-driven development is an alternative only when the user authorizes delegation. Steps use checkbox syntax for tracking. Do not execute this document during the planning-only task.
 
 **Goal:** Reduce repeated SynWare connection/lifetime code through Cocoa-style classes, typed bindings and descriptors, while preserving every admitted application's functionality, visuals and FX behavior.

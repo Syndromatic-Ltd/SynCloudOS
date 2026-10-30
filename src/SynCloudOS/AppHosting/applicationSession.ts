@@ -24,27 +24,33 @@ import type {
   NSEApplicationClass,
   NSEApplicationContext,
   NSEOpenWindowOptions,
-} from "../../NSE/Application/NSEApplication";
-import type {
-  NSEAnyWindowController,
-  NSEWindowControllerClass,
-  NSEWindowControllerContext,
-} from "../../NSE/Application/NSEWindowController";
+} from "../../NSE/applicationHostInterop";
+import {
+  NSEWindowController,
+  validateNSEWindowControllerClass,
+  type NSEAnyWindowController,
+  type NSEWindowControllerClass,
+  type NSEWindowControllerContext,
+} from "../../NSE/applicationHostInterop";
+import { validateNSEViewControllerClass } from "../../NSE/applicationHostInterop";
 import {
   enterClassApplication,
   instantiateInOwnerScope,
   nseDisposeFor,
   NSEOwnershipScope,
-} from "../../NSE/Controllers/ownership";
-import type { SynWareOwnedWindowSnapshot, SynWareWindowPort } from "../../SynCloudOSReact/appRuntimeTypes";
+} from "../../NSE/applicationHostInterop";
+import type { SynWareOwnedWindowSnapshot, SynWareWindowPort } from "../../SynCloudOSReact";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import type { ApplicationLifecycle } from "../Lifecycle/applicationLifecycleHooks";
 import { SynCloudOSLifecycleVeto, type SynCloudOSLifecycleHook } from "../Lifecycle/lifecycleTypes";
 import { currentClass, trackLiveApplicationObject, type LiveApplicationObject } from "./applicationHotReload";
-import { createMountedSynWareRuntime, type MountedSynWareRuntime } from "./appRuntimeFacade";
-import { createSynWareContextValue } from "./createSynWareContextValue";
-import { installControllerServices } from "./controllerServices";
-import type { ResponderRegistrationHandle } from "../Responders/responderTypes";
+import { createMountedSynWareRuntime, type MountedSynWareRuntime } from "../AppSDK/appRuntimeFacade";
+import { createSynWareContextValue } from "../AppSDK/createSynWareContextValue";
+import { installControllerServices } from "../AppSDK/controllerServices";
+import type { ResponderRegistrationHandle } from "../SynCloudOS";
+import { attachNSEAuthoringContext } from "../../NSE/applicationHostInterop";
+import { finalizeNSEAuthoringOwner } from "../../NSE/applicationHostInterop";
+import { subscribePersistencePreferences } from "../Persistence/Persistence";
 
 /** How a class-based application is identified inside the runtime that launched it. */
 export interface ApplicationSessionIdentity {
@@ -101,6 +107,22 @@ function keyOf({ runtimeId, appId }: ApplicationSessionIdentity): string {
 
 let windowSequence = 0;
 const windowClasses = new WeakMap<NSEApplicationClass, Map<string, NSEWindowControllerClass>>();
+const standardWindowClasses = new WeakMap<Function, NSEWindowControllerClass>();
+
+/** @internal Both shorthand and custom windows use the same session/admission path. */
+export function applicationMainWindowClass(AppClass: NSEApplicationClass): NSEWindowControllerClass | undefined {
+  if (AppClass.mainWindow && AppClass.mainViewController) throw new TypeError("An application cannot declare both mainWindow and mainViewController.");
+  if (AppClass.mainWindow) { validateNSEWindowControllerClass(AppClass.mainWindow); return AppClass.mainWindow; }
+  const Root = AppClass.mainViewController;
+  if (!Root) return undefined;
+  validateNSEViewControllerClass(Root);
+  let Window = standardWindowClasses.get(Root);
+  if (!Window) {
+    Window = class StandardMainWindowController extends NSEWindowController { static override contentViewControllerClass = Root; };
+    standardWindowClasses.set(Root, Window);
+  }
+  return Window;
+}
 
 /**
  * One launched class-based application: its instance, its window controllers
@@ -129,6 +151,9 @@ export class ApplicationSession {
   #applicationResponder: ResponderRegistrationHandle | null = null;
   #terminationOperationId: string | null = null;
   #serviceResponder: ResponderRegistrationHandle | null = null;
+  #removeLaunchAbort: (() => void) | null = null;
+  #removeTerminationAbort: (() => void) | null = null;
+  #removeRuntimeAbort: (() => void) | null = null;
   readonly live: LiveApplicationObject;
 
   constructor(identity: ApplicationSessionIdentity, source: ApplicationSessionSource) {
@@ -153,6 +178,34 @@ export class ApplicationSession {
 
   markLaunchReported(): void {
     this.#launchReported = true;
+    this.#removeLaunchAbort?.();
+    this.#removeLaunchAbort = null;
+  }
+
+  /** Releases an initial launch even when application code ignores cancellation. */
+  beginLaunch(operationId: string, signal: AbortSignal): () => void {
+    this.#removeLaunchAbort?.();
+    const remove = () => {
+      signal.removeEventListener("abort", onAbort);
+      if (this.#removeLaunchAbort === remove) this.#removeLaunchAbort = null;
+    };
+    const abandon = () => {
+      remove();
+      const state = this.#kernel?.lifecycle.getState(this.#identity.appId);
+      // Cancellation after the structural launch commit may skip launch:did.
+      // That application remains open and must follow the ordinary close path.
+      if (!this.#launchReported && state !== "active" && state !== "suspended") this.dispose("application-closed");
+    };
+    const onAbort = () => {
+      // markCommitted notifies operation observers before the lifecycle store
+      // publication. Let that synchronous commit finish before reading state.
+      if (this.#kernel?.operations.inspectPending().some(record => record.operationId === operationId && record.committed)) queueMicrotask(abandon);
+      else abandon();
+    };
+    this.#removeLaunchAbort = remove;
+    signal.addEventListener("abort", onAbort, { once: true });
+    if (signal.aborted) onAbort();
+    return abandon;
   }
 
   get isDisposed(): boolean {
@@ -187,14 +240,41 @@ export class ApplicationSession {
     this.attachMount(this.#servicesMount.runtime.windows, runtime);
     const context = createSynWareContextValue(this.#servicesMount.runtime);
     installControllerServices(context, runtime);
-    runtime.signal.addEventListener("abort", () => { this.dispose("explicit"); }, { once: true });
+    attachNSEAuthoringContext(this.app, {
+      scheduler: context.scheduler,
+      errors: context.errors,
+      persistence: context.persistence,
+      subscribePreferences: listener => subscribePersistencePreferences(runtime.persistence, key => {
+        if (key.startsWith(`${normalizeBundleIdentifier(appId)}:`)) listener();
+      }),
+    });
+    finalizeNSEAuthoringOwner(this.app);
+    const onRuntimeAbort = () => { this.dispose("explicit"); };
+    runtime.signal.addEventListener("abort", onRuntimeAbort, { once: true });
+    this.#removeRuntimeAbort = () => runtime.signal.removeEventListener("abort", onRuntimeAbort);
   }
 
   #construct(Controller: NSEWindowControllerClass, options: NSEOpenWindowOptions = {}): NSEAnyWindowController {
+    Controller = currentClass(Controller);
+    validateNSEWindowControllerClass(Controller);
     const scope = new NSEOwnershipScope("NSEWindowController", Controller.name);
     const context: NSEWindowControllerContext = { app: this.app, openingOptions: Object.freeze({ ...options }) };
-    const controller = instantiateInOwnerScope(scope, () => new (currentClass(Controller))(options), context);
+    const controller = instantiateInOwnerScope(scope, () => {
+      const result = new Controller(options);
+      const Content = Controller.contentViewControllerClass ? currentClass(Controller.contentViewControllerClass) : undefined;
+      if (Content) {
+        const assigned = result.contentViewController;
+        if (assigned && !(assigned instanceof Content)) throw new TypeError("The window constructor assigned a root conflicting with contentViewControllerClass.");
+        if (!assigned) result.contentViewController = instantiateInOwnerScope(
+          new NSEOwnershipScope("NSEViewController", Content.name), () => new Content(result as never),
+        );
+      }
+      if (this.#disposed || this.app.isDisposed) throw new DOMException("The application closed during window construction.", "InvalidStateError");
+      return result;
+    }, context);
     const leaveApplication = this.#scope.adopt(controller);
+    try { finalizeNSEAuthoringOwner(controller); }
+    catch (error) { try { controller[nseDisposeFor]("explicit"); } finally { leaveApplication(); } throw error; }
     const untrack = trackLiveApplicationObject(controller, this.live);
     this.#controllers.push(controller);
     controller.onDispose(() => {
@@ -210,7 +290,7 @@ export class ApplicationSession {
 
   #mainController(): NSEAnyWindowController | null {
     if (this.#main && !this.#main.isDisposed) return this.#main;
-    const Controller = this.#source.AppClass.mainWindow;
+    const Controller = applicationMainWindowClass(currentClass(this.#source.AppClass));
     if (!Controller) return null;
     this.#main = this.#construct(Controller);
     return this.#main;
@@ -237,7 +317,7 @@ export class ApplicationSession {
         controller = this.#construct(Controller, restored.options);
       } else if (current.isMain) controller = this.#mainController();
       else {
-        const Controller = this.#source.AppClass.mainWindow;
+        const Controller = applicationMainWindowClass(currentClass(this.#source.AppClass));
         controller = Controller ? this.#construct(Controller) : null;
       }
     }
@@ -254,7 +334,34 @@ export class ApplicationSession {
   }
 
   /** Keeps application-owned controllers alive until the accepted quit commits. */
-  beginTermination(operationId: string): void { this.#terminationOperationId = operationId; }
+  beginTermination(operationId: string, signal: AbortSignal): void {
+    this.#removeTerminationAbort?.();
+    this.#terminationOperationId = operationId;
+    const remove = () => {
+      signal.removeEventListener("abort", onAbort);
+      unsubscribe?.();
+      if (this.#removeTerminationAbort === remove) {
+        this.#removeTerminationAbort = null;
+        this.#terminationOperationId = null;
+      }
+    };
+    const finishAbort = () => {
+      remove();
+      // A committed close must release its session even if close:did is
+      // skipped or is still awaiting an uncooperative application callback.
+      if (this.#kernel?.lifecycle.getState(this.#identity.appId) === "closed") this.dispose("application-closed");
+    };
+    const onAbort = () => {
+      if (this.#kernel?.operations.inspectPending().some(record => record.operationId === operationId && record.committed)) queueMicrotask(finishAbort);
+      else finishAbort();
+    };
+    const unsubscribe = this.#kernel?.operations.subscribe(() => {
+      if (!this.#kernel?.operations.inspectPending().some(operation => operation.operationId === operationId)) remove();
+    });
+    this.#removeTerminationAbort = remove;
+    signal.addEventListener("abort", onAbort, { once: true });
+    if (signal.aborted) onAbort();
+  }
 
   /** Disposes the controllers of windows that are no longer open, with the reason `"window-closed"`. */
   pruneClosedWindows(owned: readonly SynWareOwnedWindowSnapshot[]): void {
@@ -418,6 +525,12 @@ export class ApplicationSession {
   dispose(reason: "application-closed" | "explicit" = "application-closed"): void {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#removeLaunchAbort?.();
+    this.#removeTerminationAbort?.();
+    this.#removeRuntimeAbort?.();
+    this.#removeLaunchAbort = null;
+    this.#removeTerminationAbort = null;
+    this.#removeRuntimeAbort = null;
     sessions.delete(keyOf(this.#identity));
     this.#untrackApp();
     try {
@@ -491,7 +604,14 @@ export function createApplicationLifecycle(source: ApplicationSessionSource): Ap
       const existing = sessionOf(context);
       if (existing?.launchReported) return;
       const session = existing ?? ensureApplicationSession(context, source);
-      await session.app.applicationWillFinishLaunching();
+      const abandon = session.beginLaunch(context.operationId, context.signal);
+      try {
+        context.signal.throwIfAborted();
+        await session.app.applicationWillFinishLaunching();
+      } catch (error) {
+        // Cleanup must not replace the application's original launch failure.
+        try { abandon(); } finally { throw error; }
+      }
     },
     "launch:did": async (context) => {
       const session = sessionOf(context);
@@ -511,7 +631,8 @@ export function createApplicationLifecycle(source: ApplicationSessionSource): Ap
       if ((await session.app.applicationShouldTerminate()) === false) {
         throw new SynCloudOSLifecycleVeto("close", `${source.appName} declined to terminate.`);
       }
-      session.beginTermination(context.operationId);
+      context.signal.throwIfAborted();
+      session.beginTermination(context.operationId, context.signal);
     },
     "close:did": async (context) => {
       const session = sessionOf(context);

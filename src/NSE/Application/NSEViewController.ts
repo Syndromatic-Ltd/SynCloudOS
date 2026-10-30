@@ -18,12 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import type { AFXLayer } from "../../FX/AnimationFX/AFXLayer";
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
-import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/AppSDK/appClientTypes";
+import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/nseRuntimeContracts";
 import {
   instantiateInOwnerScope,
+  hasNSEConstructionOwner,
   nseDisposeFor,
   NSEOwnershipScope,
   type NSEControllerOwnershipOptions,
@@ -32,6 +33,12 @@ import {
 } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
 import { NSEObjectLifetime } from "./objectLifetime";
+import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
+import { NSEViewActivity } from "./viewActivity";
+import { bindNSEViewOutlets } from "./viewOutlet";
+import { finalizeNSEAuthoringOwner } from "./authoringLifecycle";
+import { getNSEAuthoringContext } from "./authoringContext";
+import type { NSEObservable } from "../Objects/observable";
 import { createViewControllerFX, type NSEViewControllerFX, type NSEViewControllerFXClients } from "./viewControllerFX";
 
 /**
@@ -44,8 +51,17 @@ export type NSEViewControllerOptions = NSEControllerOwnershipOptions;
 
 /** A view controller class, as `addChild` and `static` view slots accept it. */
 export interface NSEViewControllerClass<TController extends NSEViewController<unknown> = NSEViewController<unknown>> {
-  new (options?: NSEViewControllerOptions): TController;
+  /** Window content roots receive their owning window; no-argument classes remain valid. */
+  new (window: never): TController;
   readonly view?: NSEViewComponent;
+  viewDependencies?(controller: TController): readonly (NSEObservable | null | undefined)[];
+}
+
+/** @internal Reject ambiguous rendering before constructing or mounting a view. */
+export function validateNSEViewControllerClass(Controller: NSEViewControllerClass): void {
+  if (Controller.view && typeof Controller.prototype.renderView === "function") {
+    throw new TypeError(`${Controller.name} declares both static view and renderView; choose one rendering form.`);
+  }
 }
 
 /** The view a controller manages, while it is mounted. */
@@ -54,6 +70,8 @@ export interface NSEControllerView {
   readonly isLoaded: boolean;
   /** The view's root element. Throws `NSE_VIEW_NOT_LOADED` unless mounted. */
   readonly element: HTMLElement;
+  /** Aborts at the end of this committed mount; renewed on a real remount. */
+  readonly mountSignal: AbortSignal;
   /**
    * The view's animation layer: draw into it with `addSublayer`. Bound to the
    * mounted element on first use and released when the view unmounts. Throws
@@ -70,11 +88,14 @@ export interface NSETraitCollection {
 
 /** @internal Updates presentation traits without replaying appearance callbacks. */
 export const nseUpdateTraits: unique symbol = Symbol("nse.updateTraits");
+/** @internal Effective presentation/application/browser activity from the mounted host. */
+export const nseUpdateViewActivity: unique symbol = Symbol("nse.updateViewActivity");
 
 /** What the React host gives a view controller when its view mounts. */
 export interface NSEViewControllerBinding {
   readonly element: HTMLElement;
   readonly traits?: NSETraitCollection;
+  readonly active?: boolean;
   /** The mounted application's animation host; absent outside an application. */
   bindLayer?(target: object, signal?: AbortSignal): AFXLayer;
   /** The mounted application's FX clients; absent outside an application. */
@@ -97,7 +118,7 @@ let viewControllerSequence = 0;
  * ```ts
  * class NoteViewController extends NSEViewController {
  *   static view = NoteView;
- *   readonly notes = new NSEArrayController<Note>({ id: "notes", getId: (note) => note.id });
+ *   readonly notes = new NSEArrayController<Note>({ owner: this, id: "notes", getId: (note) => note.id });
  *   viewDidLoad() { this.view.layer.addSublayer(new AFXShapeLayer()); }
  * }
  * ```
@@ -107,18 +128,29 @@ let viewControllerSequence = 0;
  * owner is constructing (field initialisers, the constructor, `addChild`)
  * is owned by it; created anywhere else it throws `NSE_CONTROLLER_UNOWNED`
  * unless `owner` or `ownerSignal` is given.
+ *
+ * `addChild(ControllerClass)` gives the child its own construction scope. For
+ * a raw `new Controller()` nested in another owner's constructor, its own
+ * controller fields should pass `owner: this`: the ambient scope still belongs
+ * to the outer constructor, including after the nested constructor returns.
  */
 export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> implements NSEOwner, NSEOwnedObject {
   /** The component that renders this controller's view. */
   static view?: NSEViewComponent;
+  /** Additional explicitly observed state; the controller itself is always observed. */
+  static viewDependencies?: (controller: never) => readonly (NSEObservable | null | undefined)[];
+  /** Optional inline TSX. Compose function components for local React hooks. */
+  renderView?(): ReactNode;
 
   readonly #lifetime: NSEObjectLifetime;
   readonly #children: NSEViewController<unknown>[] = [];
   readonly #view: NSEControllerView;
   #parent: NSEViewController<unknown> | null = null;
+  #windowScope: NSEOwnershipScope | null = null;
   #loaded = false;
   #binding: NSEViewControllerBinding | null = null;
-  #mountSignal: AbortController | null = null;
+  readonly #activity: NSEViewActivity;
+  #active = true;
   #layer: AFXLayer | null = null;
   #appeared = false;
   #pendingDetach: object | null = null;
@@ -133,10 +165,12 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
       `${new.target.name || "NSEViewController"}#${++viewControllerSequence}`,
       options,
     );
+    this.#activity = new NSEViewActivity(this);
     const controller = this as NSEViewController<unknown>;
     this.#view = Object.freeze({
       get isLoaded() { return controller.#loaded; },
       get element() { return controller.#requireMounted("view.element").element; },
+      get mountSignal() { controller.#requireMounted("view.mountSignal"); return controller.#activity.snapshot("mounted").signal; },
       get layer() { return controller.#boundLayer(); },
     });
   }
@@ -148,6 +182,9 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
 
   /** Current NSE animation and content-bound presentation traits. */
   get traitCollection(): NSETraitCollection { return this.#traits; }
+
+  /** @internal Updates activity without replaying presentation lifecycle callbacks. */
+  [nseUpdateViewActivity](active: boolean): void { this.#active = active; this.#activity.setActive(active); }
 
   /** Called when traits change; observing this controller also observes traits. */
   traitCollectionDidChange(_previous: NSETraitCollection): void {}
@@ -170,6 +207,11 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     return this.#lifetime.isDisposed;
   }
 
+  /** Constructs and owns a disposable synchronously, including after await. */
+  own<T extends NSEDisposable>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
+    return ownNSEFactory(this, factory);
+  }
+
   /**
    * The FX services of the mounted application (motion, location, haptics,
    * MIDI, media, video, Lumina), owned by this controller. Available once the
@@ -178,7 +220,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   get fx(): NSEViewControllerFX {
     const binding = this.#requireMounted("fx");
     if (!binding.fx) throw new TypeError("fx needs a mounted application: render the view inside a SynWare.");
-    this.#fx ??= createViewControllerFX(binding.fx, this.ownerSignal);
+    this.#fx ??= createViewControllerFX(binding.fx, this.ownerSignal, this);
     return this.#fx;
   }
 
@@ -227,14 +269,22 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
    * class to have the framework construct it (its own controllers belong to
    * it), or an instance created elsewhere.
    */
-  addChild<TChild extends NSEViewController<unknown>>(child: TChild | (new (options?: NSEViewControllerOptions) => TChild)): TChild {
+  addChild<TChild extends NSEViewController<unknown>>(child: TChild): TChild;
+  addChild<TChild extends NSEViewController<unknown>, TArgs extends unknown[]>(Controller: new (...args: TArgs) => TChild, ...args: TArgs): TChild;
+  addChild<TChild extends NSEViewController<unknown>, TArgs extends unknown[]>(child: TChild | (new (...args: TArgs) => TChild), ...args: TArgs): TChild {
     this.#assertLive("addChild", "call");
     const instance = typeof child === "function"
-      ? instantiateInOwnerScope(new NSEOwnershipScope("NSEViewController", child.name), () => new child())
+      ? instantiateInOwnerScope(new NSEOwnershipScope("NSEViewController", child.name), () => {
+        const result = new child(...args);
+        try { this.#assertLive("addChild", "call"); }
+        catch (error) { try { result[nseDisposeFor](this.disposalReason ?? "explicit"); } finally { throw error; } }
+        return result;
+      })
       : child;
     const added = instance as NSEViewController<unknown>;
     if (added === (this as NSEViewController<unknown>)) throw new TypeError("A view controller cannot be its own child.");
     added.#assertLive("addChild", "call");
+    if (added.#windowScope) throw new TypeError("A window's content view controller cannot also be a child view controller.");
     if (added.#parent && added.#parent !== (this as NSEViewController<unknown>)) {
       throw new TypeError("The view controller already has a parent; call removeFromParent() first.");
     }
@@ -242,9 +292,16 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     for (let ancestor = this.#parent; ancestor; ancestor = ancestor.#parent) {
       if (ancestor === added) throw new TypeError("A view controller cannot become a child of its own descendant.");
     }
-    added.#parent = this as NSEViewController<unknown>;
     added.#lifetime.adoptBy(added, this.#lifetime.scope);
+    added.#parent = this as NSEViewController<unknown>;
     this.#children.push(added);
+    if (!hasNSEConstructionOwner() && getNSEAuthoringContext(this)) {
+      try { finalizeNSEAuthoringOwner(added); }
+      catch (error) {
+        if (typeof child === "function") { try { added[nseDisposeFor]("explicit"); } catch { /* Preserve finalization failure. */ } }
+        throw error;
+      }
+    }
     this.notifyObservers();
     return instance;
   }
@@ -262,42 +319,52 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
 
   /** @internal Disposal entry used by owners; records `reason`. */
   [nseDisposeFor](reason: SynCloudOSLifecycleDisposalReason): void {
-    this.#lifetime.dispose(reason, () => {
-      this.#flushDetach();
-      const parent = this.#parent;
-      this.#parent = null;
-      if (parent) {
-        const index = parent.#children.indexOf(this as NSEViewController<unknown>);
-        if (index >= 0) parent.#children.splice(index, 1);
-        if (!parent.isDisposed) parent.notifyObservers();
-      }
-      this.didDispose();
-    });
+    if (this.isDisposed) return;
+    try {
+      this.#lifetime.dispose(reason, () => {
+        this.#flushDetach();
+        const parent = this.#parent;
+        this.#parent = null;
+        if (parent) {
+          const index = parent.#children.indexOf(this as NSEViewController<unknown>);
+          if (index >= 0) parent.#children.splice(index, 1);
+          if (!parent.isDisposed) parent.notifyObservers();
+        }
+        this.didDispose();
+      });
+    } finally {
+      this.notifyObservers();
+    }
   }
 
   /** @internal Makes `scope` (a window controller's) own this root view controller. */
   [nseAdoptViewController](scope: NSEOwnershipScope): void {
     this.#assertLive("contentViewController", "set");
     if (this.#parent) throw new TypeError("A child view controller cannot be a window's content view controller; call removeFromParent() first.");
+    if (this.#windowScope && this.#windowScope !== scope) throw new TypeError("The view controller is already another window's content view controller.");
     this.#lifetime.adoptBy(this, scope);
+    this.#windowScope = scope;
   }
 
   /** @internal Called by the React host when the view mounts. Returns the unmount function. */
   [nseAttachView](binding: NSEViewControllerBinding): () => void {
     this.#assertLive("view", "get");
+    finalizeNSEAuthoringOwner(this);
     if (this.#pendingDetach) {
       // React replayed the mount (StrictMode): the view never left.
       this.#pendingDetach = null;
       this.#rebind(binding);
     } else {
-      this.#mountSignal = new AbortController();
       this.#rebind(binding);
+      this.#activity.mount();
       if (!this.#loaded) {
         this.#loaded = true;
         this.viewDidLoad();
       }
+      this.#activity.didLoad();
       this.viewWillAppear();
       this.#appeared = true;
+      this.#activity.present(this.#active);
       this.viewDidAppear();
     }
     const token = {};
@@ -312,6 +379,8 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #rebind(binding: NSEViewControllerBinding): void {
     if (this.#binding && this.#binding.element !== binding.element) this.#releaseLayer();
     this.#binding = binding;
+    bindNSEViewOutlets(this, binding);
+    if (binding.active !== undefined) this[nseUpdateViewActivity](binding.active);
     if (binding.traits) this[nseUpdateTraits](binding.traits);
   }
 
@@ -321,9 +390,9 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     const wasAppeared = this.#appeared;
     if (wasAppeared) this.viewWillDisappear();
     this.#appeared = false;
+    bindNSEViewOutlets(this, null);
     this.#releaseLayer();
-    this.#mountSignal?.abort(new DOMException("The view unmounted.", "AbortError"));
-    this.#mountSignal = null;
+    this.#activity.unmount();
     this.#binding = null;
     if (wasAppeared) this.viewDidDisappear();
   }
@@ -348,7 +417,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     if (!binding.bindLayer) {
       throw new TypeError("view.layer needs a mounted application: render the view inside a SynWare.");
     }
-    this.#layer = binding.bindLayer(binding.element, this.#mountSignal?.signal);
+    this.#layer = binding.bindLayer(binding.element, this.#activity.snapshot("mounted").signal);
     return this.#layer;
   }
 

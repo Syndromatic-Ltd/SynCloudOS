@@ -19,6 +19,7 @@
  */
 
 import type { ReactNode } from "react";
+import type { NSEActionReference } from "../Controls/Core/actionReference";
 import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 import type {
   ControllerCommitResult,
@@ -87,6 +88,15 @@ export type NSEToolbarOwner =
   | { readonly kind: "window"; readonly windowControllerId: string }
   | { readonly kind: "application"; readonly applicationId: string };
 
+/** An authored action uses the same validation, dispatch and overflow menu as a command item. */
+export type NSEToolbarActionItem<Payload = unknown> = Omit<Extract<NSEToolbarItem, { readonly kind: "command" }>, "commandId" | "payload"> & {
+  readonly action: string | NSEActionReference<Payload>;
+  readonly commandId?: never;
+  readonly payload?: NoInfer<Payload>;
+};
+
+export type NSEToolbarItemInput = NSEToolbarItem | NSEToolbarActionItem;
+
 export interface NSEToolbarConfiguration {
   readonly identifier: string;
   readonly owner: NSEToolbarOwner;
@@ -119,6 +129,7 @@ export interface NSEToolbarRuntimePort {
    * key-binding and scheduling authority as an ordinary menu. */
   readonly keyBindings?: NSEMenuRuntimePort["keyBindings"];
   readonly scheduler?: NSEMenuRuntimePort["scheduler"];
+  readonly resolveAction?: NSEMenuRuntimePort["resolveAction"];
 }
 
 export type NSEToolbarPresentedItem =
@@ -166,7 +177,7 @@ export interface NSEToolbarSnapshot {
 
 export interface NSEToolbarControllerOptions extends NSEControllerOwnershipOptions {
   readonly configuration: NSEToolbarConfiguration;
-  readonly items: readonly NSEToolbarItem[];
+  readonly items: readonly NSEToolbarItemInput[];
   /** The host constructs and owns this preference controller. */
   readonly preferences: NSEPreferencesController<NSEToolbarPreferences>;
   readonly runtime: NSEToolbarRuntimePort;

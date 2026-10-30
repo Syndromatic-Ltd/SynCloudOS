@@ -1,5 +1,7 @@
 # Application migration and feature preservation
 
+Migration authorized 28 October 2026 for all eleven bundles, including the previously exempt SynCal, MemoJournal and Gallery applications. The source inventory and proposed status below are the 24 October baseline. Current completion requires the implementation, ownership and preserved behavior gates; the execution ledger records accepted changes.
+
 Compiler baseline for every migration: exact TypeScript 6.0.3, now approved. Native TypeScript 7/API porting is a separate deferred phase and is not an app-migration prerequisite. Compiler approval does not authorize the proposed application rewrites; preserve the ownership, feature, document and FX gates below.
 
 Status: source inventory and proposed migrations, 24 October 2026. S is `C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site`, HEAD `9a78fd30f6b2cab61fcf469a72c37c08ae202b23`. Paths below are S-relative. F's framework plan is pinned separately in README. No application has been edited by this task.

@@ -58,6 +58,13 @@ export type {
   NSEControllerDisposalReason, NSEControllerOwnership,
 } from "./Controllers/NSEController";
 export { nseUnowned } from "./Controllers/ownership";
+export { bind, createNSEBinding, useNSEBinding } from "./Bindings";
+export type { NSEBinding, NSEBindingValue, NSEBindingSnapshot, NSEBindingCommitResult, NSEBindingEdit, NSEBindingOwner, NSEBindingAdapter, NSEBoundValueProps, NSEBindingView, NSEWritableBindingKey } from "./Bindings";
+export { managedTask, NSETaskQueueFullError } from "./Tasks";
+export type { NSETaskLifetime, NSETaskSettlement, NSETaskContext, NSETaskRun, NSETaskSnapshot, NSEManagedTask, NSETaskOptions } from "./Tasks";
+export { outlet } from "./Application/viewOutlet";
+export type { NSEViewOutlet, NSEOutletOptions } from "./Application/viewOutlet";
+export type { NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "./Application/managedAnimationRenderer";
 export type { NSEOwner, NSEControllerOwnershipOptions } from "./Controllers/ownership";
 export { useNSEArrayController, useNSETreeController } from "./Controllers/useNSEOwnedController";
 export { SynCloudOSLifecycleError } from "../SynCloudOS/nseRuntimeContracts";
@@ -166,6 +173,8 @@ export type {
 } from "./Controllers/NSEArrayController";
 export {
   NSEPreferencesController,
+  PreferenceValidationError,
+  PreferencePersistenceError,
 } from "./Controllers/NSEPreferencesController";
 export type {
   PreferencesAdapter,
@@ -839,6 +848,8 @@ export type {
 export type {
   NSEToolbarConfiguration,
   NSEToolbarItem,
+  NSEToolbarActionItem,
+  NSEToolbarItemInput,
   NSEToolbarPreferences,
 } from "./Toolbars/toolbarTypes";
 export {
@@ -976,4 +987,14 @@ export type {
   NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
 } from "./Application";
 export { NSEActionScopeProvider } from "./Controls/Core/useNSEControlAction";
+export { preference } from "./Objects/preference";
+export type { NSEPreferenceDescriptor } from "./Objects/preference";
+export { observes } from "./Objects/observes";
+export type { NSEObservationOptions } from "./Objects/observes";
+export { createNSETabSelectionRestoration } from "./Navigation/navigationRestoration";
+export type { NSENavigationRestorationDescriptor } from "./Navigation/navigationRestoration";
 export type { NSEActionScopeProviderProps } from "./Controls/Core/useNSEControlAction";
+
+export { actionRef } from "./Controls/Core/actionReference";
+export type { NSEActionReference, NSEActionPayloadCheck } from "./Controls/Core/actionReference";
+export type { NSEViewControllerFX, NSEViewControllerFXClients } from "./Application";

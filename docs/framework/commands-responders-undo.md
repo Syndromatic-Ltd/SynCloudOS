@@ -1,5 +1,7 @@
 # Commands, responders and undo
 
+The [class authoring guide](cocoa-authoring.md#actions-and-undo) describes typed references, declared action results/undo and their unchanged canonical admission path.
+
 Desktop applications route user intent through a shared vocabulary: a menu item, a key press and a toolbar button all ask the application to do the same thing. SynCloudOS provides that vocabulary through three cooperating parts. Commands name the operations, the responder chain decides who handles them, and undo histories record how to reverse them.
 
 ## Commands
@@ -58,6 +60,8 @@ const payload = {
 
 `validate` returns an object with `enabled`, and optionally `denied`, `hidden`, `state` (`"off"`, `"on"` or `"mixed"`, for checkable items), a replacement `title` and a `disabledReason`. Menus and buttons read this result, so a command disables everywhere at once. Validation may be asynchronous and receives the command context, including the payload.
 
+Synchronous validators finish in the sender's event, so closing a picker does not invalidate a completed check. Asynchronous checks retain their authority and cancellation fences. Standard controls, pickers and callback menus inherit their class controller's modal ancestry; app code does not supply focus provenance for these ordinary cases. UI activation also honours visibility from the validation that admits the command. `hidden` remains a presentation rule; direct API calls still use `enabled` and `denied` for admission.
+
 ### Execution context
 
 `execute` receives a context with the `commandId`, the `payload`, an `operationId` and `correlationId` for tracing, an `AbortSignal` that fires when the dispatch is superseded or cancelled, and the `source` of the request (menu, key binding, code and so on). Treat an aborted signal as a cancelled operation and skip the late result.
@@ -105,6 +109,9 @@ class NotesWindowController extends NSEWindowController<NotesApp> {
 - Dispatch walks the responder chain: the focused view controller answers first, then its window controller, then the application. The first object that declares the action runs it.
 - `useAction` and action controls revalidate when logical focus, focus scopes or active responder anchors change, even if no command or responder is registered or removed. A newly mounted action control stays unavailable until its asynchronous validation result arrives; this also applies to actions in segmented-control overflow menus.
 - Replacing a class during development (hot reload) re-reads its actions and validation without re-registering the application.
+- Action availability follows observable changes on its controller and recorded lifetime owners, including application state read by a window validator. Disposing the controller removes its registrations and prevents delayed work from executing through that binding.
+- A declared `validate<Name>` must be a method. Invalid declarations report an error instead of silently enabling the action. Failed action registration or hot refresh removes the entire binding's command set.
+- Default and rest payload parameters accept payloads; genuinely parameterless methods reject them. Standard controls prepare current authority when activated and suppress late value/selection callbacks after unmount or rebinding. App code does not need to schedule focus-driven menu validation.
 
 `useCommands` stays the way to declare commands in a function-component application.
 

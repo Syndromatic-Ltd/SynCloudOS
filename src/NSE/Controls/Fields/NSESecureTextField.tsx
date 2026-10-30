@@ -1,3 +1,5 @@
+import { useNSEValueBinding } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -63,7 +65,11 @@ export interface NSESecureTextFieldProps extends Omit<InputHTMLAttributes<HTMLIn
   onValueChange?(value: string): void;
 }
 
-export function NSESecureTextField(props: NSESecureTextFieldProps) {
+export function NSESecureTextField(props: NSEBoundValueProps<string, NSESecureTextFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <NSESecureTextFieldControl {...useNSEValueBinding<string, NSESecureTextFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
+}
+
+function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
   const controlled = props.value !== undefined;
   const [stored, setStored] = useState(props.defaultValue ?? "");
   const [revealed, setRevealed] = useState(false);

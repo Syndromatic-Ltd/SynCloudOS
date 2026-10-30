@@ -32,8 +32,9 @@ import {
 } from "react";
 import { useNSEActionBinding } from "../Controls/Core/useNSEControlAction";
 import { useNSEControlCommand } from "../Controls/Core/useNSEControlCommand";
+import type { NSEActionReference } from "../Controls/Core/actionReference";
 
-export interface NSECoverFlowItem {
+export interface NSECoverFlowItem<Payload = unknown> {
   /** Stable identity for the panel. */
   id: string;
   /** Source URL for the panel artwork. */
@@ -45,13 +46,13 @@ export interface NSECoverFlowItem {
   /** Fired when the panel is the centre item and is activated (click / Enter). */
   onActivate?: () => void;
   /** Sent when the centre panel is activated. Overrides the cover flow's default action. */
-  action?: string;
+  action?: string | NSEActionReference<Payload>;
   /** Defaults to this item's id; an explicitly present undefined sends no payload. */
-  actionPayload?: unknown;
+  actionPayload?: NoInfer<Payload>;
 }
 
-export interface NSECoverFlowProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
-  items: NSECoverFlowItem[];
+export interface NSECoverFlowProps<Payload = unknown> extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
+  items: NSECoverFlowItem<Payload>[];
   /** Controlled centre index. Omit for uncontrolled use. */
   activeIndex?: number;
   /** Initial centre index for uncontrolled use. Defaults to the middle item. */
@@ -59,9 +60,9 @@ export interface NSECoverFlowProps extends Omit<HTMLAttributes<HTMLDivElement>, 
   /** Notified whenever the centre item changes. */
   onActiveChange?: (index: number) => void;
   /** Default action for centre-panel activation by click, Enter or Space. */
-  action?: string;
+  action?: string | NSEActionReference<Payload>;
   /** Defaults to the active item's id; an item-specific action uses its own payload override. */
-  actionPayload?: unknown;
+  actionPayload?: NoInfer<Payload>;
   /** Render mirrored reflections under each panel. Defaults to true. */
   reflection?: boolean;
   /** Show the floating label/caption for the centre item. Defaults to false. */
@@ -122,7 +123,7 @@ function panelTransform(offset: number) {
  * whose artwork is the ring index for that position; near the seam an item simply appears in two
  * slots at once and the depart/arrive pair cross-fades.
  */
-export function NSECoverFlow(props: NSECoverFlowProps) {
+export function NSECoverFlow<Payload = unknown>(props: NSECoverFlowProps<Payload>) {
   const {
     items,
     activeIndex,

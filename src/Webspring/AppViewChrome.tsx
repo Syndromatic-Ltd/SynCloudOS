@@ -20,8 +20,8 @@
 
 import { useCallback, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
 import { useNSEPresenceExiting, useNSEPresentation } from "../NSE/Animation";
-import { nseTopBarHeightCssValue } from "../NSE/Windows/Chrome/nseTopBarStyles";
-import { isWithinNSEFocusOrigin } from "../NSE/Focus/focusOrigin";
+import { nseTopBarHeightCssValue } from "../NSE/hostComposition";
+import { isWithinNSEFocusOrigin } from "../NSE/hostComposition";
 import type { SynCloudOSAppFrameManifest } from "../SynCloudOS/SynCloudOS";
 import type { ApplicationStagePartMotion } from "./ApplicationStage.transitions";
 

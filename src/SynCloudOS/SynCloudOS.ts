@@ -117,6 +117,7 @@ export {
 } from "./Responders/MountedAppResponderBridge";
 export {
   getMountedAppOverlayAuthority,
+  getMountedAppDOMRuntimeId,
   setMountedAppOverlayAuthority,
   clearMountedAppOverlayAuthority,
 } from "./Runtime/MountedAppOverlayBridge";

@@ -283,13 +283,13 @@ describe("lifecycle launch and activation authority", () => {
   });
 
   it("keeps a delayed logout authoritative when a normal route is requested before the locked commit", async () => {
-    let releaseSuspend!: () => void;
+    let releaseClose!: () => void;
     const runtime = createTestRuntime({
       initialBundles: [
         createTestBundle({ bundleIdentifier: "com.example.current", route: "/current" }, {
           lifecycleHooks: {
-            suspend: {
-              will: () => new Promise<void>((resolve) => { releaseSuspend = resolve; }),
+            close: {
+              will: () => new Promise<void>((resolve) => { releaseClose = resolve; }),
             },
           } as never,
         }),
@@ -300,7 +300,7 @@ describe("lifecycle launch and activation authority", () => {
     await runtime.routes.openRoute("/current", { source: "setup", syncRoute: false }).result;
 
     const logout = runtime.logOut({ reason: "authoritative" });
-    await vi.waitFor(() => expect(releaseSuspend).toBeTypeOf("function"));
+    await vi.waitFor(() => expect(releaseClose).toBeTypeOf("function"));
     const displacedRoute = runtime.routes.openRoute("/next", { source: "during-logout", syncRoute: false });
 
     await expect(displacedRoute.result).resolves.toMatchObject({
@@ -308,7 +308,7 @@ describe("lifecycle launch and activation authority", () => {
       committed: false,
       error: { code: "session-logout-pending" },
     });
-    releaseSuspend();
+    releaseClose();
     await expect(logout.result).resolves.toMatchObject({ status: "completed", committed: true });
     expect(runtime.store.getSnapshot()).toMatchObject({
       loginServices: { isAuthorised: false },

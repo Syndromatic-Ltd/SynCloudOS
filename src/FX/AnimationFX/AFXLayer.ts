@@ -729,6 +729,9 @@ export class AFXLayer {
       () => {
         this.#sublayerTransform = value;
         delete this.#values.sublayerTransform;
+        // Retained renderers compose the parent's presentation snapshot.
+        // Publish it as well as each child's inherited transform.
+        this.#display();
         for (const child of this.#children) child.#display();
       },
     );

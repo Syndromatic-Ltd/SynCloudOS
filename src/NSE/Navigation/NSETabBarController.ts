@@ -20,6 +20,9 @@
 
 import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
 import { NSENavigationStackController } from "./NSENavigationStackController";
+import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle";
+import { connectNSENavigationRestoration, type NSENavigationRestorationDescriptor } from "./navigationRestoration";
+import { observe } from "../Objects/observable";
 import type {
   NSENavigationDestination,
   NSENavigationSection,
@@ -34,6 +37,7 @@ export interface NSETabBarControllerOptions<TContent = unknown> extends NSEViewC
   /** Explicit source-list grouping. Omit to derive stable groups from `groupId`. */
   readonly sections?: readonly NSENavigationSection[];
   readonly initialSelectedId?: string;
+  readonly restoration?: NSENavigationRestorationDescriptor<NSETabBarController<TContent>, unknown>;
   readonly onSelect?: (
     destination: NSENavigationDestination<TContent>,
     options: { readonly signal: AbortSignal; readonly source?: string },
@@ -166,6 +170,8 @@ function awaitAbortable<T>(value: Promise<T>, signal: AbortSignal): Promise<T> {
 /** A semantic tab owner. Physical tab bars and source-list projections consume
  * this controller; it never infers destinations from panes or visual tabs. */
 export class NSETabBarController<TContent = unknown> extends NSEViewController<NSETabBarControllerSnapshot> {
+  /** Semantic snapshots never publish a fabricated navigation change on disposal. */
+  override readonly subscribe = (listener: () => void): (() => void) => observe(this, () => { if (!this.isDisposed) listener(); });
   readonly id: string;
   readonly moreStack: NSENavigationStackController | null;
   #destinations: readonly NSENavigationDestination<TContent>[];
@@ -178,6 +184,7 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
   readonly #onSelect: NSETabBarControllerOptions<TContent>["onSelect"];
   readonly #contentByDestinationId = new Map<string, TContent>();
   #selectedDestinationId: string;
+  readonly #initialSelectedId: string;
   #revision = 0;
   #snapshot: NSETabBarControllerSnapshot;
   #pending: AbortController | null = null;
@@ -218,6 +225,7 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
       : destinations.find(({ disabled }) => !disabled)?.id;
     if (!initial) throw new TypeError("Tab bar controllers require at least one enabled destination.");
     this.#selectedDestinationId = initial;
+    this.#initialSelectedId = initial;
     this.moreStack = overflow.length === 0
       ? null
       : new NSENavigationStackController({
@@ -235,6 +243,7 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
     }) ?? null;
     this.#snapshot = this.#makeSnapshot();
     this.getSnapshot = () => this.#snapshot;
+    if (options.restoration) registerNSEAuthoringFinalizer(this, () => connectNSENavigationRestoration(this, options.restoration!), 15);
   }
 
   get destinations(): readonly NSENavigationDestination<TContent>[] { return this.#destinations; }
@@ -342,7 +351,7 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
     }
     const selected = [restoredOverflowDestinationId, snapshot?.selectedDestinationId, legacyOverflowDestinationId]
       .find((destinationId): destinationId is string => Boolean(destinationId && this.#isSelectable(destinationId)))
-      ?? this.#destinations.find(({ disabled }) => !disabled)!.id;
+      ?? this.#initialSelectedId;
     if (selected === this.#selectedDestinationId) return;
     this.#selectedDestinationId = selected;
     this.#publish();

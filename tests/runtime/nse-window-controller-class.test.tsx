@@ -6,7 +6,7 @@ import { NSEApplication, type NSEApplicationClass } from "../../src/NSE/Applicat
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
-import { applicationSessionFor, ensureApplicationSession } from "../../src/SynCloudOS/AppSDK/applicationSession";
+import { applicationSessionFor, ensureApplicationSession } from "../../src/SynCloudOS/AppHosting/applicationSession";
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import { useSCOS } from "../../src/SynCloudOS/AppSDK/scos";
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";

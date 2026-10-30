@@ -4,6 +4,7 @@ import { afterEach, expect, it } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
+import { outlet, type NSEViewOutlet } from "../../src/NSE/Application/viewOutlet";
 import { createSynWareTestHost } from "../../src/SynCloudOS/AppSDK/testing/createSynWareTestHost";
 import { createAppSCOS } from "../../src/SynCloudOS/AppSDK/scos/scosFacade";
 import type { SynWareTestHost } from "../../src/SynCloudOS/AppSDK/testing/testHostTypes";
@@ -14,6 +15,61 @@ import { act, waitFor, within } from "@testing-library/react";
 import { action } from "../../src/SynCloudOS/AppSDK/actions";
 const hosts: SynWareTestHost[] = [];
 afterEach(async () => { for (const host of hosts.splice(0)) await host.dispose(); });
+it("remounts a retained class application without launching it twice or retaining the old view epoch", async () => {
+  class Content extends NSEViewController {
+    @outlet accessor paper!: NSEViewOutlet<HTMLDivElement>;
+    static override view = ({ controller }: { controller: Content }) => <div ref={controller.paper.ref}>Retained content</div>;
+  }
+  class Application extends NSEApplication {
+    static override mainViewController = Content;
+    launches = 0;
+    override applicationDidFinishLaunching() { this.launches += 1; }
+  }
+  const host = createSynWareTestHost({ application: Application, document, strictMode: true,
+    manifest: { schemaVersion: 1, bundleIdentifier: "com.example.remounted-class-host", displayName: "Remounted", version: "1.0.0" } });
+  hosts.push(host);
+  let first!: Awaited<ReturnType<typeof host.render>>;
+  await act(async () => { first = await host.render(); });
+  const application = host.application as Application;
+  const content = application.windows[0].contentViewController as Content;
+  const epoch = content.paper.mountSignal;
+  const registrationCount = host.commands.inspect().length;
+  await act(async () => { first.unmount(); });
+  expect(epoch.aborted).toBe(true);
+  expect(application.isDisposed).toBe(false);
+  await act(async () => { await host.render(); });
+  expect(host.application).toBe(application);
+  expect(application.windows).toHaveLength(1);
+  expect(application.windows[0].contentViewController).toBe(content);
+  expect(application.launches).toBe(1);
+  expect(content.paper.mountSignal).not.toBe(epoch);
+  expect(content.paper.mountSignal.aborted).toBe(false);
+  expect(host.commands.inspect()).toHaveLength(registrationCount);
+});
+it("isolates concurrent instances of one application even when their deterministic clocks match", async () => {
+  class MainWindow extends NSEWindowController { static override view = () => <p>Independent window</p>; }
+  class Application extends NSEApplication {
+    static override mainWindow = MainWindow;
+    changes = 0;
+    @action increment() { this.changes += 1; }
+  }
+  const options = { application: Application, document, manifest: { schemaVersion: 1 as const, bundleIdentifier: "com.example.concurrent-class-host", displayName: "Concurrent", version: "1.0.0" } };
+  const first = createSynWareTestHost(options), second = createSynWareTestHost(options);
+  hosts.push(first, second);
+  await act(async () => { await first.render(); await second.render(); });
+  expect(first.clock.now()).toBe(second.clock.now());
+  expect(first.application).not.toBe(second.application);
+  expect(first.application!.windows[0]).not.toBe(second.application!.windows[0]);
+  await act(async () => { await second.appContext.commands.dispatch("com.example.concurrent-class-host.increment"); });
+  expect((first.application as Application).changes).toBe(0);
+  const survivor = second.application as Application;
+  expect(survivor.changes).toBe(1);
+  await act(async () => { await first.dispose(); });
+  expect(second.application).toBe(survivor);
+  expect(survivor.isDisposed).toBe(false);
+  await act(async () => { await second.appContext.commands.dispatch("com.example.concurrent-class-host.increment"); });
+  expect(survivor.changes).toBe(2);
+});
 it("launches a real class app with running services and exposes its live window controllers and preferences", async () => {
   const services = createAppSCOS("com.example.class-test-host");
   class MainWindow extends NSEWindowController { static override view = () => <p>Class test window</p>; }

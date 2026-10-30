@@ -297,10 +297,22 @@ function NSEConfiguredToolbar({
             onBlur={() => setFocusedItemId((current) => current === entry.instanceId ? null : current)}
             onPointerEnter={() => setHoveredItemId(entry.instanceId)}
             onPointerLeave={() => setHoveredItemId((current) => current === entry.instanceId ? null : current)}
-            onPointerDown={() => setPressedItemId(entry.instanceId)}
+            onPointerDown={(event) => {
+              // A pointer-operated toolbar acts on the editor's first responder.
+              // Moving focus into the toolbar would invalidate its command tuple
+              // between pointer-down and click (and lose the text selection).
+              if (event.button === 0) event.preventDefault();
+              setPressedItemId(entry.instanceId);
+            }}
             onPointerUp={() => setPressedItemId((current) => current === entry.instanceId ? null : current)}
             onPointerCancel={() => setPressedItemId((current) => current === entry.instanceId ? null : current)}
-            onClick={() => void controller.dispatch(entry.instanceId)}
+            onClick={async () => {
+              // Focus and document state can change since the toolbar was
+              // drawn. Acquire a current presentation before activation;
+              // dispatch still fences the exact validated authority tuple.
+              const validation = await controller.refresh();
+              if (validation.status === "published") await controller.dispatch(entry.instanceId);
+            }}
           >
             <NSEChromeSurface slot={itemAppearance} state={itemAppearanceState} />
             <NSEChromeBevel slot={itemAppearance} state={itemAppearanceState} />

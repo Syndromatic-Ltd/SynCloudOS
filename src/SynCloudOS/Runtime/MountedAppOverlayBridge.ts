@@ -55,6 +55,15 @@ export interface MountedAppOverlayAuthority {
 }
 
 const authorities = new WeakMap<object, MountedAppOverlayAuthority>();
+// Presentation identity is inert metadata. Keep it through an exiting mount's
+// final render without retaining its revoked environment or focus authority.
+const domRuntimeIds = new WeakMap<object, string>();
+
+export function getMountedAppDOMRuntimeId(runtime: object): string {
+  const runtimeId = domRuntimeIds.get(runtime);
+  if (runtimeId === undefined) throw new DOMException("The mounted application has no host runtime identity.", "SecurityError");
+  return runtimeId;
+}
 
 export function getMountedAppOverlayAuthority(runtime: object): MountedAppOverlayAuthority {
   const authority = authorities.get(runtime);
@@ -63,6 +72,12 @@ export function getMountedAppOverlayAuthority(runtime: object): MountedAppOverla
 }
 
 export function setMountedAppOverlayAuthority(runtime: object, authority: MountedAppOverlayAuthority): void {
+  const runtimeId = authority.runtimeId;
+  const previousId = domRuntimeIds.get(runtime);
+  if (previousId !== undefined && previousId !== runtimeId) {
+    throw new DOMException("The mounted application cannot change its host runtime identity.", "SecurityError");
+  }
+  domRuntimeIds.set(runtime, runtimeId);
   authorities.set(runtime, authority);
 }
 

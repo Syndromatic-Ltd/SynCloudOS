@@ -20,9 +20,9 @@
 
 // @vitest-environment jsdom
 
-import React from "react";
+import React, { useInsertionEffect, useSyncExternalStore } from "react";
 import { afterEach, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import {
   SynWareProvider,
   createSynWare,
@@ -66,6 +66,31 @@ function Probe() {
   const app = useSCOS();
   return <output>{`${app.app.bundleIdentifier}:${app.runtimeInfo.id}`}</output>;
 }
+
+it("revokes window snapshots synchronously without scheduling React work during insertion cleanup", async () => {
+  const runtime = createTestRuntime({ id: "runtime:window-insertion-cleanup" });
+  const appId = "com.example.window-insertion-cleanup";
+  registerTestSynWare(runtime, { schemaVersion: 1, version: "1.0.0", bundleIdentifier: appId, displayName: appId });
+  const mounted = mountTestSynWareRuntime(runtime, appId); mountedApps.push(mounted);
+  const context = createSynWareContextValue(mounted.runtime);
+  const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+  const seen = vi.fn(); const unsubscribe = context.windows.subscribe(seen);
+  function Consumer() {
+    const snapshot = useSyncExternalStore(context.windows.subscribe, context.windows.getSnapshot);
+    return <output>{snapshot.state}</output>;
+  }
+  function Owner() {
+    useInsertionEffect(() => () => { mounted.dispose(); expect(context.windows.getSnapshot().state).toBe("closed"); }, []);
+    return <Consumer />;
+  }
+  try {
+    const view = render(<Owner />);
+    view.unmount();
+    await act(async () => { await Promise.resolve(); });
+    expect(seen).toHaveBeenCalledOnce();
+    expect(errors.mock.calls.filter(call => String(call[0]).includes("useInsertionEffect must not schedule updates"))).toEqual([]);
+  } finally { unsubscribe(); errors.mockRestore(); await runtime.dispose("window teardown test complete"); }
+});
 
 it("resolves the nearest app and runtime instance", () => {
   const outer = createTestAppContext("runtime:outer", "com.example.outer-app");

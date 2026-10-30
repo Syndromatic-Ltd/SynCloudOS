@@ -34,7 +34,9 @@ function fixture() {
   }
   function project(options = {}, development = true) {
     const discovered = discoverSynWareProject(root, { webspringEntry: false, ...options });
-    const code = ts.transpileModule(discovered.code.replaceAll("import.meta.env.DEV", String(development)), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+    // The fixture's require returns ESM namespace records, matching Vite's generated imports.
+    // Do not wrap their default export again through TypeScript's CommonJS interop helper.
+    const code = ts.transpileModule(discovered.code.replaceAll("import.meta.env.DEV", String(development)), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: false } }).outputText;
     const exports = {} as Omit<SynCloudOSProjectComposition, "bundles"> & { bundles: { manifest: SynWareManifestV1; localeResources: unknown }[] };
     const require = (id: string) => {
       if (id === "@syndromatic/syncloudos/webspring") return webspring;
@@ -54,6 +56,17 @@ function fixture() {
 }
 
 describe("folder-derived projects with explicit app identity", () => {
+  it("orders generated widgets by declared order with an ID tie-break instead of folder order", () => {
+    const f = fixture();
+    const declared = (id: string, order?: number) => webspring.defineWidget({ id, title: id, order, load: () => id, view: () => null, whenEmpty: "hide" });
+    const late = declared("late", 10), early = declared("early", -10), alpha = declared("alpha"), zeta = declared("zeta");
+    for (const [folder, definition] of [["A", late], ["B", zeta], ["C", alpha], ["Z", early]] as const) {
+      f.put(`src/Widgets/${folder}.widget/index.tsx`, "export default defineWidget({});", { default: definition });
+    }
+    const project = f.project();
+    expect(project.widgets).toEqual([early, alpha, zeta, late]);
+    expect(Object.isFrozen(project.widgets)).toBe(true);
+  });
   it("discovers every folder kind, preserves identity and defaults only schema, icons and locale files", () => {
     const f = fixture(); f.app("NSEControlGallery", { bundleIdentifier: "com.example.NSEControlGallery", displayName: "NSE Control Gallery", version: "1.2.0" });
     f.put("src/SynWare/NSEControlGallery.app/Contents/Resources/AppIcon.svg", "<svg/>");

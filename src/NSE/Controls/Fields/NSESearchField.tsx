@@ -1,3 +1,5 @@
+import { useNSEValueBinding } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -67,7 +69,11 @@ export interface NSESearchFieldProps {
   onChange?(event: ChangeEvent<HTMLInputElement>): void;
 }
 
-export function NSESearchField(props: NSESearchFieldProps) {
+export function NSESearchField(props: NSEBoundValueProps<string, NSESearchFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <NSESearchFieldControl {...useNSEValueBinding<string, NSESearchFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
+}
+
+function NSESearchFieldControl(props: NSESearchFieldProps) {
   const controlled = props.value !== undefined;
   const [stored, setStored] = useState(props.defaultValue ?? "");
   const current = controlled ? props.value! : stored;

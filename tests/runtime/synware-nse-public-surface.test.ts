@@ -38,6 +38,7 @@ describe("SynWare NSE public framework boundary", () => {
   it("exports complete controller, model and control authoring contracts", () => {
     expect(publicExports().names).toEqual(expect.arrayContaining([
       "NSEObjectController", "NSEDictionaryController", "ObjectControllerOptions",
+      "PreferenceValidationError", "PreferencePersistenceError",
       "DictionaryControllerOptions", "ControllerEditTransaction", "ControllerCommitResult",
       "IndexPath", "IndexSet", "Predicate", "ChangeSet", "SortDescriptor", "TreeNode",
       "NSEControlValidation", "Formatter", "FormatterContext", "FormatterResult",

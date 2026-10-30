@@ -20,12 +20,12 @@
 import type { SynWareContextValue } from "../appContextTypes";
 import type { SynWareDefinition } from "../appDefinitionTypes";
 import type { AppTrustedDiagnosticsClient } from "../appTrustedClientTypes";
-import type { NSEApplication, NSEApplicationClass } from "../../../NSE/Application/NSEApplication";
+import type { NSEApplication, NSEApplicationClass } from "../../../NSE/sdkPackageEntry";
 import type { SynWareManifestV1 } from "../manifest/manifestTypes";
 import type { SynWareServiceToken } from "../runtimeContracts";
 import type { ApplicationDocumentRuntimeConfiguration } from "../../Runtime/runtimeInstanceTypes";
 import type { SynCloudOSDocumentKindMetadata } from "../../DocumentStore";
-import type { SynCloudOSHostContributionCleanup, SynCloudOSHostInstallContext } from "../../HostContributions/hostContribution";
+import type { SynCloudOSHostContributionCleanup, SynCloudOSHostInstallContext } from "../../Testing/appSdkTestingPort";
 import type { PasteboardRepresentation } from "../../SynCloudOS";
 import type { LFXAuthorizationStatus, LFXLocation } from "../../../FX/LocationFX/public";
 import type { MIFXAuthorizationState } from "../../../FX/MIDIFX/public";

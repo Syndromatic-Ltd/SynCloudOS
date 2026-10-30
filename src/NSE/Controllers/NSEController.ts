@@ -29,10 +29,9 @@ import type {
 } from "../../SynCloudOS/SynCloudOS";
 import {
   SynCloudOSLifecycleRecord,
-  synCloudOSLifecycleSignalReason,
   type SynCloudOSLifecycleDisposalReason,
 } from "../../SynCloudOS/nseRuntimeContracts";
-import { resolveOwnership, type NSEControllerOwnershipOptions } from "./ownership";
+import { bindNSEOwnedResource, resolveOwnership, type NSEControllerOwnershipOptions } from "./ownership";
 
 /** Why a controller was disposed. `"explicit"` is a `dispose()` call. */
 export type NSEControllerDisposalReason = SynCloudOSLifecycleDisposalReason;
@@ -158,11 +157,7 @@ export abstract class NSEController<TSnapshot, TChange> {
     this.id = options.id;
     this.responderId = options.responderId ?? `controller:${options.id}`;
     this.#lifecycle = new SynCloudOSLifecycleRecord({ kind: options.kind, id: options.id });
-    if (ownerSignal) {
-      const release = () => this.#disposeFor(synCloudOSLifecycleSignalReason(ownerSignal));
-      ownerSignal.addEventListener("abort", release, { once: true });
-      this.#releaseOwnerSignal = () => ownerSignal.removeEventListener("abort", release);
-    }
+    this.#releaseOwnerSignal = bindNSEOwnedResource(this, ownerSignal, reason => this.#disposeFor(reason));
   }
 
   abstract getSnapshot(): TSnapshot;

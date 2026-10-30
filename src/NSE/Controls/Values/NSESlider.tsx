@@ -1,3 +1,5 @@
+import { useNSEValueBinding, type NSEValueBindingControlProps } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -44,7 +46,11 @@ function SliderTooltipAnchor({ input, content }: { readonly input: ReactElement<
   })}{binding.tooltip}</>;
 }
 
-export function NSESlider({ controlSize = "regular", length, thumbMaterial = "standard", wraps: _wraps, value, defaultValue, minimum: suppliedMinimum, maximum: suppliedMaximum, min, max, step = 1, orientation = "horizontal", dir, disabled, readOnly, ticks, detents, detentThreshold = step * 2, name, id, className, label, tooltip, undoManager, onValueChange, onChanging, onChange, style, ...props }: NSESliderProps) {
+export function NSESlider(props: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'onChanging' | 'onChange'>) {
+  return <NSESliderControl {...useNSEValueBinding<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'onChanging' | 'onChange'>(props, {excludes:['onChanging','onChange'],fallback:0,cancellable:true})} />;
+}
+
+function NSESliderControl({ __nseBindingEditor, controlSize = "regular", length, thumbMaterial = "standard", wraps: _wraps, value, defaultValue, minimum: suppliedMinimum, maximum: suppliedMaximum, min, max, step = 1, orientation = "horizontal", dir, disabled, readOnly, ticks, detents, detentThreshold = step * 2, name, id, className, label, tooltip, undoManager, onValueChange, onChanging, onChange, style, ...props }: NSESliderProps & NSEValueBindingControlProps<number>) {
   const feedback = useNSEFeedback();
   // The value tooltip needs the app's tooltip host; without one the slider
   // still works, its value spoken by the input alone.
@@ -88,6 +94,12 @@ export function NSESlider({ controlSize = "regular", length, thumbMaterial = "st
     enteredDetent.current = null;
     setDragging(false);
     commitValue(opening.current, latest.current);
+  };
+  const cancel = () => {
+    if(!__nseBindingEditor){commit();return;}
+    if(!active.current)return;
+    active.current=false;enteredDetent.current=null;setDragging(false);
+    __nseBindingEditor.cancel();
   };
 
   useEffect(() => {
@@ -149,11 +161,12 @@ export function NSESlider({ controlSize = "regular", length, thumbMaterial = "st
       else emit(next, "preview");
     }}
     onPointerUp={commit}
-    onPointerCancel={commit}
-    onLostPointerCapture={commit}
+    onPointerCancel={cancel}
+    onLostPointerCapture={cancel}
     onBlur={commit}
     onKeyDown={(event) => {
-      if (event.key === "ArrowUp") { event.preventDefault(); move(step); }
+      if (event.key === "Escape" && __nseBindingEditor && active.current) { event.preventDefault(); cancel(); }
+      else if (event.key === "ArrowUp") { event.preventDefault(); move(step); }
       else if (event.key === "ArrowDown") { event.preventDefault(); move(-step); }
       else if (event.key === "ArrowRight") { event.preventDefault(); move(step * (orientation === "horizontal" ? inlineDirection : 1)); }
       else if (event.key === "ArrowLeft") { event.preventDefault(); move(-step * (orientation === "horizontal" ? inlineDirection : 1)); }

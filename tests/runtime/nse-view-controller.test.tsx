@@ -8,7 +8,7 @@ import { NSEWindowController } from "../../src/NSE/Application/NSEWindowControll
 import { AFXLayer } from "../../src/FX/AnimationFX/AFXLayer";
 import { AFXTransform3D } from "../../src/FX/AnimationFX/AFXTransform3D";
 import { GFXColour } from "../../src/FX/GraphicsFX/GFXColour";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppSDK/applicationHosting";
+import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { NSEAnimationEnvironmentProvider } from "../../src/NSE/Animation";
 import { render } from "@testing-library/react";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";

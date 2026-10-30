@@ -19,7 +19,7 @@
 
 import { useMemo } from "react";
 import type { NSEMenuRuntimePort } from "../../NSE/Menus";
-import { nseActionCommandId } from "../../NSE/Controls/Core/actionCommandId";
+import { nseActionCommandId } from "../../NSE/applicationHostInterop";
 import { useSCOS } from "./scos/useSCOS"
 import type { AppClientHandle } from "./appClientTypes";
 import type { CommandDispatchResult } from "../SynCloudOS";

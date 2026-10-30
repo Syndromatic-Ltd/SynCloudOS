@@ -1,3 +1,5 @@
+import { useNSEValueBinding } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -124,7 +126,11 @@ function toTextValue<T>(value: T | undefined, formatter: Formatter<T> | undefine
   return value === undefined ? "" : String(value);
 }
 
-export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
+export function NSETextField<T = string>(props: NSEBoundValueProps<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <NSETextFieldControl {...useNSEValueBinding<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback: '' as T})} />;
+}
+
+function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
   const {
     label,
     controlSize = "regular",
@@ -395,7 +401,11 @@ export interface NSECheckboxProps extends NSECheckboxPropsBase {
   onChange?: InputHTMLAttributes<HTMLInputElement>["onChange"];
 }
 
-export function NSECheckbox({
+export function NSECheckbox(props: NSEBoundValueProps<NSECheckboxState, NSECheckboxProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'state' | 'defaultState' | 'checked' | 'defaultChecked' | 'onStateChange' | 'onCheckedChange' | 'onChange'>) {
+  return <NSECheckboxControl {...useNSEValueBinding<NSECheckboxState, NSECheckboxProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'state' | 'defaultState' | 'checked' | 'defaultChecked' | 'onStateChange' | 'onCheckedChange' | 'onChange'>(props, {value:'state',change:'onStateChange',excludes:['checked','defaultChecked','defaultState','onCheckedChange','onChange'],fallback:false,mixedValue:'mixed'})} />;
+}
+
+function NSECheckboxControl({
   label,
   state,
   defaultState,
@@ -506,7 +516,11 @@ export interface NSEToggleButtonProps extends Omit<ButtonHTMLAttributes<HTMLButt
   selectionHaptic?: HFXFeedbackRequest;
 }
 
-export function NSEToggleButton({
+export function NSEToggleButton(props: NSEBoundValueProps<boolean, NSEToggleButtonProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'checked' | 'defaultChecked' | 'onCheckedChange' | 'onClick'>) {
+  return <NSEToggleButtonControl {...useNSEValueBinding<boolean, NSEToggleButtonProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'checked' | 'defaultChecked' | 'onCheckedChange' | 'onClick'>(props, {value:'checked',change:'onCheckedChange',excludes:['defaultChecked','onClick'],fallback:false})} />;
+}
+
+function NSEToggleButtonControl({
   thumbMaterial = "standard",
   checked,
   defaultChecked,
@@ -677,20 +691,28 @@ interface NSERadioOptionControlProps {
   readonly name: string;
   readonly required?: boolean;
   readonly disabled: boolean;
+  readonly tabStop: boolean;
+  readonly onAvailabilityChange: (value: string, available: boolean | null) => void;
   readonly inputRef: (node: HTMLInputElement | null) => void;
   readonly onCommit: () => void;
   readonly onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
 
-function NSERadioOptionControl({ option, selected, position, name, required, disabled, inputRef, onCommit, onKeyDown }: NSERadioOptionControlProps) {
+function NSERadioOptionControl({ option, selected, position, name, required, disabled, tabStop, onAvailabilityChange, inputRef, onCommit, onKeyDown }: NSERadioOptionControlProps) {
   const command = useNSEControlCommand(option.command);
-  const optionDisabled = disabled || Boolean(option.disabled);
+  const presentation = command.presentation;
+  const optionDisabled = disabled || Boolean(option.disabled) || Boolean(option.command && (!presentation?.enabled || presentation.denied || presentation.hidden || presentation.stale));
+  useEffect(() => {
+    onAvailabilityChange(option.value, !optionDisabled);
+    return () => onAvailabilityChange(option.value, null);
+  }, [onAvailabilityChange, option.value, optionDisabled]);
   return (
     <label
       className="nse-control-radio"
       data-position={position}
       data-selected={selected ? "true" : "false"}
       data-disabled={optionDisabled ? "true" : "false"}
+      hidden={presentation?.hidden}
     >
       <input
         ref={inputRef}
@@ -702,9 +724,9 @@ function NSERadioOptionControl({ option, selected, position, name, required, dis
         disabled={optionDisabled}
         checked={selected}
         aria-checked={selected}
-        tabIndex={selected ? 0 : -1}
+        tabIndex={tabStop && !optionDisabled ? 0 : -1}
         onChange={() => {
-          if (disabled || option.disabled) return;
+          if (optionDisabled) return;
           void (async () => {
             if (option.command) {
               const result = await command.dispatch();
@@ -720,7 +742,11 @@ function NSERadioOptionControl({ option, selected, position, name, required, dis
   );
 }
 
-export function NSERadioGroup({
+export function NSERadioGroup(props: NSEBoundValueProps<string, NSERadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <NSERadioGroupControl {...useNSEValueBinding<string, NSERadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
+}
+
+function NSERadioGroupControl({
   options,
   value,
   defaultValue,
@@ -742,6 +768,15 @@ export function NSERadioGroup({
   const groupName = name ?? generatedName;
   const firstInputRef = useRef<HTMLInputElement>(null);
   const inputRefs = useRef(new Map<string, HTMLInputElement>());
+  const [availability, setAvailability] = useState<ReadonlyMap<string, boolean>>(() => new Map());
+  const reportAvailability = useCallback((value: string, available: boolean | null) => {
+    setAvailability(previous => {
+      if (available === null ? !previous.has(value) : previous.get(value) === available) return previous;
+      const next = new Map(previous);
+      if (available === null) next.delete(value); else next.set(value, available);
+      return next;
+    });
+  }, []);
   const fallbackValue = defaultValue ?? options.find((option) => !option.disabled)?.value ?? "";
   const currentValue = useNSEControlValue<string>({
     value,
@@ -755,6 +790,8 @@ export function NSERadioGroup({
     },
   });
   useNSEControlFormReset(firstInputRef, currentValue.reset);
+  const enabledOptions = disabled ? [] : options.filter(option => !option.disabled && (!option.command || availability.get(option.value) === true));
+  const tabStopValue = enabledOptions.find(option => option.value === currentValue.value)?.value ?? enabledOptions[0]?.value;
   const invalid = validation?.kind === "invalid";
   const errorId = `${groupName}-error`;
   const describedBy = [props["aria-describedby"], invalid ? errorId : undefined].filter(Boolean).join(" ") || undefined;
@@ -766,9 +803,8 @@ export function NSERadioGroup({
     currentValue.change(nextValue, "commit");
   }
 
-  function moveSelection(direction: 1 | -1) {
-    const enabledOptions = options.filter((option) => !option.disabled);
-    const currentIndex = enabledOptions.findIndex((option) => option.value === currentValue.value);
+  function moveSelection(direction: 1 | -1, focusedValue: string) {
+    const currentIndex = enabledOptions.findIndex((option) => option.value === focusedValue);
     const nextIndex = currentIndex < 0
       ? 0
       : (currentIndex + direction + enabledOptions.length) % enabledOptions.length;
@@ -808,6 +844,8 @@ export function NSERadioGroup({
             name={groupName}
             required={required}
             disabled={disabled}
+            tabStop={option.value === tabStopValue}
+            onAvailabilityChange={reportAvailability}
             inputRef={(node) => {
                 if (node) inputRefs.current.set(option.value, node);
                 else inputRefs.current.delete(option.value);
@@ -820,10 +858,10 @@ export function NSERadioGroup({
                 const rtl = dir === "rtl";
                 if (event.key === "ArrowDown" || event.key === (rtl ? "ArrowLeft" : "ArrowRight")) {
                   event.preventDefault();
-                  moveSelection(1);
+                  moveSelection(1, event.currentTarget.value);
                 } else if (event.key === "ArrowUp" || event.key === (rtl ? "ArrowRight" : "ArrowLeft")) {
                   event.preventDefault();
-                  moveSelection(-1);
+                  moveSelection(-1, event.currentTarget.value);
                 }
                 onKeyDown?.(event as unknown as KeyboardEvent<HTMLDivElement>);
               }}

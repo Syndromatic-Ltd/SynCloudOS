@@ -27,6 +27,13 @@ import type {
   CommandValidationOptions,
 } from "../../../SynCloudOS/SynCloudOS";
 import type { Formatter, FormatterContext } from "../../../SynCloudOS/Models";
+import type { NSEActionReference } from "./actionReference";
+
+/** Typed action connection; dynamic string IDs keep their existing payload contract. */
+export interface NSEControlActionProps<Payload = unknown> {
+  readonly action?: string | NSEActionReference<Payload>;
+  readonly actionPayload?: NoInfer<Payload>;
+}
 
 /** The user-visible stage of a control value change. */
 export type NSEControlInteractionPhase = "preview" | "commit" | "cancel";

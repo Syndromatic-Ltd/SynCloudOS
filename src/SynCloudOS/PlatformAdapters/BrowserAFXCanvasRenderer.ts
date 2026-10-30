@@ -279,6 +279,7 @@ const maximumPooledTextures = 64;
 
 export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
   readonly #canvas: HTMLCanvasElement;
+  readonly #cssLayout: boolean;
   readonly #gl: WebGL2RenderingContext | null;
   readonly #fallback: CanvasRenderingContext2D | null;
   readonly #pipelines = new Map<boolean, Pipeline>();
@@ -324,8 +325,10 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
     for (const listener of this.#invalidationListeners) listener();
   };
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, options: Readonly<{ layout?: "css" }> = {}) {
+    if (options.layout !== undefined && options.layout !== "css") throw new TypeError('Renderer layout must be "css" when specified.');
     this.#canvas = canvas;
+    this.#cssLayout = options.layout === "css";
     // Multisampling belongs to the staged colour/depth target. Resolve to the
     // single-sample canvas; a multisampled default canvas cannot receive a blit.
     const gl = canvas.getContext("webgl2", {
@@ -429,7 +432,7 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
   #publishViewport(scene: AFXRendererScene, width: number, height: number, ratio: number): void {
     if (this.#canvas.width !== width) this.#canvas.width = width;
     if (this.#canvas.height !== height) this.#canvas.height = height;
-    if (this.#pendingViewport) {
+    if (this.#pendingViewport && !this.#cssLayout) {
       this.#canvas.style.width = `${scene.width}px`;
       this.#canvas.style.height = `${scene.height}px`;
     }

@@ -22,3 +22,7 @@ export { NSEObject } from "./NSEObject";
 export { observable, observe, observableVersion, publishObservableChange } from "./observable";
 export type { NSEObservable } from "./observable";
 export { useObserve } from "./useObserve";
+export { preference } from "./preference";
+export type { NSEPreferenceDescriptor } from "./preference";
+export { observes } from "./observes";
+export type { NSEObservationOptions } from "./observes";

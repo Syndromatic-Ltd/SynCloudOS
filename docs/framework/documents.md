@@ -122,6 +122,19 @@ Every write names the version it expects, so a conflict always surfaces as a sta
 
 Each document has its own undo history, and `getUndoManager(documentId)` returns it. The history follows the responder that has focus, so pressing undo in one document never reverses another. See [commands, responders and undo](commands-responders-undo.md).
 
+For models containing provider metadata such as ETags, declare an optional `history` policy on the document type:
+
+```ts
+history: {
+  captureContent: model => ({ text: model.text }),
+  restoreContent: (historical, current) => ({ ...current, text: historical.text }),
+},
+```
+
+`captureContent` returns a JSON value or deterministic fingerprint of authored content. Values compare by canonical JSON identity. `restoreContent` merges historical authored content into the current model, retaining current synchronization metadata. Both callbacks are synchronous and pure and receive immutable inputs. Replay validates the resulting model and requires its authored projection to match the historical one before publishing or restoring selection.
+
+With this policy, a `recordUndo: false` adoption preserves existing Undo and Redo only when authored content is unchanged; it still closes typing coalescing. Replacing authored content clears obsolete history. Without the policy, non-history model adoption retains the existing behavior of clearing history. Keep this domain policy on the document type instead of maintaining a separate application undo stack.
+
 ## Document resources
 
 Binary content such as images and audio lives beside the model as document resources. `documentResources.acquire`, `resolve` and `release` manage each resource's lifetime, and `subscribeInvalidation` reports when a resource changes. Keep large assets here so the model stays small enough to save quickly.

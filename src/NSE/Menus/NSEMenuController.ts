@@ -19,6 +19,7 @@
  */
 
 import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import { nseActionReferenceName } from "../Controls/Core/actionReference";
 import type { CommandDispatchResult, CommandPresentation, CommandValidationRequest } from "../../SynCloudOS/SynCloudOS";
 import { commandValidationRequestKey } from "../../SynCloudOS/nseRuntimeContracts";
 import type {
@@ -32,6 +33,8 @@ import type {
   NSEMenuPresentedEntry,
   NSEMenuSection,
   NSEMenuSnapshot,
+  NSEMenuModel,
+  NSEMenuModelActionCheck,
 } from "./menuTypes";
 
 const initialSnapshot: NSEMenuSnapshot = Object.freeze({
@@ -112,7 +115,7 @@ function resolveMenuEntries(
         throw new TypeError(`The menu entry "${entry.id}" names the action "${entry.action}", but this menu has no application to resolve it. Show the menu inside an application's views.`);
       }
       const { action, ...rest } = entry;
-      return { ...rest, commandId: resolveAction(action) };
+      return { ...rest, commandId: resolveAction(typeof action === "string" ? action : nseActionReferenceName(action)) };
     }
     return entry;
   });
@@ -183,6 +186,8 @@ function cancelled(commandId: string, reason: string): CommandDispatchResult<unk
 }
 
 type PresentationGeneration = ReturnType<NSEMenuControllerOptions["runtime"]["commands"]["getPresentationGeneration"]>;
+/** @internal A mounted menu revalidates its current branch without removing focused rows. */
+export const nseRefreshMenuPresentation: unique symbol = Symbol("nse.refreshMenuPresentation");
 function samePresentationGeneration(left: PresentationGeneration | null, right: PresentationGeneration): boolean {
   return left?.registryGeneration === right.registryGeneration && left.responderGeneration === right.responderGeneration;
 }
@@ -191,8 +196,8 @@ function samePresentationGeneration(left: PresentationGeneration | null, right: 
  * Immutable command presentation controller. It has no responder/focus/undo
  * graph of its own: every branch delegates validation and dispatch to the command authority.
  */
-export class NSEMenuController {
-  readonly model;
+export class NSEMenuController<const Model extends NSEMenuModel = NSEMenuModel> {
+  readonly model: Model;
   readonly runtime;
   readonly #ownership: NSEControllerLifetime;
   #snapshot: NSEMenuSnapshot = initialSnapshot;
@@ -209,10 +214,10 @@ export class NSEMenuController {
   #disposed = false;
   #runtimeAbort = () => this.dispose();
 
-  constructor(options: NSEMenuControllerOptions) {
+  constructor(options: Omit<NSEMenuControllerOptions, "model"> & { readonly model: Model & NSEMenuModelActionCheck<NoInfer<Model>> }) {
     const { model, runtime } = options;
     if (!model.id.trim()) throw new TypeError("NSE menu IDs must not be empty.");
-    this.#ownership = new NSEControllerLifetime(options, { kind: "NSEMenuController", id: model.id });
+    this.#ownership = new NSEControllerLifetime(options, { kind: "NSEMenuController", id: model.id }, runtime.signal);
     const sectionIds = new Set<string>();
     for (const section of model.sections ?? []) {
       if (!section.id.trim()) throw new TypeError(`NSE menu section IDs must not be empty (${model.id}).`);
@@ -247,6 +252,12 @@ export class NSEMenuController {
     this.#cancelPendingSubmenu();
     this.#branchStack = [];
     await this.#openBranch(this.model.id, this.#rootEntries, []);
+  }
+
+  /** @internal Keeps branch identity and DOM focus while preparing a visible activation. */
+  [nseRefreshMenuPresentation](): Promise<void> {
+    if(!this.#snapshot.open||this.#disposed)return Promise.resolve();
+    return this.#openBranch(this.#branchId,this.#branchEntries,this.#snapshot.branchPath,true);
   }
 
   async openSubmenu(id: string, delayMs = 0): Promise<void> {
@@ -396,7 +407,7 @@ export class NSEMenuController {
     this.#listeners.clear();
   }
 
-  async #openBranch(branchId: string, entries: readonly NSEMenuEntry[], branchPath: readonly string[]): Promise<void> {
+  async #openBranch(branchId: string, entries: readonly NSEMenuEntry[], branchPath: readonly string[], preserveRows=false): Promise<void> {
     this.#cancelPendingSubmenu();
     this.#validation?.dispose();
     const generation = ++this.#generation;
@@ -409,7 +420,7 @@ export class NSEMenuController {
       validating: true,
       generation,
       branchPath,
-      entries: [],
+      entries: preserveRows ? this.#snapshot.entries : [],
     });
     const requests = requestsFor(branchId, entries);
     const presentationGeneration = this.runtime.commands.getPresentationGeneration();

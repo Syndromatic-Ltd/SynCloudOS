@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
-import { createSynWareDefinitionFromApplicationClass } from "../../src/SynCloudOS/AppSDK/applicationClass";
+import { createSynWareDefinitionFromApplicationClass } from "../../src/SynCloudOS/AppHosting/applicationClass";
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudOSReact/browserRuntime";
 import { defineWebspring, WebspringBoardView } from "../../src/Webspring/public";

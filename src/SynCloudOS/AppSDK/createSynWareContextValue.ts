@@ -178,16 +178,29 @@ function windowClientFor(runtime: SynWareRuntime, sessionId: string): AppWindowC
   return Object.freeze({
     getSnapshot,
     subscribe(listener: () => void) {
+      let live = true;
+      let queued = false;
       let observed = getSnapshot();
-      const notify = () => {
+      const deliver = () => {
+        if (!live) return;
         const next = getSnapshot();
         if (next === observed) return;
         observed = next;
         listener();
       };
+      const notify = () => {
+        if (!runtime.signal.aborted) { deliver(); return; }
+        // Authority and getSnapshot revoke immediately. React consumers may
+        // still be subscribed while their parent's insertion cleanup aborts
+        // this mount; publish only after that commit, and only if still live.
+        if (queued || !live) return;
+        queued = true;
+        queueMicrotask(() => { queued = false; deliver(); });
+      };
       const unsubscribe = runtime.windows.subscribe(notify);
       runtime.signal.addEventListener("abort", notify, { once: true });
       return () => {
+        live = false;
         runtime.signal.removeEventListener("abort", notify);
         unsubscribe();
       };

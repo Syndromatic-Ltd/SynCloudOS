@@ -17,9 +17,9 @@
  * limitations under the License.
  */
 
-import { publishObservableChange } from "../../NSE/Objects/observable";
-import { refreshActionBindings } from "./actions";
-import { isNSEApplicationClass } from "./applicationClass";
+import { publishObservableChange } from "../../NSE/applicationHostInterop";
+import { refreshActionBindings } from "../AppSDK/actions";
+import { isNSEApplicationClass, validateApplicationControllerDeclarations } from "./applicationClass";
 
 /**
  * Hot reload for class-based applications (dev server only).
@@ -138,7 +138,9 @@ function ignoreExportsForFastRefresh(refreshHost: object, moduleId: string, name
  */
 export function registerApplicationHotModule(hot: ApplicationHotContext | undefined, record: ApplicationHotModuleRecord): void {
   if (!hot) return;
-  if (!isNSEApplicationClass(record.classes[record.defaultClass])) return;
+  const AppClass = record.classes[record.defaultClass];
+  if (!isNSEApplicationClass(AppClass)) return;
+  validateApplicationControllerDeclarations(AppClass);
   ignoreExportsForFastRefresh(record.refreshHost, record.id, record.ignoredExports);
   const previous = registeredModules.get(record.id);
   registeredModules.set(record.id, { classes: record.classes, signatures: record.signatures });

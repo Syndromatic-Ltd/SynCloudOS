@@ -26,6 +26,7 @@ import {
   useEffect,
   useId,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -39,6 +40,7 @@ import { createPortal } from "react-dom";
 import { useNSEAppearanceProjection } from "../Appearance";
 import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
 import { NSEActionSheet, useOptionalNSEOverlayProvider, type NSEActionSheetProps } from "../Overlays";
+import { DialogTitleInContent, usePresentedDialogContent } from "../Overlays/presentedDialogContent";
 import "../Navigation/SourceList/nse-sourcelist.css";
 import { NSEDivider } from "../Controls/Selection/NSEDivider";
 import { NSEPushButton, type NSEButtonTone } from "../Controls/Buttons/NSEButtons";
@@ -886,6 +888,10 @@ export function NSEDialog({
 }: NSEDialogProps) {
   const titleId = useId();
   const descriptionId = useId();
+  const dialogOwner = usePresentedDialogContent();
+  const presented = dialogOwner.presented && role === "dialog";
+  const heading = useRef<HTMLHeadingElement>(null);
+  useLayoutEffect(() => presented && heading.current ? dialogOwner.observeTitle?.(heading.current) : undefined, [dialogOwner, presented, Boolean(title)]);
   const surfaceProps = getOptionalNSESmoothSurfaceProps(
     smoothSurface,
     classes("nse-container-dialog", className),
@@ -905,8 +911,8 @@ export function NSEDialog({
       {...props}
       className={surfaceProps.className}
       data-variant={variant}
-      role={role}
-      aria-modal={modal || undefined}
+      role={presented ? "group" : role}
+      aria-modal={!presented && modal || undefined}
       aria-labelledby={title ? titleId : undefined}
       aria-describedby={description ? descriptionId : undefined}
       tabIndex={props.tabIndex ?? -1}
@@ -915,7 +921,7 @@ export function NSEDialog({
     >
       {title || onClose ? (
         <header className="nse-container-dialog-header">
-          {title ? <h2 id={titleId}>{title}</h2> : null}
+          {title ? <h2 id={titleId} ref={heading}>{title}</h2> : null}
           {onClose ? (
             <button className="nse-container-dialog-close" type="button" aria-label={closeLabel} onClick={onClose}>
               <span aria-hidden="true">x</span>
@@ -963,15 +969,16 @@ export function NSEModalDialog({
 
   if (interaction) {
     return (
-      <NSEActionSheet
+      <DialogTitleInContent><NSEActionSheet
         {...interaction}
+        title={props.title}
         open={open}
         dismissOnOutside={dismissOnOutside}
         dismissOnEscape={dismissOnEscape}
         onOpenChange={(_nextOpen, _reason) => close()}
       >
         <NSEDialog {...props} className={className} modal={modal} onClose={close} />
-      </NSEActionSheet>
+      </NSEActionSheet></DialogTitleInContent>
     );
   }
 

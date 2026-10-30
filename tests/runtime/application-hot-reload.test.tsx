@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
+import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEObject, observable, observe } from "../../src/NSE/Objects";
 import {
   acceptApplicationHotUpdate,
@@ -7,7 +8,7 @@ import {
   registerApplicationHotModule,
   trackLiveApplicationObject,
   type ApplicationHotModuleRecord,
-} from "../../src/SynCloudOS/AppSDK/applicationHotReload";
+} from "../../src/SynCloudOS/AppHosting/applicationHotReload";
 
 const hot = { invalidate: vi.fn() };
 const stops: Array<() => void> = [];
@@ -45,6 +46,16 @@ class NotesWindowV2 extends NSEObject {
 }
 
 describe("application hot reload", () => {
+  it("rejects conflicting inline view declarations before changing live class lineages", () => {
+    class Root extends NSEViewController { renderView() { return null; } }
+    class App extends NSEApplication { static override mainViewController = Root; }
+    evaluate("inline-conflict.tsx", { App, Root }, { App: "app", Root: "root" });
+    class InvalidRoot extends NSEViewController { static override view = () => null; renderView() { return null; } }
+    class InvalidApp extends NSEApplication { static override mainViewController = InvalidRoot; }
+    expect(() => evaluate("inline-conflict.tsx", { App: InvalidApp, Root: InvalidRoot }, { App: "app", Root: "root" })).toThrow(/static view.*renderView|renderView.*static view/);
+    expect(currentClass(App)).toBe(App);
+    expect(currentClass(Root)).toBe(Root);
+  });
   it("gives live instances the new class's methods and keeps their state when the field signature is unchanged", () => {
     const relaunch = vi.fn();
     evaluate("notes.tsx", { App: NotesAppV1, Window: NotesWindowV1 }, { App: "a", Window: "w" });

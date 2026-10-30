@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type Ref, type ReactNode } from "react";
-import { nseUnowned } from "../NSE/Controllers/ownership";
+import { nseUnowned } from "../NSE/sdkPackageEntry";
 import { useWebspringLaunchZoom } from "./WebspringLaunchZoomContext";
 import { useNSEAnimationEnvironment, useNSEPresenceExiting, useNSEPresentation, type NSEPresentationSpec } from "../NSE/Animation";
 import { useApplicationStageMotion } from "./ApplicationStage.transitions";
@@ -147,6 +147,8 @@ export function ApplicationStageView({
   const [railWidth, setRailWidthState] = useState(railDefault);
   const [barTitle, setBarTitle] = useState<string | null>(null);
   const appMenuStore = useMemo(createApplicationMenuStore, [stage.id]);
+  const applicationResponderId = `application:${app.bundleIdentifier}`;
+  const [appMenuParent, setAppMenuParent] = useState<string | null>(null);
   const setRailWidth = useCallback(
     (px: number | null) => {
       if (px === null) {
@@ -207,7 +209,15 @@ export function ApplicationStageView({
   const openSystemPreferences = useCallback(() => {
     void runtime.commands.dispatch("system.showPreferences", undefined, { source: "toolbar" });
   }, [runtime]);
-  const activateMenu = opensPreferencesDirectly ? openSystemPreferences : appMenuStore.toggle;
+  const toggleApplicationMenu = useCallback(() => {
+    if (!appMenuStore.getSnapshot().open) {
+      const focused = runtime.focus.getFocusedResponderId();
+      setAppMenuParent(focused && runtime.responders.resolveChain(focused).some(responder => responder.id === applicationResponderId)
+        ? focused : applicationResponderId);
+    }
+    appMenuStore.toggle();
+  }, [appMenuStore, applicationResponderId, runtime]);
+  const activateMenu = opensPreferencesDirectly ? openSystemPreferences : toggleApplicationMenu;
   const hasRightSlot = usesStandardTopBar && frame.rightSlot !== "none";
   const hasApplicationMenu = menuPresentationReady && !opensPreferencesDirectly && (hasRightSlot || app.applicationMenu?.trigger === "content");
   useEffect(() => {
@@ -311,7 +321,6 @@ export function ApplicationStageView({
   );
 
   const applicationUndoOwner = useMemo(() => ({ kind: "application" as const, id: app.bundleIdentifier }), [app.bundleIdentifier]);
-  const applicationResponderId = `application:${app.bundleIdentifier}`;
   const nseFocusPort = useRuntimeNSEFocusPort(applicationResponderId);
   const nseOverlayPort = useRuntimeNSEOverlayPort(applicationResponderId);
   const nseControlPort = useRuntimeNSEControlPort();
@@ -357,7 +366,7 @@ export function ApplicationStageView({
           controller={appMenuController}
           overlay={{
             id: `webspring:app-menu-overlay:${stage.id}`,
-            parentResponderId: applicationResponderId,
+            parentResponderId: appMenuParent ?? applicationResponderId,
             placement: "block-end-inline-end",
           }}
           anchorTitle={appName}
@@ -374,7 +383,7 @@ export function ApplicationStageView({
           <ApplicationMenuTriggerBridge
             menuStore={appMenuStore}
             label={appName}
-            onActivate={opensPreferencesDirectly ? openSystemPreferences : undefined}
+            onActivate={activateMenu}
           >
           <QuickSwitchTriggerProvider port={quickSwitchTrigger}>
           <AppViewContent.Surface

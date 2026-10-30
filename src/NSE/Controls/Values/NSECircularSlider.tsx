@@ -1,3 +1,5 @@
+import { useNSEValueBinding, type NSEValueBindingControlProps } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -32,7 +34,11 @@ import type { NSECircularSliderProps } from "./valueControlTypes";
  * The linear alternative stays in the accessibility tree for assistive
  * technologies that cannot operate a radial control.
  */
-export function NSECircularSlider({ controlSize = "regular", valueText, ...props }: NSECircularSliderProps) {
+export function NSECircularSlider(props: NSEBoundValueProps<number, NSECircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <NSECircularSliderControl {...useNSEValueBinding<number, NSECircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0,cancellable:true})} />;
+}
+
+function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular", valueText, ...props }: NSECircularSliderProps & NSEValueBindingControlProps<number>) {
   const activePointer = useRef<number | null>(null);
   const opening = useRef(props.value);
   const latest = useRef(props.value);
@@ -55,6 +61,7 @@ export function NSECircularSlider({ controlSize = "regular", valueText, ...props
   const cancel = () => {
     if (activePointer.current === null || inert) return;
     activePointer.current = null;
+    if(__nseBindingEditor){__nseBindingEditor.cancel();return;}
     latest.current = opening.current;
     props.onValueChange(opening.current, "preview");
   };
@@ -99,7 +106,7 @@ export function NSECircularSlider({ controlSize = "regular", valueText, ...props
       onKeyDown={(event) => { if (inert || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return; event.preventDefault(); keyChange(event.key); }}
     ><NSEMetalThumb disabled={props.disabled} /><i aria-hidden="true" data-nse-part="knob" {...knobAppearance.attributes} /></span>
     <span data-nse-part="linear-alternative">
-      <NSESlider {...props} aria-label={`${props["aria-label"]} linear alternative`} orientation="horizontal" />
+      <NSESlider {...props} {...(__nseBindingEditor?{__nseBindingEditor}:{})} aria-label={`${props["aria-label"]} linear alternative`} orientation="horizontal" />
     </span>
   </span>;
 }

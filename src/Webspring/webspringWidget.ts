@@ -54,9 +54,10 @@ const definedWidgets = new WeakSet<object>();
  */
 export function defineWidget<TData>(input: WebspringWidgetInput<TData>): WebspringWidget {
   if (typeof input !== "object" || input === null) throw new TypeError("A widget definition must be an object.");
-  const { id, title, icon, load, view, whenEmpty, isEmpty, timeout } = input;
+  const { id, order, title, icon, load, view, whenEmpty, isEmpty, timeout } = input;
   if (typeof id !== "string" || id.trim() === "") throw new TypeError("A widget needs a nonempty id.");
   const label = `Widget ${id}`;
+  if (order !== undefined && (typeof order !== "number" || !Number.isFinite(order))) throw new TypeError(`${label} order must be a finite number.`);
   if (typeof load !== "function") throw new TypeError(`${label} needs a load function.`);
   if (typeof view !== "function" && (typeof view !== "object" || view === null)) throw new TypeError(`${label} needs a React component as its view.`);
   if (icon !== undefined && (typeof icon !== "string" || icon.trim() === "")) throw new TypeError(`${label} icon must be a nonempty resource path.`);
@@ -72,6 +73,7 @@ export function defineWidget<TData>(input: WebspringWidgetInput<TData>): Webspri
 
   const widget: WebspringWidget = Object.freeze({
     id,
+    order: order ?? 0,
     title: localised(title, `widgets.${id}.title`, `${label} title`),
     ...(icon === undefined ? {} : { icon }),
     load: async (signal: AbortSignal) => load(signal),

@@ -72,7 +72,7 @@ const factories = {
   },
 };
 
-describe.each(Object.entries(factories))("%s controller ownership", (_name, create) => {
+describe.each(Object.entries(factories))("%s controller ownership", (name, create) => {
   it("adopts an ambient owner and is disposed when that owner is released", () => {
     const scope = new NSEOwnershipScope("application", "ambient");
     const controller = instantiateInOwnerScope(scope, () => create({}));
@@ -92,10 +92,18 @@ describe.each(Object.entries(factories))("%s controller ownership", (_name, crea
     expect(controller.isDisposed).toBe(true);
   });
 
-  it("requires an owner in class applications, but honours deliberate standalone ownership", () => {
+  it("requires an admitted lifetime in class applications and honours deliberate standalone ownership", () => {
     const leave = enterClassApplication();
     try {
-      expect(() => create({})).toThrowError(expect.objectContaining({ code: "NSE_CONTROLLER_UNOWNED" }));
+      if (name === "menu" || name === "toolbar") {
+        // Their already-required runtime port carries a concrete lifetime.
+        const inferred = create({});
+        expect(inferred.isDisposed).toBe(false);
+        inferred.dispose();
+        expect(inferred.isDisposed).toBe(true);
+      } else {
+        expect(() => create({})).toThrowError(expect.objectContaining({ code: "NSE_CONTROLLER_UNOWNED" }));
+      }
       const controller = create({ owner: nseUnowned });
       expect(controller.isDisposed).toBe(false);
       controller.dispose();

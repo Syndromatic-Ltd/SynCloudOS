@@ -18,11 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Children, Fragment, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { Children, Fragment, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { useNSERubberBandScroll } from "../Scroll";
 import { NSEPopup, useNSEPopupOpenState, type NSEPopupPresentation } from "./NSEPopup";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
 import type { NSEOverlayDismissReason } from "./overlayTypes";
+import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 
 export interface NSEListboxOption<T = unknown> {
   readonly id: string;
@@ -140,9 +141,10 @@ export function NSEListboxPopup<T = unknown>({
   onSelect,
 }: NSEListboxPopupProps<T>) {
   const provider = useNSEOverlayProvider();
+  const nearestResponderId = useContext(NSEActionResponderContext);
   const generatedId = useId().replace(/:/g, "");
   const resolvedId = id ?? `nse-listbox:${generatedId}`;
-  const resolvedParentResponderId = parentResponderId ?? provider.defaultParentResponderId;
+  const resolvedParentResponderId = parentResponderId ?? nearestResponderId ?? provider.defaultParentResponderId;
   if (!resolvedParentResponderId) {
     throw new Error("NSEListboxPopup requires parentResponderId or an NSEStandaloneControlHost.");
   }

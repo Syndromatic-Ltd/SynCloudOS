@@ -1988,6 +1988,11 @@ export class DocumentController {
         environment: this.dependencies.environment,
         observeError: this.dependencies.observeError,
       });
+      throwIfDocumentAborted(request.signal);
+      this.validateApplicationMutation(admissionTicket);
+      if (!this.#types.isCurrent(typeAdmission) || (adapterAdmission !== null && !this.#isCurrentAdapter(adapterAdmission))) {
+        throw new DocumentAbortError("The document creation admission became stale during model validation.");
+      }
       await this.#installResourceLifecycle(document, request.signal);
       throwIfDocumentAborted(request.signal);
       document.markUnsaved(documentAdoptionAuthority);
@@ -2043,6 +2048,11 @@ export class DocumentController {
           environment: this.dependencies.environment,
           observeError: this.dependencies.observeError,
         }, documentProjectionAuthority);
+        throwIfDocumentAborted(request.signal);
+        this.validateApplicationMutation(admissionTicket);
+        if (!this.#types.isCurrent(typeAdmission)) {
+          throw new DocumentAbortError("The projection creation admission became stale during model validation.");
+        }
         await this.#installResourceLifecycle(document, request.signal);
         throwIfDocumentAborted(request.signal);
         // No markUnsaved: a projection is born clean (dirtyRevision 0) and

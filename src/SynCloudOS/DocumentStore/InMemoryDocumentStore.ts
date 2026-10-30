@@ -560,6 +560,12 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     if (typeof options.ifMatch === "string" && current?.storageVersion?.etag !== options.ifMatch) {
       throw new SynCloudOSDocumentStoreVersionConflictError(migrated.id, options.ifMatch, current ? clonePlain(current) : null);
     }
+    if (current && (current.publishState === "published" || current.publishState === "unlisted")
+      && draft.publishState === current.publishState) {
+      // Editing live content is a publish operation as well as a draft write.
+      // Authorise before changing the record, history, idempotency or events.
+      this.authorise("publish", current.kind, context, current.id);
+    }
     this.enforceUniqueIndexes(migrated as SynCloudOSDocument);
     const savedAt = context.now === undefined ? this.clock().toISOString() : toIso(context.now);
     const sequence = (current?.storageVersion?.sequence ?? 0) + 1;
@@ -771,7 +777,12 @@ export class SynCloudOSInMemoryDocumentStore implements SynCloudOSDocumentStoreA
     const metadata = this.kinds.get(draft.kind);
     const ownership = resolveDocumentOwnership(draft, existing, context);
     const requestedState = draft.publishState ?? existing?.publishState ?? "draft";
-    const publishState = requestedState === "published" || requestedState === "unlisted" ? "draft" : requestedState;
+    // An explicit matching state edits the already-public canonical record in
+    // this single save. New publications, state changes and omitted intent
+    // still stage a draft and require the separate publish operation.
+    const retainsPublication = draft.publishState === existing?.publishState;
+    const publishState = (requestedState === "published" || requestedState === "unlisted") && !retainsPublication
+      ? "draft" : requestedState;
     const next = {
       ...existing,
       ...clonePlain(draft),

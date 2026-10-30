@@ -18,6 +18,7 @@
  */
 
 import { createFilePanelService } from "../FilePanels";
+import { isHiddenCommandAcceptance, markHiddenCommandAcceptance } from "../nseRuntimeContracts";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { createBrowserFilePanelAdapter } from "../FilePanels";
 import type { FilePanelReference, FilePanelReleaseReason, OpenPanelRequest, SavePanelRequest } from "../FilePanels";
@@ -57,6 +58,7 @@ import type {
   CommandQueryContext,
   CommandValidationOptions,
   CommandPresentation,
+  LocalisedCommandTitle,
   DragEndpoint,
   FocusScopeHandle,
   ApplicationDocumentSnapshot,
@@ -105,6 +107,7 @@ import {
 import { createBundleGenerationFence } from "../BundleLoader/bundleGenerationFence";
 import { getHostDiagnosticsProvision, type HostDiagnosticsGrant } from "../Testing/hostDiagnosticsProvision";
 import { createAppPresentationClient } from "./appPresentationClient";
+import { translateSynWareText } from "./useStrings";
 import type { AppCommandClient, AppDocumentCloseOptions, AppWorkspaceDocumentsClient } from "./appClientTypes";
 import {
   isAuthenticSynWareServiceToken,
@@ -406,6 +409,52 @@ function assertMountedCallbackFunction(value: unknown, label: string): (...argum
   return value as (...arguments_: readonly unknown[]) => unknown;
 }
 
+/** Capture the declared title schema without coercing or retaining app values. */
+function snapshotMountedCommandTitle(
+  value: unknown,
+  label: string,
+  isNativeProxy: ((value: object) => boolean) | undefined,
+): LocalisedCommandTitle {
+  const record = (source: unknown, field: string): Record<string, unknown> => {
+    if (!source || typeof source !== "object") throw securityError(`${field} must be a plain record.`);
+    if (isNativeProxy?.(source)) throw securityError(`${field} must not be a proxy.`);
+    const prototype = Object.getPrototypeOf(source);
+    if (prototype !== Object.prototype && prototype !== null) throw securityError(`${field} must be a plain record.`);
+    const descriptors = Object.getOwnPropertyDescriptors(source);
+    const output: Record<string, unknown> = Object.create(null);
+    for (const key of Reflect.ownKeys(descriptors)) {
+      if (typeof key !== "string") throw securityError(`${field} requires string property names.`);
+      const descriptor = descriptors[key]!;
+      if (!descriptor.enumerable || !("value" in descriptor) || descriptor.get || descriptor.set) {
+        throw securityError(`${field}.${key} must be an enumerable accessor-free data property.`);
+      }
+      output[key] = descriptor.value;
+    }
+    return output;
+  };
+  const source = record(value, label);
+  if (Object.keys(source).some(key => key !== "key" && key !== "fallback" && key !== "values")) {
+    throw securityError(`${label} contains an unsupported property.`);
+  }
+  if (typeof source.key !== "string" || typeof source.fallback !== "string") {
+    throw securityError(`${label}.key and fallback must be strings.`);
+  }
+  const values: Record<string, string | number> = Object.create(null);
+  if (source.values !== undefined) {
+    for (const [key, replacement] of Object.entries(record(source.values, `${label}.values`))) {
+      if (typeof replacement !== "string" && !(typeof replacement === "number" && Number.isFinite(replacement))) {
+        throw securityError(`${label}.values.${key} must be a string or finite number.`);
+      }
+      values[key] = replacement;
+    }
+  }
+  return Object.freeze({
+    key: source.key,
+    fallback: source.fallback,
+    ...(source.values === undefined ? {} : { values: Object.freeze(values) }),
+  });
+}
+
 /** Mounted command declarations have their own callback context.  The kernel
  * receives a detached wrapper and never calls an app callback with the raw
  * runtime, operation context or undo target. */
@@ -490,13 +539,24 @@ function canonicalCommandDeclaration<P, R>(
       } } : {}),
     } as UndoAction;
   };
+  const localiseTitle = (value: unknown): LocalisedCommandTitle => {
+    const source = snapshotMountedCommandTitle(value, "Mounted command title", isNativeProxy);
+    const appRuntime = getAppRuntime();
+    // The app namespace and interpolation belong to the mounted catalogue.
+    // Omit consumed values so the kernel does not interpolate the result twice.
+    return Object.freeze({
+      key: source.key,
+      fallback: translateSynWareText(appRuntime.app.bundleIdentifier, source.key, source.fallback, source.values, undefined, appRuntime.locale),
+    });
+  };
   const titleDeclaration = declaration.title;
   const title = typeof titleDeclaration === "function"
-    ? (context: CommandQueryContext<P>) => projectCallbackValue(titleDeclaration(queryContext(context)), "Mounted command title callback result")
-    : projected({
+    ? (context: CommandQueryContext<P>) => localiseTitle(projectCallbackValue(titleDeclaration(queryContext(context)), "Mounted command title callback result"))
+    : Object.freeze({
         key: titleDeclaration.key,
-        fallback: titleDeclaration.fallback,
-        ...(titleDeclaration.values ? { values: { ...titleDeclaration.values } } : {}),
+        // This is a manager-owned read-through accessor, never an app accessor.
+        // Keep static titles static for the invalid-payload presentation path.
+        get fallback() { return localiseTitle(titleDeclaration).fallback; },
       });
   const payload = Object.freeze({
     description: declaration.payload.description,
@@ -520,7 +580,13 @@ function canonicalCommandDeclaration<P, R>(
         return projectMountedCallbackSettlement(
           value,
           "Mounted command validation result",
-          projectCallbackValue,
+          (settled, label) => {
+            const detached = projectCallbackValue(settled, label);
+            const validation = detached as SynWareCommandValidation;
+            return (validation?.title !== undefined
+              ? Object.freeze({ ...validation, title: localiseTitle(validation.title) })
+              : detached) as typeof settled;
+          },
           isNativeProxy,
         ) as SynWareCommandValidation | Promise<SynWareCommandValidation>;
       }
@@ -757,18 +823,11 @@ function snapshotMountedCallbackValue<T>(
   return snapshotCommandValue(value, label, new Map(), 0, { count: 0 }, preserveOpaque, callbackProxyProbe, byteBudget) as T;
 }
 
-function snapshotAppCommandDeclaration<P, R>(input: SynWareCommandDeclaration<P, R>): SynWareCommandDeclaration<P, R> {
+function snapshotAppCommandDeclaration<P, R>(input: SynWareCommandDeclaration<P, R>, isNativeProxy: ((value: object) => boolean) | undefined): SynWareCommandDeclaration<P, R> {
   const declaration = snapshotOwnDataObject(input, "Command declaration");
   const title = typeof declaration.title === "function"
     ? declaration.title
-    : (() => {
-        const value = snapshotOwnDataObject(declaration.title, "Command title");
-        return Object.freeze({
-          key: String(value.key ?? ""),
-          fallback: String(value.fallback ?? ""),
-          ...(value.values === undefined ? {} : { values: Object.freeze({ ...snapshotOwnDataObject(value.values, "Command title values") }) }),
-        });
-      })();
+    : snapshotMountedCommandTitle(declaration.title, "Command title", isNativeProxy);
   const payloadValue = snapshotOwnDataObject(declaration.payload, "Command payload");
   const payload = Object.freeze({
     description: String(payloadValue.description ?? ""),
@@ -2391,6 +2450,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         commandId: acceptance.commandId,
         responderId: acceptance.responderId,
       }) as CommandDispatchAcceptance;
+      if (isHiddenCommandAcceptance(acceptance)) markHiddenCommandAcceptance(exposed);
       mountedAcceptances.set(exposed, { acceptance, originalPayload, payloadSnapshot });
       return exposed;
     };
@@ -2666,7 +2726,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       },
       register(declaration: object) {
         assertLive();
-        const snapshot = snapshotAppCommandDeclaration(declaration as SynWareCommandDeclaration<unknown, unknown>);
+        const snapshot = snapshotAppCommandDeclaration(declaration as SynWareCommandDeclaration<unknown, unknown>, runtime.environment.isNativeProxy);
         if (!isSafeAppCommandId(snapshot.id)) throw securityError("This command is reserved for system-owned runtime services.");
         if (snapshot.responderId.trim().length === 0) throw securityError("Application commands require a responder owner.");
         const canonical = canonicalCommandDeclaration(
@@ -2695,6 +2755,9 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
             return removed;
           },
         };
+        // App-owned preflight reflection can synchronously revoke this mount.
+        // Never record a new lease after its abort cleanup has already run.
+        assertLive();
         if (runtime.responders.get(snapshot.responderId)) {
           ownResponder(snapshot.responderId);
           attachCommandRegistration(scopedRegistration);

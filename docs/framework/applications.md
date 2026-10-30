@@ -1,5 +1,7 @@
 # Applications
 
+The [class authoring guide](cocoa-authoring.md) covers inline and separate views, automatic root construction, typed action connections, bindings and managed lifetimes.
+
 Class-based apps export an `NSEApplication` subclass as the module's default. The framework creates
 one instance per launch (never call `new` on it), opens `static mainWindow` when present, and awaits each lifecycle hook:
 `applicationWillFinishLaunching`, `applicationDidFinishLaunching`, `applicationDidBecomeActive`,
@@ -170,11 +172,24 @@ Keep subscription disposers on the owning controller and release them when it di
 
 ## Ownership
 
-Controllers created in an application's, window controller's or view controller's field
-initialisers or constructor are owned by that object and disposed with it. Child view controllers
+Controllers created while the framework constructs an application, window controller or an
+`addChild(ControllerClass)` child adopt that construction scope and are disposed with it. Child view controllers
 are owned by their parent. When an object is disposed, its child view controllers go first, then the
 object itself, then the controllers it owns. Quitting an application therefore disposes the deepest
 view controllers first, then the window controllers, then the application, each followed by what it owns.
+
+A raw nested `new RootController()` inside a window constructor does not establish a new
+ambient construction scope for Root's own resource fields. Give those fields `owner: this`
+(for example, `rows = new NSEArrayController({ ..., owner: this })`) so replacing Root disposes
+them immediately. Passing an owner only to Root's constructor does not retarget its fields.
+Use `addChild(ControllerClass)` for framework-constructed children. The framework cannot infer
+where an arbitrary derived JavaScript constructor returns.
+
+Disposed owners reject new controllers, including during teardown. A window root cannot also
+be another window's root or a view-controller child; rejected content assignments preserve the
+previous content. Framework-controlled construction failures release their acquired resources
+and preserve the original error. Disposed controllers revoke their actions and notify managed
+views so those views unmount.
 
 The disposal reason says what triggered it, and every object in the tree records the same one:
 `application-closed` when the application quits, `window-closed` when a window closes while the

@@ -102,10 +102,12 @@ export function createHttpAuthentication(options: HttpAuthenticationOptions = {}
   let disposed = false;
   let generation = 0;
   let logoutGeneration: number | null = null;
+  let signInGeneration: number | null = null;
   let expiryHandle: unknown = null;
   const requests = new Set<AbortController>();
   const listeners = new Set<() => void>();
   const identityListeners = new Set<(value: IdentitySessionAdapterSnapshot | null) => void>();
+  let confirmedIdentity: IdentitySessionAdapterSnapshot | null = null;
 
   const identity = (): IdentitySessionAdapterSnapshot | null => snapshot.status === "authenticated" && snapshot.profile ? Object.freeze({
     id: `${snapshot.profile.subject}:${snapshot.expiresAt}`,
@@ -114,17 +116,23 @@ export function createHttpAuthentication(options: HttpAuthenticationOptions = {}
     expiresAt: snapshot.expiresAt ?? undefined,
     claims: Object.freeze({ displayName: snapshot.profile.name ?? snapshot.profile.email ?? snapshot.profile.subject, email: snapshot.profile.email ?? "", roles: snapshot.profile.roles.join(",") }),
   }) : null;
-  const notifyIdentity = () => { const value = identity(); identityListeners.forEach((listener) => listener(value)); };
+  const notifyIdentity = () => { confirmedIdentity = identity(); identityListeners.forEach((listener) => listener(confirmedIdentity)); };
   const clearExpiry = () => { if (expiryHandle !== null) cancelScheduled(expiryHandle); expiryHandle = null; };
   const publish = (next: AuthenticationSnapshot, identityChanged = false) => {
     if (disposed) return snapshot;
     snapshot = Object.freeze(next);
-    clearExpiry();
-    if (snapshot.status === "authenticated" && snapshot.expiresAt !== null) {
-      expiryHandle = schedule(() => publish({ ...snapshot, status: "expired", profile: null, error: "Your session expired. Sign in again.", errorCode: undefined }, true), Math.max(0, snapshot.expiresAt - now()));
+    // Checking/authenticating describe transport work, not a server decision
+    // about the last verified session. Keep its expiry and authority alive.
+    if (identityChanged) {
+      clearExpiry();
+      if (snapshot.status === "authenticated" && snapshot.expiresAt !== null) {
+        expiryHandle = schedule(() => publish({ ...snapshot, status: "expired", profile: null, error: "Your session expired. Sign in again.", errorCode: undefined }, true), Math.max(0, snapshot.expiresAt - now()));
+      }
     }
-    listeners.forEach((listener) => listener());
     if (identityChanged) notifyIdentity();
+    // A UI observer may launch an app as soon as it sees authenticated. Publish
+    // runtime authority first, including revocation on logout and expiry.
+    listeners.forEach((listener) => listener());
     return snapshot;
   };
   const request = async <T>(externalSignal: AbortSignal | undefined, work: (signal: AbortSignal, parseResponse: typeof parse) => Promise<T>) => {
@@ -216,8 +224,8 @@ export function createHttpAuthentication(options: HttpAuthenticationOptions = {}
     }
   };
   const revalidate = () => {
-    // Passive browser events must not overtake the current explicit logout.
-    if (!disposed && logoutGeneration !== generation) void refresh().catch(() => undefined);
+    // Passive browser events must not overtake an explicit sign-in or logout.
+    if (!disposed && logoutGeneration !== generation && signInGeneration !== generation) void refresh().catch(() => undefined);
   };
   eventTarget?.addEventListener("focus", revalidate);
   eventTarget?.addEventListener("storage", revalidate);
@@ -230,7 +238,7 @@ export function createHttpAuthentication(options: HttpAuthenticationOptions = {}
       publish({ ...snapshot, error: null, errorCode: undefined });
       await request(signal, async (requestSignal, parseResponse) => { await parseResponse(await fetchResponse("/auth/logout", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, signal: requestSignal })); });
       if (current !== generation || disposed) return;
-      publish({ ...initial, status: "anonymous" }, true);
+      publish({ ...initial, status: "anonymous", methods: snapshot.methods }, true);
       if (broadcast) channel?.postMessage({ type: "session-changed" });
     } catch (error) {
       if (signal?.aborted || disposed) throw error;
@@ -244,7 +252,7 @@ export function createHttpAuthentication(options: HttpAuthenticationOptions = {}
   return {
     sessionAdapter: {
       id: "http-session",
-      read: async (signal) => { await refresh(signal); return identity(); },
+      read: async (signal) => { await refresh(signal); return confirmedIdentity; },
       subscribe(listener) { identityListeners.add(listener); return () => identityListeners.delete(listener); },
       end: ({ signal }) => logout(signal),
       dispose() {},
@@ -255,18 +263,31 @@ export function createHttpAuthentication(options: HttpAuthenticationOptions = {}
     async signIn(methodId, returnPath, signal) {
       if (!localPath(returnPath)) throw new TypeError("Authentication return path must be local.");
       if (!snapshot.methods.some((entry) => entry.id === methodId)) throw new TypeError("Authentication method is unavailable.");
-      const current = ++generation;
+      let current = ++generation;
+      signInGeneration = current;
       publish({ ...snapshot, status: "authenticating", error: null, errorCode: undefined });
       try {
         const body = await request(signal, async (requestSignal, parseResponse) => parseResponse(await fetchResponse("/auth/start", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ method: methodId, returnPath }), signal: requestSignal })));
         if (current !== generation || disposed) return;
         if (typeof body.redirectTo !== "string") throw new Error("Authentication redirect is invalid.");
+        if (body.redirectTo === returnPath) {
+          // A provider that completes sign-in in /start returns to the requested
+          // app directly. Browser Navigation API routing may keep this document
+          // alive, so navigation cannot be relied on to refresh its authority.
+          current = generation + 1;
+          signInGeneration = current;
+          const verified = await refresh(signal);
+          if (current !== generation || disposed) return;
+          if (verified.status !== "authenticated") throw new Error(verified.error ?? "Sign-in did not establish an authorised session. Try signing in again.");
+        }
         navigate(body.redirectTo);
       } catch (error) {
         if (signal?.aborted || disposed) throw error;
         if (current !== generation) return;
         publish({ ...snapshot, status: "error", ...failure(error) });
         throw error;
+      } finally {
+        if (signInGeneration === current) signInGeneration = null;
       }
     },
     signOut: (signal) => logout(signal),

@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -24,7 +24,7 @@
  * A module that default-exports a class is made a hot-reload boundary: this
  * transform appends a call that registers the module's classes with the
  * runtime, together with a signature of each class's fields. The runtime
- * (`src/SynCloudOS/AppSDK/applicationHotReload.ts`) compares signatures between
+ * (`src/SynCloudOS/AppHosting/applicationHotReload.ts`) compares signatures between
  * two versions of the module: equal means live instances take the new class's
  * methods; different means that application relaunches.
  *
@@ -86,15 +86,24 @@ function memberKey(code, member) {
 /** What a method swap cannot repair, as text. Methods are deliberately absent. */
 function ownShape(code, node) {
   const parts = [`extends ${sourceOf(code, node.superClass)}`, ...(node.decorators ?? []).map((decorator) => `@${sourceOf(code, decorator.expression)}`)];
+  const dependencies = [node.superClass, ...(node.decorators ?? []).map(decorator => decorator.expression)];
   let unswappable = false;
   for (const member of node.body.body) {
     switch (member.type) {
       case "ClassProperty":
       case "ClassAccessorProperty":
         parts.push(`${member.static ? "static " : ""}${member.type === "ClassAccessorProperty" ? "accessor " : ""}${(member.decorators ?? []).map((decorator) => `@${sourceOf(code, decorator.expression)}`).join(" ")} ${memberKey(code, member)} = ${sourceOf(code, member.value)}`);
+        dependencies.push(member.value, ...(member.decorators ?? []).map(decorator => decorator.expression));
         break;
       case "ClassMethod":
-        if (member.kind === "constructor") parts.push(`constructor ${sourceOf(code, member)}`);
+        if (member.kind === "constructor" || (member.static && memberKey(code, member) === "viewDependencies")) {
+          parts.push(sourceOf(code, member));
+          dependencies.push(member);
+        } else if (member.decorators?.length) {
+          // Lifetimes and declaration options cannot be repaired by swapping the method body.
+          parts.push(`${member.static ? "static " : ""}method ${memberKey(code, member)} ${(member.decorators ?? []).map(decorator => `@${sourceOf(code, decorator.expression)}`).join(" ")}`);
+          dependencies.push(...member.decorators.map(decorator => decorator.expression));
+        }
         break;
       case "ClassPrivateProperty":
       case "ClassPrivateMethod":
@@ -105,7 +114,26 @@ function ownShape(code, node) {
         break;
     }
   }
-  return { text: parts.join("\n"), unswappable };
+  return { text: parts.join("\n"), unswappable, dependencies };
+}
+
+/** Resource initializers may refer to a descriptor/helper declared beside the class. */
+function resourceBindingText(code, nodes, bindings) {
+  const found = new Set();
+  const scan = node => {
+    if (!node || typeof node !== "object") return;
+    if (node.type === "Identifier" && bindings.has(node.name) && !found.has(node.name)) {
+      found.add(node.name);
+      scan(bindings.get(node.name));
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (key === "loc" || key === "extra" || key.endsWith("Comments")) continue;
+      if (Array.isArray(value)) value.forEach(scan);
+      else if (value && typeof value === "object" && typeof value.type === "string") scan(value);
+    }
+  };
+  nodes.forEach(scan);
+  return [...found].sort().map(name => `${name}: ${sourceOf(code, bindings.get(name))}`).join("\n");
 }
 
 /**
@@ -113,7 +141,7 @@ function ownShape(code, node) {
  * signature includes that of its superclass when the superclass is declared in
  * the same module, since a field change there changes every subclass instance.
  */
-function classSignatures(code, classes) {
+function classSignatures(code, classes, bindings) {
   const signatures = new Map();
   const visit = (name, active) => {
     if (signatures.has(name)) return signatures.get(name);
@@ -121,7 +149,7 @@ function classSignatures(code, classes) {
     const shape = ownShape(code, node);
     const superName = node.superClass?.type === "Identifier" ? node.superClass.name : null;
     const inherited = superName && classes.has(superName) && !active.has(superName) ? visit(superName, new Set([...active, name])) : "";
-    const signature = hash(`${shape.unswappable ? sourceOf(code, node) : shape.text}\n${inherited}`);
+    const signature = hash(`${shape.unswappable ? sourceOf(code, node) : shape.text}\n${resourceBindingText(code, shape.dependencies, bindings)}\n${inherited}`);
     signatures.set(name, signature);
     return signature;
   };
@@ -143,9 +171,14 @@ export function analyseApplicationModule(code) {
     return null;
   }
   const classes = new Map();
+  const bindings = new Map();
   for (const statement of program.body) {
     const declaration = classDeclarationOf(statement);
     if (declaration?.id) classes.set(declaration.id.name, declaration);
+    const value = statement.type === "ExportNamedDeclaration" ? statement.declaration : statement;
+    if (value?.type === "VariableDeclaration") {
+      for (const variable of value.declarations) if (variable.id.type === "Identifier" && variable.init) bindings.set(variable.id.name, variable.init);
+    } else if (value?.type === "FunctionDeclaration" && value.id) bindings.set(value.id.name, value);
   }
   let defaultClass = null;
   const exportedClasses = new Set();
@@ -165,7 +198,7 @@ export function analyseApplicationModule(code) {
     }
   }
   if (!defaultClass || !classes.get(defaultClass)?.superClass) return null;
-  const signatures = classSignatures(code, classes);
+  const signatures = classSignatures(code, classes, bindings);
   return { defaultClass, classes: [...classes.keys()], signatures, ignoredExports: ["default", ...exportedClasses] };
 }
 

@@ -44,3 +44,9 @@ export type {
 export { canonicalDocumentJson } from "./Documents/documentTypes";
 export { createUndoManager } from "./Undo/UndoManager";
 export { createCanonicalWindowRecord, freezeWindowRecord } from "./Windows/windowTypes";
+
+// Type-only authoring projections retain their existing canonical authorities.
+export type { SynWareMigration, AppBounds, AppOwnedWindowSnapshot, SynCloudOSPresentationTraits, SynWareOwnedWindowSnapshot, SynWareWindowCloseGuard } from "./AppSDK/runtimeContracts";
+export type { SynWareRouteGraph } from "./Routing/appRouteTypes";
+export { normalizeBundleIdentifier } from "./Identity/bundleIdentifier.mjs";
+export { markHiddenCommandAcceptance, isHiddenCommandAcceptance } from "./Commands/acceptancePresentation";

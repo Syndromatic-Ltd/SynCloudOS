@@ -34,8 +34,8 @@ import {
 } from "../../../Webspring/WindowLayer";
 import { createSynWare, createSynWareBundle } from "../createSynWare";
 import { useSynWareContext } from "../SynWareContext";
-import { createSynWareDefinitionFromApplicationClass } from "../applicationClass";
-import { applicationSessionFor } from "../applicationSession";
+import { createSynWareDefinitionFromApplicationClass } from "../../AppHosting/runtimeEntry";
+import { applicationSessionFor } from "../../AppHosting/runtimeEntry";
 import { applicationLifecycleFor, registerApplicationLifecycle } from "../../Lifecycle/applicationLifecycleHooks";
 import { normalizeBundleIdentifier } from "../../Identity/bundleIdentifier.mjs";
 import type { SynWareContextValue } from "../appContextTypes";
@@ -130,7 +130,10 @@ function renderResult(container: HTMLElement, unmount: () => void): SynWareTestR
  * the ordinary AppRegistry, definition loader, and production application
  * stage. Kernel instances and managers remain closure-private; this factory
  * returns only test controls. */
+let hostSequence = 0;
+
 export function createSynWareTestHost(options: CreateSynWareTestHostOptions): SynWareTestHost {
+  const hostIdentity = ++hostSequence;
   const hostDocument = options.document ?? options.container?.ownerDocument ?? null;
   const environment = createDeterministicRuntimeEnvironment({
     now: options.now,
@@ -179,7 +182,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
     const finishBootstrap = environment.prepareRuntimeBootstrap();
     try {
       return createSynCloudOS({
-        id: `runtime:synapp-test:${environment.clock.now()}:${bundle.manifest.bundleIdentifier}`,
+        id: `runtime:synapp-test:${environment.clock.now()}:${hostIdentity}:${bundle.manifest.bundleIdentifier}`,
         environment: environment.environment,
         documentStoreLock: createIsolatedDocumentStoreLock(),
         initialPathname: bundle.manifest.route,
@@ -434,7 +437,8 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
         runtime.responsiveModeManager.observe();
         await runtime.bundles.loadBundle(app.bundleIdentifier, { signal: renderController.signal });
         assertRenderLive(generation);
-        if (options.application) {
+        const applicationState = runtime.lifecycle.getState(app.bundleIdentifier);
+        if (options.application && applicationState !== "active" && applicationState !== "suspended") {
           const launched = await runtime.lifecycle.launch(app.bundleIdentifier, { signal: renderController.signal }).result;
           if (launched.status !== "completed") throw new Error(`The test application failed to launch: ${launched.status}.`);
           if (launched.postCommit !== "completed") throw new Error(`The test application launch did not complete: ${launched.issues.map(issue => issue.message).join("; ") || launched.postCommit}.`);

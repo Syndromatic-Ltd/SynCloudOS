@@ -76,6 +76,11 @@ function stalePresentation(commandId: CommandId): CommandPresentation {
   return { ...unresolvedPresentation(commandId), stale: true, disabledReason: commandValidationStaleReason };
 }
 
+function isPromiseLike<T>(value: T | PromiseLike<T>): value is PromiseLike<T> {
+  return value !== null && (typeof value === "object" || typeof value === "function")
+    && typeof (value as PromiseLike<T>).then === "function";
+}
+
 export function createCommandSystem(options: CreateCommandSystemOptions): CommandSystem {
   const getRuntime = options.getRuntime ?? (() => options.runtime!);
   const registry = new CommandRegistry();
@@ -104,7 +109,13 @@ export function createCommandSystem(options: CreateCommandSystemOptions): Comman
     const runtime = getRuntime();
     const context = { runtime, runtimeId: runtime.runtimeId, commandId: id, responderId: resolved.responder.id, scopeId: resolved.responder.scopeId, payload: parsed.value };
     const declaredTitle = typeof resolved.declaration.title === "function" ? resolved.declaration.title(context) : resolved.declaration.title;
-    const validation = await resolved.declaration.validate?.(context) ?? { enabled: true };
+    // Synchronous validators complete within the sender's event. Yielding here
+    // would misclassify the sender's own popup-close commit as stale validation.
+    // Real asynchronous validation still retains the authority fence below.
+    const pendingValidation = resolved.declaration.validate?.(context);
+    const validation = (isPromiseLike(pendingValidation)
+      ? await pendingValidation
+      : pendingValidation) ?? { enabled: true };
     if (validationOptions.signal?.aborted) return cancelledPresentation(id);
     if (disposed || registry.generation !== registryGeneration || (options.responderResolver.getGeneration?.() ?? 0) !== responderGeneration) {
       return stalePresentation(id);

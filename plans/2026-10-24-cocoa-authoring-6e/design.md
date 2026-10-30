@@ -1,5 +1,7 @@
 # 6E design: Cocoa-style controllers, bindings and TSX
 
+Implementation authorized 28 October 2026. The original proposed status below is historical. Current source and acceptance work follow this contract, including supplying the owning window to `contentViewControllerClass` construction; no-argument content classes remain valid. Application migrations are admitted; toolchain major upgrades remain separate.
+
 Status: proposed for review, 24 October 2026. This is a design, not an implemented API catalogue. Baselines and exact F/S paths are in [README](README.md); Apple evidence and original 6C links are in [research-and-baseline](research-and-baseline.md).
 
 Approved compiler baseline: exact TypeScript 6.0.3. The user authorized that compiler upgrade and prior security remediation, while the APIs and application migrations in this document remain proposed. Standard decorators, bindings and TSX require no native TypeScript 7 dependency; a future native compiler/API port is a separate deferred phase.

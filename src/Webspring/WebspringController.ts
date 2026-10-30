@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getSynWareNamespace } from "../SynCloudOS/AppSDK/useStrings";
+import { getSynWareNamespace } from "../SynCloudOS/AppSDK";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import {
   WEBSPRING_PRESENTATION_ROLES,

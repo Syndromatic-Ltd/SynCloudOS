@@ -32,6 +32,8 @@ export type {
   NSEToolbarConfigurationSheetWindowRequest,
   NSEToolbarControllerOptions,
   NSEToolbarItem,
+  NSEToolbarActionItem,
+  NSEToolbarItemInput,
   NSEToolbarLayout,
   NSEToolbarLayoutEntry,
   NSEToolbarLayoutOptions,

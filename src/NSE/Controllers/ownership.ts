@@ -20,6 +20,7 @@
 
 import {
   declareSynCloudOSLifecycleSignal,
+  synCloudOSLifecycleSignalReason,
   SynCloudOSLifecycleRecord,
   type SynCloudOSLifecycleDisposalReason,
 } from "../../SynCloudOS/nseRuntimeContracts";
@@ -59,8 +60,8 @@ export interface NSEControllerOwnershipOptions {
 
 /**
  * Marks a controller as deliberately unowned: the caller disposes it, or it
- * lives as long as the page. It is the only way to construct a controller
- * outside an owner while a class-based application is running.
+ * lives as long as the page. A controller with no runtime lifetime otherwise
+ * needs an explicit owner outside construction in a class-based application.
  */
 export const nseUnowned: NSEOwner = Object.freeze({ ownerSignal: undefined });
 
@@ -72,6 +73,8 @@ export interface NSEOwnedObject {
   [nseDisposeFor](reason: SynCloudOSLifecycleDisposalReason): void;
 }
 
+const scopesBySignal = new WeakMap<AbortSignal, NSEOwnershipScope>();
+
 /**
  * The lifetime of one application, window controller or view controller.
  * Controllers created while the framework constructs the object adopt its
@@ -80,10 +83,15 @@ export interface NSEOwnedObject {
  */
 export class NSEOwnershipScope {
   readonly #abort = new AbortController();
+  readonly #authority = new AbortController();
   readonly #adopted = new Set<NSEOwnedObject>();
+  readonly #resources = new Map<object, (reason: SynCloudOSLifecycleDisposalReason) => void>();
   #released = false;
+  #disposing = false;
 
-  constructor(readonly kind: string, readonly id: string) {}
+  constructor(readonly kind: string, readonly id: string) {
+    scopesBySignal.set(this.signal, this);
+  }
 
   get signal(): AbortSignal {
     return this.#abort.signal;
@@ -93,14 +101,41 @@ export class NSEOwnershipScope {
     return this.#released;
   }
 
+  /** @internal Revoked before child/owner/resource teardown begins. */
+  get authoritySignal(): AbortSignal { return this.#authority.signal; }
+  /** @internal Construction finalization follows the existing ownership tree. */
+  get adoptedObjects(): readonly NSEOwnedObject[] { return [...this.#adopted]; }
+
+  /** @internal Keep resource disposal separate from structural children. */
+  registerResource(object: object, dispose: (reason: SynCloudOSLifecycleDisposalReason) => void): () => void {
+    this.assertLive();
+    this.#resources.set(object, dispose);
+    return () => { this.#resources.delete(object); };
+  }
+
+  /** @internal Ends publication authority without changing 6C teardown order. */
+  beginDisposal(reason: SynCloudOSLifecycleDisposalReason): void {
+    this.#disposing = true;
+    declareSynCloudOSLifecycleSignal(this.#authority.signal, reason);
+    this.#authority.abort(new DOMException(`The ${this.kind} owner is disposing.`, "AbortError"));
+  }
+
+  /** @internal Refuses new resources as soon as teardown starts. */
+  assertLive(): void {
+    this.signal.throwIfAborted();
+    if (this.#disposing) throw new DOMException(`The ${this.kind} owner is disposing.`, "InvalidStateError");
+  }
+
   /** Disposes `object` with this scope. Returns a function that stops doing so. */
   adopt(object: NSEOwnedObject): () => void {
+    this.assertLive();
     this.#adopted.add(object);
     return () => { this.#adopted.delete(object); };
   }
 
   /** Disposes adopted objects, newest first. Failures are collected and thrown together. */
   disposeAdopted(reason: SynCloudOSLifecycleDisposalReason): void {
+    this.#disposing = true;
     const failures: unknown[] = [];
     for (const object of [...this.#adopted].reverse()) {
       this.#adopted.delete(object);
@@ -113,14 +148,30 @@ export class NSEOwnershipScope {
   /** Aborts the signal with `reason` recorded, disposing every controller it owns. */
   release(reason: SynCloudOSLifecycleDisposalReason): void {
     if (this.#released) return;
+    this.beginDisposal(reason);
     this.#released = true;
+    const failures: unknown[] = [];
+    for (const [object, dispose] of [...this.#resources]) {
+      this.#resources.delete(object);
+      try { dispose(reason); } catch (error) { failures.push(error); }
+    }
     declareSynCloudOSLifecycleSignal(this.#abort.signal, reason);
     this.#abort.abort(new DOMException(`The ${this.kind} that owned this object was released.`, "AbortError"));
+    if (failures.length === 1) throw failures[0];
+    if (failures.length > 1) throw new AggregateError(failures, "Owned resources failed to dispose.");
   }
 }
 
 let ambientScope: NSEOwnershipScope | null = null;
-let pendingSelf: { readonly scope: NSEOwnershipScope; readonly context: unknown } | null = null;
+interface PendingSelf {
+  readonly scope: NSEOwnershipScope;
+  readonly context: unknown;
+  /** The base constructor registers itself for rollback if a derived constructor throws. */
+  object?: NSEOwnedObject;
+}
+let pendingSelf: PendingSelf | null = null;
+/** @internal Nested owner finalization waits until the synchronous construction boundary. */
+export function hasNSEConstructionOwner(): boolean { return ambientScope !== null; }
 let classApplicationsLive = 0;
 
 const scopesByOwner = new WeakMap<object, NSEOwnershipScope>();
@@ -128,6 +179,80 @@ const scopesByOwner = new WeakMap<object, NSEOwnershipScope>();
 /** Associates the scope that `owner.ownerSignal` belongs to. */
 export function registerOwnerScope(owner: object, scope: NSEOwnershipScope): void {
   scopesByOwner.set(owner, scope);
+}
+
+/** @internal Recorded scopes only; never evaluates application getters. */
+export function getNSEOwnerScope(owner: object): NSEOwnershipScope | undefined { return scopesByOwner.get(owner); }
+
+interface ResourceRegistration {
+  readonly signal: AbortSignal | undefined;
+  active: boolean;
+  dispose(reason: SynCloudOSLifecycleDisposalReason): void;
+}
+const resources = new WeakMap<object, ResourceRegistration>();
+const acquisitionJournals: Array<Array<() => void>> = [];
+
+/** @internal Records only acquisitions, so rollback never touches existing resources. */
+export function journalNSEAcquisition(rollback: () => void): void {
+  for (const journal of acquisitionJournals) journal.push(rollback);
+}
+
+/** @internal Data controllers and plain disposables share one identity registration. */
+export function bindNSEOwnedResource(object: object, signal: AbortSignal | undefined, dispose: (reason: SynCloudOSLifecycleDisposalReason) => void): () => void {
+  const existing = resources.get(object);
+  if (existing?.active && existing.signal === signal) return () => {};
+  if (existing?.active && existing.signal && !existing.signal.aborted) throw new TypeError("A resource already belongs to another live owner; implicit ownership transfer is forbidden.");
+  signal?.throwIfAborted();
+  let remove = () => {};
+  const registration: ResourceRegistration = {
+    signal, active: true,
+    dispose(reason) {
+      if (!registration.active) return;
+      registration.active = false;
+      remove();
+      dispose(reason);
+    },
+  };
+  const scope = signal ? scopesBySignal.get(signal) : undefined;
+  if (scope) remove = scope.registerResource(object, reason => registration.dispose(reason));
+  else if (signal) {
+    const abort = () => registration.dispose(synCloudOSLifecycleSignalReason(signal));
+    signal.addEventListener("abort", abort, { once: true });
+    remove = () => signal.removeEventListener("abort", abort);
+  }
+  resources.set(object, registration);
+  journalNSEAcquisition(() => registration.dispose("explicit"));
+  return () => { registration.active = false; remove(); };
+}
+
+/** @internal An existing factory result must have the same live owner. */
+export function isNSEOwnedResource(object: object, signal: AbortSignal): boolean {
+  const registration = resources.get(object);
+  if (!registration) return false;
+  if (!registration.active) throw new TypeError("An owned factory cannot return an already disposed resource.");
+  if (registration.signal === signal) return true;
+  if (registration.signal) throw new TypeError("A resource already belongs to another owner; implicit ownership transfer is forbidden.");
+  return false;
+}
+
+/** @internal Synchronous construction slot, deliberately separate from pendingSelf. */
+export function constructNSEOwnedResource<T>(scope: NSEOwnershipScope, construct: () => T): T {
+  scope.assertLive();
+  const previousAmbient = ambientScope;
+  const previousSelf = pendingSelf;
+  const journal: Array<() => void> = [];
+  acquisitionJournals.push(journal);
+  ambientScope = scope;
+  pendingSelf = null;
+  try { return construct(); }
+  catch (error) {
+    for (const rollback of journal.reverse()) { try { rollback(); } catch { /* Preserve the construction error; finish every release. */ } }
+    throw error;
+  } finally {
+    acquisitionJournals.pop();
+    ambientScope = previousAmbient;
+    pendingSelf = previousSelf;
+  }
 }
 
 /**
@@ -138,12 +263,22 @@ export function registerOwnerScope(owner: object, scope: NSEOwnershipScope): voi
  * the object it is constructing).
  */
 export function instantiateInOwnerScope<T>(scope: NSEOwnershipScope, construct: () => T, context?: unknown): T {
+  scope.assertLive();
   const previousAmbient = ambientScope;
   const previousSelf = pendingSelf;
   ambientScope = scope;
-  pendingSelf = { scope, context };
+  const pending: PendingSelf = { scope, context };
+  pendingSelf = pending;
   try {
     return construct();
+  } catch (error) {
+    // A derived constructor may fail after super() acquired resources. Finish
+    // every cleanup step, but never replace the original construction error.
+    const reason = scope.kind === "NSEApplication" ? "application-closed" : "explicit";
+    try { pending.object?.[nseDisposeFor](reason); } catch { /* Preserve error. */ }
+    try { scope.disposeAdopted(reason); } catch { /* Preserve error. */ }
+    try { scope.release(reason); } catch { /* Preserve error. */ }
+    throw error;
   } finally {
     ambientScope = previousAmbient;
     pendingSelf = previousSelf;
@@ -151,7 +286,7 @@ export function instantiateInOwnerScope<T>(scope: NSEOwnershipScope, construct: 
 }
 
 /** Consumed by the base constructors of the framework's owned objects. */
-export function takePendingSelf(): { readonly scope: NSEOwnershipScope; readonly context: unknown } | null {
+export function takePendingSelf(): PendingSelf | null {
   const taken = pendingSelf;
   pendingSelf = null;
   return taken;
@@ -159,8 +294,8 @@ export function takePendingSelf(): { readonly scope: NSEOwnershipScope; readonly
 
 /**
  * Marks a class-based application as running. While at least one is, a
- * controller constructed outside an owner and without `owner` or
- * `ownerSignal` throws `NSE_CONTROLLER_UNOWNED`.
+ * controller constructed outside an owner, without explicit ownership or an
+ * admitted runtime lifetime, throws `NSE_CONTROLLER_UNOWNED`.
  */
 export function enterClassApplication(): () => void {
   classApplicationsLive += 1;
@@ -181,18 +316,33 @@ export interface ResolvedOwnership {
 /**
  * Resolves who owns a resource that is being constructed: `ownerSignal`, then
  * `owner`, then the ambient owner. Throws `NSE_CONTROLLER_UNOWNED` when there
- * is none and a class-based application is running.
+ * is none and a class-based application is running. Presentation controllers
+ * with an existing runtime lifetime may supply that signal as a final fallback.
  */
 export function resolveOwnership(
   options: NSEControllerOwnershipOptions,
   resource: { readonly kind: string; readonly id: string },
+  fallbackSignal?: AbortSignal,
 ): ResolvedOwnership {
-  if (options.ownerSignal) return { signal: options.ownerSignal, scope: undefined };
+  if (options.ownerSignal) {
+    scopesBySignal.get(options.ownerSignal)?.assertLive();
+    return { signal: options.ownerSignal, scope: undefined };
+  }
   if (options.owner) {
     const signal = options.owner.ownerSignal;
-    return { signal, scope: signal ? scopesByOwner.get(options.owner) : undefined };
+    const scope = signal ? scopesByOwner.get(options.owner) : undefined;
+    (scope ?? (signal ? scopesBySignal.get(signal) : undefined))?.assertLive();
+    return { signal, scope };
   }
-  if (ambientScope) return { signal: ambientScope.signal, scope: ambientScope };
+  if (ambientScope) {
+    ambientScope.assertLive();
+    return { signal: ambientScope.signal, scope: ambientScope };
+  }
+  if (fallbackSignal) {
+    scopesBySignal.get(fallbackSignal)?.assertLive();
+    fallbackSignal.throwIfAborted();
+    return { signal: fallbackSignal, scope: undefined };
+  }
   if (classApplicationsLive > 0) {
     throw new SynCloudOSLifecycleRecord(resource).error({
       code: "NSE_CONTROLLER_UNOWNED",

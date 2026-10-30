@@ -355,7 +355,7 @@ function generateProjectModule(discovery) {
   body.push(`export const widgets = Object.freeze(definedWidgets.map(({ path, definition }) => {
   if (!isDefinedWebspringWidget(definition)) throw new TypeError(\`\${path} must default-export defineWidget(...).\`);
   return definition;
-}));`);
+}).sort((left, right) => left.order - right.order || left.id.localeCompare(right.id)));`);
   body.push(`const shellDefinition = ${shellExpression};`);
   body.push("export const shell = shellDefinition === null ? null : withDiscoveredWebspringItems(shellDefinition, { preferences, widgets });");
   body.push(`const allBundles = Object.freeze([\n${bundleExpressions.join(",\n")}\n]);`);

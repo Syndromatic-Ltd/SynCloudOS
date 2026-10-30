@@ -5,7 +5,7 @@ import type { ComponentType } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { NSEApplication, type NSEApplicationClass } from "../../src/NSE/Application/NSEApplication";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
-import { applicationSessionFor } from "../../src/SynCloudOS/AppSDK/applicationSession";
+import { applicationSessionFor } from "../../src/SynCloudOS/AppHosting/applicationSession";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
 const hosts: ClassApplicationHost[] = [];

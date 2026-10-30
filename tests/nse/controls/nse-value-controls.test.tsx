@@ -21,7 +21,7 @@
 // @vitest-environment jsdom
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
 installNSEScrollIntoViewFixture();
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"; import React, { useState } from "react"; import { afterEach, describe, expect, it, vi } from "vitest";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"; import React, { useState } from "react"; import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSECircularSlider, NSELevelIndicator, NSESegmentedControl, NSESlider, NSEStepper } from "../../../src/NSE/Controls/Values";
 import { NSEControlRuntimeProvider } from "../../../src/NSE/Controls/Core";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
@@ -114,6 +114,25 @@ describe("value controls", () => {
   it("wraps an angle dial round through its start and speaks its value",()=>{const change=vi.fn();render(<NSECircularSlider aria-label="Shadow angle" value={345} minimum={0} maximum={360} step={15} wraps controlSize="small" valueText={(value)=>`${value} degrees`} onValueChange={change}/>);const dial=screen.getByRole("slider",{name:"Shadow angle"});expect(dial.getAttribute("aria-valuetext")).toBe("345 degrees");expect(dial.closest("[data-nse-control=\"circular-slider\"]")?.getAttribute("data-size")).toBe("small");fireEvent.keyDown(dial,{key:"ArrowRight"});expect(change).toHaveBeenLastCalledWith(0,"commit");});
   it("maps circular pointer angle rather than horizontal range position",()=>{const change=vi.fn();const{container}=render(<NSECircularSlider aria-label="Angle" value={0} minimum={0} maximum={360} step={15} onValueChange={change}/>);const body=container.querySelector('[data-nse-part="circular-body"]') as HTMLElement;Object.assign(body,{setPointerCapture:vi.fn(),getBoundingClientRect:()=>({left:0,top:0,width:100,height:100,right:100,bottom:100,x:0,y:0,toJSON:()=>({})})});fireEvent.pointerDown(body,{pointerId:1,clientX:100,clientY:50});fireEvent.pointerUp(body,{pointerId:1,clientX:100,clientY:50});expect(change).toHaveBeenCalledWith(90,"commit");});
   it("exposes meter thresholds and interactive rating semantics",()=>{const change=vi.fn();const {rerender}=render(<NSELevelIndicator aria-label="Capacity" value={80} minimum={0} maximum={100} warningValue={70} criticalValue={90}/>);expect(screen.getByRole("meter").getAttribute("data-state")).toBe("warning");rerender(<NSELevelIndicator aria-label="Rating" value={2} minimum={0} maximum={5} mode="rating" onValueChange={change}/>);fireEvent.click(screen.getByRole("radio",{name:"4"}));expect(change).toHaveBeenCalledWith(4,"commit");});
+  it("does not commit a disposed segment's selection after an asynchronous command completes", async () => {
+    const change = vi.fn();
+    let finish!: (result: object) => void;
+    const dispatch = vi.fn(() => new Promise<object>(resolve => { finish = resolve; }));
+    const port = { signal: new AbortController().signal, commands: {
+      getPresentationGeneration: () => ({ registryGeneration: 1, responderGeneration: 1 }),
+      validate: async () => ({ commandId: "tools.select", responderId: "workspace", title: "B", enabled: true, denied: false, hidden: false, state: "off" as const }),
+      prepareDispatch: async () => ({ status: "accepted" as const, acceptance: { commandId: "tools.select", responderId: "workspace" } as never }),
+      dispatch: dispatch as never,
+    } };
+    const view = render(<NSEControlRuntimeProvider port={port}><NSESegmentedControl aria-label="Tools" items={[{ id: "b", label: "B", commandId: "tools.select" }]} selection={{ mode: "momentary", selectedIds: new Set() }} onSelectionChange={change} /></NSEControlRuntimeProvider>);
+    const button = screen.getByRole("button", { name: "B" }) as HTMLButtonElement;
+    await waitFor(() => expect(button.disabled).toBe(false));
+    fireEvent.click(button);
+    await waitFor(() => expect(dispatch).toHaveBeenCalledOnce());
+    view.unmount();
+    await act(async () => { finish({ status: "executed", commandId: "tools.select", responderId: "workspace", operationId: "op", correlationId: "c", value: undefined }); });
+    expect(change).not.toHaveBeenCalled();
+  });
   it("marks a fill-equally segmented control, as NSSegmentedControl.segmentDistribution does",()=>{const view=render(<NSESegmentedControl aria-label="Alignment" distribution="fill-equally" items={[{id:"a",label:"A"},{id:"b",label:"B"}]} selection={{mode:"select-one",selectedIds:new Set(["a"]),allowsEmpty:false}} onSelectionChange={()=>undefined}/>);expect(screen.getByRole("group",{name:"Alignment"}).getAttribute("data-distribution")).toBe("fill-equally");view.unmount();render(<NSESegmentedControl aria-label="Fitted" items={[{id:"a",label:"A"}]} selection={{mode:"select-one",selectedIds:new Set(["a"]),allowsEmpty:false}} onSelectionChange={()=>undefined}/>);expect(screen.getByRole("group",{name:"Fitted"}).hasAttribute("data-distribution")).toBe(false);});
   it("implements momentary, single, and multiple segmented modes",()=>{const change=vi.fn();render(<NSESegmentedControl aria-label="Tools" items={[{id:"a",label:"A"},{id:"b",label:"B"}]} selection={{mode:"select-many",selectedIds:new Set(["a"])}} onSelectionChange={change}/>);fireEvent.click(screen.getByRole("button",{name:"B"}));expect([...change.mock.calls[0][0].selectedIds]).toEqual(["a","b"]);});
   it("names the pressed segment of a momentary control, which springs back",()=>{const change=vi.fn();render(<NSESegmentedControl aria-label="Add or remove" items={[{id:"add",label:"Add"},{id:"remove",label:"Remove"}]} selection={{mode:"momentary",selectedIds:new Set()}} onSelectionChange={change}/>);fireEvent.click(screen.getByRole("button",{name:"Remove"}));expect([...change.mock.calls[0][0].selectedIds]).toEqual(["remove"]);expect(screen.getByRole("button",{name:"Remove"}).getAttribute("aria-pressed")).not.toBe("true");});

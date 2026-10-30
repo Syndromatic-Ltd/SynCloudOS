@@ -53,16 +53,11 @@ export function NSEAlertBackdrop({
 
   useEffect(() => {
     const previousFocus = resolveNSEFocusReturnTarget(document.activeElement);
-    backdropRef.current?.focus({ preventScroll: true });
-    return () => previousFocus?.focus({ preventScroll: true });
-  }, []);
-
-  useEffect(() => {
     const backdrop = backdropRef.current;
+    backdrop?.focus({ preventScroll: true });
     const parent = backdrop?.parentElement;
-    if (!backdrop || !parent) return;
 
-    const siblingState = Array.from(parent.children)
+    const siblingState = Array.from(parent?.children ?? [])
       .filter((element): element is InertHTMLElement => element instanceof HTMLElement && element !== backdrop)
       .map((element) => ({
         element,
@@ -91,6 +86,9 @@ export function NSEAlertBackdrop({
         }
         element.inert = inert;
       });
+      // Native focus refuses an inert target. Release background ownership
+      // before returning focus, including during StrictMode effect replay.
+      previousFocus?.focus({ preventScroll: true });
     };
   }, []);
 

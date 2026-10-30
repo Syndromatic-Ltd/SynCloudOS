@@ -30,6 +30,9 @@ import { NSEControlRuntimeProvider, type NSEControlRuntimePort } from "../../../
 import type { CommandId } from "../../../src/SynCloudOS/SynCloudOS";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
+import { NSEObject } from "../../../src/NSE/Objects/NSEObject";
+import { observable } from "../../../src/NSE/Objects/observable";
+import { bind } from "../../../src/NSE/Bindings/propertyBinding";
 afterEach(cleanup);
 
 const completionWorkArea = Object.freeze({ width: 1280, height: 720, safeArea: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }) });
@@ -170,6 +173,14 @@ describe("completion and field families", () => {
   });
   it("hosts token disclosure menus and begins editing without a drag service",()=>{const ada={id:"ada",representedObject:"Ada",label:"Ada"};const change=vi.fn(),action=vi.fn();render(<OverlayHarness><NSETokenField aria-label="People" values={[ada]} tokenMenu={()=>[{id:"inspect",label:"Inspect Ada"}]} onTokenMenuAction={action} onValuesChange={change} createToken={(label)=>({id:label.toLowerCase(),representedObject:label,label})}/></OverlayHarness>);fireEvent.click(screen.getByRole("button",{name:"More options for Ada"}));fireEvent.click(screen.getByRole("option",{name:"Inspect Ada"}));expect(action).toHaveBeenCalledWith("ada","inspect");fireEvent.doubleClick(screen.getByRole("button",{name:"Ada, token"}));expect(change).toHaveBeenCalledWith([],"edit");expect((screen.getByRole("combobox",{name:"People"})as HTMLInputElement).value).toBe("Ada");});
   it("resynchronizes controlled combo text", () => { const source = { query: async () => [], idForItem: (item: string) => item, labelForItem: (item: string) => item }; const view = render(<OverlayHarness><NSEComboBox aria-label="City" dataSource={source} value={null} inputValue="Lon" onInputValueChange={() => undefined} onValueChange={() => undefined} /></OverlayHarness>); view.rerender(<OverlayHarness><NSEComboBox aria-label="City" dataSource={source} value={null} inputValue="Paris" onInputValueChange={() => undefined} onValueChange={() => undefined} /></OverlayHarness>); expect((screen.getByRole("combobox") as HTMLInputElement).value).toBe("Paris"); });
+  it("binds completion text without replacing domain selection or freeform semantics", async()=>{
+    class Model extends NSEObject { @observable accessor query="Lon"; }
+    const model=new Model();const selected=vi.fn();const source={query:async()=>[{id:'london',title:'London'}],idForItem:(item:{id:string})=>item.id,labelForItem:(item:{title:string})=>item.title};
+    render(<OverlayHarness><NSEComboBox aria-label="Bound city" binding={bind(model,'query')} dataSource={source} value={null} onValueChange={selected} allowsFreeform /></OverlayHarness>);
+    const input=screen.getByRole('combobox');fireEvent.change(input,{target:{value:'Londo'}});
+    const option=await screen.findByRole('option',{name:'London'});fireEvent.click(option);
+    expect(model.query).toBe('London');expect(selected).toHaveBeenCalledWith({id:'london',title:'London'},'completion');
+  });
   it("search submits and cancels without dispatching while composing", () => { const submit = vi.fn(), cancel = vi.fn(); render(<NSESearchField aria-label="Search" defaultValue="memo" onSearch={submit} onCancel={cancel} />); const input = screen.getByRole("searchbox"); fireEvent.keyDown(input, { key: "Enter" }); expect(submit).toHaveBeenCalledWith("memo"); fireEvent.click(screen.getByRole("button", { name: "Clear search" })); expect(cancel).toHaveBeenCalled(); });
   it("supports buttonless incremental search while preserving the NSE field", () => {
     const query = vi.fn();
@@ -198,7 +209,7 @@ describe("completion and field families", () => {
   it("dispatches search only through an accepted current command generation", async () => {
     const dispatch = vi.fn(async () => ({ status: "executed" as const }));
     const generation = { registryGeneration: 1, responderGeneration: 1 };
-    const port = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => generation, validate: vi.fn(async () => ({ commandId: "search.perform", responderId: "workspace", title: "Search", enabled: true, denied: false, hidden: false, state: "off" as const })), prepareDispatch: vi.fn(async () => ({ status: "accepted" as const, acceptance: {} })), dispatch } } as unknown as NSEControlRuntimePort;
+    const port = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => generation, validate: vi.fn(async () => ({ commandId: "search.perform", responderId: "workspace", title: "Search", enabled: true, denied: false, hidden: false, state: "off" as const })), prepareDispatch: vi.fn(async () => ({ status: "accepted" as const, acceptance: { responderId: "workspace" } })), dispatch } } as unknown as NSEControlRuntimePort;
     const submit = vi.fn();
     render(<NSEControlRuntimeProvider port={port}><NSESearchField aria-label="Command search" defaultValue="memo" command={{ id: "search.perform" as CommandId, payload: { query: "" } }} onSearch={submit} /></NSEControlRuntimeProvider>);
     await waitFor(() => expect(port.commands.validate).toHaveBeenCalled());
