@@ -208,6 +208,10 @@ export function createRuntimeAudioService(input: {
   let masterVolume = normaliseAudioLevel(input.masterVolume);
   let appVolumes = Object.freeze(Object.fromEntries(Object.entries(input.appVolumes ?? {}).map(([id, level]) => [normalizeBundleIdentifier(id), normaliseAudioLevel(level)])));
   const mixerListeners = new Set<() => void>();
+  const playbackListeners = new Set<(handleId: string) => void>();
+  const notifyPlayback = (record: HandleRecord) => {
+    for (const listener of [...playbackListeners]) { try { listener(record.id); } catch { /* observation cannot change playback outcomes */ } }
+  };
   let mixerSnapshot: RuntimeAudioMixerSnapshot;
   const appVolume = (appId: string) => {
     const key = normalizeBundleIdentifier(appId);
@@ -289,6 +293,7 @@ export function createRuntimeAudioService(input: {
       invalidateActivation(activation);
     }
     handles.delete(record.id);
+    notifyPlayback(record);
     publishMixer();
     try { record.playback.dispose(); } catch { /* owner release is terminal */ }
     record.cache.references = Math.max(0, record.cache.references - 1);
@@ -378,17 +383,20 @@ export function createRuntimeAudioService(input: {
     } catch (error) {
       record.state = "error";
       record.playingIntent = false;
+      notifyPlayback(record);
       if (!internal && (error as { name?: unknown })?.name === "NotAllowedError") {
         return Promise.reject(new AudioActivationRequiredError());
       }
       return Promise.reject(error);
     }
     record.state = "playing";
+    notifyPlayback(record);
     return Promise.resolve(result).then(() => {
       if (!current(record) || record.playEpoch !== epoch) return;
       record.state = "playing";
+      notifyPlayback(record);
     }, (error) => {
-      if (current(record) && record.playEpoch === epoch) { record.state = "error"; record.playingIntent = false; }
+      if (current(record) && record.playEpoch === epoch) { record.state = "error"; record.playingIntent = false; notifyPlayback(record); }
       if (!internal && (error as { name?: unknown })?.name === "NotAllowedError") {
         throw new AudioActivationRequiredError();
       }
@@ -407,6 +415,7 @@ export function createRuntimeAudioService(input: {
     record.playEpoch += 1;
     try { record.playback.pause(); record.state = "paused"; }
     catch { record.state = "error"; record.playingIntent = false; }
+    notifyPlayback(record);
   };
 
   const removeBlocker = (record: HandleRecord, blocker: "lifecycle" | "settings" | "sensory") => {
@@ -420,6 +429,10 @@ export function createRuntimeAudioService(input: {
     runtimeId: input.runtimeId,
     getMixerSnapshot: () => mixerSnapshot,
     getOwnerPolicy: (appId) => Object.freeze({ volume: appVolume(appId), muted: !enabled || disposed, paused: disposed || !enabled || reducedSensory || suspendedApps.has(normalizeBundleIdentifier(appId)) || closedApps.has(normalizeBundleIdentifier(appId)) }),
+    subscribePlayback(listener) {
+      if (disposed) return () => undefined;
+      playbackListeners.add(listener); return () => { playbackListeners.delete(listener); };
+    },
     subscribeMixer(listener) {
       if (disposed) return () => undefined;
       mixerListeners.add(listener);
@@ -491,11 +504,11 @@ export function createRuntimeAudioService(input: {
         playback = adapter!.createPlayback(resource, Object.freeze({
           onEnded(playEpoch: number) {
             if (!record || !current(record) || record.playEpoch !== playEpoch || record.state !== "playing") return;
-            if (!record.loop) { record.playEpoch += 1; record.state = "stopped"; record.playingIntent = false; }
+            if (!record.loop) { record.playEpoch += 1; record.state = "stopped"; record.playingIntent = false; notifyPlayback(record); }
           },
           onError(playEpoch: number) {
             if (!record || !current(record) || record.playEpoch !== playEpoch) return;
-            record.playEpoch += 1; record.state = "error"; record.playingIntent = false;
+            record.playEpoch += 1; record.state = "error"; record.playingIntent = false; notifyPlayback(record);
           },
         }));
         record = {
@@ -552,8 +565,9 @@ export function createRuntimeAudioService(input: {
       if (!record || !current(record)) return false;
       record.playingIntent = false;
       record.playEpoch += 1;
-      try { record.playback.pause(); } catch { record.state = "error"; return false; }
+      try { record.playback.pause(); } catch { record.state = "error"; notifyPlayback(record); return false; }
       record.state = "paused";
+      notifyPlayback(record);
       return true;
     },
     stop(handleId) {
@@ -561,8 +575,9 @@ export function createRuntimeAudioService(input: {
       if (!record || !current(record)) return false;
       record.playingIntent = false;
       record.playEpoch += 1;
-      try { record.playback.stop(); } catch { record.state = "error"; return false; }
+      try { record.playback.stop(); } catch { record.state = "error"; notifyPlayback(record); return false; }
       record.state = "stopped";
+      notifyPlayback(record);
       return true;
     },
     setLoop(handleId, loop) {
@@ -581,7 +596,7 @@ export function createRuntimeAudioService(input: {
       if (typeof rate !== "number" || !Number.isFinite(rate) || rate < 0.25 || rate > 4) throw new RangeError("Sound playback rate is invalid.");
       const record = handles.get(handleId);
       if (!record || !current(record)) throw abortError("Sound handle is no longer active.");
-      record.playback.setRate(rate); record.rate = rate;
+      record.playback.setRate(rate); record.rate = rate; notifyPlayback(record);
     },
     setCurrentTime(handleId, time) {
       if (typeof time !== "number" || !Number.isFinite(time) || time < 0 || time > 86_400) throw new RangeError("Sound playback time is invalid.");
@@ -589,7 +604,7 @@ export function createRuntimeAudioService(input: {
       if (!record || !current(record)) throw abortError("Sound handle is no longer active.");
       const duration = record.playback.duration();
       if (duration !== null && time > duration) throw new RangeError("Sound playback time exceeds its duration.");
-      record.playback.setCurrentTime(time);
+      record.playback.setCurrentTime(time); notifyPlayback(record);
     },
     release(handleId) {
       const record = handles.get(handleId);
@@ -661,7 +676,7 @@ export function createRuntimeAudioService(input: {
       for (const record of [...handles.values()]) releaseRecord(record);
       for (const entry of [...cache.values()]) releaseCacheEntry(entry);
       input.caches.remove("runtime.sounds.decoded");
-      mixerListeners.clear();
+      mixerListeners.clear(); playbackListeners.clear();
       owners.clear();
       suspendedApps.clear(); closedApps.clear(); closedWindows.clear();
       activationCount = 0;

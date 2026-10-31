@@ -17,6 +17,9 @@
  * limitations under the License.
  */
 
+import type { AppPlaybackPresentationLease, AppPlaybackPresentationRequest } from "./playbackPresentationTypes";
+
+
 import type { AUFXAudioEngine } from "../../FX/AudioFX/AUFXAudioEngine";
 import type { AUFXAudioFormat } from "../../FX/AudioFX/AUFXAudioFormat";
 import type { AUFXAudioSession } from "../../FX/AudioFX/AUFXAudioSession";
@@ -492,7 +495,9 @@ export interface AUFXAudioHandle {
   readonly id: string;
 }
 
+
 export interface AUFXAudioClient {
+  present(handleId: string, request: AppPlaybackPresentationRequest, signal?: AbortSignal): AppPlaybackPresentationLease;
   createEngine(format: AUFXAudioFormat, signal?: AbortSignal): AUFXAudioEngine;
   createSession(signal?: AbortSignal): AUFXAudioSession;
   fileCapabilities(): AUFXAudioFileCapabilities;
