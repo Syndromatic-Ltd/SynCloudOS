@@ -254,7 +254,8 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
         if (index < 0 || (!event.shiftKey && index === targets.length - 1) || (event.shiftKey && index === 0)) {
           event.preventDefault();
           event.stopPropagation();
-          targets[event.shiftKey ? targets.length - 1 : 0]?.focus({ preventScroll: true });
+          // Match native Tab: reveal the destination when a resized modal clips it.
+          targets[event.shiftKey ? targets.length - 1 : 0]?.focus();
           return;
         }
       }
