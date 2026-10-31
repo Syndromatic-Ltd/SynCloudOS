@@ -17,6 +17,10 @@
  * limitations under the License.
  */
 
+import { createMountedPlaybackPresentation } from "./mountedPlaybackPresentation";
+import { createMountedScreenWakeLock } from "./mountedScreenWakeLock";
+
+
 import { createMountedShareClient } from "./mountedShareClient";
 import { createMountedFilePanelClient } from "./mountedFilePanelClient";
 import { isHiddenCommandAcceptance, markHiddenCommandAcceptance } from "../nseRuntimeContracts";
@@ -3449,6 +3453,53 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       return new TFXRunDelegate({ width: metrics.inline, ascent: metrics.block, descent: 0, attachment: { image: pixels.image, accessibilityLabel: inspected.accessibilityLabel } });
     };
 
+    // Browser presentation is owned by this mount, with an additional identity
+    // fence. A retained controller cannot revive a prior account's lease.
+    const presentationOwner = new AbortController();
+    const presentationSignal = AbortSignal.any([signal, presentationOwner.signal]);
+    const initialIdentity = runtime.identity.session.getSnapshot();
+    const identityKey = (value: typeof initialIdentity) => value ? `${value.id}\0${value.subjectId}\0${value.state}` : "anonymous";
+    const removePresentationIdentity = runtime.identity.session.subscribe(value => {
+      if (identityKey(value) !== identityKey(initialIdentity)) presentationOwner.abort(new DOMException("Playback/power account changed.", "AbortError"));
+    });
+    cleanupOnAbort(removePresentationIdentity);
+    const presentationDocument = runtime.environment.browser.getDocument();
+    const presentationWindow = runtime.environment.browser.getWindow();
+    const presentationVisible = () => presentationDocument?.visibilityState === "visible";
+    const presentationForeground = () => {
+      if (presentationSignal.aborted || !presentationVisible() || !presentationDocument?.hasFocus() || runtime.lifecycle.getState(app.bundleIdentifier) !== "active") return false;
+      // Use the same runtime ownership marker as input dispatch. A key window
+      // in another mounted runtime is not foreground evidence for this one.
+      const active = presentationDocument?.activeElement;
+      if (active?.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) return false;
+      if (windowControllerId !== undefined) return runtime.windows.snapshot().keyWindowControllerId === windowControllerId;
+      return normalizeBundleIdentifier(runtime.store.getSnapshot().application.activeAppId ?? "") === normalizeBundleIdentifier(app.bundleIdentifier);
+    };
+    const subscribePresentationOwner = (listener: () => void) => {
+      const focusOut = () => queueMicrotask(() => { if (!presentationSignal.aborted) listener(); });
+      const removeWindows = runtime.windows.subscribe(listener);
+      const removeStore = runtime.store.subscribe(listener);
+      const removeFocus = runtime.focus.subscribe(listener);
+      presentationDocument?.addEventListener("visibilitychange", listener);
+      presentationDocument?.addEventListener("focusin", listener);
+      presentationDocument?.addEventListener("focusout", focusOut);
+      presentationWindow?.addEventListener("blur", listener);
+      presentationWindow?.addEventListener("focus", listener);
+      return () => {
+        removeWindows(); removeStore(); removeFocus();
+        presentationDocument?.removeEventListener("visibilitychange", listener);
+        presentationDocument?.removeEventListener("focusin", listener);
+        presentationDocument?.removeEventListener("focusout", focusOut);
+        presentationWindow?.removeEventListener("blur", listener);
+        presentationWindow?.removeEventListener("focus", listener);
+      };
+    };
+    const screenWakeLock = createMountedScreenWakeLock({ signal: presentationSignal, navigator: runtime.environment.browser.getNavigator(), assertLive, isForeground: presentationForeground, isVisible: presentationVisible, subscribeOwner: subscribePresentationOwner, nativeActivity: runtime.nativeActivity, ownerEndReason: () => presentationOwner.signal.aborted ? "account-changed" : "owner-ended" });
+    const playbackPresentation = createMountedPlaybackPresentation({
+      signal: presentationSignal, navigator: runtime.environment.browser.getNavigator(), assertLive, isForeground: presentationForeground, subscribeOwner: subscribePresentationOwner,
+      metadataFactory: presentationWindow && "MediaMetadata" in presentationWindow ? data => new (presentationWindow as Window & typeof globalThis).MediaMetadata(data) : null,
+      subscribePlayback: runtime.audio.subscribePlayback, commands,
+    });
     const soundIds = new Set<string>();
     // Keep retired IDs distinguishable from arbitrary caller input so a
     // cleanup callback that runs after mount revocation can release its own
@@ -3462,6 +3513,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       if (!soundIds.has(handleId)) throw securityError("Sound handles are owned by the issuing mounted application.");
     };
     const audio: SynWareAudioPort = frozen<SynWareAudioPort>({
+      present(handleId, request, callerSignal) { requireSound(handleId); return playbackPresentation.present(soundHandles.get(handleId)!, request, callerSignal); },
       async load(request, callerSignal) {
         assertLive();
         const pending = Object.freeze({});
@@ -4672,6 +4724,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           }), signal, assertLive);
         },
       }),
+      screenWakeLock,
       share: createMountedShareClient({ browser: runtime.environment.browser, signal, assertLive, nativeActivity: runtime.nativeActivity,
         access: audit => environmentCapabilityAccess("web.share", audit),
         invoke: (action, operationSignal) => runTestControl("browser", "browser.share", operationSignal, action),

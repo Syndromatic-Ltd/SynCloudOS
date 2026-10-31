@@ -122,6 +122,7 @@ export interface SynWareContextValue {
   readonly alerts: AppAlertClient;
   readonly externalActions: AppExternalActionClient;
   readonly share: AppShareClient;
+  readonly screenWakeLock: import("./playbackPresentationTypes").AppScreenWakeClient;
   readonly workArea: AppWorkAreaClient;
   readonly settingsAvailability: AppSettingsAvailabilityClient;
   readonly connectivity: AppConnectivityClient;

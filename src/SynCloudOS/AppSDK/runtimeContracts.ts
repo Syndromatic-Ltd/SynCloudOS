@@ -32,3 +32,4 @@ export type { SynWareMigration } from "./appDefinitionTypes";
 export type { AppBounds, AppOwnedWindowSnapshot, SynCloudOSPresentationTraits } from "./appClientTypes";
 export type { SynWareOwnedWindowSnapshot, SynWareWindowCloseGuard } from "../../SynCloudOSReact";
 export type { AppTrustedDiagnosticsClient } from "./appTrustedClientTypes";
+export type { AppPlaybackPresentationLease, AppPlaybackPresentationRequest } from "./playbackPresentationTypes";

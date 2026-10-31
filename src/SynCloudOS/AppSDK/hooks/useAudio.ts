@@ -100,6 +100,7 @@ export function useAudio(): AUFXAudioClient {
       try { return await app.audio.exportStream(options, controller.signal); }
       finally { signal?.removeEventListener("abort", abortFromCaller); controllers.current.delete(controller); }
     },
+    present: app.audio.present,
     activation: app.audio.activation,
     async load(request: Parameters<AUFXAudioClient["load"]>[0], signal?: AbortSignal) {
       const controller = new AbortController();

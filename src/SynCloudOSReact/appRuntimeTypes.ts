@@ -476,7 +476,9 @@ export type SynWareAnimationPort = Pick<RuntimeAnimationService, "acquireOwner" 
 export type SynWareImagePort = Pick<RuntimeImageService, "createGraphicsIdentifierIssuer"> & { diagnostics(): SynWareImageDiagnostics } & {
   load(request: SynWareImageLoadRequest): RuntimeImageResource;
 };
-export type SynWareAudioPort = Pick<RuntimeAudioService, "activation" | "play" | "pause" | "stop" | "setLoop" | "setVolume" | "setRate" | "setCurrentTime" | "release"> & { diagnostics(): SynWareAudioDiagnostics } & {
+import type { AppPlaybackPresentationLease, AppPlaybackPresentationRequest } from "../SynCloudOS/AppSDK/runtimeContracts";
+
+export type SynWareAudioPort = { present(handleId: string, request: AppPlaybackPresentationRequest, signal?: AbortSignal): AppPlaybackPresentationLease } & Pick<RuntimeAudioService, "activation" | "play" | "pause" | "stop" | "setLoop" | "setVolume" | "setRate" | "setCurrentTime" | "release"> & { diagnostics(): SynWareAudioDiagnostics } & {
   load(request: SynWareAudioLoadRequest, signal?: AbortSignal): Promise<RuntimeAudioHandle>;
   suspend(): void;
   resume(): void;
