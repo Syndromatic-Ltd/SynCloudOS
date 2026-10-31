@@ -19,6 +19,7 @@
 
 import { createMountedPlaybackPresentation } from "./mountedPlaybackPresentation";
 import { createMountedScreenWakeLock } from "./mountedScreenWakeLock";
+import type { AppPlaybackMetadata } from "./playbackPresentationTypes";
 
 
 import { createMountedShareClient } from "./mountedShareClient";
@@ -3495,9 +3496,10 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       };
     };
     const screenWakeLock = createMountedScreenWakeLock({ signal: presentationSignal, navigator: runtime.environment.browser.getNavigator(), assertLive, isForeground: presentationForeground, isVisible: presentationVisible, subscribeOwner: subscribePresentationOwner, nativeActivity: runtime.nativeActivity, ownerEndReason: () => presentationOwner.signal.aborted ? "account-changed" : "owner-ended" });
+    const MetadataConstructor = (presentationWindow as (Window & { MediaMetadata?: new(data: AppPlaybackMetadata) => MediaMetadata }) | null)?.MediaMetadata;
     const playbackPresentation = createMountedPlaybackPresentation({
       signal: presentationSignal, navigator: runtime.environment.browser.getNavigator(), assertLive, isForeground: presentationForeground, subscribeOwner: subscribePresentationOwner,
-      metadataFactory: presentationWindow && "MediaMetadata" in presentationWindow ? data => new (presentationWindow as Window & typeof globalThis).MediaMetadata(data) : null,
+      metadataFactory: typeof MetadataConstructor === "function" ? data => new MetadataConstructor(data) : null,
       subscribePlayback: runtime.audio.subscribePlayback, commands,
     });
     const soundIds = new Set<string>();
