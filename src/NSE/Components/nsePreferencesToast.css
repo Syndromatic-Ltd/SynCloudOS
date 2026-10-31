@@ -85,9 +85,20 @@
 }
 
 .nse-prefs-header.nse-control-page-header .nse-control-page-header-title {
+  white-space: normal;
+  overflow-wrap: anywhere;
   /* Light on the header plate, the way a popup states its own name. */
   color: var(--nse-prefs-header-title-colour, #f7f8f9);
   text-shadow: var(--nse-prefs-header-title-shadow, 0 -1px 0 rgba(0, 0, 0, 0.55));
+}
+
+/* Let enlarged titles use the available column rather than its max-content
+   width. A live Back control reserves symmetric space on either side. */
+.nse-prefs-header.nse-control-page-header[data-align="center"] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
+}
+.nse-prefs-header.nse-control-page-header[data-align="center"]:has(.nse-prefs-back-slot) {
+  grid-template-columns: minmax(50px, 1fr) minmax(0, auto) minmax(50px, 1fr);
 }
 
 /* The two titles cross inside one clipped box.
@@ -113,7 +124,8 @@
   /* Stated rather than inherited, so the box the clip measures always has room
      for both ascenders and descenders whatever the header's line-height is. */
   line-height: 1.35;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* The animated wrapper. Its own box has to be the button's, or the 50px control
@@ -209,6 +221,15 @@
 .nse-prefs-list .nse-control-list-item {
   padding-inline: 16px;
   background: transparent;
+}
+
+/* Preferences labels identify destinations, so retain their full copy when
+   enlarged or localized instead of the generic list's one-line ellipsis. */
+.nse-prefs-list .nse-control-list-primary,
+.nse-prefs-list .nse-control-list-meta {
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
 }
 
 /* Retain the list typography while making pane navigation a native keyboard
