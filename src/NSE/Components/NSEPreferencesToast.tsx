@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type HTMLAttributes, type ReactNode, type RefObject } from "react";
+import { createContext, useCallback, useContext, useEffect, useInsertionEffect, useLayoutEffect, useRef, useState, type HTMLAttributes, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import "./nsePreferencesToast.css";
 import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
@@ -162,6 +162,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
   });
   const dialogRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
+  const openRef = useRef(open);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [direction, setDirection] = useState<PaneDirection>("forward");
 
@@ -223,13 +224,22 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
     setActiveId(initialPane ?? null);
   }, [initialPane, open]);
 
+  // Capture before a child modal's layout effect moves focus into its trap.
+  // An interrupted exit keeps the original origin while focus is still inside.
+  useInsertionEffect(() => {
+    openRef.current = open;
+    if (open && typeof document !== "undefined" && (!restoreFocusRef.current?.isConnected || !dialogRef.current?.contains(document.activeElement))) {
+      restoreFocusRef.current = resolveNSEFocusReturnTarget(document.activeElement);
+    }
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
-    restoreFocusRef.current = resolveNSEFocusReturnTarget(document.activeElement);
     dialogRef.current?.focus({ preventScroll: true });
     return () => {
       restoreFocusRef.current?.focus({ preventScroll: true });
-      restoreFocusRef.current = null;
+      // Containment may still be present during the animated exit. Retain the
+      // origin for the physical exit completion rather than losing the retry.
     };
   }, [open]);
 
@@ -240,7 +250,18 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
   // Mounted whether or not it is open: returning null on close would unmount the
   // panel on the same frame the flag flips, and the exit would never play.
   return createPortal(
-    <NSEPresence onExitComplete={() => setActiveId(null)}>
+    <NSEPresence onExitComplete={() => {
+      setActiveId(null);
+      const target = restoreFocusRef.current, panel = dialogRef.current;
+      queueMicrotask(() => {
+        if (openRef.current) return;
+        const active = document.activeElement;
+        const stranded = !active || active === document.body || active === document.documentElement || !active.isConnected || Boolean(panel?.contains(active));
+        const owned = !runtimeOwner || target?.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner === runtimeOwner;
+        if (stranded && owned && target?.isConnected) target.focus({ preventScroll: true });
+        if (restoreFocusRef.current === target) restoreFocusRef.current = null;
+      });
+    }}>
       {open ? (
         <NSEFocusScope options={{ scopeId: focusScopeId ?? "nse-preferences-toast", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
           <div
