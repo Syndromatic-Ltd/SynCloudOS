@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { revealKeyboardTarget } from "./focusVisibility";
 import { cloneElement, isValidElement, useContext, useInsertionEffect, useLayoutEffect, useMemo, useRef, type KeyboardEvent as ReactKeyboardEvent, type PropsWithChildren, type ReactElement } from "react";
 import { getMountedAppDOMRuntimeId, type FocusScopeKind, type UndoOwner } from "../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "./SynCloudOSProvider";
@@ -254,8 +255,11 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
         if (index < 0 || (!event.shiftKey && index === targets.length - 1) || (event.shiftKey && index === 0)) {
           event.preventDefault();
           event.stopPropagation();
-          // Match native Tab: reveal the destination when a resized modal clips it.
-          targets[event.shiftKey ? targets.length - 1 : 0]?.focus();
+          const target = targets[event.shiftKey ? targets.length - 1 : 0];
+          if (target && root) {
+            target.focus({ preventScroll: true });
+            revealKeyboardTarget(root, target);
+          }
           return;
         }
       }

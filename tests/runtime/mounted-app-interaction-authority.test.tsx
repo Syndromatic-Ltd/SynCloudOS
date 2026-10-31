@@ -169,6 +169,33 @@ function CanonicalDocumentChildProbe({ documentId, onComplete }: {
 }
 
 describe("mounted application context and interaction authority", () => {
+  it("reveals a clipped keyboard-wrapped action through the mounted app focus lease", async () => {
+    const runtime = createTestRuntime();runtimes.push(runtime);
+    const app = registerApp(runtime, "com.example.focus-reveal-app");
+    render(<SynCloudOSProvider runtime={runtime}><HostSiteBrandingProvider value={siteBranding}>
+      <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.bundleIdentifier}`}>
+        <div data-testid="outer-reveal" style={{ overflowY: "auto" }}>
+          <FocusScope scopeId="focus:reveal" kind="modal" parentResponderId={`application:${app.bundleIdentifier}`}>
+            <div data-testid="app-scroll" style={{ overflowY: "auto" }}>
+              <button>App clipped first</button><button>App clipped last</button>
+            </div>
+          </FocusScope>
+        </div>
+      </SynWareRuntimeMount>
+    </HostSiteBrandingProvider></SynCloudOSProvider>);
+    const first = await screen.findByRole("button", { name: "App clipped first" });
+    const last = screen.getByRole("button", { name: "App clipped last" });
+    await waitFor(() => expect(document.activeElement).toBe(first));
+    const scroll = screen.getByTestId("app-scroll");
+    Object.defineProperties(scroll, { clientHeight: { value: 80 }, scrollHeight: { value: 240 } });
+    vi.spyOn(scroll, "getBoundingClientRect").mockReturnValue({ top: 100, bottom: 180, left: 0, right: 300, width: 300, height: 80 } as DOMRect);
+    vi.spyOn(first, "getBoundingClientRect").mockReturnValue({ top: 300, bottom: 340, left: 0, right: 80, width: 80, height: 40 } as DOMRect);
+    last.focus();fireEvent.keyDown(last, { key: "Tab" });
+    expect(document.activeElement).toBe(first);
+    expect(scroll.scrollTop).toBe(160);
+    expect(screen.getByTestId("outer-reveal").scrollTop).toBe(0);
+  });
+
   it("preserves a child-owned ref when an app focus scope attaches asChild authority", async () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
