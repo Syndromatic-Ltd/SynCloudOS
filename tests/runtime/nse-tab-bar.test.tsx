@@ -66,6 +66,17 @@ function SharedChromeBack({ controller }: { readonly controller: NSEApplicationN
 }
 
 describe("NSETabBar", () => {
+  it("requests visible focus for keyboard roving independently of selection paint", () => {
+    const controller = new NSETabBarController<React.ReactNode>({ id: "keyboard-visible-tabs", destinations: destinations(3) });
+    const { unmount } = render(<NSETabBar controller={controller} aria-label="Keyboard visible tabs" />);
+    const home = screen.getByRole("tab", { name: "Home destination" });
+    const library = screen.getByRole("tab", { name: "Library destination" });
+    const focus = vi.spyOn(library, "focus");
+    fireEvent.keyDown(home, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(library);
+    expect(focus).toHaveBeenCalledWith({ focusVisible: true });
+    unmount(); controller.dispose();
+  });
   it("keeps NSETabGroup as a selected-value strip without panel ownership", () => {
     const change = vi.fn();
     render(

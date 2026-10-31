@@ -2978,6 +2978,19 @@
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-dis-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-dis-start);
 }
+/* Tall tabs replace the generic button pseudo-elements with this atomic
+   surface. Paint keyboard focus here so selection never hides the indicator. */
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:focus-visible > .nse-tab-bar-chrome-surface {
+  border-start-start-radius: var(--nse-tab-chrome-start-width);
+  border-end-start-radius: var(--nse-tab-chrome-start-width);
+  border-start-end-radius: var(--nse-tab-chrome-end-width);
+  border-end-end-radius: var(--nse-tab-chrome-end-width);
+  outline: 2px solid rgba(76, 164, 255, 0.95);
+  outline-offset: -3px;
+}
+@media (forced-colors: active) {
+  [data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:focus-visible > .nse-tab-bar-chrome-surface { outline-color: Highlight; }
+}
 /* End tall tab material. */
 
 

@@ -253,7 +253,8 @@ export function NSETabBar({
   const focusControl = useCallback((controlId: string, source: string, activate: boolean) => {
     setFocusedTabId(controlId);
     const control = tabRefs.current.get(controlId);
-    control?.focus();
+    // Keyboard roving retains visible intent even after programmatic entry.
+    control?.focus({ focusVisible: true } as FocusOptions);
     if (orientation === "vertical") control?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     if (!activate) return;
     if (controlId === NSETabBarMoreDestinationId) {
