@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from "vitest";
 import { createMountedScreenWakeLock } from "../../src/SynCloudOS/AppSDK/mountedScreenWakeLock";
+import { NativeOperationActivity } from "../../src/SynCloudOS/Updates";
 
 function deferred<T>() { let resolve!: (value: T) => void, reject!: (error: unknown) => void; const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; }
 class Sentinel extends EventTarget {
@@ -79,5 +80,17 @@ describe("explicit scoped screen wake lock", () => {
   it("observers can release reentrantly without recursive acquisition or release", async () => {
     const f = fixture(); const lease = f.service.request("Reader"); lease.subscribe(() => { if (lease.getSnapshot().state === "releasing") void lease.release(); }); await flush(); await lease.release();
     expect(lease.getSnapshot().state).toBe("released"); expect(f.sentinel.release).toHaveBeenCalledOnce(); f.owner.abort();
+  });
+  it("rechecks the mounted owner after native-activity publication before requesting", async () => {
+    const owner=new AbortController(),runtime=new AbortController(),activity=new NativeOperationActivity(runtime.signal),request=vi.fn();
+    const client=createMountedScreenWakeLock({signal:owner.signal,navigator:{wakeLock:{request}} as never,assertLive:()=>owner.signal.throwIfAborted(),isForeground:()=>true,isVisible:()=>true,subscribeOwner:()=>()=>{},nativeActivity:activity});
+    activity.subscribe(()=>{if(activity.pendingOperationCount)owner.abort();});
+    const lease=client.request("Explicit reader");await flush();expect(request).not.toHaveBeenCalled();expect(lease.getSnapshot().state).toBe("released");expect(activity.pendingOperationCount).toBe(0);runtime.abort();
+  });
+  it("still releases when a native-activity observer ends the ledger before native invocation", async () => {
+    const owner=new AbortController(),runtime=new AbortController(),activity=new NativeOperationActivity(runtime.signal),sentinel=new Sentinel();
+    const client=createMountedScreenWakeLock({signal:owner.signal,navigator:{wakeLock:{request:()=>Promise.resolve(sentinel)}} as never,assertLive:()=>owner.signal.throwIfAborted(),isForeground:()=>true,isVisible:()=>true,subscribeOwner:()=>()=>{},nativeActivity:activity});
+    const lease=client.request("Explicit reader");await flush();activity.subscribe(()=>{if(activity.pendingOperationCount)runtime.abort();});
+    await lease.release();expect(sentinel.release).toHaveBeenCalledOnce();expect(lease.getSnapshot().state).toBe("released");owner.abort();
   });
 });

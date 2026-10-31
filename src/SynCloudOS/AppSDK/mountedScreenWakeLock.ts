@@ -75,7 +75,19 @@ export function createMountedScreenWakeLock(input: {
         retired = true;
         releasePromise = acquisition.then(async () => {
           if (!sentinel || sentinel.released) { if (!terminal) { publish({ state: "released" }); cleanup(); } return; }
-          try { await (input.nativeActivity && !input.nativeActivity.signal.aborted ? input.nativeActivity.track(() => sentinel!.release()) : sentinel.release()); if (!terminal) { publish({ state: "released" }); cleanup(); } }
+          try {
+            let invoked = false;
+            const releaseNative = () => { invoked = true; return sentinel!.release(); };
+            try {
+              await (input.nativeActivity && !input.nativeActivity.signal.aborted ? input.nativeActivity.track(releaseNative) : releaseNative());
+            } catch (error) {
+              // A ledger observer can end its runtime before track invokes
+              // native release. Cleanup must still run, exactly once.
+              if (!invoked && input.nativeActivity?.signal.aborted) await releaseNative();
+              else throw error;
+            }
+            if (!terminal) { publish({ state: "released" }); cleanup(); }
+          }
           catch (error) { publish({ state: "failed", reason: "release-failed", errorName: browserPresentationErrorName(error) }); releasePromise = null; }
         });
         publish({ state: "releasing", reason: cause, errorName: null });
@@ -92,7 +104,18 @@ export function createMountedScreenWakeLock(input: {
       } else {
         leases.add(owned); signal?.addEventListener("abort", abort, { once: true });
         let pending: Promise<WakeLockSentinel>;
-        try { pending = input.nativeActivity ? input.nativeActivity.track(() => wake.request("screen")) : wake.request("screen"); }
+        let deferredReason: "hidden" | "not-foreground" | null = null;
+        const requestNative = () => {
+          // Ledger notification is observable. Recheck the narrower owner
+          // after it runs, before crossing the native request boundary.
+          input.signal.throwIfAborted(); signal?.throwIfAborted();
+          if (!input.isVisible() || !input.isForeground()) {
+            deferredReason = input.isVisible() ? "not-foreground" : "hidden";
+            throw new DOMException("Screen wake owner is no longer foreground.", "AbortError");
+          }
+          return wake.request("screen");
+        };
+        try { pending = input.nativeActivity ? input.nativeActivity.track(requestNative) : requestNative(); }
         catch (error) { pending = Promise.reject(error); }
         void Promise.resolve(pending).then(value => {
           sentinel = value;
@@ -106,7 +129,9 @@ export function createMountedScreenWakeLock(input: {
           } else publish({ state: "held" });
         }, error => {
           if (retired) return;
-          publish({ state: "failed", reason: "request-failed", errorName: browserPresentationErrorName(error) }); cleanup();
+          if (deferredReason) publish({ state: "deferred", reason: deferredReason, errorName: null });
+          else publish({ state: "failed", reason: "request-failed", errorName: browserPresentationErrorName(error) });
+          cleanup();
         }).finally(settleAcquisition);
         if (input.signal.aborted || signal?.aborted) abort();
       }

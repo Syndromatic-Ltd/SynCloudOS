@@ -149,7 +149,7 @@ export function createMountedPlaybackPresentation(input: {
           if (disposed) return;
           if (handle.state === "released") { release(); return; }
           if (!session || !input.metadataFactory) { publish({ state: "unsupported" }); return; }
-          if (!active) { publish({ state: "deferred", actions: Object.freeze([]) }); return; }
+          if (!active || !eligible()) { clear(); publish({ state: "deferred", actions: Object.freeze([]) }); return; }
           try {
             if (!installed) {
               installed = true;
@@ -174,10 +174,13 @@ export function createMountedPlaybackPresentation(input: {
         callerSignal?.removeEventListener("abort", release);
         if (key) {
           const page = pages.get(key)!;
-          if (page.active === candidate) { candidate.clear(); page.active = null; }
           page.candidates.delete(candidate);
         }
-        leases.delete(owned); publish({ state: "released", actions: Object.freeze([]) }); listeners.clear(); refresh();
+        // Native teardown belongs to the arbiter's serialized transition.
+        // Cancelling commands/notifying observers can create a replacement
+        // synchronously; old cleanup must finish before that owner installs.
+        leases.delete(owned); refresh();
+        publish({ state: "released", actions: Object.freeze([]) }); listeners.clear();
       }
       // A mounted controller explicitly replaces its prior presentation.
       // Separate foreground owners remain ambiguous and defer page-wide.
