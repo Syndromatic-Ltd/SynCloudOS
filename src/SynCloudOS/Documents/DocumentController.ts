@@ -24,6 +24,7 @@ import type { OperationCoordinator } from "../Operations";
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeDisposalPreparation, RuntimeDisposalPrepareContext } from "../Runtime/disposalTypes";
 import type { UndoManagerRegistry } from "../Undo";
+import { DocumentActivityObservations, type DocumentActivitySource } from "./DocumentActivityObservations";
 import {
   ApplicationDocument,
   type ApplicationDocumentCloseTransaction,
@@ -439,6 +440,9 @@ function awaitDocumentSignal<T>(value: Promise<T>, signal?: AbortSignal): Promis
 }
 
 export class DocumentController {
+  readonly #activity = new DocumentActivityObservations();
+  /** Read-only stages, including unpublished and retired document work. */
+  get activity(): DocumentActivitySource { return this.#activity.source; }
   readonly #types = new DocumentTypeRegistry();
   readonly #adapters = new Map<string, DocumentStorageAdapter>();
   readonly #adapterGenerations = new Map<string, number>();
@@ -1590,7 +1594,7 @@ export class DocumentController {
         if (this.dependencies.recovery.dispose) {
           const error = await settleBoundedDocumentCleanup(
             "document recovery disposal",
-            () => this.dependencies.recovery.dispose!(),
+            () => this.#activity.track("cleanup", () => this.dependencies.recovery.dispose!()),
             cleanupTimeoutMs(),
             cleanupTimers,
           );
@@ -1839,7 +1843,8 @@ export class DocumentController {
 
   async #loadRecoveryRecord(entry: RestorableDocument): Promise<DocumentRecoveryRecord> {
     if (entry.recovery.kind !== "record") throw new DocumentRecoveryCorruptError(entry.documentId);
-    const record = await this.dependencies.recovery.read(entry.recovery.recoveryId);
+    const recoveryId = entry.recovery.recoveryId;
+    const record = await this.#activity.track("recovery", () => this.dependencies.recovery.read(recoveryId));
     if (!record) throw new DocumentRecoveryMissingError(entry.recovery.recoveryId);
     const matches = record.schemaVersion === 1 && record.recoveryVersion === entry.recovery.recoveryVersion &&
       record.documentId === entry.documentId && record.typeId === entry.typeId &&
@@ -1873,6 +1878,7 @@ export class DocumentController {
       type,
       undoManager,
       recovery: this.dependencies.recovery,
+      activity: this.#activity,
       persistenceNamespace: this.dependencies.persistenceNamespace,
       environment: this.dependencies.environment,
       observeError: this.dependencies.observeError,
@@ -1895,9 +1901,9 @@ export class DocumentController {
     const revision = document.dirtyRevision;
     let abandoned = false;
     const pending = this.dependencies.resourceLifecycle(document, signal);
-    void pending.then(lifecycle => {
-      if (abandoned) void Promise.resolve().then(() => lifecycle.dispose()).catch(error => this.#reportError(error, "document-resource-late-factory-dispose"));
-    }, () => undefined);
+    void this.#activity.track("admissions", () => pending.then(async lifecycle => {
+      if (abandoned) await this.#activity.track("cleanup", () => Promise.resolve().then(() => lifecycle.dispose()).catch(error => this.#reportError(error, "document-resource-late-factory-dispose")));
+    }, () => undefined));
     let lifecycle: DocumentResourceLifecycle;
     try { lifecycle = await awaitDocumentSignal(pending, signal); }
     catch (error) { abandoned = true; throw error; }
@@ -1984,6 +1990,7 @@ export class DocumentController {
         adapter,
         undoManager,
         recovery: this.dependencies.recovery,
+      activity: this.#activity,
         persistenceNamespace: this.dependencies.persistenceNamespace,
         environment: this.dependencies.environment,
         observeError: this.dependencies.observeError,
@@ -2044,6 +2051,7 @@ export class DocumentController {
           model: request.initialModel,
           undoManager,
           recovery: this.dependencies.recovery,
+      activity: this.#activity,
           persistenceNamespace: this.dependencies.persistenceNamespace,
           environment: this.dependencies.environment,
           observeError: this.dependencies.observeError,
@@ -2165,6 +2173,7 @@ export class DocumentController {
         adapter,
         undoManager,
         recovery: this.dependencies.recovery,
+      activity: this.#activity,
         persistenceNamespace: this.dependencies.persistenceNamespace,
         environment: this.dependencies.environment,
         observeError: this.dependencies.observeError,
@@ -3423,7 +3432,7 @@ export class DocumentController {
     if (document.hasTerminalReconciliationLease) return;
     if (deferred.promise) return deferred.promise;
     const dirtyRevision = document.dirtyRevision;
-    const cleanup = (async () => {
+    const cleanup = this.#activity.track("cleanup", async () => {
       try {
         if (this.#documents.get(document.id) !== document || normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(applicationId) ||
             document.hasTerminalReconciliationLease || this.hasActiveDocumentOwnerLease(document.id, applicationId) ||
@@ -3445,7 +3454,7 @@ export class DocumentController {
         // close leaves this exact document open rather than closing a newer
         // same-ID generation.
       }
-    })();
+    });
     deferred.promise = cleanup;
     void cleanup.finally(() => {
       if (this.#deferredFinalOwnerCleanups.get(document) !== deferred) return;
@@ -3610,21 +3619,25 @@ export class DocumentController {
   }
 
   async #operate<I, T>(kind: string, input: I, signal: AbortSignal | undefined, run: () => Promise<T>): Promise<T> {
-    throwIfDocumentAborted(signal);
-    const handle = this.dependencies.operations.run({ kind, input, commit: run });
-    const cancel = () => handle.cancel("Document operation aborted.");
-    signal?.addEventListener("abort", cancel, { once: true });
-    if (signal?.aborted) cancel();
+    const admission = ["documents.new", "documents.open", "documents.new-projection", "documents.import", "documents.duplicate", "documents.reopen", "documents.restore-session", "documents.save-as", "documents.move"].includes(kind);
+    const release = admission ? this.#activity.begin("admissions") : () => {};
     try {
-      const result = await handle.result;
-      if (result.status === "completed") return result.value;
-      if (result.status === "cancelled") throw new DocumentAbortError(result.reason);
-      const cause = result.error.cause;
-      if (cause) throw cause;
-      throw new DocumentUnavailableError(result.error.message, { retryable: false });
-    } finally {
-      signal?.removeEventListener("abort", cancel);
-    }
+      throwIfDocumentAborted(signal);
+      const handle = this.dependencies.operations.run({ kind, input, commit: () => admission ? this.#activity.track("admissions", run) : run() });
+      const cancel = () => handle.cancel("Document operation aborted.");
+      signal?.addEventListener("abort", cancel, { once: true });
+      if (signal?.aborted) cancel();
+      try {
+        const result = await handle.result;
+        if (result.status === "completed") return result.value;
+        if (result.status === "cancelled") throw new DocumentAbortError(result.reason);
+        const cause = result.error.cause;
+        if (cause) throw cause;
+        throw new DocumentUnavailableError(result.error.message, { retryable: false });
+      } finally {
+        signal?.removeEventListener("abort", cancel);
+      }
+    } finally { release(); }
   }
 
   #emit(): void {

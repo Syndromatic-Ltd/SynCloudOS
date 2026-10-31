@@ -28,20 +28,33 @@ export class AutosaveScheduler {
   #running: Promise<void> = Promise.resolve();
   #abortController: AbortController | null = null;
   #generation = 0;
+  #releaseScheduled: (() => void) | null = null;
 
   constructor(
     private readonly delayMs: number,
     private readonly save: (signal: AbortSignal) => Promise<void>,
     private readonly onError: (error: unknown) => void,
     private readonly timers: AutosaveTimerAPI,
+    private readonly observePending?: () => (() => void),
   ) {}
 
   schedule(): void {
     const generation = ++this.#generation;
+    const releasePrevious = this.#releaseScheduled;
+    this.#releaseScheduled = null;
     if (this.#timer !== null) this.timers.clearTimeout(this.#timer);
+    this.#timer = null;
+    const release = this.observePending?.() ?? null;
+    releasePrevious?.();
+    // Observers may synchronously cancel or replace this schedule.
+    if (generation !== this.#generation) { release?.(); return; }
+    this.#releaseScheduled = release;
     this.#timer = this.timers.setTimeout(() => {
+      if (generation !== this.#generation) return;
       this.#timer = null;
+      const release = this.#releaseScheduled; this.#releaseScheduled = null;
       void this.#enqueue(generation);
+      release?.();
     }, this.delayMs);
   }
 
@@ -49,7 +62,10 @@ export class AutosaveScheduler {
     if (this.#timer !== null) {
       this.timers.clearTimeout(this.#timer);
       this.#timer = null;
-      await this.#enqueue(this.#generation);
+      const release = this.#releaseScheduled; this.#releaseScheduled = null;
+      const pending = this.#enqueue(this.#generation);
+      release?.();
+      await pending;
       return;
     }
     await this.#running;
@@ -59,6 +75,8 @@ export class AutosaveScheduler {
     this.#generation += 1;
     if (this.#timer !== null) this.timers.clearTimeout(this.#timer);
     this.#timer = null;
+    const release = this.#releaseScheduled; this.#releaseScheduled = null;
+    release?.();
     this.#abortController?.abort(reason);
   }
 
@@ -68,6 +86,7 @@ export class AutosaveScheduler {
   }
 
   #enqueue(generation: number): Promise<void> {
+    const release = this.observePending?.();
     const execution = this.#running.then(async () => {
       if (generation !== this.#generation) return;
       const controller = new AbortController();
@@ -79,6 +98,7 @@ export class AutosaveScheduler {
       }
     });
     this.#running = execution.catch((error) => { this.onError(error); });
+    void this.#running.then(release, release);
     return this.#running;
   }
 }

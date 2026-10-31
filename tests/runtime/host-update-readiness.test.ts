@@ -77,8 +77,8 @@ describe('host readiness owner integration', () => {
   it('observes an empty host conservatively and keeps every missing owner domain explicit', () => {
     const runtime = fixture(); const snapshot = runtime.updateReadiness.inspect();
     expect(snapshot.decision).toBe('defer'); expect(snapshot.activationAuthorized).toBe(false); expect(snapshot.client.readiness).toBe('unknown');
-    expect(snapshot.coverage).toHaveLength(4); expect(snapshot.coverage.every(row => row.status === 'partial' && row.gaps.length)).toBe(true);
-    expect(snapshot.coverage.flatMap(row => row.gaps)).toEqual(expect.arrayContaining(['document-admission', 'recovery-cleanup', 'editing-owner-census', 'managed-task-owners', 'native-write-permission', 'service-network-media']));
+    expect(snapshot.coverage).toHaveLength(4); expect(snapshot.coverage.find(row => row.domain === 'documents')).toMatchObject({ status: 'observed', gaps: [] }); expect(snapshot.coverage.filter(row => row.domain !== 'documents').every(row => row.status === 'partial' && row.gaps.length)).toBe(true);
+    expect(snapshot.coverage.flatMap(row => row.gaps)).toEqual(expect.arrayContaining(['editing-owner-census', 'managed-task-owners', 'native-write-permission', 'service-network-media']));
     expect(runtime.store.getSnapshot().updateReadiness).toEqual(snapshot); expect(Object.isFrozen(snapshot)).toBe(true); expect(Object.isFrozen(snapshot.counts)).toBe(true);
     expect(snapshot.inspection).toMatchObject({ available: false, state: 'not-inspected' });
   });
@@ -208,5 +208,36 @@ describe('host readiness owner integration', () => {
     const editing = new NSEObjectController({ id: 'generated-editing', owner: nseUnowned, content: { value: 1 }, fields: { value: { read: value => value.value, write: (model, value: number) => ({ ...model, value }) } } });
     const readiness = new NSEUpdateReadinessController({ id: 'generated-observer', owner: nseUnowned, clientInstance: 'generated-instance', hostBuild: 'build-A', inventory: { read: () => ({ covered: updateReadinessDomains, authorities: [editingControllerUpdateReadiness(editing)] }), subscribe: () => () => {} } });
     const first = readiness.getSnapshot(); editing.dispose(); expect(readiness.getSnapshot().clientInstance).toBe(first.clientInstance); expect(readiness.getSnapshot().readiness).toBe('unknown'); expect(readiness.getSnapshot().generation).toBeGreaterThan(first.generation); readiness.dispose();
+  });
+});
+
+describe('document admission/recovery host facts', () => {
+  it('publishes pending admission before a document exists, invalidates evidence and retains real work across account change', async () => {
+    const runtime = fixture({ updateReadiness: { hostBuild: 'generated', inspectParticipants: async () => ready } });
+    const adapter = new InMemoryDocumentAdapter(runtime.environment); runtime.documents.registerAdapter({ ...adapter, id: 'generated-held', supports: loc => loc.kind === 'generated-held', read: () => gate.promise } as any);
+    const gate = deferred<null>(), caller = new AbortController();
+    await runtime.updateReadiness.inspectParticipants();
+    const opening = runtime.documents.newDocument({ typeId: noteType.id, location: { kind: 'generated-held', key: 'private-never-projected' } as any, signal: caller.signal }).catch(e => e);
+    try {
+      await vi.waitFor(() => expect(runtime.updateReadiness.getSnapshot().counts.documentAdmissions).toBeGreaterThan(0));
+      expect(runtime.updateReadiness.getSnapshot().counts.documents).toBe(0);
+      expect(runtime.updateReadiness.getSnapshot().inspection.state).toBe('stale');
+      expect(runtime.store.getSnapshot().updateReadiness).toBe(runtime.updateReadiness.getSnapshot());
+      runtime.store.mutate(draft => { draft.loginServices.sessionId = 'generated-replacement'; }); caller.abort();
+      expect(runtime.updateReadiness.getSnapshot().counts.documentAdmissions).toBeGreaterThan(0);
+      expect(JSON.stringify(runtime.updateReadiness.getSnapshot())).not.toContain('private-never-projected');
+    } finally { gate.resolve(null); await opening; }
+    await vi.waitFor(() => expect(runtime.updateReadiness.getSnapshot().counts.documentAdmissions).toBe(0));
+    const snapshot = runtime.updateReadiness.getSnapshot(); expect(snapshot.activationAuthorized).toBe(false); expect(snapshot.decision).toBe('defer'); expect(snapshot.client.readiness).toBe('unknown');
+    expect(snapshot.coverage.flatMap(row => row.gaps)).not.toContain('document-admission'); expect(snapshot.coverage.flatMap(row => row.gaps)).not.toContain('recovery-cleanup');
+    expect(snapshot.coverage.flatMap(row => row.gaps)).toContain('underlying-operation-work');
+  });
+  it('projects recovery work and stops publication on observer disposal while actual work finishes', async () => {
+    const runtime = fixture(), observer = new HostUpdateReadinessService(runtime), doc = await runtime.documents.newDocument({ typeId: noteType.id });
+    expect(runtime.updateReadiness.getSnapshot().counts.documentRecovery).toBeGreaterThan(0);
+    expect(runtime.updateReadiness.getSnapshot().client.blockers).toContain('recovery-write');
+    const changed = vi.fn(); observer.subscribe(changed); observer.dispose(); const calls = changed.mock.calls.length;
+    await doc.markClosed(); await vi.waitFor(() => expect(runtime.updateReadiness.getSnapshot().counts.documentRecovery).toBe(0));
+    expect(changed).toHaveBeenCalledTimes(calls); expect(observer.getSnapshot().ended).toBe(true); expect(observer.getSnapshot().activationAuthorized).toBe(false);
   });
 });

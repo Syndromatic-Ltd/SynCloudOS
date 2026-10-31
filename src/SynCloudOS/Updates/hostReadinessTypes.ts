@@ -2,7 +2,7 @@ import { UPDATE_READINESS_PROTOCOL, type UpdateReadinessDomain, type UpdateReadi
 import type { UpdateReadinessObservation } from './observeUpdateReadiness';
 
 export type HostReadinessGap = 'document-admission' | 'recovery-cleanup' | 'resource-terminal-work' | 'editing-participants' | 'editing-owner-census' | 'underlying-operation-work' | 'private-job-admissions' | 'managed-task-owners' | 'application-lifecycle-owners' | 'command-lifecycle-undo' | 'persistence-work' | 'service-network-media' | 'native-picker-instrumentation' | 'native-write-permission' | 'clipboard-download' | 'runtime-store-publication';
-export interface HostReadinessCoverage { readonly domain: UpdateReadinessDomain; readonly status: 'partial'; readonly gaps: readonly HostReadinessGap[] }
+export interface HostReadinessCoverage { readonly domain: UpdateReadinessDomain; readonly status: 'partial' | 'observed'; readonly gaps: readonly HostReadinessGap[] }
 export const hostReadinessCoverage: readonly HostReadinessCoverage[] = Object.freeze([
   Object.freeze({ domain: 'documents' as const, status: 'partial' as const, gaps: Object.freeze(['document-admission'] as const) }),
   Object.freeze({ domain: 'editing' as const, status: 'partial' as const, gaps: Object.freeze(['editing-participants', 'editing-owner-census'] as const) }),
@@ -10,6 +10,8 @@ export const hostReadinessCoverage: readonly HostReadinessCoverage[] = Object.fr
   Object.freeze({ domain: 'native' as const, status: 'partial' as const, gaps: Object.freeze(['native-write-permission', 'clipboard-download', 'service-network-media'] as const) }),
 ]);
 export interface HostReadinessCounts {
+  /** Outstanding owner stages; concurrent/nested stages are not unique requests. */
+  readonly documentAdmissions: number; readonly documentRecovery: number; readonly documentCleanup: number;
   readonly documents: number; readonly dirtyDocuments: number; readonly savingDocuments: number; readonly conflictedDocuments: number;
   readonly windows: number; readonly operations: number; readonly activeJobs: number; readonly queuedJobs: number; readonly nativeOperations: number;
 }
@@ -56,7 +58,7 @@ export function captureHostUpdateReadinessOptions(input: HostUpdateReadinessOpti
 }
 export function initialHostUpdateReadinessSnapshot(): HostUpdateReadinessSnapshot {
   return Object.freeze({ client: Object.freeze({ protocol: UPDATE_READINESS_PROTOCOL, clientInstance: 'unconfigured-host', hostBuild: 'unconfigured', generation: 0, readiness: 'unknown', blockers: Object.freeze(['provider-unavailable'] as const) }), decision: 'defer', activationAuthorized: false, ended: false, coverage: hostReadinessCoverage,
-    counts: Object.freeze({ documents: 0, dirtyDocuments: 0, savingDocuments: 0, conflictedDocuments: 0, windows: 0, operations: 0, activeJobs: 0, queuedJobs: 0, nativeOperations: 0 }),
+    counts: Object.freeze({ documentAdmissions: 0, documentRecovery: 0, documentCleanup: 0, documents: 0, dirtyDocuments: 0, savingDocuments: 0, conflictedDocuments: 0, windows: 0, operations: 0, activeJobs: 0, queuedJobs: 0, nativeOperations: 0 }),
     compatibility: Object.freeze({ status: 'not-configured', reasons: Object.freeze(['target-build-unverified'] as const) }),
     inspection: Object.freeze({ available: false, state: 'not-inspected', observedAt: null, sourceGeneration: null, result: null, reason: 'not-configured' }),
   });
