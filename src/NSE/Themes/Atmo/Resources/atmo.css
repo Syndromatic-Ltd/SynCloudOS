@@ -2978,18 +2978,30 @@
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-dis-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-dis-start);
 }
-/* Tall tabs replace the generic button pseudo-elements with this atomic
-   surface. Paint keyboard focus here so selection never hides the indicator. */
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:focus-visible > .nse-tab-bar-chrome-surface {
+/* Tall tabs reserve the button pseudo-elements while their atomic child paints
+   the material. Use the foreground layer only for visible keyboard focus;
+   descendant outlines are not painted consistently across available engines. */
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:focus-visible::after {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: 2px;
+  box-sizing: border-box;
+  border: 2px solid rgba(76, 164, 255, 0.95);
+  border-image: none;
+  background: none;
+  box-shadow: none;
+  filter: none;
+  opacity: 1;
   border-start-start-radius: var(--nse-tab-chrome-start-width);
   border-end-start-radius: var(--nse-tab-chrome-start-width);
   border-start-end-radius: var(--nse-tab-chrome-end-width);
   border-end-end-radius: var(--nse-tab-chrome-end-width);
-  outline: 2px solid rgba(76, 164, 255, 0.95);
-  outline-offset: -3px;
+  pointer-events: none;
+  z-index: 3;
 }
 @media (forced-colors: active) {
-  [data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:focus-visible > .nse-tab-bar-chrome-surface { outline-color: Highlight; }
+  [data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:focus-visible::after { border-color: Highlight; }
 }
 /* End tall tab material. */
 
