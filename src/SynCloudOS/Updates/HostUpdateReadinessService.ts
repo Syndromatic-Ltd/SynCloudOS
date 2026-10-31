@@ -1,4 +1,5 @@
 import type { SynCloudOSRuntime } from '../Runtime/runtimeInstanceTypes';
+import { bindRuntimeReadinessProjection } from '../Runtime/RuntimeStore';
 import { UpdateReadinessProjection } from './UpdateReadinessProjection';
 import { documentUpdateReadiness, type UpdateReadinessAuthority } from './updateReadiness';
 import { captureHostUpdateReadinessOptions, hostReadinessCoverage, initialHostUpdateReadinessSnapshot, type HostReadinessCounts, type HostReadinessInspection, type HostUpdateReadinessOptions, type HostUpdateReadinessSnapshot } from './hostReadinessTypes';
@@ -25,6 +26,8 @@ export class HostUpdateReadinessService {
   #revision = 0;
   #disposed = false;
   #publishing = false;
+  #projectingStore = false;
+  #storeProjectionAttached = false;
   #again = false;
   #storeFingerprint = '';
   #flight: { controller: AbortController; generation: number } | null = null;
@@ -55,12 +58,21 @@ export class HostUpdateReadinessService {
       runtime.identity.session.subscribe(changed),
     );
     this.#storeFingerprint = this.#fingerprint();
-    this.#releases.push(runtime.store.subscribe(() => {
+    const storeFactsChanged = () => {
       if (this.#disposed) return;
       const next = this.#fingerprint();
       if (next !== this.#storeFingerprint) { this.#storeFingerprint = next; changed(); }
       else if (!this.#publishing && JSON.stringify(runtime.store.getSnapshot().updateReadiness) !== JSON.stringify(this.#snapshot)) this.#publish();
-    }));
+    };
+    const releaseProjection = bindRuntimeReadinessProjection(runtime.store, () => {
+      const previous = this.#projectingStore;
+      this.#projectingStore = true;
+      try { storeFactsChanged(); return this.#snapshot; }
+      finally { this.#projectingStore = previous; }
+    });
+    this.#storeProjectionAttached = !!releaseProjection;
+    if (releaseProjection) this.#releases.push(releaseProjection);
+    else this.#releases.push(runtime.store.subscribe(storeFactsChanged));
     runtime.signal.addEventListener('abort', this.#ended, { once: true });
     this.#publish(); if (runtime.signal.aborted) this.dispose();
   }
@@ -111,7 +123,7 @@ export class HostUpdateReadinessService {
     for (const release of this.#releases.splice(0).reverse()) { try { release(); } catch { /* Release every owner. */ } }
     this.#documents.clear(); this.#inventoryListeners.clear(); this.#taskListeners.clear();
     this.#snapshot = Object.freeze({ ...this.#snapshot, client: this.#projection.getSnapshot(), ended: true, inspection: Object.freeze({ ...this.#inspection, state: 'stale', reason: 'owner-ended' }) });
-    try { this.#runtime.store.mutate(draft => { draft.updateReadiness = this.#snapshot; }); } catch { /* Store may already have ended. */ }
+    if (this.#storeProjectionAttached) { try { this.#runtime.store.mutate(draft => { draft.updateReadiness = this.#snapshot; }); } catch { /* Store may already have ended. */ } }
     this.#notify(); this.#listeners.clear();
   }
   #reconcileDocuments(): void {
@@ -136,9 +148,10 @@ export class HostUpdateReadinessService {
     try {
       const client = this.#projection.inspect();
       if (this.#inspection.sourceGeneration !== null && this.#inspection.sourceGeneration !== client.generation && ['checking', 'observed'].includes(this.#inspection.state)) this.#stale('work-changed');
-      const coverage = this.#runtime.environment.createFileSystemAccessPanelPort ? hostReadinessCoverage : Object.freeze(hostReadinessCoverage.map(row => row.domain === 'native' ? Object.freeze({ ...row, gaps: Object.freeze([...row.gaps, 'native-picker-instrumentation' as const]) }) : row));
+      let coverage = this.#runtime.environment.createFileSystemAccessPanelPort ? hostReadinessCoverage : Object.freeze(hostReadinessCoverage.map(row => row.domain === 'native' ? Object.freeze({ ...row, gaps: Object.freeze([...row.gaps, 'native-picker-instrumentation' as const]) }) : row));
+      if (!this.#storeProjectionAttached) coverage = Object.freeze(coverage.map(row => row.domain === 'tasks' ? Object.freeze({ ...row, gaps: Object.freeze([...row.gaps, 'runtime-store-publication' as const]) }) : row));
       const next: HostUpdateReadinessSnapshot = Object.freeze({ client, decision: 'defer', activationAuthorized: false, ended: false, coverage, counts: this.#counts(), compatibility: Object.freeze({ status: this.#options.compatibilityRestricted ? 'restricted' : 'not-configured', reasons: Object.freeze(this.#options.compatibilityRestricted ? ['host-policy-restricted'] as const : ['target-build-unverified'] as const) }), inspection: this.#inspection });
-      if (JSON.stringify(next) !== JSON.stringify(this.#snapshot) || JSON.stringify(this.#runtime.store.getSnapshot().updateReadiness) !== JSON.stringify(next)) { this.#snapshot = next; this.#runtime.store.mutate(draft => { draft.updateReadiness = next; }); this.#notify(); }
+      if (JSON.stringify(next) !== JSON.stringify(this.#snapshot) || this.#storeProjectionAttached && JSON.stringify(this.#runtime.store.getSnapshot().updateReadiness) !== JSON.stringify(next)) { this.#snapshot = next; if (this.#storeProjectionAttached && !this.#projectingStore) this.#runtime.store.mutate(draft => { draft.updateReadiness = next; }); this.#notify(); }
     } finally { this.#publishing = false; }
     if (this.#again) { this.#again = false; this.#publish(); }
   }

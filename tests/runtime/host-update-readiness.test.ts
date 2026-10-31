@@ -11,6 +11,7 @@ import { NSEObjectController } from '../../src/NSE/Controllers/NSEObjectControll
 import { NSEUpdateReadinessController } from '../../src/NSE/Controllers/NSEUpdateReadinessController';
 import { nseUnowned } from '../../src/NSE/Controllers/ownership';
 import { editingControllerUpdateReadiness, updateReadinessDomains } from '../../src/SynCloudOS/Updates';
+import { HostUpdateReadinessService } from '../../src/SynCloudOS/Updates/HostUpdateReadinessService';
 
 const runtimes: ReturnType<typeof createTestRuntime>[] = [], releases: (() => void)[] = [];
 const deferred = <T>() => { let resolve!: (value: T) => void; const promise = new Promise<T>(r => { resolve = r; }); return { promise, resolve }; };
@@ -28,6 +29,37 @@ function fixture(options: Parameters<typeof createTestRuntime>[0] = {}) {
   runtime.store.mutate(draft => { draft.booted = true; }); runtimes.push(runtime); return runtime;
 }
 describe('host readiness owner integration', () => {
+  it('folds current readiness into the single public notification of an outer batch', () => {
+    const runtime = fixture(); runtime.store.mutate(draft => { draft.booted = false; });
+    const observed: unknown[] = [];
+    const release = runtime.store.subscribe(() => {
+      observed.push(runtime.store.getSnapshot().updateReadiness);
+      expect(runtime.store.getSnapshot().updateReadiness).toBe(runtime.updateReadiness.getSnapshot());
+    }); releases.push(release);
+    runtime.store.batch(() => { runtime.store.mutate(draft => { draft.booted = true; }); runtime.store.batch(() => runtime.store.mutate(draft => { draft.webspring.isBooted = true; })); });
+    expect(observed).toHaveLength(1); expect(runtime.updateReadiness.getSnapshot().client.blockers).not.toContain('owner-busy');
+    observed.length = 0;
+    const historical = runtime.store.cloneSnapshot(); historical.updateReadiness = { ...historical.updateReadiness, client: { ...historical.updateReadiness.client, readiness: 'ready', blockers: [] } };
+    runtime.store.replaceSnapshot(historical); expect(observed).toHaveLength(1);
+    expect(runtime.store.getSnapshot().updateReadiness.client.readiness).toBe('unknown');
+  });
+  it('defers an alternate store and never writes a second projection through its public subscriber', () => {
+    const runtime = fixture(), actual = runtime.store;
+    const store = { runtimeId: actual.runtimeId, getSnapshot: actual.getSnapshot, cloneSnapshot: actual.cloneSnapshot, createCheckpoint: actual.createCheckpoint, subscribe: actual.subscribe, listenerCount: actual.listenerCount, mutate: vi.fn(actual.mutate), batch: actual.batch, replaceSnapshot: actual.replaceSnapshot, dispose() {} };
+    const facade = Object.create(runtime); Object.defineProperty(facade, 'store', { value: store });
+    const before = actual.listenerCount(), observer = new HostUpdateReadinessService(facade);
+    expect(observer.getSnapshot().coverage.find(row => row.domain === 'tasks')?.gaps).toContain('runtime-store-publication');
+    actual.mutate(draft => { draft.booted = false; }); observer.inspect(); observer.dispose();
+    expect(store.mutate).not.toHaveBeenCalled(); expect(actual.listenerCount()).toBe(before);
+  });
+  it('does not take over or clear another live readiness publisher', () => {
+    const runtime = fixture(), observer = new HostUpdateReadinessService(runtime);
+    expect(observer.getSnapshot().coverage.find(row => row.domain === 'tasks')?.gaps).toContain('runtime-store-publication');
+    observer.dispose(); expect(runtime.updateReadiness.getSnapshot().ended).toBe(false);
+    const changed = vi.fn(); const release = runtime.store.subscribe(changed); releases.push(release);
+    runtime.store.batch(() => runtime.store.mutate(draft => { draft.booted = false; }));
+    expect(changed).toHaveBeenCalledOnce(); expect(runtime.store.getSnapshot().updateReadiness).toBe(runtime.updateReadiness.getSnapshot());
+  });
   it('captures readonly host options without getters or update-control capabilities', async () => {
     const getter = vi.fn(); expect(() => captureHostUpdateReadinessOptions(Object.defineProperty({}, 'hostBuild', { enumerable: true, get: getter }))).toThrow(); expect(getter).not.toHaveBeenCalled();
     expect(() => captureHostUpdateReadinessOptions({ activateNow() {} } as any)).toThrow();
