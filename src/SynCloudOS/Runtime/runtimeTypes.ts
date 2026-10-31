@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { HostUpdateReadinessSnapshot } from '../Updates/hostReadinessTypes';
 import type { SynCloudOSAppInfo } from "../AppInfo/appInfoTypes";
 import type { SynCloudOSAppManifest } from "../AppRegistry/appRegistryTypes";
 import type { SynCloudOSAppLifecycleState, AppLifecycleEvent, AppManagerRuntimeRecord } from "../AppManager/appManagerTypes";
@@ -86,6 +87,8 @@ export interface RuntimeTransactionContext {
 export type RuntimeTransactionCallback<T> = (context: RuntimeTransactionContext) => T | Promise<T>;
 
 export interface RuntimeSnapshot {
+  /** Transient derived observations, never a persisted update approval. */
+  updateReadiness: HostUpdateReadinessSnapshot;
   runtimeId: string;
   rawApps: Record<string, SynCloudOSAppManifest>;
   appInfo: Record<string, SynCloudOSAppInfo>;

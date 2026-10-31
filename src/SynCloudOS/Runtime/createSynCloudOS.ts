@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NativeOperationActivity, HostUpdateReadinessService, captureHostUpdateReadinessOptions } from '../Updates';
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { createAudioGraphHostService } from "../AudioFX/AudioGraphHostService";
 import { MotionService } from "../MotionFX/MotionService";
@@ -153,10 +154,12 @@ function accessModeForAuthenticationPolicy(
 
 
 export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRuntime {
+  const readinessOptions = captureHostUpdateReadinessOptions(config.updateReadiness);
   const runtimeId = asRuntimeId(config.id ?? `runtime:${config.environment.randomUUID()}`);
   const ownerToken = createRuntimeOwnerToken();
   const policyProfile = config.policyProfile ?? defaultPolicyProfile;
   const controller = new AbortController();
+  const nativeActivity = new NativeOperationActivity(controller.signal);
   const store = createRuntimeStore(runtimeId);
   const diagnostics = createRuntimeDiagnostics({ eventHistoryLimit: config.operationHistoryLimit ?? 240 });
   const resources = createRuntimeResourceLedger({ softBudgetBytes: config.resourceSoftBudgetBytes ?? null });
@@ -274,6 +277,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   let commands!: SynCloudOSRuntime["commands"];
   let keyBindings!: SynCloudOSRuntime["keyBindings"];
   let documents!: DocumentController;
+  let updateReadiness!: HostUpdateReadinessService;
   let documentStore!: SynCloudOSRuntime["documentStore"];
   let documentResources!: SynCloudOSRuntime["documentResources"];
   let documentAssetIntegration: ReturnType<typeof createDocumentAssetRuntimeIntegration> | undefined;
@@ -364,6 +368,8 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     get presentationTraits() { return presentationTraits; },
     get windows() { return windows; },
     get documents() { return documents; },
+    get updateReadiness() { return updateReadiness; },
+    nativeActivity,
     get documentStore() { return documentStore; },
     get documentResources() { return documentResources; },
     get documentAssets() { return documentAssetIntegration?.cooperation; },
@@ -1436,8 +1442,11 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     webContentWindowIds = nextWindowIds;
   });
 
+  updateReadiness = new HostUpdateReadinessService(runtime, readinessOptions);
+
   const coreParticipants: RuntimeDisposalParticipant[] = [
     alwaysReady("runtime:store", () => store.dispose()),
+    alwaysReady("runtime:update-readiness", () => updateReadiness.dispose()),
     alwaysReady("runtime:diagnostics", () => diagnostics.dispose()),
     alwaysReady("runtime:jobs", () => jobs.dispose(new DOMException("Runtime disposed.", "AbortError"))),
     alwaysReady("runtime:resources", () => resources.dispose()),
@@ -1527,7 +1536,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     setTimeout: config.environment.setTimeout,
     clearTimeout: config.environment.clearTimeout,
     coreParticipants,
-    onStateChange(state) { disposalState = state; },
+    onStateChange(state) { disposalState = state; updateReadiness.inspect(); },
   });
 
   bootImplementation = (options: SynCloudOSBootOptions = {}) => {

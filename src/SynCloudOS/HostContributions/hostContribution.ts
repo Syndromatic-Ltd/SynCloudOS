@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { captureHostUpdateReadinessOptions } from '../Updates/hostReadinessTypes';
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   SynCloudOSAppServiceDefinition,
@@ -346,6 +347,7 @@ const runtimeScalarKeys = new Set<string>([
   "windowPersistenceNamespace",
   "documentStoreLock",
   "operationHistoryLimit",
+  "updateReadiness",
   "jobs",
   "resourceSoftBudgetBytes",
   "performancePolicy",
@@ -363,6 +365,12 @@ const runtimeScalarKeys = new Set<string>([
   "policyProfile",
   "userNotifications",
 ]);
+function captureRuntimeConfig(value: unknown, label: string): Readonly<SynCloudOSHostScalarRuntimeConfig> {
+  const scalar = cloneReadonlyRecord(value, label, runtimeScalarKeys);
+  if (scalar.updateReadiness === undefined) return scalar as SynCloudOSHostScalarRuntimeConfig;
+  return Object.freeze({ ...scalar, updateReadiness: captureHostUpdateReadinessOptions(scalar.updateReadiness as never) });
+}
+
 const applicationDocumentKeys = new Set<string>(["recoveryStore", "initialAdapters", "initialTypes", "assetBacking"]);
 
 function captureRecoveryStore(value: unknown): DocumentRecoveryStore | undefined {
@@ -493,7 +501,7 @@ function normalizePreparation(record: ContributionRecord, value: unknown): Prepa
   for (const key of ownKeys(value, `Host contribution ${record.id} preparation`)) {
     if (!allowed.has(key)) throw new TypeError(`Host contribution ${record.id} preparation does not support ${key}.`);
   }
-  const runtimeConfig = cloneReadonlyRecord(ownData(value, "runtimeConfig", `Host contribution ${record.id} preparation`), "Host contribution runtimeConfig", runtimeScalarKeys) as SynCloudOSHostScalarRuntimeConfig;
+  const runtimeConfig = captureRuntimeConfig(ownData(value, "runtimeConfig", `Host contribution ${record.id} preparation`), "Host contribution runtimeConfig");
   const initialBundles = cloneArray<TrustedSynWareBundle>(ownData(value, "initialBundles", `Host contribution ${record.id} preparation`), "Host contribution initialBundles");
   const applicationOwners = Object.freeze(cloneArray<string>(
     ownData(value, "applicationOwners", `Host contribution ${record.id} preparation`), "Host contribution applicationOwners",
@@ -637,7 +645,7 @@ function addUnique<T>(target: T[], values: readonly T[], idOf: (value: T) => str
 
 function normalizedCompositionInput(input: SynCloudOSHostCompositionInput): SynCloudOSHostComposition {
   if (!isRecord(input)) throw new TypeError("Host composition input must be a plain record.");
-  const runtimeConfig = cloneReadonlyRecord(input.runtimeConfig, "Host composition runtimeConfig", runtimeScalarKeys) as SynCloudOSHostScalarRuntimeConfig;
+  const runtimeConfig = captureRuntimeConfig(input.runtimeConfig, "Host composition runtimeConfig");
   const initialBundles = cloneArray<TrustedSynWareBundle>(input.initialBundles, "Host composition initialBundles");
   const trustedDocumentKinds = cloneArray<SynCloudOSDocumentKindMetadata>(input.trustedDocumentKinds, "Host composition trustedDocumentKinds");
   const applicationDocumentsValue = ownData(input, "applicationDocuments", "Host composition input");

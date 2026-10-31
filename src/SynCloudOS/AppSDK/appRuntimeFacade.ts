@@ -4672,7 +4672,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           }), signal, assertLive);
         },
       }),
-      share: createMountedShareClient({ browser: runtime.environment.browser, signal, assertLive,
+      share: createMountedShareClient({ browser: runtime.environment.browser, signal, assertLive, nativeActivity: runtime.nativeActivity,
         access: audit => environmentCapabilityAccess("web.share", audit),
         invoke: (action, operationSignal) => runTestControl("browser", "browser.share", operationSignal, action),
       }),
@@ -4856,7 +4856,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         } : {}),
       }),
       filePanels: createMountedFilePanelClient({ picker: runtime.environment.filePicker,
-        native: runtime.environment.fileSystemAccess, download: runtime.environment.downloadExport,
+        native: runtime.environment.createFileSystemAccessPanelPort ? runtime.environment.createFileSystemAccessPanelPort(runtime.nativeActivity) : runtime.environment.fileSystemAccess, download: runtime.environment.downloadExport,
         signal, assertLive, activation: () => runtime.environment.browser.getNavigator()?.userActivation?.isActive,
         access: environmentCapabilityAccess,
       }),

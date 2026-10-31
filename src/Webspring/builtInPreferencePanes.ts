@@ -25,6 +25,7 @@ import motion from "./Preferences/Motion.prefPane";
 import notifications from "./Preferences/Notifications.prefPane";
 import language from "./Preferences/Language.prefPane";
 import account from "./Preferences/Account.prefPane";
+import updates from "./Preferences/Updates.prefPane";
 
 /** The panes every host lists, in their default order. */
 export const builtInPreferencePanes: readonly PreferencePaneDefinition[] = Object.freeze([
@@ -33,6 +34,7 @@ export const builtInPreferencePanes: readonly PreferencePaneDefinition[] = Objec
   motion,
   notifications,
   language,
+  updates,
 ]);
 
 /** Sign in and out, for hosts whose authentication is not disabled. */

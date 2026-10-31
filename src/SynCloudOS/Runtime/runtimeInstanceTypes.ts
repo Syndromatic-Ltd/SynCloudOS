@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { NativeOperationActivity, HostUpdateReadinessService, HostUpdateReadinessOptions } from '../Updates';
 import type { BrowserFilePanelPort, FileSystemAccessPanelPort, DownloadFilePanelPort } from "../FilePanels/filePanelTypes";
 import type { RuntimeResourceLedger } from "../Resources/RuntimeResourceLedger";
 import type { HeavyJobAdmission, HeavyJobCapacity } from "../Operations/HeavyJobAdmission";
@@ -381,6 +382,8 @@ export interface SynCloudOSRuntimeEnvironment {
   readonly filePicker?: BrowserFilePanelPort | null;
   /** Native chooser and write-only export ports; apps receive only scoped panel clients. */
   readonly fileSystemAccess?: FileSystemAccessPanelPort | null;
+  /** Creates an instrumented port for this runtime without mutating a shared environment. */
+  readonly createFileSystemAccessPanelPort?: (activity: NativeOperationActivity) => FileSystemAccessPanelPort | null;
   readonly downloadExport?: DownloadFilePanelPort | null;
   /** Environment-owned Web Animations and fallback-scheduler authority. */
   readonly animation?: RuntimeAnimationAdapterFactory | null;
@@ -881,6 +884,8 @@ export interface ApplicationDocumentRuntimeConfiguration {
 }
 
 export interface SynCloudOSRuntimeConfig {
+  /** Readonly host diagnostics; no worker discovery, activation or cache policy. */
+  readonly updateReadiness?: HostUpdateReadinessOptions;
   readonly id?: string;
   readonly environment: SynCloudOSRuntimeEnvironment;
   /** Runtime-owned browser adapters may be supplied independently of the environment bundle. */
@@ -978,6 +983,9 @@ export interface SynCloudOSRuntimeController {
 }
 
 export interface SynCloudOSRuntime {
+  readonly updateReadiness: HostUpdateReadinessService;
+  /** Host-owned underlying native promise instrumentation. Not an AppSDK authority. */
+  readonly nativeActivity: NativeOperationActivity;
   readonly runtimeId: SynCloudOSRuntimeId;
   readonly environment: SynCloudOSRuntimeEnvironment;
   readonly signal: AbortSignal;
