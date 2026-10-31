@@ -28,6 +28,7 @@ export class HostUpdateReadinessService {
   #publishing = false;
   #projectingStore = false;
   #storeProjectionAttached = false;
+  #pendingStoreNotification = false;
   #again = false;
   #storeFingerprint = '';
   #flight: { controller: AbortController; generation: number } | null = null;
@@ -69,6 +70,8 @@ export class HostUpdateReadinessService {
       this.#projectingStore = true;
       try { storeFactsChanged(); return this.#snapshot; }
       finally { this.#projectingStore = previous; }
+    }, () => {
+      if (!this.#disposed && this.#pendingStoreNotification) { this.#pendingStoreNotification = false; this.#notify(); }
     });
     this.#storeProjectionAttached = !!releaseProjection;
     if (releaseProjection) this.#releases.push(releaseProjection);
@@ -117,7 +120,7 @@ export class HostUpdateReadinessService {
     return this.#snapshot;
   }
   dispose(): void {
-    if (this.#disposed) return; this.#disposed = true;
+    if (this.#disposed) return; this.#disposed = true; this.#pendingStoreNotification = false;
     this.#cancelFlight(); this.#clearExpiry(); this.#projection.dispose();
     this.#runtime.signal.removeEventListener('abort', this.#ended);
     for (const release of this.#releases.splice(0).reverse()) { try { release(); } catch { /* Release every owner. */ } }
@@ -151,7 +154,11 @@ export class HostUpdateReadinessService {
       let coverage = this.#runtime.environment.createFileSystemAccessPanelPort ? hostReadinessCoverage : Object.freeze(hostReadinessCoverage.map(row => row.domain === 'native' ? Object.freeze({ ...row, gaps: Object.freeze([...row.gaps, 'native-picker-instrumentation' as const]) }) : row));
       if (!this.#storeProjectionAttached) coverage = Object.freeze(coverage.map(row => row.domain === 'tasks' ? Object.freeze({ ...row, gaps: Object.freeze([...row.gaps, 'runtime-store-publication' as const]) }) : row));
       const next: HostUpdateReadinessSnapshot = Object.freeze({ client, decision: 'defer', activationAuthorized: false, ended: false, coverage, counts: this.#counts(), compatibility: Object.freeze({ status: this.#options.compatibilityRestricted ? 'restricted' : 'not-configured', reasons: Object.freeze(this.#options.compatibilityRestricted ? ['host-policy-restricted'] as const : ['target-build-unverified'] as const) }), inspection: this.#inspection });
-      if (JSON.stringify(next) !== JSON.stringify(this.#snapshot) || this.#storeProjectionAttached && JSON.stringify(this.#runtime.store.getSnapshot().updateReadiness) !== JSON.stringify(next)) { this.#snapshot = next; if (this.#storeProjectionAttached && !this.#projectingStore) this.#runtime.store.mutate(draft => { draft.updateReadiness = next; }); this.#notify(); }
+      if (JSON.stringify(next) !== JSON.stringify(this.#snapshot) || this.#storeProjectionAttached && JSON.stringify(this.#runtime.store.getSnapshot().updateReadiness) !== JSON.stringify(next)) {
+        this.#snapshot = next;
+        if (this.#storeProjectionAttached && this.#projectingStore) this.#pendingStoreNotification = true;
+        else { if (this.#storeProjectionAttached) this.#runtime.store.mutate(draft => { draft.updateReadiness = next; }); this.#notify(); }
+      }
     } finally { this.#publishing = false; }
     if (this.#again) { this.#again = false; this.#publish(); }
   }
