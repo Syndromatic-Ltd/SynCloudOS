@@ -1,7 +1,7 @@
 import { UPDATE_READINESS_PROTOCOL, type UpdateReadinessDomain, type UpdateReadinessSnapshot } from './updateReadiness';
 import type { UpdateReadinessObservation } from './observeUpdateReadiness';
 
-export type HostReadinessGap = 'document-admission' | 'recovery-cleanup' | 'resource-terminal-work' | 'editing-participants' | 'editing-owner-census' | 'underlying-operation-work' | 'private-job-admissions' | 'managed-task-owners' | 'application-lifecycle-owners' | 'command-lifecycle-undo' | 'persistence-work' | 'service-network-media' | 'native-picker-instrumentation' | 'native-write-permission' | 'clipboard-download';
+export type HostReadinessGap = 'document-admission' | 'recovery-cleanup' | 'resource-terminal-work' | 'editing-participants' | 'editing-owner-census' | 'underlying-operation-work' | 'private-job-admissions' | 'managed-task-owners' | 'application-lifecycle-owners' | 'command-lifecycle-undo' | 'persistence-work' | 'service-network-media' | 'native-picker-instrumentation' | 'native-write-permission' | 'clipboard-download' | 'runtime-store-publication';
 export interface HostReadinessCoverage { readonly domain: UpdateReadinessDomain; readonly status: 'partial'; readonly gaps: readonly HostReadinessGap[] }
 export const hostReadinessCoverage: readonly HostReadinessCoverage[] = Object.freeze([
   Object.freeze({ domain: 'documents' as const, status: 'partial' as const, gaps: Object.freeze(['document-admission'] as const) }),

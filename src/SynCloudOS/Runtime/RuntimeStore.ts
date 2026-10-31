@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { initialHostUpdateReadinessSnapshot } from '../Updates/hostReadinessTypes';
+import { initialHostUpdateReadinessSnapshot, type HostUpdateReadinessSnapshot } from '../Updates/hostReadinessTypes';
 import type { RuntimeListener, RuntimeMutator, RuntimeSnapshot } from "./runtimeTypes";
 import type {
   SynCloudOSRuntimeId,
@@ -27,6 +27,7 @@ import type {
 import { getInitialLocaleServicesSnapshot } from "../LocaleServices/localeRegistry";
 
 const runtimeDraftState = Symbol("SynCloudOS.runtimeDraftState");
+const runtimeReadinessPublication = Symbol("SynCloudOS.runtimeReadinessPublication");
 
 type RuntimeDraftObject = object;
 
@@ -292,6 +293,7 @@ export class SynCloudOSRuntimeStore implements SynCloudOSRuntimeStoreContract {
   private batchDraft: RuntimeSnapshot | null = null;
   private batchChanged = false;
   private disposed = false;
+  private readinessProjection: { readonly read: () => HostUpdateReadinessSnapshot } | null = null;
 
   constructor(runtimeId: SynCloudOSRuntimeId, seed: Partial<RuntimeSnapshot> = {}) {
     this.runtimeId = runtimeId;
@@ -312,7 +314,21 @@ export class SynCloudOSRuntimeStore implements SynCloudOSRuntimeStoreContract {
 
   listenerCount = () => this.listeners.size;
 
+  [runtimeReadinessPublication](read: () => HostUpdateReadinessSnapshot): (() => void) | null {
+    if (this.disposed || this.readinessProjection) return null;
+    const owned = { read }; this.readinessProjection = owned;
+    return () => { if (this.readinessProjection === owned) this.readinessProjection = null; };
+  }
+
   private emit() {
+    // Fold derived host facts before the existing public publication. A
+    // subscriber must not need a second mutation/notification to see them.
+    if (this.readinessProjection) {
+      let readiness: HostUpdateReadinessSnapshot;
+      try { readiness = this.readinessProjection.read(); }
+      catch { readiness = initialHostUpdateReadinessSnapshot(); }
+      if (readiness !== this.snapshot.updateReadiness) this.snapshot = { ...this.snapshot, updateReadiness: readiness };
+    }
     this.listeners.forEach((listener) => listener());
   }
 
@@ -386,6 +402,7 @@ export class SynCloudOSRuntimeStore implements SynCloudOSRuntimeStoreContract {
 
   dispose() {
     this.disposed = true;
+    this.readinessProjection = null;
     this.listeners.clear();
     this.batchDraft = null;
     this.batchDepth = 0;
@@ -398,6 +415,12 @@ export function createRuntimeStore(
   seed: Partial<RuntimeSnapshot> = {},
 ): SynCloudOSRuntimeStoreContract {
   return new SynCloudOSRuntimeStore(runtimeId, seed);
+}
+
+/** Internal owned boundary; the public RuntimeStore batching API is unchanged.
+ * An alternate store without this boundary cannot publish host readiness. */
+export function bindRuntimeReadinessProjection(store: SynCloudOSRuntimeStoreContract, read: () => HostUpdateReadinessSnapshot): (() => void) | null {
+  return store instanceof SynCloudOSRuntimeStore ? store[runtimeReadinessPublication](read) : null;
 }
 
 export function cloneRuntimeSnapshot(snapshot: RuntimeSnapshot): RuntimeSnapshot {

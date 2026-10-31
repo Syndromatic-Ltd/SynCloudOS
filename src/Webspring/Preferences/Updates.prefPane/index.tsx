@@ -22,6 +22,7 @@ const gapLabels: Record<HostReadinessGap, string> = {
   'native-picker-instrumentation': 'Native pickers without this host’s operation instrumentation',
   'native-write-permission': 'Native file writes and permission requests',
   'clipboard-download': 'Clipboard operations and download completion',
+  'runtime-store-publication': 'Host store without an owned readiness publication boundary',
 };
 export function UpdateReadinessDetails({ snapshot }: { readonly snapshot: HostUpdateReadinessSnapshot }) {
   const t = useSystemText();
