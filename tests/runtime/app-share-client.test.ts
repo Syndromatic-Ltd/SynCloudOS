@@ -73,6 +73,11 @@ function scopedFixture(native:(this:Navigator,data:ShareData)=>Promise<void>,act
 }
 
 describe('explicit mounted share completion',()=>{
+  it('omits undefined optional fields like a native share dictionary',async()=>{
+    const native=vi.fn(async()=>undefined),f=scopedFixture(native);
+    await expect(f.client.perform({title:'Generated fixture',text:undefined,url:undefined})).resolves.toEqual({kind:'shared'});
+    expect(native).toHaveBeenCalledWith({title:'Generated fixture'});
+  });
   it('returns a typed policy denial when the host admission gate rejects before native access',async()=>{
     const native=vi.fn(async()=>undefined),f=scopedFixture(native);
     f.access.mockImplementation(audit=>{if(audit)throw new DOMException('denied','SecurityError');return {declared:true,allowed:true};});

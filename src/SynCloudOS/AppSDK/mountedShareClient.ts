@@ -21,7 +21,9 @@ function normalize(request: AppShareRequest,base:()=>string): AppShareRequest {
   for (const key of Reflect.ownKeys(request)) {
     if (typeof key !== 'string' || !['title','text','url'].includes(key)) throw new TypeError('Unknown share data.');
     const field=Object.getOwnPropertyDescriptor(request,key)!;
-    if (!('value' in field) || !field.enumerable || typeof field.value !== 'string' || field.value.length>65536) throw new TypeError('Invalid share data.');
+    if (!('value' in field) || !field.enumerable) throw new TypeError('Invalid share data.');
+    if(key!=='title'&&field.value===undefined)continue;
+    if(typeof field.value!=='string'||field.value.length>65536)throw new TypeError('Invalid share data.');
     values[key]=field.value;
   }
   if (typeof values.title !== 'string' || !Object.values(values).some(value=>value.trim())) throw new TypeError('Share data is empty.');
