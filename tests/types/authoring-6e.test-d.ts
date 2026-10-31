@@ -94,3 +94,13 @@ class ValidMainViewApplication extends NSEApplication {
   static override mainViewController = SearchController;
 }
 void [CustomWindow, InvalidMainViewApplication, ValidMainViewApplication];
+
+// The lazy loader already admits class and component entries; its public
+// module type must describe those same 6C authoring paths.
+import type { SynCloudOSAppModule } from '@syndromatic/syncloudos/browser';
+class PlaybackModuleApplication extends NSEApplication {}
+const playbackClassModule = { default: PlaybackModuleApplication } satisfies SynCloudOSAppModule;
+const playbackComponentModule = { default: () => createElement('p', null, 'Generated module') } satisfies SynCloudOSAppModule;
+// @ts-expect-error A primitive is not a supported application entry.
+const rejectedPlaybackModule = { default: 42 } satisfies SynCloudOSAppModule;
+void playbackClassModule; void playbackComponentModule; void rejectedPlaybackModule;

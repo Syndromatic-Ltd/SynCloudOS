@@ -113,6 +113,7 @@ export function createMountedPlaybackPresentation(input: {
         installed = false; actionEpoch++; installEpoch++; metadataDirty = true;
         for (const controller of pendingActions) controller.abort(new DOMException("Media Session foreground owner changed.", "AbortError"));
         pendingActions.clear();
+        if (snapshot.lastAction === "pending") publish({ lastAction: "cancelled" });
         for (const action of actions) { try { session.setActionHandler(action, null); } catch { /* individually unsupported */ } }
         try { session.playbackState = "none"; session.metadata = null; session.setPositionState?.(); } catch { /* browser may revoke support */ }
       };
