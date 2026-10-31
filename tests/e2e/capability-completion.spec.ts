@@ -1,6 +1,7 @@
 import {expect,test} from 'playwright/test';
 
 test.beforeEach(async({page})=>{
+  await page.route('**/*',route=>{const url=new URL(route.request().url());return ['http:','https:'].includes(url.protocol)&&url.hostname!=='127.0.0.1'?route.abort():route.continue();});
   await page.goto('/__framework-tests/navigation/adaptive');
   await page.getByTestId('navigation-state').waitFor();
   await page.evaluate(async()=>{
@@ -30,6 +31,39 @@ test.beforeEach(async({page})=>{
     document.body.prepend(button,revoke,output);
     Object.assign(window,{generatedCapabilities:{share,panels,owner,request}});
   });
+});
+
+test('a generated cross-window File keeps the exact probed payload through its action gesture',async({page})=>{
+  await page.evaluate(async()=>{
+    const path='/src/SynCloudOS/AppSDK/mountedShareClient.ts';const {createMountedShareClient}=await import(path);
+    const owner=new AbortController(),frame=document.createElement('iframe');frame.hidden=true;document.body.append(frame);
+    const foreign=frame.contentWindow as Window & typeof globalThis;
+    const file=new foreign.File(['Generated cross-window fixture\n'],'generated-cross-window.txt',{type:'text/plain'});
+    const probes:ShareData[]=[];let shared:ShareData|undefined;
+    const native={userActivation:navigator.userActivation,canShare(this:unknown,data:ShareData){if(this!==native)throw Error('Receiver lost');probes.push(data);return true;},share(this:unknown,data:ShareData){if(this!==native)throw Error('Receiver lost');shared=data;return Promise.resolve();}};
+    const browser={getNavigator:()=>native as unknown as Navigator,getWindow:()=>window,getDocument:()=>document,getLocation:()=>({href:location.href})};
+    const client=createMountedShareClient({browser,signal:owner.signal,assertLive:()=>owner.signal.throwIfAborted(),access:()=>({declared:true,allowed:true})});
+    const output=document.createElement('output');output.id='prepared-file-proof';const button=document.createElement('button');button.id='prepared-file-button';button.textContent='Share generated contract fixture';
+    button.addEventListener('click',async()=>{
+      const source=[file],pending=client.perform({title:'Generated fixture',files:source});source.splice(0);
+      const result=await pending;
+      output.textContent=JSON.stringify({result,active:navigator.userActivation.isActive,probes:probes.length,samePayload:probes.at(-1)===shared,sameFile:shared?.files?.[0]===file,frozen:Object.isFrozen(shared)&&Object.isFrozen(shared?.files),foreign:!(file instanceof File)});
+    },{signal:owner.signal});document.body.prepend(button,output);
+  });
+  await page.locator('#prepared-file-button').click();
+  await expect(page.locator('#prepared-file-proof')).toHaveText(/samePayload/);
+  expect(JSON.parse(await page.locator('#prepared-file-proof').textContent()??'null')).toEqual({result:{kind:'shared'},active:true,probes:2,samePayload:true,sameFile:true,frozen:true,foreign:true});
+});
+
+test('native prepared-file status is read-only and revoked owners cannot open a chooser',async({page},testInfo)=>{
+  const result=await page.evaluate(async()=>{
+    const harness=(window as unknown as {generatedCapabilities:{share:{getStatus(request:unknown):unknown;perform(request:unknown):Promise<unknown>};owner:AbortController}}).generatedCapabilities;
+    const request={title:'Generated fixture',files:[new File(['Generated native probe\n'],'generated-native-probe.txt',{type:'text/plain'})]};
+    const status=harness.share.getStatus(request);harness.owner.abort();
+    return {status,result:await harness.share.perform(request)};
+  });
+  await testInfo.attach('read-only-native-file-probe',{body:JSON.stringify(result),contentType:'application/json'});
+  expect(result.result).toEqual({kind:'aborted'});
 });
 
 test('generated export uses the actual browser download and removes temporary anchors',async({page})=>{

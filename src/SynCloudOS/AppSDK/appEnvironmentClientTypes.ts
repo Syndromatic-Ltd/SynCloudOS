@@ -105,6 +105,8 @@ export interface AppShareRequest {
   readonly title: string;
   readonly text?: string;
   readonly url?: string;
+  /** Immutable file content prepared before the action gesture. No handles or lazy producers. */
+  readonly files?: readonly File[];
 }
 
 /** Read-only facts projected by the existing service; querying never prompts. */
