@@ -338,7 +338,9 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                           )}
                           onClick={() => goToPane(pane.id)}
                         >
-                          {pane.label}
+                          {/* Native keyboard activation bubbles through the same row action.
+                              Accessories remain siblings, never children of this button. */}
+                          <button type="button" className="nse-prefs-pane-link">{pane.label}</button>
                         </NSEListItem>
                       ))}
                     </div>

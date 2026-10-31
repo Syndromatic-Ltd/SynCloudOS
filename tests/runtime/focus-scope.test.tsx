@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -356,6 +356,32 @@ describe("focus scopes", () => {
     expect(redirect).toHaveBeenCalledOnce();
   });
 
+  it("reveals a clipped wrapped action only inside its owning scroll region", async () => {
+    const runtime = createTestRuntime();
+    runtime.responders.register({ id: "app", kind: "application", parentId: "runtime", scopeId: "root" });
+    render(<SynCloudOSProvider runtime={runtime}>
+      <div data-testid="outer-scroll" style={{ overflowY: "auto" }}>
+        <FocusScope scopeId="modal:clipped" kind="modal" parentResponderId="app">
+          <div data-testid="owned-scroll" style={{ overflowY: "auto" }}>
+            <button>Clipped first action</button><button>Clipped last action</button>
+          </div>
+        </FocusScope>
+      </div>
+    </SynCloudOSProvider>);
+    const first = screen.getByRole("button", { name: "Clipped first action" });
+    const last = screen.getByRole("button", { name: "Clipped last action" });
+    await waitFor(() => expect(document.activeElement).toBe(first));
+    const scroll = screen.getByTestId("owned-scroll");
+    Object.defineProperties(scroll, { clientHeight: { value: 80 }, scrollHeight: { value: 240 } });
+    vi.spyOn(scroll, "getBoundingClientRect").mockReturnValue({ top: 100, bottom: 180, left: 0, right: 300, width: 300, height: 80 } as DOMRect);
+    vi.spyOn(first, "getBoundingClientRect").mockReturnValue({ top: 300, bottom: 340, left: 0, right: 80, width: 80, height: 40 } as DOMRect);
+    last.focus();fireEvent.keyDown(last, { key: "Tab" });
+    expect(document.activeElement).toBe(first);
+    expect(scroll.scrollTop).toBe(160);
+    expect(screen.getByTestId("outer-scroll").scrollTop).toBe(0);
+    await runtime.dispose();
+  });
+
   it("loops Tab in both directions and restores inert background state", async () => {
     const runtime = createTestRuntime();
     runtime.responders.register({ id: "app", kind: "application", parentId: "runtime", scopeId: "root" });
@@ -376,12 +402,12 @@ describe("focus scopes", () => {
     const lastFocus = vi.spyOn(last, "focus");
     fireEvent.keyDown(last, { key: "Tab" });
     expect(document.activeElement).toBe(first);
-    // Keyboard wrapping must retain native reveal scrolling for clipped actions.
+    // The scope reveals its own scroll regions without moving the host page.
     // Pixel/scroll behaviour is also exercised in the rendered shallow-sheet journey.
-    expect(firstFocus).toHaveBeenLastCalledWith();
+    expect(firstFocus).toHaveBeenLastCalledWith({ preventScroll: true });
     fireEvent.keyDown(first, { key: "Tab", shiftKey: true });
     expect(document.activeElement).toBe(last);
-    expect(lastFocus).toHaveBeenLastCalledWith();
+    expect(lastFocus).toHaveBeenLastCalledWith({ preventScroll: true });
     const background = screen.getByTestId("background");
     view.unmount();
     expect(background.inert).not.toBe(true);

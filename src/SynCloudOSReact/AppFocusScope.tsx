@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { revealKeyboardTarget } from "./focusVisibility";
 import { cloneElement, isValidElement, useCallback, useContext, useInsertionEffect, useLayoutEffect, useMemo, useRef, type ReactElement, type ReactNode, type Ref } from "react";
 import type { FocusScopeKind } from "../SynCloudOS/SynCloudOS";
 import { SynWareRuntimeContext } from "./runtimeContext";
@@ -113,7 +114,11 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       const current = doc?.activeElement instanceof HTMLElement ? targets.indexOf(doc.activeElement) : -1;
       if (current < 0 || (!event.shiftKey && current === targets.length - 1) || (event.shiftKey && current === 0)) {
         event.preventDefault();
-        targets[event.shiftKey ? targets.length - 1 : 0]?.focus({ preventScroll: true });
+        const target = targets[event.shiftKey ? targets.length - 1 : 0];
+        if (target) {
+          target.focus({ preventScroll: true });
+          revealKeyboardTarget(root, target);
+        }
       }
     };
     if (trapFocus) doc?.addEventListener("focusin", onFocus, true);

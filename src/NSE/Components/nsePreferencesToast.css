@@ -211,6 +211,24 @@
   background: transparent;
 }
 
+/* Retain the list typography while making pane navigation a native keyboard
+   action. The optional master switch remains a separate control. */
+.nse-prefs-pane-link {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.nse-prefs-pane-link:focus-visible {
+  outline: 2px solid Highlight;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* The selected/held plate is opaque and full-bleed, and the group box's inner
    sits 2px inside a 14px frame whose corners are round — so a highlight on the
    first or last row ran straight out through the curve.
