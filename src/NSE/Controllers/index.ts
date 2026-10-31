@@ -27,3 +27,5 @@ export * from "./NSETreeController";
 export * from "./useNSEController";
 export * from "./useNSEOwnedController";
 export { nseUnowned, type NSEOwner, type NSEControllerOwnershipOptions } from "./ownership";
+
+export * from "./NSEUpdateReadinessController";
