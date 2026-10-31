@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useEffect, useId, useSyncExternalStore, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import "./nse-source-list-scene.css";
-import { NSEAdaptiveNavigationController } from "../NSEAdaptiveNavigationController";
+import { NSEAdaptiveNavigationController, NSEAdaptiveNavigationMetrics } from "../NSEAdaptiveNavigationController";
 import { NSEHierarchyStack } from "../NSEHierarchyStack";
 import { NSENavigationDestinationHost } from "../NSENavigationDestinationHost";
 import { NSETabBar, NSETabBarOverflowList } from "../NSETabBar";
@@ -69,7 +69,7 @@ interface NSESourceListLegacySceneProps extends NSESourceListSceneSharedProps {
 }
 
 export interface NSESourceListCompactHandoff {
-  readonly renderer: "tabs" | "stack";
+  readonly renderer: "tabs" | "rail" | "stack";
   readonly selectedDestinationId: string;
   readonly snapshot: NSEAdaptiveNavigationSnapshot;
   readonly controller: NSETabBarController<ReactNode>;
@@ -127,6 +127,11 @@ function NSESourceListSceneBody({
   resizeLabel = "Resize sidebar",
   compact = false,
 }: NSESourceListSceneBodyProps) {
+  const setCompactNavigation = frame?.setCompactNavigation;
+  useLayoutEffect(() => {
+    setCompactNavigation?.(compact ? true : null);
+    return () => setCompactNavigation?.(null);
+  }, [compact, setCompactNavigation]);
   const appearance = useNSEAppearance();
   const scheme = appearance.requestedColourScheme === "auto"
     ? frame?.scheme ?? appearance.resolvedColourScheme
@@ -217,9 +222,38 @@ function NSESourceListNavigationScene({
     projection.adaptiveController.getSnapshot,
   );
   const contentHostId = useId().replace(/:/g, "");
+  const rootRef = useRef<HTMLDivElement>(null);
+  const navigationHadFocus = useRef(false);
   const stackController = projection.adaptiveController.stackController;
-  const compact = adaptiveSnapshot.renderer === "tabs" || adaptiveSnapshot.renderer === "stack";
+  const peer = adaptiveSnapshot.model === "peer";
+  const compact = adaptiveSnapshot.renderer === "tabs" || adaptiveSnapshot.renderer === "rail" || adaptiveSnapshot.renderer === "stack";
   const overflowOpen = tabSnapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
+
+  useLayoutEffect(() => {
+    const element = rootRef.current;
+    if (!element) return;
+    const controller = projection.adaptiveController;
+    const measure = () => controller.setContentBounds({ x: 0, y: 0, width: element.clientWidth, height: element.clientHeight });
+    const Observer = element.ownerDocument.defaultView?.ResizeObserver;
+    const observer = Observer ? new Observer(measure) : null;
+    observer?.observe(element);
+    measure();
+    return () => { observer?.disconnect(); controller.setContentBounds(null); };
+  }, [projection.adaptiveController]);
+
+  // A chrome transition may hide the focused sidebar/tab. Transfer that
+  // navigation focus only; an editor, overlay or other window keeps its focus.
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root || !navigationHadFocus.current) return;
+    const active = root.ownerDocument.activeElement;
+    if (active && active !== root.ownerDocument.body && !root.contains(active)) return;
+    const target = compact
+      ? Array.from(root.querySelectorAll<HTMLElement>('[role="tab"]')).find(node => node.getAttribute("aria-selected") === "true")
+      : root.querySelector<HTMLElement>('[data-nse-sidebar-row="true"][aria-current="true"]');
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+  }, [adaptiveSnapshot.renderer]);
 
   useEffect(() => {
     if (adaptiveSnapshot.model !== "hierarchy" || !stackController) return;
@@ -254,17 +288,18 @@ function NSESourceListNavigationScene({
   );
 
   const handoff: NSESourceListCompactHandoff | null = compact ? {
-    renderer: adaptiveSnapshot.renderer as "tabs" | "stack",
+    renderer: adaptiveSnapshot.renderer as "tabs" | "rail" | "stack",
     selectedDestinationId: tabSnapshot.selectedDestinationId,
     snapshot: adaptiveSnapshot,
     controller: projection.controller,
   } : null;
-  const compactChrome = adaptiveSnapshot.renderer === "tabs" ? (
+  const compactChrome = peer ? (
     <NSETabBar
       controller={projection.controller}
       aria-label={projection.ariaLabel ?? "Navigation"}
       reducedMotion={adaptiveSnapshot.traits.reducedMotion}
       renderPanels={false}
+      orientation={adaptiveSnapshot.renderer === "rail" ? "vertical" : "horizontal"}
       idScope={contentHostId}
     />
   ) : adaptiveSnapshot.renderer === "stack" && stackController ? (
@@ -278,8 +313,16 @@ function NSESourceListNavigationScene({
 
   return (
     <div
+      ref={rootRef}
       className="nse-source-list-scene-projection nse-compact-bottom-chrome-owner"
+      onFocusCapture={(event) => {
+        navigationHadFocus.current = Boolean((event.target as Element).closest('.nse-source-list-scene-sidebar, [data-nse-source-list-compact-chrome="true"]'));
+      }}
+      onBlurCapture={(event) => {
+        if (event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) navigationHadFocus.current = false;
+      }}
       data-navigation-renderer={adaptiveSnapshot.renderer}
+      style={{ "--nse-navigation-rail-width": `${NSEAdaptiveNavigationMetrics.railWidth}px` } as CSSProperties}
     >
       <NSESourceListSceneBody
         key="source-list-body"
@@ -293,9 +336,9 @@ function NSESourceListNavigationScene({
             controller={projection.controller}
             idScope={contentHostId}
             snapshot={tabSnapshot}
-            tabSemantics={adaptiveSnapshot.renderer === "tabs"}
+            tabSemantics={compact && peer}
           />
-          {adaptiveSnapshot.renderer === "tabs" ? (
+          {peer ? (
             <NSETabBarOverflowList
               controller={projection.controller}
               aria-label={projection.ariaLabel ?? "Navigation"}
@@ -305,15 +348,17 @@ function NSESourceListNavigationScene({
           ) : null}
         </div>
       </NSESourceListSceneBody>
-      {compact ? (
+      {peer || compact ? (
         <div
           key="compact-chrome"
           className={classes(
             "nse-source-list-scene-projection-compact",
             adaptiveSnapshot.renderer === "tabs" && "nse-compact-bottom-chrome-mount",
           )}
+          hidden={!compact}
+          inert={!compact}
           data-nse-source-list-compact-chrome="true"
-          data-nse-compact-bottom-chrome={adaptiveSnapshot.renderer === "tabs" ? "tabs-only" : "stack-only"}
+          data-nse-compact-bottom-chrome={adaptiveSnapshot.renderer === "rail" ? undefined : peer ? "tabs-only" : "stack-only"}
         >
           {compactChrome}
           {handoff ? projection.compactContent?.(handoff) : null}

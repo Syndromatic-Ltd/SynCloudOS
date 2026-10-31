@@ -950,7 +950,8 @@ export class WindowManager {
 
   isCompactPresentation(windowControllerId: string): boolean {
     const controller = this.select(windowControllerId);
-    return this.dependencies.screen.getCurrentSnapshot().breakpoint === "compact" && controller.record.mobilePolicy !== "hidden";
+    const screen = this.dependencies.screen.getCurrentSnapshot();
+    return (screen.geometryState === "unavailable" || screen.breakpoint === "compact") && controller.record.mobilePolicy !== "hidden";
   }
 
   minimise(windowControllerId: string): void {
@@ -983,8 +984,9 @@ export class WindowManager {
     if (controller.record.state !== "minimised" || this.#blockedWindowIds().has(windowControllerId)) return;
     const geometry = controller.geometryState;
     const restoringZoom = geometry.minimisedFrom === "zoomed";
-    const bounds = restoringZoom
-      ? this.dependencies.screen.getSnapshot().workArea
+    const screen = this.dependencies.screen.getCurrentSnapshot();
+    const bounds = restoringZoom && screen.geometryState !== "unavailable"
+      ? screen.workArea
       : this.#constrainBounds(controller, geometry.normalBounds);
     controller.replaceGeometry(
       { ...controller.record, bounds, state: "open" },
@@ -1014,7 +1016,7 @@ export class WindowManager {
         { normalBounds: bounds, zoomed: false, minimisedFrom: null },
       );
     } else {
-      const bounds = this.dependencies.screen.getSnapshot().workArea;
+      const bounds = this.dependencies.screen.getCurrentSnapshot().workArea;
       controller.replaceGeometry(
         { ...controller.record, bounds },
         { normalBounds: controller.record.bounds, zoomed: true, minimisedFrom: null },
@@ -1379,7 +1381,7 @@ export class WindowManager {
         continue;
       }
       const presentation = resolveWindowPresentation(entry.controller.record, this.dependencies.screen.getCurrentSnapshot());
-      if (!presentation.visible) {
+      if (!presentation.visible && entry.controller.record.mobilePolicy === "hidden") {
         restoredWindowControllerIds.push(entry.controller.id);
         continue;
       }
@@ -1397,7 +1399,13 @@ export class WindowManager {
         if (this.#controllers.get(entry.controller.id) !== entry.controller) {
           throw new Error("The restored window authority became stale while opening.");
         }
-        if (entry.source.wasZoomed && !this.isCompactPresentation(entry.controller.id)) this.zoom(entry.controller.id);
+        if (entry.source.wasZoomed) {
+          if (this.dependencies.screen.getCurrentSnapshot().geometryState === "unavailable") {
+            // Preserve restoration intent without writing a placeholder frame.
+            // WindowHost projects this owned zoom state when geometry arrives.
+            entry.controller.replaceGeometry(entry.controller.record, { ...entry.controller.geometryState, zoomed: true });
+          } else if (!this.isCompactPresentation(entry.controller.id)) this.zoom(entry.controller.id);
+        }
         if (entry.source.wasMinimised) this.minimise(entry.controller.id);
         restoredWindowControllerIds.push(entry.controller.id);
       } catch (error) {
@@ -1852,7 +1860,8 @@ export class WindowManager {
   #constrainBounds(controller: WindowController, requested: WindowBounds): WindowBounds {
     assertFiniteWindowBounds(requested, "bounds", false);
     const record = controller.record;
-    const workArea = this.dependencies.screen.getSnapshot().workArea;
+    const screen = this.dependencies.screen.getCurrentSnapshot();
+    const workArea = screen.workArea;
     const width = Math.min(
       record.maximumSize?.width ?? Number.POSITIVE_INFINITY,
       Math.max(record.minimumSize.width, requested.width),
@@ -1865,8 +1874,8 @@ export class WindowManager {
     const maximumX = workArea.x + workArea.width - 96;
     const minimumY = workArea.y;
     const maximumY = workArea.y + workArea.height - 31;
-    const x = Math.min(maximumX, Math.max(minimumX, requested.x));
-    const y = Math.min(maximumY, Math.max(minimumY, requested.y));
+    const x = screen.geometryState === "unavailable" ? requested.x : Math.min(maximumX, Math.max(minimumX, requested.x));
+    const y = screen.geometryState === "unavailable" ? requested.y : Math.min(maximumY, Math.max(minimumY, requested.y));
     const current = requested;
     if (current.x === x && current.y === y && current.width === width && current.height === height) return current;
     const existing = controller.record.bounds;

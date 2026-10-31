@@ -472,6 +472,7 @@ function readWorkArea(): RuntimeWorkAreaSnapshot {
     height: viewport.height,
     devicePixelRatio: typeof window === "undefined" ? 1 : window.devicePixelRatio || 1,
     safeArea: unavailableBrowserSafeArea,
+    safeAreaAvailability: "unavailable",
   };
 }
 

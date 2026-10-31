@@ -21,6 +21,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createContentBoundPresentationTraitsService } from "../../src/SynCloudOS/SynCloudOS";
 import { ScreenService, type WindowBounds } from "../../src/SynCloudOS/Windows";
+import { createAppPresentationClient } from "../../src/SynCloudOS/AppSDK/appPresentationClient";
 import type {
   RuntimeMediaQuery,
   RuntimeScreenSnapshot,
@@ -169,7 +170,7 @@ function createPresentationFixture({
 
 function legacyModeAt(width: number): "desktop" | "tablet" | "mobile" {
   const environment = createTestRuntimeEnvironment();
-  vi.spyOn(environment.visualViewport, "getSnapshot").mockReturnValue({ width, height: 700, offsetLeft: 0, offsetTop: 0, scale: 1 });
+  vi.spyOn(environment.layoutViewport, "getSnapshot").mockReturnValue({ width, height: 700 });
   const runtime = createTestRuntime({ environment });
   const { ResponsiveModeManager } = createRuntimeHarness(runtime);
   ResponsiveModeManager.sync();
@@ -179,6 +180,53 @@ function legacyModeAt(width: number): "desktop" | "tablet" | "mobile" {
 }
 
 describe("NavigationFoundation presentation-trait characterization", () => {
+  it("publishes availability-only changes through the public app client and freezes them on revocation", () => {
+    const f = createPresentationFixture();
+    f.workArea.set({ ...f.workArea.source.getSnapshot(), safeArea: { top: 0, right: 0, bottom: 0, left: 0 }, safeAreaAvailability: "available" });
+    const service = createContentBoundPresentationTraitsService({ contentBounds: f.contentBounds.source, screen: f.screen, matchMedia: f.environment.matchMedia });
+    const abort = new AbortController();
+    const client = createAppPresentationClient(service, abort.signal);
+    const changed = vi.fn();
+    client.subscribe(changed);
+    expect(client.getSnapshot()).toMatchObject({ geometryState: "current", safeAreaAvailability: "available" });
+    f.workArea.set({ ...f.workArea.source.getSnapshot(), safeAreaAvailability: "unavailable" });
+    f.flush();
+    expect(changed).toHaveBeenCalledOnce();
+    expect(client.getSnapshot().safeAreaAvailability).toBe("unavailable");
+    const retained = client.getSnapshot();
+    abort.abort();
+    f.workArea.set({ ...f.workArea.source.getSnapshot(), safeAreaAvailability: "available" });
+    f.flush();
+    expect(client.getSnapshot()).toBe(retained);
+    service.dispose(); f.screen.dispose();
+  });
+
+  it("retains content bounds and classification through invalid content or host samples", () => {
+    const f = createPresentationFixture({ contentWidth: 900 });
+    const service = createContentBoundPresentationTraitsService({ contentBounds: f.contentBounds.source, screen: f.screen, matchMedia: f.environment.matchMedia });
+    const previous = service.getSnapshot();
+    f.contentBounds.set({ x: 0, y: 0, width: 0, height: Number.NaN });
+    expect(service.getSnapshot()).toMatchObject({ geometryState: "retained", horizontalSizeClass: "regular" });
+    expect(service.getSnapshot().contentBounds).toEqual(previous.contentBounds);
+    f.layoutViewport.set({ width: 0, height: 0 });
+    f.contentBounds.set({ x: 0, y: 0, width: 390, height: 700 });
+    expect(service.getSnapshot().contentBounds).toEqual(previous.contentBounds);
+    f.flush();
+    f.layoutViewport.set({ width: 1200, height: 900 });
+    f.flush();
+    expect(service.getSnapshot()).toMatchObject({ geometryState: "current", horizontalSizeClass: "compact", contentBounds: { width: 390 } });
+    service.dispose(); f.screen.dispose();
+  });
+
+  it("marks initial invalid content unavailable until an owned content measurement arrives", () => {
+    const f = createPresentationFixture({ contentWidth: 0, contentHeight: 0 });
+    const service = createContentBoundPresentationTraitsService({ contentBounds: f.contentBounds.source, screen: f.screen, matchMedia: f.environment.matchMedia });
+    expect(service.getSnapshot().geometryState).toBe("unavailable");
+    f.contentBounds.set({ x: 0, y: 0, width: 900, height: 500 });
+    expect(service.getSnapshot()).toMatchObject({ geometryState: "current", horizontalSizeClass: "regular" });
+    service.dispose(); f.screen.dispose();
+  });
+
   it("records the legacy 720 and 1080 responsive classifier boundaries", () => {
     expect(legacyModeAt(719)).toBe("mobile");
     expect(legacyModeAt(720)).toBe("tablet");

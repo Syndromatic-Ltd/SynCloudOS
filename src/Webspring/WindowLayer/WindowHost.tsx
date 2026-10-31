@@ -143,7 +143,7 @@ export function WindowHost({
       ? { key: chromeHandshakeKey, ready: false, failed: true }
       : state),
   }), [chromeHandshakeKey, chromeSlotNode]);
-  const presentation = resolveWindowPresentation(record, screen);
+  const presentation = resolveWindowPresentation(record, screen, controller.geometryState);
   const focusPort = useRuntimeNSEFocusPort(controller.windowResponderId);
   const overlayPort = useRuntimeNSEOverlayPort(controller.windowResponderId);
   const controlPort = useRuntimeNSEControlPort();

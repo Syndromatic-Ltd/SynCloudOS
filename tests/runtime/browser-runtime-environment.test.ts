@@ -30,6 +30,8 @@ describe("BrowserRuntimeEnvironment snapshot sources", () => {
     const initialLayout = environment.layoutViewport.getSnapshot();
     const initialScreen = environment.screen.getSnapshot();
     const initialWorkArea = environment.workArea.getSnapshot();
+    expect(initialWorkArea.safeAreaAvailability).toBe("unavailable");
+    expect(initialWorkArea.safeArea).toEqual({ top: 0, right: 0, bottom: 0, left: 0 });
     expect(environment.layoutViewport.getSnapshot()).toBe(initialLayout);
     expect(environment.screen.getSnapshot()).toBe(initialScreen);
     expect(environment.workArea.getSnapshot()).toBe(initialWorkArea);

@@ -304,7 +304,9 @@ export function useNSEOverlay({
       onDismiss: onManagerDismiss,
     };
     return register(initialRegistration);
-  }, [controlledDismissGeneration, id, kind, open, parentRegistered, register, runtime, surface]);
+  // Kind is presentation metadata, updated below. Releasing a live parent
+  // lease for a modality change would dismiss its still-open descendants.
+  }, [controlledDismissGeneration, id, open, parentRegistered, register, runtime, surface]);
 
   useLayoutEffect(() => {
     if (registration) manager.update(registration);

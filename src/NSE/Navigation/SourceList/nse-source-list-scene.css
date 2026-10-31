@@ -122,3 +122,16 @@
   grid-column: 1;
   grid-row: 1;
 }
+
+.nse-source-list-scene-projection > [hidden] { display: none; }
+.nse-source-list-scene-projection[data-navigation-renderer="rail"] {
+  flex-direction: row;
+}
+.nse-source-list-scene-projection[data-navigation-renderer="rail"] > .nse-source-list-scene {
+  order: 1;
+}
+.nse-source-list-scene-projection[data-navigation-renderer="rail"] > .nse-source-list-scene-projection-compact {
+  order: 0;
+  inline-size: var(--nse-navigation-rail-width);
+  min-block-size: 0;
+}

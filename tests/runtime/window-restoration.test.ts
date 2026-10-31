@@ -23,7 +23,8 @@ import type {
   WindowRestorationPersistencePort,
   WindowRestorationSnapshot,
 } from "../../src/SynCloudOS/Windows";
-import { resolveWindowPersistenceNamespace } from "../../src/SynCloudOS/Windows";
+import { resolveWindowPersistenceNamespace, resolveWindowPresentation } from "../../src/SynCloudOS/Windows";
+import { createTestRuntimeEnvironment } from "./helpers";
 import {
   createWindowTestDependencies,
   standardWindow,
@@ -39,6 +40,38 @@ function memoryPersistence(): WindowRestorationPersistencePort & { readonly valu
 }
 
 describe("window workspace restoration", () => {
+  it.each([{ zoomed: false, minimised: false }, { zoomed: true, minimised: false }, { zoomed: true, minimised: true }])("restores controller and window state %j while initial geometry is unavailable", async ({ zoomed, minimised }) => {
+    const source = createWindowTestDependencies();
+    const original = source.manager.create(standardWindow("pending-geometry"));
+    await source.manager.open(original.id);
+    if (zoomed) source.manager.zoom(original.id);
+    if (minimised) source.manager.minimise(original.id);
+    const saved = source.manager.createRestorationSnapshot();
+    await source.cleanup();
+    const environment = createTestRuntimeEnvironment();
+    const layout = vi.spyOn(environment.layoutViewport, "getSnapshot").mockReturnValue({ width: 0, height: 0 });
+    const target = createWindowTestDependencies({ environment });
+    expect(target.screen.getSnapshot().geometryState).toBe("unavailable");
+    const restored = await target.manager.restoreWorkspace(saved);
+    expect(restored.failures).toEqual([]);
+    const controller = target.manager.select("pending-geometry");
+    const normal = controller.geometryState.normalBounds;
+    expect(controller.record.state).toBe(minimised ? "minimised" : "open");
+    expect(controller.geometryState.zoomed).toBe(zoomed);
+    expect(resolveWindowPresentation(controller.record, target.screen.getCurrentSnapshot(), controller.geometryState).visible).toBe(false);
+    layout.mockReturnValue({ width: 1000, height: 760 });
+    expect(resolveWindowPresentation(controller.record, target.screen.getCurrentSnapshot(), controller.geometryState).visible).toBe(true);
+    if (minimised) target.manager.restore(controller.id);
+    if (zoomed) {
+      expect(resolveWindowPresentation(controller.record, target.screen.getCurrentSnapshot(), controller.geometryState).bounds).toEqual(target.screen.getCurrentSnapshot().workArea);
+      target.manager.zoom(controller.id);
+      expect(controller.record.bounds).toEqual(normal);
+    }
+    expect(target.manager.select(controller.id)).toBe(controller);
+    expect(controller.geometryState.normalBounds).toBe(normal);
+    await target.cleanup();
+  });
+
   it("uses the exact durable default namespace and preserves supplied whitespace", () => {
     expect(resolveWindowPersistenceNamespace()).toBe("syncloudos");
     expect(resolveWindowPersistenceNamespace("  tenant windows  ")).toBe("  tenant windows  ");

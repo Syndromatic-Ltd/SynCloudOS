@@ -181,6 +181,8 @@ export interface NSETabBarProps {
   readonly "aria-label": string;
   readonly className?: string;
   readonly dir?: "ltr" | "rtl";
+  /** Same tabs and retained panels, projected into an independently scrollable rail. */
+  readonly orientation?: "horizontal" | "vertical";
   /** Structural hook only in NavigationFoundation; appearance work is deferred to AppearanceAuthority. */
   readonly reducedMotion?: boolean;
   /** A source-list projection supplies one external stable host instead. */
@@ -198,7 +200,8 @@ export function NSETabBar({
   controller,
   "aria-label": ariaLabel,
   className,
-  dir = "ltr",
+  dir,
+  orientation = "horizontal",
   reducedMotion = false,
   renderPanels = true,
   idScope,
@@ -249,14 +252,16 @@ export function NSETabBar({
 
   const focusControl = useCallback((controlId: string, source: string, activate: boolean) => {
     setFocusedTabId(controlId);
-    tabRefs.current.get(controlId)?.focus();
+    const control = tabRefs.current.get(controlId);
+    control?.focus();
+    if (orientation === "vertical") control?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     if (!activate) return;
     if (controlId === NSETabBarMoreDestinationId) {
       openOverflow(source);
       return;
     }
     selectDestination(controlId, source);
-  }, [openOverflow, selectDestination]);
+  }, [openOverflow, orientation, selectDestination]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, controlId: string) => {
     const enabledControls = controls.filter((id) => {
@@ -267,9 +272,11 @@ export function NSETabBar({
     const index = currentIndex < 0 ? 0 : currentIndex;
     const nextForDelta = (delta: number) => enabledControls[(index + delta + enabledControls.length) % enabledControls.length];
 
-    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+    const vertical = orientation === "vertical";
+    if (vertical ? event.key === "ArrowDown" || event.key === "ArrowUp" : event.key === "ArrowRight" || event.key === "ArrowLeft") {
       event.preventDefault();
-      const forward = event.key === "ArrowRight" ? dir !== "rtl" : dir === "rtl";
+      const rtl = getComputedStyle(event.currentTarget).direction === "rtl";
+      const forward = vertical ? event.key === "ArrowDown" : event.key === "ArrowRight" ? !rtl : rtl;
       const target = nextForDelta(forward ? 1 : -1);
       if (target) focusControl(target, "keyboard", true);
       return;
@@ -350,6 +357,7 @@ export function NSETabBar({
       <div
         className={classes("nse-tab-bar-safe-area", className)}
         data-nse-tab-bar="true"
+        data-orientation={orientation}
         data-safe-area-wrapper="true"
         data-reduced-motion={reducedMotion ? "true" : "false"}
         data-nse-tab-chrome-status={chromeStatus}
@@ -362,10 +370,11 @@ export function NSETabBar({
         <div
           className={classes("nse-tab-bar", usesTallTabChrome && "nse-control-toolbar")}
           role="tablist"
+          aria-orientation={orientation}
           aria-label={ariaLabel}
           data-position={usesTallTabChrome ? "inline" : undefined}
           data-grouped={usesTallTabChrome ? "true" : undefined}
-          data-nse-tab-layout="floating-bottom"
+          data-nse-tab-layout={orientation === "vertical" ? "side-rail" : "floating-bottom"}
           data-nse-tab-chrome-family={usesTallTabChrome ? "grouped-toolbutton" : undefined}
           data-nse-tab-chrome-variant={usesTallTabChrome ? "tall" : undefined}
           data-nse-tab-chrome-size={usesTallTabChrome ? "tall" : undefined}
@@ -399,7 +408,7 @@ export function NSETabBar({
             : projectNSEAppearanceSlot(nseAppearanceSlot("tab-bar", "badge", state), appearance);
           const icon = projectNSENavigationIcon(destination.icon, state);
           const iconStyle = tabIconStyle(destination.icon);
-          const segment = tabChromeSegment(index, controls.length);
+          const segment = tabChromeSegment(index, orientation === "vertical" ? 1 : controls.length);
           const chromeState = tabChromeState(state, selected, pressed);
           return (
             <button
@@ -493,7 +502,7 @@ export function NSETabBar({
             data-nse-tab-visual-state={tabVisualState(moreState, moreSelected, morePressed)}
             {...tabChromeMetadata(
               moreAppearance,
-              tabChromeSegment(controls.length - 1, controls.length),
+              tabChromeSegment(controls.length - 1, orientation === "vertical" ? 1 : controls.length),
               tabChromeState(moreState, moreSelected, morePressed),
             )}
             {...moreAppearance.attributes}

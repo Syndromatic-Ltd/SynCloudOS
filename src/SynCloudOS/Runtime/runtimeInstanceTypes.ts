@@ -238,6 +238,9 @@ export interface RuntimeWorkAreaSnapshot {
   readonly height: number;
   readonly devicePixelRatio: number;
   readonly safeArea: { readonly top: number; readonly right: number; readonly bottom: number; readonly left: number };
+  /** Existing external adapters may omit this; their availability is unknown.
+   * Browser adapters explicitly report unavailable rather than measured zero. */
+  readonly safeAreaAvailability?: "available" | "unavailable";
 }
 
 export interface RuntimeSnapshotSource<T> {

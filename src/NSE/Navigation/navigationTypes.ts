@@ -130,7 +130,7 @@ export interface NSENavigationStackRestorationSnapshot {
 
 export type NSEAdaptiveNavigationModel = "peer" | "hierarchy";
 export type NSEAdaptiveNavigationPresentation = "adaptive" | "bottom-tabs";
-export type NSEAdaptiveNavigationRenderer = "tabs" | "source-list-content" | "list-detail" | "stack";
+export type NSEAdaptiveNavigationRenderer = "tabs" | "rail" | "source-list-content" | "list-detail" | "stack";
 
 export interface NSEAdaptiveNavigationSnapshot {
   readonly revision: number;
@@ -138,6 +138,8 @@ export interface NSEAdaptiveNavigationSnapshot {
   readonly model: NSEAdaptiveNavigationModel;
   readonly presentation: NSEAdaptiveNavigationPresentation;
   readonly renderer: NSEAdaptiveNavigationRenderer;
+  /** Actual allocated navigation scene, when supplied by its owning view. */
+  readonly layoutBounds: SynCloudOSPresentationTraits["contentBounds"];
   readonly traits: SynCloudOSPresentationTraits;
   readonly selectedDestinationId: string;
   readonly stack: NSENavigationStackSnapshot | null;

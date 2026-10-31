@@ -146,6 +146,8 @@ export function ApplicationStageView({
   const railLabel = sourceList?.railLabel ?? app.shortName;
   const [railWidth, setRailWidthState] = useState(railDefault);
   const [barTitle, setBarTitle] = useState<string | null>(null);
+  const [compactNavigation, setCompactNavigation] = useState<boolean | null>(null);
+  const showsSourceListRail = sourceList && !(compactNavigation ?? presentationTraits.horizontalSizeClass === "compact");
   const appMenuStore = useMemo(createApplicationMenuStore, [stage.id]);
   const applicationResponderId = `application:${app.bundleIdentifier}`;
   const [appMenuParent, setAppMenuParent] = useState<string | null>(null);
@@ -170,7 +172,8 @@ export function ApplicationStageView({
             defaultWidth: railDefault,
             railLabel,
             scheme: resolvedMode,
-            setBarTitle
+            setBarTitle,
+            setCompactNavigation
           }
         : null,
     [sourceList, railWidth, setRailWidth, railMin, railMax, railDefault, railLabel, resolvedMode]
@@ -261,8 +264,8 @@ export function ApplicationStageView({
       title={activeNavigationChrome?.title ?? standardBarTitle}
       variant={frame.material === "metal" ? "atmoMetal" : "atmoCumulus"}
       scheme={resolvedMode}
-      rail={sourceList && presentationTraits.horizontalSizeClass !== "compact" ? { width: railWidth, content: railLabel, titleAction: quickSwitchAction } : undefined}
-      titleAction={activeNavigationChrome ? null : sourceList && presentationTraits.horizontalSizeClass !== "compact" ? null : quickSwitchAction}
+      rail={showsSourceListRail ? { width: railWidth, content: railLabel, titleAction: quickSwitchAction } : undefined}
+      titleAction={activeNavigationChrome ? null : showsSourceListRail ? null : quickSwitchAction}
       leadingItems={[{
         kind: "webspring",
         label: returnToWebspringLabel,

@@ -631,6 +631,7 @@ export function createDeterministicRuntimeEnvironment(options: {
   const workArea = snapshotSource<RuntimeWorkAreaSnapshot>(Object.freeze({
     x: 0, y: 0, width: 1440, height: 900, devicePixelRatio: 1,
     safeArea: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }),
+    safeAreaAvailability: "available",
   }));
   const mediaQueries = new Map<RuntimeMediaQuery, Set<(matches: boolean) => void>>();
   const mediaQueryMatches = new Map<string, boolean>();

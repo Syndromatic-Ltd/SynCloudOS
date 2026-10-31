@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type {
   CreateWindowRequest,
   SynCloudOSRuntime,
@@ -26,6 +26,7 @@ import type {
   WindowRecord,
 } from "../../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "../../SynCloudOSReact";
+import { NSEPopover } from "../../NSE/NSE";
 import type { FrameworkTestFixtureProps } from "../frameworkTestTypes";
 
 const applicationId = "framework-windows";
@@ -91,11 +92,36 @@ function closeWindow(runtime: SynCloudOSRuntime, id: string) {
   return runtime.windows.requestClose(id, { reason: "command" });
 }
 
+function GeometryContinuityContent({ window }: { readonly window: WindowRecord }) {
+  const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
+  const [open, setOpen] = useState(false);
+  return <div data-syncloudos-responder-id={`window-content:${window.id}`} style={{ padding: 12 }}>
+    <button type="button">Diagnostics content</button>
+    <label style={{ display: "block" }}>Continuity draft<textarea aria-label="Continuity draft" defaultValue="Unsaved draft" /></label>
+    <div data-testid="geometry-anchor-scroll" style={{ height: 120, overflow: "auto" }}>
+      <div style={{ height: 360, paddingTop: 60 }}>
+        <button type="button" ref={setAnchor} onClick={() => setOpen(true)}>Geometry popover</button>
+      </div>
+    </div>
+    <output data-testid="geometry-normal-bounds">{JSON.stringify(window.bounds)}</output>
+    <button type="button" style={{ display: "block", marginTop: 300 }}>Document end action</button>
+    <NSEPopover id="geometry-continuity-popover" title="Geometry continuity popover" open={open} anchor={anchor}
+      parentWindowControllerId={window.id} presentation={{ mode: "anchored" }} contentSize={{ width: 300, height: 200 }}
+      onOpenChange={setOpen}>
+      <div style={{ padding: 12, overflow: "auto", maxHeight: "100%" }}>
+        <label>Popover draft<input aria-label="Popover draft" defaultValue="Popover state" /></label>
+        <button type="button" onClick={() => setOpen(false)}>Close geometry popover</button>
+      </div>
+    </NSEPopover>
+  </div>;
+}
+
 function WindowFixtureContent({ runtime, window }: {
   readonly runtime: SynCloudOSRuntime;
   readonly window: WindowRecord;
 }) {
   const responderId = `window-content:${window.id}`;
+  if (window.id === "diagnostics") return <GeometryContinuityContent window={window} />;
   if (window.id === "memo") {
     return (
       <div data-syncloudos-responder-id={responderId}>
@@ -199,6 +225,7 @@ async function initialiseScenario(runtime: SynCloudOSRuntime, scenario: WindowSc
 
 export function WindowManagementFixture({ windowRendererRegistration }: FrameworkTestFixtureProps) {
   const runtime = useKernelSynCloudOS();
+  const geometry = useSyncExternalStore(runtime.screen.subscribe, runtime.screen.getSnapshot, runtime.screen.getSnapshot);
   const scenario = scenarioFromRuntime(runtime);
   const initialisationRef = useRef<Promise<void> | null>(null);
   const [status, setStatus] = useState("Opening windows");
@@ -282,6 +309,7 @@ export function WindowManagementFixture({ windowRendererRegistration }: Framewor
 
   return (
     <main aria-label="Window management framework fixture" data-window-fixture-scenario={scenario}>
+      <output hidden data-testid="geometry-authority">{JSON.stringify({ state: geometry.geometryState, safeArea: geometry.safeAreaAvailability })}</output>
       <div
         aria-label="Window test controls"
         style={{ position: "fixed", insetBlockStart: 8, insetInlineEnd: 8, zIndex: 200, display: "flex", gap: 6 }}

@@ -27,7 +27,13 @@ export type ScreenServiceEnvironment = Pick<
   "layoutViewport" | "visualViewport" | "screen" | "workArea" | "requestAnimationFrame" | "cancelAnimationFrame"
 >;
 
+export type ScreenGeometryState = "current" | "retained" | "unavailable";
+export type ScreenGeometrySource = "layoutViewport" | "visualViewport" | "workArea";
+
 export interface ScreenSnapshot {
+  /** Retained geometry is the last complete valid sample, not a new measurement. */
+  readonly geometryState: ScreenGeometryState;
+  readonly invalidGeometrySources: readonly ScreenGeometrySource[];
   readonly layoutViewport: WindowBounds;
   readonly visualViewport: WindowBounds;
   readonly workArea: WindowBounds;
@@ -37,6 +43,8 @@ export interface ScreenSnapshot {
     readonly blockEnd: number;
     readonly inlineStart: number;
   };
+  /** Unknown means an existing host adapter did not declare availability. */
+  readonly safeAreaAvailability: "available" | "unavailable" | "unknown";
   readonly devicePixelRatio: number;
   /** Compatibility geometry projection. It uses the canonical trait
    * classifier rather than owning a competing media-query boundary. */
@@ -47,10 +55,16 @@ export interface ScreenSnapshot {
 
 function freezeBounds(bounds: WindowBounds): WindowBounds { return Object.freeze(bounds); }
 
+function validBounds(bounds: WindowBounds): boolean {
+  return [bounds.x, bounds.y, bounds.width, bounds.height, bounds.x + bounds.width, bounds.y + bounds.height].every(Number.isFinite)
+    && bounds.width > 0 && bounds.height > 0;
+}
+
 export class ScreenService {
   readonly #listeners = new Set<() => void>();
   readonly #disposers: Array<() => void> = [];
   #snapshot: ScreenSnapshot;
+  #lastValid: ScreenSnapshot | null = null;
   #frame: unknown = null;
   #disposed = false;
 
@@ -69,7 +83,7 @@ export class ScreenService {
 
   /** Reads the injected sources without publishing, so a pending desktop
    * gesture cannot race a compact-presentation transition in the same frame. */
-  getCurrentSnapshot = (): ScreenSnapshot => this.#project();
+  getCurrentSnapshot = (): ScreenSnapshot => this.#disposed ? this.#snapshot : this.#project();
 
   subscribe = (listener: () => void): (() => void) => {
     if (this.#disposed) return () => undefined;
@@ -92,22 +106,56 @@ export class ScreenService {
       ? { x: visual.offsetLeft, y: visual.offsetTop, width: visual.width, height: visual.height }
       : { ...layoutViewport });
     const workArea = freezeBounds({ x: work.x, y: work.y, width: work.width, height: work.height });
+    const invalidGeometrySources: ScreenGeometrySource[] = [];
+    if (!validBounds(layoutViewport)) invalidGeometrySources.push("layoutViewport");
+    if (!validBounds(visualViewport) || (visual !== null && (!Number.isFinite(visual.scale) || visual.scale <= 0))) invalidGeometrySources.push("visualViewport");
+    if (!validBounds(workArea) || !Number.isFinite(work.devicePixelRatio) || work.devicePixelRatio <= 0) invalidGeometrySources.push("workArea");
+    if (invalidGeometrySources.length === 0 && (
+      Math.min(workArea.x + workArea.width, visualViewport.x + visualViewport.width) <= Math.max(workArea.x, visualViewport.x) ||
+      Math.min(workArea.y + workArea.height, visualViewport.y + visualViewport.height) <= Math.max(workArea.y, visualViewport.y)
+    )) invalidGeometrySources.push("workArea");
+    if (invalidGeometrySources.length > 0) {
+      // A folding/occlusion event can briefly invalidate one source while the
+      // others have already changed. Retain one complete sample, not a mixture
+      // of new layout and stale visible bounds. An initial placeholder is
+      // explicitly unavailable and must never be used as a measured frame.
+      const placeholder = freezeBounds({ x: 0, y: 0, width: 1, height: 1 });
+      return Object.freeze({
+        ...(this.#lastValid ?? {
+          layoutViewport: placeholder, visualViewport: placeholder, workArea: placeholder,
+          safeAreaInsets: Object.freeze({ blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 }),
+          safeAreaAvailability: work.safeAreaAvailability === "unavailable" ? "unavailable" as const : "unknown" as const,
+          devicePixelRatio: 1, breakpoint: "compact" as const, orientation: "landscape" as const, virtualKeyboardInset: 0,
+        }),
+        geometryState: this.#lastValid ? "retained" as const : "unavailable" as const,
+        invalidGeometrySources: Object.freeze(invalidGeometrySources),
+      });
+    }
+    const validInsets = [work.safeArea?.top, work.safeArea?.right, work.safeArea?.bottom, work.safeArea?.left]
+      .every(value => Number.isFinite(value) && value >= 0);
+    const safeAreaAvailability = !validInsets || work.safeAreaAvailability === "unavailable" ? "unavailable" as const
+      : work.safeAreaAvailability === "available" ? "available" as const : "unknown" as const;
     const safeAreaInsets = Object.freeze({
-      blockStart: work.safeArea.top,
-      inlineEnd: work.safeArea.right,
-      blockEnd: work.safeArea.bottom,
-      inlineStart: work.safeArea.left,
+      blockStart: safeAreaAvailability === "unavailable" ? 0 : work.safeArea.top,
+      inlineEnd: safeAreaAvailability === "unavailable" ? 0 : work.safeArea.right,
+      blockEnd: safeAreaAvailability === "unavailable" ? 0 : work.safeArea.bottom,
+      inlineStart: safeAreaAvailability === "unavailable" ? 0 : work.safeArea.left,
     });
-    return Object.freeze({
+    const snapshot: ScreenSnapshot = Object.freeze({
+      geometryState: "current",
+      invalidGeometrySources: Object.freeze([]),
       layoutViewport,
       visualViewport,
       workArea,
       safeAreaInsets,
+      safeAreaAvailability,
       devicePixelRatio: work.devicePixelRatio,
       breakpoint: getSynCloudOSHorizontalSizeClass(layoutViewport.width),
       orientation: screen.orientation.startsWith("portrait") || screen.height > screen.width ? "portrait" : "landscape",
       virtualKeyboardInset: Math.max(0, layoutViewport.height - (visualViewport.y + visualViewport.height)),
     });
+    this.#lastValid = snapshot;
+    return snapshot;
   }
 
   #schedule(): void {

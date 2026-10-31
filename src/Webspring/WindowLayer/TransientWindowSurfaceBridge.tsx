@@ -138,27 +138,48 @@ interface PopoverPlacement {
  * end that keeps the popover on screen. Null when the anchor has no layout
  * (detached, or a host without one), so the request's bounds stand.
  */
-function popoverPlacement(anchor: HTMLElement | null, size: WindowBounds): PopoverPlacement | null {
-  const view = anchor?.isConnected ? anchor.ownerDocument.defaultView : null;
-  if (!anchor || !view) return null;
+function placementViewport(runtime: SynCloudOSRuntime): WindowBounds | null {
+  const screen = runtime.screen.getCurrentSnapshot();
+  if (screen.geometryState !== "current") return null;
+  const { visualViewport, workArea } = screen;
+  for (const bounds of [visualViewport, workArea]) {
+    if (![bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) || bounds.width <= 0 || bounds.height <= 0) return null;
+  }
+  // Both rectangles are in page CSS pixels. Do not subtract safe-area insets
+  // again: the host owns its work area and browser env() padding stays in CSS.
+  const x = Math.max(visualViewport.x, workArea.x);
+  const y = Math.max(visualViewport.y, workArea.y);
+  const width = Math.min(visualViewport.x + visualViewport.width, workArea.x + workArea.width) - x;
+  const height = Math.min(visualViewport.y + visualViewport.height, workArea.y + workArea.height) - y;
+  return width > 0 && height > 0 ? { x, y, width, height } : null;
+}
+
+function popoverPlacement(anchor: HTMLElement | null, size: WindowBounds, viewport: WindowBounds | null): PopoverPlacement | null {
+  if (!anchor?.isConnected || !viewport) return null;
   const rect = anchor.getBoundingClientRect();
   if (rect.width === 0 && rect.height === 0) return null;
-  const { width } = size;
-  const margin = POPOVER_VIEWPORT_MARGIN;
+  if (![rect.x, rect.y, rect.width, rect.height].every(Number.isFinite)) return null;
+  const inlineMargin = Math.min(POPOVER_VIEWPORT_MARGIN, viewport.width / 4);
+  const blockMargin = Math.min(POPOVER_VIEWPORT_MARGIN, viewport.height / 4);
+  const left = viewport.x + inlineMargin;
+  const top = viewport.y + blockMargin;
+  const right = viewport.x + viewport.width - inlineMargin;
+  const bottom = viewport.y + viewport.height - blockMargin;
+  const width = Math.min(size.width, right - left);
   const below = rect.bottom + POPOVER_ANCHOR_GAP;
-  const roomBelow = view.innerHeight - margin - below;
-  const roomAbove = rect.top - POPOVER_ANCHOR_GAP - margin;
+  const roomBelow = Math.max(0, bottom - Math.max(top, below));
+  const roomAbove = Math.max(0, Math.min(bottom, rect.top - POPOVER_ANCHOR_GAP) - top);
   // Hang below when the content fits there or there is more room below;
   // otherwise above. Taller content than the chosen side holds is clamped to
   // it and scrolls inside the window, rather than running off the screen.
   const edge = size.height <= roomBelow || roomBelow >= roomAbove ? "block-end" : "block-start";
-  const height = Math.max(Math.min(size.height, 120), Math.min(size.height, edge === "block-end" ? roomBelow : roomAbove));
+  const height = Math.min(size.height, Math.max(Math.min(120, bottom - top), edge === "block-end" ? roomBelow : roomAbove));
   const above = rect.top - POPOVER_ANCHOR_GAP - height;
   const centre = rect.left + rect.width / 2;
-  const maxX = Math.max(margin, view.innerWidth - width - margin);
+  const maxX = right - width;
   let x = centre - width / 2;
   let alignment: WindowAnchor["alignment"] = "center";
-  if (x < margin) {
+  if (x < left) {
     x = centre - POPOVER_POINTER_INSET;
     alignment = "start";
   } else if (x > maxX) {
@@ -167,8 +188,8 @@ function popoverPlacement(anchor: HTMLElement | null, size: WindowBounds): Popov
   }
   return {
     bounds: {
-      x: Math.round(Math.min(Math.max(x, margin), maxX)),
-      y: Math.round(edge === "block-end" ? below : above),
+      x: Math.min(Math.max(Math.round(x), left), maxX),
+      y: Math.min(Math.max(Math.round(edge === "block-end" ? below : above), top), bottom - height),
       width,
       height,
     },
@@ -179,11 +200,12 @@ function popoverPlacement(anchor: HTMLElement | null, size: WindowBounds): Popov
 
 const PANEL_SCREEN_MARGIN = 12;
 
-function keptOnScreen(bounds: WindowBounds, anchor: HTMLElement | null): WindowBounds {
-  const view = anchor?.ownerDocument.defaultView ?? (typeof window === "undefined" ? null : window);
-  if (!view) return bounds;
-  const x = Math.max(PANEL_SCREEN_MARGIN, Math.min(bounds.x, view.innerWidth - PANEL_SCREEN_MARGIN - bounds.width));
-  const y = Math.max(PANEL_SCREEN_MARGIN, Math.min(bounds.y, view.innerHeight - PANEL_SCREEN_MARGIN - bounds.height));
+function keptOnScreen(bounds: WindowBounds, viewport: WindowBounds | null): WindowBounds {
+  if (!viewport) return bounds;
+  const minX = viewport.x + Math.min(PANEL_SCREEN_MARGIN, viewport.width / 4);
+  const minY = viewport.y + Math.min(PANEL_SCREEN_MARGIN, viewport.height / 4);
+  const x = Math.max(minX, Math.min(bounds.x, viewport.x + viewport.width - PANEL_SCREEN_MARGIN - bounds.width));
+  const y = Math.max(minY, Math.min(bounds.y, viewport.y + viewport.height - PANEL_SCREEN_MARGIN - bounds.height));
   return { ...bounds, x, y };
 }
 
@@ -259,6 +281,56 @@ export function createTransientWindowSurfaceBridge({
   let generation = 0;
   let disposed = false;
   let contentRegistration: WindowContentRegistration | null = null;
+  let geometryFrame: unknown = null;
+  const geometryDisposers: Array<() => void> = [];
+  let anchorResizeObserver: ResizeObserver | null = null;
+  let observedAnchors = new Set<HTMLElement>();
+
+  function stopGeometryObservation() {
+    if (geometryFrame !== null) runtime.environment.cancelAnimationFrame(geometryFrame);
+    geometryFrame = null;
+    for (const dispose of geometryDisposers.splice(0)) dispose();
+    anchorResizeObserver?.disconnect();
+    anchorResizeObserver = null;
+    observedAnchors.clear();
+  }
+
+  function scheduleGeometry() {
+    if (disposed || runtime.signal.aborted || geometryFrame !== null) return;
+    geometryFrame = runtime.environment.requestAnimationFrame(() => {
+      geometryFrame = null;
+      if (disposed || runtime.signal.aborted) return;
+      for (const entry of entries.values()) {
+        if (entry.phase === "open" && entry.request.role === "popover" && entry.request.anchor?.isConnected) applyMutableRequest(entry);
+      }
+    });
+  }
+
+  function refreshGeometryObservation() {
+    const anchors = new Set([...entries.values()]
+      .filter(entry => entry.phase !== "closed" && entry.request.role === "popover")
+      .flatMap(entry => entry.request.anchor?.isConnected ? [entry.request.anchor] : []));
+    if (disposed || runtime.signal.aborted || anchors.size === 0) {
+      stopGeometryObservation();
+      return;
+    }
+    if (geometryDisposers.length === 0) {
+      geometryDisposers.push(
+        runtime.screen.subscribe(scheduleGeometry),
+        runtime.windows.subscribe(scheduleGeometry),
+        runtime.environment.addWindowListener("scroll", scheduleGeometry, { capture: true, passive: true }),
+      );
+      const view = runtime.environment.browser.getWindow() as (Window & { ResizeObserver?: typeof ResizeObserver }) | null;
+      anchorResizeObserver = view?.ResizeObserver ? new view.ResizeObserver(scheduleGeometry) : null;
+    }
+    if (anchors.size !== observedAnchors.size || [...anchors].some(anchor => !observedAnchors.has(anchor))) {
+      anchorResizeObserver?.disconnect();
+      for (const anchor of anchors) anchorResizeObserver?.observe(anchor);
+      observedAnchors = anchors;
+    }
+  }
+
+  runtime.signal.addEventListener("abort", stopGeometryObservation, { once: true });
 
   const maybeDisposeFactory = () => {
     if (!disposed || entries.size > 0 || !contentRegistration) return;
@@ -274,6 +346,7 @@ export function createTransientWindowSurfaceBridge({
     entry.anchorIdentity?.dispose();
     entry.anchorIdentity = null;
     if (entries.get(entry.requestId) === entry) entries.delete(entry.requestId);
+    refreshGeometryObservation();
     if (notify && !entry.suppressCloseNotification && !entry.closeNotified) {
       entry.closeNotified = true;
       entry.request.onDidClose?.();
@@ -327,6 +400,7 @@ export function createTransientWindowSurfaceBridge({
     const previous = entry.anchorIdentity;
     entry.anchorIdentity = anchor ? acquireAnchorIdentity(anchor, `${entry.mountKey}:anchor`) : null;
     previous?.dispose();
+    refreshGeometryObservation();
   };
 
   const applyMutableRequest = (entry: SurfaceEntry) => {
@@ -334,13 +408,15 @@ export function createTransientWindowSurfaceBridge({
     const controller = runtime.windows.select(entry.windowControllerId);
     const request = entry.request;
     updateAnchorIdentity(entry);
-    const placement = request.role === "popover" ? popoverPlacement(request.anchor, request.bounds) : null;
+    const viewport = placementViewport(runtime);
+    if (request.role === "popover" && !viewport) return;
+    const placement = request.role === "popover" ? popoverPlacement(request.anchor, request.bounds, viewport) : null;
     // An open content-sized panel (an inspector) is a window the user moves:
     // it keeps its position, follows only its content's size and is brought
     // back on screen when it grows. A popover is re-placed on its anchor.
     const current = controller.record.bounds;
     const bounds = placement?.bounds ?? (request.role === "panel" && request.sizing === "content"
-      ? keptOnScreen({ ...request.bounds, x: current.x, y: current.y }, request.anchor)
+      ? keptOnScreen({ ...request.bounds, x: current.x, y: current.y }, viewport)
       : request.bounds);
     if (!boundsEqual(current, bounds)) {
       // A popover's (or a content-sized panel's) size is its content's; only
@@ -429,7 +505,7 @@ export function createTransientWindowSurfaceBridge({
     entry.opened = (async () => {
       try {
         updateAnchorIdentity(entry);
-        const placement = request.role === "popover" ? popoverPlacement(request.anchor, request.bounds) : null;
+        const placement = request.role === "popover" ? popoverPlacement(request.anchor, request.bounds, placementViewport(runtime)) : null;
         runtime.windows.create({
           id: windowControllerId,
           workspaceId: owner.workspaceId,
@@ -446,7 +522,11 @@ export function createTransientWindowSurfaceBridge({
           title: request.title,
           content: Object.freeze({ rendererId, parameters: Object.freeze({ mountKey, requestId, generation: entryGeneration }) }),
           bounds: placement?.bounds ?? request.bounds,
-          minimumSize: Object.freeze({ width: Math.min(240, request.bounds.width), height: Math.min(160, request.bounds.height) }),
+          // Popovers are fitted, non-resizable surfaces. A desktop inspector's
+          // minimum must not force them beyond a shallow visible viewport.
+          minimumSize: Object.freeze(request.role === "popover"
+            ? { width: 1, height: 1 }
+            : { width: Math.min(240, request.bounds.width), height: Math.min(160, request.bounds.height) }),
           maximumSize: null,
           level: request.role === "panel" || request.role === "popover" ? "floating" : "modal",
           parentWindowControllerId: request.parentWindowControllerId,
@@ -557,6 +637,8 @@ export function createTransientWindowSurfaceBridge({
     dispose() {
       if (disposed) return;
       disposed = true;
+      runtime.signal.removeEventListener("abort", stopGeometryObservation);
+      stopGeometryObservation();
       for (const entry of [...entries.values()]) {
         entry.closeRequested = true;
         void closeEntry(entry).catch(() => undefined);

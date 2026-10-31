@@ -62,6 +62,8 @@ const workAreaSnapshot = Object.freeze({
 function presentationSnapshot(reducedMotion: boolean) {
   return Object.freeze({
     revision: 1,
+    geometryState: "current" as const,
+    safeAreaAvailability: "available" as const,
     contentBounds: Object.freeze({ x: 0, y: 0, width: 1280, height: 720 }),
     hostViewportBounds: Object.freeze({ x: 0, y: 0, width: 1280, height: 720 }),
     horizontalSizeClass: "wide" as const,

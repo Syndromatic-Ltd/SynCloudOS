@@ -118,6 +118,7 @@
   background: color-mix(in srgb, CanvasText 18%, transparent);
 }
 
+.nse-overlay-popup-host,
 .nse-overlay-popup-modal-host {
   display: contents;
 }

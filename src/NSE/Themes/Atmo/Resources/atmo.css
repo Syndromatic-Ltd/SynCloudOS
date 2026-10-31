@@ -2762,218 +2762,218 @@
 [data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button::after {
   content: none;
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:first-child:not(:last-child) > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start-width: 36px;
   --nse-tab-chrome-end-width: 1.714286px;
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:first-child:not(:last-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-first-up-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-first-up-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-first-up-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:first-child:not(:last-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-first-down-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-first-down-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-first-down-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:first-child:not(:last-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-first-sel-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-first-sel-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-first-sel-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:first-child:not(:last-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-first-seldown-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-first-seldown-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-first-seldown-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:first-child:not(:last-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-first-dis-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-first-dis-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-first-dis-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:first-child:not(:last-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-last-up-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-last-up-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-last-up-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:first-child:not(:last-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-last-down-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-last-down-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-last-down-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:first-child:not(:last-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-last-sel-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-last-sel-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-last-sel-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:first-child:not(:last-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-last-seldown-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-last-seldown-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-last-seldown-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:first-child:not(:last-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-last-dis-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-last-dis-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-last-dis-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:not(:first-child):not(:last-child) > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="middle"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start-width: 1.714286px;
   --nse-tab-chrome-end-width: 1.714286px;
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:not(:first-child):not(:last-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="middle"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-middle-up-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-middle-up-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-middle-up-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:not(:first-child):not(:last-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="middle"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-middle-down-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-middle-down-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-middle-down-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:not(:first-child):not(:last-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="middle"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-middle-sel-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-middle-sel-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-middle-sel-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:not(:first-child):not(:last-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="middle"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-middle-seldown-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-middle-seldown-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-middle-seldown-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:not(:first-child):not(:last-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="middle"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-middle-dis-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-middle-dis-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-middle-dis-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:not(:first-child):not(:last-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="middle"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-middle-up-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-middle-up-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-middle-up-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:not(:first-child):not(:last-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="middle"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-middle-down-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-middle-down-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-middle-down-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:not(:first-child):not(:last-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="middle"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-middle-sel-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-middle-sel-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-middle-sel-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:not(:first-child):not(:last-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="middle"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-middle-seldown-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-middle-seldown-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-middle-seldown-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:not(:first-child):not(:last-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="middle"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-middle-dis-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-middle-dis-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-middle-dis-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:last-child:not(:first-child) > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start-width: 1.714286px;
   --nse-tab-chrome-end-width: 36px;
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:last-child:not(:first-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-last-up-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-last-up-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-last-up-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:last-child:not(:first-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-last-down-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-last-down-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-last-down-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:last-child:not(:first-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-last-sel-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-last-sel-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-last-sel-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:last-child:not(:first-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-last-seldown-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-last-seldown-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-last-seldown-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:last-child:not(:first-child)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-last-dis-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-last-dis-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-last-dis-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:last-child:not(:first-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-first-up-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-first-up-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-first-up-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:last-child:not(:first-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-first-down-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-first-down-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-first-down-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:last-child:not(:first-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-first-sel-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-first-sel-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-first-sel-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:last-child:not(:first-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-first-seldown-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-first-seldown-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-first-seldown-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:last-child:not(:first-child):dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-first-dis-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-first-dis-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-first-dis-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:only-child > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="only"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start-width: 36px;
   --nse-tab-chrome-end-width: 36px;
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:only-child[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="only"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-only-up-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-up-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-up-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:only-child[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="only"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-only-down-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-down-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-down-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:only-child[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="only"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-only-sel-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-sel-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-sel-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:only-child[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="only"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-only-seldown-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-seldown-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-seldown-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:only-child[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="only"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-only-dis-start);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-dis-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-dis-end);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:only-child:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="only"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="up"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-only-up-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-up-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-up-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:only-child:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="only"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="down"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-only-down-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-down-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-down-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:only-child:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="only"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="sel"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-only-sel-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-sel-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-sel-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:only-child:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="only"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="seldown"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-only-seldown-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-seldown-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-seldown-start);
 }
-[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button:only-child:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
+[data-nse-appearance="atmo"] .nse-tab-bar.nse-control-toolbar[data-grouped="true"][data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="only"]:dir(rtl)[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-state="dis"] > .nse-tab-bar-chrome-surface {
   --nse-tab-chrome-start: var(--nse-atmo-svg-nse-tab-atmo-only-dis-end);
   --nse-tab-chrome-body: var(--nse-atmo-svg-nse-tab-atmo-only-dis-body);
   --nse-tab-chrome-end: var(--nse-atmo-svg-nse-tab-atmo-only-dis-start);

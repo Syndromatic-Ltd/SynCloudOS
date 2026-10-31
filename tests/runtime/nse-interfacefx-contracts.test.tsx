@@ -82,6 +82,8 @@ function navigationTraits(horizontalSizeClass: SynCloudOSPresentationTraits["hor
   const width = horizontalSizeClass === "compact" ? 640 : 1280;
   return Object.freeze({
     revision: 1,
+    geometryState: "current",
+    safeAreaAvailability: "available",
     contentBounds: Object.freeze({ x: 0, y: 0, width, height: 800 }),
     hostViewportBounds: Object.freeze({ x: 0, y: 0, width, height: 800 }),
     horizontalSizeClass,
