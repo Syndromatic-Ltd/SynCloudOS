@@ -14,25 +14,43 @@ function nameOf(error: unknown): unknown {
   return typeof error === 'object' && error !== null && 'name' in error ? error.name : null;
 }
 
-function normalize(request: AppShareRequest,base:()=>string): AppShareRequest {
+type NativeShareRequest = Omit<AppShareRequest,'files'> & { readonly files?: File[] };
+function isFile(value:unknown): value is File {
+  // Invoke the WebIDL brand getter: accept another window's File, reject a
+  // forged name/type record without reading caller-supplied accessors.
+  try{return typeof File!=='undefined'&&typeof Object.getOwnPropertyDescriptor(File.prototype,'name')?.get?.call(value)==='string';}
+  catch{return false;}
+}
+function normalize(request: AppShareRequest,base:()=>string): NativeShareRequest {
   if (!request || typeof request !== 'object' || Array.isArray(request) ||
       ![Object.prototype, null].includes(Object.getPrototypeOf(request))) throw new TypeError('Share data must be a plain record.');
-  const values: Record<string,string> = {};
+  const values: Record<string,string|File[]> = {};
   for (const key of Reflect.ownKeys(request)) {
-    if (typeof key !== 'string' || !['title','text','url'].includes(key)) throw new TypeError('Unknown share data.');
+    if (typeof key !== 'string' || !['title','text','url','files'].includes(key)) throw new TypeError('Unknown share data.');
     const field=Object.getOwnPropertyDescriptor(request,key)!;
     if (!('value' in field) || !field.enumerable) throw new TypeError('Invalid share data.');
     if(key!=='title'&&field.value===undefined)continue;
+    if(key==='files'){
+      if(!Array.isArray(field.value)||!field.value.length)throw new TypeError('Share files must be a nonempty prepared array.');
+      const files:File[]=[];
+      for(let index=0;index<field.value.length;index++){
+        const entry=Object.getOwnPropertyDescriptor(field.value,String(index));
+        if(!entry||!('value' in entry)||!isFile(entry.value))throw new TypeError('Share files must be prepared File objects.');
+        files.push(entry.value);
+      }
+      values.files=Object.freeze(files) as unknown as File[];
+      continue;
+    }
     if(typeof field.value!=='string'||field.value.length>65536)throw new TypeError('Invalid share data.');
     values[key]=field.value;
   }
-  if (typeof values.title !== 'string' || !Object.values(values).some(value=>value.trim())) throw new TypeError('Share data is empty.');
+  if (typeof values.title !== 'string' || !Object.values(values).some(value=>typeof value==='string'?value.trim():value.length)) throw new TypeError('Share data is empty.');
   if (values.url !== undefined) {
-    const url=new URL(values.url,base());
+    const url=new URL(values.url as string,base());
     if(!['https:','http:'].includes(url.protocol))throw new TypeError('Share URL must use HTTP or HTTPS.');
     values.url=url.href;
   }
-  return Object.freeze(values) as unknown as AppShareRequest;
+  return Object.freeze(values) as unknown as NativeShareRequest;
 }
 
 function ownedCompletion(operation: Promise<void>, signal: AbortSignal): Promise<void> {
@@ -47,9 +65,8 @@ function ownedCompletion(operation: Promise<void>, signal: AbortSignal): Promise
 /** Mount-scoped projection; it neither owns browser permission nor manufactures activation. */
 export function createMountedShareClient(options: MountedShareOptions): AppShareClient {
   let pending=false;
-  const status=(request?: AppShareRequest): Readonly<AppCapabilityStatus>=>{
+  const inspect=(data?:NativeShareRequest,navigator=options.browser.getNavigator()): Readonly<AppCapabilityStatus>=>{
     options.assertLive();
-    const navigator=options.browser.getNavigator();
     const activation:AppCapabilityStatus['activation']=navigator?.userActivation ? navigator.userActivation.isActive?'active':'inactive' : 'unknown';
     const facts={provider:typeof navigator?.share==='function'?'native' as const:'none' as const,activation,requiresUserActivation:true,permission:'unknown' as const};
     const access=options.access(false);
@@ -65,17 +82,29 @@ export function createMountedShareClient(options: MountedShareOptions): AppShare
     let policyDenied=false;
     try{policyDenied=policy?.features?.().includes('web-share')===true&&policy.allowsFeature('web-share')===false;}catch{/* Native API remains the authority. */}
     if (policyDenied) return Object.freeze({...facts,availability:'blocked',reason:'permissions-policy'});
-    if (request && typeof navigator.canShare==='function') {
-      try { if (!navigator.canShare.call(navigator,normalize(request,()=>options.browser.getLocation().href))) return Object.freeze({...facts,availability:'unsupported',reason:'unsupported-data'}); }
+    if (data) {
+      // A title can make a Web Share Level 1 implementation accept the whole
+      // dictionary while silently ignoring files. Probe files alone as well.
+      if(data.files&&typeof navigator.canShare!=='function')return Object.freeze({...facts,availability:'unsupported',reason:'unsupported-data'});
+      try { if (typeof navigator.canShare==='function'&&
+        ((data.files&&!navigator.canShare.call(navigator,{files:data.files}))||!navigator.canShare.call(navigator,data))) return Object.freeze({...facts,availability:'unsupported',reason:'unsupported-data'}); }
       catch { return Object.freeze({...facts,availability:'unsupported',reason:'unsupported-data'}); }
     }
     return Object.freeze({...facts,availability:'available'});
+  };
+  const status=(request?:AppShareRequest):Readonly<AppCapabilityStatus>=>{
+    options.assertLive();
+    if(request===undefined)return inspect();
+    let data:NativeShareRequest;
+    try{data=normalize(request,()=>options.browser.getLocation().href);}
+    catch{const facts=inspect();return facts.availability==='blocked'?facts:Object.freeze({...facts,availability:'unsupported',reason:'unsupported-data'});}
+    return inspect(data);
   };
   const perform=async(request: AppShareRequest,caller?:AbortSignal):Promise<AppShareResult>=>{
     const signal=caller?AbortSignal.any([options.signal,caller]):options.signal;
     if(signal.aborted)return {kind:'aborted'};
     options.assertLive();
-    let data:AppShareRequest;
+    let data:NativeShareRequest;
     try{data=normalize(request,()=>options.browser.getLocation().href);}catch{return {kind:'invalid'};}
     let access:ReturnType<MountedShareOptions['access']>;
     try{access=options.access(true);}catch(error){
@@ -85,17 +114,18 @@ export function createMountedShareClient(options: MountedShareOptions): AppShare
     }
     if(!access.declared)return {kind:'denied',reason:'manifest'};
     if(!access.allowed)return {kind:'denied',reason:'policy'};
-    const snapshot=status(data);
+    const navigator=options.browser.getNavigator();
+    const snapshot=inspect(data,navigator);
+    if(signal.aborted)return {kind:'aborted'};
     if(snapshot.availability==='unsupported')return {kind:'unsupported'};
     if(snapshot.availability==='blocked')return {kind:'denied',reason:'browser'};
     if(snapshot.activation==='inactive')return {kind:'denied',reason:'activation'};
     if(pending)return {kind:'failed',reason:'busy'};
-    const navigator=options.browser.getNavigator()!;
     pending=true;
     let nativeSettlementOwnsPending=false;
     try {
       // Retain the native receiver and consume activation before the first await.
-      const action=()=>navigator.share.call(navigator,data);
+      const action=()=>{signal.throwIfAborted();options.assertLive();return navigator!.share.call(navigator,data);};
       const operation=options.invoke?options.invoke(action,signal):action();
       nativeSettlementOwnsPending=true;
       // Caller cancellation cannot close a native share sheet. Keep the busy
