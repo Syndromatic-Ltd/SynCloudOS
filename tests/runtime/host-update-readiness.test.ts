@@ -32,15 +32,18 @@ describe('host readiness owner integration', () => {
   it('folds current readiness into the single public notification of an outer batch', () => {
     const runtime = fixture(); runtime.store.mutate(draft => { draft.booted = false; });
     const observed: unknown[] = [];
+    const serviceObserved: boolean[] = [];
+    releases.push(runtime.updateReadiness.subscribe(() => serviceObserved.push(runtime.store.getSnapshot().updateReadiness === runtime.updateReadiness.getSnapshot())));
     const release = runtime.store.subscribe(() => {
       observed.push(runtime.store.getSnapshot().updateReadiness);
       expect(runtime.store.getSnapshot().updateReadiness).toBe(runtime.updateReadiness.getSnapshot());
     }); releases.push(release);
     runtime.store.batch(() => { runtime.store.mutate(draft => { draft.booted = true; }); runtime.store.batch(() => runtime.store.mutate(draft => { draft.webspring.isBooted = true; })); });
-    expect(observed).toHaveLength(1); expect(runtime.updateReadiness.getSnapshot().client.blockers).not.toContain('owner-busy');
+    expect(observed).toHaveLength(1); expect(serviceObserved).toEqual([true]); expect(runtime.updateReadiness.getSnapshot().client.blockers).not.toContain('owner-busy');
     observed.length = 0;
     const historical = runtime.store.cloneSnapshot(); historical.updateReadiness = { ...historical.updateReadiness, client: { ...historical.updateReadiness.client, readiness: 'ready', blockers: [] } };
     runtime.store.replaceSnapshot(historical); expect(observed).toHaveLength(1);
+    expect(serviceObserved).toEqual([true, true]);
     expect(runtime.store.getSnapshot().updateReadiness.client.readiness).toBe('unknown');
   });
   it('defers an alternate store and never writes a second projection through its public subscriber', () => {

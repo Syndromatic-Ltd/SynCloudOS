@@ -293,7 +293,7 @@ export class SynCloudOSRuntimeStore implements SynCloudOSRuntimeStoreContract {
   private batchDraft: RuntimeSnapshot | null = null;
   private batchChanged = false;
   private disposed = false;
-  private readinessProjection: { readonly read: () => HostUpdateReadinessSnapshot } | null = null;
+  private readinessProjection: { readonly read: () => HostUpdateReadinessSnapshot; readonly didProject: () => void } | null = null;
 
   constructor(runtimeId: SynCloudOSRuntimeId, seed: Partial<RuntimeSnapshot> = {}) {
     this.runtimeId = runtimeId;
@@ -314,20 +314,24 @@ export class SynCloudOSRuntimeStore implements SynCloudOSRuntimeStoreContract {
 
   listenerCount = () => this.listeners.size;
 
-  [runtimeReadinessPublication](read: () => HostUpdateReadinessSnapshot): (() => void) | null {
+  [runtimeReadinessPublication](read: () => HostUpdateReadinessSnapshot, didProject: () => void): (() => void) | null {
     if (this.disposed || this.readinessProjection) return null;
-    const owned = { read }; this.readinessProjection = owned;
+    const owned = { read, didProject }; this.readinessProjection = owned;
     return () => { if (this.readinessProjection === owned) this.readinessProjection = null; };
   }
 
   private emit() {
     // Fold derived host facts before the existing public publication. A
     // subscriber must not need a second mutation/notification to see them.
-    if (this.readinessProjection) {
+    const owned = this.readinessProjection;
+    if (owned) {
       let readiness: HostUpdateReadinessSnapshot;
-      try { readiness = this.readinessProjection.read(); }
+      try { readiness = owned.read(); }
       catch { readiness = initialHostUpdateReadinessSnapshot(); }
-      if (readiness !== this.snapshot.updateReadiness) this.snapshot = { ...this.snapshot, updateReadiness: readiness };
+      if (this.readinessProjection === owned) {
+        if (readiness !== this.snapshot.updateReadiness) this.snapshot = { ...this.snapshot, updateReadiness: readiness };
+        try { owned.didProject(); } catch { /* A derived observer cannot interrupt public store publication. */ }
+      }
     }
     this.listeners.forEach((listener) => listener());
   }
@@ -419,8 +423,8 @@ export function createRuntimeStore(
 
 /** Internal owned boundary; the public RuntimeStore batching API is unchanged.
  * An alternate store without this boundary cannot publish host readiness. */
-export function bindRuntimeReadinessProjection(store: SynCloudOSRuntimeStoreContract, read: () => HostUpdateReadinessSnapshot): (() => void) | null {
-  return store instanceof SynCloudOSRuntimeStore ? store[runtimeReadinessPublication](read) : null;
+export function bindRuntimeReadinessProjection(store: SynCloudOSRuntimeStoreContract, read: () => HostUpdateReadinessSnapshot, didProject: () => void): (() => void) | null {
+  return store instanceof SynCloudOSRuntimeStore ? store[runtimeReadinessPublication](read, didProject) : null;
 }
 
 export function cloneRuntimeSnapshot(snapshot: RuntimeSnapshot): RuntimeSnapshot {
