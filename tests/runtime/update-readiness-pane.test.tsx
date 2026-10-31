@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { SynCloudOSProvider, RuntimeInputBoundary } from '../../src/SynCloudOSReact';
 import { SystemUILayer } from '../../src/Webspring/SystemUILayer';
 import { UpdateReadinessDetails } from '../../src/Webspring/Preferences/Updates.prefPane';
@@ -16,6 +16,17 @@ function fixture(options: Parameters<typeof createTestRuntime>[0] = {}) {
   act(() => runtime.systemUI.preferences.open('updates')); return { runtime, ...view };
 }
 describe('read-only Updates preference pane', () => {
+  it('returns focus to the runtime-owned shell trigger after the preferences owner actually closes', async () => {
+    const runtime = createTestRuntime({ authenticationPolicy: 'disabled' }); runtimes.push(runtime);
+    runtime.store.mutate(draft => { draft.booted = true; });
+    render(<SynCloudOSProvider runtime={runtime}><RuntimeInputBoundary><button data-syncloudos-runtime-owner={runtime.runtimeId}>Generated preferences trigger</button><SystemUILayer /></RuntimeInputBoundary></SynCloudOSProvider>);
+    const trigger = screen.getByRole('button', { name: 'Generated preferences trigger' }); trigger.focus();
+    act(() => runtime.systemUI.preferences.open('updates'));
+    const inspect = screen.getByRole('button', { name: 'Inspect current work' }); inspect.focus();fireEvent.keyDown(inspect, { key: 'Escape' });
+    const dialog = screen.getByRole('dialog', { name: 'System Preferences' });fireEvent.keyDown(dialog, { key: 'Escape' });
+    await waitFor(() => expect(runtime.systemUI.preferences.isOpen()).toBe(false));
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
+  });
   it('retains keyboard focus on the stable preferences owner when leaving a pane', () => {
     const { runtime } = fixture(); const dialog = screen.getByRole('dialog', { name: 'System Preferences' });
     const inspect = screen.getByRole('button', { name: 'Inspect current work' }); inspect.focus();

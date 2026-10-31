@@ -33,6 +33,19 @@ import type { FocusScopeHandle } from "../../src/SynCloudOS/Focus/focusTypes";
 afterEach(cleanup);
 
 describe("focus scopes", () => {
+  it("returns to a same-runtime shell control when no logical responder was previously focused", async () => {
+    const runtime = createTestRuntime();
+    const ui = (open: boolean) => <SynCloudOSProvider runtime={runtime}>
+      <button data-syncloudos-runtime-owner={runtime.runtimeId}>Generated shell origin</button>
+      {open && createPortal(<FocusScope scopeId="shell-options" kind="modal" parentResponderId="webspring"><input aria-label="Generated shell dialog" /></FocusScope>, document.body)}
+    </SynCloudOSProvider>;
+    const view = render(ui(false)); const trigger = screen.getByRole("button", { name: "Generated shell origin" }); trigger.focus();
+    expect(runtime.focus.getFocusedResponderId()).toBeNull();
+    view.rerender(ui(true)); screen.getByRole("textbox", { name: "Generated shell dialog" }).focus();
+    view.rerender(ui(false)); await waitFor(() => expect(document.activeElement).toBe(trigger));
+    await runtime.dispose();
+  });
+
   it("updates a live scope's presentation without closing descendants or granting stale handles authority", async () => {
     const runtime = createTestRuntime();
     runtime.responders.register({ id: "editor", kind: "control", parentId: "runtime", scopeId: "root" });
