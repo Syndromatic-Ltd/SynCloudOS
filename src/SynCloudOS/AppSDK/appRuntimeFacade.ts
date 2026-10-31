@@ -17,11 +17,10 @@
  * limitations under the License.
  */
 
-import { createFilePanelService } from "../FilePanels";
+import { createMountedShareClient } from "./mountedShareClient";
+import { createMountedFilePanelClient } from "./mountedFilePanelClient";
 import { isHiddenCommandAcceptance, markHiddenCommandAcceptance } from "../nseRuntimeContracts";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
-import { createBrowserFilePanelAdapter } from "../FilePanels";
-import type { FilePanelReference, FilePanelReleaseReason, OpenPanelRequest, SavePanelRequest } from "../FilePanels";
 import { createMountedServiceTerminalOperations } from "./mountedServiceTerminalOperations";
 import { registerMountedDocumentWorkflowProvider } from "./mountedDocumentWorkflowProvider";
 import { prepareMountedDocumentAssetEdit } from "./mountedDocumentAssetPreparation";
@@ -4101,6 +4100,20 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     };
 
     const diagnosticsProvision = getHostDiagnosticsProvision(runtime);
+    const environmentCapabilityAccess = (capability: "web.share" | "file.open" | "file.write", audit: boolean) => {
+      assertLive();
+      const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
+      // Read-only file input retains its existing manifest contract. Newly wired
+      // write/handle authority requires an explicit declaration.
+      const declared = !!declaration && (capability === "file.open" || !!declaration.permissions?.includes(capability));
+      if (!declared) return { declared: false, allowed: false };
+      const request = { action: capability, origin: "runtime", source: "SynWareEnvironmentClient", app,
+        bundlePermissions: [...(declaration?.permissions ?? [])], context: Object.freeze({ appId: app.bundleIdentifier, capability }) };
+      const decision = audit
+        ? runTestControlSync("policy", "policy.evaluate", () => runtime.policy.authorise(request))
+        : runtime.policy.evaluate(request);
+      return { declared: true, allowed: decision.allowed };
+    };
     let issuedDiagnostics: Readonly<{ grant: HostDiagnosticsGrant | undefined; client: AppTrustedDiagnosticsClient }> | undefined;
     const createTrustedDiagnosticsClient = (grant: HostDiagnosticsGrant | undefined): AppTrustedDiagnosticsClient => {
       const assertDiagnosticsLive = () => {
@@ -4659,24 +4672,9 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           }), signal, assertLive);
         },
       }),
-      share: Object.freeze({
-        available() {
-          assertLive();
-          return typeof runtime.environment.browser.getNavigator()?.share === "function";
-        },
-        async share(request: Readonly<{ title: string; text?: string; url?: string }>) {
-          requireDeclaredCapability("web.share", "sharing application content");
-          const share = runtime.environment.browser.getNavigator()?.share;
-          if (typeof share !== "function") return "cancelled";
-          try {
-            await awaitMounted(runTestControl("browser", "browser.share", signal, () => share({ ...request })), signal, assertLive);
-            return "shared" as const;
-          } catch (error) {
-            if (signal.aborted) throw error;
-            if (isAbortError(error)) return "cancelled" as const;
-            throw error;
-          }
-        },
+      share: createMountedShareClient({ browser: runtime.environment.browser, signal, assertLive,
+        access: audit => environmentCapabilityAccess("web.share", audit),
+        invoke: (action, operationSignal) => runTestControl("browser", "browser.share", operationSignal, action),
       }),
       workArea: Object.freeze({
         getSnapshot() {
@@ -4857,28 +4855,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           geometry: appRuntime.platform.imageGeometry as never,
         } : {}),
       }),
-      filePanels: (() => {
-        const picker = runtime.environment.filePicker;
-        const service = picker ? createFilePanelService([createBrowserFilePanelAdapter(picker)]) : null;
-        if (service) cleanupOnAbort(() => service.dispose());
-        const signalFor = (callerSignal?: AbortSignal) => mergeSignals(runtime.signal, controller.signal, callerSignal);
-        return Object.freeze({
-          open(request: OpenPanelRequest, callerSignal?: AbortSignal) {
-            assertLive();
-            if (!service) return Promise.resolve({ kind: "unavailable" as const, missingCapabilities: Object.freeze(["read" as const]), message: "This host has no file chooser." });
-            return service.open(request, signalFor(callerSignal));
-          },
-          save(request: SavePanelRequest, callerSignal?: AbortSignal) {
-            assertLive();
-            if (!service) return Promise.resolve({ kind: "unavailable" as const, missingCapabilities: Object.freeze(["write" as const]), message: "This host has no file chooser." });
-            return service.save(request, signalFor(callerSignal));
-          },
-          release(reference: FilePanelReference, reason: FilePanelReleaseReason = "caller-finished") {
-            if (service) service.release(reference, reason); else reference.release(reason);
-          },
-          dispose() { /* The mount owns its panel service. */ },
-        });
-      })(),
+      filePanels: createMountedFilePanelClient({ picker: runtime.environment.filePicker,
+        native: runtime.environment.fileSystemAccess, download: runtime.environment.downloadExport,
+        signal, assertLive, activation: () => runtime.environment.browser.getNavigator()?.userActivation?.isActive,
+        access: environmentCapabilityAccess,
+      }),
       webContent: Object.freeze({
         createSession(request: Readonly<Record<string, unknown>>, callerSignal?: AbortSignal) {
           assertLive();

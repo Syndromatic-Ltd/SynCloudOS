@@ -107,7 +107,31 @@ export interface AppShareRequest {
   readonly url?: string;
 }
 
+/** Read-only facts projected by the existing service; querying never prompts. */
+export interface AppCapabilityStatus {
+  readonly availability: "available" | "unsupported" | "blocked";
+  readonly provider: "native" | "browser-input" | "download" | "none";
+  readonly reason?: "manifest" | "policy" | "insecure-context" | "permissions-policy" | "unsupported-data";
+  readonly activation: "active" | "inactive" | "unknown";
+  readonly requiresUserActivation: boolean;
+  /** Selection/runtime policy is not a persistent browser permission grant. */
+  readonly permission: "unknown";
+}
+
+export type AppShareResult =
+  /** Native promise fulfillment is platform handoff, not a recipient receipt. */
+  | { readonly kind: "shared" }
+  | { readonly kind: "cancelled" }
+  | { readonly kind: "unsupported" }
+  | { readonly kind: "aborted" }
+  | { readonly kind: "denied"; readonly reason: "manifest" | "policy" | "activation" | "browser" }
+  | { readonly kind: "invalid" }
+  | { readonly kind: "failed"; readonly reason: "busy" | "browser" | "runtime" };
+
 export interface AppShareClient {
+  getStatus(request?: Readonly<AppShareRequest>): Readonly<AppCapabilityStatus>;
+  perform(request: Readonly<AppShareRequest>, signal?: AbortSignal): Promise<AppShareResult>;
+  /** Legacy convenience surface. Use perform to distinguish unsupported and cancelled. */
   available(): boolean;
   share(request: Readonly<AppShareRequest>): Promise<"shared" | "cancelled">;
 }
@@ -213,6 +237,7 @@ export interface AppImageGeometryClient {
  * `NSEOpenPanel`'s service.
  */
 export interface AppFilePanelClient {
+  getStatus(): Readonly<{ open: AppCapabilityStatus; save: AppCapabilityStatus; persistentSave: AppCapabilityStatus }>;
   open(request: OpenPanelRequest, signal?: AbortSignal): Promise<FilePanelResult<FilePanelReference>>;
   save(request: SavePanelRequest, signal?: AbortSignal): Promise<FilePanelResult<FilePanelSaveTarget>>;
   release(reference: FilePanelReference, reason?: FilePanelReleaseReason): void;

@@ -59,6 +59,7 @@ export type {
   SynWareFakeDocumentOperation,
   SynWareFakeDragOperation,
   SynWareFakeFileOperation,
+  SynWareFakeFiles,
   SynWareFakeImageOperation,
   SynWareFakeLocation,
   SynWareFakeLocationOperation,

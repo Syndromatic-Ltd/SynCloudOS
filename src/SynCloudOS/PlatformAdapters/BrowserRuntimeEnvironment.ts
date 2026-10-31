@@ -19,6 +19,8 @@
  */
 
 import { createBrowserFilePickerPort } from "./BrowserFilePickerPort";
+import { createBrowserFileSystemAccessPanelPort } from "./BrowserFileSystemAccessPanelPort";
+import { createBrowserDownloadFilePanelPort } from "./BrowserDownloadFilePanelPort";
 import { BrowserAudioCaptureAdapter, createBrowserAudioCapturePlatform } from "./BrowserAudioCaptureAdapter";
 import { BrowserVideoCaptureAdapter, createBrowserVideoCapturePlatform } from "./BrowserVideoCaptureAdapter";
 import { BrowserVideoDecoder } from "./BrowserVideoDecoder";
@@ -669,6 +671,8 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     images,
     imageGeometry,
     filePicker,
+    fileSystemAccess: createBrowserFileSystemAccessPanelPort(browserWindow),
+    downloadExport: createBrowserDownloadFilePanelPort(browserWindow),
     animation,
     animationFrames: browserWindow ? createBrowserAFXFrameScheduler(browserWindow, browserWindow.document) : undefined,
     animationLayers: browserWindow ? createBrowserAnimationLayerHost(browserWindow.document, createBrowserAFXFrameScheduler(browserWindow, browserWindow.document)) : undefined,

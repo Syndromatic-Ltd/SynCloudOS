@@ -257,7 +257,7 @@ export interface FileSystemAccessSaveSelection {
 export interface FileSystemAccessPanelPort {
   isSecureContext(): boolean;
   /** False means the browser does not expose this capability at all. */
-  isAvailable?(): boolean;
+  isAvailable?(operation?: "open" | "save" | "directory"): boolean;
   hasTransientUserActivation(): boolean;
   openFiles(options: FileSystemAccessOpenOptions, signal: AbortSignal): Promise<readonly FilePanelFileHandle[]>;
   openDirectory(signal: AbortSignal): Promise<FilePanelDirectoryHandle | null>;

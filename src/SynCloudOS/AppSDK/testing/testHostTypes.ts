@@ -74,6 +74,10 @@ export type SynWareFakeDragOperation = "drag.authorise" | "drag.begin" | "drag.d
  * browser credential authority, which belongs to the Identity boundary. */
 export type SynWareFakeCredentialOperation = "credentials.read" | "credentials.write" | "credentials.remove";
 export type SynWareFakeFileOperation = "file.read" | "file.write" | "file.remove";
+export interface SynWareFakeFiles extends SynWareFakePort<SynWareFakeFileOperation> {
+  /** Host-only captured exports; never dispatches a native download. */
+  exported(): readonly import('../../FilePanels').FilePanelExportPayload[];
+}
 export type SynWareFakeDocumentOperation = "document.read" | "document.write" | "document.remove";
 export type SynWareFakeRecoveryOperation = "recovery.read" | "recovery.write" | "recovery.remove";
 export type SynWareFakeWindowOperation = "window.open" | "window.close";
@@ -193,7 +197,7 @@ export interface SynWareTestAdapters {
   readonly clipboard: SynWareFakeClipboard;
   readonly drag: SynWareFakePort<SynWareFakeDragOperation>;
   readonly credentials: SynWareFakePort<SynWareFakeCredentialOperation>;
-  readonly files: SynWareFakePort<SynWareFakeFileOperation>;
+  readonly files: SynWareFakeFiles;
   readonly documents: SynWareFakePort<SynWareFakeDocumentOperation>;
   readonly recovery: SynWareFakePort<SynWareFakeRecoveryOperation>;
   readonly windows: SynWareFakePort<SynWareFakeWindowOperation>;

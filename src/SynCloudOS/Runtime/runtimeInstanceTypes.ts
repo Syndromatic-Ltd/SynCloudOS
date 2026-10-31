@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { BrowserFilePanelPort } from "../FilePanels/filePanelTypes";
+import type { BrowserFilePanelPort, FileSystemAccessPanelPort, DownloadFilePanelPort } from "../FilePanels/filePanelTypes";
 import type { RuntimeResourceLedger } from "../Resources/RuntimeResourceLedger";
 import type { HeavyJobAdmission, HeavyJobCapacity } from "../Operations/HeavyJobAdmission";
 import type { SynCloudOSRuntimeDiagnostics } from "../Diagnostics/runtimeDiagnostics";
@@ -379,6 +379,9 @@ export interface SynCloudOSRuntimeEnvironment {
   /** Environment-owned file chooser behind every application's Open panel. Mounted apps
    * receive a scoped panel client, never this port. */
   readonly filePicker?: BrowserFilePanelPort | null;
+  /** Native chooser and write-only export ports; apps receive only scoped panel clients. */
+  readonly fileSystemAccess?: FileSystemAccessPanelPort | null;
+  readonly downloadExport?: DownloadFilePanelPort | null;
   /** Environment-owned Web Animations and fallback-scheduler authority. */
   readonly animation?: RuntimeAnimationAdapterFactory | null;
   readonly animationFrames?: AFXFrameScheduler;
