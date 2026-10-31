@@ -276,17 +276,26 @@ function directoryReference(
   });
 }
 
-function preflight(port: FileSystemAccessPanelPort): FilePanelResult<never> | null {
+function preflight(port: FileSystemAccessPanelPort, operation: "open" | "save" | "directory"): FilePanelResult<never> | null {
   if (!port.isSecureContext()) {
     return { kind: "unavailable", missingCapabilities: Object.freeze(["persistent-handle"]), message: "File System Access requires a secure browser context." };
   }
-  if (port.isAvailable && !port.isAvailable()) {
+  if (port.isAvailable && !port.isAvailable(operation)) {
     return { kind: "unavailable", missingCapabilities: Object.freeze(["persistent-handle"]), message: "File System Access is unavailable in this browser." };
   }
   if (!port.hasTransientUserActivation()) {
     return { kind: "denied", reason: "policy", message: "File selection must begin from an active user action." };
   }
   return null;
+}
+
+function pickerFailure(error:unknown,signal:AbortSignal):FilePanelResult<never>{
+  const name=typeof error==='object'&&error!==null&&'name'in error?error.name:null;
+  if(!signal.aborted&&name==='AbortError')return {kind:'cancelled'};
+  // Availability/secure-context checks have already passed. A native security
+  // refusal is a denial, not a reason to try a different export transport.
+  if(!signal.aborted&&name==='SecurityError')return {kind:'denied',reason:'policy',message:'Browser policy did not admit this file selection.'};
+  return mapFilePanelBrowserException(error);
 }
 
 /** File System Access adapter with wrapper-only lifetime; browser handles are never persisted or logged. */
@@ -298,7 +307,7 @@ export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPo
     async open(request: OpenPanelRequest, signal: AbortSignal): Promise<FilePanelResult<FilePanelReference>> {
       try {
         throwIfFilePanelAborted(signal);
-        const blocked = preflight(port);
+        const blocked = preflight(port, request.selection === "single-directory" ? "directory" : "open");
         if (blocked) return blocked;
         if (request.selection === "single-directory") {
           const handle = await port.openDirectory(signal);
@@ -327,13 +336,13 @@ export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPo
             : fileReference(handle, request.id, index, initialPermissions[index]!, port.hasTransientUserActivation, "readwrite"))),
         };
       } catch (error) {
-        return mapFilePanelBrowserException(error);
+        return pickerFailure(error,signal);
       }
     },
     async save(request: SavePanelRequest, signal: AbortSignal): Promise<FilePanelResult<import("./filePanelTypes").FilePanelSaveTarget>> {
       try {
         throwIfFilePanelAborted(signal);
-        const blocked = preflight(port);
+        const blocked = preflight(port, "save");
         if (blocked) return blocked;
         const selected = await port.saveFile({ accepts: request.accepts, suggestedName: request.suggestedName }, signal);
         throwIfFilePanelAborted(signal);
@@ -369,7 +378,7 @@ export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPo
         };
         return { kind: "accepted", values: Object.freeze([{ kind: "file-handle", reference, sink, exists: selected.exists }]) };
       } catch (error) {
-        return mapFilePanelBrowserException(error);
+        return pickerFailure(error,signal);
       }
     },
   };

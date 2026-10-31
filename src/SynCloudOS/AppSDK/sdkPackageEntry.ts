@@ -275,6 +275,8 @@ export type {
   AppSettingsAvailabilitySnapshot,
   AppShareClient,
   AppShareRequest,
+  AppShareResult,
+  AppCapabilityStatus,
   AppTextLayoutClient,
   AppTrackingClient,
   AppWebContentClient,

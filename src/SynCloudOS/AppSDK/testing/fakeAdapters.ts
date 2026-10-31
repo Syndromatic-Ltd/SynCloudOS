@@ -568,6 +568,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     audio: control<SynWareFakeAudioOperation>(clock, denied),
     webContent: control<SynWareFakeWebContentOperation>(clock, denied),
   });
+  const exportedFiles:import('../../FilePanels').FilePanelExportPayload[]=[];
   const adapters: SynWareTestAdapters = Object.freeze({
     browser: publicPort(controls.browser),
     media: publicPort(controls.media),
@@ -577,7 +578,10 @@ export function createDeterministicRuntimeEnvironment(options: {
     clipboard: clipboard.control,
     drag: publicPort(controls.drag),
     credentials: publicPort(controls.credentials),
-    files: publicPort(controls.files),
+    files: Object.freeze({...publicPort(controls.files),
+      exported:()=>Object.freeze([...exportedFiles]),
+      reset(){controls.files.reset();exportedFiles.splice(0);},
+    }),
     documents: publicPort(controls.documents),
     recovery: publicPort(controls.recovery),
     windows: publicPort(controls.windows),
@@ -721,6 +725,12 @@ export function createDeterministicRuntimeEnvironment(options: {
     screen: gatedSnapshotSource(screen, testControls.viewport, "viewport.screen"),
     workArea: gatedSnapshotSource(workArea, testControls.viewport, "viewport.work-area"),
     clipboard: clipboard.adapter,
+    downloadExport: Object.freeze({id:'deterministic-download',
+      export:(payload:import('../../FilePanels').FilePanelExportPayload,signal?:AbortSignal)=>controls.files.run('file.write',signal,()=>{
+        exportedFiles.push(Object.freeze({...payload}));
+        return {kind:'exported' as const,fileName:payload.fileName};
+      }),
+    }),
     location: locationAdapter,
     midi: midiAdapter,
     videoCapture: videoCapture.host,
