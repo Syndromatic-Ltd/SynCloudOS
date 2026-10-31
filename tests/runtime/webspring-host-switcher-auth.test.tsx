@@ -94,3 +94,31 @@ describe("WebspringHost anonymous switcher availability", () => {
     expect(runtime.store.getSnapshot().application.multiSwitch.status).not.toBe("switching");
   });
 });
+
+
+describe("Webspring application outlet transport", () => {
+  it("respects a successor layout's focus and never revives a removed handoff target", async () => {
+    let phase="narrow";
+    const movingShell=defineWebspring({...shell,components:{main:({applicationOutlet})=>phase==="hidden"?<article/>:phase==="wide"?<section><button autoFocus>New layout focus</button>{applicationOutlet}</section>:<main>{applicationOutlet}</main>}});
+    const runtime=createTestRuntime();runtimes.push(runtime);await runtime.boot();
+    const ui=()=> <SynCloudOSProvider runtime={runtime}><WebspringHost shell={movingShell} authentication="disabled" startupPhase="complete" /></SynCloudOSProvider>;
+    const view=render(ui());const container=document.querySelector<HTMLElement>(".webspring-application-outlet-host")!;
+    const input=document.createElement("input");container.appendChild(input);input.focus();phase="wide";view.rerender(ui());expect(document.activeElement).toBe(screen.getByRole("button",{name:"New layout focus"}));
+    input.focus();phase="hidden";view.rerender(ui());input.remove();phase="wide";view.rerender(ui());expect(input.isConnected).toBe(false);expect(document.activeElement).toBe(screen.getByRole("button",{name:"New layout focus"}));
+  });
+  it("retains focus, input selection and native selection when the shell relocates its live outlet", async () => {
+    let wide = false;
+    const movingShell = defineWebspring({ ...shell, components: { main: ({ applicationOutlet }) => wide
+      ? <section><aside>{applicationOutlet}</aside></section> : <main>{applicationOutlet}</main> } });
+    const runtime = createTestRuntime();runtimes.push(runtime);await runtime.boot();
+    const ui = () => <SynCloudOSProvider runtime={runtime}><WebspringHost shell={movingShell} authentication="disabled" startupPhase="complete" /></SynCloudOSProvider>;
+    const view = render(ui());
+    const container = document.querySelector<HTMLElement>(".webspring-application-outlet-host")!;
+    const input = document.createElement("input");input.value = "Generated local draft";container.appendChild(input);input.focus();input.setSelectionRange(2,7);
+    for (const value of [true,false,true]) {
+      wide=value;view.rerender(ui());expect(input.isConnected).toBe(true);expect(document.activeElement).toBe(input);expect([input.selectionStart,input.selectionEnd]).toEqual([2,7]);
+    }
+    const editor = document.createElement("div");editor.contentEditable="true";editor.tabIndex=0;const text=document.createTextNode("Retained text selection");editor.appendChild(text);container.appendChild(editor);editor.focus();document.getSelection()!.setBaseAndExtent(text,2,text,8);
+    wide=false;view.rerender(ui());expect(document.activeElement).toBe(editor);expect(document.getSelection()!.anchorNode).toBe(text);expect(document.getSelection()!.anchorOffset).toBe(2);expect(document.getSelection()!.focusNode).toBe(text);expect(document.getSelection()!.focusOffset).toBe(8);
+  });
+});

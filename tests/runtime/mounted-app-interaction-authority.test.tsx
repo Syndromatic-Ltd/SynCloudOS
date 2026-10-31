@@ -169,6 +169,13 @@ function CanonicalDocumentChildProbe({ documentId, onComplete }: {
 }
 
 describe("mounted application context and interaction authority", () => {
+  it.each(["inert","aria-hidden"] as const)("keeps actions in an outgoing %s subtree out of mounted app Tab order", async hidden => {
+    const runtime=createTestRuntime();runtimes.push(runtime);const app=registerApp(runtime,"com.example.hidden-focus-app");
+    const attributes=hidden==="inert"?{inert:true}:{"aria-hidden":true as const};
+    render(<SynCloudOSProvider runtime={runtime}><HostSiteBrandingProvider value={siteBranding}><SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.bundleIdentifier}`}><FocusScope scopeId="focus:outgoing" kind="modal" parentResponderId={`application:${app.bundleIdentifier}`}><div {...attributes}><button>Leaving action</button></div><button>Current action</button></FocusScope></SynWareRuntimeMount></HostSiteBrandingProvider></SynCloudOSProvider>);
+    const current=await screen.findByRole("button",{name:"Current action"});await waitFor(()=>expect(document.activeElement).toBe(current));
+    fireEvent.keyDown(current,{key:"Tab"});expect(document.activeElement).toBe(current);
+  });
   it("reveals a clipped keyboard-wrapped action through the mounted app focus lease", async () => {
     const runtime = createTestRuntime();runtimes.push(runtime);
     const app = registerApp(runtime, "com.example.focus-reveal-app");

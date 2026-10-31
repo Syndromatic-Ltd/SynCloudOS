@@ -101,13 +101,57 @@ class WebspringViewBoundary extends Component<ViewBoundaryProps, ViewBoundarySta
   }
 }
 
-function ApplicationOutletSlot({ container }: { readonly container: HTMLElement }) {
+interface OutletFocusSnapshot {
+  readonly element: HTMLElement;
+  readonly visible: boolean;
+  readonly selection: { readonly anchor: Node; readonly anchorOffset: number; readonly focus: Node; readonly focusOffset: number } | null;
+}
+
+function captureOutletFocus(container: HTMLElement): OutletFocusSnapshot | null {
+  const active = container.ownerDocument.activeElement;
+  if (!(active instanceof HTMLElement) || !container.contains(active)) return null;
+  const selection = container.ownerDocument.getSelection();
+  let visible = false;
+  try { visible = active.matches(":focus-visible"); } catch { /* Older engines retain their native focus treatment. */ }
+  return {
+    element: active, visible,
+    selection: selection?.anchorNode && selection.focusNode && container.contains(selection.anchorNode) && container.contains(selection.focusNode)
+      ? { anchor: selection.anchorNode, anchorOffset: selection.anchorOffset, focus: selection.focusNode, focusOffset: selection.focusOffset } : null,
+  };
+}
+
+function validSelectionOffset(node: Node, offset: number): boolean {
+  const characterData = node.nodeType === Node.TEXT_NODE || node.nodeType === Node.CDATA_SECTION_NODE || node.nodeType === Node.COMMENT_NODE;
+  return offset >= 0 && offset <= (characterData ? node.nodeValue?.length ?? 0 : node.childNodes.length);
+}
+
+function ApplicationOutletSlot({ container, focusHandoff }: { readonly container: HTMLElement; readonly focusHandoff: { current: OutletFocusSnapshot | null } }) {
   const slot = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const element = slot.current;
     if (!element) return;
-    element.appendChild(container);
-  }, [container]);
+    // A shell view can detach its slot before the successor adopts the same
+    // live application DOM. Capture on detach as well as before a direct move.
+    const previous = captureOutletFocus(container) ?? focusHandoff.current;
+    focusHandoff.current = null;
+    if (container.parentElement !== element) element.appendChild(container);
+    const document = container.ownerDocument;
+    const active = document.activeElement;
+    if (previous?.element.isConnected && container.contains(previous.element)
+      && !previous.element.closest("[inert], [hidden], [aria-hidden='true']") && !previous.element.matches(":disabled")
+      && (!active || active === document.body || active === document.documentElement || active === previous.element)) {
+      previous.element.focus({ preventScroll: true, ...(previous.visible ? { focusVisible: true } : {}) } as FocusOptions);
+      const selection = previous.selection;
+      if (document.activeElement === previous.element && selection?.anchor.isConnected && selection.focus.isConnected
+        && container.contains(selection.anchor) && container.contains(selection.focus)
+        && validSelectionOffset(selection.anchor, selection.anchorOffset) && validSelectionOffset(selection.focus, selection.focusOffset)) {
+        document.getSelection()?.setBaseAndExtent(selection.anchor, selection.anchorOffset, selection.focus, selection.focusOffset);
+      }
+    }
+    return () => {
+      if (container.parentElement === element) focusHandoff.current = captureOutletFocus(container);
+    };
+  }, [container, focusHandoff]);
   return <div ref={slot} className="webspring-application-outlet" />;
 }
 
@@ -234,7 +278,8 @@ export function WebspringHost({
   useEffect(() => {
     if (quickSwitchOpen && !canUseQuickSwitch) setQuickSwitchOpen(false);
   }, [canUseQuickSwitch, quickSwitchOpen]);
-  const applicationOutlet = <ApplicationOutletSlot container={outletContainer} />;
+  const outletFocusHandoff = useRef<OutletFocusSnapshot | null>(null);
+  const applicationOutlet = <ApplicationOutletSlot container={outletContainer} focusHandoff={outletFocusHandoff} />;
   const launchZoom = shell.launchZooms?.[viewId] ?? defaultWebspringLaunchZoom;
   const applicationStage = <WebspringLaunchZoomContext.Provider value={launchZoom}><ApplicationStageLayer
     windowContentRegistry={registry}
