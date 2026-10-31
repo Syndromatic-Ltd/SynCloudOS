@@ -101,4 +101,12 @@ describe("scoped playback presentation", () => {
     const f=fixture(); const request=new Proxy(f.request,{ownKeys(target){f.owner.abort();return Reflect.ownKeys(target);}});
     expect(()=>f.service.present(f.handle,request)).toThrow(); expect(f.session.setActionHandler).not.toHaveBeenCalled(); expect(f.ownerListeners.size+f.playbackListeners.size).toBe(0);
   });
+  it("serializes replacement installed by a cancellation observer before old native teardown", () => {
+    const f=fixture(); f.dispatch.mockReturnValueOnce(new Promise(()=>{}));
+    const first=f.service.present(f.handle,f.request);let replacement: ReturnType<typeof f.service.present> | null=null;
+    f.handlers.get("play")!({action:"play"});
+    first.subscribe(()=>{if(first.getSnapshot().lastAction==="cancelled"&&!replacement)replacement=f.service.present(f.handle,{...f.request,metadata:{title:"Replacement"}});});
+    first.dispose();expect(replacement!.getSnapshot().state).toBe("active");expect(f.session.metadata?.title).toBe("Replacement");expect(f.handlers.get("play")).toEqual(expect.any(Function));
+    first.dispose();expect(f.session.metadata?.title).toBe("Replacement");f.owner.abort();expect(f.session.metadata).toBeNull();
+  });
 });
