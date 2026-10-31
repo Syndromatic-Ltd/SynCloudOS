@@ -291,3 +291,5 @@ export function createSynCloudOSFacade(runtime: SynCloudOSRuntime) {
   facadeCache.set(runtime, facade);
   return facade;
 }
+
+export * from "./Updates";
