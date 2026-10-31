@@ -138,6 +138,19 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Ordinary action labels may wrap when text zoom or localization exhausts
+   their available width. Keep the 52px minimum target; explicit tool/tab
+   chrome retains its own sizing and single-line presentation. */
+:where([data-nse-appearance="atmo"]) .nse-control-button:where(:not(.nse-extended-tool-button, .nse-control-picker-button, .nse-tab-bar-tab)) {
+  grid-auto-columns: minmax(0, max-content);
+  height: auto;
+  line-height: 1.2;
+}
+:where([data-nse-appearance="atmo"]) .nse-control-button:where(:not(.nse-extended-tool-button, .nse-control-picker-button, .nse-tab-bar-tab)) > .nse-control-button-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 :where([data-nse-appearance="atmo"]) .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"] {
   border-image-source: var(--nse-atmo-button-light);
   color: #332;
@@ -2016,8 +2029,8 @@
   font-size: 32px;
   font-weight: 900;
   line-height: 1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-page-header-body {
