@@ -23,6 +23,7 @@
  * session capabilities, never a runtime/store/manager escape hatch.
  */
 export { SCOS, useSCOS, createAppSCOS, SCOSError } from "./scos";
+export type { AppPlaybackMetadata, AppPlaybackAction, AppPlaybackPresentationRequest, AppPlaybackPresentationSnapshot, AppPlaybackPresentationLease, AppScreenWakeClient, AppScreenWakeSnapshot, AppScreenWakeLease } from "./playbackPresentationTypes";
 export type { SCOSFacade, SCOSApplicationInfo, SCOSPreferences, SCOSStrings, SCOSErrorCode, SynCloudOSAlertRequest, SynCloudOSAlertButton, SynCloudOSAlertButtonRole } from "./scos";
 export { useFonts } from "./fontAccess";
 export type { SynWareFontAccess } from "./fontAccess";

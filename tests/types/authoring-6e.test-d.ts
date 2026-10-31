@@ -104,3 +104,8 @@ const playbackComponentModule = { default: () => createElement('p', null, 'Gener
 // @ts-expect-error A primitive is not a supported application entry.
 const rejectedPlaybackModule = { default: 42 } satisfies SynCloudOSAppModule;
 void playbackClassModule; void playbackComponentModule; void rejectedPlaybackModule;
+
+import type { SCOSFacade, AppPlaybackPresentationLease, AppScreenWakeLease } from '@syndromatic/syncloudos/sdk';
+const publicWakeLease = (lease: ReturnType<SCOSFacade['screenWakeLock']['request']>): AppScreenWakeLease => lease;
+const publicPlaybackLease = (lease: ReturnType<SCOSFacade['audio']['present']>): AppPlaybackPresentationLease => lease;
+void publicWakeLease; void publicPlaybackLease;
