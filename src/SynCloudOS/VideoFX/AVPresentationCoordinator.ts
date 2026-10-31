@@ -77,6 +77,27 @@ export class AVPresentationCoordinator {
   #loop: Readonly<{ start: MEFXTime; end: MEFXTime }> | null = null;
   #playRateNumerator = 1n;
   #playRateDenominator = 1n;
+  readonly #playbackListeners = new Set<() => void>();
+
+  /** Host projection of existing transport facts; no second clock or player.
+   * Pending or failed worklet transport must not appear to have completed. */
+  get playbackState(): "playing" | "paused" | "stopped" | "released" {
+    if (this.#disposed) return "released";
+    if (this.#transportPending || this.#transportFailure || (this.#ended && !this.#queue.length && !this.#inFlight)) return "stopped";
+    return this.#timebase.snapshot().rateNumerator === 0n ? "paused" : "playing";
+  }
+
+  subscribePlayback(listener: () => void): () => void {
+    this.#assertActive();
+    this.#playbackListeners.add(listener);
+    return () => { this.#playbackListeners.delete(listener); };
+  }
+
+  #publishPlayback(): void {
+    for (const listener of [...this.#playbackListeners]) {
+      try { listener(); } catch { /* observers do not own transport */ }
+    }
+  }
 
   constructor(options: AVPresentationCoordinatorOptions) {
     if (!options || typeof options !== "object") throw new TypeError("A/V presentation coordinator options are required.");
@@ -130,7 +151,9 @@ export class AVPresentationCoordinator {
     this.#assertActive();
     if (this.#queue.length >= this.#maximumQueuedFrames) return "queue-full";
     this.#queue.push(frame.clone());
+    const wasEnded = this.#ended;
     this.#ended = false;
+    if (wasEnded) this.#publishPlayback();
     return "queued";
   }
 
@@ -234,6 +257,7 @@ export class AVPresentationCoordinator {
     if (skewSeconds < -effectiveToleranceSeconds) {
       this.#droppedFrames += 1;
       frame.close();
+      if (this.#ended && !this.#queue.length) this.#publishPlayback();
       return Object.freeze({ action: "drop", skewSeconds });
     }
     const controller = new AbortController();
@@ -265,12 +289,14 @@ export class AVPresentationCoordinator {
     } finally {
       frame.close();
       this.#inFlight = null;
+      if (this.#ended && !this.#queue.length) this.#publishPlayback();
     }
   }
 
   end(): void {
     this.#assertActive();
     this.#ended = true;
+    this.#publishPlayback();
   }
 
   dispose(): void {
@@ -282,6 +308,8 @@ export class AVPresentationCoordinator {
     this.#inFlight?.abort();
     this.#audioTransport?.signal.removeEventListener("abort", this.#transportRevoked);
     this.#audioTransport?.dispose();
+    this.#publishPlayback();
+    this.#playbackListeners.clear();
   }
 
   #invalidate(): void {
@@ -292,6 +320,7 @@ export class AVPresentationCoordinator {
     this.#ended = false;
     for (const frame of this.#queue.splice(0)) frame.close();
     this.#inFlight?.abort();
+    this.#publishPlayback();
   }
 
   #invalidatePlayback(): void {
@@ -309,10 +338,11 @@ export class AVPresentationCoordinator {
     const receipt = this.#audioTransport?.apply(command);
     this.#transportFailure = null;
     change();
-    if (!receipt) return Promise.resolve();
-    if (!(receipt instanceof Promise)) { this.#alignTransport(receipt); return Promise.resolve(); }
+    if (!receipt) { this.#publishPlayback(); return Promise.resolve(); }
+    if (!(receipt instanceof Promise)) { this.#alignTransport(receipt); this.#publishPlayback(); return Promise.resolve(); }
     this.#transportPending = true;
     const mapping = this.#timebase.snapshot();
+    this.#publishPlayback();
     const settled = receipt.then(applied => {
       this.#assertActive();
       const current = this.#timebase.snapshot();
@@ -323,7 +353,7 @@ export class AVPresentationCoordinator {
       }
       if (!applied.audioAnchor) throw new DOMException("Live transport omitted its applied output anchor.", "InvalidStateError");
       this.#alignTransport(applied);
-    }).catch(error => { this.#transportFailure = error; throw error; }).finally(() => { this.#transportPending = false; });
+    }).catch(error => { this.#transportFailure = error; throw error; }).finally(() => { this.#transportPending = false; this.#publishPlayback(); });
     void settled.catch(() => {});
     return settled;
   }

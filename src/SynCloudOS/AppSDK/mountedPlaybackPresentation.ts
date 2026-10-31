@@ -25,6 +25,12 @@ import { browserPresentationErrorName } from "./browserPresentationError";
 const actions = Object.freeze(["play", "pause", "stop", "seekto", "seekbackward", "seekforward"] as const);
 type SessionPort = Pick<MediaSession, "metadata" | "playbackState" | "setActionHandler" | "setPositionState">;
 type Candidate = { eligible(): boolean; refresh(active: boolean): void; clear(): void };
+/** Host-created observation only; never accepts application-supplied player
+ * callbacks. AudioService and an issued video coordinator remain authorities. */
+export type MountedPlaybackSource = Pick<RuntimeAudioHandle, "state" | "duration" | "currentTime" | "rate"> & {
+  readonly allowedActions?: readonly AppPlaybackAction[];
+  subscribe?(listener: () => void): () => void;
+};
 // Media Session is page-global. Runtime-local services must not overwrite one
 // another. Ambiguous foreground evidence clears the old owner and defers all.
 const pages = new WeakMap<object, { candidates: Set<Candidate>; active: Candidate | null; refreshing: boolean; again: boolean }>();
@@ -77,7 +83,7 @@ export function createMountedPlaybackPresentation(input: {
   input.signal.addEventListener("abort", end, { once: true });
   if (input.signal.aborted) end();
   return Object.freeze({
-    present(handle: RuntimeAudioHandle, request: AppPlaybackPresentationRequest, callerSignal?: AbortSignal): AppPlaybackPresentationLease {
+    present(handle: MountedPlaybackSource, request: AppPlaybackPresentationRequest, callerSignal?: AbortSignal): AppPlaybackPresentationLease {
       input.assertLive(); input.signal.throwIfAborted(); callerSignal?.throwIfAborted();
       if (ended) throw new DOMException("Playback presentation owner ended.", "AbortError");
       if (!request || typeof request !== "object") throw new TypeError("Playback presentation requires a data record.");
@@ -92,6 +98,7 @@ export function createMountedPlaybackPresentation(input: {
       for (const action of actions) {
         const id = descriptors[action]?.value;
         if (id === undefined) continue;
+        if (handle.allowedActions && !handle.allowedActions.includes(action)) throw new TypeError("This playback owner does not support that transport action.");
         if (typeof id !== "string" || !id.trim() || id.length > 256) throw new TypeError("Playback action requires a bounded command ID.");
         bindings.set(action, id);
       }
@@ -99,6 +106,7 @@ export function createMountedPlaybackPresentation(input: {
       // Never create a new lease after its abort cleanup has already run.
       input.assertLive(); input.signal.throwIfAborted(); callerSignal?.throwIfAborted();
       const listeners = new Set<() => void>();
+      let removeSource: () => void = () => undefined;
       let disposed = false, installed = false, metadataDirty = true, actionEpoch = 0, installEpoch = 0;
       const pendingActions = new Set<AbortController>();
       let snapshot: AppPlaybackPresentationSnapshot = Object.freeze({ state: session && input.metadataFactory ? "deferred" : "unsupported", actions: Object.freeze([]), lastAction: "none", errorName: null });
@@ -171,6 +179,7 @@ export function createMountedPlaybackPresentation(input: {
       function release() {
         if (disposed) return;
         disposed = true; actionEpoch++;
+        removeSource();
         callerSignal?.removeEventListener("abort", release);
         if (key) {
           const page = pages.get(key)!;
@@ -186,6 +195,12 @@ export function createMountedPlaybackPresentation(input: {
       // Separate foreground owners remain ambiguous and defer page-wide.
       for (const previous of [...leases]) previous.release();
       leases.add(owned); if (key) pages.get(key)!.candidates.add(candidate);
+      try {
+        const unsubscribeSource = handle.subscribe?.(refresh);
+        if (unsubscribeSource) {
+          if (disposed) unsubscribeSource(); else removeSource = unsubscribeSource;
+        }
+      } catch (error) { release(); throw error; }
       callerSignal?.addEventListener("abort", release, { once: true }); refresh();
       return Object.freeze({ getSnapshot: () => snapshot, subscribe(listener: () => void) { if (disposed) return () => undefined; listeners.add(listener); return () => { listeners.delete(listener); }; }, updateMetadata(value: AppPlaybackMetadata) { input.assertLive(); if (disposed) throw new DOMException("Playback presentation released.", "AbortError"); data = metadata(value); metadataDirty = true; refresh(); }, dispose: release });
     },

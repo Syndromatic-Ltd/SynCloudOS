@@ -26,6 +26,9 @@ import type {
   VFXVideoClient,
 } from "../../FX/VideoFX/VFXCaptureSession";
 import type { VFXPresentationCoordinator } from "../../FX/VideoFX/VFXPresentation";
+import type { AppVideoClient, AppVideoPlaybackPresentationRequest } from "./appClientTypes";
+import type { AppPlaybackPresentationLease } from "./playbackPresentationTypes";
+import type { MountedPlaybackSource } from "./mountedPlaybackPresentation";
 import type { AudioGraphHostService, VideoCaptureService } from "../HostServices/AppSDKHostServiceTypes";
 import { AVPresentationCoordinator } from "../HostServices/AppSDKHostVideoPresentation";
 import { createMountedResourceScope, type MountedResourceAccounting } from "../HostServices/mountedResourceScope";
@@ -58,7 +61,19 @@ export function createMountedVideoClient(
   audioCapability?: object,
   limits: MountedVideoResourceLimits = {},
   accounting?: MountedResourceAccounting,
-): VFXVideoClient {
+  presentPlayback?: (source: MountedPlaybackSource, request: AppVideoPlaybackPresentationRequest, signal?: AbortSignal) => AppPlaybackPresentationLease,
+): AppVideoClient {
+  const presentationSources = new WeakMap<VFXPresentationCoordinator, MountedPlaybackSource>();
+  const registerPresentation = (coordinator: AVPresentationCoordinator) => {
+    presentationSources.set(coordinator, Object.freeze({
+      get state() { return coordinator.playbackState; },
+      // A looping coordinator does not establish a finite OS track position.
+      duration: null, currentTime: 0, rate: 1,
+      allowedActions: Object.freeze(["play", "pause"] as const),
+      subscribe: (listener: () => void) => coordinator.subscribePlayback(listener),
+    }));
+    return coordinator;
+  };
   // Host admission accounts for configured pixel workload independently of
   // stream count. Many small previews must not cost the same as as many 4K
   // streams. Consumers still own and bound their retained output windows.
@@ -106,6 +121,13 @@ export function createMountedVideoClient(
   };
 
   return Object.freeze({
+    present(coordinator: VFXPresentationCoordinator, request: AppVideoPlaybackPresentationRequest, signal?: AbortSignal) {
+      mountSignal.throwIfAborted(); signal?.throwIfAborted();
+      const source = presentationSources.get(coordinator);
+      if (!source || source.state === "released") throw securityError("Playback presentation requires this mount's live video coordinator.");
+      if (!presentPlayback) throw new DOMException("Video playback presentation is unavailable.", "NotSupportedError");
+      return presentPlayback(source, request, signal);
+    },
     queryDecoder(
       input: Parameters<VFXVideoClient["queryDecoder"]>[0],
       signal: Parameters<VFXVideoClient["queryDecoder"]>[1],
@@ -240,7 +262,7 @@ export function createMountedVideoClient(
           };
           Object.defineProperty(coordinator, "dispose", { configurable: true, value: dispose });
           lease.addEventListener("abort", dispose, { once: true });
-          return coordinator;
+          return registerPresentation(coordinator);
         }, coordinator => coordinator.dispose(), { sessions: 1 });
       }
       if (!audioGraphs) throw new DOMException("A/V synchronization host is unavailable.", "NotSupportedError");
@@ -269,7 +291,7 @@ export function createMountedVideoClient(
         };
         Object.defineProperty(coordinator, "dispose", { configurable: true, value: dispose });
         lease.addEventListener("abort", dispose, { once: true });
-        return coordinator;
+        return registerPresentation(coordinator);
       }, coordinator => coordinator.dispose(), { sessions: 1 });
     },
 

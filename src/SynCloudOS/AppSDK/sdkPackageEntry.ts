@@ -352,6 +352,7 @@ export type {
   SynWareWindowState,
 } from "./hooks";
 export type { SynCloudOSPresentationTraits } from "./appClientTypes";
+export type { AppVideoClient, AppVideoPlaybackPresentationRequest } from "./appClientTypes";
 export type { SCOSRoutes } from "./controllerServices";
 
 export { useStrings, translateSynWareText, getSynWareNamespace } from "./useStrings";

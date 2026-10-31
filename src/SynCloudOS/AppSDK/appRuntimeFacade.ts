@@ -4460,6 +4460,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         audioInputCapability,
         {},
         { owner: app.bundleIdentifier, register: (participant) => runtime.resources.register(participant) },
+        (source, request, callerSignal) => playbackPresentationForMount().present(source, request, callerSignal),
       ),
       location: createMountedLocationClient(
         runtime.location,
