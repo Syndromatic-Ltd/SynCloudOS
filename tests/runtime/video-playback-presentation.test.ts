@@ -135,3 +135,12 @@ it("allows reentrant observer disposal without retaining observers or native han
   await coordinator.play(); expect(coordinator.playbackState).toBe("released"); expect(lease.getSnapshot().state).toBe("released");
   expect(f.session.metadata).toBeNull(); const count = observer.mock.calls.length; coordinator.dispose(); expect(observer).toHaveBeenCalledTimes(count);
 });
+
+it("retires observational presentation when the underlying timebase ends before its coordinator", () => {
+  const f = fixture(), coordinator = f.create(), lease = f.video.present(coordinator, f.request), old = f.handlers.get("play")!;
+  f.timebase.dispose();
+  expect(() => f.foreground(false)).not.toThrow();
+  expect(lease.getSnapshot().state).toBe("released"); expect(f.session.metadata).toBeNull();
+  old({ action: "play" }); expect(f.dispatch).not.toHaveBeenCalled();
+  expect(() => f.video.present(coordinator, f.request)).toThrow(expect.objectContaining({ name: "SecurityError" }));
+});

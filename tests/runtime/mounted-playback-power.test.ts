@@ -8,7 +8,7 @@ import type { RuntimeAudioAdapter, RuntimeAudioPlaybackCallbacks } from "../../s
 
 const cleanups: (() => void | Promise<unknown>)[] = [];
 afterEach(async () => { for (const fn of cleanups.splice(0).reverse()) await fn(); vi.restoreAllMocks(); document.body.innerHTML = ""; });
-async function fixture() {
+async function fixture(withMediaClock = false) {
   const handlers = new Map<string, MediaSessionActionHandler | null>();
   const session = { metadata: null as MediaMetadata | null, playbackState: "none", setActionHandler: (a: string, fn: MediaSessionActionHandler | null) => { handlers.set(a, fn); }, setPositionState: vi.fn() };
   const sentinel = new EventTarget() as EventTarget & { released: boolean; release: ReturnType<typeof vi.fn> }; sentinel.released = false; sentinel.release = vi.fn(async () => { sentinel.released = true; sentinel.dispatchEvent(new Event("release")); });
@@ -21,7 +21,7 @@ async function fixture() {
   const playback = { play: vi.fn(async () => {}), pause: vi.fn(), stop: vi.fn(), setLoop: vi.fn(), setVolume: vi.fn(), setRate: vi.fn(), setCurrentTime: vi.fn((value: number) => { time = value; }), duration: () => 60, currentTime: () => time, dispose: vi.fn() };
   const adapter = { claimActivation: () => Object.freeze({}), loadResource: async (source: string) => ({ id: source, source, byteLength: 4, mimeType: "audio/wav" }), createPlayback: (_: unknown, cb: RuntimeAudioPlaybackCallbacks) => { callbacks = cb; return playback; }, releaseResource: vi.fn(), dispose: vi.fn(), diagnostics: () => ({ resourceCount: 0, objectURLCount: 0, playbackCount: 0, listenerCount: 0, activationCount: 0 }) } as unknown as RuntimeAudioAdapter;
   const env = createTestRuntimeEnvironment();
-  const runtime = createTestRuntime({ environment: { ...env, browser: { ...env.browser, getNavigator: () => nav }, audio: { acquire: () => ({ adapter, release() {} }) } } }); cleanups.push(() => runtime.dispose());
+  const runtime = createTestRuntime({ environment: { ...env, ...(withMediaClock ? { monotonicNowSeconds: () => 0 } : {}), browser: { ...env.browser, getNavigator: () => nav }, audio: { acquire: () => ({ adapter, release() {} }) } } }); cleanups.push(() => runtime.dispose());
   unlockRuntime(runtime); await runtime.identity.session.refresh();
   const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.playback-power", displayName: "Playback power", version: "1.0.0" });
   const responderId = `application:${app.bundleIdentifier}`; runtime.responders.register({ id: responderId, kind: "application", parentId: "runtime", scopeId: responderId });
@@ -93,4 +93,24 @@ describe("mounted playback and power authority", () => {
     const result = await f.runtime.windows.requestClose(f.windowController.id, { reason: "command" }); await flush();
     expect(result.outcome).toBe("closed"); expect(wake.getSnapshot().state).toBe("released"); expect(presentation.getSnapshot().state).toBe("released"); expect(f.session.metadata).toBeNull();
   });
+  it("retires issued video presentation on account change and rejects retained prior-account clients", async () => {
+    const f = await fixture(true); const timebase = f.context.media.createTimebase({ rateNumerator: 0n });
+    const coordinator = f.context.video.createPresentationCoordinator({ mode: "media", timebase, present() {} });
+    const lease = f.context.video.present(coordinator, f.request), old = f.handlers.get("play")!;
+    expect(lease.getSnapshot().state).toBe("active");
+    await f.runtime.identity.session.end({ reason: "Generated video account ended" }); await flush();
+    expect(lease.getSnapshot().state).toBe("released"); expect(f.session.metadata).toBeNull();
+    old({ action: "play" }); await flush(); expect(f.execute).not.toHaveBeenCalled();
+    expect(() => f.context.video.present(coordinator, f.request)).toThrow();
+  });
+  it("retires the actual scoped video coordinator presentation when its window closes", async () => {
+    const f = await fixture(true); const timebase = f.context.media.createTimebase({ rateNumerator: 0n });
+    const coordinator = f.context.video.createPresentationCoordinator({ mode: "media", timebase, present() {} });
+    const lease = f.context.video.present(coordinator, f.request), old = f.handlers.get("play")!;
+    const result = await f.runtime.windows.requestClose(f.windowController.id, { reason: "command" }); await flush();
+    expect(result.outcome).toBe("closed"); expect(lease.getSnapshot().state).toBe("released"); expect(f.session.metadata).toBeNull();
+    old({ action: "play" }); await flush(); expect(f.execute).not.toHaveBeenCalled();
+    expect(() => f.context.video.present(coordinator, f.request)).toThrow();
+  });
+
 });
