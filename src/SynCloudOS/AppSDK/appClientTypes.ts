@@ -18,6 +18,16 @@
  */
 
 import type { AppPlaybackPresentationLease, AppPlaybackPresentationRequest } from "./playbackPresentationTypes";
+import type { VFXVideoClient, VFXPresentationCoordinator } from "../../FX/VideoFX/public";
+
+/** Looping video has no finite track position. Transport stays with the exact
+ * mounted coordinator and the application's validated play/pause commands. */
+export type AppVideoPlaybackPresentationRequest = Omit<AppPlaybackPresentationRequest, "commands"> & {
+  readonly commands: Readonly<Partial<Record<"play" | "pause", string>>>;
+};
+export interface AppVideoClient extends VFXVideoClient {
+  present(coordinator: VFXPresentationCoordinator, request: AppVideoPlaybackPresentationRequest, signal?: AbortSignal): AppPlaybackPresentationLease;
+}
 
 
 import type { AUFXAudioEngine } from "../../FX/AudioFX/AUFXAudioEngine";

@@ -22,7 +22,7 @@ import type { MFXMotionClient } from "../../FX/MotionFX/public";
 import type { LFXLocationClient } from "../../FX/LocationFX/public";
 import type { MIFXClient } from "../../FX/MIDIFX/public";
 import type { MEFXMediaClient } from "../../FX/MediaFX/MEFXMediaClient";
-import type { VFXVideoClient } from "../../FX/VideoFX/public";
+import type { AppVideoClient } from "./appClientTypes";
 import type { LUFXIndexClient } from "../../FX/LuminaFX/public";
 import type {
   AppAppearanceClient,
@@ -135,7 +135,7 @@ export interface SynWareContextValue {
   readonly filePanels: AppFilePanelClient;
   readonly motion: MFXMotionClient;
   readonly media: MEFXMediaClient;
-  readonly video: VFXVideoClient;
+  readonly video: AppVideoClient;
   readonly location: LFXLocationClient;
   readonly midi: MIFXClient;
   readonly lumina: LUFXIndexClient;

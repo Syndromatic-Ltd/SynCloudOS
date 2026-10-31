@@ -208,5 +208,6 @@ export type { NSEActionBinding, NSEActionHost, NSEActionMethod, NSEActionOptions
 export { NSEViewControllerView } from "../AppHosting/authoring";
 export type { NSEViewControllerViewProps } from "../AppHosting/authoring";
 export type { SynCloudOSPresentationTraits } from "./appClientTypes";
+export type { AppVideoClient, AppVideoPlaybackPresentationRequest } from "./appClientTypes";
 export type { AppPlaybackMetadata, AppPlaybackAction, AppPlaybackPresentationRequest, AppPlaybackPresentationSnapshot, AppPlaybackPresentationLease, AppScreenWakeClient, AppScreenWakeSnapshot, AppScreenWakeLease } from "./playbackPresentationTypes";
 export type { SCOSRoutes } from "./controllerServices";
