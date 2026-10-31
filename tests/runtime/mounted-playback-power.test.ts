@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createTestRuntime, createTestRuntimeEnvironment, registerTestSynWare, unlockRuntime } from "./helpers";
+import { createTestRuntime, createTestRuntimeEnvironment, registerTestSynWare, unlockRuntime, mountTestSynWareRuntime } from "./helpers";
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { standardWindow } from "../fixtures/windowTestDependencies";
@@ -40,6 +40,16 @@ async function fixture() {
 }
 async function flush() { for (let i = 0; i < 24; i++) await Promise.resolve(); }
 describe("mounted playback and power authority", () => {
+  it("leaves unused media and wake capabilities untouched for narrow share/picker host windows", async () => {
+    const media=vi.fn(()=>{throw new Error("Unused Media Session was inspected");}),wake=vi.fn(()=>{throw new Error("Unused wake lock was inspected");});
+    const nav=Object.defineProperties({},{mediaSession:{get:media},wakeLock:{get:wake}});
+    const environment=createTestRuntimeEnvironment();Object.assign(environment.browser,{getNavigator:()=>nav,getWindow:()=>({isSecureContext:true})});
+    const runtime=createTestRuntime({environment});cleanups.push(()=>runtime.dispose());
+    registerTestSynWare(runtime,{schemaVersion:1,bundleIdentifier:"com.example.unused-native-ports",version:"1.0.0",displayName:"Generated"});
+    const mounted=mountTestSynWareRuntime(runtime,"com.example.unused-native-ports");cleanups.push(()=>mounted.dispose());
+    const context=createSynWareContextValue(mounted.runtime);expect(context.screenWakeLock.request).toEqual(expect.any(Function));expect(context.audio.present).toEqual(expect.any(Function));
+    expect(media).not.toHaveBeenCalled();expect(wake).not.toHaveBeenCalled();
+  });
   it("enforces handle ownership and dispatches native transport through actual mounted validation and audio tokens", async () => {
     const f = await fixture(); expect(() => f.context.audio.present("foreign", f.request)).toThrow(/owned/);
     const lease = f.context.audio.present(f.handle.id, f.request); expect(lease.getSnapshot().state).toBe("active");
