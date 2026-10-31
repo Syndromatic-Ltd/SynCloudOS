@@ -155,6 +155,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #appeared = false;
   #pendingDetach: object | null = null;
   #fx: NSEViewControllerFX | null = null;
+  #fxClients: NSEViewControllerFXClients | undefined;
   #traits: NSETraitCollection = Object.freeze({ reducedMotion: false, presentation: null });
 
   constructor(options: NSEViewControllerOptions = {}) {
@@ -220,7 +221,12 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   get fx(): NSEViewControllerFX {
     const binding = this.#requireMounted("fx");
     if (!binding.fx) throw new TypeError("fx needs a mounted application: render the view inside a SynWare.");
-    this.#fx ??= createViewControllerFX(binding.fx, this.ownerSignal, this);
+    // A retained controller can return in a new application mount. Its old
+    // ports remain retired; only the current binding may supply new FX work.
+    if (!this.#fx || this.#fxClients !== binding.fx) {
+      this.#fx = createViewControllerFX(binding.fx, this.ownerSignal, this);
+      this.#fxClients = binding.fx;
+    }
     return this.#fx;
   }
 
