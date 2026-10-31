@@ -33,6 +33,15 @@ import type { FocusScopeHandle } from "../../src/SynCloudOS/Focus/focusTypes";
 afterEach(cleanup);
 
 describe("focus scopes", () => {
+  it("requests a visible initial focus indicator for a programmatically focused modal action", async () => {
+    const runtime = createTestRuntime();runtime.responders.register({id:"app",kind:"application",parentId:"runtime",scopeId:"root"});
+    const focus=vi.spyOn(HTMLElement.prototype,"focus");
+    try {
+      render(<SynCloudOSProvider runtime={runtime}><FocusScope scopeId="modal:initial-visible" kind="modal" parentResponderId="app"><button>Initial visible action</button></FocusScope></SynCloudOSProvider>);
+      await waitFor(()=>expect(document.activeElement).toBe(screen.getByRole("button",{name:"Initial visible action"})));
+      expect(focus).toHaveBeenCalledWith({preventScroll:true,focusVisible:true});
+    } finally {focus.mockRestore();await runtime.dispose();}
+  });
   it("returns to a same-runtime shell control when no logical responder was previously focused", async () => {
     const runtime = createTestRuntime();
     const ui = (open: boolean) => <SynCloudOSProvider runtime={runtime}>
@@ -404,10 +413,10 @@ describe("focus scopes", () => {
     expect(document.activeElement).toBe(first);
     // The scope reveals its own scroll regions without moving the host page.
     // Pixel/scroll behaviour is also exercised in the rendered shallow-sheet journey.
-    expect(firstFocus).toHaveBeenLastCalledWith({ preventScroll: true });
+    expect(firstFocus).toHaveBeenLastCalledWith({ preventScroll: true, focusVisible: true });
     fireEvent.keyDown(first, { key: "Tab", shiftKey: true });
     expect(document.activeElement).toBe(last);
-    expect(lastFocus).toHaveBeenLastCalledWith({ preventScroll: true });
+    expect(lastFocus).toHaveBeenLastCalledWith({ preventScroll: true, focusVisible: true });
     const background = screen.getByTestId("background");
     view.unmount();
     expect(background.inert).not.toBe(true);

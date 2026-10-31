@@ -161,7 +161,7 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
       // than recursively redirecting the same transition.
       redirectingFocus = true;
       try {
-        target.focus({ preventScroll: true });
+        target.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
       } finally {
         queueMicrotask(() => {
           redirectingFocus = false;
@@ -183,7 +183,7 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
           belongsToRuntime(element, runtime.runtimeId) &&
           focusableTarget(element, runtime.runtimeId)
         ));
-      if (scopeRoot) focusableTarget(scopeRoot, runtime.runtimeId)?.focus({ preventScroll: true });
+      if (scopeRoot) focusableTarget(scopeRoot, runtime.runtimeId)?.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
     });
     return () => {
       live = false;
@@ -257,7 +257,7 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
           event.stopPropagation();
           const target = targets[event.shiftKey ? targets.length - 1 : 0];
           if (target && root) {
-            target.focus({ preventScroll: true });
+            target.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
             revealKeyboardTarget(root, target);
           }
           return;

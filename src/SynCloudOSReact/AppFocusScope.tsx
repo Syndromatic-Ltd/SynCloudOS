@@ -81,7 +81,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
     const root = rootRef.current;
     const doc = root?.ownerDocument ?? (typeof document === "undefined" ? null : document);
     const focusables = () => Array.from(root?.querySelectorAll<HTMLElement>(focusableSelector) ?? [])
-      .filter((element) => !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true");
+      .filter((element) => !element.hasAttribute("disabled") && !element.closest("[inert], [aria-hidden='true']"));
     let redirectingFocus = false;
     const onFocus = (event: FocusEvent) => {
       if (runtime.signal.aborted || redirectingFocus || !trapFocus || !root || !(event.target instanceof Node) || isWithinNSEFocusOrigin(root, event.target)) return;
@@ -100,7 +100,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       // app-owned trap cannot recurse through its own redirect.
       redirectingFocus = true;
       try {
-        target.focus({ preventScroll: true });
+        target.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
       } finally {
         queueMicrotask(() => {
           redirectingFocus = false;
@@ -116,7 +116,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
         event.preventDefault();
         const target = targets[event.shiftKey ? targets.length - 1 : 0];
         if (target) {
-          target.focus({ preventScroll: true });
+          target.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
           revealKeyboardTarget(root, target);
         }
       }
@@ -130,7 +130,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
     runtime.signal.addEventListener("abort", releaseDOMListeners, { once: true });
     queueMicrotask(() => {
       if (!live || runtime.signal.aborted) return;
-      if (root && doc?.activeElement && !isWithinNSEFocusOrigin(root, doc.activeElement)) focusables()[0]?.focus({ preventScroll: true });
+      if (root && doc?.activeElement && !isWithinNSEFocusOrigin(root, doc.activeElement)) focusables()[0]?.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
     });
     return () => {
       live = false;

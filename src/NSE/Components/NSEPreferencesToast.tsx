@@ -21,7 +21,7 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type HTMLAttributes, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import "./nsePreferencesToast.css";
-import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
+import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation, useNSEPresenceExiting } from "../Animation";
 import {
   resolveNSEPreferencesTransitions,
   type NSEPreferencesPaneDirection,
@@ -117,15 +117,17 @@ function PaneTitle({ children }: { children: ReactNode }) {
 
 /** A pane, pushed in and popped out as the stack moves. */
 function PaneSlide({ children }: { children: ReactNode }) {
+  const exiting = useNSEPresenceExiting();
   const ref = useRef<HTMLDivElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().pane(useContext(PaneDirectionContext)));
-  return <div ref={ref} className="nse-prefs-pane">{children}</div>;
+  return <div ref={ref} className="nse-prefs-pane" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</div>;
 }
 
 function BackSlot({ children }: { children: ReactNode }) {
+  const exiting = useNSEPresenceExiting();
   const ref = useRef<HTMLSpanElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().back);
-  return <span ref={ref} className="nse-prefs-back-slot">{children}</span>;
+  return <span ref={ref} className="nse-prefs-back-slot" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</span>;
 }
 
 /** The panel's body, at the height of the pane it shows, springing between
