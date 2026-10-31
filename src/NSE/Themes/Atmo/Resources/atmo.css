@@ -149,6 +149,14 @@
   --nse-atmo-btn-down-side: rgba(59, 59, 59, 0.87);
 }
 
+/* The vector material owns the final control height. Ordinary action copy
+   can reflow under text zoom; fixed chrome and explicitly sized controls
+   retain their existing metrics. The minimum target remains the theme's. */
+[data-nse-appearance="atmo"] .nse-control-button:where(:not(.nse-extended-tool-button, .nse-control-picker-button, .nse-tab-bar-tab, .nse-system-alert-action-button, [data-size])):where(:not(.nse-app-topbar *)) {
+  height: auto;
+  line-height: 1.35;
+}
+
 [data-nse-appearance="atmo"] .nse-control-button:where(:not(.nse-control-picker-button)):focus-visible {
   outline: none;
 }
