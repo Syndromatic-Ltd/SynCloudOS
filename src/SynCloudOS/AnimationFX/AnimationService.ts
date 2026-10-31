@@ -502,8 +502,16 @@ export function createRuntimeAnimationService(input: {
         get state() {
           return entry.state;
         },
-        cancel: (reason = "animation cancelled") =>
-          entry.settle("cancelled", reason),
+        cancel: (reason = "animation cancelled") => {
+          if (entry.state === "completed") {
+            // Completion settles once, but a held native fill still belongs
+            // to this handle until its presentation is superseded/removed.
+            const completed = playback; playback = null;
+            try { completed?.cancel(); } catch { /* cleanup is best effort */ }
+            return;
+          }
+          entry.settle("cancelled", reason);
+        },
         seek(seconds: number) {
           finite(
             seconds,

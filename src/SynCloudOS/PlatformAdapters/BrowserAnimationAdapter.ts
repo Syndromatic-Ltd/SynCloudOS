@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -351,6 +351,12 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
                   : cssTiming(request.timing)),
             }),
           );
+    let nativeCancelled = false;
+    const cancelNative = () => {
+      if (nativeCancelled) return;
+      nativeCancelled = true;
+      native?.cancel();
+    };
     let settled = false;
     let paused = false;
     let finishListenerInstalled = false;
@@ -533,7 +539,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
           return true;
         } catch {
           try {
-            native?.cancel();
+            cancelNative();
           } catch {
             /* settlement still owns cleanup */
           }
@@ -550,7 +556,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
           return true;
         } catch {
           try {
-            native?.cancel();
+            cancelNative();
           } catch {
             /* settlement still owns cleanup */
           }
@@ -583,18 +589,18 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
         if (!paused) scheduleCompletion();
       },
       cancel() {
-        if (!settled) {
-          try {
-            native?.cancel();
-          } finally {
-            settle("cancelled");
-          }
+        // A finished forwards fill is still a native presentation effect.
+        // Explicit cancellation removes it without changing settled facts.
+        try {
+          cancelNative();
+        } finally {
+          if (!settled) settle("cancelled");
         }
       },
       dispose() {
         if (!settled) {
           try {
-            native?.cancel();
+            cancelNative();
           } finally {
             settle("cancelled");
           }
@@ -610,7 +616,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
           (compiled.scroll && !this.#platform.applyScrollPosition)
         ) {
           settle("cancelled");
-          native?.cancel();
+          cancelNative();
           return;
         }
         native?.pause();
@@ -625,11 +631,11 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
             scrollSample(request, compiled, terminalProgress(request)),
           );
         settle("completed");
-        native?.cancel();
+        cancelNative();
       } catch {
         settle("cancelled");
         try {
-          native?.cancel();
+          cancelNative();
         } catch {
           /* Teardown remains terminal. */
         }
@@ -660,7 +666,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
       }
     } catch (error) {
       try {
-        native?.cancel();
+        cancelNative();
       } catch {
         /* preserve the startup failure */
       }

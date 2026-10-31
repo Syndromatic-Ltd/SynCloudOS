@@ -435,13 +435,14 @@ export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: N
   const settledState = useRef<string | null>(null);
   const run = (spec: NSEPresentationSpec | null | undefined, phase: "enter" | "exit"): AFXAnimationHandle | null => {
     const element = ref.current, active = view.current;
-    if (!spec || !element || !active) return null;
     const previous = running.current;
     running.current = null;
     // A presentation still in flight hands over from what it shows now.
-    const origin = previous && (previous.state === "running" || previous.state === "paused")
+    const origin = spec && element && previous && (previous.state === "running" || previous.state === "paused")
       ? presentedOrigin(element, spec) : {};
     previous?.cancel("superseded by the next presentation");
+    // A model-only state also supersedes a held exit presentation.
+    if (!spec || !element || !active) return null;
     active.generation += 1;
     // Presentation is cosmetic: an animation the service refuses leaves the
     // element in its final state rather than failing the view.
@@ -463,7 +464,7 @@ export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: N
     const handle = run(spec, "enter");
     if (!handle) { settledState.current = state; latest.current.onPresented?.(state); return; }
     void handle.finished.then((settlement) => {
-      if ((settlement.state === "completed" || settlement.state === "failed") && presentedState.current === state) {
+      if (running.current === handle && (settlement.state === "completed" || settlement.state === "failed") && presentedState.current === state) {
         settledState.current = state;
         latest.current.onPresented?.(state);
       }
