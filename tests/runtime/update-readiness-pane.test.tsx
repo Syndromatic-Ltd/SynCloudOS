@@ -16,6 +16,14 @@ function fixture(options: Parameters<typeof createTestRuntime>[0] = {}) {
   act(() => runtime.systemUI.preferences.open('updates')); return { runtime, ...view };
 }
 describe('read-only Updates preference pane', () => {
+  it('retains keyboard focus on the stable preferences owner when leaving a pane', () => {
+    const { runtime } = fixture(); const dialog = screen.getByRole('dialog', { name: 'System Preferences' });
+    const inspect = screen.getByRole('button', { name: 'Inspect current work' }); inspect.focus();
+    fireEvent.keyDown(inspect, { key: 'Escape' });
+    expect(document.activeElement).toBe(dialog);
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    expect(runtime.systemUI.preferences.isOpen()).toBe(false);
+  });
   it('shows incomplete coverage, known counts and compatibility independently, with no activation action', () => {
     fixture(); const dialog = screen.getByRole('dialog', { name: 'System Preferences' });
     expect(within(dialog).getByRole('status').textContent).toContain('Some work cannot be inspected');

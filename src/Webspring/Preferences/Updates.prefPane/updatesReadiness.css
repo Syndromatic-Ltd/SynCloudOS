@@ -1,4 +1,7 @@
-.nse-update-readiness { display: grid; gap: 14px; min-width: 0; }
+.nse-update-readiness { display: grid; gap: 14px; min-width: 0; color: var(--nse-prefs-row-colour, #263746); }
+.nse-update-readiness .nse-prefs-note { color: var(--nse-prefs-note-lead-colour, rgba(42, 55, 70, 0.78)); }
+[data-mode="dark"] .nse-update-readiness { color: var(--nse-prefs-row-colour, #e7ecf2); }
+[data-mode="dark"] .nse-update-readiness .nse-prefs-note { color: var(--nse-prefs-note-lead-colour, rgba(206, 214, 224, 0.82)); }
 .nse-update-readiness-section { padding: 12px; min-width: 0; overflow-wrap: anywhere; }
 .nse-update-readiness h2, .nse-update-readiness h3 { font: inherit; font-weight: 600; margin: 0 0 10px; }
 .nse-update-readiness p { margin: 8px 0; }

@@ -206,6 +206,9 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
   }, [contentNode]);
 
   const goToPane = useCallback((id: string | null) => {
+    // Keep keyboard ownership on the stable dialog before its outgoing pane
+    // unmounts. Otherwise focus can fall to the page and Escape stops reaching it.
+    if (dialogRef.current?.contains(document.activeElement)) dialogRef.current.focus({ preventScroll: true });
     setDirection(id === null ? "back" : "forward");
     setActiveId(id);
   }, []);
