@@ -66,7 +66,10 @@ export function createMountedVideoClient(
   const presentationSources = new WeakMap<VFXPresentationCoordinator, MountedPlaybackSource>();
   const registerPresentation = (coordinator: AVPresentationCoordinator) => {
     presentationSources.set(coordinator, Object.freeze({
-      get state() { return coordinator.playbackState; },
+      get state() {
+        try { return coordinator.playbackState; }
+        catch { return "released" as const; } // an ended timebase cannot own native presentation
+      },
       // A looping coordinator does not establish a finite OS track position.
       duration: null, currentTime: 0, rate: 1,
       allowedActions: Object.freeze(["play", "pause"] as const),
