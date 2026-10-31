@@ -151,6 +151,22 @@ describe('owned readonly update facts', () => {
     const owner = new AbortController(), activity = new NativeOperationActivity(owner.signal), invoke = vi.fn();
     activity.subscribe(() => owner.abort()); expect(() => activity.track(invoke)).toThrow(); expect(invoke).not.toHaveBeenCalled();
   });
+  it('rechecks the share caller after a longer-lived native activity observer ends that caller', async () => {
+    const host = new AbortController(), caller = new AbortController(); const activity = new NativeOperationActivity(host.signal);
+    const invoke = vi.fn(async () => {}); activity.subscribe(() => caller.abort());
+    const environment = createTestRuntimeEnvironment(); Object.assign(environment.browser, { getNavigator: () => ({ share: invoke, userActivation: { isActive: true } }), getWindow: () => ({ isSecureContext: true }) });
+    const client = createMountedShareClient({ browser: environment.browser, signal: caller.signal, assertLive() {}, access: () => ({ declared: true, allowed: true }), nativeActivity: activity });
+    expect(await client.perform({ title: 'Generated only' })).toEqual({ kind: 'aborted' });
+    expect(invoke).not.toHaveBeenCalled(); expect(activity.read().known).toBe(true); expect(activity.read().blockers).toEqual([]); host.abort();
+  });
+  it.each(['open', 'directory', 'save'] as const)('rechecks the %s caller after a longer-lived native activity observer ends that caller', async operation => {
+    const host = new AbortController(), caller = new AbortController(); const activity = new NativeOperationActivity(host.signal);
+    const invoke = vi.fn(async () => operation === 'open' ? [] : { kind: 'file', name: 'generated.txt' }); activity.subscribe(() => caller.abort());
+    const native = { showOpenFilePicker: invoke, showDirectoryPicker: invoke, showSaveFilePicker: invoke };
+    const port = createBrowserFileSystemAccessPanelPort(native as unknown as Window, activity)!;
+    const pending = operation === 'open' ? port.openFiles({ accepts: [], multiple: false }, caller.signal) : operation === 'directory' ? port.openDirectory(caller.signal) : port.saveFile({ accepts: [], suggestedName: 'generated.txt' }, caller.signal);
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' }); expect(invoke).not.toHaveBeenCalled(); expect(activity.read().blockers).toEqual([]); host.abort();
+  });
   it('isolates a throwing presentation observer from its existing authority', () => {
     const facts = source(); const c = controller(inventory([facts])); c.subscribe(() => { throw new Error('Generated observer error'); });
     expect(() => facts.set(['dirty'])).not.toThrow(); expect(c.inspect().blockers).toEqual(['dirty']);

@@ -128,7 +128,7 @@ export function createMountedShareClient(options: MountedShareOptions): AppShare
     let nativeSettlementOwnsPending=false;
     try {
       // Retain the native receiver and consume activation before the first await.
-      const action=()=>{signal.throwIfAborted();options.assertLive();return options.nativeActivity ? options.nativeActivity.track(()=>navigator!.share.call(navigator,data)) : navigator!.share.call(navigator,data);};
+      const action=()=>{signal.throwIfAborted();options.assertLive();return options.nativeActivity ? options.nativeActivity.track(()=>{signal.throwIfAborted();options.assertLive();return navigator!.share.call(navigator,data);}) : navigator!.share.call(navigator,data);};
       const operation=options.invoke?options.invoke(action,signal):action();
       nativeSettlementOwnsPending=true;
       // Caller cancellation cannot close a native share sheet. Keep the busy
