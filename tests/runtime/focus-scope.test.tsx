@@ -372,10 +372,16 @@ describe("focus scopes", () => {
     await waitFor(() => expect(document.activeElement).toBe(first));
     expect(screen.getByTestId("background").inert).toBe(true);
     last.focus();
+    const firstFocus = vi.spyOn(first, "focus");
+    const lastFocus = vi.spyOn(last, "focus");
     fireEvent.keyDown(last, { key: "Tab" });
     expect(document.activeElement).toBe(first);
+    // Keyboard wrapping must retain native reveal scrolling for clipped actions.
+    // Pixel/scroll behaviour is also exercised in the rendered shallow-sheet journey.
+    expect(firstFocus).toHaveBeenLastCalledWith();
     fireEvent.keyDown(first, { key: "Tab", shiftKey: true });
     expect(document.activeElement).toBe(last);
+    expect(lastFocus).toHaveBeenLastCalledWith();
     const background = screen.getByTestId("background");
     view.unmount();
     expect(background.inert).not.toBe(true);
