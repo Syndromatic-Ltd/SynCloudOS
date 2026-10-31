@@ -67,7 +67,7 @@ describe("mounted playback and power authority", () => {
     const lease = f.context.audio.present(f.handle.id, { metadata: { title: "Generated" }, commands: { play: "com.example.playback-power.delayed" } });
     f.handlers.get("play")!({ action: "play" }); await flush();
     const foreign = document.createElement("button"); foreign.dataset.syncloudosRuntimeOwner = "runtime:other"; document.body.append(foreign); foreign.focus(); finish({ enabled: true }); await flush();
-    expect(execute).not.toHaveBeenCalled(); expect(lease.getSnapshot().state).toBe("deferred");
+    expect(execute).not.toHaveBeenCalled(); expect(lease.getSnapshot()).toMatchObject({ state: "deferred", lastAction: "cancelled" });
   });
   it("account changes retire presentation, pending native requests and all retained prior-account clients", async () => {
     const f = await fixture(); const presentation = f.context.audio.present(f.handle.id, f.request); const wake = f.context.screenWakeLock.request("Reader"); await flush();

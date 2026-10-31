@@ -34,7 +34,7 @@ export interface AppPlaybackPresentationRequest {
 export interface AppPlaybackPresentationSnapshot {
   readonly state: "active" | "deferred" | "unsupported" | "failed" | "released";
   readonly actions: readonly AppPlaybackAction[];
-  readonly lastAction: "none" | "pending" | "completed" | "refused" | "failed";
+  readonly lastAction: "none" | "pending" | "completed" | "refused" | "failed" | "cancelled";
   readonly errorName: string | null;
 }
 export interface AppPlaybackPresentationLease {
