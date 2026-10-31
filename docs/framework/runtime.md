@@ -222,3 +222,24 @@ The retained controller's lazy FX facade follows the current mounted client bind
 Controller route subscriptions observe the committed route snapshot, rather than every RuntimeStore publication. Readiness/native-operation/job changes still publish their own facts without replaying an unchanged route or its restoration/provider work. Each listener advances its own observed snapshot before invoking application code, so an earlier listener's read or reentrant unrelated publication cannot duplicate or suppress another listener's real route event. A genuinely committed recognition, including a new recognition of the same URL, remains observable. Unsubscription and mount retirement end that observation without reviving departing query state.
 
 Both clients are optional browser integrations without service-worker registration, caching, activation, notifications, capture or backend configuration. Wake lock requires browser support, a secure context and permission/policy/OS approval; the OS can revoke it. Unit and injected-browser ports verify ownership and lifecycle, not native installation, OS media controls, physical folding or universal wake-lock support. The installed/offline host rollout and credentialed WebKit gate remain separate decisions.
+
+### Document work in update-readiness observations
+
+`DocumentController.activity` is a read-only source of immutable, revisioned
+admission, recovery and cleanup stage counts. Counts describe outstanding stages,
+not unique requests or documents. The controller observes admission queueing and
+actual commit settlement separately: logical cancellation cannot release a still
+running adapter read or late resource-factory cleanup. All controller-created
+documents inherit this source. Recovery observations include scheduled timers,
+queued/running writes and removals; structural close remains observed through its
+actual cleanup promise even after published membership is removed. None of these
+observations invokes save, discard, cancellation, settle or close.
+
+The host marks controller-owned document admission coverage as observed and
+removes the recovery-cleanup gap for these owners. Editing, terminal/resource and
+deferred terminal/window ownership, underlying operation callbacks, application
+lifecycle, private jobs, native writes, general persistence and service/media work
+still have explicit gaps. Directly constructed documents outside this controller
+are outside its census. Zero stage counts do not establish global idle, recovery
+presence does not establish latest-data durability, and participant observations
+remain historical. Host update decisions still defer, with activation disabled.

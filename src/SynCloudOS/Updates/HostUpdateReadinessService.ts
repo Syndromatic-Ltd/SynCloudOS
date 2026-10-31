@@ -40,10 +40,14 @@ export class HostUpdateReadinessService {
     this.#inspection = Object.freeze({ ...this.#snapshot.inspection, available: !!options.inspectParticipants, reason: options.inspectParticipants ? null : 'not-configured' });
     const build = options.hostBuild ?? 'unconfigured';
     this.#reconcileDocuments();
+    const activity = runtime.documents.activity;
+    const admissions: UpdateReadinessAuthority = { domain: 'documents', read: () => ({ known: !this.#disposed, revision: activity.getSnapshot().revision, blockers: activity.getSnapshot().admissions ? ['owner-busy'] : [] }), subscribe: listener => activity.subscribe(listener) };
+    const recovery: UpdateReadinessAuthority = { domain: 'tasks', read: () => ({ known: !this.#disposed, revision: activity.getSnapshot().revision, blockers: activity.getSnapshot().recovery || activity.getSnapshot().cleanup ? ['recovery-write'] : [] }), subscribe: listener => activity.subscribe(listener) };
     const tasks: UpdateReadinessAuthority = { domain: 'tasks', read: () => ({ known: !this.#disposed, revision: this.#revision, blockers: !runtime.store.getSnapshot().booted || runtime.disposalState !== 'running' || runtime.operations.inspectPending().length || runtime.jobs.snapshot().active || runtime.jobs.snapshot().queued ? ['owner-busy'] : [] }), subscribe: listener => { this.#taskListeners.add(listener); return () => { this.#taskListeners.delete(listener); }; } };
     this.#projection = new UpdateReadinessProjection({ clientInstance: ('host-' + runtime.environment.randomUUID().replace(/[^a-zA-Z0-9_-]/g, '_')).slice(0, 96).padEnd(8, '_'), hostBuild: build, inventory: {
-      // Every audited domain still has a precise unresolved owner census.
-      read: () => ({ covered: [], authorities: [...this.#documents.values(), tasks, runtime.nativeActivity] }),
+      // Controller-owned document admissions are observed; the other domains
+      // still have explicit unresolved owner coverage.
+      read: () => ({ covered: ['documents'], authorities: [...this.#documents.values(), admissions, recovery, tasks, runtime.nativeActivity] }),
       subscribe: listener => { this.#inventoryListeners.add(listener); return () => { this.#inventoryListeners.delete(listener); }; },
     } });
     this.#releases.push(this.#projection.subscribe(() => this.#publish()));
@@ -142,7 +146,7 @@ export class HostUpdateReadinessService {
   }
   #counts(): HostReadinessCounts {
     const documents = this.#runtime.documents.openDocuments, jobs = this.#runtime.jobs.snapshot();
-    return Object.freeze({ documents: documents.length, dirtyDocuments: documents.filter(document => document.hasUnsavedChanges).length, savingDocuments: documents.filter(document => document.state === 'saving').length, conflictedDocuments: documents.filter(document => document.state === 'conflicted').length, windows: this.#runtime.windows.snapshot().windowControllerIds.length, operations: this.#runtime.operations.inspectPending().length, activeJobs: jobs.active, queuedJobs: jobs.queued, nativeOperations: this.#runtime.nativeActivity.pendingOperationCount });
+    return Object.freeze({ documents: documents.length, dirtyDocuments: documents.filter(document => document.hasUnsavedChanges).length, savingDocuments: documents.filter(document => document.state === 'saving').length, conflictedDocuments: documents.filter(document => document.state === 'conflicted').length, windows: this.#runtime.windows.snapshot().windowControllerIds.length, operations: this.#runtime.operations.inspectPending().length, activeJobs: jobs.active, queuedJobs: jobs.queued, nativeOperations: this.#runtime.nativeActivity.pendingOperationCount, documentAdmissions: this.#runtime.documents.activity.getSnapshot().admissions, documentRecovery: this.#runtime.documents.activity.getSnapshot().recovery, documentCleanup: this.#runtime.documents.activity.getSnapshot().cleanup });
   }
   #publish(): void {
     if (this.#disposed) return;
@@ -151,7 +155,8 @@ export class HostUpdateReadinessService {
     try {
       const client = this.#projection.inspect();
       if (this.#inspection.sourceGeneration !== null && this.#inspection.sourceGeneration !== client.generation && ['checking', 'observed'].includes(this.#inspection.state)) this.#stale('work-changed');
-      let coverage = this.#runtime.environment.createFileSystemAccessPanelPort ? hostReadinessCoverage : Object.freeze(hostReadinessCoverage.map(row => row.domain === 'native' ? Object.freeze({ ...row, gaps: Object.freeze([...row.gaps, 'native-picker-instrumentation' as const]) }) : row));
+      const observedCoverage = Object.freeze(hostReadinessCoverage.map(row => row.domain === 'documents' ? Object.freeze({ ...row, status: 'observed' as const, gaps: Object.freeze([]) }) : row.domain === 'tasks' ? Object.freeze({ ...row, gaps: Object.freeze(row.gaps.filter(gap => gap !== 'recovery-cleanup')) }) : row));
+      let coverage = this.#runtime.environment.createFileSystemAccessPanelPort ? observedCoverage : Object.freeze(observedCoverage.map(row => row.domain === 'native' ? Object.freeze({ ...row, gaps: Object.freeze([...row.gaps, 'native-picker-instrumentation' as const]) }) : row));
       if (!this.#storeProjectionAttached) coverage = Object.freeze(coverage.map(row => row.domain === 'tasks' ? Object.freeze({ ...row, gaps: Object.freeze([...row.gaps, 'runtime-store-publication' as const]) }) : row));
       const next: HostUpdateReadinessSnapshot = Object.freeze({ client, decision: 'defer', activationAuthorized: false, ended: false, coverage, counts: this.#counts(), compatibility: Object.freeze({ status: this.#options.compatibilityRestricted ? 'restricted' : 'not-configured', reasons: Object.freeze(this.#options.compatibilityRestricted ? ['host-policy-restricted'] as const : ['target-build-unverified'] as const) }), inspection: this.#inspection });
       if (JSON.stringify(next) !== JSON.stringify(this.#snapshot) || this.#storeProjectionAttached && JSON.stringify(this.#runtime.store.getSnapshot().updateReadiness) !== JSON.stringify(next)) {

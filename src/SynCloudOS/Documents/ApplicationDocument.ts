@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { DocumentActivityObservations } from "./DocumentActivityObservations";
+
 import { type UndoManager, type UndoReservation } from "../Undo";
 import { refuseUnchangedUndoReplay } from "../Undo/undoReplayRefusal";
 import { stageDocumentEdit } from "./DocumentEditTransaction";
@@ -89,6 +91,8 @@ interface BaseApplicationDocumentOptions<TModel, TSerialized> {
   readonly type: DocumentType<TModel, TSerialized>;
   readonly undoManager: UndoManager;
   readonly recovery: DocumentRecoveryStore;
+  /** Kernel owner instrumentation; does not grant document/update authority. */
+  readonly activity?: DocumentActivityObservations;
   readonly persistenceNamespace: string;
   readonly environment: DocumentRuntimeEnvironment;
   readonly observeError?: (error: unknown, context: string) => void;
@@ -269,6 +273,8 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
   readonly type: DocumentType<TModel, TSerialized>;
   readonly undoManager: UndoManager;
   readonly #recovery: DocumentRecoveryStore;
+  readonly #activity?: DocumentActivityObservations;
+  #observingClose = false;
   readonly #environment: DocumentRuntimeEnvironment;
   readonly #observeError?: (error: unknown, context: string) => void;
   readonly #recoveryId: string;
@@ -341,6 +347,7 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
     this.type = options.type;
     this.undoManager = options.undoManager;
     this.#recovery = options.recovery;
+    this.#activity = options.activity;
     this.#environment = options.environment;
     this.#observeError = options.observeError;
     this.#recoveryId = JSON.stringify([options.persistenceNamespace, options.id]);
@@ -382,6 +389,7 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
         this.#emit();
       },
       options.environment,
+      options.activity ? () => options.activity!.begin("recovery") : undefined,
     );
     this.#editing = new DocumentEditingParticipants({
       documentId: this.id, lifecycleSignal: () => this.#mutationAbortController.signal,
@@ -1261,6 +1269,15 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
   }
 
   markClosed(authority?: DocumentAdoptionAuthority): Promise<void> {
+    if (!this.#activity || this.#observingClose || this.#state === "closed") return this.#markClosedCore(authority);
+    // An observation can synchronously trigger owner disposal; reentrant close
+    // joins the existing structural-close path rather than recursively observing.
+    this.#observingClose = true;
+    try { return this.#activity.track("cleanup", () => this.#markClosedCore(authority)); }
+    finally { this.#observingClose = false; }
+  }
+
+  #markClosedCore(authority?: DocumentAdoptionAuthority): Promise<void> {
     if (authority !== undefined && authority !== documentAdoptionAuthority) {
       throw new TypeError("Document structural close requires controller authority.");
     }
@@ -1994,6 +2011,7 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       if (this.#recoveryRecord === record) this.#recoveryRecord = null;
       throwIfDocumentAborted(signal);
     });
+    this.#activity?.track("recovery", () => operation);
     // Deletion and writing share the same queue and recovery-version owner.
     this.#recoveryTail = operation.catch(() => undefined);
     try { await operation; }

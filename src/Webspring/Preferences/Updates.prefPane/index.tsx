@@ -27,10 +27,13 @@ const gapLabels: Record<HostReadinessGap, string> = {
 export function UpdateReadinessDetails({ snapshot }: { readonly snapshot: HostUpdateReadinessSnapshot }) {
   const t = useSystemText();
   const counts = snapshot.counts;
-  const busy = counts.dirtyDocuments + counts.savingDocuments + counts.conflictedDocuments + counts.operations + counts.activeJobs + counts.queuedJobs + counts.nativeOperations > 0 || snapshot.client.blockers.some(blocker => blocker !== 'provider-unavailable' && blocker !== 'owner-ended');
+  const busy = counts.dirtyDocuments + counts.savingDocuments + counts.conflictedDocuments + counts.operations + counts.activeJobs + counts.queuedJobs + counts.nativeOperations + counts.documentAdmissions + counts.documentRecovery + counts.documentCleanup > 0 || snapshot.client.blockers.some(blocker => blocker !== 'provider-unavailable' && blocker !== 'owner-ended');
   const headline = snapshot.ended ? t('preferences.updates.closed', 'Host observation has ended') : busy ? t('preferences.updates.busy', 'Work is still in progress') : t('preferences.updates.incomplete', 'Some work cannot be inspected');
   const rows = [
     [t('preferences.updates.documents', 'Published documents'), counts.documents],
+    [t('preferences.updates.admissions', 'Pending document admission stages'), counts.documentAdmissions],
+    [t('preferences.updates.recoveryWork', 'Pending recovery stages'), counts.documentRecovery],
+    [t('preferences.updates.cleanupWork', 'Pending document cleanup stages'), counts.documentCleanup],
     [t('preferences.updates.dirty', 'Documents with unsaved work'), counts.dirtyDocuments],
     [t('preferences.updates.saving', 'Documents saving'), counts.savingDocuments],
     [t('preferences.updates.conflicts', 'Conflicted documents'), counts.conflictedDocuments],
@@ -51,8 +54,8 @@ export function UpdateReadinessDetails({ snapshot }: { readonly snapshot: HostUp
     <NSEGroupBox><div className="nse-update-readiness-section">
       <h3>{t('preferences.updates.coverage', 'Inspection coverage')}</h3>
       {snapshot.coverage.map(row => <details key={row.domain}>
-        <summary>{domainLabels[row.domain]} — {t('preferences.updates.partial', 'Incomplete')}</summary>
-        <ul>{row.gaps.map(gap => <li key={gap}>{t(`preferences.updates.gap.${gap}`, gapLabels[gap])}</li>)}</ul>
+        <summary>{domainLabels[row.domain]} — {row.status === 'observed' ? t('preferences.updates.documentOwnersObserved', 'Controller-owned work observed') : t('preferences.updates.partial', 'Incomplete')}</summary>
+        {row.gaps.length ? <ul>{row.gaps.map(gap => <li key={gap}>{t(`preferences.updates.gap.${gap}`, gapLabels[gap])}</li>)}</ul> : <p>{t('preferences.updates.documentScope', 'Published documents and their admission stages are observed through the document controller. Other domains remain incomplete.')}</p>}
       </details>)}
     </div></NSEGroupBox>
     <NSEGroupBox><div className="nse-update-readiness-section">
