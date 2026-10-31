@@ -3464,44 +3464,62 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       if (identityKey(value) !== identityKey(initialIdentity)) presentationOwner.abort(new DOMException("Playback/power account changed.", "AbortError"));
     });
     cleanupOnAbort(removePresentationIdentity);
-    const presentationDocument = runtime.environment.browser.getDocument();
-    const presentationWindow = runtime.environment.browser.getWindow();
-    const presentationVisible = () => presentationDocument?.visibilityState === "visible";
+    const presentationVisible = () => runtime.environment.browser.getDocument()?.visibilityState === "visible";
     const presentationForeground = () => {
-      if (presentationSignal.aborted || !presentationVisible() || !presentationDocument?.hasFocus() || runtime.lifecycle.getState(app.bundleIdentifier) !== "active") return false;
+      const presentationDocument = runtime.environment.browser.getDocument();
+      if (presentationSignal.aborted || presentationDocument?.visibilityState !== "visible" || !presentationDocument.hasFocus?.() || runtime.lifecycle.getState(app.bundleIdentifier) !== "active") return false;
       // Use the same runtime ownership marker as input dispatch. A key window
       // in another mounted runtime is not foreground evidence for this one.
-      const active = presentationDocument?.activeElement;
-      if (active?.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) return false;
+      const active = presentationDocument.activeElement;
+      const ownerElement = active && typeof active.closest === "function" ? active.closest<HTMLElement>("[data-syncloudos-runtime-owner]") : null;
+      if (ownerElement?.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) return false;
       if (windowControllerId !== undefined) return runtime.windows.snapshot().keyWindowControllerId === windowControllerId;
       return normalizeBundleIdentifier(runtime.store.getSnapshot().application.activeAppId ?? "") === normalizeBundleIdentifier(app.bundleIdentifier);
     };
     const subscribePresentationOwner = (listener: () => void) => {
+      const presentationDocument = runtime.environment.browser.getDocument();
+      const presentationWindow = runtime.environment.browser.getWindow();
       const focusOut = () => queueMicrotask(() => { if (!presentationSignal.aborted) listener(); });
       const removeWindows = runtime.windows.subscribe(listener);
       const removeStore = runtime.store.subscribe(listener);
       const removeFocus = runtime.focus.subscribe(listener);
-      presentationDocument?.addEventListener("visibilitychange", listener);
-      presentationDocument?.addEventListener("focusin", listener);
-      presentationDocument?.addEventListener("focusout", focusOut);
-      presentationWindow?.addEventListener("blur", listener);
-      presentationWindow?.addEventListener("focus", listener);
+      presentationDocument?.addEventListener?.("visibilitychange", listener);
+      presentationDocument?.addEventListener?.("focusin", listener);
+      presentationDocument?.addEventListener?.("focusout", focusOut);
+      presentationWindow?.addEventListener?.("blur", listener);
+      presentationWindow?.addEventListener?.("focus", listener);
       return () => {
         removeWindows(); removeStore(); removeFocus();
-        presentationDocument?.removeEventListener("visibilitychange", listener);
-        presentationDocument?.removeEventListener("focusin", listener);
-        presentationDocument?.removeEventListener("focusout", focusOut);
-        presentationWindow?.removeEventListener("blur", listener);
-        presentationWindow?.removeEventListener("focus", listener);
+        presentationDocument?.removeEventListener?.("visibilitychange", listener);
+        presentationDocument?.removeEventListener?.("focusin", listener);
+        presentationDocument?.removeEventListener?.("focusout", focusOut);
+        presentationWindow?.removeEventListener?.("blur", listener);
+        presentationWindow?.removeEventListener?.("focus", listener);
       };
     };
-    const screenWakeLock = createMountedScreenWakeLock({ signal: presentationSignal, navigator: runtime.environment.browser.getNavigator(), assertLive, isForeground: presentationForeground, isVisible: presentationVisible, subscribeOwner: subscribePresentationOwner, nativeActivity: runtime.nativeActivity, ownerEndReason: () => presentationOwner.signal.aborted ? "account-changed" : "owner-ended" });
-    const MetadataConstructor = (presentationWindow as (Window & { MediaMetadata?: new(data: AppPlaybackMetadata) => MediaMetadata }) | null)?.MediaMetadata;
-    const playbackPresentation = createMountedPlaybackPresentation({
-      signal: presentationSignal, navigator: runtime.environment.browser.getNavigator(), assertLive, isForeground: presentationForeground, subscribeOwner: subscribePresentationOwner,
-      metadataFactory: typeof MetadataConstructor === "function" ? data => new MetadataConstructor(data) : null,
-      subscribePlayback: runtime.audio.subscribePlayback, commands,
+    // Optional browser integrations bind only on explicit feature use. Other
+    // mounted services do not need a media/power-capable browser window.
+    let screenWakeClient: ReturnType<typeof createMountedScreenWakeLock> | null = null;
+    const screenWakeLock = Object.freeze({
+      request(reason: string, callerSignal?: AbortSignal) {
+        assertLive(); presentationSignal.throwIfAborted();
+        screenWakeClient ??= createMountedScreenWakeLock({ signal: presentationSignal, navigator: runtime.environment.browser.getNavigator(), assertLive, isForeground: presentationForeground, isVisible: presentationVisible, subscribeOwner: subscribePresentationOwner, nativeActivity: runtime.nativeActivity, ownerEndReason: () => presentationOwner.signal.aborted ? "account-changed" : "owner-ended" });
+        return screenWakeClient.request(reason, callerSignal);
+      },
     });
+    let playbackPresentation: ReturnType<typeof createMountedPlaybackPresentation> | null = null;
+    const playbackPresentationForMount = () => {
+      assertLive(); presentationSignal.throwIfAborted();
+      if (playbackPresentation) return playbackPresentation;
+      const presentationWindow = runtime.environment.browser.getWindow();
+      const MetadataConstructor = (presentationWindow as (Window & { MediaMetadata?: new(data: AppPlaybackMetadata) => MediaMetadata }) | null)?.MediaMetadata;
+      playbackPresentation = createMountedPlaybackPresentation({
+        signal: presentationSignal, navigator: runtime.environment.browser.getNavigator(), assertLive, isForeground: presentationForeground, subscribeOwner: subscribePresentationOwner,
+        metadataFactory: typeof MetadataConstructor === "function" ? data => new MetadataConstructor(data) : null,
+        subscribePlayback: runtime.audio.subscribePlayback, commands,
+      });
+      return playbackPresentation;
+    };
     const soundIds = new Set<string>();
     // Keep retired IDs distinguishable from arbitrary caller input so a
     // cleanup callback that runs after mount revocation can release its own
@@ -3515,7 +3533,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       if (!soundIds.has(handleId)) throw securityError("Sound handles are owned by the issuing mounted application.");
     };
     const audio: SynWareAudioPort = frozen<SynWareAudioPort>({
-      present(handleId, request, callerSignal) { requireSound(handleId); return playbackPresentation.present(soundHandles.get(handleId)!, request, callerSignal); },
+      present(handleId, request, callerSignal) { requireSound(handleId); return playbackPresentationForMount().present(soundHandles.get(handleId)!, request, callerSignal); },
       async load(request, callerSignal) {
         assertLive();
         const pending = Object.freeze({});
