@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneElement, isValidElement, useContext, useLayoutEffect, useRef, type KeyboardEvent as ReactKeyboardEvent, type PropsWithChildren, type ReactElement } from "react";
+import { cloneElement, isValidElement, useContext, useInsertionEffect, useLayoutEffect, useMemo, useRef, type KeyboardEvent as ReactKeyboardEvent, type PropsWithChildren, type ReactElement } from "react";
 import { getMountedAppDOMRuntimeId, type FocusScopeKind, type UndoOwner } from "../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "./SynCloudOSProvider";
 import { retainUndoOwner } from "./undoOwnerLease";
@@ -90,21 +90,31 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
   const fallbackProtocolRef = useRef<ReturnType<typeof createRuntimeInputProtocol> | null>(null);
   if (!fallbackProtocolRef.current || fallbackProtocolRef.current.runtimeId !== runtime.runtimeId) fallbackProtocolRef.current = createRuntimeInputProtocol(runtime.runtimeId);
   const protocol = inheritedProtocol?.runtimeId === runtime.runtimeId ? inheritedProtocol : fallbackProtocolRef.current;
+  const scopeLease = useRef<ReturnType<typeof runtime.focus.openScope> | null>(null);
+  const configuration = useMemo(() => ({ runtime, scopeId, parentScopeId, parentResponderId, externallyManagedScope }), [runtime, scopeId, kind, parentScopeId, parentResponderId, modal, trapFocus, restoreFocus, undoOwner, externallyManagedScope, externallyManagedInert]);
+  const latestConfiguration = useRef(configuration);
+  useInsertionEffect(() => { latestConfiguration.current = configuration; }, [configuration]);
+  const focusReturn = useRef<{ runtimeId: string; scopeId: string; target: HTMLElement | null } | null>(null);
   useLayoutEffect(() => {
     let live = true;
-    const handle = externallyManagedScope
-      ? null
-      : runtime.focus.openScope({ id: scopeId, kind, parentScopeId, parentResponderId, modal, trapFocus });
-    if (!externallyManagedScope) runtime.focus.requestFocus(parentResponderId);
+    const newlyOpened = !externallyManagedScope && scopeLease.current === null;
+    const handle = externallyManagedScope ? null : scopeLease.current ?? runtime.focus.openScope({ id: scopeId, kind, parentScopeId, parentResponderId, modal, trapFocus });
+    scopeLease.current = handle;
+    handle?.updatePresentation({ kind, modal, trapFocus });
+    if (newlyOpened) runtime.focus.requestFocus(parentResponderId);
     const undoLease = undoOwner ? retainUndoOwner(runtime, undoOwner) : null;
     const document = runtime.environment.browser.getDocument();
     const root = scopeRoot(document, runtime.runtimeId, scopeId);
     // The control this scope was opened from. A scope opened by a menu
     // command sees the menu row as focused; that row will be gone, so resolve
     // it to the control that opened the menu.
-    const openedFrom = document?.activeElement && !root?.contains(document.activeElement)
+    const candidateReturnTarget = document?.activeElement && !root?.contains(document.activeElement)
       ? resolveNSEFocusReturnTarget(document.activeElement)
       : null;
+    if (focusReturn.current?.runtimeId !== runtime.runtimeId || focusReturn.current?.scopeId !== scopeId) {
+      focusReturn.current = { runtimeId: runtime.runtimeId, scopeId, target: candidateReturnTarget };
+    }
+    const openedFrom = focusReturn.current.target;
     // NSEAlertBackdrop already owns sibling inertness and restores the exact
     // prior state. A second owner would make parent/child effect cleanup order
     // restore the modal's captured `true` state after this scope restores it.
@@ -183,9 +193,18 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
         if (ariaHidden === null) element.removeAttribute("aria-hidden");
         else element.setAttribute("aria-hidden", ariaHidden);
       }
-      const result = handle?.close({ restore: restoreFocus }) ?? {
+      // Reconfiguring one live scope (e.g. popover -> sheet) is not a close.
+      // Restoring its trigger here can dismiss the newly configured overlay
+      // as focus-left. The final detach still restores the original target.
+      const next = latestConfiguration.current;
+      const reconfiguring = next !== configuration && next.runtime === runtime && next.scopeId === scopeId &&
+        next.parentScopeId === parentScopeId && next.parentResponderId === parentResponderId && next.externallyManagedScope === externallyManagedScope;
+      const shouldRestore = restoreFocus && !reconfiguring;
+      if (!reconfiguring) focusReturn.current = null;
+      if (!reconfiguring) scopeLease.current = null;
+      const result = (reconfiguring ? null : handle?.close({ restore: shouldRestore })) ?? {
         status: "closed" as const,
-        restoredResponderId: restoreFocus ? runtime.focus.getFocusedResponderId() : null,
+        restoredResponderId: shouldRestore ? runtime.focus.getFocusedResponderId() : null,
       };
       undoLease?.release();
       if (result.status === "closed" && result.restoredResponderId) {

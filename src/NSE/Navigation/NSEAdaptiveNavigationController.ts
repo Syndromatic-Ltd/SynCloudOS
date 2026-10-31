@@ -63,6 +63,8 @@ function sameBounds(
 
 function sameTraits(left: SynCloudOSPresentationTraits, right: SynCloudOSPresentationTraits): boolean {
   return left.revision === right.revision &&
+    left.geometryState === right.geometryState &&
+    left.safeAreaAvailability === right.safeAreaAvailability &&
     sameBounds(left.contentBounds, right.contentBounds) &&
     sameBounds(left.hostViewportBounds, right.hostViewportBounds) &&
     left.horizontalSizeClass === right.horizontalSizeClass &&
@@ -83,18 +85,35 @@ function sameTraits(left: SynCloudOSPresentationTraits, right: SynCloudOSPresent
     left.forcedColours === right.forcedColours;
 }
 
+/** CSS-pixel budgets for the shared peer projection. Rail targets keep the
+ * existing 72px height; its 104px allocation includes inline safe padding.
+ * These are content budgets, never device/posture or physical-screen rules. */
+export const NSEAdaptiveNavigationMetrics = Object.freeze({
+  railWidth: 104,
+  minimumRailContentWidth: 360,
+  maximumRailHeight: 480,
+  sidebarMinimumWidth: 768,
+});
+
 function rendererFor(
   model: NSEAdaptiveNavigationModel,
   presentation: NSEAdaptiveNavigationPresentation,
   traits: SynCloudOSPresentationTraits,
+  previous?: NSEAdaptiveNavigationRenderer,
 ): NSEAdaptiveNavigationRenderer {
-  if (model === "peer") return presentation === "bottom-tabs" || traits.horizontalSizeClass === "compact" ? "tabs" : "source-list-content";
-  return traits.horizontalSizeClass === "compact" ? "stack" : "list-detail";
+  if (traits.geometryState !== "current") return previous ?? (model === "peer" ? "tabs" : "stack");
+  const { width, height } = traits.contentBounds;
+  if (model === "hierarchy") return width < NSEAdaptiveNavigationMetrics.sidebarMinimumWidth ? "stack" : "list-detail";
+  if (presentation === "bottom-tabs") return "tabs";
+  if (height <= NSEAdaptiveNavigationMetrics.maximumRailHeight && width > height &&
+      width - NSEAdaptiveNavigationMetrics.railWidth >= NSEAdaptiveNavigationMetrics.minimumRailContentWidth) return "rail";
+  return width < NSEAdaptiveNavigationMetrics.sidebarMinimumWidth ? "tabs" : "source-list-content";
 }
 
 function freezeSnapshot(input: NSEAdaptiveNavigationSnapshot): NSEAdaptiveNavigationSnapshot {
   return Object.freeze({
     ...input,
+    layoutBounds: Object.freeze({ ...input.layoutBounds }),
     traits: cloneTraits(input.traits),
     stack: input.stack ? Object.freeze({ ...input.stack, path: Object.freeze([...input.stack.path]) }) : null,
   });
@@ -111,6 +130,7 @@ export class NSEAdaptiveNavigationController<TContent = unknown> extends NSEView
   readonly #unsubscribeTab: () => void;
   readonly #unsubscribeStack: (() => void) | null;
   #traits: SynCloudOSPresentationTraits;
+  #contentBounds: SynCloudOSPresentationTraits["contentBounds"] | null = null;
   #snapshot: NSEAdaptiveNavigationSnapshot;
   #revision = 0;
 
@@ -149,6 +169,18 @@ export class NSEAdaptiveNavigationController<TContent = unknown> extends NSEView
     this.#publish();
   }
 
+  /** View-owned allocation, in untransformed CSS pixels. Invalid/hidden
+   * measurements retain the last allocation; null releases the view binding.
+   * Host facts and their trust state still come from canonical traits. */
+  setContentBounds(bounds: SynCloudOSPresentationTraits["contentBounds"] | null): void {
+    if (this.isDisposed) return;
+    if (bounds && (!Number.isFinite(bounds.x) || !Number.isFinite(bounds.y) ||
+      !Number.isFinite(bounds.width) || !Number.isFinite(bounds.height) || bounds.width <= 0 || bounds.height <= 0)) return;
+    if (bounds === null ? this.#contentBounds === null : this.#contentBounds && sameBounds(this.#contentBounds, bounds)) return;
+    this.#contentBounds = bounds ? Object.freeze({ ...bounds }) : null;
+    this.#publish();
+  }
+
   protected override didDispose(): void {
     this.#unsubscribeTab();
     this.#unsubscribeStack?.();
@@ -156,12 +188,14 @@ export class NSEAdaptiveNavigationController<TContent = unknown> extends NSEView
 
   #makeSnapshot(): NSEAdaptiveNavigationSnapshot {
     const tabSnapshot = this.tabController.getSnapshot();
+    const layoutBounds = this.#contentBounds ?? this.#traits.contentBounds;
     return freezeSnapshot({
       revision: this.#revision,
       id: this.id,
       model: this.model,
       presentation: this.presentation,
-      renderer: rendererFor(this.model, this.presentation, this.#traits),
+      renderer: rendererFor(this.model, this.presentation, { ...this.#traits, contentBounds: layoutBounds }, this.#snapshot?.renderer),
+      layoutBounds,
       traits: this.#traits,
       selectedDestinationId: tabSnapshot.selectedDestinationId,
       stack: this.stackController?.getSnapshot() ?? null,

@@ -3880,6 +3880,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
            };
            const wrapped = Object.freeze({
              id: handle.id,
+             updatePresentation(presentation: Parameters<FocusScopeHandle["updatePresentation"]>[0]) {
+               assertLive();
+               if (!focusHandles.has(handle)) throw securityError("Focus presentation requires an owned live scope.");
+               handle.updatePresentation(presentation);
+             },
              close: closeOwned,
              dispose() { return closeOwned(); },
            });

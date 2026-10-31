@@ -495,3 +495,44 @@
 .nse-icon-tab:disabled {
   opacity: 0.45;
 }
+
+/* A rail changes only tab orientation. Targets keep the tall tab's 72px
+   height and independent end caps; content is beside it, never underneath. */
+.nse-tab-bar-safe-area[data-orientation="vertical"] {
+  align-items: stretch;
+  block-size: 100%;
+  box-sizing: border-box;
+  inline-size: var(--nse-navigation-rail-width, 104px);
+  padding: 10px;
+  min-block-size: 0;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar-scroll-viewport {
+  align-items: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: auto;
+  min-block-size: 0;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar {
+  flex-direction: column;
+  block-size: auto;
+  min-block-size: 0;
+  min-inline-size: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  gap: 6px;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar > .nse-tab-bar-tab {
+  flex: 0 0 72px;
+  block-size: 72px;
+  min-block-size: 72px;
+  min-inline-size: 64px;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar-label {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

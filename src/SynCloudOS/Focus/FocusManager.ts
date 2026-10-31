@@ -81,18 +81,26 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
       if (scopes.has(registration.id)) throw new FocusScopeError(`Focus scope ${registration.id} is already open.`);
       if (!options.responders.has(registration.parentResponderId)) throw new FocusScopeError(`Parent responder ${registration.parentResponderId} is not registered.`);
       if (registration.parentScopeId && !scopes.has(registration.parentScopeId)) throw new FocusScopeError(`Parent focus scope ${registration.parentScopeId} is not open.`);
-      scopes.set(registration.id, { ...registration, restoreResponderId: registration.restoreResponderId ?? focusedResponderId });
+      let ownedScope = { ...registration, restoreResponderId: registration.restoreResponderId ?? focusedResponderId };
+      scopes.set(registration.id, ownedScope);
       stack.push(registration.id);
       generation += 1;
       publish();
       let live = true;
       const close = (closeOptions?: { restore?: boolean }) => {
-        if (!live) return { status: "missing", scopeId: registration.id, restoredResponderId: null } as const;
+        if (!live || scopes.get(registration.id) !== ownedScope) return { status: "missing", scopeId: registration.id, restoredResponderId: null } as const;
         const result = manager.closeScope(registration.id, closeOptions);
         if (result.status === "closed") live = false;
         return result;
       };
-      return { id: registration.id, close, dispose: () => close() };
+      return { id: registration.id, close, dispose: () => close(), updatePresentation(presentation) {
+        if (disposed || !live || scopes.get(registration.id) !== ownedScope) throw new FocusScopeError("Focus scope presentation requires its live handle.");
+        if (ownedScope.kind === presentation.kind && ownedScope.modal === presentation.modal && ownedScope.trapFocus === presentation.trapFocus) return;
+        ownedScope = { ...ownedScope, kind: presentation.kind, modal: presentation.modal, trapFocus: presentation.trapFocus };
+        scopes.set(registration.id, ownedScope);
+        generation += 1;
+        publish();
+      } };
     },
     requestFocus(responderId) {
       if (!options.responders.has(responderId)) return { status: "missing", responderId, reason: "The responder is no longer registered." };

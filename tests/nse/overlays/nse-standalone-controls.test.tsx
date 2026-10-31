@@ -44,6 +44,32 @@ function Probe({ publish }: { publish(context: NSEOverlayProviderContextValue): 
 }
 
 describe("standalone NSE host lifetime", () => {
+  it("honors retained presentation geometry and rejects invalid live visual samples", () => {
+    const previous = Object.getOwnPropertyDescriptor(window, "visualViewport");
+    const viewport = Object.assign(new EventTarget(), { width: 600, height: 400, offsetLeft: 10, offsetTop: 20 });
+    Object.defineProperty(window, "visualViewport", { configurable: true, value: viewport });
+    const base = presentation.getSnapshot();
+    let state: "current" | "retained" = "retained";
+    const local = createStandaloneNSEControlRuntime({ document, window, presentation: { getSnapshot: () => ({ ...base, geometryState: state }), subscribe: () => () => {} } });
+    try {
+      local.start();
+      expect(local.runtime.environment.visualViewport.getSnapshot()).toMatchObject({ width: 1024, height: 768 });
+      state = "current";
+      viewport.width = 0;
+      viewport.height = Number.NaN;
+      window.dispatchEvent(new Event("resize"));
+      expect(local.runtime.environment.visualViewport.getSnapshot()).toMatchObject({ width: 1024, height: 768 });
+      viewport.width = 600;
+      viewport.height = 400;
+      window.dispatchEvent(new Event("resize"));
+      expect(local.runtime.environment.visualViewport.getSnapshot()).toMatchObject({ width: 600, height: 400, offsetLeft: 10, offsetTop: 20 });
+    } finally {
+      local.dispose();
+      if (previous) Object.defineProperty(window, "visualViewport", previous);
+      else Reflect.deleteProperty(window, "visualViewport");
+    }
+  });
+
   it("keeps nested overlays and their authority across parent rerenders and Strict Mode replay", async () => {
     let authority: NSEOverlayProviderContextValue | undefined;
     const publish = (value: NSEOverlayProviderContextValue) => { authority = value; };

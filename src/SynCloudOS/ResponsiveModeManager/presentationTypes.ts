@@ -31,6 +31,8 @@ export type SynCloudOSHorizontalSizeClass = "compact" | "regular" | "wide";
 
 export interface SynCloudOSPresentationTraits {
   readonly revision: number;
+  readonly geometryState: "current" | "retained" | "unavailable";
+  readonly safeAreaAvailability: "available" | "unavailable" | "unknown";
   readonly contentBounds: WindowBounds;
   readonly hostViewportBounds: WindowBounds;
   readonly horizontalSizeClass: SynCloudOSHorizontalSizeClass;

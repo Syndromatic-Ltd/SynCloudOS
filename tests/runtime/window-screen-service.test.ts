@@ -99,6 +99,7 @@ function fixture() {
     height: 700,
     devicePixelRatio: 2,
     safeArea: { top: 4, right: 5, bottom: 6, left: 7 },
+    safeAreaAvailability: "available",
   });
   const compact = mediaQuery("(max-width: 767px)", true);
   const wide = mediaQuery("(min-width: 1280px)", false);
@@ -137,11 +138,87 @@ function fixture() {
 }
 
 describe("ScreenService", () => {
+  it("distinguishes measured zero insets from unavailable and legacy unknown values", () => {
+    const f = fixture();
+    f.workArea.set({ ...f.workArea.source.getSnapshot(), safeArea: { top: 0, right: 0, bottom: 0, left: 0 } });
+    const service = new ScreenService(f.environment);
+    expect(service.getSnapshot().safeAreaAvailability).toBe("available");
+    f.workArea.set({ ...f.workArea.source.getSnapshot(), safeAreaAvailability: "unavailable" });
+    expect(service.getCurrentSnapshot().safeAreaAvailability).toBe("unavailable");
+    f.workArea.set({ ...f.workArea.source.getSnapshot(), safeAreaAvailability: undefined });
+    expect(service.getCurrentSnapshot().safeAreaAvailability).toBe("unknown");
+    service.dispose();
+  });
+
+  it("does not publish invalid insets as an available measurement", () => {
+    const f = fixture();
+    const service = new ScreenService(f.environment);
+    f.workArea.set({ ...f.workArea.source.getSnapshot(), safeArea: { top: Number.NaN, right: 0, bottom: -1, left: 0 } });
+    expect(service.getCurrentSnapshot()).toMatchObject({ geometryState: "current", safeAreaAvailability: "unavailable", safeAreaInsets: { blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 } });
+    service.dispose();
+  });
+
+  it.each(["layout", "visual", "work", "dpr", "disjoint"] as const)("retains a complete sample through invalid %s geometry and recovers", source => {
+    const f = fixture();
+    const service = new ScreenService(f.environment);
+    const previous = service.getSnapshot();
+    const work = f.workArea.source.getSnapshot();
+    if (source === "layout") f.layoutViewport.set({ width: 0, height: Number.NaN });
+    if (source === "visual") f.visualViewport.set({ width: -1, height: 0, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    if (source === "work") f.workArea.set({ ...work, height: 0 });
+    if (source === "dpr") f.workArea.set({ ...work, devicePixelRatio: Number.NaN });
+    if (source === "disjoint") f.workArea.set({ ...work, x: 5000 });
+    f.flush();
+    const retained = service.getSnapshot();
+    expect(retained.geometryState).toBe("retained");
+    expect(retained.invalidGeometrySources.length).toBeGreaterThan(0);
+    expect(Object.isFrozen(retained.invalidGeometrySources)).toBe(true);
+    expect(retained.layoutViewport).toBe(previous.layoutViewport);
+    expect(retained.visualViewport).toBe(previous.visualViewport);
+    expect(retained.workArea).toBe(previous.workArea);
+    expect(retained.virtualKeyboardInset).toBe(previous.virtualKeyboardInset);
+    f.layoutViewport.set({ width: 900, height: 600 });
+    f.visualViewport.set({ width: 900, height: 500, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    f.workArea.set({ ...work, x: 0, y: 0, width: 900, height: 600 });
+    f.flush();
+    expect(service.getSnapshot()).toMatchObject({ geometryState: "current", invalidGeometrySources: [], layoutViewport: { width: 900, height: 600 }, virtualKeyboardInset: 100 });
+    service.dispose();
+  });
+
+  it("marks initial invalid geometry unavailable and treats an absent visual API as layout geometry", () => {
+    const f = fixture();
+    f.layoutViewport.set({ width: 0, height: 0 });
+    f.visualViewport.set(null);
+    f.workArea.set({ ...f.workArea.source.getSnapshot(), safeAreaAvailability: "unavailable" });
+    const service = new ScreenService(f.environment);
+    expect(service.getSnapshot().geometryState).toBe("unavailable");
+    expect(service.getSnapshot().safeAreaAvailability).toBe("unavailable");
+    f.layoutViewport.set({ width: 900, height: 700 });
+    f.flush();
+    expect(service.getSnapshot()).toMatchObject({ geometryState: "current", visualViewport: { x: 0, y: 0, width: 900, height: 700 }, virtualKeyboardInset: 0 });
+    service.dispose();
+  });
+
+  it("retains a valid current read even if a source becomes invalid before publication", () => {
+    const f = fixture();
+    const service = new ScreenService(f.environment);
+    f.layoutViewport.set({ width: 900, height: 700 });
+    const current = service.getCurrentSnapshot();
+    f.layoutViewport.set({ width: Number.NaN, height: 0 });
+    f.flush();
+    expect(service.getSnapshot().geometryState).toBe("retained");
+    expect(service.getSnapshot().layoutViewport).toBe(current.layoutViewport);
+    service.dispose();
+  });
+
   it("projects immutable CSS-pixel screen state from injected runtime ports", () => {
     const f = fixture();
     const service = new ScreenService(f.environment);
 
     expect(service.getSnapshot()).toEqual({
+      geometryState: "current",
+      invalidGeometrySources: [],
+      safeAreaAvailability: "available",
       layoutViewport: { x: 0, y: 0, width: 1024, height: 700 },
       visualViewport: { x: 10, y: 20, width: 720, height: 430 },
       workArea: { x: 20, y: 30, width: 1200, height: 700 },

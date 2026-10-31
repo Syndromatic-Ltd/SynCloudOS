@@ -40,6 +40,9 @@ export interface SourceListFrameContextValue {
   /** Sets the dynamic centre title shown in the system bar (e.g. the active section); `null` reverts
    *  to the window title. Lets a source-list app drive its bar title without owning the bar. */
   setBarTitle: (title: string | null) => void;
+  /** Presentation request from the retained body; null restores the host default.
+   * Keeps stage header seams aligned with a short-window rail or compact stack. */
+  setCompactNavigation?: (compact: boolean | null) => void;
 }
 
 const SourceListFrameContext = createContext<SourceListFrameContextValue | null>(null);

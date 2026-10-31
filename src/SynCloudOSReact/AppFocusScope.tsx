@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneElement, isValidElement, useCallback, useContext, useLayoutEffect, useRef, type ReactElement, type ReactNode, type Ref } from "react";
+import { cloneElement, isValidElement, useCallback, useContext, useInsertionEffect, useLayoutEffect, useMemo, useRef, type ReactElement, type ReactNode, type Ref } from "react";
 import type { FocusScopeKind } from "../SynCloudOS/SynCloudOS";
 import { SynWareRuntimeContext } from "./runtimeContext";
 import type { SynWareRuntime } from "./appRuntimeTypes";
@@ -56,11 +56,17 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
   const parentResponderId = options.parentResponderId
     ?? (hierarchy.runtimeId === `app:${runtime.app.bundleIdentifier}` ? hierarchy.responderId : null)
     ?? `application:${runtime.app.bundleIdentifier}`;
+  const scopeLease = useRef<ReturnType<typeof runtime.focus.openScope> | null>(null);
+  const configuration = useMemo(() => ({ runtime, scopeId: options.scopeId, parentScopeId: options.parentScopeId, parentResponderId }), [modal, options.kind, options.parentScopeId, options.restoreFocus, options.scopeId, parentResponderId, runtime, runtimeId, trapFocus]);
+  const latestConfiguration = useRef(configuration);
+  useInsertionEffect(() => { latestConfiguration.current = configuration; }, [configuration]);
   useLayoutEffect(() => {
     if (runtime.signal.aborted) return;
+    let live = true;
     // Resolve the declared parent through the same mounted focus authority;
     // inheriting a child controller never grants authority to another app.
-    const handle = runtime.focus.openScope({
+    const newlyOpened = scopeLease.current === null;
+    const handle = scopeLease.current ?? runtime.focus.openScope({
       id: options.scopeId,
       kind: options.kind,
       parentScopeId: options.parentScopeId,
@@ -68,7 +74,9 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       modal,
       trapFocus,
     });
-    runtime.focus.requestFocus(parentResponderId);
+    scopeLease.current = handle;
+    handle.updatePresentation({ kind: options.kind, modal, trapFocus });
+    if (newlyOpened) runtime.focus.requestFocus(parentResponderId);
     const root = rootRef.current;
     const doc = root?.ownerDocument ?? (typeof document === "undefined" ? null : document);
     const focusables = () => Array.from(root?.querySelectorAll<HTMLElement>(focusableSelector) ?? [])
@@ -116,17 +124,24 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
     };
     runtime.signal.addEventListener("abort", releaseDOMListeners, { once: true });
     queueMicrotask(() => {
-      if (runtime.signal.aborted) return;
+      if (!live || runtime.signal.aborted) return;
       if (root && doc?.activeElement && !isWithinNSEFocusOrigin(root, doc.activeElement)) focusables()[0]?.focus({ preventScroll: true });
     });
     return () => {
+      live = false;
       redirectingFocus = false;
       runtime.signal.removeEventListener("abort", releaseDOMListeners);
       releaseDOMListeners();
       // The mount owner aborts before React removes descendant scopes. The
       // app focus facade is intentionally revoked at that point, so its
       // logical close must not call back into a dead capability.
-      if (!runtime.signal.aborted) handle.close({ restore: options.restoreFocus });
+      const next = latestConfiguration.current;
+      const reconfiguring = next !== configuration && next.runtime === runtime && next.scopeId === options.scopeId &&
+        next.parentScopeId === options.parentScopeId && next.parentResponderId === parentResponderId;
+      if (!reconfiguring) {
+        scopeLease.current = null;
+        if (!runtime.signal.aborted) handle.close({ restore: options.restoreFocus });
+      }
     };
   }, [modal, options.kind, options.parentScopeId, options.restoreFocus, options.scopeId, parentResponderId, runtime, runtimeId, trapFocus]);
 

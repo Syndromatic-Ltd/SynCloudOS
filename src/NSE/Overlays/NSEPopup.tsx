@@ -241,18 +241,19 @@ export function NSEPopup({
   // A compact action sheet owns a physical outside target. It remains outside
   // the registered surface, so the provider's one capture listener performs
   // the same branch-aware outside-pointer dismissal as an anchored popup.
-  const portalContents = isModal
-    ? createElement(
+  // Keep the same parent and child positions when adaptive presentation
+  // changes modality. Reparenting the surface would remount an unsaved editor.
+  const portalContents = createElement(
       "div",
-      { className: "nse-overlay-popup-modal-host", ...appearanceProjection },
+      { className: isModal ? "nse-overlay-popup-modal-host" : "nse-overlay-popup-host", ...appearanceProjection },
       createElement("div", {
         className: "nse-overlay-popup-backdrop",
+        hidden: !isModal,
         "data-nse-part": "backdrop",
         "aria-hidden": true,
       }),
       surface,
-    )
-    : surface;
+    );
 
   return createPortal(overlay.withFocusScope(portalContents), overlay.portalHost);
 }

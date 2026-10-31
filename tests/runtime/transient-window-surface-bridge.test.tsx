@@ -28,9 +28,177 @@ import { NSEPicker } from "../../src/NSE/Menus";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { createTransientWindowSurfaceBridge, WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 import { WindowLayer } from "../../src/Webspring/WindowLayer/WindowLayer";
-import { createTestRuntime } from "./helpers";
+import { createTestRuntime, createTestRuntimeEnvironment } from "./helpers";
+
+function geometrySource<T>(initial: T) {
+  let value = initial;
+  const listeners = new Set<(snapshot: T) => void>();
+  return {
+    source: { getSnapshot: () => value, subscribe: (listener: (snapshot: T) => void) => {
+      listeners.add(listener);
+      return () => { listeners.delete(listener); };
+    } },
+    set(next: T) { value = next; for (const listener of listeners) listener(next); },
+  };
+}
+
+function geometryEnvironment() {
+  const base = createTestRuntimeEnvironment();
+  const layout = geometrySource({ width: 1024, height: 768 });
+  const visual = geometrySource({ width: 1024, height: 768, offsetLeft: 0, offsetTop: 0, scale: 1 });
+  const work = geometrySource({ x: 0, y: 0, width: 1024, height: 768, devicePixelRatio: 1, safeArea: { top: 0, right: 0, bottom: 0, left: 0 } });
+  return { layout, visual, work, environment: { ...base, layoutViewport: layout.source, visualViewport: visual.source, workArea: work.source } };
+}
 
 describe("window-hosted transient surface bridge", () => {
+  it("retains the fitted frame while host geometry is invalid even if the anchor moves", async () => {
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "invalid-anchor", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const rect = vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 300, y: 100, width: 100, height: 30 }));
+    const id = await bridge.present({ id: "retained", role: "popover", title: "Retained", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <input defaultValue="Retained" />);
+    const controller = runtime.windows.select(id);
+    const bounds = controller.record.bounds;
+    const content = controller.record.content;
+    rect.mockReturnValue(DOMRect.fromRect({ x: 800, y: 100, width: 100, height: 30 }));
+    geometry.visual.set({ width: 0, height: 0, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    await waitFor(() => expect(runtime.screen.getSnapshot().geometryState).toBe("retained"));
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(controller.record.bounds).toBe(bounds);
+    geometry.visual.set({ width: 1024, height: 768, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    await waitFor(() => expect(controller.record.anchor?.rect.x).toBe(800));
+    expect(controller.record.content).toBe(content);
+    expect(runtime.windows.select(id)).toBe(controller);
+    await bridge.dismiss("retained");
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+  });
+
+  it("remeasures an open popover from canonical visual bounds without reopening or losing its preferred size", async () => {
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "geometry", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const rect = vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 300, y: 400, width: 100, height: 30 }));
+    const id = await bridge.present({ id: "live", role: "popover", title: "Live", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <input defaultValue="Retained draft" />);
+    const controller = runtime.windows.select(id);
+    const content = controller.record.content;
+    rect.mockReturnValue(DOMRect.fromRect({ x: 400, y: 160, width: 100, height: 30 }));
+    geometry.visual.set({ width: 800, height: 400, offsetLeft: 100, offsetTop: 80, scale: 1 });
+    await waitFor(() => expect(controller.record.bounds).toEqual({ x: 270, y: 200, width: 360, height: 272 }));
+    expect(runtime.windows.select(id)).toBe(controller);
+    expect(controller.record.content).toBe(content);
+    expect(renderers.size).toBe(1);
+    geometry.visual.set({ width: 1024, height: 768, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    await waitFor(() => expect(controller.record.bounds.height).toBe(280));
+    await bridge.dismiss("live");
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+  });
+
+  it("remeasures an anchor after a captured scroll without another present request", async () => {
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "scroll", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const rect = vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 300, y: 100, width: 100, height: 30 }));
+    const id = await bridge.present({ id: "scrolling", role: "popover", title: "Scrolling", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <p>Retained</p>);
+    rect.mockReturnValue(DOMRect.fromRect({ x: 800, y: 100, width: 100, height: 30 }));
+    const listener = geometry.environment.addWindowListener.mock.calls.find(([type]) => type === "scroll")?.[1] as (() => void) | undefined;
+    expect(listener).toBeTypeOf("function");
+    listener?.();
+    await waitFor(() => expect(runtime.windows.select(id).record.anchor?.rect.x).toBe(800));
+    expect(runtime.windows.select(id).record.bounds.x).toBe(518);
+    await bridge.dismiss("scrolling");
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+  });
+
+  it("fits narrow shallow viewports and recovers from invalid visual measurements without persisting an invalid frame", async () => {
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "shallow", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 100, y: 70, width: 30, height: 20 }));
+    const id = await bridge.present({ id: "shallow", role: "popover", title: "Shallow", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <p>Retained</p>);
+    geometry.visual.set({ width: 260, height: 100, offsetLeft: 50, offsetTop: 50, scale: 1 });
+    await waitFor(() => expect(runtime.windows.select(id).record.bounds.width).toBeLessThanOrEqual(244));
+    const fitted = runtime.windows.select(id).record.bounds;
+    expect(fitted.x).toBeGreaterThanOrEqual(50);
+    expect(fitted.y).toBeGreaterThanOrEqual(50);
+    expect(fitted.x + fitted.width).toBeLessThanOrEqual(310);
+    expect(fitted.y + fitted.height).toBeLessThanOrEqual(150);
+    geometry.visual.set({ width: Number.NaN, height: 0, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(runtime.windows.select(id).record.bounds).toBe(fitted);
+    geometry.visual.set({ width: 1024, height: 768, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    await waitFor(() => expect(runtime.windows.select(id).record.bounds.width).toBe(360));
+    await bridge.dismiss("shallow");
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+  });
+
+  it("remeasures resized anchors and releases the observer after the final popover closes", async () => {
+    let resized = () => {};
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    class ResizeFixture {
+      constructor(callback: () => void) { resized = callback; }
+      observe = observe;
+      disconnect = disconnect;
+    }
+    vi.stubGlobal("ResizeObserver", ResizeFixture);
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "anchor-resize", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const rect = vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 300, y: 100, width: 100, height: 30 }));
+    const id = await bridge.present({ id: "resize", role: "popover", title: "Resize", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <p>Retained</p>);
+    expect(observe).toHaveBeenCalledWith(anchor);
+    rect.mockReturnValue(DOMRect.fromRect({ x: 300, y: 100, width: 220, height: 30 }));
+    resized();
+    await waitFor(() => expect(runtime.windows.select(id).record.anchor?.rect.width).toBe(220));
+    await bridge.dismiss("resize");
+    expect(disconnect).toHaveBeenCalled();
+    const scrollIndex = geometry.environment.addWindowListener.mock.calls.findIndex(([type]) => type === "scroll");
+    expect(geometry.environment.addWindowListener.mock.results[scrollIndex].value).toHaveBeenCalledTimes(1);
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+    vi.unstubAllGlobals();
+  });
+
+  it("uses the host work area once rather than adding its safe-area insets again", async () => {
+    const geometry = geometryEnvironment();
+    geometry.work.set({ x: 100, y: 80, width: 400, height: 200, devicePixelRatio: 1, safeArea: { top: 80, right: 20, bottom: 30, left: 100 } });
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "work-area", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 100, y: 30, width: 30, height: 20 }));
+    const id = await bridge.present({ id: "insets", role: "popover", title: "Insets", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 220 } }, <p>Retained</p>);
+    expect(runtime.windows.select(id).record.bounds.y).toBe(88);
+    await bridge.dismiss("insets");
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+  });
+
+  it("cancels scheduled placement when disposed", async () => {
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "dispose-geometry", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 300, y: 100, width: 100, height: 30 }));
+    await bridge.present({ id: "dispose", role: "popover", title: "Dispose", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <p>Retained</p>);
+    const setBounds = vi.spyOn(runtime.windows, "setBounds");
+    geometry.visual.set({ width: 800, height: 400, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    bridge.dispose();
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(setBounds).not.toHaveBeenCalled();
+    expect(runtime.windows.snapshot().windowControllerIds).toHaveLength(0);
+    anchor.remove(); await runtime.dispose("test");
+  });
   it("keeps a popover anchored to an ordinary idless element until that element is removed", async () => {
     const runtime = createTestRuntime({ id: "runtime:idless-popover" });
     const renderers = new WindowContentRendererRegistry();

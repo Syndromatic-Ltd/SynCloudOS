@@ -52,6 +52,8 @@ describe("Atmo vector coverage", () => {
         }
       }
     }
+    // Geometry metadata is shared by horizontal groups and independent rail items.
+    expect(generatedBlock).not.toMatch(/:(?:first|last|only)-child/);
     expect(generatedBlock).toContain("border-image-source: none;");
     expect(generatedBlock).not.toMatch(/border-image(?:-source)?:\s*(?:var\(|url\()/i);
     expect(generatedBlock).toContain("filter: none;");
@@ -68,10 +70,10 @@ describe("Atmo vector coverage", () => {
     expect(generatedBlock).toContain("backdrop-filter: blur(6px) saturate(1.25);");
     for (const state of ["up", "down", "sel", "seldown", "dis"]) {
       expect(generatedBlock).toMatch(new RegExp(
-        `:first-child:not\\(:last-child\\):dir\\(rtl\\)[^{]*\\{[\\s\\S]*?--nse-tab-chrome-start: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-end\\);[\\s\\S]*?--nse-tab-chrome-body: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-body\\);[\\s\\S]*?--nse-tab-chrome-end: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-start\\);`,
+        `\\[data-nse-tab-chrome-segment="first"\\]:dir\\(rtl\\)[^{]*\\{[\\s\\S]*?--nse-tab-chrome-start: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-end\\);[\\s\\S]*?--nse-tab-chrome-body: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-body\\);[\\s\\S]*?--nse-tab-chrome-end: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-start\\);`,
       ));
       expect(generatedBlock).toMatch(new RegExp(
-        `:last-child:not\\(:first-child\\):dir\\(rtl\\)[^{]*\\{[\\s\\S]*?--nse-tab-chrome-start: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-end\\);[\\s\\S]*?--nse-tab-chrome-body: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-body\\);[\\s\\S]*?--nse-tab-chrome-end: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-start\\);`,
+        `\\[data-nse-tab-chrome-segment="last"\\]:dir\\(rtl\\)[^{]*\\{[\\s\\S]*?--nse-tab-chrome-start: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-end\\);[\\s\\S]*?--nse-tab-chrome-body: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-body\\);[\\s\\S]*?--nse-tab-chrome-end: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-start\\);`,
       ));
     }
 

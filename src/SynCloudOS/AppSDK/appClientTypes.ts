@@ -56,6 +56,8 @@ export type SynCloudOSHorizontalSizeClass = "compact" | "regular" | "wide";
 /** Immutable, content-bound presentation values for the current mount. */
 export interface SynCloudOSPresentationTraits {
   readonly revision: number;
+  readonly geometryState: "current" | "retained" | "unavailable";
+  readonly safeAreaAvailability: "available" | "unavailable" | "unknown";
   readonly contentBounds: AppBounds;
   readonly hostViewportBounds: AppBounds;
   readonly horizontalSizeClass: SynCloudOSHorizontalSizeClass;
@@ -130,6 +132,7 @@ export interface AppCommandPresentation {
 
 export interface AppFocusScope extends AppClientHandle {
   readonly id: string;
+  updatePresentation(presentation: Readonly<{ kind: "root" | "webspring" | "application" | "window" | "menu" | "sheet" | "popover" | "modal"; modal: boolean; trapFocus: boolean }>): void;
   close(options?: Readonly<{ restore?: boolean }>): Readonly<{ status: string; scopeId: string; restoredResponderId: string | null }>;
 }
 

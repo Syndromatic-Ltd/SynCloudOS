@@ -33,6 +33,45 @@ import type { FocusScopeHandle } from "../../src/SynCloudOS/Focus/focusTypes";
 afterEach(cleanup);
 
 describe("focus scopes", () => {
+  it("updates a live scope's presentation without closing descendants or granting stale handles authority", async () => {
+    const runtime = createTestRuntime();
+    runtime.responders.register({ id: "editor", kind: "control", parentId: "runtime", scopeId: "root" });
+    const parent = runtime.focus.openScope({ id: "adaptive-parent", kind: "popover", parentResponderId: "editor", modal: false, trapFocus: false });
+    const child = runtime.focus.openScope({ id: "nested-child", kind: "menu", parentScopeId: parent.id, parentResponderId: "editor", modal: false, trapFocus: false });
+    parent.updatePresentation({ kind: "sheet", modal: true, trapFocus: true });
+    expect(runtime.focus.isScopeWithin(child.id, parent.id)).toBe(true);
+    expect(runtime.focus.inspect().scopes.map(scope => scope.id)).toEqual([parent.id, child.id]);
+    expect(runtime.focus.inspect().restorations).toEqual([]);
+    parent.close({ restore: false });
+    const replacement = runtime.focus.openScope({ id: parent.id, kind: "popover", parentResponderId: "editor", modal: false, trapFocus: false });
+    expect(() => parent.updatePresentation({ kind: "sheet", modal: true, trapFocus: true })).toThrow();
+    expect(parent.close().status).toBe("missing");
+    expect(runtime.focus.inspect().scopes).toHaveLength(1);
+    replacement.close(); await runtime.dispose();
+  });
+  it("keeps scope configuration changes from restoring its trigger before the actual close", async () => {
+    const runtime = createTestRuntime();
+    runtime.responders.register({ id: "app", kind: "application", parentId: "runtime", scopeId: "root" });
+    const ui = (open: boolean, modal: boolean) => <SynCloudOSProvider runtime={runtime}>
+      <ResponderScope responderId="editor" kind="control" parentResponderId="app" scopeId="root"><button>Open adaptive options</button></ResponderScope>
+      {open && createPortal(<FocusScope scopeId="adaptive-options" kind={modal ? "modal" : "popover"} parentResponderId="editor" modal={modal} trapFocus={modal}><input aria-label="Live options draft" /></FocusScope>, document.body)}
+    </SynCloudOSProvider>;
+    const view = render(ui(false, false));
+    const trigger = screen.getByRole("button", { name: "Open adaptive options" });
+    trigger.focus();
+    view.rerender(ui(true, false));
+    const draft = screen.getByRole("textbox", { name: "Live options draft" });
+    draft.focus();
+    const restored = vi.fn(); trigger.addEventListener("focus", restored);
+    view.rerender(ui(true, true));
+    view.rerender(ui(true, false));
+    expect(screen.getByRole("textbox", { name: "Live options draft" })).toBe(draft);
+    expect(restored).not.toHaveBeenCalled();
+    view.rerender(ui(false, false));
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
+    expect(restored).toHaveBeenCalledOnce();
+    await runtime.dispose();
+  });
   it("publishes focus authority changes and detaches disposed subscriptions", async () => {
     const runtime = createTestRuntime();
     runtime.responders.register({ id: "editor", kind: "control", parentId: "runtime", scopeId: "root" });
