@@ -79,6 +79,8 @@ export interface HeavyJobAdmissionPort {
 
 export interface HeavyJobAdmission extends HeavyJobAdmissionPort {
   snapshot(): HeavyJobAdmissionSnapshot;
+  /** Observes this admission owner only, not arbitrary background work. */
+  subscribe(listener: () => void): () => void;
   /** Adaptive policy hook; applies to waiting jobs immediately. */
   setCapacity(capacity: Partial<HeavyJobCapacity>): void;
   dispose(reason?: unknown): void;
@@ -147,6 +149,9 @@ export function createHeavyJobAdmission(options: HeavyJobAdmissionOptions = {}):
   };
   const fits = (bytes: number) => active < concurrency && activeBytes + bytes <= maximumBytes;
 
+  const listeners = new Set<() => void>();
+  const notify = () => { for (const listener of [...listeners]) { try { listener(); } catch { /* Observation cannot interrupt a lease. */ } } };
+
   const grant = (request: Waiter["request"], enqueuedAt: number): HeavyJobLease => {
     active += 1;
     activeBytes += request.bytes;
@@ -155,6 +160,7 @@ export function createHeavyJobAdmission(options: HeavyJobAdmissionOptions = {}):
     state.active += 1;
     state.served = ++serviceCounter;
     admitted += 1;
+    notify();
     let released = false;
     return Object.freeze({
       id: ++leaseId,
@@ -172,7 +178,7 @@ export function createHeavyJobAdmission(options: HeavyJobAdmissionOptions = {}):
         const state = owner(request.owner);
         state.active -= 1;
         if (state.active === 0 && !queue.some((waiter) => waiter.request.owner === request.owner)) owners.delete(request.owner);
-        pump();
+        pump(); notify();
       },
     });
   };
@@ -219,6 +225,7 @@ export function createHeavyJobAdmission(options: HeavyJobAdmissionOptions = {}):
       detach(waiter);
       superseded += 1;
       waiter.reject(new DOMException("Heavy job was superseded by a newer request.", "AbortError"));
+      notify();
     }
   };
 
@@ -251,14 +258,15 @@ export function createHeavyJobAdmission(options: HeavyJobAdmissionOptions = {}):
             if (index < 0) return;
             queue.splice(index, 1);
             reject(abortReason(normalised.signal!));
-            pump();
+            pump(); notify();
           },
         };
         owner(normalised.owner);
         normalised.signal?.addEventListener("abort", waiter.onAbort, { once: true });
-        queue.push(waiter);
+        queue.push(waiter); notify();
       });
     },
+    subscribe(listener) { if (disposed) return () => {}; listeners.add(listener); return () => { listeners.delete(listener); }; },
     snapshot() {
       return Object.freeze({
         concurrency,
@@ -275,7 +283,7 @@ export function createHeavyJobAdmission(options: HeavyJobAdmissionOptions = {}):
     setCapacity(capacity) {
       if (capacity.concurrency !== undefined) concurrency = positiveInteger(capacity.concurrency, "Heavy job concurrency");
       if (capacity.maximumBytes !== undefined) maximumBytes = positiveInteger(capacity.maximumBytes, "Heavy job byte budget");
-      pump();
+      pump(); notify();
     },
     dispose(reason = new DOMException("Heavy job admission is disposed.", "AbortError")) {
       if (disposed) return;
@@ -284,6 +292,7 @@ export function createHeavyJobAdmission(options: HeavyJobAdmissionOptions = {}):
         detach(waiter);
         waiter.reject(reason);
       }
+      notify(); listeners.clear();
     },
   };
 }

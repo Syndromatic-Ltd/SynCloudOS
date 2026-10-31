@@ -52,3 +52,4 @@ export { normalizeBundleIdentifier } from "./Identity/bundleIdentifier.mjs";
 export { markHiddenCommandAcceptance, isHiddenCommandAcceptance } from "./Commands/acceptancePresentation";
 
 export { UPDATE_READINESS_PROTOCOL, updateReadinessDomains, updateReadinessBlockers } from './Updates/updateReadiness';
+export { UpdateReadinessProjection } from './Updates/UpdateReadinessProjection';

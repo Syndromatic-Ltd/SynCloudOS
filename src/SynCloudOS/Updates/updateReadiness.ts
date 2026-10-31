@@ -61,8 +61,12 @@ export function textSessionUpdateReadiness(session: {
 export function editingControllerUpdateReadiness(controller: {
   readonly isEditing: boolean; readonly isDisposed: boolean;
   subscribe(listener: () => void): () => void;
+  onDispose?(listener: () => void): () => void;
 }, signal?: AbortSignal): UpdateReadinessAuthority {
-  return Object.freeze({ domain: 'editing' as const, signal, subscribe: (listener: () => void) => controller.subscribe(listener), read() {
+  return Object.freeze({ domain: 'editing' as const, signal, subscribe: (listener: () => void) => {
+    const release = controller.subscribe(listener), releaseDisposal = controller.onDispose?.(listener);
+    return () => { try { release(); } finally { releaseDisposal?.(); } };
+  }, read() {
     return { known: !controller.isDisposed, blockers: controller.isEditing ? ['transaction' as const] : [] };
   } });
 }
@@ -77,6 +81,7 @@ export class NativeOperationActivity implements UpdateReadinessAuthority {
   readonly #listeners = new Set<() => void>();
   #pending = 0;
   #revision = 0;
+  get pendingOperationCount(): number { return this.#pending; }
   constructor(readonly signal: AbortSignal) {
     signal.addEventListener('abort', () => { this.#emit(); this.#listeners.clear(); }, { once: true });
   }

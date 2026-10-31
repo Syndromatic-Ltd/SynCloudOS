@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { initialHostUpdateReadinessSnapshot } from '../Updates/hostReadinessTypes';
 import type { RuntimeListener, RuntimeMutator, RuntimeSnapshot } from "./runtimeTypes";
 import type {
   SynCloudOSRuntimeId,
@@ -277,6 +278,7 @@ function createInitialRuntimeSnapshot(runtimeId: string, seed: Partial<RuntimeSn
   lifecycleOperations: [],
   booted: false,
   ...seed,
+  updateReadiness: initialHostUpdateReadinessSnapshot(),
   };
 }
 

@@ -672,6 +672,7 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     imageGeometry,
     filePicker,
     fileSystemAccess: createBrowserFileSystemAccessPanelPort(browserWindow),
+    createFileSystemAccessPanelPort: activity => createBrowserFileSystemAccessPanelPort(browserWindow, activity),
     downloadExport: createBrowserDownloadFilePanelPort(browserWindow),
     animation,
     animationFrames: browserWindow ? createBrowserAFXFrameScheduler(browserWindow, browserWindow.document) : undefined,
