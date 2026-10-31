@@ -33,9 +33,26 @@ export function installControllerServices(context: SynWareContextValue, runtime:
     },
     subscribe(listener: () => void) {
       if (context.signal.aborted) return () => {};
-      const remove = runtime.store.subscribe(listener);
+      let active = true;
+      let observed = session.getSnapshot();
+      const removeStore = runtime.store.subscribe(() => {
+        if (!active || context.signal.aborted) return;
+        const next = session.getSnapshot();
+        if (next === observed) return;
+        // Each observer tracks its own committed route. Publish that cursor
+        // before calling out: the listener may read or publish reentrantly.
+        observed = next;
+        listener();
+      });
+      const remove = () => {
+        if (!active) return;
+        active = false;
+        context.signal.removeEventListener("abort", remove);
+        removeStore();
+      };
       context.signal.addEventListener("abort", remove, { once: true });
-      return () => { context.signal.removeEventListener("abort", remove); remove(); };
+      if (context.signal.aborted) remove();
+      return remove;
     },
   };
   const routerFor = <const TRoutes extends readonly SynWareRouteDefinition[]>(graph: SynWareRouteGraph<TRoutes>) => {
