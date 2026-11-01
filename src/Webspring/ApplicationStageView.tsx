@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSETooltipProvider } from "../NSE/Tooltips";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type Ref, type ReactNode } from "react";
 import { nseUnowned } from "../NSE/sdkPackageEntry";
 import { useWebspringLaunchZoom } from "./WebspringLaunchZoomContext";
@@ -32,6 +31,7 @@ import {
   NSEApplicationNavigationChromeProvider,
   NSEMenuController,
   NSEOverlayProvider,
+  NSETooltipProvider,
   NSEWindowSurfaceBridgeProvider,
   useNSEDeferredDisposal,
 } from "../NSE/NSE";
