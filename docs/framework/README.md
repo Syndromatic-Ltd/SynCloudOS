@@ -53,6 +53,7 @@ The [FX overview](fx/README.md) introduces the twelve frameworks and how they re
 | Guide | Read it to |
 | --- | --- |
 | [The runtime and the host](runtime.md) | Mount the runtime, and configure policy and contributions |
+| [Read-only storage diagnostics](storage-diagnostics.md) | Inspect approximate origin usage, quota and current persistence status |
 | [Webspring](webspring.md) | Define the shell, the Board launcher, branding and content |
 | [Authentication](authentication.md) | Add sign-in, server handlers and roles |
 | [Google sign-in setup](google-oidc-setup.md) | Connect Google as the identity provider |
