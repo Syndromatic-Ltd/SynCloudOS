@@ -1,4 +1,5 @@
 .nse-storage-diagnostics-section {
+  color: var(--nse-prefs-row-colour, #263746);
   display: grid;
   gap: 0.7rem;
   padding: 0.85rem;
@@ -9,3 +10,7 @@
 .nse-storage-diagnostics-values { display: grid; gap: 0.6rem; }
 .nse-storage-diagnostics-values > div { display: grid; gap: 0.2rem; min-inline-size: 0; }
 .nse-storage-diagnostics-values dd { margin: 0; }
+
+.nse-storage-diagnostics .nse-prefs-note { color: var(--nse-prefs-note-lead-colour, rgba(42, 55, 70, 0.78)); }
+[data-mode="dark"] .nse-storage-diagnostics-section { color: var(--nse-prefs-row-colour, #e7ecf2); }
+[data-mode="dark"] .nse-storage-diagnostics .nse-prefs-note { color: var(--nse-prefs-note-lead-colour, rgba(206, 214, 224, 0.82)); }
