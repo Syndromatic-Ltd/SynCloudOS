@@ -32,7 +32,7 @@ function StoragePane() {
       </dl> : null}
       {persistence ? <p><strong>{t("preferences.storage.persistence", "Current persistence status")}: </strong>{persistence.state !== "observed" ? unavailable(persistence.state) : persistence.persisted ? t("preferences.storage.persistent", "The browser reports persistent storage") : t("preferences.storage.bestEffort", "The browser does not report persistent storage")}</p> : null}
       <p className="nse-prefs-note">{t("preferences.storage.limit", "Persistence is not a backup or a guarantee of offline availability or update readiness. This check does not request persistence or change stored data.")}</p>
-      <NSEPushButton disabled={!controller || snapshot.state === "checking" || snapshot.state === "ended"} onClick={() => { void controller?.refresh(); }}>{snapshot.state === "completed" ? t("preferences.storage.refresh", "Refresh storage status") : t("preferences.storage.inspect", "Check storage status")}</NSEPushButton>
+      <NSEPushButton disabled={!controller || snapshot.state === "ended"} onClick={() => { void controller?.refresh(); }}>{snapshot.state === "completed" ? t("preferences.storage.refresh", "Refresh storage status") : t("preferences.storage.inspect", "Check storage status")}</NSEPushButton>
     </div></NSEGroupBox>
   </section>;
 }
