@@ -100,8 +100,9 @@ export function useNSETooltip({
     provider.dismiss(id);
   }, [id, provider]);
 
+  const dismiss = useCallback(() => provider.dismiss(id), [id, provider]);
   return {
-    dismiss: () => provider.dismiss(id),
+    dismiss,
     anchorProps: disabled ? {} : {
       "aria-describedby": open ? id : undefined,
       onPointerEnter,

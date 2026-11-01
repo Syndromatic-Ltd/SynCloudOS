@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneElement, type HTMLAttributes, type ReactElement, type ReactNode, type SyntheticEvent } from "react";
+import { cloneElement, useLayoutEffect, type HTMLAttributes, type ReactElement, type ReactNode, type SyntheticEvent } from "react";
 import { useNSETooltip } from "./useNSETooltip";
 import { useOptionalNSETooltipProvider } from "./NSETooltipProvider";
 
@@ -31,6 +31,10 @@ export function NSELabelHelp(props: LabelHelpProps) {
 }
 function BoundLabelHelp({ label, children }: LabelHelpProps) {
   const binding = useNSETooltip({ content: label });
+  // A route/title change ends the old contextual disclosure. Rich-node
+  // identity alone does not establish a changed semantic label.
+  const semanticLabel = typeof label === "string" || typeof label === "number" ? label : null;
+  useLayoutEffect(() => { binding.dismiss?.(); }, [binding.dismiss, semanticLabel]);
   const props: AnchorProps = {};
   const names = ["onFocus", "onBlur", "onPointerEnter", "onPointerLeave", "onPointerDown", "onPointerMove", "onPointerUp", "onPointerCancel", "onClick"] as const;
   for (const name of names) {
