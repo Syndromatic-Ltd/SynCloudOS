@@ -141,6 +141,16 @@ afterEach(() => {
 });
 
 describe("NSE tooltip service", () => {
+  it("dismisses old label help when the same control changes semantic context", async () => {
+    const scheduler=createScheduler(),ref=React.createRef<HTMLButtonElement>();
+    const view=(label:string)=><TooltipHarness scheduler={scheduler} reducedMotion><NSELabelHelp label={label}><button ref={ref}>Context title</button></NSELabelHelp></TooltipHarness>;
+    const {rerender}=render(view("Categories"));const anchor=screen.getByRole("button",{name:"Context title"});
+    fireEvent.pointerEnter(anchor,{pointerType:"mouse"});expect((await screen.findByRole("tooltip")).textContent).toBe("Categories");
+    rerender(view("Date and Time"));
+    await waitFor(()=>expect(screen.queryByRole("tooltip")).toBeNull());
+    expect(ref.current).toBe(anchor);expect(anchor.getAttribute("aria-describedby")).toBeNull();
+  });
+
   it("preserves the original control ref, handlers and existing description", async () => {
     const scheduler=createScheduler(), ref=React.createRef<HTMLButtonElement>(), click=vi.fn();
     const {unmount}=render(<TooltipHarness scheduler={scheduler} reducedMotion><NSELabelHelp label="Complete destination"><button ref={ref} aria-describedby="existing-description" onClick={click}>Short</button></NSELabelHelp></TooltipHarness>);
