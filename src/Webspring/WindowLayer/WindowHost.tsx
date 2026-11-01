@@ -18,13 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSETooltipProvider } from "../../NSE/Tooltips";
 import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useNSEPresenceExiting, useNSEPresentation, type NSEPresentationSpec } from "../../NSE/Animation";
 import {
   NSEControlRuntimeProvider,
   NSEFocusPortProvider,
   NSEOverlayProvider,
+  NSETooltipProvider,
   NSEWindowSurfaceBridgeProvider,
   NSEBorderlessWindowView,
   NSEHUDWindowView,
