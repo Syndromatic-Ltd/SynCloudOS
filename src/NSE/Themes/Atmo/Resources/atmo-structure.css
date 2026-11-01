@@ -889,6 +889,7 @@
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-text-off {
+  text-align: right;
   right: calc(var(--nse-control-toggle-unit) / 4);
   opacity: calc(1 - var(--nse-control-toggle-ratio, 0));
   color: rgba(245, 245, 245, 0.78);

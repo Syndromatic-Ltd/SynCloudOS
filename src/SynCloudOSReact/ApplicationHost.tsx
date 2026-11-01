@@ -1,6 +1,7 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { NSETooltipProvider } from "../NSE/Tooltips";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
 import { NSEMenuController, NSEOverlayProvider, NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
@@ -194,6 +195,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
         <SynCloudOSWatchdog runtime={runtime} watchdogName={`${app.packageName} application`} scope="app" app={app}
           resetKey={applicationId} fallback={() => null}>
           <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId={responderId}>
+          <NSETooltipProvider>
           <NSEWindowSurfaceBridgeProvider bridge={bridge}>
           {contentMenu ? <ApplicationMenuOverlayHost menuStore={menuStore} model={menuModel} controller={menuController}
             overlay={{ id: `application-host:app-menu-overlay:${applicationId}`, parentResponderId: responderId, placement: "block-end-inline-end" }}
@@ -202,6 +204,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
             {entry}
           </ApplicationMenuTriggerBridge> : entry}
           </NSEWindowSurfaceBridgeProvider>
+          </NSETooltipProvider>
           </NSEOverlayProvider>
         </SynCloudOSWatchdog>
       </section>
