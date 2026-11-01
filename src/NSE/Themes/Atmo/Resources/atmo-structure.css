@@ -869,7 +869,7 @@
   background-position: calc(-1 * var(--nse-control-toggle-unit)) calc(-2 * var(--nse-control-toggle-unit));
 }
 
-.nse-control-toggle-state-label { display: inline-block; white-space: nowrap; }
+:where([data-nse-appearance="atmo"]) .nse-control-toggle-state-label { display: inline-block; white-space: nowrap; }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-text {
   position: absolute;
