@@ -1414,3 +1414,8 @@
 /* Fixed chrome deliberately ellipsizes from the end; provider-owned help
    reveals the complete caption without moving or replacing the action. */
 .nse-app-topbar .nse-control-button { grid-auto-columns: minmax(0, max-content); }
+
+/* A centred metal title clips its label; keep keyboard focus inside that clip. */
+.nse-app-topbar-metal-title:not(.nse-app-topbar-metal-leading-title) .nse-app-topbar-title-button:focus-visible {
+  outline-offset: -3px;
+}

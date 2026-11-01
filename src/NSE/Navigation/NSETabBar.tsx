@@ -251,8 +251,9 @@ export function NSETabBar({
   }, [controller, tooltips]);
 
   const closeOverflow = useCallback(() => {
+    tooltips?.dismissActive();
     controller.closeOverflow();
-  }, [controller]);
+  }, [controller, tooltips]);
 
   const focusControl = useCallback((controlId: string, source: string, activate: boolean) => {
     setFocusedTabId(controlId);
@@ -487,7 +488,7 @@ export function NSETabBar({
           );
         })}
         {overflowDestinations.length > 0 ? (
-          <button
+          <NSELabelHelp label="More destinations"><button
             className={classes("nse-tab-bar-tab", "nse-tab-bar-more", usesTallTabChrome && "nse-control-button")}
             type="button"
             role="tab"
@@ -552,7 +553,7 @@ export function NSETabBar({
               </span>
               <span className="nse-tab-bar-label" {...moreLabelAppearance.attributes}>More</span>
             </span>
-          </button>
+          </button></NSELabelHelp>
         ) : null}
           </div>
         </div>
