@@ -20,7 +20,7 @@
 
 import { createPortal } from "react-dom";
 import { useState } from "react";
-import { useNSEOverlay } from "../Overlays";
+import { useNSEOverlay, useNSEOverlayProvider } from "../Overlays";
 import type { NSETooltipProps } from "./tooltipTypes";
 import { useNSEAppearanceProjection } from "../Appearance";
 
@@ -28,10 +28,12 @@ import { useNSEAppearanceProjection } from "../Appearance";
 export function NSETooltip({ id, content, open, anchor, placement = "block-end-inline-start", onOpenChange, onPointerEnter, onPointerLeave }: NSETooltipProps) {
   const appearanceProjection = useNSEAppearanceProjection();
   if (!id.trim()) throw new TypeError("NSE tooltip IDs must not be empty.");
+  const { runtime, defaultParentResponderId } = useNSEOverlayProvider();
   const [arrow, setArrow] = useState<HTMLSpanElement | null>(null);
   const overlay = useNSEOverlay({
     id,
     kind: "tooltip",
+    parentResponderId: defaultParentResponderId ?? runtime.runtimeId,
     anchor,
     open,
     placement,
