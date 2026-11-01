@@ -19,6 +19,7 @@
 
 import { createMountedPlaybackPresentation } from "./mountedPlaybackPresentation";
 import { createMountedScreenWakeLock } from "./mountedScreenWakeLock";
+import { createStorageDiagnosticsClient } from "../SynCloudOS";
 import type { AppPlaybackMetadata } from "./playbackPresentationTypes";
 
 
@@ -4745,6 +4746,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           }), signal, assertLive);
         },
       }),
+      storageDiagnostics: createStorageDiagnosticsClient({ signal: presentationSignal, assertLive, getNavigator: () => runtime.environment.browser.getNavigator() }),
       screenWakeLock,
       share: createMountedShareClient({ browser: runtime.environment.browser, signal, assertLive, nativeActivity: runtime.nativeActivity,
         access: audit => environmentCapabilityAccess("web.share", audit),

@@ -392,6 +392,7 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
     alerts: environment.alerts,
     externalActions: environment.externalActions,
     share: environment.share,
+    storageDiagnostics: environment.storageDiagnostics,
     screenWakeLock: environment.screenWakeLock,
     workArea: environment.workArea,
     settingsAvailability: environment.settingsAvailability,

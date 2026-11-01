@@ -106,6 +106,7 @@ export interface SCOSFacade extends Omit<SynWareContextValue, "appId" | "appInfo
   readonly navigation: AppNavigationClient;
   readonly pasteboards: AppPasteboardClient;
   readonly services: AppServiceClient;
+  readonly storageDiagnostics: import("../storageDiagnosticsTypes").AppStorageDiagnosticsClient;
   readonly share: AppShareClient;
   readonly routes: SCOSRoutes;
   readonly fonts: SynWareFontAccess;
@@ -182,6 +183,7 @@ function createFacade(source: () => SCOSFacadeSource): SCOSFacade {
     get pasteboards() { return context().pasteboards; },
     get services() { return context().services; },
     get share() { return context().share; },
+    get storageDiagnostics() { return context().storageDiagnostics; },
     get screenWakeLock() { return context().screenWakeLock; },
     get routes() { return controllerServicesFor(context()).routes; },
     get fonts() { return controllerServicesFor(context()).fonts; },
@@ -268,6 +270,7 @@ export const unboundSCOS: SCOSFacade = Object.freeze({
   get pasteboards() { return unboundMember("pasteboards"); },
   get services() { return unboundMember("services"); },
   get share() { return unboundMember("share"); },
+  get storageDiagnostics() { return unboundMember("storageDiagnostics"); },
   get screenWakeLock() { return unboundMember("screenWakeLock"); },
   get routes() { return unboundMember("routes"); },
   get fonts() { return unboundMember("fonts"); },

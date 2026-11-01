@@ -1,3 +1,4 @@
+import { createStorageDiagnosticsClient } from "../Persistence/storageDiagnostics";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -369,6 +370,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     get windows() { return windows; },
     get documents() { return documents; },
     get updateReadiness() { return updateReadiness; },
+    storageDiagnostics: createStorageDiagnosticsClient({ signal: controller.signal, assertLive: () => controller.signal.throwIfAborted(), getNavigator: () => config.environment.browser.getNavigator() }),
     nativeActivity,
     get documentStore() { return documentStore; },
     get documentResources() { return documentResources; },
