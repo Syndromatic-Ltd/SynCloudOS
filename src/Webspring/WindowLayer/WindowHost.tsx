@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSETooltipProvider } from "../../NSE/Tooltips";
 import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useNSEPresenceExiting, useNSEPresentation, type NSEPresentationSpec } from "../../NSE/Animation";
 import {
@@ -292,6 +293,7 @@ export function WindowHost({
         defaultParentResponderId={controller.windowResponderId}
         portalContainer={overlayLayerNode}
       >
+        <NSETooltipProvider>
         <NSEControlRuntimeProvider port={controlPort}>
           <NSEFocusPortProvider port={focusPort}>
             {childTransientBridge ? (
@@ -299,6 +301,7 @@ export function WindowHost({
             ) : hostedContent}
           </NSEFocusPortProvider>
         </NSEControlRuntimeProvider>
+      </NSETooltipProvider>
       </NSEOverlayProvider>
     </WindowChromeSlotContext.Provider>
   );

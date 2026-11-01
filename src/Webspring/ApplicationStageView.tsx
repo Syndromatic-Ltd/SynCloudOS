@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSETooltipProvider } from "../NSE/Tooltips";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type Ref, type ReactNode } from "react";
 import { nseUnowned } from "../NSE/sdkPackageEntry";
 import { useWebspringLaunchZoom } from "./WebspringLaunchZoomContext";
@@ -350,6 +351,7 @@ export function ApplicationStageView({
   }, [applicationResponderId, runtime, stage.isFocused]);
   return (
     <NSEOverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>
+    <NSETooltipProvider>
     <NSEWindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
     <NSEControlRuntimeProvider port={nseControlPort}>
     <NSEApplicationNavigationChromeProvider controller={navigationChromeController}>
@@ -426,6 +428,7 @@ export function ApplicationStageView({
       style={{ ...stageMotion.root.style, zIndex: stage.zIndex + 70, ...(staged ? { visibility: "hidden" as const } : {}) }}>
       <div ref={attachOverlayDestination} className="webspring-app-overlay-plane" data-multiswitch-role={multiSwitchRole ?? undefined} style={stageMotion.surface.style} />
     </div>
+    </NSETooltipProvider>
     </NSEOverlayProvider>
   );
 }
