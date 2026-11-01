@@ -57,6 +57,7 @@ interface NSETooltipProviderContextValue {
   requestClose(id: string, delayMs: number): void;
   cancelPendingOpen(id: string): void;
   dismiss(id: string): void;
+  dismissActive(): void;
 }
 
 const NSETooltipContext = createContext<NSETooltipProviderContextValue | null>(null);
@@ -141,9 +142,8 @@ export function NSETooltipProvider({ children, leaveDelayMs = 100, longPressDela
 
   const requestClose = useCallback((id: string, delayMs: number) => {
     if (activeIdRef.current !== id) return;
-    const resolvedDelay = runtime.environment.presentation.getSnapshot().reducedMotion
-      ? 0
-      : nonNegativeFinite(delayMs, "NSE tooltip close delay");
+    // Hover transfer is an interaction grace period, independent of motion.
+    const resolvedDelay = nonNegativeFinite(delayMs, "NSE tooltip close delay");
     cancelPending();
     if (resolvedDelay === 0) {
       activeIdRef.current = null;
@@ -230,6 +230,7 @@ export function NSETooltipProvider({ children, leaveDelayMs = 100, longPressDela
     requestClose,
     cancelPendingOpen,
     dismiss,
+    dismissActive: () => { const id = activeIdRef.current; if (id) dismiss(id); },
   }), [cancelPendingOpen, dismiss, register, requestClose, requestOpen, resolvedLeaveDelayMs, resolvedLongPressDelayMs]);
   return <NSETooltipContext.Provider value={value}>{children}</NSETooltipContext.Provider>;
 }

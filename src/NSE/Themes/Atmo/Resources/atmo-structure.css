@@ -764,11 +764,12 @@
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle {
+  --nse-control-toggle-unit: max(var(--nse-atmo-toggle-height), calc((var(--nse-control-toggle-label-width, 0px) + 4px) * 1.333333333));
   position: relative;
   display: inline-block;
-  width: var(--nse-atmo-toggle-width);
-  min-width: var(--nse-atmo-toggle-width);
-  height: var(--nse-atmo-toggle-height);
+  width: calc(var(--nse-control-toggle-unit) * 2);
+  min-width: calc(var(--nse-control-toggle-unit) * 2);
+  height: var(--nse-control-toggle-unit);
   margin: 1px 0;
   padding: 0;
   overflow: visible;
@@ -791,7 +792,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: calc(var(--nse-control-toggle-unit) / 2);
   background: transparent;
 }
 
@@ -802,14 +803,14 @@
   position: absolute;
   background-image: var(--nse-atmo-toggle);
   background-repeat: no-repeat;
-  background-size: 64px 128px;
+  background-size: calc(var(--nse-control-toggle-unit) * 2) calc(var(--nse-control-toggle-unit) * 4);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-rail {
   top: 0;
   z-index: 0;
-  width: 32px;
-  height: 32px;
+  width: var(--nse-control-toggle-unit);
+  height: var(--nse-control-toggle-unit);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-rail-start {
@@ -819,18 +820,19 @@
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-rail-end {
   right: 0;
-  background-position: -32px -32px;
+  background-position: calc(-1 * var(--nse-control-toggle-unit)) calc(-1 * var(--nse-control-toggle-unit));
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-thumb {
   top: 0;
   left: 0;
   z-index: 3;
-  width: 32px;
-  height: 32px;
+  width: var(--nse-control-toggle-unit);
+  height: var(--nse-control-toggle-unit);
   background-image: none;
-  transform: translateX(var(--nse-control-toggle-thumb-x, 0));
-  transition: transform 180ms cubic-bezier(0.22, 0.75, 0.28, 1), filter 140ms ease;
+  left: calc(100% * var(--nse-control-toggle-ratio, 0));
+  transform: translateX(calc(-100% * var(--nse-control-toggle-ratio, 0)));
+  transition: left 180ms cubic-bezier(0.22, 0.75, 0.28, 1), transform 180ms cubic-bezier(0.22, 0.75, 0.28, 1), filter 140ms ease;
   will-change: transform;
 }
 
@@ -842,30 +844,32 @@
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-thumb::before {
-  background-position: 0 -32px;
+  background-position: 0 calc(-1 * var(--nse-control-toggle-unit));
   opacity: calc(1 - var(--nse-control-toggle-ratio, 0));
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-thumb::after {
-  background-position: -32px 0;
+  background-position: calc(-1 * var(--nse-control-toggle-unit)) 0;
   opacity: var(--nse-control-toggle-ratio, 0);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle:disabled .nse-control-toggle-rail-start {
-  background-position: 0 -64px;
+  background-position: 0 calc(-2 * var(--nse-control-toggle-unit));
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle:disabled .nse-control-toggle-rail-end {
-  background-position: -32px -96px;
+  background-position: calc(-1 * var(--nse-control-toggle-unit)) calc(-3 * var(--nse-control-toggle-unit));
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle:disabled .nse-control-toggle-thumb::before {
-  background-position: 0 -96px;
+  background-position: 0 calc(-3 * var(--nse-control-toggle-unit));
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle:disabled .nse-control-toggle-thumb::after {
-  background-position: -32px -64px;
+  background-position: calc(-1 * var(--nse-control-toggle-unit)) calc(-2 * var(--nse-control-toggle-unit));
 }
+
+.nse-control-toggle-state-label { display: inline-block; white-space: nowrap; }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-text {
   position: absolute;
@@ -880,12 +884,12 @@
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-text-on {
-  left: 9px;
+  left: calc(var(--nse-control-toggle-unit) * .28125);
   opacity: var(--nse-control-toggle-ratio, 0);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-text-off {
-  right: 8px;
+  right: calc(var(--nse-control-toggle-unit) / 4);
   opacity: calc(1 - var(--nse-control-toggle-ratio, 0));
   color: rgba(245, 245, 245, 0.78);
 }

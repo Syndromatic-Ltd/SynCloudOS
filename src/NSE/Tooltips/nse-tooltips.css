@@ -24,7 +24,7 @@
   --nse-tooltip-source-radius: 2px;
   --nse-tooltip-source-background: #FFFFCA;
   display: inline-flex;
-  pointer-events: none;
+  pointer-events: auto;
   max-inline-size: var(--nse-overlay-available-inline-size, 100%);
   max-block-size: var(--nse-overlay-available-block-size, 100%);
 }

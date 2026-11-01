@@ -32,6 +32,8 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { NSELabelHelp } from "../Tooltips/NSELabelHelp";
+import { useOptionalNSETooltipProvider } from "../Tooltips/NSETooltipProvider";
 import {
   nseAppearanceSlot,
   projectNSEAppearanceSlot,
@@ -224,6 +226,7 @@ export function NSETabBar({
     ...(overflowDestinations.length > 0 ? [NSETabBarMoreDestinationId] : []),
   ];
   const overflowOpen = snapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
+  const tooltips = useOptionalNSETooltipProvider();
   const [focusedTabId, setFocusedTabId] = useState(snapshot.activeTabId);
   const [paintFocusedTabId, setPaintFocusedTabId] = useState<string | null>(null);
   const [hoveredTabId, setHoveredTabId] = useState<string | null>(null);
@@ -242,9 +245,10 @@ export function NSETabBar({
   }, [controller]);
 
   const openOverflow = useCallback((source: string) => {
+    tooltips?.dismissActive();
     setFocusedTabId(NSETabBarMoreDestinationId);
     void controller.openOverflow({ source }).catch(() => undefined);
-  }, [controller]);
+  }, [controller, tooltips]);
 
   const closeOverflow = useCallback(() => {
     controller.closeOverflow();
@@ -412,7 +416,7 @@ export function NSETabBar({
           const segment = tabChromeSegment(index, orientation === "vertical" ? 1 : controls.length);
           const chromeState = tabChromeState(state, selected, pressed);
           return (
-            <button
+            <NSELabelHelp key={destination.id} label={destination.accessibleLabel ?? destination.label}><button
               className={classes("nse-tab-bar-tab", usesTallTabChrome && "nse-control-button")}
               key={destination.id}
               type="button"
@@ -479,7 +483,7 @@ export function NSETabBar({
                   <span className="nse-tab-bar-badge" data-nse-tab-badge="true" aria-hidden="true" {...badgeAppearance.attributes}>{destination.badge}</span>
                 ) : null}
               </span>
-            </button>
+            </button></NSELabelHelp>
           );
         })}
         {overflowDestinations.length > 0 ? (

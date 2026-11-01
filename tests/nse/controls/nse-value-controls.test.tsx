@@ -19,6 +19,7 @@
  */
 
 // @vitest-environment jsdom
+import { NSEToggleButton } from "../../../src/NSE/Controls/Fields/NSEFields";
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
 installNSEScrollIntoViewFixture();
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"; import React, { useState } from "react"; import { afterEach, describe, expect, it, vi } from "vitest";
@@ -140,4 +141,22 @@ describe("value controls", () => {
   it("hosts segment menus and width overflow through the overlay host",()=>{const action=vi.fn(),change=vi.fn();const workArea={width:800,height:600,safeArea:{top:0,right:0,bottom:0,left:0}};const presentation=createStaticPresentationPort({width:800,height:600});const port={runtimeId:"runtime:segments",signal:new AbortController().signal,environment:{browser:{getDocument:()=>document,getWindow:()=>window},workArea:{getSnapshot:()=>workArea,subscribe:()=>()=>undefined},visualViewport:{getSnapshot:()=>null,subscribe:()=>()=>undefined},presentation,setTimeout:(callback:()=>void)=>{callback();return 0},clearTimeout:()=>undefined},restoreFocus:(_id:string,anchor:HTMLElement|null)=>anchor?.focus(),reportPlacementFailure:()=>undefined,wrapFocusScope:(_options:unknown,node:React.ReactNode)=>node};render(<NSEOverlayProvider runtimePort={port} defaultParentResponderId="workspace"><NSESegmentedControl aria-label="Tools" maximumVisibleSegments={2} items={[{id:"a",label:"A",menu:[{id:"inspect",label:"Inspect"}]},{id:"b",label:"B"},{id:"c",label:"C"}]} selection={{mode:"select-one",selectedIds:new Set(["a"]),allowsEmpty:false}} onSelectionChange={change} onMenuAction={action}/></NSEOverlayProvider>);fireEvent.click(screen.getByRole("button",{name:"More options for A"}));fireEvent.click(screen.getByRole("option",{name:"Inspect"}));expect(action).toHaveBeenCalledWith("a","inspect");fireEvent.click(screen.getByRole("button",{name:"More Tools"}));fireEvent.click(screen.getByRole("option",{name:"C"}));expect([...change.mock.calls.at(-1)![0].selectedIds]).toEqual(["c"]);});
   it("commits command segments only after canonical command execution",async()=>{const change=vi.fn();const dispatch=vi.fn(async()=>({status:"executed" as const,commandId:"tools.select",responderId:"workspace",operationId:"op",correlationId:"correlation",value:undefined}));const port={signal:new AbortController().signal,commands:{getPresentationGeneration:()=>({registryGeneration:1,responderGeneration:1}),validate:vi.fn(async()=>({commandId:"tools.select",responderId:"workspace",title:"B",enabled:true,denied:false,hidden:false,state:"off" as const})),prepareDispatch:vi.fn(async()=>({status:"accepted" as const,acceptance:{commandId:"tools.select",responderId:"workspace"} as never})),dispatch}};render(<NSEControlRuntimeProvider port={port}><NSESegmentedControl aria-label="Tools" items={[{id:"a",label:"A"},{id:"b",label:"B",commandId:"tools.select",commandPayload:{id:"b"}}]} selection={{mode:"select-one",selectedIds:new Set(["a"]),allowsEmpty:false}} onSelectionChange={change}/></NSEControlRuntimeProvider>);const button=screen.getByRole("button",{name:"B"});await waitFor(()=>expect((button as HTMLButtonElement).disabled).toBe(false));fireEvent.click(button);await waitFor(()=>expect(dispatch).toHaveBeenCalled());expect([...change.mock.calls[0][0].selectedIds]).toEqual(["b"]);});
   it("registers one command undo group for each committed stepper and slider gesture",async()=>{const runtime=createSynCloudOS({id:"runtime:value-undo",environment:createTestRuntimeEnvironment()});const manager=runtime.undo.create({kind:"application",id:"value-controls"});function Harness(){const[count,setCount]=useState(1);const[gain,setGain]=useState(5);return <><NSEStepper aria-label="Undo count" value={count} minimum={0} maximum={10} step={1} undoManager={manager} onValueChange={setCount}/><NSESlider aria-label="Undo gain" value={gain} minimum={0} maximum={10} step={1} undoManager={manager} onValueChange={setGain}/><output>{count}/{gain}</output></>}render(<Harness/>);fireEvent.click(screen.getByRole("button",{name:"Increment Undo count"}));fireEvent.keyDown(screen.getByRole("slider",{name:"Undo gain"}),{key:"ArrowRight"});expect(manager.inspect().entries).toHaveLength(2);await manager.undo();await waitFor(()=>expect(screen.getByText("2/5")).not.toBeNull());await manager.undo();await waitFor(()=>expect(screen.getByText("1/5")).not.toBeNull());});
+});
+
+
+describe("toggle text geometry observation", () => {
+  it("remeasures rendered label width and releases its observer", () => {
+    let width = 20; let notify!: ResizeObserverCallback;
+    const disconnect = vi.fn();
+    vi.stubGlobal("ResizeObserver", class { constructor(callback:ResizeObserverCallback){notify=callback;} observe(){} disconnect=disconnect; });
+    const getter=vi.spyOn(HTMLElement.prototype,"offsetWidth","get").mockImplementation(function(this:HTMLElement){return this.classList.contains("nse-control-toggle-state-label")?width:64;});
+    const {unmount}=render(<NSEToggleButton aria-label="Observed switch" onLabel="Ein" offLabel="Aus" />);
+    const control=screen.getByRole("switch",{name:"Observed switch"});
+    expect(control.style.getPropertyValue("--nse-control-toggle-label-width")).toBe("20px");
+    width=40;
+    act(()=>notify([],{}as ResizeObserver));
+    expect(control.style.getPropertyValue("--nse-control-toggle-label-width")).toBe("40px");
+    expect(control.getAttribute("aria-checked")).toBe("false");
+    unmount();expect(disconnect).toHaveBeenCalled();getter.mockRestore();vi.unstubAllGlobals();
+  });
 });

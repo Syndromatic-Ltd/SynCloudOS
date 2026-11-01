@@ -25,7 +25,7 @@ import type { NSETooltipProps } from "./tooltipTypes";
 import { useNSEAppearanceProjection } from "../Appearance";
 
 /** A noninteractive overlay; focus stays on its anchor. */
-export function NSETooltip({ id, content, open, anchor, placement = "block-end-inline-start", onOpenChange }: NSETooltipProps) {
+export function NSETooltip({ id, content, open, anchor, placement = "block-end-inline-start", onOpenChange, onPointerEnter, onPointerLeave }: NSETooltipProps) {
   const appearanceProjection = useNSEAppearanceProjection();
   if (!id.trim()) throw new TypeError("NSE tooltip IDs must not be empty.");
   const { runtime } = useNSEOverlayProvider();
@@ -51,6 +51,8 @@ export function NSETooltip({ id, content, open, anchor, placement = "block-end-i
       {...appearanceProjection}
       id={id}
       role="tooltip"
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
       className="nse-tooltip"
       data-nse-control="tooltip"
       data-nse-part="surface"

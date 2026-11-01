@@ -18,7 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { CSSProperties } from "react";
+import { isValidElement, type CSSProperties, type HTMLAttributes, type ReactElement, type ReactNode } from "react";
+import { NSELabelHelp } from "../../Tooltips/NSELabelHelp";
+
+function leadingLabelHelp(node: ReactNode) {
+  if (!isValidElement(node)) return node;
+  const props = node.props as HTMLAttributes<HTMLElement> & { children?: ReactNode };
+  const label = props["aria-label"] ?? (typeof props.children === "string" ? props.children : null);
+  return label ? <NSELabelHelp label={label}>{node as ReactElement<HTMLAttributes<HTMLElement>>}</NSELabelHelp> : node;
+}
 import {
   getOptionalNSESmoothSurfaceProps,
   type NSESmoothSurfaceStyle
@@ -40,7 +48,7 @@ function NSETopBarTitle({
   if (center) return <>{center}</>;
   if (!titleAction) return <>{title}</>;
   return (
-    <button
+    <NSELabelHelp label={typeof title === "string" && title !== titleAction.label ? `${title} — ${titleAction.label}` : titleAction.label}><button
       type="button"
       className="nse-app-topbar-title-button"
       data-selected={titleAction.selected ? "true" : "false"}
@@ -60,7 +68,7 @@ function NSETopBarTitle({
         <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-right" />
         <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-down" />
       </span>
-    </button>
+    </button></NSELabelHelp>
   );
 }
 
@@ -121,7 +129,7 @@ function NSETopBarMetal({
       <span className="nse-app-topbar-metal-grain" aria-hidden="true" />
       {leading !== undefined || leadingItems.length || leadingTitle ? (
         <div className="nse-app-topbar-metal-cluster nse-app-topbar-metal-leading">
-          {leading !== undefined ? leading : leadingItems.map((item) => (
+          {leading !== undefined ? leadingLabelHelp(leading) : leadingItems.map((item) => (
             <NSETopBarMetalPill key={`${item.kind}-${item.label}`} item={item} position="left" />
           ))}
           {leadingTitle ? (
@@ -207,7 +215,7 @@ export function NSETopBar(props: NSETopBarProps) {
       </div>
       <div className="nse-app-topbar-content">
         <div className="nse-app-topbar-slot nse-app-topbar-slot-left">
-          {leading !== undefined ? leading : leadingItems.map((item) => (
+          {leading !== undefined ? leadingLabelHelp(leading) : leadingItems.map((item) => (
             <NSETopBarButton key={`${item.kind}-${item.label}`} item={item} position="left" styleDefinition={styleDefinition} />
           ))}
         </div>
