@@ -1410,3 +1410,7 @@
       var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
   }
 }
+
+/* Fixed chrome deliberately ellipsizes from the end; provider-owned help
+   reveals the complete caption without moving or replacing the action. */
+.nse-app-topbar .nse-control-button { grid-auto-columns: minmax(0, max-content); }

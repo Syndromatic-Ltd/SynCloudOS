@@ -536,3 +536,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Overflow destinations have room to grow vertically; keep their names readable. */
+.nse-tab-bar-overflow-option .nse-control-list-primary { white-space: normal; overflow: visible; overflow-wrap: anywhere; }

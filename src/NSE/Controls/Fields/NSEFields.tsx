@@ -539,6 +539,19 @@ function NSEToggleButtonControl({
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const thumbRef = useRef<HTMLSpanElement>(null);
+  const onTextRef = useRef<HTMLSpanElement>(null);
+  const offTextRef = useRef<HTMLSpanElement>(null);
+  const [labelWidth, setLabelWidth] = useState(0);
+  useLayoutEffect(() => {
+    const labels = [onTextRef.current, offTextRef.current].filter((node): node is HTMLSpanElement => !!node);
+    const measure = () => setLabelWidth(Math.max(0, ...labels.map(node => node.offsetWidth)));
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    labels.forEach(node => observer.observe(node));
+    return () => observer.disconnect();
+  }, [onLabel, offLabel]);
   const dragState = useRef({ pointerId: -1, startX: 0, moved: false });
   const [dragPercent, setDragPercent] = useState<number | null>(null);
   const [isDragging, setDragging] = useState(false);
@@ -551,6 +564,7 @@ function NSEToggleButtonControl({
   const displayPercent = dragPercent ?? (isChecked ? 1 : 0);
   const toggleStyle = {
     ...style,
+    "--nse-control-toggle-label-width": `${labelWidth}px`,
     "--nse-control-toggle-ratio": displayPercent,
     "--nse-control-toggle-thumb-x": `${displayPercent * TOGGLE_TRAVEL_PX}px`
   } as CSSVarStyle;
@@ -558,8 +572,9 @@ function NSEToggleButtonControl({
   function getPercentFromPointer(clientX: number) {
     const rect = toggleRef.current?.getBoundingClientRect();
     if (!rect) return isChecked ? 1 : 0;
-    const start = TOGGLE_INSET_PX + TOGGLE_THUMB_PX / 2;
-    const end = rect.width - TOGGLE_INSET_PX - TOGGLE_THUMB_PX / 2;
+    const thumbWidth = thumbRef.current?.getBoundingClientRect().width || TOGGLE_THUMB_PX;
+    const start = TOGGLE_INSET_PX + thumbWidth / 2;
+    const end = rect.width - TOGGLE_INSET_PX - thumbWidth / 2;
     return clamp((clientX - rect.left - start) / Math.max(1, end - start), 0, 1);
   }
 
@@ -655,9 +670,9 @@ function NSEToggleButtonControl({
       <span className="nse-control-toggle-track" aria-hidden="true">
         <span className="nse-control-toggle-rail nse-control-toggle-rail-start" />
         <span className="nse-control-toggle-rail nse-control-toggle-rail-end" />
-        <span className="nse-control-toggle-text nse-control-toggle-text-on">{onLabel}</span>
-        <span className="nse-control-toggle-text nse-control-toggle-text-off">{offLabel}</span>
-        <span className="nse-control-toggle-thumb">{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span>
+        <span className="nse-control-toggle-text nse-control-toggle-text-on"><span className="nse-control-toggle-state-label" ref={onTextRef}>{onLabel}</span></span>
+        <span className="nse-control-toggle-text nse-control-toggle-text-off"><span className="nse-control-toggle-state-label" ref={offTextRef}>{offLabel}</span></span>
+        <span className="nse-control-toggle-thumb" ref={thumbRef}>{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span>
       </span>
     </button>
   );
