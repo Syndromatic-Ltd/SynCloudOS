@@ -34,6 +34,13 @@ describe("owned Storage preference pane", () => {
     expect(runtime.updateReadiness.getSnapshot()).toBe(readiness);
     expect(screen.queryByRole("button", { name: /persist|delete|clear|install|reload|update now/i })).toBeNull();
   });
+  it("keeps the explicit check keyboard-focusable while pending so a refresh can supersede it", async () => {
+    const pending = deferred<object>(), runtime = fixture({ estimate: () => pending.promise, persisted: async () => false }); view(runtime);
+    const check = screen.getByRole("button", { name: "Check storage status" }); check.focus();
+    act(() => { fireEvent.click(check); });
+    try { expect(check.hasAttribute("disabled")).toBe(false); expect(document.activeElement).toBe(check); }
+    finally { await act(async () => { pending.resolve({ usage: 1, quota: 2 }); await pending.promise; }); }
+  });
   it("shows unsupported, denied and failed facts without reporting zero bytes", async () => {
     const runtime = fixture({ estimate: async () => { throw new DOMException("private-generated", "SecurityError"); }, persisted: async () => { throw Error("private-generated"); } }); view(runtime);
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Check storage status" })); });
