@@ -1,0 +1,11 @@
+.nse-storage-diagnostics-section {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.85rem;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+.nse-storage-diagnostics-section :is(h2, p, dl) { margin: 0; }
+.nse-storage-diagnostics-values { display: grid; gap: 0.6rem; }
+.nse-storage-diagnostics-values > div { display: grid; gap: 0.2rem; min-inline-size: 0; }
+.nse-storage-diagnostics-values dd { margin: 0; }

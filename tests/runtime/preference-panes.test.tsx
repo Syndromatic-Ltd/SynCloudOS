@@ -37,7 +37,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const builtInTitles = ["Appearance", "Audio & Haptics", "Motion", "Notifications", "Language", "Updates"];
+const builtInTitles = ["Appearance", "Audio & Haptics", "Motion", "Notifications", "Language", "Updates", "Storage"];
 
 function renderPreferences(options: { preferences?: WebspringPreferencesOptions; account?: SystemUIAccount; open?: string } = {}) {
   const runtime = createTestRuntime();
@@ -91,7 +91,7 @@ describe("System Preferences panes", () => {
 
   it("hides built-ins by id", () => {
     renderPreferences({ preferences: { hide: ["sounds", "motion"] } });
-    expect(listedTitles(builtInTitles)).toEqual(["Appearance", "Notifications", "Language", "Updates"]);
+    expect(listedTitles(builtInTitles)).toEqual(["Appearance", "Notifications", "Language", "Updates", "Storage"]);
   });
 
   it("hides Account even when sign-in is offered", () => {
@@ -103,12 +103,12 @@ describe("System Preferences panes", () => {
     const titles = ["First", ...builtInTitles, "Between", "Billing"];
     renderPreferences({ preferences: { panes: [pane("billing", "Billing", 600), pane("first", "First", 10), pane("between", "Between", 250)] } });
     expect(listedTitles(titles))
-      .toEqual(["First", "Appearance", "Audio & Haptics", "Between", "Motion", "Notifications", "Language", "Billing", "Updates"]);
+      .toEqual(["First", "Appearance", "Audio & Haptics", "Between", "Motion", "Notifications", "Language", "Billing", "Updates", "Storage"]);
   });
 
   it("replaces a built-in with a developer pane of the same id, in the list and when opened", () => {
     const { runtime } = renderPreferences({ preferences: { panes: [pane("sounds", "My Sounds", 200, () => <p>custom sounds pane</p>)] } });
-    expect(listedTitles([...builtInTitles, "My Sounds"])).toEqual(["Appearance", "My Sounds", "Motion", "Notifications", "Language", "Updates"]);
+    expect(listedTitles([...builtInTitles, "My Sounds"])).toEqual(["Appearance", "My Sounds", "Motion", "Notifications", "Language", "Updates", "Storage"]);
     act(() => { runtime.systemUI.preferences.open("sounds"); });
     expect(screen.getByText("custom sounds pane")).toBeTruthy();
     expect(screen.queryByRole("slider", { name: "Master volume" })).toBeNull();

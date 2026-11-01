@@ -64,6 +64,7 @@ export interface MountedAppEnvironmentClients {
   readonly launcher: AppLauncherClient;
   readonly externalActions: AppExternalActionClient;
   readonly share: AppShareClient;
+  readonly storageDiagnostics: import("./storageDiagnosticsTypes").AppStorageDiagnosticsClient;
   readonly screenWakeLock: import("./playbackPresentationTypes").AppScreenWakeClient;
   readonly workArea: AppWorkAreaClient;
   readonly settingsAvailability: AppSettingsAvailabilityClient;

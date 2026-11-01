@@ -20,6 +20,7 @@
 export { SynCloudOSNSEFontPanel, type SynCloudOSNSEFontPanelProps } from "../../SynCloudOSReact/SynCloudOSNSEFontPanel";
 export { SynWareProvider, type SynWareProviderProps } from "./SynWareContext";
 export { SCOS, useSCOS, createAppSCOS } from "./scos";
+export type { AppStorageDiagnosticsClient, StorageDiagnosticsSnapshot, StorageEstimateObservation, StoragePersistenceObservation, StorageDiagnosticsUnavailable } from "./storageDiagnosticsTypes";
 export type { SCOSFacade, SCOSApplicationInfo, SCOSPreferences, SCOSStrings, SCOSErrorCode } from "./scos";
 export { useFonts } from "./fontAccess";
 export type { SynWareFontAccess } from "./fontAccess";

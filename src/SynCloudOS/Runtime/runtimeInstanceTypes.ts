@@ -983,6 +983,7 @@ export interface SynCloudOSRuntimeController {
 }
 
 export interface SynCloudOSRuntime {
+  readonly storageDiagnostics: import("../Persistence/storageDiagnostics").StorageDiagnosticsClient;
   readonly updateReadiness: HostUpdateReadinessService;
   /** Host-owned underlying native promise instrumentation. Not an AppSDK authority. */
   readonly nativeActivity: NativeOperationActivity;
