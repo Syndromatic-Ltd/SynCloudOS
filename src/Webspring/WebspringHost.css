@@ -26,6 +26,15 @@
   --webspring-hover-label-duration: 180ms;
 }
 
+/* The board and its widget shelf scroll as an ordinary page while visible.
+   A full-screen app stage owns the viewport until its exit completes; the
+   covered board must not consume that app's wheel, touch or keyboard input.
+   Presence supplies composition/cleanup across switches without changing the
+   host's inline styles or scroll position. Preloaded staged views own no input. */
+:root:has(.webspring-app-view-frame:not([data-launch-staged="true"])) {
+  overflow: hidden;
+}
+
 .webspring-view-host,
 .webspring-entrance-surface {
   display: contents;
