@@ -323,10 +323,12 @@
   inset: 0;
   z-index: 10000;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   place-items: center;
   box-sizing: border-box;
   overflow: hidden;
-  padding: clamp(10px, 4vw, 22px);
+  padding: max(clamp(10px, 4vw, 22px), env(safe-area-inset-top)) max(clamp(10px, 4vw, 22px), env(safe-area-inset-right)) max(clamp(10px, 4vw, 22px), env(safe-area-inset-bottom)) max(clamp(10px, 4vw, 22px), env(safe-area-inset-left));
   background: rgba(0, 0, 0, 0.42);
   -webkit-backdrop-filter: blur(5px) saturate(0.85);
   backdrop-filter: blur(5px) saturate(0.85);
@@ -347,6 +349,8 @@
   width: min(620px, calc(100vw - 22px));
   max-width: calc(100vw - 22px);
   max-height: calc(100vh - 22px);
+  max-inline-size: 100%;
+  max-block-size: 100%;
   min-height: 250px;
   padding: 28px;
   overflow: hidden;
@@ -545,6 +549,7 @@
   }
 
   .nse-alert-actions {
+    grid-template-columns: minmax(0, 1fr);
     margin-right: 0;
     margin-left: 0;
   }
