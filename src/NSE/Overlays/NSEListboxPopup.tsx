@@ -342,6 +342,7 @@ export function NSEListboxPopup<T = unknown>({
       labelledBy={labelledBy}
       describedBy={describedBy}
       overlayKind={resolvedPresentation.mode === "sheet" ? "action-sheet" : "listbox"}
+      chrome="listbox"
       modal={resolvedPresentation.mode === "sheet"}
       presentation={resolvedPresentation}
       dir={direction}

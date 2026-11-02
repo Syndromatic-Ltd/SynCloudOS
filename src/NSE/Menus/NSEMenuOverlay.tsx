@@ -124,6 +124,7 @@ export function NSEMenuOverlay({ overlay, controller, open, anchor, labelledBy, 
       parentScopeId={overlay.parentScopeId}
       presentation={presentation}
       overlayKind={presentation.mode === "sheet" ? "action-sheet" : kind}
+      chrome={kind}
       modal={presentation.mode === "sheet"}
       keepPortalMounted
       contentPending={contentPending}
