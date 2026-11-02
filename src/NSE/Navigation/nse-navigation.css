@@ -416,6 +416,17 @@
   overflow: hidden;
 }
 
+/* A retained destination owns the child controller frame's available size.
+   An auto-sized flex item expands to its document height, leaving a nested
+   native scroller with no scroll range behind the panel's overflow clip. */
+.nse-navigation-destination-host > .nse-tab-bar-panel > [data-nse-view-controller],
+.nse-tab-bar-more-stack > [data-nse-more-destination] > [data-nse-view-controller] {
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
 .nse-hierarchy-stack {
   min-width: 0;
 }

@@ -137,10 +137,9 @@ function Surface({
   const surfaceClass = isStandardFrame(frame)
     ? "webspring-app-view-surface-generic"
     : "webspring-app-view-surface-custom";
-  // The content sits below a standard bar, the way a content view sits below a title bar, and the
-  // app's own background still fills the whole frame behind it. The reserved band is the bar's
-  // own height token (nse-chrome.css), so the two can never disagree; a custom or absent bar
-  // leaves the whole frame to the app.
+  // The floating bar and the neutral initial-content inset share the bar's
+  // own height token. The viewport/background remain full size beneath the
+  // glass; a custom or absent bar contributes no system overlay inset.
   const topBarHeight = frame.topBar === "standard"
     ? nseTopBarHeightCssValue(frame.material === "metal" ? "atmoMetal" : "atmoCumulus")
     : "0px";

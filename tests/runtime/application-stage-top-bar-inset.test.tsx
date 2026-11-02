@@ -92,8 +92,8 @@ function stageElements() {
 
 afterEach(cleanup);
 
-describe("the standard top bar's band above app content", () => {
-  it("reserves the cumulus bar height and keeps the content out of the bar", () => {
+describe("the standard top bar's overlay and content-inset contract", () => {
+  it("exposes the cumulus overlay inset without nesting content inside the bar", () => {
     renderStage({ topBar: "standard", material: "standard" });
     const { bar, content, background } = stageElements();
 
@@ -103,10 +103,11 @@ describe("the standard top bar's band above app content", () => {
     // The content sits in the body, which still fills the whole frame behind the floating bar.
     expect(background).not.toBeNull();
     expect(background!.contains(content!)).toBe(true);
+    expect(background!.style.getPropertyValue("--nse-app-content-inset-top")).toBe("var(--webspring-app-top-bar-height, 0px)");
     expect(bar!.contains(content!)).toBe(false);
   });
 
-  it("reserves the metal bar height for a metal frame", () => {
+  it("exposes the metal overlay inset for a metal frame", () => {
     renderStage({ topBar: "standard", material: "metal" });
 
     expect(stageElements().root?.style.getPropertyValue("--webspring-app-top-bar-height")).toBe("var(--nse-app-topbar-height, var(--nse-topbar-height-metal))");
@@ -120,6 +121,7 @@ describe("the standard top bar's band above app content", () => {
     expect(stageElements().root?.style.getPropertyValue("--webspring-app-top-bar-height")).toBe("0px");
     expect(bar).toBeNull();
     expect(background!.contains(content!)).toBe(true);
+    expect(background!.style.getPropertyValue("--nse-app-content-inset-top")).toBe("var(--webspring-app-top-bar-height, 0px)");
   });
 
   it("keeps the bar in the body's own flow for a source list, as before", () => {
@@ -130,5 +132,6 @@ describe("the standard top bar's band above app content", () => {
     // The source list draws the bar as the body's header, so both share the same clipped surface.
     expect(bar!.closest("[data-frame-background]")).toBe(background);
     expect(background!.contains(content!)).toBe(true);
+    expect(background!.style.getPropertyValue("--nse-app-content-inset-top")).toBe("0px");
   });
 });
