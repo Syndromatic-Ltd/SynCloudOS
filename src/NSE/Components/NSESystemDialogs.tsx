@@ -190,7 +190,7 @@ export function NSEConfirmDialog({
               <img className="nse-system-alert-icon" src={iconSrc} alt="" aria-hidden="true" />
             </div>
           ) : null}
-          <div className="nse-system-alert-copy">
+          <div className="nse-system-alert-copy" tabIndex={0}>
             <h2 id={titleId}>{title}</h2>
             {message ? <p id={messageId}>{message}</p> : null}
           </div>

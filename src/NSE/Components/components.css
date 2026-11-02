@@ -379,6 +379,7 @@
 .nse-system-alert-content {
   display: grid;
   grid-template-columns: 116px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: 8px;
   align-items: start;
   text-align: left;
@@ -429,7 +430,8 @@
   min-width: 0;
   min-height: 0;
   max-width: 100%;
-  overflow: hidden;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .nse-system-alert-copy h2 {

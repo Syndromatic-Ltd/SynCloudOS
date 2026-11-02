@@ -412,12 +412,14 @@
 }
 
 [data-nse-appearance="atmo"] .nse-alert-actions .nse-system-alert-action-button.nse-control-button:where(:not(.nse-control-picker-button)) {
-  height: 52px;
+  height: auto;
+  grid-auto-columns: minmax(0, 1fr);
+  padding-block: 10px;
   min-height: 52px;
   color: #fff;
   font-size: 18px;
   font-weight: 800;
-  line-height: 52px;
+  line-height: 1.12;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.72), 0 1px 1px rgba(255, 255, 255, 0.16);
 }
 
