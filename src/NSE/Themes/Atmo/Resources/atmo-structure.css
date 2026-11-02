@@ -5089,3 +5089,14 @@
 :where([data-nse-appearance="atmo"]) .nse-overlay-popup--listbox .nse-overlay-listbox-separator + .nse-overlay-listbox-option::before {
   content: none;
 }
+
+/* Modal placement changes the menu's geometry, never its Atmo family paint.
+   These same system-menu / picker-list frames and rows serve every width. */
+.nse-overlay-popup:where([data-nse-appearance="atmo"]):is(.nse-overlay-popup--menu, .nse-overlay-popup--context-menu, .nse-overlay-popup--submenu, .nse-overlay-popup--listbox)[data-nse-presentation="sheet"] {
+  inset: 0;
+  inline-size: fit-content;
+  block-size: fit-content;
+  max-inline-size: calc(100vi - 24px);
+  max-block-size: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  margin: auto;
+}

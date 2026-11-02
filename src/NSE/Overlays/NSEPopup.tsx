@@ -71,9 +71,11 @@ export interface NSEPopupProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   readonly dismissOnEscape?: boolean;
   readonly restoreFocus?: boolean;
   readonly exitDuration?: number;
-  /** Content supplies its own surface, padding and scrolling (for example a
-   * paper card). Placement, dismissal and focus remain owned by NSEPopup. */
-  readonly chrome?: "standard" | "content";
+  /** Surface family stays independent of adaptive placement and modality.
+   * Content supplies its own paint (for example a paper card); menus and
+   * listboxes retain their family recipe when presented as a modal sheet.
+   * Placement, dismissal and focus remain owned by NSEPopup. */
+  readonly chrome?: "standard" | "content" | "menu" | "context-menu" | "submenu" | "listbox";
   /** Keep the portal container mounted while a menu is closed to preserve its event boundary. */
   readonly keepPortalMounted?: boolean;
   /** The content is still arriving; the surface is not painted until it has. */
@@ -186,7 +188,7 @@ export function NSEPopup({
   });
   const surfaceClassName = useMemo(() => classNames(
     "nse-overlay-popup",
-    `nse-overlay-popup--${chrome === "content" ? "content" : kind}`,
+    `nse-overlay-popup--${chrome === "standard" ? kind : chrome}`,
     isModal && "nse-overlay-popup--modal",
     className,
   ), [chrome, className, isModal, kind]);
