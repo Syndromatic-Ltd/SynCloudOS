@@ -427,6 +427,7 @@
 }
 
 .nse-system-alert-copy {
+  align-self: stretch;
   min-width: 0;
   min-height: 0;
   max-width: 100%;
