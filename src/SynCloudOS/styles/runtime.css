@@ -37,7 +37,18 @@ body,
   min-width: 320px;
   min-height: 100%;
   margin: 0;
+}
+
+html {
   overflow-x: hidden;
+}
+
+/* Flow wrappers must not become nested one-pixel scroll views when content
+   rounds to a fractional CSS height. The document owns vertical scrolling;
+   clipping horizontal ink does not create another scroll container. */
+body,
+#root {
+  overflow-x: clip;
 }
 
 button,
@@ -51,9 +62,7 @@ button {
 }
 
 @media (max-width: 880px) {
-  html,
-  body,
-  #root {
+  html {
     overflow: auto;
   }
 }
