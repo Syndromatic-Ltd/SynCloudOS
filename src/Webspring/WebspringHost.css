@@ -1286,12 +1286,12 @@
   overflow: auto;
 }
 
-/* A standard top bar floats over the body, so the content starts below it the way a content view
-   starts below a title bar. The stage exposes the bar's own height (the property is 0px when there
-   is no standard bar), and the body still fills the whole frame behind it, so the app background
-   runs under the bar. The source-list rule below resets this for layouts that put the bar in flow. */
-.webspring-app-view-body-surface .webspring-app-view-fullbleed-content {
-  inset-block-start: var(--webspring-app-top-bar-height, 0px);
+/* A floating bar overlays the full content surface, including its background
+   and scroller. Apps use the neutral content inset for their initial layout;
+   moving the entire viewport below the bar creates a blank band and prevents
+   content from passing beneath the glass. Source-list headers stay in flow. */
+.webspring-app-view-fullbleed-content [data-nse-navigation-scroll-surface="true"] {
+  scroll-padding-block-start: var(--nse-app-content-inset-top, 0px);
 }
 
 /* Source-list windows render the metal bar INSIDE the rounded body surface as a non-scrolling

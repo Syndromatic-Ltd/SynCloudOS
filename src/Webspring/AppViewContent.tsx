@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   NSESmoothSurface,
   nseSmoothSurfaceDefaultPhysicality,
@@ -79,7 +79,10 @@ function Surface({
     : "webspring-app-view-body-surface";
   const paint = {
     "data-frame-background": typeof background === "string" ? background : "surface",
-    ...(typeof background === "string" ? {} : { style: webspringSurfaceStyle(background, "--nse-app-surface") }),
+    style: {
+      ...(typeof background === "string" ? {} : webspringSurfaceStyle(background, "--nse-app-surface")),
+      "--nse-app-content-inset-top": sourceList ? "0px" : "var(--webspring-app-top-bar-height, 0px)",
+    } as CSSProperties,
   };
 
   if (!request) {
