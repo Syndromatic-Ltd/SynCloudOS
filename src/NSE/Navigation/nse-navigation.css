@@ -21,6 +21,13 @@
 [data-nse-control="tab-view"] [role="tablist"]{display:flex;overflow:auto}[data-nse-control="accordion-view"] [role="region"]{padding:8px}
 
 /* NavigationFoundation owns controller geometry/retention; AppearanceAuthority projects only source-bound paint. */
+/* A destination's vertical scroll boundary belongs to the app, not the host
+   document. Contain chaining while retaining local native/rubber-band
+   affordances; horizontal browser navigation remains unchanged. */
+[data-nse-navigation-scroll-surface="true"] {
+  overscroll-behavior-y: contain;
+}
+
 .nse-tab-bar-safe-area {
   --nse-tab-safe-inline-inset: clamp(
     10px,
