@@ -546,7 +546,7 @@
 @media (max-width: 680px) {
   .nse-control-alert {
     width: min(100%, calc(100vw - 18px));
-    max-height: calc(100vh - 20px);
+    max-block-size: 100%;
     border-width: 34px;
     border-image-width: 34px;
   }
