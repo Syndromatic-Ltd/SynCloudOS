@@ -23,7 +23,7 @@ import { createPortal } from "react-dom";
 import "./components.css";
 import "./nseSystemDialogs.css";
 import { NSEFocusScope } from "../Focus";
-import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
+import { NSEPushButton, type NSEButtonTone } from "../Controls/Buttons/NSEButtons";
 import { NSEAlert } from "./NSEAlert";
 import { NSEAlertBackdrop } from "./NSEAlertBackdrop";
 import { useNSEAppearance } from "../Appearance";
@@ -141,8 +141,10 @@ export interface NSEConfirmDialogProps {
   title: ReactNode;
   message?: ReactNode;
   iconSrc?: string;
-  /** The destructive choice. Rendered as the negative (red) button. */
+  /** The confirmation choice; defaults to the destructive negative tone. */
   confirmLabel: string;
+  /** Non-destructive handoffs can retain their normal action tone. */
+  confirmTone?: NSEButtonTone;
   cancelLabel: string;
   /** Defaults to the host's resolved light or dark appearance. */
   appearance?: "dark" | "light";
@@ -157,6 +159,7 @@ export function NSEConfirmDialog({
   message,
   iconSrc,
   confirmLabel,
+  confirmTone = "negative",
   cancelLabel,
   onConfirm,
   onCancel,
@@ -193,7 +196,7 @@ export function NSEConfirmDialog({
           </div>
         </div>
         <div className="nse-alert-actions">
-          <NSEPushButton className="nse-system-alert-action-button" tone="negative" onClick={onConfirm}>
+          <NSEPushButton className="nse-system-alert-action-button" tone={confirmTone} onClick={onConfirm}>
             {confirmLabel}
           </NSEPushButton>
           <NSEPushButton className="nse-system-alert-action-button nse-confirm-cancel" tone={appearance === "dark" ? "medium" : "light"} onClick={onCancel}>
