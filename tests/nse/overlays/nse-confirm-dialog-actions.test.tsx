@@ -20,5 +20,6 @@ describe("canonical confirmation action intent", () => {
     const copy=screen.getByText("A long body message").closest(".nse-system-alert-content");
     expect(copy?.classList.contains("nse-confirm-content-textonly")).toBe(true);
     expect(copy?.querySelector(".nse-system-alert-icon-frame")).toBeNull();
+    expect(copy?.querySelector<HTMLElement>(".nse-system-alert-copy")?.tabIndex).toBe(0);
   });
 });
