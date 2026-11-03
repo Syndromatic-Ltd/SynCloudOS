@@ -1419,3 +1419,23 @@
 .nse-app-topbar-metal-title:not(.nse-app-topbar-metal-leading-title) .nse-app-topbar-title-button:focus-visible {
   outline-offset: -3px;
 }
+
+/* Region placement is geometry, independent of Atmo material and motion.
+   Physical CSS coordinates remain physical in RTL; child text stays inherited. */
+.nse-split-view[data-book-regions="true"] {
+  grid-template-columns: var(--nse-book-left) var(--nse-book-left-width) var(--nse-book-gap) var(--nse-book-right-width) minmax(0, 1fr);
+  grid-template-rows: var(--nse-book-top) var(--nse-book-height) minmax(0, 1fr);
+}
+.nse-split-view[data-book-regions="true"] > :is(.nse-split-view-sidebar, .nse-split-view-main) { grid-row: 2; }
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"] > .nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"] > .nse-split-view-main { grid-column: 2; }
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"] > .nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"] > .nse-split-view-main { grid-column: 4; }
+/* CSS grid line numbers follow direction; reverse physical tracks for RTL. */
+.nse-split-view[data-book-regions="true"]:dir(rtl) {
+  grid-template-columns: minmax(0, 1fr) var(--nse-book-right-width) var(--nse-book-gap) var(--nse-book-left-width) var(--nse-book-left);
+}
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]:dir(rtl) > .nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]:dir(rtl) > .nse-split-view-main { grid-column: 4; }
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]:dir(rtl) > .nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]:dir(rtl) > .nse-split-view-main { grid-column: 2; }

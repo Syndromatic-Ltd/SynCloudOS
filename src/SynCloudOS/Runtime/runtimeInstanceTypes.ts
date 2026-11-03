@@ -366,6 +366,8 @@ export interface SynCloudOSRuntimeEnvironment {
   readonly visualViewport: RuntimeSnapshotSource<RuntimeVisualViewportSnapshot | null>;
   readonly screen: RuntimeSnapshotSource<RuntimeScreenSnapshot>;
   readonly workArea: RuntimeSnapshotSource<RuntimeWorkAreaSnapshot>;
+  /** Optional for existing hosts. Actual posture/segment facts, never inferred from size. */
+  readonly viewportFeatures?: RuntimeSnapshotSource<import("../Windows/viewportFeatures").RuntimeViewportFeaturesSnapshot>;
   /** Environment-owned system clipboard authority. Tests inject a recording
    * adapter; the browser environment is the only production constructor. */
   readonly clipboard?: PasteboardAdapter | null;

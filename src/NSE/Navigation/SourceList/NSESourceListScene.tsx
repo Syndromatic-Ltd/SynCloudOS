@@ -20,6 +20,7 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import "./nse-source-list-scene.css";
+import type { NSEBookRegions } from "../bookRegions";
 import { NSEAdaptiveNavigationController, NSEAdaptiveNavigationMetrics } from "../NSEAdaptiveNavigationController";
 import { NSEHierarchyStack } from "../NSEHierarchyStack";
 import { NSENavigationDestinationHost } from "../NSENavigationDestinationHost";
@@ -114,6 +115,7 @@ interface NSESourceListSceneBodyProps extends NSESourceListSceneSharedProps {
   readonly sidebar: ReactNode;
   readonly children: ReactNode;
   readonly compact?: boolean;
+  readonly bookRegions?: NSEBookRegions | null;
 }
 
 function NSESourceListSceneBody({
@@ -126,6 +128,7 @@ function NSESourceListSceneBody({
   contentClassName,
   resizeLabel = "Resize sidebar",
   compact = false,
+  bookRegions,
 }: NSESourceListSceneBodyProps) {
   const setCompactNavigation = frame?.setCompactNavigation;
   useLayoutEffect(() => {
@@ -150,10 +153,11 @@ function NSESourceListSceneBody({
         onSidebarWidthChange={frame ? frame.setRailWidth : undefined}
         label={resizeLabel}
         resizable={!compact}
+        bookRegions={bookRegions}
       >
         <div className={classes("nse-source-list-scene-content", contentClassName)}>{children}</div>
       </NSESplitView>
-      {!compact && status ? (
+      {!compact && !bookRegions && status ? (
         <NSEStatusBar
           variant="atmoMetal"
           scheme={scheme}
@@ -233,13 +237,13 @@ function NSESourceListNavigationScene({
     const element = rootRef.current;
     if (!element) return;
     const controller = projection.adaptiveController;
-    const measure = () => controller.setContentBounds({ x: 0, y: 0, width: element.clientWidth, height: element.clientHeight });
+    const measure = () => { const rect = element.getBoundingClientRect(); controller.setContentBounds({ x: rect.x, y: rect.y, width: element.clientWidth, height: element.clientHeight }); };
     const Observer = element.ownerDocument.defaultView?.ResizeObserver;
     const observer = Observer ? new Observer(measure) : null;
     observer?.observe(element);
     measure();
     return () => { observer?.disconnect(); controller.setContentBounds(null); };
-  }, [projection.adaptiveController]);
+  }, [projection.adaptiveController, adaptiveSnapshot.traits.revision]);
 
   // A chrome transition may hide the focused sidebar/tab. Transfer that
   // navigation focus only; an editor, overlay or other window keeps its focus.
@@ -330,6 +334,7 @@ function NSESourceListNavigationScene({
         frame={frame}
         sidebar={sidebar}
         compact={compact}
+        bookRegions={adaptiveSnapshot.bookRegions}
       >
         <div className="nse-source-list-scene-projection-content" data-nse-source-list-overflow-open={overflowOpen ? "true" : "false"}>
           <NSENavigationDestinationHost

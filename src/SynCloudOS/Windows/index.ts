@@ -27,3 +27,5 @@ export * from "./WindowManager";
 export * from "./WindowDocumentPresentationCloseCoordinator";
 export * from "./WindowRestoration";
 export * from "./windowGesture";
+
+export * from "./viewportFeatures";

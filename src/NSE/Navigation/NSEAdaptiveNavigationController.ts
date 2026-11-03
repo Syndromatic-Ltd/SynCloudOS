@@ -19,6 +19,7 @@
  */
 
 import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
+import { sameViewportFeatures } from "../../SynCloudOS/SynCloudOS";
 import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
 import { NSENavigationStackController } from "./NSENavigationStackController";
 import { NSETabBarController } from "./NSETabBarController";
@@ -28,6 +29,8 @@ import type {
   NSEAdaptiveNavigationRenderer,
   NSEAdaptiveNavigationSnapshot,
 } from "./navigationTypes";
+
+import { resolveNSEBookRegions } from "./bookRegions";
 
 export interface NSEAdaptiveNavigationControllerOptions<TContent = unknown> extends NSEViewControllerOptions {
   readonly id: string;
@@ -46,6 +49,7 @@ function requireId(value: string): string {
 function cloneTraits(source: SynCloudOSPresentationTraits): SynCloudOSPresentationTraits {
   return Object.freeze({
     ...source,
+    viewportFeatures: source.viewportFeatures ? Object.freeze({ ...source.viewportFeatures, segments: source.viewportFeatures.segments ? Object.freeze(source.viewportFeatures.segments.map(rect => Object.freeze({ ...rect }))) : null }) : undefined,
     contentBounds: Object.freeze({ ...source.contentBounds }),
     hostViewportBounds: Object.freeze({ ...source.hostViewportBounds }),
     workArea: Object.freeze({ ...source.workArea }),
@@ -62,7 +66,7 @@ function sameBounds(
 }
 
 function sameTraits(left: SynCloudOSPresentationTraits, right: SynCloudOSPresentationTraits): boolean {
-  return left.revision === right.revision &&
+  return sameViewportFeatures(left.viewportFeatures, right.viewportFeatures) && left.revision === right.revision &&
     left.geometryState === right.geometryState &&
     left.safeAreaAvailability === right.safeAreaAvailability &&
     sameBounds(left.contentBounds, right.contentBounds) &&
@@ -189,12 +193,14 @@ export class NSEAdaptiveNavigationController<TContent = unknown> extends NSEView
   #makeSnapshot(): NSEAdaptiveNavigationSnapshot {
     const tabSnapshot = this.tabController.getSnapshot();
     const layoutBounds = this.#contentBounds ?? this.#traits.contentBounds;
+    const bookRegions = this.presentation === "adaptive" ? resolveNSEBookRegions(this.#traits, layoutBounds) : null;
     return freezeSnapshot({
       revision: this.#revision,
       id: this.id,
       model: this.model,
       presentation: this.presentation,
-      renderer: rendererFor(this.model, this.presentation, { ...this.#traits, contentBounds: layoutBounds }, this.#snapshot?.renderer),
+      bookRegions,
+      renderer: bookRegions ? (this.model === "hierarchy" ? "list-detail" : "source-list-content") : rendererFor(this.model, this.presentation, { ...this.#traits, contentBounds: layoutBounds }, this.#snapshot?.renderer),
       layoutBounds,
       traits: this.#traits,
       selectedDestinationId: tabSnapshot.selectedDestinationId,

@@ -138,6 +138,32 @@ function fixture() {
 }
 
 describe("ScreenService", () => {
+  it("coalesces explicit feature changes and clears stale regions with invalid host geometry", () => {
+    const f = fixture();
+    const features = mutableSource({ posture: "folded" as const, segments: [{ x: 0, y: 0, width: 500, height: 700 }, { x: 524, y: 0, width: 500, height: 700 }] });
+    const service = new ScreenService({ ...f.environment, viewportFeatures: features.source });
+    expect(features.listenerCount()).toBe(1);
+    expect(service.getSnapshot().viewportFeatures.segments).toHaveLength(2);
+    const before = service.getSnapshot().viewportFeatures;
+    expect(Object.isFrozen(before.segments?.[0])).toBe(true);
+    f.layoutViewport.set({ width: 0, height: 0 }); f.flush();
+    expect(service.getSnapshot().geometryState).toBe("retained");
+    expect(service.getSnapshot().viewportFeatures).toEqual({ posture: null, segments: null });
+    f.layoutViewport.set({ width: 1024, height: 700 }); f.flush();
+    expect(service.getSnapshot().viewportFeatures.segments).toHaveLength(2);
+    features.set({ posture: "folded", segments: [{ x: 0, y: 0, width: 5000, height: 700 }] }); f.flush();
+    expect(service.getSnapshot().viewportFeatures).toEqual({ posture: "folded", segments: null });
+    service.dispose(); expect(features.listenerCount()).toBe(0);
+  });
+
+  it("contains a throwing optional geometry reader without changing normal screen geometry", () => {
+    const f = fixture();
+    const service = new ScreenService({ ...f.environment, viewportFeatures: { getSnapshot() { throw Error("gone"); }, subscribe: () => () => undefined } });
+    expect(service.getSnapshot().geometryState).toBe("current");
+    expect(service.getSnapshot().viewportFeatures).toEqual({ posture: null, segments: null });
+    service.dispose();
+  });
+
   it("distinguishes measured zero insets from unavailable and legacy unknown values", () => {
     const f = fixture();
     f.workArea.set({ ...f.workArea.source.getSnapshot(), safeArea: { top: 0, right: 0, bottom: 0, left: 0 } });
@@ -216,6 +242,7 @@ describe("ScreenService", () => {
     const service = new ScreenService(f.environment);
 
     expect(service.getSnapshot()).toEqual({
+      viewportFeatures: { posture: null, segments: null },
       geometryState: "current",
       invalidGeometrySources: [],
       safeAreaAvailability: "available",

@@ -19,6 +19,7 @@
  */
 
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
+import { sameViewportFeatures } from "../Windows/viewportFeatures";
 import type { WindowBounds } from "../Windows/windowTypes";
 import type { SynCloudOSResponsiveMode } from "./responsiveTypes";
 import {
@@ -37,7 +38,7 @@ function sameBounds(left: WindowBounds, right: WindowBounds): boolean {
 }
 
 function samePresentationTraits(left: SynCloudOSPresentationTraits, right: SynCloudOSPresentationTraits): boolean {
-  return left.geometryState === right.geometryState &&
+  return sameViewportFeatures(left.viewportFeatures, right.viewportFeatures) && left.geometryState === right.geometryState &&
     left.safeAreaAvailability === right.safeAreaAvailability &&
     sameBounds(left.contentBounds, right.contentBounds) &&
     sameBounds(left.hostViewportBounds, right.hostViewportBounds) &&
@@ -108,6 +109,7 @@ export function createContentBoundPresentationTraitsService(
       revision,
       geometryState,
       safeAreaAvailability: screen.safeAreaAvailability,
+      viewportFeatures: screen.viewportFeatures,
       contentBounds: freezeBounds(contentBounds),
       hostViewportBounds: freezeBounds(screen.layoutViewport),
       horizontalSizeClass: getSynCloudOSHorizontalSizeClass(contentBounds.width),
