@@ -671,8 +671,3 @@
   max-block-size: 100%;
   overflow: auto;
 }
-
-.nse-control-alert-backdrop[data-nse-overlay-region="true"] { container: nse-alert-region / inline-size; }
-@container nse-alert-region (max-width: 680px) {
-  .nse-alert-actions { grid-template-columns: minmax(0, 1fr); margin-inline: 0; }
-}

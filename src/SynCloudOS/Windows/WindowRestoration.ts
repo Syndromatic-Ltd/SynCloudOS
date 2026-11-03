@@ -19,7 +19,7 @@
  */
 
 import type { DocumentKind, DocumentWindowAssociation } from "../Documents";
-import { selectViewportBookRegion, screenViewportRegionGeometry } from "./viewportFeatures";
+import { selectViewportFoldRegion, screenViewportRegionGeometry } from "./viewportFeatures";
 import type { ScreenSnapshot } from "./ScreenService";
 import {
   assertFiniteWindowBounds,
@@ -277,7 +277,7 @@ export function resolveWindowPresentation(record: WindowRecord, screen: ScreenSn
     });
   }
   const region = ["modal", "sheet", "popover"].includes(record.role)
-    ? selectViewportBookRegion(screenViewportRegionGeometry(screen), screen.layoutViewport, record.bounds) : null;
+    ? selectViewportFoldRegion(screenViewportRegionGeometry(screen), screen.layoutViewport, record.bounds) : null;
   if (region) {
     // Projection only: normal bounds, minimum-size/restoration contracts and
     // controller/document identity remain with WindowManager unchanged.

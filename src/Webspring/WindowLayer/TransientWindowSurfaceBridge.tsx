@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { selectViewportBookRegion, screenViewportRegionGeometry } from "../../SynCloudOS/SynCloudOS";
+import { selectViewportFoldRegion, screenViewportRegionGeometry } from "../../SynCloudOS/SynCloudOS";
 import type { ReactNode } from "react";
 import type {
   SynCloudOSRuntime,
@@ -161,7 +161,7 @@ function placementViewport(runtime: SynCloudOSRuntime, request: TransientWindowS
     try { owner = runtime.windows.select(request.parentWindowControllerId).record.bounds; } catch { /* normal create validation still applies */ }
   }
   const origin = request.anchor?.isConnected ? request.anchor.getBoundingClientRect() : request.bounds;
-  const region = selectViewportBookRegion(screenViewportRegionGeometry(screen), owner, origin);
+  const region = selectViewportFoldRegion(screenViewportRegionGeometry(screen), owner, origin);
   if (!region) return { bounds: { x, y, width, height }, bookRegion: false };
   const left = Math.max(x, region.x), top = Math.max(y, region.y);
   const right = Math.min(x + width, region.x + region.width), bottom = Math.min(y + height, region.y + region.height);

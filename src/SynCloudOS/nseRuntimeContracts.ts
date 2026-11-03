@@ -56,3 +56,5 @@ export { UpdateReadinessProjection } from './Updates/UpdateReadinessProjection';
 
 // Host-only authoring observation bridge, with no runtime construction.
 export { trackOwnedWork } from "./Operations/OwnedWorkObservations";
+
+export { resolveViewportBookRegions, selectViewportFoldRegion } from "./Windows/viewportFeatures";

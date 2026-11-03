@@ -19,7 +19,7 @@
  */
 
 import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
-import { selectViewportBookRegion } from "../../SynCloudOS/SynCloudOS";
+import { selectViewportFoldRegion } from "../../SynCloudOS/nseRuntimeContracts";
 
 export type NSEOverlayRegionBounds = SynCloudOSPresentationTraits["contentBounds"];
 export type NSEOverlayPresentationSource = Readonly<{
@@ -29,8 +29,8 @@ export type NSEOverlayPresentationSource = Readonly<{
 
 /** Selection shares the same pure Windows geometry used by physical hosts. */
 export function resolveNSEOverlayRegion(traits: SynCloudOSPresentationTraits, origin?: NSEOverlayRegionBounds | null,
-  direction: "ltr" | "rtl" = "ltr"): NSEOverlayRegionBounds | null {
-  return selectViewportBookRegion(traits, traits.contentBounds, origin, direction);
+  direction: "ltr" | "rtl" = "ltr", purpose: "contextual" | "alert" = "contextual"): NSEOverlayRegionBounds | null {
+  return selectViewportFoldRegion(traits, traits.contentBounds, origin, direction, purpose);
 }
 
 export function nseOverlayRegionInsets(region: NSEOverlayRegionBounds, host: NSEOverlayRegionBounds) {

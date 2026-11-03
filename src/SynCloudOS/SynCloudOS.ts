@@ -25,7 +25,7 @@ import { createAppLifecycleRules } from "./AppManager/AppLifecycle";
 import type { RuntimeSnapshot } from "./Runtime/runtimeTypes";
 import type { SynCloudOSRuntime } from "./Runtime/runtimeInstanceTypes";
 
-export { resolveViewportBookRegions, selectViewportBookRegion, screenViewportRegionGeometry } from "./Windows/viewportFeatures";
+export { resolveViewportBookRegions, resolveViewportFoldRegions, selectViewportBookRegion, selectViewportFoldRegion, screenViewportRegionGeometry } from "./Windows/viewportFeatures";
 export { sameViewportFeatures } from "./Windows/viewportFeatures";
 export type { RuntimeViewportFeaturesSnapshot } from "./Windows/viewportFeatures";
 export { createStorageDiagnosticsClient } from "./Persistence/storageDiagnostics";

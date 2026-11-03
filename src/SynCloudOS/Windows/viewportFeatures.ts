@@ -66,30 +66,59 @@ export interface ViewportRegionGeometry {
 export interface ViewportBookRegions { readonly left: WindowBounds; readonly right: WindowBounds; }
 type Bounds = WindowBounds;
 
-export function resolveViewportBookRegions(traits: ViewportRegionGeometry, bounds: WindowBounds,
-  minimumPaneSize: Readonly<{ width: number; height: number }> = { width: 280, height: 160 }): ViewportBookRegions | null {
+export interface ViewportFoldRegions {
+  readonly axis: "book" | "tabletop";
+  readonly first: WindowBounds;
+  readonly second: WindowBounds;
+}
+
+function resolvePair(traits: ViewportRegionGeometry, bounds: WindowBounds,
+  minimumPaneSize: Readonly<{ width: number; height: number }>, axis: "book" | "tabletop"): readonly [WindowBounds, WindowBounds] | null {
   if (![minimumPaneSize.width, minimumPaneSize.height].every(value => Number.isFinite(value) && value > 0)) return null;
   const features = traits.viewportFeatures;
   if (traits.geometryState !== "current" || features?.posture !== "folded" || features.segments?.length !== 2 ||
     ![bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) || bounds.width <= 0 || bounds.height <= 0) return null;
-  const [a, b] = [...features.segments].sort((left, right) => left.x - right.x);
-  if (!a || !b || ![a, b].every(rect => [rect.x, rect.y, rect.width, rect.height].every(Number.isFinite) && rect.width > 0 && rect.height > 0) ||
-    a.x + a.width > b.x || Math.abs(a.y - b.y) > 1 || Math.abs(a.height - b.height) > 1) return null;
+  const [a, b] = [...features.segments].sort((left, right) => axis === "book" ? left.x - right.x : left.y - right.y);
+  if (!a || !b || ![a, b].every(rect => [rect.x, rect.y, rect.width, rect.height].every(Number.isFinite) && rect.width > 0 && rect.height > 0)) return null;
+  if (axis === "book" ? a.x + a.width > b.x || Math.abs(a.y - b.y) > 1 || Math.abs(a.height - b.height) > 1
+    : a.y + a.height > b.y || Math.abs(a.x - b.x) > 1 || Math.abs(a.width - b.width) > 1) return null;
   const host = traits.hostViewportBounds;
   if (![a, b].every(rect => rect.x >= host.x && rect.y >= host.y && rect.x + rect.width <= host.x + host.width + 1 && rect.y + rect.height <= host.y + host.height + 1)) return null;
   const visible = traits.visualViewportBounds;
-  // Pinch zoom/visual panning uses the existing single-region experience.
+  // Pinch zoom/visual panning retains the existing single-region experience.
   if (visible.width < host.width - 1 || visible.x > host.x + 1) return null;
   const safe = traits.safeAreaInsets;
-  const x0 = Math.max(bounds.x, visible.x, host.x + safe.inlineStart);
-  const x1 = Math.min(bounds.x + bounds.width, visible.x + visible.width, host.x + host.width - safe.inlineEnd);
-  const y0 = Math.max(bounds.y, visible.y, a.y, b.y, host.y + safe.blockStart);
-  const y1 = Math.min(bounds.y + bounds.height, visible.y + visible.height, a.y + a.height, b.y + b.height, host.y + host.height - safe.blockEnd);
-  const clip = (rect: Bounds): Bounds => Object.freeze({ x: Math.max(x0, rect.x) - bounds.x, y: y0 - bounds.y,
-    width: Math.min(x1, rect.x + rect.width) - Math.max(x0, rect.x), height: y1 - y0 });
-  const left = clip(a), right = clip(b);
-  if (![left, right].every(rect => rect.width >= minimumPaneSize.width && rect.height >= minimumPaneSize.height)) return null;
-  return Object.freeze({ left, right });
+  const x0 = Math.max(bounds.x, visible.x, host.x + safe.inlineStart, axis === "tabletop" ? Math.max(a.x, b.x) : -Infinity);
+  const x1 = Math.min(bounds.x + bounds.width, visible.x + visible.width, host.x + host.width - safe.inlineEnd,
+    axis === "tabletop" ? Math.min(a.x + a.width, b.x + b.width) : Infinity);
+  const y0 = Math.max(bounds.y, visible.y, host.y + safe.blockStart, axis === "book" ? Math.max(a.y, b.y) : -Infinity);
+  const y1 = Math.min(bounds.y + bounds.height, visible.y + visible.height, host.y + host.height - safe.blockEnd,
+    axis === "book" ? Math.min(a.y + a.height, b.y + b.height) : Infinity);
+  const clip = (rect: Bounds): Bounds => Object.freeze({ x: Math.max(x0, rect.x) - bounds.x, y: Math.max(y0, rect.y) - bounds.y,
+    width: Math.min(x1, rect.x + rect.width) - Math.max(x0, rect.x), height: Math.min(y1, rect.y + rect.height) - Math.max(y0, rect.y) });
+  const first = clip(a), second = clip(b);
+  if (![first, second].every(rect => rect.width >= minimumPaneSize.width && rect.height >= minimumPaneSize.height)) return null;
+  return Object.freeze([first, second]);
+}
+
+export function resolveViewportBookRegions(traits: ViewportRegionGeometry, bounds: WindowBounds,
+  minimumPaneSize: Readonly<{ width: number; height: number }> = { width: 280, height: 160 }): ViewportBookRegions | null {
+  const pair = resolvePair(traits, bounds, minimumPaneSize, "book");
+  return pair ? Object.freeze({ left: pair[0], right: pair[1] }) : null;
+}
+
+/** Current, valid capabilities only. Navigation remains free to support just
+ * book arrangements; lightweight presentations can also use tabletop bounds. */
+export function resolveViewportFoldRegions(geometry: ViewportRegionGeometry): ViewportFoldRegions | null {
+  const host = geometry.hostViewportBounds;
+  for (const axis of ["book", "tabletop"] as const) {
+    const pair = resolvePair(geometry, host, { width: 280, height: 160 }, axis);
+    if (pair) {
+      const absolute = (rect: WindowBounds) => Object.freeze({ ...rect, x: rect.x + host.x, y: rect.y + host.y });
+      return Object.freeze({ axis, first: absolute(pair[0]), second: absolute(pair[1]) });
+    }
+  }
+  return null;
 }
 
 function validRegionOwner(bounds: WindowBounds | null | undefined): bounds is WindowBounds {
@@ -100,19 +129,33 @@ function regionOverlap(a: WindowBounds, b: WindowBounds): number {
     Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
 }
 
-export function selectViewportBookRegion(geometry: ViewportRegionGeometry, owner: WindowBounds,
-  origin?: WindowBounds | null, direction: "ltr" | "rtl" = "ltr"): WindowBounds | null {
-  if (!validRegionOwner(owner) || owner.width <= 0 || owner.height <= 0) return null;
-  const host = geometry.hostViewportBounds;
-  const pair = resolveViewportBookRegions(geometry, host);
-  if (!pair) return null;
-  const regions = [pair.left, pair.right].map(rect => Object.freeze({ ...rect, x: rect.x + host.x, y: rect.y + host.y }));
+function selectContextRegion(regions: readonly WindowBounds[], owner: WindowBounds, host: WindowBounds,
+  origin: WindowBounds | null | undefined, tie: number): WindowBounds {
   const target = validRegionOwner(origin) && regionOverlap({ ...origin, width: Math.max(1, origin.width), height: Math.max(1, origin.height) }, host) > 0 ? origin : owner;
   const scores = regions.map(rect => regionOverlap(rect, target));
   if (scores[0] !== scores[1]) return regions[scores[0]! > scores[1]! ? 0 : 1]!;
   const ownerScores = regions.map(rect => regionOverlap(rect, owner));
   if (ownerScores[0] !== ownerScores[1]) return regions[ownerScores[0]! > ownerScores[1]! ? 0 : 1]!;
-  return regions[direction === "rtl" ? 1 : 0]!;
+  return regions[tie]!;
+}
+
+export function selectViewportBookRegion(geometry: ViewportRegionGeometry, owner: WindowBounds,
+  origin?: WindowBounds | null, direction: "ltr" | "rtl" = "ltr"): WindowBounds | null {
+  if (!validRegionOwner(owner) || owner.width <= 0 || owner.height <= 0) return null;
+  const host = geometry.hostViewportBounds, pair = resolveViewportBookRegions(geometry, host);
+  if (!pair) return null;
+  const regions = [pair.left, pair.right].map(rect => Object.freeze({ ...rect, x: rect.x + host.x, y: rect.y + host.y }));
+  return selectContextRegion(regions, owner, host, origin, direction === "rtl" ? 1 : 0);
+}
+
+/** Purpose determines displacement; no native behavior is implied for HTML. */
+export function selectViewportFoldRegion(geometry: ViewportRegionGeometry, owner: WindowBounds,
+  origin?: WindowBounds | null, direction: "ltr" | "rtl" = "ltr", purpose: "contextual" | "alert" = "contextual"): WindowBounds | null {
+  if (!validRegionOwner(owner) || owner.width <= 0 || owner.height <= 0) return null;
+  const pair = resolveViewportFoldRegions(geometry);
+  if (!pair) return null;
+  if (purpose === "alert") return pair.axis === "tabletop" || direction === "rtl" ? pair.first : pair.second;
+  return selectContextRegion([pair.first, pair.second], owner, geometry.hostViewportBounds, origin, pair.axis === "book" && direction === "rtl" ? 1 : 0);
 }
 
 export function screenViewportRegionGeometry(screen: Pick<import("./ScreenService").ScreenSnapshot,

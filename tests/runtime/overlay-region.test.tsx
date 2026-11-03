@@ -23,11 +23,30 @@ describe('shared overlay region selection',()=>{
  it('uses logical leading only when both origin and owner remain ambiguous',()=>{
   expect(resolveNSEOverlayRegion(traits(),null,'ltr')?.x).toBe(0);expect(resolveNSEOverlayRegion(traits(),null,'rtl')?.x).toBe(460);
  });
- it.each([undefined,{posture:null,segments:[r(0,0,440,700),r(460,0,440,700)]},{posture:'continuous',segments:[r(0,0,440,700),r(460,0,440,700)]},{posture:'folded',segments:null},{posture:'folded',segments:[r(0,0,900,700)]},{posture:'folded',segments:[r(0,0,900,340),r(0,360,900,340)]}] as SynCloudOSPresentationTraits['viewportFeatures'][])('retains old fallback without valid book facts (%j)',viewportFeatures=>expect(resolveNSEOverlayRegion(traits({viewportFeatures}))).toBeNull());
+ it.each([undefined,{posture:null,segments:[r(0,0,440,700),r(460,0,440,700)]},{posture:'continuous',segments:[r(0,0,440,700),r(460,0,440,700)]},{posture:'folded',segments:null},{posture:'folded',segments:[r(0,0,900,700)]}] as SynCloudOSPresentationTraits['viewportFeatures'][])('retains old fallback without valid book facts (%j)',viewportFeatures=>expect(resolveNSEOverlayRegion(traits({viewportFeatures}))).toBeNull());
  it('rejects retained/invalid owner geometry and clips keyboard/safe boundaries once',()=>{
   expect(resolveNSEOverlayRegion(traits({geometryState:'retained'}))).toBeNull();expect(resolveNSEOverlayRegion(traits({contentBounds:r(0,0,NaN,500)}))).toBeNull();
   const value=traits({visualViewportBounds:r(0,0,900,400),virtualKeyboardInset:300,safeAreaInsets:{inlineStart:10,inlineEnd:15,blockStart:5,blockEnd:0}});
   const region=resolveNSEOverlayRegion(value,r(800,10,40,40))!;expect(region).toEqual(r(460,5,425,395));expect(nseOverlayRegionInsets(region,value.hostViewportBounds)).toEqual({left:460,right:15,top:5,bottom:300});
+ });
+ it.each(['ltr','rtl'] as const)('positions global book alerts in logical trailing for %s independently of origin',direction=>{
+  for(const origin of [r(20,20,40,40),r(800,20,40,40),null]) expect(resolveNSEOverlayRegion(traits(),origin,direction,'alert')?.x).toBe(direction==='rtl'?0:460);
+ });
+ it('uses upper tabletop for alerts and preserves contextual source relationships',()=>{
+  const value=traits({viewportFeatures:{posture:'folded',segments:[r(0,360,900,340),r(0,0,900,340)]}});
+  expect(resolveNSEOverlayRegion(value,r(50,500,40,40),'ltr','alert')).toEqual(r(0,0,900,340));
+  expect(resolveNSEOverlayRegion(value,r(50,500,40,40),'rtl','alert')).toEqual(r(0,0,900,340));
+  expect(resolveNSEOverlayRegion(value,r(50,500,40,40))).toEqual(r(0,360,900,340));
+  expect(resolveNSEOverlayRegion(value,r(50,30,40,40))).toEqual(r(0,0,900,340));
+ });
+ it('rejects unusable/diagonal/overlapping tabletop regions and incomplete alert signals',()=>{
+  for(const viewportFeatures of [
+   {posture:'folded',segments:[r(0,0,900,150),r(0,170,900,530)]},
+   {posture:'folded',segments:[r(0,0,850,340),r(50,360,850,340)]},
+   {posture:'folded',segments:[r(0,0,900,380),r(0,360,900,340)]},
+   {posture:null,segments:[r(0,0,900,340),r(0,360,900,340)]},
+   {posture:'continuous',segments:[r(0,0,900,340),r(0,360,900,340)]},
+  ] as SynCloudOSPresentationTraits['viewportFeatures'][])expect(resolveNSEOverlayRegion(traits({viewportFeatures}),null,'ltr','alert')).toBeNull();
  });
  it('keeps an opening origin through trapping, removal and posture changes',()=>{
   const s=source(),origin=document.createElement('button');origin.getBoundingClientRect=()=>({...r(800,20,40,40),top:20,right:840,bottom:60,left:800,toJSON(){return this;}});document.body.append(origin);origin.focus();

@@ -54,7 +54,7 @@ export function NSEAlertBackdrop({
 }: NSEAlertBackdropProps) {
   const appearanceProjection = useNSEAppearanceProjection();
   const provider = useOptionalNSEOverlayProvider();
-  const { region, hostViewport } = useNSEOverlayRegion({ source: presentation ?? provider?.runtime.environment.presentation ?? null, open: true, document: typeof document === "undefined" ? null : document });
+  const { region, hostViewport } = useNSEOverlayRegion({ source: presentation ?? provider?.runtime.environment.presentation ?? null, open: true, purpose: "alert", document: typeof document === "undefined" ? null : document });
   const regionInsets = region && hostViewport ? nseOverlayRegionInsets(region, hostViewport) : null;
   const regionStyle = regionInsets ? Object.fromEntries(Object.entries(regionInsets).map(([side, value]) => [`--nse-overlay-region-${side}`, `${value}px`])) as CSSProperties : undefined;
   const previousFocusRef = useRef(typeof document === "undefined" ? null : resolveNSEFocusReturnTarget(document.activeElement));
