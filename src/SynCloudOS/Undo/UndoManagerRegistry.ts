@@ -22,6 +22,7 @@ import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { ResponderGraph } from "../Responders/responderTypes";
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
 import { createUndoManager } from "./UndoManager";
+import { OwnedWorkObservations } from "../Operations/OwnedWorkObservations";
 import type { UndoManagerCreateOptions, UndoManagerRegistry, UndoOwner } from "./undoTypes";
 
 const ownerKey = (owner: UndoOwner) => `${owner.kind}\u0000${owner.kind === "application" ? normalizeBundleIdentifier(owner.id) : owner.id}`;
@@ -36,7 +37,8 @@ export function createUndoManagerRegistry(options: {
 }): UndoManagerRegistry {
   const managers = new Map<string, ReturnType<typeof createUndoManager>>();
   let disposed = false;
-  return {
+  const work = new OwnedWorkObservations();
+  const registry: UndoManagerRegistry = {
     runtimeId: options.runtimeId,
     create(owner, createOptions: UndoManagerCreateOptions = {}) {
       if (disposed) throw new Error("Undo registry is disposed.");
@@ -52,6 +54,9 @@ export function createUndoManagerRegistry(options: {
         observeListenerError: options.observeListenerError,
       });
       managers.set(key, manager);
+      // The existing registry owns this cohort, including removed managers
+      // whose real callbacks are still settling. No history is projected.
+      work.bind(manager);
       return manager;
     },
     get: (owner) => managers.get(ownerKey(owner)) ?? null,
@@ -65,6 +70,8 @@ export function createUndoManagerRegistry(options: {
       return null;
     },
     inspect: () => Array.from(managers.values(), (manager) => manager.inspect()),
-    dispose() { disposed = true; for (const manager of managers.values()) manager.dispose(); managers.clear(); },
+    dispose() { disposed = true; try { for (const manager of managers.values()) manager.dispose(); managers.clear(); } finally { work.end(); } },
   };
+  work.bind(registry);
+  return registry;
 }
