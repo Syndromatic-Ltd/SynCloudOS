@@ -430,6 +430,43 @@ function reconcileEntries<T>(
   return [...result.values()];
 }
 
+/** @internal Coarse observations of this canonical store's actual mutation tail.
+ * Queued and running stages remain counted until their real promise settles.
+ * This is neither a durability assertion nor a census of other persistence owners.
+ */
+export interface DocumentStorePersistenceObservation {
+  getSnapshot(): Readonly<{ revision: number; pending: number; ended: boolean }>;
+  subscribe(listener: () => void): () => void;
+}
+const persistenceObservations = new WeakMap<object, DocumentStorePersistenceObservation>();
+export function observeDocumentStorePersistence(store: SynCloudOSDocumentStoreAdapter): DocumentStorePersistenceObservation | null {
+  return persistenceObservations.get(store) ?? null;
+}
+function createMutationObservation(owner: object) {
+  let snapshot: ReturnType<DocumentStorePersistenceObservation["getSnapshot"]> = Object.freeze({ revision: 0, pending: 0, ended: false });
+  const listeners = new Set<() => void>();
+  const publish = (pending: number, ended = snapshot.ended) => {
+    snapshot = Object.freeze({ revision: snapshot.revision + 1, pending, ended });
+    for (const listener of [...listeners]) { try { listener(); } catch { /* Inspection cannot affect mutations. */ } }
+    if (ended && pending === 0) listeners.clear();
+  };
+  persistenceObservations.set(owner, Object.freeze({
+    getSnapshot: () => snapshot,
+    subscribe(listener: () => void) {
+      if (snapshot.ended && snapshot.pending === 0) return () => undefined;
+      listeners.add(listener); return () => { listeners.delete(listener); };
+    },
+  }));
+  return {
+    begin() {
+      publish(snapshot.pending + 1);
+      let released = false;
+      return () => { if (!released) { released = true; publish(snapshot.pending - 1); } };
+    },
+    end() { if (!snapshot.ended) publish(snapshot.pending, true); },
+  };
+}
+
 export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentStoreAdapter {
   readonly runtimeId?: SynCloudOSRuntimeId;
   private readonly preferenceKey: string;
@@ -443,6 +480,7 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
   private readonly terminalMutationLocks = new Map<string, ActiveTerminalMutationLock>();
   private readonly ordinaryMutationsByDocumentId = new Map<string, number>();
   private mutationTail: Promise<void> = Promise.resolve();
+  private readonly mutationObservation = createMutationObservation(this);
   private readonly importedSnapshotSavedAt?: string;
   private snapshotDirty = false;
   /** Storage state against which accepted, memory-only changes were made. */
@@ -648,6 +686,7 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
 
   dispose() {
     this.disposed = true;
+    this.mutationObservation.end();
     this.terminalMutationLocks.clear();
     this.ordinaryMutationsByDocumentId.clear();
   }
@@ -701,6 +740,10 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
   private enqueueMutation<T>(mutation: () => Promise<T>): Promise<T> {
     const result = this.mutationTail.then(mutation, mutation);
     this.mutationTail = result.then(() => undefined, () => undefined);
+    // Establish queue ordering before notifying observers: reentrant work must
+    // join this tail. Logical cancellation/disposal never releases real work.
+    const release = this.mutationObservation.begin();
+    void result.then(release, release);
     return result;
   }
 

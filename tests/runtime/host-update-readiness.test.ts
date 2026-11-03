@@ -241,3 +241,19 @@ describe('document admission/recovery host facts', () => {
     expect(changed).toHaveBeenCalledTimes(calls); expect(observer.getSnapshot().ended).toBe(true); expect(observer.getSnapshot().activationAuthorized).toBe(false);
   });
 });
+
+
+it('observes canonical persistence admissions without declaring all persistence covered', async () => {
+  const held = deferred<void>();
+  const runtime = fixture({ documentStoreLock: { request: async (_name, _options, callback) => { await held.promise; return callback(); } } });
+  const initialGeneration = runtime.updateReadiness.getSnapshot().client.generation;
+  runtime.documentStore.registerKind({ kind: 'readiness.generated', displayName: 'Generated', version: 1 });
+  expect(runtime.updateReadiness.getSnapshot().counts.persistenceMutations).toBe(1);
+  expect(runtime.updateReadiness.getSnapshot().client.generation).toBeGreaterThan(initialGeneration);
+  expect(runtime.updateReadiness.getSnapshot().client.blockers).toContain('owner-busy');
+  expect(runtime.updateReadiness.getSnapshot().coverage.flatMap(row => row.gaps)).toContain('persistence-work');
+  expect(runtime.updateReadiness.getSnapshot().activationAuthorized).toBe(false);
+  held.resolve();
+  await vi.waitFor(() => expect(runtime.updateReadiness.getSnapshot().counts.persistenceMutations).toBe(0));
+  expect(runtime.updateReadiness.getSnapshot().decision).toBe('defer');
+});

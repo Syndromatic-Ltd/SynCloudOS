@@ -27,13 +27,14 @@ const gapLabels: Record<HostReadinessGap, string> = {
 export function UpdateReadinessDetails({ snapshot }: { readonly snapshot: HostUpdateReadinessSnapshot }) {
   const t = useSystemText();
   const counts = snapshot.counts;
-  const busy = counts.dirtyDocuments + counts.savingDocuments + counts.conflictedDocuments + counts.operations + counts.activeJobs + counts.queuedJobs + counts.nativeOperations + counts.documentAdmissions + counts.documentRecovery + counts.documentCleanup > 0 || snapshot.client.blockers.some(blocker => blocker !== 'provider-unavailable' && blocker !== 'owner-ended');
+  const busy = counts.persistenceMutations + counts.dirtyDocuments + counts.savingDocuments + counts.conflictedDocuments + counts.operations + counts.activeJobs + counts.queuedJobs + counts.nativeOperations + counts.documentAdmissions + counts.documentRecovery + counts.documentCleanup > 0 || snapshot.client.blockers.some(blocker => blocker !== 'provider-unavailable' && blocker !== 'owner-ended');
   const headline = snapshot.ended ? t('preferences.updates.closed', 'Host observation has ended') : busy ? t('preferences.updates.busy', 'Work is still in progress') : t('preferences.updates.incomplete', 'Some work cannot be inspected');
   const rows = [
     [t('preferences.updates.documents', 'Published documents'), counts.documents],
     [t('preferences.updates.admissions', 'Pending document admission stages'), counts.documentAdmissions],
     [t('preferences.updates.recoveryWork', 'Pending recovery stages'), counts.documentRecovery],
     [t('preferences.updates.cleanupWork', 'Pending document cleanup stages'), counts.documentCleanup],
+    [t('preferences.updates.persistenceWork', 'Pending observed document-store mutations'), counts.persistenceMutations],
     [t('preferences.updates.dirty', 'Documents with unsaved work'), counts.dirtyDocuments],
     [t('preferences.updates.saving', 'Documents saving'), counts.savingDocuments],
     [t('preferences.updates.conflicts', 'Conflicted documents'), counts.conflictedDocuments],
