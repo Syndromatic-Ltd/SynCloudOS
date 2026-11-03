@@ -2422,7 +2422,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   :where([data-nse-appearance="atmo"]) .nse-control-popup.nse-extended-app-menu-popup,
-:where([data-nse-appearance="atmo"]) .nse-overlay-popup--application-menu .nse-control-app-menu-surface {
+:where([data-nse-appearance="atmo"]) .nse-overlay-popup--application-menu[data-state] .nse-control-app-menu-surface {
+    /* Match the open/closing recipe's specificity so reduced motion removes
+       the keyframe, rather than shortening an off-screen first pose. */
     animation: none;
   }
 }
