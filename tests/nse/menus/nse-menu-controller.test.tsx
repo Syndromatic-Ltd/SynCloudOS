@@ -40,6 +40,8 @@ import { defineNSEAppearance, NSEAppearanceProvider } from "../../../src/NSE/App
 import { NSEPicker, NSEPopup } from "../../../src/NSE/Menus";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
+import { NSEMenuOverlayPresentationScope } from "../../../src/NSE/Menus/menuPresentationContext";
+
 const customAppearance = defineNSEAppearance({ id: "test-custom", displayName: "Test custom" });
 
 afterEach(() => {
@@ -788,4 +790,64 @@ describe("NSE runtime overlay contracts", () => {
       </MenuOverlayHarness>,
     )).toThrow(/id|parentResponderId|provenance|standalone/i);
   });
+});
+
+
+describe("menu presentation readiness", () => {
+  function fixture(ready: boolean, controller: NSEMenuController, open = true) {
+    return <NSEMenuOverlayPresentationScope ready={ready}><NSEMenu model={model} controller={controller} open={open} /></NSEMenuOverlayPresentationScope>;
+  }
+  function readyController() {
+    return new NSEMenuController({ model, runtime: runtime(async requests => new Map(requests.map(request => [request.key, presentation(request.commandId)]))) });
+  }
+  it("waits for the popup's visible content commit before initial focus", async () => {
+    const controller = readyController();
+    const prior = document.createElement("button"); document.body.append(prior); prior.focus();
+    const view = render(fixture(false, controller));
+    await screen.findByRole("menuitem", { name: "Bold" });
+    await waitFor(() => expect(screen.getByRole("menuitem", { name: "Bold" }).tabIndex).toBe(0));
+    expect(document.activeElement).toBe(prior);
+    view.rerender(fixture(true, controller));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("menuitem", { name: "Bold" })));
+  });
+  it("does not steal an intervening focus choice when content becomes ready", async () => {
+    const controller = readyController();
+    const prior = document.createElement("button"), next = document.createElement("button"); document.body.append(prior, next); prior.focus();
+    const view = render(fixture(false, controller));
+    await screen.findByRole("menuitem", { name: "Bold" });
+    await waitFor(() => expect(screen.getByRole("menuitem", { name: "Bold" }).tabIndex).toBe(0));
+    next.focus();
+    view.rerender(fixture(true, controller));
+    expect(document.activeElement).toBe(next);
+  });
+  it("retires a pending focus on close and focuses a fresh reopening", async () => {
+    const controller = readyController();
+    const prior = document.createElement("button"); document.body.append(prior); prior.focus();
+    const view = render(fixture(false, controller));
+    await screen.findByRole("menuitem", { name: "Bold" });
+    await waitFor(() => expect(screen.getByRole("menuitem", { name: "Bold" }).tabIndex).toBe(0));
+    view.rerender(fixture(true, controller, false));
+    expect(document.activeElement).toBe(prior);
+    view.rerender(fixture(true, controller));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("menuitem", { name: "Bold" })));
+  });
+});
+
+
+it("keeps a validating popup inert and measurable, then publishes focusable content", async () => {
+  let finish!: () => void;
+  const held = new Promise<void>(resolve => { finish = resolve; });
+  const controller = new NSEMenuController({ model, runtime: runtime(async requests => { await held; return new Map(requests.map(request => [request.key, presentation(request.commandId)])); }) });
+  function Fixture() {
+    const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
+    return <MenuOverlayHarness><button ref={setAnchor}>Generated trigger</button><NSEMenuOverlay overlay={{ id: 'pending-observed', parentResponderId: 'editor' }} controller={controller} open anchor={anchor} onOpenChange={() => undefined}><NSEMenu model={model} controller={controller} open /></NSEMenuOverlay></MenuOverlayHarness>;
+  }
+  render(<Fixture />);
+  const popup = await waitFor(() => { const e = document.querySelector('[data-nse-content-pending=true]'); expect(e).not.toBeNull(); return e!; });
+  expect(popup.hasAttribute('inert')).toBe(true);
+  await act(async () => { finish(); await held; });
+  const item = await screen.findByRole('menuitem', { name: 'Bold' });
+  await waitFor(() => expect(document.activeElement).toBe(item));
+  expect(popup.hasAttribute('inert')).toBe(false);
+  expect(popup.hasAttribute('data-nse-content-pending')).toBe(false);
 });

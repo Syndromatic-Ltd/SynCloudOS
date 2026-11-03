@@ -64,9 +64,12 @@
   }
 }
 
-/* Laid out and placed, but not painted until its content has arrived. */
+/* Keep pending surfaces measurable for placement. Inertness (owned by the
+ * overlay hook) excludes focus and accessibility; opacity hides the whole
+ * surface without inherited visibility surviving the content-ready commit. */
 [data-nse-control="overlay"][data-nse-part="surface"][data-nse-content-pending="true"] {
-  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .nse-overlay-popup {
