@@ -494,6 +494,8 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
    * rebuilding every record. Any other outcome clears it.
    */
   private persistedText: string | null = null;
+  /** A format check is separate from the mutation/rebase cache. */
+  private compatibleStoredText: string | null = null;
 
   get supportsAtomicConditionalWrites(): boolean { return this.conditionalWriteLock !== undefined; }
 
@@ -549,6 +551,7 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
     if (hasPersistedSnapshot) this.importedSnapshotSavedAt = snapshot.savedAt;
     this.store = this.createStore(snapshot);
     this.persistedText = text ?? null;
+    this.compatibleStoredText = text ?? null;
   }
 
   registerKind<TDocument extends SynCloudOSDocument>(
@@ -556,6 +559,7 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
     options: SynCloudOSDocumentKindRegistrationOptions = {},
   ) {
     this.assertActive();
+    this.assertStoredCompatibility();
     const registered = this.store.registerKind(metadata, options);
     this.runtimeKinds.set(registered.kind, registered);
     // The store now differs from what was stored.
@@ -771,9 +775,10 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
       throwIfDocumentStoreAborted(signal);
       const execute = async () => {
         throwIfDocumentStoreAborted(signal);
+        if (!this.conditionalWriteLock) this.assertStoredCompatibility();
         const { store, base, canPersist } = this.conditionalWriteLock
           ? this.lockedMutationStore(resolution)
-          : { store: this.store, base: this.store, canPersist: true };
+          : { store: this.store.fork(), base: this.store, canPersist: true };
         this.persistedText = null;
         const value = await mutation(store);
         throwIfDocumentStoreAborted(signal);
@@ -862,7 +867,22 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
     return { store: this.createStore(merged), base, canPersist: true };
   }
 
+  /** Refuse a format introduced after this reader started. A lock is still
+   * required for atomic cross-context writes; this check is not a lock. */
+  private assertStoredCompatibility(): void {
+    const text = this.readSnapshotText();
+    if (text === undefined) {
+      normaliseSnapshot(this.readStoredSnapshot());
+    } else if (text !== null && text !== this.compatibleStoredText) {
+      normaliseSnapshot(parseStoredSnapshot(text));
+      this.compatibleStoredText = text;
+    }
+  }
+
   private persistStore(store: SynCloudOSInMemoryDocumentStore) {
+    // A mutation may await authorization/work after its first format check.
+    // Preserve newly observed unsupported bytes instead of overwriting them.
+    this.assertStoredCompatibility();
     this.persistedText = null;
     const { writePreferenceText } = this.persistence;
     if (typeof writePreferenceText === "function" && typeof this.persistence.readPreferenceText === "function") {
@@ -871,7 +891,7 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
       const snapshot = store.serialisableSnapshot();
       const text = documentStoreSnapshotText({ ...snapshot, kinds: snapshot.kinds.map(toSerializableKind) });
       const persisted = writePreferenceText.call(this.persistence, this.preferenceKey, text);
-      if (persisted) this.persistedText = text;
+      if (persisted) { this.persistedText = text; this.compatibleStoredText = text; }
       return persisted;
     }
     const snapshot = store.exportSnapshot();

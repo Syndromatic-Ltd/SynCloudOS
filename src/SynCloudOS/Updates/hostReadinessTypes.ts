@@ -12,6 +12,8 @@ export const hostReadinessCoverage: readonly HostReadinessCoverage[] = Object.fr
 export interface HostReadinessCounts {
   /** Outstanding owner stages; concurrent/nested stages are not unique requests. */
   readonly documentEditingParticipants: number; readonly documentEditingWork: number;
+  /** Actual callback stages, retained after logical cancellation; nested stages are not unique requests. */
+  readonly operationWork: number; readonly lifecycleWork: number;
   readonly persistenceMutations: number;
   readonly documentAdmissions: number; readonly documentRecovery: number; readonly documentCleanup: number;
   readonly documents: number; readonly dirtyDocuments: number; readonly savingDocuments: number; readonly conflictedDocuments: number;
@@ -60,7 +62,7 @@ export function captureHostUpdateReadinessOptions(input: HostUpdateReadinessOpti
 }
 export function initialHostUpdateReadinessSnapshot(): HostUpdateReadinessSnapshot {
   return Object.freeze({ client: Object.freeze({ protocol: UPDATE_READINESS_PROTOCOL, clientInstance: 'unconfigured-host', hostBuild: 'unconfigured', generation: 0, readiness: 'unknown', blockers: Object.freeze(['provider-unavailable'] as const) }), decision: 'defer', activationAuthorized: false, ended: false, coverage: hostReadinessCoverage,
-    counts: Object.freeze({ documentEditingParticipants: 0, documentEditingWork: 0, persistenceMutations: 0, documentAdmissions: 0, documentRecovery: 0, documentCleanup: 0, documents: 0, dirtyDocuments: 0, savingDocuments: 0, conflictedDocuments: 0, windows: 0, operations: 0, activeJobs: 0, queuedJobs: 0, nativeOperations: 0 }),
+    counts: Object.freeze({ operationWork: 0, lifecycleWork: 0, documentEditingParticipants: 0, documentEditingWork: 0, persistenceMutations: 0, documentAdmissions: 0, documentRecovery: 0, documentCleanup: 0, documents: 0, dirtyDocuments: 0, savingDocuments: 0, conflictedDocuments: 0, windows: 0, operations: 0, activeJobs: 0, queuedJobs: 0, nativeOperations: 0 }),
     compatibility: Object.freeze({ status: 'not-configured', reasons: Object.freeze(['target-build-unverified'] as const) }),
     inspection: Object.freeze({ available: false, state: 'not-inspected', observedAt: null, sourceGeneration: null, result: null, reason: 'not-configured' }),
   });

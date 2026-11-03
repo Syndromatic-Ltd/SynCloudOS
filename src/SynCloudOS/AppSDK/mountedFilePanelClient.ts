@@ -1,3 +1,4 @@
+import type {NativeOperationActivity} from "../SynCloudOS";
 import type {AppCapabilityStatus,AppFilePanelClient} from './appEnvironmentClientTypes';
 import {createBrowserFilePanelAdapter,createDownloadFilePanelAdapter,createFilePanelService,createFileSystemAccessPanelAdapter,FilePanelReferenceError} from '../FilePanels';
 import type {BrowserFilePanelPort,DownloadFilePanelPort,FileSystemAccessPanelPort,FilePanelResult,FilePanelSaveTarget} from '../FilePanels';
@@ -5,6 +6,7 @@ import type {BrowserFilePanelPort,DownloadFilePanelPort,FileSystemAccessPanelPor
 export interface MountedFilePanelOptions {
   readonly picker?:BrowserFilePanelPort|null;
   readonly native?:FileSystemAccessPanelPort|null;
+  readonly nativeActivity?:NativeOperationActivity;
   readonly download?:DownloadFilePanelPort|null;
   readonly signal:AbortSignal;
   readonly assertLive:()=>void;
@@ -14,7 +16,7 @@ export interface MountedFilePanelOptions {
 
 /** Scopes the existing panel service; it is not a browser permission broker. */
 export function createMountedFilePanelClient(options:MountedFilePanelOptions):AppFilePanelClient {
-  const native=options.native?createFileSystemAccessPanelAdapter(options.native):null;
+  const native=options.native?createFileSystemAccessPanelAdapter(options.native,options.nativeActivity):null;
   const adapters=[...(options.picker?[createBrowserFilePanelAdapter(options.picker)]:[]),...(native?[{...native,
     // Portable read-only input must not unexpectedly fall through to another
     // native chooser. Handles/directories are explicitly requested capabilities.

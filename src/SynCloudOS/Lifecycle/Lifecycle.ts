@@ -27,6 +27,7 @@ import type { AppLifecycleEvent, AppManagerRuntimeRecord, SynCloudOSAppLifecycle
 import type { SynCloudOSBundleLifecycleHook, SynCloudOSBundleLifecycleHookName, TrustedSynWareBundle } from "../BundleLoader/bundleTypes";
 import type { SynCloudOSRuntimeEventType } from "../EventBus/eventTypes";
 import type { OperationContext } from "../Operations/operationTypes";
+import { OwnedWorkObservations } from "../Operations/OwnedWorkObservations";
 import type { WindowCloseResult, WindowManager } from "../Windows";
 import type { SynCloudOSStateTransitionRecord } from "../Statechart/statechartTypes";
 import type {
@@ -203,6 +204,7 @@ export function createLifecycle(
   const Caches = dependencies.caches;
   const lifecycleHistoryLimit = Math.max(1, dependencies.operationHistoryLimit ?? 160);
   const activeOperations = new Set<CancellableLifecycleOperation>();
+  const hookWork = new OwnedWorkObservations();
   let disposed = false;
 
   const aliases: Readonly<Record<string, SynCloudOSRuntimeEventType | string>> = {
@@ -374,7 +376,10 @@ export function createLifecycle(
       payload,
     };
     try {
-      await awaitLifecycleHook(candidate.invoke(context), operation.signal);
+      await awaitLifecycleHook(hookWork.track(() => {
+        operation.throwIfCancelled();
+        return candidate.invoke(context);
+      }), operation.signal);
       operation.throwIfCancelled();
       const endedAt = runtime.environment.now();
       recordLifecycleOperation({
@@ -1167,8 +1172,10 @@ export function createLifecycle(
       disposed = true;
       for (const operation of activeOperations) operation.cancel("runtime-disposed");
       activeOperations.clear();
+      hookWork.end();
     },
   };
 
+  hookWork.bind(ownedLifecycle);
   return ownedLifecycle;
 }

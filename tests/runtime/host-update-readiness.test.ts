@@ -135,7 +135,7 @@ describe('host readiness owner integration', () => {
     const runtime = fixture(), entered = deferred<void>(), gate = deferred<void>();
     const handle = runtime.operations.run({ kind: 'fixture-held-will', input: undefined, will: [async () => { entered.resolve(); await gate.promise; }], commit() {} });
     await entered.promise; handle.cancel('generated cancellation'); await handle.result;
-    expect(runtime.updateReadiness.inspect().counts.operations).toBe(0); expect(runtime.updateReadiness.getSnapshot().coverage.flatMap(row => row.gaps)).toContain('underlying-operation-work'); expect(runtime.updateReadiness.getSnapshot().client.readiness).toBe('unknown'); gate.resolve();
+    expect(runtime.updateReadiness.inspect().counts).toMatchObject({ operations: 0, operationWork: 1 }); expect(runtime.updateReadiness.getSnapshot().coverage.flatMap(row => row.gaps)).not.toContain('underlying-operation-work'); expect(runtime.updateReadiness.getSnapshot().client.blockers).toContain('owner-busy'); gate.resolve(); await vi.waitFor(() => expect(runtime.updateReadiness.getSnapshot().counts.operationWork).toBe(0)); expect(runtime.updateReadiness.getSnapshot().client.readiness).toBe('unknown');
   });
   it('wires the actual mounted share boundary to the runtime-owned underlying promise', async () => {
     const environment = createTestRuntimeEnvironment(), gate = deferred<void>();
@@ -230,7 +230,8 @@ describe('document admission/recovery host facts', () => {
     await vi.waitFor(() => expect(runtime.updateReadiness.getSnapshot().counts.documentAdmissions).toBe(0));
     const snapshot = runtime.updateReadiness.getSnapshot(); expect(snapshot.activationAuthorized).toBe(false); expect(snapshot.decision).toBe('defer'); expect(snapshot.client.readiness).toBe('unknown');
     expect(snapshot.coverage.flatMap(row => row.gaps)).not.toContain('document-admission'); expect(snapshot.coverage.flatMap(row => row.gaps)).not.toContain('recovery-cleanup');
-    expect(snapshot.coverage.flatMap(row => row.gaps)).toContain('underlying-operation-work');
+    expect(snapshot.coverage.flatMap(row => row.gaps)).not.toContain('underlying-operation-work');
+    expect(snapshot.counts.operationWork).toBe(0); expect(snapshot.coverage.flatMap(row => row.gaps)).toContain('application-lifecycle-owners');
   });
   it('projects recovery work and stops publication on observer disposal while actual work finishes', async () => {
     const runtime = fixture(), observer = new HostUpdateReadinessService(runtime), doc = await runtime.documents.newDocument({ typeId: noteType.id });
@@ -274,4 +275,55 @@ it('observes editing work beyond logical cancellation while inspection never set
   expect(runtime.updateReadiness.getSnapshot().counts.documentEditingWork).toBe(1);expect(runtime.updateReadiness.getSnapshot().decision).toBe('defer');
  } finally {held.resolve({status:'settled'});registration.dispose();}
  await vi.waitFor(()=>expect(runtime.updateReadiness.getSnapshot().counts.documentEditingWork).toBe(0));
+});
+
+
+it('retains underlying operation callbacks after a cancellation receipt', async () => {
+  const runtime = fixture(), gate = deferred<void>(), entered = deferred<void>();
+  const handle = runtime.operations.run({ kind: 'generated-underlying-work', input: undefined,
+    will: [() => { entered.resolve(); return gate.promise; }], commit() { throw new Error('cancelled work must not commit'); } });
+  await entered.promise; handle.cancel('generated cancellation');
+  await expect(handle.result).resolves.toMatchObject({ status: 'cancelled', committed: false });
+  expect(runtime.operations.inspectPending()).toEqual([]);
+  try {
+    expect(runtime.updateReadiness.inspect().counts).toMatchObject({ operations: 0, operationWork: 1 });
+    expect(runtime.updateReadiness.getSnapshot().client.blockers).toContain('owner-busy');
+    expect(runtime.updateReadiness.getSnapshot().activationAuthorized).toBe(false);
+  } finally { gate.resolve(); }
+});
+
+it('retains unknown operation coverage for a foreign coordinator facade', () => {
+  const runtime = fixture(), facade = Object.create(runtime);
+  Object.defineProperty(facade, 'operations', { value: { ...runtime.operations } });
+  const observer = new HostUpdateReadinessService(facade);
+  try {
+    expect(observer.getSnapshot().coverage.flatMap(row => row.gaps)).toContain('underlying-operation-work');
+    expect(observer.getSnapshot().client.readiness).toBe('unknown');
+    expect(observer.getSnapshot().activationAuthorized).toBe(false);
+  } finally { observer.dispose(); }
+});
+
+it('retains real mounted file-write work across mount retirement without charging a sibling runtime', async () => {
+  const environment = createTestRuntimeEnvironment(), gate = deferred<void>(), entered = deferred<void>();
+  const writable = { write: () => { entered.resolve(); return gate.promise; }, close: async () => {}, abort: async () => {} };
+  const handle = { name: 'generated.txt', queryPermission: async () => 'granted' as const, requestPermission: async () => 'granted' as const, getFile: async () => new File(['generated'], 'generated.txt'), createWritable: async () => writable };
+  const port = { isSecureContext: () => true, isAvailable: () => true, hasTransientUserActivation: () => true, openFiles: async () => [], openDirectory: async () => null, saveFile: async () => ({ handle, exists: false }) };
+  Object.assign(environment, { createFileSystemAccessPanelPort: () => port });
+  Object.assign(environment.browser, { getNavigator: () => ({ userActivation: { isActive: true } }) });
+  const a = fixture({ environment }), b = fixture({ environment }), appId = 'com.example.generated-observed-file';
+  registerTestSynWare(a, { schemaVersion: 1, bundleIdentifier: appId, version: '1.0.0', displayName: 'Generated file observer', routes: [{ path: '/generated-observed-file', primary: true }], permissions: ['file.write'] });
+  const mounted = mountTestSynWareRuntime(a, appId); releases.push(() => mounted.dispose('generated-test-end'));
+  const selected = await createSynWareContextValue(mounted.runtime).filePanels.save({ id: 'generated-write', accepts: [], suggestedName: 'generated.txt', destination: 'persistent-handle-required', conflictPolicy: 'fail-if-exists' });
+  expect(selected.kind).toBe('accepted'); if (selected.kind !== 'accepted') throw new Error('Generated target missing');
+  const pending = selected.values[0]!.sink.write({ fileName: 'generated.txt', mediaType: 'text/plain', blob: new Blob(['generated harmless bytes']) });
+  await entered.promise;
+  try {
+    expect(a.updateReadiness.getSnapshot().counts.nativeOperations).toBe(1); expect(b.updateReadiness.getSnapshot().counts.nativeOperations).toBe(0);
+    mounted.dispose('generated-window-retired'); expect(a.updateReadiness.getSnapshot().counts.nativeOperations).toBe(1);
+    expect(a.updateReadiness.getSnapshot().client.blockers).toContain('native-operation');
+    expect(a.updateReadiness.getSnapshot().coverage.flatMap(row => row.gaps)).toContain('native-write-permission');
+    expect(a.updateReadiness.getSnapshot().activationAuthorized).toBe(false);
+  } finally { gate.resolve(); }
+  await expect(pending).rejects.toMatchObject({ code: 'operation-aborted' });
+  expect(a.updateReadiness.getSnapshot().counts.nativeOperations).toBe(0);
 });
