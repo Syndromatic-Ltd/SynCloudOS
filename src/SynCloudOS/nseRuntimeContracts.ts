@@ -53,3 +53,6 @@ export { markHiddenCommandAcceptance, isHiddenCommandAcceptance } from "./Comman
 
 export { UPDATE_READINESS_PROTOCOL, updateReadinessDomains, updateReadinessBlockers } from './Updates/updateReadiness';
 export { UpdateReadinessProjection } from './Updates/UpdateReadinessProjection';
+
+// Host-only authoring observation bridge, with no runtime construction.
+export { trackOwnedWork } from "./Operations/OwnedWorkObservations";

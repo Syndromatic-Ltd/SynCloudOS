@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -51,6 +51,7 @@ import type { ResponderRegistrationHandle } from "../SynCloudOS";
 import { attachNSEAuthoringContext } from "../../NSE/applicationHostInterop";
 import { finalizeNSEAuthoringOwner } from "../../NSE/applicationHostInterop";
 import { subscribePersistencePreferences } from "../Persistence/Persistence";
+import { trackOwnedWork } from "../nseRuntimeContracts";
 
 /** How a class-based application is identified inside the runtime that launched it. */
 export interface ApplicationSessionIdentity {
@@ -241,6 +242,7 @@ export class ApplicationSession {
     const context = createSynWareContextValue(this.#servicesMount.runtime);
     installControllerServices(context, runtime);
     attachNSEAuthoringContext(this.app, {
+      observeManagedTask: work => { trackOwnedWork(runtime.lifecycle, () => work); },
       scheduler: context.scheduler,
       errors: context.errors,
       persistence: context.persistence,

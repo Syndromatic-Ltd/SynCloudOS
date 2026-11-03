@@ -2,6 +2,8 @@ import { getNSEObjectOwners } from './objectLifetime';
 
 /** @internal Ports supplied by the canonical session; never an ambient current app. */
 export interface NSEAuthoringContext {
+  /** Optional host observation only; never task scheduling or commit authority. */
+  readonly observeManagedTask?: (work: Promise<void>) => void;
   readonly scheduler: {
     setTimeout(callback: () => void, delayMs: number): { dispose(): void };
   };
