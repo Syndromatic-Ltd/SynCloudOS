@@ -19,7 +19,7 @@
  */
 
 /** Coarse observations owned by DocumentController; no scheduling or mutation authority. */
-export type DocumentActivityKind = 'admissions' | 'recovery' | 'cleanup' | 'editingParticipants' | 'editingSettlements' | 'editingCallbacks';
+export type DocumentActivityKind = 'admissions' | 'recovery' | 'cleanup' | 'editingParticipants' | 'editingSettlements' | 'editingCallbacks' | 'storageCallbacks';
 export interface DocumentActivitySnapshot {
   readonly revision: number;
   /** Counts are outstanding stages, not unique documents or user requests. */
@@ -29,13 +29,15 @@ export interface DocumentActivitySnapshot {
   readonly editingParticipants: number;
   readonly editingSettlements: number;
   readonly editingCallbacks: number;
+  /** Underlying provider write/recovery and fenced reconciliation stages. */
+  readonly storageCallbacks: number;
 }
 export interface DocumentActivitySource {
   getSnapshot(): DocumentActivitySnapshot;
   subscribe(listener: () => void): () => void;
 }
 export class DocumentActivityObservations {
-  #snapshot: DocumentActivitySnapshot = Object.freeze({ revision: 0, admissions: 0, recovery: 0, cleanup: 0, editingParticipants: 0, editingSettlements: 0, editingCallbacks: 0 });
+  #snapshot: DocumentActivitySnapshot = Object.freeze({ revision: 0, admissions: 0, recovery: 0, cleanup: 0, editingParticipants: 0, editingSettlements: 0, editingCallbacks: 0, storageCallbacks: 0 });
   readonly #listeners = new Set<() => void>();
   readonly source: DocumentActivitySource = Object.freeze({
     getSnapshot: () => this.#snapshot,

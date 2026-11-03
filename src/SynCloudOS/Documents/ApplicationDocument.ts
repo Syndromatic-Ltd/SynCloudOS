@@ -819,10 +819,10 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
         if (!pending.adapter.recoverWriteByIdempotencyKey) {
           throw new DocumentWriteOutcomeUnknownError(pending.request.location, pending.request.idempotencyKey);
         }
-        record = await pending.adapter.recoverWriteByIdempotencyKey<TSerialized>({
+        record = await this.#observeStorageCallback(() => pending.adapter.recoverWriteByIdempotencyKey!<TSerialized>({
           ...pending.request,
           signal: operationSignal,
-        });
+        }), () => throwIfDocumentAborted(operationSignal));
       }
       throwIfDocumentAborted(operationSignal);
       this.#assertTerminalReconciliation(token, authority);
@@ -1807,7 +1807,7 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       if ((fenceCallerAbortAfterCommit && operationSignal.aborted) || lifecycleSignal.aborted ||
           (generation !== this.#mutationGeneration && closeToken !== this.#closeGateToken) ||
           this.state === "closed" || this.state === "closing") {
-        await this.#reconcileFencedSave(adapter, location, record, expectedVersion, capturedBase, operationId);
+        await this.#observeStorageCallback(() => this.#reconcileFencedSave(adapter, location, record, expectedVersion, capturedBase, operationId));
       }
       throwIfDocumentAborted(fenceCallerAbortAfterCommit ? operationSignal : lifecycleSignal);
       if (generation !== this.#mutationGeneration && closeToken !== this.#closeGateToken) {
@@ -1863,6 +1863,16 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
     }
   }
 
+  #observeStorageCallback<T>(invoke: () => T, beforeInvoke?: () => void): T {
+    if (!this.#activity) return invoke();
+    return this.#activity.track("storageCallbacks", () => {
+      // A readonly observer can synchronously revoke a caller. Mandatory
+      // already-owned reconciliation passes no new-invocation guard.
+      beforeInvoke?.();
+      return invoke();
+    });
+  }
+
   #awaitTerminalAwareWrite(
     adapter: DocumentStorageAdapter,
     request: DocumentWriteRequest<TSerialized>,
@@ -1871,7 +1881,7 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
   ): Promise<DocumentRecord<TSerialized>> {
     let provider: Promise<DocumentRecord<TSerialized>>;
     try {
-      provider = Promise.resolve(adapter.write<TSerialized>(request));
+      provider = Promise.resolve(this.#observeStorageCallback(() => adapter.write<TSerialized>(request), () => throwIfDocumentAborted(signal)));
     } catch (error) {
       return Promise.reject(error);
     }
