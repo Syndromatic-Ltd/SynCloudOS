@@ -1,3 +1,4 @@
+import { observeDocumentStorePersistence } from "../DocumentStore/PersistenceDocumentStore";
 import type { SynCloudOSRuntime } from '../Runtime/runtimeInstanceTypes';
 import { bindRuntimeReadinessProjection } from '../Runtime/RuntimeStore';
 import { UpdateReadinessProjection } from './UpdateReadinessProjection';
@@ -41,13 +42,19 @@ export class HostUpdateReadinessService {
     const build = options.hostBuild ?? 'unconfigured';
     this.#reconcileDocuments();
     const activity = runtime.documents.activity;
+    const persistence = observeDocumentStorePersistence(runtime.documentStore);
     const admissions: UpdateReadinessAuthority = { domain: 'documents', read: () => ({ known: !this.#disposed, revision: activity.getSnapshot().revision, blockers: activity.getSnapshot().admissions ? ['owner-busy'] : [] }), subscribe: listener => activity.subscribe(listener) };
     const recovery: UpdateReadinessAuthority = { domain: 'tasks', read: () => ({ known: !this.#disposed, revision: activity.getSnapshot().revision, blockers: activity.getSnapshot().recovery || activity.getSnapshot().cleanup ? ['recovery-write'] : [] }), subscribe: listener => activity.subscribe(listener) };
+    const persistenceWork: UpdateReadinessAuthority | null = persistence ? {
+      domain: 'tasks',
+      read: () => ({ known: !this.#disposed && !persistence.getSnapshot().ended, revision: persistence.getSnapshot().revision, blockers: persistence.getSnapshot().pending ? ['owner-busy'] : [] }),
+      subscribe: listener => persistence.subscribe(listener),
+    } : null;
     const tasks: UpdateReadinessAuthority = { domain: 'tasks', read: () => ({ known: !this.#disposed, revision: this.#revision, blockers: !runtime.store.getSnapshot().booted || runtime.disposalState !== 'running' || runtime.operations.inspectPending().length || runtime.jobs.snapshot().active || runtime.jobs.snapshot().queued ? ['owner-busy'] : [] }), subscribe: listener => { this.#taskListeners.add(listener); return () => { this.#taskListeners.delete(listener); }; } };
     this.#projection = new UpdateReadinessProjection({ clientInstance: ('host-' + runtime.environment.randomUUID().replace(/[^a-zA-Z0-9_-]/g, '_')).slice(0, 96).padEnd(8, '_'), hostBuild: build, inventory: {
       // Controller-owned document admissions are observed; the other domains
       // still have explicit unresolved owner coverage.
-      read: () => ({ covered: ['documents'], authorities: [...this.#documents.values(), admissions, recovery, tasks, runtime.nativeActivity] }),
+      read: () => ({ covered: ['documents'], authorities: [...this.#documents.values(), admissions, recovery, ...(persistenceWork ? [persistenceWork] : []), tasks, runtime.nativeActivity] }),
       subscribe: listener => { this.#inventoryListeners.add(listener); return () => { this.#inventoryListeners.delete(listener); }; },
     } });
     this.#releases.push(this.#projection.subscribe(() => this.#publish()));
@@ -146,7 +153,7 @@ export class HostUpdateReadinessService {
   }
   #counts(): HostReadinessCounts {
     const documents = this.#runtime.documents.openDocuments, jobs = this.#runtime.jobs.snapshot();
-    return Object.freeze({ documents: documents.length, dirtyDocuments: documents.filter(document => document.hasUnsavedChanges).length, savingDocuments: documents.filter(document => document.state === 'saving').length, conflictedDocuments: documents.filter(document => document.state === 'conflicted').length, windows: this.#runtime.windows.snapshot().windowControllerIds.length, operations: this.#runtime.operations.inspectPending().length, activeJobs: jobs.active, queuedJobs: jobs.queued, nativeOperations: this.#runtime.nativeActivity.pendingOperationCount, documentAdmissions: this.#runtime.documents.activity.getSnapshot().admissions, documentRecovery: this.#runtime.documents.activity.getSnapshot().recovery, documentCleanup: this.#runtime.documents.activity.getSnapshot().cleanup });
+    return Object.freeze({ persistenceMutations: observeDocumentStorePersistence(this.#runtime.documentStore)?.getSnapshot().pending ?? 0, documents: documents.length, dirtyDocuments: documents.filter(document => document.hasUnsavedChanges).length, savingDocuments: documents.filter(document => document.state === 'saving').length, conflictedDocuments: documents.filter(document => document.state === 'conflicted').length, windows: this.#runtime.windows.snapshot().windowControllerIds.length, operations: this.#runtime.operations.inspectPending().length, activeJobs: jobs.active, queuedJobs: jobs.queued, nativeOperations: this.#runtime.nativeActivity.pendingOperationCount, documentAdmissions: this.#runtime.documents.activity.getSnapshot().admissions, documentRecovery: this.#runtime.documents.activity.getSnapshot().recovery, documentCleanup: this.#runtime.documents.activity.getSnapshot().cleanup });
   }
   #publish(): void {
     if (this.#disposed) return;
