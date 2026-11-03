@@ -29,6 +29,7 @@ import {
   type Padding,
   type Placement,
 } from "@floating-ui/dom";
+import type { NSEOverlayRegionBounds } from "./overlayRegion";
 import type { NSELogicalPlacement } from "./overlayTypes";
 
 export type NSEOverlayDirection = "ltr" | "rtl";
@@ -47,6 +48,7 @@ export interface NSEOverlayPositionScheduler {
 export interface NSEOverlayPositionOptions {
   readonly anchor: HTMLElement;
   readonly floating: HTMLElement;
+  readonly boundary?: () => NSEOverlayRegionBounds | null;
   readonly arrow?: HTMLElement | null;
   readonly placement?: NSELogicalPlacement;
   readonly direction?: NSEOverlayDirection;
@@ -62,6 +64,7 @@ export interface NSEOverlayPositionOptions {
 export interface NSEViewportCornerPositionOptions {
   readonly anchor: HTMLElement;
   readonly floating: HTMLElement;
+  readonly boundary?: NSEOverlayRegionBounds | null;
   readonly insetBlockStart: number;
   readonly insetInlineEnd: number;
   readonly availableInlineSize: number;
@@ -92,6 +95,7 @@ export function logicalPlacementToFloatingPlacement(
 export function computeNSEOverlayPosition({
   anchor,
   floating,
+  boundary,
   arrow,
   placement = "block-end-inline-start",
   direction = "ltr",
@@ -145,6 +149,8 @@ export function computeNSEOverlayPosition({
     }
     const updateGeneration = ++generation;
     try {
+      const region = boundary?.() ?? null;
+      const clipping = region ? { rootBoundary: region, boundary: [] as Element[] } : {};
       void computePosition(anchor, floating, {
         // The surface is written as position: fixed, so it is placed in
         // viewport coordinates. The default "absolute" strategy answers in
@@ -154,13 +160,14 @@ export function computeNSEOverlayPosition({
         placement: logicalPlacementToFloatingPlacement(placement, direction),
         middleware: [
           offset(offsetValue),
-          flip({ fallbackAxisSideDirection: "start" }),
-          shift({ padding: collisionPadding }),
+          flip({ ...(region ? { ...clipping, padding: collisionPadding } : {}), fallbackAxisSideDirection: "start" }),
+          shift({ ...clipping, padding: collisionPadding }),
           size({
+            ...clipping,
             padding: collisionPadding,
             apply: ({ availableWidth, availableHeight, elements }) => {
-              elements.floating.style.setProperty("--nse-overlay-available-inline-size", `${availableWidth}px`);
-              elements.floating.style.setProperty("--nse-overlay-available-block-size", `${availableHeight}px`);
+              elements.floating.style.setProperty("--nse-overlay-available-inline-size", `${region ? Math.max(0, availableWidth) : availableWidth}px`);
+              elements.floating.style.setProperty("--nse-overlay-available-block-size", `${region ? Math.max(0, availableHeight) : availableHeight}px`);
             },
           }),
           ...(arrow ? [floatingArrow({ element: arrow })] : []),
@@ -186,8 +193,8 @@ export function computeNSEOverlayPosition({
         // placement before the portal surface's first measured rect. Clamp
         // that result once more at the owning viewport so an interactive
         // overlay cannot be rendered outside the hit-testable area.
-        const boundedX = Math.min(Math.max(x, padding.left), Math.max(padding.left, viewportWidth - floatingRect.width - padding.right));
-        const boundedY = Math.min(Math.max(y, padding.top), Math.max(padding.top, viewportHeight - floatingRect.height - padding.bottom));
+        const boundedX = Math.min(Math.max(x, (region?.x ?? 0) + padding.left), Math.max((region?.x ?? 0) + padding.left, (region ? region.x + region.width : viewportWidth) - floatingRect.width - padding.right));
+        const boundedY = Math.min(Math.max(y, (region?.y ?? 0) + padding.top), Math.max((region?.y ?? 0) + padding.top, (region ? region.y + region.height : viewportHeight) - floatingRect.height - padding.bottom));
         floating.style.position = "fixed";
         floating.style.left = `${boundedX}px`;
         floating.style.top = `${boundedY}px`;
@@ -266,6 +273,7 @@ export function computeNSEOverlayPosition({
 export function computeNSEViewportCornerPosition({
   anchor,
   floating,
+  boundary,
   insetBlockStart,
   insetInlineEnd,
   availableInlineSize,
@@ -291,13 +299,13 @@ export function computeNSEViewportCornerPosition({
       return;
     }
     floating.style.position = "fixed";
-    floating.style.top = `${insetBlockStart}px`;
+    floating.style.top = `${(boundary?.y ?? 0) + insetBlockStart}px`;
     floating.style.bottom = "auto";
     if (direction === "rtl") {
-      floating.style.left = `${insetInlineEnd}px`;
+      floating.style.left = `${(boundary?.x ?? 0) + insetInlineEnd}px`;
       floating.style.right = "auto";
     } else {
-      floating.style.right = `${insetInlineEnd}px`;
+      floating.style.right = `${(boundary ? (floating.ownerDocument.defaultView?.innerWidth ?? boundary.x + boundary.width) - boundary.x - boundary.width : 0) + insetInlineEnd}px`;
       floating.style.left = "auto";
     }
     floating.style.setProperty("--nse-overlay-available-inline-size", `${availableInlineSize}px`);

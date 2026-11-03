@@ -21,6 +21,8 @@
 import { createContext, useCallback, useContext, useEffectEvent, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactElement, type ReactNode } from "react";
 import { computeNSEOverlayPosition, computeNSEViewportCornerPosition, type NSEOverlayCollisionPadding, type NSEOverlayDirection } from "./computeNSEOverlayPosition";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
+import { useNSEOverlayRegion } from "./useNSEOverlayRegion";
+import { nseOverlayRegionInsets } from "./overlayRegion";
 import { registerNSEFocusOrigin } from "../Focus/focusOrigin";
 import type {
   NSELogicalPlacement,
@@ -171,6 +173,7 @@ export function useNSEOverlay({
     () => runtime.environment.visualViewport.getSnapshot(),
     () => runtime.environment.visualViewport.getSnapshot(),
   );
+  const { region, hostViewport, getBoundary } = useNSEOverlayRegion({ source: runtime.environment.presentation, open, origin: anchor, document: runtime.environment.browser.getDocument(), direction });
   const [surface, setSurface] = useState<HTMLElement | null>(null);
   const [controlledDismissGeneration, setControlledDismissGeneration] = useState(0);
   const onDismissRef = useRef(onDismiss);
@@ -191,6 +194,7 @@ export function useNSEOverlay({
       left: Math.max(sidePadding(collisionPadding, "left"), workArea.safeArea.left),
     };
   }, [collisionPadding, visualViewport, workArea]);
+  const placementPadding = region ? { top: Math.max(0, sidePadding(collisionPadding, "top")), right: Math.max(0, sidePadding(collisionPadding, "right")), bottom: Math.max(0, sidePadding(collisionPadding, "bottom")), left: Math.max(0, sidePadding(collisionPadding, "left")) } : effectiveCollisionPadding;
   const placementScheduler = useMemo(() => ({
     setTimeout: (callback: () => void, delayMs: number) => runtime.environment.setTimeout(callback, delayMs),
     clearTimeout: (handle: unknown) => runtime.environment.clearTimeout(handle),
@@ -314,10 +318,21 @@ export function useNSEOverlay({
   }, [manager, registration]);
 
   useLayoutEffect(() => {
+    if (!open || !surface || !region || !hostViewport) return;
+    const insets = nseOverlayRegionInsets(region, hostViewport);
+    surface.dataset.nseOverlayRegion = "true";
+    for (const side of ["top", "right", "bottom", "left"] as const) surface.style.setProperty(`--nse-overlay-region-${side}`, `${insets[side]}px`);
+    return () => {
+      delete surface.dataset.nseOverlayRegion;
+      for (const side of ["top", "right", "bottom", "left"]) surface.style.removeProperty(`--nse-overlay-region-${side}`);
+    };
+  }, [open, surface, region?.x, region?.y, region?.width, region?.height, hostViewport?.width, hostViewport?.height]);
+
+  useLayoutEffect(() => {
     if (!open || !surface) return;
     if (kind === "action-sheet") {
-      surface.style.setProperty("--nse-overlay-available-inline-size", `${Math.max(0, workArea.width - workArea.safeArea.left - workArea.safeArea.right)}px`);
-      surface.style.setProperty("--nse-overlay-available-block-size", `${Math.max(0, workArea.height - workArea.safeArea.top - workArea.safeArea.bottom - effectiveCollisionPadding.bottom)}px`);
+      surface.style.setProperty("--nse-overlay-available-inline-size", `${Math.max(0, region ? region.width - placementPadding.left - placementPadding.right : workArea.width - workArea.safeArea.left - workArea.safeArea.right)}px`);
+      surface.style.setProperty("--nse-overlay-available-block-size", `${Math.max(0, region ? region.height - placementPadding.top - placementPadding.bottom : workArea.height - workArea.safeArea.top - workArea.safeArea.bottom - effectiveCollisionPadding.bottom)}px`);
       return () => {
         surface.style.removeProperty("--nse-overlay-available-inline-size");
         surface.style.removeProperty("--nse-overlay-available-block-size");
@@ -328,10 +343,11 @@ export function useNSEOverlay({
       return computeNSEViewportCornerPosition({
         anchor,
         floating: surface,
-        insetBlockStart: workArea.safeArea.top - (viewportCornerBleed?.blockStart ?? 0),
-        insetInlineEnd: workArea.safeArea.right - (viewportCornerBleed?.inlineEnd ?? 0),
-        availableInlineSize: workArea.width - workArea.safeArea.left - workArea.safeArea.right,
-        availableBlockSize: workArea.height - workArea.safeArea.top - workArea.safeArea.bottom,
+        boundary: region,
+        insetBlockStart: region ? placementPadding.top : workArea.safeArea.top - (viewportCornerBleed?.blockStart ?? 0),
+        insetInlineEnd: region ? placementPadding.right : workArea.safeArea.right - (viewportCornerBleed?.inlineEnd ?? 0),
+        availableInlineSize: region ? region.width - placementPadding.left - placementPadding.right : workArea.width - workArea.safeArea.left - workArea.safeArea.right,
+        availableBlockSize: region ? region.height - placementPadding.top - placementPadding.bottom : workArea.height - workArea.safeArea.top - workArea.safeArea.bottom,
         direction,
         signal: runtime.signal,
         onAnchorRemoved,
@@ -344,13 +360,14 @@ export function useNSEOverlay({
       placement,
       direction,
       offset,
-      collisionPadding: effectiveCollisionPadding,
+      collisionPadding: placementPadding,
+      boundary: getBoundary,
       signal: runtime.signal,
       scheduler: placementScheduler,
       onAnchorRemoved,
       onError: () => runtime.reportPlacementFailure({ overlayId: id, overlayKind: kind }),
     });
-  }, [anchor, arrow, contentPending, direction, effectiveCollisionPadding, id, kind, offset, onAnchorRemoved, open, placement, placementScheduler, positioning, runtime, surface, viewportCornerBleed, workArea]);
+  }, [anchor, arrow, contentPending, direction, effectiveCollisionPadding, id, kind, offset, onAnchorRemoved, open, placement, placementScheduler, positioning, runtime, surface, viewportCornerBleed, workArea, region?.x, region?.y, region?.width, region?.height, getBoundary, collisionPadding]);
 
   const setSurfaceRef = useCallback((element: HTMLElement | null) => {
     setSurface(element);

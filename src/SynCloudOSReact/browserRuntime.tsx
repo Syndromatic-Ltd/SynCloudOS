@@ -375,7 +375,7 @@ function renderHost(
               <NSERubberBandProvider>{home
                 ? <ApplicationHost applicationId={home.primaryId} authentication={options.authentication ?? "disabled"} home={home} />
                 : Shell && <Shell shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} />}</NSERubberBandProvider>
-              {!home ? <SCOSAlertPresenter center={runtime.alerts} /> : null}
+              {!home ? <SCOSAlertPresenter center={runtime.alerts} presentation={runtime.presentationTraits} /> : null}
             </RootRecoveryBoundary>
           </RuntimeInputBoundary>
         </NSEAppearanceProvider>

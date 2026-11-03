@@ -19,6 +19,7 @@
  */
 
 import type { DocumentKind, DocumentWindowAssociation } from "../Documents";
+import { selectViewportBookRegion, screenViewportRegionGeometry } from "./viewportFeatures";
 import type { ScreenSnapshot } from "./ScreenService";
 import {
   assertFiniteWindowBounds,
@@ -274,6 +275,21 @@ export function resolveWindowPresentation(record: WindowRecord, screen: ScreenSn
       resizable: false,
       titleBarVisible,
     });
+  }
+  const region = ["modal", "sheet", "popover"].includes(record.role)
+    ? selectViewportBookRegion(screenViewportRegionGeometry(screen), screen.layoutViewport, record.bounds) : null;
+  if (region) {
+    // Projection only: normal bounds, minimum-size/restoration contracts and
+    // controller/document identity remain with WindowManager unchanged.
+    const gap = 8;
+    const width = Math.min(record.bounds.width, region.width - 2 * gap);
+    const height = Math.min(record.bounds.height, region.height - 2 * gap);
+    const compact = screen.breakpoint === "compact";
+    const x = Math.max(region.x + gap, Math.min(record.bounds.x, region.x + region.width - gap - width));
+    const y = compact ? region.y + region.height - gap - height
+      : Math.max(region.y + gap, Math.min(record.bounds.y, region.y + region.height - gap - height));
+    return Object.freeze({ kind: compact ? "mobile-sheet" : "desktop-window", visible: true,
+      bounds: Object.freeze({ x, y, width, height }), safeAreaInsets, movable: false, resizable: false, titleBarVisible });
   }
   if (screen.breakpoint !== "compact") {
     // Work and visible rectangles share page CSS coordinates. A keyboard or

@@ -53,3 +53,70 @@ export function validateViewportFeatures(source: RuntimeViewportFeaturesSnapshot
   }
   return Object.freeze({ posture, segments: Object.freeze(segments.map(rect => Object.freeze({ x: rect.x, y: rect.y, width: rect.width, height: rect.height }))) });
 }
+
+/** Immutable canonical geometry needed by both native window presentation and
+ * NSE projections; this is a pure calculation, not another screen service. */
+export interface ViewportRegionGeometry {
+  readonly geometryState: "current" | "retained" | "unavailable";
+  readonly viewportFeatures?: RuntimeViewportFeaturesSnapshot;
+  readonly hostViewportBounds: WindowBounds;
+  readonly visualViewportBounds: WindowBounds;
+  readonly safeAreaInsets: Readonly<{ blockStart: number; inlineEnd: number; blockEnd: number; inlineStart: number }>;
+}
+export interface ViewportBookRegions { readonly left: WindowBounds; readonly right: WindowBounds; }
+type Bounds = WindowBounds;
+
+export function resolveViewportBookRegions(traits: ViewportRegionGeometry, bounds: WindowBounds,
+  minimumPaneSize: Readonly<{ width: number; height: number }> = { width: 280, height: 160 }): ViewportBookRegions | null {
+  if (![minimumPaneSize.width, minimumPaneSize.height].every(value => Number.isFinite(value) && value > 0)) return null;
+  const features = traits.viewportFeatures;
+  if (traits.geometryState !== "current" || features?.posture !== "folded" || features.segments?.length !== 2 ||
+    ![bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) || bounds.width <= 0 || bounds.height <= 0) return null;
+  const [a, b] = [...features.segments].sort((left, right) => left.x - right.x);
+  if (!a || !b || ![a, b].every(rect => [rect.x, rect.y, rect.width, rect.height].every(Number.isFinite) && rect.width > 0 && rect.height > 0) ||
+    a.x + a.width > b.x || Math.abs(a.y - b.y) > 1 || Math.abs(a.height - b.height) > 1) return null;
+  const host = traits.hostViewportBounds;
+  if (![a, b].every(rect => rect.x >= host.x && rect.y >= host.y && rect.x + rect.width <= host.x + host.width + 1 && rect.y + rect.height <= host.y + host.height + 1)) return null;
+  const visible = traits.visualViewportBounds;
+  // Pinch zoom/visual panning uses the existing single-region experience.
+  if (visible.width < host.width - 1 || visible.x > host.x + 1) return null;
+  const safe = traits.safeAreaInsets;
+  const x0 = Math.max(bounds.x, visible.x, host.x + safe.inlineStart);
+  const x1 = Math.min(bounds.x + bounds.width, visible.x + visible.width, host.x + host.width - safe.inlineEnd);
+  const y0 = Math.max(bounds.y, visible.y, a.y, b.y, host.y + safe.blockStart);
+  const y1 = Math.min(bounds.y + bounds.height, visible.y + visible.height, a.y + a.height, b.y + b.height, host.y + host.height - safe.blockEnd);
+  const clip = (rect: Bounds): Bounds => Object.freeze({ x: Math.max(x0, rect.x) - bounds.x, y: y0 - bounds.y,
+    width: Math.min(x1, rect.x + rect.width) - Math.max(x0, rect.x), height: y1 - y0 });
+  const left = clip(a), right = clip(b);
+  if (![left, right].every(rect => rect.width >= minimumPaneSize.width && rect.height >= minimumPaneSize.height)) return null;
+  return Object.freeze({ left, right });
+}
+
+function validRegionOwner(bounds: WindowBounds | null | undefined): bounds is WindowBounds {
+  return Boolean(bounds && [bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) && bounds.width >= 0 && bounds.height >= 0);
+}
+function regionOverlap(a: WindowBounds, b: WindowBounds): number {
+  return Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) *
+    Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
+}
+
+export function selectViewportBookRegion(geometry: ViewportRegionGeometry, owner: WindowBounds,
+  origin?: WindowBounds | null, direction: "ltr" | "rtl" = "ltr"): WindowBounds | null {
+  if (!validRegionOwner(owner) || owner.width <= 0 || owner.height <= 0) return null;
+  const host = geometry.hostViewportBounds;
+  const pair = resolveViewportBookRegions(geometry, host);
+  if (!pair) return null;
+  const regions = [pair.left, pair.right].map(rect => Object.freeze({ ...rect, x: rect.x + host.x, y: rect.y + host.y }));
+  const target = validRegionOwner(origin) && regionOverlap({ ...origin, width: Math.max(1, origin.width), height: Math.max(1, origin.height) }, host) > 0 ? origin : owner;
+  const scores = regions.map(rect => regionOverlap(rect, target));
+  if (scores[0] !== scores[1]) return regions[scores[0]! > scores[1]! ? 0 : 1]!;
+  const ownerScores = regions.map(rect => regionOverlap(rect, owner));
+  if (ownerScores[0] !== ownerScores[1]) return regions[ownerScores[0]! > ownerScores[1]! ? 0 : 1]!;
+  return regions[direction === "rtl" ? 1 : 0]!;
+}
+
+export function screenViewportRegionGeometry(screen: Pick<import("./ScreenService").ScreenSnapshot,
+  "geometryState" | "viewportFeatures" | "layoutViewport" | "visualViewport" | "safeAreaInsets">): ViewportRegionGeometry {
+  return { geometryState: screen.geometryState, viewportFeatures: screen.viewportFeatures,
+    hostViewportBounds: screen.layoutViewport, visualViewportBounds: screen.visualViewport, safeAreaInsets: screen.safeAreaInsets };
+}

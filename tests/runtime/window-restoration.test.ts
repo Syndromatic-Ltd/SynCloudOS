@@ -40,6 +40,27 @@ function memoryPersistence(): WindowRestorationPersistencePort & { readonly valu
 }
 
 describe("window workspace restoration", () => {
+  it.each(["modal", "sheet", "popover"] as const)("projects a %s inside one reported region without changing its normal bounds", async role => {
+    const f = createWindowTestDependencies();
+    const controller = f.manager.create(standardWindow("book-" + role, { role, anchor: role === "popover" ? { id: "generated-book-origin", rect: { x: 780, y: 40, width: 40, height: 32 }, edge: "block-end", alignment: "center", offset: 0 } : null, bounds: { x: 500, y: 100, width: 500, height: 500 }, restorationKey: null }));
+    const normal = controller.geometryState.normalBounds, original = controller.record.bounds;
+    const screen = { ...f.screen.getCurrentSnapshot(), geometryState: "current" as const, breakpoint: "regular" as const,
+      layoutViewport: { x: 0, y: 0, width: 900, height: 700 }, visualViewport: { x: 0, y: 0, width: 900, height: 700 }, workArea: { x: 0, y: 0, width: 900, height: 700 },
+      viewportFeatures: { posture: "folded" as const, segments: [{ x: 0, y: 0, width: 440, height: 700 }, { x: 460, y: 0, width: 440, height: 700 }] } };
+    const projected = resolveWindowPresentation(controller.record, screen, controller.geometryState);
+    expect(projected.bounds).toEqual({ x: 468, y: 100, width: 424, height: 500 });
+    expect(projected.movable).toBe(false); expect(projected.resizable).toBe(false);
+    expect(controller.record.bounds).toBe(original); expect(controller.geometryState.normalBounds).toBe(normal);
+    expect(resolveWindowPresentation(controller.record, { ...screen, viewportFeatures: { posture: "continuous", segments: null } }, controller.geometryState).bounds).toBe(original);
+    await f.cleanup();
+  });
+  it.each(["standard", "panel"] as const)("does not force an ordinary %s into a region", async role => {
+    const f = createWindowTestDependencies(); const controller = f.manager.create(standardWindow("free-" + role, { role, level: role === "panel" ? "floating" : "normal" }));
+    const screen = { ...f.screen.getCurrentSnapshot(), viewportFeatures: { posture: "folded" as const, segments: [{ x: 0, y: 0, width: 710, height: 900 }, { x: 730, y: 0, width: 710, height: 900 }] } };
+    const before = resolveWindowPresentation(controller.record, { ...screen, viewportFeatures: { posture: "continuous" as const, segments: null } });
+    expect(resolveWindowPresentation(controller.record, screen).bounds).toEqual(before.bounds); await f.cleanup();
+  });
+
   it.each([{ zoomed: false, minimised: false }, { zoomed: true, minimised: false }, { zoomed: true, minimised: true }])("restores controller and window state %j while initial geometry is unavailable", async ({ zoomed, minimised }) => {
     const source = createWindowTestDependencies();
     const original = source.manager.create(standardWindow("pending-geometry"));

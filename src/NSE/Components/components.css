@@ -656,3 +656,23 @@
     margin-top: 12px;
   }
 }
+
+/* The backdrop still covers both halves. Its content box is the selected
+   region; no wrapper/reparenting or second focus trap is introduced. */
+.nse-control-alert-backdrop[data-nse-overlay-region="true"] {
+  padding-top: calc(var(--nse-overlay-region-top) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-top)));
+  padding-right: calc(var(--nse-overlay-region-right) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-right)));
+  padding-bottom: calc(var(--nse-overlay-region-bottom) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-bottom)));
+  padding-left: calc(var(--nse-overlay-region-left) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-left)));
+}
+.nse-control-alert-backdrop[data-nse-overlay-region="true"] > .nse-control-alert {
+  min-block-size: 0;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  overflow: auto;
+}
+
+.nse-control-alert-backdrop[data-nse-overlay-region="true"] { container: nse-alert-region / inline-size; }
+@container nse-alert-region (max-width: 680px) {
+  .nse-alert-actions { grid-template-columns: minmax(0, 1fr); margin-inline: 0; }
+}

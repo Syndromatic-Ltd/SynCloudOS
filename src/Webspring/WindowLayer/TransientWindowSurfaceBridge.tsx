@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { selectViewportBookRegion, screenViewportRegionGeometry } from "../../SynCloudOS/SynCloudOS";
 import type { ReactNode } from "react";
 import type {
   SynCloudOSRuntime,
@@ -69,6 +70,8 @@ export interface TransientWindowSurfaceBridgeOptions {
 }
 
 interface SurfaceEntry {
+  /** Last normal transient frame; never shared with ordinary window geometry. */
+  bookFrameBase: WindowBounds | null;
   readonly generation: number;
   readonly requestId: string;
   readonly windowControllerId: string;
@@ -138,12 +141,12 @@ interface PopoverPlacement {
  * end that keeps the popover on screen. Null when the anchor has no layout
  * (detached, or a host without one), so the request's bounds stand.
  */
-function placementViewport(runtime: SynCloudOSRuntime): WindowBounds | null {
+function placementViewport(runtime: SynCloudOSRuntime, request: TransientWindowSurfaceRequest): { bounds: WindowBounds | null; bookRegion: boolean } {
   const screen = runtime.screen.getCurrentSnapshot();
-  if (screen.geometryState !== "current") return null;
+  if (screen.geometryState !== "current") return { bounds: null, bookRegion: false };
   const { visualViewport, workArea } = screen;
   for (const bounds of [visualViewport, workArea]) {
-    if (![bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) || bounds.width <= 0 || bounds.height <= 0) return null;
+    if (![bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) || bounds.width <= 0 || bounds.height <= 0) return { bounds: null, bookRegion: false };
   }
   // Both rectangles are in page CSS pixels. Do not subtract safe-area insets
   // again: the host owns its work area and browser env() padding stays in CSS.
@@ -151,7 +154,18 @@ function placementViewport(runtime: SynCloudOSRuntime): WindowBounds | null {
   const y = Math.max(visualViewport.y, workArea.y);
   const width = Math.min(visualViewport.x + visualViewport.width, workArea.x + workArea.width) - x;
   const height = Math.min(visualViewport.y + visualViewport.height, workArea.y + workArea.height) - y;
-  return width > 0 && height > 0 ? { x, y, width, height } : null;
+  if (width <= 0 || height <= 0) return { bounds: null, bookRegion: false };
+  if (!["popover", "sheet", "modal"].includes(request.role)) return { bounds: { x, y, width, height }, bookRegion: false };
+  let owner = request.bounds;
+  if (request.parentWindowControllerId) {
+    try { owner = runtime.windows.select(request.parentWindowControllerId).record.bounds; } catch { /* normal create validation still applies */ }
+  }
+  const origin = request.anchor?.isConnected ? request.anchor.getBoundingClientRect() : request.bounds;
+  const region = selectViewportBookRegion(screenViewportRegionGeometry(screen), owner, origin);
+  if (!region) return { bounds: { x, y, width, height }, bookRegion: false };
+  const left = Math.max(x, region.x), top = Math.max(y, region.y);
+  const right = Math.min(x + width, region.x + region.width), bottom = Math.min(y + height, region.y + region.height);
+  return { bounds: right > left && bottom > top ? { x: left, y: top, width: right - left, height: bottom - top } : null, bookRegion: true };
 }
 
 function popoverPlacement(anchor: HTMLElement | null, size: WindowBounds, viewport: WindowBounds | null): PopoverPlacement | null {
@@ -196,6 +210,12 @@ function popoverPlacement(anchor: HTMLElement | null, size: WindowBounds, viewpo
     edge,
     alignment,
   };
+}
+
+function fittedBookFrame(bounds: WindowBounds, viewport: WindowBounds): WindowBounds {
+  const gap = 8, width = Math.min(bounds.width, viewport.width - 2 * gap), height = Math.min(bounds.height, viewport.height - 2 * gap);
+  return { x: Math.max(viewport.x + gap, Math.min(bounds.x, viewport.x + viewport.width - gap - width)),
+    y: Math.max(viewport.y + gap, Math.min(bounds.y, viewport.y + viewport.height - gap - height)), width, height };
 }
 
 const PANEL_SCREEN_MARGIN = 12;
@@ -301,16 +321,16 @@ export function createTransientWindowSurfaceBridge({
       geometryFrame = null;
       if (disposed || runtime.signal.aborted) return;
       for (const entry of entries.values()) {
-        if (entry.phase === "open" && entry.request.role === "popover" && entry.request.anchor?.isConnected) applyMutableRequest(entry);
+        if (entry.phase === "open" && (entry.request.role === "sheet" || entry.request.role === "modal" || (entry.request.role === "popover" && entry.request.anchor?.isConnected))) applyMutableRequest(entry, true);
       }
     });
   }
 
   function refreshGeometryObservation() {
     const anchors = new Set([...entries.values()]
-      .filter(entry => entry.phase !== "closed" && entry.request.role === "popover")
+      .filter(entry => entry.phase !== "closed" && ["popover", "sheet", "modal"].includes(entry.request.role))
       .flatMap(entry => entry.request.anchor?.isConnected ? [entry.request.anchor] : []));
-    if (disposed || runtime.signal.aborted || anchors.size === 0) {
+    if (disposed || runtime.signal.aborted || ![...entries.values()].some(entry => entry.phase !== "closed" && ["popover", "sheet", "modal"].includes(entry.request.role))) {
       stopGeometryObservation();
       return;
     }
@@ -396,20 +416,30 @@ export function createTransientWindowSurfaceBridge({
 
   const updateAnchorIdentity = (entry: SurfaceEntry) => {
     const anchor = entry.request.role === "popover" ? entry.request.anchor : null;
-    if (entry.anchorIdentity?.anchor === anchor && entry.anchorIdentity?.id === anchor?.id) return;
+    if (entry.anchorIdentity?.anchor === anchor && entry.anchorIdentity?.id === anchor?.id) { refreshGeometryObservation(); return; }
     const previous = entry.anchorIdentity;
     entry.anchorIdentity = anchor ? acquireAnchorIdentity(anchor, `${entry.mountKey}:anchor`) : null;
     previous?.dispose();
     refreshGeometryObservation();
   };
 
-  const applyMutableRequest = (entry: SurfaceEntry) => {
+  const applyMutableRequest = (entry: SurfaceEntry, geometryOnly = false) => {
     if (entry.phase !== "open") return;
     const controller = runtime.windows.select(entry.windowControllerId);
     const request = entry.request;
     updateAnchorIdentity(entry);
-    const viewport = placementViewport(runtime);
-    if (request.role === "popover" && !viewport) return;
+    const anchoredTransient = request.role === "modal" || request.role === "sheet";
+    const normalOrigin = entry.bookFrameBase ?? (geometryOnly ? controller.record.bounds : null);
+    const geometryRequest = anchoredTransient && normalOrigin && !request.anchor?.isConnected
+      ? { ...request, bounds: { ...request.bounds, x: normalOrigin.x, y: normalOrigin.y } } : request;
+    const { bounds: viewport, bookRegion } = placementViewport(runtime, geometryRequest);
+    const wasBook = entry.bookFrameBase;
+    if (anchoredTransient) {
+      if (bookRegion && !entry.bookFrameBase) entry.bookFrameBase = controller.record.bounds;
+      if (!bookRegion && geometryOnly && !entry.bookFrameBase) return;
+      if (bookRegion && entry.bookFrameBase && !geometryOnly) entry.bookFrameBase = { ...entry.bookFrameBase, width: request.bounds.width, height: request.bounds.height };
+    }
+    if (["popover", "sheet", "modal"].includes(request.role) && !viewport) return;
     const placement = request.role === "popover" ? popoverPlacement(request.anchor, request.bounds, viewport) : null;
     // An open content-sized panel (an inspector) is a window the user moves:
     // it keeps its position, follows only its content's size and is brought
@@ -417,11 +447,13 @@ export function createTransientWindowSurfaceBridge({
     const current = controller.record.bounds;
     const bounds = placement?.bounds ?? (request.role === "panel" && request.sizing === "content"
       ? keptOnScreen({ ...request.bounds, x: current.x, y: current.y }, viewport)
-      : request.bounds);
+      : bookRegion && viewport && anchoredTransient ? fittedBookFrame({ ...request.bounds, ...(entry.bookFrameBase ? { x: entry.bookFrameBase.x, y: entry.bookFrameBase.y } : {}) }, viewport)
+        : geometryOnly && wasBook ? wasBook : request.bounds);
+    if (anchoredTransient && !bookRegion) entry.bookFrameBase = null;
     if (!boundsEqual(current, bounds)) {
       // A popover's (or a content-sized panel's) size is its content's; only
       // its position is placement.
-      const contentSized = request.role === "popover" || request.sizing === "content";
+      const contentSized = request.role === "popover" || request.sizing === "content" || (anchoredTransient && (bookRegion || Boolean(wasBook)));
       runtime.windows.setBounds(entry.windowControllerId, bounds, contentSized ? "content-size" : "programmatic");
     }
     const latest = runtime.windows.select(entry.windowControllerId).record;
@@ -483,6 +515,7 @@ export function createTransientWindowSurfaceBridge({
     const mountKey = `${rendererId}:${identity}:${entryGeneration}`;
     const rendererRegistration = renderers.register(mountKey, () => content);
     const entry: SurfaceEntry = {
+      bookFrameBase: null,
       generation: entryGeneration,
       requestId,
       windowControllerId,
@@ -505,7 +538,9 @@ export function createTransientWindowSurfaceBridge({
     entry.opened = (async () => {
       try {
         updateAnchorIdentity(entry);
-        const placement = request.role === "popover" ? popoverPlacement(request.anchor, request.bounds, placementViewport(runtime)) : null;
+        const { bounds: viewport, bookRegion } = placementViewport(runtime, request);
+        if (bookRegion && (request.role === "modal" || request.role === "sheet")) entry.bookFrameBase = request.bounds;
+        const placement = request.role === "popover" ? popoverPlacement(request.anchor, request.bounds, viewport) : null;
         runtime.windows.create({
           id: windowControllerId,
           workspaceId: owner.workspaceId,
@@ -521,7 +556,7 @@ export function createTransientWindowSurfaceBridge({
           style: Object.freeze(request.role === "popover" ? ["closable"] : request.role === "sheet" || request.role === "modal" ? ["titled", "closable"] : ["titled", "closable", "resizable"]),
           title: request.title,
           content: Object.freeze({ rendererId, parameters: Object.freeze({ mountKey, requestId, generation: entryGeneration }) }),
-          bounds: placement?.bounds ?? request.bounds,
+          bounds: placement?.bounds ?? (bookRegion && viewport && (request.role === "sheet" || request.role === "modal") ? fittedBookFrame(request.bounds, viewport) : request.bounds),
           // Popovers are fitted, non-resizable surfaces. A desktop inspector's
           // minimum must not force them beyond a shallow visible viewport.
           minimumSize: Object.freeze(request.role === "popover"

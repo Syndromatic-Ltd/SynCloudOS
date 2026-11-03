@@ -3,14 +3,16 @@ import { useId, useSyncExternalStore } from "react";
 import { NSEAlert } from "../NSE/hostComposition";
 import { NSEAlertBackdrop } from "../NSE/hostComposition";
 import { NSEPushButton } from "../NSE/public/controls";
+import type { SynCloudOSPresentationTraitsService } from "../SynCloudOS/SynCloudOS";
 import type { SynCloudOSAlertCenter } from "../SynCloudOS/SystemUI/alertCenter";
 import { FocusScope } from "./FocusScope";
 import { useResolvedMode } from "./serviceHooks";
 import "./system-alert.css";
 
 /** One presenter per host, sharing the kernel's ordered presentation queue. */
-export function SCOSAlertPresenter({ center, appearance: requestedAppearance }: {
+export function SCOSAlertPresenter({ center, appearance: requestedAppearance, presentation }: {
   readonly center: SynCloudOSAlertCenter;
+  readonly presentation?: Pick<SynCloudOSPresentationTraitsService, "getSnapshot" | "subscribe">;
   readonly appearance?: "dark" | "light";
 }) {
   const resolvedAppearance = useResolvedMode();
@@ -21,7 +23,7 @@ export function SCOSAlertPresenter({ center, appearance: requestedAppearance }: 
   if (!current) return null;
   const primary = current.buttons.find(button => button.role === "default" || button.role === "destructive") ?? current.buttons[0];
   return <FocusScope asChild key={current.id} scopeId={`scos-alert:${current.id}`} kind="modal" parentResponderId="runtime" trapFocus>
-    <NSEAlertBackdrop onSafeDismiss={() => center.dismiss(current.id)}>
+    <NSEAlertBackdrop presentation={presentation} onSafeDismiss={() => center.dismiss(current.id)}>
       <NSEAlert appearance={appearance} labelledBy={titleId} describedBy={current.message ? messageId : undefined} initialFocusSelector="[data-scos-alert-primary]">
         <div className="nse-system-alert-content">
           {current.iconUrl ? <img className="syncloudos-alert-logo" src={current.iconUrl} alt="" /> : null}
