@@ -20,6 +20,7 @@
 
 import type { AwaitUndoAction, AutomaticUndoGroup, SyncUndoAction, UndoAction, UndoGroup, UndoGroupOptions, UndoManager, UndoManagerOptions, UndoRegistrationLease, UndoReservation, UndoRestorationSnapshot, UndoResult } from "./undoTypes";
 import { consumeUndoReplayRefusal } from "./undoReplayRefusal";
+import { trackOwnedWork } from "../Operations/OwnedWorkObservations";
 
 interface RegistrationLeaseState { readonly token: object; live: boolean }
 
@@ -178,8 +179,15 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
     executing = true;
     activeEntry = entry;
     lastFailure = null;
-    notify();
+    let releaseObservation!: () => void;
+    const actual = new Promise<void>(resolve => { releaseObservation = resolve; });
+    trackOwnedWork(manager, () => actual);
     try {
+      notify();
+      // A diagnostic observer can end ownership before the first callback.
+      if (disposed || (requiredLease && !requiredLease.live) || entryHasRevokedLease(entry)) {
+        return { status: "cancelled", direction, actionName: entry.name, reason: "Undo ownership ended before invocation." };
+      }
       const actions = direction === "undo" ? [...entry.actions].reverse() : entry.actions;
       const applied: UndoAction[] = [];
       let restorationAttempted = false;
@@ -272,13 +280,15 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
       lastFailure = { code, message: failure.message };
       return { status: "failed", direction, actionName: entry.name, code, error: failure };
     } finally {
-      executing = false;
-      activeEntry = null;
-      for (const lease of [...pendingLeaseRemovals]) {
-        pendingLeaseRemovals.delete(lease);
-        removeLease(lease);
-      }
-      notify();
+      try {
+        executing = false;
+        activeEntry = null;
+        for (const lease of [...pendingLeaseRemovals]) {
+          pendingLeaseRemovals.delete(lease);
+          removeLease(lease);
+        }
+        notify();
+      } finally { releaseObservation(); }
     }
   };
 
