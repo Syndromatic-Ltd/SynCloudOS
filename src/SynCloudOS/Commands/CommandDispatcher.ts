@@ -33,6 +33,7 @@ import type {
 } from "./commandTypes";
 import { CommandUnknownOutcomeError, isCommandOperationResult } from "./commandTypes";
 import { CommandRegistry } from "./CommandRegistry";
+import { trackOwnedWork } from "../Operations/OwnedWorkObservations";
 import { markHiddenCommandAcceptance } from "./acceptancePresentation";
 import type { ResponderResolution } from "../Responders/responderTypes";
 
@@ -166,7 +167,7 @@ export class CommandDispatcher {
     };
     const validation = resolved.declaration.validate?.(context) ?? { enabled: true };
     return validation instanceof Promise || (validation && typeof (validation as unknown as { then?: unknown }).then === "function")
-      ? Promise.resolve(validation).then(finish)
+      ? trackOwnedWork(this, () => Promise.resolve(validation)).then(finish)
       : finish(validation);
   }
 
