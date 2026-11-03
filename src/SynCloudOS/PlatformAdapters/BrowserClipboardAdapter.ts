@@ -22,6 +22,8 @@ import { canonicalDocumentJson, immutableDocumentValue } from "../Documents/docu
 import { PasteboardUnavailableError } from "../Pasteboard/pasteboardErrors";
 import type { PasteboardAdapter, PasteboardCanonicalValue, PasteboardRepresentation, PasteboardWriteResult } from "../Pasteboard/pasteboardTypes";
 
+import type { NativeOperationActivity } from "../SynCloudOS";
+
 const MAX_TEXT_BYTES = 4 * 1024 * 1024;
 const MAX_BINARY_BYTES = 16 * 1024 * 1024;
 
@@ -33,6 +35,8 @@ export interface BrowserClipboardPort {
 }
 
 export interface BrowserClipboardAdapterOptions {
+  /** Coarse lifetime observation only; no permission or cancellation authority. */
+  readonly nativeActivity?: NativeOperationActivity;
   readonly clipboard: BrowserClipboardPort | null;
   readonly isSecureContext: () => boolean;
   readonly isUserActive: () => boolean;
@@ -88,6 +92,12 @@ function encodeRepresentation(representation: PasteboardRepresentation): Blob {
 export class BrowserClipboardAdapter implements PasteboardAdapter {
   constructor(private readonly options: BrowserClipboardAdapterOptions) {}
 
+  private observe<T>(invoke: () => Promise<T>, signal: AbortSignal): Promise<T> {
+    signal.throwIfAborted();
+    const run = () => { signal.throwIfAborted(); return invoke(); };
+    return this.options.nativeActivity ? this.options.nativeActivity.track(run) : run();
+  }
+
   private requireClipboard(signal: AbortSignal) {
     signal.throwIfAborted();
     if (!this.options.isSecureContext()) {
@@ -101,6 +111,10 @@ export class BrowserClipboardAdapter implements PasteboardAdapter {
 
   async read(types: readonly string[], signal: AbortSignal = new AbortController().signal): Promise<readonly PasteboardRepresentation[]> {
     const clipboard = this.requireClipboard(signal);
+    return this.observe(() => this.readClipboard(clipboard, types, signal), signal);
+  }
+
+  private async readClipboard(clipboard: BrowserClipboardPort, types: readonly string[], signal: AbortSignal): Promise<readonly PasteboardRepresentation[]> {
     try {
       if (clipboard.read) {
         const items = await clipboard.read();
@@ -137,6 +151,10 @@ export class BrowserClipboardAdapter implements PasteboardAdapter {
     if (!this.options.isUserActive()) {
       throw unavailable("System pasteboard writes require current user activation.");
     }
+    return this.observe(() => this.writeClipboard(clipboard, values, signal), signal);
+  }
+
+  private async writeClipboard(clipboard: BrowserClipboardPort, values: readonly PasteboardRepresentation[], signal: AbortSignal): Promise<void | PasteboardWriteResult> {
     try {
       const hostSafe = values.filter((value) =>
         value.type === "text/plain" ||
