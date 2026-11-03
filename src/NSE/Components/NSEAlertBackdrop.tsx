@@ -18,17 +18,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import "./components.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
 import { resolveNSEAlertBackdropMotion } from "./NSEAlert.transitions";
 import { useNSEAppearanceProjection } from "../Appearance";
 import { resolveNSEFocusReturnTarget } from "../Focus";
 
+import { useOptionalNSEOverlayProvider } from "../Overlays/NSEOverlayProvider";
+import { useNSEOverlayRegion } from "../Overlays/useNSEOverlayRegion";
+import { nseOverlayRegionInsets, type NSEOverlayPresentationSource } from "../Overlays/overlayRegion";
+
 type InertHTMLElement = HTMLElement & { inert?: boolean };
 
 interface NSEAlertBackdropProps {
   readonly children: ReactNode;
+  readonly presentation?: NSEOverlayPresentationSource;
   readonly onSafeDismiss?: () => void;
   readonly onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => void;
   readonly onKeyDownCapture?: (event: KeyboardEvent<HTMLDivElement>) => void;
@@ -39,6 +44,7 @@ interface NSEAlertBackdropProps {
 
 export function NSEAlertBackdrop({
   children,
+  presentation,
   onSafeDismiss,
   onKeyDown,
   onKeyDownCapture,
@@ -47,12 +53,17 @@ export function NSEAlertBackdrop({
   "data-syncloudos-focus-scope": focusScope,
 }: NSEAlertBackdropProps) {
   const appearanceProjection = useNSEAppearanceProjection();
+  const provider = useOptionalNSEOverlayProvider();
+  const { region, hostViewport } = useNSEOverlayRegion({ source: presentation ?? provider?.runtime.environment.presentation ?? null, open: true, document: typeof document === "undefined" ? null : document });
+  const regionInsets = region && hostViewport ? nseOverlayRegionInsets(region, hostViewport) : null;
+  const regionStyle = regionInsets ? Object.fromEntries(Object.entries(regionInsets).map(([side, value]) => [`--nse-overlay-region-${side}`, `${value}px`])) as CSSProperties : undefined;
+  const previousFocusRef = useRef(typeof document === "undefined" ? null : resolveNSEFocusReturnTarget(document.activeElement));
   const { reducedMotion } = useNSEAnimationEnvironment();
   const backdropRef = useRef<HTMLDivElement>(null);
   useNSEPresentation(backdropRef, resolveNSEAlertBackdropMotion(reducedMotion));
 
   useEffect(() => {
-    const previousFocus = resolveNSEFocusReturnTarget(document.activeElement);
+    const previousFocus = previousFocusRef.current;
     const backdrop = backdropRef.current;
     backdrop?.focus({ preventScroll: true });
     const parent = backdrop?.parentElement;
@@ -96,6 +107,8 @@ export function NSEAlertBackdrop({
     <div
       ref={backdropRef}
       className={["nse-control-alert-backdrop", className].filter(Boolean).join(" ")}
+      data-nse-overlay-region={region ? "true" : undefined}
+      style={regionStyle}
       tabIndex={-1}
       {...appearanceProjection}
       data-syncloudos-runtime-owner={runtimeOwner}

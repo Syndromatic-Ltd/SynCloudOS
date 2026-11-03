@@ -62,6 +62,7 @@ export function WebspringStatusLayer({ errors }: { errors: CapturedSynCloudOSErr
         {latest ? (
           <FocusScope asChild key={latest.id} scopeId={`system-alert:${latest.id}`} kind="modal" parentResponderId="workspace" trapFocus>
             <NSEAlertBackdrop
+              presentation={runtime.presentationTraits}
               onSafeDismiss={latest.recoverable === false ? undefined : () => runtime.errors.dismiss(latest.id)}
             >
               <SystemAlert

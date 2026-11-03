@@ -220,3 +220,22 @@
 .nse-overlay-listbox-option[data-kind="action"] {
   font-style: italic;
 }
+
+/* Only explicit validated book geometry changes the sheet's physical bounds.
+   Its full-screen sibling backdrop and existing modal/focus policy remain. */
+.nse-overlay-popup[data-nse-overlay-region="true"][data-nse-overlay-kind="action-sheet"] {
+  inset-inline: auto;
+  left: calc(var(--nse-overlay-region-left) + max(8px, env(safe-area-inset-left)));
+  right: calc(var(--nse-overlay-region-right) + max(8px, env(safe-area-inset-right)));
+  bottom: calc(var(--nse-overlay-region-bottom) + max(8px, env(safe-area-inset-bottom)));
+}
+
+/* Region constraints override app minimum sizes while the physical fold is
+   present. Removing the attribute restores current caller/theme declarations,
+   rather than replaying a stale inline style captured at opening. */
+[data-nse-control="overlay"][data-nse-part="surface"][data-nse-overlay-region="true"] {
+  min-inline-size: 0 !important;
+  max-inline-size: var(--nse-overlay-available-inline-size) !important;
+  max-block-size: var(--nse-overlay-available-block-size) !important;
+  overflow: auto;
+}

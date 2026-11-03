@@ -115,7 +115,7 @@ function ReturnDecisionDialog({
 
   return createPortal(
     <NSEFocusScope options={{ scopeId: "system-ui:return-decision", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-      <NSEAlertBackdrop onSafeDismiss={onSafeDismiss}>
+      <NSEAlertBackdrop presentation={runtime.presentationTraits} onSafeDismiss={onSafeDismiss}>
         <NSEAlert
           appearance={alertAppearance}
           labelledBy={titleId}
@@ -227,6 +227,7 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
       </SystemUIAccountContext.Provider>
       {aboutApp ? (
         <NSEAboutDialog
+          presentation={runtime.presentationTraits}
           open
           appearance={resolvedMode === "dark" ? "dark" : "light"}
           focusScopeId={`system-ui:about:${normalizeBundleIdentifier(aboutApp.bundleIdentifier)}`}
@@ -251,6 +252,7 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
         />
       ) : null}
       {onLogOut ? <NSEConfirmDialog
+        presentation={runtime.presentationTraits}
         open={ui.logOutOpen}
         appearance={resolvedMode === "dark" ? "dark" : "light"}
         focusScopeId="system-ui:log-out"

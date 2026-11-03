@@ -26,6 +26,7 @@ import { NSEFocusScope } from "../Focus";
 import { NSEPushButton, type NSEButtonTone } from "../Controls/Buttons/NSEButtons";
 import { NSEAlert } from "./NSEAlert";
 import { NSEAlertBackdrop } from "./NSEAlertBackdrop";
+import type { NSEOverlayPresentationSource } from "../Overlays/overlayRegion";
 import { useNSEAppearance } from "../Appearance";
 
 /** A system dialog takes the host's light or dark appearance unless told otherwise. */
@@ -63,6 +64,7 @@ export interface NSEAboutInfo {
 }
 
 export interface NSEAboutDialogProps {
+  readonly presentation?: NSEOverlayPresentationSource;
   open: boolean;
   info: NSEAboutInfo;
   /** Runtime hosts can provide a stable logical scope identity. */
@@ -76,6 +78,7 @@ export interface NSEAboutDialogProps {
 }
 
 export function NSEAboutDialog({
+  presentation,
   open,
   info,
   focusScopeId,
@@ -96,7 +99,7 @@ export function NSEAboutDialog({
 
   return createPortal(
     <NSEFocusScope options={{ scopeId: focusScopeId ?? `nse-system-about:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEAlertBackdrop onSafeDismiss={onDismiss}>
+    <NSEAlertBackdrop presentation={presentation} onSafeDismiss={onDismiss}>
       <NSEAlert
         appearance={appearance}
         role="dialog"
@@ -135,6 +138,7 @@ export function NSEAboutDialog({
 }
 
 export interface NSEConfirmDialogProps {
+  readonly presentation?: NSEOverlayPresentationSource;
   open: boolean;
   /** Runtime hosts can provide a stable logical scope identity. */
   focusScopeId?: string;
@@ -153,6 +157,7 @@ export interface NSEConfirmDialogProps {
 }
 
 export function NSEConfirmDialog({
+  presentation,
   open,
   focusScopeId,
   title,
@@ -175,7 +180,7 @@ export function NSEConfirmDialog({
     // Escape and a backdrop click both CANCEL, never confirm — the safe choice
     // is the one that happens by accident.
     <NSEFocusScope options={{ scopeId: focusScopeId ?? `nse-system-confirm:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEAlertBackdrop onSafeDismiss={onCancel}>
+    <NSEAlertBackdrop presentation={presentation} onSafeDismiss={onCancel}>
       <NSEAlert
         appearance={appearance}
         labelledBy={titleId}

@@ -51,6 +51,32 @@ function geometryEnvironment() {
 }
 
 describe("window-hosted transient surface bridge", () => {
+  it.each(["modal", "sheet"] as const)("restores a user-positioned normal %s after book changes and removes geometry work", async role => {
+    const geometry = geometryEnvironment();
+    geometry.layout.set({ width: 900, height: 700 }); geometry.visual.set({ width: 900, height: 700, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    geometry.work.set({ ...geometry.work.source.getSnapshot(), width: 900, height: 700 });
+    const features = geometrySource<{ posture: "continuous" | "folded"; segments: readonly { x: number; y: number; width: number; height: number }[] | null }>({ posture: "continuous", segments: null });
+    const frames = new Map<number, (time: number) => void>(); let nextFrame = 0;
+    const flush = () => { for (let pass = 0; pass < 20 && frames.size; pass++) { const batch = [...frames.values()]; frames.clear(); for (const callback of batch) callback(0); } expect(frames.size).toBe(0); };
+    const runtime = createTestRuntime({ environment: { ...geometry.environment, viewportFeatures: features.source,
+      requestAnimationFrame(callback) { const id = ++nextFrame; frames.set(id, callback); return id; }, cancelAnimationFrame(handle) { frames.delete(handle as number); } } });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "book-" + role, owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const request = { id: "book-owned", role, title: "Generated modal", parentWindowControllerId: null, anchor: null, bounds: { x: 180, y: 120, width: 520, height: 420 } };
+    const id = await bridge.present(request, <input defaultValue="Retained generated work" />); const controller = runtime.windows.select(id), content = controller.record.content;
+    runtime.windows.setBounds(id, { x: 500, y: 80, width: 520, height: 420 }, "programmatic"); flush();
+    const normal = controller.record.bounds; expect(normal.x).toBe(500);
+    const folded = { posture: "folded" as const, segments: [{ x: 0, y: 0, width: 440, height: 700 }, { x: 460, y: 0, width: 440, height: 700 }] };
+    for (let repeat = 0; repeat < 3; repeat++) {
+      features.set(folded); flush(); expect(controller.record.bounds.x).toBe(468); expect(controller.record.bounds.width).toBe(424);
+      const held = controller.record.bounds; geometry.layout.set({ width: 0, height: 0 }); flush(); expect(controller.record.bounds).toBe(held);
+      geometry.layout.set({ width: 900, height: 700 }); flush(); features.set({ posture: "continuous", segments: null }); flush(); expect(controller.record.bounds).toEqual(normal);
+      expect(runtime.windows.select(id)).toBe(controller); expect(controller.record.content).toBe(content);
+    }
+    const setBounds = vi.spyOn(runtime.windows, "setBounds"); features.set(folded); await bridge.dismiss(request.id); flush(); const settledCalls = setBounds.mock.calls.length;
+    bridge.dispose(); features.set({ posture: "continuous", segments: null }); flush(); expect(setBounds.mock.calls.length).toBe(settledCalls); expect(runtime.windows.snapshot().windowControllerIds).toEqual([]);
+    await runtime.dispose("test");
+  });
+
   it("retains the fitted frame while host geometry is invalid even if the anchor moves", async () => {
     const geometry = geometryEnvironment();
     const runtime = createTestRuntime({ environment: geometry.environment });

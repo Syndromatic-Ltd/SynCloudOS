@@ -221,9 +221,9 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
       branding={branding ?? undefined}
       authentication={authentication}
     />
-    <SCOSAlertPresenter center={runtime.alerts} appearance={appearance} />
+    <SCOSAlertPresenter center={runtime.alerts} presentation={runtime.presentationTraits} appearance={appearance} />
     {error ? <FocusScope asChild key={error.id} scopeId={`application-host-error:${error.id}`} kind="modal" parentResponderId="runtime" trapFocus>
-      <NSEAlertBackdrop onSafeDismiss={error.recoverable === false ? undefined : () => runtime.errors.dismiss(error.id)}>
+      <NSEAlertBackdrop presentation={runtime.presentationTraits} onSafeDismiss={error.recoverable === false ? undefined : () => runtime.errors.dismiss(error.id)}>
         <SystemAlert error={error} appearance={appearance} applicationIcon={app?.icon.src ?? null}
           onDismiss={() => runtime.errors.dismiss(error.id)} onReload={() => browserWindow?.location.reload()}
           onReturn={() => browserWindow?.location.reload()}
