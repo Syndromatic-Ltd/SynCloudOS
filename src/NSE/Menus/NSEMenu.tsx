@@ -166,7 +166,8 @@ function NSECommandMenuSurface({
     if (!controller.runtime.signal.aborted) listener();
   }), [controller]);
   const snapshot = useSyncExternalStore(subscribe, () => controller.snapshot, () => controller.snapshot);
-  const portalPresentation = useNSEMenuOverlayPresentationScope();
+  const { portaled: portalPresentation, ready: presentationReady } = useNSEMenuOverlayPresentationScope();
+  const pendingFocus = useRef<{ generation: number; prior: Element | null } | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const itemRefs = useRef(new Map<string, HTMLButtonElement>());
   const hadOpenSnapshot = useRef(false);
@@ -230,9 +231,26 @@ function NSECommandMenuSurface({
   }, [focusableEntries, initialFocus, snapshot.open]);
 
   useEffect(() => {
-    if (!snapshot.open || !activeId) return;
-    itemRefs.current.get(activeId)?.focus({ preventScroll: true });
-  }, [activeId, snapshot.generation, snapshot.open]);
+    if (!open || !snapshot.open || !activeId) {
+      pendingFocus.current = null;
+      return;
+    }
+    const target = itemRefs.current.get(activeId);
+    if (!target) return;
+    // Validation can publish rows before the parent popup removes its pending
+    // visibility. Focus only after that owned presentation commit, never after
+    // an arbitrary frame/timer. A later external focus choice takes precedence.
+    if (!presentationReady) {
+      pendingFocus.current ??= { generation: snapshot.generation, prior: target.ownerDocument.activeElement };
+      return;
+    }
+    const pending = pendingFocus.current;
+    pendingFocus.current = null;
+    const current = target.ownerDocument.activeElement;
+    if (pending && (pending.generation !== snapshot.generation ||
+      current !== pending.prior && current !== target.ownerDocument.body && !target.closest('[role="menu"]')?.contains(current))) return;
+    target.focus({ preventScroll: true });
+  }, [activeId, open, presentationReady, snapshot.generation, snapshot.open]);
 
   const activate = async (entry: NSEMenuPresentedEntry, delayed = false) => {
     if (entry.kind === "submenu") {

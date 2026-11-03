@@ -69,6 +69,7 @@ export interface UseNSEOverlayResult {
     readonly "data-placement": NSELogicalPlacement;
     readonly "data-nse-viewport-limited": "true" | "false";
     readonly "data-nse-content-pending"?: "true";
+    readonly inert?: boolean;
   };
   withFocusScope(children: ReactElement): ReactNode;
 }
@@ -395,7 +396,7 @@ export function useNSEOverlay({
       "data-state": "open",
       "data-placement": placement,
       "data-nse-viewport-limited": viewportLimited ? "true" : "false",
-      ...(contentPending ? { "data-nse-content-pending": "true" as const } : {}),
+      ...(contentPending ? { "data-nse-content-pending": "true" as const, inert: true } : {}),
     },
     withFocusScope,
   };

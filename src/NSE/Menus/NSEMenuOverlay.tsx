@@ -135,7 +135,7 @@ export function NSEMenuOverlay({ overlay, controller, open, anchor, labelledBy, 
       restoreFocus={restoreFocus}
       onOpenChange={handleOpenChange}
     >
-      <NSEMenuOverlayPresentationScope>{children}</NSEMenuOverlayPresentationScope>
+      <NSEMenuOverlayPresentationScope ready={!contentPending}>{children}</NSEMenuOverlayPresentationScope>
     </NSEPopup>
   );
 }
