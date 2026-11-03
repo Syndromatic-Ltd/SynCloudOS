@@ -21,6 +21,7 @@
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import { CommandDispatcher } from "./CommandDispatcher";
 import { CommandRegistry } from "./CommandRegistry";
+import { OwnedWorkObservations } from "../Operations/OwnedWorkObservations";
 import type {
   CommandDeclaration,
   CommandDiagnosticRecord,
@@ -85,6 +86,8 @@ export function createCommandSystem(options: CreateCommandSystemOptions): Comman
   const getRuntime = options.getRuntime ?? (() => options.runtime!);
   const registry = new CommandRegistry();
   const dispatcher = new CommandDispatcher(getRuntime, registry, options.responderResolver);
+  const work = new OwnedWorkObservations();
+  work.bind(dispatcher);
   const history: CommandDiagnosticRecord[] = [];
   const historyLimit = Math.max(1, options.historyLimit ?? 80);
   let disposed = false;
@@ -114,7 +117,7 @@ export function createCommandSystem(options: CreateCommandSystemOptions): Comman
     // Real asynchronous validation still retains the authority fence below.
     const pendingValidation = resolved.declaration.validate?.(context);
     const validation = (isPromiseLike(pendingValidation)
-      ? await pendingValidation
+      ? await work.track(() => Promise.resolve(pendingValidation))
       : pendingValidation) ?? { enabled: true };
     if (validationOptions.signal?.aborted) return cancelledPresentation(id);
     if (disposed || registry.generation !== registryGeneration || (options.responderResolver.getGeneration?.() ?? 0) !== responderGeneration) {
@@ -210,8 +213,9 @@ export function createCommandSystem(options: CreateCommandSystemOptions): Comman
     dispose() {
       if (disposed) return;
       disposed = true;
-      registry.dispose();
+      try { registry.dispose(); } finally { work.end(); }
     },
   };
+  work.bind(system);
   return system;
 }

@@ -27,7 +27,7 @@ const gapLabels: Record<HostReadinessGap, string> = {
 export function UpdateReadinessDetails({ snapshot }: { readonly snapshot: HostUpdateReadinessSnapshot }) {
   const t = useSystemText();
   const counts = snapshot.counts;
-  const busy = counts.undoWork + counts.documentStorageWork + counts.operationWork + counts.lifecycleWork + counts.documentEditingWork + counts.persistenceMutations + counts.dirtyDocuments + counts.savingDocuments + counts.conflictedDocuments + counts.operations + counts.activeJobs + counts.queuedJobs + counts.nativeOperations + counts.documentAdmissions + counts.documentRecovery + counts.documentCleanup > 0 || snapshot.client.blockers.some(blocker => blocker !== 'provider-unavailable' && blocker !== 'owner-ended');
+  const busy = counts.commandWork + counts.undoWork + counts.documentStorageWork + counts.operationWork + counts.lifecycleWork + counts.documentEditingWork + counts.persistenceMutations + counts.dirtyDocuments + counts.savingDocuments + counts.conflictedDocuments + counts.operations + counts.activeJobs + counts.queuedJobs + counts.nativeOperations + counts.documentAdmissions + counts.documentRecovery + counts.documentCleanup > 0 || snapshot.client.blockers.some(blocker => blocker !== 'provider-unavailable' && blocker !== 'owner-ended');
   const headline = snapshot.ended ? t('preferences.updates.closed', 'Host observation has ended') : busy ? t('preferences.updates.busy', 'Work is still in progress') : t('preferences.updates.incomplete', 'Some work cannot be inspected');
   const rows = [
     [t('preferences.updates.documents', 'Published documents'), counts.documents],
@@ -46,6 +46,7 @@ export function UpdateReadinessDetails({ snapshot }: { readonly snapshot: HostUp
     [t('preferences.updates.operationWork', 'Pending operation callback stages'), counts.operationWork],
     [t('preferences.updates.lifecycleWork', 'Pending application and managed-task stages'), counts.lifecycleWork],
     [t('preferences.updates.undoWork', 'Pending undo and compensation stages'), counts.undoWork],
+    [t('preferences.updates.commandWork', 'Pending async command validation stages'), counts.commandWork],
     [t('preferences.updates.jobs', 'Active / queued jobs'), `${counts.activeJobs} / ${counts.queuedJobs}`],
     [t('preferences.updates.native', 'Pending observed native operations'), counts.nativeOperations],
   ];
