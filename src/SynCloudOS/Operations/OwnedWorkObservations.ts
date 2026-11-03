@@ -28,11 +28,17 @@ export interface OwnedWorkSource {
   getSnapshot(): OwnedWorkSnapshot;
   subscribe(listener: () => void): () => void;
 }
-const sources = new WeakMap<object, OwnedWorkSource>();
+const sources = new WeakMap<object, OwnedWorkObservations>();
 
 /** A facade or foreign owner without this instrumentation remains unknown. */
 export function observeOwnedWork(owner: object): OwnedWorkSource | null {
-  return sources.get(owner) ?? null;
+  return sources.get(owner)?.source ?? null;
+}
+
+/** Internal host bridge. Foreign owners still have no observation coverage. */
+export function trackOwnedWork<T>(owner: object, run: () => T): T {
+  const source = sources.get(owner);
+  return source ? source.track(run) : run();
 }
 
 /** Internal lifetime sampler, instantiated by the operation/lifecycle owners. */
@@ -46,7 +52,7 @@ export class OwnedWorkObservations {
       return () => { this.#listeners.delete(listener); };
     },
   });
-  bind(owner: object): void { sources.set(owner, this.source); }
+  bind(owner: object): void { sources.set(owner, this); }
   end(): void {
     if (!this.#snapshot.ended) this.#change(this.#snapshot.pending, true);
   }

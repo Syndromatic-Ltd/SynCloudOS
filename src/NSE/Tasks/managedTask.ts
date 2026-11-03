@@ -14,7 +14,7 @@ type CancelReason = Extract<NSETaskSettlement<unknown>,{status:'cancelled'}>['re
 interface Work<A,T> {
   readonly argument:A;readonly generation:number;readonly epoch:NSEActivitySnapshot;
   readonly abort:AbortController;readonly handle:NSETaskRun<T>;readonly resolve:(result:NSETaskSettlement<T>)=>void;
-  scope?:NSEOwnershipScope;settled:boolean;started:boolean;cancelling?:boolean;stopEpoch:()=>void;timer?:{dispose():void};
+  scope?:NSEOwnershipScope;invocationPending?:boolean;releaseObservation?:()=>void;settled:boolean;started:boolean;cancelling?:boolean;stopEpoch:()=>void;timer?:{dispose():void};
 }
 function assertSynchronous(result:unknown,operation:string):void {
   if(result && typeof (result as {then?:unknown}).then==='function') {
@@ -77,6 +77,13 @@ class ManagedTask<A,T> extends NSEObject<NSETaskSnapshot<T>> implements NSEManag
       for(const old of [...this.#works]) if(old!==work && old.generation<work.generation) this.#cancel(old,'superseded');
     }
     if(work.settled)return work.handle;
+    const observe = getNSEAuthoringContext(this.#owner)?.observeManagedTask;
+    if (observe) {
+      const actual = new Promise<void>(resolve => { work.releaseObservation = resolve; });
+      try { observe(actual); } catch (error) { this.#report(error); }
+      // Observation may synchronously dispose the owner or cancel this run.
+      if (work.settled) { this.#releaseObservation(work); return work.handle; }
+    }
     this.#publish(this.#snapshot.value,null);
     if(work.settled)return work.handle;
     if(this.#options.policy==='serial' && this.#current!==work)return work.handle;
@@ -118,7 +125,10 @@ class ManagedTask<A,T> extends NSEObject<NSETaskSnapshot<T>> implements NSEManag
     };
     // Begin synchronously: actions may depend on browser user activation.
     let result:T|Promise<T>;
-    try {result=this.#options.run(work.argument,context);} catch(error) {this.#settle(work,{status:'failed',error});return;}
+    work.invocationPending=true;
+    try {result=this.#options.run(work.argument,context);} catch(error) {
+      work.invocationPending=false;this.#settle(work,{status:'failed',error});return;
+    }
     void Promise.resolve(result).then(value=>{
       if(!this.#live(work)) return;
       try {
@@ -128,7 +138,15 @@ class ManagedTask<A,T> extends NSEObject<NSETaskSnapshot<T>> implements NSEManag
         }
         if(this.#live(work)) this.#settle(work,{status:'succeeded',value});
       } catch(error) {this.#settle(work,{status:'failed',error});}
-    },error=>{if(this.#live(work)) this.#settle(work,{status:'failed',error});});
+    },error=>{if(this.#live(work)) this.#settle(work,{status:'failed',error});}).then(() => {
+      work.invocationPending=false;this.#releaseObservation(work);
+    }, error => {
+      work.invocationPending=false;this.#releaseObservation(work);this.#report(error);
+    });
+  }
+  #releaseObservation(work:Work<A,T>):void {
+    if (!work.settled || work.invocationPending) return;
+    const release=work.releaseObservation;work.releaseObservation=undefined;release?.();
   }
   #cancel(work:Work<A,T>,reason:CancelReason):void {
     if(work.settled||work.cancelling) return;
@@ -166,6 +184,7 @@ class ManagedTask<A,T> extends NSEObject<NSETaskSnapshot<T>> implements NSEManag
     else this.#publish(settlement.status==='succeeded' && retain ? settlement.value : this.#snapshot.value,null);
     work.resolve(settlement);
     if(next)this.#start(next);
+    this.#releaseObservation(work);
   }
   cancel():void {
     const previous=this.#cancelling;this.#cancelling=true;
