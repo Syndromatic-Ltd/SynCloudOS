@@ -1119,7 +1119,9 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   const policyApp = (appId: string) => apps.getApp(appId);
   const clipboardAdapter = config.adapters?.clipboard !== undefined
     ? config.adapters.clipboard
-    : config.environment.clipboard;
+    : config.environment.createClipboardAdapter
+      ? config.environment.createClipboardAdapter(nativeActivity)
+      : config.environment.clipboard;
   pasteboards = createPasteboardRegistry({
     runtimeId,
     signal: controller.signal,

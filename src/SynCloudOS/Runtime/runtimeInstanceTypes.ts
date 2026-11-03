@@ -369,6 +369,8 @@ export interface SynCloudOSRuntimeEnvironment {
   /** Environment-owned system clipboard authority. Tests inject a recording
    * adapter; the browser environment is the only production constructor. */
   readonly clipboard?: PasteboardAdapter | null;
+  /** Creates a runtime-owned clipboard observation boundary without charging a shared environment. */
+  readonly createClipboardAdapter?: (activity: NativeOperationActivity) => PasteboardAdapter | null;
   /** Environment-owned pointer geometry, observer and cursor authority. */
   readonly pointer?: RuntimePointerAdapter | null;
   /** Environment-owned segmentation and browser measurement authority. */

@@ -42,7 +42,7 @@ import type {
   RuntimeImageGeometryPort,
   SynCloudOSRuntimeEnvironment,
 } from "../Runtime/runtimeInstanceTypes";
-import { BrowserClipboardAdapter } from "./BrowserClipboardAdapter";
+import { BrowserClipboardAdapter, type BrowserClipboardAdapterOptions } from "./BrowserClipboardAdapter";
 import { BrowserPointerAdapter } from "./BrowserPointerAdapter";
 import { BrowserTextLayoutAdapterFactory } from "./BrowserTextLayoutAdapter";
 import { createBrowserFontFaceRegistrationPort } from "./BrowserFontFaceRegistration";
@@ -536,14 +536,15 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
   const imageGeometry = createBrowserImageGeometryPort(browserWindow);
   const filePicker = createBrowserFilePickerPort(browserWindow);
   const browserNavigator = typeof navigator === "undefined" ? null : navigator;
-  const clipboard = new BrowserClipboardAdapter({
+  const clipboardOptions: BrowserClipboardAdapterOptions = {
     clipboard: browserNavigator?.clipboard ?? null,
     isSecureContext: () => browserWindow?.isSecureContext ?? false,
     isUserActive: () => browserNavigator?.userActivation?.isActive ?? false,
     createItem: typeof ClipboardItem !== "undefined"
       ? (values) => new ClipboardItem(values)
       : null,
-  });
+  };
+  const clipboard = new BrowserClipboardAdapter(clipboardOptions);
   const pointer = new BrowserPointerAdapter({
     cursorImages: options.cursorImages,
     createResizeObserver: (callback) => typeof ResizeObserver === "undefined" ? null : new ResizeObserver((entries) => callback(entries)),
@@ -666,6 +667,7 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     screen,
     workArea,
     clipboard,
+    createClipboardAdapter: nativeActivity => new BrowserClipboardAdapter({ ...clipboardOptions, nativeActivity }),
     pointer,
     textLayout,
     images,
