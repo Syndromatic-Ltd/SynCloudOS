@@ -392,6 +392,7 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       options.activity ? () => options.activity!.begin("recovery") : undefined,
     );
     this.#editing = new DocumentEditingParticipants({
+      activity: options.activity,
       documentId: this.id, lifecycleSignal: () => this.#mutationAbortController.signal,
       assertAvailable: () => { this.#assertNotClosed(); this.#assertNoTerminalReconciliation(); this.#assertCloseGateAllowsMutation(); },
       transact: (transform, editOptions, admission) => this.transact(transform, editOptions, admission),

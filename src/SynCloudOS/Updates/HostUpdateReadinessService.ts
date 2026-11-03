@@ -45,6 +45,7 @@ export class HostUpdateReadinessService {
     const persistence = observeDocumentStorePersistence(runtime.documentStore);
     const admissions: UpdateReadinessAuthority = { domain: 'documents', read: () => ({ known: !this.#disposed, revision: activity.getSnapshot().revision, blockers: activity.getSnapshot().admissions ? ['owner-busy'] : [] }), subscribe: listener => activity.subscribe(listener) };
     const recovery: UpdateReadinessAuthority = { domain: 'tasks', read: () => ({ known: !this.#disposed, revision: activity.getSnapshot().revision, blockers: activity.getSnapshot().recovery || activity.getSnapshot().cleanup ? ['recovery-write'] : [] }), subscribe: listener => activity.subscribe(listener) };
+    const editing: UpdateReadinessAuthority = { domain: 'editing', read: () => { const current = activity.getSnapshot(); return { known: !this.#disposed, revision: current.revision, blockers: current.editingSettlements || current.editingCallbacks ? ['owner-busy'] : [] }; }, subscribe: listener => activity.subscribe(listener) };
     const persistenceWork: UpdateReadinessAuthority | null = persistence ? {
       domain: 'tasks',
       read: () => ({ known: !this.#disposed && !persistence.getSnapshot().ended, revision: persistence.getSnapshot().revision, blockers: persistence.getSnapshot().pending ? ['owner-busy'] : [] }),
@@ -54,7 +55,7 @@ export class HostUpdateReadinessService {
     this.#projection = new UpdateReadinessProjection({ clientInstance: ('host-' + runtime.environment.randomUUID().replace(/[^a-zA-Z0-9_-]/g, '_')).slice(0, 96).padEnd(8, '_'), hostBuild: build, inventory: {
       // Controller-owned document admissions are observed; the other domains
       // still have explicit unresolved owner coverage.
-      read: () => ({ covered: ['documents'], authorities: [...this.#documents.values(), admissions, recovery, ...(persistenceWork ? [persistenceWork] : []), tasks, runtime.nativeActivity] }),
+      read: () => ({ covered: ['documents'], authorities: [...this.#documents.values(), admissions, recovery, editing, ...(persistenceWork ? [persistenceWork] : []), tasks, runtime.nativeActivity] }),
       subscribe: listener => { this.#inventoryListeners.add(listener); return () => { this.#inventoryListeners.delete(listener); }; },
     } });
     this.#releases.push(this.#projection.subscribe(() => this.#publish()));
@@ -153,7 +154,7 @@ export class HostUpdateReadinessService {
   }
   #counts(): HostReadinessCounts {
     const documents = this.#runtime.documents.openDocuments, jobs = this.#runtime.jobs.snapshot();
-    return Object.freeze({ persistenceMutations: observeDocumentStorePersistence(this.#runtime.documentStore)?.getSnapshot().pending ?? 0, documents: documents.length, dirtyDocuments: documents.filter(document => document.hasUnsavedChanges).length, savingDocuments: documents.filter(document => document.state === 'saving').length, conflictedDocuments: documents.filter(document => document.state === 'conflicted').length, windows: this.#runtime.windows.snapshot().windowControllerIds.length, operations: this.#runtime.operations.inspectPending().length, activeJobs: jobs.active, queuedJobs: jobs.queued, nativeOperations: this.#runtime.nativeActivity.pendingOperationCount, documentAdmissions: this.#runtime.documents.activity.getSnapshot().admissions, documentRecovery: this.#runtime.documents.activity.getSnapshot().recovery, documentCleanup: this.#runtime.documents.activity.getSnapshot().cleanup });
+    return Object.freeze({ documentEditingParticipants: this.#runtime.documents.activity.getSnapshot().editingParticipants, documentEditingWork: this.#runtime.documents.activity.getSnapshot().editingSettlements + this.#runtime.documents.activity.getSnapshot().editingCallbacks, persistenceMutations: observeDocumentStorePersistence(this.#runtime.documentStore)?.getSnapshot().pending ?? 0, documents: documents.length, dirtyDocuments: documents.filter(document => document.hasUnsavedChanges).length, savingDocuments: documents.filter(document => document.state === 'saving').length, conflictedDocuments: documents.filter(document => document.state === 'conflicted').length, windows: this.#runtime.windows.snapshot().windowControllerIds.length, operations: this.#runtime.operations.inspectPending().length, activeJobs: jobs.active, queuedJobs: jobs.queued, nativeOperations: this.#runtime.nativeActivity.pendingOperationCount, documentAdmissions: this.#runtime.documents.activity.getSnapshot().admissions, documentRecovery: this.#runtime.documents.activity.getSnapshot().recovery, documentCleanup: this.#runtime.documents.activity.getSnapshot().cleanup });
   }
   #publish(): void {
     if (this.#disposed) return;

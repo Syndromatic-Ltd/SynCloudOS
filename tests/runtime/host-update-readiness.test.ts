@@ -257,3 +257,21 @@ it('observes canonical persistence admissions without declaring all persistence 
   await vi.waitFor(() => expect(runtime.updateReadiness.getSnapshot().counts.persistenceMutations).toBe(0));
   expect(runtime.updateReadiness.getSnapshot().decision).toBe('defer');
 });
+
+
+it('observes editing work beyond logical cancellation while inspection never settles participants', async () => {
+ const runtime=fixture(),document=await runtime.documents.newDocument({typeId:noteType.id}),held=deferred<{status:'settled'}>(),caller=new AbortController();
+ const settle=vi.fn(()=>held.promise),registration=document.registerEditingParticipant({id:'generated-editing-owner',settle});
+ try {
+  const observed=runtime.updateReadiness.inspect();
+  expect(observed.counts.documentEditingParticipants).toBe(1);expect(observed.counts.documentEditingWork).toBe(0);expect(settle).not.toHaveBeenCalled();
+  expect(observed.coverage.flatMap(row=>row.gaps)).toContain('editing-owner-census');expect(observed.activationAuthorized).toBe(false);
+  const pending=document.settleEditing('save',caller.signal);
+  await vi.waitFor(()=>expect(runtime.updateReadiness.getSnapshot().counts.documentEditingWork).toBe(2));
+  expect(runtime.updateReadiness.getSnapshot().client.blockers).toContain('owner-busy');caller.abort();expect((await pending).status).toBe('revoked');registration.dispose();
+  await vi.waitFor(()=>expect(runtime.updateReadiness.getSnapshot().counts.documentEditingWork).toBe(1));
+  runtime.store.mutate(draft=>{draft.loginServices.sessionId='generated-replacement';});
+  expect(runtime.updateReadiness.getSnapshot().counts.documentEditingWork).toBe(1);expect(runtime.updateReadiness.getSnapshot().decision).toBe('defer');
+ } finally {held.resolve({status:'settled'});registration.dispose();}
+ await vi.waitFor(()=>expect(runtime.updateReadiness.getSnapshot().counts.documentEditingWork).toBe(0));
+});
