@@ -62,6 +62,14 @@
   .nse-utility-panel {
     transition: none;
   }
+
+  /* A tiny global duration can create transitions for otherwise instant
+     pending/ready opacity and size changes. Popup readiness and its reduced
+     closing pose must commit immediately; owned entry/exit motion is separate. */
+  .nse-overlay-popup,
+  .nse-overlay-popup .nse-control-app-menu-surface {
+    transition-property: none;
+  }
 }
 
 /* Keep pending surfaces measurable for placement. Inertness (owned by the
