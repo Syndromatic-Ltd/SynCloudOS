@@ -20,6 +20,7 @@
 
 import {
   useCallback,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -29,6 +30,8 @@ import {
   type ReactNode
 } from "react";
 
+import type { NSEBookRegions } from "../../Navigation/bookRegions";
+
 function classes(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
 }
@@ -36,6 +39,7 @@ function classes(...values: Array<string | false | null | undefined>) {
 type CSSVarStyle = CSSProperties & Record<`--${string}`, string | number>;
 
 export interface NSESplitViewProps extends HTMLAttributes<HTMLDivElement> {
+  readonly bookRegions?: NSEBookRegions | null;
   sidebar: ReactNode;
   children: ReactNode;
   sidebarWidth?: number | null;
@@ -52,6 +56,7 @@ export interface NSESplitViewProps extends HTMLAttributes<HTMLDivElement> {
 export function NSESplitView({
   sidebar,
   children,
+  bookRegions,
   sidebarWidth,
   defaultSidebarWidth = 280,
   minSidebarWidth = 208,
@@ -61,11 +66,20 @@ export function NSESplitView({
   sidebarPosition = "leading",
   label = "Resize sidebar",
   valueText,
-  dir = "ltr",
+  dir,
   className = "",
   style,
   ...props
 }: NSESplitViewProps) {
+  const root = useRef<HTMLDivElement>(null);
+  const [inheritedDirection, setInheritedDirection] = useState("ltr");
+  useLayoutEffect(() => {
+    const element = root.current;
+    if (element) setInheritedDirection(element.ownerDocument.defaultView?.getComputedStyle(element).direction ?? "ltr");
+  }, [dir, bookRegions]);
+  const direction = dir ?? inheritedDirection;
+  const canResize = resizable && !bookRegions;
+  useLayoutEffect(() => { if (!canResize) { dragRef.current = null; setResizing(false); } }, [canResize]);
   const [internalWidth, setInternalWidth] = useState<number | null>(null);
   const resolvedWidth = sidebarWidth !== undefined ? sidebarWidth : internalWidth;
   const activeWidth = resolvedWidth ?? defaultSidebarWidth;
@@ -82,7 +96,7 @@ export function NSESplitView({
   }, [onSidebarWidthChange, sidebarWidth]);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!resizable || event.button !== 0) return;
+    if (!canResize || event.button !== 0) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = { startX: event.clientX, startWidth: activeWidth };
@@ -91,8 +105,8 @@ export function NSESplitView({
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
-    if (!drag) return;
-    const physicalDirection = (sidebarPosition === "leading" ? 1 : -1) * (dir === "rtl" ? -1 : 1);
+    if (!drag || !canResize) return;
+    const physicalDirection = (sidebarPosition === "leading" ? 1 : -1) * (direction === "rtl" ? -1 : 1);
     const delta = (event.clientX - drag.startX) * physicalDirection;
     commitWidth(clampWidth(drag.startWidth + delta));
   };
@@ -114,10 +128,10 @@ export function NSESplitView({
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (!resizable) return;
-    const direction = (sidebarPosition === "leading" ? 1 : -1) * (dir === "rtl" ? -1 : 1);
-    if (event.key === "ArrowLeft") commitWidth(clampWidth(activeWidth - 16 * direction));
-    else if (event.key === "ArrowRight") commitWidth(clampWidth(activeWidth + 16 * direction));
+    if (!canResize) return;
+    const keyDirection = (sidebarPosition === "leading" ? 1 : -1) * (direction === "rtl" ? -1 : 1);
+    if (event.key === "ArrowLeft") commitWidth(clampWidth(activeWidth - 16 * keyDirection));
+    else if (event.key === "ArrowRight") commitWidth(clampWidth(activeWidth + 16 * keyDirection));
     else if (event.key === "Home") commitWidth(minSidebarWidth);
     else if (event.key === "End") commitWidth(maxSidebarWidth);
     else return;
@@ -126,21 +140,30 @@ export function NSESplitView({
 
   const splitStyle: CSSVarStyle = {
     "--nse-split-sidebar": `${activeWidth}px`,
-    ...(style as CSSVarStyle | undefined)
+    ...(style as CSSVarStyle | undefined),
+    ...(bookRegions ? {
+      "--nse-book-left": `${bookRegions.left.x}px`, "--nse-book-left-width": `${bookRegions.left.width}px`,
+      "--nse-book-gap": `${bookRegions.right.x - bookRegions.left.x - bookRegions.left.width}px`,
+      "--nse-book-right-width": `${bookRegions.right.width}px`, "--nse-book-top": `${bookRegions.left.y}px`,
+      "--nse-book-height": `${bookRegions.left.height}px`,
+    } : {})
   };
 
   return (
     <div
+      ref={root}
       className={classes("nse-split-view", className)}
+      data-book-regions={bookRegions ? "true" : undefined}
+      data-book-sidebar-side={((sidebarPosition === "leading") !== (direction === "rtl")) ? "left" : "right"}
       data-sidebar-position={sidebarPosition}
-      data-resizable={resizable ? "true" : "false"}
+      data-resizable={canResize ? "true" : "false"}
       data-resizing={resizing ? "true" : undefined}
       dir={dir}
       style={splitStyle}
       {...props}
     >
       <div className="nse-split-view-sidebar">{sidebar}</div>
-      {resizable ? (
+      {canResize ? (
         <div
           className="nse-split-view-resizer"
           role="separator"

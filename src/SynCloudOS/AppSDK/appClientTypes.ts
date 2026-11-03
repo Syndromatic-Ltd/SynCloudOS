@@ -71,6 +71,11 @@ export interface SynCloudOSPresentationTraits {
   readonly revision: number;
   readonly geometryState: "current" | "retained" | "unavailable";
   readonly safeAreaAvailability: "available" | "unavailable" | "unknown";
+  /** Actual browser capabilities, absent for older host projections. */
+  readonly viewportFeatures?: Readonly<{
+    readonly posture: "continuous" | "folded" | null;
+    readonly segments: readonly AppBounds[] | null;
+  }>;
   readonly contentBounds: AppBounds;
   readonly hostViewportBounds: AppBounds;
   readonly horizontalSizeClass: SynCloudOSHorizontalSizeClass;

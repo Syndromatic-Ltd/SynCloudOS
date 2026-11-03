@@ -140,6 +140,7 @@ export interface NSEAdaptiveNavigationSnapshot {
   readonly renderer: NSEAdaptiveNavigationRenderer;
   /** Actual allocated navigation scene, when supplied by its owning view. */
   readonly layoutBounds: SynCloudOSPresentationTraits["contentBounds"];
+  readonly bookRegions: import("./bookRegions").NSEBookRegions | null;
   readonly traits: SynCloudOSPresentationTraits;
   readonly selectedDestinationId: string;
   readonly stack: NSENavigationStackSnapshot | null;

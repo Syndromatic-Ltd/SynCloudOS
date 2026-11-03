@@ -36,3 +36,5 @@ export * from "./SourceList";
 import "./SourceList/nse-sourcelist.css";
 import "./SourceList/nse-source-list-scene.css";
 import "./nse-navigation.css";
+
+export * from "./bookRegions";

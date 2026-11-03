@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { createBrowserViewportFeaturesSource } from "./BrowserViewportFeatures";
 import { createBrowserFilePickerPort } from "./BrowserFilePickerPort";
 import { createBrowserFileSystemAccessPanelPort } from "./BrowserFileSystemAccessPanelPort";
 import { createBrowserDownloadFilePanelPort } from "./BrowserDownloadFilePanelPort";
@@ -666,6 +667,7 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     visualViewport,
     screen,
     workArea,
+    viewportFeatures: createBrowserViewportFeaturesSource(browserWindow),
     clipboard,
     createClipboardAdapter: nativeActivity => new BrowserClipboardAdapter({ ...clipboardOptions, nativeActivity }),
     pointer,

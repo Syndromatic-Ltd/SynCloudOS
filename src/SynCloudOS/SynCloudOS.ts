@@ -25,6 +25,8 @@ import { createAppLifecycleRules } from "./AppManager/AppLifecycle";
 import type { RuntimeSnapshot } from "./Runtime/runtimeTypes";
 import type { SynCloudOSRuntime } from "./Runtime/runtimeInstanceTypes";
 
+export { sameViewportFeatures } from "./Windows/viewportFeatures";
+export type { RuntimeViewportFeaturesSnapshot } from "./Windows/viewportFeatures";
 export { createStorageDiagnosticsClient } from "./Persistence/storageDiagnostics";
 export type { StorageDiagnosticsClient, StorageDiagnosticsSnapshot, StorageEstimateObservation, StoragePersistenceObservation, StorageDiagnosticsUnavailable } from "./Persistence/storageDiagnostics";
 export { createSynCloudOS } from "./Runtime/createSynCloudOS";

@@ -20,11 +20,12 @@
 
 import type { SynCloudOSRuntimeEnvironment } from "../Runtime/runtimeInstanceTypes";
 import { getSynCloudOSHorizontalSizeClass, type SynCloudOSHorizontalSizeClass } from "../ResponsiveModeManager/presentationTypes";
+import { unavailableViewportFeatures, validateViewportFeatures, type RuntimeViewportFeaturesSnapshot } from "./viewportFeatures";
 import type { WindowBounds } from "./windowTypes";
 
 export type ScreenServiceEnvironment = Pick<
   SynCloudOSRuntimeEnvironment,
-  "layoutViewport" | "visualViewport" | "screen" | "workArea" | "requestAnimationFrame" | "cancelAnimationFrame"
+  "layoutViewport" | "visualViewport" | "screen" | "workArea" | "viewportFeatures" | "requestAnimationFrame" | "cancelAnimationFrame"
 >;
 
 export type ScreenGeometryState = "current" | "retained" | "unavailable";
@@ -33,6 +34,7 @@ export type ScreenGeometrySource = "layoutViewport" | "visualViewport" | "workAr
 export interface ScreenSnapshot {
   /** Retained geometry is the last complete valid sample, not a new measurement. */
   readonly geometryState: ScreenGeometryState;
+  readonly viewportFeatures: RuntimeViewportFeaturesSnapshot;
   readonly invalidGeometrySources: readonly ScreenGeometrySource[];
   readonly layoutViewport: WindowBounds;
   readonly visualViewport: WindowBounds;
@@ -77,6 +79,7 @@ export class ScreenService {
       environment.screen.subscribe(schedule),
       environment.workArea.subscribe(schedule),
     );
+    if (environment.viewportFeatures) this.#disposers.push(environment.viewportFeatures.subscribe(schedule));
   }
 
   getSnapshot = (): ScreenSnapshot => this.#snapshot;
@@ -127,6 +130,7 @@ export class ScreenService {
           safeAreaAvailability: work.safeAreaAvailability === "unavailable" ? "unavailable" as const : "unknown" as const,
           devicePixelRatio: 1, breakpoint: "compact" as const, orientation: "landscape" as const, virtualKeyboardInset: 0,
         }),
+        viewportFeatures: unavailableViewportFeatures,
         geometryState: this.#lastValid ? "retained" as const : "unavailable" as const,
         invalidGeometrySources: Object.freeze(invalidGeometrySources),
       });
@@ -141,7 +145,10 @@ export class ScreenService {
       blockEnd: safeAreaAvailability === "unavailable" ? 0 : work.safeArea.bottom,
       inlineStart: safeAreaAvailability === "unavailable" ? 0 : work.safeArea.left,
     });
+    let viewportFeatures = unavailableViewportFeatures;
+    try { viewportFeatures = validateViewportFeatures(this.environment.viewportFeatures?.getSnapshot(), layoutViewport); } catch { /* provider failed closed */ }
     const snapshot: ScreenSnapshot = Object.freeze({
+      viewportFeatures,
       geometryState: "current",
       invalidGeometrySources: Object.freeze([]),
       layoutViewport,
