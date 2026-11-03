@@ -165,7 +165,7 @@ export class IndexedDBDocumentRecoveryStore implements DocumentRecoveryStore {
   async #database(signal?: AbortSignal): Promise<IDBDatabase> {
     throwIfDocumentAborted(signal);
     if (!this.#databasePromise) {
-      this.#databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
+      const opening = new Promise<IDBDatabase>((resolve, reject) => {
         let settled = false;
         const request = this.#indexedDB.open(this.#databaseName, 1);
         const fail = (error: unknown) => {
@@ -184,13 +184,21 @@ export class IndexedDBDocumentRecoveryStore implements DocumentRecoveryStore {
         request.onsuccess = () => {
           if (settled) { request.result.close(); return; }
           settled = true;
-          request.result.onversionchange = () => request.result.close();
+          const database = request.result;
+          database.onversionchange = () => {
+            database.close();
+            // The native connection has retired. Do not hand a closed handle
+            // to later calls or clear a replacement connection's generation.
+            if (this.#databasePromise === ownedPromise) this.#databasePromise = null;
+          };
           resolve(request.result);
         };
-      }).catch((error) => {
-        this.#databasePromise = null;
+      });
+      const ownedPromise: Promise<IDBDatabase> = opening.catch((error) => {
+        if (this.#databasePromise === ownedPromise) this.#databasePromise = null;
         throw error;
       });
+      this.#databasePromise = ownedPromise;
     }
     const database = await this.#databasePromise;
     throwIfDocumentAborted(signal);

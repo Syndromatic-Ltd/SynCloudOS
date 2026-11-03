@@ -4931,7 +4931,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           geometry: appRuntime.platform.imageGeometry as never,
         } : {}),
       }),
-      filePanels: createMountedFilePanelClient({ picker: runtime.environment.filePicker,
+      filePanels: createMountedFilePanelClient({ picker: runtime.environment.filePicker, nativeActivity: runtime.nativeActivity,
         native: runtime.environment.createFileSystemAccessPanelPort ? runtime.environment.createFileSystemAccessPanelPort(runtime.nativeActivity) : runtime.environment.fileSystemAccess, download: runtime.environment.downloadExport,
         signal, assertLive, activation: () => runtime.environment.browser.getNavigator()?.userActivation?.isActive,
         access: environmentCapabilityAccess,

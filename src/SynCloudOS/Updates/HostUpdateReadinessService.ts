@@ -1,3 +1,4 @@
+import { observeOwnedWork } from "../Operations/OwnedWorkObservations";
 import { observeDocumentStorePersistence } from "../DocumentStore/PersistenceDocumentStore";
 import type { SynCloudOSRuntime } from '../Runtime/runtimeInstanceTypes';
 import { bindRuntimeReadinessProjection } from '../Runtime/RuntimeStore';
@@ -42,6 +43,12 @@ export class HostUpdateReadinessService {
     const build = options.hostBuild ?? 'unconfigured';
     this.#reconcileDocuments();
     const activity = runtime.documents.activity;
+    const workOwners = [runtime.operations, runtime.lifecycle].map(owner => observeOwnedWork(owner));
+    const workAuthorities: UpdateReadinessAuthority[] = workOwners.flatMap(source => source ? [{
+      domain: 'tasks' as const,
+      read: () => { const facts = source.getSnapshot(); return { known: !this.#disposed && !facts.ended, revision: facts.revision, blockers: facts.pending ? ['owner-busy' as const] : [] }; },
+      subscribe: (listener: () => void) => source.subscribe(listener),
+    }] : []);
     const persistence = observeDocumentStorePersistence(runtime.documentStore);
     const admissions: UpdateReadinessAuthority = { domain: 'documents', read: () => ({ known: !this.#disposed, revision: activity.getSnapshot().revision, blockers: activity.getSnapshot().admissions ? ['owner-busy'] : [] }), subscribe: listener => activity.subscribe(listener) };
     const recovery: UpdateReadinessAuthority = { domain: 'tasks', read: () => ({ known: !this.#disposed, revision: activity.getSnapshot().revision, blockers: activity.getSnapshot().recovery || activity.getSnapshot().cleanup ? ['recovery-write'] : [] }), subscribe: listener => activity.subscribe(listener) };
@@ -55,7 +62,7 @@ export class HostUpdateReadinessService {
     this.#projection = new UpdateReadinessProjection({ clientInstance: ('host-' + runtime.environment.randomUUID().replace(/[^a-zA-Z0-9_-]/g, '_')).slice(0, 96).padEnd(8, '_'), hostBuild: build, inventory: {
       // Controller-owned document admissions are observed; the other domains
       // still have explicit unresolved owner coverage.
-      read: () => ({ covered: ['documents'], authorities: [...this.#documents.values(), admissions, recovery, editing, ...(persistenceWork ? [persistenceWork] : []), tasks, runtime.nativeActivity] }),
+      read: () => ({ covered: ['documents'], authorities: [...this.#documents.values(), admissions, recovery, editing, ...(persistenceWork ? [persistenceWork] : []), tasks, ...workAuthorities, runtime.nativeActivity] }),
       subscribe: listener => { this.#inventoryListeners.add(listener); return () => { this.#inventoryListeners.delete(listener); }; },
     } });
     this.#releases.push(this.#projection.subscribe(() => this.#publish()));
@@ -154,7 +161,7 @@ export class HostUpdateReadinessService {
   }
   #counts(): HostReadinessCounts {
     const documents = this.#runtime.documents.openDocuments, jobs = this.#runtime.jobs.snapshot();
-    return Object.freeze({ documentEditingParticipants: this.#runtime.documents.activity.getSnapshot().editingParticipants, documentEditingWork: this.#runtime.documents.activity.getSnapshot().editingSettlements + this.#runtime.documents.activity.getSnapshot().editingCallbacks, persistenceMutations: observeDocumentStorePersistence(this.#runtime.documentStore)?.getSnapshot().pending ?? 0, documents: documents.length, dirtyDocuments: documents.filter(document => document.hasUnsavedChanges).length, savingDocuments: documents.filter(document => document.state === 'saving').length, conflictedDocuments: documents.filter(document => document.state === 'conflicted').length, windows: this.#runtime.windows.snapshot().windowControllerIds.length, operations: this.#runtime.operations.inspectPending().length, activeJobs: jobs.active, queuedJobs: jobs.queued, nativeOperations: this.#runtime.nativeActivity.pendingOperationCount, documentAdmissions: this.#runtime.documents.activity.getSnapshot().admissions, documentRecovery: this.#runtime.documents.activity.getSnapshot().recovery, documentCleanup: this.#runtime.documents.activity.getSnapshot().cleanup });
+    return Object.freeze({ operationWork: observeOwnedWork(this.#runtime.operations)?.getSnapshot().pending ?? 0, lifecycleWork: observeOwnedWork(this.#runtime.lifecycle)?.getSnapshot().pending ?? 0, documentEditingParticipants: this.#runtime.documents.activity.getSnapshot().editingParticipants, documentEditingWork: this.#runtime.documents.activity.getSnapshot().editingSettlements + this.#runtime.documents.activity.getSnapshot().editingCallbacks, persistenceMutations: observeDocumentStorePersistence(this.#runtime.documentStore)?.getSnapshot().pending ?? 0, documents: documents.length, dirtyDocuments: documents.filter(document => document.hasUnsavedChanges).length, savingDocuments: documents.filter(document => document.state === 'saving').length, conflictedDocuments: documents.filter(document => document.state === 'conflicted').length, windows: this.#runtime.windows.snapshot().windowControllerIds.length, operations: this.#runtime.operations.inspectPending().length, activeJobs: jobs.active, queuedJobs: jobs.queued, nativeOperations: this.#runtime.nativeActivity.pendingOperationCount, documentAdmissions: this.#runtime.documents.activity.getSnapshot().admissions, documentRecovery: this.#runtime.documents.activity.getSnapshot().recovery, documentCleanup: this.#runtime.documents.activity.getSnapshot().cleanup });
   }
   #publish(): void {
     if (this.#disposed) return;
@@ -163,7 +170,7 @@ export class HostUpdateReadinessService {
     try {
       const client = this.#projection.inspect();
       if (this.#inspection.sourceGeneration !== null && this.#inspection.sourceGeneration !== client.generation && ['checking', 'observed'].includes(this.#inspection.state)) this.#stale('work-changed');
-      const observedCoverage = Object.freeze(hostReadinessCoverage.map(row => row.domain === 'documents' ? Object.freeze({ ...row, status: 'observed' as const, gaps: Object.freeze([]) }) : row.domain === 'tasks' ? Object.freeze({ ...row, gaps: Object.freeze(row.gaps.filter(gap => gap !== 'recovery-cleanup')) }) : row));
+      const observedCoverage = Object.freeze(hostReadinessCoverage.map(row => row.domain === 'documents' ? Object.freeze({ ...row, status: 'observed' as const, gaps: Object.freeze([]) }) : row.domain === 'tasks' ? Object.freeze({ ...row, gaps: Object.freeze(row.gaps.filter(gap => gap !== 'recovery-cleanup' && !(gap === 'underlying-operation-work' && observeOwnedWork(this.#runtime.operations)))) }) : row));
       let coverage = this.#runtime.environment.createFileSystemAccessPanelPort ? observedCoverage : Object.freeze(observedCoverage.map(row => row.domain === 'native' ? Object.freeze({ ...row, gaps: Object.freeze([...row.gaps, 'native-picker-instrumentation' as const]) }) : row));
       if (!this.#storeProjectionAttached) coverage = Object.freeze(coverage.map(row => row.domain === 'tasks' ? Object.freeze({ ...row, gaps: Object.freeze([...row.gaps, 'runtime-store-publication' as const]) }) : row));
       const next: HostUpdateReadinessSnapshot = Object.freeze({ client, decision: 'defer', activationAuthorized: false, ended: false, coverage, counts: this.#counts(), compatibility: Object.freeze({ status: this.#options.compatibilityRestricted ? 'restricted' : 'not-configured', reasons: Object.freeze(this.#options.compatibilityRestricted ? ['host-policy-restricted'] as const : ['target-build-unverified'] as const) }), inspection: this.#inspection });
