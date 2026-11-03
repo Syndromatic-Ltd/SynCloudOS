@@ -25,12 +25,13 @@ import { resolveNSEOverlayRegion, type NSEOverlayPresentationSource, type NSEOve
 /** Read-only placement projection. The existing focus owner remains the only
  * focus authority. Capture origin before the trap moves focus; do not switch
  * halves merely because a live dialog's control now has focus. */
-export function useNSEOverlayRegion({ source, open, origin, document, direction }: {
+export function useNSEOverlayRegion({ source, open, origin, document, direction, purpose = "contextual" }: {
   readonly source: NSEOverlayPresentationSource | null;
   readonly open: boolean;
   readonly origin?: HTMLElement | null;
   readonly document: Document | null;
   readonly direction?: "ltr" | "rtl";
+  readonly purpose?: "contextual" | "alert";
 }) {
   const captured = useRef<{ source: NSEOverlayPresentationSource | null; element: HTMLElement | null; bounds: NSEOverlayRegionBounds | null; direction: "ltr" | "rtl" } | null>(null);
   if (!open) captured.current = null;
@@ -39,7 +40,7 @@ export function useNSEOverlayRegion({ source, open, origin, document, direction 
     const element = origin ?? (ownerChanged ? null : resolveNSEFocusReturnTarget(document?.activeElement ?? null));
     const rect = element?.isConnected ? element.getBoundingClientRect() : null;
     captured.current = { source, element, bounds: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null,
-      direction: direction ?? (element && document?.defaultView?.getComputedStyle(element).direction === "rtl" ? "rtl" : "ltr") };
+      direction: direction ?? ((element ?? document?.documentElement) && document?.defaultView?.getComputedStyle(element ?? document.documentElement).direction === "rtl" ? "rtl" : "ltr") };
   }
   const read = useCallback(() => {
     if (!open) return null;
@@ -56,7 +57,7 @@ export function useNSEOverlayRegion({ source, open, origin, document, direction 
     const element = origin?.isConnected ? origin : captured.current?.element;
     const rect = element?.isConnected ? element.getBoundingClientRect() : null;
     const bounds = rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : captured.current?.bounds;
-    return resolveNSEOverlayRegion(traits, bounds, direction ?? captured.current?.direction);
-  }, [direction, origin, read]);
+    return resolveNSEOverlayRegion(traits, bounds, direction ?? captured.current?.direction, purpose);
+  }, [direction, origin, purpose, read]);
   return { region: getBoundary(), hostViewport: snapshot?.hostViewportBounds ?? null, getBoundary };
 }

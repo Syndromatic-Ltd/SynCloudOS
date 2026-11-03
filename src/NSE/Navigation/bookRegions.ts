@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { resolveViewportBookRegions } from "../../SynCloudOS/SynCloudOS";
+import { resolveViewportBookRegions } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
 
 type Bounds = SynCloudOSPresentationTraits["contentBounds"];
