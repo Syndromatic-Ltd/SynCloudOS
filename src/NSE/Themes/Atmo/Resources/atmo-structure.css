@@ -2427,6 +2427,10 @@
        the keyframe, rather than shortening an off-screen first pose. */
     animation: none;
   }
+
+  :where([data-nse-appearance="atmo"]) .nse-overlay-popup--application-menu[data-state="closing"] .nse-control-app-menu-surface {
+    opacity: 0;
+  }
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-app-menu-title {
