@@ -303,6 +303,8 @@ export type {
   NSESourceListSceneProps,
   NSESourceListSceneStatus,
 } from "./Navigation/SourceList";
+export { resolveNSEBookRegions, NSEBookRegionMetrics } from "./Navigation/bookRegions";
+export type { NSEBookRegions } from "./Navigation/bookRegions";
 export { NSESplitView } from "./DataViews/Split/NSESplitView";
 export type { NSESplitViewProps } from "./DataViews/Split/NSESplitView";
 export { NSEMetalSurface, NSERoundedBox } from "./Material";
