@@ -114,9 +114,9 @@ describe('document-owner readiness activity', () => {
     const releaseBad = controller.activity.subscribe(() => { throw new Error('observer'); }), release = controller.activity.subscribe(changed);
     const before = controller.activity.getSnapshot();
     await controller.newDocument({ typeId: noteType.id });
-    expect(changed).toHaveBeenCalled(); expect(before).toEqual({ revision: 0, admissions: 0, recovery: 0, cleanup: 0, editingParticipants: 0, editingSettlements: 0, editingCallbacks: 0 });
+    expect(changed).toHaveBeenCalled(); expect(before).toEqual({ revision: 0, admissions: 0, recovery: 0, cleanup: 0, editingParticipants: 0, editingSettlements: 0, editingCallbacks: 0, storageCallbacks: 0 });
     expect(Object.keys(controller.activity).sort()).toEqual(['getSnapshot', 'subscribe']);
-    expect(Object.keys(controller.activity.getSnapshot()).sort()).toEqual(['admissions', 'cleanup', 'editingCallbacks', 'editingParticipants', 'editingSettlements', 'recovery', 'revision']);
+    expect(Object.keys(controller.activity.getSnapshot()).sort()).toEqual(['admissions', 'cleanup', 'editingCallbacks', 'editingParticipants', 'editingSettlements', 'recovery', 'revision', 'storageCallbacks']);
     release(); releaseBad(); const calls = changed.mock.calls.length;
     const doc = controller.openDocuments[0]!; await doc.markClosed(documentAdoptionAuthority); expect(changed).toHaveBeenCalledTimes(calls);
   });
