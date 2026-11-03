@@ -1736,8 +1736,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-nse-appearance="atmo"] .nse-overlay-popup--application-menu .nse-control-app-menu-surface {
+  [data-nse-appearance="atmo"] .nse-overlay-popup--application-menu[data-state] .nse-control-app-menu-surface {
     animation: none;
+  }
+
+  [data-nse-appearance="atmo"] .nse-overlay-popup--application-menu[data-state="closing"] .nse-control-app-menu-surface {
+    opacity: 0;
   }
 }
 
