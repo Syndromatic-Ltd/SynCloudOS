@@ -6659,3 +6659,110 @@
 [data-nse-appearance="atmo"] :is(.nse-extended-tool-button[data-size], :is(.nse-extended-tool-button-group, .nse-extended-radio-tool-button-group)[data-size] .nse-control-button) .nse-control-button-icon {
   font-size: calc(var(--nse-atmo-bar-h) * 0.58);
 }
+
+/* State material residency. Each control state paints its own vector (up,
+   down, selected, selected-down, disabled, focus). Chromium and WebKit load a
+   data: image asynchronously the first time a style references it, so the
+   first press or selection of a state painted one frame with no material at
+   all. The appearance boundary references every swappable state once, at zero
+   size, so all of them are already loaded before any control needs one. It
+   paints nothing, takes no space and is not interactive. Add any new
+   --nse-atmo-svg-* state here; atmo-vector-coverage enforces the list. */
+[data-nse-appearance="atmo"].nse-appearance-provider::before {
+  content: "";
+  position: absolute;
+  inline-size: 0;
+  block-size: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background-image:
+    var(--nse-atmo-svg-mb-only-up),
+    var(--nse-atmo-svg-mb-only-down),
+    var(--nse-atmo-svg-mb-only-sel),
+    var(--nse-atmo-svg-mb-only-seldown),
+    var(--nse-atmo-svg-mb-only-dis),
+    var(--nse-atmo-svg-gt-first-up),
+    var(--nse-atmo-svg-gt-first-down),
+    var(--nse-atmo-svg-gt-first-sel),
+    var(--nse-atmo-svg-gt-first-seldown),
+    var(--nse-atmo-svg-gt-first-dis),
+    var(--nse-atmo-svg-gt-middle-up),
+    var(--nse-atmo-svg-gt-middle-down),
+    var(--nse-atmo-svg-gt-middle-sel),
+    var(--nse-atmo-svg-gt-middle-seldown),
+    var(--nse-atmo-svg-gt-middle-dis),
+    var(--nse-atmo-svg-gt-last-up),
+    var(--nse-atmo-svg-gt-last-down),
+    var(--nse-atmo-svg-gt-last-sel),
+    var(--nse-atmo-svg-gt-last-seldown),
+    var(--nse-atmo-svg-gt-last-dis),
+    var(--nse-atmo-svg-gt-only-up),
+    var(--nse-atmo-svg-gt-only-down),
+    var(--nse-atmo-svg-gt-only-sel),
+    var(--nse-atmo-svg-gt-only-seldown),
+    var(--nse-atmo-svg-gt-only-dis),
+    var(--nse-atmo-svg-si-only-up),
+    var(--nse-atmo-svg-si-only-focus),
+    var(--nse-atmo-svg-nse-tab-atmo-first-up-start),
+    var(--nse-atmo-svg-nse-tab-atmo-first-up-body),
+    var(--nse-atmo-svg-nse-tab-atmo-first-up-end),
+    var(--nse-atmo-svg-nse-tab-atmo-first-down-start),
+    var(--nse-atmo-svg-nse-tab-atmo-first-down-body),
+    var(--nse-atmo-svg-nse-tab-atmo-first-down-end),
+    var(--nse-atmo-svg-nse-tab-atmo-first-sel-start),
+    var(--nse-atmo-svg-nse-tab-atmo-first-sel-body),
+    var(--nse-atmo-svg-nse-tab-atmo-first-sel-end),
+    var(--nse-atmo-svg-nse-tab-atmo-first-seldown-start),
+    var(--nse-atmo-svg-nse-tab-atmo-first-seldown-body),
+    var(--nse-atmo-svg-nse-tab-atmo-first-seldown-end),
+    var(--nse-atmo-svg-nse-tab-atmo-first-dis-start),
+    var(--nse-atmo-svg-nse-tab-atmo-first-dis-body),
+    var(--nse-atmo-svg-nse-tab-atmo-first-dis-end),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-up-start),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-up-body),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-up-end),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-down-start),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-down-body),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-down-end),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-sel-start),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-sel-body),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-sel-end),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-seldown-start),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-seldown-body),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-seldown-end),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-dis-start),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-dis-body),
+    var(--nse-atmo-svg-nse-tab-atmo-middle-dis-end),
+    var(--nse-atmo-svg-nse-tab-atmo-last-up-start),
+    var(--nse-atmo-svg-nse-tab-atmo-last-up-body),
+    var(--nse-atmo-svg-nse-tab-atmo-last-up-end),
+    var(--nse-atmo-svg-nse-tab-atmo-last-down-start),
+    var(--nse-atmo-svg-nse-tab-atmo-last-down-body),
+    var(--nse-atmo-svg-nse-tab-atmo-last-down-end),
+    var(--nse-atmo-svg-nse-tab-atmo-last-sel-start),
+    var(--nse-atmo-svg-nse-tab-atmo-last-sel-body),
+    var(--nse-atmo-svg-nse-tab-atmo-last-sel-end),
+    var(--nse-atmo-svg-nse-tab-atmo-last-seldown-start),
+    var(--nse-atmo-svg-nse-tab-atmo-last-seldown-body),
+    var(--nse-atmo-svg-nse-tab-atmo-last-seldown-end),
+    var(--nse-atmo-svg-nse-tab-atmo-last-dis-start),
+    var(--nse-atmo-svg-nse-tab-atmo-last-dis-body),
+    var(--nse-atmo-svg-nse-tab-atmo-last-dis-end),
+    var(--nse-atmo-svg-nse-tab-atmo-only-up-start),
+    var(--nse-atmo-svg-nse-tab-atmo-only-up-body),
+    var(--nse-atmo-svg-nse-tab-atmo-only-up-end),
+    var(--nse-atmo-svg-nse-tab-atmo-only-down-start),
+    var(--nse-atmo-svg-nse-tab-atmo-only-down-body),
+    var(--nse-atmo-svg-nse-tab-atmo-only-down-end),
+    var(--nse-atmo-svg-nse-tab-atmo-only-sel-start),
+    var(--nse-atmo-svg-nse-tab-atmo-only-sel-body),
+    var(--nse-atmo-svg-nse-tab-atmo-only-sel-end),
+    var(--nse-atmo-svg-nse-tab-atmo-only-seldown-start),
+    var(--nse-atmo-svg-nse-tab-atmo-only-seldown-body),
+    var(--nse-atmo-svg-nse-tab-atmo-only-seldown-end),
+    var(--nse-atmo-svg-nse-tab-atmo-only-dis-start),
+    var(--nse-atmo-svg-nse-tab-atmo-only-dis-body),
+    var(--nse-atmo-svg-nse-tab-atmo-only-dis-end);
+  background-repeat: no-repeat;
+  background-size: 0 0;
+}
