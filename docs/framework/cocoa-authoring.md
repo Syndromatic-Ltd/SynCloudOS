@@ -139,6 +139,14 @@ Record a figure once with `GFXContext`, draw its `GFXDisplayList` on screen with
 - `contentsGravity` is `"resize-aspect"` (the default: the whole figure stays visible, centred), `"resize-aspect-fill"` or `"resize"`, as on `AFXLayer`.
 - Pointer handlers (`onPointerDown`, `onPointerMove`, `onPointerUp`, `onPointerLeave`, `onPointerCancel`) receive the event and `locationInView`, the point in display-list coordinates after scaling and gravity. `convertPointToGFXDisplayList(svg, clientX, clientY, displayList)` performs the same conversion directly. Points beyond the figure are not clipped, so drags can continue past an edge.
 
+`GFXContext.recording` needs `identifiers`, an issuer that gives every gradient, clip and pattern definition in the output an identifier unique on the page. Ask the host for one with `SCOS.images.createGraphicsIdentifierIssuer()` (or `useImages().createGraphicsIdentifierIssuer()` in a view); see [Graphics contexts](fx/graphics/contexts.md).
+
+```ts
+const context = GFXContext.recording({ size: { width: 480, height: 240 }, identifiers: SCOS.images.createGraphicsIdentifierIssuer() });
+context.fillPath(GFXPath.ellipse({ x: 8, y: 8, width: 64, height: 64 }), GFXColour.rgba(0.2, 0.5, 0.8));
+const figure = context.displayList; // draw with <NSEGraphicsView displayList={figure} autoSize />
+```
+
 ## Scaffolds and validation
 
 `synware:create Search.app` generates the separate-view pattern by default, with `Contents/Views/SearchView.tsx`; `--authoring inline` keeps the view in `index.tsx`. Add `--content-application-menu` to declare `applicationMenu.trigger: "content"` and render the menu trigger as an `NSEPushButton`. `--authoring function` is an explicit opt-in for a function-component app, and it is what the hook-based `--fx` recipe scaffolds use when no authoring is given. Class views can compose those components; combining class scaffold mode with `--fx` is diagnosed before writing files. The Developer MCP `scaffold` tool uses the same templates.

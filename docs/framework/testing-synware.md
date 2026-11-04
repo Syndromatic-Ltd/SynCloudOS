@@ -2,6 +2,16 @@
 
 `@syndromatic/syncloudos/sdk/testing` provides a deterministic host for unit and integration tests. The host mounts your application exactly as production does, on an isolated runtime with a controllable clock, in-memory storage and fakes for the browser capabilities your code may call. Tests that use it run without a browser, a network or a real device.
 
+## Prerequisites
+
+The examples run under Vitest with a DOM. Install the test tools as dev dependencies; the SDK doesn't bring them:
+
+```sh
+npm install --save-dev vitest jsdom @testing-library/react
+```
+
+Mark DOM tests with `// @vitest-environment jsdom` (or set `environment: "jsdom"` in the Vitest config) and pass that environment's `document` to the host.
+
 ## A first test
 
 ```tsx

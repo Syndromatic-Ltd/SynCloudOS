@@ -6,14 +6,14 @@ You choose an appearance once, at the root of your site, and every control below
 
 ## Load Atmo
 
-Import the base styles and the Atmo styles next to your entry point:
+What you import depends on whether the page runs the SynCloudOS host.
 
-```tsx
-import "@syndromatic/syncloudos/nse/styles.css";
-import "@syndromatic/syncloudos/nse/themes/atmo/styles.css";
-```
+| Page | Imports | Appearance |
+| --- | --- | --- |
+| A site or single application on `mountSynCloudOS` | `@syndromatic/syncloudos/nse/styles.css` and `@syndromatic/syncloudos/browser/styles.css`, once, in the host entry | The host installs Atmo for the shell and every SynWare it hosts. Don't import the Atmo theme stylesheet or wrap anything in `NSEAppearanceProvider`. |
+| A standalone React page without the host | `@syndromatic/syncloudos/nse/styles.css` and `@syndromatic/syncloudos/nse/themes/atmo/styles.css` | Wrap the page in `NSEAppearanceProvider`, as below. |
 
-`mountSynCloudOS` installs the Atmo appearance for the shell and every SynWare it hosts, so a site built on the host needs nothing more. A standalone React page provides it directly:
+A SynWare never imports these stylesheets itself; the page that hosts it does. A standalone React page provides the appearance directly:
 
 ```tsx
 import { NSEAppearanceProvider } from "@syndromatic/syncloudos/nse/appearance";
@@ -47,7 +47,26 @@ Atmo is the one theme SynCloudOS ships. It is drawn as vectors, and it styles bo
 
 Atmo-Heritage and Atmo-Onyx are obsolete raster themes from earlier releases. Don't use them, don't mistake either for a dark mode, and don't copy their colours into your own stylesheet. You can still build your own SynCloudOS theme as an appearance; a custom theme replaces Atmo's look, it doesn't sit beside a hand-written palette.
 
-Hard-coded colours work against this. An application stylesheet with its own hex palette doesn't follow the colour scheme, contrast or transparency settings, and the Developer MCP `validate` tool reports it as an `idiom.atmo-appearance` warning. Use NSE controls for controls, semantic tokens (`var(--nse-*)`) for your own surfaces, and `[data-mode="dark"]` only where your own content needs a different treatment.
+Hard-coded colours work against this. An application stylesheet with its own hex palette doesn't follow the colour scheme, contrast or transparency settings, and the Developer MCP `validate` tool reports it as an `idiom.atmo-appearance` warning. Use NSE controls for controls, the tokens below for your own surfaces, and `[data-mode="dark"]` only where your own content needs a different treatment.
+
+## Tokens for your own content
+
+These custom properties are the public vocabulary for content you draw yourself. They follow the colour scheme, and the type and spacing scales follow the layout defaults.
+
+| Purpose | Tokens |
+| --- | --- |
+| Colour | `--nse-app-background` and `--nse-app-foreground`, the plain application background and its text in the resolved light or dark scheme. |
+| Type | `--nse-text-body-size`, `--nse-text-body-line`, `--nse-text-callout-size`, `--nse-text-caption-size`, `--nse-text-footnote-size`, `--nse-text-headline-size`, `--nse-text-headline-weight`, `--nse-text-label-size`, `--nse-text-label-weight` and `--nse-text-secondary-opacity`. |
+| Spacing | `--nse-space-1` to `--nse-space-8` (4 to 40 px), `--nse-spacing-tight`, `--nse-spacing-standard`, `--nse-spacing-inline`, `--nse-spacing-related`, `--nse-spacing-group`, `--nse-content-margin` and `--nse-content-spacing`. |
+
+Derive secondary text, rules and tints from the foreground rather than inventing colours, so they follow the scheme:
+
+```css
+.figure-caption { color: color-mix(in srgb, currentColor 62%, transparent); }
+.figure-frame { border: 1px solid color-mix(in srgb, currentColor 18%, transparent); }
+```
+
+Other `--nse-*` properties belong to individual controls and themes and may change between releases. A name that isn't defined at all, such as `--nse-label-primary`, resolves to its `var()` fallback or the property's initial value, so it never follows Atmo; `validate` reports it as `idiom.nse-token`.
 
 ## Read the appearance
 

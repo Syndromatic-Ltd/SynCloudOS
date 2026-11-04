@@ -158,14 +158,15 @@ export async function scaffold(input) {
   let testFallback=false;
   const files=Object.fromEntries(scaffoldProjectFiles({kind,name,id,bundleIdentifier,organisation:input.organisation,owners:input.owners,...(kind==="application"?{authoring:input.authoring,contentApplicationMenu:input.contentApplicationMenu===true}:{})}));
   if (kind === "application") {
-    files["Contents/Info.ts"]=header+"export default "+JSON.stringify(manifest,null,2)+" as const;\n";
+    files["Contents/Info.ts"]=header+'import type { SynWareInfo } from "@syndromatic/syncloudos/sdk";\n\nexport default '+JSON.stringify(manifest,null,2)+" satisfies SynWareInfo;\n";
     files["Contents/index.tsx"]=header+files["Contents/index.tsx"];
-    // The class scaffold's host test runs under Vitest with jsdom. A project without Vitest gets a
-    // dependency-free smoke test instead, so the scaffold type-checks in any consumer.
+    // The class scaffold's host test runs under Vitest with jsdom and Testing Library. A project
+    // missing any of them gets a dependency-free smoke test instead, so the scaffold type-checks.
     const deps={...context.manifest.dependencies,...context.manifest.devDependencies};
-    if (files["Contents/__tests__/app.test.tsx"]?.includes('from "vitest"') && !deps.vitest) {
+    const missingTestTools=["vitest","jsdom","@testing-library/react"].filter(name=>!deps[name]);
+    if (files["Contents/__tests__/app.test.tsx"]?.includes('from "vitest"') && missingTestTools.length>0) {
       files["Contents/__tests__/app.test.tsx"]='import Application from "../index";\n\nif (typeof Application !== "function") throw new Error("Expected an NSEApplication subclass");\n';
-      testFallback=true;
+      testFallback=missingTestTools;
     }
   }
   if (kind !== "integration") mkdirSync(target,{recursive:true});
@@ -175,7 +176,7 @@ export async function scaffold(input) {
   if (input.policy?.public!==true) nextSteps.push('Before using this bundle as the primary application with authentication "disabled" or "optional", explicitly set runtime.policy.public to true. Do not make private applications public unless that access is intended.');
   if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "windowedView"; the default appView is for the primary application.');
   if (!input.contentApplicationMenu && (input.presentation===undefined || input.presentation==="appView")) nextSteps.push('A fullscreen primary with authentication "optional" or "required" must declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button, so people can reach Preferences > Account, Sign In and Log Out. Pass contentApplicationMenu: true to scaffold both.');
-  if (testFallback) nextSteps.push("The project has no Vitest, so Contents/__tests__/app.test.tsx is a smoke test. Install vitest and jsdom to test the application with createSynWareTestHost from @syndromatic/syncloudos/sdk/testing.");
+  if (testFallback) nextSteps.push(`The project has no ${testFallback.join(", ")}, so Contents/__tests__/app.test.tsx is a smoke test. Install vitest, jsdom and @testing-library/react as dev dependencies to test the application with createSynWareTestHost from @syndromatic/syncloudos/sdk/testing.`);
   nextSteps.push("Review the generated manifest and run syncloudos.validate before registering the bundle.");
   return {createdPaths,nextSteps};
 }
