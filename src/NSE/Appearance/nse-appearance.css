@@ -27,15 +27,33 @@
 :where([data-nse-colour-scheme-resolved="light"]) { color-scheme: light; }
 :where([data-nse-colour-scheme-resolved="dark"]) { color-scheme: dark; }
 
-/* The plain app background and its text, switched by the resolved light or dark mode. Light follows the
-   aluminium metal family and dark the blue-hued one; a theme may redefine them. */
+/* The colours an application uses for content it draws itself, switched by the resolved light or dark
+   mode. Light follows the aluminium metal family and dark the blue-hued one. These are theme-neutral
+   defaults: a theme (Atmo among them) redefines them, so content drawn with them follows the theme.
+   Text tokens keep at least 4.5:1 against --nse-app-background; the accent at least 3:1. */
 :where([data-nse-colour-scheme-resolved="light"]) {
   --nse-app-background: #d9dbde;
   --nse-app-foreground: #2a2f36;
+  --nse-app-foreground-secondary: #555d66;
+  --nse-app-surface: rgb(255 255 255 / 55%);
+  --nse-app-surface-border: rgb(0 0 0 / 16%);
+  --nse-app-separator: rgb(0 0 0 / 12%);
+  --nse-app-accent: #2c6fc2;
+  --nse-app-accent-foreground: #ffffff;
+  --nse-app-selection: rgb(44 111 194 / 20%);
+  --nse-app-critical: #a52d28;
 }
 :where([data-nse-colour-scheme-resolved="dark"]) {
   --nse-app-background: #1b222c;
   --nse-app-foreground: #dde3ea;
+  --nse-app-foreground-secondary: #a7afba;
+  --nse-app-surface: rgb(255 255 255 / 6%);
+  --nse-app-surface-border: rgb(255 255 255 / 10%);
+  --nse-app-separator: rgb(255 255 255 / 9%);
+  --nse-app-accent: #7fb2f0;
+  --nse-app-accent-foreground: #0d1a2a;
+  --nse-app-selection: rgb(127 178 240 / 24%);
+  --nse-app-critical: #ff7b72;
 }
 
 .nse-control-appearance-provider {

@@ -276,7 +276,7 @@ export function auditSynWareIdioms({ root, applications, sdkRoot }) {
       if (unknown.size === 0) continue;
       stylesheetReport.unknownTokens += unknown.size;
       const names = [...unknown.keys()];
-      at(file, [...unknown.values()][0], "idiom.nse-token", `${names.length} --nse-* token${names.length === 1 ? "" : "s"} the installed SDK does not define: ${names.slice(0, 8).join(", ")}${names.length > 8 ? ", ..." : ""}. An undefined token falls back to its var() fallback or the property's initial value, so it never follows Atmo. Use the documented tokens in docs/framework/appearance.md (for example --nse-app-background and --nse-app-foreground), or derive tints from currentColor with color-mix().`);
+      at(file, [...unknown.values()][0], "idiom.nse-token", `${names.length} --nse-* token${names.length === 1 ? "" : "s"} the installed SDK does not define: ${names.slice(0, 8).join(", ")}${names.length > 8 ? ", ..." : ""}. An undefined token falls back to its var() fallback or the property's initial value, so it never follows Atmo. Use the documented tokens in docs/framework/appearance.md (--nse-app-foreground-secondary, --nse-app-surface, --nse-app-separator, --nse-app-accent and the rest of the --nse-app-* colours), which every theme defines for light and dark, or mix a tint from one of them with color-mix().`);
     }
   }
   for (const file of new Set([...stylesheets, ...collectProjectStylesheets(root)])) {
