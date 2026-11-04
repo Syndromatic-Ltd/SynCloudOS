@@ -129,7 +129,7 @@
   background: transparent;
   font: inherit;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 52px;
   text-align: center;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.72), 0 1px 1px rgba(255, 255, 255, 0.16);
@@ -619,7 +619,7 @@
 :where([data-nse-appearance="atmo"]) .nse-control-slider-label {
   color: var(--nse-atmo-label-ink, #314255);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.2;
 }
 
@@ -687,7 +687,7 @@
   min-width: 24px;
   height: 34px;
   color: var(--nse-atmo-field-affix, #5d6c7a);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 34px;
 }
 
@@ -740,7 +740,7 @@
 
 :where([data-nse-appearance="atmo"]) .nse-control-checkbox {
   color: var(--nse-atmo-control-ink, #243040);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-checkbox.is-disabled {
@@ -778,7 +778,7 @@
   background: transparent;
   font: inherit;
   font-size: 10px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
   text-align: left;
   text-transform: uppercase;
@@ -937,7 +937,7 @@
   background: transparent;
   font: inherit;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 50px;
   text-align: center;
   text-overflow: ellipsis;
@@ -1023,7 +1023,7 @@
   border-style: solid;
   color: #555;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 50px;
   text-transform: uppercase;
 }
@@ -1136,7 +1136,7 @@
   padding: 2px 0 14px 12px;
   color: #fff;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.2;
   text-shadow: #646454 0 1px 0;
   text-transform: uppercase;
@@ -1236,7 +1236,7 @@
   margin: -8px -12px 8px;
   color: var(--nse-atmo-title-ink, #1d2a37);
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-popup-inner {
@@ -2022,7 +2022,7 @@
 :where([data-nse-appearance="atmo"]) .nse-control-page-header-kicker {
   color: var(--nse-atmo-label-ink, #5d6875);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -2030,7 +2030,7 @@
   overflow: hidden;
   color: var(--nse-atmo-title-ink, #293645);
   font-size: 32px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -2248,7 +2248,7 @@
   background: transparent;
   font: inherit;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 700;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.72);
   cursor: pointer;
 }
@@ -2299,7 +2299,7 @@
   border-image: var(--nse-atmo-progress-track) 0 6 0 6 fill stretch;
   color: #243040;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-progress-item[data-variant="pill"] {
@@ -2439,7 +2439,7 @@
   gap: 7px;
   align-items: center;
   margin: -12px -10px 8px;
-  font-weight: 900;
+  font-weight: 700;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55);
 }
 
@@ -2582,7 +2582,7 @@
      in from it (24px border less 4px), not on its edge. */
   margin: -8px -4px 8px;
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-dialog-inner {
@@ -2612,7 +2612,7 @@
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-file-picker-label {
-  font-weight: 900;
+  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-file-picker-meta {
@@ -2691,7 +2691,7 @@
   color: #fff;
   background: #26313c;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-spinner {
@@ -3407,7 +3407,7 @@
   margin: -8px -4px 8px;
   color: var(--nse-atmo-title-ink, #1d2a37);
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .nse-overlay-popup:where([data-nse-appearance="atmo"]):is(.nse-overlay-popup--popover, .nse-overlay-popup--action-sheet) > .nse-overlay-popup-content {
@@ -3529,7 +3529,7 @@
   margin: 0;
   overflow: hidden;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 20px;
   text-align: center;
   text-overflow: ellipsis;
@@ -3581,7 +3581,7 @@
   padding-block: 2px 5px;
   overflow: hidden;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.05em;
   line-height: 13px;
   text-align: center;
@@ -3822,7 +3822,7 @@
 :where([data-nse-appearance="atmo"]) :is([data-nse-part="calendar-sheet"], [data-nse-control="date-time-picker"] section) > h2 {
   margin: 0;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.04em;
   line-height: 16px;
   text-transform: uppercase;
