@@ -138,7 +138,7 @@
   color: #fff;
   font-family: inherit;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: var(--nse-atmo-control-h);
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.72), 0 1px 1px rgba(255, 255, 255, 0.16);
   cursor: pointer;
@@ -435,7 +435,7 @@
   min-height: 52px;
   color: #fff;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.12;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.72), 0 1px 1px rgba(255, 255, 255, 0.16);
 }
@@ -672,7 +672,7 @@
   padding: 0 16px 0 15px; /* middle cell content insets (measured live) */
   color: #555;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
 }
 [data-nse-appearance="atmo"] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button:where(:not(.nse-control-picker-button)):first-child,
@@ -1768,7 +1768,7 @@
   gap: 7px;
   align-items: center;
   margin: -12px -10px 8px;
-  font-weight: 900;
+  font-weight: 700;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55);
 }
 
@@ -3660,14 +3660,14 @@
   background: linear-gradient(#8ec3f3 0, #68a8ea 45%, #4a90dd 55%, #3f86d4 100%) padding-box;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 1px 1px rgba(0, 0, 0, 0.18);
   text-shadow: 0 -1px 0 rgba(20, 60, 110, 0.55);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 /* Today: a hairline ring and blue numeral, under any selection paint. */
 [data-nse-appearance="atmo"] [data-nse-control="calendar"] [data-nse-part="day"][data-today]:not([data-state="selected"]) {
   border-color: var(--nse-atmo-cal-today-ring);
   color: var(--nse-atmo-cal-today-ink);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 /* Ranges: the endpoints keep the glossy pill, rounded on their outer side
@@ -5083,7 +5083,7 @@
   background: transparent;
   font: inherit;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 50px;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
   cursor: default;
@@ -5276,7 +5276,7 @@
 [data-nse-appearance="atmo"] [data-nse-control="progress-indicator"] > [data-nse-part="status"] {
   color: var(--nse-atmo-label-ink, #314255);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
@@ -5426,7 +5426,7 @@
   background: transparent;
   font: inherit;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 50px;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
   cursor: default;
@@ -5625,7 +5625,7 @@
   background: transparent;
   font: inherit;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   text-align: start;
   cursor: default;
 }

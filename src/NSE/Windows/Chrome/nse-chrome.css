@@ -188,7 +188,7 @@
   color: #f6f8fb;
   font-family: inherit;
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
   line-height: 1.1;
   text-align: center;
@@ -665,7 +665,7 @@
   padding: 0 14px;
   font-family: inherit;
   font-size: 19px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--nse-metal-title);
   text-shadow: var(--nse-metal-text-emboss);
 }
@@ -680,7 +680,7 @@
   white-space: nowrap;
   font-family: inherit;
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.1;
   text-align: center;
   color: var(--nse-metal-title);
@@ -1064,7 +1064,7 @@
   margin-right: 9px;
   color: var(--nse-sidebar-section-label, #3a78c2);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.58);

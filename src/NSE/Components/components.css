@@ -126,7 +126,7 @@
   border-radius: 999px;
   color: #fff;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 24px;
   background: linear-gradient(#ff7676, #d72128);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.65);
@@ -186,7 +186,7 @@
   overflow: hidden;
   font-family: inherit;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
   text-align: center;
   text-overflow: ellipsis;
@@ -291,7 +291,7 @@
   color: #f4f7fb;
   font-family: inherit;
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1;
   text-shadow:
     0 -1px 0 rgba(0, 0, 0, 0.95),
@@ -464,7 +464,7 @@
   color: var(--nse-alert-link-text);
   background: transparent;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -512,6 +512,8 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   font: 11px/1.38 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  /* The plate's emboss smears small monospace glyphs into what reads as bold. */
+  text-shadow: none;
 }
 
 .nse-alert-actions {
