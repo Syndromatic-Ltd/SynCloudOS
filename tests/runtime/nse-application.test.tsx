@@ -52,6 +52,27 @@ describe("NSEApplication lifecycle", () => {
     ]);
   });
 
+  it("lists a failed launch method in the technical details of a later fatal report", async () => {
+    class FailingApp extends NSEApplication {
+      async applicationDidFinishLaunching() { throw new Error("DocumentStore getDraft denied"); }
+    }
+    const { launch, runtime, appId } = host(FailingApp, "com.example.failing-app");
+    const result = await launch();
+    // A failure after the launch commits leaves the application running.
+    expect(result).toMatchObject({ status: "completed", committed: true });
+    expect(runtime.errors.getLatest()).toBeNull();
+
+    const report = runtime.errors.createAppContentFailedError(
+      { bundleIdentifier: appId, packageName: appId, displayName: "Failing" },
+      new TypeError("Cannot read properties of undefined (reading 'getSnapshot')"),
+    );
+    expect(report.code).toBe("APP_CONTENT_FAILED");
+    expect(report.technicalDetails).toContain("Earlier LIFECYCLE_HOOK_FAILED:");
+    expect(report.technicalDetails).toContain("(launch:did)");
+    expect(report.technicalDetails).toContain("DocumentStore getDraft denied");
+    expect(report.context.lifecycleFailures).toEqual([expect.objectContaining({ code: "LIFECYCLE_HOOK_FAILED", stage: "launch", phase: "did" })]);
+  });
+
   it("tells the same instance when it is suspended and when it becomes active again", async () => {
     const events: string[] = [];
     let instances = 0;
