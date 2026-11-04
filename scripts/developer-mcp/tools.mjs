@@ -11,6 +11,7 @@ import { createSynWareValidator, deriveManifestForFolder, discoverProjectFolders
 import { deriveSynWareManifest, kebabCase, titleFromFolderName, assertUniqueBundleIdentifiers } from "../synware/project-derivation.mjs";
 import { scaffoldProjectFiles, scaffoldBundleIdentifier } from "../synware/create-synware.mjs";
 import { auditSynWareIdioms } from "../synware/idiom-audit.mjs";
+import { runLaunchCheck } from "./launch-check.mjs";
 import { normalizeBundleIdentifier } from "../../src/SynCloudOS/Identity/bundleIdentifier.mjs";
 import { applicationHostHints, bundlePaths, discoveryKeys, inside, json, projectContext, sdkName, slash, viteHints } from "./project.mjs";
 import { docSections, lookupSdk, similarity } from "./lookup.mjs";
@@ -58,6 +59,12 @@ export async function validateProject(input={}) {
     if (primaries.length!==1 || !primaries[0].ok) host={...host,status:"unresolved",reason:"The primary bundle is missing, ambiguous or invalid; its application-menu requirement could not be assessed."};
     else {
       const file=resolve(primaries[0].directory,"Contents/Info.ts"), primary=primaries[0].manifest;
+      // With sign-in disabled no session can exist, so a primary that is not public can never open.
+      const isPublic=primary.runtime?.policy?.public===true || (primary.permissions ?? []).includes("app.open.public");
+      if (host.authentication==="disabled" && !isPublic) findings.push({
+        file:slash(relative(root,file)),line:1,rule:"synware.public-policy",
+        message:`Primary application ${host.application.bundleIdentifier} is mounted with authentication "disabled" but is not public, so it can never launch: nobody can sign in. Set runtime: { policy: { public: true } } in Info.ts, or enable authentication.`,
+      });
       const fillsPage=host.application.frame==="fullscreen" || (primary.runtime?.presentation ?? "appView")==="appView";
       if (fillsPage && host.authentication!=="disabled" && primary.applicationMenu?.trigger!=="content") findings.push({
         file:slash(relative(root,file)),line:1,rule:"synware.application-menu",
@@ -91,11 +98,19 @@ export async function validateProject(input={}) {
       if (exitCode && findings.length===before) findings.push({file:"tsconfig.json",line:1,rule:"typescript.failed",message:output.trim() || "TypeScript process failed or timed out."});
     }
   }
+  // Building is not launching: run the host entry in a page so launch-time failures (denied
+  // capabilities, missing documents, render loops) are found here rather than in a browser.
+  let launch={ran:false,reason:"Skipped by launch: false."};
+  if (input.launch!==false) {
+    const checked=await runLaunchCheck(root);
+    launch={ran:checked.ran,...(checked.entry ? {entry:checked.entry} : {}),...(checked.limits ? {limits:checked.limits} : {}),...(checked.reason ? {reason:checked.reason} : {})};
+    findings.push(...checked.findings);
+  }
   // Idiom findings are warnings: they never make a valid project invalid, but an
   // agent must not read "0 errors" as idiomatic SynCloudOS.
   const audit=input.idioms===false ? {findings:[],idiomAudit:null} : auditSynWareIdioms({root,sdkRoot:context.sdkRoot,applications:bundles.filter(bundle=>bundle.kind==="application" && bundle.ok)});
   findings.push(...audit.findings);
-  return {ok:findings.every(finding=>finding.severity==="warning"),findings,bundles:bundles.map(({findings,...bundle})=>bundle),typescript,host,idiomAudit:audit.idiomAudit};
+  return {ok:findings.every(finding=>finding.severity==="warning"),findings,bundles:bundles.map(({findings,...bundle})=>bundle),typescript,launch,host,idiomAudit:audit.idiomAudit};
 }
 /** The TypeScript projects validate checks: the root config, or the projects a solution-style root config references. */
 function typescriptProjects(context,root) {
