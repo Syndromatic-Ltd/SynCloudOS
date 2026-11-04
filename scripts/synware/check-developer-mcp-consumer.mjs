@@ -30,9 +30,9 @@ try {
   client=new Client({name:"installed-consumer-smoke",version:"1.0.0"});
   await client.connect(transport);
   const listed=await client.listTools();
-  assert.deepEqual(listed.tools.map(tool=>tool.name).sort(),["syncloudos.explain_error","syncloudos.inspect_project","syncloudos.lookup_sdk","syncloudos.scaffold","syncloudos.validate"]);
+  assert.deepEqual(listed.tools.map(tool=>tool.name).sort(),["explain_error","inspect_project","lookup_sdk","scaffold","validate"]);
   async function call(name,input={}) {
-    const response=await client.callTool({name:"syncloudos."+name,arguments:input});
+    const response=await client.callTool({name,arguments:input});
     assert(!response.isError,JSON.stringify(response));
     return response.structuredContent ?? JSON.parse(response.content[0].text);
   }

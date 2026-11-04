@@ -63,7 +63,7 @@ The server writes MCP protocol messages only to stdout. Configuration and startu
 
 Every successful call includes both JSON text content and the same object in MCP `structuredContent`. Tool failures return `isError: true` and an explanatory text message. Paths in findings and created-file lists are relative to the detected project. SDK locations and the detected project root are absolute.
 
-### `syncloudos.inspect_project`
+### `inspect_project`
 
 Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false }`.
 
@@ -73,17 +73,17 @@ Discovers direct `*.app` bundles using the Vite plugin's shared discovery rules:
 
 Vite configuration is parsed **without executing it**. Literal `synCloudOS({ appsDirectory, webspringEntry })` options, including an aliased named import, are understood. Computed options require explicit tool overrides rather than guessing a directory. This is inspection of configuration hints, not execution of Vite's configuration pipeline.
 
-### `syncloudos.lookup_sdk`
+### `lookup_sdk`
 
-Input: `{ projectRoot?: string, entry?: string, query?: string, limit?: number }` (`limit` defaults to 20, range 1–100).
+Input: `{ projectRoot?: string, entry?: string, query?: string, limit?: number, full?: boolean }` (`limit` defaults to 8, range 1–100).
 
-With neither `entry` nor `query`, output is `{ version, entries: string[] }`. Otherwise output is `{ version, symbols: [{ entry, name, signature, jsDoc, file, score }], docs: [{ file, heading, text, score }] }`.
+With neither `entry` nor `query`, output is `{ version, entries: string[] }`. Otherwise output is `{ version, symbols: [{ entry, entries, name, signature, outlined, jsDoc, file, line, score }], docs: [{ file, heading, text, truncated, score }] }`.
 
-Use entry names such as `sdk`, `nse` or `fx/animation`. An entry without a query lists its exports. Queries fuzzy-match exported names, follow declaration re-exports and return declaration signatures, attached JSDoc and relevant sections of the installed framework docs. A low-confidence query can return no symbols; it does not invent an API. Returned documentation sections are capped at 6,000 characters each.
+Use entry names such as `sdk`, `nse` or `fx/animation`. An entry without a query lists its exports. Queries fuzzy-match exported names, follow declaration re-exports and return declaration signatures, attached JSDoc and relevant sections of the installed framework docs. A low-confidence query can return no symbols; it does not invent an API. Each symbol appears once: `entries` lists every package entry that exports it and `entry` is the one to import from. A class or interface longer than about 1,200 characters comes back as an outline, its header and public member signatures without bodies, with `outlined: true`; pass `full: true` for complete declarations. At most three documentation sections are returned, each capped at 1,500 characters with `truncated: true` when cut; read the named `file` for the rest.
 
 Broad `application menu`, `settings`, `preferences` and `account` queries prioritise the public `useApplicationMenuTrigger` hook and `SynWareApplicationMenuManifest` before lower-level menu props or availability APIs. Documentation ranking favours the corresponding application-menu/Preferences sections and worked examples. Exact exported names still take precedence; equally relevant symbols from the main `sdk` entry rank before other entries.
 
-### `syncloudos.validate`
+### `validate`
 
 Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, typescript?: boolean, idioms?: boolean }` (`typescript` and `idioms` default to `true`).
 
@@ -113,7 +113,7 @@ For each valid application, the audit follows the relative imports of `Contents/
 
 Validation does not run package scripts or builds. TypeScript checks may write the compiler's incremental cache if the consumer enables it. The source repository's additional governed-source boundary audit is not applied to independent consumers.
 
-### `syncloudos.scaffold`
+### `scaffold`
 
 Input: `{ projectRoot?, appsDirectory?, preferencesDirectory?, widgetsDirectory?, integrationsDirectory?, webspringEntry?, kind?: "application" | "preferencePane" | "widget" | "integration", organisation?, bundleIdentifier?, id?, name, route?, owners?, policy?, presentation?, contentApplicationMenu?, authoring?: "separate" | "inline" | "function" }`. `kind` defaults to `"application"`; `id` is only for non-application contributions. Integrations require nonempty owner bundle identifiers.
 
@@ -127,9 +127,9 @@ For example, scaffold a deliberate public primary with `{ bundleIdentifier: "org
 
 For a secondary windowed inspector, choose `presentation: "windowedView"` and declare only the access policy it actually needs. Omitting presentation also returns that windowed-secondary reminder; it is distinct from the desktop/tablet/mobile device presentations.
 
-Names cannot contain path separators or Windows reserved device names. Targets must stay inside the project, cannot traverse symbolic links, and the entire target bundle must be absent. Existing bundles are never merged or overwritten. Review generated files and call `syncloudos.validate` before registering the app.
+Names cannot contain path separators or Windows reserved device names. Targets must stay inside the project, cannot traverse symbolic links, and the entire target bundle must be absent. Existing bundles are never merged or overwritten. Review generated files and call `validate` before registering the app.
 
-### `syncloudos.explain_error`
+### `explain_error`
 
 Input: `{ projectRoot?: string, query: string, limit?: number }` (`limit` defaults to 5, range 1–20).
 
@@ -137,7 +137,7 @@ Output: `{ version, classification: { kind, catalogue, message, codes? }, matche
 
 `matches` contains **only whole error-code tokens** found in the installed global catalogue, at score `2`. Both `[NSE_CONTROLLER_DISPOSED]` and bare `AFX_LAYER_DISPOSED` work inside a pasted message; a code embedded in a longer identifier is not an exact match. A message without its canonical code is not treated as a confirmed diagnosis.
 
-`classification.kind` is `catalogue`, `sdk-error`, `typescript`, `npm-warning` or `unclassified`. Exported SDK error classes such as `GFXColourParseError` are resolved through the installed public declarations and their re-exports; `sdkErrors` points to their signatures, typed fields and domain documentation. They need not have a global runtime code. `TS` diagnostics such as `TS2345` and npm warnings are explicitly outside that catalogue and receive tool-specific next steps. `suggestedLookups` lists symbol names from the input to try with `syncloudos.lookup_sdk`; it does not assert that those names are SDK exports.
+`classification.kind` is `catalogue`, `sdk-error`, `typescript`, `npm-warning` or `unclassified`. Exported SDK error classes such as `GFXColourParseError` are resolved through the installed public declarations and their re-exports; `sdkErrors` points to their signatures, typed fields and domain documentation. They need not have a global runtime code. `TS` diagnostics such as `TS2345` and npm warnings are explicitly outside that catalogue and receive tool-specific next steps. `suggestedLookups` lists symbol names from the input to try with `lookup_sdk`; it does not assert that those names are SDK exports.
 
 Only an `unclassified` query receives fuzzy `related` suggestions. Their documented minimum score is `relatedThreshold: 0.3`; this is a retrieval threshold, **not diagnostic confidence**. Even a high similarity is never promoted into `matches`. Empty results and unrelated symptoms must not be interpreted as a login-session or other runtime failure. Documentation links are relative to the installed SDK package, with optional heading anchors.
 

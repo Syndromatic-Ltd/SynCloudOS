@@ -29,7 +29,22 @@ function symbolScore(query, name) {
   }
   return similarity(query,name);
 }
-export function docSections(sdkRoot, query, limit=5) {
+const DOC_EXCERPT=1500, SIGNATURE_OUTLINE=1200;
+/** A long class or interface as its header and member signatures, without bodies or private members. */
+function outline(declaration) {
+  const text=declaration.getText().replace(/^\s*export\s+/u,"");
+  if (text.length<=SIGNATURE_OUTLINE || !(ts.isClassDeclaration(declaration) || ts.isInterfaceDeclaration(declaration))) return {signature:text,outlined:false};
+  const source=declaration.getSourceFile(), open=text.indexOf("{");
+  const members=[];
+  for (const member of declaration.members) {
+    if (member.name && (ts.isPrivateIdentifier(member.name) || ts.getCombinedModifierFlags(member) & (ts.ModifierFlags.Private | ts.ModifierFlags.Protected))) continue;
+    const body=member.body;
+    const start=member.getStart(source), end=body ? body.getStart(source) : member.getEnd();
+    members.push("  "+source.text.slice(start,end).replace(/\s+/gu," ").trim().replace(/[;{]?$/u,";"));
+  }
+  return {signature:(open===-1 ? text : text.slice(0,open+1))+"\n"+members.join("\n")+"\n}",outlined:true};
+}
+export function docSections(sdkRoot, query, limit=3) {
   const docsRoot=resolve(sdkRoot,"docs/framework");
   if (!existsSync(docsRoot) || !query) return [];
   const words=query.toLowerCase().match(/[a-z][a-z0-9_]+/gu) ?? [];
@@ -49,7 +64,7 @@ export function docSections(sdkRoot, query, limit=5) {
             if (lower.includes("preferences")) score+=2;
             if (text.includes("```")) score+=1;
           }
-          if (score) results.push({file:slash(relative(sdkRoot,path)),heading:text.split("\n")[0],text:text.slice(0,6000),score});
+          if (score) results.push({file:slash(relative(sdkRoot,path)),heading:text.split("\n")[0],text:text.slice(0,DOC_EXCERPT),truncated:text.length>DOC_EXCERPT,score});
         }
       }
     }
@@ -57,7 +72,7 @@ export function docSections(sdkRoot, query, limit=5) {
   scan(docsRoot);
   return results.sort((a,b)=>b.score-a.score).slice(0,limit);
 }
-export async function lookupSdk({projectRoot,entry,query,limit=20}={}) {
+export async function lookupSdk({projectRoot,entry,query,limit=8,full=false}={}) {
   const {sdkRoot,sdk}=projectContext(projectRoot);
   const entries=Object.entries(sdk.exports ?? {}).filter(([,target])=>target && typeof target==="object" && target.types).map(([name,target])=>({name:name.replace(/^\.\//u,""),path:resolve(sdkRoot,target.types)}));
   if (!query && !entry) return {version:sdk.version,entries:entries.map(value=>value.name)};
@@ -65,7 +80,8 @@ export async function lookupSdk({projectRoot,entry,query,limit=20}={}) {
   if (!selected.length) throw new Error("Unknown SDK entry: " + entry);
   for (const value of selected) if (!inside(sdkRoot,value.path)) throw new Error("SDK type export escapes its package.");
   const program=ts.createProgram(selected.map(value=>value.path),{noLib:true,skipLibCheck:true,moduleResolution:ts.ModuleResolutionKind.Bundler,module:ts.ModuleKind.ESNext,allowJs:false});
-  const checker=program.getTypeChecker(),symbols=[];
+  // One result per declaration: a symbol re-exported by several entries lists every entry once.
+  const checker=program.getTypeChecker(),symbols=[],byDeclaration=new Map();
   for (const value of selected) {
     const source=program.getSourceFile(value.path),module=source && checker.getSymbolAtLocation(source);
     if (!module) continue;
@@ -74,12 +90,21 @@ export async function lookupSdk({projectRoot,entry,query,limit=20}={}) {
       if (score<0.55) continue;
       const symbol=exported.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exported) : exported;
       const declarations=symbol.getDeclarations() ?? [];
-      const signature=declarations.map(declaration=>declaration.getText().replace(/^\s*export\s+/u,"")).join("\n");
+      const key=declarations.map(declaration=>declaration.getSourceFile().fileName+":"+declaration.pos).join("|")+"|"+name;
+      const existing=byDeclaration.get(key);
+      if (existing) { existing.entries.push(value.name); continue; }
+      const shapes=declarations.map(declaration=>full ? {signature:declaration.getText().replace(/^\s*export\s+/u,""),outlined:false} : outline(declaration));
+      const signature=shapes.map(shape=>shape.signature).join("\n");
       const jsDoc=ts.displayPartsToString(symbol.getDocumentationComment(checker));
       const tags=symbol.getJsDocTags(checker).map(tag=>"@"+tag.name+" "+ts.displayPartsToString(tag.text));
-      symbols.push({entry:value.name,name,signature,jsDoc:[jsDoc,...tags].filter(Boolean).join("\n"),file:declarations[0] ? slash(relative(sdkRoot,declarations[0].getSourceFile().fileName)) : null,score});
+      const first=declarations[0];
+      const record={entry:value.name,entries:[value.name],name,signature,outlined:shapes.some(shape=>shape.outlined),jsDoc:[jsDoc,...tags].filter(Boolean).join("\n"),file:first ? slash(relative(sdkRoot,first.getSourceFile().fileName)) : null,line:first ? first.getSourceFile().getLineAndCharacterOfPosition(first.getStart()).line+1 : null,score};
+      byDeclaration.set(key,record); symbols.push(record);
     }
   }
-  const matches=symbols.sort((a,b)=>b.score-a.score || Number(b.entry==="sdk")-Number(a.entry==="sdk") || a.name.localeCompare(b.name)).slice(0,limit);
+  // Report each symbol under one entry: sdk first, then the root, nse and the rest.
+  const rank=name=>name==="sdk" ? 0 : name==="." ? 1 : name==="nse" ? 2 : 3;
+  for (const record of symbols) { record.entries.sort((a,b)=>rank(a)-rank(b) || a.localeCompare(b)); record.entry=record.entries[0]; }
+  const matches=symbols.sort((a,b)=>b.score-a.score || rank(a.entry)-rank(b.entry) || a.name.localeCompare(b.name)).slice(0,limit);
   return {version:sdk.version,symbols:matches,docs:docSections(sdkRoot,applicationMenuQuery(query) ? query : matches[0]?.name ?? query ?? entry)};
 }
