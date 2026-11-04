@@ -123,21 +123,9 @@ Two checks apply, and an action needs whichever of them governs it:
 | What the application declares | `permissions` in `Info.ts` | File panels: `file.open` (always declared) and `file.write` (declare it to save files with `SCOS.filePanels`). Without it, a save reports "The file capability must be declared." |
 | What the person may do | The role's capabilities in the host's policy profile | Document store: `documentStore.drafts.read`, `documentStore.draft.write`, `documentStore.draft.delete`, `documentStore.publish`, `documentStore.unpublish`, `documentStore.revision.create`, `documentStore.media.write` and `documentStore.media.attach`. |
 
-Declaring a document-store capability in `permissions` does not grant it: the role of the person using the application must hold it, and a denial names the missing capabilities and the role. A host grants role capabilities with `policyProfile` in `mountSynCloudOS`. A single-application site with `authentication: "disabled"` runs everyone as the anonymous role, so give that role what the application needs:
+Declaring a document-store capability in `permissions` does not by itself grant it: the role of the person using the application must hold it, and a denial names the missing capabilities and the role. A host grants role capabilities with `policyProfile` in `mountSynCloudOS`.
 
-```tsx
-await mountSynCloudOS({
-  element,
-  application: { bundleIdentifier: "org.example.lab" },
-  authentication: "disabled",
-  policyProfile: {
-    id: "lab",
-    roles: { guest: ["app.open.public", "documentStore.drafts.read", "documentStore.draft.write"] },
-    anonymousRole: "guest",
-    resolveRole: () => "guest",
-  },
-});
-```
+A single application without sign-in (`application` with `authentication: "disabled"`, the default) needs no profile. Everyone using it is the anonymous role, so the host grants that role the `documentStore.*` capabilities the application declares. Other declared capabilities are not granted this way, and a host that passes its own `policyProfile` keeps it unchanged.
 
 The [test host](testing-synware.md) grants declared permissions to its test subject, so a unit test can pass where the browser host denies.
 

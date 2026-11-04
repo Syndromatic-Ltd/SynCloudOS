@@ -146,6 +146,24 @@ describe("application-only browser host", () => {
     expect(dialog.textContent).toContain("1.0.0");
   });
 
+  it("grants a no-sign-in single application the document-store capabilities it declares", async () => {
+    const documentBundle = createSynWare({ manifest: { ...bundle.manifest, permissions: ["documentStore.drafts.read", "documentStore.draft.write", "file.write", "runtime.configure"] }, root: Application });
+    await mount(element(), { bundles: [documentBundle] });
+    const profile = vi.mocked(createSynCloudOS).mock.calls.at(-1)![0].policyProfile!;
+    expect(profile.id).toBe("syncloudos.single-application");
+    const anonymous = profile.roles[profile.anonymousRole]!;
+    expect(anonymous).toEqual(expect.arrayContaining(["app.open.public", "documentStore.drafts.read", "documentStore.draft.write"]));
+    // Only document-store capabilities are granted by declaring them.
+    expect(anonymous).not.toContain("runtime.configure");
+    expect(anonymous).not.toContain("file.write");
+  });
+  it("keeps a single application host's own policy profile", async () => {
+    const documentBundle = createSynWare({ manifest: { ...bundle.manifest, permissions: ["documentStore.drafts.read"] }, root: Application });
+    const own = { id: "own", roles: { visitor: ["app.open.public"] }, anonymousRole: "visitor", resolveRole: () => "visitor" };
+    await mount(element(), { bundles: [documentBundle], policyProfile: own });
+    expect(vi.mocked(createSynCloudOS).mock.calls.at(-1)![0].policyProfile).toBe(own);
+  });
+
   it("does not invent an About item when the host supplies no attribution", async () => {
     const { element: target } = await mount(element(), { bundles: [menuBundle] });
     await openApplicationMenu(target);
