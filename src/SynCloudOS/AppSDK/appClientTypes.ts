@@ -308,8 +308,10 @@ export interface AppDocumentOpenRequest<TModel = unknown> {
   readonly typeId: string;
   readonly location: AppDocumentLocation;
   /**
-   * Not used to create a missing document: openDocument rejects with code "document-not-found" when
-   * nothing is stored at `location`. Catch that code and call newDocument with the same location.
+   * The model for a document that does not exist yet. When nothing is stored at `location`,
+   * openDocument creates a new document there from this model, written on its first save. Without
+   * it, a missing document rejects with code "document-not-found". A stored document always opens
+   * with its stored model; this is never merged into it.
    */
   readonly initialModel?: TModel;
   readonly activate?: boolean;
