@@ -94,24 +94,28 @@ function TooltipHarness({
   readonly runtimeController?: AbortController;
   readonly children: React.ReactNode;
 }) {
-  const runtimePort = useMemo(() => ({
-    runtimeId: "runtime:tooltip-tests",
-    signal: runtimeController?.signal ?? new AbortController().signal,
-    environment: {
-      browser: { getDocument: () => document, getWindow: () => window },
-      workArea: { getSnapshot: () => workAreaSnapshot, subscribe: () => () => undefined },
-      visualViewport: { getSnapshot: () => null, subscribe: () => () => undefined },
-      presentation: {
-        getSnapshot: () => presentationSnapshot(reducedMotion),
-        subscribe: () => () => undefined,
+  const runtimePort = useMemo(() => {
+    // useSyncExternalStore requires a stable snapshot until the source changes, as real sources keep.
+    const presentation = presentationSnapshot(reducedMotion);
+    return {
+      runtimeId: "runtime:tooltip-tests",
+      signal: runtimeController?.signal ?? new AbortController().signal,
+      environment: {
+        browser: { getDocument: () => document, getWindow: () => window },
+        workArea: { getSnapshot: () => workAreaSnapshot, subscribe: () => () => undefined },
+        visualViewport: { getSnapshot: () => null, subscribe: () => () => undefined },
+        presentation: {
+          getSnapshot: () => presentation,
+          subscribe: () => () => undefined,
+        },
+        setTimeout: scheduler.setTimeout,
+        clearTimeout: scheduler.clearTimeout,
       },
-      setTimeout: scheduler.setTimeout,
-      clearTimeout: scheduler.clearTimeout,
-    },
-    restoreFocus: vi.fn(),
-    reportPlacementFailure: vi.fn(),
-    wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
-  }), [reducedMotion, runtimeController, scheduler]);
+      restoreFocus: vi.fn(),
+      reportPlacementFailure: vi.fn(),
+      wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
+    };
+  }, [reducedMotion, runtimeController, scheduler]);
   return (
     <NSEOverlayProvider runtimePort={runtimePort}>
       <NSETooltipProvider leaveDelayMs={50}>{children}</NSETooltipProvider>
