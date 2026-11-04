@@ -170,6 +170,25 @@ describe("Atmo vector coverage", () => {
     }
   });
 
+  it("keeps every swappable Atmo state vector resident before a control first needs it", () => {
+    const css = readVectorCss();
+    const defined = [...new Set([...css.matchAll(/(--nse-atmo-svg-[\w-]+):\s*url\(/gu)].map((match) => match[1]))];
+    expect(defined.length).toBeGreaterThan(0);
+    const selector = "[data-nse-appearance=\"atmo\"].nse-appearance-provider::before {";
+    const start = css.indexOf(selector);
+    expect(start, "missing appearance-boundary residency rule").toBeGreaterThanOrEqual(0);
+    const rule = css.slice(start, css.indexOf("}", start));
+    // One declared layer per state vector: a missing one would paint a blank
+    // frame on its first use in Chromium and WebKit.
+    const resident = [...rule.matchAll(/var\((--nse-atmo-svg-[\w-]+)\)/gu)].map((match) => match[1]);
+    expect([...resident].sort()).toEqual([...defined].sort());
+    expect(new Set(resident).size).toBe(resident.length);
+    // It must stay invisible, sizeless and inert.
+    for (const declaration of [
+      "content: \"\";", "position: absolute;", "inline-size: 0;", "block-size: 0;",
+      "overflow: hidden;", "pointer-events: none;", "background-repeat: no-repeat;", "background-size: 0 0;",
+    ]) expect(rule).toContain(declaration);
+  });
   it("keeps blur and deep elevation on the inert shared layer with accessibility fallbacks", () => {
     const navigationCss = readFileSync(path.join(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8");
 
