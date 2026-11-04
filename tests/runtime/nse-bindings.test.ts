@@ -69,6 +69,25 @@ describe('value binding authority', () => {
     expect(committed).toBe(1);
     expect(binding.getSnapshot()).toBe(snapshot);
   });
+  it('keeps snapshot identity for an adapter that builds a new snapshot on every read', () => {
+    const owner = new Model(); let revision = 1; let value = 'a'; let readOnly = false;
+    const binding = createNSEBinding<string>(owner, { source: owner,
+      read: () => ({ revision, value: { kind: 'value', value }, readOnly, issues: [] }),
+      beginEditing: () => ({ preview() {}, cancel() {}, async commit() { return { status: 'committed' }; } }),
+    });
+    const first = binding.getSnapshot();
+    expect(binding.getSnapshot()).toBe(first);
+    value = 'b';
+    const changedValue = binding.getSnapshot();
+    expect(changedValue).not.toBe(first);
+    expect(changedValue.value).toEqual({ kind: 'value', value: 'b' });
+    expect(binding.getSnapshot()).toBe(changedValue);
+    readOnly = true;
+    expect(binding.getSnapshot().readOnly).toBe(true);
+    const locked = binding.getSnapshot();
+    revision = 2;
+    expect(binding.getSnapshot()).not.toBe(locked);
+  });
   it('cancels pending adapter settlement after lifetime ends without hiding a rejected write', async () => {
     const owner = new Model(); let resolve!: (value: {status:'committed'}) => void;
     const binding = createNSEBinding<string>(owner, { source: owner,

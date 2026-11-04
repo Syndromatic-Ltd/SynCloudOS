@@ -114,6 +114,33 @@ When System Preferences is the only item, the control opens it directly and no m
 
 `permissions` lists the capabilities the application asks the host for, for example `"app.open.public"`, `"external.open"` or `"diagnostics.view"`. The host's policy decides what to grant. FX clients that reach devices ask for their own permissions, which the [FX guides](fx/README.md) name.
 
+### Permissions
+
+Two checks apply, and an action needs whichever of them governs it:
+
+| Check | Decided by | Capabilities |
+| --- | --- | --- |
+| What the application declares | `permissions` in `Info.ts` | File panels: `file.open` (always declared) and `file.write` (declare it to save files with `SCOS.filePanels`). Without it, a save reports "The file capability must be declared." |
+| What the person may do | The role's capabilities in the host's policy profile | Document store: `documentStore.drafts.read`, `documentStore.draft.write`, `documentStore.draft.delete`, `documentStore.publish`, `documentStore.unpublish`, `documentStore.revision.create`, `documentStore.media.write` and `documentStore.media.attach`. |
+
+Declaring a document-store capability in `permissions` does not grant it: the role of the person using the application must hold it, and a denial names the missing capabilities and the role. A host grants role capabilities with `policyProfile` in `mountSynCloudOS`. A single-application site with `authentication: "disabled"` runs everyone as the anonymous role, so give that role what the application needs:
+
+```tsx
+await mountSynCloudOS({
+  element,
+  application: { bundleIdentifier: "org.example.lab" },
+  authentication: "disabled",
+  policyProfile: {
+    id: "lab",
+    roles: { guest: ["app.open.public", "documentStore.drafts.read", "documentStore.draft.write"] },
+    anonymousRole: "guest",
+    resolveRole: () => "guest",
+  },
+});
+```
+
+The [test host](testing-synware.md) grants declared permissions to its test subject, so a unit test can pass where the browser host denies.
+
 `services` declares the host services the application depends on. Each entry has an `id`, and optionally `required` and `minimumVersion`.
 
 ## Localisation and appearance

@@ -188,7 +188,9 @@ export interface AppUndoReservation {
 export interface AppUndoHistory {
   readonly canUndo: boolean;
   readonly canRedo: boolean;
+  /** The complete menu title, verb included: "Undo Rename", or "Undo" when nothing can be undone. Use it as the item title; do not prefix it. */
   readonly undoTitle: string | null;
+  /** The complete menu title, verb included: "Redo Rename", or "Redo" when nothing can be redone. */
   readonly redoTitle: string | null;
   readonly isExecuting: boolean;
   register(action: AppUndoAction, options?: Readonly<{
@@ -305,6 +307,10 @@ export interface AppDocumentOpenRequest<TModel = unknown> {
   readonly documentId?: string;
   readonly typeId: string;
   readonly location: AppDocumentLocation;
+  /**
+   * Not used to create a missing document: openDocument rejects with code "document-not-found" when
+   * nothing is stored at `location`. Catch that code and call newDocument with the same location.
+   */
   readonly initialModel?: TModel;
   readonly activate?: boolean;
   readonly signal?: AbortSignal;

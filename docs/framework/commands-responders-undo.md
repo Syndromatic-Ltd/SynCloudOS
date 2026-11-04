@@ -143,7 +143,7 @@ export function useRenameWithUndo(documentId: string, setTitle: (title: string) 
 }
 ```
 
-`AppUndoHistory` reports `canUndo`, `canRedo`, `undoTitle` and `redoTitle`, and offers `undo()`, `redo()` and `subscribe()`. Menus read the titles to show entries such as "Undo Rename Note".
+`AppUndoHistory` reports `canUndo`, `canRedo`, `undoTitle` and `redoTitle`, and offers `undo()`, `redo()` and `subscribe()`. The titles are complete menu titles with the verb included, such as "Undo Rename Note" (or "Undo" when nothing can be undone), so use them as given rather than prefixing "Undo". The standard Edit menu commands already show them.
 
 For an operation that first has to finish work before it knows what to reverse, call `reserve()`. It returns a reservation you either `commit(action)` or `cancel()`.
 

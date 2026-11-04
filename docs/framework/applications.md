@@ -3,7 +3,7 @@
 The [class authoring guide](cocoa-authoring.md) covers inline and separate views, automatic root construction, typed action connections, bindings and managed lifetimes.
 
 Class-based apps export an `NSEApplication` subclass as the module's default. The framework creates
-one instance per launch (never call `new` on it), opens `static mainWindow` when present, and awaits each lifecycle hook:
+one instance per launch (never call `new` on it), opens `static mainWindow` when present, and awaits each lifecycle hook in turn:
 `applicationWillFinishLaunching`, `applicationDidFinishLaunching`, `applicationDidBecomeActive`,
 `applicationWillResignActive` (when the app is suspended), `applicationShouldTerminate`, then
 `applicationWillTerminate`. Return `false` (or a promise of it) from `applicationShouldTerminate` to
@@ -12,14 +12,24 @@ operation's timeout (`lifecycleHookTimeoutMs`, 5 seconds unless the host raises 
 `static migrations` declare what `createSynWare` took before, and a `handleBackgroundTask(taskId, { signal })`
 method handles background tasks.
 
-`SCOS` is running before the launch callbacks, including `applicationDidFinishLaunching`.
+`SCOS` is running before the launch callbacks, including `applicationWillFinishLaunching`.
 Preferences, services, routes and secondary-window creation do not depend on a React view mounting.
+
+The two launch hooks sit on either side of the main window, as in Cocoa:
+
+| Hook | When | Use it for |
+| --- | --- | --- |
+| `applicationWillFinishLaunching` | Before the main window opens. The window waits for it, including its promise. | Asynchronous setup the windows read: opening the primary document or session, loading content, restoring state. |
+| `applicationDidFinishLaunching` | After the launch commits. The main window is open and may already have rendered. | Work that needs the window to exist, or that the window does not depend on. A failure here is reported but does not undo the launch. |
+
+A view that reads state assigned in `applicationDidFinishLaunching` can render before the assignment and fail.
 
 ```tsx
 import { NSEApplication, NSEWindowController, useObserve } from "@syndromatic/syncloudos";
 import { NSEArrayController } from "@syndromatic/syncloudos/nse";
 
 interface Note { readonly id: string }
+declare function loadNotes(): Promise<readonly Note[]>;
 
 function NotesView({ controller }: { readonly controller: NotesWindow }) {
   const notes = useObserve(controller.app.notes);        // `controller` itself is observed already
@@ -34,8 +44,8 @@ export default class NotesApp extends NSEApplication {
   static mainWindow = NotesWindow;
   readonly notes = new NSEArrayController<Note>({ id: "notes", getId: (note) => note.id });
 
-  applicationDidFinishLaunching() {
-    this.notes.setContent([]);
+  async applicationWillFinishLaunching() {
+    this.notes.setContent(await loadNotes());
   }
   applicationShouldTerminate() { return true; }
 }

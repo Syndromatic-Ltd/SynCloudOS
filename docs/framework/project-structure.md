@@ -132,7 +132,7 @@ Remove view-to-controller service bridges. Use `SCOS.routes.state(graph, name)`,
 `useRouteState`/`useRouter` clients. Use `SCOS.fonts.manager` and `SCOS.menus.runtime` instead of
 passing `useFonts()` and `useNSEMenuPort()` values back from a view.
 
-Restore preferences in `applicationDidFinishLaunching`: `SCOS` is already running there.
+Restore preferences in `applicationWillFinishLaunching`: `SCOS` is already running there, and the main window waits for it.
 Move reduced-motion work to `traitCollectionDidChange(previous)` and read
 `this.traitCollection.reducedMotion`; content-bound values are in `traitCollection.presentation`.
 Move geometry-dependent controller work to `viewWillLayout`/`viewDidLayout`.
