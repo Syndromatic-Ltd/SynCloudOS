@@ -2725,7 +2725,20 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       subscribePresentation(listener: () => void) {
         assertLive();
         const notify = () => { if (!signal.aborted) listener(); };
-        const removeState = runtime.store.subscribe(notify);
+        // Validation is itself observed command work, which update readiness
+        // republishes into the store. Revalidating on that publication would
+        // validate forever, so a change confined to readiness is not one.
+        let observedState = runtime.store.getSnapshot();
+        const notifyState = () => {
+          const next = runtime.store.getSnapshot();
+          const previous = observedState;
+          observedState = next;
+          const keys = new Set([...Object.keys(previous), ...Object.keys(next)]);
+          for (const key of keys) {
+            if (key !== "updateReadiness" && previous[key as keyof typeof previous] !== next[key as keyof typeof next]) { notify(); return; }
+          }
+        };
+        const removeState = runtime.store.subscribe(notifyState);
         const removeResponders = runtime.responders.subscribe(notify);
         const removeCommands = runtime.commands.subscribe(notify);
         const removeFocus = runtime.focus.subscribe(notify);
