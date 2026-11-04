@@ -100,8 +100,13 @@ export function assertExpectedDocumentVersion<T>(
   }
 }
 
+export interface InMemoryDocumentAdapterOptions {
+  /** The adapter ID; defaults to "memory". */
+  readonly id?: string;
+}
+
 export class InMemoryDocumentAdapter implements DocumentStorageAdapter {
-  readonly id = "memory";
+  readonly id: string;
   readonly capabilities = Object.freeze({
     versions: true,
     delete: true,
@@ -115,7 +120,9 @@ export class InMemoryDocumentAdapter implements DocumentStorageAdapter {
   readonly #listeners = new Map<string, Set<DocumentWatchListener>>();
   readonly #closeTransactions = new Map<string, ActiveCloseTransaction>();
 
-  constructor(private readonly environment: DocumentAdapterEnvironment) {}
+  constructor(private readonly environment: DocumentAdapterEnvironment, options: InMemoryDocumentAdapterOptions = {}) {
+    this.id = options.id ?? "memory";
+  }
 
   supports(location: DocumentLocation): boolean { return location.kind === "memory"; }
 

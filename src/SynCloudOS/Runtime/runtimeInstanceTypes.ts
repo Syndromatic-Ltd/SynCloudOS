@@ -890,6 +890,12 @@ export interface ApplicationDocumentRuntimeConfiguration {
   readonly initialTypes?: readonly DocumentType<unknown, unknown>[];
   /** Supplied stores are host owned; createStore results are runtime owned. */
   readonly assetBacking?: DocumentAssetRuntimeBacking;
+  /**
+   * Built-in adapters for `memory` locations, and for `indexed-db` locations when `indexedDB` is
+   * given, used only when no registered adapter supports the location. The browser host turns this
+   * on; it is off for runtimes that leave it out.
+   */
+  readonly defaultAdapters?: { readonly indexedDB?: IDBFactory };
 }
 
 export interface SynCloudOSRuntimeConfig {

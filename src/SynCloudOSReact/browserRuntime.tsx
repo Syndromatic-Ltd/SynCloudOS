@@ -52,6 +52,7 @@ import type { CapturedSynCloudOSError } from "../SynCloudOS/ErrorManager/errorTy
 import type { OperationResult } from "../SynCloudOS/Operations/operationTypes";
 import type { SynCloudOSLocaleBundleResourceInput } from "../SynCloudOS/LocaleServices/localeTypes";
 import { createBrowserRuntimeEnvironment } from "../SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
+import { createBrowserDocumentAssetEnvironment } from "../SynCloudOS/PlatformAdapters/BrowserDocumentAssetEnvironment";
 import { createBrowserRoutePlatform } from "../SynCloudOS/PlatformAdapters/BrowserRoutePlatform";
 import { createBrowserRecoveryWatchdog } from "../SynCloudOS/PlatformAdapters/BrowserRecoveryWatchdog";
 import { createBrowserRouteCoordinator, type CoordinatedRouteResolution } from "../SynCloudOS/Routing/BrowserRouteCoordinator";
@@ -591,6 +592,17 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
           frame: Object.freeze({ ...bundle.manifest.frame, topBar: "none" as const, presentationMotion: "content" as const }),
         }) }));
     }
+    if ((authenticationPolicy ?? "disabled") === "disabled") {
+      // Without sign-in nobody can hold a session, so gating the primary application behind one only
+      // stops it opening. It is public here; asking for sign-in explicitly contradicts the host.
+      initialBundles = initialBundles.map(bundle => {
+        if (normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId) return bundle;
+        if (bundle.manifest.policy?.requiresLogin === true) {
+          throw new TypeError(`Application ${primaryId} declares runtime.policy.requiresLogin, but this host mounts it with authentication "disabled", so nobody could ever open it. Enable authentication, or remove requiresLogin.`);
+        }
+        return Object.freeze({ ...bundle, manifest: Object.freeze({ ...bundle.manifest, policy: Object.freeze({ ...bundle.manifest.policy, public: true }) }) });
+      });
+    }
     const primary = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId)!.manifest;
     // Without sign-in everyone is the anonymous role, so a single application that brings no policy
     // profile gets the document-store capabilities it declares; otherwise its documents are denied.
@@ -609,7 +621,8 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     ...(applicationPolicyProfile === undefined ? {} : { policyProfile: applicationPolicyProfile }),
     initialBundles,
     trustedDocumentKinds: composition.trustedDocumentKinds,
-    ...(composition.applicationDocuments === undefined ? {} : { applicationDocuments: composition.applicationDocuments }),
+    // Memory and IndexedDB locations work out of the box; an adapter the host registers still wins.
+    applicationDocuments: { ...composition.applicationDocuments, defaultAdapters: { indexedDB: createBrowserDocumentAssetEnvironment().indexedDB } },
   };
   const runtime = createSynCloudOS(config);
   runtimeFontCatalogue(runtime, fontCatalogue);

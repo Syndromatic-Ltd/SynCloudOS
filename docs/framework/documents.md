@@ -74,19 +74,17 @@ export function useNoteActions() {
 | `document-store` | `documentId` | The host's document store. |
 | `remote` | `url` | A remote endpoint. |
 
-Each location kind needs a document adapter that the host registers (`applicationDocuments.initialAdapters`, or `registerAdapter` in a host contribution's `install`). Without one, opening or saving there fails with `document-adapter-unavailable` ("No document adapter supports the requested memory location"). The browser host does not register `memory`, `indexed-db` or `remote` adapters by default, so check what your host provides. A scratch document that is never saved needs no location at all: call `newDocument` without one.
+Each location kind is stored by a document adapter. The browser host (`mountSynCloudOS`) provides `memory` and `indexed-db` out of the box: `memory` keeps documents for the life of the page, and `indexed-db` stores them in the browser under the location's `database`. `document-store` uses the host's document store, and `remote` needs an adapter the host registers, because only the host knows the endpoint and its credentials. A host registers adapters through `applicationDocuments.initialAdapters` or `registerAdapter` in a host contribution's `install`, and an adapter it registers always takes precedence over a built-in one. Without any adapter for a location, opening or saving there fails with `document-adapter-unavailable`. A scratch document that is never saved needs no location at all: call `newDocument` without one.
 
-Opening a location that is already open returns the existing document. `openDocument` only opens what is stored: a missing document rejects with code `document-not-found`, and `initialModel` is not used to create it. To open the document on first launch, catch that code and create it at the same location:
+Opening a location that is already open returns the existing document. Give `openDocument` an `initialModel` to open or create: when nothing is stored at the location yet, it creates a new document there from that model, written on its first save. A stored document always opens with its stored model. Without `initialModel`, a missing document rejects with code `document-not-found`. This makes the first launch the same as every other:
 
 ```ts
 async applicationWillFinishLaunching() {
-  const request = { typeId: "org.example.lab.simulation", location: { kind: "document-store", documentId: "lab.workspace" } } as const;
-  try {
-    this.document = await SCOS.documents.openDocument(request);
-  } catch (error) {
-    if ((error as { code?: string }).code !== "document-not-found") throw error;
-    this.document = await SCOS.documents.newDocument({ ...request, initialModel: emptySimulation() });
-  }
+  this.document = await SCOS.documents.openDocument({
+    typeId: "org.example.lab.simulation",
+    location: { kind: "document-store", documentId: "lab.workspace" },
+    initialModel: emptySimulation(),
+  });
 }
 ```
 

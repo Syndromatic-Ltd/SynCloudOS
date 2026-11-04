@@ -124,6 +124,11 @@ export interface DocumentControllerDependencies {
   readonly observeError?: (error: unknown, context: string) => void;
   readonly resourceLifecycle?: (document: ApplicationDocument<unknown, unknown>, signal?: AbortSignal) => Promise<DocumentResourceLifecycle>;
   readonly transformAdapter?: (adapter: DocumentStorageAdapter) => DocumentStorageAdapter;
+  /**
+   * A built-in adapter for a location no registered adapter supports, or null. It is registered on
+   * first use and gives way to any adapter registered later that supports the same location.
+   */
+  readonly defaultAdapterFor?: (location: DocumentLocation) => DocumentStorageAdapter | null;
 }
 
 
@@ -446,6 +451,7 @@ export class DocumentController {
   readonly #types = new DocumentTypeRegistry();
   readonly #adapters = new Map<string, DocumentStorageAdapter>();
   readonly #adapterGenerations = new Map<string, number>();
+  readonly #defaultAdapterIds = new Set<string>();
   #nextAdapterGeneration = 0;
   readonly #documents = new Map<string, ApplicationDocument<unknown, unknown>>();
   readonly #documentIdsByLocation = new Map<string, string>();
@@ -3556,8 +3562,19 @@ export class DocumentController {
   }
 
   #resolveAdapter(location: DocumentLocation): DocumentStorageAdapter {
-    const candidates = [...this.#adapters.values()].filter((adapter) => adapter.supports(location));
-    if (candidates.length === 0) throw new DocumentAdapterUnavailableError(location);
+    const supporting = [...this.#adapters.values()].filter((adapter) => adapter.supports(location));
+    // A registered adapter always wins over a built-in default for the same location.
+    const registered = supporting.filter(({ id }) => !this.#defaultAdapterIds.has(id));
+    let candidates = registered.length > 0 ? registered : supporting;
+    if (candidates.length === 0) {
+      const fallback = this.dependencies.defaultAdapterFor?.(location) ?? null;
+      if (!fallback || !fallback.supports(location)) throw new DocumentAdapterUnavailableError(location);
+      if (!this.#adapters.has(fallback.id)) {
+        this.#defaultAdapterIds.add(fallback.id);
+        this.registerAdapter(fallback);
+      }
+      candidates = [this.#adapters.get(fallback.id)!];
+    }
     if (candidates.length > 1) throw new DocumentAdapterAmbiguousError(location, candidates.map(({ id }) => id));
     return candidates[0]!;
   }

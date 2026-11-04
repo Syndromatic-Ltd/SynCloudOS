@@ -56,15 +56,8 @@ try {
   const broken=await call("validate",{typescript:false,idioms:false});
   assert.equal(broken.ok,false,JSON.stringify(broken));
   assert(broken.findings.some(finding=>finding.rule==="launch.failed" && finding.file==="src/main.tsx"),JSON.stringify(broken.findings));
-  // Not public under disabled sign-in: found statically, and the launch says how to fix it.
+  // The scaffold is not marked public; with sign-in disabled the host still opens it.
   writeFileSync(resolve(consumer.root,"src/main.tsx"),hostEntry("org.example.hello"));
-  const unreachable=await call("validate",{typescript:false,idioms:false});
-  assert(unreachable.findings.some(finding=>finding.rule==="synware.public-policy"),JSON.stringify(unreachable.findings));
-  assert(unreachable.findings.some(finding=>finding.rule==="launch.failed" && finding.message.includes("runtime: { policy: { public: true } }")),JSON.stringify(unreachable.findings));
-  const info=resolve(consumer.root,"src/SynWare/Hello.app/Contents/Info.ts");
-  const infoSource=readFileSync(info,"utf8");
-  assert(infoSource.includes("export default {"),infoSource);
-  writeFileSync(info,infoSource.replace("export default {","export default {\n  runtime: { policy: { public: true } },"));
   const checked=await call("validate");
   assert.equal(checked.ok,true,JSON.stringify(checked.findings));
   assert.equal(checked.typescript.ran,true);
