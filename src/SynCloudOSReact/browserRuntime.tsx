@@ -59,6 +59,7 @@ import { createSynCloudOS } from "../SynCloudOS/Runtime/createSynCloudOS";
 import type { RuntimeDisposalResult } from "../SynCloudOS/Runtime/disposalTypes";
 import type { SynCloudOSRuntime, SynCloudOSRuntimeConfig } from "../SynCloudOS/Runtime/runtimeInstanceTypes";
 import type { SynCloudOSPolicyProfile } from "../SynCloudOS/PolicyKit/policyTypes";
+import { singleApplicationPolicyProfile } from "../SynCloudOS/PolicyKit/singleApplicationPolicyProfile";
 import { createSynCloudOSFacade } from "../SynCloudOS/SynCloudOS";
 import type { AuthenticationInput, WebspringDefinition } from "../Webspring/webspringTypes";
 import type { SynCloudOSShellResources } from "../Webspring/WebspringController";
@@ -570,6 +571,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     initialBundles: browserBundles(options.bundles ?? [], projectBundles, options.about),
   });
   let initialBundles = composition.initialBundles;
+  let applicationPolicyProfile: SynCloudOSPolicyProfile | undefined;
   if (options.application) {
     const primaryId = normalizeBundleIdentifier(options.application.bundleIdentifier);
     if (!initialBundles.some(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId)) {
@@ -590,6 +592,12 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
         }) }));
     }
     const primary = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId)!.manifest;
+    // Without sign-in everyone is the anonymous role, so a single application that brings no policy
+    // profile gets the document-store capabilities it declares; otherwise its documents are denied.
+    if ((authenticationPolicy ?? "disabled") === "disabled" && composition.runtimeConfig.policyProfile === undefined) {
+      const primaryBundle = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId) as { readonly synWareManifest?: { readonly permissions?: readonly string[] } } | undefined;
+      applicationPolicyProfile = singleApplicationPolicyProfile(primaryBundle?.synWareManifest?.permissions ?? []);
+    }
     if (authenticationPolicy !== undefined && authenticationPolicy !== "disabled"
       && (primary.presentation ?? "appView") === "appView" && primary.applicationMenu?.trigger !== "content") {
       throw new TypeError(`Application ${primaryId} fills the page with ${authenticationPolicy} sign-in but declares no content application-menu trigger. Declare applicationMenu: { trigger: "content" } and open the menu with useApplicationMenuTrigger(), so people can reach Preferences > Account, Sign In and Log Out.`);
@@ -598,6 +606,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
   const config: SynCloudOSRuntimeConfig = {
     environment,
     ...composition.runtimeConfig,
+    ...(applicationPolicyProfile === undefined ? {} : { policyProfile: applicationPolicyProfile }),
     initialBundles,
     trustedDocumentKinds: composition.trustedDocumentKinds,
     ...(composition.applicationDocuments === undefined ? {} : { applicationDocuments: composition.applicationDocuments }),
