@@ -19,7 +19,7 @@ describe('document editing owner observations', () => {
   const member={id:'generated-private-id',settle,discard}; const registration=document.registerEditingParticipant(member,{isCurrent});
   isCurrent.mockClear();expect(read().editingParticipants).toBe(1);const prior=read();expect(Object.isFrozen(prior)).toBe(true);
   expect(read()).toBe(prior);expect(settle).not.toHaveBeenCalled();expect(discard).not.toHaveBeenCalled();expect(isCurrent).not.toHaveBeenCalled();
-  expect(Object.keys(prior).sort()).toEqual(['admissions','cleanup','editingCallbacks','editingParticipants','editingSettlements','recovery','revision']);
+  expect(Object.keys(prior).sort()).toEqual(['admissions','cleanup','editingCallbacks','editingParticipants','editingSettlements','recovery','revision','storageCallbacks']);
   expect(JSON.stringify(prior)).not.toContain('generated-private-id');
   member.id='changed';registration.dispose();registration.dispose();expect(read().editingParticipants).toBe(0);expect(read().revision).toBeGreaterThan(prior.revision);
  });
