@@ -10,6 +10,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import { createSynWareValidator, deriveManifestForFolder, discoverProjectFolders, rejectDuplicateBundleIdentifiers } from "../synware/validation-core.mjs";
 import { deriveSynWareManifest, kebabCase, titleFromFolderName, assertUniqueBundleIdentifiers } from "../synware/project-derivation.mjs";
 import { scaffoldProjectFiles, scaffoldBundleIdentifier } from "../synware/create-synware.mjs";
+import { auditSynWareIdioms } from "../synware/idiom-audit.mjs";
 import { normalizeBundleIdentifier } from "../../src/SynCloudOS/Identity/bundleIdentifier.mjs";
 import { applicationHostHints, bundlePaths, discoveryKeys, inside, json, projectContext, sdkName, slash, viteHints } from "./project.mjs";
 import { docSections, lookupSdk, similarity } from "./lookup.mjs";
@@ -84,7 +85,11 @@ export async function validateProject(input={}) {
       if (exitCode && findings.length===before) findings.push({file:"tsconfig.json",line:1,rule:"typescript.failed",message:output.trim() || "TypeScript process failed or timed out."});
     }
   }
-  return {ok:findings.length===0,findings,bundles:bundles.map(({findings,...bundle})=>bundle),typescript,host};
+  // Idiom findings are warnings: they never make a valid project invalid, but an
+  // agent must not read "0 errors" as idiomatic SynCloudOS.
+  const audit=input.idioms===false ? {findings:[],idiomAudit:null} : auditSynWareIdioms({root,applications:bundles.filter(bundle=>bundle.kind==="application" && bundle.ok)});
+  findings.push(...audit.findings);
+  return {ok:findings.every(finding=>finding.severity==="warning"),findings,bundles:bundles.map(({findings,...bundle})=>bundle),typescript,host,idiomAudit:audit.idiomAudit};
 }
 export async function scaffold(input) {
   const context=projectContext(input.projectRoot),{root}=context, vite=optionsFor(context,input);
@@ -115,12 +120,22 @@ export async function scaffold(input) {
   const validateManifest=new Ajv2020({allErrors:true,strict:false}).compile(json(resolve(context.sdkRoot,"tooling/manifest.schema.json")));
   if (kind === "application" && !validateManifest(deriveSynWareManifest({folderName:name+".app",info:manifest}))) throw new Error("Scaffold manifest is invalid: "+validateManifest.errors.map(error=>(error.instancePath || "/")+" "+error.message).join("; "));
   const header="/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. All rights reserved.\n * Designed by Kavish Krishnakumar in Manchester.\n * SPDX-License-Identifier: AGPL-3.0-or-later\n */\n";
-  const files=Object.fromEntries(scaffoldProjectFiles({kind,name,id,bundleIdentifier,organisation:input.organisation,owners:input.owners}));
+  if (input.authoring!==undefined && !["separate","inline","function"].includes(input.authoring)) throw new Error("authoring must be separate, inline or function.");
+  if (kind !== "application" && input.authoring!==undefined) throw new Error("authoring applies to application scaffolds only.");
+  // Class authoring (NSEApplication + NSEViewController + NSE controls) is the default. The CLI
+  // and this tool share one template, so the code an agent is handed cannot drift from create-synware.
+  let testFallback=false;
+  const files=Object.fromEntries(scaffoldProjectFiles({kind,name,id,bundleIdentifier,organisation:input.organisation,owners:input.owners,...(kind==="application"?{authoring:input.authoring,contentApplicationMenu:input.contentApplicationMenu===true}:{})}));
   if (kind === "application") {
     files["Contents/Info.ts"]=header+"export default "+JSON.stringify(manifest,null,2)+" as const;\n";
-    files["Contents/index.tsx"]=header+(input.contentApplicationMenu
-      ? 'import { SCOS, useApplicationMenuTrigger } from "@syndromatic/syncloudos";\n\nexport default function Root() {\n  const menu = useApplicationMenuTrigger();\n  return <main><h1>{SCOS.app.displayName}</h1><button type="button" ref={element => menu?.setAnchor(element)} disabled={!menu} aria-haspopup="menu" aria-expanded={menu?.open ?? false} onClick={() => menu?.toggle()}>{menu?.label ?? "Application menu"}</button></main>;\n}\n'
-      : 'import { SCOS } from "@syndromatic/syncloudos";\n\nexport default function Root() { return <main><h1>{SCOS.app.displayName}</h1></main>; }\n');
+    files["Contents/index.tsx"]=header+files["Contents/index.tsx"];
+    // The class scaffold's host test runs under Vitest with jsdom. A project without Vitest gets a
+    // dependency-free smoke test instead, so the scaffold type-checks in any consumer.
+    const deps={...context.manifest.dependencies,...context.manifest.devDependencies};
+    if (files["Contents/__tests__/app.test.tsx"]?.includes('from "vitest"') && !deps.vitest) {
+      files["Contents/__tests__/app.test.tsx"]='import Application from "../index";\n\nif (typeof Application !== "function") throw new Error("Expected an NSEApplication subclass");\n';
+      testFallback=true;
+    }
   }
   if (kind !== "integration") mkdirSync(target,{recursive:true});
   const createdPaths=[];
@@ -129,6 +144,7 @@ export async function scaffold(input) {
   if (input.policy?.public!==true) nextSteps.push('Before using this bundle as the primary application with authentication "disabled" or "optional", explicitly set runtime.policy.public to true. Do not make private applications public unless that access is intended.');
   if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "windowedView"; the default appView is for the primary application.');
   if (!input.contentApplicationMenu && (input.presentation===undefined || input.presentation==="appView")) nextSteps.push('A fullscreen primary with authentication "optional" or "required" must declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button, so people can reach Preferences > Account, Sign In and Log Out. Pass contentApplicationMenu: true to scaffold both.');
+  if (testFallback) nextSteps.push("The project has no Vitest, so Contents/__tests__/app.test.tsx is a smoke test. Install vitest and jsdom to test the application with createSynWareTestHost from @syndromatic/syncloudos/sdk/testing.");
   nextSteps.push("Review the generated manifest and run syncloudos.validate before registering the bundle.");
   return {createdPaths,nextSteps};
 }

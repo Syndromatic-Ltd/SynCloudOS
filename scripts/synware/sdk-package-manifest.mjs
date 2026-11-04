@@ -153,7 +153,7 @@ export function assertReviewedPackageFiles(files) {
       assertReviewedPackageFiles([file.slice(0, -4)]);
       continue;
     }
-    if (["LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "sdk/LICENSE", "sdk/NOTICE", "sdk/package.json", "licenses/dependencies.json"].includes(file)) continue;
+    if (["LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "AGENTS.md", "sdk/LICENSE", "sdk/NOTICE", "sdk/package.json", "licenses/dependencies.json"].includes(file)) continue;
     if (["index.js","index.d.ts","app-module-source.mjs","project-derivation.mjs","manifest-source.mjs","manifest-validator.mjs","bundleIdentifier.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","bundle-paths.mjs"].includes(file) || /^tooling\/(?:manifest\.schema|error-catalogue|build-receipt)\.json$/u.test(file)) continue;
     if (/^docs\/framework\/(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.(?:md|json|png|webp|svg|jpg|jpeg|gif)$/u.test(file)) continue;
     if (/^licenses\/(?:dependencies\/)?[A-Za-z0-9._-]+\/(?:(?:MIT|APACHE|BSD)[.-])?(?:LICENSE|LICENCE|COPYING|NOTICE)(?:[.-][A-Za-z0-9._-]+)?$/iu.test(file)) continue;

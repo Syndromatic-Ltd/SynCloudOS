@@ -97,8 +97,8 @@ export type { NSEBinding, NSEBindingValue, NSEBindingSnapshot, NSEBindingCommitR
 export { managedTask, NSETaskQueueFullError } from "../../NSE/sdkPackageEntry";
 export type { NSETaskLifetime, NSETaskSettlement, NSETaskContext, NSETaskRun, NSETaskSnapshot, NSEManagedTask, NSETaskOptions } from "../../NSE/sdkPackageEntry";
 export { outlet } from "../../NSE/sdkPackageEntry";
-export type { NSEViewOutlet, NSEOutletOptions } from "../../NSE/sdkPackageEntry";
-export type { NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "../../NSE/sdkPackageEntry";
+export type { NSEViewOutlet, NSEOutletElement, NSEOutletOptions } from "../../NSE/sdkPackageEntry";
+export type { NSEManagedAFXDisplayLink, NSEManagedAFXDisplayLinkOptions, NSEManagedAFXFrame, NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "../../NSE/sdkPackageEntry";
 export { createSynWareNSEDataViewDragBinding, type SynWareNSEDataViewDragOptions, type SynWareNSEDataViewDropProposal } from "./SynWareNSEDragAdapter";
 export { createSynWareNSEDragCommandPort, createSynWareNSEFontPanelCommandPort } from "./SynWareNSECommandAdapter";
 export { createSynWareNSETextLayoutPort, useNSEViewAnimator } from "./SynWareNSEMediaAdapters";

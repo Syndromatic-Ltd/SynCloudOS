@@ -20,8 +20,8 @@ export { NSEActionScopeProvider } from "../../NSE/sdkPackageEntry";
 export type { NSEActionScopeProviderProps } from "../../NSE/sdkPackageEntry";
 export { NSEApplication, NSEWindowController, NSEViewController } from "../../NSE/sdkPackageEntry";
 export { outlet } from "../../NSE/sdkPackageEntry";
-export type { NSEViewOutlet, NSEOutletOptions } from "../../NSE/sdkPackageEntry";
-export type { NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "../../NSE/sdkPackageEntry";
+export type { NSEViewOutlet, NSEOutletElement, NSEOutletOptions } from "../../NSE/sdkPackageEntry";
+export type { NSEManagedAFXDisplayLink, NSEManagedAFXDisplayLinkOptions, NSEManagedAFXFrame, NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "../../NSE/sdkPackageEntry";
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,
   NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEViewControllerFX, NSEViewControllerFXClients,

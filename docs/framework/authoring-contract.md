@@ -1,0 +1,20 @@
+# SynCloudOS authoring contract
+
+This is the contract for writing a SynWare application with SynCloudOS. It is written for people and for coding agents. The installed SDK ships it as `node_modules/@syndromatic/syncloudos/AGENTS.md`, so an agent working in a consumer project finds it before writing code.
+
+A SynWare that mounts and validates is not automatically idiomatic. An app that keeps its state in React hooks, draws its own buttons and paints its own palette loses most of SynCloudOS: Atmo's appearance in light and dark, focus and keyboard handling, accessibility, the responder chain, undo, document saving and managed lifetimes. Use the APIs below for each job.
+
+| Job | Use | Do not use |
+| --- | --- | --- |
+| Application, window and view ownership | An `NSEApplication` subclass as the default export, `NSEWindowController`, and `NSEViewController` subclasses holding `@observable` state, `bind()` bindings, `@action` methods and `actionRef()` handles. See [Class authoring](cocoa-authoring.md). | A plain function component with many `useState` and `useEffect` hooks as the application. Function authoring is an explicit opt-in for small apps. |
+| Controls | `NSEPushButton`, `NSETextField`, `NSESearchField`, `NSESlider`, `NSEStepper`, `NSESegmentedControl`, `NSEPopupButton`, `NSEToggleButton`, `NSECheckbox`, `NSETextView`, `NSETable` with an `NSEArrayController`, `NSESplitView`, `NSETabView` and `NSEToolbar`. See [NSE controls](nse-controls.md). | Raw `<button>`, `<input>`, `<select>`, `<textarea>` or `<table>` elements. |
+| Appearance and dark mode | Atmo, the vector theme SynCloudOS ships. It draws NSE controls and window and application chrome, and it supports light and dark colour schemes itself (`colourScheme` `"auto"`, `"light"` or `"dark"`). Use semantic tokens (`var(--nse-*)`) and `[data-mode="dark"]` only for your own content. See [Appearance](appearance.md). | A custom stylesheet with a hard-coded hex palette. Atmo-Heritage and Atmo-Onyx, which are obsolete raster themes and are never a dark mode. |
+| Primary application state | A document type declared in `documentTypes` and opened through `workspaceDocuments`, which provides saving, undo and autosave. See [Documents](documents.md). | `preferences.set()` holding JSON records. Preferences are for small settings. |
+| Asynchronous and worker computation | `managedTask(this, { lifetime, policy: "latest", debounceMs })` on a view controller, which cancels superseded work and ends with the view. | `new Worker()` or promises started inside `useEffect`. |
+| 2.5D layer animation | `this.fx.animation.manageRenderer(outlet)` with `AFXLayer`. | Hand-written `requestAnimationFrame` loops. |
+| Three.js, raw WebGL2 or WebGPU | `this.fx.animation.manageDisplayLink(outlet, { drawableSizeDidChange })`, `onFrame` and `setNeedsDisplay()`. The display link paces frames, pauses while the view is hidden or off screen, follows reduced motion and reports the drawable size; your engine owns the canvas context. | `requestAnimationFrame`, `ResizeObserver` and `devicePixelRatio` wired by hand in an effect. |
+| 2D vector figures and plots | `GFXContext` recording a `GFXDisplayList`, drawn on screen by `NSEGraphicsView` (`autoSize`, `contentsGravity`, pointer handlers with display-list coordinates and an `@outlet` of `NSEViewOutlet<SVGSVGElement>`) and exported to SVG or PDF from the same display list. | A second, hand-written `<svg>` component that duplicates the exported figure. |
+
+Start new applications from the scaffold, which follows this contract: `create-synware Name.app` from the framework, or the Developer MCP `scaffold` tool. Both default to class authoring with a separate view file.
+
+The Developer MCP `validate` tool returns an `idiomAudit`. Its `idiom.*` findings have `severity: "warning"`: they never make `ok` false, but a project with idiom warnings is not idiomatic SynCloudOS. Treat each one as work to do.

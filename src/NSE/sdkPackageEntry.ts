@@ -63,8 +63,8 @@ export type { NSEBinding, NSEBindingValue, NSEBindingSnapshot, NSEBindingCommitR
 export { managedTask, NSETaskQueueFullError } from "./Tasks";
 export type { NSETaskLifetime, NSETaskSettlement, NSETaskContext, NSETaskRun, NSETaskSnapshot, NSEManagedTask, NSETaskOptions } from "./Tasks";
 export { outlet } from "./Application/viewOutlet";
-export type { NSEViewOutlet, NSEOutletOptions } from "./Application/viewOutlet";
-export type { NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "./Application/managedAnimationRenderer";
+export type { NSEViewOutlet, NSEOutletElement, NSEOutletOptions } from "./Application/viewOutlet";
+export type { NSEManagedAFXDisplayLink, NSEManagedAFXDisplayLinkOptions, NSEManagedAFXFrame, NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "./Application/managedAnimationRenderer";
 export type { NSEOwner, NSEControllerOwnershipOptions } from "./Controllers/ownership";
 export { useNSEArrayController, useNSETreeController } from "./Controllers/useNSEOwnedController";
 export { SynCloudOSLifecycleError } from "../SynCloudOS/nseRuntimeContracts";
@@ -630,10 +630,13 @@ export type {
 } from "./Focus/NSEFocusPort";
 export {
   NSEGraphicsView,
+  convertPointToGFXDisplayList,
 } from "./Graphics/NSEGraphicsView";
 export { snapshotNSEView } from "./Graphics/snapshotNSEView";
 export type { NSEViewSnapshotOptions } from "./Graphics/snapshotNSEView";
 export type {
+  NSEGraphicsViewContentsGravity,
+  NSEGraphicsViewPointerHandler,
   NSEGraphicsViewProps,
 } from "./Graphics/NSEGraphicsView";
 export {

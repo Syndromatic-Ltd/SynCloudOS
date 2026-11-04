@@ -26,7 +26,7 @@ import type { MEFXMediaClient } from "../../FX/MediaFX/MEFXMediaClient";
 import type { MIFXAccess, MIFXClient } from "../../FX/MIDIFX/public";
 import type { MFXMotionClient, MFXMotionManager } from "../../FX/MotionFX/public";
 import type { VFXCaptureSession, VFXVideoClient } from "../../FX/VideoFX/public";
-import { manageNSEAnimationRenderer, type NSEManagedAnimationHost, type NSEManagedAFXRenderer, type NSEManagedAFXRendererOptions } from "./managedAnimationRenderer";
+import { manageNSEAnimationDisplayLink, manageNSEAnimationRenderer, type NSEManagedAnimationHost, type NSEManagedAFXDisplayLink, type NSEManagedAFXDisplayLinkOptions, type NSEManagedAFXRenderer, type NSEManagedAFXRendererOptions } from "./managedAnimationRenderer";
 import type { NSEViewController } from "./NSEViewController";
 import type { NSEViewOutlet } from "./viewOutlet";
 
@@ -50,7 +50,14 @@ export interface NSEViewControllerFXClients {
  */
 export interface NSEViewControllerFX {
   readonly animation: {
+    /** An AFXRenderer that owns the canvas's drawing context (CARenderer). */
     manageRenderer(outlet: NSEViewOutlet<HTMLCanvasElement>, options?: NSEManagedAFXRendererOptions): NSEManagedAFXRenderer;
+    /**
+     * Frame pacing and drawable-size tracking for a canvas whose context you
+     * own, such as Three.js, raw WebGL2 or WebGPU (CADisplayLink / MTKView).
+     * A canvas outlet takes either a renderer or a display link, never both.
+     */
+    manageDisplayLink(outlet: NSEViewOutlet<HTMLCanvasElement>, options?: NSEManagedAFXDisplayLinkOptions): NSEManagedAFXDisplayLink;
   };
   /** Device motion and attitude (MotionFX). */
   readonly motion: MFXMotionManager;
@@ -88,11 +95,18 @@ export function createViewControllerFX(clients: NSEViewControllerFXClients, owne
       clients.media.createTimebase(options, boundTo(owner, signal)),
   }) as MEFXMediaClient;
   return Object.freeze({
-    animation: Object.freeze({ manageRenderer(outlet: NSEViewOutlet<HTMLCanvasElement>, options?: NSEManagedAFXRendererOptions) {
-      owner.throwIfAborted();
-      if (!controller) throw new TypeError("Managed animation renderers require a view controller.");
-      return manageNSEAnimationRenderer(controller, outlet, options);
-    } }),
+    animation: Object.freeze({
+      manageRenderer(outlet: NSEViewOutlet<HTMLCanvasElement>, options?: NSEManagedAFXRendererOptions) {
+        owner.throwIfAborted();
+        if (!controller) throw new TypeError("Managed animation renderers require a view controller.");
+        return manageNSEAnimationRenderer(controller, outlet, options);
+      },
+      manageDisplayLink(outlet: NSEViewOutlet<HTMLCanvasElement>, options?: NSEManagedAFXDisplayLinkOptions) {
+        owner.throwIfAborted();
+        if (!controller) throw new TypeError("Managed display links require a view controller.");
+        return manageNSEAnimationDisplayLink(controller, outlet, options);
+      },
+    }),
     get motion() { return (motion ??= clients.motion.createManager(owner)); },
     get location() { return (location ??= clients.location.createManager(owner)); },
     get haptics() { return (haptics ??= clients.haptics.createEngine(owner)); },

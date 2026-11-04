@@ -85,9 +85,9 @@ Broad `application menu`, `settings`, `preferences` and `account` queries priori
 
 ### `syncloudos.validate`
 
-Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, typescript?: boolean }` (`typescript` defaults to `true`).
+Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, typescript?: boolean, idioms?: boolean }` (`typescript` and `idioms` default to `true`).
 
-Output: `{ ok: boolean, findings: [{ file, line, column?, rule, message }], bundles: [{ directory, id, ok, error }], typescript: { ran, exitCode }, host: { status: "checked" | "unresolved" | "not-found", reason?, file?, line?, application?: { id, frame } | null, authentication? } }`.
+Output: `{ ok: boolean, findings: [{ file, line, column?, rule, severity?, message }], bundles: [{ directory, id, ok, error }], typescript: { ran, exitCode }, host: { status: "checked" | "unresolved" | "not-found", reason?, file?, line?, application?: { id, frame } | null, authentication? }, idiomAudit: { applications: [...], stylesheets: {...}, warnings } | null }`. `ok` is false only for findings without `severity: "warning"`.
 
 Uses the **same static manifest parser, import checks and directory validator as the repository's `validate-synware.mjs`**, compiled against the installed SDK's manifest schema and exports. It does not evaluate `Info.ts`. It then invokes the consumer's installed TypeScript compiler with `--noEmit --pretty false`; missing TypeScript or compiler failure is a finding, never a passing check. Set `typescript: false` only when intentionally requesting manifest/bundle checks without project type checking. Schema/import findings currently identify the containing file at line 1; TypeScript findings preserve the compiler's line and column.
 
@@ -95,19 +95,35 @@ For a directly imported `mountSynCloudOS` call with inline, literal host options
 
 `host.status` makes the limits explicit: `"checked"` means a single direct top-level mount's relevant options were read safely; `"unresolved"` supplies a reason when computed options, spreads, duplicate properties, nested/ambiguous calls or an unavailable primary prevent that check. `"not-found"` means no directly imported mount was found. The scanner reads project TypeScript/JavaScript source, excluding dependency, hidden, generated (`dist`, `build`, `coverage`), test, script and `.app` directories. It recognises named imports (including aliases) and namespace imports from `@syndromatic/syncloudos/browser`, but does not execute code, follow re-exports or evaluate wrappers/control flow. No missing-trigger finding is guessed for unresolved hosts. This checks the manifest declaration, not whether a handwritten component actually renders its trigger button; verify that interaction in the running app.
 
+#### Idiom audit
+
+A project can be valid and still bypass most of SynCloudOS. The idiom audit reports where an application departs from the [authoring contract](authoring-contract.md), as findings with `severity: "warning"`. Warnings never make `ok` false, but **a project with idiom warnings is not idiomatic SynCloudOS**; don't read "no errors" as done.
+
+For each valid application, the audit follows the relative imports of `Contents/index.tsx`, including code outside the bundle such as `src/App.tsx`, and reports:
+
+| Rule | Finds | Use instead |
+| --- | --- | --- |
+| `idiom.cocoa-class-authoring` | An application with no `NSEApplication` subclass, with the number of `useState`/`useReducer` hooks its code uses. | An `NSEApplication` subclass and `NSEViewController` with `@observable`, `bind`, `@action` and `actionRef`. |
+| `idiom.nse-controls` | Raw `<button>`, `<input>` (except `hidden` and `file`), `<select>`, `<textarea>` and `<table>` elements, counted per file. | The named NSE control for each element. |
+| `idiom.atmo-appearance` | A project stylesheet with 12 or more hard-coded colour literals, and any mention of the obsolete Atmo-Heritage or Atmo-Onyx raster themes. Every project stylesheet is checked, including those the host entry imports. | Atmo, which draws controls and chrome in light and dark, with semantic tokens. |
+| `idiom.managed-lifecycle` | `requestAnimationFrame`, `new ResizeObserver`, `new IntersectionObserver` or `new Worker` inside a React effect. | `this.fx.animation.manageDisplayLink` or `manageRenderer`, and `managedTask`. |
+| `idiom.document-state` | `preferences.set()` with a structured (non-literal) value. | A document type opened through `workspaceDocuments`. |
+
+`idiomAudit.applications` summarises each application (`classAuthoring`, `stateHooks`, `rawControls`, `legacyThemeMentions`, `unmanagedLifecycle`, `preferenceDocumentWrites`, `filesScanned`), and `idiomAudit.stylesheets` the project stylesheets. The audit is static and conservative: it reads source and never runs it. Pass `idioms: false` to skip it.
+
 Validation does not run package scripts or builds. TypeScript checks may write the compiler's incremental cache if the consumer enables it. The source repository's additional governed-source boundary audit is not applied to independent consumers.
 
 ### `syncloudos.scaffold`
 
-Input: `{ projectRoot?, appsDirectory?, preferencesDirectory?, widgetsDirectory?, integrationsDirectory?, webspringEntry?, kind?: "application" | "preferencePane" | "widget" | "integration", organisation?, bundleIdentifier?, id?, name, route?, owners?, policy?, presentation?, contentApplicationMenu? }`. `kind` defaults to `"application"`; `id` is only for non-application contributions. Integrations require nonempty owner bundle identifiers.
+Input: `{ projectRoot?, appsDirectory?, preferencesDirectory?, widgetsDirectory?, integrationsDirectory?, webspringEntry?, kind?: "application" | "preferencePane" | "widget" | "integration", organisation?, bundleIdentifier?, id?, name, route?, owners?, policy?, presentation?, contentApplicationMenu?, authoring?: "separate" | "inline" | "function" }`. `kind` defaults to `"application"`; `id` is only for non-application contributions. Integrations require nonempty owner bundle identifiers.
 
 Output: `{ createdPaths: string[], nextSteps: string[] }`.
 
-Creates a conventional project folder: `Name.app/Contents/index.tsx` default-exports a component and required `Info.ts` contains explicit `bundleIdentifier`, `displayName` and `version: "1.0.0"`, typed as `SynWareInfo`. `organisation` defaults to `com.example`; the lowercased folder name is appended to form the identifier, unless an explicit `bundleIdentifier` is supplied. The display name splits folder-name words. Identity and version are never inferred during validation or taken from the project's package version. Other kinds create `Name.prefPane/index.tsx`, `Name.widget/index.tsx` or `Name.integration.ts` with the corresponding `define*` declaration; their unrelated IDs retain their names.
+Creates a conventional project folder. By default (`authoring: "separate"`), `Name.app/Contents/index.tsx` default-exports an `NSEApplication` subclass whose `NSEViewController` holds `@observable` state, a binding and an `@action`, and `Contents/Views/` holds the view, built from NSE controls. `"inline"` keeps the view in `index.tsx`; `"function"` is an explicit opt-in for a function component. The CLI's `create-synware` uses the same templates. The required `Info.ts` contains explicit `bundleIdentifier`, `displayName` and `version: "1.0.0"`, typed as `SynWareInfo`. `organisation` defaults to `com.example`; the lowercased folder name is appended to form the identifier, unless an explicit `bundleIdentifier` is supplied. The display name splits folder-name words. Identity and version are never inferred during validation or taken from the project's package version. Other kinds create `Name.prefPane/index.tsx`, `Name.widget/index.tsx` or `Name.integration.ts` with the corresponding `define*` declaration; their unrelated IDs retain their names.
 
 `policy` maps directly to `runtime.policy`, and `presentation` to `runtime.presentation`. Both are checked against the installed manifest schema before any files are written. Omitting `policy` preserves the normal private/default access behaviour; scaffolding never silently grants public access. With host authentication `"disabled"` or `"optional"`, the **primary** application must explicitly declare `policy: { public: true }`. The returned `nextSteps` flags this requirement whenever public access has not been requested. Do not apply it to private applications indiscriminately.
 
-For example, scaffold a deliberate public primary with `{ bundleIdentifier: "org.example.notes", name: "Notes", route: "/notes", policy: { public: true }, contentApplicationMenu: true }`. `contentApplicationMenu: true` adds `applicationMenu: { trigger: "content" }` and a real `useApplicationMenuTrigger()` button in the root component, with its anchor, open state, accessible menu semantics and toggle connected. This is required for a fullscreen primary under `"optional"` or `"required"` authentication, so people can reach Preferences, Account, Sign In and Log Out.
+For example, scaffold a deliberate public primary with `{ bundleIdentifier: "org.example.notes", name: "Notes", route: "/notes", policy: { public: true }, contentApplicationMenu: true }`. `contentApplicationMenu: true` adds `applicationMenu: { trigger: "content" }` and an `ApplicationMenuButton` component that renders the `useApplicationMenuTrigger()` trigger as an `NSEPushButton`, with its anchor, open state, accessible menu semantics and toggle connected, placed in the view. This is required for a fullscreen primary under `"optional"` or `"required"` authentication, so people can reach Preferences, Account, Sign In and Log Out.
 
 For a secondary windowed inspector, choose `presentation: "windowedView"` and declare only the access policy it actually needs. Omitting presentation also returns that windowed-secondary reminder; it is distinct from the desktop/tablet/mobile device presentations.
 

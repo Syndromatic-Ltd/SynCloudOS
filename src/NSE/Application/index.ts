@@ -40,5 +40,5 @@ export type {
 } from "./NSEViewController";
 export type { NSEViewControllerFX, NSEViewControllerFXClients } from "./viewControllerFX";
 export { outlet } from "./viewOutlet";
-export type { NSEViewOutlet, NSEOutletOptions } from "./viewOutlet";
-export type { NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "./managedAnimationRenderer";
+export type { NSEViewOutlet, NSEOutletElement, NSEOutletOptions } from "./viewOutlet";
+export type { NSEManagedAFXDisplayLink, NSEManagedAFXDisplayLinkOptions, NSEManagedAFXFrame, NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "./managedAnimationRenderer";
