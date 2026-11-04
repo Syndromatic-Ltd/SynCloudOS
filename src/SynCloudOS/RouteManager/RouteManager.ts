@@ -446,11 +446,10 @@ export function createRouteManager(
         ? request.appId
         : null;
     if (!appId) return null;
-    const reason = typeof record.reason === "string"
-      ? record.reason
-      : typeof record.error === "string"
-        ? record.error
-        : undefined;
+    // Keep what went wrong next to the launch reason code: "APP_LAUNCH_FAILED" alone hides the cause.
+    const reasonCode = typeof record.reason === "string" ? record.reason : undefined;
+    const failure = typeof record.error === "string" && record.error.length > 0 ? record.error : undefined;
+    const reason = reasonCode && failure && failure !== reasonCode ? `${reasonCode}: ${failure}` : reasonCode ?? failure;
     const requestId = typeof record.requestId === "string" ? record.requestId
       : request && typeof request.requestId === "string" ? request.requestId : null;
     return { appId, requestId, ...(reason ? { reason } : {}) };

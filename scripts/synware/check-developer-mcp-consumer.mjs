@@ -20,7 +20,7 @@ assert.equal(createHash("sha256").update(bytes).digest("hex"),companion.archiveS
 assert.equal("sha512-"+createHash("sha512").update(bytes).digest("base64"),companion.integrity);
 let client;
 try {
-  runNode([consumer.npm,"install","--prefer-offline","--ignore-scripts","--package-lock=false",archive],consumer.root);
+  runNode([consumer.npm,"install","--prefer-offline","--ignore-scripts","--package-lock=false",archive,"jsdom"],consumer.root);
   writeFileSync(resolve(consumer.root,"vite.config.ts"),'import { synCloudOS } from "@syndromatic/syncloudos/vite"; export default {plugins:[synCloudOS({webspringEntry:false})]};\n');
   writeFileSync(resolve(consumer.root,"tsconfig.json"),JSON.stringify({compilerOptions:{target:"ES2022",module:"ESNext",moduleResolution:"Bundler",jsx:"react-jsx",strict:true,skipLibCheck:true,noEmit:true},include:["src"]}));
   const server=resolve(consumer.root,"node_modules/@syndromatic/syncloudos-developer-mcp/scripts/developer-mcp/server.mjs");
@@ -49,17 +49,35 @@ try {
   // The default scaffold is class authoring: Info, index (NSEApplication), locale, test and Views/SearchView.
   assert.equal(created.createdPaths.length,5);
   assert(created.createdPaths.some(path=>path.endsWith("Contents/Views/SearchView.tsx")),JSON.stringify(created.createdPaths));
+  // A host entry that mounts the scaffold, so validate's launch check starts the packed app for real.
+  writeFileSync(resolve(consumer.root,"index.html"),'<!doctype html><html><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>\n');
+  const hostEntry=(bundleIdentifier)=>'import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";\nawait mountSynCloudOS({ element: document.getElementById("root")!, application: { bundleIdentifier: "'+bundleIdentifier+'" }, authentication: "disabled" });\n';
+  writeFileSync(resolve(consumer.root,"src/main.tsx"),hostEntry("org.example.missing"));
+  const broken=await call("validate",{typescript:false,idioms:false});
+  assert.equal(broken.ok,false,JSON.stringify(broken));
+  assert(broken.findings.some(finding=>finding.rule==="launch.failed" && finding.file==="src/main.tsx"),JSON.stringify(broken.findings));
+  // Not public under disabled sign-in: found statically, and the launch says how to fix it.
+  writeFileSync(resolve(consumer.root,"src/main.tsx"),hostEntry("org.example.hello"));
+  const unreachable=await call("validate",{typescript:false,idioms:false});
+  assert(unreachable.findings.some(finding=>finding.rule==="synware.public-policy"),JSON.stringify(unreachable.findings));
+  assert(unreachable.findings.some(finding=>finding.rule==="launch.failed" && finding.message.includes("runtime: { policy: { public: true } }")),JSON.stringify(unreachable.findings));
+  const info=resolve(consumer.root,"src/SynWare/Hello.app/Contents/Info.ts");
+  const infoSource=readFileSync(info,"utf8");
+  assert(infoSource.includes("export default {"),infoSource);
+  writeFileSync(info,infoSource.replace("export default {","export default {\n  runtime: { policy: { public: true } },"));
   const checked=await call("validate");
   assert.equal(checked.ok,true,JSON.stringify(checked.findings));
   assert.equal(checked.typescript.ran,true);
   assert.equal(checked.typescript.exitCode,0);
+  assert.equal(checked.launch.ran,true,JSON.stringify(checked.launch));
+  assert.equal(checked.launch.entry,"/src/main.tsx");
   // The packed class scaffold is idiomatic: no idiom.* warnings against the real installed SDK.
   assert.equal(checked.idiomAudit.warnings,0,JSON.stringify(checked.findings));
   assert.equal(checked.idiomAudit.applications[0].classAuthoring,true);
   const explained=await call("explain_error",{query:"NSE_CONTROLLER_DISPOSED"});
   assert.equal(explained.matches[0].code,"NSE_CONTROLLER_DISPOSED");
   assert.equal(stderr,"");
-  process.stdout.write(JSON.stringify({ok:true,sdkVersion:companion.version,tools:listed.tools.map(tool=>tool.name),archive:companion.archive,checks:["independent SDK tgz install","independent MCP tgz install","stdio listTools","inspect_project receipt","lookup_sdk installed declarations and docs","scaffold -> validate including tsc --noEmit","explain_error canonical code"]},null,2)+"\n");
+  process.stdout.write(JSON.stringify({ok:true,sdkVersion:companion.version,tools:listed.tools.map(tool=>tool.name),archive:companion.archive,checks:["independent SDK tgz install","independent MCP tgz install","stdio listTools","inspect_project receipt","lookup_sdk installed declarations and docs","scaffold -> validate including tsc --noEmit and a jsdom launch","explain_error canonical code"]},null,2)+"\n");
 } finally {
   await client?.close();
   rmSync(consumer.root,{recursive:true,force:true});

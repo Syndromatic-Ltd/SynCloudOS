@@ -590,7 +590,13 @@ function decide(
       explicitlyRequiresLogin ||
       (!isPublicByManifest && mode === "mixed");
     if (requiresLogin && !subject.isAuthenticated) {
-      return baseDecision(request, subject, false, "This app launch requires an authorised session.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+      // When only the missing manifest flag stands in the way, say so: with sign-in disabled no
+      // session can ever exist, and the fix is one line in the app's Info.ts.
+      const onlyNotPublic = mode === "mixed" && !explicitlyRequiresLogin && !isPublicByManifest;
+      const reason = onlyNotPublic
+        ? "This app launch requires an authorised session. The app is not public: to open it without signing in, set runtime: { policy: { public: true } } in its Info.ts."
+        : "This app launch requires an authorised session.";
+      return baseDecision(request, subject, false, reason, requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
     }
     if (!hasRole(subject, requiredRoles)) {
       return baseDecision(request, subject, false, "This app launch requires a different role.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);

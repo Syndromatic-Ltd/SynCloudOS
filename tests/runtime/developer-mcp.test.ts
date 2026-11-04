@@ -9,6 +9,7 @@ import { resolve } from "node:path";
 import { createRequire } from "node:module";
 import ts from "typescript";
 import { inspectProject, lookupSdk, validateProject, scaffold, explainError } from "../../scripts/developer-mcp/tools.mjs";
+import { hostEntryFor, runLaunchCheck } from "../../scripts/developer-mcp/launch-check.mjs";
 import { errorCatalogue } from "../../src/SynCloudOS/ErrorManager/errorCatalogue";
 import { parseManifest } from "../../scripts/synware/validation-core.mjs";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -154,11 +155,21 @@ describe("developer MCP tools", () => {
     ["authentication: \"optional\", application: { bundleIdentifier: \"org.example.primary\", frame: \"declared\" }", "windowedView", false],
     ["authentication: \"required\", application: { bundleIdentifier: \"org.example.primary\" }", undefined, true],
   ])("does not flag supported literal host configurations: %s", async (options, presentation, contentApplicationMenu) => {
-    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", presentation, contentApplicationMenu });
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true }, presentation, contentApplicationMenu });
     put("src/main.tsx", `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; mountSynCloudOS({ ${options} });`);
     const result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.host.status).toBe("checked");
     expect(result.ok).toBe(true);
+  });
+  it.each([
+    "authentication: \"disabled\", application: { bundleIdentifier: \"org.example.primary\" }",
+    "application: { bundleIdentifier: \"org.example.primary\" }",
+  ])("flags a primary that is not public under disabled sign-in, which can never launch: %s", async (options) => {
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary" });
+    put("src/main.tsx", `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; mountSynCloudOS({ ${options} });`);
+    const result = await validateProject({ projectRoot: project, typescript: false, launch: false });
+    expect(result.findings).toContainEqual(expect.objectContaining({ file: "applications/Primary.app/Contents/Info.ts", rule: "synware.public-policy", message: expect.stringContaining("runtime: { policy: { public: true } }") }));
+    expect(result.ok).toBe(false);
   });
   it("reads a top-level awaited mount whose unrelated options use shorthand properties", async () => {
     await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary" });
@@ -259,6 +270,38 @@ describe("developer MCP tools", () => {
     const full = await lookupSdk({ projectRoot: project, query: "Widget", full: true });
     expect(full.symbols.find((symbol: { name: string }) => symbol.name === "Widget").signature).toContain("Member 3.");
   });
+  it("finds the host entry and reports why the launch check was skipped", async () => {
+    put("index.html", '<!doctype html><div id="root"></div><script src="./src/main.tsx" type="module"></script>\n');
+    expect(hostEntryFor(project)).toBe("/src/main.tsx");
+    const result = await validateProject({ projectRoot: project, typescript: false, idioms: false });
+    expect(result.launch).toEqual({ ran: false, reason: "Install vite and jsdom in the project to run the launch check." });
+    expect((await validateProject({ projectRoot: project, typescript: false, idioms: false, launch: false })).launch).toEqual({ ran: false, reason: "Skipped by launch: false." });
+  });
+  it("launches the host entry in a page and reports launch failures and system alerts", async () => {
+    // The fixture SDK ships no Vite plugin, and this page needs none.
+    rmSync(resolve(project, "vite.config.ts"), { force: true });
+    for (const name of ["vite", "jsdom"]) symlinkSync(resolve(repository, "node_modules", name), resolve(project, "node_modules", name), "junction");
+    put("index.html", '<!doctype html><div id="root"></div><script type="module" src="/src/main.ts"></script>\n');
+    put("src/main.ts", 'new Worker("worker.js").postMessage(1);\ndocument.getElementById("root")!.textContent = "Ready";\n');
+    const clean = await runLaunchCheck(project);
+    expect(clean).toMatchObject({ ran: true, entry: "/src/main.ts", findings: [] });
+    expect(clean.limits.length).toBeGreaterThan(0);
+    put("src/main.ts", 'throw new Error("The workspace could not be opened");\n');
+    expect((await runLaunchCheck(project)).findings).toEqual([expect.objectContaining({ rule: "launch.failed", message: expect.stringContaining("The workspace could not be opened") })]);
+    put("src/main.ts", [
+      'console.error("TypeError: Cannot read properties of undefined");',
+      'document.getElementById("root")!.innerHTML = \'<div class="syncloudos-system-alert"><h2>Notes could not complete that action.</h2><button class="nse-alert-disclosure">Technical details</button></div>\';',
+      'document.querySelector(".nse-alert-disclosure")!.addEventListener("click", () => { document.querySelector(".syncloudos-system-alert")!.insertAdjacentHTML("beforeend", \'<pre class="nse-alert-details-text">Code: APP_CONTENT_FAILED</pre>\'); });',
+      "",
+    ].join("\n"));
+    const alert = (await runLaunchCheck(project)).findings;
+    expect(alert).toHaveLength(1);
+    expect(alert[0]).toMatchObject({ rule: "launch.stopped" });
+    expect(alert[0].severity).toBeUndefined();
+    expect(alert[0].message).toContain("Notes could not complete that action.");
+    expect(alert[0].message).toContain("Code: APP_CONTENT_FAILED");
+    expect(alert[0].message).toContain("Cannot read properties of undefined");
+  }, 120000);
   it("type-checks each project a solution-style tsconfig references", async () => {
     // A bare tsc --noEmit on { "files": [], "references": [...] } checks no file at all.
     symlinkSync(resolve(repository, "node_modules/typescript"), resolve(project, "node_modules/typescript"), "junction");

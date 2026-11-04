@@ -85,15 +85,38 @@ Broad `application menu`, `settings`, `preferences` and `account` queries priori
 
 ### `validate`
 
-Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, typescript?: boolean, idioms?: boolean }` (`typescript` and `idioms` default to `true`).
+Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, typescript?: boolean, idioms?: boolean, launch?: boolean }` (`typescript`, `idioms` and `launch` default to `true`).
 
-Output: `{ ok: boolean, findings: [{ file, line, column?, rule, severity?, message }], bundles: [{ directory, id, ok, error }], typescript: { ran, exitCode }, host: { status: "checked" | "unresolved" | "not-found", reason?, file?, line?, application?: { id, frame } | null, authentication? }, idiomAudit: { applications: [...], stylesheets: {...}, warnings } | null }`. `ok` is false only for findings without `severity: "warning"`.
+Output: `{ ok: boolean, findings: [{ file, line, column?, rule, severity?, message }], bundles: [{ directory, id, ok, error }], typescript: { ran, exitCode, projects }, launch: { ran, entry?, reason?, limits? }, host: { status: "checked" | "unresolved" | "not-found", reason?, file?, line?, application?: { id, frame } | null, authentication? }, idiomAudit: { applications: [...], stylesheets: {...}, warnings } | null }`. `ok` is false only for findings without `severity: "warning"`.
 
 Uses the **same static manifest parser, import checks and directory validator as the repository's `validate-synware.mjs`**, compiled against the installed SDK's manifest schema and exports. It does not evaluate `Info.ts`. It then invokes the consumer's installed TypeScript compiler with `--noEmit --pretty false`; missing TypeScript or compiler failure is a finding, never a passing check. Set `typescript: false` only when intentionally requesting manifest/bundle checks without project type checking. Schema/import findings currently identify the containing file at line 1; TypeScript findings preserve the compiler's line and column.
 
 For a directly imported `mountSynCloudOS` call with inline, literal host options, validation also reports `synware.application-menu` on a primary manifest missing `applicationMenu: { trigger: "content" }` when the app fills the page under `"optional"` or `"required"` authentication. This includes the default fullscreen frame and `frame: "declared"` with an `appView` presentation. A declared windowed primary or disabled authentication does not require this trigger.
 
+With `authentication: "disabled"` (the default), nobody can sign in, so a primary application that is not public can never launch. Validation reports `synware.public-policy` on its `Info.ts` unless the manifest sets `runtime: { policy: { public: true } }` or declares `app.open.public`.
+
 `host.status` makes the limits explicit: `"checked"` means a single direct top-level mount's relevant options were read safely; `"unresolved"` supplies a reason when computed options, spreads, duplicate properties, nested/ambiguous calls or an unavailable primary prevent that check. `"not-found"` means no directly imported mount was found. The scanner reads project TypeScript/JavaScript source, excluding dependency, hidden, generated (`dist`, `build`, `coverage`), test, script and `.app` directories. It recognises named imports (including aliases) and namespace imports from `@syndromatic/syncloudos/browser`, but does not execute code, follow re-exports or evaluate wrappers/control flow. No missing-trigger finding is guessed for unresolved hosts. This checks the manifest declaration, not whether a handwritten component actually renders its trigger button; verify that interaction in the running app.
+
+#### Launch check
+
+A project that builds can still fail to start. A capability can be denied, a document might not exist yet, a launch hook can throw, or a view can throw on first render. Type checking cannot see any of these, so `validate` also launches the application.
+
+It reads the module script that `index.html` loads (the host entry, usually `src/main.tsx`). It loads that script in a jsdom page through the project's own Vite configuration and plugins, so the production browser host launches the primary application as a browser would. The check runs in a child process with a 60-second limit and reports:
+
+| Rule | Severity | Meaning |
+| --- | --- | --- |
+| `launch.failed` | error | The host entry threw, or the launch did not commit. The message carries the cause, for example `APP_LAUNCH_FAILED: The workspace could not be opened`. |
+| `launch.stopped` | error | The launch finished, but the page ended on a system alert. The message gives the alert text, its technical details (error code, message, where it was caught) and any errors logged. |
+| `launch.error` | warning | Something was logged through `console.error` or thrown after launch, and the page did not end on an alert. |
+
+The check needs `vite` and `jsdom` installed in the project. If either is missing, or `index.html` has no module script, `launch.ran` is `false` and `launch.reason` says why. The check then reports nothing as passing. Pass `launch: false` to skip it.
+
+`launch.limits` lists what the page cannot show:
+
+- There is no layout, canvas drawing or WebGL, so visual problems are not detected.
+- Workers start but never reply, so work done in a worker is not checked.
+
+A passing launch check means the application starts and renders without an error. It does not mean the application looks or behaves right; check that in a browser.
 
 #### Idiom audit
 

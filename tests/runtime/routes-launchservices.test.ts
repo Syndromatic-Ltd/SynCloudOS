@@ -295,8 +295,9 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
       ));
       unlockRuntime(LoginServices);
 
+      // The route result names what went wrong, not only the launch reason code.
       await expect(RouteManager.openRoute("/broken-route", { source: "route-preload-failure", syncRoute: false }).result)
-        .resolves.toMatchObject({ status: "failed", committed: false });
+        .resolves.toMatchObject({ status: "failed", committed: false, error: { message: expect.stringContaining("fixture module unavailable") } });
 
       expect(runtime.errors.getHistory().filter((error) => error.code === "APP_LAUNCH_FAILED"))
         .toEqual([
