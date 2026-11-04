@@ -71,10 +71,16 @@ export async function validateProject(input={}) {
     try {tsc=context.require.resolve("typescript/bin/tsc");}
     catch {findings.push({file:"package.json",line:1,rule:"typescript.missing",message:"Install TypeScript in the consumer project to run tsc --noEmit."});}
     if (tsc) {
+      // A solution-style tsconfig.json ("files": [] with "references") checks nothing under a bare
+      // tsc --noEmit, so each referenced project is checked on its own.
+      const projects=typescriptProjects(context,root);
       let output="",exitCode=0;
-      try { const result=await run(process.execPath,[tsc,"--noEmit","--pretty","false"],{cwd:root,maxBuffer:16*1024*1024,timeout:120000,windowsHide:true}); output=result.stdout+result.stderr; }
-      catch (error) {output=(error.stdout ?? "")+(error.stderr ?? "");exitCode=typeof error.code==="number"?error.code:1;}
-      typescript={ran:true,exitCode};
+      for (const project of projects) {
+        const args=[tsc,"--noEmit","--pretty","false",...(project ? ["-p",project] : [])];
+        try { const result=await run(process.execPath,args,{cwd:root,maxBuffer:16*1024*1024,timeout:120000,windowsHide:true}); output+=result.stdout+result.stderr; }
+        catch (error) {output+=(error.stdout ?? "")+(error.stderr ?? "");exitCode=exitCode || (typeof error.code==="number"?error.code:1);}
+      }
+      typescript={ran:true,exitCode,projects:projects.map(project=>project ?? "tsconfig.json")};
       const before=findings.length;
       for (const line of output.split(/\r?\n/u)) {
         const located=/^(.*?)\((\d+),(\d+)\): error (TS\d+): (.*)$/u.exec(line);
@@ -87,9 +93,34 @@ export async function validateProject(input={}) {
   }
   // Idiom findings are warnings: they never make a valid project invalid, but an
   // agent must not read "0 errors" as idiomatic SynCloudOS.
-  const audit=input.idioms===false ? {findings:[],idiomAudit:null} : auditSynWareIdioms({root,applications:bundles.filter(bundle=>bundle.kind==="application" && bundle.ok)});
+  const audit=input.idioms===false ? {findings:[],idiomAudit:null} : auditSynWareIdioms({root,sdkRoot:context.sdkRoot,applications:bundles.filter(bundle=>bundle.kind==="application" && bundle.ok)});
   findings.push(...audit.findings);
   return {ok:findings.every(finding=>finding.severity==="warning"),findings,bundles:bundles.map(({findings,...bundle})=>bundle),typescript,host,idiomAudit:audit.idiomAudit};
+}
+/** The TypeScript projects validate checks: the root config, or the projects a solution-style root config references. */
+function typescriptProjects(context,root) {
+  let ts;
+  try { ts=context.require("typescript"); } catch { return [null]; }
+  const out=[], seen=new Set();
+  const visit=(configPath,depth) => {
+    const key=configPath.toLowerCase();
+    if (seen.has(key) || depth>8) return;
+    seen.add(key);
+    const read=ts.readConfigFile(configPath,ts.sys.readFile);
+    const config=read.config;
+    const solution=config && Array.isArray(config.files) && config.files.length===0 && !config.include && Array.isArray(config.references) && config.references.length>0;
+    if (!solution) { out.push(configPath); return; }
+    for (const reference of config.references) {
+      if (typeof reference?.path!=="string") continue;
+      let target=resolve(dirname(configPath),reference.path);
+      if (!/\.json$/iu.test(target)) target=resolve(target,"tsconfig.json");
+      if (ts.sys.fileExists(target)) visit(target,depth+1);
+    }
+  };
+  const rootConfig=resolve(root,"tsconfig.json");
+  if (!ts.sys.fileExists(rootConfig)) return [null];
+  visit(rootConfig,0);
+  return out.length===0 ? [null] : out.map(path=>slash(relative(root,path)) === "tsconfig.json" ? null : slash(relative(root,path)));
 }
 export async function scaffold(input) {
   const context=projectContext(input.projectRoot),{root}=context, vite=optionsFor(context,input);

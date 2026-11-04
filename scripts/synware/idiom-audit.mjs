@@ -89,14 +89,50 @@ function calleeName(node) {
   if (ts.isPropertyAccessExpression(expression)) return expression.name.text;
   return null;
 }
-function isPrimitiveLiteral(node) {
-  return node && (ts.isStringLiteralLike(node) || ts.isNumericLiteral(node) || node.kind === ts.SyntaxKind.TrueKeyword || node.kind === ts.SyntaxKind.FalseKeyword || node.kind === ts.SyntaxKind.NullKeyword);
+
+/** Strips `as`, `satisfies`, `!` and parentheses. */
+function unwrap(node) {
+  while (node && (ts.isParenthesizedExpression(node) || ts.isAsExpression(node) || ts.isSatisfiesExpression(node) || ts.isNonNullExpression(node) || ts.isTypeAssertionExpression(node))) node = node.expression;
+  return node;
+}
+/**
+ * Whether a preference value is visibly structured: an object or array literal, a chain built on
+ * one (`[...saved, entry].slice(-50)`), JSON.stringify(...), or a local variable initialised that
+ * way. Anything the audit cannot see (a parameter, a call result) is not reported.
+ */
+function isStructuredValue(node, locals, depth = 0) {
+  node = unwrap(node);
+  if (!node || depth > 4) return false;
+  if (ts.isObjectLiteralExpression(node) || ts.isArrayLiteralExpression(node)) return true;
+  if (ts.isCallExpression(node)) {
+    const callee = node.expression;
+    if (ts.isPropertyAccessExpression(callee) && callee.name.text === "stringify" && ts.isIdentifier(callee.expression) && callee.expression.text === "JSON") return true;
+    if (ts.isPropertyAccessExpression(callee)) return isStructuredValue(callee.expression, locals, depth + 1);
+    return false;
+  }
+  if (ts.isPropertyAccessExpression(node)) return false;
+  if (ts.isIdentifier(node)) return locals.has(node.text) && isStructuredValue(locals.get(node.text), locals, depth + 1);
+  return false;
+}
+/** Whether a type node is a record or list: `T[]`, `readonly T[]`, `{ ... }`, Array, ReadonlyArray, Record, Map or Set. */
+function isStructuredType(node) {
+  if (!node) return false;
+  if (ts.isTypeOperatorNode(node) || ts.isParenthesizedTypeNode(node)) return isStructuredType(node.type);
+  if (ts.isArrayTypeNode(node) || ts.isTupleTypeNode(node) || ts.isTypeLiteralNode(node)) return true;
+  if (ts.isTypeReferenceNode(node)) return ["Array", "ReadonlyArray", "Record", "Map", "ReadonlyMap", "Set", "ReadonlySet"].includes(node.typeName.getText());
+  return false;
 }
 
 /** Facts about one source file that the idiom rules read. */
 function inspectSource(file, text) {
   const facts = { nseApplication: false, functionDefaultExport: false, stateHooks: 0, rawControls: new Map(), unmanaged: [], preferenceWrites: [], legacyTheme: [] };
   const source = parse(file, text);
+  const locals = new Map();
+  const collect = node => {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) locals.set(node.name.text, node.initializer);
+    ts.forEachChild(node, collect);
+  };
+  collect(source);
   const visit = (node, inEffect) => {
     if (ts.isClassLike(node)) {
       for (const clause of node.heritageClauses ?? []) for (const type of clause.types) if (/(^|\.)NSEApplication$/u.test(type.expression.getText(source))) facts.nseApplication = true;
@@ -117,9 +153,12 @@ function inspectSource(file, text) {
       if (name === "useState" || name === "useReducer") facts.stateHooks++;
       if (name === "useEffect" || name === "useLayoutEffect") effect = true;
       if (inEffect && name === "requestAnimationFrame") facts.unmanaged.push({ api: "requestAnimationFrame", line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1 });
-      if (name === "set" && ts.isPropertyAccessExpression(node.expression) && /(^|\.)preferences$/u.test(node.expression.expression.getText(source)) && node.arguments.length >= 2 && !isPrimitiveLiteral(node.arguments[1]))
+      const onPreferences = ts.isPropertyAccessExpression(node.expression) && /(^|\.)preferences$/u.test(node.expression.expression.getText(source));
+      if (onPreferences && node.arguments.length >= 2 && (name === "setJSON" || (name === "set" && isStructuredValue(node.arguments[1], locals))))
         facts.preferenceWrites.push(source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1);
     }
+    if (ts.isTypeReferenceNode(node) && /(^|\.)NSEPreferenceDescriptor$/u.test(node.typeName.getText(source)) && isStructuredType(node.typeArguments?.[0]))
+      facts.preferenceWrites.push(source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1);
     if (inEffect && ts.isNewExpression(node) && ts.isIdentifier(node.expression) && ["ResizeObserver", "Worker", "IntersectionObserver"].includes(node.expression.text))
       facts.unmanaged.push({ api: `new ${node.expression.text}`, line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1 });
     ts.forEachChild(node, child => visit(child, effect));
@@ -138,11 +177,48 @@ function colourLiterals(css) {
   return [...stripped.matchAll(/#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?)\(/giu)].map(match => lineOf(stripped, match.index));
 }
 
+const TOKEN_DEFINITION = /(--nse-[a-z0-9-]+)\s*:/gu;
+const TOKEN_STRING = /["'`](--nse-[a-z0-9-]+)/gu;
+const TOKEN_USE = /var\(\s*(--nse-[a-z0-9-]+)/gu;
+const sdkTokenCache = new Map();
+/**
+ * The --nse-* custom properties the installed SDK defines: declared in a shipped stylesheet or set
+ * by name from its JavaScript (appearance providers set some at runtime). Null when no SDK is found.
+ */
+export function collectSdkTokens(sdkRoot) {
+  if (!sdkRoot || !existsSync(sdkRoot)) return null;
+  if (sdkTokenCache.has(sdkRoot)) return sdkTokenCache.get(sdkRoot);
+  const tokens = new Set();
+  const walk = directory => {
+    for (const name of readdirSync(directory)) {
+      if (name === "node_modules" || name === "docs") continue;
+      const path = resolve(directory, name);
+      if (statSync(path).isDirectory()) { walk(path); continue; }
+      const css = name.endsWith(".css"), js = /\.m?js$/u.test(name);
+      if (!css && !js) continue;
+      const text = readFileSync(path, "utf8");
+      for (const match of text.matchAll(css ? TOKEN_DEFINITION : TOKEN_STRING)) tokens.add(match[1]);
+    }
+  };
+  walk(sdkRoot);
+  sdkTokenCache.set(sdkRoot, tokens);
+  return tokens;
+}
+function unknownTokenUses(text, known) {
+  const unknown = new Map();
+  for (const match of text.matchAll(TOKEN_USE)) {
+    if (known.has(match[1])) continue;
+    unknown.set(match[1], unknown.get(match[1]) ?? lineOf(text, match.index));
+  }
+  return unknown;
+}
+
 /**
  * Audits application bundles for SynCloudOS idioms. `applications` are
- * `{ directory, bundleIdentifier }`; findings use `severity: "warning"`.
+ * `{ directory, bundleIdentifier }`; findings use `severity: "warning"`. With `sdkRoot`, uses of
+ * `var(--nse-*)` that the installed SDK does not define are reported as `idiom.nse-token`.
  */
-export function auditSynWareIdioms({ root, applications }) {
+export function auditSynWareIdioms({ root, applications, sdkRoot }) {
   const findings = [], summary = [], stylesheets = new Set(), scanned = new Set();
   const at = (file, line, rule, message) => findings.push({ file: slash(relative(root, file)), line, rule, severity: "warning", message });
   for (const application of applications) {
@@ -177,7 +253,7 @@ export function auditSynWareIdioms({ root, applications }) {
       }
       for (const line of facts.preferenceWrites) {
         report.preferenceDocumentWrites++;
-        at(file, line, "idiom.document-state", "preferences.set stores a structured value. Preferences are for small settings; keep primary application state (simulations, records, user work) in a document type with workspaceDocuments, which provides saving, undo and autosave.");
+        at(file, line, "idiom.document-state", "This preference holds a structured value (a list or record, through preferences.set, setJSON or a list- or record-typed NSEPreferenceDescriptor). Preferences are for small settings; keep primary application state (simulations, records, user work) in a document type with workspaceDocuments, which provides saving, undo and autosave.");
       }
     }
     if (!report.classAuthoring) {
@@ -188,7 +264,21 @@ export function auditSynWareIdioms({ root, applications }) {
   }
   // Stylesheets are often imported by the host entry rather than the bundle, so
   // every project stylesheet is checked once, in addition to those reached above.
-  const stylesheetReport = { scanned: 0, colourLiterals: 0, legacyThemeMentions: 0 };
+  const stylesheetReport = { scanned: 0, colourLiterals: 0, legacyThemeMentions: 0, unknownTokens: 0 };
+  const known = collectSdkTokens(sdkRoot);
+  if (known) {
+    // The project's own --nse-* definitions are not unknown either.
+    const files = new Set([...scanned, ...stylesheets, ...collectProjectStylesheets(root)]);
+    const local = new Set();
+    for (const file of files) for (const match of readFileSync(file, "utf8").matchAll(TOKEN_DEFINITION)) local.add(match[1]);
+    for (const file of files) {
+      const unknown = unknownTokenUses(readFileSync(file, "utf8"), { has: token => known.has(token) || local.has(token) });
+      if (unknown.size === 0) continue;
+      stylesheetReport.unknownTokens += unknown.size;
+      const names = [...unknown.keys()];
+      at(file, [...unknown.values()][0], "idiom.nse-token", `${names.length} --nse-* token${names.length === 1 ? "" : "s"} the installed SDK does not define: ${names.slice(0, 8).join(", ")}${names.length > 8 ? ", ..." : ""}. An undefined token falls back to its var() fallback or the property's initial value, so it never follows Atmo. Use the documented tokens in docs/framework/appearance.md (for example --nse-app-background and --nse-app-foreground), or derive tints from currentColor with color-mix().`);
+    }
+  }
   for (const file of new Set([...stylesheets, ...collectProjectStylesheets(root)])) {
     const text = readFileSync(file, "utf8");
     stylesheetReport.scanned++;

@@ -243,6 +243,55 @@ describe("developer MCP tools", () => {
     expect(result.idiomAudit.stylesheets).toMatchObject({ scanned: 2, colourLiterals: 15 });
     expect((await validateProject({ projectRoot: project, typescript: false, idioms: false })).findings).toEqual([]);
   });
+  it("type-checks each project a solution-style tsconfig references", async () => {
+    // A bare tsc --noEmit on { "files": [], "references": [...] } checks no file at all.
+    symlinkSync(resolve(repository, "node_modules/typescript"), resolve(project, "node_modules/typescript"), "junction");
+    put("tsconfig.json", JSON.stringify({ files: [], references: [{ path: "./tsconfig.app.json" }] }));
+    put("tsconfig.app.json", JSON.stringify({ compilerOptions: { noEmit: true, strict: true, skipLibCheck: true, types: [] }, include: ["lib"] }));
+    put("lib/broken.ts", 'export const count: number = "seven";\n');
+    const result = await validateProject({ projectRoot: project, typescript: true, idioms: false });
+    expect(result.typescript).toMatchObject({ ran: true, projects: ["tsconfig.app.json"] });
+    expect(result.typescript.exitCode).not.toBe(0);
+    expect(result.ok).toBe(false);
+    expect(result.findings).toContainEqual(expect.objectContaining({ file: "lib/broken.ts", line: 1, rule: "TS2322" }));
+  });
+  it("reports only visibly structured preference values as document state", async () => {
+    put("applications/Prefs.app/Contents/Info.ts", 'export default { bundleIdentifier: "org.example.prefs", displayName: "Prefs", version: "1.0.0" } as const;\n');
+    put("applications/Prefs.app/Contents/index.tsx", 'export { default } from "../../../lib/prefs";\n');
+    put("lib/prefs.ts", [
+      'import { SCOS, type NSEPreferenceDescriptor } from "@syndromatic/syncloudos";',
+      "export default function prefs(opacity: number, saved: readonly string[]) {",
+      '  SCOS.preferences.set("opacity", opacity);',
+      '  SCOS.preferences.set("theme", "light");',
+      "  const next = [...saved, \"run\"].slice(-50);",
+      '  SCOS.preferences.set("runs", next);',
+      '  SCOS.preferences.setJSON("history", saved);',
+      "}",
+      'export const RUNS: NSEPreferenceDescriptor<readonly { id: string }[]> = { key: "runs", version: 0, parse: () => [] } as never;',
+      'export const SIZE: NSEPreferenceDescriptor<number> = { key: "size", version: 0, parse: () => 1 } as never;',
+      "",
+    ].join("\n"));
+    const result = await validateProject({ projectRoot: project, typescript: false });
+    const lines = result.findings.filter((finding: { rule: string }) => finding.rule === "idiom.document-state").map((finding: { line: number }) => finding.line);
+    expect(lines).toEqual([6, 7, 9]);
+    expect(result.idiomAudit.applications[0].preferenceDocumentWrites).toBe(3);
+  });
+  it("reports var(--nse-*) tokens the installed SDK does not define", async () => {
+    put("node_modules/@syndromatic/syncloudos/nse/styles.css", ":root { --nse-app-foreground: #000; }\n");
+    put("node_modules/@syndromatic/syncloudos/appearance.js", 'export const set = (element) => element.style.setProperty("--nse-runtime-tint", "red");\n');
+    put("lib/app.css", [
+      ":root { --nse-own-gap: 4px; }",
+      ".a { color: var(--nse-app-foreground); background: var(--nse-runtime-tint); gap: var(--nse-own-gap); }",
+      ".b { color: var(--nse-label-primary, CanvasText); border-color: var( --nse-separator-color); }",
+      "",
+    ].join("\n"));
+    const result = await validateProject({ projectRoot: project, typescript: false });
+    const tokens = result.findings.filter((finding: { rule: string }) => finding.rule === "idiom.nse-token");
+    expect(tokens).toEqual([expect.objectContaining({ file: "lib/app.css", line: 3, severity: "warning" })]);
+    expect(tokens[0].message).toContain("does not define: --nse-label-primary, --nse-separator-color. ");
+    expect(result.idiomAudit.stylesheets.unknownTokens).toBe(2);
+    expect(result.ok).toBe(true);
+  });
   it("scaffolds a valid app without overwriting any existing bundle", async () => {
     const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.notes", name: "Notes", route: "/notes" });
     expect(result.createdPaths).toContain("applications/Notes.app/Contents/Info.ts");
