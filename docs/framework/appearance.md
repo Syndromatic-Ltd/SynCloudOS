@@ -43,6 +43,12 @@ Appearance combines several independent settings. Each one can change without di
 
 Theme and colour scheme are separate choices. Atmo ships in both light and dark, and switching one leaves the other alone.
 
+Atmo is the one theme SynCloudOS ships. It is drawn as vectors, and it styles both NSE controls and the window and application chrome around them. Dark mode is Atmo's `"dark"` colour scheme, not a different theme: request it with `colourScheme`, or leave `"auto"` to follow the system.
+
+Atmo-Heritage and Atmo-Onyx are obsolete raster themes from earlier releases. Don't use them, don't mistake either for a dark mode, and don't copy their colours into your own stylesheet. You can still build your own SynCloudOS theme as an appearance; a custom theme replaces Atmo's look, it doesn't sit beside a hand-written palette.
+
+Hard-coded colours work against this. An application stylesheet with its own hex palette doesn't follow the colour scheme, contrast or transparency settings, and the Developer MCP `validate` tool reports it as an `idiom.atmo-appearance` warning. Use NSE controls for controls, semantic tokens (`var(--nse-*)`) for your own surfaces, and `[data-mode="dark"]` only where your own content needs a different treatment.
+
 ## Read the appearance
 
 Components read the resolved appearance from context:

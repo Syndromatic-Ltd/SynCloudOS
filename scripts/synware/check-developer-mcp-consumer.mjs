@@ -46,10 +46,16 @@ try {
   assert(lookup.symbols[0].signature.includes("SynWareInfo"));
   assert(lookup.docs.length>0,"Installed docs must be available offline.");
   const created=await call("scaffold",{bundleIdentifier:"org.example.hello",name:"Hello",route:"/hello"});
-  assert.equal(created.createdPaths.length,4);
+  // The default scaffold is class authoring: Info, index (NSEApplication), locale, test and Views/SearchView.
+  assert.equal(created.createdPaths.length,5);
+  assert(created.createdPaths.some(path=>path.endsWith("Contents/Views/SearchView.tsx")),JSON.stringify(created.createdPaths));
   const checked=await call("validate");
   assert.equal(checked.ok,true,JSON.stringify(checked.findings));
   assert.equal(checked.typescript.ran,true);
+  assert.equal(checked.typescript.exitCode,0);
+  // The packed class scaffold is idiomatic: no idiom.* warnings against the real installed SDK.
+  assert.equal(checked.idiomAudit.warnings,0,JSON.stringify(checked.findings));
+  assert.equal(checked.idiomAudit.applications[0].classAuthoring,true);
   const explained=await call("explain_error",{query:"NSE_CONTROLLER_DISPOSED"});
   assert.equal(explained.matches[0].code,"NSE_CONTROLLER_DISPOSED");
   assert.equal(stderr,"");

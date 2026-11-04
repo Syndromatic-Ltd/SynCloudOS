@@ -20,7 +20,7 @@ export function writeDeveloperMcpPackage({repositoryRoot,directory,sdkVersion}) 
   const repository=JSON.parse(readFileSync(resolve(repositoryRoot,"package.json"),"utf8"));
   cpSync(resolve(repositoryRoot,"scripts/developer-mcp"),resolve(directory,"scripts/developer-mcp"),{recursive:true,filter:path=>!path.endsWith("build-package.mjs")&&!path.endsWith("PACKAGE_README.md")});
   cpSync(resolve(repositoryRoot,"scripts/developer-mcp/PACKAGE_README.md"),resolve(directory,"README.md"));
-  for (const file of ["validation-core.mjs","manifest-source.mjs","bundle-paths.mjs","project-derivation.mjs","create-synware.mjs"]) {
+  for (const file of ["validation-core.mjs","manifest-source.mjs","bundle-paths.mjs","project-derivation.mjs","create-synware.mjs","idiom-audit.mjs"]) {
     mkdirSync(resolve(directory,"scripts/synware"),{recursive:true});
     writeFileSync(resolve(directory,"scripts/synware",file),readFileSync(resolve(repositoryRoot,"scripts/synware",file),"utf8")
       .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs","./bundleIdentifier.mjs"));

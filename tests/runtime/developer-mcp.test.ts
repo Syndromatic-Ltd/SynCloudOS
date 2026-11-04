@@ -23,7 +23,7 @@ beforeEach(() => {
   project = mkdtempSync(resolve(tmpdir(), "syncloudos-mcp-test-"));
   put("package.json", JSON.stringify({ name: "consumer", version: "2.3.4", dependencies: { "@syndromatic/syncloudos": "1.0.0-beta.2" } }));
   put("vite.config.ts", 'import { synCloudOS } from "@syndromatic/syncloudos/vite"; export default {plugins:[synCloudOS({appsDirectory:"applications",webspringEntry:false})]};');
-  put("node_modules/@syndromatic/syncloudos/package.json", JSON.stringify({ name: "@syndromatic/syncloudos", version: "1.0.0-beta.2", exports: { ".": { types: "./index.d.ts" }, "./sdk": { types: "./sdk.d.ts" } } }));
+  put("node_modules/@syndromatic/syncloudos/package.json", JSON.stringify({ name: "@syndromatic/syncloudos", version: "1.0.0-beta.2", exports: { ".": { types: "./index.d.ts" }, "./sdk": { types: "./sdk.d.ts" }, "./nse/controls": { types: "./nse-controls.d.ts" }, "./nse/styles.css": "./nse/styles.css" } }));
   const sdk = resolve(project, "node_modules/@syndromatic/syncloudos");
   cpSync(resolve(repository, "tests/fixtures/developer-mcp/sdk.d.ts"), resolve(sdk, "sdk.d.ts"));
   put("node_modules/@syndromatic/syncloudos/index.d.ts", "export declare const SCOS: { app: { bundleIdentifier: string; displayName: string; version: string } };\n");
@@ -100,27 +100,30 @@ describe("developer MCP tools", () => {
     await expect(scaffold({ projectRoot: project, bundleIdentifier: "org.example.bad", name: "Bad", route: "/bad", presentation: "window" })).rejects.toThrow();
     expect((await inspectProject({ projectRoot: project })).bundles).toEqual([]);
   });
-  it("scaffolds a working content application-menu button only when explicitly requested", async () => {
+  it("scaffolds a working NSEPushButton content application-menu trigger only when explicitly requested", async () => {
     const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true }, contentApplicationMenu: true });
     const manifest = parseManifest(resolve(project, result.createdPaths[0]));
     expect(manifest.applicationMenu).toEqual({ trigger: "content" });
-    const code = ts.transpileModule(readFileSync(resolve(project, "applications/Primary.app/Contents/index.tsx"), "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
+    expect(readFileSync(resolve(project, "applications/Primary.app/Contents/index.tsx"), "utf8")).toContain("extends NSEApplication");
+    const code = ts.transpileModule(readFileSync(resolve(project, "applications/Primary.app/Contents/Views/ApplicationMenuButton.tsx"), "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
     const anchors: unknown[] = [];
     let toggles = 0;
     let port: { setAnchor(element: unknown): void; toggle(): void; label: string; open: boolean } | null = { setAnchor: element => { anchors.push(element); }, toggle: () => { toggles++; }, label: "Application menu", open: true };
-    type GeneratedButton = { type: string; props: { disabled: boolean; ref(element: unknown): void; onClick(): void } };
-    const module: { exports: { default?: () => { props: { children: GeneratedButton[] } } } } = { exports: {} };
+    type GeneratedButton = { type: unknown; props: { disabled: boolean; ref(element: unknown): void; onClick(): void } };
+    const NSEPushButton = function NSEPushButton() { return null; };
+    const module: { exports: { ApplicationMenuButton?: () => GeneratedButton } } = { exports: {} };
     const require = createRequire(import.meta.url);
-    new Function("require", "module", "exports", code)((name: string) => name === "@syndromatic/syncloudos" ? { SCOS: { app: { bundleIdentifier: "org.example.primary", displayName: "Primary", version: "1.0.0" } }, useApplicationMenuTrigger: () => port } : require(name), module, module.exports);
-    const root = module.exports.default!;
-    const button = root().props.children.find(child => child.type === "button")!;
+    new Function("require", "module", "exports", code)((name: string) => name === "@syndromatic/syncloudos" ? { useApplicationMenuTrigger: () => port } : name === "@syndromatic/syncloudos/nse/controls" ? { NSEPushButton } : require(name), module, module.exports);
+    const render = module.exports.ApplicationMenuButton!;
+    const button = render();
+    expect(button.type).toBe(NSEPushButton);
     expect(button.props).toMatchObject({ disabled: false, "aria-haspopup": "menu", "aria-expanded": true, children: "Application menu" });
     button.props.ref("anchor");
     button.props.onClick();
     expect(anchors).toEqual(["anchor"]);
     expect(toggles).toBe(1);
     port = null;
-    expect(root().props.children.find(child => child.type === "button")!.props.disabled).toBe(true);
+    expect(render().props.disabled).toBe(true);
   });
   it("keeps public scaffolds without a content menu explicit about authenticated fullscreen hosting", async () => {
     const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true } });
@@ -194,6 +197,51 @@ describe("developer MCP tools", () => {
     const result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.host.status).toBe("not-found");
     expect(result.findings).toEqual([]);
+  });
+  it("reports no idiom warnings for the default class scaffold", async () => {
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.field", name: "Field", route: "/field", policy: { public: true }, contentApplicationMenu: true });
+    const result = await validateProject({ projectRoot: project, typescript: false });
+    expect(result.ok).toBe(true);
+    expect(result.findings).toEqual([]);
+    expect(result.idiomAudit.applications).toEqual([expect.objectContaining({ bundleIdentifier: "org.example.field", classAuthoring: true, rawControls: 0, unmanagedLifecycle: 0, preferenceDocumentWrites: 0 })]);
+  });
+  it("audits a valid but unidiomatic application with warnings that keep ok true", async () => {
+    put("applications/Lab.app/Contents/Info.ts", 'export default { bundleIdentifier: "org.example.lab", displayName: "Lab", version: "1.0.0" } as const;\n');
+    put("applications/Lab.app/Contents/index.tsx", 'import App from "../../../lib/App";\nexport default App;\n');
+    put("lib/App.tsx", [
+      'import { useEffect, useState } from "react";',
+      'import { SCOS } from "@syndromatic/syncloudos";',
+      'import "./theme.css";',
+      'export default function App() {',
+      '  const [count, setCount] = useState(0);',
+      '  const [rows] = useState<number[]>([]);',
+      '  useEffect(() => { const frame = requestAnimationFrame(() => {}); const worker = new Worker("x.js"); return () => { cancelAnimationFrame(frame); worker.terminate(); }; }, []);',
+      '  useEffect(() => { SCOS.preferences.set("runs", { rows, count }); SCOS.preferences.set("theme", "light"); }, [rows, count]);',
+      '  return <main><button onClick={() => setCount(count + 1)}>Run</button><input type="range" /><input type="hidden" /><select /><table /></main>;',
+      '}',
+      '',
+    ].join("\n"));
+    put("lib/theme.css", `/* Atmo-Onyx dark palette */\n${Array.from({ length: 14 }, (_, index) => `.c${index} { color: #${String(index).padStart(3, "0")}; }`).join("\n")}\n`);
+    put("src/legacy.css", ".x { background: rgb(0 0 0); }\n");
+    const result = await validateProject({ projectRoot: project, typescript: false });
+    expect(result.ok).toBe(true);
+    expect(result.findings.every((finding: { severity?: string }) => finding.severity === "warning")).toBe(true);
+    const rules = result.findings.map((finding: { rule: string }) => finding.rule);
+    expect(new Set(rules)).toEqual(new Set(["idiom.cocoa-class-authoring", "idiom.nse-controls", "idiom.managed-lifecycle", "idiom.document-state", "idiom.atmo-appearance"]));
+    const message = (rule: string, text: string) => result.findings.find((finding: { rule: string; message: string }) => finding.rule === rule && finding.message.includes(text));
+    expect(message("idiom.cocoa-class-authoring", "2 useState")).toBeDefined();
+    expect(message("idiom.nse-controls", "NSEPushButton")).toMatchObject({ file: "lib/App.tsx", line: 9 });
+    expect(message("idiom.nse-controls", "1 raw <input>")).toBeDefined();
+    expect(message("idiom.nse-controls", "NSETable")).toBeDefined();
+    expect(message("idiom.managed-lifecycle", "requestAnimationFrame")?.message).toContain("manageDisplayLink");
+    expect(message("idiom.managed-lifecycle", "new Worker")?.message).toContain("managedTask");
+    expect(rules.filter((rule: string) => rule === "idiom.document-state")).toHaveLength(1);
+    expect(message("idiom.atmo-appearance", "Atmo-Onyx is an obsolete raster theme")).toMatchObject({ file: "lib/theme.css" });
+    expect(message("idiom.atmo-appearance", "14 colour literals")).toMatchObject({ file: "lib/theme.css" });
+    expect(result.findings.some((finding: { file: string }) => finding.file === "src/legacy.css")).toBe(false);
+    expect(result.idiomAudit.applications[0]).toMatchObject({ classAuthoring: false, stateHooks: 2, rawControls: 4, unmanagedLifecycle: 2, preferenceDocumentWrites: 1, legacyThemeMentions: 1 });
+    expect(result.idiomAudit.stylesheets).toMatchObject({ scanned: 2, colourLiterals: 15 });
+    expect((await validateProject({ projectRoot: project, typescript: false, idioms: false })).findings).toEqual([]);
   });
   it("scaffolds a valid app without overwriting any existing bundle", async () => {
     const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.notes", name: "Notes", route: "/notes" });

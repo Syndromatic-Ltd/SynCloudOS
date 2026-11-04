@@ -76,15 +76,74 @@ Adapters for grouped preferences can import `PreferenceValidationError` and `Pre
 
 ## Outlets and animation
 
-`@outlet accessor artwork!: NSEViewOutlet<HTMLDivElement>` creates a stable typed handle; attach `ref={controller.artwork.ref}`. `current` is nullable. `element`, `layer` and `mountSignal` require a live committed mount. Retaining the handle does not own a React node or keep an old mount alive. Canvas outlets use `controller.fx.animation.manageRenderer(outlet, options)` with the existing scoped renderer, full content-bound DPR and explicit capability errors.
+`@outlet accessor artwork!: NSEViewOutlet<HTMLDivElement>` creates a stable typed handle; attach `ref={controller.artwork.ref}`. `current` is nullable. `element`, `layer` and `mountSignal` require a live committed mount. Retaining the handle does not own a React node or keep an old mount alive. An outlet connects any HTML element or a root `<svg>`, such as the one `NSEGraphicsView` renders. Canvas outlets use `controller.fx.animation.manageRenderer(outlet, options)` with the existing scoped renderer, full content-bound DPR and explicit capability errors.
 
 `AFXTransaction.perform({ duration, delay, timing, disableActions }, changes)` closes a synchronous layer transaction in `finally`. It inherits outer options, batches actual applicable layer actions and does not roll back application model writes. Async callbacks are invalid. Existing begin/commit/flush, explicit animation handles and all other FX framework imports remain available.
 
 Managed frame callbacks use monotonic seconds and stop when the view is inactive. Resuming begins with delta zero. Select reduced-motion behavior explicitly (`static` or `continue`), retain the scene's real content/media timebases and handle unsupported renderers through the app's unavailable UI. Source and jsdom tests do not prove physical-GPU or visual acceptance.
 
+### Display links for your own GPU engine
+
+`manageRenderer` gives the canvas to `AFXRenderer`, and a canvas has exactly one context owner. When Three.js, raw WebGL2 or WebGPU draws instead, use `controller.fx.animation.manageDisplayLink(outlet, options)`, the `CADisplayLink` / `MTKView` pattern. It runs the same managed machinery as a renderer (mount lifetime, view visibility, on-screen tracking, resizes, device pixel ratio, the application frame scheduler and reduced motion) but never creates a context and never writes `canvas.width` or `canvas.height`.
+
+- `drawableSizeDidChange(viewport)` runs in the frame-batched resize pass, before frame observers, whenever the CSS size or pixel ratio changes. Size your drawing buffer there.
+- `onFrame(callback, { reducedMotion })` delivers `time`, `delta`, `reducedMotion`, `width`, `height` and `pixelRatio`. `static` observers draw once under reduced motion and again only when display is needed.
+- `setNeedsDisplay()` requests one more frame for every observer. Changes to the controller already request display; call it when state the controller doesn't observe changes, such as a camera an orbit control moved.
+- A mounted canvas takes a renderer or a display link, never both. A second request with the same options returns the same link.
+
+```tsx
+import * as THREE from "three";
+import { NSEViewController, observable, outlet, type NSEManagedAFXDisplayLink, type NSEViewOutlet } from "@syndromatic/syncloudos";
+import type { AFXRendererViewport } from "@syndromatic/syncloudos/fx/animation";
+
+export class FieldViewController extends NSEViewController {
+  @outlet accessor scene!: NSEViewOutlet<HTMLCanvasElement>;
+  @observable accessor coilCurrent = 1;
+  readonly #camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  readonly #world = new THREE.Scene();
+  #renderer?: THREE.WebGLRenderer;
+  #link?: NSEManagedAFXDisplayLink;
+
+  // One stable function, so asking for the link again returns the same one.
+  readonly #drawableSizeDidChange = ({ width, height, pixelRatio }: AFXRendererViewport) => {
+    this.#renderer!.setPixelRatio(pixelRatio);
+    this.#renderer!.setSize(width, height, false);
+    this.#camera.aspect = width / height;
+    this.#camera.updateProjectionMatrix();
+  };
+
+  override viewDidAppear() {
+    // A remount brings a new canvas and a new link; an ordinary reappearance does not.
+    if (this.#link && this.#renderer?.domElement === this.scene.element) return;
+    this.#renderer?.dispose();
+    this.#renderer = new THREE.WebGLRenderer({ canvas: this.scene.element, antialias: true });
+    this.#link = this.fx.animation.manageDisplayLink(this.scene, { drawableSizeDidChange: this.#drawableSizeDidChange });
+    this.#link.onFrame(() => this.#renderer!.render(this.#world, this.#camera), { reducedMotion: "static" });
+  }
+
+  protected override didDispose() { this.#renderer?.dispose(); }
+
+  override renderView() {
+    return <canvas ref={this.scene.ref} aria-label="Magnetic field" style={{ inlineSize: "100%", blockSize: "100%" }} />;
+  }
+}
+```
+
+Create the engine's renderer before asking for the link: `drawableSizeDidChange` runs once while the link is set up, with the first size. The display link ends with the mount on its own; the engine's renderer and scene are yours to dispose.
+
+### Vector figures and plots
+
+Record a figure once with `GFXContext`, draw its `GFXDisplayList` on screen with `NSEGraphicsView`, and export the same display list to SVG or PDF; don't write a second `<svg>` component for the screen. `NSEGraphicsView` forwards its ref to the root `<svg>`, so `@outlet accessor plot!: NSEViewOutlet<SVGSVGElement>` connects with `ref={this.plot.ref}`.
+
+- `autoSize` fills the layout container and scales through the viewBox, instead of keeping the display list's size in CSS pixels.
+- `contentsGravity` is `"resize-aspect"` (the default: the whole figure stays visible, centred), `"resize-aspect-fill"` or `"resize"`, as on `AFXLayer`.
+- Pointer handlers (`onPointerDown`, `onPointerMove`, `onPointerUp`, `onPointerLeave`, `onPointerCancel`) receive the event and `locationInView`, the point in display-list coordinates after scaling and gravity. `convertPointToGFXDisplayList(svg, clientX, clientY, displayList)` performs the same conversion directly. Points beyond the figure are not clipped, so drags can continue past an edge.
+
 ## Scaffolds and validation
 
-`synware:create Search.app --authoring inline` generates the first pattern; `--authoring separate` adds `Contents/Views/SearchView.tsx`. The default `--authoring function` retains function-component apps and the existing `--fx` hook-based recipe scaffolds. Class views can compose those components; combining class scaffold mode with `--fx` is diagnosed before writing files.
+`synware:create Search.app` generates the separate-view pattern by default, with `Contents/Views/SearchView.tsx`; `--authoring inline` keeps the view in `index.tsx`. Add `--content-application-menu` to declare `applicationMenu.trigger: "content"` and render the menu trigger as an `NSEPushButton`. `--authoring function` is an explicit opt-in for a function-component app, and it is what the hook-based `--fx` recipe scaffolds use when no authoring is given. Class views can compose those components; combining class scaffold mode with `--fx` is diagnosed before writing files. The Developer MCP `scaffold` tool uses the same templates.
+
+The [authoring contract](authoring-contract.md) lists which API to use for each job, and the Developer MCP `validate` tool reports `idiom.*` warnings where an application departs from it.
 
 Run `npm run typecheck:authoring` for public positive/negative contracts. The complete [installed consumer specimen](../../tests/fixtures/synware-authoring/6e/README.md) has standalone TypeScript/Vitest configs with no source aliases. Its package acceptance requires the exact built archive in a clean directory. The source host gate exercises those same application files without proving packed acceptance.
 

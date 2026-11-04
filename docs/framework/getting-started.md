@@ -33,20 +33,33 @@ The plugin discovers applications, preference panes, widgets and integrations, s
 
 ## Add an application
 
-Create `src/SynWare/Hello.app/Contents/index.tsx`:
+Create `src/SynWare/Hello.app/Contents/index.tsx`. An application is an `NSEApplication` subclass; its view controller owns the state, and NSE controls bind to it:
 
 ```tsx
-import { SCOS } from "@syndromatic/syncloudos";
-import { NSEStackItem, NSEStackView } from "@syndromatic/syncloudos/nse";
+import { NSEApplication, NSEViewController, SCOS, action, actionRef, bind, observable, type NSEBinding } from "@syndromatic/syncloudos";
+import { NSEPushButton, NSETextField } from "@syndromatic/syncloudos/nse/controls";
 
-export default function Hello() {
-  return <NSEStackView aria-label="Hello" orientation="vertical" spacing={12}>
-    <NSEStackItem id="greeting" visibilityPriority={100}>
-      <p>Hello from {SCOS.app.displayName}.</p>
-    </NSEStackItem>
-  </NSEStackView>;
+export class HelloViewController extends NSEViewController {
+  @observable accessor name = "";
+  readonly nameBinding: NSEBinding<string> = bind<HelloViewController, "name">(this, "name");
+  readonly clearAction = actionRef(HelloViewController, "clear");
+  @action clear() { this.name = ""; return this.name; }
+
+  override renderView() {
+    return <section aria-label="Hello">
+      <NSETextField aria-label="Name" binding={this.nameBinding} />
+      <p>Hello{this.name ? `, ${this.name}` : ""}, from {SCOS.app.displayName}.</p>
+      <NSEPushButton action={this.clearAction}>Clear</NSEPushButton>
+    </section>;
+  }
+}
+
+export default class Hello extends NSEApplication {
+  static override mainViewController = HelloViewController;
 }
 ```
+
+The controls take Atmo's appearance in light and dark without any stylesheet of your own; the host entry imports the NSE styles once (see below). `create-synware Hello.app` and the Developer MCP `scaffold` tool generate this shape, and the [authoring contract](authoring-contract.md) lists which API to use for each job: controls, documents, managed tasks, display links for WebGL engines and `NSEGraphicsView` for plots. A function component is still accepted as an application for very small apps, but it gives up the controller's bindings, actions, undo and managed lifetimes. See [Class authoring](cocoa-authoring.md).
 
 Create the required `Contents/Info.ts` beside the entry point. Identity and version are explicit, as in an Info.plist; `schemaVersion` defaults to `1`:
 

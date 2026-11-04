@@ -82,8 +82,19 @@ describe("6E scaffolds", () => {
     if (authoring === "inline") expect(entry).toContain("renderView()");
     else expect(files.get("Contents/Views/SearchView.tsx")).toContain("binding={controller.queryBinding}");
   });
-  it("keeps the function component scaffold as a permanent choice", () => {
-    expect(scaffoldProjectFiles({ name: "Search", kind: "application" }).get("Contents/index.tsx")).toContain("export default function");
+  it("scaffolds class authoring by default and keeps the function component scaffold as an explicit choice", () => {
+    const files = scaffoldProjectFiles({ name: "Search", kind: "application" });
+    expect(files.get("Contents/index.tsx")).toContain("export default class SynWareApplication extends NSEApplication");
+    expect(files.get("Contents/Views/SearchView.tsx")).toContain("<NSEPushButton");
+    expect(scaffoldProjectFiles({ name: "Search", kind: "application", authoring: "function" }).get("Contents/index.tsx")).toContain("export default function");
+  });
+  it.each(["separate", "inline", "function"] as const)("renders the %s content application-menu trigger as an NSEPushButton", authoring => {
+    const files = scaffoldProjectFiles({ name: "Search", kind: "application", authoring, contentApplicationMenu: true });
+    expect(files.get("Contents/Info.ts")).toContain('applicationMenu: { trigger: "content" }');
+    const source = [...files].filter(([path]) => path.endsWith(".tsx") && !path.includes("__tests__")).map(([, text]) => text).join("\n");
+    expect(source).toContain("useApplicationMenuTrigger()");
+    expect(source).toMatch(/<NSEPushButton ref=\{element => menu\?\.setAnchor\(element\)\}/);
+    expect(source).not.toMatch(/<(button|input|select|table)\b/);
   });
   it.each(["inline", "separate"])("lowers the %s decorated scaffold using the shared standard-decorator transform", async authoring => {
     const files = scaffoldProjectFiles({ name: "Search", kind: "application", authoring });
