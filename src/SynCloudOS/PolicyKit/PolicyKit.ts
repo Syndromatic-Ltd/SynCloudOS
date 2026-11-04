@@ -451,6 +451,15 @@ function appendTrace(decision: SynCloudOSPolicyDecision, entry: SynCloudOSPolicy
   return next;
 }
 
+/**
+ * Names the missing capabilities and the role that lacks them, so a denial says what to grant: a
+ * host grants role capabilities with the policyProfile passed to mountSynCloudOS.
+ */
+function missingCapabilityReason(what: string, subject: SynCloudOSPolicySubject, missing: readonly string[]): string {
+  const names = missing.join(", ");
+  return `${what} requires additional capabilities: ${names}. The role "${subject.role}" does not hold ${missing.length === 1 ? "it" : "them"}; the host grants role capabilities in its policy profile (policyProfile.roles).`;
+}
+
 function baseDecision(
   request: SynCloudOSPolicyRequest,
   subject: SynCloudOSPolicySubject,
@@ -588,7 +597,7 @@ function decide(
     }
     const missingCapabilities = requiredCapabilities.filter((capability) => !hasCapability(subject, capability));
     if (missingCapabilities.length > 0) {
-      return baseDecision(request, subject, false, "This app launch requires additional capabilities.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+      return baseDecision(request, subject, false, missingCapabilityReason("This app launch", subject, missingCapabilities), requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
     }
     return baseDecision(request, subject, true, "App launch allowed.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
   }
@@ -602,7 +611,7 @@ function decide(
   }
   const missingCapabilities = requiredCapabilities.filter((capability) => !hasCapability(subject, capability));
   if (missingCapabilities.length > 0) {
-    return baseDecision(request, subject, false, "This action requires additional capabilities.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+    return baseDecision(request, subject, false, missingCapabilityReason("This action", subject, missingCapabilities), requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
   }
 
   return baseDecision(request, subject, true, "No policy blocked this action.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);

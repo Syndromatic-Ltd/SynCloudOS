@@ -103,6 +103,17 @@ describe("PolicyKit host policy profiles", () => {
     expect(atelierTeam.capabilities).not.toContain("diagnostics.view");
   });
 
+  it("names the missing capabilities and the role that lacks them in a denial", () => {
+    const decision = policyKitFor(atelierProfile, { isAuthorised: false }).evaluate({
+      action: "documentStore.getDraft",
+      requiredCapabilities: ["documentStore.drafts.read", "route.open.public"],
+    } as never);
+    expect(decision.allowed).toBe(false);
+    expect(decision.reason).toContain("requires additional capabilities: documentStore.drafts.read.");
+    expect(decision.reason).toContain("The role \"visitor\" does not hold it");
+    expect(decision.reason).toContain("policyProfile.roles");
+  });
+
   it("authorises the same manifests differently on each host", () => {
     expect(policyKitFor(atelierProfile, { isAuthorised: false }).evaluate({ action: "app.launch", app: membersApp }).allowed).toBe(false);
     expect(policyKitFor(atelierProfile, { isAuthorised: true }).evaluate({ action: "app.launch", app: membersApp }).allowed).toBe(true);

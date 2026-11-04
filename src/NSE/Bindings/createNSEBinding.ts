@@ -1,17 +1,38 @@
 import type { NSEBinding, NSEBindingAdapter, NSEBindingEdit, NSEBindingOwner, NSEBindingSnapshot } from './bindingTypes';
 import { getNSEObjectLifetime } from '../Application/objectLifetime';
 
-/** Adapts an existing document/selection transaction without creating history. */
+function equivalentValue<T>(a: NSEBindingSnapshot<T>["value"], b: NSEBindingSnapshot<T>["value"]): boolean {
+  if (a === b) return true;
+  if (a.kind !== b.kind) return false;
+  if (a.kind === "value" && b.kind === "value") return Object.is(a.value, b.value);
+  if (a.kind === "unavailable" && b.kind === "unavailable") return a.reason === b.reason;
+  return true;
+}
+function equivalentSnapshot<T>(a: NSEBindingSnapshot<T>, b: NSEBindingSnapshot<T>): boolean {
+  if (a === b) return true;
+  return a.revision === b.revision && a.readOnly === b.readOnly && equivalentValue(a.value, b.value)
+    && a.issues.length === b.issues.length && a.issues.every((issue, index) => issue === b.issues[index]);
+}
+
+/**
+ * Adapts an existing document/selection transaction without creating history.
+ *
+ * `adapter.read()` may build a new snapshot on every call: the binding returns the previous snapshot
+ * object while revision, value, readOnly and issues are unchanged, so React sees a stable value.
+ */
 export function createNSEBinding<T>(owner: NSEBindingOwner, adapter: NSEBindingAdapter<T>): NSEBinding<T> {
   let unavailable: NSEBindingSnapshot<T> | undefined;
   let revision = 0;
   const signal = getNSEObjectLifetime(owner)?.scope.authoritySignal ?? owner.ownerSignal;
   const live = () => !signal?.aborted;
+  let last: NSEBindingSnapshot<T> | undefined;
   const read = (): NSEBindingSnapshot<T> => {
     if (live()) {
       const snapshot = adapter.read();
       revision = snapshot.revision;
-      if (live()) return snapshot;
+      // getSnapshot feeds useSyncExternalStore, which loops forever when every call returns a new
+      // object. An adapter may build its snapshot on each read; an equivalent one keeps its identity.
+      if (live()) return last = last !== undefined && equivalentSnapshot(last, snapshot) ? last : snapshot;
     }
     // The adapter can own a disposed document. Never read it after revocation.
     return unavailable ??= Object.freeze({

@@ -69,12 +69,28 @@ export function useNoteActions() {
 
 | Kind | Fields | Meaning |
 | --- | --- | --- |
-| `memory` | `namespace`, `key` | Transient storage, useful for tests and scratch work. |
+| `memory` | `namespace`, `key` | Transient storage, useful for tests. |
 | `indexed-db` | `database`, `store`, `key` | Durable browser storage. |
 | `document-store` | `documentId` | The host's document store. |
 | `remote` | `url` | A remote endpoint. |
 
-Opening a location that is already open returns the existing document.
+Each location kind needs a document adapter that the host registers (`applicationDocuments.initialAdapters`, or `registerAdapter` in a host contribution's `install`). Without one, opening or saving there fails with `document-adapter-unavailable` ("No document adapter supports the requested memory location"). The browser host does not register `memory`, `indexed-db` or `remote` adapters by default, so check what your host provides. A scratch document that is never saved needs no location at all: call `newDocument` without one.
+
+Opening a location that is already open returns the existing document. `openDocument` only opens what is stored: a missing document rejects with code `document-not-found`, and `initialModel` is not used to create it. To open the document on first launch, catch that code and create it at the same location:
+
+```ts
+async applicationWillFinishLaunching() {
+  const request = { typeId: "org.example.lab.simulation", location: { kind: "document-store", documentId: "lab.workspace" } } as const;
+  try {
+    this.document = await SCOS.documents.openDocument(request);
+  } catch (error) {
+    if ((error as { code?: string }).code !== "document-not-found") throw error;
+    this.document = await SCOS.documents.newDocument({ ...request, initialModel: emptySimulation() });
+  }
+}
+```
+
+Document-store reads and writes are authorised against the signed-in person's role, not only the application's manifest; see [Permissions](synware-manifest.md#permissions).
 
 `updateDocument` applies a transform to the current model and records an undo step named by `actionName`. Set a `coalescingKey` so a burst of edits such as typing merges into one step, or `recordUndo: false` for changes that should not be undoable.
 

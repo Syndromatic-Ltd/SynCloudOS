@@ -69,7 +69,7 @@ export interface NSEApplicationClass<TApplication extends NSEApplication = NSEAp
  *   static mainWindow = NotesWindowController;
  *   readonly notes = new NSEArrayController<Note>({ id: "notes", getId: (note) => note.id });
  *   hasUnsavedChanges = false;
- *   async applicationDidFinishLaunching() { this.notes.setContent(await load()); }
+ *   async applicationWillFinishLaunching() { this.notes.setContent(await load()); }
  *   applicationShouldTerminate() { return !this.hasUnsavedChanges; }
  * }
  * ```
@@ -145,9 +145,16 @@ export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObjec
     return this.#context.openWindow(Controller, options) as Promise<TController>;
   }
 
-  /** The kernel is launching the application; no window exists yet. Awaited. */
+  /**
+   * The kernel is launching the application; no window exists yet. Awaited before the main window
+   * opens, so do asynchronous setup that the windows read (documents, sessions, loaded content) here.
+   */
   applicationWillFinishLaunching(): void | Promise<void> {}
-  /** The application launched. Awaited before the windows render. */
+  /**
+   * The application launched. Runs after the launch commits, when the main window is already open
+   * and may have rendered, so a window must not depend on work started here. A failure is reported
+   * but does not undo the launch.
+   */
   applicationDidFinishLaunching(): void | Promise<void> {}
   /** The application became the active application. */
   applicationDidBecomeActive(): void | Promise<void> {}

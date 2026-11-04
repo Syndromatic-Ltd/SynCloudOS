@@ -89,7 +89,9 @@ export interface UndoCommandTarget {
   readonly owner: UndoOwner;
   readonly canUndo: boolean;
   readonly canRedo: boolean;
+  /** The complete menu title, verb included: "Undo Rename", or "Undo" when nothing can be undone. Use it as the item title; do not prefix it. */
   readonly undoTitle: string;
+  /** The complete menu title, verb included: "Redo Rename", or "Redo" when nothing can be redone. */
   readonly redoTitle: string;
 }
 
@@ -108,7 +110,9 @@ export interface UndoRegistrationLease {
    * entry when that lease owns the current global undo/redo frontier. */
   readonly canUndo: boolean;
   readonly canRedo: boolean;
+  /** The complete menu title, verb included: "Undo Rename", or "Undo" when nothing can be undone. Use it as the item title; do not prefix it. */
   readonly undoTitle: string;
+  /** The complete menu title, verb included: "Redo Rename", or "Redo" when nothing can be redone. */
   readonly redoTitle: string;
   readonly isExecuting: boolean;
   register(action: UndoAction, options?: { readonly automaticGroup?: AutomaticUndoGroup }): string;
