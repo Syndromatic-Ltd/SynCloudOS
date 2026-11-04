@@ -155,7 +155,7 @@ describe("developer MCP tools", () => {
     ["authentication: \"optional\", application: { bundleIdentifier: \"org.example.primary\", frame: \"declared\" }", "windowedView", false],
     ["authentication: \"required\", application: { bundleIdentifier: \"org.example.primary\" }", undefined, true],
   ])("does not flag supported literal host configurations: %s", async (options, presentation, contentApplicationMenu) => {
-    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true }, presentation, contentApplicationMenu });
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", presentation, contentApplicationMenu });
     put("src/main.tsx", `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; mountSynCloudOS({ ${options} });`);
     const result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.host.status).toBe("checked");
@@ -164,12 +164,19 @@ describe("developer MCP tools", () => {
   it.each([
     "authentication: \"disabled\", application: { bundleIdentifier: \"org.example.primary\" }",
     "application: { bundleIdentifier: \"org.example.primary\" }",
-  ])("flags a primary that is not public under disabled sign-in, which can never launch: %s", async (options) => {
-    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary" });
+  ])("flags a primary that requires sign-in on a host that disables it: %s", async (options) => {
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { requiresLogin: true } });
     put("src/main.tsx", `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; mountSynCloudOS({ ${options} });`);
     const result = await validateProject({ projectRoot: project, typescript: false, launch: false });
-    expect(result.findings).toContainEqual(expect.objectContaining({ file: "applications/Primary.app/Contents/Info.ts", rule: "synware.public-policy", message: expect.stringContaining("runtime: { policy: { public: true } }") }));
+    expect(result.findings).toContainEqual(expect.objectContaining({ file: "applications/Primary.app/Contents/Info.ts", rule: "synware.public-policy", message: expect.stringContaining("remove requiresLogin") }));
     expect(result.ok).toBe(false);
+  });
+  it("does not ask a primary on a no-sign-in host to be public", async () => {
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary" });
+    put("src/main.tsx", 'import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; mountSynCloudOS({ application: { bundleIdentifier: "org.example.primary" } });');
+    const result = await validateProject({ projectRoot: project, typescript: false, launch: false });
+    expect(result.findings.filter((finding: { rule: string }) => finding.rule === "synware.public-policy")).toEqual([]);
+    expect(result.ok).toBe(true);
   });
   it("reads a top-level awaited mount whose unrelated options use shorthand properties", async () => {
     await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary" });

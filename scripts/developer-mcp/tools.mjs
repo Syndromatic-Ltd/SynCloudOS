@@ -59,11 +59,10 @@ export async function validateProject(input={}) {
     if (primaries.length!==1 || !primaries[0].ok) host={...host,status:"unresolved",reason:"The primary bundle is missing, ambiguous or invalid; its application-menu requirement could not be assessed."};
     else {
       const file=resolve(primaries[0].directory,"Contents/Info.ts"), primary=primaries[0].manifest;
-      // With sign-in disabled no session can exist, so a primary that is not public can never open.
-      const isPublic=primary.runtime?.policy?.public===true || (primary.permissions ?? []).includes("app.open.public");
-      if (host.authentication==="disabled" && !isPublic) findings.push({
+      // With sign-in disabled the host opens the primary publicly; one that demands sign-in contradicts it.
+      if (host.authentication==="disabled" && primary.runtime?.policy?.requiresLogin===true) findings.push({
         file:slash(relative(root,file)),line:1,rule:"synware.public-policy",
-        message:`Primary application ${host.application.bundleIdentifier} is mounted with authentication "disabled" but is not public, so it can never launch: nobody can sign in. Set runtime: { policy: { public: true } } in Info.ts, or enable authentication.`,
+        message:`Primary application ${host.application.bundleIdentifier} declares runtime.policy.requiresLogin, but the host mounts it with authentication "disabled", so nobody could ever open it and mounting fails. Enable authentication, or remove requiresLogin.`,
       });
       const fillsPage=host.application.frame==="fullscreen" || (primary.runtime?.presentation ?? "appView")==="appView";
       if (fillsPage && host.authentication!=="disabled" && primary.applicationMenu?.trigger!=="content") findings.push({
@@ -188,7 +187,7 @@ export async function scaffold(input) {
   const createdPaths=[];
   for (const [path,text] of Object.entries(files)) {const file=path ? resolve(target,path) : target;mkdirSync(dirname(file),{recursive:true});writeFileSync(file,text,{flag:"wx"});createdPaths.push(slash(relative(root,file)));}
   const nextSteps=[];
-  if (input.policy?.public!==true) nextSteps.push('Before using this bundle as the primary application with authentication "disabled" or "optional", explicitly set runtime.policy.public to true. Do not make private applications public unless that access is intended.');
+  if (input.policy?.public!==true) nextSteps.push('With authentication "disabled", the host opens the primary application publicly. With "optional", set runtime.policy.public to true if it must open before anyone signs in. Do not make private applications public unless that access is intended.');
   if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "windowedView"; the default appView is for the primary application.');
   if (!input.contentApplicationMenu && (input.presentation===undefined || input.presentation==="appView")) nextSteps.push('A fullscreen primary with authentication "optional" or "required" must declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button, so people can reach Preferences > Account, Sign In and Log Out. Pass contentApplicationMenu: true to scaffold both.');
   if (testFallback) nextSteps.push(`The project has no ${testFallback.join(", ")}, so Contents/__tests__/app.test.tsx is a smoke test. Install vitest, jsdom and @testing-library/react as dev dependencies to test the application with createSynWareTestHost from @syndromatic/syncloudos/sdk/testing.`);

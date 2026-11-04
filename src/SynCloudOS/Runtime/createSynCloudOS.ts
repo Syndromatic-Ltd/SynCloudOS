@@ -73,6 +73,9 @@ import { createUndoManagerRegistry } from "../Undo";
 import { createPersistenceDocumentStore } from "../DocumentStore";
 import type { SynCloudOSDocumentStoreLock } from "../DocumentStore";
 import { DocumentController, InMemoryDocumentRecoveryStore, createDocumentResourceService } from "../Documents";
+import { InMemoryDocumentAdapter } from "../Documents/Adapters/InMemoryDocumentAdapter";
+import { IndexedDBDocumentAdapter } from "../Documents/Adapters/IndexedDBDocumentAdapter";
+import type { DocumentLocation } from "../Documents/documentTypes";
 import { createDocumentAssetRuntimeIntegration } from "./DocumentAssetRuntimeIntegration";
 import {
   ScreenService,
@@ -851,6 +854,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     environment: config.environment,
     ...(documentAssetIntegration?.resourceLifecycle ? { resourceLifecycle: documentAssetIntegration.resourceLifecycle } : {}),
     ...(documentAssetIntegration ? { transformAdapter: documentAssetIntegration.wrapAdapter } : {}),
+    ...(config.applicationDocuments?.defaultAdapters ? { defaultAdapterFor: (location: DocumentLocation) => defaultDocumentAdapterFor(location, config.environment, config.applicationDocuments!.defaultAdapters!.indexedDB) } : {}),
     observeError: (error, context) => {
       // Structural cleanup diagnostics deliberately exclude provider text:
       // error messages may contain document content, URLs, or credentials.
@@ -1674,4 +1678,13 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     },
   });
   return runtime;
+}
+
+/** The built-in adapter for a memory or IndexedDB location, or null when the environment cannot provide one. */
+function defaultDocumentAdapterFor(location: DocumentLocation, environment: SynCloudOSRuntimeConfig["environment"], indexedDB: IDBFactory | undefined) {
+  if (location.kind === "memory") return new InMemoryDocumentAdapter(environment, { id: "syncloudos.default.memory" });
+  if (location.kind === "indexed-db" && indexedDB) {
+    return new IndexedDBDocumentAdapter({ indexedDB, databaseName: location.database, environment, id: `syncloudos.default.indexed-db:${location.database}` });
+  }
+  return null;
 }

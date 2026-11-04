@@ -20,7 +20,8 @@ The shorthand strings `"optional"` and `"required"` construct no authentication 
 
 - `"disabled"` needs no backend.
 - The object form with `createHttpAuthentication` needs a server that answers the same-origin `/auth/methods`, `/auth/session`, `/auth/start` and `/auth/logout` endpoints: use the [server handler](#server-handler) and an OIDC provider.
-- With `"disabled"` or `"optional"` (string or object), the primary bundle declares `runtime.policy.public` in its manifest, because it launches before anyone signs in.
+- With `"disabled"`, nobody can sign in, so the host opens the primary application publicly; it needs no `runtime.policy.public`. A primary that declares `runtime.policy.requiresLogin` fails to mount, since nobody could ever open it.
+- With `"optional"` (string or object), the primary bundle declares `runtime.policy.public` in its manifest, because it launches before anyone signs in.
 - With `"required"`, the sign-in window is presented before the primary application launches. The `application: { id }` host accepts the same `authentication` values as the Webspring shell; see [Getting started](getting-started.md#mount-one-application).
 
 In a single-application host the **Account** pane of Preferences, Sign In and Log Out live in the application menu. A primary that fills the page has no system top bar, so it must declare `applicationMenu: { trigger: "content" }` and render a button with `useApplicationMenuTrigger()`; with `"optional"` or `"required"` authentication, mounting rejects without it. See [Mount one application in Getting started](getting-started.md#mount-one-application).

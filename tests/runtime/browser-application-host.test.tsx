@@ -157,6 +157,20 @@ describe("application-only browser host", () => {
     expect(anonymous).not.toContain("runtime.configure");
     expect(anonymous).not.toContain("file.write");
   });
+  it("opens a primary that is not marked public when sign-in is disabled", async () => {
+    const privateBundle = createSynWare({ manifest: { ...bundle.manifest, runtime: { presentation: "windowedView" } }, root: Application });
+    const { element: target, runtime } = await mount(element(), { bundles: [privateBundle] });
+    expect(target.querySelector('[data-testid="application"]')).not.toBeNull();
+    expect(runtime.lifecycle.getState(id)).toBe("active");
+  });
+  it("provides the built-in memory and IndexedDB document adapters", async () => {
+    await mount();
+    expect(vi.mocked(createSynCloudOS).mock.calls.at(-1)![0].applicationDocuments).toMatchObject({ defaultAdapters: expect.any(Object) });
+  });
+  it("rejects a primary that requires sign-in on a host that disables it", async () => {
+    const gated = createSynWare({ manifest: { ...bundle.manifest, runtime: { presentation: "windowedView", policy: { requiresLogin: true } } }, root: Application });
+    await expect(mountSynCloudOS(applicationOptions(element(), { bundles: [gated] }))).rejects.toThrow(/requiresLogin.*authentication "disabled"/);
+  });
   it("keeps a single application host's own policy profile", async () => {
     const documentBundle = createSynWare({ manifest: { ...bundle.manifest, permissions: ["documentStore.drafts.read"] }, root: Application });
     const own = { id: "own", roles: { visitor: ["app.open.public"] }, anonymousRole: "visitor", resolveRole: () => "visitor" };

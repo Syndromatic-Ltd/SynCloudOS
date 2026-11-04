@@ -125,7 +125,7 @@ Two checks apply, and an action needs whichever of them governs it:
 
 Declaring a document-store capability in `permissions` does not by itself grant it: the role of the person using the application must hold it, and a denial names the missing capabilities and the role. A host grants role capabilities with `policyProfile` in `mountSynCloudOS`.
 
-A single application without sign-in (`application` with `authentication: "disabled"`, the default) needs no profile. Everyone using it is the anonymous role, so the host grants that role the `documentStore.*` capabilities the application declares. Other declared capabilities are not granted this way, and a host that passes its own `policyProfile` keeps it unchanged.
+A single application without sign-in (`application` with `authentication: "disabled"`, the default) needs no policy setup. Nobody can sign in, so the host opens the application publicly without `runtime.policy.public`; a primary that declares `runtime.policy.requiresLogin` contradicts the host and fails to mount. Everyone using it is the anonymous role, so the host also grants that role the `documentStore.*` capabilities the application declares. Other declared capabilities are not granted this way, and a host that passes its own `policyProfile` keeps it unchanged.
 
 The [test host](testing-synware.md) grants declared permissions to its test subject, so a unit test can pass where the browser host denies.
 
