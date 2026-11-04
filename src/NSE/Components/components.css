@@ -512,8 +512,6 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   font: 11px/1.38 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  /* The plate's emboss smears small monospace glyphs into what reads as bold. */
-  text-shadow: none;
 }
 
 .nse-alert-actions {
