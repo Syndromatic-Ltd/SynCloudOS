@@ -725,6 +725,11 @@ export interface SynCloudOSLocaleServices extends RuntimeOwnedService {
 export interface SynCloudOSInspector extends SynCloudOSInspectorService {}
 export interface SynCloudOSErrorManager extends RuntimeOwnedService {
   capture(payload: SynCloudOSErrorPayload): CapturedSynCloudOSError;
+  /**
+   * Records a failed application lifecycle method. It shows no alert of its own: a later fatal
+   * report for the same application lists it in its technical details as LIFECYCLE_HOOK_FAILED.
+   */
+  recordLifecycleFailure(failure: Readonly<{ appId: string; stage: string; phase: string; hookName: string; message: string }>): void;
   getLatest(): CapturedSynCloudOSError | null;
   getHistory(): CapturedSynCloudOSError[];
   dismiss(errorId: string): boolean;

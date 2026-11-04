@@ -418,6 +418,15 @@ export function createLifecycle(
       }
       const endedAt = runtime.environment.now();
       const cancelled = operation.signal.aborted;
+      if (!cancelled && !(error instanceof SynCloudOSLifecycleVeto)) {
+        runtime.errors?.recordLifecycleFailure?.({
+          appId,
+          stage,
+          phase,
+          hookName: candidate.hookName ?? `${stage}:${phase}`,
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
       recordLifecycleOperation({
         runtimeId: runtime.runtimeId,
         appId,

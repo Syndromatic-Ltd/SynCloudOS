@@ -27,6 +27,21 @@ import { createCapturedError, toTechnicalReport } from "./errorReport";
 type ErrorApp = { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string };
 
 export function createErrorManager(runtime: SynCloudOSRuntime, dependencies: { loginServices: any }) {
+  // Lifecycle methods that failed, per application. A failure after the launch commits leaves the
+  // window running, so the error that finally stops the application is often a consequence of it.
+  const LIFECYCLE_FAILURES_KEPT = 5;
+  const lifecycleFailures = new Map<string, Array<{ code: "LIFECYCLE_HOOK_FAILED"; stage: string; phase: string; hookName: string; message: string; at: string }>>();
+  const withLifecycleFailures = (payload: SynCloudOSErrorPayload): SynCloudOSErrorPayload => {
+    if (!payload.appId || payload.severity !== "fatal") return payload;
+    const records = lifecycleFailures.get(normalizeBundleIdentifier(payload.appId));
+    if (!records?.length) return payload;
+    const lines = records.map(record => `Earlier ${record.code}: ${record.hookName} (${record.stage}:${record.phase}) failed at ${record.at}: ${record.message}`);
+    return {
+      ...payload,
+      technicalDetails: [payload.technicalDetails, ...lines].filter(Boolean).join("\n"),
+      context: { ...payload.context, lifecycleFailures: records.map(record => ({ ...record })) },
+    };
+  };
 const RuntimeStore = runtime.store;
 const EventBus = runtime.events;
 const LoginServices = dependencies.loginServices;
@@ -116,10 +131,18 @@ function rememberFingerprint(error: CapturedSynCloudOSError) {
 
 const errorManager = {
   runtimeId: runtime.runtimeId,
+  recordLifecycleFailure(failure: Readonly<{ appId: string; stage: string; phase: string; hookName: string; message: string }>) {
+    const key = normalizeBundleIdentifier(failure.appId);
+    const records = lifecycleFailures.get(key) ?? [];
+    records.push({ code: "LIFECYCLE_HOOK_FAILED", stage: failure.stage, phase: failure.phase, hookName: failure.hookName, message: failure.message, at: new Date(runtime.environment.now()).toISOString() });
+    lifecycleFailures.set(key, records.slice(-LIFECYCLE_FAILURES_KEPT));
+  },
+
   capture(payload: SynCloudOSErrorPayload): CapturedSynCloudOSError {
     const now = runtime.environment.now();
     const duplicate = findRecentDuplicate(payload.fingerprint, now);
     if (duplicate) return duplicate;
+    payload = withLifecycleFailures(payload);
 
     const snapshot = RuntimeStore.getSnapshot();
     const app = payload.appId ? snapshot.appInfo[normalizeBundleIdentifier(payload.appId)] : null;
@@ -527,6 +550,7 @@ const errorManager = {
 
   dispose() {
     recentErrorFingerprints.clear();
+    lifecycleFailures.clear();
   }
 };
 

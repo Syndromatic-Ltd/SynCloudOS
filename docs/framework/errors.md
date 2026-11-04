@@ -112,6 +112,7 @@ This table lists every stable uppercase diagnostic code in the offline catalogue
 | `SITE_NOT_RESPONDING` | Host response deadline expired. |
 | `CONNECTION_ERROR` | Network operation failed or the browser is offline. |
 | `APP_CONTENT_FAILED` | Application rendering or an application operation failed. |
+| `LIFECYCLE_HOOK_FAILED` | An application lifecycle method such as `applicationDidFinishLaunching` threw or rejected. It raises no alert of its own; a later fatal report for the same application lists it in its technical details, because a failure after launch often causes the error that finally stops the application. |
 | `UNKNOWN_RUNTIME_ERROR` | An unexpected error reached a runtime boundary. |
 | `GLOBAL_SCRIPT_ERROR` | An uncaught script error reached the watchdog. |
 | `UNHANDLED_PROMISE_REJECTION` | A promise rejected without a handler. |
