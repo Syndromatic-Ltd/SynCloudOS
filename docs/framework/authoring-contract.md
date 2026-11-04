@@ -1,6 +1,6 @@
 # SynCloudOS authoring contract
 
-This is the contract for writing a SynWare application with SynCloudOS. It is written for people and for coding agents. The installed SDK ships it as `node_modules/@syndromatic/syncloudos/AGENTS.md`, so an agent working in a consumer project finds it before writing code.
+This is the contract for writing a SynWare application with SynCloudOS. It is written for people and for coding agents. The installed SDK ships it as `AGENTS.md` at the root of the installed `@syndromatic/syncloudos` package, so an agent working in a consumer project finds it before writing code.
 
 A SynWare that mounts and validates is not automatically idiomatic. An app that keeps its state in React hooks, draws its own buttons and paints its own palette loses most of SynCloudOS: Atmo's appearance in light and dark, focus and keyboard handling, accessibility, the responder chain, undo, document saving and managed lifetimes. Use the APIs below for each job.
 
