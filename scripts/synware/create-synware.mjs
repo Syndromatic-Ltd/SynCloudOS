@@ -89,14 +89,16 @@ export function scaffoldFiles(bundleIdentifier, selected = [], title = titleFrom
   const functionName = name => `run${name[0].toUpperCase()}${name.slice(1)}`;
   const recipeImports = selected.map(name => `import { runRecipe as ${functionName(name)} } from "./recipes/${name}";`).join("\n");
   const files = new Map([
-    ["Contents/Info.ts", `export default {
+    ["Contents/Info.ts", `import type { SynWareInfo } from "@syndromatic/syncloudos/sdk";
+
+export default {
   bundleIdentifier: ${JSON.stringify(bundleIdentifier)},
   displayName: ${JSON.stringify(title)},
   version: "1.0.0",
   webspring: { visible: true },
 ${contentApplicationMenu ? '  applicationMenu: { trigger: "content" },\n' : ""}\
 ${permissions.length ? `  permissions: ${JSON.stringify(permissions)},\n` : ""}\
-} as const;
+} satisfies SynWareInfo;
 `],
     ["Contents/index.tsx", `${selected.length ? 'import { useState } from "react";\n' : ""}import { SCOS${contentApplicationMenu ? ", useApplicationMenuTrigger" : ""}${hooks.length ? `, ${hooks.join(", ")}` : ""} } from "@syndromatic/syncloudos";
 import { NSEStackItem, NSEStackView } from "@syndromatic/syncloudos/nse";

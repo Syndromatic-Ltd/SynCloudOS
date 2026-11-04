@@ -6,3 +6,5 @@
 export declare function createSynWare(options: { manifest: unknown; root: () => unknown }): unknown;
 /** An application identifier. */
 export type AppId = string;
+/** The application manifest (fixture). */
+export type SynWareInfo = Readonly<Record<string, unknown>>;
