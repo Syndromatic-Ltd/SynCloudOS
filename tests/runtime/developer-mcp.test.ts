@@ -243,6 +243,22 @@ describe("developer MCP tools", () => {
     expect(result.idiomAudit.stylesheets).toMatchObject({ scanned: 2, colourLiterals: 15 });
     expect((await validateProject({ projectRoot: project, typescript: false, idioms: false })).findings).toEqual([]);
   });
+  it("returns each SDK symbol once with its entries, outlining long declarations", async () => {
+    const members = Array.from({ length: 40 }, (_, index) => "  /** Member " + index + ". */\n  member" + index + "(value: string): string;").join("\n");
+    put("node_modules/@syndromatic/syncloudos/shared.d.ts", "export declare class Widget {\n" + members + "\n  private secret;\n}\nexport declare function makeWidget(): Widget;\n");
+    put("node_modules/@syndromatic/syncloudos/a.d.ts", 'export * from "./shared";\n');
+    put("node_modules/@syndromatic/syncloudos/b.d.ts", 'export * from "./shared";\n');
+    put("node_modules/@syndromatic/syncloudos/package.json", JSON.stringify({ name: "@syndromatic/syncloudos", version: "1.0.0-beta.2", exports: { "./a": { types: "./a.d.ts" }, "./b": { types: "./b.d.ts" } } }));
+    const result = await lookupSdk({ projectRoot: project, query: "Widget" });
+    const widget = result.symbols.filter((symbol: { name: string }) => symbol.name === "Widget");
+    expect(widget).toHaveLength(1);
+    expect(widget[0]).toMatchObject({ entry: "a", entries: ["a", "b"], outlined: true, file: "shared.d.ts", line: 1 });
+    expect(widget[0].signature).toContain("member39(value: string): string;");
+    expect(widget[0].signature).not.toContain("Member 3.");
+    expect(widget[0].signature).not.toContain("secret");
+    const full = await lookupSdk({ projectRoot: project, query: "Widget", full: true });
+    expect(full.symbols.find((symbol: { name: string }) => symbol.name === "Widget").signature).toContain("Member 3.");
+  });
   it("type-checks each project a solution-style tsconfig references", async () => {
     // A bare tsc --noEmit on { "files": [], "references": [...] } checks no file at all.
     symlinkSync(resolve(repository, "node_modules/typescript"), resolve(project, "node_modules/typescript"), "junction");
@@ -390,17 +406,17 @@ describe("developer MCP tools", () => {
       await client.connect(transport);
       const listed = await client.listTools();
       expect(listed.tools.map(tool=>tool.name)).toHaveLength(5);
-      expect(listed.tools.find(tool=>tool.name==="syncloudos.scaffold")?.inputSchema.required).toEqual(["name"]);
-      expect(listed.tools.find(tool=>tool.name==="syncloudos.scaffold")?.inputSchema.properties?.contentApplicationMenu).toMatchObject({ type: "boolean" });
-      const invalidLimit = await client.callTool({ name: "syncloudos.lookup_sdk", arguments: { limit: 101 } });
+      expect(listed.tools.find(tool=>tool.name==="scaffold")?.inputSchema.required).toEqual(["name"]);
+      expect(listed.tools.find(tool=>tool.name==="scaffold")?.inputSchema.properties?.contentApplicationMenu).toMatchObject({ type: "boolean" });
+      const invalidLimit = await client.callTool({ name: "lookup_sdk", arguments: { limit: 101 } });
       expect(invalidLimit.isError).toBe(true);
-      const invalidPolicy = await client.callTool({ name: "syncloudos.scaffold", arguments: { name: "Rejected", policy: { allowEverything: true } } });
+      const invalidPolicy = await client.callTool({ name: "scaffold", arguments: { name: "Rejected", policy: { allowEverything: true } } });
       expect(invalidPolicy.isError).toBe(true);
       expect((await inspectProject({ projectRoot: project })).bundles).toHaveLength(0);
-      const scaffolded = await client.callTool({ name: "syncloudos.scaffold", arguments: { bundleIdentifier: "org.example.menu", name: "Menu", route: "/menu", contentApplicationMenu: true } });
+      const scaffolded = await client.callTool({ name: "scaffold", arguments: { bundleIdentifier: "org.example.menu", name: "Menu", route: "/menu", contentApplicationMenu: true } });
       expect(scaffolded.isError).not.toBe(true);
       expect(parseManifest(resolve(project, "applications/Menu.app/Contents/Info.ts")).applicationMenu).toEqual({ trigger: "content" });
-      const response = await client.callTool({name:"syncloudos.inspect_project",arguments:{}});
+      const response = await client.callTool({name:"inspect_project",arguments:{}});
       expect(response.isError).not.toBe(true);
       expect(response.structuredContent).toMatchObject({sdk:{version:"1.0.0-beta.2"}});
     } finally {await client.close();}

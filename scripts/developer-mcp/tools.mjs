@@ -177,7 +177,7 @@ export async function scaffold(input) {
   if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "windowedView"; the default appView is for the primary application.');
   if (!input.contentApplicationMenu && (input.presentation===undefined || input.presentation==="appView")) nextSteps.push('A fullscreen primary with authentication "optional" or "required" must declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button, so people can reach Preferences > Account, Sign In and Log Out. Pass contentApplicationMenu: true to scaffold both.');
   if (testFallback) nextSteps.push(`The project has no ${testFallback.join(", ")}, so Contents/__tests__/app.test.tsx is a smoke test. Install vitest, jsdom and @testing-library/react as dev dependencies to test the application with createSynWareTestHost from @syndromatic/syncloudos/sdk/testing.`);
-  nextSteps.push("Review the generated manifest and run syncloudos.validate before registering the bundle.");
+  nextSteps.push("Review the generated manifest and run the validate tool before registering the bundle.");
   return {createdPaths,nextSteps};
 }
 export async function explainError({projectRoot,query,limit=5}) {
@@ -198,7 +198,7 @@ export async function explainError({projectRoot,query,limit=5}) {
     nextSteps.push("Use the matching code's cause, fix and linked documentation; inspect the original exception and its structured diagnostics.");
   } else if (codes.length) {
     classification={kind:"typescript",catalogue:false,message:"TypeScript compiler diagnostics are outside the SynCloudOS runtime error-code catalogue.",codes};
-    nextSteps.push("Read the complete compiler diagnostic and compare the argument and expected types. Use syncloudos.lookup_sdk for SDK symbols named in the message, then run the consumer's TypeScript compiler again.");
+    nextSteps.push("Read the complete compiler diagnostic and compare the argument and expected types. Use the lookup_sdk tool for SDK symbols named in the message, then run the consumer's TypeScript compiler again.");
   } else if (npmWarning) {
     classification={kind:"npm-warning",catalogue:false,message:"npm installation warnings are outside the SynCloudOS runtime error-code catalogue."};
     nextSteps.push("Inspect npm's named package and warning. A blocked install script is not proof that installation or the SDK failed; approve only trusted scripts under your project's npm policy if their native tool is needed, then run the consumer build.");
@@ -210,7 +210,7 @@ export async function explainError({projectRoot,query,limit=5}) {
     if (sdkErrors.length) {
       classification={kind:"sdk-error",catalogue:false,message:"An exported SDK error class was identified in installed declarations, outside the global runtime code catalogue."};
       nextSteps.push("Read the exported error declaration and linked domain documentation. Inspect its typed fields (such as reason) rather than interpreting it as an unrelated runtime catalogue code.");
-    } else nextSteps.push("Paste the canonical error code or exported SDK error class name, or use syncloudos.lookup_sdk for the API involved. Symptom-only similarity is not evidence of a particular failure.");
+    } else nextSteps.push("Paste the canonical error code or exported SDK error class name, or use the lookup_sdk tool for the API involved. Symptom-only similarity is not evidence of a particular failure.");
   }
   const related=classification.kind!=="unclassified" ? [] : catalogue.map(entry=>{
     const text=[entry.code,entry.title,entry.cause,entry.fix].join(" ").toLowerCase();
