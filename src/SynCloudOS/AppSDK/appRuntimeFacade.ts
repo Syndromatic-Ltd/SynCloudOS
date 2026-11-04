@@ -2046,10 +2046,21 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       async openDocument<TModel, TSerialized = TModel>(request: Parameters<SynCloudOSRuntime["documents"]["openDocument"]>[0]): Promise<ApplicationDocumentSnapshot<TModel>> {
         assertLive();
         if (!runtime.documents.isTypeAvailableToApplication(request.typeId, app.bundleIdentifier)) throw securityError("The document type is not provisioned for this application.");
-        return admitMountedDocument(
-          (operationSignal) => runtime.documents.openDocument<TModel, TSerialized>({ ...request, applicationId: app.bundleIdentifier, signal: operationSignal }),
-          request.signal,
-        );
+        // Open or create: with an initialModel, a location that holds nothing yet gets a new document
+        // there from that model (written on its first save), so first launch needs no special case.
+        const { initialModel, ...openRequest } = request as typeof request & { readonly initialModel?: TModel };
+        try {
+          return await admitMountedDocument(
+            (operationSignal) => runtime.documents.openDocument<TModel, TSerialized>({ ...openRequest, applicationId: app.bundleIdentifier, signal: operationSignal }),
+            request.signal,
+          );
+        } catch (error) {
+          if (initialModel === undefined || (error as { readonly code?: unknown } | null)?.code !== "document-not-found") throw error;
+          return admitMountedDocument(
+            (operationSignal) => runtime.documents.newDocument<TModel, TSerialized>({ ...openRequest, initialModel, applicationId: app.bundleIdentifier, signal: operationSignal } as never),
+            request.signal,
+          );
+        }
       },
       async newDocument<TModel, TSerialized = TModel>(request: Parameters<SynCloudOSRuntime["documents"]["newDocument"]>[0]): Promise<ApplicationDocumentSnapshot<TModel>> {
         assertLive();

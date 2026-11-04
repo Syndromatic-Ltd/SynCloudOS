@@ -390,3 +390,37 @@ it("observes a late installer rejection without keeping render or disposal pendi
     await disposal;
   }
 });
+
+function provisionEmptyStore(): SynWareTestApplicationDocumentsConfiguration {
+  return {
+    initialTypes: [noteType()],
+    trustedDocumentKinds: [trustedKind],
+    install: context => { context.documents.registerDocumentStoreAdapter({ id: "class-document-store", documentIdPrefix: "class-documents:" }); },
+  };
+}
+
+it("creates a missing document from initialModel when opening it, and writes it on the first save", async () => {
+  const fixture = createClassFixture(provisionEmptyStore(), { openOnLaunch: false });
+  await fixture.host.render();
+  expect(await fixture.provision.seed.getDraft(storedDocumentId)).toBeNull();
+  const location = { kind: "document-store", documentId: storedDocumentId } as const;
+  const created = await fixture.application.documents.openDocument<NoteModel>({ documentId, typeId, location, initialModel: { text: "First launch" } });
+  expect(created).toMatchObject({ id: documentId, typeId, model: { text: "First launch" } });
+  await fixture.application.documents.saveDocument(documentId, { reason: "explicit" });
+  expect(await fixture.provision.seed.getDraft(storedDocumentId)).toMatchObject({ body: { content: { text: "First launch" } } });
+});
+
+it("opens what is stored over initialModel", async () => {
+  const fixture = createClassFixture(provisionNote(), { openOnLaunch: false });
+  await fixture.host.render();
+  const location = { kind: "document-store", documentId: storedDocumentId } as const;
+  expect(await fixture.application.documents.openDocument<NoteModel>({ documentId, typeId, location, initialModel: { text: "Ignored" } }))
+    .toMatchObject({ model: { text: "Seeded before launch" } });
+});
+
+it("still rejects a missing document when no initialModel is given", async () => {
+  const fixture = createClassFixture(provisionEmptyStore(), { openOnLaunch: false });
+  await fixture.host.render();
+  const location = { kind: "document-store", documentId: storedDocumentId } as const;
+  await expect(fixture.application.documents.openDocument<NoteModel>({ documentId, typeId, location })).rejects.toMatchObject({ code: "document-not-found" });
+});
