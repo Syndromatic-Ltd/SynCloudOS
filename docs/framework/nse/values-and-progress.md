@@ -15,7 +15,7 @@ import { NSESlider, NSEStepper } from "@syndromatic/syncloudos/nse";
 | `NSELevelIndicator` | A meter, or a star rating | No |
 | `NSESegmentedControl` | Momentary, single and multiple selection segments in the rounded, capsule and textured toolbar styles, with menus and overflow | For menus and overflow |
 | `NSEPopUpButton` | A button that shows the selected choice and opens the list, or (`pullsDown`) a button that opens a menu of commands | A pull-down button does; a pop-up button falls back to the native list without one |
-| `NSEProgressBar`, `NSEProgressItem`, `NSEProgressIndicator`, `NSESpinner` | Determinate and indeterminate progress | No |
+| `NSEProgressIndicator` | Determinate and indeterminate progress, as a bar or a spinning indicator | No |
 
 Components marked "Yes" open a floating list and need an overlay host. A mounted SynWare receives one from the runtime, and elsewhere you wrap the controls in `NSEStandaloneControlHost` from `nse/controls`. See [Text fields and choice controls](text-and-choice.md#at-a-glance).
 
@@ -163,47 +163,24 @@ Arrow Down and Arrow Up on the button open the list. Without an overlay host, a 
 
 ## Progress
 
-### NSEProgressBar
+`NSEProgressIndicator` is AppKit's `NSProgressIndicator`: a bar, or a spinning indicator.
+
+```tsx
+<NSEProgressIndicator aria-label="Export" value={exported} maximum={total} />
+<NSEProgressIndicator aria-label="Waiting for the server" />
+<NSEProgressIndicator aria-label="Preparing image" style="spinning" controlSize="small" />
+```
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `value` | `number` | required | The progress. |
-| `min`, `max` | `number` | 0, 100 | The range. A `max` that is not above `min` is treated as `min + 100`. |
-| `snap` | `number` | `1` | Round the value to a multiple of this. Non-positive values use 1. |
-| `altValue` | `number` | none | A secondary fill behind the main one, for buffering. |
-| `content` | `ReactNode` | none | Text drawn over the bar. `children` does the same. |
-| `label` | `string` | none | The accessible name. |
-| `animatePosition` | `boolean` | `true` | Animate changes in width. |
+| `aria-label` | `string` | required | The accessible name. |
+| `style` | `"bar" \| "spinning"` | `"bar"` | `NSProgressIndicator.Style`. |
+| `value` | `number` | none | `doubleValue`. It is snapped to a whole number and held between `minimum` and `maximum`. |
+| `minimum`, `maximum` | `number` | 0, 100 | `minValue` and `maxValue`. A `maximum` that is not above `minimum` is treated as `minimum + 100`. |
+| `isIndeterminate` | `boolean` | `true` without a `value` | An indeterminate bar sweeps back and forth and an indeterminate spinning indicator turns. |
+| `controlSize` | `"small" \| "regular" \| "large"` | `"regular"` | A spinning indicator is 16, 32 or 64 pixels across. |
 
-A non-finite value counts as the minimum, and the value is held within the range. The element is a `role="progressbar"` with `aria-valuemin`, `aria-valuemax` and `aria-valuenow`.
-
-### NSEProgressItem
-
-A row-shaped progress element for lists: `value`, `max` (default 100), `variant` (`"item"` or `"pill"`), `label` and children for the text over the fill.
-
-### NSEProgressIndicator
-
-A state-driven indicator, for progress that can be indeterminate, paused or failed.
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | required | |
-| `state` | object | required | `{ kind: "determinate", value, minimum, maximum }`, `{ kind: "indeterminate" }`, `{ kind: "suspended", value? }`, `{ kind: "completed" }`, `{ kind: "error", message }` or `{ kind: "hidden" }`. |
-| `variant` | `"bar" \| "circular" \| "spinner"` | `"bar"` | |
-| `size` | `16 \| 32 \| 64` | `16` | |
-| `reducedMotion` | `boolean` | | Draw without motion. |
-
-A hidden state renders nothing. Completed, suspended and error states render a status message, and error shows its `message`.
-
-### NSESpinner
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `size` | `"small" \| "large"` | `"small"` | |
-| `tone` | `"light" \| "dark"` | `"light"` | Pick the tone that contrasts with the surface. |
-| `label` | `string` | `"Loading"` | The accessible label, on a `role="status"` element. |
-
-The spinner stops animating while it is scrolled out of view.
+A determinate bar is a `role="progressbar"` with `aria-valuemin`, `aria-valuemax` and `aria-valuenow`; an indeterminate one has no `aria-valuenow`. A spinning indicator with a `value` fills as a ring. Indeterminate motion stops under reduced motion (the nearest `NSEAnimationEnvironmentProvider`). To hide an indicator when no work is running, don't render it.
 
 ## Example
 
@@ -211,7 +188,7 @@ The spinner stops animating while it is scrolled out of view.
 import { useState } from "react";
 import {
   NSELevelIndicator,
-  NSEProgressBar,
+  NSEProgressIndicator,
   NSESegmentedControl,
   NSESlider,
   NSEStepper,
@@ -231,7 +208,7 @@ export function PlayerControls({ duration }: { duration: number }) {
 
   return (
     <div>
-      <NSEProgressBar label="Buffered" value={position} altValue={Math.min(duration, position + 30)} max={duration} />
+      <NSEProgressIndicator aria-label="Played" value={position} maximum={duration} />
       <NSESlider
         aria-label="Position"
         minimum={0}

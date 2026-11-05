@@ -18,7 +18,7 @@ import { useState } from "react";
 import {
   NSEBox,
   NSEButton,
-  NSEProgressBar,
+  NSEProgressIndicator,
   NSESegmentedControl,
   NSESlider,
   NSETextField,
@@ -49,7 +49,7 @@ export function ExportSettings() {
       />
       <NSESlider aria-label="Quality" label="Quality" minimum={0} maximum={100} value={quality} onValueChange={(value) => setQuality(value)} />
       <NSEButton buttonType="switch" title="Compress" state={compress} onStateChange={(state) => setCompress(state === "on" ? "on" : "off")} />
-      <NSEProgressBar aria-label="Export progress" value={40} max={100} />
+      <NSEProgressIndicator aria-label="Export progress" value={40} />
       <NSEButton title="Export" keyEquivalent={"\r"} />
     </NSEBox>
   );
@@ -105,8 +105,7 @@ Focused entries include `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSESta
 | `NSEStepper` | Increment and decrement, with hold to repeat, bounds and wrapping. |
 | `NSELevelIndicator` | Continuous, discrete, capacity and rating indicators with warning and critical thresholds. |
 | `NSESegmentedControl` | Momentary, select-one and select-any segments in the rounded, capsule and textured styles, with overflow handling. One-of-many choices and tab strips are segmented controls. |
-| `NSEProgressBar`, `NSEProgressItem` | Determinate progress, with an optional secondary fill. |
-| `NSEProgressIndicator`, `NSESpinner` | Indeterminate activity. |
+| `NSEProgressIndicator` | `NSProgressIndicator`: a determinate or indeterminate bar, or a spinning indicator. |
 
 ## Date, time and colour
 

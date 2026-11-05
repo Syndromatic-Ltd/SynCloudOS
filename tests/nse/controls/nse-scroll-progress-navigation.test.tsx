@@ -26,7 +26,8 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEScroller, NSEScrollView, NSEScrollViewController, computeScrollRectTarget, normalizeRTLScrollLeft } from "../../../src/NSE/Scroll";
 import { NSEProgressIndicator } from "../../../src/NSE/Progress";
-import { NSEProgressBar, NSEProgressItem, NSESpinner } from "../../../src/NSE/Progress";
+import { NSESpinner } from "../../../src/NSE/Progress/spinnerSprite";
+import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
 import { NSETabView } from "../../../src/NSE/Navigation";
 import { NSESegmentedControl } from "../../../src/NSE/Controls/Values";
 import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
@@ -167,7 +168,7 @@ describe("scroll progress and navigation", () => {
     view.unmount();
   });
   it("keeps an always-visible zero-range scroller disabled", () => { render(<NSEScroller orientation="vertical" policy="always" value={0} maximum={0} onValueChange={() => {}} />); expect(screen.getByRole("slider")).toHaveProperty("disabled", true); });
-  it("exposes the spinner's accessible status and visual variant", () => {
+  it("exposes the system chrome spinner's accessible status and visual variant", () => {
     render(<NSESpinner size="large" tone="dark" label="Loading records" />);
     const spinner = screen.getByRole("status", { name: "Loading records" });
     expect(spinner.getAttribute("data-size")).toBe("large");
@@ -197,25 +198,35 @@ describe("scroll progress and navigation", () => {
     expect(bold.closest("[data-segment-style]")?.getAttribute("data-segment-style")).toBe("texturedRounded");
   });
 
-  it("uses one normalized progress contract for bars and items", () => {
-    render(
-      <>
-        <NSEProgressBar value={23} min={10} max={40} snap={5} altValue={35} label="Transfer" content="Transfer" animatePosition={false} />
-        <NSEProgressItem value={42} max={100} variant="pill" label="Transfer item">Item</NSEProgressItem>
-      </>,
-    );
+  it("is NSProgressIndicator: a determinate bar clamps and reflects its value", () => {
+    render(<NSEProgressIndicator aria-label="Transfer" value={25} minimum={10} maximum={40} />);
     const bar = screen.getByRole("progressbar", { name: "Transfer" });
     expect(bar.getAttribute("aria-valuemin")).toBe("10");
     expect(bar.getAttribute("aria-valuemax")).toBe("40");
     expect(bar.getAttribute("aria-valuenow")).toBe("25");
+    expect(bar.getAttribute("data-variant")).toBe("bar");
+    expect(bar.getAttribute("data-state")).toBe("determinate");
     expect(bar.style.getPropertyValue("--nse-control-progress")).toBe("50%");
-    expect(Number.parseFloat(bar.style.getPropertyValue("--nse-control-progress-alt"))).toBeCloseTo((25 / 30) * 100, 12);
-    expect(bar.getAttribute("data-animate")).toBe("false");
-    expect(screen.getByRole("progressbar", { name: "Transfer item" }).getAttribute("data-variant")).toBe("pill");
   });
-
-  it("renders determinate, suspended, error and hidden progress semantically", () => { const { rerender } = render(<NSEProgressIndicator aria-label="Load" state={{ kind: "determinate", value: 5, minimum: 0, maximum: 10 }} />); expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("5"); rerender(<NSEProgressIndicator aria-label="Load" state={{ kind: "error", message: "Failed" }} />); expect(screen.getByRole("status").textContent).toContain("Failed"); rerender(<NSEProgressIndicator aria-label="Load" state={{ kind: "hidden" }} />); expect(screen.queryByRole("progressbar")).toBeNull(); });
-  it("uses a static indeterminate fallback under reduced motion", () => { render(<NSEProgressIndicator aria-label="Load" state={{ kind: "indeterminate" }} reducedMotion />); expect(screen.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); });
+  it("is indeterminate without a value, or when isIndeterminate says so", () => {
+    const { rerender } = render(<NSEProgressIndicator aria-label="Load" />);
+    expect(screen.getByRole("progressbar").getAttribute("data-state")).toBe("indeterminate");
+    expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBeNull();
+    rerender(<NSEProgressIndicator aria-label="Load" value={5} isIndeterminate />);
+    expect(screen.getByRole("progressbar").getAttribute("data-state")).toBe("indeterminate");
+  });
+  it("sizes a spinning indicator by controlSize, and fills it as a ring when it has a value", () => {
+    const { rerender } = render(<NSEProgressIndicator aria-label="Load" style="spinning" controlSize="small" />);
+    const spinner = screen.getByRole("progressbar");
+    expect(spinner.getAttribute("data-variant")).toBe("spinner");
+    expect(spinner.getAttribute("data-size")).toBe("16");
+    rerender(<NSEProgressIndicator aria-label="Load" style="spinning" />);
+    expect(screen.getByRole("progressbar").getAttribute("data-size")).toBe("32");
+    rerender(<NSEProgressIndicator aria-label="Load" style="spinning" controlSize="large" value={30} />);
+    expect(screen.getByRole("progressbar").getAttribute("data-variant")).toBe("circular");
+    expect(screen.getByRole("progressbar").getAttribute("data-size")).toBe("64");
+  });
+  it("uses a static indeterminate fallback under reduced motion", () => { render(<NSEAnimationEnvironmentProvider reducedMotion><NSEProgressIndicator aria-label="Load" /></NSEAnimationEnvironmentProvider>); expect(screen.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); });
   it("moves tab focus with roving keys and lazily renders content", () => { const change = vi.fn(); render(<NSETabView aria-label="Pages" items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} />); fireEvent.keyDown(screen.getByRole("tab", { name: "A" }), { key: "ArrowRight" }); expect(change).toHaveBeenCalledWith("b", "keyboard"); expect(screen.getByRole("tabpanel").textContent).toBe("Alpha"); });
   it("supports tab Home/End and keep-alive panel lifecycle", () => { const change = vi.fn(); render(<NSETabView aria-label="Pages" keepAlive items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "off", label: "Off", disabled: true, render: () => "Off" }, { id: "b", label: "B", render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} />); fireEvent.keyDown(screen.getByRole("tab", { name: "A" }), { key: "End" }); expect(change).toHaveBeenLastCalledWith("b", "keyboard"); expect(screen.getAllByRole("tabpanel", { hidden: true })).toHaveLength(2); });
   it("hosts tab overflow in an overlay and selects an overflow item", () => { const change = vi.fn(); render(<NavigationOverlay><NSETabView aria-label="Pages" maximumVisibleTabs={2} items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", render: () => "Beta" }, { id: "c", label: "C", render: () => "Gamma" }]} selectedId="a" onSelectedIdChange={change} /></NavigationOverlay>); fireEvent.click(screen.getByRole("button", { name: "More Pages" })); expect(screen.getByRole("listbox")).not.toBeNull(); fireEvent.click(screen.getByRole("option", { name: "C" })); expect(change).toHaveBeenCalledWith("c", "pointer"); });

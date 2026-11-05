@@ -24,7 +24,7 @@ import "./LoginWindow.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../../Animation";
 import { resolveLoginWindowTransitions } from "./LoginWindow.transitions";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
-import { NSESpinner } from "../../Progress/NSEProgress";
+import { NSESpinner } from "../../Progress/spinnerSprite";
 import { useNSEFeedback } from "../../Feedback";
 import { loginWindowAssets } from "./loginWindowAssets";
 
