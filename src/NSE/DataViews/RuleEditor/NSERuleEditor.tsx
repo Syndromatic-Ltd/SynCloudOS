@@ -22,16 +22,16 @@ import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 
 
 import { compilePredicateExpression, PREDICATE_OPERATOR_OPTIONS, normalisePredicateOperator } from "./predicateTemplates";
 import { dataViewAllowsNavigation, dataViewIsBusy, dataViewPresentsContent } from "../Core";
-import { NSEChoiceControl } from "./NSEChoiceControl";
+import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
 import type { NSEPredicateOperatorOption, NSEPredicateTemplate, NSERuleEditorProps, NSERuleEditorValue, NSERuleRow } from "./ruleEditorTypes";
 import "./nse-rule-editor.css";
 
 const matchOptions = Object.freeze([
-  Object.freeze({ id: "all", label: "all" }),
-  Object.freeze({ id: "any", label: "any" }),
-  Object.freeze({ id: "none", label: "none" }),
+  Object.freeze({ value: "all", title: "all" }),
+  Object.freeze({ value: "any", title: "any" }),
+  Object.freeze({ value: "none", title: "none" }),
 ]);
 
 const EMPTY_VALUE: NSERuleEditorValue = Object.freeze({ root: Object.freeze({ id: "root", kind: "group", operator: "all", children: Object.freeze([]) }) });
@@ -98,13 +98,13 @@ function RuleComparisonControls({ row, label, fields, operators, templates, loca
   const locked = readOnly || disabled;
   const compatibleOptions = (candidate: NSEPredicateTemplate<unknown> | undefined, operator: string) => candidate?.acceptsTextOptions === true && ["equals", "notEquals", "contains", "beginsWith", "endsWith", "in"].includes(operator) ? row.options : undefined;
   return <>
-    <NSEChoiceControl label={`Field ${label}`} labelHidden value={row.field} disabled={locked} options={fields.map((id) => ({ id, label: templates.find((candidate) => candidate.field === id)?.label ?? id }))} onChange={(field) => {
+    <NSEPopUpButton label={`Field ${label}`} labelHidden value={row.field} isEnabled={!locked} items={fields.map((id) => ({ value: id, title: templates.find((candidate) => candidate.field === id)?.label ?? id }))} onValueChange={(field) => {
       const nextTemplate = templates.find((candidate) => candidate.field === field);
       const operator = nextTemplate?.operators[0]?.operator ?? available[0]?.operator ?? "equals";
       const options = compatibleOptions(nextTemplate, operator);
       onChange({ ...row, field, operator, value: operator === "between" ? ["", ""] : operator === "in" ? [] : undefined, ...(options === undefined ? { options: undefined } : { options }) });
     }} />
-    <NSEChoiceControl label={`Operator ${label}`} labelHidden value={row.operator} disabled={locked} options={available.map(({ operator: id, label: text }) => ({ id, label: text }))} onChange={(nextId) => {
+    <NSEPopUpButton label={`Operator ${label}`} labelHidden value={row.operator} isEnabled={!locked} items={available.map(({ operator: id, label: text }) => ({ value: id, title: text }))} onValueChange={(nextId) => {
       const operator = normalisePredicateOperator(nextId);
       const arity = available.find((candidate) => candidate.operator === operator)?.arity;
       const prior = row.value;
@@ -193,7 +193,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
       else if (event.altKey && event.key === "ArrowDown") { event.preventDefault(); move(parentPath, index, 1); }
     }}>
       <div className="nse-rule-header">
-        <NSEChoiceControl label={`Match ${row.id}`} labelHidden value={row.operator} disabled={locked} options={matchOptions} onChange={(operator) => publishChildren(replaceAtPath(root.children, path, { ...row, operator: operator as "all" | "any" | "none" }))} />
+        <NSEPopUpButton label={`Match ${row.id}`} labelHidden value={row.operator} isEnabled={!locked} items={matchOptions} onValueChange={(operator) => publishChildren(replaceAtPath(root.children, path, { ...row, operator: operator as "all" | "any" | "none" }))} />
         <span className="nse-rule-phrase" aria-hidden="true">of the following are true</span>
         <NSEButton
           appearance="aqua"
@@ -224,7 +224,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
     </fieldset>;
     const label = parentPath.length === 0 ? String(index + 1) : row.id;
     if (row.kind === "constant") return <div key={row.id} role="group" aria-label={`Rule ${label}`} tabIndex={-1} data-rule-id={row.id} className="nse-rule-row">
-      <NSEChoiceControl label={`Constant ${label}`} labelHidden value={String(row.value)} disabled={locked} options={[{ id: "true", label: "Always true" }, { id: "false", label: "Always false" }]} onChange={(next) => publishChildren(replaceAtPath(root.children, path, { ...row, value: next === "true" }))} />
+      <NSEPopUpButton label={`Constant ${label}`} labelHidden value={String(row.value)} isEnabled={!locked} items={[{ value: "true", title: "Always true" }, { value: "false", title: "Always false" }]} onValueChange={(next) => publishChildren(replaceAtPath(root.children, path, { ...row, value: next === "true" }))} />
       <NSEButton
         appearance="aqua"
         title="−"
@@ -255,7 +255,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
       {/* The Mac's sentence: Match [all] of the following conditions. */}
       <div className="nse-rule-header">
         <span className="nse-rule-phrase" aria-hidden="true">Match</span>
-        <NSEChoiceControl label="Match" labelHidden value={root.operator} disabled={locked} options={matchOptions} onChange={(operator) => publishChildren(root.children, operator as "all" | "any" | "none")} />
+        <NSEPopUpButton label="Match" labelHidden value={root.operator} isEnabled={!locked} items={matchOptions} onValueChange={(operator) => publishChildren(root.children, operator as "all" | "any" | "none")} />
         <span className="nse-rule-phrase" aria-hidden="true">of the following conditions</span>
       </div>
       <div role="group" aria-label="Rule rows" className="nse-rule-rows">{renderRows(root.children)}</div>

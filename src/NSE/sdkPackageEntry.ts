@@ -220,7 +220,6 @@ export type {
   NSEImagePosition,
 } from "./Controls/Buttons/NSEButton";
 export type { NSEKeyEquivalentModifierMask } from "./Controls/Buttons/useNSEKeyEquivalent";
-export type { NSEExtendedControlLevel, NSESelectableOption, NSESelectorItem, NSESelectorItemInput } from "./Controls/Selection/NSESelectors";
 export {
   NSEBox,
   NSETextField,
@@ -240,8 +239,6 @@ export type {
   NSEFontTextStyle,
   NSESwitchProps,
 } from "./Controls/Fields/NSEFields";
-export { NSEListSelector, NSEPopupList, NSEIntegerPicker } from "./Controls/Selection/NSESelectors";
-export type { NSEIntegerPickerProps, NSEListSelectorProps, NSEPopupListProps } from "./Controls/Selection/NSESelectors";
 export { NSEPageHeader, NSEHeader, NSEPrevNextBanner } from "./Windows/Chrome";
 export type { NSEHeaderProps, NSEPageHeaderProps, NSEPrevNextBannerProps } from "./Windows/Chrome";
 export { NSETopBar, NSETopBarButton, NSEStatusBar } from "./Windows/Chrome";
@@ -681,11 +678,12 @@ export type {
   NSEMenuProps,
 } from "./Menus/NSEMenu";
 export {
-  NSEPopupButton,
-} from "./Menus/NSEPopupButton";
+  NSEPopUpButton,
+} from "./Menus/NSEPopUpButton";
 export type {
-  NSEPopupButtonProps,
-} from "./Menus/NSEPopupButton";
+  NSEPopUpButtonItem,
+  NSEPopUpButtonProps,
+} from "./Menus/NSEPopUpButton";
 export {
   createNSEApplicationMenuModel,
 } from "./Menus/createApplicationMenuModel";

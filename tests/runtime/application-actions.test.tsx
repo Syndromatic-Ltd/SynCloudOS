@@ -6,8 +6,7 @@ import { NSEObject, observable } from "../../src/NSE/Objects";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEActionScopeProvider, NSEControlRuntimeProvider } from "../../src/NSE/Controls/Core";
 import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
-import { NSEPicker } from "../../src/NSE/Menus/NSEPicker";
-import { NSEPopupButton } from "../../src/NSE/Menus/NSEPopupButton";
+import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
 import { NSECoverFlow } from "../../src/NSE/CoverFlow/NSECoverFlow";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
@@ -749,7 +748,7 @@ describe("actions in menus and controls", () => {
     focus("view");
     const onValueChange = vi.fn();
     render(<ControlsHost context={context}>
-      <NSEPicker label="Create" action="newNote" actionPayload={undefined} options={[{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }]} onValueChange={onValueChange} />
+      <NSEPopUpButton label="Create" action="newNote" actionPayload={undefined} items={[{ value: "a", title: "Alpha" }, { value: "b", title: "Beta" }]} onValueChange={onValueChange} />
     </ControlsHost>);
     const trigger = screen.getByRole("button", { name: /Create Alpha/ }) as HTMLButtonElement;
     await waitFor(() => expect(trigger.disabled).toBe(false));
@@ -765,21 +764,28 @@ describe("actions in menus and controls", () => {
     expect(onValueChange).toHaveBeenCalledWith("b");
   });
 
-  it("activates a popup button action through the responder chain", async () => {
-    const { context, window, focus } = fixture();
+  it("runs a pop-up button's command item after a rule without changing its value", async () => {
+    const { context, host, focus } = fixture();
+    class Fonts extends Recorder {
+      @action orderFrontFontPanel() { this.calls.push("fonts"); }
+    }
+    const fonts = new Fonts();
+    const binding = bindActionResponder(fonts, host, responderIds.window);
     focus("view");
-    let port!: NSEMenuRuntimePort;
-    render(<SynWareProvider value={context}><PortProbe onPort={(next) => { port = next; }} /></SynWareProvider>);
-    const model = { id: "popup-actions", entries: [] };
-    const controller = new NSEMenuController({ model, runtime: port });
+    const onValueChange = vi.fn();
     render(<ControlsHost context={context}>
-      <NSEPopupButton label="Save menu" action="document.save" actionPayload={undefined} model={model} controller={controller} overlay={{ id: "save-popup", parentResponderId: responderIds.view }} />
+      <NSEPopUpButton label="Font" value="serif" onValueChange={onValueChange} items={[{ value: "serif", title: "Serif" }, { value: "sans", title: "Sans" }, { isSeparatorItem: true }, { title: "Show Fonts…", action: "orderFrontFontPanel" }]} />
     </ControlsHost>);
-    const trigger = screen.getByRole("button", { name: "Save menu" }) as HTMLButtonElement;
-    await waitFor(() => expect(trigger.disabled).toBe(false));
-    await act(async () => { fireEvent.click(trigger); });
-    await waitFor(() => expect(window.calls).toEqual(["window.save"]));
-    controller.dispose();
+    fireEvent.click(screen.getByRole("button", { name: "Font Serif" }));
+    const item = await screen.findByRole("option", { name: "Show Fonts…" });
+    expect(item.getAttribute("data-kind")).toBe("action");
+    expect(item.getAttribute("aria-selected")).toBe("false");
+    expect(item.previousElementSibling?.getAttribute("role")).toBe("separator");
+    await waitFor(() => expect(item.getAttribute("aria-disabled")).not.toBe("true"));
+    await act(async () => { fireEvent.click(item); });
+    await waitFor(() => expect(fonts.calls).toEqual(["fonts"]));
+    expect(onValueChange).not.toHaveBeenCalled();
+    binding.dispose();
   });
 
   it("runs cover-flow centre activation by click and keyboard, but not when recentring or unavailable", async () => {
@@ -874,7 +880,7 @@ describe("actions in menus and controls", () => {
     const binding = bindActionResponder(choices, host, responderIds.window);
     focus("view");
     render(<ControlsHost context={context}>
-      <NSEPicker label="Candidate" action="choose" defaultValue="blocked" options={[{ value: "blocked", label: "Blocked option" }, { value: "allowed", label: "Allowed option" }]} />
+      <NSEPopUpButton label="Candidate" action="choose" defaultValue="blocked" items={[{ value: "blocked", title: "Blocked option" }, { value: "allowed", title: "Allowed option" }]} />
     </ControlsHost>);
     const trigger = screen.getByRole("button", { name: /Candidate Blocked option/ }) as HTMLButtonElement;
     await waitFor(() => expect(trigger.disabled).toBe(false));
@@ -906,30 +912,6 @@ describe("actions in menus and controls", () => {
     await waitFor(() => expect(screen.getByRole("option", { name: "Override cover" }).getAttribute("aria-disabled")).not.toBe("true"));
     await act(async () => { fireEvent.keyDown(screen.getByRole("listbox", { name: "Default payload covers" }), { key: "Enter" }); });
     await waitFor(() => expect(covers.calls).toEqual(["first", "override"]));
-    binding.dispose();
-  });
-
-  it("supplies the popup model id to its trigger action by default", async () => {
-    const { context, host, focus } = fixture();
-    class Menus extends Recorder {
-      @action openMenu(id: string) { this.calls.push(id); }
-      validateOpenMenu(id: string) { return id === "formats"; }
-    }
-    const menus = new Menus();
-    const binding = bindActionResponder(menus, host, responderIds.window);
-    focus("view");
-    let port!: NSEMenuRuntimePort;
-    render(<SynWareProvider value={context}><PortProbe onPort={(next) => { port = next; }} /></SynWareProvider>);
-    const model = { id: "formats", entries: [] };
-    const controller = new NSEMenuController({ model, runtime: port });
-    render(<ControlsHost context={context}>
-      <NSEPopupButton label="Formats" action="openMenu" model={model} controller={controller} overlay={{ id: "formats-popup", parentResponderId: responderIds.view }} />
-    </ControlsHost>);
-    const trigger = screen.getByRole("button", { name: "Formats" }) as HTMLButtonElement;
-    await waitFor(() => expect(trigger.disabled).toBe(false));
-    await act(async () => { fireEvent.keyDown(trigger, { key: "Enter" }); });
-    await waitFor(() => expect(menus.calls).toEqual(["formats"]));
-    controller.dispose();
     binding.dispose();
   });
 });

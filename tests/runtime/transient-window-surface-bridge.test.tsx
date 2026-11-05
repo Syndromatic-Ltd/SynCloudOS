@@ -24,7 +24,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest";
 import type { AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
 import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
-import { NSEPicker } from "../../src/NSE/Menus";
+import { NSEPopUpButton } from "../../src/NSE/Menus";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { createTransientWindowSurfaceBridge, WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 import { WindowLayer } from "../../src/Webspring/WindowLayer/WindowLayer";
@@ -764,10 +764,10 @@ describe("window-hosted transient surface bridge", () => {
     const request = { id: "hosted", role: "panel" as const, title: "Hosted controls", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 500, height: 400 } };
     const windowControllerId = await bridge.present(request, <p>Loading</p>);
     await bridge.present(request, (
-      <NSEPicker
+      <NSEPopUpButton
         label="Hosted density"
-        options={[{ value: "regular", label: "Regular" }, { value: "compact", label: "Compact" }]}
-        listboxOverlay={{ id: "hosted-density", parentResponderId: `window:${windowControllerId}` }}
+        items={[{ value: "regular", title: "Regular" }, { value: "compact", title: "Compact" }]}
+        overlay={{ id: "hosted-density", parentResponderId: `window:${windowControllerId}` }}
       />
     ));
 

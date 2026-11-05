@@ -19,7 +19,7 @@
  */
 
 import { useRef } from "react";
-import { NSEChoiceControl } from "../../Menus/NSEChoiceControl";
+import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import { resolveZonedDateTime } from "../calendarArithmetic";
@@ -60,7 +60,7 @@ export function NSEClockView({ value, date, timeZone, disambiguation = "reject",
       onLostPointerCapture={(event) => { const active = pointer.current; if (!active || active.pointerId !== event.pointerId) return; pointer.current = null; onValueChange(active.opening, "preview"); }}>
       <i data-nse-part="hour-hand" style={{ transform: `rotate(${hourRotation}deg)`, blockSize: 32, inlineSize: 4 }} /><i data-nse-part="minute-hand" style={{ transform: `rotate(${minuteRotation}deg)`, blockSize: 46, inlineSize: 2 }} />{showSeconds ? <i data-nse-part="second-hand" style={{ transform: `rotate(${secondRotation}deg)`, blockSize: 50, inlineSize: 2 }} /> : null}<i data-nse-part="centre" />
     </div>
-    <div data-nse-part="numeric">{field("Hour", "hour", 23)}{field("Minute", "minute", 59)}{showSeconds ? field("Second", "second", 59) : null}{hourCycle === "h12" ? <NSEChoiceControl label="AM/PM" value={value.hour >= 12 ? "pm" : "am"} disabled={disabled} options={[{ id: "am", label: "AM" }, { id: "pm", label: "PM" }]} onChange={(period) => onValueChange({ ...value, hour: value.hour % 12 + (period === "pm" ? 12 : 0) }, "commit")} /> : null}</div>
+    <div data-nse-part="numeric">{field("Hour", "hour", 23)}{field("Minute", "minute", 59)}{showSeconds ? field("Second", "second", 59) : null}{hourCycle === "h12" ? <NSEPopUpButton label="AM/PM" value={value.hour >= 12 ? "pm" : "am"} isEnabled={!disabled} items={[{ value: "am", title: "AM" }, { value: "pm", title: "PM" }]} onValueChange={(period) => onValueChange({ ...value, hour: value.hour % 12 + (period === "pm" ? 12 : 0) }, "commit")} /> : null}</div>
     {showValidationMessage && resolution.kind === "nonexistent" ? <span role="alert">This local time does not exist in {timeZone}.</span> : showValidationMessage && resolution.kind === "ambiguous" ? <span role="alert">This local time occurs twice in {timeZone}.</span> : null}
   </section>;
 }

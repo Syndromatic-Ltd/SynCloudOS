@@ -20,7 +20,7 @@
 
 import { useRef, type PointerEvent as ReactPointerEvent } from "react";
 
-import { NSEPopupButton } from "../../Menus";
+import { NSEPopUpButton } from "../../Menus";
 import type { NSETableColumnMenu } from "./tableTypes";
 
 export interface NSETableHeaderColumn {
@@ -100,7 +100,7 @@ export function NSETableHeaderView({ columns, height, width, menu, disabled = fa
             onPointerCancel={() => { dragRef.current = null; }}
           />}
           {menu && !disabled && index === columns.length - 1 ? (
-            <NSEPopupButton label="Columns" model={menu.model} controller={menu.controller} overlay={menu.overlay} />
+            <NSEPopUpButton pullsDown title="Columns" menu={menu.controller} overlay={menu.overlay} />
           ) : null}
         </div>
       ))}

@@ -21,7 +21,7 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { GFXColour } from "../../../FX/GraphicsFX/public";
 import { NSEColourSliderPicker, NSEColourWheelPicker, type NSEColourSliderModel } from "../Pickers";
-import { NSEPicker } from "../../Menus/NSEPicker";
+import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { NSESearchField } from "../../Controls/Fields/NSESearchField";
 import { NSEScrollView } from "../../Scroll";
 import { builtInColourLists, crayonRows, type NSEColourList, type NSENamedColour } from "./colourPalettes";
@@ -49,11 +49,11 @@ export function NSEColourWheelMode({ colour, preview, commit }: NSEColourPickerC
   </div>;
 }
 
-const sliderModels: readonly { readonly value: NSEColourSliderModel; readonly label: string }[] = [
-  { value: "grey", label: "Grey Scale Slider" },
-  { value: "rgb", label: "RGB Sliders" },
-  { value: "cmyk", label: "CMYK Sliders" },
-  { value: "hsv", label: "HSB Sliders" },
+const sliderModels: readonly { readonly value: NSEColourSliderModel; readonly title: string }[] = [
+  { value: "grey", title: "Grey Scale Slider" },
+  { value: "rgb", title: "RGB Sliders" },
+  { value: "cmyk", title: "CMYK Sliders" },
+  { value: "hsv", title: "HSB Sliders" },
 ];
 
 const greyPresets = [0, 0.25, 0.5, 0.75, 1] as const;
@@ -62,7 +62,7 @@ export function NSEColourSlidersMode({ colour, preview, commit }: NSEColourPicke
   const [model, setModel] = useState<NSEColourSliderModel>("rgb");
   const current = colour ?? black;
   return <div data-nse-part="sliders-mode">
-    <NSEPicker height={nseColourPanelControlHeight} label="Slider model" labelHidden options={sliderModels} value={model} onValueChange={(next) => setModel(next as NSEColourSliderModel)} />
+    <NSEPopUpButton height={nseColourPanelControlHeight} label="Slider model" labelHidden items={sliderModels} value={model} onValueChange={(next) => setModel(next as NSEColourSliderModel)} />
     <NSEColourSliderPicker model={model} colour={current} controlHeight={nseColourPanelControlHeight} onPreview={(next) => preview(next, "pointer")} onCommit={(next) => commit(next, "pointer")} />
     {model === "grey" ? <div role="group" aria-label="Greys" data-nse-part="grey-presets">
       {greyPresets.map((white) => <button key={white} type="button" aria-label={`${Math.round(white * 100)}% brightness`} style={{ "--nse-colour-sample": GFXColour.grayscale(white).toCSS() } as CSSProperties} onClick={() => commit(GFXColour.grayscale(white, current.components.a), "swatch")} />)}
@@ -109,7 +109,7 @@ export function NSEColourPalettesMode({ colour, commit, recents }: NSEColourPick
     choose(shown[Math.max(0, Math.min(shown.length - 1, (selectedIndex < 0 ? (step > 0 ? -1 : shown.length) : selectedIndex) + step))]);
   };
   return <div data-nse-part="palettes-mode">
-    <NSEPicker height={nseColourPanelControlHeight} label="List" options={lists.map((candidate) => ({ value: candidate.id, label: candidate.name }))} value={list.id} onValueChange={(next) => { setListId(next); setQuery(""); }} />
+    <NSEPopUpButton height={nseColourPanelControlHeight} label="List" items={lists.map((candidate) => ({ value: candidate.id, title: candidate.name }))} value={list.id} onValueChange={(next) => { setListId(next); setQuery(""); }} />
     <NSEScrollView data-nse-part="colour-list-scroll">
       <div ref={listRef} role="listbox" aria-label={`${list.name} colours`} tabIndex={0} aria-activedescendant={selectedIndex >= 0 ? optionId(selectedIndex) : undefined} data-nse-part="colour-list" onKeyDown={onKeyDown}>
         {shown.map((entry, index) => <div key={`${entry.name}-${entry.hex}`} id={optionId(index)} role="option" aria-selected={index === selectedIndex} data-nse-part="colour-list-row" onClick={() => choose(entry)}>
@@ -200,7 +200,7 @@ export function NSEColourImageMode({ colour, preview, commit }: NSEColourPickerC
     setMarker(null);
   };
   return <div data-nse-part="image-mode">
-    <NSEPicker height={nseColourPanelControlHeight} label="Image" options={[...images.map((candidate) => ({ value: candidate.id, label: candidate.name })), { value: OPEN_IMAGE, label: "Open Image…" }]} value={image.id} onValueChange={(next) => {
+    <NSEPopUpButton height={nseColourPanelControlHeight} label="Image" items={[...images.map((candidate) => ({ value: candidate.id, title: candidate.name })), { value: OPEN_IMAGE, title: "Open Image…" }]} value={image.id} onValueChange={(next) => {
       if (next === OPEN_IMAGE) fileRef.current?.click();
       else { setImageId(next); setMarker(null); }
     }} />

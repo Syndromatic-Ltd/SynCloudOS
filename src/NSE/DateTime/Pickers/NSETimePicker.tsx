@@ -25,7 +25,7 @@ import type { NSETimePickerEditorMode, NSETimePickerProps } from "./datePickerTy
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSEStepper } from "../../Controls/Values/NSEStepper";
-import { NSEChoiceControl } from "../../Menus/NSEChoiceControl";
+import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { NSEPopover, useOptionalNSEOverlayProvider } from "../../Overlays";
 
 export const serializePlainTime = (value: NSEPlainTime | null) => value ? `${String(value.hour).padStart(2, "0")}:${String(value.minute).padStart(2, "0")}:${String(value.second).padStart(2, "0")}` : "";
@@ -75,8 +75,8 @@ interface NSEInlineSelectProps {
 }
 
 function NSEInlineSelect({ label, value, values, disabled, format, onChange }: NSEInlineSelectProps) {
-  return <NSEChoiceControl className="nse-extended-inline-picker" label={label} labelHidden value={String(value)} disabled={disabled}
-    options={values.map((option) => ({ id: String(option), label: format?.(option) ?? String(option) }))} onChange={onChange} />;
+  return <NSEPopUpButton className="nse-extended-inline-picker" label={label} labelHidden value={String(value)} isEnabled={!disabled}
+    items={values.map((option) => ({ value: String(option), title: format?.(option) ?? String(option) }))} onValueChange={onChange} />;
 }
 
 type NSETimeSegment = "hour" | "minute" | "ampm";

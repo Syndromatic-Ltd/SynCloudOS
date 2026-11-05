@@ -24,7 +24,7 @@ import { clampPlainDate, comparePlainDates, daysInMonth } from "../calendarArith
 import { formatPlainDate, parsePlainDate, plainDatePlaceholder, plainDateToday } from "../dateTimeFormatting";
 import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";
 import { NSECalendarView } from "../Calendar";
-import { NSEChoiceControl } from "../../Menus/NSEChoiceControl";
+import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import type { NSEDatePickerEditorMode, NSEDatePickerField, NSEDatePickerProps } from "./datePickerTypes";
 
@@ -81,15 +81,15 @@ function NSEDateSegmentEditor({
   const maximumYear = maximum?.year ?? 2099;
   const yearValues = range(Math.min(minimumYear, active.year), Math.max(maximumYear, active.year));
   const editors: Record<NSEDatePickerField, ReactNode> = {
-    month: <NSEChoiceControl key="month" className="nse-extended-inline-picker" label="Month" labelHidden value={String(active.month)} disabled={disabled || readOnly}
-      options={range(1, 12).map((month) => ({ id: String(month), label: monthFormatter.format(Date.UTC(active.year, month - 1, 1)) }))}
-      onChange={(next) => { const month = Number(next); onCommit({ ...active, month, day: Math.min(active.day, daysInMonth(active.year, month)) }); }} />,
-    day: <NSEChoiceControl key="day" className="nse-extended-inline-picker" label="Day" labelHidden value={String(active.day)} disabled={disabled || readOnly}
-      options={range(1, daysInMonth(active.year, active.month)).map((day) => ({ id: String(day), label: String(day) }))}
-      onChange={(next) => onCommit({ ...active, day: Number(next) })} />,
-    year: <NSEChoiceControl key="year" className="nse-extended-inline-picker" label="Year" labelHidden value={String(active.year)} disabled={disabled || readOnly}
-      options={yearValues.map((year) => ({ id: String(year), label: String(year) }))}
-      onChange={(next) => { const year = Number(next); onCommit({ ...active, year, day: Math.min(active.day, daysInMonth(year, active.month)) }); }} />,
+    month: <NSEPopUpButton key="month" className="nse-extended-inline-picker" label="Month" labelHidden value={String(active.month)} isEnabled={!(disabled || readOnly)}
+      items={range(1, 12).map((month) => ({ value: String(month), title: monthFormatter.format(Date.UTC(active.year, month - 1, 1)) }))}
+      onValueChange={(next) => { const month = Number(next); onCommit({ ...active, month, day: Math.min(active.day, daysInMonth(active.year, month)) }); }} />,
+    day: <NSEPopUpButton key="day" className="nse-extended-inline-picker" label="Day" labelHidden value={String(active.day)} isEnabled={!(disabled || readOnly)}
+      items={range(1, daysInMonth(active.year, active.month)).map((day) => ({ value: String(day), title: String(day) }))}
+      onValueChange={(next) => onCommit({ ...active, day: Number(next) })} />,
+    year: <NSEPopUpButton key="year" className="nse-extended-inline-picker" label="Year" labelHidden value={String(active.year)} isEnabled={!(disabled || readOnly)}
+      items={yearValues.map((year) => ({ value: String(year), title: String(year) }))}
+      onValueChange={(next) => { const year = Number(next); onCommit({ ...active, year, day: Math.min(active.day, daysInMonth(year, active.month)) }); }} />,
   };
 
   return (

@@ -30,14 +30,13 @@ import {
   NSEMenuController,
   NSEMenuBar,
   NSEMenuOverlay,
-  NSEPopupButton,
   orderMenuEntries,
   type NSEMenuModel,
   type NSEMenuRuntimePort,
 } from "../../../src/NSE/Menus";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { defineNSEAppearance, NSEAppearanceProvider } from "../../../src/NSE/Appearance";
-import { NSEPicker, NSEPopup } from "../../../src/NSE/Menus";
+import { NSEPopUpButton, NSEPopup } from "../../../src/NSE/Menus";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
 import { NSEMenuOverlayPresentationScope } from "../../../src/NSE/Menus/menuPresentationContext";
@@ -622,10 +621,9 @@ describe("NSEMenuController", () => {
       const controller = useMemo(() => new NSEMenuController({ model, runtime: menuRuntime }), [menuRuntime]);
       return (
         <MenuOverlayHarness onScope={scope}>
-          <NSEPopupButton
-            label="Format"
-            model={model}
-            controller={controller}
+          <NSEPopUpButton pullsDown
+            title="Format"
+            menu={controller}
             overlay={{ id: "format-menu", parentResponderId: "editor" }}
           />
         </MenuOverlayHarness>
@@ -652,7 +650,7 @@ describe("NSEMenuController", () => {
       const controller = useMemo(() => new NSEMenuController({ model, runtime: menuRuntime }), [menuRuntime]);
       return (
         <MenuOverlayHarness>
-          <NSEPopupButton label="Format" model={model} controller={controller} overlay={{ id: "format-selection", parentResponderId: "editor" }} />
+          <NSEPopUpButton pullsDown title="Format" menu={controller} overlay={{ id: "format-selection", parentResponderId: "editor" }} />
         </MenuOverlayHarness>
       );
     }
@@ -673,7 +671,7 @@ describe("NSEMenuController", () => {
       const controller = useMemo(() => new NSEMenuController({ model, runtime: menuRuntime }), [menuRuntime]);
       return (
         <MenuOverlayHarness>
-          <NSEPopupButton label="Reopen format" model={model} controller={controller} overlay={{ id: "format-reopen", parentResponderId: "editor" }} />
+          <NSEPopUpButton pullsDown title="Reopen format" menu={controller} overlay={{ id: "format-reopen", parentResponderId: "editor" }} />
         </MenuOverlayHarness>
       );
     }
@@ -769,12 +767,12 @@ describe("NSEMenuController", () => {
     render(
       <MenuOverlayHarness>
         <NSEAppearanceProvider appearance={customAppearance}>
-          <NSEPicker
+          <NSEPopUpButton
             label="Density"
             value="balanced"
-            options={[{ value: "balanced", label: "Balanced" }, { value: "compact", label: "Compact" }]}
+            items={[{ value: "balanced", title: "Balanced" }, { value: "compact", title: "Compact" }]}
             onValueChange={onValueChange}
-            listboxOverlay={{ id: "density-listbox", parentResponderId: "editor" }}
+            overlay={{ id: "density-listbox", parentResponderId: "editor" }}
           />
         </NSEAppearanceProvider>
       </MenuOverlayHarness>,
@@ -791,11 +789,11 @@ describe("NSEMenuController", () => {
     render(
       <MenuOverlayHarness mode="mobile">
         <NSEAppearanceProvider appearance={customAppearance}>
-          <NSEPicker
+          <NSEPopUpButton
             label="Density"
             value="balanced"
-            options={[{ value: "balanced", label: "Balanced" }, { value: "compact", label: "Compact" }]}
-            listboxOverlay={{ id: "density-mobile-listbox", parentResponderId: "editor" }}
+            items={[{ value: "balanced", title: "Balanced" }, { value: "compact", title: "Compact" }]}
+            overlay={{ id: "density-mobile-listbox", parentResponderId: "editor" }}
           />
         </NSEAppearanceProvider>
       </MenuOverlayHarness>,
@@ -809,12 +807,22 @@ describe("NSEMenuController", () => {
 });
 
 describe("NSE runtime overlay contracts", () => {
-  it("does not silently start picker authority inside an NSE runtime provider", () => {
+  it("draws a native select rather than start pop-up authority without a responder", () => {
+    const { container } = render(
+      <MenuOverlayHarness>
+        <NSEPopUpButton label="Runtime density" items={[{ value: "regular", title: "Regular" }]} />
+      </MenuOverlayHarness>,
+    );
+    expect(container.querySelector("select")?.getAttribute("aria-label")).toBe("Runtime density");
+    expect(container.querySelector("[role=listbox]")).toBeNull();
+  });
+
+  it("refuses a pull-down button without overlay provenance", () => {
     expect(() => render(
       <MenuOverlayHarness>
-        <NSEPicker label="Runtime density" options={[{ value: "regular", label: "Regular" }]} />
+        <NSEPopUpButton pullsDown title="Density" items={[{ value: "regular", title: "Regular" }]} />
       </MenuOverlayHarness>,
-    )).toThrow(/listboxOverlay|provenance|standalone/i);
+    )).toThrow(/overlay host/i);
   });
 
   it("does not silently start popup authority inside an NSE runtime provider", () => {

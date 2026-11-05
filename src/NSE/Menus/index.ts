@@ -20,15 +20,12 @@
 
 export { NSEMenuController, orderMenuEntries } from "./NSEMenuController";
 export { NSEMenu } from "./NSEMenu";
-export { NSEPicker } from "./NSEPicker";
-export { NSEChoiceControl } from "./NSEChoiceControl";
-export type { NSEChoiceControlProps, NSEChoiceOption } from "./NSEChoiceControl";
+export { NSEPopUpButton } from "./NSEPopUpButton";
 export { NSEApplicationMenu } from "./NSEApplicationMenu";
 export { createNSEApplicationMenuModel } from "./createApplicationMenuModel";
 export type { NSEApplicationMenuLabels, NSEApplicationMenuModelOptions } from "./createApplicationMenuModel";
 export { NSEMenuBar } from "./NSEMenuBar";
 export { NSEContextMenu } from "./NSEContextMenu";
-export { NSEPopupButton } from "./NSEPopupButton";
 export { NSEMenuOverlay } from "./NSEMenuOverlay";
 export type {
   NSEMenuControllerOptions,
@@ -46,7 +43,7 @@ export type {
   NSEMenuSnapshot,
 } from "./menuTypes";
 export type { NSECommandMenuProps, NSEItemMenuProps, NSEMenuProps } from "./NSEMenu";
-export type { NSEPickerAction, NSEPickerOption, NSEPickerProps } from "./NSEPicker";
+export type { NSEPopUpButtonItem, NSEPopUpButtonProps } from "./NSEPopUpButton";
 export type { NSEMenuOverlayProps } from "./NSEMenuOverlay";
 export type { NSEApplicationMenuProps } from "./NSEApplicationMenu";
 export type { NSEMenuBarItem, NSEMenuBarOverlayOptions, NSEMenuBarProps } from "./NSEMenuBar";
@@ -64,4 +61,3 @@ export type {
   NSEEditMenuProps,
   NSEHelpMenuProps,
 } from "./NSEApplicationMenuControls";
-export type { NSEPopupButtonProps } from "./NSEPopupButton";
