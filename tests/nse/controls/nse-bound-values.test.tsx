@@ -18,6 +18,7 @@ class Values extends NSEObject {
   @observable accessor text = 'hello';
   @observable accessor checked = false;
   @observable accessor amount = 2;
+  @observable accessor selection: boolean | 'mixed' = 'mixed';
 }
 afterEach(cleanup);
 describe('bound controls', () => {
@@ -43,6 +44,14 @@ describe('bound controls', () => {
     await act(async () => fireEvent.click(screen.getByRole('checkbox')));
     expect(owner.checked).toBe(true);
     expect(screen.getByRole('switch').getAttribute('aria-checked')).toBe('true');
+  });
+  it('shows a mixed bound selection as the mixed state and commits a Boolean when clicked', async () => {
+    const owner = new Values();
+    render(<NSEButton buttonType="switch" title="Selection" allowsMixedState binding={bind(owner, 'selection')} />);
+    expect(screen.getByRole('checkbox').getAttribute('aria-checked')).toBe('mixed');
+    await act(async () => fireEvent.click(screen.getByRole('checkbox')));
+    expect(typeof owner.selection).toBe('boolean');
+    expect(screen.getByRole('checkbox').getAttribute('aria-checked')).toBe(String(owner.selection));
   });
   it('uses canonical numeric control keyboard paths', async () => {
     const owner = new Values();
