@@ -47,7 +47,10 @@ import { createViewControllerFX, type NSEViewControllerFX, type NSEViewControlle
  */
 export type NSEViewComponent = ComponentType<{ readonly controller: never }>;
 
-export type NSEViewControllerOptions = NSEControllerOwnershipOptions;
+export type NSEViewControllerOptions = NSEControllerOwnershipOptions & {
+  /** The localised title of the managed view (NSViewController.title), as containers show it. */
+  readonly title?: string;
+};
 
 /** A view controller class, as `addChild` and `static` view slots accept it. */
 export interface NSEViewControllerClass<TController extends NSEViewController<unknown> = NSEViewController<unknown>> {
@@ -157,9 +160,11 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #fx: NSEViewControllerFX | null = null;
   #fxClients: NSEViewControllerFXClients | undefined;
   #traits: NSETraitCollection = Object.freeze({ reducedMotion: false, presentation: null });
+  #title: string | undefined;
 
   constructor(options: NSEViewControllerOptions = {}) {
     super();
+    this.#title = options.title;
     this.#lifetime = new NSEObjectLifetime(
       this,
       "NSEViewController",
@@ -174,6 +179,17 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
       get mountSignal() { controller.#requireMounted("view.mountSignal"); return controller.#activity.snapshot("mounted").signal; },
       get layer() { return controller.#boundLayer(); },
     });
+  }
+
+  /**
+   * The localised title of the managed view (NSViewController.title). A split view controller labels
+   * its items with it when a compact width shows one item at a time.
+   */
+  get title(): string | undefined { return this.#title; }
+  set title(title: string | undefined) {
+    if (title === this.#title) return;
+    this.#title = title;
+    this.notifyObservers();
   }
 
   /** The view this controller manages. */

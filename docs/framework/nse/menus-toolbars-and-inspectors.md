@@ -87,7 +87,27 @@ Give the inspector its width from the split or pane that contains it, and let it
 
 ## Keeping pane content alive across layouts
 
-`NSESplitViewAdapter` shows two or more panes side by side on desktop, and one pane at a time behind tabs on a phone. Each pane's content stays mounted when the layout changes, or when a pane collapses and reopens. A canvas keeps its context, and component state and scroll position survive. You don't need to lift pane state out of the pane to survive a resize.
+An `NSESplitViewController` arranges its children side by side or stacked, as `NSSplitViewController` does. Each child is an `NSESplitViewItem` with a `viewController`, its thickness limits and its collapse behaviour, and the controller renders its own split view:
+
+```tsx
+import { NSESplitViewController, NSESplitViewItem } from "@syndromatic/syncloudos/nse";
+
+class LabViewController extends NSEViewController {
+  readonly split = this.addChild(new NSESplitViewController({
+    id: "lab.workspace",
+    title: "Laboratory",
+    splitViewItems: [
+      new NSESplitViewItem({ identifier: "navigator", behavior: "sidebar", viewController: this.addChild(NavigatorViewController), minimumThickness: 220, maximumThickness: 380, preferredThicknessFraction: 0.18 }),
+      new NSESplitViewItem({ identifier: "canvas", viewController: this.addChild(CanvasViewController), minimumThickness: 480 }),
+      new NSESplitViewItem({ identifier: "inspector", behavior: "inspector", viewController: this.addChild(InspectorViewController), minimumThickness: 268, maximumThickness: 400, preferredThicknessFraction: 0.2 }),
+    ],
+  }));
+}
+```
+
+Items with a lower `holdingPriority` take size changes first; when the window cannot fit every item, the highest-priority item that `canCollapse` collapses first. Sidebars and inspectors default to 260 and can collapse; other items default to 250. Collapse an item with `item.isCollapsed = true`, or with the controller's `toggleSidebar()` and `toggleInspector()`, and place a divider with `setPosition(position, dividerIndex)`.
+
+In a compact width the outermost split view shows one item at a time behind tabs labelled with each view controller's `title`; split views nested inside its items stay whole. Each item's view stays mounted when the layout changes, or when an item collapses and reopens. A canvas keeps its context, and component state and scroll position survive. You don't need to lift an item's state out of it to survive a resize.
 
 ## What validation checks, and what it doesn't
 

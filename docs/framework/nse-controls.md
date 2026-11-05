@@ -134,7 +134,7 @@ Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSESlidingPanes
 | `NSEStackView`, `NSEStackItem` | One dimensional layout with distribution, alignment and visibility priorities. Items that no longer fit collapse in priority order, and stay reachable from the keyboard. |
 | `NSEBox`, `NSEGroupBox`, `NSERoundedBox` | Bordered and titled grouping. |
 | `NSEDivider` | A separator, optionally with a disclosure arrow. |
-| `NSESplitView` | Resizable panes, driven by `NSESplitViewController`. |
+| `NSESplitView` | Two resizable panes, a sidebar beside the main view. |
 | `NSEScrollView`, `NSEClipView` | Scrolling with momentum and rubber banding. |
 | `NSETabView`, `NSETabGroup`, `NSETabBar` | Tabbed content, driven by `NSETabBarController`. |
 | `NSEAccordionView` | Collapsible sections. |
@@ -193,7 +193,7 @@ Some controls come with a controller that holds their state and restoration data
 | `NSENavigationStackController` | Push and pop navigation, with restoration snapshots. |
 | `NSEAdaptiveNavigationController` | A sidebar layout on wide screens that collapses to a stack on compact ones. |
 | `NSETabBarController` | Tabs, overflow and restoration. |
-| `NSESplitViewController` | Pane sizes and collapse state. |
+| `NSESplitViewController`, `NSESplitViewItem` | A split view of child view controllers: thicknesses, holding priorities and collapse. |
 | `NSEToolbarController` | Toolbar items and user customisation. |
 | `NSEMenuController` | Menu models, open state and overlay provenance. |
 | `NSESearchFieldController` | Search text and recent searches. |

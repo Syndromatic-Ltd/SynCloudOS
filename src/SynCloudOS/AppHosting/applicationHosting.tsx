@@ -48,6 +48,7 @@ import { trackLiveApplicationObject } from "./applicationHotReload";
 import { applicationSessionFor } from "./applicationSession";
 import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/applicationHostInterop";
 import { useNSEOverlayFocusScope } from "../../NSE/applicationHostInterop";
+import { NSEViewControllerRendererProvider } from "../../NSE/applicationHostInterop";
 
 const FRAME_STYLE: CSSProperties = Object.freeze({ display: "block", width: "100%", height: "100%", minWidth: 0, minHeight: 0 });
 const CONTENTS_STYLE: CSSProperties = Object.freeze({ display: "contents" });
@@ -261,7 +262,9 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
   if (!View) throw new TypeError(`${controller.constructor.name} has no static view or renderView; declare one rendering form.`);
   const frame = (
     <div ref={frameRef} tabIndex={-1} className={className} data-nse-view-controller="" style={controller.parent ? undefined : FRAME_STYLE}>
-      <View controller={controller} />
+      <NSEViewControllerRendererProvider value={NSEViewControllerView}>
+        <View controller={controller} />
+      </NSEViewControllerRendererProvider>
     </div>
   );
   return <NSEControllerResponder target={controller} kind="view" host="element">{frame}</NSEControllerResponder>;
