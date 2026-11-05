@@ -263,7 +263,7 @@ export { resolveNSEBookRegions, NSEBookRegionMetrics } from "./Navigation/bookRe
 export type { NSEBookRegions } from "./Navigation/bookRegions";
 export { NSESplitView } from "./DataViews/Split/NSESplitView";
 export type { NSESplitViewProps } from "./DataViews/Split/NSESplitView";
-export { NSEMetalSurface, NSERoundedBox } from "./Material";
+export { NSERoundedBox } from "./Material";
 export type { NSEMetalSurfaceProps, NSERoundedBoxProps } from "./Material";
 export { NSEDialogSurface } from "./Overlays/NSEDialogSurface";
 export type { NSEDialogSurfaceProps } from "./Overlays/NSEDialogSurface";

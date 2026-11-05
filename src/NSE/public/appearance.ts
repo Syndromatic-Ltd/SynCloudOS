@@ -46,6 +46,3 @@ export type {
   NSETransparency,
 } from "../Appearance";
 
-export { NSEMaterialLightingProvider } from "../Appearance/NSEMetalThumb";
-export { NSEMaterialLighting, staticNSEMaterialLight } from "../Appearance/NSEMaterialLighting";
-export type { NSEMaterialLight, NSEMaterialLightingPort } from "../Appearance/NSEMaterialLighting";
