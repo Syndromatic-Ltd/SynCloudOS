@@ -596,10 +596,10 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
           }}
           />
         </NSEToolButtonGroup>
-        <NSESlider controlSize="mini" length={36} aria-label="Shadow opacity" value={shadow.opacity} minimum={0} maximum={100} step={1} disabled={effectsDisabled || !shadow.enabled} tooltip={(value) => `Opacity ${value}%`} onValueChange={(value, phase) => changeShadow({ opacity: value }, phase)} />
-        <NSESlider controlSize="mini" length={36} aria-label="Shadow blur" value={shadow.blur} minimum={0} maximum={20} step={1} disabled={effectsDisabled || !shadow.enabled} tooltip={(value) => `Blur ${value}`} onValueChange={(value, phase) => changeShadow({ blur: value }, phase)} />
-        <NSESlider controlSize="mini" length={36} aria-label="Shadow offset" value={shadow.offset} minimum={0} maximum={20} step={1} disabled={effectsDisabled || !shadow.enabled} tooltip={(value) => `Offset ${value}`} onValueChange={(value, phase) => changeShadow({ offset: value }, phase)} />
-        <NSESlider sliderType="circular" controlSize="small" aria-label="Shadow angle" value={angleToDial(shadow.angle)} minimum={0} maximum={360} step={5} wraps disabled={effectsDisabled || !shadow.enabled} valueText={(dial) => `${dialToAngle(dial)} degrees`} onValueChange={(dial, phase) => changeShadow({ angle: dialToAngle(dial) }, phase)} />
+        <NSESlider controlSize="mini" length={36} aria-label="Shadow opacity" value={shadow.opacity} minimum={0} maximum={100} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Opacity ${value}%`} onValueChange={(value, phase) => changeShadow({ opacity: value }, phase)} />
+        <NSESlider controlSize="mini" length={36} aria-label="Shadow blur" value={shadow.blur} minimum={0} maximum={20} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Blur ${value}`} onValueChange={(value, phase) => changeShadow({ blur: value }, phase)} />
+        <NSESlider controlSize="mini" length={36} aria-label="Shadow offset" value={shadow.offset} minimum={0} maximum={20} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Offset ${value}`} onValueChange={(value, phase) => changeShadow({ offset: value }, phase)} />
+        <NSESlider sliderType="circular" controlSize="small" aria-label="Shadow angle" value={angleToDial(shadow.angle)} minimum={0} maximum={360} step={5} wraps isEnabled={!(effectsDisabled || !shadow.enabled)} valueText={(dial) => `${dialToAngle(dial)} degrees`} onValueChange={(dial, phase) => changeShadow({ angle: dialToAngle(dial) }, phase)} />
         <output data-nse-part="shadow-angle" aria-hidden="true">{shadow.angle}°</output>
       </div> : null}
 
@@ -615,7 +615,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
             onBlur={() => { if (Number(sizeText) !== size) chooseSize(Number(sizeText)); }} />
           <div data-nse-part="size-list">
             <FontPanelList title="Size" label="Font sizes" items={sizeItems} selectedId={standardSizes.includes(size as typeof standardSizes[number]) ? String(size) : null} width={42} rows={sizeListRows} headerHidden readOnly={readOnly || !preset} onSelect={(id) => chooseSize(Number(id))} />
-            <NSESlider controlSize="mini" orientation="vertical" length={sizeListRows * listRowHeight} aria-label="Font size slider" value={sizeToSlider(size)} minimum={0} maximum={100} step={1} disabled={readOnly || !preset}
+            <NSESlider controlSize="mini" orientation="vertical" length={sizeListRows * listRowHeight} aria-label="Font size slider" value={sizeToSlider(size)} minimum={0} maximum={100} step={1} isEnabled={!(readOnly || !preset)}
               onValueChange={(value, phase) => {
                 const next = sliderToSize(value);
                 setSize(next);

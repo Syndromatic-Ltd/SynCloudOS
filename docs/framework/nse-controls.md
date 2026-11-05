@@ -111,8 +111,7 @@ Focused entries include `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSESta
 
 | Component | Purpose |
 | --- | --- |
-| `NSEDatePicker`, `NSETimePicker`, `NSEDateTimePicker`, `NSEDateRangePicker` | Locale aware date and time entry with full keyboard support. |
-| `NSECalendarView`, `NSEClockView` | Calendar and clock presentations. |
+| `NSEDatePicker` | `NSDatePicker`: a date, a date range, a time, or a date and time, as a text field or a graphical calendar and clock, with full keyboard support. See [Date pickers](nse/values-and-progress.md#date-pickers). |
 | `NSEColourWell`, `NSEColourSwatches`, `NSEColourSliderPicker`, `NSEColourWheelPicker` | Colour selection controls. |
 | `NSEColourPanel` | The shared colour panel. Applications reach it through `useColourPanel`. |
 

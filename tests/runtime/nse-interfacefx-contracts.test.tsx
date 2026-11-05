@@ -643,7 +643,7 @@ describe("NSE semantic contracts", () => {
     const { container } = render(
       <div>
         <NSEProgressIndicator value={250} maximum={200} aria-label="Transfer" />
-        <NSESlider label="Volume" min={0} max={100} defaultValue={25} onValueChange={onValueChange} />
+        <NSESlider label="Volume" minimum={0} maximum={100} defaultValue={25} onValueChange={onValueChange} />
       </div>
     );
 
@@ -657,24 +657,19 @@ describe("NSE semantic contracts", () => {
     expect(slider.style.getPropertyValue("--nse-control-slider-progress")).toBe("25%");
 
     fireEvent.change(sliderInput, { target: { value: "70" } });
-    expect(onValueChange).toHaveBeenLastCalledWith(70);
+    expect(onValueChange).toHaveBeenLastCalledWith(70, "commit");
     expect(slider.style.getPropertyValue("--nse-control-slider-progress")).toBe("70%");
   });
 
-  it("splits Slider onChanging (drag) from onChange (commit)", () => {
-    // Slider fires onChanging continuously while dragging and onChange once on commit
-    //. A native input change (keyboard) is a committed change.
-    const onChanging = vi.fn();
-    const onChange = vi.fn();
+  it("previews a slider while it is dragged and commits a change made without the pointer", () => {
+    // A native input change outside a drag (the keyboard, assistive technology) is a committed change.
     const onValueChange = vi.fn();
     render(
       <NSESlider
         label="Vol"
-        min={0}
-        max={100}
+        minimum={0}
+        maximum={100}
         defaultValue={10}
-        onChanging={onChanging}
-        onChange={onChange}
         onValueChange={onValueChange}
       />
     );
@@ -682,9 +677,8 @@ describe("NSE semantic contracts", () => {
     const input = screen.getByLabelText("Vol") as HTMLInputElement;
     fireEvent.change(input, { target: { value: "40" } });
 
-    expect(onValueChange).toHaveBeenLastCalledWith(40);
-    expect(onChange).toHaveBeenCalledWith(40);
-    expect(onChanging).not.toHaveBeenCalled();
+    expect(onValueChange).toHaveBeenCalledTimes(1);
+    expect(onValueChange).toHaveBeenLastCalledWith(40, "commit");
   });
 
 

@@ -31,7 +31,7 @@ import type { NSENumericValueContract, NSESliderProps } from "./valueControlType
 interface NSECircularSliderProps extends NSENumericValueContract {
   readonly "aria-label": string;
   readonly value: number;
-  readonly disabled?: boolean;
+  readonly isEnabled?: boolean;
   readonly readOnly?: boolean;
   readonly controlSize?: "regular" | "small";
   readonly valueText?: (value: number) => string;
@@ -47,9 +47,9 @@ interface NSECircularSliderProps extends NSENumericValueContract {
  *
  * @internal NSESlider renders it.
  */
-export function NSECircularSlider(supplied: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'onChanging' | 'onChange'>) {
-  const { sliderType: _sliderType, minimum, maximum, min, max, step, ...rest } = supplied;
-  const props = { ...rest, "aria-label": supplied["aria-label"] ?? "Slider", minimum: minimum ?? min ?? 0, maximum: maximum ?? max ?? 100, step: step ?? 1 } as unknown as NSEBoundValueProps<number, NSECircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>;
+export function NSECircularSlider(supplied: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  const { sliderType: _sliderType, minimum, maximum, step, ...rest } = supplied;
+  const props = { ...rest, "aria-label": supplied["aria-label"] ?? "Slider", minimum: minimum ?? 0, maximum: maximum ?? 100, step: step ?? 1 } as unknown as NSEBoundValueProps<number, NSECircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>;
   return <NSECircularSliderControl {...useNSEValueBinding<number, NSECircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0,cancellable:true})} />;
 }
 
@@ -58,7 +58,7 @@ function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular",
   const opening = useRef(props.value);
   const latest = useRef(props.value);
   latest.current = props.value;
-  const inert = props.disabled || props.readOnly;
+  const inert = (props.isEnabled === false) || props.readOnly;
   const span = props.maximum - props.minimum;
   const clamp = (value: number) => Math.max(props.minimum, Math.min(props.maximum, Math.round((value - props.minimum) / props.step) * props.step + props.minimum));
   const update = (event: ReactPointerEvent<HTMLElement>, phase: "preview" | "commit") => {
@@ -92,7 +92,7 @@ function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular",
   };
   const progress = span === 0 ? 0 : (props.value - props.minimum) / span;
   const style = { "--nse-circular-angle": `${progress * 360}deg` } as CSSProperties;
-  const appearanceState = props.disabled ? "disabled" : "normal";
+  const appearanceState = (props.isEnabled === false) ? "disabled" : "normal";
   const trackAppearance = useNSEAppearanceSlot(
     nseAppearanceSlot("circular-slider", "track", appearanceState),
   );
@@ -100,7 +100,7 @@ function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular",
     nseAppearanceSlot("circular-slider", "knob", appearanceState),
   );
 
-  return <span data-nse-control="circular-slider" data-size={controlSize} data-state={props.disabled ? "disabled" : props.readOnly ? "read-only" : "ready"} {...trackAppearance.attributes} style={style}>
+  return <span data-nse-control="circular-slider" data-size={controlSize} data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : "ready"} {...trackAppearance.attributes} style={style}>
     <span
       role="slider"
       aria-label={props["aria-label"]}
@@ -109,7 +109,7 @@ function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular",
       aria-valuenow={props.value}
       aria-valuetext={valueText?.(props.value)}
       aria-readonly={props.readOnly || undefined}
-      aria-disabled={props.disabled || undefined}
+      aria-disabled={(props.isEnabled === false) || undefined}
       tabIndex={inert ? -1 : 0}
       data-nse-part="circular-body"
       {...trackAppearance.attributes}
@@ -119,7 +119,7 @@ function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular",
       onPointerCancel={cancel}
       onLostPointerCapture={cancel}
       onKeyDown={(event) => { if (inert || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return; event.preventDefault(); keyChange(event.key); }}
-    ><NSEMetalThumb disabled={props.disabled} /><i aria-hidden="true" data-nse-part="knob" {...knobAppearance.attributes} /></span>
+    ><NSEMetalThumb disabled={(props.isEnabled === false)} /><i aria-hidden="true" data-nse-part="knob" {...knobAppearance.attributes} /></span>
     <span data-nse-part="linear-alternative">
       <NSESlider {...props} {...(__nseBindingEditor?{__nseBindingEditor}:{})} aria-label={`${props["aria-label"]} linear alternative`} orientation="horizontal" />
     </span>

@@ -57,7 +57,7 @@ function itemName(item: NSESegmentedItem): string {
 }
 
 function selectOne(props: NSESegmentedControlProps, id: string) {
-  if (props.disabled || props.readOnly) return;
+  if ((props.isEnabled === false) || props.readOnly) return;
   props.onSelectionChange?.({ ...props.selection, selectedIds: new Set([id]) } as NSESegmentedSelection);
 }
 
@@ -69,14 +69,14 @@ function NSETexturedRadioSegments({ props }: { readonly props: NSESegmentedContr
       className="nse-extended-radio-tool-button-group"
       label={props["aria-label"]}
       name={props.name}
-      disabled={props.disabled || props.readOnly}
+      disabled={(props.isEnabled === false) || props.readOnly}
       data-size={sizeAttribute(props)}
       data-segment-style="texturedRounded"
       style={sizedControlStyle(undefined, props.height, undefined)}
       options={props.items.map((item) => ({
         value: item.id,
         label: item.label,
-        disabled: item.disabled,
+        disabled: (item.isEnabled === false),
         command: item.commandId ? { id: item.commandId, payload: { value: item.id } } : undefined,
       }))}
       value={selected}
@@ -89,7 +89,7 @@ function NSETexturedRadioSegments({ props }: { readonly props: NSESegmentedContr
 function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlProps }) {
   const { mode, selectedIds } = props.selection;
   const select = (id: string) => {
-    if (props.disabled || props.readOnly) return;
+    if ((props.isEnabled === false) || props.readOnly) return;
     const ids = new Set(selectedIds);
     if (mode === "momentary") { ids.clear(); ids.add(id); }
     else if (mode === "select-one") { ids.clear(); ids.add(id); }
@@ -115,7 +115,7 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
             image={item.image}
             imagePosition={item.image ? "imageOnly" : undefined}
             state={mode !== "momentary" && selectedIds.has(item.id) ? "on" : "off"}
-            isEnabled={!(props.disabled || props.readOnly || item.disabled)}
+            isEnabled={!((props.isEnabled === false) || props.readOnly || (item.isEnabled === false))}
             action={item.action}
             actionPayload={item.actionPayload}
             onClick={() => select(item.id)}

@@ -33,8 +33,8 @@ function levelState(props: NSELevelIndicatorProps): "normal" | "warning" | "crit
  */
 export function NSELevelIndicator(props: NSELevelIndicatorProps) {
   const state = levelState(props);
-  const trackState = props.disabled ? "disabled" : "normal";
-  const segmentState = props.disabled ? "disabled" : state;
+  const trackState = (props.isEnabled === false) ? "disabled" : "normal";
+  const segmentState = (props.isEnabled === false) ? "disabled" : state;
   const trackAppearance = useNSEAppearanceSlot(
     nseAppearanceSlot("level-indicator", "track", trackState),
   );
@@ -60,7 +60,7 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
               role="radio"
               aria-label={String(value)}
               aria-checked={value === props.value}
-              disabled={props.disabled}
+              disabled={(props.isEnabled === false)}
               data-nse-part="segment"
               {...segmentAppearance.attributes}
               onClick={() => props.onValueChange?.(value, "commit")}
