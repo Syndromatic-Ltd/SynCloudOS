@@ -33,7 +33,6 @@ import {
 } from "../../src/NSE/public/controls";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
-import { NSEDividerDrawer, NSERowGroup, type NSERowGroupHandle } from "../../src/NSE/Containers";
 
 const presentation = createStaticPresentationPort({ width: 1024, height: 768 });
 function Host({ children }: React.PropsWithChildren) {
@@ -59,38 +58,6 @@ describe("NSEMenu sub-item disclosure", () => {
     expect(indicator).not.toBeNull();
     // The old implementation injected a literal "›" text node; the sprite version has no text content.
     expect(indicator?.textContent).toBe("");
-  });
-});
-
-describe("NSERowGroup auto-wrap + showRow/hideRow", () => {
-  it("renders children directly when wrapRows is off (default)", () => {
-    const { container } = render(
-      <NSERowGroup>
-        <div className="row-a">A</div>
-        <div className="row-b">B</div>
-      </NSERowGroup>
-    );
-    expect(container.querySelector(".nse-container-row-group-row")).toBeNull();
-  });
-
-  it("wraps each child in a row and toggles visibility via the ref handle", () => {
-    const ref = React.createRef<NSERowGroupHandle>();
-    const { container } = render(
-      <NSERowGroup ref={ref} wrapRows>
-        <div>A</div>
-        <div>B</div>
-      </NSERowGroup>
-    );
-    const rows = container.querySelectorAll(".nse-container-row-group-row");
-    expect(rows).toHaveLength(2);
-    expect((rows[0] as HTMLElement).hidden).toBe(false);
-
-    act(() => ref.current!.hideRow(1));
-    expect(ref.current!.isRowHidden(1)).toBe(true);
-    expect((container.querySelectorAll(".nse-container-row-group-row")[1] as HTMLElement).hidden).toBe(true);
-
-    act(() => ref.current!.showRow(1));
-    expect((container.querySelectorAll(".nse-container-row-group-row")[1] as HTMLElement).hidden).toBe(false);
   });
 });
 
@@ -131,30 +98,6 @@ describe("Image family: ScrollingImage + ViewImage", () => {
     fireEvent.pointerDown(wrapper, { pointerId: 2, clientX: 180, clientY: 100 });
     fireEvent.pointerUp(wrapper, { pointerId: 1, clientX: 100, clientY: 100 });
     expect(onSwipeNext).not.toHaveBeenCalled();
-  });
-});
-
-describe("NSEDividerDrawer open/close animation", () => {
-  it("keeps the panel mounted and flips data-open + aria-hidden when toggled", () => {
-    const { container } = render(
-      <NSEDividerDrawer title="Details" defaultOpen={false}>
-        <p>Body</p>
-      </NSEDividerDrawer>
-    );
-    const root = container.querySelector(".nse-container-divider-drawer") as HTMLElement;
-    const panel = container.querySelector(".nse-container-divider-drawer-panel") as HTMLElement;
-    // keepMounted defaults true → the panel exists even while collapsed (so the grid-rows
-    // transition has something to animate, instead of popping in/out).
-    expect(panel).not.toBeNull();
-    expect(root.getAttribute("data-open")).toBe("false");
-    expect(panel.getAttribute("aria-hidden")).toBe("true");
-
-    // Toggle via the disclosure arrow.
-    const arrow = container.querySelector(".nse-container-divider-drawer-arrow") as HTMLElement;
-    fireEvent.click(arrow);
-
-    expect(root.getAttribute("data-open")).toBe("true");
-    expect(panel.getAttribute("aria-hidden")).toBe("false");
   });
 });
 

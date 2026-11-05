@@ -19,7 +19,8 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { NSEButton, NSEPane } from "../../NSE/public/inspector-controls";
+import { NSEButton } from "../../NSE/public/inspector-controls";
+import { ContainerPane } from "../../NSE/Containers/NSEContainers";
 import { NSEInputBox } from "../../NSE/Controls/Fields/NSEFields";
 import { translateSynWareText } from "../AppSDK/useStrings";
 import type { InspectorLocalization } from "./inspectorLocalization";
@@ -77,7 +78,7 @@ export function InspectorView({ client, localization, pageSize = 25 }: { readonl
     catch { setSnapshot(null); setContent(""); }
   };
   const title = t("inspector.title", "Development Inspector");
-  return <NSEPane as="section" variant="inspector" title={title} aria-label={title} className="syncloudos-inspector" lang={locale?.locale} dir={locale?.direction}>
+  return <ContainerPane as="section" variant="inspector" title={title} aria-label={title} className="syncloudos-inspector" lang={locale?.locale} dir={locale?.direction}>
     <p role="status">{t("inspector.capture.summary", "Capture {status}. {retained} notices retained; {dropped} dropped; {skipped} skipped while paused.", { status: valueLabel("capture", snapshot.capture.status), retained: snapshot.capture.retained, dropped: snapshot.capture.dropped, skipped: snapshot.capture.skipped })}</p>
     <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
       <NSEButton
@@ -114,7 +115,7 @@ export function InspectorView({ client, localization, pageSize = 25 }: { readonl
     {selected && <NSEButton title={t("inspector.showAll", "Show all records")} onClick={() => { setSelected(null); setMissing(false); }} />}
     <p>{t("inspector.records", "{count} records; {omitted} historical records omitted.", { count: matching.length, omitted: section.omittedHistory })}</p>
     {rows.map((row, index) => <article key={`${row.id}:${index}`} tabIndex={-1} aria-label={`${valueLabel("kind", row.kind)} ${row.id}`} ref={index === 0 ? focused : undefined} className="syncloudos-inspector__record">
-      <NSEPane as="div" variant="surface">
+      <ContainerPane as="div" variant="surface">
       <h4>{valueLabel("kind", row.kind)} <small>{row.id}</small></h4>
       <dl><dt>{t("inspector.status", "Status")}</dt><dd data-inspector-status={row.status}>{valueLabel("status", row.status)}</dd><dt>{t("inspector.phase", "Phase")}</dt><dd>{valueLabel("phase", row.phase)}</dd>
         {row.startedAt !== undefined && <><dt>{t("inspector.started", "Started")}</dt><dd>{row.startedAt}</dd></>}
@@ -128,7 +129,7 @@ export function InspectorView({ client, localization, pageSize = 25 }: { readonl
         key={`${link.relation}:${link.id}`}
         onClick={() => follow(link)}
       />)}</div>
-      </NSEPane>
+      </ContainerPane>
     </article>)}
     <div style={{ display: "flex", gap: "0.5rem" }}>
       <NSEButton
@@ -143,5 +144,5 @@ export function InspectorView({ client, localization, pageSize = 25 }: { readonl
       />
     </div>
     {content && <NSEInputBox><label className="syncloudos-inspector__export">{t("inspector.snapshotJSON", "Sanitized snapshot JSON")}<textarea readOnly value={content} /></label></NSEInputBox>}
-  </NSEPane>;
+  </ContainerPane>;
 }

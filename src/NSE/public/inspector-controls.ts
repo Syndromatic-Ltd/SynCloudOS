@@ -19,5 +19,4 @@
  */
 
 /** Narrow NSE projection for the development Inspector's three controls. */
-export { NSEPane } from "../Containers/NSEContainers";
 export { NSEButton } from "../Controls/Buttons/NSEButton";
