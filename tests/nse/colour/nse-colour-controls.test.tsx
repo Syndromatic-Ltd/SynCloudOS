@@ -25,7 +25,8 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GFXColour } from "../../../src/FX/GraphicsFX/public";
-import { NSEColourSliderPicker, NSEColourSwatches, NSEColourWell, NSEColourPanelProvider, NSEColourPanel, NSEColourPanelController, NSEColourWheelPicker, classifyEyeDropperError } from "../../../src/NSE/Colour";
+import { NSEColourWell, NSEColourPanelProvider, NSEColourPanel, NSEColourPanelController, classifyEyeDropperError } from "../../../src/NSE/Colour";
+import { NSEColourSliderPicker, NSEColourSwatches, NSEColourWheelPicker } from "../../../src/NSE/Colour/Pickers";
 import type { NSEEyeDropperAdapter } from "../../../src/NSE/Colour/Pickers";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { SynCloudOSProvider } from "../../../src/SynCloudOSReact";

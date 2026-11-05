@@ -139,24 +139,6 @@ export type {
   NSEColourWellProps,
 } from "./Colour/Controls/NSEColourWell";
 export {
-  NSEColourSliderPicker,
-} from "./Colour/Pickers/NSEColourSliderPicker";
-export type {
-  NSEColourSliderPickerProps,
-} from "./Colour/Pickers/NSEColourSliderPicker";
-export {
-  NSEColourSwatches,
-} from "./Colour/Pickers/NSEColourSwatches";
-export type {
-  NSEColourSwatchesProps,
-} from "./Colour/Pickers/NSEColourSwatches";
-export {
-  NSEColourWheelPicker,
-} from "./Colour/Pickers/NSEColourWheelPicker";
-export type {
-  NSEColourWheelPickerProps,
-} from "./Colour/Pickers/NSEColourWheelPicker";
-export {
   NSEAlertBackdrop,
 } from "./Components/NSEAlertBackdrop";
 export {
