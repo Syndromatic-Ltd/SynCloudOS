@@ -38,6 +38,8 @@ import { resolveStackLayout } from "./resolveStackLayout";
 import type {
   NSEStackItemLayout,
   NSEStackItemProps,
+  NSEStackObserver,
+  NSEStackObserverFactory,
   NSEStackResolvedItem,
   NSEStackViewProps,
 } from "./stackViewTypes";
@@ -169,7 +171,9 @@ function NSEStackItemPortal({
   presentationProps,
   itemId,
   sourceIndex,
+  onPlaced,
 }: {
+  readonly onPlaced: () => void;
   readonly element: ReactElement<NSEStackItemProps>;
   readonly ownerDocument: Document | null;
   readonly target: HTMLElement | null;
@@ -198,7 +202,8 @@ function NSEStackItemPortal({
       return Number.isSafeInteger(index) && index > sourceIndex;
     });
     target.insertBefore(portalHost, following ?? null);
-  }, [portalHost, sourceIndex, target]);
+    onPlaced();
+  }, [onPlaced, portalHost, sourceIndex, target]);
 
   const itemKey = `nse-stack-item:${itemId}`;
   return portalHost
@@ -281,6 +286,8 @@ export function NSEStackView({
   const [retainedItemsHost, setRetainedItemsHost] = useState<HTMLDivElement | null>(null);
   const [overflowMenu, setOverflowMenu] = useState<HTMLDivElement | null>(null);
   const [measuredSize, setMeasuredSize] = useState<number | null>(null);
+  // NSView.fittingSize along the stack's axis, for each item that gives no preferred size.
+  const [fittingSizes, setFittingSizes] = useState<ReadonlyMap<string, number>>(() => new Map());
   const [overflowOpen, setOverflowOpen] = useState(false);
   const frameRef = useRef<{ readonly token: number; handle?: unknown } | null>(null);
   const frameToken = useRef(0);
@@ -301,8 +308,10 @@ export function NSEStackView({
     edgeInsets,
     direction: dir === "rtl" ? "rtl" : "ltr",
     overflowPolicy,
-    items: childEntries.map(({ layout: item }) => item),
-  }), [alignment, childEntries, dir, distribution, edgeInsets, measuredAvailableSize, orientation, overflowPolicy, spacing]);
+    items: childEntries.map(({ layout: item }) => (
+      item.preferredSize === undefined && fittingSizes.has(item.id) ? { ...item, preferredSize: fittingSizes.get(item.id) } : item
+    )),
+  }), [alignment, childEntries, dir, distribution, edgeInsets, fittingSizes, measuredAvailableSize, orientation, overflowPolicy, spacing]);
   const resolvedItems = useMemo(() => new Map(layout.items.map((item) => [item.id, item])), [layout.items]);
   const overflowEntries = useMemo(() => childEntries.filter(({ layout: item }) => layout.overflowIds.includes(item.id)), [childEntries, layout.overflowIds]);
 
@@ -344,6 +353,44 @@ export function NSEStackView({
   }, [availableSize, cancelScheduledMeasure, host, measure, resizeObserverFactory]);
 
   useEffect(() => () => cancelScheduledMeasure(), [cancelScheduledMeasure]);
+
+  // Measure each fitting item's content before paint, and again whenever that content resizes.
+  const measureFittingSizes = useCallback(() => {
+    if (!visibleItemsHost) return;
+    setFittingSizes((current) => {
+      let next: Map<string, number> | null = null;
+      for (const item of visibleItemsHost.querySelectorAll<HTMLElement>(":scope > .nse-stack-view-item-host > [data-stack-fitting='true']")) {
+        const id = item.dataset.stackItemId;
+        const content = item.firstElementChild as HTMLElement | null;
+        if (!id || !content || item.dataset.stackHidden === "true") continue;
+        const rect = content.getBoundingClientRect();
+        // No layout box at all (no rendering engine, or not displayed): keep the default size.
+        if (rect.width === 0 && rect.height === 0) continue;
+        const size = Math.ceil(orientation === "horizontal" ? rect.width : rect.height);
+        if (Math.abs((current.get(id) ?? -1) - size) < 0.5) continue;
+        next ??= new Map(current);
+        next.set(id, size);
+      }
+      return next ?? current;
+    });
+  }, [orientation, visibleItemsHost]);
+  const fittingObserver = useRef<NSEStackObserver | null>(null);
+  useEffect(() => {
+    const factory: NSEStackObserverFactory | undefined = resizeObserverFactory
+      ?? (typeof ResizeObserver === "undefined" ? undefined : (listener) => new ResizeObserver(listener));
+    fittingObserver.current = factory?.(measureFittingSizes) ?? null;
+    return () => {
+      fittingObserver.current?.disconnect();
+      fittingObserver.current = null;
+    };
+  }, [measureFittingSizes, resizeObserverFactory]);
+  const layoutFittingItems = useCallback(() => {
+    measureFittingSizes();
+    for (const content of visibleItemsHost?.querySelectorAll<HTMLElement>(":scope > .nse-stack-view-item-host > [data-stack-fitting='true'] > .nse-stack-view-item-content") ?? []) {
+      fittingObserver.current?.observe(content);
+    }
+  }, [measureFittingSizes, visibleItemsHost]);
+  useLayoutEffect(layoutFittingItems);
 
   useEffect(() => {
     onOverflowChange?.(layout.overflowIds);
@@ -529,10 +576,13 @@ export function NSEStackView({
             target={target}
             itemId={entry.layout.id}
             sourceIndex={entry.sourceIndex}
+            onPlaced={layoutFittingItems}
             presentationProps={{
               className: [itemProps.className, menuOverflowed && !retainedForExplicitBridge ? "nse-stack-view-overflow-action" : ""].filter(Boolean).join(" "),
               style: menuOverflowed ? itemProps.style : result.hidden ? { ...itemStyleValue, display: "none" } : itemStyleValue,
               "data-stack-size": formatSize(result.size),
+              "data-stack-orientation": orientation,
+              "data-stack-fitting": entry.layout.preferredSize === undefined ? "true" : undefined,
               "data-stack-position": formatSize(result.position),
               "data-stack-hidden": result.hidden ? "true" : "false",
               "data-stack-overflow-action": menuOverflowed && !retainedForExplicitBridge ? "true" : undefined,
