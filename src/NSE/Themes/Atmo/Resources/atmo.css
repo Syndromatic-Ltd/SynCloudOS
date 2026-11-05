@@ -5775,6 +5775,9 @@
 [data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"]:not([data-size]) > :first-child > button:first-child {
   padding-inline-start: 15px;
 }
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"]:not([data-size]) > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child {
+  padding-inline-end: 15px;
+}
 
 /* The radio-group capsule, sized: segmented controls and capsule tabs.
    controlSize="small" or an explicit height sets --nse-control-height (24px
