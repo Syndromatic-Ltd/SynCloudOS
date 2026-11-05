@@ -138,7 +138,6 @@ export * from "./Scroll";
 import { GlassPanel, LinenSurface as MaterialLinenSurface, MaterialProvider, materialTokens } from "./Material";
 import {
   NSEPage,
-  NSEPageController,
   getNSEPagePreset,
   nsePageMaterialPresets,
   nsePagePresets,
@@ -222,7 +221,6 @@ export const NSE = {
   NSEPage,
   Page: {
     Root: NSEPage,
-    Controller: NSEPageController,
     useNSEPage,
     presets: nsePagePresets,
     materials: nsePageMaterialPresets,

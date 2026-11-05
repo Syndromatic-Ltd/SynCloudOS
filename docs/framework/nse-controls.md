@@ -77,7 +77,7 @@ The tables below give an overview. These pages document each component's props, 
 | [Stacks and grids](nse/stacks-and-grids.md) | `NSEStackView` and `NSEGridView` |
 | [Menus, toolbars and inspectors](nse/menus-toolbars-and-inspectors.md) | Choosing a menu control, responder provenance, configured toolbars, narrow inspectors, keep-mounted panes |
 
-Focused entries include `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSEStandaloneControlHost` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, `NSEPage` in `nse/page` and `NSECoverFlow` in `nse/cover-flow`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
+Focused entries include `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSEStandaloneControlHost` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, `NSEPage` and `NSEPageController` in `nse/page` and `NSECoverFlow` in `nse/cover-flow`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
 
 ## Buttons
 
@@ -131,6 +131,7 @@ Focused entries include `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSESta
 | `NSESourceListScene` | The scene that composes a source-list sidebar (an `NSEOutlineView` in source-list style) with content. |
 | `NSEHierarchyStack`, `NSESlidingPanes` | Drill in navigation across panes. |
 | `NSEDrawer` | A drawer that slides from a window edge. |
+| `NSEPageController` | `NSPageController`: a page for each of its `arrangedObjects`, one shown at a time, with `selectedIndex` and a horizontal swipe between pages (`transitionStyle="horizontalStrip"`). It is in `nse/page`. |
 
 ## Data views
 

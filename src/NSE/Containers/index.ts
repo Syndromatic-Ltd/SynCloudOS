@@ -27,7 +27,6 @@ export {
   NSEModalDialog,
   NSESlidingPane,
   NSESlidingPanes,
-  NSESlidingView,
   NSEToaster
 } from "./NSEContainers";
 export type {
@@ -41,8 +40,6 @@ export type {
   NSESlidingPaneProps,
   NSESlidingPaneView,
   NSESlidingPanesProps,
-  NSESlidingViewItem,
-  NSESlidingViewProps,
   NSEToast,
   NSEToastAction,
   NSEToastTone,

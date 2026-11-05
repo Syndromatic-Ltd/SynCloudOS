@@ -25,21 +25,21 @@ import {
 } from "./nsePageGeometry";
 import type {
   NSEPageCompletionReason,
-  NSEPageControllerOptions,
-  NSEPageControllerSnapshot,
+  NSEPageTurnControllerOptions,
+  NSEPageTurnSnapshot,
   NSEPageTurnOptions
 } from "./nsePageTypes";
 
-type NSEPageControllerListener = (snapshot: NSEPageControllerSnapshot) => void;
+type PageTurnListener = (snapshot: NSEPageTurnSnapshot) => void;
 
-export class NSEPageController {
-  private snapshot: NSEPageControllerSnapshot;
-  private listeners = new Set<NSEPageControllerListener>();
+export class PageTurnController {
+  private snapshot: NSEPageTurnSnapshot;
+  private listeners = new Set<PageTurnListener>();
   private nextTurnId = 1;
   readonly #lifetime: NSEControllerLifetime;
 
-  constructor(options: NSEPageControllerOptions = {}) {
-    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEPageController", id: "page" });
+  constructor(options: NSEPageTurnControllerOptions = {}) {
+    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEPage", id: "page" });
     this.snapshot = createNSEPageSnapshot({
       progress: options.progress,
       phase: options.phase,
@@ -56,7 +56,7 @@ export class NSEPageController {
     if (!this.#lifetime.dispose()) return;
     this.listeners.clear();
   }
-  subscribe(listener: NSEPageControllerListener) {
+  subscribe(listener: PageTurnListener) {
     this.#lifetime.assertLive("subscribe");
     this.listeners.add(listener);
     listener(this.snapshot);
@@ -156,7 +156,7 @@ export class NSEPageController {
     });
   }
 
-  private commit(partial: Partial<NSEPageControllerSnapshot>) {
+  private commit(partial: Partial<NSEPageTurnSnapshot>) {
     this.#lifetime.assertLive("commit");
     this.snapshot = {
       ...this.snapshot,

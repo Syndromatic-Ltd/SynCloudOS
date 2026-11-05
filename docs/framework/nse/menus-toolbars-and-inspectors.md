@@ -113,7 +113,7 @@ An inspector of 240 to 320 pixels is narrower than a form is designed for. Use t
 | --- | --- |
 | `NSEBox` with a `title` | Titles a group of related controls. The title is the label, so the controls inside it don't each need one. Use one per topic (Font, Spacing, Probe). |
 | `NSEPopUpButton` with `labelHidden width="100%"` | Fills the group's width and shows its full value. The label is still read by screen readers. A visible label would share the row with the value and push it into truncation. |
-| `NSEForm` | Puts each label beside its control, but stacks the label above its control below 420 pixels. In an inspector that means stacked labels. Use it there only if that is the layout you want. |
+| `NSEGridView` with a label column and a fill column | Puts each label beside its control, but stacks the label above its control below 420 pixels. In an inspector that means stacked labels. Use it there only if that is the layout you want. |
 
 ```tsx
 <NSEBox title="Probe">

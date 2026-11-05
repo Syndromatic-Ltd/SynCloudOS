@@ -30,7 +30,6 @@ import {
   NSEDialog,
   NSESlidingPane,
   NSESlidingPanes,
-  NSESlidingView,
   NSEToaster
 } from "../../src/NSE/Containers";
 
@@ -91,23 +90,13 @@ describe("NSE containers", () => {
     };
   }
 
-  it("renders dialog and sliding view markup", () => {
+  it("renders dialog markup", () => {
     const markup = renderToStaticMarkup(
-      <>
-        <NSESlidingView
-          controls
-          views={[
-            { key: "summary", label: "Summary", content: <span>Summary pane</span> },
-            { key: "details", label: "Details", content: <span>Details pane</span> }
-          ]}
-        />
-        <NSEDialog title="Ready" description="Dialog description">
-          Dialog body
-        </NSEDialog>
-      </>
+      <NSEDialog title="Ready" description="Dialog description">
+        Dialog body
+      </NSEDialog>
     );
 
-    expect(markup).toContain("role=\"tablist\"");
     expect(markup).toContain("role=\"dialog\"");
   });
 
