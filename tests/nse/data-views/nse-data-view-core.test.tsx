@@ -35,7 +35,7 @@ import {
   type NSEDataViewSelectionEvent,
   type NSEDataViewState,
 } from "../../../src/NSE/DataViews/Core";
-import { NSEDataViewCellContent } from "../../../src/NSE/DataViews/Core/NSEDataViewCellContent";
+import { NSETableCellView } from "../../../src/NSE/DataViews/Table/NSETableCellView";
 
 interface Person {
   readonly id: string;
@@ -316,7 +316,7 @@ describe("structured data-view coordination", () => {
 
   it("composes image, primary text, detail, badge, and accessory semantics internally", () => {
     render(
-      <NSEDataViewCellContent
+      <NSETableCellView
         image={{ src: "/ada.png", alt: "Portrait of Ada" }}
         primary="Ada"
         secondary="Compiler"

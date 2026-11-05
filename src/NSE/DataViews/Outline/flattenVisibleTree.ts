@@ -20,14 +20,14 @@
 
 import type { TreeNode } from "../../../SynCloudOS/Models";
 import type { NSEDataViewKey } from "../Core";
-import type { NSEOutlineRow } from "./outlineTypes";
+import type { NSEOutlineViewRow } from "./outlineTypes";
 
 export function flattenVisibleTree<T, TId extends NSEDataViewKey>(
   roots: readonly TreeNode<T, TId>[],
   expandedIds: ReadonlySet<TId>,
   isExpandable: (item: T, node: TreeNode<T, TId>) => boolean = (_item, node) => node.children.length > 0,
-): readonly NSEOutlineRow<T, TId>[] {
-  const rows: NSEOutlineRow<T, TId>[] = [];
+): readonly NSEOutlineViewRow<T, TId>[] {
+  const rows: NSEOutlineViewRow<T, TId>[] = [];
   const seen = new Set<TId>();
   const pending: Array<{
     node: TreeNode<T, TId>;

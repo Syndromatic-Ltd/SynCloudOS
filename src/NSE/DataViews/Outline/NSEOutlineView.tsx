@@ -37,15 +37,15 @@ import { useNSEVirtualiser } from "../Virtualisation";
 import { useNSEDataViewDragHost } from "../../Drag";
 import { flattenVisibleTree } from "./flattenVisibleTree";
 import type {
-  NSEOutlineProps,
-  NSEOutlineRow,
-  NSEOutlineSelectionEvent,
+  NSEOutlineViewProps,
+  NSEOutlineViewRow,
+  NSEOutlineViewSelectionEvent,
 } from "./outlineTypes";
 import "./nse-outline-view.css";
 
 type OutlineStyle = CSSProperties & { readonly "--nse-outline-level"?: number };
 
-export function NSEOutline<T, TId extends string | number>({
+export function NSEOutlineView<T, TId extends string | number>({
   controller,
   idForItem,
   childrenForItem,
@@ -69,7 +69,7 @@ export function NSEOutline<T, TId extends string | number>({
   style,
   onKeyDown,
   ...props
-}: NSEOutlineProps<T, TId>) {
+}: NSEOutlineViewProps<T, TId>) {
   const instanceId = useId().replace(/:/g, "");
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   const subscribeToDisposal = useCallback((notify: () => void) => controller.onDispose(notify), [controller]);
@@ -147,7 +147,7 @@ export function NSEOutline<T, TId extends string | number>({
   const activeDescendant = activeId === null ? undefined : domId(activeId);
   const allowsInteraction = dataViewAllowsNavigation(state);
   const rowFor = (id: TId) => rows.find((row) => Object.is(row.id, id));
-  const isDescendant = (candidate: NSEOutlineRow<T, TId>, ancestorId: TId) => {
+  const isDescendant = (candidate: NSEOutlineViewRow<T, TId>, ancestorId: TId) => {
     let parentId = candidate.parentId;
     const visited = new Set<TId>();
     while (parentId !== null && !visited.has(parentId)) {
@@ -158,13 +158,13 @@ export function NSEOutline<T, TId extends string | number>({
     return false;
   };
 
-  const emitSelection = (before: typeof snapshot.selection, reason: NSEOutlineSelectionEvent<TId>["reason"]) => {
+  const emitSelection = (before: typeof snapshot.selection, reason: NSEOutlineViewSelectionEvent<TId>["reason"]) => {
     const after = controller.getSnapshot().selection;
     if (before === after) return;
     onSelectionChange?.({ reason, snapshot: after, change: createSelectionChange(before, after) });
   };
 
-  const select = (id: TId, reason: NSEOutlineSelectionEvent<TId>["reason"], mode: "replace" | "toggle" | "range" = "replace") => {
+  const select = (id: TId, reason: NSEOutlineViewSelectionEvent<TId>["reason"], mode: "replace" | "toggle" | "range" = "replace") => {
     if (ignoresStaleEvent("selection") || !allowsInteraction || selectionMode === "none") return;
     const before = controller.getSnapshot().selection;
     if (mode === "toggle" && selectionMode === "multiple") {
@@ -180,7 +180,7 @@ export function NSEOutline<T, TId extends string | number>({
     emitSelection(before, reason);
   };
 
-  const expand = (row: NSEOutlineRow<T, TId>) => {
+  const expand = (row: NSEOutlineViewRow<T, TId>) => {
     if (ignoresStaleEvent("expansion") || !allowsInteraction || !row.expandable || row.expanded || delegate?.shouldExpand?.(row.id, row.item) === false) return;
     controller.expand(row.id);
     onExpandedIdsChange?.(controller.getSnapshot().expandedIds);
@@ -188,7 +188,7 @@ export function NSEOutline<T, TId extends string | number>({
     if (row.node.children.length === 0) loadRow(row);
   };
 
-  function loadRow(row: NSEOutlineRow<T, TId>): void {
+  function loadRow(row: NSEOutlineViewRow<T, TId>): void {
     if (controller.isDisposed) return;
     requests.current.get(row.id)?.abort();
     const request = new AbortController();
@@ -202,7 +202,7 @@ export function NSEOutline<T, TId extends string | number>({
     });
   }
 
-  const collapse = (row: NSEOutlineRow<T, TId>) => {
+  const collapse = (row: NSEOutlineViewRow<T, TId>) => {
     if (ignoresStaleEvent("collapse") || !allowsInteraction || !row.expanded || delegate?.shouldCollapse?.(row.id, row.item) === false) return;
     const selectedDescendant = rows.some((candidate) => isDescendant(candidate, row.id) && snapshot.selection.selectedIds.has(candidate.id));
     const activeDescendantRow = activeId === null ? undefined : rowFor(activeId);

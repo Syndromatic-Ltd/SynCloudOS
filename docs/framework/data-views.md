@@ -41,15 +41,15 @@ A view keeps its state, such as keyboard focus and an edit in progress, for as l
 
 ## Table
 
-`NSETable` shows items as rows with typed columns. A column says how to read its value, how wide it may be, and optionally how to format, sort, render and edit it.
+`NSETableView` shows items as rows with typed columns. A column says how to read its value, how wide it may be, and optionally how to format, sort, render and edit it.
 
 ```tsx
-import { NSETable } from "@syndromatic/syncloudos/nse";
+import { NSETableView } from "@syndromatic/syncloudos/nse";
 import { adapter, type Track } from "./tracks";
 
 export function TrackTable() {
   return (
-    <NSETable<Track, string>
+    <NSETableView<Track, string>
       aria-label="Tracks"
       adapter={adapter}
       selectionMode="multiple"
@@ -88,11 +88,11 @@ Table features:
 Every data view accepts a `state` that replaces its content with a message when there is nothing to show. The kinds are `ready`, `loading`, `empty`, `disabled`, `read-only`, `invalid`, `denied`, `interrupted` and `error`. The last three can carry a `retry` or `resume` callback, which the view presents as an action.
 
 ```tsx
-import { NSETable } from "@syndromatic/syncloudos/nse";
+import { NSETableView } from "@syndromatic/syncloudos/nse";
 import { adapter, type Track } from "./tracks";
 
 export function EmptyTable() {
-  return <NSETable<Track, string> adapter={adapter} columns={[]} state={{ kind: "empty", message: "No tracks yet." }} />;
+  return <NSETableView<Track, string> adapter={adapter} columns={[]} state={{ kind: "empty", message: "No tracks yet." }} />;
 }
 ```
 
@@ -104,11 +104,11 @@ If the controller is disposed while a view still shows it, the view keeps its la
 
 ## Outline
 
-`NSEOutline` presents a hierarchy with expandable rows, driven by an `NSETreeController`. It supports keyboard expansion and collapse, drop proposals for moving nodes, and lazy loading through the controller's `loadChildren`.
+`NSEOutlineView` presents a hierarchy with expandable rows, driven by an `NSETreeController`. It supports keyboard expansion and collapse, drop proposals for moving nodes, and lazy loading through the controller's `loadChildren`.
 
 ## Collection view
 
-`NSECollectionView` lays items out in a grid or a list. `createAdaptiveCollectionLayout` picks the number of columns from the available width, and `createListCollectionLayout` makes a single column. Items render through `NSEDataViewCellContent`, which arranges an image, a primary and secondary line and a badge.
+`NSECollectionView` lays items out in a grid or a list. `createAdaptiveCollectionLayout` picks the number of columns from the available width, and `createListCollectionLayout` makes a single column. Items render through `NSETableCellView`, which arranges an image, a primary and secondary line and a badge.
 
 ## Browser
 

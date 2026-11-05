@@ -36,7 +36,7 @@ import {
   createListCollectionLayout,
   type NSECollectionViewItemProps,
 } from "../../../src/NSE/DataViews/Collection";
-import { NSEOutline } from "../../../src/NSE/DataViews/Outline";
+import { NSEOutlineView } from "../../../src/NSE/DataViews/Outline";
 import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/ErrorManager/lifecycleError";
 
 interface Account { readonly id: string; readonly name: string; readonly closed?: boolean }
@@ -191,7 +191,7 @@ describe("controller lifetimes under React StrictMode", () => {
         selection,
       });
       useEffect(() => { controller = tree; });
-      return <NSEOutline aria-label="Folders" controller={tree} idForItem={(folder) => folder.id} childrenForItem={(folder) => folder.children} labelForItem={(folder) => folder.name} isExpandable={() => false} />;
+      return <NSEOutlineView aria-label="Folders" controller={tree} idForItem={(folder) => folder.id} childrenForItem={(folder) => folder.children} labelForItem={(folder) => folder.name} isExpandable={() => false} />;
     }
     const mounted = render(<StrictMode><Folders /></StrictMode>);
     await settle();
@@ -216,7 +216,7 @@ describe("data views over a disposed controller", () => {
       withChildren: (account) => account,
       selection,
     });
-    render(<NSEOutline aria-label="Accounts" controller={controller} idForItem={accountId} childrenForItem={() => []} labelForItem={accountName} isExpandable={() => false} />);
+    render(<NSEOutlineView aria-label="Accounts" controller={controller} idForItem={accountId} childrenForItem={() => []} labelForItem={accountName} isExpandable={() => false} />);
     act(() => controller.dispose());
 
     const tree = screen.getByRole("tree", { name: "Accounts" });

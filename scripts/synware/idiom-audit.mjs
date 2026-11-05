@@ -20,7 +20,7 @@ export const NSE_CONTROL_REPLACEMENTS = Object.freeze({
   input: "NSETextField, NSESearchField, NSESlider, NSEStepper, NSECheckbox or NSEToggleButton",
   select: "NSEPopupButton or NSESegmentedControl",
   textarea: "NSETextView",
-  table: "NSETable bound to an NSEArrayController",
+  table: "NSETableView bound to an NSEArrayController",
 });
 
 function slash(path) { return path.split(sep).join("/"); }

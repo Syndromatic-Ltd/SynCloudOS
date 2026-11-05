@@ -62,7 +62,7 @@ The hooks create the controller on the first render and dispose it when the comp
 
 ```tsx
 import { useEffect } from "react";
-import { NSETable, useNSEArrayController, type NSETableColumn } from "@syndromatic/syncloudos/nse";
+import { NSETableView, useNSEArrayController, type NSETableColumn } from "@syndromatic/syncloudos/nse";
 
 interface Account {
   readonly id: string;
@@ -82,7 +82,7 @@ export function AccountList({ accounts }: { accounts: readonly Account[] }) {
   });
   useEffect(() => { controller.setContent(accounts); }, [controller, accounts]);
   return (
-    <NSETable
+    <NSETableView
       aria-label="Accounts"
       adapter={{ controller, idForItem: (account) => account.id, labelForItem: (account) => account.name }}
       columns={columns}

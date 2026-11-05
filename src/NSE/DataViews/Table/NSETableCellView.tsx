@@ -18,15 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEDataViewCellContentProps } from "./dataViewTypes";
+import type { NSETableCellViewProps } from "../Core/dataViewTypes";
 
-export function NSEDataViewCellContent({
+export function NSETableCellView({
   image,
   primary,
   secondary,
   badge,
   accessory,
-}: NSEDataViewCellContentProps) {
+}: NSETableCellViewProps) {
   return (
     <span data-nse-part="cell-content">
       {image ? <img data-nse-part="image" src={image.src} alt={image.alt} /> : null}

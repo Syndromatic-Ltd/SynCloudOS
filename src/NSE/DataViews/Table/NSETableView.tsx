@@ -35,22 +35,22 @@ import { useNSEVirtualiser } from "../Virtualisation";
 import { nseDragCommandIds, nseDragNoPayload, useNSEDataViewDragHost } from "../../Drag";
 import { useNSEAppearanceSlot } from "../../Appearance";
 import { NSETableCell } from "./NSETableCell";
-import { NSETableHeader } from "./NSETableHeader";
+import { NSETableHeaderView } from "./NSETableHeaderView";
 import type {
   NSETableColumn,
   NSETableColumnConfiguration,
-  NSETableEditContext,
-  NSETableProps,
+  NSETableViewEditContext,
+  NSETableViewProps,
 } from "./tableTypes";
 import "./nse-table-view.css";
 
-export function rowAtNSETablePoint(input: { readonly block: number; readonly rowHeight: number; readonly rowCount: number }): number {
+export function rowAtNSETableViewPoint(input: { readonly block: number; readonly rowHeight: number; readonly rowCount: number }): number {
   if (input.block < 0 || input.rowHeight <= 0) return -1;
   const row = Math.floor(input.block / input.rowHeight);
   return row >= input.rowCount ? -1 : row;
 }
 
-export function columnAtNSETablePoint(input: { readonly inline: number; readonly widths: readonly number[] }): number {
+export function columnAtNSETableViewPoint(input: { readonly inline: number; readonly widths: readonly number[] }): number {
   if (input.inline < 0) return -1;
   let offset = 0;
   for (let index = 0; index < input.widths.length; index += 1) {
@@ -80,7 +80,7 @@ interface EditState<TId> {
   readonly pending: boolean;
 }
 
-export function NSETable<T, TId extends string | number>({
+export function NSETableView<T, TId extends string | number>({
   adapter,
   columns,
   state: requestedState = { kind: "ready" },
@@ -112,7 +112,7 @@ export function NSETable<T, TId extends string | number>({
   style,
   onKeyDown,
   ...props
-}: NSETableProps<T, TId>) {
+}: NSETableViewProps<T, TId>) {
   validateColumns(columns);
   const headerHeight = headerHidden ? 0 : suppliedHeaderHeight;
   const domProps = { ...props };
@@ -266,7 +266,7 @@ export function NSETable<T, TId extends string | number>({
     if (!request) return;
     const { generation, controller } = request;
     setEdit({ ...edit, error: null, pending: true });
-    const context: NSETableEditContext<T, TId, unknown> = {
+    const context: NSETableViewEditContext<T, TId, unknown> = {
       item: entry.item,
       id: entry.id,
       columnId: column.id,
@@ -450,7 +450,7 @@ export function NSETable<T, TId extends string | number>({
         data-appearance-recipe="table-view"
         onKeyDown={handleGridKey}
       >
-      {headerHidden ? null : <NSETableHeader
+      {headerHidden ? null : <NSETableHeaderView
         height={headerHeight}
         width={totalWidth}
         menu={columnMenu}
@@ -506,7 +506,7 @@ export function NSETable<T, TId extends string | number>({
                   signal: editRequest.current.controller.signal,
                   commit: (next: unknown) => { void commitEdit(next); },
                   cancel: () => { view.coordinator.cancelEditing(); },
-                } satisfies NSETableEditContext<T, TId, unknown> : null;
+                } satisfies NSETableViewEditContext<T, TId, unknown> : null;
                 const content = customEditorContext && column.editor ? column.editor(customEditorContext) : editing && column.format ? (
                   <input
                     autoFocus
