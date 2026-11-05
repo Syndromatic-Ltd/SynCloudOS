@@ -70,6 +70,8 @@ A condition the framework reports itself, such as a connection error or an unkno
 
 The rest of the technical details follows, and only what is known: the condition's detail line, the lifecycle resource identity and disposal reason, the problem, the source location, the application, window and route, severity and recoverability, the catalogue hint and docs, and the stack. The thrown error's cause, the development-only disposal stack and the React component stack come last. Unknown fields are omitted rather than printed as `none`, and no text appears twice. The copyable report (`toTechnicalReport`, also in the Inspector's error report) is the title, the message, the technical details and the capture time.
 
+The Hint and Docs lines come from the code's catalogue entry. A generic boundary code such as `APP_CONTENT_FAILED` covers any error without a code of its own, so its entry also lists known failures by message, in `diagnoses`. When the thrown message, or a message in its cause chain, matches one, the report shows that failure's own hint and docs instead of the generic ones. For example, `NSEMenuBar requires an NSEOverlayProvider.` points to where overlay controls must render, not just to the component stack. Diagnoses choose the hint only; the code is the same either way.
+
 When you capture through `runtime.errors.capture`, supply a plain `title` and `message` for the person, and pass the thrown value as `error`; its identity goes into the technical details.
 
 ### Code identity

@@ -199,7 +199,9 @@ export async function explainError({projectRoot,query,limit=5}) {
   const catalogue=json(resolve(sdkRoot,"tooling/error-catalogue.json"));
   const normalized=query.toLowerCase(), words=new Set(normalized.match(/[a-z_]{3,}/gu) ?? []);
   const tokens=new Set(normalized.match(/[a-z0-9_]+/gu) ?? []);
-  const matches=catalogue.filter(entry=>tokens.has(entry.code.toLowerCase())).slice(0,limit).map(entry=>({...entry,score:2,docs:entry.docs ?? null}));
+  // A generic boundary code (APP_CONTENT_FAILED) lists known failures by message; the pasted message picks one.
+  const diagnosisFor=entry=>entry.diagnoses?.find(diagnosis=>new RegExp(diagnosis.message,"u").test(query)) ?? null;
+  const matches=catalogue.filter(entry=>tokens.has(entry.code.toLowerCase())).slice(0,limit).map(entry=>({...entry,score:2,docs:entry.docs ?? null,diagnosis:diagnosisFor(entry)}));
   const relatedThreshold=0.3;
   const sdkErrors=[];
   const codes=[...new Set(query.match(/\bTS\d+\b/gu) ?? [])];
@@ -209,7 +211,9 @@ export async function explainError({projectRoot,query,limit=5}) {
   const nextSteps=[];
   if (matches.length) {
     classification={kind:"catalogue",catalogue:true,message:"Exact error-code tokens found in the installed SynCloudOS catalogue."};
-    nextSteps.push("Use the matching code's cause, fix and linked documentation; inspect the original exception and its structured diagnostics.");
+    nextSteps.push(matches.some(match=>match.diagnosis)
+      ? "The message matches a known failure under that code: use its diagnosis fix and documentation first, then the code's general cause and fix."
+      : "Use the matching code's cause, fix and linked documentation; inspect the original exception and its structured diagnostics.");
   } else if (codes.length) {
     classification={kind:"typescript",catalogue:false,message:"TypeScript compiler diagnostics are outside the SynCloudOS runtime error-code catalogue.",codes};
     nextSteps.push("Read the complete compiler diagnostic and compare the argument and expected types. Use the lookup_sdk tool for SDK symbols named in the message, then run the consumer's TypeScript compiler again.");

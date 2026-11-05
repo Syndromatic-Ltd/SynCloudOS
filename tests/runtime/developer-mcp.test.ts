@@ -388,6 +388,13 @@ describe("developer MCP tools", () => {
     expect(result.classification.kind).toBe("catalogue");
     expect(result.related).toEqual([]);
   });
+  it("picks the known failure a pasted message matches under a generic code", async () => {
+    const result = await explainError({ projectRoot: project, query: "Code: APP_CONTENT_FAILED\nMessage: NSEMenuBar requires an NSEOverlayProvider." });
+    expect(result.matches[0]).toMatchObject({ code: "APP_CONTENT_FAILED", diagnosis: { docs: expect.stringContaining("menus-toolbars-and-inspectors.md") } });
+    expect(result.nextSteps[0]).toMatch(/known failure/u);
+    const plain = await explainError({ projectRoot: project, query: "Code: APP_CONTENT_FAILED\nMessage: x is undefined" });
+    expect(plain.matches[0].diagnosis).toBeNull();
+  });
   it("keeps fuzzy symptoms separate from diagnoses and excludes partial code tokens", async () => {
     const result = await explainError({ projectRoot: project, query: "optional authentication login session account UI missing" });
     expect(result.matches).toEqual([]);
