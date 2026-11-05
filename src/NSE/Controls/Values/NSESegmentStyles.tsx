@@ -119,6 +119,7 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
             action={item.action}
             actionPayload={item.actionPayload}
             onClick={() => select(item.id)}
+            style={item.width === undefined ? undefined : { boxSizing: "border-box", inlineSize: item.width, minInlineSize: item.width }}
           />
         );
       })}

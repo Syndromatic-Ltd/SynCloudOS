@@ -5907,6 +5907,21 @@
   border-end-end-radius: calc(var(--nse-atmo-rg-band) * 0.22);
 }
 
+/* A sized capsule's selected cell keeps the inset ink: no ring columns at its
+   seams, the cap ring's start inside the stroke. */
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"][data-size] button[aria-pressed="true"]::after {
+  inset-inline: 0;
+  border-inline-width: 0;
+}
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"][data-size] > :first-child > button:first-child[aria-pressed="true"]::after {
+  inset-inline-start: calc(var(--nse-atmo-rg-band) * 0.04);
+  border-inline-start-width: 0;
+}
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"][data-size] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child[aria-pressed="true"]::after {
+  inset-inline-end: calc(var(--nse-atmo-rg-band) * 0.04);
+  border-inline-end-width: 0;
+}
+
 /* NSControl.ControlSize.large: the 28px band. Small is the 24px default band. */
 [data-nse-appearance="atmo"] :is(.nse-control-button, .nse-extended-tool-button-group, .nse-extended-radio-tool-button-group)[data-size="large"] {
   --nse-control-height: 28px;
