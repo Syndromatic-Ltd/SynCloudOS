@@ -122,7 +122,7 @@ describe("metal material controls", () => {
             thumbMaterial="metal"
             aria-label="Disabled slider"
             value={30}
-            disabled
+            isEnabled={false}
           />
           <NSESwitch
             state="on"
@@ -192,7 +192,7 @@ describe("metal material controls", () => {
           thumbMaterial="metal"
           aria-label="Disabled"
           value={20}
-          disabled
+          isEnabled={false}
         />
         <NSESlider
           thumbMaterial="metal"

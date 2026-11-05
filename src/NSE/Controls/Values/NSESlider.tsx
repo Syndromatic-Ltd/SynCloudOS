@@ -51,25 +51,25 @@ function SliderTooltipAnchor({ input, content }: { readonly input: ReactElement<
  * NSSlider. `sliderType` is linear (a track and thumb, horizontal or vertical)
  * or circular (a knob turned to an angle).
  */
-export function NSESlider(props: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'onChanging' | 'onChange'>) {
+export function NSESlider(props: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
   if (props.sliderType === "circular") return <NSECircularSlider {...props} />;
   return <NSELinearSlider {...props} />;
 }
 
-function NSELinearSlider(props: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'onChanging' | 'onChange'>) {
-  return <NSESliderControl {...useNSEValueBinding<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'onChanging' | 'onChange'>(props, {excludes:['onChanging','onChange'],fallback:0,cancellable:true})} />;
+function NSELinearSlider(props: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <NSESliderControl {...useNSEValueBinding<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0,cancellable:true})} />;
 }
 
-function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueText, controlSize = "regular", length, thumbMaterial = "standard", wraps: _wraps, value, defaultValue, minimum: suppliedMinimum, maximum: suppliedMaximum, min, max, step = 1, orientation = "horizontal", dir, disabled, readOnly, ticks, detents, detentThreshold = step * 2, name, id, className, label, tooltip, undoManager, onValueChange, onChanging, onChange, style, ...props }: NSESliderProps & NSEValueBindingControlProps<number>) {
+function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueText, controlSize = "regular", length, thumbMaterial = "standard", wraps: _wraps, value, defaultValue, minimum: suppliedMinimum, maximum: suppliedMaximum, step = 1, orientation = "horizontal", dir, isEnabled = true, readOnly, ticks, detents, detentThreshold = step * 2, name, id, className, label, tooltip, undoManager, onValueChange, style, ...props }: NSESliderProps & NSEValueBindingControlProps<number>) {
   const feedback = useNSEFeedback();
   // The value tooltip needs the app's tooltip host; without one the slider
   // still works, its value spoken by the input alone.
   const tooltips = useOptionalNSETooltipProvider();
 
-  const minimum = suppliedMinimum ?? min ?? 0;
-  const maximum = suppliedMaximum ?? max ?? 100;
+  const disabled = !isEnabled;
+  const minimum = suppliedMinimum ?? 0;
+  const maximum = suppliedMaximum ?? 100;
   const controlled = value !== undefined;
-  const phasedCallbacks = suppliedMinimum !== undefined || suppliedMaximum !== undefined || orientation !== "horizontal" || readOnly !== undefined || ticks !== undefined || tooltip !== undefined || undoManager !== undefined;
   const [stored, setStored] = useState(defaultValue ?? minimum);
   const [dragging, setDragging] = useState(false);
   const resolvedValue = value ?? stored;
@@ -82,9 +82,7 @@ function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueTe
   if (!active.current) latest.current = resolvedValue;
   const emit = (next: number, phase: "preview" | "commit") => {
     if (!controlled) setStored(next);
-    if (phasedCallbacks) (onValueChange as ((value: number, phase: "preview" | "commit") => void) | undefined)?.(next, phase);
-    else (onValueChange as ((value: number) => void) | undefined)?.(next);
-    if (phase === "preview") onChanging?.(next); else onChange?.(next);
+    onValueChange?.(next, phase);
   };
   callback.current = emit;
   const commitValue = (previous: number, next: number) => {
@@ -167,7 +165,7 @@ function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueTe
       if (readOnly) return;
       const next = pointerValue(Number(event.currentTarget.value));
       latest.current = next;
-      if (!phasedCallbacks && !active.current) commitValue(resolvedValue, next);
+      if (!active.current) commitValue(resolvedValue, next);
       else emit(next, "preview");
     }}
     onPointerUp={commit}

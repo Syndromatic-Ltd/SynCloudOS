@@ -1,6 +1,6 @@
 # Values, pickers and progress
 
-This page covers the controls that show or choose a number, a level or an option from a list: `NSESlider`, `NSEStepper`, `NSELevelIndicator`, `NSESegmentedControl`, the pickers, and the progress family. Dates and colours are covered separately.
+This page covers the controls that show or choose a number, a level, an option from a list or a date: `NSESlider`, `NSEStepper`, `NSELevelIndicator`, `NSESegmentedControl`, the pop-up buttons, `NSEProgressIndicator` and `NSEDatePicker`.
 
 ```tsx
 import { NSESlider, NSEStepper } from "@syndromatic/syncloudos/nse";
@@ -16,6 +16,7 @@ import { NSESlider, NSEStepper } from "@syndromatic/syncloudos/nse";
 | `NSESegmentedControl` | Momentary, single and multiple selection segments in the rounded, capsule and textured toolbar styles, with menus and overflow | For menus and overflow |
 | `NSEPopUpButton` | A button that shows the selected choice and opens the list, or (`pullsDown`) a button that opens a menu of commands | A pull-down button does; a pop-up button falls back to the native list without one |
 | `NSEProgressIndicator` | Determinate and indeterminate progress, as a bar or a spinning indicator | No |
+| `NSEDatePicker` | A date, a date range, a time, or a date and time, as a text field or a graphical calendar and clock | For the calendar and clock popover |
 
 Components marked "Yes" open a floating list and need an overlay host. A mounted SynWare receives one from the runtime, and elsewhere you wrap the controls in `NSEStandaloneControlHost` from `nse/controls`. See [Text fields and choice controls](text-and-choice.md#at-a-glance).
 
@@ -28,7 +29,7 @@ A native `<input type="range">` with the NSE track and thumb. It reports a value
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `value`, `defaultValue` | `number` | `minimum` for the default | The controlled or initial value. |
-| `minimum`, `maximum` | `number` | 0 and 100 | The range. `min` and `max` are aliases. |
+| `minimum`, `maximum` | `number` | 0 and 100 | `minValue` and `maxValue`. |
 | `step` | `number` | `1` | The increment. Values snap to it. |
 | `sliderType` | `"linear" \| "circular"` | `"linear"` | `NSSlider.sliderType`: a track and thumb, or a dial (below). |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | A linear slider's direction. |
@@ -39,12 +40,11 @@ A native `<input type="range">` with the NSE track and thumb. It reports a value
 | `tooltip` | `ReactNode \| (value: number) => ReactNode` | none | Shown at the thumb while it is focused or dragged. A function receives the current value. |
 | `thumbMaterial` | `"standard" \| "metal"` | `"standard"` | `"metal"` gives the thumb a brushed metal surface. |
 | `controlSize` | `"regular" \| "small" \| "mini"` | `"regular"` | |
-| `readOnly`, `disabled`, `name`, `dir` | | | `name` adds a hidden input for form submission. `dir="rtl"` flips the horizontal arrow keys. |
+| `isEnabled`, `readOnly`, `name`, `dir` | | | `isEnabled` is `NSControl.isEnabled` (default `true`). `name` adds a hidden input for form submission. `dir="rtl"` flips the horizontal arrow keys. |
 | `undoManager` | `NSEUndoManagerPort` | none | Registers each committed change as an undo step named "Change Slider". |
-| `onValueChange` | `(value, phase) => void` | none | `"preview"` while dragging and `"commit"` at the end of a drag or a key press. |
-| `onChanging`, `onChange` | `(value) => void` | none | The same events without a phase: `onChanging` for previews, `onChange` for commits. |
+| `onValueChange` | `(value, phase) => void` | none | `"preview"` while dragging and `"commit"` at the end of a drag or any other change: NSSlider's continuous and final actions. |
 
-Arrow keys move by one step, Home and End jump to the ends, and every key press commits. When you give the slider `minimum`, `maximum`, `orientation`, `readOnly`, `ticks`, `tooltip` or `undoManager`, `onValueChange` receives the phase. Without any of these the callback receives only the value and is called for previews and commits alike. Use `onChanging` and `onChange` to tell them apart in either case.
+Arrow keys move by one step, Home and End jump to the ends, and every key press commits, as does a change made by assistive technology.
 
 `NSEUndoManagerPort` is the part of the runtime's undo manager that the control needs (`isExecuting`, `register`, `reserve`). The undo client of the SDK provides one. A change that the value setter rejects rolls back. When the rollback also fails, the error is an `AggregateError` named `NSEValueControlCompensationError` that carries both failures.
 
@@ -71,7 +71,7 @@ Two buttons, an increment and a decrement, in a single control with `role="spinb
 | `pageStep` | `number` | ten steps | The Page Up and Page Down increment, for numeric steppers. |
 | `formatValue` | `(value: T) => string` | none | The spoken text (`aria-valuetext`). |
 | `size` | `"regular" \| "small" \| "mini"` | `"regular"` | |
-| `name`, `disabled`, `readOnly`, `undoManager` | | | |
+| `name`, `isEnabled`, `readOnly`, `undoManager` | | | |
 | `onValueChange` | `(value: T, phase) => void` | required | |
 
 A click commits one step. Arrow Up and Arrow Right increase, Arrow Down and Arrow Left decrease, Page Up and Page Down move by `pageStep`, and Home and End go to the limits. Holding a button repeats after 400 ms, then every 120 ms and speeding up to every 40 ms, sending previews and one commit when released. Hold to repeat needs the host's scheduler, so it works in a mounted SynWare and not in a bare render.
@@ -84,7 +84,7 @@ A click commits one step. Arrow Up and Arrow Right increase, Arrow Down and Arro
 | `value`, `minimum`, `maximum` | `number` | Required. |
 | `mode` | `"continuous" \| "discrete" \| "capacity" \| "rating"` | `"rating"` draws stars that the user can choose. Other modes render a native `<meter>`. |
 | `warningValue`, `criticalValue` | `number` | The value at or above which the state becomes `warning` or `critical`, for the theme's colouring. |
-| `disabled` | `boolean` | |
+| `isEnabled` | `boolean` | `NSControl.isEnabled`. Default `true`. |
 | `onValueChange` | `(value, "commit") => void` | Rating mode only. |
 
 A rating shows `maximum - minimum` stars as a radio group, and clicking star *n* commits `minimum + n`.
@@ -106,7 +106,7 @@ AppKit's `NSSegmentedControl`: a row of joined segments that acts as a momentary
 | `distribution` | `"fit" \| "fill-equally"` | `NSSegmentedControl.segmentDistribution`. `fill-equally` stretches the control to its container and shares the width evenly. |
 | `maximumVisibleSegments` | `number` | Segments beyond this fit into an overflow menu. The selected one always stays visible. |
 | `onMenuAction` | `(segmentId, actionId) => void` | A segment's menu item was chosen. |
-| `disabled`, `readOnly`, `name`, `parentResponderId` | | `name` adds a hidden input with the selected ids joined by commas. |
+| `isEnabled`, `readOnly`, `name`, `parentResponderId` | | `name` adds a hidden input with the selected ids joined by commas. |
 
 A segment (`NSESegmentedItem`) is `{ id, label }` with these optional fields:
 
@@ -116,8 +116,8 @@ A segment (`NSESegmentedItem`) is `{ id, label }` with these optional fields:
 | `width` | `setWidth(_:forSegment:)` | A fixed width in CSS pixels. Otherwise the segment sizes to fit, or shares the width under `fill-equally`. |
 | `accessibleLabel` | | The spoken name and tooltip of an image segment. |
 | `action`, `actionPayload` | | The segment's own action. It sends the segment's `actionPayload`, or no payload when that is omitted, so it can name an action method that takes no parameter. The segment disables itself while the action is unavailable. |
-| `disabled` | `setEnabled(_:forSegment:)` | |
-| `menu` | `setMenu(_:forSegment:)` | `{ id, label, disabled? }[]`, shown in a disclosure menu on the segment. |
+| `isEnabled` | `setEnabled(_:forSegment:)` | Default `true`. |
+| `menu` | `setMenu(_:forSegment:)` | `{ id, label, isEnabled? }[]`, shown in a disclosure menu on the segment. |
 
 In a momentary control every click reports an empty selection. In select-one, clicking the selected segment clears it when `allowsEmpty` is true. Arrow keys move focus among the enabled segments, wrapping around. Segment menus and overflow need an overlay host.
 
@@ -181,6 +181,41 @@ Arrow Down and Arrow Up on the button open the list. Without an overlay host, a 
 | `controlSize` | `"small" \| "regular" \| "large"` | `"regular"` | A spinning indicator is 16, 32 or 64 pixels across. |
 
 A determinate bar is a `role="progressbar"` with `aria-valuemin`, `aria-valuemax` and `aria-valuenow`; an indeterminate one has no `aria-valuenow`. A spinning indicator with a `value` fills as a ring. Indeterminate motion stops under reduced motion (the nearest `NSEAnimationEnvironmentProvider`). To hide an indicator when no work is running, don't render it.
+
+## Date pickers
+
+`NSEDatePicker` is AppKit's `NSDatePicker`. One component edits every kind of civil date and time: `datePickerElements` chooses what it edits, `datePickerMode` chooses a single date or a range, and `datePickerStyle` chooses how it looks.
+
+```tsx
+<NSEDatePicker aria-label="Due" locale="en-GB" timeZone="Europe/London" value={due} onValueChange={setDue} />
+<NSEDatePicker aria-label="Trip" datePickerMode="range" locale="en-GB" timeZone="Europe/London" value={trip} onValueChange={setTrip} />
+<NSEDatePicker aria-label="Start" datePickerElements={["hourMinute"]} hourCycle="h24" locale="en-GB" timeZone="Europe/London" value={start} onValueChange={setStart} />
+<NSEDatePicker aria-label="Appointment" datePickerElements={["yearMonthDay", "hourMinute"]} locale="en-GB" timeZone="Europe/London" value={appointment} onValueChange={setAppointment} />
+<NSEDatePicker aria-label="Calendar" datePickerStyle="clockAndCalendar" locale="en-GB" timeZone="Europe/London" value={day} onValueChange={setDay} />
+```
+
+| `datePickerElements` | `datePickerMode` | Value type |
+| --- | --- | --- |
+| `["yearMonthDay"]` (the default) | `"single"` (the default) | `NSEPlainDate` |
+| `["yearMonthDay"]` | `"range"` | `NSEDateRange` |
+| `["hourMinute"]` | none | `NSEPlainTime` |
+| `["yearMonthDay", "hourMinute"]` | none | `NSEDateTimeValue`: a date, a time, the time zone, and which of a repeated hour |
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `aria-label` | `string` | required | The accessible name. |
+| `locale`, `timeZone` | `string` | required | How the value is formatted, and the zone that "today" and daylight-saving transitions are read in. |
+| `datePickerStyle` | `"textFieldAndStepper" \| "textField" \| "clockAndCalendar"` | `"textFieldAndStepper"` | `NSDatePicker.Style`. `textField` edits the date as separate day, month and year fields. `clockAndCalendar` shows the month calendar, or the clock for a time. |
+| `presentsCalendarOverlay` | `boolean` | `true` | A text field opens the calendar, or the clock, in a popover. |
+| `value`, `defaultValue` | see above, or `null` | none | Controlled or uncontrolled. |
+| `minimum`, `maximum` | the value's date or time type | none | `minDate` and `maxDate`. Days outside them can't be chosen. For a date and time they are `NSEZonedDateTime`. |
+| `isEnabled`, `isEditable` | `boolean` | `true` | A non-editable picker still shows and submits its value. |
+| `name` | `string` | none | The form field name. The value is submitted as ISO 8601. |
+| `onValueChange` | `(value, phase: "preview" \| "commit") => void` | none | A text field previews while it is edited and commits on Return or blur. The graphical calendar commits every change. |
+| `today`, `eventIndicatorsForDate` | | | Graphical calendar only: the day marked as today, and marks under a day such as a calendar's events. NSE extensions. |
+| `date`, `minuteStep`, `hourCycle` | | | Times only: the day the time falls on, the minute interval, and a 12 or 24-hour clock. `hourCycle` defaults to the locale's. |
+
+As in AppKit, the graphical calendar edits its value live: clicking a day selects it, and the month arrows move the selected date by a month, keeping the day where the month has it. In range mode, a second click or Shift with an arrow key extends the range.
 
 ## Example
 

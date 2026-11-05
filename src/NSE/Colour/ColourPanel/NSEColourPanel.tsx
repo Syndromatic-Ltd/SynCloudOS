@@ -235,7 +235,7 @@ export function NSEColourPanel({ controller: supplied, "aria-label": label = "Co
         {eyeDropperState !== "idle" && eyeDropperState !== "picking" ? <p role="status" data-nse-part="eyedropper-status">{eyeDropperMessages[eyeDropperState]}</p> : null}
         {showsAlpha ? <div data-nse-part="opacity-row" style={{ "--nse-colour-channel-track": `linear-gradient(to right, ${current.withAlpha(0).toCSS()}, ${current.withAlpha(1).toCSS()})` } as CSSProperties}>
           <span data-nse-part="row-label" aria-hidden="true">Opacity</span>
-          <NSESlider controlSize="mini" aria-label="Opacity" minimum={0} maximum={100} disabled={disabled} value={opacity} onValueChange={(value, phase) => {
+          <NSESlider controlSize="mini" aria-label="Opacity" minimum={0} maximum={100} isEnabled={!disabled} value={opacity} onValueChange={(value, phase) => {
             const live = controller.getSnapshot().current ?? initialPanelColour;
             const next = live.withAlpha(value / 100);
             if (phase === "commit") controller.commit(next, "pointer");

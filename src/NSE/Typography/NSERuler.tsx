@@ -70,9 +70,9 @@ export function NSERuler({ value, direction = "ltr", maximum = 1_000, step = 1, 
       ["firstLineIndent", "First line indent"],
       ["headIndent", "Head indent"],
       ["tailIndent", "Tail indent"],
-    ] as const).map(([key, label]) => <NSESlider key={key} controlSize="small" data-nse-part="indent" label={label} data-logical-edge={key === "tailIndent" ? "end" : "start"} dir={key === "tailIndent" ? opposite : direction} minimum={0} maximum={maximum} step={step} value={style[key]} disabled={mutationDisabled} onValueChange={(next) => changeNumber(key, next)} />)}
+    ] as const).map(([key, label]) => <NSESlider key={key} controlSize="small" data-nse-part="indent" label={label} data-logical-edge={key === "tailIndent" ? "end" : "start"} dir={key === "tailIndent" ? opposite : direction} minimum={0} maximum={maximum} step={step} value={style[key]} isEnabled={!mutationDisabled} onValueChange={(next) => changeNumber(key, next)} />)}
     {style.tabStops.map((stop, index) => <div key={`tab-stop-${index}`} data-nse-part="tab-stop">
-      <NSESlider controlSize="small" label={`Tab stop ${index + 1}`} dir={direction} minimum={0} maximum={maximum} step={1} value={stop} disabled={readOnly} onValueChange={(next) => changeTabStop(index, next)} />
+      <NSESlider controlSize="small" label={`Tab stop ${index + 1}`} dir={direction} minimum={0} maximum={maximum} step={1} value={stop} isEnabled={!readOnly} onValueChange={(next) => changeTabStop(index, next)} />
       <NSEButton
         appearance="aqua"
         title="Remove"
