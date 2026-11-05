@@ -25,7 +25,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { NSE } from "../../src/NSE/NSE";
 import { NSEPage } from "../../src/NSE/Page/NSEPage";
-import { NSEPageController } from "../../src/NSE/Page/NSEPageController";
+import { PageTurnController } from "../../src/NSE/Page/pageTurnController";
 import { useNSEPage } from "../../src/NSE/Page/useNSEPage";
 import {
   getNSEPageAxis,
@@ -349,9 +349,9 @@ describe("NSEPage geometry", () => {
   });
 });
 
-describe("NSEPageController", () => {
+describe("PageTurnController", () => {
   it("publishes progress, gesture, tear, and reset snapshots", () => {
-    const controller = new NSEPageController({ progress: 0.2, edge: "right" });
+    const controller = new PageTurnController({ progress: 0.2, edge: "right" });
     const listener = vi.fn();
     const unsubscribe = controller.subscribe(listener);
 
@@ -527,7 +527,6 @@ describe("NSEPage React surface", () => {
 
   it("exposes the component and control surface through NSE", () => {
     expect(NSE.NSEPage).toBe(NSE.Page.Root);
-    expect(NSE.Page.Controller).toBe(NSEPageController);
     expect(NSE.Page.presets.paperTurn.name).toBe("paperTurn");
     expect(NSE.Page.getPreset("tearAway").mode).toBe("tear");
     expect("Surface" in NSE.Page).toBe(false);

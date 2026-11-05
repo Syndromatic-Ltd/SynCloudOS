@@ -319,7 +319,7 @@ export interface NSEPageBookStripGeometry {
   backBackgroundOffsetX: number;
 }
 
-export interface NSEPageControllerSnapshot {
+export interface NSEPageTurnSnapshot {
   progress: number;
   targetProgress: number;
   phase: NSEPagePhase;
@@ -332,7 +332,7 @@ export interface NSEPageControllerSnapshot {
   updatedAt: number;
 }
 
-export interface NSEPageControllerOptions extends NSEControllerOwnershipOptions {
+export interface NSEPageTurnControllerOptions extends NSEControllerOwnershipOptions {
   progress?: number;
   mode?: NSEPageMode;
   edge?: NSEPageEdge;
@@ -363,13 +363,13 @@ export interface NSEPageGestureOptions {
 }
 
 export interface NSEPageEvent {
-  snapshot: NSEPageControllerSnapshot;
+  snapshot: NSEPageTurnSnapshot;
   reason: NSEPageCompletionReason;
 }
 
 export interface NSEPageHandle {
-  getSnapshot: () => NSEPageControllerSnapshot;
-  setProgress: (progress: number, reason?: NSEPageCompletionReason) => NSEPageControllerSnapshot;
+  getSnapshot: () => NSEPageTurnSnapshot;
+  setProgress: (progress: number, reason?: NSEPageCompletionReason) => NSEPageTurnSnapshot;
   turnTo: (progress: number, options?: NSEPageTurnOptions) => void;
   turnForward: (options?: NSEPageTurnOptions) => void;
   turnBackward: (options?: NSEPageTurnOptions) => void;
@@ -424,7 +424,7 @@ export interface NSEPageDogEarHandlers {
 }
 
 export interface UseNSEPageResult {
-  snapshot: NSEPageControllerSnapshot;
+  snapshot: NSEPageTurnSnapshot;
   geometry: NSEPageGeometry;
   preset: NSEPagePreset;
   rootRef: (node: HTMLElement | null) => void;

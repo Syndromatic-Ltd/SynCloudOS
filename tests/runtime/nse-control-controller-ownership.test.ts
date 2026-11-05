@@ -5,7 +5,7 @@ import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEPreferencesController, nseUnowned, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers";
 import { enterClassApplication, instantiateInOwnerScope, NSEOwnershipScope } from "../../src/NSE/Controllers/ownership";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
-import { NSEPageController } from "../../src/NSE/Page/NSEPageController";
+import { PageTurnController } from "../../src/NSE/Page/pageTurnController";
 import { NSEColourPanelController } from "../../src/NSE/Colour/ColourPanel/NSEColourPanelController";
 import { NSEApplicationNavigationChromeController } from "../../src/NSE/Navigation/NSEApplicationNavigationChrome";
 import { NSEScrollViewController } from "../../src/NSE/Scroll/scrollTypes";
@@ -60,7 +60,7 @@ const factories = {
     const host = runtime();
     return new NSEToolbarController({ ...options, configuration: { identifier: "owned-toolbar", owner: { kind: "application", applicationId: "app" }, displayMode: "icon-only", sizeMode: "regular", allowedItemIds: [], defaultItemIds: [] }, items: [], preferences: preferences(), runtime: { signal: new AbortController().signal, commands: commandPort(host) } });
   },
-  page: (options: NSEControllerOwnershipOptions) => new NSEPageController(options),
+  page: (options: NSEControllerOwnershipOptions) => new PageTurnController(options),
   colour: (options: NSEControllerOwnershipOptions) => new NSEColourPanelController(runtime(), options),
   navigationChrome: (options: NSEControllerOwnershipOptions) => new NSEApplicationNavigationChromeController(options),
   scroll: (options: NSEControllerOwnershipOptions) => new NSEScrollViewController(document.createElement("div"), undefined, options),
@@ -138,7 +138,7 @@ it("stops menu work and toolbar preference observation on owner disposal without
 
 it("revokes page mutation and removes colour registrations with their owner", () => {
   const owner = new AbortController();
-  const page = new NSEPageController({ ownerSignal: owner.signal });
+  const page = new PageTurnController({ ownerSignal: owner.signal });
   const host = runtime();
   const colour = new NSEColourPanelController(host, { ownerSignal: owner.signal });
   colour.registerPicker({ id: "owned-picker", label: "Owned", order: 1, supportedSpaces: ["srgb"], render: () => null });

@@ -30,7 +30,6 @@ export {
   NSEModalDialog,
   NSESlidingPane,
   NSESlidingPanes,
-  NSESlidingView,
   NSEToaster,
 } from "../Containers/NSEContainers";
 export type {
@@ -40,7 +39,6 @@ export type {
   NSEModalDialogProps,
   NSESlidingPaneProps,
   NSESlidingPanesProps,
-  NSESlidingViewProps,
   NSEToasterProps,
 } from "../Containers/NSEContainers";
 

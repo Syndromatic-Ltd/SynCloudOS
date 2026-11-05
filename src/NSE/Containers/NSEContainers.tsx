@@ -113,23 +113,6 @@ export interface NSESlidingPaneProps extends Omit<ContainerPaneProps, "as">, NSE
   keepMounted?: boolean;
 }
 
-export interface NSESlidingViewItem {
-  key: string;
-  label: ReactNode;
-  content: ReactNode;
-  disabled?: boolean;
-}
-
-export interface NSESlidingViewProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
-  views: readonly NSESlidingViewItem[];
-  activeKey?: string;
-  defaultActiveKey?: string;
-  onActiveKeyChange?: (key: string) => void;
-  axis?: NSESlidingAxis;
-  controls?: boolean;
-  controlLabel?: string;
-}
-
 /** One pane in a connected NSESlidingPanes group. */
 export interface NSESlidingPaneView {
   key: string;
@@ -473,83 +456,12 @@ export function NSESlidingPane({
   );
 }
 
-export function NSESlidingView({
-  views,
-  activeKey,
-  defaultActiveKey,
-  onActiveKeyChange,
-  axis = "horizontal",
-  controls = false,
-  controlLabel = "Views",
-  className = "",
-  style,
-  ...props
-}: NSESlidingViewProps) {
-  const fallbackKey = views.find((view) => !view.disabled)?.key ?? views[0]?.key ?? "";
-  const [currentKey, setCurrentKey] = useControllableKey({
-    value: activeKey,
-    defaultValue: defaultActiveKey,
-    fallback: fallbackKey,
-    onChange: onActiveKeyChange
-  });
-  const activeIndex = Math.max(0, views.findIndex((view) => view.key === currentKey));
-  const offset = `-${activeIndex * 100}%`;
-  const trackStyle = {
-    transform: axis === "horizontal"
-      ? `translate3d(${offset}, 0, 0)`
-      : `translate3d(0, ${offset}, 0)`
-  };
-
-  return (
-    <div
-      {...props}
-      className={classes("nse-container-sliding-view", className)}
-      data-axis={axis}
-      data-active-key={currentKey}
-      style={style}
-    >
-      {controls ? (
-        <div className="nse-container-sliding-view-controls" role="tablist" aria-label={controlLabel}>
-          {views.map((view) => (
-            <NSEButton
-              appearance="aqua"
-              buttonType="pushOnPushOff"
-              title={view.label}
-              state={(view.key === currentKey) ? "on" : "off"}
-              isEnabled={!view.disabled}
-              key={view.key}
-              role="tab"
-              aria-selected={view.key === currentKey}
-              onClick={() => setCurrentKey(view.key)}
-            />
-          ))}
-        </div>
-      ) : null}
-      <div className="nse-container-sliding-view-viewport">
-        <div className="nse-container-sliding-view-track" style={trackStyle}>
-          {views.map((view) => (
-            <section
-              key={view.key}
-              className="nse-container-sliding-view-panel"
-              role="tabpanel"
-              aria-hidden={view.key !== currentKey}
-              data-active={view.key === currentKey ? "true" : "false"}
-            >
-              {view.content}
-            </section>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /**
 A connected, horizontally-sliding group of panes. The selected pane sits at the left; panes before it collapse to tappable peek strips,
 panes after it stay visible, and the last pane flexes to fill the remaining space. Selecting a peek
 strip (click, keyboard, or horizontal drag) slides the stack so that pane expands. Below
 `multiViewMinWidth` the panes stack full-width and slide one at a time. Unlike the single-pane
-NSESlidingPane drawer / NSESlidingView carousel, the panes here stay connected.
+NSESlidingPane drawer, the panes here stay connected.
 */
 export function NSESlidingPanes({
   views,
