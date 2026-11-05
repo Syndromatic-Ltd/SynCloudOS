@@ -26,6 +26,7 @@ import { useNSEFeedback } from "../../Feedback";
 import { useNSETooltip, useOptionalNSETooltipProvider } from "../../Tooltips";
 import type { NSESliderProps } from "./valueControlTypes";
 import { commitUndoableValue } from "./valueControlTransaction";
+import { NSECircularSlider } from "./circularSlider";
 
 const snap = (value: number, minimum: number, maximum: number, step: number) =>
   Math.max(minimum, Math.min(maximum, Math.round((value - minimum) / step) * step + minimum));
@@ -46,11 +47,20 @@ function SliderTooltipAnchor({ input, content }: { readonly input: ReactElement<
   })}{binding.tooltip}</>;
 }
 
+/**
+ * NSSlider. `sliderType` is linear (a track and thumb, horizontal or vertical)
+ * or circular (a knob turned to an angle).
+ */
 export function NSESlider(props: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'onChanging' | 'onChange'>) {
+  if (props.sliderType === "circular") return <NSECircularSlider {...props} />;
+  return <NSELinearSlider {...props} />;
+}
+
+function NSELinearSlider(props: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'onChanging' | 'onChange'>) {
   return <NSESliderControl {...useNSEValueBinding<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'onChanging' | 'onChange'>(props, {excludes:['onChanging','onChange'],fallback:0,cancellable:true})} />;
 }
 
-function NSESliderControl({ __nseBindingEditor, controlSize = "regular", length, thumbMaterial = "standard", wraps: _wraps, value, defaultValue, minimum: suppliedMinimum, maximum: suppliedMaximum, min, max, step = 1, orientation = "horizontal", dir, disabled, readOnly, ticks, detents, detentThreshold = step * 2, name, id, className, label, tooltip, undoManager, onValueChange, onChanging, onChange, style, ...props }: NSESliderProps & NSEValueBindingControlProps<number>) {
+function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueText, controlSize = "regular", length, thumbMaterial = "standard", wraps: _wraps, value, defaultValue, minimum: suppliedMinimum, maximum: suppliedMaximum, min, max, step = 1, orientation = "horizontal", dir, disabled, readOnly, ticks, detents, detentThreshold = step * 2, name, id, className, label, tooltip, undoManager, onValueChange, onChanging, onChange, style, ...props }: NSESliderProps & NSEValueBindingControlProps<number>) {
   const feedback = useNSEFeedback();
   // The value tooltip needs the app's tooltip host; without one the slider
   // still works, its value spoken by the input alone.

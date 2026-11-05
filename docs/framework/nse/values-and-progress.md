@@ -1,6 +1,6 @@
 # Values, pickers and progress
 
-This page covers the controls that show or choose a number, a level or an option from a list: `NSESlider`, `NSECircularSlider`, `NSEStepper`, `NSELevelIndicator`, `NSESegmentedControl`, the pickers, and the progress family. Dates and colours are covered separately.
+This page covers the controls that show or choose a number, a level or an option from a list: `NSESlider`, `NSEStepper`, `NSELevelIndicator`, `NSESegmentedControl`, the pickers, and the progress family. Dates and colours are covered separately.
 
 ```tsx
 import { NSESlider, NSEStepper } from "@syndromatic/syncloudos/nse";
@@ -11,7 +11,6 @@ import { NSESlider, NSEStepper } from "@syndromatic/syncloudos/nse";
 | Component | Purpose | Overlay host |
 | --- | --- | --- |
 | `NSESlider` | A horizontal or vertical slider with ticks, detents, a tooltip and undo | No |
-| `NSECircularSlider` | A dial, with a linear slider alongside for assistive technology | No |
 | `NSEStepper` | Increment and decrement buttons with hold to repeat | No |
 | `NSELevelIndicator` | A meter, or a star rating | No |
 | `NSESegmentedControl` | Momentary, single and multiple selection segments in the rounded, capsule and textured toolbar styles, with menus and overflow | For menus and overflow |
@@ -31,7 +30,8 @@ A native `<input type="range">` with the NSE track and thumb. It reports a value
 | `value`, `defaultValue` | `number` | `minimum` for the default | The controlled or initial value. |
 | `minimum`, `maximum` | `number` | 0 and 100 | The range. `min` and `max` are aliases. |
 | `step` | `number` | `1` | The increment. Values snap to it. |
-| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | |
+| `sliderType` | `"linear" \| "circular"` | `"linear"` | `NSSlider.sliderType`: a track and thumb, or a dial (below). |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | A linear slider's direction. |
 | `label` | `ReactNode` | none | A visible label. The accessible name comes from `aria-label`, then a string `label`, then `"Slider"`. |
 | `ticks` | `readonly number[]` | none | Tick positions. When present the slider snaps to the nearest tick rather than to the step. |
 | `detents` | `readonly number[]` | none | Soft checkpoints for pointer drags. The value is drawn to a detent when within `detentThreshold`, and a haptic tick marks the moment it enters one. Keyboard values are unaffected. |
@@ -48,19 +48,15 @@ Arrow keys move by one step, Home and End jump to the ends, and every key press 
 
 `NSEUndoManagerPort` is the part of the runtime's undo manager that the control needs (`isExecuting`, `register`, `reserve`). The undo client of the SDK provides one. A change that the value setter rejects rolls back. When the rollback also fails, the error is an `AggregateError` named `NSEValueControlCompensationError` that carries both failures.
 
-## NSECircularSlider
+### A circular slider
 
-A dial. Dragging around the circle sets the value, and a linear slider with the same range sits alongside it for assistive technology, labelled "… linear alternative".
+`sliderType="circular"` is `NSSlider`'s circular style: a dial. Dragging around it, or clicking anywhere on it, sets the value, and a linear slider with the same range sits alongside it for assistive technology, labelled "… linear alternative". The circular style takes `aria-label`, `value` or `defaultValue`, `minimum`, `maximum`, `step`, `wraps`, `valueText`, `controlSize` (`"small"` is the 22 px inspector dial), `disabled`, `readOnly` and `onValueChange(value, phase)`.
 
-| Prop | Type | Description |
-| --- | --- | --- |
-| `aria-label` | `string` | Required. |
-| `value` | `number` | The value. The control is always controlled. |
-| `minimum`, `maximum`, `step` | `number` | All required. `wraps` is accepted but has no effect on the dial. |
-| `onValueChange` | `(value, "preview" \| "commit") => void` | Previews during the drag, commit on release. A cancelled drag reports the starting value as a preview. |
-| `disabled`, `readOnly` | `boolean` | |
+```tsx
+<NSESlider sliderType="circular" aria-label="Angle" value={angle} minimum={0} maximum={359} step={1} wraps valueText={(value) => `${value} degrees`} onValueChange={setAngle} />
+```
 
-The angle runs clockwise from twelve o'clock. Arrow keys change the value by one step and commit, and Home and End go to the ends.
+The angle runs clockwise from twelve o'clock. Arrow keys change the value by one step and commit, wrapping round through the start when `wraps` is set, and Home and End go to the ends. A cancelled drag reports the starting value as a preview.
 
 ## NSEStepper
 
