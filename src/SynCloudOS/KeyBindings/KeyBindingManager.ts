@@ -148,6 +148,22 @@ export function createKeyBindingManager(options: { getRuntime(): SynCloudOSRunti
   };
 
   const manager: KeyBindingManager = {
+    bindingFor(commandId, responderId) {
+      if (disposed) return null;
+      hydrate();
+      const runtime = options.getRuntime();
+      const declaration = runtime.commands.getDeclarations().find((candidate) => candidate.id === commandId && candidate.responderId === responderId);
+      if (!declaration) return null;
+      const hasOverride = overrides.has(commandId);
+      const override = overrides.get(commandId);
+      if (hasOverride && override === null) return null;
+      const platform = runtime.environment.platform;
+      const binding = hasOverride
+        ? override!
+        : declaration.defaultKeyBindings.find((candidate) => !candidate.platform || candidate.platform === "all" || candidate.platform === platform);
+      if (!binding) return null;
+      return { ...binding, commandId, responderId, source: hasOverride ? "user" : "default", display: display(binding, platform) };
+    },
     resolve(event, context): KeyBindingResolution | null {
       if (disposed || event.getModifierState?.("AltGraph")) return null;
       hydrate();
