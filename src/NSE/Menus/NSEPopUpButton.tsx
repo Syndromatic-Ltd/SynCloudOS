@@ -73,6 +73,10 @@ export interface NSEPopUpButtonProps<Payload = unknown> extends Omit<HTMLAttribu
   readonly isEnabled?: boolean;
   /** NSView.appearance of a pull-down button's bezel. */
   readonly appearance?: NSEButtonProps["appearance"];
+  /** NSButton.bezelStyle of a pull-down button: `texturedRounded` is the toolbar capsule. */
+  readonly bezelStyle?: NSEButtonProps["bezelStyle"];
+  /** NSView.toolTip. */
+  readonly toolTip?: string;
   /** "small" is the size inspectors and panels use (24px). */
   readonly controlSize?: "regular" | "small";
   /** An explicit height in CSS pixels; the bezel keeps its proportions. */
@@ -140,6 +144,8 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
     accessibleLabel,
     isEnabled = true,
     appearance,
+    bezelStyle,
+    toolTip,
     controlSize = "regular",
     height,
     width,
@@ -297,6 +303,8 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
           <span className="nse-control-picker-arrow" aria-hidden="true" />
         </>}
         appearance={appearance}
+        bezelStyle={pullsDown ? bezelStyle : undefined}
+        toolTip={toolTip}
         isHighlighted={pullsDown ? open : itemCommands.get(selectedValue)?.presentation?.state === "on"}
         isEnabled={!(disabled || !actionAvailable)}
         ref={anchorRef}
