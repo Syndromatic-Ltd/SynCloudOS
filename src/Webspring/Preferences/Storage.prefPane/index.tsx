@@ -1,6 +1,6 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { NSEButton, NSEGroupBox } from "../../../NSE/public/controls";
+import { NSEButton, NSEBox } from "../../../NSE/public/controls";
 import { definePreferencePane } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
@@ -22,7 +22,7 @@ function StoragePane() {
   const unavailable = (state: "unsupported" | "denied" | "failed") => state === "unsupported" ? t("preferences.storage.unsupported", "Not supported by this browser") : state === "denied" ? t("preferences.storage.denied", "The browser refused this query") : t("preferences.storage.failed", "The query failed");
   const bytes = (value: number | null) => value === null ? t("preferences.storage.omitted", "Not reported by the browser") : t("preferences.storage.bytes", "About {bytes} bytes", { bytes: String(value) });
   return <section className="nse-storage-diagnostics" aria-label={t("preferences.storage", "Storage")}>
-    <NSEGroupBox><div className="nse-storage-diagnostics-section">
+    <NSEBox><div className="nse-storage-diagnostics-section">
       <h2>{t("preferences.storage.heading", "Browser storage")}</h2>
       <NSEButton
         title={snapshot.state === "completed" ? t("preferences.storage.refresh", "Refresh storage status") : t("preferences.storage.inspect", "Check storage status")}
@@ -37,7 +37,7 @@ function StoragePane() {
       </dl> : null}
       {persistence ? <p><strong>{t("preferences.storage.persistence", "Current persistence status")}: </strong>{persistence.state !== "observed" ? unavailable(persistence.state) : persistence.persisted ? t("preferences.storage.persistent", "The browser reports persistent storage") : t("preferences.storage.bestEffort", "The browser does not report persistent storage")}</p> : null}
       <p className="nse-prefs-note">{t("preferences.storage.limit", "Persistence is not a backup or a guarantee of offline availability or update readiness. This check does not request persistence or change stored data.")}</p>
-    </div></NSEGroupBox>
+    </div></NSEBox>
   </section>;
 }
 function StorageSummary() {

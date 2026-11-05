@@ -140,25 +140,20 @@ export { NSEDateTimePicker } from "../DateTime/Pickers/NSEDateTimePicker";
 export { NSETimePicker } from "../DateTime/Pickers/NSETimePicker";
 export type { NSEDatePickerProps, NSEDatePickerMode, NSEDatePickerField, NSEDatePickerEditorMode, NSEDatePickerEditorContext, NSETimePickerProps, NSETimePickerEditorMode, NSETimePickerEditorContext, NSEDateTimePickerProps } from "../DateTime/Pickers/datePickerTypes";
 
-export { NSEDivider } from "../Controls/Selection";
-export type { NSEDividerProps } from "../Controls/Selection";
 export {
   NSEBox,
-  NSEGroupBox,
   NSETextField,
   NSESwitch,
 } from "../Controls/Fields/NSEFields";
 export type {
-  NSEBoxBorder,
-  NSEBoxContentInsets,
-  NSEBoxKind,
   NSEBoxProps,
   NSEBoxTitlePosition,
+  NSEBoxType,
+  NSEBorderType,
+  NSEBoxContentViewMargins,
   NSEContentLayout,
   NSEControlSize,
-  NSELayoutMargins,
   NSEFormattedTextFieldProps,
-  NSEGroupBoxProps,
   NSEPlainTextFieldProps,
   NSETextFieldChromeProps,
   NSETextFieldProps,

@@ -28,7 +28,7 @@ This page describes the layers, the conventions they share, and the package that
 
 **FX** is a set of twelve frameworks written in TypeScript as web-native analogues of Apple's Core frameworks. AnimationFX corresponds to Core Animation, GraphicsFX to Quartz 2D, ImageFX to Core Image, TextFX to Core Text, AudioFX to AVAudioEngine, HapticsFX to Core Haptics and MotionFX to Core Motion. Four more cover media time, video, MIDI and location, and one covers on-device discovery. See the [FX frameworks](fx/README.md).
 
-**NSE** is the application kit, the counterpart of AppKit. The name follows the same convention: NS for NeXTSTEP, NSE for the Syndromatic edition. You write `NSEPushButton` where a Mac developer writes `NSButton`. NSE draws its appearance from a theme. [Atmo](appearance.md) is the default theme, a tactile material language that plays the role Aqua played on Mac OS X.
+**NSE** is the application kit, the counterpart of AppKit. The name follows the same convention: NS for NeXTSTEP, NSE for the New Syndromatic Experience. You write `NSEButton` where a Mac developer writes `NSButton`. NSE draws its appearance from a theme. [Atmo](appearance.md) is the default theme, a tactile material language that plays the role Aqua played on Mac OS X.
 
 **Webspring** is the shell. It presents the launcher, hosts the application stage, provides the app switcher and notifications, and runs the sign-in gate. Its Board launcher is a paged icon grid inspired by iOS Springboard.
 

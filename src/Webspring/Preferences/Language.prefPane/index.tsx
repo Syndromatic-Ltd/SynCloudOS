@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEGroupBox } from "../../../NSE/public/controls";
+import { NSEBox } from "../../../NSE/public/controls";
 import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
@@ -31,7 +31,7 @@ function LanguagePane({ locale }: PreferencePaneViewProps) {
   const runtime = useKernelSynCloudOS();
   return (
     <div className="nse-prefs-section">
-      <NSEGroupBox>
+      <NSEBox>
         {locale.supportedLocales.map((entry) => (
           <NSEListItem
             key={entry.code}
@@ -42,7 +42,7 @@ function LanguagePane({ locale }: PreferencePaneViewProps) {
             {entry.nativeName || entry.englishName}
           </NSEListItem>
         ))}
-      </NSEGroupBox>
+      </NSEBox>
     </div>
   );
 }

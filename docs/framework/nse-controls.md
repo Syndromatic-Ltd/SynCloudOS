@@ -1,6 +1,6 @@
 # NSE controls
 
-NSE is the application kit of SynCloudOS, the counterpart of AppKit. It supplies the buttons, fields, containers, data views, menus, panels and text machinery an application is built from. The prefix follows the Apple convention: `NS` for NeXTSTEP, `NSE` for the Syndromatic edition. Where a Mac developer reaches for `NSButton` or `NSTableView`, you reach for `NSEPushButton` or `NSETableView`.
+NSE is the application kit of SynCloudOS, the counterpart of AppKit. It supplies the buttons, fields, containers, data views, menus, panels and text machinery an application is built from. The prefix follows the Apple convention: `NS` for NeXTSTEP, `NSE` for the New Syndromatic Experience. Where a Mac developer reaches for `NSButton` or `NSTableView`, you reach for `NSEButton` or `NSETableView`.
 
 Controls describe what they are and how they behave. The [Atmo theme](appearance.md) decides how they look, so the same component renders correctly in light and dark mode and in every presentation.
 
@@ -16,10 +16,9 @@ Import controls from `@syndromatic/syncloudos/nse`. Focused subpaths such as `ns
 ```tsx
 import { useState } from "react";
 import {
-  NSECheckbox,
-  NSEGroupBox,
+  NSEBox,
+  NSEButton,
   NSEProgressBar,
-  NSEPushButton,
   NSESegmentedControl,
   NSESlider,
   NSETextField,
@@ -28,7 +27,7 @@ import {
 
 export function ExportSettings() {
   const [name, setName] = useState("Report");
-  const [compress, setCompress] = useState(true);
+  const [compress, setCompress] = useState<"on" | "off">("on");
   const [quality, setQuality] = useState(80);
   const [format, setFormat] = useState<NSESegmentedSelection>({
     mode: "select-one",
@@ -37,7 +36,7 @@ export function ExportSettings() {
   });
 
   return (
-    <NSEGroupBox label="Export">
+    <NSEBox title="Export">
       <NSETextField label="Name" value={name} onValueChange={(value) => setName(value)} />
       <NSESegmentedControl
         aria-label="Format"
@@ -49,10 +48,10 @@ export function ExportSettings() {
         onSelectionChange={setFormat}
       />
       <NSESlider aria-label="Quality" label="Quality" minimum={0} maximum={100} value={quality} onValueChange={(value) => setQuality(value)} />
-      <NSECheckbox label="Compress" checked={compress} onChange={(event) => setCompress(event.currentTarget.checked)} />
+      <NSEButton buttonType="switch" title="Compress" state={compress} onStateChange={(state) => setCompress(state === "on" ? "on" : "off")} />
       <NSEProgressBar aria-label="Export progress" value={40} max={100} />
-      <NSEPushButton tone="affirmative">Export</NSEPushButton>
-    </NSEGroupBox>
+      <NSEButton title="Export" keyEquivalent={"\r"} />
+    </NSEBox>
   );
 }
 ```
@@ -83,27 +82,20 @@ Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSESlidingPanes
 
 | Component | Purpose |
 | --- | --- |
-| `NSEPushButton` | The standard button. Tones: `medium`, `light`, `dark`, `affirmative` and `negative`. It supports `loading`, an icon and a haptic request. |
-| `NSEToggleButton` | A button that holds an on or off state. |
-| `NSEIconButton` | A button that shows only an icon. |
-| `NSEToolButton`, `NSEToolButtonGroup`, `NSERadioToolButtonGroup` | Toolbar style buttons, with grouped and radio behaviour. |
+| `NSEButton` | `NSButton`: push, toggle (`pushOnPushOff`), checkbox (`switch`), toolbar (`texturedRounded`) and disclosure buttons, set by `buttonType` and `bezelStyle`. |
+| `NSESwitch` | `NSSwitch`: an on/off switch. |
 | `NSEPopupButton` | A button that opens a menu. |
-| `NSEActivityButton`, `NSEProgressButton`, `NSENotificationButton` | Buttons that show activity, progress or a notification count. |
-| `NSEFilePickerButton` | Opens the host's file panel. |
-| `NSEButtonHeader` | A section header that acts as a button. |
 
 ## Fields
 
 | Component | Purpose |
 | --- | --- |
 | `NSETextField` | Single line text input with prefix, suffix, validation and formatter support. |
-| `NSESecureTextField`, `NSEPasswordField` | Concealed input for secrets. |
-| `NSESearchField` | A search box with a clear control and recent search support, paired with `NSESearchFieldController`. |
+| `NSETextField` with `isEditable={false}` | A label (`NSTextField(labelWithString:)`) in a text style. |
+| `NSESecureTextField` | Concealed input for secrets. |
+| `NSESearchField` | A search box with a clear control and `recentSearches`. |
 | `NSEComboBox` | An editable field with a completion list. |
 | `NSETokenField` | Tokenised entry such as tags or recipients. |
-| `NSEInputBox`, `NSERoundedInput` | Bordered input containers. |
-| `NSECheckbox` | A checkbox with a mixed state. |
-| `NSERadioGroup` | A group of radio buttons with roving focus. |
 
 ## Values and progress
 
@@ -113,8 +105,8 @@ Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSESlidingPanes
 | `NSECircularSlider` | A dial. |
 | `NSEStepper` | Increment and decrement, with hold to repeat, bounds and wrapping. |
 | `NSELevelIndicator` | Continuous, discrete, capacity and rating indicators with warning and critical thresholds. |
-| `NSESegmentedControl` | Momentary, select one and select many segments, with overflow handling. |
-| `NSEIntegerPicker`, `NSEListSelector`, `NSEPickerGroup` | Pickers for numbers and lists. |
+| `NSESegmentedControl` | Momentary, select-one and select-any segments in the rounded, capsule and textured styles, with overflow handling. One-of-many choices and tab strips are segmented controls. |
+| `NSEIntegerPicker`, `NSEListSelector` | Pickers for numbers and lists. |
 | `NSEProgressBar`, `NSEProgressSlider`, `NSEProgressItem` | Determinate progress, with an optional secondary fill. |
 | `NSEProgressIndicator`, `NSESpinner` | Indeterminate activity. |
 
@@ -132,11 +124,11 @@ Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSESlidingPanes
 | Component | Purpose |
 | --- | --- |
 | `NSEStackView`, `NSEStackItem` | One dimensional layout with distribution, alignment and visibility priorities. Items that no longer fit collapse in priority order, and stay reachable from the keyboard. |
-| `NSEBox`, `NSEGroupBox`, `NSERoundedBox` | Bordered and titled grouping. |
-| `NSEDivider` | A separator, optionally with a disclosure arrow. |
+| `NSEBox` | `NSBox`: titled boxes (`title`, `titlePosition`, `borderType`, `contentViewMargins`) and separators (`boxType="separator"`). |
+| `NSERoundedBox` | A rounded surface. |
 | `NSESplitView` | Two resizable panes, a sidebar beside the main view. |
 | `NSEScrollView`, `NSEClipView` | Scrolling with momentum and rubber banding. |
-| `NSETabView`, `NSETabGroup`, `NSETabBar` | Tabbed content, driven by `NSETabBarController`. |
+| `NSETabView`, `NSETabBar` | Tabbed content, driven by `NSETabBarController`. |
 | `NSEButton` (`bezelStyle="disclosure"`) in an `NSEStackView` | Collapsible sections: the disclosure button shows and hides the stack item below it, as in AppKit. |
 | `NSESourceListScene` | The scene that composes a source-list sidebar (an `NSEOutlineView` in source-list style) with content. |
 | `NSEHierarchyStack`, `NSESlidingPanes` | Drill in navigation across panes. |
@@ -196,7 +188,6 @@ Some controls come with a controller that holds their state and restoration data
 | `NSESplitViewController`, `NSESplitViewItem` | A split view of child view controllers: thicknesses, holding priorities and collapse. |
 | `NSEToolbarController` | Toolbar items and user customisation. |
 | `NSEMenuController` | Menu models, open state and overlay provenance. |
-| `NSESearchFieldController` | Search text and recent searches. |
 
 The [controllers guide](controllers.md) covers the array, tree and preferences controllers.
 

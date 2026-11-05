@@ -18,12 +18,12 @@ A SynWare never imports these stylesheets itself; the page that hosts it does. A
 ```tsx
 import { NSEAppearanceProvider } from "@syndromatic/syncloudos/nse/appearance";
 import { atmoAppearance } from "@syndromatic/syncloudos/nse/themes/atmo";
-import { NSEPushButton } from "@syndromatic/syncloudos/nse";
+import { NSEButton } from "@syndromatic/syncloudos/nse";
 
 export function Page() {
   return (
     <NSEAppearanceProvider appearance={atmoAppearance} colourScheme="auto">
-      <NSEPushButton tone="affirmative">Continue</NSEPushButton>
+      <NSEButton title="Continue" keyEquivalent={"\r"} />
     </NSEAppearanceProvider>
   );
 }

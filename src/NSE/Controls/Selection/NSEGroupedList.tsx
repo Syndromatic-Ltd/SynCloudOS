@@ -19,12 +19,12 @@
  */
 
 import { Children, cloneElement, isValidElement, type ReactElement, type ReactNode } from "react";
-import { NSEGroupBox, type NSEGroupBoxProps } from "../Fields/NSEFields";
+import { NSEBox, type NSEBoxProps } from "../Fields/NSEFields";
 import { classes } from "../Core/nseControlsShared";
 
 export type NSEGroupedListEdge = "first" | "middle" | "last" | "only";
 
-export interface NSEGroupedListProps extends Omit<NSEGroupBoxProps, "children"> {
+export interface NSEGroupedListProps extends Omit<NSEBoxProps, "children"> {
   /** Direct NSEListItem children; adjacent row bevels form the shared seams. */
   readonly children: ReactNode;
 }
@@ -48,7 +48,7 @@ export function NSEGroupedList({ children, className = "", ...props }: NSEGroupe
   const items = Children.toArray(children).filter(isValidElement) as Array<ReactElement<Record<string, unknown>>>;
 
   return (
-    <NSEGroupBox
+    <NSEBox
       {...props}
       className={classes("nse-control-grouped-list", className)}
       data-nse-grouped-list="true"
@@ -59,6 +59,6 @@ export function NSEGroupedList({ children, className = "", ...props }: NSEGroupe
         "data-nse-grouped-list-edge": edgeFor(index, items.length),
         key: item.key ?? `nse-grouped-list-item-${index}`,
       }))}
-    </NSEGroupBox>
+    </NSEBox>
   );
 }

@@ -20,7 +20,7 @@
 
 import "./audioHapticsPane.css";
 import { useSyncExternalStore } from "react";
-import { NSESwitch, NSEGroupBox, NSESlider } from "../../../NSE/public/controls";
+import { NSESwitch, NSEBox, NSESlider } from "../../../NSE/public/controls";
 import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import { useNSEFeedback } from "../../../NSE/hostComposition";
 import { useKernelSynCloudOS, useRuntimeSelector } from "../../../SynCloudOSReact";
@@ -46,7 +46,7 @@ export function AudioHapticsPane() {
       onValueChange={(value) => change(value / 100)} style={{ width: "100%", minWidth: 0 }} />
   );
   return <div className="nse-prefs-section">
-    <NSEGroupBox label={systemT("preferences.audio", "Audio")}>
+    <NSEBox title={systemT("preferences.audio", "Audio")}>
       <NSEListItem tapHighlight={false} trailing={<NSESwitch
         state={settings.soundEnabled ? "on" : "off"}
         onStateChange={(state) => runtime.settings.set("soundEnabled", (state === "on"))}
@@ -58,16 +58,16 @@ export function AudioHapticsPane() {
       <NSEListItem tapHighlight={false}>
         {volumeSlider(systemT("preferences.masterVolume", "Master volume"), mixer.masterVolume, runtime.audio.setMasterVolume)}
       </NSEListItem>
-    </NSEGroupBox>
-    {rows.length > 0 ? <NSEGroupBox label={systemT("preferences.applications", "Applications")}>
+    </NSEBox>
+    {rows.length > 0 ? <NSEBox title={systemT("preferences.applications", "Applications")}>
       {rows.map((session) => {
         const app = apps[session.appId];
         return <NSEListItem key={app.bundleIdentifier} tapHighlight={false} leading={<img className="nse-prefs-app-icon" src={app.icon.src} alt="" aria-hidden="true" />}>
           {volumeSlider(app.displayName, session.volume, (value) => runtime.audio.setAppVolume(app.bundleIdentifier, value))}
         </NSEListItem>;
       })}
-    </NSEGroupBox> : null}
-    {supportsHaptics ? <NSEGroupBox label={systemT("preferences.haptics", "Haptics")}>
+    </NSEBox> : null}
+    {supportsHaptics ? <NSEBox title={systemT("preferences.haptics", "Haptics")}>
       <NSEListItem tapHighlight={false} trailing={<NSESwitch
         state={settings.vibrationEnabled ? "on" : "off"}
         onStateChange={(state) => runtime.settings.set("vibrationEnabled", (state === "on"))}
@@ -76,7 +76,7 @@ export function AudioHapticsPane() {
       />}>
         {systemT("preferences.hapticsEnabled", "Haptics enabled")}
       </NSEListItem>
-    </NSEGroupBox> : null}
+    </NSEBox> : null}
   </div>;
 }
 

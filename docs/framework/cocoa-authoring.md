@@ -8,7 +8,7 @@ An application that needs no custom window policy declares its root class direct
 
 ```tsx
 import { NSEApplication, NSEViewController, observable, bind, action, actionRef, type NSEBinding } from "@syndromatic/syncloudos";
-import { NSESearchField, NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
+import { NSESearchField, NSEButton } from "@syndromatic/syncloudos/nse/controls";
 
 class SearchController extends NSEViewController {
   @observable accessor query = "";
@@ -17,7 +17,7 @@ class SearchController extends NSEViewController {
   override renderView() {
     return <section>
       <NSESearchField aria-label="Search" binding={this.queryBinding} />
-      <NSEPushButton action={actionRef(SearchController, "clearSearch")}>Clear</NSEPushButton>
+      <NSEButton action={actionRef(SearchController, "clearSearch")} title="Clear" />
     </section>;
   }
 }
@@ -149,7 +149,7 @@ const figure = context.displayList; // draw with <NSEGraphicsView displayList={f
 
 ## Scaffolds and validation
 
-`synware:create Search.app` generates the separate-view pattern by default, with `Contents/Views/SearchView.tsx`; `--authoring inline` keeps the view in `index.tsx`. Add `--content-application-menu` to declare `applicationMenu.trigger: "content"` and render the menu trigger as an `NSEPushButton`. `--authoring function` is an explicit opt-in for a function-component app, and it is what the hook-based `--fx` recipe scaffolds use when no authoring is given. Class views can compose those components; combining class scaffold mode with `--fx` is diagnosed before writing files. The Developer MCP `scaffold` tool uses the same templates.
+`synware:create Search.app` generates the separate-view pattern by default, with `Contents/Views/SearchView.tsx`; `--authoring inline` keeps the view in `index.tsx`. Add `--content-application-menu` to declare `applicationMenu.trigger: "content"` and render the menu trigger as an `NSEButton`. `--authoring function` is an explicit opt-in for a function-component app, and it is what the hook-based `--fx` recipe scaffolds use when no authoring is given. Class views can compose those components; combining class scaffold mode with `--fx` is diagnosed before writing files. The Developer MCP `scaffold` tool uses the same templates.
 
 The [authoring contract](authoring-contract.md) lists which API to use for each job, and the Developer MCP `validate` tool reports `idiom.*` warnings where an application departs from it.
 

@@ -223,18 +223,16 @@ export type { NSEKeyEquivalentModifierMask } from "./Controls/Buttons/useNSEKeyE
 export type { NSEExtendedControlLevel, NSESelectableOption, NSESelectorItem, NSESelectorItemInput } from "./Controls/Selection/NSESelectors";
 export {
   NSEBox,
-  NSEGroupBox,
   NSETextField,
   NSESwitch,
 } from "./Controls/Fields/NSEFields";
 export type {
-  NSEBoxBorder,
-  NSEBoxContentInsets,
-  NSEBoxKind,
   NSEBoxProps,
   NSEBoxTitlePosition,
+  NSEBoxType,
+  NSEBorderType,
+  NSEBoxContentViewMargins,
   NSEFormattedTextFieldProps,
-  NSEGroupBoxProps,
   NSEPlainTextFieldProps,
   NSETextFieldChromeProps,
   NSETextFieldProps,
@@ -242,8 +240,6 @@ export type {
   NSEFontTextStyle,
   NSESwitchProps,
 } from "./Controls/Fields/NSEFields";
-export { NSEDivider } from "./Controls/Selection";
-export type { NSEDividerProps } from "./Controls/Selection";
 export { NSEListSelector, NSEPopupList, NSEIntegerPicker } from "./Controls/Selection/NSESelectors";
 export type { NSEIntegerPickerProps, NSEListSelectorProps, NSEPopupListProps } from "./Controls/Selection/NSESelectors";
 export { NSEPageHeader, NSEHeader, NSEPrevNextBanner } from "./Windows/Chrome";

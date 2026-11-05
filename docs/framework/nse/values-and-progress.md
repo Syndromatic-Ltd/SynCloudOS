@@ -14,9 +14,9 @@ import { NSESlider, NSEStepper } from "@syndromatic/syncloudos/nse";
 | `NSECircularSlider` | A dial, with a linear slider alongside for assistive technology | No |
 | `NSEStepper` | Increment and decrement buttons with hold to repeat | No |
 | `NSELevelIndicator` | A meter, or a star rating | No |
-| `NSESegmentedControl` | Momentary, single and multiple selection segments, with menus and overflow | For menus and overflow |
+| `NSESegmentedControl` | Momentary, single and multiple selection segments in the rounded, capsule and textured toolbar styles, with menus and overflow | For menus and overflow |
 | `NSEPicker`, `NSEListSelector`, `NSEIntegerPicker` | A button that opens a list of options | Yes |
-| `NSEPopupList`, `NSEPickerGroup` | A menu button from a list of items, and a grouped strip for pickers | Popup list: yes |
+| `NSEPopupList` | A menu button from a list of items | Yes |
 | `NSEProgressBar`, `NSEProgressItem`, `NSEProgressSlider`, `NSEProgressIndicator`, `NSESpinner` | Determinate and indeterminate progress | No |
 
 Components marked "Yes" open a floating list and need an overlay host. A mounted SynWare receives one from the runtime, and elsewhere you wrap the controls in `NSEStandaloneControlHost` from `nse/controls`. See [Text fields and choice controls](text-and-choice.md#at-a-glance).
@@ -96,19 +96,45 @@ A rating shows `maximum - minimum` stars as a radio group, and clicking star *n*
 
 ## NSESegmentedControl
 
-A row of buttons that acts as a momentary control, a single choice or a multiple choice.
+AppKit's `NSSegmentedControl`: a row of joined segments that acts as a momentary control, a single choice or a multiple choice. It also draws the theme's capsule strips (inspector tabs, view switchers) and its textured toolbar strips, so there is no separate radio group, tab group or tool-button group.
 
 | Prop | Type | Description |
 | --- | --- | --- |
 | `aria-label` | `string` | Required. |
-| `items` | `NSESegmentedItem[]` | `{ id, label, disabled?, commandId?, commandPayload?, menu? }`. `menu` is a list of `{ id, label, disabled? }` shown in a disclosure menu on the segment. |
-| `selection` | `NSESegmentedSelection` | `{ mode: "momentary", selectedIds }`, `{ mode: "select-one", selectedIds, allowsEmpty }` or `{ mode: "select-any", selectedIds }`. |
+| `items` | `NSESegmentedItem[]` | The segments. See below. |
+| `selection` | `NSESegmentedSelection` | `NSSegmentedControl.trackingMode`: `{ mode: "momentary", selectedIds }`, `{ mode: "select-one", selectedIds, allowsEmpty }` or `{ mode: "select-any", selectedIds }`. |
 | `onSelectionChange` | `(selection) => void` | The new selection, in the same shape. |
+| `segmentStyle` | `"rounded" \| "capsule" \| "texturedRounded"` | `NSSegmentedControl.segmentStyle` (default `rounded`). `capsule` is the theme's small uppercase capsule strip; `texturedRounded` is the toolbar strip, which draws segment images. |
+| `action`, `actionPayload` | action, payload | The action sent for a segment that has no action of its own. It sends `actionPayload`, or the segment's id when that is omitted, so the receiver can tell which segment was pressed. |
+| `controlSize` | `"regular" \| "small"` | `small` is the 24px inspector size. |
+| `height` | `number` | An explicit band height in CSS pixels, overriding `controlSize`. |
+| `distribution` | `"fit" \| "fill-equally"` | `NSSegmentedControl.segmentDistribution`. `fill-equally` stretches the control to its container and shares the width evenly. |
 | `maximumVisibleSegments` | `number` | Segments beyond this fit into an overflow menu. The selected one always stays visible. |
 | `onMenuAction` | `(segmentId, actionId) => void` | A segment's menu item was chosen. |
 | `disabled`, `readOnly`, `name`, `parentResponderId` | | `name` adds a hidden input with the selected ids joined by commas. |
 
-In a momentary control every click reports an empty selection. In select-one, clicking the selected segment clears it when `allowsEmpty` is true. Give a segment a `commandId` and it disables itself while the command is unavailable and selects only after the command executes. Arrow keys move focus among the enabled segments, wrapping around. Segment menus and overflow need an overlay host.
+A segment (`NSESegmentedItem`) is `{ id, label }` with these optional fields:
+
+| Field | AppKit | Description |
+| --- | --- | --- |
+| `image` | `setImage(_:forSegment:)` | An image URL or a drawn element. The segment draws the image, and `accessibleLabel` (or a string label) names it. |
+| `width` | `setWidth(_:forSegment:)` | A fixed width in CSS pixels. Otherwise the segment sizes to fit, or shares the width under `fill-equally`. |
+| `accessibleLabel` | | The spoken name and tooltip of an image segment. |
+| `action`, `actionPayload` | | The segment's own action. It sends the segment's `actionPayload`, or no payload when that is omitted, so it can name an action method that takes no parameter. The segment disables itself while the action is unavailable. |
+| `disabled` | `setEnabled(_:forSegment:)` | |
+| `menu` | `setMenu(_:forSegment:)` | `{ id, label, disabled? }[]`, shown in a disclosure menu on the segment. |
+
+In a momentary control every click reports an empty selection. In select-one, clicking the selected segment clears it when `allowsEmpty` is true. Arrow keys move focus among the enabled segments, wrapping around. Segment menus and overflow need an overlay host.
+
+```tsx
+<NSESegmentedControl
+  aria-label="Calendar view"
+  segmentStyle="capsule"
+  selection={{ mode: "select-one", selectedIds: new Set([view]), allowsEmpty: false }}
+  items={[{ id: "day", label: "Day" }, { id: "week", label: "Week" }, { id: "month", label: "Month" }]}
+  onSelectionChange={(selection) => setView([...selection.selectedIds][0] ?? "day")}
+/>
+```
 
 ## Pickers
 
@@ -128,7 +154,7 @@ In a momentary control every click reports an empty selection. In select-one, cl
 
 Arrow Down and Arrow Up on the button open the list.
 
-**`NSEListSelector`** takes `items` (or `options`) as strings or `{ value, label, caption?, icon?, src?, disabled? }`, and adds `onChange(value, oldValue)`, `onSelect(item, value)`, `hideItem`, `hideArrow` and `contentPack` (`"start"`, `"center"` or `"end"`). **`NSEIntegerPicker`** offers the whole numbers from `min` to `max` (defaults 0 and 9) in steps of `step` (default 1), takes `value`, `defaultValue`, `onValueChange(value: number)` and `formatValue`, and clamps the value to the range. **`NSEPopupList`** is a menu button with the same item shapes, taking `label` and `onSelect(value, item)`. **`NSEPickerGroup`** groups pickers in a strip, taking `label`, `position` and `grouped` like `NSEToolButtonGroup`.
+**`NSEListSelector`** takes `items` (or `options`) as strings or `{ value, label, caption?, icon?, src?, disabled? }`, and adds `onChange(value, oldValue)`, `onSelect(item, value)`, `hideItem`, `hideArrow` and `contentPack` (`"start"`, `"center"` or `"end"`). **`NSEIntegerPicker`** offers the whole numbers from `min` to `max` (defaults 0 and 9) in steps of `step` (default 1), takes `value`, `defaultValue`, `onValueChange(value: number)` and `formatValue`, and clamps the value to the range. **`NSEPopupList`** is a menu button with the same item shapes, taking `label` and `onSelect(value, item)`.
 
 ## Progress
 
@@ -186,7 +212,7 @@ A hidden state renders nothing. Completed, suspended and error states render a s
 | `tone` | `"light" \| "dark"` | `"light"` | Pick the tone that contrasts with the surface. |
 | `label` | `string` | `"Loading"` | The accessible label, on a `role="status"` element. |
 
-The spinner stops animating while it is scrolled out of view. `NSEProgressButton` is on the [Buttons](buttons.md#nseprogressbutton) page.
+The spinner stops animating while it is scrolled out of view.
 
 ## Example
 
