@@ -24,7 +24,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { NSEDatePicker, NSEPasswordField, NSETimePicker } from "../../../src/NSE/public/controls";
+import { NSEDatePicker, NSETimePicker } from "../../../src/NSE/public/controls";
 import { NSE, NSEDatePicker as RootDatePicker, NSESecureTextField as RootSecureTextField, NSETabView as RootTabView, NSETimePicker as RootTimePicker } from "../../../src/NSE/NSE";
 import { NSEStandaloneControlHost } from "../../../src/NSE/Overlays";
 import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
@@ -150,57 +150,9 @@ describe("canonical public control contracts", () => {
     expect(pickerOptions("Hour")).toEqual(["12", "1"]);
   });
 
-  it("preserves password preview, commit, cancel, formatter, validity, decorations, and host semantics", () => {
-    const phases: string[] = [];
-    const formatter = { format: (value: string) => value.toUpperCase(), editingText: (value: string) => value.toUpperCase(), parse: (text: string) => ({ ok: true as const, value: text.toLowerCase() }), validatePartial: () => ({ valid: true }) };
-    const { container, rerender } = render(<form><NSEPasswordField label="Credential" name="credential" required pattern="[a-z]+" hint="lowercase" prefix="Lock" suffix="Required" formatter={formatter} formatterContext={{ locale: "en-GB" }} defaultValue="seed" onValueChange={(_value, phase) => phases.push(phase)} /></form>);
-    const input = container.querySelector('input[name="credential"]') as HTMLInputElement;
-    expect(input.closest("label")?.htmlFor).toBe(input.id);
-    expect(input.type).toBe("password");
-    expect(input.value).toBe("SEED");
-    fireEvent.change(input, { target: { value: "NEXT" } });
-    expect(phases).toEqual(["preview"]);
-    fireEvent.keyDown(input, { key: "Escape" });
-    expect(phases).toEqual(["preview", "cancel"]);
-    expect(input.value).toBe("SEED");
-    fireEvent.change(input, { target: { value: "FINAL" } });
-    fireEvent.blur(input);
-    expect(phases).toEqual(["preview", "cancel", "preview", "commit"]);
-    expect(input.required).toBe(true);
-    expect(input.pattern).toBe("[a-z]+");
-    expect(screen.getByText("Lock")).not.toBeNull();
-    expect(screen.getByText("Required")).not.toBeNull();
-    rerender(<NSEPasswordField label="Credential" value="fixed" disabled onValueChange={(_value, phase) => phases.push(phase)} />);
-    expect((screen.getByLabelText("Credential") as HTMLInputElement).disabled).toBe(true);
-  });
-
-  it("commits a canonical password only after its accepted command executes", async () => {
-    const changes = vi.fn();
-    const dispatch = vi.fn(async () => ({ status: "executed" as const, commandId: "credential.set", responderId: "credential", operationId: "op", correlationId: "correlation", value: undefined }));
-    const port = {
-      signal: new AbortController().signal,
-      commands: {
-        getPresentationGeneration: () => ({ registryGeneration: 3, responderGeneration: 7 }),
-        validate: vi.fn(async () => ({ commandId: "credential.set", responderId: "credential", title: "Set credential", enabled: true, denied: false, hidden: false, state: "off" as const, stale: false })),
-        prepareDispatch: vi.fn(async () => ({ status: "accepted" as const, acceptance: { commandId: "credential.set", responderId: "credential" } as never })),
-        dispatch
-      }
-    };
-    const { container } = render(<NSEControlRuntimeProvider port={port}><NSEPasswordField label="Command credential" defaultValue="base" command={{ id: "credential.set", payload: "base", responderId: "credential" }} onValueChange={changes} /></NSEControlRuntimeProvider>);
-    await waitFor(() => expect(port.commands.validate).toHaveBeenCalled());
-    const input = container.querySelector('input[type="password"]') as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "next" } });
-    expect(changes).toHaveBeenCalledWith("next", "preview");
-    expect(changes).not.toHaveBeenCalledWith("next", "commit");
-    fireEvent.blur(input);
-    await waitFor(() => expect(dispatch).toHaveBeenCalledTimes(1));
-    expect(changes).toHaveBeenCalledWith("next", "commit");
-  });
-
   it("publishes one canonical engine or stateless adapter through the semantic public routes", () => {
     expect(NSE.NSEDatePicker).toBe(NSEDatePicker);
     expect(NSE.NSETimePicker).toBe(NSETimePicker);
-    expect(NSE.NSEPasswordField).toBe(NSEPasswordField);
     expect(NSE.DateTime.NSEDatePicker).toBe(RootDatePicker);
     expect(NSE.DateTime.NSETimePicker).toBe(RootTimePicker);
     expect(NSE.FieldExtensions.NSESecureTextField).toBe(RootSecureTextField);
@@ -211,12 +163,6 @@ describe("canonical public control contracts", () => {
     expect(container.querySelectorAll('[data-nse-control="date-picker"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-nse-control="time-picker"]')).toHaveLength(1);
     expect((container.querySelector('[data-nse-control="date-picker"] input[type="hidden"]') as HTMLInputElement).value).toBe("2026-06-18");
-  });
-
-  it("routes the canonical password name through the canonical formatted field engine", () => {
-    const { container } = render(<NSEPasswordField label="Legacy password" defaultValue="secret" />);
-    expect(container.querySelector('.nse-control-text-field')).not.toBeNull();
-    expect(screen.getByLabelText("Legacy password").getAttribute("type")).toBe("password");
   });
 
   it("preserves canonical hidden date fields through the canonical date editor", () => {
@@ -240,24 +186,10 @@ describe("canonical public control contracts", () => {
     expect((screen.getByRole("combobox", { name: /AM\/PM/i }) as HTMLSelectElement).value).toBe("pm");
   });
 
-  it("forwards canonical password validity and field semantics", () => {
-    render(<form><NSEPasswordField label="Legacy password" name="password" required pattern="[A-Z]{2}[0-9]{2}" defaultValue="bad" /></form>);
-    const input = screen.getByLabelText("Legacy password") as HTMLInputElement;
-    expect(input.required).toBe(true);
-    expect(input.pattern).toBe("[A-Z]{2}[0-9]{2}");
-    expect(input.checkValidity()).toBe(false);
-    fireEvent.invalid(input);
-    expect(input.getAttribute("aria-invalid")).toBe("true");
-  });
-
-  it("preserves canonical date and password host props and decorations", () => {
-    const { container } = render(<><NSEDatePicker aria-label="Legacy date" className="consumer-date" data-consumer="calendar" defaultValue={{ year: 2026, month: 6, day: 18 }}  locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/><NSEPasswordField label="Legacy password" className="consumer-password" data-consumer="credentials" hint="Use four words" placeholder="Fallback" defaultValue="secret" /></>);
+  it("preserves canonical date host props and decorations", () => {
+    const { container } = render(<><NSEDatePicker aria-label="Legacy date" className="consumer-date" data-consumer="calendar" defaultValue={{ year: 2026, month: 6, day: 18 }}  locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/></>);
     expect(container.querySelector('.consumer-date[data-nse-control="date-picker"]')).not.toBeNull();
     expect(container.querySelector(".consumer-date")?.getAttribute("data-consumer")).toBe("calendar");
-    const password = screen.getByLabelText("Legacy password");
-    expect(password.closest("label")?.classList.contains("consumer-password")).toBe(true);
-    expect(password.getAttribute("data-consumer")).toBe("credentials");
-    expect(password.getAttribute("placeholder")).toBe("Fallback");
   });
 
   it("preserves tab-view close, reorder, external-panel identity and keep-alive state", () => {

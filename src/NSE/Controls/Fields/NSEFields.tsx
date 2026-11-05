@@ -112,6 +112,8 @@ export interface NSETextFieldProps<T = string> extends NSETextFieldChromeProps, 
   InputHTMLAttributes<HTMLInputElement>,
   "prefix" | "value" | "defaultValue" | "height"
 > {
+  /** NSTextField.isEditable (default true); false makes the field a label (see NSELabelTextFieldProps). */
+  isEditable?: true;
   value?: T;
   defaultValue?: T;
   invalid?: boolean;
@@ -126,7 +128,49 @@ function toTextValue<T>(value: T | undefined, formatter: Formatter<T> | undefine
   return value === undefined ? "" : String(value);
 }
 
-export function NSETextField<T = string>(props: NSEBoundValueProps<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+/** NSFont.TextStyle: the SDK's text styles, sized by its text tokens so every theme agrees. */
+export type NSEFontTextStyle = "body" | "callout" | "footnote" | "caption" | "headline" | "label";
+
+/**
+ * A text field that is not editable: AppKit's `NSTextField(labelWithString:)`, drawn without a bezel or
+ * background. Its children are its string value. Use it for readouts, captions and notes beside controls.
+ */
+export interface NSELabelTextFieldProps extends Omit<HTMLAttributes<HTMLSpanElement>, "color"> {
+  /** NSTextField.isEditable. */
+  readonly isEditable: false;
+  /** NSTextField.font, as a text style (default body). */
+  readonly font?: NSEFontTextStyle;
+  /** NSTextField.textColor: `labelColor` (default), or the quieter `secondaryLabelColor` for hints and metadata. */
+  readonly textColor?: "labelColor" | "secondaryLabelColor";
+  /** The monospaced-digit system font: tabular figures, so changing numbers do not jitter. */
+  readonly monospacedDigits?: boolean;
+  /** NSTextField.lineBreakMode: wrap at words (default), or anywhere for paths, URLs and hex values. */
+  readonly lineBreakMode?: "byWordWrapping" | "byCharWrapping";
+}
+
+function NSELabelTextField({ isEditable: _isEditable, font = "body", textColor = "labelColor", monospacedDigits = false, lineBreakMode = "byWordWrapping", className = "", children, ...props }: NSELabelTextFieldProps) {
+  return (
+    <span
+      {...props}
+      className={classes("nse-control-label-field", className)}
+      data-font={font}
+      data-text-color={textColor === "secondaryLabelColor" ? "secondary" : undefined}
+      data-monospaced-digits={monospacedDigits ? "true" : undefined}
+      data-line-break-mode={lineBreakMode === "byCharWrapping" ? "char" : undefined}
+    >
+      {children}
+    </span>
+  );
+}
+
+type NSEEditableTextFieldProps<T> = NSEBoundValueProps<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>;
+
+export function NSETextField<T = string>(props: NSELabelTextFieldProps | NSEEditableTextFieldProps<T>) {
+  if ((props as { readonly isEditable?: boolean }).isEditable === false) return <NSELabelTextField {...props as NSELabelTextFieldProps} />;
+  return <NSEEditableTextField<T> {...props as NSEEditableTextFieldProps<T>} />;
+}
+
+function NSEEditableTextField<T>(props: NSEEditableTextFieldProps<T>) {
   return <NSETextFieldControl {...useNSEValueBinding<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback: '' as T})} />;
 }
 
@@ -346,6 +390,9 @@ export interface NSEInputBoxProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /**
+@internal The developer Inspector's export box. Apps compose a field's affixes with NSETextField's
+`prefix` and `suffix`.
+
 A box styled like a single input that wraps a set of controls — an icon, the text input, a button —
 so they appear to live inside one field. It takes on the focused look whenever any
 child is focused, or always when `alwaysLooksFocused` is set.

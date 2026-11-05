@@ -196,13 +196,6 @@ export type {
   NSETokenValue,
 } from "./Controls/Completion/completionTypes";
 export {
-  NSESearchFieldController,
-  createNSESearchFieldPreferences,
-} from "./Controls/Fields/NSESearchFieldController";
-export type {
-  NSESearchFieldControllerOptions,
-} from "./Controls/Fields/NSESearchFieldController";
-export {
   NSESearchField,
 } from "./Controls/Fields/NSESearchField";
 export type {
@@ -231,7 +224,6 @@ export type { NSEExtendedControlLevel, NSESelectableOption, NSESelectorItem, NSE
 export {
   NSEBox,
   NSEGroupBox,
-  NSEInputBox,
   NSETextField,
   NSESwitch,
 } from "./Controls/Fields/NSEFields";
@@ -243,16 +235,13 @@ export type {
   NSEBoxTitlePosition,
   NSEFormattedTextFieldProps,
   NSEGroupBoxProps,
-  NSEInputBoxProps,
   NSEPlainTextFieldProps,
   NSETextFieldChromeProps,
   NSETextFieldProps,
+  NSELabelTextFieldProps,
+  NSEFontTextStyle,
   NSESwitchProps,
 } from "./Controls/Fields/NSEFields";
-export { NSEPasswordField } from "./Controls/Fields/NSEPasswordField";
-export type { NSEPasswordFieldProps } from "./Controls/Fields/NSEPasswordField";
-export { NSERoundedInput, NSEToolInput } from "./Controls/Fields/NSEFieldVariants";
-export type { NSERoundedInputProps, NSEToolInputProps } from "./Controls/Fields/NSEFieldVariants";
 export { NSEDivider } from "./Controls/Selection";
 export type { NSEDividerProps } from "./Controls/Selection";
 export { NSEListSelector, NSEPopupList, NSEIntegerPicker } from "./Controls/Selection/NSESelectors";

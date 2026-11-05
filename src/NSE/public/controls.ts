@@ -138,16 +138,13 @@ export type {
 export { NSEDatePicker } from "../DateTime/Pickers/NSEDatePicker";
 export { NSEDateTimePicker } from "../DateTime/Pickers/NSEDateTimePicker";
 export { NSETimePicker } from "../DateTime/Pickers/NSETimePicker";
-export { NSEPasswordField } from "../Controls/Fields/NSEPasswordField";
 export type { NSEDatePickerProps, NSEDatePickerMode, NSEDatePickerField, NSEDatePickerEditorMode, NSEDatePickerEditorContext, NSETimePickerProps, NSETimePickerEditorMode, NSETimePickerEditorContext, NSEDateTimePickerProps } from "../DateTime/Pickers/datePickerTypes";
-export type { NSEPasswordFieldProps } from "../Controls/Fields/NSEPasswordField";
 
 export { NSEDivider } from "../Controls/Selection";
 export type { NSEDividerProps } from "../Controls/Selection";
 export {
   NSEBox,
   NSEGroupBox,
-  NSEInputBox,
   NSETextField,
   NSESwitch,
 } from "../Controls/Fields/NSEFields";
@@ -162,14 +159,13 @@ export type {
   NSELayoutMargins,
   NSEFormattedTextFieldProps,
   NSEGroupBoxProps,
-  NSEInputBoxProps,
   NSEPlainTextFieldProps,
   NSETextFieldChromeProps,
   NSETextFieldProps,
+  NSELabelTextFieldProps,
+  NSEFontTextStyle,
   NSESwitchProps,
 } from "../Controls/Fields/NSEFields";
-export { NSERoundedInput, NSEToolInput } from "../Controls/Fields/NSEFieldVariants";
-export type { NSERoundedInputProps, NSEToolInputProps } from "../Controls/Fields/NSEFieldVariants";
 export { NSEImageView, NSECroppableImage, NSERotatingImage, NSEScrollingImage, NSESizeableImage, NSEViewImage } from "../Controls/Images";
 export type {
   NSECropParams,
@@ -228,6 +224,4 @@ export type {
 } from "../Layout/NSELayout";
 export { NSEForm, NSEFormRow, NSEFormSeparator } from "../Layout/NSEForm";
 export type { NSEFormProps, NSEFormRowProps } from "../Layout/NSEForm";
-export { NSEText } from "../Layout/NSEText";
-export type { NSETextProps, NSETextStyle } from "../Layout/NSEText";
 export { NSEFeedbackProvider, useNSEFeedback } from "../Feedback";

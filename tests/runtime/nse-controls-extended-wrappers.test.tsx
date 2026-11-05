@@ -27,7 +27,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
-import { NSEButton, NSEAppMenu, NSEEditMenu, NSEHeader, NSEHelpMenu, NSEIntegerPicker, NSEDatePicker, NSEListSelector, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEMenu, NSEStandaloneControlHost, NSEInputBox, NSEPasswordField, NSESearchField, NSEPopupList, NSEPrevNextBanner, NSEProgressSlider, NSERoundedInput, NSETimePicker, NSEToolInput, NSESegmentedControl } from "../../src/NSE/public/controls";
+import { NSEButton, NSEAppMenu, NSEEditMenu, NSEHeader, NSEHelpMenu, NSEIntegerPicker, NSEDatePicker, NSEListSelector, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEMenu, NSEStandaloneControlHost, NSESearchField, NSEPopupList, NSEPrevNextBanner, NSEProgressSlider, NSETimePicker, NSESegmentedControl } from "../../src/NSE/public/controls";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 afterEach(() => {
@@ -59,9 +59,6 @@ describe("NSE extended wrapper controls", () => {
         <NSEButton bezelStyle="texturedRounded" title="Back" image="/icons/back.png" imagePosition="imageOnly" />
         <NSESegmentedControl aria-label="Tools" segmentStyle="texturedRounded" selection={{ mode: "momentary", selectedIds: new Set() }} items={[{ id: "refresh", label: "Refresh", image: "/icons/refresh.png" }]} />
         <NSESegmentedControl aria-label="Calendar view" segmentStyle="texturedRounded" selection={{ mode: "select-one", selectedIds: new Set(["day"]), allowsEmpty: false }} items={[{ id: "day", label: "Day" }, { id: "week", label: "Week" }]} />
-        <NSEPasswordField label="Secret" hint="Password" />
-        <NSERoundedInput label="Name" hint="Full name" />
-        <NSEToolInput label="Filter" hint="Filter items" />
         <NSEHeader title="Header" actions={<NSEButton bezelStyle="texturedRounded" title="Info" aria-label="Info" />} />
         <NSEPrevNextBanner onPrevious={onPrevious} onNext={onNext}>Today</NSEPrevNextBanner>
         <NSEListSelector label="Provider" value="one" items={["One", "Two"]} />
@@ -83,9 +80,6 @@ describe("NSE extended wrapper controls", () => {
 
     expect(screen.getByRole("toolbar", { name: "Tools" }).classList.contains("nse-extended-tool-button-group")).toBe(true);
     expect(screen.getByRole("radio", { name: "Day" }).getAttribute("aria-checked")).toBe("true");
-    expect(screen.getByLabelText("Secret").getAttribute("type")).toBe("password");
-    expect(screen.getByLabelText("Name").getAttribute("placeholder")).toBe("Full name");
-    expect(screen.getByLabelText("Filter").getAttribute("placeholder")).toBe("Filter items");
     expect(screen.getByText("Header")).not.toBeNull();
     expect(screen.getByText("Today")).not.toBeNull();
     expect(screen.getByRole("group", { name: "Due date" }).getAttribute("data-locale-order")).toBe("day-month-year");
@@ -386,22 +380,6 @@ describe("NSE extended wrapper controls", () => {
     expect(icon?.getAttribute("aria-hidden")).toBe("true");
     expect(icon?.nextElementSibling?.tagName).toBe("INPUT");
     expect((container.querySelector("input") as HTMLInputElement).placeholder).toBe("Search contacts…");
-  });
-
-  it("renders NSEInputBox as one framed box wrapping multiple controls", () => {
-    const { container } = renderWithAppearance(
-      <NSEInputBox label="URL" alwaysLooksFocused>
-        <span className="nse-control-field-affix">https://</span>
-        <input aria-label="address" />
-        <button type="button">Go</button>
-      </NSEInputBox>
-    );
-
-    const box = container.querySelector(".nse-control-input-box") as HTMLElement;
-    expect(box.getAttribute("data-always-focused")).toBe("true");
-    expect(container.querySelectorAll(".nse-control-input-box-frame")).toHaveLength(1);
-    expect(screen.getByRole("button", { name: "Go" })).not.toBeNull();
-    expect(screen.getByLabelText("address")).not.toBeNull();
   });
 
   it("defaults IntegerPicker to the 0–9 range and centers picker captions", async () => {
