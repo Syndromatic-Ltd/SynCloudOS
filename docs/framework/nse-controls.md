@@ -101,8 +101,7 @@ Focused entries include `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSESta
 
 | Component | Purpose |
 | --- | --- |
-| `NSESlider` | Horizontal or vertical slider with ticks and detents. |
-| `NSECircularSlider` | A dial. |
+| `NSESlider` | A slider: linear (horizontal or vertical, with ticks and detents) or circular (`sliderType`). |
 | `NSEStepper` | Increment and decrement, with hold to repeat, bounds and wrapping. |
 | `NSELevelIndicator` | Continuous, discrete, capacity and rating indicators with warning and critical thresholds. |
 | `NSESegmentedControl` | Momentary, select-one and select-any segments in the rounded, capsule and textured styles, with overflow handling. One-of-many choices and tab strips are segmented controls. |

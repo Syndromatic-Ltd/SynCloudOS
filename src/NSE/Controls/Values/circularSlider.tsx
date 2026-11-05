@@ -25,16 +25,31 @@ import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } fr
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import { NSEMetalThumb } from "../../Appearance/NSEMetalThumb";
 import { NSESlider } from "./NSESlider";
-import type { NSECircularSliderProps } from "./valueControlTypes";
+import type { NSENumericValueContract, NSESliderProps } from "./valueControlTypes";
+
+/** The circular slider's resolved contract, once NSESlider has bound its value. @internal */
+interface NSECircularSliderProps extends NSENumericValueContract {
+  readonly "aria-label": string;
+  readonly value: number;
+  readonly disabled?: boolean;
+  readonly readOnly?: boolean;
+  readonly controlSize?: "regular" | "small";
+  readonly valueText?: (value: number) => string;
+  onValueChange(value: number, phase: "preview" | "commit"): void;
+}
 
 /**
- * NSSlider's circular style: a knob turned to an angle, its position marked
- * by a dot. A click anywhere on the knob turns it straight there, so no drag
- * is needed; the arrow keys step it, wrapping round when the contract wraps.
- * The linear alternative stays in the accessibility tree for assistive
- * technologies that cannot operate a radial control.
+ * NSSlider's circular style (`sliderType: "circular"`): a knob turned to an
+ * angle, its position marked by a dot. A click anywhere on the knob turns it
+ * straight there, so no drag is needed; the arrow keys step it, wrapping round
+ * when the slider wraps. The linear alternative stays in the accessibility tree
+ * for assistive technologies that cannot operate a radial control.
+ *
+ * @internal NSESlider renders it.
  */
-export function NSECircularSlider(props: NSEBoundValueProps<number, NSECircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+export function NSECircularSlider(supplied: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'onChanging' | 'onChange'>) {
+  const { sliderType: _sliderType, minimum, maximum, min, max, step, ...rest } = supplied;
+  const props = { ...rest, "aria-label": supplied["aria-label"] ?? "Slider", minimum: minimum ?? min ?? 0, maximum: maximum ?? max ?? 100, step: step ?? 1 } as unknown as NSEBoundValueProps<number, NSECircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>;
   return <NSECircularSliderControl {...useNSEValueBinding<number, NSECircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0,cancellable:true})} />;
 }
 

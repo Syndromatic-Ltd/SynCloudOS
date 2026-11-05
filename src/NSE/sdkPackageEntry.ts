@@ -272,9 +272,6 @@ export type { NSEDialogSurfaceProps } from "./Overlays/NSEDialogSurface";
 export { NSEProgressBar, NSEProgressItem, NSESpinner } from "./Progress";
 export type { NSEProgressBarProps, NSEProgressItemProps, NSESpinnerProps } from "./Progress";
 export {
-  NSECircularSlider,
-} from "./Controls/Values/NSECircularSlider";
-export {
   NSELevelIndicator,
 } from "./Controls/Values/NSELevelIndicator";
 export {
@@ -894,7 +891,6 @@ export type {
   NSESegmentedControlProps,
   NSESegmentStyle,
   NSESliderProps,
-  NSECircularSliderProps,
   NSELevelIndicatorProps,
 } from "./Controls/Values/valueControlTypes";
 

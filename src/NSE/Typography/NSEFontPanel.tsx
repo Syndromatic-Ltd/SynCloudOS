@@ -25,7 +25,6 @@ import { NSEToolButtonGroup } from "../Controls/Buttons/NSEButtonFamilies";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSETextField } from "../Controls/Fields/NSEFields";
 import { NSESearchField } from "../Controls/Fields/NSESearchField";
-import { NSECircularSlider } from "../Controls/Values/NSECircularSlider";
 import { NSESlider } from "../Controls/Values/NSESlider";
 import { useNSEArrayController } from "../Controllers";
 import { NSETableView, type NSEDataViewAdapter, type NSETableColumn } from "../DataViews";
@@ -600,7 +599,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
         <NSESlider controlSize="mini" length={36} aria-label="Shadow opacity" value={shadow.opacity} minimum={0} maximum={100} step={1} disabled={effectsDisabled || !shadow.enabled} tooltip={(value) => `Opacity ${value}%`} onValueChange={(value, phase) => changeShadow({ opacity: value }, phase)} />
         <NSESlider controlSize="mini" length={36} aria-label="Shadow blur" value={shadow.blur} minimum={0} maximum={20} step={1} disabled={effectsDisabled || !shadow.enabled} tooltip={(value) => `Blur ${value}`} onValueChange={(value, phase) => changeShadow({ blur: value }, phase)} />
         <NSESlider controlSize="mini" length={36} aria-label="Shadow offset" value={shadow.offset} minimum={0} maximum={20} step={1} disabled={effectsDisabled || !shadow.enabled} tooltip={(value) => `Offset ${value}`} onValueChange={(value, phase) => changeShadow({ offset: value }, phase)} />
-        <NSECircularSlider controlSize="small" aria-label="Shadow angle" value={angleToDial(shadow.angle)} minimum={0} maximum={360} step={5} wraps disabled={effectsDisabled || !shadow.enabled} valueText={(dial) => `${dialToAngle(dial)} degrees`} onValueChange={(dial, phase) => changeShadow({ angle: dialToAngle(dial) }, phase)} />
+        <NSESlider sliderType="circular" controlSize="small" aria-label="Shadow angle" value={angleToDial(shadow.angle)} minimum={0} maximum={360} step={5} wraps disabled={effectsDisabled || !shadow.enabled} valueText={(dial) => `${dialToAngle(dial)} degrees`} onValueChange={(dial, phase) => changeShadow({ angle: dialToAngle(dial) }, phase)} />
         <output data-nse-part="shadow-angle" aria-hidden="true">{shadow.angle}°</output>
       </div> : null}
 

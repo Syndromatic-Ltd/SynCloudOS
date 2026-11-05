@@ -23,7 +23,7 @@ import { NSESwitch } from "../../../src/NSE/Controls/Fields/NSEFields";
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
 installNSEScrollIntoViewFixture();
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"; import React, { useState } from "react"; import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSECircularSlider, NSELevelIndicator, NSESegmentedControl, NSESlider, NSEStepper } from "../../../src/NSE/Controls/Values";
+import { NSELevelIndicator, NSESegmentedControl, NSESlider, NSEStepper } from "../../../src/NSE/Controls/Values";
 import { NSEControlRuntimeProvider } from "../../../src/NSE/Controls/Core";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { NSETooltipProvider } from "../../../src/NSE/Tooltips";
@@ -64,7 +64,7 @@ describe("value controls", () => {
 
   it("blocks every circular pointer and capture terminal route while read-only", () => {
     const change = vi.fn();
-    const { container } = render(<NSECircularSlider {...({ readOnly: true } as object)} aria-label="Read-only angle" value={90} minimum={0} maximum={360} step={15} onValueChange={change} />);
+    const { container } = render(<NSESlider sliderType="circular" {...({ readOnly: true } as object)} aria-label="Read-only angle" value={90} minimum={0} maximum={360} step={15} onValueChange={change} />);
     const body = container.querySelector('[data-nse-part="circular-body"]') as HTMLElement;
     Object.assign(body, { setPointerCapture: vi.fn(), getBoundingClientRect: () => ({ left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100, x: 0, y: 0, toJSON: () => ({}) }) });
     fireEvent.pointerDown(body, { pointerId: 3, clientX: 100, clientY: 50 });
@@ -111,9 +111,9 @@ describe("value controls", () => {
     fireEvent.lostPointerCapture(slider, { pointerId: 3 });
     expect(change.mock.calls.filter(([, phase]) => phase === "commit")).toEqual([[7, "commit"]]);
   });
-  it("provides an accessible radial primary control and a named non-pointer alternative",()=>{const change=vi.fn();render(<NSECircularSlider aria-label="Angle" value={90} minimum={0} maximum={360} step={15} onValueChange={change}/>);expect(screen.getByRole("slider",{name:"Angle"})).not.toBeNull();fireEvent.change(screen.getByRole("slider",{name:"Angle linear alternative"}),{target:{value:"105"}});expect(change).toHaveBeenCalledWith(105,"preview");});
-  it("wraps an angle dial round through its start and speaks its value",()=>{const change=vi.fn();render(<NSECircularSlider aria-label="Shadow angle" value={345} minimum={0} maximum={360} step={15} wraps controlSize="small" valueText={(value)=>`${value} degrees`} onValueChange={change}/>);const dial=screen.getByRole("slider",{name:"Shadow angle"});expect(dial.getAttribute("aria-valuetext")).toBe("345 degrees");expect(dial.closest("[data-nse-control=\"circular-slider\"]")?.getAttribute("data-size")).toBe("small");fireEvent.keyDown(dial,{key:"ArrowRight"});expect(change).toHaveBeenLastCalledWith(0,"commit");});
-  it("maps circular pointer angle rather than horizontal range position",()=>{const change=vi.fn();const{container}=render(<NSECircularSlider aria-label="Angle" value={0} minimum={0} maximum={360} step={15} onValueChange={change}/>);const body=container.querySelector('[data-nse-part="circular-body"]') as HTMLElement;Object.assign(body,{setPointerCapture:vi.fn(),getBoundingClientRect:()=>({left:0,top:0,width:100,height:100,right:100,bottom:100,x:0,y:0,toJSON:()=>({})})});fireEvent.pointerDown(body,{pointerId:1,clientX:100,clientY:50});fireEvent.pointerUp(body,{pointerId:1,clientX:100,clientY:50});expect(change).toHaveBeenCalledWith(90,"commit");});
+  it("provides an accessible radial primary control and a named non-pointer alternative",()=>{const change=vi.fn();render(<NSESlider sliderType="circular" aria-label="Angle" value={90} minimum={0} maximum={360} step={15} onValueChange={change}/>);expect(screen.getByRole("slider",{name:"Angle"})).not.toBeNull();fireEvent.change(screen.getByRole("slider",{name:"Angle linear alternative"}),{target:{value:"105"}});expect(change).toHaveBeenCalledWith(105,"preview");});
+  it("wraps an angle dial round through its start and speaks its value",()=>{const change=vi.fn();render(<NSESlider sliderType="circular" aria-label="Shadow angle" value={345} minimum={0} maximum={360} step={15} wraps controlSize="small" valueText={(value)=>`${value} degrees`} onValueChange={change}/>);const dial=screen.getByRole("slider",{name:"Shadow angle"});expect(dial.getAttribute("aria-valuetext")).toBe("345 degrees");expect(dial.closest("[data-nse-control=\"circular-slider\"]")?.getAttribute("data-size")).toBe("small");fireEvent.keyDown(dial,{key:"ArrowRight"});expect(change).toHaveBeenLastCalledWith(0,"commit");});
+  it("maps circular pointer angle rather than horizontal range position",()=>{const change=vi.fn();const{container}=render(<NSESlider sliderType="circular" aria-label="Angle" value={0} minimum={0} maximum={360} step={15} onValueChange={change}/>);const body=container.querySelector('[data-nse-part="circular-body"]') as HTMLElement;Object.assign(body,{setPointerCapture:vi.fn(),getBoundingClientRect:()=>({left:0,top:0,width:100,height:100,right:100,bottom:100,x:0,y:0,toJSON:()=>({})})});fireEvent.pointerDown(body,{pointerId:1,clientX:100,clientY:50});fireEvent.pointerUp(body,{pointerId:1,clientX:100,clientY:50});expect(change).toHaveBeenCalledWith(90,"commit");});
   it("exposes meter thresholds and interactive rating semantics",()=>{const change=vi.fn();const {rerender}=render(<NSELevelIndicator aria-label="Capacity" value={80} minimum={0} maximum={100} warningValue={70} criticalValue={90}/>);expect(screen.getByRole("meter").getAttribute("data-state")).toBe("warning");rerender(<NSELevelIndicator aria-label="Rating" value={2} minimum={0} maximum={5} mode="rating" onValueChange={change}/>);fireEvent.click(screen.getByRole("radio",{name:"4"}));expect(change).toHaveBeenCalledWith(4,"commit");});
   it("does not commit a disposed segment's selection after an asynchronous command completes", async () => {
     const change = vi.fn();
