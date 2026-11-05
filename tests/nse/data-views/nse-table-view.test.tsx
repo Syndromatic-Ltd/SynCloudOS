@@ -116,6 +116,32 @@ afterEach(() => {
 });
 
 describe("NSETable", () => {
+  it("fills its container when viewportBlockSize is \"fill\", following the container as it resizes", () => {
+    let resized: (() => void) | undefined;
+    vi.stubGlobal("ResizeObserver", class {
+      constructor(callback: () => void) { resized = callback; }
+      observe() {}
+      disconnect() {}
+    });
+    let height = 180;
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(function (this: HTMLElement) {
+      return this.getAttribute("role") === "grid" ? height : 0;
+    });
+    const { container } = renderTable({ viewportBlockSize: "fill" });
+    const grid = screen.getByRole("grid", { name: "People" });
+    expect(grid.style.blockSize).toBe("100%");
+    expect(container.querySelector(".nse-table-view-container")?.hasAttribute("data-fill")).toBe(true);
+    height = 600;
+    React.act(() => resized?.());
+    expect(screen.getAllByRole("row").length).toBeGreaterThan(1);
+    vi.unstubAllGlobals();
+  });
+
+  it("keeps a fixed pixel height for a numeric viewportBlockSize", () => {
+    renderTable({ viewportBlockSize: 230 });
+    expect(screen.getByRole("grid", { name: "People" }).style.blockSize).toBe("253px");
+  });
+
   it("keeps canonical appearance loading outside NSETable's public caller contract", () => {
     const typesSource = readFileSync(resolve(process.cwd(), "src/NSE/DataViews/Table/tableTypes.ts"), "utf8");
     const barrelSource = readFileSync(resolve(process.cwd(), "src/NSE/DataViews/Table/index.ts"), "utf8");

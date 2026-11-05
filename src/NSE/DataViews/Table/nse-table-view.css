@@ -69,3 +69,10 @@
     outline: 1px solid Highlight;
   }
 }
+
+/* viewportBlockSize="fill": the table takes its container's height, in a flex column or a sized block. */
+.nse-table-view-container[data-fill] {
+  flex: 1 1 0;
+  block-size: 100%;
+  min-block-size: 0;
+}

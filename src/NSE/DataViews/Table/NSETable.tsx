@@ -22,6 +22,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -134,6 +135,22 @@ export function NSETable<T, TId extends string | number>({
   });
   const editRequest = useRef<{ generation: number; controller: AbortController } | null>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const fills = viewportBlockSize === "fill";
+  const [measuredBlockSize, setMeasuredBlockSize] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    if (!fills || !viewport) return;
+    const measure = () => setMeasuredBlockSize(viewport.clientHeight);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [fills]);
+  // Before the first measurement a filling table assumes the default, so the virtualiser renders rows.
+  const tableBlockSize = fills
+    ? (measuredBlockSize !== null && measuredBlockSize > 0 ? measuredBlockSize : headerHeight + 460)
+    : headerHeight + viewportBlockSize;
   const tableHeaderAppearance = useNSEAppearanceSlot("table.header.normal.1x");
   const tableHeaderHoverAppearance = useNSEAppearanceSlot("table.header.hover.1x");
   const tableHeaderPressedAppearance = useNSEAppearanceSlot("table.header.pressed.1x");
@@ -163,7 +180,7 @@ export function NSETable<T, TId extends string | number>({
     sizingGeneration: rowHeight,
     getKey: (index) => encodeNSEDataViewKey(view.snapshot.items[index]!.id),
     retainedIndices: view.snapshot.activeId === null ? undefined : new Set([activeRowIndex]),
-    viewportSize: headerHeight + viewportBlockSize,
+    viewportSize: tableBlockSize,
     viewportInsetEnd: headerHeight,
     viewportRef,
   });
@@ -402,7 +419,7 @@ export function NSETable<T, TId extends string | number>({
   const sortSnapshot = adapter.controller.getSnapshot().sortDescriptors;
 
   return (
-    <div className="nse-table-view-container" data-state={state.kind}>
+    <div className="nse-table-view-container" data-state={state.kind} data-fill={fills || undefined}>
       <div
         {...domProps}
         id={view.rootProps.id}
@@ -416,7 +433,7 @@ export function NSETable<T, TId extends string | number>({
         aria-rowcount={view.snapshot.items.length + (headerHidden ? 0 : 1)}
         aria-colcount={orderedColumns.length}
         className={`nse-table-view ${className}`.trim()}
-        style={{ ...style, blockSize: `${headerHeight + viewportBlockSize}px`, overflow: "auto" }}
+        style={{ ...style, blockSize: fills ? "100%" : `${tableBlockSize}px`, overflow: "auto" }}
         data-nse-control="table-view"
         {...tableHeaderAppearance.attributes}
         data-nse-table-header-hover-slot={tableHeaderHoverAppearance.slot}

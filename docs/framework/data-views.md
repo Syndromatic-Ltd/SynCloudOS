@@ -81,6 +81,7 @@ Table features:
 - Set `editable` on a column and supply an `editor` to edit in place. `onEditCommit` receives the change.
 - Selection reports through `onSelectionChange`, and `onDoubleAction` fires when a row is activated.
 - Drag and drop works through `dragBinding`, `onValidateDrop` and `onAcceptDrop`. See [drag and pasteboard](drag-and-pasteboard.md).
+- The rows scroll inside a viewport 460 px tall by default. Set `viewportBlockSize` to a pixel height, or to `"fill"` to take the container's height and follow it as it resizes. Use `"fill"` for a table that fills a pane, such as a source list between a pane header and footer.
 
 ## View states
 

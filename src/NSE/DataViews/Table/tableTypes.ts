@@ -89,7 +89,11 @@ export interface NSETableProps<T, TId extends NSEDataViewKey>
   readonly headerHeight?: number;
   /** NSTableView with no header view: the rows alone, as a list. */
   readonly headerHidden?: boolean;
-  readonly viewportBlockSize?: number;
+  /**
+   * The rows' visible height in CSS pixels, or `"fill"` to take the height of the table's container
+   * (an NSTableView in an NSScrollView that fills its pane), measured as it resizes.
+   */
+  readonly viewportBlockSize?: number | "fill";
   readonly locale?: string;
   readonly columnVisibility?: Readonly<Record<string, boolean>>;
   readonly columnOrder?: readonly string[];
