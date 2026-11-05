@@ -33,6 +33,13 @@
   min-height: 0;
 }
 
+/* As NSViewController.view, a scroll view that is a view controller's view
+   fills the frame the controller is given. Sized to its own content it would
+   have no scroll range, its overflow clipped by the container instead. */
+[data-nse-view-controller] > .nse-scroll-view-frame:only-child {
+  block-size: 100%;
+}
+
 .nse-scroll-view-frame > .nse-scroll-view {
   grid-area: 1 / 1;
   /* The frame draws its own NSEScrollers beside the clip; the browser's
