@@ -24,11 +24,29 @@
  * tool-button band, and its radio strip for one-of-many text segments.
  */
 
+import { useMemo } from "react";
 import { NSEButton } from "../Buttons/NSEButton";
 import { NSEToolButtonGroup } from "../Buttons/NSEButtonFamilies";
 import { sizedControlStyle } from "../Core/nseControlsShared";
 import { NSERadioGroup } from "../Fields/NSEFields";
 import type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection } from "./valueControlTypes";
+
+/**
+ * @internal Resolves each segment's action. A segment's own action sends its
+ * own actionPayload (none when omitted); the control's shared action sends the
+ * control's actionPayload, or the segment's id so the receiver can tell which
+ * segment was pressed.
+ */
+export function useSegmentActions(props: NSESegmentedControlProps): readonly NSESegmentedItem[] {
+  const hasActionPayload = Object.prototype.hasOwnProperty.call(props, "actionPayload");
+  return useMemo(() => {
+    if (props.action === undefined) return props.items;
+    return props.items.map((item) => {
+      if (item.commandId !== undefined || item.action !== undefined) return item;
+      return { ...item, action: props.action, actionPayload: hasActionPayload ? props.actionPayload : item.id };
+    });
+  }, [props.items, props.action, props.actionPayload, hasActionPayload]);
+}
 
 function sizeAttribute(props: NSESegmentedControlProps): "small" | "custom" | undefined {
   return props.height !== undefined ? "custom" : props.controlSize === "small" ? "small" : undefined;
@@ -79,6 +97,7 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
     else ids.add(id);
     props.onSelectionChange?.({ ...props.selection, selectedIds: ids } as NSESegmentedSelection);
   };
+  const items = useSegmentActions(props);
   return (
     <NSEToolButtonGroup
       label={props["aria-label"]}
@@ -86,8 +105,7 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
       height={props.height}
       data-segment-style="texturedRounded"
     >
-      {props.items.map((item) => {
-        const action = item.action ?? props.action;
+      {items.map((item) => {
         return (
           <NSEButton
             key={item.id}
@@ -98,8 +116,8 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
             imagePosition={item.image ? "imageOnly" : undefined}
             state={mode !== "momentary" && selectedIds.has(item.id) ? "on" : "off"}
             isEnabled={!(props.disabled || props.readOnly || item.disabled)}
-            action={action}
-            actionPayload={action === undefined ? undefined : item.actionPayload ?? (item.action === undefined && props.actionPayload !== undefined ? props.actionPayload : item.id)}
+            action={item.action}
+            actionPayload={item.actionPayload}
             onClick={() => select(item.id)}
           />
         );

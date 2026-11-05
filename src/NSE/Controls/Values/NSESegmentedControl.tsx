@@ -25,7 +25,7 @@ import { NSEListboxPopup, useOptionalNSEOverlayProvider } from "../../Overlays";
 import { useNSEControlCommand } from "../Core";
 import { useNSEActionBinding } from "../Core/useNSEControlAction";
 import type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection } from "./valueControlTypes";
-import { NSETexturedSegmentCells } from "./NSESegmentStyles";
+import { NSETexturedSegmentCells, useSegmentActions } from "./NSESegmentStyles";
 
 interface SegmentButtonProps {
   readonly item: NSESegmentedItem;
@@ -99,18 +99,7 @@ function NSERoundedSegments(props: NSESegmentedControlProps) {
   const overflowRef = useRef<HTMLButtonElement>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
   const [overflowOpen, setOverflowOpen] = useState(false);
-  const hasActionPayload = Object.prototype.hasOwnProperty.call(props, "actionPayload");
-  const items = useMemo(() => {
-    if (props.action === undefined && !props.items.some((item) => item.action !== undefined)) return props.items;
-    return props.items.map((item) => {
-      if (item.commandId !== undefined) return item;
-      const itemAction = item.action !== undefined;
-      const action = itemAction ? item.action : props.action;
-      if (action === undefined) return item;
-      if (itemAction && Object.prototype.hasOwnProperty.call(item, "actionPayload")) return item;
-      return { ...item, action, actionPayload: !itemAction && hasActionPayload ? props.actionPayload : item.id };
-    });
-  }, [props.items, props.action, props.actionPayload, hasActionPayload]);
+  const items = useSegmentActions(props);
   const [overflowBindings, setOverflowBindings] = useState<ReadonlyMap<string, OverflowSegmentActivation>>(() => new Map());
   const registerOverflow = useCallback((id: string, activation: OverflowSegmentActivation | null) => {
     setOverflowBindings((current) => {
