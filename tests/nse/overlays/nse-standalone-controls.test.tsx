@@ -175,6 +175,13 @@ describe("standalone picker and menu keyboard contracts", () => {
     expect(document.activeElement).toBe(save);
   });
 
+  it("draws a tool menu's text label as the trigger's title, not as an image", () => {
+    render(<Host><NSEMenu label="Presets" trigger="tool" triggerLabel="Coil presets" items={[{ value: "all", label: "All" }]} /></Host>);
+    const trigger = screen.getByRole("button", { name: "Coil presets" });
+    expect(trigger.querySelector("img")).toBeNull();
+    expect(trigger.textContent).toContain("Presets");
+  });
+
   it("keeps a menu open when its parent re-renders with inline items and glyph, and lights its trigger while it shows", async () => {
     const Glyph = () => <svg aria-hidden="true" />;
     // Items and label written inline: a new array and element every render.
