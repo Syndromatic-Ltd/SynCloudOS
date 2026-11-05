@@ -269,8 +269,8 @@ export { NSEMetalSurface, NSERoundedBox } from "./Material";
 export type { NSEMetalSurfaceProps, NSERoundedBoxProps } from "./Material";
 export { NSEDialogSurface } from "./Overlays/NSEDialogSurface";
 export type { NSEDialogSurfaceProps } from "./Overlays/NSEDialogSurface";
-export { NSEProgressBar, NSEProgressItem, NSEProgressSlider, NSESpinner } from "./Progress";
-export type { NSEProgressBarProps, NSEProgressItemProps, NSEProgressSliderProps, NSESpinnerProps } from "./Progress";
+export { NSEProgressBar, NSEProgressItem, NSESpinner } from "./Progress";
+export type { NSEProgressBarProps, NSEProgressItemProps, NSESpinnerProps } from "./Progress";
 export {
   NSECircularSlider,
 } from "./Controls/Values/NSECircularSlider";

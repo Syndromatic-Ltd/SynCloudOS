@@ -16,7 +16,7 @@ import { NSESlider, NSEStepper } from "@syndromatic/syncloudos/nse";
 | `NSELevelIndicator` | A meter, or a star rating | No |
 | `NSESegmentedControl` | Momentary, single and multiple selection segments in the rounded, capsule and textured toolbar styles, with menus and overflow | For menus and overflow |
 | `NSEPopUpButton` | A button that shows the selected choice and opens the list, or (`pullsDown`) a button that opens a menu of commands | A pull-down button does; a pop-up button falls back to the native list without one |
-| `NSEProgressBar`, `NSEProgressItem`, `NSEProgressSlider`, `NSEProgressIndicator`, `NSESpinner` | Determinate and indeterminate progress | No |
+| `NSEProgressBar`, `NSEProgressItem`, `NSEProgressIndicator`, `NSESpinner` | Determinate and indeterminate progress | No |
 
 Components marked "Yes" open a floating list and need an overlay host. A mounted SynWare receives one from the runtime, and elsewhere you wrap the controls in `NSEStandaloneControlHost` from `nse/controls`. See [Text fields and choice controls](text-and-choice.md#at-a-glance).
 
@@ -184,20 +184,6 @@ A non-finite value counts as the minimum, and the value is held within the range
 ### NSEProgressItem
 
 A row-shaped progress element for lists: `value`, `max` (default 100), `variant` (`"item"` or `"pill"`), `label` and children for the text over the fill.
-
-### NSEProgressSlider
-
-A slider with a progress bar behind it, for media scrubbers. It takes the props of `NSESlider` and adds:
-
-| Prop | Description |
-| --- | --- |
-| `value`, `position`, `defaultValue`, `defaultPosition` | The slider position. `position` is an alias. |
-| `onValueChange`, `onPositionChange` | `(value: number) => void`. Both fire on each change. |
-| `min`, `max`, `minimum`, `maximum`, `step`, `snap` | The range and step. |
-| `lockBar` | Make the bar follow the slider. |
-| `barPosition`, `barMinimum`, `barMaximum` | The bar's value and range when it does not follow. |
-| `altBarPosition` | The secondary fill. |
-| `progressLabel` | The bar's accessible name. |
 
 ### NSEProgressIndicator
 

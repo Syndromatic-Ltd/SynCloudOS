@@ -103,8 +103,7 @@ export const nseRegistry = [
       "NSEHeader",
       "NSEPrevNextBanner",
       "NSEDatePicker",
-      "NSETimePicker",
-      "NSEProgressSlider"
+      "NSETimePicker"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
   },

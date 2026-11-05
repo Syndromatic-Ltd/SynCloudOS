@@ -183,8 +183,8 @@ export type { NSEMenuItem, NSEMenuOptions, NSEPopUpButtonItem, NSEPopUpButtonPro
 export { NSEPopup, NSEStandaloneControlHost } from "../Overlays";
 export type { NSEPopupProps, NSEStandaloneControlHostProps } from "../Overlays";
 
-export { NSEProgressBar, NSEProgressItem, NSEProgressSlider, NSESpinner } from "../Progress";
-export type { NSEProgressBarProps, NSEProgressItemProps, NSEProgressSliderProps, NSESpinnerProps } from "../Progress";
+export { NSEProgressBar, NSEProgressItem, NSESpinner } from "../Progress";
+export type { NSEProgressBarProps, NSEProgressItemProps, NSESpinnerProps } from "../Progress";
 export { NSEDialogSurface } from "../Overlays/NSEDialogSurface";
 export type { NSEDialogSurfaceProps } from "../Overlays/NSEDialogSurface";
 export { useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
