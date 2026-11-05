@@ -31,7 +31,7 @@ import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRu
 import { createBrowserRuntimeEnvironment } from "../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { BrowserWebContentAdapterFactory, type BrowserWebContentPlatform } from "../../src/SynCloudOS/PlatformAdapters/BrowserWebContentAdapter";
 import { NSE } from "../../src/NSE/NSE";
-import { NSEWebContentView } from "../../src/NSE/WebContent";
+import { NSEWebView } from "../../src/NSE/WebContent";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 
 function deferred<T>() {
@@ -123,7 +123,7 @@ describe("runtime-owned web content", () => {
   });
 
   it("exports the neutral session-bound web content view", () => {
-    expect((NSE as unknown as { NSEWebContentView?: unknown }).NSEWebContentView).toBeTypeOf("function");
+    expect((NSE as unknown as { NSEWebView?: unknown }).NSEWebView).toBeTypeOf("function");
   });
 
   it("default-denies creation before browser preparation and rechecks an explicit grant at commit", async () => {
@@ -732,7 +732,7 @@ describe("runtime-owned web content", () => {
   it("renders only the session snapshot and disposes the session on unmount", async () => {
     const { runtime, adapter } = runtimeWithWebContent();
     const session = await runtime.webContent.createSession(remoteRequest({ capabilities: ["forms"] }) as never);
-    const view = render(<NSEWebContentView session={session} ownership="view" className="host-recipe" />);
+    const view = render(<NSEWebView session={session} ownership="view" className="host-recipe" />);
     const frame = screen.getByTitle("Reference");
     expect(frame.classList.contains("host-recipe")).toBe(true);
     expect(frame.classList.contains("nse-web-content-view")).toBe(true);
@@ -763,7 +763,7 @@ describe("runtime-owned web content", () => {
       capabilities: ["forms" as const],
       decodeMessage: (payload: unknown) => payload,
     };
-    const view = render(<NSEWebContentView {...props} />);
+    const view = render(<NSEWebView {...props} />);
     await waitFor(() => expect(screen.getByTitle("Source-bound reference")).toBeTruthy());
     expect(screen.getByTitle("Source-bound reference").getAttribute("sandbox")).toBe("allow-forms");
     expect(runtime.webContent.diagnostics().sessionCount).toBe(1);
@@ -776,7 +776,7 @@ describe("runtime-owned web content", () => {
   it("ignores a superseded epoch load and does not dispose a parent-owned session on unmount", async () => {
     const { runtime, adapter } = runtimeWithWebContent();
     const session = await runtime.webContent.createSession(remoteRequest({ capabilities: ["same-origin"] }) as never);
-    const view = render(<NSEWebContentView session={session} ownership="parent" />);
+    const view = render(<NSEWebView session={session} ownership="parent" />);
     const frame = screen.getByTitle("Reference") as HTMLIFrameElement;
     Object.defineProperty(frame, "src", { configurable: true, value: "https://stale.example/one" });
     fireEvent.load(frame);
@@ -812,7 +812,7 @@ describe("runtime-owned web content", () => {
   it("publishes a browser frame load failure through the session snapshot", async () => {
     const { runtime } = runtimeWithWebContent();
     const session = await runtime.webContent.createSession(remoteRequest({ capabilities: ["forms"] }) as never);
-    const view = render(<NSEWebContentView session={session} />);
+    const view = render(<NSEWebView session={session} />);
     act(() => session.didFail(navigationAuthority(session)));
     expect(session.getSnapshot()).toMatchObject({ state: "failed", failure: "Web content failed to load." });
     expect(view.container.querySelector("iframe")?.getAttribute("data-nse-web-content-state")).toBe("failed");
@@ -822,7 +822,7 @@ describe("runtime-owned web content", () => {
   it("rebinds the mounted frame to each committed navigation epoch", async () => {
     const { runtime, adapter } = runtimeWithWebContent();
     const session = await runtime.webContent.createSession(remoteRequest({ capabilities: ["same-origin"] }) as never);
-    const view = render(<NSEWebContentView session={session} />); const firstFrame = screen.getByTitle("Reference");
+    const view = render(<NSEWebView session={session} />); const firstFrame = screen.getByTitle("Reference");
     fireEvent.load(firstFrame); expect(session.getSnapshot().state).toBe("ready");
     await act(() => session.navigate({ kind: "url", url: "https://next.example/page" }));
     const currentFrame = screen.getByTitle("Reference");

@@ -29,8 +29,7 @@ import {
   NSEConfirmPrompt,
   NSEDialog,
   NSESlidingPane,
-  NSESlidingPanes,
-  NSEToaster
+  NSESlidingPanes
 } from "../../src/NSE/Containers";
 
 afterEach(() => {
@@ -100,13 +99,10 @@ describe("NSE containers", () => {
     expect(markup).toContain("role=\"dialog\"");
   });
 
-  it("confirms prompts and dismisses toasts through NSE controls", () => {
+  it("confirms prompts through NSE controls", () => {
     const onConfirm = vi.fn();
     const onOpenChange = vi.fn();
-    const onDismiss = vi.fn();
-
     render(
-      <>
         <NSEConfirmPrompt
           open
           portal={false}
@@ -116,19 +112,11 @@ describe("NSE containers", () => {
           onConfirm={onConfirm}
           onOpenChange={onOpenChange}
         />
-        <NSEToaster
-          toasts={[{ id: "saved", title: "Saved", message: "Changes stored.", tone: "success" }]}
-          onDismiss={onDismiss}
-        />
-      </>
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
-
-    fireEvent.click(screen.getByRole("button", { name: "Dismiss notification" }));
-    expect(onDismiss).toHaveBeenCalledWith("saved");
   });
 
   it("supports SlidingPane peek, multi-view data, and drag dismissal", () => {
@@ -213,9 +201,5 @@ describe("NSE containers", () => {
     expect(document.querySelector(".nse-container-modal-layer.nse-container-fade-in")).not.toBeNull();
     expect(document.querySelector(".nse-container-modal-shell.nse-container-rise-in")).not.toBeNull();
     modalRender.unmount();
-
-    // Toasts fly in from their screen edge.
-    render(<NSEToaster position="bottom-center" toasts={[{ id: "t1", message: "Saved" }]} />);
-    expect(document.querySelector(".nse-container-toast.nse-container-fly-in-bottom")).not.toBeNull();
   });
 });

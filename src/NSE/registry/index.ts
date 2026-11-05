@@ -33,16 +33,6 @@ export interface NSERegistryItem {
 
 export const nseRegistry = [
   {
-    name: "nse-app-frame",
-    title: "NSEAppFrame",
-    type: "composition",
-    description: "Standard SynCloudOS app-view frame with optional top bar, split content, and status bar slots.",
-    files: ["src/NSE/Windows/NSEAppFrame.tsx", "src/NSE/Windows/Chrome/nse-chrome.css"],
-    dependencies: ["nse-top-bar", "nse-split-view", "nse-status-bar"],
-    variants: ["standard", "sourceList", "document", "canvas"],
-    examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
-  },
-  {
     name: "nse-top-bar",
     title: "NSETopBar",
     type: "primitive",
@@ -98,8 +88,6 @@ export const nseRegistry = [
       "NSEPageHeader",
       "NSEDialogSurface",
       "NSERoundedBox",
-      "NSEHeader",
-      "NSEPrevNextBanner",
       "NSEDatePicker"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
@@ -128,7 +116,7 @@ export const nseRegistry = [
     name: "nse-containers",
     title: "NSE Containers",
     type: "composition",
-    description: "Drawers, sliding panes, modal dialogs, confirm prompts, and toasters for app composition in NSE vocabulary.",
+    description: "Drawers, sliding panes, modal dialogs, and confirm prompts for app composition in NSE vocabulary.",
     files: [
       "src/NSE/Containers/NSEContainers.tsx",
       "src/NSE/Containers/nse-containers.css",
@@ -139,8 +127,7 @@ export const nseRegistry = [
       "NSESlidingPane",
       "NSEDialog",
       "NSEModalDialog",
-      "NSEConfirmPrompt",
-      "NSEToaster"
+      "NSEConfirmPrompt"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
   },

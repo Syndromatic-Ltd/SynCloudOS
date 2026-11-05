@@ -105,7 +105,7 @@ Ranges use UTF-16 offsets; surrogate interiors are rejected. User deletion/movem
 
 ## Typography
 
-`NSEFontManager` and `NSEFontPanel` provide font selection in the manner of `NSFontManager`, including families, sizes, weights and paragraph styles. Applications reach the shared panel through the session, and choose fonts by `TFXFontDescriptor`. `NSERuler` draws a text ruler with tab stops and indents.
+`NSEFontManager` and `NSEFontPanel` provide font selection in the manner of `NSFontManager`, including families, sizes, weights and paragraph styles. Applications reach the shared panel through the session, and choose fonts by `TFXFontDescriptor`. `NSERulerView` draws a text ruler with tab stops and indents.
 
 Font choices belong to the host. A manager has no built-in family catalogue: supply family metadata when constructing it, or offer fonts registered in its font library. The framework packages no site font files, and its chrome inherits the host's typography. Portable font descriptors retain requested intent; font acquisition and resolution use the caller's resources.
 
@@ -115,7 +115,7 @@ Font choices belong to the host. A manager has no built-in family catalogue: sup
 
 ## Web content
 
-`NSEWebContentView` hosts external web content in a sandboxed frame. `useWebContent()` returns a client whose `createSession(request)` opens a session with a declared navigation policy. Pass the session to the view as its `session` prop.
+`NSEWebView` hosts external web content in a sandboxed frame. `useWebContent()` returns a client whose `createSession(request)` opens a session with a declared navigation policy. Pass the session to the view as its `session` prop.
 
 A session reports a snapshot with its `title`, its `state` (`loading`, `ready`, `suspended`, `failed` or `closed`), the frame's source, the expected origin and the sandbox in force. It offers `navigate`, `postMessage` and `openExternal`, each of which resolves to whether the host allowed it, and `dispose` to release the frame.
 

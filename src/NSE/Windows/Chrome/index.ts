@@ -22,7 +22,6 @@ export { NSETopBar } from "./NSETopBar";
 export { NSETopBarButton } from "./NSETopBarButton";
 export { NSEStatusBar } from "./NSEStatusBar";
 export { NSEPageHeader } from "./NSEPageHeader";
-export { NSEHeader, NSEPrevNextBanner } from "./NSEHeaders";
 export { nseTopBarStyles } from "./nseTopBarStyles";
 export type {
   NSEChromeScheme,
@@ -35,5 +34,4 @@ export type {
   NSETopBarVariant,
 } from "./nseTopBarTypes";
 export type { NSEStatusBarProps, NSEStatusBarVariant } from "./NSEStatusBar";
-export type { NSEHeaderProps, NSEPrevNextBannerProps } from "./NSEHeaders";
 export type { NSEPageHeaderProps } from "./NSEPageHeader";

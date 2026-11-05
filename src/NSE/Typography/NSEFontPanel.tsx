@@ -38,7 +38,7 @@ import { NSEToolbar } from "../Toolbars/NSEToolbar";
 import { DocumentColourGlyph, GearGlyph, MinusGlyph, PlusGlyph, ShadowGlyph, StrikethroughGlyph, TextColourGlyph, UnderlineGlyph } from "./fontPanelIcons";
 import type { NSEFontLibrary, NSEFontLibrarySnapshot } from "./NSEFontLibrary";
 import { NSEFontManager } from "./NSEFontManager";
-import { NSERuler } from "./NSERuler";
+import { NSERulerView } from "./NSERulerView";
 import {
   cssForTextShadow,
   normaliseParagraphStyle,
@@ -676,7 +676,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
             onClick={() => updateParagraph(normaliseParagraphStyleMutation({ ...style, alignment }))}
           />)}
         </NSEToolbar>
-        <NSERuler value={style} direction={direction} readOnly={readOnly} onChange={updateParagraph} />
+        <NSERulerView value={style} direction={direction} readOnly={readOnly} onChange={updateParagraph} />
       </fieldset> : null}
       <p role="status" data-nse-part="notice">{!preset ? "No fonts available." : notice}</p>
       {status !== "idle" && status !== "executed" ? <p role="alert">Typography command {status}.</p> : null}

@@ -237,8 +237,8 @@ export type {
   NSEFontTextStyle,
   NSESwitchProps,
 } from "./Controls/Fields/NSEFields";
-export { NSEPageHeader, NSEHeader, NSEPrevNextBanner } from "./Windows/Chrome";
-export type { NSEHeaderProps, NSEPageHeaderProps, NSEPrevNextBannerProps } from "./Windows/Chrome";
+export { NSEPageHeader } from "./Windows/Chrome";
+export type { NSEPageHeaderProps } from "./Windows/Chrome";
 export { NSETopBar, NSETopBarButton, NSEStatusBar } from "./Windows/Chrome";
 export type {
   NSEChromeScheme,
@@ -803,21 +803,21 @@ export type {
   NSEFontPanelProps,
 } from "./Typography/NSEFontPanel";
 export {
-  NSERuler,
-} from "./Typography/NSERuler";
+  NSERulerView,
+} from "./Typography/NSERulerView";
 export type {
-  NSERulerProps,
-} from "./Typography/NSERuler";
+  NSERulerViewProps,
+} from "./Typography/NSERulerView";
 export type {
   NSEParagraphStyle,
 } from "./Typography/typographyTypes";
 export {
-  NSEWebContentView,
-} from "./WebContent/NSEWebContentView";
+  NSEWebView,
+} from "./WebContent/NSEWebView";
 export type {
   NSEWebContentSourceViewProps,
-  NSEWebContentViewProps,
-} from "./WebContent/NSEWebContentView";
+  NSEWebViewProps,
+} from "./WebContent/NSEWebView";
 export {
   useNSEDeferredDisposal,
 } from "./interactionLifecycle";
