@@ -19,9 +19,11 @@
  */
 
 import {
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
+  useState,
   useSyncExternalStore,
   type HTMLAttributes,
   type KeyboardEvent,
@@ -96,11 +98,35 @@ export function NSESplitViewAdapter({
   const dragRef = useRef<{ divider: number; coordinate: number } | null>(null);
   const previousPresentation = useRef(snapshot.presentation);
 
+  // Panes divide the space the adapter actually occupies. A split nested inside
+  // another region (an editor above a console, a canvas beside an inspector) is
+  // smaller than the window, so the window bounds are only the fallback before
+  // the adapter has been measured, or where ResizeObserver is unavailable.
+  const [root, setRoot] = useState<HTMLDivElement | null>(null);
+  const [measured, setMeasured] = useState<{ readonly width: number; readonly height: number } | null>(null);
+  const rootRef = useCallback((node: HTMLDivElement | null) => setRoot(node), []);
+  useLayoutEffect(() => {
+    if (!root) return undefined;
+    const read = () => {
+      const width = Math.round(root.clientWidth);
+      const height = Math.round(root.clientHeight);
+      if (width <= 0 && height <= 0) return;
+      setMeasured((previous) => previous && previous.width === width && previous.height === height ? previous : { width, height });
+    };
+    read();
+    const View = root.ownerDocument.defaultView;
+    if (!View || typeof View.ResizeObserver !== "function") return undefined;
+    const observer = new View.ResizeObserver(read);
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, [root]);
+  const bounds = measured ?? windowBounds;
+
   useLayoutEffect(() => {
     controller.setAvailablePaneIds(new Set(panes.map(({ id }) => id)));
-    controller.resize(snapshot.orientation === "horizontal" ? windowBounds.width : windowBounds.height);
+    controller.resize(snapshot.orientation === "horizontal" ? bounds.width : bounds.height);
     controller.setPresentation(responsiveState.mode === "mobile" ? "single-pane" : "split");
-  }, [controller, panes, responsiveState.mode, snapshot.orientation, windowBounds.height, windowBounds.width]);
+  }, [controller, panes, responsiveState.mode, snapshot.orientation, bounds.height, bounds.width]);
 
   useEffect(() => {
     const live = new Set(panes.map(({ id }) => id));
@@ -134,7 +160,7 @@ export function NSESplitViewAdapter({
 
   function renderPresentation() {
   if (!presentsContent) {
-    return <div {...props} className={`nse-split-view-adapter ${className}`.trim()} dir={dir} aria-label={ariaLabel} aria-busy={dataViewIsBusy(state) || undefined} aria-disabled={hostDisabled || undefined} data-nse-control="split-view" data-state={state.kind} data-presentation={snapshot.presentation} tabIndex={-1}>
+    return <div {...props} ref={rootRef} className={`nse-split-view-adapter ${className}`.trim()} dir={dir} aria-label={ariaLabel} aria-busy={dataViewIsBusy(state) || undefined} aria-disabled={hostDisabled || undefined} data-nse-control="split-view" data-state={state.kind} data-presentation={snapshot.presentation} tabIndex={-1}>
       {stateFeedback}
     </div>;
   }
@@ -142,7 +168,7 @@ export function NSESplitViewAdapter({
   if (snapshot.presentation === "single-pane") {
     const active = definitions.get(snapshot.activePaneId) ?? definitions.get(visible[0]?.id ?? "");
     return (
-      <div {...props} className={`nse-split-view-adapter ${className}`.trim()} dir={dir} aria-label={ariaLabel} aria-disabled={hostDisabled || undefined} data-nse-control="split-view" data-state={state.kind} data-presentation="single-pane">
+      <div {...props} ref={rootRef} className={`nse-split-view-adapter ${className}`.trim()} dir={dir} aria-label={ariaLabel} aria-disabled={hostDisabled || undefined} data-nse-control="split-view" data-state={state.kind} data-presentation="single-pane">
         <div role="tablist" aria-label={`${ariaLabel} panes`}>
           {visible.map((pane) => (
             <button
@@ -169,6 +195,7 @@ export function NSESplitViewAdapter({
     return (
       <NSESplitView
         {...props}
+        ref={rootRef}
         className={`nse-split-view-adapter ${className}`.trim()}
         aria-label={ariaLabel}
         aria-disabled={hostDisabled || undefined}
@@ -219,6 +246,7 @@ export function NSESplitViewAdapter({
   return (
     <div
       {...props}
+      ref={rootRef}
       className={`nse-split-view-adapter ${className}`.trim()}
       dir={dir}
       aria-label={ariaLabel}
@@ -238,6 +266,7 @@ export function NSESplitViewAdapter({
               ref={(node) => { if (node) paneNodes.current.set(pane.id, node); else paneNodes.current.delete(pane.id); }}
               tabIndex={-1}
               data-pane-id={pane.id}
+              data-nse-part="split-pane"
               style={{ flex: `0 0 ${pane.size}px` }}
             >
               {paneContent(pane.id)}
@@ -245,6 +274,8 @@ export function NSESplitViewAdapter({
             {next ? (
               <div
                 role="separator"
+                data-nse-part="split-divider"
+                data-orientation={snapshot.orientation}
                 tabIndex={allowsMutation ? 0 : -1}
                 aria-label={`Resize ${definition.label} and ${definitions.get(next.id)!.label}`}
                 aria-orientation={snapshot.orientation === "horizontal" ? "vertical" : "horizontal"}

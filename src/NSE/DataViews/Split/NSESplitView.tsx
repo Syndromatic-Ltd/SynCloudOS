@@ -27,7 +27,8 @@ import {
   type HTMLAttributes,
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
-  type ReactNode
+  type ReactNode,
+  type Ref
 } from "react";
 
 import type { NSEBookRegions } from "../../Navigation/bookRegions";
@@ -51,6 +52,8 @@ export interface NSESplitViewProps extends HTMLAttributes<HTMLDivElement> {
   sidebarPosition?: "leading" | "trailing";
   label?: string;
   valueText?: (width: number) => string;
+  /** The split view's root element. */
+  ref?: Ref<HTMLDivElement>;
 }
 
 export function NSESplitView({
@@ -69,9 +72,15 @@ export function NSESplitView({
   dir,
   className = "",
   style,
+  ref,
   ...props
 }: NSESplitViewProps) {
   const root = useRef<HTMLDivElement>(null);
+  const setRoot = useCallback((node: HTMLDivElement | null) => {
+    root.current = node;
+    if (typeof ref === "function") ref(node);
+    else if (ref) ref.current = node;
+  }, [ref]);
   const [inheritedDirection, setInheritedDirection] = useState("ltr");
   useLayoutEffect(() => {
     const element = root.current;
@@ -151,7 +160,7 @@ export function NSESplitView({
 
   return (
     <div
-      ref={root}
+      ref={setRoot}
       className={classes("nse-split-view", className)}
       data-book-regions={bookRegions ? "true" : undefined}
       data-book-sidebar-side={((sidebarPosition === "leading") !== (direction === "rtl")) ? "left" : "right"}

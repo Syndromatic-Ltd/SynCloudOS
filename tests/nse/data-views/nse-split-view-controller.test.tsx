@@ -302,4 +302,43 @@ describe("split view controller", () => {
     controller.resize(400);
     expect(controller.getSnapshot().panes.map(({ size }) => size)).toEqual([200, 200]);
   });
+  it("divides the space the adapter occupies, not the window, so a nested split fits its region", () => {
+    const controller = new NSESplitViewController({
+      id: "nested",
+      orientation: "vertical",
+      panes: [
+        { id: "canvas", minimum: 200, ideal: 600, maximum: Number.POSITIVE_INFINITY, collapsible: false, collapsePriority: 0 },
+        { id: "analysis", minimum: 120, ideal: 200, maximum: 600, collapsible: true, collapsePriority: 10 },
+      ],
+    });
+    let observed: (() => void) | null = null;
+    const height = vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains("nse-split-view-adapter") ? 500 : 0;
+    });
+    const width = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains("nse-split-view-adapter") ? 800 : 0;
+    });
+    vi.stubGlobal("ResizeObserver", class { constructor(callback: () => void) { observed = callback; } observe() {} disconnect() {} });
+    try {
+      render(<NSESplitViewAdapter
+        aria-label="Workspace"
+        controller={controller}
+        responsiveState={{ mode: "desktop", width: 1400, height: 900, prefersReducedMotion: false }}
+        windowBounds={{ width: 1400, height: 900 }}
+        panes={[{ id: "canvas", label: "Canvas", content: <p>Canvas</p> }, { id: "analysis", label: "Analysis", content: <p>Analysis</p> }]}
+      />);
+      expect(controller.getSnapshot().availableSize).toBe(500);
+      expect(controller.getSnapshot().panes.reduce((sum, pane) => sum + pane.size, 0)).toBe(500);
+      const divider = screen.getByRole("separator");
+      expect(divider.getAttribute("data-nse-part")).toBe("split-divider");
+      expect(divider.getAttribute("data-orientation")).toBe("vertical");
+      height.mockImplementation(function (this: HTMLElement) { return this.classList.contains("nse-split-view-adapter") ? 420 : 0; });
+      React.act(() => observed?.());
+      expect(controller.getSnapshot().availableSize).toBe(420);
+    } finally {
+      height.mockRestore();
+      width.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
 });
