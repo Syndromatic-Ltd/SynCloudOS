@@ -5842,6 +5842,11 @@
   border-end-end-radius: calc(var(--nse-atmo-rg-band) * 0.22);
 }
 
+/* NSControl.ControlSize.large: the 28px band. Small is the 24px default band. */
+[data-nse-appearance="atmo"] :is(.nse-control-button, .nse-extended-tool-button-group, .nse-extended-radio-tool-button-group)[data-size="large"] {
+  --nse-control-height: 28px;
+}
+
 [data-nse-appearance="atmo"] :is(.nse-extended-tool-button, .nse-extended-tool-button-group, .nse-extended-radio-tool-button-group)[data-size] {
   --nse-atmo-bar-h: var(--nse-control-height, 24px);
 }

@@ -67,8 +67,11 @@ export type NSEControlStateValue = "on" | "off" | "mixed";
 /** NSAppearance.Name: the light (`aqua`) or dark (`darkAqua`) appearance a view draws in. */
 export type NSEAppearanceName = "aqua" | "darkAqua";
 
-/** NSControl.ControlSize. */
-export type NSEButtonControlSize = "regular" | "small";
+/**
+ * NSControl.ControlSize. Capsule bezels draw from one band height: small is 24px, large 28px, and
+ * regular is the theme's standard size for the bezel.
+ */
+export type NSEButtonControlSize = "small" | "regular" | "large";
 
 export interface NSEButtonProps<Payload = unknown>
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title" | "disabled" | "children" | "value" | "defaultValue">,
@@ -237,7 +240,7 @@ const NSEPushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function
       data-pressed={drawnPressed ? "true" : "false"}
       data-press-active={press.active ? "true" : "false"}
       data-key-equivalent={keyEquivalent === "\r" ? "default" : undefined}
-      data-size={controlSize === "small" ? "small" : undefined}
+      data-size={controlSize === "regular" ? undefined : controlSize}
       aria-pressed={alternates && !disclosure ? on : undefined}
       aria-expanded={disclosure ? state === "on" : undefined}
       aria-label={position === "imageOnly" ? label : undefined}
@@ -352,7 +355,7 @@ function NSESwitchButtonCell(
         title={toolTip}
         data-state={current.value === "mixed" ? "mixed" : current.value ? "checked" : "unchecked"}
         data-disabled={disabled ? "true" : "false"}
-        data-size={controlSize === "small" ? "small" : undefined}
+        data-size={controlSize === "regular" ? undefined : controlSize}
       >
         <span className="nse-control-checkbox-control">
           <input

@@ -73,7 +73,7 @@ describe("NSE push button press lifetime", () => {
     expect(getByRole("button", { name: "Reload Webspring" })).toBe(button);
     expect(button.getAttribute("data-press-active")).toBe("true");
     pointer(window, "pointercancel");
-  });
+  }, 30_000); // The first import of SystemAlert loads the whole system UI graph.
 
   it("cancels outside releases and pointer cancellation without synthesizing activation", () => {
     const { button, click } = setup();
@@ -122,5 +122,17 @@ describe("NSE push button press lifetime", () => {
     pointer(button, "pointerdown");
     expect(button.getAttribute("data-press-active")).toBe("false");
     expect(button.getAttribute("data-pressed")).toBe("true");
+  });
+});
+
+describe("NSEButton controlSize", () => {
+  it("marks small and large sizes for the theme and leaves regular unmarked", () => {
+    const view = render(<>
+      <NSEButton title="Small" controlSize="small" />
+      <NSEButton title="Regular" controlSize="regular" />
+      <NSEButton title="Large" bezelStyle="texturedRounded" controlSize="large" />
+    </>);
+    const sizes = Array.from(view.container.querySelectorAll("button")).map((button) => button.getAttribute("data-size"));
+    expect(sizes).toEqual(["small", null, "large"]);
   });
 });
