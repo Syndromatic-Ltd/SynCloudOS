@@ -6027,7 +6027,7 @@
    not, as NSOutlineView and NSBrowser do. The disclosure is the accordion's
    triangle, turned a quarter when open. Rows keep the Mac's 23px.
    ========================================================================= */
-[data-nse-appearance="atmo"] .nse-outline-view,
+[data-nse-appearance="atmo"] .nse-outline-view:not([data-style="source-list"]),
 [data-nse-appearance="atmo"] .nse-browser-columns {
   box-sizing: border-box;
   border: 1px solid var(--nse-atmo-table-edge);
@@ -6036,13 +6036,13 @@
   font-size: 13px;
 }
 
-[data-nse-appearance="atmo"] .nse-outline-view:focus-visible,
+[data-nse-appearance="atmo"] .nse-outline-view:not([data-style="source-list"]):focus-visible,
 [data-nse-appearance="atmo"] .nse-browser-column [role="listbox"]:focus-visible {
   outline: none;
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
-[data-nse-appearance="atmo"] .nse-outline-view [data-nse-part="row"] {
+[data-nse-appearance="atmo"] .nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"] {
   --nse-atmo-outline-disclosure: 14px;
   display: flex;
   align-items: center;
@@ -6054,11 +6054,11 @@
 
 /* Leaves line their labels up with their siblings' labels, past the
    disclosure column a branch spends on its triangle. */
-[data-nse-appearance="atmo"] .nse-outline-view [data-nse-part="row"][data-kind="leaf"] {
+[data-nse-appearance="atmo"] .nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"][data-kind="leaf"] {
   padding-inline-start: calc(6px + var(--nse-atmo-outline-disclosure) + 4px + var(--nse-outline-level, 0) * var(--nse-outline-indentation, 16px));
 }
 
-[data-nse-appearance="atmo"] .nse-outline-view [data-nse-part="label"] {
+[data-nse-appearance="atmo"] .nse-outline-view:not([data-style="source-list"]) [data-nse-part="label"] {
   min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -6108,11 +6108,11 @@
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
-[data-nse-appearance="atmo"] .nse-outline-view [data-nse-part="row"][data-state="selected"] {
+[data-nse-appearance="atmo"] .nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"][data-state="selected"] {
   background: var(--nse-atmo-table-selection-inactive);
 }
 
-[data-nse-appearance="atmo"] .nse-outline-view:focus-within [data-nse-part="row"][data-state="selected"] {
+[data-nse-appearance="atmo"] .nse-outline-view:not([data-style="source-list"]):focus-within [data-nse-part="row"][data-state="selected"] {
   color: #fff;
   background: var(--nse-atmo-table-selection);
 }
@@ -6200,7 +6200,7 @@
 }
 
 @media (forced-colors: active) {
-  [data-nse-appearance="atmo"] .nse-outline-view [data-nse-part="row"][data-state="selected"],
+  [data-nse-appearance="atmo"] .nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"][data-state="selected"],
   [data-nse-appearance="atmo"] .nse-browser-option[data-focused] {
     forced-color-adjust: none;
     color: HighlightText;
