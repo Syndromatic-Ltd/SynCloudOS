@@ -111,10 +111,12 @@ export interface NSEFormattedTextFieldProps<T> extends NSETextFieldChromeProps, 
  */
 export interface NSETextFieldProps<T = string> extends NSETextFieldChromeProps, Omit<
   InputHTMLAttributes<HTMLInputElement>,
-  "prefix" | "value" | "defaultValue" | "height"
+  "prefix" | "value" | "defaultValue" | "height" | "disabled"
 > {
   /** NSTextField.isEditable (default true); false makes the field a label (see NSELabelTextFieldProps). */
   isEditable?: true;
+  /** NSControl.isEnabled (default true). */
+  isEnabled?: boolean;
   value?: T;
   defaultValue?: T;
   invalid?: boolean;
@@ -186,7 +188,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
     groupPosition = "single",
     className = "",
     id,
-    disabled,
+    isEnabled = true,
     readOnly,
     required,
     name,
@@ -206,6 +208,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
     "aria-describedby": ariaDescribedBy,
     ...inputProps
   } = props;
+  const disabled = !isEnabled;
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const inputRef = useRef<HTMLInputElement>(null);

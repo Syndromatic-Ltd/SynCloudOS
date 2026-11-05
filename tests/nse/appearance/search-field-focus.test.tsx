@@ -93,7 +93,7 @@ describe("Atmo search-field focus paint", () => {
   });
 
   it("does not paint a disabled field even if another descendant receives focus", () => {
-    const { input, frame } = mount({ disabled: true });
+    const { input, frame } = mount({ isEnabled: false });
     focus(input, frame);
     expect(document.activeElement).not.toBe(input);
     frame.tabIndex = 0;

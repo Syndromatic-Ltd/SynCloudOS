@@ -39,7 +39,8 @@ export interface NSESearchFieldProps {
   readonly "aria-label"?: string;
   readonly value?: string;
   readonly defaultValue?: string;
-  readonly disabled?: boolean;
+  /** NSControl.isEnabled (default true). */
+  readonly isEnabled?: boolean;
   readonly readOnly?: boolean;
   readonly name?: string;
   readonly id?: string;
@@ -111,7 +112,7 @@ function NSESearchFieldControl(props: NSESearchFieldProps) {
   useEffect(() => () => cancelPending(), [runtime]);
   const query = (value: string) => {
     cancelPending();
-    if (!props.onQuery || props.disabled || props.readOnly) return;
+    if (!props.onQuery || (props.isEnabled === false) || props.readOnly) return;
     const abort = new AbortController();
     const execute = () => { if (!abort.signal.aborted) void Promise.resolve(props.onQuery?.(value, abort.signal)).catch(() => undefined); };
     const delay = Math.max(0, props.debounceMs ?? 0);
@@ -127,7 +128,7 @@ function NSESearchFieldControl(props: NSESearchFieldProps) {
     setRecentOpen(false);
   };
   const submit = async (value = current) => {
-    if (props.disabled || props.readOnly || composing.current) return;
+    if ((props.isEnabled === false) || props.readOnly || composing.current) return;
     cancelPending();
     if (props.command) {
       const result = await command.dispatch({ query: value });
@@ -135,8 +136,8 @@ function NSESearchFieldControl(props: NSESearchFieldProps) {
     }
     rememberAndNotify(value);
   };
-  const clear = () => { if (props.disabled || props.readOnly) return; cancelPending(); if (!controlled) setStored(""); props.onValueChange?.(""); props.onClear?.(); props.onCancel?.(); setRecentOpen(recents.length > 0); inputRef.current?.focus({ preventScroll: true }); };
+  const clear = () => { if ((props.isEnabled === false) || props.readOnly) return; cancelPending(); if (!controlled) setStored(""); props.onValueChange?.(""); props.onClear?.(); props.onCancel?.(); setRecentOpen(recents.length > 0); inputRef.current?.focus({ preventScroll: true }); };
   const accessibleName = props["aria-label"] ?? (typeof props.label === "string" ? props.label : props.placeholder ?? props.searchLabel ?? "Search");
   const popupId = `search-recents-${instanceId}`;
-  return <label className={["nse-control-search-field", props.className].filter(Boolean).join(" ")} data-nse-control="search-field" data-size={props.height !== undefined ? "custom" : props.controlSize === "small" ? "small" : undefined} style={sizedControlStyle(undefined, props.height, props.width)} data-state={props.disabled ? "disabled" : props.readOnly ? "read-only" : current ? "populated" : "empty"}>{props.label ? <span className="nse-control-field-label">{props.label}</span> : null}<span className="nse-control-search-frame" data-affordance={showsAffordance ? "visible" : "hidden"} data-search-icon={props.showsSearchIcon ? "visible" : undefined}>{props.showsSearchIcon ? <span className="nse-control-search-icon" aria-hidden="true" /> : null}<input ref={inputRef} id={props.id ?? `search-input-${instanceId}`} type="search" aria-label={accessibleName} aria-controls={recentOpen && overlay ? popupId : undefined} aria-expanded={recentOpen && Boolean(overlay)} name={props.name} placeholder={props.placeholder ?? "search something…"} value={current} disabled={props.disabled} readOnly={props.readOnly} onFocus={() => setRecentOpen(Boolean(!current && recents.length && overlay))} onCompositionStart={() => { composing.current = true; cancelPending(); }} onCompositionEnd={(event) => { composing.current = false; set(event.currentTarget.value); }} onInput={props.onInput} onChange={(event) => { props.onChange?.(event); if (!composing.current) set(event.currentTarget.value); }} onKeyDown={(event) => { if (event.key === "Enter" && !composing.current) { event.preventDefault(); void submit(); } else if (event.key === "Escape") { if (current) clear(); else setRecentOpen(false); } }} />{showsAffordance && current ? <button className="nse-control-search-affordance" type="button" data-state="clear" aria-label={props.clearLabel ?? "Clear search"} disabled={props.disabled || props.readOnly} onClick={clear}>×</button> : null}</span>{overlay && recents.length ? <NSEListboxPopup id={popupId} open={recentOpen} anchor={inputRef.current} parentResponderId={props.parentResponderId} labelledBy={props.id ?? `search-input-${instanceId}`} options={recents.map((recent) => ({ id: recent, label: recent, value: recent }))} onOpenChange={setRecentOpen} onSelect={(option) => { const recent = option.value; if (!recent) return; if (!controlled) setStored(recent); props.onValueChange?.(recent); void submit(recent); }} /> : null}</label>;
+  return <label className={["nse-control-search-field", props.className].filter(Boolean).join(" ")} data-nse-control="search-field" data-size={props.height !== undefined ? "custom" : props.controlSize === "small" ? "small" : undefined} style={sizedControlStyle(undefined, props.height, props.width)} data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : current ? "populated" : "empty"}>{props.label ? <span className="nse-control-field-label">{props.label}</span> : null}<span className="nse-control-search-frame" data-affordance={showsAffordance ? "visible" : "hidden"} data-search-icon={props.showsSearchIcon ? "visible" : undefined}>{props.showsSearchIcon ? <span className="nse-control-search-icon" aria-hidden="true" /> : null}<input ref={inputRef} id={props.id ?? `search-input-${instanceId}`} type="search" aria-label={accessibleName} aria-controls={recentOpen && overlay ? popupId : undefined} aria-expanded={recentOpen && Boolean(overlay)} name={props.name} placeholder={props.placeholder ?? "search something…"} value={current} disabled={(props.isEnabled === false)} readOnly={props.readOnly} onFocus={() => setRecentOpen(Boolean(!current && recents.length && overlay))} onCompositionStart={() => { composing.current = true; cancelPending(); }} onCompositionEnd={(event) => { composing.current = false; set(event.currentTarget.value); }} onInput={props.onInput} onChange={(event) => { props.onChange?.(event); if (!composing.current) set(event.currentTarget.value); }} onKeyDown={(event) => { if (event.key === "Enter" && !composing.current) { event.preventDefault(); void submit(); } else if (event.key === "Escape") { if (current) clear(); else setRecentOpen(false); } }} />{showsAffordance && current ? <button className="nse-control-search-affordance" type="button" data-state="clear" aria-label={props.clearLabel ?? "Clear search"} disabled={(props.isEnabled === false) || props.readOnly} onClick={clear}>×</button> : null}</span>{overlay && recents.length ? <NSEListboxPopup id={popupId} open={recentOpen} anchor={inputRef.current} parentResponderId={props.parentResponderId} labelledBy={props.id ?? `search-input-${instanceId}`} options={recents.map((recent) => ({ id: recent, label: recent, value: recent }))} onOpenChange={setRecentOpen} onSelect={(option) => { const recent = option.value; if (!recent) return; if (!controlled) setStored(recent); props.onValueChange?.(recent); void submit(recent); }} /> : null}</label>;
 }

@@ -117,10 +117,10 @@ function RuleComparisonControls({ row, label, fields, operators, templates, loca
         : { ...row, operator, value: value as never, ...(options === undefined ? { options: undefined } : { options }) });
     }} />
     {row.operator === "between" ? <>
-      <NSETextField className="nse-rule-value" aria-label={`Lower value rule ${row.id}`} value={parts[0] ?? ""} readOnly={readOnly} disabled={disabled} onChange={(event) => { const next = [event.target.value, parts[1] ?? ""]; setParts(next); if (next[1] !== "") publishParts(next); }} />
-      <NSETextField className="nse-rule-value" aria-label={`Upper value rule ${row.id}`} value={parts[1] ?? ""} readOnly={readOnly} disabled={disabled} onChange={(event) => { const next = [parts[0] ?? "", event.target.value]; setParts(next); if (next[0] !== "") publishParts(next); }} />
-    </> : row.operator === "in" ? <NSETextField className="nse-rule-value" aria-label={`Values rule ${row.id}`} value={parts.join(", ")} readOnly={readOnly} disabled={disabled} onChange={(event) => { const next = event.target.value.split(","); setParts(next); publishParts(next); }} />
-      : option?.arity !== 0 ? <NSETextField className="nse-rule-value" aria-label={`Value ${label}`} value={parts[0] ?? ""} readOnly={readOnly} disabled={disabled} onChange={(event) => { const next = [event.target.value]; setParts(next); publishParts(next); }} /> : null}
+      <NSETextField className="nse-rule-value" aria-label={`Lower value rule ${row.id}`} value={parts[0] ?? ""} readOnly={readOnly} isEnabled={!disabled} onChange={(event) => { const next = [event.target.value, parts[1] ?? ""]; setParts(next); if (next[1] !== "") publishParts(next); }} />
+      <NSETextField className="nse-rule-value" aria-label={`Upper value rule ${row.id}`} value={parts[1] ?? ""} readOnly={readOnly} isEnabled={!disabled} onChange={(event) => { const next = [parts[0] ?? "", event.target.value]; setParts(next); if (next[0] !== "") publishParts(next); }} />
+    </> : row.operator === "in" ? <NSETextField className="nse-rule-value" aria-label={`Values rule ${row.id}`} value={parts.join(", ")} readOnly={readOnly} isEnabled={!disabled} onChange={(event) => { const next = event.target.value.split(","); setParts(next); publishParts(next); }} />
+      : option?.arity !== 0 ? <NSETextField className="nse-rule-value" aria-label={`Value ${label}`} value={parts[0] ?? ""} readOnly={readOnly} isEnabled={!disabled} onChange={(event) => { const next = [event.target.value]; setParts(next); publishParts(next); }} /> : null}
     {error && <span role="alert" className="nse-rule-error">{error}</span>}
   </>;
 }

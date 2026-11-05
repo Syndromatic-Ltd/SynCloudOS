@@ -369,7 +369,7 @@ describe("colour controls", () => {
   });
 
   it("keeps disabled wells inert", () => {
-    render(wrapper(<NSEColourWell aria-label="Ink" disabled defaultValue={GFXColour.parse("#000")} />));
+    render(wrapper(<NSEColourWell aria-label="Ink" isEnabled={false} defaultValue={GFXColour.parse("#000")} />));
     const well = screen.getByRole("button", { name: "Ink" });
     expect((well as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(well);

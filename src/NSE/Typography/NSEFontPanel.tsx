@@ -609,7 +609,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
         <FontPanelList title="Typeface" label="Typeface" items={typefaceItems} selectedId={typefaces.some((candidate) => candidate.id === fontId) ? fontId : null} width={118} rows={6} readOnly={readOnly} onSelect={chooseTypeface} />
         <div data-nse-part="size-column" role="group" aria-label="Size">
           <span data-nse-part="column-caption" aria-hidden="true">Size</span>
-          <NSETextField controlSize="mini" aria-label="Font size" type="number" inputMode="decimal" min={minimumSize} max={maximumSize} disabled={readOnly || !preset} value={sizeText}
+          <NSETextField controlSize="mini" aria-label="Font size" type="number" inputMode="decimal" min={minimumSize} max={maximumSize} isEnabled={!(readOnly || !preset)} value={sizeText}
             onChange={(event) => setSizeText(event.currentTarget.value)}
             onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); chooseSize(Number(sizeText)); } }}
             onBlur={() => { if (Number(sizeText) !== size) chooseSize(Number(sizeText)); }} />

@@ -48,7 +48,8 @@ export interface NSESecureTextFieldProps extends Omit<InputHTMLAttributes<HTMLIn
   readonly name?: string;
   readonly value?: string;
   readonly defaultValue?: string;
-  readonly disabled?: boolean;
+  /** NSControl.isEnabled (default true). */
+  readonly isEnabled?: boolean;
   readonly readOnly?: boolean;
   readonly autoComplete?: string;
   readonly required?: boolean;
@@ -96,7 +97,7 @@ function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
     form.addEventListener("reset", reset);
     return () => form.removeEventListener("reset", reset);
   }, [controlled, props.defaultValue]);
-  useEffect(() => { if (props.disabled || props.readOnly || policy === "never") conceal(); }, [policy, props.disabled, props.readOnly]);
+  useEffect(() => { if ((props.isEnabled === false) || props.readOnly || policy === "never") conceal(); }, [policy, (props.isEnabled === false), props.readOnly]);
 
   const { revealPolicy: _revealPolicy, invalid: _invalid, validationMessage: _validationMessage, validation: _validation, label, prefix, suffix, onValueChange: _onValueChange, value: _value, defaultValue: _defaultValue, onBlur, onKeyDown, onInvalid, onChange, ...inputProps } = props;
   return (
@@ -110,7 +111,7 @@ function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
         type={revealed ? "text" : "password"}
         name={props.name}
         value={current}
-        disabled={props.disabled}
+        disabled={(props.isEnabled === false)}
         readOnly={props.readOnly}
         autoComplete={props.autoComplete}
         required={props.required}
@@ -127,7 +128,7 @@ function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
         <button
           type="button"
           aria-label={revealed ? "Conceal password" : "Reveal password"}
-          disabled={props.disabled || props.readOnly}
+          disabled={(props.isEnabled === false) || props.readOnly}
           onClick={() => { if (policy === "toggle") setRevealed((value) => !value); }}
           onPointerDown={(event) => {
             if (policy !== "hold") return;
