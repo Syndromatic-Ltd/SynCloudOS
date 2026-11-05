@@ -19,7 +19,7 @@
  */
 
 import { useMemo } from "react";
-import { NSESwitch, NSEGroupBox } from "../../../NSE/public/controls";
+import { NSESwitch, NSEBox } from "../../../NSE/public/controls";
 import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import type { RuntimeSnapshot } from "../../../SynCloudOS/SynCloudOS";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
@@ -97,7 +97,7 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
           <p className="nse-prefs-note nse-prefs-note-lead">
             {t("preferences.notificationsLead", "View notifications from:")}
           </p>
-          <NSEGroupBox>
+          <NSEBox>
             {apps.map((app) => (
               <NSEListItem
                 key={app.bundleIdentifier}
@@ -115,7 +115,7 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
                 {app.displayName}
               </NSEListItem>
             ))}
-          </NSEGroupBox>
+          </NSEBox>
           {settings.notificationsEnabled ? null : (
             <p className="nse-prefs-note">
               {t(

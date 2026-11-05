@@ -21,6 +21,7 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
  */
 
 import { NSEMetalThumb, type NSEThumbMaterial } from "../../Appearance/NSEMetalThumb";
+import { NSEDivider } from "../Selection/NSEDivider";
 import {
   useCallback,
   useEffect,
@@ -835,31 +836,26 @@ function NSERadioGroupControl({
   );
 }
 
+/** NSBox.TitlePosition. */
 export type NSEBoxTitlePosition =
-  | "none"
-  | "above-top"
-  | "at-top"
-  | "below-top"
-  | "above-bottom"
-  | "at-bottom"
-  | "below-bottom";
+  | "noTitle"
+  | "aboveTop"
+  | "atTop"
+  | "belowTop"
+  | "aboveBottom"
+  | "atBottom"
+  | "belowBottom";
 
-export type NSEBoxKind = "primary" | "secondary" | "separator" | "custom";
-export type NSEBoxBorder = "none" | "line" | "bezel" | "groove";
+/** NSBox.BoxType. */
+export type NSEBoxType = "primary" | "secondary" | "separator" | "custom";
+/** NSBorderType. */
+export type NSEBorderType = "noBorder" | "lineBorder" | "bezelBorder" | "grooveBorder";
 
-export interface NSEBoxContentInsets {
-  readonly top: number;
-  readonly right: number;
-  readonly bottom: number;
-  readonly left: number;
+/** NSBox.contentViewMargins: the horizontal (width) and vertical (height) distance from the border to the content. */
+export interface NSEBoxContentViewMargins {
+  readonly width: number;
+  readonly height: number;
 }
-
-/**
- * A container's layout margins (UIKit's layoutMargins): `standard` insets
- * content by the SDK's content margin, except that rows (list items) run edge
- * to edge like a grouped table section; `none` removes the margins.
- */
-export type NSELayoutMargins = "standard" | "none";
 
 /**
  * How a container lays out its children. `stack` (the default) is a
@@ -870,98 +866,113 @@ export type NSELayoutMargins = "standard" | "none";
 export type NSEContentLayout = "stack" | "flow";
 
 export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "title"> {
+  /** NSBox.title. A titled separator draws its title as the theme's captioned separator. */
   title?: ReactNode;
+  /** NSBox.titlePosition (default atTop with a title, otherwise noTitle). */
   titlePosition?: NSEBoxTitlePosition;
-  kind?: NSEBoxKind;
-  border?: NSEBoxBorder;
-  /** Explicit content insets in pixels. When given, they replace `layoutMargins`. */
-  contentInsets?: NSEBoxContentInsets;
-  layoutMargins?: NSELayoutMargins;
+  /** NSBox.boxType (default primary). */
+  boxType?: NSEBoxType;
+  /** NSBox.borderType (default bezelBorder). */
+  borderType?: NSEBorderType;
+  /** NSBox.contentViewMargins. Without them the content sits at the standard content margin, and rows run edge to edge. */
+  contentViewMargins?: NSEBoxContentViewMargins;
   contentLayout?: NSEContentLayout;
-  fill?: string;
+  /** NSBox.fillColor, as one CSS background value. */
+  fillColor?: string;
   smoothSurface?: NSESmoothSurfaceRequest;
 }
 
 function validateNSEBoxFill(fill: string | undefined): string | undefined {
   if (fill === undefined) return undefined;
-  if (typeof fill !== "string") throw new TypeError("NSEBox fill must be a CSS background string.");
+  if (typeof fill !== "string") throw new TypeError("NSEBox fillColor must be a CSS background string.");
   const value = fill.trim();
   if (!value || value.length > 512 || /[;{}]/u.test(value)) {
-    throw new TypeError("NSEBox fill must be one safe CSS background value.");
+    throw new TypeError("NSEBox fillColor must be one safe CSS background value.");
   }
   const css = globalThis.CSS;
   if (css && typeof css.supports === "function" && !css.supports("background", value)) {
-    throw new TypeError(`NSEBox fill is not a supported CSS background: ${value}`);
+    throw new TypeError(`NSEBox fillColor is not a supported CSS background: ${value}`);
   }
   return value;
 }
 
-function validateNSEBoxInsets(insets: NSEBoxContentInsets | undefined): NSEBoxContentInsets | undefined {
-  if (insets === undefined) return undefined;
-  const descriptors = Object.getOwnPropertyDescriptors(insets);
-  const result = {} as Record<keyof NSEBoxContentInsets, number>;
-  for (const edge of ["top", "right", "bottom", "left"] as const) {
-    const descriptor = descriptors[edge];
+function validateNSEBoxMargins(margins: NSEBoxContentViewMargins | undefined): NSEBoxContentViewMargins | undefined {
+  if (margins === undefined) return undefined;
+  const descriptors = Object.getOwnPropertyDescriptors(margins);
+  const result = {} as Record<keyof NSEBoxContentViewMargins, number>;
+  for (const axis of ["width", "height"] as const) {
+    const descriptor = descriptors[axis];
     if (!descriptor || "get" in descriptor || "set" in descriptor) {
-      throw new TypeError(`NSEBox ${edge} inset must be a data property.`);
+      throw new TypeError(`NSEBox contentViewMargins ${axis} must be a data property.`);
     }
     const value = descriptor.value;
     if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > 4096) {
-      throw new RangeError(`NSEBox ${edge} inset must be a finite number from 0 to 4096.`);
+      throw new RangeError(`NSEBox contentViewMargins ${axis} must be a finite number from 0 to 4096.`);
     }
-    result[edge] = value;
+    result[axis] = value;
   }
   return result;
 }
 
+// The theme's recipes and attributes keep their own spellings.
+const titlePositionAttribute: Record<NSEBoxTitlePosition, string> = {
+  noTitle: "none", aboveTop: "above-top", atTop: "at-top", belowTop: "below-top",
+  aboveBottom: "above-bottom", atBottom: "at-bottom", belowBottom: "below-bottom",
+};
+const borderAttribute: Record<NSEBorderType, string> = { noBorder: "none", lineBorder: "line", bezelBorder: "bezel", grooveBorder: "groove" };
+
 export function NSEBox({
   title,
-  titlePosition = title ? "at-top" : "none",
-  kind = "primary",
-  border = "bezel",
-  contentInsets,
-  layoutMargins = "standard",
+  titlePosition = title ? "atTop" : "noTitle",
+  boxType = "primary",
+  borderType = "bezelBorder",
+  contentViewMargins,
   contentLayout = "stack",
-  fill,
+  fillColor,
   smoothSurface = false,
   className = "",
   style,
   children,
   ...props
 }: NSEBoxProps) {
-  if (kind === "separator") {
+  const position = titlePositionAttribute[titlePosition];
+  const border = borderAttribute[borderType];
+  if (boxType === "separator") {
     if (children !== undefined && children !== null && import.meta.env.DEV) {
       throw new TypeError("NSEBox separators cannot contain children.");
     }
     const separatorLabel = props["aria-label"] ?? (typeof title === "string" ? title : undefined);
+    if (title && titlePosition !== "noTitle") {
+      return <NSEDivider className={classes("nse-box", "nse-box-separator-titled", className)} variant="alpha" caption={title} label={separatorLabel} style={style} />;
+    }
     return (
       <div
         {...props as HTMLAttributes<HTMLDivElement>}
         role="separator"
         aria-label={separatorLabel}
         className={classes("nse-box", "nse-box-separator", className)}
-        data-title-position={titlePosition}
+        data-title-position={position}
         data-box-kind="separator"
         data-border-style={border}
-        data-appearance-recipe={`box.separator.${border}.${titlePosition}`}
+        data-appearance-recipe={`box.separator.${border}.${position}`}
         style={style}
       />
     );
   }
 
-  const resolvedFill = validateNSEBoxFill(fill);
-  const resolvedInsets = validateNSEBoxInsets(contentInsets);
+  const resolvedFill = validateNSEBoxFill(fillColor);
+  const resolvedMargins = validateNSEBoxMargins(contentViewMargins);
   const customStyle: CSSVarStyle = {
     ...style,
     ...(resolvedFill ? { "--nse-box-fill": resolvedFill } : null),
-    // Explicit insets win; otherwise the layout margins resolve through
+    // Explicit margins win; otherwise the standard margins resolve through
     // --nse-box-margin-* (nse-layout-defaults.css), which also drops them to
     // zero when the box holds rows.
-    ...(resolvedInsets ? {
-      "--nse-box-inset-top": `${resolvedInsets.top}px`,
-      "--nse-box-inset-right": `${resolvedInsets.right}px`,
-      "--nse-box-inset-bottom": `${resolvedInsets.bottom}px`,
-      "--nse-box-inset-left": `${resolvedInsets.left}px`,
+    ...(resolvedMargins ? {
+      "--nse-box-inset-top": `${resolvedMargins.height}px`,
+      "--nse-box-inset-right": `${resolvedMargins.width}px`,
+      "--nse-box-inset-bottom": `${resolvedMargins.height}px`,
+      "--nse-box-inset-left": `${resolvedMargins.width}px`,
     } : {
       "--nse-box-inset-top": "var(--nse-box-margin-top, 0px)",
       "--nse-box-inset-right": "var(--nse-box-margin-right, 0px)",
@@ -970,7 +981,7 @@ export function NSEBox({
     }),
   };
   const surfaceProps = getControlSmoothSurfaceProps(smoothSurface, className, customStyle);
-  const visuallyIntegratedTitle = Boolean(title) && titlePosition === "at-top";
+  const visuallyIntegratedTitle = Boolean(title) && titlePosition === "atTop";
 
   return (
     <fieldset
@@ -981,11 +992,11 @@ export function NSEBox({
         visuallyIntegratedTitle && "is-labeled",
         surfaceProps.className,
       )}
-      data-title-position={titlePosition}
-      data-box-kind={kind}
+      data-title-position={position}
+      data-box-kind={boxType}
       data-border-style={border}
-      data-appearance-recipe={`box.${kind}.${border}.${titlePosition}`}
-      data-nse-layout-margins={resolvedInsets ? undefined : layoutMargins}
+      data-appearance-recipe={`box.${boxType}.${border}.${position}`}
+      data-nse-layout-margins={resolvedMargins ? undefined : "standard"}
       style={surfaceProps.style}
     >
       {title ? (
@@ -993,7 +1004,7 @@ export function NSEBox({
           className={classes(
             "nse-control-group-label",
             "nse-box-title",
-            titlePosition === "none" && "nse-control-visually-hidden",
+            titlePosition === "noTitle" && "nse-control-visually-hidden",
           )}
         >
           {title}
@@ -1001,33 +1012,6 @@ export function NSEBox({
       ) : null}
       <div className="nse-control-group-inner nse-box-content" data-nse-content-layout={contentLayout === "stack" ? "stack" : undefined}>{children}</div>
     </fieldset>
-  );
-}
-
-export interface NSEGroupBoxProps extends Omit<
-  NSEBoxProps,
-  "title" | "titlePosition" | "kind" | "border"
-> {
-  label?: ReactNode;
-}
-
-export function NSEGroupBox({
-  label,
-  children,
-  smoothSurface = false,
-  ...props
-}: NSEGroupBoxProps) {
-  return (
-    <NSEBox
-      {...props}
-      title={label}
-      titlePosition={label ? "at-top" : "none"}
-      kind="primary"
-      border="bezel"
-      smoothSurface={smoothSurface}
-    >
-      {children}
-    </NSEBox>
   );
 }
 

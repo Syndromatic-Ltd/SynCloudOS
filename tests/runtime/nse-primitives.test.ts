@@ -21,7 +21,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { NSESwitch, NSEButton, NSEGroupBox, NSEMenu, NSEPicker, NSESegmentedControl, NSETopBar, useNSEControlFeedback } from "../../src/NSE/public/controls";
+import { NSESwitch, NSEButton, NSEBox, NSEMenu, NSEPicker, NSESegmentedControl, NSETopBar, useNSEControlFeedback } from "../../src/NSE/public/controls";
 import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEGlassPanel } from "../../src/NSE/Components/NSEGlassPanel";
 import { BrowserHapticsAdapter, createHFXVibratePattern, normalizeHFXFeedbackInput } from "../../src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter";
@@ -500,9 +500,9 @@ describe("NSESmoothSurface", () => {
     });
 
     const groupBoxMarkup = renderToStaticMarkup(createElement(
-      NSEGroupBox,
+      NSEBox,
       {
-        label: "Reader",
+        title: "Reader",
         smoothSurface: {
           radius: "xl",
           focus: "within",

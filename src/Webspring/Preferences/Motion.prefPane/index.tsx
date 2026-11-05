@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEGroupBox } from "../../../NSE/public/controls";
+import { NSEBox } from "../../../NSE/public/controls";
 import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
@@ -35,7 +35,7 @@ function MotionPane({ settings }: PreferencePaneViewProps) {
   const motion = settings.motion === "reduced" ? "reduced" : "standard";
   return (
     <div className="nse-prefs-section">
-      <NSEGroupBox>
+      <NSEBox>
         {([
           { value: "standard" as const, label: t("preferences.standard", "Standard") },
           { value: "reduced" as const, label: t("preferences.reduced", "Reduced") },
@@ -48,7 +48,7 @@ function MotionPane({ settings }: PreferencePaneViewProps) {
             {choice.label}
           </NSEListItem>
         ))}
-      </NSEGroupBox>
+      </NSEBox>
       <p className="nse-prefs-note">
         {t("preferences.motionNote", "Reduced motion replaces slides and zooms with a simple fade.")}
       </p>

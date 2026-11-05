@@ -19,7 +19,7 @@
  */
 
 import { useMemo } from "react";
-import { NSEGroupBox } from "../../../NSE/public/controls";
+import { NSEBox } from "../../../NSE/public/controls";
 import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
@@ -45,7 +45,7 @@ function AppearancePane({ appearance }: PreferencePaneViewProps) {
   const choices = useAppearanceChoices();
   return (
     <div className="nse-prefs-section">
-      <NSEGroupBox>
+      <NSEBox>
         {choices.map((choice) => (
           <NSEListItem
             key={choice.value}
@@ -55,7 +55,7 @@ function AppearancePane({ appearance }: PreferencePaneViewProps) {
             {choice.label}
           </NSEListItem>
         ))}
-      </NSEGroupBox>
+      </NSEBox>
       <p className="nse-prefs-note">
         {t("preferences.autoNote", "Auto follows the system setting on this device.")}
       </p>

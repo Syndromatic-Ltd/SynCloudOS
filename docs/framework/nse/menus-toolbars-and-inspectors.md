@@ -72,15 +72,15 @@ An inspector of 240 to 320 pixels is narrower than a form is designed for. Use t
 
 | Container | What it does at inspector width |
 | --- | --- |
-| `NSEGroupBox` | Titles a group of related controls. The title is the label, so the controls inside it don't each need one. Use one per topic (Font, Spacing, Probe). |
+| `NSEBox` with a `title` | Titles a group of related controls. The title is the label, so the controls inside it don't each need one. Use one per topic (Font, Spacing, Probe). |
 | `NSEPicker` with `labelHidden width="100%"` | Fills the group's width and shows its full value. The label is still read by screen readers. A visible label would share the row with the value and push it into truncation. |
 | `NSEForm` | Puts each label beside its control, but stacks the label above its control below 420 pixels. In an inspector that means stacked labels. Use it there only if that is the layout you want. |
 
 ```tsx
-<NSEGroupBox label="Probe">
+<NSEBox title="Probe">
   <NSEPicker label="Resolution" labelHidden width="100%" value={resolution} options={resolutions} onValueChange={setResolution} />
   <NSESlider label="Current" value={current} minimum={0} maximum={20} onValueChange={setCurrent} />
-</NSEGroupBox>
+</NSEBox>
 ```
 
 Give the inspector its width from the split or pane that contains it, and let its controls fill it. Don't make room by shrinking text or changing the theme's control art. JournalPublisher's `PublisherInspector.tsx` follows this pattern.

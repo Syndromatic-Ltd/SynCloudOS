@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEButton, NSEGroupBox } from "../../../NSE/public/controls";
+import { NSEButton, NSEBox } from "../../../NSE/public/controls";
 import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import { definePreferencePane } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
@@ -42,7 +42,7 @@ function AccountPane() {
   const label = useAccountLabel();
   return (
     <div className="nse-prefs-section">
-      <NSEGroupBox>
+      <NSEBox>
         <NSEListItem
           tapHighlight={false}
           trailing={account.signedIn ? (
@@ -65,7 +65,7 @@ function AccountPane() {
         >
           {label}
         </NSEListItem>
-      </NSEGroupBox>
+      </NSEBox>
     </div>
   );
 }

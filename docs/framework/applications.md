@@ -266,8 +266,8 @@ bindings, not the application actions available in the remaining windows; reopen
 window controller.
 
 ```tsx
-<NSEPushButton action="newNote">New Note</NSEPushButton>
-<NSEPushButton action="rename" actionPayload={SCOS.commands.createPayload("title", "Receipts")}>Rename</NSEPushButton>
+<NSEButton action="newNote" title="New Note" />
+<NSEButton action="rename" actionPayload={SCOS.commands.createPayload("title", "Receipts")} title="Rename" />
 ```
 
 A menu item is `{ kind: "command", id: "new", action: "newNote" }`. Every control and menu item that names the action follows its validation, so one `validateNewNote()` disables them all. [Commands, responders and undo](commands-responders-undo.md#actions-on-class-based-applications) lists the rules: payloads, validation results, standard command IDs and how names resolve.

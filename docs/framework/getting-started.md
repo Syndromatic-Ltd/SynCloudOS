@@ -37,7 +37,7 @@ Create `src/SynWare/Hello.app/Contents/index.tsx`. An application is an `NSEAppl
 
 ```tsx
 import { NSEApplication, NSEViewController, SCOS, action, actionRef, bind, observable, type NSEBinding } from "@syndromatic/syncloudos";
-import { NSEPushButton, NSETextField } from "@syndromatic/syncloudos/nse/controls";
+import { NSEButton, NSETextField } from "@syndromatic/syncloudos/nse/controls";
 
 export class HelloViewController extends NSEViewController {
   @observable accessor name = "";
@@ -49,7 +49,7 @@ export class HelloViewController extends NSEViewController {
     return <section aria-label="Hello">
       <NSETextField aria-label="Name" binding={this.nameBinding} />
       <p>Hello{this.name ? `, ${this.name}` : ""}, from {SCOS.app.displayName}.</p>
-      <NSEPushButton action={this.clearAction}>Clear</NSEPushButton>
+      <NSEButton action={this.clearAction} title="Clear" />
     </section>;
   }
 }
