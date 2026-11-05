@@ -116,28 +116,25 @@ A sidebar is an `NSEOutlineView` with `selectionHighlightStyle="sourceList"`. Th
 
 `NSEBrowser` is the multi column view familiar from the Finder. It reads its hierarchy from an `NSEBrowserDataSource`, and it loads each column on demand.
 
-## Virtual list
+## Lists
 
-For plain, very long lists, `NSEVirtualList` renders only what is visible and keeps a small look ahead for smooth scrolling.
+A list is a single-column `NSETableView` with `headerHidden`, as in AppKit, where a list is a view-based `NSTableView` without a header view. The table draws only the rows in view, so a list of thousands of rows costs no more than one that fits on screen.
 
 ```tsx
-import { NSEVirtualList } from "@syndromatic/syncloudos/nse";
+import { NSETableCellView, NSETableView, useNSEArrayController } from "@syndromatic/syncloudos/nse";
 
-export function Records() {
-  return (
-    <NSEVirtualList
-      rowCount={5000}
-      rowHeight={32}
-      pageSize={10}
-      lookAhead={2}
-      getKey={(_item, index) => `row-${index}`}
-      renderRow={({ index }) => <span>Row {index}</span>}
-    />
-  );
+const columns = [{
+  id: "name", title: "Name", value: (item: Reminder) => item.title, width: { min: 120, ideal: 320, max: 2000 },
+  render: (_value: string, item: Reminder) => <NSETableCellView primary={item.title} secondary={item.due} />,
+}];
+
+export function Reminders({ reminders }: { readonly reminders: readonly Reminder[] }) {
+  const controller = useNSEArrayController<Reminder, string>({ id: "reminders", getId: (item) => item.id });
+  useEffect(() => { controller.setContent(reminders); }, [controller, reminders]);
+  return <NSETableView aria-label="Reminders" headerHidden rowHeight={40} viewportBlockSize="fill"
+    adapter={{ controller, idForItem: (item) => item.id, labelForItem: (item) => item.title }} columns={columns} />;
 }
 ```
-
-`computeNSEVirtualWindow` exposes the windowing calculation for custom views.
 
 ## Rule and predicate editors
 

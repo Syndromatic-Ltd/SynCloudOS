@@ -830,14 +830,14 @@
           "src/NSE/Editor/index.ts",
           "src/NSE/Haptics/index.ts",
           "src/NSE/Layout/index.ts",
-          "src/NSE/List/index.ts",
           "src/NSE/Material/index.ts",
           "src/NSE/Page/index.ts",
           "src/NSE/registry/index.ts",
           "src/NSE/Scroll/index.ts",
           "src/NSE/SmoothSurface/index.ts",
           "src/NSE/SystemUI/index.ts",
-          "src/NSE/sdkPackageEntry.ts"
+          "src/NSE/sdkPackageEntry.ts",
+          "src/NSE/Controls/Selection/NSEListItem.tsx"
         ],
         "appearance": [
           "src/NSE/Appearance/index.ts",
@@ -1083,6 +1083,14 @@
         "browser-host"
       ],
       "reason": "Kernel and React host bootstrap for application classes and sessions. Not an SDK package export."
+    },
+    {
+      "path": "src/NSE/Controls/Selection/NSEListItem.tsx",
+      "consumers": [
+        "nse",
+        "webspring"
+      ],
+      "reason": "The row part that NSE menus, tab bars and the system preference panes draw their choice rows with. Not a public control: lists are NSETableView."
     }
   ]
 }

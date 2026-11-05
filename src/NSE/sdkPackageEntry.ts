@@ -272,8 +272,8 @@ export { NSEPasswordField } from "./Controls/Fields/NSEPasswordField";
 export type { NSEPasswordFieldProps } from "./Controls/Fields/NSEPasswordField";
 export { NSERoundedInput, NSEToolInput } from "./Controls/Fields/NSEFieldVariants";
 export type { NSERoundedInputProps, NSEToolInputProps } from "./Controls/Fields/NSEFieldVariants";
-export { NSEDivider, NSEGroupedList, NSEListItem } from "./Controls/Selection";
-export type { NSEDividerProps, NSEGroupedListEdge, NSEGroupedListProps, NSEListItemProps } from "./Controls/Selection";
+export { NSEDivider } from "./Controls/Selection";
+export type { NSEDividerProps } from "./Controls/Selection";
 export { NSEListSelector, NSEPopupList, NSEPickerGroup, NSEIntegerPicker } from "./Controls/Selection/NSESelectors";
 export type { NSEIntegerPickerProps, NSEListSelectorProps, NSEPickerGroupProps, NSEPopupListProps } from "./Controls/Selection/NSESelectors";
 export { NSEPageHeader, NSEHeader, NSEPrevNextBanner } from "./Windows/Chrome";
@@ -670,15 +670,6 @@ export {
   resolveStackLayout,
 } from "./Layout/resolveStackLayout";
 export {
-  NSEVirtualList,
-  computeNSEVirtualWindow,
-} from "./List/NSEVirtualList";
-export type {
-  NSEVirtualListHandle,
-  NSEVirtualListProps,
-  NSEVirtualWindowOptions,
-} from "./List/NSEVirtualList";
-export {
   NSEMediaPanel,
 } from "./MediaPanels/NSEMediaPanel";
 export type {
@@ -972,10 +963,6 @@ export type {
   NSECircularSliderProps,
   NSELevelIndicatorProps,
 } from "./Controls/Values/valueControlTypes";
-export type {
-  NSEVirtualRowState,
-  NSEVirtualWindow,
-} from "./List/NSEVirtualList";
 
 export { NSEObject, observable, observe, useObserve } from "./Objects";
 export type { NSEObservable } from "./Objects";

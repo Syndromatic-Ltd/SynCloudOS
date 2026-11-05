@@ -24,7 +24,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import {
   NSECheckbox,
   NSEGroupBox,
-  NSEListItem,
+
   NSEMenu,
   NSEPicker,
   NSEProgressButton,
@@ -34,6 +34,7 @@ import {
   NSETopBar,
   useNSEControlFeedback,
 } from "../../src/NSE/public/controls";
+import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEGlassPanel } from "../../src/NSE/Components/NSEGlassPanel";
 import { BrowserHapticsAdapter, createHFXVibratePattern, normalizeHFXFeedbackInput } from "../../src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter";
 import { defaultHFXFeedbackPatterns, HFX_FEEDBACK_PRESET_NAMES } from "../../src/SynCloudOS/HapticsFX/feedbackPatterns";

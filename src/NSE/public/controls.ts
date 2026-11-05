@@ -156,8 +156,8 @@ export type { NSEDatePickerProps, NSEDatePickerMode, NSEDatePickerField, NSEDate
 export type { NSEPasswordFieldProps } from "../Controls/Fields/NSEPasswordField";
 export type { NSETabGroupProps, NSETabOption } from "../Navigation/NSETabGroup";
 
-export { NSEDivider, NSEGroupedList, NSEListItem } from "../Controls/Selection";
-export type { NSEDividerProps, NSEGroupedListEdge, NSEGroupedListProps, NSEListItemProps } from "../Controls/Selection";
+export { NSEDivider } from "../Controls/Selection";
+export type { NSEDividerProps } from "../Controls/Selection";
 export {
   NSEBox,
   NSECheckbox,
@@ -253,8 +253,4 @@ export { NSEForm, NSEFormRow, NSEFormSeparator } from "../Layout/NSEForm";
 export type { NSEFormProps, NSEFormRowProps } from "../Layout/NSEForm";
 export { NSEText } from "../Layout/NSEText";
 export type { NSETextProps, NSETextStyle } from "../Layout/NSEText";
-export { NSEList, NSEListRow, NSESwipeableItem } from "../List/NSEList";
-export type { NSEListProps, NSEListRowProps, NSEListSelectionOptions, NSEPageWindowOptions, NSESwipeableItemProps } from "../List/NSEList";
-export { NSEVirtualList } from "../List/NSEVirtualList";
-export type { NSEVirtualListHandle, NSEVirtualListProps, NSEVirtualWindowOptions } from "../List/NSEVirtualList";
 export { NSEFeedbackProvider, useNSEFeedback } from "../Feedback";

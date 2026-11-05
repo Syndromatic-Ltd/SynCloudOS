@@ -43,7 +43,6 @@ import {
   NSETabBarController,
 } from "../../src/NSE/Navigation";
 import type { SynCloudOSPresentationTraits } from "../../src/SynCloudOS/SynCloudOS";
-import { NSEList, NSEListRow, NSESwipeableItem, useNSEPageWindow } from "../../src/NSE/List";
 import { NSEOrdered } from "../../src/NSE/Layout";
 import { NSE } from "../../src/NSE/NSE";
 import { getNSERegistryItem, nseRegistry } from "../../src/NSE/registry";
@@ -458,16 +457,14 @@ describe("NSE semantic contracts", () => {
     expect(NSE.NSEProgressBar).toBe(NSEProgressBar);
     expect(NSE.NSESlider).toBe(NSESlider);
     expect(typeof NSE.NSEFlex).toBe("function");
-    expect(typeof NSE.NSEList).toBe("function");
     expect(typeof NSE.NSEPane).toBe("function");
     expect(typeof NSE.NSEDatePicker).toBe("function");
     expect(NSE.NSEOrdered).toBe(NSEOrdered);
     expect(NSE.Layout.NSEOrdered).toBe(NSEOrdered);
-    expect(NSE.List.NSEList).toBe(NSEList);
     expect(NSE.Registry.items).toBe(nseRegistry);
 
     const names = nseRegistry.map((item) => item.name);
-    expect(names).toEqual(expect.arrayContaining(["nse-controls", "nse-layout", "nse-list", "nse-containers"]));
+    expect(names).toEqual(expect.arrayContaining(["nse-controls", "nse-layout", "nse-containers"]));
     expect(new Set(names).size).toBe(names.length);
     for (const item of nseRegistry) {
       expect(getNSERegistryItem(item.name)).toBe(item);
@@ -640,71 +637,6 @@ describe("NSE semantic contracts", () => {
     expect(onSidebarWidthChange).toHaveBeenLastCalledWith(null);
   });
 
-  it("keeps NSEList selection and page windows stable", () => {
-    const onSelectionChange = vi.fn();
-    const onPageChange = vi.fn();
-
-    function PageWindowHarness() {
-      const pageWindow = useNSEPageWindow(["Alpha", "Beta", "Gamma", "Delta", "Epsilon"], {
-        pageSize: 2,
-        overscan: 1,
-        onPageChange
-      });
-
-      return (
-        <section aria-label="Page window" {...pageWindow.getWindowProps()}>
-          {pageWindow.windowItems.map(({ item }) => <span key={item}>{item}</span>)}
-          <button type="button" onClick={pageWindow.nextPage}>Next page</button>
-        </section>
-      );
-    }
-
-    render(
-      <div>
-        <NSEList
-          items={["Alpha", "Beta", "Gamma", "Delta"]}
-          getKey={(item) => item.toLowerCase()}
-          mode="single"
-          defaultSelectedKey="gamma"
-          pageWindow={{ defaultPageIndex: 1, pageSize: 2, overscan: 1 }}
-          onSelectionChange={onSelectionChange}
-          renderItem={(item, index, state) => (
-            <NSEListRow itemKey={state.key} title={item} meta={`#${index}`} />
-          )}
-        />
-        <PageWindowHarness />
-      </div>
-    );
-
-    const list = screen.getByRole("listbox");
-    expect(list.getAttribute("data-page-index")).toBe("1");
-    expect(list.getAttribute("data-page-size")).toBe("2");
-    expect(list.getAttribute("data-window-start")).toBe("2");
-    expect(list.getAttribute("data-window-end")).toBe("4");
-    expect(within(list).queryByText("Alpha")).toBeNull();
-    expect(screen.getByText("Gamma").closest("[role='option']")?.getAttribute("aria-selected")).toBe("true");
-
-    fireEvent.click(screen.getByText("Delta").closest("[role='option']") as HTMLElement);
-    expect(onSelectionChange).toHaveBeenCalledWith(expect.objectContaining({
-      action: "select",
-      key: "delta",
-      selectedKey: "delta"
-    }));
-
-    const pageWindow = screen.getByRole("region", { name: "Page window" });
-    expect(pageWindow.getAttribute("data-page-index")).toBe("0");
-    expect(pageWindow.textContent).toContain("Alpha");
-    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-    expect(onPageChange).toHaveBeenCalledWith(expect.objectContaining({
-      pageIndex: 1,
-      startIndex: 2,
-      endIndex: 4,
-      overscanStartIndex: 1,
-      overscanEndIndex: 5
-    }));
-    expect(pageWindow.getAttribute("data-page-index")).toBe("1");
-    expect(pageWindow.textContent).toContain("Gamma");
-  });
 
   it("keeps progress and slider values clamped, labelled, and reflected in CSS vars", () => {
     const onValueChange = vi.fn();
@@ -787,43 +719,4 @@ describe("NSE semantic contracts", () => {
     expect(onActiveChange).toHaveBeenLastCalledWith(2);
   });
 
-  it("uses swipe thresholds before opening list row actions", () => {
-    const restorePointerCapture = installPointerCaptureMocks();
-    const onOpenChange = vi.fn();
-    const onSwipe = vi.fn();
-    const onDelete = vi.fn();
-
-    try {
-      const { container } = render(
-        <NSESwipeableItem
-          threshold={48}
-          maxSwipe={96}
-          trailingActions={[{ id: "delete", label: "Delete", tone: "negative", onPress: onDelete }]}
-          onOpenChange={onOpenChange}
-          onSwipe={onSwipe}
-        >
-          <NSEListRow title="Message" />
-        </NSESwipeableItem>
-      );
-
-      const item = container.querySelector(".nse-list-swipeable") as HTMLElement;
-      fireEvent.pointerDown(item, { button: 0, pointerId: 1, clientX: 100 });
-      fireEvent.pointerMove(item, { pointerId: 1, clientX: 70 });
-      fireEvent.pointerUp(item, { pointerId: 1, clientX: 70 });
-      expect(onOpenChange).toHaveBeenLastCalledWith(null);
-      expect(onSwipe).not.toHaveBeenCalled();
-
-      fireEvent.pointerDown(item, { button: 0, pointerId: 2, clientX: 100 });
-      fireEvent.pointerMove(item, { pointerId: 2, clientX: 40 });
-      fireEvent.pointerUp(item, { pointerId: 2, clientX: 40 });
-      expect(onOpenChange).toHaveBeenLastCalledWith("trailing");
-      expect(onSwipe).toHaveBeenCalledWith("trailing");
-
-      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-      expect(onDelete).toHaveBeenCalled();
-      expect(onOpenChange).toHaveBeenLastCalledWith(null);
-    } finally {
-      restorePointerCapture();
-    }
-  });
 });
