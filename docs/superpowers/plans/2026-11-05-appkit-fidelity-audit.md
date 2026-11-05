@@ -1,0 +1,279 @@
+# NSE AppKit fidelity audit
+
+Date: 2026-11-05. Author: Claude Opus, at the owner's request. Status: **for approval**. Nothing in this document has been changed in code yet.
+
+## The rule
+
+SynCloudOS follows AppKit and Cocoa closely: in application architecture, and also in class names, API shapes and coding conventions. An NSE class corresponds to a real AppKit class (`NSOutlineView` → `NSEOutlineView`) and behaves the way that class does. Appearance belongs to themes. While the framework is in beta, any public NSE API that has no AppKit counterpart, departs from one, or splits one AppKit class across several NSE ones is fixed in place. There are **no compatibility shims, aliases or deprecation periods**.
+
+What prompted this: `NSEAccordionView` has no AppKit counterpart (its API matches web accordion libraries, not Cappuccino's `CPAccordionView` either), and the source-list section header that apps and agents admire exists only inside an invented `NSESidebar`. Agents built on both, believing them native.
+
+## Method
+
+- Every value export (class, function, component, constant) of the SDK entries `@syndromatic/syncloudos`, `/sdk`, `/nse` and `/nse/*` was listed from the built declarations with the TypeScript compiler API: 439 names. 181 of them are NSE UI or controller APIs outside the text system. This audit maps those 181. The text system and the Foundation-style models are reviewed briefly in [Second pass](#second-pass).
+- For each name, the files that reference it were counted in the framework's source, its tests, the site (`site/src`) and Fusion. In the tables, `fw N` counts framework files other than the declaring one. Two or three of those are always the public index and entry files, so **`fw 2`–`fw 3` usually means no internal use**. "Gallery" is `NSEControlGallery.app`, which exists to show every control and moves with whatever is decided.
+- Each AppKit counterpart was checked against what the NSE component actually does (its props and implementation), not only its name. Where the AppKit class arrived after Mountain Lion, its macOS version is given.
+
+## Conventions the target API follows
+
+1. **One NSE type per AppKit class, with the AppKit name and capitalisation**: `NSETableView`, `NSEOutlineView`, `NSEPopUpButton` (capital U, as `NSPopUpButton`), `NSEUserDefaultsController`.
+2. **Variants are properties, not classes.** AppKit has one `NSButton`, whose `buttonType` and `bezelStyle` give a push button, checkbox, radio button, disclosure triangle, toggle, recessed or textured button. Likewise `NSSlider.sliderType` (linear or circular), `NSProgressIndicator.style` (bar or spinning), `NSDatePicker.datePickerStyle`, `datePickerElements` and `datePickerMode` (single or range), `NSBox.boxType` (primary, separator, custom), `NSTextField.bezelStyle`, and `NSPopUpButton.pullsDown`. NSE today often has a separate component per variant.
+3. **Appearance belongs to the theme.** The class says what something is (a source list's group row, a disclosure button), and Atmo decides how it looks. The look the owner wants to keep, a blue label with a line to the edge and a disclosure arrow, is Atmo's drawing of an `NSEOutlineView` group row in source-list style.
+4. **Data views use a data source, a delegate or bindings, and cells are views.** `NSTableView` and `NSOutlineView` take a data source or are bound to an `NSArrayController` or `NSTreeController`. A delegate answers questions such as `isGroupItem` and `shouldShowOutlineCellForItem`, and cells are `NSTableCellView`s.
+5. **Commands go through target-action and the responder chain, and menus validate.** NSE already has this (`@action`, `validate…`). Every control that sends a command takes an `action`, including menu items in pop-up buttons (see FRICTION-OPUS O5).
+6. **Menus are models, not components.** `NSMenu` and `NSMenuItem` are objects. A view shows one as its context menu (`NSView.menu`), a pop-up button shows one, and the application has a `mainMenu`. There is no standalone "menu" widget.
+7. **Windows, panels, sheets and alerts are objects their controllers present.** `NSAlert` is configured (`messageText`, `informativeText`, `addButton(withTitle:)`, `alertStyle`) and presented with `beginSheetModal(for:completionHandler:)`, just as `NSEOpenPanel` already is. They are not ad-hoc JSX trees.
+8. **No web or React vocabulary in public names**: Provider, Presence, Surface, Scene, Adapter, Host, Backdrop, Toaster, Listbox, Popup (as a noun), Inline, Flex.
+9. **Control state is AppKit's state value**: `on`, `off`, `mixed` (`NSControl.StateValue`), and a control's size is `controlSize` on every control (see FRICTION-OPUS O6).
+
+## The case that started this: section lists
+
+| Want | AppKit (Mountain Lion) | NSE target |
+|---|---|---|
+| A sidebar with sections (`[Section] ——— ⌄`), items inside, nested items | `NSOutlineView` with `selectionHighlightStyle = .sourceList` and `floatsGroupRows = false`. Top-level items are group items (`outlineView(_:isGroupItem:)`); AppKit draws the group row's Show/Hide control, and `outlineView(_:shouldShowOutlineCellForItem:)` returning `false` makes a section fixed. Children expand with disclosure triangles. It sits in the left pane of an `NSSplitView`. | `NSEOutlineView` with `selectionHighlightStyle: "sourceList"`, a delegate with `isGroupItem` and `shouldShowOutlineCellForItem`, and `floatsGroupRows`. **Atmo draws group rows as today's sidebar header**: blue label, line to the edge, and the `NSEDivider` arrow sprite as the outline cell, collapsing with the current animation, which reduced motion turns off. `NSESidebar`'s rendering becomes Atmo's source-list styling for `NSEOutlineView`. |
+| A collapsible section in an inspector or form (Motion, Xcode) | An `NSButton` with `bezelStyle = .disclosure` (or `.roundedDisclosure`) that hides the view below it, in an `NSStackView` (10.9) that reflows. | `NSEButton` with `bezelStyle: "disclosure"` and `NSEStackView` (whose items already have `hidden` and visibility priority). Atmo may draw the inspector header with the same label, line and arrow grammar. `NSEAccordionView` is removed. |
+
+## Findings by family
+
+Verdicts: **Keep** (the name and shape are AppKit's); **Rename**; **Merge into** (fold into one AppKit class as a property); **Remove** (no AppKit counterpart and no need); **Internal** (needed, but implementation detail that should not be public); **Decide** (needs an owner decision, listed at the end).
+
+### Application, objects and controllers
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSEApplication` | `NSApplication` | Keep | fw 15 · 12 site apps · Fusion |
+| `NSEWindowController` | `NSWindowController` | Keep | fw 10 · 11 site apps · Fusion |
+| `NSEViewController` | `NSViewController` | Keep | fw 20 · 12 site apps · Fusion |
+| `NSEViewControllerView` | `NSViewController.view` | Decide (D7): the React host for a controller's view. It has to exist; the question is its name | fw 3 · 8 site apps · Fusion |
+| `NSEObject` | `NSObject` | Keep | fw 12 · AnimationFX · Fusion |
+| `NSEArrayController`, `NSETreeController`, `NSEObjectController`, `NSEDictionaryController` | same | Keep | Diagnostics, Portfolio, Software · Fusion |
+| `NSEPreferencesController` | `NSUserDefaultsController` | Rename → `NSEUserDefaultsController`, backed by an `NSEUserDefaults` store (schema, validation and migrations stay) | fw 11 · JournalPublisher, Software · Fusion |
+| `NSETaskQueueFullError` | — | Keep (an error type, not a view) | fw 4 |
+| `NSEActionScopeProvider` | Responder chain | Internal: the framework supplies it around every class app | fw 4 |
+| `NSEStandaloneControlHost` | — | Internal | fw 6 |
+| `NSEFocusScope` | `NSWindow.initialFirstResponder`, `nextKeyView`, sheet modality | Internal. Sheets and alerts own their key-view loop once they are objects (D3) | fw 10 · Journal, JournalPublisher, MemoJournal |
+| `NSEFeedbackProvider` | `NSHapticFeedbackManager` (10.11) | Rename → `NSEHapticFeedbackManager` (an object, not a provider) | fw 4 |
+| `NSEAppearanceProvider` | `NSAppearance` (10.9), `NSView.appearance` | Rename → `NSEAppearance`, set on a view or window (`appearance` property) | fw 6 · Gallery |
+| `NSEAnimationDefaults`, `NSEAnimationEnvironmentProvider` | `NSAnimationContext` | Merge into `NSEAnimationContext` (duration, timing function, `allowsImplicitAnimation`, reduced motion) | fw 11 / 4 · About, Journal |
+| `NSEPresence`, `NSELayoutView` | `NSView.animator()`, `NSViewController.transition(from:to:options:)` (10.10) | Internal. Expose transitions on `NSEViewController`; `NSELayoutView`'s layout animation becomes the animator | fw 13 / 4 · About, MemoJournal, Webspring |
+| `NSEMaterialLighting`, `NSEMaterialLightingProvider`, `NSEMetalSurface`, `NSESmoothSurface`, `NSERoundedBox`, `NSEShadowView` | `NSVisualEffectView` (10.10), `NSBox` (`boxType: .custom`), `NSView.shadow` (`NSShadow`) | Internal (theme parts). Public: `NSEBox` custom boxes, an `NSEShadow` value on views, and `NSEVisualEffectView` only if an app needs a material | Gallery |
+| `NSECursor` | `NSCursor` | Keep | Gallery |
+| `NSETooltipProvider` | `NSView.toolTip` | Internal. Every NSE view takes `toolTip` | fw 8 · Gallery |
+
+### Buttons
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSEPushButton` | `NSButton` (`.momentaryPushIn`, `.rounded`) | Rename → `NSEButton`. Tones become AppKit's: `keyEquivalent = "\r"` makes the default button, `hasDestructiveAction` (11) or `bezelColor` | fw 36 · 10 site apps · Fusion |
+| `NSEIconButton` | `NSButton` with `image` and `imagePosition = .imageOnly` | Merge into `NSEButton` | Gallery |
+| `NSEToolButton` | `NSButton` with `bezelStyle = .texturedRounded` or `.recessed` | Merge into `NSEButton` | AnimationFX · Fusion |
+| `NSEToggleButton` (thumb switch) | `NSSwitch` (10.15) | Rename → `NSESwitch` | Gallery |
+| `NSECheckbox` | `NSButton` with `buttonType = .switch` | Merge into `NSEButton` (`buttonType: "switch"`, `state: "on" \| "off" \| "mixed"`, `allowsMixedState`) | 5 site apps · Fusion |
+| `NSERadioGroup` | Radio `NSButton`s sharing an action (Mountain Lion: `NSMatrix` of radio cells) | Merge into `NSEButton` (`buttonType: "radio"`), grouped the AppKit way. Decide (D5) whether a grouping container stays for roving focus | Gallery, SynCal |
+| `NSEToolButtonGroup`, `NSERadioToolButtonGroup`, `NSEPickerGroup`, `NSETabGroup` | `NSSegmentedControl` (`trackingMode` select-one, select-any, momentary; `segmentStyle`) | Merge into `NSESegmentedControl` | AnimationFX, JournalPublisher |
+| `NSEPopupButton` | `NSPopUpButton` with `pullsDown = true` | Merge into `NSEPopUpButton` | JournalPublisher |
+| `NSEActivityButton`, `NSEProgressButton` | `NSButton` beside an `NSProgressIndicator` | Remove | Gallery |
+| `NSENotificationButton` | `NSButton` with a badge (no AppKit badge on buttons; `NSDockTile.badgeLabel` is the Dock's) | Remove, or Decide (D4) as a Syndromatic original | Gallery |
+| `NSEButtonHeader` | Disclosure `NSButton`, or a source-list group row | Remove | Gallery |
+| `NSEFilePickerButton` | `NSButton` whose action runs `NSOpenPanel` | Remove | Gallery |
+| `NSEGrabHandle` | The `NSSplitView` divider (`dividerStyle`, `drawDivider(in:)`) | Internal to `NSESplitView` | Gallery |
+| `NSEHashBadge` | — | Remove | Gallery |
+
+### Text fields
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSETextField` | `NSTextField` | Keep (gains `isEditable`, `isBezeled` and `bezelStyle`, which also cover labels) | fw 13 · JournalPublisher, Portfolio, SynCal · Fusion |
+| `NSERoundedInput`, `NSEToolInput` | `NSTextField` with `bezelStyle = .roundedBezel` or `.squareBezel` | Merge into `NSETextField` | Gallery |
+| `NSEInputBox` | `NSSearchField` or `NSTokenField` cells; no general "field containing controls" | Remove | Gallery |
+| `NSESecureTextField` | `NSSecureTextField` | Keep | Gallery |
+| `NSEPasswordField` | `NSSecureTextField` | Merge into `NSESecureTextField` (a duplicate) | Gallery |
+| `NSESearchField` | `NSSearchField` | Keep | 4 site apps |
+| `NSESearchFieldController` | `NSSearchField.recentSearches` and `recentsAutosaveName` | Merge into `NSESearchField` | Gallery |
+| `NSEComboBox`, `NSETokenField` | same | Keep | Gallery |
+| `NSEText` | `NSTextField(labelWithString:)` (10.12), a non-editable, non-bezelled `NSTextField` | Merge into `NSETextField` | Gallery |
+
+### Values and progress
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSESlider` | `NSSlider` | Keep | AnimationFX, JournalPublisher · Fusion |
+| `NSECircularSlider` | `NSSlider` with `sliderType = .circular` | Merge into `NSESlider` | JournalPublisher |
+| `NSEProgressSlider` | — (a scrubber with buffered progress) | Remove | Gallery |
+| `NSEStepper`, `NSELevelIndicator`, `NSESegmentedControl` | same | Keep | JournalPublisher, Software · Fusion |
+| `NSEProgressIndicator` | `NSProgressIndicator` (`style` bar or spinning, `isIndeterminate`, `controlSize`) | Keep, and absorb the four below. Its `size: 16 \| 32 \| 64` becomes `controlSize` | JournalPublisher · Fusion |
+| `NSEProgressBar`, `NSEProgressItem`, `NSESpinner`, `LoadingSpinner` | `NSProgressIndicator` | Merge into `NSEProgressIndicator` | Gallery |
+
+### Pop-up buttons, menus and choosers
+
+AppKit has two choosers: `NSPopUpButton` (pick from a menu, or with `pullsDown` a command menu) and `NSComboBox` (type or pick). NSE has eight.
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSEPicker` | `NSPopUpButton` | Rename → `NSEPopUpButton` | JournalPublisher, Software, SynCal · Fusion |
+| `NSEPopupButton` | `NSPopUpButton` with `pullsDown` | Merge into `NSEPopUpButton` | JournalPublisher |
+| `NSEListSelector`, `NSEPopupList`, `NSEChoiceControl` | `NSPopUpButton` | Merge into `NSEPopUpButton` | Portfolio, Gallery |
+| `NSEIntegerPicker` | `NSPopUpButton` with numbered items, or `NSTextField` with an `NSStepper` | Remove | Gallery |
+| `NSEMenu` (component with a trigger) | `NSMenu` shown by an `NSPopUpButton` (pull-down) | Reshape: `NSEMenu` becomes the menu **object** (`NSEMenu`, `NSEMenuItem` with `title`, `action`, `keyEquivalent`, `state`, `submenu`, `isSeparatorItem`). The trigger is `NSEPopUpButton` with `pullsDown` | fw 11 · Fusion |
+| `NSEMenuController`, `NSEMenuModel` | `NSMenu` (with its `delegate` and `update()` validation) | Merge into the `NSEMenu` object | fw 12 · JournalPublisher · Fusion |
+| `NSEContextMenu` | `NSView.menu`, `menu(for:)` | Merge into a `menu` property on views | JournalPublisher |
+| `NSEApplicationMenu`, `NSEAppMenu`, `NSEEditMenu`, `NSEHelpMenu`, `NSEAppMenuSurface`, `createNSEApplicationMenuModel` | `NSApplication.mainMenu`, the standard menu templates, `NSApplication.helpMenu` and `windowsMenu` | Merge into `NSEApplication.mainMenu` (an `NSEMenu`), with standard Edit, Window and Help menus the framework fills | Gallery |
+| `NSEMenuBar` | The menu bar draws `NSApp.mainMenu`; there is no menu-bar view | Decide (D6): on the web the menu bar is drawn in the window, so it should render `mainMenu` automatically, not be authored | Fusion |
+| `NSEMenuOverlay`, `NSEListboxPopup`, `NSEPopup` | — | Internal (the overlay mechanics behind menus and popovers) | fw 8–13 · Portfolio, SynCal (`NSEPopup` used directly) |
+
+### Containers, boxes and layout
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSEBox` | `NSBox` | Keep (`boxType`, `title`, `titlePosition`, `borderType`, `contentViewMargins`) | Gallery |
+| `NSEGroupBox` | `NSBox` with a title | Merge into `NSEBox` | JournalPublisher |
+| `NSEDivider` | `NSBox` with `boxType = .separator` | Merge into `NSEBox`. Its arrow becomes the theme's art for disclosure buttons and group-row outline cells | About |
+| `NSEStackView` | `NSStackView` (10.9) | Keep | Gallery |
+| `NSEStackItem` | Arranged views with visibility priorities | Keep only if `NSStackView`'s per-view API needs a wrapper in JSX; otherwise merge | Gallery |
+| `NSEStack`, `NSEInline`, `NSEFlex`, `NSEFit`, `NSEOrdered`, `NSESpacer` | `NSStackView` (orientation, distribution, spacing, `setCustomSpacing`) | Merge into `NSEStackView` | Gallery |
+| `NSEForm`, `NSEFormRow`, `NSEFormSeparator`, `NSERowGroup` | `NSGridView` (10.12); in Mountain Lion `NSForm` (deprecated in 10.10) | Merge into `NSEGridView` (rows, columns, `xPlacement`, `rowAlignment`, merged cells) | Gallery |
+| `NSEPane` | An `NSView` in a split pane; no "pane" class | Remove (Diagnostics uses it as a titled box: `NSEBox`) | Diagnostics |
+| `NSEDrawer` | `NSDrawer` (deprecated in 10.13, current in Mountain Lion) | Keep | Gallery |
+| `NSEDividerDrawer` | — | Remove | Gallery |
+| `NSESlidingView` | `NSPageController` (10.8: swipe between pages) | Rename → `NSEPageController` | Gallery |
+| `NSESlidingPane`, `NSESlidingPanes` | `NSSplitViewController` collapse, or `NSPageController` | Merge (see Navigation) | Gallery |
+| `NSEScrollView`, `NSEClipView` | same | Keep. `NSScrollView.allowsMagnification` (10.8) also absorbs the image zoom views below | Gallery |
+| `NSESplitView` | `NSSplitView` | Keep | Gallery |
+| `NSESplitViewController` | `NSSplitViewController` (10.10) | Keep (`splitViewItems` with `canCollapse`, `holdingPriority`, `minimumThickness`, and sidebar behaviour) | Gallery · Fusion |
+| `NSESplitViewAdapter` | `NSSplitViewController.splitView` | Merge into `NSESplitViewController`: the controller renders its own split view, as a view controller renders its view | Gallery · Fusion |
+| `NSEAccordionView` | — | Remove (see [section lists](#the-case-that-started-this-section-lists)) | Gallery · Fusion |
+| `NSEBookRegionMetrics`, `resolveNSEBookRegions` | — | Internal | fw 1 |
+
+### Data views
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSETable` | `NSTableView` | Rename → `NSETableView`. Columns become `NSETableColumn` (`identifier`, `title`, `width`, `minWidth`, `maxWidth`, `sortDescriptorPrototype`); cells become views via a delegate | Diagnostics, Software · Fusion |
+| `NSEOutline` | `NSOutlineView` | Rename → `NSEOutlineView`, and gain `selectionHighlightStyle: "sourceList"`, group items, `floatsGroupRows`, `autosaveExpandedItems` | Diagnostics, Software |
+| `NSESidebar`, `NSESidebarSurface`, `NSESidebarVariant` | `NSOutlineView` in source-list style | Remove. Its look becomes Atmo's source-list styling of `NSEOutlineView` (see above) | JournalPublisher |
+| `NSEList`, `NSEListRow`, `NSEListItem`, `NSEVirtualList`, `NSEGroupedList` | A single-column view-based `NSTableView` with `NSTableCellView` rows (group rows for sections) | Merge into `NSETableView`. `NSEListItem` (used inside menus and the sidebar, fw 16) becomes the theme's `NSETableCellView` | Diagnostics, JournalPublisher |
+| `NSESwipeableItem` | `NSTableView` row actions (`tableView(_:rowActionsForRow:edge:)`, 10.11) | Merge into `NSETableView`'s delegate | Gallery |
+| `NSEDataViewCellContent` | `NSTableCellView` (`textField`, `imageView`) | Rename → `NSETableCellView` | fw 1 |
+| `NSECollectionView`, `NSEBrowser`, `NSERuleEditor`, `NSEPredicateEditor` | same | Keep | Portfolio, Software |
+
+### Navigation and tabs
+
+AppKit has `NSTabView`, `NSTabViewController` (10.10), `NSSplitViewController` and `NSPageController`. NSE's navigation controllers come from UIKit, for the compact (phone) idiom.
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSETabView` | `NSTabView` | Keep (`tabViewItems`, `tabViewType`, `selectedTabViewItem`) | Gallery · Fusion |
+| `NSETabBarController`, `NSETabBar`, `NSETabBarOverflowList` | `NSTabViewController` (`tabStyle`: segmented control on top or bottom, toolbar, unspecified); UIKit `UITabBarController` | Decide (D2). Recommended: rename to `NSETabViewController`, with its tab bar as a `tabStyle` the theme draws | About, Journal, Portfolio, Software |
+| `NSENavigationStackController`, `NSEHierarchyStack` | No AppKit stack; UIKit `UINavigationController`. `NSPageController` (history mode) is AppKit's closest | Decide (D2) | Journal, Portfolio |
+| `NSEAdaptiveNavigationController` | `NSSplitViewController` with a collapsible sidebar item; UIKit `UISplitViewController` collapse | Decide (D2). Recommended: merge into `NSESplitViewController` collapse behaviour driven by the trait collection | About, Journal, Portfolio, Software |
+| `NSESourceListScene` | A window whose content is an `NSSplitViewController` with a sidebar item holding an `NSOutlineView` | Remove, as an `NSESplitViewController` configuration plus window chrome | Software |
+
+### Windows, chrome and toolbars
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSETopBar`, `NSETopBarButton`, `nseTopBarStyles` | The `NSWindow` title bar (`title`, `subtitle` 11, `representedURL`, `isDocumentEdited`, `titleVisibility`) with an `NSToolbar` and `NSTitlebarAccessoryViewController` (10.10) | Reshape: `NSEWindowController` and `NSEWindow` own the title bar. A document's "— Edited" comes from `isDocumentEdited`; Webspring and QuickSwitch items become title-bar accessories | JournalPublisher · Fusion |
+| `NSEStatusBar` | **Name collision**: `NSStatusBar` is the system menu bar's status-item area. A window's bottom bar is `NSWindow.setContentBorderThickness(_:for: .minY)` with ordinary views on it | Rename → a bottom-bar accessory of `NSEWindow` (content border), never `NSEStatusBar` | JournalPublisher · Fusion |
+| `NSEAppFrame` | `NSWindow` content layout | Internal | Gallery |
+| `NSEHeader`, `NSEPageHeader`, `NSEPrevNextBanner` | — (labels, `NSBox`, buttons) | Remove | Gallery |
+| `NSEToolbar` | `NSToolbar` | Keep, merging `NSEToolbarController` into it: `NSToolbar` *is* the model (`items`, `delegate`, `allowsUserCustomization`, `autosavesConfiguration`, `displayMode`) | 7 site apps · Fusion |
+| `NSEToolbarController` | `NSToolbar` and its delegate | Merge into `NSEToolbar` | JournalPublisher · Fusion |
+| `NSEToolbarConfigurationSheet` | `NSToolbar.runCustomizationPalette(_:)` | Merge into `NSEToolbar` (a method) | JournalPublisher |
+| `NSEToolbarOverflowMenu`, `allocateNSEToolbarItems` | Toolbar overflow (`»`) | Internal | fw 3 |
+
+### Panels, sheets and alerts
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSEOpenPanel`, `NSESavePanel` | same | Keep | Gallery |
+| `NSEFontPanel`, `NSEFontManager` | same | Keep | Libraries/JournalPages |
+| `NSEColourPanel`, `NSEColourWell` | `NSColorPanel`, `NSColorWell` | Keep or rename to `Color`: Decide (D1) | JournalPublisher, MemoJournal, Portfolio |
+| `NSEColourSliderPicker`, `NSEColourSwatches`, `NSEColourWheelPicker` | The colour panel's modes (`NSColorPanel.Mode`), `NSColorPicker` | Internal to the colour panel | Gallery |
+| `NSEAlert`, `NSEAlertBackdrop`, `NSEConfirmDialog`, `NSEConfirmPrompt`, `NSEDialog`, `NSEModalDialog`, `NSEDialogSurface` | `NSAlert` (`messageText`, `informativeText`, `addButton(withTitle:)`, `alertStyle`, `showsSuppressionButton`, `accessoryView`, `beginSheetModal(for:)`), and sheets (`NSWindow.beginSheet`) or `NSPanel` for custom dialogs | Merge into `NSEAlert` (an object) and window or panel sheets: Decide (D3) | 5 site apps |
+| `NSEPopover` | `NSPopover` | Keep (`contentViewController`, `behavior`, `show(relativeTo:of:preferredEdge:)`) | JournalPublisher |
+| `NSEToaster` | `NSUserNotification` (10.8), later `UNUserNotificationCenter` | Remove from NSE: notices go through the system notification service (`useNotifications`) | Gallery |
+| `NSEMediaPanel` | — (AVKit's `AVPlayerView` is 10.9; no system media chooser) | Decide (D4) | Gallery |
+| `NSERuler` | `NSRulerView` | Rename → `NSERulerView` | Gallery |
+| `NSEWebContentView` | WebKit `WebView` (Mountain Lion), `WKWebView` (10.10) | Rename → `NSEWebView` (WebKit names drop NS; D1 note) | Gallery |
+
+### Images and graphics
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSEImageView` | `NSImageView` | Keep (`imageScaling`, `imageAlignment`, `isEditable`, `animates`) | Gallery |
+| `NSESizeableImage`, `NSEScrollingImage`, `NSEViewImage` | `NSImageView` in an `NSScrollView` with `allowsMagnification` | Merge into `NSEImageView` and `NSEScrollView` | Gallery |
+| `NSECroppableImage` | — (`IKImageView` in ImageKit can crop) | Decide (D4) | Gallery |
+| `NSERotatingImage` | A spinning `NSProgressIndicator` | Remove | Gallery |
+| `NSEGraphicsView` | A custom `NSView` with `draw(_:)` | Keep (its doc already says this) | Gallery · Fusion |
+| `NSECoverFlow` | Cover Flow was `IKImageFlowView`, private to Apple | Decide (D4) | AnimationFX, Software |
+| `NSEPage` | — (page curl) | Decide (D4) | MemoJournal, Portfolio |
+
+### Date, time and colour controls
+
+| NSE today | AppKit | Verdict | Callers |
+|---|---|---|---|
+| `NSEDatePicker` | `NSDatePicker` | Keep, and absorb the five below (`datePickerStyle`: text field, text field and stepper, clock and calendar; `datePickerElements`: year-month-day, hour-minute-second, time zone; `datePickerMode`: single or range) | SynCal |
+| `NSETimePicker`, `NSEDateTimePicker`, `NSEDateRangePicker`, `NSECalendarView`, `NSEClockView` | `NSDatePicker` | Merge into `NSEDatePicker` | SynCal |
+
+## Decisions for the owner
+
+- **D1. "Colour" or "Color".** AppKit spells it `NSColor`, `NSColorPanel`, `NSColorWell`. NSE and GraphicsFX use British "Colour" throughout (`NSEColourWell`, `GFXColour`, `colourScheme`). Strict AppKit fidelity says `Color`. Recommended: `Color` in class and property names, keeping British English in prose and documentation.
+- **D2. The compact-idiom controllers.** AppKit has no navigation stack or tab bar controller for phones; UIKit does. Recommended: no UIKit classes in NSE. Express the same behaviour through AppKit classes whose presentation follows the trait collection:
+  - `NSETabViewController` with a `tabStyle`;
+  - `NSESplitViewController` that collapses to one pane at a time (it already does: `responsiveState.mode === "mobile"`);
+  - `NSEPageController` for drill-in history.
+  The alternative is to adopt UIKit names for compact-only classes.
+- **D3. Alerts and sheets as objects.** Recommended: `NSEAlert` becomes a class configured and presented by a controller, like `NSEOpenPanel` already is (`alert.beginSheetModal(for: window)` returns the response). Custom dialogs become sheets presenting a view controller (`presentAsSheet`, 10.10). This removes the seven dialog components and the app-managed `open` state.
+- **D4. Syndromatic originals.** Some components have no Apple class but are part of SynCloudOS's character: `NSECoverFlow`, `NSEPage` (page curl), `NSECroppableImage`, `NSEMediaPanel`, perhaps a notification badge. Recommended: keep the ones the site uses (Cover Flow, Page), under a prefix that is not `NSE` (for example `SYN…`), so that `NSE` means only "this is an AppKit class". Remove the rest.
+- **D5. JSX property names.** NSE controls are React components, so their properties are JSX props. Recommended: props take AppKit's property names exactly (`title`, `state`, `bezelStyle`, `buttonType`, `controlSize`, `keyEquivalent`, `toolTip`, `isEnabled`). React's DOM spellings (`disabled`, `onClick`) stay only where the element *is* the DOM element underneath. Also decide whether radio buttons keep a grouping container for roving focus (AppKit groups them by shared superview and action).
+- **D6. The in-window menu bar.** Recommended: the window renders `NSEApplication.mainMenu` itself whenever the app has one, so no app authors an `NSEMenuBar`. This matches [menu bar opt-in](../../framework/nse-controls.md#menus-and-toolbars): apps without a main menu get none.
+- **D7. `NSEViewControllerView`.** The bridge that renders a controller's view inside React has to exist. Recommended: keep it, but make the common case unnecessary: a parent's `renderView` names a child controller (`<child.view />` or `this.viewer.view`), as `NSViewController.view` is a property.
+
+## Summary of verdicts
+
+Of the 181 UI and controller exports:
+
+- **Keep:** about 45.
+- **Rename:** about 15, including `NSETable` → `NSETableView`, `NSEOutline` → `NSEOutlineView`, `NSEPicker` → `NSEPopUpButton`, `NSEPushButton` → `NSEButton`, and `NSEPreferencesController` → `NSEUserDefaultsController`.
+- **Merge into an AppKit class:** about 70. The largest merges:
+  - `NSEButton` absorbs 8;
+  - `NSEPopUpButton` absorbs 6;
+  - `NSEStackView` absorbs 6;
+  - `NSEDatePicker` absorbs 5;
+  - `NSEProgressIndicator` absorbs 4;
+  - `NSETableView` absorbs 6;
+  - `NSEAlert` absorbs 7.
+- **Make internal:** about 25.
+- **Remove:** about 20.
+- **Awaiting a decision:** about 10.
+
+Afterwards the public UI surface is roughly 70 classes, each naming an AppKit class.
+
+## Execution plan (after approval)
+
+The beta break lands as one sweep, so no app is ever half-migrated. Each phase finishes before the next starts. Within a phase, the framework, the Atmo theme, the documentation, the developer MCP's lookup catalogue, the control gallery, every site app and Fusion change together. Each phase ends green: typecheck, tests, the site build, and a visual pass of the gallery in light and dark.
+
+1. **Data views and source lists.** This unblocks Minimak's navigator and inspector.
+   - `NSETableView`, `NSETableColumn`, `NSETableCellView`, `NSEOutlineView` in source-list style with group rows. Atmo's current sidebar look moves to group rows.
+   - Remove `NSESidebar`, `NSEAccordionView` and the `NSEList` family.
+   - `NSESplitViewController` renders its own view (no adapter).
+2. **Buttons and fields.**
+   - `NSEButton` with `buttonType` and `bezelStyle`, including disclosure. `NSESwitch`.
+   - The `NSETextField` bezel styles, `NSESecureTextField`, and `NSEBox` with its box types.
+3. **Pop-up buttons and menus.** The `NSEMenu` and `NSEMenuItem` objects, `NSEPopUpButton` (pull-down included, validated through the responder chain), `NSView.menu`, and `NSEApplication.mainMenu`.
+4. **Values, progress, and date and time.** `NSESlider` `sliderType`, `NSEProgressIndicator`, `NSEDatePicker`.
+5. **Layout and containers.** `NSEStackView` only, `NSEGridView`, `NSEPageController`, `NSEDrawer`; theme parts made internal.
+6. **Windows and chrome.** The title bar from `NSEWindow` (title, `isDocumentEdited`, accessories), the bottom bar, `NSEToolbar` absorbing its controller, and alerts and sheets as objects (after D3).
+7. **Navigation controllers** (after D2).
+8. **Guard rails for agents:**
+   - An `appkitCounterpart` field on every entry in the developer MCP's `lookup_sdk` catalogue.
+   - A test that fails when a public NSE export has none.
+   - A rule in the SDK's `AGENTS.md`: NSE names are AppKit names; an AppKit pattern goes in a theme, not a new component.
+
+## Second pass
+
+These are out of scope for this approval, listed so they are not forgotten:
+
+- **Text system.** `NSETextStorage`, `NSELayoutManager`, `NSETextView` and `NSETextInputClient` are AppKit's. About 60 free functions around them (`applyNSETextOperations`, `findNSEText`, `nseToggleListOperations`…) would be methods on those classes in AppKit (`NSTextStorage.replaceCharacters(in:with:)`, `NSTextFinder`, `NSTextList`).
+- **Foundation types.** `NumberFormatter`, `DateFormatter`, `ByteCountFormatter`, `IndexPath`, `IndexSet`, `SortDescriptor` and `ValueTransformer` follow Swift Foundation's unprefixed names, which is consistent. `TreeNode` should be `NSTreeNode` (Swift keeps the prefix); `SelectionModel` and `Predicate` need checking against `NSIndexSet` selection and `NSPredicate`.
+- **SDK hooks** (`useDocument`, `useMedia`, …). These are SynCloudOS services, not AppKit; they need a separate review against `NSDocument`, `NSWorkspace`, `NSPasteboard` and friends.
