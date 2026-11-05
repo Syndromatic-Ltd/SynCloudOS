@@ -207,6 +207,7 @@ export function NSESplitViewAdapter({
             ref={(node) => { if (node) paneNodes.current.set(first.id, node); else paneNodes.current.delete(first.id); }}
             tabIndex={-1}
             data-pane-id={first.id}
+            data-nse-part="split-pane"
           >
             {paneContent(first.id)}
           </div>
@@ -221,6 +222,7 @@ export function NSESplitViewAdapter({
           ref={(node) => { if (node) paneNodes.current.set(second.id, node); else paneNodes.current.delete(second.id); }}
           tabIndex={-1}
           data-pane-id={second.id}
+          data-nse-part="split-pane"
         >
           {paneContent(second.id)}
           {stateFeedback}
