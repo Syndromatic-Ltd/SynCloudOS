@@ -297,31 +297,31 @@ export function NSEMediaPanel({
         ) : null}
         <NSESearchField className="nse-media-panel-search" aria-label={labels.search} placeholder={labels.search} value={search} onValueChange={setSearch} disabled={Boolean(provider?.requiresUserActivation)} />
         {provider?.requiresUserActivation ? <NSEButton
-                                              appearance="aqua"
-                                              title={labels.chooseFiles}
-                                              isEnabled={!loading}
-                                              data-nse-part="choose-files"
-                                              data-nse-initial-focus=""
-                                              onClick={() => void load(null, true)}
-                                            /> : null}
+          appearance="aqua"
+          title={labels.chooseFiles}
+          isEnabled={!loading}
+          data-nse-part="choose-files"
+          data-nse-initial-focus=""
+          onClick={() => void load(null, true)}
+        /> : null}
         {loading ? <p role="status" data-state="loading">Loading media…</p> : null}
         {message ? <p role="status" data-state={result?.kind}>{message}</p> : null}
         {result?.kind === "empty" ? <p role="status" data-state="empty">{labels.empty}</p> : null}
         {items.length > 0 ? <CollectionPresenter items={items} selectedIds={selectedIds} selection={selection} direction={direction} onSelectionChange={setSelectedIds} onActivate={activate} /> : null}
         {preview ? <aside className="nse-media-panel-preview" aria-label="Media preview"><strong>{preview.name}</strong><span>{preview.kind}</span><span>{preview.mimeType}</span></aside> : null}
         {nextCursor ? <NSEButton
-                        appearance="aqua"
-                        title={labels.loadMore}
-                        isEnabled={!loading}
-                        data-nse-part="load-more"
-                        onClick={() => void load(nextCursor, false)}
-                      /> : null}
+          appearance="aqua"
+          title={labels.loadMore}
+          isEnabled={!loading}
+          data-nse-part="load-more"
+          onClick={() => void load(nextCursor, false)}
+        /> : null}
         <div className="nse-media-panel-actions"><NSEButton
-                                                   appearance="aqua"
-                                                   title={labels.cancel}
-                                                   data-nse-part="cancel"
-                                                   onClick={() => void requestDismiss("programmatic")}
-                                                 /><NSEButton
+          appearance="aqua"
+          title={labels.cancel}
+          data-nse-part="cancel"
+          onClick={() => void requestDismiss("programmatic")}
+        /><NSEButton
                                                                                                                                                                                          keyEquivalent={"\r"}
                                                                                                                                                                                          title={labels.insertSelected}
                                                                                                                                                                                          isEnabled={!(selectedItems.length === 0 || inserting)}

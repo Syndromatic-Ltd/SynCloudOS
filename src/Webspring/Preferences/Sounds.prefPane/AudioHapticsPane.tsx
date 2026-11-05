@@ -48,11 +48,11 @@ export function AudioHapticsPane() {
   return <div className="nse-prefs-section">
     <NSEGroupBox label={systemT("preferences.audio", "Audio")}>
       <NSEListItem tapHighlight={false} trailing={<NSESwitch
-                                                    state={settings.soundEnabled ? "on" : "off"}
-                                                    onStateChange={(state) => runtime.settings.set("soundEnabled", (state === "on"))}
-                                                    thumbMaterial="metal"
-                                                    aria-label={systemT("preferences.audioEnabled", "Audio enabled")}
-                                                  />}>
+        state={settings.soundEnabled ? "on" : "off"}
+        onStateChange={(state) => runtime.settings.set("soundEnabled", (state === "on"))}
+        thumbMaterial="metal"
+        aria-label={systemT("preferences.audioEnabled", "Audio enabled")}
+      />}>
         {systemT("preferences.audioEnabled", "Audio enabled")}
       </NSEListItem>
       <NSEListItem tapHighlight={false}>
@@ -69,11 +69,11 @@ export function AudioHapticsPane() {
     </NSEGroupBox> : null}
     {supportsHaptics ? <NSEGroupBox label={systemT("preferences.haptics", "Haptics")}>
       <NSEListItem tapHighlight={false} trailing={<NSESwitch
-                                                    state={settings.vibrationEnabled ? "on" : "off"}
-                                                    onStateChange={(state) => runtime.settings.set("vibrationEnabled", (state === "on"))}
-                                                    thumbMaterial="metal"
-                                                    aria-label={systemT("preferences.hapticsEnabled", "Haptics enabled")}
-                                                  />}>
+        state={settings.vibrationEnabled ? "on" : "off"}
+        onStateChange={(state) => runtime.settings.set("vibrationEnabled", (state === "on"))}
+        thumbMaterial="metal"
+        aria-label={systemT("preferences.hapticsEnabled", "Haptics enabled")}
+      />}>
         {systemT("preferences.hapticsEnabled", "Haptics enabled")}
       </NSEListItem>
     </NSEGroupBox> : null}
