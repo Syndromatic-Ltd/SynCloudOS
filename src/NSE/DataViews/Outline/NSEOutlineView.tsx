@@ -165,6 +165,13 @@ export function NSEOutlineView<T, TId extends string | number>({
     if (activeId !== null && rows.some(({ id }) => Object.is(id, activeId))) return;
     setActiveId(rows[0]?.id ?? null);
   }, [activeId, rows]);
+  // The keyboard's active row follows a selection made elsewhere (the controller, a binding).
+  useEffect(() => {
+    const selected = snapshot.selection.selectedIds;
+    if (selected.size === 0 || (activeId !== null && selected.has(activeId))) return;
+    const next = rows.find(({ id }) => selected.has(id));
+    if (next) setActiveId(next.id);
+  }, [snapshot.selection]);
   useEffect(() => () => {
     for (const request of requests.current.values()) request.abort();
     requests.current.clear();

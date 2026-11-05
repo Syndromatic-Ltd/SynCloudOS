@@ -254,7 +254,9 @@ function NSESourceListNavigationScene({
     if (active && active !== root.ownerDocument.body && !root.contains(active)) return;
     const target = compact
       ? Array.from(root.querySelectorAll<HTMLElement>('[role="tab"]')).find(node => node.getAttribute("aria-selected") === "true")
-      : root.querySelector<HTMLElement>('[data-nse-sidebar-row="true"][aria-current="true"]');
+      : root.querySelector<HTMLElement>('[data-nse-sidebar-row="true"][aria-current="true"]')
+        // An app's own source list is an outline view, which takes focus itself (its active row follows the selection).
+        ?? root.querySelector<HTMLElement>('.nse-outline-view[data-style="source-list"]');
     target?.focus({ preventScroll: true });
     target?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
   }, [adaptiveSnapshot.renderer]);
