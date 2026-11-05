@@ -933,6 +933,12 @@
   overflow: hidden;
 }
 
+/* A two-pane adapter's panes fill the split view's grid cells, so their content divides the pane's
+   height rather than growing to its own. */
+.nse-split-view-adapter > :is(.nse-split-view-sidebar, .nse-split-view-main) > [data-nse-part="split-pane"] {
+  block-size: 100%;
+}
+
 .nse-split-view[data-sidebar-position="trailing"] .nse-split-view-sidebar {
   grid-column: 2;
   grid-row: 1;
@@ -1001,7 +1007,8 @@
 }
 
 .nse-split-view-adapter > [data-nse-part="split-pane"],
-.nse-split-view-adapter > * > [data-nse-part="split-pane"] {
+.nse-split-view-adapter > * > [data-nse-part="split-pane"],
+.nse-split-view-adapter > :is(.nse-split-view-sidebar, .nse-split-view-main) > [data-nse-part="split-pane"] {
   display: flex;
   flex-direction: column;
   min-width: 0;

@@ -335,10 +335,32 @@ describe("split view controller", () => {
       height.mockImplementation(function (this: HTMLElement) { return this.classList.contains("nse-split-view-adapter") ? 420 : 0; });
       React.act(() => observed?.());
       expect(controller.getSnapshot().availableSize).toBe(420);
+      for (const id of ["canvas", "analysis"])
+        expect(document.querySelector(`[data-pane-id="${id}"]`)?.getAttribute("data-nse-part")).toBe("split-pane");
     } finally {
       height.mockRestore();
       width.mockRestore();
       vi.unstubAllGlobals();
     }
+  });
+
+  it("marks a two-pane horizontal split's panes, so they fill the split view's cells", () => {
+    const controller = new NSESplitViewController({
+      id: "two",
+      orientation: "horizontal",
+      panes: [
+        { id: "plots", minimum: 200, ideal: 500, maximum: Number.POSITIVE_INFINITY, collapsible: false, collapsePriority: 0 },
+        { id: "slice", minimum: 200, ideal: 300, maximum: 600, collapsible: true, collapsePriority: 10 },
+      ],
+    });
+    render(<NSESplitViewAdapter
+      aria-label="Analysis"
+      controller={controller}
+      responsiveState={{ mode: "desktop", width: 1400, height: 900, prefersReducedMotion: false }}
+      windowBounds={{ width: 1400, height: 900 }}
+      panes={[{ id: "plots", label: "Plots", content: <p>Plots</p> }, { id: "slice", label: "Slice", content: <p>Slice</p> }]}
+    />);
+    expect(document.querySelector(".nse-split-view-sidebar > [data-pane-id=\"plots\"]")?.getAttribute("data-nse-part")).toBe("split-pane");
+    expect(document.querySelector(".nse-split-view-main > [data-pane-id=\"slice\"]")?.getAttribute("data-nse-part")).toBe("split-pane");
   });
 });
