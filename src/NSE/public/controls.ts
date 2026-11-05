@@ -52,7 +52,7 @@ export type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection,
 export { NSEAppFrame } from "../Windows/NSEAppFrame";
 export type { NSEAppFrameProps, NSEAppFrameVariant } from "../Windows/NSEAppFrame";
 
-export { NSEMetalSurface, NSERoundedBox } from "../Material";
+export { NSERoundedBox } from "../Material";
 export type { NSEMetalSurfaceProps, NSERoundedBoxProps } from "../Material";
 export {
   NSESourceListScene,
