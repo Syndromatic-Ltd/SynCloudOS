@@ -84,10 +84,10 @@ function NSEComparisonPredicateEditor<T>({ expression, templates, publish, readO
         publish(nextOption?.arity === 0 ? { kind: "comparison", field: expression.field, operator: nextOperator } : { kind: "comparison", field: expression.field, operator: nextOperator, value: nextValue as never, ...compatibleOptions(template, nextOperator) });
       }} />
     {operator === "between" ? <>
-      <NSETextField className="nse-rule-value" aria-label="Lower value" value={parts[0] ?? ""} readOnly={readOnly} disabled={disabled} onChange={(event) => { const next = [event.target.value, parts[1] ?? ""]; setParts(next); if (next[1] !== "") publishParts(next); }} />
-      <NSETextField className="nse-rule-value" aria-label="Upper value" value={parts[1] ?? ""} readOnly={readOnly} disabled={disabled} onChange={(event) => { const next = [parts[0] ?? "", event.target.value]; setParts(next); if (next[0] !== "") publishParts(next); }} />
-    </> : operator === "in" ? <NSETextField className="nse-rule-value" aria-label="Values" value={parts.join(", ")} readOnly={readOnly} disabled={disabled} onChange={(event) => { const next = event.target.value.split(","); setParts(next); publishParts(next); }} />
-      : option.arity > 0 && <NSETextField className="nse-rule-value" aria-label="Value" value={text} readOnly={readOnly} disabled={disabled} aria-invalid={error !== null} onChange={(event) => {
+      <NSETextField className="nse-rule-value" aria-label="Lower value" value={parts[0] ?? ""} readOnly={readOnly} isEnabled={!disabled} onChange={(event) => { const next = [event.target.value, parts[1] ?? ""]; setParts(next); if (next[1] !== "") publishParts(next); }} />
+      <NSETextField className="nse-rule-value" aria-label="Upper value" value={parts[1] ?? ""} readOnly={readOnly} isEnabled={!disabled} onChange={(event) => { const next = [parts[0] ?? "", event.target.value]; setParts(next); if (next[0] !== "") publishParts(next); }} />
+    </> : operator === "in" ? <NSETextField className="nse-rule-value" aria-label="Values" value={parts.join(", ")} readOnly={readOnly} isEnabled={!disabled} onChange={(event) => { const next = event.target.value.split(","); setParts(next); publishParts(next); }} />
+      : option.arity > 0 && <NSETextField className="nse-rule-value" aria-label="Value" value={text} readOnly={readOnly} isEnabled={!disabled} aria-invalid={error !== null} onChange={(event) => {
         const nextText = event.target.value; setText(nextText);
         const parsed = template!.formatter.parse(nextText, { locale });
         if (!parsed.ok) { setError(parsed.error.message); return; }

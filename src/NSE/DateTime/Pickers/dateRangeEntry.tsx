@@ -163,8 +163,8 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
   const valueId = `date-range-picker-value-${instanceId}`;
   const fields = (
     <div data-nse-part="range-fields">
-      <NSETextField controlSize="small" label="Start" aria-label={`${props["aria-label"]} start`} value={startText} disabled={props.disabled} readOnly={props.readOnly} onValueChange={(text, phase) => { if (phase === "preview") setStartText(text); else if (phase === "commit") { if (overlay) previewText(text, endText); } }} />
-      <NSETextField controlSize="small" label="End" aria-label={`${props["aria-label"]} end`} value={endText} disabled={props.disabled} readOnly={props.readOnly} onValueChange={(text, phase) => { if (phase === "preview") setEndText(text); else if (phase === "commit") { if (overlay) previewText(startText, text); } }} />
+      <NSETextField controlSize="small" label="Start" aria-label={`${props["aria-label"]} start`} value={startText} isEnabled={!props.disabled} readOnly={props.readOnly} onValueChange={(text, phase) => { if (phase === "preview") setStartText(text); else if (phase === "commit") { if (overlay) previewText(text, endText); } }} />
+      <NSETextField controlSize="small" label="End" aria-label={`${props["aria-label"]} end`} value={endText} isEnabled={!props.disabled} readOnly={props.readOnly} onValueChange={(text, phase) => { if (phase === "preview") setEndText(text); else if (phase === "commit") { if (overlay) previewText(startText, text); } }} />
     </div>
   );
   return <section ref={hostRef} data-nse-control="date-range-picker" data-state={invalid ? "invalid" : props.disabled ? "disabled" : props.readOnly ? "read-only" : open ? "open" : "ready"}>

@@ -266,7 +266,7 @@ describe("NSE control contracts", () => {
           onValueChange={changes}
         />
         <NSETextField label="Read-only amount" defaultValue="7" readOnly />
-        <NSETextField label="Disabled amount" defaultValue="8" disabled />
+        <NSETextField label="Disabled amount" defaultValue="8" isEnabled={false} />
       </form>,
     );
 

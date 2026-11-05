@@ -176,14 +176,14 @@ describe("NSE appearance composition", () => {
   it("keeps semantic disabled and invalid state when controls change", async () => {
     const { rerender } = render(
       <NSEAppearanceProvider appearance={atmoAppearance}>
-        <NSETextField label="Name" disabled invalid />
+        <NSETextField label="Name" isEnabled={false} invalid />
       </NSEAppearanceProvider>,
     );
     expect(screen.getByLabelText("Name").getAttribute("aria-invalid")).toBe("true");
 
     rerender(
       <NSEAppearanceProvider appearance={atmoAppearance}>
-        <NSETextField label="Name" disabled invalid />
+        <NSETextField label="Name" isEnabled={false} invalid />
       </NSEAppearanceProvider>,
     );
     expect((screen.getByLabelText("Name") as HTMLInputElement).disabled).toBe(true);

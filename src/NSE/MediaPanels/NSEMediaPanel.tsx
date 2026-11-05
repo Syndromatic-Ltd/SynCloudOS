@@ -295,7 +295,7 @@ export function NSEMediaPanel({
             />
           </div>
         ) : null}
-        <NSESearchField className="nse-media-panel-search" aria-label={labels.search} placeholder={labels.search} value={search} onValueChange={setSearch} disabled={Boolean(provider?.requiresUserActivation)} />
+        <NSESearchField className="nse-media-panel-search" aria-label={labels.search} placeholder={labels.search} value={search} onValueChange={setSearch} isEnabled={!(Boolean(provider?.requiresUserActivation))} />
         {provider?.requiresUserActivation ? <NSEButton
           appearance="aqua"
           title={labels.chooseFiles}
