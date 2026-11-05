@@ -124,6 +124,7 @@ export function createCommandSystem(options: CreateCommandSystemOptions): Comman
       return stalePresentation(id);
     }
     const title = validation.title ?? declaredTitle;
+    const keyBinding = runtime.keyBindings?.bindingFor(id, resolved.responder.id) ?? undefined;
     const presentation: CommandPresentation = {
       commandId: id,
       responderId: resolved.responder.id,
@@ -135,6 +136,7 @@ export function createCommandSystem(options: CreateCommandSystemOptions): Comman
       state: validation.state ?? "off",
       stale: false,
       disabledReason: validation.disabledReason,
+      ...(keyBinding ? { keyBinding } : {}),
     };
     record({ at: startedAt, type: "validation", commandId: id, responderId: resolved.responder.id, chain: resolved.chain.map(({ id: responderId }) => responderId), durationMs: Math.max(0, runtime.environment.now() - startedAt), outcome: validation.denied ? "denied" : validation.enabled ? "enabled" : "disabled" });
     return presentation;
