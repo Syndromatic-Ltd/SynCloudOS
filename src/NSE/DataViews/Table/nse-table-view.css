@@ -76,3 +76,43 @@
   block-size: 100%;
   min-block-size: 0;
 }
+
+/* NSTableCellView: an optional image, then the title over its detail, then a badge or accessory. */
+.nse-table-view [data-nse-part="cell-content"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+.nse-table-view [data-nse-part="cell-content"] > [data-nse-part="image"] {
+  flex: 0 0 auto;
+  inline-size: 24px;
+  block-size: 24px;
+  object-fit: contain;
+}
+
+.nse-table-view [data-nse-part="cell-content"] [data-nse-part="text-content"] {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.nse-table-view [data-nse-part="cell-content"] [data-nse-part="primary-text"],
+.nse-table-view [data-nse-part="cell-content"] [data-nse-part="secondary-text"] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nse-table-view [data-nse-part="cell-content"] [data-nse-part="secondary-text"] {
+  font-size: 0.85em;
+  opacity: 0.72;
+}
+
+.nse-table-view [data-nse-part="cell-content"] > [data-nse-part="badge"],
+.nse-table-view [data-nse-part="cell-content"] > [data-nse-part="accessory"] {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+}
