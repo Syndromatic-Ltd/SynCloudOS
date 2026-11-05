@@ -24,22 +24,19 @@ import { cleanup, render } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import * as nse from "@syndromatic/syncloudos/nse";
 import * as systemUI from "@syndromatic/syncloudos/nse/system-ui";
-import type { LoadingSpinnerVariant } from "@syndromatic/syncloudos/nse";
-import type { LoadingSpinnerVariant as SystemUISpinnerVariant } from "@syndromatic/syncloudos/nse/system-ui";
+import type { LoadingSpinnerVariant } from "@syndromatic/syncloudos/nse/system-ui";
 import { LoadingSpinner as ExistingLoadingSpinner } from "../../src/NSE/Components/LoadingSpinner";
 
 afterEach(cleanup);
 
 // These imports resolve through the SDK entry table used by the package build.
 // No component or public module is mocked.
-it.each([
-  ["nse", nse],
-  ["nse/system-ui", systemUI],
-] as const)("exports the existing sprite spinner through %s", (_name, entry) => {
-  expect(entry.LoadingSpinner).toBe(ExistingLoadingSpinner);
-  const RootSpinner = entry.LoadingSpinner;
-  const variant: LoadingSpinnerVariant & SystemUISpinnerVariant = "light";
-  const rendered = render(<RootSpinner variant={variant} label="" ariaLabel="Loading Example" />);
+it("exports the system chrome's sprite spinner through nse/system-ui only", () => {
+  expect(systemUI.LoadingSpinner).toBe(ExistingLoadingSpinner);
+  // SynWare draws progress with NSEProgressIndicator.
+  expect("LoadingSpinner" in nse).toBe(false);
+  const variant: LoadingSpinnerVariant = "light";
+  const rendered = render(<systemUI.LoadingSpinner variant={variant} label="" ariaLabel="Loading Example" />);
   const spinner = rendered.getByRole("status", { name: "Loading Example" });
   expect(spinner.classList.contains("nse-loading-spinner--light")).toBe(true);
   expect(spinner.querySelector(".nse-loading-spinner-sprite")).not.toBeNull();

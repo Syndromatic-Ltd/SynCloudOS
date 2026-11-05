@@ -32,6 +32,7 @@ import { NSEComboBox, type NSECompletionDataSource } from "../../src/NSE/Control
 import { NSECalendarView, type NSECalendarMonth } from "../../src/NSE/DateTime";
 import { NSEOverlayProvider } from "../../src/NSE/Overlays";
 import { NSEProgressIndicator } from "../../src/NSE/Progress";
+import { NSEAnimationEnvironmentProvider } from "../../src/NSE/Animation/NSEAnimationEnvironment";
 import { NSEScrollView } from "../../src/NSE/Scroll";
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
@@ -162,5 +163,5 @@ it("coalesces the real scroll view observer and keeps rubber-band listeners dist
 it("schedules no animation for reduced-motion indeterminate progress", async () => {
   const budget = budgets.portableCases["progress-controls.reduced-motion"];
   const raf = vi.fn(); vi.stubGlobal("requestAnimationFrame", raf);
-  await runStructuralScenario({ run: () => render(<NSEProgressIndicator aria-label="Static progress" state={{ kind: "indeterminate" }} reducedMotion />), assertStructural: (view) => { expect(raf).toHaveBeenCalledTimes(budget.maxAnimationCallbacks); expect(view.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); view.unmount(); } });
+  await runStructuralScenario({ run: () => render(<NSEAnimationEnvironmentProvider reducedMotion><NSEProgressIndicator aria-label="Static progress" /></NSEAnimationEnvironmentProvider>), assertStructural: (view) => { expect(raf).toHaveBeenCalledTimes(budget.maxAnimationCallbacks); expect(view.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); view.unmount(); } });
 });

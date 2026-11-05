@@ -1598,16 +1598,10 @@
 }
 
 :where([data-nse-appearance="atmo"]) .nse-extended-date-picker,
-:where([data-nse-appearance="atmo"]) .nse-extended-time-picker,
-:where([data-nse-appearance="atmo"]) .nse-extended-progress-slider {
+:where([data-nse-appearance="atmo"]) .nse-extended-time-picker {
   display: inline-flex;
   align-items: center;
   max-width: 100%;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-extended-progress-slider {
-  position: relative;
-  min-width: min(320px, 100%);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-extended-progress-slider-bar {
@@ -1655,102 +1649,6 @@
 
 :where([data-nse-appearance="atmo"]) .nse-control-picker-list .nse-control-picker-option:disabled {
   color: rgba(35, 45, 55, 0.42);
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar {
-  position: relative;
-  height: 11px;
-  min-width: 120px;
-  box-sizing: border-box;
-}
-
-/* The track — left + right end caps with a repeating middle.
-   Lives on a pseudo-element so the fill's percentage is relative to the full (border-less) bar
-   and reaches the right cap exactly at 100%. */
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border: 0 solid transparent;
-  border-width: 0 6px;
-  border-image: var(--nse-atmo-progress-track) 0 6 0 6 fill repeat repeat;
-  box-sizing: border-box;
-  pointer-events: none;
-}
-
-/* The fill — the same cap+middle sprite; its width is the progress fraction, so both the left cap
-   (at 0) and the right cap (at the fill's edge) always render. min-width keeps both caps visible. */
-:where([data-nse-appearance="atmo"]) .nse-control-progress-inner,
-:where([data-nse-appearance="atmo"]) .nse-control-progress-alt {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 11px;
-  width: var(--nse-control-progress, 0%);
-  min-width: 12px;
-  border: 0 solid transparent;
-  border-width: 0 6px;
-  border-image: var(--nse-atmo-progress-fill) 0 6 0 6 fill repeat repeat;
-  box-sizing: border-box;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-inner {
-  z-index: 2;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar[data-empty="true"] .nse-control-progress-inner {
-  visibility: hidden;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar[data-full="true"] .nse-control-progress-inner {
-  width: 100%;
-  visibility: visible;
-}
-
-/* ProgressSlider altBar: secondary fill behind the primary progress (a buffer/
-   download-ahead indicator). Heritage has no dedicated sprite, so use a muted primary
-   fill; Onyx swaps in slider-progress-secondary.png. */
-:where([data-nse-appearance="atmo"]) .nse-control-progress-alt {
-  z-index: 1;
-  width: var(--nse-control-progress-alt, 0%);
-  opacity: 0.4;
-  transition: width 0.3s ease;
-}
-
-/* ProgressBar.animatePosition=false: snap instead of easing the width. */
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar[data-animate="true"] .nse-control-progress-inner {
-  transition: width 0.3s ease;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar[data-animate="false"] .nse-control-progress-alt {
-  transition: none;
-}
-
-/* ProgressBar.content: text in the client area. The bar grows to fit and the
-   fill spans the full height behind the centered caption. */
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar:has(> .nse-control-progress-content) {
-  height: auto;
-  min-height: 24px;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar:has(> .nse-control-progress-content) .nse-control-progress-inner,
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar:has(> .nse-control-progress-content) .nse-control-progress-alt {
-  height: 100%;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-content {
-  position: relative;
-  z-index: 11;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 24px;
-  padding: 0 10px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-slider {
@@ -2157,43 +2055,6 @@
 
 :where([data-nse-appearance="atmo"]) .nse-control-search-field.is-disabled {
   opacity: 0.58;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-item {
-  position: relative;
-  display: grid;
-  align-items: center;
-  min-height: 26px;
-  min-width: 160px;
-  overflow: hidden;
-  border: 6px solid transparent;
-  /* stretch, not repeat: the item is taller than the 11px sprite and repeat
-     tiled clipped copies of the pill above/below (heritage splice bug). */
-  border-image: var(--nse-atmo-progress-track) 0 6 0 6 fill stretch;
-  color: #243040;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-item[data-variant="pill"] {
-  border-radius: 13px;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-item-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--nse-control-progress, 0%);
-  border: 6px solid transparent;
-  border-image: var(--nse-atmo-progress-fill) 0 6 0 6 fill stretch;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-item-label {
-  position: relative;
-  z-index: 1;
-  padding: 0 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-app-menu-surface {

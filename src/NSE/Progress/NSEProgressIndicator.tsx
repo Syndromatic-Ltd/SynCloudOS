@@ -18,30 +18,33 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
 import type { NSEProgressIndicatorProps } from "./progressTypes";
-import { normalizeNSEProgressState, progressStyle } from "./progressCore";
+import { normalizeNSEProgress, progressStyle } from "./progressCore";
 
-export function NSEProgressIndicator({ state, variant = "bar", size = 16, reducedMotion, ...props }: NSEProgressIndicatorProps) {
-  const normalizedState = normalizeNSEProgressState(state);
-  if (normalizedState.kind === "hidden") return null;
-  if (normalizedState.kind === "error" || normalizedState.kind === "suspended" || normalizedState.kind === "completed") {
-    return <span role="status" aria-label={props["aria-label"]} data-nse-control="progress-indicator" data-state={normalizedState.kind}>{normalizedState.kind === "error" ? normalizedState.message : normalizedState.kind}</span>;
-  }
+const SPINNING_SIZE = { small: 16, regular: 32, large: 64 } as const;
 
-  const determinate = normalizedState.kind === "determinate";
-  const metrics = determinate ? normalizedState.metrics : undefined;
+/**
+ * NSProgressIndicator. A bar fills from `minimum` to `maximum`, or, while
+ * indeterminate, sweeps back and forth; a spinning indicator turns, or, given
+ * a value, fills as a ring. Indeterminate motion stops under reduced motion.
+ */
+export function NSEProgressIndicator({ "aria-label": accessibleLabel, style = "bar", value, minimum, maximum, isIndeterminate = value === undefined, controlSize = "regular" }: NSEProgressIndicatorProps) {
+  const { reducedMotion } = useNSEAnimationEnvironment();
+  const metrics = isIndeterminate ? undefined : normalizeNSEProgress({ value, minimum, maximum });
   const percentage = metrics ? Math.round(metrics.percent) : null;
   return (
     <div
       role="progressbar"
-      aria-label={props["aria-label"]}
+      aria-label={accessibleLabel}
       aria-valuemin={metrics?.minimum}
       aria-valuemax={metrics?.maximum}
       aria-valuenow={metrics?.value}
       data-nse-control="progress-indicator"
-      data-state={normalizedState.kind}
-      data-variant={variant}
-      data-size={size}
+      data-state={metrics ? "determinate" : "indeterminate"}
+      data-variant={style === "bar" ? "bar" : metrics ? "circular" : "spinner"}
+      data-size={style === "bar" ? undefined : SPINNING_SIZE[controlSize]}
+      data-control-size={controlSize}
       data-motion={reducedMotion ? "static" : "animated"}
       data-appearance-recipe="progress-indicator"
       style={metrics ? progressStyle(metrics) : undefined}

@@ -40,8 +40,6 @@ export type {
   NSETranslationUnit,
 } from "./Animation";
 /** Supported SynWare SDK NSE framework surface. Concrete themes are explicit subpaths. */
-export { LoadingSpinner } from "./Components/LoadingSpinner";
-export type { LoadingSpinnerVariant } from "./Components/LoadingSpinner";
 export { NSEObjectController } from "./Controllers/NSEObjectController";
 export type {
   ObjectControllerField, ObjectControllerFields, ObjectControllerSnapshot,
@@ -269,8 +267,6 @@ export { NSEMetalSurface, NSERoundedBox } from "./Material";
 export type { NSEMetalSurfaceProps, NSERoundedBoxProps } from "./Material";
 export { NSEDialogSurface } from "./Overlays/NSEDialogSurface";
 export type { NSEDialogSurfaceProps } from "./Overlays/NSEDialogSurface";
-export { NSEProgressBar, NSEProgressItem, NSESpinner } from "./Progress";
-export type { NSEProgressBarProps, NSEProgressItemProps, NSESpinnerProps } from "./Progress";
 export {
   NSELevelIndicator,
 } from "./Controls/Values/NSELevelIndicator";
@@ -726,6 +722,7 @@ export {
 export {
   NSEProgressIndicator,
 } from "./Progress/NSEProgressIndicator";
+export type { NSEProgressIndicatorProps } from "./Progress/progressTypes";
 export {
   NSEClipView,
 } from "./Scroll/NSEClipView";

@@ -29,7 +29,7 @@ import { NSECoverFlow } from "../../src/NSE/CoverFlow";
 import { NSEAppFrame } from "../../src/NSE/Windows/NSEAppFrame";
 import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEMenu, NSEPopUpButton } from "../../src/NSE/Menus";
-import { NSEProgressBar } from "../../src/NSE/Progress";
+import { NSEProgressIndicator } from "../../src/NSE/Progress";
 import { NSESourceListScene } from "../../src/NSE/Navigation/SourceList";
 import { NSESidebar } from "../../src/NSE/Navigation/SourceList/NSESidebar";
 import { NSESlider } from "../../src/NSE/Controls/Values";
@@ -454,7 +454,7 @@ describe("NSE semantic contracts", () => {
   it("keeps semantic control owners, the NSE facade, and the registry wired together", () => {
     expect(NSE.NSEAppFrame).toBe(NSEAppFrame);
     expect(NSE.NSESplitView).toBe(NSESplitView);
-    expect(NSE.NSEProgressBar).toBe(NSEProgressBar);
+    expect(NSE.NSEProgressIndicator).toBe(NSEProgressIndicator);
     expect(NSE.NSESlider).toBe(NSESlider);
     expect(typeof NSE.NSEFlex).toBe("function");
     expect(typeof NSE.NSEPane).toBe("function");
@@ -642,7 +642,7 @@ describe("NSE semantic contracts", () => {
     const onValueChange = vi.fn();
     const { container } = render(
       <div>
-        <NSEProgressBar value={250} max={200} label="Transfer" />
+        <NSEProgressIndicator value={250} maximum={200} aria-label="Transfer" />
         <NSESlider label="Volume" min={0} max={100} defaultValue={25} onValueChange={onValueChange} />
       </div>
     );
@@ -650,7 +650,6 @@ describe("NSE semantic contracts", () => {
     const progress = screen.getByRole("progressbar", { name: "Transfer" });
     expect(progress.getAttribute("aria-valuemax")).toBe("200");
     expect(progress.getAttribute("aria-valuenow")).toBe("200");
-    expect(progress.getAttribute("data-full")).toBe("true");
     expect(progress.style.getPropertyValue("--nse-control-progress")).toBe("100%");
 
     const sliderInput = screen.getByLabelText("Volume") as HTMLInputElement;
