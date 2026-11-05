@@ -26,7 +26,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { NSEGridRow, NSEGridView, NSEStackItem, NSEStackView, resolveNSESpacing } from "../../src/NSE/Layout";
 import { NSETextField } from "../../src/NSE/Controls/Fields";
 import { NSEBox } from "../../src/NSE/Controls/Fields/NSEFields";
-import { NSEDialog, NSEDividerDrawer, NSEPane } from "../../src/NSE/Containers";
+import { NSEDialog } from "../../src/NSE/Containers";
+import { ContainerPane } from "../../src/NSE/Containers/NSEContainers";
 
 afterEach(cleanup);
 
@@ -99,13 +100,12 @@ describe("NSE default layout", () => {
 
   it("lays out containers' bodies as content stacks unless asked for flow", () => {
     const { container } = render(<>
-      <NSEPane title="Pane"><span>Body</span></NSEPane>
-      <NSEPane title="Flow" contentLayout="flow"><span>Body</span></NSEPane>
+      <ContainerPane title="Pane"><span>Body</span></ContainerPane>
+      <ContainerPane title="Flow" contentLayout="flow"><span>Body</span></ContainerPane>
       <NSEDialog title="Dialog"><span>Body</span></NSEDialog>
-      <NSEDividerDrawer title="Drawer" defaultOpen><span>Body</span></NSEDividerDrawer>
     </>);
-    const bodies = [...container.querySelectorAll(".nse-container-pane-body, .nse-container-dialog-body, .nse-container-divider-drawer-panel-inner")];
-    expect(bodies.map((body) => body.getAttribute("data-nse-content-layout"))).toEqual(["stack", null, "stack", "stack"]);
+    const bodies = [...container.querySelectorAll(".nse-container-pane-body, .nse-container-dialog-body")];
+    expect(bodies.map((body) => body.getAttribute("data-nse-content-layout"))).toEqual(["stack", null, "stack"]);
   });
 
   it("lays out a two-column grid as a form, each row's views named by its label", () => {

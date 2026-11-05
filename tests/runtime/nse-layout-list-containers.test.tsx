@@ -28,9 +28,6 @@ import { rubberBandOffset } from "../../src/NSE/Scroll";
 import {
   NSEConfirmPrompt,
   NSEDialog,
-  NSEDividerDrawer,
-  NSEPane,
-  NSERowGroup,
   NSESlidingPane,
   NSESlidingPanes,
   NSESlidingView,
@@ -40,9 +37,6 @@ import {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
-});
-
-describe("NSE layout primitives", () => {
 });
 
 describe("NSE scroll primitives", () => {
@@ -97,14 +91,9 @@ describe("NSE containers", () => {
     };
   }
 
-  it("renders pane, row group, dialog, divider drawer, and sliding view markup", () => {
+  it("renders dialog and sliding view markup", () => {
     const markup = renderToStaticMarkup(
-      <NSEPane title="Inspector" subtitle="Details">
-        <NSERowGroup title="Rows" caption="Grouped controls">
-          <NSEDividerDrawer title="Sources" defaultOpen>
-            <span>Source panel</span>
-          </NSEDividerDrawer>
-        </NSERowGroup>
+      <>
         <NSESlidingView
           controls
           views={[
@@ -115,12 +104,9 @@ describe("NSE containers", () => {
         <NSEDialog title="Ready" description="Dialog description">
           Dialog body
         </NSEDialog>
-      </NSEPane>
+      </>
     );
 
-    expect(markup).toContain("nse-container-pane");
-    expect(markup).toContain("nse-container-row-group");
-    expect(markup).toContain("nse-container-divider-drawer");
     expect(markup).toContain("role=\"tablist\"");
     expect(markup).toContain("role=\"dialog\"");
   });
@@ -242,19 +228,5 @@ describe("NSE containers", () => {
     // Toasts fly in from their screen edge.
     render(<NSEToaster position="bottom-center" toasts={[{ id: "t1", message: "Saved" }]} />);
     expect(document.querySelector(".nse-container-toast.nse-container-fly-in-bottom")).not.toBeNull();
-  });
-
-  it("frames NSERowGroup with guide-line rails by default, opt-out via rails={false}", () => {
-    const railed = render(
-      <NSERowGroup title="A/V Options">
-        <div>Sound</div>
-        <div>Video</div>
-      </NSERowGroup>
-    );
-    expect(railed.container.querySelector(".nse-container-row-group")?.getAttribute("data-rails")).toBe("true");
-    railed.unmount();
-
-    const plain = render(<NSERowGroup title="A/V Options" rails={false}><div>Sound</div></NSERowGroup>);
-    expect(plain.container.querySelector(".nse-container-row-group")?.getAttribute("data-rails")).toBe("false");
   });
 });

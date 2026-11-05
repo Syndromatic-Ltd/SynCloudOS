@@ -457,7 +457,7 @@ describe("NSE semantic contracts", () => {
     expect(NSE.NSEProgressIndicator).toBe(NSEProgressIndicator);
     expect(NSE.NSESlider).toBe(NSESlider);
     expect(typeof NSE.NSEStackView).toBe("function");
-    expect(typeof NSE.NSEPane).toBe("function");
+    expect(typeof NSE.NSEBox).toBe("function");
     expect(typeof NSE.NSEDatePicker).toBe("function");
     expect(NSE.NSEGridView).toBe(NSEGridView);
     expect(NSE.Layout.NSEStackView).toBe(NSE.NSEStackView);

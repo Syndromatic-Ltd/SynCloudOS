@@ -30,49 +30,8 @@
       as `sn-*`, now a reusable system material.
    ============================================================================================= */
 
-:where(.nse-container-divider-drawer, .nse-control-divider-captioned) {
+:where(.nse-control-divider-captioned) {
   --nse-sourcelist-divider: var(--nse-atmo-divider);
-}
-
-/* --- DividerDrawer caption rail: label -> line -> arrow knob -> line-to-edge ------------------ */
-.nse-container-divider-drawer-header {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  /* No right padding: the rail's line bleeds to the very edge (rows keep their own inset). */
-  padding: 7px 0 6px 12px;
-}
-
-.nse-container-divider-drawer-label {
-  flex: 0 0 auto;
-  margin-right: 9px;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #3a8bcb;
-}
-
-/* The line uses the shared Atmo vector tokens so it matches the knob's baked line. */
-.nse-container-divider-drawer-line {
-  flex: 4 1 0;
-  align-self: center;
-  height: var(--nse-atmo-divider-arrow-line);
-  background: var(--nse-atmo-divider) left center / auto var(--nse-atmo-divider-arrow-line) repeat-x;
-}
-
-/* Continuation right of the knob: grows 1:4 so the knob keeps its right-of-centre seat while the
-   line carries on to the edge. */
-.nse-container-divider-drawer-line-end {
-  flex: 1 1 0;
-}
-
-.nse-container-divider-drawer-arrow.nse-control-divider[data-variant="arrow"] {
-  flex: 0 0 auto;
-  width: var(--nse-atmo-divider-arrow-width);
-  height: var(--nse-atmo-divider-arrow-size);
-  margin: 0;
 }
 
 /* --- Captioned divider --------------------------------- */
@@ -212,14 +171,4 @@
 }
 [data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta {
   color: rgba(241, 246, 251, 0.72);
-}
-
-/* Section labels: blue, embossed to match the rows. */
-[data-mode="light"] :where([data-nse-material="metal"]) .nse-container-divider-drawer-label {
-  color: #2f6da6;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-container-divider-drawer-label {
-  color: #6fb2e6;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.7);
 }

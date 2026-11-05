@@ -21,11 +21,9 @@
 import {
   Children,
   createElement,
-  forwardRef,
   useCallback,
   useEffect,
   useId,
-  useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -54,7 +52,7 @@ type NSEStyleVars = CSSProperties & { [key: `--nse-${string}`]: string | number 
 type NSEContainerElement = "div" | "section" | "aside" | "main" | "nav" | "article" | "ul" | "ol";
 
 export type NSEDrawerPlacement = "leading" | "trailing" | "top" | "bottom";
-export type NSEPaneVariant = "plain" | "surface" | "sidebar" | "inspector" | "floating";
+export type ContainerPaneVariant = "plain" | "surface" | "sidebar" | "inspector" | "floating";
 export type NSESlidingAxis = "horizontal" | "vertical";
 export type NSEDialogVariant = "dialog" | "sheet" | "panel" | "confirm";
 export type NSEToastTone = "info" | "success" | "warning" | "critical";
@@ -72,27 +70,6 @@ interface NSEDisclosureOptions {
   onOpenChange?: (open: boolean) => void;
 }
 
-export interface NSERowGroupProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
-  as?: NSEContainerElement;
-  title?: ReactNode;
-  caption?: ReactNode;
-  footer?: ReactNode;
-  inset?: boolean;
-  /** Render the body as a "roundy" framed group with guide-line rails between rows. Default true. */
-  rails?: boolean;
-  /** Wrap each child in an Item-style row. Enables the
-      showRow/hideRow ref handle. Default false so already-row-shaped children aren't double-wrapped. */
-  wrapRows?: boolean;
-}
-
-/** Imperative handle that shows and hides individual rows (operates on wrapped rows). */
-export interface NSERowGroupHandle {
-  showRow: (index: number) => void;
-  hideRow: (index: number) => void;
-  toggleRow: (index: number) => void;
-  isRowHidden: (index: number) => boolean;
-}
-
 /**
  * How a container's body lays out its children: `stack` (the default) is the
  * SDK's leading-aligned content stack at standard spacing; `flow` is plain
@@ -100,13 +77,13 @@ export interface NSERowGroupHandle {
  */
 export type NSEContainerContentLayout = "stack" | "flow";
 
-export interface NSEPaneProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
+export interface ContainerPaneProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
   as?: NSEContainerElement;
   title?: ReactNode;
   subtitle?: ReactNode;
   actions?: ReactNode;
   footer?: ReactNode;
-  variant?: NSEPaneVariant;
+  variant?: ContainerPaneVariant;
   smoothSurface?: NSESmoothSurfaceRequest;
   contentLayout?: NSEContainerContentLayout;
 }
@@ -124,14 +101,7 @@ export interface NSEDrawerProps extends Omit<HTMLAttributes<HTMLElement>, "title
   contentLayout?: NSEContainerContentLayout;
 }
 
-export interface NSEDividerDrawerProps extends Omit<HTMLAttributes<HTMLDivElement>, "title">, NSEDisclosureOptions {
-  title: string;
-  dividerLabel?: string;
-  keepMounted?: boolean;
-  contentLayout?: NSEContainerContentLayout;
-}
-
-export interface NSESlidingPaneProps extends Omit<NSEPaneProps, "as">, NSEDisclosureOptions {
+export interface NSESlidingPaneProps extends Omit<ContainerPaneProps, "as">, NSEDisclosureOptions {
   placement?: NSEDrawerPlacement;
   size?: number | string;
   peekWidth?: number | string;
@@ -303,91 +273,7 @@ function useControllableKey({
   return [currentValue, setValue] as const;
 }
 
-export const NSERowGroup = forwardRef<NSERowGroupHandle, NSERowGroupProps>(function NSERowGroup({
-  as = "section",
-  title,
-  caption,
-  footer,
-  inset = false,
-  rails = true,
-  wrapRows = false,
-  className = "",
-  children,
-  ...props
-}, ref) {
-  const titleId = useId();
-  const labelledBy = props["aria-labelledby"] ?? (title ? titleId : undefined);
-  const [hiddenRows, setHiddenRows] = useState<ReadonlySet<number>>(() => new Set());
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      showRow: (index) =>
-        setHiddenRows((set) => {
-          if (!set.has(index)) return set;
-          const next = new Set(set);
-          next.delete(index);
-          return next;
-        }),
-      hideRow: (index) =>
-        setHiddenRows((set) => {
-          if (set.has(index)) return set;
-          const next = new Set(set);
-          next.add(index);
-          return next;
-        }),
-      toggleRow: (index) =>
-        setHiddenRows((set) => {
-          const next = new Set(set);
-          if (next.has(index)) next.delete(index);
-          else next.add(index);
-          return next;
-        }),
-      isRowHidden: (index) => hiddenRows.has(index)
-    }),
-    [hiddenRows]
-  );
-
-  // A row group can wrap each child into an item row; opt-in so already-row-shaped children aren't
-  // double-wrapped. The wrapper carries the show/hide state.
-  const body = wrapRows
-    ? Children.toArray(children).map((child, index) => (
-        <div
-          key={index}
-          className="nse-container-row-group-row"
-          role="listitem"
-          data-row-index={index}
-          hidden={hiddenRows.has(index)}
-        >
-          {child}
-        </div>
-      ))
-    : children;
-
-  return createElement(
-    as,
-    {
-      ...props,
-      className: classes("nse-container-row-group", inset && "is-inset", className),
-      "data-rails": rails ? "true" : "false",
-      "aria-labelledby": labelledBy
-    },
-    <>
-      {title || caption ? (
-        <header className="nse-container-row-group-header">
-          {title ? <h3 id={titleId}>{title}</h3> : null}
-          {caption ? <p>{caption}</p> : null}
-        </header>
-      ) : null}
-      <div className="nse-container-row-group-body" role={wrapRows ? "list" : undefined}>
-        {body}
-      </div>
-      {footer ? <footer className="nse-container-row-group-footer">{footer}</footer> : null}
-    </>
-  );
-});
-
-export function NSEPane({
+export function ContainerPane({
   as = "section",
   title,
   subtitle,
@@ -400,7 +286,7 @@ export function NSEPane({
   style,
   children,
   ...props
-}: NSEPaneProps) {
+}: ContainerPaneProps) {
   const titleId = useId();
   const labelledBy = props["aria-labelledby"] ?? (title ? titleId : undefined);
   const surfaceProps = getOptionalNSESmoothSurfaceProps(
@@ -466,7 +352,7 @@ export function NSEDrawer({
       aria-hidden={!isOpen || undefined}
       hidden={!isOpen}
     >
-      <NSEPane
+      <ContainerPane
         title={title}
         subtitle={subtitle}
         actions={(
@@ -482,54 +368,8 @@ export function NSEDrawer({
         style={style}
       >
         {children}
-      </NSEPane>
+      </ContainerPane>
     </aside>
-  );
-}
-
-export function NSEDividerDrawer({
-  title,
-  dividerLabel,
-  keepMounted = true,
-  contentLayout = "stack",
-  open,
-  defaultOpen,
-  onOpenChange,
-  className = "",
-  children,
-  ...props
-}: NSEDividerDrawerProps) {
-  const [isOpen, setOpen] = useDisclosureState({ open, defaultOpen, onOpenChange });
-
-  // Divider-drawer grammar: caption styled as part of the divider rail, then one continuous line
-  // that runs to the edge, passing through the disclosure arrow (label -> line -> arrow -> line-end).
-  const header = (
-    <div className="nse-container-divider-drawer-header">
-      <span className="nse-container-divider-drawer-label">{title}</span>
-      <span className="nse-container-divider-drawer-line" aria-hidden="true" />
-      <NSEDivider
-        variant="arrow"
-        className="nse-container-divider-drawer-arrow"
-        label={dividerLabel ?? title}
-        expanded={isOpen}
-        onToggle={() => setOpen((value) => !value)}
-      />
-      <span className="nse-container-divider-drawer-line nse-container-divider-drawer-line-end" aria-hidden="true" />
-    </div>
-  );
-
-  return (
-    <div {...props} className={classes("nse-container-divider-drawer", className)} data-open={isOpen ? "true" : "false"}>
-      {header}
-      {keepMounted || isOpen ? (
-        // The drawer animates open and closed. A grid-rows 1fr↔0fr transition on the
-        // panel (inner content clipped) animates the height without measuring; aria-hidden + the clip
-        // keep the collapsed content out of the way.
-        <div className="nse-container-divider-drawer-panel" aria-hidden={!isOpen}>
-          <div className="nse-container-divider-drawer-panel-inner" data-nse-content-layout={contentLayout === "stack" ? "stack" : undefined}>{children}</div>
-        </div>
-      ) : null}
-    </div>
   );
 }
 
@@ -585,7 +425,7 @@ export function NSESlidingPane({
   }
 
   return (
-    <NSEPane
+    <ContainerPane
       {...props}
       className={classes("nse-container-sliding-pane", className)}
       data-placement={placement}
@@ -629,7 +469,7 @@ export function NSESlidingPane({
       }}
     >
       {children}
-    </NSEPane>
+    </ContainerPane>
   );
 }
 

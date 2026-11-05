@@ -128,17 +128,14 @@ export const nseRegistry = [
     name: "nse-containers",
     title: "NSE Containers",
     type: "composition",
-    description: "Row groups, drawers, panes, sliding views, modal dialogs, confirm prompts, and toasters for app composition in NSE vocabulary.",
+    description: "Drawers, sliding views, modal dialogs, confirm prompts, and toasters for app composition in NSE vocabulary.",
     files: [
       "src/NSE/Containers/NSEContainers.tsx",
       "src/NSE/Containers/nse-containers.css",
       "src/NSE/Containers/index.ts"
     ],
     variants: [
-      "NSERowGroup",
       "NSEDrawer",
-      "NSEDividerDrawer",
-      "NSEPane",
       "NSESlidingPane",
       "NSESlidingView",
       "NSEDialog",
