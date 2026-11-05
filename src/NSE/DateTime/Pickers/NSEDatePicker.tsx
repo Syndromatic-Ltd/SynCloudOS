@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 
 import { useNSEAnimationEnvironment } from "../../Animation/NSEAnimationEnvironment";
 import { addCalendarMonths, clampPlainDate, comparePlainDates } from "../calendarArithmetic";
@@ -47,7 +47,11 @@ const isRange = (props: NSEDatePickerProps): props is NSEDatePickerRangeProps =>
  * graphical calendar and clock (`clockAndCalendar`). A text field opens a
  * calendar or clock in a popover when `presentsCalendarOverlay` (the default).
  */
-export function NSEDatePicker(props: NSEDatePickerProps) {
+export function NSEDatePicker(props: NSEDatePickerTimeProps): ReactElement;
+export function NSEDatePicker(props: NSEDatePickerDateTimeProps): ReactElement;
+export function NSEDatePicker(props: NSEDatePickerRangeProps): ReactElement;
+export function NSEDatePicker(props: NSEDatePickerDateProps): ReactElement;
+export function NSEDatePicker(props: NSEDatePickerProps): ReactElement {
   const { datePickerStyle = "textFieldAndStepper", presentsCalendarOverlay = true, isEnabled = true, isEditable = true } = props;
   const disabled = !isEnabled;
   const readOnly = !isEditable;
