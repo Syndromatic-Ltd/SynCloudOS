@@ -24,9 +24,9 @@ import { NSETextField } from "../../Controls/Fields/NSEFields";
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import { resolveZonedDateTime } from "../calendarArithmetic";
 import type { NSEPlainTime } from "../dateTimeTypes";
-import type { NSEClockViewProps } from "./calendarTypes";
+import type { NSEGraphicalClockProps } from "./calendarTypes";
 
-export function NSEClockView({ value, date, timeZone, disambiguation = "reject", showSeconds, disabled, showValidationMessage = true, minuteStep = 1, hourCycle = "h24", onValueChange, ...props }: NSEClockViewProps) {
+export function NSEGraphicalClock({ value, date, timeZone, disambiguation = "reject", showSeconds, disabled, showValidationMessage = true, minuteStep = 1, hourCycle = "h24", onValueChange, ...props }: NSEGraphicalClockProps) {
   const pointer = useRef<{ pointerId: number; opening: NSEPlainTime; latest: NSEPlainTime } | null>(null);
   const resolution = resolveZonedDateTime({ date, time: value }, timeZone, disambiguation);
   const update = (field: keyof NSEPlainTime, amount: number) => {
