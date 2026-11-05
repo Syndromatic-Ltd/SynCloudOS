@@ -290,7 +290,7 @@ These are out of scope for this approval, listed so they are not forgotten:
 
 Updated as each phase lands on `dev`.
 
-- [ ] 1. Data views and source lists
+- [x] 1. Data views and source lists. `NSETableView`, `NSETableHeaderView`, `NSETableCellView` and `NSEOutlineView` take their AppKit names; source lists are `NSEOutlineView` with `selectionHighlightStyle: "sourceList"` and group items, drawn by Atmo as the old sidebar; lists are single-column `NSETableView`s and the `NSEList` family is removed; `NSESplitViewController` renders its own view of `NSESplitViewItem`s. Two items move: `NSEAccordionView`'s removal needs the disclosure bezel (phase 2), and `NSESidebar`, already internal, goes with `NSESourceListScene` (phase 7).
 - [ ] 2. Buttons and fields
 - [ ] 3. Pop-up buttons and menus
 - [ ] 4. Values, progress, date and time
