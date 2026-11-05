@@ -76,7 +76,7 @@ The tables below give an overview. These pages document each component's props, 
 | [Values, pickers and progress](nse/values-and-progress.md) | Sliders, steppers, level indicators, segmented controls, pickers, progress |
 | [Menus, toolbars and inspectors](nse/menus-toolbars-and-inspectors.md) | Choosing a menu control, responder provenance, configured toolbars, narrow inspectors, keep-mounted panes |
 
-Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSEStandaloneControlHost` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, `NSEPage` in `nse/page` and `NSECoverFlow` in `nse/cover-flow`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
+Focused entries include `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSEStandaloneControlHost` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, `NSEPage` in `nse/page` and `NSECoverFlow` in `nse/cover-flow`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
 
 ## Buttons
 
@@ -84,7 +84,7 @@ Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSESlidingPanes
 | --- | --- |
 | `NSEButton` | `NSButton`: push, toggle (`pushOnPushOff`), checkbox (`switch`), toolbar (`texturedRounded`) and disclosure buttons, set by `buttonType` and `bezelStyle`. |
 | `NSESwitch` | `NSSwitch`: an on/off switch. |
-| `NSEPopupButton` | A button that opens a menu. |
+| `NSEPopUpButton` | A pop-up button showing the selected choice, or (`pullsDown`) a button that opens a menu of commands. |
 
 ## Fields
 
@@ -106,7 +106,6 @@ Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSESlidingPanes
 | `NSEStepper` | Increment and decrement, with hold to repeat, bounds and wrapping. |
 | `NSELevelIndicator` | Continuous, discrete, capacity and rating indicators with warning and critical thresholds. |
 | `NSESegmentedControl` | Momentary, select-one and select-any segments in the rounded, capsule and textured styles, with overflow handling. One-of-many choices and tab strips are segmented controls. |
-| `NSEIntegerPicker`, `NSEListSelector` | Pickers for numbers and lists. |
 | `NSEProgressBar`, `NSEProgressSlider`, `NSEProgressItem` | Determinate progress, with an optional secondary fill. |
 | `NSEProgressIndicator`, `NSESpinner` | Indeterminate activity. |
 
@@ -150,8 +149,10 @@ Data views render collections owned by a controller. They are virtualised, so a 
 
 | Component | Purpose |
 | --- | --- |
-| `NSEMenu`, `NSEMenuBar`, `NSEContextMenu`, `NSEPopup`, `NSEPopupList` | Menus of every kind, driven by `NSEMenuController`. |
-| `NSEApplicationMenu`, `NSEEditMenu`, `NSEHelpMenu` | Standard application menus. |
+| `NSEMenu` | A menu object (`NSMenu`) of command, submenu, separator and view items, validated along the responder chain when it opens. A pull-down `NSEPopUpButton` shows one, a view shows one as its `NSEView.menu`, and the application's `mainMenu` is one. |
+| `NSEMenuBar` | Draws the application's `mainMenu` across the window. |
+| `NSEView` | A view with a contextual `menu` and a `toolTip` (`NSView.menu`, `NSView.toolTip`). |
+| `NSEPopup` | An anchored or modal popup plate. |
 | `NSEToolbar`, `NSEToolbarConfigurationSheet` | Toolbars with customisation, driven by `NSEToolbarController`. |
 | `NSEStatusBar`, `NSETopBar` | Status and title strips. The metal bar's `titlePlacement: "leading"` suits document windows: the app title (with its QuickSwitch action) beside the return control, the document in the middle. Items are `webspring`, `userInfo`, `settings` or `custom`. Every item glyph is a single-shape SVG drawn as a CSS mask over theme colours, so its normal, pressed and selected looks follow the theme for any icon: pass the SVG's URL as `icon` on any item, or omit it to get the built-in house (`webspring`), person (`userInfo`) or gear (`settings`). There is no separate selected icon. The metal bar's buttons are drawn in CSS (raised aluminium that presses in deeply, light and dark). |
 
@@ -187,7 +188,6 @@ Some controls come with a controller that holds their state and restoration data
 | `NSETabBarController` | Tabs, overflow and restoration. |
 | `NSESplitViewController`, `NSESplitViewItem` | A split view of child view controllers: thicknesses, holding priorities and collapse. |
 | `NSEToolbarController` | Toolbar items and user customisation. |
-| `NSEMenuController` | Menu models, open state and overlay provenance. |
 
 The [controllers guide](controllers.md) covers the array, tree and preferences controllers.
 

@@ -2,48 +2,87 @@
 
 These are task recipes. Each one names the controls it uses, the layout behaviour each container owns, and the responder provenance its overlays need. The components themselves are documented in [NSE controls](../nse-controls.md).
 
-## Choosing a menu control
+## Menus are objects
 
-Four controls open menus. They look different and mean different things, so choose by what the user is doing, not by which one renders a menu.
+A menu is an `NSEMenu`, as in AppKit an `NSMenu` is an object, not a widget. Make one with a title and its items, and show it in one of three places:
 
-| You want | Use | It looks like |
+| Where it appears | AppKit | NSE |
 | --- | --- | --- |
-| A row of text menu titles (File, Edit, View…) inside your window | `NSEMenuBar` | Plain text titles; the open title highlights; hovering across titles switches menus; arrow keys move between them. |
-| One button that opens a list of commands (a pull-down) | `NSEMenu` with `trigger="push"` (the default) | A push button with a disclosure arrow. |
-| A pull-down that sits in a toolbar or tool strip | `NSEMenu` with `trigger="tool"` | A tool capsule with a disclosure arrow. It is still a button, not a menu title. |
-| A choice of one value from a list | `NSEPicker` or `NSEPopupButton` | A pop-up button showing the current value. |
+| A button that opens a list of commands (a pull-down) | `NSPopUpButton` with `pullsDown` | `<NSEPopUpButton pullsDown title="Export" menu={menu} />` |
+| A view's contextual menu (secondary click, the context-menu key, Shift-F10, a touch long press) | `NSView.menu` | `<NSEView menu={menu}>…</NSEView>` |
+| The menus across the application's menu bar | `NSApplication.mainMenu` | `this.mainMenu = menu` in the application, drawn by `<NSEMenuBar menu={…} />` |
 
-The host's application menu (the app name menu in the SynCloudOS top bar) belongs to the system. Do not draw your own copy of it.
+A choice of one value from a list is not a menu of commands: use a pop-up button (`NSEPopUpButton` with `items` and a `value`), described in [Values and progress](values-and-progress.md).
 
-Most SynWare doesn't need a menu bar of its own. Its commands live in the toolbar, in context menus, and in the host's application menu. Add an `NSEMenuBar` only when the application is a dense, document- or instrument-style tool whose users expect File/Edit/View menus. When you add one, follow the standard order: File, Edit, View, then your own menus, then Window and Help last. Put the standard items in their standard places (Undo and Redo first in Edit, Close in File).
+```ts
+import { NSEMenu, type NSEMenuItem } from "@syndromatic/syncloudos/nse";
+
+const exportMenu = new NSEMenu({
+  owner: this,
+  title: "Export",
+  items: [
+    { action: "exportPDF", title: "PDF…" },
+    { action: "exportText" },                       // the action's own title
+    { isSeparatorItem: true },
+    { title: "More", submenu: [{ action: "exportHTML", title: "HTML…" }] },
+  ],
+  runtime: SCOS.menus.runtime,
+});
+```
+
+An item is one of four kinds, as `NSMenuItem` is:
+
+| Item | Fields |
+| --- | --- |
+| A command | `action` (an `@action` name or reference), `actionPayload`, `title`, `image`, `identifier` |
+| A submenu | `title`, `submenu` (its items), `image`, `isEnabled`, `toolTip`, `identifier` |
+| A separator | `isSeparatorItem: true` |
+| A view | `view`, `title`, `identifier` |
+
+When a menu opens, each command item is validated along the responder chain, as `validateMenuItem(_:)` does: the action's `validate<Name>()` decides whether it is enabled and whether it shows a check mark (its `state`). An item's key equivalent is the action's key binding, so declare the shortcut once, in `@action({ keyBindings })`, and the menu shows it; the binding is also what performs the action from the keyboard.
+
+## A menu bar
+
+The host's application menu (the app name menu in the SynCloudOS top bar) belongs to the system. Open it from your own control with `useApplicationMenuTrigger()`; do not draw your own copy of it.
+
+Most SynWare doesn't need a menu bar of its own. Its commands live in the toolbar, in context menus, and in the host's application menu. Give the application a `mainMenu` only when it is a dense, document- or instrument-style tool whose users expect File/Edit/View menus. Setting `mainMenu` is the opt-in: an application without one has no menu bar. Follow the standard order: File, Edit, View, then your own menus, then Window and Help last. Put the standard items in their standard places (Undo and Redo first in Edit, Close in File).
 
 ```tsx
-// Contents/menus.ts: one owned controller per menu, all on the app's menu port
-const fileMenu = new NSEMenuController({ owner: this, model: fileModel, runtime: SCOS.menus.runtime });
-const editMenu = new NSEMenuController({ owner: this, model: editModel, runtime: SCOS.menus.runtime });
+// Contents/index.tsx: the application owns its main menu
+async applicationWillFinishLaunching() {
+  this.mainMenu = new NSEMenu({
+    owner: this,
+    title: "Main Menu",
+    items: [
+      { title: "File", submenu: [{ action: "document.save" }, { action: "exportPDF", title: "Export as PDF…" }] },
+      { title: "Edit", submenu: [{ action: "undo" }, { action: "redo" }] },
+      { title: "View", submenu: [{ action: "toggleInspector", title: "Inspector" }] },
+      { title: "Help", submenu: [{ action: "startDemo", title: "Guided Demonstration" }] },
+    ],
+    runtime: SCOS.menus.runtime,
+  });
+}
 
-// In the view controller's view
-<NSEMenuBar items={[
-  { model: fileModel, controller: fileMenu },
-  { model: editModel, controller: editMenu },
-  { model: viewModel, controller: viewMenu },
-  { model: helpModel, controller: helpMenu },
-]} />
+// In the main window's view (the window controller's `app` is the application)
+const { mainMenu } = windowController.app;
+{mainMenu ? <NSEMenuBar menu={mainMenu} /> : null}
 ```
+
+Each item with a submenu is a menu across the bar. As `NSApp.mainMenu` does with the key window, the bar validates and dispatches its items along the responder chain of the window that draws it, so an `@action` on a view controller is enabled when that view controller is in the chain.
 
 ## Responder provenance for toolbars and menus
 
-An overlay (a toolbar's overflow menu, a menu bar's open menu, a picker's list) must know which responder it belongs to, so that its commands go to the right view controller and focus returns to the right place.
+An overlay (a toolbar's overflow menu, a menu bar's open menu, a pop-up button's list) must know which responder it belongs to, so that its commands go to the right view controller and focus returns to the right place.
 
-Inside a view controller you do not need to supply this. `NSEToolbar`, `NSEMenuBar`, `NSEMenu`, `NSEPicker` and `NSEPopup` use the nearest responder: the view controller (or `ResponderScope`) the control renders inside.
+Inside a view controller you do not need to supply this. `NSEToolbar`, `NSEMenuBar`, `NSEPopUpButton`, `NSEView` and `NSEPopup` use the nearest responder: the view controller (or `ResponderScope`) the control renders inside.
 
 ```tsx
 // Inside a view controller's view: no interaction or overlay props needed
 <NSEToolbar composition="configured" controller={this.toolbar} width={width} aria-label="Lab toolbar" />
-<NSEMenuBar items={menuBarItems} />
+<NSEMenuBar menu={mainMenu} />
 ```
 
-Do not pass `SCOS.responderId` as the parent. It identifies the application's mount, which sits above every view controller. A command routed from the mount cannot reach an `@action` declared on a view controller below it. Pass `interaction={{ parentResponderId, overflowOverlayId }}` (toolbar) or `overlay={{ parentResponderId }}` (menu bar) only when the control renders outside the responder that should own it. If a toolbar finds no responder at all, it throws an error that explains how to fix it.
+Do not pass `SCOS.responderId` as the parent. It identifies the application's mount, which sits above every view controller. A command routed from the mount cannot reach an `@action` declared on a view controller below it. Pass `interaction={{ parentResponderId, overflowOverlayId }}` (toolbar), `overlay={{ parentResponderId }}` (menu bar or pop-up button) or `menuOverlay={{ id, parentResponderId }}` (a view's menu) only when the control renders outside the responder that should own it. If a toolbar finds no responder at all, it throws an error that explains how to fix it.
 
 ## A configured toolbar owned by the window controller
 
@@ -73,12 +112,12 @@ An inspector of 240 to 320 pixels is narrower than a form is designed for. Use t
 | Container | What it does at inspector width |
 | --- | --- |
 | `NSEBox` with a `title` | Titles a group of related controls. The title is the label, so the controls inside it don't each need one. Use one per topic (Font, Spacing, Probe). |
-| `NSEPicker` with `labelHidden width="100%"` | Fills the group's width and shows its full value. The label is still read by screen readers. A visible label would share the row with the value and push it into truncation. |
+| `NSEPopUpButton` with `labelHidden width="100%"` | Fills the group's width and shows its full value. The label is still read by screen readers. A visible label would share the row with the value and push it into truncation. |
 | `NSEForm` | Puts each label beside its control, but stacks the label above its control below 420 pixels. In an inspector that means stacked labels. Use it there only if that is the layout you want. |
 
 ```tsx
 <NSEBox title="Probe">
-  <NSEPicker label="Resolution" labelHidden width="100%" value={resolution} options={resolutions} onValueChange={setResolution} />
+  <NSEPopUpButton label="Resolution" labelHidden width="100%" value={resolution} items={resolutions} onValueChange={setResolution} />
   <NSESlider label="Current" value={current} minimum={0} maximum={20} onValueChange={setCurrent} />
 </NSEBox>
 ```
@@ -116,7 +155,7 @@ In a compact width the outermost split view shows one item at a time behind tabs
 - a pane boundary is fixed when it should be resizable;
 - a toolbar wraps instead of overflowing;
 - an inspector has no labelled groups;
-- a picker's value is truncated;
+- a pop-up button's value is truncated;
 - the chrome takes too much height from the workspace.
 
 Check those by looking at the application at desktop and phone widths, in light and dark appearance.

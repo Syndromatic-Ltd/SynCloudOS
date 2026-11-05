@@ -705,12 +705,6 @@ export {
   NSETabView,
 } from "./Navigation/NSETabView";
 export {
-  NSEListboxPopup,
-} from "./Overlays/NSEListboxPopup";
-export type {
-  NSEListboxPopupProps,
-} from "./Overlays/NSEListboxPopup";
-export {
   NSEPopover,
 } from "./Overlays/NSEPopover";
 export type {

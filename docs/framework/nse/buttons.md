@@ -15,7 +15,7 @@ import { NSEButton, NSESwitch } from "@syndromatic/syncloudos/nse";
 | `NSEButton` | `NSButton` | Push, toggle, checkbox, toolbar and disclosure buttons | `nse`, `nse/controls` |
 | `NSESwitch` | `NSSwitch` | An on/off switch that drags like a physical toggle | `nse`, `nse/controls` |
 | `NSESegmentedControl` | `NSSegmentedControl` | Joined segments, including the capsule and textured toolbar strips | [Values and progress](values-and-progress.md#nsesegmentedcontrol) |
-| `NSEPopupButton` | `NSPopUpButton` | A button that opens a menu | [Menus, toolbars and inspectors](menus-toolbars-and-inspectors.md) |
+| `NSEPopUpButton` | `NSPopUpButton` | A button that shows a choice, or (`pullsDown`) opens a menu of commands | [Menus, toolbars and inspectors](menus-toolbars-and-inspectors.md) |
 
 ## NSEButton
 
