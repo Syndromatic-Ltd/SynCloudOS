@@ -23,7 +23,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
-import { NSEFlex, NSEForm, NSEFormRow, NSEFormSeparator, NSEInline, NSEStack, resolveNSESpacing } from "../../src/NSE/Layout";
+import { NSEGridRow, NSEGridView, NSEStackItem, NSEStackView, resolveNSESpacing } from "../../src/NSE/Layout";
 import { NSETextField } from "../../src/NSE/Controls/Fields";
 import { NSEBox } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSEDialog, NSEDividerDrawer, NSEPane } from "../../src/NSE/Containers";
@@ -31,20 +31,26 @@ import { NSEDialog, NSEDividerDrawer, NSEPane } from "../../src/NSE/Containers";
 afterEach(cleanup);
 
 describe("NSE default layout", () => {
-  it("applies a stack's gap even when no row or column gap is given", () => {
-    // React writes an undefined style value as "", and clearing row-gap or
-    // column-gap after `gap` erased the shorthand: every stack had no gap.
-    const { container } = render(<>
-      <NSEStack data-testid="stack"><span>A</span><span>B</span></NSEStack>
-      <NSEInline data-testid="inline"><span>A</span><span>B</span></NSEInline>
-      <NSEFlex data-testid="flex" gap={12}><span>A</span></NSEFlex>
-      <NSEFlex data-testid="row-only" rowGap="group"><span>A</span></NSEFlex>
+  it("spaces a column and a row by the theme's standard and inline spacing", () => {
+    render(<>
+      <NSEStackView data-testid="column" orientation="vertical"><span>A</span><span>B</span></NSEStackView>
+      <NSEStackView data-testid="row"><span>A</span><span>B</span></NSEStackView>
+      <NSEStackView data-testid="pixels" spacing={12}><span>A</span></NSEStackView>
+      <NSEStackView data-testid="wrapping" overflowPolicy="wrap" distribution="equal-spacing"><span>A</span></NSEStackView>
     </>);
-    expect(screen.getByTestId("stack").style.gap).toBe("var(--nse-spacing-standard)");
-    expect(screen.getByTestId("inline").style.gap).toBe("var(--nse-spacing-inline)");
-    expect(screen.getByTestId("flex").style.gap).toBe("12px");
-    expect(screen.getByTestId("row-only").style.rowGap).toBe("var(--nse-spacing-group)");
-    expect(container.querySelectorAll("[style*='gap']")).toHaveLength(4);
+    expect(screen.getByTestId("column").style.gap).toBe("var(--nse-spacing-standard)");
+    expect(screen.getByTestId("column").style.flexDirection).toBe("column");
+    expect(screen.getByTestId("row").style.gap).toBe("var(--nse-spacing-inline)");
+    expect(screen.getByTestId("row").style.alignItems).toBe("center");
+    expect(screen.getByTestId("pixels").style.gap).toBe("12px");
+    expect(screen.getByTestId("wrapping").style.flexWrap).toBe("wrap");
+    expect(screen.getByTestId("wrapping").style.justifyContent).toBe("space-between");
+  });
+
+  it("keeps a hidden stack item mounted but out of the layout", () => {
+    render(<NSEStackView orientation="vertical"><NSEStackItem id="shown">Shown</NSEStackItem><NSEStackItem id="gone" hidden>Gone</NSEStackItem></NSEStackView>);
+    expect(screen.getByText("Gone").closest("[data-stack-item-id]")?.hasAttribute("hidden")).toBe(true);
+    expect(screen.getByText("Shown").closest("[data-stack-item-id]")?.hasAttribute("hidden")).toBe(false);
   });
 
   it("resolves named spacing to the SDK's tokens and passes lengths through", () => {
@@ -57,8 +63,8 @@ describe("NSE default layout", () => {
 
   it("makes a leading stack a content stack, and leaves a fill stack alone", () => {
     render(<>
-      <NSEStack data-testid="leading" alignment="leading"><span>A</span></NSEStack>
-      <NSEStack data-testid="fill"><span>A</span></NSEStack>
+      <NSEStackView data-testid="leading" orientation="vertical" alignment="leading"><span>A</span></NSEStackView>
+      <NSEStackView data-testid="fill" orientation="vertical"><span>A</span></NSEStackView>
     </>);
     const leading = screen.getByTestId("leading");
     expect(leading.getAttribute("data-nse-content-layout")).toBe("stack");
@@ -102,22 +108,31 @@ describe("NSE default layout", () => {
     expect(bodies.map((body) => body.getAttribute("data-nse-content-layout"))).toEqual(["stack", null, "stack", "stack"]);
   });
 
-  it("names each form row's controls by its label and describes them by its help", () => {
-    render(<NSEForm labelWidth={96}>
-      <NSEFormRow label="Name:" help="As it appears on invoices."><input aria-label="Name field" /></NSEFormRow>
-      <NSEFormSeparator />
-      <NSEFormRow><span>Full-width note</span></NSEFormRow>
-      <NSEFormRow label="Sync:" labelAlign="center"><span>Switch</span></NSEFormRow>
-    </NSEForm>);
+  it("lays out a two-column grid as a form, each row's views named by its label", () => {
+    render(<NSEGridView columns={[{ xPlacement: "trailing", width: 96 }, { xPlacement: "fill" }]}>
+      <NSEGridRow>{"Name:"}<input aria-label="Name field" /></NSEGridRow>
+      <NSEGridRow mergesCells><span>Full-width note</span></NSEGridRow>
+      <NSEGridRow yPlacement="centre">{"Sync:"}<span>Switch</span></NSEGridRow>
+    </NSEGridView>);
     const group = screen.getByRole("group", { name: "Name:" });
     expect(group.getAttribute("data-nse-content-layout")).toBe("stack");
-    expect(group.getAttribute("aria-describedby")).toBe(screen.getByText("As it appears on invoices.").id);
     const rows = document.querySelectorAll(".nse-form-row");
     expect(rows[1]!.getAttribute("data-nse-full-width")).toBe("true");
     expect(rows[1]!.querySelector(".nse-form-label")).toBeNull();
     expect(rows[2]!.getAttribute("data-label-align")).toBe("center");
-    expect((document.querySelector(".nse-form") as HTMLElement).style.getPropertyValue("--nse-form-label-column")).toBe("96px");
-    expect(document.querySelector("hr.nse-form-separator")).not.toBeNull();
+    const grid = document.querySelector("[data-nse-control='grid-view']") as HTMLElement;
+    expect(grid.style.getPropertyValue("--nse-form-label-column")).toBe("96px");
+    expect(grid.getAttribute("data-label-alignment")).toBe("trailing");
+  });
+
+  it("places each cell of a grid that is not a form by its column", () => {
+    render(<NSEGridView columns={[{ xPlacement: "leading" }, { xPlacement: "centre", width: 40 }, { xPlacement: "fill" }]}>
+      <NSEGridRow>{"Size"}<span>12</span><span>points</span></NSEGridRow>
+    </NSEGridView>);
+    expect((document.querySelector(".nse-form-grid") as HTMLElement).style.gridTemplateColumns).toBe("max-content 40px minmax(0, 1fr)");
+    const middle = screen.getByText("12").parentElement as HTMLElement;
+    expect(middle.style.gridColumn).toBe("2");
+    expect(middle.style.justifySelf).toBe("center");
   });
 
   it("draws a label text field in a font text style and colour", () => {

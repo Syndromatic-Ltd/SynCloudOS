@@ -24,14 +24,6 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  NSEFit,
-  NSEFlex,
-  NSEInline,
-  NSEOrdered,
-  NSESpacer,
-  NSEStack
-} from "../../src/NSE/Layout";
 import { rubberBandOffset } from "../../src/NSE/Scroll";
 import {
   NSEConfirmPrompt,
@@ -51,51 +43,6 @@ afterEach(() => {
 });
 
 describe("NSE layout primitives", () => {
-  it("renders flex, stack, inline, fit, spacer, and ordered children with stable data contracts", () => {
-    const orderedMarkup = renderToStaticMarkup(
-      <NSEOrdered gap={4}>
-        <span data-nse-order={20}>Second</span>
-        <span data-nse-order={10}>First</span>
-        <span hidden data-nse-order={0}>Hidden</span>
-      </NSEOrdered>
-    );
-
-    expect(orderedMarkup.indexOf("First")).toBeLessThan(orderedMarkup.indexOf("Second"));
-    expect(orderedMarkup).not.toContain("Hidden");
-    expect(orderedMarkup).toContain("data-nse-layout=\"ordered\"");
-    expect(orderedMarkup).toContain("data-nse-order=\"first\"");
-    expect(orderedMarkup).toContain("data-nse-order=\"last\"");
-    expect(orderedMarkup).toContain("data-nse-sort-order=\"10\"");
-    expect(orderedMarkup).toContain("data-source-index=\"1\"");
-
-    const layoutMarkup = renderToStaticMarkup(
-      <NSEFlex direction="column" align="stretch" gap={12} fill>
-        <NSEStack dividers>
-          <span>Top</span>
-          <span>Bottom</span>
-        </NSEStack>
-        <NSEInline scroll>
-          <span>Chip</span>
-          <NSESpacer axis="inline" min={16} />
-        </NSEInline>
-        <NSEFit mode="contain" aspectRatio="16 / 9">
-          Preview
-        </NSEFit>
-      </NSEFlex>
-    );
-
-    expect(layoutMarkup).toContain("nse-layout-flex");
-    expect(layoutMarkup).toContain("data-nse-layout=\"flex\"");
-    expect(layoutMarkup).toContain("data-nse-layout=\"stack\"");
-    expect(layoutMarkup).toContain("data-nse-layout=\"inline\"");
-    expect(layoutMarkup).toContain("data-nse-layout=\"fit\"");
-    expect(layoutMarkup).toContain("data-nse-layout=\"spacer\"");
-    expect(layoutMarkup).toContain("data-direction=\"column\"");
-    expect(layoutMarkup).toContain("nse-layout-stack-divider");
-    expect(layoutMarkup).toContain("data-scroll=\"true\"");
-    expect(layoutMarkup).toContain("data-axis=\"inline\"");
-    expect(layoutMarkup).toContain("data-mode=\"contain\"");
-  });
 });
 
 describe("NSE scroll primitives", () => {

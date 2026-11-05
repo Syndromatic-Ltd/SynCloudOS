@@ -108,20 +108,19 @@ export const nseRegistry = [
     name: "nse-layout",
     title: "NSE Layout",
     type: "composition",
-    description: "Modern NSE layout layer for flex, stack, inline, fit, spacer, and ordered visible-child composition.",
+    description: "NSStackView and NSGridView: views in a row or column, and in rows and columns.",
     files: [
-      "src/NSE/Layout/NSELayout.tsx",
+      "src/NSE/Layout/NSEStackView.tsx",
+      "src/NSE/Layout/flowStackView.tsx",
+      "src/NSE/Layout/NSEGridView.tsx",
       "src/NSE/Layout/nse-layout.css",
       "src/NSE/Layout/index.ts"
     ],
     variants: [
-      "NSEFlex",
-      "NSEStack",
-      "NSEInline",
-      "NSEFit",
-      "NSEOrdered",
-      "NSESpacer",
-      "useNSEOrderedChildren"
+      "NSEStackView",
+      "NSEStackItem",
+      "NSEGridView",
+      "NSEGridRow"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
   },

@@ -65,6 +65,7 @@ describe("NSEStackView", () => {
         aria-label="Inspector actions"
         orientation="horizontal"
         distribution="fill-proportionally"
+        spacing={0}
         availableSize={240}
       >
         <NSEStackItem id="save" weight={2} visibilityPriority={100}>Save</NSEStackItem>
@@ -80,6 +81,7 @@ describe("NSEStackView", () => {
         aria-label="Inspector actions"
         orientation="horizontal"
         distribution="fill-proportionally"
+        spacing={0}
         availableSize={150}
       >
         <NSEStackItem id="save" weight={2} visibilityPriority={100}>Save</NSEStackItem>
