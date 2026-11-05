@@ -41,7 +41,7 @@ export interface NSEWebContentSourceViewProps extends Omit<RuntimeScopedWebConte
   readonly onMessage?: RuntimeScopedWebContentSessionRequest["onMessage"];
 }
 
-export type NSEWebContentViewProps = NSEWebContentSessionViewProps | NSEWebContentSourceViewProps;
+export type NSEWebViewProps = NSEWebContentSessionViewProps | NSEWebContentSourceViewProps;
 
 function frameMatchesSnapshot(frame: HTMLIFrameElement, frameSource: string): boolean {
   if (!frameSource || frameSource === "about:blank") return false;
@@ -130,6 +130,6 @@ function SourceBoundView(props: NSEWebContentSourceViewProps) {
   return <SessionView session={session} className={className} ownership="view" />;
 }
 
-export function NSEWebContentView(props: NSEWebContentViewProps) {
+export function NSEWebView(props: NSEWebViewProps) {
   return "session" in props ? <SessionView {...props} /> : <SourceBoundView {...props} />;
 }

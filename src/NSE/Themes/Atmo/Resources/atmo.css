@@ -2471,30 +2471,6 @@
   --nse-atmo-next-prev: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='600' viewBox='0 0 40 600'><defs><path id='np-a' d='M12.539 26.849A1.2 1.2 0 0 1 12.539 25.151L19.771 17.919A1.2 1.2 0 0 1 21.82 18.767L21.82 33.233A1.2 1.2 0 0 1 19.771 34.081Z'/><radialGradient id='np-gg' gradientUnits='userSpaceOnUse' cx='18' cy='26' r='21.5' gradientTransform='translate(0 26) scale(1 1.093) translate(0 -26)'><stop offset='0' stop-color='%23fff' stop-opacity='0.522'/><stop offset='0.1' stop-color='%23fff' stop-opacity='0.49'/><stop offset='0.15' stop-color='%23fff' stop-opacity='0.463'/><stop offset='0.2' stop-color='%23fff' stop-opacity='0.429'/><stop offset='0.25' stop-color='%23fff' stop-opacity='0.386'/><stop offset='0.3' stop-color='%23fff' stop-opacity='0.321'/><stop offset='0.35' stop-color='%23fff' stop-opacity='0.275'/><stop offset='0.4' stop-color='%23fff' stop-opacity='0.244'/><stop offset='0.45' stop-color='%23fff' stop-opacity='0.2'/><stop offset='0.5' stop-color='%23fff' stop-opacity='0.167'/><stop offset='0.55' stop-color='%23fff' stop-opacity='0.133'/><stop offset='0.6' stop-color='%23fff' stop-opacity='0.105'/><stop offset='0.65' stop-color='%23fff' stop-opacity='0.078'/><stop offset='0.7' stop-color='%23fff' stop-opacity='0.055'/><stop offset='0.75' stop-color='%23fff' stop-opacity='0.036'/><stop offset='0.8' stop-color='%23fff' stop-opacity='0.023'/><stop offset='0.85' stop-color='%23fff' stop-opacity='0.013'/><stop offset='0.9' stop-color='%23fff' stop-opacity='0.008'/><stop offset='0.95' stop-color='%23fff' stop-opacity='0.004'/><stop offset='1' stop-color='%23fff' stop-opacity='0.001'/><stop offset='1.05' stop-color='%23fff' stop-opacity='0'/></radialGradient><g id='np-mS'><use href='%23np-a' fill='%23fff'/></g><g id='np-dnB'><use href='%23np-a' fill='rgb(40,108,161)'/><rect x='-4' y='-4' width='48' height='58' fill='url(%23np-gg)'/><use href='%23np-a' fill='%23fff'/></g><g id='np-dnR'><use href='%23np-a' fill='rgb(161,49,40)'/><rect x='-4' y='-4' width='48' height='58' fill='url(%23np-gg)'/><use href='%23np-a' fill='%23fff'/></g><linearGradient id='np-dB' x1='0' y1='0' x2='0' y2='1'><stop offset='0.37' stop-color='rgb(62,140,194)'/><stop offset='0.39' stop-color='rgb(65,145,202)'/><stop offset='0.41' stop-color='rgb(68,150,211)'/><stop offset='0.43' stop-color='rgb(70,153,214)'/><stop offset='0.45' stop-color='rgb(72,157,216)'/><stop offset='0.47' stop-color='rgb(73,157,219)'/><stop offset='0.49' stop-color='rgb(74,158,220)'/><stop offset='0.51' stop-color='rgb(75,160,223)'/><stop offset='0.53' stop-color='rgb(79,164,226)'/><stop offset='0.55' stop-color='rgb(85,167,226)'/><stop offset='0.57' stop-color='rgb(87,167,226)'/><stop offset='0.59' stop-color='rgb(88,168,226)'/><stop offset='0.61' stop-color='rgb(91,169,226)'/><stop offset='0.63' stop-color='rgb(92,170,226)'/><stop offset='0.65' stop-color='rgb(101,174,228)'/><stop offset='0.67' stop-color='rgb(106,177,230)'/></linearGradient><linearGradient id='np-dR' x1='0' y1='0' x2='0' y2='1'><stop offset='0.37' stop-color='rgb(194,68,62)'/><stop offset='0.39' stop-color='rgb(202,73,65)'/><stop offset='0.41' stop-color='rgb(211,76,68)'/><stop offset='0.43' stop-color='rgb(214,78,70)'/><stop offset='0.45' stop-color='rgb(216,79,72)'/><stop offset='0.47' stop-color='rgb(219,82,73)'/><stop offset='0.49' stop-color='rgb(220,82,74)'/><stop offset='0.51' stop-color='rgb(223,83,75)'/><stop offset='0.53' stop-color='rgb(226,87,79)'/><stop offset='0.55' stop-color='rgb(226,93,85)'/><stop offset='0.57' stop-color='rgb(226,95,87)'/><stop offset='0.59' stop-color='rgb(226,96,88)'/><stop offset='0.61' stop-color='rgb(226,98,91)'/><stop offset='0.63' stop-color='rgb(226,100,92)'/><stop offset='0.65' stop-color='rgb(228,108,101)'/><stop offset='0.67' stop-color='rgb(230,114,106)'/></linearGradient><mask id='Mnp' maskUnits='userSpaceOnUse' x='0' y='0' width='40' height='600' style='color-interpolation:sRGB'><rect width='40' height='600' fill='black'/><g transform='translate(0 0)'><use href='%23np-mS'/></g><g transform='translate(0 100)'><use href='%23np-mS'/></g><g transform='translate(0 150) translate(39 0) scale(-1 1)'><use href='%23np-mS'/></g><g transform='translate(0 250) translate(39 0) scale(-1 1)'><use href='%23np-mS'/></g><g transform='translate(0 300)'><use href='%23np-mS'/></g><g transform='translate(0 400)'><use href='%23np-mS'/></g><g transform='translate(0 450) translate(39 0) scale(-1 1)'><use href='%23np-mS'/></g><g transform='translate(0 550) translate(39 0) scale(-1 1)'><use href='%23np-mS'/></g></mask></defs><g mask='url(%23Mnp)'><g transform='translate(0 0)'><rect width='40' height='50' fill='rgb(40,108,161)'/></g><g transform='translate(0 100)'><rect width='40' height='50' fill='url(%23np-dB)'/></g><g transform='translate(0 150)'><rect width='40' height='50' fill='rgb(40,108,161)'/></g><g transform='translate(0 250)'><rect width='40' height='50' fill='url(%23np-dB)'/></g><g transform='translate(0 300)'><rect width='40' height='50' fill='rgb(161,49,40)'/></g><g transform='translate(0 400)'><rect width='40' height='50' fill='url(%23np-dR)'/></g><g transform='translate(0 450)'><rect width='40' height='50' fill='rgb(161,49,40)'/></g><g transform='translate(0 550)'><rect width='40' height='50' fill='url(%23np-dR)'/></g></g><g transform='translate(0 50)'><use href='%23np-dnB'/></g><g transform='translate(0 200) translate(39 0) scale(-1 1)'><use href='%23np-dnB'/></g><g transform='translate(0 350) translate(1 0)'><use href='%23np-dnR'/></g><g transform='translate(0 500) translate(39 0) scale(-1 1)'><use href='%23np-dnR'/></g></svg>");
 }
 
-/* These arrows are sprite buttons, not framed push buttons, but they carry
-   .nse-control-button — so the vector push-button skin lands on them: it draws a
-   pill through ::before/::after and, because it ties specificity with the
-   raster consumer while loading LATER, it also wins on height, padding,
-   line-height and background. Restore the whole 40x50 sprite box, not just
-   the image, and suppress the pill. (Browser-only defect: the offline sheet
-   diff was 0.35 while the page rendered a grey button frame around every
-   arrow at meanD 49.) */
-[data-nse-appearance="atmo"] .nse-extended-prev-next-button.nse-control-button {
-  width: 40px;
-  min-width: 40px;
-  height: 50px;
-  min-height: 50px;
-  padding: 0;
-  line-height: normal;
-  background-image: var(--nse-atmo-next-prev);
-  background-repeat: no-repeat;
-}
-
-[data-nse-appearance="atmo"] .nse-extended-prev-next-button.nse-control-button::before,
-[data-nse-appearance="atmo"] .nse-extended-prev-next-button.nse-control-button::after {
-  content: none;
-}
-
 [data-nse-appearance="atmo"] {
   --nse-atmo-onyx-gb-frame: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='41' height='40' viewBox='0 0 41 40'><defs><linearGradient id='s' x1='0' y1='1.5' x2='0' y2='37.5' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='%23000' stop-opacity='0.478'/><stop offset='0.2' stop-color='%23000' stop-opacity='0.447'/><stop offset='0.8' stop-color='%23000' stop-opacity='0.447'/><stop offset='1' stop-color='%23000' stop-opacity='0.478'/></linearGradient><linearGradient id='hm' x1='0' y1='0' x2='0' y2='40' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='%23fff'/><stop offset='0.15' stop-color='%23fff'/><stop offset='0.2' stop-color='%23000'/><stop offset='0.8' stop-color='%23000'/><stop offset='0.85' stop-color='%23fff'/><stop offset='1' stop-color='%23fff'/></linearGradient><mask id='m' maskUnits='userSpaceOnUse' x='0' y='0' width='41' height='40'><rect width='41' height='40' fill='url(%23hm)'/></mask></defs><path d='M 10 2.5 L 31 2.5 C 35.694 2.5 39.5 6.306 39.5 11 L 39.5 30 C 39.5 34.694 35.694 38.5 31 38.5 L 10 38.5 C 5.306 38.5 1.5 34.694 1.5 30 L 1.5 11 C 1.5 6.306 5.306 2.5 10 2.5 Z' fill='none' stroke='%23fff' stroke-opacity='0.102' stroke-width='1' mask='url(%23m)'/><path d='M 10 1.5 L 31 1.5 C 35.694 1.5 39.5 5.306 39.5 10 L 39.5 29 C 39.5 33.694 35.694 37.5 31 37.5 L 10 37.5 C 5.306 37.5 1.5 33.694 1.5 29 L 1.5 10 C 1.5 5.306 5.306 1.5 10 1.5 Z' fill='none' stroke='url(%23s)' stroke-width='1'/></svg>");
   --nse-atmo-onyx-gb-frame-labeled: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='58' height='83' viewBox='0 0 58 83'><defs><linearGradient id='b' x1='0' y1='1' x2='0' y2='29' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='%23000' stop-opacity='0.424'/><stop offset='0.036' stop-color='%23000' stop-opacity='0.337'/><stop offset='0.071' stop-color='%23000' stop-opacity='0.278'/><stop offset='0.107' stop-color='%23000' stop-opacity='0.251'/><stop offset='0.929' stop-color='%23000' stop-opacity='0.251'/><stop offset='1' stop-color='%23000' stop-opacity='0.278'/></linearGradient><linearGradient id='s' x1='0' y1='1.5' x2='0' y2='80.5' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='%23000' stop-opacity='0.424'/><stop offset='0.9' stop-color='%23000' stop-opacity='0.424'/><stop offset='1' stop-color='%23000' stop-opacity='0.455'/></linearGradient><linearGradient id='hm' x1='0' y1='0' x2='0' y2='83' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='%23000'/><stop offset='0.916' stop-color='%23000'/><stop offset='0.94' stop-color='%23fff'/><stop offset='1' stop-color='%23fff'/></linearGradient><mask id='m' maskUnits='userSpaceOnUse' x='0' y='0' width='58' height='83'><rect width='58' height='83' fill='url(%23hm)'/></mask><clipPath id='bandclip'><path clip-rule='evenodd' d='M 10.5 1.5 L 47.5 1.5 C 52.471 1.5 56.5 5.529 56.5 10.5 L 56.5 72 C 56.5 76.694 52.694 80.5 48 80.5 L 10 80.5 C 5.306 80.5 1.5 76.694 1.5 72 L 1.5 10.5 C 1.5 5.529 5.529 1.5 10.5 1.5 Z M 11.5 29 L 46.5 29 C 52.023 29 56.5 33.477 56.5 39 L 56.5 72 C 56.5 76.694 52.694 80.5 48 80.5 L 10 80.5 C 5.306 80.5 1.5 76.694 1.5 72 L 1.5 39 C 1.5 33.477 5.977 29 11.5 29 Z'/></clipPath></defs><path d='M 10.5 1.5 L 47.5 1.5 C 52.471 1.5 56.5 5.529 56.5 10.5 L 56.5 72 C 56.5 76.694 52.694 80.5 48 80.5 L 10 80.5 C 5.306 80.5 1.5 76.694 1.5 72 L 1.5 10.5 C 1.5 5.529 5.529 1.5 10.5 1.5 Z M 11.5 29 L 46.5 29 C 52.023 29 56.5 33.477 56.5 39 L 56.5 72 C 56.5 76.694 52.694 80.5 48 80.5 L 10 80.5 C 5.306 80.5 1.5 76.694 1.5 72 L 1.5 39 C 1.5 33.477 5.977 29 11.5 29 Z' fill-rule='evenodd' fill='url(%23b)'/><g clip-path='url(%23bandclip)'><path d='M 10.5 2.5 L 47.5 2.5 C 51.918 2.5 55.5 6.082 55.5 10.5 L 55.5 72 C 55.5 76.142 52.142 79.5 48 79.5 L 10 79.5 C 5.858 79.5 2.5 76.142 2.5 72 L 2.5 10.5 C 2.5 6.082 6.082 2.5 10.5 2.5 Z' fill='none' stroke='%23000' stroke-opacity='0.037' stroke-width='1'/></g><rect x='11.5' y='29' width='35' height='1' fill='%23fff' fill-opacity='0.102'/><path d='M 10.5 2.5 L 47.5 2.5 C 52.471 2.5 56.5 6.529 56.5 11.5 L 56.5 73 C 56.5 77.694 52.694 81.5 48 81.5 L 10 81.5 C 5.306 81.5 1.5 77.694 1.5 73 L 1.5 11.5 C 1.5 6.529 5.529 2.5 10.5 2.5 Z' fill='none' stroke='%23fff' stroke-opacity='0.102' stroke-width='1' mask='url(%23m)'/><path d='M 10.5 1.5 L 47.5 1.5 C 52.471 1.5 56.5 5.529 56.5 10.5 L 56.5 72 C 56.5 76.694 52.694 80.5 48 80.5 L 10 80.5 C 5.306 80.5 1.5 76.694 1.5 72 L 1.5 10.5 C 1.5 5.529 5.529 1.5 10.5 1.5 Z' fill='none' stroke='url(%23s)' stroke-width='1'/></svg>");
@@ -6462,46 +6438,6 @@
 /* Swipeable rows slide over their action trays on the row's own white. */
 [data-nse-appearance="atmo"] .nse-list-swipeable {
   --nse-list-swipe-surface: var(--nse-atmo-table-fill);
-}
-
-/* Prev/next banner arrows. They are NSEToolButtons, so the tool capsule
-   (border-image, 25px caps, background: none) won on source order: the
-   arrows sat in dark capsules and every state showed the first cell of the
-   sprite. Restore the bare 40x50 sprite box and step the cells again. */
-[data-nse-appearance="atmo"] .nse-extended-prev-next-button.nse-extended-tool-button.nse-control-button {
-  width: 40px;
-  min-width: 40px;
-  height: 50px;
-  min-height: 50px;
-  padding: 0;
-  border: 0;
-  border-image: none;
-  border-radius: 0;
-  box-shadow: none;
-  background: var(--nse-atmo-next-prev) no-repeat 0 0;
-}
-
-[data-nse-appearance="atmo"] .nse-extended-prev-next-button.nse-extended-tool-button.nse-control-button[data-direction="prev"]:is(:active, [data-press-active="true"]):not(:disabled) { background-position: 0 -50px; }
-[data-nse-appearance="atmo"] .nse-extended-prev-next-button.nse-extended-tool-button.nse-control-button[data-direction="prev"]:disabled { background-position: 0 -100px; }
-[data-nse-appearance="atmo"] .nse-extended-prev-next-button.nse-extended-tool-button.nse-control-button[data-direction="next"] { background-position: 0 -150px; }
-[data-nse-appearance="atmo"] .nse-extended-prev-next-button.nse-extended-tool-button.nse-control-button[data-direction="next"]:is(:active, [data-press-active="true"]):not(:disabled) { background-position: 0 -200px; }
-[data-nse-appearance="atmo"] .nse-extended-prev-next-button.nse-extended-tool-button.nse-control-button[data-direction="next"]:disabled { background-position: 0 -250px; }
-
-[data-nse-appearance="atmo"] .nse-extended-prev-next-button.nse-extended-tool-button.nse-control-button:disabled {
-  filter: none;
-  opacity: 1;
-}
-
-[data-nse-appearance="atmo"] .nse-extended-prev-next-button.nse-extended-tool-button.nse-control-button:focus-visible {
-  outline: none;
-  border-radius: 8px;
-  box-shadow: var(--nse-atmo-focus-ring);
-}
-
-[data-nse-appearance="atmo"] .nse-extended-prev-next-content {
-  color: var(--nse-atmo-control-ink, #283444);
-  font-size: 14px;
-  font-weight: 700;
 }
 
 /* ============================================================================

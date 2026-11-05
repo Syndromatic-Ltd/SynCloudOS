@@ -21,9 +21,7 @@
 import "./nse-toolbars.css";
 
 export { NSEToolbarController } from "./NSEToolbarController";
-export { allocateNSEToolbarItems } from "./toolbarLayout";
 export { NSEToolbar } from "./NSEToolbar";
-export { NSEToolbarOverflowMenu } from "./NSEToolbarOverflowMenu";
 export { NSEToolbarConfigurationSheet } from "./NSEToolbarConfigurationSheet";
 export type {
   NSEToolbarConfiguration,
@@ -45,5 +43,4 @@ export type {
   NSEToolbarSnapshot,
 } from "./toolbarTypes";
 export type { NSEToolbarProps, NSEToolbarInteraction } from "./NSEToolbar";
-export type { NSEToolbarOverflowMenuProps } from "./NSEToolbarOverflowMenu";
 export type { NSEToolbarConfigurationSheetProps } from "./NSEToolbarConfigurationSheet";

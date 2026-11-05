@@ -324,57 +324,6 @@
   border-image-slice: 200 25 0 25 fill;
 }
 
-/* PrevNextBanner: a flex row of [prev arrow][content][next
-   arrow]. The arrows are 40x50 next-prev.png sprite buttons (not framed tool buttons);
-   6 vertical states: prev 0/-50/-100, next -150/-200/-250 (normal/down/disabled). */
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-banner {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-content {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: normal;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button {
-  flex: 0 0 auto;
-  width: 40px;
-  min-width: 40px;
-  height: 50px;
-  min-height: 50px;
-  padding: 0;
-  border: 0;
-  border-image: none;
-  background: var(--nse-atmo-next-prev) no-repeat;
-  transform: none;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="prev"] {
-  background-position: 0 0;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="prev"]:active:not([data-press-active]):not(:disabled),
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="prev"][data-press-active="true"]:not(:disabled) {
-  background-position: 0 -50px;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="prev"]:disabled {
-  background-position: 0 -100px;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="next"] {
-  background-position: 0 -150px;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="next"]:active:not([data-press-active]):not(:disabled),
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="next"][data-press-active="true"]:not(:disabled) {
-  background-position: 0 -200px;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="next"]:disabled {
-  background-position: 0 -250px;
-}
-
 :where([data-nse-appearance="atmo"]) .nse-control-toolbar[data-grouped="true"] > .nse-control-button {
   min-width: calc(var(--nse-atmo-bar-h, 50px) * 0.84);
   height: var(--nse-atmo-bar-h, 50px);

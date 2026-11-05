@@ -452,7 +452,6 @@ describe("NSE semantic contracts", () => {
   });
 
   it("keeps semantic control owners, the NSE facade, and the registry wired together", () => {
-    expect(NSE.NSEAppFrame).toBe(NSEAppFrame);
     expect(NSE.NSESplitView).toBe(NSESplitView);
     expect(NSE.NSEProgressIndicator).toBe(NSEProgressIndicator);
     expect(NSE.NSESlider).toBe(NSESlider);

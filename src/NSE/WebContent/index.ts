@@ -18,5 +18,5 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { NSEWebContentView } from "./NSEWebContentView";
-export type { NSEWebContentSourceViewProps, NSEWebContentViewProps } from "./NSEWebContentView";
+export { NSEWebView } from "./NSEWebView";
+export type { NSEWebContentSourceViewProps, NSEWebViewProps } from "./NSEWebView";

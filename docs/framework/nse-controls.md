@@ -77,7 +77,7 @@ The tables below give an overview. These pages document each component's props, 
 | [Stacks and grids](nse/stacks-and-grids.md) | `NSEStackView` and `NSEGridView` |
 | [Menus, toolbars and inspectors](nse/menus-toolbars-and-inspectors.md) | Choosing a menu control, responder provenance, configured toolbars, narrow inspectors, keep-mounted panes |
 
-Focused entries include `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSEStandaloneControlHost` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, `NSEPage` and `NSEPageController` in `nse/page` and `NSECoverFlow` in `nse/cover-flow`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
+Focused entries include `NSEDrawer`, `NSESlidingPanes` and `NSEStandaloneControlHost` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, `NSEPage` and `NSEPageController` in `nse/page` and `NSECoverFlow` in `nse/cover-flow`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
 
 ## Buttons
 
@@ -164,7 +164,7 @@ Data views render collections owned by a controller. They are virtualised, so a 
 | `NSEPopover` | An anchored transient surface. |
 | `NSEOpenPanel`, `NSESavePanel` | File panels. |
 | `NSEFontPanel`, `NSEMediaPanel` | The font panel and a media chooser. |
-| `NSEToaster`, `NSETooltipProvider` | Transient notices and tooltips. |
+| `NSETooltipProvider` | Tooltips. Transient notices go through the notification service (`useNotifications`). |
 
 ## Images and graphics
 
@@ -196,8 +196,8 @@ The [controllers guide](controllers.md) covers the array, tree and preferences c
 | Component | Purpose |
 | --- | --- |
 | `NSETextView` | A text view over a canonical owner and independent editing session. See [Text and editing](text-and-editing.md). |
-| `NSEFontManager`, `NSELayoutManager`, `NSERuler`, `drawNSEString` | Typography and text layout. |
-| `NSEWebContentView` | Hosts external web content inside a sandbox. |
+| `NSEFontManager`, `NSELayoutManager`, `NSERulerView`, `drawNSEString` | Typography and text layout. |
+| `NSEWebView` | Hosts external web content inside a sandbox. |
 
 ## Tracking and animation
 

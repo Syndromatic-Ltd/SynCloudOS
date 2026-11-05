@@ -190,8 +190,7 @@
   max-inline-size: min(440px, calc(100vw - 32px));
 }
 
-.nse-container-dialog-close,
-.nse-container-toast-dismiss {
+.nse-container-dialog-close{
   display: inline-grid;
   place-items: center;
   inline-size: 28px;
@@ -202,8 +201,7 @@
   background: transparent;
 }
 
-.nse-container-dialog-close:hover,
-.nse-container-toast-dismiss:hover {
+.nse-container-dialog-close:hover{
   background: color-mix(in srgb, currentColor 10%, transparent);
 }
 
@@ -304,67 +302,6 @@
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-}
-
-.nse-container-toaster {
-  position: fixed;
-  z-index: 3200;
-  display: grid;
-  gap: 8px;
-  max-inline-size: min(380px, calc(100vw - 24px));
-  pointer-events: none;
-}
-
-.nse-container-toaster[data-position^="top"] {
-  inset-block-start: 12px;
-}
-
-.nse-container-toaster[data-position^="bottom"] {
-  inset-block-end: 12px;
-}
-
-.nse-container-toaster[data-position$="leading"] {
-  inset-inline-start: 12px;
-}
-
-.nse-container-toaster[data-position$="center"] {
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
-}
-
-.nse-container-toaster[data-position$="trailing"] {
-  inset-inline-end: 12px;
-}
-
-.nse-container-toast {
-  pointer-events: auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 8px;
-  padding: 10px;
-  color: inherit;
-  background: color-mix(in srgb, canvas 86%, white 8%);
-  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
-}
-
-.nse-container-toast-copy {
-  display: grid;
-  gap: 2px;
-  min-inline-size: 0;
-}
-
-.nse-container-toast[data-tone="success"] {
-  border-color: color-mix(in srgb, #1f9d62 42%, transparent);
-}
-
-.nse-container-toast[data-tone="warning"] {
-  border-color: color-mix(in srgb, #c79320 46%, transparent);
-}
-
-.nse-container-toast[data-tone="critical"] {
-  border-color: color-mix(in srgb, #c44b4b 52%, transparent);
 }
 
 /* --- NSESlidingPanes ------------- */

@@ -22,7 +22,7 @@ import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSESlider } from "../Controls/Values/NSESlider";
 import { normaliseParagraphStyle, normaliseParagraphStyleMutation, type NSEParagraphStyle } from "./typographyTypes";
 
-export interface NSERulerProps {
+export interface NSERulerViewProps {
   readonly value: NSEParagraphStyle;
   readonly direction?: "ltr" | "rtl";
   readonly maximum?: number;
@@ -35,7 +35,7 @@ function updated(style: NSEParagraphStyle, change: Partial<NSEParagraphStyle>): 
   return normaliseParagraphStyleMutation({ ...style, ...change });
 }
 
-export function NSERuler({ value, direction = "ltr", maximum = 1_000, step = 1, readOnly = false, onChange }: NSERulerProps) {
+export function NSERulerView({ value, direction = "ltr", maximum = 1_000, step = 1, readOnly = false, onChange }: NSERulerViewProps) {
   const style = normaliseParagraphStyle(value);
   const mutationDisabled = readOnly;
   const changeNumber = (key: "firstLineIndent" | "headIndent" | "tailIndent", next: number) => {

@@ -55,15 +55,6 @@ export type NSEDrawerPlacement = "leading" | "trailing" | "top" | "bottom";
 export type ContainerPaneVariant = "plain" | "surface" | "sidebar" | "inspector" | "floating";
 export type NSESlidingAxis = "horizontal" | "vertical";
 export type NSEDialogVariant = "dialog" | "sheet" | "panel" | "confirm";
-export type NSEToastTone = "info" | "success" | "warning" | "critical";
-export type NSEToasterPosition =
-  | "top-leading"
-  | "top-center"
-  | "top-trailing"
-  | "bottom-leading"
-  | "bottom-center"
-  | "bottom-trailing";
-
 interface NSEDisclosureOptions {
   open?: boolean;
   defaultOpen?: boolean;
@@ -183,27 +174,6 @@ export interface NSEConfirmPromptProps extends Omit<NSEModalDialogProps, "action
   inline?: boolean;
   /** Whether the modal form is open (ignored when `inline`). */
   open?: boolean;
-}
-
-export interface NSEToastAction {
-  label: ReactNode;
-  tone?: NSEButtonTone;
-  onPress: () => void;
-}
-
-export interface NSEToast {
-  id: string;
-  title?: ReactNode;
-  message: ReactNode;
-  tone?: NSEToastTone;
-  action?: NSEToastAction;
-  dismissLabel?: string;
-}
-
-export interface NSEToasterProps extends HTMLAttributes<HTMLDivElement> {
-  toasts: readonly NSEToast[];
-  position?: NSEToasterPosition;
-  onDismiss?: (id: string) => void;
 }
 
 function classes(...values: Array<string | false | null | undefined>) {
@@ -829,50 +799,5 @@ export function NSEConfirmPrompt({
       onOpenChange={onOpenChange}
       actions={actions}
     />
-  );
-}
-
-export function NSEToaster({
-  toasts,
-  position = "top-trailing",
-  onDismiss,
-  className = "",
-  ...props
-}: NSEToasterProps) {
-  const hasCriticalToast = useMemo(() => toasts.some((toast) => toast.tone === "critical"), [toasts]);
-  // Toasts fly in from the toaster's screen edge.
-  const flyInClass = position.startsWith("bottom") ? "nse-container-fly-in-bottom" : "nse-container-fly-in-top";
-
-  return (
-    <div
-      {...props}
-      className={classes("nse-container-toaster", className)}
-      data-position={position}
-      role={hasCriticalToast ? "alert" : "status"}
-      aria-live={hasCriticalToast ? "assertive" : "polite"}
-      aria-atomic="false"
-    >
-      {toasts.map((toast) => (
-        <article key={toast.id} className={classes("nse-container-toast", flyInClass)} data-tone={toast.tone ?? "info"}>
-          <span className="nse-container-toast-copy">
-            {toast.title ? <strong>{toast.title}</strong> : null}
-            <span>{toast.message}</span>
-          </span>
-          {toast.action ? (
-            <NSEButton title={toast.action.label} {...nseButtonToneProps(toast.action.tone ?? "dark")} onClick={toast.action.onPress} />
-          ) : null}
-          {onDismiss ? (
-            <button
-              className="nse-container-toast-dismiss"
-              type="button"
-              aria-label={toast.dismissLabel ?? "Dismiss notification"}
-              onClick={() => onDismiss(toast.id)}
-            >
-              <span aria-hidden="true">x</span>
-            </button>
-          ) : null}
-        </article>
-      ))}
-    </div>
   );
 }

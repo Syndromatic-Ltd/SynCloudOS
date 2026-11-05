@@ -30,5 +30,3 @@ export * from "./NSESheetView";
 export * from "./NSEPopoverWindowView";
 export * from "./Chrome";
 export * from "./NSEBorderlessWindowView";
-export { NSEAppFrame } from "./NSEAppFrame";
-export type { NSEAppFrameProps, NSEAppFrameVariant } from "./NSEAppFrame";
