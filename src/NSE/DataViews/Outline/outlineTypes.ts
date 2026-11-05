@@ -34,6 +34,22 @@ export interface NSEOutlineViewDataSource<T, TId extends NSEDataViewKey> {
 }
 
 export interface NSEOutlineViewDelegate<T, TId extends NSEDataViewKey> {
+  /**
+   * `outlineView(_:isGroupItem:)`: a group item is a section header. In a source
+   * list the theme draws it as a group row (Atmo: blue label, a line to the edge
+   * and the disclosure arrow) rather than as a selectable row.
+   */
+  isGroupItem?(id: TId, item: T): boolean;
+  /**
+   * `outlineView(_:shouldShowOutlineCellForItem:)`: return false to hide an
+   * item's disclosure control, so a section cannot be collapsed.
+   */
+  shouldShowOutlineCell?(id: TId, item: T): boolean;
+  /**
+   * `outlineView(_:shouldSelectItem:)`. Without it, every item except a group
+   * item can be selected.
+   */
+  shouldSelect?(id: TId, item: T): boolean;
   shouldExpand?(id: TId, item: T): boolean;
   shouldCollapse?(id: TId, item: T): boolean;
   didExpand?(id: TId, item: T): void;
@@ -83,7 +99,20 @@ export interface NSEOutlineViewProps<T, TId extends NSEDataViewKey>
   readonly onExpandedIdsChange?: (ids: ReadonlySet<TId>) => void;
   readonly onSelectionChange?: (event: NSEOutlineViewSelectionEvent<TId>) => void;
   readonly rowHeight?: number;
-  readonly viewportBlockSize?: number;
+  /**
+   * `NSTableView.selectionHighlightStyle`. `"sourceList"` draws the outline as
+   * a sidebar source list: the theme's source-list background, group rows for
+   * group items, and the source-list selection. Default `"regular"`.
+   */
+  readonly selectionHighlightStyle?: "regular" | "sourceList";
+  /**
+   * Views that float over the rows at the top of the enclosing scroll view
+   * (`NSScrollView.addFloatingSubview(_:for:)`), such as a source list's search
+   * field. Rows scroll beneath them.
+   */
+  readonly floatingSubviews?: ReactNode;
+  /** The scroll viewport's height in pixels, or `"fill"` to take the container's height. */
+  readonly viewportBlockSize?: number | "fill";
   readonly onValidateDrop?: (proposal: NSEOutlineViewDropProposal<TId>) => boolean | Promise<boolean>;
   readonly onAcceptDrop?: (proposal: NSEOutlineViewDropProposal<TId>) => void | Promise<void>;
   readonly dragBinding?: NSEDataViewDragBinding<TId>;

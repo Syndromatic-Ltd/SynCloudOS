@@ -22,19 +22,29 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
+  isValidElement,
   useMemo,
   useRef,
   useState,
   useSyncExternalStore,
   type CSSProperties,
   type KeyboardEvent,
+  type DragEvent,
   type MouseEvent,
+  type ReactNode,
 } from "react";
 
 import { createSelectionChange, dataViewAllowsMutation, dataViewAllowsNavigation, dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, dataViewIsDisabled, encodeNSEDataViewKey } from "../Core";
 import { dataViewDisposedControllerState, warnDisposedDataViewController } from "../Core/disposedController";
 import { useNSEVirtualiser } from "../Virtualisation";
 import { useNSEDataViewDragHost } from "../../Drag";
+import { NSEDivider } from "../../Controls/Selection/NSEDivider";
+import { NSEListItem } from "../../Controls/Selection/NSEListItem";
+import { NSETableCellView } from "../Table/NSETableCellView";
+import type { NSETableCellViewProps } from "../Core/dataViewTypes";
+import { useNSERubberBandScroll } from "../../Scroll";
+import type { TreeNode } from "../../../SynCloudOS/Models";
 import { flattenVisibleTree } from "./flattenVisibleTree";
 import type {
   NSEOutlineViewProps,
@@ -59,6 +69,8 @@ export function NSEOutlineView<T, TId extends string | number>({
   onExpandedIdsChange,
   onSelectionChange,
   rowHeight = 23,
+  selectionHighlightStyle = "regular",
+  floatingSubviews,
   viewportBlockSize = 460,
   onValidateDrop,
   onAcceptDrop,
@@ -104,6 +116,26 @@ export function NSEOutlineView<T, TId extends string | number>({
   const dragHost = useNSEDataViewDragHost({ binding: dragBinding, endpoint: dragEndpoint, validate: onValidateDrop, accept: onAcceptDrop, onStatus: setDragStatus, enabled: allowsMutation });
   const requests = useRef(new Map<TId, AbortController>());
   const viewportRef = useRef<HTMLDivElement>(null);
+  const sourceListContentRef = useRef<HTMLDivElement>(null);
+  const sourceList = selectionHighlightStyle === "sourceList";
+  const fills = viewportBlockSize === "fill";
+  const [measuredBlockSize, setMeasuredBlockSize] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    if (!fills || !viewport) return;
+    const measure = () => setMeasuredBlockSize(viewport.clientHeight);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [fills]);
+  // Before the first measurement a filling outline assumes the default, so the virtualiser renders rows.
+  const outlineBlockSize = fills
+    ? (measuredBlockSize !== null && measuredBlockSize > 0 ? measuredBlockSize : 460)
+    : viewportBlockSize;
+  // A source list scrolls with the system rubber band, as the sidebar rail always has.
+  useNSERubberBandScroll(viewportRef, sourceListContentRef);
   const activeIndex = activeId === null ? -1 : rows.findIndex(({ id }) => Object.is(id, activeId));
   const virtualiser = useNSEVirtualiser({
     count: rows.length,
@@ -113,7 +145,7 @@ export function NSEOutlineView<T, TId extends string | number>({
     sizingGeneration: rowHeight,
     getKey: (index) => encodeNSEDataViewKey(rows[index]!.id),
     retainedIndices: activeIndex < 0 ? undefined : new Set([activeIndex]),
-    viewportSize: viewportBlockSize,
+    viewportSize: outlineBlockSize,
     viewportRef,
   });
 
@@ -158,6 +190,10 @@ export function NSEOutlineView<T, TId extends string | number>({
     return false;
   };
 
+  const isGroup = (row: NSEOutlineViewRow<T, TId>) => delegate?.isGroupItem?.(row.id, row.item) === true;
+  const showsOutlineCell = (row: NSEOutlineViewRow<T, TId>) => row.expandable && delegate?.shouldShowOutlineCell?.(row.id, row.item) !== false;
+  const selectable = (row: NSEOutlineViewRow<T, TId>) => delegate?.shouldSelect?.(row.id, row.item) ?? !isGroup(row);
+
   const emitSelection = (before: typeof snapshot.selection, reason: NSEOutlineViewSelectionEvent<TId>["reason"]) => {
     const after = controller.getSnapshot().selection;
     if (before === after) return;
@@ -166,6 +202,8 @@ export function NSEOutlineView<T, TId extends string | number>({
 
   const select = (id: TId, reason: NSEOutlineViewSelectionEvent<TId>["reason"], mode: "replace" | "toggle" | "range" = "replace") => {
     if (ignoresStaleEvent("selection") || !allowsInteraction || selectionMode === "none") return;
+    const target = rowFor(id);
+    if (target && !selectable(target)) return;
     const before = controller.getSnapshot().selection;
     if (mode === "toggle" && selectionMode === "multiple") {
       const next = new Set(before.selectedIds);
@@ -212,7 +250,9 @@ export function NSEOutlineView<T, TId extends string | number>({
     onExpandedIdsChange?.(controller.getSnapshot().expandedIds);
     delegate?.didCollapse?.(row.id, row.item);
     if (activeDescendantRow && isDescendant(activeDescendantRow, row.id)) setActiveId(row.id);
-    if (selectedDescendant) {
+    // A selected child moves the selection to its parent, unless the parent
+    // cannot be selected (a source-list section), where the child stays selected.
+    if (selectedDescendant && selectable(row)) {
       const before = controller.getSnapshot().selection;
       controller.select([row.id]);
       emitSelection(before, "collapse-parent");
@@ -291,8 +331,123 @@ export function NSEOutlineView<T, TId extends string | number>({
     onKeyDown?.(event);
   };
 
+  const disclosureFor = (row: NSEOutlineViewRow<T, TId>) => showsOutlineCell(row) ? (
+    <button
+      type="button"
+      aria-label={`${row.expanded ? "Collapse" : "Expand"} ${labelForItem(row.item)}`}
+      data-nse-part="disclosure"
+      data-state={row.expanded ? "open" : "closed"}
+      data-appearance-recipe="outline-disclosure"
+      disabled={!allowsInteraction}
+      onClick={(event) => { event.stopPropagation(); if (row.expanded) collapse(row); else expand(row); }}
+    />
+  ) : null;
+
+  const rowStatus = (row: NSEOutlineViewRow<T, TId>) => (
+    <>
+      {row.node.loading ? <span data-nse-part="loading">Loading children</span> : null}
+      {row.node.error ? (
+        <span data-nse-part="error">
+          {row.node.error}
+          <button type="button" onClick={(event) => { event.stopPropagation(); loadRow(row); }}>Retry loading {labelForItem(row.item)}</button>
+        </span>
+      ) : null}
+    </>
+  );
+
+  const rowProps = (row: NSEOutlineViewRow<T, TId>, selected: boolean) => {
+    const sourceIds = selected
+      ? rows.filter(({ id }) => snapshot.selection.selectedIds.has(id)).map(({ id }) => id)
+      : [row.id];
+    return {
+      id: domId(row.id),
+      role: "treeitem",
+      "aria-level": row.level,
+      "aria-posinset": row.positionInSet,
+      "aria-setsize": row.setSize,
+      "aria-expanded": row.expandable ? row.expanded : undefined,
+      "aria-selected": selected,
+      "aria-disabled": controllerDisposed || undefined,
+      draggable: Boolean(allowsMutation && dragBinding && dragEndpoint),
+      onDragStart: (event: DragEvent<HTMLDivElement>) => dragHost.start(event, sourceIds),
+      onDragOver: (event: DragEvent<HTMLDivElement>) => dragHost.over(event, row.id, row.row),
+      onDrop: (event: DragEvent<HTMLDivElement>) => dragHost.drop(event, row.id, row.row),
+      onDragEnd: dragHost.end,
+      onClick: (event: MouseEvent) => {
+        if (ignoresStaleEvent("selection") || !allowsInteraction) return;
+        setActiveId(row.id);
+        select(row.id, "pointer", event.shiftKey ? "range" : event.ctrlKey || event.metaKey ? "toggle" : "replace");
+      },
+      onDoubleClick: () => { if (!ignoresStaleEvent("activation") && allowsInteraction) delegate?.didActivate?.(row.id, row.item); },
+    };
+  };
+
+  // A source list draws every loaded item, so a section's rows slide closed
+  // rather than vanish; rows inside a collapsed item are built here.
+  const visibleRows = new Map(rows.map((row) => [row.id, row] as const));
+  const sourceListRow = (node: TreeNode<T, TId>, level: number, positionInSet: number, setSize: number): NSEOutlineViewRow<T, TId> => {
+    const visible = visibleRows.get(node.id);
+    if (visible) return visible;
+    const supplied = isExpandable?.(node.value);
+    const expandable = supplied ?? (node.children.length > 0 || node.loading || node.error !== null || !attemptedLoads.has(node.id));
+    return Object.freeze({
+      id: node.id, item: node.value, node, row: -1, level, parentId: node.parentId, positionInSet, setSize,
+      expandable, expanded: expandable && snapshot.expandedIds.has(node.id),
+    });
+  };
+
+  const renderSourceListNodes = (nodes: readonly TreeNode<T, TId>[], level: number, indent: number): ReactNode => nodes.map((node, index) => {
+    const row = sourceListRow(node, level, index + 1, nodes.length);
+    const group = isGroup(row);
+    const selected = snapshot.selection.selectedIds.has(row.id);
+    const content = delegate?.renderItem?.(row) ?? labelForItem(row.item);
+    // A table cell view is drawn by the source list's own row: its image, title,
+    // detail and badge take the row's icon, title, detail and badge places.
+    const cell = isValidElement<NSETableCellViewProps>(content) && content.type === NSETableCellView ? content.props : null;
+    const children = row.expandable ? node.children : [];
+    return (
+      <div key={encodeNSEDataViewKey(row.id)} className="nse-outline-node" data-group={group || undefined}>
+        {group ? (
+          <div {...rowProps(row, false)} aria-selected={undefined} className="nse-outline-group-row" data-nse-part="group-row">
+            <span className="nse-outline-group-label">{content}</span>
+            <span className="nse-outline-group-line" aria-hidden="true" />
+            {showsOutlineCell(row) ? (
+              <NSEDivider
+                variant="arrow"
+                className="nse-outline-group-toggle"
+                expanded={row.expanded}
+                onToggle={() => { if (row.expanded) collapse(row); else expand(row); }}
+                label={`${row.expanded ? "Collapse" : "Expand"} ${labelForItem(row.item)}`}
+              />
+            ) : null}
+          </div>
+        ) : (
+          <NSEListItem
+            {...rowProps(row, selected)}
+            className="nse-outline-source-row"
+            data-nse-part="row"
+            selected={selected}
+            disabled={controllerDisposed}
+            style={{ "--nse-outline-level": indent } as OutlineStyle}
+            leading={disclosureFor(row) ?? (cell?.image ? <img data-nse-part="image" src={cell.image.src} alt={cell.image.alt} /> : undefined)}
+            meta={cell?.secondary}
+            trailing={cell ? cell.badge ?? cell.accessory : undefined}
+          >
+            {cell ? cell.primary : content}
+            {rowStatus(row)}
+          </NSEListItem>
+        )}
+        {children.length ? (
+          <div className="nse-outline-children" data-collapsed={row.expanded ? "false" : "true"} inert={!row.expanded}>
+            <div className="nse-outline-children-inner">{renderSourceListNodes(children, level + 1, group ? indent : indent + 1)}</div>
+          </div>
+        ) : null}
+      </div>
+    );
+  });
+
   return (
-    <div className="nse-outline-container" data-state={state.kind}>
+    <div className="nse-outline-container" data-state={state.kind} data-fill={fills || undefined} data-style={sourceList ? "source-list" : undefined}>
       <div
         {...props}
         ref={viewportRef}
@@ -306,16 +461,20 @@ export function NSEOutlineView<T, TId extends string | number>({
         dir={dir}
         data-nse-control="outline-view"
         data-state={state.kind}
-        style={{ ...style, position: "relative", overflow: "auto", blockSize: `${viewportBlockSize}px` }}
+        data-style={sourceList ? "source-list" : undefined}
+        style={{ ...style, position: "relative", overflow: "auto", blockSize: fills ? "100%" : `${viewportBlockSize}px` }}
         onKeyDown={handleKey}
       >
+        {floatingSubviews != null ? <div className="nse-outline-floating-subviews">{floatingSubviews}</div> : null}
+        {sourceList ? (
+          <div className="nse-outline-source-list" ref={sourceListContentRef}>
+            {renderSourceListNodes(snapshot.roots, 1, 0)}
+          </div>
+        ) : (
         <div style={{ position: "relative", blockSize: `${virtualiser.snapshot.range.totalSize}px` }}>
           {virtualiser.snapshot.items.map((virtualItem) => {
             const row = rows[virtualItem.index]!;
             const selected = snapshot.selection.selectedIds.has(row.id);
-            const sourceIds = selected
-              ? rows.filter(({ id }) => snapshot.selection.selectedIds.has(id)).map(({ id }) => id)
-              : [row.id];
             const rowStyle: OutlineStyle = {
               position: "absolute",
               insetBlockStart: `${virtualItem.start}px`,
@@ -326,54 +485,21 @@ export function NSEOutlineView<T, TId extends string | number>({
             return (
               <div
                 key={virtualItem.key}
-                id={domId(row.id)}
-                role="treeitem"
-                aria-level={row.level}
-                aria-posinset={row.positionInSet}
-                aria-setsize={row.setSize}
-                aria-expanded={row.expandable ? row.expanded : undefined}
-                aria-selected={selected}
-                aria-disabled={controllerDisposed || undefined}
-                data-nse-part="row"
+                {...rowProps(row, selected)}
+                data-nse-part={isGroup(row) ? "group-row" : "row"}
                 data-state={selected ? "selected" : row.row % 2 === 0 ? "even" : "odd"}
                 data-kind={row.expandable ? "branch" : "leaf"}
                 data-appearance-recipe={selected ? "outline-selected-row" : "outline-row"}
-                draggable={Boolean(allowsMutation && dragBinding && dragEndpoint)}
-                onDragStart={(event) => dragHost.start(event, sourceIds)}
-                onDragOver={(event) => dragHost.over(event, row.id, row.row)}
-                onDrop={(event) => dragHost.drop(event, row.id, row.row)}
-                onDragEnd={dragHost.end}
                 style={rowStyle}
-                onClick={(event: MouseEvent) => {
-                  if (ignoresStaleEvent("selection") || !allowsInteraction) return;
-                  setActiveId(row.id);
-                  select(row.id, "pointer", event.shiftKey ? "range" : event.ctrlKey || event.metaKey ? "toggle" : "replace");
-                }}
-                onDoubleClick={() => { if (!ignoresStaleEvent("activation") && allowsInteraction) delegate?.didActivate?.(row.id, row.item); }}
               >
-                {row.expandable ? (
-                  <button
-                    type="button"
-                    aria-label={`${row.expanded ? "Collapse" : "Expand"} ${labelForItem(row.item)}`}
-                    data-nse-part="disclosure"
-                    data-state={row.expanded ? "open" : "closed"}
-                    data-appearance-recipe="outline-disclosure"
-                    disabled={!allowsInteraction}
-                    onClick={(event) => { event.stopPropagation(); row.expanded ? collapse(row) : expand(row); }}
-                  />
-                ) : null}
+                {disclosureFor(row)}
                 <span data-nse-part="label">{delegate?.renderItem?.(row) ?? labelForItem(row.item)}</span>
-                {row.node.loading ? <span data-nse-part="loading">Loading children</span> : null}
-                {row.node.error ? (
-                  <span data-nse-part="error">
-                    {row.node.error}
-                    <button type="button" onClick={(event) => { event.stopPropagation(); loadRow(row); }}>Retry loading {labelForItem(row.item)}</button>
-                  </span>
-                ) : null}
+                {rowStatus(row)}
               </div>
             );
           })}
         </div>
+        )}
       </div>
       <span role="status" aria-live="polite" className="nse-outline-status">{dragStatus || dataViewAnnouncement(state)}</span>
       {(state.kind === "error" || state.kind === "denied") && state.retry ? <button type="button" onClick={state.retry}>Retry</button> : null}

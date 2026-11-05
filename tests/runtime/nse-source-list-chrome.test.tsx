@@ -22,7 +22,8 @@
 import * as React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSESidebar, NSESourceListScene, SourceListFrameProvider, type SourceListFrameContextValue } from "../../src/NSE/Navigation/SourceList";
+import { NSESidebar } from "../../src/NSE/Navigation/SourceList/NSESidebar";
+import { NSESourceListScene, SourceListFrameProvider, type SourceListFrameContextValue } from "../../src/NSE/Navigation/SourceList";
 import { defineNSEAppearance, NSEAppearanceProvider } from "../../src/NSE/Appearance";
 
 afterEach(cleanup);

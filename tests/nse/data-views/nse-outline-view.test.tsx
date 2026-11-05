@@ -291,3 +291,61 @@ describe("NSEOutlineView", () => {
     expect(flattenVisibleTree([cyclic as never], new Set(["cycle"]))).toHaveLength(1);
   });
 });
+
+describe("NSEOutlineView source list", () => {
+  const library: FileNode = { id: "library", name: "Library", children: [documents, pictures] };
+  const devices: FileNode = { id: "devices", name: "Devices", children: [{ id: "disk", name: "Disk", children: [] }] };
+
+  function renderSourceList(delegate: Record<string, unknown> = {}) {
+    const controller = createController([library, devices]);
+    controller.expand("library");
+    controller.expand("devices");
+    const view = render(
+      <NSEOutlineView
+        aria-label="Sidebar"
+        controller={controller}
+        selectionHighlightStyle="sourceList"
+        idForItem={(node) => node.id}
+        childrenForItem={(node) => node.children}
+        labelForItem={(node) => node.name}
+        isExpandable={(node) => node.children.length > 0}
+        delegate={{ isGroupItem: (id: string) => id === "library" || id === "devices", ...delegate }}
+      />,
+    );
+    return { controller, view };
+  }
+
+  it("draws group items as section rows with the disclosure arrow", () => {
+    const { view } = renderSourceList();
+    const groups = view.container.querySelectorAll('[data-nse-part="group-row"]');
+    expect([...groups].map((row) => row.textContent)).toEqual(["Library", "Devices"]);
+    expect(groups[0]!.querySelector(".nse-outline-group-line")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Collapse Library" })).toBeTruthy();
+    expect(view.container.querySelector('[data-style="source-list"]')).not.toBeNull();
+  });
+
+  it("does not select group items, and selects their rows", () => {
+    const { controller } = renderSourceList();
+    fireEvent.click(screen.getByRole("treeitem", { name: /^Library/ }));
+    expect(controller.getSnapshot().selection.selectedIds.size).toBe(0);
+    fireEvent.click(screen.getByRole("treeitem", { name: /Pictures/ }));
+    expect(controller.getSnapshot().selection.selectedIds).toEqual(new Set(["pictures"]));
+  });
+
+  it("collapses a section through its arrow, keeping its rows mounted but inert", () => {
+    const { controller, view } = renderSourceList();
+    fireEvent.click(screen.getByRole("treeitem", { name: /Pictures/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Collapse Library" }));
+    expect(controller.getSnapshot().expandedIds.has("library")).toBe(false);
+    const region = view.container.querySelector('.nse-outline-children[data-collapsed="true"]')!;
+    expect(region.hasAttribute("inert")).toBe(true);
+    expect(region.textContent).toContain("Pictures");
+    expect(controller.getSnapshot().selection.selectedIds).toEqual(new Set(["pictures"]));
+  });
+
+  it("hides the arrow when the delegate does not show the outline cell", () => {
+    renderSourceList({ shouldShowOutlineCell: (id: string) => id !== "devices" });
+    expect(screen.queryByRole("button", { name: "Collapse Devices" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Collapse Library" })).toBeTruthy();
+  });
+});
