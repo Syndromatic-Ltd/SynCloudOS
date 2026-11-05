@@ -291,7 +291,7 @@ These are out of scope for this approval, listed so they are not forgotten:
 Updated as each phase lands on `dev`.
 
 - [x] 1. Data views and source lists. `NSETableView`, `NSETableHeaderView`, `NSETableCellView` and `NSEOutlineView` take their AppKit names; source lists are `NSEOutlineView` with `selectionHighlightStyle: "sourceList"` and group items, drawn by Atmo as the old sidebar; lists are single-column `NSETableView`s and the `NSEList` family is removed; `NSESplitViewController` renders its own view of `NSESplitViewItem`s. Two items move: `NSEAccordionView`'s removal needs the disclosure bezel (phase 2), and `NSESidebar`, already internal, goes with `NSESourceListScene` (phase 7).
-- [ ] 2. Buttons and fields
+- [ ] 2. Buttons and fields. Landed so far: one `NSEButton` (`buttonType`, `bezelStyle`, `controlSize` small/regular/large, AppKit prop names) replaces the push, toggle, tool, icon and checkbox components, and `NSESwitch` takes `state`; the disclosure bezel and `NSEStackView` fitting sizes replace `NSEAccordionView`; `NSESegmentedControl.segmentStyle` (`rounded`, `capsule`, `texturedRounded`), segment `image` and `width`, and `trackingMode` `select-any` replace `NSERadioGroup`, `NSERadioToolButtonGroup`, `NSEToolButtonGroup` and `NSETabGroup`; `NSEPickerGroup` is removed. Open in this phase: text fields, `NSEBox` box types, and an owner decision on `NSEButton` `buttonType: "radio"`: AppKit has a round radio button, but Atmo draws no such art (its radio family is the capsule strip), so it needs a design first. Until then Cappuccino's `CPRadio` maps to a capsule segmented control.
 - [ ] 3. Pop-up buttons and menus
 - [ ] 4. Values, progress, date and time
 - [ ] 5. Layout and containers
