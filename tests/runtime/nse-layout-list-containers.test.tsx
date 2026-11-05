@@ -32,15 +32,6 @@ import {
   NSESpacer,
   NSEStack
 } from "../../src/NSE/Layout";
-import {
-  computeNSEVirtualWindow,
-  NSEList,
-  NSEListRow,
-  NSESwipeableItem,
-  NSEVirtualList,
-  useNSEPageWindow,
-  type NSEListSelectionChange
-} from "../../src/NSE/List";
 import { rubberBandOffset } from "../../src/NSE/Scroll";
 import {
   NSEConfirmPrompt,
@@ -107,139 +98,12 @@ describe("NSE layout primitives", () => {
   });
 });
 
-describe("NSE list primitives", () => {
-  it("keeps row selection state in list context", () => {
-    const changes: NSEListSelectionChange[] = [];
+describe("NSE scroll primitives", () => {
 
-    render(
-      <NSEList mode="multiple" defaultSelectedKeys={["notes"]} onSelectionChange={(change) => changes.push(change)}>
-        <NSEListRow itemKey="mail" title="Mail" />
-        <NSEListRow itemKey="notes" title="Notes" />
-      </NSEList>
-    );
 
-    const mail = screen.getByRole("option", { name: "Mail" });
-    const notes = screen.getByRole("option", { name: "Notes" });
 
-    expect(mail.getAttribute("aria-selected")).toBe("false");
-    expect(notes.getAttribute("aria-selected")).toBe("true");
 
-    fireEvent.click(mail);
-    expect(changes.at(-1)?.selectedKeys).toEqual(new Set(["notes", "mail"]));
 
-    fireEvent.keyDown(notes, { key: " " });
-    expect(changes.at(-1)?.selectedKeys).toEqual(new Set(["mail"]));
-  });
-
-  it("exposes a stable non-virtual page window hook", () => {
-    const pageChanges = vi.fn();
-
-    function Harness() {
-      const windowState = useNSEPageWindow(["alpha", "beta", "gamma", "delta", "epsilon"], {
-        pageSize: 2,
-        defaultPageIndex: 1,
-        onPageChange: pageChanges
-      });
-
-      return (
-        <div>
-          <output data-testid="window" data-start={windowState.startIndex} data-end={windowState.endIndex}>
-            {windowState.windowItems.map(({ item }) => item).join(",")}
-          </output>
-          <button type="button" onClick={windowState.nextPage}>Next</button>
-          <button type="button" onClick={windowState.firstPage}>First</button>
-        </div>
-      );
-    }
-
-    render(<Harness />);
-
-    const output = screen.getByTestId("window");
-    expect(output.textContent).toBe("gamma,delta");
-    expect(output.getAttribute("data-start")).toBe("2");
-
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
-    expect(output.textContent).toBe("epsilon");
-    expect(pageChanges).toHaveBeenLastCalledWith(expect.objectContaining({
-      pageIndex: 2,
-      startIndex: 4,
-      endIndex: 5
-    }));
-
-    fireEvent.click(screen.getByRole("button", { name: "First" }));
-    expect(output.textContent).toBe("alpha,beta");
-  });
-
-  it("keeps NSEList item rendering paged without virtualization offsets", () => {
-    render(
-      <NSEList
-        items={["one", "two", "three"]}
-        pageWindow={{ pageSize: 2, defaultPageIndex: 1 }}
-        getKey={(item) => item}
-        renderItem={(item) => <NSEListRow itemKey={item} title={item} />}
-      />
-    );
-
-    expect(screen.queryByText("one")).toBeNull();
-    expect(screen.getByText("three").textContent).toBe("three");
-    expect(screen.getByRole("list").getAttribute("data-window-start")).toBe("2");
-  });
-
-  it("renders swipeable rows with action rails", () => {
-    const archive = vi.fn();
-
-    render(
-      <NSESwipeableItem trailingActions={[{ id: "archive", label: "Archive", onPress: archive }]} open="trailing">
-        <NSEListRow title="Message" />
-      </NSESwipeableItem>
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "Archive" }));
-    expect(archive).toHaveBeenCalledTimes(1);
-  });
-
-  it("windows the rendered rows around the viewport", () => {
-    // At the top: only the visible page plus lookAhead pages of overbuffer are rendered.
-    const top = computeNSEVirtualWindow({ rowCount: 1000, rowHeight: 40, viewportHeight: 400, scrollTop: 0, pageSize: 10, lookAhead: 2 });
-    expect(top.startIndex).toBe(0);
-    expect(top.endIndex).toBe(30); // 1 visible page (rows 0–9) + 2 lookAhead pages
-    expect(top.offsetY).toBe(0);
-    expect(top.totalHeight).toBe(40000);
-    expect(top.pageCount).toBe(100);
-
-    // Scrolled into the middle: the window follows and the strip offset snaps to a page boundary.
-    const mid = computeNSEVirtualWindow({ rowCount: 1000, rowHeight: 40, viewportHeight: 400, scrollTop: 4000, pageSize: 10, lookAhead: 2 });
-    expect(mid.startIndex).toBe(80);
-    expect(mid.endIndex).toBe(130);
-    expect(mid.offsetY).toBe(3200);
-
-    // Empty list and over-scroll are clamped, not thrown.
-    expect(computeNSEVirtualWindow({ rowCount: 0, rowHeight: 40, viewportHeight: 400, scrollTop: 0 })).toMatchObject({ startIndex: 0, endIndex: 0, totalHeight: 0 });
-    expect(computeNSEVirtualWindow({ rowCount: 50, rowHeight: 40, viewportHeight: 400, scrollTop: 999999, pageSize: 10, lookAhead: 0 }).endIndex).toBe(50);
-  });
-
-  it("renders only a small window of NSEVirtualList rows, not every row", () => {
-    render(
-      <NSEVirtualList
-        rowCount={5000}
-        rowHeight={32}
-        pageSize={10}
-        lookAhead={2}
-        getKey={(_, index) => `row-${index}`}
-        renderRow={({ index }) => <span>Row {index}</span>}
-      />
-    );
-
-    const list = screen.getByRole("list");
-    // The full scroll height is present for the scrollbar...
-    expect(list.querySelector(".nse-virtual-list-sizer")?.getAttribute("style")).toContain("160000px");
-    // ...but only a windowed handful of rows is actually in the DOM (not 5000).
-    const rendered = list.querySelectorAll(".nse-virtual-list-row");
-    expect(rendered.length).toBeGreaterThan(0);
-    expect(rendered.length).toBeLessThan(60);
-    expect(screen.getByText("Row 0")).not.toBeNull();
-    expect(screen.queryByText("Row 4999")).toBeNull();
-  });
 
   it("damps rubber-band overscroll logarithmically (sign-preserving, sub-linear)", () => {
     expect(rubberBandOffset(0, 300)).toBe(0);

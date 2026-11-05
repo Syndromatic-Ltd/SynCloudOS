@@ -138,7 +138,6 @@ export type {
   NSEStackResolvedItem,
   NSEStackViewProps,
 } from "./Layout";
-import * as NSEList from "./List";
 import * as NSEScroll from "./Scroll";
 export * from "./Scroll";
 import { GlassPanel, LinenSurface as MaterialLinenSurface, MaterialProvider, materialTokens } from "./Material";
@@ -166,7 +165,6 @@ import { getNSERegistryItem, nseRegistry } from "./registry";
 export const NSE = {
   ...NSEAppearance,
   ...NSELayout,
-  ...NSEList,
   ...NSEScroll,
   ...NSEControlCore,
   ...NSEColourControls,
@@ -194,7 +192,6 @@ export const NSE = {
   Navigation: NSENavigation,
   ProgressIndicators: NSEProgressIndicators,
   Layout: NSELayout,
-  List: NSEList,
   Scroll: NSEScroll,
   Containers: NSEContainers,
   Controllers: NSEControllers,

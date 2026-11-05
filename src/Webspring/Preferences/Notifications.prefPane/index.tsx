@@ -19,7 +19,8 @@
  */
 
 import { useMemo } from "react";
-import { NSEGroupBox, NSEListItem, NSEToggleButton } from "../../../NSE/public/controls";
+import { NSEGroupBox, NSEToggleButton } from "../../../NSE/public/controls";
+import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import type { RuntimeSnapshot } from "../../../SynCloudOS/SynCloudOS";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS, useRuntimeSelector } from "../../../SynCloudOSReact";

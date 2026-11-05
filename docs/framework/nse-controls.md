@@ -77,7 +77,7 @@ The tables below give an overview. These pages document each component's props, 
 | [Values, pickers and progress](nse/values-and-progress.md) | Sliders, steppers, level indicators, segmented controls, pickers, progress |
 | [Menus, toolbars and inspectors](nse/menus-toolbars-and-inspectors.md) | Choosing a menu control, responder provenance, configured toolbars, narrow inspectors, keep-mounted panes |
 
-Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSEList`, `NSESlidingPanes` and `NSEStandaloneControlHost` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, `NSEPage` in `nse/page` and `NSECoverFlow` in `nse/cover-flow`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
+Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSEStandaloneControlHost` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, `NSEPage` in `nse/page` and `NSECoverFlow` in `nse/cover-flow`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
 
 ## Buttons
 
@@ -148,11 +148,10 @@ Data views render collections owned by a controller. They are virtualised, so a 
 
 | Component | Purpose |
 | --- | --- |
-| `NSETableView` | Sortable, resizable, editable columns. |
+| `NSETableView` | Sortable, resizable, editable columns, and lists (one column, `headerHidden`). |
 | `NSEOutlineView` | Expandable hierarchies, and sidebar source lists (`selectionHighlightStyle="sourceList"`, group items). |
 | `NSECollectionView` | Grids and adaptive layouts of items. |
 | `NSEBrowser` | Multi column hierarchical browsing. |
-| `NSEVirtualList`, `NSEList`, `NSEGroupedList` | Long and grouped lists. |
 | `NSERuleEditor`, `NSEPredicateEditor` | Editors for rules and predicates. |
 
 ## Menus and toolbars

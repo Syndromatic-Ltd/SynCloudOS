@@ -20,7 +20,8 @@
 
 import "./audioHapticsPane.css";
 import { useSyncExternalStore } from "react";
-import { NSEGroupBox, NSEListItem, NSESlider, NSEToggleButton } from "../../../NSE/public/controls";
+import { NSEGroupBox, NSESlider, NSEToggleButton } from "../../../NSE/public/controls";
+import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import { useNSEFeedback } from "../../../NSE/hostComposition";
 import { useKernelSynCloudOS, useRuntimeSelector } from "../../../SynCloudOSReact";
 import type { RuntimeSnapshot } from "../../../SynCloudOS/SynCloudOS";

@@ -95,7 +95,6 @@ export const nseRegistry = [
       "NSERadioGroup",
       "NSEToolbar",
       "NSEGroupBox",
-      "NSEListItem",
       "NSEPopup",
       "NSEMenu",
       "NSEPicker",
@@ -155,25 +154,6 @@ export const nseRegistry = [
       "NSEOrdered",
       "NSESpacer",
       "useNSEOrderedChildren"
-    ],
-    examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
-  },
-  {
-    name: "nse-list",
-    title: "NSE List",
-    type: "composition",
-    description: "Selectable, page-windowed, and swipeable list primitives that keep list behaviour separate from app-specific sidebars.",
-    files: [
-      "src/NSE/List/NSEList.tsx",
-      "src/NSE/List/nse-list.css",
-      "src/NSE/List/index.ts"
-    ],
-    variants: [
-      "NSEList",
-      "NSEListRow",
-      "NSESwipeableItem",
-      "useNSEListSelection",
-      "useNSEPageWindow"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
   },

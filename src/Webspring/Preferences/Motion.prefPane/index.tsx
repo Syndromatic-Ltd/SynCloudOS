@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEGroupBox, NSEListItem } from "../../../NSE/public/controls";
+import { NSEGroupBox } from "../../../NSE/public/controls";
+import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
