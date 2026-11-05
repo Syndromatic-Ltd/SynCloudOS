@@ -180,18 +180,3 @@ export interface NSETabViewProps {
   onRequestReorder?(id: string, toIndex: number): void;
 }
 
-export interface NSEAccordionItem {
-  readonly id: string;
-  readonly label: string;
-  readonly disabled?: boolean;
-  readonly render: () => ReactNode;
-}
-
-export interface NSEAccordionViewProps {
-  readonly "aria-label": string;
-  readonly items: readonly NSEAccordionItem[];
-  readonly expandedIds: ReadonlySet<string>;
-  readonly mode: "single" | "multiple";
-  readonly headingLevel?: number;
-  onExpandedIdsChange(ids: ReadonlySet<string>): void;
-}

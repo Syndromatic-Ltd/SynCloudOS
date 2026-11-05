@@ -5387,11 +5387,11 @@
 }
 
 /* ============================================================================
-   Scrollers, accordion and circular slider.
+   Scrollers, disclosure buttons and circular slider.
    Scroller: a recessed 9px groove (the field well's hairline and inner
    shade) with a graphite capsule thumb, like the window beads' material;
-   vertical scrollers get it through writing-mode. Accordion: each header is
-   a full-width disclosure row, a wedge that turns open, a rule beneath.
+   vertical scrollers get it through writing-mode. Disclosure button: a
+   titled one is a full-width section row, a wedge that turns open, a rule beneath.
    Circular slider: a silver dial with a recessed rim, the value swept as a
    translucent blue arc and a dark pointer.
    ========================================================================= */
@@ -5473,31 +5473,35 @@
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="accordion-view"] h3 {
-  margin: 0;
-}
-
-[data-nse-appearance="atmo"] [data-nse-control="accordion-view"] h3 > button {
-  display: flex;
+/* NSButton.BezelStyle.disclosure: the triangle that shows and hides the
+   view below it. With a title it is drawn as an inspector section header,
+   after Motion's: a bold label over a rule, the triangle turning down while
+   the section shows. */
+[data-nse-appearance="atmo"] .nse-control-disclosure-button {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  inline-size: 100%;
-  min-block-size: 36px;
   margin: 0;
-  padding: 0 4px;
+  padding: 0;
   border: 0;
-  border-block-end: 1px solid var(--nse-atmo-panel-rule, rgba(0, 0, 0, 0.14));
   color: var(--nse-atmo-title-ink, #1f2833);
   background: transparent;
   font: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  text-align: start;
   cursor: default;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="accordion-view"] h3 > button::before {
-  content: "";
+[data-nse-appearance="atmo"] .nse-control-disclosure-button:has(> .nse-control-button-label) {
+  display: flex;
+  inline-size: 100%;
+  min-block-size: 36px;
+  padding: 0 4px;
+  border-block-end: 1px solid var(--nse-atmo-panel-rule, rgba(0, 0, 0, 0.14));
+  font-size: 14px;
+  font-weight: 700;
+  text-align: start;
+}
+
+[data-nse-appearance="atmo"] .nse-control-disclosure-triangle {
   flex: none;
   inline-size: 10px;
   block-size: 10px;
@@ -5508,32 +5512,31 @@
   transition: transform 140ms ease;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="accordion-view"] h3 > button[aria-expanded="true"]::before {
+[data-nse-appearance="atmo"] .nse-control-disclosure-button[aria-expanded="true"] > .nse-control-disclosure-triangle {
   transform: rotate(90deg);
 }
 
-[data-nse-appearance="atmo"] [dir="rtl"] [data-nse-control="accordion-view"] h3 > button[aria-expanded="false"]::before,
-[data-nse-appearance="atmo"] [data-nse-control="accordion-view"][dir="rtl"] h3 > button[aria-expanded="false"]::before {
+[data-nse-appearance="atmo"] [dir="rtl"] .nse-control-disclosure-button[aria-expanded="false"] > .nse-control-disclosure-triangle,
+[data-nse-appearance="atmo"] .nse-control-disclosure-button[dir="rtl"][aria-expanded="false"] > .nse-control-disclosure-triangle {
   transform: scaleX(-1);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="accordion-view"] h3 > button:hover {
+[data-nse-appearance="atmo"] .nse-control-disclosure-button:has(> .nse-control-button-label):hover:not(:disabled) {
   background: rgba(0, 0, 0, 0.04);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="accordion-view"] h3 > button:focus-visible {
+[data-nse-appearance="atmo"] .nse-control-disclosure-button:disabled {
+  opacity: 0.5;
+}
+
+[data-nse-appearance="atmo"] .nse-control-disclosure-button:focus-visible {
   outline: none;
   box-shadow: var(--nse-atmo-focus-ring);
   border-radius: 6px;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="accordion-view"] [role="region"] {
-  padding: 10px 4px 10px 22px;
-  color: var(--nse-atmo-control-ink, #283444);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  [data-nse-appearance="atmo"] [data-nse-control="accordion-view"] h3 > button::before { transition: none; }
+  [data-nse-appearance="atmo"] .nse-control-disclosure-triangle { transition: none; }
 }
 
 /* The circular slider is a turned metal knob, as the Mac's is: the same
@@ -5894,7 +5897,7 @@
    Outline and browser (Atmo-designed). They are the table's siblings, so they
    wear its material: the white well in a fine frame, the table's ink, and its
    selection — blue while the view holds focus, the quiet grey when it does
-   not, as NSOutlineView and NSBrowser do. The disclosure is the accordion's
+   not, as NSOutlineView and NSBrowser do. The disclosure is the disclosure button's
    triangle, turned a quarter when open. Rows keep the Mac's 23px.
    ========================================================================= */
 [data-nse-appearance="atmo"] .nse-outline-view:not([data-style="source-list"]),
