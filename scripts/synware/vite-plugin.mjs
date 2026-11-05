@@ -26,6 +26,7 @@ import {
   realpathSync,
   readFileSync,
 } from "node:fs";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { loadConfigFromFile } from "vite";
 import { captureFontDeclaration, fontDeclarationCSS } from "../../src/NSE/Typography/fontDeclaration.mjs";
@@ -590,6 +591,28 @@ function mountPackedSdkAssets(devServer, root, base, cacheDir) {
   for (const mountPath of mountPaths) devServer.middlewares.use(mountPath, serveAsset);
 }
 
+/**
+ * Vite serves pre-bundled dependencies as immutable files, keyed by a hash of the
+ * lockfile and the config. Replacing the installed SDK without a lockfile change
+ * (a local tarball unpacked in place, a linked checkout rebuilt) keeps that key,
+ * so a browser can combine cached and new SDK chunks: two copies of each React
+ * context, and crashes such as "NSEMenuBar requires an NSEOverlayProvider".
+ * Folding this SDK build into the key gives every build new URLs. In a source
+ * checkout there is no built SDK beside this file, and the key is left alone.
+ */
+let pluginSdkBuild;
+/** @internal Exported for tests. A fingerprint of the built SDK in `directory`, or null when it holds no built SDK. */
+export function sdkBuildFingerprint(directory) {
+  const chunks = resolve(directory, "chunks");
+  if (!existsSync(resolve(directory, "package.json")) || !existsSync(chunks)) return null;
+  const hash = createHash("sha256");
+  hash.update(readFileSync(resolve(directory, "package.json")));
+  // Chunk names carry their content hashes; entry files are hashed by content.
+  for (const name of readdirSync(chunks).sort()) hash.update(`chunk:${name}\n`);
+  for (const name of readdirSync(directory).filter(name => name.endsWith(".js")).sort()) hash.update(`entry:${name}\n`).update(readFileSync(resolve(directory, name)));
+  return hash.digest("hex").slice(0, 16);
+}
+
 export function synCloudOS(options) {
   const pluginOptions = normaliseOptions(options);
   let resolvedConfig = { root: resolve(process.cwd()) };
@@ -670,7 +693,13 @@ export function synCloudOS(options) {
   return {
     name: "syncloudos:project",
     enforce: "pre",
-    config: toolchain.config,
+    config(config, env) {
+      const toolchainConfig = toolchain.config(config, env);
+      pluginSdkBuild ??= sdkBuildFingerprint(fileURLToPath(new URL(".", import.meta.url)));
+      const build = pluginSdkBuild;
+      if (!build) return toolchainConfig;
+      return { ...toolchainConfig, optimizeDeps: { esbuildOptions: { define: { __SYNCLOUDOS_SDK_BUILD__: JSON.stringify(build) } } } };
+    },
     api: toolchain.api,
     transform: toolchain.transform,
 
