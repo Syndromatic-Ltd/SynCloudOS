@@ -5779,6 +5779,47 @@
   padding-inline-end: 15px;
 }
 
+/* A selected capsule cell sits inset, as the radio strip draws it: no bright
+   rim or seam columns, the ink running to the seams (or the stroke at a cap)
+   under the edge and cap cast overlays. */
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] button[aria-pressed="true"]::before {
+  border-inline-color: transparent;
+}
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] button[aria-pressed="true"]::after {
+  inset-inline: 0;
+  border-inline-width: 0;
+  background:
+    var(--nse-atmo-rg-edge-l) padding-box,
+    var(--nse-atmo-rg-edge-r) padding-box,
+    var(--nse-atmo-rg-sel) padding-box;
+}
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] > :first-child > button:first-child[aria-pressed="true"]::before {
+  border-inline-start-color: rgba(0, 0, 0, 0.3);
+}
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] > :first-child > button:first-child[aria-pressed="true"]::after {
+  inset-inline-start: 2px;
+  background:
+    var(--nse-atmo-rg-cap-l) padding-box,
+    var(--nse-atmo-rg-edge-r) padding-box,
+    var(--nse-atmo-rg-sel) padding-box;
+}
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child[aria-pressed="true"]::before {
+  border-inline-end-color: rgba(0, 0, 0, 0.3);
+}
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child[aria-pressed="true"]::after {
+  inset-inline-end: 2px;
+  background:
+    var(--nse-atmo-rg-edge-l) padding-box,
+    var(--nse-atmo-rg-cap-r) padding-box,
+    var(--nse-atmo-rg-sel) padding-box;
+}
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] > [data-nse-part="segment"]:only-child > button:only-child[aria-pressed="true"]::after {
+  background:
+    var(--nse-atmo-rg-cap-l) padding-box,
+    var(--nse-atmo-rg-cap-r) padding-box,
+    var(--nse-atmo-rg-sel) padding-box;
+}
+
 /* The radio-group capsule, sized: segmented controls and capsule tabs.
    controlSize="small" or an explicit height sets --nse-control-height (24px
    when small). Every measure of the silver capsule is that band's fraction of
