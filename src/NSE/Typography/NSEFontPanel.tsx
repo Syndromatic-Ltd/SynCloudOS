@@ -255,15 +255,15 @@ function EffectColourButton({ id, label, glyph, value, automatic, disabled, onPr
   // The Colours panel places itself beside the element bearing its target's
   // id, and presents only once it finds it.
   return <NSEButton
-           bezelStyle="texturedRounded"
-           title={label}
-           image={<span data-nse-part="effect-colour-face">{glyph}<span ref={chipRef} data-nse-part="colour-chip" data-automatic={shown ? undefined : automatic} style={shown ? { "--nse-font-panel-chip": shown.toCSS() } as CSSProperties : undefined} /></span>}
-           imagePosition="imageOnly"
-           isEnabled={!(disabled || !controller)}
-           toolTip={controller ? label : `${label}: this app has no colour panel`}
-           id={id}
-           data-nse-part="effect-colour"
-           onClick={() => {
+    bezelStyle="texturedRounded"
+    title={label}
+    image={<span data-nse-part="effect-colour-face">{glyph}<span ref={chipRef} data-nse-part="colour-chip" data-automatic={shown ? undefined : automatic} style={shown ? { "--nse-font-panel-chip": shown.toCSS() } as CSSProperties : undefined} /></span>}
+    imagePosition="imageOnly"
+    isEnabled={!(disabled || !controller)}
+    toolTip={controller ? label : `${label}: this app has no colour panel`}
+    id={id}
+    data-nse-part="effect-colour"
+    onClick={() => {
       if (!controller) return;
       releaseRef.current?.();
       releaseRef.current = controller.activateTarget({
@@ -278,7 +278,7 @@ function EffectColourButton({ id, label, glyph, value, automatic, disabled, onPr
       });
       controller.open();
     }}
-         />;
+  />;
 }
 
 /**
@@ -665,17 +665,17 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
         <legend className="nse-control-visually-hidden">Paragraph</legend>
         <NSEToolbar composition="children" position="inline" grouped aria-label="Paragraph alignment" aria-disabled={readOnly || undefined}>
           {alignmentLabels.map(([alignment, text]) => <NSEButton
-                                                        appearance="darkAqua"
-                                                        buttonType="pushOnPushOff"
-                                                        title={<AlignmentGlyph alignment={alignment} />}
-                                                        state={(style.alignment === alignment) ? "on" : "off"}
-                                                        isEnabled={!readOnly}
-                                                        toolTip={text.replace(" paragraph", "")}
-                                                        key={alignment}
-                                                        aria-label={text}
-                                                        aria-pressed={style.alignment === alignment}
-                                                        onClick={() => updateParagraph(normaliseParagraphStyleMutation({ ...style, alignment }))}
-                                                      />)}
+            appearance="darkAqua"
+            buttonType="pushOnPushOff"
+            title={<AlignmentGlyph alignment={alignment} />}
+            state={(style.alignment === alignment) ? "on" : "off"}
+            isEnabled={!readOnly}
+            toolTip={text.replace(" paragraph", "")}
+            key={alignment}
+            aria-label={text}
+            aria-pressed={style.alignment === alignment}
+            onClick={() => updateParagraph(normaliseParagraphStyleMutation({ ...style, alignment }))}
+          />)}
         </NSEToolbar>
         <NSERuler value={style} direction={direction} readOnly={readOnly} onChange={updateParagraph} />
       </fieldset> : null}

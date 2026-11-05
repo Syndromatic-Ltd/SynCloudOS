@@ -615,11 +615,11 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
         <NSEButton appearance="darkAqua" title="Done" haptic="success" onClick={() => actions.finishEditing(true)} />
         <NSEButton appearance="darkAqua" title="Reset" haptic="success" onClick={actions.resetOrder} />
       </NSEToolbar> : <NSEButton
-                        appearance="darkAqua"
-                        title="Reorder applications"
-                        onClick={() => actions.beginEditing(null)}
-                        aria-describedby="webspring-board-keyboard-help"
-                      />}
+        appearance="darkAqua"
+        title="Reorder applications"
+        onClick={() => actions.beginEditing(null)}
+        aria-describedby="webspring-board-keyboard-help"
+      />}
         </div>
       <p id="webspring-board-keyboard-help" className="webspring-reorder-announcement">
         {model.folders.editable

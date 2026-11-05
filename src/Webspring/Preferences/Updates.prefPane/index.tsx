@@ -93,10 +93,10 @@ function UpdatesPane() {
         onClick={() => { runtime.updateReadiness.inspect(); }}
       />
       {snapshot.inspection.available ? <NSEButton
-                                         title={t('preferences.updates.inspectOthers', 'Inspect other windows')}
-                                         isEnabled={!(snapshot.ended || snapshot.inspection.state === 'checking')}
-                                         onClick={() => { void runtime.updateReadiness.inspectParticipants(); }}
-                                       /> : null}
+        title={t('preferences.updates.inspectOthers', 'Inspect other windows')}
+        isEnabled={!(snapshot.ended || snapshot.inspection.state === 'checking')}
+        onClick={() => { void runtime.updateReadiness.inspectParticipants(); }}
+      /> : null}
     </div>
   </section>;
 }

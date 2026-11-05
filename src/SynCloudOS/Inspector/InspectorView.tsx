@@ -98,13 +98,13 @@ export function InspectorView({ client, localization, pageSize = 25 }: { readonl
       if (next >= 0) { event.preventDefault(); buttons[next]?.focus(); }
     }}>
       {inspectorPanels.map(id => <NSEButton
-                                   buttonType="pushOnPushOff"
-                                   title={valueLabel("panels", id)}
-                                   state={(panel === id) ? "on" : "off"}
-                                   key={id}
-                                   aria-pressed={panel === id}
-                                   onClick={() => select(id)}
-                                 />)}
+        buttonType="pushOnPushOff"
+        title={valueLabel("panels", id)}
+        state={(panel === id) ? "on" : "off"}
+        key={id}
+        aria-pressed={panel === id}
+        onClick={() => select(id)}
+      />)}
     </nav>
     <h3>{valueLabel("panels", panel)}</h3>
     {section.status === "unsupported" && <p>{t("inspector.unsupported", "Unsupported by this owner. No introspection is available.")}</p>}
@@ -123,10 +123,10 @@ export function InspectorView({ client, localization, pageSize = 25 }: { readonl
       </dl>
       {row.pendingRoles.length > 0 && <p>{t("inspector.awaiting", "Awaiting: {roles}", { roles: row.pendingRoles.map(role => valueLabel("role", role)).join(", ") })}</p>}
       <div className="syncloudos-inspector__actions">{row.links.map(link => <NSEButton
-                                                                              title={<>{valueLabel("relation", link.relation)}: {link.id}</>}
-                                                                              key={`${link.relation}:${link.id}`}
-                                                                              onClick={() => follow(link)}
-                                                                            />)}</div>
+        title={<>{valueLabel("relation", link.relation)}: {link.id}</>}
+        key={`${link.relation}:${link.id}`}
+        onClick={() => follow(link)}
+      />)}</div>
       </NSEPane>
     </article>)}
     <div style={{ display: "flex", gap: "0.5rem" }}>
