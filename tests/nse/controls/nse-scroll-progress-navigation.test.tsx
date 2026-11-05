@@ -27,7 +27,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEScroller, NSEScrollView, NSEScrollViewController, computeScrollRectTarget, normalizeRTLScrollLeft } from "../../../src/NSE/Scroll";
 import { NSEProgressIndicator } from "../../../src/NSE/Progress";
 import { NSEProgressBar, NSEProgressItem, NSEProgressSlider, NSESpinner } from "../../../src/NSE/Progress";
-import { NSETabGroup, NSETabView } from "../../../src/NSE/Navigation";
+import { NSETabView } from "../../../src/NSE/Navigation";
+import { NSESegmentedControl } from "../../../src/NSE/Controls/Values";
 import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEStackItem, NSEStackView } from "../../../src/NSE/Layout";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
@@ -173,29 +174,26 @@ describe("scroll progress and navigation", () => {
     expect(spinner.getAttribute("data-tone")).toBe("dark");
     expect(spinner.querySelector(".nse-control-spinner-sprite")?.getAttribute("aria-hidden")).toBe("true");
   });
-  it("keeps value tabs separate from panel-owning tab views", () => {
+  it("draws capsule and textured segment styles and reports the tracked selection", () => {
     const change = vi.fn();
+    const tools = vi.fn();
     render(
       <>
-        <NSETabGroup
-          label="Choices"
-          defaultValue="first"
-          selectionHaptic={false}
-          options={[{ value: "first", label: "First" }, { value: "second", label: "Second" }]}
-          onValueChange={change}
-        />
-        <NSETabView
-          aria-label="Pages"
-          selectedId="first"
-          items={[{ id: "first", label: "First", render: () => "First panel" }]}
-        />
+        <NSESegmentedControl aria-label="Choices" segmentStyle="capsule" selection={{ mode: "select-one", selectedIds: new Set(["first"]), allowsEmpty: false }}
+          items={[{ id: "first", label: "First" }, { id: "second", label: "Second" }]} onSelectionChange={change} />
+        <NSESegmentedControl aria-label="Tools" segmentStyle="texturedRounded" selection={{ mode: "select-any", selectedIds: new Set(["bold"]) }}
+          items={[{ id: "bold", label: "Bold", image: <b>B</b> }, { id: "italic", label: "Italic", image: <i>I</i> }]} onSelectionChange={tools} />
       </>,
     );
-    const group = screen.getByRole("tablist", { name: "Choices" });
-    expect(within(group).queryByRole("tabpanel")).toBeNull();
-    fireEvent.keyDown(within(group).getByRole("tab", { name: "First" }), { key: "ArrowRight" });
-    expect(change).toHaveBeenCalledWith("second");
-    expect(screen.getByRole("tabpanel").textContent).toBe("First panel");
+    const second = screen.getByRole("button", { name: "Second" });
+    expect(second.closest("[data-nse-control='segmented-control']")?.getAttribute("data-segment-style")).toBe("capsule");
+    fireEvent.click(second);
+    expect([...change.mock.calls[0][0].selectedIds]).toEqual(["second"]);
+    const bold = screen.getByRole("button", { name: "Bold" });
+    expect(bold.getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Italic" }));
+    expect([...tools.mock.calls[0][0].selectedIds]).toEqual(["bold", "italic"]);
+    expect(bold.closest("[data-segment-style]")?.getAttribute("data-segment-style")).toBe("texturedRounded");
   });
 
   it("uses one normalized progress contract for bars, items, and locked sliders", () => {

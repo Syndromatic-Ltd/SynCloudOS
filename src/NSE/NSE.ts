@@ -100,7 +100,6 @@ import * as NSEAppearance from "./Appearance";
 export * from "./Appearance";
 export * from "./Controls/Images";
 export { NSEPasswordField } from "./Controls/Fields/NSEPasswordField";
-export { NSETabGroup } from "./Navigation/NSETabGroup";
 
 const NSEControlCatalogue = {
   ...NSEControlButtons,

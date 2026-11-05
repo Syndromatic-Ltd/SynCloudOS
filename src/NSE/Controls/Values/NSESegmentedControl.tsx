@@ -25,6 +25,7 @@ import { NSEListboxPopup, useOptionalNSEOverlayProvider } from "../../Overlays";
 import { useNSEControlCommand } from "../Core";
 import { useNSEActionBinding } from "../Core/useNSEControlAction";
 import type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection } from "./valueControlTypes";
+import { NSETexturedSegmentCells } from "./NSESegmentStyles";
 
 interface SegmentButtonProps {
   readonly item: NSESegmentedItem;
@@ -79,7 +80,7 @@ function SegmentButton({ item, selected, tabIndex, disabled, readOnly, refs, onA
     if (!binding) { onActivate(); return; }
     void command.dispatch().then((result) => { if (result?.status === "executed") onActivate(); });
   };
-  return <button type="button" ref={(node) => { if (node) refs.current.set(item.id, node); else refs.current.delete(item.id); }} tabIndex={tabIndex} aria-label={item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)} title={typeof item.label === "string" ? undefined : item.accessibleLabel} aria-pressed={selected || command.presentation?.state === "on"} aria-readonly={readOnly || undefined} disabled={disabled || item.disabled || !commandEnabled} hidden={command.presentation?.hidden} data-command-id={binding?.id} onKeyDown={onKeyDown} onClick={activate}>{item.label}</button>;
+  return <button type="button" ref={(node) => { if (node) refs.current.set(item.id, node); else refs.current.delete(item.id); }} tabIndex={tabIndex} aria-label={item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)} title={item.image !== undefined ? item.accessibleLabel ?? (typeof item.label === "string" ? item.label : undefined) : typeof item.label === "string" ? undefined : item.accessibleLabel} aria-pressed={selected || command.presentation?.state === "on"} aria-readonly={readOnly || undefined} disabled={disabled || item.disabled || !commandEnabled} hidden={command.presentation?.hidden} data-command-id={binding?.id} onKeyDown={onKeyDown} onClick={activate}>{item.image === undefined ? item.label : typeof item.image === "string" ? <img src={item.image} alt="" aria-hidden="true" data-nse-part="segment-image" /> : <span aria-hidden="true" data-nse-part="segment-image">{item.image}</span>}</button>;
 }
 
 export function NSESegmentedControl<Payload = unknown>(props: NSEBoundValueProps<NSESegmentedSelection,NSESegmentedControlProps<Payload>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'selection'|'onSelectionChange'>) {
@@ -87,6 +88,11 @@ export function NSESegmentedControl<Payload = unknown>(props: NSEBoundValueProps
 }
 
 function NSESegmentedControlControl(props: NSESegmentedControlProps) {
+  if (props.segmentStyle === "texturedRounded") return <NSETexturedSegmentCells {...props} />;
+  return <NSERoundedSegments {...props} />;
+}
+
+function NSERoundedSegments(props: NSESegmentedControlProps) {
   const instanceId = useId().replace(/:/g, "");
   const refs = useRef(new Map<string, HTMLButtonElement>());
   const menuRefs = useRef(new Map<string, HTMLButtonElement>());
@@ -145,7 +151,7 @@ function NSESegmentedControlControl(props: NSESegmentedControlProps) {
   };
   const activeMenu = menuId ? items.find((item) => item.id === menuId) : null;
 
-  return <div role="group" aria-label={props["aria-label"]} data-nse-control="segmented-control" data-state={props.disabled ? "disabled" : props.readOnly ? "read-only" : overflow.length ? "overflow" : "ready"} data-appearance-recipe="segmented-control" data-distribution={props.distribution === "fill-equally" ? "fill-equally" : undefined} data-size={props.height !== undefined ? "custom" : props.controlSize === "small" ? "small" : undefined} style={props.height !== undefined ? { ["--nse-control-height" as string]: `${props.height}px` } : undefined}>
+  return <div role="group" aria-label={props["aria-label"]} data-nse-control="segmented-control" data-state={props.disabled ? "disabled" : props.readOnly ? "read-only" : overflow.length ? "overflow" : "ready"} data-appearance-recipe="segmented-control" data-segment-style={props.segmentStyle ?? "rounded"} data-distribution={props.distribution === "fill-equally" ? "fill-equally" : undefined} data-size={props.height !== undefined ? "custom" : props.controlSize === "small" ? "small" : undefined} style={props.height !== undefined ? { ["--nse-control-height" as string]: `${props.height}px` } : undefined}>
     {visible.map((item) => <span key={item.id} data-nse-part="segment">
       <SegmentButton item={item} selected={props.selection.selectedIds.has(item.id)} tabIndex={item.id === selected ? 0 : -1} disabled={Boolean(props.disabled)} readOnly={Boolean(props.readOnly)} refs={refs} onActivate={() => select(item.id)} onKeyDown={(event) => { if (event.key === "ArrowRight" || event.key === "ArrowDown") { event.preventDefault(); move(item.id, 1); } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") { event.preventDefault(); move(item.id, -1); } }} />
       {item.menu?.length ? <button ref={(node) => { if (node) menuRefs.current.set(item.id, node); else menuRefs.current.delete(item.id); }} type="button" aria-label={`More options for ${typeof item.label === "string" ? item.label : item.id}`} aria-expanded={menuId === item.id} disabled={props.disabled || props.readOnly || item.disabled} onClick={() => setMenuId((current) => current === item.id ? null : item.id)}>▾</button> : null}

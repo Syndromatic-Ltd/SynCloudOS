@@ -27,7 +27,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
-import { NSEButton, NSEAppMenu, NSEEditMenu, NSEHeader, NSEHelpMenu, NSEIntegerPicker, NSEDatePicker, NSEListSelector, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEMenu, NSEStandaloneControlHost, NSEInputBox, NSEPasswordField, NSEPickerGroup, NSESearchField, NSEPopupList, NSEPrevNextBanner, NSEProgressSlider, NSERadioToolButtonGroup, NSERoundedInput, NSETabGroup, NSETimePicker, NSEToolButtonGroup, NSEToolInput } from "../../src/NSE/public/controls";
+import { NSEButton, NSEAppMenu, NSEEditMenu, NSEHeader, NSEHelpMenu, NSEIntegerPicker, NSEDatePicker, NSEListSelector, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEMenu, NSEStandaloneControlHost, NSEInputBox, NSEPasswordField, NSESearchField, NSEPopupList, NSEPrevNextBanner, NSEProgressSlider, NSERoundedInput, NSETimePicker, NSEToolInput, NSESegmentedControl } from "../../src/NSE/public/controls";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 afterEach(() => {
@@ -57,25 +57,8 @@ describe("NSE extended wrapper controls", () => {
     renderWithAppearance(
       <div>
         <NSEButton bezelStyle="texturedRounded" title="Back" image="/icons/back.png" imagePosition="imageOnly" />
-        <NSEToolButtonGroup label="Tools">
-          <NSEButton bezelStyle="texturedRounded" title="Refresh" aria-label="Refresh" />
-        </NSEToolButtonGroup>
-        <NSERadioToolButtonGroup
-          label="Calendar view"
-          value="day"
-          options={[
-            { value: "day", label: "Day" },
-            { value: "week", label: "Week" }
-          ]}
-        />
-        <NSETabGroup
-          label="Sections"
-          value="files"
-          options={[
-            { value: "files", label: "Files" },
-            { value: "details", label: "Details" }
-          ]}
-        />
+        <NSESegmentedControl aria-label="Tools" segmentStyle="texturedRounded" selection={{ mode: "momentary", selectedIds: new Set() }} items={[{ id: "refresh", label: "Refresh", image: "/icons/refresh.png" }]} />
+        <NSESegmentedControl aria-label="Calendar view" segmentStyle="texturedRounded" selection={{ mode: "select-one", selectedIds: new Set(["day"]), allowsEmpty: false }} items={[{ id: "day", label: "Day" }, { id: "week", label: "Week" }]} />
         <NSEPasswordField label="Secret" hint="Password" />
         <NSERoundedInput label="Name" hint="Full name" />
         <NSEToolInput label="Filter" hint="Filter items" />
@@ -83,9 +66,7 @@ describe("NSE extended wrapper controls", () => {
         <NSEPrevNextBanner onPrevious={onPrevious} onNext={onNext}>Today</NSEPrevNextBanner>
         <NSEListSelector label="Provider" value="one" items={["One", "Two"]} />
         <NSEPopupList label="Popup actions" items={["Archive", "Pin"]} />
-        <NSEPickerGroup label="Picker family">
-          <NSEIntegerPicker label="Count" value={2} min={1} max={3} />
-        </NSEPickerGroup>
+        <NSEIntegerPicker label="Count" value={2} min={1} max={3} />
         <NSEDatePicker aria-label="Due date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 1 }} maximum={{ year: 2026, month: 6, day: 30 }} locale="en-GB"  timeZone="Europe/London" mode="text" editor="segments"/>
         <NSETimePicker aria-label="Start time" value={{ hour: 9, minute: 30, second: 0 }} minimum={{ hour: 8, minute: 0, second: 0 }} maximum={{ hour: 10, minute: 0, second: 0 }} minuteStep={15}  locale="en-GB" timeZone="Europe/London" editor="segments"/>
         <NSEProgressSlider label="Intensity" value={32} progressLabel="Download progress" />
@@ -102,13 +83,11 @@ describe("NSE extended wrapper controls", () => {
 
     expect(screen.getByRole("toolbar", { name: "Tools" }).classList.contains("nse-extended-tool-button-group")).toBe(true);
     expect(screen.getByRole("radio", { name: "Day" }).getAttribute("aria-checked")).toBe("true");
-    expect(screen.getByRole("tab", { name: "Files" }).getAttribute("aria-selected")).toBe("true");
     expect(screen.getByLabelText("Secret").getAttribute("type")).toBe("password");
     expect(screen.getByLabelText("Name").getAttribute("placeholder")).toBe("Full name");
     expect(screen.getByLabelText("Filter").getAttribute("placeholder")).toBe("Filter items");
     expect(screen.getByText("Header")).not.toBeNull();
     expect(screen.getByText("Today")).not.toBeNull();
-    expect(screen.getByRole("group", { name: "Picker family" })).not.toBeNull();
     expect(screen.getByRole("group", { name: "Due date" }).getAttribute("data-locale-order")).toBe("day-month-year");
     expect(screen.getByRole("group", { name: "Start time" }).getAttribute("data-value")).toBe("09:30:00");
     expect(screen.getByRole("progressbar", { name: "Download progress" })).not.toBeNull();
@@ -170,22 +149,12 @@ describe("NSE extended wrapper controls", () => {
     await waitFor(() => expect(onPopupSelect).toHaveBeenCalledWith("archive", expect.objectContaining({ value: "archive" })));
   });
 
-  it("keeps tab and progress slider wrappers controlled through their aliases", async () => {
-    const onTabChange = vi.fn();
+  it("keeps the progress slider wrapper controlled through its aliases", async () => {
     const onSliderValueChange = vi.fn();
     const onPositionChange = vi.fn();
 
     renderWithAppearance(
       <div>
-        <NSETabGroup
-          label="Views"
-          value="day"
-          onValueChange={onTabChange}
-          options={[
-            { value: "day", label: "Day" },
-            { value: "week", label: "Week" }
-          ]}
-        />
         <NSEProgressSlider
           label="Volume"
           position={10}
@@ -199,9 +168,6 @@ describe("NSE extended wrapper controls", () => {
         />
       </div>
     );
-
-    fireEvent.keyDown(screen.getByRole("tab", { name: "Day" }), { key: "ArrowRight" });
-    expect(onTabChange).toHaveBeenCalledWith("week");
 
     fireEvent.change(screen.getByRole("slider", { name: "Volume" }), { target: { value: "35" } });
 

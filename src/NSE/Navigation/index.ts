@@ -29,7 +29,6 @@ export * from "./NSENavigationDestinationHost";
 export * from "./NSEHierarchyStack";
 export * from "./NSEApplicationNavigationChrome";
 export * from "./NSETabView";
-export * from "./NSETabGroup";
 export type { NSETabStripPresentation, NSETabStyle } from "./tabStrip";
 export * from "./SourceList";
 import "./SourceList/nse-sourcelist.css";

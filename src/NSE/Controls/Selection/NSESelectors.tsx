@@ -190,36 +190,6 @@ export function NSEPopupList({
   );
 }
 
-export type NSEPickerGroupProps = Omit<Extract<NSEToolbarProps, { readonly composition: "children" }>, "composition"> & {
-  label?: string;
-};
-
-export function NSEPickerGroup({
-  label,
-  position = "inline",
-  grouped = true,
-  className = "",
-  children,
-  ...props
-}: NSEPickerGroupProps) {
-  return (
-    <NSEToolbar
-      composition="children"
-      className={classes("nse-extended-picker-group", className)}
-      position={position}
-      grouped={grouped}
-      role={props.role ?? "group"}
-      aria-label={label ?? props["aria-label"]}
-      {...props}
-    >
-      {label ? (
-        <span className="nse-extended-picker-group-label" aria-hidden="true">{label}</span>
-      ) : null}
-      {children}
-    </NSEToolbar>
-  );
-}
-
 export interface NSEIntegerPickerProps extends Omit<NSEPickerProps, "defaultValue" | "onValueChange" | "options" | "value"> {
   value?: number;
   defaultValue?: number;
