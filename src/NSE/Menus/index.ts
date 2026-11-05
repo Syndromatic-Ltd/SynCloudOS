@@ -50,14 +50,3 @@ export type { NSEApplicationMenuProps } from "./NSEApplicationMenu";
 export type { NSEMenuBarOverlayOptions, NSEMenuBarProps } from "./NSEMenuBar";
 export { NSEAppMenuSurface } from "./NSEAppMenuSurface";
 export type { NSEAppMenuSurfaceProps } from "./NSEAppMenuSurface";
-export {
-  NSEAppMenu,
-  NSEEditMenu,
-  NSEHelpMenu,
-} from "./NSEApplicationMenuControls";
-export type {
-  NSEAppMenuItemDefinition,
-  NSEAppMenuProps,
-  NSEEditMenuProps,
-  NSEHelpMenuProps,
-} from "./NSEApplicationMenuControls";

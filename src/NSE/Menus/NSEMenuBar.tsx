@@ -18,13 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useId, useRef, useState, type KeyboardEvent } from "react";
+import { useContext, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { useOptionalNSEOverlayProvider } from "../Overlays";
 import { NSEMenuView } from "./NSEMenuView";
-import type { NSEMenu } from "./NSEMenu";
+import { NSEMenu } from "./NSEMenu";
+import { useNSEDeferredDisposal } from "../interactionLifecycle";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
-import type { NSEMenuOverlayOptions } from "./menuTypes";
+import { nseMenuModel, type NSEMenuOverlayOptions } from "./menuTypes";
 
 export interface NSEMenuBarOverlayOptions extends Omit<NSEMenuOverlayOptions, "id" | "parentResponderId"> {
   /** Defaults to the nearest responder: in a class application, the view
@@ -35,8 +36,11 @@ export interface NSEMenuBarOverlayOptions extends Omit<NSEMenuOverlayOptions, "i
 }
 
 export interface NSEMenuBarProps {
-  /** The menus across the bar, each opened by its title. */
-  readonly menus: readonly NSEMenu[];
+  /**
+   * The main menu it draws (`NSEApplication.mainMenu`): each item with a
+   * submenu is a menu across the bar, opened by the item's title.
+   */
+  readonly menu: NSEMenu;
   /** Optional: menus are parented to the nearest responder by default. */
   readonly overlay?: NSEMenuBarOverlayOptions;
   readonly direction?: "ltr" | "rtl";
@@ -46,7 +50,24 @@ export interface NSEMenuBarProps {
  * One active presentation at a time, projected from independent command
  * controllers. It is deliberately not a command, responder, or focus owner.
  */
-export function NSEMenuBar({ menus: items, overlay, direction = "ltr" }: NSEMenuBarProps) {
+/** The bar's menus: one per top-level submenu, each with its own validation lease. */
+function useBarMenus(mainMenu: NSEMenu): readonly NSEMenu[] {
+  const menus = useMemo(() => {
+    const menus = mainMenu.model.entries.flatMap((entry) => entry.kind === "submenu"
+      ? [new NSEMenu({
+          [nseMenuModel]: { id: `${mainMenu.model.id}:${entry.id}`, label: typeof entry.label === "string" ? entry.label : entry.id, entries: entry.entries },
+          runtime: mainMenu.runtime,
+        })]
+      : []);
+    return Object.assign(menus, { dispose: () => { for (const menu of menus) menu.dispose(); } });
+  }, [mainMenu]);
+  useNSEDeferredDisposal(menus, mainMenu.runtime.scheduler);
+  return menus;
+}
+
+/** Draws the application's menu bar from its main menu (the window's menu bar, NSApp.mainMenu). */
+export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMenuBarProps) {
+  const items = useBarMenus(mainMenu);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [initialFocus, setInitialFocus] = useState<"first" | "last">("first");
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);

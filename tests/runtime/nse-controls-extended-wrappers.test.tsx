@@ -27,7 +27,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
-import { NSEButton, NSEAppMenu, NSEEditMenu, NSEHeader, NSEHelpMenu, NSEDatePicker, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEStandaloneControlHost, NSESearchField, NSEPrevNextBanner, NSEProgressSlider, NSETimePicker, NSESegmentedControl } from "../../src/NSE/public/controls";
+import { NSEButton, NSEHeader, NSEDatePicker, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEStandaloneControlHost, NSESearchField, NSEPrevNextBanner, NSEProgressSlider, NSETimePicker, NSESegmentedControl } from "../../src/NSE/public/controls";
 import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
@@ -52,8 +52,6 @@ describe("NSE extended wrapper controls", () => {
   it("renders extended control wrappers through semantic NSE owners", () => {
     const onPrevious = vi.fn();
     const onNext = vi.fn();
-    const onHelp = vi.fn();
-    const onAppMenuSelect = vi.fn();
 
     renderWithAppearance(
       <div>
@@ -65,14 +63,6 @@ describe("NSE extended wrapper controls", () => {
         <NSEDatePicker aria-label="Due date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 1 }} maximum={{ year: 2026, month: 6, day: 30 }} locale="en-GB"  timeZone="Europe/London" mode="text" editor="segments"/>
         <NSETimePicker aria-label="Start time" value={{ hour: 9, minute: 30, second: 0 }} minimum={{ hour: 8, minute: 0, second: 0 }} maximum={{ hour: 10, minute: 0, second: 0 }} minuteStep={15}  locale="en-GB" timeZone="Europe/London" editor="segments"/>
         <NSEProgressSlider label="Intensity" value={32} progressLabel="Download progress" />
-        <NSEAppMenu
-          open
-          title="App menu"
-          items={[{ value: "new", label: "New Card" }]}
-          onSelect={onAppMenuSelect}
-        />
-        <NSEEditMenu autoDisableItems={false} showShortcuts />
-        <NSEHelpMenu target="https://example.com/help" onOpenHelp={onHelp} />
       </div>
     );
 
@@ -83,19 +73,12 @@ describe("NSE extended wrapper controls", () => {
     expect(screen.getByRole("group", { name: "Due date" }).getAttribute("data-locale-order")).toBe("day-month-year");
     expect(screen.getByRole("group", { name: "Start time" }).getAttribute("data-value")).toBe("09:30:00");
     expect(screen.getByRole("progressbar", { name: "Download progress" })).not.toBeNull();
-    expect(screen.getByText("App menu")).not.toBeNull();
-    expect(screen.getByRole("menuitem", { name: "New Card" })).not.toBeNull();
-    expect(screen.getByRole("menuitem", { name: /select all\s*(?:Ctrl|Cmd)\+A/i })).not.toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "Previous" }));
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
-    fireEvent.click(screen.getByRole("button", { name: "Help" }));
-    fireEvent.click(screen.getByRole("menuitem", { name: "New Card" }));
 
     expect(onPrevious).toHaveBeenCalledTimes(1);
     expect(onNext).toHaveBeenCalledTimes(1);
-    expect(onHelp).toHaveBeenCalledWith("https://example.com/help");
-    expect(onAppMenuSelect).toHaveBeenCalledWith("new");
   });
 
   it("keeps the progress slider wrapper controlled through its aliases", async () => {
@@ -237,24 +220,6 @@ describe("NSE extended wrapper controls", () => {
 
     expect(screen.getByRole("button", { name: "Day 18" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /^Year / })).toBeNull();
-  });
-
-  it("anchors the AppMenu top-left by default and supports top-right placement", () => {
-    // AppMenu drops from the top-left status-bar corner; "top-right" is an NSE option
-    // for wiring under the rightSlot / User Info button. See controls/menu/AppMenu.js.
-    const { rerender } = renderWithAppearance(
-      <NSEAppMenu open title="App" items={[{ value: "about", label: "About" }]} />
-    );
-    expect(
-      document.querySelector(".nse-extended-app-menu-popup")?.getAttribute("data-app-menu-placement")
-    ).toBe("top-left");
-
-    rerender(
-        <NSEAppMenu open title="App" placement="top-right" items={[{ value: "about", label: "About" }]} />
-      );
-    expect(
-      document.querySelector(".nse-extended-app-menu-popup")?.getAttribute("data-app-menu-placement")
-    ).toBe("top-right");
   });
 
   it("renders the ProgressSlider altBar as a secondary fill behind the primary bar", () => {
