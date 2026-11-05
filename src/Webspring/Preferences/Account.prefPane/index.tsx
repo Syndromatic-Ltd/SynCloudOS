@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEGroupBox, NSEPushButton } from "../../../NSE/public/controls";
+import { NSEButton, NSEGroupBox } from "../../../NSE/public/controls";
 import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import { definePreferencePane } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
@@ -46,15 +46,21 @@ function AccountPane() {
         <NSEListItem
           tapHighlight={false}
           trailing={account.signedIn ? (
-            <NSEPushButton onClick={() => {
+            <NSEButton
+              title={t("session.logOut", "Log Out")}
+              onClick={() => {
               runtime.systemUI.preferences.close();
               runtime.systemUI.session.requestLogOut();
-            }}>{t("session.logOut", "Log Out")}</NSEPushButton>
+            }}
+            />
           ) : (
-            <NSEPushButton onClick={() => {
+            <NSEButton
+              title={t("session.signIn", "Sign In")}
+              onClick={() => {
               runtime.systemUI.preferences.close();
               account.onSignIn();
-            }}>{t("session.signIn", "Sign In")}</NSEPushButton>
+            }}
+            />
           )}
         >
           {label}

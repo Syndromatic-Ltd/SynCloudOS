@@ -21,19 +21,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import {
-  NSECheckbox,
-  NSEGroupBox,
-
-  NSEMenu,
-  NSEPicker,
-  NSEProgressButton,
-  NSEPushButton,
-  NSERadioGroup,
-  NSEToggleButton,
-  NSETopBar,
-  useNSEControlFeedback,
-} from "../../src/NSE/public/controls";
+import { NSESwitch, NSEButton, NSEGroupBox, NSEMenu, NSEPicker, NSERadioGroup, NSETopBar, useNSEControlFeedback } from "../../src/NSE/public/controls";
 import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEGlassPanel } from "../../src/NSE/Components/NSEGlassPanel";
 import { BrowserHapticsAdapter, createHFXVibratePattern, normalizeHFXFeedbackInput } from "../../src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter";
@@ -311,14 +299,14 @@ describe("HapticsFX feedback preservation", () => {
     try {
       const onClick = vi.fn();
       const rendered = render(createElement("div", null,
-        createElement(NSEPushButton, { tone: "medium", onClick }, "Medium"),
-        createElement(NSEPushButton, { tone: "light", onClick }, "Light"),
-        createElement(NSEPushButton, { tone: "dark", onClick }, "Dark"),
-        createElement(NSEPushButton, { tone: "affirmative", onClick }, "OK"),
-        createElement(NSEPushButton, { tone: "negative", onClick }, "Delete"),
-        createElement(NSEPushButton, { tone: "negative", haptic: false, onClick }, "Silent"),
-        createElement(NSECheckbox, { label: "Check", onChange: vi.fn() }),
-        createElement(NSEToggleButton, { onCheckedChange: vi.fn() }),
+        createElement(NSEButton, { title: "Medium", onClick }),
+        createElement(NSEButton, { title: "Light", appearance: "aqua", onClick }),
+        createElement(NSEButton, { title: "Dark", appearance: "darkAqua", onClick }),
+        createElement(NSEButton, { title: "OK", keyEquivalent: "\r", onClick }),
+        createElement(NSEButton, { title: "Delete", hasDestructiveAction: true, onClick }),
+        createElement(NSEButton, { title: "Silent", hasDestructiveAction: true, haptic: false, onClick }),
+        createElement(NSEButton, { buttonType: "switch", title: "Check", onStateChange: vi.fn() }),
+        createElement(NSESwitch, { onStateChange: vi.fn() }),
         createElement(NSERadioGroup, {
           label: "Mode",
           options: [{ value: "a", label: "A" }, { value: "b", label: "B" }],
@@ -326,7 +314,6 @@ describe("HapticsFX feedback preservation", () => {
           onValueChange: vi.fn()
         }),
         createElement(NSEListItem, { role: "button", onClick: vi.fn() }, "List item"),
-        createElement(NSEProgressButton, { value: 20, onClick: vi.fn() }, "Progress"),
         createElement(NSETopBar, {
           title: "Journal",
           leadingItems: [{ kind: "webspring", label: "Return", onClick: vi.fn() }]
@@ -353,8 +340,6 @@ describe("HapticsFX feedback preservation", () => {
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
       fireEvent.click(rendered.getByText("List item"));
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
-      fireEvent.click(rendered.getByText("Progress"));
-      expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("medium"));
       fireEvent.click(rendered.getByLabelText("Return"));
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("rigid"));
     } finally {

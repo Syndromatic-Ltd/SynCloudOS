@@ -125,7 +125,7 @@
   .nse-menu-item:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
 }
 
-/* NSEPicker drives its button through NSEPushButton, which wraps children in
+/* NSEPicker drives its button through NSEButton, which wraps children in
    a label span. The picker lays its caption and disclosure arrow out as two
    columns of the button itself, so that wrapper must not form a box. */
 .nse-control-picker-button > .nse-control-button-label {

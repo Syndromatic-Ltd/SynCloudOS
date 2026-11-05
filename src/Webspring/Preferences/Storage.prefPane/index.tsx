@@ -1,6 +1,6 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { NSEGroupBox, NSEPushButton } from "../../../NSE/public/controls";
+import { NSEButton, NSEGroupBox } from "../../../NSE/public/controls";
 import { definePreferencePane } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
@@ -24,7 +24,11 @@ function StoragePane() {
   return <section className="nse-storage-diagnostics" aria-label={t("preferences.storage", "Storage")}>
     <NSEGroupBox><div className="nse-storage-diagnostics-section">
       <h2>{t("preferences.storage.heading", "Browser storage")}</h2>
-      <NSEPushButton disabled={!controller || snapshot.state === "ended"} onClick={() => { void controller?.refresh(); }}>{snapshot.state === "completed" ? t("preferences.storage.refresh", "Refresh storage status") : t("preferences.storage.inspect", "Check storage status")}</NSEPushButton>
+      <NSEButton
+        title={snapshot.state === "completed" ? t("preferences.storage.refresh", "Refresh storage status") : t("preferences.storage.inspect", "Check storage status")}
+        isEnabled={!(!controller || snapshot.state === "ended")}
+        onClick={() => { void controller?.refresh(); }}
+      />
       <p role="status" aria-live="polite" aria-atomic="true">{snapshot.state === "checking" ? t("preferences.storage.checking", "Checking browser storage…") : snapshot.state === "completed" ? t("preferences.storage.observed", "Storage check completed. Refresh to check again.") : snapshot.state === "ended" ? t("preferences.storage.ended", "This observation has ended. Reopen Storage to check again.") : t("preferences.storage.idle", "Storage has not been checked.")}</p>
       <p className="nse-prefs-note">{t("preferences.storage.scope", "Estimates cover this website's browser storage, not one account or document. Values are approximate and may change.")}</p>
       {estimate ? <dl className="nse-storage-diagnostics-values">

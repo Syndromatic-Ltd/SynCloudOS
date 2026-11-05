@@ -22,7 +22,7 @@ import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifi
 import { useEffect, useId, useLayoutEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { NSEAlert, NSEAlertBackdrop, NSEFocusPortProvider, NSEFocusScope } from "../NSE/NSE";
-import { NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
+import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 import { useNSEFeedback } from "../NSE/hostComposition";
 import { NSEAboutDialog, NSEConfirmDialog, NSEPreferencesToast } from "../NSE/SystemUI";
 import type { RuntimeSnapshot, SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
@@ -130,22 +130,20 @@ function ReturnDecisionDialog({
             </div>
           </div>
           <div className="nse-alert-actions">
-            <NSEPushButton
+            <NSEButton
+              hasDestructiveAction
+              title={quitLabel}
+              isEnabled={!busy}
               className="nse-system-alert-action-button"
-              tone="negative"
-              disabled={busy}
               onClick={runQuit}
-            >
-              {quitLabel}
-            </NSEPushButton>
-            <NSEPushButton
+            />
+            <NSEButton
+              title={keepLabel}
+              appearance={alertAppearance === "dark" ? undefined : "aqua"}
+              isEnabled={!busy}
               className="nse-system-alert-action-button nse-return-keep"
-              tone={alertAppearance === "dark" ? "medium" : "light"}
-              disabled={busy}
               onClick={runKeep}
-            >
-              {keepLabel}
-            </NSEPushButton>
+            />
           </div>
         </NSEAlert>
       </NSEAlertBackdrop>

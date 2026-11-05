@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEToggleButton } from "../../../NSE/public/controls";
+import { NSESwitch } from "../../../NSE/public/controls";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
@@ -35,9 +35,9 @@ function SoundsSwitch({ settings }: PreferencePaneViewProps) {
   const runtime = useKernelSynCloudOS();
   const t = useSystemText();
   return (
-    <NSEToggleButton
-      checked={settings.soundEnabled}
-      onCheckedChange={(value) => runtime.settings.set("soundEnabled", value)}
+    <NSESwitch
+      state={settings.soundEnabled ? "on" : "off"}
+      onStateChange={(state) => runtime.settings.set("soundEnabled", (state === "on"))}
       aria-label={t("preferences.audioEnabled", "Audio enabled")}
     />
   );

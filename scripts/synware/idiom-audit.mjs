@@ -16,8 +16,8 @@ const COLOUR_LITERAL_THRESHOLD = 12;
 
 /** Raw interactive HTML elements and the NSE controls that replace them. */
 export const NSE_CONTROL_REPLACEMENTS = Object.freeze({
-  button: "NSEPushButton",
-  input: "NSETextField, NSESearchField, NSESlider, NSEStepper, NSECheckbox or NSEToggleButton",
+  button: "NSEButton",
+  input: "NSETextField, NSESearchField, NSESlider, NSEStepper, NSEButton with buttonType switch, or NSESwitch",
   select: "NSEPopupButton or NSESegmentedControl",
   textarea: "NSETextView",
   table: "NSETableView bound to an NSEArrayController",

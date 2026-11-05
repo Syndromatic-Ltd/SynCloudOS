@@ -101,7 +101,7 @@ describe("developer MCP tools", () => {
     await expect(scaffold({ projectRoot: project, bundleIdentifier: "org.example.bad", name: "Bad", route: "/bad", presentation: "window" })).rejects.toThrow();
     expect((await inspectProject({ projectRoot: project })).bundles).toEqual([]);
   });
-  it("scaffolds a working NSEPushButton content application-menu trigger only when explicitly requested", async () => {
+  it("scaffolds a working NSEButton content application-menu trigger only when explicitly requested", async () => {
     const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true }, contentApplicationMenu: true });
     const manifest = parseManifest(resolve(project, result.createdPaths[0]));
     expect(manifest.applicationMenu).toEqual({ trigger: "content" });
@@ -110,21 +110,21 @@ describe("developer MCP tools", () => {
     const anchors: unknown[] = [];
     let toggles = 0;
     let port: { setAnchor(element: unknown): void; toggle(): void; label: string; open: boolean } | null = { setAnchor: element => { anchors.push(element); }, toggle: () => { toggles++; }, label: "Application menu", open: true };
-    type GeneratedButton = { type: unknown; props: { disabled: boolean; ref(element: unknown): void; onClick(): void } };
-    const NSEPushButton = function NSEPushButton() { return null; };
+    type GeneratedButton = { type: unknown; props: { isEnabled: boolean; ref(element: unknown): void; onClick(): void } };
+    const NSEButton = function NSEButton() { return null; };
     const module: { exports: { ApplicationMenuButton?: () => GeneratedButton } } = { exports: {} };
     const require = createRequire(import.meta.url);
-    new Function("require", "module", "exports", code)((name: string) => name === "@syndromatic/syncloudos" ? { useApplicationMenuTrigger: () => port } : name === "@syndromatic/syncloudos/nse/controls" ? { NSEPushButton } : require(name), module, module.exports);
+    new Function("require", "module", "exports", code)((name: string) => name === "@syndromatic/syncloudos" ? { useApplicationMenuTrigger: () => port } : name === "@syndromatic/syncloudos/nse/controls" ? { NSEButton } : require(name), module, module.exports);
     const render = module.exports.ApplicationMenuButton!;
     const button = render();
-    expect(button.type).toBe(NSEPushButton);
-    expect(button.props).toMatchObject({ disabled: false, "aria-haspopup": "menu", "aria-expanded": true, children: "Application menu" });
+    expect(button.type).toBe(NSEButton);
+    expect(button.props).toMatchObject({ isEnabled: true, "aria-haspopup": "menu", "aria-expanded": true, title: "Application menu" });
     button.props.ref("anchor");
     button.props.onClick();
     expect(anchors).toEqual(["anchor"]);
     expect(toggles).toBe(1);
     port = null;
-    expect(render().props.disabled).toBe(true);
+    expect(render().props.isEnabled).toBe(false);
   });
   it("keeps public scaffolds without a content menu explicit about authenticated fullscreen hosting", async () => {
     const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true } });
@@ -248,7 +248,7 @@ describe("developer MCP tools", () => {
     expect(new Set(rules)).toEqual(new Set(["idiom.cocoa-class-authoring", "idiom.nse-controls", "idiom.managed-lifecycle", "idiom.document-state", "idiom.atmo-appearance"]));
     const message = (rule: string, text: string) => result.findings.find((finding: { rule: string; message: string }) => finding.rule === rule && finding.message.includes(text));
     expect(message("idiom.cocoa-class-authoring", "2 useState")).toBeDefined();
-    expect(message("idiom.nse-controls", "NSEPushButton")).toMatchObject({ file: "lib/App.tsx", line: 9 });
+    expect(message("idiom.nse-controls", "NSEButton")).toMatchObject({ file: "lib/App.tsx", line: 9 });
     expect(message("idiom.nse-controls", "1 raw <input>")).toBeDefined();
     expect(message("idiom.nse-controls", "NSETableView")).toBeDefined();
     expect(message("idiom.managed-lifecycle", "requestAnimationFrame")?.message).toContain("manageDisplayLink");

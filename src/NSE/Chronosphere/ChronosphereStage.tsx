@@ -138,13 +138,14 @@ export interface ChronosphereTravelImpulse {
   durationMs?: number;
 }
 
-export interface ChronospherePushButtonProps extends PropsWithChildren<{
-  tone?: "dark";
-  disabled?: boolean;
+export interface ChronospherePushButtonProps {
+  title?: ReactNode;
+  appearance?: "darkAqua";
+  isEnabled?: boolean;
   className?: string;
   onClick?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   "aria-label"?: string;
-}> {}
+}
 
 /**
  * The archive view needs only timing and reduced-motion capabilities. Keeping
@@ -613,20 +614,20 @@ export function ChronosphereStage<TDetail = unknown>({
             active={stage === "open"} settledKey={reflectionReady && !travel.travelling ? `${activeEntry?.id}:${viewport?.width}:${viewport?.height}` : null}
             style={{ position: "absolute", inset: 0, height: "100%" }} />
         </div>
-        <PushButtonComponent tone="dark" className="chronosphere-floor-action chronosphere-floor-exit" onClick={requestExit}>{twoPane ? labels.done : labels.exit}</PushButtonComponent>
+        <PushButtonComponent appearance="darkAqua" title={twoPane ? labels.done : labels.exit} className="chronosphere-floor-action chronosphere-floor-exit" onClick={requestExit} />
         <button className="chronosphere-floor-date" type="button" onClick={() => goTo(0)} aria-label={labels.jumpToPresent}>
           <strong>{activeEntry?.dateLabel ?? labels.now}</strong>
           <span>{travel.travelling ? `${shownIndex + 1} / ${browsed.length}` : activeEntry?.displayLabel ?? activeEntry?.title ?? ""}</span>
         </button>
-        {onRestore ? <PushButtonComponent tone="dark" className="chronosphere-floor-action chronosphere-floor-restore"
-          disabled={!activeEntry || activeEntry.isCurrent || travel.travelling}
+        {onRestore ? <PushButtonComponent appearance="darkAqua" title={labels.restore} className="chronosphere-floor-action chronosphere-floor-restore"
+          isEnabled={!(!activeEntry || activeEntry.isCurrent || travel.travelling)}
           onClick={() => {
             if (!activeEntry || activeEntry.isCurrent || travel.travelling || stage !== "open") return;
             onRestore(activeEntry);
             setRestoredId(activeEntry.id);
             requestExit();
-          }}>{labels.restore}</PushButtonComponent>
-          : <PushButtonComponent tone="dark" className="chronosphere-floor-action chronosphere-floor-restore" onClick={() => setDetailOpen(open => !open)}>{labels.details}</PushButtonComponent>}
+          }} />
+          : <PushButtonComponent appearance="darkAqua" title={labels.details} className="chronosphere-floor-action chronosphere-floor-restore" onClick={() => setDetailOpen(open => !open)} />}
       </div>
 
       {/* The complete launching foreground recedes down and into the galaxy,

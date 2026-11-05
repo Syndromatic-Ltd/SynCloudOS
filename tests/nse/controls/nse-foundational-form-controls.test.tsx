@@ -22,14 +22,21 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { NSECheckbox, NSERadioGroup } from "../../../src/NSE/Controls/Fields/NSEFields";
+import { NSERadioGroup } from "../../../src/NSE/Controls/Fields/NSEFields";
+import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
 
 describe("NSE foundational native form controls", () => {
   it("maps mixed checkbox state onto a native checkbox and preserves reset semantics", async () => {
     const stateChanges = vi.fn();
     render(
       <form aria-label="checkbox form">
-        <NSECheckbox label="Archive on publish" name="archive" defaultState="mixed" onStateChange={stateChanges} />
+        <NSEButton
+          buttonType="switch"
+          title="Archive on publish"
+          defaultState="mixed"
+          onStateChange={stateChanges}
+          name="archive"
+        />
       </form>,
     );
 
@@ -39,7 +46,7 @@ describe("NSE foundational native form controls", () => {
     expect(checkbox.getAttribute("aria-checked")).toBe("mixed");
     fireEvent.click(checkbox);
     expect(checkbox.checked).toBe(true);
-    expect(stateChanges).toHaveBeenCalledWith(true, "commit");
+    expect(stateChanges).toHaveBeenCalledWith("on");
     form.reset();
     await waitFor(() => expect(checkbox.indeterminate).toBe(true));
   });

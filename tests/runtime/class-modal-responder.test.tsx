@@ -5,7 +5,7 @@ import { afterEach, expect, it } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
-import { NSEPushButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEFocusScope } from "../../src/NSE/Focus";
 import { observable } from "../../src/NSE/Objects";
 import { action } from "../../src/SynCloudOS/AppSDK/actions";
@@ -38,8 +38,8 @@ async function mountModal(explicitParent = false) {
         <section role="dialog" aria-label="Templates">
           <label>Template name<input aria-label="Template name" /></label>
           <output aria-label="Child choice">{child.selected}</output>
-          <NSEPushButton action="selectTemplate" actionPayload="paper">Choose paper</NSEPushButton>
-          <NSEPushButton action="dismiss">Close templates</NSEPushButton>
+          <NSEButton title="Choose paper" action="selectTemplate" actionPayload="paper" />
+          <NSEButton title="Close templates" action="dismiss" />
         </section>
       </NSEFocusScope>;
     };
@@ -135,8 +135,8 @@ it("restores a live owned modal parent when its previously focused child button 
             <ResponderScope responderId={modalControlId} kind="control" scopeId={modalScopeId}>
               <input aria-label="Temporary template name" />
             </ResponderScope>
-            <NSEPushButton action="removeOpener">Remove original opener</NSEPushButton>
-            <NSEPushButton action="dismiss">Close removable templates</NSEPushButton>
+            <NSEButton title="Remove original opener" action="removeOpener" />
+            <NSEButton title="Close removable templates" action="dismiss" />
           </section>
         </NSEFocusScope>}
       </>;

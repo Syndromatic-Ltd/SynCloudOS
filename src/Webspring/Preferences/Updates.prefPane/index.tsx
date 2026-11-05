@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { NSEPushButton, NSEGroupBox } from '../../../NSE/public/controls';
+import { NSEButton, NSEGroupBox } from '../../../NSE/public/controls';
 import { definePreferencePane } from '../../../SynCloudOS/Preferences';
 import type { HostUpdateReadinessSnapshot, HostReadinessGap } from '../../../SynCloudOS/SynCloudOS';
 import { useKernelSynCloudOS } from '../../../SynCloudOSReact';
@@ -87,8 +87,16 @@ function UpdatesPane() {
   return <section aria-label={t('preferences.updates.readiness', 'Update readiness')}>
     <UpdateReadinessDetails snapshot={snapshot} />
     <div className="nse-update-readiness-actions">
-      <NSEPushButton disabled={snapshot.ended} onClick={() => { runtime.updateReadiness.inspect(); }}>{t('preferences.updates.inspect', 'Inspect current work')}</NSEPushButton>
-      {snapshot.inspection.available ? <NSEPushButton disabled={snapshot.ended || snapshot.inspection.state === 'checking'} onClick={() => { void runtime.updateReadiness.inspectParticipants(); }}>{t('preferences.updates.inspectOthers', 'Inspect other windows')}</NSEPushButton> : null}
+      <NSEButton
+        title={t('preferences.updates.inspect', 'Inspect current work')}
+        isEnabled={!snapshot.ended}
+        onClick={() => { runtime.updateReadiness.inspect(); }}
+      />
+      {snapshot.inspection.available ? <NSEButton
+                                         title={t('preferences.updates.inspectOthers', 'Inspect other windows')}
+                                         isEnabled={!(snapshot.ended || snapshot.inspection.state === 'checking')}
+                                         onClick={() => { void runtime.updateReadiness.inspectParticipants(); }}
+                                       /> : null}
     </div>
   </section>;
 }

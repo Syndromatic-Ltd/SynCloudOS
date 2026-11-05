@@ -22,7 +22,7 @@
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render } from "@testing-library/react";
-import { NSEPushButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 
 Object.assign(globalThis, { React });
 
@@ -37,7 +37,7 @@ function pointer(target: EventTarget, type: string, x = 50, options: { id?: numb
 
 function setup() {
   const click = vi.fn();
-  const view = render(<NSEPushButton onClick={click}>Push</NSEPushButton>);
+  const view = render(<NSEButton title="Push" onClick={click} />);
   const button = view.getByRole("button");
   vi.spyOn(button, "getBoundingClientRect").mockReturnValue({ x: 0, y: 0, left: 0, top: 0, right: 100, bottom: 50, width: 100, height: 50, toJSON: () => ({}) });
   return { ...view, button, click };
@@ -104,7 +104,7 @@ describe("NSE push button press lifetime", () => {
     fireEvent.click(button, { detail: 0 });
     expect(click).toHaveBeenCalledOnce();
     pointer(button, "pointerdown");
-    rerender(<NSEPushButton disabled>Push</NSEPushButton>);
+    rerender(<NSEButton title="Push" isEnabled={false} />);
     expect(button.getAttribute("data-press-active")).toBe("false");
     pointer(window, "pointermove");
     expect(button.getAttribute("data-press-active")).toBe("false");
@@ -118,10 +118,9 @@ describe("NSE push button press lifetime", () => {
     expect(button.getAttribute("data-press-active")).toBe("false");
     pointer(button, "pointerdown", 50, { primary: false });
     expect(button.getAttribute("data-press-active")).toBe("false");
-    rerender(<NSEPushButton pressed selected onPointerDown={event => event.preventDefault()}>Push</NSEPushButton>);
+    rerender(<NSEButton buttonType="pushOnPushOff" title="Push" state="on" onPointerDown={event => event.preventDefault()} />);
     pointer(button, "pointerdown");
     expect(button.getAttribute("data-press-active")).toBe("false");
     expect(button.getAttribute("data-pressed")).toBe("true");
-    expect(button.getAttribute("data-selected")).toBe("true");
   });
 });

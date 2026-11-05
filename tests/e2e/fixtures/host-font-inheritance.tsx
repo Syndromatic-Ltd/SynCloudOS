@@ -20,7 +20,7 @@
 
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { NSEPushButton } from "../../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
 import { NSETopBar } from "../../../src/NSE/Windows/Chrome/NSETopBar";
 import "../../../src/NSE/public/styles.css";
 import "../../../src/NSE/Themes/Atmo/Resources/atmo.css";
@@ -32,7 +32,7 @@ function HostTypography() {
   const inheritedRole = new URLSearchParams(window.location.search).has("root-role");
   return <main data-nse-appearance="atmo" style={{ fontFamily: inheritedRole ? undefined : family, maxWidth: 640 }}>
     <NSETopBar title="Host title" variant="atmoMetal" />
-    <NSEPushButton onClick={() => setClicks(value => value + 1)}>Host button</NSEPushButton>
+    <NSEButton title="Host button" onClick={() => setClicks(value => value + 1)} />
     <button onClick={() => setFamily("serif")}>Change host font</button>
     <output aria-label="Clicks">{clicks}</output>
   </main>;

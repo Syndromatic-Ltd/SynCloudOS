@@ -35,7 +35,8 @@ import {
 } from "../../src/NSE/Appearance";
 import { NSEAboutDialog } from "../../src/NSE/Components/NSESystemDialogs";
 import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
-import { NSECheckbox, NSERadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
+import { NSERadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEPicker } from "../../src/NSE/Menus";
 import { NSEOverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Overlays";
 import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
@@ -323,7 +324,7 @@ describe("NSE appearance composition", () => {
   });
 
   it("retains native mixed checkbox state and exposes stable paint state", () => {
-    render(<NSECheckbox label="Shared" state="mixed" disabled />);
+    render(<NSEButton buttonType="switch" title="Shared" state="mixed" isEnabled={false} />);
     const input = screen.getByRole("checkbox", { name: "Shared" }) as HTMLInputElement;
     expect(input.indeterminate).toBe(true);
     expect(input.getAttribute("aria-checked")).toBe("mixed");

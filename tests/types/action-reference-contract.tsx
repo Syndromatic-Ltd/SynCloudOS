@@ -1,6 +1,6 @@
 import React from "react";
 import { action, actionRef, useAction, type NSEActionReference, type NSEActionOptions } from "../../src/SynCloudOS/AppSDK/sdkPackageEntry";
-import { NSEPushButton, NSEIconButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEPicker } from "../../src/NSE/Menus/NSEPicker";
 import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
 import { NSECoverFlow } from "../../src/NSE/CoverFlow/NSECoverFlow";
@@ -46,12 +46,12 @@ function View() {
   const awaited = useAction(actionRef(Controller, "count"), 2);
   void awaited.perform().then(result => { if (result?.status === "executed") { const s: string = result.value; void s; } });
   return <>
-    <NSEPushButton action={choose} actionPayload="note">Choose</NSEPushButton>
-    <NSEIconButton action={choose} actionPayload="note" label="Choose" />
+    <NSEButton title="Choose" action={choose} actionPayload="note" />
+    <NSEButton title="Choose" imagePosition="imageOnly" action={choose} actionPayload="note" />
     {/* @ts-expect-error Button payload must match reference. */}
-    <NSEPushButton action={choose} actionPayload={2}>Bad</NSEPushButton>
+    <NSEButton title="Bad" action={choose} actionPayload={2} />
     {/* @ts-expect-error Icon payload must match reference. */}
-    <NSEIconButton action={choose} actionPayload={2} label="Bad" />
+    <NSEButton title="Bad" imagePosition="imageOnly" action={choose} actionPayload={2} />
     <NSEPicker options={[]} action={choose} actionPayload="note" />
     {/* @ts-expect-error Picker payload must match reference. */}
     <NSEPicker options={[]} action={choose} actionPayload={2} />

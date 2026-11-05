@@ -19,7 +19,7 @@
  */
 
 import { Component, useCallback, useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from "react";
-import { NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
+import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 import { useKernelSynCloudOS } from "../SynCloudOSReact";
 import { useWebspringLocale } from "./webspringLocale";
 import { webspringSurfaceStyle } from "./webspringSurface";
@@ -85,7 +85,7 @@ export function WebspringWidgetShelf({ entries, surface }: {
           ? locale.t("widgets.timeout", "This is taking too long to load.")
           : locale.t("widgets.error", "This could not be loaded.")}
       </p>
-      <NSEPushButton tone="dark" onClick={() => controller.refresh(widget.id)}>{retry}</NSEPushButton>
+      <NSEButton appearance="darkAqua" title={retry} onClick={() => controller.refresh(widget.id)} />
     </>;
     let body: ReactNode;
     if (state.status === "loading") {

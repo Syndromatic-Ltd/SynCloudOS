@@ -24,7 +24,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { NSELayoutView, useNSEAnimationEnvironment, useNSEPresentation, type NSELayoutTransitionTiming } from "../../../../NSE/Animation";
 import { Badge, LoadingSpinner } from "../../../../NSE/NSE";
 import { useNSEFeedback } from "../../../../NSE/hostComposition";
-import { NSEPushButton, NSEToolbar } from "@syndromatic/syncloudos/nse/controls";
+import { NSEButton, NSEToolbar } from "@syndromatic/syncloudos/nse/controls";
 import { MaterialProvider } from "../../../../NSE/Material";
 import { getKeyboardReorderIndex } from "../../../../SynCloudOS/SynCloudOS";
 import { WebspringWidgetShelf } from "../../../WebspringWidgetShelf";
@@ -612,9 +612,14 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
         </header>
         <div className={`webspring-board-controls ${model.layout.editing ? "is-editing" : ""}`}>
       {model.layout.editing ? <NSEToolbar composition="children" position="inline" grouped aria-label="Webspring edit controls">
-        <NSEPushButton tone="dark" haptic="success" onClick={() => actions.finishEditing(true)}>Done</NSEPushButton>
-        <NSEPushButton tone="dark" haptic="success" onClick={actions.resetOrder}>Reset</NSEPushButton>
-      </NSEToolbar> : <NSEPushButton tone="dark" onClick={() => actions.beginEditing(null)} aria-describedby="webspring-board-keyboard-help">Reorder applications</NSEPushButton>}
+        <NSEButton appearance="darkAqua" title="Done" haptic="success" onClick={() => actions.finishEditing(true)} />
+        <NSEButton appearance="darkAqua" title="Reset" haptic="success" onClick={actions.resetOrder} />
+      </NSEToolbar> : <NSEButton
+                        appearance="darkAqua"
+                        title="Reorder applications"
+                        onClick={() => actions.beginEditing(null)}
+                        aria-describedby="webspring-board-keyboard-help"
+                      />}
         </div>
       <p id="webspring-board-keyboard-help" className="webspring-reorder-announcement">
         {model.folders.editable

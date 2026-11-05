@@ -7,7 +7,7 @@ import { actionRef } from "../../src/SynCloudOS/AppSDK/actionReference";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { createSynWareMenuRuntime } from "../../src/SynCloudOS/AppSDK/SynWareNSEMenuPort";
-import { NSEPushButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEActionScopeProvider, NSEControlRuntimeProvider } from "../../src/NSE/Controls/Core";
 import { NSEMenuController } from "../../src/NSE/Menus/NSEMenuController";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
@@ -84,7 +84,7 @@ it("prepares control and menu references through canonical command dispatch", as
   const f = fixture();
   const reference = actionRef(ItemController, "chooseItem");
   f.runtime.focus.requestFocus(f.child);
-  const view = render(<NSEPushButton action={reference} actionPayload="control">Choose</NSEPushButton>, { wrapper: f.wrapper });
+  const view = render(<NSEButton title="Choose" action={reference} actionPayload="control" />, { wrapper: f.wrapper });
   await waitFor(() => expect((view.getByRole("button") as HTMLButtonElement).disabled).toBe(false));
   await act(async () => { fireEvent.click(view.getByRole("button")); });
   const menu = new NSEMenuController({ standalone: true, model: { id: "refs", label: "Refs", entries: [

@@ -24,7 +24,7 @@ import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, t
 import { useNSEOverlayProvider } from "../Overlays";
 import { NSEListboxPopup, type NSEListboxOption } from "../Overlays/NSEListboxPopup";
 import type { NSEPopupPresentation } from "../Overlays/NSEPopup";
-import { NSEPushButton, type NSEPushButtonProps } from "../Controls/Buttons/NSEButtons";
+import { NSEButton, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
 import { classes, sizedControlStyle, useControllableState, useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
 import type { NSEMenuOverlayOptions } from "./menuTypes";
 import { NSEActionResponderContext, useNSEActionBinding } from "../Controls/Core/useNSEControlAction";
@@ -64,8 +64,8 @@ export interface NSEPickerProps<Payload = unknown> extends Omit<HTMLAttributes<H
   readonly accessibleLabel?: string;
   readonly textAlign?: "start" | "center" | "end";
   readonly popupAlign?: "left" | "right";
-  readonly pressHaptic?: NSEPushButtonProps["haptic"];
-  readonly snapHaptic?: NSEPushButtonProps["haptic"];
+  readonly pressHaptic?: NSEButtonProps["haptic"];
+  readonly snapHaptic?: NSEButtonProps["haptic"];
   readonly smoothSurface?: boolean;
   readonly listboxOverlay?: NSEMenuOverlayOptions;
   readonly parentResponderId?: string;
@@ -226,12 +226,16 @@ function NSEPickerControl(props: NSEPickerProps) {
       <span id={`${pickerId}-accessible-label`} hidden>
         {accessibleLabel ?? label} {selectedOption?.label}
       </span>
-      <NSEPushButton
+      <NSEButton
+        title={<>
+        <span className="nse-control-picker-caption">{selectedOption?.label ?? "Select"}</span>
+        <span className="nse-control-picker-arrow" aria-hidden="true" />
+      </>}
+        isHighlighted={actionPresentation?.state === "on"}
+        isEnabled={!(disabled || !actionAvailable)}
         ref={anchorRef}
         id={buttonId}
         className="nse-control-picker-button"
-        disabled={disabled || !actionAvailable}
-        pressed={actionPresentation?.state === "on"}
         haptic={pressHaptic}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -245,10 +249,7 @@ function NSEPickerControl(props: NSEPickerProps) {
           }
         }}
         onClick={() => requestOpen(!open)}
-      >
-        <span className="nse-control-picker-caption">{selectedOption?.label ?? "Select"}</span>
-        <span className="nse-control-picker-arrow" aria-hidden="true" />
-      </NSEPushButton>
+      />
       <NSEListboxPopup
         id={listboxId}
         open={open}

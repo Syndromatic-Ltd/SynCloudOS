@@ -23,7 +23,7 @@ import { createPortal } from "react-dom";
 import "./components.css";
 import "./nseSystemDialogs.css";
 import { NSEFocusScope } from "../Focus";
-import { NSEPushButton, type NSEButtonTone } from "../Controls/Buttons/NSEButtons";
+import { NSEButton, nseButtonToneProps, type NSEButtonTone } from "../Controls/Buttons/NSEButton";
 import { NSEAlert } from "./NSEAlert";
 import { NSEAlertBackdrop } from "./NSEAlertBackdrop";
 import type { NSEOverlayPresentationSource } from "../Overlays/overlayRegion";
@@ -126,9 +126,12 @@ export function NSEAboutDialog({
           </div>
         </div>
         <div className="nse-alert-actions">
-          <NSEPushButton className="nse-system-alert-action-button nse-about-dismiss" tone={appearance === "dark" ? "medium" : "light"} onClick={onDismiss}>
-            {dismissLabel}
-          </NSEPushButton>
+          <NSEButton
+            title={dismissLabel}
+            {...nseButtonToneProps(appearance === "dark" ? "medium" : "light")}
+            className="nse-system-alert-action-button nse-about-dismiss"
+            onClick={onDismiss}
+          />
         </div>
       </NSEAlert>
     </NSEAlertBackdrop>
@@ -201,12 +204,13 @@ export function NSEConfirmDialog({
           </div>
         </div>
         <div className="nse-alert-actions">
-          <NSEPushButton className="nse-system-alert-action-button" tone={confirmTone} onClick={onConfirm}>
-            {confirmLabel}
-          </NSEPushButton>
-          <NSEPushButton className="nse-system-alert-action-button nse-confirm-cancel" tone={appearance === "dark" ? "medium" : "light"} onClick={onCancel}>
-            {cancelLabel}
-          </NSEPushButton>
+          <NSEButton title={confirmLabel} {...nseButtonToneProps(confirmTone)} className="nse-system-alert-action-button" onClick={onConfirm} />
+          <NSEButton
+            title={cancelLabel}
+            {...nseButtonToneProps(appearance === "dark" ? "medium" : "light")}
+            className="nse-system-alert-action-button nse-confirm-cancel"
+            onClick={onCancel}
+          />
         </div>
       </NSEAlert>
     </NSEAlertBackdrop>

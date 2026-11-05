@@ -23,7 +23,7 @@ import type { CommandDispatchAcceptance, CommandPresentation } from "../../SynCl
 import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
 import { useNSEAppearanceProjection } from "../Appearance";
 import { sizedControlStyle, useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
-import { NSEPushButton, type NSEButtonTone, type NSEPushButtonProps } from "../Controls/Buttons/NSEButtons";
+import { NSEButton, nseButtonToneProps, type NSEButtonTone, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
 import { useNSEOverlayProvider } from "../Overlays";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
 import { NSEMenuController, nseRefreshMenuPresentation, type NSEMenuController as NSEMenuControllerType } from "./NSEMenuController";
@@ -110,8 +110,8 @@ export interface NSEItemMenuProps extends Omit<HTMLAttributes<HTMLSpanElement>, 
   readonly menuOverlay?: NSEMenuOverlayOptions;
   readonly parentResponderId?: string;
   readonly tone?: NSEButtonTone;
-  readonly pressHaptic?: NSEPushButtonProps["haptic"];
-  readonly selectionHaptic?: NSEPushButtonProps["haptic"];
+  readonly pressHaptic?: NSEButtonProps["haptic"];
+  readonly selectionHaptic?: NSEButtonProps["haptic"];
   readonly smoothSurface?: boolean;
   readonly initialFocus?: "first" | "last";
   readonly submenuDelayMs?: number;
@@ -683,21 +683,22 @@ function NSEItemMenu({
 
   return (
     <span className={classNames("nse-menu-trigger-host", className)} data-nse-menu-smooth-surface={smoothSurface ? "true" : undefined} {...htmlAttributes}>
-      <NSEPushButton
+      <NSEButton
+        {...(trigger === "tool" ? {
+          bezelStyle: "texturedRounded" as const,
+          title: triggerLabel,
+          image: label,
+          imagePosition: "imageOnly" as const,
+          controlSize: controlSize === "small" ? "small" as const : undefined,
+          "data-size": height !== undefined ? "custom" : undefined,
+          style: sizedControlStyle(undefined, height, undefined),
+        } : { title: label, ...nseButtonToneProps(tone) })}
+        isHighlighted={isOpen}
+        toolTip={triggerLabel}
         ref={anchorRef}
         id={triggerId}
-        tone={trigger === "tool" ? "dark" : tone}
         haptic={pressHaptic}
-        // A menu button stays lit (its selected art) while its menu is showing.
-        pressed={isOpen}
-        {...(trigger === "tool" ? {
-          className: "nse-extended-tool-button",
-          icon: label,
-          "data-size": height !== undefined ? "custom" : controlSize === "small" ? "small" : undefined,
-          style: sizedControlStyle(undefined, height, undefined),
-        } : {})}
         aria-label={triggerLabel}
-        title={triggerLabel}
         aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-controls={resolvedOverlay.id}
@@ -710,9 +711,7 @@ function NSEItemMenu({
             requestOpen(true);
           }
         }}
-      >
-        {trigger === "tool" ? <span className="nse-control-visually-hidden">{triggerLabel}</span> : label}
-      </NSEPushButton>
+      />
       <NSEMenuOverlay
         overlay={resolvedOverlay}
         controller={controller}

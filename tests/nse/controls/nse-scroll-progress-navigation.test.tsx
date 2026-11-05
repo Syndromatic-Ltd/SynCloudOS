@@ -26,7 +26,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEScroller, NSEScrollView, NSEScrollViewController, computeScrollRectTarget, normalizeRTLScrollLeft } from "../../../src/NSE/Scroll";
 import { NSEProgressIndicator } from "../../../src/NSE/Progress";
-import { NSEProgressBar, NSEProgressButton, NSEProgressItem, NSEProgressSlider, NSESpinner } from "../../../src/NSE/Progress";
+import { NSEProgressBar, NSEProgressItem, NSEProgressSlider, NSESpinner } from "../../../src/NSE/Progress";
 import { NSEAccordionView, NSETabGroup, NSETabView } from "../../../src/NSE/Navigation";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { NSEControlRuntimeProvider } from "../../../src/NSE/Controls/Core";
@@ -194,12 +194,10 @@ describe("scroll progress and navigation", () => {
     expect(screen.getByRole("tabpanel").textContent).toBe("First panel");
   });
 
-  it("uses one normalized progress contract for bars, buttons, items, and locked sliders", () => {
-    const cancel = vi.fn();
-    const { container } = render(
+  it("uses one normalized progress contract for bars, items, and locked sliders", () => {
+    render(
       <>
         <NSEProgressBar value={23} min={10} max={40} snap={5} altValue={35} label="Transfer" content="Transfer" animatePosition={false} />
-        <NSEProgressButton value={58} max={100} label="Transfer action" onCancel={cancel}>Transfer</NSEProgressButton>
         <NSEProgressItem value={42} max={100} variant="pill" label="Transfer item">Item</NSEProgressItem>
         <NSEProgressSlider value={20} min={10} max={30} snap={5} lockBar altBarPosition={28} progressLabel="Buffer" />
       </>,
@@ -211,16 +209,12 @@ describe("scroll progress and navigation", () => {
     expect(bar.style.getPropertyValue("--nse-control-progress")).toBe("50%");
     expect(Number.parseFloat(bar.style.getPropertyValue("--nse-control-progress-alt"))).toBeCloseTo((25 / 30) * 100, 12);
     expect(bar.getAttribute("data-animate")).toBe("false");
-    expect(screen.getByRole("button", { name: "Transfer action" }).style.getPropertyValue("--nse-control-progress")).toBe("58%");
     expect(screen.getByRole("progressbar", { name: "Transfer item" }).getAttribute("data-variant")).toBe("pill");
     const sliderBar = screen.getByRole("progressbar", { name: "Buffer" });
     expect(sliderBar.getAttribute("aria-valuemin")).toBe("10");
     expect(sliderBar.getAttribute("aria-valuemax")).toBe("30");
     expect(sliderBar.getAttribute("aria-valuenow")).toBe("20");
     expect(sliderBar.style.getPropertyValue("--nse-control-progress-alt")).toBe("90%");
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(cancel).toHaveBeenCalledOnce();
-    expect(container.querySelector(".nse-control-progress-button-fill")).not.toBeNull();
   });
 
   it("renders determinate, suspended, error and hidden progress semantically", () => { const { rerender } = render(<NSEProgressIndicator aria-label="Load" state={{ kind: "determinate", value: 5, minimum: 0, maximum: 10 }} />); expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("5"); rerender(<NSEProgressIndicator aria-label="Load" state={{ kind: "error", message: "Failed" }} />); expect(screen.getByRole("status").textContent).toContain("Failed"); rerender(<NSEProgressIndicator aria-label="Load" state={{ kind: "hidden" }} />); expect(screen.queryByRole("progressbar")).toBeNull(); });

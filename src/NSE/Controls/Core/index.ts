@@ -23,8 +23,6 @@ export * from "./useNSEControlValue";
 export * from "./useNSEControlCommand";
 export * from "./useNSEControlAction";
 export { nseActionCommandId } from "./actionCommandId";
-export { NSEHashBadge } from "./NSEHashBadge";
-export type { NSEHashBadgeProps } from "./NSEHashBadge";
 export {
   useNSEControlFeedback,
 } from "./nseControlsShared";

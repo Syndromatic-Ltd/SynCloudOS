@@ -21,7 +21,7 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
 import type { HFXFeedbackRequest } from "../Feedback";
-import type { NSEButtonTone } from "../Controls/Buttons/NSEButtons";
+import type { NSEButtonTone } from "../Controls/Buttons/NSEButton";
 import { classes } from "../Controls/Core/nseControlsShared";
 import { NSETabStrip, type NSETabStyle } from "./tabStrip";
 

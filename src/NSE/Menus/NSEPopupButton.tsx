@@ -20,14 +20,15 @@
 
 import { useId, useRef, useState } from "react";
 import { useOptionalNSEOverlayProvider } from "../Overlays";
-import { NSEPushButton, type NSEButtonTone, type NSEPushButtonProps } from "../Controls/Buttons/NSEButtons";
+import { NSEButton, nseButtonToneProps, type NSEButtonTone, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
 import { NSEMenu } from "./NSEMenu";
 import type { NSEMenuController } from "./NSEMenuController";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
 import type { NSEMenuModel, NSEMenuOverlayOptions } from "./menuTypes";
 
 /** The trigger action receives the menu model's id unless actionPayload is explicitly supplied. */
-export interface NSEPopupButtonProps extends Pick<NSEPushButtonProps, "action" | "actionPayload" | "disabled"> {
+export interface NSEPopupButtonProps extends Pick<NSEButtonProps, "action" | "actionPayload"> {
+  readonly disabled?: boolean;
   readonly label: string;
   readonly model: NSEMenuModel;
   readonly controller: NSEMenuController;
@@ -51,14 +52,15 @@ export function NSEPopupButton(props: NSEPopupButtonProps) {
   return (
     <span className="nse-popup-button">
       {/* A stock push button, lit (its selected art) while its menu shows. */}
-      <NSEPushButton
+      <NSEButton
+        title={label}
+        {...nseButtonToneProps(tone)}
+        isHighlighted={open}
+        isEnabled={!disabled}
         id={triggerId}
         ref={triggerRef}
-        tone={tone}
         action={action}
         actionPayload={Object.prototype.hasOwnProperty.call(props, "actionPayload") ? actionPayload : model.id}
-        disabled={disabled}
-        pressed={open}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => {
@@ -80,9 +82,7 @@ export function NSEPopupButton(props: NSEPopupButtonProps) {
             setOpen(true);
           }
         }}
-      >
-        {label}
-      </NSEPushButton>
+      />
       <NSEMenuOverlay
         overlay={overlay}
         controller={controller}

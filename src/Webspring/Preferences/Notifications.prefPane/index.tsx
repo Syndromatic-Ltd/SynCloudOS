@@ -19,7 +19,7 @@
  */
 
 import { useMemo } from "react";
-import { NSEGroupBox, NSEToggleButton } from "../../../NSE/public/controls";
+import { NSESwitch, NSEGroupBox } from "../../../NSE/public/controls";
 import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import type { RuntimeSnapshot } from "../../../SynCloudOS/SynCloudOS";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
@@ -64,9 +64,9 @@ function NotificationsSwitch({ settings }: PreferencePaneViewProps) {
   const runtime = useKernelSynCloudOS();
   const t = useSystemText();
   return (
-    <NSEToggleButton
-      checked={settings.notificationsEnabled}
-      onCheckedChange={(value) => runtime.settings.set("notificationsEnabled", value)}
+    <NSESwitch
+      state={settings.notificationsEnabled ? "on" : "off"}
+      onStateChange={(state) => runtime.settings.set("notificationsEnabled", (state === "on"))}
       aria-label={t("preferences.allNotifications", "All notifications")}
     />
   );
@@ -104,13 +104,10 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
                 tapHighlight={false}
                 leading={<img className="nse-prefs-app-icon" src={app.icon.src} alt="" aria-hidden="true" />}
                 trailing={(
-                  <NSEToggleButton
-                    // Each app's OWN choice, not the resolved answer: with
-                    // the master off these would all read false and turning
-                    // it back on would look like it had wiped them.
-                    checked={runtime.settings.appNotificationsAllowed(app.bundleIdentifier)}
-                    disabled={!settings.notificationsEnabled}
-                    onCheckedChange={(value) => runtime.settings.setNotificationsAllowed(app.bundleIdentifier, value)}
+                  <NSESwitch
+                    state={runtime.settings.appNotificationsAllowed(app.bundleIdentifier) ? "on" : "off"}
+                    onStateChange={(state) => runtime.settings.setNotificationsAllowed(app.bundleIdentifier, (state === "on"))}
+                    isEnabled={settings.notificationsEnabled}
                     aria-label={app.displayName}
                   />
                 )}

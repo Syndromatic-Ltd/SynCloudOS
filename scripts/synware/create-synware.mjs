@@ -69,9 +69,7 @@ export function defaultAuthoring(selected = []) {
 const menuButtonComponent = `export function ApplicationMenuButton() {
   const menu = useApplicationMenuTrigger();
   return (
-    <NSEPushButton ref={element => menu?.setAnchor(element)} disabled={!menu} aria-haspopup="menu" aria-expanded={menu?.open ?? false} onClick={() => menu?.toggle()}>
-      {menu?.label ?? "Application menu"}
-    </NSEPushButton>
+    <NSEButton ref={element => menu?.setAnchor(element)} title={menu?.label ?? "Application menu"} isEnabled={Boolean(menu)} aria-haspopup="menu" aria-expanded={menu?.open ?? false} onClick={() => menu?.toggle()} />
   );
 }
 `;
@@ -102,7 +100,7 @@ ${permissions.length ? `  permissions: ${JSON.stringify(permissions)},\n` : ""}\
 `],
     ["Contents/index.tsx", `${selected.length ? 'import { useState } from "react";\n' : ""}import { SCOS${contentApplicationMenu ? ", useApplicationMenuTrigger" : ""}${hooks.length ? `, ${hooks.join(", ")}` : ""} } from "@syndromatic/syncloudos";
 import { NSEStackItem, NSEStackView } from "@syndromatic/syncloudos/nse";
-${selected.length || contentApplicationMenu ? 'import { NSEPushButton } from "@syndromatic/syncloudos/nse/controls";\n' : ""}\
+${selected.length || contentApplicationMenu ? 'import { NSEButton } from "@syndromatic/syncloudos/nse/controls";\n' : ""}\
 ${recipeImports}
 ${contentApplicationMenu ? `\n${menuButtonComponent}` : ""}
 export default function SynWareRoot() {
@@ -113,7 +111,7 @@ ${selected.length ? `  const [status, setStatus] = useState("Ready");\n${selecte
         <p>{SCOS.app.displayName} is running as {SCOS.app.bundleIdentifier}.</p>
       </NSEStackItem>
 ${contentApplicationMenu ? '      <NSEStackItem id="application-menu" visibilityPriority={100}><ApplicationMenuButton /></NSEStackItem>\n' : ""}\
-${selected.map(name => `      <NSEStackItem id="${name}" visibilityPriority={90}>\n        <NSEPushButton onClick={() => run(() => ${functionName(name)}(${fxRecipes[name].hook ? name : ""}))}>${fxRecipes[name].label ?? `Run ${name} example`}</NSEPushButton>\n      </NSEStackItem>`).join("\n")}
+${selected.map(name => `      <NSEStackItem id="${name}" visibilityPriority={90}>\n        <NSEButton title="${fxRecipes[name].label ?? `Run ${name} example`}" onClick={() => run(() => ${functionName(name)}(${fxRecipes[name].hook ? name : ""}))} />\n      </NSEStackItem>`).join("\n")}
 ${selected.length ? '      <NSEStackItem id="result" visibilityPriority={100}><p role="status">{status}</p></NSEStackItem>\n' : ""}\
     </NSEStackView>
   );
@@ -137,10 +135,10 @@ function scaffoldClassFiles(bundleIdentifier, title, authoring, contentApplicati
   const view = `  return <section aria-label={${JSON.stringify(title)}}>
 ${contentApplicationMenu ? "    <ApplicationMenuButton />\n" : ""}\
     <NSESearchField aria-label="Search" binding={controller.queryBinding} />
-    <NSEPushButton action={controller.clearSearchAction}>Clear search</NSEPushButton>
+    <NSEButton title="Clear search" action={controller.clearSearchAction} />
   </section>;`;
   files.set("Contents/index.tsx", `import { NSEApplication, NSEViewController, observable, bind, action, actionRef, type NSEBinding${!separate && contentApplicationMenu ? ", useApplicationMenuTrigger" : ""} } from "@syndromatic/syncloudos";
-${separate ? 'import { SearchView } from "./Views/SearchView";' : 'import { NSESearchField, NSEPushButton } from "@syndromatic/syncloudos/nse/controls";'}
+${separate ? 'import { SearchView } from "./Views/SearchView";' : 'import { NSESearchField, NSEButton } from "@syndromatic/syncloudos/nse/controls";'}
 ${!separate && contentApplicationMenu ? `\n${menuButtonComponent}` : ""}
 export class SearchViewController extends NSEViewController {
   @observable accessor query = "";
@@ -157,7 +155,7 @@ export default class SynWareApplication extends NSEApplication {
   static override mainViewController = SearchViewController;
 }
 `);
-  if (separate) files.set("Contents/Views/SearchView.tsx", `import { NSESearchField, NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
+  if (separate) files.set("Contents/Views/SearchView.tsx", `import { NSESearchField, NSEButton } from "@syndromatic/syncloudos/nse/controls";
 ${contentApplicationMenu ? 'import { ApplicationMenuButton } from "./ApplicationMenuButton";\n' : ""}\
 import type { SearchViewController } from "../index";
 
@@ -166,7 +164,7 @@ ${view}
 }
 `);
   if (separate && contentApplicationMenu) files.set("Contents/Views/ApplicationMenuButton.tsx", `import { useApplicationMenuTrigger } from "@syndromatic/syncloudos";
-import { NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
+import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 
 ${menuButtonComponent}`);
   files.set("Contents/__tests__/app.test.tsx", `// @vitest-environment jsdom

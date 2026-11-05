@@ -19,7 +19,7 @@
  */
 
 // @vitest-environment jsdom
-import { NSEToggleButton } from "../../../src/NSE/Controls/Fields/NSEFields";
+import { NSESwitch } from "../../../src/NSE/Controls/Fields/NSEFields";
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
 installNSEScrollIntoViewFixture();
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"; import React, { useState } from "react"; import { afterEach, describe, expect, it, vi } from "vitest";
@@ -150,7 +150,7 @@ describe("toggle text geometry observation", () => {
     const disconnect = vi.fn();
     vi.stubGlobal("ResizeObserver", class { constructor(callback:ResizeObserverCallback){notify=callback;} observe(){} disconnect=disconnect; });
     const getter=vi.spyOn(HTMLElement.prototype,"offsetWidth","get").mockImplementation(function(this:HTMLElement){return this.classList.contains("nse-control-toggle-state-label")?width:64;});
-    const {unmount}=render(<NSEToggleButton aria-label="Observed switch" onLabel="Ein" offLabel="Aus" />);
+    const {unmount}=render(<NSESwitch aria-label="Observed switch" onLabel="Ein" offLabel="Aus" />);
     const control=screen.getByRole("switch",{name:"Observed switch"});
     expect(control.style.getPropertyValue("--nse-control-toggle-label-width")).toBe("20px");
     width=40;

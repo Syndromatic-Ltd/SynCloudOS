@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSESlider } from "../Controls/Values/NSESlider";
 import { normaliseParagraphStyle, normaliseParagraphStyleMutation, type NSEParagraphStyle } from "./typographyTypes";
 
@@ -73,10 +73,21 @@ export function NSERuler({ value, direction = "ltr", maximum = 1_000, step = 1, 
     ] as const).map(([key, label]) => <NSESlider key={key} controlSize="small" data-nse-part="indent" label={label} data-logical-edge={key === "tailIndent" ? "end" : "start"} dir={key === "tailIndent" ? opposite : direction} minimum={0} maximum={maximum} step={step} value={style[key]} disabled={mutationDisabled} onValueChange={(next) => changeNumber(key, next)} />)}
     {style.tabStops.map((stop, index) => <div key={`tab-stop-${index}`} data-nse-part="tab-stop">
       <NSESlider controlSize="small" label={`Tab stop ${index + 1}`} dir={direction} minimum={0} maximum={maximum} step={1} value={stop} disabled={readOnly} onValueChange={(next) => changeTabStop(index, next)} />
-      <NSEPushButton tone="light" aria-label={`Remove tab stop ${index + 1}`} onClick={() => removeTabStop(index)} disabled={readOnly}>Remove</NSEPushButton>
+      <NSEButton
+        appearance="aqua"
+        title="Remove"
+        isEnabled={!readOnly}
+        aria-label={`Remove tab stop ${index + 1}`}
+        onClick={() => removeTabStop(index)}
+      />
     </div>)}
     <div data-nse-part="tab-stops">
-      <NSEPushButton tone="light" onClick={addTabStop} disabled={readOnly || style.tabStops.length >= 64}>Add tab stop</NSEPushButton>
+      <NSEButton
+        appearance="aqua"
+        title="Add tab stop"
+        isEnabled={!(readOnly || style.tabStops.length >= 64)}
+        onClick={addTabStop}
+      />
       <p role="status" aria-live="polite">{style.tabStops.length ? `${style.tabStops.length} custom tab stop${style.tabStops.length === 1 ? "" : "s"}.` : "No custom tab stops."}</p>
     </div>
   </section>;

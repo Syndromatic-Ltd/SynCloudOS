@@ -21,7 +21,7 @@
 import { useId, useRef, useState, type ReactNode } from "react";
 import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
 import { resolveSystemAlertDetailsMotion } from "./SystemAlert.transitions";
-import { NSEPushButton, type NSEButtonTone } from "../NSE/public/controls";
+import { NSEButton, type NSEAppearanceName } from "../NSE/public/controls";
 import { NSEAlert } from "../NSE/hostComposition";
 import cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
 import { synCloudOSLogoUrl as synCloudOSLogo } from "../SynCloudOS/Resources/frameworkAssets";
@@ -55,12 +55,13 @@ const siteScopedErrorCodes = new Set(["ROUTE_NOT_FOUND", "UNRECOVERABLE_LOGIN_SE
 
 const systemAlertIconSources = [cautionIcon, synCloudOSLogo] as const;
 
-function ActionButton({ children, onClick, tone }: {
+function ActionButton({ children, onClick, appearance, keyEquivalent }: {
   children: ReactNode;
   onClick: () => void;
-  tone: NSEButtonTone;
+  appearance?: NSEAppearanceName;
+  keyEquivalent?: string;
 }) {
-  return <NSEPushButton className="nse-system-alert-action-button" tone={tone} onClick={onClick}>{children}</NSEPushButton>;
+  return <NSEButton title={children} appearance={appearance} keyEquivalent={keyEquivalent} className="nse-system-alert-action-button" onClick={onClick} />;
 }
 
 export function SystemAlertAssetCache() {
@@ -156,7 +157,7 @@ export function SystemAlert({
     typeof error.context?.mailtoFallback === "string"
       ? `mailto:${error.context.mailtoFallback}`
       : null;
-  const actionTone: NSEButtonTone = appearance === "dark" ? "medium" : "light";
+  const actionAppearance: NSEAppearanceName | undefined = appearance === "dark" ? undefined : "aqua";
   const titleId = useId();
   const messageId = useId();
   const icon = getSystemAlertIcon(error, useHostSiteBranding(), appearance, applicationIcon);
@@ -186,18 +187,18 @@ export function SystemAlert({
         </div>
       </div>
       <div className="nse-alert-actions">
-        {isSessionMismatch && actions.includes("dismiss") ? <ActionButton tone="medium" onClick={onDismiss}>Cancel</ActionButton> : null}
-        {actions.includes("reload") ? <ActionButton tone={isSessionMismatch ? "affirmative" : actionTone} onClick={onReload}>{isSessionMismatch ? "Reload Webspring" : "Reload"}</ActionButton> : null}
+        {isSessionMismatch && actions.includes("dismiss") ? <ActionButton onClick={onDismiss}>Cancel</ActionButton> : null}
+        {actions.includes("reload") ? <ActionButton keyEquivalent={isSessionMismatch ? "\r" : undefined} appearance={isSessionMismatch ? undefined : actionAppearance} onClick={onReload}>{isSessionMismatch ? "Reload Webspring" : "Reload"}</ActionButton> : null}
         {error.retry || actions.includes("retry") ? (
-          <ActionButton tone={actionTone} onClick={error.retry ?? onReload}>Try Again</ActionButton>
+          <ActionButton appearance={actionAppearance} onClick={error.retry ?? onReload}>Try Again</ActionButton>
         ) : null}
         {actions.includes("openMailClient") && mailtoFallback && onOpenMailClient ? (
-          <ActionButton tone={actionTone} onClick={() => onOpenMailClient(mailtoFallback)}>Open Mail Client</ActionButton>
+          <ActionButton appearance={actionAppearance} onClick={() => onOpenMailClient(mailtoFallback)}>Open Mail Client</ActionButton>
         ) : null}
         {actions.includes("returnToWebspring") ? (
-          <ActionButton tone={actionTone} onClick={onReturn}>Return to Webspring</ActionButton>
+          <ActionButton appearance={actionAppearance} onClick={onReturn}>Return to Webspring</ActionButton>
         ) : null}
-        {!isSessionMismatch && actions.includes("dismiss") ? <ActionButton tone={actionTone} onClick={onDismiss}>{isNotResponding ? "Continue" : "Close"}</ActionButton> : null}
+        {!isSessionMismatch && actions.includes("dismiss") ? <ActionButton appearance={actionAppearance} onClick={onDismiss}>{isNotResponding ? "Continue" : "Close"}</ActionButton> : null}
       </div>
     </NSEAlert>
   );

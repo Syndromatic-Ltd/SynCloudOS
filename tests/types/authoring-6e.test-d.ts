@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { NSEApplication, NSEViewController, NSEWindowController, observable, bind, action, actionRef, useAction, managedTask, outlet, preference, observes,
   type NSEActionReference, type NSEViewOutlet, type NSEManagedAFXRenderer, type NSETaskSettlement, type NSEBinding, type NSETaskContext } from "@syndromatic/syncloudos";
-import { NSESearchField, NSEPushButton, NSESlider } from "@syndromatic/syncloudos/nse/controls";
+import { NSEButton, NSESearchField, NSESlider } from "@syndromatic/syncloudos/nse/controls";
 import { NSEComboBox, type NSEComboBoxProps } from "@syndromatic/syncloudos/nse";
 import { AFXTransaction } from "@syndromatic/syncloudos/fx/animation";
 
@@ -71,7 +71,7 @@ function ActionView() {
   useAction(choose, 42);
   // @ts-expect-error Event payload is inferred from the method.
   state.perform(42);
-  return createElement(NSEPushButton, { action: actionRef(SearchController, "clearSearch"), children: "Clear" });
+  return createElement(NSEButton, { action: actionRef(SearchController, "clearSearch"), title: "Clear" });
 }
 declare const renderer: NSEManagedAFXRenderer;
 renderer.onFrame(frame => { const seconds: number = frame.delta; void seconds; }, { reducedMotion: "static" });

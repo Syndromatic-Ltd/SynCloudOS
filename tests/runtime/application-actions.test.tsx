@@ -3,7 +3,7 @@ import React from "react";
 import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEObject, observable } from "../../src/NSE/Objects";
-import { NSEPushButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEActionScopeProvider, NSEControlRuntimeProvider } from "../../src/NSE/Controls/Core";
 import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
 import { NSEPicker } from "../../src/NSE/Menus/NSEPicker";
@@ -807,9 +807,9 @@ describe("actions in menus and controls", () => {
     render(
       <NSEControlRuntimeProvider port={controlPort(context)}>
         <NSEActionScopeProvider appId={appId}>
-          <NSEPushButton action="newNote">New note</NSEPushButton>
-          <NSEPushButton action="reload">Reload</NSEPushButton>
-          <NSEPushButton action="rename" actionPayload={{ title: "Button" }}>Rename</NSEPushButton>
+          <NSEButton title="New note" action="newNote" />
+          <NSEButton title="Reload" action="reload" />
+          <NSEButton title="Rename" action="rename" actionPayload={{ title: "Button" }} />
         </NSEActionScopeProvider>
       </NSEControlRuntimeProvider>,
     );
@@ -827,7 +827,7 @@ describe("actions in menus and controls", () => {
     render(
       <NSEControlRuntimeProvider port={controlPort(context)}>
         <NSEActionScopeProvider appId={appId}>
-          <NSEPushButton action="document.save">Save</NSEPushButton>
+          <NSEButton title="Save" action="document.save" />
         </NSEActionScopeProvider>
       </NSEControlRuntimeProvider>,
     );
@@ -840,7 +840,7 @@ describe("actions in menus and controls", () => {
     const { context } = fixture();
     expect(() => render(
       <NSEControlRuntimeProvider port={controlPort(context)}>
-        <NSEPushButton action="newNote">New note</NSEPushButton>
+        <NSEButton title="New note" action="newNote" />
       </NSEControlRuntimeProvider>,
     )).toThrow(/action/i);
   });

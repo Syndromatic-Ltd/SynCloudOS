@@ -302,7 +302,6 @@
 /* ButtonHeader + standalone ToolButton wear the menu-button sprite directly,
    not only when nested in a toolbar. Same 5-state ladder as the non-grouped toolbar
    button above (atmo-menu-button.png, 250px tall / 5×50px state bands). */
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button,
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button {
   height: 50px;
   min-height: 50px;
@@ -311,32 +310,18 @@
   line-height: 50px;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button:active:not([data-press-active]):not(:disabled),
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button[data-press-active="true"]:not(:disabled),
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button[data-press-active="true"]:not(:disabled) {
   border-image-slice: 50 25 150 25 fill;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button[data-selected="true"],
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button[data-pressed="true"],
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button[data-selected="true"],
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button[data-pressed="true"] {
   border-image-slice: 100 25 100 25 fill;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button:disabled,
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button:disabled {
   border-image-slice: 200 25 0 25 fill;
-}
-
-/* ButtonHeader: a block-level header bar you
-   nest content into, with the caption left-aligned. */
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button {
-  display: flex;
-  width: 100%;
-  justify-content: flex-start;
-  text-align: left;
 }
 
 /* PrevNextBanner: a flex row of [prev arrow][content][next
@@ -1551,7 +1536,6 @@
   cursor: pointer;
 }
 
-
 :where([data-nse-appearance="atmo"]) .nse-control-picker-button:active,
 :where([data-nse-appearance="atmo"]) .nse-control-picker-button[data-pressed="true"] {
   border-image-source: var(--nse-atmo-pill-down);
@@ -2232,60 +2216,6 @@
   opacity: 0.58;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button {
-  position: relative;
-  display: inline-grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  min-width: 170px;
-  height: 50px;
-  padding: 0 5px;
-  overflow: hidden;
-  border: 0 solid transparent;
-  border-width: 0 25px;
-  border-image: var(--nse-atmo-progress-button) 0 25 200 25 fill stretch;
-  color: #fff;
-  background: transparent;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 700;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.72);
-  cursor: pointer;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--nse-control-progress, 0%);
-  height: 50px;
-  margin: 0 -25px;
-  border: 0 solid transparent;
-  border-width: 0 25px;
-  border-image: var(--nse-atmo-progress-button-inner) 0 25 0 25 fill repeat repeat;
-  opacity: 0.82;
-  box-sizing: border-box;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button-label,
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button-cancel {
-  position: relative;
-  z-index: 1;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button-label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button-cancel {
-  width: 24px;
-  height: 24px;
-  margin-left: 8px;
-  background: var(--nse-atmo-progress-button-cancel) center / contain no-repeat;
-}
-
 :where([data-nse-appearance="atmo"]) .nse-control-progress-item {
   position: relative;
   display: grid;
@@ -2368,7 +2298,6 @@
   filter: none;
   animation: nse-control-app-menu-drop 0.18s ease-out;
 }
-
 
 :where([data-nse-appearance="atmo"]) .nse-control-popup.nse-extended-app-menu-popup[data-app-menu-placement="top-right"] {
   /* The box was already flush at the viewport edge — the PLATE was not. The
@@ -2619,31 +2548,6 @@
   color: #5d6875;
   font-size: 12px;
   font-weight: 700;
-}
-
-/* Heritage has no grab-button sprite (it was an Onyx-era control), so draw a neutral grip dot field
-   instead of the wrong next-prev arrows the old rule borrowed. Onyx swaps in its grabbutton.png. */
-:where([data-nse-appearance="atmo"]) .nse-control-grab-handle {
-  display: inline-block;
-  width: 56px;
-  height: 18px;
-  background-image: radial-gradient(circle, rgba(70, 92, 122, 0.55) 1px, transparent 1.6px);
-  background-size: 6px 6px;
-  background-position: center;
-  opacity: 0.8;
-  border: 0;
-  padding: 0;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-grab-handle-draggable {
-  cursor: grab;
-  touch-action: none;
-  background-color: transparent;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-grab-handle-draggable[data-dragging="true"] {
-  cursor: grabbing;
-  opacity: 1;
 }
 
 /* Recessed rounded well — the roundy + roundy-shadow pair
