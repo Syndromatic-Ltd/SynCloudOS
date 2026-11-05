@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import * as React from "react";
+import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { act, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
@@ -7,7 +8,7 @@ import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEPreferencesController } from "../../src/NSE/Controllers/NSEPreferencesController";
 import { instantiateInOwnerScope, NSEOwnershipScope, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers/ownership";
-import { NSEMenuController } from "../../src/NSE/Menus/NSEMenuController";
+import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import type { NSEMenuRuntimePort } from "../../src/NSE/Menus/menuTypes";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
 import type { NSEToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
@@ -38,7 +39,7 @@ function preferences(signal: AbortSignal) {
 }
 function construct(kind: Kind, runtime: NSEMenuRuntimePort, options: NSEControllerOwnershipOptions = {}, sharedPreferences = preferences(new AbortController().signal)) {
   const value = kind === "menu"
-    ? new NSEMenuController({ ...options, runtime, model: { id: "runtime-owned-menu", entries: [] } })
+    ? new NSEMenu({ ...options, runtime, [nseMenuModel]: { id: "runtime-owned-menu", entries: [] } })
     : new NSEToolbarController({ ...options, runtime, preferences: sharedPreferences, items: [], configuration: {
       identifier: "runtime-owned-toolbar", owner: { kind: "application", applicationId: "runtime-owner-app" }, displayMode: "icon-only", sizeMode: "regular", allowedItemIds: [], defaultItemIds: [],
     } });

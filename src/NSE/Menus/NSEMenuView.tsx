@@ -26,7 +26,8 @@ import { sizedControlStyle, useNSEControlFeedback } from "../Controls/Core/nseCo
 import { NSEButton, nseButtonToneProps, type NSEButtonTone, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
 import { useNSEOverlayProvider } from "../Overlays";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
-import { NSEMenuController, nseRefreshMenuPresentation, type NSEMenuController as NSEMenuControllerType } from "./NSEMenuController";
+import { NSEMenu, nseRefreshMenuPresentation } from "./NSEMenu";
+import { nseMenuModel } from "./menuTypes";
 import type {
   NSEMenuEntry,
   NSEMenuItemDefinition,
@@ -88,7 +89,7 @@ function useEquivalentValue<T>(value: T, equivalent: (a: T, b: T) => boolean): T
 
 export interface NSECommandMenuProps {
   readonly model: NSEMenuModel;
-  readonly controller: NSEMenuControllerType;
+  readonly controller: NSEMenu;
   readonly open: boolean;
   readonly labelledBy?: string;
   readonly onOpenChange?: (open: boolean) => void;
@@ -660,7 +661,7 @@ function NSEItemMenu({
       selectedRef.current?.(value);
     },
   ), [localMenu.records, resolvedParentResponderId, runtimeSource, selectionHaptic, triggerNSEControlHaptic]);
-  const controller = useMemo(() => new NSEMenuController({ ownerSignal: localRuntime.signal, model: localMenu.model, runtime: localRuntime }), [localMenu.model, localRuntime]);
+  const controller = useMemo(() => new NSEMenu({ ownerSignal: localRuntime.signal, [nseMenuModel]: localMenu.model, runtime: localRuntime }), [localMenu.model, localRuntime]);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const [keyboardInitialFocus, setKeyboardInitialFocus] = useState<"first" | "last" | null>(null);
   const isOpen = open ?? uncontrolledOpen;
@@ -735,7 +736,8 @@ function NSEItemMenu({
   );
 }
 
-export function NSEMenu(props: NSEMenuProps) {
+/** @internal The menu surface drawn by pop-up buttons, view menus and the menu bar. */
+export function NSEMenuView(props: NSEMenuProps) {
   if ("model" in props) return <NSECommandMenuSurface {...props} />;
   return <NSEItemMenu {...props} />;
 }

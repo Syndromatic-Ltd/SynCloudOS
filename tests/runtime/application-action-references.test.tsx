@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
+import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { act, cleanup, fireEvent, render, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { action, bindActionResponder, refreshActionBindings, useAction } from "../../src/SynCloudOS/AppSDK/actions";
@@ -9,7 +10,7 @@ import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { createSynWareMenuRuntime } from "../../src/SynCloudOS/AppSDK/SynWareNSEMenuPort";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEActionScopeProvider, NSEControlRuntimeProvider } from "../../src/NSE/Controls/Core";
-import { NSEMenuController } from "../../src/NSE/Menus/NSEMenuController";
+import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
 import { NSEPreferencesController } from "../../src/NSE/Controllers/NSEPreferencesController";
 import type { NSEToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
@@ -87,7 +88,7 @@ it("prepares control and menu references through canonical command dispatch", as
   const view = render(<NSEButton title="Choose" action={reference} actionPayload="control" />, { wrapper: f.wrapper });
   await waitFor(() => expect((view.getByRole("button") as HTMLButtonElement).disabled).toBe(false));
   await act(async () => { fireEvent.click(view.getByRole("button")); });
-  const menu = new NSEMenuController({ standalone: true, model: { id: "refs", label: "Refs", entries: [
+  const menu = new NSEMenu({ standalone: true, [nseMenuModel]: { id: "refs", label: "Refs", entries: [
     { kind: "command", id: "choose", action: reference, payload: "menu" },
   ] }, runtime: f.port });
   disposers.push(() => menu.dispose());

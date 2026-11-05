@@ -20,9 +20,10 @@
 
 // @vitest-environment jsdom
 import React from "react";
+import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEMenuController } from "../../src/NSE/Menus/NSEMenuController";
+import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import type { NSEMenuRuntimePort } from "../../src/NSE/Menus/menuTypes";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { useNSEMenuPort } from "../../src/SynCloudOS/AppSDK/SynWareNSEMenuPort";
@@ -32,7 +33,7 @@ import { createTestRuntime, mountTestSynWareRuntime, registerTestSynWare } from 
 
 const runtimes: ReturnType<typeof createTestRuntime>[] = [];
 const mounts: ReturnType<typeof mountTestSynWareRuntime>[] = [];
-const controllers: NSEMenuController[] = [];
+const controllers: NSEMenu[] = [];
 
 afterEach(async () => {
   for (const controller of controllers.splice(0)) controller.dispose();
@@ -70,8 +71,8 @@ function fixture() {
     scope: "application", defaultKeyBindings: [], undo: { kind: "none" }, execute: handler,
   });
   const registration = register();
-  const controller = new NSEMenuController({
-    model: { id: "actions", entries: [{ kind: "command", id: "action", commandId: "com.example.menu-revision.action" }] },
+  const controller = new NSEMenu({
+    [nseMenuModel]: { id: "actions", entries: [{ kind: "command", id: "action", commandId: "com.example.menu-revision.action" }] },
     runtime: port,
   });
   controllers.push(controller);
@@ -160,8 +161,8 @@ describe("scoped SynWare menu revision evidence", () => {
       payload: { description: "none", parse: () => ({ ok: true, value: undefined }) },
       scope: "runtime", defaultKeyBindings: [], undo: { kind: "none" }, execute,
     });
-    const controller = new NSEMenuController({
-      model: { id: "foreign", entries: [{ kind: "command", id: "action", commandId: "foreign.action" }] },
+    const controller = new NSEMenu({
+      [nseMenuModel]: { id: "foreign", entries: [{ kind: "command", id: "action", commandId: "foreign.action" }] },
       runtime: port,
     });
     controllers.push(controller);

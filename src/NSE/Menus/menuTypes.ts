@@ -37,7 +37,39 @@ import type {
 } from "../../SynCloudOS/SynCloudOS";
 import type { NSELogicalPlacement } from "../Overlays/overlayTypes";
 
-/** A menu entry has one unambiguous presentation kind. */
+/**
+ * An item of an NSEMenu (NSMenuItem). A command item sends its `action` along
+ * the responder chain, and the action's validation decides whether it is
+ * enabled, hidden or checked (`validateMenuItem`). A bare action name belongs
+ * to the application that shows the menu; a dotted command id is taken as
+ * written. Its key equivalent is the action's key binding, the one authority
+ * for keys, so the menu shows the binding the action declared.
+ */
+export type NSEMenuItem<Payload = unknown> =
+  | { readonly isSeparatorItem: true; readonly identifier?: string }
+  | {
+      readonly title?: ReactNode;
+      readonly action: string | NSEActionReference<Payload>;
+      readonly actionPayload?: NoInfer<Payload>;
+      readonly image?: ReactNode;
+      readonly identifier?: string;
+    }
+  | {
+      readonly title: ReactNode;
+      readonly submenu: readonly NSEMenuItem[];
+      readonly image?: ReactNode;
+      readonly isEnabled?: boolean;
+      readonly toolTip?: string;
+      readonly identifier?: string;
+    }
+  | {
+      /** NSMenuItem.view: a row the menu draws but never validates or sends. */
+      readonly view: () => ReactNode;
+      readonly title: ReactNode;
+      readonly identifier?: string;
+    };
+
+/** @internal A menu entry has one unambiguous presentation kind. */
 export type NSEMenuEntry =
   | {
       readonly kind: "command";
@@ -121,6 +153,14 @@ export type NSEMenuModelActionCheck<Model extends NSEMenuModel> = {
 } & (Model extends { readonly sections: infer Sections extends readonly NSEMenuSection[] }
   ? { readonly sections: { readonly [K in keyof Sections]: Sections[K] & { readonly entries: CheckedMenuEntries<Sections[K]["entries"]> } } }
   : unknown);
+
+/** @internal Preserve payload correlation for each authored item, including submenus. */
+export type NSECheckedMenuItems<Items extends readonly NSEMenuItem[]> = {
+  readonly [K in keyof Items]: NSEMenuItem extends Items[K] ? Items[K]
+    : Items[K] & NSEActionPayloadCheck<Items[K], "actionPayload"> &
+      (Items[K] extends { readonly submenu: infer Children extends readonly NSEMenuItem[] }
+        ? { readonly submenu: NSECheckedMenuItems<Children> } : unknown);
+};
 
 export interface NSEMenuSection<TEntry = NSEMenuEntryInput> {
   readonly id: string;
@@ -220,8 +260,22 @@ export interface NSEMenuSnapshot {
 
 export type NSEMenuDismissReason = "escape" | "selection" | "programmatic" | "parent-dismissed";
 
-export interface NSEMenuControllerOptions extends NSEControllerOwnershipOptions {
-  readonly model: NSEMenuModel;
+/** @internal The menu's internal model, for the framework's own menus (application menus, item menus). */
+export const nseMenuModel: unique symbol = Symbol("nse.menuModel");
+
+export interface NSEMenuOptions extends NSEControllerOwnershipOptions {
+  /** NSMenu.title: the menu's name in a menu bar and for assistive technology. */
+  readonly title: string;
+  readonly items: readonly NSEMenuItem[];
+  /** A stable identifier; one is generated otherwise. */
+  readonly identifier?: string;
+  /** The command authority the menu validates and sends through. A SynWare gets it from `SCOS.menus.runtime`. */
+  readonly runtime: NSEMenuRuntimePort;
+}
+
+/** @internal */
+export interface NSEMenuModelOptions extends NSEControllerOwnershipOptions {
+  readonly [nseMenuModel]: NSEMenuModel;
   readonly runtime: NSEMenuRuntimePort;
 }
 

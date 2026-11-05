@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
+import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEObject, observable } from "../../src/NSE/Objects";
@@ -10,7 +11,7 @@ import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
 import { NSECoverFlow } from "../../src/NSE/CoverFlow/NSECoverFlow";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
-import { NSEMenuController } from "../../src/NSE/Menus/NSEMenuController";
+import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import type { NSEMenuRuntimePort } from "../../src/NSE/Menus/menuTypes";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { useNSEMenuPort } from "../../src/SynCloudOS/AppSDK/SynWareNSEMenuPort";
@@ -387,8 +388,8 @@ describe("actions in menus and controls", () => {
     const { context, app, focus } = fixture();
     let port!: NSEMenuRuntimePort;
     render(<SynWareProvider value={context}><PortProbe onPort={(next) => { port = next; }} /></SynWareProvider>);
-    const controller = new NSEMenuController({
-      model: { id: "file", entries: [{ kind: "command", id: "new", action: "newNote" }, { kind: "command", id: "reload", action: "reload" }] },
+    const controller = new NSEMenu({
+      [nseMenuModel]: { id: "file", entries: [{ kind: "command", id: "new", action: "newNote" }, { kind: "command", id: "reload", action: "reload" }] },
       runtime: port,
     });
     focus("view");
@@ -406,8 +407,8 @@ describe("actions in menus and controls", () => {
     const { context, view, focus } = fixture();
     let port!: NSEMenuRuntimePort;
     render(<SynWareProvider value={context}><PortProbe onPort={(next) => { port = next; }} /></SynWareProvider>);
-    const controller = new NSEMenuController({
-      model: { id: "edit", entries: [{ kind: "command", id: "rename", action: "rename", payload: { title: "Menu" } }] },
+    const controller = new NSEMenu({
+      [nseMenuModel]: { id: "edit", entries: [{ kind: "command", id: "rename", action: "rename", payload: { title: "Menu" } }] },
       runtime: port,
     });
     focus("view");
@@ -428,7 +429,7 @@ describe("actions in menus and controls", () => {
       },
       scheduler: { setTimeout: () => 0, clearTimeout: () => undefined },
     };
-    expect(() => new NSEMenuController({ model: { id: "x", entries: [{ kind: "command", id: "a", action: "run" }] }, runtime: port })).toThrow(/no application/);
+    expect(() => new NSEMenu({ [nseMenuModel]: { id: "x", entries: [{ kind: "command", id: "a", action: "run" }] }, runtime: port })).toThrow(/no application/);
   });
 
   function controlPort(context: SynWareContextValue) {

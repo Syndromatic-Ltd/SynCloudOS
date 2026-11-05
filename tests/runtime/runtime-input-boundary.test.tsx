@@ -25,7 +25,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createPortal } from "react-dom";
 import React from "react";
 import { NSEFocusPortProvider, NSEOverlayProvider } from "../../src/NSE/NSE";
-import { NSEMenu } from "../../src/NSE/Menus";
+import { NSEMenuView } from "../../src/NSE/Menus";
 import { FocusScope, RuntimeInputBoundary, SynCloudOSProvider, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact";
 import type { CommandDeclaration } from "../../src/SynCloudOS/Commands";
 import { createTestRuntime } from "./helpers";
@@ -181,7 +181,7 @@ describe("RuntimeInputBoundary", () => {
       const overlayPort = useRuntimeNSEOverlayPort("runtime");
       return <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
         <NSEFocusPortProvider port={focusPort}>
-          <NSEMenu label="Scoped NSE menu" open items={[{ value: "one", label: "One" }]} />
+          <NSEMenuView label="Scoped NSE menu" open items={[{ value: "one", label: "One" }]} />
         </NSEFocusPortProvider>
       </NSEOverlayProvider>;
     }
@@ -203,7 +203,7 @@ describe("RuntimeInputBoundary", () => {
       const focusPort = useRuntimeNSEFocusPort("runtime");
       const overlayPort = useRuntimeNSEOverlayPort("runtime");
       return <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
-        <NSEFocusPortProvider port={focusPort}><NSEMenu label="Nested port menu" open items={[{ value: "one", label: "One" }]} /></NSEFocusPortProvider>
+        <NSEFocusPortProvider port={focusPort}><NSEMenuView label="Nested port menu" open items={[{ value: "one", label: "One" }]} /></NSEFocusPortProvider>
       </NSEOverlayProvider>;
     }
     function OuterHost() {

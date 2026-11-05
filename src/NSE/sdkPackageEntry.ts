@@ -650,11 +650,11 @@ export type {
   NSEApplicationMenuProps,
 } from "./Menus/NSEApplicationMenu";
 export {
-  NSEContextMenu,
-} from "./Menus/NSEContextMenu";
+  NSEView,
+} from "./Views/NSEView";
 export type {
-  NSEContextMenuProps,
-} from "./Menus/NSEContextMenu";
+  NSEViewProps,
+} from "./Views/NSEView";
 export {
   NSEMenuBar,
 } from "./Menus/NSEMenuBar";
@@ -663,19 +663,7 @@ export type {
   NSEMenuBarProps,
 } from "./Menus/NSEMenuBar";
 export {
-  NSEMenuController,
-} from "./Menus/NSEMenuController";
-export {
-  NSEMenuOverlay,
-} from "./Menus/NSEMenuOverlay";
-export type {
-  NSEMenuOverlayProps,
-} from "./Menus/NSEMenuOverlay";
-export {
   NSEMenu,
-} from "./Menus/NSEMenu";
-export type {
-  NSEMenuProps,
 } from "./Menus/NSEMenu";
 export {
   NSEPopUpButton,
@@ -691,7 +679,8 @@ export type {
   NSEApplicationMenuModelOptions,
 } from "./Menus/createApplicationMenuModel";
 export type {
-  NSEMenuModel,
+  NSEMenuItem,
+  NSEMenuOptions,
   NSEMenuRuntimePort,
 } from "./Menus/menuTypes";
 export {

@@ -6,9 +6,9 @@ import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedC
 import { NSECoverFlow } from "../../src/NSE/CoverFlow/NSECoverFlow";
 import type { NSEMenuActionEntry } from "../../src/NSE/Menus/menuTypes";
 import type { NSEToolbarActionItem } from "../../src/NSE/Toolbars/toolbarTypes";
-import { NSEMenuController } from "../../src/NSE/Menus/NSEMenuController";
+import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
-import type { NSEMenuControllerOptions } from "../../src/NSE/Menus/menuTypes";
+import type { NSEMenuOptions } from "../../src/NSE/Menus/menuTypes";
 import type { NSEToolbarControllerOptions } from "../../src/NSE/Toolbars/toolbarTypes";
 
 class Controller {
@@ -78,12 +78,12 @@ const options: NSEActionOptions<string, number> = { undo: { kind: "register", cr
   throw new Error("type fixture");
 } } };
 void options;
-declare const menuOptions: Omit<NSEMenuControllerOptions, "model">;
-new NSEMenuController({ ...menuOptions, model: { id: "menu", label: "Menu", entries: [{ kind: "command", id: "choose", action: choose, payload: "note" }] } });
-// @ts-expect-error Authored menu entries infer the reference payload without explicit generics.
-new NSEMenuController({ ...menuOptions, model: { id: "menu", label: "Menu", entries: [{ kind: "command", id: "choose", action: choose, payload: 2 }] } });
+declare const menuOptions: Omit<NSEMenuOptions, "items" | "title">;
+new NSEMenu({ ...menuOptions, title: "Menu", items: [{ action: choose, actionPayload: "note" }] });
+// @ts-expect-error Authored menu items infer the reference payload without explicit generics.
+new NSEMenu({ ...menuOptions, title: "Menu", items: [{ action: choose, actionPayload: 2 }] });
 // @ts-expect-error Nested submenu payloads also retain the reference contract.
-new NSEMenuController({ ...menuOptions, model: { id: "menu", label: "Menu", entries: [{ kind: "submenu", id: "sub", label: "Sub", entries: [{ kind: "command", id: "choose", action: choose, payload: 2 }] }] } });
+new NSEMenu({ ...menuOptions, title: "Menu", items: [{ title: "Sub", submenu: [{ action: choose, actionPayload: 2 }] }] });
 declare const toolbarOptions: Omit<NSEToolbarControllerOptions, "items">;
 new NSEToolbarController({ ...toolbarOptions, items: [{ kind: "command", id: "choose", action: choose, payload: "note", label: "Choose", paletteLabel: "Choose", icon: null }] });
 // @ts-expect-error Toolbar catalogues infer and check each action payload.

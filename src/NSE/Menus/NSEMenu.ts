@@ -22,19 +22,23 @@ import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
 import { nseActionReferenceName } from "../Controls/Core/actionReference";
 import type { CommandDispatchResult, CommandPresentation, CommandValidationRequest } from "../../SynCloudOS/SynCloudOS";
 import { commandValidationRequestKey } from "../../SynCloudOS/nseRuntimeContracts";
+import { nseMenuModel } from "./menuTypes";
 import type {
-  NSEMenuControllerOptions,
+  NSECheckedMenuItems,
   NSEMenuDismissReason,
   NSEMenuEntry,
   NSEMenuEntryInput,
   NSEMenuKeyEquivalent,
   NSEMenuKeyEquivalentClaim,
   NSEMenuKeyEquivalentResult,
+  NSEMenuItem,
+  NSEMenuModelOptions,
+  NSEMenuOptions,
   NSEMenuPresentedEntry,
+  NSEMenuRuntimePort,
   NSEMenuSection,
   NSEMenuSnapshot,
   NSEMenuModel,
-  NSEMenuModelActionCheck,
 } from "./menuTypes";
 
 /** Validations repeated while focus or registry authority settles before a branch closes. */
@@ -106,14 +110,41 @@ export function orderMenuEntries<TEntry extends { readonly id: string }>(
   return ordered;
 }
 
+let generatedMenuIds = 0;
+
+/** NSMenuItems as the menu's internal entries. An item's identifier, or its position, keeps it unique. */
+function entriesFromItems(items: readonly NSEMenuItem[]): readonly NSEMenuEntryInput[] {
+  return items.map((item, index): NSEMenuEntryInput => {
+    const id = item.identifier ?? String(index);
+    if ("isSeparatorItem" in item) return { kind: "separator", id };
+    if ("submenu" in item) {
+      return { kind: "submenu", id, label: item.title, icon: item.image, entries: entriesFromItems(item.submenu), enabled: item.isEnabled, disabledReason: item.toolTip };
+    }
+    if ("view" in item) return { kind: "custom", id, label: item.title, render: item.view };
+    return {
+      kind: "command",
+      id,
+      action: item.action,
+      ...(Object.prototype.hasOwnProperty.call(item, "actionPayload") ? { payload: item.actionPayload } : {}),
+      ...(item.title !== undefined ? { labelOverride: item.title } : {}),
+      ...(item.image !== undefined ? { iconOverride: item.image } : {}),
+    };
+  });
+}
+
 /** Replaces every `{ action }` entry with the command entry for that action's command ID. */
 function resolveMenuEntries(
   entries: readonly NSEMenuEntryInput[],
-  resolveAction: NSEMenuControllerOptions["runtime"]["resolveAction"],
+  resolveAction: NSEMenuRuntimePort["resolveAction"],
 ): readonly NSEMenuEntry[] {
   return entries.map((entry): NSEMenuEntry => {
     if (entry.kind === "submenu") return { ...entry, entries: resolveMenuEntries(entry.entries, resolveAction) };
     if (entry.kind === "command" && "action" in entry) {
+      const name = typeof entry.action === "string" ? entry.action : nseActionReferenceName(entry.action);
+      if (name.includes(".")) {
+        const { action: _action, ...rest } = entry;
+        return { ...rest, commandId: name };
+      }
       if (!resolveAction) {
         throw new TypeError(`The menu entry "${entry.id}" names the action "${entry.action}", but this menu has no application to resolve it. Show the menu inside an application's views.`);
       }
@@ -188,7 +219,7 @@ function cancelled(commandId: string, reason: string): CommandDispatchResult<unk
   return { status: "cancelled", commandId, operationId: "", reason };
 }
 
-type PresentationGeneration = ReturnType<NSEMenuControllerOptions["runtime"]["commands"]["getPresentationGeneration"]>;
+type PresentationGeneration = ReturnType<NSEMenuRuntimePort["commands"]["getPresentationGeneration"]>;
 /** @internal A mounted menu revalidates its current branch without removing focused rows. */
 export const nseRefreshMenuPresentation: unique symbol = Symbol("nse.refreshMenuPresentation");
 function samePresentationGeneration(left: PresentationGeneration | null, right: PresentationGeneration): boolean {
@@ -196,12 +227,16 @@ function samePresentationGeneration(left: PresentationGeneration | null, right: 
 }
 
 /**
- * Immutable command presentation controller. It has no responder/focus/undo
- * graph of its own: every branch delegates validation and dispatch to the command authority.
+ * NSMenu: a menu of NSEMenuItems. It has no responder, focus or undo graph of
+ * its own: each time a branch opens it validates the items' actions along the
+ * responder chain and sends the chosen one through the same command authority.
+ * A pop-up button that pulls down, a view's `menu`, and the menu bar show it.
  */
-export class NSEMenuController<const Model extends NSEMenuModel = NSEMenuModel> {
-  readonly model: Model;
-  readonly runtime;
+export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMenuItem[]> {
+  /** @internal */
+  readonly model: NSEMenuModel;
+  readonly items: Items;
+  readonly runtime: NSEMenuRuntimePort;
   readonly #ownership: NSEControllerLifetime;
   #snapshot: NSEMenuSnapshot = initialSnapshot;
   #listeners = new Set<() => void>();
@@ -217,10 +252,19 @@ export class NSEMenuController<const Model extends NSEMenuModel = NSEMenuModel> 
   #disposed = false;
   #runtimeAbort = () => this.dispose();
 
-  constructor(options: Omit<NSEMenuControllerOptions, "model"> & { readonly model: Model & NSEMenuModelActionCheck<NoInfer<Model>> }) {
-    const { model, runtime } = options;
-    if (!model.id.trim()) throw new TypeError("NSE menu IDs must not be empty.");
-    this.#ownership = new NSEControllerLifetime(options, { kind: "NSEMenuController", id: model.id }, runtime.signal);
+  constructor(options: Omit<NSEMenuOptions, "items"> & { readonly items: Items & NSECheckedMenuItems<NoInfer<Items>> });
+  /** @internal */
+  constructor(options: NSEMenuModelOptions);
+  constructor(options: NSEMenuOptions | NSEMenuModelOptions) {
+    const { runtime } = options;
+    const model: NSEMenuModel = nseMenuModel in options ? options[nseMenuModel] : {
+      id: options.identifier ?? `nse-menu-${++generatedMenuIds}`,
+      label: options.title,
+      entries: entriesFromItems(options.items),
+    };
+    if (!model.id.trim()) throw new TypeError("NSE menu identifiers must not be empty.");
+    this.items = ("items" in options ? options.items : []) as Items;
+    this.#ownership = new NSEControllerLifetime(options, { kind: "NSEMenu", id: model.id }, runtime.signal);
     const sectionIds = new Set<string>();
     for (const section of model.sections ?? []) {
       if (!section.id.trim()) throw new TypeError(`NSE menu section IDs must not be empty (${model.id}).`);
@@ -241,6 +285,10 @@ export class NSEMenuController<const Model extends NSEMenuModel = NSEMenuModel> 
     this.#ownership.bind(() => this.dispose());
   }
 
+  /** NSMenu.title. */
+  get title(): string { return this.model.label; }
+  /** The menu's identifier. */
+  get identifier(): string { return this.model.id; }
   get snapshot(): NSEMenuSnapshot { return this.#snapshot; }
   get isDisposed(): boolean { return this.#disposed; }
 

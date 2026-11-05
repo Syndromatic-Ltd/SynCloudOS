@@ -24,7 +24,8 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import * as cssTree from "css-tree";
 import { afterEach, describe, expect, it } from "vitest";
-import { NSEAppearanceProvider, NSEMenu, NSEListboxPopup } from "@syndromatic/syncloudos/nse";
+import { NSEAppearanceProvider, NSEListboxPopup } from "@syndromatic/syncloudos/nse";
+import { NSEMenuView } from "../../../src/NSE/Menus/NSEMenuView";
 import { NSEStandaloneControlHost } from "@syndromatic/syncloudos/nse/controls";
 import { atmoAppearance } from "@syndromatic/syncloudos/nse/themes/atmo";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
@@ -49,7 +50,7 @@ function selectorsFor(file: string, property: string, value: string): string[] {
 async function mountPopup(contrast: "normal" | "forced" = "normal") {
   render(<NSEAppearanceProvider appearance={atmoAppearance} contrast={contrast}>
     <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>
-      <NSEMenu label="Actions" defaultOpen items={[{ value: "save", label: "Save" }]} />
+      <NSEMenuView label="Actions" defaultOpen items={[{ value: "save", label: "Save" }]} />
     </NSEStandaloneControlHost>
   </NSEAppearanceProvider>);
   return screen.findByRole("menu");
@@ -74,7 +75,7 @@ describe("adaptive menu family paint", () => {
   it.each([390, 1024])("retains the desktop command-menu material at %ipx without changing modality", async (width) => {
     render(<NSEAppearanceProvider appearance={atmoAppearance}>
       <NSEStandaloneControlHost document={document} window={window} presentation={createStaticPresentationPort({ width, height: 768 })}>
-        <NSEMenu label="File" defaultOpen items={[{ value: "save", label: "Save" }]} />
+        <NSEMenuView label="File" defaultOpen items={[{ value: "save", label: "Save" }]} />
       </NSEStandaloneControlHost>
     </NSEAppearanceProvider>);
     const menu = await screen.findByRole("menu");

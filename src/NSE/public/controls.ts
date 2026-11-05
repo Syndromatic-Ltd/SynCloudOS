@@ -179,7 +179,7 @@ export type {
 
 
 export { NSEMenu, NSEPopUpButton } from "../Menus";
-export type { NSEMenuItemDefinition, NSEMenuProps, NSEPopUpButtonItem, NSEPopUpButtonProps } from "../Menus";
+export type { NSEMenuItem, NSEMenuOptions, NSEPopUpButtonItem, NSEPopUpButtonProps } from "../Menus";
 export { NSEPopup, NSEStandaloneControlHost } from "../Overlays";
 export type { NSEPopupProps, NSEStandaloneControlHostProps } from "../Overlays";
 export { NSEAppMenu, NSEEditMenu, NSEHelpMenu, NSEAppMenuSurface } from "../Menus";
