@@ -180,13 +180,14 @@ describe("scroll progress and navigation", () => {
     render(
       <>
         <NSESegmentedControl aria-label="Choices" segmentStyle="capsule" selection={{ mode: "select-one", selectedIds: new Set(["first"]), allowsEmpty: false }}
-          items={[{ id: "first", label: "First" }, { id: "second", label: "Second" }]} onSelectionChange={change} />
+          items={[{ id: "first", label: "First" }, { id: "second", label: "Second", width: 90 }]} onSelectionChange={change} />
         <NSESegmentedControl aria-label="Tools" segmentStyle="texturedRounded" selection={{ mode: "select-any", selectedIds: new Set(["bold"]) }}
           items={[{ id: "bold", label: "Bold", image: <b>B</b> }, { id: "italic", label: "Italic", image: <i>I</i> }]} onSelectionChange={tools} />
       </>,
     );
     const second = screen.getByRole("button", { name: "Second" });
     expect(second.closest("[data-nse-control='segmented-control']")?.getAttribute("data-segment-style")).toBe("capsule");
+    expect(second.style.inlineSize).toBe("90px");
     fireEvent.click(second);
     expect([...change.mock.calls[0][0].selectedIds]).toEqual(["second"]);
     const bold = screen.getByRole("button", { name: "Bold" });
