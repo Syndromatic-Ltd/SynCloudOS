@@ -267,8 +267,6 @@ export { NSESplitView } from "./DataViews/Split/NSESplitView";
 export type { NSESplitViewProps } from "./DataViews/Split/NSESplitView";
 export { NSEMetalSurface, NSERoundedBox } from "./Material";
 export type { NSEMetalSurfaceProps, NSERoundedBoxProps } from "./Material";
-export { NSEAppMenuSurface, NSEAppMenu, NSEEditMenu, NSEHelpMenu } from "./Menus";
-export type { NSEAppMenuItemDefinition, NSEAppMenuProps, NSEAppMenuSurfaceProps, NSEEditMenuProps, NSEHelpMenuProps } from "./Menus";
 export { NSEDialogSurface } from "./Overlays/NSEDialogSurface";
 export type { NSEDialogSurfaceProps } from "./Overlays/NSEDialogSurface";
 export { NSEProgressBar, NSEProgressItem, NSEProgressSlider, NSESpinner } from "./Progress";
@@ -644,12 +642,6 @@ export type {
   NSEMediaPanelProps,
 } from "./MediaPanels/NSEMediaPanel";
 export {
-  NSEApplicationMenu,
-} from "./Menus/NSEApplicationMenu";
-export type {
-  NSEApplicationMenuProps,
-} from "./Menus/NSEApplicationMenu";
-export {
   NSEView,
 } from "./Views/NSEView";
 export type {
@@ -672,12 +664,6 @@ export type {
   NSEPopUpButtonItem,
   NSEPopUpButtonProps,
 } from "./Menus/NSEPopUpButton";
-export {
-  createNSEApplicationMenuModel,
-} from "./Menus/createApplicationMenuModel";
-export type {
-  NSEApplicationMenuModelOptions,
-} from "./Menus/createApplicationMenuModel";
 export type {
   NSEMenuItem,
   NSEMenuOptions,

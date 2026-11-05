@@ -182,8 +182,6 @@ export { NSEMenu, NSEPopUpButton } from "../Menus";
 export type { NSEMenuItem, NSEMenuOptions, NSEPopUpButtonItem, NSEPopUpButtonProps } from "../Menus";
 export { NSEPopup, NSEStandaloneControlHost } from "../Overlays";
 export type { NSEPopupProps, NSEStandaloneControlHostProps } from "../Overlays";
-export { NSEAppMenu, NSEEditMenu, NSEHelpMenu, NSEAppMenuSurface } from "../Menus";
-export type { NSEAppMenuItemDefinition, NSEAppMenuProps, NSEAppMenuSurfaceProps, NSEEditMenuProps, NSEHelpMenuProps } from "../Menus";
 
 export { NSEProgressBar, NSEProgressItem, NSEProgressSlider, NSESpinner } from "../Progress";
 export type { NSEProgressBarProps, NSEProgressItemProps, NSEProgressSliderProps, NSESpinnerProps } from "../Progress";

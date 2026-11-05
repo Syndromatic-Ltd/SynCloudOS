@@ -98,17 +98,13 @@ export const nseRegistry = [
       "NSESlider",
       "NSESpinner",
       "NSEPageHeader",
-      "NSEAppMenuSurface",
       "NSEDialogSurface",
       "NSERoundedBox",
       "NSEHeader",
       "NSEPrevNextBanner",
       "NSEDatePicker",
       "NSETimePicker",
-      "NSEProgressSlider",
-      "NSEAppMenu",
-      "NSEEditMenu",
-      "NSEHelpMenu"
+      "NSEProgressSlider"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
   },

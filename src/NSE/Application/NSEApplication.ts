@@ -23,6 +23,8 @@ import type { SynWareRouteGraph } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
 import { nseDisposeFor, type NSEOwnedObject, type NSEOwner } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
+import { observable } from "../Objects/observable";
+import type { NSEMenu } from "../Menus/NSEMenu";
 import { NSEObjectLifetime } from "./objectLifetime";
 import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
 import type { NSEAnyWindowController, NSEWindowController, NSEWindowControllerClass } from "./NSEWindowController";
@@ -91,6 +93,13 @@ export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObjec
   static migrations?: readonly SynWareMigration[];
 
   readonly #lifetime: NSEObjectLifetime;
+
+  /**
+   * NSApplication.mainMenu: the menus across the application's menu bar, one
+   * per item's submenu, drawn by `NSEMenuBar`. Setting it is how an application
+   * opts in to a menu bar; most SynWare has none, so it starts null.
+   */
+  @observable accessor mainMenu: NSEMenu | null = null;
 
   constructor() {
     super();

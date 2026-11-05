@@ -742,12 +742,14 @@ describe("NSEMenu", () => {
     const validation = async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
       requests.map((request) => [request.key, presentation(request.commandId)]),
     );
-    const firstController = new NSEMenu({ [nseMenuModel]: model, runtime: runtime(validation) });
-    const secondController = new NSEMenu({ [nseMenuModel]: secondModel, runtime: runtime(validation) });
+    const mainMenu = new NSEMenu({ [nseMenuModel]: { id: "main", label: "Main Menu", entries: [
+      { kind: "submenu", id: model.id, label: model.label, entries: model.entries },
+      { kind: "submenu", id: secondModel.id, label: secondModel.label, entries: secondModel.entries },
+    ] }, runtime: runtime(validation) });
     render(
       <MenuOverlayHarness>
         <NSEMenuBar
-          menus={[firstController, secondController]}
+          menu={mainMenu}
           overlay={{ parentResponderId: "editor", idForMenu: (item) => `menubar:${item.identifier}` }}
         />
       </MenuOverlayHarness>,
