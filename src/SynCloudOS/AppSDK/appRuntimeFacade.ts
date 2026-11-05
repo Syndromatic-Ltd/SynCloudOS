@@ -421,6 +421,7 @@ function snapshotMountedCommandTitle(
   isNativeProxy: ((value: object) => boolean) | undefined,
 ): LocalisedCommandTitle {
   const record = (source: unknown, field: string): Record<string, unknown> => {
+    if (typeof source === "string") throw securityError(`${field} must be a localised title record { key, fallback }, not a string. Command declarations and validations take { key: "commands.<id>.title", fallback: "Undo Typing" }; an @action validator may return the string itself.`);
     if (!source || typeof source !== "object") throw securityError(`${field} must be a plain record.`);
     if (isNativeProxy?.(source)) throw securityError(`${field} must not be a proxy.`);
     const prototype = Object.getPrototypeOf(source);
