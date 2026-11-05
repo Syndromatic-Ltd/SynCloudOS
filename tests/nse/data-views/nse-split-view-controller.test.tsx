@@ -113,8 +113,12 @@ describe("NSESplitViewController", () => {
       expect.objectContaining({ identifier: "content", thickness: 600, isCollapsed: false }),
       expect.objectContaining({ identifier: "inspector", thickness: 300, isCollapsed: false }),
     ]);
+    // The inspector's preferred third follows the split view until a divider moves; then it holds.
     controller[nseSplitViewLayout].resize(820);
-    expect(thicknesses(controller)).toEqual([520, 300]);
+    expect(thicknesses(controller)).toEqual([547, 273]);
+    controller.setPosition(520, 0);
+    controller[nseSplitViewLayout].resize(900);
+    expect(thicknesses(controller)).toEqual([600, 300]);
 
     controller[nseSplitViewLayout].resize(500);
     expect(controller.getSnapshot().items[1]).toMatchObject({ identifier: "inspector", isCollapsed: true });
