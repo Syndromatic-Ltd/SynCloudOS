@@ -723,9 +723,6 @@ export type {
   NSEMenuRuntimePort,
 } from "./Menus/menuTypes";
 export {
-  NSEAccordionView,
-} from "./Navigation/NSEAccordionView";
-export {
   NSEAdaptiveNavigationController,
 } from "./Navigation/NSEAdaptiveNavigationController";
 export type {
@@ -915,8 +912,6 @@ export type {
   NSEAdaptiveNavigationSnapshot,
   NSETabItem,
   NSETabViewProps,
-  NSEAccordionItem,
-  NSEAccordionViewProps,
 } from "./Navigation/navigationTypes";
 export type {
   NSETableViewEditContext,

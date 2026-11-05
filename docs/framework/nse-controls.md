@@ -137,7 +137,7 @@ Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSESlidingPanes
 | `NSESplitView` | Two resizable panes, a sidebar beside the main view. |
 | `NSEScrollView`, `NSEClipView` | Scrolling with momentum and rubber banding. |
 | `NSETabView`, `NSETabGroup`, `NSETabBar` | Tabbed content, driven by `NSETabBarController`. |
-| `NSEAccordionView` | Collapsible sections. |
+| `NSEButton` (`bezelStyle="disclosure"`) in an `NSEStackView` | Collapsible sections: the disclosure button shows and hides the stack item below it, as in AppKit. |
 | `NSESourceListScene` | The scene that composes a source-list sidebar (an `NSEOutlineView` in source-list style) with content. |
 | `NSEHierarchyStack`, `NSESlidingPanes` | Drill in navigation across panes. |
 | `NSEDrawer` | A drawer that slides from a window edge. |

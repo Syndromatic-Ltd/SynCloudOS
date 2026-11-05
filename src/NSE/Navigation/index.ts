@@ -31,7 +31,6 @@ export * from "./NSEApplicationNavigationChrome";
 export * from "./NSETabView";
 export * from "./NSETabGroup";
 export type { NSETabStripPresentation, NSETabStyle } from "./tabStrip";
-export * from "./NSEAccordionView";
 export * from "./SourceList";
 import "./SourceList/nse-sourcelist.css";
 import "./SourceList/nse-source-list-scene.css";
