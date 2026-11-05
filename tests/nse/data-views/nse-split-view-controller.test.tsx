@@ -113,6 +113,35 @@ describe("split view controller", () => {
     fireEvent.click(screen.getByRole("button", { name: "Secret action" }));
     expect(activateSecret).toHaveBeenCalledTimes(1);
   });
+  it("keeps pane content mounted across split and single-pane presentation", () => {
+    const controller = new NSESplitViewController({ id: "keep-mounted", orientation: "horizontal", panes });
+    controller.resize(900);
+    const mounts = vi.fn();
+    const unmounts = vi.fn();
+    function Pane({ name }: { readonly name: string }) {
+      const [count, setCount] = React.useState(0);
+      React.useEffect(() => { mounts(name); return () => unmounts(name); }, [name]);
+      return <button type="button" onClick={() => setCount((value) => value + 1)}>{`${name} ${count}`}</button>;
+    }
+    const paneDefinitions = [
+      { id: "content", label: "Content", content: <Pane name="content" /> },
+      { id: "inspector", label: "Inspector", content: <Pane name="inspector" /> },
+    ];
+    const desktop = { responsiveState: { mode: "desktop" as const, width: 900, height: 700, prefersReducedMotion: false }, windowBounds: { width: 900, height: 700 } };
+    const mobile = { responsiveState: { mode: "mobile" as const, width: 390, height: 700, prefersReducedMotion: false }, windowBounds: { width: 390, height: 700 } };
+    const view = render(<NSESplitViewAdapter aria-label="Lab" controller={controller} panes={paneDefinitions} {...desktop} />);
+    fireEvent.click(screen.getByRole("button", { name: "inspector 0" }));
+    view.rerender(<NSESplitViewAdapter aria-label="Lab" controller={controller} panes={paneDefinitions} {...mobile} />);
+    expect(screen.getByRole("tab", { name: "Content" })).not.toBeNull();
+    fireEvent.click(screen.getByRole("tab", { name: "Inspector" }));
+    expect(screen.getByRole("button", { name: "inspector 1" })).not.toBeNull();
+    view.rerender(<NSESplitViewAdapter aria-label="Lab" controller={controller} panes={paneDefinitions} {...desktop} />);
+    expect(screen.getByRole("button", { name: "inspector 1" })).not.toBeNull();
+    expect(screen.getByRole("button", { name: "content 0" })).not.toBeNull();
+    expect(unmounts).not.toHaveBeenCalled();
+    expect(mounts).toHaveBeenCalledTimes(2);
+  });
+
   it("solves minimum, ideal, maximum and collapse-priority constraints deterministically", () => {
     const controller = new NSESplitViewController({ id: "inspector", orientation: "horizontal", panes });
 
