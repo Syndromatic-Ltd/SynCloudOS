@@ -45,6 +45,25 @@
   transition: inline-size 160ms ease, block-size 160ms ease, margin 160ms ease, opacity 160ms ease;
 }
 
+/* An item's content. Without a preferred size the item takes the content's
+ * fitting size along the stack's axis (NSView.fittingSize), so the content
+ * keeps its natural extent there; with one, the content fills the item. */
+.nse-stack-view-item-content {
+  box-sizing: border-box;
+  display: flow-root;
+  min-inline-size: 0;
+}
+
+.nse-stack-view-item:not([data-stack-fitting="true"]) > .nse-stack-view-item-content {
+  block-size: 100%;
+  inline-size: 100%;
+}
+
+.nse-stack-view-item[data-stack-fitting="true"][data-stack-orientation="horizontal"] > .nse-stack-view-item-content {
+  block-size: 100%;
+  inline-size: max-content;
+}
+
 .nse-stack-view-item[data-stack-hidden="true"]:not([data-stack-overflow-action]) {
   display: none;
 }
