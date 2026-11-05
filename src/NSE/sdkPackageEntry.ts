@@ -620,6 +620,24 @@ export {
   NSEStackView,
 } from "./Layout/NSEStackView";
 export {
+  NSEStackVisibilityPriority,
+} from "./Layout/stackViewTypes";
+export {
+  NSEGridRow,
+  NSEGridView,
+} from "./Layout/NSEGridView";
+export type {
+  NSEGridColumn,
+  NSEGridRowProps,
+  NSEGridViewProps,
+  NSEGridXPlacement,
+  NSEGridYPlacement,
+} from "./Layout/NSEGridView";
+export type {
+  NSELayoutGap,
+  NSESpacing,
+} from "./Layout/layoutSpacing";
+export {
   resolveStackLayout,
 } from "./Layout/resolveStackLayout";
 export {

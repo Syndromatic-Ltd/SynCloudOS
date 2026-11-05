@@ -73,7 +73,8 @@ The tables below give an overview. These pages document each component's props, 
 | --- | --- |
 | [Buttons](nse/buttons.md) | Push, icon, toggle, tool, activity, notification, progress and file picker buttons |
 | [Text fields and choice controls](nse/text-and-choice.md) | Text, password, secure, search, combo and token fields, checkboxes, radio groups, boxes |
-| [Values, pickers and progress](nse/values-and-progress.md) | Sliders, steppers, level indicators, segmented controls, pickers, progress |
+| [Values, pickers and progress](nse/values-and-progress.md) | Sliders, steppers, level indicators, segmented controls, pop-up buttons, progress, date pickers |
+| [Stacks and grids](nse/stacks-and-grids.md) | `NSEStackView` and `NSEGridView` |
 | [Menus, toolbars and inspectors](nse/menus-toolbars-and-inspectors.md) | Choosing a menu control, responder provenance, configured toolbars, narrow inspectors, keep-mounted panes |
 
 Focused entries include `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSEStandaloneControlHost` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, `NSEPage` in `nse/page` and `NSECoverFlow` in `nse/cover-flow`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
@@ -119,7 +120,8 @@ Focused entries include `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSESta
 
 | Component | Purpose |
 | --- | --- |
-| `NSEStackView`, `NSEStackItem` | One dimensional layout with distribution, alignment and visibility priorities. Items that no longer fit collapse in priority order, and stay reachable from the keyboard. |
+| `NSEStackView`, `NSEStackItem` | `NSStackView`: views in a row or a column, with distribution, alignment, spacing and visibility priorities. Views below `mustHold` that no longer fit detach into an overflow menu, in priority order, and stay reachable from the keyboard. See [Stacks and grids](nse/stacks-and-grids.md). |
+| `NSEGridView`, `NSEGridRow` | `NSGridView`: views in rows and columns. A trailing label column and a fill column make a Mac form. |
 | `NSEBox` | `NSBox`: titled boxes (`title`, `titlePosition`, `borderType`, `contentViewMargins`) and separators (`boxType="separator"`). |
 | `NSERoundedBox` | A rounded surface. |
 | `NSESplitView` | Two resizable panes, a sidebar beside the main view. |

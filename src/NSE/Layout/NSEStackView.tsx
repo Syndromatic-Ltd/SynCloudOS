@@ -33,6 +33,8 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { NSEFlowStackView, stackNeedsArrangedLayout } from "./flowStackView";
+import { resolveNSESpacing } from "./layoutSpacing";
 import { NSEStackItem } from "./NSEStackItem";
 import { resolveStackLayout } from "./resolveStackLayout";
 import type {
@@ -255,14 +257,33 @@ function isNativeOverflowActionTarget(target: EventTarget | null): boolean {
 }
 
 /**
- * Semantic, appearance-neutral stack layout. The host may provide an exact
- * size, or pass a runtime-owned observer/scheduler pair for responsive layout.
+ * NSStackView: views in a row or a column. A stack whose views need no
+ * per-view sizes, gravity or visibility priority below mustHold is laid out by
+ * flexbox; the others are measured, given an exact size by the host or a
+ * runtime-owned observer and scheduler pair. Both give the same frames.
  */
-export function NSEStackView({
+export function NSEStackView(props: NSEStackViewProps) {
+  return stackNeedsArrangedLayout(props) ? <NSEArrangedStackView {...props} /> : <NSEFlowStackView {...props} />;
+}
+
+/** A named spacing is resolved to pixels from the host's computed style. */
+function useSpacingInPixels(spacing: NSEStackViewProps["spacing"], host: HTMLElement | null): number {
+  const [resolved, setResolved] = useState(typeof spacing === "number" ? spacing : 8);
+  useLayoutEffect(() => {
+    if (typeof spacing === "number") { setResolved(spacing); return; }
+    if (!host) return;
+    host.style.setProperty("--nse-stack-spacing", resolveNSESpacing(spacing) ?? "0px");
+    const pixels = Number.parseFloat(getComputedStyle(host).getPropertyValue("--nse-stack-spacing"));
+    if (Number.isFinite(pixels)) setResolved(pixels);
+  }, [host, spacing]);
+  return resolved;
+}
+
+function NSEArrangedStackView({
   orientation = "horizontal",
   distribution = "fill",
-  alignment = "fill",
-  spacing = 0,
+  alignment = orientation === "vertical" ? "fill" : "centre",
+  spacing: suppliedSpacing,
   edgeInsets,
   availableSize,
   overflowPolicy = "menu",
@@ -297,6 +318,7 @@ export function NSEStackView({
   const overflowOpenRef = useRef(false);
   const overflowCloseRequest = useRef(0);
   const overflowKeyboardDispatches = useRef(new Set<() => void>());
+  const spacing = useSpacingInPixels(suppliedSpacing ?? (orientation === "vertical" ? "standard" : "inline"), host);
   const childEntries = useMemo(() => readStackChildren(children), [children]);
   const measuredAvailableSize = availableSize ?? measuredSize ?? Number.POSITIVE_INFINITY;
   const layout = useMemo(() => resolveStackLayout({

@@ -186,27 +186,11 @@ export type { NSEDialogSurfaceProps } from "../Overlays/NSEDialogSurface";
 export { useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
 export type { DefaultPreventedEvent, NSEControlHapticRequest, NSEControlHapticResult } from "../Controls/Core/nseControlsShared";
 
-export {
-  NSEFit,
-  NSEFlex,
-  NSEInline,
-  NSEOrdered,
-  NSESpacer,
-  NSEStack,
-  resolveNSESpacing,
-} from "../Layout/NSELayout";
-export type {
-  NSEFitProps,
-  NSEFlexProps,
-  NSEInlineProps,
-  NSELayoutGap,
-  NSEOrderedChildrenOptions,
-  NSEOrderedProps,
-  NSESpacerProps,
-  NSESpacing,
-  NSEStackContentAlignment,
-  NSEStackProps,
-} from "../Layout/NSELayout";
-export { NSEForm, NSEFormRow, NSEFormSeparator } from "../Layout/NSEForm";
-export type { NSEFormProps, NSEFormRowProps } from "../Layout/NSEForm";
+export { NSEStackView } from "../Layout/NSEStackView";
+export { NSEStackItem } from "../Layout/NSEStackItem";
+export { NSEStackVisibilityPriority } from "../Layout/stackViewTypes";
+export type { NSEStackViewProps, NSEStackItemProps } from "../Layout/stackViewTypes";
+export type { NSELayoutGap, NSESpacing } from "../Layout/layoutSpacing";
+export { NSEGridRow, NSEGridView } from "../Layout/NSEGridView";
+export type { NSEGridColumn, NSEGridRowProps, NSEGridViewProps, NSEGridXPlacement, NSEGridYPlacement } from "../Layout/NSEGridView";
 export { NSEFeedbackProvider, useNSEFeedback } from "../Feedback";

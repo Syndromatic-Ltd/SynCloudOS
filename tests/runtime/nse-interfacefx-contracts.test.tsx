@@ -43,7 +43,7 @@ import {
   NSETabBarController,
 } from "../../src/NSE/Navigation";
 import type { SynCloudOSPresentationTraits } from "../../src/SynCloudOS/SynCloudOS";
-import { NSEOrdered } from "../../src/NSE/Layout";
+import { NSEGridView } from "../../src/NSE/Layout";
 import { NSE } from "../../src/NSE/NSE";
 import { getNSERegistryItem, nseRegistry } from "../../src/NSE/registry";
 
@@ -456,11 +456,11 @@ describe("NSE semantic contracts", () => {
     expect(NSE.NSESplitView).toBe(NSESplitView);
     expect(NSE.NSEProgressIndicator).toBe(NSEProgressIndicator);
     expect(NSE.NSESlider).toBe(NSESlider);
-    expect(typeof NSE.NSEFlex).toBe("function");
+    expect(typeof NSE.NSEStackView).toBe("function");
     expect(typeof NSE.NSEPane).toBe("function");
     expect(typeof NSE.NSEDatePicker).toBe("function");
-    expect(NSE.NSEOrdered).toBe(NSEOrdered);
-    expect(NSE.Layout.NSEOrdered).toBe(NSEOrdered);
+    expect(NSE.NSEGridView).toBe(NSEGridView);
+    expect(NSE.Layout.NSEStackView).toBe(NSE.NSEStackView);
     expect(NSE.Registry.items).toBe(nseRegistry);
 
     const names = nseRegistry.map((item) => item.name);
@@ -563,47 +563,6 @@ describe("NSE semantic contracts", () => {
 
     fireEvent.click(container.querySelector(".nse-sidebar-section-toggle") as HTMLElement);
     expect(onToggleSection).toHaveBeenCalledWith(expect.objectContaining({ id: "library" }));
-  });
-
-  it("orders NSEOrdered children by declared order while keeping stable ties", () => {
-    const { container, rerender } = render(
-      <NSEOrdered as="ol" axis="horizontal" gap={4}>
-        <span data-nse-order="30">Third</span>
-        <span data-order="10">First</span>
-        <span data-nse-order="20">Second A</span>
-        <span data-order="20">Second B</span>
-        <span data-nse-order="5" hidden>Hidden</span>
-      </NSEOrdered>
-    );
-
-    const ordered = container.querySelector(".nse-layout-ordered") as HTMLElement;
-    expect(ordered.tagName).toBe("OL");
-    expect(ordered.getAttribute("data-axis")).toBe("horizontal");
-    expect(ordered.style.gap).toBe("4px");
-
-    const visibleItems = Array.from(container.querySelectorAll<HTMLElement>(".nse-layout-ordered-item"));
-    expect(visibleItems.map((item) => item.textContent)).toEqual(["First", "Second A", "Second B", "Third"]);
-    expect(visibleItems.map((item) => item.getAttribute("data-nse-order"))).toEqual(["first", "middle", "middle", "last"]);
-    expect(visibleItems.map((item) => item.getAttribute("data-nse-sort-order"))).toEqual(["10", "20", "20", "30"]);
-    expect(visibleItems.map((item) => item.getAttribute("data-source-index"))).toEqual(["1", "2", "3", "0"]);
-
-    rerender(
-      <NSEOrdered includeHidden descending>
-        <span data-nse-order="30">Third</span>
-        <span data-order="10">First</span>
-        <span data-nse-order="20">Second A</span>
-        <span data-order="20">Second B</span>
-        <span data-nse-order="5" hidden>Hidden</span>
-      </NSEOrdered>
-    );
-
-    expect(Array.from(container.querySelectorAll<HTMLElement>(".nse-layout-ordered-item")).map((item) => item.textContent)).toEqual([
-      "Third",
-      "Second A",
-      "Second B",
-      "First",
-      "Hidden"
-    ]);
   });
 
   it("preserves split-view keyboard behavior and reset semantics", () => {
