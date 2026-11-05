@@ -686,9 +686,10 @@ function NSEItemMenu({
       <NSEButton
         {...(trigger === "tool" ? {
           bezelStyle: "texturedRounded" as const,
-          title: triggerLabel,
-          image: label,
-          imagePosition: "imageOnly" as const,
+          // A text face is the button's title; a glyph is its image, named by the trigger label.
+          ...(typeof label === "string" || typeof label === "number"
+            ? { title: label }
+            : { title: triggerLabel, image: label, imagePosition: "imageOnly" as const }),
           controlSize: controlSize === "small" ? "small" as const : undefined,
           "data-size": height !== undefined ? "custom" : undefined,
           style: sizedControlStyle(undefined, height, undefined),
