@@ -29,9 +29,9 @@ import { NSEColourPanelProvider } from "../../src/NSE/Colour/ColourPanel/NSEColo
 import { NSEColourWell } from "../../src/NSE/Colour/Controls/NSEColourWell";
 import { NSEArrayController, NSETreeController } from "../../src/NSE/Controllers";
 import type { NSEDataViewAdapter } from "../../src/NSE/DataViews/Core";
-import { NSETable } from "../../src/NSE/DataViews/Table";
+import { NSETableView } from "../../src/NSE/DataViews/Table";
 import { NSECollectionView, createListCollectionLayout } from "../../src/NSE/DataViews/Collection";
-import { NSEOutline } from "../../src/NSE/DataViews/Outline";
+import { NSEOutlineView } from "../../src/NSE/DataViews/Outline";
 import { createNSEDataViewDragBinding } from "../../src/NSE/DataViews/Drag";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime } from "../runtime/helpers";
@@ -398,7 +398,7 @@ describe("NSE data-view transfer hosts", () => {
     const drag = recordingBinding();
     const validate = vi.fn(() => true);
     const accept = vi.fn();
-    render(<NSETable
+    render(<NSETableView
       aria-label="Transfer table"
       adapter={transferAdapter()}
       columns={[{ id: "label", title: "Label", value: (item: TransferItem) => item.label, width: { min: 80, ideal: 120, max: 200 } }]}
@@ -420,7 +420,7 @@ describe("NSE data-view transfer hosts", () => {
     runtime.responders.register({ id: "table-command-responder", kind: "view", parentId: "workspace", scopeId: "table-command-responder" });
     const drag = recordingBinding();
     const accept = vi.fn();
-    const view = render(<NSETable
+    const view = render(<NSETableView
       aria-label="Command transfer table"
       adapter={transferAdapter()}
       columns={[{ id: "label", title: "Label", value: (item: TransferItem) => item.label, width: { min: 80, ideal: 120, max: 200 } }]}
@@ -437,7 +437,7 @@ describe("NSE data-view transfer hosts", () => {
     await expect(runtime.commands.dispatch("nse.drag.drop")).resolves.toMatchObject({ status: "executed", value: true });
     await waitFor(() => expect(accept).toHaveBeenCalledTimes(1));
 
-    view.rerender(<NSETable
+    view.rerender(<NSETableView
       aria-label="Command transfer table"
       adapter={transferAdapter()}
       columns={[{ id: "label", title: "Label", value: (item: TransferItem) => item.label, width: { min: 80, ideal: 120, max: 200 } }]}
@@ -495,7 +495,7 @@ describe("NSE data-view transfer hosts", () => {
     let validateAllowed = true;
     const validate = vi.fn(() => validateAllowed);
     render(<>
-      <NSETable
+      <NSETableView
         aria-label="Source table"
         adapter={source}
         columns={[{ id: "label", title: "Label", value: (item: TransferItem) => item.label, width: { min: 80, ideal: 120, max: 200 } }]}
@@ -559,7 +559,7 @@ describe("NSE data-view transfer hosts", () => {
     const validationEntered = vi.fn();
     const accept = vi.fn();
     render(<>
-      <NSETable
+      <NSETableView
         aria-label="Claim source table"
         adapter={source}
         columns={[{ id: "label", title: "Label", value: (item: TransferItem) => item.label, width: { min: 80, ideal: 120, max: 200 } }]}
@@ -616,7 +616,7 @@ describe("NSE data-view transfer hosts", () => {
     });
     const accept = vi.fn();
     let outlineAllowed = true;
-    render(<NSEOutline
+    render(<NSEOutlineView
       aria-label="Transfer outline"
       controller={controller}
       idForItem={({ id }) => id}
@@ -666,7 +666,7 @@ describe("NSE data-view transfer hosts", () => {
         selection: { mode: "multiple", allowsEmpty: true },
       });
       render(<>
-        <NSETable
+        <NSETableView
           aria-label={`State table ${kind}`}
           adapter={transferAdapter()}
           columns={[{ id: "label", title: "Label", value: (item: TransferItem) => item.label, width: { min: 80, ideal: 120, max: 200 } }]}
@@ -683,7 +683,7 @@ describe("NSE data-view transfer hosts", () => {
           dragBinding={collectionDrag.binding}
           dragEndpoint={{ appId: "com.example.gallery", windowId: "main", responderId: "collection" }}
         />
-        <NSEOutline
+        <NSEOutlineView
           aria-label={`State outline ${kind}`}
           controller={tree}
           idForItem={({ id }) => id}

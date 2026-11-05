@@ -100,7 +100,7 @@ export type { ByteUnitSystem, DecimalByteUnit, BinaryByteUnit, ByteUnit, ByteCou
 export { createValueTransformer, composeTransformers, negateBooleanTransformer, isNullTransformer, isNotNullTransformer } from "../SynCloudOS/Models";
 export type { ValueTransformer } from "../SynCloudOS/Models";
 export type { NSEControlValidation, NSEControlInteractionPhase, NSEControlValueProps } from "./Controls/Core/controlTypes";
-export { NSEDataViewCellContent } from "./DataViews/Core/NSEDataViewCellContent";
+export { NSETableCellView } from "./DataViews/Table/NSETableCellView";
 
 export {
   NSEAppearanceProvider,
@@ -363,8 +363,8 @@ export type {
   NSEDataViewDragBinding,
 } from "./DataViews/Drag/useNSEDataViewDrag";
 export {
-  NSEOutline,
-} from "./DataViews/Outline/NSEOutline";
+  NSEOutlineView,
+} from "./DataViews/Outline/NSEOutlineView";
 export {
   NSEPredicateEditor,
 } from "./DataViews/RuleEditor/NSEPredicateEditor";
@@ -381,8 +381,8 @@ export {
   NSESplitViewController,
 } from "./DataViews/Split/NSESplitViewController";
 export {
-  NSETable,
-} from "./DataViews/Table/NSETable";
+  NSETableView,
+} from "./DataViews/Table/NSETableView";
 export type {
   NSETableColumn,
 } from "./DataViews/Table/tableTypes";
@@ -936,20 +936,20 @@ export type {
   NSEAccordionViewProps,
 } from "./Navigation/navigationTypes";
 export type {
-  NSETableEditContext,
-  NSETableDropProposal,
+  NSETableViewEditContext,
+  NSETableViewDropProposal,
   NSETableColumnConfiguration,
   NSETableColumnMenu,
-  NSETableProps,
-  NSETableSelectionSnapshot,
+  NSETableViewProps,
+  NSETableViewSelectionSnapshot,
 } from "./DataViews/Table/tableTypes";
 export type {
-  NSEOutlineDataSource,
-  NSEOutlineDelegate,
-  NSEOutlineRow,
-  NSEOutlineSelectionEvent,
-  NSEOutlineDropProposal,
-  NSEOutlineProps,
+  NSEOutlineViewDataSource,
+  NSEOutlineViewDelegate,
+  NSEOutlineViewRow,
+  NSEOutlineViewSelectionEvent,
+  NSEOutlineViewDropProposal,
+  NSEOutlineViewProps,
 } from "./DataViews/Outline/outlineTypes";
 export type {
   NSEDataViewKey,
@@ -960,7 +960,7 @@ export type {
   NSEDataViewSelectionMode,
   NSEDataViewCoordinatorOptions,
   NSEDataViewCellImage,
-  NSEDataViewCellContentProps,
+  NSETableCellViewProps,
 } from "./DataViews/Core/dataViewTypes";
 export type {
   NSECompletionDataSource,

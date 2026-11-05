@@ -28,7 +28,7 @@ import { NSESearchField } from "../Controls/Fields/NSESearchField";
 import { NSECircularSlider } from "../Controls/Values/NSECircularSlider";
 import { NSESlider } from "../Controls/Values/NSESlider";
 import { useNSEArrayController } from "../Controllers";
-import { NSETable, type NSEDataViewAdapter, type NSETableColumn } from "../DataViews";
+import { NSETableView, type NSEDataViewAdapter, type NSETableColumn } from "../DataViews";
 import type { NSEFontFamily, NSEFontPreset } from "../Text/fontDescriptors";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../interactionLifecycle";
 import { NSEMenu } from "../Menus/NSEMenu";
@@ -167,7 +167,7 @@ const sizeListRows = 4.1;
 /* The column the scroller takes, so a list's one column fills beside it. */
 const scrollerGutter = 15;
 
-/** One of the panel's lists: an NSETable of a single, fixed column. */
+/** One of the panel's lists: an NSETableView of a single, fixed column. */
 function FontPanelList({ title, label, items, selectedId, width, rows, headerHidden = false, readOnly, onSelect }: {
   readonly title: string;
   readonly label: string;
@@ -202,7 +202,7 @@ function FontPanelList({ title, label, items, selectedId, width, rows, headerHid
   }], [columnWidth, title]);
   const selectedRef = useRef(selectedId);
   selectedRef.current = selectedId;
-  return <NSETable
+  return <NSETableView
     aria-label={label}
     adapter={adapter}
     columns={columns}

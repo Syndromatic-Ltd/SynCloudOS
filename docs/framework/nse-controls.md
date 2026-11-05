@@ -1,6 +1,6 @@
 # NSE controls
 
-NSE is the application kit of SynCloudOS, the counterpart of AppKit. It supplies the buttons, fields, containers, data views, menus, panels and text machinery an application is built from. The prefix follows the Apple convention: `NS` for NeXTSTEP, `NSE` for the Syndromatic edition. Where a Mac developer reaches for `NSButton` or `NSTableView`, you reach for `NSEPushButton` or `NSETable`.
+NSE is the application kit of SynCloudOS, the counterpart of AppKit. It supplies the buttons, fields, containers, data views, menus, panels and text machinery an application is built from. The prefix follows the Apple convention: `NS` for NeXTSTEP, `NSE` for the Syndromatic edition. Where a Mac developer reaches for `NSButton` or `NSTableView`, you reach for `NSEPushButton` or `NSETableView`.
 
 Controls describe what they are and how they behave. The [Atmo theme](appearance.md) decides how they look, so the same component renders correctly in light and dark mode and in every presentation.
 
@@ -148,8 +148,8 @@ Data views render collections owned by a controller. They are virtualised, so a 
 
 | Component | Purpose |
 | --- | --- |
-| `NSETable` | Sortable, resizable, editable columns. |
-| `NSEOutline` | Expandable hierarchies. |
+| `NSETableView` | Sortable, resizable, editable columns. |
+| `NSEOutlineView` | Expandable hierarchies. |
 | `NSECollectionView` | Grids and adaptive layouts of items. |
 | `NSEBrowser` | Multi column hierarchical browsing. |
 | `NSEVirtualList`, `NSEList`, `NSEGroupedList` | Long and grouped lists. |

@@ -24,7 +24,7 @@ export { dataViewAllowsMutation, dataViewAllowsNavigation, dataViewAnnouncement,
 export { encodeNSEDataViewKey, decodeNSEDataViewKey } from "./dataViewIdentity";
 export type {
   NSEDataViewAdapter,
-  NSEDataViewCellContentProps,
+  NSETableCellViewProps,
   NSEDataViewCellImage,
   NSEDataViewCoordinatorOptions,
   NSEDataViewDelegate,

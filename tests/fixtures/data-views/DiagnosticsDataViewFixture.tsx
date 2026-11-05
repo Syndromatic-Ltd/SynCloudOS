@@ -21,7 +21,7 @@
 import React, { useEffect, useMemo } from "react";
 
 import { useNSEArrayController, useNSETreeController } from "../../../src/NSE/Controllers";
-import { NSEOutline, NSETable, type NSEDataViewAdapter, type NSEDataViewState, type NSETableColumn } from "../../../src/NSE/DataViews";
+import { NSEOutlineView, NSETableView, type NSEDataViewAdapter, type NSEDataViewState, type NSETableColumn } from "../../../src/NSE/DataViews";
 
 export interface DiagnosticRecord {
   readonly id: string;
@@ -93,7 +93,7 @@ export function DiagnosticsDataViewFixture({ records, state = { kind: "ready" } 
     { id: "value", title: "Value", value: (row) => row.valueText, width: { min: 100, ideal: 240, max: 480 } },
   ], []);
   return <div data-fixture="diagnostics-data-views">
-    <NSEOutline aria-label="Diagnostics" controller={tree} idForItem={(item) => item.id} childrenForItem={(item) => item.children} labelForItem={(item) => item.label} isExpandable={(item) => item.children.length > 0} state={state} />
-    <NSETable aria-label="Diagnostic values" adapter={adapter} columns={columns} state={state} />
+    <NSEOutlineView aria-label="Diagnostics" controller={tree} idForItem={(item) => item.id} childrenForItem={(item) => item.children} labelForItem={(item) => item.label} isExpandable={(item) => item.children.length > 0} state={state} />
+    <NSETableView aria-label="Diagnostic values" adapter={adapter} columns={columns} state={state} />
   </div>;
 }

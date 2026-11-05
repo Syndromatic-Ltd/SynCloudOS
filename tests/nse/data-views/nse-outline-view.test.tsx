@@ -27,9 +27,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSETreeController } from "../../../src/NSE/Controllers";
 import { IndexPath, TreeNode } from "../../../src/SynCloudOS/Models";
 import {
-  NSEOutline,
+  NSEOutlineView,
   flattenVisibleTree,
-  type NSEOutlineSelectionEvent,
+  type NSEOutlineViewSelectionEvent,
 } from "../../../src/NSE/DataViews/Outline";
 
 interface FileNode {
@@ -57,12 +57,12 @@ function createController(content: readonly FileNode[] = [documents, pictures], 
 
 afterEach(cleanup);
 
-describe("NSEOutline", () => {
+describe("NSEOutlineView", () => {
   it("maps rows, levels and items while expanding and collapsing selection to the parent", () => {
     const controller = createController();
     const changes = vi.fn();
     render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         controller={controller}
         idForItem={(node) => node.id}
@@ -77,7 +77,7 @@ describe("NSEOutline", () => {
     fireEvent.click(screen.getByRole("treeitem", { name: /Report/ }));
     fireEvent.click(screen.getByRole("button", { name: "Collapse Documents" }));
 
-    const event = changes.mock.calls.at(-1)?.[0] as NSEOutlineSelectionEvent<string>;
+    const event = changes.mock.calls.at(-1)?.[0] as NSEOutlineViewSelectionEvent<string>;
     expect(event.reason).toBe("collapse-parent");
     expect(event.snapshot.selectedIds).toEqual(new Set(["documents"]));
     expect(screen.queryByRole("treeitem", { name: /Report/ })).toBeNull();
@@ -88,7 +88,7 @@ describe("NSEOutline", () => {
     const controller = createController();
     const didExpand = vi.fn();
     const view = render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         controller={controller}
         idForItem={(node) => node.id}
@@ -101,7 +101,7 @@ describe("NSEOutline", () => {
     expect(controller.getSnapshot().expandedIds.size).toBe(0);
 
     view.rerender(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         controller={controller}
         idForItem={(node) => node.id}
@@ -118,7 +118,7 @@ describe("NSEOutline", () => {
   it.each(["disabled", "denied", "invalid"] as const)("blocks selection, disclosure and activation while %s", (kind) => {
     const controller = createController();
     const activate = vi.fn();
-    render(<NSEOutline aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={(node) => node.children} labelForItem={(node) => node.name} state={{ kind, message: kind }} delegate={{ didActivate: activate }} />);
+    render(<NSEOutlineView aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={(node) => node.children} labelForItem={(node) => node.name} state={{ kind, message: kind }} delegate={{ didActivate: activate }} />);
     fireEvent.click(screen.getByRole("treeitem", { name: /Documents/ }));
     fireEvent.click(screen.getByRole("button", { name: "Expand Documents" }));
     fireEvent.keyDown(screen.getByRole("tree"), { key: "Enter" });
@@ -136,7 +136,7 @@ describe("NSEOutline", () => {
       return new Promise((resolve) => { resolveChildren = resolve; });
     });
     render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         controller={controller}
         idForItem={(node) => node.id}
@@ -162,7 +162,7 @@ describe("NSEOutline", () => {
       expect(signal).toBeInstanceOf(AbortSignal);
       return [{ id: "late", name: "Late", children: [] }];
     });
-    render(<NSEOutline aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} isExpandable={(node) => node.canLoad === true} />);
+    render(<NSEOutlineView aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} isExpandable={(node) => node.canLoad === true} />);
     fireEvent.click(screen.getByRole("button", { name: "Expand Remote" }));
     expect(await screen.findByRole("treeitem", { name: /Late/ })).not.toBeNull();
     expect(childrenForItem).toHaveBeenCalledTimes(1);
@@ -174,7 +174,7 @@ describe("NSEOutline", () => {
       expect(signal).toBeInstanceOf(AbortSignal);
       return Promise.resolve([{ id: "child", name: "Loaded child", children: [] }]);
     });
-    render(<NSEOutline aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} />);
+    render(<NSEOutlineView aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} />);
 
     expect(childrenForItem).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Expand Remote" }));
@@ -188,7 +188,7 @@ describe("NSEOutline", () => {
       expect(signal).toBeInstanceOf(AbortSignal);
       return [{ id: "child", name: "Local child", children: [] }];
     });
-    render(<NSEOutline aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} />);
+    render(<NSEOutlineView aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} />);
 
     expect(childrenForItem).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Expand Local" }));
@@ -201,7 +201,7 @@ describe("NSEOutline", () => {
       expect(signal).toBeInstanceOf(AbortSignal);
       return Promise.resolve([{ id: "controlled-child", name: "Controlled child", children: [] }]);
     });
-    render(<NSEOutline aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} expandedIds={new Set(["lazy"])} />);
+    render(<NSEOutlineView aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} expandedIds={new Set(["lazy"])} />);
     expect(await screen.findByRole("treeitem", { name: /Controlled child/ })).not.toBeNull();
     expect(childrenForItem).toHaveBeenCalledTimes(1);
   });
@@ -210,7 +210,7 @@ describe("NSEOutline", () => {
     const lazy: FileNode = { id: "lazy", name: "Remote", children: [], canLoad: true };
     const controller = createController([lazy], async () => { throw new Error("Network unavailable"); });
     render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         controller={controller}
         idForItem={(node) => node.id}
@@ -228,7 +228,7 @@ describe("NSEOutline", () => {
   it("uses logical RTL indentation and disclosure keyboard semantics", () => {
     const controller = createController();
     render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         dir="rtl"
         controller={controller}
@@ -250,7 +250,7 @@ describe("NSEOutline", () => {
 
   it("does not navigate or type ahead during IME composition", () => {
     const controller = createController();
-    render(<NSEOutline aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={(node) => node.children} labelForItem={(node) => node.name} />);
+    render(<NSEOutlineView aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={(node) => node.children} labelForItem={(node) => node.name} />);
     const tree = screen.getByRole("tree");
     const before = tree.getAttribute("aria-activedescendant");
     fireEvent.keyDown(tree, { key: "ArrowDown", isComposing: true });
@@ -262,7 +262,7 @@ describe("NSEOutline", () => {
     const roots = Array.from({ length: 50_000 }, (_, index) => ({ id: `node-${index}`, name: `Node ${index}`, children: [] }));
     const controller = createController(roots);
     render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Large tree"
         controller={controller}
         idForItem={(node) => node.id}

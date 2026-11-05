@@ -95,7 +95,7 @@ export interface NSEDataViewCellImage {
   readonly alt: string;
 }
 
-export interface NSEDataViewCellContentProps {
+export interface NSETableCellViewProps {
   readonly image?: NSEDataViewCellImage;
   readonly primary: ReactNode;
   readonly secondary?: ReactNode;

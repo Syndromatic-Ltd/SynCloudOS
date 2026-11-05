@@ -250,7 +250,7 @@ describe("developer MCP tools", () => {
     expect(message("idiom.cocoa-class-authoring", "2 useState")).toBeDefined();
     expect(message("idiom.nse-controls", "NSEPushButton")).toMatchObject({ file: "lib/App.tsx", line: 9 });
     expect(message("idiom.nse-controls", "1 raw <input>")).toBeDefined();
-    expect(message("idiom.nse-controls", "NSETable")).toBeDefined();
+    expect(message("idiom.nse-controls", "NSETableView")).toBeDefined();
     expect(message("idiom.managed-lifecycle", "requestAnimationFrame")?.message).toContain("manageDisplayLink");
     expect(message("idiom.managed-lifecycle", "new Worker")?.message).toContain("managedTask");
     expect(rules.filter((rule: string) => rule === "idiom.document-state")).toHaveLength(1);

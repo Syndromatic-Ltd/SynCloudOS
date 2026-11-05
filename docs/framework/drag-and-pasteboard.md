@@ -88,7 +88,7 @@ The lifecycle runs in order:
 
 ## Data views and drag
 
-NSE data views handle these steps for you. Pass a `dragBinding` and `onValidateDrop` and `onAcceptDrop` to `NSETable`, and the table starts sessions, shows insertion feedback and reports drop proposals. `createSynWareNSEDataViewDragBinding` and `createSynWareNSEDragCommandPort` from the SDK entry connect a data view to your session.
+NSE data views handle these steps for you. Pass a `dragBinding` and `onValidateDrop` and `onAcceptDrop` to `NSETableView`, and the table starts sessions, shows insertion feedback and reports drop proposals. `createSynWareNSEDataViewDragBinding` and `createSynWareNSEDragCommandPort` from the SDK entry connect a data view to your session.
 
 ## Keyboard and touch
 

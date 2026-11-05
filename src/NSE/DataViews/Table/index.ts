@@ -18,13 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { NSETable, columnAtNSETablePoint, rowAtNSETablePoint } from "./NSETable";
+export { NSETableView, columnAtNSETableViewPoint, rowAtNSETableViewPoint } from "./NSETableView";
+export { NSETableCellView } from "./NSETableCellView";
 export type {
   NSETableColumn,
   NSETableColumnConfiguration,
   NSETableColumnMenu,
-  NSETableDropProposal,
-  NSETableEditContext,
-  NSETableProps,
-  NSETableSelectionSnapshot,
+  NSETableViewDropProposal,
+  NSETableViewEditContext,
+  NSETableViewProps,
+  NSETableViewSelectionSnapshot,
 } from "./tableTypes";

@@ -42,7 +42,7 @@ describe("SynWare NSE public framework boundary", () => {
       "DictionaryControllerOptions", "ControllerEditTransaction", "ControllerCommitResult",
       "IndexPath", "IndexSet", "Predicate", "ChangeSet", "SortDescriptor", "TreeNode",
       "NSEControlValidation", "Formatter", "FormatterContext", "FormatterResult",
-      "NSEDataViewCellContent", "NSEDataViewCellContentProps",
+      "NSETableCellView", "NSETableCellViewProps",
     ]));
     expect(publicExports(resolve("src/NSE/public/controls.ts")).names).toEqual(expect.arrayContaining([
       "NSEControlValidation", "Formatter", "FormatterContext", "FormatterResult",

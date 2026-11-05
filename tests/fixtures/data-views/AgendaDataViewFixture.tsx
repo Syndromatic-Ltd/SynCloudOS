@@ -21,7 +21,7 @@
 import React, { useEffect, useMemo } from "react";
 
 import { useNSEArrayController } from "../../../src/NSE/Controllers";
-import { NSECollectionView, NSETable, createListCollectionLayout, type NSEDataViewAdapter, type NSETableColumn } from "../../../src/NSE/DataViews";
+import { NSECollectionView, NSETableView, createListCollectionLayout, type NSEDataViewAdapter, type NSETableColumn } from "../../../src/NSE/DataViews";
 
 export interface AgendaEvent { readonly id: string; readonly title: string; readonly start: string; readonly calendar: string }
 
@@ -42,5 +42,5 @@ export function AgendaDataViewFixture({ events, responsiveMode, onActivateEvent 
   const state = rows.length === 0 ? { kind: "empty" as const, message: "No events" } : { kind: "ready" as const };
   return responsiveMode === "mobile"
     ? <NSECollectionView aria-label="Agenda cards" adapter={adapter} layout={createListCollectionLayout(52)} state={state} selectionMode="single" onActivate={(_id, event) => onActivateEvent?.(event)} renderItem={({ item }) => <span>{item.title} · {item.calendar}</span>} />
-    : <NSETable aria-label="Agenda" adapter={adapter} columns={columns} state={state} selectionMode="single" onDoubleAction={(_id, event) => onActivateEvent?.(event)} />;
+    : <NSETableView aria-label="Agenda" adapter={adapter} columns={columns} state={state} selectionMode="single" onDoubleAction={(_id, event) => onActivateEvent?.(event)} />;
 }

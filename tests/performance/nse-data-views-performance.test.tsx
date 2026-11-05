@@ -25,7 +25,7 @@ import React from "react";
 import { afterEach, expect, it } from "vitest";
 
 import { NSEArrayController, NSETreeController } from "../../src/NSE/Controllers";
-import { NSEOutline, NSETable, type NSEDataViewAdapter, type NSETableColumn } from "../../src/NSE/DataViews";
+import { NSEOutlineView, NSETableView, type NSEDataViewAdapter, type NSETableColumn } from "../../src/NSE/DataViews";
 import { runStructuralScenario } from "./structural-performance-scenario";
 
 interface Row { readonly id: string; readonly label: string }
@@ -43,13 +43,13 @@ it("keeps the 10,000-row table and sparse 50,000-node outline structurally bound
       const controller = new NSEArrayController<Row, string>({ id: "performance-table", content: rows, getId: (row) => row.id, selection: { mode: "multiple", allowsEmpty: true } });
       const adapter: NSEDataViewAdapter<Row, string> = { controller, idForItem: (row) => row.id, labelForItem: (row) => row.label };
       const before = controller.getSnapshot().arranged[5000];
-      const view = render(<NSETable aria-label="Performance table" adapter={adapter} columns={columns} viewportBlockSize={230} />);
+      const view = render(<NSETableView aria-label="Performance table" adapter={adapter} columns={columns} viewportBlockSize={230} />);
       const grid = view.getByRole("grid");
       const treeController = new NSETreeController<OutlineNode, string>({ id: "performance-outline", content: [outlineRoot], getId: (node) => node.id, getChildren: (node) => node.children, withChildren: (node, children) => ({ ...node, children }), clone: (node) => node, selection: { mode: "multiple", allowsEmpty: true } });
       const stableNode = treeController.getSnapshot().roots[0]!.children[25_000];
       let outlinePublications = 0;
       const unsubscribeOutline = treeController.subscribeChanges(() => { outlinePublications += 1; });
-      const outline = render(<NSEOutline aria-label="Performance outline" controller={treeController} idForItem={(node) => node.id} childrenForItem={(node) => node.children} labelForItem={(node) => node.label} viewportBlockSize={230} />);
+      const outline = render(<NSEOutlineView aria-label="Performance outline" controller={treeController} idForItem={(node) => node.id} childrenForItem={(node) => node.children} labelForItem={(node) => node.label} viewportBlockSize={230} />);
       fireEvent.click(outline.getByRole("button", { name: "Expand Diagnostics" }));
       const tree = outline.getByRole("tree");
       return {
@@ -83,7 +83,7 @@ it("keeps scroll updates bounded without controller publications or detached act
       let publications = 0;
       const unsubscribe = controller.subscribeChanges(() => { publications += 1; });
       const adapter: NSEDataViewAdapter<Row, string> = { controller, idForItem: (row) => row.id, labelForItem: (row) => row.label };
-      const view = render(<NSETable aria-label="Scrolling table" adapter={adapter} columns={columns} viewportBlockSize={230} />);
+      const view = render(<NSETableView aria-label="Scrolling table" adapter={adapter} columns={columns} viewportBlockSize={230} />);
       const grid = view.getByRole("grid");
       for (const scrollTop of [230, 460, 690]) { Object.defineProperty(grid, "scrollTop", { configurable: true, value: scrollTop, writable: true }); fireEvent.scroll(grid); }
       const active = grid.getAttribute("aria-activedescendant");

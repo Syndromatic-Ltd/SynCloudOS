@@ -35,7 +35,7 @@ export interface NSETableHeaderColumn {
   readonly onResize: (width: number) => void;
 }
 
-export interface NSETableHeaderProps {
+export interface NSETableHeaderViewProps {
   readonly columns: readonly NSETableHeaderColumn[];
   readonly height: number;
   readonly width: number;
@@ -43,7 +43,7 @@ export interface NSETableHeaderProps {
   readonly disabled?: boolean;
 }
 
-export function NSETableHeader({ columns, height, width, menu, disabled = false }: NSETableHeaderProps) {
+export function NSETableHeaderView({ columns, height, width, menu, disabled = false }: NSETableHeaderViewProps) {
   const dragRef = useRef<{ id: string; start: number; width: number } | null>(null);
   return (
     <div role="row" data-nse-part="header" style={{ display: "flex", height: `${height}px`, inlineSize: `${width}px`, position: "sticky", insetBlockStart: 0 }}>

@@ -26,23 +26,23 @@ import type { NSEDataViewKey, NSEDataViewState } from "../Core";
 import type { NSEDataViewDragBinding } from "../Drag";
 import type { DragEndpoint } from "../../../SynCloudOS/SynCloudOS";
 
-export interface NSEOutlineDataSource<T, TId extends NSEDataViewKey> {
+export interface NSEOutlineViewDataSource<T, TId extends NSEDataViewKey> {
   idForItem(item: T): TId;
   childrenForItem(item: T, signal?: AbortSignal): readonly T[] | Promise<readonly T[]>;
   labelForItem(item: T): string;
   isExpandable?(item: T): boolean;
 }
 
-export interface NSEOutlineDelegate<T, TId extends NSEDataViewKey> {
+export interface NSEOutlineViewDelegate<T, TId extends NSEDataViewKey> {
   shouldExpand?(id: TId, item: T): boolean;
   shouldCollapse?(id: TId, item: T): boolean;
   didExpand?(id: TId, item: T): void;
   didCollapse?(id: TId, item: T): void;
   didActivate?(id: TId, item: T): void;
-  renderItem?(row: NSEOutlineRow<T, TId>): ReactNode;
+  renderItem?(row: NSEOutlineViewRow<T, TId>): ReactNode;
 }
 
-export interface NSEOutlineRow<T, TId extends NSEDataViewKey> {
+export interface NSEOutlineViewRow<T, TId extends NSEDataViewKey> {
   readonly id: TId;
   readonly item: T;
   readonly node: TreeNode<T, TId>;
@@ -55,13 +55,13 @@ export interface NSEOutlineRow<T, TId extends NSEDataViewKey> {
   readonly expanded: boolean;
 }
 
-export interface NSEOutlineSelectionEvent<TId extends NSEDataViewKey> {
+export interface NSEOutlineViewSelectionEvent<TId extends NSEDataViewKey> {
   readonly reason: "pointer" | "keyboard" | "keyboard-range" | "collapse-parent" | "controller-change";
   readonly snapshot: SelectionSnapshot<TId>;
   readonly change: SelectionChange<TId>;
 }
 
-export interface NSEOutlineDropProposal<TId extends NSEDataViewKey> {
+export interface NSEOutlineViewDropProposal<TId extends NSEDataViewKey> {
   readonly sessionId: string;
   readonly generation: number;
   readonly signal: AbortSignal;
@@ -71,21 +71,21 @@ export interface NSEOutlineDropProposal<TId extends NSEDataViewKey> {
   readonly operation: "above" | "on" | "below";
 }
 
-export interface NSEOutlineProps<T, TId extends NSEDataViewKey>
+export interface NSEOutlineViewProps<T, TId extends NSEDataViewKey>
   extends Omit<HTMLAttributes<HTMLDivElement>, "children">,
-    NSEOutlineDataSource<T, TId> {
+    NSEOutlineViewDataSource<T, TId> {
   readonly controller: NSETreeController<T, TId>;
-  readonly delegate?: NSEOutlineDelegate<T, TId>;
+  readonly delegate?: NSEOutlineViewDelegate<T, TId>;
   readonly state?: NSEDataViewState;
   readonly selectionMode?: "none" | "single" | "multiple";
   readonly expandedIds?: ReadonlySet<TId>;
   readonly defaultExpandedIds?: ReadonlySet<TId>;
   readonly onExpandedIdsChange?: (ids: ReadonlySet<TId>) => void;
-  readonly onSelectionChange?: (event: NSEOutlineSelectionEvent<TId>) => void;
+  readonly onSelectionChange?: (event: NSEOutlineViewSelectionEvent<TId>) => void;
   readonly rowHeight?: number;
   readonly viewportBlockSize?: number;
-  readonly onValidateDrop?: (proposal: NSEOutlineDropProposal<TId>) => boolean | Promise<boolean>;
-  readonly onAcceptDrop?: (proposal: NSEOutlineDropProposal<TId>) => void | Promise<void>;
+  readonly onValidateDrop?: (proposal: NSEOutlineViewDropProposal<TId>) => boolean | Promise<boolean>;
+  readonly onAcceptDrop?: (proposal: NSEOutlineViewDropProposal<TId>) => void | Promise<void>;
   readonly dragBinding?: NSEDataViewDragBinding<TId>;
   readonly dragEndpoint?: DragEndpoint;
 }
