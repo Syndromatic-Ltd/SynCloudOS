@@ -25,7 +25,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import React, { useMemo } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEComboBox, NSETokenField } from "../../../src/NSE/Controls/Completion";
-import { NSESearchField, NSESearchFieldController, NSESecureTextField } from "../../../src/NSE/Controls/Fields";
+import { NSESearchField, NSESecureTextField } from "../../../src/NSE/Controls/Fields";
 import { NSEControlRuntimeProvider, type NSEControlRuntimePort } from "../../../src/NSE/Controls/Core";
 import type { CommandId } from "../../../src/SynCloudOS/SynCloudOS";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
@@ -192,19 +192,30 @@ describe("completion and field families", () => {
     expect(query).toHaveBeenCalledTimes(1);
     expect(query.mock.calls[0]?.[0]).toBe("water");
   });
-  it("hosts immutable controller recents in the overlay listbox and honors private mode", async () => {
-    const controller = new NSESearchFieldController({ now: () => 42 });
-    controller.rememberQuery("calendar");
-    const snapshot = controller.getSnapshot();
-    controller.rememberQuery("private", { privateMode: true });
-    expect(controller.getSnapshot()).toBe(snapshot);
+  it("offers recentSearches in the overlay listbox and remembers each search, most recent first", async () => {
     const submit = vi.fn();
-    render(<OverlayHarness><NSESearchField aria-label="Search recents" controller={controller} onSearch={submit} /></OverlayHarness>);
-    fireEvent.focus(screen.getByRole("searchbox"));
+    const changes: (readonly string[])[] = [];
+    render(<OverlayHarness><NSESearchField aria-label="Search recents" recentSearches={["calendar", "notes"]} maximumRecents={2} onRecentSearchesChange={(recents) => changes.push(recents)} onSearch={submit} /></OverlayHarness>);
+    const input = screen.getByRole("searchbox");
+    fireEvent.focus(input);
     const option = await screen.findByRole("option", { name: "calendar" });
     expect(option.closest('[data-nse-overlay-kind="listbox"]')).not.toBeNull();
     fireEvent.click(option);
     expect(submit).toHaveBeenCalledWith("calendar");
+    expect(changes).toEqual([]);
+    fireEvent.change(input, { target: { value: "  weather " } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(changes).toEqual([["weather", "calendar"]]);
+  });
+
+  it("keeps its own recents while shown when recentSearches is not bound", async () => {
+    render(<OverlayHarness><NSESearchField aria-label="Own recents" /></OverlayHarness>);
+    const input = screen.getByRole("searchbox");
+    fireEvent.change(input, { target: { value: "maps" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.change(input, { target: { value: "" } });
+    fireEvent.focus(input);
+    expect(await screen.findByRole("option", { name: "maps" })).not.toBeNull();
   });
   it("dispatches search only through an accepted current command generation", async () => {
     const dispatch = vi.fn(async () => ({ status: "executed" as const }));

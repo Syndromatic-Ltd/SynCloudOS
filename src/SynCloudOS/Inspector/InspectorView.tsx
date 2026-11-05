@@ -19,7 +19,8 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { NSEButton, NSEPane, NSEInputBox } from "../../NSE/public/inspector-controls";
+import { NSEButton, NSEPane } from "../../NSE/public/inspector-controls";
+import { NSEInputBox } from "../../NSE/Controls/Fields/NSEFields";
 import { translateSynWareText } from "../AppSDK/useStrings";
 import type { InspectorLocalization } from "./inspectorLocalization";
 import "./inspector.css";

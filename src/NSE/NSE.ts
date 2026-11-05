@@ -92,14 +92,11 @@ import * as NSEControlButtons from "./Controls/Buttons";
 import * as NSEControlFields from "./Controls/Fields";
 import * as NSEControlImages from "./Controls/Images";
 import * as NSEControlSelection from "./Controls/Selection";
-import * as NSEControlVariants from "./Controls/Fields/NSEFieldVariants";
 import * as NSEChrome from "./Windows/Chrome";
 import * as NSEMaterial from "./Material";
-import { NSEPasswordField } from "./Controls/Fields/NSEPasswordField";
 import * as NSEAppearance from "./Appearance";
 export * from "./Appearance";
 export * from "./Controls/Images";
-export { NSEPasswordField } from "./Controls/Fields/NSEPasswordField";
 
 const NSEControlCatalogue = {
   ...NSEControlButtons,
@@ -107,7 +104,6 @@ const NSEControlCatalogue = {
   ...NSEControlImages,
   ...NSEControlSelection,
   ...NSEControlCore,
-  ...NSEControlVariants,
   ...NSEValueControls,
   ...NSEChrome,
   ...NSENavigation,

@@ -20,15 +20,20 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { NSEListboxPopup, useOptionalNSEOverlayProvider } from "../../Overlays";
 import { useNSEControlCommand, useOptionalNSEControlRuntimePort, type NSEControlCommandBinding } from "../Core";
 import { sizedControlStyle } from "../Core/nseControlsShared";
-import type { NSESearchFieldController, NSESearchFieldSnapshot } from "./NSESearchFieldController";
 
-const emptySnapshot: NSESearchFieldSnapshot = Object.freeze({ revision: 0, recents: Object.freeze([]) });
-const emptySubscribe = () => () => undefined;
-const getEmptySnapshot = () => emptySnapshot;
+const noRecents: readonly string[] = Object.freeze([]);
+
+/** The recents list after a search for `query`: most recent first, without duplicates, at most `maximum` long. */
+function rememberedRecents(recents: readonly string[], query: string, maximum: number): readonly string[] | null {
+  const normalized = query.trim();
+  if (!normalized || normalized.length > 256) return null;
+  const next = [normalized, ...recents.filter((recent) => recent !== normalized)].slice(0, maximum);
+  return next.length === recents.length && next.every((recent, index) => recent === recents[index]) ? null : Object.freeze(next);
+}
 
 export interface NSESearchFieldProps {
   readonly "aria-label"?: string;
@@ -49,8 +54,14 @@ export interface NSESearchFieldProps {
   readonly showsAffordance?: boolean;
   /** Show a magnifying-glass glyph before the text. Off by default. */
   readonly showsSearchIcon?: boolean;
-  readonly controller?: NSESearchFieldController;
-  readonly privateMode?: boolean;
+  /** NSSearchField.recentSearches: the searches the recents menu offers, most recent first. Bind it to a
+   * `@preference` property to keep it between sessions, as `recentsAutosaveName` does. Without it the field
+   * keeps its own list for as long as it is shown. */
+  readonly recentSearches?: readonly string[];
+  /** NSSearchField.maximumRecents (default 20). */
+  readonly maximumRecents?: number;
+  /** Called with the new list after a search is remembered. */
+  onRecentSearchesChange?(recents: readonly string[]): void;
   /** "small" is the size inspectors and panels use (26px). */
   readonly controlSize?: "regular" | "small";
   /** An explicit height in CSS pixels; the capsule keeps its proportions. */
@@ -85,7 +96,9 @@ function NSESearchFieldControl(props: NSESearchFieldProps) {
   const instanceId = useId().replace(/:/g, "");
   const overlay = useOptionalNSEOverlayProvider();
   const runtime = useOptionalNSEControlRuntimePort();
-  const snapshot = useSyncExternalStore(props.controller?.subscribe ?? emptySubscribe, props.controller?.getSnapshot ?? getEmptySnapshot, props.controller?.getSnapshot ?? getEmptySnapshot);
+  const [storedRecents, setStoredRecents] = useState<readonly string[]>(noRecents);
+  const recents = props.recentSearches ?? storedRecents;
+  const maximumRecents = Math.max(1, Math.min(100, Math.trunc(props.maximumRecents ?? 20)));
   const commandBinding = useMemo(() => props.command ? { ...props.command, payload: { query: current } } : undefined, [current, props.command]);
   const command = useNSEControlCommand(commandBinding);
   const cancelPending = () => {
@@ -106,8 +119,13 @@ function NSESearchFieldControl(props: NSESearchFieldProps) {
     pending.current = { abort, handle };
     if (handle === null) execute();
   };
-  const set = (value: string) => { if (!controlled) setStored(value); props.onValueChange?.(value); query(value); setRecentOpen(Boolean(!value && snapshot.recents.length)); };
-  const rememberAndNotify = (value: string) => { props.controller?.rememberQuery(value, { privateMode: props.privateMode }); props.onSearch?.(value); setRecentOpen(false); };
+  const set = (value: string) => { if (!controlled) setStored(value); props.onValueChange?.(value); query(value); setRecentOpen(Boolean(!value && recents.length)); };
+  const rememberAndNotify = (value: string) => {
+    const next = rememberedRecents(recents, value, maximumRecents);
+    if (next) { if (props.recentSearches === undefined) setStoredRecents(next); props.onRecentSearchesChange?.(next); }
+    props.onSearch?.(value);
+    setRecentOpen(false);
+  };
   const submit = async (value = current) => {
     if (props.disabled || props.readOnly || composing.current) return;
     cancelPending();
@@ -117,8 +135,8 @@ function NSESearchFieldControl(props: NSESearchFieldProps) {
     }
     rememberAndNotify(value);
   };
-  const clear = () => { if (props.disabled || props.readOnly) return; cancelPending(); if (!controlled) setStored(""); props.onValueChange?.(""); props.onClear?.(); props.onCancel?.(); setRecentOpen(snapshot.recents.length > 0); inputRef.current?.focus({ preventScroll: true }); };
+  const clear = () => { if (props.disabled || props.readOnly) return; cancelPending(); if (!controlled) setStored(""); props.onValueChange?.(""); props.onClear?.(); props.onCancel?.(); setRecentOpen(recents.length > 0); inputRef.current?.focus({ preventScroll: true }); };
   const accessibleName = props["aria-label"] ?? (typeof props.label === "string" ? props.label : props.placeholder ?? props.searchLabel ?? "Search");
   const popupId = `search-recents-${instanceId}`;
-  return <label className={["nse-control-search-field", props.className].filter(Boolean).join(" ")} data-nse-control="search-field" data-size={props.height !== undefined ? "custom" : props.controlSize === "small" ? "small" : undefined} style={sizedControlStyle(undefined, props.height, props.width)} data-state={props.disabled ? "disabled" : props.readOnly ? "read-only" : current ? "populated" : "empty"}>{props.label ? <span className="nse-control-field-label">{props.label}</span> : null}<span className="nse-control-search-frame" data-affordance={showsAffordance ? "visible" : "hidden"} data-search-icon={props.showsSearchIcon ? "visible" : undefined}>{props.showsSearchIcon ? <span className="nse-control-search-icon" aria-hidden="true" /> : null}<input ref={inputRef} id={props.id ?? `search-input-${instanceId}`} type="search" aria-label={accessibleName} aria-controls={recentOpen && overlay ? popupId : undefined} aria-expanded={recentOpen && Boolean(overlay)} name={props.name} placeholder={props.placeholder ?? "search something…"} value={current} disabled={props.disabled} readOnly={props.readOnly} onFocus={() => setRecentOpen(Boolean(!current && snapshot.recents.length && overlay))} onCompositionStart={() => { composing.current = true; cancelPending(); }} onCompositionEnd={(event) => { composing.current = false; set(event.currentTarget.value); }} onInput={props.onInput} onChange={(event) => { props.onChange?.(event); if (!composing.current) set(event.currentTarget.value); }} onKeyDown={(event) => { if (event.key === "Enter" && !composing.current) { event.preventDefault(); void submit(); } else if (event.key === "Escape") { if (current) clear(); else setRecentOpen(false); } }} />{showsAffordance && current ? <button className="nse-control-search-affordance" type="button" data-state="clear" aria-label={props.clearLabel ?? "Clear search"} disabled={props.disabled || props.readOnly} onClick={clear}>×</button> : null}</span>{overlay && props.controller ? <NSEListboxPopup id={popupId} open={recentOpen && snapshot.recents.length > 0} anchor={inputRef.current} parentResponderId={props.parentResponderId} labelledBy={props.id ?? `search-input-${instanceId}`} options={snapshot.recents.map((recent) => ({ id: recent.id, label: recent.query, value: recent }))} onOpenChange={setRecentOpen} onSelect={(option) => { const recent = option.value; if (!recent) return; if (!controlled) setStored(recent.query); props.onValueChange?.(recent.query); void submit(recent.query); }} /> : null}</label>;
+  return <label className={["nse-control-search-field", props.className].filter(Boolean).join(" ")} data-nse-control="search-field" data-size={props.height !== undefined ? "custom" : props.controlSize === "small" ? "small" : undefined} style={sizedControlStyle(undefined, props.height, props.width)} data-state={props.disabled ? "disabled" : props.readOnly ? "read-only" : current ? "populated" : "empty"}>{props.label ? <span className="nse-control-field-label">{props.label}</span> : null}<span className="nse-control-search-frame" data-affordance={showsAffordance ? "visible" : "hidden"} data-search-icon={props.showsSearchIcon ? "visible" : undefined}>{props.showsSearchIcon ? <span className="nse-control-search-icon" aria-hidden="true" /> : null}<input ref={inputRef} id={props.id ?? `search-input-${instanceId}`} type="search" aria-label={accessibleName} aria-controls={recentOpen && overlay ? popupId : undefined} aria-expanded={recentOpen && Boolean(overlay)} name={props.name} placeholder={props.placeholder ?? "search something…"} value={current} disabled={props.disabled} readOnly={props.readOnly} onFocus={() => setRecentOpen(Boolean(!current && recents.length && overlay))} onCompositionStart={() => { composing.current = true; cancelPending(); }} onCompositionEnd={(event) => { composing.current = false; set(event.currentTarget.value); }} onInput={props.onInput} onChange={(event) => { props.onChange?.(event); if (!composing.current) set(event.currentTarget.value); }} onKeyDown={(event) => { if (event.key === "Enter" && !composing.current) { event.preventDefault(); void submit(); } else if (event.key === "Escape") { if (current) clear(); else setRecentOpen(false); } }} />{showsAffordance && current ? <button className="nse-control-search-affordance" type="button" data-state="clear" aria-label={props.clearLabel ?? "Clear search"} disabled={props.disabled || props.readOnly} onClick={clear}>×</button> : null}</span>{overlay && recents.length ? <NSEListboxPopup id={popupId} open={recentOpen} anchor={inputRef.current} parentResponderId={props.parentResponderId} labelledBy={props.id ?? `search-input-${instanceId}`} options={recents.map((recent) => ({ id: recent, label: recent, value: recent }))} onOpenChange={setRecentOpen} onSelect={(option) => { const recent = option.value; if (!recent) return; if (!controlled) setStored(recent); props.onValueChange?.(recent); void submit(recent); }} /> : null}</label>;
 }

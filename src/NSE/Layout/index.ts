@@ -33,8 +33,6 @@ export {
 } from "./NSELayout";
 export { NSEForm, NSEFormRow, NSEFormSeparator } from "./NSEForm";
 export type { NSEFormProps, NSEFormRowProps } from "./NSEForm";
-export { NSEText } from "./NSEText";
-export type { NSETextProps, NSETextStyle } from "./NSEText";
 
 export { NSEStackItem } from "./NSEStackItem";
 export { NSEStackView } from "./NSEStackView";

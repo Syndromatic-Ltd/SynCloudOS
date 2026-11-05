@@ -4,7 +4,6 @@ import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEPreferencesController, nseUnowned, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers";
 import { enterClassApplication, instantiateInOwnerScope, NSEOwnershipScope } from "../../src/NSE/Controllers/ownership";
 import { NSEMenuController } from "../../src/NSE/Menus/NSEMenuController";
-import { NSESearchFieldController } from "../../src/NSE/Controls/Fields/NSESearchFieldController";
 import { NSEPageController } from "../../src/NSE/Page/NSEPageController";
 import { NSEColourPanelController } from "../../src/NSE/Colour/ColourPanel/NSEColourPanelController";
 import { NSEApplicationNavigationChromeController } from "../../src/NSE/Navigation/NSEApplicationNavigationChrome";
@@ -60,7 +59,6 @@ const factories = {
     const host = runtime();
     return new NSEToolbarController({ ...options, configuration: { identifier: "owned-toolbar", owner: { kind: "application", applicationId: "app" }, displayMode: "icon-only", sizeMode: "regular", allowedItemIds: [], defaultItemIds: [] }, items: [], preferences: preferences(), runtime: { signal: new AbortController().signal, commands: commandPort(host) } });
   },
-  search: (options: NSEControllerOwnershipOptions) => new NSESearchFieldController(options),
   page: (options: NSEControllerOwnershipOptions) => new NSEPageController(options),
   colour: (options: NSEControllerOwnershipOptions) => new NSEColourPanelController(runtime(), options),
   navigationChrome: (options: NSEControllerOwnershipOptions) => new NSEApplicationNavigationChromeController(options),
@@ -137,16 +135,14 @@ it("stops menu work and toolbar preference observation on owner disposal without
   expect(() => toolbar.setSizeMode("regular")).toThrow();
 });
 
-it("revokes search and page mutation and removes colour registrations with their owner", () => {
+it("revokes page mutation and removes colour registrations with their owner", () => {
   const owner = new AbortController();
-  const search = new NSESearchFieldController({ ownerSignal: owner.signal });
   const page = new NSEPageController({ ownerSignal: owner.signal });
   const host = runtime();
   const colour = new NSEColourPanelController(host, { ownerSignal: owner.signal });
   colour.registerPicker({ id: "owned-picker", label: "Owned", order: 1, supportedSpaces: ["srgb"], render: () => null });
   expect(host.colourPanel.getSnapshot().pickers.some((picker) => picker.id === "owned-picker")).toBe(true);
   owner.abort();
-  expect(() => search.rememberQuery("after close")).toThrow();
   expect(() => page.setProgress(0.5)).toThrow();
   expect(host.colourPanel.getSnapshot().pickers.some((picker) => picker.id === "owned-picker")).toBe(false);
   expect(() => colour.open()).toThrow();
