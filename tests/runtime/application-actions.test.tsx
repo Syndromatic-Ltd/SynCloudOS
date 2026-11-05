@@ -320,6 +320,22 @@ describe("actions along the responder chain", () => {
     await expect(context.commands.validate(`${appId}.publishSelection`, { name: "locked" })).resolves.toMatchObject({ enabled: false, title: "Publication interdite : locked" });
     binding.dispose();
   });
+
+  it("accepts a plain string title from a validator, as NSMenuItem.title is set", async () => {
+    const { context, host, focus } = fixture();
+    class History extends Recorder {
+      undoTitle = "Undo Change Coil Current";
+      @action undoChange() { this.calls.push("undo"); }
+      validateUndoChange() { return { enabled: true, title: this.undoTitle }; }
+    }
+    const history = new History();
+    const binding = bindActionResponder(history, host, responderIds.window);
+    focus("view");
+    await expect(context.commands.validate(`${appId}.undoChange`)).resolves.toMatchObject({ enabled: true, title: "Undo Change Coil Current" });
+    history.undoTitle = "Undo Move Probe";
+    await expect(context.commands.validate(`${appId}.undoChange`)).resolves.toMatchObject({ title: "Undo Move Probe" });
+    binding.dispose();
+  });
 });
 
 describe("actions in menus and controls", () => {

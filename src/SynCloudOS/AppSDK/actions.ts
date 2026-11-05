@@ -84,7 +84,8 @@ function declareAction<This extends object, Payload>(
  *
  * `validate<Name>()`, found by name, says whether the action is available: it
  * returns a boolean or a command validation (`{ enabled, state, title, hidden,
- * disabledReason }`). Menu items and controls that name the action follow it.
+ * disabledReason }`). `title` may be a plain string ("Undo Typing") or a
+ * localised `{ key, fallback }`. Menu items and controls that name the action follow it.
  * The method takes at most one parameter, the payload the sender supplies.
  */
 export function action<This extends object, Payload>(
@@ -185,9 +186,18 @@ function isThenable(value: unknown): value is PromiseLike<unknown> {
   return typeof value === "object" && value !== null && "then" in value && typeof value.then === "function";
 }
 
-function toValidation(name: string, result: unknown): SynWareCommandValidation {
+function toValidation(commandId: string, name: string, result: unknown): SynWareCommandValidation {
   if (typeof result === "boolean") return { enabled: result };
-  if (typeof result === "object" && result !== null && "enabled" in result && typeof result.enabled === "boolean") return result as SynWareCommandValidation;
+  if (typeof result === "object" && result !== null && "enabled" in result && typeof result.enabled === "boolean") {
+    const validation = result as SynWareCommandValidation & { readonly title?: unknown };
+    // A plain string title ("Undo Change Coil Current") is what a validator
+    // naturally returns, as NSMenuItem.title is. Give it the same localisation
+    // key the action's declared title uses, with the string as its fallback.
+    if (typeof validation.title === "string") {
+      return { ...validation, title: Object.freeze({ key: `commands.${commandId}.title`, fallback: validation.title }) } as SynWareCommandValidation;
+    }
+    return validation;
+  }
   throw new TypeError(`validate${capitalised(name)}() must return a boolean or a command validation with an "enabled" flag.`);
 }
 
@@ -235,7 +245,7 @@ function declarationFor(target: object, name: string, commandId: string, respond
       const validator = validatorFor(target, name);
       if (!validator) return { enabled: true };
       const result: unknown = validator.call(target, context.payload);
-      return isThenable(result) ? Promise.resolve(result).then((settled) => toValidation(name, settled)) : toValidation(name, result);
+      return isThenable(result) ? Promise.resolve(result).then((settled) => toValidation(commandId, name, settled)) : toValidation(commandId, name, result);
     },
     execute(context: { readonly payload: unknown }): unknown {
       if (!isLive()) throw new Error("The action's controller was disposed.");
