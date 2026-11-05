@@ -181,7 +181,7 @@ describe("SynCloudOS public API compatibility", () => {
       "closeScope", "dispose", "getActiveAnchors", "getFocusedResponderId", "getGeneration", "handleRespondersRemoved", "inspect", "isScopeWithin", "openScope", "requestFocus", "runtimeId", "setActiveAnchors", "subscribe",
     ].sort());
     expect(Object.keys(runtime.keyBindings).sort()).toEqual([
-      "claimKeyboardEvent", "clearOverride", "dispose", "handleKeyboardEvent", "inspect", "inspectCollisions", "resolve", "setOverride",
+      "bindingFor", "claimKeyboardEvent", "clearOverride", "dispose", "handleKeyboardEvent", "inspect", "inspectCollisions", "resolve", "setOverride",
     ].sort());
     expect(Object.keys(runtime.undo).sort()).toEqual([
       "create", "dispose", "get", "inspect", "remove", "resolveForResponder", "runtimeId",

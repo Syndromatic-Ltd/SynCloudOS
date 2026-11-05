@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { ResolvedKeyBinding } from "../../SynCloudOS/KeyBindings/keyBindingTypes";
 import { Children, isValidElement, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import type { CommandDispatchAcceptance, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
 import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
@@ -448,6 +449,7 @@ function NSECommandMenuSurface({
             data-nse-menu-state={entry.kind === "command" ? entry.checked : undefined}
             data-nse-menu-disabled={!entry.enabled ? "true" : undefined}
             data-nse-menu-command={entry.kind === "command" ? entry.commandId : undefined}
+            aria-keyshortcuts={entry.kind === "command" ? ariaKeyShortcuts(entry.presentation?.keyBinding) : undefined}
             tabIndex={activeId === entry.id ? 0 : -1}
             title={!entry.enabled ? entry.disabledReason : undefined}
             onFocus={() => setActiveId(entry.id)}
@@ -467,7 +469,7 @@ function NSECommandMenuSurface({
                 </span>
                 {(entry.kind === "command" && entry.shortcut) || entry.kind === "submenu" ? (
                   <span className="nse-control-list-trailing">
-                    {entry.kind === "command" && entry.shortcut ? <span className="nse-menu-shortcut" data-nse-part="shortcut-column">{entry.shortcut}</span> : null}
+                    {entry.kind === "command" && entry.shortcut ? <span className="nse-menu-shortcut" data-nse-part="shortcut-column" aria-hidden="true">{entry.shortcut}</span> : null}
                     {entry.kind === "submenu" ? <span className="nse-menu-submenu-arrow" data-nse-part="submenu-arrow" data-direction={direction} aria-hidden="true" /> : null}
                   </span>
                 ) : null}
@@ -479,7 +481,7 @@ function NSECommandMenuSurface({
                 ) : <span className="nse-menu-state-column" data-nse-part="state-column" aria-hidden="true" />}
                 <span className="nse-menu-item-icon" data-nse-part="icon-column" aria-hidden="true">{entry.icon}</span>
                 <span className="nse-menu-item-label">{entry.label}</span>
-                {entry.kind === "command" && entry.shortcut ? <span className="nse-menu-shortcut" data-nse-part="shortcut-column">{entry.shortcut}</span> : null}
+                {entry.kind === "command" && entry.shortcut ? <span className="nse-menu-shortcut" data-nse-part="shortcut-column" aria-hidden="true">{entry.shortcut}</span> : null}
                 {entry.kind === "submenu" ? <span className="nse-menu-submenu-arrow" data-nse-part="submenu-arrow" data-direction={direction} aria-hidden="true" /> : null}
               </>
             )}
@@ -734,6 +736,18 @@ function NSEItemMenu({
       </NSEMenuOverlay>
     </span>
   );
+}
+
+/**
+ * The key equivalent in aria-keyshortcuts form. The visible shortcut column is
+ * hidden from assistive technology, so the row's name stays its title.
+ */
+function ariaKeyShortcuts(binding: ResolvedKeyBinding | undefined): string | undefined {
+  if (!binding) return undefined;
+  const names: Record<string, string> = { Ctrl: "Control", Cmd: "Meta", Alt: "Alt", Shift: "Shift" };
+  const modifiers = binding.display.split("+").slice(0, binding.modifiers.length).map((label) => names[label] ?? label);
+  const key = binding.key === "+" ? "Plus" : binding.key === " " ? "Space" : binding.key.length === 1 ? binding.key.toLocaleUpperCase() : binding.key;
+  return [...modifiers, key].join("+");
 }
 
 /** @internal The menu surface drawn by pop-up buttons, view menus and the menu bar. */

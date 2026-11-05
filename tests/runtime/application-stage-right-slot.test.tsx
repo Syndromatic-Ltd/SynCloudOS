@@ -115,7 +115,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const menuItemNames = () => screen.queryAllByRole("menuitem").map((item) => item.textContent?.trim());
+const menuItemNames = () => screen.queryAllByRole("menuitem").map((item) => (item.querySelector(".nse-menu-item-label") ?? item).textContent?.trim());
 
 describe("the right-slot control", () => {
   const combinations = [true, false].flatMap((about) => [true, false].flatMap((appPreferences) => [true, false].map((signedIn) => ({ about, appPreferences, signedIn }))));
