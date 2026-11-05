@@ -108,6 +108,7 @@
   .nse-control-progress-bar,
   .nse-control-progress-item,
   hr.nse-control-divider,
+  .nse-box-separator,
   .nse-control-divider:not(.nse-control-divider-toggle),
   .nse-container-divider-drawer,
   .nse-list,
@@ -184,6 +185,11 @@
 :where([data-nse-content-layout="stack"]):has(> :first-child:is(.nse-control-list-item, .nse-list-row, .nse-list-swipeable, .nse-virtual-list-row)) {
   align-items: stretch;
   gap: 0;
+}
+
+/* A separator box spans its container along the line, as a horizontal NSBox separator does. */
+:where(.nse-box-separator) {
+  align-self: stretch;
 }
 
 /* ----------------------------------------------------------------------------
