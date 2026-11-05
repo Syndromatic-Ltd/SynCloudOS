@@ -11,19 +11,66 @@ export interface ErrorCatalogueEntry {
   /** Version-matched path relative to the installed SDK package. */
   readonly docs?: string;
   readonly appliesTo?: string;
+  /** Known failures under this code, recognised by the thrown message. The first match replaces the entry's fix and docs in the report's Hint and Docs lines. */
+  readonly diagnoses?: readonly ErrorDiagnosis[];
 }
+/**
+ * A known failure that reaches a generic boundary code (such as APP_CONTENT_FAILED)
+ * because the thrown error has no code of its own. It only chooses the hint; code
+ * identity never depends on message text.
+ */
+export interface ErrorDiagnosis {
+  /** Regular-expression source, matched against the thrown message and its causes. A string, so the catalogue stays JSON for offline tools. */
+  readonly message: string;
+  readonly fix: string;
+  readonly docs?: string;
+}
+const thrownErrorDiagnoses: readonly ErrorDiagnosis[] = Object.freeze(([
+  {
+    message: "requires? an NSEOverlayProvider",
+    fix: "This control opens menus or popovers, so it needs the NSEOverlayProvider that every SynCloudOS window supplies. Render it inside the application's views. A control rendered into a separate React root or through createPortal outside the window, or in a test, needs its own NSEOverlayProvider. If the same code worked before an SDK update, the browser combined cached and new copies of the SDK: reload with the cache cleared.",
+    docs: "docs/framework/nse/menus-toolbars-and-inspectors.md#responder-provenance-for-toolbars-and-menus",
+  },
+  {
+    message: "requires an NSE (?:lifetime owner|application)",
+    fix: "This object must be created by an owner: in a field initialiser or constructor of an NSEApplication, window controller or view controller, not in a method, a callback or after an await.",
+    docs: "docs/framework/applications.md#ownership",
+  },
+  {
+    message: "Invalid hook call",
+    fix: "A hook was called outside a function component's render, or the page loaded two copies of React. In a class-based application, keep state on the view controller as @observable fields instead of calling hooks from its methods. Otherwise check that only one copy of react is installed (npm ls react).",
+    docs: "docs/framework/applications.md#observable-properties",
+  },
+  {
+    message: "Rendered (?:more|fewer) hooks than|change in the order of Hooks",
+    fix: "A hook is called conditionally or after an early return. Call hooks at the top of the component, in the same order on every render.",
+  },
+  {
+    message: "Maximum update depth exceeded",
+    fix: "A state update triggers itself in a loop: a setter called during render, or an effect that updates a value its own dependencies change on. Update state from events, or compare before setting.",
+  },
+  {
+    message: "Objects are not valid as a React child",
+    fix: "A view rendered a plain object where text or elements were expected. Render one of its fields, or format it as a string first.",
+  },
+  {
+    message: "Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module",
+    fix: "The browser could not load one of the app's modules. In development, the dev server restarted or rebuilt: reload the page. After a deployment, the page was still using files the deployment replaced: reload to get the current version.",
+    docs: "docs/framework/getting-started.md",
+  },
+] satisfies ErrorDiagnosis[]).map(diagnosis => Object.freeze(diagnosis)));
 export const errorCatalogue: readonly ErrorCatalogueEntry[] = Object.freeze([
   {code:"APP_NOT_FOUND",title:"SynCloudOS could not find an app registered with that identifier",cause:"The requested bundle identifier is absent from the registered composition.",fix:"Check manifest.bundleIdentifier and include the bundle in the host's bundles array.",docs:"docs/framework/getting-started.md"},
   {code:"ROUTE_NOT_FOUND",title:"SynCloudOS could not match the requested address to a registered SynWare",cause:"No registered manifest route matches the pathname.",fix:"Declare the route in Info.ts and register its bundle; check the host base path.",docs:"docs/framework/synware-sdk.md"},
-  {code:"APP_LAUNCH_FAILED",title:"SynCloudOS could not load the requested content",cause:"Loading or starting the app rejected.",fix:"Inspect the original technical message, verify the app entry export and resolve failing imports or startup operations.",docs:"docs/framework/getting-started.md"},
+  {code:"APP_LAUNCH_FAILED",title:"SynCloudOS could not load the requested content",cause:"Loading or starting the app rejected.",fix:"Inspect the original technical message, verify the app entry export and resolve failing imports or startup operations.",docs:"docs/framework/getting-started.md",diagnoses:thrownErrorDiagnoses},
   {code:"APP_NOT_RESPONDING",title:"Application has stopped responding",cause:"The app response deadline expired.",fix:"Inspect long synchronous work and unresolved startup operations; move expensive work off the main thread.",docs:"docs/framework/synware-sdk.md"},
   {code:"SITE_NOT_RESPONDING",title:"Site has stopped responding",cause:"The site response deadline expired.",fix:"Inspect blocked host initialization and main-thread work before retrying.",docs:"docs/framework/getting-started.md"},
   {code:"CONNECTION_ERROR",title:"Connection Error: could not connect to the server",cause:"The browser is offline or a server request failed.",fix:"Check connectivity, request URL, server availability and response details; retry only after resolving the connection failure.",docs:"docs/framework/getting-started.md"},
-  {code:"APP_CONTENT_FAILED",title:"An unexpected error has prevented this application from working properly",cause:"An app's rendering boundary caught an exception.",fix:"Use the technical message and component stack to fix the throwing app code.",docs:"docs/framework/synware-sdk.md"},
-  {code:"LIFECYCLE_HOOK_FAILED",title:"An application lifecycle method failed",cause:"An NSEApplication lifecycle method such as applicationDidFinishLaunching threw or rejected. A failure after the launch commits does not stop the window, so a later error can be the one that stops the application; the technical details of that report list the earlier lifecycle failures.",fix:"Fix the failing method. Do asynchronous setup that the windows read in applicationWillFinishLaunching, which the main window waits for.",docs:"docs/framework/applications.md"},
-  {code:"UNKNOWN_RUNTIME_ERROR",title:"SynCloudOS caught an unexpected rendering error before it could blank the screen",cause:"An exception reached the root runtime boundary.",fix:"Inspect the original stack and fix the failing host or framework operation.",docs:"docs/framework/getting-started.md"},
-  {code:"GLOBAL_SCRIPT_ERROR",title:"A browser-level script error escaped the runtime watchdogs",cause:"An uncaught browser script error reached the global watchdog.",fix:"Inspect the script URL, line and original stack; handle the failure at its source.",docs:"docs/framework/synware-sdk.md"},
-  {code:"UNHANDLED_PROMISE_REJECTION",title:"An asynchronous runtime operation failed without handling its rejection",cause:"A promise rejected without an attached rejection handler.",fix:"Await the operation in a try/catch or attach a rejection handler and surface the original cause.",docs:"docs/framework/synware-sdk.md"},
+  {code:"APP_CONTENT_FAILED",title:"An unexpected error has prevented this application from working properly",cause:"An app's rendering boundary caught an exception.",fix:"The Message line says what failed. In the React component stack, the first component from your application's Contents folder is where the failing code was rendered; fix it there.",docs:"docs/framework/synware-sdk.md",diagnoses:thrownErrorDiagnoses},
+  {code:"LIFECYCLE_HOOK_FAILED",title:"An application lifecycle method failed",cause:"An NSEApplication lifecycle method such as applicationDidFinishLaunching threw or rejected. A failure after the launch commits does not stop the window, so a later error can be the one that stops the application; the technical details of that report list the earlier lifecycle failures.",fix:"Fix the failing method. Do asynchronous setup that the windows read in applicationWillFinishLaunching, which the main window waits for.",docs:"docs/framework/applications.md",diagnoses:thrownErrorDiagnoses},
+  {code:"UNKNOWN_RUNTIME_ERROR",title:"SynCloudOS caught an unexpected rendering error before it could blank the screen",cause:"An exception reached the root runtime boundary.",fix:"Inspect the original stack and fix the failing host or framework operation.",docs:"docs/framework/getting-started.md",diagnoses:thrownErrorDiagnoses},
+  {code:"GLOBAL_SCRIPT_ERROR",title:"A browser-level script error escaped the runtime watchdogs",cause:"An uncaught browser script error reached the global watchdog.",fix:"Inspect the script URL, line and original stack; handle the failure at its source.",docs:"docs/framework/synware-sdk.md",diagnoses:thrownErrorDiagnoses},
+  {code:"UNHANDLED_PROMISE_REJECTION",title:"An asynchronous runtime operation failed without handling its rejection",cause:"A promise rejected without an attached rejection handler.",fix:"Await the operation in a try/catch or attach a rejection handler and surface the original cause.",docs:"docs/framework/synware-sdk.md",diagnoses:thrownErrorDiagnoses},
   {code:"RUNTIME_EVENT_LISTENER_FAILED",title:"An EventBus subscriber failed while SynCloudOS was dispatching a runtime event",cause:"A runtime event listener threw or rejected.",fix:"Inspect the listener's original stack and handle failures inside the subscriber; dispose subscriptions with their owner.",docs:"docs/framework/synware-sdk.md"},
   {code:"ASSET_LOAD_FAILED",title:"A page resource failed to load",cause:"A visual resource URL could not be loaded.",fix:"Check the resource path, emitted assets, deployment base URL and network response.",docs:"docs/framework/getting-started.md"},
   {code:"FEATURE_NOT_IMPLEMENTED",title:"The requested feature has not been implemented yet",cause:"A system action has no registered implementation.",fix:"Register the feature implementation or avoid presenting that action until it is available.",docs:"docs/framework/synware-sdk.md"},

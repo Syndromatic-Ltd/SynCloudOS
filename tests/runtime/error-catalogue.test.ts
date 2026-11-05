@@ -53,3 +53,14 @@ it("keeps the documented code table exactly matched to the offline catalogue", (
     if (entry.docs) expect(existsSync(resolve(root, entry.docs.split("#")[0]!)), `${entry.code}: ${entry.docs}`).toBe(true);
   }
 });
+
+it("keeps every message diagnosis a valid pattern with existing docs", () => {
+  for (const entry of errorCatalogue) {
+    for (const diagnosis of entry.diagnoses ?? []) {
+      expect(() => new RegExp(diagnosis.message, "u"), `${entry.code}: ${diagnosis.message}`).not.toThrow();
+      expect(Object.isFrozen(diagnosis)).toBe(true);
+      if (diagnosis.docs) expect(existsSync(resolve(root, diagnosis.docs.split("#")[0]!)), `${entry.code}: ${diagnosis.docs}`).toBe(true);
+    }
+  }
+  expect(JSON.parse(JSON.stringify(errorCatalogue))).toEqual(errorCatalogue);
+});

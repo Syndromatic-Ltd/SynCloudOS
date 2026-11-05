@@ -2,7 +2,7 @@
  * Designed by Kavish Krishnakumar in Manchester.
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { errorCatalogue, type ErrorCatalogueEntry } from "./errorCatalogue";
+import { errorCatalogue, type ErrorCatalogueEntry, type ErrorDiagnosis } from "./errorCatalogue";
 import { describeSynCloudOSLifecycleDisposal, SynCloudOSLifecycleError } from "./lifecycleError";
 import type { CapturedSynCloudOSError, SynCloudOSErrorPayload } from "./errorTypes";
 
@@ -92,6 +92,21 @@ function causeChain(thrown: unknown): string[] {
   return sections;
 }
 
+/** The first known failure under this code whose pattern matches the thrown message or one of its causes. */
+function diagnose(entry: ErrorCatalogueEntry | undefined, thrown: unknown): ErrorDiagnosis | undefined {
+  if (!entry?.diagnoses?.length) return undefined;
+  const messages: string[] = [];
+  const seen = new Set<unknown>();
+  for (let value = thrown; value !== undefined && !seen.has(value) && messages.length < 8; value = isErrorLike(value) ? value.cause : undefined) {
+    seen.add(value);
+    messages.push(isErrorLike(value) ? value.message : describeValue(value));
+  }
+  return entry.diagnoses.find((diagnosis) => {
+    const pattern = new RegExp(diagnosis.message, "u");
+    return messages.some((message) => pattern.test(message));
+  });
+}
+
 function composeTechnicalDetails(
   payload: SynCloudOSErrorPayload,
   captured: Omit<CapturedSynCloudOSError, "technicalDetails">,
@@ -103,6 +118,7 @@ function composeTechnicalDetails(
   const lifecycle = thrown instanceof SynCloudOSLifecycleError ? thrown : null;
   const appName = appDisplayName ?? captured.packageName;
   const catalogue = catalogueEntries.get(captured.code);
+  const diagnosis = diagnose(catalogue, thrown);
   const identity = facts([
     ["Exception", captured.exception],
     ["Code", captured.code],
@@ -121,8 +137,8 @@ function composeTechnicalDetails(
     ["Page", text(context.browserUrl)],
     ["User agent", text(context.userAgent)],
     ["Severity", `${captured.severity ?? "error"}, ${captured.recoverable === false ? "not recoverable" : "recoverable"}`],
-    ["Hint", catalogue?.fix],
-    ["Docs", catalogue?.docs],
+    ["Hint", diagnosis?.fix ?? catalogue?.fix],
+    ["Docs", diagnosis ? diagnosis.docs ?? catalogue?.docs : catalogue?.docs],
   ]);
   return [
     identity,
