@@ -23,7 +23,7 @@ import type { SynWareRouteGraph } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
 import { nseDisposeFor, type NSEOwnedObject, type NSEOwner } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
-import { observable } from "../Objects/observable";
+import { publishObservableChange } from "../Objects/observable";
 import type { NSEMenu } from "../Menus/NSEMenu";
 import { NSEObjectLifetime } from "./objectLifetime";
 import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
@@ -99,7 +99,17 @@ export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObjec
    * per item's submenu, drawn by `NSEMenuBar`. Setting it is how an application
    * opts in to a menu bar; most SynWare has none, so it starts null.
    */
-  @observable accessor mainMenu: NSEMenu | null = null;
+  get mainMenu(): NSEMenu | null {
+    return this.#mainMenu;
+  }
+
+  set mainMenu(menu: NSEMenu | null) {
+    if (menu === this.#mainMenu) return;
+    this.#mainMenu = menu;
+    publishObservableChange(this);
+  }
+
+  #mainMenu: NSEMenu | null = null;
 
   constructor() {
     super();
