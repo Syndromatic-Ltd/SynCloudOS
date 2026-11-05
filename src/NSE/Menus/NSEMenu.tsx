@@ -691,7 +691,7 @@ function NSEItemMenu({
             ? { title: label }
             : { title: triggerLabel, image: label, imagePosition: "imageOnly" as const }),
           controlSize: controlSize === "small" ? "small" as const : undefined,
-          "data-size": height !== undefined ? "custom" : undefined,
+          ...(height !== undefined ? { "data-size": "custom" } : {}),
           style: sizedControlStyle(undefined, height, undefined),
         } : { title: label, ...nseButtonToneProps(tone) })}
         isHighlighted={isOpen}
