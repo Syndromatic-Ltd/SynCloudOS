@@ -18,7 +18,7 @@ const COLOUR_LITERAL_THRESHOLD = 12;
 export const NSE_CONTROL_REPLACEMENTS = Object.freeze({
   button: "NSEButton",
   input: "NSETextField, NSESearchField, NSESlider, NSEStepper, NSEButton with buttonType switch, or NSESwitch",
-  select: "NSEPopupButton or NSESegmentedControl",
+  select: "NSEPopUpButton or NSESegmentedControl",
   textarea: "NSETextView",
   table: "NSETableView bound to an NSEArrayController",
 });

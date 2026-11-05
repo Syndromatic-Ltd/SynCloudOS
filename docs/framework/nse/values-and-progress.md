@@ -15,13 +15,12 @@ import { NSESlider, NSEStepper } from "@syndromatic/syncloudos/nse";
 | `NSEStepper` | Increment and decrement buttons with hold to repeat | No |
 | `NSELevelIndicator` | A meter, or a star rating | No |
 | `NSESegmentedControl` | Momentary, single and multiple selection segments in the rounded, capsule and textured toolbar styles, with menus and overflow | For menus and overflow |
-| `NSEPicker`, `NSEListSelector`, `NSEIntegerPicker` | A button that opens a list of options | Yes |
-| `NSEPopupList` | A menu button from a list of items | Yes |
+| `NSEPopUpButton` | A button that shows the selected choice and opens the list, or (`pullsDown`) a button that opens a menu of commands | A pull-down button does; a pop-up button falls back to the native list without one |
 | `NSEProgressBar`, `NSEProgressItem`, `NSEProgressSlider`, `NSEProgressIndicator`, `NSESpinner` | Determinate and indeterminate progress | No |
 
 Components marked "Yes" open a floating list and need an overlay host. A mounted SynWare receives one from the runtime, and elsewhere you wrap the controls in `NSEStandaloneControlHost` from `nse/controls`. See [Text fields and choice controls](text-and-choice.md#at-a-glance).
 
-Import `NSEPicker` from `@syndromatic/syncloudos/nse/controls`. Everything else on this page comes from `@syndromatic/syncloudos/nse`.
+Everything on this page comes from `@syndromatic/syncloudos/nse`.
 
 ## NSESlider
 
@@ -136,25 +135,35 @@ In a momentary control every click reports an empty selection. In select-one, cl
 />
 ```
 
-## Pickers
+## Pop-up buttons
 
-`NSEPicker` is a button that shows the current choice and opens a listbox. `NSEListSelector` and `NSEIntegerPicker` are built on it.
+`NSEPopUpButton` is AppKit's `NSPopUpButton`. As a pop-up button it shows the selected item and opens a list of the other choices; with `pullsDown` it keeps its title and its items run commands (see [Menus, toolbars and inspectors](menus-toolbars-and-inspectors.md)).
 
-| Prop (`NSEPicker`) | Type | Default | Description |
+```tsx
+<NSEPopUpButton
+  label="Resolution"
+  value={resolution}
+  items={[{ value: "low", title: "Low" }, { value: "high", title: "High" }, { isSeparatorItem: true }, { value: "custom", title: "Custom…", isEnabled: canCustomise }]}
+  onValueChange={setResolution}
+/>
+```
+
+| Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `options` | `readonly { value, label, disabled? }[]` | required | |
-| `value`, `defaultValue` | `string` | first enabled option | |
-| `onValueChange` | `(value: string) => void` | none | |
-| `label`, `labelHidden`, `accessibleLabel` | | | A caption above or beside the button. `accessibleLabel` overrides what a screen reader says before the current choice. |
-| `textAlign` | `"start" \| "center" \| "end"` | `"start"` | Alignment of the caption. |
-| `popupAlign` | `"left" \| "right"` | `"right"` | Which edge the list aligns to. |
-| `pressHaptic`, `snapHaptic` | `HFXFeedbackRequest` | `"soft"`, `"selection"` | The ticks for pressing the button and choosing an option. |
-| `listboxOverlay`, `parentResponderId`, `presentation` | | | Where the list belongs in the overlay and responder hierarchy. With an overlay host these have working defaults. |
-| `disabled`, `smoothSurface` | `boolean` | | |
+| `items` | `readonly NSEPopUpButtonItem[]` | | Choice items `{ value, title, image?, isEnabled? }`, separators `{ isSeparatorItem: true }`, and command items with their own `action` and `actionPayload`, which run the action rather than change the value. |
+| `value`, `defaultValue` | `string` | the first enabled item | The selected item's value. |
+| `onValueChange` | `(value: string) => void` | none | Or send the button's `action`, with the chosen value as its payload. |
+| `pullsDown` | `boolean` | `false` | `NSPopUpButton.pullsDown`. The button shows `title`; give it a command `menu` (an `NSEMenu`) or command `items`. |
+| `title` | `ReactNode` | | A pull-down button's title. |
+| `menu` | `NSEMenu` | | A pull-down button's command menu, validated along the responder chain when it opens. |
+| `label`, `labelHidden`, `accessibleLabel` | | | A caption beside the button. `accessibleLabel` overrides what a screen reader says before the current choice. |
+| `isEnabled` | `boolean` | `true` | |
+| `controlSize` | `"regular" \| "small"` | `"regular"` | `"small"` is the 24 px size inspectors and panels use. |
+| `bezelStyle`, `appearance`, `toolTip` | | | A pull-down button's `NSButton` bezel (`texturedRounded` is the toolbar capsule), its `NSView.appearance`, and its tooltip. |
+| `width`, `height` | | | An explicit size; the bezel keeps its proportions. |
+| `overlay`, `parentResponderId`, `presentation` | | | Where the list belongs in the overlay and responder hierarchy. With an overlay host these have working defaults. |
 
-Arrow Down and Arrow Up on the button open the list.
-
-**`NSEListSelector`** takes `items` (or `options`) as strings or `{ value, label, caption?, icon?, src?, disabled? }`, and adds `onChange(value, oldValue)`, `onSelect(item, value)`, `hideItem`, `hideArrow` and `contentPack` (`"start"`, `"center"` or `"end"`). **`NSEIntegerPicker`** offers the whole numbers from `min` to `max` (defaults 0 and 9) in steps of `step` (default 1), takes `value`, `defaultValue`, `onValueChange(value: number)` and `formatValue`, and clamps the value to the range. **`NSEPopupList`** is a menu button with the same item shapes, taking `label` and `onSelect(value, item)`.
+Arrow Down and Arrow Up on the button open the list. Without an overlay host, a pop-up button falls back to the platform's native `<select>`; a pull-down button needs one and throws an error that says so.
 
 ## Progress
 
