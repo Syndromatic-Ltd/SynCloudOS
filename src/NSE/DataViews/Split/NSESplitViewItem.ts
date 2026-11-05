@@ -40,8 +40,9 @@ export interface NSESplitViewItemOptions {
   /** The thickest the item may be along the split, in CSS pixels. Defaults to no limit. */
   readonly maximumThickness?: number;
   /**
-   * The share of the split view's size the item takes when it is first laid out or its sizes are reset.
-   * An item without one starts at its minimum thickness and grows by its holding priority.
+   * The share of the split view's size the item takes until a divider beside it moves, and again after
+   * its sizes are reset. An item without one starts at its minimum thickness and grows by its holding
+   * priority.
    */
   readonly preferredThicknessFraction?: number;
   /** Whether the item may collapse. Sidebars and inspectors can; other items cannot unless set. */

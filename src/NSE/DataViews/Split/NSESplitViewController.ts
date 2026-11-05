@@ -247,7 +247,6 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
       this.#activeId = item.identifier === this.#preferredActiveId ? item.identifier : this.#items[0]!.identifier;
     }
     this.#ensureSurvivor();
-    this.#materialisePreferredThicknesses();
     this.#replace();
   }
 
@@ -323,8 +322,7 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
       moveDividerTo: (index, edge) => this.#moveDividerTo(index, edge),
       resetSizes: () => {
         this.#requestedSizes = new Map();
-        this.#materialisePreferredThicknesses();
-        this.#replace(true);
+            this.#replace(true);
       },
     };
   }
@@ -336,17 +334,7 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
     const rounded = Math.round(availableSize);
     if (this.#availableSize === rounded && this.#revision > 0) return;
     this.#availableSize = rounded;
-    this.#materialisePreferredThicknesses();
     this.#replace();
-  }
-
-  /** The first real size turns each item's preferred fraction into a held thickness, as AppKit's first layout does. */
-  #materialisePreferredThicknesses(): void {
-    if (this.#availableSize <= 0) return;
-    for (const item of this.#items) {
-      if (this.#requestedSizes.has(item.identifier) || item.preferredThicknessFraction === undefined) continue;
-      this.#requestedSizes.set(item.identifier, Math.round(item.preferredThicknessFraction * this.#availableSize));
-    }
   }
 
   #setCollapsed(identifier: string, collapsed: boolean): void {
@@ -438,7 +426,14 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
       });
     }
     const panes = this.#items.map(paneFor);
-    const solution = distributeSplitSizes(panes, this.#requestedSizes, this.#availableSize, this.#explicitlyCollapsed);
+    // An item's preferred fraction holds until a divider next to it moves; then its thickness does.
+    const requested = new Map(this.#requestedSizes);
+    for (const item of this.#items) {
+      if (!requested.has(item.identifier) && item.preferredThicknessFraction !== undefined) {
+        requested.set(item.identifier, Math.round(item.preferredThicknessFraction * this.#availableSize));
+      }
+    }
+    const solution = distributeSplitSizes(panes, requested, this.#availableSize, this.#explicitlyCollapsed);
     const snapshots: NSESplitViewItemSnapshot[] = panes.map((pane) => Object.freeze({
       identifier: pane.id,
       thickness: solution.sizes.get(pane.id) ?? 0,
