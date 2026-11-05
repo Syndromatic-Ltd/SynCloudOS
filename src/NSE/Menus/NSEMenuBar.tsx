@@ -24,6 +24,7 @@ import { useOptionalNSEOverlayProvider } from "../Overlays";
 import { NSEMenuView } from "./NSEMenuView";
 import { NSEMenu } from "./NSEMenu";
 import { useNSEDeferredDisposal } from "../interactionLifecycle";
+import { useOptionalNSEMenuRuntimePort } from "./menuRuntimeContext";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
 import { nseMenuModel, type NSEMenuOverlayOptions } from "./menuTypes";
 
@@ -50,18 +51,23 @@ export interface NSEMenuBarProps {
  * One active presentation at a time, projected from independent command
  * controllers. It is deliberately not a command, responder, or focus owner.
  */
-/** The bar's menus: one per top-level submenu, each with its own validation lease. */
+/**
+ * The bar's menus: one per top-level submenu, each with its own validation
+ * lease. They validate in the window that draws the bar, as NSApp.mainMenu
+ * validates along the key window's responder chain.
+ */
 function useBarMenus(mainMenu: NSEMenu): readonly NSEMenu[] {
+  const runtime = useOptionalNSEMenuRuntimePort() ?? mainMenu.runtime;
   const menus = useMemo(() => {
     const menus = mainMenu.model.entries.flatMap((entry) => entry.kind === "submenu"
       ? [new NSEMenu({
           [nseMenuModel]: { id: `${mainMenu.model.id}:${entry.id}`, label: typeof entry.label === "string" ? entry.label : entry.id, entries: entry.entries },
-          runtime: mainMenu.runtime,
+          runtime,
         })]
       : []);
     return Object.assign(menus, { dispose: () => { for (const menu of menus) menu.dispose(); } });
-  }, [mainMenu]);
-  useNSEDeferredDisposal(menus, mainMenu.runtime.scheduler);
+  }, [mainMenu, runtime]);
+  useNSEDeferredDisposal(menus, runtime.scheduler);
   return menus;
 }
 

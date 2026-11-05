@@ -36,6 +36,7 @@ import {
 } from "../../../src/NSE/Menus";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { NSEView } from "../../../src/NSE/Views/NSEView";
+import { NSEMenuRuntimeProvider } from "../../../src/NSE/Menus/menuRuntimeContext";
 import { defineNSEAppearance, NSEAppearanceProvider } from "../../../src/NSE/Appearance";
 import { NSEPopUpButton, NSEPopup } from "../../../src/NSE/Menus";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
@@ -760,6 +761,30 @@ describe("NSEMenu", () => {
     fireEvent.keyDown(view!, { key: "ArrowDown" });
     expect(await screen.findByRole("menu", { name: "View" })).toBeTruthy();
     await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("menuitem", { name: "Toggle Sidebar" })));
+  });
+
+  it("validates a main menu's items in the window that draws its menu bar", async () => {
+    const appLevel = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
+      requests.map((request) => [request.key, presentation(request.commandId, { enabled: false })]),
+    ));
+    const windowLevel = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
+      requests.map((request) => [request.key, presentation(request.commandId)]),
+    ));
+    const mainMenu = new NSEMenu({ [nseMenuModel]: { id: "main", label: "Main Menu", entries: [
+      { kind: "submenu", id: "view", label: "View", entries: [{ kind: "command", id: "toggle-sidebar", commandId: "view.toggleSidebar", labelOverride: "Toggle Sidebar" }] },
+    ] }, runtime: runtime(appLevel) });
+    render(
+      <MenuOverlayHarness>
+        <NSEMenuRuntimeProvider port={runtime(windowLevel)}>
+          <NSEMenuBar menu={mainMenu} overlay={{ parentResponderId: "editor" }} />
+        </NSEMenuRuntimeProvider>
+      </MenuOverlayHarness>,
+    );
+    fireEvent.click(screen.getByRole("menuitem", { name: "View" }));
+    const item = await screen.findByRole("menuitem", { name: "Toggle Sidebar" });
+    await waitFor(() => expect(item.getAttribute("aria-disabled")).toBeNull());
+    expect(windowLevel).toHaveBeenCalled();
+    expect(appLevel).not.toHaveBeenCalled();
   });
 
   it("propagates a custom appearance through the picker listbox with explicit provenance", async () => {
