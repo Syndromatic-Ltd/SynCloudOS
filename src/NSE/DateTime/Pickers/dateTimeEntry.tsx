@@ -20,26 +20,27 @@
 
 import { useEffect, useId, useReducer, useRef, useState } from "react";
 import { NSEPopover, useOptionalNSEOverlayProvider } from "../../Overlays";
-import { NSECalendarView, NSEClockView } from "../Calendar";
+import { NSEGraphicalCalendar } from "../Calendar/graphicalCalendar";
+import { NSEGraphicalClock } from "../Calendar/graphicalClock";
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { civilToEpochDay, comparePlainDates, resolveZonedDateTime } from "../calendarArithmetic";
 import { formatPlainDate, parsePlainDate, plainDateToday } from "../dateTimeFormatting";
 import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";
-import type { NSEDateTimePickerMode, NSEDateTimePickerProps, NSEDateTimePickerValue } from "./datePickerTypes";
-import { serializePlainDate } from "./NSEDatePicker";
-import { serializePlainTime } from "./NSETimePicker";
+import type { NSEDateTimeEntryMode, NSEDateTimeEntryProps, NSEDateTimeValue } from "./datePickerTypes";
+import { serializePlainDate } from "./dateEntry";
+import { serializePlainTime } from "./timeEntry";
 import { createPickerTransaction, reducePickerTransaction } from "./pickerTransaction";
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 
-const emptyValue = (timeZone: string): NSEDateTimePickerValue => ({
+const emptyValue = (timeZone: string): NSEDateTimeValue => ({
   date: plainDateToday(timeZone),
   time: { hour: 0, minute: 0, second: 0 },
   timeZone,
   disambiguation: "earlier",
 });
 
-const sameDateTime = (left: NSEDateTimePickerValue | null, right: NSEDateTimePickerValue | null) => left === right || Boolean(left && right
+const sameDateTime = (left: NSEDateTimeValue | null, right: NSEDateTimeValue | null) => left === right || Boolean(left && right
   && comparePlainDates(left.date, right.date) === 0
   && left.time.hour === right.time.hour
   && left.time.minute === right.time.minute
@@ -47,13 +48,13 @@ const sameDateTime = (left: NSEDateTimePickerValue | null, right: NSEDateTimePic
   && left.timeZone === right.timeZone
   && left.disambiguation === right.disambiguation);
 
-const textForValue = (value: NSEDateTimePickerValue | null, locale: string) => value
+const textForValue = (value: NSEDateTimeValue | null, locale: string) => value
   ? `${formatPlainDate(value.date, locale)} ${String(value.time.hour).padStart(2, "0")}:${String(value.time.minute).padStart(2, "0")}`
   : "";
 
 /** The trigger's display: the locale's medium date and short time (no
  * seconds), in the picker's hour cycle, e.g. "28 Mar 2026, 12:30". */
-const displayForValue = (value: NSEDateTimePickerValue, locale: string, hourCycle: "h12" | "h24") => new Intl.DateTimeFormat(locale, {
+const displayForValue = (value: NSEDateTimeValue, locale: string, hourCycle: "h12" | "h24") => new Intl.DateTimeFormat(locale, {
   dateStyle: "medium",
   timeStyle: "short",
   hourCycle: hourCycle === "h12" ? "h12" : "h23",
@@ -61,7 +62,7 @@ const displayForValue = (value: NSEDateTimePickerValue, locale: string, hourCycl
   calendar: "gregory",
 }).format(civilToEpochDay(value.date) * 86_400_000 + value.time.hour * 3_600_000 + value.time.minute * 60_000);
 
-const parseTextValue = (text: string, locale: string, baseline: NSEDateTimePickerValue): NSEDateTimePickerValue | null => {
+const parseTextValue = (text: string, locale: string, baseline: NSEDateTimeValue): NSEDateTimeValue | null => {
   const match = /^(.*\S)\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(text.trim());
   if (!match) return null;
   const date = parsePlainDate(match[1], locale);
@@ -72,18 +73,18 @@ const parseTextValue = (text: string, locale: string, baseline: NSEDateTimePicke
   return { ...baseline, date: date.value, time: { hour, minute, second } };
 };
 
-export function NSEDateTimePicker({ value, defaultValue = null, mode = "combined", onValueChange, ...props }: NSEDateTimePickerProps) {
+export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined", onValueChange, ...props }: NSEDateTimeEntryProps) {
   const controlled = value !== undefined;
   const [stored, setStored] = useState(defaultValue);
   const current = controlled ? value : stored;
-  const [transaction, dispatchTransaction] = useReducer(reducePickerTransaction<NSEDateTimePickerValue | null>, current, createPickerTransaction);
+  const [transaction, dispatchTransaction] = useReducer(reducePickerTransaction<NSEDateTimeValue | null>, current, createPickerTransaction);
   const draft = transaction.draft;
   const open = transaction.open;
   const [textDraft, setTextDraft] = useState(() => textForValue(current, props.locale));
   const [error, setError] = useState("");
   const [focused, setFocused] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const lastPublishedRef = useRef<NSEDateTimePickerValue | null | undefined>(undefined);
+  const lastPublishedRef = useRef<NSEDateTimeValue | null | undefined>(undefined);
   const instanceId = useId().replace(/:/g, "");
   const overlay = useOptionalNSEOverlayProvider();
   if (mode === "automatic" && !overlay) throw new Error("Automatic date-time pickers require an NSEOverlayProvider.");
@@ -114,18 +115,18 @@ export function NSEDateTimePicker({ value, defaultValue = null, mode = "combined
     return () => form.removeEventListener("reset", reset);
   }, [controlled, defaultValue, props.locale]);
 
-  const resolutionFor = (candidate: NSEDateTimePickerValue) => resolveZonedDateTime({ date: candidate.date, time: candidate.time }, candidate.timeZone, candidate.disambiguation);
-  const validationError = (candidate: NSEDateTimePickerValue): string => {
+  const resolutionFor = (candidate: NSEDateTimeValue) => resolveZonedDateTime({ date: candidate.date, time: candidate.time }, candidate.timeZone, candidate.disambiguation);
+  const validationError = (candidate: NSEDateTimeValue): string => {
     const resolution = resolutionFor(candidate);
     if (resolution.kind !== "resolved") return resolution.kind === "nonexistent" ? "This local time does not exist." : "This local time is ambiguous.";
     if ((props.minimum && resolution.value.epochMilliseconds < props.minimum.epochMilliseconds) || (props.maximum && resolution.value.epochMilliseconds > props.maximum.epochMilliseconds)) return "This appointment is outside the allowed range.";
     return "";
   };
-  const outsideBounds = (candidate: NSEDateTimePickerValue): boolean => {
+  const outsideBounds = (candidate: NSEDateTimeValue): boolean => {
     const resolution = resolutionFor(candidate);
     return resolution.kind === "resolved" && Boolean((props.minimum && resolution.value.epochMilliseconds < props.minimum.epochMilliseconds) || (props.maximum && resolution.value.epochMilliseconds > props.maximum.epochMilliseconds));
   };
-  const preview = (next: NSEDateTimePickerValue) => {
+  const preview = (next: NSEDateTimeValue) => {
     if (props.disabled || props.readOnly || outsideBounds(next)) return;
     dispatchTransaction({ type: "preview", value: next });
     setTextDraft(textForValue(next, props.locale));
@@ -186,7 +187,7 @@ export function NSEDateTimePicker({ value, defaultValue = null, mode = "combined
   // Paging the calendar moves the view, never the chosen date.
   const [visibleMonth, setVisibleMonth] = useState<NSECalendarMonth>({ year: editorValue.date.year, month: editorValue.date.month });
   useEffect(() => { setVisibleMonth({ year: editorValue.date.year, month: editorValue.date.month }); }, [editorValue.date.year, editorValue.date.month, open]);
-  const editorMode: Exclude<NSEDateTimePickerMode, "automatic"> = mode === "automatic" ? "combined" : mode;
+  const editorMode: Exclude<NSEDateTimeEntryMode, "automatic"> = mode === "automatic" ? "combined" : mode;
   const showText = editorMode === "text";
   const showCalendar = editorMode === "calendar" || editorMode === "calendar-clock" || editorMode === "combined";
   const showClock = editorMode === "clock" || editorMode === "calendar-clock" || editorMode === "combined";
@@ -200,7 +201,7 @@ export function NSEDateTimePicker({ value, defaultValue = null, mode = "combined
       if (!parsed) { setError("Enter a valid date and time."); return; }
       commit(parsed);
     }} /> : null}
-    {showCalendar ? <NSECalendarView
+    {showCalendar ? <NSEGraphicalCalendar
       aria-label={`${props["aria-label"]} calendar`}
       locale={props.locale}
       timeZone={editorValue.timeZone}
@@ -210,10 +211,10 @@ export function NSEDateTimePicker({ value, defaultValue = null, mode = "combined
       onVisibleMonthChange={setVisibleMonth}
       onSelectionChange={(selection) => { if (selection.kind === "single") preview({ ...editorValue, date: selection.value }); }}
     /> : null}
-    {showClock ? <NSEClockView aria-label={props["aria-label"]} locale={props.locale} timeZone={editorValue.timeZone} date={editorValue.date} value={editorValue.time} disambiguation={editorValue.disambiguation} disabled={props.disabled || props.readOnly} showValidationMessage={false} hourCycle={hourCycle} onValueChange={(time) => preview({ ...editorValue, time })} /> : null}
+    {showClock ? <NSEGraphicalClock aria-label={props["aria-label"]} locale={props.locale} timeZone={editorValue.timeZone} date={editorValue.date} value={editorValue.time} disambiguation={editorValue.disambiguation} disabled={props.disabled || props.readOnly} showValidationMessage={false} hourCycle={hourCycle} onValueChange={(time) => preview({ ...editorValue, time })} /> : null}
     {showZone ? <>
       <NSEPopUpButton label="Time zone" accessibleLabel={`${props["aria-label"]} time zone`} value={editorValue.timeZone} isEnabled={!(props.disabled || props.readOnly)} items={[{ value: props.timeZone, title: props.timeZone }, ...(props.timeZone !== "UTC" ? [{ value: "UTC", title: "UTC" }] : [])]} onValueChange={(timeZone) => preview({ ...editorValue, timeZone })} />
-      <NSEPopUpButton label="Disambiguation" accessibleLabel={`${props["aria-label"]} disambiguation`} value={editorValue.disambiguation} isEnabled={!(props.disabled || props.readOnly)} items={[{ value: "earlier", title: "Earlier" }, { value: "later", title: "Later" }, { value: "reject", title: "Reject" }]} onValueChange={(disambiguation) => preview({ ...editorValue, disambiguation: disambiguation as NSEDateTimePickerValue["disambiguation"] })} />
+      <NSEPopUpButton label="Disambiguation" accessibleLabel={`${props["aria-label"]} disambiguation`} value={editorValue.disambiguation} isEnabled={!(props.disabled || props.readOnly)} items={[{ value: "earlier", title: "Earlier" }, { value: "later", title: "Later" }, { value: "reject", title: "Reject" }]} onValueChange={(disambiguation) => preview({ ...editorValue, disambiguation: disambiguation as NSEDateTimeValue["disambiguation"] })} />
     </> : null}
     <div data-nse-part="actions">
       <NSEButton

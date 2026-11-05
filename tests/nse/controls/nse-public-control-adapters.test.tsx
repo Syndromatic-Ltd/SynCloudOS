@@ -24,8 +24,10 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { NSEDatePicker, NSETimePicker } from "../../../src/NSE/public/controls";
-import { NSE, NSEDatePicker as RootDatePicker, NSESecureTextField as RootSecureTextField, NSETabView as RootTabView, NSETimePicker as RootTimePicker } from "../../../src/NSE/NSE";
+import { NSEDatePicker } from "../../../src/NSE/public/controls";
+import { NSEDateEntry } from "../../../src/NSE/DateTime/Pickers/dateEntry";
+import { NSETimeEntry } from "../../../src/NSE/DateTime/Pickers/timeEntry";
+import { NSE, NSEDatePicker as RootDatePicker, NSESecureTextField as RootSecureTextField, NSETabView as RootTabView } from "../../../src/NSE/NSE";
 import { NSEStandaloneControlHost } from "../../../src/NSE/Overlays";
 import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
 import { NSEControlRuntimeProvider } from "../../../src/NSE/Controls/Core";
@@ -39,16 +41,10 @@ function OverlayHarness({ children }: { readonly children: React.ReactNode }) {
   return <NSEStandaloneControlHost document={document} window={window} presentation={adapterPresentation}>{children}</NSEStandaloneControlHost>;
 }
 
-const dateRoutes = [
+const routes = [
   ["public controls", NSEDatePicker],
   ["NSE namespace/root", NSE.NSEDatePicker],
   ["NSE DateTime namespace", NSE.DateTime.NSEDatePicker]
-] as const;
-
-const timeRoutes = [
-  ["public controls", NSETimePicker],
-  ["NSE namespace/root", NSE.NSETimePicker],
-  ["NSE DateTime namespace", NSE.DateTime.NSETimePicker]
 ] as const;
 
 const selectValues = (name: string) => Array.from(screen.getByRole("combobox", { name }).querySelectorAll("option"), (option) => option.value);
@@ -62,29 +58,29 @@ const pickerOptions = (name: string) => {
 };
 
 describe("canonical public control contracts", () => {
-  it.each(dateRoutes)("mounts the %s date route inside the standard overlay provider", (_route, DatePicker) => {
-    const { container } = render(<OverlayHarness><DatePicker aria-label="Provider date" defaultValue={{ year: 2026, month: 6, day: 18 }}  locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/></OverlayHarness>);
+  it.each(routes)("mounts the %s date route inside the standard overlay provider", (_route, DatePicker) => {
+    const { container } = render(<OverlayHarness><DatePicker aria-label="Provider date" defaultValue={{ year: 2026, month: 6, day: 18 }}  locale="en-GB" timeZone="Europe/London" datePickerStyle="textField" presentsCalendarOverlay={false}/></OverlayHarness>);
     expect(container.querySelector('[data-nse-control="date-picker"]')).not.toBeNull();
     expect((container.querySelector('input[type="hidden"]') as HTMLInputElement).value).toBe("2026-06-18");
   });
 
-  it.each(timeRoutes)("mounts the %s time route in 24-hour mode inside the standard overlay provider", (_route, TimePicker) => {
-    const { container } = render(<OverlayHarness><TimePicker aria-label="Provider time" defaultValue={{ hour: 13, minute: 30, second: 0 }} hourCycle="h24"  locale="en-GB" timeZone="Europe/London" editor="segments"/></OverlayHarness>);
+  it.each(routes)("mounts the %s time route in 24-hour mode inside the standard overlay provider", (_route, DatePicker) => {
+    const { container } = render(<OverlayHarness><DatePicker datePickerElements={["hourMinute"]} aria-label="Provider time" defaultValue={{ hour: 13, minute: 30, second: 0 }} hourCycle="h24"  locale="en-GB" timeZone="Europe/London"/></OverlayHarness>);
     expect(container.querySelector('[data-nse-control="time-picker"]')).not.toBeNull();
     expect(container.querySelector('[data-hour-mode="24"]')).not.toBeNull();
   });
 
-  it.each(timeRoutes)("mounts the %s time route in 12-hour mode inside the standard overlay provider", (_route, TimePicker) => {
-    const { container } = render(<OverlayHarness><TimePicker aria-label="Provider time" locale="en-US" defaultValue={{ hour: 13, minute: 30, second: 0 }} hourCycle="h12"  timeZone="Europe/London" editor="segments"/></OverlayHarness>);
+  it.each(routes)("mounts the %s time route in 12-hour mode inside the standard overlay provider", (_route, DatePicker) => {
+    const { container } = render(<OverlayHarness><DatePicker datePickerElements={["hourMinute"]} aria-label="Provider time" locale="en-US" defaultValue={{ hour: 13, minute: 30, second: 0 }} hourCycle="h12"  timeZone="Europe/London"/></OverlayHarness>);
     expect(container.querySelector('[data-nse-control="time-picker"]')).not.toBeNull();
     expect(container.querySelector('[data-hour-mode="12"]')).not.toBeNull();
   });
 
   it("keeps an omitted date empty and resets a supplied civil default through its form", () => {
     const props = { "aria-label": "Date", locale: "en-GB", timeZone: "Europe/London", mode: "text" as const, editor: "segments" as const, name: "date" };
-    const view = render(<NSEDatePicker {...props} />);
+    const view = render(<NSEDateEntry {...props} />);
     expect(view.container.querySelector<HTMLInputElement>('input[type="hidden"]')!.value).toBe("");
-    view.rerender(<form><NSEDatePicker {...props} defaultValue={{ year: 2026, month: 6, day: 18 }} /></form>);
+    view.rerender(<form><NSEDateEntry {...props} defaultValue={{ year: 2026, month: 6, day: 18 }} /></form>);
     fireEvent.change(screen.getByRole("combobox", { name: "Day" }), { target: { value: "20" } });
     expect(view.container.querySelector<HTMLInputElement>('input[type="hidden"]')!.value).toBe("2026-06-20");
     fireEvent.reset(view.container.querySelector("form")!);
@@ -93,7 +89,7 @@ describe("canonical public control contracts", () => {
 
   it("round-trips plain civil dates without introducing instant conversions", () => {
     const change = vi.fn();
-    const view = render(<NSEDatePicker aria-label="Local date" value={{ year: 2026, month: 6, day: 18 }} onValueChange={change} locale="en-GB" timeZone="Pacific/Honolulu" mode="text" editor="segments" />);
+    const view = render(<NSEDateEntry aria-label="Local date" value={{ year: 2026, month: 6, day: 18 }} onValueChange={change} locale="en-GB" timeZone="Pacific/Honolulu" mode="text" editor="segments" />);
     expect(view.container.querySelector<HTMLInputElement>('input[type="hidden"]')!.value).toBe("2026-06-18");
     fireEvent.change(screen.getByRole("combobox", { name: "Day" }), { target: { value: "20" } });
     expect(change).toHaveBeenCalledWith({ year: 2026, month: 6, day: 20 }, "commit");
@@ -101,11 +97,11 @@ describe("canonical public control contracts", () => {
 
   it("keeps canonical date field visibility, bounds, gates, formatting, and host props", () => {
     const change = vi.fn();
-    const { container, rerender } = render(<NSEDatePicker data-consumer="civil" className="consumer-date" aria-label="Bounded date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 10 }} maximum={{ year: 2026, month: 6, day: 20 }}  disabled onValueChange={change}  hiddenFields={["month"]} locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/>);
+    const { container, rerender } = render(<NSEDateEntry data-consumer="civil" className="consumer-date" aria-label="Bounded date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 10 }} maximum={{ year: 2026, month: 6, day: 20 }}  disabled onValueChange={change}  hiddenFields={["month"]} locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/>);
     expect(container.querySelector('.consumer-date[data-consumer="civil"]')).not.toBeNull();
     expect(screen.queryByRole("combobox", { name: "Month" })).toBeNull();
     expect((screen.getByRole("combobox", { name: "Day" }) as HTMLSelectElement).disabled).toBe(true);
-    rerender(<NSEDatePicker aria-label="Bounded date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 10 }} maximum={{ year: 2026, month: 6, day: 20 }}  readOnly onValueChange={change}  hiddenFields={["year"]} locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/>);
+    rerender(<NSEDateEntry aria-label="Bounded date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 10 }} maximum={{ year: 2026, month: 6, day: 20 }}  readOnly onValueChange={change}  hiddenFields={["year"]} locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/>);
     expect(screen.queryByRole("combobox", { name: "Year" })).toBeNull();
     expect((screen.getByRole("combobox", { name: "Day" }) as HTMLSelectElement).disabled).toBe(true);
     fireEvent.change(screen.getByRole("combobox", { name: "Day" }), { target: { value: "21" } });
@@ -114,19 +110,20 @@ describe("canonical public control contracts", () => {
 
   it("preserves time interval, locale clock defaults, explicit modes, bounds, gates, and host props", () => {
     const change = vi.fn();
-    const { container, rerender } = render(<NSETimePicker className="consumer-time" data-consumer="clock" aria-label="US time" locale="en-US" defaultValue={{ hour: 13, minute: 30, second: 0 }} minuteStep={15} minimum={{ hour: 9, minute: 0, second: 0 }} maximum={{ hour: 14, minute: 0, second: 0 }} onValueChange={change}  timeZone="Europe/London" editor="segments"/>);
+    const { container, rerender } = render(<NSETimeEntry className="consumer-time" data-consumer="clock" aria-label="US time" locale="en-US" defaultValue={{ hour: 13, minute: 30, second: 0 }} minuteStep={15} minimum={{ hour: 9, minute: 0, second: 0 }} maximum={{ hour: 14, minute: 0, second: 0 }} onValueChange={change}  timeZone="Europe/London" editor="segments"/>);
     expect(container.querySelector('.consumer-time[data-consumer="clock"] [data-hour-mode="12"]')).not.toBeNull();
     expect(Array.from(screen.getByRole("combobox", { name: "Minute" }).querySelectorAll("option")).map((option) => option.value)).toEqual(["0", "15", "30", "45"]);
     fireEvent.change(screen.getByRole("combobox", { name: "Minute" }), { target: { value: "45" } });
     expect(change).toHaveBeenLastCalledWith({ hour: 13, minute: 45, second: 0 }, "commit");
-    rerender(<NSETimePicker aria-label="UK time" locale="en-GB" value={{ hour: 10, minute: 0, second: 0 }} hourCycle="h24" disabled onValueChange={change}  timeZone="Europe/London" editor="segments"/>);
+    rerender(<NSETimeEntry aria-label="UK time" locale="en-GB" value={{ hour: 10, minute: 0, second: 0 }} hourCycle="h24" disabled onValueChange={change}  timeZone="Europe/London" editor="segments"/>);
     expect(container.querySelector('[data-hour-mode="24"]')).not.toBeNull();
     expect((screen.getByRole("combobox", { name: "Hour" }) as HTMLSelectElement).disabled).toBe(true);
-    rerender(<NSETimePicker aria-label="Read only" value={{ hour: 10, minute: 0, second: 0 }} readOnly onValueChange={change}  locale="en-GB" timeZone="Europe/London" editor="segments"/>);
+    rerender(<NSETimeEntry aria-label="Read only" value={{ hour: 10, minute: 0, second: 0 }} readOnly onValueChange={change}  locale="en-GB" timeZone="Europe/London" editor="segments"/>);
     expect((screen.getByRole("combobox", { name: "Minute" }) as HTMLSelectElement).disabled).toBe(true);
   });
 
-  it.each(timeRoutes)("anchors non-zero boundary intervals and truncates the maximum through the %s route", (_route, TimePicker) => {
+  it("anchors non-zero boundary intervals and truncates the maximum", () => {
+    const TimePicker = NSETimeEntry;
     const { rerender } = render(<OverlayHarness><TimePicker aria-label="Boundary time" locale="en-GB" value={{ hour: 9, minute: 10, second: 0 }} minuteStep={15} minimum={{ hour: 9, minute: 10, second: 0 }} maximum={{ hour: 10, minute: 42, second: 0 }} hourCycle="h24"  timeZone="Europe/London" editor="segments"/></OverlayHarness>);
     expect(pickerOptions("Minute")).toEqual(["10", "25", "40", "55"]);
 
@@ -142,7 +139,7 @@ describe("canonical public control contracts", () => {
   });
 
   it("selects an available target-period hour without relying on post-selection clamping", () => {
-    const { container } = render(<OverlayHarness><NSETimePicker aria-label="Spanning time" locale="en-US" defaultValue={{ hour: 11, minute: 10, second: 0 }} minuteStep={15} minimum={{ hour: 11, minute: 10, second: 0 }} maximum={{ hour: 13, minute: 42, second: 0 }} hourCycle="h12"  timeZone="Europe/London" editor="segments"/></OverlayHarness>);
+    const { container } = render(<OverlayHarness><NSETimeEntry aria-label="Spanning time" locale="en-US" defaultValue={{ hour: 11, minute: 10, second: 0 }} minuteStep={15} minimum={{ hour: 11, minute: 10, second: 0 }} maximum={{ hour: 13, minute: 42, second: 0 }} hourCycle="h12"  timeZone="Europe/London" editor="segments"/></OverlayHarness>);
     expect(pickerOptions("Hour")).toEqual(["11"]);
     fireEvent.click(pickerTrigger("AM/PM"));
     fireEvent.click(screen.getByRole("option", { name: "PM" }));
@@ -152,14 +149,13 @@ describe("canonical public control contracts", () => {
 
   it("publishes one canonical engine or stateless adapter through the semantic public routes", () => {
     expect(NSE.NSEDatePicker).toBe(NSEDatePicker);
-    expect(NSE.NSETimePicker).toBe(NSETimePicker);
     expect(NSE.DateTime.NSEDatePicker).toBe(RootDatePicker);
-    expect(NSE.DateTime.NSETimePicker).toBe(RootTimePicker);
+    expect("NSETimeEntry" in NSE).toBe(false);
     expect(NSE.FieldExtensions.NSESecureTextField).toBe(RootSecureTextField);
     expect(NSE.Navigation.NSETabView).toBe(RootTabView);
   });
   it("routes canonical date and time props through the canonical civil picker engines", () => {
-    const { container } = render(<><NSEDatePicker aria-label="Legacy date" defaultValue={{ year: 2026, month: 6, day: 18 }}  locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/><NSETimePicker aria-label="Legacy time" defaultValue={{ hour: 13, minute: 30, second: 0 }}  locale="en-GB" timeZone="Europe/London" editor="segments"/></>);
+    const { container } = render(<><NSEDateEntry aria-label="Legacy date" defaultValue={{ year: 2026, month: 6, day: 18 }}  locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/><NSETimeEntry aria-label="Legacy time" defaultValue={{ hour: 13, minute: 30, second: 0 }}  locale="en-GB" timeZone="Europe/London" editor="segments"/></>);
     expect(container.querySelectorAll('[data-nse-control="date-picker"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-nse-control="time-picker"]')).toHaveLength(1);
     expect((container.querySelector('[data-nse-control="date-picker"] input[type="hidden"]') as HTMLInputElement).value).toBe("2026-06-18");
@@ -167,7 +163,7 @@ describe("canonical public control contracts", () => {
 
   it("preserves canonical hidden date fields through the canonical date editor", () => {
     const onValueChange = vi.fn();
-    render(<NSEDatePicker aria-label="Legacy date" locale="en-GB" defaultValue={{ year: 2026, month: 6, day: 18 }}  onValueChange={onValueChange}  hiddenFields={["month"]} timeZone="Europe/London" mode="text" editor="segments"/>);
+    render(<NSEDateEntry aria-label="Legacy date" locale="en-GB" defaultValue={{ year: 2026, month: 6, day: 18 }}  onValueChange={onValueChange}  hiddenFields={["month"]} timeZone="Europe/London" mode="text" editor="segments"/>);
     fireEvent.change(screen.getByRole("combobox", { name: "Day" }), { target: { value: "20" } });
     expect(onValueChange).toHaveBeenLastCalledWith({ year: 2026, month: 6, day: 20 }, "commit");
     expect(screen.queryByRole("button", { name: /^Month/ })).toBeNull();
@@ -175,19 +171,19 @@ describe("canonical public control contracts", () => {
 
   it("preserves canonical minute interval, bounds, and clock mode", () => {
     const onValueChange = vi.fn();
-    render(<NSETimePicker aria-label="Legacy time" locale="en-GB" defaultValue={{ hour: 10, minute: 0, second: 0 }} minuteStep={15} minimum={{ hour: 9, minute: 0, second: 0 }} maximum={{ hour: 10, minute: 30, second: 0 }} hourCycle="h24" onValueChange={onValueChange}  timeZone="Europe/London" editor="segments"/>);
+    render(<NSETimeEntry aria-label="Legacy time" locale="en-GB" defaultValue={{ hour: 10, minute: 0, second: 0 }} minuteStep={15} minimum={{ hour: 9, minute: 0, second: 0 }} maximum={{ hour: 10, minute: 30, second: 0 }} hourCycle="h24" onValueChange={onValueChange}  timeZone="Europe/London" editor="segments"/>);
     fireEvent.change(screen.getByRole("combobox", { name: "Minute" }), { target: { value: "15" } });
     expect(onValueChange).toHaveBeenLastCalledWith({ hour: 10, minute: 15, second: 0 }, "commit");
     expect(screen.queryByRole("combobox", { name: /AM\/PM/i })).toBeNull();
   });
 
   it("derives the canonical time clock mode from locale when no override is supplied", () => {
-    render(<NSETimePicker aria-label="US time" locale="en-US" defaultValue={{ hour: 13, minute: 30, second: 0 }}  timeZone="Europe/London" editor="segments"/>);
+    render(<NSETimeEntry aria-label="US time" locale="en-US" defaultValue={{ hour: 13, minute: 30, second: 0 }}  timeZone="Europe/London" editor="segments"/>);
     expect((screen.getByRole("combobox", { name: /AM\/PM/i }) as HTMLSelectElement).value).toBe("pm");
   });
 
   it("preserves canonical date host props and decorations", () => {
-    const { container } = render(<><NSEDatePicker aria-label="Legacy date" className="consumer-date" data-consumer="calendar" defaultValue={{ year: 2026, month: 6, day: 18 }}  locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/></>);
+    const { container } = render(<><NSEDateEntry aria-label="Legacy date" className="consumer-date" data-consumer="calendar" defaultValue={{ year: 2026, month: 6, day: 18 }}  locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/></>);
     expect(container.querySelector('.consumer-date[data-nse-control="date-picker"]')).not.toBeNull();
     expect(container.querySelector(".consumer-date")?.getAttribute("data-consumer")).toBe("calendar");
   });

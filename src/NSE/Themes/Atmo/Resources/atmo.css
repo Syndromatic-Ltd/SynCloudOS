@@ -5061,15 +5061,18 @@
 }
 
 /* ============================================================================
-   Progress indicator and level indicator on the Atmo progress material: the
-   11px measured track and fill twins (--nse-atmo-pg-track / -fill, sliced
-   0 6 0 6). A bar reads its percentage from --nse-control-progress and puts
-   the status caption beside it; indeterminate sweeps a third-width fill
+   Progress indicator and level indicator on the Atmo progress material. The
+   bar is drawn at --nse-atmo-progress-bar-height with fully rounded ends, in
+   the measured track and fill colours, so its caps stay half circles at any
+   height; the level indicator keeps the 11px track and fill twins
+   (--nse-atmo-pg-track / -fill, sliced 0 6 0 6). A bar reads its percentage
+   from --nse-control-progress and puts the status caption beside it; indeterminate sweeps a third-width fill
    (still under reduced motion); circular is a ring and spinner a turning
    arc at data-size. The level indicator is the same track with its fill in
    blue (normal), amber (warning) or red (critical).
    ========================================================================= */
 [data-nse-appearance="atmo"] [data-nse-control="progress-indicator"][data-variant="bar"] {
+  --nse-atmo-progress-bar-height: 14px;
   display: grid;
   grid-template-columns: minmax(80px, 1fr) auto;
   align-items: center;
@@ -5077,27 +5080,38 @@
   min-inline-size: 0;
 }
 
+/* The recessed track: the measured grey well, darkening into each cap, with
+   the white lip under it. */
 [data-nse-appearance="atmo"] [data-nse-control="progress-indicator"][data-variant="bar"] > [data-nse-part="track"] {
   position: relative;
   display: block;
-  block-size: 11px;
-  border: solid transparent;
-  border-width: 0 6px;
-  border-image: var(--nse-atmo-pg-track) 0 6 0 6 fill stretch;
+  block-size: var(--nse-atmo-progress-bar-height);
+  border-radius: calc(var(--nse-atmo-progress-bar-height) / 2);
+  background: linear-gradient(to bottom, rgba(114, 114, 115, 0.78) 5%, rgba(128, 128, 129, 0.78) 18%, rgba(147, 147, 148, 0.76) 30%, rgba(162, 162, 163, 0.74) 42%, rgba(174, 174, 175, 0.72) 53%, rgba(180, 180, 181, 0.71) 65%, rgba(180, 180, 181, 0.71) 87%, rgba(174, 174, 175, 0.72));
+  box-shadow:
+    inset 4px 0 4px -3px rgba(110, 110, 111, 0.55),
+    inset -4px 0 4px -3px rgba(110, 110, 111, 0.55),
+    inset 0 1px 1px rgba(40, 40, 42, 0.28),
+    0 1px 0 rgba(255, 255, 255, 0.85);
   overflow: hidden;
 }
 
+/* The glossy blue fill sits one pixel inside the well, its own ends round. */
 [data-nse-appearance="atmo"] [data-nse-control="progress-indicator"][data-variant="bar"] [data-nse-part="fill"] {
   position: absolute;
-  inset-block: 0;
-  inset-inline-start: -6px;
-  inline-size: calc(var(--nse-control-progress, 0%) + 12px * var(--nse-control-progress-on, 1));
-  min-inline-size: 12px;
-  max-inline-size: calc(100% + 12px);
+  inset-block: 1px;
+  inset-inline-start: 1px;
+  inline-size: calc(var(--nse-control-progress, 0%) - 2px);
+  min-inline-size: calc(var(--nse-atmo-progress-bar-height) - 2px);
+  max-inline-size: calc(100% - 2px);
   box-sizing: border-box;
-  border: solid transparent;
-  border-width: 0 6px;
-  border-image: var(--nse-atmo-pg-fill) 0 6 0 6 fill stretch;
+  border-radius: calc(var(--nse-atmo-progress-bar-height) / 2 - 1px);
+  background: linear-gradient(to bottom, rgb(172, 211, 244) 8%, rgb(138, 192, 239) 24%, rgb(131, 187, 238) 37%, rgb(123, 181, 236) 50%, rgb(113, 174, 234) 63%, rgb(104, 169, 232) 76%, rgb(97, 164, 231) 92%);
+  box-shadow:
+    0 0 0 0.5px rgba(45, 62, 80, 0.55),
+    inset 3px 0 3px -2px rgba(45, 62, 80, 0.42),
+    inset -3px 0 3px -2px rgba(45, 62, 80, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 [data-nse-appearance="atmo"] [data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"] [data-nse-part="fill"] {
@@ -5111,8 +5125,8 @@
 }
 
 @keyframes nse-atmo-progress-sweep {
-  from { inset-inline-start: -6px; }
-  to { inset-inline-start: calc(66% + 6px); }
+  from { inset-inline-start: 1px; }
+  to { inset-inline-start: calc(66% - 1px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

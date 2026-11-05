@@ -23,7 +23,7 @@ import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import { addCalendarDays, addCalendarMonths, calendarWeekStart, civilToEpochDay, comparePlainDates, epochDayToCivil } from "../calendarArithmetic";
 import { plainDateToday } from "../dateTimeFormatting";
 import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";
-import type { NSECalendarNavigationRequest, NSECalendarNavigationUnit, NSECalendarSelection, NSECalendarViewProps } from "./calendarTypes";
+import type { NSECalendarNavigationRequest, NSECalendarNavigationUnit, NSECalendarSelection, NSEGraphicalCalendarProps } from "./calendarTypes";
 
 const key = (date: NSEPlainDate) => `${String(date.year).padStart(4, "0")}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;
 const weekday = (date: NSEPlainDate) => ((civilToEpochDay(date) + 4) % 7 + 7) % 7;
@@ -45,7 +45,7 @@ function activeDate(selection: NSECalendarSelection, month: NSECalendarMonth): N
   return { ...month, day: 1 };
 }
 
-export function NSECalendarView(props: NSECalendarViewProps) {
+export function NSEGraphicalCalendar(props: NSEGraphicalCalendarProps) {
   const instanceId = useId().replace(/:/g, "");
   const gridRef = useRef<HTMLDivElement>(null);
   const swipe = useRef<{ readonly pointerId: number; readonly startX: number } | null>(null);

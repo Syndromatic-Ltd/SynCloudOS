@@ -18,8 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./calendarTypes";
-export * from "./NSECalendarView";
-export * from "./NSECalendarMonthView";
-export * from "./NSEClockView";
+export type { NSECalendarEventIndicator } from "./calendarTypes";
+export { buildCalendarMonthGrid } from "./graphicalCalendar";
 import "./nse-calendar.css";
