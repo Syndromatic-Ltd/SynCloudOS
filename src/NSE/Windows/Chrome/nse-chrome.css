@@ -989,6 +989,60 @@
   outline-offset: -2px;
 }
 
+/* NSESplitViewAdapter with three or more panes, or stacked vertically. Pane
+   sizes from NSESplitViewController sum to the adapter's measured size, so a
+   divider takes no space: its hairline and its 8px hit area overlay the seam. */
+.nse-split-view-adapter[data-presentation="split"][data-orientation] {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nse-split-view-adapter > [data-nse-part="split-pane"],
+.nse-split-view-adapter > * > [data-nse-part="split-pane"] {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+[data-nse-part="split-divider"] {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 0;
+  touch-action: none;
+}
+
+[data-nse-part="split-divider"]::before {
+  content: "";
+  position: absolute;
+  background: var(--nse-app-separator);
+}
+
+[data-nse-part="split-divider"]::after {
+  content: "";
+  position: absolute;
+}
+
+[data-nse-part="split-divider"][data-orientation="horizontal"] { cursor: col-resize; }
+[data-nse-part="split-divider"][data-orientation="horizontal"]::before { inset-block: 0; inset-inline-start: -0.5px; inline-size: 1px; }
+[data-nse-part="split-divider"][data-orientation="horizontal"]::after { inset-block: 0; inset-inline-start: -4px; inline-size: 8px; }
+[data-nse-part="split-divider"][data-orientation="vertical"] { cursor: row-resize; }
+[data-nse-part="split-divider"][data-orientation="vertical"]::before { inset-inline: 0; inset-block-start: -0.5px; block-size: 1px; }
+[data-nse-part="split-divider"][data-orientation="vertical"]::after { inset-inline: 0; inset-block-start: -4px; block-size: 8px; }
+
+[data-nse-part="split-divider"]:hover::before,
+[data-nse-part="split-divider"]:focus-visible::before {
+  background: var(--nse-app-accent);
+}
+
+[data-nse-part="split-divider"]:focus-visible {
+  outline: none;
+}
+
 .nse-sidebar {
   position: relative;
   display: flex;
