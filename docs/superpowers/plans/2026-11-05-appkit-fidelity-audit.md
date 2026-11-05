@@ -299,6 +299,7 @@ Updated as each phase lands on `dev`.
   - (b) Content views in the gallery's split, sliding and navigation examples are custom `NSEBox`es with a headline label: the surface matches, but the line border is slightly darker than the pane's and the headline sits tighter.
   - (c) Diagnostics' inspector is a titled `NSEBox`.
   - (d) `NSESlidingPane` and `NSESlidingPanes` move with the navigation controllers (phase 7), and `NSEPage` merges into `NSEPageController` as `pageCurl` with the D4 items.
-- [ ] 6. Windows and chrome
+- [ ] 6. Windows and chrome. Landed so far: `NSERulerView` and `NSEWebView` (verified loading example.org in the gallery; the site's host authorises that one origin, sandboxed, with no capabilities); `NSEHeader`, `NSEPrevNextBanner` and `NSEToaster` removed (the gallery posts notices through `useNotifications`); `NSEAppFrame`, the toolbar overflow menu, `allocateNSEToolbarItems` and the colour wheel, slider and swatch pickers internal. Still to do: the title bar from `NSEWindow` (`NSETopBar`), the bottom bar in place of `NSEStatusBar`, `NSEToolbarController` and `NSEToolbarConfigurationSheet` merged into `NSEToolbar`, alerts and sheets as objects (D3), `NSEPopover`, and `isEnabled` on pop-up items. For the owner:
+  - (a) `NSEPageHeader` is still public: it draws the gallery's section plate, and that look lives in Atmo. Removing it needs a decision on what draws the plate (a label in an `NSEBox`, or a gallery-owned view).
 - [ ] 7. Navigation controllers
 - [ ] 8. Agent guard rails
