@@ -26,7 +26,9 @@ import {
   type HTMLAttributes,
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
+  type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 
 import { NSESplitView } from "./NSESplitView";
 import { dataViewAllowsMutation, dataViewIsBusy, dataViewPresentsContent } from "../Core";
@@ -43,6 +45,23 @@ export interface NSESplitViewAdapterProps extends HTMLAttributes<HTMLDivElement>
   readonly state?: NSEDataViewState;
 }
 
+/**
+ * Places a pane's persistent host element in whichever layout slot currently
+ * shows the pane. Moving the host moves the pane's DOM (a canvas keeps its
+ * context); React keeps the pane's tree mounted through its portal.
+ */
+function NSESplitViewPaneSlot({ host, fallback }: { readonly host: HTMLDivElement | null; readonly fallback: ReactNode }) {
+  const slot = useRef<HTMLDivElement | null>(null);
+  useLayoutEffect(() => {
+    const node = slot.current;
+    if (!host || !node) return undefined;
+    if (host.parentNode !== node) node.appendChild(host);
+    return () => { if (host.parentNode === node) node.removeChild(host); };
+  }, [host]);
+  if (!host) return <>{fallback}</>;
+  return <div ref={slot} data-nse-part="split-pane-slot" style={{ display: "contents" }} />;
+}
+
 export function NSESplitViewAdapter({
   controller,
   panes,
@@ -57,6 +76,23 @@ export function NSESplitViewAdapter({
   const allowsMutation = dataViewAllowsMutation(state);
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   const paneNodes = useRef(new Map<string, HTMLDivElement>());
+  // One host per pane for the adapter's lifetime. Single-pane, two-pane and
+  // n-pane presentations are different trees; without stable hosts every
+  // responsive change or collapse would remount each pane's content.
+  const paneHosts = useRef(new Map<string, HTMLDivElement>());
+  const ownerDocument = typeof document === "undefined" ? null : document;
+  const hostFor = (id: string): HTMLDivElement | null => {
+    if (!ownerDocument) return null;
+    let host = paneHosts.current.get(id);
+    if (!host) {
+      host = ownerDocument.createElement("div");
+      host.className = "nse-split-view-pane-host";
+      host.style.display = "contents";
+      host.dataset.paneHost = id;
+      paneHosts.current.set(id, host);
+    }
+    return host;
+  };
   const dragRef = useRef<{ divider: number; coordinate: number } | null>(null);
   const previousPresentation = useRef(snapshot.presentation);
 
@@ -67,6 +103,11 @@ export function NSESplitViewAdapter({
   }, [controller, panes, responsiveState.mode, snapshot.orientation, windowBounds.height, windowBounds.width]);
 
   useEffect(() => {
+    const live = new Set(panes.map(({ id }) => id));
+    for (const id of [...paneHosts.current.keys()]) if (!live.has(id)) paneHosts.current.delete(id);
+  }, [panes]);
+
+  useEffect(() => {
     if (previousPresentation.current === "single-pane" && snapshot.presentation === "split") {
       paneNodes.current.get(snapshot.activePaneId)?.focus();
     }
@@ -74,6 +115,7 @@ export function NSESplitViewAdapter({
   }, [snapshot.activePaneId, snapshot.presentation]);
 
   const definitions = new Map(panes.map((pane) => [pane.id, pane]));
+  const paneContent = (id: string) => <NSESplitViewPaneSlot host={hostFor(id)} fallback={definitions.get(id)?.content} />;
   const visible = snapshot.panes.filter(({ collapsed, id }) => !collapsed && definitions.has(id));
   const presentsContent = dataViewPresentsContent(state);
   const stateFeedback = state.kind === "ready" ? null : <>
@@ -84,6 +126,13 @@ export function NSESplitViewAdapter({
   const recoveryAvailable = ((state.kind === "denied" || state.kind === "error") && state.retry !== undefined) || (state.kind === "interrupted" && state.resume !== undefined);
   const hostDisabled = state.kind === "denied" || (!allowsMutation && !recoveryAvailable);
 
+  // Denied, loading and error states expose no pane content at all.
+  const keepAlive = presentsContent && ownerDocument
+    ? panes.map((pane) => createPortal(pane.content, hostFor(pane.id)!, pane.id))
+    : null;
+  return <>{keepAlive}{renderPresentation()}</>;
+
+  function renderPresentation() {
   if (!presentsContent) {
     return <div {...props} className={`nse-split-view-adapter ${className}`.trim()} dir={dir} aria-label={ariaLabel} aria-busy={dataViewIsBusy(state) || undefined} aria-disabled={hostDisabled || undefined} data-nse-control="split-view" data-state={state.kind} data-presentation={snapshot.presentation} tabIndex={-1}>
       {stateFeedback}
@@ -108,7 +157,7 @@ export function NSESplitViewAdapter({
             </button>
           ))}
         </div>
-        <div role="tabpanel" data-pane-id={snapshot.activePaneId}>{active?.content}</div>
+        <div role="tabpanel" data-pane-id={snapshot.activePaneId}>{active ? paneContent(active.id) : null}</div>
         {stateFeedback}
       </div>
     );
@@ -132,7 +181,7 @@ export function NSESplitViewAdapter({
             tabIndex={-1}
             data-pane-id={first.id}
           >
-            {definitions.get(first.id)!.content}
+            {paneContent(first.id)}
           </div>
         )}
         sidebarWidth={first.size}
@@ -146,7 +195,7 @@ export function NSESplitViewAdapter({
           tabIndex={-1}
           data-pane-id={second.id}
         >
-          {definitions.get(second.id)!.content}
+          {paneContent(second.id)}
           {stateFeedback}
         </div>
       </NSESplitView>
@@ -191,7 +240,7 @@ export function NSESplitViewAdapter({
               data-pane-id={pane.id}
               style={{ flex: `0 0 ${pane.size}px` }}
             >
-              {definition.content}
+              {paneContent(pane.id)}
             </div>
             {next ? (
               <div
@@ -225,4 +274,5 @@ export function NSESplitViewAdapter({
       {stateFeedback}
     </div>
   );
+  }
 }
