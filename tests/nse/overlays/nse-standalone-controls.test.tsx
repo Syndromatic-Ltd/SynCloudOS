@@ -24,7 +24,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testi
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEStandaloneControlHost, NSEPopup, NSEListboxPopup, createStandaloneNSEControlRuntime } from "../../../src/NSE/Overlays";
 import { NSEOverlayProvider, useNSEOverlayProvider, type NSEOverlayProviderContextValue } from "../../../src/NSE/Overlays/NSEOverlayProvider";
-import { NSEMenu, NSEPicker } from "../../../src/NSE/Menus";
+import { NSEMenu, NSEPopUpButton } from "../../../src/NSE/Menus";
 import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
@@ -246,7 +246,7 @@ describe("standalone picker and menu keyboard contracts", () => {
     const engine = { trigger } as NonNullable<React.ComponentProps<typeof NSEFeedbackProvider>["value"]>;
     render(<NSEFeedbackProvider value={engine}><Host>
       <NSEMenu label="Feedback actions" items={[{ value: "save", label: "Save document" }]} />
-      <NSEPicker label="Feedback format" options={[{ value: "plain", label: "Plain" }, { value: "rich", label: "Rich" }]} />
+      <NSEPopUpButton label="Feedback format" items={[{ value: "plain", title: "Plain" }, { value: "rich", title: "Rich" }]} />
     </Host></NSEFeedbackProvider>);
     fireEvent.click(screen.getByRole("button", { name: "Feedback actions" }));
     expect(trigger).toHaveBeenLastCalledWith("soft");
@@ -279,28 +279,11 @@ describe("standalone picker and menu keyboard contracts", () => {
   });
 
   it("names the picker with its label and selection and opens it with ArrowDown", async () => {
-    render(<Host><NSEPicker label="Density" value="balanced" options={[{ value: "balanced", label: "Balanced" }, { value: "compact", label: "Compact" }]} /></Host>);
+    render(<Host><NSEPopUpButton label="Density" value="balanced" items={[{ value: "balanced", title: "Balanced" }, { value: "compact", title: "Compact" }]} /></Host>);
     const trigger = screen.getByRole("button", { name: "Density Balanced" });
     fireEvent.keyDown(trigger, { key: "ArrowDown" });
     const selected = await screen.findByRole("option", { name: "Balanced" });
     await waitFor(() => expect(document.activeElement).toBe(selected));
-  });
-
-  it("lists a picker's actions after a rule and runs them without changing the value", async () => {
-    const onValueChange = vi.fn();
-    const showFonts = vi.fn();
-    render(<Host><NSEPicker label="Font" value="serif" onValueChange={onValueChange}
-      options={[{ value: "serif", label: "Serif" }, { value: "sans", label: "Sans" }]}
-      actions={[{ id: "show-fonts", label: "Show Fonts…", onSelect: showFonts }]} /></Host>);
-    fireEvent.click(screen.getByRole("button", { name: "Font Serif" }));
-    const action = await screen.findByRole("option", { name: "Show Fonts…" });
-    expect(action.getAttribute("data-kind")).toBe("action");
-    expect(action.getAttribute("aria-selected")).toBe("false");
-    expect(action.previousElementSibling?.getAttribute("role")).toBe("separator");
-    fireEvent.click(action);
-    expect(showFonts).toHaveBeenCalledTimes(1);
-    expect(onValueChange).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Font Serif" })).toBeTruthy();
   });
 
   it("opens an item menu with ArrowDown and skips disabled entries", async () => {

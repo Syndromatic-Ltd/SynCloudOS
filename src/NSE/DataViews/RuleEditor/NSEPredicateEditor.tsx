@@ -25,7 +25,7 @@ import { compilePredicateExpression, mergePredicateTemplates, PREDICATE_OPERATOR
 import { NSERuleEditor } from "./NSERuleEditor";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
-import { NSEChoiceControl } from "./NSEChoiceControl";
+import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { dataViewAllowsNavigation, dataViewIsBusy, dataViewPresentsContent } from "../Core";
 import type { NSEPredicateEditorProps, NSEPredicateTemplate } from "./ruleEditorTypes";
 import "./nse-rule-editor.css";
@@ -67,14 +67,14 @@ function NSEComparisonPredicateEditor<T>({ expression, templates, publish, readO
     publish({ kind: "comparison", field: expression.field, operator, value: parsed.map((result) => result.ok ? result.value : undefined) as never, ...compatibleOptions(template, operator) });
   };
   return <>
-    <NSEChoiceControl label="Field" labelHidden part="field" value={template?.id ?? ""} disabled={locked} options={templates.map(({ id, label }) => ({ id, label }))} onChange={(nextId) => {
+    <NSEPopUpButton label="Field" labelHidden data-nse-part="field" value={template?.id ?? ""} isEnabled={!locked} items={templates.map(({ id, label }) => ({ value: id, title: label }))} onValueChange={(nextId) => {
         const nextTemplate = templates.find(({ id }) => id === nextId);
         if (!nextTemplate) return;
         const nextOperator = nextTemplate.operators[0]?.operator ?? "equals";
         setError(null); setText("");
         publish({ kind: "comparison", field: nextTemplate.field, operator: nextOperator, value: nextOperator === "between" ? ["", ""] : nextOperator === "in" ? [] : undefined, ...compatibleOptions(nextTemplate, nextOperator) });
       }} />
-    <NSEChoiceControl label="Operator" labelHidden value={operator} disabled={locked} options={(template?.operators ?? []).map(({ operator: id, label }) => ({ id, label }))} onChange={(nextId) => {
+    <NSEPopUpButton label="Operator" labelHidden value={operator} isEnabled={!locked} items={(template?.operators ?? []).map(({ operator: id, label }) => ({ value: id, title: label }))} onValueChange={(nextId) => {
         const nextOperator = normalisePredicateOperator(nextId);
         const nextOption = template?.operators.find((candidate) => candidate.operator === nextOperator);
         const previous = expression.value;

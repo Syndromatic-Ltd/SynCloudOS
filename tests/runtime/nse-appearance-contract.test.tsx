@@ -37,7 +37,7 @@ import { NSEAboutDialog } from "../../src/NSE/Components/NSESystemDialogs";
 import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
 import { NSERadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
-import { NSEPicker } from "../../src/NSE/Menus";
+import { NSEPopUpButton } from "../../src/NSE/Menus";
 import { NSEOverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Overlays";
 import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
@@ -136,10 +136,10 @@ function CanonicalPortalSpecimens() {
         Canonical portal
       </NSECanonicalPopup>
       <NSETooltip id="p11-tooltip" open anchor={anchor} content="Projected tooltip" />
-      <NSEPicker
+      <NSEPopUpButton
         label="Canonical picker"
-        options={[{ value: "one", label: "One" }]}
-        listboxOverlay={{ id: "p11-listbox", parentResponderId: "workspace" }}
+        items={[{ value: "one", title: "One" }]}
+        overlay={{ id: "p11-listbox", parentResponderId: "workspace" }}
       />
     </>
   );

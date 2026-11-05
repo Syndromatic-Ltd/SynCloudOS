@@ -7,7 +7,7 @@ import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { observable } from "../../src/NSE/Objects";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
-import { NSEPicker } from "../../src/NSE/Menus/NSEPicker";
+import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { action, useAction } from "../../src/SynCloudOS/AppSDK/actions";
 import { useCommands } from "../../src/SynCloudOS/AppSDK/hooks/useCommands";
@@ -25,7 +25,7 @@ it.each(["picker", "menu"] as const)("performs a custom %s callback while its ne
     const choose = useAction("choose");
     const perform = (value: string) => { void choose.perform(value); };
     return <NSEPopup defaultOpen modal title="Settings">{kind === "picker"
-      ? <NSEPicker label="Appearance" defaultValue="light" options={[{ value: "light", label: "Light" }, { value: "dark", label: "Dark" }]} onValueChange={perform} />
+      ? <NSEPopUpButton label="Appearance" defaultValue="light" items={[{ value: "light", title: "Light" }, { value: "dark", title: "Dark" }]} onValueChange={perform} />
       : <NSEMenu label="Appearance" items={[{ value: "dark", label: "Dark" }]} onSelect={perform} />}</NSEPopup>;
   }
   class MainWindow extends NSEWindowController {

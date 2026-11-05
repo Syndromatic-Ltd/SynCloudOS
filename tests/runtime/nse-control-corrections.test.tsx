@@ -26,7 +26,6 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  NSEListSelector,
   NSEMenu,
   NSEScrollingImage,
   NSEToolbar,
@@ -60,25 +59,6 @@ describe("NSEMenu sub-item disclosure", () => {
     expect(indicator).not.toBeNull();
     // The old implementation injected a literal "›" text node; the sprite version has no text content.
     expect(indicator?.textContent).toBe("");
-  });
-});
-
-describe("NSEListSelector knobs are wired to the chrome", () => {
-  it("emits hideItem / hideArrow / contentPack onto the picker root", () => {
-    const { container } = render(
-      <Host><NSEListSelector
-        items={[{ value: "a", label: "A" }, { value: "b", label: "B" }]}
-        hideItem
-        hideArrow
-        contentPack="center"
-      /></Host>
-    );
-    const root = container.querySelector(".nse-extended-list-selector");
-    expect(root?.getAttribute("data-hide-item")).toBe("true");
-    expect(root?.getAttribute("data-hide-arrow")).toBe("true");
-    expect(root?.getAttribute("data-content-pack")).toBe("center");
-    // popupAlign is now a typed prop forwarded to the popup, not a dead data-attr on the root.
-    expect(root?.getAttribute("data-popup-align")).toBe("right");
   });
 });
 

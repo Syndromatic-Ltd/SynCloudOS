@@ -1564,48 +1564,10 @@
   background: var(--nse-atmo-menu-arrow) center right no-repeat;
 }
 
-/* Picker.textAlign (default "center") aligns the button caption and popup items. */
-:where([data-nse-appearance="atmo"]) .nse-control-picker[data-text-align="center"] .nse-control-picker-caption {
-  text-align: center;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-picker[data-text-align="right"] .nse-control-picker-caption {
-  text-align: right;
-}
-
-/* ListSelector knobs, wired onto the picker chrome:
-   hideItem hides the displayed value, hideArrow drops the disclosure, contentPack aligns the caption,
-   and popupAlign (forwarded onto the portaled popup) aligns the option rows. */
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-hide-item="true"] .nse-control-picker-caption {
-  visibility: hidden;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-hide-arrow="true"] .nse-control-picker-button {
-  grid-template-columns: minmax(0, 1fr);
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-hide-arrow="true"] .nse-control-picker-arrow {
-  display: none;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-content-pack="start"] .nse-control-picker-caption {
-  text-align: left;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-content-pack="center"] .nse-control-picker-caption {
-  text-align: center;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-content-pack="end"] .nse-control-picker-caption {
-  text-align: right;
-}
 :where([data-nse-appearance="atmo"]) .nse-control-picker-list[data-popup-align="left"] .nse-control-menu-item-label {
   justify-content: flex-start;
 }
 :where([data-nse-appearance="atmo"]) .nse-control-picker-list[data-popup-align="right"] .nse-control-menu-item-label {
-  justify-content: flex-end;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-picker-list[data-text-align="center"] .nse-control-menu-item-label {
-  justify-content: center;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-picker-list[data-text-align="right"] .nse-control-menu-item-label {
   justify-content: flex-end;
 }
 

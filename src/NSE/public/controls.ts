@@ -105,7 +105,6 @@ export type {
   NSEImagePosition,
 } from "../Controls/Buttons/NSEButton";
 export type { NSEKeyEquivalentModifierMask } from "../Controls/Buttons/useNSEKeyEquivalent";
-export type { NSEExtendedControlLevel, NSESelectableOption, NSESelectorItem, NSESelectorItemInput } from "../Controls/Selection/NSESelectors";
 export {
   NSEToolbar,
   NSEToolbarController,
@@ -178,12 +177,9 @@ export type {
   NSEViewImageProps,
 } from "../Controls/Images";
 
-export { NSEListSelector, NSEPopupList, NSEIntegerPicker } from "../Controls/Selection/NSESelectors";
-export type { NSEIntegerPickerProps, NSEListSelectorProps, NSEPopupListProps } from "../Controls/Selection/NSESelectors";
 
-export { NSEChoiceControl, NSEMenu, NSEPicker } from "../Menus";
-export type { NSEChoiceControlProps, NSEChoiceOption } from "../Menus";
-export type { NSEMenuItemDefinition, NSEMenuProps, NSEPickerAction, NSEPickerOption, NSEPickerProps } from "../Menus";
+export { NSEMenu, NSEPopUpButton } from "../Menus";
+export type { NSEMenuItemDefinition, NSEMenuProps, NSEPopUpButtonItem, NSEPopUpButtonProps } from "../Menus";
 export { NSEPopup, NSEStandaloneControlHost } from "../Overlays";
 export type { NSEPopupProps, NSEStandaloneControlHostProps } from "../Overlays";
 export { NSEAppMenu, NSEEditMenu, NSEHelpMenu, NSEAppMenuSurface } from "../Menus";

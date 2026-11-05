@@ -21,7 +21,7 @@
 import { useEffect, useId, useReducer, useRef, useState } from "react";
 import { NSEPopover, useOptionalNSEOverlayProvider } from "../../Overlays";
 import { NSECalendarView, NSEClockView } from "../Calendar";
-import { NSEChoiceControl } from "../../Menus/NSEChoiceControl";
+import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { civilToEpochDay, comparePlainDates, resolveZonedDateTime } from "../calendarArithmetic";
 import { formatPlainDate, parsePlainDate, plainDateToday } from "../dateTimeFormatting";
 import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";
@@ -212,8 +212,8 @@ export function NSEDateTimePicker({ value, defaultValue = null, mode = "combined
     /> : null}
     {showClock ? <NSEClockView aria-label={props["aria-label"]} locale={props.locale} timeZone={editorValue.timeZone} date={editorValue.date} value={editorValue.time} disambiguation={editorValue.disambiguation} disabled={props.disabled || props.readOnly} showValidationMessage={false} hourCycle={hourCycle} onValueChange={(time) => preview({ ...editorValue, time })} /> : null}
     {showZone ? <>
-      <NSEChoiceControl label="Time zone" accessibleLabel={`${props["aria-label"]} time zone`} value={editorValue.timeZone} disabled={props.disabled || props.readOnly} options={[{ id: props.timeZone, label: props.timeZone }, ...(props.timeZone !== "UTC" ? [{ id: "UTC", label: "UTC" }] : [])]} onChange={(timeZone) => preview({ ...editorValue, timeZone })} />
-      <NSEChoiceControl label="Disambiguation" accessibleLabel={`${props["aria-label"]} disambiguation`} value={editorValue.disambiguation} disabled={props.disabled || props.readOnly} options={[{ id: "earlier", label: "Earlier" }, { id: "later", label: "Later" }, { id: "reject", label: "Reject" }]} onChange={(disambiguation) => preview({ ...editorValue, disambiguation: disambiguation as NSEDateTimePickerValue["disambiguation"] })} />
+      <NSEPopUpButton label="Time zone" accessibleLabel={`${props["aria-label"]} time zone`} value={editorValue.timeZone} isEnabled={!(props.disabled || props.readOnly)} items={[{ value: props.timeZone, title: props.timeZone }, ...(props.timeZone !== "UTC" ? [{ value: "UTC", title: "UTC" }] : [])]} onValueChange={(timeZone) => preview({ ...editorValue, timeZone })} />
+      <NSEPopUpButton label="Disambiguation" accessibleLabel={`${props["aria-label"]} disambiguation`} value={editorValue.disambiguation} isEnabled={!(props.disabled || props.readOnly)} items={[{ value: "earlier", title: "Earlier" }, { value: "later", title: "Later" }, { value: "reject", title: "Reject" }]} onValueChange={(disambiguation) => preview({ ...editorValue, disambiguation: disambiguation as NSEDateTimePickerValue["disambiguation"] })} />
     </> : null}
     <div data-nse-part="actions">
       <NSEButton

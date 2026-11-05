@@ -28,7 +28,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSECoverFlow } from "../../src/NSE/CoverFlow";
 import { NSEAppFrame } from "../../src/NSE/Windows/NSEAppFrame";
 import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
-import { NSEMenu, NSEPicker } from "../../src/NSE/Menus";
+import { NSEMenu, NSEPopUpButton } from "../../src/NSE/Menus";
 import { NSEProgressBar } from "../../src/NSE/Progress";
 import { NSESourceListScene } from "../../src/NSE/Navigation/SourceList";
 import { NSESidebar } from "../../src/NSE/Navigation/SourceList/NSESidebar";

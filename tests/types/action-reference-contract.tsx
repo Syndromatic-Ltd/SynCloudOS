@@ -1,7 +1,7 @@
 import React from "react";
 import { action, actionRef, useAction, type NSEActionReference, type NSEActionOptions } from "../../src/SynCloudOS/AppSDK/sdkPackageEntry";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
-import { NSEPicker } from "../../src/NSE/Menus/NSEPicker";
+import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
 import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
 import { NSECoverFlow } from "../../src/NSE/CoverFlow/NSECoverFlow";
 import type { NSEMenuActionEntry } from "../../src/NSE/Menus/menuTypes";
@@ -52,9 +52,9 @@ function View() {
     <NSEButton title="Bad" action={choose} actionPayload={2} />
     {/* @ts-expect-error Icon payload must match reference. */}
     <NSEButton title="Bad" imagePosition="imageOnly" action={choose} actionPayload={2} />
-    <NSEPicker options={[]} action={choose} actionPayload="note" />
+    <NSEPopUpButton items={[]} action={choose} actionPayload="note" />
     {/* @ts-expect-error Picker payload must match reference. */}
-    <NSEPicker options={[]} action={choose} actionPayload={2} />
+    <NSEPopUpButton items={[]} action={choose} actionPayload={2} />
     <NSESegmentedControl aria-label="Choose" items={[]} selection={{mode:"momentary",selectedIds:new Set()}} action={choose} actionPayload="note" />
     {/* @ts-expect-error Segmented payload must match reference. */}
     <NSESegmentedControl aria-label="Choose" items={[]} selection={{mode:"momentary",selectedIds:new Set()}} action={choose} actionPayload={2} />
