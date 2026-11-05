@@ -42,7 +42,8 @@ import { DevInspectorRegion } from "../../SynCloudOSReact/DevInspectorRegion";
 import type { InspectorRouteInspectionPort } from "../Inspector/inspectorOwnerSources";
 import type { AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
 import { createRuntimeAnimationState, createScopedAnimationFrames } from "../AnimationFX/scopedAnimationFrames";
-import { installControllerServices } from "./controllerServices";
+import { controllerServicesFor, installControllerServices } from "./controllerServices";
+import { NSEMenuRuntimeProvider } from "../../NSE/Menus/menuRuntimeContext";
 import { NSEViewActivityProvider } from "../../NSE/applicationHostInterop";
 
 // Host-only bridge entrypoint. This is deliberately not exported from the
@@ -73,12 +74,15 @@ export interface SynWareRuntimeMountProps {
 function MountedAppPresentationBoundary({
   runtime,
   kernelRuntime,
+  context,
   children,
 }: {
   readonly runtime: SynWareRuntime;
   readonly kernelRuntime: SynCloudOSRuntime;
+  readonly context: SynWareContextValue;
   readonly children: ReactNode;
 }) {
+  const menuPort = controllerServicesFor(context).menus.runtime;
   const focusPort = useRuntimeNSEFocusPort(`application:${runtime.app.bundleIdentifier}`);
   const overlayPort = useRuntimeNSEOverlayPort(`application:${runtime.app.bundleIdentifier}`);
   const controlPort = useRuntimeNSEControlPort();
@@ -124,7 +128,9 @@ function MountedAppPresentationBoundary({
     <NSEConformanceEvidenceProvider port={conformanceEvidencePort}>
       <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
         <NSEControlRuntimeProvider port={controlPort}>
-          <NSEFocusPortProvider port={focusPort}>{children}</NSEFocusPortProvider>
+          <NSEMenuRuntimeProvider port={menuPort}>
+            <NSEFocusPortProvider port={focusPort}>{children}</NSEFocusPortProvider>
+          </NSEMenuRuntimeProvider>
         </NSEControlRuntimeProvider>
       </NSEOverlayProvider>
     </NSEConformanceEvidenceProvider>
@@ -473,7 +479,7 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
         <SynWareProvider value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}>
-            <MountedAppPresentationBoundary runtime={mounted.mount.runtime} kernelRuntime={runtime}>
+            <MountedAppPresentationBoundary runtime={mounted.mount.runtime} kernelRuntime={runtime} context={mounted.contextBase}>
               {presentedChildren}
             </MountedAppPresentationBoundary>
           </FontCatalogueProvider>
