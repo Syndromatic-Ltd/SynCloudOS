@@ -367,14 +367,21 @@ export {
   NSERuleEditor,
 } from "./DataViews/RuleEditor/NSERuleEditor";
 export {
-  NSESplitViewAdapter,
-} from "./DataViews/Split/NSESplitViewAdapter";
-export type {
-  NSESplitViewAdapterProps,
-} from "./DataViews/Split/NSESplitViewAdapter";
-export {
   NSESplitViewController,
 } from "./DataViews/Split/NSESplitViewController";
+export {
+  NSESplitViewItem,
+} from "./DataViews/Split/NSESplitViewItem";
+export type {
+  NSESplitViewItemBehavior,
+  NSESplitViewItemOptions,
+} from "./DataViews/Split/NSESplitViewItem";
+export type {
+  NSESplitViewControllerOptions,
+  NSESplitViewItemSnapshot,
+  NSESplitViewPreferences,
+  NSESplitViewSnapshot,
+} from "./DataViews/Split/splitViewTypes";
 export {
   NSETableView,
 } from "./DataViews/Table/NSETableView";

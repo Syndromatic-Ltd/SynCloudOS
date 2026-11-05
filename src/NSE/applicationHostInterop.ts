@@ -23,3 +23,4 @@ export { NSEActionResponderContext, NSEActionScopeProvider } from "./Controls/Co
 export { useNSEAnimationEnvironment } from "./Animation/NSEAnimationEnvironment";
 export { useNSEOverlayFocusScope } from "./Overlays/useNSEOverlay";
 export { NSEViewActivityProvider, useNSEViewActivitySource } from "./Application/viewActivityContext";
+export { NSEViewControllerRendererProvider } from "./Application/viewControllerRenderer";

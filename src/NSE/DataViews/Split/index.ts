@@ -21,16 +21,12 @@
 export { NSESplitView } from "./NSESplitView";
 export type { NSESplitViewProps } from "./NSESplitView";
 
-export { NSESplitViewController, distributeNSESplitSizes } from "./NSESplitViewController";
-export { NSESplitViewAdapter } from "./NSESplitViewAdapter";
-export type { NSESplitViewAdapterProps } from "./NSESplitViewAdapter";
+export { NSESplitViewController } from "./NSESplitViewController";
+export { NSESplitViewItem } from "./NSESplitViewItem";
+export type { NSESplitViewItemBehavior, NSESplitViewItemOptions } from "./NSESplitViewItem";
 export type {
-  NSESplitPane,
-  NSESplitPaneSnapshot,
-  NSESplitViewAdapterAuthority,
-  NSESplitViewAdapterPane,
   NSESplitViewControllerOptions,
+  NSESplitViewItemSnapshot,
   NSESplitViewPreferences,
   NSESplitViewSnapshot,
-  NSESplitViewWindowBounds,
 } from "./splitViewTypes";

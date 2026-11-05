@@ -262,11 +262,7 @@ describe("navigation controllers as view controllers", () => {
     class NavigationApp extends NSEApplication {
       readonly tabs = new NSETabBarController({ id: "tabs", destinations });
       readonly stack = new NSENavigationStackController({ id: "stack", destinationIds: ["detail"] });
-      readonly split = new NSESplitViewController({
-        id: "split",
-        orientation: "horizontal",
-        panes: [{ id: "content", minimum: 320, ideal: 720, maximum: Number.POSITIVE_INFINITY, collapsible: false, collapsePriority: 0 }],
-      });
+      readonly split = new NSESplitViewController({ id: "split" });
       readonly adaptive = new NSEAdaptiveNavigationController({
         id: "adaptive",
         model: "peer",
