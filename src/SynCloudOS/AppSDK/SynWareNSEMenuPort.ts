@@ -35,6 +35,7 @@ export function createSynWareMenuRuntime(app: Pick<SynWareContextValue, "appId" 
     signal: app.signal,
     commands: {
       getPresentationGeneration: app.commands.getPresentationGeneration.bind(app.commands),
+      subscribePresentation: app.commands.subscribePresentation.bind(app.commands),
       validateMany: app.commands.validateMany.bind(app.commands),
       prepareDispatch: app.commands.prepareDispatch.bind(app.commands),
       dispatch: (id, payload, options) => app.commands.dispatch<CommandDispatchResult<unknown>>(id, payload, options),

@@ -152,6 +152,9 @@ export interface NSEMenuRuntimePort {
   readonly signal: AbortSignal;
   readonly commands: {
     getPresentationGeneration(): { readonly registryGeneration: number; readonly responderGeneration: number };
+    /** Notifies when command authority may have changed: the focused responder
+     * chain, the command registry, or application state a validator reads. */
+    subscribePresentation?(listener: () => void): () => void;
     validateMany(
       requests: readonly CommandValidationRequest[],
       options?: CommandValidationOptions,

@@ -64,6 +64,40 @@ it("revalidates a visible menu activation after focus changes without dispatchin
   controller.dispose();
 });
 
+it("keeps a pointer activation when focus settles during its revalidation", async () => {
+  // A click focuses the row; in a compact sheet the focus scope settles while
+  // the activation is being revalidated, moving responder authority once more.
+  let responderGeneration = 1;
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => {
+    if (validateMany.mock.calls.length === 2) responderGeneration++;
+    return new Map(requests.map(request => [request.key, presentation(request.commandId)]));
+  });
+  const port = runtime(validateMany);
+  port.commands.getPresentationGeneration = () => ({ registryGeneration: 0, responderGeneration });
+  const controller = new NSEMenuController({ model, runtime: port });
+  render(<NSEMenu model={model} controller={controller} open />);
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Bold" }));
+  await waitFor(() => expect(port.commands.dispatch).toHaveBeenCalledTimes(1));
+  expect(validateMany).toHaveBeenCalledTimes(3);
+  controller.dispose();
+});
+
+it("closes rather than dispatching when command authority never settles", async () => {
+  let responderGeneration = 1;
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => {
+    if (validateMany.mock.calls.length >= 2) responderGeneration++;
+    return new Map(requests.map(request => [request.key, presentation(request.commandId)]));
+  });
+  const port = runtime(validateMany);
+  port.commands.getPresentationGeneration = () => ({ registryGeneration: 0, responderGeneration });
+  const controller = new NSEMenuController({ model, runtime: port });
+  render(<NSEMenu model={model} controller={controller} open />);
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Bold" }));
+  await waitFor(() => expect(controller.snapshot.open).toBe(false));
+  expect(port.commands.dispatch).not.toHaveBeenCalled();
+  controller.dispose();
+});
+
 it("retains the selected submenu while revalidating its activation", async () => {
   let responderGeneration = 1;
   const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => new Map(requests.map(request => [request.key, presentation(request.commandId)])));

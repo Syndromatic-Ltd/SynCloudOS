@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useId, useRef, useState, type KeyboardEvent } from "react";
+import { useContext, useId, useRef, useState, type KeyboardEvent } from "react";
+import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { useOptionalNSEOverlayProvider } from "../Overlays";
 import { NSEMenu } from "./NSEMenu";
 import type { NSEMenuController } from "./NSEMenuController";
@@ -30,14 +31,18 @@ export interface NSEMenuBarItem {
   readonly controller: NSEMenuController;
 }
 
-export interface NSEMenuBarOverlayOptions extends Omit<NSEMenuOverlayOptions, "id"> {
-  /** The owner supplies stable branch IDs; menu bars never derive global IDs. */
-  idForItem(item: NSEMenuBarItem, index: number): string;
+export interface NSEMenuBarOverlayOptions extends Omit<NSEMenuOverlayOptions, "id" | "parentResponderId"> {
+  /** Defaults to the nearest responder: in a class application, the view
+   * controller whose view renders the menu bar. */
+  readonly parentResponderId?: string;
+  /** Stable branch IDs. Defaults to IDs derived from this menu bar's instance. */
+  idForItem?(item: NSEMenuBarItem, index: number): string;
 }
 
 export interface NSEMenuBarProps {
   readonly items: readonly NSEMenuBarItem[];
-  readonly overlay: NSEMenuBarOverlayOptions;
+  /** Optional: menus are parented to the nearest responder by default. */
+  readonly overlay?: NSEMenuBarOverlayOptions;
   readonly direction?: "ltr" | "rtl";
 }
 
@@ -52,6 +57,7 @@ export function NSEMenuBar({ items, overlay, direction = "ltr" }: NSEMenuBarProp
   const instanceId = useId();
   const provider = useOptionalNSEOverlayProvider();
   if (!provider) throw new Error("NSEMenuBar requires an NSEOverlayProvider.");
+  const nearestResponderId = useContext(NSEActionResponderContext);
   const focus = (index: number) => buttonRefs.current[index]?.focus({ preventScroll: true });
   const move = (current: number, delta: 1 | -1) => {
     if (items.length === 0) return;
@@ -99,7 +105,11 @@ export function NSEMenuBar({ items, overlay, direction = "ltr" }: NSEMenuBarProp
         const open = openIndex === index;
         const triggerId = `nse-menu-bar-${instanceId}-${index}`;
         const menu = <NSEMenu model={model} controller={controller} open={open} labelledBy={triggerId} onOpenChange={() => setOpenIndex(null)} direction={direction} initialFocus={initialFocus} />;
-        const overlayOptions = { ...overlay, id: overlay.idForItem(item, index) };
+        const overlayOptions = {
+          ...overlay,
+          parentResponderId: overlay?.parentResponderId ?? nearestResponderId ?? provider.defaultParentResponderId ?? "",
+          id: overlay?.idForItem?.(item, index) ?? `nse-menu-bar-${instanceId}:menu:${model.id}`,
+        };
         return (
           <span key={`${model.id}:${index}`} className="nse-menu-bar-item" onPointerEnter={() => {
             if (openIndex !== null) setOpenIndex(index);

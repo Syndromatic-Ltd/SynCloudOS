@@ -679,6 +679,102 @@ describe("NSEToolbar presentation", () => {
     ));
   });
 
+  it("revalidates once when command presentation authority changes, and stops when disposed", async () => {
+    let notify: (() => void) | undefined;
+    const unsubscribe = vi.fn();
+    const validateMany = vi.fn(async () => new Map([
+      ["editor-toolbar:save:0", commandPresentation("document.save")],
+      ["editor-toolbar:print:0", commandPresentation("document.print")],
+    ]));
+    const port = runtime(validateMany);
+    const controller = createController({
+      runtime: { ...port, commands: { ...port.commands, subscribePresentation: (listener: () => void) => { notify = listener; return unsubscribe; } } },
+    });
+    await controller.refresh();
+    expect(validateMany).toHaveBeenCalledTimes(1);
+
+    notify!();
+    notify!();
+    notify!();
+    await vi.waitFor(() => expect(validateMany).toHaveBeenCalledTimes(2));
+    await Promise.resolve();
+    expect(validateMany).toHaveBeenCalledTimes(2);
+
+    controller.dispose();
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
+  });
+
+  it("revalidates when an action that one of its commands performs announces a change", async () => {
+    const { publishNSEActionChange } = await import("../../../src/NSE/Controls/Core/actionChanges");
+    const validateMany = vi.fn(async () => new Map([
+      ["editor-toolbar:save:0", commandPresentation("document.save")],
+      ["editor-toolbar:print:0", commandPresentation("document.print")],
+    ]));
+    const controller = createController({ runtime: runtime(validateMany) });
+    await controller.refresh();
+    publishNSEActionChange("document.unrelated");
+    await Promise.resolve();
+    expect(validateMany).toHaveBeenCalledTimes(1);
+    publishNSEActionChange("document.save");
+    await vi.waitFor(() => expect(validateMany).toHaveBeenCalledTimes(2));
+    controller.dispose();
+    publishNSEActionChange("document.save");
+    await Promise.resolve();
+    expect(validateMany).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps its shown items while authority keeps moving, as when switching menus by hover", async () => {
+    // Hovering across a menu bar moves focus on every title. Each move bumps
+    // the responder generation while the toolbar is still validating.
+    let responderGeneration = 0;
+    let moving = false;
+    const validateMany = vi.fn(async () => {
+      if (moving) responderGeneration += 1;
+      return new Map([
+        ["editor-toolbar:save:0", commandPresentation("document.save")],
+        ["editor-toolbar:print:0", commandPresentation("document.print")],
+      ]);
+    });
+    const port = runtime(validateMany);
+    const controller = createController({
+      runtime: { ...port, commands: { ...port.commands, getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration }) } },
+    });
+    await expect(controller.refresh()).resolves.toMatchObject({ status: "published" });
+    const shown = controller.snapshot.items;
+    const snapshots: (typeof controller.snapshot)[] = [];
+    const unsubscribe = controller.subscribe(() => snapshots.push(controller.snapshot));
+    moving = true;
+    await controller.refresh();
+    expect(snapshots.every((snapshot) => snapshot.diagnostic === null && snapshot.items.length === shown.length)).toBe(true);
+    expect(controller.snapshot.items.find((item) => item.id === "save")).toMatchObject({ enabled: true });
+    moving = false;
+    await expect(controller.refresh()).resolves.toMatchObject({ status: "published" });
+    expect(controller.snapshot.diagnostic).toBeNull();
+    unsubscribe();
+  });
+
+  it("retries a validation whose command authority moved underneath it instead of reporting the toolbar unavailable", async () => {
+    // A file panel or comparison window returning focus bumps the responder
+    // generation while the toolbar is validating.
+    let responderGeneration = 0;
+    const validateMany = vi.fn(async () => {
+      if (validateMany.mock.calls.length === 1) responderGeneration += 1;
+      return new Map([
+        ["editor-toolbar:save:0", commandPresentation("document.save")],
+        ["editor-toolbar:print:0", commandPresentation("document.print")],
+      ]);
+    });
+    const port = runtime(validateMany);
+    const controller = createController({
+      runtime: { ...port, commands: { ...port.commands, getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration }) } },
+    });
+    const result = await controller.refresh();
+    expect(result.status).toBe("published");
+    expect(validateMany).toHaveBeenCalledTimes(2);
+    expect(controller.snapshot.diagnostic).toBeNull();
+    expect(controller.snapshot.items.find((item) => item.id === "save")).toMatchObject({ enabled: true });
+  });
+
   it("removes command controls and announces a validation failure instead of dispatching stale state", async () => {
     const controller = createController({
       runtime: runtime(vi.fn(async () => {
@@ -756,6 +852,43 @@ describe("NSEToolbar presentation", () => {
       undefined,
       expect.objectContaining({ source: "menu" }),
     ));
+  });
+
+  it("parents its overflow to the nearest responder when the toolbar does not name one", async () => {
+    const { NSEActionResponderContext } = await import("../../../src/NSE/Controls/Core/useNSEControlAction");
+    const validateMany = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
+      requests.map((request) => [request.key, commandPresentation(request.commandId)]),
+    ));
+    const toolbarRuntime = runtime(validateMany);
+    const controller = createController({
+      runtime: toolbarRuntime,
+      preferences: preferenceController("toolbar:nearest", ["save", "custom", "print"]),
+    });
+    render(
+      <OverlayHarness>
+        <NSEActionResponderContext.Provider value="view:editor">
+          <NSEToolbar composition="configured" controller={controller} width={150} aria-label="Document actions" />
+        </NSEActionResponderContext.Provider>
+      </OverlayHarness>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "More toolbar items" }));
+    await screen.findByRole("menu");
+    fireEvent.click(screen.getByRole("menuitem", { name: "Print" }));
+    await waitFor(() => expect(toolbarRuntime.commands.dispatch).toHaveBeenCalledWith(
+      "document.print",
+      undefined,
+      expect.objectContaining({ source: "menu" }),
+    ));
+  });
+
+  it("explains how to give a toolbar a responder when none is in scope", () => {
+    const controller = createController();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    expect(() => render(
+      <OverlayHarness>
+        <NSEToolbar composition="configured" controller={controller} width={150} aria-label="Document actions" />
+      </OverlayHarness>,
+    )).toThrow(/inside a view controller or responder scope/);
   });
 
   it("carries the canonical scheduler into an overflow branch so scope setup cannot stale its validation", async () => {

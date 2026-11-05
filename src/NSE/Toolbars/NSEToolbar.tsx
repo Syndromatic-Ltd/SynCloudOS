@@ -20,7 +20,9 @@
 
 import {
   useCallback,
+  useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -46,13 +48,22 @@ import {
   NSEChromeSurface,
   type NSEChromeVisualState,
 } from "../Appearance/NSEChromePrimitives";
+import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { allocateNSEToolbarItems } from "./toolbarLayout";
 import { NSEToolbarOverflowMenu } from "./NSEToolbarOverflowMenu";
 import type { NSEToolbarController } from "./NSEToolbarController";
 
+/**
+ * Where the toolbar's overflow menu sits in the responder chain. Both fields
+ * default: the overlay ID is generated, and the parent is the nearest responder
+ * (in a class application, the view controller whose view renders the toolbar,
+ * so its @action methods are reachable). Supply a parent only to target a
+ * responder elsewhere; the mount (SCOS.responderId) sits above every view
+ * controller and cannot reach their actions.
+ */
 export interface NSEToolbarInteraction {
-  readonly overflowOverlayId: string;
-  readonly parentResponderId: string;
+  readonly overflowOverlayId?: string;
+  readonly parentResponderId?: string;
   readonly parentScopeId?: string;
 }
 
@@ -74,7 +85,7 @@ type NSEToolbarConfiguredProps = Omit<HTMLAttributes<HTMLDivElement>, "children"
   readonly controller: NSEToolbarController;
   /** Layout geometry is supplied by the host/runtime measurement boundary. */
   readonly width: number;
-  readonly interaction: NSEToolbarInteraction;
+  readonly interaction?: NSEToolbarInteraction;
   readonly direction?: "ltr" | "rtl";
   readonly children?: never;
   readonly position?: never;
@@ -97,14 +108,23 @@ function classNames(...values: readonly (string | false | null | undefined)[]): 
 function NSEConfiguredToolbar({
   controller,
   width,
-  interaction,
+  interaction: requestedInteraction,
   direction = "ltr",
   className,
   onKeyDown,
   ...htmlAttributes
 }: NSEToolbarConfiguredProps) {
+  const nearestResponderId = useContext(NSEActionResponderContext);
+  const generatedOverlayId = `nse-toolbar-overflow:${useId()}`;
+  const interaction = {
+    overflowOverlayId: requestedInteraction?.overflowOverlayId ?? generatedOverlayId,
+    parentResponderId: requestedInteraction?.parentResponderId ?? nearestResponderId ?? "",
+    parentScopeId: requestedInteraction?.parentScopeId,
+  };
   if (!interaction.overflowOverlayId.trim()) throw new TypeError("NSE toolbars require a stable overflow overlay ID.");
-  if (!interaction.parentResponderId.trim()) throw new TypeError("NSE toolbars require a parent responder ID.");
+  if (!interaction.parentResponderId.trim()) {
+    throw new TypeError("NSE toolbars need a parent responder: render the toolbar inside a view controller or responder scope, or pass interaction.parentResponderId.");
+  }
   const subscribe = useCallback((listener: () => void) => controller.subscribe(listener), [controller]);
   const snapshot = useSyncExternalStore(subscribe, () => controller.snapshot, () => controller.snapshot);
   const itemRefs = useRef(new Map<string, HTMLButtonElement>());

@@ -37,6 +37,9 @@ import type {
   NSEMenuModelActionCheck,
 } from "./menuTypes";
 
+/** Validations repeated while focus or registry authority settles before a branch closes. */
+const STALE_VALIDATION_ATTEMPTS = 3;
+
 const initialSnapshot: NSEMenuSnapshot = Object.freeze({
   open: false,
   validating: false,
@@ -423,23 +426,29 @@ export class NSEMenuController<const Model extends NSEMenuModel = NSEMenuModel> 
       entries: preserveRows ? this.#snapshot.entries : [],
     });
     const requests = requestsFor(branchId, entries);
-    const presentationGeneration = this.runtime.commands.getPresentationGeneration();
     try {
-      const result = await this.runtime.commands.validateMany(requests, {
-        signal: lease.signal,
-        source: "menu",
-        generation,
-      });
-      if (lease.signal.aborted || generation !== this.#generation || !this.#snapshot.open) return;
-      if (!samePresentationGeneration(presentationGeneration, this.runtime.commands.getPresentationGeneration())) {
-        this.dismiss("programmatic");
-        return;
-      }
-      const presentations = new Map<string, CommandPresentation>(result);
-      const projected = presentBranch(branchId, entries, presentations);
-      if (projected.some((entry) => entry.kind === "command" && entry.presentation.stale)) {
-        this.dismiss("programmatic");
-        return;
+      // Focus settling after a click (a sheet's focus scope, a row taking focus)
+      // can move responder authority while the branch validates. Validate again
+      // against the authority that is current, within this same branch
+      // generation, so a pending activation still owns the branch; only
+      // authority that never settles closes the menu.
+      let presentationGeneration = this.runtime.commands.getPresentationGeneration();
+      let projected: readonly NSEMenuPresentedEntry[] = [];
+      for (let attempt = 1; ; attempt += 1) {
+        const result = await this.runtime.commands.validateMany(requests, {
+          signal: lease.signal,
+          source: "menu",
+          generation,
+        });
+        if (lease.signal.aborted || generation !== this.#generation || !this.#snapshot.open) return;
+        const settled = samePresentationGeneration(presentationGeneration, this.runtime.commands.getPresentationGeneration());
+        projected = settled ? presentBranch(branchId, entries, new Map<string, CommandPresentation>(result)) : [];
+        if (settled && !projected.some((entry) => entry.kind === "command" && entry.presentation.stale)) break;
+        if (attempt >= STALE_VALIDATION_ATTEMPTS) {
+          this.dismiss("programmatic");
+          return;
+        }
+        presentationGeneration = this.runtime.commands.getPresentationGeneration();
       }
       this.#presentationGeneration = presentationGeneration;
       this.#publish({
