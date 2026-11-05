@@ -291,13 +291,8 @@ export type {
   NSETopBarTitleAction,
   NSETopBarVariant,
 } from "./Windows/Chrome";
-export { NSESidebar, NSESourceListScene } from "./Navigation/SourceList";
+export { NSESourceListScene } from "./Navigation/SourceList";
 export type {
-  NSESidebarItem,
-  NSESidebarProps,
-  NSESidebarSection,
-  NSESidebarSurface,
-  NSESidebarVariant,
   NSESourceListCompactHandoff,
   NSESourceListNavigationProjection,
   NSESourceListSceneProps,

@@ -30,7 +30,8 @@ import { NSEAppFrame } from "../../src/NSE/Windows/NSEAppFrame";
 import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEMenu, NSEPicker } from "../../src/NSE/Menus";
 import { NSEProgressBar } from "../../src/NSE/Progress";
-import { NSESidebar, NSESourceListScene } from "../../src/NSE/Navigation/SourceList";
+import { NSESourceListScene } from "../../src/NSE/Navigation/SourceList";
+import { NSESidebar } from "../../src/NSE/Navigation/SourceList/NSESidebar";
 import { NSESlider } from "../../src/NSE/Controls/Values";
 import { NSESplitView } from "../../src/NSE/DataViews/Split";
 import { NSEStatusBar, NSETopBar } from "../../src/NSE/Windows/Chrome";
@@ -453,7 +454,6 @@ describe("NSE semantic contracts", () => {
 
   it("keeps semantic control owners, the NSE facade, and the registry wired together", () => {
     expect(NSE.NSEAppFrame).toBe(NSEAppFrame);
-    expect(NSE.NSESidebar).toBe(NSESidebar);
     expect(NSE.NSESplitView).toBe(NSESplitView);
     expect(NSE.NSEProgressBar).toBe(NSEProgressBar);
     expect(NSE.NSESlider).toBe(NSESlider);

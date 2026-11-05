@@ -18,8 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { NSESidebar } from "./NSESidebar";
-export type { NSESidebarItem, NSESidebarProps, NSESidebarSection, NSESidebarSurface, NSESidebarVariant } from "./NSESidebar";
 export { NSESourceListScene } from "./NSESourceListScene";
 export type {
   NSESourceListCompactHandoff,

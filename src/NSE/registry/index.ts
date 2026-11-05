@@ -57,14 +57,6 @@ export const nseRegistry = [
     variants: ["atmoCumulus", "atmoMetal"]
   },
   {
-    name: "nse-sidebar",
-    title: "NSESidebar",
-    type: "primitive",
-    description: "Source-list and inspector sidebar model with sections, badges, nested items, metadata, and custom row rendering.",
-    files: ["src/NSE/Navigation/SourceList/NSESidebar.tsx", "src/NSE/Navigation/SourceList/nse-sourcelist.css", "src/NSE/Windows/Chrome/nse-chrome.css"],
-    variants: ["sourceList", "inspector", "plain"]
-  },
-  {
     name: "nse-split-view",
     title: "NSESplitView",
     type: "primitive",

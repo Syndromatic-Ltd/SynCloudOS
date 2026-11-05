@@ -35,7 +35,8 @@ import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
-import { NSESidebar, NSESourceListScene } from "../../src/NSE/Navigation/SourceList";
+import { NSESourceListScene } from "../../src/NSE/Navigation/SourceList";
+import { NSESidebar } from "../../src/NSE/Navigation/SourceList/NSESidebar";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRuntimeEnvironment, mountTestSynWareRuntime } from "./helpers";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
 

@@ -45,3 +45,226 @@
 @media (forced-colors: active) {
   .nse-outline-view [aria-selected="true"] { outline: 1px solid Highlight; }
 }
+
+/* =============================================================================================
+   Source list (selectionHighlightStyle "sourceList"): Atmo's sidebar.
+   Group items draw as the section rail: blue label, a line, the disclosure arrow knob, and the
+   line continuing to the edge. Rows use the system list-item row. The app frame's material
+   (data-nse-material on the app view) chooses the plain or brushed-metal rail; the document's
+   data-mode chooses light or dark.
+   ============================================================================================= */
+
+.nse-outline-container[data-fill] {
+  flex: 1 1 0;
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+.nse-outline-container[data-style="source-list"] {
+  position: relative;
+  color: var(--nse-sidebar-text, #2a2f36);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0)),
+    var(--nse-sidebar-background, linear-gradient(180deg, #dfe0e2 0%, #cdcfd2 100%));
+}
+
+/* The raised content beside the rail casts a soft shadow back over it along the seam. */
+.nse-outline-container[data-style="source-list"]::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 3;
+  inline-size: 15px;
+  pointer-events: none;
+  background: linear-gradient(to left, var(--nse-sidebar-seam-shadow, rgba(0, 0, 0, 0.22)), transparent);
+}
+
+.nse-outline-view[data-style="source-list"] {
+  --nse-outline-background: transparent;
+  padding-block: 12px 16px;
+  scrollbar-width: none;
+}
+
+.nse-outline-view[data-style="source-list"]::-webkit-scrollbar {
+  inline-size: 0;
+  block-size: 0;
+}
+
+.nse-outline-view[data-style="source-list"]:focus-visible {
+  outline: none;
+}
+
+/* Floating subviews share the rail's material; rows pass beneath them. */
+.nse-outline-floating-subviews {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  padding: 4px 13px 18px;
+}
+
+.nse-outline-source-list > .nse-outline-node[data-group] + .nse-outline-node[data-group] {
+  margin-block-start: 10px;
+}
+
+/* Group row: label -> line -> arrow knob -> line to the edge. */
+.nse-outline-group-row {
+  display: flex;
+  align-items: center;
+  min-block-size: 26px;
+  padding-inline-start: 18px;
+}
+
+.nse-outline-group-label {
+  flex: 0 0 auto;
+  margin-inline-end: 9px;
+  color: var(--nse-sidebar-section-label, #3a78c2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.58);
+}
+
+.nse-outline-group-row::after,
+.nse-outline-group-line {
+  align-self: center;
+  block-size: var(--nse-atmo-divider-arrow-line);
+  min-inline-size: 10px;
+  background: var(--nse-atmo-divider) left center / auto var(--nse-atmo-divider-arrow-line) repeat-x;
+}
+
+.nse-outline-group-line {
+  flex: 4 1 0;
+}
+
+.nse-outline-group-row::after {
+  content: "";
+  flex: 1 1 0;
+}
+
+.nse-outline-group-toggle.nse-control-divider[data-variant="arrow"] {
+  flex: 0 0 auto;
+  inline-size: var(--nse-atmo-divider-arrow-width);
+  min-inline-size: var(--nse-atmo-divider-arrow-width);
+  block-size: var(--nse-atmo-divider-arrow-size);
+  margin: 0;
+}
+
+/* Collapse slides: the children region is one grid row animating 1fr -> 0fr while the inner
+   wrapper clips. Collapsed children are inert, so they cannot take focus mid-transition. */
+.nse-outline-view[data-style="source-list"] .nse-outline-children {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.nse-outline-view[data-style="source-list"] .nse-outline-children[data-collapsed="true"] {
+  grid-template-rows: 0fr;
+}
+
+.nse-outline-children-inner {
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nse-outline-view[data-style="source-list"] .nse-outline-children {
+    transition: none;
+  }
+}
+
+.nse-outline-source-row.nse-control-list-item {
+  margin: 0;
+  padding-inline: calc(18px + var(--nse-outline-level, 0) * 12px) 18px;
+  cursor: pointer;
+}
+
+.nse-outline-source-row.nse-control-list-item:focus-visible {
+  outline: 2px solid rgba(89, 150, 212, 0.86);
+  outline-offset: 1px;
+}
+
+.nse-outline-source-row [data-nse-part="disclosure"] {
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+/* One hairline per seam: only the top border paints, so seams never double. */
+.nse-outline-children-inner > .nse-outline-node:not(:first-child) > .nse-outline-source-row.nse-control-list-item {
+  border-block-start: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* A table cell view in a source-list row lays out as the row's icon, title, detail and badge. */
+.nse-outline-source-row [data-nse-part="cell-content"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
+.nse-outline-source-row [data-nse-part="cell-content"] > [data-nse-part="image"] {
+  flex: 0 0 auto;
+  inline-size: 24px;
+  block-size: 24px;
+  object-fit: contain;
+}
+
+.nse-outline-source-row [data-nse-part="text-content"] {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.nse-outline-source-row [data-nse-part="secondary-text"] {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.72;
+}
+
+.nse-outline-source-row [data-nse-part="badge"] {
+  margin-inline-start: auto;
+}
+
+/* --- Brushed-metal rail, under an app frame whose material is metal ------------------------- */
+:where([data-nse-material="metal"]) .nse-outline-container[data-style="source-list"] {
+  --nse-sidebar-metal-bg: linear-gradient(180deg, #dfe0e2 0%, #cdcfd2 100%);
+  --nse-sidebar-metal-text: #2a2f36;
+  --nse-sidebar-metal-label: #3a78c2;
+  --nse-sidebar-metal-emboss: 0 1px 0 rgba(255, 255, 255, 0.75);
+  --nse-sidebar-metal-edge: rgba(120, 126, 134, 0.7);
+  --nse-sidebar-metal-content-shadow: rgba(0, 0, 0, 0.22);
+  --nse-sidebar-metal-grain-blend: overlay;
+  color: var(--nse-sidebar-metal-text);
+  background:
+    var(--nse-metal-grain) 0 0 / var(--nse-metal-grain-tile) repeat,
+    var(--nse-sidebar-metal-bg);
+  background-blend-mode: var(--nse-sidebar-metal-grain-blend), normal;
+  border-inline-end: 1px solid var(--nse-sidebar-metal-edge);
+  box-shadow:
+    inset -14px 0 18px -10px var(--nse-sidebar-metal-content-shadow),
+    inset -1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-outline-container[data-style="source-list"] {
+  --nse-sidebar-metal-bg: linear-gradient(180deg, #3a3d44 0%, #202227 100%);
+  --nse-sidebar-metal-text: #dde3ea;
+  --nse-sidebar-metal-label: #6aa9e6;
+  --nse-sidebar-metal-emboss: 0 -1px 0 rgba(0, 0, 0, 0.78), 0 1px 0 rgba(255, 255, 255, 0.05);
+  --nse-sidebar-metal-edge: rgba(8, 10, 12, 0.8);
+  --nse-sidebar-metal-content-shadow: rgba(0, 0, 0, 0.42);
+  --nse-sidebar-seam-shadow: rgba(0, 0, 0, 0.42);
+}
+
+:where([data-nse-material="metal"]) .nse-outline-container[data-style="source-list"] .nse-outline-group-label {
+  color: var(--nse-sidebar-metal-label);
+  text-shadow: var(--nse-sidebar-metal-emboss);
+}
+
+:where([data-nse-material="metal"]) .nse-outline-source-row[data-selected="false"] .nse-control-list-primary {
+  color: var(--nse-sidebar-metal-text);
+  text-shadow: var(--nse-sidebar-metal-emboss);
+}
+
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-outline-children-inner > .nse-outline-node:not(:first-child) > .nse-outline-source-row.nse-control-list-item {
+  border-block-start-color: rgba(150, 180, 214, 0.14);
+}

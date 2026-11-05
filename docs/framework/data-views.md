@@ -106,6 +106,8 @@ If the controller is disposed while a view still shows it, the view keeps its la
 
 `NSEOutlineView` presents a hierarchy with expandable rows, driven by an `NSETreeController`. It supports keyboard expansion and collapse, drop proposals for moving nodes, and lazy loading through the controller's `loadChildren`.
 
+A sidebar is an `NSEOutlineView` with `selectionHighlightStyle="sourceList"`. The delegate's `isGroupItem` marks section headers, `shouldShowOutlineCell` hides a section's disclosure arrow, and `shouldSelect` decides what can be selected (by default, everything but group items). The theme draws group rows and the source-list background; see [Source-list application chrome](nse/source-list-chrome.md). `viewportBlockSize="fill"` takes the container's height.
+
 ## Collection view
 
 `NSECollectionView` lays items out in a grid or a list. `createAdaptiveCollectionLayout` picks the number of columns from the available width, and `createListCollectionLayout` makes a single column. Items render through `NSETableCellView`, which arranges an image, a primary and secondary line and a badge.

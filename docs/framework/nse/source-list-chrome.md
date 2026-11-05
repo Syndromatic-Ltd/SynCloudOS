@@ -13,16 +13,17 @@ frame: {
 <NSESourceListScene
   title={selectedSection.title}
   compact={adaptiveSnapshot.renderer === "tabs"}
-  sidebar={<NSESidebar surface="metal" header={<NSESearchField aria-label="Search sections" />} sections={sections} />}
+  sidebar={<NSEOutlineView controller={sections} selectionHighlightStyle="sourceList" viewportBlockSize="fill"
+    floatingSubviews={<NSESearchField aria-label="Search sections" />} delegate={{ isGroupItem: (_id, item) => item.isGroup }} … />}
   status={{ rail: "25 sections", leading: "Ready" }}
 >
   {content}
 </NSESourceListScene>
 ```
 
-`NSESidebar.header` is a floating, transparent slot inside the row scroll surface. It reserves its natural height initially; rows scroll underneath it. The sidebar supplies one continuous material and the seam shadow across the whole rail. Applications supply controls, without a separate material wrapper or sticky-position CSS. Header input keys remain owned by the input rather than sidebar row navigation.
+The sidebar is an `NSEOutlineView` with `selectionHighlightStyle="sourceList"`, as in AppKit. Top-level items the delegate reports through `isGroupItem` are the sections; Atmo draws them as the blue label, the line and the disclosure arrow, and their rows slide closed when collapsed. `shouldShowOutlineCell` returning false makes a section fixed. The app frame's material (`frame.material`) chooses the plain or brushed-metal rail, and the document's colour scheme chooses light or dark: there is no surface or scheme prop.
 
-Section arrows manage collapse internally when both `collapsedSectionIds` and the section's `collapsed` flag are omitted. An application that needs persistence supplies `collapsedSectionIds` and handles `onToggleSection`; explicit controlled state always wins. Collapsed rows are inert and excluded from row keyboard navigation.
+`floatingSubviews` float over the rows at the top of the scroll view, as `NSScrollView.addFloatingSubview(_:for:)` does: rows scroll beneath them, and they share the rail's material. A table cell view (`NSETableCellView`) returned from the delegate's `renderItem` is drawn by the source-list row itself: its image, title, detail and badge take the row's places. Expansion is the tree controller's state, so an app that persists it reads and writes `expandedIds`. Collapsed rows are inert and excluded from keyboard navigation.
 
 `NSESourceListScene.status.rail` is the sidebar footer cell; `leading`, `center` and `trailing` belong to the main footer. The scene draws one split footer and shares the system frame's rail width, so the header, body and footer seam resize together. Do not add a second footer inside the sidebar.
 

@@ -62,15 +62,9 @@ export type { NSEAppFrameProps, NSEAppFrameVariant } from "../Windows/NSEAppFram
 export { NSEMetalSurface, NSERoundedBox } from "../Material";
 export type { NSEMetalSurfaceProps, NSERoundedBoxProps } from "../Material";
 export {
-  NSESidebar,
   NSESourceListScene,
 } from "../Navigation/SourceList";
 export type {
-  NSESidebarItem,
-  NSESidebarProps,
-  NSESidebarSection,
-  NSESidebarSurface,
-  NSESidebarVariant,
   NSESourceListCompactHandoff,
   NSESourceListNavigationProjection,
   NSESourceListSceneProps,

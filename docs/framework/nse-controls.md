@@ -138,7 +138,7 @@ Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSEList`, `NSES
 | `NSEScrollView`, `NSEClipView` | Scrolling with momentum and rubber banding. |
 | `NSETabView`, `NSETabGroup`, `NSETabBar` | Tabbed content, driven by `NSETabBarController`. |
 | `NSEAccordionView` | Collapsible sections. |
-| `NSESidebar`, `NSESourceListScene` | A source list sidebar and the scene that composes it with content. |
+| `NSESourceListScene` | The scene that composes a source-list sidebar (an `NSEOutlineView` in source-list style) with content. |
 | `NSEHierarchyStack`, `NSESlidingPanes` | Drill in navigation across panes. |
 | `NSEDrawer` | A drawer that slides from a window edge. |
 
@@ -149,7 +149,7 @@ Data views render collections owned by a controller. They are virtualised, so a 
 | Component | Purpose |
 | --- | --- |
 | `NSETableView` | Sortable, resizable, editable columns. |
-| `NSEOutlineView` | Expandable hierarchies. |
+| `NSEOutlineView` | Expandable hierarchies, and sidebar source lists (`selectionHighlightStyle="sourceList"`, group items). |
 | `NSECollectionView` | Grids and adaptive layouts of items. |
 | `NSEBrowser` | Multi column hierarchical browsing. |
 | `NSEVirtualList`, `NSEList`, `NSEGroupedList` | Long and grouped lists. |
