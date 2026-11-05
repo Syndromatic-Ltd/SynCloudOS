@@ -24,7 +24,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoTypes";
 import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
-import { NSEMenu } from "../../src/NSE/Menus";
+import { NSEMenuView } from "../../src/NSE/Menus";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { WebspringQuickSwitchView } from "../../src/Webspring/WebspringQuickSwitchView";
@@ -54,7 +54,7 @@ describe("command, focus, undo, and overlay accessibility", () => {
     const onSelect = vi.fn();
     render(
       <NSEStandaloneControlHost document={document} window={window} presentation={createStaticPresentationPort({ width: 1024, height: 768 })}>
-        <NSEMenu
+        <NSEMenuView
           label="Actions"
           items={[
             { value: "disabled", label: "Disabled", disabled: true },

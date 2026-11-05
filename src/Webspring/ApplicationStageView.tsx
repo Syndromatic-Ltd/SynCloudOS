@@ -29,12 +29,13 @@ import {
   NSEControlRuntimeProvider,
   NSEApplicationNavigationChromeController,
   NSEApplicationNavigationChromeProvider,
-  NSEMenuController,
+  NSEMenu,
   NSEOverlayProvider,
   NSETooltipProvider,
   NSEWindowSurfaceBridgeProvider,
   useNSEDeferredDisposal,
 } from "../NSE/NSE";
+import { nseMenuModel } from "../NSE/Menus/menuTypes";
 import { NSEButton, NSETopBar } from "@syndromatic/syncloudos/nse/controls";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
@@ -235,7 +236,7 @@ export function ApplicationStageView({
   }, [activateMenu, app, frame.rightSlot, hasRightSlot, locale, opensPreferencesDirectly]);
   const appMenuRuntime = useRuntimeNSEMenuPort();
   const appMenuController = useMemo(
-    () => new NSEMenuController({ ownerSignal: appMenuRuntime.signal, model: appMenuModel, runtime: appMenuRuntime }),
+    () => new NSEMenu({ ownerSignal: appMenuRuntime.signal, [nseMenuModel]: appMenuModel, runtime: appMenuRuntime }),
     [appMenuModel, appMenuRuntime],
   );
   // `useRuntimeNSEMenuPort` remains the canonical command bridge; the controller

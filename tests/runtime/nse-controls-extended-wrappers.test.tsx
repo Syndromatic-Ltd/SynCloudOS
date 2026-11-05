@@ -27,7 +27,8 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
-import { NSEButton, NSEAppMenu, NSEEditMenu, NSEHeader, NSEHelpMenu, NSEDatePicker, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEMenu, NSEStandaloneControlHost, NSESearchField, NSEPrevNextBanner, NSEProgressSlider, NSETimePicker, NSESegmentedControl } from "../../src/NSE/public/controls";
+import { NSEButton, NSEAppMenu, NSEEditMenu, NSEHeader, NSEHelpMenu, NSEDatePicker, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEStandaloneControlHost, NSESearchField, NSEPrevNextBanner, NSEProgressSlider, NSETimePicker, NSESegmentedControl } from "../../src/NSE/public/controls";
+import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 afterEach(() => {
@@ -163,7 +164,7 @@ describe("NSE extended wrapper controls", () => {
     const onSelect = vi.fn();
 
     renderWithAppearance(
-      <NSEMenu
+      <NSEMenuView
         label="Nested"
         onSelect={onSelect}
         items={[

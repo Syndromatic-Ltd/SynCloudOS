@@ -100,7 +100,7 @@ export function NSETableHeaderView({ columns, height, width, menu, disabled = fa
             onPointerCancel={() => { dragRef.current = null; }}
           />}
           {menu && !disabled && index === columns.length - 1 ? (
-            <NSEPopUpButton pullsDown title="Columns" menu={menu.controller} overlay={menu.overlay} />
+            <NSEPopUpButton pullsDown title="Columns" menu={menu.menu} overlay={menu.overlay} />
           ) : null}
         </div>
       ))}

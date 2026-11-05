@@ -30,8 +30,8 @@ import type { NSEControlActionProps } from "../Controls/Core/controlTypes";
 import { useNSEControlCommand, type NSEControlCommandState } from "../Controls/Core/useNSEControlCommand";
 import { useNSEValueBinding } from "../Controls/Core/useNSEValueBinding";
 import type { NSEBoundValueProps } from "../Bindings/bindingTypes";
-import { NSEMenu } from "./NSEMenu";
-import type { NSEMenuController } from "./NSEMenuController";
+import { NSEMenuView } from "./NSEMenuView";
+import type { NSEMenu } from "./NSEMenu";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
 import type { NSEMenuOverlayOptions } from "./menuTypes";
 
@@ -60,7 +60,7 @@ export interface NSEPopUpButtonProps<Payload = unknown> extends Omit<HTMLAttribu
   /** A pull-down button's title. A pop-up button shows its selected item instead. */
   readonly title?: ReactNode;
   /** A pull-down button's command menu, validated along the responder chain. */
-  readonly menu?: NSEMenuController;
+  readonly menu?: NSEMenu;
   /** The selected item's value. */
   readonly value?: string;
   readonly defaultValue?: string;
@@ -324,7 +324,7 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
       />
       {menu ? (
         <NSEMenuOverlay overlay={overlayOptions} controller={menu} open={open} anchor={anchorRef.current} labelledBy={buttonId} onOpenChange={setOpen}>
-          <NSEMenu model={menu.model} controller={menu} open={open} labelledBy={buttonId} onOpenChange={setOpen} direction={direction} initialFocus={initialFocus} />
+          <NSEMenuView model={menu.model} controller={menu} open={open} labelledBy={buttonId} onOpenChange={setOpen} direction={direction} initialFocus={initialFocus} />
         </NSEMenuOverlay>
       ) : (
         <NSEListboxPopup

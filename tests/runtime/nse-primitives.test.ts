@@ -21,7 +21,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { NSESwitch, NSEButton, NSEBox, NSEMenu, NSEPopUpButton, NSESegmentedControl, NSETopBar, useNSEControlFeedback } from "../../src/NSE/public/controls";
+import { NSEMenuView } from "../../src/NSE/Menus";
+import { NSESwitch, NSEButton, NSEBox, NSEPopUpButton, NSESegmentedControl, NSETopBar, useNSEControlFeedback } from "../../src/NSE/public/controls";
 import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEGlassPanel } from "../../src/NSE/Components/NSEGlassPanel";
 import { BrowserHapticsAdapter, createHFXVibratePattern, normalizeHFXFeedbackInput } from "../../src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter";
@@ -357,7 +358,7 @@ describe("HapticsFX feedback preservation", () => {
 
     try {
       const rendered = render(createElement("div", null,
-        createElement(NSEMenu, {
+        createElement(NSEMenuView, {
           label: "Actions",
           items: [{ value: "open", label: "Open" }],
           onSelect: vi.fn()

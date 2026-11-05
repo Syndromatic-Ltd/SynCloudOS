@@ -21,14 +21,14 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { NSEPopup, useNSEOverlayProvider } from "../Overlays";
 import type { NSEOverlayDismissReason } from "../Overlays";
-import type { NSEMenuController } from "./NSEMenuController";
+import type { NSEMenu } from "./NSEMenu";
 import type { NSEMenuOverlayOptions } from "./menuTypes";
 import { NSEMenuOverlayPresentationScope } from "./menuPresentationContext";
 
 export interface NSEMenuOverlayProps {
   readonly overlay: NSEMenuOverlayOptions;
   /** The branch controller must be closed before the popup unmounts its semantic surface. */
-  readonly controller: Pick<NSEMenuController, "dismiss" | "snapshot"> & Partial<Pick<NSEMenuController, "subscribe">>;
+  readonly controller: Pick<NSEMenu, "dismiss" | "snapshot"> & Partial<Pick<NSEMenu, "subscribe">>;
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
   readonly labelledBy?: string;

@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEPreferencesController, nseUnowned, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers";
 import { enterClassApplication, instantiateInOwnerScope, NSEOwnershipScope } from "../../src/NSE/Controllers/ownership";
-import { NSEMenuController } from "../../src/NSE/Menus/NSEMenuController";
+import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { NSEPageController } from "../../src/NSE/Page/NSEPageController";
 import { NSEColourPanelController } from "../../src/NSE/Colour/ColourPanel/NSEColourPanelController";
 import { NSEApplicationNavigationChromeController } from "../../src/NSE/Navigation/NSEApplicationNavigationChrome";
@@ -53,7 +54,7 @@ function preferences() {
 const factories = {
   menu: (options: NSEControllerOwnershipOptions) => {
     const host = runtime();
-    return new NSEMenuController({ ...options, model: { id: "owned-menu", entries: [] }, runtime: { signal: new AbortController().signal, commands: commandPort(host) } });
+    return new NSEMenu({ ...options, [nseMenuModel]: { id: "owned-menu", entries: [] }, runtime: { signal: new AbortController().signal, commands: commandPort(host) } });
   },
   toolbar: (options: NSEControllerOwnershipOptions) => {
     const host = runtime();
@@ -119,7 +120,7 @@ describe.each(Object.entries(factories))("%s controller ownership", (name, creat
 it("stops menu work and toolbar preference observation on owner disposal without disposing shared preferences", async () => {
   const owner = new AbortController();
   const host = runtime();
-  const menu = new NSEMenuController({ ownerSignal: owner.signal, model: { id: "menu", entries: [] }, runtime: { signal: new AbortController().signal, commands: commandPort(host) } });
+  const menu = new NSEMenu({ ownerSignal: owner.signal, [nseMenuModel]: { id: "menu", entries: [] }, runtime: { signal: new AbortController().signal, commands: commandPort(host) } });
   const toolbar = factories.toolbar({ ownerSignal: owner.signal });
   await menu.open();
   expect(menu.snapshot.open).toBe(true);

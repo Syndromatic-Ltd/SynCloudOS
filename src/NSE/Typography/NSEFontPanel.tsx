@@ -31,7 +31,7 @@ import { useNSEArrayController } from "../Controllers";
 import { NSETableView, type NSEDataViewAdapter, type NSETableColumn } from "../DataViews";
 import type { NSEFontFamily, NSEFontPreset } from "../Text/fontDescriptors";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../interactionLifecycle";
-import { NSEMenu } from "../Menus/NSEMenu";
+import { NSEMenuView } from "../Menus/NSEMenuView";
 import type { NSEMenuItemDefinition } from "../Menus/menuTypes";
 import { useNSEOverlayProvider } from "../Overlays/NSEOverlayProvider";
 import { NSEUtilityPanel } from "../Overlays/NSEUtilityPanel";
@@ -288,7 +288,7 @@ function EffectColourButton({ id, label, glyph, value, automatic, disabled, onPr
  */
 function FontActionsMenu({ fallbackParentResponderId, items, onSelect }: { readonly fallbackParentResponderId?: string; readonly items: readonly NSEMenuItemDefinition[]; onSelect(value: string): void }) {
   const overlays = useNSEOverlayProvider();
-  return <NSEMenu label={<GearGlyph />} trigger="tool" triggerLabel="Font actions" controlSize="small" parentResponderId={overlays.defaultParentResponderId ?? fallbackParentResponderId} items={items} data-nse-part="action-menu" onSelect={onSelect} />;
+  return <NSEMenuView label={<GearGlyph />} trigger="tool" triggerLabel="Font actions" controlSize="small" parentResponderId={overlays.defaultParentResponderId ?? fallbackParentResponderId} items={items} data-nse-part="action-menu" onSelect={onSelect} />;
 }
 
 function familyMatchesQuery(family: NSEFontFamily, query: string): boolean {
