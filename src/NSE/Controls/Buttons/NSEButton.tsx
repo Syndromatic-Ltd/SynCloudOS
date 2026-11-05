@@ -107,8 +107,11 @@ export interface NSEButtonProps<Payload = unknown>
   readonly controlSize?: NSEButtonControlSize;
   /** NSView.toolTip. */
   readonly toolTip?: string;
-  /** A `switch` button's value as Cocoa Bindings' `value`: on for true, off for false. */
-  readonly binding?: NSEBinding<boolean>;
+  /**
+   * A `switch` button's value as Cocoa Bindings' `value`: on for true, off for false, and mixed for a
+   * selection whose values differ (Cocoa's multiple-values marker).
+   */
+  readonly binding?: NSEBinding<boolean | "mixed">;
   readonly validation?: NSEControlValidation;
   /** The form value a `switch` button submits when on. */
   readonly submissionValue?: string;
@@ -394,7 +397,7 @@ const NSESwitchButton = forwardRef(NSESwitchButtonCell);
 
 const NSEButtonControl = forwardRef<HTMLButtonElement, NSEButtonProps>(function NSEButton(input, ref) {
   // Cocoa Bindings bind a switch's value to a Boolean; mixed comes from a mixed selection.
-  const bound = useNSEValueBinding<boolean, NSEButtonProps & { state?: unknown; onStateChange?: unknown }, "state" | "defaultState" | "onStateChange">(
+  const bound = useNSEValueBinding<boolean | "mixed", NSEButtonProps & { state?: unknown; onStateChange?: unknown }, "state" | "defaultState" | "onStateChange">(
     input as never,
     { value: "state", change: "onStateChange", excludes: ["defaultState"], fallback: false, mixedValue: "mixed" as never },
   ) as NSEButtonProps & { state?: unknown; onStateChange?: (state: unknown) => void; disabled?: boolean };
