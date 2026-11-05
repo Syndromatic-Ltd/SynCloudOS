@@ -522,6 +522,30 @@
   }
 }
 
+/* Chrome corner contract. Edge chrome that reaches a surface's outer corners
+   (the metal top bar and footer) reads the corner radius of the surface it sits
+   on from these two properties instead of assuming one. A smooth surface (a
+   rounded app frame or window) publishes its radius; a themed window frame
+   publishes --nse-window-radius; anything else is square. A window's title bar
+   owns its top corners, so content below it is square at the top. */
+.nse-smooth-surface {
+  --nse-chrome-top-corner-radius: var(--nse-smooth-surface-active-radius, var(--nse-smooth-surface-radius, 0px));
+  --nse-chrome-bottom-corner-radius: var(--nse-smooth-surface-active-radius, var(--nse-smooth-surface-radius, 0px));
+}
+
+.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]) > .nse-window__surface:not(.nse-smooth-surface) {
+  --nse-chrome-top-corner-radius: var(--nse-window-radius, 8px);
+  --nse-chrome-bottom-corner-radius: var(--nse-window-radius, 8px);
+}
+
+.nse-window__surface > :not(:first-child) {
+  --nse-chrome-top-corner-radius: 0px;
+}
+
+.nse-window__surface > :not(:last-child) {
+  --nse-chrome-bottom-corner-radius: 0px;
+}
+
 /* Film grain shared by the metal chrome surfaces (top bar, source list, footer). */
 :root {
   --nse-metal-grain-tile: 56px 56px;
@@ -537,8 +561,6 @@
    Adapted from the hand-spliced Software.app chrome into a first-party NSE variant.
    =========================================================================== */
 .nse-app-topbar-metal {
-  --nse-metal-header-curve-l: url("/assets/nse/chrome/metal/light/header-curve-left.png");
-  --nse-metal-header-curve-r: url("/assets/nse/chrome/metal/light/header-curve-right.png");
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/light/header-middle.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/light/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/light/header-endcap-right.png");
@@ -573,6 +595,21 @@
   overflow: hidden;
   box-shadow: 0 6px 11px -5px var(--nse-metal-cast-shadow);
   backdrop-filter: none;
+  /* The bar's outer corners are the corners of the surface it sits on (see the
+     chrome corner contract): square unless that window or app frame is actually
+     rounded at its top edge. The middle strip is clipped to that radius rather
+     than painted under curved artwork, and the edge sheen is drawn as inset
+     highlights, so it follows any radius, including none. */
+  --nse-metal-corner: var(--nse-chrome-top-corner-radius, 0px);
+  --nse-metal-rim-edge: min(var(--nse-metal-corner), 1px);
+  --nse-metal-rim: rgb(255 255 255 / 18%);
+  --nse-metal-rim-soft: rgb(255 255 255 / 15%);
+  --nse-metal-rim-top: rgb(252 252 252);
+  --nse-metal-rim-left: inset var(--nse-metal-rim-edge) 0 0 var(--nse-metal-rim), inset calc(2 * var(--nse-metal-rim-edge)) 0 0 var(--nse-metal-rim-soft);
+  --nse-metal-rim-right: inset calc(-1 * var(--nse-metal-rim-edge)) 0 0 var(--nse-metal-rim), inset calc(-2 * var(--nse-metal-rim-edge)) 0 0 var(--nse-metal-rim-soft);
+  --nse-metal-rim-crest: inset 0 1px 0 var(--nse-metal-rim-top);
+  border-top-left-radius: var(--nse-metal-corner);
+  border-top-right-radius: var(--nse-metal-corner);
 }
 
 .nse-app-topbar-metal::before {
@@ -584,8 +621,6 @@
 }
 
 .nse-app-topbar-metal[data-mode="dark"] {
-  --nse-metal-header-curve-l: url("/assets/nse/chrome/metal/dark/header-curve-left.png");
-  --nse-metal-header-curve-r: url("/assets/nse/chrome/metal/dark/header-curve-right.png");
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/dark/header-middle.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/dark/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/dark/header-endcap-right.png");
@@ -603,6 +638,9 @@
   --nse-metal-cast-shadow: rgba(0, 0, 0, 0.52);
   --nse-metal-content-shadow: rgba(0, 0, 0, 0.42);
   --nse-metal-grain-opacity: 0.95;
+  --nse-metal-rim: rgb(255 255 255 / 9%);
+  --nse-metal-rim-soft: rgb(255 255 255 / 8%);
+  --nse-metal-rim-top: rgb(124 126 129);
 }
 
 .nse-app-topbar-metal-rail {
@@ -611,11 +649,11 @@
   display: grid;
   place-items: center;
   min-width: 0;
+  border-top-left-radius: var(--nse-metal-corner);
   background:
-    var(--nse-metal-header-curve-l) left top / auto 100% no-repeat,
     var(--nse-metal-header-endcap-r) right top / auto 100% no-repeat,
     var(--nse-metal-header-mid) left top / auto 100% repeat-x;
-  box-shadow: inset -14px 0 18px -10px var(--nse-metal-content-shadow);
+  box-shadow: var(--nse-metal-rim-left), var(--nse-metal-rim-crest), inset -14px 0 18px -10px var(--nse-metal-content-shadow);
 }
 
 .nse-app-topbar-metal-main {
@@ -626,22 +664,22 @@
   justify-content: center;
   min-width: 0;
   padding: 0 16px;
+  border-top-right-radius: var(--nse-metal-corner);
   background:
     var(--nse-metal-header-endcap-l) left top / auto 100% no-repeat,
-    var(--nse-metal-header-curve-r) right top / auto 100% no-repeat,
     var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+  box-shadow: var(--nse-metal-rim-right), var(--nse-metal-rim-crest);
 }
 
 .nse-app-topbar-metal[data-has-rail="true"] .nse-app-topbar-metal-main {
-  box-shadow: -10px 0 18px -6px var(--nse-metal-content-shadow);
+  box-shadow: var(--nse-metal-rim-right), var(--nse-metal-rim-crest), -10px 0 18px -6px var(--nse-metal-content-shadow);
 }
 
-/* Single bar (no rail): both ends rounded. */
+/* Single bar (no rail): the bar reaches both outer corners. */
 .nse-app-topbar-metal[data-has-rail="false"] .nse-app-topbar-metal-main {
-  background:
-    var(--nse-metal-header-curve-l) left top / auto 100% no-repeat,
-    var(--nse-metal-header-curve-r) right top / auto 100% no-repeat,
-    var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+  border-top-left-radius: var(--nse-metal-corner);
+  background: var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+  box-shadow: var(--nse-metal-rim-left), var(--nse-metal-rim-right), var(--nse-metal-rim-crest);
 }
 
 .nse-app-topbar-metal-grain {
@@ -809,11 +847,9 @@
   }
 
   .nse-app-topbar-metal[data-has-rail="true"] .nse-app-topbar-metal-main {
-    box-shadow: none;
-    background:
-      var(--nse-metal-header-curve-l) left top / auto 100% no-repeat,
-      var(--nse-metal-header-curve-r) right top / auto 100% no-repeat,
-      var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+    border-top-left-radius: var(--nse-metal-corner);
+    box-shadow: var(--nse-metal-rim-left), var(--nse-metal-rim-right), var(--nse-metal-rim-crest);
+    background: var(--nse-metal-header-mid) left top / auto 100% repeat-x;
   }
 }
 
@@ -1264,8 +1300,6 @@
 
 /* --- Metal footer status bar (mirror of the metal top bar) ------------------- */
 .nse-statusbar-metal {
-  --nse-metal-footer-curve-l: url("/assets/nse/chrome/metal/light/footer-curve-left.png");
-  --nse-metal-footer-curve-r: url("/assets/nse/chrome/metal/light/footer-curve-right.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/light/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/light/header-endcap-right.png");
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/light/header-middle.png");
@@ -1291,6 +1325,10 @@
   overflow: hidden;
   box-shadow: 0 -6px 11px -5px var(--nse-metal-cast-shadow);
   text-shadow: none;
+  /* Bottom corners follow the surface's real bottom radius, as the top bar's do. */
+  --nse-metal-corner: var(--nse-chrome-bottom-corner-radius, 0px);
+  border-bottom-left-radius: var(--nse-metal-corner);
+  border-bottom-right-radius: var(--nse-metal-corner);
 }
 
 .nse-statusbar-metal[data-has-rail="true"] {
@@ -1298,8 +1336,6 @@
 }
 
 .nse-statusbar-metal[data-mode="dark"] {
-  --nse-metal-footer-curve-l: url("/assets/nse/chrome/metal/dark/footer-curve-left.png");
-  --nse-metal-footer-curve-r: url("/assets/nse/chrome/metal/dark/footer-curve-right.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/dark/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/dark/header-endcap-right.png");
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/dark/header-middle.png");
@@ -1320,8 +1356,8 @@
   min-width: 0;
   height: 100%;
   padding: 0 14px;
+  border-bottom-left-radius: var(--nse-metal-corner);
   background:
-    var(--nse-metal-footer-curve-l) left bottom / auto 100% no-repeat,
     var(--nse-metal-header-endcap-r) right bottom / auto 100% no-repeat,
     var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
   box-shadow: inset -14px 0 18px -10px var(--nse-metal-content-shadow);
@@ -1336,9 +1372,9 @@
   min-width: 0;
   height: 100%;
   padding: 0 16px;
+  border-bottom-right-radius: var(--nse-metal-corner);
   background:
     var(--nse-metal-header-endcap-l) left bottom / auto 100% no-repeat,
-    var(--nse-metal-footer-curve-r) right bottom / auto 100% no-repeat,
     var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
 }
 
@@ -1347,10 +1383,8 @@
 }
 
 .nse-statusbar-metal[data-has-rail="false"] .nse-statusbar-metal-main {
-  background:
-    var(--nse-metal-footer-curve-l) left bottom / auto 100% no-repeat,
-    var(--nse-metal-footer-curve-r) right bottom / auto 100% no-repeat,
-    var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+  border-bottom-left-radius: var(--nse-metal-corner);
+  background: var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
 }
 
 .nse-statusbar-metal-grain {
@@ -1404,10 +1438,8 @@
 
   .nse-statusbar-metal[data-has-rail="true"] .nse-statusbar-metal-rail {
     box-shadow: none;
-    background:
-      var(--nse-metal-footer-curve-l) left bottom / auto 100% no-repeat,
-      var(--nse-metal-footer-curve-r) right bottom / auto 100% no-repeat,
-      var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+    border-bottom-right-radius: var(--nse-metal-corner);
+    background: var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
   }
 }
 
