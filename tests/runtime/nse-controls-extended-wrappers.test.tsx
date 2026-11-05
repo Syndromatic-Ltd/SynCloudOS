@@ -27,7 +27,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
-import { NSEButton, NSEHeader, NSEDatePicker, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEStandaloneControlHost, NSESearchField, NSEPrevNextBanner, NSEProgressSlider, NSETimePicker, NSESegmentedControl } from "../../src/NSE/public/controls";
+import { NSEButton, NSEHeader, NSEDatePicker, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEStandaloneControlHost, NSESearchField, NSEPrevNextBanner, NSETimePicker, NSESegmentedControl } from "../../src/NSE/public/controls";
 import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
@@ -62,7 +62,6 @@ describe("NSE extended wrapper controls", () => {
         <NSEPrevNextBanner onPrevious={onPrevious} onNext={onNext}>Today</NSEPrevNextBanner>
         <NSEDatePicker aria-label="Due date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 1 }} maximum={{ year: 2026, month: 6, day: 30 }} locale="en-GB"  timeZone="Europe/London" mode="text" editor="segments"/>
         <NSETimePicker aria-label="Start time" value={{ hour: 9, minute: 30, second: 0 }} minimum={{ hour: 8, minute: 0, second: 0 }} maximum={{ hour: 10, minute: 0, second: 0 }} minuteStep={15}  locale="en-GB" timeZone="Europe/London" editor="segments"/>
-        <NSEProgressSlider label="Intensity" value={32} progressLabel="Download progress" />
       </div>
     );
 
@@ -72,40 +71,12 @@ describe("NSE extended wrapper controls", () => {
     expect(screen.getByText("Today")).not.toBeNull();
     expect(screen.getByRole("group", { name: "Due date" }).getAttribute("data-locale-order")).toBe("day-month-year");
     expect(screen.getByRole("group", { name: "Start time" }).getAttribute("data-value")).toBe("09:30:00");
-    expect(screen.getByRole("progressbar", { name: "Download progress" })).not.toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "Previous" }));
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
 
     expect(onPrevious).toHaveBeenCalledTimes(1);
     expect(onNext).toHaveBeenCalledTimes(1);
-  });
-
-  it("keeps the progress slider wrapper controlled through its aliases", async () => {
-    const onSliderValueChange = vi.fn();
-    const onPositionChange = vi.fn();
-
-    renderWithAppearance(
-      <div>
-        <NSEProgressSlider
-          label="Volume"
-          position={10}
-          minimum={0}
-          maximum={100}
-          snap={5}
-          lockBar
-          onValueChange={onSliderValueChange}
-          onPositionChange={onPositionChange}
-          progressLabel="Volume progress"
-        />
-      </div>
-    );
-
-    fireEvent.change(screen.getByRole("slider", { name: "Volume" }), { target: { value: "35" } });
-
-    await waitFor(() => expect(onSliderValueChange).toHaveBeenCalledWith(35));
-    expect(onPositionChange).toHaveBeenCalledWith(35);
-    expect(screen.getByRole("progressbar", { name: "Volume progress" }).getAttribute("aria-valuemax")).toBe("100");
   });
 
   it("maps date and time pickers to controlled NSE picker values", async () => {
@@ -220,18 +191,6 @@ describe("NSE extended wrapper controls", () => {
 
     expect(screen.getByRole("button", { name: "Day 18" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /^Year / })).toBeNull();
-  });
-
-  it("renders the ProgressSlider altBar as a secondary fill behind the primary bar", () => {
-    // ProgressSlider altBarPosition: a secondary (buffer) fill drawn behind the
-    // primary bar. Primary = barPosition.
-    const { container } = renderWithAppearance(
-      <NSEProgressSlider value={20} barPosition={40} altBarPosition={72} progressLabel="Buffer" />
-    );
-    const bar = container.querySelector(".nse-extended-progress-slider-bar") as HTMLElement;
-    expect(bar.style.getPropertyValue("--nse-control-progress").trim()).toBe("40%");
-    expect(bar.style.getPropertyValue("--nse-control-progress-alt").trim()).toBe("72%");
-    expect(container.querySelector(".nse-control-progress-alt")).not.toBeNull();
   });
 
   it("renders NSEImageView with the source image and zoom controls", () => {

@@ -106,7 +106,7 @@ Focused entries include `NSEDrawer`, `NSEToaster`, `NSESlidingPanes` and `NSESta
 | `NSEStepper` | Increment and decrement, with hold to repeat, bounds and wrapping. |
 | `NSELevelIndicator` | Continuous, discrete, capacity and rating indicators with warning and critical thresholds. |
 | `NSESegmentedControl` | Momentary, select-one and select-any segments in the rounded, capsule and textured styles, with overflow handling. One-of-many choices and tab strips are segmented controls. |
-| `NSEProgressBar`, `NSEProgressSlider`, `NSEProgressItem` | Determinate progress, with an optional secondary fill. |
+| `NSEProgressBar`, `NSEProgressItem` | Determinate progress, with an optional secondary fill. |
 | `NSEProgressIndicator`, `NSESpinner` | Indeterminate activity. |
 
 ## Date, time and colour
