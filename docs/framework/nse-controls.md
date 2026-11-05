@@ -75,6 +75,7 @@ The tables below give an overview. These pages document each component's props, 
 | [Buttons](nse/buttons.md) | Push, icon, toggle, tool, activity, notification, progress and file picker buttons |
 | [Text fields and choice controls](nse/text-and-choice.md) | Text, password, secure, search, combo and token fields, checkboxes, radio groups, boxes |
 | [Values, pickers and progress](nse/values-and-progress.md) | Sliders, steppers, level indicators, segmented controls, pickers, progress |
+| [Menus, toolbars and inspectors](nse/menus-toolbars-and-inspectors.md) | Choosing a menu control, responder provenance, configured toolbars, narrow inspectors, keep-mounted panes |
 
 Focused entries include `NSEPicker`, `NSEDrawer`, `NSEToaster`, `NSEList`, `NSESlidingPanes` and `NSEStandaloneControlHost` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, `NSEPage` in `nse/page` and `NSECoverFlow` in `nse/cover-flow`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
 
