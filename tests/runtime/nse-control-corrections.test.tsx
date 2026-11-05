@@ -26,7 +26,6 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  NSEGrabHandle,
   NSEListSelector,
   NSEMenu,
   NSEScrollingImage,
@@ -61,35 +60,6 @@ describe("NSEMenu sub-item disclosure", () => {
     expect(indicator).not.toBeNull();
     // The old implementation injected a literal "›" text node; the sprite version has no text content.
     expect(indicator?.textContent).toBe("");
-  });
-});
-
-describe("NSEGrabHandle drag behaviour", () => {
-  it("is a presentational span with no drag handlers", () => {
-    const { container } = render(<NSEGrabHandle />);
-    const handle = container.querySelector(".nse-control-grab-handle");
-    expect(handle?.tagName).toBe("SPAN");
-    expect(handle?.getAttribute("role")).toBe("img");
-  });
-
-  it("becomes a draggable button and reports the drag delta", () => {
-    const onDragStart = vi.fn();
-    const onDragMove = vi.fn();
-    const onDragEnd = vi.fn();
-    const { container } = render(
-      <NSEGrabHandle onDragStart={onDragStart} onDragMove={onDragMove} onDragEnd={onDragEnd} />
-    );
-    const handle = container.querySelector(".nse-control-grab-handle") as HTMLButtonElement;
-    expect(handle.tagName).toBe("BUTTON");
-    expect(handle.classList.contains("nse-control-grab-handle-draggable")).toBe(true);
-
-    fireEvent.pointerDown(handle, { pointerId: 1, clientX: 10, clientY: 10 });
-    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 25, clientY: 18 });
-    fireEvent.pointerUp(handle, { pointerId: 1, clientX: 25, clientY: 18 });
-
-    expect(onDragStart).toHaveBeenCalledTimes(1);
-    expect(onDragMove).toHaveBeenCalledWith({ dx: 15, dy: 8 }, expect.anything());
-    expect(onDragEnd).toHaveBeenCalledTimes(1);
   });
 });
 

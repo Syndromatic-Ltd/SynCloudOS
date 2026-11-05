@@ -839,7 +839,7 @@
    both columns rather than a 0.77 wash.
 
    Only the tone changes. The geometry, the states and the markup are still the
-   standard NSEPushButton, and deleting this rule returns the placard to the
+   standard NSEButton, and deleting this rule returns the placard to the
    system light tone. The black stroke ring is already right — measured 0.426
    and 0.432 against the tone's 0.44 — so it is left alone.
 
@@ -855,7 +855,7 @@
 
 /* The button's spinner, left the colour it was drawn.
 
-   NSEPushButton picks the opposite spinner tone to its own — a light button
+   The sign-in button shows the opposite spinner tone to its own — a light button
    asks for `data-tone="dark"` so the sprite stays legible — and the skin builds
    that tone out of the light one with `invert(1) ... brightness(0.72)`. On a
    button face that runs 178..234 the inversion lands somewhere near black, and

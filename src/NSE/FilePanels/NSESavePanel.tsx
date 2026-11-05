@@ -24,7 +24,7 @@ import type { FilePanelDocumentSaveBinding, FilePanelDocumentSaveResult, FilePan
 import { saveFilePanelTarget } from "../../SynCloudOS/nseRuntimeContracts";
 import { NSEFilePanelView, type NSEFilePanelWindowBridge } from "./NSEFilePanelView";
 import type { NSEFilePanelService } from "./NSEOpenPanel";
-import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 
 export interface NSESavePanelProps {
   readonly id: string;
@@ -175,8 +175,15 @@ export function NSESavePanel({
     >
       <p className="nse-file-panel-prompt" data-nse-part="prompt">Save <strong className="nse-file-panel-suggested-name" data-nse-part="suggested-name">{request.suggestedName}</strong> to a destination you choose.</p>
       <div className="nse-file-panel-actions">
-        <NSEPushButton tone="light" data-nse-part="cancel" onClick={() => dismiss(false, "programmatic")}>Cancel</NSEPushButton>
-        <NSEPushButton tone="affirmative" data-nse-part="choose" data-nse-initial-focus="" data-appearance-recipe="file-panel.choose" onClick={() => void choose()}>Choose destination</NSEPushButton>
+        <NSEButton appearance="aqua" title="Cancel" data-nse-part="cancel" onClick={() => dismiss(false, "programmatic")} />
+        <NSEButton
+          keyEquivalent={"\r"}
+          title="Choose destination"
+          data-nse-part="choose"
+          data-nse-initial-focus=""
+          data-appearance-recipe="file-panel.choose"
+          onClick={() => void choose()}
+        />
       </div>
     </NSEFilePanelView>
   );

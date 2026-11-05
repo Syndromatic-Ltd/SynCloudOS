@@ -22,9 +22,9 @@
 import React, { useMemo, useState } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSECheckbox, NSERadioGroup, NSETextField } from "../../../src/NSE/Controls/Fields/NSEFields";
+import { NSERadioGroup, NSETextField } from "../../../src/NSE/Controls/Fields/NSEFields";
 import { NSEControlRuntimeProvider, useNSEControlCommand } from "../../../src/NSE/Controls/Core";
-import { NSEPushButton } from "../../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
 
 afterEach(cleanup);
 
@@ -193,7 +193,14 @@ describe("NSE control contracts", () => {
     render(
       <NSEControlRuntimeProvider port={port}>
         <NSETextField label="Command title" defaultValue="Base" command={{ id: "title.set", payload: "Base" }} onValueChange={changes} />
-        <NSECheckbox label="Command checkbox" defaultChecked={false} command={{ id: "flag.set", payload: true }} onCheckedChange={checkboxChanges} />
+        <NSEButton
+          buttonType="switch"
+          title="Command checkbox"
+          defaultState="off"
+          onStateChange={(state) => checkboxChanges(state === "on")}
+          action="flag.set"
+          actionPayload={true}
+        />
         <NSERadioGroup
           label="Command radio"
           defaultValue="first"
@@ -331,14 +338,12 @@ describe("NSE control contracts", () => {
     expect(screen.getByRole("textbox", { name: "Regular" }).closest("label")?.getAttribute("data-size")).toBe("regular");
   });
 
-  it("sizes the push button as NSControl does: regular, small, or an explicit band height", () => {
-    render(<><NSEPushButton>Regular</NSEPushButton><NSEPushButton controlSize="small">Small</NSEPushButton><NSEPushButton height={32} style={{ marginTop: 4 }}>Custom</NSEPushButton></>);
+  it("sizes the push button as NSControl does: regular or small", () => {
+    render(<><NSEButton title="Regular" /><NSEButton title="Small" controlSize="small" style={{ marginTop: 4 }} /></>);
     expect(screen.getByRole("button", { name: "Regular" }).hasAttribute("data-size")).toBe(false);
-    expect(screen.getByRole("button", { name: "Small" }).getAttribute("data-size")).toBe("small");
-    const custom = screen.getByRole("button", { name: "Custom" });
-    expect(custom.getAttribute("data-size")).toBe("custom");
-    expect(custom.style.getPropertyValue("--nse-control-height")).toBe("32px");
-    expect(custom.style.marginTop).toBe("4px");
+    const small = screen.getByRole("button", { name: "Small" });
+    expect(small.getAttribute("data-size")).toBe("small");
+    expect(small.style.marginTop).toBe("4px");
   });
 
   it("validates and dispatches through the injected command authority", async () => {

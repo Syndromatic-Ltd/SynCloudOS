@@ -23,7 +23,7 @@ import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 
 import { compilePredicateExpression, PREDICATE_OPERATOR_OPTIONS, normalisePredicateOperator } from "./predicateTemplates";
 import { dataViewAllowsNavigation, dataViewIsBusy, dataViewPresentsContent } from "../Core";
 import { NSEChoiceControl } from "./NSEChoiceControl";
-import { NSEPushButton } from "../../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
 import type { NSEPredicateOperatorOption, NSEPredicateTemplate, NSERuleEditorProps, NSERuleEditorValue, NSERuleRow } from "./ruleEditorTypes";
 import "./nse-rule-editor.css";
@@ -195,25 +195,59 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
       <div className="nse-rule-header">
         <NSEChoiceControl label={`Match ${row.id}`} labelHidden value={row.operator} disabled={locked} options={matchOptions} onChange={(operator) => publishChildren(replaceAtPath(root.children, path, { ...row, operator: operator as "all" | "any" | "none" }))} />
         <span className="nse-rule-phrase" aria-hidden="true">of the following are true</span>
-        <NSEPushButton tone="light" className="nse-rule-remove" aria-label={`Remove group ${row.id}`} disabled={locked} onClick={() => { repairFocus(rows, index, parentPath); publishChildren(replaceAtPath(root.children, path, null)); }}>−</NSEPushButton>
+        <NSEButton
+          appearance="aqua"
+          title="−"
+          isEnabled={!locked}
+          className="nse-rule-remove"
+          aria-label={`Remove group ${row.id}`}
+          onClick={() => { repairFocus(rows, index, parentPath); publishChildren(replaceAtPath(root.children, path, null)); }}
+        />
       </div>
       <div className="nse-rule-rows">{renderRows(row.children, path)}</div>
       <div className="nse-rule-footer">
-        <NSEPushButton tone="light" aria-label={`Add rule to ${row.id}`} disabled={locked || fields.length === 0} onClick={() => addRule(path)}>Add Rule</NSEPushButton>
-        <NSEPushButton tone="light" aria-label={`Add group to ${row.id}`} disabled={locked} onClick={() => addGroup(path)}>Add Group</NSEPushButton>
+        <NSEButton
+          appearance="aqua"
+          title="Add Rule"
+          isEnabled={!(locked || fields.length === 0)}
+          aria-label={`Add rule to ${row.id}`}
+          onClick={() => addRule(path)}
+        />
+        <NSEButton
+          appearance="aqua"
+          title="Add Group"
+          isEnabled={!locked}
+          aria-label={`Add group to ${row.id}`}
+          onClick={() => addGroup(path)}
+        />
       </div>
     </fieldset>;
     const label = parentPath.length === 0 ? String(index + 1) : row.id;
     if (row.kind === "constant") return <div key={row.id} role="group" aria-label={`Rule ${label}`} tabIndex={-1} data-rule-id={row.id} className="nse-rule-row">
       <NSEChoiceControl label={`Constant ${label}`} labelHidden value={String(row.value)} disabled={locked} options={[{ id: "true", label: "Always true" }, { id: "false", label: "Always false" }]} onChange={(next) => publishChildren(replaceAtPath(root.children, path, { ...row, value: next === "true" }))} />
-      <NSEPushButton tone="light" className="nse-rule-remove" aria-label="Remove rule" disabled={locked} onClick={() => { repairFocus(rows, index, parentPath); publishChildren(replaceAtPath(root.children, path, null)); }}>−</NSEPushButton>
+      <NSEButton
+        appearance="aqua"
+        title="−"
+        isEnabled={!locked}
+        className="nse-rule-remove"
+        aria-label="Remove rule"
+        onClick={() => { repairFocus(rows, index, parentPath); publishChildren(replaceAtPath(root.children, path, null)); }}
+      />
     </div>;
     return <div key={row.id} role="group" aria-label={`Rule ${label}`} tabIndex={-1} data-rule-id={row.id} className="nse-rule-row" data-appearance-recipe="rule-row" data-alternating={index % 2 === 1 || undefined} onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
       if (event.altKey && event.key === "ArrowUp") { event.preventDefault(); move(parentPath, index, -1); }
       else if (event.altKey && event.key === "ArrowDown") { event.preventDefault(); move(parentPath, index, 1); }
     }}>
       <RuleComparisonControls row={row} label={label} fields={fields} operators={operators} templates={templates} locale={locale} readOnly={effectiveReadOnly} disabled={effectiveDisabled} onChange={(next) => publishChildren(replaceAtPath(root.children, path, next))} />
-      <NSEPushButton tone="light" className="nse-rule-remove" aria-label="Remove rule" data-appearance-recipe="rule-remove" disabled={locked} onClick={() => { repairFocus(rows, index, parentPath); publishChildren(replaceAtPath(root.children, path, null)); }}>−</NSEPushButton>
+      <NSEButton
+        appearance="aqua"
+        title="−"
+        isEnabled={!locked}
+        className="nse-rule-remove"
+        aria-label="Remove rule"
+        data-appearance-recipe="rule-remove"
+        onClick={() => { repairFocus(rows, index, parentPath); publishChildren(replaceAtPath(root.children, path, null)); }}
+      />
     </div>;
   });
   return <div {...props} aria-disabled={hostDisabled || undefined} aria-busy={dataViewIsBusy(effectiveState) || undefined} ref={containerRef} tabIndex={-1} data-rule-id={root.id} className={`nse-rule-editor ${className}`.trim()} data-nse-control="rule-editor" data-state={effectiveState.kind}>
@@ -226,12 +260,19 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
       </div>
       <div role="group" aria-label="Rule rows" className="nse-rule-rows">{renderRows(root.children)}</div>
       <div className="nse-rule-footer">
-        <NSEPushButton tone="light" aria-label="Add rule" data-appearance-recipe="rule-add" disabled={locked || fields.length === 0} onClick={() => addRule([])}>Add Rule</NSEPushButton>
-        <NSEPushButton tone="light" aria-label="Add group" disabled={locked} onClick={() => addGroup([])}>Add Group</NSEPushButton>
+        <NSEButton
+          appearance="aqua"
+          title="Add Rule"
+          isEnabled={!(locked || fields.length === 0)}
+          aria-label="Add rule"
+          data-appearance-recipe="rule-add"
+          onClick={() => addRule([])}
+        />
+        <NSEButton appearance="aqua" title="Add Group" isEnabled={!locked} aria-label="Add group" onClick={() => addGroup([])} />
       </div>
     </>}
     {effectiveState.kind !== "ready" && <span role="status">{effectiveState.message}</span>}
-    {(effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEPushButton tone="light" onClick={effectiveState.retry}>Retry</NSEPushButton>}
-    {effectiveState.kind === "interrupted" && effectiveState.resume && <NSEPushButton tone="light" onClick={effectiveState.resume}>Resume</NSEPushButton>}
+    {(effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEButton appearance="aqua" title="Retry" onClick={effectiveState.retry} />}
+    {effectiveState.kind === "interrupted" && effectiveState.resume && <NSEButton appearance="aqua" title="Resume" onClick={effectiveState.resume} />}
   </div>;
 }

@@ -6,7 +6,7 @@ import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { observable } from "../../src/NSE/Objects";
-import { NSEPushButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEPicker } from "../../src/NSE/Menus/NSEPicker";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { action, useAction } from "../../src/SynCloudOS/AppSDK/actions";
@@ -73,7 +73,7 @@ it("revokes a disposed controller's actions immediately and removes its managed 
 it("automatically revalidates window actions when application observable state changes", async () => {
   let application!: Application;
   class MainWindow extends NSEWindowController<Application> {
-    static override view = () => <NSEPushButton action="write">Write</NSEPushButton>;
+    static override view = () => <NSEButton title="Write" action="write" />;
     @action write() {}
     validateWrite() { return !this.app.readOnly; }
   }
@@ -102,7 +102,7 @@ it("revalidates action buttons and useAction after a parent registers commands i
       execute() { return undefined; },
     }]);
     const ping = useAction("ping");
-    return <><NSEPushButton action="ping">Ping button</NSEPushButton><button disabled={!ping.enabled} onClick={() => { void ping.perform(); }}>Ping hook</button></>;
+    return <><NSEButton title="Ping button" action="ping" /><button disabled={!ping.enabled} onClick={() => { void ping.perform(); }}>Ping hook</button></>;
   }
   class Panel extends NSEViewController {
     static override view = View;
@@ -134,8 +134,8 @@ it("revalidates sibling actions after an observable snapshot becomes available w
     const exportSnapshot = useAction("exportSnapshot");
     return <>
       <output>{panel.snapshot ? "Snapshot ready" : "No snapshot"}</output>
-      <NSEPushButton action="refreshSnapshot">Refresh snapshot</NSEPushButton>
-      <NSEPushButton action="exportSnapshot">Export snapshot</NSEPushButton>
+      <NSEButton title="Refresh snapshot" action="refreshSnapshot" />
+      <NSEButton title="Export snapshot" action="exportSnapshot" />
       <button disabled={!exportSnapshot.enabled} onClick={() => { void exportSnapshot.perform(); }}>Export hook</button>
     </>;
   }
@@ -176,7 +176,7 @@ it("inherits class-controller ancestry for root and child actions inside a modal
   const dismissals: string[] = [];
   const calls: string[] = [];
   class Editor extends NSEViewController {
-    static override view = () => <><input aria-label="Collection name" /><NSEPushButton action="saveCollection">Save collection</NSEPushButton></>;
+    static override view = () => <><input aria-label="Collection name" /><NSEButton title="Save collection" action="saveCollection" /></>;
     @action saveCollection() { calls.push("editor.save"); }
   }
   class Panel extends NSEViewController {
@@ -184,7 +184,7 @@ it("inherits class-controller ancestry for root and child actions inside a modal
     static override view = ({ controller }: { readonly controller: Panel }) => <>
       <p>Library</p>
       <NSEPopup defaultOpen modal title="Collection tools" onOpenChange={(_open, reason) => { dismissals.push(reason); }}>
-        <NSEPushButton action="chooseCollection">Choose collection</NSEPushButton>
+        <NSEButton title="Choose collection" action="chooseCollection" />
         <NSEViewControllerView controller={controller.editor} />
       </NSEPopup>
     </>;

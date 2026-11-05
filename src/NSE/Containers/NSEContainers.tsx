@@ -43,7 +43,7 @@ import { NSEActionSheet, useOptionalNSEOverlayProvider, type NSEActionSheetProps
 import { DialogTitleInContent, usePresentedDialogContent } from "../Overlays/presentedDialogContent";
 import "../Navigation/SourceList/nse-sourcelist.css";
 import { NSEDivider } from "../Controls/Selection/NSEDivider";
-import { NSEPushButton, type NSEButtonTone } from "../Controls/Buttons/NSEButtons";
+import { NSEButton, nseButtonToneProps, type NSEButtonTone } from "../Controls/Buttons/NSEButton";
 import {
   getOptionalNSESmoothSurfaceProps,
   type NSESmoothSurfaceRequest,
@@ -472,9 +472,7 @@ export function NSEDrawer({
         actions={(
           <>
             {actions}
-            <NSEPushButton className="nse-container-drawer-close" tone="light" onClick={() => setOpen(false)}>
-              {closeLabel}
-            </NSEPushButton>
+            <NSEButton appearance="aqua" title={closeLabel} className="nse-container-drawer-close" onClick={() => setOpen(false)} />
           </>
         )}
         footer={footer}
@@ -673,17 +671,17 @@ export function NSESlidingView({
       {controls ? (
         <div className="nse-container-sliding-view-controls" role="tablist" aria-label={controlLabel}>
           {views.map((view) => (
-            <NSEPushButton
+            <NSEButton
+              appearance="aqua"
+              buttonType="pushOnPushOff"
+              title={view.label}
+              state={(view.key === currentKey) ? "on" : "off"}
+              isEnabled={!view.disabled}
               key={view.key}
               role="tab"
-              tone="light"
-              selected={view.key === currentKey}
               aria-selected={view.key === currentKey}
-              disabled={view.disabled}
               onClick={() => setCurrentKey(view.key)}
-            >
-              {view.label}
-            </NSEPushButton>
+            />
           ))}
         </div>
       ) : null}
@@ -1047,8 +1045,8 @@ export function NSEConfirmPrompt({
 
   const actions = (
     <>
-      <NSEPushButton tone={cancelTone} onClick={cancel}>{cancelLabel}</NSEPushButton>
-      <NSEPushButton tone={confirmTone} onClick={confirm}>{confirmLabel}</NSEPushButton>
+      <NSEButton title={cancelLabel} {...nseButtonToneProps(cancelTone)} onClick={cancel} />
+      <NSEButton title={confirmLabel} {...nseButtonToneProps(confirmTone)} onClick={confirm} />
     </>
   );
 
@@ -1109,9 +1107,7 @@ export function NSEToaster({
             <span>{toast.message}</span>
           </span>
           {toast.action ? (
-            <NSEPushButton tone={toast.action.tone ?? "dark"} onClick={toast.action.onPress}>
-              {toast.action.label}
-            </NSEPushButton>
+            <NSEButton title={toast.action.label} {...nseButtonToneProps(toast.action.tone ?? "dark")} onClick={toast.action.onPress} />
           ) : null}
           {onDismiss ? (
             <button

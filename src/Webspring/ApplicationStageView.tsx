@@ -35,10 +35,7 @@ import {
   NSEWindowSurfaceBridgeProvider,
   useNSEDeferredDisposal,
 } from "../NSE/NSE";
-import {
-  NSEToolButton,
-  NSETopBar,
-} from "@syndromatic/syncloudos/nse/controls";
+import { NSEButton, NSETopBar } from "@syndromatic/syncloudos/nse/controls";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
@@ -276,11 +273,13 @@ export function ApplicationStageView({
       }]}
       leading={activeNavigationChrome?.back ? (
         <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
-          <NSEToolButton
+          <NSEButton
+            bezelStyle="texturedRounded"
+            title={activeNavigationChrome.back.label}
+            image={ApplicationNavigationBackArrow}
+            imagePosition="imageOnly"
             className="webspring-application-navigation-back"
             data-nse-application-navigation-back="true"
-            icon={ApplicationNavigationBackArrow}
-            label={activeNavigationChrome.back.label}
             onClick={activeNavigationChrome.back.onActivate}
           />
         </NavigationChromeSlot>

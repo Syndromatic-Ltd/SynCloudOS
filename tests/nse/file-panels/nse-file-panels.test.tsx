@@ -24,7 +24,6 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { NSEOpenPanel, NSESavePanel, type NSEFilePanelService } from "../../../src/NSE/FilePanels";
-import { NSEFilePickerButton } from "../../../src/NSE/FilePanels/NSEFilePickerButton";
 import { createBrowserFilePanelAdapter, createFilePanelService, FilePanelReferenceError } from "../../../src/SynCloudOS/FilePanels";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
@@ -358,30 +357,6 @@ describe("NSE file panels", () => {
     fireEvent.click(screen.getByRole("button", { name: "Choose destination" }));
     await waitFor(() => expect(repeatedSave).toHaveBeenCalledTimes(2));
     expect(repeatedSave.mock.calls[1]![0]).not.toHaveProperty("existingTarget");
-  });
-
-  it("adapts the legacy file picker button through NSEOpenPanel only when a typed overlay binding is supplied", async () => {
-    const fileService = service();
-    const bridge = { open: vi.fn(), close: vi.fn() };
-    render(
-      <OverlayHarness>
-        <NSEFilePickerButton
-          label="Choose legacy image"
-          openPanel={{
-            id: "legacy-open-image",
-            parentResponderId: "window:editor",
-            parentWindowControllerId: "window:editor",
-            service: fileService,
-            windowBridge: bridge,
-            request: { id: "legacy-open-image", accepts: [], selection: "single-file", access: "read", requires: [] },
-          }}
-        />
-      </OverlayHarness>,
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Choose legacy image" }));
-    expect(await screen.findByRole("dialog", { name: "Open files" })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Choose files" }));
-    await waitFor(() => expect(fileService.open).toHaveBeenCalled());
   });
 
   it("surfaces an injected service failure without leaving the panel request pending", async () => {

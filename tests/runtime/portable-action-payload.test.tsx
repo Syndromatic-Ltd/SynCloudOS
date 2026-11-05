@@ -4,7 +4,7 @@ import { act, fireEvent, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
-import { NSEPushButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { action, useAction } from "../../src/SynCloudOS/AppSDK/actions";
 import { createAppSCOS } from "../../src/SynCloudOS/AppSDK/scos/scosFacade";
 import { createSynWareTestHost } from "../../src/SynCloudOS/AppSDK/testing/createSynWareTestHost";
@@ -39,7 +39,7 @@ async function mountPayloadApp(cases: readonly PayloadCase[] = [], withControl =
       {cases.map(entry => <button key={entry.label} onClick={() => {
         pending = receive.perform(entry.payload());
       }}>{entry.label}</button>)}
-      {withControl && <NSEPushButton action="receive" actionPayload={controlPayload}>Receive control</NSEPushButton>}
+      {withControl && <NSEButton title="Receive control" action="receive" actionPayload={controlPayload} />}
     </>;
   }
   class MainWindow extends NSEWindowController { static override view = View; }

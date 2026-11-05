@@ -22,7 +22,7 @@ import { forwardRef, useId, useRef, useState, type HTMLAttributes, type ReactNod
 import { useOptionalNSEControlRuntimePort } from "../Controls/Core/useNSEControlCommand";
 import type { NSEControlRuntimePort } from "../Controls/Core/controlTypes";
 import { classes } from "../Controls/Core/nseControlsShared";
-import { NSEPushButton, type NSEPushButtonProps } from "../Controls/Buttons/NSEButtons";
+import { NSEButton, nseButtonToneProps, type NSEButtonProps, type NSEButtonTone } from "../Controls/Buttons/NSEButton";
 import { NSEListItem } from "../Controls/Selection/NSEListItem";
 import { NSEPopup, type NSEPopupProps } from "../Overlays";
 import { NSEAppMenuSurface } from "./NSEAppMenuSurface";
@@ -215,7 +215,8 @@ export function NSEEditMenu({
   );
 }
 
-export interface NSEHelpMenuProps extends Omit<NSEPushButtonProps, "children"> {
+export interface NSEHelpMenuProps extends Omit<NSEButtonProps, "title"> {
+  tone?: NSEButtonTone;
   caption?: ReactNode;
   target?: string;
   onOpenHelp?: (target: string) => void;
@@ -236,10 +237,12 @@ export const NSEHelpMenu = forwardRef<HTMLButtonElement, NSEHelpMenuProps>(funct
   ref
 ) {
   return (
-    <NSEPushButton
+    <NSEButton
+      title={children ?? caption}
+      {...props}
+      {...nseButtonToneProps(tone)}
       ref={ref}
       className={classes("nse-extended-help-menu", className)}
-      tone={tone}
       onClick={(event) => {
         onClick?.(event);
         if (event.defaultPrevented || !target) return;
@@ -249,9 +252,6 @@ export const NSEHelpMenu = forwardRef<HTMLButtonElement, NSEHelpMenuProps>(funct
         }
         window.open(target, "_blank", "noopener,noreferrer");
       }}
-      {...props}
-    >
-      {children ?? caption}
-    </NSEPushButton>
+    />
   );
 });

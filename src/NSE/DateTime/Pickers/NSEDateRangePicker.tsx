@@ -26,7 +26,7 @@ import { formatPlainDate, parsePlainDate, plainDatePlaceholder, plainDateToday }
 import type { NSECalendarMonth, NSEDateRange } from "../dateTimeTypes";
 import type { NSEDateRangePickerProps } from "./datePickerTypes";
 import { createPickerTransaction, reducePickerTransaction } from "./pickerTransaction";
-import { NSEPushButton } from "../../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
 import { civilToEpochDay } from "../calendarArithmetic";
 
@@ -170,11 +170,28 @@ export function NSEDateRangePicker({ value, defaultValue = null, onValueChange, 
     {overlay ? <button ref={triggerRef} type="button" aria-label={`Choose ${props["aria-label"].toLowerCase()} dates`} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={props.disabled || props.readOnly} onClick={openCalendar} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openCalendar(); } }} onKeyUp={(event) => { if (event.key === " ") event.preventDefault(); }}><span id={valueId} data-nse-part="value" data-placeholder={current ? undefined : "true"}>{current ? displayRange(current, props.locale) : `${plainDatePlaceholder(props.locale)} – ${plainDatePlaceholder(props.locale)}`}</span></button> : <>
       {fields}
       <span data-nse-part="actions">
-        <NSEPushButton tone="affirmative" aria-label={`Apply ${props["aria-label"].toLowerCase()}`} disabled={props.disabled || props.readOnly} onClick={commitText}>Apply</NSEPushButton>
-        <NSEPushButton tone="light" aria-label={`Cancel ${props["aria-label"].toLowerCase()}`} disabled={props.disabled} onClick={cancel}>Cancel</NSEPushButton>
+        <NSEButton
+          keyEquivalent={"\r"}
+          title="Apply"
+          isEnabled={!(props.disabled || props.readOnly)}
+          aria-label={`Apply ${props["aria-label"].toLowerCase()}`}
+          onClick={commitText}
+        />
+        <NSEButton
+          appearance="aqua"
+          title="Cancel"
+          isEnabled={!props.disabled}
+          aria-label={`Cancel ${props["aria-label"].toLowerCase()}`}
+          onClick={cancel}
+        />
       </span>
     </>}
-    {overlay ? <NSEPopover id={`date-range-picker-${instanceId}`} open={open} anchor={triggerRef.current} parentWindowControllerId="date-range-picker-window" parentResponderId={props.parentResponderId} presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next) cancel(); }}><section data-nse-part="calendar-sheet"><h2 id={titleId} className="nse-control-visually-hidden">{props["aria-label"]} calendar</h2>{fields}{calendar}{invalid ? <span role="alert">Enter a valid date range.</span> : null}<div data-nse-part="actions"><NSEPushButton tone="affirmative" disabled={!draft || invalid || props.disabled || props.readOnly} onClick={applyCalendar}>Apply</NSEPushButton><NSEPushButton tone="light" onClick={cancel}>Cancel</NSEPushButton></div></section></NSEPopover> : null}
+    {overlay ? <NSEPopover id={`date-range-picker-${instanceId}`} open={open} anchor={triggerRef.current} parentWindowControllerId="date-range-picker-window" parentResponderId={props.parentResponderId} presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next) cancel(); }}><section data-nse-part="calendar-sheet"><h2 id={titleId} className="nse-control-visually-hidden">{props["aria-label"]} calendar</h2>{fields}{calendar}{invalid ? <span role="alert">Enter a valid date range.</span> : null}<div data-nse-part="actions"><NSEButton
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   keyEquivalent={"\r"}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title="Apply"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   isEnabled={!(!draft || invalid || props.disabled || props.readOnly)}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   onClick={applyCalendar}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 /><NSEButton appearance="aqua" title="Cancel" onClick={cancel} /></div></section></NSEPopover> : null}
     {props.name ? <input type="hidden" name={props.name} value={serialise(current)} /> : null}
     {invalid && !open ? <span role="alert">Enter a valid date range.</span> : null}
   </section>;

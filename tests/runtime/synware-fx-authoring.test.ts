@@ -119,7 +119,7 @@ it("does no device work on render and shows explicit action failures rather than
   const definition = load(join(app, "Contents/index.tsx"), {
     "react": { useState: () => ["Ready", (value: unknown) => states.push(value)] }, "react/jsx-runtime": jsx,
     "@syndromatic/syncloudos": { SCOS: { app: { id: "example", title: "Example" } }, useVideo: () => ({capabilities:{camera:true},requestCamera}) },
-    "@syndromatic/syncloudos/nse": { NSEStackView: "div", NSEStackItem: "div" }, "@syndromatic/syncloudos/nse/controls": { NSEPushButton: "button" }, "@syndromatic/syncloudos/nse/styles.css": {},
+    "@syndromatic/syncloudos/nse": { NSEStackView: "div", NSEStackItem: "div" }, "@syndromatic/syncloudos/nse/controls": { NSEButton: "button" }, "@syndromatic/syncloudos/nse/styles.css": {},
   }).default;
   const tree = definition();
   expect(requestCamera).not.toHaveBeenCalled();

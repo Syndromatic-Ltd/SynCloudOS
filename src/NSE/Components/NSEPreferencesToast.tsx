@@ -30,7 +30,7 @@ import {
 import { NSEListItem } from "../Controls/Selection/NSEListItem";
 import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
 import { NSEPageHeader } from "../Windows/Chrome/NSEPageHeader";
-import { NSEToolButton } from "../Controls/Buttons/NSEButtonFamilies";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
 
 /**
@@ -294,10 +294,12 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                 <NSEPresence initial={false}>
                   {active ? (
                     <BackSlot key="back">
-                      <NSEToolButton
+                      <NSEButton
+                        bezelStyle="texturedRounded"
+                        title={backLabel}
+                        image={BackArrow}
+                        imagePosition="imageOnly"
                         className="nse-prefs-back"
-                        icon={BackArrow}
-                        label={backLabel}
                         onClick={() => goToPane(null)}
                       />
                     </BackSlot>

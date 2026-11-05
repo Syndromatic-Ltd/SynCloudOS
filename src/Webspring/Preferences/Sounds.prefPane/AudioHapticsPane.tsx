@@ -20,7 +20,7 @@
 
 import "./audioHapticsPane.css";
 import { useSyncExternalStore } from "react";
-import { NSEGroupBox, NSESlider, NSEToggleButton } from "../../../NSE/public/controls";
+import { NSESwitch, NSEGroupBox, NSESlider } from "../../../NSE/public/controls";
 import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
 import { useNSEFeedback } from "../../../NSE/hostComposition";
 import { useKernelSynCloudOS, useRuntimeSelector } from "../../../SynCloudOSReact";
@@ -47,8 +47,12 @@ export function AudioHapticsPane() {
   );
   return <div className="nse-prefs-section">
     <NSEGroupBox label={systemT("preferences.audio", "Audio")}>
-      <NSEListItem tapHighlight={false} trailing={<NSEToggleButton thumbMaterial="metal" checked={settings.soundEnabled}
-        onCheckedChange={(value) => runtime.settings.set("soundEnabled", value)} aria-label={systemT("preferences.audioEnabled", "Audio enabled")} />}>
+      <NSEListItem tapHighlight={false} trailing={<NSESwitch
+                                                    state={settings.soundEnabled ? "on" : "off"}
+                                                    onStateChange={(state) => runtime.settings.set("soundEnabled", (state === "on"))}
+                                                    thumbMaterial="metal"
+                                                    aria-label={systemT("preferences.audioEnabled", "Audio enabled")}
+                                                  />}>
         {systemT("preferences.audioEnabled", "Audio enabled")}
       </NSEListItem>
       <NSEListItem tapHighlight={false}>
@@ -64,8 +68,12 @@ export function AudioHapticsPane() {
       })}
     </NSEGroupBox> : null}
     {supportsHaptics ? <NSEGroupBox label={systemT("preferences.haptics", "Haptics")}>
-      <NSEListItem tapHighlight={false} trailing={<NSEToggleButton thumbMaterial="metal" checked={settings.vibrationEnabled}
-        onCheckedChange={(value) => runtime.settings.set("vibrationEnabled", value)} aria-label={systemT("preferences.hapticsEnabled", "Haptics enabled")} />}>
+      <NSEListItem tapHighlight={false} trailing={<NSESwitch
+                                                    state={settings.vibrationEnabled ? "on" : "off"}
+                                                    onStateChange={(state) => runtime.settings.set("vibrationEnabled", (state === "on"))}
+                                                    thumbMaterial="metal"
+                                                    aria-label={systemT("preferences.hapticsEnabled", "Haptics enabled")}
+                                                  />}>
         {systemT("preferences.hapticsEnabled", "Haptics enabled")}
       </NSEListItem>
     </NSEGroupBox> : null}

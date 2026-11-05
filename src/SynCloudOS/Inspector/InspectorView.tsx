@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { NSEPane, NSEPushButton, NSEInputBox } from "../../NSE/public/inspector-controls";
+import { NSEButton, NSEPane, NSEInputBox } from "../../NSE/public/inspector-controls";
 import { translateSynWareText } from "../AppSDK/useStrings";
 import type { InspectorLocalization } from "./inspectorLocalization";
 import "./inspector.css";
@@ -79,8 +79,14 @@ export function InspectorView({ client, localization, pageSize = 25 }: { readonl
   return <NSEPane as="section" variant="inspector" title={title} aria-label={title} className="syncloudos-inspector" lang={locale?.locale} dir={locale?.direction}>
     <p role="status">{t("inspector.capture.summary", "Capture {status}. {retained} notices retained; {dropped} dropped; {skipped} skipped while paused.", { status: valueLabel("capture", snapshot.capture.status), retained: snapshot.capture.retained, dropped: snapshot.capture.dropped, skipped: snapshot.capture.skipped })}</p>
     <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-      <NSEPushButton onClick={capture}>{snapshot.capture.status === "paused" ? t("inspector.capture.resume", "Resume capture") : t("inspector.capture.pause", "Pause capture")}</NSEPushButton>
-      <NSEPushButton onClick={() => { try { setContent(client.exportSnapshot(snapshot).content); } catch { setSnapshot(null); setContent(""); } }}>{t("inspector.export", "Export sanitized snapshot")}</NSEPushButton>
+      <NSEButton
+        title={snapshot.capture.status === "paused" ? t("inspector.capture.resume", "Resume capture") : t("inspector.capture.pause", "Pause capture")}
+        onClick={capture}
+      />
+      <NSEButton
+        title={t("inspector.export", "Export sanitized snapshot")}
+        onClick={() => { try { setContent(client.exportSnapshot(snapshot).content); } catch { setSnapshot(null); setContent(""); } }}
+      />
     </div>
     <nav ref={navigation} aria-label={t("inspector.views", "Inspector views")} className="syncloudos-inspector__navigation" onKeyDown={event => {
       const buttons = Array.from(navigation.current?.querySelectorAll("button") ?? []);
@@ -91,13 +97,20 @@ export function InspectorView({ client, localization, pageSize = 25 }: { readonl
       const next = event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1 : event.key === forward ? (index + 1) % buttons.length : event.key === backward ? (index + buttons.length - 1) % buttons.length : -1;
       if (next >= 0) { event.preventDefault(); buttons[next]?.focus(); }
     }}>
-      {inspectorPanels.map(id => <NSEPushButton key={id} selected={panel === id} aria-pressed={panel === id} onClick={() => select(id)}>{valueLabel("panels", id)}</NSEPushButton>)}
+      {inspectorPanels.map(id => <NSEButton
+                                   buttonType="pushOnPushOff"
+                                   title={valueLabel("panels", id)}
+                                   state={(panel === id) ? "on" : "off"}
+                                   key={id}
+                                   aria-pressed={panel === id}
+                                   onClick={() => select(id)}
+                                 />)}
     </nav>
     <h3>{valueLabel("panels", panel)}</h3>
     {section.status === "unsupported" && <p>{t("inspector.unsupported", "Unsupported by this owner. No introspection is available.")}</p>}
     {section.status === "unavailable" && <p role="alert">{t("inspector.unavailable", "The owner could not provide inspection data.")}</p>}
     {missing && <p role="status">{t("inspector.missing", "Owner record is not available in retained inspection data.")}</p>}
-    {selected && <NSEPushButton onClick={() => { setSelected(null); setMissing(false); }}>{t("inspector.showAll", "Show all records")}</NSEPushButton>}
+    {selected && <NSEButton title={t("inspector.showAll", "Show all records")} onClick={() => { setSelected(null); setMissing(false); }} />}
     <p>{t("inspector.records", "{count} records; {omitted} historical records omitted.", { count: matching.length, omitted: section.omittedHistory })}</p>
     {rows.map((row, index) => <article key={`${row.id}:${index}`} tabIndex={-1} aria-label={`${valueLabel("kind", row.kind)} ${row.id}`} ref={index === 0 ? focused : undefined} className="syncloudos-inspector__record">
       <NSEPane as="div" variant="surface">
@@ -109,12 +122,24 @@ export function InspectorView({ client, localization, pageSize = 25 }: { readonl
         {row.queryCount !== undefined && <><dt>{t("inspector.query", "Redacted query fields")}</dt><dd>{row.queryCount}</dd></>}
       </dl>
       {row.pendingRoles.length > 0 && <p>{t("inspector.awaiting", "Awaiting: {roles}", { roles: row.pendingRoles.map(role => valueLabel("role", role)).join(", ") })}</p>}
-      <div className="syncloudos-inspector__actions">{row.links.map(link => <NSEPushButton key={`${link.relation}:${link.id}`} onClick={() => follow(link)}>{valueLabel("relation", link.relation)}: {link.id}</NSEPushButton>)}</div>
+      <div className="syncloudos-inspector__actions">{row.links.map(link => <NSEButton
+                                                                              title={<>{valueLabel("relation", link.relation)}: {link.id}</>}
+                                                                              key={`${link.relation}:${link.id}`}
+                                                                              onClick={() => follow(link)}
+                                                                            />)}</div>
       </NSEPane>
     </article>)}
     <div style={{ display: "flex", gap: "0.5rem" }}>
-      <NSEPushButton disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - size))}>{t("inspector.previousPage", "Previous page")}</NSEPushButton>
-      <NSEPushButton disabled={offset + size >= matching.length} onClick={() => setOffset(offset + size)}>{t("inspector.nextPage", "Next page")}</NSEPushButton>
+      <NSEButton
+        title={t("inspector.previousPage", "Previous page")}
+        isEnabled={!(offset === 0)}
+        onClick={() => setOffset(Math.max(0, offset - size))}
+      />
+      <NSEButton
+        title={t("inspector.nextPage", "Next page")}
+        isEnabled={!(offset + size >= matching.length)}
+        onClick={() => setOffset(offset + size)}
+      />
     </div>
     {content && <NSEInputBox><label className="syncloudos-inspector__export">{t("inspector.snapshotJSON", "Sanitized snapshot JSON")}<textarea readOnly value={content} /></label></NSEInputBox>}
   </NSEPane>;

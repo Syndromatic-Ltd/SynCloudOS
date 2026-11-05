@@ -27,38 +27,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
-import {
-  NSEActivityButton,
-  NSENotificationButton,
-  NSEAppMenu,
-  NSEButtonHeader,
-  NSEEditMenu,
-  NSEHeader,
-  NSEHelpMenu,
-  NSEIntegerPicker,
-  NSEDatePicker,
-  NSEListSelector,
-  NSECroppableImage,
-  NSEImageView,
-  NSERotatingImage,
-  type NSERotatingImageHandle,
-  NSEMenu,
-  NSEStandaloneControlHost,
-  NSEInputBox,
-  NSEPasswordField,
-  NSEPickerGroup,
-  NSESearchField,
-  NSEPopupList,
-  NSEPrevNextBanner,
-  NSEProgressSlider,
-  NSERadioToolButtonGroup,
-  NSERoundedInput,
-  NSETabGroup,
-  NSETimePicker,
-  NSEToolButton,
-  NSEToolButtonGroup,
-  NSEToolInput
-} from "../../src/NSE/public/controls";
+import { NSEButton, NSEAppMenu, NSEEditMenu, NSEHeader, NSEHelpMenu, NSEIntegerPicker, NSEDatePicker, NSEListSelector, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEMenu, NSEStandaloneControlHost, NSEInputBox, NSEPasswordField, NSEPickerGroup, NSESearchField, NSEPopupList, NSEPrevNextBanner, NSEProgressSlider, NSERadioToolButtonGroup, NSERoundedInput, NSETabGroup, NSETimePicker, NSEToolButtonGroup, NSEToolInput } from "../../src/NSE/public/controls";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 afterEach(() => {
@@ -87,12 +56,9 @@ describe("NSE extended wrapper controls", () => {
 
     renderWithAppearance(
       <div>
-        <NSEActivityButton active caption="Sync" />
-        <NSENotificationButton variant="negative" label="Dismiss" />
-        <NSEButtonHeader content="Actions" />
-        <NSEToolButton label="Back" icon="/icons/back.png" />
+        <NSEButton bezelStyle="texturedRounded" title="Back" image="/icons/back.png" imagePosition="imageOnly" />
         <NSEToolButtonGroup label="Tools">
-          <NSEToolButton label="Refresh" showLabel>Refresh</NSEToolButton>
+          <NSEButton bezelStyle="texturedRounded" title="Refresh" aria-label="Refresh" />
         </NSEToolButtonGroup>
         <NSERadioToolButtonGroup
           label="Calendar view"
@@ -113,7 +79,7 @@ describe("NSE extended wrapper controls", () => {
         <NSEPasswordField label="Secret" hint="Password" />
         <NSERoundedInput label="Name" hint="Full name" />
         <NSEToolInput label="Filter" hint="Filter items" />
-        <NSEHeader title="Header" actions={<NSEToolButton label="Info">Info</NSEToolButton>} />
+        <NSEHeader title="Header" actions={<NSEButton bezelStyle="texturedRounded" title="Info" aria-label="Info" />} />
         <NSEPrevNextBanner onPrevious={onPrevious} onNext={onNext}>Today</NSEPrevNextBanner>
         <NSEListSelector label="Provider" value="one" items={["One", "Two"]} />
         <NSEPopupList label="Popup actions" items={["Archive", "Pin"]} />
@@ -134,9 +100,6 @@ describe("NSE extended wrapper controls", () => {
       </div>
     );
 
-    expect(screen.getByRole("button", { name: /sync/i }).getAttribute("data-active")).toBe("true");
-    expect(screen.getByRole("button", { name: "Dismiss" }).getAttribute("data-variant")).toBe("negative");
-    expect(screen.getByRole("button", { name: "Actions" }).classList.contains("nse-extended-button-header")).toBe(true);
     expect(screen.getByRole("toolbar", { name: "Tools" }).classList.contains("nse-extended-tool-button-group")).toBe(true);
     expect(screen.getByRole("radio", { name: "Day" }).getAttribute("aria-checked")).toBe("true");
     expect(screen.getByRole("tab", { name: "Files" }).getAttribute("aria-selected")).toBe("true");
@@ -327,21 +290,25 @@ describe("NSE extended wrapper controls", () => {
     await waitFor(() => expect(onSelect).toHaveBeenCalledWith("export"));
   });
 
-  it("maps NotificationButton variants onto the button tone vocabulary", () => {
-    // Notification buttons: default = medium, alternate = dark, affirmative = green, negative = red.
+  it("draws the default, destructive and appearance buttons with the theme's art for each", () => {
     renderWithAppearance(
       <div>
-        <NSENotificationButton variant="default" label="Default note" />
-        <NSENotificationButton variant="alternate" label="Alternate note" />
-        <NSENotificationButton variant="affirmative" label="Affirm note" />
-        <NSENotificationButton variant="negative" label="Negative note" />
+        <NSEButton title="Plain" />
+        <NSEButton title="Light" appearance="aqua" />
+        <NSEButton title="Dark" appearance="darkAqua" />
+        <NSEButton title="Save" keyEquivalent={"\r"} />
+        <NSEButton title="Delete" hasDestructiveAction />
+        <NSEButton title="Tool" bezelStyle="texturedRounded" />
       </div>
     );
 
-    expect(screen.getByRole("button", { name: "Default note" }).getAttribute("data-tone")).toBe("medium");
-    expect(screen.getByRole("button", { name: "Alternate note" }).getAttribute("data-tone")).toBe("dark");
-    expect(screen.getByRole("button", { name: "Affirm note" }).getAttribute("data-tone")).toBe("affirmative");
-    expect(screen.getByRole("button", { name: "Negative note" }).getAttribute("data-tone")).toBe("negative");
+    expect(screen.getByRole("button", { name: "Plain" }).getAttribute("data-tone")).toBe("medium");
+    expect(screen.getByRole("button", { name: "Light" }).getAttribute("data-tone")).toBe("light");
+    expect(screen.getByRole("button", { name: "Dark" }).getAttribute("data-tone")).toBe("dark");
+    expect(screen.getByRole("button", { name: "Save" }).getAttribute("data-tone")).toBe("affirmative");
+    expect(screen.getByRole("button", { name: "Save" }).getAttribute("data-key-equivalent")).toBe("default");
+    expect(screen.getByRole("button", { name: "Delete" }).getAttribute("data-tone")).toBe("negative");
+    expect(screen.getByRole("button", { name: "Tool" }).getAttribute("data-tone")).toBe("dark");
   });
 
   it("renders a 12-hour TimePicker with an AM/PM field when is24HrMode is false", () => {

@@ -21,8 +21,8 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { GFXColour } from "../../FX/GraphicsFX/public";
 import { useNSEColourPanelContextCarrier, useOptionalNSEColourPanelController, useOptionalNSEColourPanelResponderId } from "../Colour/ColourPanel/NSEColourPanelProvider";
-import { NSEToolButton, NSEToolButtonGroup } from "../Controls/Buttons/NSEButtonFamilies";
-import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
+import { NSEToolButtonGroup } from "../Controls/Buttons/NSEButtonFamilies";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSETextField } from "../Controls/Fields/NSEFields";
 import { NSESearchField } from "../Controls/Fields/NSESearchField";
 import { NSECircularSlider } from "../Controls/Values/NSECircularSlider";
@@ -254,14 +254,16 @@ function EffectColourButton({ id, label, glyph, value, automatic, disabled, onPr
   const shown = preview ?? value;
   // The Colours panel places itself beside the element bearing its target's
   // id, and presents only once it finds it.
-  return <NSEToolButton
-    id={id}
-    label={label}
-    title={controller ? label : `${label}: this app has no colour panel`}
-    disabled={disabled || !controller}
-    data-nse-part="effect-colour"
-    icon={<span data-nse-part="effect-colour-face">{glyph}<span ref={chipRef} data-nse-part="colour-chip" data-automatic={shown ? undefined : automatic} style={shown ? { "--nse-font-panel-chip": shown.toCSS() } as CSSProperties : undefined} /></span>}
-    onClick={() => {
+  return <NSEButton
+           bezelStyle="texturedRounded"
+           title={label}
+           image={<span data-nse-part="effect-colour-face">{glyph}<span ref={chipRef} data-nse-part="colour-chip" data-automatic={shown ? undefined : automatic} style={shown ? { "--nse-font-panel-chip": shown.toCSS() } as CSSProperties : undefined} /></span>}
+           imagePosition="imageOnly"
+           isEnabled={!(disabled || !controller)}
+           toolTip={controller ? label : `${label}: this app has no colour panel`}
+           id={id}
+           data-nse-part="effect-colour"
+           onClick={() => {
       if (!controller) return;
       releaseRef.current?.();
       releaseRef.current = controller.activateTarget({
@@ -276,7 +278,7 @@ function EffectColourButton({ id, label, glyph, value, automatic, disabled, onPr
       });
       controller.open();
     }}
-  />;
+         />;
 }
 
 /**
@@ -551,19 +553,49 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
 
       {showsEffects ? <div role="toolbar" aria-label="Text effects" data-nse-part="effects">
         <NSEToolButtonGroup controlSize="small" label="Lines">
-          <NSEToolButton label="Underline" icon={<UnderlineGlyph />} selected={underline} aria-pressed={underline} disabled={effectsDisabled} onClick={() => { const next = !underline; setUnderline(next); applyAttributes({ underline: next }); }} />
-          <NSEToolButton label="Strikethrough" icon={<StrikethroughGlyph />} selected={strike} aria-pressed={strike} disabled={effectsDisabled} onClick={() => { const next = !strike; setStrike(next); applyAttributes({ strike: next }); }} />
+          <NSEButton
+            bezelStyle="texturedRounded"
+            buttonType="pushOnPushOff"
+            title="Underline"
+            image={<UnderlineGlyph />}
+            imagePosition="imageOnly"
+            state={underline ? "on" : "off"}
+            isEnabled={!effectsDisabled}
+            aria-pressed={underline}
+            onClick={() => { const next = !underline; setUnderline(next); applyAttributes({ underline: next }); }}
+          />
+          <NSEButton
+            bezelStyle="texturedRounded"
+            buttonType="pushOnPushOff"
+            title="Strikethrough"
+            image={<StrikethroughGlyph />}
+            imagePosition="imageOnly"
+            state={strike ? "on" : "off"}
+            isEnabled={!effectsDisabled}
+            aria-pressed={strike}
+            onClick={() => { const next = !strike; setStrike(next); applyAttributes({ strike: next }); }}
+          />
         </NSEToolButtonGroup>
         <NSEToolButtonGroup controlSize="small" label="Colours">
           <EffectColourButton id={`font-panel-${instanceId}-text-colour`} label="Text colour" glyph={<TextColourGlyph />} value={textColour} automatic="ink" disabled={effectsDisabled} onPreview={(colour) => setColourPreview((current) => ({ ...current, text: colour }))} onCommit={(colour) => { setTextColour(colour); applyAttributes({ foregroundColour: colour.toHex({ includeAlpha: colour.components.a < 1 }) }); }} />
           <EffectColourButton id={`font-panel-${instanceId}-document-colour`} label="Document colour" glyph={<DocumentColourGlyph />} value={documentColour} automatic="ground" disabled={effectsDisabled} onPreview={(colour) => setColourPreview((current) => ({ ...current, document: colour }))} onCommit={(colour) => { setDocumentColour(colour); applyAttributes({ documentColour: colour.toHex({ includeAlpha: colour.components.a < 1 }) }); }} />
         </NSEToolButtonGroup>
         <NSEToolButtonGroup controlSize="small" label="Shadow">
-          <NSEToolButton label="Text shadow" icon={<ShadowGlyph />} selected={shadow.enabled} aria-pressed={shadow.enabled} disabled={effectsDisabled} onClick={() => {
+          <NSEButton
+            bezelStyle="texturedRounded"
+            buttonType="pushOnPushOff"
+            title="Text shadow"
+            image={<ShadowGlyph />}
+            imagePosition="imageOnly"
+            state={shadow.enabled ? "on" : "off"}
+            isEnabled={!effectsDisabled}
+            aria-pressed={shadow.enabled}
+            onClick={() => {
             const next = { ...shadow, enabled: !shadow.enabled };
             setShadow(next);
             applyAttributes(shadowPayload(next));
-          }} />
+          }}
+          />
         </NSEToolButtonGroup>
         <NSESlider controlSize="mini" length={36} aria-label="Shadow opacity" value={shadow.opacity} minimum={0} maximum={100} step={1} disabled={effectsDisabled || !shadow.enabled} tooltip={(value) => `Opacity ${value}%`} onValueChange={(value, phase) => changeShadow({ opacity: value }, phase)} />
         <NSESlider controlSize="mini" length={36} aria-label="Shadow blur" value={shadow.blur} minimum={0} maximum={20} step={1} disabled={effectsDisabled || !shadow.enabled} tooltip={(value) => `Blur ${value}`} onValueChange={(value, phase) => changeShadow({ blur: value }, phase)} />
@@ -597,8 +629,22 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
 
       <div data-nse-part="footer">
         <NSEToolButtonGroup controlSize="small" label="Add or remove fonts">
-          <NSEToolButton label="Add fonts" icon={<PlusGlyph />} disabled={readOnly || !library?.canAddFonts} onClick={() => fileInputRef.current?.click()} />
-          <NSEToolButton label={removable === "favourite" ? "Remove from Favourites" : "Remove font"} icon={<MinusGlyph />} disabled={removable === null} onClick={() => { void remove(); }} />
+          <NSEButton
+            bezelStyle="texturedRounded"
+            title="Add fonts"
+            image={<PlusGlyph />}
+            imagePosition="imageOnly"
+            isEnabled={!(readOnly || !library?.canAddFonts)}
+            onClick={() => fileInputRef.current?.click()}
+          />
+          <NSEButton
+            bezelStyle="texturedRounded"
+            title={removable === "favourite" ? "Remove from Favourites" : "Remove font"}
+            image={<MinusGlyph />}
+            imagePosition="imageOnly"
+            isEnabled={!(removable === null)}
+            onClick={() => { void remove(); }}
+          />
         </NSEToolButtonGroup>
         <FontActionsMenu fallbackParentResponderId={parentResponderId} items={menuItems} onSelect={(value) => {
           if (value === "favourite" && library) { if (isFavourite) library.removeFavourite(fontId); else library.addFavourite(fontId); }
@@ -618,7 +664,18 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
       {showsRuler ? <fieldset data-nse-part="paragraph" disabled={readOnly}>
         <legend className="nse-control-visually-hidden">Paragraph</legend>
         <NSEToolbar composition="children" position="inline" grouped aria-label="Paragraph alignment" aria-disabled={readOnly || undefined}>
-          {alignmentLabels.map(([alignment, text]) => <NSEPushButton key={alignment} tone="dark" selected={style.alignment === alignment} disabled={readOnly} aria-label={text} title={text.replace(" paragraph", "")} aria-pressed={style.alignment === alignment} onClick={() => updateParagraph(normaliseParagraphStyleMutation({ ...style, alignment }))}><AlignmentGlyph alignment={alignment} /></NSEPushButton>)}
+          {alignmentLabels.map(([alignment, text]) => <NSEButton
+                                                        appearance="darkAqua"
+                                                        buttonType="pushOnPushOff"
+                                                        title={<AlignmentGlyph alignment={alignment} />}
+                                                        state={(style.alignment === alignment) ? "on" : "off"}
+                                                        isEnabled={!readOnly}
+                                                        toolTip={text.replace(" paragraph", "")}
+                                                        key={alignment}
+                                                        aria-label={text}
+                                                        aria-pressed={style.alignment === alignment}
+                                                        onClick={() => updateParagraph(normaliseParagraphStyleMutation({ ...style, alignment }))}
+                                                      />)}
         </NSEToolbar>
         <NSERuler value={style} direction={direction} readOnly={readOnly} onChange={updateParagraph} />
       </fieldset> : null}

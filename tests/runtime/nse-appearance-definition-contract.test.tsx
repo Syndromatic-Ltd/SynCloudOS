@@ -25,7 +25,7 @@ import React, { type PropsWithChildren } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as appearanceModule from "../../src/NSE/public/appearance";
-import { NSEPushButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEOverlayProvider } from "../../src/NSE/Overlays";
 import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
@@ -260,7 +260,7 @@ describe("NSE appearance definition boundary", () => {
 
     const { rerender } = render(
       <Provider {...providerProps} appearance={firstDefinition}>
-        <NSEPushButton onClick={onClick}>Continue</NSEPushButton>
+        <NSEButton title="Continue" onClick={onClick} />
       </Provider>,
     );
 
@@ -275,7 +275,7 @@ describe("NSE appearance definition boundary", () => {
 
     rerender(
       <Provider {...providerProps} appearance={secondDefinition}>
-        <NSEPushButton onClick={onClick}>Continue</NSEPushButton>
+        <NSEButton title="Continue" onClick={onClick} />
       </Provider>,
     );
 

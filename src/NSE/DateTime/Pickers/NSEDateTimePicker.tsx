@@ -30,7 +30,7 @@ import { serializePlainDate } from "./NSEDatePicker";
 import { serializePlainTime } from "./NSETimePicker";
 import { createPickerTransaction, reducePickerTransaction } from "./pickerTransaction";
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
-import { NSEPushButton } from "../../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../Controls/Buttons/NSEButton";
 
 const emptyValue = (timeZone: string): NSEDateTimePickerValue => ({
   date: plainDateToday(timeZone),
@@ -216,9 +216,28 @@ export function NSEDateTimePicker({ value, defaultValue = null, mode = "combined
       <NSEChoiceControl label="Disambiguation" accessibleLabel={`${props["aria-label"]} disambiguation`} value={editorValue.disambiguation} disabled={props.disabled || props.readOnly} options={[{ id: "earlier", label: "Earlier" }, { id: "later", label: "Later" }, { id: "reject", label: "Reject" }]} onChange={(disambiguation) => preview({ ...editorValue, disambiguation: disambiguation as NSEDateTimePickerValue["disambiguation"] })} />
     </> : null}
     <div data-nse-part="actions">
-      <NSEPushButton ref={mode === "automatic" ? undefined : triggerRef} tone="affirmative" aria-label={`Apply ${props["aria-label"].toLowerCase()}`} disabled={props.disabled || props.readOnly || (props.required && !draft)} onClick={() => { if (applyEditor()) queueMicrotask(() => triggerRef.current?.focus({ preventScroll: true })); }}>Apply</NSEPushButton>
-      <NSEPushButton tone="light" aria-label={`Clear ${props["aria-label"].toLowerCase()}`} disabled={props.disabled || props.readOnly || props.required} onClick={clear}>Clear</NSEPushButton>
-      <NSEPushButton tone="light" aria-label={`Cancel ${props["aria-label"].toLowerCase()}`} disabled={props.disabled} onClick={cancel}>Cancel</NSEPushButton>
+      <NSEButton
+        keyEquivalent={"\r"}
+        title="Apply"
+        isEnabled={!(props.disabled || props.readOnly || (props.required && !draft))}
+        ref={mode === "automatic" ? undefined : triggerRef}
+        aria-label={`Apply ${props["aria-label"].toLowerCase()}`}
+        onClick={() => { if (applyEditor()) queueMicrotask(() => triggerRef.current?.focus({ preventScroll: true })); }}
+      />
+      <NSEButton
+        appearance="aqua"
+        title="Clear"
+        isEnabled={!(props.disabled || props.readOnly || props.required)}
+        aria-label={`Clear ${props["aria-label"].toLowerCase()}`}
+        onClick={clear}
+      />
+      <NSEButton
+        appearance="aqua"
+        title="Cancel"
+        isEnabled={!props.disabled}
+        aria-label={`Cancel ${props["aria-label"].toLowerCase()}`}
+        onClick={cancel}
+      />
     </div>
     {error ? <span role="alert">{error}</span> : null}
   </section>;

@@ -373,154 +373,51 @@ export function NSEInputBox({
   );
 }
 
-interface NSECheckboxPropsBase extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  "type" | "checked" | "defaultChecked" | "onChange"
-> {
-  label: ReactNode;
-  /** Native form submission value; defaults to the browser's normal "on" value. */
-  submissionValue?: string;
-  state?: NSECheckboxState;
-  defaultState?: NSECheckboxState;
-  mixed?: boolean;
-  command?: NSEControlCommandBinding<void>;
-  validation?: NSEControlValidation;
-  onStateChange?(state: NSECheckboxState, phase: "commit"): void;
-  /** Existing native callback kept as a narrow compatibility entry point. */
-  onCheckedChange?(checked: boolean): void;
-  selectionHaptic?: HFXFeedbackRequest;
-}
-
-/**
- * `state`/`defaultState` model the complete native checkbox state machine. The
- * legacy checked props remain deliberately narrow compatibility aliases.
- */
-export interface NSECheckboxProps extends NSECheckboxPropsBase {
-  checked?: boolean;
-  defaultChecked?: boolean;
-  onChange?: InputHTMLAttributes<HTMLInputElement>["onChange"];
-}
-
-export function NSECheckbox(props: NSEBoundValueProps<NSECheckboxState, NSECheckboxProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'state' | 'defaultState' | 'checked' | 'defaultChecked' | 'onStateChange' | 'onCheckedChange' | 'onChange'>) {
-  return <NSECheckboxControl {...useNSEValueBinding<NSECheckboxState, NSECheckboxProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'state' | 'defaultState' | 'checked' | 'defaultChecked' | 'onStateChange' | 'onCheckedChange' | 'onChange'>(props, {value:'state',change:'onStateChange',excludes:['checked','defaultChecked','defaultState','onCheckedChange','onChange'],fallback:false,mixedValue:'mixed'})} />;
-}
-
-function NSECheckboxControl({
-  label,
-  state,
-  defaultState,
-  checked,
-  defaultChecked,
-  mixed,
-  submissionValue,
-  command: commandBinding,
-  validation,
-  onStateChange,
-  onCheckedChange,
-  selectionHaptic = "selection",
-  className = "",
-  id,
-  disabled,
-  readOnly,
-  onChange,
-  ...props
-}: NSECheckboxProps) {
-  const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
-
-  const generatedId = useId();
-  const inputId = id ?? generatedId;
-  const inputRef = useRef<HTMLInputElement>(null);
-  const defaultCheckboxState = defaultState ?? (defaultChecked ?? false);
-  const currentState = useNSEControlValue<NSECheckboxState>({
-    value: state ?? (mixed ? "mixed" : checked),
-    defaultValue: defaultCheckboxState,
-    fallback: false,
-    disabled,
-    readOnly,
-    required: props.required,
-    validation,
-    onValueChange(nextState, phase) {
-      if (phase !== "commit") return;
-      onStateChange?.(nextState, "commit");
-      if (typeof nextState === "boolean") onCheckedChange?.(nextState);
-    },
-  });
-  const command = useNSEControlCommand(commandBinding);
-  const restoreMixedAfterReset = useCallback(() => {
-    if (inputRef.current) inputRef.current.indeterminate = defaultCheckboxState === "mixed";
-  }, [defaultCheckboxState]);
-  useNSEControlFormReset(inputRef, currentState.reset, restoreMixedAfterReset);
-
-  useLayoutEffect(() => {
-    if (inputRef.current) inputRef.current.indeterminate = currentState.value === "mixed";
-  }, [currentState.value]);
-
-  const invalid = validation?.kind === "invalid";
-  const errorId = `${inputId}-error`;
-  const describedBy = [props["aria-describedby"], invalid ? errorId : undefined].filter(Boolean).join(" ") || undefined;
-
-  return (
-    <>
-      <label
-        className={classes("nse-control-checkbox", disabled && "is-disabled", className)}
-        htmlFor={inputId}
-        data-state={currentState.value === "mixed" ? "mixed" : currentState.value ? "checked" : "unchecked"}
-        data-disabled={disabled ? "true" : "false"}
-      >
-        <span className="nse-control-checkbox-control">
-          <input
-          {...props}
-          ref={inputRef}
-          id={inputId}
-          type="checkbox"
-          disabled={disabled}
-          readOnly={readOnly}
-          checked={currentState.value === true}
-          value={submissionValue}
-          aria-checked={currentState.value === "mixed" ? "mixed" : currentState.value}
-          aria-invalid={invalid || undefined}
-          aria-describedby={describedBy}
-          onClick={(event) => {
-            if (readOnly) event.preventDefault();
-          }}
-          onChange={(event) => {
-            onChange?.(event);
-            if (readOnly || disabled) return;
-            const nextState = event.currentTarget.checked;
-            triggerNSEControlHapticForEvent(selectionHaptic, event, !disabled);
-            void (async () => {
-              if (commandBinding) {
-                const result = await command.dispatch();
-                if (result?.status !== "executed") return;
-              }
-              currentState.change(nextState, "commit");
-            })();
-          }}
-          />
-          <span className="nse-control-checkbox-art" aria-hidden="true" />
-        </span>
-        <span className="nse-control-checkbox-label">{label}</span>
-      </label>
-      {invalid ? <span id={errorId} className="nse-control-field-error" role="alert">{validation.message}</span> : null}
-    </>
-  );
-}
-
-export interface NSEToggleButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onChange" | "defaultChecked"> {
+export interface NSESwitchProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onChange" | "defaultChecked" | "disabled" | "title"> {
+  /** The theme's thumb: the standard glass thumb or brushed metal. */
   thumbMaterial?: NSEThumbMaterial;
-  checked?: boolean;
-  defaultChecked?: boolean;
-  onCheckedChange?: (checked: boolean) => void;
+  /** NSSwitch.state. */
+  state?: "on" | "off";
+  defaultState?: "on" | "off";
+  /** Called with the new state after the user flips the switch. */
+  onStateChange?: (state: "on" | "off") => void;
+  /** NSControl.isEnabled. Defaults to true. */
+  isEnabled?: boolean;
+  /** NSView.toolTip. */
+  toolTip?: string;
+  /** The words the track shows on each side. */
   onLabel?: string;
   offLabel?: string;
   selectionHaptic?: HFXFeedbackRequest;
 }
 
-export function NSEToggleButton(props: NSEBoundValueProps<boolean, NSEToggleButtonProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'checked' | 'defaultChecked' | 'onCheckedChange' | 'onClick'>) {
-  return <NSEToggleButtonControl {...useNSEValueBinding<boolean, NSEToggleButtonProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager' | 'checked' | 'defaultChecked' | 'onCheckedChange' | 'onClick'>(props, {value:'checked',change:'onCheckedChange',excludes:['defaultChecked','onClick'],fallback:false})} />;
+type NSESwitchControlProps = Omit<NSESwitchProps, "state" | "defaultState" | "onStateChange"> & {
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+};
+
+/** NSSwitch: an on/off switch. Bound through Cocoa Bindings' `value`, it reads and writes a Boolean. */
+export function NSESwitch(props: NSEBoundValueProps<boolean, NSESwitchProps, 'state' | 'defaultState' | 'onStateChange'>) {
+  const bound = useNSEValueBinding<boolean, NSESwitchControlProps & { binding?: unknown }, 'checked' | 'onCheckedChange'>(
+    toSwitchControlProps(props) as never,
+    { value: 'checked', change: 'onCheckedChange', excludes: ['defaultChecked'], fallback: false },
+  ) as NSESwitchControlProps & { disabled?: boolean };
+  const { disabled, ...rest } = bound;
+  return <NSESwitchControl {...rest} isEnabled={(rest.isEnabled ?? true) && !disabled} />;
 }
 
-function NSEToggleButtonControl({
+function toSwitchControlProps(props: NSESwitchProps & { binding?: unknown }): NSESwitchControlProps & { binding?: unknown } {
+  const { state, defaultState, onStateChange, ...rest } = props;
+  return {
+    ...rest,
+    ...(state !== undefined ? { checked: state === "on" } : {}),
+    ...(defaultState !== undefined ? { defaultChecked: defaultState === "on" } : {}),
+    ...(onStateChange ? { onCheckedChange: (checked: boolean) => onStateChange(checked ? "on" : "off") } : {}),
+  };
+}
+
+function NSESwitchControl({
   thumbMaterial = "standard",
   checked,
   defaultChecked,
@@ -529,13 +426,15 @@ function NSEToggleButtonControl({
   offLabel = "Off",
   selectionHaptic = "selection",
   className = "",
-  disabled,
+  isEnabled = true,
+  toolTip,
   onClick,
   onKeyDown,
   style,
   type = "button",
   ...props
-}: NSEToggleButtonProps) {
+}: NSESwitchControlProps) {
+  const disabled = !isEnabled;
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -634,6 +533,7 @@ function NSEToggleButtonControl({
       {...props}
       type={type}
       role="switch"
+      title={toolTip}
       aria-checked={isChecked}
       data-thumb-material={thumbMaterial}
       data-state={isChecked ? "on" : "off"}

@@ -5,7 +5,7 @@ import { NSETooltipProvider } from "../NSE/Tooltips";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
 import { NSEMenuController, NSEOverlayProvider, NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
-import { NSEPushButton } from "@syndromatic/syncloudos/nse/controls";
+import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 import { SynWareEntryRenderer } from "../Webspring/SynWareEntryRenderer";
 import { SystemUILayer } from "../Webspring/SystemUILayer";
 import type { SystemUIAccount } from "../Webspring/Preferences/systemAccount";
@@ -251,6 +251,6 @@ function ApplicationQuitSurface({ iconSrc, name, reopenLabel, onReopen }: {
   return <main ref={surface} className="syncloudos-application-quit" aria-labelledby={titleId}>
     <img className="syncloudos-application-quit-icon" src={iconSrc} alt="" aria-hidden="true" />
     <h1 id={titleId} className="syncloudos-application-quit-name">{name}</h1>
-    <NSEPushButton onClick={onReopen}>{reopenLabel}</NSEPushButton>
+    <NSEButton title={reopenLabel} onClick={onReopen} />
   </main>;
 }

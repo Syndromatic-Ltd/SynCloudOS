@@ -20,7 +20,7 @@
 
 import type { HTMLAttributes, ReactNode } from "react";
 import { classes } from "../../Controls/Core/nseControlsShared";
-import { NSEToolButton } from "../../Controls/Buttons/NSEButtonFamilies";
+import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSEPageHeader } from "./NSEPageHeader";
 
 export interface NSEHeaderProps extends Omit<HTMLAttributes<HTMLElement>, "content" | "title"> {
@@ -79,19 +79,21 @@ export function NSEPrevNextBanner({
 }: NSEPrevNextBannerProps) {
   return (
     <div className={classes("nse-extended-prev-next-banner", className)} {...props}>
-      <NSEToolButton
+      <NSEButton
+        bezelStyle="texturedRounded"
+        title={previousLabel}
+        isEnabled={!previousDisabled}
         className="nse-extended-prev-next-button"
         data-direction="prev"
-        label={previousLabel}
-        disabled={previousDisabled}
         onClick={() => onPrevious?.()}
       />
       <span className="nse-extended-prev-next-content">{children ?? content}</span>
-      <NSEToolButton
+      <NSEButton
+        bezelStyle="texturedRounded"
+        title={nextLabel}
+        isEnabled={!nextDisabled}
         className="nse-extended-prev-next-button"
         data-direction="next"
-        label={nextLabel}
-        disabled={nextDisabled}
         onClick={() => onNext?.()}
       />
     </div>

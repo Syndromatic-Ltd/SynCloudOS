@@ -23,7 +23,7 @@ import { NSEClockView } from "../Calendar";
 import type { NSEPlainDate, NSEPlainTime } from "../dateTimeTypes";
 import type { NSETimePickerEditorMode, NSETimePickerProps } from "./datePickerTypes";
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
-import { NSEPushButton } from "../../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSEStepper } from "../../Controls/Values/NSEStepper";
 import { NSEChoiceControl } from "../../Menus/NSEChoiceControl";
 import { NSEPopover, useOptionalNSEOverlayProvider } from "../../Overlays";
@@ -337,7 +337,13 @@ export function NSETimePicker({
   ) : current ? (
     <NSEClockView aria-label={label} locale={locale} timeZone={timeZone} date={date ?? { year: 1970, month: 1, day: 1 }} value={current} disabled={disabled || readOnly} minuteStep={minuteStep} hourCycle={hourCycle} onValueChange={change} />
   ) : (
-    <NSEPushButton tone="light" disabled={disabled || readOnly} aria-label={`Set ${label.toLowerCase()}`} onClick={() => change(minimum, "commit")}>Set time</NSEPushButton>
+    <NSEButton
+      appearance="aqua"
+      title="Set time"
+      isEnabled={!(disabled || readOnly)}
+      aria-label={`Set ${label.toLowerCase()}`}
+      onClick={() => change(minimum, "commit")}
+    />
   ));
   const appearanceState = disabled ? "disabled" : focused ? "focused" : "normal";
   const appearance = useNSEAppearanceSlot(nseAppearanceSlot("time-picker", "select", appearanceState));

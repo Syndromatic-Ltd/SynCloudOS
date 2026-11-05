@@ -2,7 +2,7 @@
 import { useId, useSyncExternalStore } from "react";
 import { NSEAlert } from "../NSE/hostComposition";
 import { NSEAlertBackdrop } from "../NSE/hostComposition";
-import { NSEPushButton } from "../NSE/public/controls";
+import { NSEButton } from "../NSE/public/controls";
 import type { SynCloudOSPresentationTraitsService } from "../SynCloudOS/SynCloudOS";
 import type { SynCloudOSAlertCenter } from "../SynCloudOS/SystemUI/alertCenter";
 import { FocusScope } from "./FocusScope";
@@ -33,10 +33,16 @@ export function SCOSAlertPresenter({ center, appearance: requestedAppearance, pr
           </div>
         </div>
         <div className="nse-alert-actions">
-          {current.buttons.map(button => <NSEPushButton key={button.id} className="nse-system-alert-action-button"
-            data-scos-alert-primary={button === primary ? "" : undefined}
-            tone={button.role === "destructive" ? "negative" : button.role === "default" ? "affirmative" : appearance === "dark" ? "medium" : "light"}
-            onClick={() => center.dismiss(current.id, button.id)}>{button.label}</NSEPushButton>)}
+          {current.buttons.map(button => <NSEButton
+                                           title={button.label}
+                                           hasDestructiveAction={button.role === "destructive"}
+                                           keyEquivalent={button.role === "default" ? "\r" : undefined}
+                                           appearance={button.role === "destructive" || button.role === "default" || appearance === "dark" ? undefined : "aqua"}
+                                           key={button.id}
+                                           className="nse-system-alert-action-button"
+                                           data-scos-alert-primary={button === primary ? "" : undefined}
+                                           onClick={() => center.dismiss(current.id, button.id)}
+                                         />)}
         </div>
       </NSEAlert>
     </NSEAlertBackdrop>

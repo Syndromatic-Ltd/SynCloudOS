@@ -7,7 +7,8 @@ import { observable } from '../../../src/NSE/Objects/observable';
 import { bind } from '../../../src/NSE/Bindings/propertyBinding';
 import { createNSEBinding } from '../../../src/NSE/Bindings/createNSEBinding';
 import { useNSEBinding } from '../../../src/NSE/Bindings/useNSEBinding';
-import { NSETextField, NSECheckbox, NSEToggleButton } from '../../../src/NSE/Controls/Fields/NSEFields';
+import { NSESwitch, NSETextField } from '../../../src/NSE/Controls/Fields/NSEFields';
+import { NSEButton } from '../../../src/NSE/Controls/Buttons/NSEButton';
 import { NSESearchField } from '../../../src/NSE/Controls/Fields/NSESearchField';
 import { NSESlider } from '../../../src/NSE/Controls/Values/NSESlider';
 import { NSEStepper } from '../../../src/NSE/Controls/Values/NSEStepper';
@@ -38,7 +39,7 @@ describe('bound controls', () => {
   });
   it('updates checkbox and toggle through the same model', async () => {
     const owner = new Values();
-    render(<><NSECheckbox label="Check" binding={bind(owner, 'checked')} /><NSEToggleButton aria-label="Toggle" binding={bind(owner, 'checked')} /></>);
+    render(<><NSEButton buttonType="switch" title="Check" binding={bind(owner, 'checked')} /><NSESwitch aria-label="Toggle" binding={bind(owner, 'checked')} /></>);
     await act(async () => fireEvent.click(screen.getByRole('checkbox')));
     expect(owner.checked).toBe(true);
     expect(screen.getByRole('switch').getAttribute('aria-checked')).toBe('true');

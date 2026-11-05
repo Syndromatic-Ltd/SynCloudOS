@@ -32,8 +32,8 @@ vi.mock("../../../src/NSE/Focus/NSEFocusPort", () => ({ NSEFocusScope: ({ childr
 vi.mock("../../../src/NSE/Components/LoadingSpinner", () => ({
   LoadingSpinner: ({ label, variant }: { label: string; variant: string }) => <span data-spinner-variant={variant}>{label}</span>,
 }));
-vi.mock("../../../src/NSE/Controls/Buttons/NSEButtons", () => ({
-  NSEPushButton: ({ children, tone: _tone, ...props }: Record<string, any>) => <button {...props}>{children}</button>,
+vi.mock("../../../src/NSE/Controls/Buttons/NSEButton", () => ({
+  NSEButton: ({ title, appearance: _appearance, isEnabled, ...props }: Record<string, any>) => <button disabled={isEnabled === false} {...props}>{title}</button>,
 }));
 vi.mock("../../../src/NSE/Chronosphere/Vortex/VortexEffect", () => ({ VortexEffect: (props: { preparedImages?: object }) => {
   useLayoutEffect(() => { host.vortexMounts.push(props); }, []);

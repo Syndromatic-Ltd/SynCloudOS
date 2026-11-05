@@ -23,7 +23,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { PredicateExpression } from "../../../SynCloudOS/Models";
 import { compilePredicateExpression, mergePredicateTemplates, PREDICATE_OPERATOR_OPTIONS, normalisePredicateOperator, ruleRowFromExpression } from "./predicateTemplates";
 import { NSERuleEditor } from "./NSERuleEditor";
-import { NSEPushButton } from "../../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
 import { NSEChoiceControl } from "./NSEChoiceControl";
 import { dataViewAllowsNavigation, dataViewIsBusy, dataViewPresentsContent } from "../Core";
@@ -120,14 +120,14 @@ export function NSEPredicateEditor<T>({ schema, templates: explicit, value, defa
     return (<div {...props} aria-disabled={hostDisabled || undefined} aria-busy={dataViewIsBusy(effectiveState) || undefined} className={`nse-predicate-editor ${className}`.trim()} data-nse-control="predicate-editor" data-expression-kind={expression.kind} data-state={effectiveState.kind}>
       {presentsContent && <NSERuleEditor aria-label="Predicate expression" value={ruleValue} fields={templates.map(({ field }) => field)} templates={templates as readonly NSEPredicateTemplate<unknown>[]} locale={locale} state={effectiveState} readOnly={effectiveReadOnly} disabled={effectiveDisabled} onChange={(next) => publish(compilePredicateExpression(next))} />}
       {!presentsContent && <span role="status">{"message" in effectiveState ? effectiveState.message : effectiveState.kind}</span>}
-      {!presentsContent && (effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEPushButton tone="light" onClick={effectiveState.retry}>Retry</NSEPushButton>}
-      {!presentsContent && effectiveState.kind === "interrupted" && effectiveState.resume && <NSEPushButton tone="light" onClick={effectiveState.resume}>Resume</NSEPushButton>}
+      {!presentsContent && (effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEButton appearance="aqua" title="Retry" onClick={effectiveState.retry} />}
+      {!presentsContent && effectiveState.kind === "interrupted" && effectiveState.resume && <NSEButton appearance="aqua" title="Resume" onClick={effectiveState.resume} />}
     </div>);
   }
   return (<div {...props} aria-disabled={hostDisabled || undefined} aria-busy={dataViewIsBusy(effectiveState) || undefined} className={`nse-predicate-editor ${className}`.trim()} data-nse-control="predicate-editor" data-expression-kind="comparison" data-state={effectiveState.kind}>
     {presentsContent && <NSEComparisonPredicateEditor expression={expression} templates={templates} publish={publish} readOnly={effectiveReadOnly} disabled={effectiveDisabled} locale={locale} />}
     {effectiveState.kind !== "ready" && <span role="status">{effectiveState.message}</span>}
-    {(effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEPushButton tone="light" onClick={effectiveState.retry}>Retry</NSEPushButton>}
-    {effectiveState.kind === "interrupted" && effectiveState.resume && <NSEPushButton tone="light" onClick={effectiveState.resume}>Resume</NSEPushButton>}
+    {(effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEButton appearance="aqua" title="Retry" onClick={effectiveState.retry} />}
+    {effectiveState.kind === "interrupted" && effectiveState.resume && <NSEButton appearance="aqua" title="Resume" onClick={effectiveState.resume} />}
   </div>);
 }
