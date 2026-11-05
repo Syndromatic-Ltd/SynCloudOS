@@ -60,7 +60,7 @@ Use `"preview"` for a live readout, and `"commit"` for anything that should be s
 | `validation` | `NSEControlValidation` | none | Your validation result. |
 | `invalid` | `boolean` | `false` | A shortcut for an invalid state with the message "This value needs attention." |
 | `command` | binding | none | See Shared behaviour. |
-| `disabled`, `readOnly`, `required`, `name`, `id` | | | As on `<input>`. `required` and other native constraints report through `onInvalid` and show the browser's message. |
+| `isEnabled`, `readOnly`, `required`, `name`, `id` | `boolean`, … | `true` for `isEnabled` | `isEnabled` is `NSControl.isEnabled`; the others are as on `<input>`. `required` and other native constraints report through `onInvalid` and show the browser's message. |
 
 Every other `<input>` attribute passes through, except `prefix`, which the frame uses.
 
@@ -132,7 +132,7 @@ A search box for incremental and submitted searches, with an affordance that cle
 | `clearLabel` | `string` | `"Clear search"` | The clear button's accessible name. |
 | `controlSize`, `height`, `width` | | `"regular"` | `"small"` is the inspector and panel size. |
 | `parentResponderId` | `string` | none | The responder that owns the recents list. |
-| `disabled`, `readOnly`, `name`, `id`, `className` | | | Standard. |
+| `isEnabled`, `readOnly`, `name`, `id`, `className` | | `true` for `isEnabled` | `isEnabled` is `NSControl.isEnabled`; the others are standard. |
 
 Enter submits and Escape clears the text, or closes the recents menu when the field is already empty. Recent searches appear when the empty field takes focus, and need an overlay host. Choosing one fills the field and submits it. While an input method is composing, the field neither queries nor submits.
 
