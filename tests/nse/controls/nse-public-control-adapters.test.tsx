@@ -24,7 +24,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { NSEDatePicker, NSEPasswordField, NSETabGroup, NSETimePicker } from "../../../src/NSE/public/controls";
+import { NSEDatePicker, NSEPasswordField, NSETimePicker } from "../../../src/NSE/public/controls";
 import { NSE, NSEDatePicker as RootDatePicker, NSESecureTextField as RootSecureTextField, NSETabView as RootTabView, NSETimePicker as RootTimePicker } from "../../../src/NSE/NSE";
 import { NSEStandaloneControlHost } from "../../../src/NSE/Overlays";
 import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
@@ -49,11 +49,6 @@ const timeRoutes = [
   ["public controls", NSETimePicker],
   ["NSE namespace/root", NSE.NSETimePicker],
   ["NSE DateTime namespace", NSE.DateTime.NSETimePicker]
-] as const;
-
-const tabRoutes = [
-  ["public controls", NSETabGroup],
-  ["NSE namespace/root", NSE.NSETabGroup]
 ] as const;
 
 const selectValues = (name: string) => Array.from(screen.getByRole("combobox", { name }).querySelectorAll("option"), (option) => option.value);
@@ -202,84 +197,10 @@ describe("canonical public control contracts", () => {
     expect(changes).toHaveBeenCalledWith("next", "commit");
   });
 
-  it("preserves controlled value-tab host, icon, caption and callback semantics without owning panels", () => {
-    const change = vi.fn();
-    const options = [{ value: "a", label: "Account", icon: <span>★</span>, caption: "Profile" }, { value: "b", label: "Billing", src: "/billing.svg", caption: "Plans" }];
-    const view = render(<NSETabGroup className="consumer-tabs" data-consumer="pages" tone="light" selectionHaptic={false} label="Pages" value="a" options={options} onValueChange={change} />);
-    expect(view.container.querySelector('.consumer-tabs[data-consumer="pages"][data-tone="light"]')).not.toBeNull();
-    expect(screen.queryByRole("tabpanel")).toBeNull();
-    expect(screen.queryByText("Profile")).toBeNull();
-    expect(view.container.querySelector('img[src="/billing.svg"]')).not.toBeNull();
-    fireEvent.click(screen.getByRole("tab", { name: "Billing" }));
-    expect(change).toHaveBeenCalledWith("b");
-    expect(screen.getByRole("tab", { name: "Account" }).getAttribute("aria-selected")).toBe("true");
-    view.rerender(<NSETabGroup label="Pages" value="b" options={options} onValueChange={change} />);
-    expect(screen.getByRole("tab", { name: "Billing" }).getAttribute("aria-selected")).toBe("true");
-  });
-
-  it("draws icon tabs named by their tooltip, or by captions beneath the icons", () => {
-    const change = vi.fn();
-    const options = [{ value: "wheel", label: "Colour Wheel", icon: <svg data-glyph="wheel" /> }, { value: "sliders", label: "Colour Sliders", icon: <svg data-glyph="sliders" /> }];
-    const view = render(<NSETabGroup label="Colour pickers" tabStyle="icons" selectionHaptic={false} value="wheel" options={options} onValueChange={change} />);
-    const list = screen.getByRole("tablist", { name: "Colour pickers" });
-    expect(list.classList.contains("nse-icon-tabs")).toBe(true);
-    expect(list.classList.contains("nse-control-toolbar")).toBe(false);
-    const sliders = screen.getByRole("tab", { name: "Colour Sliders" });
-    // Without a tooltip provider the name falls back to a title; no caption shows.
-    expect(sliders.getAttribute("title")).toBe("Colour Sliders");
-    expect(sliders.querySelector('[data-nse-part="tab-icon"] [data-glyph="sliders"]')).not.toBeNull();
-    expect(screen.queryByText("Colour Sliders")).toBeNull();
-    fireEvent.click(sliders);
-    expect(change).toHaveBeenCalledWith("sliders");
-    view.rerender(<NSETabGroup label="Colour pickers" tabStyle="icons" showsCaptions selectionHaptic={false} value="wheel" options={options} onValueChange={change} />);
-    expect(screen.getByText("Colour Sliders").getAttribute("data-nse-part")).toBe("tab-caption");
-    expect(screen.getByRole("tab", { name: "Colour Sliders" }).getAttribute("title")).toBeNull();
-  });
-
-  it.each(tabRoutes)("preserves canonical Atmo, icon, caption, and panel semantics through the %s route", (_route, TabGroup) => {
-    const { container } = render(<div data-consumer="tabs"><section id="external-panel" role="tabpanel">External panel</section><TabGroup label="Route tabs" tone="light" defaultValue="external" options={[
-      { value: "external", label: "External", icon: "/external.svg", caption: "Ignored caption" },
-      { value: "owned", caption: "Owned caption", icon: <span data-glyph="owned">◆</span> },
-      { value: "history", label: "History" }
-    ]} /></div>);
-    const externalTab = screen.getByRole("tab", { name: "External" });
-    const ownedTab = screen.getByRole("tab", { name: "Owned caption" });
-    const historyTab = screen.getByRole("tab", { name: "History" });
-    const tablist = screen.getByRole("tablist", { name: "Route tabs" });
-    expect(externalTab.classList.contains("nse-control-button")).toBe(true);
-    expect(externalTab.getAttribute("data-tone")).toBe("light");
-    expect(tablist.matches('.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]')).toBe(true);
-    expect(externalTab.parentElement).toBe(tablist);
-    expect(ownedTab.parentElement).toBe(tablist);
-    expect(historyTab.parentElement).toBe(tablist);
-    expect(tablist.querySelector('.nse-control-button:first-child:not(:last-child)')).toBe(externalTab);
-    expect(tablist.querySelector('.nse-control-button:not(:first-child):not(:last-child)')).toBe(ownedTab);
-    expect(tablist.querySelector('.nse-control-button:last-child:not(:first-child)')).toBe(historyTab);
-    expect(externalTab.querySelector('.nse-extended-option-icon img[src="/external.svg"]')).not.toBeNull();
-    expect(externalTab.querySelector('.nse-extended-option-label')?.textContent).toBe("External");
-    expect(screen.queryByText("Ignored caption")).toBeNull();
-    expect(ownedTab.querySelector('.nse-extended-option-icon [data-glyph="owned"]')).not.toBeNull();
-    expect(ownedTab.querySelector('.nse-extended-option-label')?.textContent).toBe("Owned caption");
-    expect(externalTab.getAttribute("aria-controls")).toBeNull();
-    expect(container.querySelectorAll("#external-panel")).toHaveLength(1);
-    expect(container.querySelector('[role="tabpanel"][data-restoration-id="owned"]')).toBeNull();
-  });
-
-  it("only publishes and requests feedback when value-tab selection changes", () => {
-    const change = vi.fn(), trigger = vi.fn(async () => {});
-    const engine = { trigger } as NonNullable<React.ComponentProps<typeof NSEFeedbackProvider>["value"]>;
-    render(<NSEFeedbackProvider value={engine}><NSETabGroup label="Stable tabs" defaultValue="a" selectionHaptic="selection" options={[{ value: "a", label: "A" }, { value: "b", label: "B" }]} onValueChange={change} /></NSEFeedbackProvider>);
-    fireEvent.click(screen.getByRole("tab", { name: "A" }));
-    expect(change).not.toHaveBeenCalled(); expect(trigger).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("tab", { name: "B" }));
-    expect(change).toHaveBeenCalledExactlyOnceWith("b"); expect(trigger).toHaveBeenCalledExactlyOnceWith("selection");
-  });
-
   it("publishes one canonical engine or stateless adapter through the semantic public routes", () => {
     expect(NSE.NSEDatePicker).toBe(NSEDatePicker);
     expect(NSE.NSETimePicker).toBe(NSETimePicker);
     expect(NSE.NSEPasswordField).toBe(NSEPasswordField);
-    expect(NSE.NSETabGroup).toBe(NSETabGroup);
     expect(NSE.DateTime.NSEDatePicker).toBe(RootDatePicker);
     expect(NSE.DateTime.NSETimePicker).toBe(RootTimePicker);
     expect(NSE.FieldExtensions.NSESecureTextField).toBe(RootSecureTextField);
@@ -296,12 +217,6 @@ describe("canonical public control contracts", () => {
     const { container } = render(<NSEPasswordField label="Legacy password" defaultValue="secret" />);
     expect(container.querySelector('.nse-control-text-field')).not.toBeNull();
     expect(screen.getByLabelText("Legacy password").getAttribute("type")).toBe("password");
-  });
-
-  it("routes the canonical tab group through canonical tab navigation semantics", () => {
-    const { container } = render(<NSETabGroup label="Pages" defaultValue="a" options={[{ value: "a", label: "A" }, { value: "b", label: "B" }]} />);
-    expect(container.querySelector('[data-nse-control="tab-group"]')).not.toBeNull();
-    expect(screen.getByRole("tab", { name: "A" }).getAttribute("aria-selected")).toBe("true");
   });
 
   it("preserves canonical hidden date fields through the canonical date editor", () => {
@@ -366,15 +281,5 @@ describe("canonical public control contracts", () => {
     expect(reorder).toHaveBeenCalledWith("a", 2);
     fireEvent.click(screen.getByRole("button", { name: "Close A" }));
     expect(close).toHaveBeenCalledWith("a");
-  });
-
-  it("keeps controlled tab selection stateless across replacement", () => {
-    const onValueChange = vi.fn();
-    const { rerender } = render(<NSETabGroup label="Pages" value="a" options={[{ value: "a", label: "A" }, { value: "b", label: "B" }]} onValueChange={onValueChange} />);
-    fireEvent.click(screen.getByRole("tab", { name: "B" }));
-    expect(onValueChange).toHaveBeenCalledWith("b");
-    expect(screen.getByRole("tab", { name: "A" }).getAttribute("aria-selected")).toBe("true");
-    rerender(<NSETabGroup label="Pages" value="b" options={[{ value: "a", label: "A" }, { value: "b", label: "B" }]} onValueChange={onValueChange} />);
-    expect(screen.getByRole("tab", { name: "B" }).getAttribute("aria-selected")).toBe("true");
   });
 });

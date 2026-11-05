@@ -1635,25 +1635,6 @@
   white-space: nowrap;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-extended-picker-group {
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 8px;
-}
-
-/* PickerGroup carries a single blue uppercase label; the
-   member pickers render value-only pills with no per-field label. */
-:where([data-nse-appearance="atmo"]) .nse-extended-picker-group-label {
-  flex: 0 0 auto;
-  padding-right: 5px;
-  color: #1f75bf;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  text-shadow: 0 1px 0 #fff;
-  white-space: nowrap;
-}
-
 :where([data-nse-appearance="atmo"]) .nse-extended-date-picker,
 :where([data-nse-appearance="atmo"]) .nse-extended-time-picker,
 :where([data-nse-appearance="atmo"]) .nse-extended-progress-slider {

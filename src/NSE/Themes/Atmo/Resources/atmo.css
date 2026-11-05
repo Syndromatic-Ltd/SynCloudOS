@@ -5758,6 +5758,24 @@
   border-radius: calc(var(--nse-atmo-btn-band) * 0.27);
 }
 
+/* segmentStyle "capsule": the same silver capsule set in its uppercase type,
+   with the radio strip's cell insets (15px caps, 14px/15px between seams) and
+   no emboss under unselected labels. A sized capsule keeps the band's own
+   fractional insets below. */
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] button {
+  min-inline-size: 54px;
+  text-transform: uppercase;
+}
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] button:not([aria-pressed="true"], [aria-expanded="true"]) {
+  text-shadow: none;
+}
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"]:not([data-size]) > [data-nse-part="segment"] > button:not([aria-expanded]) {
+  padding-inline: 14px 15px;
+}
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"]:not([data-size]) > :first-child > button:first-child {
+  padding-inline-start: 15px;
+}
+
 /* The radio-group capsule, sized: segmented controls and capsule tabs.
    controlSize="small" or an explicit height sets --nse-control-height (24px
    when small). Every measure of the silver capsule is that band's fraction of

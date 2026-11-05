@@ -102,7 +102,7 @@ A row of buttons that acts as a momentary control, a single choice or a multiple
 | --- | --- | --- |
 | `aria-label` | `string` | Required. |
 | `items` | `NSESegmentedItem[]` | `{ id, label, disabled?, commandId?, commandPayload?, menu? }`. `menu` is a list of `{ id, label, disabled? }` shown in a disclosure menu on the segment. |
-| `selection` | `NSESegmentedSelection` | `{ mode: "momentary", selectedIds }`, `{ mode: "select-one", selectedIds, allowsEmpty }` or `{ mode: "select-many", selectedIds }`. |
+| `selection` | `NSESegmentedSelection` | `{ mode: "momentary", selectedIds }`, `{ mode: "select-one", selectedIds, allowsEmpty }` or `{ mode: "select-any", selectedIds }`. |
 | `onSelectionChange` | `(selection) => void` | The new selection, in the same shape. |
 | `maximumVisibleSegments` | `number` | Segments beyond this fit into an overflow menu. The selected one always stays visible. |
 | `onMenuAction` | `(segmentId, actionId) => void` | A segment's menu item was chosen. |

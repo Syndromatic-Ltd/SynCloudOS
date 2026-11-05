@@ -227,20 +227,11 @@ export type {
   NSEImagePosition,
 } from "./Controls/Buttons/NSEButton";
 export type { NSEKeyEquivalentModifierMask } from "./Controls/Buttons/useNSEKeyEquivalent";
-export {
-  NSERadioToolButtonGroup,
-  NSEToolButtonGroup,
-} from "./Controls/Buttons/NSEButtonFamilies";
-export type {
-  NSERadioToolButtonGroupProps,
-  NSEToolButtonGroupProps,
-} from "./Controls/Buttons/NSEButtonFamilies";
 export type { NSEExtendedControlLevel, NSESelectableOption, NSESelectorItem, NSESelectorItemInput } from "./Controls/Selection/NSESelectors";
 export {
   NSEBox,
   NSEGroupBox,
   NSEInputBox,
-  NSERadioGroup,
   NSETextField,
   NSESwitch,
 } from "./Controls/Fields/NSEFields";
@@ -254,8 +245,6 @@ export type {
   NSEGroupBoxProps,
   NSEInputBoxProps,
   NSEPlainTextFieldProps,
-  NSERadioGroupProps,
-  NSERadioOption,
   NSETextFieldChromeProps,
   NSETextFieldProps,
   NSESwitchProps,
@@ -266,8 +255,8 @@ export { NSERoundedInput, NSEToolInput } from "./Controls/Fields/NSEFieldVariant
 export type { NSERoundedInputProps, NSEToolInputProps } from "./Controls/Fields/NSEFieldVariants";
 export { NSEDivider } from "./Controls/Selection";
 export type { NSEDividerProps } from "./Controls/Selection";
-export { NSEListSelector, NSEPopupList, NSEPickerGroup, NSEIntegerPicker } from "./Controls/Selection/NSESelectors";
-export type { NSEIntegerPickerProps, NSEListSelectorProps, NSEPickerGroupProps, NSEPopupListProps } from "./Controls/Selection/NSESelectors";
+export { NSEListSelector, NSEPopupList, NSEIntegerPicker } from "./Controls/Selection/NSESelectors";
+export type { NSEIntegerPickerProps, NSEListSelectorProps, NSEPopupListProps } from "./Controls/Selection/NSESelectors";
 export { NSEPageHeader, NSEHeader, NSEPrevNextBanner } from "./Windows/Chrome";
 export type { NSEHeaderProps, NSEPageHeaderProps, NSEPrevNextBannerProps } from "./Windows/Chrome";
 export { NSETopBar, NSETopBarButton, NSEStatusBar } from "./Windows/Chrome";
@@ -951,6 +940,7 @@ export type {
   NSEUndoManagerPort,
   NSESegmentedItem,
   NSESegmentedControlProps,
+  NSESegmentStyle,
   NSESliderProps,
   NSECircularSliderProps,
   NSELevelIndicatorProps,

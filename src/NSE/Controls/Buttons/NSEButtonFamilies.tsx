@@ -22,27 +22,6 @@
 import type { ReactNode } from "react";
 import { classes, sizedControlStyle } from "../Core/nseControlsShared";
 import { NSEToolbar, type NSEToolbarProps } from "../../Toolbars";
-import { NSERadioGroup, type NSERadioGroupProps, type NSERadioOption } from "../Fields/NSEFields";
-import type { NSESelectableOption } from "../Selection/NSESelectors";
-
-function renderControlIcon(icon?: ReactNode, src?: string) {
-  const iconSrc = src ?? (typeof icon === "string" ? icon : undefined);
-  if (iconSrc) return <img src={iconSrc} alt="" draggable={false} />;
-  return icon ?? null;
-}
-
-function renderSelectableOption(option: NSESelectableOption) {
-  const icon = renderControlIcon(option.icon, option.src);
-  const label = option.label ?? option.caption ?? option.value;
-  if (!icon) return label;
-
-  return (
-    <span className="nse-extended-option">
-      <span className="nse-extended-option-icon">{icon}</span>
-      <span className="nse-extended-option-label">{label}</span>
-    </span>
-  );
-}
 
 /** A capsule control's size: NSControl's regular or small, or custom when a
  * height is given. The skin draws every part from the one band height, so
@@ -62,6 +41,7 @@ export type NSEToolButtonGroupProps = Omit<Extract<NSEToolbarProps, { readonly c
   label?: string;
 };
 
+/** @internal The joined tool-button band: the font panel's tool groups and NSESegmentedControl's textured segments. */
 export function NSEToolButtonGroup({
   label,
   position = "inline",
@@ -86,34 +66,5 @@ export function NSEToolButtonGroup({
     >
       {children}
     </NSEToolbar>
-  );
-}
-
-export interface NSERadioToolButtonGroupProps extends Omit<NSERadioGroupProps, "options">, NSECapsuleSizing {
-  options: NSESelectableOption[];
-}
-
-export function NSERadioToolButtonGroup({
-  options,
-  controlSize,
-  height,
-  className = "",
-  style,
-  ...props
-}: NSERadioToolButtonGroupProps) {
-  const radioOptions: NSERadioOption[] = options.map((option) => ({
-    value: option.value,
-    label: renderSelectableOption(option),
-    disabled: option.disabled
-  }));
-
-  return (
-    <NSERadioGroup
-      className={classes("nse-extended-radio-tool-button-group", className)}
-      options={radioOptions}
-      data-size={capsuleSizeAttribute({ controlSize, height })}
-      style={sizedControlStyle(style, height, undefined)}
-      {...props}
-    />
   );
 }

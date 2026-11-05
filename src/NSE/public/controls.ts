@@ -55,6 +55,8 @@ export { NSESearchField } from "../Controls/Fields/NSESearchField";
 export type { NSESearchFieldProps } from "../Controls/Fields/NSESearchField";
 export { NSESlider } from "../Controls/Values/NSESlider";
 export type { NSESliderProps } from "../Controls/Values/valueControlTypes";
+export { NSESegmentedControl } from "../Controls/Values/NSESegmentedControl";
+export type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection, NSESegmentStyle } from "../Controls/Values/valueControlTypes";
 
 export { NSEAppFrame } from "../Windows/NSEAppFrame";
 export type { NSEAppFrameProps, NSEAppFrameVariant } from "../Windows/NSEAppFrame";
@@ -103,14 +105,6 @@ export type {
   NSEImagePosition,
 } from "../Controls/Buttons/NSEButton";
 export type { NSEKeyEquivalentModifierMask } from "../Controls/Buttons/useNSEKeyEquivalent";
-export {
-  NSERadioToolButtonGroup,
-  NSEToolButtonGroup,
-} from "../Controls/Buttons/NSEButtonFamilies";
-export type {
-  NSERadioToolButtonGroupProps,
-  NSEToolButtonGroupProps,
-} from "../Controls/Buttons/NSEButtonFamilies";
 export type { NSEExtendedControlLevel, NSESelectableOption, NSESelectorItem, NSESelectorItemInput } from "../Controls/Selection/NSESelectors";
 export {
   NSEToolbar,
@@ -145,10 +139,8 @@ export { NSEDatePicker } from "../DateTime/Pickers/NSEDatePicker";
 export { NSEDateTimePicker } from "../DateTime/Pickers/NSEDateTimePicker";
 export { NSETimePicker } from "../DateTime/Pickers/NSETimePicker";
 export { NSEPasswordField } from "../Controls/Fields/NSEPasswordField";
-export { NSETabGroup } from "../Navigation/NSETabGroup";
 export type { NSEDatePickerProps, NSEDatePickerMode, NSEDatePickerField, NSEDatePickerEditorMode, NSEDatePickerEditorContext, NSETimePickerProps, NSETimePickerEditorMode, NSETimePickerEditorContext, NSEDateTimePickerProps } from "../DateTime/Pickers/datePickerTypes";
 export type { NSEPasswordFieldProps } from "../Controls/Fields/NSEPasswordField";
-export type { NSETabGroupProps, NSETabOption } from "../Navigation/NSETabGroup";
 
 export { NSEDivider } from "../Controls/Selection";
 export type { NSEDividerProps } from "../Controls/Selection";
@@ -156,7 +148,6 @@ export {
   NSEBox,
   NSEGroupBox,
   NSEInputBox,
-  NSERadioGroup,
   NSETextField,
   NSESwitch,
 } from "../Controls/Fields/NSEFields";
@@ -173,8 +164,6 @@ export type {
   NSEGroupBoxProps,
   NSEInputBoxProps,
   NSEPlainTextFieldProps,
-  NSERadioGroupProps,
-  NSERadioOption,
   NSETextFieldChromeProps,
   NSETextFieldProps,
   NSESwitchProps,
@@ -198,8 +187,8 @@ export type {
   NSEViewImageProps,
 } from "../Controls/Images";
 
-export { NSEListSelector, NSEPopupList, NSEPickerGroup, NSEIntegerPicker } from "../Controls/Selection/NSESelectors";
-export type { NSEIntegerPickerProps, NSEListSelectorProps, NSEPickerGroupProps, NSEPopupListProps } from "../Controls/Selection/NSESelectors";
+export { NSEListSelector, NSEPopupList, NSEIntegerPicker } from "../Controls/Selection/NSESelectors";
+export type { NSEIntegerPickerProps, NSEListSelectorProps, NSEPopupListProps } from "../Controls/Selection/NSESelectors";
 
 export { NSEChoiceControl, NSEMenu, NSEPicker } from "../Menus";
 export type { NSEChoiceControlProps, NSEChoiceOption } from "../Menus";

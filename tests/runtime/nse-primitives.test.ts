@@ -21,7 +21,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { NSESwitch, NSEButton, NSEGroupBox, NSEMenu, NSEPicker, NSERadioGroup, NSETopBar, useNSEControlFeedback } from "../../src/NSE/public/controls";
+import { NSESwitch, NSEButton, NSEGroupBox, NSEMenu, NSEPicker, NSESegmentedControl, NSETopBar, useNSEControlFeedback } from "../../src/NSE/public/controls";
 import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEGlassPanel } from "../../src/NSE/Components/NSEGlassPanel";
 import { BrowserHapticsAdapter, createHFXVibratePattern, normalizeHFXFeedbackInput } from "../../src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter";
@@ -307,11 +307,12 @@ describe("HapticsFX feedback preservation", () => {
         createElement(NSEButton, { title: "Silent", hasDestructiveAction: true, haptic: false, onClick }),
         createElement(NSEButton, { buttonType: "switch", title: "Check", onStateChange: vi.fn() }),
         createElement(NSESwitch, { onStateChange: vi.fn() }),
-        createElement(NSERadioGroup, {
-          label: "Mode",
-          options: [{ value: "a", label: "A" }, { value: "b", label: "B" }],
-          defaultValue: "a",
-          onValueChange: vi.fn()
+        createElement(NSESegmentedControl, {
+          "aria-label": "Mode",
+          segmentStyle: "capsule",
+          items: [{ id: "a", label: "A" }, { id: "b", label: "B" }],
+          selection: { mode: "select-one", selectedIds: new Set(["a"]), allowsEmpty: false },
+          onSelectionChange: vi.fn()
         }),
         createElement(NSEListItem, { role: "button", onClick: vi.fn() }, "List item"),
         createElement(NSETopBar, {
@@ -336,7 +337,7 @@ describe("HapticsFX feedback preservation", () => {
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
       fireEvent.click(rendered.getByRole("switch"));
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
-      fireEvent.click(rendered.getByRole("radio", { name: "B" }));
+      fireEvent.click(rendered.getByRole("button", { name: "B" }));
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
       fireEvent.click(rendered.getByText("List item"));
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
