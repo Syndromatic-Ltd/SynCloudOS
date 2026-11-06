@@ -219,6 +219,7 @@
       "none": "A host service port: SynCloudOS supplies it to the framework; apps do not use it directly."
     },
     "NSEImagePosition": "NSControl.ImagePosition",
+    "NSEImageScaling": "NSImageScaling",
     "NSEImageStringSourceLease": {
       "none": "A host service port: SynCloudOS supplies it to the framework; apps do not use it directly."
     },
@@ -350,7 +351,6 @@
     "NSESavePanel": "NSSavePanel",
     "NSEScrollView": "NSScrollView",
     "NSEScrollerProps": "NSScroller",
-    "NSEScrollingImage": "NSImageView",
     "NSESearchField": "NSSearchField",
     "NSESecureTextField": "NSSecureTextField",
     "NSESegmentStyle": "NSSegmentedControl.Style",
@@ -367,8 +367,6 @@
     "NSEShapedTextProjection": "CTTypesetter",
     "NSEShapedTextProjectionWindow": "CTTypesetter",
     "NSEShapedTextWindow": "CTTypesetter",
-    "NSESizeableImage": "NSImageView",
-    "NSESizeableImageHandle": "NSImageView",
     "NSESlider": "NSSlider",
     "NSESlidingPane": {
       "none": "Phase 7 removes this UIKit-shaped navigation API.",
@@ -575,7 +573,6 @@
     "NSEViewControllerFXClients": {
       "none": "The FX framework clients a view controller owns, such as its display link. AppKit reaches Core Animation through the view's layer."
     },
-    "NSEViewImage": "NSImageView",
     "NSEViewOutlet": "@IBOutlet",
     "NSEViewSnapshotOptions": "NSView.bitmapImageRepForCachingDisplay(in:)",
     "NSEWebContentSourceViewProps": "WKWebView.load(_:)",
