@@ -105,7 +105,7 @@ Focused entries include `NSEDrawer`, `NSESlidingPanes` and `NSEStandaloneControl
 | `NSESlider` | A slider: linear (horizontal or vertical, with ticks and detents) or circular (`sliderType`). |
 | `NSEStepper` | Increment and decrement, with hold to repeat, bounds and wrapping. |
 | `NSELevelIndicator` | Continuous, discrete, capacity and rating indicators with warning and critical thresholds. |
-| `NSESegmentedControl` | Momentary, select-one and select-any segments in the rounded, capsule and textured styles, with overflow handling. One-of-many choices and tab strips are segmented controls. |
+| `NSESegmentedControl` | Momentary, select-one and select-any segments in the rounded, capsule and textured styles, with overflow handling. One-of-many choices and tab strips are segmented controls, and so is a joined row of tool buttons (`segmentStyle: "texturedRounded"`, momentary); a lone tool button is an `NSEButton` with the `texturedRounded` bezel. `className` styles the root, `haptic` sets each segment's haptic and an item's `toolTip` is `setToolTip(_:forSegment:)`. |
 | `NSEProgressIndicator` | `NSProgressIndicator`: a determinate or indeterminate bar, or a spinning indicator. |
 
 ## Date, time and colour

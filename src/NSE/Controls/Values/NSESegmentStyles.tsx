@@ -66,7 +66,7 @@ function NSETexturedRadioSegments({ props }: { readonly props: NSESegmentedContr
   const selected = props.items.find((item) => props.selection.selectedIds.has(item.id))?.id ?? "";
   return (
     <NSERadioGroup
-      className="nse-extended-radio-tool-button-group"
+      className={["nse-extended-radio-tool-button-group", props.className].filter(Boolean).join(" ")}
       label={props["aria-label"]}
       name={props.name}
       isEnabled={props.isEnabled !== false && !props.readOnly}
@@ -103,6 +103,7 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
       label={props["aria-label"]}
       controlSize={props.controlSize}
       height={props.height}
+      className={props.className}
       data-segment-style="texturedRounded"
     >
       {items.map((item) => {
@@ -114,10 +115,12 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
             title={item.image ? itemName(item) : item.label}
             image={item.image}
             imagePosition={item.image ? "imageOnly" : undefined}
+            toolTip={item.toolTip}
             state={mode !== "momentary" && selectedIds.has(item.id) ? "on" : "off"}
             isEnabled={!((props.isEnabled === false) || props.readOnly || (item.isEnabled === false))}
             action={item.action}
             actionPayload={item.actionPayload}
+            haptic={props.haptic}
             onClick={() => select(item.id)}
             style={item.width === undefined ? undefined : { boxSizing: "border-box", inlineSize: item.width, minInlineSize: item.width }}
           />

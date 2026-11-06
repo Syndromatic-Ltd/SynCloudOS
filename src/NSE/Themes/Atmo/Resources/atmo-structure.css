@@ -4615,6 +4615,16 @@
   stroke-linecap: round;
 }
 
+/* The alignment segments draw their glyph at its own size, not in the 24px
+   toolbar icon slot, so the capsule keeps its compact segments; they take
+   the label's 1px optical lift. */
+:where([data-nse-appearance="atmo"]) [data-nse-control="font-panel"] > fieldset[data-nse-part="paragraph"] .nse-control-button-icon {
+  width: auto;
+  height: auto;
+  margin: 0;
+  transform: translateY(-1px);
+}
+
 :where([data-nse-appearance="atmo"]) [data-nse-control="font-panel"] [dir="rtl"] [data-nse-part="alignment-glyph"],
 :where([data-nse-appearance="atmo"]) [data-nse-control="font-panel"][dir="rtl"] [data-nse-part="alignment-glyph"] {
   transform: scaleX(-1);
