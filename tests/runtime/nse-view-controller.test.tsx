@@ -115,7 +115,7 @@ describe("view controller lifecycle", () => {
     }
     class Parent extends NSEViewController {
       static override view = function ParentView({ controller }: { readonly controller: Parent }) {
-        return <section><p>Parent content</p><NSEViewControllerView controller={controller.child} /></section>;
+        return <section><p>Parent content</p><controller.child.view /></section>;
       };
       readonly child = this.addChild(Child);
       viewDidLoad() { events.push("parent viewDidLoad"); }
@@ -206,7 +206,7 @@ describe("view.layer", () => {
       static override view = ({ controller }: { controller: Parent }) => <>
         <style>{".native-fx-stage { position: relative; width: 320px; height: 150px; }"}</style>
         <h2>Before the stage</h2>
-        <NSEViewControllerView controller={controller.stage} className="native-fx-stage" />
+        <controller.stage.view className="native-fx-stage" />
       </>;
     }
     try {

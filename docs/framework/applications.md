@@ -110,8 +110,9 @@ class NotesApp extends NSEApplication {
 ## View controllers
 
 `NSEViewController` manages a React view and owns child view controllers. `static view` receives
-`{ controller }`; use `addChild(ControllerClass)` to create a child under its parent, then render
-that child with `NSEViewControllerView`. `viewDidLoad` runs on first mount, followed by the appear
+`{ controller }`; use `addChild(ControllerClass)` to create a child under its parent, then place
+its view in yours as AppKit adds a subview: `<controller.sidebar.view className="…" />` renders the child's
+`view` (`NSViewController.view`). `viewDidLoad` runs on first mount, followed by the appear
 hooks; the disappear hooks run when the view leaves. Reading `view.layer` or `view.element` before
 mounting or after unmounting throws `NSE_VIEW_NOT_LOADED`. `fx` gives the controller the FX services
 of the mounted application (`motion`, `location`, `haptics`, `midi`, `media`, `video`, `lumina`)
@@ -123,7 +124,7 @@ Its bounds follow the outlet's untransformed layout size. Add AFX sublayers in `
 opacity and transforms remain animation-owned, and unmounting releases the backing layer.
 
 ```tsx
-import { NSEViewController, NSEViewControllerView } from "@syndromatic/syncloudos";
+import { NSEViewController } from "@syndromatic/syncloudos";
 import { AFXShapeLayer } from "@syndromatic/syncloudos/fx/animation";
 
 class SidebarController extends NSEViewController {
@@ -140,7 +141,7 @@ class WorkspaceController extends NSEViewController {
 
 function WorkspaceView({ controller }: { readonly controller: WorkspaceController }) {
   return <main className="workspace-layout">
-    <NSEViewControllerView controller={controller.sidebar} className="workspace-sidebar-region" />
+    <controller.sidebar.view className="workspace-sidebar-region" />
   </main>;
 }
 ```

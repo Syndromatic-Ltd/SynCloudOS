@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { ComponentType, ReactNode } from "react";
+import { createElement, type ComponentType, type ReactElement, type ReactNode } from "react";
 import type { AFXLayer } from "../../FX/AnimationFX/AFXLayer";
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/nseRuntimeContracts";
@@ -35,6 +35,7 @@ import { NSEObject } from "../Objects/NSEObject";
 import { NSEObjectLifetime } from "./objectLifetime";
 import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
 import { NSEViewActivity } from "./viewActivity";
+import { NSEChildViewControllerView } from "./viewControllerRenderer";
 import { bindNSEViewOutlets } from "./viewOutlet";
 import { finalizeNSEAuthoringOwner } from "./authoringLifecycle";
 import { getNSEAuthoringContext } from "./authoringContext";
@@ -81,8 +82,13 @@ export function validateNSEViewControllerClass(Controller: NSEViewControllerClas
   }
 }
 
-/** The view a controller manages, while it is mounted. */
+/**
+ * The view a controller manages (NSViewController.view). A parent places it as AppKit adds a subview:
+ * `<this.sidebar.view className="workspace-sidebar" />` renders the child's view, loading it on first
+ * mount, inside the parent's own view.
+ */
 export interface NSEControllerView {
+  (props: { readonly className?: string }): ReactElement;
   /** Whether the view has mounted at least once and `viewDidLoad` has run. */
   readonly isLoaded: boolean;
   /** The view's root element. Throws `NSE_VIEW_NOT_LOADED` unless mounted. */
@@ -197,13 +203,17 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     );
     this.#activity = new NSEViewActivity(this);
     const controller = this as NSEViewController<unknown>;
-    this.#view = Object.freeze({
-      get isLoaded() { return controller.#loaded; },
-      get element() { return controller.#requireMounted("view.element").element; },
-      get mountSignal() { controller.#requireMounted("view.mountSignal"); return controller.#activity.snapshot("mounted").signal; },
-      get layer() { return controller.#boundLayer(); },
-      get window() { return controller.#windowOf(); },
+    // One stable component per controller, so React keeps the child's view mounted across renders.
+    const view = ({ className }: { readonly className?: string }) => createElement(NSEChildViewControllerView, { controller, className });
+    Object.defineProperties(view, {
+      displayName: { value: `${new.target.name || "NSEViewController"}.view` },
+      isLoaded: { get: () => controller.#loaded },
+      element: { get: () => controller.#requireMounted("view.element").element },
+      mountSignal: { get: () => { controller.#requireMounted("view.mountSignal"); return controller.#activity.snapshot("mounted").signal; } },
+      layer: { get: () => controller.#boundLayer() },
+      window: { get: () => controller.#windowOf() },
     });
+    this.#view = Object.freeze(view) as unknown as NSEControllerView;
   }
 
   /**

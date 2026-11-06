@@ -110,7 +110,7 @@ A class app default-exports an `NSEApplication` subclass, with `static mainWindo
 | App launch, active state and termination veto | `NSEApplication` lifecycle methods |
 | Window title, key state, close decision and document | `NSEWindowController` and `window` |
 | Appearance, subscriptions and layout | `NSEViewController` lifecycle and `viewWillLayout` / `viewDidLayout` |
-| Child controller containment | `addChild` / `removeFromParent`, rendered with `NSEViewControllerView` |
+| Child controller containment | `addChild` / `removeFromParent`, its view placed with `<child.view />` |
 | Changing controller state | `@observable accessor` |
 | Read another model/controller in a view | `useObserve(object)` |
 | User intent and availability | `@action` and `validate<Name>` |
@@ -119,7 +119,7 @@ Controller views already observe their own controller. If action validation depe
 
 Controllers created in class field initialisers or constructors inherit ownership. Controllers created later, including after `await`, need an explicit `owner: this`. Dispose subscriptions in the corresponding disappearance/disposal lifecycle; do not reintroduce React bridges or hand-dispose a controller that the class already owns. Text editing's content authority is now `textOwner`; `owner` means lifetime ownership.
 
-Child view-controller frames no longer impose `width: 100%; height: 100%`. The parent owns layout. Pass `className` to `NSEViewControllerView` to style its existing managed outlet—for example, a flex-growing canvas beside fixed-width sidebars. Keep that real frame for layer bounds and lifecycle; remove internal-attribute selectors and `display: contents` workarounds. See [Applications](applications.md) for complete layout examples.
+Child view-controller frames no longer impose `width: 100%; height: 100%`. The parent owns layout. Pass `className` to `<child.view />` to style its existing managed outlet—for example, a flex-growing canvas beside fixed-width sidebars. Keep that real frame for layer bounds and lifecycle; remove internal-attribute selectors and `display: contents` workarounds. See [Applications](applications.md) for complete layout examples.
 
 ### Actions retain command security
 

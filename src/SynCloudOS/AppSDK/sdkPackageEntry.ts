@@ -360,8 +360,6 @@ export { action, useAction } from "./actions";
 export { actionRef } from "./actionReference";
 export type { NSEActionReference } from "./actionReference";
 export type { NSEActionMethod, NSEActionOptions, NSEActionState } from "./actions";
-export { NSEViewControllerView } from "../AppHosting/authoring";
-export type { NSEViewControllerViewProps } from "../AppHosting/authoring";
 // Called by the code the dev server appends to application modules, and by the host that runs them.
 export { acceptApplicationHotUpdate, currentClass, registerApplicationHotModule, trackLiveApplicationObject } from "../AppHosting/authoring";
 export type { ApplicationHotContext, ApplicationHotModuleRecord, LiveApplicationObject } from "../AppHosting/authoring";

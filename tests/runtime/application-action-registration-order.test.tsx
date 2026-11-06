@@ -185,7 +185,7 @@ it("inherits class-controller ancestry for root and child actions inside a modal
       <p>Library</p>
       <NSEPopup defaultOpen modal title="Collection tools" onOpenChange={(_open, reason) => { dismissals.push(reason); }}>
         <NSEButton title="Choose collection" action="chooseCollection" />
-        <NSEViewControllerView controller={controller.editor} />
+        <controller.editor.view />
       </NSEPopup>
     </>;
     @action chooseCollection() { calls.push("panel.choose"); }
