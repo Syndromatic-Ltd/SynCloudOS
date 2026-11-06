@@ -162,6 +162,22 @@
   min-inline-size: 0;
 }
 
+/* An NSEPageController fills its superview: in a container with a set height its pages take that
+   height; otherwise they size to their content. */
+.nse-page-controller {
+  block-size: 100%;
+}
+
+.nse-page-controller.nse-container-sliding-view {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.nse-page-controller .nse-container-sliding-view-viewport,
+.nse-page-controller .nse-container-sliding-view-track,
+.nse-page-controller .nse-container-sliding-view-panel > * {
+  block-size: 100%;
+}
+
 /* --- NSESlidingPanes ------------- */
 .nse-container-sliding-panes {
   position: relative;
