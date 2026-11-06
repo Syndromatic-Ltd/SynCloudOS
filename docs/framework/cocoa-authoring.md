@@ -72,7 +72,7 @@ After every await, recheck cancellation before domain work. `context.commit` gat
 
 `@preference("explicit.key") accessor includeArchived = false` uses the accessor initializer as its default and the attached app's persistence authority. Complex values use a versioned descriptor/parser/migrations. Failed writes retain the prior published value. Existing grouped preferences drafts stay with `NSEPreferencesController`. Navigation restoration uses its existing controller APIs and preserves explicit-route precedence; it is not another route store.
 
-Adapters for grouped preferences can import `PreferenceValidationError` and `PreferencePersistenceError` beside `NSEPreferencesController` from the NSE entry. Invalid values and refused synchronous writes can become binding issues; unexpected or unknown-outcome failures must still reject. Keep the controller's transaction and saved envelope.
+Bindings to grouped preferences can import `PreferenceValidationError` and `PreferencePersistenceError` beside `NSEUserDefaultsController` from the NSE entry. Invalid values and refused synchronous writes can become binding issues; unexpected or unknown-outcome failures must still reject. Keep the controller's transaction and saved envelope.
 
 ## Outlets and animation
 

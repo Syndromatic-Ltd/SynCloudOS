@@ -22,7 +22,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEPreferencesController, type PreferencesAdapter } from "../../../src/NSE/Controllers";
+import { NSEUserDefaultsController } from "../../../src/NSE/Controllers";
 import { NSEOverlayProvider, type NSEWindowSurfaceDismissResult, type NSEWindowSurfaceRequest } from "../../../src/NSE/Overlays";
 import { allocateNSEToolbarItems } from "../../../src/NSE/Toolbars/toolbarLayout";
 import { NSEToolbarView as NSEToolbar } from "../../../src/NSE/Toolbars/NSEToolbarView";
@@ -31,6 +31,7 @@ import { NSEToolbarController } from "../../../src/NSE/Toolbars/NSEToolbarContro
 import type { NSEToolbarConfiguration, NSEToolbarItem, NSEToolbarPreferences, NSEToolbarRuntimePort } from "../../../src/NSE/Toolbars/toolbarTypes";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
+import { defaultsFrom, type TestDefaultsStore } from "../../fixtures/userDefaults";
 
 afterEach(() => {
   document.body.replaceChildren();
@@ -123,15 +124,15 @@ const items = [
 function preferenceController(
   namespace: string,
   itemIds: readonly string[] = configuration.defaultItemIds,
-  adapter?: PreferencesAdapter,
+  adapter?: TestDefaultsStore,
 ) {
   const values = new Map<string, unknown>();
   const resolvedAdapter = adapter ?? {
     read: (key: string) => values.get(key) ?? null,
     write: (key: string, value: unknown) => void values.set(key, value),
     remove: (key: string) => void values.delete(key),
-  } satisfies PreferencesAdapter;
-  return new NSEPreferencesController<NSEToolbarPreferences>({
+  } satisfies TestDefaultsStore;
+  return new NSEUserDefaultsController<NSEToolbarPreferences>({
     namespace,
     schema: {
       version: 1,
@@ -147,12 +148,12 @@ function preferenceController(
       },
       migrations: [],
     },
-    adapter: resolvedAdapter,
+    defaults: defaultsFrom(resolvedAdapter),
   });
 }
 
 function createController(options: Partial<{
-  readonly preferences: NSEPreferencesController<NSEToolbarPreferences>;
+  readonly preferences: NSEUserDefaultsController<NSEToolbarPreferences>;
   readonly runtime: NSEToolbarRuntimePort;
 }> = {}) {
   return new NSEToolbarController({
@@ -289,7 +290,7 @@ describe("NSEToolbarController", () => {
     const values = new Map<string, unknown>();
     let writes = 0;
     let failAt = Number.POSITIVE_INFINITY;
-    const adapter: PreferencesAdapter = {
+    const adapter: TestDefaultsStore = {
       read: (key) => values.get(key) ?? null,
       write: (key, value) => {
         writes += 1;

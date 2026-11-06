@@ -25,7 +25,7 @@ import React, { type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NSEViewController, nseUpdateTraits } from "../../../src/NSE/Application/NSEViewController";
-import { NSEPreferencesController } from "../../../src/NSE/Controllers";
+import { NSEUserDefaultsController } from "../../../src/NSE/Controllers";
 import {
   NSESplitViewController,
   NSESplitViewItem,
@@ -35,6 +35,7 @@ import {
 import { nseSplitViewLayout } from "../../../src/NSE/DataViews/Split/NSESplitViewController";
 import { NSEViewControllerView } from "../../../src/SynCloudOS/AppHosting/applicationHosting";
 import { createStaticPresentationTraits } from "../../fixtures/presentationTraits";
+import { defaultsFrom } from "../../fixtures/userDefaults";
 
 /** A child view controller that renders `content`. */
 class PaneViewController extends NSEViewController {
@@ -51,7 +52,7 @@ function item(identifier: string, title: string, content: () => ReactNode, optio
 }
 
 /** Content then an inspector: the content absorbs resizing, the inspector collapses first. */
-function inspectorSplit(id: string, contents: { readonly content?: () => ReactNode; readonly inspector?: () => ReactNode } = {}, preferences?: NSEPreferencesController<NSESplitViewPreferences>) {
+function inspectorSplit(id: string, contents: { readonly content?: () => ReactNode; readonly inspector?: () => ReactNode } = {}, preferences?: NSEUserDefaultsController<NSESplitViewPreferences>) {
   return new NSESplitViewController({
     id,
     title: "Workspace",
@@ -65,13 +66,13 @@ function inspectorSplit(id: string, contents: { readonly content?: () => ReactNo
 
 function createPreferences(initial?: NSESplitViewPreferences) {
   let stored: unknown = initial ? ["syncloudos:nse-preferences:v1", 1, initial] : null;
-  return new NSEPreferencesController<NSESplitViewPreferences>({
+  return new NSEUserDefaultsController<NSESplitViewPreferences>({
     namespace: "split-test",
-    adapter: {
+    defaults: defaultsFrom({
       read: () => stored,
       write: (_key, value) => { stored = value; },
       remove: () => { stored = null; },
-    },
+    }),
     schema: {
       version: 1,
       defaults: { sizes: {}, collapsedPaneIds: [], activePaneId: "content" },

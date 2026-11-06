@@ -22,10 +22,11 @@ import { afterAll, expect, it, vi } from "vitest";
 
 import { createUndoManager } from "../../src/SynCloudOS/Undo";
 import {
-  NSEPreferencesController,
+  NSEUserDefaultsController,
   type PreferencesSchema,
 } from "../../src/NSE/Controllers";
 import { createTestRuntime } from "./helpers";
+import { defaultsFrom } from "../fixtures/userDefaults";
 
 const runtime = createTestRuntime({ id: "runtime:preferences-controller" });
 afterAll(() => runtime.dispose("test"));
@@ -61,9 +62,9 @@ function schema() {
 it.each([false, true])("supports scoped undo registration and rolls back on rejection (%s)", async (rejectRegistration) => {
   const values = new Map<string, unknown>();
   const undo = createUndoManager({ runtimeId: runtime.runtimeId, owner: { kind: "application", id: "scoped-preferences" }, maxEntries: 10 });
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "scoped", schema: schema(),
-    adapter: { read: key => values.get(key) ?? null, write: (key, value) => { values.set(key, value); }, remove: key => { values.delete(key); } },
+    defaults: defaultsFrom({ read: key => values.get(key) ?? null, write: (key, value) => { values.set(key, value); }, remove: key => { values.delete(key); } }),
   });
   try {
     const before = values.get("scoped");
@@ -94,17 +95,17 @@ it("migrates, repairs and writes versioned preferences through one instance adap
     ["editor", { version: 1, theme: "grey" }],
   ]);
   const writes: unknown[] = [];
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "editor",
     schema: schema(),
-    adapter: {
+    defaults: defaultsFrom({
       read: (key) => values.get(key) ?? null,
       write: (key, value) => {
         writes.push(value);
         values.set(key, value);
       },
       remove: (key) => void values.delete(key),
-    },
+    }),
   });
   expect(controller.getSnapshot()).toMatchObject({
     value: { theme: "system", lineNumbers: true },
@@ -134,14 +135,14 @@ it("migrates, repairs and writes versioned preferences through one instance adap
 it("keeps edits draft-only, discards without writes and replays one undo action", async () => {
   const values = new Map<string, unknown>();
   const write = vi.fn((key: string, value: unknown) => void values.set(key, value));
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "editor-undo",
     schema: schema(),
-    adapter: {
+    defaults: defaultsFrom({
       read: () => null,
       write,
       remove: (key) => void values.delete(key),
-    },
+    }),
   });
   const undo = createUndoManager({
     runtimeId: runtime.runtimeId,
@@ -186,14 +187,14 @@ it("repairs invalid fields and refuses broken migration chains", () => {
   const values = new Map<string, unknown>([
     ["repair", { version: 2, theme: 42, lineNumbers: false }],
   ]);
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "repair",
     schema: schema(),
-    adapter: {
+    defaults: defaultsFrom({
       read: (key) => values.get(key) ?? null,
       write: (key, value) => void values.set(key, value),
       remove: (key) => void values.delete(key),
-    },
+    }),
   });
   expect(controller.getSnapshot().value).toEqual({
     theme: "system",
@@ -211,23 +212,23 @@ it("repairs invalid fields and refuses broken migration chains", () => {
 
   expect(
     () =>
-      new NSEPreferencesController({
+      new NSEUserDefaultsController({
         namespace: "broken",
         schema: { ...schema(), version: 3 },
-        adapter: {
+        defaults: defaultsFrom({
           read: () => ({ version: 1, theme: "grey" }),
           write: () => undefined,
           remove: () => undefined,
-        },
+        }),
       }),
   ).toThrow(/migration chain/);
 });
 
 it("rejects inherited prototype names as preference schema fields", () => {
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "prototype-preferences",
     schema: schema(),
-    adapter: { read: () => null, write: () => undefined, remove: () => undefined },
+    defaults: defaultsFrom({ read: () => null, write: () => undefined, remove: () => undefined }),
   });
   expect(() => controller.reset(["constructor" as "theme"])).toThrow(
     /Preference "constructor" failed schema validation/,
@@ -241,7 +242,7 @@ it("rejects inherited prototype names as preference schema fields", () => {
   });
   expect(
     () =>
-      new NSEPreferencesController({
+      new NSEUserDefaultsController({
         namespace: "invalid-prototype-schema",
         schema: {
           version: 0,
@@ -249,7 +250,7 @@ it("rejects inherited prototype names as preference schema fields", () => {
           fields: {},
           migrations: [],
         } as unknown as PreferencesSchema<{ constructor: number }>,
-        adapter: { read: () => null, write: () => undefined, remove: () => undefined },
+        defaults: defaultsFrom({ read: () => null, write: () => undefined, remove: () => undefined }),
       }),
   ).toThrow('Preference default "constructor" does not satisfy its schema.');
 });
@@ -268,14 +269,14 @@ it("fails closed for future-version preferences without overwriting their bytes"
 
   expect(
     () =>
-      new NSEPreferencesController({
+      new NSEUserDefaultsController({
         namespace: "future",
         schema: schema(),
-        adapter: {
+        defaults: defaultsFrom({
           read: (key) => values.get(key) ?? null,
           write,
           remove: (key) => void values.delete(key),
-        },
+        }),
       }),
   ).toThrow(/future version/i);
   expect(write).not.toHaveBeenCalled();
@@ -309,10 +310,10 @@ it("exposes no mutable map, set or date state from preference snapshots", () => 
     },
     migrations: [],
   };
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "rich-preferences",
     schema: richSchema,
-    adapter: { read: () => null, write: () => undefined, remove: () => undefined },
+    defaults: defaultsFrom({ read: () => null, write: () => undefined, remove: () => undefined }),
   });
   const value = controller.getSnapshot().value.settings;
   source.settings.tags.add("external");
@@ -337,10 +338,10 @@ it("keeps a preference draft and storage unchanged when undo registration reject
     maxEntries: 10,
   });
   undo.dispose();
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "preferences-registration",
     schema: schema(),
-    adapter: { read: () => null, write, remove: () => undefined },
+    defaults: defaultsFrom({ read: () => null, write, remove: () => undefined }),
   });
   controller.beginEditing({
     id: "preferences-registration",
@@ -381,10 +382,10 @@ it("keeps persistence, undo history and editing state atomic when a commit write
     owner: { kind: "document", id: "preferences-write-atomicity" },
     maxEntries: 10,
   });
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "write-atomicity",
     schema: schema(),
-    adapter: { read: (key) => values.get(key) ?? null, write, remove: () => undefined },
+    defaults: defaultsFrom({ read: (key) => values.get(key) ?? null, write, remove: () => undefined }),
   });
   controller.beginEditing({
     id: "write-atomicity",
@@ -445,10 +446,10 @@ it("keeps a user preference named version separate from the persistence schema v
     write: (key: string, value: unknown) => void values.set(key, value),
     remove: (key: string) => void values.delete(key),
   };
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "version-preference",
     schema: versionSchema,
-    adapter,
+    defaults: defaultsFrom(adapter),
   });
   controller.set("version", "editor-v2");
   expect(values.get("version-preference")).toEqual([
@@ -456,10 +457,10 @@ it("keeps a user preference named version separate from the persistence schema v
     3,
     { version: "editor-v2", theme: "system" },
   ]);
-  const reloaded = new NSEPreferencesController({
+  const reloaded = new NSEUserDefaultsController({
     namespace: "version-preference",
     schema: versionSchema,
-    adapter,
+    defaults: defaultsFrom(adapter),
   });
   expect(reloaded.getSnapshot().value).toEqual({
     version: "editor-v2",
@@ -497,10 +498,10 @@ it("preserves a legacy flat values field before migrating it into the tagged env
     remove: (key: string) => void storage.delete(key),
   };
 
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "legacy-values",
     schema: valuesSchema,
-    adapter,
+    defaults: defaultsFrom(adapter),
   });
   expect(controller.getSnapshot().value).toEqual({
     values: { preserved: "legacy-value" },
@@ -511,10 +512,10 @@ it("preserves a legacy flat values field before migrating it into the tagged env
     { values: { preserved: "legacy-value" } },
   ]);
 
-  const reloaded = new NSEPreferencesController({
+  const reloaded = new NSEUserDefaultsController({
     namespace: "legacy-values",
     schema: valuesSchema,
-    adapter,
+    defaults: defaultsFrom(adapter),
   });
   expect(reloaded.getSnapshot().value).toEqual({
     values: { preserved: "legacy-value" },
@@ -554,14 +555,14 @@ it("preserves nested legacy data named values when the shape matches the former 
       { version: 1, values: { values: { preserved: "legacy-value" } } },
     ],
   ]);
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "legacy-nested-values",
     schema: valuesSchema,
-    adapter: {
+    defaults: defaultsFrom({
       read: (key) => storage.get(key) ?? null,
       write: (key, value) => void storage.set(key, value),
       remove: (key) => void storage.delete(key),
-    },
+    }),
   });
 
   expect(controller.getSnapshot().value).toEqual({
@@ -593,14 +594,14 @@ it("migrates an unambiguous prior object envelope into the tagged envelope", () 
   const storage = new Map<string, unknown>([
     ["prior-object-envelope", { version: 1, values: { theme: "prior-theme" } }],
   ]);
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "prior-object-envelope",
     schema: priorEnvelopeSchema,
-    adapter: {
+    defaults: defaultsFrom({
       read: (key) => storage.get(key) ?? null,
       write: (key, value) => void storage.set(key, value),
       remove: (key) => void storage.delete(key),
-    },
+    }),
   });
 
   expect(controller.getSnapshot().value).toEqual({ theme: "prior-theme" });
@@ -628,17 +629,17 @@ it("fails closed before publication when an adapter returns a rejecting write pr
     owner: { kind: "document", id: "preferences-rejecting-write" },
     maxEntries: 10,
   });
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "rejecting-write",
     schema: schema(),
-    adapter: {
+    defaults: defaultsFrom({
       read: (key) => values.get(key) ?? null,
       write: (key, value) => {
         values.set(key, value);
         return Promise.reject(new Error("adapter rejected asynchronously"));
       },
       remove: () => undefined,
-    },
+    }),
   });
   controller.beginEditing({
     id: "rejecting-write",

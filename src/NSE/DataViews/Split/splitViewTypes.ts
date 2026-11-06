@@ -19,7 +19,7 @@
  */
 
 import type { NSEViewControllerOptions } from "../../Application/NSEViewController";
-import type { NSEPreferencesController } from "../../Controllers";
+import type { NSEUserDefaultsController } from "../../Controllers";
 import type { NSEDataViewState } from "../Core";
 import type { NSESplitViewItem } from "./NSESplitViewItem";
 
@@ -55,5 +55,5 @@ export interface NSESplitViewControllerOptions extends NSEViewControllerOptions 
   /** NSSplitView.isVertical; `true` (the default) places the items side by side. */
   readonly isVertical?: boolean;
   readonly splitViewItems?: readonly NSESplitViewItem[];
-  readonly preferences?: NSEPreferencesController<NSESplitViewPreferences>;
+  readonly preferences?: NSEUserDefaultsController<NSESplitViewPreferences>;
 }

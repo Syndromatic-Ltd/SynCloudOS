@@ -28,11 +28,26 @@ import {
   type ControllerValidationIssue,
 } from "./NSEController";
 import { mutableClone, ownImmutable } from "./immutableValue";
+import { NSEUserDefaults } from "./NSEUserDefaults";
 
-export interface PreferencesAdapter {
+interface PreferencesAdapter {
   read(key: string): unknown;
-  write(key: string, value: unknown): void | PromiseLike<void>;
+  write(key: string, value: unknown): unknown;
   remove(key: string): void;
+}
+
+function adapterFor(defaults: NSEUserDefaults): PreferencesAdapter {
+  if (!(defaults instanceof NSEUserDefaults)) throw new TypeError("NSEUserDefaultsController needs an NSEUserDefaults.");
+  const store = NSEUserDefaults.storeOf(defaults);
+  return {
+    read: (key) => { const value = store.get(key); return value === undefined ? null : value; },
+    write: (key, value) => {
+      const result = store.set(key, value);
+      if (result === false) throw new PreferencePersistenceError(`Could not persist preferences for ${key}.`);
+      return result === true ? undefined : result;
+    },
+    remove: (key) => store.remove(key),
+  };
 }
 
 export interface PreferencesMigration {
@@ -62,16 +77,17 @@ export interface PreferencesSnapshot<T extends object> {
   readonly issues: readonly ControllerValidationIssue[];
 }
 
-export interface PreferencesControllerChange<T extends object> {
+export interface NSEUserDefaultsControllerChange<T extends object> {
   readonly kind: "preference";
   readonly keys: readonly (keyof T)[];
 }
 
-export interface PreferencesControllerOptions<T extends object> extends NSEControllerOwnership {
+export interface NSEUserDefaultsControllerOptions<T extends object> extends NSEControllerOwnership {
   readonly namespace: string;
   readonly responderId?: string;
   readonly schema: PreferencesSchema<T>;
-  readonly adapter: PreferencesAdapter;
+  /** The NSEUserDefaults the values are kept in: `new NSEUserDefaults(SCOS.preferences)` in an application. */
+  readonly defaults: NSEUserDefaults;
 }
 
 export class PreferenceValidationError extends Error {
@@ -162,7 +178,7 @@ function thenable(result: unknown): boolean {
   return typeof Reflect.get(result, "then") === "function";
 }
 
-function requireSynchronousWrite(result: void | PromiseLike<void>): void {
+function requireSynchronousWrite(result: unknown): void {
   try {
     if (!thenable(result)) return;
     void Promise.resolve(result).catch(() => undefined);
@@ -335,9 +351,9 @@ export function changedPreferenceKeys<T extends object>(
   return Object.freeze(keys.filter((key) => !Object.is(left[key], right[key])));
 }
 
-export class NSEPreferencesController<T extends object> extends NSEController<
+export class NSEUserDefaultsController<T extends object> extends NSEController<
   PreferencesSnapshot<T>,
-  PreferencesControllerChange<T>
+  NSEUserDefaultsControllerChange<T>
 > {
   readonly #namespace: string;
   readonly #schema: PreferencesSchema<T>;
@@ -346,13 +362,13 @@ export class NSEPreferencesController<T extends object> extends NSEController<
   #snapshot: PreferencesSnapshot<T>;
   #draft: T | null = null;
 
-  constructor(options: PreferencesControllerOptions<T>) {
-    super({ kind: "NSEPreferencesController", id: options.namespace, responderId: options.responderId, ownerSignal: options.ownerSignal, owner: options.owner });
+  constructor(options: NSEUserDefaultsControllerOptions<T>) {
+    super({ kind: "NSEUserDefaultsController", id: options.namespace, responderId: options.responderId, ownerSignal: options.ownerSignal, owner: options.owner });
     this.#namespace = options.namespace;
     this.#schema = options.schema;
-    this.#adapter = options.adapter;
+    this.#adapter = adapterFor(options.defaults);
     this.#keys = Object.freeze(Object.keys(options.schema.defaults) as (keyof T)[]);
-    const persisted = options.adapter.read(options.namespace);
+    const persisted = this.#adapter.read(options.namespace);
     const hydrated = hydratePreferences(persisted, options.schema);
     const committed = freezePreferences(hydrated.value);
     this.#snapshot = Object.freeze({

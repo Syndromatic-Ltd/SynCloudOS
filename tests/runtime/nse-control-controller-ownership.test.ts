@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
-import { NSEPreferencesController, nseUnowned, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers";
+import { NSEUserDefaultsController, nseUnowned, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers";
 import { enterClassApplication, instantiateInOwnerScope, NSEOwnershipScope } from "../../src/NSE/Controllers/ownership";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { PageTurnController } from "../../src/NSE/Page/pageTurnController";
@@ -15,6 +15,7 @@ import { createInMemoryNSETextOwner } from "../../src/NSE/Text";
 import { TextEditingSession } from "../../src/NSE/TextEditing/TextEditingSession";
 import { createTestRuntime } from "./helpers";
 import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
+import { defaultsFrom } from "../fixtures/userDefaults";
 
 const disposals: Array<() => unknown> = [];
 const runtimes: SynCloudOSRuntime[] = [];
@@ -38,7 +39,7 @@ function commandPort(host: SynCloudOSRuntime) {
   };
 }
 function preferences() {
-  const result = new NSEPreferencesController<NSEToolbarPreferences>({
+  const result = new NSEUserDefaultsController<NSEToolbarPreferences>({
     owner: nseUnowned, namespace: "ownership.toolbar", schema: {
       version: 1, defaults: { itemIds: [], displayMode: "icon-only", sizeMode: "regular" }, migrations: [],
       fields: {
@@ -46,7 +47,7 @@ function preferences() {
         displayMode: { validate: (value: unknown): value is NSEToolbarPreferences["displayMode"] => value === "icon-only" || value === "icon-and-label" || value === "label-only" },
         sizeMode: { validate: (value: unknown): value is NSEToolbarPreferences["sizeMode"] => value === "small" || value === "regular" },
       },
-    }, adapter: { read: () => null, write: () => undefined, remove: () => undefined },
+    }, defaults: defaultsFrom({ read: () => null, write: () => undefined, remove: () => undefined }),
   });
   disposals.push(() => result.dispose());
   return result;

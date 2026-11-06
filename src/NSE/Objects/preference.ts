@@ -1,4 +1,4 @@
-import { PreferencePersistenceError } from "../Controllers/NSEPreferencesController";
+import { PreferencePersistenceError } from "../Controllers/NSEUserDefaultsController";
 import { mutableClone, ownImmutable } from "../Controllers/immutableValue";
 import { getNSEAuthoringContext, type NSEAuthoringContext } from "../Application/authoringContext";
 import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle";

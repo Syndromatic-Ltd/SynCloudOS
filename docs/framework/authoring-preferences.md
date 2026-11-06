@@ -24,7 +24,7 @@ Writes must succeed synchronously before the accessor publishes. `PreferencePers
 
 Owner observations connect after hydration. Initial mounted observations run after committed refs and `viewDidLoad`; visible observations run when effective activity begins. Each new epoch can deliver its own initial value. StrictMode replay preserves the committed epoch. Existing `observe` and React `useObserve` remain supported.
 
-Navigation controllers accept a `restoration` descriptor containing `key`, `version`, `parse`, `capture`, `restore` and `migrations`. `restore(controller, value)` calls the controller's existing restoration API. `hasExplicitRoute` preserves app-owned incoming route authority. Outside an attached application, supply the existing `PreferencesAdapter` through `preferences`. Connection occurs after construction; creating a separate route store is unnecessary.
+Navigation controllers accept a `restoration` descriptor containing `key`, `version`, `parse`, `capture`, `restore` and `migrations`. `restore(controller, value)` calls the controller's existing restoration API. `hasExplicitRoute` preserves app-owned incoming route authority. Outside an attached application, pass an `NSEUserDefaults` as `defaults`. Connection occurs after construction; creating a separate route store is unnecessary.
 
 `createNSETabSelectionRestoration({ key })` persists selected destination identity, validates it against the current destinations through canonical restoration, and falls back to the authored initial selection. Retitling tabs does not write selection state. For existing unversioned app formats, declare a version-zero descriptor whose parser/capture match that format exactly.
 

@@ -19,7 +19,8 @@
  */
 
 import { NSEObject } from "../Objects/NSEObject";
-import { NSEPreferencesController, type PreferencesAdapter } from "../Controllers/NSEPreferencesController";
+import { NSEUserDefaultsController } from "../Controllers/NSEUserDefaultsController";
+import { NSEUserDefaults } from "../Controllers/NSEUserDefaults";
 import type { NSEOwner } from "../Controllers/ownership";
 import { NSEToolbarController } from "./NSEToolbarController";
 import type { NSEToolbarItemInput, NSEToolbarPreferences, NSEToolbarRuntimePort } from "./toolbarTypes";
@@ -51,7 +52,8 @@ export interface NSEToolbarServices {
   readonly owner: NSEOwner;
   readonly applicationId: string;
   readonly runtime: NSEToolbarRuntimePort;
-  readonly preferences: PreferencesAdapter;
+  /** The application's defaults; the toolbar keeps its configuration under `toolbar.<identifier>`. */
+  readonly preferences: NSEUserDefaults;
 }
 
 /** @internal */
@@ -101,7 +103,7 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
   #isVisible = true;
   #customizing = false;
   #engine: NSEToolbarController | null = null;
-  #preferences: NSEPreferencesController<NSEToolbarPreferences> | null = null;
+  #preferences: NSEUserDefaultsController<NSEToolbarPreferences> | null = null;
 
   constructor(options: NSEToolbarOptions<Items>) {
     super();
@@ -215,11 +217,15 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
     if (this.#engine) throw new TypeError(`Toolbar "${this.identifier}" is already in a window.`);
     const allowed = this.#allowedItemIdentifiers;
     const defaults: NSEToolbarPreferences = this.#state;
-    const memory = new Map<string, unknown>();
-    const adapter: PreferencesAdapter = this.autosavesConfiguration
-      ? { read: (key) => services.preferences.read(`toolbar.${key}`), write: (key, value) => services.preferences.write(`toolbar.${key}`, value), remove: (key) => services.preferences.remove(`toolbar.${key}`) }
-      : { read: (key) => memory.get(key) ?? null, write: (key, value) => { memory.set(key, value); }, remove: (key) => { memory.delete(key); } };
-    const preferences = new NSEPreferencesController<NSEToolbarPreferences>({
+    const stored = services.preferences;
+    const userDefaults = this.autosavesConfiguration
+      ? new NSEUserDefaults({
+        get: (key) => stored.object(`toolbar.${key}`),
+        set: (key, value) => stored.set(value, `toolbar.${key}`),
+        remove: (key) => stored.removeObject(`toolbar.${key}`),
+      })
+      : new NSEUserDefaults();
+    const preferences = new NSEUserDefaultsController<NSEToolbarPreferences>({
       owner: services.owner,
       namespace: this.identifier,
       schema: {
@@ -232,7 +238,7 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
         },
         migrations: [],
       },
-      adapter,
+      defaults: userDefaults,
     });
     let engine: NSEToolbarController;
     try {

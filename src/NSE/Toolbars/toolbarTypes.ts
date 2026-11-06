@@ -24,7 +24,7 @@ import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 import type {
   ControllerCommitResult,
   ControllerEditTransaction,
-  NSEPreferencesController,
+  NSEUserDefaultsController,
 } from "../Controllers";
 import type {
   CommandDispatchOptions,
@@ -182,7 +182,7 @@ export interface NSEToolbarControllerOptions extends NSEControllerOwnershipOptio
   readonly configuration: NSEToolbarConfiguration;
   readonly items: readonly NSEToolbarItemInput[];
   /** The host constructs and owns this preference controller. */
-  readonly preferences: NSEPreferencesController<NSEToolbarPreferences>;
+  readonly preferences: NSEUserDefaultsController<NSEToolbarPreferences>;
   readonly runtime: NSEToolbarRuntimePort;
 }
 

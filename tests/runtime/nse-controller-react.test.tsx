@@ -24,9 +24,10 @@ import React from "react";
 import { afterEach, expect, it } from "vitest";
 
 import {
-  NSEPreferencesController,
+  NSEUserDefaultsController,
   useNSEController,
 } from "../../src/NSE/Controllers";
+import { defaultsFrom } from "../fixtures/userDefaults";
 
 afterEach(cleanup);
 
@@ -34,7 +35,7 @@ it("rerenders only when the selected preference changes", () => {
   const values = new Map<string, unknown>([
     ["editor", { version: 1, theme: "grey" }],
   ]);
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "editor",
     schema: {
       version: 2,
@@ -58,11 +59,11 @@ it("rerenders only when the selected preference changes", () => {
         },
       ],
     },
-    adapter: {
+    defaults: defaultsFrom({
       read: (key) => values.get(key) ?? null,
       write: (key, value) => void values.set(key, value),
       remove: (key) => void values.delete(key),
-    },
+    }),
   });
   let renders = 0;
   function Harness() {
@@ -87,7 +88,7 @@ it("rerenders only when the selected preference changes", () => {
 });
 
 it("uses caller equality to preserve a selected object reference", () => {
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "object-selector",
     schema: {
       version: 1,
@@ -102,7 +103,7 @@ it("uses caller equality to preserve a selected object reference", () => {
       },
       migrations: [],
     },
-    adapter: { read: () => null, write: () => undefined, remove: () => undefined },
+    defaults: defaultsFrom({ read: () => null, write: () => undefined, remove: () => undefined }),
   });
   let renders = 0;
   function Harness() {
@@ -121,7 +122,7 @@ it("uses caller equality to preserve a selected object reference", () => {
 });
 
 it("recomputes a selection when selector semantics change for the same snapshot", () => {
-  const controller = new NSEPreferencesController({
+  const controller = new NSEUserDefaultsController({
     namespace: "selector-freshness",
     schema: {
       version: 1,
@@ -132,7 +133,7 @@ it("recomputes a selection when selector semantics change for the same snapshot"
       },
       migrations: [],
     },
-    adapter: { read: () => null, write: () => undefined, remove: () => undefined },
+    defaults: defaultsFrom({ read: () => null, write: () => undefined, remove: () => undefined }),
   });
   function Harness({ mode }: { readonly mode: "theme" | "line-numbers" }) {
     const selection = useNSEController(

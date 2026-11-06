@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
-import { NSEPreferencesController } from "../../src/NSE/Controllers/NSEPreferencesController";
+import { NSEUserDefaultsController } from "../../src/NSE/Controllers/NSEUserDefaultsController";
 import { instantiateInOwnerScope, NSEOwnershipScope, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers/ownership";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import type { NSEMenuRuntimePort } from "../../src/NSE/Menus/menuTypes";
@@ -14,6 +14,7 @@ import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarControlle
 import type { NSEToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
 import { useRuntimeNSEMenuPort } from "../../src/SynCloudOSReact/nseMenuPort";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
+import { defaultsFrom } from "../fixtures/userDefaults";
 
 const hosts: ClassApplicationHost[] = [];
 const disposables: Array<{ dispose(): void }> = [];
@@ -24,7 +25,7 @@ afterEach(async () => {
 const kinds = ["menu", "toolbar"] as const;
 type Kind = typeof kinds[number];
 function preferences(signal: AbortSignal) {
-  const value = new NSEPreferencesController<NSEToolbarPreferences>({
+  const value = new NSEUserDefaultsController<NSEToolbarPreferences>({
     ownerSignal: signal, namespace: "runtime-owned-toolbar", schema: {
       version: 1, defaults: { itemIds: [], displayMode: "icon-only", sizeMode: "regular" }, migrations: [],
       fields: {
@@ -32,7 +33,7 @@ function preferences(signal: AbortSignal) {
         displayMode: { validate: (value): value is NSEToolbarPreferences["displayMode"] => value === "icon-only" || value === "icon-and-label" || value === "label-only" },
         sizeMode: { validate: (value): value is NSEToolbarPreferences["sizeMode"] => value === "small" || value === "regular" },
       },
-    }, adapter: { read: () => null, write() {}, remove() {} },
+    }, defaults: defaultsFrom({ read: () => null, write() {}, remove() {} }),
   });
   disposables.push(value);
   return value;

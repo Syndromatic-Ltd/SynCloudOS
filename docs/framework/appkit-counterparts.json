@@ -330,7 +330,6 @@
     "NSEPopup": "NSPanel",
     "NSEPredicateEditor": "NSPredicateEditor",
     "NSEPreferenceDescriptor": "UserDefaults",
-    "NSEPreferencesController": "NSUserDefaultsController",
     "NSEPresence": "NSViewController.transition(from:to:options:completionHandler:)",
     "NSEPresentationEnter": "CAAnimation",
     "NSEPresentationMotion": "CAAnimation",
@@ -561,6 +560,11 @@
     "NSETreeController": "NSTreeController",
     "NSEUndoManagerPort": "UndoManager",
     "NSEUnsupportedShapedTextError": "CTTypesetter",
+    "NSEUserDefaults": "NSUserDefaults",
+    "NSEUserDefaultsController": "NSUserDefaultsController",
+    "NSEUserDefaultsStore": {
+      "none": "Where an NSEUserDefaults keeps its values: SCOS.preferences in an application, which SynCloudOS persists the way cfprefsd does on a Mac."
+    },
     "NSEView": "NSView",
     "NSEViewComponent": "NSView",
     "NSEViewController": "NSViewController",
