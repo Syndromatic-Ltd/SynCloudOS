@@ -112,6 +112,39 @@ A sidebar is an `NSEOutlineView` with `selectionHighlightStyle="sourceList"`. Th
 
 `NSECollectionView` lays items out in a grid or a list. `createAdaptiveCollectionLayout` picks the number of columns from the available width, and `createListCollectionLayout` makes a single column. Items render through `NSETableCellView`, which arranges an image, a primary and secondary line and a badge.
 
+### Cover Flow
+
+`createCoverFlowCollectionLayout` gives the collection view a Cover Flow layout, after a custom `NSCollectionViewLayout` (AppKit's own Cover Flow was the private `IKImageFlowView`). The selected item faces the viewer, the others turn inward on either side, and every item is mirrored on the floor. AnimationFX draws the view: each item is a layer, and the mirrors sit under an `AFXReplicatorLayer` that darkens them with its instance colour, while a fade mask on each mirror fades it out. Items and mirrors are drawn in depth order, so a nearer item hides a farther one and its mirror.
+
+```tsx
+const showcase = createCoverFlowCollectionLayout({ isWrapped: true });
+
+<NSECollectionView
+  aria-label="Showcase"
+  adapter={adapter}
+  layout={showcase}
+  imageForItem={(item) => pictures.get(item.id)}   // an ImageFX IFXImageResource, from useImages().load
+  subtitleForItem={(item) => item.caption}
+  onActivate={(id, item) => open(item)}
+/>
+```
+
+| Layout property | Default | Meaning |
+| --- | --- | --- |
+| `cameraDistance` | `4` | The camera's distance from the selected item, in item widths. Nearer is more dramatic. |
+| `cameraPitch` | `0.335` | How far the camera looks down on the items, in radians. `0` is a level camera. |
+| `itemAspectRatio` | `16 / 10` | Every item's width over its height; pictures are cropped to it. |
+| `itemHeightFraction` | `0.62` | The selected item's height as a fraction of the view's height. |
+| `itemCentreFraction` | `0.47` | Where the selected item's centre sits, from the top of the view. |
+| `isWrapped` | `false` | The items form an endless ring. |
+| `visibleItemsEachSide` | `4` | Items at full opacity on each side before the fan fades out. |
+
+The defaults are AnimationFX's showcase camera. Software uses `{ cameraDistance: 3, cameraPitch: 0.04 }`, a level camera a little nearer.
+
+The selection is the array controller's: the selected item is the centre one, and selecting an item on the controller scrolls to it. The arrow keys, Home and End, a click on a side item, a drag and a horizontal wheel select. A drag moves the items under the pointer, and on release the scroll settles on the nearest item, carried on by the drag's speed. Enter or a click on the centre item activates it, calling `onActivate`. The title under the centre item is the adapter's label; `subtitleForItem` supplies the line beneath it, after `IKImageBrowserItem.imageSubtitle`, and `showsTitles` and `showsReflections` turn either off.
+
+`coverFlowItemAttributes` and `coverFlowLayoutAttributes` give the same geometry to a scene of your own, as AnimationFX's showcase uses it.
+
 ## Browser
 
 `NSEBrowser` is the multi column view familiar from the Finder. It reads its hierarchy from an `NSEBrowserDataSource`, and it loads each column on demand.

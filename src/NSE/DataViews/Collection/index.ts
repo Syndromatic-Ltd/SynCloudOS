@@ -20,7 +20,7 @@
 
 export { NSECollectionView } from "./NSECollectionView";
 export { calculateCollectionLayout, collectionColumnCount, createAdaptiveCollectionLayout, createListCollectionLayout } from "./collectionLayout";
-export { coverFlowLayoutAttributes, coverFlowReflectionBrightness, coverFlowReflectionFadeMask, coverFlowReflectionFrameY, coverFlowReflectionOpacity, type NSECoverFlowLayoutAttributes } from "./coverFlowLayout";
+export { coverFlowItemAttributes, coverFlowLayoutAttributes, createCoverFlowCollectionLayout, type NSECollectionViewCoverFlowLayout, type NSECollectionViewCoverFlowLayoutOptions, coverFlowReflectionBrightness, coverFlowReflectionFadeMask, coverFlowReflectionFrameY, coverFlowReflectionOpacity, type NSECoverFlowLayoutAttributes } from "./coverFlowLayout";
 export type {
   NSECollectionDropProposal,
   NSECollectionLayout,
@@ -28,4 +28,6 @@ export type {
   NSECollectionLayoutItem,
   NSECollectionViewItemProps,
   NSECollectionViewProps,
+  NSECollectionViewGridProps,
+  NSECollectionViewCoverFlowProps,
 } from "./collectionTypes";

@@ -71,10 +71,6 @@
       "replacement": "src/NSE/public/layout.ts"
     },
     {
-      "find": "@syndromatic/syncloudos/nse/cover-flow",
-      "replacement": "src/NSE/public/cover-flow.ts"
-    },
-    {
       "find": "@syndromatic/syncloudos/nse/system-ui",
       "replacement": "src/NSE/public/system-ui.ts"
     },
@@ -825,7 +821,6 @@
           "src/NSE/public/controls.ts",
           "src/NSE/AuroreEngine/index.ts",
           "src/NSE/Containers/index.ts",
-          "src/NSE/CoverFlow/index.ts",
           "src/NSE/Content/index.ts",
           "src/NSE/Editor/index.ts",
           "src/NSE/Haptics/index.ts",
@@ -996,7 +991,6 @@
           "src/NSE/public/page.ts",
           "src/NSE/public/aurore.ts",
           "src/NSE/public/layout.ts",
-          "src/NSE/public/cover-flow.ts",
           "src/NSE/public/system-ui.ts",
           "src/NSE/public/styles.css"
         ],

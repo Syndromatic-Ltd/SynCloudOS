@@ -3,7 +3,6 @@ import { action, actionRef, useAction, type NSEActionReference, type NSEActionOp
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
 import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
-import { NSECoverFlow } from "../../src/NSE/CoverFlow/NSECoverFlow";
 import type { NSEMenuActionEntry } from "../../src/NSE/Menus/menuTypes";
 import type { NSEToolbarActionItem } from "../../src/NSE/Toolbars/toolbarTypes";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
@@ -58,9 +57,6 @@ function View() {
     <NSESegmentedControl aria-label="Choose" items={[]} selection={{mode:"momentary",selectedIds:new Set()}} action={choose} actionPayload="note" />
     {/* @ts-expect-error Segmented payload must match reference. */}
     <NSESegmentedControl aria-label="Choose" items={[]} selection={{mode:"momentary",selectedIds:new Set()}} action={choose} actionPayload={2} />
-    <NSECoverFlow items={[]} action={choose} actionPayload="note" />
-    {/* @ts-expect-error Cover flow payload must match reference. */}
-    <NSECoverFlow items={[]} action={choose} actionPayload={2} />
   </>;
 }
 void View;

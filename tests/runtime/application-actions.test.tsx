@@ -8,7 +8,6 @@ import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEActionScopeProvider, NSEControlRuntimeProvider } from "../../src/NSE/Controls/Core";
 import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
 import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
-import { NSECoverFlow } from "../../src/NSE/CoverFlow/NSECoverFlow";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
@@ -789,25 +788,6 @@ describe("actions in menus and controls", () => {
     binding.dispose();
   });
 
-  it("runs cover-flow centre activation by click and keyboard, but not when recentring or unavailable", async () => {
-    const { context, view, focus } = fixture();
-    focus("view");
-    render(<ControlsHost context={context}>
-      <NSECoverFlow aria-label="Action covers" defaultActiveIndex={0} action="rename" actionPayload={{ title: "Cover" }} items={[{ id: "first", image: "/first.png", label: "First cover" }, { id: "second", image: "/second.png", label: "Second cover", action: "reload" }]} />
-    </ControlsHost>);
-    const first = screen.getByRole("option", { name: "First cover" });
-    await waitFor(() => expect(first.getAttribute("aria-disabled")).not.toBe("true"));
-    await act(async () => { fireEvent.click(first); });
-    await waitFor(() => expect(view.calls).toEqual(["view.rename:Cover"]));
-    await act(async () => { fireEvent.keyDown(screen.getByRole("listbox", { name: "Action covers" }), { key: "Enter" }); });
-    await waitFor(() => expect(view.calls).toEqual(["view.rename:Cover", "view.rename:Cover"]));
-    fireEvent.click(screen.getByRole("option", { name: "Second cover" }));
-    await waitFor(() => expect(screen.getByRole("option", { name: "Second cover" }).getAttribute("aria-selected")).toBe("true"));
-    await waitFor(() => expect(screen.getByRole("option", { name: "Second cover" }).getAttribute("aria-disabled")).toBe("true"));
-    await act(async () => { fireEvent.keyDown(screen.getByRole("listbox", { name: "Action covers" }), { key: "Enter" }); });
-    expect(view.calls).toHaveLength(2);
-  });
-
   it("disables a push button whose action is unavailable and runs one that is available", async () => {
     const { context, app, view, focus } = fixture();
     focus("view");
@@ -890,29 +870,6 @@ describe("actions in menus and controls", () => {
     expect(blocked.getAttribute("aria-disabled")).toBe("true");
     await act(async () => { fireEvent.click(screen.getByRole("option", { name: "Allowed option" })); });
     await waitFor(() => expect(choices.calls).toEqual(["allowed"]));
-    binding.dispose();
-  });
-
-  it("sends the active cover's id by default and honours an explicit item payload", async () => {
-    const { context, host, focus } = fixture();
-    class Covers extends Recorder {
-      @action openCover(value: string) { this.calls.push(value); }
-      validateOpenCover(value: string) { return value === "first" || value === "override"; }
-    }
-    const covers = new Covers();
-    const binding = bindActionResponder(covers, host, responderIds.window);
-    focus("view");
-    render(<ControlsHost context={context}>
-      <NSECoverFlow aria-label="Default payload covers" action="openCover" defaultActiveIndex={0} items={[{ id: "first", label: "Default cover", image: "/first.png" }, { id: "second", label: "Override cover", image: "/second.png", action: "openCover", actionPayload: "override" }]} />
-    </ControlsHost>);
-    const first = screen.getByRole("option", { name: "Default cover" });
-    await waitFor(() => expect(first.getAttribute("aria-disabled")).not.toBe("true"));
-    await act(async () => { fireEvent.click(first); });
-    await waitFor(() => expect(covers.calls).toEqual(["first"]));
-    fireEvent.click(screen.getByRole("option", { name: "Override cover" }));
-    await waitFor(() => expect(screen.getByRole("option", { name: "Override cover" }).getAttribute("aria-disabled")).not.toBe("true"));
-    await act(async () => { fireEvent.keyDown(screen.getByRole("listbox", { name: "Default payload covers" }), { key: "Enter" }); });
-    await waitFor(() => expect(covers.calls).toEqual(["first", "override"]));
     binding.dispose();
   });
 });

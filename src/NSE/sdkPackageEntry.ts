@@ -281,7 +281,11 @@ export {
   createListCollectionLayout,
 } from "./DataViews/Collection/collectionLayout";
 export {
+  coverFlowItemAttributes,
   coverFlowLayoutAttributes,
+  createCoverFlowCollectionLayout,
+  type NSECollectionViewCoverFlowLayout,
+  type NSECollectionViewCoverFlowLayoutOptions,
   coverFlowReflectionBrightness,
   coverFlowReflectionFadeMask,
   coverFlowReflectionFrameY,

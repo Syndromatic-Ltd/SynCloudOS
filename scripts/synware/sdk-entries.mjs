@@ -52,7 +52,6 @@ export const synWareSdkEntries = Object.freeze({
   "nse/scroll": "src/NSE/public/scroll.ts",
   "nse/page": "src/NSE/public/page.ts",
   "nse/layout": "src/NSE/public/layout.ts",
-  "nse/cover-flow": "src/NSE/public/cover-flow.ts",
   "nse/system-ui": "src/NSE/public/system-ui.ts",
 });
 export const synWareSdkStyles = Object.freeze({
