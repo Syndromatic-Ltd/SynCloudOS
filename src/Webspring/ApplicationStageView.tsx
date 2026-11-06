@@ -36,7 +36,8 @@ import {
   useNSEDeferredDisposal,
 } from "../NSE/NSE";
 import { nseMenuModel } from "../NSE/Menus/menuTypes";
-import { NSEButton, NSETopBar } from "@syndromatic/syncloudos/nse/controls";
+import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
+import { NSETopBar } from "../NSE/Windows/Chrome/NSETopBar";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";

@@ -156,7 +156,6 @@ On a desktop (a fine pointer that hovers), choosing an item in any menu or pop-u
 | `NSEView` | A view with a contextual `menu` and a `toolTip` (`NSView.menu`, `NSView.toolTip`). |
 | `NSEPopup` | An anchored or modal popup plate. |
 | `NSEToolbar` | A window's toolbar (`window.toolbar`): validated items, overflow, display and size modes, the customisation palette and autosaved configuration. |
-| `NSETopBar` | Title strips. The metal bar's `titlePlacement: "leading"` suits document windows: the app title (with its QuickSwitch action) beside the return control, the document in the middle. Items are `webspring`, `userInfo`, `settings` or `custom`. Every item glyph is a single-shape SVG drawn as a CSS mask over theme colours, so its normal, pressed and selected looks follow the theme for any icon: pass the SVG's URL as `icon` on any item, or omit it to get the built-in house (`webspring`), person (`userInfo`) or gear (`settings`). There is no separate selected icon. The metal bar's buttons are drawn in CSS (raised aluminium that presses in deeply, light and dark). |
 
 ## Panels and overlays
 

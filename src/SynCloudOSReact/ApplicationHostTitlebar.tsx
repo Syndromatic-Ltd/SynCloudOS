@@ -19,7 +19,7 @@
  */
 
 import { useMemo, useState, type ReactNode } from "react";
-import { NSETopBar } from "@syndromatic/syncloudos/nse/controls";
+import { NSETopBar } from "../NSE/Windows/Chrome/NSETopBar";
 import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarDocument, type NSEWindowTitlebarHost } from "../SynCloudOS/AppHosting/windowChrome";
 import { useApplicationMenuSnapshot, type ApplicationMenuStore } from "../Webspring/applicationMenuPresentation";
 
