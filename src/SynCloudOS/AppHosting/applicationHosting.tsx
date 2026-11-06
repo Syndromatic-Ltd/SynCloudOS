@@ -20,6 +20,7 @@
 
 import {
   useContext,
+  useEffect,
   useId,
   useLayoutEffect,
   useMemo,
@@ -31,8 +32,11 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
+import { useEnclosingFocusScopeId } from "../../SynCloudOSReact/focusScopeContext";
+import { useNSEAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
 import type { NSEAnyWindowController, NSEWindowMount } from "../../NSE/applicationHostInterop";
-import { nseWindowInternals } from "../../NSE/applicationHostInterop";
+import { nseSetKeyWindowModalPresenter, nseWindowInternals } from "../../NSE/applicationHostInterop";
 import { nseAttachView, nsePopoverPositioning, nseUpdateTraits, nseUpdateViewActivity, validateNSEViewControllerClass, type NSEViewController, type NSEViewControllerClass } from "../../NSE/applicationHostInterop";
 import { useObserve } from "../../NSE/applicationHostInterop";
 import { observableVersion, type NSEObservable } from "../../NSE/applicationHostInterop";
@@ -47,8 +51,9 @@ import { NSEAlertBackdrop, NSEAlertSurface, NSEFocusScope, NSEPopover } from "..
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
-import { NSEWindowContentBorder, NSEWindowTitlebarAccessories, nseContentBorderSize, NSEWindowTitlebarHostContext, NSEWindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
+import { NSEWindowContentBorder, NSEWindowSheetFrame, NSEWindowSheetHostContext, NSEWindowTitlebarAccessories, nseContentBorderSize, NSEWindowTitlebarHostContext, useNSEWindowSheetHost, NSEWindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
 import { applicationSessionFor } from "./applicationSession";
+import { createNSEWindowAlertQueue, NSEWindowAlertSheet, type NSEWindowAlertQueue } from "./windowAlertSheet";
 import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/applicationHostInterop";
 import { useNSEOverlayFocusScope } from "../../NSE/applicationHostInterop";
 import { NSEViewControllerRendererProvider } from "../../NSE/applicationHostInterop";
@@ -127,7 +132,9 @@ function ControllerResponder({ appRuntime, target, kind, host, children }: Contr
   const kernel = useContext(SynCloudOSRuntimeContext);
   const parentId = hierarchy.responderId ?? appRuntime.responderId;
   const overlayScopeId = useNSEOverlayFocusScope();
-  const scopeId = overlayScopeId ?? kernel?.responders.get(parentId)?.scopeId ?? parentId;
+  // The innermost focus scope it renders in (a sheet's, a popover's), else its parent responder's.
+  const enclosingScopeId = useEnclosingFocusScopeId();
+  const scopeId = enclosingScopeId ?? overlayScopeId ?? kernel?.responders.get(parentId)?.scopeId ?? parentId;
   const appId = appRuntime.app.bundleIdentifier;
   const responderId = `${kind}:${appId}:${identityOf(target)}:${bindingId}`;
   useLayoutEffect(() => {
@@ -150,7 +157,10 @@ function ControllerResponder({ appRuntime, target, kind, host, children }: Contr
  */
 export function NSEControllerResponder({ target, kind, host = "contents", children }: Omit<ControllerResponderProps, "appRuntime" | "host"> & { readonly host?: ControllerResponderProps["host"] }) {
   const appRuntime = useContext(SynWareRuntimeContext);
-  if (!appRuntime || !hasActions(target)) return <>{children}</>;
+  // A presented view controller (a sheet's, a popover's) roots its own responder chain, as a sheet's
+  // window does, so its controls sit in its modal focus scope even when it declares no actions.
+  const presented = kind === "view" && ((target as Partial<NSEViewController<unknown>>).presentingViewController ?? null) !== null;
+  if (!appRuntime || (!hasActions(target) && !presented)) return <>{children}</>;
   return <ControllerResponder appRuntime={appRuntime} target={target} kind={kind} host={host}>{children}</ControllerResponder>;
 }
 
@@ -215,7 +225,7 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
     // Transfer only that existing handoff, never an editor or portalled focus.
     const active = element.ownerDocument.activeElement;
     if (active instanceof HTMLElement && active.dataset.syncloudosResponderId?.startsWith("application:")
-      && active.contains(element) && active.querySelector("[data-nse-view-controller]") === element
+      && active.contains(element) && firstContentFrame(active) === element
       && !element.closest("[inert]")) {
       const target = active.querySelector<HTMLElement>("[data-nse-initial-focus]") ?? element;
       target.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
@@ -276,6 +286,14 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
   return <NSEControllerResponder target={controller} kind="view" host="element">{frame}</NSEControllerResponder>;
 }
 
+/** The first view controller frame in the application's content, past any in the window's title bar. */
+function firstContentFrame(root: HTMLElement): Element | null {
+  for (const frame of root.querySelectorAll("[data-nse-view-controller]")) {
+    if (!frame.closest(".nse-window-titlebar-accessory-slot, .nse-window-titlebar-accessories")) return frame;
+  }
+  return null;
+}
+
 const popoverPlacement = { minY: "block-start", maxY: "block-end", minX: "inline-start", maxX: "inline-end" } as const;
 
 /**
@@ -317,24 +335,33 @@ function sheetKey(controller: object): string {
 function NSEPresentedSheet({ controller }: { readonly controller: NSEViewController<unknown> }) {
   useObserve(controller);
   const titleId = useId();
+  const sheetHost = useContext(NSEWindowSheetHostContext);
+  const { reducedMotion } = useNSEAnimationEnvironment();
+  // A window's sheet is drawn in the window's colour scheme, so its controls' ink matches its plate.
+  const colourScheme = useNSEAppearance().resolvedColourScheme;
+  useLayoutEffect(() => sheetHost?.attach(), [sheetHost]);
   const size = controller.preferredContentSize;
   const cancel = () => {
     const operation = (controller as { cancelOperation?: () => unknown }).cancelOperation;
     if (typeof operation === "function") void operation.call(controller);
     else controller.dismiss();
   };
-  return <NSEFocusScope options={{ scopeId: `nse-sheet:${sheetKey(controller)}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEAlertBackdrop onSafeDismiss={cancel}>
-      <NSEAlertSurface role="dialog" labelledBy={controller.title ? titleId : undefined} className="nse-sheet"
-        style={size ? { width: `min(${size.width}px, calc(100vw - 32px))` } : undefined}>
+  const sheet = <NSEFocusScope options={{ scopeId: `nse-sheet:${sheetKey(controller)}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+    <NSEAlertBackdrop onSafeDismiss={cancel} className={sheetHost ? "nse-window-sheet-backdrop" : undefined} motion={sheetHost ? "sheet" : "alert"}>
+      <NSEAlertSurface role="dialog" labelledBy={controller.title ? titleId : undefined} className="nse-sheet" motion={sheetHost ? "sheet" : "alert"}
+        appearance={sheetHost ? colourScheme : "dark"}
+        style={size ? { width: `min(${size.width}px, calc(100% - 32px))` } : undefined}>
         {controller.title ? <h2 id={titleId} className="nse-sheet-title">{controller.title}</h2> : null}
         <NSEViewControllerView controller={controller} />
       </NSEAlertSurface>
     </NSEAlertBackdrop>
   </NSEFocusScope>;
+  // A window attaches the sheet under its title bar and toolbar; outside a window it covers the page.
+  if (!sheetHost) return sheet;
+  return sheetHost.layer ? createPortal(<NSEWindowSheetFrame reducedMotion={reducedMotion} frozen={controller.isDisposed} holdsController>{sheet}</NSEWindowSheetFrame>, sheetHost.layer) : null;
 }
 
-function createWindowMount(appRuntime: SynWareRuntime, alerts: SynWareContextValue["alerts"] | null): NSEWindowMount {
+function createWindowMount(appRuntime: SynWareRuntime, alerts: NSEWindowAlertQueue, appAlerts: SynWareContextValue["alerts"] | null): NSEWindowMount {
   const windows = appRuntime.windows;
   const current = () => {
     const snapshot = windows.getSnapshot();
@@ -362,9 +389,12 @@ function createWindowMount(appRuntime: SynWareRuntime, alerts: SynWareContextVal
       const id = current()?.id;
       return id ? windows.registerCloseGuard(id, guard) : () => {};
     },
-    presentAlert: (request, signal) => {
-      if (!alerts) return Promise.reject(new Error("Cannot present an alert: this window has no application context."));
-      return alerts.present({ title: request.title, ...(request.message ? { message: request.message } : {}), buttons: request.buttons }, signal);
+    // NSAlert.beginSheetModal(for:): the alert attaches to this window as a sheet.
+    presentAlert: (request, signal) => alerts.present(request, signal),
+    // NSAlert.runModal(): the application's centred alert, from the system alert presenter.
+    presentModalAlert: (request, signal) => {
+      if (!appAlerts) return Promise.reject(new Error("Cannot present an alert: this window has no application context."));
+      return appAlerts.present({ title: request.title, ...(request.message ? { message: request.message } : {}), buttons: request.buttons }, signal);
     },
   };
 }
@@ -381,18 +411,32 @@ export interface NSEWindowControllerViewProps {
 export function NSEWindowControllerView({ controller }: NSEWindowControllerViewProps) {
   useObserve(controller);
   const appRuntime = useContext(SynWareRuntimeContext);
-  const alerts = useSynWareContext()?.alerts ?? null;
-  const mount = useMemo(() => (appRuntime ? createWindowMount(appRuntime, alerts) : null), [appRuntime, alerts]);
+  const alerts = useMemo(() => createNSEWindowAlertQueue(), []);
+  const appAlerts = useSynWareContext()?.alerts ?? null;
+  const mount = useMemo(() => (appRuntime ? createWindowMount(appRuntime, alerts, appAlerts) : null), [appRuntime, alerts, appAlerts]);
   const [loaded, setLoaded] = useState(false);
   const titlebarHost = useContext(NSEWindowTitlebarHostContext);
   // A window of its own draws its title in the window record; only the stage's title bar takes the document.
   const stageTitlebar = mount && mount.windowId === null ? titlebarHost : null;
   useNSEWindowTitlebarDocument(controller, loaded ? stageTitlebar : null);
+  // While a sheet is attached, the window's close button and Close command are refused (performClose(_:)).
+  const sheetCloseGuard = useRef<(() => void) | null>(null);
+  const sheets = useNSEWindowSheetHost((attached) => {
+    sheetCloseGuard.current?.();
+    sheetCloseGuard.current = attached && mount
+      ? mount.registerCloseGuard({ shouldClose: (reason) => reason !== "control" && reason !== "command", willClose: () => {} })
+      : null;
+  });
+  useEffect(() => () => { sheetCloseGuard.current?.(); sheetCloseGuard.current = null; }, []);
   useLayoutEffect(() => {
     if (!mount || controller.isDisposed) return;
     const internals = controller[nseWindowInternals];
     const detach = internals.attach(mount);
-    const reportKey = () => { internals.setKey(mount.getSnapshot()?.isKey ?? mount.windowId === null); };
+    const reportKey = () => {
+      const isKey = mount.getSnapshot()?.isKey ?? mount.windowId === null;
+      internals.setKey(isKey);
+      if (isKey) nseSetKeyWindowModalPresenter(mount, mount.presentModalAlert);
+    };
     reportKey();
     const unsubscribe = mount.subscribe(reportKey);
     // A window that closes on its own (not because the application quits) disposes its controller once the view leaves.
@@ -408,6 +452,7 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
     });
     setLoaded(true);
     return () => {
+      nseSetKeyWindowModalPresenter(mount, null);
       removeGuard();
       unsubscribe();
       detach();
@@ -419,9 +464,10 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   if (controller.isDisposed || !loaded) return null;
   const root = controller.contentViewController;
   const View = viewComponentOf(controller);
-  const content = root
+  const content = <NSEWindowSheetHostContext.Provider value={sheets.host}>{root
     ? <NSEViewControllerView controller={root} />
-    : View ? <View controller={controller} /> : null;
+    : View ? <View controller={controller} /> : null}<NSEWindowAlertSheet queue={alerts} /></NSEWindowSheetHostContext.Provider>;
+  const sheetLayer = <div ref={sheets.layerRef} className="nse-window-sheet-layer" data-sheet-attached={sheets.attached ? "true" : undefined} />;
   const { toolbar, titlebarAccessoryViewControllers: accessories } = controller.window;
   const renderAccessory = (accessory: NSEViewController<unknown>) => <NSEViewControllerView controller={accessory} className="nse-window-titlebar-accessory" />;
   const bottomBorder = controller.window.contentBorderThickness("minY");
@@ -439,9 +485,10 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
             <div className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined}>
               {content}
               {bottomBorder > 0 ? <NSEWindowContentBorder thickness={bottomBorder} /> : null}
+              {sheetLayer}
             </div>
           </div>
-        ) : content}
+        ) : <>{content}{sheetLayer}</>}
       </NSEControllerResponder>
     </NSEActionScopeProvider>
   );

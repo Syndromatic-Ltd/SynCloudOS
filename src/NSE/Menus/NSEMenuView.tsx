@@ -19,6 +19,7 @@
  */
 
 import type { ResolvedKeyBinding } from "../../SynCloudOS/KeyBindings/keyBindingTypes";
+import { nseFlashMenuSelection } from "./menuSelectionFlash";
 import { Children, isValidElement, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import type { CommandDispatchAcceptance, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
 import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
@@ -254,6 +255,11 @@ function NSECommandMenuSurface({
     target.focus({ preventScroll: true });
   }, [activeId, open, presentationReady, snapshot.generation, snapshot.open]);
 
+  const flashing = useRef(false);
+  // Set once a chosen row has flashed, until the menu opens again.
+  const chosen = useRef(false);
+  const shownSnapshot = useRef(snapshot);
+  if (open && snapshot.open && shownSnapshot.current.generation !== snapshot.generation) chosen.current = false;
   const activate = async (entry: NSEMenuPresentedEntry, delayed = false) => {
     if (entry.kind === "submenu") {
       if (!entry.enabled) return;
@@ -281,7 +287,15 @@ function NSECommandMenuSurface({
       controller.dismiss("programmatic");
       return;
     }
-    if (current.enabled && !current.hidden) await controller.dispatch(current.id);
+    if (!current.enabled || current.hidden || flashing.current) return;
+    const flash = nseFlashMenuSelection(itemRefs.current.get(entry.id));
+    if (flash) {
+      flashing.current = true;
+      try { await flash; } finally { flashing.current = false; }
+      if (!ownsBranch(path)) return;
+      chosen.current = true;
+    }
+    await controller.dispatch(current.id);
   };
 
   const move = (delta: number) => {
@@ -392,22 +406,27 @@ function NSECommandMenuSurface({
     }
   };
 
-  if (!open || !snapshot.open) return null;
+  // A menu whose row was chosen keeps drawing what it showed while its popup fades out.
+  const showing = open && snapshot.open;
+  if (showing) shownSnapshot.current = snapshot;
+  const view = showing ? snapshot : chosen.current ? shownSnapshot.current : null;
+  if (!view) return null;
   return (
     <div
       className={`nse-menu${applicationAppearance ? " nse-application-menu-list" : ""}`}
       role="menu"
       aria-labelledby={labelledBy}
-      aria-busy={snapshot.validating || undefined}
+      aria-busy={view.validating || undefined}
+      inert={!showing || undefined}
       data-nse-menu-id={model.id}
-      data-nse-menu-generation={snapshot.generation}
+      data-nse-menu-generation={view.generation}
       {...appearanceProjection}
       data-nse-menu-variant={applicationAppearance ? "application-menu" : "popup"}
       dir={direction}
       onKeyDown={handleKeyDown}
     >
       <NSEAppearanceNineSlice kind="menu-surface" className="nse-menu__surface-layer" />
-      {snapshot.branchPath.length > 0 ? (
+      {view.branchPath.length > 0 ? (
         <button
           className={`nse-menu-item nse-menu-back${applicationAppearance ? " nse-control-list-item" : ""}`}
           type="button"
@@ -427,7 +446,7 @@ function NSECommandMenuSurface({
           )}
         </button>
       ) : null}
-      {snapshot.entries.map((entry) => {
+      {view.entries.map((entry) => {
         if (entry.kind === "separator") return <div key={entry.id} className="nse-menu-separator" role="separator" />;
         if (entry.kind === "custom") return <div key={entry.id} className="nse-menu-custom" role="presentation">{entry.render()}</div>;
         const role = roleFor(entry);

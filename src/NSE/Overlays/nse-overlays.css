@@ -202,9 +202,7 @@
   text-align: start;
 }
 
-.nse-overlay-listbox-option:focus-visible,
-.nse-overlay-listbox-option:hover:not(:disabled),
-.nse-overlay-listbox-option[aria-selected="true"] {
+.nse-overlay-listbox-option:is([data-highlighted="true"], [data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]) {
   outline: none;
   background: color-mix(in srgb, Highlight 18%, transparent);
 }
@@ -239,3 +237,8 @@
   max-block-size: var(--nse-overlay-available-block-size) !important;
   overflow: auto;
 }
+
+/* A menu or list whose row was chosen fades out as it closes (desktop; see menuSelectionFlash). */
+.nse-overlay-popup[data-state="closing"] { pointer-events: none; }
+.nse-overlay-popup[data-state="closing"][data-nse-menu-chosen] { animation: nse-menu-chosen-fade 0.2s ease-in forwards; }
+@keyframes nse-menu-chosen-fade { to { opacity: 0; } }

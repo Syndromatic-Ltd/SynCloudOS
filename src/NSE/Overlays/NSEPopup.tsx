@@ -30,6 +30,7 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from "react";
+import { nseMenuChosenAttribute, nseMenuChosenFadeMs } from "../Menus/menuSelectionFlash";
 import { createPortal } from "react-dom";
 import { useNSEOverlay } from "./useNSEOverlay";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
@@ -194,23 +195,32 @@ export function NSEPopup({
   ), [chrome, className, isModal, kind]);
   const surfaceRole: AriaRole = role ?? (kind === "listbox" ? "listbox" : "dialog");
 
+  // A menu whose row was just chosen fades out (the row flashed and marked its popup), so it stays
+  // mounted for the fade even when this popup has no exit of its own.
+  const chosen = !state.open && mounted
+    && overlay.portalHost?.ownerDocument.getElementById(resolvedId)?.hasAttribute(nseMenuChosenAttribute) === true;
+  const exit = Math.max(exitDuration, chosen ? nseMenuChosenFadeMs : 0);
+
   useEffect(() => {
-    if (exitDuration <= 0) return;
     if (state.open) {
       setMounted(true);
       setClosing(false);
       return;
     }
     if (!mounted) return;
+    if (exit <= 0) {
+      setMounted(false);
+      return;
+    }
     setClosing(true);
     const handle = runtime.environment.setTimeout(() => {
       setMounted(false);
       setClosing(false);
-    }, exitDuration);
+    }, exit);
     return () => runtime.environment.clearTimeout(handle);
-  }, [exitDuration, mounted, runtime, state.open]);
+  }, [exit, mounted, runtime, state.open]);
 
-  const rendered = exitDuration > 0 ? state.open || mounted : state.open;
+  const rendered = exit > 0 ? state.open || mounted : state.open;
   if (!overlay.portalHost || (!rendered && !keepPortalMounted)) return null;
   if (!rendered) {
     return createPortal(

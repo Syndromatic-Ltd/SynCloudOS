@@ -151,6 +151,8 @@ Data views render collections owned by a controller. They are virtualised, so a 
 | --- | --- |
 | `NSEMenu` | A menu object (`NSMenu`) of command, submenu, separator and view items, validated along the responder chain when it opens. A pull-down `NSEPopUpButton` shows one, a view shows one as its `NSEView.menu`, and the application's `mainMenu` is one. |
 | `NSEMenuBar` | Draws the application's `mainMenu` across the window. |
+
+On a desktop (a fine pointer that hovers), choosing an item in any menu or pop-up list flashes it (highlighted, unhighlighted, highlighted again) before the command runs, then the menu fades out, as a Mac menu does. Dismissing a menu without a choice closes it at once, and touch presentations do neither. A pop-up button's list is at least as wide as the button, and without a `width` the button is sized to its widest item (`sizeToFit`). Pressing an open pop-up button closes its list.
 | `NSEView` | A view with a contextual `menu` and a `toolTip` (`NSView.menu`, `NSView.toolTip`). |
 | `NSEPopup` | An anchored or modal popup plate. |
 | `NSEToolbar` | A window's toolbar (`window.toolbar`): validated items, overflow, display and size modes, the customisation palette and autosaved configuration. |

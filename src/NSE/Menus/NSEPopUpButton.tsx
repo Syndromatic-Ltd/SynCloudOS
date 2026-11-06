@@ -299,7 +299,11 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
       )}
       <NSEButton
         title={pullsDown ? title : <>
-          <span className="nse-control-picker-caption">{selectedRow?.item.title ?? "Select"}</span>
+          <span className="nse-control-picker-caption">
+            <span className="nse-control-picker-caption-title">{selectedRow?.item.title ?? "Select"}</span>
+            {/* Sizes the button to its widest item, as NSPopUpButton's sizeToFit does. */}
+            {choiceRows.map((row) => <span key={row.item.value} className="nse-control-picker-caption-sizer" aria-hidden="true">{row.item.title}</span>)}
+          </span>
           <span className="nse-control-picker-arrow" aria-hidden="true" />
         </>}
         appearance={appearance}

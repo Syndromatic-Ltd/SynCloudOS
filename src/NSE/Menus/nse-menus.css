@@ -69,8 +69,7 @@
   text-align: start;
 }
 
-.nse-menu-item:focus-visible,
-.nse-menu-item:hover {
+.nse-menu-item:is(:focus-visible, :hover, [data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]) {
   outline: none;
   background: Highlight;
   color: HighlightText;
@@ -138,3 +137,6 @@
 .nse-menu-state-column[data-state="mixed"]::before { content: "\2013"; }
 .nse-menu-submenu-arrow::before { content: "\203A"; }
 .nse-menu-submenu-arrow[data-direction="rtl"]::before { content: "\2039"; }
+
+.nse-control-picker-caption-title { display: block; overflow: hidden; text-overflow: ellipsis; }
+.nse-control-picker-caption-sizer { display: block; block-size: 0; overflow: hidden; visibility: hidden; }

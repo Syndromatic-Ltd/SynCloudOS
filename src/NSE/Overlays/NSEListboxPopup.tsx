@@ -19,6 +19,7 @@
  */
 
 import { Children, Fragment, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { nseFlashMenuSelection } from "../Menus/menuSelectionFlash";
 import { useNSERubberBandScroll } from "../Scroll";
 import { NSEPopup, useNSEPopupOpenState, type NSEPopupPresentation } from "./NSEPopup";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
@@ -153,6 +154,11 @@ export function NSEListboxPopup<T = unknown>({
   const listboxRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
+  const attachContent = useCallback((element: HTMLDivElement | null) => {
+    contentRef.current = element;
+    setContentElement(element);
+  }, []);
   const optionRefs = useRef(new Map<string, HTMLButtonElement>());
   const pendingFocusId = useRef<string | null>(null);
   const typeaheadRef = useRef<{ prefix: string; handle: unknown | null }>({ prefix: "", handle: null });
@@ -225,11 +231,17 @@ export function NSEListboxPopup<T = unknown>({
     updateScrollState();
   }, [state.open, virtualWindow, updateScrollState]);
 
+  // Opening highlights and focuses the selected row. Only opening does: a re-render while the list is
+  // open (a parent passing new option objects) must not pull the highlight back from the pointer.
+  const opening = useRef({ options, selectedId, focusIndex, updateScrollState });
+  opening.current = { options, selectedId, focusIndex, updateScrollState };
   useEffect(() => {
     if (!state.open) return;
+    const { options, selectedId } = opening.current;
     const selectedIndex = selectedId ? options.findIndex((option) => option.id === selectedId && !option.disabled) : -1;
     setActiveIndex(selectedIndex >= 0 ? selectedIndex : firstEnabledIndex(options));
     const handle = provider.runtime.environment.setTimeout(() => {
+      const { options, focusIndex, updateScrollState } = opening.current;
       const index = selectedIndex >= 0 ? selectedIndex : firstEnabledIndex(options);
       if (index >= 0) {
         focusIndex(index);
@@ -239,13 +251,37 @@ export function NSEListboxPopup<T = unknown>({
       updateScrollState();
     }, 0);
     return () => provider.runtime.environment.clearTimeout(handle);
-  }, [focusIndex, options, provider.runtime, selectedId, state.open, updateScrollState]);
+  }, [provider.runtime, state.open]);
 
+  const flashing = useRef(false);
+  // The highlight follows the pointer as it moves, as a menu's does. A native listener on the list's own
+  // content: the overlay's ancestors keep pointer movement from reaching React's root listener.
+  useEffect(() => {
+    const content = contentElement;
+    if (!state.open || !content) return;
+    const onMove = (event: MouseEvent) => {
+      if (flashing.current || !(event.target instanceof Element)) return;
+      const row = event.target.closest<HTMLElement>(".nse-overlay-listbox-option");
+      const index = row && content.contains(row) ? Number(row.dataset.index) : -1;
+      if (index >= 0 && !options[index]?.disabled) setActiveIndex(index);
+    };
+    content.addEventListener("mousemove", onMove);
+    return () => content.removeEventListener("mousemove", onMove);
+  }, [contentElement, options, state.open]);
   const select = useCallback((option: NSEListboxOption<T>) => {
-    if (option.disabled) return;
-    onSelect?.(option);
-    state.requestOpen(false, "selection");
-  }, [onSelect, state]);
+    if (option.disabled || flashing.current) return;
+    // On a desktop the chosen row flashes before the list chooses it and fades; an action sheet does not.
+    const row = resolvedPresentation.mode === "sheet" ? null : optionRefs.current.get(option.id);
+    const choose = () => {
+      flashing.current = false;
+      onSelect?.(option);
+      state.requestOpen(false, "selection");
+    };
+    const flash = nseFlashMenuSelection(row);
+    if (!flash) { choose(); return; }
+    flashing.current = true;
+    void flash.then(choose);
+  }, [onSelect, resolvedPresentation.mode, state]);
 
   const handleKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
     if (event.defaultPrevented || event.nativeEvent.isComposing) return;
@@ -311,6 +347,7 @@ export function NSEListboxPopup<T = unknown>({
         type="button"
         role="option"
         aria-selected={option.kind !== "action" && option.id === selectedId}
+        data-highlighted={index === activeIndex && !option.disabled ? "true" : undefined}
         data-kind={option.kind === "action" ? "action" : undefined}
         aria-posinset={index + 1}
         aria-setsize={options.length}
@@ -319,7 +356,7 @@ export function NSEListboxPopup<T = unknown>({
         tabIndex={index === activeIndex ? 0 : -1}
         style={optionStyle}
         onFocus={() => setActiveIndex(index)}
-        onMouseEnter={() => !option.disabled && setActiveIndex(index)}
+        data-index={index}
         onClick={() => select(option)}
       >
         {option.label}
@@ -366,7 +403,7 @@ export function NSEListboxPopup<T = unknown>({
         onKeyDown={handleKeyDown}
       >
         <div ref={scrollRef} className="nse-overlay-listbox-scroll" onScroll={updateScrollState}>
-          <div ref={contentRef} className="nse-overlay-listbox-scroll-content" style={contentStyle}>
+          <div ref={attachContent} className="nse-overlay-listbox-scroll-content" style={contentStyle}>
             {optionRows}
           </div>
         </div>
