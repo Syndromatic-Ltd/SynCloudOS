@@ -23,7 +23,7 @@ export {
   NSEPage,
 } from "../Page/NSEPage";
 export { NSEPageController } from "../Page/NSEPageController";
-export type { NSEPageControllerProps, NSEPageControllerTransitionStyle } from "../Page/NSEPageController";
+export type { NSEPageControllerOptions, NSEPageControllerSnapshot, NSEPageControllerTransitionStyle } from "../Page/NSEPageController";
 export type {
   NSEPageEvent,
   NSEPageHandle,

@@ -1,63 +1,149 @@
-/*
- * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
- *
- * Designed by Kavish Krishnakumar in Manchester.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 // @vitest-environment jsdom
-
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import React from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import * as React from "react";
+import { act, cleanup, fireEvent, screen } from "@testing-library/react";
+import { afterEach, expect, it } from "vitest";
+import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
+import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
+import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
+import { useObserve } from "../../src/NSE/Objects/useObserve";
 import { NSEPageController } from "../../src/NSE/Page";
+import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
-afterEach(cleanup);
+const hosts: ClassApplicationHost[] = [];
+afterEach(async () => {
+  cleanup();
+  for (const host of hosts.splice(0)) await host.dispose();
+});
 
-const days = ["Saturday", "Sunday", "Monday"] as const;
+interface Entry { readonly kind: "folder" | "note"; readonly name: string }
 
-describe("NSEPageController", () => {
-  it("shows the selected object's page and keeps the others mounted but inert", () => {
-    render(<NSEPageController aria-label="Days" arrangedObjects={days} selectedIndex={1} identifierForObject={(day) => day} viewForObject={(day) => <span>{day}</span>} />);
-    const pages = [...document.querySelectorAll("[aria-roledescription='page']")];
-    expect(pages).toHaveLength(3);
-    expect(pages.map((page) => page.getAttribute("data-active"))).toEqual(["false", "true", "false"]);
-    expect(pages[0]!.hasAttribute("inert")).toBe(true);
-    expect((document.querySelector(".nse-container-sliding-view-track") as HTMLElement).style.transform).toBe("translate3d(-100%, 0, 0)");
-    expect(screen.getByLabelText("Days").getAttribute("data-transition-style")).toBe("horizontalStrip");
+class EntryPage extends NSEViewController {
+  constructor(readonly kind: string) { super(); }
+  static override view = function EntryPageView({ controller }: { readonly controller: EntryPage }) {
+    useObserve(controller);
+    const object = controller.representedObject as Entry | string | undefined;
+    return <p>{controller.kind}: {typeof object === "string" ? object : object?.name}</p>;
+  };
+}
+
+/** A history of folders and notes; every folder shares one page, as do the notes. */
+class History extends NSEPageController<Entry> {
+  readonly made: string[] = [];
+  readonly transitions: string[] = [];
+  constructor() {
+    super({ title: "Notes" });
+    this.arrangedObjects = [{ kind: "folder", name: "All notes" }];
+  }
+  override identifierForObject(entry: Entry) { return entry.kind; }
+  override viewControllerForIdentifier(identifier: string) {
+    this.made.push(identifier);
+    return this.addChild(EntryPage, identifier);
+  }
+  override didTransitionToObject(entry: Entry) { this.transitions.push(entry.name); }
+}
+
+class Days extends NSEPageController<string> {
+  constructor() {
+    super({ transitionStyle: "horizontalStrip", title: "Days" });
+    this.arrangedObjects = ["Saturday", "Sunday", "Monday"];
+  }
+  override viewControllerForIdentifier(identifier: string) { return this.addChild(EntryPage, identifier); }
+}
+
+let history!: History;
+let days!: Days;
+class Content extends NSEViewController {
+  readonly history = this.addChild(History);
+  readonly days = this.addChild(Days);
+  constructor() { super(); history = this.history; days = this.days; }
+  static override view = function ContentView({ controller }: { readonly controller: Content }) {
+    return <><controller.history.view /><controller.days.view /></>;
+  };
+}
+class MainWindow extends NSEWindowController {
+  constructor() { super(); this.contentViewController = new Content(); }
+}
+class Application extends NSEApplication { static override mainWindow = MainWindow; }
+
+async function launch() {
+  const host = createClassApplicationHost(Application, "com.example.page-controller");
+  hosts.push(host);
+  await host.launch();
+  host.mountWindows();
+  await act(async () => { await host.openMainWindow(); });
+  return host;
+}
+
+it("keeps a history: forward to a new page drops the pages after the selected one (stackHistory)", async () => {
+  await launch();
+  expect(history.transitionStyle).toBe("stackHistory");
+  expect(await screen.findByText("folder: All notes")).toBeTruthy();
+  expect(history.canNavigateBack).toBe(false);
+
+  await act(async () => { history.navigateForwardToObject({ kind: "folder", name: "Travel" }); });
+  expect(await screen.findByText("folder: Travel")).toBeTruthy();
+  // Both folders share the one folder page, which now shows Travel.
+  expect(history.made).toEqual(["folder"]);
+  await act(async () => { history.navigateForwardToObject({ kind: "note", name: "Lisbon" }); });
+  expect(await screen.findByText("note: Lisbon")).toBeTruthy();
+  expect(screen.queryByText(/^folder:/)).toBeNull();
+  expect(history.arrangedObjects.map(entry => entry.name)).toEqual(["All notes", "Travel", "Lisbon"]);
+
+  await act(async () => { history.navigateBack(); });
+  expect(await screen.findByText("folder: Travel")).toBeTruthy();
+  expect(history.canNavigateForward).toBe(true);
+  await act(async () => { history.navigateBack(); });
+  expect(await screen.findByText("folder: All notes")).toBeTruthy();
+  await act(async () => { history.navigateForwardToObject({ kind: "note", name: "Shopping" }); });
+  expect(history.arrangedObjects.map(entry => entry.name)).toEqual(["All notes", "Shopping"]);
+  expect(history.selectedIndex).toBe(1);
+  expect(history.transitions).toEqual(["Travel", "Lisbon", "Travel", "All notes", "Shopping"]);
+
+  // A swipe to the right goes back.
+  const view = screen.getByLabelText("Notes");
+  await act(async () => {
+    fireEvent.pointerDown(view, { pointerId: 1, isPrimary: true, clientX: 100, clientY: 10 });
+    fireEvent.pointerUp(view, { pointerId: 1, clientX: 220, clientY: 12 });
   });
+  expect(history.selectedIndex).toBe(0);
+});
 
-  it("turns the page on a horizontal swipe and reports the transition", () => {
-    const onSelectedIndexChange = vi.fn();
-    render(<NSEPageController aria-label="Days" arrangedObjects={days} onSelectedIndexChange={onSelectedIndexChange} viewForObject={(day) => <span>{day}</span>} />);
-    const controller = screen.getByLabelText("Days");
-    fireEvent.pointerDown(controller, { pointerId: 1, isPrimary: true, clientX: 200, clientY: 10 });
-    fireEvent.pointerUp(controller, { pointerId: 1, clientX: 100, clientY: 14 });
-    expect(onSelectedIndexChange).toHaveBeenCalledWith(1, "Sunday");
-    expect(controller.getAttribute("data-selected-index")).toBe("1");
-    fireEvent.pointerDown(controller, { pointerId: 2, isPrimary: true, clientX: 100, clientY: 10 });
-    fireEvent.pointerUp(controller, { pointerId: 2, clientX: 120, clientY: 10 });
-    expect(controller.getAttribute("data-selected-index")).toBe("1");
-  });
+it("lays its pages side by side and turns them with a swipe (horizontalStrip)", async () => {
+  await launch();
+  await screen.findByText("Saturday: Saturday");
+  const view = screen.getByLabelText("Days");
+  const pages = [...view.querySelectorAll("[aria-roledescription='page']")];
+  expect(pages).toHaveLength(3);
+  expect(pages.map(page => page.getAttribute("data-active"))).toEqual(["true", "false", "false"]);
+  expect(pages[1]!.hasAttribute("inert")).toBe(true);
+  expect(screen.getByText("Monday: Monday")).toBeTruthy();
 
-  it("does not turn past the first page", () => {
-    const onSelectedIndexChange = vi.fn();
-    render(<NSEPageController aria-label="Days" arrangedObjects={days} selectedIndex={0} onSelectedIndexChange={onSelectedIndexChange} viewForObject={(day) => <span>{day}</span>} />);
-    const controller = screen.getByLabelText("Days");
-    fireEvent.pointerDown(controller, { pointerId: 1, isPrimary: true, clientX: 100, clientY: 10 });
-    fireEvent.pointerUp(controller, { pointerId: 1, clientX: 220, clientY: 10 });
-    expect(onSelectedIndexChange).not.toHaveBeenCalled();
+  await act(async () => {
+    fireEvent.pointerDown(view, { pointerId: 1, isPrimary: true, clientX: 200, clientY: 10 });
+    fireEvent.pointerUp(view, { pointerId: 1, clientX: 100, clientY: 14 });
   });
+  expect(days.selectedIndex).toBe(1);
+  expect(view.getAttribute("data-selected-index")).toBe("1");
+  expect((view.querySelector(".nse-container-sliding-view-track") as HTMLElement).style.transform).toBe("translate3d(-100%, 0, 0)");
+  // A short or vertical drag does not turn the page, nor does a swipe past the first page.
+  await act(async () => {
+    fireEvent.pointerDown(view, { pointerId: 2, isPrimary: true, clientX: 100, clientY: 10 });
+    fireEvent.pointerUp(view, { pointerId: 2, clientX: 120, clientY: 10 });
+  });
+  expect(days.selectedIndex).toBe(1);
+  await act(async () => { days.selectedIndex = 0; });
+  await act(async () => {
+    fireEvent.pointerDown(view, { pointerId: 3, isPrimary: true, clientX: 100, clientY: 10 });
+    fireEvent.pointerUp(view, { pointerId: 3, clientX: 220, clientY: 10 });
+  });
+  expect(days.selectedIndex).toBe(0);
+});
+
+it("refuses a page that is not its child", async () => {
+  await launch();
+  class Stray extends NSEPageController<string> {
+    override viewControllerForIdentifier() { return days.viewControllerAt(0)!; }
+  }
+  const stray = history.parent!.addChild(Stray);
+  expect(() => { stray.arrangedObjects = ["Lost"]; }).toThrow(/must be a child of its page controller/);
 });

@@ -131,7 +131,7 @@ Focused entries include `NSEDrawer`, `NSESlidingPanes` and `NSEStandaloneControl
 | `NSESourceListScene` | The scene that composes a source-list sidebar (an `NSEOutlineView` in source-list style) with content. |
 | `NSEHierarchyStack`, `NSESlidingPanes` | Drill in navigation across panes. |
 | `NSEDrawer` | A drawer that slides from a window edge. |
-| `NSEPageController` | `NSPageController`: a page for each of its `arrangedObjects`, one shown at a time, with `selectedIndex` and a horizontal swipe between pages (`transitionStyle="horizontalStrip"`). It is in `nse/page`. |
+| `NSEPageController` | `NSPageController`, a view controller subclass: one of its `arrangedObjects` shown at a time, each through a child view controller. Override `identifierForObject`, `viewControllerForIdentifier` (make the page with `this.addChild`) and `prepareViewController` (sets `representedObject` by default), the `NSPageControllerDelegate` methods. `transitionStyle: "stackHistory"` (the default) keeps a drill-in history with `navigateForwardToObject`, `navigateBack` and `navigateForward`; `"horizontalStrip"` lays the pages side by side. A horizontal swipe turns the page. It is in `nse/page`. |
 
 ## Data views
 

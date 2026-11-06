@@ -232,6 +232,18 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     this.notifyObservers();
   }
 
+  #representedObject: unknown = undefined;
+  /**
+   * The object the view shows (NSViewController.representedObject). A page controller sets it on the
+   * page that shows an object; the view reads it, and observers hear when it changes.
+   */
+  get representedObject(): unknown { return this.#representedObject; }
+  set representedObject(object: unknown) {
+    if (Object.is(object, this.#representedObject)) return;
+    this.#representedObject = object;
+    this.notifyObservers();
+  }
+
   /** The view this controller manages. */
   get view(): NSEControllerView {
     return this.#view;
