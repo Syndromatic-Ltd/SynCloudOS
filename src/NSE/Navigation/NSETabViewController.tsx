@@ -21,6 +21,7 @@
 import { useId, type ReactNode } from "react";
 import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
 import { useObserve } from "../Objects/useObserve";
+import { NSEPresence } from "../Animation/NSEPresentation";
 import { NSETabBar } from "./NSETabBar";
 import { NSETabBarController } from "./NSETabBarController";
 import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinationHost";
@@ -68,13 +69,13 @@ export class NSETabViewItem {
 
   /** NSTabViewItem.label. Defaults to the view controller's title. */
   get label(): string { return this.#label; }
-  set label(label: string) { if (label !== this.#label) { this.#label = label; this.owner?.[tabItemChanged](); } }
+  set label(label: string) { if (label !== this.#label) { this.#label = label; this.owner?.[tabItemChanged](this, "title"); } }
   /** NSTabViewItem.image. */
   get image(): NSENavigationIcon | undefined { return this.#image; }
-  set image(image: NSENavigationIcon | undefined) { if (image !== this.#image) { this.#image = image; this.owner?.[tabItemChanged](); } }
+  set image(image: NSENavigationIcon | undefined) { if (image !== this.#image) { this.#image = image; this.owner?.[tabItemChanged](this, "image"); } }
   /** NSTabViewItem.toolTip. */
   get toolTip(): string | undefined { return this.#toolTip; }
-  set toolTip(toolTip: string | undefined) { if (toolTip !== this.#toolTip) { this.#toolTip = toolTip; this.owner?.[tabItemChanged](); } }
+  set toolTip(toolTip: string | undefined) { if (toolTip !== this.#toolTip) { this.#toolTip = toolTip; this.owner?.[tabItemChanged](this, "title"); } }
 }
 
 const tabItemChanged: unique symbol = Symbol("nse.tabItemChanged");
@@ -198,7 +199,14 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
   /** @internal The tab control's model, rebuilt from the items. */
   get tabControlModel(): NSETabBarController<ReactNode> | null { return this.#model; }
 
-  [tabItemChanged](): void { this.#rebuild(); }
+  [tabItemChanged](item: NSETabViewItem, change: "title" | "image"): void {
+    // New words retitle the tab control in place; a new picture rebuilds it.
+    if (change === "title" && this.#model) {
+      this.#model.retitle({ destinations: { [item.identifier]: { label: item.label, ...(item.toolTip ? { accessibleLabel: item.toolTip } : {}) } } });
+      return;
+    }
+    this.#rebuild();
+  }
 
   #select(index: number): void {
     this.#selectedIndex = index;
@@ -262,7 +270,8 @@ function NSETabViewControllerView({ controller }: { readonly controller: NSETabV
     <div className="nse-tab-view-controller-content" role={bar && selected ? "tabpanel" : undefined}
       id={selected ? getNSETabBarPanelId(scope, selected.identifier) : undefined}
       aria-labelledby={bar && selected ? getNSETabBarTabId(scope, selected.identifier) : undefined}>
-      {Selected ? <Selected.view key={selected!.identifier} /> : null}
+      {/* The leaving item's view stays while its own exit animations run (none: it goes at once). */}
+      <NSEPresence>{Selected ? <Selected.view key={selected!.identifier} /> : null}</NSEPresence>
     </div>
     {controller.tabStyle === "segmentedControlOnBottom" ? bar : null}
   </div>;
