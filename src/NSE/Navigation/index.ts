@@ -20,6 +20,7 @@
 
 export * from "./navigationTypes";
 export * from "./NSETabBarController";
+export * from "./NSETabViewController";
 export * from "./NSENavigationStackController";
 export { createNSETabSelectionRestoration } from "./navigationRestoration";
 export type { NSENavigationRestorationDescriptor } from "./navigationRestoration";
