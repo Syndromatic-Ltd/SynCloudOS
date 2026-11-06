@@ -35,6 +35,7 @@ export function NSEComboBox<T>(props: NSEBoundValueProps<string,NSEComboBoxProps
 }
 
 function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
+  const disabled = props.isEnabled === false;
   useNSEOverlayProvider();
   const generatedId = useId().replace(/:/g, "");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,7 +63,7 @@ function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
     setItems([]);
     setActive(-1);
     setLoading(false);
-  }, [props.dataSource, props.disabled, props.readOnly]);
+  }, [props.dataSource, disabled, props.readOnly]);
 
   const query = (text: string) => {
     controller.current?.abort();
@@ -96,7 +97,7 @@ function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
     });
   };
   const commit = (item: T) => {
-    if (composing.current || props.disabled || props.readOnly) return;
+    if (composing.current || disabled || props.readOnly) return;
     props.onValueChange(item, "completion");
     setDraft(props.dataSource.labelForItem(item));
     setItems([]);
@@ -105,7 +106,7 @@ function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
   const activeItem = active >= 0 ? items[active] : undefined;
   const activeOptionId = activeItem ? `${popupId}-option-${props.dataSource.idForItem(activeItem)}` : undefined;
   const options = items.map((item) => ({ id: props.dataSource.idForItem(item), label: props.dataSource.labelForItem(item), value: item }));
-  const appearanceState = props.disabled ? "disabled" : focused ? "focused" : "normal";
+  const appearanceState = disabled ? "disabled" : focused ? "focused" : "normal";
   const appearance = useNSEAppearanceSlot(nseAppearanceSlot("combo-box", "well", appearanceState));
   return (
     <span data-nse-control="combo-box" data-state={loading ? "loading" : items.length ? "ready" : "empty"} {...appearance.attributes}>
@@ -118,19 +119,19 @@ function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
         aria-controls={items.length > 0 ? popupId : undefined}
         aria-activedescendant={activeOptionId}
         value={draft}
-        disabled={props.disabled}
+        disabled={disabled}
         readOnly={props.readOnly}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         onCompositionStart={() => { composing.current = true; }}
         onCompositionEnd={(event) => {
-          if (props.disabled || props.readOnly) return;
+          if (disabled || props.readOnly) return;
           composing.current = false;
           props.onInputValueChange(event.currentTarget.value);
           query(event.currentTarget.value);
         }}
         onChange={(event) => {
-          if (props.disabled || props.readOnly) return;
+          if (disabled || props.readOnly) return;
           setDraft(event.currentTarget.value);
           if (!composing.current) {
             props.onInputValueChange(event.currentTarget.value);
@@ -138,7 +139,7 @@ function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
           }
         }}
         onKeyDown={(event) => {
-          if (props.disabled || props.readOnly || composing.current || event.nativeEvent.isComposing) return;
+          if (disabled || props.readOnly || composing.current || event.nativeEvent.isComposing) return;
           if (event.key === "ArrowDown" && items.length) {
             event.preventDefault();
             setActive((value) => Math.min(items.length - 1, value + 1));

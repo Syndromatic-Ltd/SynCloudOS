@@ -277,7 +277,7 @@ function NSETimeFieldEditor({ value, minimum, maximum, locale, timeZone, date, h
       {overlay ? <button ref={clockButton} type="button" data-nse-part="clock-affix" aria-label={`Show ${label.toLowerCase()} clock`} aria-expanded={open} disabled={inert} onClick={() => setOpen(true)} /> : null}
       {overlay ? <NSEPopover id={`time-field-${instanceId}`} open={open} anchor={clockButton.current} parentWindowControllerId="time-picker-window" parentResponderId={parentResponderId} presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next) { setOpen(false); queueMicrotask(() => clockButton.current?.focus({ preventScroll: true })); } }}>
         <section data-nse-part="clock-sheet"><h2 id={titleId} className="nse-control-visually-hidden">{label} clock</h2>
-          <NSEGraphicalClock aria-label={label} locale={locale} timeZone={timeZone} date={date ?? { year: 1970, month: 1, day: 1 }} value={value} disabled={inert} minuteStep={minuteStep} hourCycle={hourCycle} onValueChange={(next, phase) => commit(next.hour * 60 + next.minute, phase)} />
+          <NSEGraphicalClock aria-label={label} locale={locale} timeZone={timeZone} date={date ?? { year: 1970, month: 1, day: 1 }} value={value} isEnabled={!inert} minuteStep={minuteStep} hourCycle={hourCycle} onValueChange={(next, phase) => commit(next.hour * 60 + next.minute, phase)} />
         </section>
       </NSEPopover> : null}
     </span>
@@ -286,9 +286,10 @@ function NSETimeFieldEditor({ value, minimum, maximum, locale, timeZone, date, h
 
 export function NSETimeEntry({
   value, defaultValue = null, onValueChange,
-  name, editor: requestedEditor, locale, timeZone, date, minimum: requestedMinimum, maximum: requestedMaximum, minuteStep: requestedMinuteStep, hourCycle: requestedHourCycle, disabled, readOnly, required, renderEditor, parentResponderId, presentsClockOverlay = true,
+  name, editor: requestedEditor, locale, timeZone, date, minimum: requestedMinimum, maximum: requestedMaximum, minuteStep: requestedMinuteStep, hourCycle: requestedHourCycle, isEnabled = true, readOnly, required, renderEditor, parentResponderId, presentsClockOverlay = true,
   "aria-label": label, onFocusCapture, onBlurCapture, ...hostProps
 }: NSETimeEntryProps) {
+  const disabled = !isEnabled;
   const controlled = value !== undefined;
   const [stored, setStored] = useState(defaultValue);
   const [focused, setFocused] = useState(false);
@@ -319,7 +320,7 @@ export function NSETimeEntry({
   const hourCycle = requestedHourCycle ?? (localeHourCycle === "h11" || localeHourCycle === "h12" ? "h12" : "h24");
   const minuteStep = Math.max(1, Math.min(60, Math.floor(requestedMinuteStep ?? 1)));
   const editorMode: NSETimeEntryEditorMode = requestedEditor ?? "field";
-  const customEditor = renderEditor?.({ value: current, disabled: Boolean(disabled), readOnly: Boolean(readOnly), commit: (next) => change(next, "commit") });
+  const customEditor = renderEditor?.({ value: current, isEnabled: !disabled, readOnly: Boolean(readOnly), commit: (next) => change(next, "commit") });
   const editor = customEditor ?? (editorMode === "segments" ? (
     <NSETimeSegmentEditor
       value={current}
@@ -337,7 +338,7 @@ export function NSETimeEntry({
   ) : current && editorMode === "field" ? (
     <NSETimeFieldEditor presentsClockOverlay={presentsClockOverlay} value={current} minimum={minimum} maximum={maximum} locale={locale} timeZone={timeZone} date={date} hourCycle={hourCycle} minuteStep={minuteStep} label={label} disabled={Boolean(disabled)} readOnly={Boolean(readOnly)} parentResponderId={parentResponderId} onChange={change} />
   ) : current ? (
-    <NSEGraphicalClock aria-label={label} locale={locale} timeZone={timeZone} date={date ?? { year: 1970, month: 1, day: 1 }} value={current} disabled={disabled || readOnly} minuteStep={minuteStep} hourCycle={hourCycle} onValueChange={change} />
+    <NSEGraphicalClock aria-label={label} locale={locale} timeZone={timeZone} date={date ?? { year: 1970, month: 1, day: 1 }} value={current} isEnabled={!(disabled || readOnly)} minuteStep={minuteStep} hourCycle={hourCycle} onValueChange={change} />
   ) : (
     <NSEButton
       appearance="aqua"

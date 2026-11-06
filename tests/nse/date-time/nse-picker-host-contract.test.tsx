@@ -51,11 +51,11 @@ describe("canonical picker host and editor contracts", () => {
     expect(blur).toHaveBeenCalledOnce();
   });
 
-  it.each(["disabled", "readOnly"] as const)("rejects segment commits while %s", (gate) => {
+  it.each([{ isEnabled: false }, { readOnly: true }])("rejects segment commits while gated by %o", (gate) => {
     const change = vi.fn();
     render(<NSETimeEntry aria-label="Time" locale="en-GB" timeZone="Europe/London"
       defaultValue={{ hour: 13, minute: 30, second: 0 }} editor="segments"
-      {...{ [gate]: true }} onValueChange={change} />);
+      {...gate} onValueChange={change} />);
     fireEvent.change(screen.getByRole("combobox", { name: "Minute" }), { target: { value: "45" } });
     expect(change).not.toHaveBeenCalled();
   });
@@ -71,9 +71,9 @@ describe("canonical picker host and editor contracts", () => {
     fireEvent.click(screen.getByRole("button", { name: "Clear" }));
     expect(change).toHaveBeenCalledWith(null, "commit");
     expect(view.container.querySelector<HTMLInputElement>('input[name="time"]')!.value).toBe("");
-    for (const gate of ["required", "disabled", "readOnly"]) {
+    for (const gate of [{ required: true }, { isEnabled: false }, { readOnly: true }]) {
       change.mockClear();
-      view.rerender(<NSETimeEntry {...props} {...{ [gate]: true }} />);
+      view.rerender(<NSETimeEntry {...props} {...gate} />);
       fireEvent.click(screen.getByRole("button", { name: "Clear" }));
       expect(change).not.toHaveBeenCalled();
     }

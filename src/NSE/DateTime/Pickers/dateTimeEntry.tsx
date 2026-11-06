@@ -74,6 +74,7 @@ const parseTextValue = (text: string, locale: string, baseline: NSEDateTimeValue
 };
 
 export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined", onValueChange, ...props }: NSEDateTimeEntryProps) {
+  const disabled = props.isEnabled === false;
   const controlled = value !== undefined;
   const [stored, setStored] = useState(defaultValue);
   const current = controlled ? value : stored;
@@ -127,7 +128,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
     return resolution.kind === "resolved" && Boolean((props.minimum && resolution.value.epochMilliseconds < props.minimum.epochMilliseconds) || (props.maximum && resolution.value.epochMilliseconds > props.maximum.epochMilliseconds));
   };
   const preview = (next: NSEDateTimeValue) => {
-    if (props.disabled || props.readOnly || outsideBounds(next)) return;
+    if (disabled || props.readOnly || outsideBounds(next)) return;
     dispatchTransaction({ type: "preview", value: next });
     setTextDraft(textForValue(next, props.locale));
     setError("");
@@ -135,7 +136,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
     onValueChange?.(next, "preview");
   };
   const commit = (candidate = draft) => {
-    if (!candidate || props.disabled || props.readOnly) return false;
+    if (!candidate || disabled || props.readOnly) return false;
     const nextError = validationError(candidate);
     if (nextError) { setError(nextError); return false; }
     setError("");
@@ -147,7 +148,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
     return true;
   };
   const clear = () => {
-    if (props.disabled || props.readOnly || props.required) return false;
+    if (disabled || props.readOnly || props.required) return false;
     setError("");
     dispatchTransaction({ type: "commit", value: null });
     setTextDraft("");
@@ -177,7 +178,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
     queueMicrotask(() => triggerRef.current?.focus({ preventScroll: true }));
   };
   const begin = () => {
-    if (props.disabled || props.readOnly) return;
+    if (disabled || props.readOnly) return;
     const next = current ?? emptyValue(props.timeZone);
     dispatchTransaction({ type: "begin", value: current, draft: next });
     setTextDraft(textForValue(next, props.locale));
@@ -193,7 +194,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
   const showClock = editorMode === "clock" || editorMode === "calendar-clock" || editorMode === "combined";
   const showZone = editorMode === "calendar-clock" || editorMode === "combined";
   const editor = <section data-testid="date-time-editor" data-nse-part="date-time-editor" data-editor-mode={editorMode}>
-    {showText ? <input aria-label={`${props["aria-label"]} date and time`} type="text" value={textDraft} disabled={props.disabled} readOnly={props.readOnly} required={props.required} aria-invalid={Boolean(error) || undefined} onChange={(event) => { if (!props.readOnly) { setTextDraft(event.currentTarget.value); setError(""); } }} onKeyDown={(event) => {
+    {showText ? <input aria-label={`${props["aria-label"]} date and time`} type="text" value={textDraft} disabled={disabled} readOnly={props.readOnly} required={props.required} aria-invalid={Boolean(error) || undefined} onChange={(event) => { if (!props.readOnly) { setTextDraft(event.currentTarget.value); setError(""); } }} onKeyDown={(event) => {
       if (event.key === "Escape") { event.preventDefault(); cancel(); return; }
       if (event.key !== "Enter") return;
       event.preventDefault();
@@ -211,16 +212,16 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
       onVisibleMonthChange={setVisibleMonth}
       onSelectionChange={(selection) => { if (selection.kind === "single") preview({ ...editorValue, date: selection.value }); }}
     /> : null}
-    {showClock ? <NSEGraphicalClock aria-label={props["aria-label"]} locale={props.locale} timeZone={editorValue.timeZone} date={editorValue.date} value={editorValue.time} disambiguation={editorValue.disambiguation} disabled={props.disabled || props.readOnly} showValidationMessage={false} hourCycle={hourCycle} onValueChange={(time) => preview({ ...editorValue, time })} /> : null}
+    {showClock ? <NSEGraphicalClock aria-label={props["aria-label"]} locale={props.locale} timeZone={editorValue.timeZone} date={editorValue.date} value={editorValue.time} disambiguation={editorValue.disambiguation} isEnabled={!(disabled || props.readOnly)} showValidationMessage={false} hourCycle={hourCycle} onValueChange={(time) => preview({ ...editorValue, time })} /> : null}
     {showZone ? <>
-      <NSEPopUpButton label="Time zone" accessibleLabel={`${props["aria-label"]} time zone`} value={editorValue.timeZone} isEnabled={!(props.disabled || props.readOnly)} items={[{ value: props.timeZone, title: props.timeZone }, ...(props.timeZone !== "UTC" ? [{ value: "UTC", title: "UTC" }] : [])]} onValueChange={(timeZone) => preview({ ...editorValue, timeZone })} />
-      <NSEPopUpButton label="Disambiguation" accessibleLabel={`${props["aria-label"]} disambiguation`} value={editorValue.disambiguation} isEnabled={!(props.disabled || props.readOnly)} items={[{ value: "earlier", title: "Earlier" }, { value: "later", title: "Later" }, { value: "reject", title: "Reject" }]} onValueChange={(disambiguation) => preview({ ...editorValue, disambiguation: disambiguation as NSEDateTimeValue["disambiguation"] })} />
+      <NSEPopUpButton label="Time zone" accessibleLabel={`${props["aria-label"]} time zone`} value={editorValue.timeZone} isEnabled={!(disabled || props.readOnly)} items={[{ value: props.timeZone, title: props.timeZone }, ...(props.timeZone !== "UTC" ? [{ value: "UTC", title: "UTC" }] : [])]} onValueChange={(timeZone) => preview({ ...editorValue, timeZone })} />
+      <NSEPopUpButton label="Disambiguation" accessibleLabel={`${props["aria-label"]} disambiguation`} value={editorValue.disambiguation} isEnabled={!(disabled || props.readOnly)} items={[{ value: "earlier", title: "Earlier" }, { value: "later", title: "Later" }, { value: "reject", title: "Reject" }]} onValueChange={(disambiguation) => preview({ ...editorValue, disambiguation: disambiguation as NSEDateTimeValue["disambiguation"] })} />
     </> : null}
     <div data-nse-part="actions">
       <NSEButton
         keyEquivalent={"\r"}
         title="Apply"
-        isEnabled={!(props.disabled || props.readOnly || (props.required && !draft))}
+        isEnabled={!(disabled || props.readOnly || (props.required && !draft))}
         ref={mode === "automatic" ? undefined : triggerRef}
         aria-label={`Apply ${props["aria-label"].toLowerCase()}`}
         onClick={() => { if (applyEditor()) queueMicrotask(() => triggerRef.current?.focus({ preventScroll: true })); }}
@@ -228,14 +229,14 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
       <NSEButton
         appearance="aqua"
         title="Clear"
-        isEnabled={!(props.disabled || props.readOnly || props.required)}
+        isEnabled={!(disabled || props.readOnly || props.required)}
         aria-label={`Clear ${props["aria-label"].toLowerCase()}`}
         onClick={clear}
       />
       <NSEButton
         appearance="aqua"
         title="Cancel"
-        isEnabled={!props.disabled}
+        isEnabled={!disabled}
         aria-label={`Cancel ${props["aria-label"].toLowerCase()}`}
         onClick={cancel}
       />
@@ -245,10 +246,10 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
 
   const titleId = `date-time-picker-title-${instanceId}`;
   const valueId = `date-time-picker-value-${instanceId}`;
-  const appearanceState = error ? "invalid" : props.disabled ? "disabled" : focused || open ? "focused" : "normal";
+  const appearanceState = error ? "invalid" : disabled ? "disabled" : focused || open ? "focused" : "normal";
   const appearance = useNSEAppearanceSlot(nseAppearanceSlot("date-time-picker", "select", appearanceState));
-  return <span data-nse-control="date-time-picker" data-state={error ? "invalid" : props.disabled ? "disabled" : props.readOnly ? "read-only" : current ? "ready" : "empty"} {...appearance.attributes} onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
-    {mode === "automatic" ? <><button ref={triggerRef} type="button" aria-label={props["aria-label"]} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={props.disabled || props.readOnly} onClick={begin}><span id={valueId} data-nse-part="value">{current ? displayForValue(current, props.locale, hourCycle) : props["aria-label"]}</span></button><NSEPopover id={`date-time-picker-${instanceId}`} open={open} anchor={triggerRef.current} parentWindowControllerId="date-time-picker-window" presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next && open) cancel(); }}><section data-nse-part="calendar-sheet"><h2 id={titleId}>{props["aria-label"]}</h2>{editor}</section></NSEPopover></> : editor}
+  return <span data-nse-control="date-time-picker" data-state={error ? "invalid" : disabled ? "disabled" : props.readOnly ? "read-only" : current ? "ready" : "empty"} {...appearance.attributes} onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
+    {mode === "automatic" ? <><button ref={triggerRef} type="button" aria-label={props["aria-label"]} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={disabled || props.readOnly} onClick={begin}><span id={valueId} data-nse-part="value">{current ? displayForValue(current, props.locale, hourCycle) : props["aria-label"]}</span></button><NSEPopover id={`date-time-picker-${instanceId}`} open={open} anchor={triggerRef.current} parentWindowControllerId="date-time-picker-window" presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next && open) cancel(); }}><section data-nse-part="calendar-sheet"><h2 id={titleId}>{props["aria-label"]}</h2>{editor}</section></NSEPopover></> : editor}
     {props.name ? <><input type="hidden" name={props.name} value={`${serializePlainDate(current?.date ?? null)}${current ? `T${serializePlainTime(current.time)}` : ""}`} /><input type="hidden" name={`${props.name}.timeZone`} value={current?.timeZone ?? ""} /><input type="hidden" name={`${props.name}.disambiguation`} value={current?.disambiguation ?? ""} /></> : null}
   </span>;
 }

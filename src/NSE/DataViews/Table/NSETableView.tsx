@@ -454,7 +454,7 @@ export function NSETableView<T, TId extends string | number>({
         height={headerHeight}
         width={totalWidth}
         menu={columnMenu}
-        disabled={!allowsMutation}
+        isEnabled={allowsMutation}
         columns={orderedColumns.map((column) => {
           const descriptor = sortSnapshot.find((candidate) => candidate instanceof SortDescriptor && candidate.id === column.id) as SortDescriptor<T, unknown> | undefined;
           return {

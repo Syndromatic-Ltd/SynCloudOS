@@ -734,7 +734,7 @@ export function NSETabBarOverflowList({
                   }}
                   role="button"
                   selected={selected}
-                  disabled={Boolean(destination.disabled)}
+                  isEnabled={!destination.disabled}
                   aria-label={destination.accessibleLabel ?? asText(destination.label)}
                   aria-current={selected ? "page" : undefined}
                   tabIndex={destination.disabled ? -1 : focusedDestinationId === destination.id ? 0 : -1}

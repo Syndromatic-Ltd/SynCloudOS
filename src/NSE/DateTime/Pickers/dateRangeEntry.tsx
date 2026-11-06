@@ -41,6 +41,7 @@ const displayRange = (value: NSEDateRange, locale: string) => {
 const sameRange = (left: NSEDateRange | null, right: NSEDateRange | null) => left === right || Boolean(left && right && comparePlainDates(left.start, right.start) === 0 && comparePlainDates(left.end, right.end) === 0);
 
 export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, ...props }: NSEDateRangeEntryProps) {
+  const disabled = props.isEnabled === false;
   const controlled = value !== undefined;
   const [stored, setStored] = useState(defaultValue);
   const current = controlled ? value : stored;
@@ -97,9 +98,9 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
     }
     onValueChange?.(next, phase);
   };
-  const commitText = () => { if (props.disabled || props.readOnly) return; const start = parsePlainDate(startText, props.locale), end = parsePlainDate(endText, props.locale); if (!start.ok || !end.ok) { setInvalid(true); return; } const validated = validateDateRange({ start: start.value, end: end.value }); if (!validated.ok || !inBounds(validated.value)) { setInvalid(true); return; } setInvalid(false); publish(validated.value, "commit"); };
+  const commitText = () => { if (disabled || props.readOnly) return; const start = parsePlainDate(startText, props.locale), end = parsePlainDate(endText, props.locale); if (!start.ok || !end.ok) { setInvalid(true); return; } const validated = validateDateRange({ start: start.value, end: end.value }); if (!validated.ok || !inBounds(validated.value)) { setInvalid(true); return; } setInvalid(false); publish(validated.value, "commit"); };
   const previewText = (nextStart = startText, nextEnd = endText) => {
-    if (props.disabled || props.readOnly) return;
+    if (disabled || props.readOnly) return;
     if (!nextStart.trim() && !nextEnd.trim()) { setInvalid(false); return; }
     const start = parsePlainDate(nextStart, props.locale), end = parsePlainDate(nextEnd, props.locale);
     if (!start.ok || !end.ok) { setInvalid(true); return; }
@@ -123,7 +124,7 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
     }
     queueMicrotask(() => triggerRef.current?.focus({ preventScroll: true }));
   };
-  const applyCalendar = () => { if (!draft || props.disabled || props.readOnly || !inBounds(draft)) return; setInvalid(false); selectionStartRef.current = null; publish(draft, "commit"); queueMicrotask(() => triggerRef.current?.focus({ preventScroll: true })); };
+  const applyCalendar = () => { if (!draft || disabled || props.readOnly || !inBounds(draft)) return; setInvalid(false); selectionStartRef.current = null; publish(draft, "commit"); queueMicrotask(() => triggerRef.current?.focus({ preventScroll: true })); };
   const openCalendar = () => {
     selectionStartRef.current = null;
     dispatchTransaction({ type: "begin", value: current });
@@ -131,7 +132,7 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
     setVisibleMonth({ year: seed.year, month: seed.month });
   };
   const previewDate = (date: NSEDateRange["start"]) => {
-    if (props.disabled || props.readOnly) return;
+    if (disabled || props.readOnly) return;
     const anchor = (transaction.hasOpening ? transaction.opening : null)?.start ?? draft?.start ?? date;
     const reversed = comparePlainDates(date, anchor) < 0;
     publish(reversed && props.reversePolicy === "restart" ? { start: date, end: date } : reversed ? { start: date, end: anchor } : { start: anchor, end: date }, "preview");
@@ -156,32 +157,32 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
     publish(reversedFromOpening && props.reversePolicy !== "restart" ? { start: selected, end: openingAnchor! } : { start: selected, end: selected }, "preview");
   };
   const calendar = <NSEGraphicalCalendar aria-label={`${props["aria-label"]} calendar`} locale={props.locale} timeZone={props.timeZone} visibleMonth={visibleMonth} selection={draft ? { kind: "range", value: draft } : { kind: "none" }} isDateDisabled={(date) => Boolean((props.minimum && comparePlainDates(date, props.minimum) < 0) || (props.maximum && comparePlainDates(date, props.maximum) > 0))} onDatePreview={previewDate} onVisibleMonthChange={setVisibleMonth} onSelectionChange={(selection) => {
-    if (props.disabled || props.readOnly) return;
+    if (disabled || props.readOnly) return;
     if (selection.kind === "range") selectDate(selectedDateFromCalendar(selection));
     else if (selection.kind === "single") selectDate(selection.value);
   }} />;
   const valueId = `date-range-picker-value-${instanceId}`;
   const fields = (
     <div data-nse-part="range-fields">
-      <NSETextField controlSize="small" label="Start" aria-label={`${props["aria-label"]} start`} value={startText} isEnabled={!props.disabled} readOnly={props.readOnly} onValueChange={(text, phase) => { if (phase === "preview") setStartText(text); else if (phase === "commit") { if (overlay) previewText(text, endText); } }} />
-      <NSETextField controlSize="small" label="End" aria-label={`${props["aria-label"]} end`} value={endText} isEnabled={!props.disabled} readOnly={props.readOnly} onValueChange={(text, phase) => { if (phase === "preview") setEndText(text); else if (phase === "commit") { if (overlay) previewText(startText, text); } }} />
+      <NSETextField controlSize="small" label="Start" aria-label={`${props["aria-label"]} start`} value={startText} isEnabled={!disabled} readOnly={props.readOnly} onValueChange={(text, phase) => { if (phase === "preview") setStartText(text); else if (phase === "commit") { if (overlay) previewText(text, endText); } }} />
+      <NSETextField controlSize="small" label="End" aria-label={`${props["aria-label"]} end`} value={endText} isEnabled={!disabled} readOnly={props.readOnly} onValueChange={(text, phase) => { if (phase === "preview") setEndText(text); else if (phase === "commit") { if (overlay) previewText(startText, text); } }} />
     </div>
   );
-  return <section ref={hostRef} data-nse-control="date-range-picker" data-state={invalid ? "invalid" : props.disabled ? "disabled" : props.readOnly ? "read-only" : open ? "open" : "ready"}>
-    {overlay ? <button ref={triggerRef} type="button" aria-label={`Choose ${props["aria-label"].toLowerCase()} dates`} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={props.disabled || props.readOnly} onClick={openCalendar} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openCalendar(); } }} onKeyUp={(event) => { if (event.key === " ") event.preventDefault(); }}><span id={valueId} data-nse-part="value" data-placeholder={current ? undefined : "true"}>{current ? displayRange(current, props.locale) : `${plainDatePlaceholder(props.locale)} – ${plainDatePlaceholder(props.locale)}`}</span></button> : <>
+  return <section ref={hostRef} data-nse-control="date-range-picker" data-state={invalid ? "invalid" : disabled ? "disabled" : props.readOnly ? "read-only" : open ? "open" : "ready"}>
+    {overlay ? <button ref={triggerRef} type="button" aria-label={`Choose ${props["aria-label"].toLowerCase()} dates`} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={disabled || props.readOnly} onClick={openCalendar} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openCalendar(); } }} onKeyUp={(event) => { if (event.key === " ") event.preventDefault(); }}><span id={valueId} data-nse-part="value" data-placeholder={current ? undefined : "true"}>{current ? displayRange(current, props.locale) : `${plainDatePlaceholder(props.locale)} – ${plainDatePlaceholder(props.locale)}`}</span></button> : <>
       {fields}
       <span data-nse-part="actions">
         <NSEButton
           keyEquivalent={"\r"}
           title="Apply"
-          isEnabled={!(props.disabled || props.readOnly)}
+          isEnabled={!(disabled || props.readOnly)}
           aria-label={`Apply ${props["aria-label"].toLowerCase()}`}
           onClick={commitText}
         />
         <NSEButton
           appearance="aqua"
           title="Cancel"
-          isEnabled={!props.disabled}
+          isEnabled={!disabled}
           aria-label={`Cancel ${props["aria-label"].toLowerCase()}`}
           onClick={cancel}
         />
@@ -190,7 +191,7 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
     {overlay ? <NSEPopover id={`date-range-picker-${instanceId}`} open={open} anchor={triggerRef.current} parentWindowControllerId="date-range-picker-window" parentResponderId={props.parentResponderId} presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next) cancel(); }}><section data-nse-part="calendar-sheet"><h2 id={titleId} className="nse-control-visually-hidden">{props["aria-label"]} calendar</h2>{fields}{calendar}{invalid ? <span role="alert">Enter a valid date range.</span> : null}<div data-nse-part="actions"><NSEButton
       keyEquivalent={"\r"}
       title="Apply"
-      isEnabled={!(!draft || invalid || props.disabled || props.readOnly)}
+      isEnabled={!(!draft || invalid || disabled || props.readOnly)}
       onClick={applyCalendar}
     /><NSEButton appearance="aqua" title="Cancel" onClick={cancel} /></div></section></NSEPopover> : null}
     {props.name ? <input type="hidden" name={props.name} value={serialise(current)} /> : null}

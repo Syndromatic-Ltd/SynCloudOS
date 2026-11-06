@@ -99,7 +99,8 @@ function NSEComparisonPredicateEditor<T>({ expression, templates, publish, readO
   </>;
 }
 
-export function NSEPredicateEditor<T>({ schema, templates: explicit, value, defaultValue, onChange, state, readOnly = false, disabled = false, locale = "en-GB", className = "", ...props }: NSEPredicateEditorProps<T>) {
+export function NSEPredicateEditor<T>({ schema, templates: explicit, value, defaultValue, onChange, state, readOnly = false, isEnabled = true, locale = "en-GB", className = "", ...props }: NSEPredicateEditorProps<T>) {
+  const disabled = !isEnabled;
   const templates = useMemo(() => mergePredicateTemplates(schema, explicit), [explicit, schema]);
   const fallback: PredicateExpression = defaultValue ?? { kind: "comparison", field: templates[0]?.field ?? "", operator: templates[0]?.operators[0]?.operator ?? "equals", value: undefined };
   const [internal, setInternal] = useState<PredicateExpression>(fallback);
@@ -118,7 +119,7 @@ export function NSEPredicateEditor<T>({ schema, templates: explicit, value, defa
   if (expression.kind !== "comparison") {
     const ruleValue = { root: validatedRoot };
     return (<div {...props} aria-disabled={hostDisabled || undefined} aria-busy={dataViewIsBusy(effectiveState) || undefined} className={`nse-predicate-editor ${className}`.trim()} data-nse-control="predicate-editor" data-expression-kind={expression.kind} data-state={effectiveState.kind}>
-      {presentsContent && <NSERuleEditor aria-label="Predicate expression" value={ruleValue} fields={templates.map(({ field }) => field)} templates={templates as readonly NSEPredicateTemplate<unknown>[]} locale={locale} state={effectiveState} readOnly={effectiveReadOnly} disabled={effectiveDisabled} onChange={(next) => publish(compilePredicateExpression(next))} />}
+      {presentsContent && <NSERuleEditor aria-label="Predicate expression" value={ruleValue} fields={templates.map(({ field }) => field)} templates={templates as readonly NSEPredicateTemplate<unknown>[]} locale={locale} state={effectiveState} readOnly={effectiveReadOnly} isEnabled={!effectiveDisabled} onChange={(next) => publish(compilePredicateExpression(next))} />}
       {!presentsContent && <span role="status">{"message" in effectiveState ? effectiveState.message : effectiveState.kind}</span>}
       {!presentsContent && (effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEButton appearance="aqua" title="Retry" onClick={effectiveState.retry} />}
       {!presentsContent && effectiveState.kind === "interrupted" && effectiveState.resume && <NSEButton appearance="aqua" title="Resume" onClick={effectiveState.resume} />}

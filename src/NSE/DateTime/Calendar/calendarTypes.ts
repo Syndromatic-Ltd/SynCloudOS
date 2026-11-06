@@ -56,7 +56,7 @@ export interface NSEGraphicalClockProps {
   readonly value: NSEPlainTime;
   readonly showSeconds?: boolean;
   readonly disambiguation?: "earlier" | "later" | "reject";
-  readonly disabled?: boolean;
+  readonly isEnabled?: boolean;
   readonly reducedMotion?: boolean;
   readonly showValidationMessage?: boolean;
   readonly minuteStep?: number;

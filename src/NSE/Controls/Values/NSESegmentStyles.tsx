@@ -69,7 +69,7 @@ function NSETexturedRadioSegments({ props }: { readonly props: NSESegmentedContr
       className="nse-extended-radio-tool-button-group"
       label={props["aria-label"]}
       name={props.name}
-      disabled={(props.isEnabled === false) || props.readOnly}
+      isEnabled={props.isEnabled !== false && !props.readOnly}
       data-size={sizeAttribute(props)}
       data-segment-style="texturedRounded"
       style={sizedControlStyle(undefined, props.height, undefined)}
