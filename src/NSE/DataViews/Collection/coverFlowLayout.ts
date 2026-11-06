@@ -1,3 +1,5 @@
+import { GFXImage } from "../../../FX/GraphicsFX/GFXImage";
+
 /**
  * The Cover Flow collection layout: a frontal centre item, inward-facing neighbours, dense overlap and
  * progressive recession. AppKit's Cover Flow was the private `IKImageFlowView`; here it is a layout of the
@@ -44,4 +46,47 @@ export function coverFlowLayoutAttributes(
       scale: distance === 0 ? 1 : Math.max(.72, 1 - distance * .04),
     });
   }));
+}
+
+// Reflections: a replicator layer (CAReplicatorLayer) mirrors each item, darkened by colour modulation
+// and faded by an alpha mask, as AnimationFX draws them.
+
+/** Reflection brightness is colour modulation, leaving alpha available only for the physical fade. */
+export const coverFlowReflectionBrightness = .28;
+export const coverFlowReflectionOpacity = 1;
+
+/**
+ * Place a vertically-flipped result reflection so its transformed near edge
+ * stays a fixed gap below the transformed source card at every Cover Flow scale.
+ */
+export function coverFlowReflectionFrameY(
+  cardCentreY: number,
+  height: number,
+  scale: number,
+  gap = 8,
+): number {
+  if (![cardCentreY, height, scale, gap].every(Number.isFinite) || height <= 0 || scale <= 0 || gap < 0)
+    throw new RangeError("Cover Flow reflection geometry must be finite and positive.");
+  return cardCentreY + height * scale + gap - height / 2;
+}
+
+export function coverFlowReflectionFadeMask(height = 64): GFXImage {
+  if (!Number.isSafeInteger(height) || height < 2 || height > 512)
+    throw new RangeError("Reflection fade-mask height must be a bounded integer.");
+  const bytes = new Uint8Array(height * 4);
+  for (let row = 0; row < height; row++) {
+    const t = row / (height - 1);
+    const smooth = t * t * (3 - 2 * t);
+    // The mask is transformed with the reflection layer. Cover Flow mirrors
+    // that layer vertically, so its local alpha ramp must run in the opposite
+    // direction: after the mirror, the edge touching the card is strongest
+    // and the reflection fades as it travels away from the source.
+    const alpha = Math.round(255 * Math.pow(smooth, 1.5));
+    const offset = row * 4;
+    bytes[offset] = 255;
+    bytes[offset + 1] = 255;
+    bytes[offset + 2] = 255;
+    bytes[offset + 3] = alpha;
+  }
+  return new GFXImage({ width: 1, height, alpha: "straight", colourSpace: "srgb", data: bytes });
 }

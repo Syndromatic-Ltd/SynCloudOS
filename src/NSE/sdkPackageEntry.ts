@@ -282,6 +282,10 @@ export {
 } from "./DataViews/Collection/collectionLayout";
 export {
   coverFlowLayoutAttributes,
+  coverFlowReflectionBrightness,
+  coverFlowReflectionFadeMask,
+  coverFlowReflectionFrameY,
+  coverFlowReflectionOpacity,
   type NSECoverFlowLayoutAttributes,
 } from "./DataViews/Collection/coverFlowLayout";
 export type {
