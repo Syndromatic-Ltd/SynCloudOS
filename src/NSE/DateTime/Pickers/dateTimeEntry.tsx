@@ -19,7 +19,8 @@
  */
 
 import { useEffect, useId, useReducer, useRef, useState } from "react";
-import { NSEPopover, useOptionalNSEOverlayProvider } from "../../Overlays";
+import { useOptionalNSEOverlayProvider } from "../../Overlays";
+import { NSEPopover } from "../../Overlays/NSEPopover";
 import { NSEGraphicalCalendar } from "../Calendar/graphicalCalendar";
 import { NSEGraphicalClock } from "../Calendar/graphicalClock";
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";

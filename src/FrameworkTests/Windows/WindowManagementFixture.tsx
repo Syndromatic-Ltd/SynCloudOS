@@ -26,7 +26,7 @@ import type {
   WindowRecord,
 } from "../../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "../../SynCloudOSReact";
-import { NSEPopover } from "../../NSE/NSE";
+import { NSEPopover } from "../../NSE/Overlays/NSEPopover";
 import type { FrameworkTestFixtureProps } from "../frameworkTestTypes";
 
 const applicationId = "framework-windows";

@@ -1,7 +1,8 @@
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { createContentBoundPresentationTraitsService, type SynCloudOSRuntime, type WindowBounds } from '../../SynCloudOS/SynCloudOS';
 import { ResponderScope, useKernelSynCloudOS, useRuntimeNSEOverlayPort } from '../../SynCloudOSReact';
-import { NSEAdaptiveNavigationController, NSEOverlayProvider, NSEPopover, NSESourceListScene, NSETabBarController, NSEViewController, nseUnowned, useNSEDeferredDisposal } from '../../NSE/NSE';
+import { NSEAdaptiveNavigationController, NSEOverlayProvider, NSESourceListScene, NSETabBarController, NSEViewController, nseUnowned, useNSEDeferredDisposal } from '../../NSE/NSE';
+import { NSEPopover } from '../../NSE/Overlays/NSEPopover';
 
 function Draft({ id }: { id: string }) {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);

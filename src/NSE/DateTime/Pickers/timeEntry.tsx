@@ -26,7 +26,8 @@ import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSEStepper } from "../../Controls/Values/NSEStepper";
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
-import { NSEPopover, useOptionalNSEOverlayProvider } from "../../Overlays";
+import { useOptionalNSEOverlayProvider } from "../../Overlays";
+import { NSEPopover } from "../../Overlays/NSEPopover";
 
 export const serializePlainTime = (value: NSEPlainTime | null) => value ? `${String(value.hour).padStart(2, "0")}:${String(value.minute).padStart(2, "0")}:${String(value.second).padStart(2, "0")}` : "";
 

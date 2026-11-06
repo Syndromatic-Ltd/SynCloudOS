@@ -19,7 +19,8 @@
  */
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { NSEPopover, useOptionalNSEOverlayProvider } from "../../Overlays";
+import { useOptionalNSEOverlayProvider } from "../../Overlays";
+import { NSEPopover } from "../../Overlays/NSEPopover";
 import { clampPlainDate, comparePlainDates, daysInMonth } from "../calendarArithmetic";
 import { formatPlainDate, parsePlainDate, plainDatePlaceholder, plainDateToday } from "../dateTimeFormatting";
 import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";

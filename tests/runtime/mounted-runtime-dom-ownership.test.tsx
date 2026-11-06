@@ -13,7 +13,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeMount";
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import * as overlayBridge from "../../src/SynCloudOS/Runtime/MountedAppOverlayBridge";
-import { NSEPopover } from "../../src/NSE/Overlays";
+import { NSEPopover } from "../../src/NSE/Overlays/NSEPopover";
 import { NSEWindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 import { FocusScope, HostSiteBrandingProvider, ResponderScope, SynCloudOSProvider, useRuntimeNSEFocusPort } from "../../src/SynCloudOSReact";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../src/SynCloudOSReact/runtimeContext";

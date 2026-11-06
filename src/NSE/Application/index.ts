@@ -23,6 +23,7 @@ export type { NSEApplicationClass, NSEApplicationContext, NSEOpenWindowOptions }
 export { NSEWindowController } from "./NSEWindowController";
 export { NSEAlert, NSEAlertButton, NSEModalResponse } from "./NSEAlert";
 export type { NSEAlertStyle } from "./NSEAlert";
+export type { NSEPopoverPositioning } from "./NSEViewController";
 export type {
   NSEAnyWindowController,
   NSEWindow,

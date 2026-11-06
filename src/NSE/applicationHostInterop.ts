@@ -5,7 +5,7 @@ export { NSEApplication } from "./Application/NSEApplication";
 export type { NSEApplicationClass, NSEApplicationContext, NSEOpenWindowOptions } from "./Application/NSEApplication";
 export { NSEWindowController, validateNSEWindowControllerClass, nseWindowInternals } from "./Application/NSEWindowController";
 export type { NSEAnyWindowController, NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowMount } from "./Application/NSEWindowController";
-export { validateNSEViewControllerClass, nseAttachView, nseUpdateTraits, nseUpdateViewActivity } from "./Application/NSEViewController";
+export { validateNSEViewControllerClass, nseAttachView, nseUpdateTraits, nseUpdateViewActivity, nsePopoverPositioning } from "./Application/NSEViewController";
 export type { NSEViewController, NSEViewControllerClass } from "./Application/NSEViewController";
 export { enterClassApplication, instantiateInOwnerScope, nseDisposeFor, NSEOwnershipScope } from "./Controllers/ownership";
 export { attachNSEAuthoringContext } from "./Application/authoringContext";

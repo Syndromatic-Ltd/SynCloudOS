@@ -33,7 +33,7 @@ import {
 } from "react";
 import type { NSEAnyWindowController, NSEWindowMount } from "../../NSE/applicationHostInterop";
 import { nseWindowInternals } from "../../NSE/applicationHostInterop";
-import { nseAttachView, nseUpdateTraits, nseUpdateViewActivity, validateNSEViewControllerClass, type NSEViewController, type NSEViewControllerClass } from "../../NSE/applicationHostInterop";
+import { nseAttachView, nsePopoverPositioning, nseUpdateTraits, nseUpdateViewActivity, validateNSEViewControllerClass, type NSEViewController, type NSEViewControllerClass } from "../../NSE/applicationHostInterop";
 import { useObserve } from "../../NSE/applicationHostInterop";
 import { observableVersion, type NSEObservable } from "../../NSE/applicationHostInterop";
 import { nseDisposeFor } from "../../NSE/applicationHostInterop";
@@ -43,7 +43,7 @@ import { useResponderHierarchy } from "../../SynCloudOSReact";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
 import type { SynWareRuntime } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
-import { NSEAlertBackdrop, NSEAlertSurface, NSEFocusScope } from "../../NSE/hostComposition";
+import { NSEAlertBackdrop, NSEAlertSurface, NSEFocusScope, NSEPopover } from "../../NSE/hostComposition";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
@@ -267,10 +267,37 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
       <NSEViewControllerRendererProvider value={NSEViewControllerView}>
         <View controller={controller} />
       </NSEViewControllerRendererProvider>
-      {controller.presentedViewControllers.map(sheet => <NSEPresentedSheet key={sheetKey(sheet)} controller={sheet} />)}
+      {controller.presentedViewControllers.map(presented => presented[nsePopoverPositioning]
+        ? <NSEPresentedPopover key={sheetKey(presented)} controller={presented} />
+        : <NSEPresentedSheet key={sheetKey(presented)} controller={presented} />)}
     </div>
   );
   return <NSEControllerResponder target={controller} kind="view" host="element">{frame}</NSEControllerResponder>;
+}
+
+const popoverPlacement = { minY: "block-start", maxY: "block-end", minX: "inline-start", maxX: "inline-end" } as const;
+
+/**
+ * A view controller presented in a popover (presentAsPopover): anchored to its positioning element and
+ * closed, by its behaviour, on Escape or a click elsewhere, which dismisses it.
+ */
+function NSEPresentedPopover({ controller }: { readonly controller: NSEViewController<unknown> }) {
+  useObserve(controller);
+  const positioning = controller[nsePopoverPositioning]!;
+  const size = controller.preferredContentSize;
+  return <NSEPopover id={`nse-popover:${sheetKey(controller)}`} open surface="overlay" anchor={positioning.of} parentWindowControllerId={null}
+    presentation={{ mode: "automatic", placement: popoverPlacement[positioning.preferredEdge ?? "maxY"] }}
+    {...(controller.title ? { title: controller.title } : {})} {...(size ? { contentSize: size } : {})}
+    onOpenChange={(open, reason) => {
+      if (open) return;
+      const behavior = positioning.behavior ?? "transient";
+      const closes = reason === "anchor-removed" || reason === "parent-dismissed" || reason === "programmatic"
+        || (behavior !== "applicationDefined" && reason === "escape")
+        || (behavior === "transient");
+      if (closes) controller.dismiss();
+    }}>
+    <NSEViewControllerView controller={controller} />
+  </NSEPopover>;
 }
 
 const sheetKeys = new WeakMap<object, string>();

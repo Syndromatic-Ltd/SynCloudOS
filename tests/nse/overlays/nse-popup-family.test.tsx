@@ -24,7 +24,8 @@ installNSEScrollIntoViewFixture();
 import React, { useMemo, useState } from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEOverlayProvider, NSEActionSheet, NSEListboxPopup, NSEPopover, NSEPopup } from "../../../src/NSE/Overlays";
+import { NSEOverlayProvider, NSEActionSheet, NSEListboxPopup, NSEPopup } from "../../../src/NSE/Overlays";
+import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { NSEUtilityPanel } from "../../../src/NSE/Overlays/NSEUtilityPanel";
 

@@ -48,6 +48,19 @@ import type { NSEWindow } from "./NSEWindowController";
  */
 export type NSEViewComponent = ComponentType<{ readonly controller: never }>;
 
+/** Where a popover points (the positioning view, preferred edge and behaviour of NSPopover). */
+export interface NSEPopoverPositioning {
+  /** The element the popover points at (NSPopover's positioning view). */
+  readonly of: HTMLElement;
+  /** The edge of `of` the popover prefers to open from, in the view's flipped coordinates: `"maxY"` (below, the default), `"minY"` (above), `"minX"` or `"maxX"`. */
+  readonly preferredEdge?: "minX" | "maxX" | "minY" | "maxY";
+  /** NSPopover.Behavior: `"transient"` (default), `"semitransient"` or `"applicationDefined"`. */
+  readonly behavior?: "transient" | "semitransient" | "applicationDefined";
+}
+
+/** @internal */
+export const nsePopoverPositioning: unique symbol = Symbol("nse.popoverPositioning");
+
 export type NSEViewControllerOptions = NSEControllerOwnershipOptions & {
   /** The localised title of the managed view (NSViewController.title), as containers show it. */
   readonly title?: string;
@@ -158,6 +171,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #windowScope: NSEOwnershipScope | null = null;
   #window: NSEWindow | null = null;
   #presenting: NSEViewController<unknown> | null = null;
+  #popover: NSEPopoverPositioning | null = null;
   readonly #presented: NSEViewController<unknown>[] = [];
   #preferredContentSize: Readonly<{ width: number; height: number }> | null = null;
   #loaded = false;
@@ -351,8 +365,11 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     this.notifyObservers();
   }
 
-  /** The view controllers this one presents, as sheets (NSViewController.presentedViewControllers). */
+  /** The view controllers this one presents, as sheets and popovers (NSViewController.presentedViewControllers). */
   get presentedViewControllers(): readonly NSEViewController<unknown>[] { return Object.freeze([...this.#presented]); }
+
+  /** @internal How a presented controller is positioned when it is a popover; `null` for a sheet. */
+  get [nsePopoverPositioning](): NSEPopoverPositioning | null { return this.#popover; }
 
   /** The view controller presenting this one (NSViewController.presentingViewController), or `null`. */
   get presentingViewController(): NSEViewController<unknown> | null { return this.#presenting; }
@@ -367,23 +384,49 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   /** Creates the view controller in this controller's ownership, as `addChild` does, and presents it as a sheet. */
   presentAsSheet<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(Controller: new (...args: TArgs) => TSheet, ...args: TArgs): TSheet;
   presentAsSheet<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(viewController: TSheet | (new (...args: TArgs) => TSheet), ...args: TArgs): TSheet {
-    this.#assertLive("presentAsSheet", "call");
+    return this.#present("presentAsSheet", null, viewController, args);
+  }
+
+  /**
+   * Presents `viewController` in a popover next to `positioning.of`
+   * (NSViewController.present(_:asPopoverRelativeTo:of:preferredEdge:behavior:)). The popover takes the
+   * presented controller's `title` as its accessible name and `preferredContentSize` as its size. A
+   * `"transient"` popover (the default) closes when the person clicks elsewhere or presses Escape; a
+   * `"semitransient"` one only on Escape; an `"applicationDefined"` one only when it is dismissed. Every
+   * popover closes when its positioning element leaves the document. Closing dismisses (disposes) it.
+   */
+  presentAsPopover<TPopover extends NSEViewController<unknown>>(viewController: TPopover, positioning: NSEPopoverPositioning): TPopover;
+  /** Creates the view controller in this controller's ownership, as `addChild` does, and presents it in a popover. */
+  presentAsPopover<TPopover extends NSEViewController<unknown>, TArgs extends unknown[]>(Controller: new (...args: TArgs) => TPopover, positioning: NSEPopoverPositioning, ...args: TArgs): TPopover;
+  presentAsPopover<TPopover extends NSEViewController<unknown>, TArgs extends unknown[]>(viewController: TPopover | (new (...args: TArgs) => TPopover), positioning: NSEPopoverPositioning, ...args: TArgs): TPopover {
+    const view = positioning?.of as unknown;
+    if (!view || typeof view !== "object" || (view as Node).nodeType !== 1) throw new TypeError("presentAsPopover needs positioning.of, the element the popover points at.");
+    const edge = positioning.preferredEdge ?? "maxY";
+    if (edge !== "minX" && edge !== "maxX" && edge !== "minY" && edge !== "maxY") throw new TypeError("A popover's preferredEdge is minX, maxX, minY or maxY.");
+    const behavior = positioning.behavior ?? "transient";
+    if (behavior !== "transient" && behavior !== "semitransient" && behavior !== "applicationDefined") throw new TypeError("A popover's behavior is transient, semitransient or applicationDefined.");
+    return this.#present("presentAsPopover", Object.freeze({ of: positioning.of, preferredEdge: edge, behavior }), viewController, args);
+  }
+
+  #present<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(operation: string, popover: NSEPopoverPositioning | null, viewController: TSheet | (new (...args: TArgs) => TSheet), args: TArgs): TSheet {
+    this.#assertLive(operation, "call");
     const instance = typeof viewController === "function"
       ? instantiateInOwnerScope(new NSEOwnershipScope("NSEViewController", viewController.name), () => {
         const result = new viewController(...args);
-        try { this.#assertLive("presentAsSheet", "call"); }
+        try { this.#assertLive(operation, "call"); }
         catch (error) { try { result[nseDisposeFor](this.disposalReason ?? "explicit"); } finally { throw error; } }
         return result;
       })
       : viewController;
     const sheet = instance as NSEViewController<unknown>;
-    if (!(sheet instanceof NSEViewController)) throw new TypeError("presentAsSheet needs a view controller.");
-    sheet.#assertLive("presentAsSheet", "call");
+    if (!(sheet instanceof NSEViewController)) throw new TypeError(`${operation} needs a view controller.`);
+    sheet.#assertLive(operation, "call");
     if (sheet === (this as NSEViewController<unknown>)) throw new TypeError("A view controller cannot present itself.");
     if (sheet.#presenting === (this as NSEViewController<unknown>)) return instance;
     if (sheet.#parent || sheet.#windowScope || sheet.#presenting) throw new TypeError("A presented view controller cannot already be a child, a window's content or presented elsewhere.");
     sheet.#lifetime.adoptBy(sheet, this.#lifetime.scope);
     sheet.#presenting = this as NSEViewController<unknown>;
+    sheet.#popover = popover;
     this.#presented.push(sheet);
     if (typeof viewController === "function" && !hasNSEConstructionOwner() && getNSEAuthoringContext(this)) {
       try { finalizeNSEAuthoringOwner(sheet); }
