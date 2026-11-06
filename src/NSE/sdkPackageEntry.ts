@@ -209,17 +209,16 @@ export type {
   NSEPlainTextFieldProps,
   NSETextFieldChromeProps,
   NSETextFieldProps,
+  NSELabelBackgroundStyle,
   NSELabelTextFieldProps,
   NSEFontTextStyle,
   NSESwitchProps,
 } from "./Controls/Fields/NSEFields";
 export { NSEPageHeader } from "./Windows/Chrome";
 export type { NSEPageHeaderProps } from "./Windows/Chrome";
-export { NSETopBar, NSETopBarButton, NSEStatusBar } from "./Windows/Chrome";
+export { NSETopBar, NSETopBarButton } from "./Windows/Chrome";
 export type {
   NSEChromeScheme,
-  NSEStatusBarProps,
-  NSEStatusBarVariant,
   NSETopBarItem,
   NSETopBarItemKind,
   NSETopBarItemPosition,
@@ -887,7 +886,7 @@ export type { NSEAlertStyle, NSEPopoverPositioning } from "./Application";
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,
   NSETraitCollection,
-  NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowCloseOutcome,
+  NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowCloseOutcome, NSEWindowContentBorderEdge,
   NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
 } from "./Application";
 export { NSEActionScopeProvider } from "./Controls/Core/useNSEControlAction";

@@ -55,15 +55,13 @@ export type {
 } from "../Navigation/SourceList";
 export { NSESplitView } from "../DataViews/Split/NSESplitView";
 export type { NSESplitViewProps } from "../DataViews/Split/NSESplitView";
-export { NSEStatusBar, NSETopBar, NSETopBarButton, NSEPageHeader } from "../Windows/Chrome";
+export { NSETopBar, NSETopBarButton, NSEPageHeader } from "../Windows/Chrome";
 export { nseTopBarStyles } from "../Windows/Chrome";
 export type {
   NSEChromeScheme,
 
   NSEPageHeaderProps,
 
-  NSEStatusBarProps,
-  NSEStatusBarVariant,
   NSETopBarItem,
   NSETopBarItemKind,
   NSETopBarItemPosition,
@@ -116,6 +114,7 @@ export type {
   NSEPlainTextFieldProps,
   NSETextFieldChromeProps,
   NSETextFieldProps,
+  NSELabelBackgroundStyle,
   NSELabelTextFieldProps,
   NSEFontTextStyle,
   NSESwitchProps,

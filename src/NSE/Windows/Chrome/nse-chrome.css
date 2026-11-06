@@ -1521,6 +1521,50 @@
   }
 }
 
+/* --- A window's bottom content border (setContentBorderThickness(_:for: .minY)) ----------------
+   A tall border is the metal footer; a short one is the compact strip. The content's controls sit
+   over it; its edge casts the footer's shadow up onto the content. */
+.nse-window-content-border[data-size="large"] {
+  --nse-metal-header-mid: url("/assets/nse/chrome/metal/light/header-middle.png");
+  background: var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+  border-bottom-left-radius: var(--nse-chrome-bottom-corner-radius, 0px);
+  border-bottom-right-radius: var(--nse-chrome-bottom-corner-radius, 0px);
+}
+
+.nse-window-content-border[data-size="large"][data-mode="dark"] {
+  --nse-metal-header-mid: url("/assets/nse/chrome/metal/dark/header-middle.png");
+}
+
+.nse-window-content-border[data-size="large"] > .nse-window-content-border-grain {
+  position: absolute;
+  inset: 0;
+  background: var(--nse-metal-grain) repeat;
+  background-size: var(--nse-metal-grain-tile);
+  opacity: 0.9;
+  mix-blend-mode: overlay;
+}
+
+.nse-window-content-border[data-size="large"][data-mode="dark"] > .nse-window-content-border-grain {
+  opacity: 0.95;
+}
+
+.nse-window-content-border-edge[data-size="large"] {
+  border-bottom-left-radius: var(--nse-chrome-bottom-corner-radius, 0px);
+  border-bottom-right-radius: var(--nse-chrome-bottom-corner-radius, 0px);
+  box-shadow: 0 -6px 11px -5px rgba(0, 0, 0, 0.26);
+}
+
+.nse-window-content-border-edge[data-size="large"][data-mode="dark"] {
+  box-shadow: 0 -6px 11px -5px rgba(0, 0, 0, 0.52);
+}
+
+.nse-window-content-border[data-size="small"] {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0)),
+    var(--nse-statusbar-background, linear-gradient(180deg, #d9dbde, #bfc3c8));
+  border-top: 1px solid rgba(70, 76, 84, 0.46);
+}
+
 /* Fixed chrome deliberately ellipsizes from the end; provider-owned help
    reveals the complete caption without moving or replacing the action. */
 .nse-app-topbar .nse-control-button { grid-auto-columns: minmax(0, max-content); }

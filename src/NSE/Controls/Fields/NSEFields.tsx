@@ -149,9 +149,17 @@ export interface NSELabelTextFieldProps extends Omit<HTMLAttributes<HTMLSpanElem
   readonly monospacedDigits?: boolean;
   /** NSTextField.lineBreakMode: wrap at words (default), or anywhere for paths, URLs and hex values. */
   readonly lineBreakMode?: "byWordWrapping" | "byCharWrapping";
+  /**
+   * NSCell.backgroundStyle: what the label is drawn on. `raised` is a label on a raised surface, such
+   * as status text on a window's bottom content border, which the theme draws embossed.
+   */
+  readonly backgroundStyle?: NSELabelBackgroundStyle;
 }
 
-function NSELabelTextField({ isEditable: _isEditable, font = "body", textColor = "labelColor", monospacedDigits = false, lineBreakMode = "byWordWrapping", className = "", children, ...props }: NSELabelTextFieldProps) {
+/** NSView.BackgroundStyle. */
+export type NSELabelBackgroundStyle = "normal" | "emphasized" | "raised" | "lowered";
+
+function NSELabelTextField({ isEditable: _isEditable, font = "body", textColor = "labelColor", monospacedDigits = false, lineBreakMode = "byWordWrapping", backgroundStyle = "normal", className = "", children, ...props }: NSELabelTextFieldProps) {
   return (
     <span
       {...props}
@@ -160,6 +168,7 @@ function NSELabelTextField({ isEditable: _isEditable, font = "body", textColor =
       data-text-color={textColor === "secondaryLabelColor" ? "secondary" : undefined}
       data-monospaced-digits={monospacedDigits ? "true" : undefined}
       data-line-break-mode={lineBreakMode === "byCharWrapping" ? "char" : undefined}
+      data-background-style={backgroundStyle === "normal" ? undefined : backgroundStyle}
     >
       {children}
     </span>

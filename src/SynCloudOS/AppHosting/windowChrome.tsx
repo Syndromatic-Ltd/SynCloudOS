@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useContext, useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { NSEAnyWindowController } from "../../NSE/applicationHostInterop";
 import { useObserve, NSEActionResponderContext } from "../../NSE/applicationHostInterop";
@@ -114,6 +114,28 @@ export function NSEWindowTitlebarAccessories({ accessories, renderController, ho
 function AccessoryRow({ children }: { readonly children: ReactNode }) {
   const mode = useWindowChromeMode();
   return <div className="nse-window-titlebar-accessories" data-nse-part="titlebar-accessories" data-mode={mode}>{children}</div>;
+}
+
+/** @internal Atmo draws a tall content border as its metal footer and a short one as its compact strip. */
+export function nseContentBorderSize(thickness: number): "large" | "small" {
+  return thickness >= 44 ? "large" : "small";
+}
+
+/**
+ * The band a window paints along the bottom of its content (NSWindow.setContentBorderThickness(_:for: .minY)).
+ * It lies behind the content, so the content's own controls sit over it; only its edge, which casts a
+ * shadow up onto the content, is drawn above.
+ */
+export function NSEWindowContentBorder({ thickness }: { readonly thickness: number }) {
+  const mode = useWindowChromeMode();
+  const style = { "--nse-window-content-border-thickness": `${thickness}px` } as CSSProperties;
+  const size = nseContentBorderSize(thickness);
+  return <>
+    <div className="nse-window-content-border" data-nse-part="content-border" data-edge="minY" data-size={size} data-mode={mode} style={style} aria-hidden="true">
+      <span className="nse-window-content-border-grain" />
+    </div>
+    <div className="nse-window-content-border-edge" data-edge="minY" data-size={size} data-mode={mode} style={style} aria-hidden="true" />
+  </>;
 }
 
 /** Light or dark, as the application's appearance resolves, for the window's own chrome. */

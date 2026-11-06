@@ -50,8 +50,13 @@ window.addTitlebarAccessoryViewController(fileAccessory);   // layoutAttribute "
    navigation back (owner decision, 2026-11-06), drawn as its labelled push button; its phone recipes are
    Atmo's compact document title bar. Open: FieldLab, the gallery's `NSESourceListScene` bar title, and
    `NSETopBar` becoming internal.
-4. Bottom bar: `NSEStatusBar` and `position="bottom"` toolbars become the window's bottom content border
-   (`setContentBorderThickness(_:for:)` with an accessory at `layoutAttribute: "bottom"`), drawn by Atmo as today.
+4. Done: the status line is the window's bottom content border, `setContentBorderThickness(_:for: .minY)`, with the
+   content's own raised labels (`NSETextField backgroundStyle="raised"`) over it, as in AppKit; a bottom titlebar
+   accessory is not used, since it sits under the title bar. Atmo draws the band as the metal footer (tall) or the
+   compact strip (short). Publisher and FieldLab use it; `NSEStatusBar` is internal, kept only for
+   `NSESourceListScene`'s sidebar-split footer (open: that footer as the window's border, with the sidebar drawing
+   its own cell). Recorded difference: Publisher's light-mode bottom rim is 1 px darker (the window's rim now draws
+   over its content border).
 
 Users: Publisher (configured toolbar, custom top bar, status bar, phone bottom toolbar), the gallery (toolbar,
 top bar and status bar specimens), Fusion FieldLab (configured toolbar in its menu strip, custom top bar,
