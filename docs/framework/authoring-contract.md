@@ -15,6 +15,14 @@ A SynWare that mounts and validates is not automatically idiomatic. An app that 
 | Three.js, raw WebGL2 or WebGPU | `this.fx.animation.manageDisplayLink(outlet, { drawableSizeDidChange })`, `onFrame` and `setNeedsDisplay()`. The display link paces frames, pauses while the view is hidden or off screen, follows reduced motion and reports the drawable size; your engine owns the canvas context. | `requestAnimationFrame`, `ResizeObserver` and `devicePixelRatio` wired by hand in an effect. |
 | 2D vector figures and plots | `GFXContext` recording a `GFXDisplayList`, drawn on screen by `NSEGraphicsView` (`autoSize`, `contentsGravity`, pointer handlers with display-list coordinates and an `@outlet` of `NSEViewOutlet<SVGSVGElement>`) and exported to SVG or PDF from the same display list. | A second, hand-written `<svg>` component that duplicates the exported figure. |
 
+## NSE names are AppKit names
+
+NSE follows AppKit, and the FX frameworks follow Apple's Core frameworks: an NSE class, property or method has the name, shape and meaning of its AppKit counterpart (`NSEPopUpButton` is `NSPopUpButton`, `isEnabled` is `isEnabled`, `presentAsSheet` is `presentAsSheet(_:)`). When you need something:
+
+- Look for the AppKit way first, and write it with NSE's names. A child view controller's view is placed with `<child.view />`, as AppKit adds a subview; a dialog is a view controller presented with `presentAsSheet`, `presentAsModalWindow` or `presentAsPopover`; an alert is an `NSEAlert`.
+- A new appearance is a theme recipe that Atmo draws for an existing AppKit class (a `bezelStyle`, a `tabStyle`, a box type), never a new component.
+- Do not invent API with an AppKit-sounding name, or bring in UIKit classes and idioms. If AppKit has no counterpart, say so and propose the smallest AppKit-shaped addition rather than adding one silently.
+
 Every package entry exports the same objects, so imports from different entries mix safely. Prefer one entry per job: `@syndromatic/syncloudos` for application, window and view controller classes, decorators and `SCOS`; `@syndromatic/syncloudos/nse` for controls and NSE types, with focused controls such as `NSEDrawer` in `@syndromatic/syncloudos/nse/controls`; `@syndromatic/syncloudos/sdk` for `SynWareInfo` and hooks; and `@syndromatic/syncloudos/sdk/testing` for tests.
 
 Start new applications from the scaffold, which follows this contract: `create-synware Name.app` from the framework, or the Developer MCP `scaffold` tool. Both default to class authoring with a separate view file.
