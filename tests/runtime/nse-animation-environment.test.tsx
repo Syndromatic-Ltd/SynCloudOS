@@ -25,10 +25,11 @@ import * as React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AFXTimingFunction } from "../../src/FX/AnimationFX/public";
 import {
-  NSEAnimationDefaults,
   NSEAnimationEnvironmentProvider,
   useNSEAnimationEnvironment,
 } from "../../src/NSE/sdkPackageEntry";
+// Atmo's curves and durations: internal, published as atmoMotion and NSEAnimationContext.current.
+import { NSEAnimationDefaults } from "../../src/NSE/Animation/NSEAnimationDefaults";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import {
   createTestRuntime,

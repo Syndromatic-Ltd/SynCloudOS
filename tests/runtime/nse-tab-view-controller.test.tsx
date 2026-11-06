@@ -7,6 +7,7 @@ import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
+import { defaultsFrom } from "../fixtures/userDefaults";
 
 const hosts: ClassApplicationHost[] = [];
 afterEach(async () => {
@@ -106,9 +107,9 @@ it("removes an item with its view controller", async () => {
 
 it("restores the selected tab and remembers each new one", async () => {
   const stored = new Map<string, unknown>();
-  const preferences = { read: (key: string) => stored.get(key), write: (key: string, value: unknown) => { stored.set(key, value); } };
+  const defaults = defaultsFrom({ read: (key: string) => stored.get(key), write: (key: string, value: unknown) => { stored.set(key, value); }, remove: (key: string) => { stored.delete(key); } });
   const restoration = {
-    key: "sections.tab", version: 0, migrations: [], preferences,
+    key: "sections.tab", version: 0, migrations: [], defaults,
     parse: (value: unknown) => typeof value === "string" ? { ok: true as const, value } : { ok: false as const, issues: ["An identifier."] },
     capture: (snapshot: { readonly selectedIdentifier: string | null }) => snapshot.selectedIdentifier ?? "company",
     restore: (tabs: NSETabViewController, value: unknown) => { tabs.selectTabViewItem(String(value)); },

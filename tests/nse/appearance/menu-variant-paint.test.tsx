@@ -24,10 +24,10 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import * as cssTree from "css-tree";
 import { afterEach, describe, expect, it } from "vitest";
-import { NSEAppearanceProvider } from "@syndromatic/syncloudos/nse";
+import { NSEAppearanceProvider } from "../../../src/NSE/Appearance";
 import { NSEListboxPopup } from "../../../src/NSE/Overlays/NSEListboxPopup";
 import { NSEMenuView } from "../../../src/NSE/Menus/NSEMenuView";
-import { NSEStandaloneControlHost } from "@syndromatic/syncloudos/nse/controls";
+import { NSEStandaloneControlHost } from "../../../src/NSE/Overlays";
 import { atmoAppearance } from "@syndromatic/syncloudos/nse/themes/atmo";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
