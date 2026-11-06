@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { nseEndSheet, nsePresentWindowAlert, type NSESheet, type NSEWindow } from "./NSEWindowController";
+import { nseEndSheet, nsePresentModalAlert, nsePresentWindowAlert, type NSESheet, type NSEWindow, type NSEWindowAlertRequest } from "./NSEWindowController";
 
 /** How an alert presents itself, after NSAlert.Style. */
 export type NSEAlertStyle = "warning" | "informational" | "critical";
@@ -88,7 +88,7 @@ export class NSEAlert implements NSESheet {
   #informativeText = "";
   #alertStyle: NSEAlertStyle = "warning";
   readonly #buttons: NSEAlertButton[] = [];
-  #presentation: { readonly window: NSEWindow; readonly end: AbortController; returnCode?: number } | null = null;
+  #presentation: { readonly window: NSEWindow | null; readonly end: AbortController; returnCode?: number } | null = null;
 
   /** The alert's title. */
   get messageText(): string { return this.#messageText; }
@@ -128,7 +128,19 @@ export class NSEAlert implements NSESheet {
    * Presents the alert as a sheet on `window` (NSAlert.beginSheetModal(for:)) and resolves with the chosen
    * button's response. Closing the window ends the sheet as Escape would.
    */
-  async beginSheetModal(window: NSEWindow): Promise<NSEModalResponse> {
+  beginSheetModal(window: NSEWindow): Promise<NSEModalResponse> {
+    return this.#run(window, (request, signal) => nsePresentWindowAlert(window, request, signal));
+  }
+
+  /**
+   * Presents the alert application-modally (NSAlert.runModal()): a centred alert for the active
+   * application rather than a sheet attached to one window. Resolves with the chosen button's response.
+   */
+  runModal(): Promise<NSEModalResponse> {
+    return this.#run(null, nsePresentModalAlert);
+  }
+
+  async #run(window: NSEWindow | null, present: (request: NSEWindowAlertRequest, signal: AbortSignal) => Promise<string>): Promise<NSEModalResponse> {
     const title = this.#messageText.trim();
     if (!title) throw new TypeError("An alert needs messageText before it is presented.");
     if (this.#presentation) throw new TypeError("This alert is already presented.");
@@ -146,10 +158,10 @@ export class NSEAlert implements NSESheet {
           : button.keyEquivalent === "\r" ? { role: "default" as const } : {}),
       }))),
     });
-    const presentation: { readonly window: NSEWindow; readonly end: AbortController; returnCode?: number } = { window, end: new AbortController() };
+    const presentation: { readonly window: NSEWindow | null; readonly end: AbortController; returnCode?: number } = { window, end: new AbortController() };
     this.#presentation = presentation;
     try {
-      const chosen = await nsePresentWindowAlert(window, request, presentation.end.signal);
+      const chosen = await present(request, presentation.end.signal);
       if (presentation.returnCode !== undefined) return presentation.returnCode;
       const index = Number(chosen);
       return NSEModalResponse.alertFirstButtonReturn + (Number.isInteger(index) && index >= 0 ? index : buttons.length - 1);

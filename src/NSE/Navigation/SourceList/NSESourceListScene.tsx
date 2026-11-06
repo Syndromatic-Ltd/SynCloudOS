@@ -48,8 +48,6 @@ export interface NSESourceListSceneStatus {
 }
 
 interface NSESourceListSceneSharedProps {
-  /** Dynamic centre title for the system bar (e.g. the active section). Falls back to the window title. */
-  title?: string;
   /** Optional seam-aligned metal status bar content. Omit for no footer. */
   status?: NSESourceListSceneStatus;
   className?: string;
@@ -378,19 +376,13 @@ function NSESourceListNavigationScene({
 /**
  * App-facing body for a system-owned source-list window. The app supplies sidebar + main (+ optional
  * status) content; the system frame owns the top bar, the seam, the resizable width, and QuickSwitch.
+ * The bar's centre title is the window's (`view.window.title`).
  *
  * Reads the width from {@link useSourceListFrame} so the sidebar and the top-bar seam share one source
  * of truth. Used outside a source-list frame it degrades to a self-managed split (no shared seam).
  */
 export function NSESourceListScene(props: NSESourceListSceneProps) {
   const frame = useSourceListFrame();
-  const setBarTitle = frame?.setBarTitle;
-
-  useEffect(() => {
-    if (!setBarTitle) return;
-    setBarTitle(props.title ?? null);
-    return () => setBarTitle(null);
-  }, [setBarTitle, props.title]);
 
   if ("projection" in props && props.projection) {
     const { projection, ...sharedProps } = props;

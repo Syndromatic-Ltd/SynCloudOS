@@ -25,6 +25,7 @@ import { useKernelSynCloudOS } from "./SynCloudOSProvider";
 import { retainUndoOwner } from "./undoOwnerLease";
 import { createRuntimeInputProtocol, useRuntimeInputProtocol } from "./runtimeInputProtocol";
 import { AppFocusScope } from "./AppFocusScope";
+import { FocusScopeIdContext } from "./focusScopeContext";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext } from "./runtimeContext";
 import { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin } from "../NSE/hostComposition";
 
@@ -278,15 +279,15 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
   if (asChild) {
     if (!isValidElement(children)) throw new Error("FocusScope asChild requires exactly one host element.");
     const child = children as ReactElement<{ onKeyDownCapture?: (event: ReactKeyboardEvent<HTMLDivElement>) => void }>;
-    return cloneElement(child, {
+    return <FocusScopeIdContext value={scopeId}>{cloneElement(child, {
       ...scopeProps,
       onKeyDownCapture: (event: ReactKeyboardEvent<HTMLDivElement>) => {
         handleKeyDownCapture(event);
         if (!event.defaultPrevented) child.props.onKeyDownCapture?.(event);
       },
-    });
+    })}</FocusScopeIdContext>;
   }
-  return <div {...scopeProps}>{children}</div>;
+  return <FocusScopeIdContext value={scopeId}><div {...scopeProps}>{children}</div></FocusScopeIdContext>;
 }
 
 export function FocusScope(props: FocusScopeProps) {

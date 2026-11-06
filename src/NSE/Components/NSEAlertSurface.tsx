@@ -21,7 +21,7 @@
 import { useRef, type CSSProperties, type ReactNode } from "react";
 import "./components.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
-import { resolveNSEAlertMotion } from "./NSEAlert.transitions";
+import { resolveNSEAlertMotion, resolveNSESheetMotion } from "./NSEAlert.transitions";
 import {
   getOptionalNSESmoothSurfaceProps,
   type NSESmoothSurfaceRequest,
@@ -39,6 +39,7 @@ export function NSEAlertSurface({
   role = "alertdialog",
   initialFocusSelector,
   smoothSurface = false,
+  motion = "alert",
   style
 }: {
   children: ReactNode;
@@ -49,11 +50,13 @@ export function NSEAlertSurface({
   role?: "alertdialog" | "dialog";
   initialFocusSelector?: string;
   smoothSurface?: NSESmoothSurfaceRequest;
+  /** `sheet` slides the surface out from the window's top content edge, as a window sheet attaches. */
+  motion?: "alert" | "sheet";
   style?: CSSProperties;
 }) {
   const { reducedMotion } = useNSEAnimationEnvironment();
   const alertRef = useRef<HTMLDivElement>(null);
-  useNSEPresentation(alertRef, resolveNSEAlertMotion(reducedMotion));
+  useNSEPresentation(alertRef, motion === "sheet" ? resolveNSESheetMotion(reducedMotion) : resolveNSEAlertMotion(reducedMotion));
   const surfaceProps = getOptionalNSESmoothSurfaceProps(
     smoothSurface,
     className,

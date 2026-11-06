@@ -376,8 +376,8 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
 
   /**
    * Presents `viewController` as a sheet on this controller's window (NSViewController.presentAsSheet(_:)).
-   * The sheet is modal to the window and draws over this controller's view; its actions reach this
-   * controller after its own. Escape sends the sheet `cancelOperation()` when it has one, and otherwise
+   * The sheet attaches under the window's title bar and toolbar and blocks the rest of the window, whose
+   * close button is refused until it is dismissed; its actions reach this controller after its own. Escape sends the sheet `cancelOperation()` when it has one, and otherwise
    * dismisses it. The presenter owns the sheet: dismissing it disposes it.
    */
   presentAsSheet<TSheet extends NSEViewController<unknown>>(viewController: TSheet): TSheet;

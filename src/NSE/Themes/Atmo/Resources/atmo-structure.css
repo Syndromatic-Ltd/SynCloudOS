@@ -2234,8 +2234,7 @@
   background: transparent;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list > .nse-control-list-item:not(.is-disabled):hover,
-:where([data-nse-appearance="atmo"]) .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list > .nse-control-list-item:not(.is-disabled):focus-visible {
+:where([data-nse-appearance="atmo"]) .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list > .nse-control-list-item:not(.is-disabled):is(:hover, :focus-visible, [data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]) {
   background: rgba(255, 255, 255, 0.16);
   color: #fff;
 }
@@ -2936,7 +2935,7 @@
   opacity: 0.78;
 }
 
-.nse-menu:where([data-nse-appearance="atmo"]):not(.nse-application-menu-list) .nse-menu-item:is(:hover, :focus-visible):not([data-nse-menu-disabled="true"]) {
+.nse-menu:where([data-nse-appearance="atmo"]):not(.nse-application-menu-list) .nse-menu-item:is(:hover, :focus-visible, [data-nse-menu-flash="on"]):not([data-nse-menu-disabled="true"]):not([data-nse-menu-flash="off"]) {
   outline: none;
   color: inherit;
   background:
@@ -3003,7 +3002,7 @@
   font-weight: 700;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-overlay-popup--listbox .nse-overlay-listbox-option:is(:hover, :focus-visible, [aria-selected="true"]):not(:disabled) {
+:where([data-nse-appearance="atmo"]) .nse-overlay-popup--listbox .nse-overlay-listbox-option:is([data-highlighted="true"], [data-nse-menu-flash="on"]):not(:disabled):not([data-nse-menu-flash="off"]) {
   outline: none;
   color: #0d253e;
   background:
@@ -4847,3 +4846,19 @@
   border-bottom-color: #000;
 }
 :where([data-nse-appearance="atmo"]) .nse-window-toolbar:has(+ .nse-window-titlebar-accessories) { border-bottom-color: transparent; }
+
+/* A chosen command fades the application menu out (nse-overlays.css) instead of retracting it. */
+:where([data-nse-appearance="atmo"]) .nse-overlay-popup--application-menu[data-state="closing"][data-nse-menu-chosen] .nse-control-app-menu-surface {
+  animation: none;
+}
+
+/* The pop-up list's face is as wide as its button's (the list's face is 6px narrower than its box, the
+   button's 2px), and the button is sized to its widest item with room for the list's check column, so
+   the list never outgrows its button. */
+.nse-overlay-popup:where([data-nse-appearance="atmo"]).nse-overlay-popup--listbox {
+  min-inline-size: max(140px, calc(var(--nse-overlay-anchor-inline-size, 0px) + 4px));
+}
+
+:where([data-nse-appearance="atmo"]) .nse-control-picker-caption-sizer {
+  padding-inline-end: 13px;
+}

@@ -19,7 +19,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { NSEAlert, NSEModalResponse, NSEViewController, NSEWindowController } from "../../../src/NSE/Application";
-import { nseWindowInternals, type NSEWindowAlertRequest, type NSEWindowMount } from "../../../src/NSE/Application/NSEWindowController";
+import { nseSetKeyWindowModalPresenter, nseWindowInternals, type NSEWindowAlertRequest, type NSEWindowMount } from "../../../src/NSE/Application/NSEWindowController";
 
 function mountedWindow(choose: (request: NSEWindowAlertRequest, signal: AbortSignal) => Promise<string>) {
   const controller = new NSEWindowController();
@@ -32,6 +32,7 @@ function mountedWindow(choose: (request: NSEWindowAlertRequest, signal: AbortSig
     close: async () => "closed" as never,
     registerCloseGuard: () => () => {},
     presentAlert: (request, signal) => { requests.push(request); return choose(request, signal); },
+    presentModalAlert: (request, signal) => { requests.push(request); return choose(request, signal); },
   };
   controller[nseWindowInternals].attach(mount);
   return { controller, requests };
@@ -159,5 +160,22 @@ describe("NSEAlert", () => {
     root.dismiss(popover);
     expect(popover.isDisposed).toBe(true);
     controller.dispose();
+  });
+
+  it("runs application-modally for the active application (NSAlert.runModal())", async () => {
+    const alert = new NSEAlert();
+    alert.messageText = "Edit this post?";
+    alert.addButton("Open");
+    alert.addButton("Cancel");
+    await expect(alert.runModal()).rejects.toThrow(/active application/);
+    const owner = {};
+    const requests: NSEWindowAlertRequest[] = [];
+    nseSetKeyWindowModalPresenter(owner, async (request) => { requests.push(request); return "1"; });
+    try {
+      await expect(alert.runModal()).resolves.toBe(NSEModalResponse.alertSecondButtonReturn);
+      expect(requests[0]?.title).toBe("Edit this post?");
+    } finally {
+      nseSetKeyWindowModalPresenter(owner, null);
+    }
   });
 });

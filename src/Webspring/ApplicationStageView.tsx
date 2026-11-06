@@ -145,7 +145,6 @@ export function ApplicationStageView({
   const railDefault = sourceList?.defaultWidth ?? 264;
   const railLabel = sourceList?.railLabel ?? app.shortName;
   const [railWidth, setRailWidthState] = useState(railDefault);
-  const [barTitle, setBarTitle] = useState<string | null>(null);
   // The window shown on the stage puts its document (title, subtitle, titlebar accessories) in the standard bar.
   const [titlebarDocument, setTitlebarDocument] = useState<NSEWindowTitlebarDocument | null>(null);
   const [leadingAccessories, setLeadingAccessories] = useState<HTMLSpanElement | null>(null);
@@ -181,18 +180,17 @@ export function ApplicationStageView({
             defaultWidth: railDefault,
             railLabel,
             scheme: resolvedMode,
-            setBarTitle,
             setCompactNavigation
           }
         : null,
     [sourceList, railWidth, setRailWidth, railMin, railMax, railDefault, railLabel, resolvedMode]
   );
-  // Source-list bars surface QuickSwitch on the rail wordmark (app identity) and show a dynamic
-  // app-provided centre title; plain standard bars keep QuickSwitch on the centre title.
+  // Source-list bars surface QuickSwitch on the rail wordmark (app identity) and show the window's
+  // title (NSWindow.title) in the centre; plain standard bars keep QuickSwitch on the centre title.
   const quickSwitchAction = onQuickSwitchRequest
     ? { label: quickSwitchLabel, selected: quickSwitchOpen, onClick: () => { void runtime.commands.dispatch("webspring.quickSwitch.toggle", undefined, { source: "toolbar" }); } }
     : null;
-  const standardBarTitle = sourceList ? (barTitle ?? appWindowTitle) : appWindowTitle;
+  const standardBarTitle = sourceList ? (titlebarDocument?.title || appWindowTitle) : appWindowTitle;
   const appMenuLabels = useMemo(() => applicationMenuLabels(appName, locale.t), [appName, locale]);
   const appDeclaresAbout = applicationDeclaresAbout(app.about);
   const appPreferences = app.applicationMenu?.preferences;
@@ -221,11 +219,28 @@ export function ApplicationStageView({
   const openSystemPreferences = useCallback(() => {
     void runtime.commands.dispatch("system.showPreferences", undefined, { source: "toolbar" });
   }, [runtime]);
+  // The application menu validates its commands from the key window's first responder, as AppKit's
+  // menus do, not from the control that opened it: the title bar's controls resolve to the application,
+  // so the last responder focused inside the application's content stands in for it.
+  const contentResponder = useRef<string | null>(null);
+  useEffect(() => {
+    const inContent = (id: string | null): id is string => Boolean(id && id !== applicationResponderId
+      && runtime.responders.resolveChain(id).some(responder => responder.id === applicationResponderId));
+    const remember = () => {
+      const focused = runtime.focus.getFocusedResponderId();
+      if (inContent(focused)) contentResponder.current = focused;
+    };
+    remember();
+    return runtime.focus.subscribe(remember);
+  }, [applicationResponderId, runtime]);
   const toggleApplicationMenu = useCallback(() => {
     if (!appMenuStore.getSnapshot().open) {
       const focused = runtime.focus.getFocusedResponderId();
-      setAppMenuParent(focused && runtime.responders.resolveChain(focused).some(responder => responder.id === applicationResponderId)
-        ? focused : applicationResponderId);
+      const inApplication = (id: string | null): id is string => Boolean(id && runtime.responders.resolveChain(id).some(responder => responder.id === applicationResponderId));
+      const remembered = contentResponder.current;
+      setAppMenuParent(inApplication(focused) && focused !== applicationResponderId ? focused
+        : remembered && runtime.responders.get(remembered) && inApplication(remembered) ? remembered
+          : applicationResponderId);
     }
     appMenuStore.toggle();
   }, [appMenuStore, applicationResponderId, runtime]);

@@ -132,6 +132,8 @@ export interface NSEWindowMount {
   registerCloseGuard(guard: SynWareWindowCloseGuard): () => void;
   /** Presents an alert sheet for the window and resolves with the chosen button's id; aborting `signal` dismisses it. */
   presentAlert(request: NSEWindowAlertRequest, signal: AbortSignal): Promise<string>;
+  /** Presents an application-modal alert (NSAlert.runModal()) for the window's application, centred over it. */
+  presentModalAlert(request: NSEWindowAlertRequest, signal: AbortSignal): Promise<string>;
 }
 
 /** An alert as the window's host presents it. Not part of the public API. */
@@ -149,6 +151,25 @@ export function nsePresentWindowAlert(window: NSEWindow, request: NSEWindowAlert
   const present = windowAlertPresenters.get(window);
   if (!present) return Promise.reject(new TypeError("An alert is presented on a window controller's window (this.window)."));
   return present(request, signal);
+}
+
+type NSEAlertPresenter = (request: NSEWindowAlertRequest, signal: AbortSignal) => Promise<string>;
+let keyWindowModalPresenter: { readonly owner: object; readonly present: NSEAlertPresenter } | null = null;
+
+/**
+ * @internal The key window reports its application's modal-alert presenter: an application-modal alert
+ * (NSAlert.runModal()) belongs to the active application, NSApp, whose window is key. `null` withdraws
+ * the owner's presenter when it is still the current one.
+ */
+export function nseSetKeyWindowModalPresenter(owner: object, present: NSEAlertPresenter | null): void {
+  if (present) keyWindowModalPresenter = { owner, present };
+  else if (keyWindowModalPresenter?.owner === owner) keyWindowModalPresenter = null;
+}
+
+/** @internal Presents an application-modal alert for the active application. */
+export function nsePresentModalAlert(request: NSEWindowAlertRequest, signal: AbortSignal): Promise<string> {
+  if (!keyWindowModalPresenter) return Promise.reject(new TypeError("runModal needs an active application with a key window."));
+  return keyWindowModalPresenter.present(request, signal);
 }
 
 /** What the framework hands a window controller it constructs. */

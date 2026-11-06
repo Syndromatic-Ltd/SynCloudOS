@@ -95,8 +95,11 @@ function Root({
       const owner = frame.dataset.syncloudosRuntimeOwner;
       if (!owner || active.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner !== owner) return;
     }
-    const target = frame.querySelector<HTMLElement>("[data-nse-initial-focus]")
-      ?? frame.querySelector<HTMLElement>("[data-nse-view-controller]")
+    // The window's content takes focus, not a view controller drawn in its title bar (an accessory).
+    const inTitlebar = (element: Element) => element.closest(".nse-window-titlebar-accessory-slot, .nse-window-titlebar-accessories, .nse-document-titlebar");
+    const firstOutsideTitlebar = (selector: string) => [...frame.querySelectorAll<HTMLElement>(selector)].find((element) => !inTitlebar(element));
+    const target = firstOutsideTitlebar("[data-nse-initial-focus]")
+      ?? firstOutsideTitlebar("[data-nse-view-controller]")
       ?? frame;
     target.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
   }, [inactive, keyWindow]);

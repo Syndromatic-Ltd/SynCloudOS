@@ -445,6 +445,32 @@
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.76);
 }
 
+/*
+ * A window sheet is the alert plate attached to the window: it meets the bottom of the toolbar (or title
+ * bar) with square top corners, and that edge casts a shadow down onto it. Only its lower corners are
+ * rounded, and it keeps the plate's drop shadow below.
+ */
+[data-nse-appearance="atmo"] .nse-window-sheet .nse-control-alert {
+  padding-top: calc(var(--nse-atmo-alert-slice) - var(--nse-atmo-alert-px) * 27);
+}
+[data-nse-appearance="atmo"] .nse-window-sheet .nse-control-alert::before {
+  inset-block-start: 0;
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+  box-shadow:
+    inset 0 10px 12px -6px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(0, 0, 0, 0.5),
+    inset 0 0 calc(var(--nse-atmo-alert-px) * 8) var(--nse-atmo-alert-rim),
+    0 calc(var(--nse-atmo-alert-px) * 26) calc(var(--nse-atmo-alert-px) * 44) rgba(0, 0, 0, 0.58);
+}
+[data-nse-appearance="atmo"] .nse-window-sheet .nse-control-alert.is-light::before {
+  box-shadow:
+    inset 0 10px 12px -6px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(0, 0, 0, 0.35),
+    inset 0 0 calc(var(--nse-atmo-alert-px) * 8) var(--nse-atmo-alert-rim),
+    0 calc(var(--nse-atmo-alert-px) * 26) calc(var(--nse-atmo-alert-px) * 44) rgba(0, 0, 0, 0.58);
+}
+
 @media (max-width: 680px) {
   [data-nse-appearance="atmo"] .nse-control-alert {
     --nse-atmo-alert-slice: 34px;
@@ -3041,7 +3067,7 @@
   ) center top / 236px 1px repeat-x;
 }
 
-.nse-menu[data-nse-appearance="atmo"]:not(.nse-application-menu-list) .nse-menu-item:is(:hover, :focus-visible):not([data-nse-menu-disabled="true"]) {
+.nse-menu[data-nse-appearance="atmo"]:not(.nse-application-menu-list) .nse-menu-item:is(:hover, :focus-visible, [data-nse-menu-flash="on"]):not([data-nse-menu-disabled="true"]):not([data-nse-menu-flash="off"]) {
   background:
     linear-gradient(
       rgba(91, 141, 184, 0.75) 0, rgba(91, 141, 184, 0.75) 1px,
@@ -3052,7 +3078,7 @@
     rgba(40, 65, 82, 0.74);
 }
 
-[data-nse-appearance="atmo"] .nse-overlay-popup--listbox .nse-overlay-listbox-option:is(:hover, :focus-visible, [aria-selected="true"]):not(:disabled) {
+[data-nse-appearance="atmo"] .nse-overlay-popup--listbox .nse-overlay-listbox-option:is([data-highlighted="true"], [data-nse-menu-flash="on"]):not(:disabled):not([data-nse-menu-flash="off"]) {
   background:
     linear-gradient(
       rgba(91, 141, 184, 0.75) 0, rgba(91, 141, 184, 0.75) 1px,

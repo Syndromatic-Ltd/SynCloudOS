@@ -165,7 +165,8 @@ export function computeNSEOverlayPosition({
           size({
             ...clipping,
             padding: collisionPadding,
-            apply: ({ availableWidth, availableHeight, elements }) => {
+            apply: ({ availableWidth, availableHeight, elements, rects }) => {
+              elements.floating.style.setProperty("--nse-overlay-anchor-inline-size", `${rects.reference.width}px`);
               elements.floating.style.setProperty("--nse-overlay-available-inline-size", `${region ? Math.max(0, availableWidth) : availableWidth}px`);
               elements.floating.style.setProperty("--nse-overlay-available-block-size", `${region ? Math.max(0, availableHeight) : availableHeight}px`);
             },

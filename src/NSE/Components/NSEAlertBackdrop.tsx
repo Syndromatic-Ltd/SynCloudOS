@@ -21,7 +21,7 @@
 import { useEffect, useRef, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import "./components.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
-import { resolveNSEAlertBackdropMotion } from "./NSEAlert.transitions";
+import { resolveNSEAlertBackdropMotion, resolveNSESheetBackdropMotion } from "./NSEAlert.transitions";
 import { useNSEAppearanceProjection } from "../Appearance";
 import { resolveNSEFocusReturnTarget } from "../Focus";
 
@@ -38,6 +38,8 @@ interface NSEAlertBackdropProps {
   readonly onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => void;
   readonly onKeyDownCapture?: (event: KeyboardEvent<HTMLDivElement>) => void;
   readonly className?: string;
+  /** `sheet`: the backdrop of a window sheet, which neither dims nor fades, so the sheet only slides. */
+  readonly motion?: "alert" | "sheet";
   readonly "data-syncloudos-runtime-owner"?: string;
   readonly "data-syncloudos-focus-scope"?: string;
 }
@@ -49,6 +51,7 @@ export function NSEAlertBackdrop({
   onKeyDown,
   onKeyDownCapture,
   className,
+  motion = "alert",
   "data-syncloudos-runtime-owner": runtimeOwner,
   "data-syncloudos-focus-scope": focusScope,
 }: NSEAlertBackdropProps) {
@@ -60,7 +63,7 @@ export function NSEAlertBackdrop({
   const previousFocusRef = useRef(typeof document === "undefined" ? null : resolveNSEFocusReturnTarget(document.activeElement));
   const { reducedMotion } = useNSEAnimationEnvironment();
   const backdropRef = useRef<HTMLDivElement>(null);
-  useNSEPresentation(backdropRef, resolveNSEAlertBackdropMotion(reducedMotion));
+  useNSEPresentation(backdropRef, motion === "sheet" ? resolveNSESheetBackdropMotion(reducedMotion) : resolveNSEAlertBackdropMotion(reducedMotion));
 
   useEffect(() => {
     const previousFocus = previousFocusRef.current;

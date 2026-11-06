@@ -1,6 +1,6 @@
 # Source-list application chrome
 
-Declare a standard system frame with `sourceList` in the SynWare manifest. Use `NSESourceListScene` for the body. The system owns the application identity on the rail, dynamic main title, QuickSwitch, return control, the right-slot menu, and the rail width. Do not place another NSEAppFrame or top bar inside this scene.
+Declare a standard system frame with `sourceList` in the SynWare manifest. Use `NSESourceListScene` for the body. The system owns the application identity on the rail, QuickSwitch, return control, the right-slot menu, and the rail width. Do not place another NSEAppFrame or top bar inside this scene. The bar's centre title is the window's: set `view.window.title` (`NSWindow.title`) to what the window shows, such as the selected section.
 
 ```tsx
 // Manifest
@@ -11,7 +11,6 @@ frame: {
 
 // Application body
 <NSESourceListScene
-  title={selectedSection.title}
   compact={adaptiveSnapshot.renderer === "tabs"}
   sidebar={<NSEOutlineView controller={sections} selectionHighlightStyle="sourceList" viewportBlockSize="fill"
     floatingSubviews={<NSESearchField aria-label="Search sections" />} delegate={{ isGroupItem: (_id, item) => item.isGroup }} … />}

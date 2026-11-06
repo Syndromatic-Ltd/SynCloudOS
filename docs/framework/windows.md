@@ -172,7 +172,7 @@ if (await alert.beginSheetModal(this.window) === NSEModalResponse.alertFirstButt
 | `alertStyle` | `"warning"` (default), `"informational"` or `"critical"`. |
 | `addButton(title)` | Adds a button and returns it (`NSEAlertButton`: `title`, `keyEquivalent`, `hasDestructiveAction`). The first button takes Return; a button titled "Cancel" takes Escape. With none, the alert shows OK. |
 | `buttons` | The buttons in the order they were added. |
-| `beginSheetModal(window)` | Presents the alert on `window` and resolves with `NSEModalResponse.alertFirstButtonReturn + index` of the chosen button. Escape, or closing the window, chooses the Escape button, else the last. |
+| `beginSheetModal(window)` | Attaches the alert to `window` as a sheet, which blocks the window as any sheet does, and resolves with `NSEModalResponse.alertFirstButtonReturn + index` of the chosen button. Escape, or closing the window, chooses the Escape button, else the last. |
 
 `NSEModalResponse` names AppKit's responses: `OK`, `cancel`, `stop`, `abort`, `continue` and `alertFirstButtonReturn`, `alertSecondButtonReturn`, `alertThirdButtonReturn`. `window.endSheet(alert, returnCode?)` ends a presented alert (`NSWindow.endSheet(_:returnCode:)`); its promise resolves with `returnCode`, or the Escape response when omitted.
 
@@ -189,7 +189,7 @@ sheet.preferredContentSize = { width: 480, height: 0 };
 this.dismiss(sheet);   // or, inside the sheet, this.dismiss()
 ```
 
-The sheet is modal to the window and draws on the alert panel over its presenter's view. Its actions reach its presenter after itself. Its `title`, when set, is drawn above it, and `preferredContentSize.width` sets its width (capped to the window). Escape and the backdrop send the sheet `cancelOperation()` when it defines one, and otherwise dismiss it. The presenter owns its sheets: `dismiss` disposes the sheet, and disposing the presenter disposes them. `presentedViewControllers` and `presentingViewController` report the relationship.
+The sheet attaches to the window: it slides down from the top edge of the window's content, under the title bar, toolbar and accessory row, and is drawn on the alert panel. While it is attached the rest of the window takes no input (the toolbar, accessories and content are inert) and the close button and Close command are refused, as `performClose(_:)` refuses with a sheet attached. Its actions reach its presenter after itself. Its `title`, when set, is drawn above it, and `preferredContentSize.width` sets its width (capped to the window). Escape and the backdrop send the sheet `cancelOperation()` when it defines one, and otherwise dismiss it. The presenter owns its sheets: `dismiss` disposes the sheet, and disposing the presenter disposes them. `presentedViewControllers` and `presentingViewController` report the relationship.
 
 ### Popovers
 

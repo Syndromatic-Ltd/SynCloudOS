@@ -3,7 +3,7 @@
  */
 export { NSEApplication } from "./Application/NSEApplication";
 export type { NSEApplicationClass, NSEApplicationContext, NSEOpenWindowOptions } from "./Application/NSEApplication";
-export { NSEWindowController, validateNSEWindowControllerClass, nseWindowInternals } from "./Application/NSEWindowController";
+export { NSEWindowController, validateNSEWindowControllerClass, nseWindowInternals, nseSetKeyWindowModalPresenter } from "./Application/NSEWindowController";
 export type { NSEAnyWindowController, NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowMount } from "./Application/NSEWindowController";
 export { validateNSEViewControllerClass, nseAttachView, nseUpdateTraits, nseUpdateViewActivity, nsePopoverPositioning } from "./Application/NSEViewController";
 export type { NSEViewController, NSEViewControllerClass } from "./Application/NSEViewController";

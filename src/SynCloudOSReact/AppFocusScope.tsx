@@ -25,6 +25,7 @@ import { SynWareRuntimeContext } from "./runtimeContext";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import { isWithinNSEFocusOrigin } from "../NSE/hostComposition";
 import { useResponderHierarchy } from "./responderHierarchy";
+import { FocusScopeIdContext } from "./focusScopeContext";
 
 export interface AppFocusScopeOptions {
   readonly scopeId: string;
@@ -151,13 +152,13 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
   }, [modal, options.kind, options.parentScopeId, options.restoreFocus, options.scopeId, parentResponderId, runtime, runtimeId, trapFocus]);
 
   const host = <div ref={rootRef} data-syncloudos-runtime-owner={runtimeId} data-syncloudos-focus-scope={options.scopeId}>{children}</div>;
-  if (!options.asChild) return host;
+  if (!options.asChild) return <FocusScopeIdContext value={options.scopeId}>{host}</FocusScopeIdContext>;
   if (!child) throw new Error("App focus scope asChild requires one React element.");
-  return cloneElement(child, {
+  return <FocusScopeIdContext value={options.scopeId}>{cloneElement(child, {
     ref: composedRootRef,
     "data-syncloudos-runtime-owner": runtimeId,
     "data-syncloudos-focus-scope": options.scopeId,
-  } as never);
+  } as never)}</FocusScopeIdContext>;
 }
 
 /** Kept as a tiny hook-level assertion for callers that accidentally render

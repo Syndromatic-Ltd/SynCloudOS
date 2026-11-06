@@ -37,6 +37,7 @@ import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
 import { NSESourceListScene } from "../../src/NSE/Navigation/SourceList";
 import { NSESidebar } from "../../src/NSE/Navigation/SourceList/NSESidebar";
+import { NSEWindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRuntimeEnvironment, mountTestSynWareRuntime } from "./helpers";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
 
@@ -195,7 +196,13 @@ describe("ApplicationStageView app menu", () => {
     const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), layoutViewport: { getSnapshot: () => viewport, subscribe: listener => { listeners.add(listener); return () => { listeners.delete(listener); }; } } } });
     function SourceListFixture() {
       const traits = React.useSyncExternalStore(runtime.presentationTraits.subscribe, runtime.presentationTraits.getSnapshot, runtime.presentationTraits.getSnapshot);
-      return <NSESourceListScene title="Buttons" compact={traits.horizontalSizeClass === "compact"} sidebar={<NSESidebar sections={[]} />} status={{ rail: "25 sections" }}><input aria-label="Live draft" defaultValue="Draft" /></NSESourceListScene>;
+      // Stands in for a window titled "Buttons" (NSWindow.title), as the window controller's mount does.
+      const titlebar = React.useContext(NSEWindowTitlebarHostContext);
+      React.useLayoutEffect(() => {
+        titlebar?.setDocument({ title: "Buttons", subtitle: "", documentEdited: false });
+        return () => titlebar?.setDocument(null);
+      }, [titlebar]);
+      return <NSESourceListScene compact={traits.horizontalSizeClass === "compact"} sidebar={<NSESidebar sections={[]} />} status={{ rail: "25 sections" }}><input aria-label="Live draft" defaultValue="Draft" /></NSESourceListScene>;
     }
     runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.test-app", route: "/test" }, {
       loadModule: async () => ({ default: SourceListFixture }),
