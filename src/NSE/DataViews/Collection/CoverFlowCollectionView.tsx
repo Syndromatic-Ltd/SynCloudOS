@@ -138,6 +138,9 @@ function makeSlot(scene: CoverFlowScene): CoverFlowSlot {
   AFXTransaction.perform({ disableActions: true }, () => {
     card.allowsEdgeAntialiasing = true;
     mirror.allowsEdgeAntialiasing = true;
+    // Side items draw their pictures at a fraction of their size; trilinear sampling keeps the detail steady as they move.
+    card.minificationFilter = "trilinear";
+    mirror.minificationFilter = "trilinear";
     // The renderer draws contents, so the darkening veil is a one-pixel picture stretched over the item.
     shade.contents = shadeImage;
     shade.opacity = 0;

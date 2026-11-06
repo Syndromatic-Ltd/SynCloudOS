@@ -259,6 +259,7 @@ You create one with `useAnimations().createRenderer(canvas, options?, signal?)`.
 | `layer` | The root layer. Its frame always matches the viewport. Add content under it. |
 | `makeLayer(parent?)` | Creates an `AFXLayer` under the parent (default the root) and returns it. |
 | `makeReplicatorLayer(parent?)` | Creates an `AFXReplicatorLayer`. |
+| `makeTransformLayer(parent?)` | Creates an `AFXTransformLayer`, whose sublayers keep their depth. |
 | `makeParticleLayer(parent?)` | Creates an `AFXParticleLayer`. |
 | `setViewport({ width, height, pixelRatio })` | Sets the size in CSS points and the device pixel ratio, and redraws. Width and height are positive integers, `pixelRatio` is above 0, and the backing size must be a safe integer. Throws `RangeError` and restores the old viewport on failure. Call it when the canvas resizes. |
 | `setPickable(layer, eligible)` | Includes a layer in `hitTest`. Layers do not pick by default, so decoration never captures the pointer. Throws `TypeError` for the root or a layer outside the scene. |
