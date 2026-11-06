@@ -107,7 +107,19 @@ export function NSEWindowTitlebarAccessories({ accessories, renderController, ho
       {host?.trailingAccessories ? createPortal(views("trailing"), host.trailingAccessories) : null}
     </>;
   }
-  return <div className="nse-window-titlebar-accessories" data-nse-part="titlebar-accessories">{views(null)}</div>;
+  return <AccessoryRow>{views(null)}</AccessoryRow>;
+}
+
+/** The row of bottom accessories, on the window's chrome under the toolbar. */
+function AccessoryRow({ children }: { readonly children: ReactNode }) {
+  const mode = useWindowChromeMode();
+  return <div className="nse-window-titlebar-accessories" data-nse-part="titlebar-accessories" data-mode={mode}>{children}</div>;
+}
+
+/** Light or dark, as the application's appearance resolves, for the window's own chrome. */
+function useWindowChromeMode(): "light" | "dark" {
+  const appearance = useSynWareContext()?.appearance;
+  return useSyncExternalStore(appearance?.subscribe ?? noSubscription, () => (appearance?.resolved() === "dark" ? "dark" : "light"), () => "light");
 }
 
 /**
@@ -121,8 +133,7 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
   // The window controller's responder when it has actions; otherwise the application's mount.
   const responderId = useContext(NSEActionResponderContext) ?? appRuntime?.responderId ?? null;
   const overlayId = `nse-window-toolbar:${useId()}`;
-  const appearance = context?.appearance;
-  const mode = useSyncExternalStore(appearance?.subscribe ?? noSubscription, () => (appearance?.resolved() === "dark" ? "dark" : "light"), () => "light");
+  const mode = useWindowChromeMode();
   const element = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
   const [attached, setAttached] = useState(false);

@@ -4833,3 +4833,17 @@
 /* The strip is the toolbar's material, so the toolbar's own surface (which stops short of the strip's padding) is not drawn. */
 :where([data-nse-appearance="atmo"]) .nse-window-toolbar::after { content: ""; position: absolute; inset: auto 0 0; height: 27px; pointer-events: none; background: linear-gradient(to top, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); }
 :where([data-nse-appearance="atmo"]) .nse-window-toolbar[data-mode="dark"]::after { background: linear-gradient(to top, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)); }
+/* Bottom titlebar accessories continue the strip under the toolbar, which hands them its foot rule. */
+:where([data-nse-appearance="atmo"]) .nse-window-titlebar-accessories {
+  min-height: 30px;
+  padding: 0 6px;
+  color: #1d1d1f;
+  background: #d9dbde;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.26);
+}
+:where([data-nse-appearance="atmo"]) .nse-window-titlebar-accessories[data-mode="dark"] {
+  color: #ececee;
+  background: #2d2e31;
+  border-bottom-color: #000;
+}
+:where([data-nse-appearance="atmo"]) .nse-window-toolbar:has(+ .nse-window-titlebar-accessories) { border-bottom-color: transparent; }

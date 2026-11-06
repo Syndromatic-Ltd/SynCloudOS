@@ -109,7 +109,9 @@ interface BrowserHostOptions {
 
 /** How an application-only host presents its primary application:
  * `fullscreen` (the default) fills the page with the app's content and no
- * system top bar; `declared` keeps the manifest's presentation and frame.
+ * system top bar; `declared` keeps the manifest's presentation and frame, so a
+ * page-filling primary with `topBar: "standard"` draws the standard bar above it,
+ * with its window's title, subtitle and titlebar accessories.
  * A primary that fills the page under `optional` or `required` authentication
  * must declare `applicationMenu: { trigger: "content" }` and open the menu
  * from its content with `useApplicationMenuTrigger()`: that menu is the

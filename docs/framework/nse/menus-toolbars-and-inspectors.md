@@ -110,7 +110,7 @@ The window owns the toolbar's command and preference authority, so you do not bu
 
 `window.title` names the window's document; on the stage, a window with a title (or titlebar accessories) draws the standard bar's document layout: the application's name leading, then the document centred. `window.subtitle` is a second line of the title (Atmo draws it as a status capsule) and `window.isDocumentEdited` marks unsaved changes.
 
-Controls an application puts in its title bar are `NSETitlebarAccessoryViewController`s (NSTitlebarAccessoryViewController), added with `window.addTitlebarAccessoryViewController(_:)`; the window owns them from then on. On the stage, Atmo draws `leading` accessories before the title and `trailing` accessories after it; `bottom` accessories, and in a window of its own every accessory, sit in a row under the toolbar.
+Controls an application puts in its title bar are `NSETitlebarAccessoryViewController`s (NSTitlebarAccessoryViewController), added with `window.addTitlebarAccessoryViewController(_:)`; the window owns them from then on. The Webspring stage draws this bar, and so does an application-only host (`mountSynCloudOS({ application: { bundleIdentifier, frame: "declared" } })`) for a page-filling application whose frame declares `topBar: "standard"`; there the application's icon stands where the stage has its home button. On the stage, Atmo draws `leading` accessories before the title and `trailing` accessories after it; `bottom` accessories, and in a window of its own every accessory, sit in a row under the toolbar.
 
 ```ts
 class FileAccessory extends NSETitlebarAccessoryViewController {

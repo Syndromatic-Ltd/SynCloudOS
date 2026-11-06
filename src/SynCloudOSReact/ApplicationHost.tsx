@@ -33,6 +33,7 @@ import { useRuntimeNSEOverlayPort } from "./nseFocusPort";
 import { useRuntimeNSEMenuPort } from "./nseMenuPort";
 import { activateResponderHierarchy, clearOwnedResponderAnchor } from "./responderHierarchy";
 import { SystemAlert } from "./SystemAlert";
+import { ApplicationHostTitlebar } from "./ApplicationHostTitlebar";
 
 /** An application-only host has no Webspring to return to: every recovery
  * offer drops "Return to Webspring" and gains a page reload. */
@@ -185,6 +186,17 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
     loadingLabel={locale.t("apps.loading", "Loading {app}", { app: appName })}
     loadingPackageLabel={locale.t("apps.loadingPackage", "Loading {packageName}", { packageName: app.packageName })}
     missingComponentLabel={locale.t("apps.missingComponent", "SynCloudOS could not find a component for {packageName}.", { packageName: app.packageName })} /> : null;
+  // A page-filling primary that declares the standard bar (frame: "declared") draws it above its content.
+  const framedEntry = app && app.frame.topBar === "standard" ? (
+    <ApplicationHostTitlebar
+      title={locale.appName(app, "window")}
+      iconSrc={app.icon.src}
+      material={app.frame.material === "metal" ? "metal" : "cumulus"}
+      scheme={appearance === "dark" ? "dark" : "light"}
+      menuStore={menuStore}
+      menuLabel={contentMenu && app.frame.rightSlot !== "none" ? locale.t("settings.label", "Settings") : null}
+    >{entry}</ApplicationHostTitlebar>
+  ) : entry;
   return <>
     {mounted ? <ResponderScope asChild responderId={responderId} kind="application" parentResponderId="workspace"
       scopeId={responderId} undoOwner={undoOwner} diagnosticsLabel={app.displayName}>
@@ -202,8 +214,8 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
             overlay={{ id: `application-host:app-menu-overlay:${applicationId}`, parentResponderId: responderId, placement: "block-end-inline-end" }}
             anchorTitle={appName} /> : null}
           {contentMenu ? <ApplicationMenuTriggerBridge menuStore={menuStore} label={appName}>
-            {entry}
-          </ApplicationMenuTriggerBridge> : entry}
+            {framedEntry}
+          </ApplicationMenuTriggerBridge> : framedEntry}
           </NSEWindowSurfaceBridgeProvider>
           </NSETooltipProvider>
           </NSEOverlayProvider>
