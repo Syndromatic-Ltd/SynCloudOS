@@ -43,6 +43,8 @@ import { useResponderHierarchy } from "../../SynCloudOSReact";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
 import type { SynWareRuntime } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
+import { NSEAlertBackdrop, NSEAlertSurface, NSEFocusScope } from "../../NSE/hostComposition";
+import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
 import { applicationSessionFor } from "./applicationSession";
@@ -265,12 +267,46 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
       <NSEViewControllerRendererProvider value={NSEViewControllerView}>
         <View controller={controller} />
       </NSEViewControllerRendererProvider>
+      {controller.presentedViewControllers.map(sheet => <NSEPresentedSheet key={sheetKey(sheet)} controller={sheet} />)}
     </div>
   );
   return <NSEControllerResponder target={controller} kind="view" host="element">{frame}</NSEControllerResponder>;
 }
 
-function createWindowMount(appRuntime: SynWareRuntime): NSEWindowMount {
+const sheetKeys = new WeakMap<object, string>();
+let sheetSequence = 0;
+function sheetKey(controller: object): string {
+  let key = sheetKeys.get(controller);
+  if (!key) sheetKeys.set(controller, key = `sheet-${++sheetSequence}`);
+  return key;
+}
+
+/**
+ * A view controller presented as a sheet (presentAsSheet): modal to the window, drawn on the alert panel
+ * surface over its presenter's view, which stays the next responder. Escape and the backdrop send the
+ * sheet `cancelOperation()` when it has one; otherwise they dismiss it.
+ */
+function NSEPresentedSheet({ controller }: { readonly controller: NSEViewController<unknown> }) {
+  useObserve(controller);
+  const titleId = useId();
+  const size = controller.preferredContentSize;
+  const cancel = () => {
+    const operation = (controller as { cancelOperation?: () => unknown }).cancelOperation;
+    if (typeof operation === "function") void operation.call(controller);
+    else controller.dismiss();
+  };
+  return <NSEFocusScope options={{ scopeId: `nse-sheet:${sheetKey(controller)}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+    <NSEAlertBackdrop onSafeDismiss={cancel}>
+      <NSEAlertSurface role="dialog" labelledBy={controller.title ? titleId : undefined} className="nse-sheet"
+        style={size ? { width: `min(${size.width}px, calc(100vw - 32px))` } : undefined}>
+        {controller.title ? <h2 id={titleId} className="nse-sheet-title">{controller.title}</h2> : null}
+        <NSEViewControllerView controller={controller} />
+      </NSEAlertSurface>
+    </NSEAlertBackdrop>
+  </NSEFocusScope>;
+}
+
+function createWindowMount(appRuntime: SynWareRuntime, alerts: SynWareContextValue["alerts"] | null): NSEWindowMount {
   const windows = appRuntime.windows;
   const current = () => {
     const snapshot = windows.getSnapshot();
@@ -297,6 +333,10 @@ function createWindowMount(appRuntime: SynWareRuntime): NSEWindowMount {
       const id = current()?.id;
       return id ? windows.registerCloseGuard(id, guard) : () => {};
     },
+    presentAlert: (request, signal) => {
+      if (!alerts) return Promise.reject(new Error("Cannot present an alert: this window has no application context."));
+      return alerts.present({ title: request.title, ...(request.message ? { message: request.message } : {}), buttons: request.buttons }, signal);
+    },
   };
 }
 
@@ -312,7 +352,8 @@ export interface NSEWindowControllerViewProps {
 export function NSEWindowControllerView({ controller }: NSEWindowControllerViewProps) {
   useObserve(controller);
   const appRuntime = useContext(SynWareRuntimeContext);
-  const mount = useMemo(() => (appRuntime ? createWindowMount(appRuntime) : null), [appRuntime]);
+  const alerts = useSynWareContext()?.alerts ?? null;
+  const mount = useMemo(() => (appRuntime ? createWindowMount(appRuntime, alerts) : null), [appRuntime, alerts]);
   const [loaded, setLoaded] = useState(false);
   useLayoutEffect(() => {
     if (!mount || controller.isDisposed) return;

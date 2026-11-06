@@ -34,9 +34,10 @@ export {
 } from "./Feedback";
 export { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin } from "./Focus/focusOrigin";
 
-export { NSEAlert } from "./Components/NSEAlert";
+export { NSEAlertSurface } from "./Components/NSEAlertSurface";
 export { SourceListFrameProvider } from "./Navigation/SourceList/sourceListFrameContext";
 export type { SourceListFrameContextValue } from "./Navigation/SourceList/sourceListFrameContext";
 
 export { NSEAlertBackdrop } from "./SystemUI";
 export { nseTopBarHeightCssValue } from "./Windows/Chrome/nseTopBarStyles";
+export { NSEFocusScope } from "./Focus";

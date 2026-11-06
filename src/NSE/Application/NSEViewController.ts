@@ -40,6 +40,7 @@ import { finalizeNSEAuthoringOwner } from "./authoringLifecycle";
 import { getNSEAuthoringContext } from "./authoringContext";
 import type { NSEObservable } from "../Objects/observable";
 import { createViewControllerFX, type NSEViewControllerFX, type NSEViewControllerFXClients } from "./viewControllerFX";
+import type { NSEWindow } from "./NSEWindowController";
 
 /**
  * The React component a view controller renders. It receives the controller
@@ -81,6 +82,11 @@ export interface NSEControllerView {
    * `NSE_VIEW_NOT_LOADED` before the view loads and after it unmounts.
    */
   readonly layer: AFXLayer;
+  /**
+   * The window the view is in (NSView.window): its window controller's window, reached through the
+   * parent chain. `null` until the controller is a window's content or its descendant.
+   */
+  readonly window: NSEWindow | null;
 }
 
 /** The presentation environment of a controller's view. */
@@ -150,6 +156,10 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   readonly #view: NSEControllerView;
   #parent: NSEViewController<unknown> | null = null;
   #windowScope: NSEOwnershipScope | null = null;
+  #window: NSEWindow | null = null;
+  #presenting: NSEViewController<unknown> | null = null;
+  readonly #presented: NSEViewController<unknown>[] = [];
+  #preferredContentSize: Readonly<{ width: number; height: number }> | null = null;
   #loaded = false;
   #binding: NSEViewControllerBinding | null = null;
   readonly #activity: NSEViewActivity;
@@ -178,6 +188,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
       get element() { return controller.#requireMounted("view.element").element; },
       get mountSignal() { controller.#requireMounted("view.mountSignal"); return controller.#activity.snapshot("mounted").signal; },
       get layer() { return controller.#boundLayer(); },
+      get window() { return controller.#windowOf(); },
     });
   }
 
@@ -328,6 +339,73 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     return instance;
   }
 
+  /**
+   * The size the view prefers when it is presented (NSViewController.preferredContentSize): a sheet is
+   * this wide, up to the window's width. `null` lets the content decide.
+   */
+  get preferredContentSize(): Readonly<{ width: number; height: number }> | null { return this.#preferredContentSize; }
+  set preferredContentSize(size: Readonly<{ width: number; height: number }> | null) {
+    if (size !== null && !(Number.isFinite(size?.width) && size.width >= 0 && Number.isFinite(size?.height) && size.height >= 0))
+      throw new TypeError("A preferred content size needs a finite width and height of 0 or more.");
+    this.#preferredContentSize = size === null ? null : Object.freeze({ width: size.width, height: size.height });
+    this.notifyObservers();
+  }
+
+  /** The view controllers this one presents, as sheets (NSViewController.presentedViewControllers). */
+  get presentedViewControllers(): readonly NSEViewController<unknown>[] { return Object.freeze([...this.#presented]); }
+
+  /** The view controller presenting this one (NSViewController.presentingViewController), or `null`. */
+  get presentingViewController(): NSEViewController<unknown> | null { return this.#presenting; }
+
+  /**
+   * Presents `viewController` as a sheet on this controller's window (NSViewController.presentAsSheet(_:)).
+   * The sheet is modal to the window and draws over this controller's view; its actions reach this
+   * controller after its own. Escape sends the sheet `cancelOperation()` when it has one, and otherwise
+   * dismisses it. The presenter owns the sheet: dismissing it disposes it.
+   */
+  presentAsSheet<TSheet extends NSEViewController<unknown>>(viewController: TSheet): TSheet;
+  /** Creates the view controller in this controller's ownership, as `addChild` does, and presents it as a sheet. */
+  presentAsSheet<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(Controller: new (...args: TArgs) => TSheet, ...args: TArgs): TSheet;
+  presentAsSheet<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(viewController: TSheet | (new (...args: TArgs) => TSheet), ...args: TArgs): TSheet {
+    this.#assertLive("presentAsSheet", "call");
+    const instance = typeof viewController === "function"
+      ? instantiateInOwnerScope(new NSEOwnershipScope("NSEViewController", viewController.name), () => {
+        const result = new viewController(...args);
+        try { this.#assertLive("presentAsSheet", "call"); }
+        catch (error) { try { result[nseDisposeFor](this.disposalReason ?? "explicit"); } finally { throw error; } }
+        return result;
+      })
+      : viewController;
+    const sheet = instance as NSEViewController<unknown>;
+    if (!(sheet instanceof NSEViewController)) throw new TypeError("presentAsSheet needs a view controller.");
+    sheet.#assertLive("presentAsSheet", "call");
+    if (sheet === (this as NSEViewController<unknown>)) throw new TypeError("A view controller cannot present itself.");
+    if (sheet.#presenting === (this as NSEViewController<unknown>)) return instance;
+    if (sheet.#parent || sheet.#windowScope || sheet.#presenting) throw new TypeError("A presented view controller cannot already be a child, a window's content or presented elsewhere.");
+    sheet.#lifetime.adoptBy(sheet, this.#lifetime.scope);
+    sheet.#presenting = this as NSEViewController<unknown>;
+    this.#presented.push(sheet);
+    if (typeof viewController === "function" && !hasNSEConstructionOwner() && getNSEAuthoringContext(this)) {
+      try { finalizeNSEAuthoringOwner(sheet); }
+      catch (error) { try { sheet[nseDisposeFor]("explicit"); } catch { /* Preserve finalization failure. */ } throw error; }
+    }
+    this.notifyObservers();
+    return instance;
+  }
+
+  /**
+   * Dismisses a view controller this one presents (NSViewController.dismiss(_:)), disposing it. With no
+   * argument, a presented controller dismisses itself.
+   */
+  dismiss(viewController?: NSEViewController<unknown>): void {
+    if (viewController === undefined) {
+      this.#presenting?.dismiss(this as NSEViewController<unknown>);
+      return;
+    }
+    if (viewController.#presenting !== (this as NSEViewController<unknown>)) return;
+    viewController[nseDisposeFor]("removed-from-parent");
+  }
+
   /** Disposes this controller (reason `"removed-from-parent"`) and detaches it from its parent. */
   removeFromParent(): void {
     if (!this.#parent) return;
@@ -345,11 +423,14 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     try {
       this.#lifetime.dispose(reason, () => {
         this.#flushDetach();
-        const parent = this.#parent;
+        const parent = this.#parent ?? this.#presenting;
         this.#parent = null;
+        this.#presenting = null;
         if (parent) {
           const index = parent.#children.indexOf(this as NSEViewController<unknown>);
           if (index >= 0) parent.#children.splice(index, 1);
+          const presented = parent.#presented.indexOf(this as NSEViewController<unknown>);
+          if (presented >= 0) parent.#presented.splice(presented, 1);
           if (!parent.isDisposed) parent.notifyObservers();
         }
         this.didDispose();
@@ -360,12 +441,22 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   }
 
   /** @internal Makes `scope` (a window controller's) own this root view controller. */
-  [nseAdoptViewController](scope: NSEOwnershipScope): void {
+  [nseAdoptViewController](scope: NSEOwnershipScope, window: NSEWindow): void {
     this.#assertLive("contentViewController", "set");
     if (this.#parent) throw new TypeError("A child view controller cannot be a window's content view controller; call removeFromParent() first.");
     if (this.#windowScope && this.#windowScope !== scope) throw new TypeError("The view controller is already another window's content view controller.");
     this.#lifetime.adoptBy(this, scope);
     this.#windowScope = scope;
+    this.#window = window;
+  }
+
+  #windowOf(): NSEWindow | null {
+    let controller: NSEViewController<unknown> | null = this as NSEViewController<unknown>;
+    while (controller) {
+      if (controller.#window) return controller.#window;
+      controller = controller.#parent ?? controller.#presenting;
+    }
+    return null;
   }
 
   /** @internal Called by the React host when the view mounts. Returns the unmount function. */

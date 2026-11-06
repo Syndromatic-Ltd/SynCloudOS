@@ -152,3 +152,42 @@ The host saves each window's bounds, minimised and zoomed state, order and docum
 ## Accessibility
 
 System title bars use labelled buttons with hit targets of at least 44 by 44 CSS pixels. Modal windows and sheets expose the dialog role, trap focus and make the content behind them inert. Reduced motion removes transform travel without changing ordering, focus or completion, and forced colours mode draws visible outlines around controls and focus.
+
+## Alerts and sheets
+
+An alert is an object, after `NSAlert`. Configure it, present it as a sheet on a window, and await the response:
+
+```ts
+const alert = new NSEAlert();
+alert.messageText = `Delete “${post.title}”?`;
+alert.informativeText = "You cannot undo this action.";
+alert.addButton("Delete").hasDestructiveAction = true;
+alert.addButton("Cancel");
+if (await alert.beginSheetModal(this.window) === NSEModalResponse.alertFirstButtonReturn) this.delete(post);
+```
+
+| Member | Purpose |
+| --- | --- |
+| `messageText`, `informativeText` | The title and the text under it. `messageText` is required to present. |
+| `alertStyle` | `"warning"` (default), `"informational"` or `"critical"`. |
+| `addButton(title)` | Adds a button and returns it (`NSEAlertButton`: `title`, `keyEquivalent`, `hasDestructiveAction`). The first button takes Return; a button titled "Cancel" takes Escape. With none, the alert shows OK. |
+| `buttons` | The buttons in the order they were added. |
+| `beginSheetModal(window)` | Presents the alert on `window` and resolves with `NSEModalResponse.alertFirstButtonReturn + index` of the chosen button. Escape, or closing the window, chooses the Escape button, else the last. |
+
+`NSEModalResponse` names AppKit's responses: `OK`, `cancel`, `stop`, `abort`, `continue` and `alertFirstButtonReturn`, `alertSecondButtonReturn`, `alertThirdButtonReturn`. `window.endSheet(alert, returnCode?)` ends a presented alert (`NSWindow.endSheet(_:returnCode:)`); its promise resolves with `returnCode`, or the Escape response when omitted.
+
+A window controller passes `this.window`; a view controller passes `this.view.window` (`NSView.window`), which follows its parents and presenters to the window, or is `null` before it is in one. Present an alert from an action and return; do not await the alert inside the action. An action that fails after an `await` should show its alert once it has finished.
+
+### Sheets
+
+Custom content is a view controller presented as a sheet, after `NSViewController.presentAsSheet(_:)`:
+
+```ts
+const sheet = this.presentAsSheet(LinkSheetViewController, this);   // or presentAsSheet(instance)
+sheet.preferredContentSize = { width: 480, height: 0 };
+// later
+this.dismiss(sheet);   // or, inside the sheet, this.dismiss()
+```
+
+The sheet is modal to the window and draws on the alert panel over its presenter's view. Its actions reach its presenter after itself. Its `title`, when set, is drawn above it, and `preferredContentSize.width` sets its width (capped to the window). Escape and the backdrop send the sheet `cancelOperation()` when it defines one, and otherwise dismiss it. The presenter owns its sheets: `dismiss` disposes the sheet, and disposing the presenter disposes them. `presentedViewControllers` and `presentingViewController` report the relationship.
+

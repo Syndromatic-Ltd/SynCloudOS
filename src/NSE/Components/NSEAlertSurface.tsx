@@ -29,7 +29,8 @@ import {
 } from "../SmoothSurface";
 
 
-export function NSEAlert({
+/** The alert panel surface hosts draw alerts in. Apps present alerts with the NSEAlert object. */
+export function NSEAlertSurface({
   children,
   className = "",
   appearance = "dark",

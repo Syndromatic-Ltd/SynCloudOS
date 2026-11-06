@@ -21,7 +21,7 @@
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useEffect, useId, useLayoutEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { NSEAlert, NSEAlertBackdrop, NSEFocusPortProvider, NSEFocusScope } from "../NSE/NSE";
+import { NSEAlertSurface, NSEAlertBackdrop, NSEFocusPortProvider, NSEFocusScope } from "../NSE/NSE";
 import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 import { useNSEFeedback } from "../NSE/hostComposition";
 import { NSEAboutDialog, NSEConfirmDialog, NSEPreferencesToast } from "../NSE/SystemUI";
@@ -116,7 +116,7 @@ function ReturnDecisionDialog({
   return createPortal(
     <NSEFocusScope options={{ scopeId: "system-ui:return-decision", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
       <NSEAlertBackdrop presentation={runtime.presentationTraits} onSafeDismiss={onSafeDismiss}>
-        <NSEAlert
+        <NSEAlertSurface
           appearance={alertAppearance}
           labelledBy={titleId}
           describedBy={messageId}
@@ -145,7 +145,7 @@ function ReturnDecisionDialog({
               onClick={runKeep}
             />
           </div>
-        </NSEAlert>
+        </NSEAlertSurface>
       </NSEAlertBackdrop>
     </NSEFocusScope>,
     document.body,

@@ -21,6 +21,8 @@
 export { NSEApplication } from "./NSEApplication";
 export type { NSEApplicationClass, NSEApplicationContext, NSEOpenWindowOptions } from "./NSEApplication";
 export { NSEWindowController } from "./NSEWindowController";
+export { NSEAlert, NSEAlertButton, NSEModalResponse } from "./NSEAlert";
+export type { NSEAlertStyle } from "./NSEAlert";
 export type {
   NSEAnyWindowController,
   NSEWindow,

@@ -20,7 +20,7 @@
 
 import "./Typography/fonts.css";
 
-import { NSEAlert } from "./Components/NSEAlert";
+import { NSEAlertSurface } from "./Components/NSEAlertSurface";
 import { NSEAlertBackdrop } from "./Components/NSEAlertBackdrop";
 import { Badge } from "./Components/Badge";
 import { IconWell } from "./Components/IconWell";
@@ -30,7 +30,7 @@ export {
   Badge,
   IconWell,
   LoadingSpinner,
-  NSEAlert,
+  NSEAlertSurface,
   NSEAlertBackdrop,
 };
 import * as NSEText from "./Text";
@@ -209,7 +209,7 @@ export const NSE = {
   NSETreeController: NSEControllers.NSETreeController,
   NSEUpdateReadinessController: NSEControllers.NSEUpdateReadinessController,
   useNSEController: NSEControllers.useNSEController,
-  NSEAlert,
+  NSEAlertSurface,
   NSEAlertBackdrop,
   IconWell,
   LinenSurface,

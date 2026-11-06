@@ -158,7 +158,7 @@ clients remain available for existing capability hooks; FX types stay separate i
 not a namespace under `SCOS`. `preferences.get/set/remove` uses the same store as
 `persistence.getPreference/setPreference/removePreference`.
 
-Alerts are queued by the kernel and presented by the host through `NSEAlert`. Each call
+Alerts are queued by the kernel and drawn by the host's alert presenter; apps usually present them with the `NSEAlert` object (see [Alerts and sheets](windows.md#alerts-and-sheets)). Each call
 returns its own promise resolving to the chosen button ID. Omitting buttons gives an
 `ok` button. Escape, safe dismissal, caller abort and closing the owner resolve to its
 cancel button (or the last button if none is marked cancel). Closing an app also cancels

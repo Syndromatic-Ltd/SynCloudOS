@@ -142,9 +142,6 @@ export {
   NSEAlertBackdrop,
 } from "./Components/NSEAlertBackdrop";
 export {
-  NSEAlert,
-} from "./Components/NSEAlert";
-export {
   NSEArrayController,
 } from "./Controllers/NSEArrayController";
 export type {
@@ -899,7 +896,8 @@ export type {
 
 export { NSEObject, observable, observe, useObserve } from "./Objects";
 export type { NSEObservable } from "./Objects";
-export { NSEApplication, NSEWindowController, NSEViewController } from "./Application";
+export { NSEApplication, NSEWindowController, NSEViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "./Application";
+export type { NSEAlertStyle } from "./Application";
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,
   NSETraitCollection,
