@@ -37,6 +37,7 @@ export type { WebspringBoardConfiguration } from "./Contents/Views/WebspringBoar
 
 // The pieces a site's own launcher view is built from, as the Board is.
 export { WebspringWidgetShelf } from "./WebspringWidgetShelf";
+export { useWebspringHapticEngine } from "./webspringHaptics";
 export { WebspringSurface, webspringSurfaceStyle } from "./webspringSurface";
 export { defineWidget, isDefinedWebspringWidget } from "./webspringWidget";
 export { WebspringDragProxy, getWebspringDragGrabOffset, useWebspringDragProxyPosition } from "./WebspringDragProxy";
