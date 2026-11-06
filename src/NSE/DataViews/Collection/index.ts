@@ -20,6 +20,7 @@
 
 export { NSECollectionView } from "./NSECollectionView";
 export { calculateCollectionLayout, collectionColumnCount, createAdaptiveCollectionLayout, createListCollectionLayout } from "./collectionLayout";
+export { coverFlowLayoutAttributes, type NSECoverFlowLayoutAttributes } from "./coverFlowLayout";
 export type {
   NSECollectionDropProposal,
   NSECollectionLayout,
