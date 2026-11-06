@@ -557,3 +557,27 @@
 
 /* Overflow destinations have room to grow vertically; keep their names readable. */
 .nse-tab-bar-overflow-option .nse-control-list-primary { white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+
+/* NSETabViewController: the selected item's view above or below the tab control its tabStyle names. */
+.nse-tab-view-controller {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.nse-tab-view-controller-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.nse-tab-view-controller-content > [data-nse-view-controller] {
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
