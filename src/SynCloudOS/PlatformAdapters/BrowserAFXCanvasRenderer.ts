@@ -271,7 +271,17 @@ interface TextureAllocation {
   readonly texture: WebGLTexture;
   readonly width: number;
   readonly height: number;
+  /** Mipmap levels; more than one only for contents a layer samples trilinearly. */
+  readonly levels: number;
   readonly bytes: number;
+}
+
+/** A layer's sampling: its minification and magnification filters, after CALayer's. */
+type SamplingKey = "linear" | "nearest" | "trilinear" | "linear/nearest" | "nearest/nearest" | "trilinear/nearest";
+
+function samplingKeyFor(quad: AFXRendererQuad): SamplingKey {
+  const minification = quad.minificationFilter ?? "linear";
+  return (quad.magnificationFilter === "nearest" ? `${minification}/nearest` : minification) as SamplingKey;
 }
 
 const maximumPooledTextureBytes = 64 * 1024 * 1024;
@@ -308,7 +318,8 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
   readonly #uploadedThisRender: Array<VFXFrame | GFXImage> = [];
   readonly #groups: Array<{ content: VFXFrame | GFXImage; mask: GFXImage | null; opaque: boolean;
     addition: boolean; premultiplied: boolean; accumulated: boolean; texture: WebGLTexture | null;
-    start: number; end: number; first: number; count: number }> = [];
+    depthContext: number; sampling: SamplingKey; start: number; end: number; first: number; count: number }> = [];
+  readonly #samplers = new Map<SamplingKey, WebGLSampler>();
   readonly #onContextLost = (event: Event) => {
     if (this.#disposed) return;
     event.preventDefault();
@@ -546,15 +557,18 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
       const effect = this.#effectTextures.get(quad);
       const texture = effect?.texture ?? null, premultiplied = effect?.premultiplied ?? false;
       const accumulated = effect?.accumulated ?? false;
+      const depthContext = quad.depthContext ?? 0;
+      const sampling = samplingKeyFor(quad);
       while (nextBreak < batches.length && batches[nextBreak]!.beforeQuad < index) nextBreak++;
       const breaks = nextBreak < batches.length && batches[nextBreak]!.beforeQuad === index;
       const group = groupCount ? groups[groupCount - 1]! : null;
       if (!group || breaks || group.content !== quad.content || group.mask !== mask || group.opaque !== opaque ||
-        group.addition !== addition || group.texture !== texture || group.premultiplied !== premultiplied || group.accumulated !== accumulated) {
-        const next = groups[groupCount] ??= { content: null!, mask, opaque, addition, texture, premultiplied, accumulated, start: index, end: index, first: 0, count: 0 };
+        group.addition !== addition || group.texture !== texture || group.premultiplied !== premultiplied || group.accumulated !== accumulated ||
+        group.depthContext !== depthContext || group.sampling !== sampling) {
+        const next = groups[groupCount] ??= { content: null!, mask, opaque, addition, texture, premultiplied, accumulated, depthContext, sampling, start: index, end: index, first: 0, count: 0 };
         next.content = quad.content as VFXFrame | GFXImage; next.mask = mask; next.opaque = opaque;
         next.addition = addition; next.texture = texture; next.premultiplied = premultiplied;
-        next.accumulated = accumulated;
+        next.accumulated = accumulated; next.depthContext = depthContext; next.sampling = sampling;
         next.start = index; next.end = index + 1;
         groupCount++;
       } else group.end = index + 1;
@@ -574,20 +588,36 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
     // One contiguous upload per scene; runs preserve exact painter/depth order.
     gl.bufferData(gl.ARRAY_BUFFER, this.#geometry.subarray(0, length), gl.DYNAMIC_DRAW);
     this.#bufferBytes = length * Float32Array.BYTES_PER_ELEMENT;
+    // Depth is tested only within a three-dimensional context (a transform layer's, or a depth-preserving
+    // replicator's); each new context starts from a clear depth buffer, and flattened content draws over all of it.
+    let currentContext = -1;
+    const enterContext = (context: number) => {
+      if (context === currentContext) return;
+      currentContext = context;
+      if (context === 0) { gl.disable(gl.DEPTH_TEST); return; }
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthMask(true);
+      gl.clear(gl.DEPTH_BUFFER_BIT);
+    };
     let nextBatch = 0;
     const drawParticlesBefore = (index: number) => {
       while (nextBatch < batches.length && batches[nextBatch]!.beforeQuad <= index) {
+        enterContext(batches[nextBatch]!.depthContext ?? 0);
         this.#particlePipeline ??= new BrowserAFXParticlePipeline(gl);
         this.#particlePipeline.render(batches[nextBatch++]!, scene.width, scene.height, image => this.#textureFor(image));
       }
     };
     for (let index = 0; index < groupCount; index++) {
-        const { content, mask, opaque, first, count, start, addition, premultiplied, accumulated, texture: effectTexture } = groups[index]!;
+        const { content, mask, opaque, first, count, start, addition, premultiplied, accumulated, depthContext, sampling, texture: effectTexture } = groups[index]!;
         drawParticlesBefore(start);
+        enterContext(depthContext);
         gl.useProgram(pipeline.program);
-        const texture = effectTexture ?? this.#textureFor(content);
+        // Trilinear sampling reads the contents' mipmaps; effect textures are drawn at their own size.
+        const sampled = effectTexture ? "linear" : sampling;
+        const texture = effectTexture ?? this.#textureFor(content, sampled.startsWith("trilinear"));
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.bindSampler(0, sampled === "linear" ? null : this.#samplerFor(sampled));
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, mask ? this.#textureFor(mask) : texture);
         gl.uniform1i(pipeline.hasMask, mask ? 1 : 0);
@@ -599,10 +629,12 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
           addition ? gl.ONE : gl.ONE_MINUS_SRC_ALPHA);
         else if (addition) gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
         else gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-        gl.depthMask(opaque);
+        gl.depthMask(depthContext !== 0 && opaque);
         gl.drawArrays(gl.TRIANGLES, first, count);
     }
     drawParticlesBefore(quads.length);
+    gl.bindSampler(0, null);
+    gl.enable(gl.DEPTH_TEST);
     gl.depthMask(true);
     if (gl.isContextLost()) throw new DOMException("Layer renderer GPU context was lost.", "InvalidStateError");
     } finally {
@@ -709,13 +741,36 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
     }
   }
 
-  #textureFor(content: VFXFrame | GFXImage): WebGLTexture {
+  /** A sampler for a layer's filters, made once per combination. */
+  #samplerFor(key: SamplingKey): WebGLSampler {
+    const gl = this.#gl!;
+    let sampler = this.#samplers.get(key);
+    if (sampler) return sampler;
+    sampler = gl.createSampler();
+    if (!sampler) throw new DOMException('Layer renderer sampler allocation failed.', 'NotSupportedError');
+    const [minification, magnification = "linear"] = key.split("/");
+    gl.samplerParameteri(sampler, gl.TEXTURE_MIN_FILTER, minification === "trilinear" ? gl.LINEAR_MIPMAP_LINEAR
+      : minification === "nearest" ? gl.NEAREST : gl.LINEAR);
+    gl.samplerParameteri(sampler, gl.TEXTURE_MAG_FILTER, magnification === "nearest" ? gl.NEAREST : gl.LINEAR);
+    gl.samplerParameteri(sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.samplerParameteri(sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    this.#samplers.set(key, sampler);
+    return sampler;
+  }
+
+  #textureFor(content: VFXFrame | GFXImage, mipmapped = false): WebGLTexture {
     const gl = this.#gl!;
     const existing = this.#textures.get(content);
-    if (existing) return existing.texture;
+    if (existing && (!mipmapped || existing.levels > 1)) return existing.texture;
+    if (existing) {
+      // First trilinear use of uploaded contents: upload them again with a mipmap chain.
+      this.#textures.delete(content);
+      this.#recycleTexture(existing);
+    }
     let allocation: TextureAllocation | undefined;
     const allocate = (width: number, height: number) => {
-      allocation = this.#acquireTexture(width, height);
+      const levels = mipmapped ? Math.floor(Math.log2(Math.max(width, height))) + 1 : 1;
+      allocation = this.#acquireTexture(width, height, levels);
       gl.bindTexture(gl.TEXTURE_2D, allocation.texture);
     };
     try {
@@ -742,6 +797,7 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
         allocate(image.width, image.height);
         gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, image.width, image.height, gl.RGBA, gl.UNSIGNED_BYTE, afxImageTexturePixels(image));
       }
+      if (allocation!.levels > 1) gl.generateMipmap(gl.TEXTURE_2D);
       this.#textures.set(content, allocation!);
       this.#uploadedThisRender.push(content);
       return allocation!.texture;
@@ -751,9 +807,9 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
     }
   }
 
-  #acquireTexture(width: number, height: number): TextureAllocation {
+  #acquireTexture(width: number, height: number, levels = 1): TextureAllocation {
     const gl = this.#gl!;
-    const index = this.#texturePool.findIndex(entry => entry.width === width && entry.height === height);
+    const index = this.#texturePool.findIndex(entry => entry.width === width && entry.height === height && entry.levels === levels);
     if (index !== -1) {
       const entry = this.#texturePool.splice(index, 1)[0]!;
       this.#pooledTextureBytes -= entry.bytes;
@@ -767,8 +823,9 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, width, height);
-      return { texture, width, height, bytes: width * height * 4 };
+      gl.texStorage2D(gl.TEXTURE_2D, levels, gl.RGBA8, width, height);
+      // A mipmap chain adds a third to the base level.
+      return { texture, width, height, levels, bytes: Math.ceil(width * height * 4 * (levels > 1 ? 4 / 3 : 1)) };
     } catch (error) {
       gl.deleteTexture(texture);
       throw error;
@@ -884,6 +941,7 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
       }
       for (const allocation of this.#textures.values()) gl.deleteTexture(allocation.texture);
       for (const allocation of this.#texturePool) gl.deleteTexture(allocation.texture);
+      for (const sampler of this.#samplers.values()) gl.deleteSampler(sampler);
       if (this.#buffer) gl.deleteBuffer(this.#buffer);
       this.#particlePipeline?.dispose();
       this.#shaderPipeline?.dispose();
@@ -897,6 +955,7 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
 
   #forgetGPUResources(): void {
     this.#textures.clear();
+    this.#samplers.clear();
     this.#texturePool.length = 0;
     this.#pooledTextureBytes = 0;
     this.#stage = null;

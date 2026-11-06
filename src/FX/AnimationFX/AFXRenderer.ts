@@ -27,6 +27,7 @@ import {
   type AFXLayerSurface,
 } from "./AFXLayer";
 import { AFXReplicatorLayer } from "./AFXReplicatorLayer";
+import { AFXTransformLayer } from "./AFXTransformLayer";
 import { AFXParticleLayer } from './AFXParticleLayer';
 import { createAFXLayer } from "./host";
 import { AFXTransform3D } from "./AFXTransform3D";
@@ -61,6 +62,16 @@ export interface AFXRendererQuad {
   readonly mask?: AFXRendererMask;
   /** Effective edge flags after the layer's allowsEdgeAntialiasing gate. */
   readonly edgeAntialiasingMask?: number;
+  /**
+   * The three-dimensional context the quad belongs to: quads of one context are depth-tested against each other,
+   * as the sublayers of a transform layer or of a depth-preserving replicator are. Absent (or 0), the quad is
+   * flattened: it draws over everything before it, in order.
+   */
+  readonly depthContext?: number;
+  /** The layer's minification filter, when it is not `"linear"`. */
+  readonly minificationFilter?: "nearest" | "trilinear";
+  /** The layer's magnification filter, when it is not `"linear"`. */
+  readonly magnificationFilter?: "nearest";
 }
 
 /** Adapter submission for a bounded, local-coordinate content and sublayer image. */
@@ -86,6 +97,8 @@ export interface AFXRendererParticleBatch {
   readonly opacity: number;
   readonly colourModulation: AFXRendererColourModulation;
   readonly mask?: AFXRendererMask;
+  /** As for `AFXRendererQuad.depthContext`. */
+  readonly depthContext?: number;
 }
 
 export interface AFXRendererTarget {
@@ -219,6 +232,20 @@ export class AFXRenderer {
     return layer;
   }
 
+  /** A layer whose sublayers keep their depth in one shared space, after `CATransformLayer`. */
+  makeTransformLayer(parent: AFXLayer | null = this.layer): AFXTransformLayer {
+    this.#assertLive();
+    if (parent && parent !== this.layer && !this.#isDescendant(parent))
+      throw new TypeError("Layer renderer parent must belong to this scene.");
+    const surface = new RendererLayerSurface(() => this.#invalidate());
+    const layer = createAFXLayer(AFXTransformLayer, surface, this.#scheduler);
+    this.#surfaces.set(layer, surface);
+    this.#ownedLayers.add(layer);
+    try { parent?.addSublayer(layer); }
+    catch (error) { layer.dispose(); throw error; }
+    return layer;
+  }
+
   makeReplicatorLayer(parent: AFXLayer | null = this.layer): AFXReplicatorLayer {
     this.#assertLive();
     if (parent && parent !== this.layer && !this.#isDescendant(parent))
@@ -295,7 +322,10 @@ export class AFXRenderer {
     if (point.x < 0 || point.y < 0 || point.x > scene.width || point.y > scene.height) return null;
     let result: AFXLayer | null = null;
     let writtenDepth = -Infinity;
+    let context = 0;
     for (const quad of scene.quads) {
+      const quadContext = quad.depthContext ?? 0;
+      if (quadContext !== context) { context = quadContext; writtenDepth = -Infinity; }
       const opacity = parentOpacity * quad.opacity;
       if ((!quad.group && (!quad.pickable || !quad.layer)) || opacity <= 0) continue;
       const m = quad.transform.values, b = quad.bounds, x = point.x, y = point.y;
@@ -311,14 +341,14 @@ export class AFXRenderer {
       const w = m[3] * lx + m[7] * ly + m[15];
       if (w <= 0) continue;
       const depth = (m[2] * lx + m[6] * ly + m[14]) / w;
-      if (depth < writtenDepth - 1e-9) continue;
+      if (context !== 0 && depth < writtenDepth - 1e-9) continue;
       // The group texture maps bounds to a zero-origin local scene. Recurse
       // through that accepted scene rather than consulting the current tree.
       const descendant = quad.group ? this.#hitScene(quad.group.scene, { x: lx - b.x, y: ly - b.y }, opacity) : null;
       const candidate = descendant ?? (quad.pickable ? quad.layer : null);
       if (!candidate) continue;
       result = candidate;
-      if (opacity === 1) writtenDepth = depth;
+      if (context !== 0 && opacity === 1) writtenDepth = depth;
     }
     return result;
   }
@@ -382,6 +412,16 @@ export class AFXRenderer {
     let quads: AFXRendererQuad[] = [];
     let particleBatches: AFXRendererParticleBatch[] = [];
     let submittedCount = 0;
+    let contexts = 0;
+    // Siblings draw in zPosition order, as in Core Animation; equal positions keep their sublayer order.
+    const ordered = (children: readonly AFXLayer[]): readonly AFXLayer[] => {
+      let sorted = true;
+      for (let index = 1; index < children.length && sorted; index++)
+        sorted = this.#presentationFor(children[index - 1]!).zPosition <= this.#presentationFor(children[index]!).zPosition;
+      if (sorted) return children;
+      return children.map((layer, index) => ({ layer, index, z: this.#presentationFor(layer).zPosition }))
+        .sort((a, b) => a.z - b.z || a.index - b.index).map(entry => entry.layer);
+    };
     const admit = (count = 1) => {
       submittedCount += count;
       if (submittedCount > this.#maximumQuads) throw new RangeError('Renderer quad budget exceeded.');
@@ -421,6 +461,7 @@ export class AFXRenderer {
       parentOpacity: number,
       modulation: AFXRendererColourModulation,
       isolatedRoot = false,
+      depthContext = 0,
     ): void => {
       if (layer.hidden) return;
       const p = this.#presentationFor(layer);
@@ -451,7 +492,8 @@ export class AFXRenderer {
         quads.push(Object.freeze({ layer, pickable: this.#pickable.has(layer), content: null,
           group: Object.freeze({ scene, filters: p.filters ?? Object.freeze([]) }), compositingFilter,
           uv: unitRect, bounds: p.bounds, transform: world, opacity, colourModulation: modulation,
-          mask: maskFor(layer, record), edgeAntialiasingMask: p.style.allowsEdgeAntialiasing ? p.style.edgeAntialiasingMask : 0 }));
+          mask: maskFor(layer, record), edgeAntialiasingMask: p.style.allowsEdgeAntialiasing ? p.style.edgeAntialiasingMask : 0,
+          ...(depthContext ? { depthContext } : {}) }));
         return;
       }
       if (p.content?.kind === 'emitter') {
@@ -459,7 +501,7 @@ export class AFXRenderer {
           admit(p.content.particles.length);
           particleBatches.push(Object.freeze({ beforeQuad: quads.length, particles: p.content.particles,
             transform: world, opacity, colourModulation: modulation, compositingFilter,
-            mask: isolatedRoot ? undefined : maskFor(layer, record) }));
+            mask: isolatedRoot ? undefined : maskFor(layer, record), ...(depthContext ? { depthContext } : {}) }));
         } else {
         // Particle order is authored by the producer, as with AFXEmitterLayer.
         // Keep it stable for transparent overlap; no per-particle layer traversal.
@@ -479,11 +521,12 @@ export class AFXRenderer {
               offset: { r: 0, g: 0, b: 0, a: 0 } }), mask: isolatedRoot ? undefined : maskFor(layer, record),
             // Sprites keep all four analytic edges, avoiding the conservative
             // expanded-edge geometry needed by partially disabled layer edges.
-            edgeAntialiasingMask: 15 }));
+            edgeAntialiasingMask: 15, ...(depthContext ? { depthContext } : {}) }));
         }
         }
       }
-      if (p.content?.kind === "video" || p.content?.kind === "image" || p.content?.kind === 'shader') {
+      // A transform layer is a space for its sublayers; it draws no contents of its own.
+      if (!(layer instanceof AFXTransformLayer) && (p.content?.kind === "video" || p.content?.kind === "image" || p.content?.kind === 'shader')) {
         if (p.contentsGravity !== "resize")
           throw new DOMException("Layer renderer content gravity is unsupported.", "NotSupportedError");
         if (p.contentsCenter.x !== 0 || p.contentsCenter.y !== 0 ||
@@ -496,34 +539,43 @@ export class AFXRenderer {
           admit();
           const pickable = this.#pickable.has(layer), mask = isolatedRoot ? undefined : maskFor(layer, record);
           const edgeAntialiasingMask = p.style.allowsEdgeAntialiasing ? p.style.edgeAntialiasingMask : 0;
+          const minificationFilter = p.style.minificationFilter === "linear" ? undefined : p.style.minificationFilter;
+          const magnificationFilter = p.style.magnificationFilter === "linear" ? undefined : p.style.magnificationFilter;
           // Quads are immutable and may outlive this frame (picking, targets),
           // so an unchanged layer republishes its previous quad object.
           const prior = record.quad;
           if (prior && prior.content === content && prior.uv === p.contentsRect && prior.bounds === p.bounds &&
             prior.transform === world && prior.opacity === opacity && prior.colourModulation === modulation &&
             prior.mask === mask && prior.pickable === pickable && prior.edgeAntialiasingMask === edgeAntialiasingMask &&
-            prior.compositingFilter === compositingFilter)
+            prior.compositingFilter === compositingFilter && (prior.depthContext ?? 0) === depthContext &&
+            prior.minificationFilter === minificationFilter && prior.magnificationFilter === magnificationFilter)
             quads.push(prior);
           else quads.push(record.quad = Object.freeze({ layer, pickable, content,
             uv: p.contentsRect, bounds: p.bounds, transform: world, opacity,
-            colourModulation: modulation, mask, edgeAntialiasingMask, compositingFilter }));
+            colourModulation: modulation, mask, edgeAntialiasingMask, compositingFilter,
+            ...(depthContext ? { depthContext } : {}), ...(minificationFilter ? { minificationFilter } : {}),
+            ...(magnificationFilter ? { magnificationFilter } : {}) }));
         }
       }
-      const children = layer.sublayers;
+      const children = ordered(layer.sublayers);
       if (!children.length) return;
       const replication = p.replication;
+      // A transform layer, or a replicator preserving projective depth, gives its sublayers one shared space; a
+      // nested one extends the space it is in. Any other layer passes on the space it is in, or none.
+      const preservesDepth = layer instanceof AFXTransformLayer || replication?.projectionMode === "projective";
+      const childContext = preservesDepth && !depthContext ? ++contexts : depthContext;
       if (!replication) {
         if (isolatedRoot || !placement.children || placement.sublayer !== p.sublayerTransform) {
           placement.sublayer = p.sublayerTransform;
           if (isolatedRoot) {
             const childParent = world.multiply(p.sublayerTransform);
-            for (const child of children) visit(child, childParent, opacity, modulation);
+            for (const child of children) visit(child, childParent, opacity, modulation, false, childContext);
             return;
           }
           placement.children = world.multiply(p.sublayerTransform);
         }
         const childParent = placement.children;
-        for (let index = 0; index < children.length; index++) visit(children[index]!, childParent, opacity, modulation);
+        for (let index = 0; index < children.length; index++) visit(children[index]!, childParent, opacity, modulation, false, childContext);
         return;
       }
       const colour = replication.instanceColour.converting("srgb").components;
@@ -547,7 +599,7 @@ export class AFXRenderer {
         const childParent = world.multiply(aroundBounds).multiply(p.sublayerTransform);
         const childModulation = combineModulation(modulation, replicaModulation);
         for (let child = 0; child < children.length; child++)
-          visit(children[child]!, childParent, opacity * instanceOpacity, childModulation);
+          visit(children[child]!, childParent, opacity * instanceOpacity, childModulation, false, childContext);
         instanceTransform = instanceTransform.multiply(replication.instanceTransform);
       }
     };

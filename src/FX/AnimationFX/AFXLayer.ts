@@ -34,6 +34,7 @@ import {
   layerColour,
   type AFXLayerStyle,
   type AFXLayerCorner,
+  type AFXLayerContentsFilter,
 } from "./AFXLayerStyle";
 import type { GFXColour } from "../GraphicsFX/GFXColour";
 import { GFXImage } from "../GraphicsFX/GFXImage";
@@ -761,6 +762,20 @@ export class AFXLayer {
   set allowsEdgeAntialiasing(value: boolean) {
     if (typeof value !== 'boolean') throw new TypeError('Edge antialiasing must be boolean.');
     this.#setStyle('allowsEdgeAntialiasing', value);
+  }
+  /** How contents are sampled when drawn smaller than their pixels, after CALayer.minificationFilter. */
+  get minificationFilter(): AFXLayerContentsFilter { return this.#style.minificationFilter; }
+  set minificationFilter(value: AFXLayerContentsFilter) {
+    if (value !== "linear" && value !== "nearest" && value !== "trilinear")
+      throw new TypeError('Minification filter must be "linear", "nearest" or "trilinear".');
+    this.#setStyle("minificationFilter", value);
+  }
+  /** How contents are sampled when drawn larger than their pixels, after CALayer.magnificationFilter. */
+  get magnificationFilter(): Exclude<AFXLayerContentsFilter, "trilinear"> { return this.#style.magnificationFilter; }
+  set magnificationFilter(value: Exclude<AFXLayerContentsFilter, "trilinear">) {
+    if (value !== "linear" && value !== "nearest")
+      throw new TypeError('Magnification filter must be "linear" or "nearest".');
+    this.#setStyle("magnificationFilter", value);
   }
   get edgeAntialiasingMask(): number { return this.#style.edgeAntialiasingMask; }
   set edgeAntialiasingMask(value: number) {

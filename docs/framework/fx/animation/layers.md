@@ -38,7 +38,7 @@ A layer is a rectangle with a position, an anchor and a transform, in the coordi
 | `frame` | The rectangle the layer covers in its superlayer. It derives from `position`, `anchorPoint` and the size, so `frame.x = position.x - anchorPoint.x * width`. Setting it moves and resizes the layer together. |
 | `transform` | An `AFXTransform3D` applied around the anchor point. |
 | `sublayerTransform` | An `AFXTransform3D` applied to every sublayer, around the layer's origin. Useful for perspective. |
-| `zPosition`, `anchorPointZ` | Depth, from -1e9 to 1e9. Sublayers sort by `zPosition` for hit testing. |
+| `zPosition`, `anchorPointZ` | Depth, from -1e9 to 1e9. Sublayers draw and hit-test in `zPosition` order (see [Depth and AFXTransformLayer](#depth-and-afxtransformlayer)). |
 
 **Model and presentation.** Setting a property changes the *model*. When an animation is running, the layer shows a different value, the *presentation*, and the two meet when the animation finishes. `layer.model` and `layer.presentation` return frozen snapshots of each: geometry, appearance, content and a `values` record of the animated properties. Read `presentation` when you need what the eye sees, for example to retarget a gesture from the visible position, and `model` for the value the layer is heading to.
 
@@ -99,6 +99,8 @@ Assigning a value of the wrong type throws `TypeError`, and a value outside its 
 | `shadowOffset` | `GFXPoint` | `(0, -3)` | Offset in layer coordinates. |
 | `allowsEdgeAntialiasing` | `boolean` | `false` | Antialiases the layer's edges when it is transformed. |
 | `edgeAntialiasingMask` | `number` | 15 | Which edges antialias, a combination of the `AFXEdgeAntialiasingMask` flags. An integer from 0 to 15. |
+| `minificationFilter` | `AFXLayerContentsFilter` | `"linear"` | How contents are sampled when drawn smaller than their pixels, after `CALayer.minificationFilter`: `"linear"`, `"nearest"` or `"trilinear"`. Trilinear samples a mipmapped copy, so fine detail drawn at a fraction of its size stays steady as the layer moves. |
+| `magnificationFilter` | `"linear" \| "nearest"` | `"linear"` | How contents are sampled when drawn larger than their pixels, after `CALayer.magnificationFilter`. |
 
 `AFXEdgeAntialiasingMask` is a frozen object of the four flags: `layerLeftEdge` (1), `layerRightEdge` (2), `layerBottomEdge` (4) and `layerTopEdge` (8). Combine them with `|`. Every colour must be a `GFXColour` or `null` (see [GraphicsFX](../graphics.md)), and anything else throws `TypeError`.
 
@@ -215,6 +217,14 @@ new AFXTransform3D(values?: readonly number[])        // 16 finite numbers, defa
 | `AFXTransform3D.fromCSS(css, size?)` | Parses a CSS transform list: `none`, `matrix`, `matrix3d`, `translate`, `translate3d`, `translateX`, `translateY`, `translateZ`, `scale`, `scale3d`, `scaleX`, `scaleY`, `scaleZ`, `rotate`, `rotateX`, `rotateY`, `rotateZ`, `rotate3d` and `perspective`. Lengths take `px`, angles take `deg`, `rad` and `turn`, and a percentage in `translate` resolves against `size`. Anything else throws `TypeError`. |
 
 `AFXPoint3D` is `{ x, y, z }`. `AFXSingularTransformError` extends `RangeError`.
+
+## Depth and AFXTransformLayer
+
+As in Core Animation, an ordinary layer flattens its sublayers. They draw in `zPosition` order (sublayer order breaks ties), later over earlier, and never cut into one another, however they are turned in 3D. `zPosition` still moves a layer along z, so it can both order and place.
+
+`AFXTransformLayer`, after `CATransformLayer`, keeps depth instead. Its sublayers share one three-dimensional space: a nearer opaque one hides a farther one whatever their order, and two that cross intersect where they cross. Nested transform layers extend the same space. A transform layer draws no contents of its own. An `AFXReplicatorLayer` whose `projectionMode` is `"projective"` preserves depth the same way (its `preservesDepth` is `true`). Create one with `renderer.makeTransformLayer(parent?)`, or `new AFXTransformLayer()` on a view's layer tree.
+
+Use a transform layer for a scene whose parts must hide one another by where they are, such as a camera rig. Use ordinary layers when the drawing order is the design, as in Cover Flow, where the item nearer the centre always draws over its neighbours.
 
 ## AFXShapeLayer
 
