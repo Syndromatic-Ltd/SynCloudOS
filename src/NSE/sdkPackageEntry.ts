@@ -19,7 +19,7 @@
  */
 
 export {
-  NSEAnimationDefaults,
+  NSEAnimationContext,
   NSEAnimationEnvironmentProvider,
   NSELayoutView,
   NSEPresence,

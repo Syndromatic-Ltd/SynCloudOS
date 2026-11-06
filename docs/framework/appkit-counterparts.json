@@ -51,7 +51,7 @@
     "NSEAlert": "NSAlert",
     "NSEAlertButton": "NSAlert.addButton(withTitle:)",
     "NSEAlertStyle": "NSAlert.Style",
-    "NSEAnimationDefaults": "NSAnimationContext",
+    "NSEAnimationContext": "NSAnimationContext",
     "NSEAnimationEnvironment": "NSAnimationContext",
     "NSEAnimationEnvironmentProvider": "NSAnimationContext",
     "NSEAnyWindowController": "NSWindowController",

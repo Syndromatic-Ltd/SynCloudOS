@@ -72,7 +72,7 @@ describe("SynWare NSE public framework boundary", () => {
       "NSETabBarController",
       "useNSEDeferredDisposal",
       "NSEDisposalScheduler",
-      "NSEAnimationDefaults",
+      "NSEAnimationContext",
       "NSEAnimationEnvironment",
       "NSEAnimationEnvironmentProvider",
       "NSEAnimationEnvironmentProviderProps",
