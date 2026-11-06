@@ -673,6 +673,12 @@ export type {
   NSEHierarchyStackProps,
 } from "./Navigation/NSEHierarchyStack";
 export {
+  useNSEApplicationNavigationChrome,
+} from "./Navigation/NSEApplicationNavigationChrome";
+export type {
+  NSEApplicationNavigationChromeState,
+} from "./Navigation/NSEApplicationNavigationChrome";
+export {
   NSENavigationStackController,
 } from "./Navigation/NSENavigationStackController";
 export type {
@@ -743,26 +749,17 @@ export type {
   NSEProjectedAttachmentSource,
 } from "./TextLayout/attachmentProjection";
 export {
-  NSEToolbarConfigurationSheet,
-} from "./Toolbars/NSEToolbarConfigurationSheet";
-export type {
-  NSEToolbarConfigurationSheetProps,
-} from "./Toolbars/NSEToolbarConfigurationSheet";
-export {
-  NSEToolbarController,
-} from "./Toolbars/NSEToolbarController";
-export {
   NSEToolbar,
 } from "./Toolbars/NSEToolbar";
 export type {
-  NSEToolbarProps,
+  NSEToolbarDisplayMode,
+  NSEToolbarOptions,
+  NSEToolbarSizeMode,
 } from "./Toolbars/NSEToolbar";
 export type {
-  NSEToolbarConfiguration,
   NSEToolbarItem,
   NSEToolbarActionItem,
   NSEToolbarItemInput,
-  NSEToolbarPreferences,
 } from "./Toolbars/toolbarTypes";
 export {
   NSETooltipProvider,
@@ -885,7 +882,7 @@ export type {
 
 export { NSEObject, observable, observe, useObserve } from "./Objects";
 export type { NSEObservable } from "./Objects";
-export { NSEApplication, NSEWindowController, NSEViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "./Application";
+export { NSEApplication, NSEWindowController, NSEViewController, NSETitlebarAccessoryViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "./Application";
 export type { NSEAlertStyle, NSEPopoverPositioning } from "./Application";
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,

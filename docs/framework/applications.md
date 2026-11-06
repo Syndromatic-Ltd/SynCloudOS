@@ -173,7 +173,7 @@ const stop = page.subscribe(() => this.refreshResults(page.getQuery()));
 page.pushQuery({ search: "Manchester" });       // replaceQuery updates the current history entry
 SCOS.routes.isActive(routes, { name: "catalogue" });
 const fonts = SCOS.fonts.manager;
-const toolbar = new NSEToolbarController({ owner: this, configuration, items, preferences, runtime: SCOS.menus.runtime });
+this.window.toolbar = new NSEToolbar({ identifier: "notes.toolbar", items, defaultItemIdentifiers, autosavesConfiguration: true });
 ```
 
 `SCOS.routes.subscribe(listener)` observes committed routing changes. Query clients retain the

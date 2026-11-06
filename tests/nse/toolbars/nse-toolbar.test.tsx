@@ -25,15 +25,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEPreferencesController, type PreferencesAdapter } from "../../../src/NSE/Controllers";
 import { NSEOverlayProvider, type NSEWindowSurfaceDismissResult, type NSEWindowSurfaceRequest } from "../../../src/NSE/Overlays";
 import { allocateNSEToolbarItems } from "../../../src/NSE/Toolbars/toolbarLayout";
-import {
-  NSEToolbar,
-  NSEToolbarConfigurationSheet,
-  NSEToolbarController,
-  type NSEToolbarConfiguration,
-  type NSEToolbarItem,
-  type NSEToolbarPreferences,
-  type NSEToolbarRuntimePort,
-} from "../../../src/NSE/Toolbars";
+import { NSEToolbarView as NSEToolbar } from "../../../src/NSE/Toolbars/NSEToolbarView";
+import { NSEToolbarConfigurationSheet } from "../../../src/NSE/Toolbars/NSEToolbarConfigurationSheet";
+import { NSEToolbarController } from "../../../src/NSE/Toolbars/NSEToolbarController";
+import type { NSEToolbarConfiguration, NSEToolbarItem, NSEToolbarPreferences, NSEToolbarRuntimePort } from "../../../src/NSE/Toolbars/toolbarTypes";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 

@@ -78,7 +78,7 @@ See [Applications](applications.md) for the complete class tree and ownership ru
 | `SCOS.routes.isActive(graph, target, { exact? }?)` | Tests the canonical committed route; `SCOS.routes.isActive(routes, { name: "catalogue" })`. |
 | `SCOS.routes.subscribe(listener)` | Observes committed routing changes; returns a disposer. |
 | `SCOS.fonts` | The font-access client, including `.manager` and `.loadFace(...)`; the configured host catalogue is available during `applicationDidFinishLaunching` and stays the same when the view mounts. |
-| `SCOS.menus.runtime` | Scoped NSE menu runtime for controller construction; `new NSEToolbarController({ owner: this, configuration, items, preferences, runtime: SCOS.menus.runtime })`. |
+| `SCOS.menus.runtime` | Scoped NSE menu runtime for controller construction; `new NSEMenu({ owner: this, identifier, title, items, runtime: SCOS.menus.runtime })`. |
 | `NSEViewController.traitCollection` | `{ reducedMotion, presentation }`; presentation is `SynCloudOSPresentationTraits` or `null`. Override `traitCollectionDidChange(previous)` to react. |
 | `NSEViewController.viewWillLayout()` / `viewDidLayout()` | Called after DOM commits and on frame resize. `this.view.element.getBoundingClientRect()` reads the committed view. |
 | `NSEViewControllerView({ controller, className? })` | Renders one managed outlet. `className` gives its parent CSS layout control; child outlets impose no inline display mode or dimensions. |

@@ -47,6 +47,7 @@ import { NSEAlertBackdrop, NSEAlertSurface, NSEFocusScope, NSEPopover } from "..
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
+import { NSEWindowTitlebarAccessories, NSEWindowTitlebarHostContext, NSEWindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
 import { applicationSessionFor } from "./applicationSession";
 import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/applicationHostInterop";
 import { useNSEOverlayFocusScope } from "../../NSE/applicationHostInterop";
@@ -353,7 +354,8 @@ function createWindowMount(appRuntime: SynWareRuntime, alerts: SynWareContextVal
     zoom: () => { windows.zoom(requireId("zoom the window")); },
     setTitle: (title) => {
       const id = current()?.id;
-      if (id) windows.setTitle(id, title);
+      // An untitled window is named after its application in the window record.
+      if (id) windows.setTitle(id, title.trim() || appRuntime.app.displayName);
     },
     close: async () => (await windows.close(requireId("close the window"))).outcome,
     registerCloseGuard: (guard) => {
@@ -382,6 +384,10 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   const alerts = useSynWareContext()?.alerts ?? null;
   const mount = useMemo(() => (appRuntime ? createWindowMount(appRuntime, alerts) : null), [appRuntime, alerts]);
   const [loaded, setLoaded] = useState(false);
+  const titlebarHost = useContext(NSEWindowTitlebarHostContext);
+  // A window of its own draws its title in the window record; only the stage's title bar takes the document.
+  const stageTitlebar = mount && mount.windowId === null ? titlebarHost : null;
+  useNSEWindowTitlebarDocument(controller, loaded ? stageTitlebar : null);
   useLayoutEffect(() => {
     if (!mount || controller.isDisposed) return;
     const internals = controller[nseWindowInternals];
@@ -416,9 +422,22 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   const content = root
     ? <NSEViewControllerView controller={root} />
     : View ? <View controller={controller} /> : null;
+  const { toolbar, titlebarAccessoryViewControllers: accessories } = controller.window;
+  const renderAccessory = (accessory: NSEViewController<unknown>) => <NSEViewControllerView controller={accessory} className="nse-window-titlebar-accessory" />;
+  // Content keeps its own frame unless the window draws a toolbar or an accessory row above it.
+  const framed = Boolean(toolbar?.isVisible) || accessories.some((accessory) => !accessory.isHidden && (!stageTitlebar || accessory.layoutAttribute === "bottom"));
   return (
     <NSEActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
-      <NSEControllerResponder target={controller} kind="controller">{content}</NSEControllerResponder>
+      <NSEControllerResponder target={controller} kind="controller">
+        {accessories.length ? <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={stageTitlebar} placement="titlebar" /> : null}
+        {framed ? (
+          <div className="nse-window-chrome-frame">
+            {toolbar ? <NSEWindowToolbar controller={controller} toolbar={toolbar} /> : null}
+            <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={stageTitlebar} placement="row" />
+            <div className="nse-window-chrome-content">{content}</div>
+          </div>
+        ) : content}
+      </NSEControllerResponder>
     </NSEActionScopeProvider>
   );
 }

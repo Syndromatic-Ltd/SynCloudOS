@@ -21,7 +21,7 @@
 
 import type { ReactNode } from "react";
 import { classes, sizedControlStyle } from "../Core/nseControlsShared";
-import { NSEToolbar, type NSEToolbarProps } from "../../Toolbars";
+import { NSEToolbarView, type NSEToolbarViewProps } from "../../Toolbars/NSEToolbarView";
 
 /** A capsule control's size: NSControl's regular or small, or custom when a
  * height is given. The skin draws every part from the one band height, so
@@ -37,7 +37,7 @@ function capsuleSizeAttribute({ controlSize = "regular", height }: NSECapsuleSiz
   return height !== undefined ? "custom" : controlSize === "small" ? "small" : undefined;
 }
 
-export type NSEToolButtonGroupProps = Omit<Extract<NSEToolbarProps, { readonly composition: "children" }>, "composition"> & NSECapsuleSizing & {
+export type NSEToolButtonGroupProps = Omit<Extract<NSEToolbarViewProps, { readonly composition: "children" }>, "composition"> & NSECapsuleSizing & {
   label?: string;
 };
 
@@ -54,7 +54,7 @@ export function NSEToolButtonGroup({
   ...props
 }: NSEToolButtonGroupProps) {
   return (
-    <NSEToolbar
+    <NSEToolbarView
       composition="children"
       className={classes("nse-extended-tool-button-group", className)}
       position={position}
@@ -65,6 +65,6 @@ export function NSEToolButtonGroup({
       {...props}
     >
       {children}
-    </NSEToolbar>
+    </NSEToolbarView>
   );
 }

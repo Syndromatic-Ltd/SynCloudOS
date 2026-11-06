@@ -52,6 +52,7 @@ import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction"
 import { allocateNSEToolbarItems } from "./toolbarLayout";
 import { NSEToolbarOverflowMenu } from "./NSEToolbarOverflowMenu";
 import type { NSEToolbarController } from "./NSEToolbarController";
+import "./nse-toolbars.css";
 
 /**
  * Where the toolbar's overflow menu sits in the responder chain. Both fields
@@ -94,7 +95,7 @@ type NSEToolbarConfiguredProps = Omit<HTMLAttributes<HTMLDivElement>, "children"
   readonly smoothSurface?: never;
 };
 
-export type NSEToolbarProps = NSEToolbarChildrenProps | NSEToolbarConfiguredProps;
+export type NSEToolbarViewProps = NSEToolbarChildrenProps | NSEToolbarConfiguredProps;
 
 function classNames(...values: readonly (string | false | null | undefined)[]): string {
   return values.filter(Boolean).join(" ");
@@ -439,7 +440,8 @@ function isKeyboardField(node: Element | null): boolean {
  * must not receive child-composition props, and the child branch must not
  * receive command authority props that it could accidentally ignore.
  */
-export function NSEToolbar(props: NSEToolbarProps) {
+/** @internal Draws a toolbar: a window's configured toolbar, or a row of joined tool controls. */
+export function NSEToolbarView(props: NSEToolbarViewProps) {
   const rawProps = props as Record<string, unknown>;
   if (rawProps.composition !== "children" && rawProps.composition !== "configured") {
     throw new TypeError("NSE toolbar composition must be 'children' or 'configured'.");

@@ -6274,6 +6274,11 @@
   background: var(--nse-atmo-toolbar-fade);
 }
 
+/* A window's toolbar sits on the window's metal strip, which draws its own fade. */
+[data-nse-appearance="atmo"] .nse-window-toolbar .nse-toolbar > .nse-chrome-primitive[data-nse-chrome-primitive="surface"] {
+  display: none;
+}
+
 [data-nse-appearance="atmo"] .nse-toolbar-item {
   gap: 6px;
   block-size: var(--nse-atmo-bar-h);
