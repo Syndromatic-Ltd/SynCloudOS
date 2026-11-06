@@ -27,8 +27,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
 import {
-  NSEScrollingImage,
-  NSEViewImage,
+  NSEImageView,
 } from "../../src/NSE/public/controls";
 import { NSEToolbarView as NSEToolbar } from "../../src/NSE/Toolbars/NSEToolbarView";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
@@ -61,43 +60,13 @@ describe("NSEMenu sub-item disclosure", () => {
   });
 });
 
-describe("Image family: ScrollingImage + ViewImage", () => {
-  it("NSEScrollingImage renders a sizeable image that does not auto-fit", () => {
-    const { container } = render(<NSEScrollingImage src="/x.png" alt="x" />);
-    const box = container.querySelector(".nse-control-scrolling-image");
-    expect(box).not.toBeNull();
-    expect(box?.classList.contains("nse-control-sizeable-image")).toBe(true);
-  });
-
-  it("NSEViewImage hands a horizontal swipe off to the carousel when not zoomed in", () => {
-    const onSwipeNext = vi.fn();
-    const onSwipePrev = vi.fn();
-    const { container } = render(
-      <NSEViewImage src="/x.png" alt="x" onSwipeNext={onSwipeNext} onSwipePrev={onSwipePrev} />
-    );
-    const wrapper = container.querySelector(".nse-control-view-image") as HTMLElement;
-    expect(wrapper).not.toBeNull();
-
-    // Swipe left (dx < -threshold) → next image.
-    fireEvent.pointerDown(wrapper, { pointerId: 1, clientX: 200, clientY: 100 });
-    fireEvent.pointerUp(wrapper, { pointerId: 1, clientX: 110, clientY: 104 });
-    expect(onSwipeNext).toHaveBeenCalledTimes(1);
-    expect(onSwipePrev).not.toHaveBeenCalled();
-
-    // Swipe right → previous image.
-    fireEvent.pointerDown(wrapper, { pointerId: 2, clientX: 110, clientY: 100 });
-    fireEvent.pointerUp(wrapper, { pointerId: 2, clientX: 205, clientY: 103 });
-    expect(onSwipePrev).toHaveBeenCalledTimes(1);
-  });
-
-  it("NSEViewImage ignores a multi-finger gesture (no accidental swipe)", () => {
-    const onSwipeNext = vi.fn();
-    const { container } = render(<NSEViewImage src="/x.png" alt="x" onSwipeNext={onSwipeNext} />);
-    const wrapper = container.querySelector(".nse-control-view-image") as HTMLElement;
-    fireEvent.pointerDown(wrapper, { pointerId: 1, clientX: 200, clientY: 100 });
-    fireEvent.pointerDown(wrapper, { pointerId: 2, clientX: 180, clientY: 100 });
-    fireEvent.pointerUp(wrapper, { pointerId: 1, clientX: 100, clientY: 100 });
-    expect(onSwipeNext).not.toHaveBeenCalled();
+describe("NSEImageView imageScaling", () => {
+  it("fits by default and shows the natural size with imageScaling none (NSImageView.imageScaling)", () => {
+    const { container } = render(<><NSEImageView src="/x.png" alt="fitted" /><NSEImageView src="/x.png" alt="natural" imageScaling="none" controls={false} /></>);
+    const views = container.querySelectorAll(".nse-control-image-view");
+    expect(views[0]?.getAttribute("data-image-scaling")).toBe("proportionallyUpOrDown");
+    expect(views[1]?.getAttribute("data-image-scaling")).toBe("none");
+    expect(views[1]?.querySelector(".nse-control-image-view-controls")).toBeNull();
   });
 });
 

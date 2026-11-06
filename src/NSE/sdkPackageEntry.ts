@@ -559,9 +559,6 @@ export {
 export {
   NSECroppableImage,
   NSEImageView,
-  NSEScrollingImage,
-  NSESizeableImage,
-  NSEViewImage,
 } from "./Controls/Images/NSEImage";
 export type {
   NSECropParams,
@@ -570,11 +567,8 @@ export type {
   NSEImageGeometryPort,
   NSEImageStringSourceLease,
   NSEImageStringSourcePort,
+  NSEImageScaling,
   NSEImageViewProps,
-  NSEScrollingImageProps,
-  NSESizeableImageHandle,
-  NSESizeableImageProps,
-  NSEViewImageProps,
 } from "./Controls/Images/NSEImage";
 export {
   NSEStackItem,

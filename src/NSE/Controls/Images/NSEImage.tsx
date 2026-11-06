@@ -508,7 +508,15 @@ export const NSESizeableImage = forwardRef<NSESizeableImageHandle, NSESizeableIm
   }
 );
 
-export interface NSEImageViewProps extends Omit<NSESizeableImageProps, "ref"> {
+/**
+ * NSImageView.imageScaling. `proportionallyUpOrDown` fits the image to the view; `none` shows it at its
+ * natural size, panned by dragging.
+ */
+export type NSEImageScaling = "proportionallyUpOrDown" | "none";
+
+export interface NSEImageViewProps extends Omit<NSESizeableImageProps, "ref" | "autoSize"> {
+  /** NSImageView.imageScaling. Default `proportionallyUpOrDown`. */
+  imageScaling?: NSEImageScaling;
   /** Show the +/− zoom controls. Default true. */
   controls?: boolean;
   zoomInLabel?: string;
@@ -516,9 +524,11 @@ export interface NSEImageViewProps extends Omit<NSESizeableImageProps, "ref"> {
 }
 
 /**
-A full image viewer: an NSESizeableImage in a framed, pannable box with optional +/− zoom controls. Wheel and double-click zoom, drag pans once zoomed in.
+NSImageView: an image in a framed box, fitted (or at natural size with `imageScaling="none"`), with
+optional +/− zoom controls. Wheel and double-click zoom; drag pans once the image overflows the box.
 */
 export function NSEImageView({
+  imageScaling = "proportionallyUpOrDown",
   controls = true,
   zoomInLabel = "Zoom in",
   zoomOutLabel = "Zoom out",
@@ -528,8 +538,8 @@ export function NSEImageView({
   const imageRef = useRef<NSESizeableImageHandle>(null);
 
   return (
-    <div className={classes("nse-control-image-view", className)}>
-      <NSESizeableImage ref={imageRef} {...props} />
+    <div className={classes("nse-control-image-view", className)} data-image-scaling={imageScaling}>
+      <NSESizeableImage ref={imageRef} autoSize={imageScaling !== "none"} {...props} />
       {controls ? (
         <div className="nse-control-image-view-controls" role="group" aria-label="Zoom">
           <button
@@ -616,91 +626,3 @@ export function NSECroppableImage({
     </div>
   );
 }
-
-export type NSEScrollingImageProps = NSESizeableImageProps;
-
-/**
-A scrolling image: a sizeable image that does NOT auto-fit (`autoSize` defaults false), so the image
-shows at its natural size and the user drags to pan it within the box. Wheel and pinch still zoom; the
-pan now engages at the base zoom too (the image already overflows the box).
-*/
-export const NSEScrollingImage = forwardRef<NSESizeableImageHandle, NSEScrollingImageProps>(
-  function NSEScrollingImage({ autoSize = false, className = "", ...props }, ref) {
-    return (
-      <NSESizeableImage
-        ref={ref}
-        autoSize={autoSize}
-        className={classes("nse-control-scrolling-image", className)}
-        {...props}
-      />
-    );
-  }
-);
-
-export interface NSEViewImageProps extends NSESizeableImageProps {
-  /** Carousel handoff: a horizontal swipe while NOT zoomed in advances to the next image. */
-  onSwipeNext?: () => void;
-  /** Carousel handoff: a horizontal swipe while NOT zoomed in returns to the previous image. */
-  onSwipePrev?: () => void;
-  /** Minimum horizontal travel (px) that counts as a swipe. Default 60. */
-  swipeThreshold?: number;
-}
-
-function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
-  if (typeof ref === "function") ref(value);
-  else if (ref) ref.current = value;
-}
-
-/**
-A carousel image: a scrolling image built for a carousel. It auto-fits like ImageView, but while the image
-is NOT zoomed in a horizontal swipe is handed off to the carousel (`onSwipePrev`/`onSwipeNext`) instead
-of panning, so a flick only reaches the carousel when the image is not zoomed in. Once zoomed in, drags pan
-the image and the swipe handoff is suppressed; multi-finger (pinch) gestures never trigger a swipe.
-*/
-export const NSEViewImage = forwardRef<NSESizeableImageHandle, NSEViewImageProps>(
-  function NSEViewImage({ onSwipeNext, onSwipePrev, swipeThreshold = 60, className = "", ...props }, ref) {
-    const innerRef = useRef<NSESizeableImageHandle>(null);
-    const swipeRef = useRef<{ x: number; y: number; armed: boolean } | null>(null);
-    const activePointers = useRef<Set<number>>(new Set());
-
-    return (
-      <div
-        className={classes("nse-control-view-image", className)}
-        onPointerDown={(event) => {
-          activePointers.current.add(event.pointerId);
-          if (activePointers.current.size > 1) {
-            if (swipeRef.current) swipeRef.current.armed = false;
-            return;
-          }
-          // Arm a swipe only when the image is at fit zoom — zoomed-in drags pan instead.
-          swipeRef.current = { x: event.clientX, y: event.clientY, armed: !(innerRef.current?.isZoomIn() ?? false) };
-        }}
-        onPointerUp={(event) => {
-          activePointers.current.delete(event.pointerId);
-          const start = swipeRef.current;
-          swipeRef.current = null;
-          if (!start || !start.armed) return;
-          const dx = event.clientX - start.x;
-          const dy = event.clientY - start.y;
-          if (Math.abs(dx) < swipeThreshold || Math.abs(dx) <= Math.abs(dy)) return;
-          (dx < 0 ? onSwipeNext : onSwipePrev)?.();
-        }}
-        onPointerCancel={(event) => {
-          activePointers.current.delete(event.pointerId);
-          swipeRef.current = null;
-        }}
-      >
-        <NSESizeableImage
-          ref={(node) => {
-            innerRef.current = node;
-            assignRef(ref, node);
-          }}
-          autoSize
-          className="nse-control-view-image-media"
-          {...props}
-        />
-      </div>
-    );
-  }
-);
-

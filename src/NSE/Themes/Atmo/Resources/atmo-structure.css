@@ -2482,22 +2482,9 @@
   border-radius: 8px;
 }
 
-/* ScrollingImage shows the source at natural size and pans within the box (autoSize off). */
-:where([data-nse-appearance="atmo"]) .nse-control-scrolling-image {
+/* An image view at natural size (imageScaling none) pans within the box. */
+:where([data-nse-appearance="atmo"]) .nse-control-image-view[data-image-scaling="none"] .nse-control-sizeable-image {
   cursor: grab;
-}
-
-/* ViewImage: a fit-to-box image in a carousel; the wrapper captures horizontal swipes for handoff. */
-:where([data-nse-appearance="atmo"]) .nse-control-view-image {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-view-image-media {
-  width: 100%;
-  height: 100%;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-image-view-controls {
