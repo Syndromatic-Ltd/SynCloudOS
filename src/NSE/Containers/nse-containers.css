@@ -19,7 +19,6 @@
  */
 
 .nse-container-pane,
-.nse-container-dialog,
 .nse-container-drawer,
 .nse-container-sliding-pane,
 .nse-container-sliding-view {
@@ -28,34 +27,28 @@
 }
 
 .nse-container-pane-header,
-.nse-container-pane-footer,
-.nse-container-dialog-header,
-.nse-container-dialog-actions {
+.nse-container-pane-footer{
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.nse-container-pane-header,
-.nse-container-dialog-header {
+.nse-container-pane-header{
   justify-content: space-between;
 }
 
-.nse-container-pane-header h2,
-.nse-container-dialog-header h2 {
+.nse-container-pane-header h2{
   margin: 0;
   font: inherit;
   font-weight: 700;
 }
 
-.nse-container-pane-subtitle,
-.nse-container-dialog-description {
+.nse-container-pane-subtitle{
   margin: 0;
   color: color-mix(in srgb, currentColor 66%, transparent);
 }
 
-.nse-container-pane-body,
-.nse-container-dialog-body {
+.nse-container-pane-body{
   min-inline-size: 0;
 }
 
@@ -95,9 +88,6 @@
 .nse-container-drawer[hidden],
 .nse-container-sliding-pane[hidden] {
   display: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
 }
 
 .nse-container-sliding-pane {
@@ -170,138 +160,6 @@
 .nse-container-sliding-view-panel {
   flex: 0 0 100%;
   min-inline-size: 0;
-}
-
-.nse-container-dialog {
-  display: grid;
-  gap: var(--nse-spacing-related);
-  max-inline-size: min(520px, calc(100vw - 32px));
-  padding: var(--nse-content-margin);
-  background: color-mix(in srgb, canvas 88%, white 6%);
-  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
-  outline: none;
-}
-
-.nse-container-dialog[data-variant="sheet"] {
-  max-inline-size: min(680px, calc(100vw - 32px));
-}
-
-.nse-container-dialog[data-variant="confirm"] {
-  max-inline-size: min(440px, calc(100vw - 32px));
-}
-
-.nse-container-dialog-close{
-  display: inline-grid;
-  place-items: center;
-  inline-size: 28px;
-  block-size: 28px;
-  border: 0;
-  border-radius: 6px;
-  color: inherit;
-  background: transparent;
-}
-
-.nse-container-dialog-close:hover{
-  background: color-mix(in srgb, currentColor 10%, transparent);
-}
-
-.nse-container-dialog-actions {
-  justify-content: flex-end;
-}
-
-/* Container entrances keep the former modal/toaster choreography local to NSE containers. */
-@keyframes nse-container-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes nse-container-rise-in {
-  from { opacity: 0; transform: translateY(10px) scale(0.97); }
-  to { opacity: 1; transform: none; }
-}
-
-@keyframes nse-container-slide-in-top {
-  from { opacity: 0; transform: translateY(-18px); }
-  to { opacity: 1; transform: none; }
-}
-
-@keyframes nse-container-slide-in-bottom {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: none; }
-}
-
-.nse-container-fade-in {
-  animation: nse-container-fade-in 0.18s ease both;
-}
-
-.nse-container-rise-in {
-  animation: nse-container-rise-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.nse-container-fly-in-top {
-  animation: nse-container-slide-in-top 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.nse-container-fly-in-bottom {
-  animation: nse-container-slide-in-bottom 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nse-container-fade-in,
-  .nse-container-rise-in,
-  .nse-container-fly-in-top,
-  .nse-container-fly-in-bottom {
-    animation: none;
-  }
-}
-
-/* Modal layer placement. */
-.nse-container-modal-layer {
-  position: fixed;
-  inset: 0;
-  z-index: 3000;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background: color-mix(in srgb, black 34%, transparent);
-}
-
-.nse-container-modal-shell {
-  outline: none;
-}
-
-/* The action-sheet wrapper retains NSEDialog's semantic content while the
-   shared overlay surface owns the physical modal boundary and placement. */
-.nse-overlay-popup--action-sheet .nse-container-dialog {
-  max-inline-size: 100%;
-  border: 0;
-  background: transparent;
-}
-
-/* Inline (unscrimmed) ConfirmPrompt. */
-.nse-container-confirm-inline {
-  display: grid;
-  gap: 10px;
-  padding: 14px 16px;
-  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
-  border-radius: 10px;
-  background: color-mix(in srgb, canvas 88%, white 6%);
-}
-
-.nse-container-confirm-inline-title {
-  font-weight: 700;
-}
-
-.nse-container-confirm-inline-message {
-  margin: 0;
-  line-height: 1.4;
-  opacity: 0.85;
-}
-
-.nse-container-confirm-inline-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
 }
 
 /* --- NSESlidingPanes ------------- */

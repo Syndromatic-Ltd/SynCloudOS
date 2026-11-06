@@ -161,7 +161,7 @@ Data views render collections owned by a controller. They are virtualised, so a 
 | Component | Purpose |
 | --- | --- |
 | `NSEAlert` | An alert object (`NSAlert`) presented as a sheet on a window. See [Alerts and sheets](windows.md#alerts-and-sheets). |
-| `NSEDialog`, `NSEModalDialog`, `NSEConfirmDialog` | Dialog surfaces for content outside a window, with focus trapping and inert backgrounds. Inside a window, present a view controller as a sheet instead. |
+| `NSEAlert`, `presentAsSheet` | An alert is an `NSEAlert` object presented on a window; a custom dialog is a view controller presented as a sheet. See [Alerts and sheets](windows.md#alerts-and-sheets). Host system UI outside any window uses `NSEConfirmDialog` from `nse/system-ui`. |
 | `presentAsPopover` | `NSEViewController.presentAsPopover(controller, { of, preferredEdge, behavior })` presents a view controller in a popover. See [Popovers](windows.md#popovers). |
 | `NSEOpenPanel`, `NSESavePanel` | File panels. |
 | `NSEFontPanel`, `NSEMediaPanel` | The font panel and a media chooser. |

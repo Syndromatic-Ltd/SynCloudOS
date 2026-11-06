@@ -139,9 +139,6 @@ export type {
   NSEColourWellProps,
 } from "./Colour/Controls/NSEColourWell";
 export {
-  NSEAlertBackdrop,
-} from "./Components/NSEAlertBackdrop";
-export {
   NSEArrayController,
 } from "./Controllers/NSEArrayController";
 export type {
@@ -244,8 +241,6 @@ export { NSESplitView } from "./DataViews/Split/NSESplitView";
 export type { NSESplitViewProps } from "./DataViews/Split/NSESplitView";
 export { NSERoundedBox } from "./Material";
 export type { NSEMetalSurfaceProps, NSERoundedBoxProps } from "./Material";
-export { NSEDialogSurface } from "./Overlays/NSEDialogSurface";
-export type { NSEDialogSurfaceProps } from "./Overlays/NSEDialogSurface";
 export {
   NSELevelIndicator,
 } from "./Controls/Values/NSELevelIndicator";

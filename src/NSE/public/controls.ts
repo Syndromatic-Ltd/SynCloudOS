@@ -24,18 +24,12 @@ export type { Formatter, FormatterContext, FormatterError, FormatterResult } fro
 export type { NSEThumbMaterial } from "../Appearance/NSEMetalThumb";
 
 export {
-  NSEConfirmPrompt,
-  NSEDialog,
   NSEDrawer,
-  NSEModalDialog,
   NSESlidingPane,
   NSESlidingPanes,
 } from "../Containers/NSEContainers";
 export type {
-  NSEConfirmPromptProps,
-  NSEDialogProps,
   NSEDrawerProps,
-  NSEModalDialogProps,
   NSESlidingPaneProps,
   NSESlidingPanesProps,
 } from "../Containers/NSEContainers";
@@ -165,8 +159,6 @@ export type { NSEMenuItem, NSEMenuOptions, NSEPopUpButtonItem, NSEPopUpButtonPro
 export { NSEPopup, NSEStandaloneControlHost } from "../Overlays";
 export type { NSEPopupProps, NSEStandaloneControlHostProps } from "../Overlays";
 
-export { NSEDialogSurface } from "../Overlays/NSEDialogSurface";
-export type { NSEDialogSurfaceProps } from "../Overlays/NSEDialogSurface";
 export { useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
 export type { DefaultPreventedEvent, NSEControlHapticRequest, NSEControlHapticResult } from "../Controls/Core/nseControlsShared";
 
