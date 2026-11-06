@@ -30,6 +30,24 @@ function symbolScore(query, name) {
   return similarity(query,name);
 }
 const DOC_EXCERPT=1500, SIGNATURE_OUTLINE=1200;
+/** The installed SDK's map of NSE names to their AppKit, Foundation or Core framework counterparts. */
+export function appkitCounterparts(sdkRoot) {
+  const path=resolve(sdkRoot,"docs/framework/appkit-counterparts.json");
+  return existsSync(path) ? JSON.parse(readFileSync(path,"utf8")) : null;
+}
+/**
+ * The counterpart of a public NSE name: its own entry, or the entry of the name it extends with one of
+ * the map's derived suffixes (NSEButtonProps takes NSEButton's). Undefined when the map has none.
+ */
+export function appkitCounterpartFor(name, map) {
+  if (!map) return undefined;
+  const suffix=new RegExp("(?:"+map.derivedSuffixes.join("|")+")$","u");
+  for (let base=name;;) {
+    if (Object.hasOwn(map.counterparts,base)) return map.counterparts[base];
+    if (!suffix.test(base)) return undefined;
+    base=base.replace(suffix,"");
+  }
+}
 /** A long class or interface as its header and member signatures, without bodies or private members. */
 function outline(declaration) {
   const text=declaration.getText().replace(/^\s*export\s+/u,"");
@@ -81,7 +99,7 @@ export async function lookupSdk({projectRoot,entry,query,limit=8,full=false}={})
   for (const value of selected) if (!inside(sdkRoot,value.path)) throw new Error("SDK type export escapes its package.");
   const program=ts.createProgram(selected.map(value=>value.path),{noLib:true,skipLibCheck:true,moduleResolution:ts.ModuleResolutionKind.Bundler,module:ts.ModuleKind.ESNext,allowJs:false});
   // One result per declaration: a symbol re-exported by several entries lists every entry once.
-  const checker=program.getTypeChecker(),symbols=[],byDeclaration=new Map();
+  const checker=program.getTypeChecker(),symbols=[],byDeclaration=new Map(),counterparts=appkitCounterparts(sdkRoot);
   for (const value of selected) {
     const source=program.getSourceFile(value.path),module=source && checker.getSymbolAtLocation(source);
     if (!module) continue;
@@ -99,6 +117,9 @@ export async function lookupSdk({projectRoot,entry,query,limit=8,full=false}={})
       const tags=symbol.getJsDocTags(checker).map(tag=>"@"+tag.name+" "+ts.displayPartsToString(tag.text));
       const first=declarations[0];
       const record={entry:value.name,entries:[value.name],name,signature,outlined:shapes.some(shape=>shape.outlined),jsDoc:[jsDoc,...tags].filter(Boolean).join("\n"),file:first ? slash(relative(sdkRoot,first.getSourceFile().fileName)) : null,line:first ? first.getSourceFile().getLineAndCharacterOfPosition(first.getStart()).line+1 : null,score};
+      // NSE names are AppKit names: say which, or why there is none.
+      const counterpart=/^NSE[A-Z]/u.test(name) ? appkitCounterpartFor(name,counterparts) : undefined;
+      if (counterpart!==undefined) record.appkitCounterpart=counterpart;
       byDeclaration.set(key,record); symbols.push(record);
     }
   }

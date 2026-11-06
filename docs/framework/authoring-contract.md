@@ -22,6 +22,7 @@ NSE follows AppKit, and the FX frameworks follow Apple's Core frameworks: an NSE
 - Look for the AppKit way first, and write it with NSE's names. A child view controller's view is placed with `<child.view />`, as AppKit adds a subview; a dialog is a view controller presented with `presentAsSheet`, `presentAsModalWindow` or `presentAsPopover`; an alert is an `NSEAlert`.
 - A new appearance is a theme recipe that Atmo draws for an existing AppKit class (a `bezelStyle`, a `tabStyle`, a box type), never a new component.
 - Do not invent API with an AppKit-sounding name, or bring in UIKit classes and idioms. If AppKit has no counterpart, say so and propose the smallest AppKit-shaped addition rather than adding one silently.
+- The Developer MCP's `lookup_sdk` gives each NSE symbol its `appkitCounterpart`. Read it before using the symbol, and when it says there is none, use its `replacement`.
 
 Every package entry exports the same objects, so imports from different entries mix safely. Prefer one entry per job: `@syndromatic/syncloudos` for application, window and view controller classes, decorators and `SCOS`; `@syndromatic/syncloudos/nse` for controls and NSE types, with focused controls such as `NSEDrawer` in `@syndromatic/syncloudos/nse/controls`; `@syndromatic/syncloudos/sdk` for `SynWareInfo` and hooks; and `@syndromatic/syncloudos/sdk/testing` for tests.
 
