@@ -876,3 +876,5 @@ export type { NSENavigationRestorationDescriptor } from "./Navigation/navigation
 export { actionRef } from "./Controls/Core/actionReference";
 export type { NSEActionReference, NSEActionPayloadCheck } from "./Controls/Core/actionReference";
 export type { NSEViewControllerFX, NSEViewControllerFXClients } from "./Application";
+export { NSEHapticFeedbackManager } from "./Feedback/NSEHapticFeedbackManager";
+export type { NSEHapticFeedbackPattern, NSEHapticFeedbackPerformanceTime, NSEHapticFeedbackPerformer } from "./Feedback/NSEHapticFeedbackManager";

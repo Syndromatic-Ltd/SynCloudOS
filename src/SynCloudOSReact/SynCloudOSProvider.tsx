@@ -24,7 +24,9 @@ import {
   NSEMaterialLightingProvider,
 } from "../NSE/hostComposition";
 import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../NSE/Animation";
+import { registerNSEHapticFeedbackEngine } from "../NSE/Feedback/NSEHapticFeedbackManager";
 import {
+  useLayoutEffect,
   useMemo,
   useSyncExternalStore,
   type PropsWithChildren,
@@ -75,6 +77,8 @@ export function SynCloudOSProvider({
     if (!frames) return null;
     return createScopedAnimationFrames(runtime.signal, animationState, frames);
   }, [runtime, animationState]);
+  // NSEHapticFeedbackManager.defaultPerformer performs through this runtime's engine while it is mounted.
+  useLayoutEffect(() => (runtime.haptics ? registerNSEHapticFeedbackEngine(runtime.haptics) : undefined), [runtime.haptics]);
   const lighting = useMemo(() => {
     if (!shellFrames) return null;
     return new NSEMaterialLighting(

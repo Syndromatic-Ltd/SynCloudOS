@@ -25,3 +25,5 @@ const FeedbackContext = createContext<HFXHapticEngine | null>(null);
 export const NSEFeedbackProvider = FeedbackContext.Provider;
 export function useNSEFeedback() { return useContext(FeedbackContext); }
 export type { HFXFeedbackRequest, HFXFeedbackPresetName } from "../../FX/HapticsFX/HFXHapticEvent";
+export { NSEHapticFeedbackManager, registerNSEHapticFeedbackEngine } from "./NSEHapticFeedbackManager";
+export type { NSEHapticFeedbackPattern, NSEHapticFeedbackPerformanceTime, NSEHapticFeedbackPerformer } from "./NSEHapticFeedbackManager";
