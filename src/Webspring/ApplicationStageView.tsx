@@ -43,6 +43,7 @@ import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
 import { AppViewContent } from "./AppViewContent";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
+import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarDocument, type NSEWindowTitlebarHost } from "../SynCloudOS/AppHosting/windowChrome";
 import { applicationDeclaresAbout, applicationMenuLabels, ApplicationMenuOverlayHost, ApplicationMenuTriggerBridge, createApplicationMenuStore, menuOpensSystemPreferencesDirectly, useApplicationMenuSnapshot, type ApplicationMenuStore } from "./applicationMenuPresentation";
 import { createWebspringAppMenuModel } from "./webspringAppMenu";
 import { useWebspringLocale } from "./webspringLocale";
@@ -145,6 +146,15 @@ export function ApplicationStageView({
   const railLabel = sourceList?.railLabel ?? app.shortName;
   const [railWidth, setRailWidthState] = useState(railDefault);
   const [barTitle, setBarTitle] = useState<string | null>(null);
+  // The window shown on the stage puts its document (title, subtitle, titlebar accessories) in the standard bar.
+  const [titlebarDocument, setTitlebarDocument] = useState<NSEWindowTitlebarDocument | null>(null);
+  const [leadingAccessories, setLeadingAccessories] = useState<HTMLSpanElement | null>(null);
+  const [trailingAccessories, setTrailingAccessories] = useState<HTMLSpanElement | null>(null);
+  const titlebarHost = useMemo<NSEWindowTitlebarHost | null>(() => (usesStandardTopBar ? Object.freeze({
+    setDocument: setTitlebarDocument,
+    leadingAccessories,
+    trailingAccessories,
+  }) : null), [leadingAccessories, trailingAccessories, usesStandardTopBar]);
   const [compactNavigation, setCompactNavigation] = useState<boolean | null>(null);
   const showsSourceListRail = sourceList && !(compactNavigation ?? presentationTraits.horizontalSizeClass === "compact");
   const appMenuStore = useMemo(createApplicationMenuStore, [stage.id]);
@@ -256,7 +266,41 @@ export function ApplicationStageView({
   // Only the original stage elements report roles and canonical settlement.
   useNSEPresentation(overlayRootRef, stageMotion.root);
   useNSEPresentation(overlayPlaneRef, stageMotion.surface);
-  const standardTopBar = showsApplicationStageTopBar ? (
+  const documentTitlebar = titlebarDocument && !sourceList ? titlebarDocument : null;
+  const navigationBack = activeNavigationChrome?.back ?? null;
+  const standardTopBar = showsApplicationStageTopBar && documentTitlebar ? (
+    <ApplicationStageTopBar
+      menuStore={appMenuStore}
+      rightSlot={rightSlot}
+      title={standardBarTitle}
+      titlePlacement="leading"
+      className="nse-document-titlebar"
+      data-nse-titlebar-document="true"
+      variant={frame.material === "metal" ? "atmoMetal" : "atmoCumulus"}
+      scheme={resolvedMode}
+      titleAction={quickSwitchAction}
+      leadingItems={[{
+        kind: "webspring",
+        label: returnToWebspringLabel,
+        ...(siteBranding?.homeIconUrl ? { icon: siteBranding.homeIconUrl } : {}),
+        selected: false,
+        onClick: () => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }
+      }]}
+      leading={navigationBack ? (
+        <NSEButton title={navigationBack.label} className="nse-window-titlebar-back" onClick={navigationBack.onActivate} />
+      ) : undefined}
+      center={(
+        <span className="nse-window-titlebar-document">
+          <span ref={setLeadingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="leading" />
+          <span className="nse-window-titlebar-title" data-document-edited={documentTitlebar.documentEdited || undefined}>
+            {documentTitlebar.title ? <span className="nse-window-titlebar-title-text">{documentTitlebar.title}</span> : null}
+            {documentTitlebar.subtitle ? <span className="nse-window-titlebar-subtitle">{documentTitlebar.subtitle}</span> : null}
+            <span ref={setTrailingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="trailing" />
+          </span>
+        </span>
+      )}
+    />
+  ) : showsApplicationStageTopBar ? (
     <ApplicationStageTopBar
       menuStore={appMenuStore}
       rightSlot={rightSlot}
@@ -382,7 +426,7 @@ export function ApplicationStageView({
         multiSwitchRole={multiSwitchRole}
         presentation={surfacePresentation}
       >
-        {showsApplicationStageTopBar && !sourceList ? standardTopBar : null}
+        {showsApplicationStageTopBar && !sourceList && !documentTitlebar ? standardTopBar : null}
         <NSEFocusPortProvider port={nseFocusPort}>
         <SourceListFrameProvider value={sourceListContext}>
           <ApplicationMenuTriggerBridge
@@ -394,13 +438,14 @@ export function ApplicationStageView({
           <AppViewContent.Surface
             smoothSurface={frame.smoothSurface}
             background={frame.background}
-            sourceList={Boolean(sourceList)}
-            header={sourceList ? standardTopBar : undefined}
+            sourceList={Boolean(sourceList || documentTitlebar)}
+            header={sourceList || documentTitlebar ? standardTopBar : undefined}
           >
             <div
               className="webspring-app-view-fullbleed-content"
               aria-label={appName}
             >
+              <NSEWindowTitlebarHostContext.Provider value={titlebarHost}>
               <SynWareEntryRenderer
                 runtime={runtime}
                 app={app}
@@ -411,6 +456,7 @@ export function ApplicationStageView({
                 loadingPackageLabel={loadingPackageLabel}
                 missingComponentLabel={missingComponentLabel}
               />
+              </NSEWindowTitlebarHostContext.Provider>
             </div>
           </AppViewContent.Surface>
           </QuickSwitchTriggerProvider>
@@ -449,7 +495,8 @@ function ApplicationStageTopBar({
   menuStore,
   rightSlot,
   ...props
-}: Pick<TopBarProps, "title" | "variant" | "scheme" | "rail" | "titleAction" | "leadingItems" | "leading" | "trailing" | "center"> & {
+}: Pick<TopBarProps, "title" | "titlePlacement" | "className" | "variant" | "scheme" | "rail" | "titleAction" | "leadingItems" | "leading" | "trailing" | "center"> & {
+  readonly "data-nse-titlebar-document"?: "true";
   readonly menuStore: ApplicationMenuStore;
   readonly rightSlot: RightSlotControl | null;
 }) {

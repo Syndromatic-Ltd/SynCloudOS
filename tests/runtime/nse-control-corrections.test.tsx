@@ -28,9 +28,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
 import {
   NSEScrollingImage,
-  NSEToolbar,
   NSEViewImage,
 } from "../../src/NSE/public/controls";
+import { NSEToolbarView as NSEToolbar } from "../../src/NSE/Toolbars/NSEToolbarView";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 

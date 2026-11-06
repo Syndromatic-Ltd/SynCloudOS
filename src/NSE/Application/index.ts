@@ -34,6 +34,8 @@ export type {
   NSEWindowDocument,
 } from "./NSEWindowController";
 export { NSEViewController } from "./NSEViewController";
+export { NSETitlebarAccessoryViewController } from "./NSETitlebarAccessoryViewController";
+export type { NSETitlebarAccessoryLayoutAttribute } from "./NSETitlebarAccessoryViewController";
 export type {
   NSEControllerView,
   NSEViewComponent,

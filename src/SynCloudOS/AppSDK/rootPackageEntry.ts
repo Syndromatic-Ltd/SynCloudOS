@@ -18,7 +18,7 @@ export { managedTask, NSETaskQueueFullError } from "../../NSE/sdkPackageEntry";
 export type { NSETaskLifetime, NSETaskSettlement, NSETaskContext, NSETaskRun, NSETaskSnapshot, NSEManagedTask, NSETaskOptions } from "../../NSE/sdkPackageEntry";
 export { NSEActionScopeProvider } from "../../NSE/sdkPackageEntry";
 export type { NSEActionScopeProviderProps } from "../../NSE/sdkPackageEntry";
-export { NSEApplication, NSEWindowController, NSEViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "../../NSE/sdkPackageEntry";
+export { NSEApplication, NSEWindowController, NSEViewController, NSETitlebarAccessoryViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "../../NSE/sdkPackageEntry";
 export type { NSEAlertStyle, NSEPopoverPositioning } from "../../NSE/sdkPackageEntry";
 export { outlet } from "../../NSE/sdkPackageEntry";
 export type { NSEViewOutlet, NSEOutletElement, NSEOutletOptions } from "../../NSE/sdkPackageEntry";

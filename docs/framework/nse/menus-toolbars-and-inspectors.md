@@ -74,36 +74,53 @@ Each item with a submenu is a menu across the bar. As `NSApp.mainMenu` does with
 
 An overlay (a toolbar's overflow menu, a menu bar's open menu, a pop-up button's list) must know which responder it belongs to, so that its commands go to the right view controller and focus returns to the right place.
 
-Inside a view controller you do not need to supply this. `NSEToolbar`, `NSEMenuBar`, `NSEPopUpButton`, `NSEView` and `NSEPopup` use the nearest responder: the view controller (or `ResponderScope`) the control renders inside.
+Inside a view controller you do not need to supply this. A window's toolbar, `NSEMenuBar`, `NSEPopUpButton`, `NSEView` and `NSEPopup` use the nearest responder: the view controller (or `ResponderScope`) the control renders inside.
 
 ```tsx
-// Inside a view controller's view: no interaction or overlay props needed
-<NSEToolbar composition="configured" controller={this.toolbar} width={width} aria-label="Lab toolbar" />
+// Inside a view controller's view: no overlay props needed
 <NSEMenuBar menu={mainMenu} />
 ```
 
-Do not pass `SCOS.responderId` as the parent. It identifies the application's mount, which sits above every view controller. A command routed from the mount cannot reach an `@action` declared on a view controller below it. Pass `interaction={{ parentResponderId, overflowOverlayId }}` (toolbar), `overlay={{ parentResponderId }}` (menu bar or pop-up button) or `menuOverlay={{ id, parentResponderId }}` (a view's menu) only when the control renders outside the responder that should own it. If a toolbar finds no responder at all, it throws an error that explains how to fix it.
+Do not pass `SCOS.responderId` as the parent. It identifies the application's mount, which sits above every view controller. A command routed from the mount cannot reach an `@action` declared on a view controller below it. Pass `overlay={{ parentResponderId }}` (menu bar or pop-up button) or `menuOverlay={{ id, parentResponderId }}` (a view's menu) only when the control renders outside the responder that should own it. A window's toolbar dispatches from the window controller's responder, or from the application's mount when the window controller declares no actions.
 
-## A configured toolbar owned by the window controller
+## A window's toolbar (NSToolbar)
 
-A configured toolbar is a controller with a configuration, items and stored preferences. It adds customisation, overflow into a menu, and command validation: an item disables itself when its action's `validate<Name>()` says so, and re-enables when that changes.
+A toolbar belongs to a window. Create an `NSEToolbar` with its items and give it to the window; the window draws it under its title bar, validates its command items along the responder chain (an item disables itself when its action's `validate<Name>()` says so), lays the items out to its width and moves those that don't fit into an overflow menu.
 
 ```ts
-const preferences = new NSEPreferencesController<NSEToolbarPreferences>({
-  owner: this,
-  namespace: configuration.identifier,
-  schema: {
-    version: 1,
-    defaults: { itemIds: configuration.defaultItemIds, displayMode: configuration.displayMode, sizeMode: configuration.sizeMode },
-    fields: { /* validate itemIds, displayMode and sizeMode */ },
-    migrations: [],
-  },
-  adapter: { read, write, remove },
+const toolbar = new NSEToolbar({
+  identifier: "journal-publisher.toolbar",           // NSToolbar(identifier:)
+  items,                                              // every item the toolbar can show
+  defaultItemIdentifiers: ["posts", "zoom", "flexible", "publish"],
+  allowedItemIdentifiers,                             // what the customisation palette offers; every item when omitted
+  displayMode: "iconAndLabel", sizeMode: "regular",
+  allowsUserCustomization: true,
+  autosavesConfiguration: true,                       // kept in the application's preferences under the identifier
 });
-this.toolbar = new NSEToolbarController({ owner: this, configuration, items, preferences, runtime: SCOS.menus.runtime });
+this.window.toolbar = toolbar;
+toolbar.runCustomizationPalette();                    // the customisation sheet, on the window
+toolbar.insertItem("link", 3); toolbar.removeItem(3);
+toolbar.isVisible = !compact;                         // a hidden toolbar keeps its items and configuration
+toolbar.validateVisibleItems();                       // after state its validators read changes outside an action
 ```
 
-Render it with `composition="configured"` and the width it can use. Items that don't fit go into the overflow menu; don't wrap them onto a second row. JournalPublisher (`PublisherWindowController.tsx`) builds its toolbar this way.
+The window owns the toolbar's command and preference authority, so you do not build a preferences controller or pass a menu runtime. JournalPublisher (`PublisherWindowController.tsx`) and the control gallery's Toolbars section use it.
+
+## The title bar: title, subtitle and accessories
+
+`window.title` names the window's document; on the stage, a window with a title (or titlebar accessories) draws the standard bar's document layout: the application's name leading, then the document centred. `window.subtitle` is a second line of the title (Atmo draws it as a status capsule) and `window.isDocumentEdited` marks unsaved changes.
+
+Controls an application puts in its title bar are `NSETitlebarAccessoryViewController`s (NSTitlebarAccessoryViewController), added with `window.addTitlebarAccessoryViewController(_:)`; the window owns them from then on. On the stage, Atmo draws `leading` accessories before the title and `trailing` accessories after it; `bottom` accessories, and in a window of its own every accessory, sit in a row under the toolbar.
+
+```ts
+class FileAccessory extends NSETitlebarAccessoryViewController {
+  static view = FileMenuButton;
+  constructor(readonly owner: DocumentWindowController) { super({ owner }); this.layoutAttribute = "leading"; }
+}
+this.window.addTitlebarAccessoryViewController(new FileAccessory(this));
+```
+
+A textured `NSESegmentedControl` segment can carry a command menu (`menu: NSEMenu`, NSSegmentedControl.setMenu(_:forSegment:)): pressing it shows the menu below the segment, which stays highlighted while the menu is open. Publisher's File accessory is a small one-segment control of this kind.
 
 ## A narrow inspector
 

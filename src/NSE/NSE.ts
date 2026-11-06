@@ -200,8 +200,6 @@ export const NSE = {
   TypographyControls: NSETypography,
   TextLayout: NSETextLayout,
   WebContent: NSEWebContent,
-  NSEToolbarController: NSEToolbars.NSEToolbarController,
-  NSEToolbarConfigurationSheet: NSEToolbars.NSEToolbarConfigurationSheet,
   NSEArrayController: NSEControllers.NSEArrayController,
   NSEDictionaryController: NSEControllers.NSEDictionaryController,
   NSEObjectController: NSEControllers.NSEObjectController,

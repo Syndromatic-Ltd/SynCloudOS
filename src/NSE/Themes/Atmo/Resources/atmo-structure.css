@@ -4777,3 +4777,59 @@
     margin: 0;
   }
 }
+
+/* ---- Window chrome: the document title bar and the window toolbar ---- */
+
+/* The document in a metal title bar: accessories 12px from the title; title, subtitle and trailing accessories 8px apart. */
+:where([data-nse-appearance="atmo"]) .nse-window-titlebar-document { gap: 12px; }
+:where([data-nse-appearance="atmo"]) .nse-window-titlebar-title { gap: 8px; }
+/* The subtitle is a status capsule. */
+:where([data-nse-appearance="atmo"]) .nse-window-titlebar-subtitle {
+  flex: none;
+  padding: 1px 7px 2px;
+  border-radius: 999px;
+  font: 700 10px/1.4 "Syndromatic UI", system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* In a compact width the document title bar shares its row between the controls' own widths
+   (absolute clusters would let the QuickSwitch title cover the accessories) and drops the title. */
+@media (max-width: 767px) {
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-metal-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content max-content;
+    gap: 8px;
+    padding-inline: 14px;
+  }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-metal-cluster { position: relative; inset: auto; min-width: 0; transform: none; }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-metal-leading-title { flex: 1; min-width: 0; }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-title-button { display: flex; min-width: 0; }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-title-arrow,
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-window-titlebar-back { flex: none; }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-metal-centre { max-width: none; overflow: visible; }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-window-titlebar-title { display: none; }
+}
+
+/* The window toolbar is a lit metal strip, edge to edge, with a soft fade at its foot. */
+:where([data-nse-appearance="atmo"]) .nse-window-toolbar {
+  min-height: 58px;
+  padding: 3px 10px 2px;
+  color: #1d1d1f;
+  font: 13px/1.38 "Syndromatic UI", system-ui, sans-serif;
+  background: linear-gradient(180deg, #ebecee 0%, #d9dbde 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.26);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+:where([data-nse-appearance="atmo"]) .nse-window-toolbar[data-mode="dark"] {
+  color: #ececee;
+  background: linear-gradient(180deg, #3a3b3f 0%, #2d2e31 100%);
+  border-bottom-color: #000;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+/* The strip is the toolbar's material, so the toolbar's own surface (which stops short of the strip's padding) is not drawn. */
+:where([data-nse-appearance="atmo"]) .nse-window-toolbar::after { content: ""; position: absolute; inset: auto 0 0; height: 27px; pointer-events: none; background: linear-gradient(to top, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); }
+:where([data-nse-appearance="atmo"]) .nse-window-toolbar[data-mode="dark"]::after { background: linear-gradient(to top, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)); }

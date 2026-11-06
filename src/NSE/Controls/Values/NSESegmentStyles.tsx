@@ -24,7 +24,12 @@
  * tool-button band, and its radio strip for one-of-many text segments.
  */
 
-import { useMemo } from "react";
+import { useContext, useId, useMemo, useState } from "react";
+import { NSEMenu } from "../../Menus/NSEMenu";
+import { NSEMenuOverlay } from "../../Menus/NSEMenuOverlay";
+import { NSEMenuView } from "../../Menus/NSEMenuView";
+import { useOptionalNSEOverlayProvider } from "../../Overlays";
+import { NSEActionResponderContext } from "../Core/useNSEControlAction";
 import { NSEButton } from "../Buttons/NSEButton";
 import { NSEToolButtonGroup } from "../Buttons/NSEButtonFamilies";
 import { sizedControlStyle } from "../Core/nseControlsShared";
@@ -107,6 +112,7 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
       data-segment-style="texturedRounded"
     >
       {items.map((item) => {
+        if (item.menu instanceof NSEMenu) return <NSEMenuSegment key={item.id} item={item} menu={item.menu} props={props} />;
         return (
           <NSEButton
             key={item.id}
@@ -127,6 +133,41 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
         );
       })}
     </NSEToolButtonGroup>
+  );
+}
+
+/** A textured segment with a command menu (setMenu(_:forSegment:)): a pull-down that keeps its place in the group. */
+function NSEMenuSegment({ item, menu, props }: { readonly item: NSESegmentedItem; readonly menu: NSEMenu; readonly props: NSESegmentedControlProps }) {
+  const [open, setOpen] = useState(false);
+  const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
+  const provider = useOptionalNSEOverlayProvider();
+  const nearestResponderId = useContext(NSEActionResponderContext);
+  const baseId = `nse-segment-menu:${useId().replace(/:/g, "")}`;
+  const parentResponderId = props.parentResponderId ?? nearestResponderId ?? provider?.defaultParentResponderId;
+  if (!provider || !parentResponderId) throw new Error("A segment with a command menu needs an overlay host and a parent responder.");
+  const disabled = (props.isEnabled === false) || props.readOnly || (item.isEnabled === false);
+  return (
+    <>
+      <NSEButton
+        ref={setAnchor}
+        id={`${baseId}-button`}
+        bezelStyle="texturedRounded"
+        title={item.image ? itemName(item) : item.label}
+        image={item.image}
+        imagePosition={item.image ? "imageOnly" : undefined}
+        toolTip={item.toolTip}
+        isHighlighted={open}
+        isEnabled={!disabled}
+        haptic={props.haptic ?? "soft"}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        style={item.width === undefined ? undefined : { boxSizing: "border-box", inlineSize: item.width, minInlineSize: item.width }}
+      />
+      <NSEMenuOverlay overlay={{ id: `${baseId}:overlay`, parentResponderId }} controller={menu} open={open} anchor={anchor} labelledBy={`${baseId}-button`} onOpenChange={setOpen}>
+        <NSEMenuView model={menu.model} controller={menu} open={open} labelledBy={`${baseId}-button`} onOpenChange={setOpen} initialFocus="first" />
+      </NSEMenuOverlay>
+    </>
   );
 }
 

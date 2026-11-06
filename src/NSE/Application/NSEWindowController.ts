@@ -30,6 +30,8 @@ import { NSEObject } from "../Objects/NSEObject";
 import type { NSEApplication, NSEOpenWindowOptions } from "./NSEApplication";
 import { NSEObjectLifetime } from "./objectLifetime";
 import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
+import type { NSEToolbar } from "../Toolbars/NSEToolbar";
+import type { NSETitlebarAccessoryViewController } from "./NSETitlebarAccessoryViewController";
 import { nseAdoptViewController, validateNSEViewControllerClass, type NSEViewComponent, type NSEViewController, type NSEViewControllerClass } from "./NSEViewController";
 
 export type NSEWindowControllerOptions = NSEControllerOwnershipOptions & NSEOpenWindowOptions;
@@ -42,8 +44,20 @@ export type NSEWindowCloseOutcome = "closed" | "cancelled" | "refused";
 export interface NSEWindow {
   /** The window's identity, or `null` when the application is shown on the stage. */
   readonly id: string | null;
-  /** The window title; assigning it renames the window. */
+  /** The window title; assigning it renames the window. On the stage it names the document in the title bar. */
   title: string;
+  /** NSWindow.subtitle: a second line of the title, such as a document's state; the theme draws it beside the title. */
+  subtitle: string;
+  /** NSWindow.isDocumentEdited: whether the window's document has unsaved changes. */
+  isDocumentEdited: boolean;
+  /** NSWindow.toolbar: the window draws it under its title bar. */
+  toolbar: NSEToolbar | null;
+  /** NSWindow.titlebarAccessoryViewControllers, in the order they were added. */
+  readonly titlebarAccessoryViewControllers: readonly NSETitlebarAccessoryViewController<unknown>[];
+  /** NSWindow.addTitlebarAccessoryViewController(_:): the window owns the accessory from now on. */
+  addTitlebarAccessoryViewController(controller: NSETitlebarAccessoryViewController<unknown>): void;
+  /** NSWindow.removeTitlebarAccessoryViewController(at:): removes and disposes the accessory. */
+  removeTitlebarAccessoryViewController(index: number): void;
   readonly isKey: boolean;
   readonly isMinimised: boolean;
   /** The window's current bounds, or `null` before it has mounted. */
@@ -181,6 +195,10 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   #loaded = false;
   #key = false;
   #pendingTitle: string | null = null;
+  #subtitle = "";
+  #documentEdited = false;
+  #toolbar: NSEToolbar | null = null;
+  #accessories: readonly NSETitlebarAccessoryViewController<unknown>[] = Object.freeze([]);
   #contentViewController: NSEViewController<unknown> | null = null;
   /** The options used to open or restore this controller, available in its constructor. */
   get openingOptions(): Readonly<NSEOpenWindowOptions> {
@@ -210,8 +228,51 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       get id() { return controller.#mount?.windowId ?? null; },
       get title() { return controller.#mount?.getSnapshot()?.title ?? controller.#pendingTitle ?? ""; },
       set title(value: string) {
+        if (typeof value !== "string") throw new TypeError("A window's title is a string.");
+        if (value === controller.#pendingTitle) return;
         controller.#pendingTitle = value;
         controller.#mount?.setTitle(value);
+        controller.notifyObservers();
+      },
+      get subtitle() { return controller.#subtitle; },
+      set subtitle(value: string) {
+        if (typeof value !== "string") throw new TypeError("A window's subtitle is a string.");
+        if (value === controller.#subtitle) return;
+        controller.#subtitle = value;
+        controller.notifyObservers();
+      },
+      get isDocumentEdited() { return controller.#documentEdited; },
+      set isDocumentEdited(edited: boolean) {
+        if (typeof edited !== "boolean") throw new TypeError("A window's isDocumentEdited is a boolean.");
+        if (edited === controller.#documentEdited) return;
+        controller.#documentEdited = edited;
+        controller.notifyObservers();
+      },
+      get toolbar() { return controller.#toolbar; },
+      set toolbar(toolbar: NSEToolbar | null) {
+        controller.#assertLive("toolbar", "set");
+        if (toolbar === controller.#toolbar) return;
+        controller.#toolbar = toolbar;
+        controller.notifyObservers();
+      },
+      get titlebarAccessoryViewControllers() { return controller.#accessories; },
+      addTitlebarAccessoryViewController: (accessory: NSETitlebarAccessoryViewController<unknown>) => {
+        controller.#assertLive("addTitlebarAccessoryViewController", "call");
+        if (controller.#accessories.includes(accessory)) throw new TypeError("This titlebar accessory is already in the window.");
+        accessory[nseAdoptViewController](controller.#lifetime.scope, controller.#window);
+        controller.#accessories = Object.freeze([...controller.#accessories, accessory]);
+        controller.notifyObservers();
+      },
+      removeTitlebarAccessoryViewController: (index: number) => {
+        controller.#assertLive("removeTitlebarAccessoryViewController", "call");
+        const accessory = Number.isInteger(index) ? controller.#accessories[index] : undefined;
+        if (!accessory) throw new RangeError(`This window has no titlebar accessory at index ${index}.`);
+        controller.#accessories = Object.freeze(controller.#accessories.filter((_, position) => position !== index));
+        try {
+          accessory[nseDisposeFor]("removed-from-parent");
+        } finally {
+          controller.notifyObservers();
+        }
       },
       get isKey() { return controller.#key; },
       get isMinimised() { return controller.#mount?.getSnapshot()?.state === "minimised"; },

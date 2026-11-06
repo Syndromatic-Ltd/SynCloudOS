@@ -153,7 +153,7 @@ Data views render collections owned by a controller. They are virtualised, so a 
 | `NSEMenuBar` | Draws the application's `mainMenu` across the window. |
 | `NSEView` | A view with a contextual `menu` and a `toolTip` (`NSView.menu`, `NSView.toolTip`). |
 | `NSEPopup` | An anchored or modal popup plate. |
-| `NSEToolbar`, `NSEToolbarConfigurationSheet` | Toolbars with customisation, driven by `NSEToolbarController`. |
+| `NSEToolbar` | A window's toolbar (`window.toolbar`): validated items, overflow, display and size modes, the customisation palette and autosaved configuration. |
 | `NSEStatusBar`, `NSETopBar` | Status and title strips. The metal bar's `titlePlacement: "leading"` suits document windows: the app title (with its QuickSwitch action) beside the return control, the document in the middle. Items are `webspring`, `userInfo`, `settings` or `custom`. Every item glyph is a single-shape SVG drawn as a CSS mask over theme colours, so its normal, pressed and selected looks follow the theme for any icon: pass the SVG's URL as `icon` on any item, or omit it to get the built-in house (`webspring`), person (`userInfo`) or gear (`settings`). There is no separate selected icon. The metal bar's buttons are drawn in CSS (raised aluminium that presses in deeply, light and dark). |
 
 ## Panels and overlays
@@ -188,7 +188,7 @@ Some controls come with a controller that holds their state and restoration data
 | `NSEAdaptiveNavigationController` | A sidebar layout on wide screens that collapses to a stack on compact ones. |
 | `NSETabBarController` | Tabs, overflow and restoration. |
 | `NSESplitViewController`, `NSESplitViewItem` | A split view of child view controllers: thicknesses, holding priorities and collapse. |
-| `NSEToolbarController` | Toolbar items and user customisation. |
+| `NSETitlebarAccessoryViewController` | A view controller drawn in the window's title bar (`window.addTitlebarAccessoryViewController`). |
 
 The [controllers guide](controllers.md) covers the array, tree and preferences controllers.
 
