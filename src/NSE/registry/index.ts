@@ -86,7 +86,6 @@ export const nseRegistry = [
       "NSEProgressIndicator",
       "NSESlider",
       "NSEPageHeader",
-      "NSEDialogSurface",
       "NSERoundedBox",
       "NSEDatePicker"
     ],
@@ -116,7 +115,7 @@ export const nseRegistry = [
     name: "nse-containers",
     title: "NSE Containers",
     type: "composition",
-    description: "Drawers, sliding panes, modal dialogs, and confirm prompts for app composition in NSE vocabulary.",
+    description: "Drawers and sliding panes. Alerts are NSEAlert objects and custom dialogs are view controllers presented as sheets.",
     files: [
       "src/NSE/Containers/NSEContainers.tsx",
       "src/NSE/Containers/nse-containers.css",
@@ -124,10 +123,7 @@ export const nseRegistry = [
     ],
     variants: [
       "NSEDrawer",
-      "NSESlidingPane",
-      "NSEDialog",
-      "NSEModalDialog",
-      "NSEConfirmPrompt"
+      "NSESlidingPane"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
   },

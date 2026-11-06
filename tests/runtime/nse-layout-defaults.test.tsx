@@ -26,7 +26,6 @@ import { afterEach, describe, expect, it } from "vitest";
 import { NSEGridRow, NSEGridView, NSEStackItem, NSEStackView, resolveNSESpacing } from "../../src/NSE/Layout";
 import { NSETextField } from "../../src/NSE/Controls/Fields";
 import { NSEBox } from "../../src/NSE/Controls/Fields/NSEFields";
-import { NSEDialog } from "../../src/NSE/Containers";
 import { ContainerPane } from "../../src/NSE/Containers/NSEContainers";
 
 afterEach(cleanup);
@@ -102,10 +101,9 @@ describe("NSE default layout", () => {
     const { container } = render(<>
       <ContainerPane title="Pane"><span>Body</span></ContainerPane>
       <ContainerPane title="Flow" contentLayout="flow"><span>Body</span></ContainerPane>
-      <NSEDialog title="Dialog"><span>Body</span></NSEDialog>
     </>);
-    const bodies = [...container.querySelectorAll(".nse-container-pane-body, .nse-container-dialog-body")];
-    expect(bodies.map((body) => body.getAttribute("data-nse-content-layout"))).toEqual(["stack", null, "stack"]);
+    const bodies = [...container.querySelectorAll(".nse-container-pane-body")];
+    expect(bodies.map((body) => body.getAttribute("data-nse-content-layout"))).toEqual(["stack", null]);
   });
 
   it("lays out a two-column grid as a form, each row's views named by its label", () => {

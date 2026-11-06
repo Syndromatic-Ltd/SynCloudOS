@@ -21,20 +21,13 @@
 import "./nse-containers.css";
 
 export {
-  NSEConfirmPrompt,
-  NSEDialog,
   NSEDrawer,
-  NSEModalDialog,
   NSESlidingPane,
   NSESlidingPanes
 } from "./NSEContainers";
 export type {
-  NSEConfirmPromptProps,
-  NSEDialogProps,
-  NSEDialogVariant,
   NSEDrawerPlacement,
   NSEDrawerProps,
-  NSEModalDialogProps,
   NSESlidingAxis,
   NSESlidingPaneProps,
   NSESlidingPaneView,

@@ -26,8 +26,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { rubberBandOffset } from "../../src/NSE/Scroll";
 import {
-  NSEConfirmPrompt,
-  NSEDialog,
   NSESlidingPane,
   NSESlidingPanes
 } from "../../src/NSE/Containers";
@@ -88,36 +86,6 @@ describe("NSE containers", () => {
       else delete prototype.hasPointerCapture;
     };
   }
-
-  it("renders dialog markup", () => {
-    const markup = renderToStaticMarkup(
-      <NSEDialog title="Ready" description="Dialog description">
-        Dialog body
-      </NSEDialog>
-    );
-
-    expect(markup).toContain("role=\"dialog\"");
-  });
-
-  it("confirms prompts through NSE controls", () => {
-    const onConfirm = vi.fn();
-    const onOpenChange = vi.fn();
-    render(
-        <NSEConfirmPrompt
-          open
-          portal={false}
-          title="Delete item?"
-          message="This action cannot be undone."
-          confirmLabel="Delete"
-          onConfirm={onConfirm}
-          onOpenChange={onOpenChange}
-        />
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    expect(onConfirm).toHaveBeenCalledTimes(1);
-    expect(onOpenChange).toHaveBeenLastCalledWith(false);
-  });
 
   it("supports SlidingPane peek, multi-view data, and drag dismissal", () => {
     const restorePointerCapture = installPointerCaptureMocks();
@@ -182,24 +150,4 @@ describe("NSE containers", () => {
     expect(screen.queryByRole("button", { name: "Folders" })).toBeNull();
   });
 
-  it("supports an inline ConfirmPrompt and fly-in animated dialogs/toasts (NSE container classes)", () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
-
-    // Inline (unscrimmed) ConfirmPrompt — no modal layer.
-    const inlineRender = render(
-      <NSEConfirmPrompt inline title="Discard draft?" message="This cannot be undone." onConfirm={onConfirm} onCancel={onCancel} />
-    );
-    expect(inlineRender.container.querySelector(".nse-container-modal-layer")).toBeNull();
-    expect(inlineRender.container.querySelector(".nse-container-confirm-inline")).not.toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
-    expect(onConfirm).toHaveBeenCalledTimes(1);
-    inlineRender.unmount();
-
-    // Modal ConfirmPrompt flies in: rise-in shell over a fading scrim (local NSE container classes).
-    const modalRender = render(<NSEConfirmPrompt open title="Delete?" onConfirm={onConfirm} onCancel={onCancel} />);
-    expect(document.querySelector(".nse-container-modal-layer.nse-container-fade-in")).not.toBeNull();
-    expect(document.querySelector(".nse-container-modal-shell.nse-container-rise-in")).not.toBeNull();
-    modalRender.unmount();
-  });
 });

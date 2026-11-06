@@ -19,29 +19,19 @@
  */
 
 import {
-  Children,
   createElement,
   useCallback,
   useEffect,
   useId,
-  useLayoutEffect,
-  useMemo,
   useRef,
   useState,
   type CSSProperties,
   type HTMLAttributes,
-  type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode
 } from "react";
-import { createPortal } from "react-dom";
-import { useNSEAppearanceProjection } from "../Appearance";
-import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
-import { NSEActionSheet, useOptionalNSEOverlayProvider, type NSEActionSheetProps } from "../Overlays";
-import { DialogTitleInContent, usePresentedDialogContent } from "../Overlays/presentedDialogContent";
 import "../Navigation/SourceList/nse-sourcelist.css";
-import { NSEDivider } from "../Controls/Selection/NSEDivider";
-import { NSEButton, nseButtonToneProps, type NSEButtonTone } from "../Controls/Buttons/NSEButton";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import {
   getOptionalNSESmoothSurfaceProps,
   type NSESmoothSurfaceRequest,
@@ -54,7 +44,6 @@ type NSEContainerElement = "div" | "section" | "aside" | "main" | "nav" | "artic
 export type NSEDrawerPlacement = "leading" | "trailing" | "top" | "bottom";
 export type ContainerPaneVariant = "plain" | "surface" | "sidebar" | "inspector" | "floating";
 export type NSESlidingAxis = "horizontal" | "vertical";
-export type NSEDialogVariant = "dialog" | "sheet" | "panel" | "confirm";
 interface NSEDisclosureOptions {
   open?: boolean;
   defaultOpen?: boolean;
@@ -132,48 +121,6 @@ export interface NSESlidingPanesProps extends Omit<HTMLAttributes<HTMLDivElement
   multiViewMinWidth?: number;
   /** Allow dragging horizontally to move between panes. Default true. */
   draggable?: boolean;
-}
-
-export interface NSEDialogProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
-  title?: ReactNode;
-  description?: ReactNode;
-  actions?: ReactNode;
-  variant?: NSEDialogVariant;
-  role?: "dialog" | "alertdialog";
-  modal?: boolean;
-  closeLabel?: string;
-  onClose?: () => void;
-  smoothSurface?: NSESmoothSurfaceRequest;
-  contentLayout?: NSEContainerContentLayout;
-}
-
-export interface NSEModalDialogProps extends NSEDialogProps {
-  open: boolean;
-  onOpenChange?: (open: boolean) => void;
-  dismissOnOutside?: boolean;
-  dismissOnEscape?: boolean;
-  portal?: boolean;
-  /**
-   * Opt into the canonical action-sheet branch. Existing standalone
-   * callers retain their compatibility presentation until their runtime host
-   * supplies an NSEOverlayProvider.
-   */
-  interaction?: Pick<NSEActionSheetProps, "id" | "anchor" | "parentResponderId" | "parentId" | "parentScopeId" | "presentation" | "restoreFocus" | "parentWindowControllerId" | "windowBridge">;
-}
-
-export interface NSEConfirmPromptProps extends Omit<NSEModalDialogProps, "actions" | "children" | "title" | "variant" | "role" | "open"> {
-  title: ReactNode;
-  message?: ReactNode;
-  confirmLabel?: ReactNode;
-  cancelLabel?: ReactNode;
-  confirmTone?: NSEButtonTone;
-  cancelTone?: NSEButtonTone;
-  onConfirm: () => void;
-  onCancel?: () => void;
-  /** Render inline within the page rather than as a scrimmed modal overlay. */
-  inline?: boolean;
-  /** Whether the modal form is open (ignored when `inline`). */
-  open?: boolean;
 }
 
 function classes(...values: Array<string | false | null | undefined>) {
@@ -586,218 +533,5 @@ export function NSESlidingPanes({
         })}
       </div>
     </div>
-  );
-}
-
-export function NSEDialog({
-  title,
-  description,
-  actions,
-  variant = "dialog",
-  role = "dialog",
-  modal = false,
-  closeLabel = "Close dialog",
-  onClose,
-  smoothSurface = false,
-  contentLayout = "stack",
-  className = "",
-  style,
-  children,
-  onKeyDown,
-  ...props
-}: NSEDialogProps) {
-  const titleId = useId();
-  const descriptionId = useId();
-  const dialogOwner = usePresentedDialogContent();
-  const presented = dialogOwner.presented && role === "dialog";
-  const heading = useRef<HTMLHeadingElement>(null);
-  useLayoutEffect(() => presented && heading.current ? dialogOwner.observeTitle?.(heading.current) : undefined, [dialogOwner, presented, Boolean(title)]);
-  const surfaceProps = getOptionalNSESmoothSurfaceProps(
-    smoothSurface,
-    classes("nse-container-dialog", className),
-    style as NSESmoothSurfaceStyle | undefined
-  );
-
-  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
-    if (event.key === "Escape" && onClose) {
-      event.preventDefault();
-      onClose();
-    }
-    onKeyDown?.(event);
-  }
-
-  return (
-    <section
-      {...props}
-      className={surfaceProps.className}
-      data-variant={variant}
-      role={presented ? "group" : role}
-      aria-modal={!presented && modal || undefined}
-      aria-labelledby={title ? titleId : undefined}
-      aria-describedby={description ? descriptionId : undefined}
-      tabIndex={props.tabIndex ?? -1}
-      style={surfaceProps.style}
-      onKeyDown={handleKeyDown}
-    >
-      {title || onClose ? (
-        <header className="nse-container-dialog-header">
-          {title ? <h2 id={titleId} ref={heading}>{title}</h2> : null}
-          {onClose ? (
-            <button className="nse-container-dialog-close" type="button" aria-label={closeLabel} onClick={onClose}>
-              <span aria-hidden="true">x</span>
-            </button>
-          ) : null}
-        </header>
-      ) : null}
-      {description ? <p id={descriptionId} className="nse-container-dialog-description">{description}</p> : null}
-      <div className="nse-container-dialog-body" data-nse-content-layout={contentLayout === "stack" ? "stack" : undefined}>{children}</div>
-      {actions ? <footer className="nse-container-dialog-actions">{actions}</footer> : null}
-    </section>
-  );
-}
-
-export function NSEModalDialog({
-  open,
-  onOpenChange,
-  dismissOnOutside = true,
-  dismissOnEscape = true,
-  portal = true,
-  modal = true,
-  className = "",
-  onClose,
-  interaction,
-  ...props
-}: NSEModalDialogProps) {
-  const appearanceProjection = useNSEAppearanceProjection();
-  const overlayProvider = useOptionalNSEOverlayProvider();
-  const focusScopeId = useId();
-  const shellRef = useRef<HTMLDivElement>(null);
-  const close = useCallback(() => {
-    onClose?.();
-    onOpenChange?.(false);
-  }, [onClose, onOpenChange]);
-
-  useEffect(() => {
-    if (interaction || !open) return;
-    const previousFocus = resolveNSEFocusReturnTarget(document.activeElement);
-    shellRef.current?.focus({ preventScroll: true });
-
-    return () => {
-      previousFocus?.focus({ preventScroll: true });
-    };
-  }, [interaction, open]);
-
-  if (interaction) {
-    return (
-      <DialogTitleInContent><NSEActionSheet
-        {...interaction}
-        title={props.title}
-        open={open}
-        dismissOnOutside={dismissOnOutside}
-        dismissOnEscape={dismissOnEscape}
-        onOpenChange={(_nextOpen, _reason) => close()}
-      >
-        <NSEDialog {...props} className={className} modal={modal} onClose={close} />
-      </NSEActionSheet></DialogTitleInContent>
-    );
-  }
-
-  if (overlayProvider) throw new Error("NSEModalDialog inside an NSEOverlayProvider requires explicit canonical interaction provenance.");
-
-  if (!open) return null;
-
-  const content = (
-    <NSEFocusScope options={{ scopeId: `nse-modal-dialog:${focusScopeId}`, kind: "modal", modal, trapFocus: modal, asChild: true }}>
-      <div
-        className="nse-container-modal-layer nse-container-fade-in"
-        {...appearanceProjection}
-        onMouseDown={(event) => {
-          if (dismissOnOutside && event.target === event.currentTarget) close();
-        }}
-      >
-        <div
-          ref={shellRef}
-          className="nse-container-modal-shell nse-container-rise-in"
-          tabIndex={-1}
-          onKeyDown={(event) => {
-            if (dismissOnEscape && event.key === "Escape") {
-              event.preventDefault();
-              close();
-            }
-          }}
-        >
-          <NSEDialog
-            {...props}
-            className={className}
-            modal={modal}
-            onClose={close}
-          />
-        </div>
-      </div>
-    </NSEFocusScope>
-  );
-
-  return portal && typeof document !== "undefined" ? createPortal(content, document.body) : content;
-}
-
-export function NSEConfirmPrompt({
-  title,
-  message,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
-  confirmTone = "affirmative",
-  cancelTone = "light",
-  onConfirm,
-  onCancel,
-  onOpenChange,
-  inline = false,
-  open,
-  className = "",
-  ...props
-}: NSEConfirmPromptProps) {
-  function cancel() {
-    onCancel?.();
-    onOpenChange?.(false);
-  }
-
-  function confirm() {
-    onConfirm();
-    onOpenChange?.(false);
-  }
-
-  const actions = (
-    <>
-      <NSEButton title={cancelLabel} {...nseButtonToneProps(cancelTone)} onClick={cancel} />
-      <NSEButton title={confirmLabel} {...nseButtonToneProps(confirmTone)} onClick={confirm} />
-    </>
-  );
-
-  // Inline prompts render without a scrim; the default is a modal overlay.
-  if (inline) {
-    return (
-      <div
-        className={classes("nse-container-confirm-inline", className)}
-        role="alertdialog"
-        aria-label={typeof title === "string" ? title : undefined}
-      >
-        {title ? <div className="nse-container-confirm-inline-title">{title}</div> : null}
-        {message ? <p className="nse-container-confirm-inline-message">{message}</p> : null}
-        <div className="nse-container-confirm-inline-actions">{actions}</div>
-      </div>
-    );
-  }
-
-  return (
-    <NSEModalDialog
-      {...props}
-      open={open ?? false}
-      className={className}
-      title={title}
-      description={message}
-      role="alertdialog"
-      variant="confirm"
-      onOpenChange={onOpenChange}
-      actions={actions}
-    />
   );
 }
