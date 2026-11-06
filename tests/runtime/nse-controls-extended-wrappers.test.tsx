@@ -28,6 +28,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
 import { NSEButton, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEStandaloneControlHost, NSESearchField, NSESegmentedControl } from "../../src/NSE/public/controls";
+import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
+import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
 import { NSEDateEntry } from "../../src/NSE/DateTime/Pickers/dateEntry";
 import { NSETimeEntry } from "../../src/NSE/DateTime/Pickers/timeEntry";
 import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
@@ -66,6 +68,28 @@ describe("NSE extended wrapper controls", () => {
     expect(screen.getByRole("radio", { name: "Day" }).getAttribute("aria-checked")).toBe("true");
     expect(screen.getByRole("group", { name: "Due date" }).getAttribute("data-locale-order")).toBe("day-month-year");
     expect(screen.getByRole("group", { name: "Start time" }).getAttribute("data-value")).toBe("09:30:00");
+  });
+
+  it("puts a segmented control's className on its root and plays its haptic for every segment style", () => {
+    const haptic = vi.fn();
+    const engine = new HFXHapticEngine({ supported: true, trigger: haptic, cancel: vi.fn(), dispose: vi.fn() });
+    const onSelectionChange = vi.fn();
+    renderWithAppearance(
+      <NSEFeedbackProvider value={engine}>
+        <NSESegmentedControl aria-label="Edit controls" className="app-edit-controls" segmentStyle="texturedRounded" haptic="success" selection={{ mode: "momentary", selectedIds: new Set() }} items={[{ id: "done", label: "Done" }, { id: "reset", label: "Reset" }]} onSelectionChange={onSelectionChange} />
+        <NSESegmentedControl aria-label="View" className="app-view-switcher" haptic="success" selection={{ mode: "select-one", selectedIds: new Set(["list"]), allowsEmpty: false }} items={[{ id: "list", label: "List" }, { id: "grid", label: "Grid" }]} />
+      </NSEFeedbackProvider>
+    );
+
+    expect(screen.getByRole("toolbar", { name: "Edit controls" }).classList.contains("app-edit-controls")).toBe(true);
+    expect(screen.getByRole("group", { name: "View" }).classList.contains("app-view-switcher")).toBe(true);
+    const reset = screen.getByRole("button", { name: "Reset" });
+    fireEvent.pointerDown(reset);
+    fireEvent.click(reset);
+    expect(onSelectionChange).toHaveBeenCalledWith(expect.objectContaining({ selectedIds: new Set(["reset"]) }));
+    expect(haptic).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Grid" }));
+    expect(haptic).toHaveBeenCalledTimes(2);
   });
 
   it("maps date and time pickers to controlled NSE picker values", async () => {

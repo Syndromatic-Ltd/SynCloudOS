@@ -34,7 +34,7 @@ import { NSEMenuView } from "../Menus/NSEMenuView";
 import type { NSEMenuItemDefinition } from "../Menus/menuTypes";
 import { useNSEOverlayProvider } from "../Overlays/NSEOverlayProvider";
 import { NSEUtilityPanel } from "../Overlays/NSEUtilityPanel";
-import { NSEToolbar } from "../Toolbars/NSEToolbar";
+import { NSESegmentedControl } from "../Controls/Values/NSESegmentedControl";
 import { DocumentColourGlyph, GearGlyph, MinusGlyph, PlusGlyph, ShadowGlyph, StrikethroughGlyph, TextColourGlyph, UnderlineGlyph } from "./fontPanelIcons";
 import type { NSEFontLibrary, NSEFontLibrarySnapshot } from "./NSEFontLibrary";
 import { NSEFontManager } from "./NSEFontManager";
@@ -662,20 +662,14 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
 
       {showsRuler ? <fieldset data-nse-part="paragraph" disabled={readOnly}>
         <legend className="nse-control-visually-hidden">Paragraph</legend>
-        <NSEToolbar composition="children" position="inline" grouped aria-label="Paragraph alignment" aria-disabled={readOnly || undefined}>
-          {alignmentLabels.map(([alignment, text]) => <NSEButton
-            appearance="darkAqua"
-            buttonType="pushOnPushOff"
-            title={<AlignmentGlyph alignment={alignment} />}
-            state={(style.alignment === alignment) ? "on" : "off"}
-            isEnabled={!readOnly}
-            toolTip={text.replace(" paragraph", "")}
-            key={alignment}
-            aria-label={text}
-            aria-pressed={style.alignment === alignment}
-            onClick={() => updateParagraph(normaliseParagraphStyleMutation({ ...style, alignment }))}
-          />)}
-        </NSEToolbar>
+        <NSESegmentedControl
+          aria-label="Paragraph alignment"
+          segmentStyle="texturedRounded"
+          readOnly={readOnly}
+          items={alignmentLabels.map(([alignment, text]) => ({ id: alignment, label: text, image: <AlignmentGlyph alignment={alignment} />, accessibleLabel: text, toolTip: text.replace(" paragraph", "") }))}
+          selection={{ mode: "select-one", selectedIds: new Set([style.alignment]), allowsEmpty: false }}
+          onSelectionChange={({ selectedIds }) => { const [alignment] = selectedIds; if (alignment) updateParagraph(normaliseParagraphStyleMutation({ ...style, alignment: alignment as typeof style.alignment })); }}
+        />
         <NSERulerView value={style} direction={direction} readOnly={readOnly} onChange={updateParagraph} />
       </fieldset> : null}
       <p role="status" data-nse-part="notice">{!preset ? "No fonts available." : notice}</p>

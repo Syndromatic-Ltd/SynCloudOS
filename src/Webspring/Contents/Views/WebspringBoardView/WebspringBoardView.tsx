@@ -24,7 +24,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { NSELayoutView, useNSEAnimationEnvironment, useNSEPresentation, type NSELayoutTransitionTiming } from "../../../../NSE/Animation";
 import { Badge, LoadingSpinner } from "../../../../NSE/NSE";
 import { useNSEFeedback } from "../../../../NSE/hostComposition";
-import { NSEButton, NSEToolbar } from "@syndromatic/syncloudos/nse/controls";
+import { NSEButton, NSESegmentedControl } from "@syndromatic/syncloudos/nse/controls";
 import { MaterialProvider } from "../../../../NSE/Material";
 import { getKeyboardReorderIndex } from "../../../../SynCloudOS/SynCloudOS";
 import { WebspringWidgetShelf } from "../../../WebspringWidgetShelf";
@@ -611,10 +611,14 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
             : <span>{model.branding.name}</span>}
         </header>
         <div className={`webspring-board-controls ${model.layout.editing ? "is-editing" : ""}`}>
-      {model.layout.editing ? <NSEToolbar composition="children" position="inline" grouped aria-label="Webspring edit controls">
-        <NSEButton appearance="darkAqua" title="Done" haptic="success" onClick={() => actions.finishEditing(true)} />
-        <NSEButton appearance="darkAqua" title="Reset" haptic="success" onClick={actions.resetOrder} />
-      </NSEToolbar> : <NSEButton
+      {model.layout.editing ? <NSESegmentedControl
+        segmentStyle="texturedRounded"
+        aria-label="Webspring edit controls"
+        haptic="success"
+        items={[{ id: "done", label: "Done" }, { id: "reset", label: "Reset" }]}
+        selection={{ mode: "momentary", selectedIds: new Set() }}
+        onSelectionChange={({ selectedIds }) => { if (selectedIds.has("done")) actions.finishEditing(true); else if (selectedIds.has("reset")) actions.resetOrder(); }}
+      /> : <NSEButton
         appearance="darkAqua"
         title="Reorder applications"
         onClick={() => actions.beginEditing(null)}
