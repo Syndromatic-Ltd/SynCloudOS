@@ -66,7 +66,7 @@ Drill-in (Journal's folders, then notes, then a note; Portfolio's library, then 
 
 Each step ends green (typecheck, tests, the site build, the gallery in light and dark, and pixel diffs of every changed app route).
 
-1. `NSETabViewController` and `NSETabViewItem`. About moves first (no stack), then Software, then the gallery's peer examples.
+1. `NSETabViewController` and `NSETabViewItem`. About moves first (no stack), then Software, then the gallery's peer examples. *Landed: the classes, drawn with the internal tab bar (`segmentedControlOnTop`, `segmentedControlOnBottom`, `unspecified`; `toolbar` and `transitionOptions` still to do). No app has moved yet.*
 2. `NSEPageController` `stackHistory`. The gallery's hierarchy examples move, then Portfolio's library to reader.
 3. `NSESplitViewController` compact collapse, then Journal and JournalOld (tabs, stack and adaptive together).
 4. The source-list window and the bottom bar. Software and the gallery move, and `NSESourceListScene`, `NSESidebar` and `NSEStatusBar` go.

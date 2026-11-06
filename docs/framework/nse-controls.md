@@ -188,7 +188,8 @@ Some controls come with a controller that holds their state and restoration data
 | --- | --- |
 | `NSENavigationStackController` | Push and pop navigation, with restoration snapshots. |
 | `NSEAdaptiveNavigationController` | A sidebar layout on wide screens that collapses to a stack on compact ones. |
-| `NSETabBarController` | Tabs, overflow and restoration. |
+| `NSETabViewController`, `NSETabViewItem` | A container showing one child at a time behind a tab control (`NSTabViewController`): `tabViewItems` (each an `NSETabViewItem` with the child `viewController`, `label`, `image` and `toolTip`), `selectedTabViewItemIndex`, and `tabStyle` (`segmentedControlOnTop`, `segmentedControlOnBottom`, which Atmo draws as its bottom tab bar, or `unspecified`). Override `shouldSelect`, `willSelect` and `didSelect`. Place it with `<tabs.view />`. |
+| `NSETabBarController` | Tabs, overflow and restoration. Being replaced by `NSETabViewController` (phase 7). |
 | `NSESplitViewController`, `NSESplitViewItem` | A split view of child view controllers: thicknesses, holding priorities and collapse. |
 | `NSETitlebarAccessoryViewController` | A view controller drawn in the window's title bar (`window.addTitlebarAccessoryViewController`). |
 
