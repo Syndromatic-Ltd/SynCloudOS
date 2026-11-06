@@ -26,7 +26,8 @@ import { resolveZonedDateTime } from "../calendarArithmetic";
 import type { NSEPlainTime } from "../dateTimeTypes";
 import type { NSEGraphicalClockProps } from "./calendarTypes";
 
-export function NSEGraphicalClock({ value, date, timeZone, disambiguation = "reject", showSeconds, disabled, showValidationMessage = true, minuteStep = 1, hourCycle = "h24", onValueChange, ...props }: NSEGraphicalClockProps) {
+export function NSEGraphicalClock({ value, date, timeZone, disambiguation = "reject", showSeconds, isEnabled = true, showValidationMessage = true, minuteStep = 1, hourCycle = "h24", onValueChange, ...props }: NSEGraphicalClockProps) {
+  const disabled = !isEnabled;
   const pointer = useRef<{ pointerId: number; opening: NSEPlainTime; latest: NSEPlainTime } | null>(null);
   const resolution = resolveZonedDateTime({ date, time: value }, timeZone, disambiguation);
   const update = (field: keyof NSEPlainTime, amount: number) => {

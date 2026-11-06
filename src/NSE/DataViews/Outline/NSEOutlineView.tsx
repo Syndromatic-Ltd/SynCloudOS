@@ -434,7 +434,7 @@ export function NSEOutlineView<T, TId extends string | number>({
             className="nse-outline-source-row"
             data-nse-part="row"
             selected={selected}
-            disabled={controllerDisposed}
+            isEnabled={!controllerDisposed}
             style={{ "--nse-outline-level": indent } as OutlineStyle}
             leading={disclosureFor(row) ?? (cell?.image ? <img data-nse-part="image" src={cell.image.src} alt={cell.image.alt} /> : undefined)}
             meta={cell?.secondary}

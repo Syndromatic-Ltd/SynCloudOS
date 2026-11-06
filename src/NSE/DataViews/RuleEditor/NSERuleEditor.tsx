@@ -125,7 +125,8 @@ function RuleComparisonControls({ row, label, fields, operators, templates, loca
   </>;
 }
 
-export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onValidationChange, fields, operators = PREDICATE_OPERATOR_OPTIONS, templates = [], locale = "en-GB", state, readOnly = false, disabled = false, className = "", ...props }: NSERuleEditorProps) {
+export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onValidationChange, fields, operators = PREDICATE_OPERATOR_OPTIONS, templates = [], locale = "en-GB", state, readOnly = false, isEnabled = true, className = "", ...props }: NSERuleEditorProps) {
+  const disabled = !isEnabled;
   const [internal, setInternal] = useState(defaultValue);
   const current = value ?? internal;
   compilePredicateExpression(current);

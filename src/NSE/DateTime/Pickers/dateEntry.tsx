@@ -101,9 +101,10 @@ function NSEDateSegmentEditor({
 
 export function NSEDateEntry({
   value, defaultValue = null, mode = "automatic", parentResponderId, onValueChange,
-  name, editor, hiddenFields, locale, timeZone, minimum, maximum, disabled, readOnly, required, renderEditor, normalizeValue,
+  name, editor, hiddenFields, locale, timeZone, minimum, maximum, isEnabled = true, readOnly, required, renderEditor, normalizeValue,
   "aria-label": label, onFocusCapture, onBlurCapture, ...hostProps
 }: NSEDateEntryProps) {
+  const disabled = !isEnabled;
   const controlled = value !== undefined;
   const [stored, setStored] = useState<NSEPlainDate | null>(defaultValue);
   const current = controlled ? value : stored;
@@ -203,7 +204,7 @@ export function NSEDateEntry({
   const appearance = useNSEAppearanceSlot(nseAppearanceSlot("date-picker", "select", appearanceState));
   return <span {...hostProps} data-nse-control="date-picker" data-state={invalid ? "invalid" : disabled ? "disabled" : readOnly ? "read-only" : open ? "open" : "ready"} {...appearance.attributes} onFocusCapture={(event) => { setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); onBlurCapture?.(event); }}>
     {mode === "automatic" ? <button ref={triggerRef} type="button" aria-label={`Choose ${label.toLocaleLowerCase()}`} aria-expanded={open} disabled={disabled || readOnly} onClick={() => { setCalendarDraft(current); setOpen(true); }}>▦</button> : null}
-    {renderEditor ? renderEditor({ value: current, disabled: Boolean(disabled), readOnly: Boolean(readOnly), commit: commitEditor }) : segmentEditor ?? (!showCalendar ? <input data-nse-part="date-entry" aria-label={label} type="text" inputMode="numeric" placeholder={plainDatePlaceholder(locale)} value={draft} disabled={disabled} readOnly={readOnly} required={required} aria-invalid={invalid || undefined} onChange={(event) => { if (readOnly) return; setDraft(event.currentTarget.value); setInvalid(false); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); commitText(); } else if (event.key === "Escape") { if (invalid || draft !== (current ? formatPlainDate(current, locale) : "")) event.preventDefault(); setInvalid(false); setDraft(current ? formatPlainDate(current, locale) : ""); } }} onBlur={commitText} /> : null)}
+    {renderEditor ? renderEditor({ value: current, isEnabled: !disabled, readOnly: Boolean(readOnly), commit: commitEditor }) : segmentEditor ?? (!showCalendar ? <input data-nse-part="date-entry" aria-label={label} type="text" inputMode="numeric" placeholder={plainDatePlaceholder(locale)} value={draft} disabled={disabled} readOnly={readOnly} required={required} aria-invalid={invalid || undefined} onChange={(event) => { if (readOnly) return; setDraft(event.currentTarget.value); setInvalid(false); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); commitText(); } else if (event.key === "Escape") { if (invalid || draft !== (current ? formatPlainDate(current, locale) : "")) event.preventDefault(); setInvalid(false); setDraft(current ? formatPlainDate(current, locale) : ""); } }} onBlur={commitText} /> : null)}
     {showCalendar && !renderEditor ? calendar : null}
     {mode === "automatic" ? <NSEPopover id={`date-picker-${instanceId}`} open={open} anchor={triggerRef.current} parentWindowControllerId="date-picker-window" parentResponderId={parentResponderId} presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next) closeCalendar(); }}><section data-nse-part="calendar-sheet"><h2 id={titleId} className="nse-control-visually-hidden">{label} calendar</h2>{calendar}</section></NSEPopover> : null}
     <input ref={hiddenRef} type="hidden" {...(name ? { name: name } : {})} value={serializePlainDate(current)} />

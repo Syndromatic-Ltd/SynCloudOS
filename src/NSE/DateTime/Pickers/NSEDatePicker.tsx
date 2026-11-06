@@ -55,7 +55,7 @@ export function NSEDatePicker(props: NSEDatePickerProps): ReactElement {
   const { datePickerStyle = "textFieldAndStepper", presentsCalendarOverlay = true, isEnabled = true, isEditable = true } = props;
   const disabled = !isEnabled;
   const readOnly = !isEditable;
-  const common = { "aria-label": props["aria-label"], locale: props.locale, timeZone: props.timeZone, name: props.name, required: props.required, disabled, readOnly };
+  const common = { "aria-label": props["aria-label"], locale: props.locale, timeZone: props.timeZone, name: props.name, required: props.required, isEnabled, readOnly };
   if (isDateTime(props)) {
     return <NSEDateTimeEntry {...common} mode={datePickerStyle === "clockAndCalendar" ? "combined" : presentsCalendarOverlay ? "automatic" : "text"} value={props.value} defaultValue={props.defaultValue} minimum={props.minimum} maximum={props.maximum} hourCycle={props.hourCycle} onValueChange={props.onValueChange} />;
   }

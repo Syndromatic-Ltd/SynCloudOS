@@ -62,7 +62,7 @@ describe("NSE foundational native form controls", () => {
           options={[
             { value: "grid", label: "Grid" },
             { value: "list", label: "List" },
-            { value: "locked", label: "Locked", disabled: true },
+            { value: "locked", label: "Locked", isEnabled: false },
           ]}
           onValueChange={changes}
         />

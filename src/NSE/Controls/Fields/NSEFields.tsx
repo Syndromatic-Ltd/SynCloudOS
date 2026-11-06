@@ -219,7 +219,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
     value: value as T | string | undefined,
     defaultValue: defaultValue as T | string | undefined,
     fallback: "",
-    disabled,
+    isEnabled: !disabled,
     readOnly,
     required,
     validation,
@@ -633,7 +633,7 @@ function NSESwitchControl({
 export interface NSERadioOption {
   value: string;
   label: ReactNode;
-  disabled?: boolean;
+  isEnabled?: boolean;
   command?: NSEControlCommandBinding<{ readonly value: string }>;
 }
 
@@ -646,7 +646,7 @@ export interface NSERadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>,
   /** New callers should supply a native group name. An ID-backed compatibility name protects existing callers. */
   name?: string;
   required?: boolean;
-  disabled?: boolean;
+  isEnabled?: boolean;
   validation?: NSEControlValidation;
   selectionHaptic?: HFXFeedbackRequest;
 }
@@ -668,7 +668,7 @@ interface NSERadioOptionControlProps {
 function NSERadioOptionControl({ option, selected, position, name, required, disabled, tabStop, onAvailabilityChange, inputRef, onCommit, onKeyDown }: NSERadioOptionControlProps) {
   const command = useNSEControlCommand(option.command);
   const presentation = command.presentation;
-  const optionDisabled = disabled || Boolean(option.disabled) || Boolean(option.command && (!presentation?.enabled || presentation.denied || presentation.hidden || presentation.stale));
+  const optionDisabled = disabled || option.isEnabled === false || Boolean(option.command && (!presentation?.enabled || presentation.denied || presentation.hidden || presentation.stale));
   useEffect(() => {
     onAvailabilityChange(option.value, !optionDisabled);
     return () => onAvailabilityChange(option.value, null);
@@ -721,7 +721,7 @@ function NSERadioGroupControl({
   label,
   name,
   required,
-  disabled = false,
+  isEnabled = true,
   validation,
   selectionHaptic = "selection",
   className = "",
@@ -729,6 +729,7 @@ function NSERadioGroupControl({
   dir,
   ...props
 }: NSERadioGroupProps) {
+  const disabled = !isEnabled;
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 
   const generatedName = useId();
@@ -744,20 +745,20 @@ function NSERadioGroupControl({
       return next;
     });
   }, []);
-  const fallbackValue = defaultValue ?? options.find((option) => !option.disabled)?.value ?? "";
+  const fallbackValue = defaultValue ?? options.find((option) => option.isEnabled !== false)?.value ?? "";
   const currentValue = useNSEControlValue<string>({
     value,
     defaultValue,
     fallback: fallbackValue,
     required,
-    disabled,
+    isEnabled,
     validation,
     onValueChange(value, phase) {
       if (phase === "commit") onValueChange?.(value, "commit");
     },
   });
   useNSEControlFormReset(firstInputRef, currentValue.reset);
-  const enabledOptions = disabled ? [] : options.filter(option => !option.disabled && (!option.command || availability.get(option.value) === true));
+  const enabledOptions = disabled ? [] : options.filter(option => option.isEnabled !== false && (!option.command || availability.get(option.value) === true));
   const tabStopValue = enabledOptions.find(option => option.value === currentValue.value)?.value ?? enabledOptions[0]?.value;
   const invalid = validation?.kind === "invalid";
   const errorId = `${groupName}-error`;

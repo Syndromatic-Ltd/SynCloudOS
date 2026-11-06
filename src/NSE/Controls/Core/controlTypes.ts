@@ -51,7 +51,7 @@ export interface NSEControlValueProps<T> {
   readonly value?: T;
   readonly defaultValue?: T;
   readonly name?: string;
-  readonly disabled?: boolean;
+  readonly isEnabled?: boolean;
   readonly readOnly?: boolean;
   readonly required?: boolean;
   readonly validation?: NSEControlValidation;

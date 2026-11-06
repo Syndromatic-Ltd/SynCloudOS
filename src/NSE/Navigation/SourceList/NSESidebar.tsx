@@ -113,7 +113,7 @@ function SidebarRow({
     <NSEListItem
       className="nse-sidebar-row"
       selected={selected}
-      disabled={item.disabled}
+      isEnabled={!item.disabled}
       role="button"
       tabIndex={item.disabled ? -1 : 0}
       data-nse-sidebar-row="true"

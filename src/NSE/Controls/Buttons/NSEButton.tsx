@@ -322,7 +322,7 @@ function NSESwitchButtonCell(
     value: toCheckState(state),
     defaultValue: initial,
     fallback: false,
-    disabled,
+    isEnabled,
     readOnly,
     validation,
     onValueChange(next, phase) {

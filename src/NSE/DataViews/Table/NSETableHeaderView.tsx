@@ -40,10 +40,11 @@ export interface NSETableHeaderViewProps {
   readonly height: number;
   readonly width: number;
   readonly menu?: NSETableColumnMenu;
-  readonly disabled?: boolean;
+  readonly isEnabled?: boolean;
 }
 
-export function NSETableHeaderView({ columns, height, width, menu, disabled = false }: NSETableHeaderViewProps) {
+export function NSETableHeaderView({ columns, height, width, menu, isEnabled = true }: NSETableHeaderViewProps) {
+  const disabled = !isEnabled;
   const dragRef = useRef<{ id: string; start: number; width: number } | null>(null);
   return (
     <div role="row" data-nse-part="header" style={{ display: "flex", height: `${height}px`, inlineSize: `${width}px`, position: "sticky", insetBlockStart: 0 }}>

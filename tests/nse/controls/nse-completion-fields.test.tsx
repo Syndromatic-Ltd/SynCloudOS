@@ -93,7 +93,7 @@ describe("completion and field families", () => {
     const source = { query: async () => [], idForItem: (item: string) => item, labelForItem: (item: string) => item };
     const view = render(<OverlayHarness><NSEComboBox aria-label="Read-only city" dataSource={source} value={null} inputValue="London" readOnly allowsFreeform onInputValueChange={vi.fn()} onValueChange={value} /></OverlayHarness>);
     fireEvent.keyDown(screen.getByRole("combobox", { name: "Read-only city" }), { key: "Enter" });
-    view.rerender(<OverlayHarness><NSEComboBox aria-label="Disabled city" dataSource={source} value={null} inputValue="Paris" disabled allowsFreeform onInputValueChange={vi.fn()} onValueChange={value} /></OverlayHarness>);
+    view.rerender(<OverlayHarness><NSEComboBox aria-label="Disabled city" dataSource={source} value={null} inputValue="Paris" isEnabled={false} allowsFreeform onInputValueChange={vi.fn()} onValueChange={value} /></OverlayHarness>);
     fireEvent.keyDown(screen.getByRole("combobox", { name: "Disabled city" }), { key: "Enter" });
     expect(value).not.toHaveBeenCalled();
   });

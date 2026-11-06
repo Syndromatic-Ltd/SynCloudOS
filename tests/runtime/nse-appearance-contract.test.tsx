@@ -339,7 +339,7 @@ describe("NSE appearance composition", () => {
         value="standard"
         options={[
           { value: "standard", label: "Standard" },
-          { value: "locked", label: "Locked", disabled: true },
+          { value: "locked", label: "Locked", isEnabled: false },
         ]}
       />,
     );

@@ -27,7 +27,7 @@ import { classes, getControlSmoothSurfaceProps, useNSEControlFeedback } from "..
 
 export interface NSEListItemProps extends HTMLAttributes<HTMLDivElement> {
   selected?: boolean;
-  disabled?: boolean;
+  isEnabled?: boolean;
   /** Show the held (#555→#888) press highlight on tap. Default true. */
   tapHighlight?: boolean;
   leading?: ReactNode;
@@ -39,7 +39,7 @@ export interface NSEListItemProps extends HTMLAttributes<HTMLDivElement> {
 
 export const NSEListItem = forwardRef<HTMLDivElement, NSEListItemProps>(function NSEListItem({
   selected = false,
-  disabled = false,
+  isEnabled = true,
   tapHighlight = true,
   leading,
   trailing,
@@ -52,6 +52,7 @@ export const NSEListItem = forwardRef<HTMLDivElement, NSEListItemProps>(function
   style,
   ...props
 }: NSEListItemProps, ref) {
+  const disabled = !isEnabled;
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 
   const surfaceProps = getControlSmoothSurfaceProps(smoothSurface, className, style);

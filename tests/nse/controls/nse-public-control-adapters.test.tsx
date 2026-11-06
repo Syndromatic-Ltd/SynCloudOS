@@ -97,7 +97,7 @@ describe("canonical public control contracts", () => {
 
   it("keeps canonical date field visibility, bounds, gates, formatting, and host props", () => {
     const change = vi.fn();
-    const { container, rerender } = render(<NSEDateEntry data-consumer="civil" className="consumer-date" aria-label="Bounded date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 10 }} maximum={{ year: 2026, month: 6, day: 20 }}  disabled onValueChange={change}  hiddenFields={["month"]} locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/>);
+    const { container, rerender } = render(<NSEDateEntry data-consumer="civil" className="consumer-date" aria-label="Bounded date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 10 }} maximum={{ year: 2026, month: 6, day: 20 }}  isEnabled={false} onValueChange={change}  hiddenFields={["month"]} locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/>);
     expect(container.querySelector('.consumer-date[data-consumer="civil"]')).not.toBeNull();
     expect(screen.queryByRole("combobox", { name: "Month" })).toBeNull();
     expect((screen.getByRole("combobox", { name: "Day" }) as HTMLSelectElement).disabled).toBe(true);
@@ -115,7 +115,7 @@ describe("canonical public control contracts", () => {
     expect(Array.from(screen.getByRole("combobox", { name: "Minute" }).querySelectorAll("option")).map((option) => option.value)).toEqual(["0", "15", "30", "45"]);
     fireEvent.change(screen.getByRole("combobox", { name: "Minute" }), { target: { value: "45" } });
     expect(change).toHaveBeenLastCalledWith({ hour: 13, minute: 45, second: 0 }, "commit");
-    rerender(<NSETimeEntry aria-label="UK time" locale="en-GB" value={{ hour: 10, minute: 0, second: 0 }} hourCycle="h24" disabled onValueChange={change}  timeZone="Europe/London" editor="segments"/>);
+    rerender(<NSETimeEntry aria-label="UK time" locale="en-GB" value={{ hour: 10, minute: 0, second: 0 }} hourCycle="h24" isEnabled={false} onValueChange={change}  timeZone="Europe/London" editor="segments"/>);
     expect(container.querySelector('[data-hour-mode="24"]')).not.toBeNull();
     expect((screen.getByRole("combobox", { name: "Hour" }) as HTMLSelectElement).disabled).toBe(true);
     rerender(<NSETimeEntry aria-label="Read only" value={{ hour: 10, minute: 0, second: 0 }} readOnly onValueChange={change}  locale="en-GB" timeZone="Europe/London" editor="segments"/>);
