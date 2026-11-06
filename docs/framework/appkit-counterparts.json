@@ -187,7 +187,6 @@
     "NSEDrawer": "NSDrawer",
     "NSEEffectiveAttribute": "NSTextView.typingAttributes",
     "NSEEffectiveTextAttributeOptions": "NSTextView.typingAttributes",
-    "NSEFeedbackProvider": "NSHapticFeedbackManager",
     "NSEFontDescriptor": "NSFontDescriptor",
     "NSEFontFamily": "NSFontManager.availableFontFamilies",
     "NSEFontManager": "NSFontManager",
@@ -207,6 +206,10 @@
     "NSEGridView": "NSGridView",
     "NSEGridXPlacement": "NSGridCell.Placement",
     "NSEGridYPlacement": "NSGridCell.Placement",
+    "NSEHapticFeedbackManager": "NSHapticFeedbackManager",
+    "NSEHapticFeedbackPattern": "NSHapticFeedbackManager.FeedbackPattern",
+    "NSEHapticFeedbackPerformanceTime": "NSHapticFeedbackManager.PerformanceTime",
+    "NSEHapticFeedbackPerformer": "NSHapticFeedbackPerformer",
     "NSEHierarchyStack": {
       "none": "Phase 7 removes this UIKit-shaped navigation API.",
       "replacement": "NSPageController"

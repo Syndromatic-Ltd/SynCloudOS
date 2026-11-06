@@ -139,4 +139,5 @@ export type { NSEStackViewProps, NSEStackItemProps } from "../Layout/stackViewTy
 export type { NSELayoutGap, NSESpacing } from "../Layout/layoutSpacing";
 export { NSEGridRow, NSEGridView } from "../Layout/NSEGridView";
 export type { NSEGridColumn, NSEGridRowProps, NSEGridViewProps, NSEGridXPlacement, NSEGridYPlacement } from "../Layout/NSEGridView";
-export { NSEFeedbackProvider, useNSEFeedback } from "../Feedback";
+export { NSEHapticFeedbackManager } from "../Feedback/NSEHapticFeedbackManager";
+export type { NSEHapticFeedbackPattern, NSEHapticFeedbackPerformanceTime, NSEHapticFeedbackPerformer } from "../Feedback/NSEHapticFeedbackManager";

@@ -168,6 +168,7 @@ On a desktop (a fine pointer that hovers), choosing an item in any menu or pop-u
 | `NSEOpenPanel`, `NSESavePanel` | File panels. |
 | `NSEFontPanel`, `NSEMediaPanel` | The font panel and a media chooser. |
 | `toolTip` | Every NSE view and control takes a `toolTip`, as `NSView.toolTip` does; the host shows it. Transient notices go through the notification service (`useNotifications`). |
+| `NSEHapticFeedbackManager` | `NSHapticFeedbackManager`: `NSEHapticFeedbackManager.defaultPerformer.perform("alignment")` (`generic`, `alignment`, `levelChange`; `performanceTime` `default`, `now` or `drawCompleted`) for feedback from your own views. Controls perform their own. |
 
 ## Images and graphics
 
