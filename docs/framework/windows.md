@@ -191,6 +191,16 @@ this.dismiss(sheet);   // or, inside the sheet, this.dismiss()
 
 The sheet attaches to the window: it slides down from the top edge of the window's content, under the title bar, toolbar and accessory row, and is drawn on the alert panel. While it is attached the rest of the window takes no input (the toolbar, accessories and content are inert) and the close button and Close command are refused, as `performClose(_:)` refuses with a sheet attached. Its actions reach its presenter after itself. Its `title`, when set, is drawn above it, and `preferredContentSize.width` sets its width (capped to the window). Escape and the backdrop send the sheet `cancelOperation()` when it defines one, and otherwise dismiss it. The presenter owns its sheets: `dismiss` disposes the sheet, and disposing the presenter disposes them. `presentedViewControllers` and `presentingViewController` report the relationship.
 
+### Modal windows
+
+A view controller can also be presented as an application-modal window, centred over the application, after `NSViewController.presentAsModalWindow(_:)`. Use it for a panel that is not tied to one window's content, such as preferences or Jump To:
+
+```ts
+@action showPreferences() { this.presentAsModalWindow(PreferencesViewController); }
+```
+
+The window takes the controller's `title` as its title and `preferredContentSize.width` as its width; without one it sizes to its content. Atmo draws it on the modal plate. The rest of the application takes no input until it is dismissed. Escape sends the controller `cancelOperation()` when it defines one, and otherwise dismisses it. Its actions reach its presenter after itself, and the presenter owns it: `dismiss` disposes it.
+
 ### Popovers
 
 A popover is a view controller presented next to an element, after `NSViewController.present(_:asPopoverRelativeTo:of:preferredEdge:behavior:)`:

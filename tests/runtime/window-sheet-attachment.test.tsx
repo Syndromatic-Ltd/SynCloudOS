@@ -112,3 +112,49 @@ it("attaches an alert to its window as a sheet (NSAlert.beginSheetModal(for:))",
   await expect(response).resolves.toBe(NSEModalResponse.alertSecondButtonReturn);
   expect(screen.queryByRole("alertdialog")).toBeNull();
 });
+
+it("presents a view controller as a centred modal window (presentAsModalWindow)", async () => {
+  let content!: Content;
+  class Preferences extends NSEViewController {
+    override title = "Preferences";
+    cancelled = 0;
+    constructor() { super(); this.preferredContentSize = { width: 400, height: 0 }; }
+    cancelOperation() { this.cancelled += 1; this.dismiss(); }
+    static override view = function PreferencesView() {
+      return <NSEButton title="Use weeks" action="choose" actionPayload="weeks" />;
+    };
+  }
+  class Content extends NSEViewController {
+    @observable accessor chosen = "none";
+    constructor() { super(); content = this; }
+    @action choose(value: string) { this.chosen = value; }
+    static override view = function ContentView({ controller }: { readonly controller: Content }) {
+      return <button onClick={() => { controller.presentAsModalWindow(Preferences); }}>Preferences…</button>;
+    };
+  }
+  class MainWindow extends NSEWindowController {
+    constructor() { super(); this.contentViewController = new Content(); }
+  }
+  class Application extends NSEApplication { static override mainWindow = MainWindow; }
+  const host = createClassApplicationHost(Application, "com.example.modal-window");
+  hosts.push(host);
+  await host.launch();
+  host.mountWindows();
+  await act(async () => { await host.openMainWindow(); });
+  await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Preferences…" })); });
+
+  const panel = await screen.findByRole("dialog", { name: "Preferences" });
+  // Not attached to the window as a sheet: it is the application's modal plate.
+  expect(panel.closest(".nse-window-sheet-layer")).toBeNull();
+  expect(panel.closest(".nse-modal-window, .nse-overlay-popup")).not.toBeNull();
+  const presented = content.presentedViewControllers[0] as Preferences;
+  expect(presented.presentingViewController).toBe(content);
+  // Its actions reach its presenter after itself.
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Use weeks" })); });
+  expect(content.chosen).toBe("weeks");
+  // Escape sends cancelOperation, which dismisses (disposes) it.
+  await act(async () => { fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" }); });
+  expect(presented.cancelled).toBe(1);
+  expect(presented.isDisposed).toBe(true);
+  expect(content.presentedViewControllers).toEqual([]);
+});
