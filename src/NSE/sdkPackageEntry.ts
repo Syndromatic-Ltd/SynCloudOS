@@ -280,6 +280,10 @@ export {
   createAdaptiveCollectionLayout,
   createListCollectionLayout,
 } from "./DataViews/Collection/collectionLayout";
+export {
+  coverFlowLayoutAttributes,
+  type NSECoverFlowLayoutAttributes,
+} from "./DataViews/Collection/coverFlowLayout";
 export type {
   NSECollectionLayout,
   NSECollectionLayoutInput,
