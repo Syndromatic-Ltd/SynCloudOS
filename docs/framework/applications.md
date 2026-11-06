@@ -356,7 +356,7 @@ controller's responder ancestry through its portal, so focused editor actions ca
 parent controller's actions while the popup keeps its modal focus scope. Use an explicit parent
 only when you intend to change the popup's focus parent.
 
-`NSEFocusScope` also inherits the nearest mounted controller as its logical focus parent.
+A sheet, popover or modal window's focus scope also inherits the nearest mounted controller as its logical focus parent.
 A native input or action button inside a child controller's modal therefore resolves that
 child's actions before its ancestors. An explicit `parentResponderId` takes precedence;
 it still passes through the application's ordinary focus authority and cannot admit

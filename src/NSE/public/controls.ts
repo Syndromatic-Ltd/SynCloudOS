@@ -108,7 +108,7 @@ export type {
   NSEFontTextStyle,
   NSESwitchProps,
 } from "../Controls/Fields/NSEFields";
-export { NSEImageView, NSECroppableImage, NSERotatingImage, NSEScrollingImage, NSESizeableImage, NSEViewImage } from "../Controls/Images";
+export { NSEImageView, NSECroppableImage, NSEScrollingImage, NSESizeableImage, NSEViewImage } from "../Controls/Images";
 export type {
   NSECropParams,
   NSECroppableImageProps,
@@ -117,8 +117,6 @@ export type {
   NSEImageStringSourceLease,
   NSEImageStringSourcePort,
   NSEImageViewProps,
-  NSERotatingImageHandle,
-  NSERotatingImageProps,
   NSEScrollingImageProps,
   NSESizeableImageHandle,
   NSESizeableImageProps,
@@ -128,8 +126,8 @@ export type {
 
 export { NSEMenu, NSEPopUpButton } from "../Menus";
 export type { NSEMenuItem, NSEMenuOptions, NSEPopUpButtonItem, NSEPopUpButtonProps } from "../Menus";
-export { NSEPopup, NSEStandaloneControlHost } from "../Overlays";
-export type { NSEPopupProps, NSEStandaloneControlHostProps } from "../Overlays";
+export { NSEPopup } from "../Overlays";
+export type { NSEPopupProps } from "../Overlays";
 
 export { useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
 export type { DefaultPreventedEvent, NSEControlHapticRequest, NSEControlHapticResult } from "../Controls/Core/nseControlsShared";

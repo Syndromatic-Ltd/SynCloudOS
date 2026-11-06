@@ -77,7 +77,7 @@ The tables below give an overview. These pages document each component's props, 
 | [Stacks and grids](nse/stacks-and-grids.md) | `NSEStackView` and `NSEGridView` |
 | [Menus, toolbars and inspectors](nse/menus-toolbars-and-inspectors.md) | Choosing a menu control, responder provenance, configured toolbars, narrow inspectors, keep-mounted panes |
 
-Focused entries include `NSEDrawer`, `NSESlidingPanes` and `NSEStandaloneControlHost` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, `NSEPage` and `NSEPageController` in `nse/page` and `NSECoverFlow` in `nse/cover-flow`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
+Focused entries include `NSEDrawer` and `NSESlidingPanes` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, and `NSEPage` and `NSEPageController` in `nse/page`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
 
 ## Buttons
 
@@ -167,14 +167,14 @@ On a desktop (a fine pointer that hovers), choosing an item in any menu or pop-u
 | `presentAsPopover` | `NSEViewController.presentAsPopover(controller, { of, preferredEdge, behavior })` presents a view controller in a popover. See [Popovers](windows.md#popovers). |
 | `NSEOpenPanel`, `NSESavePanel` | File panels. |
 | `NSEFontPanel`, `NSEMediaPanel` | The font panel and a media chooser. |
-| `NSETooltipProvider` | Tooltips. Transient notices go through the notification service (`useNotifications`). |
+| `toolTip` | Every NSE view and control takes a `toolTip`, as `NSView.toolTip` does; the host shows it. Transient notices go through the notification service (`useNotifications`). |
 
 ## Images and graphics
 
 | Component | Purpose |
 | --- | --- |
 | `NSEImageView` | Displays an image with correct sizing and decoding. |
-| `NSECroppableImage`, `NSESizeableImage`, `NSERotatingImage`, `NSEScrollingImage` | Interactive image presentations. |
+| `NSECroppableImage`, `NSESizeableImage`, `NSEScrollingImage` | Interactive image presentations. |
 | `NSEGraphicsView` | A drawing surface for GraphicsFX content. |
 | `snapshotNSEView` | Draws a view your app owns into a PNG data URL, for a version card, a drag image or a thumbnail. Canvas content is left out. |
 | `NSEShadowView`, `NSEMetalSurface`, `NSESmoothSurface` | Shadows, brushed metal and smooth cornered surfaces. |

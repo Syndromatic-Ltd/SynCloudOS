@@ -27,7 +27,8 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
-import { NSEButton, NSECroppableImage, NSEImageView, NSERotatingImage, type NSERotatingImageHandle, NSEStandaloneControlHost, NSESearchField, NSESegmentedControl } from "../../src/NSE/public/controls";
+import { NSEButton, NSECroppableImage, NSEImageView, NSESearchField, NSESegmentedControl } from "../../src/NSE/public/controls";
+import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
 import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
 import { NSEDateEntry } from "../../src/NSE/DateTime/Pickers/dateEntry";
@@ -221,26 +222,6 @@ describe("NSE extended wrapper controls", () => {
 
     expect(container.querySelector(".nse-control-croppable-image-frame")).not.toBeNull();
     expect(screen.getByRole("button", { name: "Crop" })).not.toBeNull();
-  });
-
-  it("renders NSERotatingImage spinning by default with imageSrc, and stops via the running prop", () => {
-    // RotatingImage: imageSrc painted as background; spins while running; start()/stop() toggle it.
-    const ref = React.createRef<NSERotatingImageHandle>();
-    const { container, rerender } = renderWithAppearance(
-      <NSERotatingImage ref={ref} imageSrc="/spin.png" size={48} />
-    );
-    const el = container.querySelector(".nse-control-rotating-image") as HTMLElement;
-
-    expect(el).not.toBeNull();
-    expect(el.getAttribute("data-running")).toBe("true");
-    expect(el.style.backgroundImage).toContain("/spin.png");
-    expect(typeof ref.current?.start).toBe("function");
-    expect(typeof ref.current?.stop).toBe("function");
-
-    rerender(
-        <NSERotatingImage ref={ref} imageSrc="/spin.png" size={48} running={false} />
-      );
-    expect(el.getAttribute("data-running")).toBe("false");
   });
 
   it("gives NSESearchField an italic prompt, a clear button only while it has text, and an optional magnifier", () => {
