@@ -19,14 +19,14 @@
  */
 
 /** Supported SynWare SDK NSE appearance surface. Concrete themes are explicit subpaths. */
+export { NSEAppearance } from "../Appearance/NSEAppearance";
+export type { NSEAppearanceOptions } from "../Appearance/NSEAppearance";
 export {
-  NSEAppearanceProvider,
   useNSEAppearance,
   useNSEAppearanceProjection,
   useNSEAppearanceSlot,
   resolveNSEAppearanceSlot,
 } from "../Appearance";
-export type { NSEAppearanceProviderProps } from "../Appearance";
 export {
   defineNSEAppearance,
 } from "../Appearance";
