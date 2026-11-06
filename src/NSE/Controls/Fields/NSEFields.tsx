@@ -388,7 +388,8 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
 export interface NSEInputBoxProps extends HTMLAttributes<HTMLDivElement> {
   label?: ReactNode;
   invalid?: boolean;
-  disabled?: boolean;
+  /** NSControl.isEnabled (default true). */
+  isEnabled?: boolean;
   /** Render with the focused appearance even when nothing inside has focus. */
   alwaysLooksFocused?: boolean;
 }
@@ -404,7 +405,7 @@ child is focused, or always when `alwaysLooksFocused` is set.
 export function NSEInputBox({
   label,
   invalid = false,
-  disabled = false,
+  isEnabled = true,
   alwaysLooksFocused = false,
   className = "",
   children,
@@ -413,10 +414,10 @@ export function NSEInputBox({
   return (
     <div
       {...props}
-      className={classes("nse-control-input-box", disabled && "is-disabled", className)}
+      className={classes("nse-control-input-box", !isEnabled && "is-disabled", className)}
       data-invalid={invalid ? "true" : "false"}
       data-always-focused={alwaysLooksFocused ? "true" : "false"}
-      aria-disabled={disabled || undefined}
+      aria-disabled={!isEnabled || undefined}
     >
       {label ? <span className="nse-control-field-label">{label}</span> : null}
       <div className="nse-control-field-frame nse-control-input-box-frame">{children}</div>
