@@ -57,7 +57,7 @@ async function mountModal(explicitParent = false) {
         <button onClick={() => { parent.shown = true; }}>Open templates</button>
         <output aria-label="Parent choice">{parent.selected}</output>
         {parent.shown && <ParentResponder.Provider value={explicitParent ? hierarchy.responderId ?? undefined : undefined}>
-          <NSEViewControllerView controller={parent.child} />
+          <parent.child.view />
         </ParentResponder.Provider>}
       </>;
     };

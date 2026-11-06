@@ -59,8 +59,8 @@ a root with `createAFXLayer(surface, scheduler)` from `sdk/animation-host`.
 
 The native view's backing layer keeps the managed outlet's CSS position and dimensions. Its bounds
 follow the outlet's layout and resize automatically, including sublayer autoresizing masks; opacity
-and transforms still run through AnimationFX. Size the outlet with `NSEViewControllerView`'s
-`className`, rather than assigning a frame to the backing layer. Unmounting the view disposes its
+and transforms still run through AnimationFX. Size the outlet with the `className` its parent
+passes to `<child.view />`, rather than assigning a frame to the backing layer. Unmounting the view disposes its
 backing layer, sublayers and resize observation. Explicit `bindLayer(element)` retains layer-owned
 frame geometry by default.
 

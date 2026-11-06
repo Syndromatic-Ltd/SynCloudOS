@@ -81,7 +81,7 @@ See [Applications](applications.md) for the complete class tree and ownership ru
 | `SCOS.menus.runtime` | Scoped NSE menu runtime for controller construction; `new NSEMenu({ owner: this, identifier, title, items, runtime: SCOS.menus.runtime })`. |
 | `NSEViewController.traitCollection` | `{ reducedMotion, presentation }`; presentation is `SynCloudOSPresentationTraits` or `null`. Override `traitCollectionDidChange(previous)` to react. |
 | `NSEViewController.viewWillLayout()` / `viewDidLayout()` | Called after DOM commits and on frame resize. `this.view.element.getBoundingClientRect()` reads the committed view. |
-| `NSEViewControllerView({ controller, className? })` | Renders one managed outlet. `className` gives its parent CSS layout control; child outlets impose no inline display mode or dimensions. |
+| `controller.view` (`<child.view className? />`) | `NSViewController.view`: renders the controller's managed outlet. `className` gives its parent CSS layout control; child outlets impose no inline display mode or dimensions. |
 | `NSEApplication.openWindow(Controller, options?)` | Returns `Promise<Controller>`; options include title, width, height, documentId, restorationKey, mobilePolicy and explicit/centred/cascaded preferredBounds. |
 | `SCOS.commands.subscribePresentation(listener)` | Returns a disposer; invalidates command presentation after registry, responder or focus changes and stops with the app scope. |
 | `SCOS.commands.createPayload("key", value, ...)` / `.createPayloadArray(value, ...)` | Construct immutable command records and arrays from primitives and nested values built by the same mounted scope. Use explicit known fields; arbitrary raw nested objects are rejected. |
