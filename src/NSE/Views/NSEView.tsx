@@ -18,7 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
+import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode, type Ref } from "react";
+import { NSEAppearanceProvider, useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
+import type { NSEAppearance } from "../Appearance/NSEAppearance";
 import { useOptionalNSEOverlayProvider } from "../Overlays";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { NSEMenuView } from "../Menus/NSEMenuView";
@@ -39,21 +41,51 @@ export interface NSEViewProps extends HTMLAttributes<HTMLDivElement> {
   /** How long a touch must rest before the menu opens. */
   readonly longPressDelayMs?: number;
   readonly direction?: "ltr" | "rtl";
+  /**
+   * NSView.appearance: how this view and its subviews are drawn. Without one they take the
+   * appearance of the view they are in (NSView.effectiveAppearance).
+   */
+  readonly appearance?: NSEAppearance;
+  readonly ref?: Ref<HTMLDivElement>;
 }
 
 /** NSView: a region of a window, with the contextual menu and tooltip every view can carry. */
-export function NSEView({ menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", children, ...htmlAttributes }: NSEViewProps) {
-  if (!menu) return <div title={toolTip} {...htmlAttributes}>{children}</div>;
+export function NSEView({ menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", appearance, children, ...htmlAttributes }: NSEViewProps) {
+  const content = appearance ? <NSEViewAppearance appearance={appearance}>{children}</NSEViewAppearance> : children;
+  if (!menu) return <div title={toolTip} {...htmlAttributes}>{content}</div>;
   return (
     <NSEMenuHostView menu={menu} toolTip={toolTip} menuOverlay={menuOverlay} longPressDelayMs={longPressDelayMs} direction={direction} {...htmlAttributes}>
-      {children}
+      {content}
     </NSEMenuHostView>
   );
 }
 
-function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, direction, children, className, ...htmlAttributes }: NSEViewProps & { readonly menu: NSEMenu }) {
+/** The appearance boundary a view with its own appearance draws its subviews in. */
+function NSEViewAppearance({ appearance, children }: { readonly appearance: NSEAppearance; readonly children?: ReactNode }) {
+  const inherited = useNSEAppearance();
+  const scheme = appearance.name === "darkAqua" ? "dark" : "light";
+  return (
+    <NSEAppearanceProvider
+      appearance={appearance.theme ?? inherited.appearance}
+      colourScheme={scheme}
+      resolvedColourScheme={scheme}
+      {...(appearance.chrome ? { chrome: appearance.chrome } : {})}
+      {...(appearance.contrast ? { contrast: appearance.contrast } : {})}
+      {...(appearance.transparency ? { transparency: appearance.transparency } : {})}
+    >
+      {children}
+    </NSEAppearanceProvider>
+  );
+}
+
+function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, direction, children, className, ref, ...htmlAttributes }: NSEViewProps & { readonly menu: NSEMenu }) {
   const [open, setOpen] = useState(false);
   const hostRef = useRef<HTMLDivElement>(null);
+  const attachHost = useCallback((element: HTMLDivElement | null) => {
+    hostRef.current = element;
+    if (typeof ref === "function") ref(element);
+    else if (ref) ref.current = element;
+  }, [ref]);
   const longPressRef = useRef<unknown | null>(null);
   const instanceId = useId();
   const provider = useOptionalNSEOverlayProvider();
@@ -98,7 +130,7 @@ function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, directi
     <div
       {...htmlAttributes}
       id={viewId}
-      ref={hostRef}
+      ref={attachHost}
       title={toolTip}
       className={["nse-context-menu-host", className].filter(Boolean).join(" ")}
       tabIndex={htmlAttributes.tabIndex ?? 0}

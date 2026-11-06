@@ -55,11 +55,11 @@
     "NSEAnimationEnvironment": "NSAnimationContext",
     "NSEAnimationEnvironmentProvider": "NSAnimationContext",
     "NSEAnyWindowController": "NSWindowController",
+    "NSEAppearance": "NSAppearance",
     "NSEAppearanceDataAttributes": "NSAppearance",
     "NSEAppearanceDefinition": "NSAppearance",
     "NSEAppearanceDefinitionInput": "NSAppearance",
     "NSEAppearanceName": "NSAppearance.Name",
-    "NSEAppearanceProvider": "NSAppearance",
     "NSEAppearanceRecipeDefinition": "NSAppearance",
     "NSEAppearanceSelection": "NSAppearance",
     "NSEAppearanceServicePort": {

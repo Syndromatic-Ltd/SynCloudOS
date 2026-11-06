@@ -101,7 +101,6 @@ export type { NSEControlValidation, NSEControlInteractionPhase, NSEControlValueP
 export { NSETableCellView } from "./DataViews/Table/NSETableCellView";
 
 export {
-  NSEAppearanceProvider,
   defineNSEAppearance,
   useNSEAppearanceProjection,
   useNSEAppearance,
@@ -109,7 +108,6 @@ export {
   resolveNSEAppearanceSlot,
 } from "./Appearance";
 export type {
-  NSEAppearanceProviderProps,
   NSEAppearanceDataAttributes,
   NSEAppearanceDefinition,
   NSEAppearanceDefinitionInput,
@@ -878,3 +876,5 @@ export type { NSEActionReference, NSEActionPayloadCheck } from "./Controls/Core/
 export type { NSEViewControllerFX, NSEViewControllerFXClients } from "./Application";
 export { NSEHapticFeedbackManager } from "./Feedback/NSEHapticFeedbackManager";
 export type { NSEHapticFeedbackPattern, NSEHapticFeedbackPerformanceTime, NSEHapticFeedbackPerformer } from "./Feedback/NSEHapticFeedbackManager";
+export { NSEAppearance } from "./Appearance/NSEAppearance";
+export type { NSEAppearanceOptions } from "./Appearance/NSEAppearance";
