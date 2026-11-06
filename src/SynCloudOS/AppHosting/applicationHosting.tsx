@@ -37,7 +37,7 @@ import { useEnclosingFocusScopeId } from "../../SynCloudOSReact/focusScopeContex
 import { useNSEAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
 import type { NSEAnyWindowController, NSEWindowMount } from "../../NSE/applicationHostInterop";
 import { nseSetKeyWindowModalPresenter, nseWindowInternals } from "../../NSE/applicationHostInterop";
-import { nseAttachView, nsePopoverPositioning, nseUpdateTraits, nseUpdateViewActivity, validateNSEViewControllerClass, type NSEViewController, type NSEViewControllerClass } from "../../NSE/applicationHostInterop";
+import { nseAttachView, nsePopoverPositioning, nsePresentationStyle, nseUpdateTraits, nseUpdateViewActivity, validateNSEViewControllerClass, type NSEViewController, type NSEViewControllerClass } from "../../NSE/applicationHostInterop";
 import { useObserve } from "../../NSE/applicationHostInterop";
 import { observableVersion, type NSEObservable } from "../../NSE/applicationHostInterop";
 import { nseDisposeFor } from "../../NSE/applicationHostInterop";
@@ -47,7 +47,7 @@ import { useResponderHierarchy } from "../../SynCloudOSReact";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
 import type { SynWareRuntime } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
-import { NSEAlertBackdrop, NSEAlertSurface, NSEFocusScope, NSEPopover } from "../../NSE/hostComposition";
+import { NSEAlertBackdrop, NSEAlertSurface, NSEFocusScope, NSEPopover, NSEPopup } from "../../NSE/hostComposition";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
@@ -278,9 +278,12 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
       <NSEViewControllerRendererProvider value={NSEViewControllerView}>
         <View controller={controller} />
       </NSEViewControllerRendererProvider>
-      {controller.presentedViewControllers.map(presented => presented[nsePopoverPositioning]
-        ? <NSEPresentedPopover key={sheetKey(presented)} controller={presented} />
-        : <NSEPresentedSheet key={sheetKey(presented)} controller={presented} />)}
+      {controller.presentedViewControllers.map(presented => {
+        const style = presented[nsePresentationStyle];
+        if (style === "popover") return <NSEPresentedPopover key={sheetKey(presented)} controller={presented} />;
+        if (style === "modalWindow") return <NSEPresentedModalWindow key={sheetKey(presented)} controller={presented} />;
+        return <NSEPresentedSheet key={sheetKey(presented)} controller={presented} />;
+      })}
     </div>
   );
   return <NSEControllerResponder target={controller} kind="view" host="element">{frame}</NSEControllerResponder>;
@@ -317,6 +320,27 @@ function NSEPresentedPopover({ controller }: { readonly controller: NSEViewContr
     }}>
     <NSEViewControllerView controller={controller} />
   </NSEPopover>;
+}
+
+/**
+ * A view controller presented as a modal window (presentAsModalWindow): centred over the application on
+ * Atmo's modal plate, with its title above it. Escape sends it `cancelOperation()` when it has one;
+ * otherwise it is dismissed.
+ */
+function NSEPresentedModalWindow({ controller }: { readonly controller: NSEViewController<unknown> }) {
+  useObserve(controller);
+  const size = controller.preferredContentSize;
+  const cancel = () => {
+    const operation = (controller as { cancelOperation?: () => unknown }).cancelOperation;
+    if (typeof operation === "function") void operation.call(controller);
+    else controller.dismiss();
+  };
+  return <NSEPopup id={`nse-modal-window:${sheetKey(controller)}`} open modal className="nse-modal-window"
+    {...(controller.title ? { title: controller.title } : {})}
+    style={size ? { width: `min(${size.width}px, calc(100vw - 24px))`, maxHeight: "calc(100vh - 40px)" } : undefined}
+    onOpenChange={(open) => { if (!open) cancel(); }}>
+    <NSEViewControllerView controller={controller} />
+  </NSEPopup>;
 }
 
 const sheetKeys = new WeakMap<object, string>();

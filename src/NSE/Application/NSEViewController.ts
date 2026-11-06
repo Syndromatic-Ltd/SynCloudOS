@@ -61,6 +61,10 @@ export interface NSEPopoverPositioning {
 
 /** @internal */
 export const nsePopoverPositioning: unique symbol = Symbol("nse.popoverPositioning");
+/** @internal How a presented view controller is shown: as a sheet, in a popover, or as a modal window. */
+export const nsePresentationStyle: unique symbol = Symbol("nse.presentationStyle");
+/** @internal */
+export type NSEPresentationStyle = "sheet" | "popover" | "modalWindow";
 
 export type NSEViewControllerOptions = NSEControllerOwnershipOptions & {
   /** The localised title of the managed view (NSViewController.title), as containers show it. */
@@ -178,6 +182,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #window: NSEWindow | null = null;
   #presenting: NSEViewController<unknown> | null = null;
   #popover: NSEPopoverPositioning | null = null;
+  #presentationStyle: NSEPresentationStyle | null = null;
   readonly #presented: NSEViewController<unknown>[] = [];
   #preferredContentSize: Readonly<{ width: number; height: number }> | null = null;
   #loaded = false;
@@ -375,11 +380,14 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     this.notifyObservers();
   }
 
-  /** The view controllers this one presents, as sheets and popovers (NSViewController.presentedViewControllers). */
+  /** The view controllers this one presents, as sheets, popovers and modal windows (NSViewController.presentedViewControllers). */
   get presentedViewControllers(): readonly NSEViewController<unknown>[] { return Object.freeze([...this.#presented]); }
 
   /** @internal How a presented controller is positioned when it is a popover; `null` for a sheet. */
   get [nsePopoverPositioning](): NSEPopoverPositioning | null { return this.#popover; }
+
+  /** @internal How this controller is presented, or `null` when it is not presented. */
+  get [nsePresentationStyle](): NSEPresentationStyle | null { return this.#presentationStyle; }
 
   /** The view controller presenting this one (NSViewController.presentingViewController), or `null`. */
   get presentingViewController(): NSEViewController<unknown> | null { return this.#presenting; }
@@ -394,7 +402,21 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   /** Creates the view controller in this controller's ownership, as `addChild` does, and presents it as a sheet. */
   presentAsSheet<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(Controller: new (...args: TArgs) => TSheet, ...args: TArgs): TSheet;
   presentAsSheet<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(viewController: TSheet | (new (...args: TArgs) => TSheet), ...args: TArgs): TSheet {
-    return this.#present("presentAsSheet", null, viewController, args);
+    return this.#present("presentAsSheet", "sheet", null, viewController, args);
+  }
+
+  /**
+   * Presents `viewController` as an application-modal window, centred over the application
+   * (NSViewController.presentAsModalWindow(_:)). It takes the controller's `title` as its title and
+   * `preferredContentSize.width` as its width; the rest of the application takes no input until it is
+   * dismissed. Escape sends it `cancelOperation()` when it has one, and otherwise dismisses it. The
+   * presenter owns it: dismissing it disposes it.
+   */
+  presentAsModalWindow<TWindow extends NSEViewController<unknown>>(viewController: TWindow): TWindow;
+  /** Creates the view controller in this controller's ownership, as `addChild` does, and presents it as a modal window. */
+  presentAsModalWindow<TWindow extends NSEViewController<unknown>, TArgs extends unknown[]>(Controller: new (...args: TArgs) => TWindow, ...args: TArgs): TWindow;
+  presentAsModalWindow<TWindow extends NSEViewController<unknown>, TArgs extends unknown[]>(viewController: TWindow | (new (...args: TArgs) => TWindow), ...args: TArgs): TWindow {
+    return this.#present("presentAsModalWindow", "modalWindow", null, viewController, args);
   }
 
   /**
@@ -415,10 +437,10 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     if (edge !== "minX" && edge !== "maxX" && edge !== "minY" && edge !== "maxY") throw new TypeError("A popover's preferredEdge is minX, maxX, minY or maxY.");
     const behavior = positioning.behavior ?? "transient";
     if (behavior !== "transient" && behavior !== "semitransient" && behavior !== "applicationDefined") throw new TypeError("A popover's behavior is transient, semitransient or applicationDefined.");
-    return this.#present("presentAsPopover", Object.freeze({ of: positioning.of, preferredEdge: edge, behavior }), viewController, args);
+    return this.#present("presentAsPopover", "popover", Object.freeze({ of: positioning.of, preferredEdge: edge, behavior }), viewController, args);
   }
 
-  #present<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(operation: string, popover: NSEPopoverPositioning | null, viewController: TSheet | (new (...args: TArgs) => TSheet), args: TArgs): TSheet {
+  #present<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(operation: string, style: NSEPresentationStyle, popover: NSEPopoverPositioning | null, viewController: TSheet | (new (...args: TArgs) => TSheet), args: TArgs): TSheet {
     this.#assertLive(operation, "call");
     const instance = typeof viewController === "function"
       ? instantiateInOwnerScope(new NSEOwnershipScope("NSEViewController", viewController.name), () => {
@@ -437,6 +459,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     sheet.#lifetime.adoptBy(sheet, this.#lifetime.scope);
     sheet.#presenting = this as NSEViewController<unknown>;
     sheet.#popover = popover;
+    sheet.#presentationStyle = style;
     this.#presented.push(sheet);
     if (typeof viewController === "function" && !hasNSEConstructionOwner() && getNSEAuthoringContext(this)) {
       try { finalizeNSEAuthoringOwner(sheet); }
