@@ -19,7 +19,8 @@
  */
 
 import { useEffect, useId, useReducer, useRef, useState } from "react";
-import { NSEPopover, useOptionalNSEOverlayProvider } from "../../Overlays";
+import { useOptionalNSEOverlayProvider } from "../../Overlays";
+import { NSEPopover } from "../../Overlays/NSEPopover";
 import { NSEGraphicalCalendar } from "../Calendar/graphicalCalendar";
 import type { NSECalendarSelection } from "../Calendar/calendarTypes";
 import { comparePlainDates, validateDateRange } from "../calendarArithmetic";

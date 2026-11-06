@@ -143,4 +143,21 @@ describe("NSEAlert", () => {
     expect(second.isDisposed).toBe(true);
     expect(() => { second.preferredContentSize = { width: -1, height: 0 }; }).toThrow(TypeError);
   });
+
+  it("presents a view controller in a popover pointing at an element", () => {
+    const { controller } = mountedWindow(async () => "0");
+    class Content extends NSEViewController {}
+    class Root extends NSEViewController {}
+    const root = new Root();
+    controller.contentViewController = root;
+    const anchor = { nodeType: 1 } as unknown as HTMLElement;
+    const popover = root.presentAsPopover(Content, { of: anchor, behavior: "semitransient" });
+    expect(root.presentedViewControllers).toEqual([popover]);
+    expect(popover.view.window).toBe(controller.window);
+    expect(() => root.presentAsPopover(Content, { of: null as never })).toThrow(TypeError);
+    expect(() => root.presentAsPopover(Content, { of: anchor, preferredEdge: "top" as never })).toThrow(TypeError);
+    root.dismiss(popover);
+    expect(popover.isDisposed).toBe(true);
+    controller.dispose();
+  });
 });

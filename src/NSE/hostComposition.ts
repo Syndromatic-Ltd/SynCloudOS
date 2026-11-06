@@ -41,3 +41,4 @@ export type { SourceListFrameContextValue } from "./Navigation/SourceList/source
 export { NSEAlertBackdrop } from "./SystemUI";
 export { nseTopBarHeightCssValue } from "./Windows/Chrome/nseTopBarStyles";
 export { NSEFocusScope } from "./Focus";
+export { NSEPopover } from "./Overlays/NSEPopover";

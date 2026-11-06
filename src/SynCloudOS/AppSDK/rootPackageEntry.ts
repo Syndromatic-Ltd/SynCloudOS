@@ -19,7 +19,7 @@ export type { NSETaskLifetime, NSETaskSettlement, NSETaskContext, NSETaskRun, NS
 export { NSEActionScopeProvider } from "../../NSE/sdkPackageEntry";
 export type { NSEActionScopeProviderProps } from "../../NSE/sdkPackageEntry";
 export { NSEApplication, NSEWindowController, NSEViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "../../NSE/sdkPackageEntry";
-export type { NSEAlertStyle } from "../../NSE/sdkPackageEntry";
+export type { NSEAlertStyle, NSEPopoverPositioning } from "../../NSE/sdkPackageEntry";
 export { outlet } from "../../NSE/sdkPackageEntry";
 export type { NSEViewOutlet, NSEOutletElement, NSEOutletOptions } from "../../NSE/sdkPackageEntry";
 export type { NSEManagedAFXDisplayLink, NSEManagedAFXDisplayLinkOptions, NSEManagedAFXFrame, NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "../../NSE/sdkPackageEntry";

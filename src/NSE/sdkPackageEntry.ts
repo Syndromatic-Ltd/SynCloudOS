@@ -701,12 +701,6 @@ export {
   NSETabView,
 } from "./Navigation/NSETabView";
 export {
-  NSEPopover,
-} from "./Overlays/NSEPopover";
-export type {
-  NSEPopoverProps,
-} from "./Overlays/NSEPopover";
-export {
   NSEPopup,
 } from "./Overlays/NSEPopup";
 export { useNSEOverlayProvider } from "./Overlays/NSEOverlayProvider";
@@ -897,7 +891,7 @@ export type {
 export { NSEObject, observable, observe, useObserve } from "./Objects";
 export type { NSEObservable } from "./Objects";
 export { NSEApplication, NSEWindowController, NSEViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "./Application";
-export type { NSEAlertStyle } from "./Application";
+export type { NSEAlertStyle, NSEPopoverPositioning } from "./Application";
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,
   NSETraitCollection,

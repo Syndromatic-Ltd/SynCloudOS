@@ -191,3 +191,20 @@ this.dismiss(sheet);   // or, inside the sheet, this.dismiss()
 
 The sheet is modal to the window and draws on the alert panel over its presenter's view. Its actions reach its presenter after itself. Its `title`, when set, is drawn above it, and `preferredContentSize.width` sets its width (capped to the window). Escape and the backdrop send the sheet `cancelOperation()` when it defines one, and otherwise dismiss it. The presenter owns its sheets: `dismiss` disposes the sheet, and disposing the presenter disposes them. `presentedViewControllers` and `presentingViewController` report the relationship.
 
+### Popovers
+
+A popover is a view controller presented next to an element, after `NSViewController.present(_:asPopoverRelativeTo:of:preferredEdge:behavior:)`:
+
+```ts
+// In a button's click handler:
+const popover = this.presentAsPopover(PublishOptionsViewController, { of: event.currentTarget }, this);
+```
+
+| `NSEPopoverPositioning` | Meaning |
+| --- | --- |
+| `of` | The element the popover points at (NSPopover's positioning view). Required. |
+| `preferredEdge` | The edge of `of` it opens from: `"maxY"` (below, the default), `"minY"` (above), `"minX"` or `"maxX"`. It moves to the other side when there is no room. |
+| `behavior` | `"transient"` (the default) closes on Escape or a click elsewhere; `"semitransient"` closes on Escape only; `"applicationDefined"` closes only when dismissed. |
+
+The popover takes the controller's `title` as its accessible name and `preferredContentSize` as its size. On a compact display it is presented as a sheet. It closes when `of` leaves the document. Closing dismisses (disposes) the controller, so a controller that tracks whether its popover is open does so in `didDispose`. To toggle a popover from its button, dismiss the open one rather than presenting a second.
+

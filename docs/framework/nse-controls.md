@@ -162,7 +162,7 @@ Data views render collections owned by a controller. They are virtualised, so a 
 | --- | --- |
 | `NSEAlert` | An alert object (`NSAlert`) presented as a sheet on a window. See [Alerts and sheets](windows.md#alerts-and-sheets). |
 | `NSEDialog`, `NSEModalDialog`, `NSEConfirmDialog` | Dialog surfaces for content outside a window, with focus trapping and inert backgrounds. Inside a window, present a view controller as a sheet instead. |
-| `NSEPopover` | An anchored transient surface. |
+| `presentAsPopover` | `NSEViewController.presentAsPopover(controller, { of, preferredEdge, behavior })` presents a view controller in a popover. See [Popovers](windows.md#popovers). |
 | `NSEOpenPanel`, `NSESavePanel` | File panels. |
 | `NSEFontPanel`, `NSEMediaPanel` | The font panel and a media chooser. |
 | `NSETooltipProvider` | Tooltips. Transient notices go through the notification service (`useNotifications`). |
