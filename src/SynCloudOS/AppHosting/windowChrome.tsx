@@ -30,6 +30,7 @@ import { SynWareRuntimeContext } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
 import { controllerServicesFor } from "../AppSDK/controllerServices";
 import "./window-chrome.css";
+import { NSEUserDefaults } from "../../NSE/Controllers/NSEUserDefaults";
 
 const noSubscription = () => () => {};
 
@@ -166,11 +167,11 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
       owner: controller,
       applicationId: appRuntime.app.bundleIdentifier,
       runtime: controllerServicesFor(context).menus.runtime,
-      preferences: {
-        read: (key) => persistence.getPreference<unknown>(key, null),
-        write: (key, value) => { persistence.setPreference(key, value); },
+      preferences: new NSEUserDefaults({
+        get: (key) => persistence.getPreference<unknown>(key, null),
+        set: (key, value) => { persistence.setPreference(key, value); },
         remove: (key) => persistence.removePreference(key),
-      },
+      }),
     });
     setAttached(true);
     return () => {

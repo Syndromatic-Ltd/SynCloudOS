@@ -6,6 +6,7 @@ import { finalizeNSEAuthoringOwner } from "../../src/NSE/Application/authoringLi
 import { attachNSEAuthoringContext, type NSEAuthoringContext } from "../../src/NSE/Application/authoringContext";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
 import type { NSEViewController } from "../../src/NSE/Application/NSEViewController";
+import { defaultsFrom } from "../fixtures/userDefaults";
 
 const owners: NSEViewController<unknown>[] = [];
 afterEach(() => { for (const owner of owners.splice(0)) owner.dispose(); });
@@ -64,7 +65,7 @@ describe("navigation restoration descriptors", () => {
     const disconnected = new NSETabBarController({ owner: nseUnowned, id: "no-context", destinations, restoration: createNSETabSelectionRestoration({ key: "navigation" }) }); owners.push(disconnected);
     expect(() => finalizeNSEAuthoringOwner(disconnected)).toThrow(/context|adapter/i);
     let stored: unknown = ["syncloudos:nse-preferences:v1", 2, "library"]; const write = vi.fn((_key, value) => { stored = value; });
-    const tabs = new NSETabBarController({ owner: nseUnowned, id: "adapter", destinations, restoration: createNSETabSelectionRestoration({ key: "navigation", preferences: { read: () => stored, write, remove() {} } }) }); owners.push(tabs);
+    const tabs = new NSETabBarController({ owner: nseUnowned, id: "adapter", destinations, restoration: createNSETabSelectionRestoration({ key: "navigation", defaults: defaultsFrom({ read: () => stored, write, remove() {} }) }) }); owners.push(tabs);
     finalizeNSEAuthoringOwner(tabs); await tabs.select("search"); expect(write).not.toHaveBeenCalled(); expect(stored).toEqual(["syncloudos:nse-preferences:v1", 2, "library"]);
   });
 });

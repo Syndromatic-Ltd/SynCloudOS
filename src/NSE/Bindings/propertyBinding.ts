@@ -1,5 +1,5 @@
 import { createNSEBinding } from './createNSEBinding';
-import { PreferencePersistenceError } from '../Controllers/NSEPreferencesController';
+import { PreferencePersistenceError } from '../Controllers/NSEUserDefaultsController';
 import { getNSEObjectLifetime } from '../Application/objectLifetime';
 import type { NSEBinding, NSEBindingOwner, NSEBindingSnapshot } from './bindingTypes';
 

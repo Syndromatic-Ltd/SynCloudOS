@@ -144,14 +144,13 @@ export type {
   ArrayControllerSelectionOptions,
 } from "./Controllers/NSEArrayController";
 export {
-  NSEPreferencesController,
+  NSEUserDefaultsController,
   PreferenceValidationError,
   PreferencePersistenceError,
-} from "./Controllers/NSEPreferencesController";
-export type {
-  PreferencesAdapter,
-  PreferencesControllerOptions,
-} from "./Controllers/NSEPreferencesController";
+} from "./Controllers/NSEUserDefaultsController";
+export type { NSEUserDefaultsControllerOptions } from "./Controllers/NSEUserDefaultsController";
+export { NSEUserDefaults } from "./Controllers/NSEUserDefaults";
+export type { NSEUserDefaultsStore } from "./Controllers/NSEUserDefaults";
 export {
   NSETreeController,
 } from "./Controllers/NSETreeController";

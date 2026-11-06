@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEPreferencesController, PreferencePersistenceError, type NSEControllerOwnership } from "../../Controllers";
+import { NSEUserDefaults, NSEUserDefaultsController, PreferencePersistenceError, type NSEControllerOwnership } from "../../Controllers";
 import { GFXColour } from "../../../FX/GraphicsFX/public";
 
 export interface NSEColourPanelPreferences {
@@ -26,7 +26,7 @@ export interface NSEColourPanelPreferences {
   readonly swatches: readonly string[];
 }
 
-export type NSEColourPanelPreferencesController = NSEPreferencesController<NSEColourPanelPreferences>;
+export type NSEColourPanelPreferencesController = NSEUserDefaultsController<NSEColourPanelPreferences>;
 
 export interface NSEColourPanelPreferencePersistence {
   getPreference<T>(key: string, fallback: T): T;
@@ -48,7 +48,7 @@ export function createNSEColourPanelPreferences(
   namespace = "nse.colour-panel.palette",
   ownership: NSEControllerOwnership = {},
 ): NSEColourPanelPreferencesController {
-  return new NSEPreferencesController<NSEColourPanelPreferences>({
+  return new NSEUserDefaultsController<NSEColourPanelPreferences>({
     ...ownership,
     namespace,
     schema: {
@@ -60,12 +60,12 @@ export function createNSEColourPanelPreferences(
       },
       migrations: Object.freeze([]),
     },
-    adapter: {
-      read: (key) => persistence.getPreference<unknown>(key, null),
-      write: (key, value) => {
+    defaults: new NSEUserDefaults({
+      get: (key) => persistence.getPreference<unknown>(key, null),
+      set: (key, value) => {
         if (!persistence.setPreference(key, value)) throw new PreferencePersistenceError(`Could not persist colour panel preferences for ${key}.`);
       },
       remove: (key) => persistence.removePreference(key),
-    },
+    }),
   });
 }

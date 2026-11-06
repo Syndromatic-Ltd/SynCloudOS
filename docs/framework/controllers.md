@@ -207,25 +207,22 @@ export function removeNotes(controller: NSEArrayController<{ id: string }, strin
 
 `commitEditing()` returns `{ status: "committed" }`, `{ status: "invalid", issues }` or `{ status: "not-editing" }`. A commit publishes one immutable snapshot and registers at most one undo action. `discardEditing()` restores the committed content and selection. When you pass an `undoManager` in the transaction, undo and redo publish through the same path as ordinary edits.
 
-## Preferences controller
+## User defaults controller
 
-`NSEPreferencesController` keeps typed, versioned settings behind an adapter that you provide.
+`NSEUserDefaultsController` (`NSUserDefaultsController`) keeps typed, versioned settings in an `NSEUserDefaults` (`NSUserDefaults`). `new NSEUserDefaults(SCOS.preferences)` keeps them with the application's preferences; `new NSEUserDefaults()` keeps them in memory only.
 
 ```ts
-import { NSEPreferencesController } from "@syndromatic/syncloudos/nse";
+import { SCOS } from "@syndromatic/syncloudos";
+import { NSEUserDefaults, NSEUserDefaultsController } from "@syndromatic/syncloudos/nse";
 
 interface EditorPrefs {
   theme: string;
   lineNumbers: boolean;
 }
 
-const preferences = new NSEPreferencesController<EditorPrefs>({
+const preferences = new NSEUserDefaultsController<EditorPrefs>({
   namespace: "com.example.notes.editor",
-  adapter: {
-    read: (key) => JSON.parse(localStorage.getItem(key) ?? "null"),
-    write: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
-    remove: (key) => localStorage.removeItem(key),
-  },
+  defaults: new NSEUserDefaults(SCOS.preferences),
   schema: {
     version: 2,
     defaults: { theme: "light", lineNumbers: false },
@@ -242,9 +239,9 @@ const preferences = new NSEPreferencesController<EditorPrefs>({
 preferences.set("theme", "dark");
 ```
 
-The schema gives each field a default and a validator, plus a version and a contiguous chain of migrations. On load, the controller repairs invalid fields and writes migrated data forward. A record written by a newer schema version is left untouched, so an older build never overwrites data it cannot read. Outside an edit, `set` and `reset` write immediately. Inside an edit they change a draft, and the commit writes once and can register one undo action. The adapter is synchronous by contract.
+The schema gives each field a default and a validator, plus a version and a contiguous chain of migrations. On load, the controller repairs invalid fields and writes migrated data forward. A record written by a newer schema version is left untouched, so an older build never overwrites data it cannot read. Outside an edit, `set` and `reset` write immediately. Inside an edit they change a draft, and the commit writes once and can register one undo action. The store writes synchronously by contract. `NSEUserDefaults` on its own reads and writes single values with `object(forKey)`, `set(value, forKey)` and `removeObject(forKey)`.
 
-Applications reach per-application settings through `useSCOS().persistence`, which needs no controller. Use the preferences controller when you want schemas, migrations and undoable settings panes.
+Applications reach per-application settings through `useSCOS().persistence`, which needs no controller. Use the user defaults controller when you want schemas, migrations and undoable settings panes.
 
 ## Where to go next
 

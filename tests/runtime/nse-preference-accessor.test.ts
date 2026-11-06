@@ -4,7 +4,7 @@ import { nseUnowned } from "../../src/NSE/Controllers/ownership";
 import { attachNSEAuthoringContext, type NSEAuthoringContext } from "../../src/NSE/Application/authoringContext";
 import { finalizeNSEAuthoringOwner } from "../../src/NSE/Application/authoringLifecycle";
 import { preference, type NSEPreferenceDescriptor } from "../../src/NSE/Objects/preference";
-import { PreferencePersistenceError } from "../../src/NSE/Controllers/NSEPreferencesController";
+import { PreferencePersistenceError } from "../../src/NSE/Controllers/NSEUserDefaultsController";
 
 const owners: NSEViewController[] = [];
 afterEach(() => { for (const owner of owners.splice(0)) owner.dispose(); });

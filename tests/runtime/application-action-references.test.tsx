@@ -12,9 +12,10 @@ import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEActionScopeProvider, NSEControlRuntimeProvider } from "../../src/NSE/Controls/Core";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
-import { NSEPreferencesController } from "../../src/NSE/Controllers/NSEPreferencesController";
+import { NSEUserDefaultsController } from "../../src/NSE/Controllers/NSEUserDefaultsController";
 import type { NSEToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
 import { createTestRuntime, mountTestSynWareRuntime, registerTestSynWare } from "./helpers";
+import { defaultsFrom } from "../fixtures/userDefaults";
 
 const disposers: (() => void | Promise<void>)[] = [];
 afterEach(async () => { cleanup(); for (const dispose of disposers.splice(0).reverse()) await dispose(); });
@@ -113,8 +114,8 @@ it("preserves standard IDs and uses refreshed methods without a stale implementa
 it("projects toolbar action entries into canonical commands for dispatch and overflow", async () => {
   const f = fixture();
   f.runtime.focus.requestFocus(f.child);
-  const preferences = new NSEPreferencesController<NSEToolbarPreferences>({
-    standalone: true, namespace: "refs-toolbar", adapter: { read: () => null, write: () => {}, remove: () => {} },
+  const preferences = new NSEUserDefaultsController<NSEToolbarPreferences>({
+    standalone: true, namespace: "refs-toolbar", defaults: defaultsFrom({ read: () => null, write: () => {}, remove: () => {} }),
     schema: { version: 1, defaults: { itemIds: ["choose"], displayMode: "icon-and-label", sizeMode: "regular" }, fields: {
       itemIds: { validate: (value: unknown): value is readonly string[] => Array.isArray(value) },
       displayMode: { validate: (value: unknown): value is NSEToolbarPreferences["displayMode"] => value === "icon-and-label" },

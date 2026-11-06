@@ -4,7 +4,7 @@ import { act, cleanup, renderHook } from '@testing-library/react';
 import { NSEObject } from '../../src/NSE/Objects/NSEObject';
 import { createNSEBinding } from '../../src/NSE/Bindings/createNSEBinding';
 import { bind } from '../../src/NSE/Bindings/propertyBinding';
-import { PreferencePersistenceError } from '../../src/NSE/Controllers/NSEPreferencesController';
+import { PreferencePersistenceError } from '../../src/NSE/Controllers/NSEUserDefaultsController';
 import { NSEViewController } from '../../src/NSE/Application/NSEViewController';
 import { nseUnowned } from '../../src/NSE/Controllers/ownership';
 import { observable } from '../../src/NSE/Objects/observable';

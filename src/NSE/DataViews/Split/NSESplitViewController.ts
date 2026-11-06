@@ -21,7 +21,7 @@
 import { createElement, type ReactNode } from "react";
 
 import { NSEViewController } from "../../Application/NSEViewController";
-import type { NSEPreferencesController } from "../../Controllers";
+import type { NSEUserDefaultsController } from "../../Controllers";
 import type { NSEDataViewState } from "../Core";
 import { nseSplitViewItemHost, type NSESplitViewItem, type NSESplitViewItemHost } from "./NSESplitViewItem";
 import type {
@@ -164,7 +164,7 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
   readonly id: string;
   readonly #isVertical: boolean;
   readonly #items: NSESplitViewItem[] = [];
-  readonly #preferences?: NSEPreferencesController<NSESplitViewPreferences>;
+  readonly #preferences?: NSEUserDefaultsController<NSESplitViewPreferences>;
   readonly #restored: NSESplitViewPreferences | undefined;
   readonly #host: NSESplitViewItemHost;
   #requestedSizes = new Map<string, number>();
