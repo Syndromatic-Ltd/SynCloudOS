@@ -41,6 +41,9 @@ const defaultOpeningOptions: Readonly<NSEOpenWindowOptions> = Object.freeze({});
 export type NSEWindowCloseOutcome = "closed" | "cancelled" | "refused";
 
 /** The window a controller manages. Available once the window has loaded. */
+/** The edge of a window's content that carries a content border (NSRectEdge.minY, the bottom). */
+export type NSEWindowContentBorderEdge = "minY";
+
 export interface NSEWindow {
   /** The window's identity, or `null` when the application is shown on the stage. */
   readonly id: string | null;
@@ -52,6 +55,14 @@ export interface NSEWindow {
   isDocumentEdited: boolean;
   /** NSWindow.toolbar: the window draws it under its title bar. */
   toolbar: NSEToolbar | null;
+  /**
+   * NSWindow.contentBorderThickness(for:): the height of the band the window paints along an edge of
+   * its content (0 when it paints none). The content's own controls, such as status text fields with
+   * `backgroundStyle="raised"`, sit over the band.
+   */
+  contentBorderThickness(edge: NSEWindowContentBorderEdge): number;
+  /** NSWindow.setContentBorderThickness(_:for:). Only the bottom edge (`"minY"`) is drawn. */
+  setContentBorderThickness(thickness: number, edge: NSEWindowContentBorderEdge): void;
   /** NSWindow.titlebarAccessoryViewControllers, in the order they were added. */
   readonly titlebarAccessoryViewControllers: readonly NSETitlebarAccessoryViewController<unknown>[];
   /** NSWindow.addTitlebarAccessoryViewController(_:): the window owns the accessory from now on. */
@@ -197,6 +208,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   #pendingTitle: string | null = null;
   #subtitle = "";
   #documentEdited = false;
+  #contentBorderMinY = 0;
   #toolbar: NSEToolbar | null = null;
   #accessories: readonly NSETitlebarAccessoryViewController<unknown>[] = Object.freeze([]);
   #contentViewController: NSEViewController<unknown> | null = null;
@@ -246,6 +258,17 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
         if (typeof edited !== "boolean") throw new TypeError("A window's isDocumentEdited is a boolean.");
         if (edited === controller.#documentEdited) return;
         controller.#documentEdited = edited;
+        controller.notifyObservers();
+      },
+      contentBorderThickness(edge: NSEWindowContentBorderEdge) {
+        if (edge !== "minY") throw new RangeError(`A window draws a content border only at its bottom edge ("minY"), not "${String(edge)}".`);
+        return controller.#contentBorderMinY;
+      },
+      setContentBorderThickness(thickness: number, edge: NSEWindowContentBorderEdge) {
+        if (edge !== "minY") throw new RangeError(`A window draws a content border only at its bottom edge ("minY"), not "${String(edge)}".`);
+        if (typeof thickness !== "number" || !Number.isFinite(thickness) || thickness < 0) throw new RangeError("A content border's thickness is a finite number of points, 0 or more.");
+        if (thickness === controller.#contentBorderMinY) return;
+        controller.#contentBorderMinY = thickness;
         controller.notifyObservers();
       },
       get toolbar() { return controller.#toolbar; },

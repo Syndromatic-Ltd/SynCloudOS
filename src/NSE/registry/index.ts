@@ -54,13 +54,6 @@ export const nseRegistry = [
     files: ["src/NSE/DataViews/Split/NSESplitView.tsx", "src/NSE/Windows/Chrome/nse-chrome.css"]
   },
   {
-    name: "nse-status-bar",
-    title: "NSEStatusBar",
-    type: "primitive",
-    description: "Compact bottom app status strip with leading, centre, and trailing regions.",
-    files: ["src/NSE/Windows/Chrome/NSEStatusBar.tsx", "src/NSE/Windows/Chrome/nse-chrome.css"]
-  },
-  {
     name: "nse-controls",
     title: "NSE Controls",
     type: "primitive",

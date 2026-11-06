@@ -122,6 +122,23 @@ this.window.addTitlebarAccessoryViewController(new FileAccessory(this));
 
 A textured `NSESegmentedControl` segment can carry a command menu (`menu: NSEMenu`, NSSegmentedControl.setMenu(_:forSegment:)): pressing it shows the menu below the segment, which stays highlighted while the menu is open. Publisher's File accessory is a small one-segment control of this kind.
 
+## The status line: a window's bottom content border
+
+A status line is the window's bottom content border (NSWindow.setContentBorderThickness(_:for: .minY)), not a component. The window paints the band along the bottom of its content; the content lays out its own row of that height at its foot and puts ordinary controls on it, labels drawn `backgroundStyle="raised"` (NSCell.backgroundStyle) so the theme embosses them. The content leaves the band unpainted: an opaque background over it hides it, as an opaque content view does in AppKit.
+
+```ts
+this.window.setContentBorderThickness(56, "minY");   // 0 removes it
+```
+
+```tsx
+<div className="status-line" style={{ blockSize: 56 }}>
+  <NSETextField isEditable={false} font="footnote" backgroundStyle="raised">{words} words</NSETextField>
+  <NSETextField isEditable={false} font="footnote" backgroundStyle="raised">Saved</NSETextField>
+</div>
+```
+
+Atmo draws a tall border (44 points or more) as its metal footer and a shorter one as its compact strip. Journal Publisher (56) and FieldLab (28) use it. Only the bottom edge is drawn.
+
 ## A narrow inspector
 
 An inspector of 240 to 320 pixels is narrower than a form is designed for. Use the containers that suit that width:

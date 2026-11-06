@@ -27,6 +27,10 @@ function classes(...values: Array<string | false | null | undefined>) {
 
 type CSSVarStyle = HTMLAttributes<HTMLElement>["style"] & Record<`--${string}`, string>;
 
+/**
+ * @internal The footer an `NSESourceListScene` draws under its sidebar and content. Applications put
+ * status text on their window's bottom content border instead (`window.setContentBorderThickness`).
+ */
 export type NSEStatusBarVariant = "default" | "atmoMetal";
 
 export interface NSEStatusBarProps extends HTMLAttributes<HTMLElement> {

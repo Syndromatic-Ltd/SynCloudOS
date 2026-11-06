@@ -28,6 +28,7 @@ export type {
   NSEAnyWindowController,
   NSEWindow,
   NSEWindowCloseOutcome,
+  NSEWindowContentBorderEdge,
   NSEWindowControllerClass,
   NSEWindowControllerContext,
   NSEWindowControllerOptions,

@@ -47,7 +47,7 @@ import { NSEAlertBackdrop, NSEAlertSurface, NSEFocusScope, NSEPopover } from "..
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
-import { NSEWindowTitlebarAccessories, NSEWindowTitlebarHostContext, NSEWindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
+import { NSEWindowContentBorder, NSEWindowTitlebarAccessories, nseContentBorderSize, NSEWindowTitlebarHostContext, NSEWindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
 import { applicationSessionFor } from "./applicationSession";
 import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/applicationHostInterop";
 import { useNSEOverlayFocusScope } from "../../NSE/applicationHostInterop";
@@ -424,8 +424,10 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
     : View ? <View controller={controller} /> : null;
   const { toolbar, titlebarAccessoryViewControllers: accessories } = controller.window;
   const renderAccessory = (accessory: NSEViewController<unknown>) => <NSEViewControllerView controller={accessory} className="nse-window-titlebar-accessory" />;
-  // Content keeps its own frame unless the window draws a toolbar or an accessory row above it.
-  const framed = Boolean(toolbar?.isVisible) || accessories.some((accessory) => !accessory.isHidden && (!stageTitlebar || accessory.layoutAttribute === "bottom"));
+  const bottomBorder = controller.window.contentBorderThickness("minY");
+  // Content keeps its own frame unless the window draws a toolbar, an accessory row or a content border.
+  const framed = Boolean(toolbar?.isVisible) || bottomBorder > 0
+    || accessories.some((accessory) => !accessory.isHidden && (!stageTitlebar || accessory.layoutAttribute === "bottom"));
   return (
     <NSEActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
       <NSEControllerResponder target={controller} kind="controller">
@@ -434,7 +436,10 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
           <div className="nse-window-chrome-frame">
             {toolbar ? <NSEWindowToolbar controller={controller} toolbar={toolbar} /> : null}
             <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={stageTitlebar} placement="row" />
-            <div className="nse-window-chrome-content">{content}</div>
+            <div className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined}>
+              {content}
+              {bottomBorder > 0 ? <NSEWindowContentBorder thickness={bottomBorder} /> : null}
+            </div>
           </div>
         ) : content}
       </NSEControllerResponder>

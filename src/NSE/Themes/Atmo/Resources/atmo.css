@@ -6242,6 +6242,27 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* A label on a raised surface (NSCell backgroundStyle .raised), such as status text on a window's
+   bottom content border: the metal footer's embossed ink. */
+[data-nse-appearance="atmo"] .nse-control-label-field[data-background-style="raised"] {
+  color: #5b636c;
+  font-weight: 600;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+[data-nse-appearance="atmo"][data-mode="dark"] .nse-control-label-field[data-background-style="raised"],
+[data-nse-appearance="atmo"] [data-mode="dark"] .nse-control-label-field[data-background-style="raised"] {
+  color: #a7afba;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.78), 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Over the compact strip (a short content border), which stays light in both modes. */
+[data-nse-appearance="atmo"] .nse-window-chrome-content[data-content-border="small"] .nse-control-label-field[data-background-style="raised"] {
+  color: #2b333c;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.62);
+}
+
 [data-nse-appearance="atmo"] .nse-toolbar {
   --nse-toolbar-height: calc(var(--nse-atmo-bar-h) + 8px);
   --nse-toolbar-item-inline-margin: 3px;
