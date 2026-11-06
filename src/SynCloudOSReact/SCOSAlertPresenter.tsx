@@ -1,6 +1,6 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import { useId, useSyncExternalStore } from "react";
-import { NSEAlert } from "../NSE/hostComposition";
+import { NSEAlertSurface } from "../NSE/hostComposition";
 import { NSEAlertBackdrop } from "../NSE/hostComposition";
 import { NSEButton } from "../NSE/public/controls";
 import type { SynCloudOSPresentationTraitsService } from "../SynCloudOS/SynCloudOS";
@@ -24,8 +24,9 @@ export function SCOSAlertPresenter({ center, appearance: requestedAppearance, pr
   const primary = current.buttons.find(button => button.role === "default" || button.role === "destructive") ?? current.buttons[0];
   return <FocusScope asChild key={current.id} scopeId={`scos-alert:${current.id}`} kind="modal" parentResponderId="runtime" trapFocus>
     <NSEAlertBackdrop presentation={presentation} onSafeDismiss={() => center.dismiss(current.id)}>
-      <NSEAlert appearance={appearance} labelledBy={titleId} describedBy={current.message ? messageId : undefined} initialFocusSelector="[data-scos-alert-primary]">
-        <div className="nse-system-alert-content">
+      <NSEAlertSurface appearance={appearance} labelledBy={titleId} describedBy={current.message ? messageId : undefined} initialFocusSelector="[data-scos-alert-primary]">
+        {/* Without an icon the copy would otherwise sit in the alert's fixed icon column. */}
+        <div className={`nse-system-alert-content${current.iconUrl ? "" : " nse-confirm-content-textonly"}`}>
           {current.iconUrl ? <img className="syncloudos-alert-logo" src={current.iconUrl} alt="" /> : null}
           <div className="nse-system-alert-copy">
             <h2 id={titleId}>{current.title}</h2>
@@ -44,7 +45,7 @@ export function SCOSAlertPresenter({ center, appearance: requestedAppearance, pr
             onClick={() => center.dismiss(current.id, button.id)}
           />)}
         </div>
-      </NSEAlert>
+      </NSEAlertSurface>
     </NSEAlertBackdrop>
   </FocusScope>;
 }

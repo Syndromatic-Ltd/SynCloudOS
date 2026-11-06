@@ -190,7 +190,7 @@ SynCloudOS logo. The host composes the caution badge at runtime; an unavailable
 app or site logo receives caution alone. No precomposed error artwork is needed.
 
 This recovery presentation belongs to the browser host. Applications compose
-their own alerts with the existing `NSEAlert` content slot and controls.
+their own alerts with the `NSEAlert` object and present custom content as a sheet (`presentAsSheet`).
 
 ## Background and size of the Board
 

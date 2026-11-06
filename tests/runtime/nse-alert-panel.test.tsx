@@ -23,7 +23,7 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAnimationDefaults, NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
-import { NSEAlert } from "../../src/NSE/Components/NSEAlert";
+import { NSEAlertSurface } from "../../src/NSE/Components/NSEAlertSurface";
 import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
 import { SystemAlert } from "../../src/SynCloudOSReact/SystemAlert";
 import type { AFXAnimationDefinition, AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
@@ -131,7 +131,7 @@ describe("NSE alert choreography on AnimationFX", () => {
     const { animator, played } = recordingAnimator();
     const standard = render(
       <NSEAnimationEnvironmentProvider reducedMotion={false} animator={animator}>
-        <NSEAlert labelledBy="title"><h2 id="title">Notice</h2></NSEAlert>
+        <NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface>
       </NSEAnimationEnvironmentProvider>,
     );
     const alert = screen.getByRole("alertdialog");
@@ -159,7 +159,7 @@ describe("NSE alert choreography on AnimationFX", () => {
     const reduced = recordingAnimator();
     render(
       <NSEAnimationEnvironmentProvider reducedMotion animator={reduced.animator}>
-        <NSEAlert labelledBy="title"><h2 id="title">Notice</h2></NSEAlert>
+        <NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface>
       </NSEAnimationEnvironmentProvider>,
     );
     const [fade] = reduced.played as [Played];
@@ -172,7 +172,7 @@ describe("NSE alert choreography on AnimationFX", () => {
       const { animator, played } = recordingAnimator();
       const view = render(
         <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator}>
-          <NSEAlertBackdrop><NSEAlert labelledBy="title"><h2 id="title">Notice</h2></NSEAlert></NSEAlertBackdrop>
+          <NSEAlertBackdrop><NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface></NSEAlertBackdrop>
         </NSEAnimationEnvironmentProvider>,
       );
       const backdrop = document.querySelector<HTMLElement>(".nse-control-alert-backdrop")!;

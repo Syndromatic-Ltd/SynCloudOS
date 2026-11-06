@@ -27,6 +27,7 @@ import { createSynCloudOS } from "../../SynCloudOS";
 import { RuntimeInputBoundary, SynCloudOSProvider } from "../../../SynCloudOSReact";
 import { ApplicationStageView } from "../../../Webspring/ApplicationStageView";
 import { HostSiteBrandingProvider } from "../../../SynCloudOSReact";
+import { SCOSAlertPresenter } from "../../../SynCloudOSReact/SCOSAlertPresenter";
 import {
   createApplicationWindowContentRendererRegistry,
   WindowContentRendererRegistry,
@@ -467,6 +468,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
                 lifecycle="ready"
               />
             )}
+            <SCOSAlertPresenter center={runtime.alerts} presentation={runtime.presentationTraits} />
           </RuntimeInputBoundary>
           </SynCloudOSProvider>
           </HostSiteBrandingProvider>

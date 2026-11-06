@@ -160,7 +160,8 @@ Data views render collections owned by a controller. They are virtualised, so a 
 
 | Component | Purpose |
 | --- | --- |
-| `NSEAlert`, `NSEDialog`, `NSEModalDialog`, `NSEConfirmDialog` | Alerts and dialogs with focus trapping and inert backgrounds. |
+| `NSEAlert` | An alert object (`NSAlert`) presented as a sheet on a window. See [Alerts and sheets](windows.md#alerts-and-sheets). |
+| `NSEDialog`, `NSEModalDialog`, `NSEConfirmDialog` | Dialog surfaces for content outside a window, with focus trapping and inert backgrounds. Inside a window, present a view controller as a sheet instead. |
 | `NSEPopover` | An anchored transient surface. |
 | `NSEOpenPanel`, `NSESavePanel` | File panels. |
 | `NSEFontPanel`, `NSEMediaPanel` | The font panel and a media chooser. |

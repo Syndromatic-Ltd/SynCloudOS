@@ -671,3 +671,11 @@
   max-block-size: 100%;
   overflow: auto;
 }
+
+/* A view controller presented as a sheet (presentAsSheet) draws its title above its view. */
+.nse-sheet-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}

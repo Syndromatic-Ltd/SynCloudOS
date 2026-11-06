@@ -53,7 +53,21 @@ export interface NSEWindow {
   minimise(): void;
   zoom(): void;
   focus(): void;
+  /**
+   * Ends a sheet presented on this window (NSWindow.endSheet(_:returnCode:)). Its `beginSheetModal` promise
+   * resolves with `returnCode`, or, when omitted, with the response Escape would give. Does nothing when the
+   * sheet is not presented on this window.
+   */
+  endSheet(sheet: NSESheet, returnCode?: number): void;
 }
+
+/** @internal What `NSEWindow.endSheet` ends: a sheet presented on a window. */
+export interface NSESheet {
+  [nseEndSheet](window: NSEWindow, returnCode?: number): void;
+}
+
+/** @internal */
+export const nseEndSheet: unique symbol = Symbol("nse.endSheet");
 
 /** The document a window was opened for. */
 export interface NSEWindowDocument {
@@ -91,6 +105,25 @@ export interface NSEWindowMount {
   close(): Promise<NSEWindowCloseOutcome>;
   /** Lets the controller veto the window's close and learn it is closing. Does nothing on the stage. Returns the function that removes the guard. */
   registerCloseGuard(guard: SynWareWindowCloseGuard): () => void;
+  /** Presents an alert sheet for the window and resolves with the chosen button's id; aborting `signal` dismisses it. */
+  presentAlert(request: NSEWindowAlertRequest, signal: AbortSignal): Promise<string>;
+}
+
+/** An alert as the window's host presents it. Not part of the public API. */
+export interface NSEWindowAlertRequest {
+  readonly title: string;
+  readonly message?: string;
+  readonly style: "warning" | "informational" | "critical";
+  readonly buttons: readonly { readonly id: string; readonly label: string; readonly role?: "default" | "cancel" | "destructive" }[];
+}
+
+const windowAlertPresenters = new WeakMap<NSEWindow, (request: NSEWindowAlertRequest, signal: AbortSignal) => Promise<string>>();
+
+/** @internal Presents an NSEAlert as a sheet on a window a window controller manages; aborting `signal` ends it. */
+export function nsePresentWindowAlert(window: NSEWindow, request: NSEWindowAlertRequest, signal: AbortSignal): Promise<string> {
+  const present = windowAlertPresenters.get(window);
+  if (!present) return Promise.reject(new TypeError("An alert is presented on a window controller's window (this.window)."));
+  return present(request, signal);
 }
 
 /** What the framework hands a window controller it constructs. */
@@ -169,7 +202,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       throw controller.#lifetime.record.error({
         code: "NSE_VIEW_NOT_LOADED",
         operation: `window.${member}`,
-        access: member === "close" || member === "minimise" || member === "zoom" || member === "focus" ? "call" : "get",
+        access: member === "close" || member === "minimise" || member === "zoom" || member === "focus" || member === "beginSheetModal" ? "call" : "get",
         problem: "The window has not mounted yet or has closed.",
       });
     };
@@ -187,6 +220,14 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       minimise: () => requireMount("minimise").minimise(),
       zoom: () => requireMount("zoom").zoom(),
       focus: () => requireMount("focus").focus(),
+      endSheet: (sheet: NSESheet, returnCode?: number) => {
+        if (returnCode !== undefined && !Number.isInteger(returnCode)) throw new TypeError("A sheet's return code must be an integer.");
+        sheet?.[nseEndSheet]?.(controller.#window, returnCode);
+      },
+    });
+    windowAlertPresenters.set(this.#window, (request, signal) => {
+      controller.#assertLive("beginSheetModal", "call");
+      return requireMount("beginSheetModal").presentAlert(request, AbortSignal.any([controller.ownerSignal, signal]));
     });
     this.#internals = {
       get isLoaded() { return controller.#loaded; },
@@ -230,7 +271,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
     this.#assertLive("contentViewController", "set");
     if (controller === this.#contentViewController) return;
     const previous = this.#contentViewController;
-    if (controller) controller[nseAdoptViewController](this.#lifetime.scope);
+    if (controller) controller[nseAdoptViewController](this.#lifetime.scope, this.#window);
     this.#contentViewController = controller;
     try {
       if (previous) previous[nseDisposeFor]("removed-from-parent");

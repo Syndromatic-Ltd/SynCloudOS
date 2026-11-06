@@ -24,7 +24,7 @@ import "./components.css";
 import "./nseSystemDialogs.css";
 import { NSEFocusScope } from "../Focus";
 import { NSEButton, nseButtonToneProps, type NSEButtonTone } from "../Controls/Buttons/NSEButton";
-import { NSEAlert } from "./NSEAlert";
+import { NSEAlertSurface } from "./NSEAlertSurface";
 import { NSEAlertBackdrop } from "./NSEAlertBackdrop";
 import type { NSEOverlayPresentationSource } from "../Overlays/overlayRegion";
 import { useNSEAppearance } from "../Appearance";
@@ -38,7 +38,7 @@ function useSystemDialogAppearance(appearance: "dark" | "light" | undefined): "d
 /**
  * The two dialogs every SynWare is expected to have: About, and a confirm.
  *
- * Both sit on the SAME surface the error alerts use (NSEAlert inside
+ * Both sit on the SAME surface the error alerts use (NSEAlertSurface inside
  * NSEAlertBackdrop) rather than on a popup of their own. macOS does the same
  * thing — the About panel and a "are you sure?" sheet are the one alert widget
  * with different content — and it means focus trapping, the Escape key, the
@@ -100,7 +100,7 @@ export function NSEAboutDialog({
   return createPortal(
     <NSEFocusScope options={{ scopeId: focusScopeId ?? `nse-system-about:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
     <NSEAlertBackdrop presentation={presentation} onSafeDismiss={onDismiss}>
-      <NSEAlert
+      <NSEAlertSurface
         appearance={appearance}
         role="dialog"
         className="nse-about-dialog"
@@ -133,7 +133,7 @@ export function NSEAboutDialog({
             onClick={onDismiss}
           />
         </div>
-      </NSEAlert>
+      </NSEAlertSurface>
     </NSEAlertBackdrop>
     </NSEFocusScope>,
     document.body
@@ -184,7 +184,7 @@ export function NSEConfirmDialog({
     // is the one that happens by accident.
     <NSEFocusScope options={{ scopeId: focusScopeId ?? `nse-system-confirm:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
     <NSEAlertBackdrop presentation={presentation} onSafeDismiss={onCancel}>
-      <NSEAlert
+      <NSEAlertSurface
         appearance={appearance}
         labelledBy={titleId}
         describedBy={message ? messageId : undefined}
@@ -212,7 +212,7 @@ export function NSEConfirmDialog({
             onClick={onCancel}
           />
         </div>
-      </NSEAlert>
+      </NSEAlertSurface>
     </NSEAlertBackdrop>
     </NSEFocusScope>,
     document.body
