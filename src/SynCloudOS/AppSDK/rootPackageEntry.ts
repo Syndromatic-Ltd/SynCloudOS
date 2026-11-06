@@ -16,8 +16,6 @@ export { bind, createNSEBinding, useNSEBinding } from "../../NSE/sdkPackageEntry
 export type { NSEBinding, NSEBindingValue, NSEBindingSnapshot, NSEBindingCommitResult, NSEBindingEdit, NSEBindingOwner, NSEBindingAdapter, NSEBoundValueProps, NSEBindingView, NSEWritableBindingKey } from "../../NSE/sdkPackageEntry";
 export { managedTask, NSETaskQueueFullError } from "../../NSE/sdkPackageEntry";
 export type { NSETaskLifetime, NSETaskSettlement, NSETaskContext, NSETaskRun, NSETaskSnapshot, NSEManagedTask, NSETaskOptions } from "../../NSE/sdkPackageEntry";
-export { NSEActionScopeProvider } from "../../NSE/sdkPackageEntry";
-export type { NSEActionScopeProviderProps } from "../../NSE/sdkPackageEntry";
 export { NSEApplication, NSEWindowController, NSEViewController, NSETitlebarAccessoryViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "../../NSE/sdkPackageEntry";
 export type { NSEAlertStyle, NSEPopoverPositioning } from "../../NSE/sdkPackageEntry";
 export { outlet } from "../../NSE/sdkPackageEntry";

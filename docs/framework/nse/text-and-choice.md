@@ -17,7 +17,7 @@ import { NSEBox, NSESearchField, NSETextField } from "@syndromatic/syncloudos/ns
 | `NSETokenField` | `NSTokenField` | Tokens such as tags or recipients, with paste, reorder and completion | For completion and token menus |
 | `NSEBox` | `NSBox` | Titled boxes and separators | No |
 
-Controls marked "Yes" open a floating list, so they need an *overlay host*. A mounted SynWare receives one from the runtime. Elsewhere, wrap the controls in `NSEStandaloneControlHost` from `nse/controls`, which supplies the same overlay, scheduler and focus authority. A control that needs a host and finds none throws an `Error` when it renders.
+Controls marked "Yes" open a floating list, so they need an *overlay host*. A mounted SynWare receives one from the runtime, so use these controls inside an application's views. A control that needs a host and finds none throws an `Error` when it renders.
 
 ## Shared behaviour
 

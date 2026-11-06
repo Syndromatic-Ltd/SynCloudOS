@@ -2568,35 +2568,6 @@
   background: rgba(20, 24, 30, 0.82);
 }
 
-/* RotatingImage — a background image that spins a full turn while running. */
-@keyframes nse-control-rotating-image-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-rotating-image {
-  display: inline-block;
-  overflow: hidden;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-origin: padding-box;
-  background-clip: content-box;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-rotating-image[data-running="true"] {
-  animation-name: nse-control-rotating-image-rotate;
-  animation-duration: 1s;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :where([data-nse-appearance="atmo"]) .nse-control-rotating-image[data-running="true"] {
-    animation: none;
-  }
-}
-
 /* Semantic state repair. The native input remains authoritative; these
    stable state hooks only make that state reachable to the appearance layer. */
 :where([data-nse-appearance="atmo"]) .nse-control-radio:has(input:focus-visible) {

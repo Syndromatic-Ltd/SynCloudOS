@@ -27,7 +27,6 @@
     "NSEActionOptions": "@IBAction",
     "NSEActionPayloadCheck": "NSUserInterfaceValidations",
     "NSEActionReference": "NSControl.action",
-    "NSEActionScopeProvider": "NSResponder",
     "NSEActionState": "NSUserInterfaceValidations",
     "NSEAdaptiveNavigationController": {
       "none": "Phase 7 removes this UIKit-shaped navigation API.",
@@ -189,7 +188,6 @@
     "NSEEffectiveAttribute": "NSTextView.typingAttributes",
     "NSEEffectiveTextAttributeOptions": "NSTextView.typingAttributes",
     "NSEFeedbackProvider": "NSHapticFeedbackManager",
-    "NSEFocusScope": "NSView.nextKeyView",
     "NSEFontDescriptor": "NSFontDescriptor",
     "NSEFontFamily": "NSFontManager.availableFontFamilies",
     "NSEFontManager": "NSFontManager",
@@ -343,8 +341,6 @@
     "NSEResolvedAppearance": "NSAppearance",
     "NSEResolvedColourScheme": "NSAppearance.Name",
     "NSERetainedTextTarget": "NSTextStorage",
-    "NSERotatingImage": "NSImageView",
-    "NSERotatingImageHandle": "NSImageView",
     "NSERoundedBox": "NSBox.cornerRadius",
     "NSERubberBandOptions": "NSScrollView.verticalScrollElasticity",
     "NSERuleEditor": "NSRuleEditor",
@@ -419,9 +415,6 @@
     "NSEStackResolvedItem": "NSStackView",
     "NSEStackView": "NSStackView",
     "NSEStackVisibilityPriority": "NSStackView.VisibilityPriority",
-    "NSEStandaloneControlHost": {
-      "none": "Hosts NSE controls outside an application window, for embedding in other pages."
-    },
     "NSEStepper": "NSStepper",
     "NSEStepperValueContract": "NSStepper",
     "NSEStringDrawingOptions": "NSString.DrawingOptions",
@@ -555,7 +548,6 @@
     "NSEToolbarItem": "NSToolbarItem",
     "NSEToolbarItemInput": "NSToolbarItem",
     "NSEToolbarSizeMode": "NSToolbar.SizeMode",
-    "NSETooltipProvider": "NSView.toolTip",
     "NSETrackingEvent": "NSTrackingArea",
     "NSETraitCollection": {
       "none": "AppKit spreads these traits over NSAppearance, NSWorkspace's accessibility display options and the window's size (D2)."

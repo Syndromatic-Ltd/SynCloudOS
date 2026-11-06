@@ -18,7 +18,7 @@ import { NSESlider, NSEStepper } from "@syndromatic/syncloudos/nse";
 | `NSEProgressIndicator` | Determinate and indeterminate progress, as a bar or a spinning indicator | No |
 | `NSEDatePicker` | A date, a date range, a time, or a date and time, as a text field or a graphical calendar and clock | For the calendar and clock popover |
 
-Components marked "Yes" open a floating list and need an overlay host. A mounted SynWare receives one from the runtime, and elsewhere you wrap the controls in `NSEStandaloneControlHost` from `nse/controls`. See [Text fields and choice controls](text-and-choice.md#at-a-glance).
+Components marked "Yes" open a floating list and need an overlay host. A mounted SynWare receives one from the runtime, so use them inside an application's views. See [Text fields and choice controls](text-and-choice.md#at-a-glance).
 
 Everything on this page comes from `@syndromatic/syncloudos/nse`.
 

@@ -546,12 +546,6 @@ export type {
   NSESavePanelProps,
 } from "./FilePanels/NSESavePanel";
 export {
-  NSEFocusScope,
-} from "./Focus/NSEFocusPort";
-export type {
-  NSEFocusScopeOptions,
-} from "./Focus/NSEFocusPort";
-export {
   NSEGraphicsView,
   convertPointToGFXDisplayList,
 } from "./Graphics/NSEGraphicsView";
@@ -568,7 +562,6 @@ export {
 export {
   NSECroppableImage,
   NSEImageView,
-  NSERotatingImage,
   NSEScrollingImage,
   NSESizeableImage,
   NSEViewImage,
@@ -581,8 +574,6 @@ export type {
   NSEImageStringSourceLease,
   NSEImageStringSourcePort,
   NSEImageViewProps,
-  NSERotatingImageHandle,
-  NSERotatingImageProps,
   NSEScrollingImageProps,
   NSESizeableImageHandle,
   NSESizeableImageProps,
@@ -753,12 +744,6 @@ export type {
   NSEToolbarItemInput,
 } from "./Toolbars/toolbarTypes";
 export {
-  NSETooltipProvider,
-} from "./Tooltips/NSETooltipProvider";
-export type {
-  NSETooltipProviderProps,
-} from "./Tooltips/NSETooltipProvider";
-export {
   useNSETooltip,
 } from "./Tooltips/useNSETooltip";
 export {
@@ -881,14 +866,12 @@ export type {
   NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowCloseOutcome, NSEWindowContentBorderEdge,
   NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
 } from "./Application";
-export { NSEActionScopeProvider } from "./Controls/Core/useNSEControlAction";
 export { preference } from "./Objects/preference";
 export type { NSEPreferenceDescriptor } from "./Objects/preference";
 export { observes } from "./Objects/observes";
 export type { NSEObservationOptions } from "./Objects/observes";
 export { createNSETabSelectionRestoration } from "./Navigation/navigationRestoration";
 export type { NSENavigationRestorationDescriptor } from "./Navigation/navigationRestoration";
-export type { NSEActionScopeProviderProps } from "./Controls/Core/useNSEControlAction";
 
 export { actionRef } from "./Controls/Core/actionReference";
 export type { NSEActionReference, NSEActionPayloadCheck } from "./Controls/Core/actionReference";
