@@ -72,7 +72,7 @@ Everything ships in one package, `@syndromatic/syncloudos`. It uses explicit sub
 | `nse/content` | Portable attributed content values |
 | `nse/appearance` | The appearance provider, slots and material lighting |
 | `nse/themes/atmo` | The Atmo theme definition |
-| `nse/layout`, `nse/scroll`, `nse/page`, `nse/cover-flow`, `nse/system-ui` | Focused presentation entries |
+| `nse/layout`, `nse/scroll`, `nse/page`, `nse/system-ui` | Focused presentation entries |
 | `nse/styles.css` | Base NSE styles |
 | `nse/themes/atmo/styles.css` | Theme styles and resources |
 | `typography` | `defineFontDeclaration`, the Node-safe [managed fonts](managed-fonts.md) declaration |

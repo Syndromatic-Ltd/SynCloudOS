@@ -23,10 +23,20 @@ import { useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type C
 import { dataViewAllowsMutation, dataViewAnnouncement, dataViewEventIsComposing, encodeNSEDataViewKey, useNSEDataView } from "../Core";
 import { useNSEVirtualiser } from "../Virtualisation";
 import { useNSEDataViewDragHost } from "../../Drag";
-import type { NSECollectionViewProps } from "./collectionTypes";
+import type { NSECollectionViewCoverFlowProps, NSECollectionViewGridProps, NSECollectionViewProps } from "./collectionTypes";
+import { CoverFlowCollectionView } from "./CoverFlowCollectionView";
 import "./nse-collection-view.css";
 
-export function NSECollectionView<T, TId extends string | number>({
+/**
+ * NSCollectionView: items laid out by `layout`. A grid or list layout renders each item with `renderItem`;
+ * the Cover Flow layout draws the items' pictures with AnimationFX.
+ */
+export function NSECollectionView<T, TId extends string | number>(props: NSECollectionViewProps<T, TId>) {
+  if ("kind" in props.layout && props.layout.kind === "coverFlow") return <CoverFlowCollectionView {...props as NSECollectionViewCoverFlowProps<T, TId>} />;
+  return <GridCollectionView {...props as NSECollectionViewGridProps<T, TId>} />;
+}
+
+function GridCollectionView<T, TId extends string | number>({
   adapter,
   layout,
   renderItem,
@@ -50,7 +60,7 @@ export function NSECollectionView<T, TId extends string | number>({
   style,
   onKeyDown,
   ...props
-}: NSECollectionViewProps<T, TId>) {
+}: NSECollectionViewGridProps<T, TId>) {
   const view = useNSEDataView(adapter, {
     selectionMode,
     state: requestedState,

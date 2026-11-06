@@ -18,3 +18,18 @@ describe("coverFlowLayoutAttributes", () => {
     expect(() => coverFlowLayoutAttributes(["a"], 0, 0)).toThrow(RangeError);
   });
 });
+
+describe("coverFlowItemAttributes", () => {
+  it("matches the whole-position layout and blends between positions", async () => {
+    const { coverFlowItemAttributes } = await import("../../../src/NSE/DataViews/Collection/coverFlowLayout");
+    const whole = coverFlowLayoutAttributes(["a", "b", "c", "d"], 0, 100);
+    for (const item of whole) {
+      const fractional = coverFlowItemAttributes(item.id, item.offset, 100);
+      for (const key of ["x", "z", "yawRadians", "scale"] as const) expect(fractional[key]).toBeCloseTo(item[key], 10);
+    }
+    const halfway = coverFlowItemAttributes("h", .5, 100);
+    expect(halfway.x).toBeGreaterThan(0);
+    expect(halfway.x).toBeLessThan(whole[1]!.x);
+    expect(Math.abs(halfway.yawRadians)).toBeLessThan(Math.abs(whole[1]!.yawRadians));
+  });
+});

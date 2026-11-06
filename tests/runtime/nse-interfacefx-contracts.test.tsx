@@ -25,7 +25,6 @@ import { resolve } from "node:path";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSECoverFlow } from "../../src/NSE/CoverFlow";
 import { NSEAppFrame } from "../../src/NSE/Windows/NSEAppFrame";
 import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEMenu, NSEPopUpButton } from "../../src/NSE/Menus";
@@ -637,37 +636,6 @@ describe("NSE semantic contracts", () => {
 
     expect(onValueChange).toHaveBeenCalledTimes(1);
     expect(onValueChange).toHaveBeenLastCalledWith(40, "commit");
-  });
-
-
-  it("honours CoverFlow click slop and swipe step thresholds", () => {
-    const onActiveChange = vi.fn();
-    const onActivate = vi.fn();
-    render(
-      <NSECoverFlow
-        defaultActiveIndex={1}
-        onActiveChange={onActiveChange}
-        items={[
-          { id: "one", image: "/assets/one.png", label: "One" },
-          { id: "two", image: "/assets/two.png", label: "Two", onActivate },
-          { id: "three", image: "/assets/three.png", label: "Three" }
-        ]}
-      />
-    );
-
-    const listbox = screen.getByRole("listbox", { name: "Showcase" });
-    fireEvent.click(screen.getByRole("option", { name: "Two" }));
-    expect(onActivate).toHaveBeenCalledTimes(1);
-
-    fireEvent.pointerDown(listbox, { button: 0, pointerId: 1, clientX: 200 });
-    fireEvent.pointerMove(listbox, { pointerId: 1, clientX: 170 });
-    fireEvent.pointerUp(listbox, { pointerId: 1, clientX: 170 });
-    expect(onActiveChange).not.toHaveBeenCalled();
-
-    fireEvent.pointerDown(listbox, { button: 0, pointerId: 2, clientX: 200 });
-    fireEvent.pointerMove(listbox, { pointerId: 2, clientX: 120 });
-    fireEvent.pointerUp(listbox, { pointerId: 2, clientX: 120 });
-    expect(onActiveChange).toHaveBeenLastCalledWith(2);
   });
 
 });

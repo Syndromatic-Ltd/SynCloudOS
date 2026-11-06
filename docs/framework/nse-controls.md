@@ -9,7 +9,7 @@ import "@syndromatic/syncloudos/nse/styles.css";
 import "@syndromatic/syncloudos/nse/themes/atmo/styles.css";
 ```
 
-Import controls from `@syndromatic/syncloudos/nse`. Focused subpaths such as `nse/controls`, `nse/text`, `nse/layout`, `nse/scroll`, `nse/page`, `nse/cover-flow` and `nse/system-ui` expose subsets for code that wants narrower imports.
+Import controls from `@syndromatic/syncloudos/nse`. Focused subpaths such as `nse/controls`, `nse/text`, `nse/layout`, `nse/scroll`, `nse/page` and `nse/system-ui` expose subsets for code that wants narrower imports.
 
 ## A first form
 
@@ -175,7 +175,7 @@ Data views render collections owned by a controller. They are virtualised, so a 
 | `NSEGraphicsView` | A drawing surface for GraphicsFX content. |
 | `snapshotNSEView` | Draws a view your app owns into a PNG data URL, for a version card, a drag image or a thumbnail. Canvas content is left out. |
 | `NSEShadowView`, `NSEMetalSurface`, `NSESmoothSurface` | Shadows, brushed metal and smooth cornered surfaces. |
-| `NSEPage`, `NSECoverFlow` | A page with a curl transition, and the cover flow browser. |
+| `NSEPage` | A page with a curl transition. |
 
 ## Navigation controllers
 
