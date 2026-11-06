@@ -55,21 +55,10 @@ export type {
 } from "../Navigation/SourceList";
 export { NSESplitView } from "../DataViews/Split/NSESplitView";
 export type { NSESplitViewProps } from "../DataViews/Split/NSESplitView";
-export { NSETopBar, NSETopBarButton, NSEPageHeader } from "../Windows/Chrome";
-export { nseTopBarStyles } from "../Windows/Chrome";
-export type {
-  NSEChromeScheme,
-
-  NSEPageHeaderProps,
-
-  NSETopBarItem,
-  NSETopBarItemKind,
-  NSETopBarItemPosition,
-  NSETopBarProps,
-  NSETopBarRail,
-  NSETopBarTitleAction,
-  NSETopBarVariant,
-} from "../Windows/Chrome";
+// NSETopBar is the host's drawing of a window's title bar (NSWindow.title, its toolbar and
+// titlebar accessories); it is internal, not an app control.
+export { NSEPageHeader } from "../Windows/Chrome";
+export type { NSEChromeScheme, NSEPageHeaderProps } from "../Windows/Chrome";
 
 export {
   NSEButton,

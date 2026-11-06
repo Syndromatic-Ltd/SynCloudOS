@@ -216,17 +216,7 @@ export type {
 } from "./Controls/Fields/NSEFields";
 export { NSEPageHeader } from "./Windows/Chrome";
 export type { NSEPageHeaderProps } from "./Windows/Chrome";
-export { NSETopBar, NSETopBarButton } from "./Windows/Chrome";
-export type {
-  NSEChromeScheme,
-  NSETopBarItem,
-  NSETopBarItemKind,
-  NSETopBarItemPosition,
-  NSETopBarProps,
-  NSETopBarRail,
-  NSETopBarTitleAction,
-  NSETopBarVariant,
-} from "./Windows/Chrome";
+export type { NSEChromeScheme } from "./Windows/Chrome";
 export { NSESourceListScene } from "./Navigation/SourceList";
 export type {
   NSESourceListCompactHandoff,

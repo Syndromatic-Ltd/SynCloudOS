@@ -33,20 +33,6 @@ export interface NSERegistryItem {
 
 export const nseRegistry = [
   {
-    name: "nse-top-bar",
-    title: "NSETopBar",
-    type: "primitive",
-    description: "Apple-inspired app chrome bar: the Cumulus slice variant and the reusable atmoMetal source-list chrome (rail+main seam, grain, light/dark, metal pills).",
-    files: [
-      "src/NSE/Windows/Chrome/NSETopBar.tsx",
-      "src/NSE/Windows/Chrome/NSETopBarButton.tsx",
-      "src/NSE/Windows/Chrome/nseTopBarTypes.ts",
-      "src/NSE/Windows/Chrome/nseTopBarStyles.ts",
-      "src/NSE/Windows/Chrome/nse-chrome.css"
-    ],
-    variants: ["atmoCumulus", "atmoMetal"]
-  },
-  {
     name: "nse-split-view",
     title: "NSESplitView",
     type: "primitive",
