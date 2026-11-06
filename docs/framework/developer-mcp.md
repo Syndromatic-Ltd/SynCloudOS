@@ -77,9 +77,11 @@ Vite configuration is parsed **without executing it**. Literal `synCloudOS({ app
 
 Input: `{ projectRoot?: string, entry?: string, query?: string, limit?: number, full?: boolean }` (`limit` defaults to 8, range 1–100).
 
-With neither `entry` nor `query`, output is `{ version, entries: string[] }`. Otherwise output is `{ version, symbols: [{ entry, entries, name, signature, outlined, jsDoc, file, line, score }], docs: [{ file, heading, text, truncated, score }] }`.
+With neither `entry` nor `query`, output is `{ version, entries: string[] }`. Otherwise output is `{ version, symbols: [{ entry, entries, name, signature, outlined, jsDoc, file, line, score, appkitCounterpart? }], docs: [{ file, heading, text, truncated, score }] }`.
 
 Use entry names such as `sdk`, `nse` or `fx/animation`. An entry without a query lists its exports. Queries fuzzy-match exported names, follow declaration re-exports and return declaration signatures, attached JSDoc and relevant sections of the installed framework docs. A low-confidence query can return no symbols; it does not invent an API. Each symbol appears once: `entries` lists every package entry that exports it and `entry` is the one to import from. A class or interface longer than about 1,200 characters comes back as an outline, its header and public member signatures without bodies, with `outlined: true`; pass `full: true` for complete declarations. At most three documentation sections are returned, each capped at 1,500 characters with `truncated: true` when cut; read the named `file` for the rest.
+
+Every NSE symbol carries `appkitCounterpart`, from the installed `docs/framework/appkit-counterparts.json`: the AppKit, Foundation or Core framework name it follows (`"NSPopUpButton"`, `"NSAppearance.Name"`), or `{ none, replacement? }` saying why it has none and what replaces it. A type such as `NSEButtonProps` takes its class's counterpart. Write NSE code the way the counterpart is written in AppKit, and prefer the replacement of an entry with none.
 
 Broad `application menu`, `settings`, `preferences` and `account` queries prioritise the public `useApplicationMenuTrigger` hook and `SynWareApplicationMenuManifest` before lower-level menu props or availability APIs. Documentation ranking favours the corresponding application-menu/Preferences sections and worked examples. Exact exported names still take precedence; equally relevant symbols from the main `sdk` entry rank before other entries.
 
