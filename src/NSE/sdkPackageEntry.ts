@@ -677,7 +677,7 @@ export {
   NSETabBarController,
 } from "./Navigation/NSETabBarController";
 export { NSETabViewController, NSETabViewItem } from "./Navigation/NSETabViewController";
-export type { NSETabViewControllerOptions, NSETabViewControllerTabStyle, NSETabViewItemOptions } from "./Navigation/NSETabViewController";
+export type { NSETabViewControllerOptions, NSETabViewControllerSnapshot, NSETabViewControllerTabStyle, NSETabViewItemOptions } from "./Navigation/NSETabViewController";
 export type {
   NSETabBarControllerOptions,
 } from "./Navigation/NSETabBarController";

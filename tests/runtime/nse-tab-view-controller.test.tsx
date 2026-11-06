@@ -103,3 +103,38 @@ it("removes an item with its view controller", async () => {
   expect(await screen.findByText("Framework page")).toBeTruthy();
   expect(() => sections.insertTabViewItem(new NSETabViewItem({ viewController: sections.parent!.addChild(Pane, "Stray") }), 0)).toThrow(/child of its tab view controller/);
 });
+
+it("restores the selected tab and remembers each new one", async () => {
+  const stored = new Map<string, unknown>();
+  const preferences = { read: (key: string) => stored.get(key), write: (key: string, value: unknown) => { stored.set(key, value); } };
+  const restoration = {
+    key: "sections.tab", version: 0, migrations: [], preferences,
+    parse: (value: unknown) => typeof value === "string" ? { ok: true as const, value } : { ok: false as const, issues: ["An identifier."] },
+    capture: (snapshot: { readonly selectedIdentifier: string | null }) => snapshot.selectedIdentifier ?? "company",
+    restore: (tabs: NSETabViewController, value: unknown) => { tabs.selectTabViewItem(String(value)); },
+  };
+  let restored!: Remembering;
+  class Remembering extends NSETabViewController {
+    constructor() {
+      super({ restoration });
+      restored = this;
+      for (const name of ["Company", "Team"]) this.addTabViewItem(new NSETabViewItem({ viewController: this.addChild(Pane, name), identifier: name.toLowerCase() }));
+    }
+  }
+  class Holder extends NSEViewController {
+    readonly tabs = this.addChild(Remembering);
+    static override view = function HolderView({ controller }: { readonly controller: Holder }) { return <controller.tabs.view />; };
+  }
+  stored.set("sections.tab", "team");
+  class RestoringWindow extends NSEWindowController { constructor() { super(); this.contentViewController = new Holder(); } }
+  class RestoringApplication extends NSEApplication { static override mainWindow = RestoringWindow; }
+  const host = createClassApplicationHost(RestoringApplication, "com.example.tab-view-restoration");
+  hosts.push(host);
+  await host.launch();
+  host.mountWindows();
+  await act(async () => { await host.openMainWindow(); });
+  expect(restored.selectedTabViewItem?.identifier).toBe("team");
+  expect(await screen.findByText("Team page")).toBeTruthy();
+  await act(async () => { restored.selectedTabViewItemIndex = 0; });
+  expect(stored.get("sections.tab")).toBe("company");
+});

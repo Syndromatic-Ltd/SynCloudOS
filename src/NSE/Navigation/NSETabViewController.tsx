@@ -25,6 +25,8 @@ import { NSETabBar } from "./NSETabBar";
 import { NSETabBarController } from "./NSETabBarController";
 import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinationHost";
 import type { NSENavigationIcon } from "./navigationTypes";
+import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle";
+import { connectNSENavigationRestoration, type NSENavigationRestorationDescriptor } from "./navigationRestoration";
 
 /**
  * NSTabViewController.TabStyle. Atmo draws `segmentedControlOnBottom` as its bottom tab bar and
@@ -77,8 +79,18 @@ export class NSETabViewItem {
 
 const tabItemChanged: unique symbol = Symbol("nse.tabItemChanged");
 
+/** What a tab view controller's restoration captures: the selected item's identifier. */
+export interface NSETabViewControllerSnapshot {
+  readonly selectedIdentifier: string | null;
+}
+
 export interface NSETabViewControllerOptions extends NSEViewControllerOptions {
   readonly tabStyle?: NSETabViewControllerTabStyle;
+  /**
+   * Remembers the selected tab across launches. `capture` receives the snapshot; `restore` usually calls
+   * `selectTabViewItem(withIdentifier)`. It connects once the subclass constructor has added its items.
+   */
+  readonly restoration?: NSENavigationRestorationDescriptor<NSETabViewController, unknown>;
 }
 
 function refused(): DOMException { return new DOMException("The tab view controller refused the selection.", "AbortError"); }
@@ -89,7 +101,7 @@ function refused(): DOMException { return new DOMException("The tab view control
  * and the tab control its `tabStyle` names. Override `shouldSelect`, `willSelect` and `didSelect` (the
  * tab view delegate methods AppKit's controller implements) to take part in a change of tab.
  */
-export class NSETabViewController extends NSEViewController {
+export class NSETabViewController extends NSEViewController<NSETabViewControllerSnapshot> {
   readonly #items: NSETabViewItem[] = [];
   #selectedIndex = -1;
   #tabStyle: NSETabViewControllerTabStyle;
@@ -99,6 +111,20 @@ export class NSETabViewController extends NSEViewController {
   constructor(options: NSETabViewControllerOptions = {}) {
     super(options);
     this.#tabStyle = options.tabStyle ?? "segmentedControlOnTop";
+    if (options.restoration) registerNSEAuthoringFinalizer(this, () => connectNSENavigationRestoration(this, options.restoration!), 15);
+  }
+
+  #snapshot: NSETabViewControllerSnapshot = Object.freeze({ selectedIdentifier: null });
+  override getSnapshot(): NSETabViewControllerSnapshot {
+    const selectedIdentifier = this.selectedTabViewItem?.identifier ?? null;
+    if (selectedIdentifier !== this.#snapshot.selectedIdentifier) this.#snapshot = Object.freeze({ selectedIdentifier });
+    return this.#snapshot;
+  }
+
+  /** NSTabView.selectTabViewItem(withIdentifier:): selects the item with `identifier`, if there is one. */
+  selectTabViewItem(withIdentifier: string): void {
+    const index = this.#items.findIndex(item => item.identifier === withIdentifier);
+    if (index !== -1) this.selectedTabViewItemIndex = index;
   }
 
   /** NSTabViewController.tabStyle. */
