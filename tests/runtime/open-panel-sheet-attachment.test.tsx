@@ -4,6 +4,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { afterEach, expect, it, vi } from "vitest";
 import { NSEOpenPanel } from "../../src/NSE/FilePanels/NSEOpenPanel";
 import { NSEOpenPanelWindowHost } from "../../src/SynCloudOS/AppHosting/openPanelHosting";
+import { NSEOpenPanelApplicationHost } from "../../src/SynCloudOS/AppHosting/openPanelHosting";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { NSEWindowSheetHostContext, useNSEWindowSheetHost } from "../../src/SynCloudOS/AppHosting/windowChrome";
 import { NSEWindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
@@ -30,7 +31,7 @@ it.each([[false, false, false, false], [true, false, false, false], [false, true
     </NSEOpenPanelWindowHost></NSEWindowSheetHostContext.Provider><div ref={sheets.layerRef} className="nse-window-sheet-layer" data-sheet-attached={attached} /></div>;
   }
   render(<NSEStandaloneControlHost document={document} window={globalThis.window} presentation={createStaticPresentationPort({ width: compact ? 390 : 1000, height: compact ? 844 : 720 })}>
-    <NSEWindowSurfaceBridgeProvider bridge={bridge}><SynWareProvider value={value}><Parent /></SynWareProvider></NSEWindowSurfaceBridgeProvider></NSEStandaloneControlHost>);
+    <NSEWindowSurfaceBridgeProvider bridge={bridge}><SynWareProvider value={value}><NSEOpenPanelApplicationHost value={value}><Parent /></NSEOpenPanelApplicationHost></SynWareProvider></NSEWindowSurfaceBridgeProvider></NSEStandaloneControlHost>);
   const trigger = screen.getByRole("button", { name: "Import…" }); trigger.focus();
   if (immediate) {
     const host = resolveNSEOpenPanelHost(application ? null : window);
