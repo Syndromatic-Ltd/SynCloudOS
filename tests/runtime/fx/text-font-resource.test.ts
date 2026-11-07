@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../src/Foundation/NSEData";
+
 import { notoFontEncodings, readNotoSans as noto } from "../../fixtures/fx/fonts/noto-font-encodings";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TFXFontDescriptor } from "../../../src/FX/TextFX/public";
@@ -33,11 +35,11 @@ describe("TextFX packaged font resources", () => {
   it("loads only through the mounted bundle's private resource authority", async () => {
     const firstLoader = vi.fn(async (path: string) => {
       if (path !== "Resources/Fonts/Shared.ttf") throw new DOMException("missing", "NotFoundError");
-      return { bytes: noto(), mimeType: "font/ttf" as const };
+      return { bytes: NSEData.from(noto()), mimeType: "font/ttf" as const };
     });
     const secondLoader = vi.fn(async (path: string) => {
       if (path !== "Resources/Fonts/Peer.ttf") throw new DOMException("missing", "NotFoundError");
-      return { bytes: noto(), mimeType: "font/ttf" as const };
+      return { bytes: NSEData.from(noto()), mimeType: "font/ttf" as const };
     });
     const firstBundle = createTestBundle({ bundleIdentifier: "com.example.font-resource-first", route: "/font-resource-first" }, { fontResourceLoader: firstLoader });
     const secondBundle = createTestBundle({ bundleIdentifier: "com.example.font-resource-second", route: "/font-resource-second" }, { fontResourceLoader: secondLoader });
@@ -66,7 +68,7 @@ describe("TextFX packaged font resources", () => {
     "https://example.test/font.ttf",
     "Resources/Fonts/font.ttf\0ignored",
   ])("rejects non-canonical bundle path %s before invoking its loader", async (path) => {
-    const loader = vi.fn(async () => ({ bytes: noto(), mimeType: "font/ttf" as const }));
+    const loader = vi.fn(async () => ({ bytes: NSEData.from(noto()), mimeType: "font/ttf" as const }));
     const bundle = createTestBundle({ bundleIdentifier: "com.example.font-resource-paths", route: "/font-resource-paths" }, { fontResourceLoader: loader });
     const runtime = createTestRuntime({ initialBundles: [bundle] });
     const mount = mountTestSynWareRuntime(runtime, bundle.manifest.bundleIdentifier);
@@ -78,10 +80,10 @@ describe("TextFX packaged font resources", () => {
 
   it("rejects mismatched MIME and oversized loader results before font decoding", async () => {
     const mismatched = createTestBundle({ bundleIdentifier: "com.example.font-resource-mime", route: "/font-resource-mime" }, {
-      fontResourceLoader: async () => ({ bytes: noto(), mimeType: "font/woff2" }),
+      fontResourceLoader: async () => ({ bytes: NSEData.from(noto()), mimeType: "font/woff2" }),
     });
     const oversized = createTestBundle({ bundleIdentifier: "com.example.font-resource-size", route: "/font-resource-size" }, {
-      fontResourceLoader: async () => ({ bytes: new Uint8Array(maximumTFXFontResourceBytes + 1), mimeType: "font/ttf" }),
+      fontResourceLoader: async () => ({ bytes: NSEData.from(new Uint8Array(maximumTFXFontResourceBytes + 1)), mimeType: "font/ttf" }),
     });
     const runtime = createTestRuntime({ initialBundles: [mismatched, oversized] });
     const mimeMount = mountTestSynWareRuntime(runtime, mismatched.manifest.bundleIdentifier);
@@ -109,11 +111,11 @@ describe("TextFX packaged font resources", () => {
   });
 
   it("rolls back a caller-aborted resource reservation and ignores its late completion", async () => {
-    let complete!: (resource: { bytes: Uint8Array; mimeType: "font/ttf" }) => void;
+    let complete!: (resource: { bytes: NSEData; mimeType: "font/ttf" }) => void;
     let defer = true;
     const loader = vi.fn(() => defer
-      ? new Promise<{ bytes: Uint8Array; mimeType: "font/ttf" }>((resolve) => { complete = resolve; })
-      : Promise.resolve({ bytes: noto(), mimeType: "font/ttf" as const }));
+      ? new Promise<{ bytes: NSEData; mimeType: "font/ttf" }>((resolve) => { complete = resolve; })
+      : Promise.resolve({ bytes: NSEData.from(noto()), mimeType: "font/ttf" as const }));
     const bundle = createTestBundle({ bundleIdentifier: "com.example.font-resource-caller-abort", route: "/font-resource-caller-abort" }, { fontResourceLoader: loader });
     const runtime = createTestRuntime({ initialBundles: [bundle] });
     const mount = mountTestSynWareRuntime(runtime, bundle.manifest.bundleIdentifier);
@@ -123,7 +125,7 @@ describe("TextFX packaged font resources", () => {
       await vi.waitFor(() => expect(loader).toHaveBeenCalledTimes(1));
       caller.abort(new DOMException("caller cancelled", "AbortError"));
       await expect(pending).rejects.toMatchObject({ name: "AbortError" });
-      complete({ bytes: noto(), mimeType: "font/ttf" });
+      complete({ bytes: NSEData.from(noto()), mimeType: "font/ttf" });
       await Promise.resolve();
       expect(mount.runtime.textLayout.fontReadinessGeneration).toBe(0);
       defer = false;

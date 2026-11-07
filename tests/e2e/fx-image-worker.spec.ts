@@ -92,7 +92,7 @@ test("ImageFX executes in a real browser worker with explicit destination capabi
       let webp: { type: string; size: number } | null = null;
       if (backend.capabilities.encodedMimeTypes.includes("image/webp")) {
         const encoded = await backend.renderEncoded(source, { format: "image/webp", colourSpace: "srgb", orientation: "up" });
-        webp = { type: encoded.blob.type, size: encoded.blob.size };
+        webp = { type: encoded.metadata.mimeType, size: encoded.data.count };
       }
       let canvas: unknown = null;
       if (backend.capabilities.destinations.includes("offscreen-canvas")) {
@@ -230,7 +230,7 @@ test("ImageFX executes in a real browser worker with explicit destination capabi
           pixels: Array.from(rendered.image.copyData()),
           published: destination.image ? Array.from(destination.image.copyData()) : null,
           infoBackend: rendered.info.backend,
-          png: { type: png.blob.type, size: png.blob.size, metadata: png.metadata },
+          png: { type: png.metadata.mimeType, size: png.data.count, metadata: png.metadata },
           webp,
           canvas,
           fx13,
