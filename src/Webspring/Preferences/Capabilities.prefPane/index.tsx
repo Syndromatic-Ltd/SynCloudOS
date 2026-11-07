@@ -25,6 +25,7 @@ import { definePreferencePane } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { installedApplicationForDocument } from "../../../SynCloudOS/SynCloudOS";
 import { useSystemText } from "../useSystemText";
+import "./capabilities.css";
 const idleSubscribe = () => () => {};
 const idleSnapshot = () => null;
 export function CapabilitiesPane() {
@@ -42,19 +43,19 @@ export function CapabilitiesPane() {
     ["Window controls overlay", !!navigator && "windowControlsOverlay" in navigator], ["View Transitions", !!document && "startViewTransition" in document],
     ["Background sync", !!browserWindow && "SyncManager" in browserWindow], ["Background fetch", !!browserWindow && "BackgroundFetchManager" in browserWindow],
   ] as const;
-  return <section aria-label={t("preferences.capabilities", "Capabilities")} style={{ padding: 16 }}><NSEBox><div style={{ padding: 16 }}>
+  return <section className="nse-capabilities" aria-label={t("preferences.capabilities", "Capabilities")}><NSEBox><div className="nse-capabilities-content">
     <h2>{t("preferences.capabilities.heading", "Installed application")}</h2>
-    <p role="status">{snapshot?.installed ? t("preferences.capabilities.installed", "Running as an installed application") : t("preferences.capabilities.browser", "Running in a browser tab")}</p>
+    <p role="status">{snapshot?.installed ? t("preferences.capabilities.installed", "Application installed") : t("preferences.capabilities.browser", "Running in a browser tab")}</p>
     <NSEButton title={t("preferences.capabilities.install", "Install application")} isEnabled={snapshot?.canInstall === true}
       onClick={() => { void runtime.commands.dispatch("webspring.install", undefined); }} />
     <p>{t("preferences.capabilities.scope", "Installation is offered when the site declares an install scope and this browser permits it.")}</p>
-    <dl><dt>{t("preferences.capabilities.worker", "Offline worker")}</dt><dd>{snapshot?.worker ?? "Not configured"}</dd>
+    <dl className="nse-capabilities-details"><dt>{t("preferences.capabilities.worker", "Offline worker")}</dt><dd>{snapshot?.worker ?? "Not configured"}</dd>
       <dt>{t("preferences.capabilities.persistence", "Persistent storage")}</dt><dd>{snapshot?.persistence ?? "Not requested"}</dd></dl>
     {snapshot?.error ? <p role="alert">{snapshot.error}</p> : null}
     <h2>{t("preferences.capabilities.browserSupport", "Browser support")}</h2>
-    <dl>{capabilities.map(([name, supported]) => <div key={name} style={{ display: "flex", justifyContent: "space-between", gap: 24 }}><dt>{name}</dt><dd>{supported ? t("preferences.capabilities.available", "Available") : t("preferences.capabilities.unavailable", "Unavailable")}</dd></div>)}</dl>
+    <dl className="nse-capabilities-support">{capabilities.map(([name, supported]) => <div key={name}><dt>{name}</dt><dd>{supported ? t("preferences.capabilities.available", "Available") : t("preferences.capabilities.unavailable", "Unavailable")}</dd></div>)}</dl>
     <h2>{t("preferences.capabilities.fx", "FX frameworks")}</h2>
-    <dl>{families.map(row => <div key={row.family} style={{ marginBlock: 12 }}><dt>{row.family}</dt><dd style={{ marginInlineStart: 0, overflowWrap: "anywhere" }}>{row.value}</dd></div>)}</dl>
+    <dl className="nse-capabilities-families">{families.map(row => <div key={row.family}><dt>{row.family}</dt><dd>{row.value}</dd></div>)}</dl>
     <p>{t("preferences.capabilities.limit", "Support does not imply permission. Offline availability covers the application shell and bundled resources; server data still needs a connection.")}</p>
   </div></NSEBox></section>;
 }
