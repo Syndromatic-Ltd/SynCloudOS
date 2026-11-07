@@ -53,6 +53,7 @@
 @import "../Navigation/nse-navigation.css";
 @import "../Overlays/nse-overlays.css";
 @import "../Page/nse-page.css";
+@import "../Page/pageCurlController.css";
 @import "../Scroll/scroll.css";
 @import "../Toolbars/nse-toolbars.css";
 @import "../Tooltips/nse-tooltips.css";
