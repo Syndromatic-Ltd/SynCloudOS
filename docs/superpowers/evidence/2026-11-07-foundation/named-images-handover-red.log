@@ -1,0 +1,38 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-application-navigation-chrome.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-application-navigation-chrome.test.tsx (5 tests | 1 failed) 92ms
+     × claims released chrome with the latest pending state and stops waiting on unmount 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-application-navigation-chrome.test.tsx > NSE application navigation chrome > claims released chrome with the latest pending state and stops waiting on unmount
+AssertionError: expected null to match object { ownerId: 'gallery', …(1) }
+
+- Expected:
+{
+  "ownerId": "gallery",
+  "title": "Sections",
+}
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-application-navigation-chrome.test.tsx:73:45
+     71|     expect(controller.getSnapshot().active?.ownerId).toBe("split:initi…
+     72|     act(() => split.release());
+     73|     expect(controller.getSnapshot().active).toMatchObject({ ownerId: "…
+       |                                             ^
+     74|     view.unmount();
+     75|     expect(controller.getSnapshot().active).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  12:46:59
+   Duration  6.57s (transform 4.02s, setup 26ms, import 5.42s, tests 92ms, environment 903ms)
+

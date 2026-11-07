@@ -1,0 +1,262 @@
+[
+  {
+    "colourScheme": "light",
+    "dpr": 1,
+    "receipt": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+    "errors": [],
+    "stage": {
+      "bounds": {
+        "x": 14,
+        "y": 3,
+        "width": 50,
+        "height": 50,
+        "top": 3,
+        "right": 64,
+        "bottom": 53,
+        "left": 14
+      },
+      "label": "Sections",
+      "bezel": "texturedRounded",
+      "image": {
+        "tag": "svg",
+        "bounds": {
+          "x": 30.5,
+          "y": 19.5,
+          "width": 17,
+          "height": 17,
+          "top": 19.5,
+          "right": 47.5,
+          "bottom": 36.5,
+          "left": 30.5
+        },
+        "colour": "rgb(244, 246, 248)",
+        "background": "rgba(0, 0, 0, 0)",
+        "mask": "none",
+        "transform": "none"
+      }
+    },
+    "preferences": {
+      "bounds": {
+        "x": 20,
+        "y": 276.5,
+        "width": 50,
+        "height": 50,
+        "top": 276.5,
+        "right": 70,
+        "bottom": 326.5,
+        "left": 20
+      },
+      "label": "Back",
+      "bezel": "texturedRounded",
+      "image": {
+        "tag": "svg",
+        "bounds": {
+          "x": 36.5,
+          "y": 293,
+          "width": 17,
+          "height": 17,
+          "top": 293,
+          "right": 53.5,
+          "bottom": 310,
+          "left": 36.5
+        },
+        "colour": "rgb(244, 246, 248)",
+        "background": "rgba(0, 0, 0, 0)",
+        "mask": "none",
+        "transform": "none"
+      }
+    },
+    "history": {
+      "bounds": {
+        "x": 536,
+        "y": 70,
+        "width": 80.03125,
+        "height": 24,
+        "top": 70,
+        "right": 616.03125,
+        "bottom": 94,
+        "left": 536
+      },
+      "label": "Folder navigation",
+      "bezel": null,
+      "image": {
+        "tag": "IMG",
+        "bounds": {
+          "x": 549.390625,
+          "y": 74.078125,
+          "width": 17,
+          "height": 17,
+          "top": 74.078125,
+          "right": 566.390625,
+          "bottom": 91.078125,
+          "left": 549.390625
+        },
+        "colour": "rgb(255, 255, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "mask": "none",
+        "transform": "none"
+      }
+    },
+    "phone": {
+      "bounds": {
+        "x": 28,
+        "y": 218.5,
+        "width": 76,
+        "height": 50,
+        "top": 218.5,
+        "right": 104,
+        "bottom": 268.5,
+        "left": 28
+      },
+      "label": "Sources",
+      "bezel": "texturedRounded",
+      "image": {
+        "tag": "IMG",
+        "bounds": {
+          "x": 57.5,
+          "y": 235,
+          "width": 17,
+          "height": 17,
+          "top": 235,
+          "right": 74.5,
+          "bottom": 252,
+          "left": 57.5
+        },
+        "colour": "rgb(255, 255, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "mask": "none",
+        "transform": "none"
+      }
+    }
+  },
+  {
+    "colourScheme": "dark",
+    "dpr": 1,
+    "receipt": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+    "errors": [],
+    "stage": {
+      "bounds": {
+        "x": 14,
+        "y": 3,
+        "width": 50,
+        "height": 50,
+        "top": 3,
+        "right": 64,
+        "bottom": 53,
+        "left": 14
+      },
+      "label": "Sections",
+      "bezel": "texturedRounded",
+      "image": {
+        "tag": "svg",
+        "bounds": {
+          "x": 30.5,
+          "y": 19.5,
+          "width": 17,
+          "height": 17,
+          "top": 19.5,
+          "right": 47.5,
+          "bottom": 36.5,
+          "left": 30.5
+        },
+        "colour": "rgb(244, 246, 248)",
+        "background": "rgba(0, 0, 0, 0)",
+        "mask": "none",
+        "transform": "none"
+      }
+    },
+    "preferences": {
+      "bounds": {
+        "x": 20,
+        "y": 276.5,
+        "width": 50,
+        "height": 50,
+        "top": 276.5,
+        "right": 70,
+        "bottom": 326.5,
+        "left": 20
+      },
+      "label": "Back",
+      "bezel": "texturedRounded",
+      "image": {
+        "tag": "svg",
+        "bounds": {
+          "x": 36.5,
+          "y": 293,
+          "width": 17,
+          "height": 17,
+          "top": 293,
+          "right": 53.5,
+          "bottom": 310,
+          "left": 36.5
+        },
+        "colour": "rgb(244, 246, 248)",
+        "background": "rgba(0, 0, 0, 0)",
+        "mask": "none",
+        "transform": "none"
+      }
+    },
+    "history": {
+      "bounds": {
+        "x": 536,
+        "y": 70,
+        "width": 80.03125,
+        "height": 24,
+        "top": 70,
+        "right": 616.03125,
+        "bottom": 94,
+        "left": 536
+      },
+      "label": "Folder navigation",
+      "bezel": null,
+      "image": {
+        "tag": "IMG",
+        "bounds": {
+          "x": 549.390625,
+          "y": 74.078125,
+          "width": 17,
+          "height": 17,
+          "top": 74.078125,
+          "right": 566.390625,
+          "bottom": 91.078125,
+          "left": 549.390625
+        },
+        "colour": "rgb(255, 255, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "mask": "none",
+        "transform": "none"
+      }
+    },
+    "phone": {
+      "bounds": {
+        "x": 28,
+        "y": 218.5,
+        "width": 76,
+        "height": 50,
+        "top": 218.5,
+        "right": 104,
+        "bottom": 268.5,
+        "left": 28
+      },
+      "label": "Sources",
+      "bezel": "texturedRounded",
+      "image": {
+        "tag": "IMG",
+        "bounds": {
+          "x": 57.5,
+          "y": 235,
+          "width": 17,
+          "height": 17,
+          "top": 235,
+          "right": 74.5,
+          "bottom": 252,
+          "left": 57.5
+        },
+        "colour": "rgb(255, 255, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "mask": "none",
+        "transform": "none"
+      }
+    }
+  }
+]

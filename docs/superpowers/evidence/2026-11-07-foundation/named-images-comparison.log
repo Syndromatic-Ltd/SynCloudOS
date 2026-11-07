@@ -1,0 +1,130 @@
+[
+  {
+    dpr: 1,
+    scheme: 'light',
+    control: 'stage',
+    boundsEqual: true,
+    changed: 0,
+    mean: 0.0014666666666666667
+  },
+  {
+    dpr: 1,
+    scheme: 'light',
+    control: 'preferences',
+    boundsEqual: true,
+    changed: 0,
+    mean: 0.001437908496732026
+  },
+  {
+    dpr: 1,
+    scheme: 'light',
+    control: 'history',
+    boundsEqual: true,
+    changed: 54,
+    mean: 0.8045267489711934
+  },
+  {
+    dpr: 1,
+    scheme: 'light',
+    control: 'phone',
+    boundsEqual: true,
+    changed: 0,
+    mean: 0.0006879944960440316
+  },
+  {
+    dpr: 1,
+    scheme: 'dark',
+    control: 'stage',
+    boundsEqual: true,
+    changed: 5,
+    mean: 0.017466666666666665
+  },
+  {
+    dpr: 1,
+    scheme: 'dark',
+    control: 'preferences',
+    boundsEqual: true,
+    changed: 0,
+    mean: 0.001437908496732026
+  },
+  {
+    dpr: 1,
+    scheme: 'dark',
+    control: 'history',
+    boundsEqual: true,
+    changed: 55,
+    mean: 1.6958161865569272
+  },
+  {
+    dpr: 1,
+    scheme: 'dark',
+    control: 'phone',
+    boundsEqual: true,
+    changed: 0,
+    mean: 0.0006879944960440316
+  },
+  {
+    dpr: 2,
+    scheme: 'light',
+    control: 'stage',
+    boundsEqual: true,
+    changed: 0,
+    mean: 0.0014666666666666667
+  },
+  {
+    dpr: 2,
+    scheme: 'light',
+    control: 'preferences',
+    boundsEqual: true,
+    changed: 0,
+    mean: 0.001437908496732026
+  },
+  {
+    dpr: 2,
+    scheme: 'light',
+    control: 'history',
+    boundsEqual: true,
+    changed: 54,
+    mean: 0.8045267489711934
+  },
+  {
+    dpr: 2,
+    scheme: 'light',
+    control: 'phone',
+    boundsEqual: true,
+    changed: 0,
+    mean: 0.0006879944960440316
+  },
+  {
+    dpr: 2,
+    scheme: 'dark',
+    control: 'stage',
+    boundsEqual: true,
+    changed: 5,
+    mean: 0.017466666666666665
+  },
+  {
+    dpr: 2,
+    scheme: 'dark',
+    control: 'preferences',
+    boundsEqual: true,
+    changed: 0,
+    mean: 0.001437908496732026
+  },
+  {
+    dpr: 2,
+    scheme: 'dark',
+    control: 'history',
+    boundsEqual: true,
+    changed: 55,
+    mean: 1.6958161865569272
+  },
+  {
+    dpr: 2,
+    scheme: 'dark',
+    control: 'phone',
+    boundsEqual: true,
+    changed: 0,
+    mean: 0.0006879944960440316
+  }
+]

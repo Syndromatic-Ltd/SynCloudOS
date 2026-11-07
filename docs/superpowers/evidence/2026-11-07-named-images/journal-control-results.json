@@ -1,0 +1,124 @@
+[
+  {
+    "colorScheme": "light",
+    "phone": [
+      {
+        "label": "Back",
+        "bounds": {
+          "x": 6,
+          "y": 5,
+          "width": 50,
+          "height": 44,
+          "top": 5,
+          "right": 56,
+          "bottom": 49,
+          "left": 6
+        },
+        "named": "NSGoBackTemplate"
+      },
+      {
+        "label": "Return to Webspring",
+        "bounds": {
+          "x": 62,
+          "y": 5,
+          "width": 50,
+          "height": 44,
+          "top": 5,
+          "right": 112,
+          "bottom": 49,
+          "left": 62
+        }
+      },
+      {
+        "label": "Journal",
+        "bounds": {
+          "x": 334,
+          "y": 5,
+          "width": 50,
+          "height": 44,
+          "top": 5,
+          "right": 384,
+          "bottom": 49,
+          "left": 334
+        }
+      }
+    ],
+    "counts": [
+      {
+        "label": "Open QuickSwitch",
+        "bounds": {
+          "x": 230.09375,
+          "y": 23,
+          "width": 91.8125,
+          "height": 24,
+          "top": 23,
+          "right": 321.90625,
+          "bottom": 47,
+          "left": 230.09375
+        },
+        "size": "small"
+      }
+    ]
+  },
+  {
+    "colorScheme": "dark",
+    "phone": [
+      {
+        "label": "Back",
+        "bounds": {
+          "x": 6,
+          "y": 5,
+          "width": 50,
+          "height": 44,
+          "top": 5,
+          "right": 56,
+          "bottom": 49,
+          "left": 6
+        },
+        "named": "NSGoBackTemplate"
+      },
+      {
+        "label": "Return to Webspring",
+        "bounds": {
+          "x": 62,
+          "y": 5,
+          "width": 50,
+          "height": 44,
+          "top": 5,
+          "right": 112,
+          "bottom": 49,
+          "left": 62
+        }
+      },
+      {
+        "label": "Journal",
+        "bounds": {
+          "x": 334,
+          "y": 5,
+          "width": 50,
+          "height": 44,
+          "top": 5,
+          "right": 384,
+          "bottom": 49,
+          "left": 334
+        }
+      }
+    ],
+    "counts": [
+      {
+        "label": "Open QuickSwitch",
+        "bounds": {
+          "x": 230.09375,
+          "y": 23,
+          "width": 91.8125,
+          "height": 24,
+          "top": 23,
+          "right": 321.90625,
+          "bottom": 47,
+          "left": 230.09375
+        },
+        "size": "small"
+      }
+    ]
+  }
+]

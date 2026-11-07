@@ -1,0 +1,818 @@
+[
+  {
+    "dpr": 1,
+    "scheme": "light",
+    "control": "stage",
+    "before": {
+      "x": 14,
+      "y": 3,
+      "width": 50,
+      "height": 50,
+      "top": 3,
+      "right": 64,
+      "bottom": 53,
+      "left": 14
+    },
+    "after": {
+      "x": 14,
+      "y": 3,
+      "width": 50,
+      "height": 50,
+      "top": 3,
+      "right": 64,
+      "bottom": 53,
+      "left": 14
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 30.5,
+      "y": 19.5,
+      "width": 17,
+      "height": 17,
+      "top": 19.5,
+      "right": 47.5,
+      "bottom": 36.5,
+      "left": 30.5
+    },
+    "imageAfter": {
+      "x": 30.5,
+      "y": 19.5,
+      "width": 17,
+      "height": 17,
+      "top": 19.5,
+      "right": 47.5,
+      "bottom": 36.5,
+      "left": 30.5
+    },
+    "changedPixelsAboveOne": 0,
+    "meanChannelDifference": 0.0014666666666666667,
+    "maxChannelDifference": 1,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 1,
+    "scheme": "light",
+    "control": "preferences",
+    "before": {
+      "x": 20,
+      "y": 276.5,
+      "width": 50,
+      "height": 50,
+      "top": 276.5,
+      "right": 70,
+      "bottom": 326.5,
+      "left": 20
+    },
+    "after": {
+      "x": 20,
+      "y": 276.5,
+      "width": 50,
+      "height": 50,
+      "top": 276.5,
+      "right": 70,
+      "bottom": 326.5,
+      "left": 20
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 36.5,
+      "y": 293,
+      "width": 17,
+      "height": 17,
+      "top": 293,
+      "right": 53.5,
+      "bottom": 310,
+      "left": 36.5
+    },
+    "imageAfter": {
+      "x": 36.5,
+      "y": 293,
+      "width": 17,
+      "height": 17,
+      "top": 293,
+      "right": 53.5,
+      "bottom": 310,
+      "left": 36.5
+    },
+    "changedPixelsAboveOne": 0,
+    "meanChannelDifference": 0.001437908496732026,
+    "maxChannelDifference": 1,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 1,
+    "scheme": "light",
+    "control": "history",
+    "before": {
+      "x": 536,
+      "y": 70,
+      "width": 80.03125,
+      "height": 24,
+      "top": 70,
+      "right": 616.03125,
+      "bottom": 94,
+      "left": 536
+    },
+    "after": {
+      "x": 536,
+      "y": 70,
+      "width": 80.03125,
+      "height": 24,
+      "top": 70,
+      "right": 616.03125,
+      "bottom": 94,
+      "left": 536
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 549.390625,
+      "y": 74.078125,
+      "width": 17,
+      "height": 17,
+      "top": 74.078125,
+      "right": 566.390625,
+      "bottom": 91.078125,
+      "left": 549.390625
+    },
+    "imageAfter": {
+      "x": 549.390625,
+      "y": 74.078125,
+      "width": 17,
+      "height": 17,
+      "top": 74.078125,
+      "right": 566.390625,
+      "bottom": 91.078125,
+      "left": 549.390625
+    },
+    "changedPixelsAboveOne": 54,
+    "meanChannelDifference": 0.8045267489711934,
+    "maxChannelDifference": 46,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 1,
+    "scheme": "light",
+    "control": "phone",
+    "before": {
+      "x": 28,
+      "y": 218.5,
+      "width": 76,
+      "height": 50,
+      "top": 218.5,
+      "right": 104,
+      "bottom": 268.5,
+      "left": 28
+    },
+    "after": {
+      "x": 28,
+      "y": 218.5,
+      "width": 76,
+      "height": 50,
+      "top": 218.5,
+      "right": 104,
+      "bottom": 268.5,
+      "left": 28
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 57.5,
+      "y": 235,
+      "width": 17,
+      "height": 17,
+      "top": 235,
+      "right": 74.5,
+      "bottom": 252,
+      "left": 57.5
+    },
+    "imageAfter": {
+      "x": 57.5,
+      "y": 235,
+      "width": 17,
+      "height": 17,
+      "top": 235,
+      "right": 74.5,
+      "bottom": 252,
+      "left": 57.5
+    },
+    "changedPixelsAboveOne": 0,
+    "meanChannelDifference": 0.0006879944960440316,
+    "maxChannelDifference": 1,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 1,
+    "scheme": "dark",
+    "control": "stage",
+    "before": {
+      "x": 14,
+      "y": 3,
+      "width": 50,
+      "height": 50,
+      "top": 3,
+      "right": 64,
+      "bottom": 53,
+      "left": 14
+    },
+    "after": {
+      "x": 14,
+      "y": 3,
+      "width": 50,
+      "height": 50,
+      "top": 3,
+      "right": 64,
+      "bottom": 53,
+      "left": 14
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 30.5,
+      "y": 19.5,
+      "width": 17,
+      "height": 17,
+      "top": 19.5,
+      "right": 47.5,
+      "bottom": 36.5,
+      "left": 30.5
+    },
+    "imageAfter": {
+      "x": 30.5,
+      "y": 19.5,
+      "width": 17,
+      "height": 17,
+      "top": 19.5,
+      "right": 47.5,
+      "bottom": 36.5,
+      "left": 30.5
+    },
+    "changedPixelsAboveOne": 5,
+    "meanChannelDifference": 0.017466666666666665,
+    "maxChannelDifference": 22,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 1,
+    "scheme": "dark",
+    "control": "preferences",
+    "before": {
+      "x": 20,
+      "y": 276.5,
+      "width": 50,
+      "height": 50,
+      "top": 276.5,
+      "right": 70,
+      "bottom": 326.5,
+      "left": 20
+    },
+    "after": {
+      "x": 20,
+      "y": 276.5,
+      "width": 50,
+      "height": 50,
+      "top": 276.5,
+      "right": 70,
+      "bottom": 326.5,
+      "left": 20
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 36.5,
+      "y": 293,
+      "width": 17,
+      "height": 17,
+      "top": 293,
+      "right": 53.5,
+      "bottom": 310,
+      "left": 36.5
+    },
+    "imageAfter": {
+      "x": 36.5,
+      "y": 293,
+      "width": 17,
+      "height": 17,
+      "top": 293,
+      "right": 53.5,
+      "bottom": 310,
+      "left": 36.5
+    },
+    "changedPixelsAboveOne": 0,
+    "meanChannelDifference": 0.001437908496732026,
+    "maxChannelDifference": 1,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 1,
+    "scheme": "dark",
+    "control": "history",
+    "before": {
+      "x": 536,
+      "y": 70,
+      "width": 80.03125,
+      "height": 24,
+      "top": 70,
+      "right": 616.03125,
+      "bottom": 94,
+      "left": 536
+    },
+    "after": {
+      "x": 536,
+      "y": 70,
+      "width": 80.03125,
+      "height": 24,
+      "top": 70,
+      "right": 616.03125,
+      "bottom": 94,
+      "left": 536
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 549.390625,
+      "y": 74.078125,
+      "width": 17,
+      "height": 17,
+      "top": 74.078125,
+      "right": 566.390625,
+      "bottom": 91.078125,
+      "left": 549.390625
+    },
+    "imageAfter": {
+      "x": 549.390625,
+      "y": 74.078125,
+      "width": 17,
+      "height": 17,
+      "top": 74.078125,
+      "right": 566.390625,
+      "bottom": 91.078125,
+      "left": 549.390625
+    },
+    "changedPixelsAboveOne": 55,
+    "meanChannelDifference": 1.6958161865569272,
+    "maxChannelDifference": 95,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 1,
+    "scheme": "dark",
+    "control": "phone",
+    "before": {
+      "x": 28,
+      "y": 218.5,
+      "width": 76,
+      "height": 50,
+      "top": 218.5,
+      "right": 104,
+      "bottom": 268.5,
+      "left": 28
+    },
+    "after": {
+      "x": 28,
+      "y": 218.5,
+      "width": 76,
+      "height": 50,
+      "top": 218.5,
+      "right": 104,
+      "bottom": 268.5,
+      "left": 28
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 57.5,
+      "y": 235,
+      "width": 17,
+      "height": 17,
+      "top": 235,
+      "right": 74.5,
+      "bottom": 252,
+      "left": 57.5
+    },
+    "imageAfter": {
+      "x": 57.5,
+      "y": 235,
+      "width": 17,
+      "height": 17,
+      "top": 235,
+      "right": 74.5,
+      "bottom": 252,
+      "left": 57.5
+    },
+    "changedPixelsAboveOne": 0,
+    "meanChannelDifference": 0.0006879944960440316,
+    "maxChannelDifference": 1,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 2,
+    "scheme": "light",
+    "control": "stage",
+    "before": {
+      "x": 14,
+      "y": 3,
+      "width": 50,
+      "height": 50,
+      "top": 3,
+      "right": 64,
+      "bottom": 53,
+      "left": 14
+    },
+    "after": {
+      "x": 14,
+      "y": 3,
+      "width": 50,
+      "height": 50,
+      "top": 3,
+      "right": 64,
+      "bottom": 53,
+      "left": 14
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 30.5,
+      "y": 19.5,
+      "width": 17,
+      "height": 17,
+      "top": 19.5,
+      "right": 47.5,
+      "bottom": 36.5,
+      "left": 30.5
+    },
+    "imageAfter": {
+      "x": 30.5,
+      "y": 19.5,
+      "width": 17,
+      "height": 17,
+      "top": 19.5,
+      "right": 47.5,
+      "bottom": 36.5,
+      "left": 30.5
+    },
+    "changedPixelsAboveOne": 0,
+    "meanChannelDifference": 0.0014666666666666667,
+    "maxChannelDifference": 1,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 2,
+    "scheme": "light",
+    "control": "preferences",
+    "before": {
+      "x": 20,
+      "y": 276.5,
+      "width": 50,
+      "height": 50,
+      "top": 276.5,
+      "right": 70,
+      "bottom": 326.5,
+      "left": 20
+    },
+    "after": {
+      "x": 20,
+      "y": 276.5,
+      "width": 50,
+      "height": 50,
+      "top": 276.5,
+      "right": 70,
+      "bottom": 326.5,
+      "left": 20
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 36.5,
+      "y": 293,
+      "width": 17,
+      "height": 17,
+      "top": 293,
+      "right": 53.5,
+      "bottom": 310,
+      "left": 36.5
+    },
+    "imageAfter": {
+      "x": 36.5,
+      "y": 293,
+      "width": 17,
+      "height": 17,
+      "top": 293,
+      "right": 53.5,
+      "bottom": 310,
+      "left": 36.5
+    },
+    "changedPixelsAboveOne": 0,
+    "meanChannelDifference": 0.001437908496732026,
+    "maxChannelDifference": 1,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 2,
+    "scheme": "light",
+    "control": "history",
+    "before": {
+      "x": 536,
+      "y": 70,
+      "width": 80.03125,
+      "height": 24,
+      "top": 70,
+      "right": 616.03125,
+      "bottom": 94,
+      "left": 536
+    },
+    "after": {
+      "x": 536,
+      "y": 70,
+      "width": 80.03125,
+      "height": 24,
+      "top": 70,
+      "right": 616.03125,
+      "bottom": 94,
+      "left": 536
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 549.390625,
+      "y": 74.078125,
+      "width": 17,
+      "height": 17,
+      "top": 74.078125,
+      "right": 566.390625,
+      "bottom": 91.078125,
+      "left": 549.390625
+    },
+    "imageAfter": {
+      "x": 549.390625,
+      "y": 74.078125,
+      "width": 17,
+      "height": 17,
+      "top": 74.078125,
+      "right": 566.390625,
+      "bottom": 91.078125,
+      "left": 549.390625
+    },
+    "changedPixelsAboveOne": 54,
+    "meanChannelDifference": 0.8045267489711934,
+    "maxChannelDifference": 46,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 2,
+    "scheme": "light",
+    "control": "phone",
+    "before": {
+      "x": 28,
+      "y": 218.5,
+      "width": 76,
+      "height": 50,
+      "top": 218.5,
+      "right": 104,
+      "bottom": 268.5,
+      "left": 28
+    },
+    "after": {
+      "x": 28,
+      "y": 218.5,
+      "width": 76,
+      "height": 50,
+      "top": 218.5,
+      "right": 104,
+      "bottom": 268.5,
+      "left": 28
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 57.5,
+      "y": 235,
+      "width": 17,
+      "height": 17,
+      "top": 235,
+      "right": 74.5,
+      "bottom": 252,
+      "left": 57.5
+    },
+    "imageAfter": {
+      "x": 57.5,
+      "y": 235,
+      "width": 17,
+      "height": 17,
+      "top": 235,
+      "right": 74.5,
+      "bottom": 252,
+      "left": 57.5
+    },
+    "changedPixelsAboveOne": 0,
+    "meanChannelDifference": 0.0006879944960440316,
+    "maxChannelDifference": 1,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 2,
+    "scheme": "dark",
+    "control": "stage",
+    "before": {
+      "x": 14,
+      "y": 3,
+      "width": 50,
+      "height": 50,
+      "top": 3,
+      "right": 64,
+      "bottom": 53,
+      "left": 14
+    },
+    "after": {
+      "x": 14,
+      "y": 3,
+      "width": 50,
+      "height": 50,
+      "top": 3,
+      "right": 64,
+      "bottom": 53,
+      "left": 14
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 30.5,
+      "y": 19.5,
+      "width": 17,
+      "height": 17,
+      "top": 19.5,
+      "right": 47.5,
+      "bottom": 36.5,
+      "left": 30.5
+    },
+    "imageAfter": {
+      "x": 30.5,
+      "y": 19.5,
+      "width": 17,
+      "height": 17,
+      "top": 19.5,
+      "right": 47.5,
+      "bottom": 36.5,
+      "left": 30.5
+    },
+    "changedPixelsAboveOne": 5,
+    "meanChannelDifference": 0.017466666666666665,
+    "maxChannelDifference": 22,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 2,
+    "scheme": "dark",
+    "control": "preferences",
+    "before": {
+      "x": 20,
+      "y": 276.5,
+      "width": 50,
+      "height": 50,
+      "top": 276.5,
+      "right": 70,
+      "bottom": 326.5,
+      "left": 20
+    },
+    "after": {
+      "x": 20,
+      "y": 276.5,
+      "width": 50,
+      "height": 50,
+      "top": 276.5,
+      "right": 70,
+      "bottom": 326.5,
+      "left": 20
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 36.5,
+      "y": 293,
+      "width": 17,
+      "height": 17,
+      "top": 293,
+      "right": 53.5,
+      "bottom": 310,
+      "left": 36.5
+    },
+    "imageAfter": {
+      "x": 36.5,
+      "y": 293,
+      "width": 17,
+      "height": 17,
+      "top": 293,
+      "right": 53.5,
+      "bottom": 310,
+      "left": 36.5
+    },
+    "changedPixelsAboveOne": 0,
+    "meanChannelDifference": 0.001437908496732026,
+    "maxChannelDifference": 1,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 2,
+    "scheme": "dark",
+    "control": "history",
+    "before": {
+      "x": 536,
+      "y": 70,
+      "width": 80.03125,
+      "height": 24,
+      "top": 70,
+      "right": 616.03125,
+      "bottom": 94,
+      "left": 536
+    },
+    "after": {
+      "x": 536,
+      "y": 70,
+      "width": 80.03125,
+      "height": 24,
+      "top": 70,
+      "right": 616.03125,
+      "bottom": 94,
+      "left": 536
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 549.390625,
+      "y": 74.078125,
+      "width": 17,
+      "height": 17,
+      "top": 74.078125,
+      "right": 566.390625,
+      "bottom": 91.078125,
+      "left": 549.390625
+    },
+    "imageAfter": {
+      "x": 549.390625,
+      "y": 74.078125,
+      "width": 17,
+      "height": 17,
+      "top": 74.078125,
+      "right": 566.390625,
+      "bottom": 91.078125,
+      "left": 549.390625
+    },
+    "changedPixelsAboveOne": 55,
+    "meanChannelDifference": 1.6958161865569272,
+    "maxChannelDifference": 95,
+    "errors": [],
+    "backInteraction": true
+  },
+  {
+    "dpr": 2,
+    "scheme": "dark",
+    "control": "phone",
+    "before": {
+      "x": 28,
+      "y": 218.5,
+      "width": 76,
+      "height": 50,
+      "top": 218.5,
+      "right": 104,
+      "bottom": 268.5,
+      "left": 28
+    },
+    "after": {
+      "x": 28,
+      "y": 218.5,
+      "width": 76,
+      "height": 50,
+      "top": 218.5,
+      "right": 104,
+      "bottom": 268.5,
+      "left": 28
+    },
+    "boundsEqual": true,
+    "imageBefore": {
+      "x": 57.5,
+      "y": 235,
+      "width": 17,
+      "height": 17,
+      "top": 235,
+      "right": 74.5,
+      "bottom": 252,
+      "left": 57.5
+    },
+    "imageAfter": {
+      "x": 57.5,
+      "y": 235,
+      "width": 17,
+      "height": 17,
+      "top": 235,
+      "right": 74.5,
+      "bottom": 252,
+      "left": 57.5
+    },
+    "changedPixelsAboveOne": 0,
+    "meanChannelDifference": 0.0006879944960440316,
+    "maxChannelDifference": 1,
+    "errors": [],
+    "backInteraction": true
+  }
+]
