@@ -73,6 +73,14 @@ describe("NSEView.draw", () => {
     expect(() => render(<NSEView draw={() => {}} />)).toThrow(/SynCloudOSProvider/);
   });
 
+  it("draws nothing, without failing, in a runtime that has no geometry port to measure with", () => {
+    const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), imageGeometry: undefined } });
+    const draw = vi.fn();
+    const view = render(<SynCloudOSProvider runtime={runtime}><NSEView draw={draw}>Subview</NSEView></SynCloudOSProvider>);
+    expect(draw).not.toHaveBeenCalled();
+    expect(view.getByText("Subview")).toBeTruthy();
+  });
+
   it("waits for positive finite bounds and clears a drawing when its bounds collapse", () => {
     const { runtime, resize } = drawingRuntime(0, 0);
     const draw = vi.fn();
