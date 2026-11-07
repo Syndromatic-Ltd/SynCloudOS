@@ -21,6 +21,28 @@
 
 import { expect, it, vi } from "vitest";
 import { BrowserInstalledApplicationAdapter } from "../../src/SynCloudOS/PlatformAdapters/BrowserInstalledApplicationAdapter";
+import { createBrowserRuntimeEnvironment } from "../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
+
+it("reserves the visible host title bar in the canonical work area and tracks geometry changes", () => {
+  const previous = Object.getOwnPropertyDescriptor(window.navigator, "windowControlsOverlay");
+  const overlay = Object.assign(new EventTarget(), { visible: true, getTitlebarAreaRect: () => new DOMRect(0, 0, window.innerWidth - 138, 32) });
+  Object.defineProperty(window.navigator, "windowControlsOverlay", { configurable: true, value: overlay });
+  let unsubscribe = () => {};
+  try {
+    const source = createBrowserRuntimeEnvironment().workArea;
+    expect(source.getSnapshot()).toMatchObject({ x: 0, y: 32, width: window.innerWidth, height: window.innerHeight - 32 });
+    const changed = vi.fn(); unsubscribe = source.subscribe(changed);
+    overlay.visible = false; overlay.dispatchEvent(new Event("geometrychange"));
+    expect(source.getSnapshot()).toMatchObject({ y: 0, height: window.innerHeight });
+    expect(changed).toHaveBeenCalledOnce();
+    unsubscribe(); overlay.visible = true; overlay.dispatchEvent(new Event("geometrychange"));
+    expect(changed).toHaveBeenCalledOnce();
+  } finally {
+    unsubscribe();
+    if (previous) Object.defineProperty(window.navigator, "windowControlsOverlay", previous);
+    else Reflect.deleteProperty(window.navigator, "windowControlsOverlay");
+  }
+});
 
 it("registers one receipt worker, requests persistence only when installed and releases listeners", async () => {
   const register = vi.fn(async () => ({ scope: "https://example.test/" }));
