@@ -133,13 +133,15 @@ export class NSEScrollViewController {
           previous = next;
           if (controller.contentView.postsBoundsChangedNotifications) observer(next);
         };
-        const disconnectScroll = controller.connect(publish);
+        // Bounds notifications follow the native event, so a client's next-frame
+        // drawing does not acquire an extra frame of scroll latency.
+        host.addEventListener("scroll", publish, { passive: true });
         const Resize = host.ownerDocument.defaultView?.ResizeObserver;
         const resize = Resize ? new Resize(publish) : null;
         resize?.observe(host);
         const disconnect = () => {
           controller.#connections.delete(disconnect);
-          disconnectScroll();
+          host.removeEventListener("scroll", publish);
           resize?.disconnect();
         };
         controller.#connections.add(disconnect);
