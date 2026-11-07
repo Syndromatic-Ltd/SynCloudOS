@@ -4,11 +4,11 @@ import { NSEData } from "../../Foundation/NSEData";
 import { NSEWorkspace } from "../Application/NSEWorkspace";
 import { NSEImageView } from "../Controls/Images/NSEImage";
 import type { IFXImageResource } from "../../FX/ImageFX/IFXImageResource";
-import type { AppImageClient } from "../../SynCloudOS/AppSDK/appEnvironmentClientTypes";
+import type { NSEOpenPanelImagePort } from "./openPanelHost";
 import type { OpenPanelItem } from "./NSEOpenPanelCollection";
 
 /** A visible collection cell owns its decode lease; fallback artwork stays until decoding succeeds. */
-export function NSEOpenPanelItemImage({ item, images }: { item: OpenPanelItem; images?: AppImageClient }) {
+export function NSEOpenPanelItemImage({ item, images }: { item: OpenPanelItem; images?: NSEOpenPanelImagePort }) {
   const [thumbnail, setThumbnail] = useState<{ item: OpenPanelItem; resource: IFXImageResource } | null>(null);
   useEffect(() => {
     let current = true;

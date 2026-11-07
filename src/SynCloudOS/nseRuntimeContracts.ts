@@ -58,3 +58,11 @@ export { UpdateReadinessProjection } from './Updates/UpdateReadinessProjection';
 export { trackOwnedWork } from "./Operations/OwnedWorkObservations";
 
 export { resolveViewportBookRegions, selectViewportFoldRegion } from "./Windows/viewportFeatures";
+
+// File and media panel capabilities; no runtime construction or application SDK dependency.
+export type { FilePanelReference, FilePanelResult, FilePanelService, OpenPanelRequest, FilePanelFileHandle } from "./FilePanels/filePanelTypes";
+export type { FilePanelDirectory, OpenPanelFolder, OpenPanelFileSystem } from "./FilePanels/OpenPanelFileSystem";
+export { matchesOpenPanelContentType, openPanelAcceptTypes } from "./FilePanels/OpenPanelFileSystem";
+export { referenceForOpenPanelHandle } from "./FilePanels/FileSystemAccessPanelAdapter";
+export type { MediaPanelItem, MediaPanelProvider } from "./MediaPanels/mediaPanelTypes";
+export { createMediaPanelService, takeOpenPanelMediaSelection } from "./MediaPanels/MediaPanelService";

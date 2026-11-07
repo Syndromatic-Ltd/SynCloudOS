@@ -1,7 +1,7 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
-import type { FilePanelDirectory, OpenPanelBookmark, OpenPanelStoragePort } from "../FilePanels/OpenPanelFileSystem";
+import type { FilePanelDirectory, OpenPanelBookmark, OpenPanelStoragePort } from "../Runtime/platformAdapterContracts";
 import { createBrowserFileSystemAccessPanelPort } from "./BrowserFileSystemAccessPanelPort";
-import type { NativeOperationActivity } from "../Updates/updateReadiness";
+import type { NativeOperationActivity } from "../Runtime/platformAdapterContracts";
 import { bridgeFilePanelDirectory, nativeFilePanelDirectory, type NativeFilePanelDirectory } from "./nativeFilePanelBridge";
 
 /** IndexedDB preserves the actual structured-cloneable handles, never serialised file paths. */

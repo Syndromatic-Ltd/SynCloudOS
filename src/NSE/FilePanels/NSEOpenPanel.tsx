@@ -19,9 +19,9 @@
  */
 
 import React from "react";
-import type { FilePanelReference, FilePanelResult, FilePanelService, OpenPanelRequest } from "../../SynCloudOS/FilePanels/filePanelTypes";
-import { matchesOpenPanelContentType, openPanelAcceptTypes, type FilePanelDirectory } from "../../SynCloudOS/FilePanels/OpenPanelFileSystem";
-import type { MediaPanelItem, MediaPanelProvider } from "../../SynCloudOS/MediaPanels/mediaPanelTypes";
+import type { FilePanelReference, FilePanelResult, FilePanelService, OpenPanelRequest } from "../../SynCloudOS/nseRuntimeContracts";
+import { matchesOpenPanelContentType, openPanelAcceptTypes, type FilePanelDirectory } from "../../SynCloudOS/nseRuntimeContracts";
+import type { MediaPanelItem, MediaPanelProvider } from "../../SynCloudOS/nseRuntimeContracts";
 import { NSEModalResponse } from "../Application/NSEAlert";
 import { nseEndSheet, type NSESheet, type NSEWindow } from "../Application/NSEWindowController";
 import { resolveNSEOpenPanelHost, type NSEOpenPanelHost } from "./openPanelHost";

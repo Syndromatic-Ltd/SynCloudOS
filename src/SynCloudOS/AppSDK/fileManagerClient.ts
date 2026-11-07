@@ -1,5 +1,5 @@
 /* SynWare SDK — Copyright © 2026 Syndromatic Ltd. Apache-2.0. */
-import { openPanelFileSystemFor, type FilePanelDirectory } from "../FilePanels/OpenPanelFileSystem";
+import { openPanelFileSystemFor, type FilePanelDirectory } from "../FilePanels";
 
 /** FileManager.urls(for:in:). Browser handles stand for directories, never guessed OS paths. */
 export interface AppFileManager {

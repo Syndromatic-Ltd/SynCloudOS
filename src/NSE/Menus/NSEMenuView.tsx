@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { ResolvedKeyBinding } from "../../SynCloudOS/KeyBindings/keyBindingTypes";
+import type { ResolvedKeyBinding } from "../../SynCloudOS/SynCloudOS";
 import { nseFlashMenuSelection } from "./menuSelectionFlash";
 import { Children, isValidElement, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import type { CommandDispatchAcceptance, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
