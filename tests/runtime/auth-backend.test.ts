@@ -345,6 +345,30 @@ describe("server authentication boundary", () => {
     expect((await protectedHandler(request("/api/private", { headers: { cookie: `__Host-syncloudos_session=${sessionCookie}` } }))).status).toBe(403);
   });
 
+  it("R9 ignores elevated browser claims when authorising a protected server resource", async () => {
+    const harness = await createHarness({ admission: { async admit() { return { allowed: true, roles: ["reader"] }; } } });
+    let handled = 0;
+    const protectedHandler = harness.auth.protect("documents.write", async () => {
+      handled++;
+      return Response.json({ written: true });
+    });
+    const forgedRequest = (sessionCookie?: string) => request("/api/private?role=system&capability=documents.write", {
+      method: "POST",
+      headers: {
+        origin,
+        "content-type": "application/json",
+        "x-syncloudos-role": "system",
+        "x-syncloudos-capabilities": "*",
+        ...(sessionCookie ? { cookie: `__Host-syncloudos_session=${sessionCookie}` } : {}),
+      },
+      body: JSON.stringify({ subject: { role: "system", capabilities: ["*"] }, allowed: true, isAuthenticated: true }),
+    });
+    expect((await protectedHandler(forgedRequest())).status).toBe(401);
+    const sessionCookie = cookieValue(await harness.callback(await harness.start()), "__Host-syncloudos_session");
+    expect((await protectedHandler(forgedRequest(sessionCookie))).status).toBe(403);
+    expect(handled).toBe(0);
+  });
+
   it("rejects a cross-origin protected mutation before resource handling", async () => {
     const harness = await createHarness({ admission: { async admit() { return { allowed: true, roles: ["documents.write"] }; } } });
     const protectedHandler = harness.auth.protect("documents.write", async () => Response.json({ written: true }));
