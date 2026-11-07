@@ -63,6 +63,12 @@ export { useMedia } from "./useMedia";
 
 export { useVideo } from "./useVideo";
 
+export { useBluetooth } from "./useBluetooth";
+export { useNFC } from "./useNFC";
+export { useSpeech } from "./useSpeech";
+export { useContacts } from "./useContacts";
+export { usePayment } from "./usePayment";
+export { useXR } from "./useXR";
 export { useLocation } from "./useLocation";
 
 export { useMIDI } from "./useMIDI";

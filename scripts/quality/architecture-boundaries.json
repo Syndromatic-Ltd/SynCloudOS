@@ -119,6 +119,30 @@
       "replacement": "src/FX/LocationFX/public.ts"
     },
     {
+      "find": "@syndromatic/syncloudos/fx/bluetooth",
+      "replacement": "src/FX/BluetoothFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/nfc",
+      "replacement": "src/FX/NFCFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/speech",
+      "replacement": "src/FX/SpeechFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/contacts",
+      "replacement": "src/FX/ContactsFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/pass",
+      "replacement": "src/FX/PassFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/xr",
+      "replacement": "src/FX/XRFX/public.ts"
+    },
+    {
       "find": "@syndromatic/syncloudos/fx/lumina",
       "replacement": "src/FX/LuminaFX/public.ts"
     },
