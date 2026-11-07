@@ -50,6 +50,11 @@ export function useVideo(): VFXCaptureSession {
       enumerateDevices: () => requireSession().enumerateDevices(),
       requestCamera: (request) => requireSession().requestCamera(request),
       requestDisplay: (request) => requireSession().requestDisplay(request),
+      async setContentFilter(filter, signal) {
+        const session = requireSession();
+        if (!session.setContentFilter) throw new DOMException("Element capture is unavailable.", "NotSupportedError");
+        await session.setContentFilter(filter, signal);
+      },
       suspend: () => requireSession().suspend(),
       resume: () => requireSession().resume(),
       subscribe: (listener) => requireSession().subscribe(listener),

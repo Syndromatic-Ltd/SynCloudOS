@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { VFXContentFilter } from "../../FX/VideoFX/VFXContentFilter";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   VFXCameraCaptureRequest,
@@ -46,7 +47,7 @@ import { VFXFrameProcessor } from "../../FX/VideoFX/VFXFrameProcessor";
 import type { IFXRenderBackend } from "../../FX/ImageFX/IFXRenderBackend";
 
 export interface VideoCaptureSessionHost {
-  createSession(signal?: AbortSignal, capability?: object): VFXCaptureSession;
+  createSession(signal?: AbortSignal, capability?: object, reauthoriseElement?: () => boolean): VFXCaptureSession;
 }
 
 export interface VideoDecoderBackendHost {
@@ -94,6 +95,7 @@ const unavailableVideoCaptureHost: VideoCaptureSessionHost = Object.freeze({
 });
 
 export interface VideoCaptureServiceSessionOptions {
+  readonly reauthoriseElement?: () => boolean;
   readonly signal?: AbortSignal;
   readonly appId?: string;
   readonly capability?: object;
@@ -288,7 +290,7 @@ export class VideoCaptureService {
     const owner = new AbortController();
     const revoke = () => owner.abort(options.signal?.reason ?? new DOMException("Video capture owner was revoked.", "AbortError"));
     options.signal?.addEventListener("abort", revoke, { once: true });
-    const underlying = this.host.createSession(owner.signal, options.capability);
+    const underlying = this.host.createSession(owner.signal, options.capability, options.reauthoriseElement);
     let disposed = false;
     let record!: OwnedCapture;
     const dispose = () => {
@@ -306,6 +308,12 @@ export class VideoCaptureService {
       enumerateDevices: () => underlying.enumerateDevices(),
       requestCamera: (request: VFXCameraCaptureRequest) => underlying.requestCamera(request),
       requestDisplay: (request: VFXDisplayCaptureRequest) => underlying.requestDisplay(request),
+      async setContentFilter(filter: VFXContentFilter | null, signal?: AbortSignal) {
+        owner.signal.throwIfAborted();
+        if (!options.reauthoriseElement?.()) throw new DOMException("Element capture is not authorised.", "SecurityError");
+        if (!underlying.setContentFilter) throw new DOMException("Element capture is unavailable.", "NotSupportedError");
+        await underlying.setContentFilter(filter, signal);
+      },
       suspend: () => underlying.suspend(),
       resume: () => underlying.resume(),
       subscribe: (listener: () => void) => underlying.subscribe(listener),

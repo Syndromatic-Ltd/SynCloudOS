@@ -649,3 +649,15 @@ Camera and display capture show the browser's consent prompt and indicator. Stop
 - [GraphicsFX](graphics.md) and [ImageFX](image.md), for drawing on and filtering frames
 - [TextFX](text.md), for text overlays
 - [Manifest reference](../synware-manifest.md), for the capture permissions
+
+## Native browser presentation and display-element capture
+
+`useVideoPresentation()` exposes component-scoped VideoFX presentation authority. Declare `video.pictureInPicture` for PiP or `video.route` for remote playback in the app manifest. The client creates a `VFXPictureInPictureController` or `VFXRouteDetector` for an app-provided `HTMLVideoElement`. Construction is passive. Each controller exposes capabilities plus `authorizationStatus()` and `requestAuthorization()`; these check host authority and API support without fabricating a browser permission prompt.
+
+Call `startPictureInPicture()` or the route detector's `prompt()` directly from a genuine user gesture. Browser activation and media requirements still apply. PiP controllers expose `isPictureInPictureActive`, `stopPictureInPicture()`, `subscribe()`, and `dispose()`. Only the controller owning a PiP target may close it; late completion after abort cleans up that target without exiting another controller's presentation.
+
+Route detectors expose `startDiscovery()`, `stopDiscovery()`, `areRoutesAvailable`, `connectionState`, `subscribe()`, and `dispose()`. Availability is `null` until the browser invokes its discovery callback. Remote Playback support is not a promise of AirPlay: Chromium may expose a different transport or no routes. Browser availability watching can itself reject for browser policy. Cancellation also cancels watch IDs that arrive after disposal. Mount abort, caller abort and hook cleanup end all ownership.
+
+`VFXContentFilter(element, "restrict" | "crop")` follows ScreenCaptureKit's content-filter concept. After the user grants a display capture, call the optional capture-session `setContentFilter(filter)` method; pass `null` to clear. This additionally requires `video.capture.element` and existing `video.capture.display` authority. The browser must support RestrictionTarget/restrictTo or CropTarget/cropTo. Camera sessions, inactive captures, and arbitrary external tracks are rejected; the host applies filters only to its private stream. Cancellation or revoked authority during a filter update interrupts capture rather than retaining an uncertain filtering result. Capture tracks are never returned to the app.
+
+The host injects its document and element-target constructors into `BrowserVideoPresentationAdapter`, and passes that adapter into `BrowserVideoCaptureAdapter`. Unsupported hosts report capabilities explicitly. These APIs do not create document Picture-in-Picture windows or infer screen-cast devices.

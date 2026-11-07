@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { VFXContentFilter } from "./VFXContentFilter";
+
 export type VFXCaptureKind = "camera" | "display";
 export type VFXCaptureState =
   | "idle"
@@ -78,6 +80,8 @@ export interface VFXCaptureSession {
   enumerateDevices(): Promise<readonly VFXCaptureDevice[]>;
   requestCamera(request?: VFXCameraCaptureRequest): Promise<VFXCaptureSettings>;
   requestDisplay(request?: VFXDisplayCaptureRequest): Promise<VFXCaptureSettings>;
+  /** Applies only to this session's already granted display stream. */
+  setContentFilter?(filter: VFXContentFilter | null, signal?: AbortSignal): Promise<void>;
   suspend(): void;
   resume(): Promise<void>;
   subscribe(listener: () => void): () => void;
