@@ -73,7 +73,7 @@ describe("shared pixel ownership", () => {
     const resource = new IFXImageResource({
       resource: readyResource(),
       readPixels: async () => source,
-      export: async () => source.toPNG(),
+      export: async () => source.toPNG().bytes,
     });
     const lease = await resource.pixelLease();
 

@@ -1,5 +1,7 @@
 # ImageFX
 
+Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+
 ImageFX (`IFX`) is the web-native analogue of Core Image. It describes image processing as a graph of lazy operations. Building a graph does no pixel work, and nothing runs until you render it. That delay lets the framework work out which region each output pixel needs, split the output into tiles, keep memory inside a budget, choose a backend and run the work off the main thread.
 
 An ImageFX image is a description, not a bitmap. `IFXImage.fromPixels()` wraps existing pixels, `IFXImage.constant()` describes a colour that fills all space, and every filter takes images and returns a new image that records what it does. The graph is immutable, so you can share a node between several outputs and render them separately.
@@ -315,7 +317,7 @@ A source is one of:
 | `src` | `string` | The resource's URL identity. |
 | `intrinsicSize`, `density` | `GFXSize \| null`, `number \| null` | The decoded size in points and the pixel density. |
 | `sourceOrientation` | `1` to `8` or `null` | The EXIF orientation of the encoded file. Decoded pixels may already be rotated by the browser, and the framework leaves that as the browser made it. |
-| `sourceICCProfile` | `Uint8Array \| null` | A fresh copy of the embedded ICC profile, when present. |
+| `sourceICCProfile` | `NSEData \| null` | A fresh copy of the embedded ICC profile, when present. |
 | `accessibleLabel` | `string` | The description for assistive technology. |
 | `renderingMode` | `"original" \| "template"` | Template images are drawn as a mask that takes `tintColour`. |
 | `tintColour` | `string \| null` | A CSS colour for template images. |
@@ -323,7 +325,7 @@ A source is one of:
 | `resizingMode` | `"stretch" \| "tile" \| "cap-insets"` | How the image fills a larger area. |
 | `image(signal?)` | `Promise<IFXImage>` | A graph node that reuses the decoded pixels. |
 | `pixelLease(signal?)` | `Promise<GFXPixelLease>` | A short-lived view of the pixels. |
-| `export(format, signal?)` | `Promise<Uint8Array>` | Encoded bytes as `"image/png"` or `"image/webp"`. Rejects if the browser answers with a different type, and never labels PNG bytes as WebP. |
+| `export(format, signal?)` | `Promise<NSEData>` | Encoded bytes as `"image/png"` or `"image/webp"`. Rejects if the browser answers with a different type, and never labels PNG bytes as WebP. |
 | `release()` | `void` | Frees the image. |
 
 The session checks export policy, CORS cleanliness and mount lifetime before it hands pixels over. When a host cannot identify colour channels reliably, numeric pixel and export access rejects with `NotSupportedError` while display decoding continues to work. Operations that read pixels wait for `ready` and reject with `AbortError` if the image changes while they run.

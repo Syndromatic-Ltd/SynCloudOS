@@ -248,7 +248,7 @@ export async function createTextSystemExample(options: {
       const before = documents.getDocument<TextSystemExampleModel>(document.id)!;
       if (before.model.assets.length) throw new Error("The private example already has its single image asset.");
       const bytes = resources.image!.toPNG();
-      const lease = await resourceClient.acquire(document.id, { type: "image/png", size: bytes.length, arrayBuffer: async () => bytes.slice().buffer }, signal);
+      const lease = await resourceClient.acquire(document.id, { type: "image/png", size: bytes.count, data: async () => bytes }, signal);
       let admitted = false;
       try {
         const reference = await resourceClient.persist(document.id, lease, signal);

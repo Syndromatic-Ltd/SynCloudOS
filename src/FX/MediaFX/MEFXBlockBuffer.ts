@@ -18,12 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/fxRuntimeContracts";
 
 export type MEFXBlockSegmentInput =
-    | Uint8Array
+    | NSEDataConvertible
     | Readonly<{
-        bytes: Uint8Array;
+        bytes: NSEDataConvertible;
         offset?: number;
         length?: number;
     }>;
@@ -86,7 +87,7 @@ function checkedInteger(value: unknown, name: string, maximum = Number.MAX_SAFE_
     return value as number;
 }
 
-function segmentRecord(value: Exclude<MEFXBlockSegmentInput, Uint8Array>): PreparedSegment {
+function segmentRecord(value: Exclude<MEFXBlockSegmentInput, NSEDataConvertible>): PreparedSegment {
     if (!value || typeof value !== "object" || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null))
         throw new TypeError("Media block segment must be plain data.");
     if (Object.getOwnPropertySymbols(value).length)
@@ -99,7 +100,7 @@ function segmentRecord(value: Exclude<MEFXBlockSegmentInput, Uint8Array>): Prepa
     if ((descriptors.offset && !("value" in descriptors.offset)) || (descriptors.length && !("value" in descriptors.length)))
         throw new TypeError("Media block segment fields must be data properties.");
 
-    const bytes = descriptors.bytes.value;
+    const bytes = new Uint8Array(NSEData.from(descriptors.bytes.value!).bytes);
     if (!(bytes instanceof Uint8Array))
         throw new TypeError("Media block segment bytes must be Uint8Array.");
     const offset = descriptors.offset ? checkedInteger(descriptors.offset.value, "Media block segment offset", bytes.byteLength) : 0;
@@ -115,13 +116,13 @@ function prepareSegments(input: MEFXBlockSegmentInput | readonly MEFXBlockSegmen
     segments: readonly PreparedSegment[];
     byteLength: number;
 }> {
-    const supplied = input instanceof Uint8Array ? [input] : Array.isArray(input) ? input : [input];
+    const supplied = (input instanceof Uint8Array || input instanceof NSEData || input instanceof ArrayBuffer) ? [input] : Array.isArray(input) ? input : [input];
     const prepared: PreparedSegment[] = [];
     let total = 0;
 
     for (const segment of supplied) {
-        const current = segment instanceof Uint8Array
-            ? Object.freeze({ bytes: segment, offset: 0, length: segment.byteLength })
+        const current = segment instanceof Uint8Array || segment instanceof NSEData || segment instanceof ArrayBuffer
+            ? (() => { const bytes = new Uint8Array(NSEData.from(segment).bytes); return Object.freeze({ bytes, offset: 0, length: bytes.byteLength }); })()
             : segmentRecord(segment);
         if (current.length > maximumPortableBlockBytes - total)
             throw new RangeError("Media block exceeds the " + maximumPortableBlockBytes + " byte portable block limit.");
@@ -224,7 +225,7 @@ export class MEFXBlockBuffer {
     readonly #length: number;
 
     constructor(
-        input: MEFXBlockSegmentInput | readonly MEFXBlockSegmentInput[] | InternalView,
+        input: MEFXBlockSegmentInput | readonly MEFXBlockSegmentInput[],
         options: MEFXBlockBufferOptions = {},
     ) {
         if (isInternalView(input)) {
@@ -285,7 +286,7 @@ export class MEFXBlockBuffer {
                 backing,
                 offset: this.#offset + checkedStart,
                 length: checkedEnd - checkedStart,
-            });
+            } as unknown as MEFXBlockSegmentInput);
             if (owner && handle)
                 attachRuntimeHandle(slice, owner, handle);
             return slice;

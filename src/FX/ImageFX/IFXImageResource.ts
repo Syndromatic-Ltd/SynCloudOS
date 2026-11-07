@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import { GFXImage } from "../GraphicsFX/GFXImage";
 import { createGFXPixelLease, type GFXPixelLease } from "../GraphicsFX/GFXPixelLease";
 import type { GFXSize } from "../GraphicsFX/GFXGeometry";
@@ -31,7 +32,7 @@ export interface IFXResourceHandle {
     readonly density: number | null;
     /** EXIF orientation of the encoded source; decoded pixels may already be oriented. */
     readonly sourceOrientation: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | null;
-    readonly sourceICCProfile: Uint8Array | null;
+    readonly sourceICCProfile: NSEData | null;
     readonly accessibleLabel: string;
     readonly renderingMode: "original" | "template";
     readonly tintColour: string | null;
@@ -49,7 +50,7 @@ export interface IFXResourceHandle {
 export interface IFXImageResourcePort {
     readonly resource: IFXResourceHandle;
     readPixels(signal?: AbortSignal): Promise<GFXImage>;
-    export(format: "image/png" | "image/webp", signal?: AbortSignal): Promise<Uint8Array>;
+    export(format: "image/png" | "image/webp", signal?: AbortSignal): Promise<NSEData>;
 }
 export class IFXImageResource implements IFXResourceHandle {
     readonly #port: IFXImageResourcePort;
@@ -145,13 +146,13 @@ export class IFXImageResource implements IFXResourceHandle {
             throw new TypeError("Image host must return owned GFXImage pixels.");
         return createGFXPixelLease(pixels);
     }
-    async export(format: "image/png" | "image/webp", signal?: AbortSignal): Promise<Uint8Array> {
+    async export(format: "image/png" | "image/webp", signal?: AbortSignal): Promise<NSEData> {
         if (format !== "image/png" && format !== "image/webp")
             throw new TypeError("Image export format is unsupported.");
         const bytes = await this.#runOwned(ownedSignal => this.#port.export(format, ownedSignal), signal);
-        if (!(bytes instanceof Uint8Array) || bytes.byteLength > 8 * 1024 * 1024)
+        if (!(bytes instanceof NSEData) || bytes.count > 8 * 1024 * 1024)
             throw new TypeError("Image host returned invalid export bytes.");
-        return Uint8Array.prototype.slice.call(bytes) as Uint8Array;
+        return NSEData.from(bytes);
     }
     async image(signal?: AbortSignal): Promise<IFXImage> {
         const lease = await this.pixelLease(signal);
