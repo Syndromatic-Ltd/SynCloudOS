@@ -304,6 +304,9 @@ const knownActions = new Set([
   "webspring.enter", "webspring.displayApp", "webspring.refresh", "app.register", "app.launch", "app.close",
   "route.open", "external.open", "service.use", "runtime.inspect", "runtime.mutate", "statechart.goto",
   "diagnostics.view", "plugin.register", "notification.post", "notification.action", "notification.requestPermission",
+  "documentStore.readPublished", "documentStore.listPublished", "documentStore.listDrafts", "documentStore.getDraft",
+  "documentStore.saveDraft", "documentStore.listDraftVersions", "documentStore.readDraftVersion", "documentStore.deleteDraft",
+  "documentStore.createRevision", "documentStore.publish", "documentStore.unpublish", "documentStore.attachMedia",
 ]);
 
 function diagnosticURL(value: string | undefined): string | undefined {
@@ -538,7 +541,7 @@ function decide(
   const subject = getSubject(request, registrations);
   const policy = appPolicy(request.app);
   const app = request.app ?? null;
-  const bundlePermissions = request.bundlePermissions ?? (app?.bundleIdentifier ? BundleLoader.getBundle(app.bundleIdentifier)?.permissions ?? [] : []);
+  const bundleEntitlements = app?.bundleIdentifier ? BundleLoader.getBundle(app.bundleIdentifier)?.entitlements ?? [] : [];
   const requiredCapabilities = unique([
     ...(request.requiredCapabilities ?? []),
     ...(policy.requiredCapabilities ?? [])
@@ -556,8 +559,8 @@ function decide(
   const appType = app?.type ?? "internal";
   const isSystemApp = appType === "system";
   const isExternalApp = appType === "external";
-  const isPublicByManifest = policy.public === true || bundlePermissions.includes("app.open.public");
-  const explicitlyRequiresLogin = policy.requiresLogin === true || bundlePermissions.includes("app.open.protected");
+  const isPublicByManifest = policy.public === true;
+  const explicitlyRequiresLogin = policy.requiresLogin === true;
 
   if (disposed)
     return baseDecision(request, subject, false, "Configuration profiles are disposed.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
@@ -584,6 +587,9 @@ function decide(
       : "This app launch requires an authorised session.";
     return baseDecision(request, subject, false, reason, requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
   }
+
+  if (request.action === "app.launch" && (policy.requiredEntitlements ?? []).some(name => !bundleEntitlements.includes(name)))
+    return baseDecision(request, subject, false, "The application lacks required launch entitlements.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
 
   if (request.action === "runtime.inspect") {
     return baseDecision(request, subject, true, "Runtime inspection is allowed.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);

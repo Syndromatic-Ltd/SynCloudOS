@@ -140,7 +140,7 @@ describe("runtime browser host contribution context", () => {
       const [prepared] = await prepareSynCloudOSHostContributions([contribution], runtime.environment);
       const handle = createSynCloudOSHostInstallContext(prepared!, runtime, {});
 
-      handle.context.configurationProfiles.registerRoleCapabilities({
+      handle.context.policy.registerRoleCapabilities({
         roles: ["employee"],
         capabilities: ["tests.seed.write", "tests.seed.write"],
       });
