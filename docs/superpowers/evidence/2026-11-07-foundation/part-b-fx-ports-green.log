@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/foundation-byte-contracts.test.ts tests/runtime/fx/audio-file.test.ts tests/runtime/fx/audio-file-host.test.ts tests/runtime/fx/audio-opus-codec.test.ts tests/runtime/fx/audio-capture.test.ts tests/runtime/fx/midi-messages.test.ts tests/runtime/fx/midi-ump.test.ts tests/runtime/fx/midi-scheduling.test.ts tests/runtime/fx/midi-access.test.ts tests/runtime/fx/video-container.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  10 passed (10)
+      Tests  76 passed (76)
+   Start at  09:38:13
+   Duration  2.46s (transform 1.02s, setup 140ms, import 1.54s, tests 1.13s, environment 1ms)
+

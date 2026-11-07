@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/text-font-resource.test.ts tests/runtime/fx/image-worker.test.ts tests/runtime/fx/foundation-byte-contracts.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  58 passed (58)
+   Start at  09:42:52
+   Duration  17.71s (transform 8.61s, setup 71ms, import 11.84s, tests 8.89s, environment 0ms)
+
