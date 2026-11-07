@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../src/Foundation/NSEData";
+
 import { describe, it, expect, vi } from "vitest";
 import { deflateSync } from "node:zlib";
 import { readFileSync } from "node:fs";
@@ -29,7 +31,7 @@ import { BrowserImageAdapter, BrowserImageAdapterFactory } from "../../../src/Sy
 import { createBrowserImagePlatform } from "../../../src/SynCloudOS/PlatformAdapters/BrowserImagePlatform";
 const pixels = () => new GFXImage({ width: 1, height: 1, alpha: "straight", colourSpace: "srgb", data: new Uint8Array([0, 255, 0, 255]) });
 const pngWithICC = (profile: Uint8Array) => {
-    const source = pixels().toPNG();
+    const source = pixels().toPNG().bytes;
     const payload = new Uint8Array([115, 82, 71, 66, 0, 0, ...deflateSync(profile)]);
     const chunk = new Uint8Array(payload.length + 12);
     new DataView(chunk.buffer).setUint32(0, payload.length);
@@ -74,11 +76,11 @@ describe("ImageFX existing decoded lease integration", () => {
             await resource.ready;
             expect(new IFXImageResource({ resource, readPixels: signal => runtime.images.readPixels(resource, signal), export: (format, signal) => runtime.images.export(resource, format, signal) }).sourceOrientation).toBe(6);
             const publicProfile = new IFXImageResource({ resource, readPixels: signal => runtime.images.readPixels(resource, signal), export: (format, signal) => runtime.images.export(resource, format, signal) }).sourceICCProfile;
-            expect(publicProfile).toEqual(profile);
-            publicProfile![0] = 255;
-            expect(resource.sourceICCProfile).toEqual(profile);
+            expect(publicProfile?.bytes).toEqual(profile);
+            publicProfile!.bytes[0] = 255;
+            expect(resource.sourceICCProfile?.bytes).toEqual(profile);
             expect((await runtime.images.readPixels(resource)).pixel(0, 0).g).toBe(1);
-            await expect(runtime.images.export(resource, "image/png")).resolves.toEqual(new Uint8Array([1]));
+            await expect(runtime.images.export(resource, "image/png")).resolves.toEqual(NSEData.from(new Uint8Array([1])));
             expect(browser.readPixels).toHaveBeenCalledWith("blob:runtime-owned", { width: 1, height: 1 }, expect.any(AbortSignal));
             expect(browser.export).toHaveBeenCalledWith("blob:runtime-owned", { width: 1, height: 1 }, "image/png", expect.any(AbortSignal));
             resource.release();
@@ -111,7 +113,7 @@ describe("ImageFX existing decoded lease integration", () => {
         const profile = new Uint8Array(132);
         new DataView(profile.buffer).setUint32(0, 132);
         profile.set([97, 99, 115, 112], 36);
-        decode.mockResolvedValueOnce(Object.freeze({ src: "blob:mounted-metadata", intrinsicSize: { width: 1, height: 1 }, density: 1, byteLength: 132, corsClean: true, sourceOrientation: 6, sourceICCProfile: profile, release: vi.fn() }));
+        decode.mockResolvedValueOnce(Object.freeze({ src: "blob:mounted-metadata", intrinsicSize: { width: 1, height: 1 }, density: 1, byteLength: 132, corsClean: true, sourceOrientation: 6, sourceICCProfile: NSEData.from(profile), release: vi.fn() }));
         const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.image-consumer", version: "1.0.0", displayName: "Images" });
         const mount = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
         try {
@@ -120,7 +122,7 @@ describe("ImageFX existing decoded lease integration", () => {
             expect(resource).toBeInstanceOf(IFXImageResource);
             await resource.ready;
             expect(resource.sourceOrientation).toBe(6);
-            expect(resource.sourceICCProfile).toEqual(profile);
+            expect(resource.sourceICCProfile?.bytes).toEqual(profile);
             expect((await new IFXContext().render(await resource.image())).image.pixel(0, 0).g).toBe(1);
             expect(authorise.mock.calls.map(call => call[0].operation)).toEqual(["decode", "export"]);
             mount.dispose();
@@ -155,7 +157,7 @@ describe("ImageFX existing decoded lease integration", () => {
         try {
             const resource = createSynWareContextValue(mount.runtime).images.load({ source: request.source, accessibleLabel: "Green" });
             await resource.ready;
-            await expect(resource.export("image/webp")).resolves.toEqual(new Uint8Array([1]));
+            await expect(resource.export("image/webp")).resolves.toEqual(NSEData.from(new Uint8Array([1])));
             expect(authorise.mock.calls.map(call => call[0].operation)).toEqual(["decode", "export"]);
             mount.dispose();
             await expect(resource.export("image/webp")).rejects.toMatchObject({ name: "AbortError" });
@@ -195,7 +197,7 @@ describe("ImageFX existing decoded lease integration", () => {
         profile.set([97, 99, 115, 112], 36);
         const release = vi.fn();
         const { runtime, decode } = setup();
-        decode.mockResolvedValueOnce(Object.freeze({ src: "blob:forged-profile", intrinsicSize: { width: 1, height: 1 }, density: 1, byteLength: 4, corsClean: true, sourceICCProfile: profile, release }));
+        decode.mockResolvedValueOnce(Object.freeze({ src: "blob:forged-profile", intrinsicSize: { width: 1, height: 1 }, density: 1, byteLength: 4, corsClean: true, sourceICCProfile: NSEData.from(profile), release }));
         try {
             const resource = runtime.images.load(request);
             await expect(resource.ready).rejects.toThrow(/ICC|profile|budget/i);
@@ -312,7 +314,7 @@ describe("ImageFX existing decoded lease integration", () => {
                 } };
                 return image;
             }
-            return { width: 0, height: 0, getContext: () => ({ drawImage: () => {} }), toBlob: (callback: (blob: Blob) => void) => callback(new Blob([pixels().toPNG()], { type: "image/png" })) };
+            return { width: 0, height: 0, getContext: () => ({ drawImage: () => {} }), toBlob: (callback: (blob: Blob) => void) => callback(new Blob([pixels().toPNG().bytes], { type: "image/png" })) };
         } };
         const create = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:format-fallback");
         const revoke = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
@@ -345,7 +347,7 @@ describe("ImageFX existing decoded lease integration", () => {
         try {
             const platform = createBrowserImagePlatform(document as unknown as Document, {} as Window);
             const signal = new AbortController().signal;
-            const decoded = await platform.decode({ kind: "bytes", mimeType: "image/png", bytes: pngWithICC(profile) }, signal);
+            const decoded = await platform.decode({ kind: "bytes", mimeType: "image/png", bytes: NSEData.from(pngWithICC(profile)) }, signal);
             expect(decoded.sourceICCProfile).toEqual(profile);
             await expect(platform.readPixels!(decoded.src, decoded.intrinsicSize, signal)).rejects.toMatchObject({ name: "NotSupportedError" });
             await expect(platform.export(decoded.src, decoded.intrinsicSize, "image/png", signal)).rejects.toMatchObject({ name: "NotSupportedError" });
@@ -377,7 +379,7 @@ describe("ImageFX existing decoded lease integration", () => {
             const browser = { createImageBitmap: vi.fn().mockRejectedValue(new Error("Bitmap calibration unavailable")), setTimeout: globalThis.setTimeout, clearTimeout: globalThis.clearTimeout };
             const platform = createBrowserImagePlatform(document as unknown as Document, browser as unknown as Window);
             const signal = new AbortController().signal;
-            const decoded = await platform.decode({ kind: "bytes", mimeType: "image/png", bytes: pngWithICC(profile) }, signal);
+            const decoded = await platform.decode({ kind: "bytes", mimeType: "image/png", bytes: NSEData.from(pngWithICC(profile)) }, signal);
             expect(decoded.sourceICCProfile).toEqual(profile);
             await expect(platform.readPixels!(decoded.src, decoded.intrinsicSize, signal)).rejects.toMatchObject({ name: "NotSupportedError" });
             await expect(platform.export(decoded.src, decoded.intrinsicSize, "image/png", signal)).rejects.toMatchObject({ name: "NotSupportedError" });
@@ -409,7 +411,7 @@ describe("ImageFX existing decoded lease integration", () => {
         try {
             const browser = { createImageBitmap: vi.fn().mockRejectedValue(new Error("Bitmap calibration unavailable")), setTimeout: globalThis.setTimeout, clearTimeout: globalThis.clearTimeout };
             const platform = createBrowserImagePlatform(document as unknown as Document, browser as unknown as Window);
-            const decoded = await platform.decode({ kind: "bytes", mimeType: "image/png", bytes: pngWithICC(profile) }, new AbortController().signal);
+            const decoded = await platform.decode({ kind: "bytes", mimeType: "image/png", bytes: NSEData.from(pngWithICC(profile)) }, new AbortController().signal);
             const controller = new AbortController();
             outcome = platform.readPixels!(decoded.src, decoded.intrinsicSize, controller.signal).then(() => "resolved", error => (error as Error).name);
             await vi.waitFor(() => expect(releaseCalibration).not.toBeNull());
@@ -449,7 +451,7 @@ describe("ImageFX existing decoded lease integration", () => {
             const browser = { createImageBitmap: vi.fn().mockRejectedValue(new Error("Bitmap calibration unavailable")), setTimeout: globalThis.setTimeout, clearTimeout: globalThis.clearTimeout };
             const platform = createBrowserImagePlatform(document as unknown as Document, browser as unknown as Window);
             const signal = new AbortController().signal;
-            const decoded = await platform.decode({ kind: "bytes", mimeType: "image/png", bytes: pngWithICC(profile) }, signal);
+            const decoded = await platform.decode({ kind: "bytes", mimeType: "image/png", bytes: NSEData.from(pngWithICC(profile)) }, signal);
             let firstResult: string | null = null;
             const first = platform.readPixels!(decoded.src, decoded.intrinsicSize, signal).then(() => { firstResult = "resolved"; }, error => { firstResult = (error as Error).name; });
             for (let i = 0; i < 8; i++) await Promise.resolve();

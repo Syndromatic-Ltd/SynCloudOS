@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
+
 import { GFXImage, type GFXAlphaFormat, type GFXPixelFormat } from "../../FX/GraphicsFX/GFXImage";
 import type { GFXColourSpace } from "../../FX/GraphicsFX/colourTypes";
 import {
@@ -112,7 +115,7 @@ export class BrowserImageProcessingWorker implements IFXRenderBackend {
   readonly #worker: Worker;
   readonly #maximumJobBytes: number;
   readonly #pending = new Map<number, Pending>();
-  readonly #encodedPending = new Map<number, ValuePending<Readonly<{ blob: Blob; metadata: IFXEncodedImageMetadata }>>>();
+  readonly #encodedPending = new Map<number, ValuePending<Readonly<{ data: NSEData; metadata: IFXEncodedImageMetadata }>>>();
   readonly #canvasPending = new Map<number, ValuePending<IFXCanvasImageMetadata>>();
   readonly #admission: HeavyJobAdmissionPort;
   readonly #owner: string;
@@ -267,7 +270,7 @@ export class BrowserImageProcessingWorker implements IFXRenderBackend {
     });
   }
 
-  renderEncoded(image: IFXImage, options: Readonly<{ format: "image/png" | "image/webp"; colourSpace?: "srgb"; orientation?: "up"; signal?: AbortSignal; interpolation?: "nearest" | "linear" }>): Promise<Readonly<{ blob: Blob; metadata: IFXEncodedImageMetadata }>> {
+  renderEncoded(image: IFXImage, options: Readonly<{ format: "image/png" | "image/webp"; colourSpace?: "srgb"; orientation?: "up"; signal?: AbortSignal; interpolation?: "nearest" | "linear" }>): Promise<Readonly<{ data: NSEData; metadata: IFXEncodedImageMetadata }>> {
     if (!this.capabilities.destinations.includes("encoded-blob"))
       return Promise.reject(new DOMException("Encoded worker output is unavailable.", "NotSupportedError"));
     if (!options || !this.capabilities.encodedMimeTypes.includes(options.format) || (options.colourSpace ?? "srgb") !== "srgb" || (options.orientation ?? "up") !== "up")
@@ -369,7 +372,7 @@ export class BrowserImageProcessingWorker implements IFXRenderBackend {
       if (response.kind === "encoded") {
         if (!encodedPending) throw new TypeError("Unexpected encoded worker response.");
         if (!(response.value.blob instanceof Blob)) throw new TypeError("Worker encoded payload must contain a Blob.");
-        encodedPending.resolve(Object.freeze({ blob: response.value.blob, metadata: Object.freeze(response.value.metadata) }));
+        void NSEData.read(response.value.blob).then(data => encodedPending.resolve(Object.freeze({ data, metadata: Object.freeze(response.value.metadata) })), error => encodedPending.reject(error));
         return;
       }
       if (!canvasPending) throw new TypeError("Unexpected canvas worker response.");

@@ -79,9 +79,9 @@ describe("ImageFX barcode descriptors and generators", () => {
     const source = new Uint8Array([0x40, 0xf5, 0x46, 0x86, 0x96, 0xe6, 0xb2, 0x04, 0x46, 0x96, 0x66, 0x66, 0x57, 0x26, 0x56, 0xe7, 0x40, 0xec, 0x11]);
     const descriptor = new IFXQRCodeDescriptor(source, 1, 4, "L");
     source.fill(0);
-    const first = descriptor.errorCorrectedPayload;
+    const first = descriptor.errorCorrectedPayload.bytes;
     first.fill(0);
-    expect(descriptor.errorCorrectedPayload[0]).toBe(0x40);
+    expect(descriptor.errorCorrectedPayload.bytes[0]).toBe(0x40);
     expect(IFXBarcodeDescriptor.fromData(descriptor.toData())).toEqual(descriptor);
     expect(descriptor.toData()).toEqual({ kind: "qr", errorCorrectedPayload: [0x40, 0xf5, 0x46, 0x86, 0x96, 0xe6, 0xb2, 0x04, 0x46, 0x96, 0x66, 0x66, 0x57, 0x26, 0x56, 0xe7, 0x40, 0xec, 0x11], symbolVersion: 1, maskPattern: 4, errorCorrectionLevel: "L" });
   });

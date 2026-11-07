@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -80,7 +80,7 @@ function CustomSurface({ example, view, label, onInputClient }: TextSystemExampl
     return local && layout.provider.positionAt({ ...layout.provider.snapshot(), ...local, transformRevision: 0, outside: nearest ? "nearest" : "reject" });
   };
   const image = example.resources.image;
-  const imageURL = image ? `data:image/png;base64,${btoa(String.fromCharCode(...image.toPNG()))}` : undefined;
+  const imageURL = image ? `data:image/png;base64,${image.toPNG().base64EncodedString()}` : undefined;
   const objectPoint = (event: PointerEvent<SVGImageElement>) => {
     const transform = example.transformsFor(view, { name: "container:0", units: "css-pixels" }).client;
     const inverse = transform && invertNSETextGeometryTransform(transform);
@@ -127,7 +127,7 @@ function CustomSurface({ example, view, label, onInputClient }: TextSystemExampl
       </svg>)}
     </div>
     {client && <NSETextInputHost ref={host} client={client} label={label} className="native-text-host" onInputError={failure => { root.current?.setAttribute("data-input-error", String(failure)); }} />}
-    <p className="pane-footnote">{layout?.complete ? `${indices.length} explicit ${indices.length === 1 ? "box" : "boxes"}` : "Waiting for complete geometry"} · independent selection</p>
+    <p className="pane-footnote">{layout?.complete ? `${indices.length} explicit ${indices.length === 1 ? "box" : "boxes"}` : "Waiting for complete geometry"} Â· independent selection</p>
     {gestureError && <p role="status">{gestureError}</p>}
   </div>;
 }
@@ -139,7 +139,7 @@ export function TextSystemExampleView({ example, onInputClient }: TextSystemExam
   const run = async (operation: () => unknown | Promise<unknown>) => { try { await operation(); setStatus(""); } catch (failure) { setStatus(String(failure)); } };
   const inspectorValue = state.fontSizeState.state === "uniform" ? `${state.fontSizeState.value}px` : state.fontSizeState.state;
   return <main className="text-system-example" data-testid="example-ready" data-geometry-ready={state.geometryReady}>
-    <header><p className="eyebrow">Text System · framework example</p><h1>A small engine, two flows</h1><p>Compose around an object. Edit one body from two views. Keep the caption independent.</p></header>
+    <header><p className="eyebrow">Text System Â· framework example</p><h1>A small engine, two flows</h1><p>Compose around an object. Edit one body from two views. Keep the caption independent.</p></header>
     <section className="example-toolbar" aria-label="Text controls">
       <div className="size-control"><label htmlFor="example-font-size">Font size <span data-testid="font-size-state">{inspectorValue}</span></label>
         <input id="example-font-size" data-testid="font-size-input" type="number" min="1" max="48" value={size} onFocus={() => { target.current = example.captureFontTarget(); }} onChange={event => setSize(event.target.value)} />
@@ -155,7 +155,7 @@ export function TextSystemExampleView({ example, onInputClient }: TextSystemExam
       {state.canSaveNative && <><button data-testid="image-insert" onClick={() => void run(example.insertImage)}>Store image asset</button><button data-testid="native-save" onClick={() => void run(async () => { const saved = await example.saveNative(); setPDFStatus(`Native memory version ${saved.currentVersion?.sequence}`); })}>Save native</button></>}
       <label className="zoom-control">Zoom <input data-testid="zoom-input" type="range" min=".5" max="2" step=".1" value={state.zoom} onChange={event => example.setZoom(Number(event.target.value))} /><output>{Math.round(state.zoom * 100)}%</output></label>
       <button data-testid="pdf-export" onClick={() => void run(async () => {
-        setPDFStatus("Preparing captured document…");
+        setPDFStatus("Preparing captured documentâ€¦");
         const prepared = await example.preparePDF();
         if (prepared.status !== "prepared") { setPDFStatus(prepared.status); return; }
         const result = await prepared.output.exportPDF();
@@ -163,10 +163,10 @@ export function TextSystemExampleView({ example, onInputClient }: TextSystemExam
         const url = URL.createObjectURL(new Blob([new Uint8Array(result.bytes)], { type: result.mimeType }));
         const link = document.createElement("a"); link.href = url; link.download = "TextSystem-example.pdf"; link.click();
         setTimeout(() => URL.revokeObjectURL(url), 0);
-        setPDFStatus(`PDF revision ${result.receipt.revision} · ${result.bytes.length} bytes`);
+        setPDFStatus(`PDF revision ${result.receipt.revision} Â· ${result.bytes.length} bytes`);
       })}>Export snapshot PDF</button>
     </section>
-    <p className="readiness" role="status">{state.error ?? (status || (state.geometryReady ? "Fonts and object ready. Geometry matches the document." : "Resolving fonts and geometry…"))}</p>
+    <p className="readiness" role="status">{state.error ?? (status || (state.geometryReady ? "Fonts and object ready. Geometry matches the document." : "Resolving fonts and geometryâ€¦"))}</p>
     <div className="example-workspace">
       <section><CustomSurface example={example} view="body" label="Body" onInputClient={onInputClient} /><CustomSurface example={example} view="caption" label="Caption" onInputClient={onInputClient} /></section>
       <section><CustomSurface example={example} view="bodyMirror" label="Body mirror" onInputClient={onInputClient} /><aside><h2>Private example policy</h2><p>Two columns per page, up to sixteen pages. Only the first box excludes the object. Overflow remains editable and prevents incomplete PDF output.</p><p>Both body views share text. Their selections are independent. Every edit uses the document's transaction and history.</p></aside></section>

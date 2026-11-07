@@ -1,5 +1,7 @@
 # TextFX
 
+Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+
 TextFX (`TFX`) is the web-native analogue of Core Text. It turns text and font data into shaped glyphs, breaks them into lines, fits lines into frames of any shape, and gives you the geometry to draw, measure and hit-test the result. Layout, measurement and drawing reuse shaped glyph data. Caret and selection queries must use the current model, font and container revisions.
 
 The pipeline has five stages, and each has a class.
@@ -75,7 +77,7 @@ The constructor throws `RangeError` for a bad size or index and `TypeError` for 
 A loaded, sized font that can shape text and produce glyph outlines. Create one with the asynchronous factory. The constructor is private.
 
 ```text
-TFXFont.create(bytes: Uint8Array, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFont>
+TFXFont.create(bytes: NSEDataConvertible, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFont>
 ```
 
 `bytes` holds a TrueType, OpenType, WOFF or WOFF2 file of 12 bytes to 32 MiB. The font copies it. The first call loads the HarfBuzz engine, and later calls reuse it. The factory rejects with `RangeError` for a bad size, `TypeError` for an unreadable or unsupported face, and the signal's reason when aborted.

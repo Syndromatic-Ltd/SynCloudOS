@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { GFXPoint, GFXRect, GFXSize } from "../GraphicsFX/GFXGeometry";
 import type { TFXFont } from "./TFXFont";
 import type { TFXFontDescriptor } from "./TFXFontDescriptor";
@@ -181,7 +182,7 @@ export interface TFXTextLayoutDiagnostics {
 
 export interface TFXFontFaceRegistrationRequest {
   readonly familyName: string;
-  readonly bytes: Uint8Array;
+  readonly bytes: NSEDataConvertible;
   readonly descriptor: TFXFontDescriptor;
   readonly signal: AbortSignal;
 }
@@ -233,7 +234,7 @@ export interface TFXFontRegistration {
 export type TFXFontResourceMimeType = "font/woff" | "font/woff2" | "font/ttf" | "font/otf";
 
 export interface TFXPackagedFontResource {
-  readonly bytes: Uint8Array;
+  readonly bytes: NSEData;
   readonly mimeType: TFXFontResourceMimeType;
 }
 
@@ -245,7 +246,7 @@ export type TFXPackagedFontResourceLoader = (
 
 export interface TFXFontClient {
   readonly fontReadinessGeneration: number;
-  registerFont(bytes: Uint8Array, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFontRegistration>;
+  registerFont(bytes: NSEDataConvertible, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFontRegistration>;
   registerFontResource(relativeBundlePath: string, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFontRegistration>;
   subscribeFontReadiness(listener: (change: TFXFontReadinessChange) => void): () => void;
 }

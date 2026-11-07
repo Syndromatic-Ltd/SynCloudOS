@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../../Foundation/NSEData";
 import { GFXFloatImage } from "../../GraphicsFX/GFXFloatImage";
 import {
   IFXRAWMetadata,
@@ -170,8 +171,8 @@ export interface IFXRAWDevelopmentResult {
 
 export interface IFXRAWBackend {
   readonly capabilities: IFXRAWBackendCapabilities;
-  inspect(source: Uint8Array): IFXRAWMetadata;
-  develop(source: Uint8Array, options?: IFXRAWDevelopmentOptions): Promise<IFXRAWDevelopmentResult>;
+  inspect(source: NSEDataConvertible): IFXRAWMetadata;
+  develop(source: NSEDataConvertible, options?: IFXRAWDevelopmentOptions): Promise<IFXRAWDevelopmentResult>;
 }
 
 interface TIFFTag {
@@ -524,15 +525,15 @@ export class IFXPortableDNGRAWBackend implements IFXRAWBackend {
     embeddedPreviewDevelopment: false,
   });
 
-  inspect(source: Uint8Array): IFXRAWMetadata {
-    return parseDNG(source).metadata;
+  inspect(source: NSEDataConvertible): IFXRAWMetadata {
+    return parseDNG(new Uint8Array(NSEData.from(source).bytes)).metadata;
   }
 
-  async develop(source: Uint8Array, options: IFXRAWDevelopmentOptions = {}): Promise<IFXRAWDevelopmentResult> {
+  async develop(source: NSEDataConvertible, options: IFXRAWDevelopmentOptions = {}): Promise<IFXRAWDevelopmentResult> {
     options.signal?.throwIfAborted();
     await Promise.resolve();
     options.signal?.throwIfAborted();
-    const parsed = parseDNG(source);
+    const parsed = parseDNG(new Uint8Array(NSEData.from(source).bytes));
     const { metadata, view } = parsed;
     const exposureEV = options.exposureEV ?? 0;
     if (!Number.isFinite(exposureEV) || exposureEV < -8 || exposureEV > 8) throw new RangeError("RAW exposureEV must be finite within -8...+8 EV.");

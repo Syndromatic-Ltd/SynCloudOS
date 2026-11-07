@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
 import { IFXContext } from "../../FX/ImageFX/IFXContext";
 import { decodeIFXGraphTransport } from "../../FX/ImageFX/IFXGraphTransport";
 import { IFXRenderDestination } from "../../FX/ImageFX/IFXRenderDestination";
@@ -134,7 +136,7 @@ export async function executeImageProcessingWorkerRequest(
   if (request.operation === "render-encoded") {
     let blob: Blob;
     if (request.format === "image/png") {
-      const bytes = image.toPNG();
+      const bytes = image.toPNG().bytes;
       const data = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
       blob = new Blob([data], { type: "image/png" });
     } else {

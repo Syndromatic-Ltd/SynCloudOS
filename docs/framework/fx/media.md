@@ -1,5 +1,7 @@
 # MediaFX
 
+Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+
 MediaFX (`MEFX`) is the web-native analogue of Core Media. It supplies the vocabulary that audio, video and animation share: exact rational time, clocks and timebases, timed sample buffers and bounded queues to carry them. A frame from a decoder, an audio chunk from a recorder and a haptic cue can all be described with the same time values and moved through the same queue, so they stay in step.
 
 Floating point seconds drift. Add 1/30 of a second three hundred times and the total is not ten seconds. MediaFX time is a `bigint` numerator over an integer timescale, so arithmetic is exact, comparisons are exact and long timelines lose nothing. Conversion to seconds happens once, at the edge, when you need a number for a timer or a display.
@@ -215,7 +217,7 @@ An immutable, owned run of bytes, used as the payload of a sample buffer. The bl
 new MEFXBlockBuffer(input: MEFXBlockSegmentInput | readonly MEFXBlockSegmentInput[], options?: MEFXBlockBufferOptions)
 ```
 
-A segment is a `Uint8Array`, or `{ bytes, offset?, length? }` to take part of one. The total must not exceed 2,147,483,647 bytes. In an application, prefer `useMedia().copyBlock(bytes)`, which counts the memory against the application's budget (64 MiB by default).
+A segment is an `NSEDataConvertible`, or `{ bytes, offset?, length? }` to take part of one. The total must not exceed 2,147,483,647 bytes. In an application, prefer `useMedia().copyBlock(bytes)`, which counts the memory against the application's budget (64 MiB by default).
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -467,7 +469,7 @@ export function Pipeline() {
 
 | Method | Returns | Description |
 | --- | --- | --- |
-| `copyBlock(bytes, signal?)` | `MEFXBlockBuffer` | Copies bytes into a block that counts against the application's memory budget. Budget defaults are 64 MiB of bytes, 64 live handles, 16 sessions and 8 worker jobs. Throws `TypeError` for a non-`Uint8Array` and a budget error when the limit is reached. |
+| `copyBlock(bytes, signal?)` | `MEFXBlockBuffer` | Copies bytes into a block that counts against the application's memory budget. Budget defaults are 64 MiB of bytes, 64 live handles, 16 sessions and 8 worker jobs. Throws `TypeError` for a non-convertible byte value and a budget error when the limit is reached. |
 | `createQueue(options, signal?)` | `MEFXBufferQueue<T>` | A queue that the session disposes with your component. |
 | `observeClock(signal?)` | `MEFXClockLease` | A read-only lease on the session's monotonic clock, with `now()`, `subscribeDiscontinuities()` and `dispose()`. |
 | `createTimebase(options?, signal?)` | `MEFXTimebase` | A timebase over the session clock, ready with browser timers for `scheduleAt`. |

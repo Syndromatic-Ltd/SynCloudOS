@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/fxRuntimeContracts";
 
 import type * as HarfBuzz from "harfbuzzjs";
@@ -159,8 +160,9 @@ export class TFXFont {
     Object.freeze(this);
   }
 
-  static async create(bytes: Uint8Array, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFont> {
+  static async create(input: NSEDataConvertible, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFont> {
     signal?.throwIfAborted();
+    const bytes = NSEData.from(input).bytes;
     if (!(bytes instanceof Uint8Array) || bytes.byteLength < 12 || bytes.byteLength > 32 * 1024 * 1024) throw new RangeError("Font binary must contain 12 bytes to 32 MiB.");
     const backend = await waitForTFXFontBackend(signal);
     signal?.throwIfAborted();
