@@ -27,6 +27,7 @@ import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoType
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { ApplicationStageLayer } from "../../src/Webspring/ApplicationStageLayer";
 import { createWindowTestDependencies, modalWindow } from "../fixtures/windowTestDependencies";
+import { WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer/WindowContentRendererRegistry";
 
 vi.mock("../../src/Webspring/ApplicationStageHost", () => ({
   ApplicationStageHost: ({ app }: { readonly app: SynCloudOSAppInfo }) => (
@@ -36,6 +37,25 @@ vi.mock("../../src/Webspring/ApplicationStageHost", () => ({
 
 describe("ApplicationStageLayer modal domain", () => {
   afterEach(() => vi.restoreAllMocks());
+
+  it("keeps full-screen application views in the canonical work area as host chrome changes", async () => {
+    const fixture = createWindowTestDependencies();
+    const source = fixture.runtime.environment.workArea;
+    const original = source.getSnapshot();
+    let snapshot = { ...original, y: 32, height: original.height - 32 };
+    const listeners = new Set<Parameters<typeof source.subscribe>[0]>();
+    vi.spyOn(source, "getSnapshot").mockImplementation(() => snapshot);
+    vi.spyOn(source, "subscribe").mockImplementation(listener => { listeners.add(listener); return () => { listeners.delete(listener); }; });
+    const view = render(<SynCloudOSProvider runtime={fixture.runtime}><ApplicationStageLayer windowContentRegistry={new WindowContentRendererRegistry()} apps={{}} lifecycle={{}} /></SynCloudOSProvider>);
+    try {
+      const stage = view.container.querySelector<HTMLElement>(".webspring-apps-container")!;
+      expect(stage.style.top).toBe("32px");
+      expect(stage.style.height).toBe(`${original.height - 32}px`);
+      act(() => { snapshot = { ...original }; for (const listener of listeners) listener(snapshot); });
+      expect(stage.style.top).toBe("0px");
+      expect(stage.style.height).toBe(`${original.height}px`);
+    } finally { view.unmount(); await fixture.cleanup(); }
+  });
 
   it("restores exact physical inert and aria-hidden state when the top-level modal closes", async () => {
     const fixture = createWindowTestDependencies();

@@ -117,6 +117,11 @@ export function ApplicationStageLayer({
 }) {
   const hasMultiSwitch = multiSwitch?.status === "switching";
   const runtime = useKernelSynCloudOS();
+  const workArea = useSyncExternalStore(
+    runtime.environment.workArea.subscribe,
+    runtime.environment.workArea.getSnapshot,
+    runtime.environment.workArea.getSnapshot,
+  );
   const windowSnapshot = useSyncExternalStore(
     runtime.windows.subscribe,
     runtime.windows.snapshot,
@@ -217,7 +222,8 @@ export function ApplicationStageLayer({
       data-multiswitching={hasMultiSwitch ? "true" : undefined}
       inert={applicationStageBlocked ? true : undefined}
       aria-hidden={applicationStageBlocked ? true : undefined}
-      style={applicationStageBlocked ? { pointerEvents: "none" } : undefined}
+      style={{ left: workArea.x, top: workArea.y, right: "auto", bottom: "auto", width: workArea.width, height: workArea.height,
+        pointerEvents: applicationStageBlocked ? "none" : undefined }}
       // Clicking the application behind the windows makes it the active
       // surface: every window, floating panels included, goes inactive.
       onPointerDownCapture={() => runtime.windows.resignKey()}
