@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { createAppFileManager } from "./fileManagerClient";
 import { Config } from "../SynCloudOS";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import { getMountedAppEnvironmentClients } from "./mountedEnvironmentClientRegistry";
@@ -403,6 +404,7 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
     animations: environment.animations,
     images: environment.images,
     filePanels: environment.filePanels,
+    fileManager: createAppFileManager(environment.filePanels, runtime.signal),
     motion: environment.motion,
     media: environment.media,
     video: environment.video,

@@ -3,7 +3,11 @@ import type {AppCapabilityStatus,AppFilePanelClient} from './appEnvironmentClien
 import {createBrowserFilePanelAdapter,createDownloadFilePanelAdapter,createFilePanelService,createFileSystemAccessPanelAdapter,FilePanelReferenceError} from '../FilePanels';
 import type {BrowserFilePanelPort,DownloadFilePanelPort,FileSystemAccessPanelPort,FilePanelResult,FilePanelSaveTarget} from '../FilePanels';
 
+import { createOpenPanelFileSystem, registerOpenPanelFileSystem, type OpenPanelStoragePort } from "../FilePanels/OpenPanelFileSystem";
+
 export interface MountedFilePanelOptions {
+  readonly bundleIdentifier?: string;
+  readonly storage?: OpenPanelStoragePort | null;
   readonly picker?:BrowserFilePanelPort|null;
   readonly native?:FileSystemAccessPanelPort|null;
   readonly nativeActivity?:NativeOperationActivity;
@@ -51,7 +55,7 @@ export function createMountedFilePanelClient(options:MountedFilePanelOptions):Ap
     if(options.activation()===false)return {kind:'denied',reason:'policy',message:'File selection requires an active user action.'};
     return null;
   };
-  return Object.freeze<AppFilePanelClient>({
+  const client = Object.freeze<AppFilePanelClient>({
     getStatus(){
       options.assertLive();
       const nativeSave=nativeAvailable('save');
@@ -94,4 +98,6 @@ export function createMountedFilePanelClient(options:MountedFilePanelOptions):Ap
     release(reference,reason='caller-finished'){service.release(reference,reason);},
     dispose(){/* The mount owns the panel service. */},
   });
+  registerOpenPanelFileSystem(client, createOpenPanelFileSystem(options.storage, options.bundleIdentifier ?? "unbound", options.signal));
+  return client;
 }

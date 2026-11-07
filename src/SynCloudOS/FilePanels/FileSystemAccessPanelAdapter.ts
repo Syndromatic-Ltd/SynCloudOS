@@ -405,3 +405,10 @@ export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPo
     },
   };
 }
+
+/** @internal Wraps a browsed handle with the existing reference lifetime and permission rules. */
+export async function referenceForOpenPanelHandle(handle: FilePanelFileHandle | FilePanelDirectoryHandle, requestId: string, index: number, activation: () => boolean): Promise<FilePanelReference> {
+  const permission = typeof handle.queryPermission === "function" ? await handle.queryPermission({ mode: "read" }) : "granted";
+  if (permission !== "granted") throw new Error("The selected item needs permission. Choose its folder to unlock it.");
+  return handle.kind === "directory" ? directoryReference(handle, requestId, permission, activation, "read") : fileReference(handle, requestId, index, permission, activation, "read");
+}
