@@ -337,7 +337,10 @@ export function ApplicationStageView({
       trailing={activeNavigationChrome?.back ? <span className="webspring-application-navigation-chrome-balance" aria-hidden="true" /> : undefined}
       leadingAccessory={titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setLeadingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="leading" /> : undefined}
       trailingAccessory={titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setTrailingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="trailing" /> : undefined}
-      center={activeNavigationChrome?.back ? (
+      // An expanded window draws its large title below the bar, so the bar
+      // carries no inline title beside Back, as with a large-title
+      // navigation bar.
+      center={activeNavigationChrome?.back && titlebarDocument?.toolbarStyle !== "expanded" ? (
         <NavigationChromeSlot className="webspring-application-navigation-title" enter={stageMotion.navigationTitle}>
           {activeNavigationChrome.title}
         </NavigationChromeSlot>
