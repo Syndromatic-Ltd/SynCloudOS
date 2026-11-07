@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
+import type { OpenDocumentContentsRequest } from "./documentTypes";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { CommandSystem } from "../Commands/commandTypes";
 import type { OperationCoordinator } from "../Operations";
@@ -923,9 +925,26 @@ export class DocumentController {
     ));
   }
 
+  openDocument<TModel, TSerialized = TModel>(request: OpenDocumentContentsRequest): Promise<ApplicationDocument<TModel, TSerialized>>;
+  openDocument<TModel, TSerialized = TModel>(request: OpenDocumentRequest): Promise<ApplicationDocument<TModel, TSerialized>>;
   async openDocument<TModel, TSerialized = TModel>(
-    request: OpenDocumentRequest,
+    request: OpenDocumentRequest | OpenDocumentContentsRequest,
   ): Promise<ApplicationDocument<TModel, TSerialized>> {
+    if ("withContentsOf" in request) {
+      const ticket = this.captureApplicationMutation(request.applicationId);
+      return this.#trackApplicationAdmission(ticket, this.#operate("documents.open", request, request.signal, async () => {
+        throwIfDocumentAborted(request.signal);
+        const admission = this.#types.admission(request.typeId);
+        const type = admission.type as DocumentType<TModel, TSerialized>;
+        if (!this.isTypeAvailableToApplication(type.id, request.applicationId)) throw new DocumentUnavailableError("The application cannot open this document type.", { retryable: false });
+        if (!type.readFromData) throw new DocumentSchemaError(type.id, "The document type must implement readFromData to open incoming file contents.");
+        const data = await NSEData.read(request.withContentsOf);
+        const model = await type.readFromData(data, { typeId: type.id, schemaVersion: type.schemaVersion });
+        throwIfDocumentAborted(request.signal);
+        if (!this.#types.isCurrent(admission)) throw new DocumentAbortError("The incoming document type changed while reading.");
+        return this.#newDocumentCore<TModel, TSerialized>({ typeId: type.id, applicationId: request.applicationId, initialModel: model, activate: request.activate, signal: request.signal }, ticket);
+      }));
+    }
     const locationKey = canonicalDocumentLocation(request.location);
     const liveOwner = this.#documents.get(this.#documentIdsByLocation.get(locationKey) ?? "")?.applicationId;
     const closedOwner = this.#closedLocationOwners.get(locationKey);
