@@ -32,6 +32,7 @@ import {
 } from "react";
 import { nseMenuChosenAttribute, nseMenuChosenFadeMs } from "../Menus/menuSelectionFlash";
 import { createPortal } from "react-dom";
+import type { NSEOverlayAnchorPoint } from "./computeNSEOverlayPosition";
 import { useNSEOverlay } from "./useNSEOverlay";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
