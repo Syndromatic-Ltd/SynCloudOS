@@ -20,7 +20,7 @@
 
 import { afterAll, expect, it } from "vitest";
 
-import { createValueTransformer } from "../../src/SynCloudOS/Models";
+import { NSEValueTransformer } from "../../src/Foundation/NSEValueTransformer";
 import { NSENumberFormatter } from "../../src/Foundation/public";
 import { createUndoManager } from "../../src/SynCloudOS/Undo";
 import { NSEObjectController } from "@syndromatic/syncloudos/nse";
@@ -46,11 +46,9 @@ it("validates, discards and registers committed object edits with runtime undo",
           totalPennies: value,
         }),
         formatter: new NSENumberFormatter({ minimum: 0 }),
-        transformer: createValueTransformer({
-          id: "pounds-to-pennies",
-          transform: (pounds: number) => Math.round(pounds * 100),
-          reverse: (pennies: number) => pennies / 100,
-        }),
+        transformer: new (class extends NSEValueTransformer<number, number> {
+          override transformedValue(pounds: number) { return Math.round(pounds * 100); }
+        })(),
       },
     },
   });
