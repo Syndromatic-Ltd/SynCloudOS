@@ -18,7 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useLayoutEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useLayoutEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+
+const PresentedContentContext = createContext<((content: ReactNode) => ReactNode) | null>(null);
+
+/** Host-only: retain the presenting application's services when a real
+ * window renders its content elsewhere in the React tree. */
+export const NSEPresentedContentProvider = PresentedContentContext.Provider;
 
 /**
  * Latest content for a surface a window bridge presents. The bridge receives
@@ -59,6 +65,8 @@ function NSEPresentedContent({ store }: { readonly store: NSEPresentedContentSto
  * present. Present once per request and let this element follow the content.
  */
 export function useNSEPresentedContent(content: ReactNode): ReactNode {
+  const wrap = useContext(PresentedContentContext);
+  content = wrap ? wrap(content) : content;
   const [store] = useState(() => new NSEPresentedContentStore(content));
   const [element] = useState(() => <NSEPresentedContent store={store} />);
   useLayoutEffect(() => {
