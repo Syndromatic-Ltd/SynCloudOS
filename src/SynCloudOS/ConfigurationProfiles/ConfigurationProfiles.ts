@@ -127,12 +127,14 @@ const auditLog = runtime.diagnostics.policyDecisions;
 let subjectGrants = new WeakMap<SynCloudOSPolicySubjectGrant, SynCloudOSPolicySubject>();
 const registeredRoleCapabilities = new Map<SynCloudOSRole, Map<string, number>>();
 
-const defaultAccessMode: SynCloudOSAccessMode =
-  typeof import.meta.env.VITE_SYNCLOUDOS_ACCESS_MODE === "string"
-    ? (import.meta.env.VITE_SYNCLOUDOS_ACCESS_MODE as SynCloudOSAccessMode)
-    : "fullyLocked";
-
-let accessMode: SynCloudOSAccessMode = dependencies.accessMode ?? defaultAccessMode;
+const accessModes = new Set<string>([
+  "fullyLocked", "webspringVisibleAppProtected", "public", "mixed", "developer", "enterprisePrivate",
+]);
+function validatedAccessMode(value: unknown): SynCloudOSAccessMode {
+  if (typeof value !== "string" || !accessModes.has(value)) throw new TypeError("Unknown SynCloudOS access mode.");
+  return value as SynCloudOSAccessMode;
+}
+let accessMode = validatedAccessMode(dependencies.accessMode ?? import.meta.env.VITE_SYNCLOUDOS_ACCESS_MODE ?? "fullyLocked");
 
 function unique<T>(items: T[]) {
   return Array.from(new Set(items));
@@ -322,7 +324,15 @@ function resourceForRequest(request: SynCloudOSPolicyRequest) {
 
 function summariseContextValue(value: unknown): string | number | boolean | null {
   if (value === null) return null;
-  if (typeof value === "string") return value.length > 120 ? `${value.slice(0, 117)}...` : value;
+  if (typeof value === "string") {
+    // Context can contain a URL under any label, or embedded in a description.
+    // Remove credentials/query/fragment before applying the diagnostic size bound.
+    const safe = value.startsWith("/") ? diagnosticURL(value)! : value.replace(
+      /\b[a-z][a-z0-9+.-]*:\/\/[^\s<>"']+/giu,
+      (url) => diagnosticURL(url) ?? "[invalid URL]",
+    );
+    return safe.length > 120 ? `${safe.slice(0, 117)}...` : safe;
+  }
   if (typeof value === "number" || typeof value === "boolean") return value;
   if (Array.isArray(value)) return `Array(${value.length})`;
   if (typeof value === "object") return "Object";
@@ -337,7 +347,7 @@ function summariseContext(context?: Record<string, unknown>): SynCloudOSPolicyCo
   return {
     keys: [...keys],
     values: Object.fromEntries(keys.slice(0, 20).map((key) => [key,
-      /token|secret|password|credential|cookie|authorization|assertion|challenge/i.test(key)
+      /token|secret|pass(?:word|phrase)|credential|cookie|authori[sz]ation|assertion|challenge|api[-_]?key|private[-_]?key|session[-_]?key/i.test(key)
         ? "[redacted]" : summariseContextValue(context[key])]))
   };
 }
@@ -558,8 +568,22 @@ function decide(
   const missing = getMissingCapabilities(subject, requiredCapabilities);
   if (missing.length > 0)
     return baseDecision(request, subject, false, missingCapabilityReason("This action", subject, missing), requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
-  if (explicitlyRequiresLogin && !subject.isAuthenticated)
-    return baseDecision(request, subject, false, "This app requires an authorised session.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+  const isAppLaunch = request.action === "app.launch" || request.action === "route.open";
+  const requiresLogin = explicitlyRequiresLogin || (isAppLaunch && (
+    mode === "fullyLocked" || mode === "enterprisePrivate" ||
+    (mode === "developer" && !isExternalApp) ||
+    (mode === "webspringVisibleAppProtected" && !isExternalApp) ||
+    (!isPublicByManifest && mode === "mixed")
+  ));
+  // Deployment and explicit app login requirements apply before all action-specific
+  // branches, including diagnostics/system-app launch.
+  if (requiresLogin && !subject.isAuthenticated) {
+    const onlyNotPublic = isAppLaunch && mode === "mixed" && !explicitlyRequiresLogin && !isPublicByManifest;
+    const reason = onlyNotPublic
+      ? "This app launch requires an authorised session. The app is not public: to open it without signing in, set runtime: { policy: { public: true } } in its Info.ts."
+      : "This app launch requires an authorised session.";
+    return baseDecision(request, subject, false, reason, requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+  }
 
   if (request.action === "runtime.inspect") {
     return baseDecision(request, subject, true, "Runtime inspection is allowed.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
@@ -596,22 +620,6 @@ function decide(
   }
 
   if (request.action === "app.launch" || request.action === "route.open") {
-    const requiresLogin =
-      mode === "fullyLocked" ||
-      mode === "enterprisePrivate" ||
-      (mode === "developer" && !isExternalApp) ||
-      (mode === "webspringVisibleAppProtected" && !isExternalApp) ||
-      explicitlyRequiresLogin ||
-      (!isPublicByManifest && mode === "mixed");
-    if (requiresLogin && !subject.isAuthenticated) {
-      // When only the missing manifest flag stands in the way, say so: with sign-in disabled no
-      // session can ever exist, and the fix is one line in the app's Info.ts.
-      const onlyNotPublic = mode === "mixed" && !explicitlyRequiresLogin && !isPublicByManifest;
-      const reason = onlyNotPublic
-        ? "This app launch requires an authorised session. The app is not public: to open it without signing in, set runtime: { policy: { public: true } } in its Info.ts."
-        : "This app launch requires an authorised session.";
-      return baseDecision(request, subject, false, reason, requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
-    }
     if (!hasRole(subject, requiredRoles)) {
       return baseDecision(request, subject, false, "This app launch requires a different role.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
     }
@@ -637,6 +645,25 @@ function decide(
   return baseDecision(request, subject, true, "No policy blocked this action.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
 }
 
+/** Isolate callbacks from the caller's app, requirements and nested diagnostic data.
+ * Opaque grants already issued by this engine are immutable and retain their identity
+ * so a host restriction can perform a dry evaluation with the same explicit authority. */
+function restrictionProjection(value: unknown, copies = new WeakMap<object, unknown>()): unknown {
+  if (value === null || typeof value !== "object") return typeof value === "function" ? "[function]" : value;
+  if (subjectGrants.has(value as SynCloudOSPolicySubjectGrant)) return value;
+  if (copies.has(value)) return copies.get(value);
+  const copy: Record<string, unknown> | unknown[] = Array.isArray(value) ? [] : Object.create(null);
+  copies.set(value, copy);
+  for (const key of Object.keys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || !("value" in descriptor)) throw new TypeError("Restriction input must contain data properties.");
+    Object.defineProperty(copy, key, {
+      value: restrictionProjection(descriptor.value, copies), enumerable: true, writable: false, configurable: false,
+    });
+  }
+  return Object.freeze(copy);
+}
+
 function applyRegisteredPolicies(
   request: SynCloudOSPolicyRequest,
   initialDecision: SynCloudOSPolicyDecision,
@@ -648,15 +675,21 @@ function applyRegisteredPolicies(
   let decision = cloneDecision(initialDecision);
   for (const [policyId, policy] of policies.entries()) {
     const before = cloneDecision(decision);
-    let proposed: SynCloudOSPolicyDecision;
+    let restrictionAllowed = false;
+    let restrictionReason = "Registered restriction failed closed.";
     try {
-      proposed = policy(Object.freeze({ ...request }), cloneDecision(decision));
+      const proposed = policy(restrictionProjection(request) as SynCloudOSPolicyRequest, cloneDecision(decision));
+      // Read callback-controlled properties inside the same error boundary. Getters
+      // and proxies can throw just as the callback body can; none may skip audit.
+      restrictionAllowed = proposed?.allowed === true;
+      const reason = proposed?.reason;
+      if (typeof reason === "string") restrictionReason = reason;
     } catch {
-      proposed = { ...before, allowed: false, reason: "Registered restriction failed closed." };
+      restrictionAllowed = false;
+      restrictionReason = "Registered restriction failed closed.";
     }
     // Restrictions may deny, never mint authority or rewrite decision provenance.
-    const next = cloneDecision({ ...before, allowed: before.allowed && proposed?.allowed === true,
-      reason: typeof proposed?.reason === "string" ? proposed.reason : "Registered restriction failed closed." });
+    const next = cloneDecision({ ...before, allowed: before.allowed && restrictionAllowed, reason: restrictionReason });
     next.decision = next.allowed ? "allow" : "deny";
     if (next.allowed !== before.allowed && next.reason === before.reason) {
       next.reason = next.allowed
@@ -823,6 +856,7 @@ const configurationProfiles = {
   },
 
   setAccessMode(mode: SynCloudOSAccessMode) {
+    validatedAccessMode(mode);
     const changed = accessMode !== mode;
     accessMode = mode;
     if (changed) notifyChanged();
