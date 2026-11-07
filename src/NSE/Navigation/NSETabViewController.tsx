@@ -31,6 +31,7 @@ import { connectNSENavigationRestoration, type NSENavigationRestorationDescripto
 import { NSETreeController } from "../Controllers/NSETreeController";
 import { NSEAdaptiveTabView, type NSEAdaptiveTabOutlineItem } from "./adaptiveTabView";
 import { useNSETabToolbar } from "./tabToolbarView";
+import { registerTabViewProjection, tabViewProjection } from "./tabViewInternals";
 
 /**
  * NSTabViewController.TabStyle. Atmo draws `segmentedControlOnBottom` as its bottom tab bar and
@@ -117,6 +118,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
   constructor(options: NSETabViewControllerOptions = {}) {
     super(options);
     this.#tabStyle = options.tabStyle ?? "segmentedControlOnTop";
+    registerTabViewProjection(this, { control: () => this.#model, outline: () => this.#tabOutlineModel() });
     if (options.restoration) registerNSEAuthoringFinalizer(this, () => connectNSENavigationRestoration(this, options.restoration!), 15);
   }
 
@@ -201,11 +203,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
   /** `tabView(_:didSelect:)`. */
   didSelect(_tabViewItem: NSETabViewItem): void {}
 
-  /** @internal The tab control's model, rebuilt from the items. */
-  get tabControlModel(): NSETabBarController<ReactNode> | null { return this.#model; }
-
-  /** @internal The source-list projection uses the same items and selection as the tab control. */
-  get tabOutlineModel(): NSETreeController<NSEAdaptiveTabOutlineItem, string> {
+  #tabOutlineModel(): NSETreeController<NSEAdaptiveTabOutlineItem, string> {
     if (!this.#outline) this.#outline = new NSETreeController({
       owner: this, id: `${this.constructor.name}:tab-outline`,
       content: this.#outlineItems(), getId: item => item.identifier,
@@ -289,7 +287,7 @@ function NSETabViewControllerView({ controller }: { readonly controller: NSETabV
   if (controller.tabStyle === "sidebarAdaptable" || controller.tabStyle === "unspecified" || controller.tabStyle === "toolbar") return <div className="nse-tab-view-controller" data-tab-style={controller.tabStyle}>
     <NSEAdaptiveTabView controller={controller} scope={scope} />
   </div>;
-  const model = controller.tabControlModel;
+  const model = tabViewProjection(controller).control();
   const selected = controller.selectedTabViewItem;
   const Selected = selected?.viewController;
   const bar = model
