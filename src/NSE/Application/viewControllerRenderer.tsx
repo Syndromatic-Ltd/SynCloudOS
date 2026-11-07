@@ -21,6 +21,8 @@
 import { createContext, useContext, type ComponentType } from "react";
 
 import type { NSEViewController } from "./NSEViewController";
+import { useObserve } from "../Objects/useObserve";
+import { nseChildTransition, NSETransitionSlot } from "./viewControllerTransition";
 
 /** The host component that mounts a view controller's view: attaches it, feeds it traits and activity. */
 export type NSEViewControllerRenderer = ComponentType<{
@@ -42,6 +44,9 @@ export function NSEChildViewControllerView({ controller, className }: {
   readonly className?: string;
 }) {
   const Renderer = useContext(NSEViewControllerRendererContext);
+  const parent = useObserve(controller.parent);
   if (!Renderer) throw new Error(`${controller.constructor.name}'s view can only be shown inside a view an application hosts.`);
+  const transition = parent?.[nseChildTransition](controller);
+  if (transition) return <NSETransitionSlot transition={transition} Renderer={Renderer} className={className} />;
   return <Renderer controller={controller} className={className} />;
 }

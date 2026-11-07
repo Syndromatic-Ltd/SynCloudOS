@@ -777,6 +777,9 @@ export { NSEObject, observable, observe, useObserve } from "./Objects";
 export type { NSEObservable } from "./Objects";
 export { NSEApplication, NSEWindowController, NSEViewController, NSETitlebarAccessoryViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "./Application";
 export type { NSEAlertStyle, NSEPopoverPositioning } from "./Application";
+export type { NSEViewControllerPresentationAnimator } from "./Application";
+export { NSEViewControllerTransitionOptions } from "./Application";
+export type { NSEViewAnimator } from "./Animation/NSEViewAnimator";
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,
   NSETraitCollection,

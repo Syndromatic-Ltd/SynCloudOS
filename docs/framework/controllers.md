@@ -6,6 +6,8 @@ NSE follows the Cocoa split between views and controllers. A view draws and hand
 
 All controllers come from `@syndromatic/syncloudos/nse`.
 
+View controllers present retained overlays with `present(viewController, animator)` and dismiss them with `dismiss`. An `NSEViewControllerPresentationAnimator` animates presentation and dismissal after both views mount. Child swaps use `transition(from, to, options, completionHandler?)`; `view.animator()` and outlet animators apply alpha and frame changes in an `NSEAnimationContext` group. See [animation objects](nse/animation.md) for ownership, transition options and reduced motion.
+
 ## Shared behaviour
 
 Every collection controller shares one contract:
