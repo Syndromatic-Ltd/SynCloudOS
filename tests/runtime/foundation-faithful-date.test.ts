@@ -79,3 +79,13 @@ it("rejects unsupported era and pattern calendars", () => {
   const b=new NSEDateFormatter({locale:"en-US-u-ca-buddhist",timeZone:"UTC",dateFormat:"yyyy-MM-dd"});
   expect(() => b.string(new Date())).toThrow(/Gregorian/i);
 });
+
+it("round-trips midnight and noon with h11 and h24 hour cycles", () => {
+  for (const cycle of ["h11", "h24"]) {
+    const formatter = new NSEDateFormatter({locale:`en-US-u-hc-${cycle}`, timeZone:"UTC", dateStyle:"short", timeStyle:"short"});
+    for (const text of ["2026-08-09T00:30:00Z", "2026-08-09T12:30:00Z"]) {
+      const date = new Date(text);
+      expect(formatter.date(formatter.string(date))?.toISOString()).toBe(date.toISOString());
+    }
+  }
+});

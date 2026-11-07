@@ -147,10 +147,17 @@ export class NSEDateFormatter extends NSEFormatter<Date> {
       let n=Number(raw); if (this.dateFormat === undefined && groups[i] === "year" && raw.length <= 2) n+=2000;
       fields[groups[i] as keyof Fields]=n;
     }
+    const hourCycle = this.dateFormat === undefined ? this.#style(locale, zone).resolvedOptions().hourCycle : undefined;
+    if (groups.includes("hour") && hourCycle === "h24") {
+      if (fields.hour < 1 || fields.hour > 24) return null;
+      fields.hour %= 24;
+    }
     if (dayPeriod !== undefined) {
       const period=(hour:number) => { const instant=resolveCivil({year:2006,month:11,day:22,hour,minute:0,second:0},zone)!; return this.#style(locale,zone).formatToParts(instant).find(p=>p.type==="dayPeriod")?.value; };
       const am=period(0), pm=period(12); if (dayPeriod !== am && dayPeriod !== pm) return null;
-      if (fields.hour < 1 || fields.hour > 12) return null;
+      if (hourCycle === "h11") {
+        if (fields.hour < 0 || fields.hour > 11) return null;
+      } else if (fields.hour < 1 || fields.hour > 12) return null;
       fields.hour = fields.hour % 12 + (dayPeriod === pm ? 12 : 0);
     }
     const result=resolveCivil(fields,zone);
