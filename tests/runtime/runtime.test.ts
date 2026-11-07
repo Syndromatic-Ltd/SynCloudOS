@@ -19,7 +19,7 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import { createTestBundle, createTestRuntime, createRuntimeHarness, flushMultiSwitchLaunch } from "./helpers";
+import { asPolicySubject, createTestBundle, createTestRuntime, createRuntimeHarness, flushMultiSwitchLaunch } from "./helpers";
 
 type RuntimeLoginSurface = {
   readonly runtimeId: string;
@@ -321,7 +321,11 @@ describe("runtime controller, inspector, and transaction contracts", () => {
       expect(watchdog.getStatus()).toMatchObject({ installed: false });
       expect(watchdog.install()).toMatchObject({ installed: true });
       const plugin = { id: "runtime-contract-plugin", name: "Runtime Contract Plugin", version: "1.0.0" };
-      await expect(PluginRegistry.register(plugin)).resolves.toMatchObject({
+      const hostAuthority = asPolicySubject(runtime.configurationProfiles, {
+        user: { id: "plugin-host", displayName: "Plugin host" },
+        role: "admin", capabilities: ["plugin.register"], isAuthenticated: true,
+      });
+      await expect(PluginRegistry.register(plugin, hostAuthority)).resolves.toMatchObject({
         status: "enabled",
         plugin,
       });

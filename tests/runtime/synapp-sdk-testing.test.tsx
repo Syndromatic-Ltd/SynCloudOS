@@ -113,7 +113,7 @@ async function flushControlResult() {
 it("boots an app against deterministic adapters and exposes only harness controls", async () => {
   const host = createSynWareTestHost({
     app: ExampleApp,
-    permissions: ["clipboard.read", "documents.write"],
+    entitlements: ["clipboard.read", "documents.write"],
     document,
   });
   const view = await host.render();
@@ -184,7 +184,7 @@ it("gates mounted public SDK operations through real deterministic adapters", as
     // The system pasteboard crosses the runtime boundary, so it is governed by
     // the canonical transfer capability rather than an out-of-band test-only
     // clipboard entitlement.
-    permissions: ["app.open.public", "transfer.cross-application"],
+    entitlements: ["app.open.public", "transfer.cross-application"],
     document,
   });
   const view = await host.render();
