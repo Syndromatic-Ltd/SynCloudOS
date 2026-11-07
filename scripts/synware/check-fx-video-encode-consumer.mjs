@@ -205,7 +205,7 @@ function Probe() {
       const backend = new VFXWebMContainerBackend();
       const writer = new VFXContainerWriter({
         backend,
-        sink: { async write(bytes) { fragments.push(bytes.slice()); await Promise.resolve(); } },
+        sink: { async write(bytes) { fragments.push(new Uint8Array(bytes.bytes)); await Promise.resolve(); } },
         track: { id: 1, kind: "video", codec: "vp8", codedWidth: 16, codedHeight: 16, timescale: 1_000_000 },
         maximumBufferedBytes: 64 * 1024,
       });

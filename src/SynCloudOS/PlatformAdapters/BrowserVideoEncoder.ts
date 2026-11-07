@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
 import { MEFXSampleTimingInfo } from "../../FX/MediaFX/MEFXSampleTimingInfo";
 import { MEFXTime } from "../../FX/MediaFX/MEFXTime";
 import { VFXEncodedChunk } from "../../FX/VideoFX/VFXEncodedChunk";
@@ -91,7 +93,7 @@ function outputMetadata(metadata: EncodedVideoChunkMetadata | undefined): VFXEnc
   const decoder = metadata?.decoderConfig;
   if (!decoder) return Object.freeze({});
   const description = decoder.description
-    ? Uint8Array.from(new Uint8Array(decoder.description as ArrayBuffer))
+    ? NSEData.from(new Uint8Array(decoder.description as ArrayBuffer))
     : undefined;
   return Object.freeze({
     decoderConfig: Object.freeze({

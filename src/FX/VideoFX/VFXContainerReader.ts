@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
+
 import { VFXEncodedChunk } from "./VFXEncodedChunk";
 import type { VFXContainerBackend, VFXContainerTrack } from "./VFXContainerWriter";
 
@@ -40,7 +43,7 @@ export interface VFXContainerReadLimits {
 }
 
 export interface VFXContainerBackendReadSession {
-  push(bytes: Uint8Array): void;
+  push(bytes: NSEDataConvertible): void;
   finish(): VFXContainerReadResult;
 }
 
@@ -63,10 +66,10 @@ function limit(value: unknown, fallback: number, name: string): number {
   return Number(value);
 }
 
-async function* source(input: Uint8Array | AsyncIterable<Uint8Array>): AsyncIterable<Uint8Array> {
-  if (input instanceof Uint8Array) { yield input; return; }
-  if (!input || typeof (input as AsyncIterable<Uint8Array>)[Symbol.asyncIterator] !== "function")
-    throw new TypeError("Video container source must be Uint8Array or AsyncIterable<Uint8Array>.");
+async function* source(input: NSEDataConvertible | AsyncIterable<NSEDataConvertible>): AsyncIterable<NSEDataConvertible> {
+  if (input instanceof Uint8Array || input instanceof NSEData || input instanceof ArrayBuffer) { yield input; return; }
+  if (!input || typeof (input as AsyncIterable<NSEDataConvertible>)[Symbol.asyncIterator] !== "function")
+    throw new TypeError("Video container source must be Uint8Array or AsyncIterable<NSEDataConvertible>.");
   yield* input;
 }
 
@@ -88,13 +91,12 @@ export class VFXContainerReader {
     this.#signal = options.signal;
   }
 
-  async read(input: Uint8Array | AsyncIterable<Uint8Array>): Promise<VFXContainerReadResult> {
+  async read(input: NSEDataConvertible | AsyncIterable<NSEDataConvertible>): Promise<VFXContainerReadResult> {
     this.#throwIfAborted();
     const session = this.#backend.createReader(this.#limits);
     for await (const bytes of source(input)) {
       this.#throwIfAborted();
-      if (!(bytes instanceof Uint8Array)) throw new TypeError("Video container source yielded a non-Uint8Array fragment.");
-      session.push(bytes);
+      session.push(NSEData.from(bytes));
     }
     this.#throwIfAborted();
     const result = session.finish();

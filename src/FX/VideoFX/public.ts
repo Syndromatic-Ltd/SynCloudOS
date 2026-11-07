@@ -72,6 +72,7 @@ export type {
   VFXContainerCapability,
   VFXAudioContainerTrack,
   VFXContainerTrack,
+  VFXContainerTrackInput,
   VFXVideoContainerTrack,
   VFXContainerWriterDiagnostics,
   VFXContainerWriterOptions,

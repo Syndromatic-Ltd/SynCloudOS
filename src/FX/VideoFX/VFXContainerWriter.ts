@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
+
 import { VFXEncodedChunk } from "./VFXEncodedChunk";
 
 export interface VFXVideoContainerTrack {
@@ -27,7 +30,7 @@ export interface VFXVideoContainerTrack {
   readonly codedWidth: number;
   readonly codedHeight: number;
   readonly timescale: number;
-  readonly description?: Uint8Array;
+  readonly description?: NSEData;
 }
 
 /** Single-track audio uses the same bounded container port as video. */
@@ -42,6 +45,7 @@ export interface VFXAudioContainerTrack {
 }
 
 export type VFXContainerTrack = VFXVideoContainerTrack | VFXAudioContainerTrack;
+export type VFXContainerTrackInput = (Omit<VFXVideoContainerTrack, "description"> & { readonly description?: NSEDataConvertible }) | VFXAudioContainerTrack;
 
 export interface VFXContainerCapability {
   readonly container: string;
@@ -54,9 +58,9 @@ export interface VFXContainerCapability {
 }
 
 export interface VFXContainerBackendWriter {
-  start(): readonly Uint8Array[];
-  write(chunk: VFXEncodedChunk): readonly Uint8Array[];
-  close(): readonly Uint8Array[];
+  start(): readonly NSEData[];
+  write(chunk: VFXEncodedChunk): readonly NSEData[];
+  close(): readonly NSEData[];
 }
 
 export interface VFXContainerBackend {
@@ -67,7 +71,7 @@ export interface VFXContainerBackend {
 }
 
 export interface VFXContainerByteSink {
-  write(bytes: Uint8Array): void | Promise<void>;
+  write(bytes: NSEData): void | Promise<void>;
   close?(): void | Promise<void>;
   abort?(reason: unknown): void | Promise<void>;
 }
@@ -84,7 +88,7 @@ export interface VFXContainerWriterDiagnostics {
 export interface VFXContainerWriterOptions {
   readonly backend: VFXContainerBackend;
   readonly sink: VFXContainerByteSink;
-  readonly track: VFXContainerTrack;
+  readonly track: VFXContainerTrackInput;
   readonly maximumBufferedBytes?: number;
   readonly signal?: AbortSignal;
 }
@@ -96,7 +100,7 @@ function limit(value: unknown, fallback: number): number {
   return Number(value);
 }
 
-function validateTrack(track: VFXContainerTrack): VFXContainerTrack {
+function validateTrack(track: VFXContainerTrackInput): VFXContainerTrack {
   if (!track || typeof track !== "object") throw new TypeError("Video container track metadata is required.");
   if (!Number.isSafeInteger(track.id) || track.id < 1 || track.id > 126) throw new RangeError("Video container track id must be between 1 and 126.");
   if (track.kind !== "video" && track.kind !== "audio") throw new TypeError("VFX container track kind is invalid.");
@@ -104,13 +108,17 @@ function validateTrack(track: VFXContainerTrack): VFXContainerTrack {
   if (track.kind === "video") {
     if (!Number.isSafeInteger(track.codedWidth) || track.codedWidth < 1 || track.codedWidth > 16_384) throw new RangeError("Video container width is invalid.");
     if (!Number.isSafeInteger(track.codedHeight) || track.codedHeight < 1 || track.codedHeight > 16_384) throw new RangeError("Video container height is invalid.");
-    if (track.description !== undefined && !(track.description instanceof Uint8Array)) throw new TypeError("Video container description must be Uint8Array.");
+    if (track.description !== undefined) NSEData.from(track.description);
   } else {
     if (track.sampleRate !== 48_000 || !Number.isSafeInteger(track.channelCount) || track.channelCount < 1 || track.channelCount > 2 || !Number.isSafeInteger(track.preSkip) || track.preSkip < 0 || track.preSkip > 65_535)
       throw new RangeError("Unsupported audio sample rate, channel layout or pre-skip.");
   }
   if (!Number.isSafeInteger(track.timescale) || track.timescale < 1 || track.timescale > 1_000_000_000) throw new RangeError("Video container timescale is invalid.");
-  return Object.freeze({ ...track, codec: track.codec.trim(), ...(track.kind === "video" && track.description ? { description: track.description.slice() } : {}) });
+  if (track.kind === "video") {
+    const { description, ...metadata } = track;
+    return Object.freeze({ ...metadata, codec: track.codec.trim(), ...(description !== undefined ? { description: NSEData.from(description) } : {}) });
+  }
+  return Object.freeze({ ...track, codec: track.codec.trim() });
 }
 
 export class VFXContainerWriter {
@@ -198,17 +206,17 @@ export class VFXContainerWriter {
     await this.#writeFragments(this.#writer.start());
   }
 
-  async #writeFragments(fragments: readonly Uint8Array[]): Promise<void> {
+  async #writeFragments(fragments: readonly NSEData[]): Promise<void> {
     for (const fragment of fragments) {
-      if (!(fragment instanceof Uint8Array)) throw new TypeError("Video container backend emitted an invalid byte fragment.");
-      if (fragment.byteLength > this.#maximumBufferedBytes)
+      if (!(fragment instanceof NSEData)) throw new TypeError("Video container backend emitted an invalid byte fragment.");
+      if (fragment.count > this.#maximumBufferedBytes)
         throw new DOMException("Video container fragment exceeds the configured buffer limit.", "QuotaExceededError");
-      this.#peakBufferedBytes = Math.max(this.#peakBufferedBytes, fragment.byteLength);
+      this.#peakBufferedBytes = Math.max(this.#peakBufferedBytes, fragment.count);
       this.#throwIfAborted();
       await this.#sink.write(fragment);
       this.#throwIfAborted();
       this.#fragmentsWritten += 1;
-      this.#bytesWritten += fragment.byteLength;
+      this.#bytesWritten += fragment.count;
     }
   }
 
