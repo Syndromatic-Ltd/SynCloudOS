@@ -136,7 +136,30 @@ The rule that settles each new capability:
 - **Both are opt-in.** A site with `authenticationPolicy: "disabled"` or an app that never imports it carries none of it.
 - **PolicyKit needs a review of its own** before it is relied on as the security layer. The owner questioned its efficacy, and that review is out of scope here.
 
+## PolicyKit redesign (proposal)
+
+PolicyKit (`src/SynCloudOS/PolicyKit`, about 1,200 lines) answers one question, "may this subject do this action?", for several different things that Apple keeps apart. It mixes:
+
+- site visibility modes (`fullyLocked`, `public`, `enterprisePrivate`, and so on);
+- roles and access classes;
+- per-app access (`requiresLogin`, `requiredRoles`);
+- manifest permissions (`requiredBundlePermissions`);
+- every FX device check (`mountedLocationClient` throws "PolicyKit denied SynWare capability ...");
+- internal actions (`runtime.mutate`, `diagnostics.view`, `plugin.register`).
+
+Proposed split, each part named for its Apple counterpart:
+
+| Today in PolicyKit | Apple shape | Proposed home |
+|---|---|---|
+| Manifest `permissions` checked before device access | **Entitlements** (`com.apple.security.device.camera`, ...), declared in the bundle and enforced by the sandbox | `Info.ts` entitlements, checked once at launch by the runtime |
+| Whether the user has allowed location, camera, notifications, ... | **Per-framework authorisation**: `CLLocationManager.authorizationStatus`, `AVCaptureDevice.requestAccess`, `UNUserNotificationCenter.requestAuthorization`, `CBManager.authorization`, `CNContactStore`, `SFSpeechRecognizer.requestAuthorization`, backed by the privacy database (TCC), shown in Privacy & Security | Each FX framework owns its `authorizationStatus` and request (LocationFX already does). One privacy store backs them, shown in a Webspring Privacy & Security pane |
+| Admin-only actions (`runtime.mutate`, `diagnostics.view`, `plugin.register`) | **Authorization Services**: named rights (`system.preferences`, ...), `AuthorizationCreate` / `AuthorizationCopyRights` | A small `SCAuthorization` with named rights checked against the signed-in subject's role |
+| Site access modes, roles, access classes, login-required apps | **Configuration profiles / managed settings** (MDM restrictions, managed app configuration) | A site configuration profile (`syndromaticPolicyProfile.ts` becomes one), applied by the runtime at boot |
+| Who the user is | AuthenticationServices / `ASAuthorization` | Authentication (with optional passkeys, above) |
+
+The name "PolicyKit" goes away. Its evaluator, audit trace and tests survive inside these four pieces. This is the Linux polkit idea under AppKit names, and it is the larger refactor. It should come **after** the efficacy review, so the redesign fixes real weaknesses instead of renaming them.
+
 ## Open questions for the owner (remaining)
 
-- Confirm the CRFX, ZFX and NWFX prefixes.
-- Confirm the passkey recommendation above.
+- Approve the PolicyKit split above, and whether to do the efficacy review first (recommended).
+- Compression: `ZFX` was an invention (from zlib), not an Apple name. Apple ships compression two ways: `NSData.compressed(using:)` in Foundation, and the streaming Compression framework. There is no Foundation layer here, so the closest honest home is CompressionFX with a two-letter-plus-FX prefix that is free and isn't Core Media's `CM`: `CPFX` (recommended).
