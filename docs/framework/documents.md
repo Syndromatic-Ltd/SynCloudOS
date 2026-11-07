@@ -88,7 +88,7 @@ async applicationWillFinishLaunching() {
 }
 ```
 
-Document-store reads and writes are authorised against the signed-in person's role, not only the application's manifest; see [Permissions](synware-manifest.md#permissions).
+Document-store reads and writes are authorised against the signed-in person's role, not only the application's manifest; see [Entitlements](synware-manifest.md#entitlements-privacy-and-services).
 
 `updateDocument` applies a transform to the current model and records an undo step named by `actionName`. Set a `coalescingKey` so a burst of edits such as typing merges into one step, or `recordUndo: false` for changes that should not be undoable.
 
