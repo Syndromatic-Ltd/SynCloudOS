@@ -1,0 +1,70 @@
+{
+  "checkedAt": "2026-11-07T11:25:10.989Z",
+  "framework": {
+    "head": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+    "branch": "fix/blind-rewrite-friction",
+    "ownedSourceDirty": [],
+    "vitestExists": true
+  },
+  "site": {
+    "head": "890305c919b5831c8a774050403b4657c5d1857e",
+    "branch": "prerelease",
+    "receiptCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+    "archive": "syndromatic-syncloudos-1.0.0-beta.2-1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f.tgz",
+    "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+    "archiveHashMatches": true,
+    "sourceSha256": "05a3f2ab75b10862ee2d70786102d932e3dbaa3a0a6097ba7b1e8d297e51b772",
+    "resourceSha256": "c97463f939fce24cbbcc8d9a37bcefd4c593e8d6fd21c2249fa779ee86413ca0",
+    "resourceCount": 2167,
+    "installedResourceFailures": [],
+    "note": "Concurrent adoption observed; its package/vendor files were preserved."
+  },
+  "checkouts": [
+    {
+      "file": "part-b-adoption-checkout.json",
+      "scratch": "C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e",
+      "exists": false
+    },
+    {
+      "file": "part-b-docs-adoption-checkout.json",
+      "scratch": "C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\syncloudos-foundation-part-b-8d07e0dbbef84b13b88bd1471a8cdcbd",
+      "exists": false
+    },
+    {
+      "file": "part-b-head-adoption-checkout.json",
+      "scratch": "C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\syncloudos-foundation-part-b-9027e072b000497582884cb1c4562519",
+      "exists": false
+    },
+    {
+      "file": "part-b-last-adoption-checkout.json",
+      "scratch": "C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\syncloudos-foundation-part-b-e716d5ab68714dcca1431d72cef4b588",
+      "exists": false
+    },
+    {
+      "file": "part-b-final-checkout.log",
+      "scratch": "C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-1386beb3645b4a9baaa109810b774619",
+      "exists": false
+    }
+  ],
+  "preview": {
+    "checkedAt": "2026-11-07T11:30:37.264Z",
+    "url": "http://127.0.0.1:5199/",
+    "httpStatus": 200,
+    "listeners": [
+      {
+        "port": 5173,
+        "pid": 72912
+      },
+      {
+        "port": 5199,
+        "pid": 54076
+      },
+      {
+        "port": 5387,
+        "pid": 69072
+      }
+    ],
+    "port5210Absent": true,
+    "note": "Read-only listener and HTTP recheck; no restart."
+  }
+}

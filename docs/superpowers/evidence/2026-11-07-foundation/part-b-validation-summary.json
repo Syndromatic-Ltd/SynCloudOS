@@ -1,0 +1,221 @@
+{
+  "note": "Original runs and later bounded rechecks; no replacement full-suite run.",
+  "frameworkFullCommit": "31b057525494b7ae6e0ef025689e132d55198a2f",
+  "sdkAndPackedCommit": "35b91dc",
+  "finalTaskAdoptionCommit": "b21cf2975212cf91ed0cb19f93165b586468b4c2",
+  "results": {
+    "part-b-framework-full.json": {
+      "total": 7273,
+      "passed": 7244,
+      "failed": 29,
+      "files": 873,
+      "failures": [
+        {
+          "file": "integration/text-system-example.test.ts",
+          "title": "private public-package TextSystem engine admits a scoped image, saves its native references and reacquires verified bytes in a fresh mounted runtime",
+          "message": "TypeError: bytes.subarray is not a function\n    at decodePNG (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/integration/text-system-example.test.ts:55:33)\n    at hydrateAsset (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/examples/TextSystem.app/Contents/example.ts:108:27)\n    at createTextSystemExample (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-f"
+        },
+        {
+          "file": "integration/text-system-example.test.ts",
+          "title": "private public-package TextSystem engine exports the captured revision without dirtying history or releasing live view fonts",
+          "message": "TypeError: result.bytes.subarray is not a function\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/integration/text-system-example.test.ts:270:50\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+        },
+        {
+          "file": "integration/text-system-keyboard.test.tsx",
+          "title": "only lets the originating surface cancel its object gesture with Escape",
+          "message": "TypeError: image.toPNG(...).base64EncodedString is not a function\n    at CustomSurface (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/examples/TextSystem.app/Contents/view.tsx:83:67)\n    at Object.react_stack_bottom_frame (C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\node_modules\\react-dom\\cjs\\react-dom-client.development.js:25904:20)\n    at renderWithHooks (C:\\Users\\Kavish Krish"
+        },
+        {
+          "file": "integration/text-system-keyboard.test.tsx",
+          "title": "focuses the owning input and leaves an already handled Escape alone",
+          "message": "TypeError: image.toPNG(...).base64EncodedString is not a function\n    at CustomSurface (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/examples/TextSystem.app/Contents/view.tsx:83:67)\n    at Object.react_stack_bottom_frame (C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\node_modules\\react-dom\\cjs\\react-dom-client.development.js:25904:20)\n    at renderWithHooks (C:\\Users\\Kavish Krish"
+        },
+        {
+          "file": "integration/text-system-keyboard.test.tsx",
+          "title": "revokes the captured gesture lifetime when its surface unmounts",
+          "message": "TypeError: image.toPNG(...).base64EncodedString is not a function\n    at CustomSurface (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/examples/TextSystem.app/Contents/view.tsx:83:67)\n    at Object.react_stack_bottom_frame (C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\node_modules\\react-dom\\cjs\\react-dom-client.development.js:25904:20)\n    at renderWithHooks (C:\\Users\\Kavish Krish"
+        },
+        {
+          "file": "integration/text-system-keyboard.test.tsx",
+          "title": "leaves composition keys alone and consumes only a gesture's Escape",
+          "message": "TypeError: image.toPNG(...).base64EncodedString is not a function\n    at CustomSurface (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/examples/TextSystem.app/Contents/view.tsx:83:67)\n    at Object.react_stack_bottom_frame (C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\node_modules\\react-dom\\cjs\\react-dom-client.development.js:25904:20)\n    at renderWithHooks (C:\\Users\\Kavish Krish"
+        },
+        {
+          "file": "performance/text-primitives-performance.test.ts",
+          "title": "headless text layout contracts lays out 100000+ UTF16 units, reuses warm results and releases retained state",
+          "message": "Error: STACK_TRACE_ERROR\n    at task (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1784:27)\n    at Object.<anonymous> (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1817:16)\n    at Object.<anonymous> (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/"
+        },
+        {
+          "file": "runtime/browser-file-picker-port.test.ts",
+          "title": "the browser file chooser behind the Open panel offers the request's types, returns the chosen file and leaves no input behind",
+          "message": "Error: expected NSEData{} to be File{ …(1) } // Object.is equality\n    at _Assertion.__VITEST_RESOLVES__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/expect/dist/index.js:1710:17)\n    at _Assertion.propertyGetter (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGet"
+        },
+        {
+          "file": "runtime/framework-doc-links.test.ts",
+          "title": "framework documentation links every guide from the framework index",
+          "message": "AssertionError: expected [ Array(1) ] to deeply equal []\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/framework-doc-links.test.ts:104:22\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folde"
+        },
+        {
+          "file": "runtime/heritage-inspector-dev.test.ts",
+          "title": "heritage development boundary excludes the lazy Inspector graph and CSS from the production host region",
+          "message": "Error: Build failed with 39 errors:\nsrc/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563: ERROR: Could not resolve \"fs\"\nsrc/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629: ERROR: Could not resolve \"path\"\nsrc/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653: ERROR: Could not resolve \"url\"\nsrc/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28: ERROR: No loader is configured for \".wasm\" files: ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/harfbuzzjs/dist/harfbuzz.w"
+        },
+        {
+          "file": "runtime/heritage-inspector-dev.test.ts",
+          "title": "heritage development boundary removes the bridge and UI from the production import graph without a package rebuild",
+          "message": "Error: Build failed with 39 errors:\nsrc/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563: ERROR: Could not resolve \"fs\"\nsrc/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629: ERROR: Could not resolve \"path\"\nsrc/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653: ERROR: Could not resolve \"url\"\nsrc/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28: ERROR: No loader is configured for \".wasm\" files: ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/harfbuzzjs/dist/harfbuzz.w"
+        },
+        {
+          "file": "runtime/nse-file-browser-packed.test.ts",
+          "title": "exports usable path items and workspace artwork from an independently installed SDK",
+          "message": "Error: STACK_TRACE_ERROR\n    at task (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1784:27)\n    at Object.<anonymous> (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1817:16)\n    at Object.<anonymous> (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/"
+        },
+        {
+          "file": "runtime/synapp-manifest-validator-generated.test.ts",
+          "title": "keeps the precompiled manifest validator current with the schema",
+          "message": "Error: Command failed: C:\\Program Files\\nodejs\\node.exe scripts/synware/gen-manifest-validator.mjs --check\nsynappManifestValidator.generated.mjs is stale: run node scripts/synware/gen-manifest-validator.mjs\n\n    at genericNodeError (node:internal/errors:986:15)\n    at wrappedFn (node:internal/errors:540:14)\n    at checkExecSyncError (node:child_process:943:11)\n    at execFileSync (node:child_process:979:15)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "waits for the entrance to settle without capturing or running an idle frame loop",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "replaces documents immediately when the environment has no animation clock",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "mirrors the visible foot of an asymmetric page without squeezing its full height into the shelf",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "keeps a page shorter than the shelf at its natural height",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "finishes selection replacement in 180 milliseconds on the canonical seconds clock",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "captures settled documents once and submits mirrored image quads with a real ImageFX fade mask",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "moves retained reflections with travelling documents without capturing on animation frames",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "retains images during travel and captures the incoming selection only after settling",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "preserves a 530px document's projected width and x origin on a tilted floor",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "serializes replacement captures and rejects the stale selection before decoding it",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "deduplicates the present document and releases pending work when deactivated",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "releases a late pixel lease without publishing after deactivation",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "cancels capture when the renderer fails and hides an unavailable surface",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/chronosphere/chronosphere-reflection.test.tsx",
+          "title": "loads captured PNG bytes through the mounted app image client and real resource policy",
+          "message": "TypeError: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received an instance of NSEData\n    at Buffer.from (node:buffer:364:9)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-foundation-part-b-a2f73a3b77834ff6b4c4f1f9ec12130e/tests/runtime/chronosphere/chronosphere-reflection.test.tsx:84:78\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node"
+        },
+        {
+          "file": "runtime/fx/packed-fx.test.ts",
+          "title": "executes substantive FX operations from the built npm archive outside the repository",
+          "message": "Error: Command failed: C:\\Program Files\\nodejs\\node.exe specimen.mjs\nfile:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/synware-fx-packed-yfNOhY/node_modules/@syndromatic/syncloudos/chunks/GFXImage-CNafF8Pv.js:275\r\n      throw new RangeError(\"Callback provider returned an invalid read length.\");\r\n            ^\r\n\r\nRangeError: Callback provider returned an invalid read length.\r\n    at it.read (file:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/synware-fx-packed-yfNOhY/node_modules/@s"
+        },
+        {
+          "file": "runtime/fx/packed-value-foundations.test.ts",
+          "title": "executes and typechecks LocationFX and MIDIFX from an independently installed SDK archive",
+          "message": "Error: Command failed (1): node specimen.mjs\n\n\nfile:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/synware-fx-values-packed-ebofNq/specimen.mjs:75\r\nassert.deepEqual([...MIFXEncoder.encode({ kind: \"pitch-bend\", channel: 15, value: 16383 })], [0xef, 0x7f, 0x7f]);\r\n                                 ^\r\n\r\nTypeError: MIFXEncoder.encode is not a function or its return value is not iterable\r\n    at file:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/synware-fx-values-packed-ebofNq/specimen.mj"
+        }
+      ]
+    },
+    "part-b-site-full.json": {
+      "total": 399,
+      "passed": 396,
+      "failed": 3,
+      "files": 61,
+      "failures": [
+        {
+          "file": "runtime/gallery-atmo-surfaces.test.tsx",
+          "title": "Gallery Atmo surface coverage in its class application uses real owned window and document states for focus, minimisation, zoom and dirty/clean history",
+          "message": "Error: expected undefined to be defined\n    at Proxy.__VITEST_POLL_CHAIN__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3748:47)\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx:58:119\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/sit"
+        },
+        {
+          "file": "runtime/publisher/product-controller.test.tsx",
+          "title": "Publisher admission and export command moves imagePopover to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+        },
+        {
+          "file": "runtime/publisher/product-controller.test.tsx",
+          "title": "Publisher admission and export command moves publishMenu to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+        }
+      ]
+    },
+    "part-b-sdk-final.json": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "files": 2,
+      "failures": []
+    },
+    "part-b-packed-final.json": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "files": 3,
+      "failures": []
+    },
+    "part-b-site-complete-ui.json": {
+      "total": 16,
+      "passed": 13,
+      "failed": 3,
+      "files": 2,
+      "failures": [
+        {
+          "file": "runtime/gallery-atmo-surfaces.test.tsx",
+          "title": "Gallery Atmo surface coverage in its class application uses real owned window and document states for focus, minimisation, zoom and dirty/clean history",
+          "message": "Error: expected undefined to be defined\n    at Proxy.__VITEST_POLL_CHAIN__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3748:47)\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx:58:119\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/sit"
+        },
+        {
+          "file": "runtime/publisher/product-controller.test.tsx",
+          "title": "Publisher admission and export command moves imagePopover to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+        },
+        {
+          "file": "runtime/publisher/product-controller.test.tsx",
+          "title": "Publisher admission and export command moves publishMenu to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+        }
+      ]
+    }
+  }
+}

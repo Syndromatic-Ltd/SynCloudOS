@@ -1,0 +1,8 @@
+{
+  "url": "http://127.0.0.1:5199",
+  "created": "2026-11-07T11:16:51.868748+00:00",
+  "note": "Combined restart was blocked by automatic approval; a concurrent session refreshed the server, so the fresh verified listener was preserved.",
+  "pid": 54076,
+  "command": "\"C:\\Program Files\\nodejs\\node.exe\" ../framework/docs/superpowers/evidence/2026-11-07-foundation/open-ui-preview.mjs",
+  "status": 200
+}

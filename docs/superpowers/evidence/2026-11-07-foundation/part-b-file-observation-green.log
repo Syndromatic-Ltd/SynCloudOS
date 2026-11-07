@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/native-file-work-observation.test.ts tests/runtime/file-panel-service.test.ts tests/runtime/mounted-file-panel-client.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  50 passed (50)
+   Start at  09:59:58
+   Duration  2.93s (transform 2.04s, setup 73ms, import 2.51s, tests 83ms, environment 2.08s)

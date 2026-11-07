@@ -83,3 +83,15 @@ Reviewed the subsequent diff limited to `AppSDK/testing/fakeAdapters.ts`, `AppSD
 The original delivered-type assertion failed before correction (`part-b-captured-output-red.log`: one failed, 12 passed). The completed focused recheck records **46 passed, three files** in `part-b-captured-output-green.log`, covering mounted file panels, pasteboards and the SDK test host. The reviewer read this evidence and the source; no tests/builds were repeated.
 
 **Spec-compliance verdict: pass. Code-quality verdict: pass.** This correction closes the input-versus-output distinction in the testing entry without retaining a raw-return alias. No new finding arose; the separate final package/full-suite/site gates remain unchanged.
+
+## Final bounded consumer/example recheck
+
+Reviewed `5b9bb7b` and `de26031`, restricted to the two TextSystem example helpers and their fixture/consumer follow-ups. No framework production API changed in this follow-up.
+
+- The TextSystem hydration callback now consumes delivered `NSEData`; `decodeExamplePNG` accepts convertible input and captures its native PNG Blob through Foundation before awaiting `createImageBitmap`. Existing abort checks and `bitmap.close()` cleanup remain intact. Asset receipt serialisation explicitly reads the defensive byte view.
+- Packed FX and MIDI specimens now consume `.bytes`/`.count`, return actual Foundation data from provider/resource fixtures, and bridge encoded fragments explicitly for native typed-array assembly. Their substantive format/lifetime assertions remain in place.
+- The file-picker fixture separately verifies retained selected `File` identity and delivered `NSEData` content. Reflection fixtures use Foundation base64 output, preserve numeric pixel storage, and add an explicit content comparison at the real adapter boundary. The public guide link is a documentation-only addition.
+
+Read the recorded TextSystem result: all **17 tests pass** in the two TextSystem files; the same historical recheck records two packed cases blocked by the unchanged source-fingerprint guard before specimen execution. The parent reports subsequent clean-snapshot acceptance for the repaired packed/browser consumers and is separately completing the final SDK package/installed-worker checks. This reviewer ran no tests/builds and does not convert the earlier guard failures into passing historical results.
+
+**Final source-quality verdict: pass. Final source spec-compliance verdict: pass.** No new Critical or Important finding arose in the bounded follow-up. Package/full-suite/site validation and the unresolved site UI diagnosis remain separately recorded integration results; these source verdicts assert no additional suite acceptance.
