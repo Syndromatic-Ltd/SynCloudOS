@@ -47,9 +47,9 @@ export function createMountedBluetoothClient(adapter: BTFXBluetoothClient | unde
         const characteristic = (value: BTFXCharacteristic): BTFXCharacteristic => Object.freeze<BTFXCharacteristic>({ uuid: value.uuid,
           readValue: () => call(() => value.readValue()),
           writeValue: (data, response) => call(() => value.writeValue(data, response)),
-          setNotifyValue: (enabled, listener) => call(() => value.setNotifyValue(enabled, listener && (data => {
-            try { check(); } catch { manager?.dispose(); return; } listener(data);
-          }))),
+          setNotifyValue: (enabled, listener) => enabled ? call(() => value.setNotifyValue(true, listener && (data => {
+            try { check(); } catch { dispose(); return; } listener(data);
+          }))) : value.setNotifyValue(false),
         });
         const service = (value: BTFXService): BTFXService => Object.freeze({ uuid: value.uuid, isPrimary: value.isPrimary,
           discoverCharacteristics: () => call(() => value.discoverCharacteristics()).then(values => Object.freeze(values.map(characteristic))) });
