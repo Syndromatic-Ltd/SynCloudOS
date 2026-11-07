@@ -18,12 +18,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { runInNewContext } from "node:vm";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
 import { expect, it } from "vitest";
 import { NSEData } from "../../../src/Foundation/NSEData";
 import { AUFXAudioFile, AUFXAudioFormat, AUFXAudioPCMBuffer } from "../../../src/FX/AudioFX/public";
 import { GFXDataConsumer, GFXDataProvider, GFXImage } from "../../../src/FX/GraphicsFX/GFXImage";
+import { MEFXBlockBuffer } from "../../../src/FX/MediaFX/MEFXBlockBuffer";
+import { IFXDataMatrixCodeDescriptor } from "../../../src/FX/ImageFX/IFXBarcodeDescriptor";
+import { VFXContainerReader, type VFXContainerReadableBackend } from "../../../src/FX/VideoFX/VFXContainerReader";
 import { VFXPixelBuffer } from "../../../src/FX/VideoFX/VFXPixelBuffer";
 import { MIFXEncoder } from "../../../src/FX/MIDIFX/MIFXEncoder";
 import { MIFXParser } from "../../../src/FX/MIDIFX/MIFXParser";
@@ -70,4 +74,53 @@ it("omits native recorder and PDF worker ports from exported constructor declara
 
 it("keeps pixel backing ownership private while exposing numeric pixel copies", () => {
   expect("fromBacking" in VFXPixelBuffer).toBe(false);
+});
+
+const foreignByteSources = [
+  "new Uint8Array([1, 2]).buffer",
+  "new Uint8Array([9, 1, 2, 9]).subarray(1, 3)",
+];
+
+it.each(foreignByteSources)("normalises a genuine foreign byte source before provider dispatch: %s", expression => {
+  const input = runInNewContext(expression) as ArrayBuffer | Uint8Array;
+  expect([...NSEData.from(input).bytes]).toEqual([1, 2]);
+  const provider = new GFXDataProvider(input);
+  expect([...provider.read(0, 2).bytes]).toEqual([1, 2]);
+  provider.release();
+});
+
+it.each(foreignByteSources)("normalises a genuine foreign byte source before media segment dispatch: %s", expression => {
+  const input = runInNewContext(expression) as ArrayBuffer | Uint8Array;
+  const block = new MEFXBlockBuffer(input);
+  const bytes = new Uint8Array(2);
+  expect(block.copyTo(bytes)).toBe(2);
+  expect([...bytes]).toEqual([1, 2]);
+  block.close();
+  const segment = new MEFXBlockBuffer({ bytes: input, offset: 1, length: 1 });
+  segment.copyTo(bytes, { length: 1 });
+  expect(bytes[0]).toBe(2);
+  segment.close();
+});
+
+it.each(foreignByteSources)("normalises a genuine foreign byte source before container stream dispatch: %s", async expression => {
+  const input = runInNewContext(expression) as ArrayBuffer | Uint8Array;
+  const fragments: NSEData[] = [];
+  const backend: VFXContainerReadableBackend = {
+    container: "test", capabilities: [], supports: () => true,
+    createWriter: () => ({ start: () => [], write: () => [], close: () => [] }),
+    createReader: () => ({
+      push: bytes => { fragments.push(NSEData.from(bytes)); },
+      finish: () => ({ container: "test", track: { id: 1, kind: "audio", codec: "opus", sampleRate: 48000, channelCount: 1, preSkip: 0, timescale: 1000000 }, chunks: [], seekIndex: [] }),
+    }),
+  };
+  await new VFXContainerReader({ backend }).read(input);
+  expect(fragments.map(data => [...data.bytes])).toEqual([[1, 2]]);
+  await new VFXContainerReader({ backend }).read((async function* () { yield input; })());
+  expect(fragments.map(data => [...data.bytes])).toEqual([[1, 2], [1, 2]]);
+});
+
+it.each(foreignByteSources)("normalises a genuine foreign byte source before barcode payload dispatch: %s", expression => {
+  const input = runInNewContext(expression) as ArrayBuffer | Uint8Array;
+  const descriptor = new IFXDataMatrixCodeDescriptor(input, { rows: 12, columns: 12, quietSpace: 2 });
+  expect([...descriptor.message.bytes]).toEqual([1, 2]);
 });

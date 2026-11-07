@@ -81,13 +81,15 @@ const maximumDescriptorBytes = 4096;
 const matrices = new WeakMap<IFXBarcodeDescriptor, BarcodeMatrix>();
 
 function ownBytes(value: unknown, maximum = maximumDescriptorBytes): Uint8Array {
-    if (value instanceof NSEData || value instanceof ArrayBuffer) value = new Uint8Array(NSEData.from(value).bytes);
-    if (value instanceof Uint8Array && Object.getPrototypeOf(value) === Uint8Array.prototype) {
-        if (value.length < 1 || value.length > maximum)
+    if (!Array.isArray(value)) {
+        let data: NSEData;
+        try { data = NSEData.from(value as NSEDataConvertible); }
+        catch { throw new TypeError("Barcode payload must be a nonempty plain byte array."); }
+        if (data.count < 1 || data.count > maximum)
             throw new RangeError("Barcode payload exceeds its byte limit.");
-        return new Uint8Array(value);
+        return new Uint8Array(data.bytes);
     }
-    if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype)
+    if (Object.getPrototypeOf(value) !== Array.prototype)
         throw new TypeError("Barcode payload must be a nonempty plain byte array.");
     if (value.length < 1 || value.length > maximum)
         throw new RangeError("Barcode payload exceeds its byte limit.");
