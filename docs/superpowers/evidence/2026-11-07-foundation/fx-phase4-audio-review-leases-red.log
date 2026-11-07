@@ -1,0 +1,59 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/speech-synthesis.test.ts tests/runtime/fx/audio-session-category.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/speech-synthesis.test.ts (9 tests | 2 failed) 11ms
+   × releases caller-aborted mounted synthesizer leases for reuse 2ms
+   × resumes the shared native queue after cancelling a paused owner 2ms
+ ❯ tests/runtime/fx/audio-session-category.test.ts (5 tests | 1 failed) 9ms
+   × releases caller-aborted category leases and does not overwrite an external native owner 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/audio-session-category.test.ts > releases caller-aborted category leases and does not overwrite an external native owner
+QuotaExceededError: Mounted resource limit reached.
+ ❯ Object.acquire src/SynCloudOS/HostServices/mountedResourceScope.ts:125:47
+    123|       owner.throwIfAborted();
+    124|       caller?.throwIfAborted();
+    125|       if (entries.size >= maxResources) throw new DOMException("Mounte…
+       |                                               ^
+    126|       const budgetReservation = reserve(charge);
+    127|       const controller = new AbortController();
+ ❯ Object.createSession src/SynCloudOS/AppSDK/mountedAudioSessions.ts:44:20
+ ❯ tests/runtime/fx/audio-session-category.test.ts:80:95
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/fx/speech-synthesis.test.ts > releases caller-aborted mounted synthesizer leases for reuse
+QuotaExceededError: Mounted resource limit reached.
+ ❯ Object.acquire src/SynCloudOS/HostServices/mountedResourceScope.ts:125:47
+    123|       owner.throwIfAborted();
+    124|       caller?.throwIfAborted();
+    125|       if (entries.size >= maxResources) throw new DOMException("Mounte…
+       |                                               ^
+    126|       const budgetReservation = reserve(charge);
+    127|       const controller = new AbortController();
+ ❯ Object.createSynthesizer src/SynCloudOS/AppSDK/mountedAudioSpeechClient.ts:27:20
+ ❯ tests/runtime/fx/speech-synthesis.test.ts:102:50
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/fx/speech-synthesis.test.ts > resumes the shared native queue after cancelling a paused owner
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ tests/runtime/fx/speech-synthesis.test.ts:112:55
+    110|   const p1 = first.speak(new AUFXSpeechUtterance("First")), p2 = secon…
+    111|   first.pauseSpeaking(); const rejection = expect(p1).rejects.toMatchO…
+    112|   a.abort(); await rejection; expect(f.native.resume).toHaveBeenCalled…
+       |                                                       ^
+    113|   f.utterances[1].onend(); await p2;
+    114| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 11 passed (14)
+   Start at  19:12:11
+   Duration  272ms (transform 178ms, setup 55ms, import 169ms, tests 20ms, environment 0ms)
+

@@ -21,6 +21,8 @@
 import type { AUFXAudioRecorder, AUFXAudioRecorderOptions } from "./AUFXAudioRecorder";
 import type { AUFXAudioFormat } from "./AUFXAudioFormat";
 import type { AUFXAudioInputNode } from "./AUFXAudioInputNode";
+export type AUFXAudioSessionCategory = "ambient" | "soloAmbient" | "playback" | "record" | "playAndRecord";
+export type AUFXAudioSessionType = "auto" | "ambient" | "playback" | "transient" | "transient-solo" | "play-and-record";
 export type AUFXAudioSessionState = "idle" | "requesting" | "authorized" | "recording" | "paused" | "interrupted" | "denied" | "unavailable" | "disposed";
 export interface AUFXAudioDevice { readonly id: string; readonly kind: "input" | "output"; readonly label: string; readonly groupId: string; }
 export interface AUFXAudioRoute { readonly desiredInput: string | null; readonly actualInput: string | null; readonly desiredOutput: string | null; readonly actualOutput: string | null; }
@@ -37,7 +39,9 @@ export interface AUFXAudioSessionPort {
   readonly state: AUFXAudioSessionState;
   readonly route: AUFXAudioRoute;
   readonly interruptionReason?: AUFXAudioInterruptionReason | null;
-  readonly capabilities: Readonly<{ capture: boolean; inputSelection: boolean; outputSelection: boolean; mimeTypes: readonly string[] }>;
+  readonly capabilities: Readonly<{ capture: boolean; inputSelection: boolean; outputSelection: boolean; mimeTypes: readonly string[]; sessionType?: boolean }>;
+  readonly category?: AUFXAudioSessionCategory | null;
+  setCategory?(category: AUFXAudioSessionCategory): Promise<void>;
   requestRecordAuthorization(signal?: AbortSignal): Promise<void>;
   enumerateDevices(signal?: AbortSignal): Promise<readonly AUFXAudioDevice[]>;
   setPreferredInput(deviceId: string, signal?: AbortSignal): Promise<void>;
@@ -57,6 +61,12 @@ export class AUFXAudioSession {
   get route() { return this.#port.route; }
   get interruptionReason() { return this.#port.interruptionReason ?? null; }
   get capabilities() { return this.#port.capabilities; }
+  get category() { return this.#port.category ?? null; }
+  async setCategory(category: AUFXAudioSessionCategory): Promise<void> {
+    if (!["ambient", "soloAmbient", "playback", "record", "playAndRecord"].includes(category)) throw new TypeError("Unknown audio session category.");
+    if (!this.#port.setCategory) throw new DOMException("Audio session types are unavailable.", "NotSupportedError");
+    await this.#port.setCategory(category);
+  }
   async requestRecordAuthorization(signal?: AbortSignal) {
     try { await this.#port.requestRecordAuthorization(signal); this.#hasAuthorizedInput = true; }
     catch (error) { if (error instanceof DOMException && error.name === "NotAllowedError") this.#hasAuthorizedInput = false; throw error; }
