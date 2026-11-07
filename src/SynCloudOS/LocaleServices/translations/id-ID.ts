@@ -21,6 +21,7 @@
 import type { SynCloudOSTranslationMessages } from "../localeTypes";
 
 export const idIDTranslations: SynCloudOSTranslationMessages = {
+  "navigation.more": "Lainnya",
   "about.tagline.nse-control-gallery": "Semua kontrol NSE, dalam satu jendela.",
   "about.version": "Versi {version}",
   "about.versionBuild": "Versi {version} ({build})",

@@ -21,6 +21,7 @@
 import type { SynCloudOSTranslationMessages } from "../localeTypes";
 
 export const ruRUTranslations: SynCloudOSTranslationMessages = {
+  "navigation.more": "Ещё",
   "about.tagline.nse-control-gallery": "Все элементы управления NSE в одном окне.",
   "about.version": "Версия {version}",
   "about.versionBuild": "Версия {version} ({build})",

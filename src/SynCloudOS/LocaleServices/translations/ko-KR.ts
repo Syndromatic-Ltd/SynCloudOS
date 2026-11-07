@@ -21,6 +21,7 @@
 import type { SynCloudOSTranslationMessages } from "../localeTypes";
 
 export const koKRTranslations: SynCloudOSTranslationMessages = {
+  "navigation.more": "더 보기",
   "about.tagline.nse-control-gallery": "모든 NSE 제어기를 한 창에서.",
   "about.version": "버전 {version}",
   "about.versionBuild": "버전 {version} ({build})",

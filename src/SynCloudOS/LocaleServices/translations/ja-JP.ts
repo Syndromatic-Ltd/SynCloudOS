@@ -21,6 +21,7 @@
 import type { SynCloudOSTranslationMessages } from "../localeTypes";
 
 export const jaJPTranslations: SynCloudOSTranslationMessages = {
+  "navigation.more": "その他",
   "about.tagline.nse-control-gallery": "すべてのNSEコントロールを、ひとつのウインドウに。",
   "about.version": "バージョン {version}",
   "about.versionBuild": "バージョン {version}（{build}）",

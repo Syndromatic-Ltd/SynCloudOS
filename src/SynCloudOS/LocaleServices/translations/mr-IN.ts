@@ -21,6 +21,7 @@
 import type { SynCloudOSTranslationMessages } from "../localeTypes";
 
 export const mrINTranslations: SynCloudOSTranslationMessages = {
+  "navigation.more": "अधिक",
   "about.tagline.nse-control-gallery": "सर्व NSE नियंत्रणे, एकाच विंडोमध्ये.",
   "about.version": "आवृत्ती {version}",
   "about.versionBuild": "आवृत्ती {version} ({build})",

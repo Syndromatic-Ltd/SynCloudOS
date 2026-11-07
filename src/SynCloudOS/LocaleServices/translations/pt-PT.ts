@@ -21,6 +21,7 @@
 import type { SynCloudOSTranslationMessages } from "../localeTypes";
 
 export const ptPTTranslations: SynCloudOSTranslationMessages = {
+  "navigation.more": "Mais",
   "about.tagline.nse-control-gallery": "Todos os controlos NSE, numa só janela.",
   "about.version": "Versão {version}",
   "about.versionBuild": "Versão {version} ({build})",

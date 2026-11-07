@@ -21,6 +21,7 @@
 import type { SynCloudOSTranslationMessages } from "../localeTypes";
 
 export const zhTWTranslations: SynCloudOSTranslationMessages = {
+  "navigation.more": "更多",
   "about.tagline.nse-control-gallery": "所有 NSE 控制項，盡在一個視窗。",
   "about.version": "版本 {version}",
   "about.versionBuild": "版本 {version}（{build}）",
