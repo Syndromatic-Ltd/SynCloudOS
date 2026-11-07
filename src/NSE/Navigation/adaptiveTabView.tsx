@@ -18,6 +18,7 @@ import type { NSETabViewController } from "./NSETabViewController";
 import type { NSENavigationIcon } from "./navigationTypes";
 import { tabViewProjection } from "./tabViewInternals";
 import "./adaptiveTabView.css";
+import { useNSECompactMoreTitle } from "./compactMoreTitle";
 
 /** @internal Plain source-list data; view controllers stay with the tab view items. */
 export interface NSEAdaptiveTabOutlineItem {
@@ -62,6 +63,7 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
   const modelSnapshot = useSyncExternalStore(subscribeModel, () => model?.getSnapshot() ?? null, () => model?.getSnapshot() ?? null);
   const moreListOpen = compact && modelSnapshot?.activeTabId === NSETabBarMoreDestinationId
     && modelSnapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
+  useNSECompactMoreTitle(controller.view.window, Boolean(moreListOpen), root);
   const visited = useRef(new Set<string>());
   if (selected) visited.current.add(selected.identifier);
   const navigationHadFocus = useRef(false);

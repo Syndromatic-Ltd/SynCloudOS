@@ -21,6 +21,7 @@
 import type { SynCloudOSTranslationMessages } from "../localeTypes";
 
 export const viVNTranslations: SynCloudOSTranslationMessages = {
+  "navigation.more": "Thêm",
   "about.tagline.nse-control-gallery": "Mọi điều khiển NSE, trong một cửa sổ.",
   "about.version": "Phiên bản {version}",
   "about.versionBuild": "Phiên bản {version} ({build})",

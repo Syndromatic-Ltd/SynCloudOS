@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEMoreTitle } from "./compactMoreTitle";
 import {
   useCallback,
   useEffect,
@@ -322,6 +323,7 @@ export function NSETabBar({
     focused: paintFocusedTabId === controlId,
     hovered: hoveredTabId === controlId,
   });
+  const moreTitle = useNSEMoreTitle();
   const moreSelected = snapshot.activeTabId === NSETabBarMoreDestinationId;
   const morePressed = pressedTabId === NSETabBarMoreDestinationId;
   const moreState = stateForTab(NSETabBarMoreDestinationId, moreSelected, false);
@@ -551,7 +553,7 @@ export function NSETabBar({
               >
                 <span className="nse-tab-bar-icon-glyph" data-nse-tab-icon-glyph="true" />
               </span>
-              <span className="nse-tab-bar-label" {...moreLabelAppearance.attributes}>More</span>
+              <span className="nse-tab-bar-label" {...moreLabelAppearance.attributes}>{moreTitle}</span>
             </span>
           </button></NSELabelHelp>
         ) : null}

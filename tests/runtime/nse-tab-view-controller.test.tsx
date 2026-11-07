@@ -6,7 +6,7 @@ import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
-import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
+import { nseWindowPresentedTitle, NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
 import { NSEToolbar } from "../../src/NSE/Toolbars/NSEToolbar";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
@@ -350,4 +350,26 @@ it("retains toolbar tabs when the window replaces its active toolbar", async () 
   expect(window.toolbar).toBe(replacement);
   expect(screen.getByText("Replacement toolbar item")).toBeTruthy();
   expect(screen.queryByRole("button", { name: "Team" })).toBeNull();
+});
+
+
+it("presents More while its compact list is visible and restores the latest app title on exit or resize", async () => {
+  await launch();
+  const window = sections.view.window!;
+  act(() => {
+    window.title = "Company";
+    for (const name of ["News", "Work", "Contact"]) sections.addTabViewItem(new NSETabViewItem({ viewController: sections.addChild(Pane, name), identifier: name.toLowerCase() }));
+    sections.tabStyle = "sidebarAdaptable";
+  });
+  resizeTabs(sections, 390, 844);
+  await act(async () => { fireEvent.click(screen.getByRole("tab", { name: /More/ })); });
+  expect(nseWindowPresentedTitle(window)).toBe("More");
+  expect(window.title).toBe("Company");
+  act(() => { window.title = "A newer app title"; });
+  expect(nseWindowPresentedTitle(window)).toBe("More");
+  await act(async () => { fireEvent.click(screen.getByRole("tab", { name: /Framework/ })); });
+  expect(nseWindowPresentedTitle(window)).toBe("A newer app title");
+  await act(async () => { fireEvent.click(screen.getByRole("tab", { name: /More/ })); });
+  resizeTabs(sections, 1440, 900);
+  expect(nseWindowPresentedTitle(window)).toBe("A newer app title");
 });

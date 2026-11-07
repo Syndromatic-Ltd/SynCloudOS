@@ -21,6 +21,7 @@
 import type { SynCloudOSTranslationMessages } from "../localeTypes";
 
 export const taINTranslations: SynCloudOSTranslationMessages = {
+  "navigation.more": "மேலும்",
   "about.tagline.nse-control-gallery": "அனைத்து NSE கட்டுப்பாடுகளும், ஒரே சாளரத்தில்.",
   "about.version": "பதிப்பு {version}",
   "about.versionBuild": "பதிப்பு {version} ({build})",
