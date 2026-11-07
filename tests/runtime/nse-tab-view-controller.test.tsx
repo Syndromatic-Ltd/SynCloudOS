@@ -71,6 +71,20 @@ it("shows every tab directly rather than inventing a More history", () => {
   tabs.dispose();
 });
 
+it("keeps the adaptive compact bottom bar to five slots, with the rest under More", () => {
+  const tabs = new Sections();
+  for (const name of ["News", "Work", "Contact"]) tabs.addTabViewItem(new NSETabViewItem({ viewController: tabs.addChild(Pane, name), identifier: name.toLowerCase() }));
+  tabs.tabStyle = "sidebarAdaptable";
+  resizeTabs(tabs, 390, 844);
+  render(<NSEViewControllerView controller={tabs} />);
+  expect(screen.getAllByRole("tab")).toHaveLength(5);
+  expect(screen.getByRole("tab", { name: /More/ })).toBeTruthy();
+  act(() => { tabs.tabStyle = "segmentedControlOnBottom"; });
+  expect(screen.getAllByRole("tab")).toHaveLength(6);
+  expect(screen.queryByRole("tab", { name: /More/ })).toBeNull();
+  tabs.dispose();
+});
+
 it("retains the same section DOM when an outer split hands unspecified presentation to compact peer tabs", () => {
   const tabs = new Sections();
   tabs.tabStyle = "unspecified";

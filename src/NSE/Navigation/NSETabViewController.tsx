@@ -141,7 +141,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
     if (style !== "segmentedControlOnTop" && style !== "segmentedControlOnBottom" && style !== "toolbar" && style !== "unspecified" && style !== "sidebarAdaptable") throw new TypeError(`Unknown tab style "${String(style)}".`);
     if (style === this.#tabStyle) return;
     this.#tabStyle = style;
-    this.notifyObservers();
+    this.#rebuild();
   }
 
   /** NSTabViewController.tabViewItems. */
@@ -246,7 +246,9 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
         owner: this,
         id: `${this.constructor.name || "NSETabViewController"}:tabs`,
         initialSelectedId: selected.identifier,
-        maximumDirectTabs: this.#items.length,
+        // A fixed segmented style shows every item. The adaptive bottom bar keeps
+        // the tab bar's five slots and moves the rest under More, as before.
+        ...(this.#tabStyle === "sidebarAdaptable" ? {} : { maximumDirectTabs: this.#items.length }),
         destinations: this.#items.map(item => ({
           id: item.identifier,
           label: item.label,

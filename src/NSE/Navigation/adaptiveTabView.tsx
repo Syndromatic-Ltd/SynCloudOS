@@ -5,11 +5,12 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { NSEOutlineView } from "../DataViews/Outline/NSEOutlineView";
 import { NSESplitView } from "../DataViews/Split/NSESplitView";
 import { NSETableCellView } from "../DataViews/Table/NSETableCellView";
-import { NSETabBar } from "./NSETabBar";
+import { NSETabBar, NSETabBarOverflowList } from "./NSETabBar";
+import { NSETabBarMoreDestinationId } from "./NSETabBarController";
 import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinationHost";
 import { resolveNSEBookRegions } from "./bookRegions";
 import { useSourceListFrame } from "./SourceList/sourceListFrameContext";
@@ -56,6 +57,11 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
   const selected = controller.selectedTabViewItem;
   const model = tabViewProjection(controller).control();
   const outline = tabViewProjection(controller).outline();
+  // The compact bar's More list stands in for the selected panel while it is open.
+  const subscribeModel = useCallback((listener: () => void) => model?.subscribe(listener) ?? (() => undefined), [model]);
+  const modelSnapshot = useSyncExternalStore(subscribeModel, () => model?.getSnapshot() ?? null, () => model?.getSnapshot() ?? null);
+  const moreListOpen = compact && modelSnapshot?.activeTabId === NSETabBarMoreDestinationId
+    && modelSnapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
   const visited = useRef(new Set<string>());
   if (selected) visited.current.add(selected.identifier);
   const navigationHadFocus = useRef(false);
@@ -125,11 +131,14 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
       onSidebarWidthChange={frame?.setRailWidth} resizable={renderer === "source-list-content"} bookRegions={adaptive ? bookRegions : null}>
       <div className="nse-adaptive-tab-content">
         {controller.tabViewItems.filter(item => visited.current.has(item.identifier)).map(item => <div key={item.identifier}
-          className="nse-adaptive-tab-panel" hidden={item !== selected} inert={item !== selected}
+          className="nse-adaptive-tab-panel" hidden={item !== selected || moreListOpen} inert={item !== selected || moreListOpen}
           role={compact ? "tabpanel" : undefined} id={getNSETabBarPanelId(scope, item.identifier)}
           aria-labelledby={compact ? getNSETabBarTabId(scope, item.identifier) : undefined}>
           <item.viewController.view />
         </div>)}
+        {model && compact && modelSnapshot && modelSnapshot.overflowDestinationIds.length > 0
+          ? <NSETabBarOverflowList controller={model} aria-label={controller.title ?? "Tabs"} idScope={scope} />
+          : null}
       </div>
     </NSESplitView>
     <div className={`nse-adaptive-tab-chrome${renderer === "tabs" ? " nse-compact-bottom-chrome-mount" : ""}`}

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
-import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSESplitViewController, NSESplitViewItem } from "../../src/NSE/DataViews/Split";
 import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
@@ -64,7 +64,7 @@ describe("sidebar-adaptable tab navigation", () => {
     tabs.dispose(); split.dispose();
   });
 
-  it("retains draft DOM, scroll, and focus through tabs, rail and sidebar changes; every tab stays directly accessible", async () => {
+  it("retains draft DOM, scroll, and focus through tabs, rail and sidebar changes; overflow tabs stay reachable through More", async () => {
     const controller = tabViewController({});
     const view = renderTabController(controller, traits(382,580));
     const draft = screen.getByRole("textbox", { name: "Draft Home" }) as HTMLInputElement;
@@ -80,8 +80,9 @@ describe("sidebar-adaptable tab navigation", () => {
     fireEvent.keyDown(tab, { key: "ArrowDown" });
     await waitFor(() => expect(controller.selectedTabViewItem?.identifier).toBe("Library"));
     expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Library destination" }));
-    expect(screen.getAllByRole("tab")).toHaveLength(7);
-    fireEvent.click(screen.getByRole("tab", { name: "History destination" }));
+    expect(screen.getAllByRole("tab")).toHaveLength(5);
+    fireEvent.click(screen.getByRole("tab", { name: "More destinations" }));
+    fireEvent.click(within(await screen.findByRole("region", { name: "More destinations" })).getByRole("button", { name: "History destination" }));
     await waitFor(() => expect(controller.selectedTabViewItem?.identifier).toBe("History"));
     act(() => controller.selectTabViewItem("Home")); draft.focus();
     updateTraits(controller, traits(1200,800));
