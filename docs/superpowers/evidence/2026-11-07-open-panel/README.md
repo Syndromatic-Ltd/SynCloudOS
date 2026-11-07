@@ -55,7 +55,7 @@ Phone dark also passes at **DPR2** ([results](hidpi-browser/browser-results.json
 
 | Check | Revision / result | Evidence |
 | --- | --- | --- |
-| Framework `npx tsc -b --pretty false` | Passed on b963a00 before adoption. Frozen 66ac061 also passed. | [frozen log](final-66ac061/frozen-framework-typecheck.log), [receipt](final-66ac061/site-adoption.json) |
+| Framework `npx tsc -b --pretty false` | Passed on b963a00 before adoption and during its clean SDK build. Frozen 66ac061 also passed. | [b963a00 build](adopt-b963a00/site-adoption.log), [frozen log](final-66ac061/frozen-framework-typecheck.log), [receipt](final-66ac061/site-adoption.json) |
 | Focused framework Vitest | **73 passed, 10 files** on clean detached b963a00. Includes permission/persistence/filtering/bundle isolation/reference ownership, panel object, integration, sheet attachment, existing media service, browser-global boundary and counterpart map. | [log](adopt-b963a00/framework-focused.log) |
 | Installed TypeScript consumer | Zero diagnostics; exercises object API, storage handle read/write types and negative imports proving `NSEMediaPanel` and `NSEOpenPanelProps` are gone. | [receipt](sdk-consumer.json), [script](sdk-consumer.mjs) |
 | Site `npx tsc -b --pretty false` | Passed after clean adoption of b963a00. | [log](adopt-b963a00/site-typecheck.log), [receipt](adopt-b963a00/site-adoption.json) |
