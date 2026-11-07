@@ -19,11 +19,11 @@
  */
 
 import { getSynWareNamespace } from "./SynCloudOS/AppSDK/useStrings";
-import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type ComponentType } from "react";
 import { WebspringHost } from "./Webspring/WebspringHost";
 import type { SynCloudOSShellResources } from "./Webspring/WebspringController";
 import type { AuthenticationInput, WebspringDefinition } from "./Webspring/webspringTypes";
-import { WindowContentRendererRegistry, WindowLayer } from "./Webspring/WindowLayer";
+import { WindowContentRendererRegistry, WindowLayer, syncApplicationWindowContentRenderers, type ApplicationWindowRendererRegistrations } from "./Webspring/WindowLayer";
 import type { SystemStartupPhase } from "./Webspring/SystemStartupLayer";
 import { useRuntimeSelector, useKernelSynCloudOS } from "./SynCloudOSReact";
 import { SystemUILayer } from "./Webspring/SystemUILayer";
@@ -46,6 +46,8 @@ export function App({ shell, shellResources, authentication }: {
 }) {
   const runtime = useKernelSynCloudOS();
   const frameworkWindowRenderers = useMemo(() => new WindowContentRendererRegistry(), []);
+  const frameworkApplicationRenderers = useMemo<ApplicationWindowRendererRegistrations>(() => new Map(), []);
+  const apps = useRuntimeSelector(snapshot => snapshot.appInfo);
   const frameworkWindowRendererRegistration = useMemo(() => ({
     register: frameworkWindowRenderers.register.bind(frameworkWindowRenderers),
   }), [frameworkWindowRenderers]);
@@ -53,6 +55,10 @@ export function App({ shell, shellResources, authentication }: {
     ? runtime.environment.browser.getLocation().pathname
     : null;
   const [FrameworkTestHost, setFrameworkTestHost] = useState<ComponentType<DevelopmentTestHostProps> | null>(null);
+  useLayoutEffect(() => {
+    if (!frameworkTestPath?.startsWith("/__framework-tests/")) return;
+    syncApplicationWindowContentRenderers(frameworkWindowRenderers, runtime, apps, frameworkApplicationRenderers);
+  }, [apps, frameworkApplicationRenderers, frameworkTestPath, frameworkWindowRenderers, runtime]);
   const presentationReady = useRuntimeSelector(selectRuntimePresentationReady);
   const localeVersion = useRuntimeSelector((snapshot) => snapshot.localeServices.dictionaryVersion);
   const siteNameKey = shell.manifest.webspringShell.branding.name.key;
@@ -86,13 +92,14 @@ export function App({ shell, shellResources, authentication }: {
 
   if (frameworkTestPath?.startsWith("/__framework-tests/") && FrameworkTestHost) {
     const windowManagement = frameworkTestPath.startsWith("/__framework-tests/windows/management");
+    const usesWindows = windowManagement || frameworkTestPath.startsWith("/__framework-tests/navigation/adaptive");
     return (
       <>
         <FrameworkTestHost
           pathname={frameworkTestPath}
           windowRendererRegistration={windowManagement ? frameworkWindowRendererRegistration : undefined}
         />
-        {windowManagement ? <WindowLayer contentRegistry={frameworkWindowRenderers} /> : null}
+        {usesWindows ? <WindowLayer contentRegistry={frameworkWindowRenderers} /> : null}
       </>
     );
   }
