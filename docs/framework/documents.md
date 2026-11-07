@@ -197,3 +197,5 @@ The same scoped client exposes `saveAsDocument`, `duplicateDocument`, `moveDocum
 ## Persistent assets and derived output
 
 Stable asset references are native data; live image descriptors and object URLs are temporary leases. See [document assets](document-assets.md) for storage guarantees, preflight, retention and fresh-runtime reopen, and [custom document engines](custom-document-engines.md) for immutable output preparation. PDF/print output captures a settled revision and retains its dependencies without changing document history or saved identity.
+
+Binary import sources accept `NSEDataConvertible`. Document resource inputs expose `data(): Promise<NSEData>` with `type` and `size` metadata; `resolve` returns `NSEData | null`. PDF output returns `NSEData` in its existing exported-result wrapper. Use `.count` for byte length, `.bytes` for a defensive web view and `.blob(mimeType)` only when calling a browser API. The native document model remains plain JSON; retain resource/asset references in the model.

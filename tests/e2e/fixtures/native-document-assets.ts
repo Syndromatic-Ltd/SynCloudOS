@@ -20,6 +20,7 @@
 
 // Load the runtime graph before publishing assetFixture. Loading it inside runtimeSave
 // discovers browser dependencies after Vite's initial crawl and can reload mid-save.
+import { NSEData } from "../../../src/Foundation/NSEData";
 import { createSynCloudOS } from "../../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { createBrowserRuntimeEnvironment } from "../../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { createIndexedDBDocumentAssetStore } from "../../../src/SynCloudOS/Documents/IndexedDBDocumentAssetStore";
@@ -46,9 +47,9 @@ function backing() {
     randomUUID: () => crypto.randomUUID(), signal: abort(), assetBacking: { store, scopeForDocument: () => scope } });
   return { store, adapter, wrapper, service };
 }
-async function display(bytes: Uint8Array) {
+async function display(bytes: NSEData) {
   const img = document.querySelector<HTMLImageElement>("#asset-image")!;
-  const url = URL.createObjectURL(new Blob([bytes.slice().buffer], { type: "image/png" }));
+  const url = URL.createObjectURL(bytes.blob("image/png"));
   try {
     img.src = url; await img.decode();
     return { width: img.naturalWidth, height: img.naturalHeight };
@@ -80,7 +81,7 @@ const fixture = {
     const document = await runtime.documents.newDocument({ documentId: "first-runtime-document", typeId: type.id });
     try {
       await runtime.documentAssets!.whenReady(document.id);
-      const live = await runtime.documentResources.acquire(document.id, { type: "image/png", size: imageBytes.length, arrayBuffer: async () => imageBytes.slice().buffer }, abort());
+      const live = await runtime.documentResources.acquire(document.id, { type: "image/png", size: imageBytes.length, data: async () => NSEData.from(await (imageBytes.slice().buffer)) }, abort());
       const reference = await runtime.documentResources.persist(document.id, live, abort());
       const next = { assets: [reference], private: { preserved: true } };
       const prepared = await runtime.documentAssets!.prepareEdit(document.id, document.model, next);
@@ -108,7 +109,7 @@ const fixture = {
       const geometry = await display(bytes);
       const version = document.currentVersion;
       const disposition = await runtime.dispose("fresh asset runtime fixture reopened");
-      return { reference, leaseId: live.leaseId, version, bytes: Array.from(bytes), geometry, disposition: disposition.status, disposals: disposals() };
+      return { reference, leaseId: live.leaseId, version, bytes: Array.from(bytes.bytes), geometry, disposition: disposition.status, disposals: disposals() };
     } finally {
       runtime.documents.registerCloseReviewer({ review: async () => "discard" });
       await runtime.dispose("runtime reopen fixture cleanup");
@@ -117,7 +118,7 @@ const fixture = {
   async save() {
     const { store, adapter, wrapper, service } = backing();
     try {
-      const live = await service.acquire(scope.documentId, { type: "image/png", size: imageBytes.length, arrayBuffer: async () => imageBytes.slice().buffer }, abort());
+      const live = await service.acquire(scope.documentId, { type: "image/png", size: imageBytes.length, data: async () => NSEData.from(await (imageBytes.slice().buffer)) }, abort());
       const reference = await service.persist(scope.documentId, live, abort());
       const written = await wrapper.write({ location: locationValue, typeId: "fixture.native", schemaVersion: 1, content: { assets: [reference], private: { retained: true } }, expectedVersion: null, idempotencyKey: "first-save" });
       const geometry = await display(service.resolve(scope.documentId, live)!);
@@ -133,7 +134,7 @@ const fixture = {
       const live = await service.acquireAsset(scope.documentId, reference, abort());
       const bytes = service.resolve(scope.documentId, live)!;
       const geometry = await display(bytes);
-      return { reference, leaseId: live.leaseId, version: record.version, bytes: Array.from(bytes), geometry, collection: await store.collectGarbage(scope) };
+      return { reference, leaseId: live.leaseId, version: record.version, bytes: Array.from(bytes.bytes), geometry, collection: await store.collectGarbage(scope) };
     } finally { service.dispose(); store.dispose(); adapter.dispose(); }
   },
   async concurrentWriters() {
@@ -162,3 +163,5 @@ const fixture = {
   },
 };
 Object.assign(window, { assetFixture: fixture });
+
+function resourceInput(blob: Blob) { return { type: blob.type, size: blob.size, data: () => NSEData.read(blob) }; }

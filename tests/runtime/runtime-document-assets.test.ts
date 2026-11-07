@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTestRuntime, createTestRuntimeEnvironment, mountTestSynWareRuntime, registerTestSynWare } from "./helpers";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
@@ -147,11 +148,11 @@ describe("runtime document asset integration", () => {
       expect(resources.assetCapabilities).toMatchObject({ durability: "memory" });
       expect(resources).not.toHaveProperty("store");
       expect(resources).not.toHaveProperty("resourceBacking");
-      const live = await resources.acquire(document.id, new Blob([input.bytes], { type: "image/png" }));
+      const live = await resources.acquire(document.id, resourceInput(new Blob([input.bytes], { type: "image/png" })));
       const reference = await resources.persist(document.id, live);
       expect(reference.scope).toEqual(scope);
       const next = await resources.acquireAsset(document.id, reference);
-      expect(resources.resolve(document.id, next)).toEqual(input.bytes);
+      expect(resources.resolve(document.id, next)?.bytes).toEqual(input.bytes);
       f.runtime.documents.registerCloseReviewer({ review: async () => "discard" });
       expect(await context.documents.workspaceDocuments.closeDocument(document.id)).toMatchObject({ outcome: "closed" });
       expect(f.runtime.documentResources.isActive(document.id, next)).toBe(false);
@@ -257,7 +258,7 @@ describe("runtime document asset integration", () => {
   it("rejects canceled/stale preflight and releases document leases on close", async () => {
     const f = fixture();
     const doc = await f.runtime.documents.newDocument<Model>({ documentId: scope.documentId, typeId: type.id });
-    const live = await f.runtime.documentResources.acquire(doc.id, { size: 3, type: "image/png", arrayBuffer: async () => input.bytes.slice().buffer }, signal());
+    const live = await f.runtime.documentResources.acquire(doc.id, { size: 3, type: "image/png", data: async () => NSEData.from(await (input.bytes.slice().buffer)) }, signal());
     expect(f.runtime.documentResources.assetCapabilities).toBeDefined();
     const ref = await f.runtime.documentResources.persist(doc.id, live, signal());
     const abort = new AbortController(); abort.abort();
@@ -270,3 +271,5 @@ describe("runtime document asset integration", () => {
     expect(await f.store.listRetentionRoots(scope)).toEqual([]);
   });
 });
+
+function resourceInput(blob: Blob) { return { type: blob.type, size: blob.size, data: () => NSEData.read(blob) }; }

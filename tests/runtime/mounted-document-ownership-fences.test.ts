@@ -20,6 +20,7 @@
 
 // @vitest-environment jsdom
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DocumentType } from "../../src/SynCloudOS/Documents";
 import type { DocumentRecord } from "../../src/SynCloudOS/Documents/documentTypes";
@@ -309,7 +310,7 @@ describe("mounted document ownership fences", () => {
     const descriptor = await first.runtime.documentResources.acquire(document.id, {
       type: "image/png",
       size: bytes.byteLength,
-      arrayBuffer: async () => bytes.slice().buffer,
+      data: async () => NSEData.from(await (bytes.slice().buffer)),
     });
     const decode = vi.spyOn(runtime.images, "load");
     const reconstructed = { ...descriptor };

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { describe, expect, it, vi } from "vitest";
 import {
   attachmentRun, attributedContent, attributedContentLayoutText, attributedContentText,
@@ -120,12 +121,12 @@ describe("portable current attributed content", () => {
     const second = createTestRuntime({ id: "runtime:editor-resource:second" });
     const descriptor = await first.documentResources.acquire(
       "document:image",
-      new Blob([new Uint8Array([1, 2, 3, 4])], { type: "image/png" }),
+      resourceInput(new Blob([new Uint8Array([1, 2, 3, 4])], { type: "image/png" })),
       new AbortController().signal,
     );
 
     expect(first.documentResources.isActive("document:image", descriptor)).toBe(true);
-    expect(first.documentResources.resolve("document:image", descriptor)).toEqual(new Uint8Array([1, 2, 3, 4]));
+    expect(first.documentResources.resolve("document:image", descriptor)?.bytes).toEqual(new Uint8Array([1, 2, 3, 4]));
     expect(second.documentResources.isActive("document:image", descriptor)).toBe(false);
     expect(first.documentResources.isActive("document:other", descriptor)).toBe(false);
     const forged = { ...descriptor, documentId: "document:forged" };
@@ -133,7 +134,7 @@ describe("portable current attributed content", () => {
     expect(first.documentResources.resolve("document:forged", forged)).toBeNull();
     const disposable = await first.documentResources.acquire(
       "document:disposable",
-      new Blob([new Uint8Array([5])], { type: "image/png" }),
+      resourceInput(new Blob([new Uint8Array([5])], { type: "image/png" })),
       new AbortController().signal,
     );
     expect(first.documentResources.releaseDocument("document:disposable")).toBe(1);
@@ -147,12 +148,12 @@ describe("portable current attributed content", () => {
 
     await expect(first.documentResources.acquire(
       "document:image",
-      { type: "image/svg+xml", size: 1, arrayBuffer: async () => new ArrayBuffer(1) },
+      { type: "image/svg+xml", size: 1, data: async () => NSEData.from(await (new ArrayBuffer(1))) },
       new AbortController().signal,
     )).rejects.toThrow(/MIME type/i);
     await expect(first.documentResources.acquire(
       "document:image",
-      { type: "image/png", size: 8 * 1024 * 1024 + 1, arrayBuffer: async () => new ArrayBuffer(0) },
+      { type: "image/png", size: 8 * 1024 * 1024 + 1, data: async () => NSEData.from(await (new ArrayBuffer(0))) },
       new AbortController().signal,
     )).rejects.toThrow(/byte limit/i);
 
@@ -160,7 +161,7 @@ describe("portable current attributed content", () => {
     const cancellation = new AbortController();
     const pending = first.documentResources.acquire(
       "document:late",
-      { type: "image/png", size: 1, arrayBuffer: () => new Promise((resolve) => { resolveLate = resolve; }) },
+      { type: "image/png", size: 1, data: async () => NSEData.from(await (new Promise((resolve) => { resolveLate = resolve; }))) },
       cancellation.signal,
     );
     cancellation.abort(new DOMException("cancelled", "AbortError"));
@@ -174,3 +175,5 @@ describe("portable current attributed content", () => {
   });
 
 });
+
+function resourceInput(blob: Blob) { return { type: blob.type, size: blob.size, data: () => NSEData.read(blob) }; }

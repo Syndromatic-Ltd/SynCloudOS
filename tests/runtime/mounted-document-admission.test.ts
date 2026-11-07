@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { InMemoryDocumentAdapter, type DocumentType } from "../../src/SynCloudOS/Documents";
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
@@ -107,7 +108,7 @@ describe("mounted document admission", () => {
     const acquireDescriptor = vi.spyOn(f.runtime.documentResources, "acquire");
     const releaseDescriptor = vi.spyOn(f.runtime.documentResources, "release");
     const pendingResource = f.first.runtime.documentResources.acquire(first.id, {
-      type: "image/png", size: 4, arrayBuffer: async () => bytes.promise,
+      type: "image/png", size: 4, data: async () => NSEData.from(await (bytes.promise)),
     });
     const result = Promise.allSettled([pendingResource]);
     const rawAcquisition = acquireDescriptor.mock.results[0].value;

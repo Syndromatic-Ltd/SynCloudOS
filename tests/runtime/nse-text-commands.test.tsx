@@ -19,6 +19,7 @@
  */
 
 // @vitest-environment jsdom
+import { NSEData } from "../../src/Foundation/NSEData";
 import React from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -237,7 +238,7 @@ describe("current text commands through canonical owners", () => {
   it("treats attachments as one semantic unit with descriptive copy and canonical undo", async () => {
     const f = await fixture("");
     const descriptor = await f.runtime.documentResources.acquire(f.document.id,
-      new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" }), new AbortController().signal);
+      resourceInput(new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" })), new AbortController().signal);
     const content = attributedContent([paragraph([attachmentRun({ id: "attachment:unit", kind: "image", source: descriptor, alt: "Diagram" })])]);
     expect(f.runtime.documentResources.isActive(f.document.id, descriptor)).toBe(true);
     await f.commands.execute("text.replace", { range: { location: 0, length: 0 }, content });
@@ -298,3 +299,5 @@ describe("current text commands through canonical owners", () => {
     expect(f.owner.getSnapshot()).toBe(before);
   });
 });
+
+function resourceInput(blob: Blob) { return { type: blob.type, size: blob.size, data: () => NSEData.read(blob) }; }
