@@ -80,7 +80,10 @@ export class AFXAnimation {
       throw new TypeError(
         "repeatDuration requires a nonzero cycle and cannot also specify iterations.",
       );
-    this.iterations = afxAnimationNumber(
+    const endless = input.iterations === Infinity || input.repeatDuration === Infinity;
+    if (endless && this.duration === 0)
+      throw new RangeError("An endless animation requires a nonzero cycle.");
+    this.iterations = endless ? Infinity : afxAnimationNumber(
       input.repeatDuration === undefined
         ? (input.iterations ?? 1)
         : afxAnimationNumber(
