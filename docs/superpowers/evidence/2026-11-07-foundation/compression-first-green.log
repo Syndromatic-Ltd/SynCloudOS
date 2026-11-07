@@ -1,0 +1,31 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-data.test.ts tests/runtime/compression-fx.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/compression-fx.test.ts (11 tests | 1 failed) 106ms
+     × cancels its upstream source and validates read lengths 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/compression-fx.test.ts > CompressionFX > cancels its upstream source and validates read lengths
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'finished' ]
+
+Number of calls: 0
+
+ ❯ tests/runtime/compression-fx.test.ts:82:23
+     80|     await expect(filter.readData(0)).rejects.toThrow(RangeError);
+     81|     await filter.cancel("finished");
+     82|     expect(cancelled).toHaveBeenCalledWith("finished");
+       |                       ^
+     83|   });
+     84|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 24 passed (25)
+   Start at  08:20:06
+   Duration  364ms (transform 110ms, setup 67ms, import 86ms, tests 127ms, environment 0ms)
+
