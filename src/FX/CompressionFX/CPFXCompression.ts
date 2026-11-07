@@ -53,6 +53,7 @@ export class CPFXInputFilter {
   #reading = false;
 
   constructor(operation: CPFXOperation, algorithm: CPFXAlgorithm, source: ReadableStream<NSEDataConvertible>) {
+    if (source.locked) throw new TypeError("CPFXInputFilter requires an unlocked source stream.");
     const codec = createCompressionStream(operation, algorithm);
     const bridge = new TransformStream<NSEDataConvertible, Uint8Array<ArrayBuffer>>({
       transform(chunk, controller) { controller.enqueue(NSEData.from(chunk).bytes); },
@@ -82,8 +83,8 @@ export class CPFXInputFilter {
 
   async cancel(reason?: unknown): Promise<void> {
     this.#pending = new Uint8Array(0);
-    await this.#reader.cancel(reason);
-    await this.#completion.catch(() => undefined);
+    try { await this.#reader.cancel(reason); }
+    finally { await this.#completion; }
   }
 }
 
@@ -95,6 +96,7 @@ export class CPFXOutputFilter {
   #finished = false;
 
   constructor(operation: CPFXOperation, algorithm: CPFXAlgorithm, destination: WritableStream<NSEData>) {
+    if (destination.locked) throw new TypeError("CPFXOutputFilter requires an unlocked destination stream.");
     const codec = createCompressionStream(operation, algorithm);
     this.#writer = codec.writable.getWriter();
     this.#completion = codec.readable.pipeThrough(new TransformStream<Uint8Array, NSEData>({
