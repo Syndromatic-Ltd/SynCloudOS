@@ -63,6 +63,8 @@ const selected = [...indexes].filter(value => even.evaluate(value));
 
 Index sets normalise and coalesce adjacent ranges. Character sets operate on Unicode scalars rather than UTF-16 code units. Predicates also accept a restricted schema-backed expression tree; this is not an interpreter for arbitrary Cocoa predicate-format strings.
 
+`NSEIndexPath.indexAtPosition(position)` accepts nonnegative safe-integer positions. Invalid or out-of-range positions return `undefined`, the web API sentinel; negative, fractional and non-finite positions are never coerced into valid indexes. `indexPathByRemovingLastIndex()` always returns an `NSEIndexPath`: paths with zero or one index produce an empty path. The original path remains unchanged.
+
 ## Formatters
 
 ```ts

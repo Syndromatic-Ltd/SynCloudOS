@@ -33,6 +33,26 @@ describe("model indexes", () => {
     expect(Object.isFrozen(path.indexes)).toBe(true);
   });
 
+  it("rejects invalid index positions without applying Array.at coercion", () => {
+    const path = NSEIndexPath.from(2, 4);
+    expect(path.indexAtPosition(0)).toBe(2);
+    expect(path.indexAtPosition(1)).toBe(4);
+    for (const position of [-1, -2, 0.5, 1.5, NaN, Infinity, -Infinity, Number.MAX_SAFE_INTEGER + 1]) {
+      expect(path.indexAtPosition(position)).toBeUndefined();
+    }
+    expect(path.indexAtPosition(2)).toBeUndefined();
+    expect(path.indexAtPosition(Number.MAX_SAFE_INTEGER)).toBeUndefined();
+  });
+
+  it("removes the last index of an empty or single-index path to an empty path", () => {
+    for (const path of [NSEIndexPath.from(), NSEIndexPath.from(3)]) {
+      const removed = path.indexPathByRemovingLastIndex();
+      expect(removed).toBeInstanceOf(NSEIndexPath);
+      expect(removed.indexes).toEqual([]);
+      expect(path.indexes).toEqual(path.length === 0 ? [] : [3]);
+    }
+  });
+
   it("normalises overlapping ranges without expanding them", () => {
     const set = NSEIndexSet.fromRanges([
       { location: 5, length: 3 },
