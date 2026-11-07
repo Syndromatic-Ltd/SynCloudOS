@@ -29,7 +29,16 @@ import { BrowserVideoDecoder } from "./BrowserVideoDecoder";
 import { BrowserVideoEncoder } from "./BrowserVideoEncoder";
 import { createBrowserVideoWorkerTransport } from "../VideoFX/platformAdapterVideoWorker";
 import { BrowserMotionAdapter } from "./BrowserMotionAdapter";
+import { BrowserBluetoothAdapter, type BrowserBluetoothOptions } from "./BrowserBluetoothAdapter";
+import { BrowserNFCAdapter, type BrowserNFCAdapterOptions } from "./BrowserNFCAdapter";
+import { BrowserSpeechAdapter, type BrowserSpeechAdapterOptions } from "./BrowserSpeechAdapter";
+import { BrowserContactsAdapter, type BrowserContactsAdapterOptions } from "./BrowserContactsAdapter";
+import { BrowserPaymentAdapter, type BrowserPaymentAdapterOptions } from "./BrowserPaymentAdapter";
+import { BrowserXRAdapter, createBrowserXRRenderingLayerFactory, type BrowserXROptions } from "./BrowserXRAdapter";
 import { BrowserLocationAdapter } from "./BrowserLocationAdapter";
+import { BrowserNetworkPathAdapter } from "./BrowserNetworkPathAdapter";
+import { createBrowserSpeechSynthesisAdapter } from "./BrowserSpeechSynthesisAdapter";
+import { BrowserVideoPresentationAdapter, type BrowserElementCapturePlatform } from "./BrowserVideoPresentationAdapter";
 import { BrowserMIDIAdapter } from "./BrowserMIDIAdapter";
 import { createBrowserLuminaIndexBackendFactory } from "./WorkerLuminaIndexBackend";
 import type {
@@ -650,6 +659,8 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     },
   }) : null;
 
+  const videoPresentation = new BrowserVideoPresentationAdapter(browserWindow?.document ?? null,
+    (browserWindow ?? {}) as unknown as BrowserElementCapturePlatform);
   const isNativeProxy = nativeProxyProbe();
   return {
     navigation,
@@ -704,10 +715,27 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
       } } : {}),
     })) : undefined,
     motion: browserWindow && typeof document !== "undefined" ? new BrowserMotionAdapter(browserWindow, document) : undefined,
-    videoCapture: new BrowserVideoCaptureAdapter(browserNavigator ? createBrowserVideoCapturePlatform(browserNavigator) : null),
+    videoCapture: new BrowserVideoCaptureAdapter(browserNavigator ? createBrowserVideoCapturePlatform(browserNavigator) : null, videoPresentation),
+    videoPresentation,
+    speechSynthesis: createBrowserSpeechSynthesisAdapter(browserWindow),
+    networkPaths: new BrowserNetworkPathAdapter({ navigator: browserNavigator ?? undefined, eventTarget: browserWindow ?? undefined }),
     videoDecoder: { createBackend: (options) => new BrowserVideoDecoder(options) },
     videoEncoder: { createBackend: () => new BrowserVideoEncoder() },
     videoProcessing: { createBackend: ownerId => createBrowserVideoWorkerTransport(ownerId) },
+    bluetooth: new BrowserBluetoothAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
+      browserNavigator: browserNavigator as unknown as BrowserBluetoothOptions["browserNavigator"] }),
+    speech: new BrowserSpeechAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
+      browserWindow: browserWindow as unknown as BrowserSpeechAdapterOptions["browserWindow"] }),
+    contacts: new BrowserContactsAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
+      browserNavigator: browserNavigator as unknown as BrowserContactsAdapterOptions["browserNavigator"] }),
+    nfc: new BrowserNFCAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
+      NDEFReader: (browserWindow as unknown as { NDEFReader?: BrowserNFCAdapterOptions["NDEFReader"] } | null)?.NDEFReader,
+      permissions: browserNavigator?.permissions as unknown as BrowserNFCAdapterOptions["permissions"] }),
+    payment: new BrowserPaymentAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
+      PaymentRequest: (browserWindow as unknown as { PaymentRequest?: BrowserPaymentAdapterOptions["PaymentRequest"] } | null)?.PaymentRequest }),
+    xr: new BrowserXRAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
+      browserNavigator: browserNavigator as unknown as BrowserXROptions["browserNavigator"],
+      createRenderingLayer: browserWindow ? createBrowserXRRenderingLayerFactory(browserWindow) : undefined }),
     location: browserWindow && browserNavigator ? new BrowserLocationAdapter(browserWindow, browserNavigator) : undefined,
     midi: browserNavigator ? new BrowserMIDIAdapter(browserNavigator) : undefined,
     luminaIndex: createBrowserLuminaIndexBackendFactory(undefined, {

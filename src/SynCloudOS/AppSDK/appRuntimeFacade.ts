@@ -41,6 +41,9 @@ import { createMountedAnimationLayers } from "../HostServices/mountedAnimationLa
 import type { GFXImage } from "../../FX/GraphicsFX/GFXImage";
 import { createMountedAudioGraphs } from "./mountedAudioGraphs";
 import { createMountedAudioSessions } from "./mountedAudioSessions";
+import { createMountedAudioSpeechClient } from "./mountedAudioSpeechClient";
+import { createMountedNetworkClient } from "./mountedNetworkClient";
+import { createMountedVideoPresentationClient } from "./mountedVideoPresentationClient";
 import { createMountedAudioFiles } from "./mountedAudioFiles";
 import { createMountedHapticsClient } from "./mountedHapticsClient";
 import type { AFXAnimationHandle } from "../../FX/AnimationFX/animationTypes";
@@ -52,6 +55,12 @@ import { createMountedGFXIdentifierIssuer } from "../../FX/GraphicsFX/identifier
 import { createMountedMotionClient } from "./mountedMotionClient";
 import { createMountedMediaClient } from "./mountedMediaClient";
 import { createMountedVideoClient } from "./mountedVideoClient";
+import { createMountedBluetoothClient } from "./mountedBluetoothClient";
+import { createMountedNFCClient } from "./mountedNFCClient";
+import { createMountedSpeechClient } from "./mountedSpeechClient";
+import { createMountedContactsClient } from "./mountedContactsClient";
+import { createMountedPaymentClient } from "./mountedPaymentClient";
+import { createMountedXRClient } from "./mountedXRClient";
 import { createMountedLocationClient } from "./mountedLocationClient";
 import { createMountedMIDIClient } from "./mountedMIDIClient";
 import { createMountedLuminaClient } from "./mountedLuminaClient";
@@ -4432,7 +4441,31 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const mountedSettlement = createMountedSettlementPort(runtime);
     let cachedFontReadinessGeneration = appRuntime.textLayout.fontReadinessGeneration;
     let cachedAttachmentReadinessGeneration = appRuntime.textLayout.attachmentReadinessGeneration;
+    const deviceEntitlements = () => {
+      assertLive();
+      return mountedBundle?.entitlements ?? [];
+    };
+    const authoriseDeviceCapability = (capability: string) => {
+      assertLive();
+      if (!mountedBundle?.entitlements?.includes(capability)) return false;
+      return runTestControlSync("permissions", "permission.request", () =>
+        runTestControlSync("policy", "policy.evaluate", () => ({
+          allowed: runtime.lifecycle.validateAccess(app.bundleIdentifier, "activate").ok,
+        }))).allowed;
+    };
     const environmentClients = Object.freeze({
+      speechSynthesis: createMountedAudioSpeechClient(runtime.environment.speechSynthesis, signal, deviceEntitlements),
+      network: createMountedNetworkClient(runtime.environment.networkPaths ?? {
+        capabilities: () => Object.freeze({ pathMonitoring: false, networkInformation: false, interfaceType: false, expensive: false, constrained: false, authorizationPrompt: false }),
+        currentPath: () => null, subscribe: () => ({ dispose() {} }),
+      }, signal, deviceEntitlements, () => true),
+      videoPresentation: createMountedVideoPresentationClient(runtime.environment.videoPresentation, signal, deviceEntitlements),
+      bluetooth: createMountedBluetoothClient(runtime.environment.bluetooth, signal, deviceEntitlements, authoriseDeviceCapability),
+      nfc: createMountedNFCClient(runtime.environment.nfc, signal, deviceEntitlements, authoriseDeviceCapability),
+      speech: createMountedSpeechClient(runtime.environment.speech, signal, deviceEntitlements, authoriseDeviceCapability),
+      contacts: createMountedContactsClient(runtime.environment.contacts, signal, deviceEntitlements, authoriseDeviceCapability),
+      payment: createMountedPaymentClient(runtime.environment.payment, signal, deviceEntitlements, authoriseDeviceCapability),
+      xr: createMountedXRClient(runtime.environment.xr, signal, deviceEntitlements, authoriseDeviceCapability),
       audioGraphs: createMountedAudioGraphs(runtime.audioGraphs, signal, () => {
         assertLive();
         return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
