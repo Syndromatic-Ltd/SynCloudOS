@@ -17,6 +17,9 @@
  * limitations under the License.
  */
 
+import type { SynWareWebAppManifest, SynWareURLTypeManifest, SynWareLinkCaptureManifest, SynWareShortcutItemManifest, SynWareShareTargetManifest } from "./installedApplicationTypes";
+export type * from "./installedApplicationTypes";
+
 export type SynCloudOSAppFrameSmoothSurfaceCurve = "arc" | "squircle" | "superellipse" | "clothoid";
 export type SynCloudOSAppFrameSmoothSurfacePhysicality = "default" | "off" | {
   top?: { offsetX?: number; offsetY: number; blur?: number; spread?: number; color: string; opacity: number };
@@ -143,6 +146,7 @@ export interface SynWareApplicationMenuManifest {
 export interface SynWareDocumentTypeManifest {
   readonly id: string;
   readonly extensions?: readonly string[];
+  readonly mimeTypes?: readonly string[];
   readonly displayName?: string;
 }
 
@@ -287,6 +291,11 @@ export interface SynWareManifestV1 {
   readonly windowDefaults?: SynWareWindowDefaultsManifest;
   readonly frame?: SynWareFrameManifest;
   readonly documentTypes?: readonly SynWareDocumentTypeManifest[];
+  readonly webApp?: SynWareWebAppManifest;
+  readonly urlTypes?: readonly SynWareURLTypeManifest[];
+  readonly linkCapture?: SynWareLinkCaptureManifest;
+  readonly shortcutItems?: readonly SynWareShortcutItemManifest[];
+  readonly shareTarget?: SynWareShareTargetManifest;
   readonly commands?: readonly SynWareCommandManifest[];
   readonly menus?: readonly SynWareMenuManifest[];
   readonly applicationMenu?: SynWareApplicationMenuManifest;
