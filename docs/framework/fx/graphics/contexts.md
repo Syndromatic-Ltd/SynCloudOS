@@ -144,6 +144,7 @@ Unlike the bitmap context, the recording context keeps a full graphics state wit
 | `fill(path, rule?)`, `stroke(path)` | `void` | Records a fill or stroke with the current paint and state. |
 | `drawImage(image, rect)` | `void` | Records an image. Each image is limited to one megapixel. An empty rectangle records nothing. |
 | `drawLayer(layer, rect)` | `void` | Draws a `GFXLayer`. |
+| `drawDisplayList(list, rect)` | `void` | Draws another recorded display list scaled into `rect`, as `CGContext` draws a PDF page. The list keeps its own coordinate space under the current transform, clip and alpha, and its gradients, patterns and masks never collide with this context's. Only lists a `GFXContext` recorded are accepted, their commands count against the 10,000-command limit, and lists nest at most eight deep. An empty `rect` draws nothing. |
 | `drawText(text, origin, font)` | `void` | Records text as an SVG `text` element with the current fill. `font` is `{ family, size, weight?, style? }` (`GFXTextFont`): a family up to 256 characters, a size up to 512, a weight from 1 to 1000 (default 400) and a style `"normal"` (default) or `"italic"`. Text is limited to 64 KiB. The text is set by the viewer's fonts. For exact glyph shapes, draw [TextFX](../text.md) outlines as paths. |
 | `beginTransparencyGroup(options?)`, `endTransparencyGroup(group)` | | Groups, to a depth of 16. |
 | `displayList` | `GFXDisplayList` | The recording so far as an immutable value. Throws while a group is open. |

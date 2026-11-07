@@ -117,17 +117,18 @@ export const NSEGraphicsView = forwardRef<SVGSVGElement, NSEGraphicsViewProps>(f
         const leafCommands: GFXCommand[] = [];
         const collectLeaves = (commands: readonly GFXCommand[]) => {
             for (const command of commands) {
-                if (command.kind === "transparency-group") collectLeaves(command.commands);
+                if (command.kind === "display-list") leafCommands.push(command);
+                if (command.kind === "transparency-group" || command.kind === "display-list") collectLeaves(command.commands);
                 else leafCommands.push(command);
             }
         };
         collectLeaves(displayList.commands);
         for (const command of leafCommands) {
             if (command.kind === "transparency-group") continue;
-            for (const paint of [command.state.fill, command.state.stroke])
+            for (const paint of command.kind === "display-list" ? [] : [command.state.fill, command.state.stroke])
                 if (paint.kind === "gradient")
                     gradients.set(paint.id, paint);
-            for (const paint of [command.state.fill, command.state.stroke])
+            for (const paint of command.kind === "display-list" ? [] : [command.state.fill, command.state.stroke])
                 if (paint.kind === "pattern")
                     patterns.set(paint.id, paint);
             for (const mask of command.state.masks)
@@ -160,12 +161,17 @@ export const NSEGraphicsView = forwardRef<SVGSVGElement, NSEGraphicsViewProps>(f
         ...(state.shadow ? { filter: `url(#${definitions.ids.get(`shadow:${JSON.stringify(state.shadow)}`)!})` } : {}),
         ...(state.blendMode === "normal" ? {} : { style: { mixBlendMode: svgBlendMode(state.blendMode) } }),
     });
+    const withClips = (node: React.ReactElement, state: GFXCommandState, key: React.Key): React.ReactNode => state.clipPathDataChain.reduceRight<React.ReactNode>((child, pathData, clipIndex) => <g key={`${String(key)}:clip:${clipIndex}`} clipPath={`url(#${definitions.ids.get(`clip:${state.clipRules[clipIndex]}:${pathData}`)!})`}>{child}</g>, state.masks.reduceRight<React.ReactNode>((child, mask, maskIndex) => <g key={`${String(key)}:mask:${maskIndex}`} mask={`url(#${definitions.ids.get(`mask:${mask.id}`)!})`}>{child}</g>, React.cloneElement(node, { key })));
     const renderCommand = (command: GFXCommand, key: React.Key): React.ReactNode => {
         if (command.kind === "transparency-group") {
             const style = command.group.blendMode === "normal"
                 ? { isolation: "isolate" as const }
                 : { isolation: "isolate" as const, mixBlendMode: svgBlendMode(command.group.blendMode) };
             return <g key={key} data-gfx-transparency-group={command.group.id} opacity={command.group.alpha} style={style}>{command.commands.map((child, index) => renderCommand(child, `${String(key)}:${index}`))}</g>;
+        }
+        if (command.kind === "display-list") {
+            const group = <g key={key} data-gfx-display-list="" opacity={command.state.alpha} transform={transformValue(command.transform)} {...(command.state.blendMode === "normal" ? {} : { style: { mixBlendMode: svgBlendMode(command.state.blendMode) } })}>{command.commands.map((child, index) => renderCommand(child, `${String(key)}:${index}`))}</g>;
+            return withClips(group, command.state, key);
         }
         const common = stateProps(command.state);
         const node = command.kind === "fill-path"
@@ -174,7 +180,7 @@ export const NSEGraphicsView = forwardRef<SVGSVGElement, NSEGraphicsViewProps>(f
                 ? <path d={command.pathData} fill="none" stroke={paintValue(command.paint, definitions.ids)} strokeWidth={command.lineWidth} strokeLinecap={command.lineCap} strokeLinejoin={command.lineJoin} strokeDashoffset={command.state.lineDashPhase} strokeMiterlimit={command.state.miterLimit} strokeDasharray={command.lineDash.length ? command.lineDash.join(" ") : undefined} {...common}/>
                 : command.kind === "image" ? <image x={command.destination.x} y={command.destination.y} width={command.destination.width} height={command.destination.height} preserveAspectRatio="none" href={imagePNGDataURL(command.image)} {...common} style={{ ...common.style, imageRendering: command.state.interpolation === "nearest" ? "pixelated" : "auto" }}/>
                     : <text x={command.origin.x} y={command.origin.y} fill={paintValue(command.paint, definitions.ids)} fontFamily={command.font.family} fontSize={command.font.size} fontWeight={command.font.weight} fontStyle={command.font.style} letterSpacing={command.textAttributes.letterSpacing} textAnchor={command.textAttributes.alignment} {...common}>{command.text}</text>;
-        return command.state.clipPathDataChain.reduceRight<React.ReactNode>((child, pathData, clipIndex) => <g key={`${String(key)}:clip:${clipIndex}`} clipPath={`url(#${definitions.ids.get(`clip:${command.state.clipRules[clipIndex]}:${pathData}`)!})`}>{child}</g>, command.state.masks.reduceRight<React.ReactNode>((child, mask, maskIndex) => <g key={`${String(key)}:mask:${maskIndex}`} mask={`url(#${definitions.ids.get(`mask:${mask.id}`)!})`}>{child}</g>, React.cloneElement(node, { key })));
+        return withClips(node, command.state, key);
     };
     const pointer = (handler: NSEGraphicsViewPointerHandler | undefined) => handler
         ? (event: React.PointerEvent<SVGSVGElement>) => handler(event, convertPointToGFXDisplayList(event.currentTarget, event.clientX, event.clientY, displayList))
