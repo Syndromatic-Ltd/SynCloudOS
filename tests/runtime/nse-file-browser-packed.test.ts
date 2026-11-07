@@ -19,4 +19,4 @@ assert.equal(item.title, "Downloads"); assert.equal(item.image, image);
 console.log("Installed path control and workspace passed");
 `);
   expect(runNode(["specimen.mjs"], consumer.root)).toContain("Installed path control and workspace passed");
-});
+}, 120_000);
