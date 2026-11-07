@@ -26,3 +26,8 @@ it("derives standard path items from a URL, decodes titles and supports keyboard
   fireEvent.click(screen.getByRole("button", { name: "Test" }));
   expect(onAction.mock.calls[0]?.[0].clickedPathItem.url).toBe("file:///Users/Test");
 });
+it.each([["file:///", "/"], ["https://example.test/", "example.test"]])("keeps the root of %s actionable", (url, title) => {
+  const onAction = vi.fn(); render(<NSEPathControl url={url} onAction={onAction} />);
+  fireEvent.click(screen.getByRole("button", { name: title }));
+  expect(onAction.mock.calls[0]?.[0].clickedPathItem.url).toBe(url);
+});

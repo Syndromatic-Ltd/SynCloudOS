@@ -52,10 +52,11 @@ function itemsForURL(value: string | URL | null): readonly NSEPathControlItem[] 
   if (!value) return [];
   const url = new URL(String(value));
   const parts = url.pathname.split("/").filter(Boolean);
-  return parts.map((part, index) => new NSEPathControlItem({ title: decodeURIComponent(part),
+  const root = new NSEPathControlItem({ title: url.host || "/", url: `${url.protocol}//${url.host}/`, image: NSEWorkspace.shared.icon("public.folder", 24) });
+  return [root, ...parts.map((part, index) => new NSEPathControlItem({ title: decodeURIComponent(part),
     url: `${url.protocol}//${url.host}/${parts.slice(0, index + 1).join("/")}`,
     image: NSEWorkspace.shared.icon("public.folder", 24),
-  }));
+  }))];
 }
 
 /** NSPathControl's standard path: semantic components; Atmo supplies the joined path bezel. */

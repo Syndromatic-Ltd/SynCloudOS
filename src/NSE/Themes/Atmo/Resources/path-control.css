@@ -37,6 +37,7 @@
 :where([data-nse-appearance="atmo"]) .nse-path-item img { width: 100%; height: 100%; object-fit: contain; }
 :where([data-nse-appearance="atmo"]) .nse-path-item[aria-current] { font-weight: 600; }
 :where([data-nse-appearance="atmo"]) .nse-path-control .nse-path-item:is(:hover, :focus-visible) { background: #fff3; }
+:is([data-nse-appearance="atmo"]) .nse-path-control > .nse-path-item.nse-control-button:focus-visible { outline: 2px solid #438edf; outline-offset: -2px; background: #fff3; }
 :where([data-nse-appearance="atmo"])[data-mode="dark"] .nse-path-control,
 :where([data-nse-appearance="atmo"]) [data-nse-colour-scheme-resolved="dark"] .nse-path-control { background: linear-gradient(#292d33, #444950); color: #fff; border-color: #171a20; box-shadow: inset 0 1px 2px #0008, 0 1px #fff2; }
 :where([data-nse-appearance="atmo"])[data-mode="dark"] .nse-path-item,

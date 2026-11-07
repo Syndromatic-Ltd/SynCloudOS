@@ -6,7 +6,6 @@ import { NSESearchField } from "../Controls/Fields/NSESearchField";
 import { NSESegmentedControl } from "../Controls/Values/NSESegmentedControl";
 import { NSEPathControl, NSEPathControlItem } from "../Controls/Values/NSEPathControl";
 import { NSEWorkspace } from "../Application/NSEWorkspace";
-import BackArrow from "../Themes/Atmo/Resources/navigation-back.svg?url";
 import { createMediaPanelService, takeOpenPanelMediaSelection } from "../../SynCloudOS/MediaPanels/MediaPanelService";
 import { matchesOpenPanelContentType, type FilePanelDirectory, type OpenPanelFolder } from "../../SynCloudOS/FilePanels/OpenPanelFileSystem";
 import { referenceForOpenPanelHandle } from "../../SynCloudOS/FilePanels/FileSystemAccessPanelAdapter";
@@ -17,6 +16,7 @@ import { NSEOpenPanelSources, type OpenPanelSource } from "./NSEOpenPanelSources
 import { NSEOpenPanelCollection, type OpenPanelItem } from "./NSEOpenPanelCollection";
 
 interface Location { readonly source: string; readonly title: string; readonly path: readonly FilePanelDirectory[] }
+const BackArrow = new URL("../Themes/Atmo/Resources/navigation-back.svg", import.meta.url).href;
 export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSession }) {
   const { host, compact } = session;
   const fs = host.fileSystem;
