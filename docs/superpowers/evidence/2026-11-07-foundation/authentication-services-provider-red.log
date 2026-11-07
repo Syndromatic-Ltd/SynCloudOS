@@ -1,0 +1,26 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/authentication-services.test.ts tests/runtime/authentication-services-provider.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/authentication-services-provider.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/authentication-services-provider.test.ts [ tests/runtime/authentication-services-provider.test.ts ]
+Error: Cannot find module '../../src/SynCloudOS/Authentication/providers/passkey' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/authentication-services-provider.test.ts
+ ❯ tests/runtime/authentication-services-provider.test.ts:24:1
+     22| import { createHttpAuthentication } from "../../src/SynCloudOS/Authent…
+     23| import { ASAuthorizationPlatformPublicKeyCredentialProvider, type ASAu…
+     24| import { createPasskeyAuthentication } from "../../src/SynCloudOS/Auth…
+       | ^
+     25|
+     26| function fixture(options: { serverSession?: boolean; verify?: () => Pr…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  8 passed (8)
+   Start at  19:09:45
+   Duration  423ms (transform 84ms, setup 37ms, import 55ms, tests 9ms, environment 0ms)

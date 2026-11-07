@@ -1,0 +1,90 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/mounted-recording.test.ts tests/runtime/framework-doc-links.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/framework-doc-links.test.ts (4 tests | 2 failed) 206ms
+     × links only to files and headings that exist 87ms
+     × links every guide from the framework index 43ms
+ ❯ tests/runtime/fx/mounted-recording.test.ts (4 tests | 2 failed) 12ms
+   × keeps unavailable sessions truthful, isolated and revoked 4ms
+   × passes only the mount-issued opaque input capability to its capture host 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/framework-doc-links.test.ts > framework documentation > links only to files and headings that exist
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "docs\\framework\\documents.md links to missing heading synware-manifest.md#permissions",
++ ]
+
+ ❯ tests/runtime/framework-doc-links.test.ts:85:20
+     83|       }
+     84|     }
+     85|     expect(errors).toEqual([]);
+       |                    ^
+     86|   });
+     87|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/framework-doc-links.test.ts > framework documentation > links every guide from the framework index
+AssertionError: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "docs\\framework\\installed-applications.md",
++   "docs\\framework\\privacy.md",
++ ]
+
+ ❯ tests/runtime/framework-doc-links.test.ts:104:22
+    102|       .filter((file) => !linked.has(file))
+    103|       .map((file) => relative(repositoryRoot, file));
+    104|     expect(unlinked).toEqual([]);
+       |                      ^
+    105|   });
+    106|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/fx/mounted-recording.test.ts > keeps unavailable sessions truthful, isolated and revoked
+Error: Audio capture is unavailable.
+ ❯ BrowserAudioSession.assertActive src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:153:134
+
+ ❯ BrowserAudioSession.subscribe src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:155:42
+ ❯ AUFXAudioSession.subscribe src/FX/AudioFX/AUFXAudioSession.ts:118:55
+ ❯ createAudioSessionFacade src/SynCloudOS/AppSDK/audioSessionFacade.ts:95:38
+ ❯ src/SynCloudOS/AppSDK/mountedAudioSessions.ts:49:24
+ ❯ Object.acquire src/SynCloudOS/HostServices/mountedResourceScope.ts:147:23
+ ❯ Object.createSession src/SynCloudOS/AppSDK/mountedAudioSessions.ts:46:20
+ ❯ tests/runtime/fx/mounted-recording.test.ts:41:84
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/runtime/fx/mounted-recording.test.ts > passes only the mount-issued opaque input capability to its capture host
+Error: Audio capture is unavailable.
+ ❯ BrowserAudioSession.assertActive src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:153:134
+
+ ❯ BrowserAudioSession.subscribe src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:155:42
+ ❯ AUFXAudioSession.subscribe src/FX/AudioFX/AUFXAudioSession.ts:118:55
+ ❯ createAudioSessionFacade src/SynCloudOS/AppSDK/audioSessionFacade.ts:95:38
+ ❯ src/SynCloudOS/AppSDK/mountedAudioSessions.ts:49:24
+ ❯ Object.acquire src/SynCloudOS/HostServices/mountedResourceScope.ts:147:23
+ ❯ Object.createSession src/SynCloudOS/AppSDK/mountedAudioSessions.ts:46:20
+ ❯ tests/runtime/fx/mounted-recording.test.ts:55:131
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 4 passed (8)
+   Start at  22:02:58
+   Duration  711ms (transform 117ms, setup 40ms, import 123ms, tests 218ms, environment 0ms)

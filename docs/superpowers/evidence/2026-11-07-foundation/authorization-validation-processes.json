@@ -1,0 +1,44 @@
+[
+  {
+    "Id": 54996,
+    "Cpu": 0.046875,
+    "WorkingMB": 61.0,
+    "Command": "\"C:\\Program Files\\nodejs\\node.exe\" scripts/use-framework.mjs \"C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\syncloudos-faithful-adopt-1794084248979\""
+  },
+  {
+    "Id": 85764,
+    "Cpu": 113.65625,
+    "WorkingMB": 2886.0,
+    "Command": "node  scripts/synware/build-sdk.mjs"
+  },
+  {
+    "Id": 88904,
+    "Cpu": 1.046875,
+    "WorkingMB": 82.0,
+    "Command": "\"C:\\Program Files\\nodejs\\\\node.exe\"  \"C:\\Users\\Kavish Krishnakumar\\AppData\\Roaming\\npm\\node_modules\\npm\\bin\\npx-cli.js\" vitest run tests/runtime/synapp-sdk-package.test.ts tests/runtime/fx/phase5-packed.test.ts"
+  },
+  {
+    "Id": 76232,
+    "Cpu": 10.890625,
+    "WorkingMB": 314.0,
+    "Command": "\"node\"   \"C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\syncloudos-phase5-585c4f3ad0-fa4c2592\\node_modules\\.bin\\\\..\\vitest\\vitest.mjs\" run tests/runtime/synapp-sdk-package.test.ts tests/runtime/fx/phase5-packed.test.ts"
+  },
+  {
+    "Id": 53336,
+    "Cpu": 2.53125,
+    "WorkingMB": 86.0,
+    "Command": "\"C:\\Program Files\\nodejs\\node.exe\" --experimental-import-meta-resolve --require \"C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vitest/suppress-warnings.cjs\" --conditions node --conditions development \"C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\node_modules\\vitest\\dist\\workers\\forks.js\""
+  },
+  {
+    "Id": 54804,
+    "Cpu": 4.765625,
+    "WorkingMB": 263.0,
+    "Command": "\"C:\\Program Files\\nodejs\\node.exe\" --experimental-import-meta-resolve --require \"C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vitest/suppress-warnings.cjs\" --conditions node --conditions development \"C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\node_modules\\vitest\\dist\\workers\\forks.js\""
+  },
+  {
+    "Id": 83192,
+    "Cpu": 11.78125,
+    "WorkingMB": 847.0,
+    "Command": "\"C:\\Program Files\\nodejs\\node.exe\" scripts/synware/build-sdk.mjs"
+  }
+]

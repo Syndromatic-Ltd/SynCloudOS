@@ -1,0 +1,80 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-capture.test.ts tests/runtime/fx/video-capture-mounted.test.tsx tests/runtime/privacy-location-mounted.test.ts tests/runtime/fx/location-mounted.test.tsx --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/video-capture-mounted.test.tsx (4 tests | 2 failed) 148ms
+   × routes mounted video capture through manifest, privacy, lifecycle and deterministic test authority 97ms
+   × makes useVideo component-scoped and tears it down on unmount without prompting on mount 22ms
+ ❯ tests/runtime/fx/location-mounted.test.tsx (2 tests | 2 failed) 104ms
+   × keeps mounted privacy authority before a mounted LocationFX client reaches its host adapter 84ms
+   × routes a mounted watch through lifecycle suspension, reauthorization and mount revocation 19ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/location-mounted.test.tsx > keeps mounted privacy authority before a mounted LocationFX client reaches its host adapter
+SecurityError: SynWare capability location.read must be declared.
+ ❯ securityError src/SynCloudOS/AppSDK/mountedLocationClient.ts:33:10
+     31|
+     32| function securityError(message: string): DOMException {
+     33|   return new DOMException(message, "SecurityError");
+       |          ^
+     34| }
+     35|
+ ❯ requireCapability src/SynCloudOS/AppSDK/mountedLocationClient.ts:53:13
+ ❯ Object.createManager src/SynCloudOS/AppSDK/mountedLocationClient.ts:59:7
+ ❯ tests/runtime/fx/location-mounted.test.tsx:77:44
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/fx/location-mounted.test.tsx > routes a mounted watch through lifecycle suspension, reauthorization and mount revocation
+SecurityError: SynWare capability location.read must be declared.
+ ❯ securityError src/SynCloudOS/AppSDK/mountedLocationClient.ts:33:10
+     31|
+     32| function securityError(message: string): DOMException {
+     33|   return new DOMException(message, "SecurityError");
+       |          ^
+     34| }
+     35|
+ ❯ requireCapability src/SynCloudOS/AppSDK/mountedLocationClient.ts:53:13
+ ❯ Object.createManager src/SynCloudOS/AppSDK/mountedLocationClient.ts:59:7
+ ❯ tests/runtime/fx/location-mounted.test.tsx:99:44
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/fx/video-capture-mounted.test.tsx > routes mounted video capture through manifest, privacy, lifecycle and deterministic test authority
+SecurityError: SynWare capability video.capture.camera must be declared.
+ ❯ securityError src/SynCloudOS/AppSDK/mountedVideoClient.ts:50:10
+     48|
+     49| function securityError(message: string): DOMException {
+     50|   return new DOMException(message, "SecurityError");
+       |          ^
+     51| }
+     52|
+ ❯ requireCapability src/SynCloudOS/AppSDK/mountedVideoClient.ts:123:13
+ ❯ Object.requestCamera src/SynCloudOS/AppSDK/mountedVideoClient.ts:343:13
+ ❯ tests/runtime/fx/video-capture-mounted.test.tsx:69:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/runtime/fx/video-capture-mounted.test.tsx > makes useVideo component-scoped and tears it down on unmount without prompting on mount
+SecurityError: SynWare capability video.capture.camera must be declared.
+ ❯ securityError src/SynCloudOS/AppSDK/mountedVideoClient.ts:50:10
+     48|
+     49| function securityError(message: string): DOMException {
+     50|   return new DOMException(message, "SecurityError");
+       |          ^
+     51| }
+     52|
+ ❯ requireCapability src/SynCloudOS/AppSDK/mountedVideoClient.ts:123:13
+ ❯ Object.requestCamera src/SynCloudOS/AppSDK/mountedVideoClient.ts:343:13
+ ❯ Object.requestCamera src/SynCloudOS/AppSDK/hooks/useVideo.ts:52:52
+ ❯ tests/runtime/fx/video-capture-mounted.test.tsx:130:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  4 failed | 7 passed (11)
+   Start at  19:40:46
+   Duration  11.27s (transform 5.62s, setup 54ms, import 8.59s, tests 265ms, environment 1.82s)

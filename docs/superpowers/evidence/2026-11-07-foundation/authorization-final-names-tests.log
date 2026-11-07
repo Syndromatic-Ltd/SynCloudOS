@@ -1,0 +1,29 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/error-catalogue.test.ts tests/runtime/authorization-efficacy.test.ts tests/runtime/configuration-profiles-host-profiles.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/error-catalogue.test.ts (3 tests | 1 failed) 33188ms
+   × catalogues every stable diagnostic code literal throughout src, including conditional branches 33173ms
+[vitest-pool]: Timeout terminating forks worker for test files C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/authorization-efficacy.test.ts.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/error-catalogue.test.ts > catalogues every stable diagnostic code literal throughout src, including conditional branches
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/runtime/error-catalogue.test.ts:37:1
+     35| }
+     36|
+     37| it("catalogues every stable diagnostic code literal throughout src, in…
+       | ^
+     38|   const known = new Set(errorCatalogue.map(entry => entry.code));
+     39|   expect(known.size).toBe(errorCatalogue.length);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 26 passed (27)
+   Start at  21:16:29
+   Duration  181.74s (transform 76.10s, setup 15.87s, import 114.79s, tests 33.41s, environment 0ms)

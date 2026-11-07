@@ -1,0 +1,15 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/performance/text-primitives-performance.test.ts tests/runtime/fx/phase5-real-authority.test.ts --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=docs/superpowers/evidence/2026-11-07-foundation/authorization-last-failures-recheck.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ✓ tests/performance/text-primitives-performance.test.ts (1 test) 23228ms
+     ✓ lays out 100000+ UTF16 units, reuses warm results and releases retained state  23228ms
+ ✓ tests/runtime/fx/phase5-real-authority.test.ts (2 tests) 69ms
+
+ Test Files  2 passed (2)
+      Tests  3 passed (3)
+   Start at  22:14:56
+   Duration  34.42s (transform 8.65s, setup 37ms, import 10.78s, tests 23.30s, environment 0ms)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/authorization-last-failures-recheck.json

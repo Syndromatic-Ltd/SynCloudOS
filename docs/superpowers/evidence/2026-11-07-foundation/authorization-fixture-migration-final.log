@@ -1,0 +1,16 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/runtime.test.ts tests/runtime/app-share-client.test.ts tests/runtime/synapp-sdk-testing.test.tsx tests/runtime/preference-panes.test.tsx --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=docs/superpowers/evidence/2026-11-07-foundation/authorization-fixture-migration-final.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ✓ tests/runtime/app-share-client.test.ts (36 tests) 177ms
+ ✓ tests/runtime/preference-panes.test.tsx (21 tests) 703ms
+ ✓ tests/runtime/synapp-sdk-testing.test.tsx (10 tests) 525ms
+ ✓ tests/runtime/runtime.test.ts (14 tests) 154ms
+
+ Test Files  4 passed (4)
+      Tests  81 passed (81)
+   Start at  21:57:29
+   Duration  31.28s (transform 19.00s, setup 62ms, import 27.08s, tests 1.56s, environment 2.01s)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/authorization-fixture-migration-final.json

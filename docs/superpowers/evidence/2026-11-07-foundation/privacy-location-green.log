@@ -1,0 +1,27 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-location-mounted.test.ts tests/runtime/fx/location-requests.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-location-mounted.test.ts (3 tests | 1 failed) 8ms
+   × revokes a live watch before it can deliver another fix 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-location-mounted.test.ts > revokes a live watch before it can deliver another fix
+AssertionError: expected "vi.fn()" to be called at least once
+ ❯ tests/runtime/privacy-location-mounted.test.ts:54:72
+     52|  const f=fixture(),manager=f.client.createManager();let fixes=0;
+     53|  manager.watch({accuracy:"balanced"},()=>{fixes++;});f.emit();expect(f…
+     54|  f.store.revoke(f.scope);f.emit();expect(fixes).toBe(1);expect(f.stop)…
+       |                                                                        ^
+     55| });
+     56|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 11 passed (12)
+   Start at  19:27:15
+   Duration  6.95s (transform 5.07s, setup 33ms, import 6.63s, tests 20ms, environment 0ms)

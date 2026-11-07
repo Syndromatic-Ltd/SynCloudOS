@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-capture.test.ts tests/runtime/fx/video-capture.test.ts tests/runtime/fx/audio-capture.test.ts tests/runtime/fx/audio-route-recovery.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  4 passed (4)
+      Tests  26 passed (26)
+   Start at  19:42:49
+   Duration  1.21s (transform 397ms, setup 45ms, import 550ms, tests 139ms, environment 0ms)

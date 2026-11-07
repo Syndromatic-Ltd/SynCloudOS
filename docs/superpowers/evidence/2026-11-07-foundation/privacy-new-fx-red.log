@@ -1,0 +1,174 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-new-fx.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-new-fx.test.ts (24 tests | 24 failed) 30026ms
+     × does not turn origin permission or passive capability queries into app consent 6ms
+     × denies an app before active native access while retaining passive status inspection 1ms
+     × records explicit successful use, then releases live resources and suppresses callbacks on revocation 2ms
+     × rejects stale in-flight results immediately after revocation 5001ms
+     × does not turn origin permission or passive capability queries into app consent 1ms
+     × denies an app before active native access while retaining passive status inspection 1ms
+     × records explicit successful use, then releases live resources and suppresses callbacks on revocation 1ms
+     × rejects stale in-flight results immediately after revocation 5001ms
+     × does not turn origin permission or passive capability queries into app consent 1ms
+     × denies an app before active native access while retaining passive status inspection 1ms
+     × records explicit successful use, then releases live resources and suppresses callbacks on revocation 1ms
+     × rejects stale in-flight results immediately after revocation 5001ms
+     × does not turn origin permission or passive capability queries into app consent 1ms
+     × denies an app before active native access while retaining passive status inspection 0ms
+     × records explicit successful use, then releases live resources and suppresses callbacks on revocation 1ms
+     × rejects stale in-flight results immediately after revocation 5002ms
+     × does not turn origin permission or passive capability queries into app consent 1ms
+     × denies an app before active native access while retaining passive status inspection 0ms
+     × records explicit successful use, then releases live resources and suppresses callbacks on revocation 1ms
+     × rejects stale in-flight results immediately after revocation 5001ms
+     × does not turn origin permission or passive capability queries into app consent 1ms
+     × denies an app before active native access while retaining passive status inspection 1ms
+     × records explicit successful use, then releases live resources and suppresses callbacks on revocation 0ms
+     × rejects stale in-flight results immediately after revocation 5000ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 24 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for bluetooth > does not turn origin permission or passive capability queries into app consent
+AssertionError: expected 'granted' to be 'prompt' // Object.is equality
+
+Expected: "prompt"
+Received: "granted"
+
+ ❯ tests/runtime/privacy-new-fx.test.ts:114:39
+    112|       f.device.capabilities();
+    113|       expect(f.store.getSnapshot()).toEqual([]);
+    114|       expect(await f.device.status()).toBe("prompt");
+       |                                       ^
+    115|       expect(f.device.nativeRequest).not.toHaveBeenCalled();
+    116|       expect(f.store.getSnapshot()[0]).toMatchObject({ decision: "prom…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/24]⎯
+
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for bluetooth > denies an app before active native access while retaining passive status inspection
+AssertionError: expected 'granted' to be 'denied' // Object.is equality
+
+Expected: "denied"
+Received: "granted"
+
+ ❯ tests/runtime/privacy-new-fx.test.ts:123:39
+    121|     try {
+    122|       f.store.revoke(f.scope);
+    123|       expect(await f.device.status()).toBe("denied");
+       |                                       ^
+    124|       expect(f.device.nativeStatus).toHaveBeenCalledTimes(1);
+    125|       await expect(f.device.request()).rejects.toMatchObject({ name: "…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/24]⎯
+
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for bluetooth > records explicit successful use, then releases live resources and suppresses callbacks on revocation
+AssertionError: expected undefined to match object { decision: 'granted' }
+
+- Expected:
+{
+  "decision": "granted",
+}
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-new-fx.test.ts:133:40
+    131|     try {
+    132|       await f.device.request(); await f.device.startLive?.();
+    133|       expect(f.store.getSnapshot()[0]).toMatchObject({ decision: "gran…
+       |                                        ^
+    134|       expect(await f.device.status()).toBe("granted");
+    135|       f.device.emit?.();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/24]⎯
+
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for bluetooth > rejects stale in-flight results immediately after revocation
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for nfc > rejects stale in-flight results immediately after revocation
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for speech > rejects stale in-flight results immediately after revocation
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for contacts > rejects stale in-flight results immediately after revocation
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for payment > rejects stale in-flight results immediately after revocation
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for xr > rejects stale in-flight results immediately after revocation
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/runtime/privacy-new-fx.test.ts:144:3
+    142|     } finally { f.mount.abort(); f.store.dispose(); }
+    143|   });
+    144|   it("rejects stale in-flight results immediately after revocation", a…
+       |   ^
+    145|     const f = fixture(family);
+    146|     let finish!: (value: unknown) => void;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/24]⎯
+
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for nfc > does not turn origin permission or passive capability queries into app consent
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for speech > does not turn origin permission or passive capability queries into app consent
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for contacts > does not turn origin permission or passive capability queries into app consent
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for payment > does not turn origin permission or passive capability queries into app consent
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for xr > does not turn origin permission or passive capability queries into app consent
+AssertionError: expected 'granted' to be 'prompt' // Object.is equality
+
+Expected: "prompt"
+Received: "granted"
+
+ ❯ tests/runtime/privacy-new-fx.test.ts:114:39
+    112|       f.device.capabilities();
+    113|       expect(f.store.getSnapshot()).toEqual([]);
+    114|       expect(await f.device.status()).toBe("prompt");
+       |                                       ^
+    115|       expect(f.device.nativeRequest).not.toHaveBeenCalled();
+    116|       expect(f.store.getSnapshot()[0]).toMatchObject({ decision: "prom…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/24]⎯
+
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for nfc > denies an app before active native access while retaining passive status inspection
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for speech > denies an app before active native access while retaining passive status inspection
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for contacts > denies an app before active native access while retaining passive status inspection
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for payment > denies an app before active native access while retaining passive status inspection
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for xr > denies an app before active native access while retaining passive status inspection
+AssertionError: expected 'granted' to be 'denied' // Object.is equality
+
+Expected: "denied"
+Received: "granted"
+
+ ❯ tests/runtime/privacy-new-fx.test.ts:123:39
+    121|     try {
+    122|       f.store.revoke(f.scope);
+    123|       expect(await f.device.status()).toBe("denied");
+       |                                       ^
+    124|       expect(f.device.nativeStatus).toHaveBeenCalledTimes(1);
+    125|       await expect(f.device.request()).rejects.toMatchObject({ name: "…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/24]⎯
+
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for nfc > records explicit successful use, then releases live resources and suppresses callbacks on revocation
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for speech > records explicit successful use, then releases live resources and suppresses callbacks on revocation
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for contacts > records explicit successful use, then releases live resources and suppresses callbacks on revocation
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for payment > records explicit successful use, then releases live resources and suppresses callbacks on revocation
+ FAIL  tests/runtime/privacy-new-fx.test.ts > shared privacy for xr > records explicit successful use, then releases live resources and suppresses callbacks on revocation
+AssertionError: expected undefined to match object { decision: 'granted' }
+
+- Expected:
+{
+  "decision": "granted",
+}
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-new-fx.test.ts:133:40
+    131|     try {
+    132|       await f.device.request(); await f.device.startLive?.();
+    133|       expect(f.store.getSnapshot()[0]).toMatchObject({ decision: "gran…
+       |                                        ^
+    134|       expect(await f.device.status()).toBe("granted");
+    135|       f.device.emit?.();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/24]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  24 failed (24)
+   Start at  19:35:14
+   Duration  30.27s (transform 87ms, setup 27ms, import 88ms, tests 30.03s, environment 0ms)

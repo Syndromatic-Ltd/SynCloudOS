@@ -1,0 +1,84 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-location-mounted.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-location-mounted.test.ts (3 tests | 3 failed) 10ms
+   × reports origin grants as prompt until this app explicitly requests 5ms
+   × blocks a locally denied request before device access 3ms
+   × revokes a live watch before it can deliver another fix 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-location-mounted.test.ts > reports origin grants as prompt until this app explicitly requests
+AssertionError: expected 'granted' to be 'prompt' // Object.is equality
+
+Expected: "prompt"
+Received: "granted"
+
+ ❯ tests/runtime/privacy-location-mounted.test.ts:40:49
+     38| it("reports origin grants as prompt until this app explicitly requests…
+     39|  const f=fixture(),manager=f.client.createManager();
+     40|  expect(await manager.getAuthorizationStatus()).toBe("prompt");
+       |                                                 ^
+     41|  expect(f.current).not.toHaveBeenCalled();
+     42|  await manager.current();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/privacy-location-mounted.test.ts > blocks a locally denied request before device access
+AssertionError: promise resolved "LFXLocation{ …(8) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ LFXLocation {
++   "altitudeAccuracyMetres": null,
++   "altitudeMetres": null,
++   "coordinate": LFXCoordinate {
++     "latitude": 53,
++     "longitude": -2,
++   },
++   "courseRadians": null,
++   "horizontalAccuracyMetres": 1,
++   "observedAtUnixMilliseconds": 1,
++   "receivedAtMonotonicSeconds": 1,
++   "speedMetresPerSecond": null,
+  }
+
+ ❯ tests/runtime/privacy-location-mounted.test.ts:48:32
+     46| it("blocks a locally denied request before device access",async()=>{
+     47|  const f=fixture(),manager=f.client.createManager();f.store.revoke(f.s…
+     48|  await expect(manager.current()).rejects.toMatchObject({name:expect.st…
+       |                                ^
+     49|  expect(f.current).not.toHaveBeenCalled();
+     50| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/privacy-location-mounted.test.ts > revokes a live watch before it can deliver another fix
+AssertionError: expected 2 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ tests/runtime/privacy-location-mounted.test.ts:54:49
+     52|  const f=fixture(),manager=f.client.createManager();let fixes=0;
+     53|  manager.watch({accuracy:"balanced"},()=>{fixes++;});f.emit();expect(f…
+     54|  f.store.revoke(f.scope);f.emit();expect(fixes).toBe(1);expect(f.stop)…
+       |                                                 ^
+     55| });
+     56|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  19:26:44
+   Duration  255ms (transform 79ms, setup 27ms, import 77ms, tests 10ms, environment 0ms)

@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/appkit-counterparts.test.ts tests/runtime/authorization-counterparts.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  22:39:04
+   Duration  6.11s (transform 156ms, setup 45ms, import 5.69s, tests 21ms, environment 0ms)

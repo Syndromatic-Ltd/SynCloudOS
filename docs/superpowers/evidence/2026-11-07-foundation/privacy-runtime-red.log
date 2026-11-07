@@ -1,0 +1,27 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-runtime.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-runtime.test.ts (1 test | 1 failed) 29ms
+   × owns an isolated privacy store and registers Privacy & Security 28ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-runtime.test.ts > owns an isolated privacy store and registers Privacy & Security
+TypeError: Cannot read properties of undefined (reading 'setAuthorization')
+ ❯ tests/runtime/privacy-runtime.test.ts:27:12
+     25|  const a=createTestRuntime(), b=createTestRuntime();
+     26|  const scope={userId:"public.anonymous",appId:"com.example.app",servic…
+     27|  a.privacy.setAuthorization(scope,"denied");
+       |            ^
+     28|  expect(a.privacy.forApplication(scope).authorizationStatus()).toBe("d…
+     29|  expect(b.privacy.forApplication(scope).authorizationStatus()).toBe("p…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  19:22:59
+   Duration  6.71s (transform 5.02s, setup 29ms, import 6.52s, tests 29ms, environment 0ms)

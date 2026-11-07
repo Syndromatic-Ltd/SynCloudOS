@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/pwa-installation.test.ts tests/runtime/authorization-counterparts.test.ts tests/runtime/privacy-security-pane.test.tsx --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-authorization-final-8c78a917def1-28840fd8
+
+
+ Test Files  3 passed (3)
+      Tests  11 passed (11)
+   Start at  22:45:46
+   Duration  14.09s (transform 8.97s, setup 49ms, import 11.50s, tests 185ms, environment 1.93s)
