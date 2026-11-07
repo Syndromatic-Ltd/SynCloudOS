@@ -1,0 +1,52 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-store.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-store.test.ts (15 tests | 2 failed) 13ms
+     × only permission refusal is persisted as denial 3ms
+     × returns unavailable status requests without recording a grant 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-store.test.ts > shared per-application privacy authorisation > only permission refusal is persisted as denial
+AssertionError: expected 'denied' to be 'prompt' // Object.is equality
+
+Expected: "prompt"
+Received: "denied"
+
+ ❯ tests/runtime/privacy-store.test.ts:113:40
+    111|     expect(port.authorizationStatus()).toBe("prompt");
+    112|     await expect(port.request(async () => { throw new DOMException("In…
+    113|     expect(port.authorizationStatus()).toBe("prompt");
+       |                                        ^
+    114|     await expect(port.request(async () => { throw new DOMException("No…
+    115|     expect(port.authorizationStatus()).toBe("denied");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/privacy-store.test.ts > shared per-application privacy authorisation > returns unavailable status requests without recording a grant
+AssertionError: expected undefined to be 'prompt' // Object.is equality
+
+- Expected:
+"prompt"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-store.test.ts:133:46
+    131|     const port = store.forApplication(first);
+    132|     expect(await port.requestAuthorization(async () => "unavailable"))…
+    133|     expect(store.getSnapshot()[0]?.decision).toBe("prompt");
+       |                                              ^
+    134|     expect(port.authorizationStatus()).toBe("unavailable");
+    135|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 13 passed (15)
+   Start at  19:12:20
+   Duration  225ms (transform 43ms, setup 32ms, import 27ms, tests 13ms, environment 0ms)
+
