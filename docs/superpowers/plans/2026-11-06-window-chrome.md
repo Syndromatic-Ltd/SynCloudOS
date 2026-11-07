@@ -48,19 +48,20 @@ window.addTitlebarAccessoryViewController(fileAccessory);   // layoutAttribute "
    (leading before the title, trailing after it, bottom under the toolbar) and the standard bar's document
    layout, in flow above the window. Publisher is `topBar: "standard"`; its phone back is the stage's
    navigation back (owner decision, 2026-11-06), drawn as its labelled push button; its phone recipes are
-   Atmo's compact document title bar. Open: FieldLab, the gallery's `NSESourceListScene` bar title, and
-   `NSETopBar` becoming internal.
+   Atmo's compact document title bar. The gallery and Software use `window.title` and the host's source-list
+   frame; `NSETopBar` is internal. FieldLab remains a separate Fusion consumer.
 4. Done: the status line is the window's bottom content border, `setContentBorderThickness(_:for: .minY)`, with the
    content's own raised labels (`NSETextField backgroundStyle="raised"`) over it, as in AppKit; a bottom titlebar
    accessory is not used, since it sits under the title bar. Atmo draws the band as the metal footer (tall) or the
-   compact strip (short). Publisher and FieldLab use it; `NSEStatusBar` is internal, kept only for
-   `NSESourceListScene`'s sidebar-split footer (open: that footer as the window's border, with the sidebar drawing
-   its own cell). Recorded difference: Publisher's light-mode bottom rim is 1 px darker (the window's rim now draws
+   compact strip (short). Publisher and FieldLab use it. Phase 7 adds the approved `window.bottomBarAccessory`
+   extension for ordinary views in that border; Software and the gallery supply their own footer cells,
+   aligned with the shared split/sidebar seam. `NSEStatusBar` and `NSESourceListScene` are removed. Bottom navigation
+   tabs remain `NSETabViewController` controls. Recorded difference: Publisher's light-mode bottom rim is 1 px darker (the window's rim now draws
    over its content border).
 
 Users: Publisher (configured toolbar, custom top bar, status bar, phone bottom toolbar), the gallery (toolbar,
 top bar and status bar specimens), Fusion FieldLab (configured toolbar in its menu strip, custom top bar,
-status bar), SynCal's footer, `NSESourceListScene`'s status bar.
+status bar), SynCal's footer, Software and the gallery's window bottom-bar accessories.
 
 ## Open for later (owner)
 

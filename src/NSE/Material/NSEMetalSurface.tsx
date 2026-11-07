@@ -24,7 +24,7 @@ import { classes } from "../Controls/Core/nseControlsShared";
 
 /**
  * A layout-neutral projection of the Metal source-list material owned by
- * NSESidebar. It deliberately owns only the appearance surface: callers keep
+ * source-list outlines. It deliberately owns only the appearance surface: callers keep
  * their own navigation/layout semantics instead of importing desktop sidebar
  * geometry into a contained hierarchy page.
  */
