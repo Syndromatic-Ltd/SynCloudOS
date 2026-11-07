@@ -23,11 +23,12 @@ import type { NSEMenu } from "../../Menus/NSEMenu";
 import type { NSEActionReference } from "../Core/actionReference";
 import type { NSEThumbMaterial } from "../../Appearance/NSEMetalThumb";
 import type { InputHTMLAttributes, ReactNode } from "react";
-import type { UndoManager } from "../../../SynCloudOS/SynCloudOS";
+import type { NSEUndoRegistrationCapability } from "../../../Foundation/NSEUndoRegistrationCapability";
+import type { UndoAction, UndoReservation, AutomaticUndoGroup } from "../../../SynCloudOS/Undo/undoTypes";
 import type { HFXFeedbackRequest } from "../../../FX/HapticsFX/HFXHapticEvent";
 export interface NSENumericValueContract { readonly minimum: number; readonly maximum: number; readonly step: number; readonly wraps?: boolean }
 export interface NSEStepperValueContract<T> { readonly minimum:T;readonly maximum:T;compare(first:T,second:T):number;step(value:T,direction:1|-1):T;readonly wraps?:boolean }
-export type NSEUndoManagerPort = Pick<UndoManager, "isExecuting" | "register" | "reserve">;
+export type NSEUndoManagerPort = NSEUndoRegistrationCapability<UndoAction, UndoReservation, { readonly automaticGroup?: AutomaticUndoGroup }>;
 /** NSSegmentedControl.trackingMode with the selected segments: momentary, selectOne or selectAny. */
 export type NSESegmentedSelection = { readonly mode:"momentary";readonly selectedIds:ReadonlySet<string>}|{readonly mode:"select-one";readonly selectedIds:ReadonlySet<string>;readonly allowsEmpty:boolean}|{readonly mode:"select-any";readonly selectedIds:ReadonlySet<string>};
 /** NSSegmentedControl.Style. `capsule` and `texturedRounded` draw the theme's capsule strip and joined tool band. */

@@ -1,0 +1,157 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-text-command-undo.test.tsx tests/runtime/command-focus-undo-accessibility.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-text-command-undo.test.tsx (6 tests | 6 failed) 30ms
+     × routes focused control commands through the containing application and canonical document history 20ms
+     × shares the same document history with a second session and native model edits 2ms
+     × isolates document histories and focused responder targets 2ms
+     × observes canonical hydration without recording it as a user undo step 2ms
+     × keeps standalone owner history independent of native document history 2ms
+     × keeps shared canonical history alive across view unmount and revokes the session on owner disposal 2ms
+ ❯ tests/runtime/command-focus-undo-accessibility.test.tsx (4 tests | 2 failed) 293ms
+     × navigates and cancels QuickSwitch inside its popover scope, restoring the prior responder 17ms
+     × exposes current dynamic document history names and preserves the text control focus 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/command-focus-undo-accessibility.test.tsx > command, focus, undo, and overlay accessibility > navigates and cancels QuickSwitch inside its popover scope, restoring the prior responder
+TypeError: Cannot read properties of undefined (reading 'getCurrentSubject')
+ ❯ new LUFXHostService src/SynCloudOS/LuminaFX/LUFXHostService.ts:113:87
+    111|   constructor(options: LUFXHostServiceOptions) {
+    112|     this.#options = options;
+    113|     this.#subjectFingerprint = luminaSubjectFingerprint(options.config…
+       |                                                                                       ^
+    114|     this.#activation = new LUFXActivationResolver({
+    115|       runtimeId: options.runtimeId,
+ ❯ createSynCloudOS src/SynCloudOS/Runtime/createSynCloudOS.ts:1264:16
+ ❯ createTestRuntime tests/runtime/helpers.ts:475:19
+ ❯ tests/runtime/command-focus-undo-accessibility.test.tsx:108:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/runtime/command-focus-undo-accessibility.test.tsx > command, focus, undo, and overlay accessibility > exposes current dynamic document history names and preserves the text control focus
+TypeError: Cannot read properties of undefined (reading 'getCurrentSubject')
+ ❯ new LUFXHostService src/SynCloudOS/LuminaFX/LUFXHostService.ts:113:87
+    111|   constructor(options: LUFXHostServiceOptions) {
+    112|     this.#options = options;
+    113|     this.#subjectFingerprint = luminaSubjectFingerprint(options.config…
+       |                                                                                       ^
+    114|     this.#activation = new LUFXActivationResolver({
+    115|       runtimeId: options.runtimeId,
+ ❯ createSynCloudOS src/SynCloudOS/Runtime/createSynCloudOS.ts:1264:16
+ ❯ createTestRuntime tests/runtime/helpers.ts:475:19
+ ❯ currentTextDocumentFixture tests/runtime/fixtures/currentTextDocument.ts:55:40
+ ❯ tests/runtime/command-focus-undo-accessibility.test.tsx:128:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/runtime/nse-text-command-undo.test.tsx > current text owner command history > routes focused control commands through the containing application and canonical document history
+TypeError: Cannot read properties of undefined (reading 'getCurrentSubject')
+ ❯ new LUFXHostService src/SynCloudOS/LuminaFX/LUFXHostService.ts:113:87
+    111|   constructor(options: LUFXHostServiceOptions) {
+    112|     this.#options = options;
+    113|     this.#subjectFingerprint = luminaSubjectFingerprint(options.config…
+       |                                                                                       ^
+    114|     this.#activation = new LUFXActivationResolver({
+    115|       runtimeId: options.runtimeId,
+ ❯ createSynCloudOS src/SynCloudOS/Runtime/createSynCloudOS.ts:1264:16
+ ❯ createTestRuntime tests/runtime/helpers.ts:475:19
+ ❯ currentTextDocumentFixture tests/runtime/fixtures/currentTextDocument.ts:55:40
+ ❯ fixture tests/runtime/nse-text-command-undo.test.tsx:35:24
+ ❯ tests/runtime/nse-text-command-undo.test.tsx:40:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  tests/runtime/nse-text-command-undo.test.tsx > current text owner command history > shares the same document history with a second session and native model edits
+TypeError: Cannot read properties of undefined (reading 'getCurrentSubject')
+ ❯ new LUFXHostService src/SynCloudOS/LuminaFX/LUFXHostService.ts:113:87
+    111|   constructor(options: LUFXHostServiceOptions) {
+    112|     this.#options = options;
+    113|     this.#subjectFingerprint = luminaSubjectFingerprint(options.config…
+       |                                                                                       ^
+    114|     this.#activation = new LUFXActivationResolver({
+    115|       runtimeId: options.runtimeId,
+ ❯ createSynCloudOS src/SynCloudOS/Runtime/createSynCloudOS.ts:1264:16
+ ❯ createTestRuntime tests/runtime/helpers.ts:475:19
+ ❯ currentTextDocumentFixture tests/runtime/fixtures/currentTextDocument.ts:55:40
+ ❯ fixture tests/runtime/nse-text-command-undo.test.tsx:35:24
+ ❯ tests/runtime/nse-text-command-undo.test.tsx:54:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  tests/runtime/nse-text-command-undo.test.tsx > current text owner command history > isolates document histories and focused responder targets
+TypeError: Cannot read properties of undefined (reading 'getCurrentSubject')
+ ❯ new LUFXHostService src/SynCloudOS/LuminaFX/LUFXHostService.ts:113:87
+    111|   constructor(options: LUFXHostServiceOptions) {
+    112|     this.#options = options;
+    113|     this.#subjectFingerprint = luminaSubjectFingerprint(options.config…
+       |                                                                                       ^
+    114|     this.#activation = new LUFXActivationResolver({
+    115|       runtimeId: options.runtimeId,
+ ❯ createSynCloudOS src/SynCloudOS/Runtime/createSynCloudOS.ts:1264:16
+ ❯ createTestRuntime tests/runtime/helpers.ts:475:19
+ ❯ currentTextDocumentFixture tests/runtime/fixtures/currentTextDocument.ts:55:40
+ ❯ fixture tests/runtime/nse-text-command-undo.test.tsx:35:24
+ ❯ tests/runtime/nse-text-command-undo.test.tsx:73:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  tests/runtime/nse-text-command-undo.test.tsx > current text owner command history > observes canonical hydration without recording it as a user undo step
+TypeError: Cannot read properties of undefined (reading 'getCurrentSubject')
+ ❯ new LUFXHostService src/SynCloudOS/LuminaFX/LUFXHostService.ts:113:87
+    111|   constructor(options: LUFXHostServiceOptions) {
+    112|     this.#options = options;
+    113|     this.#subjectFingerprint = luminaSubjectFingerprint(options.config…
+       |                                                                                       ^
+    114|     this.#activation = new LUFXActivationResolver({
+    115|       runtimeId: options.runtimeId,
+ ❯ createSynCloudOS src/SynCloudOS/Runtime/createSynCloudOS.ts:1264:16
+ ❯ createTestRuntime tests/runtime/helpers.ts:475:19
+ ❯ currentTextDocumentFixture tests/runtime/fixtures/currentTextDocument.ts:55:40
+ ❯ fixture tests/runtime/nse-text-command-undo.test.tsx:35:24
+ ❯ tests/runtime/nse-text-command-undo.test.tsx:88:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  tests/runtime/nse-text-command-undo.test.tsx > current text owner command history > keeps standalone owner history independent of native document history
+TypeError: Cannot read properties of undefined (reading 'getCurrentSubject')
+ ❯ new LUFXHostService src/SynCloudOS/LuminaFX/LUFXHostService.ts:113:87
+    111|   constructor(options: LUFXHostServiceOptions) {
+    112|     this.#options = options;
+    113|     this.#subjectFingerprint = luminaSubjectFingerprint(options.config…
+       |                                                                                       ^
+    114|     this.#activation = new LUFXActivationResolver({
+    115|       runtimeId: options.runtimeId,
+ ❯ createSynCloudOS src/SynCloudOS/Runtime/createSynCloudOS.ts:1264:16
+ ❯ createTestRuntime tests/runtime/helpers.ts:475:19
+ ❯ currentTextDocumentFixture tests/runtime/fixtures/currentTextDocument.ts:55:40
+ ❯ fixture tests/runtime/nse-text-command-undo.test.tsx:35:24
+ ❯ tests/runtime/nse-text-command-undo.test.tsx:99:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  tests/runtime/nse-text-command-undo.test.tsx > current text owner command history > keeps shared canonical history alive across view unmount and revokes the session on owner disposal
+TypeError: Cannot read properties of undefined (reading 'getCurrentSubject')
+ ❯ new LUFXHostService src/SynCloudOS/LuminaFX/LUFXHostService.ts:113:87
+    111|   constructor(options: LUFXHostServiceOptions) {
+    112|     this.#options = options;
+    113|     this.#subjectFingerprint = luminaSubjectFingerprint(options.config…
+       |                                                                                       ^
+    114|     this.#activation = new LUFXActivationResolver({
+    115|       runtimeId: options.runtimeId,
+ ❯ createSynCloudOS src/SynCloudOS/Runtime/createSynCloudOS.ts:1264:16
+ ❯ createTestRuntime tests/runtime/helpers.ts:475:19
+ ❯ currentTextDocumentFixture tests/runtime/fixtures/currentTextDocument.ts:55:40
+ ❯ fixture tests/runtime/nse-text-command-undo.test.tsx:35:24
+ ❯ tests/runtime/nse-text-command-undo.test.tsx:111:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  8 failed | 2 passed (10)
+   Start at  19:13:26
+   Duration  9.67s (transform 10.49s, setup 79ms, import 15.41s, tests 324ms, environment 2.83s)
+

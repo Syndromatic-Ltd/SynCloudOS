@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { UndoHistory } from "../../Foundation/internal/UndoHistory";
 import type { AwaitUndoAction, AutomaticUndoGroup, SyncUndoAction, UndoAction, UndoGroup, UndoGroupOptions, UndoManager, UndoManagerOptions, UndoRegistrationLease, UndoReservation, UndoRestorationSnapshot, UndoResult } from "./undoTypes";
 import { consumeUndoReplayRefusal } from "./undoReplayRefusal";
 import { trackOwnedWork } from "../Operations/OwnedWorkObservations";
@@ -68,11 +69,10 @@ function sameAutomatic(left?: AutomaticUndoGroup, right?: AutomaticUndoGroup) {
 }
 
 export function createUndoManager(options: UndoManagerOptions): UndoManager {
-  const entries: UndoEntry[] = [];
-  const groups: OpenGroup[] = [];
+  const history = new UndoHistory<UndoEntry, OpenGroup>();
+  const { entries, groups } = history;
   const listeners = new Set<() => void>();
   const createId = options.randomUUID ?? (() => `undo:${Math.random().toString(36).slice(2)}`);
-  let cursor = 0;
   let executing = false;
   let disposed = false;
   let cleanKey: string | null = "0";
@@ -96,7 +96,7 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
     }
   };
   const cleanup = (entry: UndoEntry) => { for (const action of entry.actions) action.cleanup?.(); };
-  const stateKey = () => `${cursor}:${entries.slice(0, cursor).map((entry) => `${entry.id}/${entry.actions.length}`).join("|")}:${groups.map((group) => `${group.id}/${group.actions.length}`).join("|")}`;
+  const stateKey = () => `${history.cursor}:${entries.slice(0, history.cursor).map((entry) => `${entry.id}/${entry.actions.length}`).join("|")}:${groups.map((group) => `${group.id}/${group.actions.length}`).join("|")}`;
   const hasPoisonedEntry = () => entries.some((entry) => entry.poisoned);
   const entryHasRevokedLease = (entry: UndoEntry) =>
     entry.actions.some((action) => {
@@ -127,18 +127,14 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
     restoration: group.restoration,
     ...(group.lease ? { lease: group.lease } : {}),
   });
-  const discardRedo = () => {
-    for (const entry of entries.splice(cursor)) cleanup(entry);
-  };
   const evict = () => {
     if (groups.length > 0) return;
     const maxBytes = options.maxEstimatedBytes ?? Number.POSITIVE_INFINITY;
     let bytes = entries.reduce((sum, entry) => sum + entry.estimatedBytes, 0);
     while (entries.length > options.maxEntries || bytes > maxBytes) {
-      const removed = entries.shift();
+      const removed = history.evictOldest();
       if (!removed) break;
       bytes -= removed.estimatedBytes;
-      cursor = Math.max(0, cursor - 1);
       cleanup(removed);
       cleanKey = null;
     }
@@ -172,124 +168,124 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
       lastFailure = { code: "undo-entry-poisoned", message: error.message };
       return { status: "failed", direction, actionName: poisoned.name, code: "undo-entry-poisoned", error };
     }
-    const index = direction === "undo" ? cursor - 1 : cursor;
-    const entry = entries[index];
-    if (!entry) return { status: "empty", direction };
-    if (requiredLease && entry.lease !== requiredLease) return { status: "empty", direction };
-    executing = true;
-    activeEntry = entry;
-    lastFailure = null;
-    let releaseObservation!: () => void;
-    const actual = new Promise<void>(resolve => { releaseObservation = resolve; });
-    trackOwnedWork(manager, () => actual);
-    try {
-      notify();
-      // A diagnostic observer can end ownership before the first callback.
-      if (disposed || (requiredLease && !requiredLease.live) || entryHasRevokedLease(entry)) {
-        return { status: "cancelled", direction, actionName: entry.name, reason: "Undo ownership ended before invocation." };
-      }
-      const actions = direction === "undo" ? [...entry.actions].reverse() : entry.actions;
-      const applied: UndoAction[] = [];
-      let restorationAttempted = false;
-      const authorityWasLost = () => Boolean((requiredLease && !requiredLease.live) || entryHasRevokedLease(entry));
-      const compensate = async (): Promise<Error[]> => {
-        const inverse = direction === "undo" ? "redo" : "undo";
-        const compensationErrors: Error[] = [];
-        for (const action of [...applied].reverse()) {
-          try {
-            await invoke(action, inverse);
-          } catch (compensationError) {
-            consumeUndoReplayRefusal(compensationError);
-            compensationErrors.push(compensationError instanceof Error ? compensationError : new Error(String(compensationError)));
-          }
+    return history.replayAsync(direction, async (entry, commit): Promise<UndoResult> => {
+      if (!entry) return { status: "empty", direction };
+      if (requiredLease && entry.lease !== requiredLease) return { status: "empty", direction };
+      executing = true;
+      activeEntry = entry;
+      lastFailure = null;
+      let releaseObservation!: () => void;
+      const actual = new Promise<void>(resolve => { releaseObservation = resolve; });
+      trackOwnedWork(manager, () => actual);
+      try {
+        notify();
+        // A diagnostic observer can end ownership before the first callback.
+        if (disposed || (requiredLease && !requiredLease.live) || entryHasRevokedLease(entry)) {
+          return { status: "cancelled", direction, actionName: entry.name, reason: "Undo ownership ended before invocation." };
         }
-        if (restorationAttempted) {
-          const restoration = restorationFor(entry, inverse);
-          if (restoration) {
+        const actions = direction === "undo" ? [...entry.actions].reverse() : entry.actions;
+        const applied: UndoAction[] = [];
+        let restorationAttempted = false;
+        const authorityWasLost = () => Boolean((requiredLease && !requiredLease.live) || entryHasRevokedLease(entry));
+        const compensate = async (): Promise<Error[]> => {
+          const inverse = direction === "undo" ? "redo" : "undo";
+          const compensationErrors: Error[] = [];
+          for (const action of [...applied].reverse()) {
             try {
-              await restoration.restoration.restore(restoration.snapshot);
+              await invoke(action, inverse);
             } catch (compensationError) {
               consumeUndoReplayRefusal(compensationError);
               compensationErrors.push(compensationError instanceof Error ? compensationError : new Error(String(compensationError)));
             }
           }
-        }
-        return compensationErrors;
-      };
-      try {
-        for (const action of actions) {
-          await invoke(action, direction);
-          applied.push(action);
-        }
-        const restoration = restorationFor(entry, direction);
-        if (restoration) {
-          restorationAttempted = true;
-          await restoration.restoration.restore(restoration.snapshot);
-        }
-        if (authorityWasLost()) {
-          const compensationErrors = await compensate();
-          if (compensationErrors.length > 0) {
-            const primary = new Error("Undo authority was revoked while the action was in flight.");
-            const failure = new UndoCompensationError(primary, compensationErrors);
-            entry.poisoned = { direction, code: "undo-compensation-failed", message: failure.message };
-            cleanKey = null;
-            lastFailure = { code: "undo-compensation-failed", message: failure.message };
-            return { status: "failed", direction, actionName: entry.name, code: "undo-compensation-failed", error: failure };
+          if (restorationAttempted) {
+            const restoration = restorationFor(entry, inverse);
+            if (restoration) {
+              try {
+                await restoration.restoration.restore(restoration.snapshot);
+              } catch (compensationError) {
+                consumeUndoReplayRefusal(compensationError);
+                compensationErrors.push(compensationError instanceof Error ? compensationError : new Error(String(compensationError)));
+              }
+            }
           }
-          return {
-            status: "cancelled",
-            direction,
-            actionName: entry.name,
-            reason: "Undo authority was revoked while the action was in flight; completed effects were compensated.",
-          };
+          return compensationErrors;
+        };
+        try {
+          for (const action of actions) {
+            await invoke(action, direction);
+            applied.push(action);
+          }
+          const restoration = restorationFor(entry, direction);
+          if (restoration) {
+            restorationAttempted = true;
+            await restoration.restoration.restore(restoration.snapshot);
+          }
+          if (authorityWasLost()) {
+            const compensationErrors = await compensate();
+            if (compensationErrors.length > 0) {
+              const primary = new Error("Undo authority was revoked while the action was in flight.");
+              const failure = new UndoCompensationError(primary, compensationErrors);
+              entry.poisoned = { direction, code: "undo-compensation-failed", message: failure.message };
+              cleanKey = null;
+              lastFailure = { code: "undo-compensation-failed", message: failure.message };
+              return { status: "failed", direction, actionName: entry.name, code: "undo-compensation-failed", error: failure };
+            }
+            return {
+              status: "cancelled",
+              direction,
+              actionName: entry.name,
+              reason: "Undo authority was revoked while the action was in flight; completed effects were compensated.",
+            };
+          }
+        } catch (error) {
+          const unchangedRefusal = consumeUndoReplayRefusal(error);
+          const primary = error instanceof Error ? error : new Error(String(error));
+          const compensationErrors = await compensate();
+          if (authorityWasLost() && compensationErrors.length === 0) {
+            return {
+              status: "cancelled",
+              direction,
+              actionName: entry.name,
+              reason: "Undo authority was revoked while the action was in flight; completed effects were compensated.",
+            };
+          }
+          const code = compensationErrors.length > 0
+            ? "undo-compensation-failed"
+            : error instanceof UndoAsyncPolicyError
+              ? error.code
+              : "undo-action-failed";
+          const failure = compensationErrors.length > 0 ? new UndoCompensationError(primary, compensationErrors) : primary;
+          // An action that rejects or leaks a thenable can have committed an
+          // unknown partial effect.  Compensation restores every completed
+          // sibling, then poisons the entry so cursor and model state are never
+          // silently treated as safely retryable.
+          if (!unchangedRefusal || compensationErrors.length > 0) {
+            entry.poisoned = { direction, code, message: failure.message };
+            cleanKey = null;
+          }
+          lastFailure = { code, message: failure.message };
+          return { status: "failed", direction, actionName: entry.name, code, error: failure };
         }
+        commit();
+        return { status: "completed", direction, actionName: entry.name };
       } catch (error) {
-        const unchangedRefusal = consumeUndoReplayRefusal(error);
-        const primary = error instanceof Error ? error : new Error(String(error));
-        const compensationErrors = await compensate();
-        if (authorityWasLost() && compensationErrors.length === 0) {
-          return {
-            status: "cancelled",
-            direction,
-            actionName: entry.name,
-            reason: "Undo authority was revoked while the action was in flight; completed effects were compensated.",
-          };
-        }
-        const code = compensationErrors.length > 0
-          ? "undo-compensation-failed"
-          : error instanceof UndoAsyncPolicyError
-            ? error.code
-            : "undo-action-failed";
-        const failure = compensationErrors.length > 0 ? new UndoCompensationError(primary, compensationErrors) : primary;
-        // An action that rejects or leaks a thenable can have committed an
-        // unknown partial effect.  Compensation restores every completed
-        // sibling, then poisons the entry so cursor and model state are never
-        // silently treated as safely retryable.
-        if (!unchangedRefusal || compensationErrors.length > 0) {
-          entry.poisoned = { direction, code, message: failure.message };
-          cleanKey = null;
-        }
+        const failure = error instanceof Error ? error : new Error(String(error));
+        const code = error instanceof UndoAsyncPolicyError ? error.code : "undo-action-failed";
         lastFailure = { code, message: failure.message };
         return { status: "failed", direction, actionName: entry.name, code, error: failure };
+      } finally {
+        try {
+          executing = false;
+          activeEntry = null;
+          for (const lease of [...pendingLeaseRemovals]) {
+            pendingLeaseRemovals.delete(lease);
+            removeLease(lease);
+          }
+          notify();
+        } finally { releaseObservation(); }
       }
-      cursor += direction === "undo" ? -1 : 1;
-      return { status: "completed", direction, actionName: entry.name };
-    } catch (error) {
-      const failure = error instanceof Error ? error : new Error(String(error));
-      const code = error instanceof UndoAsyncPolicyError ? error.code : "undo-action-failed";
-      lastFailure = { code, message: failure.message };
-      return { status: "failed", direction, actionName: entry.name, code, error: failure };
-    } finally {
-      try {
-        executing = false;
-        activeEntry = null;
-        for (const lease of [...pendingLeaseRemovals]) {
-          pendingLeaseRemovals.delete(lease);
-          removeLease(lease);
-        }
-        notify();
-      } finally { releaseObservation(); }
-    }
+    });
   };
 
   const registerInternal = (action: UndoAction, registerOptions: { readonly automaticGroup?: AutomaticUndoGroup } = {}, lease?: RegistrationLeaseState): string => {
@@ -297,33 +293,32 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
     assertCanRegister();
     const bytes = Math.max(0, action.estimatedBytes ?? 0);
     actionLeases.set(action, lease ?? { token: managerToken, live: true });
-    const open = groups.at(-1);
-    if (open) {
-      const actionLease = lease ?? null;
-      if (open.lease === undefined) open.lease = actionLease;
-      else if (open.lease !== actionLease) open.lease = null;
-      open.actions.push(action);
-      open.estimatedBytes += bytes;
-      notify();
-      return open.id;
-    }
     const beginsAtCleanPoint = cleanKey === stateKey();
-    discardRedo();
-    const previous = entries[cursor - 1];
-    if (!beginsAtCleanPoint && previous && previous.lease === lease && sameAutomatic(previous.automaticGroup, registerOptions.automaticGroup)) {
-      previous.actions.push(action);
-      previous.estimatedBytes += bytes;
-      notify();
-      evict();
-      return previous.id;
-    }
-    const entry = makeEntry(action.name, [action], bytes, registerOptions.automaticGroup);
-    entry.lease = lease;
-    entries.push(entry);
-    cursor = entries.length;
-    evict();
+    const registration = history.register(
+      () => {
+        const entry = makeEntry(action.name, [action], bytes, registerOptions.automaticGroup);
+        entry.lease = lease;
+        return entry;
+      },
+      open => {
+        const actionLease = lease ?? null;
+        if (open.lease === undefined) open.lease = actionLease;
+        else if (open.lease !== actionLease) open.lease = null;
+        open.actions.push(action);
+        open.estimatedBytes += bytes;
+      },
+      previous => {
+        if (beginsAtCleanPoint || previous.lease !== lease || !sameAutomatic(previous.automaticGroup, registerOptions.automaticGroup)) return false;
+        previous.actions.push(action);
+        previous.estimatedBytes += bytes;
+        return true;
+      },
+      cleanup,
+    );
+    if (!registration.group && !registration.merged) evict();
     notify();
-    return entry.id;
+    if (registration.merged) evict();
+    return registration.group?.id ?? registration.entry!.id;
   };
   const removeLease = (lease: RegistrationLeaseState): void => {
     // An action may have yielded to a mounted owner.  Retiring its history
@@ -349,7 +344,7 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
       if (groups[index]!.actions.length === 0) groups.splice(index, 1);
     }
     const oldEntries = [...entries];
-    const oldCursor = cursor;
+    const oldCursor = history.cursor;
     let retainedCursor = 0;
     const retainedEntries: UndoEntry[] = [];
     oldEntries.forEach((entry, index) => {
@@ -367,7 +362,7 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
       if (index < oldCursor) retainedCursor += 1;
     });
     entries.splice(0, entries.length, ...retainedEntries);
-    cursor = retainedCursor;
+    history.cursor = retainedCursor;
     if (wasClean) cleanKey = stateKey();
     else cleanKey = null;
     notify();
@@ -377,12 +372,12 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
     const state: RegistrationLeaseState = { token: Object.freeze({}), live: true };
     const undoEntryForLease = () => {
       if (!state.live || disposed || hasPoisonedEntry()) return null;
-      const entry = entries[cursor - 1];
+      const entry = entries[history.cursor - 1];
       return entry?.lease === state ? entry : null;
     };
     const redoEntryForLease = () => {
       if (!state.live || disposed || hasPoisonedEntry()) return null;
-      const entry = entries[cursor];
+      const entry = entries[history.cursor];
       return entry?.lease === state ? entry : null;
     };
     const lease: UndoRegistrationLease = {
@@ -443,10 +438,10 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
   const manager: UndoManager = {
     runtimeId: options.runtimeId,
     owner: options.owner,
-    get canUndo() { return !disposed && !hasPoisonedEntry() && cursor > 0; },
-    get canRedo() { return !disposed && !hasPoisonedEntry() && cursor < entries.length; },
-    get undoTitle() { return cursor > 0 ? `Undo ${entries[cursor - 1].name}` : "Undo"; },
-    get redoTitle() { return cursor < entries.length ? `Redo ${entries[cursor].name}` : "Redo"; },
+    get canUndo() { return !disposed && !hasPoisonedEntry() && history.cursor > 0; },
+    get canRedo() { return !disposed && !hasPoisonedEntry() && history.cursor < entries.length; },
+    get undoTitle() { return history.cursor > 0 ? `Undo ${entries[history.cursor - 1].name}` : "Undo"; },
+    get redoTitle() { return history.cursor < entries.length ? `Redo ${entries[history.cursor].name}` : "Redo"; },
     get isExecuting() { return executing; },
     get isDirty() { return hasPoisonedEntry() || cleanKey === null || cleanKey !== stateKey(); },
     assertCanRegister,
@@ -456,30 +451,30 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
     beginGroup(name, groupOptions = {}) {
       if (disposed) throw new Error("Undo manager is disposed.");
       if (hasPoisonedEntry()) throw new Error("Undo history is unsafe after a failed action and cannot open a group.");
-      groups.push({ id: createId(), name, actions: [], estimatedBytes: 0, restoration: groupOptions.restoration });
+      history.beginGroup({ id: createId(), name, actions: [], estimatedBytes: 0, restoration: groupOptions.restoration });
       notify();
     },
     endGroup(): UndoGroup | null {
-      const group = groups.pop();
-      if (!group) throw new Error("No undo group is open.");
+      const closed = history.closeGroup(
+        group => group.actions.length === 0,
+        (parent, group) => {
+          parent.actions.push(...group.actions);
+          parent.estimatedBytes += group.estimatedBytes;
+          if (parent.lease === undefined) parent.lease = group.lease ?? null;
+          else if (parent.lease !== group.lease) parent.lease = null;
+        },
+        entryFromGroup,
+        cleanup,
+      );
+      if (!closed) throw new Error("No undo group is open.");
+      const group = closed.group;
       if (group.actions.length === 0) { notify(); return null; }
-      const parent = groups.at(-1);
-      if (parent) {
-        parent.actions.push(...group.actions);
-        parent.estimatedBytes += group.estimatedBytes;
-        if (parent.lease === undefined) parent.lease = group.lease ?? null;
-        else if (parent.lease !== group.lease) parent.lease = null;
-      } else {
-        discardRedo();
-        entries.push(entryFromGroup(group));
-        cursor = entries.length;
-        evict();
-      }
+      if (closed.committed) evict();
       notify();
       return { id: group.id, name: group.name, actionCount: group.actions.length, estimatedBytes: group.estimatedBytes };
     },
     cancelGroup() {
-      const group = groups.pop();
+      const group = history.endGroup();
       if (!group) throw new Error("No undo group is open.");
       cleanup(entryFromGroup(group));
       notify();
@@ -490,14 +485,14 @@ export function createUndoManager(options: UndoManagerOptions): UndoManager {
     clear() {
       for (const group of groups.splice(0)) cleanup(entryFromGroup(group));
       for (const entry of entries.splice(0)) cleanup(entry);
-      cursor = 0;
+      history.cursor = 0;
       cleanKey = stateKey();
       lastFailure = null;
       notify();
     },
     subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
-    inspect: () => ({ owner: options.owner, canUndo: manager.canUndo, canRedo: manager.canRedo, undoTitle: manager.undoTitle, redoTitle: manager.redoTitle, isExecuting: executing, isDirty: manager.isDirty, groupDepth: groups.length, cursor, entries: entries.map(({ id, name, actions, estimatedBytes, poisoned }) => ({ id, name, actionCount: actions.length, estimatedBytes, poisoned: Boolean(poisoned) })), lastFailure }),
-    dispose() { if (disposed) return; disposed = true; activeReservations = 0; for (const group of groups.splice(0)) cleanup(entryFromGroup(group)); for (const entry of entries.splice(0)) cleanup(entry); cursor = 0; listeners.clear(); },
+    inspect: () => ({ owner: options.owner, canUndo: manager.canUndo, canRedo: manager.canRedo, undoTitle: manager.undoTitle, redoTitle: manager.redoTitle, isExecuting: executing, isDirty: manager.isDirty, groupDepth: groups.length, cursor: history.cursor, entries: entries.map(({ id, name, actions, estimatedBytes, poisoned }) => ({ id, name, actionCount: actions.length, estimatedBytes, poisoned: Boolean(poisoned) })), lastFailure }),
+    dispose() { if (disposed) return; disposed = true; activeReservations = 0; for (const group of groups.splice(0)) cleanup(entryFromGroup(group)); for (const entry of entries.splice(0)) cleanup(entry); history.cursor = 0; listeners.clear(); },
   };
   return manager;
 }
