@@ -32,4 +32,5 @@ Browser WebCrypto requires a secure context and algorithm availability may vary.
 
 ## Commits
 
-Implementation commit recorded by the task completion message; this report and logs are included in that owned-path commit.
+`db872f3` — FX: add standalone WebCrypto-backed CryptoFX (sources, tests, guide, consumer and validation logs). A subsequent report-only commit records this SHA.
+
