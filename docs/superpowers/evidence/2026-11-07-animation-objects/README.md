@@ -53,7 +53,7 @@ Two baseline cases remain unsuitable for settled pixel comparison: MemoJournal d
 | Framework TypeScript | Passed in the active worktree before the concurrent open-panel work; each clean adoption also ran `tsc -b --pretty false` |
 | Framework focused animation/public API/counterparts | 26 passed across six files |
 | Framework motion/environment integration | 20 passed across two files |
-| Packed SDK build | Passed from clean detached committed checkouts; final installed commit `397f881`, archive SHA-256 `121f5b62ec47c0b782137ec0859b3bd9e36909d626fb870e787190e6d2f15a40` |
+| Packed SDK build for the complete capture matrix | Passed from a clean detached committed checkout at `397f881`, archive SHA-256 `121f5b62ec47c0b782137ec0859b3bd9e36909d626fb870e787190e6d2f15a40` |
 | Full framework suite, once, clean adoption snapshot `2ae4023` | 7,128 passed; three failed across 850 files. Text performance exceeded 30 s; SystemUI boundary scan exceeded 15 s; generated manifest validator was stale |
 | Isolated timeout rerun, unchanged snapshot and default timeouts | Both passed, with one worker. The stale validator is still unresolved |
 | Site TypeScript on the final installed SDK | Passed |
@@ -62,7 +62,9 @@ Two baseline cases remain unsuitable for settled pixel comparison: MemoJournal d
 
 Logs are retained in `framework/.artifacts/animation-{framework-full-suite,framework-timeout-rerun,site-full-suite-latest,site-final-focused,site-typecheck-latest,adoption-latest}.log`. `synapp-sdk-package.test.ts` participated in the full framework run after its SDK build. The full run intentionally used the clean committed adoption snapshot while other agents continued editing the active worktree; it is not a claim to validate their subsequent uncommitted changes.
 
-The final capture matrix records 64 cases against the single final archive above: 52 exercised flows pass, eight JournalOld cases are limited by service access, and four phone Dial-reorder cases are not applicable. It covers both sizes, appearances and media settings with no page errors. The baseline has 50 usable comparisons, eight limited cases, four inapplicable cases and the two excluded captures described above. There are 880 retained PNGs including exploratory captures. Run `summarise-evidence.cjs` for the per-case source identity and quality classification in `.artifacts/animation-objects/evidence-summary.json`.
+The complete capture matrix records 64 cases against the single matrix archive above: 52 exercised flows pass, eight JournalOld cases are limited by service access, and four phone Dial-reorder cases are not applicable. It covers both sizes, appearances and media settings with no page errors. The baseline has 50 usable comparisons, eight limited cases, four inapplicable cases and the two excluded captures described above. Retained PNGs include exploratory captures. Run `summarise-evidence.cjs` for the per-case source identity, image count and quality classification in `.artifacts/animation-objects/evidence-summary.json`.
+
+Another session adopted a newer page-curl build after the complete matrix finished. Following the owner's workflow, this pass re-adopted the then-current committed framework `ba7d226` from a clean detached checkout. The final installed archive is `5034e2d9a6163ed2eb99ba712d3fd5081829e1b921e7c5c45733c9f1abe86a47`. TypeScript passes; the subsequent full site run again has 392 passes and the same three failures. Nine additional `post-adoption` browser cases pass with no page errors: MemoJournal desktop/normal and phone/reduced; About phone/normal and phone/reduced; gallery phone/reduced; and desktop Dial, reorder, Journal and Portfolio. Their filenames preserve this separate stage rather than relabelling the complete matrix. The post-adoption logs are `.artifacts/animation-{adoption,site-typecheck,site-full-suite}-post-matrix.log`. Initial connection/cold-load failures during this final restart were rerun successfully once Vite was ready.
 
 About's first migrated version replayed an entrance during the retained tab-slot handoff. A frame probe exposed the nearly transparent page. The app now leaves crossfade opacity to the controller, preserves its slide artwork, and avoids replaying entrance on the same selection. The final eight About captures assert at least 0.48 effective opacity on one pane throughout the swap. Repeated tab input is refused during movement and normal input works again afterward. Three early MemoJournal open/dismiss cycles retained exactly one list and left no editor behind. Disposal/cancellation contracts are additionally covered by the controller tests.
 
@@ -93,6 +95,7 @@ Framework:
 - `3bc9c44` NSE: keep animation environment and presence internal
 - `3ba377b` NSE: read system motion in standalone shell views
 - `dad2c5a` NSE: record landed animation object contracts
+- `5317c5f` NSE: record animation object verification
 
 Site:
 
@@ -107,6 +110,7 @@ Site:
 - `d1b6a41` Gallery: mount the system motion evidence harness
 - `24f7c97` About: keep the pane visible across the tab handoff
 - `6742520` NSE: adopt committed animation objects and shared hosts
+- `531dd6e` NSE: preserve the current shared framework adoption
 
 ## Fusion and remaining acceptance
 

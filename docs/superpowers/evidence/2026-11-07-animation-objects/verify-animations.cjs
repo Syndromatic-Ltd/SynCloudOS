@@ -191,7 +191,7 @@ async function gallery(page, options) {
   const file = prefix("gallery", options);
   await target.scrollIntoViewIfNeeded(); await shot(page, file, "idle");
   const setting = await page.locator(".nse-conformance-motion-evidence").innerText();
-  if (options.stage === "after" && !setting.includes(options.motion === "reduce" ? "System reduced motion: on" : "System reduced motion: off")) throw new Error(`The specimen did not report the system motion setting: ${setting}`);
+  if (options.stage !== "before" && !setting.includes(options.motion === "reduce" ? "System reduced motion: on" : "System reduced motion: off")) throw new Error(`The specimen did not report the system motion setting: ${setting}`);
   await sample(page, '[aria-label="Animation target"]');
   await target.click(); await shot(page, file, "run-1"); await shot(page, file, "run-2");
   await page.waitForTimeout(600); await shot(page, file, "settled"); await saveFrames(page, file);
