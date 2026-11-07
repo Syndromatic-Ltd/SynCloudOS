@@ -177,11 +177,13 @@ function fileReference(
     },
   } as const;
   if (access === "read") {
-    return Object.freeze({ ...base, access: "read" as const });
+    return Object.freeze({ ...base, access: "read" as const, get released() { return released; }, get permission() { return lastPermission; } });
   }
   const reference: Extract<FilePanelReference, { readonly kind: "file-handle"; readonly access: "readwrite" }> = {
     ...base,
     access: "readwrite",
+    get released() { return released; },
+    get permission() { return lastPermission; },
     createWritable: async (signal?: AbortSignal): Promise<FilePanelWritable> => {
       await requirePermission("readwrite", signal);
       let writable: FilePanelWritable;
@@ -407,8 +409,18 @@ export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPo
 }
 
 /** @internal Wraps a browsed handle with the existing reference lifetime and permission rules. */
-export async function referenceForOpenPanelHandle(handle: FilePanelFileHandle | FilePanelDirectoryHandle, requestId: string, index: number, activation: () => boolean): Promise<FilePanelReference> {
+export async function referenceForOpenPanelHandle(handle: FilePanelFileHandle | FilePanelDirectoryHandle, requestId: string, index: number, activation: () => boolean, ownerSignal?: AbortSignal): Promise<FilePanelReference> {
+  throwIfFilePanelAborted(ownerSignal);
   const permission = typeof handle.queryPermission === "function" ? await handle.queryPermission({ mode: "read" }) : "granted";
+  throwIfFilePanelAborted(ownerSignal);
   if (permission !== "granted") throw new Error("The selected item needs permission. Choose its folder to unlock it.");
-  return handle.kind === "directory" ? directoryReference(handle, requestId, permission, activation, "read") : fileReference(handle, requestId, index, permission, activation, "read");
+  const reference = handle.kind === "directory" ? directoryReference(handle, requestId, permission, activation, "read") : fileReference(handle, requestId, index, permission, activation, "read");
+  if (!ownerSignal) return reference;
+  const abort = () => owned.release("runtime-disposed");
+  const descriptors = Object.getOwnPropertyDescriptors(reference);
+  const owned = Object.freeze(Object.defineProperties({}, { ...descriptors,
+    release: { enumerable: true, value(reason: FilePanelReleaseReason) { ownerSignal.removeEventListener("abort", abort); reference.release(reason); } },
+  })) as FilePanelReference;
+  ownerSignal.addEventListener("abort", abort, { once: true });
+  return owned;
 }

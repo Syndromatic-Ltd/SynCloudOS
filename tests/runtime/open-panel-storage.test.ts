@@ -2,8 +2,17 @@ import { describe, expect, it, vi } from "vitest";
 import { createAppFileManager } from "../../src/SynCloudOS/AppSDK/fileManagerClient";
 import { createOpenPanelFileSystem, registerOpenPanelFileSystem } from "../../src/SynCloudOS/FilePanels/OpenPanelFileSystem";
 import { createBrowserOpenPanelStoragePort } from "../../src/SynCloudOS/PlatformAdapters/BrowserOpenPanelStoragePort";
+import { referenceForOpenPanelHandle } from "../../src/SynCloudOS/FilePanels/FileSystemAccessPanelAdapter";
 
 describe("application-support directories", () => {
+  it("releases browsed file references when their application mount ends", async () => {
+    const owner = new AbortController();
+    const handle = { kind: "file", name: "working.png", getFile: vi.fn(), queryPermission: async () => "granted", requestPermission: vi.fn(), createWritable: vi.fn() } as any;
+    const reference = await referenceForOpenPanelHandle(handle, "owner-test", 0, () => true, owner.signal);
+    owner.abort(); expect(reference.released).toBe(true);
+    if (reference.kind !== "directory-handle") await expect(reference.read()).rejects.toThrow(/released/);
+    expect(handle.getFile).not.toHaveBeenCalled();
+  });
   it("uses one encoded bundle component beneath the private application-support root", async () => {
     const scoped = { name: "org.test.editor" };
     const support = { getDirectoryHandle: vi.fn(async () => scoped) };

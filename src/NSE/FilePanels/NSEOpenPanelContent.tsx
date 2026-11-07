@@ -7,6 +7,7 @@ import { createMediaPanelService, takeOpenPanelMediaSelection } from "../../SynC
 import { matchesOpenPanelContentType, type FilePanelDirectory, type OpenPanelFolder } from "../../SynCloudOS/FilePanels/OpenPanelFileSystem";
 import { referenceForOpenPanelHandle } from "../../SynCloudOS/FilePanels/FileSystemAccessPanelAdapter";
 import type { MediaPanelItem } from "../../SynCloudOS/MediaPanels/mediaPanelTypes";
+import type { FilePanelReference } from "../../SynCloudOS/FilePanels/filePanelTypes";
 import type { OpenPanelSession } from "./NSEOpenPanel";
 import { NSEOpenPanelSources, type OpenPanelSource } from "./NSEOpenPanelSources";
 import { NSEOpenPanelCollection, type OpenPanelItem } from "./NSEOpenPanelCollection";
@@ -136,7 +137,10 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
       const selectedMedia = selectedItems.flatMap(item => item.media ? [item.media] : []);
       const handles = selectedItems.flatMap(item => item.handle ? [item.handle] : []);
       if (!selectedMedia.length && !handles.length && directory && session.canChooseDirectories) handles.push(directory);
-      const refs = await Promise.all(handles.map((handle, index) => referenceForOpenPanelHandle(handle, session.id, index, host.hasTransientUserActivation)));
+      const refs: FilePanelReference[] = [];
+      try {
+        for (const [index, handle] of handles.entries()) refs.push(await referenceForOpenPanelHandle(handle, session.id, index, host.hasTransientUserActivation, host.signal));
+      } catch (error) { refs.forEach(ref => ref.release("request-replaced")); throw error; }
       if (session.signal.aborted) { refs.forEach(ref => ref.release("request-replaced")); return; }
       await session.accept([...refs, ...selectedMedia], takeOpenPanelMediaSelection(media, selectedMedia));
     } catch (error) { fail(error); }
