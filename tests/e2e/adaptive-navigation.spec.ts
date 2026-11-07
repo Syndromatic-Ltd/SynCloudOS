@@ -1,5 +1,42 @@
 import { expect, test } from 'playwright/test';
 
+for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+  test(`mounted navigation presents retained controller options (${reducedMotion})`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion });
+    await page.setViewportSize({ width: 1200, height: 800 });
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto('/__framework-tests/navigation/adaptive');
+    await expect(page.getByTestId('navigation-state')).toHaveText('source-list-content:Editor');
+    const draft = page.getByRole('textbox', { name: 'Draft Editor', exact: true });
+    await draft.fill('Retain mounted editor');
+    const draftIdentity = await draft.elementHandle();
+    const trigger = page.getByRole('button', { name: 'Open draft options', exact: true });
+    await trigger.click();
+    const options = page.getByRole('dialog', { name: 'Draft options', exact: true });
+    await expect(options).toBeVisible();
+    const host = options.locator('xpath=ancestor::*[@data-window-host][1]');
+    const windowId = await host.getAttribute('data-window-host');
+    expect(windowId).toBeTruthy();
+    const value = options.getByRole('textbox', { name: 'Option draft' });
+    await value.fill('Retain mounted options');
+    const identity = await value.elementHandle();
+    for (const [width, height] of [[382, 580], [800, 280], [1200, 800], [594, 368]]) {
+      await page.setViewportSize({ width, height });
+      await expect(options).toBeVisible();
+      await expect(host).toHaveAttribute('data-window-host', windowId!);
+      await expect(value).toHaveValue('Retain mounted options');
+      expect(await value.evaluate((element, original) => element === original, identity)).toBe(true);
+      expect(await draft.evaluate((element, original) => element === original, draftIdentity)).toBe(true);
+      await expect(draft).toHaveValue('Retain mounted editor');
+    }
+    await page.keyboard.press('Escape');
+    await expect(options).toBeHidden();
+    await expect(trigger).toBeFocused();
+    expect(errors).toEqual([]);
+  });
+}
+
 for (const reducedMotion of ['no-preference','reduce'] as const) {
   test(`adaptive peer chrome preserves editing, direct tabs and focus (${reducedMotion})`,async({page},testInfo)=>{
     await page.emulateMedia({reducedMotion});
@@ -8,6 +45,7 @@ for (const reducedMotion of ['no-preference','reduce'] as const) {
     await page.goto('/__framework-tests/navigation/adaptive');
     const state=page.getByTestId('navigation-state');
     await expect(state).toHaveText('source-list-content:Editor');
+    await expect(page.getByTestId('navigation-window').locator('xpath=ancestor::*[@data-window-id][1]')).toHaveAttribute('data-window-id', 'adaptive-navigation');
     const draft=page.getByRole('textbox',{name:'Draft Editor'});
     await draft.fill('Keep this unsaved editor');
     const node=await draft.elementHandle();
