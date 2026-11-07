@@ -26,13 +26,13 @@ import { isAbsolute, relative, resolve } from "node:path";
 
 export const requiredFxFamilies = Object.freeze([
   "animation", "graphics", "image", "text", "audio", "haptics", "motion",
-  "media", "video", "midi", "location", "lumina",
+  "media", "video", "midi", "location", "lumina", "compression",
 ]);
 
-export function assertTwelveFxPackageExports(exports) {
-  assert(exports && typeof exports === "object", "SDK exports must describe all twelve FX families.");
+export function assertFxPackageExports(exports) {
+  assert(exports && typeof exports === "object", "SDK exports must describe all thirteen FX families.");
   assert.deepEqual(Object.keys(exports).filter(key => /^\.\/fx\/[^/]+$/u.test(key)).sort(),
-    requiredFxFamilies.map(family => `./fx/${family}`).sort(), "SDK must export exactly the twelve FX families.");
+    requiredFxFamilies.map(family => `./fx/${family}`).sort(), "SDK must export exactly the thirteen FX families.");
   assert.deepEqual(Object.keys(exports).filter(key => /^\.\/fx\/[^/]+\//u.test(key)),
     ["./fx/video/webm"], "Only reviewed FX format extensions may be exported.");
   assert.deepEqual(exports["./fx/video/webm"],
@@ -169,7 +169,7 @@ export function assertReviewedPackageFiles(files) {
     if (/^nse\/themes\/atmo\/(?:[A-Za-z0-9._-]+\/)*[A-Za-z0-9._@-]+\.(?:css|png|webp|svg|jpg|jpeg|gif|avif|woff2?|ttf|otf)$/u.test(file)) continue;
     if (/^assets\/[A-Za-z0-9_-]+\.css$/u.test(file)) continue;
     if (file === "webspring/styles.css" || file === "chronosphere/styles.css") continue;
-    if (/^fx\/video\/webm\.(?:js|d\.ts)$/u.test(file)) continue;
+    if (/^(?:foundation|fx\/compression|fx\/video\/webm)\.(?:js|d\.ts)$/u.test(file)) continue;
     if (!/^(?:(?:(?:sdk|nse)(?:\/(?:[a-z][a-z-]*\/)*[a-z][a-z-]*)?|auth|browser|typography|server\/auth|webspring|chronosphere|fx\/(?:animation|graphics|image|text|audio|haptics|motion|media|video|midi|location|lumina))\.(?:js|d\.ts|css)|browser\/styles\.css|vite\.mjs|chunks\/[A-Za-z0-9_-]+\.js|assets\/[A-Za-z0-9._-]+\.(?:png|webp|svg|jpg|jpeg|gif|woff2?|ttf|otf)|README\.md|types\/(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.(?:d\.ts|d\.mts|mjs|json))$/u.test(file)) {
       throw new TypeError(`SDK package contains an unreviewed public file: ${file}`);
     }

@@ -26,7 +26,7 @@ import { tmpdir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {
-  assertSdkFingerprint, assertSdkRelativePath, assertSdkSourceUnchanged, assertTwelveFxPackageExports,
+  assertSdkFingerprint, assertSdkRelativePath, assertSdkSourceUnchanged, assertFxPackageExports,
   captureSdkSourceFingerprint, fingerprintSdkFiles, requiredFxFamilies, sdkDirectoryFiles,
 } from "./sdk-package-manifest.mjs";
 
@@ -75,7 +75,7 @@ export function readVerifiedSdkArchive(repositoryRoot, {
   const entries = manifest.entries;
   assert(entries && typeof entries === "object", "Missing SDK entry fingerprints.");
   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+$/u.test(key.slice(manifest.package.length + 1))).sort(),
-    requiredFxFamilies.map(family => `${manifest.package}/fx/${family}`).sort(), "SDK manifest must contain all twelve FX entries.");
+    requiredFxFamilies.map(family => `${manifest.package}/fx/${family}`).sort(), "SDK manifest must contain all thirteen FX entries.");
   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+\//u.test(key.slice(manifest.package.length + 1))),
     [`${manifest.package}/fx/video/webm`], "Only reviewed FX format extensions may be installed.");
   for (const [specifier, entry] of Object.entries(entries)) {
@@ -111,7 +111,7 @@ export function verifyInstalledSdkResources(installed, manifest) {
   assert.equal(actual.sha256, manifest.resources.sha256, "Installed SDK resource fingerprint mismatch (missing, changed or extra file).");
   const pkg = JSON.parse(readFileSync(join(installed, "package.json"), "utf8"));
   assert.equal(pkg.name, manifest.package, "Installed SDK identity mismatch.");
-  assertTwelveFxPackageExports(pkg.exports);
+  assertFxPackageExports(pkg.exports);
   return actual;
 }
 
