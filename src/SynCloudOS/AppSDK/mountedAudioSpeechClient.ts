@@ -25,8 +25,13 @@ export function createMountedAudioSpeechClient(host: AUFXSpeechSynthesisHost | u
   return Object.freeze({
     createSynthesizer(signal?: AbortSignal) {
       return scope.acquire(signal, (lease, release) => {
-        if (!host) throw new DOMException("Speech synthesis is unavailable.", "NotSupportedError");
-        const raw = host.createSynthesizer(lease, () => !owner.aborted && permissions().includes("audio.speech"));
+        const unsupported = () => { lease.throwIfAborted(); throw new DOMException("Speech synthesis is unavailable.", "NotSupportedError"); };
+        const raw = host?.createSynthesizer(lease, () => !owner.aborted && permissions().includes("audio.speech")) ?? new AUFXSpeechSynthesizer({
+          capabilities: Object.freeze({ speechSynthesis: false, nativePermissionPrompt: false }), authorizationStatus: "unavailable", isSpeaking: false, isPaused: false,
+          requestAuthorization: async () => "unavailable", speechVoices: () => Object.freeze([]), speak: async () => unsupported(),
+          pauseSpeaking: () => false, continueSpeaking: () => false, stopSpeaking: () => false,
+          subscribe: () => { lease.throwIfAborted(); return () => {}; }, dispose() {},
+        });
         let disposed = false;
         const dispose = () => { if (disposed) return; disposed = true; lease.removeEventListener("abort", dispose); try { raw.dispose(); } finally { release(); } };
         lease.addEventListener("abort", dispose, { once: true });

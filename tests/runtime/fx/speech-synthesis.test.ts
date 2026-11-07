@@ -30,6 +30,14 @@ function fixture() {
   return { native, utterances, host };
 }
 describe("AudioFX speech synthesis", () => {
+  it("allows passive unavailable owners on hosts without speech", async () => {
+    const owner = new AbortController();
+    const synth = createMountedSpeechClient(undefined, owner.signal, () => ["audio.speech"]).createSynthesizer();
+    expect(synth.authorizationStatus).toBe("unavailable");
+    expect(synth.capabilities.speechSynthesis).toBe(false);
+    await expect(synth.speak(new AUFXSpeechUtterance("Hello"))).rejects.toMatchObject({ name: "NotSupportedError" });
+    owner.abort();
+  });
   it("validates immutable utterance values", () => {
     const u = new AUFXSpeechUtterance("Hello", { rate: 1.2, language: "en-GB" });
     expect(Object.isFrozen(u)).toBe(true);

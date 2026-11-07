@@ -140,6 +140,9 @@ export interface SynWareContextValue {
   readonly media: MEFXMediaClient;
   readonly video: AppVideoClient;
   readonly location: LFXLocationClient;
+  readonly network: import("../../FX/NetworkFX/public").NWFXPathClient;
+  readonly speechSynthesis: import("../../FX/AudioFX/AUFXSpeechSynthesizer").AUFXSpeechClient;
+  readonly videoPresentation: import("../../FX/VideoFX/VFXPictureInPictureController").VFXVideoPresentationClient;
   readonly bluetooth: import("../../FX/BluetoothFX/public").BTFXBluetoothClient;
   readonly nfc: import("../../FX/NFCFX/public").NFXNFCClient;
   readonly speech: import("../../FX/SpeechFX/public").SPFXSpeechClient;
