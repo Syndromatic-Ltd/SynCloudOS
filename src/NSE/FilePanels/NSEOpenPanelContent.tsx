@@ -37,7 +37,7 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
   const selectedItems = visibleItems.filter(item => selected.has(item.id));
   const chosen = selectedItems.filter(item => item.kind === "directory" ? session.canChooseDirectories : session.canChooseFiles);
   const canOpen = !busy && (chosen.length > 0 || (!!directory && session.canChooseDirectories && !selectedItems.length));
-  const title = directory?.name ?? location?.title ?? "Open";
+  const title = location?.path.length === 1 ? location.title : directory?.name ?? location?.title ?? "Open";
   const fail = useCallback((error: unknown) => { if (!session.signal.aborted) setStatus(error instanceof Error ? error.message : "This source could not be opened."); }, [session]);
 
   const navigate = useCallback((next: Location) => {
