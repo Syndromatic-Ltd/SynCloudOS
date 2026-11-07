@@ -28,17 +28,45 @@ interface FramePort {
   readonly trackedAnchors?: ReadonlySet<AnchorPort>;
   getPose?(space: unknown, reference: unknown): { readonly transform: TransformPort } | null;
 }
-interface SessionPort extends EventTarget {
+export interface BrowserXRSession extends EventTarget {
   requestReferenceSpace(type: string): Promise<unknown>;
   requestAnimationFrame(callback: (time: number, frame: FramePort) => void): number;
   cancelAnimationFrame(handle: number): void;
   end(): Promise<void>;
+  updateRenderState(state: { baseLayer: unknown }): void;
 }
 interface XRPort {
   isSessionSupported(mode: string): Promise<boolean>;
-  requestSession(mode: string, options: { readonly requiredFeatures: readonly string[]; readonly optionalFeatures: readonly string[] }): Promise<SessionPort>;
+  requestSession(mode: string, options: { readonly requiredFeatures: readonly string[]; readonly optionalFeatures: readonly string[] }): Promise<BrowserXRSession>;
 }
-export interface BrowserXROptions { readonly isSecureContext: boolean; readonly browserNavigator?: { readonly xr?: XRPort } | null }
+export interface BrowserXRRenderingLayer { readonly layer: unknown; dispose(): void }
+export interface BrowserXROptions {
+  readonly isSecureContext: boolean;
+  readonly browserNavigator?: { readonly xr?: XRPort } | null;
+  readonly createRenderingLayer?: (session: BrowserXRSession, configuration: XRFXConfiguration) => Promise<BrowserXRRenderingLayer>;
+}
+
+/** A detached, owner-scoped WebGL layer enables real WebXR frame delivery. */
+export function createBrowserXRRenderingLayerFactory(browserWindow: Window & {
+  readonly XRWebGLLayer?: new(session: BrowserXRSession, context: WebGLRenderingContext | WebGL2RenderingContext) => unknown;
+}): BrowserXROptions["createRenderingLayer"] {
+  const Layer = browserWindow.XRWebGLLayer;
+  if (!Layer) return undefined;
+  return async (session, configuration) => {
+    const canvas = browserWindow.document.createElement("canvas");
+    const context = canvas.getContext("webgl2", { alpha: true }) ?? canvas.getContext("webgl", { alpha: true });
+    if (!context) throw new DOMException("A WebXR compatible WebGL context is unavailable.", "NotSupportedError");
+    const dispose = () => { context.getExtension("WEBGL_lose_context")?.loseContext(); canvas.width = canvas.height = 1; };
+    try {
+      const xrContext = context as typeof context & { makeXRCompatible?: () => Promise<void> };
+      if (configuration.mode !== "inline") {
+        if (!xrContext.makeXRCompatible) throw new DOMException("WebGL cannot become XR compatible.", "NotSupportedError");
+        await xrContext.makeXRCompatible();
+      }
+      return { layer: new Layer(session, context), dispose };
+    } catch (error) { dispose(); throw error; }
+  };
+}
 
 /** Pose delivery only: no renderer, fabricated anchors or ARKit tracking claims. */
 export class BrowserXRAdapter implements XRFXClient {
@@ -46,19 +74,24 @@ export class BrowserXRAdapter implements XRFXClient {
   getCapabilities(): XRFXCapabilities { return Object.freeze({ apiAvailable: this.options.isSecureContext && typeof this.options.browserNavigator?.xr?.requestSession === "function", worldTracking: false, nativeARKit: false }); }
   createSession(parent?: AbortSignal): XRFXSession {
     const owner = browserDeviceOwner(parent), signal = owner.signal;
-    let native: SessionPort | undefined, frameHandle: number | undefined, generation = 0, starting = false;
+    const createRenderingLayer = this.options.createRenderingLayer;
+    let native: BrowserXRSession | undefined, frameHandle: number | undefined, generation = 0, starting = false;
+    let renderingLayer: BrowserXRRenderingLayer | undefined;
     let authorization: XRFXAuthorizationStatus = "unknown";
     const anchors = new WeakMap<object, string>(); let nextAnchor = 0;
     const port = () => { signal.throwIfAborted(); if (!this.getCapabilities().apiAvailable) throw new DOMException("WebXR is unavailable.", "NotSupportedError"); return this.options.browserNavigator!.xr!; };
-    const ended = () => { generation++; native = undefined; frameHandle = undefined; authorization = "unknown"; };
+    const releaseLayer = () => { const previous = renderingLayer; renderingLayer = undefined; previous?.dispose(); };
+    const ended = () => { generation++; native = undefined; frameHandle = undefined; authorization = "unknown"; releaseLayer(); };
     const stop = (): Promise<void> => {
       const previous = native;
+      const previousLayer = renderingLayer;
+      renderingLayer = undefined;
       generation++; native = undefined;
       if (!previous) return Promise.resolve();
       previous.removeEventListener("end", ended);
       if (frameHandle !== undefined) previous.cancelAnimationFrame(frameHandle);
       frameHandle = undefined; authorization = "unknown";
-      return previous.end();
+      return previous.end().finally(() => previousLayer?.dispose());
     };
     signal.addEventListener("abort", () => { void stop().catch(() => {}); }, { once: true });
     return Object.freeze<XRFXSession>({
@@ -80,6 +113,10 @@ export class BrowserXRAdapter implements XRFXClient {
           if (generation !== runGeneration) { await session.end(); throw new DOMException("The XR request was cancelled.", "AbortError"); }
           native = session;
           session.addEventListener("end", ended, { once: true });
+          if (!createRenderingLayer) throw new DOMException("A WebXR rendering layer is unavailable.", "NotSupportedError");
+          renderingLayer = await browserDeviceOperation(signal, () => createRenderingLayer(session, configuration), layer => layer.dispose());
+          if (generation !== runGeneration || signal.aborted) { releaseLayer(); throw new DOMException("The XR session ended.", "AbortError"); }
+          session.updateRenderState({ baseLayer: renderingLayer.layer });
           const space = await browserDeviceOperation(signal, () => session.requestReferenceSpace(configuration.referenceSpace));
           if (generation !== runGeneration || signal.aborted) throw new DOMException("The XR session ended.", "AbortError");
           authorization = "granted";
