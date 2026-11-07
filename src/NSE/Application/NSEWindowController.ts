@@ -148,6 +148,12 @@ export interface NSEWindowAlertRequest {
 }
 
 const windowAlertPresenters = new WeakMap<NSEWindow, (request: NSEWindowAlertRequest, signal: AbortSignal) => Promise<string>>();
+const windowChromeSubscriptions = new WeakMap<NSEWindow, (listener: () => void) => () => void>();
+
+/** @internal Observes window-owned chrome without adding a second public window state API. */
+export function nseSubscribeWindowChrome(window: NSEWindow, listener: () => void): () => void {
+  return windowChromeSubscriptions.get(window)?.(listener) ?? (() => {});
+}
 
 /** @internal Presents an NSEAlert as a sheet on a window a window controller manages; aborting `signal` ends it. */
 export function nsePresentWindowAlert(window: NSEWindow, request: NSEWindowAlertRequest, signal: AbortSignal): Promise<string> {
@@ -341,6 +347,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
         sheet?.[nseEndSheet]?.(controller.#window, returnCode);
       },
     });
+    windowChromeSubscriptions.set(this.#window, listener => controller.subscribe(listener));
     windowAlertPresenters.set(this.#window, (request, signal) => {
       controller.#assertLive("beginSheetModal", "call");
       return requireMount("beginSheetModal").presentAlert(request, AbortSignal.any([controller.ownerSignal, signal]));

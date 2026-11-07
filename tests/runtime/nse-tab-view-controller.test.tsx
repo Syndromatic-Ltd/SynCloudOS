@@ -313,3 +313,20 @@ it("adds selectable toolbar tabs without replacing a window's existing toolbar o
   expect(toolbar.itemIdentifiers).toEqual(["status"]);
   expect(screen.queryByRole("button", { name: "Framework" })).toBeNull();
 });
+
+it("retains toolbar tabs when the window replaces its active toolbar", async () => {
+  await launch();
+  const window = sections.view.window!;
+  await act(async () => { sections.tabStyle = "toolbar"; });
+  expect(screen.getByRole("button", { name: "Team" })).toBeTruthy();
+  const replacement = new NSEToolbar({ identifier: "replacement", items: [{ kind: "custom", id: "replacement-item", label: "Replacement", minimumWidth: 50, idealWidth: 80, render: () => <span>Replacement toolbar item</span> }], defaultItemIdentifiers: ["replacement-item"] });
+  await act(async () => { window.toolbar = replacement; });
+  expect(screen.getByText("Replacement toolbar item")).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Team" })).toBeTruthy();
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Team" })); });
+  expect(sections.selectedTabViewItem?.identifier).toBe("team");
+  await act(async () => { sections.tabStyle = "unspecified"; });
+  expect(window.toolbar).toBe(replacement);
+  expect(screen.getByText("Replacement toolbar item")).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Team" })).toBeNull();
+});

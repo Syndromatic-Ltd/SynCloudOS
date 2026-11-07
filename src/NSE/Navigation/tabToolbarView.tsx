@@ -5,7 +5,8 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
+import { useLayoutEffect, useRef, useSyncExternalStore, type KeyboardEvent } from "react";
+import { nseSubscribeWindowChrome } from "../Application/NSEWindowController";
 import { useObserve } from "../Objects/useObserve";
 import { NSEToolbar, nseRegisterToolbarTabView } from "../Toolbars/NSEToolbar";
 import { nseAppearanceSlot, projectNSEAppearanceSlot, useNSEAppearance } from "../Appearance";
@@ -17,17 +18,20 @@ import "./tabToolbarView.css";
 export function useNSETabToolbar(controller: NSETabViewController): void {
   const enabled = controller.tabStyle === "toolbar";
   const window = controller.view.window;
+  const generated = useRef<NSEToolbar | null>(null);
+  const currentToolbar = useSyncExternalStore(listener => window ? nseSubscribeWindowChrome(window, listener) : () => {},
+    () => window?.toolbar ?? null, () => null);
   useLayoutEffect(() => {
     if (!enabled || !window) return undefined;
-    const existing = window.toolbar;
-    const toolbar = existing ?? new NSEToolbar({ identifier: `${controller.constructor.name}:tabs`, items: [], defaultItemIdentifiers: [] });
+    const toolbar = currentToolbar ?? new NSEToolbar({ identifier: `${controller.constructor.name}:tabs`, items: [], defaultItemIdentifiers: [] });
+    if (!currentToolbar) { generated.current = toolbar; window.toolbar = toolbar; }
     const release = toolbar[nseRegisterToolbarTabView](controller, <NSETabToolbarView controller={controller} toolbar={toolbar} />);
-    if (!existing) window.toolbar = toolbar;
-    return () => {
-      release();
+    return release;
+  }, [controller, enabled, window, currentToolbar]);
+  useLayoutEffect(() => () => {
       // An application that replaced the toolbar while this view was mounted keeps its replacement.
-      if (!existing && !controller.isDisposed && window.toolbar === toolbar) window.toolbar = null;
-    };
+      if (enabled && window && !controller.isDisposed && window.toolbar === generated.current) window.toolbar = null;
+      generated.current = null;
   }, [controller, enabled, window]);
 }
 
