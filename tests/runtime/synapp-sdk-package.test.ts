@@ -127,6 +127,13 @@ afterEach(() => {
 });
 
 describe("portable SynWare SDK packages", () => {
+  it("keeps the public page entry limited to the controller contract", () => {
+    expect(sourceExports(resolve(repositoryRoot, "src/NSE/public/page.ts")).sort()).toEqual([
+      "NSEPageController", "NSEPageControllerOptions", "NSEPageControllerSnapshot",
+      "NSEPageControllerSpineLocation", "NSEPageControllerTransitionStyle",
+    ].sort());
+  });
+
   it("pins the removal of the old navigation, source-list and sliding-pane exports", () => {
     const removed = ["NSEAdaptiveNavigationController", "NSETabBarController", "NSETabBar", "NSETabBarOverflowList", "NSENavigationStackController", "NSEHierarchyStack", "NSESourceListScene", "NSESidebar", "NSEStatusBar", "NSESlidingPane", "NSESlidingPanes", "createNSETabSelectionRestoration"];
     for (const entry of ["src/NSE/sdkPackageEntry.ts", "src/NSE/public/controls.ts", "src/NSE/public/layout.ts", "src/SynCloudOS/AppSDK/rootPackageEntry.ts"]) {
@@ -296,6 +303,10 @@ describe("portable SynWare SDK packages", () => {
       `file:${join(repositoryRoot, "node_modules", "@types", "react-dom")}`,
     ], fixture);
     const installedPackage = join(fixture, "node_modules", "@syndromatic", "syncloudos");
+    expect(sourceExports(join(installedPackage, "types", "NSE", "public", "page.d.ts")).sort()).toEqual([
+      "NSEPageController", "NSEPageControllerOptions", "NSEPageControllerSnapshot",
+      "NSEPageControllerSpineLocation", "NSEPageControllerTransitionStyle",
+    ].sort());
     expect(JSON.parse(readFileSync(join(installedPackage, "package.json"), "utf8")).license).toBe("AGPL-3.0-or-later AND Apache-2.0");
     expect(JSON.parse(readFileSync(join(installedPackage, "sdk", "package.json"), "utf8")).license).toBe("Apache-2.0");
     expect(readFileSync(join(installedPackage, "LICENSE"), "utf8")).toBe(readFileSync(join(repositoryRoot, "LICENSE"), "utf8"));
@@ -307,6 +318,7 @@ import * as nse from "@syndromatic/syncloudos/nse";
 import * as controls from "@syndromatic/syncloudos/nse/controls";
 import * as layout from "@syndromatic/syncloudos/nse/layout";
 import * as appearance from "@syndromatic/syncloudos/nse/appearance";
+import * as page from "@syndromatic/syncloudos/nse/page";
 import * as webspring from "@syndromatic/syncloudos/webspring";
 import * as browser from "@syndromatic/syncloudos/browser";
 import * as auth from "@syndromatic/syncloudos/auth";
@@ -314,6 +326,11 @@ assert.equal("AnimationFX" in nse, false);
 assert.equal("useAnimationFX" in nse, false);
 assert.equal(typeof nse.NSEView, "function");
 assert.equal(typeof nse.NSEShadow, "function");
+assert.deepEqual(Object.keys(page), ["NSEPageController"]);
+for (const removed of ["NSEPage", "NSEPageEvent", "NSEPageHandle", "NSEPageProps", "useNSEPage", "getNSEPagePreset", "nsePagePresets", "nsePageMaterialPresets"]) {
+  assert.equal(removed in page, false);
+  assert.equal(removed in nse, false);
+}
 for (const removed of ["NSERoundedBox", "NSEShadowView", "NSESmoothSurface", "NSEAnimationDefaults", "NSEAnimationEnvironmentProvider", "useNSEAnimationEnvironment", "NSEPresence", "NSEPresenceBoundary", "useNSEPresenceExiting", "NSELayoutView", "useNSEPresentation", "nseTransformStyle", "compileNSEPresentation"]) {
   assert.equal(removed in nse, false);
   assert.equal(removed in controls, false);
@@ -411,6 +428,35 @@ for (const privatePath of ["nse/NSE", "nse/private", "sdk/internal/runtime", "ty
     }, null, 2)}\n`, "utf8");
     const sourceDirectory = join(fixture, "src");
     mkdirSync(sourceDirectory, { recursive: true });
+    writeFileSync(join(sourceDirectory, "page-contract.ts"), `import {
+  NSEPageController,
+  type NSEPageControllerOptions,
+  type NSEPageControllerSnapshot,
+  type NSEPageControllerSpineLocation,
+  type NSEPageControllerTransitionStyle,
+} from "@syndromatic/syncloudos/nse/page";
+
+const spine: NSEPageControllerSpineLocation = "mid";
+const style: NSEPageControllerTransitionStyle = "pageCurl";
+const options: NSEPageControllerOptions = { transitionStyle: style, spineLocation: spine };
+const pages = new NSEPageController(options);
+const snapshot: NSEPageControllerSnapshot = pages.getSnapshot();
+const progress: number = snapshot.turnProgress;
+const direction: "forward" | "backward" | null = snapshot.turnDirection;
+void [progress, direction];
+// @ts-expect-error The standalone curl component has been removed.
+import { NSEPage } from "@syndromatic/syncloudos/nse/page";
+// @ts-expect-error Curl events are private engine details.
+import type { NSEPageEvent } from "@syndromatic/syncloudos/nse/page";
+// @ts-expect-error Imperative curl handles are private engine details.
+import type { NSEPageHandle } from "@syndromatic/syncloudos/nse/page";
+// @ts-expect-error Curl leaf props are private engine details.
+import type { NSEPageProps } from "@syndromatic/syncloudos/nse/page";
+// @ts-expect-error Curl presets are private engine details.
+import type { NSEPagePreset } from "@syndromatic/syncloudos/nse/page";
+// @ts-expect-error Curl hooks are private engine details.
+import { useNSEPage } from "@syndromatic/syncloudos/nse/page";
+`, "utf8");
     writeFileSync(join(sourceDirectory, "index.tsx"), "import {\n  useSCOS,\n  useCommands,\n  useDocument,\n  usePersistence,\n  useScheduler,\n  useService,\n  defineSynWareServiceToken,\n  useTrustedClient,\n  useWindow,\n} from \"@syndromatic/syncloudos/sdk\";\nimport {\n  createDeterministicScheduler,\n  createSynWare,\n  createFakeCapabilityPort,\n  createSynWareTestHost,\n  type SynWareFakeWebContentOperation,\n  type SynWareTestDisposalReport,\n} from \"@syndromatic/syncloudos/sdk/testing\";\nimport { WebspringWidgetShelf, defineWebspring, defineWidget, type LocalisedText, type WebspringViewProps } from \"@syndromatic/syncloudos/webspring\";\nimport { mountSynCloudOS } from \"@syndromatic/syncloudos/browser\";\nimport { createRoot } from \"react-dom/client\";\nimport {\n  NSEAnimationContext,\n  NSEStackItem,\n  NSEStackView,\n  NSETableView,\n  useNSETraitCollection,\n  useNSEArrayController,\n} from \"@syndromatic/syncloudos/nse\";\n\nfunction AnimationEnvironmentProbe({ label }: { label: string }) {\n  const environment = useNSETraitCollection();\n  return <span data-animation-root={label} data-reduced-motion={String(environment.reducedMotion)} />;\n}\n\nexport function mountAnimationRoots(firstElement: Element, secondElement: Element) {\n  const firstRoot = createRoot(firstElement);\n  const secondRoot = createRoot(secondElement);\n  firstRoot.render(<AnimationEnvironmentProbe label=\"first\" />);\n  secondRoot.render(<AnimationEnvironmentProbe label=\"second\" />);\n  const original = NSEAnimationContext.current;\n  let scoped = false;\n  NSEAnimationContext.runAnimationGroup(context => {\n    context.duration = 0.37;\n    scoped = NSEAnimationContext.current === context && context.duration === 0.37;\n  });\n  return {\n    contextGrouping: scoped && NSEAnimationContext.current === original,\n    dispose() {\n      firstRoot.unmount();\n      secondRoot.unmount();\n    },\n  };\n}\n\nconst manifest = {\n  schemaVersion: 1,\n  bundleIdentifier: \"com.example.external.fixture\",\n  version: \"0.1.0\",\n  displayName: \"External Fixture\",\n  routes: [{ path: \"/external\", primary: true }],\n  commands: [{ id: \"com.example.external.fixture.save\", title: \"Save\" }],\n  services: [{ id: \"com.example.external.search\", required: false }],\n  documentTypes: [{ id: \"com.example.external.document\", extensions: [\"fixture\"] }],\n  runtime: { policy: { public: true } },\n  webspring: { visible: true, order: 1 },\n} as const;\n\nconst externalSearchToken = defineSynWareServiceToken({ id: \"com.example.external.search\" });\n\nfunction ExternalFixture() {\n  const app = useSCOS();\n  if (\"resolve\" in app.services || \"routeState\" in app) throw new Error(\"Retired public API leaked into the installed SDK.\");\n  const persistence = usePersistence();\n  const scheduler = useScheduler();\n  const documents = useDocument();\n  const window = useWindow();\n  const trusted = useTrustedClient();\n  const service = useService(externalSearchToken);\n  useCommands([{\n    id: \"com.example.external.fixture.save\",\n    title: \"Save\",\n    payload: { description: \"No payload\", parse: (value) => value === undefined ? { ok: true, value } : { ok: false, issues: [\"No payload\"] } },\n    execute: () => undefined,\n  }]);\n  const everyClientCategory = [\n    app.lifecycle, app.commands, app.responders, app.undo, app.documents, app.windows,\n    app.pasteboards, app.drag, app.colourPanel, app.audio, app.services,\n    app.navigation, app.locale, app.appearance, documents.workspaceDocuments, persistence, scheduler, window.snapshot, service.available,\n    trusted.diagnostics, trusted.conformance,\n  ];\n  if (false) {\n    void app.lifecycle.closeSelf();\n    void app.commands.createPayload(\"fixture\", true);\n    void app.responders.getFocusedResponderId();\n    void app.undo.get({} as never);\n    void app.documents.workspaceDocuments.getDocument;\n    void app.windows.getSnapshot();\n    void app.pasteboards;\n    void app.drag.endpoint();\n    void app.colourPanel.getSnapshot();\n    void app.audio.play;\n    void app.services.optional(externalSearchToken);\n    // @ts-expect-error String service lookup is retired from the installed public SDK.\n    void app.services.resolve(\"com.example.external.search\");\n    // @ts-expect-error Required acquisition accepts a token.\n    void app.services.require(\"com.example.external.search\");\n    // @ts-expect-error Raw query state is retired; use a mounted named graph.\n    void app.routeState.getQuery();\n    void app.navigation.openRoute;\n    void app.locale.getActiveLocale();\n    void app.appearance.resolved();\n    void trusted.diagnostics?.refreshConformanceSnapshot();\n    void trusted.conformance?.registerAppearanceFact({ slot: \"fixture\", status: \"covered\" });\n  }\n  return <NSEStackView\n    aria-label=\"External SDK fixture\"\n    orientation=\"horizontal\"\n    distribution=\"gravity-areas\"\n    alignment=\"centre\"\n    availableSize={240}\n    spacing={8}\n    edgeInsets={{ inlineStart: 4, inlineEnd: 4, blockStart: 2, blockEnd: 2 }}\n    overflowPolicy=\"menu\"\n    overflowLabel=\"More fixture actions\"\n    resizeObserverFactory={() => null}\n    frameScheduler={{ requestFrame: () => 0, cancelFrame: () => undefined }}\n    reducedMotion\n    onOverflowChange={(ids) => { void ids; }}\n  >\n    <NSEStackItem id=\"summary\" minimumSize={48} preferredSize={120} maximumSize={180} weight={2} gravity=\"leading\" spacingAfter={4} overflowLabel=\"Fixture summary\" onOverflowActivate={() => undefined}>Clients: {everyClientCategory.length}; Brand: {app.branding.name}</NSEStackItem>\n    <NSEStackItem id=\"records\" minimumSize={48} preferredSize={96} maximumSize={144} weight={1} visibilityPriority={10} detachedWhenHidden gravity=\"trailing\" overflowLabel=\"Fixture records\" onOverflowActivate={() => undefined}>\n      <FixtureRecords />\n    </NSEStackItem>\n  </NSEStackView>;\n}\n\nfunction FixtureRecords() {\n  const records = useNSEArrayController<string, string>({ id: \"fixture:records\", content: [\"one\", \"two\"], getId: (item) => item });\n  return <NSETableView aria-label=\"Fixture records\" headerHidden rowHeight={24} adapter={{ controller: records, idForItem: (item) => item, labelForItem: (item) => item }} columns={[{ id: \"record\", title: \"Record\", value: (item: string) => item, width: { min: 48, ideal: 96, max: 144 } }]} />;\n}\n\nconst news = defineWidget({\n  id: \"news\",\n  title: \"News\",\n  load: async () => [\"Public content\"],\n  view: ({ data }) => <ul>{data.map((title) => <li key={title}>{title}</li>)}</ul>,\n  whenEmpty: \"hide\",\n});\n\nfunction WebsiteView({ model, applicationOutlet }: WebspringViewProps) {\n  return <main data-logo={model.branding.logoUrl ?? \"\"}>{model.apps.map(({ bundleIdentifier }) => <span key={bundleIdentifier}>{bundleIdentifier}</span>)}{model.widgets.length > 0 ? <WebspringWidgetShelf entries={model.widgets} surface={model.background.shelf} /> : null}{applicationOutlet}</main>;\n}\n\nconst siteName: LocalisedText = { key: \"site.name\", fallback: \"Example\" };\nexport const webspring = defineWebspring({\n  manifest: {\n    schemaVersion: 1,\n    bundleIdentifier: \"com.example.webspring\",\n    version: \"0.1.0\",\n    displayName: \"Example Webspring\",\n    webspringShell: {\n      views: [{ id: \"website\", presentations: [\"desktop\", \"tablet\", \"mobile\"], mode: \"persistent\" }],\n      defaults: { desktop: \"website\", tablet: \"website\", mobile: \"website\" },\n      homeRoute: \"/\",\n      branding: { name: siteName, logo: { resource: \"./Resources/SiteLogo.svg\", alternativeText: { key: \"site.logo\", fallback: \"Example logo\" } } },\n    },\n  },\n  components: { website: WebsiteView },\n  widgets: [news],\n});\nexport const app = createSynWare({ manifest, root: ExternalFixture });\nexport const contactApp = createSynWare({\n  manifest: {\n    schemaVersion: 1,\n    bundleIdentifier: \"com.example.contact\",\n    version: \"0.1.0\",\n    displayName: \"Contact\",\n    routes: [{ path: \"/contact\", primary: true }],\n    presentations: [\"desktop\", \"tablet\", \"mobile\"],\n    runtime: { policy: { public: true } },\n    webspring: { visible: true, order: 2 },\n  },\n  root: () => <p>Contact</p>,\n});\nexport function mountFixture(element: Element) {\n  return mountSynCloudOS({ element, bundles: [app, contactApp], shell: webspring, shellResources: { resourceUrls: { \"./Resources/SiteLogo.svg\": \"/site-logo.svg\" }, fontResourceUrls: { \"./Resources/Site.woff2\": \"/site.woff2\" } } });\n}\nexport function mountFixtureWithoutContact(element: Element) {\n  return mountSynCloudOS({ element, bundles: [app], shell: webspring, shellResources: { resourceUrls: { \"./Resources/SiteLogo.svg\": \"/site-logo.svg\" } } });\n}\nexport const testHost = createSynWareTestHost({ app });\nexport const disposal: Promise<SynWareTestDisposalReport> = testHost.dispose();\nfunction BrandingProbe() {\n  const app = useSCOS();\n  return <output data-branding-name={app.branding.name}>{app.branding.name}</output>;\n}\nconst brandingProbeApp = createSynWare({\n  manifest: {\n    schemaVersion: 1,\n    bundleIdentifier: \"com.example.external.branding-probe\",\n    version: \"0.1.0\",\n    displayName: \"Branding Probe\",\n    routes: [{ path: \"/branding-probe\", primary: true }],\n    runtime: { policy: { public: true } },\n    webspring: { visible: false, order: 3 },\n  },\n  root: BrandingProbe,\n});\nexport async function readBrandingFromMountedApp(container: HTMLElement) {\n  const host = createSynWareTestHost({ app: brandingProbeApp, container, branding: { name: \"Example\", logoUrl: \"/site-logo.svg\", lightLogoUrl: \"/site-logo.svg\", darkLogoUrl: \"/site-logo.svg\", compactLogoUrl: \"/site-logo.svg\", logoAlt: \"Example logo\" } });\n  await host.render();\n  const name = container.querySelector(\"[data-branding-name]\")?.getAttribute(\"data-branding-name\");\n  await host.dispose();\n  if (!name) throw new Error(\"The mounted branding probe did not render a branding name.\");\n  return name;\n}\nconst webContentControl = createFakeCapabilityPort<SynWareFakeWebContentOperation>(createDeterministicScheduler());\nvoid webContentControl.run(\"web-content.load\");\n", "utf8");
     writeFileSync(join(sourceDirectory, "assets.d.ts"), `declare module "*.css";
 declare module "*.svg" { const url: string; export default url; }

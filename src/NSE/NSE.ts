@@ -136,13 +136,6 @@ export type {
 import * as NSEScroll from "./Scroll";
 export * from "./Scroll";
 import { GlassPanel, LinenSurface as MaterialLinenSurface, MaterialProvider, materialTokens } from "./Material";
-import {
-  NSEPage,
-  getNSEPagePreset,
-  nsePageMaterialPresets,
-  nsePagePresets,
-  useNSEPage
-} from "./Page";
 import { typographyTokens } from "./Typography/typographyTokens";
 import * as NSETypography from "./Typography";
 export * from "./Typography";
@@ -216,14 +209,6 @@ export const NSE = {
   Text: NSEText,
   TextEditing: NSETextEditing,
   NSEFeedbackProvider,
-  NSEPage,
-  Page: {
-    Root: NSEPage,
-    useNSEPage,
-    presets: nsePagePresets,
-    materials: nsePageMaterialPresets,
-    getPreset: getNSEPagePreset
-  },
   Material: {
     Provider: MaterialProvider,
     tokens: materialTokens,

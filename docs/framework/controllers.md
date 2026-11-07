@@ -256,6 +256,20 @@ Applications reach per-application settings through `useSCOS().persistence`, whi
 
 `NSESplitViewController` owns `NSESplitViewItem`s (`behavior`, `canCollapse`, `isCollapsed`, thickness constraints and holding priority). Compact content shows one item at a time; the approved NSE extension `compactItem` selects it, and `showDetail(viewController)` moves to an existing detail. The theme draws Back and restores initiating focus. A split subclass may override its static view for app-specific appearance while retaining controller-owned trait, geometry and compact selection.
 
-`NSEPageController` from `/nse/page` owns drill-in history in `stackHistory` style: `arrangedObjects`, `selectedIndex`, `navigateForwardToObject`, `navigateBack` and `navigateForward`. Its `identifierForObject`, `viewControllerForIdentifier` and `prepareViewController` methods supply actual child page controllers. Journal composes this folder/list history with the split controller's note detail.
+`NSEPageController` from `/nse/page` owns page navigation. Journal composes its folder/list history with the split controller's note detail.
+
+### Page controller
+
+Import `NSEPageController` and its options, snapshot, transition-style and spine-location types from `@syndromatic/syncloudos/nse/page`. Place the controller with `<pages.view />`. The controller owns `arrangedObjects`, `selectedIndex`, `navigateForwardToObject`, `navigateBack` and `navigateForward`.
+
+`transitionStyle` accepts `"stackHistory"` (the default), `"horizontalStrip"` or `"pageCurl"`. `stackHistory` keeps drill-in history: navigating forward to an object discards the history after the selected page and appends the object. `horizontalStrip` slides between adjacent pages. `pageCurl` prints the selected child controller's view on the turning sheet and reveals the next or previous page underneath. A trailing- or leading-edge drag, a horizontal swipe, or `navigateForward`/`navigateBack` turns it.
+
+For `pageCurl`, `spineLocation: "min"` (the default) displays one page; `"mid"` displays two-page spreads. `pageCurl` and `spineLocation` deliberately use the names of `UIPageViewController.TransitionStyle.pageCurl` and `UIPageViewController.SpineLocation`. These are owner-approved naming exceptions to the AppKit shape (decision 8, 2026-11-07); the owning class remains `NSEPageController` (`NSPageController`).
+
+Override `identifierForObject`, `viewControllerForIdentifier` and `prepareViewController`, corresponding to `NSPageControllerDelegate`. Make children with `this.addChild(...)`. `prepareViewController` assigns the child's `representedObject` by default. In `stackHistory` and `horizontalStrip`, pages with the same identifier reuse a child controller. In `pageCurl`, an identifier names the page kind, while each arranged object retains its own child: several printed pages may need their `representedObject` and live view at the same time. Each live child view is mounted once; repeated decorative paper faces are inert replicas.
+
+The observable snapshot has `selectedIndex`, `count`, `turnProgress` (`0..1`) and `turnDirection` (`"forward"`, `"backward"` or `null`). An app such as Portfolio observes progress for its own book scene; opening and closing that scene remain app behaviour. In `pageCurl`, `didTransitionToObject(object)` fires only after a curl completes successfully. Cancellation leaves the selected page unchanged and sends no completion delegate call.
+
+The curl renderer, hook, geometry, presets and leaf types are internal. The standalone `NSEPage` component, its handle and the `NSE.Page` facade have been removed. The controller preserves the existing WebGL curl, CSS fallback, reduced-motion crossfade and inert decorative faces. See the [page implementation notes](../../src/NSE/Page/README.md) for the rendering model.
 
 See [source-list windows](nse/source-list-chrome.md) for outline groups, the host's rail seam and window bottom-bar accessories.

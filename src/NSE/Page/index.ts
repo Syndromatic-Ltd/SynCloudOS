@@ -20,30 +20,10 @@
 
 import "./nse-page.css";
 
-export { NSEPage } from "./NSEPage";
 export { NSEPageController } from "./NSEPageController";
-export type { NSEPageControllerOptions, NSEPageControllerSnapshot, NSEPageControllerTransitionStyle } from "./NSEPageController";
-export { useNSEPage } from "./useNSEPage";
-export {
-  clampNSEPageProgress,
-  easeOutNSEPageProgress,
-  getNSEPageAxis,
-  getNSEPageBackFaceTransform,
-  getNSEPageBookSignedDirection,
-  getNSEPageCurlDragProgress,
-  getNSEPageGeometryStyle,
-  getNSEPageNearestEdge,
-  getNSEPageHingeEdge,
-  getNSEPageOppositeEdge,
-  getNSEPageProgressFromPoint,
-  getNSEPageSignedDirection,
-  getNSEPageTransformOrigin,
-  isNSEPagePointNearEdge,
-  isNSEPageBookSurfaceActive,
-  lerpNSEPageValue,
-  resolveNSEPageBookStripGeometry,
-  resolveNSEPageGeometry,
-  smoothNSEPageProgress
-} from "./nsePageGeometry";
-export { getNSEPagePreset, nsePageMaterialPresets, nsePagePresets } from "./nsePagePresets";
-export type * from "./nsePageTypes";
+export type {
+  NSEPageControllerOptions,
+  NSEPageControllerSnapshot,
+  NSEPageControllerSpineLocation,
+  NSEPageControllerTransitionStyle,
+} from "./NSEPageController";

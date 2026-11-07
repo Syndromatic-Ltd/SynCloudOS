@@ -233,16 +233,11 @@
     "NSEOwner": {
       "none": "SynCloudOS object lifetimes. AppKit relies on reference counting and parent-child ownership instead."
     },
-    "NSEPage": {
-      "none": "A page-curl surface; D4 merges it into NSEPageController as a transitionStyle.",
-      "replacement": "NSEPageController"
-    },
     "NSEPageController": "NSPageController",
-    "NSEPageControllerTransitionStyle": "NSPageController.TransitionStyle",
-    "NSEPageHandle": {
-      "none": "The page-curl surface's imperative handle; D4 merges page curl into NSEPageController.transitionStyle.",
-      "replacement": "NSEPageController"
+    "NSEPageControllerSpineLocation": {
+      "none": "Owner-approved UIKit naming exception (decision 8, 2026-11-07): UIPageViewController.SpineLocation supplies min for a single page and mid for two-page spreads."
     },
+    "NSEPageControllerTransitionStyle": "NSPageController.TransitionStyle",
     "NSEPageHeader": {
       "none": "A content header with no AppKit counterpart; its shape awaits the owner's decision."
     },
