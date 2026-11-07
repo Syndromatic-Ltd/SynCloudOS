@@ -216,6 +216,8 @@ export interface SynWareRuntimeManifest {
     readonly public?: boolean;
     readonly requiresLogin?: boolean;
     readonly requiredCapabilities?: readonly string[];
+    readonly requiredRoles?: readonly string[];
+    readonly requiredEntitlements?: readonly string[];
     readonly requiredAccessClasses?: readonly ("team" | "external")[];
   };
   readonly notifications?: { readonly badgeCount?: number };
@@ -302,7 +304,6 @@ export interface SynWareManifestV1 {
   readonly services?: readonly SynWareServiceManifest[];
   /** Device and service capabilities captured by the runtime at application launch. */
   readonly entitlements?: readonly string[];
-  readonly permissions?: readonly string[];
   /** Whether the build serves this application in development only. */
   readonly availability?: SynWareApplicationAvailability;
   readonly appearances?: readonly SynWareAppearanceManifest[];
