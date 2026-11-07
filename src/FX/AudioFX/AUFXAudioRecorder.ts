@@ -18,8 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
+
 export interface AUFXAudioRecording {
-  readonly data: Blob;
+  readonly data: NSEData;
   readonly mimeType: string;
   readonly byteLength: number;
   readonly elapsedRecordingTime: number;
@@ -70,7 +73,7 @@ export class AUFXAudioRecorder {
   #finalizing = false;
   #durationTimer: ReturnType<typeof setTimeout> | null = null;
   #finishTimer: ReturnType<typeof setTimeout> | null = null;
-  constructor(port: AUFXAudioRecorderPort, options: AUFXAudioRecorderOptions = {}) {
+  private constructor(port: AUFXAudioRecorderPort, options: AUFXAudioRecorderOptions = {}) {
     this.#port = port;
     this.#limitBytes = bounded(options.maximumBytes, 16777216, 67108864, "byte limit");
     this.#limitChunks = bounded(options.maximumChunks, 4096, 16384, "chunk limit");
@@ -124,15 +127,20 @@ export class AUFXAudioRecorder {
     try {
       if (!this.#bytes) throw new Error("Recording contains no audio data.");
       const data = new Blob(this.#chunks, { type: this.#port.mimeType }); this.#chunks = [];
-      const metadata = await this.#port.decode?.(data, this.#decodeAbort.signal);
+      const [encodedData, metadata] = await Promise.all([NSEData.read(data), this.#port.decode?.(data, this.#decodeAbort.signal)]);
       if (this.#settled) return;
       if (metadata && (!Number.isSafeInteger(metadata.frameCount) || metadata.frameCount < 0 || !Number.isFinite(metadata.duration) || metadata.duration < 0 || !Number.isFinite(metadata.sampleRate) || metadata.sampleRate <= 0 || !Number.isInteger(metadata.channelCount) || metadata.channelCount < 1)) throw new Error("Invalid decoded recording metadata.");
       this.#settled = true; this.#state = "finished"; this.cleanup();
-      this.#resolve(Object.freeze({ data, mimeType: this.#port.mimeType, byteLength: data.size, elapsedRecordingTime: this.#elapsed, duration: metadata?.duration ?? null, frameCount: metadata?.frameCount ?? null, sampleRate: metadata?.sampleRate ?? null, channelCount: metadata?.channelCount ?? null }));
+      this.#resolve(Object.freeze({ data: encodedData, mimeType: this.#port.mimeType, byteLength: data.size, elapsedRecordingTime: this.#elapsed, duration: metadata?.duration ?? null, frameCount: metadata?.frameCount ?? null, sampleRate: metadata?.sampleRate ?? null, channelCount: metadata?.channelCount ?? null }));
     } catch (error) { this.fail(error instanceof Error ? error : new Error(String(error))); }
   }
   private fail(error: Error, cancelled = false) { if (this.#settled) return; this.#elapsed = this.elapsedRecordingTime; this.#settled = true; this.#state = cancelled ? "cancelled" : "error"; this.#decodeAbort.abort(error); this.cleanup(); this.#reject(error); }
   private cleanup() { if (this.#durationTimer !== null) clearTimeout(this.#durationTimer); if (this.#finishTimer !== null) clearTimeout(this.#finishTimer); this.#durationTimer = null; this.#finishTimer = null; this.#unsubscribe(); this.#removeAbort?.(); this.#removeAbort = null; this.#chunks = []; this.#port.dispose(); }
   cancel(reason?: unknown) { this.fail(reason instanceof Error ? reason : new DOMException("Audio recording cancelled.", "AbortError"), true); }
   dispose() { this.cancel(); }
+}
+
+/** Host construction is intentionally absent from the public SDK entry. */
+export function createHostAUFXAudioRecorder(port: AUFXAudioRecorderPort, options: AUFXAudioRecorderOptions = {}): AUFXAudioRecorder {
+  return Reflect.construct(AUFXAudioRecorder, [port, options]) as AUFXAudioRecorder;
 }

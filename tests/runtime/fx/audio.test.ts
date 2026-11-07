@@ -36,7 +36,7 @@ describe("AudioFX PCM values", () => {
     const buffer = new AUFXAudioPCMBuffer(new AUFXAudioFormat(8000, 1), 4);
     buffer.frameLength = 4;
     [0, 0.5, -0.5, 1].forEach((v, i) => buffer.setSample(0, i, v));
-    const wav = AUFXAudioFile.encodeWAV(buffer);
+    const wav = AUFXAudioFile.encodeWAV(buffer).bytes;
     const decoded = AUFXAudioFile.decodeWAV(wav);
     expect(decoded.getSample(0, 1)).toBeCloseTo(0.5, 4);
     expect(AUFXAudioConverter.convert(decoded, new AUFXAudioFormat(16000, 1)).frameLength).toBe(8);
