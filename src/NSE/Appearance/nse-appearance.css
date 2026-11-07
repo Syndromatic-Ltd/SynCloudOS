@@ -126,8 +126,7 @@
   .nse-prefs-veil,
   .nse-control-popup,
   .nse-overlay-popup,
-  .nse-control-image-view-controls,
-  .nse-control-image-view-crop
+  .nse-control-image-view-controls
 ),
 :where([data-nse-transparency="reduced"]) :where(
   .atmo-glass,
@@ -135,8 +134,7 @@
   .nse-prefs-veil,
   .nse-control-popup,
   .nse-overlay-popup,
-  .nse-control-image-view-controls,
-  .nse-control-image-view-crop
+  .nse-control-image-view-controls
 ) {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;

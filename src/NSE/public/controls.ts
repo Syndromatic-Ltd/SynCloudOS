@@ -108,14 +108,8 @@ export type {
   NSEFontTextStyle,
   NSESwitchProps,
 } from "../Controls/Fields/NSEFields";
-export { NSEImageView, NSECroppableImage } from "../Controls/Images";
+export { NSEImageView } from "../Controls/Images";
 export type {
-  NSECropParams,
-  NSECroppableImageProps,
-  NSEImageDimensions,
-  NSEImageGeometryPort,
-  NSEImageStringSourceLease,
-  NSEImageStringSourcePort,
   NSEImageScaling,
   NSEImageViewProps,
 } from "../Controls/Images";

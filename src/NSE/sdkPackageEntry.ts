@@ -557,16 +557,9 @@ export {
   NSEShadowView,
 } from "./Graphics/NSEShadowView";
 export {
-  NSECroppableImage,
   NSEImageView,
 } from "./Controls/Images/NSEImage";
 export type {
-  NSECropParams,
-  NSECroppableImageProps,
-  NSEImageDimensions,
-  NSEImageGeometryPort,
-  NSEImageStringSourceLease,
-  NSEImageStringSourcePort,
   NSEImageScaling,
   NSEImageViewProps,
 } from "./Controls/Images/NSEImage";

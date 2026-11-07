@@ -27,7 +27,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
-import { NSEButton, NSECroppableImage, NSEImageView, NSESearchField, NSESegmentedControl } from "../../src/NSE/public/controls";
+import { NSEButton, NSEImageView, NSESearchField, NSESegmentedControl } from "../../src/NSE/public/controls";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
 import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
@@ -214,14 +214,6 @@ describe("NSE extended wrapper controls", () => {
     expect(container.querySelector(".nse-control-sizeable-image-media")?.getAttribute("src")).toBe("/sample.jpg");
     expect(screen.getByRole("button", { name: "Zoom in" })).not.toBeNull();
     expect(screen.getByRole("button", { name: "Zoom out" })).not.toBeNull();
-  });
-
-  it("renders NSECroppableImage with a crop frame and Crop control", () => {
-    // CroppableImage: zoom/pan a SizeableImage; Crop reports the visible source region.
-    const { container } = renderWithAppearance(<NSECroppableImage src="/crop.jpg" alt="Crop" />);
-
-    expect(container.querySelector(".nse-control-croppable-image-frame")).not.toBeNull();
-    expect(screen.getByRole("button", { name: "Crop" })).not.toBeNull();
   });
 
   it("gives NSESearchField an italic prompt, a clear button only while it has text, and an optional magnifier", () => {
