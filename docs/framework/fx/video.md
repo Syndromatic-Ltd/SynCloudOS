@@ -604,7 +604,7 @@ export default {
   version: "1.0.0",
   displayName: "Camera",
   routes: [{ path: "/camera", primary: true }],
-  permissions: ["video.capture.camera"],
+  entitlements: ["video.capture.camera"],
 } as const;
 ```
 
