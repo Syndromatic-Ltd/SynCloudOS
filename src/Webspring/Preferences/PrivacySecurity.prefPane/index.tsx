@@ -28,9 +28,18 @@ function PrivacyPane() {
  const runtime = useKernelSynCloudOS(), text = useSystemText();
  const apps = useRuntimeSelector(snapshot => snapshot.appInfo);
  useRuntimeSelector(snapshot => snapshot.loginServices);
- const userId = useSyncExternalStore(runtime.configurationProfiles.subscribe,
-   () => runtime.configurationProfiles.getCurrentSubject().user.id,
-   () => runtime.configurationProfiles.getCurrentSubject().user.id);
+ const subject = useMemo(() => ({
+   subscribe(listener: () => void) {
+     const profile = runtime.configurationProfiles.subscribe(listener);
+     const identity = runtime.identity.session.subscribe(listener);
+     return () => { profile(); identity(); };
+   },
+   getSnapshot() {
+     const session = runtime.identity.session.getSnapshot();
+     return session?.state === "active" ? `identity:${session.subjectId}` : runtime.configurationProfiles.getCurrentSubject().user.id;
+   },
+ }), [runtime]);
+ const userId = useSyncExternalStore(subject.subscribe, subject.getSnapshot, subject.getSnapshot);
  const applicationNames = useMemo(() => Object.fromEntries(Object.values(apps).map(app => [app.bundleIdentifier.toLowerCase(),app.displayName])), [apps]);
  return <PrivacySecurityPane store={runtime.privacy} userId={userId} applicationNames={applicationNames} text={text} />;
 }

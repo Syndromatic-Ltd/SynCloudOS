@@ -607,7 +607,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
       initialBundles = initialBundles.map(bundle => {
         if (normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId) return bundle;
         if (bundle.manifest.policy?.requiresLogin === true) {
-          throw new TypeError(`Application ${primaryId} declares runtime.configurationProfiles.requiresLogin, but this host mounts it with authentication "disabled", so nobody could ever open it. Enable authentication, or remove requiresLogin.`);
+          throw new TypeError(`Application ${primaryId} declares runtime.policy.requiresLogin, but this host mounts it with authentication "disabled", so nobody could ever open it. Enable authentication, or remove requiresLogin.`);
         }
         return Object.freeze({ ...bundle, manifest: Object.freeze({ ...bundle.manifest, policy: Object.freeze({ ...bundle.manifest.policy, public: true }) }) });
       });
