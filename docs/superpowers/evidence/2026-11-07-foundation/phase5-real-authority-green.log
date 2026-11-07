@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-real-authority.test.ts tests/runtime/fx/phase5-mounted.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  2 passed (2)
+      Tests  3 passed (3)
+   Start at  19:41:19
+   Duration  8.78s (transform 11.75s, setup 43ms, import 15.10s, tests 156ms, environment 970ms)
+

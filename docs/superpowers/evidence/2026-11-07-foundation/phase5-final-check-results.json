@@ -1,0 +1,9 @@
+{
+  "commit": "dd1a6ddcef5d94028af931f8f3175b632a2af115",
+  "strictPackageExit": 0,
+  "fullSuiteExit": null,
+  "finishedAt": "2026-11-07T21:42:25.2315059+00:00",
+  "unreliableShellExit": 0,
+  "fullSuiteComplete": false,
+  "failure": "ENOSPC prevented suite/report completion; original shell exit 0 was stale after ResourceUnavailable and is not a passing result."
+}

@@ -1,0 +1,11 @@
+{
+  "commit": "dd1a6ddcef5d94028af931f8f3175b632a2af115",
+  "archive": "archives/syndromatic-syncloudos-1.0.0-beta.2-a97ca257683d731116e7be17d0ffdb1164ec99146ca7cbc8e770fabe2ccf336e.tgz",
+  "archiveSha256": "a97ca257683d731116e7be17d0ffdb1164ec99146ca7cbc8e770fabe2ccf336e",
+  "sourceSha256": "0e256e225ee78a9323cdf8dc8f25b914657969ad3b9deab611b48cd1857e9d33",
+  "resourceCount": 2336,
+  "strictPackagePassed": true,
+  "fullSuiteComplete": false,
+  "fullSuiteFailure": "ENOSPC; output and final JSON could not be completed",
+  "checkedAt": "2026-11-07T21:52:52.5752425+00:00"
+}

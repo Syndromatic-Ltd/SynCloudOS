@@ -1,0 +1,4 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 boundaries:architecture
+npm notice run node scripts/quality/architecture-boundaries.mjs
+unknown or conflicting boundary alias @syndromatic/syncloudos/authentication-services
+unknown or conflicting boundary alias @syndromatic/syncloudos/auth/passkey

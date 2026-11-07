@@ -1,0 +1,39 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-bluetooth.test.ts tests/runtime/fx/phase5-xr.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-xr.test.ts (0 test)
+ ❯ tests/runtime/fx/phase5-bluetooth.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-bluetooth.test.ts [ tests/runtime/fx/phase5-bluetooth.test.ts ]
+Error: Cannot find module '../../../src/SynCloudOS/PlatformAdapters/BrowserBluetoothAdapter' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/fx/phase5-bluetooth.test.ts
+ ❯ tests/runtime/fx/phase5-bluetooth.test.ts:3:1
+      1| import { describe, expect, it, vi } from "vitest";
+      2| import { NSEData } from "../../../src/Foundation/public";
+      3| import { BrowserBluetoothAdapter } from "../../../src/SynCloudOS/Platf…
+       | ^
+      4| import { createMountedBluetoothClient } from "../../../src/SynCloudOS/…
+      5|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/fx/phase5-xr.test.ts [ tests/runtime/fx/phase5-xr.test.ts ]
+Error: Cannot find module '../../../src/FX/XRFX/public' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/fx/phase5-xr.test.ts
+ ❯ tests/runtime/fx/phase5-xr.test.ts:2:1
+      1| import { describe, expect, it, vi } from "vitest";
+      2| import { XRFXConfiguration } from "../../../src/FX/XRFX/public";
+       | ^
+      3| import { BrowserXRAdapter } from "../../../src/SynCloudOS/PlatformAdap…
+      4| import { createMountedXRClient } from "../../../src/SynCloudOS/AppSDK/…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  no tests
+   Start at  19:03:48
+   Duration  307ms (transform 139ms, setup 56ms, import 0ms, tests 0ms, environment 0ms)
+

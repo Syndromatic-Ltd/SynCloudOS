@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx\phase5-xr.test.ts tests/runtime/fx\phase5-speech.test.ts tests/runtime/fx\phase5-speech-contacts-hooks.test.tsx tests/runtime/fx\phase5-real-authority.test.ts tests/runtime/fx\phase5-payment.test.ts tests/runtime/fx\phase5-payment-hook.test.tsx tests/runtime/fx\phase5-nfc.test.ts tests/runtime/fx\phase5-nfc-hook.test.tsx tests/runtime/fx\phase5-mounted.test.tsx tests/runtime/fx\phase5-counterparts.test.ts tests/runtime/fx\phase5-contacts.test.ts tests/runtime/fx\phase5-bluetooth.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  12 passed (12)
+      Tests  56 passed (56)
+   Start at  20:24:29
+   Duration  15.00s (transform 16.83s, setup 134ms, import 22.37s, tests 339ms, environment 4.95s)
+
