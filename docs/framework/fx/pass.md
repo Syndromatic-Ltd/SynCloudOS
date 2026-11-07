@@ -2,7 +2,7 @@
 
 PassFX uses `PKFXPaymentRequest`, payment summary items, and `PKFXPaymentAuthorizationController` after PassKit. Its browser transport is Payment Request. It does not provide Apple Pay entitlement, native Wallet passes, a merchant account, payment processing, or a drawn payment sheet.
 
-Declare `payment.request` in the app's permissions. The mounted client rechecks this declaration and host policy before `canMakePayments()`, `present()`, and response completion. The browser and the merchant's configured payment method own the payment UI and authorization. Merchants must verify the returned details with their payment provider/server before completing with `"success"`.
+Declare `payment.request` in the app's `Info.ts` entitlements. The mounted client rechecks this declaration and host policy before `canMakePayments()`, `present()`, and response completion. The browser and the merchant's configured payment method own the payment UI and authorization. Merchants must verify the returned details with their payment provider/server before completing with `"success"`.
 
 ```tsx
 import { usePayment } from "@syndromatic/syncloudos/sdk";
