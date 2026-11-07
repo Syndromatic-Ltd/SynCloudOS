@@ -120,3 +120,19 @@ it("observes browser-input file byte acquisition until native settlement", async
   await expect(pending).rejects.toMatchObject({ code: "reference-released" });
   expect(activity.pendingOperationCount).toBe(0);
 });
+
+it("does not start input-file byte work after an activity listener releases its reference", async () => {
+  const runtime = new AbortController(), owner = new AbortController(), activity = new NativeOperationActivity(runtime.signal);
+  const file = new File(["generated"], "generated.txt"), read = vi.spyOn(file, "arrayBuffer");
+  const client = createMountedFilePanelClient({ nativeActivity: activity, signal: owner.signal, assertLive: () => owner.signal.throwIfAborted(),
+    activation: () => true, access: () => ({ declared: true, allowed: true }),
+    picker: { pickFiles: async () => ({ kind: "accepted", files: [file], cleanup() {} }) } });
+  const selected = await client.open({ id: "input-admission", accepts: [], selection: "single-file", access: "read", requires: [] });
+  if (selected.kind !== "accepted" || selected.values[0]!.kind === "directory-handle") throw new Error("Expected file");
+  const reference = selected.values[0]!, unsubscribe = activity.subscribe(() => { if (activity.pendingOperationCount) reference.release("runtime-disposed"); });
+  try {
+    await expect(reference.read()).rejects.toMatchObject({ code: "reference-released" });
+    expect(read).not.toHaveBeenCalled();
+    expect(activity.pendingOperationCount).toBe(0);
+  } finally { unsubscribe(); }
+});

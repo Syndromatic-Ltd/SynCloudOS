@@ -60,7 +60,7 @@ function ephemeralReference(file: File, request: OpenPanelRequest, index: number
     permission: "granted" as const,
     read: async (signal?: AbortSignal) => {
       assertLive(signal);
-      const data = await (nativeActivity ? nativeActivity.track(() => NSEData.read(file)) : NSEData.read(file));
+      const data = await (nativeActivity ? nativeActivity.track(() => { assertLive(signal); return NSEData.read(file); }) : NSEData.read(file));
       assertLive(signal);
       return data;
     },
