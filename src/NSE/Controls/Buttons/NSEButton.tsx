@@ -31,6 +31,8 @@ import {
   type ReactNode,
   type RefAttributes,
 } from "react";
+import { NSEControlImage } from "../Images/NSEControlImage";
+import type { NSEImage } from "../Images/NSEImageResource";
 import type { HFXFeedbackPresetName, HFXFeedbackRequest } from "../../Feedback";
 import type { NSEBinding } from "../../Bindings/bindingTypes";
 import type { NSEControlActionProps, NSEControlValidation } from "../Core/controlTypes";
@@ -80,8 +82,8 @@ export interface NSEButtonProps<Payload = unknown>
   readonly title?: ReactNode;
   readonly buttonType?: NSEButtonType;
   readonly bezelStyle?: NSEBezelStyle;
-  /** The button's image: an image URL or a drawn element. */
-  readonly image?: ReactNode;
+  /** The button's image: an NSEImage, image URL or drawn element. Template images inherit the content colour. */
+  readonly image?: ReactNode | NSEImage;
   /** Defaults to `imageLeading` when the button has an image, otherwise `noImage`. */
   readonly imagePosition?: NSEImagePosition;
   /** The state a `pushOnPushOff`, `toggle` or `switch` button shows. */
@@ -156,10 +158,6 @@ function toneFor(props: Pick<NSEButtonProps, "hasDestructiveAction" | "keyEquiva
   return props.bezelStyle === "texturedRounded" ? "dark" : "medium";
 }
 
-function renderImage(image: ReactNode): ReactNode {
-  return typeof image === "string" ? <img src={image} alt="" draggable={false} /> : image;
-}
-
 function accessibleTitle(title: ReactNode): string | undefined {
   return typeof title === "string" || typeof title === "number" ? String(title) : undefined;
 }
@@ -220,7 +218,7 @@ const NSEPushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function
   const on = (alternates && state === "on") || presentation?.state === "on";
   const drawnPressed = on || isHighlighted;
   const position = imagePosition ?? (image ? "imageLeading" : "noImage");
-  const shownImage = position === "noImage" ? null : renderImage(image);
+  const shownImage = position === "noImage" ? null : <NSEControlImage image={image} />;
   const label = accessibleTitle(title);
   const disclosure = bezelStyle === "disclosure";
 

@@ -21,7 +21,13 @@
     "Metrics",
     "Spec"
   ],
+  "members": {
+    "NSEImage.named": "NSImage.init(named:)",
+    "NSEImage.goBackTemplateName": "NSImage.goBackTemplateName",
+    "NSEImage.goForwardTemplateName": "NSImage.goForwardTemplateName"
+  },
   "counterparts": {
+    "NSEImage": "NSImage",
     "NSEWorkspace": "NSWorkspace",
     "NSEPathControl": "NSPathControl",
     "NSEPathControlItem": "NSPathControlItem",

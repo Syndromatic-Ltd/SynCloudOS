@@ -6,6 +6,7 @@ import { appkitCounterpartFor } from "../../scripts/developer-mcp/lookup.mjs";
 import { synWareSdkEntries } from "../../scripts/synware/sdk-entries.mjs";
 
 interface CounterpartMap {
+  readonly members: Readonly<Record<string, string>>;
   readonly derivedSuffixes: readonly string[];
   readonly counterparts: Readonly<Record<string, string | { readonly none: string; readonly replacement?: string }>>;
 }
@@ -57,7 +58,16 @@ describe("NSE names are AppKit names", () => {
     }
   });
 
+  it("records the NSImage named lookup and both template name constants", () => {
+    expect(map.members).toMatchObject({
+      "NSEImage.named": "NSImage.init(named:)",
+      "NSEImage.goBackTemplateName": "NSImage.goBackTemplateName",
+      "NSEImage.goForwardTemplateName": "NSImage.goForwardTemplateName",
+    });
+  });
+
   it("derives a type's counterpart from its class", () => {
+    expect(appkitCounterpartFor("NSEImage", map)).toBe("NSImage");
     expect(appkitCounterpartFor("NSEButtonProps", map)).toBe("NSButton");
     expect(appkitCounterpartFor("NSETabViewControllerSnapshot", map)).toBe("NSTabViewController");
     expect(appkitCounterpartFor("NSEColourWell", map)).toBe("NSColorWell");

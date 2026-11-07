@@ -32,6 +32,8 @@ import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
 import { NSEWindowController } from "../Application/NSEWindowController";
 import { NSETitlebarAccessoryViewController } from "../Application/NSETitlebarAccessoryViewController";
 import { NSEWindowTitlebarContent } from "../Windows/windowTitlebarContext";
+import { NSEImage } from "../Controls/Images/NSEImageResource";
+import { NSEControlImage } from "../Controls/Images/NSEControlImage";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
 
@@ -76,19 +78,6 @@ export interface NSEPreferencesToastProps {
   runtimeOwner?: string;
   onClose: () => void;
 }
-
-const BackArrow = (
-  <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false">
-    <path
-      d="M15 4 L7 12 L15 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 type PaneDirection = NSEPreferencesPaneDirection;
 
@@ -325,7 +314,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                       <NSEButton
                         bezelStyle="texturedRounded"
                         title={backLabel}
-                        image={BackArrow}
+                        image={NSEImage.named(NSEImage.goBackTemplateName)}
                         imagePosition="imageOnly"
                         className="nse-prefs-back"
                         onClick={() => goToPane(null)}
@@ -365,7 +354,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                                   {pane.accessory}
                                 </span>
                               ) : null}
-                              <span className="nse-prefs-chevron" aria-hidden="true">›</span>
+                              <span className="nse-prefs-chevron" aria-hidden="true"><NSEControlImage image={NSEImage.named(NSEImage.goForwardTemplateName)} /></span>
                             </span>
                           )}
                           onClick={() => goToPane(pane.id)}
