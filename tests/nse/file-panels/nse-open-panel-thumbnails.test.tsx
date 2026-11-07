@@ -33,3 +33,15 @@ it("does not start decoding when a file read finishes after its cell unmounts", 
   await act(async () => { read({ type: "image/png", arrayBuffer: async () => new ArrayBuffer(4) }); });
   expect(load).not.toHaveBeenCalled();
 });
+it.each(["url", "file-reference"])("decodes an image provider's %s when it has no separate thumbnail", async kind => {
+  const resource = { state: "loading", ready: new Promise<void>(() => {}), release: vi.fn() };
+  const load = vi.fn((_request: unknown) => resource);
+  const data = NSEData.from(new Uint8Array([137, 80, 78, 71]));
+  const item = { id: "provider:one", name: "Coast", kind: "media", media: { kind: "image", mimeType: "image/png",
+    ...(kind === "url" ? { source: "/coast.png" } : { fileReference: { read: async () => data } }),
+  } } as any;
+  const view = render(<NSEOpenPanelItemImage item={item} images={{ load } as any} />);
+  await waitFor(() => expect(load).toHaveBeenCalledOnce());
+  expect(load.mock.calls[0]?.[0]).toMatchObject({ source: kind === "url" ? { kind: "url", url: "/coast.png" } : { kind: "bytes", mimeType: "image/png", bytes: data } });
+  view.unmount(); expect(resource.release).toHaveBeenCalledOnce();
+});
