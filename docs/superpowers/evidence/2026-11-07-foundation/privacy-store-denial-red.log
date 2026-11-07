@@ -49,4 +49,3 @@ undefined
       Tests  2 failed | 13 passed (15)
    Start at  19:12:20
    Duration  225ms (transform 43ms, setup 32ms, import 27ms, tests 13ms, environment 0ms)
-
