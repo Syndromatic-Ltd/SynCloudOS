@@ -84,6 +84,7 @@ export interface MIFXOutputLease extends MIFXSubscription {
 }
 
 export interface MIFXAccess extends MIFXSubscription {
+  readonly authorizationStatus: MIFXAuthorizationState;
   getCapabilities(): MIFXCapabilities;
   getEndpoints(): readonly MIFXEndpointSnapshot[];
   requestAuthorization(request?: MIFXAuthorizationRequest): Promise<MIFXAuthorizationResult>;

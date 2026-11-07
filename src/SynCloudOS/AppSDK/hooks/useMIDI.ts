@@ -44,6 +44,7 @@ export function useMIDI(): MIFXAccess {
       return current;
     };
     const facade = Object.freeze<MIFXAccess>({
+      get authorizationStatus() { return current?.authorizationStatus ?? "unavailable"; },
       getCapabilities: () => current?.getCapabilities() ?? pendingCapabilities,
       getEndpoints: () => current?.getEndpoints() ?? noEndpoints,
       requestAuthorization: (request) => requireAccess().requestAuthorization(request),

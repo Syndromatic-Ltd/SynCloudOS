@@ -50,6 +50,9 @@ export function useMotion(): MFXMotionManager {
       return current;
     };
     const facade: MFXMotionManager = Object.freeze<MFXMotionManager>({
+      get authorizationStatus() {
+        return current?.authorizationStatus ?? "unavailable";
+      },
       get capabilities() {
         return current?.capabilities ?? pendingCapabilities;
       },

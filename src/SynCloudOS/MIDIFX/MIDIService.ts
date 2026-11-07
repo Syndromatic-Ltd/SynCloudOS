@@ -265,6 +265,7 @@ export class MIDIService {
     owner.externalSignal?.addEventListener("abort", owner.externalAbort, { once: true });
 
     const access: MIFXAccess = {
+      get authorizationStatus() { assertLive(); return owner.authorization; },
       getCapabilities: capabilities,
       getEndpoints: endpoints,
 
