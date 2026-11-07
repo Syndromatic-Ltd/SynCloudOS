@@ -66,4 +66,5 @@ void [bluetooth,nfc,speech,contacts,payment,xr,session];
 `);
   writeFileSync(join(consumer.root, "tsconfig.json"), JSON.stringify({ compilerOptions: { target: "ES2022", module: "NodeNext", moduleResolution: "NodeNext", strict: true, noEmit: true, skipLibCheck: true }, files: ["consumer.ts"] }));
   expect(runNode([join(consumer.root, "node_modules/typescript/bin/tsc"), "-p", "tsconfig.json"], consumer.root)).toBe("");
-}, 120000);
+// A cold npm installation can exceed two minutes while the shared Windows jobs are building.
+}, 600000);
