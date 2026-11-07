@@ -494,7 +494,7 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
     ? <NSEViewControllerView controller={root} />
     : View ? <View controller={controller} /> : null}<NSEWindowAlertSheet queue={alerts} /></NSEWindowSheetHostContext.Provider>;
   const sheetLayer = <div ref={sheets.layerRef} className="nse-window-sheet-layer" data-sheet-attached={sheets.attached ? "true" : undefined} />;
-  const { toolbar, titlebarAccessoryViewControllers: accessories } = controller.window;
+  const { toolbar, bottomBarAccessory, titlebarAccessoryViewControllers: accessories } = controller.window;
   const renderAccessory = (accessory: NSEViewController<unknown>) => <NSEViewControllerView controller={accessory} className="nse-window-titlebar-accessory" />;
   const bottomBorder = controller.window.contentBorderThickness("minY");
   // Content keeps its own frame unless the window draws a toolbar, an accessory row or a content border.
@@ -509,7 +509,10 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
             {toolbar ? <NSEWindowToolbar controller={controller} toolbar={toolbar} /> : null}
             <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={stageTitlebar} placement="row" />
             <div className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined}>
-              {content}
+              {bottomBorder > 0 && bottomBarAccessory != null ? <>
+                <div className="nse-window-content-above-bottom-bar" style={{ bottom: bottomBorder }}>{content}</div>
+                <div className="nse-window-bottom-bar-accessory" data-nse-part="bottom-bar-accessory" style={{ height: bottomBorder }}>{bottomBarAccessory}</div>
+              </> : content}
               {bottomBorder > 0 ? <NSEWindowContentBorder thickness={bottomBorder} /> : null}
               {sheetLayer}
             </div>

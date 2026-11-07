@@ -31,6 +31,7 @@ import type { NSEApplication, NSEOpenWindowOptions } from "./NSEApplication";
 import { NSEObjectLifetime } from "./objectLifetime";
 import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
 import type { NSEToolbar } from "../Toolbars/NSEToolbar";
+import type { ReactNode } from "react";
 import type { NSETitlebarAccessoryViewController } from "./NSETitlebarAccessoryViewController";
 import { nseAdoptViewController, validateNSEViewControllerClass, type NSEViewComponent, type NSEViewController, type NSEViewControllerClass } from "./NSEViewController";
 
@@ -55,6 +56,8 @@ export interface NSEWindow {
   isDocumentEdited: boolean;
   /** NSWindow.toolbar: the window draws it under its title bar. */
   toolbar: NSEToolbar | null;
+  /** NSE extension: ordinary views in the window's bottom content border, separate from navigation tabs. */
+  bottomBarAccessory: ReactNode;
   /**
    * NSWindow.contentBorderThickness(for:): the height of the band the window paints along an edge of
    * its content (0 when it paints none). The content's own controls, such as status text fields with
@@ -231,6 +234,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   #documentEdited = false;
   #contentBorderMinY = 0;
   #toolbar: NSEToolbar | null = null;
+  #bottomBarAccessory: ReactNode = null;
   #accessories: readonly NSETitlebarAccessoryViewController<unknown>[] = Object.freeze([]);
   #contentViewController: NSEViewController<unknown> | null = null;
   /** The options used to open or restore this controller, available in its constructor. */
@@ -297,6 +301,13 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
         controller.#assertLive("toolbar", "set");
         if (toolbar === controller.#toolbar) return;
         controller.#toolbar = toolbar;
+        controller.notifyObservers();
+      },
+      get bottomBarAccessory() { return controller.#bottomBarAccessory; },
+      set bottomBarAccessory(accessory: ReactNode) {
+        controller.#assertLive("bottomBarAccessory", "set");
+        if (accessory === controller.#bottomBarAccessory) return;
+        controller.#bottomBarAccessory = accessory;
         controller.notifyObservers();
       },
       get titlebarAccessoryViewControllers() { return controller.#accessories; },
