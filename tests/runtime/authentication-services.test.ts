@@ -122,6 +122,14 @@ describe("optional AuthenticationServices passkeys", () => {
     expect(() => provider().createCredentialRegistrationRequest(bytes(1), "ada", bytes())).toThrow(TypeError);
     expect(() => provider().createCredentialRegistrationRequest(bytes(1), "ada", new Uint8Array(65))).toThrow(TypeError);
   });
+  it("ends controller ownership before invoking an error delegate that retries", async () => {
+    const get = vi.fn(async () => assertion()).mockRejectedValueOnce(new DOMException("Cancelled", "NotAllowedError"));
+    const controller = new ASAuthorizationController([provider().createCredentialAssertionRequest(bytes(1))], { browser: browser({ get }) });
+    let retry: ReturnType<ASAuthorizationController["performRequests"]> | undefined;
+    controller.delegate = { authorizationControllerDidCompleteWithError() { retry = controller.performRequests(); } };
+    await expect(controller.performRequests()).rejects.toMatchObject({ code: "canceled" });
+    await expect(retry).resolves.toHaveProperty("credential.kind", "assertion");
+  });
   it("reports user cancellation once without exposing native error details", async () => {
     const error = vi.fn();
     const controller = new ASAuthorizationController([provider().createCredentialAssertionRequest(bytes(1))], { browser: browser({ get: async () => { throw new DOMException("secret native message", "NotAllowedError"); } }) });
