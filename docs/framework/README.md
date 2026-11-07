@@ -48,11 +48,15 @@ SynCloudOS is an application framework for the web, in the tradition of Cocoa. T
 
 ## FX frameworks
 
-The [FX overview](fx/README.md) introduces the thirteen frameworks and how they reach a SynWare. Each has its own page:
+The [FX overview](fx/README.md) introduces the frameworks and how they reach a SynWare. Each has its own page:
 
 [AnimationFX](fx/animation.md) · [GraphicsFX](fx/graphics.md) · [ImageFX](fx/image.md) · [TextFX](fx/text.md) · [AudioFX](fx/audio.md) · [HapticsFX](fx/haptics.md) · [MotionFX](fx/motion.md) · [MediaFX](fx/media.md) · [VideoFX](fx/video.md) · [MIDIFX](fx/midi.md) · [LocationFX](fx/location.md) · [LuminaFX](fx/lumina.md) · [CompressionFX](fx/compression.md)
 
 ## Hosting
+
+[NetworkFX](fx/network.md) monitors browser path hints. [CryptoFX](fx/crypto.md)
+provides worker-safe CryptoKit-shaped WebCrypto operations. [Route picker](nse/route-picker.md)
+documents the Atmo control for VideoFX remote playback.
 
 | Guide | Read it to |
 | --- | --- |
