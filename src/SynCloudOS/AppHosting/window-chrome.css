@@ -25,6 +25,9 @@
 .nse-window-content-border-edge { position: absolute; inset: auto 0 0; height: var(--nse-window-content-border-thickness); pointer-events: none; }
 .nse-window-content-border { z-index: -1; overflow: hidden; }
 .nse-window-content-border-edge { z-index: 1; }
+.nse-window-content-above-bottom-bar { position: absolute; inset: 0; }
+.nse-window-bottom-bar-accessory { position: absolute; inset: auto 0 0; z-index: 2; min-width: 0; }
+.nse-window-bottom-bar-accessory > * { height: 100%; }
 
 /*
  * A window's sheets attach at the top of its content, under the title bar, toolbar and accessory row,
