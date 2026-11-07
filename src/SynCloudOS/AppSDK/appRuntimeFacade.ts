@@ -102,6 +102,7 @@ import {
   setMountedAppOverlayAuthority,
   clearMountedAppOverlayAuthority,
   createContentBoundPresentationTraitsService,
+  resolveWindowPresentation,
 } from "../SynCloudOS";
 import type { MountedAppOverlayAuthority } from "../SynCloudOS";
 import type { DocumentResourceDescriptor } from "../SynCloudOS";
@@ -1175,8 +1176,8 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     }
     const source = createContentBoundPresentationTraitsService({
       contentBounds: {
-        getSnapshot: () => mountedWindow.record.bounds,
-        subscribe: (listener) => mountedWindow.subscribe(() => listener(mountedWindow.record.bounds)),
+        getSnapshot: () => resolveWindowPresentation(mountedWindow.record, runtime.screen.getSnapshot(), mountedWindow.geometryState).bounds,
+        subscribe: (listener) => mountedWindow.subscribe(() => listener(resolveWindowPresentation(mountedWindow.record, runtime.screen.getSnapshot(), mountedWindow.geometryState).bounds)),
       },
       screen: runtime.screen,
       matchMedia: runtime.environment.matchMedia,
