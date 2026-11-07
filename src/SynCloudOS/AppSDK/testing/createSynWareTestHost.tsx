@@ -30,7 +30,6 @@ import { HostSiteBrandingProvider } from "../../../SynCloudOSReact";
 import { SCOSAlertPresenter } from "../../../SynCloudOSReact/SCOSAlertPresenter";
 import {
   createApplicationWindowContentRendererRegistry,
-  WindowContentRendererRegistry,
   WindowLayer,
 } from "../../../Webspring/WindowLayer";
 import { createSynWare, createSynWareBundle } from "../createSynWare";
@@ -243,9 +242,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
   // The production stage owns the application responder lifecycle. The former
   // direct mount needed a host-side registration here; retaining it would
   // collide with ApplicationStageView's ResponderScope.
-  const windowContentRegistry = options.surface === "window"
-    ? createApplicationWindowContentRendererRegistry(runtime, { [app.bundleIdentifier]: app })
-    : new WindowContentRendererRegistry();
+  const windowContentRegistry = createApplicationWindowContentRendererRegistry(runtime, { [app.bundleIdentifier]: app });
   const stage = Object.freeze({
     id: `application-stage:synapp-test:${app.bundleIdentifier}`,
     appId: app.bundleIdentifier,
@@ -458,16 +455,16 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
           <HostSiteBrandingProvider value={options.branding ?? Object.freeze({ name: "SynWare Test Host", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "" })}>
           <SynCloudOSProvider runtime={runtime}>
           <RuntimeInputBoundary>
-            {options.surface === "window" ? (
-              <WindowLayer contentRegistry={windowContentRegistry} />
-            ) : (
+            {options.surface !== "window" ? (
               <ApplicationStageView
                 windowContentRegistry={windowContentRegistry}
                 stage={stage}
                 app={app}
                 lifecycle="ready"
               />
-            )}
+            ) : null}
+            {/* A stage application can present owned windows and popovers too. */}
+            <WindowLayer contentRegistry={windowContentRegistry} />
             <SCOSAlertPresenter center={runtime.alerts} presentation={runtime.presentationTraits} />
           </RuntimeInputBoundary>
           </SynCloudOSProvider>
