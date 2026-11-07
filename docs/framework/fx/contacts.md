@@ -2,7 +2,7 @@
 
 ContactsFX (`CNFX`) provides `CNFXContactStore`, immutable `CNFXContact` selections and `CNFXContactPickerViewController` through the browser's Contact Picker API. It returns only what the user shares for that request; it does not enumerate or modify the address book.
 
-Declare `contacts.select` in the app's `Info.ts` permissions. Mounted declaration and policy checks run before each picker request and before delivering its selection. The browser additionally enforces secure-context, user-activation, top-level-context and platform support requirements.
+Declare `contacts.select` in the app's `Info.ts` entitlements. Mounted declaration and policy checks run before each picker request and before delivering its selection. The browser additionally enforces secure-context, user-activation, top-level-context and platform support requirements.
 
 ```ts
 import { useContacts } from "@syndromatic/syncloudos/sdk";

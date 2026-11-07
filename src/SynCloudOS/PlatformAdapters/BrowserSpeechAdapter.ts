@@ -58,7 +58,7 @@ function snapshot(results: ArrayLike<BrowserSpeechResult>): SPFXSpeechRecognitio
   const transcriptions = Object.freeze(Array.from({ length: count }, (_, index) => {
     const alternatives = parts.map(part => part[Math.min(index, part.length - 1)]!);
     return Object.freeze({
-      formattedString: alternatives.map(alternative => alternative.transcript).join(" "),
+      formattedString: alternatives.map(alternative => alternative.transcript.trim()).join(" "),
       confidence: alternatives.reduce((total, alternative) => total + alternative.confidence, 0) / alternatives.length,
     });
   }));

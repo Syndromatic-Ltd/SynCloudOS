@@ -63,6 +63,17 @@ describe("SpeechFX web recognition", () => {
     expect(listener).toHaveBeenCalledTimes(1);
     expect(native.onresult).toBeNull();
   });
+  it("normalizes whitespace at transcript boundaries while retaining segment text", async () => {
+    const task = setup().createRecognizer().recognitionTask({});
+    const native = Recognition.instances[0]!;
+    native.onresult!({ results: [
+      { 0: { transcript: "  hello", confidence: 0.9 }, length: 1, isFinal: true },
+      { 0: { transcript: " world  ", confidence: 0.8 }, length: 1, isFinal: true },
+      { 0: { transcript: "日本語の文章", confidence: 0.9 }, length: 1, isFinal: true },
+    ], resultIndex: 0 });
+    native.onend!();
+    expect((await task.result).bestTranscription.formattedString).toBe("hello world 日本語の文章");
+  });
   it("aborts device work and ignores late callbacks on owner cancellation", async () => {
     const owner = new AbortController();
     const task = setup().createRecognizer(owner.signal).recognitionTask({});
@@ -97,6 +108,19 @@ describe("SpeechFX web recognition", () => {
     expect((await result).name).toBe("AbortError");
     expect(client.getCapabilities().recognition).toBe(false);
     expect(await recognizer.getAuthorizationStatus()).toBe("unavailable");
+  });
+  it("allows finish to stop microphone work after policy revocation and denies its final result", async () => {
+    let permitted = true;
+    const client = createMountedSpeechClient(setup(), new AbortController().signal, () => ["speech.recognize"], () => permitted);
+    const task = client.createRecognizer().recognitionTask({});
+    const result = task.result.catch(error => error);
+    const native = Recognition.instances[0]!;
+    permitted = false;
+    expect(() => task.finish()).not.toThrow();
+    expect(native.stop).toHaveBeenCalledOnce();
+    native.onresult!({ results: [{ 0: { transcript: "private", confidence: 0.9 }, length: 1, isFinal: true }], resultIndex: 0 });
+    native.onend!();
+    expect((await result).name).toBe("SecurityError");
   });
   it("reports insecure and missing implementations without invoking browser APIs", async () => {
     const client = new BrowserSpeechAdapter({ isSecureContext: false, browserWindow: { SpeechRecognition: Recognition } });
