@@ -49,6 +49,15 @@ describe("drawn Open panel", () => {
     await screen.findByText("sunset.png"); expect(screen.getByRole("searchbox", { name: "Search Projects" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Sources" })); expect(screen.queryByText("sunset.png")).toBeNull();
   });
+  it("drills into a compact folder once and waits for Open before accepting a file", async () => {
+    const { session } = fixture(true); render(<NSEOpenPanelContent session={session} />);
+    await choose("Projects"); await choose("Drone"); await screen.findByText("flight.png");
+    fireEvent.click(screen.getByText("flight.png")); expect(session.accept).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Back" })); await screen.findByText("sunset.png");
+    fireEvent.click(screen.getByRole("button", { name: "Forward" })); await screen.findByText("flight.png");
+    fireEvent.click(screen.getByText("flight.png")); fireEvent.click(screen.getByRole("button", { name: "Open" }));
+    await waitFor(() => expect(session.accept).toHaveBeenCalledTimes(1));
+  });
   it("shows a locked bookmark without requesting permission and renews it on one click", async () => {
     const { session, locked } = fixture(); render(<NSEOpenPanelContent session={session} />);
     expect(await screen.findByRole("img", { name: "Needs permission" })).toBeTruthy();
