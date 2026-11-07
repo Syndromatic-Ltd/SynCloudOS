@@ -73,3 +73,13 @@ This section supersedes the initial verdict above. The recheck read the correcte
 **Spec-compliance verdict: pass for the reviewed framework source contracts.** No open migration, carve-out, private-port or convertible-input issue remains from this review.
 
 **Code-quality verdict: pass.** All three Important findings have source corrections and relevant red/green evidence. No Critical or Important issue remains open in the reviewed changes. Final SDK/packed-consumer validation, complete framework/site suites and site adoption remain the parent's separate integration gates; this source-review verdict does not assert their results.
+
+## Bounded SDK-testing output recheck
+
+Reviewed the subsequent diff limited to `AppSDK/testing/fakeAdapters.ts`, `AppSDK/testing/testHostTypes.ts` and `mounted-file-panel-client.test.ts`.
+
+`SynWareFakeFiles.exported()` now describes delivered records with `data: NSEData` rather than reusing the export-input union. The deterministic download adapter copies convertible inputs into an immutable Foundation value before its control can yield, and exposes frozen captured records. The mutation regression examines the delivered byte view after mutating the caller's original array. `SynWareFakeClipboard.write` accepts concrete convertible input representations and normalises them before calling its delivered-value adapter; lazy providers remain outside this deterministic injection method.
+
+The original delivered-type assertion failed before correction (`part-b-captured-output-red.log`: one failed, 12 passed). The completed focused recheck records **46 passed, three files** in `part-b-captured-output-green.log`, covering mounted file panels, pasteboards and the SDK test host. The reviewer read this evidence and the source; no tests/builds were repeated.
+
+**Spec-compliance verdict: pass. Code-quality verdict: pass.** This correction closes the input-versus-output distinction in the testing entry without retaining a raw-return alias. No new finding arose; the separate final package/full-suite/site gates remain unchanged.

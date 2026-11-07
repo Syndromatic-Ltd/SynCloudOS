@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import type { NSEData } from "../../../Foundation/NSEData";
 import type { SynWareContextValue } from "../appContextTypes";
 import type { SynWareDefinition } from "../appDefinitionTypes";
 import type { AppTrustedDiagnosticsClient } from "../appTrustedClientTypes";
@@ -26,7 +27,7 @@ import type { SynWareServiceToken } from "../runtimeContracts";
 import type { ApplicationDocumentRuntimeConfiguration } from "../../Runtime/runtimeInstanceTypes";
 import type { SynCloudOSDocumentKindMetadata } from "../../DocumentStore";
 import type { SynCloudOSHostContributionCleanup, SynCloudOSHostInstallContext } from "../../Testing/appSdkTestingPort";
-import type { PasteboardRepresentation } from "../../SynCloudOS";
+import type { LazyPasteboardRepresentation, PasteboardRepresentation, PasteboardRepresentationInput } from "../../SynCloudOS";
 import type { LFXAuthorizationStatus, LFXLocation } from "../../../FX/LocationFX/public";
 import type { MIFXAuthorizationState } from "../../../FX/MIDIFX/public";
 import type { VFXCaptureSettings } from "../../../FX/VideoFX/public";
@@ -76,7 +77,7 @@ export type SynWareFakeCredentialOperation = "credentials.read" | "credentials.w
 export type SynWareFakeFileOperation = "file.read" | "file.write" | "file.remove";
 export interface SynWareFakeFiles extends SynWareFakePort<SynWareFakeFileOperation> {
   /** Host-only captured exports; never dispatches a native download. */
-  exported(): readonly import('../../FilePanels').FilePanelExportPayload[];
+  exported(): readonly { readonly fileName: string; readonly mediaType: string; readonly data: NSEData }[];
 }
 export type SynWareFakeDocumentOperation = "document.read" | "document.write" | "document.remove";
 export type SynWareFakeRecoveryOperation = "recovery.read" | "recovery.write" | "recovery.remove";
@@ -114,7 +115,7 @@ export interface SynWareFakeVideo extends SynWareFakeControl<SynWareFakeVideoOpe
 
 export interface SynWareFakeClipboard extends SynWareFakeControl<SynWareFakeClipboardOperation> {
   read(types: readonly string[], signal?: AbortSignal): Promise<readonly PasteboardRepresentation[]>;
-  write(values: readonly PasteboardRepresentation[], signal?: AbortSignal): Promise<void>;
+  write(values: readonly Exclude<PasteboardRepresentationInput, LazyPasteboardRepresentation>[], signal?: AbortSignal): Promise<void>;
   readonly values: () => readonly { readonly type: string }[];
 }
 
