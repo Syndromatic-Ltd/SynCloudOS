@@ -51,6 +51,22 @@ function geometryEnvironment() {
 }
 
 describe("window-hosted transient surface bridge", () => {
+  it("finishes the initial focus handoff when a popover's command controls become available", async () => {
+    const runtime = createTestRuntime();
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "deferred-focus", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button"); document.body.append(anchor);
+    const request = { id: "deferred", role: "popover" as const, title: "Deferred actions", parentWindowControllerId: null, anchor, drawsBackground: true, bounds: { x: 20, y: 20, width: 240, height: 140 } };
+    await bridge.present(request, <button disabled>Validated action</button>);
+    const view = render(<SynCloudOSProvider runtime={runtime}><WindowLayer contentRegistry={renderers} /></SynCloudOSProvider>);
+    try {
+      await screen.findByRole("dialog", { name: "Deferred actions" });
+      anchor.focus();
+      await act(async () => { await bridge.present(request, <button>Validated action</button>); });
+      await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Validated action" })));
+    } finally { view.unmount(); bridge.dispose(); anchor.remove(); await runtime.dispose("test"); }
+  });
+
   it("keeps closing paint inert and replaces it when the same popover reopens before its exit finishes", async () => {
     const runtime = createTestRuntime();
     const renderers = new WindowContentRendererRegistry();
