@@ -26,6 +26,7 @@ export function NSEOpenPanelApplicationHost({ value, children }: PropsWithChildr
     compact: () => value.presentation.getSnapshot().horizontalSizeClass === "compact",
     frame: () => value.presentation.getSnapshot().contentBounds,
     focusedElement: () => openPanelFileSystemFor(value.filePanels)?.focusedElement() ?? null,
+    ...(value.scheduler ? { restoreFocus: (element: HTMLElement) => { value.scheduler.setTimeout(() => { if (!value.signal.aborted && element.isConnected) element.focus(); }, 0); } } : {}),
     ...(value.images.geometry ? { observeGeometry: (element: HTMLElement, listener: () => void) => value.images.geometry!.observe(element, listener) } : {}),
   } : null, [bridge, runtime, value]);
   useLayoutEffect(() => host ? registerNSEOpenPanelHost(host) : undefined, [host]);

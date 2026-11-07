@@ -114,7 +114,14 @@ export class NSEOpenPanel implements NSESheet {
       this.#cancel = null; this.#window = null; this.#result = result;
       this.#urls = Object.freeze(result.kind === "accepted" ? [...result.values] : []);
       const response = result.kind === "accepted" ? NSEModalResponse.OK : NSEModalResponse.cancel;
-      anchor?.focus(); finish(response); completion?.(response);
+      // The sheet's parent is still inert until its unmount commits. Restore
+      // through the mounted scheduler after that commit, rather than focusing
+      // an inert control while the modal scope is still being removed.
+      if (anchor) queueMicrotask(() => {
+        if (host.signal.aborted || !anchor.isConnected) return;
+        if (host.restoreFocus) host.restoreFocus(anchor); else anchor.focus();
+      });
+      finish(response); completion?.(response);
     };
     const close = async (result: FilePanelResult<NSEOpenPanelURL>) => {
       if (settled || closing) return;
