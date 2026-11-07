@@ -36,6 +36,9 @@ export interface VFXCaptureCapabilities {
   readonly camera: boolean;
   readonly display: boolean;
   readonly deviceEnumeration: boolean;
+  /** Before grant: factory availability; after grant: private display-track support. */
+  readonly elementRestriction?: boolean;
+  readonly elementCrop?: boolean;
 }
 
 export interface VFXCaptureDevice {

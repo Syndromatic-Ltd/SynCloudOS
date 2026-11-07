@@ -87,3 +87,23 @@ describe('VideoFX element capture host helper', () => {
   });
 
 });
+
+it('reports pregrant target factories and verifies actual display-track methods', async () => {
+  const empty = new BrowserVideoPresentationAdapter(null);
+  expect(empty.elementCaptureCapabilities()).toEqual({ restriction: false, crop: false });
+  const helper = new BrowserVideoPresentationAdapter(null, { RestrictionTarget: { fromElement: async () => ({}) }, CropTarget: { fromElement: async () => ({}) } });
+  expect(helper.elementCaptureCapabilities()).toEqual({ restriction: true, crop: true });
+  expect(helper.elementCaptureCapabilities({ readyState: 'live' })).toEqual({ restriction: false, crop: false });
+  const track = Object.assign(new EventTarget(), { kind: 'video', readyState: 'live', enabled: true, muted: false,
+    stop: vi.fn(), getSettings: () => ({ displaySurface: 'browser' }), cropTo: vi.fn(async () => {}) });
+  expect(helper.elementCaptureCapabilities(track)).toEqual({ restriction: false, crop: true });
+  const stream = { getTracks: () => [track], getVideoTracks: () => [track] } as unknown as MediaStream;
+  const platform = { getUserMedia: async () => stream, getDisplayMedia: async () => stream, enumerateDevices: async () => [], subscribeDeviceChange: () => () => {} };
+  const session = new BrowserVideoCaptureAdapter(platform, helper).createSession(undefined, undefined, () => true);
+  expect(session.capabilities).toMatchObject({ elementRestriction: true, elementCrop: true });
+  await session.requestDisplay();
+  expect(session.capabilities).toMatchObject({ elementRestriction: false, elementCrop: true });
+  session.dispose();
+  expect(session.capabilities).toMatchObject({ elementRestriction: false, elementCrop: false });
+  expect(new BrowserVideoCaptureAdapter(platform).createSession().capabilities).toMatchObject({ elementRestriction: false, elementCrop: false });
+});

@@ -104,7 +104,9 @@ describe('VideoFX presentation', () => {
     await detector.startDiscovery(); listener.mockClear();
     permissions = [];
     remote.dispatchEvent(new Event('connect'));
-    expect(listener).not.toHaveBeenCalled();
+    expect(listener).toHaveBeenCalledTimes(1); // terminal lifecycle notification, without route delivery
+    expect(detector.connectionState).toBe("unknown");
+    expect(detector.capabilities.remotePlayback).toBe(false);
     expect(remote.cancelWatchAvailability).toHaveBeenCalledWith(42);
     expect(detector.authorizationStatus()).toBe('denied');
     await expect(detector.prompt()).rejects.toThrow();
@@ -118,4 +120,18 @@ describe('VideoFX presentation', () => {
     expect(() => client.createPictureInPictureController(target)).toThrow(/unavailable/);
   });
 
+});
+
+it('publishes reset and final lifecycle state before clearing observers', async () => {
+  const { adapter, video, remote } = fixture();
+  const detector = createMountedVideoPresentationClient(adapter, new AbortController().signal, () => ['video.route']).createRouteDetector(video);
+  await detector.startDiscovery();
+  const snapshots: unknown[] = [];
+  detector.subscribe(() => snapshots.push({ state: detector.connectionState, enabled: detector.capabilities.remotePlayback }));
+  detector.stopDiscovery();
+  expect(snapshots).toEqual([{ state: 'unknown', enabled: true }]);
+  detector.dispose();
+  expect(snapshots).toEqual([{ state: 'unknown', enabled: true }, { state: 'unknown', enabled: false }]);
+  remote.dispatchEvent(new Event('connect'));
+  expect(snapshots).toHaveLength(2);
 });

@@ -102,3 +102,29 @@ it("snapshots async input before suspension and reports unavailable crypto", asy
     else Reflect.deleteProperty(globalThis, "crypto");
   }
 });
+
+it("rejects public key wrappers for wrong curves, algorithms, private keys and fake keys", async () => {
+  const signing = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+  const otherCurve = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-384" }, true, ["sign", "verify"]);
+  const agreement = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const otherAgreement = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-384" }, true, ["deriveBits"]);
+  expect(() => new CRFXP256.Signing.PublicKey(otherCurve.publicKey)).toThrow(TypeError);
+  expect(() => new CRFXP256.Signing.PublicKey(signing.privateKey)).toThrow(TypeError);
+  expect(() => new CRFXP256.Signing.PublicKey(agreement.publicKey)).toThrow(TypeError);
+  expect(() => new CRFXP256.KeyAgreement.PublicKey(otherAgreement.publicKey)).toThrow(TypeError);
+  expect(() => new CRFXP256.KeyAgreement.PublicKey(agreement.privateKey)).toThrow(TypeError);
+  expect(() => new CRFXP256.KeyAgreement.PublicKey(signing.publicKey)).toThrow(TypeError);
+  expect(() => new CRFXP256.Signing.PublicKey({ type: "public", algorithm: { name: "ECDSA", namedCurve: "P-256" }, usages: ["verify"] } as CryptoKey)).toThrow(TypeError);
+  expect((await new CRFXP256.Signing.PublicKey(signing.publicKey).rawRepresentation()).count).toBe(65);
+  expect((await new CRFXP256.KeyAgreement.PublicKey(agreement.publicKey).rawRepresentation()).count).toBe(65);
+});
+
+it("enforces intrinsic key type and verification usages", async () => {
+  const pair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+  const raw = await crypto.subtle.exportKey("raw", pair.publicKey);
+  const noVerification = await crypto.subtle.importKey("raw", raw, { name: "ECDSA", namedCurve: "P-256" }, true, []);
+  expect(() => new CRFXP256.Signing.PublicKey(noVerification)).toThrow(TypeError);
+  Object.defineProperty(pair.privateKey, "type", { value: "public" });
+  expect(() => new CRFXP256.Signing.PublicKey(pair.privateKey)).toThrow(TypeError);
+  expect(() => new CRFXP256.Signing.PublicKey(Object.create(CryptoKey.prototype))).toThrow(TypeError);
+});

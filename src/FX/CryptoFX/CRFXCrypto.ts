@@ -100,9 +100,23 @@ export class CRFXSharedSecret {
   get rawRepresentation(): NSEData { return NSEData.from(this.#data); }
   hkdfDerivedSymmetricKey(salt: NSEDataConvertible, sharedInfo: NSEDataConvertible, outputByteCount: number, algorithm: CRFXHashFunction = "SHA-256"): Promise<CRFXSymmetricKey> { return CRFXHKDF.deriveKey(new CRFXSymmetricKey(this.#data), salt, sharedInfo, outputByteCount, algorithm); }
 }
+function requireP256PublicKey(key: CryptoKey, algorithmName: "ECDSA" | "ECDH"): void {
+  // Intrinsic accessors brand-check across realms and cannot be spoofed by own properties.
+  const prototype = globalThis.CryptoKey?.prototype;
+  if (!prototype) throw new TypeError("A genuine WebCrypto public key is required.");
+  let type: KeyType, algorithm: EcKeyAlgorithm, usages: readonly KeyUsage[];
+  try {
+    type = Object.getOwnPropertyDescriptor(prototype, "type")!.get!.call(key);
+    algorithm = Object.getOwnPropertyDescriptor(prototype, "algorithm")!.get!.call(key);
+    usages = Object.getOwnPropertyDescriptor(prototype, "usages")!.get!.call(key);
+  } catch { throw new TypeError("A genuine WebCrypto public key is required."); }
+  const validUsages = algorithmName === "ECDSA" ? usages.length === 1 && usages[0] === "verify" : usages.length === 0;
+  if (type !== "public" || algorithm.name !== algorithmName || algorithm.namedCurve !== "P-256" || !validUsages)
+    throw new TypeError(`Expected a P-256 ${algorithmName} public key with public-key usages.`);
+}
 export class CRFXP256SigningPublicKey {
   readonly #key: CryptoKey;
-  constructor(key: CryptoKey) { this.#key = key; Object.freeze(this); }
+  constructor(key: CryptoKey) { requireP256PublicKey(key, "ECDSA"); this.#key = key; Object.freeze(this); }
   static async fromRawRepresentation(data: NSEDataConvertible): Promise<CRFXP256SigningPublicKey> { return new CRFXP256SigningPublicKey(await cryptoProvider().subtle.importKey("raw", copy(data), { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"])); }
   async rawRepresentation(): Promise<NSEData> { return NSEData.from(await cryptoProvider().subtle.exportKey("raw", this.#key)); }
   async isValidSignature(signature: NSEDataConvertible, data: NSEDataConvertible): Promise<boolean> { return cryptoProvider().subtle.verify({ name: "ECDSA", hash: "SHA-256" }, this.#key, copy(signature), copy(data)); }
@@ -115,7 +129,7 @@ export class CRFXP256SigningPrivateKey {
 }
 const agreementKeys = new WeakMap<CRFXP256KeyAgreementPublicKey, CryptoKey>();
 export class CRFXP256KeyAgreementPublicKey {
-  constructor(key: CryptoKey) { agreementKeys.set(this, key); Object.freeze(this); }
+  constructor(key: CryptoKey) { requireP256PublicKey(key, "ECDH"); agreementKeys.set(this, key); Object.freeze(this); }
   static async fromRawRepresentation(data: NSEDataConvertible): Promise<CRFXP256KeyAgreementPublicKey> { return new CRFXP256KeyAgreementPublicKey(await cryptoProvider().subtle.importKey("raw", copy(data), { name: "ECDH", namedCurve: "P-256" }, true, [])); }
   async rawRepresentation(): Promise<NSEData> { return NSEData.from(await cryptoProvider().subtle.exportKey("raw", agreementKeys.get(this)!)); }
 }

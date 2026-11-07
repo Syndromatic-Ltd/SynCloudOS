@@ -31,10 +31,11 @@ export interface NSERoutePickerViewProps extends Omit<NSEButtonProps, "onClick" 
 /** AVRoutePickerView: the system route chooser, invoked by a real Atmo NSEButton. */
 export function NSERoutePickerView({ routeDetector, title = "Choose playback device", isEnabled = true, onError, ...props }: NSERoutePickerViewProps) {
   const subscribe = useCallback((listener: () => void) => routeDetector.subscribe(listener), [routeDetector]);
-  const snapshot = useCallback(() => routeDetector.connectionState, [routeDetector]);
-  const state = useSyncExternalStore(subscribe, snapshot, () => "unknown" as const);
+  const snapshot = useCallback(() => `${routeDetector.connectionState}:${routeDetector.capabilities.remotePlayback ? "enabled" : "disabled"}`, [routeDetector]);
+  const value = useSyncExternalStore(subscribe, snapshot, () => "unknown:disabled");
+  const [state, capability] = value.split(":");
   return <NSEButton {...props} title={title} data-nse-control="route-picker" data-route-state={state}
     aria-label={props["aria-label"] ?? title} aria-pressed={state === "connected"}
-    isEnabled={isEnabled && routeDetector.capabilities.remotePlayback}
+    isEnabled={isEnabled && capability === "enabled"}
     onClick={() => { void routeDetector.prompt().catch(error => onError?.(error)); }} />;
 }

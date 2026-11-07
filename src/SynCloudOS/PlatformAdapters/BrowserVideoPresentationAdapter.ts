@@ -112,7 +112,12 @@ export class BrowserVideoPresentationAdapter {
     const remote = target.remote;
     const allowed = () => !disposed && !signal.aborted && authorise();
     const requireAccess = () => { signal.throwIfAborted(); if (disposed) throw invalid(); if (!authorise()) { dispose(); throw denied(); } };
-    const notify = () => { if (!allowed()) { dispose(); return; } for (const listener of listeners) listener(); };
+    const publish = () => {
+      for (const listener of [...listeners]) {
+        try { listener(); } catch { /* An observer cannot retain browser resources. */ }
+      }
+    };
+    const notify = () => { if (!allowed()) { dispose(); return; } publish(); };
     const stopDiscovery = () => {
       generation++; watching = false;
       if (watchId !== undefined) { void remote.cancelWatchAvailability(watchId).catch(() => undefined); watchId = undefined; }
@@ -120,6 +125,7 @@ export class BrowserVideoPresentationAdapter {
       remote?.removeEventListener("connecting", update);
       remote?.removeEventListener("connect", update);
       remote?.removeEventListener("disconnect", update);
+      publish();
     };
     const update = () => { if (!allowed()) { dispose(); return; } state = remote.state; notify(); };
     const dispose = () => { if (disposed) return; disposed = true; stopDiscovery(); listeners.clear(); signal.removeEventListener("abort", dispose); onDispose?.(); };
@@ -158,6 +164,13 @@ export class BrowserVideoPresentationAdapter {
       async prompt() { requireAccess(); if (!adapter.capabilities(target).remotePlayback) throw unsupported(); await remote.prompt(); requireAccess(); },
       subscribe(listener: () => void) { requireAccess(); listeners.add(listener); return () => { listeners.delete(listener); }; },
       dispose,
+    });
+  }
+  /** Before a display grant this reports target factories only, never track compatibility. */
+  elementCaptureCapabilities(track?: BrowserElementCaptureTrack): Readonly<{ restriction: boolean; crop: boolean }> {
+    return Object.freeze({
+      restriction: typeof this.elementCapture.RestrictionTarget?.fromElement === "function" && (!track || (track.readyState === "live" && typeof track.restrictTo === "function")),
+      crop: typeof this.elementCapture.CropTarget?.fromElement === "function" && (!track || (track.readyState === "live" && typeof track.cropTo === "function")),
     });
   }
   /** Host only: caller supplies the private session-owned display track. */
