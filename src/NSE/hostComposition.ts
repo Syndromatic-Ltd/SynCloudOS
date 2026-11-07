@@ -43,3 +43,18 @@ export { nseTopBarHeightCssValue } from "./Windows/Chrome/nseTopBarStyles";
 export { NSEFocusScope } from "./Focus";
 export { NSEPopover } from "./Overlays/NSEPopover";
 export { NSEPopup } from "./Overlays/NSEPopup";
+
+// Window chrome and transient surfaces are drawn by NSE for framework hosts.
+export { NSETopBar } from "./Windows/Chrome/NSETopBar";
+export { NSEWindowTitlebarHostContext } from "./Windows/windowTitlebarContext";
+export type { NSEWindowTitlebarDocument, NSEWindowTitlebarHost } from "./Windows/windowTitlebarContext";
+export { NSEPopoverFrame } from "./Overlays/NSEPopoverFrame";
+export { applyNSEPopoverPosition, computeNSEPopoverPosition, nsePopoverEdgePlacement, nsePopoverReference } from "./Overlays/popoverPosition";
+export type { NSEPopoverPosition } from "./Overlays/popoverPosition";
+export { nsePopoverSpringEasing, useNSEPopoverSurface } from "./Overlays/useNSEPopoverSurface";
+export { NSEWindowSurfaceBridgeProvider } from "./Overlays/NSEWindowSurfaceBridge";
+export type { NSEWindowSurfaceRequest } from "./Overlays/NSEWindowSurfaceBridge";
+export { logicalPlacementToFloatingPlacement } from "./Overlays/computeNSEOverlayPosition";
+export { registerNSEHapticFeedbackEngine } from "./Feedback/NSEHapticFeedbackManager";
+export { NSEViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironment";
+export type { NSEViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";

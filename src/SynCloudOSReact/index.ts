@@ -110,3 +110,10 @@ export type { SynWareWindowCloseGuard } from "./appRuntimeTypes";
 
 // Framework responder hosts consume the enclosing canonical focus scope.
 export { useEnclosingFocusScopeId } from "./focusScopeContext";
+
+export { createApplicationMenuStore, useApplicationMenuSnapshot } from "./ApplicationMenuTrigger";
+export type { ApplicationMenuSnapshot, ApplicationMenuStore } from "./ApplicationMenuTrigger";
+
+// Framework window hosts preserve the canonical responder and modal focus ancestry.
+export { ResponderHierarchyContext } from "./responderHierarchy";
+export { FocusScopeIdContext } from "./focusScopeContext";

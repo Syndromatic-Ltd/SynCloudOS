@@ -35,18 +35,19 @@ import {
   NSEWindowSurfaceBridgeProvider,
   useNSEDeferredDisposal,
 } from "../NSE/NSE";
-import { nseMenuModel } from "../NSE/Menus/menuTypes";
+import { nseMenuModel } from "../NSE/NSE";
 import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButton";
 import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
-import { NSETopBar } from "../NSE/Windows/Chrome/NSETopBar";
+import { NSETopBar } from "../NSE/hostComposition";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
 import { AppViewContent } from "./AppViewContent";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
-import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarDocument, type NSEWindowTitlebarHost } from "../SynCloudOS/AppHosting/windowChrome";
-import { applicationDeclaresAbout, applicationMenuLabels, ApplicationMenuOverlayHost, ApplicationMenuTriggerBridge, createApplicationMenuStore, menuOpensSystemPreferencesDirectly, useApplicationMenuSnapshot, type ApplicationMenuStore } from "./applicationMenuPresentation";
+import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarDocument, type NSEWindowTitlebarHost } from "../NSE/hostComposition";
+import { createApplicationMenuStore, useApplicationMenuSnapshot, type ApplicationMenuStore } from "../SynCloudOSReact";
+import { applicationDeclaresAbout, applicationMenuLabels, ApplicationMenuOverlayHost, ApplicationMenuTriggerBridge, menuOpensSystemPreferencesDirectly } from "./applicationMenuPresentation";
 import { createWebspringAppMenuModel } from "./webspringAppMenu";
 import { useWebspringLocale } from "./webspringLocale";
 import type { ApplicationStagePresentation } from "./stage";

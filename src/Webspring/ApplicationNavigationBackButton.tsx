@@ -19,8 +19,8 @@
  */
 
 import React from "react";
-import { NSEButton } from "../NSE/Controls/Buttons/NSEButton";
-import { NSEImage } from "../NSE/Controls/Images/NSEImageResource";
+import { NSEButton } from "../NSE/public/controls";
+import { NSEImage } from "../NSE/public/controls";
 
 /** @internal The stage's standard back cell, shared by application and document title bars. */
 export function ApplicationNavigationBackButton({ label, onActivate }: {

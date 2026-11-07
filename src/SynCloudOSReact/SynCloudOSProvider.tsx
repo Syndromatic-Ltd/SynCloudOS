@@ -24,10 +24,10 @@ import {
   NSEMaterialLightingProvider,
 } from "../NSE/hostComposition";
 import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../NSE/Animation";
-import { NSEViewControllerRendererProvider } from "../NSE/Application/viewControllerRenderer";
-import { NSEViewControllerView } from "../SynCloudOS/AppHosting/applicationHosting";
-import { registerNSEHapticFeedbackEngine } from "../NSE/Feedback/NSEHapticFeedbackManager";
-import { NSEViewDrawingEnvironmentContext, type NSEViewDrawingEnvironment } from "../NSE/Views/NSEViewDrawingEnvironment";
+import { NSEViewControllerRendererProvider } from "../NSE/applicationHostInterop";
+import { NSEViewControllerView } from "../SynCloudOS/AppHosting/runtimeEntry";
+import { registerNSEHapticFeedbackEngine } from "../NSE/hostComposition";
+import { NSEViewDrawingEnvironmentContext, type NSEViewDrawingEnvironment } from "../NSE/hostComposition";
 import {
   useLayoutEffect,
   useMemo,
