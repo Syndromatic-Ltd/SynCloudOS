@@ -20,7 +20,7 @@
 
 import { useId, useSyncExternalStore } from "react";
 import { NSEBox, NSEButton, NSEStackView, NSESwitch } from "../NSE/public/controls";
-import type { PrivacyAuthorizationRecord, PrivacyAuthorizationStatus, PrivacyDecision, PrivacyStore } from "../SynCloudOS/Privacy";
+import type { PrivacyAuthorizationRecord, PrivacyAuthorizationStatus, PrivacyDecision, PrivacyStore } from "../SynCloudOS/SynCloudOS";
 import type { SystemText } from "./Preferences/useSystemText";
 
 export interface PrivacySecurityPaneProps {
