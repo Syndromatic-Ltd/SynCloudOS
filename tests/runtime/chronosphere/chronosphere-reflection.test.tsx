@@ -81,7 +81,7 @@ beforeEach(() => {
     return { release, pixelLease: async () => ({ transferImage: () => image, release: releaseLease }) };
   });
   host.app = { images: { load } };
-  host.capture.mockReset().mockResolvedValue(`data:image/png;base64,${Buffer.from(image.toPNG()).toString("base64")}`);
+  host.capture.mockReset().mockResolvedValue(`data:image/png;base64,${image.toPNG().base64EncodedString()}`);
 });
 afterEach(async () => {
   await act(async () => root.unmount()); container.remove(); current.remove(); selected.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers();
@@ -264,7 +264,7 @@ it("serializes replacement captures and rejects the stale selection before decod
   await act(async () => finish("data:image/png;base64,OLD")); await flush();
   expect(host.capture).toHaveBeenCalledTimes(3);
   expect(load).toHaveBeenCalledTimes(2);
-  for (const [request] of load.mock.calls) expect(request.source).toEqual({ kind: "bytes", mimeType: "image/png", bytes: image.toPNG() });
+  for (const [request] of load.mock.calls) expect(request.source).toEqual({ kind: "bytes", mimeType: "image/png", bytes: image.toPNG().bytes });
   expect(scenes.at(-1)!.quads).toHaveLength(4);
 });
 
@@ -309,9 +309,9 @@ it("cancels capture when the renderer fails and hides an unavailable surface", a
 it("loads captured PNG bytes through the mounted app image client and real resource policy", async () => {
   const environment = createTestRuntimeEnvironment();
   const png = image.toPNG();
-  host.capture.mockResolvedValue(`data:image/png;base64,${Buffer.from(png).toString("base64")}`);
+  host.capture.mockResolvedValue(`data:image/png;base64,${png.base64EncodedString()}`);
   const decode = vi.fn(async () => ({ src: "blob:reflection", intrinsicSize: { width: 2, height: 2 }, density: 1,
-    byteLength: png.length, corsClean: true, release: vi.fn() }));
+    byteLength: png.count, corsClean: true, release: vi.fn() }));
   const adapter = { decode, readPixels: vi.fn(async () => image), export: vi.fn(async () => png), dispose: vi.fn() };
   Object.defineProperty(environment, "images", { value: { acquire: () => ({ adapter, release: () => adapter.dispose() }) } });
   const runtime = createTestRuntime({ id: "runtime:reflection", environment });
@@ -323,6 +323,7 @@ it("loads captured PNG bytes through the mounted app image client and real resou
     expect(container.querySelector("[data-reflection='ready']"), container.innerHTML).not.toBeNull();
     expect(decode).toHaveBeenCalled();
     expect(decode.mock.calls[0][0].source).toEqual({ kind: "bytes", mimeType: "image/png", bytes: png });
+    expect(decode.mock.calls[0][0].source.bytes.isEqual(png)).toBe(true);
     expect(scenes.at(-1)!.quads.filter(quad => quad.transform.values[5] < 0)).toHaveLength(2);
     expect(runtime.images.diagnostics().activeReferenceCount).toBe(0);
   } finally {
