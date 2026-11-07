@@ -1,6 +1,6 @@
 /*
  * SynWare SDK
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -36,11 +36,11 @@ import { normalizeVFXDecoderConfig } from "../../FX/VideoFX/VFXCodecCapabilities
 
 export interface MountedVideoResourceLimits {
   readonly maximumDecoderSessions?: number;
-  /** Sum of configured width × height × four, not a claim about native heap use. */
+  /** Sum of configured width Ã— height Ã— four, not a claim about native heap use. */
   readonly maximumConfiguredFrameBytes?: number;
 }
 
-export type MountedVideoCapability = "video.capture.camera" | "video.capture.display";
+export type MountedVideoCapability = "video.capture.camera" | "video.capture.display" | "video.capture.element";
 
 function capabilityFor(kind: VFXCaptureKind): MountedVideoCapability {
   return kind === "camera" ? "video.capture.camera" : "video.capture.display";
@@ -307,6 +307,7 @@ export function createMountedVideoClient(
           appId,
           capability,
           reauthorise: allowed,
+          reauthoriseElement: () => !lease.aborted && allowed("display") && permissions().includes("video.capture.element") && authorise("video.capture.element"),
         });
         let disposed = false;
         const dispose = () => {
@@ -328,6 +329,21 @@ export function createMountedVideoClient(
           async requestDisplay(request) {
             requireCapability("display");
             return session.requestDisplay(request);
+          },
+          async setContentFilter(filter, signal) {
+            lease.throwIfAborted();
+            signal?.throwIfAborted();
+            requireCapability("display");
+            if (!permissions().includes("video.capture.element") || !authorise("video.capture.element"))
+              throw securityError("SynWare capability video.capture.element must be declared and authorised.");
+            if (!session.setContentFilter) throw new DOMException("Element capture is unavailable.", "NotSupportedError");
+            await session.setContentFilter(filter, signal);
+            lease.throwIfAborted();
+            requireCapability("display");
+            if (!permissions().includes("video.capture.element") || !authorise("video.capture.element")) {
+              dispose();
+              throw securityError("SynWare capability video.capture.element was revoked.");
+            }
           },
           suspend: () => session.suspend(),
           resume: async () => {

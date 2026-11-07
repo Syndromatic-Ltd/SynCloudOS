@@ -17,12 +17,11 @@
  * limitations under the License.
  */
 
-import type { VFXVideoPresentationClient } from "../../FX/VideoFX/VFXPictureInPictureController";
-import type { BrowserVideoPresentationAdapter } from "../PlatformAdapters/BrowserVideoPresentationAdapter";
+import type { VFXVideoPresentationClient, VFXVideoPresentationAdapter } from "../../FX/VideoFX/VFXPictureInPictureController";
 import { createMountedResourceScope } from "../HostServices/mountedResourceScope";
 export type MountedVideoPresentationCapability = "video.pictureInPicture" | "video.route";
 export function createMountedVideoPresentationClient(
-  adapter: BrowserVideoPresentationAdapter,
+  adapter: VFXVideoPresentationAdapter | undefined,
   mountSignal: AbortSignal,
   permissions: () => readonly string[],
   authorise: (capability: MountedVideoPresentationCapability) => boolean = () => true,
@@ -36,11 +35,12 @@ export function createMountedVideoPresentationClient(
   return Object.freeze({
     capabilities(target) {
       if (!allowed("video.pictureInPicture") && !allowed("video.route")) throw new DOMException("Video presentation is not authorised.", "SecurityError");
-      const caps = adapter.capabilities(target);
+      const caps = adapter?.capabilities(target) ?? { pictureInPicture: false, remotePlayback: false };
       return Object.freeze({ pictureInPicture: allowed("video.pictureInPicture") && caps.pictureInPicture, remotePlayback: allowed("video.route") && caps.remotePlayback });
     },
     createPictureInPictureController(target, signal) {
       requireAccess("video.pictureInPicture");
+      if (!adapter) throw new DOMException("Video presentation is unavailable.", "NotSupportedError");
       return scope.acquire(signal, (lease, release) => {
         const controller = adapter.createPictureInPictureController(target, lease, () => allowed("video.pictureInPicture"), release);
         const dispose = () => { try { controller.dispose(); } finally { release(); } };
@@ -56,6 +56,7 @@ export function createMountedVideoPresentationClient(
     },
     createRouteDetector(target, signal) {
       requireAccess("video.route");
+      if (!adapter) throw new DOMException("Video presentation is unavailable.", "NotSupportedError");
       return scope.acquire(signal, (lease, release) => {
         const detector = adapter.createRouteDetector(target, lease, () => allowed("video.route"), release);
         const dispose = () => { try { detector.dispose(); } finally { release(); } };

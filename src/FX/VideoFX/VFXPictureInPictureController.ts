@@ -39,3 +39,10 @@ export interface VFXVideoPresentationClient {
   createPictureInPictureController(target: HTMLVideoElement, signal?: AbortSignal): VFXPictureInPictureController;
   createRouteDetector(target: HTMLVideoElement, signal?: AbortSignal): VFXRouteDetector;
 }
+
+/** Internal host port; not part of the public SDK barrel. */
+export interface VFXVideoPresentationAdapter {
+  capabilities(target: HTMLVideoElement): VFXVideoPresentationCapabilities;
+  createPictureInPictureController(target: HTMLVideoElement, signal: AbortSignal, authorise: () => boolean, onDispose?: () => void): VFXPictureInPictureController;
+  createRouteDetector(target: HTMLVideoElement, signal: AbortSignal, authorise: () => boolean, onDispose?: () => void): VFXRouteDetector;
+}
