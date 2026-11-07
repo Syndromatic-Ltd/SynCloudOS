@@ -1,0 +1,114 @@
+{
+  "errors": [],
+  "url": "http://127.0.0.1:5199/software",
+  "text": "About\nPortfolio Hub\nExperiments\n2\nJournal\nSoftware\nLate-Breaking News\nWebspring 4.0 enters first implementation\n14 May 2026\nNSE and Atmo define the interface layer\n6 May 2026\nSoftware\nOverview\nOverview\nAVAILABLE NOW\nSynCloudOS\nCOMING SOON\nOpenXMB\nSynOS Canora\nMediaSonic\nDocSurf\nAtmo Design\nSynOS Canora\nSynPhone\nSynCloudOS\nOpenXMB\nSynPhone\nConcept\nSoftware. Our Bread & Butter.\n\nWhat catnip is to cats and what bad decisions are to Britain's government, software is to Syndromatic. We obsess over the most minute details in our software, whether it be an icon's textures or an app's animations and fluidity. We think this is what sets our software a generation apart from the industry, and if you have found the website a pleasure to use, then you'll find yourself naturally agreeing with us.\n\nEverything on this page is built in-house: the runtime under your cursor, the launcher you came in through, the controls you are touching and the material language that dresses them. They share one personality because one studio makes them.\n\nSpin the showcase above to see where that work lands: from the SynCloudOS Webspring to the AtmoPad home screen, the SynOS Canora desktop and the OpenXMB shell.\n\nLast updated: 3 October 2026\nAppearance\nLight\nDark\nAuto\n\nAuto follows the system setting on this device.",
+  "buttons": [
+    {
+      "label": "Open About",
+      "text": "About"
+    },
+    {
+      "label": "Open Portfolio Hub",
+      "text": "Portfolio Hub"
+    },
+    {
+      "label": "Open folder Experiments",
+      "text": "Experiments"
+    },
+    {
+      "label": "Open Journal",
+      "text": "2\nJournal"
+    },
+    {
+      "label": "Open Software",
+      "text": "Software"
+    },
+    {
+      "label": "Open QuickSwitch",
+      "text": "Software"
+    },
+    {
+      "label": "Return to Webspring",
+      "text": ""
+    },
+    {
+      "label": "User Info",
+      "text": ""
+    },
+    {
+      "label": "Collapse Available Now",
+      "text": ""
+    },
+    {
+      "label": "Collapse Coming Soon",
+      "text": ""
+    },
+    {
+      "label": "Back",
+      "text": ""
+    }
+  ],
+  "prefs": [
+    {
+      "class": "nse-control-page-header nse-prefs-header",
+      "rect": {
+        "x": 520,
+        "y": 296.5,
+        "width": 400,
+        "height": 66,
+        "top": 296.5,
+        "right": 920,
+        "bottom": 362.5,
+        "left": 520
+      },
+      "font": "16px \"Syndromatic UI\", system-ui, sans-serif",
+      "colour": "rgb(41, 54, 69)"
+    },
+    {
+      "class": "nse-control-button nse-extended-tool-button nse-prefs-back",
+      "rect": {
+        "x": 528,
+        "y": 304.5,
+        "width": 50,
+        "height": 50,
+        "top": 304.5,
+        "right": 578,
+        "bottom": 354.5,
+        "left": 528
+      },
+      "font": "700 18px / 50px \"Syndromatic UI\", system-ui, sans-serif",
+      "colour": "rgb(255, 255, 255)"
+    },
+    {
+      "class": "nse-prefs-title",
+      "rect": {
+        "x": 666.5625,
+        "y": 316.671875,
+        "width": 106.875,
+        "height": 25.640625,
+        "top": 316.671875,
+        "right": 773.4375,
+        "bottom": 342.3125,
+        "left": 666.5625
+      },
+      "font": "700 19px / 25.65px \"Syndromatic UI\", system-ui, sans-serif",
+      "colour": "rgb(247, 248, 249)"
+    }
+  ],
+  "titles": [
+    {
+      "text": "Software",
+      "rect": {
+        "x": 75.3125,
+        "y": 10,
+        "width": 113.375,
+        "height": 36,
+        "top": 10,
+        "right": 188.6875,
+        "bottom": 46,
+        "left": 75.3125
+      },
+      "style": null
+    }
+  ]
+}

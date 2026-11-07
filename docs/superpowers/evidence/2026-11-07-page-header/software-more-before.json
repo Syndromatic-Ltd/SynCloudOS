@@ -1,0 +1,79 @@
+{
+  "errors": [],
+  "url": "http://127.0.0.1:5199/software",
+  "text": "Reorder applications\n\nHold an application to reorder. Rest it on another application or a folder to group them. Use arrow keys to move it. Press Escape when finished.\n\nAbout\nPortfolio Hub\nExperiments\n2\nJournal\nSoftware\nLate-Breaking News\nWebspring 4.0 enters first implementation\n14 May 2026\nNSE and Atmo define the interface layer\n6 May 2026\nOverview\nMediaSonic\nDocSurf\nOverview\nSynCloudOS\nOpenXMB\nSynOS Canora\nMore",
+  "buttons": [
+    {
+      "label": null,
+      "text": "Reorder applications"
+    },
+    {
+      "label": "Open About",
+      "text": "About"
+    },
+    {
+      "label": "Open Portfolio Hub",
+      "text": "Portfolio Hub"
+    },
+    {
+      "label": "Open folder Experiments",
+      "text": "Experiments"
+    },
+    {
+      "label": "Open Journal",
+      "text": "2\nJournal"
+    },
+    {
+      "label": "Open Software",
+      "text": "Software"
+    },
+    {
+      "label": "Return to Webspring",
+      "text": ""
+    },
+    {
+      "label": "Open QuickSwitch",
+      "text": "Overview"
+    },
+    {
+      "label": "User Info",
+      "text": ""
+    },
+    {
+      "label": null,
+      "text": "Overview"
+    },
+    {
+      "label": null,
+      "text": "SynCloudOS"
+    },
+    {
+      "label": null,
+      "text": "OpenXMB"
+    },
+    {
+      "label": null,
+      "text": "SynOS Canora"
+    },
+    {
+      "label": "More destinations",
+      "text": "More"
+    }
+  ],
+  "titles": [
+    {
+      "text": "Overview",
+      "rect": {
+        "x": 137.75,
+        "y": 13,
+        "width": 114.5,
+        "height": 30,
+        "top": 13,
+        "right": 252.25,
+        "bottom": 43,
+        "left": 137.75
+      },
+      "style": null
+    }
+  ]
+}

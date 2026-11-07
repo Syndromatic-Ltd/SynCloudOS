@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/synapp-sdk-package.test.ts -t pins the removal|public page entry
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 7 skipped (9)
+   Start at  10:47:20
+   Duration  11.19s (transform 8.20s, setup 30ms, import 10.03s, tests 21ms, environment 961ms)

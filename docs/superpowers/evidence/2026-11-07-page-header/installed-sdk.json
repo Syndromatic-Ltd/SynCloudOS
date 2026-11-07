@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+  "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+  "removed": [
+    "NSEPageHeader",
+    "NSEPageHeaderProps"
+  ],
+  "styles": [
+    "automatic",
+    "expanded",
+    "preference",
+    "unified",
+    "unifiedCompact"
+  ],
+  "subtitle": true,
+  "leadingAccessory": true
+}
