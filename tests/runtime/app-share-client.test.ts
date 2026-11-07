@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import {createMountedShareClient} from '../../src/SynCloudOS/AppSDK/mountedShareClient';
@@ -74,33 +75,33 @@ function scopedFixture(native:(this:Navigator,data:ShareData)=>Promise<void>,act
 
 describe('explicit mounted share completion',()=>{
   it('shares the same frozen prepared payload accepted by both receiver-bound probes before yielding',async()=>{
-    const file=new File(['Generated fixture\n'],'generated.txt',{type:'text/plain'});
+    const file=shareFile(['Generated fixture\n'],'generated.txt',{type:'text/plain'});
     let checked:ShareData|undefined,shared:ShareData|undefined;
     const f=scopedFixture(function(data){expect(this).toBe(f.navigator);shared=data;return Promise.resolve();});
     const probes:ShareData[]=[];
     Object.assign(f.navigator,{canShare:function(this:Navigator,data:ShareData){expect(this).toBe(f.navigator);probes.push(data);if('title' in data)checked=data;return true;}});
     const files=[file],input={title:'Generated fixture',files};
     const pending=f.client.perform(input);
-    expect(shared).toBe(checked);expect(shared?.files).toEqual([file]);expect(shared?.files).not.toBe(files);
+    expect(shared).toBe(checked);expect(shared?.files).toMatchObject([{name:file.name,type:file.mimeType}]);expect(shared?.files).not.toBe(files);
     expect(Object.isFrozen(shared)).toBe(true);expect(Object.isFrozen(shared?.files)).toBe(true);
     files.splice(0);input.title='Changed';
-    expect(shared?.title).toBe('Generated fixture');expect(shared?.files).toEqual([file]);expect(probes).toHaveLength(2);
+    expect(shared?.title).toBe('Generated fixture');expect(shared?.files).toMatchObject([{name:file.name,type:file.mimeType}]);expect(probes).toHaveLength(2);
     await expect(pending).resolves.toEqual({kind:'shared'});
   });
   it('does not let a title mask an unsupported files member or fall back to text',async()=>{
-    const native=vi.fn(async()=>undefined),f=scopedFixture(native),file=new File(['Generated'],'generated.txt');
+    const native=vi.fn(async()=>undefined),f=scopedFixture(native),file=shareFile(['Generated'],'generated.txt');
     Object.assign(f.navigator,{canShare:vi.fn((data:ShareData)=>'title' in data)});
     const request={title:'Generated fixture',files:[file]};
     expect(f.client.getStatus(request)).toMatchObject({availability:'unsupported',reason:'unsupported-data'});
     await expect(f.client.perform(request)).resolves.toEqual({kind:'unsupported'});expect(native).not.toHaveBeenCalled();
   });
   it('requires the exact combined payload to be supported even after the files-only probe succeeds',async()=>{
-    const native=vi.fn(async()=>undefined),f=scopedFixture(native),file=new File(['Generated'],'generated.txt');
+    const native=vi.fn(async()=>undefined),f=scopedFixture(native),file=shareFile(['Generated'],'generated.txt');
     Object.assign(f.navigator,{canShare:(data:ShareData)=>!('title' in data)});
     await expect(f.client.perform({title:'Generated',files:[file]})).resolves.toEqual({kind:'unsupported'});expect(native).not.toHaveBeenCalled();
   });
   it('reports prepared files unsupported without canShare while preserving ordinary text sharing',async()=>{
-    const native=vi.fn(async()=>undefined),f=scopedFixture(native),file=new File(['Generated'],'generated.txt');
+    const native=vi.fn(async()=>undefined),f=scopedFixture(native),file=shareFile(['Generated'],'generated.txt');
     await expect(f.client.perform({title:'Generated',files:[file]})).resolves.toEqual({kind:'unsupported'});
     expect(native).not.toHaveBeenCalled();await expect(f.client.perform({title:'Generated',files:undefined})).resolves.toEqual({kind:'shared'});
     expect(native).toHaveBeenCalledWith({title:'Generated'});
@@ -108,8 +109,8 @@ describe('explicit mounted share completion',()=>{
   it('rejects empty, sparse, lazy and forged prepared files without evaluating accessors',async()=>{
     const native=vi.fn(async()=>undefined),f=scopedFixture(native),getter=vi.fn();
     const accessed=Object.defineProperty([],'0',{get:getter});
-    for(const files of [[],new Array(1),accessed,[new Blob(['Generated'])],[{name:'forged.txt',type:'text/plain'}],[Promise.resolve(new File(['Generated'],'generated.txt'))]]){
-      await expect(f.client.perform({title:'Generated',files:files as File[]})).resolves.toEqual({kind:'invalid'});
+    for(const files of [[],new Array(1),accessed,[new Blob(['Generated'])],[{name:'forged.txt',type:'text/plain'}],[Promise.resolve(shareFile(['Generated'],'generated.txt'))]]){
+      await expect(f.client.perform({title:'Generated',files:files as never})).resolves.toEqual({kind:'invalid'});
     }
     expect(getter).not.toHaveBeenCalled();expect(native).not.toHaveBeenCalled();
   });
@@ -117,14 +118,14 @@ describe('explicit mounted share completion',()=>{
     for(const source of ['owner','caller']){
       const native=vi.fn(async()=>undefined),f=scopedFixture(native),caller=new AbortController();
       Object.assign(f.navigator,{canShare:()=>{(source==='owner'?f.owner:caller).abort();return true;}});
-      await expect(f.client.perform({title:'Generated',files:[new File(['Generated'],'generated.txt')]},caller.signal)).resolves.toEqual({kind:'aborted'});
+      await expect(f.client.perform({title:'Generated',files:[shareFile(['Generated'],'generated.txt')]},caller.signal)).resolves.toEqual({kind:'aborted'});
       expect(native).not.toHaveBeenCalled();
     }
   });
   it.each(['AbortError','NotAllowedError'])('never substitutes a fallback after prepared-file %s',async name=>{
     const native=vi.fn(async()=>{throw new DOMException('Generated browser outcome',name);}),f=scopedFixture(native);
     Object.assign(f.navigator,{canShare:()=>true});
-    expect(await f.client.perform({title:'Generated',files:[new File(['Generated'],'generated.txt')]})).toMatchObject({kind:name==='AbortError'?'cancelled':'denied'});
+    expect(await f.client.perform({title:'Generated',files:[shareFile(['Generated'],'generated.txt')]})).toMatchObject({kind:name==='AbortError'?'cancelled':'denied'});
     expect(native).toHaveBeenCalledOnce();
   });
   it('omits undefined optional fields like a native share dictionary',async()=>{
@@ -257,3 +258,5 @@ describe("mounted AppSDK share client", () => {
     expect(native).not.toHaveBeenCalled();
   });
 });
+
+function shareFile(parts: readonly string[], name: string, options: { type?: string } = {}) { return { name, mimeType: options.type ?? "", data: NSEData.from(new TextEncoder().encode(parts.join(""))) }; }

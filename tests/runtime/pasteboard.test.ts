@@ -305,7 +305,7 @@ describe("runtime pasteboards", () => {
       .rejects.toMatchObject({ name: "InvalidPasteboardRepresentationError" });
     await expect(runtime.pasteboards.find.write([{
       type: "application/octet-stream",
-      value: new Blob([new Uint8Array(16 * 1024 * 1024 + 1)]),
+      value: new Uint8Array(16 * 1024 * 1024 + 1),
     }])).rejects.toMatchObject({ name: "InvalidPasteboardRepresentationError" });
     expect(getter).not.toHaveBeenCalled();
     expect(poisonedIterator).not.toHaveBeenCalled();
