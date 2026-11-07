@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export class IndexPath {
+export class NSEIndexPath {
   readonly indexes: readonly number[];
 
   private constructor(indexes: readonly number[]) {
@@ -28,7 +28,7 @@ export class IndexPath {
       )
     ) {
       throw new RangeError(
-        "IndexPath indexes must be non-negative safe integers.",
+        "NSEIndexPath indexes must be non-negative safe integers.",
       );
     }
 
@@ -36,38 +36,38 @@ export class IndexPath {
     Object.freeze(this);
   }
 
-  static from(...indexes: number[]): IndexPath {
-    return new IndexPath(indexes);
+  static from(...indexes: number[]): NSEIndexPath {
+    return new NSEIndexPath(indexes);
   }
 
-  static fromJSON(indexes: readonly number[]): IndexPath {
-    return new IndexPath(indexes);
+  static fromJSON(indexes: readonly number[]): NSEIndexPath {
+    return new NSEIndexPath(indexes);
   }
 
   get length(): number {
     return this.indexes.length;
   }
 
-  at(position: number): number | undefined {
+  indexAtPosition(position: number): number | undefined {
     return this.indexes.at(position);
   }
 
-  append(index: number): IndexPath {
-    return new IndexPath([...this.indexes, index]);
+  indexPathByAddingIndex(index: number): NSEIndexPath {
+    return new NSEIndexPath([...this.indexes, index]);
   }
 
-  parent(): IndexPath | null {
+  indexPathByRemovingLastIndex(): NSEIndexPath | null {
     return this.length === 0
       ? null
-      : new IndexPath(this.indexes.slice(0, -1));
+      : new NSEIndexPath(this.indexes.slice(0, -1));
   }
 
-  equals(other: IndexPath): boolean {
+  isEqual(other: NSEIndexPath): boolean {
     return this.compare(other) === 0;
   }
 
-  compare(other: IndexPath): -1 | 0 | 1 {
-    return compareIndexPaths(this, other);
+  compare(other: NSEIndexPath): -1 | 0 | 1 {
+    return compareNSEIndexPaths(this, other);
   }
 
   toJSON(): number[] {
@@ -79,7 +79,7 @@ export class IndexPath {
   }
 }
 
-export function compareIndexPaths(left: IndexPath, right: IndexPath): -1 | 0 | 1 {
+export function compareNSEIndexPaths(left: NSEIndexPath, right: NSEIndexPath): -1 | 0 | 1 {
   const length = Math.min(left.length, right.length);
 
   for (let index = 0; index < length; index += 1) {

@@ -20,7 +20,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import type { PredicateExpression } from "../../../SynCloudOS/Models";
+import type { NSEPredicateExpression } from "../../../Foundation/public";
 import { compilePredicateExpression, mergePredicateTemplates, PREDICATE_OPERATOR_OPTIONS, normalisePredicateOperator, ruleRowFromExpression } from "./predicateTemplates";
 import { NSERuleEditor } from "./NSERuleEditor";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
@@ -31,9 +31,9 @@ import type { NSEPredicateEditorProps, NSEPredicateTemplate } from "./ruleEditor
 import "./nse-rule-editor.css";
 
 interface ComparisonEditorProps<T> {
-  readonly expression: Extract<PredicateExpression, { kind: "comparison" }>;
+  readonly expression: Extract<NSEPredicateExpression, { kind: "comparison" }>;
   readonly templates: readonly NSEPredicateTemplate<T>[];
-  readonly publish: (value: PredicateExpression) => void;
+  readonly publish: (value: NSEPredicateExpression) => void;
   readonly readOnly: boolean;
   readonly disabled: boolean;
   readonly locale: string;
@@ -43,18 +43,18 @@ function NSEComparisonPredicateEditor<T>({ expression, templates, publish, readO
   const template = templates.find(({ field }) => field === expression.field) ?? templates[0];
   const operator = normalisePredicateOperator(expression.operator);
   const option = template?.operators.find((candidate) => candidate.operator === operator) ?? PREDICATE_OPERATOR_OPTIONS.find((candidate) => candidate.operator === operator)!;
-  const [text, setText] = useState(() => template?.formatter.editingText(expression.value, { locale }) ?? String(expression.value ?? ""));
-  const [parts, setParts] = useState<readonly string[]>(() => Array.isArray(expression.value) ? expression.value.map((item) => template?.formatter.editingText(item, { locale }) ?? String(item ?? "")) : []);
+  const [text, setText] = useState(() => template?.formatter.editingString(expression.value, { locale }) ?? String(expression.value ?? ""));
+  const [parts, setParts] = useState<readonly string[]>(() => Array.isArray(expression.value) ? expression.value.map((item) => template?.formatter.editingString(item, { locale }) ?? String(item ?? "")) : []);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
-    setText(template?.formatter.editingText(expression.value, { locale }) ?? String(expression.value ?? ""));
-    setParts(Array.isArray(expression.value) ? expression.value.map((item) => template?.formatter.editingText(item, { locale }) ?? String(item ?? "")) : []);
+    setText(template?.formatter.editingString(expression.value, { locale }) ?? String(expression.value ?? ""));
+    setParts(Array.isArray(expression.value) ? expression.value.map((item) => template?.formatter.editingString(item, { locale }) ?? String(item ?? "")) : []);
   }, [expression.value, locale, template]);
   const locked = disabled || readOnly;
   const acceptsOptions = (candidate: NSEPredicateTemplate<T> | undefined, candidateOperator: string) => candidate?.acceptsTextOptions === true && ["equals", "notEquals", "contains", "beginsWith", "endsWith", "in"].includes(candidateOperator);
   const compatibleOptions = (candidate: NSEPredicateTemplate<T> | undefined, candidateOperator: string) => acceptsOptions(candidate, candidateOperator) && expression.options !== undefined ? { options: expression.options } : {};
   const parsePart = (candidate: string) => {
-    const parsed = template!.formatter.parse(candidate.trim(), { locale });
+    const parsed = template!.formatter.getObjectValue(candidate.trim(), { locale });
     if (!parsed.ok) { setError(parsed.error.message); return parsed; }
     const validated = template!.validate(parsed.value);
     if (!validated.ok) setError(validated.error.message);
@@ -89,7 +89,7 @@ function NSEComparisonPredicateEditor<T>({ expression, templates, publish, readO
     </> : operator === "in" ? <NSETextField className="nse-rule-value" aria-label="Values" value={parts.join(", ")} readOnly={readOnly} isEnabled={!disabled} onChange={(event) => { const next = event.target.value.split(","); setParts(next); publishParts(next); }} />
       : option.arity > 0 && <NSETextField className="nse-rule-value" aria-label="Value" value={text} readOnly={readOnly} isEnabled={!disabled} aria-invalid={error !== null} onChange={(event) => {
         const nextText = event.target.value; setText(nextText);
-        const parsed = template!.formatter.parse(nextText, { locale });
+        const parsed = template!.formatter.getObjectValue(nextText, { locale });
         if (!parsed.ok) { setError(parsed.error.message); return; }
         const validated = template!.validate(parsed.value);
         if (!validated.ok) { setError(validated.error.message); return; }
@@ -102,8 +102,8 @@ function NSEComparisonPredicateEditor<T>({ expression, templates, publish, readO
 export function NSEPredicateEditor<T>({ schema, templates: explicit, value, defaultValue, onChange, state, readOnly = false, isEnabled = true, locale = "en-GB", className = "", ...props }: NSEPredicateEditorProps<T>) {
   const disabled = !isEnabled;
   const templates = useMemo(() => mergePredicateTemplates(schema, explicit), [explicit, schema]);
-  const fallback: PredicateExpression = defaultValue ?? { kind: "comparison", field: templates[0]?.field ?? "", operator: templates[0]?.operators[0]?.operator ?? "equals", value: undefined };
-  const [internal, setInternal] = useState<PredicateExpression>(fallback);
+  const fallback: NSEPredicateExpression = defaultValue ?? { kind: "comparison", field: templates[0]?.field ?? "", operator: templates[0]?.operators[0]?.operator ?? "equals", value: undefined };
+  const [internal, setInternal] = useState<NSEPredicateExpression>(fallback);
   const expression = value ?? internal;
   const effectiveState = state ?? (disabled ? { kind: "disabled", message: "Disabled" } : readOnly ? { kind: "read-only", message: "Read only" } : { kind: "ready" });
   const effectiveReadOnly = readOnly || effectiveState.kind === "read-only";
@@ -112,14 +112,14 @@ export function NSEPredicateEditor<T>({ schema, templates: explicit, value, defa
   const hostDisabled = disabled || effectiveState.kind === "disabled" || effectiveState.kind === "invalid" || (effectiveState.kind === "denied" && !effectiveState.retry);
   const validatedRoot = ruleRowFromExpression(expression, "root");
   compilePredicateExpression({ root: validatedRoot });
-  const publish = (next: PredicateExpression) => {
+  const publish = (next: NSEPredicateExpression) => {
     if (value === undefined) setInternal(next);
     onChange?.(Object.freeze(next));
   };
   if (expression.kind !== "comparison") {
     const ruleValue = { root: validatedRoot };
     return (<div {...props} aria-disabled={hostDisabled || undefined} aria-busy={dataViewIsBusy(effectiveState) || undefined} className={`nse-predicate-editor ${className}`.trim()} data-nse-control="predicate-editor" data-expression-kind={expression.kind} data-state={effectiveState.kind}>
-      {presentsContent && <NSERuleEditor aria-label="Predicate expression" value={ruleValue} fields={templates.map(({ field }) => field)} templates={templates as readonly NSEPredicateTemplate<unknown>[]} locale={locale} state={effectiveState} readOnly={effectiveReadOnly} isEnabled={!effectiveDisabled} onChange={(next) => publish(compilePredicateExpression(next))} />}
+      {presentsContent && <NSERuleEditor aria-label="NSEPredicate expression" value={ruleValue} fields={templates.map(({ field }) => field)} templates={templates as readonly NSEPredicateTemplate<unknown>[]} locale={locale} state={effectiveState} readOnly={effectiveReadOnly} isEnabled={!effectiveDisabled} onChange={(next) => publish(compilePredicateExpression(next))} />}
       {!presentsContent && <span role="status">{"message" in effectiveState ? effectiveState.message : effectiveState.kind}</span>}
       {!presentsContent && (effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEButton appearance="aqua" title="Retry" onClick={effectiveState.retry} />}
       {!presentsContent && effectiveState.kind === "interrupted" && effectiveState.resume && <NSEButton appearance="aqua" title="Resume" onClick={effectiveState.resume} />}

@@ -18,17 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {
-  diffCollection,
-  emptyChangeSet,
-  SelectionModel,
-  sortWithDescriptors,
-  type ChangeSet,
-  type ItemIdentity,
-  type Predicate,
-  type SelectionSnapshot,
-  type SortComparator,
-} from "../../SynCloudOS/Models";
+import { diffCollection, emptyChangeSet, SelectionModel, sortWithDescriptors, type ChangeSet, type ItemIdentity, type SelectionSnapshot } from "../../SynCloudOS/Models";
+import { type NSEPredicate, type NSESortComparator } from "../../Foundation/public";
 import { defineSyncUndoAction } from "../../SynCloudOS/nseRuntimeContracts";
 import {
   ControllerEditingStateError,
@@ -65,8 +56,8 @@ export interface ArrayControllerSnapshot<T, TId extends ItemIdentity> {
   readonly selectionRevision: number;
   readonly content: readonly T[];
   readonly arranged: readonly T[];
-  readonly predicate: Predicate<T> | null;
-  readonly sortDescriptors: readonly SortComparator<T>[];
+  readonly predicate: NSEPredicate<T> | null;
+  readonly sortDescriptors: readonly NSESortComparator<T>[];
   readonly selection: SelectionSnapshot<TId>;
   readonly changeSet: ChangeSet<TId, T>;
   readonly editable: boolean;
@@ -209,7 +200,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
     });
   }
 
-  setPredicate(predicate: Predicate<T> | null): void {
+  setPredicate(predicate: NSEPredicate<T> | null): void {
     this.assertActive("setPredicate");
     if (this.#snapshot.predicate === predicate) return;
     this.#replaceArrangement("arrangement", this.#snapshot.content, {
@@ -218,7 +209,7 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
     });
   }
 
-  setSortDescriptors(descriptors: readonly SortComparator<T>[]): void {
+  setSortDescriptors(descriptors: readonly NSESortComparator<T>[]): void {
     this.assertActive("setSortDescriptors");
     const next = Object.freeze([...descriptors]);
     if (
@@ -445,10 +436,10 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
 
   #arrange(
     content: readonly T[],
-    predicate: Predicate<T> | null,
-    descriptors: readonly SortComparator<T>[],
+    predicate: NSEPredicate<T> | null,
+    descriptors: readonly NSESortComparator<T>[],
   ): readonly T[] {
-    const filtered = predicate ? content.filter((item) => predicate.test(item)) : content;
+    const filtered = predicate ? content.filter((item) => predicate.evaluate(item)) : content;
     return Object.freeze([...sortWithDescriptors(filtered, descriptors)]);
   }
 
@@ -456,8 +447,8 @@ export class NSEArrayController<T, TId extends ItemIdentity> extends NSEControll
     kind: ArrayControllerChange<T, TId>["kind"],
     content: readonly T[],
     options: {
-      readonly predicate: Predicate<T> | null;
-      readonly sortDescriptors: readonly SortComparator<T>[];
+      readonly predicate: NSEPredicate<T> | null;
+      readonly sortDescriptors: readonly NSESortComparator<T>[];
       readonly isEditing?: boolean;
     },
     beforePublish?: () => void,

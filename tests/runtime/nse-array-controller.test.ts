@@ -20,7 +20,7 @@
 
 import { afterAll, describe, expect, it } from "vitest";
 
-import { Predicate, SortDescriptor } from "../../src/SynCloudOS/Models";
+import { NSEPredicate, NSESortDescriptor } from "../../src/Foundation/public";
 import { createUndoManager } from "../../src/SynCloudOS/Undo";
 import { NSEArrayController } from "../../src/NSE/Controllers";
 import { createTestRuntime } from "./helpers";
@@ -57,7 +57,7 @@ describe("NSEArrayController", () => {
   it("preserves identity selection while filtering, sorting and editing incrementally", () => {
     const controller = createController();
     controller.setSortDescriptors([
-      new SortDescriptor({
+      new NSESortDescriptor({
         id: "label",
         select: (item: Item) => item.label,
       }),
@@ -79,7 +79,7 @@ describe("NSEArrayController", () => {
       },
     } as const;
     controller.setPredicate(
-      Predicate.compile(schema, {
+      NSEPredicate.compile(schema, {
         kind: "comparison",
         field: "active",
         operator: "equals",
@@ -238,7 +238,7 @@ describe("NSEArrayController", () => {
       },
     } as const;
     controller.setPredicate(
-      Predicate.compile(schema, {
+      NSEPredicate.compile(schema, {
         kind: "comparison",
         field: "label",
         operator: "contains",
@@ -268,7 +268,7 @@ describe("NSEArrayController", () => {
       selection: { mode: "multiple", allowsEmpty: true, preservesSelection: false },
     });
     controller.setPredicate(
-      Predicate.compile(
+      NSEPredicate.compile(
         { id: "visible-items", fields: { active: { type: "boolean", read: (item: Item) => item.active } } },
         { kind: "comparison", field: "active", operator: "equals", value: true },
       ),

@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEUserDefaults, NSEUserDefaultsController, PreferencePersistenceError, type NSEControllerOwnership } from "../../Controllers";
+import { NSEUserDefaults } from "../../../Foundation/NSEUserDefaults";
+import { NSEUserDefaultsController, PreferencePersistenceError, type NSEControllerOwnership } from "../../Controllers";
 import { GFXColour } from "../../../FX/GraphicsFX/public";
 
 export interface NSEColourPanelPreferences {

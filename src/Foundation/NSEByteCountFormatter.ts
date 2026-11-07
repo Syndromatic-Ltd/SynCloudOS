@@ -20,20 +20,20 @@
 
 import {
   formatterFailure,
-  type Formatter,
-  type FormatterContext,
-  type FormatterResult,
-} from "./Formatter";
-import { NumberFormatter } from "./NumberFormatter";
+  NSEFormatter,
+  type NSEFormatterContext,
+  type NSEFormatterResult,
+} from "./NSEFormatter";
+import { NSENumberFormatter } from "./NSENumberFormatter";
 
-export type ByteUnitSystem = "decimal" | "binary";
-export type DecimalByteUnit = "B" | "kB" | "MB" | "GB" | "TB" | "PB";
-export type BinaryByteUnit = "B" | "KiB" | "MiB" | "GiB" | "TiB" | "PiB";
-export type ByteUnit = DecimalByteUnit | BinaryByteUnit;
+export type NSEByteUnitSystem = "decimal" | "binary";
+export type NSEDecimalByteUnit = "B" | "kB" | "MB" | "GB" | "TB" | "PB";
+export type NSEBinaryByteUnit = "B" | "KiB" | "MiB" | "GiB" | "TiB" | "PiB";
+export type NSEByteUnit = NSEDecimalByteUnit | NSEBinaryByteUnit;
 
-export interface ByteCountFormatterOptions {
-  readonly unitSystem: ByteUnitSystem;
-  readonly allowedUnits?: readonly ByteUnit[];
+export interface NSEByteCountFormatterOptions {
+  readonly unitSystem: NSEByteUnitSystem;
+  readonly allowedUnits?: readonly NSEByteUnit[];
   readonly minimumFractionDigits?: number;
   readonly maximumFractionDigits?: number;
   readonly includeCount?: boolean;
@@ -44,12 +44,13 @@ export interface ByteCountFormatterOptions {
 const DECIMAL_UNITS = ["B", "kB", "MB", "GB", "TB", "PB"] as const;
 const BINARY_UNITS = ["B", "KiB", "MiB", "GiB", "TiB", "PiB"] as const;
 
-export class ByteCountFormatter implements Formatter<number> {
-  readonly #units: readonly ByteUnit[];
+export class NSEByteCountFormatter extends NSEFormatter<number> {
+  readonly #units: readonly NSEByteUnit[];
   readonly #base: number;
-  readonly #options: ByteCountFormatterOptions;
+  readonly #options: NSEByteCountFormatterOptions;
 
-  constructor(options: ByteCountFormatterOptions) {
+  constructor(options: NSEByteCountFormatterOptions) {
+    super();
     const available = options.unitSystem === "binary" ? BINARY_UNITS : DECIMAL_UNITS;
     const units = options.allowedUnits ?? available;
     if (units.length === 0 || units.some((unit) => !available.includes(unit as never))) {
@@ -63,12 +64,12 @@ export class ByteCountFormatter implements Formatter<number> {
     Object.freeze(this);
   }
 
-  #factor(unit: ByteUnit): number {
+  #factor(unit: NSEByteUnit): number {
     const available = this.#options.unitSystem === "binary" ? BINARY_UNITS : DECIMAL_UNITS;
     return this.#base ** available.indexOf(unit as never);
   }
 
-  #displayUnit(bytes: number): ByteUnit {
+  #displayUnit(bytes: number): NSEByteUnit {
     const magnitude = Math.abs(bytes);
     return [...this.#units]
       .sort((left, right) => this.#factor(right) - this.#factor(left))
@@ -82,20 +83,20 @@ export class ByteCountFormatter implements Formatter<number> {
     return Object.is(value, -0) ? 0 : value;
   }
 
-  format(value: number, context: FormatterContext): string {
+  string(value: number, context: NSEFormatterContext): string {
     value = this.#normaliseByteCount(value);
     const unit = this.#displayUnit(value);
     const count = value / this.#factor(unit);
-    const number = new NumberFormatter({
+    const number = new NSENumberFormatter({
       minimumFractionDigits: this.#options.minimumFractionDigits,
       maximumFractionDigits: this.#options.maximumFractionDigits ?? 1,
-    }).format(count, context);
+    }).string(count, context);
     const parts: string[] = [];
     if (this.#options.includeCount ?? true) parts.push(number);
     if (this.#options.includeUnit ?? true) parts.push(unit);
     let result = parts.join(" ");
     if (this.#options.includeActualByteCount) {
-      const actual = new NumberFormatter({ maximumFractionDigits: 0 }).format(
+      const actual = new NSENumberFormatter({ maximumFractionDigits: 0 }).string(
         value,
         context,
       );
@@ -104,18 +105,18 @@ export class ByteCountFormatter implements Formatter<number> {
     return result;
   }
 
-  editingText(value: number, context: FormatterContext): string {
+  editingString(value: number, context: NSEFormatterContext): string {
     value = this.#normaliseByteCount(value);
-    return new NumberFormatter({
+    return new NSENumberFormatter({
       maximumFractionDigits: 0,
       useGrouping: false,
-    }).editingText(value, context);
+    }).editingString(value, context);
   }
 
-  parse(text: string, context: FormatterContext): FormatterResult<number> {
+  getObjectValue(text: string, context: NSEFormatterContext): NSEFormatterResult<number> {
     const trimmed = text.trim();
     const match = /^(.*?)(?:\s*([A-Za-z]+))?$/.exec(trimmed);
-    const unit = (match?.[2] ?? "B") as ByteUnit;
+    const unit = (match?.[2] ?? "B") as NSEByteUnit;
     if (!this.#units.includes(unit)) {
       return formatterFailure(
         "bytes.unit",
@@ -123,7 +124,7 @@ export class ByteCountFormatter implements Formatter<number> {
         text,
       );
     }
-    const parsed = new NumberFormatter({ minimum: 0 }).parse(
+    const parsed = new NSENumberFormatter({ minimum: 0 }).getObjectValue(
       match?.[1]?.trim() ?? "",
       context,
     );
@@ -141,10 +142,10 @@ export class ByteCountFormatter implements Formatter<number> {
     return { ok: true, value: Object.is(value, -0) ? 0 : value };
   }
 
-  validatePartial(text: string, context: FormatterContext) {
+  isPartialStringValid(text: string, context: NSEFormatterContext) {
     const match = /^(.*?)(?:\s*([A-Za-z]*))?$/.exec(text.trim());
     const unit = match?.[2] ?? "";
-    const number = new NumberFormatter({ minimum: 0 }).validatePartial(
+    const number = new NSENumberFormatter({ minimum: 0 }).isPartialStringValid(
       match?.[1] ?? "",
       context,
     );

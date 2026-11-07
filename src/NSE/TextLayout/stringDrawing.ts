@@ -22,7 +22,8 @@ import { normalisePoint, normaliseRect, normaliseSize, type GFXPoint, type GFXRe
 import type { GFXImage } from "../../FX/GraphicsFX/GFXImage";
 import type { TFXRunDelegate } from "../../FX/TextFX/TFXRunDelegate";
 import type { TFXRunDelegateRequest } from "../../FX/TextFX/textLayoutTypes";
-import { type RangeValue, type TFXLogicalTextInput, type TFXTextFontDescriptor, type TFXTextLayoutService, type TFXTextTruncation, type TFXTextWritingMode } from "../../SynCloudOS/SynCloudOS";
+import { type TFXLogicalTextInput, type TFXTextFontDescriptor, type TFXTextLayoutService, type TFXTextTruncation, type TFXTextWritingMode } from "../../SynCloudOS/SynCloudOS";
+import type { NSERange } from "../../Foundation/NSERange";
 import { TFXTextContainer, normaliseTFXTextLayoutRecord } from "../../FX/TextFX/TFXTextContainer";
 import { normaliseFontDescriptor } from "../Typography/typographyTypes";
 import { attributedContent, attributedContentLayoutText, paragraph, parseAttributedContent, textRun, type NSEAttributedAttachmentRun, type NSEAttributedParagraph, type NSEAttributedTextAttributes } from "../Text/attributedContent";
@@ -43,7 +44,7 @@ interface AttributedDisplaySpan {
 
 interface AttributedDisplayPiece {
   readonly text: string;
-  readonly range: RangeValue;
+  readonly range: NSERange;
   readonly font: TFXTextFontDescriptor;
   readonly attachment?: NSEAttributedAttachmentRun;
 }
@@ -52,7 +53,7 @@ export interface NSETextDisplayTextCommand {
   readonly kind: "text";
   readonly text: string;
   readonly origin: GFXPoint;
-  readonly range: RangeValue;
+  readonly range: NSERange;
   readonly font: TFXTextFontDescriptor;
   readonly direction: TFXLogicalTextInput["direction"];
   /** Device-independent baseline after the caller-supplied baseline offset. */
@@ -65,7 +66,7 @@ export interface NSETextDisplayAttachmentCommand {
   readonly kind: "attachment";
   readonly image: GFXImage;
   readonly rect: GFXRect;
-  readonly range: RangeValue;
+  readonly range: NSERange;
   readonly accessibilityLabel: string;
 }
 

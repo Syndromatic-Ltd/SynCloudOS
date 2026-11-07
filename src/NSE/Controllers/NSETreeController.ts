@@ -18,19 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {
-  diffCollection,
-  emptyChangeSet,
-  IndexPath,
-  SelectionModel,
-  sortWithDescriptors,
-  TreeNode,
-  type ChangeSet,
-  type ItemIdentity,
-  type Predicate,
-  type SelectionSnapshot,
-  type SortComparator,
-} from "../../SynCloudOS/Models";
+import { diffCollection, emptyChangeSet, SelectionModel, sortWithDescriptors, type ChangeSet, type ItemIdentity, type SelectionSnapshot } from "../../SynCloudOS/Models";
+import { TreeControllerNodeSnapshot } from "./treeControllerSnapshot";
+import { NSEIndexPath, type NSEPredicate, type NSESortComparator } from "../../Foundation/public";
 import { defineSyncUndoAction } from "../../SynCloudOS/nseRuntimeContracts";
 import {
   ControllerEditingStateError,
@@ -62,13 +52,13 @@ export interface TreeControllerOptions<T, TId extends ItemIdentity> extends NSEC
 export interface TreeControllerSnapshot<T, TId extends ItemIdentity> {
   readonly revision: number;
   readonly content: readonly T[];
-  readonly roots: readonly TreeNode<T, TId>[];
-  readonly visibleNodes: readonly TreeNode<T, TId>[];
-  readonly predicate: Predicate<T> | null;
-  readonly sortDescriptors: readonly SortComparator<T>[];
+  readonly roots: readonly TreeControllerNodeSnapshot<T, TId>[];
+  readonly visibleNodes: readonly TreeControllerNodeSnapshot<T, TId>[];
+  readonly predicate: NSEPredicate<T> | null;
+  readonly sortDescriptors: readonly NSESortComparator<T>[];
   readonly expandedIds: ReadonlySet<TId>;
   readonly selection: SelectionSnapshot<TId>;
-  readonly changeSet: ChangeSet<TId, TreeNode<T, TId>>;
+  readonly changeSet: ChangeSet<TId, TreeControllerNodeSnapshot<T, TId>>;
   readonly loadingIds: ReadonlySet<TId>;
   readonly errors: ReadonlyMap<TId, string>;
   readonly editable: boolean;
@@ -236,7 +226,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
       sortDescriptors: [],
       expandedIds: readonlySet([]),
       selection: this.#selection.getSnapshot(),
-      changeSet: emptyChangeSet<TId, TreeNode<T, TId>>(),
+      changeSet: emptyChangeSet<TId, TreeControllerNodeSnapshot<T, TId>>(),
       loadingIds: readonlySet([]),
       errors: readonlyMap([]),
       editable: options.editable ?? true,
@@ -266,7 +256,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     this.#publishArrangement("content", owned);
   }
 
-  setPredicate(predicate: Predicate<T> | null): void {
+  setPredicate(predicate: NSEPredicate<T> | null): void {
     this.assertActive("setPredicate");
     if (this.#snapshot.predicate === predicate) return;
     this.#publishArrangement("arrangement", this.#snapshot.content, {
@@ -274,7 +264,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     });
   }
 
-  setSortDescriptors(descriptors: readonly SortComparator<T>[]): void {
+  setSortDescriptors(descriptors: readonly NSESortComparator<T>[]): void {
     this.assertActive("setSortDescriptors");
     const next = Object.freeze([...descriptors]);
     if (
@@ -510,13 +500,13 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     this.#applyDraft(this.#insertAt(without, adjusted, moved));
   }
 
-  node(id: TId): TreeNode<T, TId> | null {
+  node(id: TId): TreeControllerNodeSnapshot<T, TId> | null {
     return this.#allNodes(this.#snapshot.roots).find((node) => node.id === id) ?? null;
   }
 
-  nodeAt(path: IndexPath): TreeNode<T, TId> | null {
+  nodeAt(path: NSEIndexPath): TreeControllerNodeSnapshot<T, TId> | null {
     let siblings = this.#snapshot.roots;
-    let node: TreeNode<T, TId> | undefined;
+    let node: TreeControllerNodeSnapshot<T, TId> | undefined;
     for (const index of path.indexes) {
       node = siblings[index];
       if (!node) return null;
@@ -661,14 +651,14 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
 
   #buildRoots(
     content: readonly T[],
-    predicate: Predicate<T> | null,
-    descriptors: readonly SortComparator<T>[],
-  ): readonly TreeNode<T, TId>[] {
+    predicate: NSEPredicate<T> | null,
+    descriptors: readonly NSESortComparator<T>[],
+  ): readonly TreeControllerNodeSnapshot<T, TId>[] {
     const prepare = (item: T): PreparedNode<T> | null => {
       const children = this.#getChildren(item)
         .map(prepare)
         .filter((child): child is PreparedNode<T> => child !== null);
-      if (predicate && !predicate.test(item) && children.length === 0) return null;
+      if (predicate && !predicate.evaluate(item) && children.length === 0) return null;
       const sorted = sortWithDescriptors(
         children,
         descriptors.map((descriptor) => ({
@@ -689,15 +679,15 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
       siblings: readonly PreparedNode<T>[],
       parentId: TId | null,
       parentPath: readonly number[],
-    ): readonly TreeNode<T, TId>[] =>
+    ): readonly TreeControllerNodeSnapshot<T, TId>[] =>
       Object.freeze(
         siblings.map((preparedNode, index) => {
           const id = this.#getId(preparedNode.item);
           const path = [...parentPath, index];
-          return new TreeNode({
+          return new TreeControllerNodeSnapshot({
             id,
             value: preparedNode.item,
-            indexPath: IndexPath.from(...path),
+            indexPath: NSEIndexPath.from(...path),
             parentId,
             children: materialise(preparedNode.children, id, path),
             loading: this.#loading.has(id),
@@ -708,9 +698,9 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     return materialise(prepared, null, []);
   }
 
-  #visible(roots: readonly TreeNode<T, TId>[]): readonly TreeNode<T, TId>[] {
-    const visible: TreeNode<T, TId>[] = [];
-    const visit = (nodes: readonly TreeNode<T, TId>[]) => {
+  #visible(roots: readonly TreeControllerNodeSnapshot<T, TId>[]): readonly TreeControllerNodeSnapshot<T, TId>[] {
+    const visible: TreeControllerNodeSnapshot<T, TId>[] = [];
+    const visit = (nodes: readonly TreeControllerNodeSnapshot<T, TId>[]) => {
       for (const node of nodes) {
         visible.push(node);
         if (this.#expanded.has(node.id)) visit(node.children);
@@ -720,9 +710,9 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     return Object.freeze(visible);
   }
 
-  #allNodes(roots: readonly TreeNode<T, TId>[]): readonly TreeNode<T, TId>[] {
-    const nodes: TreeNode<T, TId>[] = [];
-    const visit = (siblings: readonly TreeNode<T, TId>[]) => {
+  #allNodes(roots: readonly TreeControllerNodeSnapshot<T, TId>[]): readonly TreeControllerNodeSnapshot<T, TId>[] {
+    const nodes: TreeControllerNodeSnapshot<T, TId>[] = [];
+    const visit = (siblings: readonly TreeControllerNodeSnapshot<T, TId>[]) => {
       for (const node of siblings) {
         nodes.push(node);
         visit(node.children);
@@ -736,8 +726,8 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     kind: TreeControllerChange<T, TId>["kind"],
     content: readonly T[],
     patch: {
-      readonly predicate?: Predicate<T> | null;
-      readonly sortDescriptors?: readonly SortComparator<T>[];
+      readonly predicate?: NSEPredicate<T> | null;
+      readonly sortDescriptors?: readonly NSESortComparator<T>[];
       readonly isEditing?: boolean;
     } = {},
   ): void {
@@ -828,7 +818,7 @@ export class NSETreeController<T, TId extends ItemIdentity> extends NSEControlle
     }
   }
 
-  #requireNode(operation: string, id: TId): TreeNode<T, TId> {
+  #requireNode(operation: string, id: TId): TreeControllerNodeSnapshot<T, TId> {
     this.assertActive(operation);
     const node = this.node(id);
     if (!node) throw new RangeError("Unknown arranged tree identity.");

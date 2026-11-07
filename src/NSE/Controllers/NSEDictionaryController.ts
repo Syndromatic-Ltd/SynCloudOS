@@ -18,13 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {
-  diffCollection,
-  emptyChangeSet,
-  SelectionModel,
-  type ChangeSet,
-  type SelectionSnapshot,
-} from "../../SynCloudOS/Models";
+import { diffCollection, emptyChangeSet, SelectionModel, type ChangeSet, type SelectionSnapshot } from "../../SynCloudOS/Models";
 import { defineSyncUndoAction } from "../../SynCloudOS/nseRuntimeContracts";
 import {
   ControllerEditingStateError,

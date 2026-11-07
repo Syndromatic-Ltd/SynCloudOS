@@ -39,7 +39,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode
 } from "react";
-import type { Formatter, FormatterContext } from "../../../SynCloudOS/Models";
+import type { NSEFormatter, NSEFormatterContext } from "../../../Foundation/public";
 import {
   useNSEControlCommand,
   useNSEControlFormReset,
@@ -100,8 +100,8 @@ export interface NSEFormattedTextFieldProps<T> extends NSETextFieldChromeProps, 
   value?: T;
   defaultValue?: T;
   invalid?: boolean;
-  formatter: Formatter<T>;
-  formatterContext: FormatterContext;
+  formatter: NSEFormatter<T>;
+  formatterContext: NSEFormatterContext;
   command?: NSEControlCommandBinding<T>;
   onValueChange?(value: T, phase: NSEControlInteractionPhase): void;
 }
@@ -122,14 +122,14 @@ export interface NSETextFieldProps<T = string> extends NSETextFieldChromeProps, 
   value?: T;
   defaultValue?: T;
   invalid?: boolean;
-  formatter?: Formatter<T>;
-  formatterContext?: FormatterContext;
+  formatter?: NSEFormatter<T>;
+  formatterContext?: NSEFormatterContext;
   command?: NSEControlCommandBinding<T>;
   onValueChange?(value: T, phase: NSEControlInteractionPhase): void;
 }
 
-function toTextValue<T>(value: T | undefined, formatter: Formatter<T> | undefined, context: FormatterContext | undefined) {
-  if (formatter && value !== undefined && context) return formatter.editingText(value, context);
+function toTextValue<T>(value: T | undefined, formatter: NSEFormatter<T> | undefined, context: NSEFormatterContext | undefined) {
+  if (formatter && value !== undefined && context) return formatter.editingString(value, context);
   return value === undefined ? "" : String(value);
 }
 
@@ -264,7 +264,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
 
   const validatePartial = useCallback((text: string) => {
     if (!formatter || !formatterContext) return true;
-    const partial = formatter.validatePartial(text, formatterContext);
+    const partial = formatter.isPartialStringValid(text, formatterContext);
     if (partial.valid) {
       setEditingValidation(undefined);
       if (partial.replacement !== undefined && partial.replacement !== text) setDraft(partial.replacement);
@@ -288,7 +288,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
       currentValue.change(draft, "commit");
       return true;
     }
-    const parsed = formatter.parse(draft, formatterContext);
+    const parsed = formatter.getObjectValue(draft, formatterContext);
     if (!parsed.ok) {
       setEditingValidation({ kind: "invalid", code: parsed.error.code, message: parsed.error.message });
       return false;
@@ -299,7 +299,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
       if (result?.status !== "executed") return false;
     }
     currentValue.change(parsed.value, "commit");
-    setDraft(formatter.editingText(parsed.value, formatterContext));
+    setDraft(formatter.editingString(parsed.value, formatterContext));
     return true;
   }, [command, commandBinding, currentValue, disabled, draft, formatter, formatterContext, readOnly]);
 
@@ -341,7 +341,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
             if (composing.current) return;
             if (isFormatted) {
               if (validatePartial(nextText) && formatter && formatterContext) {
-                const parsed = formatter.parse(nextText, formatterContext);
+                const parsed = formatter.getObjectValue(nextText, formatterContext);
                 if (parsed.ok) currentValue.change(parsed.value, "preview");
               }
             } else currentValue.change(nextText, "preview");
@@ -356,7 +356,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
             setDraft(nextText);
             if (isFormatted) {
               if (validatePartial(nextText) && formatter && formatterContext) {
-                const parsed = formatter.parse(nextText, formatterContext);
+                const parsed = formatter.getObjectValue(nextText, formatterContext);
                 if (parsed.ok) currentValue.change(parsed.value, "preview");
               }
             } else currentValue.change(nextText, "preview");

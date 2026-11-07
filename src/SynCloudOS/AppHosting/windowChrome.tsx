@@ -30,7 +30,7 @@ import { SynWareRuntimeContext } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
 import { controllerServicesFor } from "../AppSDK/controllerServices";
 import "./window-chrome.css";
-import { NSEUserDefaults } from "../../NSE/Controllers/NSEUserDefaults";
+import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 
 const noSubscription = () => () => {};
 

@@ -18,19 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type SortDirection = "ascending" | "descending";
-export type SortNulls = "first" | "last";
+export type NSESortDirection = "ascending" | "descending";
+export type NSESortNulls = "first" | "last";
 
-export interface SortDescriptorOptions<T, V> {
+export interface NSESortDescriptorOptions<T, V> {
   readonly id: string;
   readonly select: (item: T) => V;
-  readonly direction?: SortDirection;
-  readonly nulls?: SortNulls;
+  readonly direction?: NSESortDirection;
+  readonly nulls?: NSESortNulls;
   readonly compare?: (left: V, right: V) => number;
   readonly collator?: Intl.Collator;
 }
 
-export interface SortComparator<T> {
+export interface NSESortComparator<T> {
   compare(left: T, right: T): number;
 }
 
@@ -73,12 +73,12 @@ function compareNative(left: unknown, right: unknown): number {
   return rank(left) - rank(right);
 }
 
-export class SortDescriptor<T, V> implements SortComparator<T> {
+export class NSESortDescriptor<T, V> implements NSESortComparator<T> {
   readonly id: string;
-  readonly direction: SortDirection;
-  readonly #options: SortDescriptorOptions<T, V>;
+  readonly direction: NSESortDirection;
+  readonly #options: NSESortDescriptorOptions<T, V>;
 
-  constructor(options: SortDescriptorOptions<T, V>) {
+  constructor(options: NSESortDescriptorOptions<T, V>) {
     if (options.id.trim().length === 0) {
       throw new TypeError("Sort descriptor id must not be empty.");
     }
@@ -127,29 +127,11 @@ export class SortDescriptor<T, V> implements SortComparator<T> {
     return this.direction === "ascending" ? ordered : -ordered;
   }
 
-  reversed(): SortDescriptor<T, V> {
-    return new SortDescriptor({
+  reversedSortDescriptor(): NSESortDescriptor<T, V> {
+    return new NSESortDescriptor({
       ...this.#options,
       direction:
         this.direction === "ascending" ? "descending" : "ascending",
     });
   }
-}
-
-export function sortWithDescriptors<T>(
-  items: readonly T[],
-  descriptors: readonly SortComparator<T>[],
-): readonly T[] {
-  if (descriptors.length === 0) return items;
-
-  return items
-    .map((item, index) => ({ item, index }))
-    .sort((left, right) => {
-      for (const descriptor of descriptors) {
-        const result = descriptor.compare(left.item, right.item);
-        if (result !== 0) return result;
-      }
-      return left.index - right.index;
-    })
-    .map(({ item }) => item);
 }

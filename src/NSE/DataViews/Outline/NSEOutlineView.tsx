@@ -44,7 +44,7 @@ import { NSEListItem } from "../../Controls/Selection/NSEListItem";
 import { NSETableCellView } from "../Table/NSETableCellView";
 import type { NSETableCellViewProps } from "../Core/dataViewTypes";
 import { useNSERubberBandScroll } from "../../Scroll";
-import type { TreeNode } from "../../../SynCloudOS/Models";
+import type { TreeControllerNodeSnapshot } from "../../Controllers/treeControllerSnapshot";
 import { flattenVisibleTree } from "./flattenVisibleTree";
 import type {
   NSEOutlineViewProps,
@@ -392,7 +392,7 @@ export function NSEOutlineView<T, TId extends string | number>({
   // A source list draws every loaded item, so a section's rows slide closed
   // rather than vanish; rows inside a collapsed item are built here.
   const visibleRows = new Map(rows.map((row) => [row.id, row] as const));
-  const sourceListRow = (node: TreeNode<T, TId>, level: number, positionInSet: number, setSize: number): NSEOutlineViewRow<T, TId> => {
+  const sourceListRow = (node: TreeControllerNodeSnapshot<T, TId>, level: number, positionInSet: number, setSize: number): NSEOutlineViewRow<T, TId> => {
     const visible = visibleRows.get(node.id);
     if (visible) return visible;
     const supplied = isExpandable?.(node.value);
@@ -403,7 +403,7 @@ export function NSEOutlineView<T, TId extends string | number>({
     });
   };
 
-  const renderSourceListNodes = (nodes: readonly TreeNode<T, TId>[], level: number, indent: number): ReactNode => nodes.map((node, index) => {
+  const renderSourceListNodes = (nodes: readonly TreeControllerNodeSnapshot<T, TId>[], level: number, indent: number): ReactNode => nodes.map((node, index) => {
     const row = sourceListRow(node, level, index + 1, nodes.length);
     const group = isGroup(row);
     const selected = snapshot.selection.selectedIds.has(row.id);

@@ -56,7 +56,7 @@ Use `"preview"` for a live readout, and `"commit"` for anything that should be s
 | `prefix`, `suffix` | `ReactNode` | none | Content inside the frame before and after the text, such as a currency symbol or a unit. |
 | `controlSize` | `"regular" \| "small" \| "mini"` | `"regular"` | Frame and text metrics. |
 | `groupPosition` | `"single" \| "first" \| "middle" \| "last"` | `"single"` | Join several fields into one block by giving each its place, so the theme draws shared edges. |
-| `formatter`, `formatterContext` | `Formatter<T>`, `{ locale, timeZone? }` | none | Typed editing. See below. |
+| `formatter`, `formatterContext` | `NSEFormatter<T>`, `{ locale, timeZone? }` | none | Typed editing. See below. |
 | `validation` | `NSEControlValidation` | none | Your validation result. |
 | `invalid` | `boolean` | `false` | A shortcut for an invalid state with the message "This value needs attention." |
 | `command` | binding | none | See Shared behaviour. |
@@ -70,12 +70,12 @@ Every other `<input>` attribute passes through, except `prefix`, which the frame
 
 | Method | Purpose |
 | --- | --- |
-| `format(value, context)` | The display text for a value. The interface requires it for your own use, and the field itself edits with `editingText`. |
-| `editingText(value, context)` | The text the field shows, both at rest and while editing. |
-| `parse(text, context)` | `{ ok: true, value }` or `{ ok: false, error: { code, message, input } }`. |
-| `validatePartial(text, context)` | `{ valid, replacement?, error? }`. Called on every keystroke so the field can reject or rewrite input the moment it goes wrong. |
+| `string(value, context)` | The display text for a value. The interface requires it for your own use, and the field itself edits with `editingString`. |
+| `editingString(value, context)` | The text the field shows, both at rest and while editing. |
+| `getObjectValue(text, context)` | `{ ok: true, value }` or `{ ok: false, error: { code, message, input } }`. |
+| `isPartialStringValid(text, context)` | `{ valid, replacement?, error? }`. Called on every keystroke so the field can reject or rewrite input the moment it goes wrong. |
 
-The field previews a parsed value as the user types, shows a formatter's error as an alert while the text cannot parse, and on commit replaces the text with `editingText` of the parsed value.
+The field previews a parsed value as the user types, shows a formatter's error as an alert while the text cannot parse, and on commit replaces the text with `editingString` of the parsed value.
 
 ### Labels
 

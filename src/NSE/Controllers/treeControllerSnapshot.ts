@@ -18,29 +18,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { ItemIdentity } from "./ChangeSet";
-import { IndexPath } from "./IndexPath";
+import type { ItemIdentity } from "../../SynCloudOS/Models/ChangeSet";
+import { NSEIndexPath } from "../../Foundation/NSEIndexPath";
 
-export interface TreeNodeInit<T, TId extends ItemIdentity> {
+export interface TreeControllerNodeSnapshotInit<T, TId extends ItemIdentity> {
   readonly id: TId;
   readonly value: T;
-  readonly indexPath: IndexPath;
+  readonly indexPath: NSEIndexPath;
   readonly parentId: TId | null;
-  readonly children: readonly TreeNode<T, TId>[];
+  readonly children: readonly TreeControllerNodeSnapshot<T, TId>[];
   readonly loading?: boolean;
   readonly error?: string | null;
 }
 
-export class TreeNode<T, TId extends ItemIdentity> {
+export class TreeControllerNodeSnapshot<T, TId extends ItemIdentity> {
   readonly id: TId;
   readonly value: T;
-  readonly indexPath: IndexPath;
+  readonly indexPath: NSEIndexPath;
   readonly parentId: TId | null;
-  readonly children: readonly TreeNode<T, TId>[];
+  readonly children: readonly TreeControllerNodeSnapshot<T, TId>[];
   readonly loading: boolean;
   readonly error: string | null;
 
-  constructor(init: TreeNodeInit<T, TId>) {
+  constructor(init: TreeControllerNodeSnapshotInit<T, TId>) {
     this.id = init.id;
     this.value = init.value;
     this.indexPath = init.indexPath;
@@ -59,8 +59,8 @@ export class TreeNode<T, TId extends ItemIdentity> {
     return this.children.length === 0;
   }
 
-  descendant(path: IndexPath): TreeNode<T, TId> | null {
-    let node: TreeNode<T, TId> | undefined = this;
+  descendant(path: NSEIndexPath): TreeControllerNodeSnapshot<T, TId> | null {
+    let node: TreeControllerNodeSnapshot<T, TId> | undefined = this;
     for (const index of path.indexes) node = node?.children[index];
     return node ?? null;
   }

@@ -73,14 +73,14 @@ function RuleComparisonControls({ row, label, fields, operators, templates, loca
   const template = templates.find((candidate) => candidate.field === row.field);
   const available = template?.operators ?? operators;
   const option = available.find((candidate) => candidate.operator === row.operator) ?? operators.find((candidate) => candidate.operator === row.operator);
-  const textFor = (value: unknown) => template?.formatter.editingText(value, { locale }) ?? String(value ?? "");
+  const textFor = (value: unknown) => template?.formatter.editingString(value, { locale }) ?? String(value ?? "");
   const [parts, setParts] = useState<readonly string[]>(() => Array.isArray(row.value) ? row.value.map(textFor) : [textFor(row.value)]);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => setParts(Array.isArray(row.value) ? row.value.map(textFor) : [textFor(row.value)]), [row.value, template, locale]);
   const parse = (text: string) => {
     try {
       if (!template) return { ok: true as const, value: text };
-      const parsed = template.formatter.parse(text.trim(), { locale });
+      const parsed = template.formatter.getObjectValue(text.trim(), { locale });
       if (!parsed.ok) return parsed;
       return template.validate(parsed.value);
     } catch (cause) {

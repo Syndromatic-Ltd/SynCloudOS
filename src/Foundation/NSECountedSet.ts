@@ -18,21 +18,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export class CountedSet<T> implements Iterable<T> {
+export class NSECountedSet<T> implements Iterable<T> {
   readonly #counts = new Map<T, number>();
   #totalCount = 0;
 
-  constructor(values?: Iterable<T> | CountedSet<T>) {
-    if (values instanceof CountedSet) {
+  constructor(values?: Iterable<T> | NSECountedSet<T>) {
+    if (values instanceof NSECountedSet) {
       for (const [value, count] of values.entriesWithCounts()) {
-        this.add(value, count);
+        this.addObject(value, count);
       }
     } else if (values) {
-      for (const value of values) this.add(value);
+      for (const value of values) this.addObject(value);
     }
   }
 
-  get size(): number {
+  get count(): number {
     return this.#counts.size;
   }
 
@@ -40,31 +40,31 @@ export class CountedSet<T> implements Iterable<T> {
     return this.#totalCount;
   }
 
-  count(value: T): number {
+  countForObject(value: T): number {
     return this.#counts.get(value) ?? 0;
   }
 
-  has(value: T): boolean {
+  contains(value: T): boolean {
     return this.#counts.has(value);
   }
 
-  add(value: T, increment = 1): this {
+  addObject(value: T, increment = 1): this {
     if (!Number.isSafeInteger(increment) || increment <= 0) {
       throw new RangeError("Count increment must be a positive safe integer.");
     }
-    const count = this.count(value);
+    const count = this.countForObject(value);
     if (!Number.isSafeInteger(count + increment)) {
-      throw new RangeError("CountedSet item count exceeds the safe integer range.");
+      throw new RangeError("NSECountedSet item count exceeds the safe integer range.");
     }
     if (!Number.isSafeInteger(this.#totalCount + increment)) {
-      throw new RangeError("CountedSet total count exceeds the safe integer range.");
+      throw new RangeError("NSECountedSet total count exceeds the safe integer range.");
     }
     this.#counts.set(value, count + increment);
     this.#totalCount += increment;
     return this;
   }
 
-  delete(value: T): boolean {
+  removeObject(value: T): boolean {
     const count = this.#counts.get(value);
     if (count === undefined) return false;
     if (count === 1) this.#counts.delete(value);
@@ -81,7 +81,7 @@ export class CountedSet<T> implements Iterable<T> {
     return count;
   }
 
-  clear(): void {
+  removeAllObjects(): void {
     this.#counts.clear();
     this.#totalCount = 0;
   }

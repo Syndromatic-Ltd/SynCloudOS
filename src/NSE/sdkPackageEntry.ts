@@ -55,31 +55,8 @@ export type {
 export type { ArrayControllerSnapshot, ArrayControllerChange, ArrayControllerInsertion } from "./Controllers/NSEArrayController";
 export type { TreeControllerSnapshot, TreeControllerChange, TreeDestination } from "./Controllers/NSETreeController";
 
-// Value models required to author and consume the public controller contracts.
-export { IndexPath, compareIndexPaths } from "../SynCloudOS/Models";
-export { IndexSet } from "../SynCloudOS/Models";
-export type { IndexRange } from "../SynCloudOS/Models";
-export { Predicate, PredicateValidationError } from "../SynCloudOS/Models";
-export type {
-  PredicateScalar, PredicateLiteral, PredicateComparisonOperator, PredicateTextOptions,
-  PredicateExpression, PredicateField, PredicateSchema,
-} from "../SynCloudOS/Models";
-export type { ItemIdentity, CollectionChange, ChangeSet } from "../SynCloudOS/Models";
-export { SelectionModel } from "../SynCloudOS/Models";
-export type { SelectionSnapshot, SelectionChange, SelectionModelOptions } from "../SynCloudOS/Models";
-export { SortDescriptor, sortWithDescriptors } from "../SynCloudOS/Models";
-export type { SortDirection, SortNulls, SortDescriptorOptions, SortComparator } from "../SynCloudOS/Models";
-export { TreeNode } from "../SynCloudOS/Models";
-export type { TreeNodeInit } from "../SynCloudOS/Models";
-export type { Formatter, FormatterContext, FormatterError, FormatterResult } from "../SynCloudOS/Models";
-export { NumberFormatter } from "../SynCloudOS/Models";
-export type { NumberFormatterOptions } from "../SynCloudOS/Models";
-export { DateFormatter } from "../SynCloudOS/Models";
-export type { DateFormatterValueType, DateFormatterValue, DateFormatterOptions } from "../SynCloudOS/Models";
-export { ByteCountFormatter } from "../SynCloudOS/Models";
-export type { ByteUnitSystem, DecimalByteUnit, BinaryByteUnit, ByteUnit, ByteCountFormatterOptions } from "../SynCloudOS/Models";
-export { createValueTransformer, composeTransformers, negateBooleanTransformer, isNullTransformer, isNotNullTransformer } from "../SynCloudOS/Models";
-export type { ValueTransformer } from "../SynCloudOS/Models";
+// AppKit tree nodes belong to NSE; Cocoa value models are imported from Foundation.
+export { NSETreeNode } from "./Controllers/NSETreeNode";
 export type { NSEControlValidation, NSEControlInteractionPhase, NSEControlValueProps } from "./Controls/Core/controlTypes";
 export { NSETableCellView } from "./DataViews/Table/NSETableCellView";
 
@@ -132,8 +109,6 @@ export {
   PreferencePersistenceError,
 } from "./Controllers/NSEUserDefaultsController";
 export type { NSEUserDefaultsControllerOptions } from "./Controllers/NSEUserDefaultsController";
-export { NSEUserDefaults } from "./Controllers/NSEUserDefaults";
-export type { NSEUserDefaultsStore } from "./Controllers/NSEUserDefaults";
 export {
   NSETreeController,
 } from "./Controllers/NSETreeController";

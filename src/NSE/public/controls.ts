@@ -20,7 +20,6 @@
 
 /** Supported SynWare SDK NSE controls surface. Host machinery stays private. */
 export type { NSEControlValidation, NSEControlInteractionPhase, NSEControlValueProps } from "../Controls/Core/controlTypes";
-export type { Formatter, FormatterContext, FormatterError, FormatterResult } from "../../SynCloudOS/Models";
 export type { NSEThumbMaterial } from "../Appearance/NSEMetalThumb";
 
 export {
