@@ -13,8 +13,18 @@ import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { createClassApplicationHost } from "./fixtures/classApplicationHost";
 import { act } from "@testing-library/react";
+import { NSETopBar } from "../../src/NSE/Windows/Chrome/NSETopBar";
 
 afterEach(cleanup);
+
+it("keeps the host's Home and Account controls alongside window titlebar accessories", () => {
+  render(<NSETopBar variant="atmoMetal" title="" leadingItems={[{kind:"webspring",label:"Home"}]}
+    trailingItems={[{kind:"userInfo",label:"Account"}]}
+    leadingAccessory={<button>Sections</button>} trailingAccessory={<span>Window action</span>} />);
+  expect(screen.getByRole("button", {name:"Home"})).toBeTruthy();
+  expect(screen.getByRole("button", {name:"Account"})).toBeTruthy();
+  expect(screen.getByRole("button", {name:"Sections"})).toBeTruthy();
+});
 
 it("owns the Preferences panel and Back accessory while a class application is running", async () => {
   class Content extends NSEViewController {

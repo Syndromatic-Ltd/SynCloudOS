@@ -113,6 +113,8 @@ function NSETopBarMetal({
   trailingItems = [],
   leading,
   trailing,
+  leadingAccessory,
+  trailingAccessory,
   titleAction = null,
   titlePlacement = "centre",
   center,
@@ -127,11 +129,12 @@ function NSETopBarMetal({
   const main = (
     <div className="nse-app-topbar-metal-main">
       <span className="nse-app-topbar-metal-grain" aria-hidden="true" />
-      {leading !== undefined || leadingItems.length || leadingTitle ? (
+      {leading !== undefined || leadingItems.length || leadingAccessory || leadingTitle ? (
         <div className="nse-app-topbar-metal-cluster nse-app-topbar-metal-leading">
           {leading !== undefined ? leadingLabelHelp(leading) : leadingItems.map((item) => (
             <NSETopBarMetalPill key={`${item.kind}-${item.label}`} item={item} position="left" />
           ))}
+          {leadingAccessory}
           {leadingTitle ? (
             <h1 className="nse-app-topbar-metal-title nse-app-topbar-metal-leading-title">
               <NSETopBarTitle title={title} titleAction={titleAction} />
@@ -146,13 +149,12 @@ function NSETopBarMetal({
           <NSETopBarTitle title={title} center={center} titleAction={titleAction} />
         </h1>
       )}
-      {trailing !== undefined ? (
-        <div className="nse-app-topbar-metal-cluster nse-app-topbar-metal-trailing">{trailing}</div>
-      ) : trailingItems.length ? (
+      {trailing !== undefined || trailingItems.length || trailingAccessory ? (
         <div className="nse-app-topbar-metal-cluster nse-app-topbar-metal-trailing">
-          {trailingItems.map((item) => (
+          {trailing !== undefined ? trailing : trailingItems.map(item => (
             <NSETopBarMetalPill key={`${item.kind}-${item.label}`} item={item} position="right" />
           ))}
+          {trailingAccessory}
         </div>
       ) : null}
     </div>
@@ -195,6 +197,8 @@ export function NSETopBar(props: NSETopBarProps) {
     trailingItems = [],
     leading,
     trailing,
+    leadingAccessory,
+    trailingAccessory,
     titleAction = null,
     center,
     className = "",
@@ -218,6 +222,7 @@ export function NSETopBar(props: NSETopBarProps) {
           {leading !== undefined ? leadingLabelHelp(leading) : leadingItems.map((item) => (
             <NSETopBarButton key={`${item.kind}-${item.label}`} item={item} position="left" styleDefinition={styleDefinition} />
           ))}
+          {leadingAccessory}
         </div>
         <h1 className="nse-app-topbar-title">
           <NSETopBarTitle title={title} center={center} titleAction={titleAction} />
@@ -226,6 +231,7 @@ export function NSETopBar(props: NSETopBarProps) {
           {trailing !== undefined ? trailing : trailingItems.map((item) => (
             <NSETopBarButton key={`${item.kind}-${item.label}`} item={item} position="right" styleDefinition={styleDefinition} />
           ))}
+          {trailingAccessory}
         </div>
       </div>
     </header>
