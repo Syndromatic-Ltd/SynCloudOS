@@ -1,0 +1,75 @@
+{
+  "frames": 224,
+  "staticFrames": 84,
+  "identicalStatic": 80,
+  "staticDifferences": [
+    {
+      "case": "phone-dark-no-preference",
+      "frame": "05-edge-backward-settled.png",
+      "width": 390,
+      "height": 844,
+      "changedPixels": 104125,
+      "percent": 31.6335520719407,
+      "bbox": [
+        32,
+        36,
+        357,
+        818
+      ],
+      "maxChannelDelta": 248,
+      "classification": "leading-edge-now-turns",
+      "static": true
+    },
+    {
+      "case": "phone-dark-reduce",
+      "frame": "05-edge-backward-settled.png",
+      "width": 390,
+      "height": 844,
+      "changedPixels": 104125,
+      "percent": 31.6335520719407,
+      "bbox": [
+        32,
+        36,
+        357,
+        818
+      ],
+      "maxChannelDelta": 248,
+      "classification": "leading-edge-now-turns",
+      "static": true
+    },
+    {
+      "case": "phone-light-no-preference",
+      "frame": "05-edge-backward-settled.png",
+      "width": 390,
+      "height": 844,
+      "changedPixels": 104125,
+      "percent": 31.6335520719407,
+      "bbox": [
+        32,
+        36,
+        357,
+        818
+      ],
+      "maxChannelDelta": 248,
+      "classification": "leading-edge-now-turns",
+      "static": true
+    },
+    {
+      "case": "phone-light-reduce",
+      "frame": "05-edge-backward-settled.png",
+      "width": 390,
+      "height": 844,
+      "changedPixels": 104125,
+      "percent": 31.6335520719407,
+      "bbox": [
+        32,
+        36,
+        357,
+        818
+      ],
+      "maxChannelDelta": 248,
+      "classification": "leading-edge-now-turns",
+      "static": true
+    }
+  ]
+}

@@ -40,6 +40,7 @@ for before in sorted((root / "before").glob("*/*.png")):
                  "static": "settled" in name or name == "01-open.png"})
 
 (output / "pixels.json").write_text(json.dumps(rows, indent=2), encoding="utf-8")
+(root / "pixel-comparison.json").write_text(json.dumps(rows, indent=2), encoding="utf-8")
 html = """<!doctype html><meta charset="utf-8"><title>Portfolio page curl comparison</title>
 <style>body{background:#202020;color:#eee;font:15px system-ui;margin:20px}select{font:inherit;padding:6px;margin:4px}section{display:grid;grid-template-columns:1fr 1fr;gap:12px}img{width:100%;background:white}figure{margin:0}figcaption{padding:8px 0}pre{white-space:pre-wrap}a{color:#acf}</style>
 <h1>Portfolio page curl: before / after</h1><p>DPR 1. Same viewport, appearance, motion preference and input trajectory. Moving-frame pixel deltas include timing; use held drags for geometry. Click an image for full size.</p>

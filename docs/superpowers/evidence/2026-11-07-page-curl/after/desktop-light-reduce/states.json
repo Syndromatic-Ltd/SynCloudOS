@@ -1,38 +1,38 @@
 {
   "name": "desktop-light-reduce",
-  "capturedAt": "2026-11-07T09:27:02.747Z",
+  "capturedAt": "2026-11-07T09:54:55.483Z",
   "devHotReload": false,
   "viewport": "1440x900",
   "dpr": 1,
-  "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
-  "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+  "frameworkCommit": "b9d17a9999b7e782303a046706990d06d73edf0e",
+  "archiveSha256": "49ebdce0a7b5a61c1ee7456537bedfefdaed6fb6714def50657de45857def7e1",
   "errors": [],
   "consoleErrors": [],
   "failedRequests": [],
   "navigations": [
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043594357
+      "time": 1794045265450
     },
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043595463
+      "time": 1794045266816
     },
     {
       "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-      "time": 1794043597124
+      "time": 1794045268615
     },
     {
       "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-      "time": 1794043597125
+      "time": 1794045268615
     },
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043621616
+      "time": 1794045294345
     },
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043621617
+      "time": 1794045294347
     }
   ],
   "states": [

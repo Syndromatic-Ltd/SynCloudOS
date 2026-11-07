@@ -1,0 +1,89 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-page-controller.test.tsx tests/runtime/nse-page-surface-key.test.ts tests/runtime/nse-page-curl-engine.test.ts tests/runtime/nse-page-curl-cylinder.test.ts tests/runtime/nse-page-tear.test.ts tests/runtime/navigation-controller-back.test.tsx tests/runtime/synware-nse-public-surface.test.ts tests/runtime/appkit-counterparts.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-pagecurl-bbc1cebf
+
+ ❯ tests/runtime/appkit-counterparts.test.ts (4 tests | 1 failed) 33ms
+     × gives every public NSE export an AppKit counterpart, or says why it has none 17ms
+ ❯ tests/runtime/nse-page-tear.test.ts (13 tests | 1 failed) 107978ms
+     × never lifts the paper still bound below the ragged line, in any pull 70831ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/appkit-counterparts.test.ts > NSE names are AppKit names > gives every public NSE export an AppKit counterpart, or says why it has none
+AssertionError: expected [ 'NSEBinaryByteUnit', …(37) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "NSEBinaryByteUnit",
++   "NSEByteCountFormatter",
++   "NSEByteCountFormatterOptions",
++   "NSEByteUnit",
++   "NSEByteUnitSystem",
++   "NSECharacterSet",
++   "NSECountedSet",
++   "NSEData",
++   "NSEDataCompressionAlgorithm",
++   "NSEDataConvertible",
++   "NSEDecimalByteUnit",
++   "NSEEqualRanges",
++   "NSEFormatter",
++   "NSEFormatterContext",
++   "NSEFormatterError",
++   "NSEFormatterResult",
++   "NSEIndexPath",
++   "NSEIndexSet",
++   "NSEIntersectionRange",
++   "NSENumberFormatter",
++   "NSENumberFormatterOptions",
++   "NSEPredicate",
++   "NSEPredicateComparisonOperator",
++   "NSEPredicateExpression",
++   "NSEPredicateField",
++   "NSEPredicateLiteral",
++   "NSEPredicateScalar",
++   "NSEPredicateSchema",
++   "NSEPredicateTextOptions",
++   "NSEPredicateValidationError",
++   "NSERange",
++   "NSESortComparator",
++   "NSESortDescriptor",
++   "NSESortDescriptorOptions",
++   "NSESortDirection",
++   "NSESortNulls",
++   "NSETreeNode",
++   "NSEUnicodePropertyName",
++ ]
+
+ ❯ tests/runtime/appkit-counterparts.test.ts:45:21
+     43|     // Add the new name to docs/framework/appkit-counterparts.json wit…
+     44|     // name with no counterpart needs { "none": reason }: see "NSE nam…
+     45|     expect(missing).toEqual([]);
+       |                     ^
+     46|   });
+     47|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/nse-page-tear.test.ts > NSEPage tear > never lifts the paper still bound below the ragged line, in any pull
+Error: Test timed out in 60000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/runtime/nse-page-tear.test.ts:144:3
+    142|   });
+    143|
+    144|   it("never lifts the paper still bound below the ragged line, in any …
+       |   ^
+    145|     for (const { binding, corner } of cases) {
+    146|       const poses = [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 6 passed (8)
+      Tests  2 failed | 76 passed (78)
+   Start at  08:44:58
+   Duration  108.31s (transform 40.55s, setup 138ms, import 63.93s, tests 112.32s, environment 6.65s)
+

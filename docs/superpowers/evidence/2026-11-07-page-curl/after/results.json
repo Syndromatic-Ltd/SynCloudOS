@@ -1,39 +1,39 @@
 [
   {
     "name": "desktop-dark-no-preference",
-    "capturedAt": "2026-11-07T09:28:15.004Z",
+    "capturedAt": "2026-11-07T09:56:10.971Z",
     "devHotReload": false,
     "viewport": "1440x900",
     "dpr": 1,
-    "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
-    "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+    "frameworkCommit": "b9d17a9999b7e782303a046706990d06d73edf0e",
+    "archiveSha256": "49ebdce0a7b5a61c1ee7456537bedfefdaed6fb6714def50657de45857def7e1",
     "errors": [],
     "consoleErrors": [],
     "failedRequests": [],
     "navigations": [
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043622799
+        "time": 1794045295549
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043623783
+        "time": 1794045296790
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043625534
+        "time": 1794045298857
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043625535
+        "time": 1794045298858
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043694827
+        "time": 1794045370813
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043694827
+        "time": 1794045370815
       }
     ],
     "states": [
@@ -852,39 +852,39 @@
   },
   {
     "name": "desktop-dark-reduce",
-    "capturedAt": "2026-11-07T09:28:42.835Z",
+    "capturedAt": "2026-11-07T09:56:39.63Z",
     "devHotReload": false,
     "viewport": "1440x900",
     "dpr": 1,
-    "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
-    "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+    "frameworkCommit": "b9d17a9999b7e782303a046706990d06d73edf0e",
+    "archiveSha256": "49ebdce0a7b5a61c1ee7456537bedfefdaed6fb6714def50657de45857def7e1",
     "errors": [],
     "consoleErrors": [],
     "failedRequests": [],
     "navigations": [
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043695064
+        "time": 1794045371053
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043696089
+        "time": 1794045372328
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043697622
+        "time": 1794045374100
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043697623
+        "time": 1794045374100
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043721701
+        "time": 1794045398494
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043721702
+        "time": 1794045398495
       }
     ],
     "states": [
@@ -1649,39 +1649,39 @@
   },
   {
     "name": "desktop-light-no-preference",
-    "capturedAt": "2026-11-07T09:32:37.427Z",
+    "capturedAt": "2026-11-07T10:01:11.974Z",
     "devHotReload": false,
     "viewport": "1440x900",
     "dpr": 1,
-    "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
-    "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+    "frameworkCommit": "9d681d8886b20a359b45a176def84d1f0ef2e0a6",
+    "archiveSha256": "6e5ca2b8ab79a3d4ab7037e670026ae84d2a9a6eddbc9e96a00de5b4f891bd65",
     "errors": [],
     "consoleErrors": [],
     "failedRequests": [],
     "navigations": [
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043880024
+        "time": 1794045594212
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043881334
+        "time": 1794045595611
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043883255
+        "time": 1794045597746
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043883257
+        "time": 1794045597746
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043957231
+        "time": 1794045671795
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043957231
+        "time": 1794045671795
       }
     ],
     "states": [
@@ -2500,39 +2500,39 @@
   },
   {
     "name": "desktop-light-reduce",
-    "capturedAt": "2026-11-07T09:27:02.747Z",
+    "capturedAt": "2026-11-07T09:54:55.483Z",
     "devHotReload": false,
     "viewport": "1440x900",
     "dpr": 1,
-    "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
-    "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+    "frameworkCommit": "b9d17a9999b7e782303a046706990d06d73edf0e",
+    "archiveSha256": "49ebdce0a7b5a61c1ee7456537bedfefdaed6fb6714def50657de45857def7e1",
     "errors": [],
     "consoleErrors": [],
     "failedRequests": [],
     "navigations": [
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043594357
+        "time": 1794045265450
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043595463
+        "time": 1794045266816
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043597124
+        "time": 1794045268615
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043597125
+        "time": 1794045268615
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043621616
+        "time": 1794045294345
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043621617
+        "time": 1794045294347
       }
     ],
     "states": [
@@ -3297,39 +3297,39 @@
   },
   {
     "name": "phone-dark-no-preference",
-    "capturedAt": "2026-11-07T09:30:22.746Z",
+    "capturedAt": "2026-11-07T10:02:52.186Z",
     "devHotReload": false,
     "viewport": "390x844",
     "dpr": 1,
-    "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
-    "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+    "frameworkCommit": "9d681d8886b20a359b45a176def84d1f0ef2e0a6",
+    "archiveSha256": "6e5ca2b8ab79a3d4ab7037e670026ae84d2a9a6eddbc9e96a00de5b4f891bd65",
     "errors": [],
     "consoleErrors": [],
     "failedRequests": [],
     "navigations": [
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043784884
+        "time": 1794045734516
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043785918
+        "time": 1794045735877
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043787544
+        "time": 1794045737613
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043787545
+        "time": 1794045737614
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043822483
+        "time": 1794045771932
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043822484
+        "time": 1794045771933
       }
     ],
     "states": [
@@ -3377,7 +3377,7 @@
       },
       {
         "label": "02-button-forward-moving",
-        "page": "1",
+        "page": "2",
         "phase": "reading",
         "leaves": [
           {
@@ -3438,7 +3438,7 @@
       {
         "label": "03-button-backward-moving",
         "page": "2",
-        "phase": "turning",
+        "phase": "reading",
         "leaves": [
           {
             "direction": "forward",
@@ -3662,7 +3662,7 @@
       },
       {
         "label": "06-corner-half-released",
-        "page": "2",
+        "page": "3",
         "phase": "reading",
         "leaves": [
           {
@@ -4145,39 +4145,39 @@
   },
   {
     "name": "phone-dark-reduce",
-    "capturedAt": "2026-11-07T09:30:47.687Z",
+    "capturedAt": "2026-11-07T10:03:17.445Z",
     "devHotReload": false,
     "viewport": "390x844",
     "dpr": 1,
-    "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
-    "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+    "frameworkCommit": "9d681d8886b20a359b45a176def84d1f0ef2e0a6",
+    "archiveSha256": "6e5ca2b8ab79a3d4ab7037e670026ae84d2a9a6eddbc9e96a00de5b4f891bd65",
     "errors": [],
     "consoleErrors": [],
     "failedRequests": [],
     "navigations": [
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043822814
+        "time": 1794045772248
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043823968
+        "time": 1794045773413
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043825612
+        "time": 1794045775049
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043825612
+        "time": 1794045775050
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043846554
+        "time": 1794045796308
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043846555
+        "time": 1794045796309
       }
     ],
     "states": [
@@ -4942,39 +4942,39 @@
   },
   {
     "name": "phone-light-no-preference",
-    "capturedAt": "2026-11-07T09:29:20.195Z",
+    "capturedAt": "2026-11-07T10:01:49.158Z",
     "devHotReload": false,
     "viewport": "390x844",
     "dpr": 1,
-    "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
-    "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+    "frameworkCommit": "9d681d8886b20a359b45a176def84d1f0ef2e0a6",
+    "archiveSha256": "6e5ca2b8ab79a3d4ab7037e670026ae84d2a9a6eddbc9e96a00de5b4f891bd65",
     "errors": [],
     "consoleErrors": [],
     "failedRequests": [],
     "navigations": [
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043722885
+        "time": 1794045672037
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043723908
+        "time": 1794045673157
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043725403
+        "time": 1794045674797
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043725404
+        "time": 1794045674798
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043759932
+        "time": 1794045708895
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043759933
+        "time": 1794045708897
       }
     ],
     "states": [
@@ -4988,7 +4988,7 @@
             "progress": "0.000",
             "phase": "idle",
             "corner": "bottom-right",
-            "renderer": "css",
+            "renderer": "webgl",
             "surface": "css",
             "reduced": "false"
           }
@@ -5022,7 +5022,7 @@
       },
       {
         "label": "02-button-forward-moving",
-        "page": "1",
+        "page": "2",
         "phase": "reading",
         "leaves": [
           {
@@ -5040,7 +5040,7 @@
             "phase": "idle",
             "corner": "bottom-right",
             "renderer": "webgl",
-            "surface": "webgl",
+            "surface": "css",
             "reduced": "false"
           }
         ],
@@ -5163,7 +5163,7 @@
             "phase": "idle",
             "corner": "bottom-right",
             "renderer": "webgl",
-            "surface": "css",
+            "surface": "webgl",
             "reduced": "false"
           }
         ],
@@ -5556,7 +5556,7 @@
             "phase": "idle",
             "corner": "bottom-left",
             "renderer": "webgl",
-            "surface": "css",
+            "surface": "webgl",
             "reduced": "false"
           },
           {
@@ -5565,7 +5565,7 @@
             "phase": "idle",
             "corner": "bottom-right",
             "renderer": "webgl",
-            "surface": "css",
+            "surface": "webgl",
             "reduced": "false"
           }
         ],
@@ -5790,39 +5790,39 @@
   },
   {
     "name": "phone-light-reduce",
-    "capturedAt": "2026-11-07T09:29:44.833Z",
+    "capturedAt": "2026-11-07T10:02:14.455Z",
     "devHotReload": false,
     "viewport": "390x844",
     "dpr": 1,
-    "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
-    "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+    "frameworkCommit": "9d681d8886b20a359b45a176def84d1f0ef2e0a6",
+    "archiveSha256": "6e5ca2b8ab79a3d4ab7037e670026ae84d2a9a6eddbc9e96a00de5b4f891bd65",
     "errors": [],
     "consoleErrors": [],
     "failedRequests": [],
     "navigations": [
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043760244
+        "time": 1794045709216
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043761212
+        "time": 1794045710436
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043762687
+        "time": 1794045712073
       },
       {
         "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-        "time": 1794043762689
+        "time": 1794045712073
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043783695
+        "time": 1794045733316
       },
       {
         "url": "http://127.0.0.1:5199/portfolio",
-        "time": 1794043783697
+        "time": 1794045733317
       }
     ],
     "states": [

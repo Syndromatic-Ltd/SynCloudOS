@@ -1,0 +1,94 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-pagecurl-53d75c10
+
+ ❯ tests/performance/text-primitives-performance.test.ts (1 test | 1 failed) 34644ms
+     × lays out 100000+ UTF16 units, reuses warm results and releases retained state 34642ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ❯ tests/runtime/product-name-hygiene.test.ts (6 tests | 1 failed) 9154ms
+     × reports no retired product names in shipped source, public docs or the built package 5417ms
+ ❯ tests/runtime/runtime-singleton-boundary.test.ts (6 tests | 1 failed) 19336ms
+     × keeps diagnostic-default imports within the explicit exposure boundary 7120ms
+ ❯ tests/runtime/synapp-manifest-validator-generated.test.ts (2 tests | 1 failed) 229ms
+   × keeps the precompiled manifest validator current with the schema 173ms
+Not implemented: navigation to another Document
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/performance/text-primitives-performance.test.ts > headless text layout contracts > lays out 100000+ UTF16 units, reuses warm results and releases retained state
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/performance/text-primitives-performance.test.ts:30:3
+     28| import { NSEShapedTextLayoutAdapter } from "../../src/NSE/TextLayout/s…
+     29| describe("headless text layout contracts", () => {
+     30|   it("lays out 100000+ UTF16 units, reuses warm results and releases r…
+       |   ^
+     31|     const font = await TFXFont.create(new Uint8Array(readFileSync("tes…
+     32|     const adapter = new NSEShapedTextLayoutAdapter({ yieldToHost: asyn…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/product-name-hygiene.test.ts > product-name hygiene > reports no retired product names in shipped source, public docs or the built package
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/runtime/product-name-hygiene.test.ts:42:3
+     40|   });
+     41|
+     42|   it("reports no retired product names in shipped source, public docs …
+       |   ^
+     43|     expect(scanRetiredProductNames()).toEqual([]);
+     44|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/runtime-singleton-boundary.test.ts > runtime singleton boundary > keeps diagnostic-default imports within the explicit exposure boundary
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/runtime/runtime-singleton-boundary.test.ts:278:3
+    276|   });
+    277|
+    278|   it("keeps diagnostic-default imports within the explicit exposure bo…
+       |   ^
+    279|     const offenders = sourceFiles(resolve(repositoryRoot, "src"))
+    280|       .flatMap((path) => inspectRuntimeSingletonSource(path, readFileS…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/runtime/synapp-manifest-validator-generated.test.ts > keeps the precompiled manifest validator current with the schema
+Error: Command failed: C:\Program Files\nodejs\node.exe scripts/synware/gen-manifest-validator.mjs --check
+synappManifestValidator.generated.mjs is stale: run node scripts/synware/gen-manifest-validator.mjs
+
+ ❯ tests/runtime/synapp-manifest-validator-generated.test.ts:31:3
+     29| it("keeps the precompiled manifest validator current with the schema",…
+     30|   // Throws, with the regeneration command in its output, when stale.
+     31|   execFileSync(process.execPath, ["scripts/synware/gen-manifest-valida…
+       |   ^
+     32| });
+     33|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  4 failed | 846 passed (850)
+      Tests  4 failed | 7128 passed (7132)
+   Start at  07:54:54
+   Duration  990.43s (transform 42.88s, setup 7.54s, import 711.34s, tests 788.21s, environment 338.80s)
+

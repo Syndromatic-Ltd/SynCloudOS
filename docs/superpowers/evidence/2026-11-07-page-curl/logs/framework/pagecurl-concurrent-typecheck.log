@@ -1,0 +1,31 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -b --pretty false
+src/SynCloudOS/PlatformAdapters/BrowserOpenPanelStoragePort.ts(40,70): error TS2345: Argument of type '{ handle: NativeFilePanelDirectory; id: string; name: string; }[]' is not assignable to parameter of type 'readonly OpenPanelBookmark[]'.
+  Type '{ handle: NativeFilePanelDirectory; id: string; name: string; }' is not assignable to type 'OpenPanelBookmark'.
+    The types returned by 'handle.values().next(...)' are incompatible between these types.
+      Type 'Promise<IteratorResult<NativeFilePanelHandle | NativeFilePanelDirectory, any>>' is not assignable to type 'Promise<IteratorResult<FilePanelFileHandle | FilePanelDirectory, any>>'.
+        Type 'IteratorResult<NativeFilePanelHandle | NativeFilePanelDirectory, any>' is not assignable to type 'IteratorResult<FilePanelFileHandle | FilePanelDirectory, any>'.
+          Type 'IteratorYieldResult<NativeFilePanelHandle | NativeFilePanelDirectory>' is not assignable to type 'IteratorResult<FilePanelFileHandle | FilePanelDirectory, any>'.
+            Type 'IteratorYieldResult<NativeFilePanelHandle | NativeFilePanelDirectory>' is not assignable to type 'IteratorYieldResult<FilePanelFileHandle | FilePanelDirectory>'.
+              Type 'NativeFilePanelHandle | NativeFilePanelDirectory' is not assignable to type 'FilePanelFileHandle | FilePanelDirectory'.
+                Type 'NativeFilePanelHandle' is not assignable to type 'FilePanelFileHandle | FilePanelDirectory'.
+                  Type 'NativeFilePanelHandle' is not assignable to type 'FilePanelFileHandle'.
+                    The types returned by 'createWritable()' are incompatible between these types.
+                      Type 'Promise<{ write(data: string | Uint8Array<ArrayBufferLike> | Blob): Promise<void>; close(): Promise<void>; abort(reason?: unknown): Promise<...>; }>' is not assignable to type 'Promise<FilePanelWritable>'.
+                        Type '{ write(data: string | Uint8Array<ArrayBufferLike> | Blob): Promise<void>; close(): Promise<void>; abort(reason?: unknown): Promise<...>; }' is not assignable to type 'FilePanelWritable'.
+                          Types of property 'write' are incompatible.
+                            Type '(data: string | Uint8Array<ArrayBufferLike> | Blob) => Promise<void>' is not assignable to type '(data: string | NSEDataConvertible) => Promise<void>'.
+                              Types of parameters 'data' and 'data' are incompatible.
+                                Type 'string | NSEDataConvertible' is not assignable to type 'string | Uint8Array<ArrayBufferLike> | Blob'.
+                                  Type 'ArrayBuffer' is not assignable to type 'string | Uint8Array<ArrayBufferLike> | Blob'.
+                                    Type 'ArrayBuffer' is missing the following properties from type 'Uint8Array<ArrayBufferLike>': BYTES_PER_ELEMENT, buffer, byteOffset, copyWithin, and 24 more.
+src/SynCloudOS/PlatformAdapters/nativeFilePanelBridge.ts(42,28): error TS7006: Parameter 'options' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/nativeFilePanelBridge.ts(43,30): error TS7006: Parameter 'options' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/nativeFilePanelBridge.ts(47,16): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/nativeFilePanelBridge.ts(48,45): error TS7006: Parameter 'reason' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/nativeFilePanelBridge.ts(58,28): error TS7006: Parameter 'options' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/nativeFilePanelBridge.ts(59,30): error TS7006: Parameter 'options' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/nativeFilePanelBridge.ts(61,32): error TS7006: Parameter 'name' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/nativeFilePanelBridge.ts(61,38): error TS7006: Parameter 'options' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/nativeFilePanelBridge.ts(62,27): error TS7006: Parameter 'name' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/nativeFilePanelBridge.ts(62,33): error TS7006: Parameter 'options' implicitly has an 'any' type.

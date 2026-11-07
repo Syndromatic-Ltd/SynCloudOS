@@ -10,13 +10,21 @@ const dpr = Number(process.argv[3] || 1);
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const results = [];
+  let diagnose = async () => {};
   try {
     for (const phone of [false, true]) for (const motion of ['no-preference', 'reduce']) {
       const receipt = JSON.parse(fs.readFileSync(path.join(site, 'vendor/framework-receipt.json'), 'utf8'));
       const context = await browser.newContext({ viewport: phone ? { width: 390, height: 844 } : { width: 1440, height: 900 }, deviceScaleFactor: dpr });
       const page = await context.newPage();
       const errors = [];
+      const failedRequests = [];
       page.on('pageerror', error => errors.push(String(error)));
+      page.on('requestfailed', request => failedRequests.push({ url: request.url(), error: request.failure()?.errorText }));
+      diagnose = async () => {
+        const folder = path.join(__dirname, 'probe'); fs.mkdirSync(folder, { recursive: true });
+        fs.writeFileSync(path.join(folder, `${outputName}-failure.json`), JSON.stringify({ phone, motion, receipt: { commit:receipt.commit, archiveSha256:receipt.archiveSha256 }, errors, failedRequests, url:page.url(), body:(await page.locator('body').innerText()).slice(-6000), focus:await page.evaluate(() => document.activeElement?.outerHTML.slice(0,600)), reader:await page.locator('[data-portfolio-reader]').evaluateAll(es => es.map(e => ({page:e.dataset.currentPage, phase:e.dataset.phase}))) },null,2));
+        await page.screenshot({ path:path.join(folder, `${outputName}-failure.png`) });
+      };
       await page.route('**/@vite/client', async route => {
         const response = await route.fetch();
         const body = (await response.text()).replace('async function handleMessage(payload) {', "async function handleMessage(payload) { if (['update', 'full-reload', 'prune'].includes(payload.type)) return;").replace(/(?:window\.)?location\.reload\(\)/g, 'void 0');
@@ -63,5 +71,6 @@ const dpr = Number(process.argv[3] || 1);
       await context.close();
     }
     fs.writeFileSync(path.join(__dirname, 'after', `${outputName}.json`), JSON.stringify(results, null, 2));
-  } finally { await browser.close(); }
+  } catch (error) { await diagnose(); throw error; }
+  finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
