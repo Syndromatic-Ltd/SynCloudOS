@@ -148,6 +148,8 @@ export const nseSplitViewLayout: unique symbol = Symbol("nse.splitViewLayout");
 
 /** @internal */
 export interface NSESplitViewLayout {
+  /** The mounted default renderer, including one embedded by a custom view, owns its allocation. */
+  claimBoundsAuthority(): () => void;
   resize(availableSize: number): void;
   updateBounds(bounds: SynCloudOSPresentationTraits["contentBounds"] | null): void;
   moveDivider(index: number, delta: number): boolean;
@@ -171,6 +173,7 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
   #explicitlyCollapsed = new Set<string>();
   #presentation: "split" | "single-pane" = "split";
   #contentBounds: SynCloudOSPresentationTraits["contentBounds"] | null = null;
+  readonly #boundsAuthorities = new Set<symbol>();
   #hasCurrentGeometry = false;
   #activeId = "";
   #preferredActiveId = "";
@@ -338,6 +341,9 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
   }
 
   override viewDidLayout(): void {
+    // The managed view's wrapper can include insets outside the default split renderer. Only one
+    // of those rectangles may drive the solver, or every layout alternates the two allocations.
+    if (this.#boundsAuthorities.size > 0) return;
     const element = this.view.element;
     const width = element.clientWidth;
     const height = element.clientHeight;
@@ -347,12 +353,26 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
   }
 
   override viewDidDisappear(): void {
+    if (this.#boundsAuthorities.size > 0) return;
     this[nseSplitViewLayout].updateBounds(null);
   }
 
   /** @internal */
   get [nseSplitViewLayout](): NSESplitViewLayout {
     return {
+      claimBoundsAuthority: () => {
+        const token = Symbol("split-bounds-authority");
+        this.#boundsAuthorities.add(token);
+        let released = false;
+        return () => {
+          if (released) return;
+          released = true;
+          this.#boundsAuthorities.delete(token);
+          // A stale cleanup cannot clear a replacement renderer's bounds. A custom view that
+          // removes its default renderer resumes wrapper measurement on its next layout.
+          if (this.#boundsAuthorities.size === 0 && !this.isDisposed) this[nseSplitViewLayout].updateBounds(null);
+        };
+      },
       resize: (availableSize) => this.#resize(availableSize),
       updateBounds: (bounds) => {
         if (bounds && (![bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) || bounds.width <= 0 || bounds.height <= 0)) return;

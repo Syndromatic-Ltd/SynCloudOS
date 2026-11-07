@@ -33,6 +33,7 @@ import {
   type NSESplitViewPreferences,
 } from "../../../src/NSE/DataViews/Split";
 import { nseSplitViewLayout } from "../../../src/NSE/DataViews/Split/NSESplitViewController";
+import { NSESplitViewControllerView } from "../../../src/NSE/DataViews/Split/splitViewControllerView";
 import { NSEViewControllerView } from "../../../src/SynCloudOS/AppHosting/applicationHosting";
 import { createStaticPresentationTraits } from "../../fixtures/presentationTraits";
 import { defaultsFrom } from "../../fixtures/userDefaults";
@@ -96,8 +97,9 @@ function setWidth(controller: NSESplitViewController, width: number) {
 afterEach(cleanup);
 
 describe("NSESplitViewController", () => {
-  it("keeps a controller's valid allocation until its inner view has a valid measurement", () => {
-    const controller = inspectorSplit("controller-allocation");
+  it("measures the controller wrapper when a custom split view does not render the default layout", () => {
+    class CustomSplit extends NSESplitViewController { static override view = () => <p>Custom layout</p>; }
+    const controller = new CustomSplit({ id: "controller-allocation", splitViewItems: [item("content", "Content", () => null)] });
     render(<NSEViewControllerView controller={controller} />);
     setWidth(controller, 1440);
     Object.defineProperty(controller.view.element, "clientWidth", { configurable: true, value: 430 });
@@ -106,6 +108,51 @@ describe("NSESplitViewController", () => {
     expect(controller.snapshot.presentation).toBe("single-pane");
     expect(controller.snapshot.availableSize).toBe(430);
     controller.dispose();
+  });
+  it.each(["default", "embedded", "strict"] as const)("lets the %s split renderer own valid inset bounds without competing wrapper measurements", (mode) => {
+    let showDefault = true;
+    class FramedSplit extends NSESplitViewController {
+      static override view = ({ controller }: { controller: NSESplitViewController }) => <section data-testid="custom-frame">{showDefault ? <NSESplitViewControllerView controller={controller} /> : <p>Custom layout only</p>}</section>;
+    }
+    const Controller = mode === "default" ? NSESplitViewController : FramedSplit;
+    const controller = new Controller({ id: `inset-${mode}`, splitViewItems: [item("content", "Content", () => <p>Editor</p>)] });
+    let outer: HTMLElement | null = null;
+    let valid = false;
+    const isInner = (element: HTMLElement) => element.classList.contains("nse-split-view-controller-view");
+    const observations = new Map<Element, () => void>();
+    const width = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(function (this: HTMLElement) { return !valid ? 0 : this === outer ? 900 : isInner(this) ? 880 : 0; });
+    const height = vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(function (this: HTMLElement) { return !valid ? 0 : this === outer ? 700 : isInner(this) ? 660 : 0; });
+    const rectangle = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) { return new DOMRect(this === outer ? 10 : 30, this === outer ? 20 : 40, this.clientWidth, this.clientHeight); });
+    vi.stubGlobal("ResizeObserver", class {
+      constructor(readonly callback: () => void) {}
+      observe(element: Element) { observations.set(element, this.callback); }
+      disconnect() {}
+    });
+    const content = () => <NSEViewControllerView controller={controller} />;
+    try {
+      const view = render(mode === "strict" ? <React.StrictMode>{content()}</React.StrictMode> : content());
+      setWidth(controller, 1440);
+      outer = controller.view.element;
+      const inner = outer.querySelector<HTMLElement>(".nse-split-view-controller-view")!;
+      valid = true;
+      expect(() => act(() => observations.get(inner)!())).not.toThrow();
+      expect(controller.snapshot.availableSize).toBe(880);
+      const revision = controller.snapshot.revision;
+      act(() => { controller.viewDidLayout(); controller.viewDidDisappear(); });
+      expect(controller.snapshot.availableSize).toBe(880);
+      expect(controller.snapshot.revision).toBe(revision);
+      if (mode !== "default") {
+        showDefault = false;
+        view.rerender(mode === "strict" ? <React.StrictMode>{content()}</React.StrictMode> : content());
+        act(() => controller.viewDidLayout());
+        expect(controller.snapshot.availableSize).toBe(900);
+        expect(screen.getByText("Custom layout only")).toBeTruthy();
+      }
+      view.unmount();
+    } finally {
+      width.mockRestore(); height.mockRestore(); rectangle.mockRestore(); vi.unstubAllGlobals();
+      controller.dispose();
+    }
   });
   it("starts a hierarchy on its first pane until geometry is current, then retains the last presentation", () => {
     const controller = new NSESplitViewController({ id: "initial-geometry", splitViewItems: [
