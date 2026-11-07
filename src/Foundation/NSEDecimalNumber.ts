@@ -111,10 +111,10 @@ export class NSEDecimalNumber {
     return new NSEDecimalNumber(coefficient, exponent);
   }
   static fromString(value: string): NSEDecimalNumber {
-    const m = /^([+-]?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(value);
-    if (!m) throw new TypeError("Invalid decimal string.");
+    const m = /^([+-]?)(\d*)(?:\.(\d*))?(?:[eE]([+-]?\d+))?$/.exec(value);
+    if (!m || (!m[2] && !m[3])) throw new TypeError("Invalid decimal string.");
     const exponent = Number(m[4] ?? 0) - (m[3]?.length ?? 0);
-    return NSEDecimalNumber.#make(BigInt(`${m[1]}${m[2]}${m[3] ?? ""}`), exponent, parsingBehavior);
+    return NSEDecimalNumber.#make(BigInt(`${m[1]}${m[2] || "0"}${m[3] ?? ""}`), exponent, parsingBehavior);
   }
   #perform(other: NSEDecimalNumber, op: "add" | "subtract" | "multiply" | "divide", h: NSEDecimalNumberBehaviors): NSEDecimalNumber {
     if (this.#isNaN || other.#isNaN) return NSEDecimalNumber.notANumber;
