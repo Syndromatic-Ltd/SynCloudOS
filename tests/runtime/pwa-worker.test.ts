@@ -51,6 +51,22 @@ it("leaves API, authentication, writes and other origins out of the offline cach
     expect(respondWith).not.toHaveBeenCalled();
   }
 });
+it("refreshes development modules online and retains the refreshed bytes offline", async () => {
+  const listeners = new Map<string, (event: any) => void>();
+  const entries = new Map<string, Response>([["https://site.test/src/main.tsx", new Response("old graph")]]);
+  const cache = { match: async (request: Request) => entries.get(request.url)?.clone(), put: async (request: Request, response: Response) => { entries.set(request.url, response); } };
+  const fetch = vi.fn(async () => new Response("current graph"));
+  runInNewContext(createServiceWorkerSource({ base: "/", receipt: "sdk", development: true, assets: [], manifests: [] }), {
+    self: { location: { origin: "https://site.test" }, addEventListener: (name: string, listener: any) => listeners.set(name, listener) },
+    URL, Response, Request, fetch, caches: { open: async () => cache },
+  });
+  const request = new Request("https://site.test/src/main.tsx");
+  let response!: Promise<Response>;
+  const load = () => { listeners.get("fetch")!({ request, respondWith(value: Promise<Response>) { response = value; } }); return response; };
+  expect(await (await load()).text()).toBe("current graph");
+  fetch.mockRejectedValueOnce(new TypeError("offline"));
+  expect(await (await load()).text()).toBe("current graph");
+});
 it("delivers notification actions to a live client without reloading its documents", async () => {
   const { listeners, clients } = worker();
   const postMessage = vi.fn(), navigate = vi.fn(), focus = vi.fn(async () => {});

@@ -201,6 +201,19 @@ function runtimeServiceWorker(config) {
     if (!assets.has(url.href) && !devAsset) return;
     event.respondWith((async () => {
       const cache = await caches.open(cacheName);
+      // Vite module identities change after edits and SDK adoption. Refresh the
+      // complete online graph; only immutable production assets are cache-first.
+      if (config.development) {
+        try {
+          const response = await fetch(request);
+          if (response.ok && response.type !== "opaque") await cache.put(request, response.clone());
+          return response;
+        } catch (error) {
+          const cached = await cache.match(request);
+          if (cached) return cached;
+          throw error;
+        }
+      }
       const cached = await cache.match(request);
       if (cached) return cached;
       const response = await fetch(request);
