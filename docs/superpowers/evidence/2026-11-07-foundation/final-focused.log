@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/foundation-data.test.ts tests/runtime/compression-fx.test.ts tests/runtime/foundation-models.test.ts tests/runtime/model-indexes.test.ts tests/runtime/model-predicates-sort.test.ts tests/runtime/appkit-counterparts.test.ts tests/runtime/fx/package-resources.test.ts tests/runtime/foundation-boundary.test.ts tests/runtime/fx/fx-entry-contract.test.ts tests/runtime/nse-tree-node.test.ts tests/runtime/synware-fx-authoring.test.ts tests/runtime/architecture-boundaries.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  12 passed (12)
+      Tests  129 passed (129)
+   Start at  09:14:55
+   Duration  11.86s (transform 1.67s, setup 128ms, import 5.60s, tests 16.26s, environment 1ms)
+

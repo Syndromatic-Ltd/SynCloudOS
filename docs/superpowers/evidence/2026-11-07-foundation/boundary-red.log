@@ -1,0 +1,42 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/foundation-boundary.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-boundary.test.ts (10 tests | 5 failed) 1646ms
+   × rejects a DOM or React dependency: import type { ReactNode } from "react"; 6ms
+   × rejects a DOM or React dependency: export const element = document.body; 6ms
+   × rejects a DOM or React dependency: export const element = globalThis["document"]; 6ms
+   × rejects a DOM or React dependency: export type View = HTMLElement; 5ms
+   × allows web worker data primitives 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-boundary.test.ts > rejects a DOM or React dependency: import type { ReactNode } from "react";
+ FAIL  tests/runtime/foundation-boundary.test.ts > rejects a DOM or React dependency: export const element = document.body;
+ FAIL  tests/runtime/foundation-boundary.test.ts > rejects a DOM or React dependency: export const element = globalThis["document"];
+ FAIL  tests/runtime/foundation-boundary.test.ts > rejects a DOM or React dependency: export type View = HTMLElement;
+TypeError: validateFoundationEnvironment is not a function
+ ❯ tests/runtime/foundation-boundary.test.ts:48:10
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/runtime/foundation-boundary.test.ts > allows web worker data primitives
+TypeError: validateFoundationEnvironment is not a function
+ ❯ tests/runtime/foundation-boundary.test.ts:52:10
+     50| it("allows web worker data primitives", () => {
+     51|   const root = fixture('export const data = new Uint8Array(); export c…
+     52|   expect(validateFoundationEnvironment({ root, files: ["src/Foundation…
+       |          ^
+     53| });
+     54|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 5 passed (10)
+   Start at  08:18:32
+   Duration  2.09s (transform 126ms, setup 30ms, import 252ms, tests 1.65s, environment 0ms)
+

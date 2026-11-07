@@ -1,0 +1,74 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/foundation-boundary.test.ts tests/runtime/fx/fx-entry-contract.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/fx-entry-contract.test.ts (4 tests | 4 failed) 67ms
+     × has exactly thirteen portable roots 7ms
+     × resolves every exact public alias in tsconfig.app.json 48ms
+     × resolves every exact public alias in tsconfig.synware.json 9ms
+     × rejects a missing family, an invented family, and a private package route, but accepts only the SynCloudOS root entry 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/fx-entry-contract.test.ts > literal thirteen-family package contract > has exactly thirteen portable roots
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/fx/fx-entry-contract.test.ts:35:99
+     33|     expect(Object.keys(synWareSdkEntries).filter(key => /^fx\/[^/]+$/u…
+     34|     expect(synWareSdkEntries["fx/video/webm"]).toBe("src/FX/VideoFX/we…
+     35|     for (const family of families) expect(existsSync(resolve(synWareSd…
+       |                                                                                                   ^
+     36|   });
+     37|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/fx/fx-entry-contract.test.ts > literal thirteen-family package contract > resolves every exact public alias in tsconfig.app.json
+ FAIL  tests/runtime/fx/fx-entry-contract.test.ts > literal thirteen-family package contract > resolves every exact public alias in tsconfig.synware.json
+AssertionError: @syndromatic/syncloudos/fx/compression: expected undefined to be 'C:/Users/Kavish Krishnakumar/Develope…' // Object.is equality
+
+- Expected:
+"C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/src/FX/CompressionFX/public.ts"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/fx/fx-entry-contract.test.ts:44:73
+     42|       expect(config.options.paths?.[specifier], specifier).toHaveLengt…
+     43|       const actual = ts.resolveModuleName(specifier, resolve("src/pack…
+     44|       expect(actual?.resolvedFileName.replaceAll("\\", "/"), specifier…
+       |                                                                         ^
+     45|     }
+     46|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/fx/fx-entry-contract.test.ts > literal thirteen-family package contract > rejects a missing family, an invented family, and a private package route, but accepts only the SynCloudOS root entry
+AssertionError: expected undefined to be type of 'function'
+
+Expected: "function"
+Received: "undefined"
+
+ ❯ tests/runtime/fx/fx-entry-contract.test.ts:49:45
+     47|
+     48|   it("rejects a missing family, an invented family, and a private pack…
+     49|     expect(contract.assertFxPackageExports).toBeTypeOf("function");
+       |                                             ^
+     50|     const exports = Object.fromEntries(families.map(family => [`./fx/$…
+     51|     exports["./fx/video/webm"] = { import: "./fx/video/webm.js", types…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 10 passed (14)
+   Start at  08:19:31
+   Duration  3.75s (transform 202ms, setup 55ms, import 560ms, tests 3.36s, environment 0ms)
+

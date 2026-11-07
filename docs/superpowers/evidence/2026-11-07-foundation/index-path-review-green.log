@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/model-indexes.test.ts tests/runtime/foundation-models.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+   Start at  08:42:52
+   Duration  336ms (transform 213ms, setup 67ms, import 217ms, tests 27ms, environment 0ms)

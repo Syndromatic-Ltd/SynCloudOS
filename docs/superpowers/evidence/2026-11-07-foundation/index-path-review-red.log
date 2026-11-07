@@ -1,0 +1,47 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/model-indexes.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/model-indexes.test.ts (5 tests | 2 failed) 11ms
+     × rejects invalid index positions without applying Array.at coercion 3ms
+     × removes the last index of an empty or single-index path to an empty path 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/model-indexes.test.ts > model indexes > rejects invalid index positions without applying Array.at coercion
+AssertionError: expected 4 to be undefined
+
+- Expected:
+undefined
+
++ Received:
+4
+
+ ❯ tests/runtime/model-indexes.test.ts:41:46
+     39|     expect(path.indexAtPosition(1)).toBe(4);
+     40|     for (const position of [-1, -2, 0.5, 1.5, NaN, Infinity, -Infinity…
+     41|       expect(path.indexAtPosition(position)).toBeUndefined();
+       |                                              ^
+     42|     }
+     43|     expect(path.indexAtPosition(2)).toBeUndefined();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/model-indexes.test.ts > model indexes > removes the last index of an empty or single-index path to an empty path
+AssertionError: expected null to be an instance of NSEIndexPath
+ ❯ tests/runtime/model-indexes.test.ts:50:23
+     48|     for (const path of [NSEIndexPath.from(), NSEIndexPath.from(3)]) {
+     49|       const removed = path.indexPathByRemovingLastIndex();
+     50|       expect(removed).toBeInstanceOf(NSEIndexPath);
+       |                       ^
+     51|       expect(removed?.indexes).toEqual([]);
+     52|       expect(path.indexes).toEqual(path.length === 0 ? [] : [3]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed (5)
+   Start at  08:41:24
+   Duration  343ms (transform 121ms, setup 36ms, import 121ms, tests 11ms, environment 0ms)
