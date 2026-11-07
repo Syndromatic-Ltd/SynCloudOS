@@ -143,7 +143,6 @@ import {
   nsePagePresets,
   useNSEPage
 } from "./Page";
-import { NSESmoothSurface } from "./SmoothSurface";
 import { typographyTokens } from "./Typography/typographyTokens";
 import * as NSETypography from "./Typography";
 export * from "./Typography";
@@ -225,13 +224,11 @@ export const NSE = {
     materials: nsePageMaterialPresets,
     getPreset: getNSEPagePreset
   },
-  NSESmoothSurface,
   Material: {
     Provider: MaterialProvider,
     tokens: materialTokens,
     GlassPanel,
-    LinenSurface: MaterialLinenSurface,
-    SmoothSurface: NSESmoothSurface
+    LinenSurface: MaterialLinenSurface
   },
   Typography: typographyTokens,
   Registry: {

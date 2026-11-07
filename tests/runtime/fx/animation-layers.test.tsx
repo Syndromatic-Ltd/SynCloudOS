@@ -32,6 +32,7 @@ import { GFXColour } from "../../../src/FX/GraphicsFX/GFXColour";
 import { GFXGradient } from "../../../src/FX/GraphicsFX/GFXGradient";
 import { BrowserAnimationLayerSurface } from "../../../src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter";
 import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
+import { AFXCompositionSnapshot } from "../../../src/FX/AnimationFX/AFXCompositionSnapshot";
 import { AFXAnimation } from "../../../src/FX/AnimationFX/AFXAnimation";
 import { AFXBasicAnimation } from "../../../src/FX/AnimationFX/AFXBasicAnimation";
 import { AFXKeyframeAnimation } from "../../../src/FX/AnimationFX/AFXKeyframeAnimation";
@@ -42,6 +43,44 @@ const scheduler: AFXFrameScheduler = {
   suspended: false,
   requestFrame: () => () => {},
 };
+
+it("projects CALayer.cornerCurve with its radius and rejects unknown curves", () => {
+  const { element, value } = layer(AFXLayer);
+  expect(value.cornerCurve).toBe("circular");
+  value.cornerRadius = 12;
+  value.cornerCurve = "continuous";
+  value.display();
+  expect(value.model.style.cornerCurve).toBe("continuous");
+  expect(element.style.getPropertyValue("corner-shape")).toBe("squircle");
+  expect(() => { value.cornerCurve = "other" as "continuous"; }).toThrow(/cornerCurve/);
+  value.cornerCurve = "circular";
+  value.display();
+  expect(element.style.getPropertyValue("corner-shape")).toBe("round");
+  value.dispose();
+});
+
+it("uses continuous corner geometry in retained composition and SVG alpha masks", async () => {
+  const { element, value } = layer(AFXLayer, 40, 40);
+  value.backgroundColour = GFXColour.parse("#fff");
+  value.cornerRadius = 20;
+  const capture = async () => AFXCompositionSnapshot.capture(value, { bounds: value.bounds, scale: 1, time: 0 })
+    .render({ rect: value.bounds, pixelWidth: 40, pixelHeight: 40, scale: 1 }, new AbortController().signal);
+  const circular = await capture();
+  value.cornerCurve = "continuous";
+  const continuous = await capture();
+  expect(circular.sample({ x: 4, y: 4 }, { interpolation: "nearest" }).a).toBe(0);
+  expect(continuous.sample({ x: 4, y: 4 }, { interpolation: "nearest" }).a).toBe(1);
+  const mask = new AFXLayer();
+  mask.frame = { x: 0, y: 0, width: 40, height: 40 };
+  mask.cornerRadius = 20;
+  mask.cornerCurve = "continuous";
+  mask.backgroundColour = GFXColour.parse("#fff");
+  value.setMask(mask);
+  const svg = decodeURIComponent(element.style.maskImage);
+  expect(svg).toContain("L ");
+  expect(svg).not.toContain(" Q ");
+  value.dispose();
+});
 function layer<T extends AFXLayer>(
   Type: new () => T,
   width = 40,

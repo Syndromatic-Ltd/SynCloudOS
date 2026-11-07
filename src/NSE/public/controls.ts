@@ -40,10 +40,9 @@ export { NSESlider } from "../Controls/Values/NSESlider";
 export type { NSESliderProps } from "../Controls/Values/valueControlTypes";
 export { NSESegmentedControl } from "../Controls/Values/NSESegmentedControl";
 export type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection, NSESegmentStyle } from "../Controls/Values/valueControlTypes";
+export type { NSEMetalSurfaceProps } from "../Material";
 
 
-export { NSERoundedBox } from "../Material";
-export type { NSEMetalSurfaceProps, NSERoundedBoxProps } from "../Material";
 export {
   NSESourceListScene,
 } from "../Navigation/SourceList";

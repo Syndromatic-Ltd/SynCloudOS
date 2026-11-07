@@ -34,6 +34,7 @@ import {
   layerColour,
   type AFXLayerStyle,
   type AFXLayerCorner,
+  type AFXLayerCornerCurve,
   type AFXLayerContentsFilter,
 } from "./AFXLayerStyle";
 import type { GFXColour } from "../GraphicsFX/GFXColour";
@@ -816,6 +817,13 @@ export class AFXLayer {
   }
   set cornerRadius(value: number) {
     this.#setStyle("cornerRadius", layerFinite(value, "corner radius", 0));
+  }
+  get cornerCurve() {
+    return this.#style.cornerCurve;
+  }
+  set cornerCurve(value: AFXLayerCornerCurve) {
+    if (value !== "circular" && value !== "continuous") throw new TypeError("Invalid cornerCurve.");
+    this.#setStyle("cornerCurve", value);
   }
   get maskedCorners() {
     return this.#style.maskedCorners;

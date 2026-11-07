@@ -323,7 +323,6 @@
     "NSEResolvedAppearance": "NSAppearance",
     "NSEResolvedColourScheme": "NSAppearance.Name",
     "NSERetainedTextTarget": "NSTextStorage",
-    "NSERoundedBox": "NSBox.cornerRadius",
     "NSERubberBandOptions": "NSScrollView.verticalScrollElasticity",
     "NSERuleEditor": "NSRuleEditor",
     "NSERulerView": "NSRulerView",
@@ -336,7 +335,7 @@
     "NSESegmentedControl": "NSSegmentedControl",
     "NSESegmentedItem": "NSSegmentedControl.setLabel(_:forSegment:)",
     "NSESegmentedSelection": "NSSegmentedControl.SwitchTracking",
-    "NSEShadowView": "NSView.shadow",
+    "NSEShadow": "NSShadow",
     "NSEShapedTextContainerConsumption": "CTTypesetter",
     "NSEShapedTextGeometryFrame": "CTTypesetter",
     "NSEShapedTextGeometryProviderOptions": "CTTypesetter",
@@ -355,7 +354,6 @@
       "none": "Phase 7 removes this UIKit-shaped navigation API.",
       "replacement": "NSSplitViewItem"
     },
-    "NSESmoothSurface": "NSVisualEffectView",
     "NSESourceListCompactHandoff": {
       "none": "Phase 7 removes this UIKit-shaped navigation API.",
       "replacement": "NSSplitViewController with an NSOutlineView source list"

@@ -34,6 +34,8 @@ export type AFXEdgeAntialiasingMask = number;
  * at a fraction of its size stays steady as it moves instead of sparkling.
  */
 export type AFXLayerContentsFilter = "linear" | "nearest" | "trilinear";
+/** CALayerCornerCurve. Continuous corners use a smooth squircle. */
+export type AFXLayerCornerCurve = "circular" | "continuous";
 export interface AFXLayerStyle {
   readonly hidden: boolean;
   readonly doubleSided: boolean;
@@ -45,6 +47,7 @@ export interface AFXLayerStyle {
   readonly borderColour: GFXColour | null;
   readonly borderWidth: number;
   readonly cornerRadius: number;
+  readonly cornerCurve: AFXLayerCornerCurve;
   readonly maskedCorners: readonly AFXLayerCorner[];
   readonly shadowColour: GFXColour | null;
   readonly shadowOpacity: number;
@@ -62,6 +65,7 @@ export const defaultAFXLayerStyle: AFXLayerStyle = Object.freeze({
   borderColour: null,
   borderWidth: 0,
   cornerRadius: 0,
+  cornerCurve: "circular",
   maskedCorners: Object.freeze([
     "top-left",
     "top-right",

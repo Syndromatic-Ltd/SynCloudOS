@@ -2315,11 +2315,13 @@
 
    The frame and shadow variants keep 18: their sprites are 64×64 and 44×44, so
    18 is within bounds and is the slice they were authored for. */
-:where([data-nse-appearance="atmo"]) .nse-control-rounded-box {
+:where([data-nse-appearance="atmo"]) .nse-box[data-box-kind="custom"] {
   position: relative;
-  min-width: 180px;
-  min-height: 74px;
-  padding: 12px;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
   border: 14px solid transparent;
   border-radius: 11px;
   border-image: var(--nse-atmo-roundy-shadow) 14 stretch;
@@ -2327,12 +2329,12 @@
   color: #273446;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-control-rounded-box[data-variant="frame"] {
+:where([data-nse-appearance="atmo"]) .nse-box[data-box-kind="custom"]:is([data-border-style="line"], [data-border-style="groove"]) {
   border-width: 18px;
   border-image: var(--nse-atmo-frame) 18 fill stretch;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-control-rounded-box[data-variant="shadow"] {
+:where([data-nse-appearance="atmo"]) .nse-box[data-box-kind="custom"][data-nse-shadow="true"] {
   border-width: 18px;
   border-image: var(--nse-atmo-shadow) 18 fill stretch;
 }

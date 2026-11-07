@@ -22,6 +22,8 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 
 import { NSEMetalThumb, type NSEThumbMaterial } from "../../Appearance/NSEMetalThumb";
 import { NSEDivider } from "../Selection/NSEDivider";
+import { nseCSSValue } from "../../Graphics/NSEShadow";
+import { nseNonNegative, useNSEViewLayerProperties, type NSEViewLayerProperties } from "../../Views/viewLayerProperties";
 import {
   useCallback,
   useEffect,
@@ -879,7 +881,7 @@ export interface NSEBoxContentViewMargins {
  */
 export type NSEContentLayout = "stack" | "flow";
 
-export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "title"> {
+export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "title">, NSEViewLayerProperties {
   /** NSBox.title. A titled separator draws its title as the theme's captioned separator. */
   title?: ReactNode;
   /** NSBox.titlePosition (default atTop with a title, otherwise noTitle). */
@@ -893,7 +895,12 @@ export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "
   contentLayout?: NSEContentLayout;
   /** NSBox.fillColor, as one CSS background value. */
   fillColor?: string;
-  smoothSurface?: NSESmoothSurfaceRequest;
+  /** NSBox.borderColor, as one CSS colour value. */
+  borderColor?: string;
+  /** NSBox.borderWidth. Explicit widths override the theme's frame thickness. */
+  borderWidth?: number;
+  /** NSBox.isTransparent: leave the interior unpainted. */
+  isTransparent?: boolean;
 }
 
 function validateNSEBoxFill(fill: string | undefined): string | undefined {
@@ -943,12 +950,20 @@ export function NSEBox({
   contentViewMargins,
   contentLayout = "stack",
   fillColor,
-  smoothSurface = false,
+  borderColor,
+  borderWidth,
+  isTransparent = false,
+  shadow,
+  cornerRadius,
+  cornerCurve,
   className = "",
   style,
   children,
   ...props
 }: NSEBoxProps) {
+  const layer = useNSEViewLayerProperties({ shadow, cornerRadius, cornerCurve });
+  const resolvedBorder = borderColor === undefined ? undefined : nseCSSValue(borderColor, "color", "NSEBox borderColor");
+  const resolvedWidth = nseNonNegative(borderWidth, "borderWidth");
   const position = titlePositionAttribute[titlePosition];
   const border = borderAttribute[borderType];
   if (boxType === "separator") {
@@ -978,6 +993,9 @@ export function NSEBox({
   const resolvedMargins = validateNSEBoxMargins(contentViewMargins);
   const customStyle: CSSVarStyle = {
     ...style,
+    ...layer.style,
+    ...(resolvedBorder !== undefined ? { "--nse-box-border-colour": resolvedBorder } : {}),
+    ...(resolvedWidth !== undefined ? { "--nse-box-border-width": `${resolvedWidth}px` } : {}),
     ...(resolvedFill ? { "--nse-box-fill": resolvedFill } : null),
     // Explicit margins win; otherwise the standard margins resolve through
     // --nse-box-margin-* (nse-layout-defaults.css), which also drops them to
@@ -994,24 +1012,27 @@ export function NSEBox({
       "--nse-box-inset-left": "var(--nse-box-margin-left, 0px)",
     }),
   };
-  const surfaceProps = getControlSmoothSurfaceProps(smoothSurface, className, customStyle);
   const visuallyIntegratedTitle = Boolean(title) && titlePosition === "atTop";
 
   return (
     <fieldset
       {...props}
+      {...layer.attributes}
       className={classes(
         "nse-box",
         "nse-control-group-box",
         visuallyIntegratedTitle && "is-labeled",
-        surfaceProps.className,
+        className,
       )}
       data-title-position={position}
       data-box-kind={boxType}
       data-border-style={border}
+      data-transparent={String(isTransparent)}
+      data-custom-fill={resolvedFill === undefined ? undefined : "true"}
+      data-custom-border={resolvedBorder !== undefined || resolvedWidth !== undefined || cornerRadius !== undefined || cornerCurve !== undefined ? "true" : undefined}
       data-appearance-recipe={`box.${boxType}.${border}.${position}`}
       data-nse-layout-margins={resolvedMargins ? undefined : "standard"}
-      style={surfaceProps.style}
+      style={customStyle}
     >
       {title ? (
         <legend

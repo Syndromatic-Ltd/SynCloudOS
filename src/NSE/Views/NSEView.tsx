@@ -34,6 +34,7 @@ import { useIFXImageBox } from "../../FX/ImageFX/IFXImageViewport";
 import { NSEViewDrawingEnvironmentContext } from "./NSEViewDrawingEnvironment";
 import type { GFXIdentifierIssuer } from "../../FX/GraphicsFX/identifierAuthority";
 import { NSEViewDisplayList } from "./NSEViewDisplayList";
+import { useNSEViewLayerProperties, type NSEViewLayerProperties } from "./viewLayerProperties";
 
 /** NSView.LayerContentsPlacement. Positional placements keep the content's natural size. */
 export type NSEViewLayerContentsPlacement = "scaleAxesIndependently" | "scaleProportionallyToFit" | "scaleProportionallyToFill"
@@ -44,7 +45,7 @@ const layerContentsPlacements: readonly NSEViewLayerContentsPlacement[] = [
   "right", "bottomRight", "bottom", "bottomLeft", "left", "topLeft",
 ];
 
-export interface NSEViewProps extends HTMLAttributes<HTMLDivElement> {
+export interface NSEViewProps extends HTMLAttributes<HTMLDivElement>, NSEViewLayerProperties {
   /** NSView.draw(_:). A React re-render redraws the whole bounds with a fresh recording context. */
   readonly draw?: (dirtyRect: GFXRect, context: GFXContext) => void;
   /** NSView.layerContentsPlacement. Defaults to scaleProportionallyToFit. */
@@ -74,7 +75,8 @@ export function NSEView({ appearance, ...props }: NSEViewProps) {
   return appearance ? <NSEViewAppearance appearance={appearance}><NSEViewContent {...props} /></NSEViewAppearance> : <NSEViewContent {...props} />;
 }
 
-function NSEViewContent({ draw, layerContentsPlacement = "scaleProportionallyToFit", menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", children, ref, ...htmlAttributes }: NSEViewProps) {
+function NSEViewContent({ shadow, cornerRadius, cornerCurve, style, draw, layerContentsPlacement = "scaleProportionallyToFit", menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", children, ref, ...htmlAttributes }: NSEViewProps) {
+  const layer = useNSEViewLayerProperties({ shadow, cornerRadius, cornerCurve });
   const hostRef = useRef<HTMLDivElement>(null);
   const attachHost = useCallback((element: HTMLDivElement | null) => {
     hostRef.current = element;
@@ -97,7 +99,7 @@ function NSEViewContent({ draw, layerContentsPlacement = "scaleProportionallyToF
       }} /> : null}
     {children}
   </>;
-  const attributes = { ...htmlAttributes, ref: attachHost, "data-nse-view-drawing": draw ? "" : undefined };
+  const attributes = { ...htmlAttributes, ...layer.attributes, style: { ...style, ...layer.style }, ref: attachHost, "data-nse-view-drawing": draw ? "" : undefined };
   if (!menu) return <div title={toolTip} {...attributes}>{content}</div>;
   return (
     <NSEMenuHostView menu={menu} toolTip={toolTip} menuOverlay={menuOverlay} longPressDelayMs={longPressDelayMs} direction={direction} {...attributes}>

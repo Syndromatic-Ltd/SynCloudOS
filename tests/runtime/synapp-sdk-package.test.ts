@@ -291,6 +291,7 @@ describe("portable SynWare SDK packages", () => {
     }
     writeFileSync(join(fixture, "shared-identity.mjs"), `import assert from "node:assert/strict";
 import * as nse from "@syndromatic/syncloudos/nse";
+import * as controls from "@syndromatic/syncloudos/nse/controls";
 import * as layout from "@syndromatic/syncloudos/nse/layout";
 import * as appearance from "@syndromatic/syncloudos/nse/appearance";
 import * as webspring from "@syndromatic/syncloudos/webspring";
@@ -299,6 +300,11 @@ import * as auth from "@syndromatic/syncloudos/auth";
 assert.equal("AnimationFX" in nse, false);
 assert.equal("useAnimationFX" in nse, false);
 assert.equal(typeof nse.NSEView, "function");
+assert.equal(typeof nse.NSEShadow, "function");
+for (const removed of ["NSERoundedBox", "NSEShadowView", "NSESmoothSurface"]) {
+  assert.equal(removed in nse, false);
+  assert.equal(removed in controls, false);
+}
 for (const removed of ["NSEGraphicsView", "convertPointToGFXDisplayList"]) assert.equal(removed in nse, false);
 for (const internal of ["NSEViewDrawingEnvironmentContext", "NSEViewDisplayList"]) assert.equal(internal in nse, false);
 assert.equal("AnimationFX" in appearance, false);

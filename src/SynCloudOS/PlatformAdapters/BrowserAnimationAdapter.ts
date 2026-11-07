@@ -24,6 +24,7 @@ import {
 } from "./BrowserAnimationReplication";
 import { layerContentSVG, layerSVGColour } from "./BrowserAnimationLayerContent";
 import { AFXTimingFunction } from "../../FX/AnimationFX/AFXTimingFunction";
+import { continuousLayerPath } from "../../FX/AnimationFX/layerCornerGeometry";
 import { afxStringsInterpolate, interpolateAFXValue } from "../../FX/AnimationFX/interpolation";
 import { AFXTransform3D } from "../../FX/AnimationFX/AFXTransform3D";
 import { AFXPresentationHistory } from "../../FX/AnimationFX/AFXPresentationHistory";
@@ -958,6 +959,7 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     style.borderTopRightRadius = `${corners.includes("top-right") ? snapshot.style.cornerRadius : 0}px`;
     style.borderBottomLeftRadius = `${corners.includes("bottom-left") ? snapshot.style.cornerRadius : 0}px`;
     style.borderBottomRightRadius = `${corners.includes("bottom-right") ? snapshot.style.cornerRadius : 0}px`;
+    style.setProperty("corner-shape", snapshot.style.cornerCurve === "continuous" ? "squircle" : "round");
     const shadow = snapshot.style.shadowColour;
     style.boxShadow =
       shadow && snapshot.style.shadowOpacity > 0
@@ -1336,7 +1338,7 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
       ? `<svg aria-hidden="true" focusable="false" viewBox="${bounds.x} ${bounds.y} ${Math.max(1, bounds.width)} ${Math.max(1, bounds.height)}" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none">${content}</svg>`
       : "";
     const markup =
-      `<div data-afx-projective-layer="" opacity="${snapshot.opacity}" style="position:absolute;left:0;top:0;width:${bounds.width}px;height:${bounds.height}px;box-sizing:border-box;transform-origin:0 0;transform-style:preserve-3d;transform:${transform.toCSS()};opacity:${snapshot.opacity};visibility:${style.hidden ? "hidden" : "visible"};backface-visibility:${style.doubleSided ? "visible" : "hidden"};background:${background};border:${style.borderWidth}px solid ${border};border-radius:${radii};overflow:${snapshot.clipsToBounds ? "hidden" : "visible"};pointer-events:none">` +
+      `<div data-afx-projective-layer="" opacity="${snapshot.opacity}" style="position:absolute;left:0;top:0;width:${bounds.width}px;height:${bounds.height}px;box-sizing:border-box;transform-origin:0 0;transform-style:preserve-3d;transform:${transform.toCSS()};opacity:${snapshot.opacity};visibility:${style.hidden ? "hidden" : "visible"};backface-visibility:${style.doubleSided ? "visible" : "hidden"};background:${background};border:${style.borderWidth}px solid ${border};border-radius:${radii};corner-shape:${style.cornerCurve === "continuous" ? "squircle" : "round"};overflow:${snapshot.clipsToBounds ? "hidden" : "visible"};pointer-events:none">` +
       contentSVG +
       children +
       `</div>`;
@@ -1395,7 +1397,9 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
         ? r
         : 0,
     );
-    const path = `M ${inset + tl} ${inset} H ${inset + w - tr} Q ${inset + w} ${inset} ${inset + w} ${inset + tr} V ${inset + h - br} Q ${inset + w} ${inset + h} ${inset + w - br} ${inset + h} H ${inset + bl} Q ${inset} ${inset + h} ${inset} ${inset + h - bl} V ${inset + tl} Q ${inset} ${inset} ${inset + tl} ${inset} Z`;
+    const path = style.cornerCurve === "continuous"
+      ? continuousLayerPath(inset, inset, w, h, r, style.maskedCorners)
+      : `M ${inset + tl} ${inset} H ${inset + w - tr} Q ${inset + w} ${inset} ${inset + w} ${inset + tr} V ${inset + h - br} Q ${inset + w} ${inset + h} ${inset + w - br} ${inset + h} H ${inset + bl} Q ${inset} ${inset + h} ${inset} ${inset + h - bl} V ${inset + tl} Q ${inset} ${inset} ${inset + tl} ${inset} Z`;
     const id = "afx-mask-node-" + budget.count;
     const content = historical?.contentMarkup ?? this.#contentMarkup;
     budget.bytes = (budget.bytes ?? 0) + content.length + path.length + 500;
