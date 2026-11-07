@@ -8,7 +8,7 @@ const excludedBaselines = new Set([
   "memo-before-desktop-dark-no-preference-result.json",
   "dial-before-desktop-dark-reduce-result.json",
 ]);
-const resultFiles = fs.readdirSync(directory).filter(name => /-(before|after)-.+-result\.json$/.test(name));
+const resultFiles = fs.readdirSync(directory).filter(name => /-(before|after|post-adoption)-.+-result\.json$/.test(name));
 const results = resultFiles.map(name => {
   const evidence = JSON.parse(fs.readFileSync(path.join(directory, name), "utf8"));
   const status = evidence.error || evidence.errors.length ? "failed"
@@ -21,14 +21,15 @@ const results = resultFiles.map(name => {
     minimumVisibleOpacity: evidence.result?.minimumVisibleOpacity };
 });
 const summary = {
-  stages: Object.fromEntries(["before", "after"].map(stage => [stage,
+  stages: Object.fromEntries(["before", "after", "post-adoption"].map(stage => [stage,
     results.filter(result => result.stage === stage).reduce((counts, result) => {
       counts[result.status] = (counts[result.status] ?? 0) + 1; return counts;
     }, {})])),
   finalArchives: [...new Set(results.filter(result => result.stage === "after").map(result => result.archive))],
+  postAdoptionArchives: [...new Set(results.filter(result => result.stage === "post-adoption").map(result => result.archive))],
   pngCount: fs.readdirSync(directory).filter(name => name.endsWith(".png")).length,
   results,
 };
 fs.writeFileSync(path.join(directory, "evidence-summary.json"), JSON.stringify(summary, null, 2) + "\n");
-console.log(JSON.stringify({ stages: summary.stages, finalArchives: summary.finalArchives, pngCount: summary.pngCount }, null, 2));
+console.log(JSON.stringify({ stages: summary.stages, finalArchives: summary.finalArchives, postAdoptionArchives: summary.postAdoptionArchives, pngCount: summary.pngCount }, null, 2));
 if (results.some(result => result.status === "failed")) process.exitCode = 1;
