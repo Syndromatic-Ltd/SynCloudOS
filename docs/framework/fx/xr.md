@@ -2,7 +2,7 @@
 
 XRFX follows ARKit's session, configuration, frame and anchor concepts using WebXR. It is a minimal pose-delivery API, not an ARKit implementation or a renderer. Import `XRFXConfiguration` and the public types from `@syndromatic/syncloudos/fx/xr`; obtain a session with `useXR()` or `useSCOS().xr.createSession(signal?)`.
 
-Declare `xr.session` in `Info.ts` entitlements (or the transitional `permissions` declaration). The mounted session checks that declaration and host authorisation before starting. Capability inspection and construction never request a native session.
+Declare `xr.session` in `Info.ts` entitlements. The mounted session checks that declaration and host authorisation before starting. Capability inspection and construction never request a native session.
 
 ```ts
 import { XRFXConfiguration } from "@syndromatic/syncloudos/fx/xr";

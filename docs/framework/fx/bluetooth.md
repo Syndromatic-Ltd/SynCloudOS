@@ -2,7 +2,7 @@
 
 BluetoothFX (`BTFX`) follows Core Bluetooth's central, peripheral, service and characteristic concepts using Web Bluetooth. Import its types from `@syndromatic/syncloudos/fx/bluetooth`. Device access comes from the mounted session, through `useBluetooth()` or `useSCOS().bluetooth.createCentralManager(signal?)`.
 
-Declare `bluetooth.access` in the app's `Info.ts` entitlements (the transitional `permissions` declaration is also accepted by the runtime). The mounted client checks that declaration and host authorisation before access, including calls through retained service and characteristic objects. The browser still owns the device chooser and its device-specific grants. Construction and `getCapabilities()` do not open a chooser.
+Declare `bluetooth.access` in the app's `Info.ts` entitlements. The mounted client checks that declaration and host authorisation before access, including calls through retained service and characteristic objects. The browser still owns the device chooser and its device-specific grants. Construction and `getCapabilities()` do not open a chooser.
 
 ```ts
 const manager = useBluetooth();

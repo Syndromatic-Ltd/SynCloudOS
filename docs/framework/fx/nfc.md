@@ -2,7 +2,7 @@
 
 NFCFX follows Core NFC's `NDEFReaderSession` and NDEF message/payload objects using the `NFX` prefix. It exposes foreground NDEF through Web NFC. It does not expose ISO 7816, ISO 15693, FeliCa, MIFARE commands, background tag discovery, or native wallet access.
 
-Declare `nfc.read` for scanning, and `nfc.write` for writing or making a tag read-only. Mounted clients recheck the declaration and host policy at each operation and before delivering readings. Removing access revokes the scanning session. Browser permission remains separate: `getAuthorizationStatus()` returns the Permissions API's `nfc` state, `unknown` when that descriptor is unsupported, and `unavailable` without secure-context Web NFC. It never starts a scan.
+Declare `nfc.read` in `Info.ts` entitlements for scanning, and `nfc.write` for writing or making a tag read-only. Mounted clients recheck the declaration and host policy at each operation and before delivering readings. Removing access revokes the scanning session. Browser permission remains separate: `getAuthorizationStatus()` returns the Permissions API's `nfc` state, `unknown` when that descriptor is unsupported, and `unavailable` without secure-context Web NFC. It never starts a scan.
 
 ```tsx
 import { useNFC } from "@syndromatic/syncloudos/sdk";
