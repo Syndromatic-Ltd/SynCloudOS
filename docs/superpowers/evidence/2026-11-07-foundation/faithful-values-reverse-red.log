@@ -1,0 +1,29 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-values.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-values.test.ts (3 tests | 1 failed) 5ms
+   × uses the forward transform as the default reverse for reversible subclasses 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-values.test.ts > uses the forward transform as the default reverse for reversible subclasses
+Error: Reverse transformation is not supported.
+ ❯ Invert.reverseTransformedValue src/Foundation/NSEValueTransformer.ts:46:11
+     44|
+     45|   reverseTransformedValue(_value: TTarget): TSource {
+     46|     throw new Error("Reverse transformation is not supported.");
+       |           ^
+     47|   }
+     48| }
+ ❯ tests/runtime/foundation-faithful-values.test.ts:28:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  19:05:32
+   Duration  183ms (transform 30ms, setup 29ms, import 15ms, tests 5ms, environment 0ms)
+

@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-values.test.ts tests/runtime/nse-object-controller.test.ts tests/runtime/model-formatters-transformers.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  18 passed (18)
+   Start at  19:06:31
+   Duration  6.63s (transform 4.92s, setup 60ms, import 6.45s, tests 48ms, environment 0ms)
+
