@@ -171,6 +171,7 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
   #explicitlyCollapsed = new Set<string>();
   #presentation: "split" | "single-pane" = "split";
   #contentBounds: SynCloudOSPresentationTraits["contentBounds"] | null = null;
+  #hasCurrentGeometry = false;
   #activeId = "";
   #preferredActiveId = "";
   #availableSize = 0;
@@ -276,6 +277,7 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
       this.#activeId = item.identifier === this.#preferredActiveId ? item.identifier : this.#items[0]!.identifier;
     }
     this.#ensureSurvivor();
+    this.#updatePresentation();
     this.#replace();
   }
 
@@ -371,12 +373,17 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
 
   #updatePresentation(): void {
     const traits = this.traitCollection.presentation;
-    // Retain the last renderer while geometry is hidden or unavailable, never old hinge positions.
-    if (!traits || traits.geometryState !== "current") return;
     let nested = false;
     for (let ancestor = this.parent; ancestor; ancestor = ancestor.parent) {
       if (ancestor instanceof NSESplitViewController) { nested = true; break; }
     }
+    // Before the first trustworthy measurement a hierarchy starts at its source pane. Thereafter
+    // hidden or unavailable geometry retains its renderer, never old hinge positions.
+    if (!traits || traits.geometryState !== "current") {
+      if (!this.#hasCurrentGeometry) this.#presentation = !nested && this.#items.some(({ behavior }) => behavior === "sidebar" || behavior === "contentList") ? "single-pane" : "split";
+      return;
+    }
+    this.#hasCurrentGeometry = true;
     const bounds = this.#contentBounds ?? traits.contentBounds;
     this.#availableSize = Math.max(0, Math.round(this.#isVertical ? bounds.width : bounds.height));
     const book = this.#isVertical ? resolveNSEBookRegions(traits, bounds) : null;

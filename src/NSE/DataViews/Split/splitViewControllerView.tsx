@@ -95,14 +95,15 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
   // Items divide the space the split view actually occupies: a split nested inside another item is
   // smaller than the window, so the window's content bounds are only the fallback before measurement.
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
+  const liveRoot = useRef<HTMLDivElement | null>(null);
   const [measured, setMeasured] = useState<{ readonly x: number; readonly y: number; readonly width: number; readonly height: number } | null>(null);
-  const rootRef = useCallback((node: HTMLDivElement | null) => setRoot(node), []);
+  const rootRef = useCallback((node: HTMLDivElement | null) => { liveRoot.current = node; setRoot(node); }, []);
   // Pane contents are persistent portals, so their React event path is a sibling of this root.
   // Listen to the document's native focus path while the initiating control is still attached.
   useLayoutEffect(() => {
     if (!root) return;
     const remember = (event: globalThis.FocusEvent) => {
-      if (event.target instanceof HTMLElement && root.contains(event.target)) lastFocused.current = event.target;
+      if (event.target instanceof HTMLElement) lastFocused.current = liveRoot.current?.contains(event.target) ? event.target : null;
     };
     root.ownerDocument.addEventListener("focusin", remember, true);
     return () => root.ownerDocument.removeEventListener("focusin", remember, true);
@@ -154,11 +155,17 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
   }, [items]);
 
   useLayoutEffect(() => {
-    if (previousPresentation.current === "single-pane" && snapshot.presentation === "split") {
+    const currentRoot = liveRoot.current;
+    const active = currentRoot?.ownerDocument.activeElement;
+    const retained = lastFocused.current;
+    if (currentRoot && retained?.isConnected && currentRoot.contains(retained) && retained.closest("[data-pane-host]") && !retained.closest("[hidden],[inert]")) {
+      if (active === currentRoot.ownerDocument.body) retained.focus({ preventScroll: true });
+    } else if (previousPresentation.current === "single-pane" && snapshot.presentation === "split"
+      && (!active || active === currentRoot?.ownerDocument.body || currentRoot?.contains(active))) {
       paneHosts.current.get(snapshot.activeItemIdentifier)?.parentElement?.parentElement?.focus({ preventScroll: true });
     }
     previousPresentation.current = snapshot.presentation;
-  }, [snapshot.activeItemIdentifier, snapshot.presentation]);
+  }, [root, snapshot.activeItemIdentifier, snapshot.presentation]);
 
   useLayoutEffect(() => {
     if (snapshot.presentation === "single-pane" && previousActive.current !== snapshot.activeItemIdentifier) {

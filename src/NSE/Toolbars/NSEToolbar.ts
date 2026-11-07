@@ -24,6 +24,7 @@ import { NSEUserDefaults } from "../Controllers/NSEUserDefaults";
 import type { NSEOwner } from "../Controllers/ownership";
 import { NSEToolbarController } from "./NSEToolbarController";
 import type { NSEToolbarItemInput, NSEToolbarPreferences, NSEToolbarRuntimePort } from "./toolbarTypes";
+import type { ReactNode } from "react";
 
 /** NSToolbar.DisplayMode. `default` follows the toolbar's own default, icon and label. */
 export type NSEToolbarDisplayMode = "default" | "iconAndLabel" | "iconOnly" | "labelOnly";
@@ -62,6 +63,10 @@ export const nseAttachToolbar: unique symbol = Symbol("nse.attachToolbar");
 export const nseToolbarEngine: unique symbol = Symbol("nse.toolbarEngine");
 /** @internal */
 export const nseEndToolbarCustomization: unique symbol = Symbol("nse.endToolbarCustomization");
+/** @internal Selectable items supplied by a toolbar-style NSTabViewController. */
+export const nseRegisterToolbarTabView: unique symbol = Symbol("nse.registerToolbarTabView");
+/** @internal The tab-controller contributions the window draws beside the toolbar's own items. */
+export const nseToolbarTabViews: unique symbol = Symbol("nse.toolbarTabViews");
 
 type StoredDisplayMode = NSEToolbarPreferences["displayMode"];
 type StoredSizeMode = NSEToolbarPreferences["sizeMode"];
@@ -104,6 +109,7 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
   #customizing = false;
   #engine: NSEToolbarController | null = null;
   #preferences: NSEUserDefaultsController<NSEToolbarPreferences> | null = null;
+  readonly #tabViews = new Map<object, { readonly token: symbol; readonly view: ReactNode }>();
 
   constructor(options: NSEToolbarOptions<Items>) {
     super();
@@ -281,6 +287,21 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
   get [nseToolbarEngine](): NSEToolbarController | null {
     return this.#engine;
   }
+
+  /** @internal A tab controller contributes selectable items without replacing the window's toolbar. */
+  [nseRegisterToolbarTabView](owner: object, view: ReactNode): () => void {
+    const token = Symbol();
+    this.#tabViews.set(owner, { token, view });
+    this.notifyObservers();
+    return () => {
+      if (this.#tabViews.get(owner)?.token !== token) return;
+      this.#tabViews.delete(owner);
+      this.notifyObservers();
+    };
+  }
+
+  /** @internal */
+  get [nseToolbarTabViews](): readonly ReactNode[] { return [...this.#tabViews.values()].map(({ view }) => view); }
 
   /** @internal The customisation sheet closed. */
   [nseEndToolbarCustomization](): void {

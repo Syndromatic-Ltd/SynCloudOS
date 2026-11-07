@@ -30,6 +30,7 @@ import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle
 import { connectNSENavigationRestoration, type NSENavigationRestorationDescriptor } from "./navigationRestoration";
 import { NSETreeController } from "../Controllers/NSETreeController";
 import { NSEAdaptiveTabView, type NSEAdaptiveTabOutlineItem } from "./adaptiveTabView";
+import { useNSETabToolbar } from "./tabToolbarView";
 
 /**
  * NSTabViewController.TabStyle. Atmo draws `segmentedControlOnBottom` as its bottom tab bar and
@@ -37,7 +38,7 @@ import { NSEAdaptiveTabView, type NSEAdaptiveTabOutlineItem } from "./adaptiveTa
  * for an app that switches items itself. `sidebarAdaptable` is an NSE extension after SwiftUI's
  * sidebar-adaptable TabView style: source list, bottom tabs or a rail, chosen from content traits.
  */
-export type NSETabViewControllerTabStyle = "segmentedControlOnTop" | "segmentedControlOnBottom" | "unspecified" | "sidebarAdaptable";
+export type NSETabViewControllerTabStyle = "segmentedControlOnTop" | "segmentedControlOnBottom" | "toolbar" | "unspecified" | "sidebarAdaptable";
 
 export interface NSETabViewItemOptions {
   /** The item's view controller (NSTabViewItem(viewController:)). It must be a child of the tab view controller. */
@@ -135,7 +136,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
   /** NSTabViewController.tabStyle. */
   get tabStyle(): NSETabViewControllerTabStyle { return this.#tabStyle; }
   set tabStyle(style: NSETabViewControllerTabStyle) {
-    if (style !== "segmentedControlOnTop" && style !== "segmentedControlOnBottom" && style !== "unspecified" && style !== "sidebarAdaptable") throw new TypeError(`Unknown tab style "${String(style)}".`);
+    if (style !== "segmentedControlOnTop" && style !== "segmentedControlOnBottom" && style !== "toolbar" && style !== "unspecified" && style !== "sidebarAdaptable") throw new TypeError(`Unknown tab style "${String(style)}".`);
     if (style === this.#tabStyle) return;
     this.#tabStyle = style;
     this.notifyObservers();
@@ -282,9 +283,10 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
 function NSETabViewControllerView({ controller }: { readonly controller: NSETabViewController }) {
   useObserve(controller);
   const scope = useId().replace(/[^\w-]/g, "");
+  useNSETabToolbar(controller);
   // Keeping these two styles in one projection preserves the selected item's DOM when an outer
   // split supplies the regular sidebar and hands compact navigation back to this tab controller.
-  if (controller.tabStyle === "sidebarAdaptable" || controller.tabStyle === "unspecified") return <div className="nse-tab-view-controller" data-tab-style={controller.tabStyle}>
+  if (controller.tabStyle === "sidebarAdaptable" || controller.tabStyle === "unspecified" || controller.tabStyle === "toolbar") return <div className="nse-tab-view-controller" data-tab-style={controller.tabStyle}>
     <NSEAdaptiveTabView controller={controller} scope={scope} />
   </div>;
   const model = controller.tabControlModel;
