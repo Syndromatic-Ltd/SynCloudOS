@@ -50,8 +50,8 @@ data.bytes;                                           // read-only Uint8Array vi
 data.subdata({ location: 4, length: 16 });            // NSRange, like the rest of NSE
 data.base64EncodedString();
 NSEData.fromBase64(text);
-await data.compressed(using: "zlib");                 // async; runs on CPFX
-await data.decompressed(using: "zlib");
+await data.compressed("zlib");                        // compressed(using:); async; runs on CPFX
+await data.decompressed("zlib");
 data.isEqual(other);
 data.blob(type);                                      // for downloads and uploads
 ```
