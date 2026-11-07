@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { expect, it, vi } from 'vitest';
-import { AFXAnimation, AFXBasicAnimation } from '../../../src/FX/AnimationFX/public';
+import { AFXAnimation, AFXBasicAnimation, AFXSpringAnimation } from '../../../src/FX/AnimationFX/public';
 import { createAFXLayer } from '../../../src/FX/AnimationFX/host';
 import { BrowserAnimationLayerSurface, createBrowserAFXFrameScheduler } from '../../../src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter';
 
@@ -61,3 +61,14 @@ it('keeps frame-sampled endless presentation time frozen while suspended', () =>
   handle.cancel(); expect(pending.size).toBe(0); layer.dispose();
 });
 
+
+it('settles delayed finite springs and fractional cycles at their exact terminal boundary', () => {
+  const spring = new AFXSpringAnimation({ targetId: 'art', keyPath: 'transform', from: 'translateY(24px) scale(0.78)', to: 'none', options: { duration: 1.2, delay: .35 } });
+  expect(spring.animation.progressAt(spring.animation.totalDuration)).toBe(1);
+  expect(spring.sample(spring.animation.totalDuration)).toBe('none');
+  const fractional = new AFXAnimation({ duration: 1.2, delay: .35, iterations: 1.5, timing: 'linear' });
+  expect(fractional.progressAt(fractional.totalDuration)).toBe(.5);
+  const reversed = new AFXAnimation({ duration: 1.2, delay: .35, iterations: .75, autoreverses: true, timing: 'linear' });
+  expect(reversed.progressAt(reversed.totalDuration)).toBe(.5);
+  expect(fractional.progressAt(fractional.totalDuration - .001)).toBeLessThan(.5);
+});
