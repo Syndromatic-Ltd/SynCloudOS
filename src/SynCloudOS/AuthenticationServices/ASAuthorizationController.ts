@@ -147,7 +147,8 @@ export class ASAuthorizationController {
     const controller = new AbortController();
     const abort = () => controller.abort(canceled());
     this.#active = controller;
-    let authorization: ASAuthorization;
+    let authorization!: ASAuthorization;
+    let failure: ASAuthorizationError | undefined;
     try {
       if (this.#disposed || signal?.aborted) throw canceled();
       signal?.addEventListener("abort", abort, { once: true });
@@ -171,12 +172,14 @@ export class ASAuthorizationController {
       });
       controller.signal.throwIfAborted();
     } catch (error) {
-      const failure = authorizationError(error);
-      delegate?.authorizationControllerDidCompleteWithError?.(this, failure);
-      throw failure;
+      failure = authorizationError(error);
     } finally {
       signal?.removeEventListener("abort", abort);
       if (this.#active === controller) this.#active = null;
+    }
+    if (failure) {
+      delegate?.authorizationControllerDidCompleteWithError?.(this, failure);
+      throw failure;
     }
     delegate?.authorizationControllerDidCompleteWithAuthorization?.(this, authorization);
     return authorization;
