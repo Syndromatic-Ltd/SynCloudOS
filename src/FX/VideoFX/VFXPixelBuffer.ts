@@ -30,6 +30,14 @@ interface VFXPixelBacking {
 
 const pixelBufferState = new WeakMap<VFXPixelBuffer, VFXPixelBacking | null>();
 
+function pixelBufferFromBacking(backing: VFXPixelBacking, increment = true): VFXPixelBuffer {
+  const value = Object.create(VFXPixelBuffer.prototype) as VFXPixelBuffer;
+  if (increment) backing.refs += 1;
+  pixelBufferState.set(value, backing);
+  Object.freeze(value);
+  return value;
+}
+
 function closedError(): DOMException {
   return new DOMException("Video pixel buffer is closed.", "InvalidStateError");
 }
@@ -64,13 +72,6 @@ export class VFXPixelBuffer {
     Object.freeze(this);
   }
 
-  static fromBacking(backing: VFXPixelBacking, increment = true): VFXPixelBuffer {
-    const value = Object.create(VFXPixelBuffer.prototype) as VFXPixelBuffer;
-    if (increment) backing.refs += 1;
-    pixelBufferState.set(value, backing);
-    Object.freeze(value);
-    return value;
-  }
 
   static fromGFXImage(image: GFXImage, options: Readonly<{ pixelFormat?: VFXPixelFormat }> = {}): VFXPixelBuffer {
     if (!(image instanceof GFXImage)) throw new TypeError("Video conversion requires a GFXImage.");
@@ -128,13 +129,13 @@ export class VFXPixelBuffer {
   get byteLength(): number { return this.assertLive().bytes.byteLength; }
 
   clone(): VFXPixelBuffer {
-    return VFXPixelBuffer.fromBacking(this.assertLive());
+    return pixelBufferFromBacking(this.assertLive());
   }
 
   transfer(): VFXPixelBuffer {
     const backing = this.assertLive();
     pixelBufferState.set(this, null);
-    return VFXPixelBuffer.fromBacking(backing, false);
+    return pixelBufferFromBacking(backing, false);
   }
 
   copyData(): Uint8Array {
@@ -248,7 +249,7 @@ export class VFXPixelBufferPool {
     }
     backing.bytes.fill(0);
     if (data) backing.bytes.set(data);
-    return VFXPixelBuffer.fromBacking(backing, false);
+    return pixelBufferFromBacking(backing, false);
   }
 
   diagnostics(): VFXPixelBufferPoolDiagnostics {

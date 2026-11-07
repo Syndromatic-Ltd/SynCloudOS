@@ -24,6 +24,7 @@ import { expect, it } from "vitest";
 import { NSEData } from "../../../src/Foundation/NSEData";
 import { AUFXAudioFile, AUFXAudioFormat, AUFXAudioPCMBuffer } from "../../../src/FX/AudioFX/public";
 import { GFXDataConsumer, GFXDataProvider, GFXImage } from "../../../src/FX/GraphicsFX/GFXImage";
+import { VFXPixelBuffer } from "../../../src/FX/VideoFX/VFXPixelBuffer";
 import { MIFXEncoder } from "../../../src/FX/MIDIFX/MIFXEncoder";
 import { MIFXParser } from "../../../src/FX/MIDIFX/MIFXParser";
 import { MIFXUniversalPacket } from "../../../src/FX/MIDIFX/MIFXUniversalPacket";
@@ -65,4 +66,8 @@ it("omits native recorder and PDF worker ports from exported constructor declara
     expect(declaration).toContain("private constructor();");
   }
   expect(readFileSync("src/FX/AudioFX/public.ts", "utf8")).not.toContain("createHostAUFXAudioRecorder");
+});
+
+it("keeps pixel backing ownership private while exposing numeric pixel copies", () => {
+  expect("fromBacking" in VFXPixelBuffer).toBe(false);
 });
