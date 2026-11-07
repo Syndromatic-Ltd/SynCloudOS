@@ -406,3 +406,12 @@ describe("UndoManager", () => {
     await expect(poisoned.undo()).resolves.toMatchObject({ status: "failed", code: "undo-entry-poisoned" });
   });
 });
+
+it("publishes the new frontier before replay-completion observers run", async () => {
+  const manager = createUndoManager({ runtimeId, owner, maxEntries: 10 });
+  manager.register(defineSyncUndoAction({ name: "Edit", asyncPolicy: "forbid", undo() {}, redo() {} }));
+  const states: boolean[] = [];
+  manager.subscribe(() => { if (!manager.isExecuting) states.push(manager.canRedo); });
+  await manager.undo();
+  expect(states.at(-1)).toBe(true);
+});

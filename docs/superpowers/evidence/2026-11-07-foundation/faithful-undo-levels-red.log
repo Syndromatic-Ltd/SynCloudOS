@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/foundation-undo.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-undo.test.ts (7 tests | 1 failed) 10ms
+     × keeps the next redo reachable when limiting a fully undone history 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-undo.test.ts > Foundation undo level changes > keeps the next redo reachable when limiting a fully undone history
+AssertionError: expected 2 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ tests/runtime/foundation-undo.test.ts:100:26
+     98|     manager.levelsOfUndo = 1;
+     99|     manager.redo();
+    100|     expect(target.value).toBe(1);
+       |                          ^
+    101|   });
+    102| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  19:12:56
+   Duration  281ms (transform 69ms, setup 46ms, import 44ms, tests 10ms, environment 0ms)
+

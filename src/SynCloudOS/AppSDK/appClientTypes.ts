@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import type { NSEUndoRegistrationCapability } from "../../Foundation/NSEUndoRegistrationCapability";
 import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { AppPlaybackPresentationLease, AppPlaybackPresentationRequest } from "./playbackPresentationTypes";
 import type { VFXVideoClient, VFXPresentationCoordinator } from "../../FX/VideoFX/public";
@@ -186,18 +187,13 @@ export interface AppUndoReservation {
   cancel(): void;
 }
 
-export interface AppUndoHistory {
+export interface AppUndoHistory extends NSEUndoRegistrationCapability<AppUndoAction, AppUndoReservation, Readonly<{ automaticGroup?: Readonly<{ kind: "typing" | "drag" | "stepper"; key: string; boundaryId: string }> }>> {
   readonly canUndo: boolean;
   readonly canRedo: boolean;
   /** The complete menu title, verb included: "Undo Rename", or "Undo" when nothing can be undone. Use it as the item title; do not prefix it. */
   readonly undoTitle: string | null;
   /** The complete menu title, verb included: "Redo Rename", or "Redo" when nothing can be redone. */
   readonly redoTitle: string | null;
-  readonly isExecuting: boolean;
-  register(action: AppUndoAction, options?: Readonly<{
-    automaticGroup?: Readonly<{ kind: "typing" | "drag" | "stepper"; key: string; boundaryId: string }>;
-  }>): string;
-  reserve(): AppUndoReservation;
   undo(signal?: AbortSignal): unknown;
   redo(signal?: AbortSignal): unknown;
   subscribe(listener: () => void): () => void;

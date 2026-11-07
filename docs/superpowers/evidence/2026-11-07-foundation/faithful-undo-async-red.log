@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/foundation-undo.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-undo.test.ts (8 tests | 1 failed) 8ms
+   × rejects a thenable returned by a synchronous Foundation handler 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-undo.test.ts > rejects a thenable returned by a synchronous Foundation handler
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/runtime/foundation-undo.test.ts:107:32
+    105|   const manager = new NSEUndoManager();
+    106|   manager.registerUndo({}, (() => Promise.resolve()) as () => void);
+    107|   expect(() => manager.undo()).toThrow(/synchronous/i);
+       |                                ^
+    108| });
+    109|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  19:19:02
+   Duration  194ms (transform 37ms, setup 29ms, import 23ms, tests 8ms, environment 0ms)
+

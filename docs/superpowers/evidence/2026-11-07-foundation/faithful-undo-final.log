@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/foundation-undo.test.ts tests/runtime/undo-manager.test.ts tests/runtime/app-undo-client.test.ts tests/runtime/application-undo-ownership.test.ts tests/runtime/undo-observation.test.ts tests/runtime/undo-manager-registry.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  6 passed (6)
+      Tests  42 passed (42)
+   Start at  19:19:41
+   Duration  10.93s (transform 12.51s, setup 75ms, import 18.58s, tests 367ms, environment 1.98s)
+
