@@ -121,7 +121,7 @@ const shell = defineWebspring({
   components: { website: Website },
 });
 const app = createSynWare({
-  manifest: { schemaVersion: 1, bundleIdentifier: "org.example.vfx06", version: "1.0.0", displayName: "VFX-06 Probe", permissions: ["audio.play"], runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/vfx06", primary: true }], webspring: { visible: true, order: 1 } },
+  manifest: { schemaVersion: 1, bundleIdentifier: "org.example.vfx06", version: "1.0.0", displayName: "VFX-06 Probe", entitlements: ["audio.play"], runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/vfx06", primary: true }], webspring: { visible: true, order: 1 } },
   root: Probe,
 });
 mountSynCloudOS({ element: document.getElementById("root")!, bundles: [app], shell, authentication: "disabled" })

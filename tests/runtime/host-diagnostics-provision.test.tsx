@@ -32,7 +32,7 @@ function fixture(diagnostics?: AppTrustedDiagnosticsClient, permissions: readonl
   }
   const host = createSynWareTestHost({
     application: Application,
-    manifest: { schemaVersion: 1, bundleIdentifier: id, displayName: "Diagnostics provision", version: "1.0.0", permissions },
+    manifest: { schemaVersion: 1, bundleIdentifier: id, displayName: "Diagnostics provision", version: "1.0.0", entitlements: permissions },
     diagnostics,
     document,
   });

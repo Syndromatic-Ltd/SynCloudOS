@@ -43,13 +43,13 @@ const fxRecipes = {
   haptics: { imports: "HFXHapticPattern", body: 'const pattern = new HFXHapticPattern([{type:"continuous",relativeTime:0,duration:0.25,intensity:0.5}]);\n  return `Pattern duration: ${pattern.duration} seconds`;', expected: "Pattern duration: 0.25 seconds" },
   motion: { imports: "MFXAttitude", body: 'return `Identity yaw: ${MFXAttitude.fromEuler(0,0,0).yaw}`;', expected: "Identity yaw: 0" },
   media: { imports: "MEFXTime", body: 'return `Media duration: ${MEFXTime.finite(3n,2).toSeconds()} seconds`;', expected: "Media duration: 1.5 seconds" },
-  video: { imports: "type VFXCaptureSession", hook: "useVideo", client: "VFXCaptureSession", permissions: ["video.capture.camera"], label: "Request camera",
+  video: { imports: "type VFXCaptureSession", hook: "useVideo", client: "VFXCaptureSession", entitlements: ["video.capture.camera"], label: "Request camera",
     body: 'if (!client.capabilities.camera) return "Camera unavailable";\n  const settings = await client.requestCamera();\n  return `Camera active: ${settings.width ?? "unknown"} x ${settings.height ?? "unknown"}`;' },
-  midi: { imports: "type MIFXAccess", hook: "useMIDI", client: "MIFXAccess", permissions: ["midi.access"], label: "Authorize MIDI",
+  midi: { imports: "type MIFXAccess", hook: "useMIDI", client: "MIFXAccess", entitlements: ["midi.access"], label: "Authorize MIDI",
     body: 'const result = await client.requestAuthorization({sysex:false});\n  return `MIDI authorization: ${result.state}`;' },
-  location: { imports: "type LFXLocationManager", hook: "useLocation", client: "LFXLocationManager", permissions: ["location.read", "location.request"], label: "Request location",
+  location: { imports: "type LFXLocationManager", hook: "useLocation", client: "LFXLocationManager", entitlements: ["location.read", "location.request"], label: "Request location",
     body: 'const fix = await client.current({timeoutSeconds:10});\n  return `Location: ${fix.coordinate.latitude}, ${fix.coordinate.longitude}`;' },
-  lumina: { imports: "LUFXQuery, type LUFXIndexClient", hook: "useLumina", client: "LUFXIndexClient", permissions: ["lumina.query"], label: "Search for hello",
+  lumina: { imports: "LUFXQuery, type LUFXIndexClient", hook: "useLumina", client: "LUFXIndexClient", entitlements: ["lumina.query"], label: "Search for hello",
     body: 'const index = client.createIndex();\n  try {\n    const result = await index.query(new LUFXQuery({text:"hello",limit:10}));\n    return `Search results: ${result.results.length}`;\n  } finally {\n    index.dispose();\n  }' },
 };
 
@@ -83,7 +83,7 @@ export function scaffoldFiles(bundleIdentifier, selected = [], title = titleFrom
     if (selected.length) throw new TypeError("FX recipe scaffolds use function authoring; compose their hook-based components from a class view explicitly.");
     return scaffoldClassFiles(bundleIdentifier, title, authoring, contentApplicationMenu);
   }
-  const permissions = [...new Set(selected.flatMap(name => fxRecipes[name].permissions ?? []))];
+  const entitlements = [...new Set(selected.flatMap(name => fxRecipes[name].entitlements ?? []))];
   const hooks = selected.flatMap(name => fxRecipes[name].hook ? [fxRecipes[name].hook] : []);
   const functionName = name => `run${name[0].toUpperCase()}${name.slice(1)}`;
   const recipeImports = selected.map(name => `import { runRecipe as ${functionName(name)} } from "./recipes/${name}";`).join("\n");
@@ -96,7 +96,7 @@ export default {
   version: "1.0.0",
   webspring: { visible: true },
 ${contentApplicationMenu ? '  applicationMenu: { trigger: "content" },\n' : ""}\
-${permissions.length ? `  permissions: ${JSON.stringify(permissions)},\n` : ""}\
+${entitlements.length ? `  entitlements: ${JSON.stringify(entitlements)},\n` : ""}\
 } satisfies SynWareInfo;
 `],
     ["Contents/index.tsx", `${selected.length ? 'import { useState } from "react";\n' : ""}import { SCOS${contentApplicationMenu ? ", useApplicationMenuTrigger" : ""}${hooks.length ? `, ${hooks.join(", ")}` : ""} } from "@syndromatic/syncloudos";

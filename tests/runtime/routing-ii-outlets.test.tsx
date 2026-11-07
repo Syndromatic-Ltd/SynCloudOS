@@ -590,8 +590,8 @@ describe("Routing II React outlets", () => {
       errorComponent: ({ error, retry }) => <div role="alert">{String(error)}<button onClick={retry}>Retry route</button></div>,
       children: [{ name: "album", path: "album/:id", load: childLoad, component: ({ routeData }) => <div data-testid="retry-album">{String(routeData)}</div> }],
     }] });
-    const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music",
-      routes: [{ path: "/music", match: "prefix", primary: true }], services: [{ id: "routing", required: true }], permissions: ["app.open.public"] },
+    const definition = createSynWare({ manifest: { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music",
+      routes: [{ path: "/music", match: "prefix", primary: true }], services: [{ id: "routing", required: true }], entitlements: ["app.open.public"] },
       root: () => <RouteOutlet />, routes: graph });
     const app = registerTestSynWare(runtime, definition);
     const href = "/music/album/cross?view=tracks#details";

@@ -70,7 +70,7 @@ afterEach(() => { for (const root of roots.splice(0)) { expect(root.startsWith(j
 
 it("keeps the default permission-free and rejects unknown recipes/options before writing", () => {
   const { app } = generate();
-  expect(load(join(app, "Contents/Info.ts")).default.permissions).toBeUndefined();
+  expect(load(join(app, "Contents/Info.ts")).default.entitlements).toBeUndefined();
   expect(existsSync(join(app, "Contents/recipes"))).toBe(false);
   for (const options of [["--fx", "unknown"], ["--fx"], ["--fxx", "media"], ["--fx", "video", "unexpected"]]) {
     const target = join(temporary(), "Invalid.app");
@@ -81,7 +81,7 @@ it("keeps the default permission-free and rejects unknown recipes/options before
 
 it("executes all twelve actual recipe modules and declares exactly their scoped authority", async () => {
   const { root, app } = generate(["--fx", families.join(",")]);
-  expect(load(join(app, "Contents/Info.ts")).default.permissions).toEqual([
+  expect(load(join(app, "Contents/Info.ts")).default.entitlements).toEqual([
     "video.capture.camera", "midi.access", "location.read", "location.request", "lumina.query",
   ]);
   const result = await exerciseRecipes((family: string) => load(join(app, `Contents/recipes/${family}.ts`)));
@@ -96,7 +96,7 @@ it("executes all twelve actual recipe modules and declares exactly their scoped 
 
 it("selects only requested recipes and deduplicates repeated options without granting unrelated authority", () => {
   const { app } = generate(["--fx", "media", "--fx", "location,media"]);
-  expect(load(join(app, "Contents/Info.ts")).default.permissions).toEqual(["location.read", "location.request"]);
+  expect(load(join(app, "Contents/Info.ts")).default.entitlements).toEqual(["location.read", "location.request"]);
   expect(existsSync(join(app, "Contents/recipes/video.ts"))).toBe(false);
   expect((readFileSync(join(app, "Contents/index.tsx"), "utf8").match(/id="media"/g) ?? [])).toHaveLength(1);
 });
@@ -134,7 +134,7 @@ it("does no device work on render and shows explicit action failures rather than
 
 it("scaffolds the thirteenth framework as a direct permission-free capability query", () => {
   const { app } = generate(["--fx", "compression"]);
-  expect(load(join(app, "Contents/Info.ts")).default.permissions).toBeUndefined();
+  expect(load(join(app, "Contents/Info.ts")).default.entitlements).toBeUndefined();
   expect(load(join(app, "Contents/recipes/compression.ts")).runRecipe()).toContain("gzip");
   expect(readFileSync(join(app, "Contents/index.tsx"), "utf8")).not.toContain("useCompression");
 });

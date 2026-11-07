@@ -48,7 +48,7 @@ function trustedDefinition(id: string, permissions: readonly string[] = ["diagno
       bundleIdentifier: id,
       version: "1.0.0",
       displayName: id,
-      permissions,
+      entitlements: permissions,
     },
     root: () => null,
   });

@@ -28,7 +28,7 @@ afterEach(async () => { for (const runtime of runtimes.splice(0)) await runtime.
 function fixture() {
   let entered = false;
   const routes = defineSynWareRoutes({ id: "remote.notes", routes: [{ name: "com.example.notes", path: "", beforeEnter: () => { entered = true; return new Promise<void>(() => {}); } }] } as const);
-  const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.notes", version: "1.0.0", displayName: "Notes", routes: [{ path: "/notes", primary: true }], permissions: ["app.open.public"] }, root: () => null, routes });
+  const definition = createSynWare({ manifest: { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.notes", version: "1.0.0", displayName: "Notes", routes: [{ path: "/notes", primary: true }], entitlements: ["app.open.public"] }, root: () => null, routes });
   const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)], lifecycleHookTimeoutMs: 100 });
   runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
   runtimes.push(runtime);

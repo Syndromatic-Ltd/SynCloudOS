@@ -308,24 +308,24 @@ describe("framework finite-work settlement", () => {
       }],
     } as const);
     registerTestSynWare(runtime, createSynWare({
-      manifest: {
+      manifest: { runtime: { policy: { public: true } },
         schemaVersion: 1,
         bundleIdentifier: "com.example.journal",
         version: "1.0.0",
         displayName: "Journal",
         routes: [{ path: "/journal", primary: true }],
-        permissions: ["app.open.public"],
+        entitlements: ["app.open.public"],
       },
       root: () => null,
     }));
     const musicApp = registerTestSynWare(runtime, createSynWare({
-      manifest: {
+      manifest: { runtime: { policy: { public: true } },
         schemaVersion: 1,
         bundleIdentifier: "com.example.music",
         version: "1.0.0",
         displayName: "Music",
         routes: [{ path: "/music", match: "prefix", primary: true }],
-        permissions: ["app.open.public"],
+        entitlements: ["app.open.public"],
       },
       root: () => createElement(RouteOutlet),
       routes: routeGraph,
@@ -814,13 +814,13 @@ describe("framework finite-work settlement", () => {
     const runtime = createTestRuntime({ id: "runtime:test03-continuous-route" });
     runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
     registerTestSynWare(runtime, createSynWare({
-      manifest: {
+      manifest: { runtime: { policy: { public: true } },
         schemaVersion: 1,
         bundleIdentifier: "com.example.journal",
         version: "1.0.0",
         displayName: "Journal",
         routes: [{ path: "/journal", primary: true }],
-        permissions: ["app.open.public"],
+        entitlements: ["app.open.public"],
       },
       root: () => null,
     }));

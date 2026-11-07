@@ -82,7 +82,7 @@ describe("runtime registry, ConfigurationProfiles, Lifecycle, and PluginRegistry
     expect(ConfigurationProfiles.authorise({ action: "runtime.mutate", ...asPolicySubject(ConfigurationProfiles, adminSubject), origin: "test" })).toMatchObject({
       allowed: true
     });
-    expect(ConfigurationProfiles.can({ action: "runtime.system", ...asPolicySubject(ConfigurationProfiles, { ...adminSubject, capabilities: ["*"], role: "system" }), origin: "test" })).toBe(true);
+    expect(ConfigurationProfiles.can({ action: "runtime.system", requiredCapabilities: ["runtime.system"], ...asPolicySubject(ConfigurationProfiles, { ...adminSubject, capabilities: ["*"], role: "system" }), origin: "test" })).toBe(true);
     expect(ConfigurationProfiles.getAuditLog()).toHaveLength(3);
     expect(PermissionManager.getRoleCapabilities("founder")).toContain("runtime.system");
   });
@@ -180,7 +180,7 @@ describe("runtime registry, ConfigurationProfiles, Lifecycle, and PluginRegistry
   });
 
   it("registers trusted bundles, plugins, and invokes lifecycle hooks", async () => {
-    const { BundleLoader, PluginRegistry, RuntimeController } = createRuntimeHarness(createTestRuntime());
+    const { BundleLoader, ConfigurationProfiles, PluginRegistry, RuntimeController } = createRuntimeHarness(createTestRuntime());
     const manifest = createTestManifest({ bundleIdentifier: "com.example.bundle-app", requiredServices: ["internalContent"] });
     const applicationDidLaunch = vi.fn();
     const register = vi.fn();
@@ -191,16 +191,20 @@ describe("runtime registry, ConfigurationProfiles, Lifecycle, and PluginRegistry
       manifest,
       componentKey: "BundleApp",
       services: manifest.requiredServices,
-      permissions: ["app.open.public"],
+      entitlements: ["app.open.public"],
       lifecycleHooks: { applicationDidLaunch }
     });
 
     await BundleLoader.invokeLifecycleHook("com.example.bundle-app", "applicationDidLaunch", { reason: "test" });
-    const plugin = await PluginRegistry.register({ id: "qa-plugin", name: "QA Plugin", version: "1.0.0", register, enable, disable }, {});
+    const pluginAuthority = asPolicySubject(ConfigurationProfiles, {
+      user: { id: "qa-host", displayName: "QA Host", role: "system", isAuthenticated: true, isAnonymous: false },
+      role: "system", capabilities: ["plugin.register"], isAuthenticated: true,
+    });
+    const plugin = await PluginRegistry.register({ id: "qa-plugin", name: "QA Plugin", version: "1.0.0", register, enable, disable }, {}, pluginAuthority);
     await PluginRegistry.disable("qa-plugin");
     await PluginRegistry.enable("qa-plugin");
 
-    expect(BundleLoader.getBundle("com.example.bundle-app")?.permissions).toEqual(["app.open.public"]);
+    expect(BundleLoader.getBundle("com.example.bundle-app")?.entitlements).toEqual(["app.open.public"]);
     expect(applicationDidLaunch).toHaveBeenCalledWith({
       appId: "com.example.bundle-app",
       packageName: manifest.packageName,

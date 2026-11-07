@@ -63,13 +63,13 @@ describe("PresentationSettlementCoordinator", () => {
       routes: [{ name: "headless.root", path: "", component: () => null }],
     });
     registerTestSynWare(runtime, createSynWare({
-      manifest: {
+      manifest: { runtime: { policy: { public: true } },
         schemaVersion: 1,
         bundleIdentifier: "com.example.headless-route-app",
         version: "1.0.0",
         displayName: "Headless route app",
         routes: [{ path: "/headless", primary: true }],
-        permissions: ["app.open.public"],
+        entitlements: ["app.open.public"],
       },
       root: () => null,
       routes,

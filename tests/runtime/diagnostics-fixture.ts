@@ -21,7 +21,8 @@
 import type { SynWareManifestV1 } from "../../src/SynCloudOS/AppSDK/manifest";
 export const diagnosticsApp = {
   schemaVersion: 1, bundleIdentifier: "com.example.diagnostics", version: "1.0.0", displayName: "Diagnostic fixture",
+  runtime: { type: "system" },
   routes: [{ path: "/__syncloudos/diagnostics", primary: true }],
-  permissions: ["diagnostics.view"],
+  entitlements: ["diagnostics.view"],
 } as const satisfies SynWareManifestV1;
 export default diagnosticsApp;

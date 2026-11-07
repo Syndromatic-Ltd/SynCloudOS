@@ -120,7 +120,7 @@ const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: 
     defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "Audio codec" } } } },
   components: { website: Website } });
 const app = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.audio-codec", version: "1.0.0", displayName: "Audio codec probe",
-  permissions: ["audio.play"], runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"],
+  entitlements: ["audio.play"], runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"],
   routes: [{ path: "/audio-codec", primary: true }], webspring: { visible: true, order: 1 } }, root: Probe });
 mountSynCloudOS({ element: document.getElementById("root")!, bundles: [app], shell, authentication: "disabled" })
   .then(host => { window.fxAudioCodec.dispose = () => host.dispose("installed audio codec complete"); })

@@ -79,8 +79,8 @@ async function renderNamedRoute() {
   RuntimeController.markBooted();
   Statechart.gotoState("active.webspring", { source: "test" });
   const app = registerTestSynWare(runtime, createSynWare({
-    manifest: { schemaVersion: 1, bundleIdentifier: "com.example.example", version: "1.0.0", displayName: "Example",
-      routes: [{ path: "/example", primary: true }], permissions: ["app.open.public"] },
+    manifest: { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.example", version: "1.0.0", displayName: "Example",
+      routes: [{ path: "/example", primary: true }], entitlements: ["app.open.public"] },
     root: () => null, routes: queryGraph,
   }));
   expect(await runtime.routes.openRoute("/example?view=folders").result).toMatchObject({ status: "completed" });
@@ -373,8 +373,8 @@ it("isolates a retained named query from foreign state and revokes mutation on u
   const fixture = await renderNamedRoute();
   const retained = fixture.query;
   try {
-    registerTestSynWare(fixture.runtime, { schemaVersion: 1, bundleIdentifier: "com.example.foreign-route-app", version: "1.0.0",
-      displayName: "Foreign Route App", routes: [{ path: "/foreign-route-app", primary: true }], permissions: ["app.open.public"] });
+    registerTestSynWare(fixture.runtime, { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.foreign-route-app", version: "1.0.0",
+      displayName: "Foreign Route App", routes: [{ path: "/foreign-route-app", primary: true }], entitlements: ["app.open.public"] });
     const listener = vi.fn();
     const unsubscribe = retained.subscribe(listener);
     await act(async () => {

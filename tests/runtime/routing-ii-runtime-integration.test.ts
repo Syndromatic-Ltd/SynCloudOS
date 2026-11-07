@@ -36,8 +36,8 @@ function fixture(block: () => boolean, events: string[]) {
     }, beforeLeave: () => { events.push("leave"); return { outcome: "allow" } as const; } },
     { name: "music.album", path: "album/:albumId" },
   ] }] } as const);
-  const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music",
-    routes: [{ path: "/music", primary: true, match: "prefix" }], permissions: ["app.open.public"] },
+  const definition = createSynWare({ manifest: { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music",
+    routes: [{ path: "/music", primary: true, match: "prefix" }], entitlements: ["app.open.public"] },
     root: () => null, routes });
   const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
   runtimes.push(runtime);
@@ -55,13 +55,13 @@ describe("Routing II actual host integration", () => {
         query: { page: routeQuery.integer({ defaultValue: 1, min: 1, max: 5 }) },
       }],
     } as const);
-    const definition = createSynWare({ manifest: {
+    const definition = createSynWare({ manifest: { runtime: { policy: { public: true } },
       schemaVersion: 1,
       bundleIdentifier: "com.example.music",
       version: "1.0.0",
       displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
-      permissions: ["app.open.public"],
+      entitlements: ["app.open.public"],
     }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
@@ -80,13 +80,13 @@ describe("Routing II actual host integration", () => {
       id: "nested.not-found",
       routes: [{ name: "com.example.music", path: "", children: [{ name: "music.artist", path: "artist/:artistId" }] }],
     } as const);
-    const definition = createSynWare({ manifest: {
+    const definition = createSynWare({ manifest: { runtime: { policy: { public: true } },
       schemaVersion: 1,
       bundleIdentifier: "com.example.music",
       version: "1.0.0",
       displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
-      permissions: ["app.open.public"],
+      entitlements: ["app.open.public"],
     }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
@@ -116,14 +116,14 @@ describe("Routing II actual host integration", () => {
         load: routeLoad,
       }],
     } as const);
-    const definition = createSynWare({ manifest: {
+    const definition = createSynWare({ manifest: { runtime: { policy: { public: true } },
       schemaVersion: 1,
       bundleIdentifier: "com.example.music",
       version: "1.0.0",
       displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
       services: [{ id: "catalogue" }],
-      permissions: ["app.open.public"],
+      entitlements: ["app.open.public"],
     }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
@@ -158,13 +158,13 @@ describe("Routing II actual host integration", () => {
       id: "preload.no-data-capability",
       routes: [{ name: "com.example.music", path: "", load }],
     } as const);
-    const definition = createSynWare({ manifest: {
+    const definition = createSynWare({ manifest: { runtime: { policy: { public: true } },
       schemaVersion: 1,
       bundleIdentifier: "com.example.music",
       version: "1.0.0",
       displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
-      permissions: ["app.open.public"],
+      entitlements: ["app.open.public"],
     }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
@@ -185,14 +185,14 @@ describe("Routing II actual host integration", () => {
       id: "preload.token-boundary",
       routes: [{ name: "com.example.music", path: "", preload: { data: { services: [allowed] } }, load }],
     } as const);
-    const definition = createSynWare({ manifest: {
+    const definition = createSynWare({ manifest: { runtime: { policy: { public: true } },
       schemaVersion: 1,
       bundleIdentifier: "com.example.music",
       version: "1.0.0",
       displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
       services: [{ id: "catalogue" }, { id: "private-catalogue" }],
-      permissions: ["app.open.public"],
+      entitlements: ["app.open.public"],
     }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
@@ -222,14 +222,14 @@ describe("Routing II actual host integration", () => {
       id: "preload.revoke",
       routes: [{ name: "com.example.music", path: "", preload: { data: { services: [token] } }, load }],
     } as const);
-    const definition = createSynWare({ manifest: {
+    const definition = createSynWare({ manifest: { runtime: { policy: { public: true } },
       schemaVersion: 1,
       bundleIdentifier: "com.example.music",
       version: "1.0.0",
       displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
       services: [{ id: "catalogue" }],
-      permissions: ["app.open.public"],
+      entitlements: ["app.open.public"],
     }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
@@ -259,7 +259,7 @@ describe("Routing II actual host integration", () => {
       guardSignal = signal;
       return new Promise<never>(() => undefined);
     } }] });
-    const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music", routes: [{ path: "/music", primary: true, match: "prefix" }], permissions: ["app.open.public"] }, root: () => null, routes });
+    const definition = createSynWare({ manifest: { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music", routes: [{ path: "/music", primary: true, match: "prefix" }], entitlements: ["app.open.public"] }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
     runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
@@ -332,7 +332,7 @@ describe("Routing II actual host integration", () => {
       expect(retained.read()).toBe("safe-read");
       return { outcome: "allow" };
     } }] });
-    const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music", routes: [{ path: "/music", primary: true, match: "prefix" }], services: [{ id: "catalogue" }], permissions: ["app.open.public"] }, root: () => null, routes });
+    const definition = createSynWare({ manifest: { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music", routes: [{ path: "/music", primary: true, match: "prefix" }], services: [{ id: "catalogue" }], entitlements: ["app.open.public"] }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
     runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
@@ -375,13 +375,13 @@ describe("Routing II actual host integration", () => {
       routes: [{ name: "com.example.music", path: "" }],
     } as const);
     const definition = createSynWare({
-      manifest: {
+      manifest: { runtime: { policy: { public: true } },
         schemaVersion: 1,
         bundleIdentifier: "com.example.music",
         version: "1.0.0",
         displayName: "Music",
         routes: [{ path: "/music", primary: true, match: "prefix" }],
-        permissions: ["app.open.public"],
+        entitlements: ["app.open.public"],
       },
       root: () => null,
       routes,
@@ -425,8 +425,8 @@ describe("Routing II actual host integration", () => {
       { name: "music.blocked", path: "blocked", beforeEnter: () => ({ outcome: "block", reason: secret }) },
       { name: "music.redirect", path: "redirect", beforeEnter: () => ({ outcome: "redirect", target: { name: "music.blocked" } }) },
     ] }] } as const);
-    const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music",
-      routes: [{ path: "/music", primary: true, match: "prefix" }], permissions: ["app.open.public"] },
+    const definition = createSynWare({ manifest: { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music",
+      routes: [{ path: "/music", primary: true, match: "prefix" }], entitlements: ["app.open.public"] },
       root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);

@@ -191,7 +191,7 @@ function stableRecords(records) {
     left.target.localeCompare(right.target));
 }
 
-// The audit reports on apps whose Info.ts the validator would reject (e.g. computed permissions), so it
+// The audit reports on apps whose Info.ts the validator would reject (e.g. computed entitlements), so it
 // reads the identifier leniently instead of deriving the strict manifest.
 function manifestBundleIdentifier(infoPath, fallback) {
   if (!existsSync(infoPath)) return fallback;
@@ -743,17 +743,17 @@ function auditFxApp(root, descriptor, synWareRoot) {
   const info = files.get(infoPath);
   const exportedInfo = info?.statements.find(ts.isExportAssignment);
   const manifest = exportedInfo && staticValue(exportedInfo.expression);
-  const permissions = manifest?.permissions ?? (manifest && !Object.hasOwn(manifest, "permissions") ? [] : undefined);
-  const knownPermissions = Array.isArray(permissions) && permissions.every(item => typeof item === "string");
+  const entitlements = manifest?.entitlements ?? (manifest && !Object.hasOwn(manifest, "entitlements") ? [] : undefined);
+  const knownEntitlements = Array.isArray(entitlements) && entitlements.every(item => typeof item === "string");
   const usage = [], violations = [];
   const record = (node, family, operation, required = [], anyOf = false, computed = false) => {
-    const missing = required.filter(permission => !knownPermissions || !permissions.includes(permission));
+    const missing = required.filter(permission => !knownEntitlements || !entitlements.includes(permission));
     const failed = computed || (anyOf ? missing.length === required.length : missing.length > 0);
     const file = normalisePath(relative(root, node.getSourceFile().fileName));
     const line = lineOf(node.getSourceFile(), node);
     const item = { app: descriptor.id, file, line, location: `${file}:${line}`, family, operation, required, anyOf, missing: failed ? missing : [] };
     usage.push(item);
-    if (failed) violations.push({ ...item, reason: computed ? "FX authority uses a computed member that cannot be audited" : !knownPermissions ? "FX permissions must be statically declared in Info.ts" : `Undeclared FX capability: ${anyOf ? "one of " : ""}${missing.join(", ")}` });
+    if (failed) violations.push({ ...item, reason: computed ? "FX authority uses a computed member that cannot be audited" : !knownEntitlements ? "FX entitlements must be statically declared in Info.ts" : `Undeclared FX capability: ${anyOf ? "one of " : ""}${missing.join(", ")}` });
   };
   for (const call of calls) for (const tag of value(call.expression)) {
     if (tag.startsWith("value:")) { const operation = tag.slice(6); record(call, operation.split(".")[0], operation); continue; }

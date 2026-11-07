@@ -102,9 +102,9 @@ describe("declared disabled applications", () => {
 
   it("keeps preload false enabled and permits an explicit launch", async () => {
     const definition = createSynWare({
-      manifest: {
+      manifest: { runtime: { policy: { public: true } },
         schemaVersion: 1, bundleIdentifier: "com.example.fixture.cold", displayName: "Cold", version: "1.0.0",
-        permissions: ["app.open.public"], lifecycle: { preload: false },
+        entitlements: ["app.open.public"], lifecycle: { preload: false },
       },
       root: () => null,
     });

@@ -46,7 +46,7 @@ function Content() {
   </div>, overlay.portalHost) : null;
 }
 const definition = createSynWare({
-  manifest: { schemaVersion: 1, bundleIdentifier: "com.example.stage-overlay-app", version: "1.0.0", displayName: "Stage Overlay", permissions: ["app.open.public"],
+  manifest: { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.stage-overlay-app", version: "1.0.0", displayName: "Stage Overlay", entitlements: ["app.open.public"],
       frame: { topBar: "none", presentationMotion: contentOwned ? "content" : "host" } },
   root: Content,
 });

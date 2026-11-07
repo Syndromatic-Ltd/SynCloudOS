@@ -135,7 +135,7 @@ it("keeps the complete V1 definition and declaration immutable through bundle re
       commands: [{ id: "com.syndromatic.complete.refresh", title: "Refresh", menu: "com.syndromatic.complete.menu", shortcut: "Cmd-R" }],
       menus: [{ id: "com.syndromatic.complete.menu", title: "Complete", commandIds: ["com.syndromatic.complete.refresh"] }],
       services: [{ id: "com.syndromatic.complete.service", required: true, minimumVersion: "1.0.0" }],
-      permissions: ["clipboard.read"],
+      entitlements: ["clipboard.read"],
       appearances: [{ id: "com.syndromatic.complete.appearance", variant: "system" }],
       lifecycle: { preload: true, suspend: true, resume: true, terminate: true },
       background: { enabled: true, tasks: ["com.syndromatic.complete.refresh"] },

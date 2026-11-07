@@ -79,7 +79,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       componentKey: "",
       content: { screen: "v1" },
       assets: ["/test-assets/dynamic-bundle/hero.png"],
-      permissions: ["app.open.public", "documents.read"],
+      entitlements: ["app.open.public", "documents.read"],
       services: ["dynamic.service"],
       loadModule,
       lifecycleHooks: {
@@ -98,7 +98,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       componentKey: "DynamicBundleComponent",
       content: { screen: "v1" },
       assets: ["/test-assets/dynamic-bundle/hero.png"],
-      permissions: ["app.open.public", "documents.read"],
+      entitlements: ["app.open.public", "documents.read"],
       services: ["dynamic.service"],
       manifest: expect.objectContaining({ bundleIdentifier: "com.example.dynamic-bundle", packageName: "DynamicBundle.app" })
     });
@@ -145,7 +145,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       componentKey: "DynamicBundleV2Component",
       content: { screen: "v2" },
       assets: ["/test-assets/dynamic-bundle/hero-v2.png"],
-      permissions: ["app.open.public"],
+      entitlements: ["app.open.public"],
       loadModule: () => Promise.resolve({ default: () => null }),
       lifecycleHooks: {
         applicationWillRegister: applicationWillUpdate,
@@ -157,7 +157,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       componentKey: "DynamicBundleV2Component",
       content: { screen: "v2" },
       assets: ["/test-assets/dynamic-bundle/hero-v2.png"],
-      permissions: ["app.open.public"],
+      entitlements: ["app.open.public"],
       services: ["webspring", "windowing"],
       manifest: expect.objectContaining({ route: "/dynamic-bundle/v2" })
     });

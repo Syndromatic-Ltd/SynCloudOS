@@ -580,10 +580,10 @@ it("integrates mounted app ownership, trusted donation, ConfigurationProfiles, R
   const publisherBase = createTestBundle({ bundleIdentifier: "com.example.lumina-real-publisher", route: "/lumina-real-publisher" });
   const publisher = Object.freeze({
     ...publisherBase,
-    permissions: Object.freeze(["app.open.public", "lumina.index", "lumina.query"]),
+    entitlements: Object.freeze(["app.open.public", "lumina.index", "lumina.query"]),
     synWareManifest: Object.freeze({
       ...publisherBase.synWareManifest,
-      permissions: Object.freeze(["app.open.public", "lumina.index", "lumina.query"]),
+      entitlements: Object.freeze(["app.open.public", "lumina.index", "lumina.query"]),
     }),
   });
   const reader = createTestBundle({ bundleIdentifier: "com.example.lumina-real-reader", route: "/lumina-real-reader" });

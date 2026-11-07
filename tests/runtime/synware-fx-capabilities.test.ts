@@ -26,9 +26,9 @@ import { auditSynWareCapabilityUsage, main } from "../../scripts/synware/audit-c
 import { auditSynWareImports } from "../../scripts/synware/audit-sdk-imports.mjs";
 
 const roots: string[] = [];
-function fixture(source: string, permissions: string[] = [], helpers: Record<string, string> = {}) {
+function fixture(source: string, entitlements: string[] = [], helpers: Record<string, string> = {}) {
   const root = mkdtempSync(join(tmpdir(), "synware-fx-capabilities-")); roots.push(root);
-  const files = { "Info.ts": `export default {schemaVersion:1,bundleIdentifier:"com.example.fx",displayName:"FX",version:"1.0.0",permissions:${JSON.stringify(permissions)}} as const;`, "index.ts": source, ...helpers };
+  const files = { "Info.ts": `export default {schemaVersion:1,bundleIdentifier:"com.example.fx",displayName:"FX",version:"1.0.0",entitlements:${JSON.stringify(entitlements)}} as const;`, "index.ts": source, ...helpers };
   for (const [name, content] of Object.entries(files)) {
     const path = join(root, "src/SynWare/Example.app/Contents", name);
     mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, content);
@@ -72,7 +72,7 @@ void MEFXTime;`, ["location.read", "location.request"]);
   expect(audit.fxUsage.every((record: any) => record.family === "location")).toBe(true);
 });
 
-it("rejects indeterminate permissions and computed authority while allowing passive MIDI inspection and pure values", () => {
+it("rejects indeterminate entitlements and computed authority while allowing passive MIDI inspection and pure values", () => {
   const root = fixture(`import { useSCOS, useMIDI } from "@syndromatic/syncloudos/sdk";
 const key = unknownKey();
 export function Root() { const app = useSCOS(); app[key](); const midi = useMIDI(); midi.getCapabilities(); midi.requestAuthorization(options); }`);
@@ -88,7 +88,7 @@ export const action = () => locate().current();
 void import("./lazy");`, [], {
     "bridge.ts": 'export { useLocation as locate } from "@syndromatic/syncloudos/sdk";',
     "lazy.ts": 'import { useVideo } from "@syndromatic/syncloudos/sdk"; useVideo().requestCamera();',
-    "Info.ts": 'const permissions = getPermissions(); export default {bundleIdentifier:"com.example.fx",displayName:"FX",version:"1.0.0",permissions};',
+    "Info.ts": 'const entitlements = getPermissions(); export default {bundleIdentifier:"com.example.fx",displayName:"FX",version:"1.0.0",entitlements};',
   });
   const violations = auditSynWareCapabilityUsage(root).fxViolations;
   expect(violations.some((record: any) => record.file.endsWith("lazy.ts") && record.missing.includes("video.capture.camera"))).toBe(true);

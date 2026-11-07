@@ -360,8 +360,8 @@ describe("BrowserRouteCoordinator", () => {
       { name: "studio.old", path: "old", beforeEnter: () => ({ outcome: "redirect", target: { name: "studio.current" } }) },
       { name: "studio.current", path: "current", beforeEnter: () => { entered.resolve(); return allow.promise; } },
     ] }] });
-    const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.studio", displayName: "Studio", version: "1.0.0",
-      routes: [{ path: "/studio", primary: true, match: "prefix" }], permissions: ["app.open.public"] }, root: () => null, routes });
+    const definition = createSynWare({ manifest: { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.studio", displayName: "Studio", version: "1.0.0",
+      routes: [{ path: "/studio", primary: true, match: "prefix" }], entitlements: ["app.open.public"] }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     const { RuntimeController, Statechart } = createRuntimeHarness(runtime);
     unlockRuntime(runtime); RuntimeController.markBooted(); Statechart.gotoState("active.webspring", { source: "test" });

@@ -31,7 +31,7 @@ function graphBundle(id: string) {
     { name: `${id}.detail`, path: "detail/:itemId" },
   ] }] } as const);
   return createSynWareBundle(createSynWare({
-    manifest: { schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: id, routes: [{ path: `/${id.split(".").at(-1)}`, primary: true, match: "prefix" }], permissions: ["app.open.public"] },
+    manifest: { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: id, routes: [{ path: `/${id.split(".").at(-1)}`, primary: true, match: "prefix" }], entitlements: ["app.open.public"] },
     root: () => null,
     routes,
   }));
