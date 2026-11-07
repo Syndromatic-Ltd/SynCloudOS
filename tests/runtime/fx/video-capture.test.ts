@@ -108,7 +108,7 @@ describe("scoped browser video capture", () => {
     const f = fixture();
     const session = new BrowserVideoCaptureAdapter(f.platform).createSession();
     expect(session.state).toBe("idle");
-    expect(session.capabilities).toEqual({ camera: true, display: true, deviceEnumeration: true });
+    expect(session.capabilities).toEqual({ camera: true, display: true, deviceEnumeration: true, elementRestriction: false, elementCrop: false });
     await expect(session.enumerateDevices()).resolves.toEqual([
       { id: "camera-actual", groupId: "group-actual", kind: "camera", label: "Camera" },
     ]);

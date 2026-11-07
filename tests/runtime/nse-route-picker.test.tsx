@@ -20,9 +20,10 @@
  */
 
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { expect, it, vi } from "vitest";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
 import { NSERoutePickerView } from "../../src/NSE/Controls/Media/NSERoutePickerView";
+import { BrowserVideoPresentationAdapter } from "../../src/SynCloudOS/PlatformAdapters/BrowserVideoPresentationAdapter";
 import type { VFXRouteDetector } from "../../src/FX/VideoFX/VFXRouteDetector";
 
 it("uses NSEButton and invokes the native route chooser from the click", () => {
@@ -33,4 +34,32 @@ it("uses NSEButton and invokes the native route chooser from the click", () => {
   expect(button.getAttribute("data-nse-control")).toBe("route-picker");
   expect(button.getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(button); expect(prompt).toHaveBeenCalledTimes(1);
+});
+
+afterEach(cleanup);
+it("refreshes enablement when capabilities change without a connection-state change", () => {
+  let enabled = true;
+  const listeners = new Set<() => void>();
+  const detector = { get capabilities() { return { remotePlayback: enabled }; }, connectionState: "unknown",
+    subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; }, prompt: vi.fn(async () => {}) } as unknown as VFXRouteDetector;
+  render(<NSERoutePickerView routeDetector={detector} />);
+  const button = screen.getByRole("button", { name: "Choose playback device" });
+  expect(button.hasAttribute("disabled")).toBe(false);
+  act(() => { enabled = false; for (const listener of listeners) listener(); });
+  expect(button.hasAttribute("disabled")).toBe(true);
+});
+
+it("refreshes the actual browser detector reset and final abort state", async () => {
+  const remote = Object.assign(new EventTarget(), { state: "disconnected", watchAvailability: async (callback: (available: boolean) => void) => { callback(false); return 1; }, cancelWatchAvailability: async () => {}, prompt: async () => {} });
+  const video = Object.assign(new EventTarget(), { remote }) as unknown as HTMLVideoElement;
+  const owner = new AbortController();
+  const detector = new BrowserVideoPresentationAdapter(null).createRouteDetector(video, owner.signal, () => true);
+  await detector.startDiscovery();
+  render(<NSERoutePickerView routeDetector={detector} />);
+  const button = screen.getByRole("button", { name: "Choose playback device" });
+  expect(button.getAttribute("data-route-state")).toBe("disconnected");
+  act(() => detector.stopDiscovery());
+  expect(button.getAttribute("data-route-state")).toBe("unknown");
+  act(() => owner.abort());
+  expect(button.hasAttribute("disabled")).toBe(true);
 });

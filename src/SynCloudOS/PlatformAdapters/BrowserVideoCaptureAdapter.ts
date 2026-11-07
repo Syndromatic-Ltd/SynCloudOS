@@ -143,7 +143,7 @@ class BrowserVFXCaptureSession implements VFXCaptureSession {
   #filterPending = false;
   #resumeEnabled = new Map<MediaStreamTrack, boolean>();
 
-  constructor(platform: BrowserVideoCapturePlatform | null, ownerSignal?: AbortSignal, private readonly presentation?: Pick<BrowserVideoPresentationAdapter, "applyContentFilter">, private readonly reauthoriseElement: () => boolean = () => false) {
+  constructor(platform: BrowserVideoCapturePlatform | null, ownerSignal?: AbortSignal, private readonly presentation?: Pick<BrowserVideoPresentationAdapter, "applyContentFilter" | "elementCaptureCapabilities">, private readonly reauthoriseElement: () => boolean = () => false) {
     this.#platform = platform;
     this.#state = platform ? "idle" : "unavailable";
     if (ownerSignal?.aborted) {
@@ -171,10 +171,16 @@ class BrowserVFXCaptureSession implements VFXCaptureSession {
   get kind(): VFXCaptureKind | null { return this.#kind; }
   get settings(): VFXCaptureSettings | null { return this.#settings; }
   get capabilities(): VFXCaptureCapabilities {
+    const track = this.#stream?.getVideoTracks()[0];
+    const element = this.#state !== "disposed" && this.#platform && (!this.#kind || this.#kind === "display")
+      ? this.presentation?.elementCaptureCapabilities(track as unknown as BrowserElementCaptureTrack | undefined)
+      : undefined;
     return Object.freeze({
       camera: this.#platform !== null && this.#state !== "disposed",
       display: !!this.#platform?.getDisplayMedia && this.#state !== "disposed",
       deviceEnumeration: this.#platform !== null && this.#state !== "disposed",
+      elementRestriction: element?.restriction ?? false,
+      elementCrop: element?.crop ?? false,
     });
   }
 
@@ -411,7 +417,7 @@ class BrowserVFXCaptureSession implements VFXCaptureSession {
 }
 
 export class BrowserVideoCaptureAdapter {
-  constructor(private readonly platform: BrowserVideoCapturePlatform | null, private readonly presentation?: Pick<BrowserVideoPresentationAdapter, "applyContentFilter">) {}
+  constructor(private readonly platform: BrowserVideoCapturePlatform | null, private readonly presentation?: Pick<BrowserVideoPresentationAdapter, "applyContentFilter" | "elementCaptureCapabilities">) {}
 
   createSession(signal?: AbortSignal, _capability?: object, reauthoriseElement?: () => boolean): VFXCaptureSession {
     return new BrowserVFXCaptureSession(this.platform, signal, this.presentation, reauthoriseElement);
