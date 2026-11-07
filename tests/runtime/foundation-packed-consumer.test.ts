@@ -28,7 +28,7 @@ it("uses Foundation and CPFX from an independent SDK installation in a worker an
   writeFileSync(join(consumer.root, "worker.mjs"), `
 import assert from "node:assert/strict";
 import { parentPort } from "node:worker_threads";
-import { NSEData, NSEUserDefaults, NSEIndexSet } from "@syndromatic/syncloudos/foundation";
+import { NSEData, NSEUserDefaults, NSEIndexSet, NSEDateFormatter, NSEDecimalNumber, NSEDecimalNumberHandler, NSEValueTransformer, NSEUndoManager } from "@syndromatic/syncloudos/foundation";
 import { CPFXCapabilities, CPFXCompress, CPFXDecompress, CPFXInputFilter } from "@syndromatic/syncloudos/fx/compression";
 assert.equal(typeof window, "undefined");
 assert.equal(typeof document, "undefined");
@@ -42,6 +42,16 @@ assert.ok(capabilities.algorithms.includes("gzip"));
 assert.equal((await CPFXDecompress(await CPFXCompress(original, "gzip"), "gzip")).isEqual(original), true);
 const defaults = new NSEUserDefaults(); defaults.set("worker", "name"); assert.equal(defaults.object("name"), "worker");
 assert.equal(NSEIndexSet.fromIndexes([1, 2, 4]).count, 3);
+const dates = new NSEDateFormatter({ locale: "en-GB", timeZone: "UTC", dateFormat: "yyyy-MM-dd" });
+assert.equal(dates.date(dates.string(new Date("2026-11-07T00:00:00Z"))).toISOString(), "2026-11-07T00:00:00.000Z");
+assert.equal(NSEDecimalNumber.fromString("0.1").adding(NSEDecimalNumber.fromString("0.2")).toString(), "0.3");
+assert.equal(NSEDecimalNumber.one.dividing(NSEDecimalNumber.fromString("8"), new NSEDecimalNumberHandler({scale:2,roundingMode:"bankers"})).toString(), "0.12");
+class Twice extends NSEValueTransformer { transformedValue(value) { return value * 2; } }
+NSEValueTransformer.setValueTransformer(new Twice(), "worker-twice");
+assert.equal(NSEValueTransformer.valueTransformerForName("worker-twice").transformedValue(3), 6);
+const undo = new NSEUndoManager(), target = { value: 1 };
+function change(object, value) { const old = object.value; undo.registerUndo(object, next => change(next, old)); object.value = value; }
+change(target, 2); undo.undo(); assert.equal(target.value, 1); undo.redo(); assert.equal(target.value, 2);
 parentPort.postMessage("Foundation and CPFX installed worker passed");
 `);
   writeFileSync(join(consumer.root, "specimen.mjs"), `
@@ -52,12 +62,13 @@ worker.on("error", error => { console.error(error); process.exitCode = 1; });
 `);
   expect(runNode(["specimen.mjs"], consumer.root)).toContain("Foundation and CPFX installed worker passed");
   writeFileSync(join(consumer.root, "consumer.ts"), `
-import { NSEData, NSEUserDefaults, NSEIndexSet, NSENumberFormatter, type NSEDataConvertible, type NSERange } from "@syndromatic/syncloudos/foundation";
+import { NSEData, NSEUserDefaults, NSEIndexSet, NSENumberFormatter, NSEDateFormatter, NSEDecimalNumber, NSEDecimalNumberHandler, NSEUndoManager, NSEValueTransformer, type NSEDataConvertible, type NSERange } from "@syndromatic/syncloudos/foundation";
 import { CPFXCompress, CPFXInputFilter, CPFXOutputFilter, CPFXAlgorithm } from "@syndromatic/syncloudos/fx/compression";
 const range: NSERange = { location: 0, length: 1 };
 const data: NSEDataConvertible = NSEData.from(new Uint8Array([1]));
 void NSEData.from(data).subdata(range).compressed(CPFXAlgorithm.gzip);
 void [NSEUserDefaults, NSEIndexSet, NSENumberFormatter, CPFXCompress, CPFXInputFilter, CPFXOutputFilter];
+void [NSEDateFormatter, NSEDecimalNumber, NSEDecimalNumberHandler, NSEUndoManager, NSEValueTransformer];
 // @ts-expect-error NSEData byte views do not allow index assignment.
 NSEData.from(data).bytes[0] = 1;
 `);
