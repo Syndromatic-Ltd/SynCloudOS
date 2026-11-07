@@ -100,8 +100,8 @@ export class NSEOpenPanel implements NSESheet {
       selection: !this.canChooseFiles ? "single-directory" : this.allowsMultipleSelection ? "multiple-files" : "single-file", access: "read", requires: !this.canChooseFiles ? ["directory"] : [],
       validateContent: async (reference, signal) => {
         if (reference.kind === "directory-handle") return { ok: true };
-        const file = await reference.read(signal);
-        return matchesOpenPanelContentType(reference.name, file.type, contentTypes) ? { ok: true } : { ok: false, message: "The selected file does not match the allowed content types." };
+        await reference.read(signal);
+        return matchesOpenPanelContentType(reference.name, reference.mediaType, contentTypes) ? { ok: true } : { ok: false, message: "The selected file does not match the allowed content types." };
       } };
     let settled = false;
     let closing = false;

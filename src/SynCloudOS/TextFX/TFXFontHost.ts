@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
 import { bindTFXFontDisposalOwner, prepareTFXFontBackend, TFXFont } from "../../FX/TextFX/TFXFont";
 import { TFXFontDescriptor } from "../../FX/TextFX/TFXFontDescriptor";
 import type { TFXFontClient, TFXFontFaceRegistration, TFXFontReadinessChange, TFXPackagedFontResourceLoader, TFXTextLayoutAdapter } from "../../FX/TextFX/textLayoutTypes";
@@ -147,7 +148,7 @@ export function createTFXFontHost(options: {
         async registerFont(source, descriptor, callerSignal) {
           if (scopeDisposed || disposed) throw abortError("TextFX font scope is disposed.");
           if (!(descriptor instanceof TFXFontDescriptor)) throw new TypeError("Font registration requires a TFXFontDescriptor.");
-          const ownedSource = source.slice();
+          const ownedSource = NSEData.from(source).bytes;
           const info = inspectTFXFontInput(ownedSource);
           const pendingBytes = info.decodedByteLength;
           if (registrations.size + scopePendingCount + scopeResourcePendingCount >= maximumScopeRegistrations || runtimeLiveCount + runtimePendingCount + runtimeResourcePendingCount >= maximumRuntimeRegistrations) throw quotaError("TextFX font registration count limit reached.");

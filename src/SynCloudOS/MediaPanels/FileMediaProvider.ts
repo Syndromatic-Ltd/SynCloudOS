@@ -127,9 +127,9 @@ export function createFileMediaProvider(options: FileMediaProviderOptions): Medi
             options.filePanelService.release(reference, "caller-finished");
             continue;
           }
-          const file = await reference.read(signal);
+          const data = await reference.read(signal);
           throwIfFilePanelAborted(signal);
-          const mimeType = (reference.kind === "ephemeral-file" ? reference.mediaType : file.type).trim().toLowerCase() || "application/octet-stream";
+          const mimeType = reference.mediaType.trim().toLowerCase() || "application/octet-stream";
           const kind = mediaKindForMime(mimeType);
           if (!kind || !query.kinds.includes(kind)) {
             options.filePanelService.release(reference, "caller-finished");
@@ -138,7 +138,7 @@ export function createFileMediaProvider(options: FileMediaProviderOptions): Medi
           let thumbnailUrl: string | undefined;
           try {
             if (kind === "image" && options.thumbnails) {
-              thumbnailUrl = await options.thumbnails.createThumbnail(file, signal);
+              thumbnailUrl = await options.thumbnails.createThumbnail(reference.kind === "ephemeral-file" ? reference.file : new File([data.blob(mimeType)], reference.name, { type: mimeType }), signal);
               throwIfFilePanelAborted(signal);
               if (!thumbnailUrl.trim()) throw new MediaPanelProviderError("error", "The thumbnail service returned an invalid URL.");
             }

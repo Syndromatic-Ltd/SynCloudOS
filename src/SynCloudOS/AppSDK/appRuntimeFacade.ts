@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import { createMountedPlaybackPresentation } from "./mountedPlaybackPresentation";
 import { createMountedScreenWakeLock } from "./mountedScreenWakeLock";
 import { createStorageDiagnosticsClient } from "../SynCloudOS";
@@ -3158,7 +3159,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     });
 
     const imagePixelReaders = new WeakMap<object, (callerSignal?: AbortSignal) => Promise<GFXImage>>();
-    const imageExporters = new WeakMap<object, (format: "image/png" | "image/webp", callerSignal?: AbortSignal) => Promise<Uint8Array>>();
+    const imageExporters = new WeakMap<object, (format: "image/png" | "image/webp", callerSignal?: AbortSignal) => Promise<NSEData>>();
     const imageResources = new Set<RuntimeImageResource>();
     const imageOperations = new Set<object>();
     cleanupOnAbort(() => {
@@ -4041,7 +4042,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           }
           return cachedRuntimeAttachmentReadinessGeneration;
         },
-        registerFont(bytes: Uint8Array, descriptor: TFXFontDescriptor, callerSignal?: AbortSignal) {
+        registerFont(bytes: NSEDataConvertible, descriptor: TFXFontDescriptor, callerSignal?: AbortSignal) {
           assertLive();
           return textFontScope.registerFont(bytes, descriptor, callerSignal === undefined
             ? signal
@@ -4860,7 +4861,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           }
           return cachedAttachmentReadinessGeneration;
         },
-        registerFont(bytes: Uint8Array, descriptor: TFXFontDescriptor, callerSignal?: AbortSignal) {
+        registerFont(bytes: NSEDataConvertible, descriptor: TFXFontDescriptor, callerSignal?: AbortSignal) {
           assertLive();
           return appRuntime.textLayout.registerFont(bytes, descriptor, callerSignal);
         },

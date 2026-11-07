@@ -1,3 +1,4 @@
+import { NSEData } from "../../Foundation/NSEData";
 import type {DownloadFilePanelPort} from '../SynCloudOS';
 
 /** Explicit download export: dispatch does not claim overwrite identity or disk persistence. */
@@ -9,7 +10,7 @@ export function createBrowserDownloadFilePanelPort(window:Window|null):DownloadF
     async export(payload,signal){
       signal?.throwIfAborted();
       const anchor=window.document.createElement('a');
-      const url=urls.createObjectURL(payload.blob);
+      const url=urls.createObjectURL(NSEData.from(payload.data).blob(payload.mediaType));
       let cleaned=false;
       const cleanup=()=>{if(cleaned)return;cleaned=true;anchor.remove();urls.revokeObjectURL(url);};
       try{

@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type PropsWithChildren } from "react";
 import { NSEFontManager, type FontDeclaration } from "../../NSE/Typography";
 import type { TFXFontClient, TFXFontRegistration, TFXPackagedFontResourceLoader } from "../../FX/TextFX/textLayoutTypes";
@@ -94,7 +95,7 @@ export function createSynWareFontAccess(catalogue: SynWareFontCatalogue, client:
       const signal = caller ? AbortSignal.any([owner, caller]) : owner;
       signal.throwIfAborted();
       const face = catalogue.declaration?.faces.find(face => face.id === id);
-      let bytes: Uint8Array | null = null;
+      let bytes: NSEData | null = null;
       if (face) {
         if (!catalogue.loadResource) throw new DOMException("The host font resource is unavailable.", "NotFoundError");
         return client.registerFontResource(hostResourcePath(catalogue.declaration!, face.resource), descriptor, signal);

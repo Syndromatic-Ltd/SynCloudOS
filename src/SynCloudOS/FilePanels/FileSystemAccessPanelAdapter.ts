@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
 import { FilePanelReferenceError, isFilePanelAbort, mapFilePanelBrowserException, throwIfFilePanelAborted } from "./FilePanelService";
 import type {
   FilePanelAdapter,
@@ -152,15 +153,16 @@ function fileReference(
     assertLive(signal);
     if (state !== "granted") throw permissionError(state);
   };
+  let mediaType = "application/octet-stream";
   const base = {
     kind: "file-handle",
     id: `${requestId}:handle:${index}`,
     name: handle.name,
+    get mediaType() { return mediaType; },
     issuedByRequestId: requestId,
     capabilities: Object.freeze<FilePanelCapability[]>(access === "read" ? ["read", "persistent-handle"] : ["read", "write", "persistent-handle"]),
     get released() { return released; },
     release: (_reason: FilePanelReleaseReason) => { released = true; },
-    handle,
     lifetime: "browser-permission",
     get permission() { return lastPermission; },
     queryPermission: async () => query(access),
@@ -170,7 +172,10 @@ function fileReference(
       try {
         const file = await invoke(() => handle.getFile(), signal);
         assertLive(signal);
-        return file;
+        const data = await NSEData.read(file);
+        assertLive(signal);
+        mediaType = file.type || "application/octet-stream";
+        return data;
       } catch (error) {
         return throwMappedHandleFailure(error, () => query("read"), wasGranted);
       }
@@ -206,7 +211,7 @@ function fileReference(
         write: async (data) => {
           await requirePermission("readwrite", signal);
           try {
-            await invoke(() => writable.write(data), signal);
+            await invoke(() => writable.write(typeof data === "string" ? data : NSEData.from(data).bytes), signal);
             assertLive(signal);
           } catch (error) {
             return throwMappedHandleFailure(error, () => query("readwrite"), wasGranted);
@@ -382,7 +387,7 @@ export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPo
             try {
               const created = await reference.createWritable(writeSignal);
               writable = created;
-              await created.write(payload.blob);
+              await created.write(payload.data);
               throwIfFilePanelAborted(writeSignal);
               await created.close();
               writable = null;

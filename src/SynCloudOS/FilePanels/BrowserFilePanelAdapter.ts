@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
 import { FilePanelReferenceError, throwIfFilePanelAborted } from "./FilePanelService";
 import type {
   BrowserFilePanelPort,
@@ -58,7 +59,9 @@ function ephemeralReference(file: File, request: OpenPanelRequest, index: number
     permission: "granted" as const,
     read: async (signal?: AbortSignal) => {
       assertLive(signal);
-      return file;
+      const data = await NSEData.read(file);
+      assertLive(signal);
+      return data;
     },
   });
 }

@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../../Foundation/NSEData";
 import { useLayoutEffect, useMemo } from "react";
 import type {
   MEFXBufferQueueOptions,
@@ -40,7 +41,7 @@ export function useMedia(): MEFXMediaClient {
       return owner.signal;
     };
     const facade = Object.freeze<MEFXMediaClient>({
-      copyBlock(bytes: Uint8Array, signal?: AbortSignal) {
+      copyBlock(bytes: NSEDataConvertible, signal?: AbortSignal) {
         return client.copyBlock(bytes, narrowedSignal(requireOwner(), signal));
       },
       createQueue<T>(options: MEFXBufferQueueOptions<T>, signal?: AbortSignal) {
