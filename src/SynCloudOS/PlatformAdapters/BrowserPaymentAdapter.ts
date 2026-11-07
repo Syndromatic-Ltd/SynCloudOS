@@ -21,14 +21,14 @@
 import {
   PKFXPaymentRequest,
   type PKFXPayment, type PKFXPaymentAuthorizationController, type PKFXPaymentClient,
-  type PKFXPaymentCompletion, type PKFXPaymentJSON,
+  type PKFXPaymentCompletion,
 } from "../../FX/PassFX/public";
-import { copyPaymentJSON } from "../../FX/PassFX/internal/paymentJSON";
+import { bridgePaymentData, snapshotPaymentDetails } from "../../FX/PassFX/internal/paymentData";
 
 interface BrowserPaymentResponse {
   readonly requestId: string;
   readonly methodName: string;
-  readonly details: PKFXPaymentJSON;
+  readonly details: unknown;
   readonly payerName: string | null;
   readonly payerEmail: string | null;
   readonly payerPhone: string | null;
@@ -82,7 +82,7 @@ export class BrowserPaymentAdapter implements PKFXPaymentClient {
       if (!Request) throw new DOMException("Payment Request is unavailable.", "NotSupportedError");
       if (!browser) {
         const items = request.paymentSummaryItems.map(item => ({ label: item.label, amount: { currency: request.currencyCode, value: item.amount }, ...(item.pending === undefined ? {} : { pending: item.pending }) }));
-        browser = new Request(request.paymentMethodData.map(method => ({ supportedMethods: method.supportedMethods, ...(method.data === undefined ? {} : { data: structuredClone(method.data) }) })),
+        browser = new Request(request.paymentMethodData.map(method => ({ supportedMethods: method.supportedMethods, ...(method.data === undefined ? {} : { data: bridgePaymentData(method.data) }) })),
           { total: items.at(-1)!, displayItems: items.slice(0, -1) },
           { requestPayerName: request.requestPayerName, requestPayerEmail: request.requestPayerEmail, requestPayerPhone: request.requestPayerPhone });
       }
@@ -108,7 +108,7 @@ export class BrowserPaymentAdapter implements PKFXPaymentClient {
         try {
           response = await perform(() => device.show(), late => { response = late; completeAbandoned(); });
           lease.throwIfAborted();
-          const details = copyPaymentJSON(response.details);
+          const details = snapshotPaymentDetails(response.details);
           return Object.freeze({
             requestId: response.requestId, methodName: response.methodName, details,
             payerName: response.payerName, payerEmail: response.payerEmail, payerPhone: response.payerPhone,

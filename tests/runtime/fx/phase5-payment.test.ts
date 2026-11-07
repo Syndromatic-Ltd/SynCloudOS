@@ -22,6 +22,7 @@ import { describe, expect, it, vi } from "vitest";
 import { PKFXPaymentRequest } from "../../../src/FX/PassFX/public";
 import { BrowserPaymentAdapter } from "../../../src/SynCloudOS/PlatformAdapters/BrowserPaymentAdapter";
 import { createMountedPaymentClient } from "../../../src/SynCloudOS/AppSDK/mountedPaymentClient";
+import { NSEData } from "../../../src/Foundation/NSEData";
 
 const request = () => new PKFXPaymentRequest({ currencyCode: "GBP", paymentSummaryItems: [{ label: "Item", amount: "4.00" }, { label: "Merchant", amount: "4.00" }], paymentMethodData: [{ supportedMethods: "https://pay.example" }] });
 class BrowserRequest {
@@ -137,5 +138,58 @@ describe("phase 5 payment", () => {
     allowed = false;
     await expect(payment.complete("success")).rejects.toMatchObject({ name: "SecurityError" });
     expect(BrowserRequest.instances.at(-1)!.response.complete).toHaveBeenCalledWith("fail");
+  });
+
+  it("bridges recursive SPC byte input to fresh ArrayBuffers without losing view offsets", async () => {
+    const bytes = new Uint8Array([0, 1, 2, 3]);
+    const request = new PKFXPaymentRequest({ currencyCode: "GBP", paymentSummaryItems: [{ label: "Merchant", amount: "1.00" }], paymentMethodData: [{ supportedMethods: "secure-payment-confirmation", data: {
+      challenge: bytes.subarray(1, 3), credentialIds: [NSEData.from(new Uint8Array([4])), new Uint8Array([5]).buffer],
+      rpId: "localhost", instrument: { displayName: "Test", icon: "https://localhost/icon.png" },
+    } }] });
+    bytes.fill(9);
+    const controller = new BrowserPaymentAdapter({ isSecureContext: true, PaymentRequest: BrowserRequest }).createAuthorizationController(request);
+    await controller.canMakePayments();
+    const native = BrowserRequest.instances.at(-1)!;
+    const methods = native.methods as { data: { challenge: ArrayBuffer; credentialIds: ArrayBuffer[] } }[];
+    expect(methods[0].data.challenge).toBeInstanceOf(ArrayBuffer);
+    expect(new Uint8Array(methods[0].data.challenge)).toEqual(new Uint8Array([1, 2]));
+    expect(methods[0].data.credentialIds.map(value => [...new Uint8Array(value)])).toEqual([[4], [5]]);
+    new Uint8Array(methods[0].data.challenge).fill(8);
+    const snapshot = request.paymentMethodData[0].data as { challenge: NSEData };
+    expect(snapshot.challenge.bytes).toEqual(new Uint8Array([1, 2]));
+    controller.dispose();
+  });
+
+  it("snapshots real WebAuthn credential getters and returned byte fields as NSEData", async () => {
+    const rawId = new Uint8Array([1, 2]);
+    const signature = new Uint8Array([3, 4]);
+    class Assertion {
+      get clientDataJSON() { return new Uint8Array([5]).buffer; }
+      get authenticatorData() { return new Uint8Array([6]).buffer; }
+      get signature() { return signature.buffer; }
+      get userHandle() { return null; }
+    }
+    class Credential {
+      get id() { return "AQI"; }
+      get type() { return "public-key"; }
+      get rawId() { return rawId.buffer; }
+      get authenticatorAttachment() { return "platform"; }
+      get response() { return new Assertion(); }
+      getClientExtensionResults() { return { payment: { isPayment: true } }; }
+    }
+    class SPCRequest extends BrowserRequest {
+      override show = vi.fn(async () => ({ ...this.response, details: new Credential() }));
+    }
+    const controller = new BrowserPaymentAdapter({ isSecureContext: true, PaymentRequest: SPCRequest }).createAuthorizationController(request());
+    const payment = await controller.present();
+    rawId.fill(9); signature.fill(8);
+    const details = payment.details as { rawId: NSEData; response: { signature: NSEData; userHandle: null }; clientExtensionResults: { payment: { isPayment: boolean } } };
+    expect(details.rawId.bytes).toEqual(new Uint8Array([1, 2]));
+    expect(details.response.signature.bytes).toEqual(new Uint8Array([3, 4]));
+    expect(details.response.userHandle).toBeNull();
+    expect(details.clientExtensionResults.payment.isPayment).toBe(true);
+    expect(Object.isFrozen(details.response)).toBe(true);
+    await payment.complete("success");
+    controller.dispose();
   });
 });
