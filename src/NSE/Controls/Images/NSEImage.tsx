@@ -23,6 +23,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useSyncExternalStore,
@@ -38,6 +39,8 @@ import {
   type IFXImageStringSourcePort,
 } from "../../../FX/ImageFX/IFXImageViewport";
 import { classes } from "../Core/nseControlsShared";
+import { useNSEAnimationEnvironment } from "../../Animation/NSEAnimationEnvironment";
+import type { AFXLayer } from "../../../FX/AnimationFX/AFXLayer";
 
 /** @internal Zoom control for NSEImageView's +/− buttons. */
 export interface NSESizeableImageHandle {
@@ -234,6 +237,8 @@ export const NSESizeableImage = forwardRef<NSESizeableImageHandle, NSESizeableIm
 export type NSEImageScaling = "proportionallyUpOrDown" | "none";
 
 export interface NSEImageViewProps extends Omit<NSESizeableImageProps, "ref" | "autoSize"> {
+  /** NSView.wantsLayer. The backing layer belongs to this mounted view. */
+  wantsLayer?: boolean;
   /** NSImageView.imageScaling. Default `proportionallyUpOrDown`. */
   imageScaling?: NSEImageScaling;
   /** Show the +/− zoom controls. Default true. */
@@ -242,22 +247,54 @@ export interface NSEImageViewProps extends Omit<NSESizeableImageProps, "ref" | "
   zoomOutLabel?: string;
 }
 
+/** NSImageView inherits NSView.element and its optional backing layer. */
+export interface NSEImageViewHandle {
+  readonly element: HTMLDivElement;
+  readonly layer: AFXLayer | null;
+}
+
 /**
 NSImageView: an image in a framed box, fitted (or at natural size with `imageScaling="none"`), with
 optional +/− zoom controls. Wheel and double-click zoom; drag pans once the image overflows the box.
 */
-export function NSEImageView({
+export const NSEImageView = forwardRef<NSEImageViewHandle, NSEImageViewProps>(function NSEImageView({
+  wantsLayer = false,
   imageScaling = "proportionallyUpOrDown",
   controls = true,
   zoomInLabel = "Zoom in",
   zoomOutLabel = "Zoom out",
   className = "",
   ...props
-}: NSEImageViewProps) {
+}: NSEImageViewProps, ref) {
   const imageRef = useRef<NSESizeableImageHandle>(null);
+  const host = useRef<HTMLDivElement>(null);
+  const { layers } = useNSEAnimationEnvironment();
+  const backing = useRef<{ abort: AbortController; layer: AFXLayer | null } | null>(null);
+  useLayoutEffect(() => {
+    if (!wantsLayer) return;
+    const connection = { abort: new AbortController(), layer: null as AFXLayer | null };
+    backing.current = connection;
+    return () => {
+      connection.abort.abort();
+      connection.layer?.dispose();
+      if (backing.current === connection) backing.current = null;
+    };
+  }, [wantsLayer, layers]);
+  useImperativeHandle(ref, () => ({
+    element: host.current!,
+    get layer() {
+      const connection = backing.current;
+      if (!wantsLayer || !connection) return null;
+      if (!connection.layer) {
+        if (!layers?.bindLayer) throw new TypeError("Layer-backed image views require a mounted animation layer client.");
+        connection.layer = layers.bindLayer(host.current!, connection.abort.signal, { layout: "css" });
+      }
+      return connection.layer;
+    },
+  }), [wantsLayer, layers]);
 
   return (
-    <div className={classes("nse-control-image-view", className)} data-image-scaling={imageScaling}>
+    <div ref={host} className={classes("nse-control-image-view", className)} data-image-scaling={imageScaling}>
       <NSESizeableImage ref={imageRef} autoSize={imageScaling !== "none"} {...props} />
       {controls ? (
         <div className="nse-control-image-view-controls" role="group" aria-label="Zoom">
@@ -281,4 +318,4 @@ export function NSEImageView({
       ) : null}
     </div>
   );
-}
+});

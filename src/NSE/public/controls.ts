@@ -95,6 +95,7 @@ export { NSEImageView } from "../Controls/Images";
 export type {
   NSEImageScaling,
   NSEImageViewProps,
+  NSEImageViewHandle,
 } from "../Controls/Images";
 
 
