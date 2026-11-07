@@ -1,0 +1,255 @@
+{
+  "name": "phone-light",
+  "journey": "cold launch at target viewport",
+  "receipt": {
+    "commit": "b21cf2975212cf91ed0cb19f93165b586468b4c2",
+    "archiveSha256": "1aa562bc384ea5218e25c846a1e4435bb9eae7224b1d21cf399185f9e3c6cdd1"
+  },
+  "sources": {
+    "surface": {
+      "x": 8,
+      "y": 204,
+      "width": 374,
+      "height": 640,
+      "top": 204,
+      "right": 382,
+      "bottom": 844,
+      "left": 8
+    },
+    "panel": {
+      "x": 16,
+      "y": 218,
+      "width": 358,
+      "height": 626,
+      "top": 218,
+      "right": 374,
+      "bottom": 844,
+      "left": 16
+    },
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "dpr": 1,
+    "presentation": "sheet",
+    "shadow": "drop-shadow(rgba(0, 0, 0, 0.42) 0px 10px 18px)",
+    "plate": "linear-gradient(rgba(142, 145, 150, 0.95) 0px, rgba(125, 127, 131, 0.95) 25px, rgba(72, 73, 76, 0.95) calc(100% - 22px), rgba(61, 62, 64, 0.95))",
+    "dimming": "rgba(0, 0, 0, 0.26)",
+    "buttons": [
+      {
+        "title": "Cancel",
+        "size": "small",
+        "bezel": "rounded",
+        "bounds": {
+          "x": 28,
+          "y": 231.5,
+          "width": 58.625,
+          "height": 24,
+          "top": 231.5,
+          "right": 86.625,
+          "bottom": 255.5,
+          "left": 28
+        }
+      },
+      {
+        "title": "System Chooser…",
+        "size": "small",
+        "bezel": "texturedRounded",
+        "bounds": {
+          "x": 132.828125,
+          "y": 808,
+          "width": 124.34375,
+          "height": 24,
+          "top": 808,
+          "right": 257.171875,
+          "bottom": 832,
+          "left": 132.828125
+        }
+      }
+    ],
+    "thumbnails": [],
+    "images": [
+      {
+        "loaded": true,
+        "width": 48
+      },
+      {
+        "loaded": true,
+        "width": 48
+      },
+      {
+        "loaded": true,
+        "width": 48
+      },
+      {
+        "loaded": true,
+        "width": 48
+      },
+      {
+        "loaded": true,
+        "width": 48
+      },
+      {
+        "loaded": true,
+        "width": 48
+      }
+    ]
+  },
+  "collection": {
+    "surface": {
+      "x": 8,
+      "y": 204,
+      "width": 374,
+      "height": 640,
+      "top": 204,
+      "right": 382,
+      "bottom": 844,
+      "left": 8
+    },
+    "panel": {
+      "x": 16,
+      "y": 218,
+      "width": 358,
+      "height": 626,
+      "top": 218,
+      "right": 374,
+      "bottom": 844,
+      "left": 16
+    },
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "dpr": 1,
+    "presentation": "sheet",
+    "shadow": "drop-shadow(rgba(0, 0, 0, 0.42) 0px 10px 18px)",
+    "plate": "linear-gradient(rgba(142, 145, 150, 0.95) 0px, rgba(125, 127, 131, 0.95) 25px, rgba(72, 73, 76, 0.95) calc(100% - 22px), rgba(61, 62, 64, 0.95))",
+    "dimming": "rgba(0, 0, 0, 0.26)",
+    "buttons": [
+      {
+        "title": "Sources",
+        "size": null,
+        "bezel": "texturedRounded",
+        "bounds": {
+          "x": 28,
+          "y": 218.5,
+          "width": 76,
+          "height": 50,
+          "top": 218.5,
+          "right": 104,
+          "bottom": 268.5,
+          "left": 28
+        }
+      },
+      {
+        "title": "Open",
+        "size": "small",
+        "bezel": "rounded",
+        "bounds": {
+          "x": 308.53125,
+          "y": 231.5,
+          "width": 53.46875,
+          "height": 24,
+          "top": 231.5,
+          "right": 362,
+          "bottom": 255.5,
+          "left": 308.53125
+        }
+      }
+    ],
+    "thumbnails": [],
+    "images": [
+      {
+        "loaded": true,
+        "width": 192
+      },
+      {
+        "loaded": true,
+        "width": 192
+      }
+    ]
+  },
+  "thumbnails": {
+    "surface": {
+      "x": 8,
+      "y": 204,
+      "width": 374,
+      "height": 640,
+      "top": 204,
+      "right": 382,
+      "bottom": 844,
+      "left": 8
+    },
+    "panel": {
+      "x": 16,
+      "y": 218,
+      "width": 358,
+      "height": 626,
+      "top": 218,
+      "right": 374,
+      "bottom": 844,
+      "left": 16
+    },
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "dpr": 1,
+    "presentation": "sheet",
+    "shadow": "drop-shadow(rgba(0, 0, 0, 0.42) 0px 10px 18px)",
+    "plate": "linear-gradient(rgba(142, 145, 150, 0.95) 0px, rgba(125, 127, 131, 0.95) 25px, rgba(72, 73, 76, 0.95) calc(100% - 22px), rgba(61, 62, 64, 0.95))",
+    "dimming": "rgba(0, 0, 0, 0.26)",
+    "buttons": [
+      {
+        "title": "Back",
+        "size": null,
+        "bezel": "texturedRounded",
+        "bounds": {
+          "x": 28,
+          "y": 218.5,
+          "width": 76,
+          "height": 50,
+          "top": 218.5,
+          "right": 104,
+          "bottom": 268.5,
+          "left": 28
+        }
+      },
+      {
+        "title": "Open",
+        "size": "small",
+        "bezel": "rounded",
+        "bounds": {
+          "x": 308.53125,
+          "y": 231.5,
+          "width": 53.46875,
+          "height": 24,
+          "top": 231.5,
+          "right": 362,
+          "bottom": 255.5,
+          "left": 308.53125
+        }
+      }
+    ],
+    "thumbnails": [
+      {
+        "src": "blob:http://127.0.0.1:5199/1281ab2c-bebe-4001-80c2-9c5c03bbbd6e",
+        "width": 320,
+        "height": 320
+      },
+      {
+        "src": "blob:http://127.0.0.1:5199/3144d2a4-6b00-49d7-a13e-1bcc25749249",
+        "width": 480,
+        "height": 318
+      },
+      {
+        "src": "blob:http://127.0.0.1:5199/46378a85-0272-468d-9a64-2cfa8399785a",
+        "width": 480,
+        "height": 318
+      }
+    ],
+    "images": []
+  },
+  "errors": [],
+  "consoleErrors": []
+}

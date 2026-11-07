@@ -1,0 +1,16 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('searchbox', { name: 'Search NSE controls' }) to be visible
+
+    at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation\open-ui-capture.mjs:50:74 {
+  log: [
+    "  - waiting for getByRole('searchbox', { name: 'Search NSE controls' }) to be visible"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1

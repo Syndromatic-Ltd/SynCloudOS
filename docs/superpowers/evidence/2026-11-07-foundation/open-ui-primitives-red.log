@@ -1,0 +1,47 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/nse/file-panels/nse-workspace.test.ts tests/nse/file-panels/nse-path-control.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/nse/file-panels/nse-workspace.test.ts (0 test)
+ ❯ tests/nse/file-panels/nse-path-control.test.tsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/nse/file-panels/nse-path-control.test.tsx [ tests/nse/file-panels/nse-path-control.test.tsx ]
+Error: Failed to resolve import "../../../src/NSE/Controls/Values/NSEPathControl" from "tests/nse/file-panels/nse-path-control.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/nse/file-panels/nse-path-control.test.tsx:5:78
+  2  |  import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+  3  |  import { afterEach, expect, it, vi } from "vitest";
+  4  |  import { NSEPathControl, NSEPathControlItem } from "../../../src/NSE/Controls/Values/NSEPathControl";
+     |                                                      ^
+  5  |  afterEach(cleanup);
+  6  |  it("exposes the clicked path item to its action and renders images as NSE image views", () => {
+ ❯ TransformPluginContext._formatLog ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/nse/file-panels/nse-workspace.test.ts [ tests/nse/file-panels/nse-workspace.test.ts ]
+Error: Cannot find module '../../../src/NSE/Application/NSEWorkspace' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/nse/file-panels/nse-workspace.test.ts
+ ❯ tests/nse/file-panels/nse-workspace.test.ts:2:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { NSEWorkspace } from "../../../src/NSE/Application/NSEWorkspac…
+       | ^
+      3|
+      4| describe("NSWorkspace icon lookup", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  no tests
+   Start at  09:31:54
+   Duration  1.78s (transform 55ms, setup 71ms, import 0ms, tests 0ms, environment 1.54s)
+

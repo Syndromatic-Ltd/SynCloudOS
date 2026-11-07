@@ -1,0 +1,101 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/nse/file-panels/nse-path-control.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/nse/file-panels/nse-path-control.test.tsx (4 tests | 2 failed) 150ms
+   × keeps the root of file:/// actionable 10ms
+   × keeps the root of https://example.test/ actionable 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/nse/file-panels/nse-path-control.test.tsx > keeps the root of file:/// actionable
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "/"
+
+Here are the accessible roles:
+
+  navigation:
+
+  Name "Path":
+  <nav
+    aria-label="Path"
+    class="nse-path-control"
+    data-nse-control="path-control"
+    data-path-style="standard"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <nav
+      aria-label="Path"
+      class="nse-path-control"
+      data-nse-control="path-control"
+      data-path-style="standard"
+    />
+  </div>
+</body>
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/nse/file-panels/nse-path-control.test.tsx:31:26
+     29| it.each([["file:///", "/"], ["https://example.test/", "example.test"]]…
+     30|   const onAction = vi.fn(); render(<NSEPathControl url={url} onAction=…
+     31|   fireEvent.click(screen.getByRole("button", { name: title }));
+       |                          ^
+     32|   expect(onAction.mock.calls[0]?.[0].clickedPathItem.url).toBe(url);
+     33| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/nse/file-panels/nse-path-control.test.tsx > keeps the root of https://example.test/ actionable
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "example.test"
+
+Here are the accessible roles:
+
+  navigation:
+
+  Name "Path":
+  <nav
+    aria-label="Path"
+    class="nse-path-control"
+    data-nse-control="path-control"
+    data-path-style="standard"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <nav
+      aria-label="Path"
+      class="nse-path-control"
+      data-nse-control="path-control"
+      data-path-style="standard"
+    />
+  </div>
+</body>
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/nse/file-panels/nse-path-control.test.tsx:31:26
+     29| it.each([["file:///", "/"], ["https://example.test/", "example.test"]]…
+     30|   const onAction = vi.fn(); render(<NSEPathControl url={url} onAction=…
+     31|   fireEvent.click(screen.getByRole("button", { name: title }));
+       |                          ^
+     32|   expect(onAction.mock.calls[0]?.[0].clickedPathItem.url).toBe(url);
+     33| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed (4)
+   Start at  10:14:51
+   Duration  3.08s (transform 489ms, setup 52ms, import 881ms, tests 150ms, environment 1.77s)
+

@@ -1,0 +1,50 @@
+
+> @syndromatic/syncloudos-source@1.0.0-beta.2 build
+> npm run typecheck && npm run sdk:build
+
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/NSE/FilePanels/NSEOpenPanelItemImage.tsx(35,96): error TS2322: Type 'string | IFXImageResource' is not assignable to type 'string | RuntimeImageResource'.
+  Type 'IFXImageResource' is not assignable to type 'string | RuntimeImageResource'.
+    Type 'IFXImageResource' is not assignable to type 'RuntimeImageResource'.
+      Types of property 'sourceICCProfile' are incompatible.
+        Type 'NSEData | null' is not assignable to type 'Uint8Array<ArrayBufferLike> | null'.
+          Type 'NSEData' is missing the following properties from type 'Uint8Array<ArrayBufferLike>': BYTES_PER_ELEMENT, buffer, byteLength, byteOffset, and 27 more.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4953,41): error TS2322: Type 'RuntimeImageResource' is not assignable to type 'IFXResourceHandle'.
+  Types of property 'sourceICCProfile' are incompatible.
+    Type 'Uint8Array<ArrayBufferLike> | null' is not assignable to type 'NSEData | null'.
+      Type 'Uint8Array<ArrayBufferLike>' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4953,63): error TS2322: Type '(format: "image/png" | "image/webp", callerSignal?: AbortSignal | undefined) => Promise<Uint8Array<ArrayBufferLike>>' is not assignable to type '(format: "image/png" | "image/webp", signal?: AbortSignal | undefined) => Promise<NSEData>'.
+  Type 'Promise<Uint8Array<ArrayBufferLike>>' is not assignable to type 'Promise<NSEData>'.
+    Type 'Uint8Array<ArrayBufferLike>' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/SynCloudOS/BundleLoader/fontResourceLoader.ts(65,3): error TS2322: Type 'Readonly<{ bytes: Uint8Array<ArrayBuffer>; mimeType: TFXFontResourceMimeType; }>' is not assignable to type 'TFXPackagedFontResource'.
+  Types of property 'bytes' are incompatible.
+    Type 'Uint8Array<ArrayBuffer>' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/SynCloudOS/BundleLoader/fontResourceLoader.ts(115,38): error TS2740: Type 'Uint8Array<ArrayBufferLike>' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/SynCloudOS/Documents/DocumentOutputPreparation.ts(216,15): error TS2322: Type '{ status: "exported"; mimeType: "application/pdf"; bytes: NSEData; receipt: DocumentOutputReceipt; }' is not assignable to type 'DocumentOutputPDFResult'.
+  Types of property 'bytes' are incompatible.
+    Type 'NSEData' is missing the following properties from type 'Uint8Array<ArrayBufferLike>': BYTES_PER_ELEMENT, buffer, byteLength, byteOffset, and 27 more.
+src/SynCloudOS/TextFX/TFXFontHost.ts(150,38): error TS2339: Property 'slice' does not exist on type 'NSEDataConvertible'.
+  Property 'slice' does not exist on type 'NSEData'.
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: npm run build failed
+
+2 !== 0
+
+    at run (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/scripts/use-framework.mjs:19:10)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/scripts/use-framework.mjs:32:37
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 2,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

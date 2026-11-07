@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/open-panel-sheet-attachment.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/open-panel-sheet-attachment.test.tsx (2 tests | 1 failed) 189ms
+   × draws Open in its owned sheet and restores focus (compact=true) 28ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/open-panel-sheet-attachment.test.tsx > draws Open in its owned sheet and restores focus (compact=true)
+AssertionError: expected null to be 'sheet' // Object.is equality
+
+- Expected:
+"sheet"
+
++ Received:
+null
+
+ ❯ tests/runtime/open-panel-sheet-attachment.test.tsx:36:57
+     34|   const sheet = await screen.findByRole("dialog", { name: "Open" });
+     35|   if (compact) {
+     36|     expect(sheet.getAttribute("data-nse-presentation")).toBe("sheet");
+       |                                                         ^
+     37|     expect(sheet.classList.contains("nse-overlay-popup--menu")).toBe(t…
+     38|     expect(document.querySelector('.nse-overlay-popup-backdrop:not([hi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  09:37:31
+   Duration  16.36s (transform 10.81s, setup 53ms, import 13.47s, tests 189ms, environment 2.47s)
+

@@ -1,0 +1,18 @@
+phone-light: panel, sources, collection and three decoded thumbnails captured
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByText('Menus & Popups', { exact: true }).filter({ visible: true }).first()
+
+    at navigate (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation\open-ui-capture.mjs:28:88)
+    at async file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/open-ui-capture.mjs:120:7 {
+  log: [
+    "  - waiting for getByText('Menus & Popups', { exact: true }).filter({ visible: true }).first()"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1

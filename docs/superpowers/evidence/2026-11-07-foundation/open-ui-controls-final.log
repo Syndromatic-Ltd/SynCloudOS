@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/nse/file-panels tests/runtime/open-panel-sheet-attachment.test.tsx tests/integration/nse-open-panel.test.tsx tests/runtime/nse-button-key-equivalents.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  8 passed (8)
+      Tests  36 passed (36)
+   Start at  10:51:18
+   Duration  10.03s (transform 6.93s, setup 108ms, import 10.19s, tests 1.31s, environment 5.63s)
+
