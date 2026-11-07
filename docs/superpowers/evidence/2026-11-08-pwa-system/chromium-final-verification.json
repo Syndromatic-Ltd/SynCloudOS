@@ -1,0 +1,70 @@
+{
+  "frameworkCommit": "359725e7f2274a8493f66192766de454b01d2592",
+  "archiveSha256": "ece730fd22b391fab6543f63877382057c82076190f5689fdbf46369e6e4e317",
+  "manifestURL": "http://127.0.0.1:5199/syncloudos-com.syndromatic.webspring.webmanifest",
+  "manifestErrors": [],
+  "manifest": {
+    "id": "/",
+    "name": "Syndromatic",
+    "short_name": "Syndromatic",
+    "scope": "/",
+    "start_url": "/",
+    "display": "standalone",
+    "display_override": [
+      "window-controls-overlay",
+      "standalone"
+    ],
+    "description": "The Syndromatic Webspring desktop",
+    "theme_color": "#929eae",
+    "background_color": "#929eae",
+    "icons": [
+      {
+        "src": "/assets/install/Syndromatic192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "/assets/install/Syndromatic512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      }
+    ]
+  },
+  "installability": {
+    "installabilityErrors": []
+  },
+  "browser": {
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+    "online": true,
+    "standalone": true,
+    "overlayVisible": false,
+    "overlayRect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+    },
+    "registrations": [
+      {
+        "scope": "http://127.0.0.1:5199/",
+        "active": "http://127.0.0.1:5199/syncloudos-sw.js",
+        "state": "activated",
+        "waiting": false
+      }
+    ],
+    "caches": [
+      "syncloudos:/:2adee90e1240717c1ae9f478f9ac49f8af9cdc9ec41265bd463c1f66e2c4adeb"
+    ],
+    "persistent": true
+  },
+  "os": {
+    "badgeCount": 0,
+    "fileHandlers": []
+  }
+}

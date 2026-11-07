@@ -1,0 +1,11 @@
+{
+  "frameworkCommit": "359725e7f2274a8493f66192766de454b01d2592",
+  "badgeCountSet": 7,
+  "badgeCountCleared": 0,
+  "transition": [
+    "update",
+    "updated",
+    "finished"
+  ],
+  "scope": "Native browser primitives; NSE integration covered by application/controller tests."
+}

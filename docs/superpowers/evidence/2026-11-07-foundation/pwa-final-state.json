@@ -1,0 +1,21 @@
+{
+  "capturedAt": "2026-11-07T23:49:38.3534693+00:00",
+  "frameworkVitestPreserved": true,
+  "listeners": [
+    {
+      "LocalPort": 5387,
+      "OwningProcess": 69072
+    },
+    {
+      "LocalPort": 5199,
+      "OwningProcess": 80252
+    }
+  ],
+  "ownedAdoptionWorktreesRemaining": [],
+  "frameworkHead": "359725e7f2274a8493f66192766de454b01d2592",
+  "siteBranch": "prerelease",
+  "archiveSha256": "ece730fd22b391fab6543f63877382057c82076190f5689fdbf46369e6e4e317",
+  "frameworkBranch": "fix/blind-rewrite-friction",
+  "siteHead": "97275d3eb47455669b800e87a9c95003d74839e3",
+  "adoptedCommit": "359725e7f2274a8493f66192766de454b01d2592"
+}

@@ -1,0 +1,30 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/pwa-worker.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/pwa-worker.test.ts (9 tests | 2 failed) 34ms
+   × refreshes development module https://site.test/src/.gitattributes?url online and retains its bytes offline 2ms
+   × refreshes development module https://site.test/src/Localisable.strings?raw online and retains its bytes offline 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/pwa-worker.test.ts > refreshes development module https://site.test/src/.gitattributes?url online and retains its bytes offline
+ FAIL  tests/runtime/pwa-worker.test.ts > refreshes development module https://site.test/src/Localisable.strings?raw online and retains its bytes offline
+TypeError: Cannot read properties of undefined (reading 'text')
+ ❯ tests/runtime/pwa-worker.test.ts:66:31
+     64|   let response!: Promise<Response>;
+     65|   const load = () => { listeners.get("fetch")!({ request, respondWith(…
+     66|   expect(await (await load()).text()).toBe("current graph");
+       |                               ^
+     67|   fetch.mockRejectedValueOnce(new TypeError("offline"));
+     68|   expect(await (await load()).text()).toBe("current graph");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 7 passed (9)
+   Start at  22:01:53
+   Duration  323ms (transform 49ms, setup 42ms, import 27ms, tests 34ms, environment 0ms)
+

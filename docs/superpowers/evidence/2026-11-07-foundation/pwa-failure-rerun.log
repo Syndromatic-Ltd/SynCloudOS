@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/architecture-boundaries.test.ts tests/integration/nse-open-panel.test.tsx --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=docs/superpowers/evidence/2026-11-07-foundation/pwa-failure-rerun.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ✓ tests/runtime/architecture-boundaries.test.ts (36 tests) 11091ms
+     ✓ routes host lifecycle protocols through the internal NSE interoperability entry  744ms
+     ✓ shares canonical bundle identity without granting manifest code runtime access  594ms
+     ✓ admits only the lifecycle runtime bridge from FX  617ms
+     ✓ keeps Chronosphere presentation independent of runtime and app context  598ms
+     ✓ uses the shared TypeScript AST scanner for raw keyboard aliases and wrappers  486ms
+     ✓ detects aliased, commented, exported, dynamic, type, and require bypasses  316ms
+     ✓ rejects non-static imports, requires, and import.meta.glob bypasses  308ms
+     ✓ resolves immutable module specifiers to their actual edges without accepting dynamic or shadowed names  625ms
+     ✓ requires every controlled source and resolved target to have one layer  338ms
+     ✓ rejects repository-local resolved targets even when they sit outside controlledSources  336ms
+     ✓ accepts exact package entry aliases with a separately mapped testing subpath  363ms
+     ✓ rejects resolved module targets outside the repository  361ms
+     ✓ expands supported local Vite assets and rejects private-app glob imports  337ms
+     ✓ expands an explicit brace set of supported local Vite asset types  341ms
+     ✓ rejects escaping, unsupported, zero-match, and dynamic glob patterns/options  345ms
+     ✓ selects the most-specific layer independent of declaration order  329ms
+     ✓ rejects equally specific overlapping classifications  398ms
+     ✓ keeps host-only AppSDK seams out of the public AppSDK and SynWare import graph  764ms
+     ✓ uses the committed policy to reject direct and indirect public AppSDK host re-exports  360ms
+     ✓ rejects default-runtime, SynWare-private, and raw-runtime imports  384ms
+     ✓ rejects an allowlist entry as soon as its exact edge disappears  693ms
+ ✓ tests/integration/nse-open-panel.test.tsx (9 tests) 770ms
+
+ Test Files  2 passed (2)
+      Tests  45 passed (45)
+   Start at  23:01:17
+   Duration  15.47s (transform 1.77s, setup 44ms, import 2.37s, tests 11.86s, environment 938ms)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/pwa-failure-rerun.json

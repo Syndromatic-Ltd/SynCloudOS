@@ -1,0 +1,39 @@
+{
+  "frameworkCommit": "359725e7f2274a8493f66192766de454b01d2592",
+  "native": {
+    "installed": true,
+    "overlayVisible": false
+  },
+  "nativeToggle": "Computer Use could not determine the native browser URL on Windows and refused access.",
+  "simulation": {
+    "x": 0,
+    "y": 0,
+    "width": 1280,
+    "height": 32
+  },
+  "metrics": {
+    "height": 32,
+    "background": "linear-gradient(rgb(245, 245, 245) 0px, rgb(230, 230, 230) 50%, rgb(211, 211, 211) 100%)",
+    "font": "700 13px / 32px \"Syndromatic UI\", system-ui, sans-serif",
+    "padding": "0px 80px",
+    "lineHeight": "32px"
+  },
+  "applicationStage": {
+    "x": 0,
+    "y": 32,
+    "width": 1440,
+    "height": 968,
+    "top": 32,
+    "right": 1440,
+    "bottom": 1000,
+    "left": 0
+  },
+  "applicationMenuBounds": {
+    "x": 1338,
+    "y": 28.5,
+    "width": 108,
+    "height": 74
+  },
+  "menuInteraction": "Real NSE application menu opened below the reserved host row.",
+  "acceptance": "Real Atmo rendering and work-area integration with explicitly simulated browser geometry; native overlay activation/drag remains unverified."
+}
