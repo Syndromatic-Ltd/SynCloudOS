@@ -115,6 +115,12 @@ describe("window-hosted transient surface bridge", () => {
       expect(await screen.findByRole("button", { name: "Second generation" })).toBeTruthy();
       expect(screen.queryByRole("button", { name: "First generation" })).toBeNull();
       expect(document.querySelectorAll("[data-nse-window-popover]")).toHaveLength(1);
+      await act(async () => {
+        await bridge.dismiss(request.id);
+        await bridge.present(request, <button>Third generation</button>);
+      });
+      await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Third generation" })));
+      expect(screen.queryByRole("button", { name: "Second generation" })).toBeNull();
     } finally { view.unmount(); bridge.dispose(); anchor.remove(); await runtime.dispose("test"); }
   });
 

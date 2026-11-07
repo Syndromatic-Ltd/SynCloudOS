@@ -242,6 +242,7 @@ export function WindowHost({
   // control, then the title-bar controls. Only on opening: later key changes
   // come from a click or a command that already placed focus.
   const openedKey = hostRendered && record.isKey;
+  const contentGeneration = contentState.status === "loaded" ? contentState.mountKey : null;
   useEffect(() => {
     if (!openedKey || (record.role !== "panel" && record.role !== "popover" && !popoverSurface)) return;
     const host = hostRef.current;
@@ -274,7 +275,7 @@ export function WindowHost({
     }
     return () => observer?.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening
-  }, [controller.id, openedKey]);
+  }, [contentGeneration, controller.id, openedKey]);
 
   if (
     record.state !== "open" ||
