@@ -78,18 +78,20 @@ export function NSETransitionSlot({ transition, Renderer, className }: {
     const y = effect === 2 ? 100 : effect === 4 ? -100 : 0;
     const fade = reducedMotion || effect === 1;
     const spec = (enter: boolean): NSEPresentationSpec => ({
-      duration: reducedMotion ? Math.min(0.12, transition.duration) : transition.duration,
+      duration: effect === 0 ? transition.duration : reducedMotion ? Math.min(0.12, transition.duration) : transition.duration,
       timing: transition.timing,
-      tracks: effect === 0 ? [] : fade
+      tracks: effect === 0 ? [{ keyPath: "opacity", values: [1, 1] }] : fade
         ? [{ keyPath: "opacity", values: enter ? [0, 1] : [1, 0] }]
         : [{ keyPath: "transform", unit: "%", values: enter ? [{ x, y }, {}] : [{}, { x: -x, y: -y }] }],
     });
     let active = true;
     const handles: import("../../FX/AnimationFX/animationTypes").AFXAnimationHandle[] = [];
     try {
-      if (outgoing.current && incoming.current && effect !== 0) {
+      if (outgoing.current && incoming.current) {
+        // With no system effect the children own their layer choreography;
+        // retain their common superview for the animation context's duration.
         handles.push(animator.animations.animate(outgoing.current, compileNSEPresentation(spec(false), "outgoing", "exit"), lease, 1));
-        handles.push(animator.animations.animate(incoming.current, compileNSEPresentation(spec(true), "incoming"), lease, 2));
+        if (effect !== 0) handles.push(animator.animations.animate(incoming.current, compileNSEPresentation(spec(true), "incoming"), lease, 2));
       }
       void Promise.allSettled(handles.map(handle => handle.finished)).then(() => { if (active) transition.finish(); });
     } catch { transition.finish(); }

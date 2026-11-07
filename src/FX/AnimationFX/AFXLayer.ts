@@ -1719,13 +1719,20 @@ export class AFXLayer {
     const finished = new Promise<AFXAnimationSettlement>((done) => {
       resolve = done;
     });
+    // A single opacity crossfade preserves continuity without spatial motion.
+    // Repeating effects and spatial properties settle under the system policy.
+    const motion = animation.toRuntime();
+    const policy = motion.reducedMotion ?? "system";
+    const reducesMotion = () => policy === "always" ||
+      (policy === "system" && this.#scheduler.reducedMotion &&
+        !(declaredKeyPath === "opacity" && (motion.iterations ?? 1) === 1 && !motion.autoreverses));
     const running: Running = {
       property: declaredKeyPath,
       value: initial,
       compositor: null,
       needsFrame: () => state === "running" && !running.compositor && !(duration === Infinity && this.#scheduler.suspended),
       environmentChanged: () => {
-        if (this.#scheduler.reducedMotion || (this.#scheduler.suspended && duration !== Infinity)) {
+        if (reducesMotion() || (this.#scheduler.suspended && duration !== Infinity)) {
           running.finish("completed");
         } else if (duration === Infinity && state === "running") {
           if (this.#scheduler.suspended) {
@@ -1775,7 +1782,7 @@ export class AFXLayer {
         resolve(
           Object.freeze({
             state: state as AFXAnimationSettlement["state"],
-            reduced: this.#scheduler.reducedMotion || this.#scheduler.suspended,
+            reduced: reducesMotion() || this.#scheduler.suspended,
           }),
         );
       },
@@ -1884,7 +1891,7 @@ export class AFXLayer {
     }
     if (
       duration === 0 ||
-      this.#scheduler.reducedMotion ||
+      reducesMotion() ||
       (this.#scheduler.suspended && duration !== Infinity)
     )
       running.finish("completed");

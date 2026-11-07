@@ -16,6 +16,7 @@ it("keeps the incoming tab mounted through transition settlement", async () => {
     override viewDidAppear = vi.fn();
   }
   class Tabs extends NSETabViewController {
+    effect = NSEViewController.TransitionOptions.crossfade;
     readonly first = this.addChild(Pane, { title: "First" });
     readonly second = this.addChild(Pane, { title: "Second" });
     constructor() {
@@ -23,7 +24,7 @@ it("keeps the incoming tab mounted through transition settlement", async () => {
       for (const pane of [this.first, this.second]) this.addTabViewItem(new NSETabViewItem({ viewController: pane, identifier: pane.title! }));
     }
     override willSelect(item: NSETabViewItem) {
-      this.transition(this.selectedTabViewItem!.viewController, item.viewController, NSEViewController.TransitionOptions.crossfade);
+      this.transition(this.selectedTabViewItem!.viewController, item.viewController, this.effect);
     }
   }
   const tabs = new Tabs();
@@ -36,7 +37,9 @@ it("keeps the incoming tab mounted through transition settlement", async () => {
   await act(async () => { tabs.selectTabViewItem("Second"); });
   await act(async () => { for (const done of finish.splice(0)) done(); });
   expect(tabs.second.viewDidAppear).toHaveBeenCalledTimes(1);
+  tabs.effect = NSEViewController.TransitionOptions.none;
   await act(async () => { tabs.selectTabViewItem("First"); });
+  expect(finish.length).toBeGreaterThan(0);
   await act(async () => { for (const done of finish.splice(0)) done(); });
   expect(tabs.first.viewDidAppear).toHaveBeenCalledTimes(2);
   mounted.unmount(); tabs.dispose();
