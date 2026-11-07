@@ -83,23 +83,29 @@ export function createAudioSessionFacade(
   release: () => void,
   appId?: string,
   settlement?: MountedSettlementPort,
+  requireRecord: () => void = () => {},
+  requireCategory: () => void = () => {},
 ): AUFXAudioSession {
+  let disposed = false;
   const label = appId ?? "mounted-audio-recording";
   const facade = new AUFXAudioSession({
           get state() { return session.state; },
           get route() { return session.route; },
           get capabilities() { return session.capabilities; },
-          requestRecordAuthorization: signal => session.requestRecordAuthorization(signal),
-          enumerateDevices: signal => session.enumerateDevices(signal),
-          setPreferredInput: (id, signal) => session.setPreferredInput(id, signal),
-          setPreferredOutput: (id, signal) => session.setPreferredOutput(id, signal),
+          get category() { return session.category; },
+          setCategory: async category => { requireCategory(); await session.setCategory(category); },
+          requestRecordAuthorization: async signal => { requireRecord(); await session.requestRecordAuthorization(signal); },
+          enumerateDevices: signal => { requireRecord(); return session.enumerateDevices(signal); },
+          setPreferredInput: (id, signal) => { requireRecord(); return session.setPreferredInput(id, signal); },
+          setPreferredOutput: (id, signal) => { requireRecord(); return session.setPreferredOutput(id, signal); },
           createRecorder: options => {
+            requireRecord();
             const recorder = session.createRecorder(options);
             return settlement ? observeRecorder(recorder, label, settlement) : recorder;
           },
-          createInputNode: format => session.createInputNode(format),
+          createInputNode: format => { requireRecord(); return session.createInputNode(format); },
           subscribe: listener => session.subscribe(listener),
-          dispose: () => { try { session.dispose(); } finally { release(); } },
+          dispose: () => { if (disposed) return; disposed = true; try { session.dispose(); } finally { release(); } },
         });
   Object.freeze(facade);
   return facade;

@@ -738,6 +738,16 @@ export function Beep() {
 | Transport limits exceeded | `DOMException` named `QuotaExceededError` |
 | Live input in an offline render | `Error` named `AUFXUnsupportedOfflineInputError` |
 
+## Speech synthesis and audio session categories
+
+`AUFXSpeechUtterance` is an immutable speech value with text, rate (0.1-10), pitch (0-2), volume (0-1), optional language and voice identifier. Use the mounted `audioSpeech` client (or `useAudioSpeech()`) to create a synthesizer, list voices and call `speak(utterance)`. The application must declare `audio.speech`. This is manifest authority, not a browser permission prompt; capabilities report `nativePermissionPrompt: false`. Speech may require a user gesture and voices depend on the browser and operating system.
+
+Each synthesizer owns up to 32 pending/active utterances. The host serialises the shared browser queue across owners. Stopping a queued owner does not cancel a sibling's active native utterance; cancelling an active owner settles its work and hands the queue to the next owner. Disposal, caller cancellation and mount teardown reject outstanding speech with `AbortError`, release listeners and return mounted resource slots. Saved late callbacks cannot settle subsequent speech. Manifest authority is checked before admission, at native dispatch and at completion; a revoked active completion rejects with `SecurityError`. Manifest changes cannot be detected instantly without a subsequent operation or callback.
+
+`AUFXAudioSession.setCategory(category)` requires the separate `audio.session` capability. It does not request the microphone and remains available with `navigator.audioSession` even when capture or `MediaRecorder` is absent. `session.capabilities.sessionType` distinguishes support; unsupported operations reject with `NotSupportedError`. Capture and device operations still require `audio.record`.
+
+Categories map to browser types: ambient to ambient, soloAmbient to transient-solo, playback to playback, and record/playAndRecord to play-and-record. These are browser hints, not guarantees of native AVAudioSession mixing, interruption, background execution or route policy. Arbitration is shared by native audio-session object: the most recently configured live owner wins; removing it restores the preceding owner, and removing the final owner restores the original native type. Removing an older owner leaves the current owner untouched. Teardown respects a different type installed externally after the framework's last write.
+
 ## Related
 
 - [FX overview](README.md)
