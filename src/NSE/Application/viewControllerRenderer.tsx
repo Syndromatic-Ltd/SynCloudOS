@@ -31,6 +31,10 @@ export type NSEViewControllerRenderer = ComponentType<{
 }>;
 
 const NSEViewControllerRendererContext = createContext<NSEViewControllerRenderer | null>(null);
+let standaloneRenderer: NSEViewControllerRenderer | null = null;
+/** @internal Static controller views also work in framework-owned previews,
+ * with no fabricated application capabilities. The host renderer handles absent services. */
+export function registerNSEStandaloneViewControllerRenderer(renderer: NSEViewControllerRenderer): void { standaloneRenderer = renderer; }
 
 /** @internal The application host provides its view controller renderer to every view it mounts. */
 export const NSEViewControllerRendererProvider = NSEViewControllerRendererContext.Provider;
@@ -43,7 +47,7 @@ export function NSEChildViewControllerView({ controller, className }: {
   readonly controller: NSEViewController<unknown>;
   readonly className?: string;
 }) {
-  const Renderer = useContext(NSEViewControllerRendererContext);
+  const Renderer = useContext(NSEViewControllerRendererContext) ?? standaloneRenderer;
   const parent = useObserve(controller.parent);
   if (!Renderer) throw new Error(`${controller.constructor.name}'s view can only be shown inside a view an application hosts.`);
   const transition = parent?.[nseChildTransition](controller);
