@@ -1,6 +1,5 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 
-import "./window-titlebar.css";
 import { createContext, type ReactNode } from "react";
 import type { NSEWindowToolbarStyle } from "../Application/NSEWindowController";
 import type { NSEViewController } from "../Application/NSEViewController";

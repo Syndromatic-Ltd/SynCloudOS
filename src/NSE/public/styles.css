@@ -45,6 +45,7 @@
 @import "../FilePanels/nse-file-panels.css";
 @import "../Navigation/SourceList/nse-sourcelist.css";
 @import "../Windows/Chrome/nse-chrome.css";
+@import "../Windows/window-titlebar.css";
 @import "../Navigation/SourceList/nse-source-list-scene.css";
 @import "../Layout/nse-layout.css";
 @import "../Layout/nse-stack-view.css";
