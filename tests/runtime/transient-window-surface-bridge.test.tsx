@@ -51,6 +51,28 @@ function geometryEnvironment() {
 }
 
 describe("window-hosted transient surface bridge", () => {
+  it("retries opening focus when the browser rejects it before the popover is positioned", async () => {
+    const runtime = createTestRuntime();
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "positioned-focus", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button"); document.body.append(anchor); anchor.focus();
+    let visible = false;
+    const focus = HTMLElement.prototype.focus;
+    const rejectHiddenFocus = vi.spyOn(HTMLElement.prototype, "focus").mockImplementation(function(this: HTMLElement, options?: FocusOptions) {
+      if (this.textContent === "Ready action" && !visible) return;
+      focus.call(this, options);
+    });
+    await bridge.present({ id: "positioned", role: "popover", title: "Positioned", parentWindowControllerId: null, anchor, drawsBackground: true, bounds: { x: 20, y: 20, width: 240, height: 140 } }, <button>Ready action</button>);
+    const view = render(<SynCloudOSProvider runtime={runtime}><WindowLayer contentRegistry={renderers} /></SynCloudOSProvider>);
+    try {
+      const surface = await screen.findByRole("dialog", { name: "Positioned" });
+      const action = screen.getByRole("button", { name: "Ready action" });
+      expect(document.activeElement).not.toBe(action);
+      await act(async () => { visible = true; surface.setAttribute("data-nse-positioned", "true"); });
+      await waitFor(() => expect(document.activeElement).toBe(action));
+    } finally { rejectHiddenFocus.mockRestore(); view.unmount(); bridge.dispose(); anchor.remove(); await runtime.dispose("test"); }
+  });
+
   it("retains one popover window and its edited input while adapting to a sheet and back", async () => {
     const runtime = createTestRuntime();
     const renderers = new WindowContentRendererRegistry();

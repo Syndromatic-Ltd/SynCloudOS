@@ -258,8 +258,9 @@ export function WindowHost({
       if (active && host.contains(active) && active !== surface && active !== initialResponder) { observer?.disconnect(); return true; }
       if (target) {
         target.focus({ preventScroll: true });
-        observer?.disconnect();
-        return true;
+        const focused = host.ownerDocument.activeElement === target || target.contains(host.ownerDocument.activeElement);
+        if (focused) observer?.disconnect();
+        return focused;
       }
       // A presented controller is a valid first responder even while every
       // command button is validating, including inside a modal compact sheet.
@@ -271,7 +272,7 @@ export function WindowHost({
       // settled. Complete the opening handoff when the first one is ready.
       const Observer = host.ownerDocument.defaultView?.MutationObserver;
       observer = Observer ? new Observer(focusInitialControl) : null;
-      observer?.observe(host, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled"] });
+      observer?.observe(host, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled", "data-nse-positioned", "hidden", "inert", "style"] });
     }
     return () => observer?.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening
