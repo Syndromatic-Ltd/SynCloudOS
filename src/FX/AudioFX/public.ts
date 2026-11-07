@@ -41,5 +41,5 @@ export { AUFXAudioInputNode, type AUFXAudioInputNodeState, type AUFXAudioInputSo
 export { AUFXAudioProcessor } from "./AUFXAudioProcessor";
 export { AUFXSpeechSynthesizer, AUFXSpeechUtterance } from "./AUFXSpeechSynthesizer";
 export type { AUFXSpeechAuthorizationStatus, AUFXSpeechVoice, AUFXSpeechUtteranceOptions, AUFXSpeechClient } from "./AUFXSpeechSynthesizer";
-export type { AUFXAudioSessionCategory, AUFXAudioSessionType } from "./AUFXAudioSession";
+export type { AUFXAudioSessionCategory, AUFXAudioSessionType, AUFXAudioSessionAuthorizationStatus } from "./AUFXAudioSession";
 export type { AUFXAudioTap } from "./AUFXAudioEngine";

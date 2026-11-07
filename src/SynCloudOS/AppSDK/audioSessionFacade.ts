@@ -93,6 +93,10 @@ export function createAudioSessionFacade(
           get route() { return session.route; },
           get capabilities() { return session.capabilities; },
           get category() { return session.category; },
+          get authorizationStatus() {
+            if (disposed || session.authorizationStatus === "unavailable") return "unavailable";
+            try { requireCategory(); return session.authorizationStatus; } catch { return "denied"; }
+          },
           setCategory: async category => { requireCategory(); await session.setCategory(category); },
           requestRecordAuthorization: async signal => { requireRecord(); await session.requestRecordAuthorization(signal); },
           enumerateDevices: signal => { requireRecord(); return session.enumerateDevices(signal); },

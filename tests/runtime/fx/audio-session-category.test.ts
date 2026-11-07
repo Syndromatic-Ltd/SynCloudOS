@@ -23,6 +23,16 @@ import { BrowserAudioCaptureAdapter } from "../../../src/SynCloudOS/PlatformAdap
 import { createMountedAudioSessions } from "../../../src/SynCloudOS/AppSDK/mountedAudioSessions";
 
 describe("AVAudioSession category", () => {
+  it("reports category authorisation independently of microphone permission", async () => {
+    const host = new BrowserAudioCaptureAdapter({ setSessionType: vi.fn(), getUserMedia: vi.fn(), enumerateDevices: async () => [], createRecorder: vi.fn(), isTypeSupported: () => false, now: () => 0, subscribeDeviceChange: () => () => {} });
+    const owner = new AbortController(); let permissions = ["audio.session"];
+    const session = createMountedAudioSessions(host, owner.signal, () => permissions).createSession();
+    expect(session.authorizationStatus).toBe("granted");
+    await expect(session.requestAuthorization()).resolves.toBe("granted");
+    permissions = []; expect(session.authorizationStatus).toBe("denied");
+    await expect(session.requestAuthorization()).resolves.toBe("denied");
+    owner.abort(); expect(session.authorizationStatus).toBe("unavailable");
+  });
   it("maps category to browser type without requesting a microphone", async () => {
     const setSessionType = vi.fn(), capture = vi.fn();
     const host = new BrowserAudioCaptureAdapter({ getUserMedia: capture, enumerateDevices: async () => [], createRecorder: vi.fn(), isTypeSupported: () => false, now: () => 0, subscribeDeviceChange: () => () => {}, setSessionType });
