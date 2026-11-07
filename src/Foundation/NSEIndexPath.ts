@@ -48,18 +48,19 @@ export class NSEIndexPath {
     return this.indexes.length;
   }
 
+  /** Invalid or out-of-range positions use the web sentinel undefined. */
   indexAtPosition(position: number): number | undefined {
-    return this.indexes.at(position);
+    if (!Number.isSafeInteger(position) || position < 0) return undefined;
+    return this.indexes[position];
   }
 
   indexPathByAddingIndex(index: number): NSEIndexPath {
     return new NSEIndexPath([...this.indexes, index]);
   }
 
-  indexPathByRemovingLastIndex(): NSEIndexPath | null {
-    return this.length === 0
-      ? null
-      : new NSEIndexPath(this.indexes.slice(0, -1));
+  /** NSIndexPath: removing the last index of an empty path yields an empty path. */
+  indexPathByRemovingLastIndex(): NSEIndexPath {
+    return new NSEIndexPath(this.indexes.slice(0, -1));
   }
 
   isEqual(other: NSEIndexPath): boolean {
