@@ -28,11 +28,13 @@ import {
 } from "react";
 import type { RuntimeAnimationService } from "../../SynCloudOS/SynCloudOS";
 import type { AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
+import type { AFXLayer } from "../../FX/AnimationFX/AFXLayer";
 import type { AFXRenderer, AFXRendererOptions } from "../../FX/AnimationFX/AFXRenderer";
 
 /** The layer capability NSE needs; host and app clients satisfy it structurally. */
 interface NSEAnimationLayers {
   createRenderer(target: object, options?: Pick<AFXRendererOptions, "maximumQuads" | "onRenderError">, signal?: AbortSignal): AFXRenderer;
+  bindLayer?(target: object, signal?: AbortSignal, options?: Readonly<{ layout?: "css" }>): AFXLayer;
 }
 
 /** Where NSE views run presentation animations: an AnimationFX service and

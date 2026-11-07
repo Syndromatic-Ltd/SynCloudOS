@@ -7,6 +7,7 @@ export { NSEWindowController, validateNSEWindowControllerClass, nseWindowInterna
 export type { NSEAnyWindowController, NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowMount } from "./Application/NSEWindowController";
 export { validateNSEViewControllerClass, nseAttachView, nseUpdateTraits, nseUpdateViewActivity, nsePopoverPositioning, nsePresentationStyle } from "./Application/NSEViewController";
 export type { NSEViewController, NSEViewControllerClass } from "./Application/NSEViewController";
+export { nseAnimatePresentation, nseIsDismissing } from "./Application/NSEViewController";
 export { enterClassApplication, instantiateInOwnerScope, nseDisposeFor, NSEOwnershipScope } from "./Controllers/ownership";
 export { attachNSEAuthoringContext } from "./Application/authoringContext";
 export { finalizeNSEAuthoringOwner } from "./Application/authoringLifecycle";

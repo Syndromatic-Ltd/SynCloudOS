@@ -57,6 +57,7 @@ import { createNSEWindowAlertQueue, NSEWindowAlertSheet, type NSEWindowAlertQueu
 import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/applicationHostInterop";
 import { useNSEOverlayFocusScope } from "../../NSE/applicationHostInterop";
 import { NSEViewControllerRendererProvider } from "../../NSE/applicationHostInterop";
+import { nseAnimatePresentation, nseIsDismissing } from "../../NSE/applicationHostInterop";
 
 const FRAME_STYLE: CSSProperties = Object.freeze({ display: "block", width: "100%", height: "100%", minWidth: 0, minHeight: 0 });
 const CONTENTS_STYLE: CSSProperties = Object.freeze({ display: "contents" });
@@ -183,7 +184,7 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
   const appRuntime = useContext(SynWareRuntimeContext);
   const kernel = useContext(SynCloudOSRuntimeContext);
   const context = useSynWareContext();
-  const { reducedMotion, frames } = useNSEAnimationEnvironment();
+  const { reducedMotion, frames, layers } = useNSEAnimationEnvironment();
   const viewActivity = useNSEViewActivitySource();
   const presentation = useSyncExternalStore(context?.presentation.subscribe ?? noTraitSubscription, context?.presentation.getSnapshot ?? noPresentation, noPresentation);
   const traits = useMemo(() => Object.freeze({ reducedMotion, presentation }), [reducedMotion, presentation]);
@@ -198,8 +199,8 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
   const fx = useMemo(
     () => (motion && location && haptics && midi && media && video && lumina
       ? { motion, location, haptics, midi, media, video, lumina, ...(animations ? { animation: { client: animations, frames } } : {}) }
-      : undefined),
-    [motion, location, haptics, midi, media, video, lumina, animations, frames],
+      : layers ? { animation: { client: layers, frames } } : undefined),
+    [motion, location, haptics, midi, media, video, lumina, animations, frames, layers],
   );
   const frameRef = useRef<HTMLDivElement | null>(null);
   const effectiveActivity = () => {
@@ -218,7 +219,8 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
       element,
       traits,
       active: effectiveActivity(),
-      ...(animations ? { bindLayer: (target: object, signal?: AbortSignal) => animations.bindLayer(target, signal, { layout: "css" }) } : {}),
+      ...(animations ? { bindLayer: (target: object, signal?: AbortSignal) => animations.bindLayer(target, signal, { layout: "css" }) }
+        : layers?.bindLayer ? { bindLayer: (target: object, signal?: AbortSignal) => layers.bindLayer!(target, signal, { layout: "css" }) } : {}),
       ...(fx ? { fx } : {}),
     });
     // Content can arrive after the key stage has focused its empty frame.
@@ -234,7 +236,7 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
       detach();
       untrack?.();
     };
-  }, [animations, appRuntime, controller, fx, kernel, frames, viewActivity]);
+  }, [animations, appRuntime, controller, fx, kernel, frames, layers, viewActivity]);
   useLayoutEffect(() => {
     if (controller.isDisposed) return;
     const document = kernel?.environment.browser.getDocument() ?? frameRef.current?.ownerDocument;
@@ -274,12 +276,13 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
   const View = controller.renderView ? InlineControllerView : viewComponentOf(controller);
   if (!View) throw new TypeError(`${controller.constructor.name} has no static view or renderView; declare one rendering form.`);
   const frame = (
-    <div ref={frameRef} tabIndex={-1} className={className} data-nse-view-controller="" style={controller.parent ? undefined : FRAME_STYLE}>
+    <div ref={frameRef} tabIndex={-1} className={className} data-nse-view-controller="" style={{ ...(controller.parent ? {} : FRAME_STYLE), ...(controller.presentedViewControllers.some(presented => presented[nsePresentationStyle] === "custom") ? { position: "relative" as const } : {}) }}>
       <NSEViewControllerRendererProvider value={NSEViewControllerView}>
         <View controller={controller} />
       </NSEViewControllerRendererProvider>
       {controller.presentedViewControllers.map(presented => {
         const style = presented[nsePresentationStyle];
+        if (style === "custom") return <NSECustomPresentation key={sheetKey(presented)} controller={presented} />;
         if (style === "popover") return <NSEPresentedPopover key={sheetKey(presented)} controller={presented} />;
         if (style === "modalWindow") return <NSEPresentedModalWindow key={sheetKey(presented)} controller={presented} />;
         return <NSEPresentedSheet key={sheetKey(presented)} controller={presented} />;
@@ -287,6 +290,17 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
     </div>
   );
   return <NSEControllerResponder target={controller} kind="view" host="element">{frame}</NSEControllerResponder>;
+}
+
+/** Custom presentations stay in the presenter's coordinate space; their
+ * animator owns movement, while the host owns mounting and lifetime. */
+function NSECustomPresentation({ controller }: { readonly controller: NSEViewController<unknown> }) {
+  useObserve(controller);
+  const dismissing = controller[nseIsDismissing];
+  useLayoutEffect(() => { controller[nseAnimatePresentation](); }, [controller, dismissing]);
+  return <div data-nse-custom-presentation="" style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+    <NSEViewControllerView controller={controller} />
+  </div>;
 }
 
 /** The first view controller frame in the application's content, past any in the window's title bar. */

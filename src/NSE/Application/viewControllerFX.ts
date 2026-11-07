@@ -80,19 +80,24 @@ function boundTo(owner: AbortSignal, signal: AbortSignal | undefined): AbortSign
 }
 
 /** The FX services of one view controller, owned by `owner`. */
-export function createViewControllerFX(clients: NSEViewControllerFXClients, owner: AbortSignal, controller?: NSEViewController<unknown>): NSEViewControllerFX {
+export function createViewControllerFX(clients: Partial<NSEViewControllerFXClients>, owner: AbortSignal, controller?: NSEViewController<unknown>): NSEViewControllerFX {
+  const requireClient = <K extends keyof NSEViewControllerFXClients>(key: K): NonNullable<NSEViewControllerFXClients[K]> => {
+    const client = clients[key];
+    if (!client) throw new DOMException(`${key} is unavailable in this view's host.`, "NotSupportedError");
+    return client;
+  };
   let motion: MFXMotionManager | undefined;
   let location: LFXLocationManager | undefined;
   let haptics: HFXHapticSession | undefined;
   let midi: MIFXAccess | undefined;
   let video: VFXCaptureSession | undefined;
   const media: MEFXMediaClient = Object.freeze({
-    copyBlock: (bytes: Uint8Array, signal?: AbortSignal) => clients.media.copyBlock(bytes, boundTo(owner, signal)),
+    copyBlock: (bytes: Uint8Array, signal?: AbortSignal) => requireClient("media").copyBlock(bytes, boundTo(owner, signal)),
     createQueue: <T>(options: Parameters<MEFXMediaClient["createQueue"]>[0], signal?: AbortSignal) =>
-      clients.media.createQueue<T>(options as never, boundTo(owner, signal)),
-    observeClock: (signal?: AbortSignal) => clients.media.observeClock(boundTo(owner, signal)),
+      requireClient("media").createQueue<T>(options as never, boundTo(owner, signal)),
+    observeClock: (signal?: AbortSignal) => requireClient("media").observeClock(boundTo(owner, signal)),
     createTimebase: (options?: Parameters<MEFXMediaClient["createTimebase"]>[0], signal?: AbortSignal) =>
-      clients.media.createTimebase(options, boundTo(owner, signal)),
+      requireClient("media").createTimebase(options, boundTo(owner, signal)),
   }) as MEFXMediaClient;
   return Object.freeze({
     animation: Object.freeze({
@@ -107,12 +112,12 @@ export function createViewControllerFX(clients: NSEViewControllerFXClients, owne
         return manageNSEAnimationDisplayLink(controller, outlet, options);
       },
     }),
-    get motion() { return (motion ??= clients.motion.createManager(owner)); },
-    get location() { return (location ??= clients.location.createManager(owner)); },
-    get haptics() { return (haptics ??= clients.haptics.createEngine(owner)); },
-    get midi() { return (midi ??= clients.midi.createAccess(owner)); },
-    get video() { return (video ??= clients.video.createCaptureSession(owner)); },
+    get motion() { return (motion ??= requireClient("motion").createManager(owner)); },
+    get location() { return (location ??= requireClient("location").createManager(owner)); },
+    get haptics() { return (haptics ??= requireClient("haptics").createEngine(owner)); },
+    get midi() { return (midi ??= requireClient("midi").createAccess(owner)); },
+    get video() { return (video ??= requireClient("video").createCaptureSession(owner)); },
     media,
-    lumina: clients.lumina,
+    get lumina() { return requireClient("lumina"); },
   });
 }

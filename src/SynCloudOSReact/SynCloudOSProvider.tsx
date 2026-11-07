@@ -24,6 +24,8 @@ import {
   NSEMaterialLightingProvider,
 } from "../NSE/hostComposition";
 import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../NSE/Animation";
+import { NSEViewControllerRendererProvider } from "../NSE/Application/viewControllerRenderer";
+import { NSEViewControllerView } from "../SynCloudOS/AppHosting/applicationHosting";
 import { registerNSEHapticFeedbackEngine } from "../NSE/Feedback/NSEHapticFeedbackManager";
 import { NSEViewDrawingEnvironmentContext, type NSEViewDrawingEnvironment } from "../NSE/Views/NSEViewDrawingEnvironment";
 import {
@@ -105,7 +107,7 @@ export function SynCloudOSProvider({
           <NSEFeedbackProvider value={runtime.haptics}>
             <NSEMaterialLightingProvider value={lighting}>
               <NSEViewDrawingEnvironmentContext.Provider value={drawingEnvironment}>
-                {children}
+                <NSEViewControllerRendererProvider value={NSEViewControllerView}>{children}</NSEViewControllerRendererProvider>
               </NSEViewDrawingEnvironmentContext.Provider>
             </NSEMaterialLightingProvider>
           </NSEFeedbackProvider>

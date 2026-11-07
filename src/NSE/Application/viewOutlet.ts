@@ -1,6 +1,7 @@
 import type { AFXLayer } from '../../FX/AnimationFX/AFXLayer';
 import type { AFXLayerActionMap } from '../../FX/AnimationFX/AFXLayerActions';
 import type { NSEViewController, NSEViewControllerBinding } from './NSEViewController';
+import { createNSEViewAnimator, type NSEViewAnimator } from '../Animation/NSEViewAnimator';
 import { getNSEObjectLifetime } from './objectLifetime';
 import { getNSETaskLifetime } from './viewActivity';
 
@@ -14,6 +15,8 @@ export interface NSEViewOutlet<T extends NSEOutletElement> {
   readonly current:T|null;
   readonly element:T;
   readonly layer:AFXLayer;
+  /** NSView.animator() on a connected HTML view. */
+  animator():NSEViewAnimator;
   readonly mountSignal:AbortSignal;
 }
 export interface NSEOutletOptions {readonly actions?:AFXLayerActionMap}
@@ -53,6 +56,14 @@ class ManagedOutlet<T extends NSEOutletElement> implements NSEViewOutlet<T> {
     return connection;
   }
   get element():T{return this.#require().element as T;}
+  animator():NSEViewAnimator {
+    const element=()=>{
+      const view=this.element;
+      if(!(view instanceof view.ownerDocument.defaultView!.HTMLElement))throw new TypeError('A view animator requires an HTML view.');
+      return view;
+    };
+    return createNSEViewAnimator(element,()=>this.layer,()=>this.owner.traitCollection.reducedMotion);
+  }
   get mountSignal():AbortSignal{return this.#require().abort.signal;}
   get layer():AFXLayer {
     const connection=this.#require();

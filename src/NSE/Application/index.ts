@@ -23,7 +23,7 @@ export type { NSEApplicationClass, NSEApplicationContext, NSEOpenWindowOptions }
 export { NSEWindowController } from "./NSEWindowController";
 export { NSEAlert, NSEAlertButton, NSEModalResponse } from "./NSEAlert";
 export type { NSEAlertStyle } from "./NSEAlert";
-export type { NSEPopoverPositioning } from "./NSEViewController";
+export type { NSEPopoverPositioning, NSEViewControllerPresentationAnimator } from "./NSEViewController";
 export type {
   NSEAnyWindowController,
   NSEWindow,
@@ -35,6 +35,7 @@ export type {
   NSEWindowDocument,
 } from "./NSEWindowController";
 export { NSEViewController } from "./NSEViewController";
+export { NSEViewControllerTransitionOptions } from "./viewControllerTransition";
 export { NSETitlebarAccessoryViewController } from "./NSETitlebarAccessoryViewController";
 export type { NSETitlebarAccessoryLayoutAttribute } from "./NSETitlebarAccessoryViewController";
 export type {

@@ -42,6 +42,10 @@ import { getNSEAuthoringContext } from "./authoringContext";
 import type { NSEObservable } from "../Objects/observable";
 import { createViewControllerFX, type NSEViewControllerFX, type NSEViewControllerFXClients } from "./viewControllerFX";
 import type { NSEWindow } from "./NSEWindowController";
+import { NSEAnimationContext } from "../Animation/NSEAnimationContext";
+import { nseChildTransition, NSEViewControllerTransitionOptions, type NSEChildTransition } from "./viewControllerTransition";
+import { createNSEViewAnimator, type NSEViewAnimator } from "../Animation/NSEViewAnimator";
+import { captureAFXTransactionAnimationStart } from "../../FX/AnimationFX/AFXTransaction";
 
 /**
  * The React component a view controller renders. It receives the controller
@@ -70,7 +74,20 @@ export const nsePopoverPositioning: unique symbol = Symbol("nse.popoverPositioni
 /** @internal How a presented view controller is shown: as a sheet, in a popover, or as a modal window. */
 export const nsePresentationStyle: unique symbol = Symbol("nse.presentationStyle");
 /** @internal */
-export type NSEPresentationStyle = "sheet" | "popover" | "modalWindow";
+export type NSEPresentationStyle = "sheet" | "popover" | "modalWindow" | "custom";
+
+/** NSViewControllerPresentationAnimator. The host mounts the presented view
+ * above the presenter's retained view before invoking the animator. Returning
+ * a promise keeps a dismissal alive until its animation has settled. */
+export interface NSEViewControllerPresentationAnimator {
+  animatePresentation(of: NSEViewController<unknown>, from: NSEViewController<unknown>): void | Promise<void>;
+  animateDismissal(of: NSEViewController<unknown>, from: NSEViewController<unknown>): void | Promise<void>;
+}
+
+/** @internal A host invokes a custom animator only after both views mount. */
+export const nseAnimatePresentation: unique symbol = Symbol("nse.animatePresentation");
+/** @internal Retained custom presentation state. */
+export const nseIsDismissing: unique symbol = Symbol("nse.isDismissing");
 
 export type NSEViewControllerOptions = NSEControllerOwnershipOptions & {
   /** The localised title of the managed view (NSViewController.title), as containers show it. */
@@ -111,6 +128,8 @@ export interface NSEControllerView {
    * `NSE_VIEW_NOT_LOADED` before the view loads and after it unmounts.
    */
   readonly layer: AFXLayer;
+  /** NSView.animator(): property changes use NSEAnimationContext.current. */
+  animator(): NSEViewAnimator;
   /**
    * The window the view is in (NSView.window): its window controller's window, reached through the
    * parent chain. `null` until the controller is a window's content or its descendant.
@@ -137,7 +156,7 @@ export interface NSEViewControllerBinding {
   /** The mounted application's animation host; absent outside an application. */
   bindLayer?(target: object, signal?: AbortSignal): AFXLayer;
   /** The mounted application's FX clients; absent outside an application. */
-  fx?: NSEViewControllerFXClients;
+  fx?: Partial<NSEViewControllerFXClients>;
 }
 
 /** The framework's hook for the React host. Not part of the public API. */
@@ -173,6 +192,7 @@ let viewControllerSequence = 0;
  * to the outer constructor, including after the nested constructor returns.
  */
 export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> implements NSEOwner, NSEOwnedObject {
+  static readonly TransitionOptions = NSEViewControllerTransitionOptions;
   /** The component that renders this controller's view. */
   static view?: NSEViewComponent;
   /** Additional explicitly observed state; the controller itself is always observed. */
@@ -189,6 +209,9 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #presenting: NSEViewController<unknown> | null = null;
   #popover: NSEPopoverPositioning | null = null;
   #presentationStyle: NSEPresentationStyle | null = null;
+  #presentationAnimator: NSEViewControllerPresentationAnimator | null = null;
+  #dismissing = false;
+  #animationPhase: "presentation" | "dismissal" | null = null;
   readonly #presented: NSEViewController<unknown>[] = [];
   #preferredContentSize: Readonly<{ width: number; height: number }> | null = null;
   #loaded = false;
@@ -199,9 +222,11 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #appeared = false;
   #pendingDetach: object | null = null;
   #fx: NSEViewControllerFX | null = null;
-  #fxClients: NSEViewControllerFXClients | undefined;
+  #fxClients: Partial<NSEViewControllerFXClients> | undefined;
   #traits: NSETraitCollection = Object.freeze({ reducedMotion: false, presentation: null });
   #title: string | undefined;
+  readonly #transitionSlots = new Map<NSEViewController<unknown>, NSEChildTransition>();
+  #transitioning = false;
 
   constructor(options: NSEViewControllerOptions = {}) {
     super();
@@ -222,6 +247,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
       element: { get: () => controller.#requireMounted("view.element").element },
       mountSignal: { get: () => { controller.#requireMounted("view.mountSignal"); return controller.#activity.snapshot("mounted").signal; } },
       layer: { get: () => controller.#boundLayer() },
+      animator: { value: () => createNSEViewAnimator(() => controller.#requireMounted("view.animator").element, () => controller.#boundLayer(), () => controller.traitCollection.reducedMotion) },
       window: { get: () => controller.#windowOf() },
     });
     this.#view = Object.freeze(view) as unknown as NSEControllerView;
@@ -317,6 +343,41 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     return this.#children;
   }
 
+  /** NSViewController.transition(from:to:options:completionHandler:). Both
+   * controllers remain children; only the incoming view remains in the slot. */
+  transition(from: NSEViewController<unknown>, to: NSEViewController<unknown>, options: NSEViewControllerTransitionOptions = NSEViewControllerTransitionOptions.none, completionHandler?: () => void): void {
+    this.#assertLive("transition", "call");
+    if (from.parent !== this || to.parent !== this || from.isDisposed || to.isDisposed) throw new TypeError("A transition requires two live children of this controller.");
+    const effect = options & 127;
+    if (!Number.isInteger(options) || options < 0 || options > 255 || (effect && (effect & (effect - 1)))) throw new TypeError("A transition takes at most one effect, optionally with allowUserInteraction.");
+    if (completionHandler !== undefined && typeof completionHandler !== "function") throw new TypeError("The completion handler must be callable.");
+    if (this.#transitioning) throw new Error("A child transition is already in progress.");
+    if (from === to) { completionHandler?.(); return; }
+    const slot = [...this.#transitionSlots].find(([, value]) => value.to === from && !value.from)?.[0] ?? from;
+    const context = NSEAnimationContext.current;
+    this.#transitioning = true;
+    const transition: NSEChildTransition = Object.freeze({ from, to, options, duration: context.duration, timing: context.timingFunction, finish: () => {
+      if (this.isDisposed || this.#transitionSlots.get(slot) !== transition) return;
+      this.#transitioning = false;
+      this.#transitionSlots.set(slot, Object.freeze({ ...transition, from: null }));
+      this.notifyObservers();
+      completionHandler?.();
+    } });
+    this.#transitionSlots.set(slot, transition);
+    const finished = new Promise<import("../../FX/AnimationFX/animationTypes").AFXAnimationSettlement>(resolve => {
+      const stop = this.subscribe(() => {
+        if (this.#transitionSlots.get(slot) === transition && !this.isDisposed) return;
+        stop();
+        resolve(Object.freeze({ state: this.isDisposed ? "cancelled" : "completed", reduced: this.traitCollection.reducedMotion }));
+      });
+    });
+    captureAFXTransactionAnimationStart(() => finished);
+    this.notifyObservers();
+  }
+
+  /** @internal The host resolves replacements in their original child slot. */
+  [nseChildTransition](child: NSEViewController<unknown>): NSEChildTransition | undefined { return this.#transitionSlots.get(child); }
+
   /** Whether the view is currently on screen. */
   get isViewVisible(): boolean {
     return this.#appeared;
@@ -410,6 +471,38 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   /** The view controller presenting this one (NSViewController.presentingViewController), or `null`. */
   get presentingViewController(): NSEViewController<unknown> | null { return this.#presenting; }
 
+  /** NSViewController.present(_:animator:). The presenter remains mounted underneath. */
+  present<TController extends NSEViewController<unknown>>(viewController: TController, animator: NSEViewControllerPresentationAnimator): TController {
+    if (!animator || typeof animator.animatePresentation !== "function" || typeof animator.animateDismissal !== "function")
+      throw new TypeError("present needs an NSViewControllerPresentationAnimator with presentation and dismissal methods.");
+    if (viewController.presentingViewController === this) return viewController;
+    const result = this.#present("present", "custom", null, viewController, []);
+    (result as NSEViewController<unknown>).#presentationAnimator = animator;
+    return result;
+  }
+
+  get [nseIsDismissing](): boolean { return this.#dismissing; }
+
+  /** @internal Called after mounting, or after a request to dismiss. */
+  [nseAnimatePresentation](): void {
+    const from = this.#presenting, animator = this.#presentationAnimator;
+    if (!from || !animator || this.isDisposed) return;
+    const phase = this.#dismissing ? "dismissal" : "presentation";
+    if (this.#animationPhase === phase) return;
+    this.#animationPhase = phase;
+    const complete = () => {
+      if (phase === "dismissal" && this.#dismissing && !this.isDisposed) this[nseDisposeFor]("removed-from-parent");
+    };
+    try {
+      const result = phase === "dismissal" ? animator.animateDismissal(this, from) : animator.animatePresentation(this, from);
+      if (result) void Promise.resolve(result).then(complete, complete);
+      else complete();
+    } catch {
+      // Cosmetic animation failures must never strand a live presentation.
+      complete();
+    }
+  }
+
   /**
    * Presents `viewController` as a sheet on this controller's window (NSViewController.presentAsSheet(_:)).
    * The sheet attaches under the window's title bar and toolbar and blocks the rest of the window, whose
@@ -502,6 +595,12 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
       return;
     }
     if (viewController.#presenting !== (this as NSEViewController<unknown>)) return;
+    if (viewController.#presentationStyle === "custom" && viewController.#binding) {
+      if (viewController.#dismissing) return;
+      viewController.#dismissing = true;
+      viewController.notifyObservers();
+      return;
+    }
     viewController[nseDisposeFor]("removed-from-parent");
   }
 
