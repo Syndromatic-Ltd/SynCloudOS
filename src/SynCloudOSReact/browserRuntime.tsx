@@ -582,7 +582,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     initialBundles: browserBundles(options.bundles ?? [], projectBundles, options.about),
   });
   let initialBundles = composition.initialBundles;
-  let applicationPolicyProfile: SynCloudOSConfigurationProfile | undefined;
+  let applicationConfigurationProfile: SynCloudOSConfigurationProfile | undefined;
   if (options.application) {
     const primaryId = normalizeBundleIdentifier(options.application.bundleIdentifier);
     if (!initialBundles.some(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId)) {
@@ -618,7 +618,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     // profile gets the document-store capabilities it declares; otherwise its documents are denied.
     if ((authenticationPolicy ?? "disabled") === "disabled" && composition.runtimeConfig.configurationProfile === undefined) {
       const primaryBundle = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId) as { readonly synWareManifest?: { readonly entitlements?: readonly string[] } } | undefined;
-      applicationPolicyProfile = singleApplicationConfigurationProfile(primaryBundle?.synWareManifest?.entitlements ?? []);
+      applicationConfigurationProfile = singleApplicationConfigurationProfile(primaryBundle?.synWareManifest?.entitlements ?? []);
     }
     if (authenticationPolicy !== undefined && authenticationPolicy !== "disabled"
       && (primary.presentation ?? "appView") === "appView" && primary.applicationMenu?.trigger !== "content") {
@@ -628,7 +628,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
   const config: SynCloudOSRuntimeConfig = {
     environment,
     ...composition.runtimeConfig,
-    ...(applicationPolicyProfile === undefined ? {} : { configurationProfile: applicationPolicyProfile }),
+    ...(applicationConfigurationProfile === undefined ? {} : { configurationProfile: applicationConfigurationProfile }),
     initialBundles,
     trustedDocumentKinds: composition.trustedDocumentKinds,
     // Memory and IndexedDB locations work out of the box; an adapter the host registers still wins.

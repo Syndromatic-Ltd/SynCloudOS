@@ -130,7 +130,7 @@ This table lists every stable uppercase diagnostic code in the offline catalogue
 | `SCOS_UNBOUND` | The calling file has no app binding; use `SCOS` in an app folder or `useSCOS()` in a shared component. |
 | `SCOS_APP_NOT_FOUND` | `SCOS.open` could not find the requested bundle identifier or route in the catalogue. |
 | `APP_DISABLED` | A required application service or capability is unavailable. |
-| `POLICYKIT_AUTHORISE_THROWN` | Launch authorisation callback threw. |
+| `CONFIGURATION_AUTHORISE_THROWN` | Launch authorisation callback threw. |
 | `RUNTIME_TRANSACTION_FAILED` | Runtime command or transaction observer threw. |
 | `NSE_MENU_DISPATCH_FAILED` | Menu command failed. |
 | `NO_FOCUSED_WINDOW` | Open windows exist but none is key. |

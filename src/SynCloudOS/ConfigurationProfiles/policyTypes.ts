@@ -73,7 +73,7 @@ export interface SynCloudOSPolicySubject {
   loginSession?: Pick<SynCloudOSLoginSessionSnapshot, "isAuthorised" | "status" | "synId" | "accessClass" | "displayName">;
 }
 
-/** What a policy profile sees of the login session when resolving a role. */
+/** What a configuration profile sees of the login session when resolving a role. */
 export interface SynCloudOSConfigurationProfileSession {
   readonly isAuthorised: boolean;
   readonly synId?: string | null;

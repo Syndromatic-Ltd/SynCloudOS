@@ -69,20 +69,20 @@ function hasOwn(record: object, key: string) {
  * system role added. */
 function policyRoleTable(profile: SynCloudOSConfigurationProfile): Readonly<Record<string, readonly string[]>> {
   if (!profile || typeof profile !== "object" || typeof profile.id !== "string" || profile.id.trim().length === 0)
-    throw new TypeError("A policy profile requires an id.");
-  if (!profile.roles || typeof profile.roles !== "object") throw new TypeError(`Policy profile ${profile.id} requires roles.`);
-  if (typeof profile.resolveRole !== "function") throw new TypeError(`Policy profile ${profile.id} requires resolveRole.`);
+    throw new TypeError("A configuration profile requires an id.");
+  if (!profile.roles || typeof profile.roles !== "object") throw new TypeError(`Configuration profile ${profile.id} requires roles.`);
+  if (typeof profile.resolveRole !== "function") throw new TypeError(`Configuration profile ${profile.id} requires resolveRole.`);
   if (hasOwn(profile.roles, SYSTEM_ROLE))
-    throw new TypeError(`Policy profile ${profile.id} cannot declare the framework's reserved "system" role.`);
+    throw new TypeError(`Configuration profile ${profile.id} cannot declare the framework's reserved "system" role.`);
   const table: Record<string, readonly string[]> = {};
   for (const [role, capabilities] of Object.entries(profile.roles)) {
-    if (role.trim().length === 0 || role !== role.trim()) throw new TypeError(`Policy profile ${profile.id} has an invalid role name "${role}".`);
+    if (role.trim().length === 0 || role !== role.trim()) throw new TypeError(`Configuration profile ${profile.id} has an invalid role name "${role}".`);
     if (!Array.isArray(capabilities) || capabilities.some((capability) => typeof capability !== "string" || capability.trim().length === 0))
-      throw new TypeError(`Policy profile ${profile.id} role "${role}" requires an array of capability names.`);
+      throw new TypeError(`Configuration profile ${profile.id} role "${role}" requires an array of capability names.`);
     table[role] = Object.freeze([...capabilities]);
   }
   if (!hasOwn(table, profile.anonymousRole))
-    throw new TypeError(`Policy profile ${profile.id} must declare its anonymous role "${String(profile.anonymousRole)}".`);
+    throw new TypeError(`Configuration profile ${profile.id} must declare its anonymous role "${String(profile.anonymousRole)}".`);
   table[SYSTEM_ROLE] = Object.freeze(["*"]);
   return Object.freeze(table);
 }
@@ -480,7 +480,7 @@ function appendTrace(decision: SynCloudOSPolicyDecision, entry: SynCloudOSPolicy
  */
 function missingCapabilityReason(what: string, subject: SynCloudOSPolicySubject, missing: readonly string[]): string {
   const names = missing.join(", ");
-  return `${what} requires additional capabilities: ${names}. The role "${subject.role}" does not hold ${missing.length === 1 ? "it" : "them"}; the host grants role capabilities in its policy profile (configurationProfile.roles).`;
+  return `${what} requires additional capabilities: ${names}. The role "${subject.role}" does not hold ${missing.length === 1 ? "it" : "them"}; the host grants role capabilities in its configuration profile (configurationProfile.roles).`;
 }
 
 function baseDecision(

@@ -25,7 +25,7 @@ import type { SynCloudOSConfigurationProfile } from "./policyTypes";
 const DOCUMENT_STORE_CAPABILITY = /^documentStore\.[A-Za-z.]+$/u;
 
 /**
- * The policy profile of a single-application host without sign-in: the default profile, with the
+ * The configuration profile of a single-application host without sign-in: the default profile, with the
  * document-store capabilities the primary application declares in `permissions` granted to the
  * anonymous role. Other declared capabilities are not granted this way. A host that passes its own
  * `configurationProfile` keeps it unchanged.
