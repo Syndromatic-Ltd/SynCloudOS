@@ -158,7 +158,9 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
     }).catch(fail);
   };
   const stepHistory = (delta: number) => { active.current?.abort(); setSearch(""); setItems([]); setSelected(new Set()); setStatus(""); setHistoryIndex(current => current + delta); };
-  const summary = chosen.length ? `${chosen.length} ${chosen.length === 1 ? "item" : "items"} selected${chosen.length === 1 ? ` — ${chosen[0]!.name}` : ""}` : directory && session.canChooseDirectories ? "Open this folder, or choose an item." : "Choose an item to open.";
+  const commonKind = chosen.length && chosen.every(item => item.media?.kind === chosen[0]?.media?.kind) ? chosen[0]?.media?.kind : null;
+  const noun = commonKind === "image" ? "picture" : commonKind === "video" ? "movie" : commonKind === "audio" ? "track" : "item";
+  const summary = chosen.length ? `${chosen.length} ${noun}${chosen.length === 1 ? "" : "s"} selected${!compact && chosen.length === 1 ? ` — ${chosen[0]!.name}` : ""}` : directory && session.canChooseDirectories ? "Open this folder, or choose an item." : "Choose an item to open.";
   const sourcePage = <nav aria-label="Open panel sources" className="nse-open-sources">
     <NSEOpenPanelSources id={`${session.id}:sources`} groups={groups} selectedId={location?.source ?? null} onSelect={id => { void chooseSource(id); }} />
     <NSEButton controlSize="small" title="System Chooser…" className="nse-open-system" onClick={system} />
@@ -186,7 +188,7 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
             onSelect={setSelected} onActivate={activate} /> : null}
         </div>
         {cursor ? <NSEButton controlSize="small" title="Load more" isEnabled={!busy} onClick={() => void loadMedia(location!.source.slice(6), cursor, false)} /> : null}
-        <footer className="nse-open-footer"><span role="status">{summary}</span>{!compact ? <><span className="nse-open-footer-spacer"/><NSEButton controlSize="small" title="Cancel" onClick={session.cancel} />{openButton}</> : <NSEButton controlSize="small" title="Cancel" onClick={session.cancel} />}</footer>
+        <footer className="nse-open-footer"><span role="status">{summary}</span>{!compact ? <><span className="nse-open-footer-spacer"/><NSEButton controlSize="small" title="Cancel" onClick={session.cancel} />{openButton}</> : null}</footer>
       </main> : null}
     </div>
     {compact && showsSources && status ? <p role="status" className="nse-open-status">{status}</p> : null}
