@@ -67,6 +67,7 @@ export function NSEPageCurlView({ controller }: { readonly controller: NSEPageCo
   const base = spread ? index - index % 2 : index;
   const [corners, setCorners] = useState<{ forward: NSEPageCorner; backward: NSEPageCorner }>({ forward: "bottom-right", backward: "bottom-left" });
   const sources = useRef(new Map<unknown, HTMLElement>());
+  const swipe = useRef<{ pointerId: number; x: number; y: number } | null>(null);
   // A surface keeps its source callback across progress renders, so replicas
   // never restart or run React views during a drag frame.
   const readers = useRef(new Map<unknown, () => HTMLElement | undefined>());
@@ -137,7 +138,24 @@ export function NSEPageCurlView({ controller }: { readonly controller: NSEPageCo
   }
   return <div className="nse-page-controller nse-page-controller--curl" aria-label={controller.title}
     data-nse-control="page-controller" data-transition-style="pageCurl" data-spine-location={controller.spineLocation}
-    data-selected-index={index} data-turn-progress={state.turnProgress} data-turn-direction={state.turnDirection ?? undefined}>
+    data-selected-index={index} data-turn-progress={state.turnProgress} data-turn-direction={state.turnDirection ?? undefined}
+    onPointerDown={event => {
+      // Edge drags already belong to the leaf. A swipe over ordinary page
+      // content uses the same curl, without also committing the edge gesture.
+      swipe.current = null;
+      if (!event.isPrimary || event.button !== 0 || event.defaultPrevented || state.turnDirection) return;
+      if ((event.target as Element).closest("button, a, input, select, textarea, [contenteditable='true'], [data-nse-page-no-drag]")) return;
+      swipe.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+    }}
+    onPointerUp={event => {
+      const start = swipe.current;
+      swipe.current = null;
+      if (!start || start.pointerId !== event.pointerId) return;
+      const dx = event.clientX - start.x;
+      if (Math.abs(dx) < 48 || Math.abs(dx) <= Math.abs(event.clientY - start.y)) return;
+      if (dx < 0) controller.navigateForward(); else controller.navigateBack();
+    }}
+    onPointerCancel={() => { swipe.current = null; }}>
     {spread || controller.canNavigateBack ? leaf("backward") : null}
     {objects.length ? leaf("forward") : null}
   </div>;

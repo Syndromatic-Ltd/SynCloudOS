@@ -270,6 +270,8 @@ Override `identifierForObject`, `viewControllerForIdentifier` and `prepareViewCo
 
 The observable snapshot has `selectedIndex`, `count`, `turnProgress` (`0..1`) and `turnDirection` (`"forward"`, `"backward"` or `null`). An app such as Portfolio observes progress for its own book scene; opening and closing that scene remain app behaviour. In `pageCurl`, `didTransitionToObject(object)` fires only after a curl completes successfully. Cancellation leaves the selected page unchanged and sends no completion delegate call.
 
+Use `selectedIndex` to select a distant page without a turn. In curl style `navigateForwardToObject` accepts the next arranged page (or next spread); it rejects a distant or unarranged object. Navigation before the view loads completes immediately because there is no visible sheet to animate.
+
 The curl renderer, hook, geometry, presets and leaf types are internal. The standalone `NSEPage` component, its handle and the `NSE.Page` facade have been removed. The controller preserves the existing WebGL curl, CSS fallback, reduced-motion crossfade and inert decorative faces. See the [page implementation notes](../../src/NSE/Page/README.md) for the rendering model.
 
 See [source-list windows](nse/source-list-chrome.md) for outline groups, the host's rail seam and window bottom-bar accessories.

@@ -79,6 +79,16 @@ function curlEvent(progress: number, direction: "forward" | "backward" = "forwar
   return { reason, snapshot: { progress, direction, phase, reason, targetProgress: 1, mode: "curl", edge: direction === "forward" ? "right" : "left", torn: false, turnId: 1, updatedAt: 0 } };
 }
 
+it("navigates arranged pages before its view loads", () => {
+  const book = new Book();
+  book.navigateForward();
+  expect(book.selectedIndex).toBe(1);
+  expect(book.transitions).toEqual(["Page 2"]);
+  book.navigateBack();
+  expect(book.selectedIndex).toBe(0);
+  book.dispose();
+});
+
 it("keeps selection and represented pages until the curl completes, including a returned drag", () => {
   const book = new Book();
   expect(book.viewControllerAt(0)).not.toBe(book.viewControllerAt(1));
@@ -178,6 +188,11 @@ it("renders one live child per printed page and completes real reduced-motion bu
   expect(liveBook.selectedIndex).toBe(2);
   expect(liveBook.getSnapshot()).toMatchObject({ turnProgress: 0, turnDirection: null });
   expect(() => liveBook.navigateForwardToObject(liveBook.arrangedObjects[0]!)).toThrow(/distant page/);
+  await act(async () => {
+    fireEvent.pointerDown(view, { pointerId: 11, button: 0, isPrimary: true, clientX: 200, clientY: 100 });
+    fireEvent.pointerUp(view, { pointerId: 11, button: 0, clientX: 300, clientY: 102 });
+  });
+  expect(liveBook.selectedIndex).toBe(0);
 });
 
 it("keeps a history: forward to a new page drops the pages after the selected one (stackHistory)", async () => {
