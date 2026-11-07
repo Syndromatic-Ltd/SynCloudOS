@@ -63,3 +63,43 @@ it("delivers notification actions to a live client without reloading its documen
   expect(postMessage).toHaveBeenCalledWith({ type: "notification-open", url: "https://site.test/notes?scos-notification=note-1&scos-action=reply" });
   expect(focus).toHaveBeenCalledOnce(); expect(navigate).not.toHaveBeenCalled();
 });
+it("keeps a replacement task when an earlier sync request finishes", async () => {
+  const data = new Map<string, any>(), listeners = new Map<string, (event: any) => void>();
+  const indexedDB = { open() {
+    const request: any = {};
+    queueMicrotask(() => {
+      request.result = { transaction() {
+        let pending = 0, completed = false;
+        const transaction: any = {};
+        const operation = (action: () => unknown) => {
+          const request: any = {}; pending++;
+          queueMicrotask(() => { request.result = action(); request.onsuccess?.(); pending--; queueMicrotask(() => { if (!pending && !completed) { completed = true; transaction.oncomplete?.(); } }); });
+          return request;
+        };
+        transaction.objectStore = () => ({ get: (key: string) => operation(() => data.get(key)), put: (value: unknown, key: string) => operation(() => { data.set(key, value); }), delete: (key: string) => operation(() => { data.delete(key); }), getAll: () => operation(() => [...data.values()]) });
+        return transaction;
+      } };
+      request.onsuccess();
+    }); return request;
+  } };
+  let startFetch!: () => void, finishFetch!: (value: unknown) => void;
+  const started = new Promise<void>(resolve => { startFetch = resolve; });
+  const fetch = vi.fn(() => { startFetch(); return new Promise(resolve => { finishFetch = resolve; }); });
+  runInNewContext(createServiceWorkerSource({ base: "/", receipt: "sdk", assets: [], manifests: [{ manifest: { scope: "/" }, members: [{ bundleIdentifier: "notes", background: { enabled: true, tasks: ["refresh"] } }] }] }), {
+    self: { location: { origin: "https://site.test" }, addEventListener: (name: string, listener: any) => listeners.set(name, listener), clients: { matchAll: async () => [] } }, URL, crypto, indexedDB, fetch,
+  });
+  async function message(value: unknown) {
+    let pending!: Promise<unknown>, reply: any;
+    listeners.get("message")!({ data: value, ports: [{ postMessage(value: unknown) { reply = value; } }], waitUntil(value: Promise<unknown>) { pending = value; } });
+    await pending; expect(reply.ok).toBe(true); return reply.value;
+  }
+  const submit = (body: string) => message({ type: "background-enqueue", appId: "notes", request: { identifier: "refresh", url: "/api/refresh", method: "POST", body } });
+  const firstId = await submit("first");
+  let first!: Promise<unknown>;
+  listeners.get("sync")!({ tag: "syncloudos:notes:refresh", waitUntil(value: Promise<unknown>) { first = value; } });
+  await started; await submit("second"); finishFetch({ ok: true }); await first;
+  expect(fetch.mock.calls[0][1]).toMatchObject({ redirect: "error", headers: { "X-SynCloudOS-Task": firstId } });
+  expect(data.get("task:notes:refresh")?.request.body).toBe("second");
+  await message({ type: "background-cancel", appId: "notes", identifier: "refresh", requestId: firstId });
+  expect(data.get("task:notes:refresh")?.request.body).toBe("second");
+});

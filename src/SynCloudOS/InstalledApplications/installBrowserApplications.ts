@@ -22,7 +22,7 @@ import { bindInstalledApplication } from "./installedApplicationRegistry";
 import { shortcutCommandIdentifier } from "./installedApplicationLaunch";
 import { systemWorkerRequest } from "../PlatformAdapters/BrowserSystemWorkerClient";
 import { observeHostDockBadge } from "./dockBadges";
-import { applicationSessionFor } from "../AppHosting/runtimeEntry";
+import { createInstalledApplicationRuntimePort } from "./installedApplicationRuntimePort";
 import { routeInstalledApplicationLaunch, type InstalledApplicationLaunch } from "./installedApplicationLaunch";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import { BrowserInstalledApplicationAdapter } from "../PlatformAdapters/BrowserInstalledApplicationAdapter";
@@ -39,6 +39,8 @@ export function installBrowserApplications(runtime: SynCloudOSRuntime, bootstrap
   const adapter = new BrowserInstalledApplicationAdapter(browserWindow, browserWindow.navigator, configuration);
   const releaseInstallation = bindInstalledApplication(document, adapter);
   runtime.registerDisposalParticipant({ id: "installed-applications", prepare: () => ({ status: "ready", commit: () => { stopBadgeObservation(); adapter.dispose(); releaseInstallation(); } }) });
+  const stopManifestObservation = runtime.routes.subscribeTransitions(() => adapter.updateManifest());
+  runtime.signal.addEventListener("abort", stopManifestObservation, { once: true });
   void adapter.start();
   const apps = [...new Map(configuration.manifests.flatMap(record => record.members).map(info => [info.bundleIdentifier, info])).values()];
   let queue = Promise.resolve();
@@ -55,15 +57,8 @@ export function installBrowserApplications(runtime: SynCloudOSRuntime, bootstrap
         const params = shareApp.shareTarget.params;
         sharedItems = { title: params.title ? target.searchParams.get(params.title) ?? undefined : undefined, text: params.text ? target.searchParams.get(params.text) ?? undefined : undefined, url: params.url ? target.searchParams.get(params.url) ?? undefined : undefined, files: [] };
       }
-      await routeInstalledApplicationLaunch({ ...launch, sharedItems }, apps, {
-        origin: browserWindow.location.origin, base: configuration.base, signal: runtime.signal,
-        launch: async (_appId, route) => { const result = await runtime.routes.openRoute(route); if (result && "status" in result && result.status !== "completed") throw new Error("The launched application's route was refused."); },
-        openDocument: request => runtime.documents.openDocument(request),
-        openURLs: async (appId, urls, context) => {
-          const app = applicationSessionFor({ runtimeId: runtime.runtimeId, appId })?.app;
-          if (app) await app.delegate?.applicationOpen?.(app, urls, context);
-        },
-      });
+      const delivered = await routeInstalledApplicationLaunch({ ...launch, sharedItems }, apps, createInstalledApplicationRuntimePort(runtime, browserWindow.location.origin, configuration.base));
+      if (shareId && !delivered) throw new Error("The shared item has no declared application route.");
       if (shareId && shareApp) await systemWorkerRequest(browserWindow.navigator, { type: "share-ack", appId: shareApp.bundleIdentifier, identifier: shareId }, runtime.signal);
     }).catch(error => { if (!runtime.signal.aborted) browserWindow.console.error("SynCloudOS application launch failed", error); });
   };
@@ -88,5 +83,5 @@ export function installBrowserApplications(runtime: SynCloudOSRuntime, bootstrap
   launchQueue?.setConsumer(deliver);
   runtime.signal.addEventListener("abort", () => launchQueue?.setConsumer(() => {}), { once: true });
   const url = new URL(browserWindow.location.href);
-  if (url.searchParams.has("scos-protocol") || url.searchParams.has("scos-shortcut") || url.searchParams.has("scos-share") || url.searchParams.has("scos-notification") || apps.some(app => app.shareTarget?.method === "GET" && app.shareTarget.action === url.pathname)) deliver({ targetURL: url.href });
+  if (url.searchParams.has("scos-protocol") || url.searchParams.has("scos-shortcut") || url.searchParams.has("scos-share") || url.searchParams.has("scos-notification") || apps.some(app => app.shareTarget?.method === "GET" && `${configuration.base.replace(/\/$/u, "")}${app.shareTarget.action}` === url.pathname)) deliver({ targetURL: url.href });
 }

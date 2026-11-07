@@ -23,7 +23,7 @@ import type { BGTaskScheduler, BGTaskRequest, BGDownloadTaskRequest } from "../S
 import { systemWorkerRequest } from "./BrowserSystemWorkerClient";
 interface BackgroundRegistration extends ServiceWorkerRegistration {
   readonly sync?: { register(tag: string): Promise<void> };
-  readonly backgroundFetch?: { fetch(id: string, requests: readonly string[], options: { title: string; downloadTotal?: number }): Promise<{ readonly id: string; abort(): Promise<boolean> }> };
+  readonly backgroundFetch?: { fetch(id: string, requests: readonly Request[], options: { title: string; downloadTotal?: number }): Promise<{ readonly id: string; abort(): Promise<boolean> }> };
 }
 export function createBrowserBackgroundTaskScheduler(navigator: Navigator, appId: string, identifiers: readonly string[], signal: AbortSignal, cacheStorage?: CacheStorage): BGTaskScheduler {
   const requireIdentifier = (identifier: string) => { signal.throwIfAborted(); if (!identifiers.includes(identifier)) throw new DOMException("Declare this background task in Info.ts before scheduling it.", "SecurityError"); };
@@ -39,16 +39,16 @@ export function createBrowserBackgroundTaskScheduler(navigator: Navigator, appId
       requireIdentifier(request.identifier);
       const worker = await registration();
       if (!worker.sync) throw new DOMException("Background sync is unavailable.", "NotSupportedError");
-      await systemWorkerRequest(navigator, { type: "background-enqueue", appId, request }, signal);
+      const requestId = await systemWorkerRequest<string>(navigator, { type: "background-enqueue", appId, request }, signal);
       try { await worker.sync.register(`syncloudos:${appId}:${request.identifier}`); }
-      catch (error) { await systemWorkerRequest(navigator, { type: "background-cancel", appId, identifier: request.identifier }, signal); throw error; }
+      catch (error) { try { await systemWorkerRequest(navigator, { type: "background-cancel", appId, identifier: request.identifier, requestId }, AbortSignal.timeout(2000)); } catch { /* The durable request can be inspected on the next launch. */ } throw error; }
     },
     async submitDownload(request: BGDownloadTaskRequest) {
       requireIdentifier(request.identifier); const worker = await registration();
       if (!worker.backgroundFetch) throw new DOMException("Background fetch is unavailable.", "NotSupportedError");
       const origin = new URL(worker.scope).origin;
       const urls = request.urls.map(value => { const url = new URL(value, worker.scope); if (url.origin !== origin || !url.pathname.startsWith(new URL(worker.scope).pathname)) throw new DOMException("Background downloads must stay on the host origin.", "SecurityError"); return url.href; });
-      return worker.backgroundFetch.fetch(`syncloudos:${appId}:${request.identifier}`, urls, { title: request.title, downloadTotal: request.downloadTotal });
+      return worker.backgroundFetch.fetch(`syncloudos:${appId}:${request.identifier}`, urls.map(url => new Request(url, { redirect: "error", credentials: "same-origin" })), { title: request.title, downloadTotal: request.downloadTotal });
     },
     async downloadedData(identifier: string, value: string) {
       requireIdentifier(identifier); const worker = await registration();

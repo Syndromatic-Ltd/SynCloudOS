@@ -59,6 +59,13 @@ it("requires configured owner push keys and keeps remote registration on the sit
   const crossOrigin = createBrowserRemoteNotifications(browser, "notes", { applicationServerKey: "no-key", subscriptionURL: "https://other.test/push" }, new AbortController().signal);
   await expect(crossOrigin.registerForRemoteNotifications()).rejects.toMatchObject({ name: "SecurityError" });
 });
+it("reports the per-app notification decision when browser permission is already granted", async () => {
+  const browser = { navigator: {}, location: { href: "https://site.test/", origin: "https://site.test" }, Notification: { permission: "granted" } } as unknown as Window;
+  const notifications = createBrowserRemoteNotifications(browser, "notes", undefined, new AbortController().signal, {
+    require: () => {}, request: async () => false, observe: () => "denied", requireRemoteRegistration: () => { throw new DOMException("App consent is required.", "NotAllowedError"); },
+  });
+  await expect(notifications.getNotificationSettings()).resolves.toMatchObject({ authorizationStatus: "denied" });
+});
 it("keeps Dock labels under application ownership and validates updates", () => {
   const update = vi.fn(), tile = new NSEDockTile(update);
   tile.badgeLabel = "Ready"; tile.badgeLabel = "Ready";

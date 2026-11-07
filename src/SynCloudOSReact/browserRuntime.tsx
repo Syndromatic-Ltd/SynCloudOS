@@ -21,6 +21,7 @@
 import { InstalledApplicationTitleBar } from "./InstalledApplicationTitleBar";
 import { configureApplicationPush } from "../SynCloudOS/InstalledApplications/applicationSystemServices";
 import type { UNPushConfiguration } from "../SynCloudOS/UserNotifications/UserNotifications";
+import { installedApplicationRoute } from "../SynCloudOS/InstalledApplications/installedApplicationLaunch";
 import { installBrowserApplications } from "../SynCloudOS/InstalledApplications/installBrowserApplications";
 import { getSynWareNamespace } from "../SynCloudOS/AppSDK/useStrings";
 import "../SynCloudOS/styles/runtime.css";
@@ -763,8 +764,9 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
       deploymentBasePath: options.deploymentBasePath,
     });
     const isApplicationRoot = (href: string) => Boolean(options.application && /^\/(?:[?#]|$)/u.test(href));
-    const applicationPath = (href: string) => isApplicationRoot(href)
-      ? `${runtime.apps.getApp(options.application!.bundleIdentifier)!.route}${href.slice(1)}` : href;
+    const launchDeclarations = runtime.bundles.getBundles().flatMap(bundle => bundle.synWareManifest ? [bundle.synWareManifest] : []);
+    const applicationPath = (href: string) => installedApplicationRoute(isApplicationRoot(href)
+      ? `${runtime.apps.getApp(options.application!.bundleIdentifier)!.route}${href.slice(1)}` : href, launchDeclarations);
     const browserRoutes = createBrowserRouteCoordinator({
       platform: browserRoutePlatform,
       getRuntimeSnapshot: runtime.store.getSnapshot,
@@ -793,7 +795,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     const frameworkTestPath = import.meta.env.DEV && location.pathname.startsWith("/__framework-tests/");
     initialPathname = frameworkTestPath
       ? "/"
-      : `${applicationPath(location.pathname)}${location.search}${location.hash}`;
+      : applicationPath(`${location.pathname}${location.search}${location.hash}`);
 
     // Framework fixtures intentionally boot the canonical Webspring runtime at
     // `/` while keeping their own browser URL so App can mount the fixture.

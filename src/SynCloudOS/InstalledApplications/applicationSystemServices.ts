@@ -37,14 +37,22 @@ export function applicationSystemServices(runtime: SynCloudOSRuntime, appId: str
     if (!runtime.bundles.getBundle(appId)?.synWareManifest?.entitlements?.includes("notifications.post")) throw new DOMException("Declare notifications.post in Info.ts entitlements.", "SecurityError");
   };
   const privacy = runtime.privacy.forApplication({ appId, userId: runtime.identity.session.getSnapshot()?.subjectId ?? "anonymous", service: "notifications", signal });
-  const notifications = createBrowserRemoteNotifications(browserWindow, appId, pushConfigurations.get(runtime), signal,
-    () => { requireNotifications(); privacy.assertRequestAllowed(); },
-    async () => {
+  const notifications = createBrowserRemoteNotifications(browserWindow, appId, pushConfigurations.get(runtime), signal, {
+    require: () => { requireNotifications(); privacy.assertRequestAllowed(); },
+    request: async () => {
       requireNotifications();
       return await privacy.requestAuthorization(async () => {
         const status = await runtime.notifications.requestBrowserPermission?.({ userGesture: true });
         return status === "granted" ? "granted" : status === "denied" ? "denied" : status === "unsupported" ? "unavailable" : "prompt";
       }, { signal }) === "granted";
-    });
+    },
+    observe: status => {
+      const effective = privacy.observe(status === "authorized" ? "granted" : status === "denied" ? "denied" : status === "unsupported" ? "unavailable" : "prompt");
+      return effective === "granted" ? "authorized" : effective === "denied" ? "denied" : effective === "unavailable" ? "unsupported" : "notDetermined";
+    },
+    requireRemoteRegistration: () => {
+      if (privacy.authorizationStatus() !== "granted") throw new DOMException("Request this application's notification authorisation before registering for push.", "NotAllowedError");
+    },
+  });
   return { scheduler, notifications, setBadgeLabel: (label: string) => setApplicationDockBadge(runtime, appId, label) };
 }

@@ -50,3 +50,20 @@ it("offers installation only after the browser supplies a prompt and records dec
   expect(adapter.getSnapshot().canInstall).toBe(false);
   adapter.dispose();
 });
+it("selects the app manifest from the live route in an SPA production document", async () => {
+  document.querySelectorAll('link[rel="manifest"]').forEach(node => node.remove());
+  const record = (id: string, scope: string) => ({ bundleIdentifier: id, fileName: `${id}.webmanifest`, manifest: { scope, start_url: scope, name: id }, members: [] });
+  const adapter = new BrowserInstalledApplicationAdapter(window, {} as Navigator, { base: "/product/", receipt: "receipt", manifests: [record("desktop", "/product/"), record("notes", "/product/notes")] });
+  adapter.updateManifest("/product/notes");
+  expect(document.querySelector('link[rel="manifest"]')?.getAttribute("href")).toBe("/product/notes.webmanifest");
+  adapter.updateManifest("/product/other");
+  expect(document.querySelector('link[rel="manifest"]')?.getAttribute("href")).toBe("/product/desktop.webmanifest");
+  adapter.dispose();
+  document.querySelectorAll('link[rel="manifest"]').forEach(node => node.remove());
+  const onlyApp = new BrowserInstalledApplicationAdapter(window, {} as Navigator, { base: "/product/", receipt: "receipt", manifests: [record("notes", "/product/notes")] });
+  onlyApp.updateManifest("/product/notes");
+  expect(document.querySelector('link[rel="manifest"]')).not.toBeNull();
+  onlyApp.updateManifest("/product/elsewhere");
+  expect(document.querySelector('link[rel="manifest"]')).toBeNull();
+  onlyApp.dispose();
+});

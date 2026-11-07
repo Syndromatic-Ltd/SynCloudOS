@@ -48,6 +48,18 @@ export class BrowserInstalledApplicationAdapter {
   readonly #beforeInstall = (event: Event) => {
     event.preventDefault(); this.#prompt = event as InstallPrompt; this.#set({ canInstall: true });
   };
+  updateManifest(pathname = this.browserWindow.location.pathname): void {
+    if (this.#disposed) return;
+    const record = this.configuration.manifests.filter(record => pathname === record.manifest.scope || pathname.startsWith(record.manifest.scope.endsWith("/") ? record.manifest.scope : `${record.manifest.scope}/`)).sort((a,b) => b.manifest.scope.length-a.manifest.scope.length)[0];
+    let link = this.browserWindow.document.querySelector<HTMLLinkElement>('link[rel="manifest"][data-syncloudos-manifest]');
+    const href = record ? `${this.configuration.base}${record.fileName}` : null;
+    if (!href) { link?.remove(); this.#prompt = null; this.#set({ canInstall: false }); return; }
+    if (link?.getAttribute("href") === href) return;
+    if (!link) { link = this.browserWindow.document.createElement("link"); link.rel = "manifest"; link.dataset.syncloudosManifest = ""; this.browserWindow.document.head.append(link); }
+    link.setAttribute("href", href);
+    this.#prompt = null; this.#set({ canInstall: false });
+  }
+  readonly #routeChanged = () => this.updateManifest();
   readonly #installed = () => { this.#prompt = null; this.#set({ installed: true, canInstall: false }); void this.#persist(); };
   async #persist() {
     try { this.#set({ persistence: this.browserNavigator.storage?.persist ? await this.browserNavigator.storage.persist() ? "granted" : "refused" : "unsupported" }); }
@@ -56,6 +68,8 @@ export class BrowserInstalledApplicationAdapter {
   async start(): Promise<void> {
     this.browserWindow.addEventListener("beforeinstallprompt", this.#beforeInstall);
     this.browserWindow.addEventListener("appinstalled", this.#installed);
+    this.browserWindow.addEventListener("popstate", this.#routeChanged);
+    this.updateManifest();
     if (this.#snapshot.installed) void this.#persist();
     if (!this.browserNavigator.serviceWorker) { this.#set({ worker: "unsupported" }); return; }
     try {
@@ -72,5 +86,6 @@ export class BrowserInstalledApplicationAdapter {
     this.#disposed = true; this.#prompt = null; this.#listeners.clear();
     this.browserWindow.removeEventListener("beforeinstallprompt", this.#beforeInstall);
     this.browserWindow.removeEventListener("appinstalled", this.#installed);
+    this.browserWindow.removeEventListener("popstate", this.#routeChanged);
   }
 }
