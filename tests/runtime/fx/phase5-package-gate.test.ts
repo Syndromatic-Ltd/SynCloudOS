@@ -25,6 +25,7 @@ import { assertReviewedPackageFiles } from "../../../scripts/synware/sdk-package
 it("accepts the reviewed type-only runtime entries while rejecting omitted implementations", () => {
   expect(() => assertFxRuntimeEntry("bluetooth", {})).not.toThrow();
   expect(() => assertFxRuntimeEntry("speech", {})).not.toThrow();
+  expect(() => assertFxRuntimeEntry("network", {})).not.toThrow();
   expect(() => assertFxRuntimeEntry("audio", {})).toThrow(/Empty FX runtime entry/);
   expect(() => assertFxRuntimeEntry("private", { accidental: true })).toThrow(/Unknown FX family/);
   expect(() => assertFxRuntimeEntry("xr", { XRFXConfiguration: class {} })).not.toThrow();

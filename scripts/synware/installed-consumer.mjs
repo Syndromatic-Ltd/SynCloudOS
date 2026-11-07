@@ -145,10 +145,10 @@ export function assertIndependentModules(root, ids) {
   }
 }
 
-/** These two device families are declaration roots; their live objects come from the session. */
+/** These device families are declaration roots; their live objects come from the session. */
 export function assertFxRuntimeEntry(family, module) {
   assert(requiredFxFamilies.includes(family), `Unknown FX family: ${family}`);
-  assert(Object.keys(module).length > 0 || ["bluetooth", "speech"].includes(family), `Empty FX runtime entry: ${family}`);
+  assert(Object.keys(module).length > 0 || ["bluetooth", "speech", "network"].includes(family), `Empty FX runtime entry: ${family}`);
 }
 
 /** Shared by source-side regression tests and the strict installed declaration gate. */
@@ -163,6 +163,8 @@ export function createSdkPublicTypeProbe() {
     `import type { SPFXSpeechRecognizer } from "@syndromatic/syncloudos/fx/speech";`,
     `const bluetoothManager: BTFXCentralManager = app.bluetooth.createCentralManager(); void bluetoothManager;`,
     `const speechRecognizer: SPFXSpeechRecognizer = app.speech.createRecognizer(); void speechRecognizer;`,
+    `import type { NWFXPathMonitor } from "@syndromatic/syncloudos/fx/network";`,
+    `const networkMonitor: NWFXPathMonitor = app.network.createMonitor(); void networkMonitor;`,
     `const token = sdk.defineSynWareServiceToken<{ read(): string }>({ id: "org.example.package-proof", contractVersion: "proof.v1" });`,
     `const serviceText: string = app.services.require(token).read(); void serviceText;`,
     `// @ts-expect-error Tokens must infer the declared client, not an arbitrary caller type.`,
