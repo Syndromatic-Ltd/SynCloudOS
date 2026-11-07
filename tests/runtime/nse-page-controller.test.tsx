@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import * as React from "react";
-import { act, cleanup, fireEvent, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
-import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
+import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { useObserve } from "../../src/NSE/Objects/useObserve";
 import { NSEPageController } from "../../src/NSE/Page";
+import { pageCurlConnection } from "../../src/NSE/Page/pageCurlConnection";
+import type { NSEPageEvent, NSEPageHandle } from "../../src/NSE/Page/nsePageTypes";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
 const hosts: ClassApplicationHost[] = [];
@@ -16,10 +18,12 @@ afterEach(async () => {
 });
 
 interface Entry { readonly kind: "folder" | "note"; readonly name: string }
+let pageRenders = 0;
 
 class EntryPage extends NSEViewController {
   constructor(readonly kind: string) { super(); }
   static override view = function EntryPageView({ controller }: { readonly controller: EntryPage }) {
+    pageRenders++;
     useObserve(controller);
     const object = controller.representedObject as Entry | string | undefined;
     return <p>{controller.kind}: {typeof object === "string" ? object : object?.name}</p>;
@@ -50,14 +54,90 @@ class Days extends NSEPageController<string> {
   override viewControllerForIdentifier(identifier: string) { return this.addChild(EntryPage, identifier); }
 }
 
+it("describes a single curling page without exposing the curl engine", () => {
+  const book = new NSEPageController({ transitionStyle: "pageCurl" });
+  expect(book.spineLocation).toBe("min");
+  expect(book.getSnapshot()).toEqual({ selectedIndex: 0, count: 0, turnProgress: 0, turnDirection: null });
+  book.spineLocation = "mid";
+  expect(book.spineLocation).toBe("mid");
+  expect(() => { book.spineLocation = "max" as never; }).toThrow(TypeError);
+  book.dispose();
+});
+
+class Book extends NSEPageController<Entry> {
+  readonly transitions: string[] = [];
+  constructor() {
+    super({ transitionStyle: "pageCurl" });
+    this.arrangedObjects = Array.from({ length: 5 }, (_, index) => ({ kind: "note", name: `Page ${index + 1}` }));
+  }
+  override identifierForObject(entry: Entry) { return entry.kind; }
+  override viewControllerForIdentifier(identifier: string) { return this.addChild(EntryPage, identifier); }
+  override didTransitionToObject(entry: Entry) { this.transitions.push(entry.name); }
+}
+
+function curlEvent(progress: number, direction: "forward" | "backward" = "forward", phase: "dragging" | "turning" | "idle" = "turning", reason: NSEPageEvent["reason"] = "gesture"): NSEPageEvent {
+  return { reason, snapshot: { progress, direction, phase, reason, targetProgress: 1, mode: "curl", edge: direction === "forward" ? "right" : "left", torn: false, turnId: 1, updatedAt: 0 } };
+}
+
+it("keeps selection and represented pages until the curl completes, including a returned drag", () => {
+  const book = new Book();
+  expect(book.viewControllerAt(0)).not.toBe(book.viewControllerAt(1));
+  expect(book.viewControllerAt(0)!.representedObject).toBe(book.arrangedObjects[0]);
+  const engine = pageCurlConnection(book);
+  engine.progress(.5, curlEvent(.5, "forward", "dragging"));
+  expect(book.selectedIndex).toBe(0);
+  expect(book.getSnapshot()).toMatchObject({ turnProgress: .5, turnDirection: "forward" });
+  engine.progress(1, curlEvent(1));
+  expect(book.transitions).toEqual([]);
+  engine.end(curlEvent(1, "forward", "idle"));
+  expect(book.selectedIndex).toBe(1);
+  expect(book.transitions).toEqual(["Page 2"]);
+  expect(book.getSnapshot()).toMatchObject({ turnProgress: 0, turnDirection: null });
+  engine.progress(.15, curlEvent(.15, "backward", "dragging"));
+  engine.progress(0, curlEvent(0, "backward", "idle", "cancel"));
+  expect(book.selectedIndex).toBe(1);
+  expect(book.getSnapshot()).toMatchObject({ turnProgress: 0, turnDirection: null });
+  expect(book.transitions).toEqual(["Page 2"]);
+  book.dispose();
+});
+
+it("turns spreads in both directions, gates overlapping commands, and cancels on replacement", () => {
+  const book = new Book();
+  book.spineLocation = "mid";
+  const engine = pageCurlConnection(book);
+  const turns: string[] = [];
+  const attach = (direction: "forward" | "backward") => engine.attach(direction, {
+    reset() {}, setProgress() {}, turnTo(progress, options) { turns.push(`${direction}:${progress}:${options?.edge}`); },
+  } as NSEPageHandle);
+  attach("forward"); attach("backward");
+  book.navigateForward(); book.navigateForward();
+  expect(turns).toEqual(["forward:1:right"]);
+  expect(book.selectedIndex).toBe(0);
+  engine.end(curlEvent(1, "forward", "idle"));
+  expect(book.selectedIndex).toBe(2);
+  book.navigateBack();
+  expect(turns.at(-1)).toBe("backward:1:left");
+  engine.end(curlEvent(1, "backward", "idle"));
+  expect(book.selectedIndex).toBe(0);
+  book.navigateForward();
+  book.selectedIndex = 4;
+  engine.end(curlEvent(1, "forward", "idle", "superseded"));
+  expect(book.selectedIndex).toBe(4);
+  expect(book.canNavigateForward).toBe(false);
+  expect(book.transitions).toEqual(["Page 3", "Page 1"]);
+  book.dispose();
+});
+
 let history!: History;
 let days!: Days;
+let liveBook!: Book;
 class Content extends NSEViewController {
   readonly history = this.addChild(History);
   readonly days = this.addChild(Days);
-  constructor() { super(); history = this.history; days = this.days; }
+  readonly book = this.addChild(Book);
+  constructor() { super(); history = this.history; days = this.days; liveBook = this.book; this.book.title = "Book"; }
   static override view = function ContentView({ controller }: { readonly controller: Content }) {
-    return <><controller.history.view /><controller.days.view /></>;
+    return <><controller.history.view /><controller.days.view /><controller.book.view /></>;
   };
 }
 class MainWindow extends NSEWindowController {
@@ -73,6 +153,32 @@ async function launch() {
   await act(async () => { await host.openMainWindow(); });
   return host;
 }
+
+it("renders one live child per printed page and completes real reduced-motion button turns", async () => {
+  await launch();
+  const view = screen.getByLabelText("Book");
+  await act(async () => { liveBook[nseUpdateTraits]({ ...liveBook.traitCollection, reducedMotion: true }); });
+  expect(view.getAttribute("data-transition-style")).toBe("pageCurl");
+  expect(view.querySelectorAll('.nse-page__face--front [data-nse-view-controller]')).toHaveLength(1);
+  const before = pageRenders;
+  await act(async () => {
+    for (let frame = 1; frame < 20; frame++) pageCurlConnection(liveBook).progress(frame / 40, curlEvent(frame / 40, "forward", "dragging"));
+  });
+  expect(pageRenders).toBe(before);
+  await act(async () => { liveBook.selectedIndex = liveBook.selectedIndex; });
+  await act(async () => { fireEvent.click(within(view).getByRole("button", { name: "Next page" })); });
+  expect(liveBook.selectedIndex).toBe(1);
+  expect(liveBook.transitions).toEqual(["Page 2"]);
+  await act(async () => { fireEvent.click(within(view).getByRole("button", { name: "Previous page" })); });
+  expect(liveBook.selectedIndex).toBe(0);
+  expect(liveBook.transitions).toEqual(["Page 2", "Page 1"]);
+  await act(async () => { liveBook.spineLocation = "mid"; });
+  expect(view.querySelectorAll('.nse-page__face--front [data-nse-view-controller]')).toHaveLength(2);
+  await act(async () => { liveBook.navigateForward(); });
+  expect(liveBook.selectedIndex).toBe(2);
+  expect(liveBook.getSnapshot()).toMatchObject({ turnProgress: 0, turnDirection: null });
+  expect(() => liveBook.navigateForwardToObject(liveBook.arrangedObjects[0]!)).toThrow(/distant page/);
+});
 
 it("keeps a history: forward to a new page drops the pages after the selected one (stackHistory)", async () => {
   await launch();

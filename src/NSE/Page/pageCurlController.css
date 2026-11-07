@@ -1,0 +1,17 @@
+.nse-page-controller--curl { position: relative; width: 100%; height: 100%; }
+.nse-page-controller__leaf { position: absolute; top: 0; width: 100%; height: 100%; }
+.nse-page-controller__leaf--forward { right: 0; }
+.nse-page-controller__leaf--backward { left: 0; }
+.nse-page-controller--curl[data-spine-location="mid"] > .nse-page-controller__leaf { width: 50%; }
+.nse-page-controller__page,
+.nse-page-controller__page > [data-nse-view-controller],
+.nse-page-controller__print,
+.nse-page-controller__reverse { width: 100%; height: 100%; }
+.nse-page-controller__reverse { transform: scaleX(-1); }
+.nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward { z-index: 4; pointer-events: none; }
+.nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward .nse-page__dogear { pointer-events: auto; }
+.nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 72px; pointer-events: auto; }
+.nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward .nse-page__sheet,
+.nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward .nse-page__inside { opacity: 0; }
+.nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward:not([data-progress="0.000"]) .nse-page__sheet,
+.nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward:not([data-progress="0.000"]) .nse-page__inside { opacity: 1; }

@@ -55,7 +55,7 @@ function svgPath(points: ReadonlyArray<{ x: number; y: number }>, close: boolean
   return points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(" ") + (close ? " Z" : "");
 }
 
-export const NSEPage = forwardRef<NSEPageHandle, NSEPageProps>(function NSEPage(
+export const NSEPageCurlLeaf = forwardRef<NSEPageHandle, NSEPageProps>(function NSEPageCurlLeaf(
   {
     children,
     front,

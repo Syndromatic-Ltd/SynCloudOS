@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useContext, useId, useLayoutEffect, useRef, type ComponentType } from "react";
+import { createContext, memo, useContext, useId, useLayoutEffect, useRef, type ComponentType } from "react";
 
 import type { NSEViewController } from "./NSEViewController";
 import { useObserve } from "../Objects/useObserve";
@@ -38,6 +38,14 @@ export function registerNSEStandaloneViewControllerRenderer(renderer: NSEViewCon
 
 /** @internal The application host provides its view controller renderer to every view it mounts. */
 export const NSEViewControllerRendererProvider = NSEViewControllerRendererContext.Provider;
+
+/** @internal A container with its own transition engine renders stable child
+ * hosts without subscribing each page to every frame of the parent's turn. */
+export const NSEUntransitionedChildView = memo(function NSEUntransitionedChildView({ controller }: { readonly controller: NSEViewController<unknown> }) {
+  const Renderer = useContext(NSEViewControllerRendererContext) ?? standaloneRenderer;
+  if (!Renderer) throw new Error(`${controller.constructor.name}'s view can only be shown inside a view an application hosts.`);
+  return <Renderer controller={controller} />;
+});
 
 /**
  * Renders a child view controller's view through the application host, as a container view
