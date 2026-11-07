@@ -1,0 +1,797 @@
+{
+  "name": "desktop-light-reduce",
+  "capturedAt": "2026-11-07T09:27:02.747Z",
+  "devHotReload": false,
+  "viewport": "1440x900",
+  "dpr": 1,
+  "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
+  "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+  "errors": [],
+  "consoleErrors": [],
+  "failedRequests": [],
+  "navigations": [
+    {
+      "url": "http://127.0.0.1:5199/portfolio",
+      "time": 1794043594357
+    },
+    {
+      "url": "http://127.0.0.1:5199/portfolio",
+      "time": 1794043595463
+    },
+    {
+      "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
+      "time": 1794043597124
+    },
+    {
+      "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
+      "time": 1794043597125
+    },
+    {
+      "url": "http://127.0.0.1:5199/portfolio",
+      "time": 1794043621616
+    },
+    {
+      "url": "http://127.0.0.1:5199/portfolio",
+      "time": 1794043621617
+    }
+  ],
+  "states": [
+    {
+      "label": "00-opening",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "top-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<div tabindex=\"-1\" data-nse-view-controller=\"\"><article class=\"portfolio-reader__page\" data-book-page=\"2\"><div class=\"portfolio-reader__chrome portfolio-reader__page-chrome\" data-shown=\"true\"><p class=\"portfolio-reader__position\">2 / 9</p></div><div class=\"portfolio-reader__page-content\"><section cl",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "01-open",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "top-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<div tabindex=\"-1\" data-nse-view-controller=\"\"><article class=\"portfolio-reader__page\" data-book-page=\"2\"><div class=\"portfolio-reader__chrome portfolio-reader__page-chrome\" data-shown=\"true\"><p class=\"portfolio-reader__position\">2 / 9</p></div><div class=\"portfolio-reader__page-content\"><section cl",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "02-button-forward-moving",
+      "page": "3",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.025",
+          "phase": "idle",
+          "corner": "top-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"3\" data-page-id=\"plate-places-and-time\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-r",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "02-button-forward-settled",
+      "page": "3",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.025",
+          "phase": "idle",
+          "corner": "top-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"3\" data-page-id=\"plate-places-and-time\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-r",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "03-button-backward-moving",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "top-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "03-button-backward-settled",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "top-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "04-edge-forward-held",
+      "page": "1",
+      "phase": "turning",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.702",
+          "phase": "dragging",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"turning\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "04-edge-forward-released",
+      "page": "3",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"3\" data-page-id=\"plate-places-and-time\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-r",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "04-edge-forward-settled",
+      "page": "3",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"3\" data-page-id=\"plate-places-and-time\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-r",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "05-edge-backward-held",
+      "page": "3",
+      "phase": "turning",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.702",
+          "phase": "dragging",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"turning\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"3\" data-page-id=\"plate-places-and-time\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-r",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "05-edge-backward-released",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "05-edge-backward-settled",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "06-corner-half-held",
+      "page": "1",
+      "phase": "turning",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.252",
+          "phase": "dragging",
+          "corner": "top-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"turning\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "06-corner-half-released",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.252",
+          "phase": "idle",
+          "corner": "top-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "06-corner-half-settled",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.252",
+          "phase": "idle",
+          "corner": "top-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "08-corner-below-held",
+      "page": "1",
+      "phase": "turning",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.042",
+          "phase": "dragging",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"turning\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "08-corner-below-released",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.025",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "08-corner-below-settled",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.025",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "09-corner-above-held",
+      "page": "1",
+      "phase": "turning",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.827",
+          "phase": "dragging",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"turning\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "09-corner-above-released",
+      "page": "3",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"3\" data-page-id=\"plate-places-and-time\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-r",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "09-corner-above-settled",
+      "page": "3",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"3\" data-page-id=\"plate-places-and-time\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-r",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "10-back-corner-below-held",
+      "page": "3",
+      "phase": "turning",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.042",
+          "phase": "dragging",
+          "corner": "top-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"turning\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"3\" data-page-id=\"plate-places-and-time\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-r",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "10-back-corner-below-released",
+      "page": "3",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.025",
+          "phase": "idle",
+          "corner": "top-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"3\" data-page-id=\"plate-places-and-time\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-r",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "10-back-corner-below-settled",
+      "page": "3",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.025",
+          "phase": "idle",
+          "corner": "top-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"3\" data-page-id=\"plate-places-and-time\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-r",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "11-back-corner-above-held",
+      "page": "3",
+      "phase": "turning",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.827",
+          "phase": "dragging",
+          "corner": "top-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"turning\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"3\" data-page-id=\"plate-places-and-time\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-r",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "11-back-corner-above-released",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "top-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    },
+    {
+      "label": "11-back-corner-above-settled",
+      "page": "1",
+      "phase": "reading",
+      "leaves": [
+        {
+          "direction": "backward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "top-left",
+          "surface": "css",
+          "reduced": "true"
+        },
+        {
+          "direction": "forward",
+          "progress": "0.000",
+          "phase": "idle",
+          "corner": "bottom-right",
+          "surface": "css",
+          "reduced": "true"
+        }
+      ],
+      "focus": {
+        "html": "<section class=\"portfolio-reader\" data-portfolio-reader=\"true\" data-phase=\"reading\" data-layout=\"spread\" data-short=\"false\" data-current-page=\"1\" data-page-id=\"introduction\" data-turn-surface=\"live\" role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" aria-label=\"Cirrus Icons\" style=\"--portfolio-reader-edg",
+        "insideReader": true,
+        "inert": false
+      }
+    }
+  ],
+  "closed": true
+}
