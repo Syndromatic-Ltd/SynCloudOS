@@ -1,0 +1,27 @@
+[
+  {
+    "ProcessId": 74600,
+    "ParentProcessId": 73320,
+    "CommandLine": "\"C:\\Program Files\\nodejs\\\\node.exe\"  \"C:\\Users\\Kavish Krishnakumar\\AppData\\Roaming\\npm\\node_modules\\npm\\bin\\npx-cli.js\" vitest run --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json \"--outputFile.json=C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\docs\\superpowers\\evidence\\2026-11-07-foundation\\pwa-final-site-tests.json\""
+  },
+  {
+    "ProcessId": 24524,
+    "ParentProcessId": 74600,
+    "CommandLine": "C:\\WINDOWS\\system32\\cmd.exe /d /s /c vitest run --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json ^^^\"--outputFile.json=C:\\Users\\Kavish^^^ Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\docs\\superpowers\\evidence\\2026-11-07-foundation\\pwa-final-site-tests.json^^^\""
+  },
+  {
+    "ProcessId": 45140,
+    "ParentProcessId": 24524,
+    "CommandLine": "\"node\"   \"C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\site\\node_modules\\.bin\\\\..\\vitest\\vitest.mjs\" run --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json \"--outputFile.json=C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\docs\\superpowers\\evidence\\2026-11-07-foundation\\pwa-final-site-tests.json\""
+  },
+  {
+    "ProcessId": 75448,
+    "ParentProcessId": 45140,
+    "CommandLine": "\"C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\site\\node_modules\\@esbuild\\win32-x64\\esbuild.exe\" --service=0.28.1 --ping"
+  },
+  {
+    "ProcessId": 93948,
+    "ParentProcessId": 45140,
+    "CommandLine": "\"C:\\Program Files\\nodejs\\node.exe\" --experimental-import-meta-resolve --require \"C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/vitest/suppress-warnings.cjs\" --conditions node --conditions development \"C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\site\\node_modules\\vitest\\dist\\workers\\forks.js\""
+  }
+]

@@ -1,0 +1,34 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/application-stage-modal-domain.test.tsx --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/application-stage-modal-domain.test.tsx (3 tests | 1 failed) 93ms
+     × keeps full-screen application views in the canonical work area as host chrome changes 64ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/application-stage-modal-domain.test.tsx > ApplicationStageLayer modal domain > keeps full-screen application views in the canonical work area as host chrome changes
+AssertionError: expected '' to be '32px' // Object.is equality
+
+- Expected
++ Received
+
+- 32px
+
+ ❯ tests/runtime/application-stage-modal-domain.test.tsx:52:31
+     50|     try {
+     51|       const stage = view.container.querySelector<HTMLElement>(".webspr…
+     52|       expect(stage.style.top).toBe("32px");
+       |                               ^
+     53|       expect(stage.style.height).toBe(`${original.height - 32}px`);
+     54|       act(() => { snapshot = { ...original }; for (const listener of l…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  23:27:54
+   Duration  8.98s (transform 6.01s, setup 29ms, import 7.81s, tests 93ms, environment 900ms)
+

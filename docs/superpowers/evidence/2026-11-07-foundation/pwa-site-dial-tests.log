@@ -1,0 +1,11 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/webspring-dial.test.tsx --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  21:45:24
+   Duration  4.92s (transform 2.70s, setup 17ms, import 3.24s, tests 386ms, environment 1.10s)
+

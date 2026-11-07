@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/pwa-worker.test.ts tests/runtime/pwa-manifest.test.ts tests/runtime/pwa-production-build.test.ts tests/runtime/pwa-launch.test.ts tests/runtime/pwa-installation.test.ts tests/runtime/pwa-system-services.test.ts tests/runtime/pwa-view-transition.test.ts tests/runtime/atmo-structure.test.ts tests/runtime/nse-standard-window.test.tsx --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  9 passed (9)
+      Tests  51 passed (51)
+   Start at  22:26:12
+   Duration  32.30s (transform 19.96s, setup 133ms, import 26.47s, tests 1.13s, environment 3.18s)
+

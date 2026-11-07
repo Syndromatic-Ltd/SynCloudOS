@@ -1,0 +1,20 @@
+node:fs:483
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open 'C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\src\SynCloudOS\Models\ValueTransformer.ts'
+    at readFileSync (node:fs:483:20)
+    at validateGlobalKeyboardListeners (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/quality/architecture-boundaries.mjs:1355:24)
+    at validateImportEdges (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/quality/architecture-boundaries.mjs:1720:23)
+    at main (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/quality/architecture-boundaries.mjs:1783:18)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/quality/architecture-boundaries.mjs:1798:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\src\\SynCloudOS\\Models\\ValueTransformer.ts'
+}
+
+Node.js v24.22.1
