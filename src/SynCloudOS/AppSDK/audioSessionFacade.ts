@@ -92,11 +92,11 @@ export function createAudioSessionFacade(
   const label = appId ?? "mounted-audio-recording";
   let unbindPrivacy = () => {};
   let bound = false;
-  const unsubscribePrivacy = session.subscribe(() => {
+  const unsubscribePrivacy = privacy && session.capabilities.capture && session.state !== "unavailable" && session.state !== "disposed" ? session.subscribe(() => {
     if (disposed || !privacy) return;
     if (session.state === "denied" || session.interruptionReason === "permission-denied") privacy.observe("denied");
     else if (session.recordPermission === "granted") privacy.observe("granted");
-  });
+  }) : () => {};
   const bindPrivacy = () => {
     privacy?.assertRequestAllowed();
     if (privacy && !bound) { unbindPrivacy = privacy.bindResource(() => facade.dispose()); bound = true; }
