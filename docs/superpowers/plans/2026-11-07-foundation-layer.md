@@ -1,6 +1,6 @@
 # A Foundation layer, and NSEData
 
-2026-11-07. Status: **proposal**. The owner wants a Foundation decision before Beta 2, so it does not force another breaking rewrite like Beta 1 → Beta 2.
+2026-11-07. Status: **approved 2026-11-07** (owner: "extremely AppKit authentic"). Breaking changes are fine until Beta 2 ships. The owner will decide the Beta 2 cut line later. The owner wants a Foundation decision before Beta 2, so it does not force another breaking rewrite like Beta 1 → Beta 2.
 
 ## What exists today
 
@@ -87,8 +87,13 @@ Additive APIs never break apps, so new capability frameworks can ship after Beta
 | Page header: `NSEPageHeader` leaves the public API | passkeys (new, opt-in) |
 | `Info.ts` declaration keys for document types, URL types, shortcuts and the share target (names only; behaviour can follow) | service worker, install, push, background tasks |
 
-## Open questions
+## Decisions (owner, 2026-11-07)
 
-1. `NSE` prefix for Foundation types and a separate `foundation` entry: agree?
-2. Return `NSEData` from public byte APIs in Beta 2 (breaking now, stable later), or accept it but keep returning `Uint8Array` (non-breaking, less Cocoa)? **Recommendation: return `NSEData`.**
-3. Is the Beta 2 cut line in the table above right?
+1. Foundation types use the `NSE` prefix and have their own `foundation` entry point. Approved.
+2. Public byte APIs return `NSEData`. Approved; breaking is fine before Beta 2.
+3. The Beta 2 cut line is deferred; the owner will decide it.
+
+## Execution
+
+- **Part A**, now: the foundation entry, the Models moves and renames, the `NSEUserDefaults`/undo moves, `NSEData`, and minimal CPFX.
+- **Part B**, after the open-panel, page-curl and animation jobs land, since it touches their files: `NSEData` return types across pasteboard, documents, file panels, share and the FX readers.
