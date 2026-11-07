@@ -34,7 +34,8 @@ const SWIPE_DISTANCE = 48;
 /**
  * NSPageController.TransitionStyle. `stackHistory` shows one page at a time and keeps the pages
  * visited as a history to go back and forward through; `horizontalStrip` lays the pages side by side
- * and slides between them.
+ * and slides between them. `pageCurl` uses the approved UIPageViewController transition name and
+ * turns a physical sheet, with one page or a two-page spread selected by `spineLocation`.
  */
 export type NSEPageControllerTransitionStyle = "stackHistory" | "horizontalStrip" | "pageCurl";
 /** UIPageViewController.SpineLocation: the owner-approved UIKit naming exception. */
@@ -58,12 +59,13 @@ export interface NSEPageControllerSnapshot {
  * NSPageController: a view controller that shows one of its `arrangedObjects` at a time, each through
  * a child view controller. Override the methods AppKit asks of `NSPageControllerDelegate`:
  * `identifierForObject` names the kind of page an object needs, `viewControllerForIdentifier` makes
- * that page (with `this.addChild(...)`; one is made for each identifier and reused), and
+ * that page (with `this.addChild(...)`; history and strip reuse a child for each identifier), and
  * `prepareViewController` hands it the object (by default as its `representedObject`).
  *
  * In `stackHistory` style the arranged objects are a history: `navigateForwardToObject` drops the
  * pages after the selected one and adds a new one, and `navigateBack` and `navigateForward` move
- * through it. A horizontal swipe turns the page in either style.
+ * through it. A horizontal swipe turns the page in all three styles. A curl retains a child per
+ * arranged object so that neighbouring printed pages can coexist.
  */
 export class NSEPageController<T = unknown> extends NSEViewController<NSEPageControllerSnapshot> {
   #objects: readonly T[] = Object.freeze([]);
@@ -181,7 +183,8 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
 
   /**
    * pageController(_:identifierFor:): the kind of page `object` needs. Objects with the same identifier
-   * share one view controller. Default: the object itself, when it is a string.
+   * share one view controller in history and strip styles. A curl keeps one child per arranged
+   * object. Default: the object itself, when it is a string.
    */
   identifierForObject(object: T): string {
     if (typeof object === "string") return object;
