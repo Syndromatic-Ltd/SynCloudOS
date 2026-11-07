@@ -211,15 +211,16 @@ The constructor validates the profile and copies the bytes. It supports ICC vers
 | `version` | `2` or `4`. |
 | `preferredIntent` | The profile's declared rendering intent, from 0 to 3. |
 | `tags` | The tag signatures the profile contains. |
-| `copyData()` | A copy of the profile bytes. |
+| `copyData()` | An immutable `NSEData` copy of the encoded ICC profile. |
 | `toSRGB(components)` | Converts profile RGBA components (unit values) to sRGB. |
 | `fromSRGB(components)` | Converts sRGB components into the profile's space. |
 | `decodeImage(descriptor)` | Builds a `GFXImage` in sRGB from image data that is in this profile. The descriptor is a `GFXImageDescriptor` without `colourSpace`. Limited to four million pixels, RGB channels only. |
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import { GFXColourProfile, GFXColourTransform } from "@syndromatic/syncloudos/fx/graphics";
 
-export function toPrinterSpace(profileBytes: Uint8Array) {
+export function toPrinterSpace(profileBytes: NSEDataConvertible) {
   const printer = new GFXColourProfile(profileBytes);
   const transform = new GFXColourTransform({ source: "srgb", destination: printer, gamutMapping: "clip" });
   return transform.apply({ r: 0.9, g: 0.2, b: 0.1, a: 1 });

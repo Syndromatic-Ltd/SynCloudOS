@@ -135,7 +135,7 @@ The constructor checks that each word is an unsigned 32-bit integer and that the
 | `toBytes()` | `NSEData` | The words as big-endian bytes. |
 | `toMIDI1Message()` | `MIFXMessage` | Decodes a system or MIDI 1.0 channel voice packet. Throws `TypeError` for other kinds. |
 | `midi2ChannelVoice()` | `MIFXMIDI2ChannelVoice` | Decodes a MIDI 2.0 channel voice packet. Throws `RangeError` when reserved bits are set. |
-| static `fromBytes(bytes)` | `MIFXUniversalPacket` | Reads big-endian bytes. The length must be a multiple of four, at most 16. |
+| static `fromBytes(bytes)` | `MIFXUniversalPacket` | Reads big-endian `NSEDataConvertible` input. The length must be a multiple of four, at most 16. |
 | static `fromMIDI1Message(group, message)` | `MIFXUniversalPacket` | Wraps a MIDI 1.0 message in a one-word packet. System exclusive messages are not supported and throw `TypeError`. |
 
 `MIFXMIDI2ChannelVoice` is a union with the higher-resolution fields of MIDI 2.0:
@@ -232,9 +232,9 @@ Before the component mounts, the hook's `getCapabilities()` reports `apiAvailabl
 | `connection` | `"open"`, `"closed"` or `"pending"` (`MIFXEndpointConnection`). |
 | `generation` | Increases when the port changes, so you can tell a snapshot has gone stale. |
 
-**Input.** The listener receives an `MIFXInputPacket` with the `endpoint`, the raw `data` bytes and `receivedAtMilliseconds` (a host timestamp, or `null`). Feed `data` to an `MIFXParser` per input. The returned `MIFXInputSubscription` has the `endpoint` and `dispose()`.
+**Input.** The listener receives an `MIFXInputPacket` with the `endpoint`, `data: NSEData` and `receivedAtMilliseconds` (a host timestamp, or `null`). Feed `data` to an `MIFXParser` per input. The returned `MIFXInputSubscription` has the `endpoint` and `dispose()`.
 
-**Output.** `MIFXOutputLease` has the `endpoint`, `send(data, timestampMilliseconds?)` and `dispose()`. `send` takes wire bytes, for example from `MIFXEncoder.encode`. A timestamp in the host's millisecond clock asks the device to play at that time, and omitting it sends now. Hold the lease while you need the port and dispose it afterwards.
+**Output.** `MIFXOutputLease` has the `endpoint`, `send(data, timestampMilliseconds?)` and `dispose()`. `send` accepts wire bytes as `NSEDataConvertible`, for example from `MIFXEncoder.encode`. A timestamp in the host's millisecond clock asks the device to play at that time, and omitting it sends now. Hold the lease while you need the port and dispose it afterwards.
 
 `MIFXSubscription` (`dispose()`), `MIFXEndpointListener` and `MIFXInputListener` are the callback and handle types.
 
@@ -332,7 +332,7 @@ new MIFXScheduler(options: MIFXSchedulerOptions)
 
 | Member | Description |
 | --- | --- |
-| `schedule(data, target)` | Queues raw MIDI bytes to send when the clock reaches the target time. `data` is copied and cannot be empty. The target must be a finite `MEFXTime` in the clock's epoch. Returns an `MIFXScheduledSend`. Throws `QuotaExceededError` when the queue is full. |
+| `schedule(data, target)` | Accepts `NSEDataConvertible` MIDI wire bytes to send when the clock reaches the target time. `data` is copied and cannot be empty. The target must be a finite `MEFXTime` in the clock's epoch. Returns an `MIFXScheduledSend`. Throws `QuotaExceededError` when the queue is full. |
 | `queuedCount` | The number of events still waiting. |
 | `dispose()` | Cancels every queued event and unsubscribes from the clock. |
 

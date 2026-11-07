@@ -28,7 +28,7 @@ The typical order is: begin a page, draw, end the page, repeat, then call `finis
 | --- | --- |
 | `beginPage(options)` | Starts a page. Throws if a page is already open, or after 256 pages. |
 | `endPage()` | Finishes the page. Throws if `save` and `restore` calls, or marked-content calls, are unbalanced. |
-| `finish(consumer?, signal?)` | Builds the PDF and resolves with its bytes. Optional `GFXDataConsumer` receives the bytes too, and `signal` cancels the export. The context is closed afterwards. Output above 32 MiB throws `RangeError`. |
+| `finish(consumer?, signal?)` | Builds the PDF as `Promise<NSEData>`. Optional `GFXDataConsumer` receives the bytes too, and `signal` cancels the export. The context is closed afterwards. Output above 32 MiB throws `RangeError`. |
 | `dispose()` | Abandons the recording and cancels a pending `finish`. |
 
 `GFXPDFPageOptions`:
@@ -81,10 +81,11 @@ A document holds up to 10,000 drawing commands and 100,000 path elements, and ex
 **Fonts and permissions.** `drawPositionedText` and `drawGlyphOutlines` refuse fonts whose embedding permission is not `"allowed"` and throw a `SecurityError` `DOMException`. That is the font's own licence bit, read from its OS/2 table, and honouring it is part of exporting responsibly.
 
 ```ts
+import type { NSEData, NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import { GFXColour, GFXPDFContext, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
 import { TFXAttributedString, TFXFont, TFXFontDescriptor, TFXGlyphDrawing, TFXTypesetter } from "@syndromatic/syncloudos/fx/text";
 
-export async function invoice(fontBytes: Uint8Array): Promise<Uint8Array> {
+export async function invoice(fontBytes: NSEDataConvertible): Promise<NSEData> {
   const font = await TFXFont.create(fontBytes, new TFXFontDescriptor({ size: 18 }));
   const heading = "Invoice 4821";
   const line = new TFXTypesetter(new TFXAttributedString(heading, [{ start: 0, end: heading.length, font }])).createLine(0, heading.length);
@@ -112,7 +113,7 @@ export async function invoice(fontBytes: Uint8Array): Promise<Uint8Array> {
 An opaque handle to a font program that a PDF may embed. You do not create one directly. `TFXFont.pdfFontSubset()` returns it, and `TFXGlyphDrawing.pdfTextRunsForLine` puts it into text runs. The framework subsets the font to the glyphs the document uses.
 
 ```text
-new GFXPDFFontSubset(source: Uint8Array, options: { familyName, size })
+new GFXPDFFontSubset(source: NSEDataConvertible, options: { familyName, size })
 ```
 
 The constructor takes 12 bytes to 32 MiB of font data. `identity` is a stable fingerprint of the font, `familyName` and `size` are the values you passed, and `embedding` is `"allowed"`, `"restricted"` or `"unknown"` (`GFXPDFFontEmbedding`). The original font bytes are never exposed by the handle.
@@ -126,8 +127,8 @@ The constructor takes 12 bytes to 32 MiB of font data. `identity` is a stable fi
 An opened PDF. Open one with the static method, which parses the file with bounds and (in a browser) inside an isolated worker.
 
 ```text
-GFXPDFDocument.open(bytes: Uint8Array, options?: GFXPDFOpenOptions, signal?: AbortSignal): Promise<GFXPDFDocument>
-GFXPDFDocument.open(bytes: Uint8Array, signal?: AbortSignal): Promise<GFXPDFDocument>
+GFXPDFDocument.open(bytes: NSEDataConvertible, options?: GFXPDFOpenOptions, signal?: AbortSignal): Promise<GFXPDFDocument>
+GFXPDFDocument.open(bytes: NSEDataConvertible, signal?: AbortSignal): Promise<GFXPDFDocument>
 ```
 
 `GFXPDFOpenOptions`:
@@ -186,9 +187,10 @@ A render throws `RangeError` before it starts when the page would exceed `maximu
 `GFXPDFRenderTask` is the handle for a render in progress: `status` (`"running"`, `"completed"`, `"failed"` or `"cancelled"`), `cancel()` and `waitUntilCompleted()`, which resolves with the `GFXImage`. At most eight renders run at once, and a ninth throws a `limit` error. The image is `rgba8`, straight alpha, sRGB.
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import { GFXPDFDocument, GFXPDFRenderDestination } from "@syndromatic/syncloudos/fx/graphics";
 
-export async function thumbnails(bytes: Uint8Array, signal: AbortSignal) {
+export async function thumbnails(bytes: NSEDataConvertible, signal: AbortSignal) {
   const document = await GFXPDFDocument.open(bytes, { maximumPageCount: 50 }, signal);
   try {
     const images = [];
@@ -221,15 +223,16 @@ The byte budget can be raised to 32 MiB. It bounds every object and stream the s
 | `document`, `maximumDecodedBytes` | The document and the budget. |
 | `objects()` | Every indirect object as `{ reference, kind }`. |
 | `object(reference, resolveReferences?)` | The object as a `GFXPDFObject` tree. With `resolveReferences` set, indirect references are replaced by their objects (a cycle throws). Traversal is limited to 20,000 nodes and 64 levels. |
-| `decodedStream(reference, signal?)` | The decoded bytes of a stream. Supports the `FlateDecode` and `ASCIIHexDecode` filters, with PNG and TIFF predictors on 8-bit data. Other filters throw a `GFXPDFError` with code `"unsupported"`, and streams over the budget throw `"limit"`. |
+| `decodedStream(reference, signal?)` | The decoded bytes of a stream as `Promise<NSEData>`. Supports the `FlateDecode` and `ASCIIHexDecode` filters, with PNG and TIFF predictors on 8-bit data. Other filters throw a `GFXPDFError` with code `"unsupported"`, and streams over the budget throw `"limit"`. |
 | `contentOperators(reference, signal?)` | The operators of a content stream as `{ operator, operands }` with operands as source tokens. Up to 20,000 operators, 256 operands each. Inline images are not supported. |
 
-`GFXPDFReference` is `{ objectNumber, generationNumber }`. `GFXPDFObject` is a union discriminated by `kind`: `"null"`, `"boolean"`, `"number"`, `"name"`, `"string"` (with `value` and raw `bytes`), `"reference"`, `"array"` (`items`), `"dictionary"` (`entries`) and `"stream"` (`dictionary` and `encodedBytes`). `GFXPDFContentOperator` is one operator with its operands.
+`GFXPDFReference` is `{ objectNumber, generationNumber }`. `GFXPDFObject` is a union discriminated by `kind`: `"null"`, `"boolean"`, `"number"`, `"name"`, `"string"` (with `value` and `bytes: NSEData`), `"reference"`, `"array"` (`items`), `"dictionary"` (`entries`) and `"stream"` (`dictionary` and `encodedBytes: NSEData`). `GFXPDFContentOperator` is one operator with its operands.
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import { GFXPDFDocument, GFXPDFScanner } from "@syndromatic/syncloudos/fx/graphics";
 
-export async function countStreams(bytes: Uint8Array) {
+export async function countStreams(bytes: NSEDataConvertible) {
   const document = await GFXPDFDocument.open(bytes);
   try {
     const scanner = new GFXPDFScanner(document);
@@ -237,7 +240,7 @@ export async function countStreams(bytes: Uint8Array) {
     let decodedBytes = 0;
     for (const { reference } of streams.slice(0, 20)) {
       try {
-        decodedBytes += (await scanner.decodedStream(reference)).byteLength;
+        decodedBytes += (await scanner.decodedStream(reference)).count;
       } catch {
         // Images use filters such as DCTDecode, which the scanner does not decode.
       }

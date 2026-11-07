@@ -56,9 +56,10 @@ Inside a group, drawing starts with alpha 1 and the normal blend mode. The optio
 `GFXTransparencyGroup` is the token that `beginTransparencyGroup` returns. It has `id`, `alpha` and `blendMode`, and it is only useful as the argument to `endTransparencyGroup`. `GFXTransparencyGroupOptions` is the options type.
 
 ```ts
+import type { NSEData } from "@syndromatic/syncloudos/foundation";
 import { GFXBitmapContext, GFXColour, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
 
-export function overlappingDiscs(): Uint8Array {
+export function overlappingDiscs(): NSEData {
   const context = new GFXBitmapContext({ width: 120, height: 80 });
   context.setAntialiasing(true);
   try {
@@ -204,9 +205,10 @@ new GFXLayer(surface: GFXBitmapContext)
 `image` is the snapshot (a `GFXImage`), and `draw(context, rect)` draws it into any `GFXImageDrawingDestination`, that is, any context with `drawImage`. Build a complicated shape once on a bitmap, wrap it in a layer, and stamp it where you need it.
 
 ```ts
+import type { NSEData } from "@syndromatic/syncloudos/foundation";
 import { GFXBitmapContext, GFXColour, GFXLayer, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
 
-export function stampedStars(): Uint8Array {
+export function stampedStars(): NSEData {
   const star = new GFXBitmapContext({ width: 16, height: 16 });
   star.setAntialiasing(true);
   const points = new GFXPath().move({ x: 8, y: 1 }).line({ x: 10, y: 6 }).line({ x: 15, y: 6 }).line({ x: 11, y: 10 }).line({ x: 13, y: 15 }).line({ x: 8, y: 12 }).line({ x: 3, y: 15 }).line({ x: 5, y: 10 }).line({ x: 1, y: 6 }).line({ x: 6, y: 6 }).close();

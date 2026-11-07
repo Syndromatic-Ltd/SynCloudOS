@@ -217,7 +217,7 @@ An immutable, owned run of bytes, used as the payload of a sample buffer. The bl
 new MEFXBlockBuffer(input: MEFXBlockSegmentInput | readonly MEFXBlockSegmentInput[], options?: MEFXBlockBufferOptions)
 ```
 
-A segment is an `NSEDataConvertible`, or `{ bytes, offset?, length? }` to take part of one. The total must not exceed 2,147,483,647 bytes. In an application, prefer `useMedia().copyBlock(bytes)`, which counts the memory against the application's budget (64 MiB by default).
+A segment is an `NSEDataConvertible`, or `{ bytes: NSEDataConvertible, offset?, length? }` to take part of one. The total must not exceed 2,147,483,647 bytes. In an application, prefer `useMedia().copyBlock(bytes)`, which counts the memory against the application's budget (64 MiB by default).
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -469,7 +469,7 @@ export function Pipeline() {
 
 | Method | Returns | Description |
 | --- | --- | --- |
-| `copyBlock(bytes, signal?)` | `MEFXBlockBuffer` | Copies bytes into a block that counts against the application's memory budget. Budget defaults are 64 MiB of bytes, 64 live handles, 16 sessions and 8 worker jobs. Throws `TypeError` for a non-convertible byte value and a budget error when the limit is reached. |
+| `copyBlock(bytes: NSEDataConvertible, signal?)` | `MEFXBlockBuffer` | Copies bytes into a block that counts against the application's memory budget. Budget defaults are 64 MiB of bytes, 64 live handles, 16 sessions and 8 worker jobs. Throws `TypeError` for a non-convertible byte value and a budget error when the limit is reached. |
 | `createQueue(options, signal?)` | `MEFXBufferQueue<T>` | A queue that the session disposes with your component. |
 | `observeClock(signal?)` | `MEFXClockLease` | A read-only lease on the session's monotonic clock, with `now()`, `subscribeDiscontinuities()` and `dispose()`. |
 | `createTimebase(options?, signal?)` | `MEFXTimebase` | A timebase over the session clock, ready with browser timers for `scheduleAt`. |

@@ -260,6 +260,8 @@ The interface a backend implements:
 
 Graphs render on a browser worker by default. An explicit WebGPU backend accelerates a reviewed subset of operations, and every graph still has a portable path. Float sources keep their precision through the worker, and clipping to bytes happens at the byte render destination. `IFXBackendRenderOptions` has `signal` and `interpolation`.
 
+The browser entry's `BrowserImageProcessingWorker.renderEncoded(image, options)` returns `Promise<{ data: NSEData; metadata: IFXEncodedImageMetadata }>`. Options select `"image/png"` or `"image/webp"`, with optional `colourSpace: "srgb"`, `orientation: "up"`, `signal` and `interpolation`. The metadata carries the MIME type and dimensions; use `data.count` for the encoded size and `data.blob(metadata.mimeType)` for a native upload or download.
+
 ### `IFXSampler`
 
 The evaluator behind a render. It samples a graph at a point and memoises the results. Most code does not need it, and it is public for backends and diagnostics.
