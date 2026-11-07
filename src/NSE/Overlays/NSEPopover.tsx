@@ -160,7 +160,7 @@ export function NSEPopover({
   }, [canonicalBridge, open, windowBridge, windowRequest]);
   const canonicalRequest = useMemo(() => ({
     id,
-    role: resolvedPresentation.mode === "sheet" ? "sheet" as const : "popover" as const,
+    role: "popover" as const,
     title: title ?? (labelledBy ? anchor?.ownerDocument.getElementById(labelledBy)?.textContent?.trim() : undefined) ?? id,
     parentWindowControllerId,
     anchor,
@@ -168,6 +168,7 @@ export function NSEPopover({
     parentResponderId: resolvedParentResponderId,
     preferredEdge,
     behavior,
+    presentation: resolvedPresentation,
     drawsBackground,
     placement: resolvedPresentation.placement,
     collisionPadding: resolvedPresentation.collisionPadding,
@@ -182,7 +183,7 @@ export function NSEPopover({
     },
     onDidClose: handleDidClose,
   }), [anchor, relativeTo, preferredEdge, behavior, drawsBackground, describedBy, contentSize?.height, contentSize?.width, fitting?.height, fitting?.width, handleDidClose, id, labelledBy, parentWindowControllerId, resolvedParentResponderId, resolvedPresentation, title]);
-  const presentedContent = useNSEPresentedContent(contentSize || resolvedPresentation.mode === "sheet"
+  const presentedContent = useNSEPresentedContent(contentSize
     ? children
     : <NSEWindowFittingContent onFittingSize={onFittingSize}>{children}</NSEWindowFittingContent>);
   useEffect(() => {

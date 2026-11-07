@@ -153,6 +153,8 @@ export function WindowHost({
       : state),
   }), [chromeHandshakeKey, chromeSlotNode]);
   const presentation = resolveWindowPresentation(record, screen, controller.geometryState);
+  const compactPopover = Boolean(popoverSurface && (presentation.kind === "mobile-sheet" || popoverSurface.request.presentation?.mode === "sheet"));
+  const ownsPopoverFocus = record.role === "popover" && popoverSurface !== null;
   const focusPort = useRuntimeNSEFocusPort(controller.windowResponderId);
   const overlayPort = useRuntimeNSEOverlayPort(controller.windowResponderId);
   const controlPort = useRuntimeNSEControlPort();
@@ -223,7 +225,11 @@ export function WindowHost({
   // no open window left to draw. The host keeps its last open frame for the
   // exit fade, inert, rather than cutting.
   const exiting = useNSEPresenceExiting();
-  const lastFrameRef = useRef<{ readonly style: React.CSSProperties; readonly contents: React.ReactNode } | null>(null);
+  const lastFrameRef = useRef<{
+    readonly style: React.CSSProperties;
+    readonly contents: React.ReactNode;
+    readonly popoverScope?: { readonly parentResponderId: string; readonly parentScopeId?: string };
+  } | null>(null);
   const hostRendered = record.state === "open" &&
     contentState.status === "loaded" &&
     contentRendererAvailable &&
@@ -237,23 +243,26 @@ export function WindowHost({
   // come from a click or a command that already placed focus.
   const openedKey = hostRendered && record.isKey;
   useEffect(() => {
-    if (!openedKey || (record.role !== "panel" && record.role !== "popover")) return;
+    if (!openedKey || (record.role !== "panel" && record.role !== "popover" && !popoverSurface)) return;
     const host = hostRef.current;
     if (!host) return;
     const surface = host.querySelector<HTMLElement>("[data-nse-window-popover]");
     let observer: MutationObserver | null = null;
     const focusInitialControl = () => {
       const active = host.ownerDocument.activeElement;
+      const initialResponder = host.querySelector<HTMLElement>("[data-nse-view-controller][tabindex]") ?? surface;
       const target = host.querySelector<HTMLElement>(`.nse-window__content [data-nse-initial-focus]:not([disabled])`) ??
         host.querySelector<HTMLElement>(`.nse-window__content :is(${windowFocusableSelector})`) ??
         host.querySelector<HTMLElement>(windowFocusableSelector);
-      if (active && host.contains(active) && active !== surface) { observer?.disconnect(); return true; }
+      if (active && host.contains(active) && active !== surface && active !== initialResponder) { observer?.disconnect(); return true; }
       if (target) {
         target.focus({ preventScroll: true });
         observer?.disconnect();
         return true;
       }
-      surface?.focus({ preventScroll: true });
+      // A presented controller is a valid first responder even while every
+      // command button is validating, including inside a modal compact sheet.
+      initialResponder?.focus({ preventScroll: true });
       return false;
     };
     if (!focusInitialControl()) {
@@ -286,7 +295,13 @@ export function WindowHost({
         inert
         style={{ ...lastFrame.style, pointerEvents: "none" }}
       >
-        {lastFrame.contents}
+        {lastFrame.popoverScope ? <FocusScope
+          scopeId={`window:${record.id}`} kind="popover"
+          parentScopeId={lastFrame.popoverScope.parentScopeId}
+          parentResponderId={lastFrame.popoverScope.parentResponderId}
+          modal={false} trapFocus={false} restoreFocus={false}
+          externallyManagedScope externallyManagedInert
+        >{lastFrame.contents}</FocusScope> : lastFrame.contents}
       </div>
     );
   }
@@ -308,7 +323,7 @@ export function WindowHost({
     presentation,
   });
   const surfaceContent = popoverSurface
-    ? <PopoverWindowSurface key={contentState.mountKey} surface={popoverSurface} windowControllerId={controller.id}>
+    ? <PopoverWindowSurface key={contentState.mountKey} surface={popoverSurface} windowControllerId={controller.id} anchored={record.role === "popover" && !compactPopover}>
         <FocusScopeIdContext.Provider value={`window:${record.id}`}>
           <ResponderHierarchyContext.Provider value={{
             runtimeId: runtime.runtimeId,
@@ -366,7 +381,6 @@ export function WindowHost({
       <div ref={setOverlayLayerNode} data-window-overlay-layer="" style={{ display: "contents" }} />
     </>
   );
-  const compactPopover = popoverSurface && presentation.kind === "mobile-sheet";
   const sheetInset = Math.max(8, presentation.safeAreaInsets.blockEnd);
   const sheetBounds = compactPopover ? {
     x: screen.visualViewport.x + Math.max(8, presentation.safeAreaInsets.inlineStart),
@@ -383,7 +397,9 @@ export function WindowHost({
     zIndex: record.zIndex,
   };
   // A modal's focus scope is not kept: an exiting sheet traps nothing.
-  lastFrameRef.current = { style: hostStyle, contents: windowContents };
+  lastFrameRef.current = { style: hostStyle, contents: windowContents,
+    ...(ownsPopoverFocus ? { popoverScope: { parentScopeId, parentResponderId: popoverSurface?.request.parentResponderId ?? parentResponderId } } : {}),
+  };
   return (
     // Exit fade only (no enter animation): a closing window dissolves instead
     // of cutting, so Quit-with-windows reads as one continuous exit rather
@@ -401,15 +417,16 @@ export function WindowHost({
       }}
       style={hostStyle}
     >
-      {record.role === "modal" || record.role === "sheet" ? (
+      {record.role === "modal" || record.role === "sheet" || ownsPopoverFocus ? (
         <FocusScope
           scopeId={`window:${record.id}`}
-          kind="modal"
+          kind={ownsPopoverFocus ? "popover" : "modal"}
           parentScopeId={parentScopeId}
-          parentResponderId={parentResponderId}
-          modal
-          trapFocus
-          externallyManagedScope
+          parentResponderId={ownsPopoverFocus ? popoverSurface?.request.parentResponderId ?? parentResponderId : parentResponderId}
+          modal={!ownsPopoverFocus || compactPopover}
+          trapFocus={!ownsPopoverFocus || compactPopover}
+          restoreFocus={!ownsPopoverFocus}
+          externallyManagedScope={!ownsPopoverFocus}
           externallyManagedInert
         >
           {windowContents}
