@@ -54,11 +54,11 @@ The [FX overview](fx/README.md) introduces the frameworks and how they reach a S
 
 [BluetoothFX](fx/bluetooth.md) · [NFCFX](fx/nfc.md) · [SpeechFX](fx/speech.md) · [ContactsFX](fx/contacts.md) · [PassFX](fx/pass.md) · [XRFX](fx/xr.md)
 
-## Hosting
-
 [NetworkFX](fx/network.md) monitors browser path hints. [CryptoFX](fx/crypto.md)
 provides worker-safe CryptoKit-shaped WebCrypto operations. [Route picker](nse/route-picker.md)
 documents the Atmo control for VideoFX remote playback.
+
+## Hosting
 
 | Guide | Read it to |
 | --- | --- |

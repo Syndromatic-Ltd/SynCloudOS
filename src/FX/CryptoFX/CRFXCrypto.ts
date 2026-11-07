@@ -20,6 +20,9 @@
 
 import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 export type CRFXHashFunction = "SHA-256" | "SHA-384" | "SHA-512";
+function validateHash(algorithm: CRFXHashFunction): void {
+  if (!["SHA-256", "SHA-384", "SHA-512"].includes(algorithm)) throw new TypeError("CryptoFX supports SHA-256, SHA-384 and SHA-512.");
+}
 const copy = (value: NSEDataConvertible): Uint8Array<ArrayBuffer> => new Uint8Array(NSEData.from(value).bytes);
 function cryptoProvider(): Crypto {
   if (!globalThis.crypto?.subtle) throw new Error("CryptoFX requires WebCrypto in a secure context.");
@@ -45,6 +48,7 @@ export class CRFXSHA256 { static hash(data: NSEDataConvertible): Promise<NSEData
 export class CRFXSHA384 { static hash(data: NSEDataConvertible): Promise<NSEData> { return hash(data, "SHA-384"); } }
 export class CRFXSHA512 { static hash(data: NSEDataConvertible): Promise<NSEData> { return hash(data, "SHA-512"); } }
 async function hmacKey(key: CRFXSymmetricKey, algorithm: CRFXHashFunction): Promise<CryptoKey> {
+  validateHash(algorithm);
   return cryptoProvider().subtle.importKey("raw", copy(key.rawRepresentation), { name: "HMAC", hash: algorithm }, false, ["sign", "verify"]);
 }
 export class CRFXHMAC {
@@ -57,6 +61,7 @@ export class CRFXHMAC {
 }
 export class CRFXHKDF {
   static async deriveKey(inputKeyMaterial: CRFXSymmetricKey, salt: NSEDataConvertible, info: NSEDataConvertible, outputByteCount: number, algorithm: CRFXHashFunction = "SHA-256"): Promise<CRFXSymmetricKey> {
+    validateHash(algorithm);
     const maximum = 255 * ({ "SHA-256": 32, "SHA-384": 48, "SHA-512": 64 }[algorithm]);
     if (!Number.isSafeInteger(outputByteCount) || outputByteCount <= 0 || outputByteCount > maximum) throw new RangeError("HKDF output exceeds the selected hash limit.");
     const parameters = { name: "HKDF", hash: algorithm, salt: copy(salt), info: copy(info) };
