@@ -28,7 +28,7 @@ describe('read-only Updates preference pane', () => {
     await waitFor(() => expect(document.activeElement).toBe(trigger));
   });
   it('retains keyboard focus on the stable preferences owner when leaving a pane', () => {
-    const { runtime } = fixture(); const dialog = screen.getByRole('dialog', { name: 'System Preferences' });
+    const { runtime } = fixture(); const dialog = screen.getByRole('dialog', { name: 'Updates' });
     const inspect = screen.getByRole('button', { name: 'Inspect current work' }); inspect.focus();
     fireEvent.keyDown(inspect, { key: 'Escape' });
     expect(document.activeElement).toBe(dialog);
@@ -36,7 +36,7 @@ describe('read-only Updates preference pane', () => {
     expect(runtime.systemUI.preferences.isOpen()).toBe(false);
   });
   it('shows incomplete coverage, known counts and compatibility independently, with no activation action', () => {
-    fixture(); const dialog = screen.getByRole('dialog', { name: 'System Preferences' });
+    fixture(); const dialog = screen.getByRole('dialog', { name: 'Updates' });
     expect(within(dialog).getByRole('status').textContent).toContain('Some work cannot be inspected');
     expect(within(dialog).getByRole('heading', { name: 'Inspection coverage' })).toBeTruthy();
     expect(within(dialog).getByText('No replacement build or storage compatibility has been verified.')).toBeTruthy();

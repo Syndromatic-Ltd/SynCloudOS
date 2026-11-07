@@ -154,7 +154,7 @@ describe("System Preferences panes", () => {
     const Broken = () => { throw new Error("boom"); };
     renderPreferences({ open: "broken", preferences: { panes: [definePreferencePane({ id: "broken", title: "Broken", order: 1, view: Broken })] } });
     expect(screen.getByText("This preference pane could not be loaded.")).toBeTruthy();
-    expect(screen.getByRole("dialog", { name: "System Preferences" })).toBeTruthy();
+    expect(screen.getByRole("dialog", { name: "Broken" })).toBeTruthy();
   });
 
   it("shows Unavailable for a failing summary and drops a failing accessory", () => {
