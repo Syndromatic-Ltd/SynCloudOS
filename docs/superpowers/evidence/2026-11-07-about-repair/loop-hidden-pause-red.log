@@ -1,0 +1,28 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation-loops.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/animation-loops.test.ts (3 tests | 1 failed) 31ms
+   × keeps frame-sampled endless presentation time frozen while suspended 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/animation-loops.test.ts > keeps frame-sampled endless presentation time frozen while suspended
+AssertionError: expected +0 to be close to 0.25, received difference is 0.25, but expected 0.005
+ ❯ tests/runtime/fx/animation-loops.test.ts:57:38
+     55|   suspended = true; notify?.(); expect(pending.size).toBe(0);
+     56|   now = 100; handle.pause();
+     57|   expect(layer.presentation.opacity).toBeCloseTo(.25); expect(handle.s…
+       |                                      ^
+     58|   suspended = false; notify?.(); expect(pending.size).toBe(0);
+     59|   handle.resume(); tick(100.5);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  09:04:59
+   Duration  2.43s (transform 712ms, setup 37ms, import 868ms, tests 31ms, environment 1.31s)
+
