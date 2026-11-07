@@ -196,14 +196,27 @@ function useNavigationChromeClaim(controller: NSEApplicationNavigationChromeCont
   const claim = useRef<NSEApplicationNavigationChromeClaim | null>(null);
   const ownerId = state?.ownerId ?? null;
 
+  const latestState = useRef(state);
+  latestState.current = state;
   useLayoutEffect(() => {
     if (!controller || !ownerId) return undefined;
-    const nextClaim = controller.claim(ownerId);
-    claim.current = nextClaim;
-    if (nextClaim && state) nextClaim.update({ title: state.title, back: state.back });
+    // A default container can release chrome after its initial compact layout.
+    // Retain the pending owner and retry the claim when that slot becomes free.
+    const acquire = () => {
+      const current = latestState.current;
+      if (claim.current || !current || current.ownerId !== ownerId) return;
+      const nextClaim = controller.claim(ownerId);
+      if (!nextClaim) return;
+      claim.current = nextClaim;
+      nextClaim.update({ title: current.title, back: current.back });
+    };
+    const unsubscribe = controller.subscribe(acquire);
+    acquire();
     return () => {
-      nextClaim?.release();
-      if (claim.current === nextClaim) claim.current = null;
+      unsubscribe();
+      const previousClaim = claim.current;
+      claim.current = null;
+      previousClaim?.release();
     };
   }, [controller, ownerId]);
 

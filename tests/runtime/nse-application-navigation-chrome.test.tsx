@@ -20,7 +20,7 @@
 
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import {
@@ -58,6 +58,28 @@ function StageChromeBackControl({ controller }: { readonly controller: NSEApplic
 }
 
 describe("NSE application navigation chrome", () => {
+  it("claims released chrome with the latest pending state and stops waiting on unmount", () => {
+    const controller = new NSEApplicationNavigationChromeController();
+    const split = controller.claim("split:initial")!;
+    split.update({ title: "Split", back: null });
+    const view = render(<NSEApplicationNavigationChromeProvider controller={controller}>
+      <ChromeRegistration state={chromeState("gallery", "First")} />
+    </NSEApplicationNavigationChromeProvider>);
+    view.rerender(<NSEApplicationNavigationChromeProvider controller={controller}>
+      <ChromeRegistration state={chromeState("gallery", "Sections")} />
+    </NSEApplicationNavigationChromeProvider>);
+    expect(controller.getSnapshot().active?.ownerId).toBe("split:initial");
+    act(() => split.release());
+    expect(controller.getSnapshot().active).toMatchObject({ ownerId: "gallery", title: "Sections" });
+    view.unmount();
+    expect(controller.getSnapshot().active).toBeNull();
+    const next = controller.claim("next")!;
+    next.update({ title: "Next", back: null });
+    next.release();
+    expect(controller.getSnapshot().active).toBeNull();
+    controller.dispose();
+  });
+
   it("keeps an unclaimed hierarchy local even inside an application chrome provider", async () => {
     const tabs = new NSETabBarController<React.ReactNode>({
       id: "unclaimed-hierarchy-tabs",
