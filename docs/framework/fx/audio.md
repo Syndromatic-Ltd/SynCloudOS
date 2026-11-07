@@ -653,7 +653,7 @@ export default {
   version: "1.0.0",
   displayName: "Voice Memo",
   routes: [{ path: "/memo", primary: true }],
-  permissions: ["audio.record"],
+  entitlements: ["audio.record"],
 } as const;
 ```
 
@@ -753,7 +753,7 @@ export function Beep() {
 
 ## Speech synthesis and audio session categories
 
-`AUFXSpeechUtterance` is an immutable speech value with text, rate (0.1-10), pitch (0-2), volume (0-1), optional language and voice identifier. Use the mounted `audioSpeech` client (or `useAudioSpeech()`) to create a synthesizer, list voices and call `speak(utterance)`. The application must declare `audio.speech`. This is manifest authority, not a browser permission prompt; capabilities report `nativePermissionPrompt: false`. Speech may require a user gesture and voices depend on the browser and operating system.
+`AUFXSpeechUtterance` is an immutable speech value with text, rate (0.1-10), pitch (0-2), volume (0-1), optional language and voice identifier. Use the mounted `speechSynthesis` client (or `useSpeechSynthesizer()`) to create a synthesizer, list voices and call `speak(utterance)`. The application must declare `audio.speech` in its `entitlements`. This is manifest authority, not a browser permission prompt; capabilities report `nativePermissionPrompt: false`. Speech may require a user gesture and voices depend on the browser and operating system.
 
 Each synthesizer owns up to 32 pending/active utterances. The host serialises the shared browser queue across owners. Stopping a queued owner does not cancel a sibling's active native utterance; cancelling an active owner settles its work and hands the queue to the next owner. Disposal, caller cancellation and mount teardown reject outstanding speech with `AbortError`, release listeners and return mounted resource slots. Saved late callbacks cannot settle subsequent speech. Manifest authority is checked before admission, at native dispatch and at completion; a revoked active completion rejects with `SecurityError`. Manifest changes cannot be detected instantly without a subsequent operation or callback.
 
