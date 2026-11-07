@@ -18,14 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** Supported SynWare SDK NSE page surface. Host machinery stays private. */
-export {
-  NSEPage,
-} from "../Page/NSEPage";
+/** Supported SynWare SDK page controller surface. The curl engine stays private. */
 export { NSEPageController } from "../Page/NSEPageController";
-export type { NSEPageControllerOptions, NSEPageControllerSnapshot, NSEPageControllerTransitionStyle } from "../Page/NSEPageController";
 export type {
-  NSEPageEvent,
-  NSEPageHandle,
-  NSEPageProps,
-} from "../Page/nsePageTypes";
+  NSEPageControllerOptions,
+  NSEPageControllerSnapshot,
+  NSEPageControllerSpineLocation,
+  NSEPageControllerTransitionStyle,
+} from "../Page/NSEPageController";

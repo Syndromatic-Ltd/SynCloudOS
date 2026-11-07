@@ -23,8 +23,7 @@ import { act, fireEvent, render, renderHook } from "@testing-library/react";
 import { createElement, createRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { NSE } from "../../src/NSE/NSE";
-import { NSEPage } from "../../src/NSE/Page/NSEPage";
+import { NSEPageCurlLeaf } from "../../src/NSE/Page/NSEPageCurlLeaf";
 import { PageTurnController } from "../../src/NSE/Page/pageTurnController";
 import { useNSEPage } from "../../src/NSE/Page/useNSEPage";
 import {
@@ -75,7 +74,7 @@ function resolveCurl(
   });
 }
 
-describe("NSEPage geometry", () => {
+describe("NSEPageCurlLeaf geometry", () => {
   it("carries a book corner across the whole spread and lands at the opposite outer edge", () => {
     const preset = getNSEPagePreset("settingsPeel", { motion: { curlPath: "book", projection: "spread" } });
     const resolve = (progress: number, corner: "bottom-right" | "bottom-left") => resolveNSEPageGeometry({
@@ -382,9 +381,9 @@ describe("PageTurnController", () => {
   });
 });
 
-describe("NSEPage React surface", () => {
+describe("NSEPageCurlLeaf React surface", () => {
   it("renders snapshot-backed book strips while keeping one semantic front and back tree", () => {
-    const markup = renderToStaticMarkup(createElement(NSEPage, {
+    const markup = renderToStaticMarkup(createElement(NSEPageCurlLeaf, {
       preset: "bookTurn",
       progress: 0.5,
       turnSurface: { front: "data:image/png;base64,FRONT", back: "data:image/png;base64,BACK", strips: 2 },
@@ -405,7 +404,7 @@ describe("NSEPage React surface", () => {
   });
 
   it("keeps a blank reverse on the rigid book fallback", () => {
-    const markup = renderToStaticMarkup(createElement(NSEPage, {
+    const markup = renderToStaticMarkup(createElement(NSEPageCurlLeaf, {
       preset: "bookTurn",
       progress: 0.5,
       front: "OnlyLiveFront",
@@ -416,7 +415,7 @@ describe("NSEPage React surface", () => {
     expect(markup.split("Destination").length - 1).toBe(1);
     expect(markup).not.toContain("data-book-surface=\"true\"");
 
-    const ordinaryTurn = renderToStaticMarkup(createElement(NSEPage, {
+    const ordinaryTurn = renderToStaticMarkup(createElement(NSEPageCurlLeaf, {
       preset: "bookTurn",
       presetOverrides: { motion: { hinge: "edge" } },
       progress: 0.5,
@@ -428,7 +427,7 @@ describe("NSEPage React surface", () => {
   });
 
   it("renders front, inside, data attributes, and CSS variables without app wiring", () => {
-    const markup = renderToStaticMarkup(createElement(NSEPage, {
+    const markup = renderToStaticMarkup(createElement(NSEPageCurlLeaf, {
       preset: "settingsPeel",
       open: true,
       interactive: true,
@@ -449,7 +448,7 @@ describe("NSEPage React surface", () => {
 
   it("reveals inside content behind the page", () => {
     const markup = renderToStaticMarkup(createElement(
-      NSEPage,
+      NSEPageCurlLeaf,
       { preset: "settingsPeel", inside: createElement("nav", null, "SettingsPanel") },
       createElement("p", null, "MainContent")
     ));
@@ -460,11 +459,11 @@ describe("NSEPage React surface", () => {
   });
 
   it("rests on a real fold with an invisible corner hit-area in curl mode only", () => {
-    const curlMarkup = renderToStaticMarkup(createElement(NSEPage, {
+    const curlMarkup = renderToStaticMarkup(createElement(NSEPageCurlLeaf, {
       preset: "settingsPeel",
       front: "Map"
     }));
-    const turnMarkup = renderToStaticMarkup(createElement(NSEPage, {
+    const turnMarkup = renderToStaticMarkup(createElement(NSEPageCurlLeaf, {
       preset: "paperTurn",
       front: "Paper"
     }));
@@ -478,12 +477,12 @@ describe("NSEPage React surface", () => {
   });
 
   it("mounts the front once unless the flap ghost is requested", () => {
-    const ghosted = renderToStaticMarkup(createElement(NSEPage, {
+    const ghosted = renderToStaticMarkup(createElement(NSEPageCurlLeaf, {
       preset: "settingsPeel",
       front: "UniqueFrontSurface",
       backGhost: true
     }));
-    const plain = renderToStaticMarkup(createElement(NSEPage, {
+    const plain = renderToStaticMarkup(createElement(NSEPageCurlLeaf, {
       preset: "settingsPeel",
       front: "UniqueFrontSurface"
     }));
@@ -495,7 +494,7 @@ describe("NSEPage React surface", () => {
   });
 
   it("keeps the aria-hidden curl duplicate inert so consumer controls cannot intercept pointer input", () => {
-    const markup = renderToStaticMarkup(createElement(NSEPage, {
+    const markup = renderToStaticMarkup(createElement(NSEPageCurlLeaf, {
       preset: "bookCurl",
       front: createElement("button", { type: "button" }, "Semantic control"),
       back: createElement("button", { type: "button" }, "Visual duplicate")
@@ -505,7 +504,7 @@ describe("NSEPage React surface", () => {
   });
 
   it("marks the page as curling so it can elevate above app chrome", () => {
-    const markup = renderToStaticMarkup(createElement(NSEPage, {
+    const markup = renderToStaticMarkup(createElement(NSEPageCurlLeaf, {
       preset: "settingsPeel",
       open: true,
       front: "Map"
@@ -515,7 +514,7 @@ describe("NSEPage React surface", () => {
   });
 
   it("keeps fractional controlled progress and pointer gestures opt-in", () => {
-    const markup = renderToStaticMarkup(createElement(NSEPage, {
+    const markup = renderToStaticMarkup(createElement(NSEPageCurlLeaf, {
       progress: 0.42,
       front: "Paper"
     }));
@@ -525,18 +524,12 @@ describe("NSEPage React surface", () => {
     expect(markup).toContain("--nse-page-progress:0.42");
   });
 
-  it("exposes the component and control surface through NSE", () => {
-    expect(NSE.NSEPage).toBe(NSE.Page.Root);
-    expect(NSE.Page.presets.paperTurn.name).toBe("paperTurn");
-    expect(NSE.Page.getPreset("tearAway").mode).toBe("tear");
-    expect("Surface" in NSE.Page).toBe(false);
-  });
 });
 
 describe("useNSEPage lifecycle", () => {
   it("snaps from the final pending pointer sample released in the same frame", () => {
     const pageRef = createRef<NSEPageHandle>();
-    const { container, unmount } = render(createElement(NSEPage, {
+    const { container, unmount } = render(createElement(NSEPageCurlLeaf, {
       ref: pageRef,
       preset: "bookTurn",
       interactive: { edges: ["right"] },

@@ -77,7 +77,7 @@ The tables below give an overview. These pages document each component's props, 
 | [Stacks and grids](nse/stacks-and-grids.md) | `NSEStackView` and `NSEGridView` |
 | [Menus, toolbars and inspectors](nse/menus-toolbars-and-inspectors.md) | Choosing a menu control, responder provenance, configured toolbars, narrow inspectors, keep-mounted panes |
 
-Focused entries include `NSEDrawer` and `NSESplitViewController` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, and `NSEPage` and `NSEPageController` in `nse/page`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
+Focused entries include `NSEDrawer` and `NSESplitViewController` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, and `NSEPageController` in `nse/page`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
 
 ## Buttons
 
@@ -128,9 +128,8 @@ Focused entries include `NSEDrawer` and `NSESplitViewController` in `nse/control
 | `NSETabView`, `NSETabViewController` | Tabbed content and owned child view controllers; fixed or `sidebarAdaptable` placement. |
 | `NSEButton` (`bezelStyle="disclosure"`) in an `NSEStackView` | Collapsible sections: the disclosure button shows and hides the stack item below it, as in AppKit. |
 | `NSESplitViewController` | Source-list outline/sidebar and detail items, with compact collapse and `showDetail`. |
-| `NSEPageController` | Drill-in history in `stackHistory` style. |
 | `NSEDrawer` | A drawer that slides from a window edge. |
-| `NSEPageController` | `NSPageController`, a view controller subclass: one of its `arrangedObjects` shown at a time, each through a child view controller. Override `identifierForObject`, `viewControllerForIdentifier` (make the page with `this.addChild`) and `prepareViewController` (sets `representedObject` by default), the `NSPageControllerDelegate` methods. `transitionStyle: "stackHistory"` (the default) keeps a drill-in history with `navigateForwardToObject`, `navigateBack` and `navigateForward`; `"horizontalStrip"` lays the pages side by side. A horizontal swipe turns the page. It is in `nse/page`. |
+| `NSEPageController` | `NSPageController`: child view controllers display `arrangedObjects`. `transitionStyle` is `"stackHistory"` (the default, with drill-in history), `"horizontalStrip"` (sliding pages) or `"pageCurl"` (a physical paper curl). `navigateForwardToObject`, `navigateBack`, `navigateForward` and horizontal gestures navigate. In `pageCurl`, `spineLocation: "min"` (the default) shows a single page; `"mid"` shows two-page spreads. See the [controller contract](controllers.md#page-controller). |
 
 ## Data views
 
@@ -177,7 +176,6 @@ On a desktop (a fine pointer that hovers), choosing an item in any menu or pop-u
 | `NSEView` | `draw(dirtyRect, context)` records GraphicsFX content at the view’s measured bounds; `layerContentsPlacement` places its layer contents. Also carries `menu`, `toolTip` and `appearance`. |
 | `snapshotNSEView` | Draws a view your app owns into a PNG data URL, for a version card, a drag image or a thumbnail. Canvas content is left out. |
 | `NSEShadow` | `NSShadow`: `shadowColor`, `shadowOffset` and `shadowBlurRadius`, set as `shadow` on a view or box. Smooth corners are `cornerRadius` and `cornerCurve: "continuous"` on views and AFX layers; material renderers are theme internals. |
-| `NSEPage` | A page with a curl transition. |
 
 ## Navigation controllers
 
@@ -185,7 +183,7 @@ Some controls come with a controller that holds their state and restoration data
 
 | Controller | Drives |
 | --- | --- |
-| `NSEPageController` | Drill-in page history with `navigateForwardToObject`, `navigateBack` and `navigateForward`. |
+| `NSEPageController` | Drill-in history, horizontal strips or page curls, with child controllers for arranged objects and single-page or two-page curl layouts. See [Page controller](controllers.md#page-controller). |
 | `NSESplitViewController.compactItem` | The selected split item in a compact layout (NSE extension). |
 | `NSETabViewController`, `NSETabViewItem` | A container showing one child at a time behind a tab control (`NSTabViewController`): `tabViewItems` (each an `NSETabViewItem` with the child `viewController`, `label`, `image` and `toolTip`), `selectedTabViewItemIndex`, and `tabStyle` (`segmentedControlOnTop`, `segmentedControlOnBottom`, which Atmo draws as its bottom tab bar, or `unspecified`). Override `shouldSelect`, `willSelect` and `didSelect`. Place it with `<tabs.view />`. |
 | `NSETabViewController` | Tab view items, selected index, restoration and fixed or adaptive tab placement. |

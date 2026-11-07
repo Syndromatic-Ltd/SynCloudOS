@@ -35,6 +35,34 @@ function publicExports(path = resolve("src/NSE/sdkPackageEntry.ts")) {
 }
 
 describe("SynWare NSE public framework boundary", () => {
+  it("exposes page curl only through the page controller", () => {
+    const controllerNames = [
+      "NSEPageController", "NSEPageControllerOptions", "NSEPageControllerSnapshot",
+      "NSEPageControllerSpineLocation", "NSEPageControllerTransitionStyle",
+    ];
+    for (const entry of ["src/NSE/public/page.ts", "src/NSE/Page/index.ts"]) {
+      const { declarations, names } = publicExports(resolve(entry));
+      expect(declarations.every((declaration) => declaration.exportClause && ts.isNamedExports(declaration.exportClause))).toBe(true);
+      expect([...names].sort()).toEqual([...controllerNames].sort());
+    }
+    const legacyNames = [
+      "NSEPage", "NSEPageEvent", "NSEPageHandle", "NSEPageProps", "useNSEPage",
+      "getNSEPagePreset", "nsePagePresets", "nsePageMaterialPresets",
+    ];
+    for (const entry of ["src/NSE/sdkPackageEntry.ts", "src/SynCloudOS/AppSDK/rootPackageEntry.ts"]) {
+      expect(publicExports(resolve(entry)).names.filter((name) => legacyNames.includes(name))).toEqual([]);
+    }
+    const namespace = readFileSync(resolve("src/NSE/NSE.ts"), "utf8");
+    for (const legacy of legacyNames) expect(namespace).not.toMatch(new RegExp(`\\b${legacy}\\b`, "u"));
+    expect(namespace).not.toMatch(/\bPage\s*:/u);
+    const registry = readFileSync(resolve("src/NSE/registry/index.ts"), "utf8");
+    expect(registry).not.toMatch(/\bNSEPage\b/u);
+    const { counterparts } = JSON.parse(readFileSync(resolve("docs/framework/appkit-counterparts.json"), "utf8"));
+    expect(counterparts).not.toHaveProperty("NSEPage");
+    expect(counterparts).not.toHaveProperty("NSEPageHandle");
+    expect(counterparts.NSEPageControllerSpineLocation.none).toContain("UIPageViewController.SpineLocation");
+  });
+
   it("exports complete controller, model and control authoring contracts", () => {
     expect(publicExports().names).toEqual(expect.arrayContaining([
       "NSEObjectController", "NSEDictionaryController", "ObjectControllerOptions",
