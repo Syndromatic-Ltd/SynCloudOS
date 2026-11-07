@@ -48,6 +48,10 @@ describe("independent custom text consumer preparation", () => {
     expect(copies.get("src/example/Contents/image.ts")).toEqual(readFileSync("examples/TextSystem.app/Contents/image.ts"));
     expect(copies.get("src/main.tsx")).toContain("startFreshHost");
   });
+  it("accepts the public Foundation base layer, while rejecting private Foundation paths", () => {
+    expect(() => assertCustomTextSystemSourceBoundary('import { NSEData } from "@syndromatic/syncloudos/foundation";', "src/example/Contents/image.ts", files)).not.toThrow();
+    expect(() => assertCustomTextSystemSourceBoundary('import { NSEData } from "@syndromatic/syncloudos/foundation/internal";', "src/example/Contents/image.ts", files)).toThrow(/consumer|public/i);
+  });
   it("accepts only public framework paths and consumer-local private example resources", () => {
     expect(() => assertCustomTextSystemSourceBoundary(`import { TextEditingSession } from "@syndromatic/syncloudos/nse/text";
       export { textSystemDocumentType } from "./example/Contents";
