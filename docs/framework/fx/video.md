@@ -169,7 +169,7 @@ new VFXEncodedChunk({ type: "key" | "delta", data: NSEDataConvertible, timing: M
 | `type` | `"key"` (decodable on its own) or `"delta"` (depends on earlier chunks). |
 | `timing` | The chunk's `MEFXSampleTimingInfo`. |
 | `byteLength` | The size of the data. |
-| `copyData()` | A copy of the bytes. |
+| `copyData()` | An immutable `NSEData` copy of the encoded bytes. |
 | `copyWithNewTiming(timing)` | A chunk with the same data and new timing. The bytes are shared, since they are immutable, so retiming costs nothing. |
 | `webCodecsTiming()` | `{ timestampMicroseconds, durationMicroseconds, rounded }`, the timing converted to the microsecond integers WebCodecs uses. `rounded` is true when the conversion was inexact. Throws for times with a non-zero epoch. |
 | `discardPaddingNanoseconds` | Trailing padding to discard, from 0 to one second. Meaningful for audio packets in WebM. |
@@ -282,7 +282,7 @@ export function useVP8Decoder(onFrame: (frame: VFXFrame) => void) {
 new VFXEncoder({ backend, output, error?, maximumPendingOutputs?, maximumEncodeQueueSize? })
 ```
 
-The options mirror the decoder's. `output` receives each `VFXEncodedChunk` and a `VFXEncoderOutputMetadata` with a `decoderConfig` (the codec, size and optional description bytes a decoder needs, or a container track needs) and an optional `colourSpace`.
+The options mirror the decoder's. `output` receives each `VFXEncodedChunk` and a `VFXEncoderOutputMetadata` with a `decoderConfig` (the codec, size and optional `description: NSEData` a decoder or container track needs) and an optional `colourSpace`.
 
 | Member | Description |
 | --- | --- |
@@ -398,8 +398,8 @@ new VFXContainerWriter({ backend, sink, track, maximumBufferedBytes?, signal? })
 | Option | Description |
 | --- | --- |
 | `backend` | The format, for example `new VFXWebMContainerBackend()`. |
-| `sink` | Where bytes go: `write(bytes)`, and optional `close()` and `abort(reason)`. Wrap a `WritableStream` or a file handle. |
-| `track` | A `VFXContainerTrack`. See below. |
+| `sink` | Receives encoded chunks through `write(bytes: NSEData): void \| Promise<void>`, and optional `close()` and `abort(reason)`. Wrap a `WritableStream` or a file handle. |
+| `track` | A `VFXContainerTrackInput`; supplied video codec descriptions accept `NSEDataConvertible`. See below. |
 | `maximumBufferedBytes` | The most input the writer will hold, default 8 MiB, from 256 bytes to 512 MiB. |
 | `signal` | An `AbortSignal` that aborts the export. |
 
@@ -415,7 +415,7 @@ The constructor throws `NotSupportedError` when the backend cannot write the tra
 
 A failure in the sink or the backend aborts the writer, calls the sink's `abort`, and rejects the operation that failed.
 
-**Tracks.** A `VFXVideoContainerTrack` has `kind: "video"`, `id` (1 to 126), `codec`, `codedWidth`, `codedHeight`, `timescale` (units per second, up to a billion) and an optional codec `description`. A `VFXAudioContainerTrack` has `kind: "audio"`, `id`, `codec`, `sampleRate` (48,000), `channelCount` (1 or 2), `preSkip` (0 to 65,535) and `timescale`. `VFXContainerTrack` is their union.
+**Tracks.** A `VFXVideoContainerTrack` has `kind: "video"`, `id` (1 to 126), `codec`, `codedWidth`, `codedHeight`, `timescale` (units per second, up to a billion) and an optional codec `description: NSEData`. A `VFXAudioContainerTrack` has `kind: "audio"`, `id`, `codec`, `sampleRate` (48,000), `channelCount` (1 or 2), `preSkip` (0 to 65,535) and `timescale`. `VFXContainerTrack` is their delivered union. `VFXContainerTrackInput` accepts the same metadata with a video `description?: NSEDataConvertible`; the writer copies it into immutable data.
 
 ### `VFXContainerReader`
 
@@ -434,7 +434,7 @@ reader.read(input: NSEDataConvertible | AsyncIterable<NSEDataConvertible>): Prom
 
 `read` accepts bytes in memory or an async iterable (a `ReadableStream` is one), so a large file streams through. The result holds the `container` name, the `track`, the `chunks` (`VFXEncodedChunk`s with timing) and a `seekIndex` of `{ timestampMicroseconds, byteOffset }` points. Malformed or oversized input fails and never allocates without bound.
 
-`VFXContainerBackend` (`container`, `capabilities`, `supports(track, operation)`, `createWriter(track)`) and `VFXContainerReadableBackend` (adds `createReader(limits)`) are the backend interfaces. `VFXContainerCapability` reports what a backend can do for a codec: `read`, `write`, `streaming`, `seekIndex` and `provenance`. The remaining types are `VFXContainerBackendWriter`, `VFXContainerBackendReadSession`, `VFXContainerByteSink`, `VFXContainerReadLimits`, `VFXContainerReadResult`, `VFXContainerSeekPoint`, `VFXContainerReaderOptions`, `VFXContainerWriterOptions`, `VFXContainerWriterState` and `VFXContainerWriterDiagnostics`.
+`VFXContainerBackendWriter.start()`, `write(chunk)` and `close()` return `readonly NSEData[]`; `VFXContainerBackendReadSession.push(bytes)` accepts `NSEDataConvertible`. `VFXContainerBackend` (`container`, `capabilities`, `supports(track, operation)`, `createWriter(track)`) and `VFXContainerReadableBackend` (adds `createReader(limits)`) are the backend interfaces. `VFXContainerCapability` reports what a backend can do for a codec: `read`, `write`, `streaming`, `seekIndex` and `provenance`. The remaining types are `VFXContainerBackendWriter`, `VFXContainerBackendReadSession`, `VFXContainerByteSink`, `VFXContainerReadLimits`, `VFXContainerReadResult`, `VFXContainerSeekPoint`, `VFXContainerReaderOptions`, `VFXContainerWriterOptions`, `VFXContainerWriterState` and `VFXContainerWriterDiagnostics`.
 
 ### WebM
 
@@ -458,7 +458,7 @@ export async function writeWebM(chunks: AsyncIterable<VFXEncodedChunk>, width: n
   });
   for await (const chunk of chunks) await writer.write(chunk);
   await writer.close();
-  return new Blob(parts as BlobPart[], { type: "video/webm" });
+  return new Blob(parts, { type: "video/webm" });
 }
 ```
 

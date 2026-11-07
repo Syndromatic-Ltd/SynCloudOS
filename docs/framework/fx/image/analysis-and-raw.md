@@ -67,7 +67,7 @@ The kinds add fields:
 | Kind | Additional fields |
 | --- | --- |
 | `IFXRectangleFeature` (`"rectangle"`) | none |
-| `IFXQRCodeFeature` (`"qr"`) | `payload` (the decoded text) and `rawBytes` |
+| `IFXQRCodeFeature` (`"qr"`) | `payload` (the decoded text) and `rawBytes: NSEData` |
 | `IFXTextRegionFeature` (`"text-region"`) | none. It marks where text is, and it does not read it. |
 | `IFXFaceFeature` (`"face"`) | `landmarks`, an optional record of named `GFXPoint`s |
 
@@ -121,7 +121,7 @@ The barcode descriptors describe a code that the [generator filters](filters.md)
 
 `IFXBarcodeDescriptor` is the abstract base. Every descriptor has `payloadKind` (`"data-codewords"` for QR, `"message"` for the others), `toData()` for a plain-data form, and the static `IFXBarcodeDescriptor.fromData(value)`, which validates plain data and rebuilds the right class.
 
-Payloads are 1 to 4,096 bytes. A descriptor copies the bytes you give it, and reading `message` or `errorCorrectedPayload` returns a fresh copy.
+Payloads are 1 to 4,096 bytes. Constructor payloads accept `NSEDataConvertible` or a plain `readonly number[]`. A descriptor copies the bytes you give it; `message` and `errorCorrectedPayload` return immutable `NSEData`. The `toData()` forms keep plain numeric arrays so graph serialisation remains JSON-compatible.
 
 | Class | Constructor | Options and ranges |
 | --- | --- | --- |
@@ -155,7 +155,7 @@ export const code: IFXImage = new IFXFilter("barcodeGenerator", { barcodeDescrip
 Reads a camera RAW file and develops it into a linear floating-point image. The counterpart is `CIRAWFilter`. ImageFX includes a portable decoder for a bounded subset of DNG (Adobe Digital Negative) files, which is enough for uncompressed sensor data from many cameras and converters. Other RAW formats fall outside this subset and report `IFXRAWUnsupportedError` when you open them, so the application can fall back to the embedded preview or tell the user.
 
 ```text
-new IFXRAWFilter(encoded: Uint8Array, backend?: IFXRAWBackend)
+new IFXRAWFilter(encoded: NSEDataConvertible, backend?: IFXRAWBackend)
 ```
 
 The constructor copies the bytes and inspects them straight away. It throws `IFXRAWDecodeError` for a corrupt file and `IFXRAWUnsupportedError` for one it cannot handle.
@@ -199,7 +199,7 @@ A frozen description of the file. `IFXRAWMetadataDescriptor` is its constructor 
 
 ### Backends and errors
 
-`IFXRAWBackend` is the interface (`capabilities`, `inspect(source)` and `develop(source, options)`). `IFXPortableDNGRAWBackend` is the built-in one. Its `IFXRAWBackendCapabilities` state the supported subset exactly: classic TIFF-based DNG in little-endian byte order, uncompressed 16-bit Bayer data, the four CFA patterns, orientations 1, 3, 6 and 8, output in linear sRGB as float32, inputs up to 128 MiB and outputs up to 32 MiB.
+`IFXRAWBackend` has `capabilities`, `inspect(source: NSEDataConvertible): IFXRAWMetadata` and `develop(source: NSEDataConvertible, options?: IFXRAWDevelopmentOptions): Promise<IFXRAWDevelopmentResult>`. `IFXPortableDNGRAWBackend` is the built-in one. Its `IFXRAWBackendCapabilities` state the supported subset exactly: classic TIFF-based DNG in little-endian byte order, uncompressed 16-bit Bayer data, the four CFA patterns, orientations 1, 3, 6 and 8, output in linear sRGB as float32, inputs up to 128 MiB and outputs up to 32 MiB.
 
 | Error | When | Fields |
 | --- | --- | --- |
@@ -209,10 +209,11 @@ A frozen description of the file. `IFXRAWMetadataDescriptor` is its constructor 
 `IFXRAWDecodeErrorCode`, `IFXRAWUnsupportedReason`, `IFXRAWDevelopmentProvenance`, `IFXRAWDevelopmentResult`, `IFXRAWOutputSampleFormat`, `IFXRAWWorkingColourSpace`, `IFXRAWDecoderDescriptor` and `IFXRAWSourceDescriptor` are the supporting types.
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import { GFXFloatImage } from "@syndromatic/syncloudos/fx/graphics";
 import { IFXFilter, IFXImage, IFXRAWFilter, IFXRAWUnsupportedError } from "@syndromatic/syncloudos/fx/image";
 
-export async function developPhoto(dng: Uint8Array): Promise<IFXImage | null> {
+export async function developPhoto(dng: NSEDataConvertible): Promise<IFXImage | null> {
   try {
     const raw = new IFXRAWFilter(dng);
     const { image } = await raw.develop({ exposureEV: 0.3, whiteBalance: "as-shot" });

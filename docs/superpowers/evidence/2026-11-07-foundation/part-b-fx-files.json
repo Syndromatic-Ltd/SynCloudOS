@@ -1,7 +1,12 @@
 [
   "docs/framework/fx/audio.md",
+  "docs/framework/fx/compression.md",
   "docs/framework/fx/graphics.md",
+  "docs/framework/fx/graphics/contexts.md",
+  "docs/framework/fx/graphics/paint-and-images.md",
+  "docs/framework/fx/graphics/pdf.md",
   "docs/framework/fx/image.md",
+  "docs/framework/fx/image/analysis-and-raw.md",
   "docs/framework/fx/media.md",
   "docs/framework/fx/midi.md",
   "docs/framework/fx/text.md",

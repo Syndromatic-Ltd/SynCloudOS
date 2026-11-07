@@ -118,9 +118,10 @@ Each `TFXGlyphInfo` has:
 | `ligatureCaretOffsets` | Caret positions inside a ligature, from the font's caret table, when present. |
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import { TFXFont, TFXFontDescriptor } from "@syndromatic/syncloudos/fx/text";
 
-export async function measureWord(fontBytes: Uint8Array, word: string) {
+export async function measureWord(fontBytes: NSEDataConvertible, word: string) {
   const font = await TFXFont.create(fontBytes, new TFXFontDescriptor({ size: 24 }));
   try {
     const run = font.shape(word, { language: "en", features: { kern: 1 } });
@@ -263,6 +264,7 @@ One shaped line. The typesetter creates lines and you read them.
 The remaining types: `TFXLineStringRange` (`location`, `length`), `TFXLineCaretOffsets` (`primary`, `secondary`), `TFXLineCaretOffset`, `TFXLineCaretVisitor`, `TFXLineTextPosition`, `TFXLineTruncationType` and `TFXPositionedGlyphRunKind`.
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import {
   TFXAttributedString,
   TFXFont,
@@ -270,7 +272,7 @@ import {
   TFXTypesetter,
 } from "@syndromatic/syncloudos/fx/text";
 
-export async function wrapAndTruncate(fontBytes: Uint8Array, message: string, width: number) {
+export async function wrapAndTruncate(fontBytes: NSEDataConvertible, message: string, width: number) {
   const font = await TFXFont.create(fontBytes, new TFXFontDescriptor({ size: 16 }));
   const text = new TFXAttributedString(message, [{ start: 0, end: message.length, font }]);
   const typesetter = new TFXTypesetter(text);
@@ -371,6 +373,7 @@ The framesetter honours paragraph styles for indents, spacing, alignment and jus
 To flow text across several frames, create the first, then start the next at `frame.visibleRange.end`.
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import {
   TFXAttributedString,
   TFXFont,
@@ -379,7 +382,7 @@ import {
   TFXParagraphStyle,
 } from "@syndromatic/syncloudos/fx/text";
 
-export async function twoColumns(fontBytes: Uint8Array, story: string) {
+export async function twoColumns(fontBytes: NSEDataConvertible, story: string) {
   const font = await TFXFont.create(fontBytes, new TFXFontDescriptor({ size: 14 }));
   const paragraph = new TFXParagraphStyle({ alignment: "justified", paragraphSpacing: 8 });
   const text = new TFXAttributedString(story, [{ start: 0, end: story.length, font, paragraphStyle: paragraph }]);
@@ -434,6 +437,7 @@ A ruby base is atomic: a line never breaks inside it, and ruby text cannot cross
 `layoutTFXRuby(input)` is the geometry the typesetter uses, exposed for renderers that place ruby themselves. It takes the position, widths, alignment, overhang, collision policy, direction, orientation and font metrics of the base and the ruby, and returns the offsets and extents (`baseInlineOffset`, `cellWidth`, `inlineOffset`, `crossOffset`, `crossMin`, `crossMax`, `width`). `tfxRubyGlyphOffsets(count, naturalWidth, targetWidth, alignment)` returns the per-glyph spacing that distributes ruby over a wider base.
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import {
   TFXAttributedString,
   TFXFont,
@@ -442,7 +446,7 @@ import {
   TFXTypesetter,
 } from "@syndromatic/syncloudos/fx/text";
 
-export async function furigana(fontBytes: Uint8Array) {
+export async function furigana(fontBytes: NSEDataConvertible) {
   const font = await TFXFont.create(fontBytes, new TFXFontDescriptor({ size: 24 }));
   const text = "漢字を読む";
   const annotated = new TFXAttributedString(text, [
@@ -547,7 +551,7 @@ planner.plan(input, containers): Promise<TFXTextLayoutResult>
 
 | Member | Description |
 | --- | --- |
-| `registerFont(bytes, descriptor, signal?)` | Registers font bytes and resolves with a `TFXFontRegistration`: `id`, `familyName`, `format` (`"truetype"`, `"opentype"`, `"woff"` or `"woff2"`), an independent `font` instance and `dispose()`. Disposing one registration never revokes another. |
+| `registerFont(bytes, descriptor, signal?)` | Accepts `NSEDataConvertible` font bytes and resolves with a `TFXFontRegistration`: `id`, `familyName`, `format` (`"truetype"`, `"opentype"`, `"woff"` or `"woff2"`), an independent `font` instance and `dispose()`. Disposing one registration never revokes another. |
 | `registerFontResource(relativeBundlePath, descriptor, signal?)` | Loads a font that ships inside your SynWare's `Resources` folder. The host resolves the path within your bundle only. |
 | `fontReadinessGeneration` | A counter that increases when a font becomes ready or is released. |
 | `subscribeFontReadiness(listener)` | Calls the listener with `{ registrationId, familyName, generation, state }` where `state` is `"ready"` or `"released"`. Returns an unsubscribe function. Redraw text when it fires. |
@@ -555,7 +559,7 @@ planner.plan(input, containers): Promise<TFXTextLayoutResult>
 | `attachmentReadinessGeneration`, `subscribeAttachmentReadiness(listener)` | The same readiness protocol for attachments. |
 | `segment(input)`, `layout(input, containers?)`, `measure(input)` | Text segmentation, layout into containers and measurement. Used by NSE's `NSELayoutManager`. |
 
-`TFXFontRegistration`, `TFXFontReadinessChange`, `TFXFontFaceRegistration`, `TFXFontFaceRegistrationRequest`, `TFXFontResourceMimeType`, `TFXPackagedFontResource`, `TFXPackagedFontResourceLoader`, `TFXRunDelegateRequest` and `TFXRunDelegateReadinessChange` are the types of these requests and events. The host implements the loader and face-registration types.
+`TFXFontRegistration`, `TFXFontReadinessChange`, `TFXFontFaceRegistration`, `TFXFontFaceRegistrationRequest`, `TFXFontResourceMimeType`, `TFXPackagedFontResource`, `TFXPackagedFontResourceLoader`, `TFXRunDelegateRequest` and `TFXRunDelegateReadinessChange` are the types of these requests and events. The host implements the loader and face-registration types. `TFXFontFaceRegistrationRequest.bytes` accepts `NSEDataConvertible`; a `TFXPackagedFontResourceLoader` resolves with `{ bytes: NSEData, mimeType: TFXFontResourceMimeType }`. MIME metadata stays beside the immutable data.
 
 ```tsx
 import { useEffect, useState } from "react";

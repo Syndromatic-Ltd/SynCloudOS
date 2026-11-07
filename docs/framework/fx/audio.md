@@ -474,7 +474,7 @@ The constructor copies `buffer`. Mode `"read-write"` allows writing, and `frameC
 | static `encodeWAV(buffer)` | `NSEData` | A complete 16-bit PCM WAV file. |
 | static `encodeWAVHeader(format, frameLength)` | `NSEData` | The 44-byte header alone, for streaming. |
 | static `encodePCM16Chunk(buffer)` | `NSEData` | Interleaved 16-bit little-endian samples, for streaming. |
-| static `decodeWAV(bytes)` | `AUFXAudioPCMBuffer` | Parses 16-bit PCM WAV of up to 64 MiB. Throws `TypeError` for other encodings and `RangeError` for truncated data. |
+| static `decodeWAV(bytes: NSEDataConvertible)` | `AUFXAudioPCMBuffer` | Parses 16-bit PCM WAV of up to 64 MiB. Throws `TypeError` for other encodings and `RangeError` for truncated data. |
 
 ```ts
 import { AUFXAudioFile, AUFXAudioFormat, AUFXAudioPCMBuffer } from "@syndromatic/syncloudos/fx/audio";
@@ -533,7 +533,7 @@ export async function renderToWavParts(engine: AUFXAudioEngine, seconds: number)
   for await (const chunk of engine.renderOfflineChunks(total, { chunkFrames: 4096 })) {
     parts.push(AUFXAudioFile.encodePCM16Chunk(chunk.buffer).blob());
   }
-  return new Blob(parts as BlobPart[], { type: "audio/wav" });
+  return new Blob(parts, { type: "audio/wav" });
 }
 
 export const mono = new AUFXAudioFormat(48_000, 1);
