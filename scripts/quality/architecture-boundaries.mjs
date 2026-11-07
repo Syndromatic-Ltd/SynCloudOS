@@ -1094,11 +1094,20 @@ export function validateFoundationEnvironment({ root = DEFAULT_ROOT, files } = {
     "HTMLInputElement", "HTMLVideoElement", "HTMLAudioElement", "CSSStyleDeclaration", "Image", "Audio", "Range",
     "requestAnimationFrame", "cancelAnimationFrame",
   ]);
-  const programme = ts.createProgram(candidates.map(path => resolve(root, path)), { ...loadCompilerOptions(root), noEmit: true });
+  const programme = ts.createProgram(candidates.map(path => resolve(root, path)), {
+    ...loadCompilerOptions(root), noEmit: true, incremental: false, composite: false,
+    lib: ["lib.es2022.d.ts", "lib.webworker.d.ts"], types: [], strict: true,
+  });
   const checker = programme.getTypeChecker();
   for (const path of candidates) {
     const source = programme.getSourceFile(resolve(root, path));
     if (!source) continue;
+    // Compile implementations, not only declarations: an inferred string return
+    // must not hide an implementation-only document or getComputedStyle call.
+    for (const diagnostic of [...programme.getSyntacticDiagnostics(source), ...programme.getSemanticDiagnostics(source)]) {
+      const { line } = source.getLineAndCharacterOfPosition(diagnostic.start ?? 0);
+      addError(errors, `${path}:${line + 1} Foundation worker contract: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, " ")}`);
+    }
     const bindings = staticModuleBindings(source);
     const report = (node, message) => {
       const { line } = source.getLineAndCharacterOfPosition(node.getStart(source));

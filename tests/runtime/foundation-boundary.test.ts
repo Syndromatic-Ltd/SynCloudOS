@@ -43,7 +43,7 @@ it.each(["NSE", "FX", "SynCloudOS", "SynCloudOSReact", "Webspring"])("rejects Fo
   const result = validateImportEdges({ root, policy: { schemaVersion: 1, controlledSources: ["src/**"], exclusions: [], aliases: [], layers, temporaryAllowlist: [] } });
   expect(result.errors.some(error => error.includes(`Foundation may not import ${target}`))).toBe(true);
 });
-it.each(['import type { ReactNode } from "react";', 'export const element = document.body;', 'export const element = globalThis["document"];', 'export type View = HTMLElement;'])("rejects a DOM or React dependency: %s", source => {
+it.each(['import type { ReactNode } from "react";', 'export const element = document.body;', 'export const element = globalThis["document"];', 'export type View = HTMLElement;', 'export const colour = getComputedStyle(null as never).color;'])("rejects a DOM or React dependency: %s", source => {
   const root = fixture(source);
   expect(validateFoundationEnvironment({ root, files: ["src/Foundation/public.ts"] })).not.toEqual([]);
 });
