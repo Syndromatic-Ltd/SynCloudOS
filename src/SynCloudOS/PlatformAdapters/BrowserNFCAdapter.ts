@@ -57,7 +57,12 @@ export interface BrowserNFCAdapterOptions {
 
 function fromRecords(records: readonly BrowserNDEFRecord[]): NFXNDEFMessage {
   return new NFXNDEFMessage(records.map(record => {
-    const nested = record.toRecords?.();
+    let nested: readonly BrowserNDEFRecord[] | null | undefined;
+    // Native toRecords exists on ordinary records too, where it throws. External
+    // and local types can also contain opaque bytes rather than an NDEF message.
+    if (record.recordType === "smart-poster" || record.recordType.includes(":")) {
+      try { nested = record.toRecords?.(); } catch { /* Keep the original opaque payload. */ }
+    }
     const bytes = record.data;
     return new NFXNDEFPayload({
       recordType: record.recordType, mediaType: record.mediaType, id: record.id,

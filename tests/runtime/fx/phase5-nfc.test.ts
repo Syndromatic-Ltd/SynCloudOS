@@ -33,7 +33,7 @@ class Reader extends EventTarget {
   constructor() { super(); Reader.instances.push(this); }
   reading(bytes: Uint8Array) {
     this.dispatchEvent(Object.assign(new Event("reading"), {
-      serialNumber: "tag", message: { records: [{ recordType: "mime", mediaType: "application/octet-stream", data: new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength) }] },
+      serialNumber: "tag", message: { records: [{ recordType: "mime", mediaType: "application/octet-stream", data: new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength), toRecords() { throw new DOMException("Not nested", "NotSupportedError"); } }] },
     }));
   }
 }
@@ -129,6 +129,25 @@ describe("phase 5 NFC", () => {
     Reader.instances.at(-1)!.dispatchEvent(new Event("readingerror"));
     expect(onError).toHaveBeenCalledWith(expect.objectContaining({ name: "NotReadableError" }));
     await expect(session.scan(() => {})).rejects.toMatchObject({ name: "InvalidStateError" });
+    session.dispose();
+  });
+
+  it("parses nested NDEF only for container types and preserves opaque external bytes", async () => {
+    const session = new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }).createReaderSession();
+    const listener = vi.fn();
+    const notNested = vi.fn(() => { throw new DOMException("Not nested", "NotSupportedError"); });
+    const opaque = new DataView(new Uint8Array([7, 8]).buffer);
+    await session.scan(listener);
+    Reader.instances.at(-1)!.dispatchEvent(Object.assign(new Event("reading"), { serialNumber: "tag", message: { records: [
+      { recordType: "text", data: opaque, toRecords: notNested },
+      { recordType: "smart-poster", data: opaque, toRecords: () => [{ recordType: "url", data: opaque, toRecords: notNested }] },
+      { recordType: "example.com:opaque", data: opaque, toRecords: () => { throw new DOMException("Opaque", "SyntaxError"); } },
+    ] } }));
+    expect(notNested).not.toHaveBeenCalled();
+    expect(listener).toHaveBeenCalledOnce();
+    const message = listener.mock.calls[0][0].message as NFXNDEFMessage;
+    expect(message.records[1].data).toBeInstanceOf(NFXNDEFMessage);
+    expect((message.records[2].data as NSEData).bytes).toEqual(new Uint8Array([7, 8]));
     session.dispose();
   });
 });
