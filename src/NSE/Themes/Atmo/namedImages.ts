@@ -18,8 +18,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** Atmo owns the artwork and natural point size of system template images. */
+/** Atmo owns the artwork and natural point size of system template images.
+ * Resolve URLs only when an image is requested: importing an unrelated control
+ * must not require an ESM asset base (for example in a classic-script view host).
+ */
+const navigationTemplateSize = Object.freeze({ width: 17, height: 17 });
 export const atmoNamedImages = Object.freeze({
-  NSGoBackTemplate: Object.freeze({ src: new URL("./Resources/navigation-back.svg", import.meta.url).href, size: Object.freeze({ width: 17, height: 17 }) }),
-  NSGoForwardTemplate: Object.freeze({ src: new URL("./Resources/navigation-forward.svg", import.meta.url).href, size: Object.freeze({ width: 17, height: 17 }) }),
+  get NSGoBackTemplate() {
+    return { src: new URL("./Resources/navigation-back.svg", import.meta.url).href, size: navigationTemplateSize };
+  },
+  get NSGoForwardTemplate() {
+    return { src: new URL("./Resources/navigation-forward.svg", import.meta.url).href, size: navigationTemplateSize };
+  },
 });

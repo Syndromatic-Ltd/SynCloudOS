@@ -4,6 +4,7 @@
 `NSEImage.goForwardTemplateName` are the `NSImage.Name` constants
 `NSGoBackTemplate` and `NSGoForwardTemplate`. `NSEImage.named(name)` corresponds
 to `NSImage(named:)`: it returns a shared image, or `null` for an unknown name.
+Artwork URLs resolve on lookup, so importing unrelated controls needs no asset base.
 
 ```tsx
 import { NSEButton, NSEImage } from "@syndromatic/syncloudos/nse/controls";
