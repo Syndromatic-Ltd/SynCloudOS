@@ -24,7 +24,7 @@ import type { NSEActionReference } from "../Core/actionReference";
 import type { NSEThumbMaterial } from "../../Appearance/NSEMetalThumb";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import type { NSEUndoRegistrationCapability } from "../../../Foundation/NSEUndoRegistrationCapability";
-import type { UndoAction, UndoReservation, AutomaticUndoGroup } from "../../../SynCloudOS/Undo/undoTypes";
+import type { UndoAction, UndoReservation, AutomaticUndoGroup } from "../../../SynCloudOS/SynCloudOS";
 import type { HFXFeedbackRequest } from "../../../FX/HapticsFX/HFXHapticEvent";
 export interface NSENumericValueContract { readonly minimum: number; readonly maximum: number; readonly step: number; readonly wraps?: boolean }
 export interface NSEStepperValueContract<T> { readonly minimum:T;readonly maximum:T;compare(first:T,second:T):number;step(value:T,direction:1|-1):T;readonly wraps?:boolean }
