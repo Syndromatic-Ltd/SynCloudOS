@@ -18,13 +18,14 @@
  */
 
 import type { XRFXClient, XRFXSession } from "../../FX/XRFX/public";
+import type { PrivacyApplicationPort } from "../HostServices/AppSDKHostServiceTypes";
 import { createMountedResourceScope } from "../HostServices/mountedResourceScope";
 
 export function createMountedXRClient(adapter: XRFXClient | undefined, mountSignal: AbortSignal,
-  permissions: () => readonly string[], authorise: (capability: string) => boolean): XRFXClient {
+  entitlements: () => readonly string[], authorise: (capability: string) => boolean, privacy?: PrivacyApplicationPort): XRFXClient {
   const scope = createMountedResourceScope(mountSignal, { maxResources: 2, budgets: { sessions: 2 } });
   const guard = () => { mountSignal.throwIfAborted();
-    if (!permissions().includes("xr.session") || !authorise("xr.session")) throw new DOMException("The xr.session capability is required.", "SecurityError"); };
+    if (!entitlements().includes("xr.session") || !authorise("xr.session")) throw new DOMException("Privacy authorisation requires the xr.session entitlement.", "SecurityError"); };
   const unavailable = Object.freeze({ apiAvailable: false, worldTracking: false as const, nativeARKit: false as const });
   const capabilities = () => mountSignal.aborted ? unavailable : adapter?.getCapabilities() ?? unavailable;
   return Object.freeze<XRFXClient>({ getCapabilities: capabilities,
@@ -32,23 +33,37 @@ export function createMountedXRClient(adapter: XRFXClient | undefined, mountSign
       return scope.acquire(signal, (lease, release) => {
         const session = adapter?.createSession(lease);
         let disposed = false;
+        let unbindPrivacy: (() => void) | undefined;
         const dispose = () => {
           if (disposed) return;
           disposed = true;
+          unbindPrivacy?.(); unbindPrivacy = undefined;
           lease.removeEventListener("abort", dispose);
           try { session?.dispose(); } finally { release(); }
         };
+        const bindPrivacy = () => { if (privacy && !unbindPrivacy) unbindPrivacy = privacy.bindResource(dispose); };
         lease.addEventListener("abort", dispose, { once: true });
-        const check = () => { lease.throwIfAborted(); guard(); };
-        const requireSession = () => { check(); if (!session) throw new DOMException("WebXR is unavailable.", "NotSupportedError"); return session; };
+        const check = (active = false) => { lease.throwIfAborted(); guard(); if (active) privacy?.assertRequestAllowed(); };
+        const requireSession = (active = false) => { check(active); if (!session) throw new DOMException("WebXR is unavailable.", "NotSupportedError"); return session; };
         const result: XRFXSession = Object.freeze<XRFXSession>({ getCapabilities: () => lease.aborted ? unavailable : capabilities(),
-          getAuthorizationStatus: async () => { try { check(); } catch { return lease.aborted ? "unavailable" : "denied"; } return session?.getAuthorizationStatus() ?? "unavailable"; },
+          getAuthorizationStatus: async () => {
+            try { check(); } catch { return lease.aborted ? "unavailable" : "denied"; }
+            if (!session) return "unavailable";
+            const query = async () => { const status = await session.getAuthorizationStatus(); lease.throwIfAborted(); return status; };
+            try { return privacy ? await privacy.getAuthorizationStatus(query) : await query(); }
+            catch (error) { if (lease.aborted) return "unavailable"; throw error; }
+          },
           isSupported: async configuration => { check(); return session?.isSupported(configuration) ?? false; },
           run: async (configuration, listener) => {
-            await requireSession().run(configuration, frame => {
-              try { check(); } catch { session?.dispose(); return; } listener(frame);
-            });
-            try { check(); } catch (error) { session?.dispose(); throw error; }
+            requireSession(true);
+            const operation = async () => {
+              bindPrivacy();
+              await requireSession(true).run(configuration, frame => {
+                try { check(true); } catch { dispose(); return; } listener(frame);
+              });
+              try { check(true); } catch (error) { dispose(); throw error; }
+            };
+            return privacy ? privacy.request(operation, { signal: lease }) : operation();
           },
           pause: () => session?.pause() ?? Promise.resolve(),
           dispose,

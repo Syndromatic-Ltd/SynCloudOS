@@ -18,53 +18,71 @@
  */
 
 import type { NFXNFCClient, NFXNDEFReaderSession } from "../../FX/NFCFX/public";
+import type { PrivacyApplicationPort } from "../HostServices/AppSDKHostServiceTypes";
 import { createMountedResourceScope } from "../HostServices/mountedResourceScope";
 
-/** Mounted declarations and policy are rechecked for each NFC operation and reading. */
+/** Mounted NFC access combines immutable launch declarations with per-app privacy. */
 export function createMountedNFCClient(
   adapter: NFXNFCClient | undefined,
   mountSignal: AbortSignal,
-  permissions: () => readonly string[],
+  entitlements: () => readonly string[],
   authorise: (capability: string) => boolean,
+  privacy?: PrivacyApplicationPort,
 ): NFXNFCClient {
   const scope = createMountedResourceScope(mountSignal, { maxResources: 4, budgets: { sessions: 4 } });
   const requireCapability = (capability: "nfc.read" | "nfc.write") => {
     mountSignal.throwIfAborted();
-    if (!permissions().includes(capability)) throw new DOMException(`SynWare capability ${capability} must be declared.`, "SecurityError");
-    if (!authorise(capability)) throw new DOMException(`PolicyKit denied SynWare capability ${capability}.`, "SecurityError");
+    if (!entitlements().includes(capability)) throw new DOMException(`SynWare entitlement ${capability} must be declared.`, "SecurityError");
+    if (!authorise(capability)) throw new DOMException(`Privacy authorisation denied ${capability}.`, "SecurityError");
+    privacy?.assertRequestAllowed();
   };
   return Object.freeze<NFXNFCClient>({
     getCapabilities: () => !mountSignal.aborted && adapter ? adapter.getCapabilities() : Object.freeze({ reading: false, writing: false, makingReadOnly: false }),
     createReaderSession: signal => scope.acquire(signal, (lease, release) => {
       let disposed = false;
+      let unbindPrivacy: (() => void) | undefined;
       const session = adapter?.createReaderSession(lease);
       const dispose = () => {
         if (disposed) return;
         disposed = true;
+        unbindPrivacy?.(); unbindPrivacy = undefined;
         lease.removeEventListener("abort", dispose);
         try { session?.dispose(); } finally { release(); }
       };
+      const bindPrivacy = () => { if (privacy && !unbindPrivacy) unbindPrivacy = privacy.bindResource(dispose); };
       lease.addEventListener("abort", dispose, { once: true });
       const requireSession = (capability: "nfc.read" | "nfc.write") => {
         lease.throwIfAborted(); requireCapability(capability);
         if (!session) throw new DOMException("Web NFC is unavailable.", "NotSupportedError");
         return session;
       };
+      const request = async (capability: "nfc.read" | "nfc.write", operation: (session: NFXNDEFReaderSession) => Promise<void>) => {
+        requireSession(capability);
+        const perform = async () => {
+          bindPrivacy();
+          await operation(requireSession(capability));
+          requireSession(capability);
+        };
+        return privacy ? privacy.request(perform, { signal: lease }) : perform();
+      };
       return Object.freeze<NFXNDEFReaderSession>({
         getAuthorizationStatus: async () => {
           if (lease.aborted || !session) return "unavailable";
-          const canInspect = ["nfc.read", "nfc.write"].some(capability => permissions().includes(capability) && authorise(capability));
-          return canInspect ? session.getAuthorizationStatus() : "denied";
+          const canInspect = ["nfc.read", "nfc.write"].some(capability => entitlements().includes(capability) && authorise(capability));
+          if (!canInspect) return "denied";
+          const query = async () => { const status = await session.getAuthorizationStatus(); lease.throwIfAborted(); return status; };
+          try { return privacy ? await privacy.getAuthorizationStatus(query) : await query(); }
+          catch (error) { if (lease.aborted) return "unavailable"; throw error; }
         },
-        scan: async (listener, onError) => requireSession("nfc.read").scan(reading => {
-          try { lease.throwIfAborted(); requireCapability("nfc.read"); } catch { dispose(); return; }
+        scan: (listener, onError) => request("nfc.read", value => value.scan(reading => {
+          try { requireSession("nfc.read"); } catch { dispose(); return; }
           listener(reading);
         }, error => {
-          try { lease.throwIfAborted(); requireCapability("nfc.read"); } catch { dispose(); return; }
+          try { requireSession("nfc.read"); } catch { dispose(); return; }
           onError?.(error);
-        }),
-        write: async (message, options) => requireSession("nfc.write").write(message, options),
-        makeReadOnly: async () => requireSession("nfc.write").makeReadOnly(),
+        })),
+        write: (message, options) => request("nfc.write", value => value.write(message, options)),
+        makeReadOnly: () => request("nfc.write", value => value.makeReadOnly()),
         dispose,
       });
     }, session => session.dispose(), { sessions: 1 }),

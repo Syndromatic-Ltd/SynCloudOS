@@ -18,22 +18,25 @@
  */
 
 import type { CNFXCapabilities, CNFXContactsClient, CNFXContactStore } from "../../FX/ContactsFX/public";
+import type { PrivacyApplicationPort } from "../HostServices/AppSDKHostServiceTypes";
 import { createMountedResourceScope } from "../HostServices/mountedResourceScope";
 
 const unavailable: CNFXCapabilities = Object.freeze({ contactPicker: false, persistentAccess: false });
 
-/** Mounted contact selection authority. Every picker request rechecks the app declaration. */
+/** Mounted contact selection. Browser picker access and per-app privacy remain separate. */
 export function createMountedContactsClient(
   adapter: CNFXContactsClient | undefined,
   mountSignal: AbortSignal,
-  permissions: () => readonly string[],
+  entitlements: () => readonly string[],
   authorise: (capability: string) => boolean,
+  privacy?: PrivacyApplicationPort,
 ): CNFXContactsClient {
   const scope = createMountedResourceScope(mountSignal, { maxResources: 8, budgets: { sessions: 8 } });
   const requireAccess = (signal: AbortSignal) => {
     signal.throwIfAborted();
-    if (!permissions().includes("contacts.select")) throw new DOMException("SynWare capability contacts.select must be declared.", "SecurityError");
-    if (!authorise("contacts.select")) throw new DOMException("Policy denied SynWare capability contacts.select.", "SecurityError");
+    if (!entitlements().includes("contacts.select")) throw new DOMException("SynWare entitlement contacts.select must be declared.", "SecurityError");
+    if (!authorise("contacts.select")) throw new DOMException("Privacy authorisation denied contacts.select.", "SecurityError");
+    privacy?.assertRequestAllowed();
     if (!adapter) throw new DOMException("Contact selection is unavailable.", "NotSupportedError");
   };
   return Object.freeze({
@@ -43,27 +46,35 @@ export function createMountedContactsClient(
         const store = adapter?.createContactStore(lease);
         const capabilities = () => lease.aborted ? unavailable : store?.getCapabilities() ?? unavailable;
         let disposed = false;
+        let unbindPrivacy: (() => void) | undefined;
         const dispose = () => {
           if (disposed) return;
           disposed = true;
+          unbindPrivacy?.(); unbindPrivacy = undefined;
           lease.removeEventListener("abort", dispose);
           try { store?.dispose(); } finally { release(); }
         };
+        const bindPrivacy = () => { if (privacy && !unbindPrivacy) unbindPrivacy = privacy.bindResource(dispose); };
         lease.addEventListener("abort", dispose, { once: true });
         return Object.freeze<CNFXContactStore>({
           getCapabilities: capabilities,
           async getAuthorizationStatus() {
             if (lease.aborted || !store) return "unavailable";
-            if (!permissions().includes("contacts.select") || !authorise("contacts.select")) return "denied";
-            const status = await store.getAuthorizationStatus();
-            if (lease.aborted) return "unavailable";
-            return status;
+            if (!entitlements().includes("contacts.select") || !authorise("contacts.select")) return "denied";
+            const query = async () => { const status = await store.getAuthorizationStatus(); lease.throwIfAborted(); return status; };
+            try { return privacy ? await privacy.getAuthorizationStatus(query) : await query(); }
+            catch (error) { if (lease.aborted) return "unavailable"; throw error; }
           },
           async requestAccess(options) {
             requireAccess(lease);
-            const contacts = await store!.requestAccess(options);
-            requireAccess(lease);
-            return contacts;
+            const requestSignal = options?.signal ? AbortSignal.any([lease, options.signal]) : lease;
+            const operation = async (signal: AbortSignal) => {
+              requireAccess(lease); bindPrivacy();
+              const contacts = await store!.requestAccess({ ...options, signal });
+              requireAccess(lease); signal.throwIfAborted();
+              return contacts;
+            };
+            return privacy ? privacy.request(operation, { signal: requestSignal }) : operation(requestSignal);
           },
           dispose,
         });
