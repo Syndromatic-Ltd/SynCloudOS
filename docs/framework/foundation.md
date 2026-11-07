@@ -148,7 +148,7 @@ For persistent application settings, inject the mounted application’s preferen
 
 ## Scope
 
-Public pasteboard, document, panel, share and FX reader byte APIs migrate separately. Existing raw-byte signatures are not changed by this layer’s introduction. Undo remains runtime-owned while a dependency-free manager contract and the mounted lease boundary are designed together; this entry does not export an undo-manager alias.
+Foundation owns the value types and the undo history engine. The system layer owns mounted authority and service adapters. The internal date, decimal and transformer predecessors have been removed. `ChangeSet` and `SelectionModel` remain private controller implementation models: neither has a Foundation class counterpart, and neither is published under an invented Cocoa name. Public byte contracts are described below.
 
 ## Public byte contracts
 
