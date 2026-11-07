@@ -13,10 +13,16 @@ export function NSEOpenPanelItemImage({ item, images }: { item: OpenPanelItem; i
   useEffect(() => {
     let current = true;
     let resource: IFXImageResource | undefined;
+    const owner = new AbortController();
     const load = async () => {
       if (!images || item.kind === "directory") return;
-      const source = item.media?.thumbnailUrl;
+      const source = item.media?.thumbnailUrl ?? (item.media?.kind === "image" ? item.media.source : undefined);
       if (source) resource = images.load({ source: { kind: "url", url: source, cors: "anonymous" }, accessibleLabel: item.name });
+      else if (item.media?.kind === "image" && item.media.fileReference) {
+        const bytes = await item.media.fileReference.read(owner.signal);
+        if (!current) return;
+        resource = images.load({ source: { kind: "bytes", mimeType: item.media.mimeType, bytes }, accessibleLabel: item.name });
+      }
       else if (item.handle?.kind === "file") {
         const file = await item.handle.getFile();
         if (!current || !file.type.startsWith("image/")) return;
@@ -29,7 +35,7 @@ export function NSEOpenPanelItemImage({ item, images }: { item: OpenPanelItem; i
       if (current && resource.state === "ready") setThumbnail({ item, resource });
     };
     void load().catch(() => { /* Unreadable or unsupported image: retain the generic document art. */ });
-    return () => { current = false; resource?.release(); };
+    return () => { current = false; owner.abort(); resource?.release(); };
   }, [images, item]);
   const resource = thumbnail && thumbnail.item === item && thumbnail.resource.state === "ready" ? thumbnail.resource : null;
   return <NSEImageView className={resource ? "nse-open-thumbnail" : "nse-open-workspace-icon"} src={resource ?? NSEWorkspace.shared.iconForFile({ name: item.name, kind: item.kind }, 96)}
