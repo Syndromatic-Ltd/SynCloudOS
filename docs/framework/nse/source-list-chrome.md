@@ -24,6 +24,6 @@ Peer navigation belongs to `NSETabViewController`: `tabStyle: "sidebarAdaptable"
 
 A source-list app with a richer outline can compose an outer split with tab content. Its outline supplies regular navigation while the tab controller uses `unspecified`; compact/rail layouts collapse that sidebar and use `sidebarAdaptable` on the same retained tab controller. Selection, mounted content and editor focus survive these presentation changes.
 
-Current explicit foldable segments are mapped into usable book regions, with at least 280 by 160 px per pane. The split excludes the hinge, respects RTL and disables divider dragging across the hinge. Stale geometry retains the preceding presentation. Browser emulation covers geometry and interaction; physical folding and reachability still need device review.
+Current explicit foldable segments are mapped into usable book regions, with at least 280 by 160 px per pane. A vertical split with two visible panes excludes the hinge, respects RTL and disables divider dragging across the hinge. Generic splits with three or more visible panes retain their ordinary allocation rather than projecting into two book regions. Stale geometry retains the preceding presentation. Browser emulation covers geometry and interaction; physical folding and reachability still need device review.
 
 Utility panels belong to their application session. Changing a retained section does not dismiss its font panel or popover; explicit close or session teardown does.

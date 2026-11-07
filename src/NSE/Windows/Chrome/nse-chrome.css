@@ -1143,7 +1143,7 @@
 
 /* Divider drawer open/close (same recipe as nse-containers.css): the items region is a single
    grid row animating 1fr -> 0fr while the inner wrapper clips, so collapse slides instead of
-   snapping. Collapsed content is inert from NSESidebar, so it cannot take focus mid-transition. */
+   snapping. The outline makes collapsed content inert, so it cannot take focus mid-transition. */
 .nse-sidebar-section-items {
   display: grid;
   grid-template-rows: 1fr;
@@ -1316,7 +1316,7 @@
 
 /* --- Metal source-list surface (sits under the atmoMetal chrome) -------------
    NSEMetalSurface is the layout-neutral surface projection. It shares this
-   exact material rule with NSESidebar, but deliberately does not inherit its
+   exact material rule with source-list outlines, but deliberately does not inherit their
    desktop-only border/seam geometry. */
 :is(.nse-sidebar[data-surface="metal"], .nse-metal-surface) {
   --nse-sidebar-metal-bg: linear-gradient(180deg, #dfe0e2 0%, #cdcfd2 100%);

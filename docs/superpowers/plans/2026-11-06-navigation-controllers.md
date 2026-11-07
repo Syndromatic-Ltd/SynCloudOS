@@ -35,7 +35,7 @@ class AboutViewController extends NSEViewController {
 
 - `tabViewItems`, `addTabViewItem(_:)`, `insertTabViewItem(_:at:)`, `removeTabViewItem(_:)`.
 - `selectedTabViewItemIndex` (observable, settable).
-- `tabStyle`: `"segmentedControlOnTop"`, `"segmentedControlOnBottom"`, `"toolbar"` or `"unspecified"`. Atmo draws `segmentedControlOnBottom` with today's tab-bar art, and `toolbar` puts the items in the window's toolbar as selectable items, as AppKit's preferences windows do.
+- `tabStyle`: `"segmentedControlOnTop"`, `"segmentedControlOnBottom"`, `"toolbar"` or `"unspecified"` are fixed AppKit styles. The approved NSE extension `"sidebarAdaptable"` selects sidebar, bottom tabs or a rail from the trait collection and measured content allocation. Atmo draws `segmentedControlOnBottom` with today's tab-bar art, and `toolbar` puts the items in the window's toolbar as selectable items, as AppKit's preferences windows do.
 - `transitionOptions`: `crossfade`, `slideForward`, `slideBackward` and `slideLeft`/`slideRight` (`NSViewController.TransitionOptions`). This replaces About's own `NSEPresence` slide.
 - Delegate hooks are overridable methods, as AppKit's `NSTabViewDelegate` methods on the controller are: `tabView(shouldSelect:)`, `tabView(willSelect:)` and `tabView(didSelect:)`. They replace `onSelect`.
 - `NSETabViewItem` (`NSTabViewItem`) has `identifier`, `label`, `image`, `toolTip` and `viewController`.
@@ -47,7 +47,7 @@ class AboutViewController extends NSEViewController {
 The adaptive controller's job, one pane at a time on a compact display, moves to the split view controller and its items:
 
 - `NSESplitViewItem.behavior`: `"sidebar"`, `"contentList"`, `"inspector"` or `"default"` (AppKit's `NSSplitViewItem.Behavior`), plus `canCollapse`, `isCollapsed`, `minimumThickness` and `maximumThickness`.
-- When the trait collection's `horizontalSizeClass` is `compact`, the split view controller shows one item at a time. `showDetail(_:)` moves forward from the sidebar to the content; the theme draws a back control that collapses back to the sidebar. Which item shows is observable as `NSESplitViewController.compactItem`. **For the owner:** AppKit has no compact collapse, so this is an NSE behaviour on an AppKit class, as D2 allows; the property name needs approval.
+- When the trait collection's `horizontalSizeClass` is `compact`, the split view controller shows one item at a time. `showDetail(_:)` moves forward from the sidebar to the content; the theme draws a back control that collapses back to the sidebar. Which item shows is observable as `NSESplitViewController.compactItem`. AppKit has no compact collapse: this is the NSE behaviour permitted by D2, with the property name approved on 2026-11-07.
 - Removed: `NSEAdaptiveNavigationController`, `model`, `presentation`, `setTraits` (the trait collection already reaches every controller through `traitCollectionDidChange`) and `setContentBounds`.
 
 ### `NSEPageController` history (`NSPageController`, `transitionStyle: "stackHistory"`)
@@ -60,7 +60,7 @@ Drill-in (Journal's folders, then notes, then a note; Portfolio's library, then 
 
 ### The source-list window
 
-`NSESourceListScene` goes. A source-list window's `contentViewController` is an `NSESplitViewController` whose sidebar item holds an `NSEOutlineView` with `selectionHighlightStyle: "sourceList"`. Its bottom bar is the window's content border, after `NSWindow.setContentBorderThickness(_:for: .minY)`: `window.bottomBarAccessory`, holding ordinary views. **For the owner:** AppKit draws the content border but has no accessory for it, so the name needs approval. The QuickSwitch rail stays the host's title-bar chrome.
+`NSESourceListScene` goes. A source-list window's `contentViewController` is an `NSESplitViewController` whose sidebar item holds an `NSEOutlineView` with `selectionHighlightStyle: "sourceList"`. Its bottom bar is the window's content border, after `NSWindow.setContentBorderThickness(_:for: .minY)`: `window.bottomBarAccessory`, holding ordinary views. AppKit draws the content border but has no accessory for it; this NSE extension was approved on 2026-11-07. The QuickSwitch rail stays the host's title-bar chrome.
 
 ## Order
 
@@ -83,7 +83,7 @@ Before removing `NSEAdaptiveNavigationController`, the existing implementation w
 | Short-wide rail (height <=480 px, landscape, at least 360 px content after a 104 px rail) | `sidebarAdaptable`'s vertical tab control; content budgets, independent of device labels |
 | Hierarchy list/detail versus one pane at a time | `NSESplitViewController`, sidebar/content-list items, `compactItem` and `showDetail(_:)` |
 | Folder/list/detail drill-in and Back | `NSEPageController` `stackHistory`; split-view Back returns to the preceding pane and restores initiating focus |
-| Foldable book regions | Shared `resolveNSEBookRegions`: explicit current side-by-side posture/segments, >=280x160 px per pane; split allocations exclude the hinge, respect RTL, and disable divider dragging |
+| Foldable book regions | Shared `resolveNSEBookRegions`: explicit current side-by-side posture/segments, >=280x160 px per pane; the existing two-pane navigation allocations exclude the hinge, respect RTL, and disable divider dragging. Generic splits with three or more visible items do not project into two book regions |
 | Bounds-driven switching | Controller views measure their own untransformed content allocation through ResizeObserver; window traits are the fallback. Zero/invalid allocations retain the last valid geometry |
 | Pending/untrusted geometry | Retain the previous presentation until current geometry is available; do not guess a device or posture |
 | Canonical trait changes | `traitCollectionDidChange`; no caller-owned `setTraits` or `setContentBounds` API |
@@ -99,8 +99,14 @@ recorded below as each step lands.
 
 Each step ends green (typecheck, tests, the site build, the gallery in light and dark, and pixel diffs of every changed app route).
 
-1. `NSETabViewController` and `NSETabViewItem`. *Done.* The classes (`segmentedControlOnTop`, `segmentedControlOnBottom`, `unspecified`; restoration through `selectTabViewItem(withIdentifier:)`; the leaving item's view exits with `NSEPresence`) and About, pixel-identical in every section on desktop and phone, with its adaptive controller gone. Software and the gallery's source-list examples are source lists, not tabs: they move in steps 3 and 4. `toolbar` and `transitionOptions` wait for a caller.
+1. `NSETabViewController` and `NSETabViewItem`. *Done.* The classes (`segmentedControlOnTop`, `segmentedControlOnBottom`, `unspecified`; restoration through `selectTabViewItem(withIdentifier:)`; the leaving item's view exits with `NSEPresence`) and About, pixel-identical in every section on desktop and phone, with its adaptive controller gone. `toolbar` now inserts selectable items into the owning window's toolbar, preserves configured items and transfers ownership when the toolbar changes. `transitionOptions` remains deferred. Renderer models stay private; the public controller does not expose the legacy tab/stack contract.
 2. `NSEPageController` `stackHistory`. *Done.* `NSEPageController` is an `NSViewController` subclass with `stackHistory` (the default) and `horizontalStrip`, the delegate methods as overridable methods, and pages as child view controllers that receive their object as `representedObject` (new on `NSEViewController`). The gallery's sliding day views use it. Portfolio's stack was only a flag for whether the reader shows, so it is plain state now; the reader itself waits on the owner's presentation decision. The gallery's section browse and detail is a sidebar collapsing to one pane, so it moves with step 3, not here.
-3. `NSESplitViewController` compact collapse, then Journal and JournalOld (tabs, stack and adaptive together).
-4. The source-list window and the bottom bar. Software and the gallery move, and `NSESourceListScene`, `NSESidebar` and `NSEStatusBar` go.
-5. `NSESlidingPane` and `NSESlidingPanes` merge into the split view controller's collapsing items.
+3. *Done.* `NSESplitViewController.compactItem` and `showDetail` own compact pane selection, measured content bounds, retained pane DOM, two-pane hinge allocation and Back/focus restoration. Standard compact split/page chrome hands title and Back to the stage; Journal keeps its own established chrome. Journal and JournalOld compose `NSETabViewController`, split detail and `NSEPageController.stackHistory`, retaining preference migration and explicit-route precedence. The default split renderer has one bounds authority so an outer controller wrapper cannot oscillate with its inner content allocation.
+4. *Done.* `window.bottomBarAccessory` renders ordinary views in the bottom content border with application context and sheet modality; its permanent content host retains editing state when the border appears or disappears. Software and the gallery compose source-list outlines, split items and adaptive tab controllers. Their footer seam follows the shared resized sidebar. Portfolio uses an `unspecified` tab controller behind its existing collection picker. `NSEAdaptiveNavigationController`, `NSESourceListScene`, `NSESidebar` and `NSEStatusBar` are removed, including public types, registry entries, catalogue mappings and pinned exports. The tab appearance model remains private implementation, without compatibility exports.
+5. *Done.* `NSESlidingPane` and `NSESlidingPanes` are removed. The gallery's note and connected-trip examples use actual split items (`canCollapse`, `isCollapsed`, `behavior`) with retained child controllers. The old animated peek-strip interaction is deliberately replaced by split collapse/dividers and a compact pane chooser; this is a recorded visual and interaction change.
+
+## Verification and recorded differences
+
+The evidence root is `%TEMP%/syncloudos-navigation-phase7-20261107`: `before/` contains the 28 baseline captures and `final/` the desktop 1440×900 and phone 390×844 captures in light and dark (DPR 1), including About, Journal, JournalOld, Software, Portfolio, the gallery and Publisher. The earlier `after/` run records the split measurement regression; it is failed evidence, retained for diagnosis. Final validation counts and commit identities are recorded in the Phase 7 completion report in that folder.
+
+Recorded differences are the removal of More (all Software/gallery peers are directly reachable), the gallery's window-owned footer reserving its own bottom border, and the collapsing-split specimens described above. Software's accidental 10 px group shift was corrected. Concurrent box/shadow/popover changes are separate work. Browser emulation verifies responsive/focus geometry, not physical folding or human visual acceptance; book-region allocation is bounded to two visible panes.
