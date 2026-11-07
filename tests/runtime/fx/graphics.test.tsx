@@ -32,7 +32,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GFXColour } from "../../../src/FX/GraphicsFX/public";
 import { GFXStateUnderflowError, GFXPath, GFXGradient, GFXContext } from "../../../src/FX/GraphicsFX/public";
-import { NSEShadowView, type NSEShadowPreferenceSource } from "../../../src/NSE/Graphics";
+import { NSEShadow } from "../../../src/NSE/Graphics";
+import { NSEAppearance } from "../../../src/NSE/Appearance/NSEAppearance";
 import { NSEView } from "../../../src/NSE/Views/NSEView";
 import { NSEImageView, NSESizeableImage } from "../../../src/NSE/Controls/Images";
 import type { IFXImageGeometryPort, IFXImageStringSourcePort } from "../../../src/FX/ImageFX/IFXImageViewport";
@@ -316,14 +317,14 @@ describe("closed NSE graphics", () => {
     context.setFill(GFXColour.parse("#123456"));
     context.fill(GFXPath.rect({ x: 0, y: 0, width: 40, height: 24 }));
     const { container } = render(
-      <NSEShadowView shadow={{ offset: { x: 1, y: 2 }, blur: 4, spread: 0, colour: GFXColour.parse("#0008") }}>
+      <NSEView shadow={new NSEShadow({ shadowOffset: { width: 1, height: -2 }, shadowBlurRadius: 4, shadowColor: GFXColour.parse("#0008") })}>
         <NSEView draw={drawFigure(context.displayList)} aria-label="Chart" aria-description="A bounded chart" />
-      </NSEShadowView>,
+      </NSEView>,
     );
     expect(container.querySelector("[aria-label]")?.getAttribute("aria-label")).toBe("Chart");
     expect(container.querySelector("path")?.getAttribute("d")).toBe("M 0 0 L 40 0 L 40 24 L 0 24 Z");
-    expect(container.querySelector("[data-nse-shadow-recipe]")).not.toBeNull();
-    expect((container.querySelector("[data-nse-shadow-recipe]") as HTMLElement | null)?.style.boxShadow).toContain("1px");
+    expect(container.querySelector("[data-nse-shadow]")).not.toBeNull();
+    expect((container.querySelector("[data-nse-shadow]") as HTMLElement | null)?.style.getPropertyValue("--nse-shadow-offset-x")).toBe("1px");
     expect(container.querySelector("script")).toBeNull();
     expect(() => render(<NSEView draw={drawFigure({ size: { width: 1, height: 1 }, commands: [{ kind: "fill-path", path: [], pathData: "M0 0", paint: { kind: "colour", css: "url(javascript:alert(1))" }, opacity: 1 }] })} aria-label="Forged" />)).toThrow(TypeError);
   });
@@ -599,54 +600,20 @@ describe("closed NSE graphics", () => {
     }
   });
 
-  it("applies a real shadow recipe and flattens it under reduced transparency and forced colours", () => {
-    const shadow = { offset: { x: 2, y: 3 }, blur: 6, spread: 1, colour: GFXColour.parse("#112233") };
-    const { container, rerender } = render(
-      <NSEShadowView shadow={shadow}>
-        <button type="button">Focusable chart</button>
-      </NSEShadowView>,
-    );
-    const host = container.querySelector("[data-nse-shadow-recipe]") as HTMLElement;
-    expect(host.style.boxShadow).toMatch(/2px 3px 6px 1px rgb\(17[, ]+34[, ]+51\)/);
-    expect(host.getAttribute("data-nse-shadow-recipe")).toBe("semantic");
-
-    rerender(
-      <NSEShadowView shadow={shadow} reducedTransparency>
-        <button type="button">Focusable chart</button>
-      </NSEShadowView>,
-    );
-    expect((container.querySelector("[data-nse-shadow-recipe]") as HTMLElement).style.boxShadow).toBe("none");
-    expect(container.querySelector("[data-nse-shadow-recipe]")?.getAttribute("data-nse-shadow-recipe")).toBe("suppressed");
-
-    rerender(
-      <NSEShadowView shadow={shadow} forcedColours>
-        <button type="button">Focusable chart</button>
-      </NSEShadowView>,
-    );
-    const forced = container.querySelector("[data-nse-shadow-recipe]") as HTMLElement;
-    expect(forced.style.boxShadow).toBe("none");
-    const focusable = container.querySelector("button") as HTMLButtonElement;
-    focusable.focus();
-    expect(getComputedStyle(focusable).outlineStyle === "none" ? forced.getAttribute("data-nse-shadow-protect-focus") : "visible").toBeTruthy();
-    expect(forced.getAttribute("data-nse-shadow-protect-focus")).toBe("true");
-  });
-
-  it("updates shadow presentation from a disposable injected preference source", () => {
-    let snapshot = { reducedTransparency: false, forcedColours: false };
-    const listeners = new Set<() => void>();
-    const source: NSEShadowPreferenceSource = {
-      getSnapshot: () => snapshot,
-      subscribe: (listener) => { listeners.add(listener); return () => listeners.delete(listener); },
-    };
-    const shadow = { offset: { x: 1, y: 1 }, blur: 2, spread: 0, colour: GFXColour.parse("#000") };
-    const { container, unmount } = render(<NSEShadowView shadow={shadow} preferenceSource={source}><button>Focus</button></NSEShadowView>);
-    const host = () => container.querySelector("[data-nse-shadow-recipe]") as HTMLElement;
-    expect(host().style.boxShadow).not.toBe("none");
-    act(() => { snapshot = { reducedTransparency: true, forcedColours: false }; listeners.forEach((listener) => listener()); });
-    expect(host().style.boxShadow).toBe("none");
-    act(() => { snapshot = { reducedTransparency: false, forcedColours: false }; listeners.forEach((listener) => listener()); });
-    expect(host().style.boxShadow).not.toBe("none");
-    unmount();
-    expect(listeners).toHaveLength(0);
+  it("projects shadow properties and follows inherited appearance preferences", () => {
+    const shadow = new NSEShadow({ shadowOffset: { width: 2, height: -3 }, shadowBlurRadius: 6, shadowColor: GFXColour.parse("#112233") });
+    const { container, rerender } = render(<NSEView shadow={shadow}><button>Focus</button></NSEView>);
+    const host = () => container.querySelector("[data-nse-shadow]") as HTMLElement;
+    expect(host().style.getPropertyValue("--nse-shadow-offset-x")).toBe("2px");
+    expect(host().style.getPropertyValue("--nse-shadow-blur")).toBe("6px");
+    expect(host().dataset.nseShadowSuppressed).toBeUndefined();
+    rerender(<NSEView shadow={shadow} appearance={new NSEAppearance("aqua", { transparency: "reduced" })}><button>Focus</button></NSEView>);
+    expect(host().dataset.nseShadowSuppressed).toBe("true");
+    rerender(<NSEView shadow={shadow} appearance={new NSEAppearance("aqua", { contrast: "forced" })}><button>Focus</button></NSEView>);
+    expect(host().dataset.nseShadowSuppressed).toBe("true");
+    const button = container.querySelector("button")!;
+    button.focus();
+    expect(document.activeElement).toBe(button);
+    expect(host().style.clipPath).toBe("");
   });
 });

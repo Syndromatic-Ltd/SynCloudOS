@@ -131,7 +131,9 @@ The `id` uses lowercase letters, digits and hyphens. Recipes named in a definiti
 
 ## Materials and lighting
 
-Surfaces such as brushed metal respond to a light direction. `NSEMaterialLightingProvider` supplies it, and `staticNSEMaterialLight` gives a fixed default for hosts that do not track device orientation. `NSESmoothSurface` draws continuous curvature corners (`arc`, `squircle`, `superellipse` or `clothoid`), and the manifest's `smoothSurface` fields drive the same shapes for windows and the application stage.
+Material lighting and the smooth geometry renderer are theme internals. Windows, app views, menus, popovers and toolbars retain their existing smooth-corner rendering. Application views and AFX layers use `cornerRadius` with `cornerCurve: "continuous"` (`CALayer.cornerCurve`); the default curve is `"circular"`. Atmo draws a continuous corner as a squircle through CSS `corner-shape`; browsers without that property retain the circular radius fallback. The internal manifest-driven geometry remains available for existing host surfaces.
+
+Custom `NSEBox` properties select Atmo's well, frame or floating plate. `NSEShadow` is an `NSShadow`-shaped value assigned to `NSEView.shadow` or `NSEBox.shadow`. Properties are projected as data attributes and CSS variables; Atmo owns the look and suppresses decorative shadows under reduced transparency or forced colours. Explicit box fill, border, radius and transparency values take precedence over sprite artwork. See the [property-to-look table](nse/boxes-and-shadows.md).
 
 ## Accessibility
 

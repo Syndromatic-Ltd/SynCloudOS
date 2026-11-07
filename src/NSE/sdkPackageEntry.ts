@@ -225,8 +225,6 @@ export { resolveNSEBookRegions, NSEBookRegionMetrics } from "./Navigation/bookRe
 export type { NSEBookRegions } from "./Navigation/bookRegions";
 export { NSESplitView } from "./DataViews/Split/NSESplitView";
 export type { NSESplitViewProps } from "./DataViews/Split/NSESplitView";
-export { NSERoundedBox } from "./Material";
-export type { NSEMetalSurfaceProps, NSERoundedBoxProps } from "./Material";
 export {
   NSELevelIndicator,
 } from "./Controls/Values/NSELevelIndicator";
@@ -542,11 +540,11 @@ export {
 export type {
   NSESavePanelProps,
 } from "./FilePanels/NSESavePanel";
+export type { NSEMetalSurfaceProps } from "./Material";
 export { snapshotNSEView } from "./Graphics/snapshotNSEView";
 export type { NSEViewSnapshotOptions } from "./Graphics/snapshotNSEView";
-export {
-  NSEShadowView,
-} from "./Graphics/NSEShadowView";
+export { NSEShadow } from "./Graphics/NSEShadow";
+export type { NSEShadowOptions } from "./Graphics/NSEShadow";
 export {
   NSEImageView,
 } from "./Controls/Images/NSEImage";
@@ -685,9 +683,6 @@ export {
 export type {
   NSEClipViewProps,
 } from "./Scroll/NSEClipView";
-export {
-  NSESmoothSurface,
-} from "./SmoothSurface/NSESmoothSurface";
 export {
   NSELayoutManager,
 } from "./TextLayout/NSELayoutManager";

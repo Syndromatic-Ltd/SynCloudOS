@@ -505,21 +505,15 @@ describe("NSESmoothSurface", () => {
       NSEBox,
       {
         title: "Reader",
-        smoothSurface: {
-          radius: "xl",
-          focus: "within",
-          shadow: "floating",
-          scroll: "panel"
-        }
+        cornerRadius: 18,
+        cornerCurve: "continuous"
       },
       "Surface"
     ));
 
     expect(groupBoxMarkup).toContain("nse-control-group-box");
-    expect(groupBoxMarkup).toContain("nse-smooth-surface-radius-xl");
-    expect(groupBoxMarkup).toContain("nse-smooth-surface-focus-within");
-    expect(groupBoxMarkup).toContain("--nse-smooth-surface-radius:18px");
-    expect(groupBoxMarkup).toContain("scrollbar-gutter:stable");
+    expect(groupBoxMarkup).toContain('data-corner-curve="continuous"');
+    expect(groupBoxMarkup).toContain("--nse-corner-radius:18px");
 
     const appTopBarMarkup = renderToStaticMarkup(createElement(NSETopBar, {
       title: "Journal",

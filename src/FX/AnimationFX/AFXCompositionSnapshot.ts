@@ -174,6 +174,7 @@ function insideRounded(snapshot: AFXLayerSnapshot, point: GFXPoint, inset = 0) {
   const corners = snapshot.style.maskedCorners;
   const test = (cx: number, cy: number) => {
     const dx = point.x - cx, dy = point.y - cy;
+    if (snapshot.style.cornerCurve === "continuous") return (dx / radius) ** 4 + (dy / radius) ** 4 <= 1;
     return dx * dx + dy * dy <= radius * radius;
   };
   if (corners.includes("top-left") && point.x < x + radius && point.y < y + radius)

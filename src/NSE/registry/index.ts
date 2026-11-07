@@ -65,7 +65,8 @@ export const nseRegistry = [
       "NSEProgressIndicator",
       "NSESlider",
       "NSEPageHeader",
-      "NSERoundedBox",
+      "NSEBox",
+      "NSEShadow",
       "NSEDatePicker"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]

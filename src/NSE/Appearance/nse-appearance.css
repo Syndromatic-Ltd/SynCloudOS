@@ -160,7 +160,6 @@
 
 :where([data-nse-contrast="high"]) :where(
   .nse-control-group-box,
-  .nse-control-rounded-box,
   .nse-control-popup,
   .nse-overlay-popup,
   .nse-material-glass,
@@ -207,7 +206,6 @@
 
 :where([data-nse-contrast="forced"]):where(
   .nse-control-group-box,
-  .nse-control-rounded-box,
   .nse-control-popup,
   .nse-overlay-popup,
   .nse-material-glass,
@@ -216,7 +214,6 @@
 ),
 :where([data-nse-contrast="forced"]) :where(
   .nse-control-group-box,
-  .nse-control-rounded-box,
   .nse-control-popup,
   .nse-overlay-popup,
   .nse-material-glass,
@@ -276,7 +273,6 @@
 
   :where([data-nse-appearance]):where(
     .nse-control-group-box,
-    .nse-control-rounded-box,
     .nse-control-popup,
     .nse-overlay-popup,
     .nse-material-glass,
@@ -285,7 +281,6 @@
   ),
   :where([data-nse-appearance]) :where(
     .nse-control-group-box,
-    .nse-control-rounded-box,
     .nse-control-popup,
     .nse-overlay-popup,
     .nse-material-glass,
