@@ -20,8 +20,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { NSEButton } from "../../NSE/public/inspector-controls";
-import { ContainerPane } from "../../NSE/Containers/NSEContainers";
-import { NSEInputBox } from "../../NSE/Controls/Fields/NSEFields";
+import { ContainerPane } from "../../NSE/public/inspector-controls";
+import { NSEInputBox } from "../../NSE/public/inspector-controls";
 import { translateSynWareText } from "../AppSDK/useStrings";
 import type { InspectorLocalization } from "./inspectorLocalization";
 import "./inspector.css";
