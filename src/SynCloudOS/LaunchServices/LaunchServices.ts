@@ -479,7 +479,7 @@ async function authoriseWithConfigurationProfiles(
       checked: true,
       allowed: false,
       reason: error instanceof Error ? error.message : String(error),
-      code: "POLICYKIT_AUTHORISE_THROWN"
+      code: "CONFIGURATION_AUTHORISE_THROWN"
     };
   }
 }
@@ -516,7 +516,7 @@ function explainWithConfigurationProfiles(
       checked: true,
       allowed: false,
       reason: error instanceof Error ? error.message : String(error),
-      code: "POLICYKIT_AUTHORISE_THROWN"
+      code: "CONFIGURATION_AUTHORISE_THROWN"
     };
   }
 }
@@ -1072,7 +1072,7 @@ function explainExternalOpen(app: SynCloudOSAppInfo, options: SynCloudOSOpenAppO
       checked: true,
       allowed: false,
       reason: error instanceof Error ? error.message : String(error),
-      code: "POLICYKIT_AUTHORISE_THROWN"
+      code: "CONFIGURATION_AUTHORISE_THROWN"
     };
   }
 }
