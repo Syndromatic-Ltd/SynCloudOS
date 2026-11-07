@@ -18,15 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { copyPaymentJSON } from "./internal/paymentJSON";
+import type { NSEData, NSEDataConvertible } from "../../Foundation/NSEData";
+import { snapshotPaymentData } from "./internal/paymentData";
 
 export type PKFXAuthorizationStatus = "unknown" | "prompt" | "granted" | "denied" | "unavailable";
 export type PKFXPaymentCompletion = "success" | "fail" | "unknown";
-export type PKFXPaymentJSON = null | boolean | number | string | readonly PKFXPaymentJSON[] | { readonly [key: string]: PKFXPaymentJSON };
+/** Merchant method input, including WebAuthn/SPC BufferSource fields. */
+export type PKFXPaymentData = null | boolean | number | string | NSEDataConvertible | readonly PKFXPaymentData[] | { readonly [key: string]: PKFXPaymentData };
+/** Immutable method or response snapshot. Every binary leaf is NSEData. */
+export type PKFXPaymentValue = null | boolean | number | string | NSEData | readonly PKFXPaymentValue[] | { readonly [key: string]: PKFXPaymentValue };
 
 export interface PKFXCapabilities { readonly paymentRequest: boolean; }
 export interface PKFXPaymentSummaryItem { readonly label: string; readonly amount: string; readonly pending?: boolean; }
-export interface PKFXPaymentMethodData { readonly supportedMethods: string; readonly data?: PKFXPaymentJSON; }
+export interface PKFXPaymentMethodData { readonly supportedMethods: string; readonly data?: PKFXPaymentData; }
 export interface PKFXPaymentRequestDescriptor {
   readonly currencyCode: string;
   /** As in PKPaymentRequest, the last summary item is the merchant total. */
@@ -41,7 +45,7 @@ export interface PKFXPaymentRequestDescriptor {
 export class PKFXPaymentRequest {
   readonly currencyCode: string;
   readonly paymentSummaryItems: readonly PKFXPaymentSummaryItem[];
-  readonly paymentMethodData: readonly PKFXPaymentMethodData[];
+  readonly paymentMethodData: readonly { readonly supportedMethods: string; readonly data?: PKFXPaymentValue }[];
   readonly requestPayerName: boolean;
   readonly requestPayerEmail: boolean;
   readonly requestPayerPhone: boolean;
@@ -58,7 +62,7 @@ export class PKFXPaymentRequest {
     }));
     this.paymentMethodData = Object.freeze(descriptor.paymentMethodData.map(method => {
       if (!method.supportedMethods) throw new TypeError("A Payment Request method identifier is required.");
-      return Object.freeze({ supportedMethods: method.supportedMethods, ...(method.data === undefined ? {} : { data: copyPaymentJSON(method.data) }) });
+      return Object.freeze({ supportedMethods: method.supportedMethods, ...(method.data === undefined ? {} : { data: snapshotPaymentData(method.data) }) });
     }));
     this.requestPayerName = descriptor.requestPayerName ?? false;
     this.requestPayerEmail = descriptor.requestPayerEmail ?? false;
@@ -70,7 +74,7 @@ export class PKFXPaymentRequest {
 export interface PKFXPayment {
   readonly requestId: string;
   readonly methodName: string;
-  readonly details: PKFXPaymentJSON;
+  readonly details: PKFXPaymentValue;
   readonly payerName: string | null;
   readonly payerEmail: string | null;
   readonly payerPhone: string | null;
