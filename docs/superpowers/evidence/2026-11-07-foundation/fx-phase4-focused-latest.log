@@ -1,0 +1,28 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/appkit-counterparts.test.ts tests/runtime/cryptofx.test.ts tests/runtime/nse-route-picker.test.tsx tests/runtime/fx/audio-session-category.test.ts tests/runtime/fx/fx-entry-contract.test.ts tests/runtime/fx/location-requests.test.ts tests/runtime/fx/location-speed.test.ts tests/runtime/fx/location-values.test.ts tests/runtime/fx/networkPaths.test.ts tests/runtime/fx/package-resources.test.ts tests/runtime/fx/speech-synthesis.test.ts tests/runtime/fx/video-capture.test.ts tests/runtime/fx/video-element-capture.test.ts tests/runtime/fx/video-presentation.test.ts --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation\fx-phase4-focused-latest.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-current-8e1c2b0b-20261107215819
+
+ ✓ tests/runtime/fx/package-resources.test.ts (9 tests) 3894ms
+     ✓ keeps the resource fingerprint through a real offline pack/install of an isolated fixture  2019ms
+     ✓ rejects tampered fingerprints and missing or modified installed resources  511ms
+ ✓ tests/runtime/fx/video-capture.test.ts (6 tests) 61ms
+ ✓ tests/runtime/fx/location-requests.test.ts (9 tests) 19ms
+ ✓ tests/runtime/cryptofx.test.ts (11 tests) 21ms
+ ✓ tests/runtime/fx/video-presentation.test.ts (9 tests) 10ms
+ ✓ tests/runtime/fx/speech-synthesis.test.ts (12 tests) 10ms
+ ✓ tests/runtime/fx/video-element-capture.test.ts (6 tests) 9ms
+ ✓ tests/runtime/fx/audio-session-category.test.ts (6 tests) 8ms
+ ✓ tests/runtime/fx/location-values.test.ts (5 tests) 5ms
+ ✓ tests/runtime/fx/networkPaths.test.ts (7 tests) 8ms
+ ✓ tests/runtime/fx/fx-entry-contract.test.ts (5 tests) 73ms
+ ✓ tests/runtime/nse-route-picker.test.tsx (3 tests) 89ms
+ ✓ tests/runtime/appkit-counterparts.test.ts (5 tests) 16ms
+ ✓ tests/runtime/fx/location-speed.test.ts (3 tests) 4ms
+
+ Test Files  14 passed (14)
+      Tests  96 passed (96)
+   Start at  22:00:29
+   Duration  23.27s (transform 9.75s, setup 140ms, import 15.82s, tests 4.23s, environment 1.02s)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/fx-phase4-focused-latest.json
