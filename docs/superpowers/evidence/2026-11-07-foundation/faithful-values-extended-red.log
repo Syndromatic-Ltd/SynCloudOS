@@ -1,0 +1,62 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-date.test.ts tests/runtime/foundation-faithful-decimal.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-decimal.test.ts (4 tests | 1 failed) 8ms
+   × rounds small operands into representable values 3ms
+ ❯ tests/runtime/foundation-faithful-date.test.ts (7 tests | 2 failed) 26ms
+   × round-trips localized long output and time-only output 3ms
+   × preserves four-digit literal years and quoted apostrophes 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-date.test.ts > round-trips localized long output and time-only output
+RangeError: Parsing supports short date style and none, short or medium time style.
+ ❯ NSEDateFormatter.date src/Foundation/NSEDateFormatter.ts:112:129
+
+ ❯ tests/runtime/foundation-faithful-date.test.ts:37:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/foundation-faithful-date.test.ts > preserves four-digit literal years and quoted apostrophes
+AssertionError: expected undefined to be 26 // Object.is equality
+
+- Expected:
+26
+
++ Received:
+undefined
+
+ ❯ tests/runtime/foundation-faithful-date.test.ts:44:58
+     42| it("preserves four-digit literal years and quoted apostrophes", () => {
+     43|   const f=new NSEDateFormatter({locale:"en-GB",timeZone:"UTC",dateForm…
+     44|   expect(f.date("0026-03-08 o'clock")?.getUTCFullYear()).toBe(26);
+       |                                                          ^
+     45|   expect(f.string(new Date("2026-03-08T00:00:00Z"))).toBe("2026-03-08 …
+     46| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/foundation-faithful-decimal.test.ts > rounds small operands into representable values
+AssertionError: expected '0.00000000000000000000000000000000000…' to be '0.00000000000000000000000000000000000…' // Object.is equality
+
+Expected: "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011"
+Received: "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011"
+
+ ❯ tests/runtime/foundation-faithful-decimal.test.ts:30:47
+     28|   const tiny = n("1e-128");
+     29|   expect(() => tiny.multiplying(n("0.1"))).toThrow(/underflow/i);
+     30|   expect(tiny.adding(n("1e-127")).toString()).toBe("0." + "0".repeat(1…
+       |                                               ^
+     31| });
+     32|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 8 passed (11)
+   Start at  19:15:18
+   Duration  208ms (transform 72ms, setup 51ms, import 50ms, tests 34ms, environment 0ms)
+

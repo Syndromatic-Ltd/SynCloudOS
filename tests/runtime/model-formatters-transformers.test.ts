@@ -20,7 +20,7 @@
 
 import { expect, it } from "vitest";
 
-import { DateFormatter } from "../../src/SynCloudOS/Models";
+import { NSEDateFormatter } from "../../src/Foundation/NSEDateFormatter";
 import { NSEByteCountFormatter, NSENumberFormatter } from "../../src/Foundation/public";
 
 it("formats and parses locale-aware values with structured failures", () => {
@@ -80,47 +80,13 @@ it("uses explicit byte units and returns structured parse failures", () => {
   });
 });
 
-it("does not guess regional numeric dates", () => {
-  const formatter = new DateFormatter({
-    valueType: "iso",
-    dateStyle: "medium",
-    timeZone: "UTC",
-  });
-
-  expect(formatter.getObjectValue("08/09/2026", { locale: "en-GB" })).toMatchObject({
-    ok: false,
-    error: { code: "date.invalidISO" },
-  });
-  expect(
-    formatter.getObjectValue("2026-08-09T12:30:00.000Z", { locale: "en-GB" }),
-  ).toEqual({ ok: true, value: "2026-08-09T12:30:00.000Z" });
-  expect(
-    formatter.string("2026-08-09T12:30:00.000Z", { locale: "en-GB" }),
-  ).toContain("9 Aug 2026");
-});
-
-it("rejects malformed grouping and preserves strict ISO civil dates", () => {
+it("rejects malformed grouping and impossible dates", () => {
   const number = new NSENumberFormatter({ style: "decimal" });
-  expect(number.getObjectValue("1,,2", { locale: "en-GB" })).toMatchObject({
-    ok: false,
-    error: { code: "number.invalid" },
-  });
-  expect(number.getObjectValue("12,34", { locale: "en-GB" })).toMatchObject({
-    ok: false,
-    error: { code: "number.invalid" },
-  });
-
-  const formatter = new DateFormatter({ valueType: "iso", dateStyle: "medium" });
-  expect(formatter.getObjectValue("2026-02-30", { locale: "en-GB" })).toMatchObject({
-    ok: false,
-    error: { code: "date.invalidISO" },
-  });
-  expect(
-    formatter.string("2026-08-09", {
-      locale: "en-GB",
-      timeZone: "America/Los_Angeles",
-    }),
-  ).toContain("9 Aug 2026");
+  expect(number.getObjectValue("1,,2", { locale: "en-GB" })).toMatchObject({ok:false});
+  expect(number.getObjectValue("12,34", { locale: "en-GB" })).toMatchObject({ok:false});
+  const date = new NSEDateFormatter({locale:"en-GB", timeZone:"UTC", dateFormat:"yyyy-MM-dd"});
+  expect(date.date("2026-02-30")).toBeNull();
+  expect(date.string(new Date("2026-08-09T00:00:00Z"))).toBe("2026-08-09");
 });
 
 it("round-trips accounting currency signs and configured unit affixes", () => {

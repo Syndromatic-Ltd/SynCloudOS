@@ -1,0 +1,26 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-date.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-date.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-date.test.ts [ tests/runtime/foundation-faithful-date.test.ts ]
+Error: Cannot find module '../../src/Foundation/NSEDateFormatter' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/foundation-faithful-date.test.ts
+ ❯ tests/runtime/foundation-faithful-date.test.ts:2:1
+      1| import { expect, it } from "vitest";
+      2| import { NSEDateFormatter } from "../../src/Foundation/NSEDateFormatte…
+       | ^
+      3| it("formats and parses explicit numeric patterns in the configured tim…
+      4|   const f = new NSEDateFormatter({locale:"en-GB", timeZone:"UTC", date…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  19:11:52
+   Duration  177ms (transform 27ms, setup 29ms, import 0ms, tests 0ms, environment 0ms)
+

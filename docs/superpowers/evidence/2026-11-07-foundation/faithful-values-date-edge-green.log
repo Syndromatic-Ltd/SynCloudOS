@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-date.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  19:13:08
+   Duration  222ms (transform 53ms, setup 28ms, import 40ms, tests 22ms, environment 0ms)
+

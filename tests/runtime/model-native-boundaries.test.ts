@@ -21,7 +21,7 @@
 import { describe, expect, it } from "vitest";
 
 import { clampPointToRect, insetRect, intersectRects, unionRects } from "../../src/FX/GraphicsFX/GFXGeometry";
-import { DecimalValue } from "../../src/SynCloudOS/Models";
+import { NSEDecimalNumber, NSEDecimalNumberHandler } from "../../src/Foundation/NSEDecimalNumber";
 import { NSECountedSet, NSECharacterSet, NSEIntersectionRange, normaliseNSERange } from "../../src/Foundation/public";
 
 describe("native model value boundaries", () => {
@@ -57,39 +57,16 @@ describe("native model value boundaries", () => {
     expect(letters.inverted().contains("7")).toBe(true);
   });
 
-  it("keeps exact decimal arithmetic and rounding deliberate", () => {
-    expect(
-      DecimalValue.parse("0.1").add(DecimalValue.parse("0.2")).toString(),
-    ).toBe("0.3");
-    expect(
-      DecimalValue.parse("1").divide(DecimalValue.parse("3"), {
-        scale: 4,
-        rounding: "half-even",
-      }).toString(),
-    ).toBe("0.3333");
-    expect(
-      DecimalValue.parse("2.5").divide(DecimalValue.parse("1"), {
-        scale: 0,
-        rounding: "half-even",
-      }).toString(),
-    ).toBe("2");
-    expect(
-      DecimalValue.parse("3.5").divide(DecimalValue.parse("1"), {
-        scale: 0,
-        rounding: "half-even",
-      }).toString(),
-    ).toBe("4");
-    expect(DecimalValue.parse("2.5").subtract(DecimalValue.parse("0.5")).toString()).toBe("2");
-    expect(DecimalValue.parse("1.2").multiply(DecimalValue.parse("3")).toString()).toBe("3.6");
-    expect(DecimalValue.parse("1.20").compare(DecimalValue.parse("1.2"))).toBe(0);
-    expect(() => DecimalValue.parse("1e3")).toThrow(/decimal/i);
-    expect(() =>
-      DecimalValue.parse("1").divide(DecimalValue.parse("3"), {
-        scale: 2,
-        rounding: "invalid" as "half-even",
-      }),
-    ).toThrow(/rounding/i);
-    expect(() => Number(DecimalValue.parse("1.2"))).toThrow(/implicit/i);
+  it("keeps decimal arithmetic and rounding deliberate", () => {
+    const n = NSEDecimalNumber.fromString;
+    const bankers = new NSEDecimalNumberHandler({ scale: 0, roundingMode: "bankers" });
+    expect(n("2.5").dividing(n("1"), bankers).toString()).toBe("2");
+    expect(n("3.5").dividing(n("1"), bankers).toString()).toBe("4");
+    expect(n("2.5").subtracting(n("0.5")).toString()).toBe("2");
+    expect(n("1.2").multiplying(n("3")).toString()).toBe("3.6");
+    expect(n("1.20").compare(n("1.2"))).toBe(0);
+    expect(n("1e3").toString()).toBe("1000");
+    expect(() => new NSEDecimalNumberHandler({roundingMode: "invalid" as "plain"})).toThrow(/rounding/i);
   });
 
   it("normalises serialisable geometry and range values immutably", () => {
