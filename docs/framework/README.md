@@ -37,6 +37,7 @@ SynCloudOS is an application framework for the web, in the tradition of Cocoa. T
 | Guide | Read it to |
 | --- | --- |
 | [NSE controls](nse-controls.md) | Find the control for a job |
+| [Paths and workspace](path-control-and-workspace.md) | Present file locations and workspace artwork |
 | [Source-list chrome](nse/source-list-chrome.md) | Compose a source-list body inside system-owned application chrome |
 | [Controllers](controllers.md) | Manage collections, trees and preferences |
 | [Data views](data-views.md) | Show large collections in tables, outlines and lists |
