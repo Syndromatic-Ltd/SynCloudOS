@@ -40,15 +40,15 @@ The framework's authored APIs use TypeScript and build under strict type checkin
 │                               MIDI, location, search                 │
 ├──────────────────────────────────────────────────────────────────────┤
 │  SynCloudOS runtime           statechart, commands, responders,      │
-│                               undo, documents, windows, PolicyKit    │
+│                               undo, documents, windows, privacy      │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-- **The runtime.** `createSynCloudOS` builds a self-contained runtime with its own store, services and adapters. It reads no globals at construction, so several runtimes can share one page. An explicit statechart tracks boot, the shell and every application's lifecycle; PolicyKit evaluates every privileged action against role capabilities; and everything a service acquires is released on disposal. See [the runtime](docs/framework/runtime.md).
+- **The runtime.** `createSynCloudOS` builds a self-contained runtime with its own store, services and adapters. It reads no globals at construction, so several runtimes can share one page. An explicit statechart tracks boot, the shell and every application's lifecycle. Configuration profiles govern app access, SCAuthorization checks named administrative rights, and the privacy store mediates device consent. These are cooperative page checks; protected servers enforce their own access. Everything a service acquires is released on disposal. See [the runtime](docs/framework/runtime.md) and [authorisation](docs/framework/authorization.md).
 - **NSE.** NSE plays the role of AppKit: you write `NSEButton` where a Mac developer writes `NSButton`. Controls expose neutral behaviour and take their look from the theme. See [NSE controls](docs/framework/nse-controls.md), [controllers](docs/framework/controllers.md) and [data views](docs/framework/data-views.md).
-- **FX.** Pure computation runs anywhere JavaScript runs; anything that touches a device comes from the mounted session, so the host enforces permissions and releases resources when the application closes. See the [FX guide](docs/framework/fx/README.md).
+- **FX.** Pure computation runs anywhere JavaScript runs; anything that touches a device comes from the mounted session, which mediates declared entitlements and privacy choices and releases resources when the application closes. See the [FX guide](docs/framework/fx/README.md).
 - **Webspring.** A project declares one validated shell definition and mounts it through the browser entry. See [Webspring](docs/framework/webspring.md).
-- **SynWare.** A bundle's `Contents/Info.ts` manifest declares its routes, presentations, commands, document types, menus, window defaults and permissions. The [SynWare SDK](docs/framework/synware-sdk.md), imported from `@syndromatic/syncloudos/sdk`, is everything a bundle needs from the platform.
+- **SynWare.** A bundle's `Contents/Info.ts` manifest declares its routes, presentations, commands, document types, menus, window defaults and entitlements. The [SynWare SDK](docs/framework/synware-sdk.md), imported from `@syndromatic/syncloudos/sdk`, is everything a bundle needs from the platform.
 
 ## Getting SynCloudOS
 
@@ -206,7 +206,7 @@ The retained scripts build and validate the distributable, scaffold and validate
 
 ```text
 src/
-  SynCloudOS/       runtime, SynWare SDK (AppSDK), PolicyKit, documents, windows
+  SynCloudOS/       runtime, SynWare SDK (AppSDK), authorisation, documents, windows
   SynCloudOSReact/  React bindings and the browser host
   NSE/              application kit, controllers, data views, Atmo appearance
   FX/               the twelve FX frameworks
