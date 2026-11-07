@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEAnimationDefaults } from "../../Animation/NSEAnimationDefaults";
+import { NSEAnimationDefaults } from "../../Appearance/NSEAnimationDefaults";
 
 /**
  * Atmo's motion: the timing curves and durations its views animate with. NSEAnimationContext.current

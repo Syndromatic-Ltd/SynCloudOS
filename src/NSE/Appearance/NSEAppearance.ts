@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEAppearanceName } from "../Controls/Buttons/NSEButton";
+import type { NSEAppearanceName } from "./nseAppearanceTypes";
 import type { NSEAppearanceDefinition } from "./NSEAppearanceDefinition";
 import type { NSEChromeAppearance, NSEContrast, NSETransparency } from "./nseAppearanceTypes";
 

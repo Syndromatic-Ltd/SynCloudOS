@@ -29,7 +29,7 @@ import {
   useNSEAnimationEnvironment,
 } from "../../src/NSE/Animation/NSEAnimationEnvironment";
 // Atmo's curves and durations: internal, published as atmoMotion and NSEAnimationContext.current.
-import { NSEAnimationDefaults } from "../../src/NSE/Animation/NSEAnimationDefaults";
+import { NSEAnimationDefaults } from "../../src/NSE/Appearance/NSEAnimationDefaults";
 import { useNSETraitCollection } from "../../src/NSE/Animation/useNSETraitCollection";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import {

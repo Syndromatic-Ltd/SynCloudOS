@@ -20,6 +20,8 @@
 
 import type { NSEAppearanceDefinition } from "./NSEAppearanceDefinition";
 
+export type NSEAppearanceName = "aqua" | "darkAqua";
+
 export type NSEChromeAppearance = "standard" | "metal" | "hud";
 export type NSEColourScheme = "auto" | "light" | "dark";
 export type NSEResolvedColourScheme = Exclude<NSEColourScheme, "auto">;

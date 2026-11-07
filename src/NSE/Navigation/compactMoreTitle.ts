@@ -1,14 +1,22 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 
-import { useLayoutEffect, useSyncExternalStore, type RefObject } from "react";
-import { useSynWareContext } from "../../SynCloudOS/AppSDK/SynWareContext";
+import { createContext, useContext, useLayoutEffect, useSyncExternalStore, type RefObject } from "react";
 import { nsePresentWindowTitle, type NSEWindow } from "../Application/NSEWindowController";
 
 const noSubscription = () => () => {};
 
+/** @internal Localisation supplied by the owning host, without an application SDK dependency. */
+interface NSELocalisationPort {
+  getSnapshot(): unknown;
+  subscribe(listener: () => void): () => void;
+  t(key: string): string;
+}
+const LocalisationContext = createContext<NSELocalisationPort | null>(null);
+export const NSELocalisationProvider = LocalisationContext.Provider;
+
 /** @internal System navigation text uses the framework dictionary, never an app-owned title. */
 export function useNSEMoreTitle(): string {
-  const locale = useSynWareContext()?.locale;
+  const locale = useContext(LocalisationContext);
   useSyncExternalStore(locale?.subscribe ?? noSubscription, () => locale?.getSnapshot() ?? null, () => null);
   const translated = locale?.t("navigation.more");
   return translated && translated !== "navigation.more" ? translated : "More";

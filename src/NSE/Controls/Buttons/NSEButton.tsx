@@ -67,7 +67,7 @@ export type NSEImagePosition = "noImage" | "imageOnly" | "imageLeading" | "image
 export type NSEControlStateValue = "on" | "off" | "mixed";
 
 /** NSAppearance.Name: the light (`aqua`) or dark (`darkAqua`) appearance a view draws in. */
-export type NSEAppearanceName = "aqua" | "darkAqua";
+import type { NSEAppearanceName } from "../../Appearance/nseAppearanceTypes";
 
 /**
  * NSControl.ControlSize. Capsule bezels draw from one band height: small is 24px, large 28px, and
