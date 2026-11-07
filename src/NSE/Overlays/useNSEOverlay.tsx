@@ -43,6 +43,7 @@ export interface UseNSEOverlayOptions {
   readonly anchor: HTMLElement | null;
   /** Place against this viewport point instead of the anchor's box (a context menu at the pointer). */
   readonly anchorPoint?: NSEOverlayAnchorPoint | null;
+  readonly anchorRect?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
   readonly open: boolean;
   readonly dismissOn?: readonly NSEOverlayDismissReason[] | ReadonlySet<NSEOverlayDismissReason>;
   readonly restoreFocus?: boolean;
@@ -137,6 +138,7 @@ export function useNSEOverlay({
   parentResponderId,
   anchor,
   anchorPoint = null,
+  anchorRect,
   open,
   dismissOn = ["escape", "outside-pointer", "focus-left", "anchor-removed", "programmatic", "parent-dismissed"],
   restoreFocus = true,
@@ -334,6 +336,9 @@ export function useNSEOverlay({
   useLayoutEffect(() => {
     if (!open || !surface) return;
     if (kind === "action-sheet") {
+      // An adaptive surface retains its DOM and editor state. Its anchored
+      // coordinates must leave with that mode so sheet CSS owns placement.
+      for (const property of ["left", "top", "right", "bottom", "transform-origin"]) surface.style.removeProperty(property);
       surface.style.setProperty("--nse-overlay-available-inline-size", `${Math.max(0, region ? region.width - placementPadding.left - placementPadding.right : workArea.width - workArea.safeArea.left - workArea.safeArea.right)}px`);
       surface.style.setProperty("--nse-overlay-available-block-size", `${Math.max(0, region ? region.height - placementPadding.top - placementPadding.bottom : workArea.height - workArea.safeArea.top - workArea.safeArea.bottom - effectiveCollisionPadding.bottom)}px`);
       return () => {
@@ -359,6 +364,7 @@ export function useNSEOverlay({
     return computeNSEOverlayPosition({
       anchor,
       anchorPoint,
+      anchorRect,
       floating: surface,
       arrow,
       placement,
@@ -371,7 +377,7 @@ export function useNSEOverlay({
       onAnchorRemoved,
       onError: () => runtime.reportPlacementFailure({ overlayId: id, overlayKind: kind }),
     });
-  }, [anchor, anchorPoint, arrow, contentPending, direction, effectiveCollisionPadding, id, kind, offset, onAnchorRemoved, open, placement, placementScheduler, positioning, runtime, surface, viewportCornerBleed, workArea, region?.x, region?.y, region?.width, region?.height, getBoundary, collisionPadding]);
+  }, [anchor, anchorPoint, anchorRect, arrow, contentPending, direction, effectiveCollisionPadding, id, kind, offset, onAnchorRemoved, open, placement, placementScheduler, positioning, runtime, surface, viewportCornerBleed, workArea, region?.x, region?.y, region?.width, region?.height, getBoundary, collisionPadding]);
 
   const setSurfaceRef = useCallback((element: HTMLElement | null) => {
     setSurface(element);

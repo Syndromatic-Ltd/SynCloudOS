@@ -53,6 +53,9 @@ export type NSEViewComponent = ComponentType<{ readonly controller: never }>;
 export interface NSEPopoverPositioning {
   /** The element the popover points at (NSPopover's positioning view). */
   readonly of: HTMLElement;
+  /** The positioning rectangle in `of`'s local coordinates (the whole view
+   * when omitted), as NSPopover.show(relativeTo:of:preferredEdge:). */
+  readonly relativeTo?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
   /** The edge of `of` the popover prefers to open from, in the view's flipped coordinates: `"maxY"` (below, the default), `"minY"` (above), `"minX"` or `"maxX"`. */
   readonly preferredEdge?: "minX" | "maxX" | "minY" | "maxY";
   /** NSPopover.Behavior: `"transient"` (default), `"semitransient"` or `"applicationDefined"`. */
@@ -454,7 +457,10 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     if (behavior !== "transient" && behavior !== "semitransient" && behavior !== "applicationDefined") throw new TypeError("A popover's behavior is transient, semitransient or applicationDefined.");
     const drawsBackground = positioning.drawsBackground ?? true;
     if (typeof drawsBackground !== "boolean") throw new TypeError("A popover's drawsBackground is a boolean.");
-    return this.#present("presentAsPopover", "popover", Object.freeze({ of: positioning.of, preferredEdge: edge, behavior, drawsBackground }), viewController, args);
+    const rect = positioning.relativeTo;
+    if (rect && (![rect.x, rect.y, rect.width, rect.height].every(Number.isFinite) || rect.width < 0 || rect.height < 0)) throw new TypeError("A popover's relativeTo is a finite rectangle with non-negative size.");
+    const relativeTo = rect ? Object.freeze({ x: rect.x, y: rect.y, width: rect.width, height: rect.height }) : undefined;
+    return this.#present("presentAsPopover", "popover", Object.freeze({ of: positioning.of, preferredEdge: edge, behavior, drawsBackground, ...(relativeTo ? { relativeTo } : {}) }), viewController, args);
   }
 
   #present<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(operation: string, style: NSEPresentationStyle, popover: NSEPopoverPositioning | null, viewController: TSheet | (new (...args: TArgs) => TSheet), args: TArgs): TSheet {

@@ -22,8 +22,8 @@ export function useNSEPopoverSurface(surface: HTMLElement | null, arrow: HTMLEle
     const update = () => {
       const root = content?.querySelector("[data-nse-view-controller]")?.firstElementChild ?? content?.firstElementChild;
       const fill = root && view?.getComputedStyle(root).getPropertyValue("--nse-popover-content-fill").trim();
-      if (fill && surface.style.getPropertyValue("--nse-popover-content-fill") !== fill) surface.style.setProperty("--nse-popover-content-fill", fill);
-      if (!fill) surface.style.removeProperty("--nse-popover-content-fill");
+      if (fill && surface.style.getPropertyValue("--nse-popover-arrow-fill") !== fill) surface.style.setProperty("--nse-popover-arrow-fill", fill);
+      if (!fill) surface.style.removeProperty("--nse-popover-arrow-fill");
       updateNSEPopoverFrame(surface, arrow);
     };
     update();
