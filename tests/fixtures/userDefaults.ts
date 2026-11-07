@@ -1,4 +1,4 @@
-import { NSEUserDefaults } from "../../src/NSE/Controllers/NSEUserDefaults";
+import { NSEUserDefaults } from "../../src/Foundation/NSEUserDefaults";
 
 /** A store written the way these tests record reads and writes. */
 export interface TestDefaultsStore {

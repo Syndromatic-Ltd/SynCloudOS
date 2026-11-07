@@ -26,7 +26,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { Predicate, type Formatter, type PredicateComparisonOperator, type PredicateExpression, type PredicateSchema } from "../../../src/SynCloudOS/Models";
+import { NSEPredicate, type NSEFormatter, type NSEPredicateComparisonOperator, type NSEPredicateExpression, type NSEPredicateSchema } from "../../../src/Foundation/public";
 import {
   NSEPredicateEditor,
   NSERuleEditor,
@@ -43,7 +43,7 @@ import { createStaticPresentationPort } from "../../fixtures/presentationTraits"
 
 interface Person { readonly name: string; readonly age: number }
 
-const schema: PredicateSchema<Person> = {
+const schema: NSEPredicateSchema<Person> = {
   id: "person",
   fields: {
     name: { type: "string", read: (person) => person.name },
@@ -51,11 +51,11 @@ const schema: PredicateSchema<Person> = {
   },
 };
 
-const numberFormatter: Formatter<unknown> = {
-  format: (value) => String(value),
-  editingText: (value) => String(value),
-  parse: (text) => Number.isFinite(Number(text)) ? { ok: true, value: Number(text) } : { ok: false, error: { code: "number", message: "Enter a number", input: text } },
-  validatePartial: (text) => Number.isFinite(Number(text)) ? { valid: true } : { valid: false, error: { code: "number", message: "Enter a number", input: text } },
+const numberFormatter: NSEFormatter<unknown> = {
+  string: (value) => String(value),
+  editingString: (value) => String(value),
+  getObjectValue: (text) => Number.isFinite(Number(text)) ? { ok: true, value: Number(text) } : { ok: false, error: { code: "number", message: "Enter a number", input: text } },
+  isPartialStringValid: (text) => Number.isFinite(Number(text)) ? { valid: true } : { valid: false, error: { code: "number", message: "Enter a number", input: text } },
 };
 
 afterEach(cleanup);
@@ -80,7 +80,7 @@ function OverlayHarness({ children }: { readonly children: React.ReactNode }) {
 
 describe("predicate template contracts", () => {
   it("preserves every exact camelCase comparison operator and rejects parallel vocabularies", () => {
-    const expected: readonly PredicateComparisonOperator[] = [
+    const expected: readonly NSEPredicateComparisonOperator[] = [
       "equals", "notEquals", "lessThan", "lessThanOrEqual", "greaterThan", "greaterThanOrEqual",
       "contains", "beginsWith", "endsWith", "in", "between", "isNull", "isNotNull",
     ];
@@ -108,7 +108,7 @@ describe("predicate template contracts", () => {
       { kind: "compound", operator: "any", children: [{ kind: "comparison", field: "age", operator: "greaterThan", value: 40 }] },
     ] });
     expect(Object.isFrozen(compilePredicateExpression(value))).toBe(true);
-    expect(() => compilePredicateExpression({ root: { id: "bad", kind: "comparison", field: "age", operator: "greater-than" as PredicateComparisonOperator, value: 1 } })).toThrow();
+    expect(() => compilePredicateExpression({ root: { id: "bad", kind: "comparison", field: "age", operator: "greater-than" as NSEPredicateComparisonOperator, value: 1 } })).toThrow();
   });
 
   it("rejects cyclic and excessively deep rule graphs with structured errors", () => {
@@ -143,7 +143,7 @@ describe("predicate template contracts", () => {
   });
 
   it("round-trips valid text comparison options losslessly", () => {
-    const expression: PredicateExpression = { kind: "comparison", field: "name", operator: "contains", value: "ada", options: { caseInsensitive: true, diacriticInsensitive: true } };
+    const expression: NSEPredicateExpression = { kind: "comparison", field: "name", operator: "contains", value: "ada", options: { caseInsensitive: true, diacriticInsensitive: true } };
     expect(compilePredicateExpression({ root: ruleRowFromExpression(expression) })).toEqual(expression);
   });
 });
@@ -159,10 +159,10 @@ describe("NSEPredicateEditor", () => {
   });
   it("switches field/operator/value templates and parses typed values", () => {
     const onChange = vi.fn();
-    const initial: PredicateExpression = { kind: "comparison", field: "name", operator: "contains", value: "Ada" };
+    const initial: NSEPredicateExpression = { kind: "comparison", field: "name", operator: "contains", value: "Ada" };
     const view = render(<NSEPredicateEditor<Person> aria-label="People filter" schema={schema} value={initial} onChange={onChange} templates={[{ id: "person:age", field: "age", label: "Age", operators: [{ operator: "greaterThan", label: "greater than", arity: 1 }], formatter: numberFormatter, validate: (value) => ({ ok: true, value }) }]} />);
     fireEvent.change(screen.getByLabelText("Field"), { target: { value: "person:age" } });
-    const ageExpression: PredicateExpression = { kind: "comparison", field: "age", operator: "greaterThan", value: undefined };
+    const ageExpression: NSEPredicateExpression = { kind: "comparison", field: "age", operator: "greaterThan", value: undefined };
     expect(onChange).toHaveBeenLastCalledWith(ageExpression);
     view.rerender(<NSEPredicateEditor<Person> aria-label="People filter" schema={schema} value={ageExpression} onChange={onChange} templates={[{ id: "person:age", field: "age", label: "Age", operators: [{ operator: "greaterThan", label: "greater than", arity: 1 }], formatter: numberFormatter, validate: (value) => ({ ok: true, value }) }]} />);
     fireEvent.change(screen.getByLabelText("Value"), { target: { value: "40" } });
@@ -204,25 +204,25 @@ describe("NSEPredicateEditor", () => {
 
   it("preserves compatible text options through actual field, operator and value publications", () => {
     const onChange = vi.fn();
-    const initial: PredicateExpression = { kind: "comparison", field: "name", operator: "contains", value: "eva", options: { caseInsensitive: true, diacriticInsensitive: true } };
+    const initial: NSEPredicateExpression = { kind: "comparison", field: "name", operator: "contains", value: "eva", options: { caseInsensitive: true, diacriticInsensitive: true } };
     const view = render(<NSEPredicateEditor<Person> aria-label="People filter" schema={schema} value={initial} onChange={onChange} />);
     fireEvent.change(screen.getByLabelText("Value"), { target: { value: "elo" } });
-    const valueEdit = onChange.mock.calls.at(-1)![0] as PredicateExpression;
+    const valueEdit = onChange.mock.calls.at(-1)![0] as NSEPredicateExpression;
     expect(valueEdit).toEqual({ ...initial, value: "elo" });
-    expect(Predicate.compile(schema, valueEdit).test({ name: "ÉLODIE", age: 30 })).toBe(true);
+    expect(NSEPredicate.compile(schema, valueEdit).evaluate({ name: "ÉLODIE", age: 30 })).toBe(true);
 
     view.rerender(<NSEPredicateEditor<Person> aria-label="People filter" schema={schema} value={initial} onChange={onChange} />);
     fireEvent.change(screen.getByLabelText("Operator"), { target: { value: "beginsWith" } });
-    const operatorEdit = onChange.mock.calls.at(-1)![0] as PredicateExpression;
+    const operatorEdit = onChange.mock.calls.at(-1)![0] as NSEPredicateExpression;
     expect(operatorEdit).toEqual({ ...initial, operator: "beginsWith" });
-    expect(Predicate.compile(schema, operatorEdit).test({ name: "ÉVA Green", age: 30 })).toBe(true);
+    expect(NSEPredicate.compile(schema, operatorEdit).evaluate({ name: "ÉVA Green", age: 30 })).toBe(true);
 
     fireEvent.change(screen.getByLabelText("Field"), { target: { value: "person:age" } });
     expect(onChange.mock.calls.at(-1)![0]).not.toHaveProperty("options");
   });
 
   it("renders compound and constant controlled values without substituting a comparison", () => {
-    const value: PredicateExpression = { kind: "compound", operator: "all", children: [{ kind: "constant", value: true }, { kind: "comparison", field: "age", operator: "greaterThan", value: 18 }] };
+    const value: NSEPredicateExpression = { kind: "compound", operator: "all", children: [{ kind: "constant", value: true }, { kind: "comparison", field: "age", operator: "greaterThan", value: 18 }] };
     render(<NSEPredicateEditor<Person> aria-label="People filter" schema={schema} value={value} onChange={() => undefined} />);
     expect(screen.getByLabelText("People filter").getAttribute("data-expression-kind")).toBe("compound");
     expect(screen.getByText("Always true")).not.toBeNull();
@@ -230,7 +230,7 @@ describe("NSEPredicateEditor", () => {
 
   it("edits compound comparisons with schema formatters and allowed arity", () => {
     const onChange = vi.fn();
-    const value: PredicateExpression = { kind: "compound", operator: "all", children: [{ kind: "comparison", field: "age", operator: "between", value: [18, 65] }] };
+    const value: NSEPredicateExpression = { kind: "compound", operator: "all", children: [{ kind: "comparison", field: "age", operator: "between", value: [18, 65] }] };
     render(<NSEPredicateEditor<Person> aria-label="People filter" schema={schema} value={value} onChange={onChange} templates={[{ id: "person:age", field: "age", label: "Age", operators: PREDICATE_OPERATOR_OPTIONS.filter(({ operator }) => operator === "between"), formatter: numberFormatter, validate: (candidate) => ({ ok: true, value: candidate }) }]} />);
     fireEvent.change(screen.getByLabelText("Lower value rule root-1"), { target: { value: "21" } });
     fireEvent.change(screen.getByLabelText("Upper value rule root-1"), { target: { value: "60" } });

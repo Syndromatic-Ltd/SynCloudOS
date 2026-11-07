@@ -77,12 +77,12 @@ function PendingCommandFixture({ prepareDispatch, onDispatch }: {
 }
 
 const integerFormatter = {
-  format: (value: number) => String(value),
-  editingText: (value: number) => String(value),
-  parse: (text: string) => /^\d+$/.test(text)
+  string: (value: number) => String(value),
+  editingString: (value: number) => String(value),
+  getObjectValue: (text: string) => /^\d+$/.test(text)
     ? { ok: true as const, value: Number(text) }
     : { ok: false as const, error: { code: "not-an-integer", message: "Enter an integer.", input: text } },
-  validatePartial: (text: string) => ({ valid: text === "" || /^\d+$/.test(text) }),
+  isPartialStringValid: (text: string) => ({ valid: text === "" || /^\d+$/.test(text) }),
 };
 
 describe("NSE control contracts", () => {

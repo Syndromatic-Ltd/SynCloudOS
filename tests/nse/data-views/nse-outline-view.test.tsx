@@ -25,7 +25,8 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NSETreeController } from "../../../src/NSE/Controllers";
-import { IndexPath, TreeNode } from "../../../src/SynCloudOS/Models";
+import { TreeControllerNodeSnapshot } from "../../../src/NSE/Controllers/treeControllerSnapshot";
+import { NSEIndexPath } from "../../../src/Foundation/public";
 import {
   NSEOutlineView,
   flattenVisibleTree,
@@ -279,14 +280,14 @@ describe("NSEOutlineView", () => {
   });
 
   it("flattens iteratively with stable sibling metadata and cycle protection", () => {
-    const leaf = new TreeNode({ id: "leaf", value: report, indexPath: IndexPath.from(0, 0), parentId: "root", children: [] });
-    const root = new TreeNode({ id: "root", value: documents, indexPath: IndexPath.from(0), parentId: null, children: [leaf] });
+    const leaf = new TreeControllerNodeSnapshot({ id: "leaf", value: report, indexPath: NSEIndexPath.from(0, 0), parentId: "root", children: [] });
+    const root = new TreeControllerNodeSnapshot({ id: "root", value: documents, indexPath: NSEIndexPath.from(0), parentId: null, children: [leaf] });
     expect(flattenVisibleTree([root], new Set(["root"]))).toEqual([
       expect.objectContaining({ id: "root", row: 0, level: 1, positionInSet: 1, setSize: 1 }),
       expect.objectContaining({ id: "leaf", row: 1, level: 2, parentId: "root", positionInSet: 1, setSize: 1 }),
     ]);
 
-    const cyclic = { id: "cycle", value: documents, indexPath: IndexPath.from(0), parentId: null, children: [] as unknown[] };
+    const cyclic = { id: "cycle", value: documents, indexPath: NSEIndexPath.from(0), parentId: null, children: [] as unknown[] };
     cyclic.children.push(cyclic);
     expect(flattenVisibleTree([cyclic as never], new Set(["cycle"]))).toHaveLength(1);
   });

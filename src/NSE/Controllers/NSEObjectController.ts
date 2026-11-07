@@ -18,12 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type {
-  Formatter,
-  FormatterContext,
-  FormatterResult,
-  ValueTransformer,
-} from "../../SynCloudOS/Models";
+import type { ValueTransformer } from "../../SynCloudOS/Models";
+import type { NSEFormatter, NSEFormatterContext, NSEFormatterResult } from "../../Foundation/public";
 import { defineSyncUndoAction } from "../../SynCloudOS/nseRuntimeContracts";
 import {
   ControllerEditingStateError,
@@ -40,7 +36,7 @@ import { mutableClone, ownImmutable } from "./immutableValue";
 export interface ObjectControllerField<T extends object, V> {
   read(content: T): V;
   write(content: T, value: V): T;
-  readonly formatter?: Formatter<any>;
+  readonly formatter?: NSEFormatter<any>;
   readonly transformer?: ValueTransformer<any, V>;
   readonly validate?: (
     value: V,
@@ -151,8 +147,8 @@ export class NSEObjectController<T extends object> extends NSEController<
   setFieldText(
     fieldName: string,
     text: string,
-    context: FormatterContext,
-  ): FormatterResult<unknown> {
+    context: NSEFormatterContext,
+  ): NSEFormatterResult<unknown> {
     const field = this.#requireField<unknown>(fieldName);
     if (!field.formatter) {
       return {
@@ -164,7 +160,7 @@ export class NSEObjectController<T extends object> extends NSEController<
         },
       };
     }
-    const parsed = field.formatter.parse(text, context);
+    const parsed = field.formatter.getObjectValue(text, context);
     if (!parsed.ok) return parsed;
     const value = field.transformer
       ? field.transformer.transform(parsed.value)

@@ -20,12 +20,12 @@
 
 import {
   formatterFailure,
-  type Formatter,
-  type FormatterContext,
-  type FormatterResult,
-} from "./Formatter";
+  NSEFormatter,
+  type NSEFormatterContext,
+  type NSEFormatterResult,
+} from "./NSEFormatter";
 
-export interface NumberFormatterOptions extends Intl.NumberFormatOptions {
+export interface NSENumberFormatterOptions extends Intl.NumberFormatOptions {
   readonly minimum?: number;
   readonly maximum?: number;
 }
@@ -216,7 +216,7 @@ function validGrouping(text: string, symbols: NumberSymbols): boolean {
 
 function normaliseNumberText(
   text: string,
-  context: FormatterContext,
+  context: NSEFormatterContext,
   options: Intl.NumberFormatOptions,
 ): string | null {
   if (!supportsParsing(context.locale, options)) return null;
@@ -249,12 +249,13 @@ function normaliseNumberText(
   return numeric;
 }
 
-export class NumberFormatter implements Formatter<number> {
+export class NSENumberFormatter extends NSEFormatter<number> {
   readonly #minimum: number | undefined;
   readonly #maximum: number | undefined;
   readonly #intlOptions: Intl.NumberFormatOptions;
 
-  constructor(options: NumberFormatterOptions = {}) {
+  constructor(options: NSENumberFormatterOptions = {}) {
+    super();
     const { minimum, maximum, ...intlOptions } = options;
     if (minimum !== undefined && !Number.isFinite(minimum)) {
       throw new RangeError("Number formatter minimum must be finite.");
@@ -271,14 +272,14 @@ export class NumberFormatter implements Formatter<number> {
     Object.freeze(this);
   }
 
-  format(value: number, context: FormatterContext): string {
+  string(value: number, context: NSEFormatterContext): string {
     if (!Number.isFinite(value)) {
       throw new RangeError("Number formatter values must be finite.");
     }
     return new Intl.NumberFormat(context.locale, this.#intlOptions).format(value);
   }
 
-  editingText(value: number, context: FormatterContext): string {
+  editingString(value: number, context: NSEFormatterContext): string {
     if (!Number.isFinite(value)) {
       throw new RangeError("Number formatter values must be finite.");
     }
@@ -288,7 +289,7 @@ export class NumberFormatter implements Formatter<number> {
     }).format(value);
   }
 
-  parse(text: string, context: FormatterContext): FormatterResult<number> {
+  getObjectValue(text: string, context: NSEFormatterContext): NSEFormatterResult<number> {
     const normalised = normaliseNumberText(text, context, this.#intlOptions);
     if (
       normalised === null ||
@@ -326,7 +327,7 @@ export class NumberFormatter implements Formatter<number> {
     return { ok: true, value };
   }
 
-  validatePartial(text: string, context: FormatterContext) {
+  isPartialStringValid(text: string, context: NSEFormatterContext) {
     const normalised = normaliseNumberText(text, context, this.#intlOptions);
     if (
       normalised !== null &&

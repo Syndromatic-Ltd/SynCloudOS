@@ -29,7 +29,7 @@ import {
   type KeyboardEvent,
 } from "react";
 
-import { SortDescriptor } from "../../../SynCloudOS/Models";
+import { NSESortDescriptor } from "../../../Foundation/public";
 import { dataViewAllowsMutation, dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, encodeNSEDataViewKey, useNSEDataView } from "../Core";
 import { useNSEVirtualiser } from "../Virtualisation";
 import { nseDragCommandIds, nseDragNoPayload, useNSEDataViewDragHost } from "../../Drag";
@@ -223,10 +223,10 @@ export function NSETableView<T, TId extends string | number>({
 
   const sortColumn = (column: NSETableColumn<T, TId, unknown>) => {
     if (!allowsMutation || !column.sort) return;
-    const current = adapter.controller.getSnapshot().sortDescriptors.find((descriptor) => descriptor instanceof SortDescriptor && descriptor.id === column.id) as SortDescriptor<T, unknown> | undefined;
+    const current = adapter.controller.getSnapshot().sortDescriptors.find((descriptor) => descriptor instanceof NSESortDescriptor && descriptor.id === column.id) as NSESortDescriptor<T, unknown> | undefined;
     const next = current
-      ? [current.reversed()]
-      : [new SortDescriptor<T, unknown>({ id: column.id, select: column.value, compare: column.sort.compare, direction: "ascending" })];
+      ? [current.reversedSortDescriptor()]
+      : [new NSESortDescriptor<T, unknown>({ id: column.id, select: column.value, compare: column.sort.compare, direction: "ascending" })];
     onSortDescriptorsChange?.(next);
     adapter.controller.setSortDescriptors(next);
   };
@@ -246,7 +246,7 @@ export function NSETableView<T, TId extends string | number>({
     const request = { generation: (editRequest.current?.generation ?? 0) + 1, controller: new AbortController() };
     editRequest.current = request;
     if (!view.coordinator.beginEditing(id, cancelEdit)) { request.controller.abort(); editRequest.current = null; return false; }
-    setEdit({ id, columnId: column.id, text: column.format?.editingText(value, { locale }) ?? String(value ?? ""), error: null, pending: false });
+    setEdit({ id, columnId: column.id, text: column.format?.editingString(value, { locale }) ?? String(value ?? ""), error: null, pending: false });
     return true;
   };
 
@@ -256,7 +256,7 @@ export function NSETableView<T, TId extends string | number>({
     const column = orderedColumns.find(({ id }) => id === edit.columnId);
     if (!entry || !column || (!column.format && providedValue === undefined)) return view.coordinator.cancelEditing();
     const parsed = providedValue === undefined
-      ? column.format!.parse(edit.text, { locale })
+      ? column.format!.getObjectValue(edit.text, { locale })
       : ({ ok: true, value: providedValue } as const);
     if (!parsed.ok) {
       setEdit({ ...edit, error: parsed.error.message, pending: false });
@@ -456,7 +456,7 @@ export function NSETableView<T, TId extends string | number>({
         menu={columnMenu}
         isEnabled={allowsMutation}
         columns={orderedColumns.map((column) => {
-          const descriptor = sortSnapshot.find((candidate) => candidate instanceof SortDescriptor && candidate.id === column.id) as SortDescriptor<T, unknown> | undefined;
+          const descriptor = sortSnapshot.find((candidate) => candidate instanceof NSESortDescriptor && candidate.id === column.id) as NSESortDescriptor<T, unknown> | undefined;
           return {
             id: column.id,
             title: column.title,
@@ -516,7 +516,7 @@ export function NSETableView<T, TId extends string | number>({
                     disabled={editing.pending}
                     value={editing.text}
                     onChange={(event) => {
-                      const partial = column.format!.validatePartial(event.target.value, { locale });
+                      const partial = column.format!.isPartialStringValid(event.target.value, { locale });
                       setEdit({ ...editing, text: partial.replacement ?? event.target.value, error: partial.valid ? null : partial.error?.message ?? "Invalid value" });
                     }}
                     onKeyDown={(event) => {
@@ -528,7 +528,7 @@ export function NSETableView<T, TId extends string | number>({
                   />
                 ) : column.render
                   ? column.render(value, entry.item, entry.id)
-                  : column.format?.format(value, { locale }) ?? String(value ?? "");
+                  : column.format?.string(value, { locale }) ?? String(value ?? "");
                 return (
                   <NSETableCell
                     key={column.id}

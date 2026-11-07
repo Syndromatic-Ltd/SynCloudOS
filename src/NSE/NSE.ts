@@ -196,7 +196,6 @@ export const NSE = {
   NSEDictionaryController: NSEControllers.NSEDictionaryController,
   NSEObjectController: NSEControllers.NSEObjectController,
   NSEUserDefaultsController: NSEControllers.NSEUserDefaultsController,
-  NSEUserDefaults: NSEControllers.NSEUserDefaults,
   NSETreeController: NSEControllers.NSETreeController,
   NSEUpdateReadinessController: NSEControllers.NSEUpdateReadinessController,
   useNSEController: NSEControllers.useNSEController,

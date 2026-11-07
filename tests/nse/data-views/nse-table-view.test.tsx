@@ -27,7 +27,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NSEArrayController } from "../../../src/NSE/Controllers";
-import type { Formatter } from "../../../src/SynCloudOS/Models";
+import type { NSEFormatter } from "../../../src/Foundation/public";
 import {
   NSETableView,
   columnAtNSETableViewPoint,
@@ -50,13 +50,13 @@ const people: readonly Person[] = [
   { id: "alan", name: "Alan", age: 41 },
 ];
 
-const nameFormatter: Formatter<unknown> = {
-  format: (value) => String(value),
-  editingText: (value) => String(value),
-  parse: (text) => text.trim()
+const nameFormatter: NSEFormatter<unknown> = {
+  string: (value) => String(value),
+  editingString: (value) => String(value),
+  getObjectValue: (text) => text.trim()
     ? { ok: true, value: text.trim() }
     : { ok: false, error: { code: "required", message: "Name is required", input: text } },
-  validatePartial: (text) => text.trim()
+  isPartialStringValid: (text) => text.trim()
     ? { valid: true }
     : { valid: false, error: { code: "required", message: "Name is required", input: text } },
 };

@@ -19,7 +19,7 @@
  */
 
 import type { SelectionChange, SelectionSnapshot } from "../../../SynCloudOS/Models";
-import { IndexPath } from "../../../SynCloudOS/Models";
+import { NSEIndexPath } from "../../../Foundation/public";
 
 import type {
   NSEDataViewAdapter,
@@ -335,7 +335,7 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
       const old = previous.get(id);
       return old && old.item === item && old.index === index && old.disabled === disabled
         ? old
-        : Object.freeze({ id, item, index, indexPath: IndexPath.from(index), disabled });
+        : Object.freeze({ id, item, index, indexPath: NSEIndexPath.from(index), disabled });
     });
     this.#projectedArranged = arranged;
     const current = this.#projectedItems;

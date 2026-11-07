@@ -18,32 +18,33 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface FormatterContext {
+export interface NSEFormatterContext {
   readonly locale: string;
   readonly timeZone?: string;
 }
 
-export interface FormatterError {
+export interface NSEFormatterError {
   readonly code: string;
   readonly message: string;
   readonly input: string;
 }
 
-export type FormatterResult<T> =
+export type NSEFormatterResult<T> =
   | { readonly ok: true; readonly value: T }
-  | { readonly ok: false; readonly error: FormatterError };
+  | { readonly ok: false; readonly error: NSEFormatterError };
 
-export interface Formatter<T> {
-  format(value: T, context: FormatterContext): string;
-  editingText(value: T, context: FormatterContext): string;
-  parse(text: string, context: FormatterContext): FormatterResult<T>;
-  validatePartial(
+/** NSFormatter: subclass to convert between objects and their display and editing strings. */
+export abstract class NSEFormatter<T> {
+  abstract string(value: T, context: NSEFormatterContext): string;
+  abstract editingString(value: T, context: NSEFormatterContext): string;
+  abstract getObjectValue(text: string, context: NSEFormatterContext): NSEFormatterResult<T>;
+  abstract isPartialStringValid(
     text: string,
-    context: FormatterContext,
+    context: NSEFormatterContext,
   ): {
     readonly valid: boolean;
     readonly replacement?: string;
-    readonly error?: FormatterError;
+    readonly error?: NSEFormatterError;
   };
 }
 
@@ -51,6 +52,6 @@ export function formatterFailure<T>(
   code: string,
   message: string,
   input: string,
-): FormatterResult<T> {
+): NSEFormatterResult<T> {
   return { ok: false, error: { code, message, input } };
 }

@@ -21,7 +21,8 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
 import type { NSETreeController } from "../../Controllers";
-import type { SelectionChange, SelectionSnapshot, TreeNode } from "../../../SynCloudOS/Models";
+import type { SelectionChange, SelectionSnapshot } from "../../../SynCloudOS/Models";
+import type { TreeControllerNodeSnapshot } from "../../Controllers/treeControllerSnapshot";
 import type { NSEDataViewKey, NSEDataViewState } from "../Core";
 import type { NSEDataViewDragBinding } from "../Drag";
 import type { DragEndpoint } from "../../../SynCloudOS/SynCloudOS";
@@ -61,7 +62,7 @@ export interface NSEOutlineViewDelegate<T, TId extends NSEDataViewKey> {
 export interface NSEOutlineViewRow<T, TId extends NSEDataViewKey> {
   readonly id: TId;
   readonly item: T;
-  readonly node: TreeNode<T, TId>;
+  readonly node: TreeControllerNodeSnapshot<T, TId>;
   readonly row: number;
   readonly level: number;
   readonly parentId: TId | null;

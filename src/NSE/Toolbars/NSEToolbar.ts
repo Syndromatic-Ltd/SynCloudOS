@@ -20,7 +20,7 @@
 
 import { NSEObject } from "../Objects/NSEObject";
 import { NSEUserDefaultsController } from "../Controllers/NSEUserDefaultsController";
-import { NSEUserDefaults } from "../Controllers/NSEUserDefaults";
+import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 import type { NSEOwner } from "../Controllers/ownership";
 import { NSEToolbarController } from "./NSEToolbarController";
 import type { NSEToolbarItemInput, NSEToolbarPreferences, NSEToolbarRuntimePort } from "./toolbarTypes";

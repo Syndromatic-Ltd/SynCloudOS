@@ -26,7 +26,7 @@ import type {
   CommandDispatchPreparation,
   CommandValidationOptions,
 } from "../../../SynCloudOS/SynCloudOS";
-import type { Formatter, FormatterContext } from "../../../SynCloudOS/Models";
+import type { NSEFormatter, NSEFormatterContext } from "../../../Foundation/public";
 import type { NSEActionReference } from "./actionReference";
 
 /** Typed action connection; dynamic string IDs keep their existing payload contract. */
@@ -101,6 +101,6 @@ export interface NSEControlRuntimePort {
 }
 
 export interface NSEFormattedControlProps<T> extends NSEControlValueProps<T> {
-  readonly formatter: Formatter<T>;
-  readonly formatterContext: FormatterContext;
+  readonly formatter: NSEFormatter<T>;
+  readonly formatterContext: NSEFormatterContext;
 }

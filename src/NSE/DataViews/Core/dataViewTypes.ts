@@ -21,13 +21,8 @@
 import type { ReactNode } from "react";
 
 import type { NSEArrayController } from "../../Controllers";
-import type {
-  ChangeSet,
-  IndexPath,
-  SelectionChange,
-  SelectionSnapshot,
-  SortComparator,
-} from "../../../SynCloudOS/Models";
+import type { ChangeSet, SelectionChange, SelectionSnapshot } from "../../../SynCloudOS/Models";
+import type { NSEIndexPath, NSESortComparator } from "../../../Foundation/public";
 
 export type NSEDataViewKey = string | number;
 
@@ -66,7 +61,7 @@ export interface NSEDataViewItem<T, TId extends NSEDataViewKey> {
   readonly id: TId;
   readonly item: T;
   readonly index: number;
-  readonly indexPath: IndexPath;
+  readonly indexPath: NSEIndexPath;
   readonly disabled: boolean;
 }
 
@@ -78,7 +73,7 @@ export interface NSEDataViewSnapshot<T, TId extends NSEDataViewKey> {
   readonly editingId: TId | null;
   readonly state: NSEDataViewState;
   readonly changeSet: ChangeSet<TId, T>;
-  readonly sortDescriptors: readonly SortComparator<T>[];
+  readonly sortDescriptors: readonly NSESortComparator<T>[];
 }
 
 export type NSEDataViewSelectionMode = "none" | "single" | "multiple";

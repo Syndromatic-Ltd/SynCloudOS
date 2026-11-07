@@ -20,13 +20,8 @@
 
 import { expect, it } from "vitest";
 
-import {
-  Predicate,
-  PredicateValidationError,
-  SortDescriptor,
-  sortWithDescriptors,
-  type PredicateSchema,
-} from "../../src/SynCloudOS/Models";
+import { sortWithDescriptors } from "../../src/SynCloudOS/Models";
+import { NSEPredicate, NSEPredicateValidationError, NSESortDescriptor, type NSEPredicateSchema } from "../../src/Foundation/public";
 
 interface Person {
   id: string;
@@ -35,7 +30,7 @@ interface Person {
   team: string | null;
 }
 
-const schema: PredicateSchema<Person> = {
+const schema: NSEPredicateSchema<Person> = {
   id: "people.v1",
   fields: {
     name: { type: "string", read: (person) => person.name },
@@ -54,11 +49,11 @@ it("sorts stably with typed accessors and null policy", () => {
     { id: "b", name: "Eva 2", age: 30, team: "Blue" },
     { id: "c", name: "Ana", age: 20, team: "Blue" },
   ];
-  const age = new SortDescriptor<Person, number>({
+  const age = new NSESortDescriptor<Person, number>({
     id: "age",
     select: (item) => item.age,
   });
-  const name = new SortDescriptor<Person, string>({
+  const name = new NSESortDescriptor<Person, string>({
     id: "name",
     select: (item) => item.name,
     collator: new Intl.Collator("en-GB", {
@@ -100,14 +95,14 @@ it("validates and evaluates serialisable predicates without source evaluation", 
       },
     ],
   } as const;
-  const predicate = Predicate.compile(schema, expression);
+  const predicate = NSEPredicate.compile(schema, expression);
 
   expect(
-    predicate.test({ id: "a", name: "Éva 10", age: 30, team: null }),
+    predicate.evaluate({ id: "a", name: "Éva 10", age: 30, team: null }),
   ).toBe(true);
   expect(predicate.toJSON()).toEqual(expression);
   expect(() =>
-    Predicate.compile(schema, {
+    NSEPredicate.compile(schema, {
       kind: "comparison",
       field: "constructor.constructor",
       operator: "equals",
@@ -118,15 +113,15 @@ it("validates and evaluates serialisable predicates without source evaluation", 
 
 it("validates operator values and nullable fields", () => {
   expect(() =>
-    Predicate.compile(schema, {
+    NSEPredicate.compile(schema, {
       kind: "comparison",
       field: "age",
       operator: "contains",
       value: "3",
     }),
-  ).toThrow(PredicateValidationError);
+  ).toThrow(NSEPredicateValidationError);
   expect(() =>
-    Predicate.compile(schema, {
+    NSEPredicate.compile(schema, {
       kind: "comparison",
       field: "age",
       operator: "between",
@@ -134,7 +129,7 @@ it("validates operator values and nullable fields", () => {
     }),
   ).toThrow(/two bounds/i);
   expect(() =>
-    Predicate.compile(schema, {
+    NSEPredicate.compile(schema, {
       kind: "comparison",
       field: "name",
       operator: "equals",
@@ -142,11 +137,11 @@ it("validates operator values and nullable fields", () => {
     }),
   ).toThrow(/does not allow null/i);
   expect(
-    Predicate.compile(schema, {
+    NSEPredicate.compile(schema, {
       kind: "comparison",
       field: "team",
       operator: "isNull",
-    }).test({ id: "a", name: "Ana", age: 30, team: null }),
+    }).evaluate({ id: "a", name: "Ana", age: 30, team: null }),
   ).toBe(true);
 });
 
@@ -163,10 +158,10 @@ it("enforces depth and term limits before publishing a predicate", () => {
     ],
   } as const;
 
-  expect(() => Predicate.compile(schema, nested, { maxDepth: 2 })).toThrow(
+  expect(() => NSEPredicate.compile(schema, nested, { maxDepth: 2 })).toThrow(
     /depth exceeds 2/i,
   );
-  expect(() => Predicate.compile(schema, nested, { maxTerms: 2 })).toThrow(
+  expect(() => NSEPredicate.compile(schema, nested, { maxTerms: 2 })).toThrow(
     /terms exceed 2/i,
   );
 });
@@ -180,22 +175,22 @@ it("caps caller-supplied limits and rejects cyclic input before recursive overfl
   cyclic.children.push(cyclic);
 
   expect(() =>
-    Predicate.compile(schema, cyclic as never, {
+    NSEPredicate.compile(schema, cyclic as never, {
       maxDepth: Number.MAX_SAFE_INTEGER,
       maxTerms: Number.MAX_SAFE_INTEGER,
     }),
-  ).toThrow(PredicateValidationError);
+  ).toThrow(NSEPredicateValidationError);
 
   let deep: unknown = { kind: "constant", value: true };
   for (let index = 0; index < 200; index += 1) {
     deep = { kind: "compound", operator: "all", children: [deep] };
   }
   expect(() =>
-    Predicate.compile(schema, deep as never, {
+    NSEPredicate.compile(schema, deep as never, {
       maxDepth: Number.MAX_SAFE_INTEGER,
       maxTerms: Number.MAX_SAFE_INTEGER,
     }),
-  ).toThrow(PredicateValidationError);
+  ).toThrow(NSEPredicateValidationError);
 });
 
 it("deeply owns and freezes predicate input", () => {
@@ -211,7 +206,7 @@ it("deeply owns and freezes predicate input", () => {
       },
     ],
   };
-  const predicate = Predicate.compile(schema, expression);
+  const predicate = NSEPredicate.compile(schema, expression);
 
   expression.children[0].value.push(40);
   const json = predicate.toJSON();
@@ -231,10 +226,10 @@ it("deeply owns and freezes predicate input", () => {
 
 it("fails closed for malformed or non-JSON predicate nodes", () => {
   expect(() =>
-    Predicate.compile(schema, null as unknown as never),
-  ).toThrow(PredicateValidationError);
+    NSEPredicate.compile(schema, null as unknown as never),
+  ).toThrow(NSEPredicateValidationError);
   expect(() =>
-    Predicate.compile(
+    NSEPredicate.compile(
       schema,
       {
         kind: "constant",
@@ -247,13 +242,13 @@ it("fails closed for malformed or non-JSON predicate nodes", () => {
 
 it("rejects malformed predicate structure before freezing and never coerces text", () => {
   expect(() =>
-    Predicate.compile(
-      { ...schema, payload: new Map([["unexpected", true]]) } as unknown as PredicateSchema<Person>,
+    NSEPredicate.compile(
+      { ...schema, payload: new Map([["unexpected", true]]) } as unknown as NSEPredicateSchema<Person>,
       { kind: "constant", value: true },
     ),
-  ).toThrow(PredicateValidationError);
+  ).toThrow(NSEPredicateValidationError);
   expect(() =>
-    Predicate.compile(
+    NSEPredicate.compile(
       schema,
       {
         kind: "comparison",
@@ -263,13 +258,13 @@ it("rejects malformed predicate structure before freezing and never coerces text
         options: null,
       } as unknown as never,
     ),
-  ).toThrow(PredicateValidationError);
+  ).toThrow(NSEPredicateValidationError);
   expect(() =>
-    Predicate.compile(
+    NSEPredicate.compile(
       schema,
       { kind: "compound", operator: "all", children: null } as unknown as never,
     ),
-  ).toThrow(PredicateValidationError);
+  ).toThrow(NSEPredicateValidationError);
 
   const hostile = {
     toString: () => {
@@ -279,22 +274,22 @@ it("rejects malformed predicate structure before freezing and never coerces text
       throw new Error("text coercion escaped the predicate boundary");
     },
   };
-  const predicate = Predicate.compile(schema, {
+  const predicate = NSEPredicate.compile(schema, {
     kind: "comparison",
     field: "name",
     operator: "contains",
     value: "a",
   });
   expect(() =>
-    predicate.test({ id: "hostile", name: hostile as unknown as string, age: 1, team: null }),
+    predicate.evaluate({ id: "hostile", name: hostile as unknown as string, age: 1, team: null }),
   ).not.toThrow();
   expect(
-    predicate.test({ id: "hostile", name: hostile as unknown as string, age: 1, team: null }),
+    predicate.evaluate({ id: "hostile", name: hostile as unknown as string, age: 1, team: null }),
   ).toBe(false);
 });
 
 it("keeps native numeric comparisons reflexive and stable around NaN", () => {
-  const numeric = new SortDescriptor<{ readonly id: string; readonly value: number }, number>({
+  const numeric = new NSESortDescriptor<{ readonly id: string; readonly value: number }, number>({
     id: "value",
     select: (item) => item.value,
   });

@@ -20,18 +20,11 @@
 
 import type { HTMLAttributes } from "react";
 
-import type {
-  Formatter,
-  FormatterResult,
-  PredicateComparisonOperator,
-  PredicateExpression,
-  PredicateLiteral,
-  PredicateSchema,
-} from "../../../SynCloudOS/Models";
+import type { NSEFormatter, NSEFormatterResult, NSEPredicateComparisonOperator, NSEPredicateExpression, NSEPredicateLiteral, NSEPredicateSchema } from "../../../Foundation/public";
 import type { NSEDataViewState } from "../Core";
 
 export interface NSEPredicateOperatorOption {
-  readonly operator: PredicateComparisonOperator;
+  readonly operator: NSEPredicateComparisonOperator;
   readonly label: string;
   readonly arity: 0 | 1 | 2;
 }
@@ -42,8 +35,8 @@ export interface NSEPredicateTemplate<T> {
   readonly label: string;
   readonly operators: readonly NSEPredicateOperatorOption[];
   readonly acceptsTextOptions?: boolean;
-  readonly formatter: Formatter<unknown>;
-  validate(value: unknown): FormatterResult<unknown>;
+  readonly formatter: NSEFormatter<unknown>;
+  validate(value: unknown): NSEFormatterResult<unknown>;
 }
 
 export type NSERuleRow =
@@ -56,8 +49,8 @@ export type NSERuleRow =
       readonly id: string;
       readonly kind: "comparison";
       readonly field: string;
-      readonly operator: PredicateComparisonOperator;
-      readonly value?: PredicateLiteral;
+      readonly operator: NSEPredicateComparisonOperator;
+      readonly value?: NSEPredicateLiteral;
       readonly options?: { readonly caseInsensitive?: boolean; readonly diacriticInsensitive?: boolean };
     }
   | {
@@ -75,11 +68,11 @@ export interface NSERuleEditorValidation {
 }
 
 export interface NSEPredicateEditorProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
-  readonly schema: PredicateSchema<T>;
+  readonly schema: NSEPredicateSchema<T>;
   readonly templates?: readonly NSEPredicateTemplate<T>[];
-  readonly value?: PredicateExpression;
-  readonly defaultValue?: PredicateExpression;
-  readonly onChange?: (value: PredicateExpression) => void;
+  readonly value?: NSEPredicateExpression;
+  readonly defaultValue?: NSEPredicateExpression;
+  readonly onChange?: (value: NSEPredicateExpression) => void;
   readonly readOnly?: boolean;
   readonly isEnabled?: boolean;
   readonly locale?: string;

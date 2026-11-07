@@ -1,7 +1,7 @@
 import type { NSEViewController } from "../Application/NSEViewController";
 import { getNSEAuthoringContext, type NSEAuthoringContext } from "../Application/authoringContext";
 import { getNSEObjectLifetime } from "../Application/objectLifetime";
-import { NSEUserDefaults } from "../Controllers/NSEUserDefaults";
+import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 import { encodeNSEPreference, equalNSEPreference, parseNSEPreference, readNSEPreference, validateNSEPreferenceDescriptor, writeNSEPreference, type NSEPreferenceDescriptor } from "../Objects/preference";
 import type { NSETabBarController } from "./NSETabBarController";
 

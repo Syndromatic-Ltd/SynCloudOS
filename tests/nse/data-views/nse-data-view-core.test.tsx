@@ -25,7 +25,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NSEArrayController } from "../../../src/NSE/Controllers";
-import { SortDescriptor } from "../../../src/SynCloudOS/Models";
+import { NSESortDescriptor } from "../../../src/Foundation/public";
 import {
   decodeNSEDataViewKey,
   encodeNSEDataViewKey,
@@ -130,7 +130,7 @@ describe("structured data-view coordination", () => {
     expect(document.getElementById(screen.getByRole("grid").getAttribute("aria-activedescendant")!)?.textContent).toBe("Grace");
     expect(controller.getSnapshot().selection.selectedIds).toEqual(new Set(["ada"]));
 
-    controller.setSortDescriptors([new SortDescriptor<Person, string>({
+    controller.setSortDescriptors([new NSESortDescriptor<Person, string>({
       id: "name",
       select: (person) => person.name,
       direction: "descending",
@@ -291,7 +291,7 @@ describe("structured data-view coordination", () => {
     const cancel = vi.fn();
     coordinator.beginEditing("ada", cancel);
 
-    controller.setSortDescriptors([new SortDescriptor<Person, string>({
+    controller.setSortDescriptors([new NSESortDescriptor<Person, string>({
       id: "name",
       select: (person) => person.name,
       direction: "descending",

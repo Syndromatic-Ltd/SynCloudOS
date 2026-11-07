@@ -133,7 +133,7 @@ export * from "./Images";
 export * from "./AnimationFX";
 export * from "./AudioFX";
 export * from "./WebContent";
-export * from "./Models/GeometryValues";
+
 export type { SynCloudOSAppInfo } from "./AppInfo/appInfoTypes";
 export { AppInfo };
 export { prepareRenderedCanvasCapture } from "./AnimationFX/renderedCanvasCapture";

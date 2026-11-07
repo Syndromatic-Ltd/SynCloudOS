@@ -21,36 +21,37 @@
 import { describe, expect, it } from "vitest";
 
 import { clampPointToRect, insetRect, intersectRects, unionRects } from "../../src/FX/GraphicsFX/GFXGeometry";
-import { CountedSet, DecimalValue, UnicodeCharacterSet, intersectRanges, normaliseRange } from "../../src/SynCloudOS/Models";
+import { DecimalValue } from "../../src/SynCloudOS/Models";
+import { NSECountedSet, NSECharacterSet, NSEIntersectionRange, normaliseNSERange } from "../../src/Foundation/public";
 
 describe("native model value boundaries", () => {
   it("preserves counts instead of pretending a counted set is a plain Set", () => {
-    const values = new CountedSet(["draft", "draft", "saved"]);
-    expect(values.count("draft")).toBe(2);
-    expect(values.size).toBe(2);
+    const values = new NSECountedSet(["draft", "draft", "saved"]);
+    expect(values.countForObject("draft")).toBe(2);
+    expect(values.count).toBe(2);
     expect(values.totalCount).toBe(3);
     const iterator = values[Symbol.iterator]();
-    values.add("later");
+    values.addObject("later");
     expect([...iterator]).toEqual(["draft", "saved"]);
-    values.delete("draft");
-    expect(values.count("draft")).toBe(1);
+    values.removeObject("draft");
+    expect(values.countForObject("draft")).toBe(1);
     expect(values.deleteAll("draft")).toBe(1);
     expect([...values]).toEqual(["saved", "later"]);
-    expect(() => values.add("bad", 0)).toThrow(/positive safe integer/i);
-    const overflow = new CountedSet<string>();
-    overflow.add("full", Number.MAX_SAFE_INTEGER);
-    expect(() => overflow.add("full")).toThrow(/safe integer range/i);
-    expect(() => overflow.add("other")).toThrow(/safe integer range/i);
+    expect(() => values.addObject("bad", 0)).toThrow(/positive safe integer/i);
+    const overflow = new NSECountedSet<string>();
+    overflow.addObject("full", Number.MAX_SAFE_INTEGER);
+    expect(() => overflow.addObject("full")).toThrow(/safe integer range/i);
+    expect(() => overflow.addObject("other")).toThrow(/safe integer range/i);
   });
 
   it("handles Unicode scalar properties without UTF-16 code-unit assumptions", () => {
-    const letters = UnicodeCharacterSet.fromProperty("Letter");
+    const letters = NSECharacterSet.fromProperty("Letter");
     expect(letters.contains("é")).toBe(true);
     expect(letters.contains("𐐀")).toBe(true);
     expect(letters.contains("7")).toBe(false);
     expect(() => letters.contains("ab")).toThrow(/one Unicode scalar/i);
     expect(() => letters.contains("\ud800")).toThrow(/one Unicode scalar/i);
-    const hexadecimal = UnicodeCharacterSet.fromScalars(["A", "B", "7"]);
+    const hexadecimal = NSECharacterSet.fromScalars(["A", "B", "7"]);
     expect(letters.intersection(hexadecimal).contains("A")).toBe(true);
     expect(letters.intersection(hexadecimal).contains("7")).toBe(false);
     expect(letters.inverted().contains("7")).toBe(true);
@@ -113,16 +114,16 @@ describe("native model value boundaries", () => {
         { x: 0, y: 0, width: 10, height: 10 },
       ),
     ).toEqual({ x: 10, y: 0 });
-    expect(normaliseRange({ location: 8, length: 3 })).toEqual({
+    expect(normaliseNSERange({ location: 8, length: 3 })).toEqual({
       location: 8,
       length: 3,
     });
     expect(
-      intersectRanges(
+      NSEIntersectionRange(
         { location: 3, length: 8 },
         { location: 7, length: 5 },
       ),
     ).toEqual({ location: 7, length: 4 });
-    expect(() => normaliseRange({ location: 0, length: -1 })).toThrow(/length/i);
+    expect(() => normaliseNSERange({ location: 0, length: -1 })).toThrow(/length/i);
   });
 });

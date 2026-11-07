@@ -21,7 +21,8 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
 import type { NSEMenu, NSEMenuOverlayOptions } from "../../Menus";
-import type { Formatter, SelectionChange, SelectionSnapshot, SortDescriptor } from "../../../SynCloudOS/Models";
+import type { SelectionChange, SelectionSnapshot } from "../../../SynCloudOS/Models";
+import type { NSEFormatter, NSESortDescriptor } from "../../../Foundation/public";
 import type {
   NSEDataViewAdapter,
   NSEDataViewKey,
@@ -50,7 +51,7 @@ export interface NSETableColumn<T, TId, TValue> {
   readonly width: { readonly min: number; readonly ideal: number; readonly max: number };
   readonly alignment?: "start" | "centre" | "end";
   readonly editable?: boolean;
-  readonly format?: Formatter<TValue>;
+  readonly format?: NSEFormatter<TValue>;
   readonly sort?: { readonly compare: (left: TValue, right: TValue) => number };
   readonly render?: (value: TValue, item: T, id: TId) => ReactNode;
   readonly editor?: (context: NSETableViewEditContext<T, TId, TValue>) => ReactNode;
@@ -98,10 +99,10 @@ export interface NSETableViewProps<T, TId extends NSEDataViewKey>
   readonly columnVisibility?: Readonly<Record<string, boolean>>;
   readonly columnOrder?: readonly string[];
   readonly columnWidths?: Readonly<Record<string, number>>;
-  readonly sortDescriptors?: readonly SortDescriptor<T, unknown>[];
+  readonly sortDescriptors?: readonly NSESortDescriptor<T, unknown>[];
   readonly columnMenu?: NSETableColumnMenu;
   readonly onColumnConfigurationChange?: (configuration: NSETableColumnConfiguration) => void;
-  readonly onSortDescriptorsChange?: (descriptors: readonly SortDescriptor<T, unknown>[]) => void;
+  readonly onSortDescriptorsChange?: (descriptors: readonly NSESortDescriptor<T, unknown>[]) => void;
   readonly onSelectionChange?: (event: NSEDataViewSelectionEvent<TId>) => void;
   readonly onDoubleAction?: (id: TId, item: T) => void;
   readonly onEditCommit?: (context: NSETableViewEditContext<T, TId, unknown>) => void | Promise<void>;

@@ -20,10 +20,10 @@
 
 import {
   formatterFailure,
-  type Formatter,
-  type FormatterContext,
-  type FormatterResult,
-} from "./Formatter";
+  type NSEFormatter,
+  type NSEFormatterContext,
+  type NSEFormatterResult,
+} from "../../Foundation/NSEFormatter";
 
 export type DateFormatterValueType = "date" | "epochMilliseconds" | "iso";
 export type DateFormatterValue = Date | number | string;
@@ -83,7 +83,7 @@ function parseISO(text: string): ParsedISO | null {
   return Number.isFinite(date.getTime()) ? { date, dateOnly: false } : null;
 }
 
-export class DateFormatter implements Formatter<DateFormatterValue> {
+export class DateFormatter implements NSEFormatter<DateFormatterValue> {
   readonly #valueType: DateFormatterValueType;
   readonly #intlOptions: Intl.DateTimeFormatOptions;
 
@@ -116,7 +116,7 @@ export class DateFormatter implements Formatter<DateFormatterValue> {
     );
   }
 
-  format(value: DateFormatterValue, context: FormatterContext): string {
+  string(value: DateFormatterValue, context: NSEFormatterContext): string {
     const parsed =
       this.#valueType === "iso" && typeof value === "string"
         ? parseISO(value)
@@ -129,17 +129,17 @@ export class DateFormatter implements Formatter<DateFormatterValue> {
     }).format(this.#date(value));
   }
 
-  editingText(value: DateFormatterValue): string {
+  editingString(value: DateFormatterValue): string {
     const date = this.#date(value);
     if (this.#valueType === "date") return date.toISOString();
     if (this.#valueType === "epochMilliseconds") return String(date.getTime());
     return value as string;
   }
 
-  parse(
+  getObjectValue(
     text: string,
-    _context: FormatterContext,
-  ): FormatterResult<DateFormatterValue> {
+    _context: NSEFormatterContext,
+  ): NSEFormatterResult<DateFormatterValue> {
     const input = text.trim();
     if (this.#valueType === "epochMilliseconds") {
       if (!/^[+-]?\d+$/u.test(input)) {
@@ -172,9 +172,9 @@ export class DateFormatter implements Formatter<DateFormatterValue> {
       : { ok: true, value: input };
   }
 
-  validatePartial(text: string, context: FormatterContext) {
+  isPartialStringValid(text: string, context: NSEFormatterContext) {
     if (text.trim() === "") return { valid: true } as const;
-    const parsed = this.parse(text, context);
+    const parsed = this.getObjectValue(text, context);
     if (parsed.ok || /^[0-9T:+.Z-]{1,29}$/u.test(text.trim())) {
       return { valid: true } as const;
     }

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type UnicodePropertyName =
+export type NSEUnicodePropertyName =
   | "Letter"
   | "Number"
   | "Decimal_Number"
@@ -30,7 +30,7 @@ export type UnicodePropertyName =
   | "Symbol"
   | "Mark";
 
-const UNICODE_PROPERTIES: ReadonlySet<UnicodePropertyName> = new Set([
+const UNICODE_PROPERTIES: ReadonlySet<NSEUnicodePropertyName> = new Set([
   "Letter",
   "Number",
   "Decimal_Number",
@@ -56,7 +56,7 @@ function scalar(value: string): string {
   return values[0]!;
 }
 
-export class UnicodeCharacterSet {
+export class NSECharacterSet {
   readonly #contains: (value: string) => boolean;
 
   private constructor(contains: (value: string) => boolean) {
@@ -64,42 +64,42 @@ export class UnicodeCharacterSet {
     Object.freeze(this);
   }
 
-  static fromProperty(property: UnicodePropertyName): UnicodeCharacterSet {
+  static fromProperty(property: NSEUnicodePropertyName): NSECharacterSet {
     if (!UNICODE_PROPERTIES.has(property)) {
       throw new TypeError("Unsupported Unicode property name.");
     }
     const expression = new RegExp(`^\\p{${property}}$`, "u");
-    return new UnicodeCharacterSet((value) => expression.test(value));
+    return new NSECharacterSet((value) => expression.test(value));
   }
 
-  static fromScalars(values: Iterable<string>): UnicodeCharacterSet {
+  static fromScalars(values: Iterable<string>): NSECharacterSet {
     const members = new Set([...values].map(scalar));
-    return new UnicodeCharacterSet((value) => members.has(value));
+    return new NSECharacterSet((value) => members.has(value));
   }
 
-  static union(...sets: readonly UnicodeCharacterSet[]): UnicodeCharacterSet {
-    return new UnicodeCharacterSet((value) => sets.some((set) => set.#contains(value)));
+  static union(...sets: readonly NSECharacterSet[]): NSECharacterSet {
+    return new NSECharacterSet((value) => sets.some((set) => set.#contains(value)));
   }
 
   static intersection(
-    ...sets: readonly UnicodeCharacterSet[]
-  ): UnicodeCharacterSet {
-    return new UnicodeCharacterSet((value) => sets.every((set) => set.#contains(value)));
+    ...sets: readonly NSECharacterSet[]
+  ): NSECharacterSet {
+    return new NSECharacterSet((value) => sets.every((set) => set.#contains(value)));
   }
 
   contains(value: string): boolean {
     return this.#contains(scalar(value));
   }
 
-  union(...sets: readonly UnicodeCharacterSet[]): UnicodeCharacterSet {
-    return UnicodeCharacterSet.union(this, ...sets);
+  union(...sets: readonly NSECharacterSet[]): NSECharacterSet {
+    return NSECharacterSet.union(this, ...sets);
   }
 
-  intersection(...sets: readonly UnicodeCharacterSet[]): UnicodeCharacterSet {
-    return UnicodeCharacterSet.intersection(this, ...sets);
+  intersection(...sets: readonly NSECharacterSet[]): NSECharacterSet {
+    return NSECharacterSet.intersection(this, ...sets);
   }
 
-  inverted(): UnicodeCharacterSet {
-    return new UnicodeCharacterSet((value) => !this.#contains(value));
+  inverted(): NSECharacterSet {
+    return new NSECharacterSet((value) => !this.#contains(value));
   }
 }

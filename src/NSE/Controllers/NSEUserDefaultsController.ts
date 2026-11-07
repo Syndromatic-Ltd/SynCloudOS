@@ -28,7 +28,7 @@ import {
   type ControllerValidationIssue,
 } from "./NSEController";
 import { mutableClone, ownImmutable } from "./immutableValue";
-import { NSEUserDefaults } from "./NSEUserDefaults";
+import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 
 interface PreferencesAdapter {
   read(key: string): unknown;

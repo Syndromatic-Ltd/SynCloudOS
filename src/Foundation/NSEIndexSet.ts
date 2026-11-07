@@ -18,21 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface IndexRange {
-  readonly start: number;
-  readonly length: number;
-}
+import type { NSERange } from "./NSERange";
 
-function validateRange({ start, length }: IndexRange): void {
+function validateRange({ location, length }: NSERange): void {
   if (
-    !Number.isSafeInteger(start) ||
-    start < 0 ||
+    !Number.isSafeInteger(location) ||
+    location < 0 ||
     !Number.isSafeInteger(length) ||
     length < 0 ||
-    !Number.isSafeInteger(start + length)
+    !Number.isSafeInteger(location + length)
   ) {
     throw new RangeError(
-      "Index ranges require non-negative safe integer start and length.",
+      "Index ranges require non-negative safe integer location and length.",
     );
   }
 }
@@ -43,26 +40,26 @@ function validateIndex(index: number): void {
   }
 }
 
-export class IndexSet implements Iterable<number> {
-  readonly ranges: readonly Readonly<IndexRange>[];
+export class NSEIndexSet implements Iterable<number> {
+  readonly ranges: readonly Readonly<NSERange>[];
   readonly count: number;
 
-  private constructor(ranges: readonly IndexRange[]) {
+  private constructor(ranges: readonly NSERange[]) {
     for (const range of ranges) validateRange(range);
 
     const ordered = ranges
       .filter(({ length }) => length > 0)
       .map((range) => ({ ...range }))
-      .sort((left, right) => left.start - right.start);
-    const normalised: Array<{ start: number; length: number }> = [];
+      .sort((left, right) => left.location - right.location);
+    const normalised: Array<{ location: number; length: number }> = [];
 
     for (const range of ordered) {
       const previous = normalised.at(-1);
-      const end = range.start + range.length;
+      const end = range.location + range.length;
 
-      if (previous && range.start <= previous.start + previous.length) {
+      if (previous && range.location <= previous.location + previous.length) {
         previous.length =
-          Math.max(previous.start + previous.length, end) - previous.start;
+          Math.max(previous.location + previous.length, end) - previous.location;
       } else {
         normalised.push(range);
       }
@@ -71,7 +68,7 @@ export class IndexSet implements Iterable<number> {
     const count = normalised.reduce((total, range) => {
       const next = total + range.length;
       if (!Number.isSafeInteger(next)) {
-        throw new RangeError("IndexSet count must be a non-negative safe integer.");
+        throw new RangeError("NSEIndexSet count must be a non-negative safe integer.");
       }
       return next;
     }, 0);
@@ -83,25 +80,25 @@ export class IndexSet implements Iterable<number> {
     Object.freeze(this);
   }
 
-  static empty(): IndexSet {
-    return new IndexSet([]);
+  static empty(): NSEIndexSet {
+    return new NSEIndexSet([]);
   }
 
-  static fromIndex(index: number): IndexSet {
-    return new IndexSet([{ start: index, length: 1 }]);
+  static fromIndex(index: number): NSEIndexSet {
+    return new NSEIndexSet([{ location: index, length: 1 }]);
   }
 
-  static fromRange(range: IndexRange): IndexSet {
-    return new IndexSet([range]);
+  static fromRange(range: NSERange): NSEIndexSet {
+    return new NSEIndexSet([range]);
   }
 
-  static fromRanges(ranges: readonly IndexRange[]): IndexSet {
-    return new IndexSet(ranges);
+  static fromRanges(ranges: readonly NSERange[]): NSEIndexSet {
+    return new NSEIndexSet(ranges);
   }
 
-  static fromIndexes(indexes: Iterable<number>): IndexSet {
-    return new IndexSet(
-      [...indexes].map((start) => ({ start, length: 1 })),
+  static fromIndexes(indexes: Iterable<number>): NSEIndexSet {
+    return new NSEIndexSet(
+      [...indexes].map((location) => ({ location, length: 1 })),
     );
   }
 
@@ -109,16 +106,16 @@ export class IndexSet implements Iterable<number> {
     validateIndex(index);
     return this.ranges.some(
       (range) =>
-        index >= range.start && index < range.start + range.length,
+        index >= range.location && index < range.location + range.length,
     );
   }
 
-  union(other: IndexSet): IndexSet {
-    return new IndexSet([...this.ranges, ...other.ranges]);
+  union(other: NSEIndexSet): NSEIndexSet {
+    return new NSEIndexSet([...this.ranges, ...other.ranges]);
   }
 
-  intersect(other: IndexSet): IndexSet {
-    const ranges: IndexRange[] = [];
+  intersect(other: NSEIndexSet): NSEIndexSet {
+    const ranges: NSERange[] = [];
     let leftIndex = 0;
     let rightIndex = 0;
 
@@ -128,11 +125,11 @@ export class IndexSet implements Iterable<number> {
     ) {
       const left = this.ranges[leftIndex]!;
       const right = other.ranges[rightIndex]!;
-      const leftEnd = left.start + left.length;
-      const rightEnd = right.start + right.length;
-      const start = Math.max(left.start, right.start);
+      const leftEnd = left.location + left.length;
+      const rightEnd = right.location + right.length;
+      const location = Math.max(left.location, right.location);
       const end = Math.min(leftEnd, rightEnd);
-      if (end > start) ranges.push({ start, length: end - start });
+      if (end > location) ranges.push({ location, length: end - location });
       if (leftEnd < rightEnd) leftIndex += 1;
       else if (rightEnd < leftEnd) rightIndex += 1;
       else {
@@ -141,43 +138,43 @@ export class IndexSet implements Iterable<number> {
       }
     }
 
-    return new IndexSet(ranges);
+    return new NSEIndexSet(ranges);
   }
 
-  subtract(other: IndexSet): IndexSet {
+  subtract(other: NSEIndexSet): NSEIndexSet {
     let ranges = this.ranges.map((range) => ({ ...range }));
 
     for (const removed of other.ranges) {
       ranges = ranges.flatMap((range) => {
-        const start = range.start;
-        const end = start + range.length;
-        const removedEnd = removed.start + removed.length;
+        const location = range.location;
+        const end = location + range.length;
+        const removedEnd = removed.location + removed.length;
 
-        if (removedEnd <= start || removed.start >= end) return [range];
+        if (removedEnd <= location || removed.location >= end) return [range];
 
         return [
-          { start, length: Math.max(0, removed.start - start) },
+          { location, length: Math.max(0, removed.location - location) },
           {
-            start: Math.max(start, removedEnd),
+            location: Math.max(location, removedEnd),
             length: Math.max(0, end - removedEnd),
           },
         ].filter(({ length }) => length > 0);
       });
     }
 
-    return new IndexSet(ranges);
+    return new NSEIndexSet(ranges);
   }
 
-  shift(startingAt: number, delta: number): IndexSet {
+  shift(startingAt: number, delta: number): NSEIndexSet {
     validateIndex(startingAt);
     if (!Number.isSafeInteger(delta)) {
-      throw new RangeError("IndexSet shift must be a safe integer.");
+      throw new RangeError("NSEIndexSet shift must be a safe integer.");
     }
 
-    const shifted: IndexRange[] = [];
-    const moveRange = (start: number, length: number): void => {
+    const shifted: NSERange[] = [];
+    const moveRange = (location: number, length: number): void => {
       if (length === 0) return;
-      const movedStart = start + delta;
+      const movedStart = location + delta;
       const movedEnd = movedStart + length;
       if (
         !Number.isSafeInteger(movedStart) ||
@@ -186,30 +183,30 @@ export class IndexSet implements Iterable<number> {
         movedEnd < 0
       ) {
         throw new RangeError(
-          "IndexSet shift must keep indexes within non-negative safe integer bounds.",
+          "NSEIndexSet shift must keep indexes within non-negative safe integer bounds.",
         );
       }
-      shifted.push({ start: movedStart, length });
+      shifted.push({ location: movedStart, length });
     };
 
     for (const range of this.ranges) {
-      const end = range.start + range.length;
+      const end = range.location + range.length;
       if (end <= startingAt) {
         shifted.push({ ...range });
-      } else if (range.start >= startingAt) {
-        moveRange(range.start, range.length);
+      } else if (range.location >= startingAt) {
+        moveRange(range.location, range.length);
       } else {
-        shifted.push({ start: range.start, length: startingAt - range.start });
+        shifted.push({ location: range.location, length: startingAt - range.location });
         moveRange(startingAt, end - startingAt);
       }
     }
-    return new IndexSet(shifted);
+    return new NSEIndexSet(shifted);
   }
 
   *[Symbol.iterator](): Iterator<number> {
     for (const range of this.ranges) {
-      const end = range.start + range.length;
-      for (let index = range.start; index < end; index += 1) yield index;
+      const end = range.location + range.length;
+      for (let index = range.location; index < end; index += 1) yield index;
     }
   }
 }

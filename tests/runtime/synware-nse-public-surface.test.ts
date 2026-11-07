@@ -68,12 +68,13 @@ describe("SynWare NSE public framework boundary", () => {
       "NSEObjectController", "NSEDictionaryController", "ObjectControllerOptions",
       "PreferenceValidationError", "PreferencePersistenceError",
       "DictionaryControllerOptions", "ControllerEditTransaction", "ControllerCommitResult",
-      "IndexPath", "IndexSet", "Predicate", "ChangeSet", "SortDescriptor", "TreeNode",
-      "NSEControlValidation", "Formatter", "FormatterContext", "FormatterResult",
+      "NSETreeNode",
+      "NSEControlValidation",
       "NSETableCellView", "NSETableCellViewProps",
     ]));
+    for (const internal of ["SelectionModel", "ChangeSet", "ValueTransformer", "createValueTransformer", "sortWithDescriptors", "DateFormatter", "DecimalValue", "NSEUserDefaults", "NSEIndexPath", "NSEFormatter"]) expect(publicExports().names).not.toContain(internal);
     expect(publicExports(resolve("src/NSE/public/controls.ts")).names).toEqual(expect.arrayContaining([
-      "NSEControlValidation", "Formatter", "FormatterContext", "FormatterResult",
+      "NSEControlValidation",
     ]));
   });
 
