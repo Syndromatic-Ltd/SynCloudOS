@@ -76,7 +76,10 @@ describe("BluetoothFX browser and mounted ownership", () => {
     expect(f.characteristic.readValue).not.toHaveBeenCalled();
     mount.abort();
     expect(f.gatt.disconnect).toHaveBeenCalled();
-    expect(() => createMountedBluetoothClient(f.adapter, new AbortController().signal, () => [], () => true).createCentralManager()).toThrowError(DOMException);
+    const undeclared = createMountedBluetoothClient(f.adapter, new AbortController().signal, () => [], () => true).createCentralManager();
+    expect(await undeclared.getAuthorizationStatus()).toBe("denied");
+    await expect(undeclared.requestAuthorization({ acceptAllDevices: true })).rejects.toMatchObject({ name: "SecurityError" });
+    undeclared.dispose();
   });
 
   it("rejects pending chooser immediately on revocation and discards a late grant", async () => {
