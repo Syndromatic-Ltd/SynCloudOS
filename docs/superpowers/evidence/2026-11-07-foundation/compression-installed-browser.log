@@ -1,0 +1,1 @@
+[{"engine":"chromium","algorithms":["zlib","gzip"],"count":19456,"hasDocument":false},{"engine":"firefox","algorithms":["zlib","gzip","brotli"],"count":19456,"hasDocument":false},{"engine":"webkit","algorithms":["zlib","gzip"],"count":19456,"hasDocument":false}]

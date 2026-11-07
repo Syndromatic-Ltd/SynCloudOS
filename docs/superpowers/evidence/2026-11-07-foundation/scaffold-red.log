@@ -1,0 +1,32 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/synware-fx-authoring.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Unknown FX recipe: compression. Available: animation, graphics, image, text, audio, haptics, motion, media, video, midi, location, lumina
+ ❯ tests/runtime/synware-fx-authoring.test.ts (6 tests | 1 failed) 1681ms
+   × scaffolds the thirteenth framework as a direct permission-free capability query 63ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/synware-fx-authoring.test.ts > scaffolds the thirteenth framework as a direct permission-free capability query
+Error: Command failed: C:\Program Files\nodejs\node.exe C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\scripts\synware\create-synware.mjs C:\Users\KAVISH~1\AppData\Local\Temp\synware-fx-authoring-4bPxZm\src\SynWare\Example.app --fx compression
+Unknown FX recipe: compression. Available: animation, graphics, image, text, audio, haptics, motion, media, video, midi, location, lumina
+
+ ❯ generate tests/runtime/synware-fx-authoring.test.ts:51:3
+     49| function generate(options: string[] = []) {
+     50|   const root = temporary(), app = join(root, "src/SynWare/Example.app"…
+     51|   execFileSync(process.execPath, [generator, app, ...options]);
+       |   ^
+     52|   return { root, app };
+     53| }
+ ❯ tests/runtime/synware-fx-authoring.test.ts:136:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  08:33:42
+   Duration  5.09s (transform 1.85s, setup 32ms, import 3.20s, tests 1.68s, environment 0ms)
+

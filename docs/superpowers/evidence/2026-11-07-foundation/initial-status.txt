@@ -1,0 +1,13 @@
+ M docs/superpowers/plans/2026-11-06-navigation-controllers.md
+?? .pagecurl-controller-final.log
+?? .pagecurl-controller.log
+?? .pagecurl-final-typecheck.log
+?? .pagecurl-focused.log
+?? .pagecurl-framework-full.log
+?? .pagecurl-normal-red.log
+?? .pagecurl-sdk-build.log
+?? .pagecurl-timeout-rechecks.log
+?? .pagecurl-typecheck-layflat.log
+?? docs/superpowers/evidence/2026-11-07-foundation/
+?? docs/superpowers/evidence/2026-11-07-open-panel/
+?? docs/superpowers/evidence/2026-11-07-page-curl/
