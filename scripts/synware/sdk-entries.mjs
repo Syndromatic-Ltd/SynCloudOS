@@ -49,6 +49,8 @@ export const synWareSdkEntries = Object.freeze({
   "sdk/testing": "src/SynCloudOS/AppSDK/testing/sdkPackageEntry.ts",
   "server/auth": "src/SynCloudOS/Server/Auth/index.ts",
   "auth": "src/SynCloudOS/Authentication/index.ts",
+  "authentication-services": "src/SynCloudOS/AuthenticationServices/index.ts",
+  "auth/passkey": "src/SynCloudOS/Authentication/providers/passkey/index.ts",
   "webspring": "src/Webspring/public.ts",
   "chronosphere": "src/SynCloudOS/AppSDK/Chronosphere/public.ts",
   "browser": "src/SynCloudOSReact/browser.tsx",
