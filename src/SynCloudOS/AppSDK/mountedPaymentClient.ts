@@ -18,50 +18,67 @@
  */
 
 import type { PKFXPaymentClient, PKFXPaymentAuthorizationController, PKFXPayment } from "../../FX/PassFX/public";
+import type { PrivacyApplicationPort } from "../HostServices/AppSDKHostServiceTypes";
 import { createMountedResourceScope } from "../HostServices/mountedResourceScope";
 
-/** Mounted merchant access. Support queries never request a payment or permission. */
+/** Mounted merchant access. Support queries never request a payment or grant app consent. */
 export function createMountedPaymentClient(
   adapter: PKFXPaymentClient | undefined,
   mountSignal: AbortSignal,
-  permissions: () => readonly string[],
+  entitlements: () => readonly string[],
   authorise: (capability: string) => boolean,
+  privacy?: PrivacyApplicationPort,
 ): PKFXPaymentClient {
   const scope = createMountedResourceScope(mountSignal, { maxResources: 4, budgets: { sessions: 4 } });
   const requireCapability = () => {
     mountSignal.throwIfAborted();
-    if (!permissions().includes("payment.request")) throw new DOMException("SynWare capability payment.request must be declared.", "SecurityError");
-    if (!authorise("payment.request")) throw new DOMException("PolicyKit denied SynWare capability payment.request.", "SecurityError");
+    if (!entitlements().includes("payment.request")) throw new DOMException("SynWare entitlement payment.request must be declared.", "SecurityError");
+    if (!authorise("payment.request")) throw new DOMException("Privacy authorisation denied payment.request.", "SecurityError");
   };
   return Object.freeze<PKFXPaymentClient>({
     getCapabilities: () => !mountSignal.aborted && adapter ? adapter.getCapabilities() : Object.freeze({ paymentRequest: false }),
     createAuthorizationController: (request, signal) => scope.acquire(signal, (lease, release) => {
       let disposed = false;
+      let unbindPrivacy: (() => void) | undefined;
       const controller = adapter?.createAuthorizationController(request, lease);
       const dispose = () => {
         if (disposed) return;
         disposed = true;
+        unbindPrivacy?.(); unbindPrivacy = undefined;
         lease.removeEventListener("abort", dispose);
         try { controller?.dispose(); } finally { release(); }
       };
+      const bindPrivacy = () => { if (privacy && !unbindPrivacy) unbindPrivacy = privacy.bindResource(dispose); };
       lease.addEventListener("abort", dispose, { once: true });
-      const requireController = () => {
+      const requireController = (active = false) => {
         lease.throwIfAborted(); requireCapability();
+        if (active) privacy?.assertRequestAllowed();
         if (!controller) throw new DOMException("Payment Request is unavailable.", "NotSupportedError");
         return controller;
+      };
+      const abandon = (payment: PKFXPayment) => {
+        try { void payment.complete("fail").catch(() => {}); } catch { /* The browser may already have closed the payment sheet. */ }
       };
       return Object.freeze<PKFXPaymentAuthorizationController>({
         getAuthorizationStatus: async () => {
           if (lease.aborted || !controller) return "unavailable";
-          if (!permissions().includes("payment.request") || !authorise("payment.request")) return "denied";
-          return controller.getAuthorizationStatus();
+          if (!entitlements().includes("payment.request") || !authorise("payment.request")) return "denied";
+          const query = async () => { const status = await controller.getAuthorizationStatus(); lease.throwIfAborted(); return status; };
+          try { return privacy ? await privacy.getAuthorizationStatus(query) : await query(); }
+          catch (error) { if (lease.aborted) return "unavailable"; throw error; }
         },
         canMakePayments: async () => requireController().canMakePayments(),
         present: async () => {
-          const payment = await requireController().present();
-          try { lease.throwIfAborted(); requireCapability(); } catch (error) { dispose(); throw error; }
+          requireController(true);
+          const operation = async () => {
+            bindPrivacy();
+            const payment = await requireController(true).present();
+            try { requireController(true); } catch (error) { abandon(payment); dispose(); throw error; }
+            return payment;
+          };
+          const payment = privacy ? await privacy.request(operation, { signal: lease, dispose: abandon }) : await operation();
           return Object.freeze<PKFXPayment>({ ...payment, complete: async result => {
-            try { lease.throwIfAborted(); requireCapability(); } catch (error) { dispose(); throw error; }
+            try { requireController(true); } catch (error) { dispose(); throw error; }
             await payment.complete(result);
           } });
         },
