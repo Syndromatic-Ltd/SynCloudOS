@@ -29,9 +29,9 @@ import type {
   WindowContentFactoryRegistration,
   WindowContentRegistration,
 } from "../../SynCloudOS/SynCloudOS";
-import type { NSEWindowSurfaceRequest } from "../../NSE/Overlays/NSEWindowSurfaceBridge";
-import { computeNSEPopoverPosition, nsePopoverEdgePlacement, nsePopoverReference, type NSEPopoverPosition } from "../../NSE/Overlays/popoverPosition";
-import { logicalPlacementToFloatingPlacement } from "../../NSE/Overlays/computeNSEOverlayPosition";
+import type { NSEWindowSurfaceRequest } from "../../NSE/hostComposition";
+import { computeNSEPopoverPosition, nsePopoverEdgePlacement, nsePopoverReference, type NSEPopoverPosition } from "../../NSE/hostComposition";
+import { logicalPlacementToFloatingPlacement } from "../../NSE/hostComposition";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
 
 export type TransientWindowSurfaceRequest = NSEWindowSurfaceRequest;

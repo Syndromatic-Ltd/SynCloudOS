@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createPortal } from "react-dom";
 import { ApplicationHostTitlebar } from "../../src/SynCloudOSReact/ApplicationHostTitlebar";
 import { NSEWindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
-import { createApplicationMenuStore } from "../../src/Webspring/applicationMenuPresentation";
+import { createApplicationMenuStore } from "../../src/SynCloudOSReact/ApplicationMenuTrigger";
 
 afterEach(cleanup);
 

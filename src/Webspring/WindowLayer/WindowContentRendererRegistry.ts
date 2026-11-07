@@ -20,8 +20,8 @@
 
 import type { ReactNode } from "react";
 import type { WindowPresentation, WindowRecord } from "../../SynCloudOS/SynCloudOS";
-import type { NSEWindowSurfaceRequest } from "../../NSE/Overlays/NSEWindowSurfaceBridge";
-import type { NSEPopoverPosition } from "../../NSE/Overlays/popoverPosition";
+import type { NSEWindowSurfaceRequest } from "../../NSE/hostComposition";
+import type { NSEPopoverPosition } from "../../NSE/hostComposition";
 
 export interface WindowSurfacePresentation {
   readonly request: NSEWindowSurfaceRequest;

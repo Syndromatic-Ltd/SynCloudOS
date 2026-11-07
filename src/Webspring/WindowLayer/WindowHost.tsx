@@ -51,8 +51,8 @@ import { WindowChromeSlotContext } from "./windowChromeSlotContext";
 import { useWindowMoveResize } from "./useWindowMoveResize";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
 import { PopoverWindowSurface } from "./PopoverWindowSurface";
-import { ResponderHierarchyContext } from "../../SynCloudOSReact/responderHierarchy";
-import { FocusScopeIdContext } from "../../SynCloudOSReact/focusScopeContext";
+import { ResponderHierarchyContext } from "../../SynCloudOSReact";
+import { FocusScopeIdContext } from "../../SynCloudOSReact";
 
 export interface WindowLayerDiagnostic {
   readonly code: "WINDOW_PRESENTATION_GEOMETRY_INVALID";

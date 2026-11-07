@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useNSEFeedback } from "../NSE/Feedback";
+import { useNSEFeedback } from "../NSE/hostComposition";
 
 /**
  * The host's haptic engine (HapticsFX) for a launcher view, which plays the full HFX preset range

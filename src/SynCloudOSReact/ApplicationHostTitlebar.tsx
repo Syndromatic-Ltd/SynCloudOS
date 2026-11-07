@@ -19,9 +19,9 @@
  */
 
 import { useMemo, useState, type ReactNode } from "react";
-import { NSETopBar } from "../NSE/Windows/Chrome/NSETopBar";
-import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarDocument, type NSEWindowTitlebarHost } from "../SynCloudOS/AppHosting/windowChrome";
-import { useApplicationMenuSnapshot, type ApplicationMenuStore } from "../Webspring/applicationMenuPresentation";
+import { NSETopBar } from "../NSE/hostComposition";
+import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarDocument, type NSEWindowTitlebarHost } from "../NSE/hostComposition";
+import { useApplicationMenuSnapshot, type ApplicationMenuStore } from "./ApplicationMenuTrigger";
 
 interface ApplicationHostTitlebarProps {
   /** The application's name, leading, as the stage's bar shows it. */

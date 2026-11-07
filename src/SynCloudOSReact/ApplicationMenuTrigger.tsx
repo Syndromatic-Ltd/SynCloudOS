@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useSyncExternalStore, type ReactNode } from "react";
 
 export interface ApplicationMenuTriggerPort {
   readonly label: string;
@@ -35,4 +35,50 @@ export function ApplicationMenuTriggerProvider({ port, children }: { port: Appli
 
 export function useApplicationMenuTrigger(): ApplicationMenuTriggerPort | null {
   return useContext(ApplicationMenuTriggerContext);
+}
+
+/** The open state and anchor of one application's menu, shared by whichever
+ * control triggers it (the top bar's User Info item or the app's own content
+ * trigger) and the overlay that presents it. */
+export interface ApplicationMenuSnapshot {
+  readonly open: boolean;
+  readonly anchor: HTMLElement | null;
+}
+
+export interface ApplicationMenuStore {
+  readonly getSnapshot: () => ApplicationMenuSnapshot;
+  readonly subscribe: (listener: () => void) => () => void;
+  readonly setAnchor: (element: HTMLElement | null) => void;
+  readonly setOpen: (open: boolean) => void;
+  readonly toggle: () => void;
+}
+
+export function createApplicationMenuStore(): ApplicationMenuStore {
+  let snapshot: ApplicationMenuSnapshot = { open: false, anchor: null };
+  const listeners = new Set<() => void>();
+  const publish = (next: ApplicationMenuSnapshot) => {
+    if (next.open === snapshot.open && next.anchor === snapshot.anchor) return;
+    snapshot = next;
+    for (const listener of [...listeners]) listener();
+  };
+  return {
+    getSnapshot: () => snapshot,
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    setAnchor(element) {
+      publish({ ...snapshot, anchor: element });
+    },
+    setOpen(open) {
+      publish({ ...snapshot, open });
+    },
+    toggle() {
+      publish({ ...snapshot, open: !snapshot.open });
+    },
+  };
+}
+
+export function useApplicationMenuSnapshot(menuStore: ApplicationMenuStore): ApplicationMenuSnapshot {
+  return useSyncExternalStore(menuStore.subscribe, menuStore.getSnapshot, menuStore.getSnapshot);
 }

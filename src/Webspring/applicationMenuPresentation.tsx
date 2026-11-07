@@ -18,61 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useMemo, useSyncExternalStore, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { NSEApplicationMenu, type NSEMenuModel } from "../NSE/NSE";
-import { ApplicationMenuTriggerProvider } from "../SynCloudOSReact";
+import { ApplicationMenuTriggerProvider, useApplicationMenuSnapshot, type ApplicationMenuStore } from "../SynCloudOSReact";
 import type { SynCloudOSAppAboutManifest } from "../SynCloudOS/SynCloudOS";
 import type { SynCloudOSTranslationParams } from "../SynCloudOS/LocaleServices";
 import type { WebspringAppMenuLabels } from "./webspringAppMenu";
 
 /** The Webspring locale's text lookup (`useWebspringLocale().t`). */
 export type ApplicationMenuText = (key: string, fallback: string, params?: SynCloudOSTranslationParams) => string;
-
-/** The open state and anchor of one application's menu, shared by whichever
- * control triggers it (the top bar's User Info item or the app's own content
- * trigger) and the overlay that presents it. */
-export interface ApplicationMenuSnapshot {
-  readonly open: boolean;
-  readonly anchor: HTMLElement | null;
-}
-
-export interface ApplicationMenuStore {
-  readonly getSnapshot: () => ApplicationMenuSnapshot;
-  readonly subscribe: (listener: () => void) => () => void;
-  readonly setAnchor: (element: HTMLElement | null) => void;
-  readonly setOpen: (open: boolean) => void;
-  readonly toggle: () => void;
-}
-
-export function createApplicationMenuStore(): ApplicationMenuStore {
-  let snapshot: ApplicationMenuSnapshot = { open: false, anchor: null };
-  const listeners = new Set<() => void>();
-  const publish = (next: ApplicationMenuSnapshot) => {
-    if (next.open === snapshot.open && next.anchor === snapshot.anchor) return;
-    snapshot = next;
-    for (const listener of [...listeners]) listener();
-  };
-  return {
-    getSnapshot: () => snapshot,
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    setAnchor(element) {
-      publish({ ...snapshot, anchor: element });
-    },
-    setOpen(open) {
-      publish({ ...snapshot, open });
-    },
-    toggle() {
-      publish({ ...snapshot, open: !snapshot.open });
-    },
-  };
-}
-
-export function useApplicationMenuSnapshot(menuStore: ApplicationMenuStore): ApplicationMenuSnapshot {
-  return useSyncExternalStore(menuStore.subscribe, menuStore.getSnapshot, menuStore.getSnapshot);
-}
 
 /** Whether the app declares anything for its About box beyond the version every app has. */
 export function applicationDeclaresAbout(about: SynCloudOSAppAboutManifest | undefined): boolean {

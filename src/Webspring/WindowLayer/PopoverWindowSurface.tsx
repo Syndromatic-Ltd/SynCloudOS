@@ -20,11 +20,11 @@
 
 import { useLayoutEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { useNSEAppearanceProjection } from "../../NSE/Appearance";
-import { useNSEAnimationEnvironment } from "../../NSE/Animation/NSEAnimationEnvironment";
+import { useNSEAnimationEnvironment } from "../../NSE/Animation";
 import { useNSEPresenceExiting } from "../../NSE/Animation";
-import { NSEPopoverFrame } from "../../NSE/Overlays/NSEPopoverFrame";
-import { applyNSEPopoverPosition } from "../../NSE/Overlays/popoverPosition";
-import { nsePopoverSpringEasing, useNSEPopoverSurface } from "../../NSE/Overlays/useNSEPopoverSurface";
+import { NSEPopoverFrame } from "../../NSE/hostComposition";
+import { applyNSEPopoverPosition } from "../../NSE/hostComposition";
+import { nsePopoverSpringEasing, useNSEPopoverSurface } from "../../NSE/hostComposition";
 import { useKernelSynCloudOS } from "../../SynCloudOSReact";
 import type { WindowSurfacePresentation } from "./WindowContentRendererRegistry";
 
