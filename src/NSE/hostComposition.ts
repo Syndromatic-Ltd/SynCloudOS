@@ -58,3 +58,5 @@ export { logicalPlacementToFloatingPlacement } from "./Overlays/computeNSEOverla
 export { registerNSEHapticFeedbackEngine } from "./Feedback/NSEHapticFeedbackManager";
 export { NSEViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironment";
 export type { NSEViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";
+
+export { NSEWindowTitleBar } from "./Windows/NSEWindowTitleBar";

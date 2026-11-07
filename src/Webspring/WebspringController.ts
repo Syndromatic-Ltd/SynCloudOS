@@ -198,6 +198,7 @@ export class WebspringController {
         state: app.isDisabled ? "disabled" as const : snapshot.lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] ?? "registered",
         disabledReason: app.isDisabled || snapshot.lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] === "disabled" ? AppInfo.explain(app).reason : undefined,
         badgeCount: app.notifications.badgeCount ?? 0,
+        badgeLabel: app.notifications.badgeLabel,
         accent: app.webspring.accent ?? "#eaf6ff",
         featured: Boolean(app.webspring.featured),
         selectorAngle: app.webspring.selectorAngle ?? app.webspring.dialPosition ?? 0,

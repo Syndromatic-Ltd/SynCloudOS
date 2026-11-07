@@ -39,6 +39,7 @@ export enum NSEViewControllerTransitionOptions {
 
 /** @internal One retained child-view slot, including its replacement in flight. */
 export interface NSEChildTransition {
+  readonly backend?: "afx" | "viewTransition";
   readonly from: NSEViewController<unknown> | null;
   readonly to: NSEViewController<unknown>;
   readonly options: NSEViewControllerTransitionOptions;
@@ -75,7 +76,7 @@ export function NSETransitionSlot({ transition, Renderer, className }: {
   useNSEPresentation(presence, { exit: { duration: reducedMotion ? Math.min(0.12, transition.duration) : transition.duration,
     timing: "linear", tracks: [{ keyPath: "opacity", values: [1, 1] }] } });
   useLayoutEffect(() => {
-    if (!transition.from) return;
+    if (!transition.from || transition.backend === "viewTransition") return;
     if (!animator || transition.duration === 0) { transition.finish(); return; }
     let lease: ReturnType<typeof animator.animations.acquireOwner>;
     try { lease = animator.animations.acquireOwner({ appId: animator.ownerAppId, viewId }); }
@@ -108,7 +109,7 @@ export function NSETransitionSlot({ transition, Renderer, className }: {
   const moving = transition.from !== null;
   const inert = moving && !(transition.options & NSEViewControllerTransitionOptions.allowUserInteraction);
   return <div ref={presence} data-nse-child-transition="" style={{ display: "grid", minWidth: 0, minHeight: 0, width: "100%", height: "100%", overflow: moving ? "hidden" : undefined }} inert={inert || undefined}>
-    {transition.from ? <div key={childViewKey(transition.from)} ref={outgoing} style={{ gridArea: "1 / 1", minWidth: 0, minHeight: 0 }} aria-hidden="true"><Renderer controller={transition.from} className={className} /></div> : null}
+    {transition.from && transition.backend !== "viewTransition" ? <div key={childViewKey(transition.from)} ref={outgoing} style={{ gridArea: "1 / 1", minWidth: 0, minHeight: 0 }} aria-hidden="true"><Renderer controller={transition.from} className={className} /></div> : null}
     <div key={childViewKey(transition.to)} ref={incoming} style={{ gridArea: "1 / 1", minWidth: 0, minHeight: 0 }}><Renderer controller={transition.to} className={className} /></div>
   </div>;
 }

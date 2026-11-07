@@ -117,3 +117,5 @@ export type { ApplicationMenuSnapshot, ApplicationMenuStore } from "./Applicatio
 // Framework window hosts preserve the canonical responder and modal focus ancestry.
 export { ResponderHierarchyContext } from "./responderHierarchy";
 export { FocusScopeIdContext } from "./focusScopeContext";
+
+export { installedApplicationMenuSections } from "../SynCloudOS/AppHosting/runtimeEntry";

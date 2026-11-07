@@ -43,6 +43,8 @@ import type { NSEObservable } from "../Objects/observable";
 import { createViewControllerFX, type NSEViewControllerFX, type NSEViewControllerFXClients } from "./viewControllerFX";
 import type { NSEWindow } from "./NSEWindowController";
 import { NSEAnimationContext } from "../Animation/NSEAnimationContext";
+import { flushSync } from "react-dom";
+import { startBrowserViewTransition } from "../../SynCloudOS/nseRuntimeContracts";
 import { nseChildTransition, nseReleaseChildViewSlot, NSEViewControllerTransitionOptions, type NSEChildTransition } from "./viewControllerTransition";
 import { createNSEViewAnimator, type NSEViewAnimator } from "../Animation/NSEViewAnimator";
 import { captureAFXTransactionAnimationStart } from "../../FX/AnimationFX/AFXTransaction";
@@ -362,7 +364,8 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     const context = NSEAnimationContext.current;
     this.#transitioning = true;
     this.#transitionHandoff = null;
-    const transition: NSEChildTransition = Object.freeze({ from, to, options, duration: context.duration, timing: context.timingFunction, finish: () => {
+    let native = false;
+    const transition: NSEChildTransition = Object.freeze({ get backend() { return native ? "viewTransition" as const : "afx" as const; }, from, to, options, duration: context.duration, timing: context.timingFunction, finish: () => {
       if (this.isDisposed || this.#transitionSlots.get(slot) !== transition) return;
       this.#transitioning = false;
       const destination = this.#transitionHandoff ?? slot;
@@ -381,6 +384,13 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
       });
     });
     captureAFXTransactionAnimationStart(() => finished);
+    const element = this.#binding?.element;
+    if (effect === NSEViewControllerTransitionOptions.crossfade && element) {
+      native = true;
+      const handle = startBrowserViewTransition(element, () => { flushSync(() => this.notifyObservers()); }, { duration: context.duration, reducedMotion: this.traitCollection.reducedMotion, signal: this.ownerSignal });
+      if (handle) { void handle.finished.then(() => transition.finish()); return; }
+      native = false;
+    }
     this.notifyObservers();
   }
 

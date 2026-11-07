@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { installedApplicationMenuSections } from "../SynCloudOSReact";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type Ref, type ReactNode } from "react";
 import { nseUnowned } from "../NSE/sdkPackageEntry";
 import { useWebspringLaunchZoom } from "./WebspringLaunchZoomContext";
@@ -208,6 +209,7 @@ export function ApplicationStageView({
       commandId: appPreferences.commandId,
       label: appPreferences.label ?? locale.t("appMenu.appPreferences", "{app} Preferences…", { app: appName }),
     } : undefined,
+    extensions: installedApplicationMenuSections(runtime, app.bundleIdentifier),
     includeAbout: appDeclaresAbout,
     includeLogOut: sessionAuthorised,
   }), [app.bundleIdentifier, appDeclaresAbout, appMenuLabels, appName, appPreferences, locale, sessionAuthorised]);

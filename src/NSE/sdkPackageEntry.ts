@@ -729,7 +729,7 @@ export type { NSEViewControllerPresentationAnimator } from "./Application";
 export { NSEViewControllerTransitionOptions } from "./Application";
 export type { NSEViewAnimator } from "./Animation/NSEViewAnimator";
 export type {
-  NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,
+  NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEApplicationDelegate, NSEControllerView, NSEOpenWindowOptions,
   NSETraitCollection,
   NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowCloseOutcome, NSEWindowContentBorderEdge, NSEWindowToolbarStyle,
   NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
@@ -755,3 +755,8 @@ export type { NSEPathControlProps, NSEPathControlHandle } from "./Controls/Value
 export { NSEImage } from "./Controls/Images/NSEImageResource";
 
 export type { NSEAppearanceName } from "./Appearance/nseAppearanceTypes";
+
+export { NSEDockTile } from "./Application/NSEDockTile";
+
+export type { BGTaskScheduler, BGTaskRequest, BGDownloadTaskRequest, UNUserNotificationCenter, UNNotificationSettings, UNNotificationCategory, UNNotificationAction, UNPushConfiguration } from "../SynCloudOS/nseRuntimeContracts";
+
