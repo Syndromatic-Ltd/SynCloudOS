@@ -46,6 +46,14 @@ import { controllerServicesFor, installControllerServices } from "./controllerSe
 import { NSEMenuRuntimeProvider } from "../../NSE/Menus/menuRuntimeContext";
 import { NSEViewActivityProvider } from "../../NSE/applicationHostInterop";
 import { NSEPresentedContentProvider } from "../../NSE/Overlays/useNSEPresentedContent";
+import { NSEActionScopeProvider } from "../../NSE/Controls/Core/useNSEControlAction";
+import { useRuntimeNSEMenuPort } from "../../SynCloudOSReact/nseMenuPort";
+
+function PresentedApplicationControls({ children }: { readonly children: ReactNode }) {
+  const controls = useRuntimeNSEControlPort();
+  const menus = useRuntimeNSEMenuPort();
+  return <NSEControlRuntimeProvider port={controls}><NSEMenuRuntimeProvider port={menus}>{children}</NSEMenuRuntimeProvider></NSEControlRuntimeProvider>;
+}
 
 // Host-only bridge entrypoint. This is deliberately not exported from the
 // public AppSDK package barrel: applications receive only the chrome hook.
@@ -479,7 +487,7 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     <SynCloudOSRuntimeContext.Provider value={null}>
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
         <SynWareProvider value={context}>
-          <FontCatalogueProvider catalogue={fontCatalogue}>{content}</FontCatalogueProvider>
+          <FontCatalogueProvider catalogue={fontCatalogue}><NSEActionScopeProvider appId={app.bundleIdentifier}><PresentedApplicationControls>{content}</PresentedApplicationControls></NSEActionScopeProvider></FontCatalogueProvider>
         </SynWareProvider>
       </SynWareRuntimeContext.Provider>
     </SynCloudOSRuntimeContext.Provider>

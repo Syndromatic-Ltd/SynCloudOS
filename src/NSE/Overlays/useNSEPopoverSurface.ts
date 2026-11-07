@@ -11,8 +11,9 @@ export const nsePopoverSpringEasing = `linear(${Array.from({ length: 65 }, (_, i
 
 /** Keeps painted frame geometry independent of animation and bridges the
  * content root's fill up to its sibling arrow across the portal. */
-export function useNSEPopoverSurface(surface: HTMLElement | null, arrow: HTMLElement | null, open: boolean, enabled: boolean): void {
+export function useNSEPopoverSurface(surface: HTMLElement | null, arrow: HTMLElement | null, open: boolean, enabled: boolean) {
   const { runtime } = useNSEOverlayProvider();
+  const paintedSurface = useRef<HTMLElement | null>(null);
   const isOpen = useRef(open);
   isOpen.current = open;
   useLayoutEffect(() => {
@@ -55,6 +56,7 @@ export function useNSEPopoverSurface(surface: HTMLElement | null, arrow: HTMLEle
         target.value = source.value;
         if ("checked" in source && "checked" in target) target.checked = source.checked;
       });
+      paintedSurface.current = snapshot;
     };
     capture();
     const Observer = surface.ownerDocument.defaultView?.MutationObserver;
@@ -83,4 +85,5 @@ export function useNSEPopoverSurface(surface: HTMLElement | null, arrow: HTMLEle
       });
     };
   }, [enabled, runtime, surface]);
+  return paintedSurface;
 }

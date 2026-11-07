@@ -214,13 +214,6 @@ export type {
 export { NSEPageHeader } from "./Windows/Chrome";
 export type { NSEPageHeaderProps } from "./Windows/Chrome";
 export type { NSEChromeScheme } from "./Windows/Chrome";
-export { NSESourceListScene } from "./Navigation/SourceList";
-export type {
-  NSESourceListCompactHandoff,
-  NSESourceListNavigationProjection,
-  NSESourceListSceneProps,
-  NSESourceListSceneStatus,
-} from "./Navigation/SourceList";
 export { resolveNSEBookRegions, NSEBookRegionMetrics } from "./Navigation/bookRegions";
 export type { NSEBookRegions } from "./Navigation/bookRegions";
 export { NSESplitView } from "./DataViews/Split/NSESplitView";
@@ -614,46 +607,8 @@ export type {
   NSEMenuOptions,
   NSEMenuRuntimePort,
 } from "./Menus/menuTypes";
-export {
-  NSEAdaptiveNavigationController,
-} from "./Navigation/NSEAdaptiveNavigationController";
-export type {
-  NSEAdaptiveNavigationControllerOptions,
-} from "./Navigation/NSEAdaptiveNavigationController";
-export {
-  NSEHierarchyStack,
-} from "./Navigation/NSEHierarchyStack";
-export type {
-  NSEHierarchyStackProps,
-} from "./Navigation/NSEHierarchyStack";
-export {
-  useNSEApplicationNavigationChrome,
-} from "./Navigation/NSEApplicationNavigationChrome";
-export type {
-  NSEApplicationNavigationChromeState,
-} from "./Navigation/NSEApplicationNavigationChrome";
-export {
-  NSENavigationStackController,
-} from "./Navigation/NSENavigationStackController";
-export type {
-  NSENavigationStackControllerOptions,
-} from "./Navigation/NSENavigationStackController";
-export {
-  NSETabBarController,
-} from "./Navigation/NSETabBarController";
 export { NSETabViewController, NSETabViewItem } from "./Navigation/NSETabViewController";
 export type { NSETabViewControllerOptions, NSETabViewControllerSnapshot, NSETabViewControllerTabStyle, NSETabViewItemOptions } from "./Navigation/NSETabViewController";
-export type {
-  NSETabBarControllerOptions,
-} from "./Navigation/NSETabBarController";
-export {
-  NSETabBar,
-  NSETabBarOverflowList,
-} from "./Navigation/NSETabBar";
-export type {
-  NSETabBarOverflowListProps,
-  NSETabBarProps,
-} from "./Navigation/NSETabBar";
 export {
   NSETabView,
 } from "./Navigation/NSETabView";
@@ -767,20 +722,8 @@ export type {
 } from "./Layout/stackViewTypes";
 export type {
   NSENavigationIcon,
-  NSENavigationSidebarItemDescriptor,
   NSENavigationPresentationState,
   NSENavigationIconPresentation,
-  NSENavigationDestination,
-  NSENavigationSection,
-  NSENavigationSelectionOptions,
-  NSETabBarControllerSnapshot,
-  NSETabBarRestorationSnapshot,
-  NSENavigationStackSnapshot,
-  NSENavigationStackRestorationSnapshot,
-  NSEAdaptiveNavigationModel,
-  NSEAdaptiveNavigationPresentation,
-  NSEAdaptiveNavigationRenderer,
-  NSEAdaptiveNavigationSnapshot,
   NSETabItem,
   NSETabViewProps,
 } from "./Navigation/navigationTypes";
@@ -841,7 +784,7 @@ export { preference } from "./Objects/preference";
 export type { NSEPreferenceDescriptor } from "./Objects/preference";
 export { observes } from "./Objects/observes";
 export type { NSEObservationOptions } from "./Objects/observes";
-export { createNSETabSelectionRestoration } from "./Navigation/navigationRestoration";
+
 export type { NSENavigationRestorationDescriptor } from "./Navigation/navigationRestoration";
 
 export { actionRef } from "./Controls/Core/actionReference";

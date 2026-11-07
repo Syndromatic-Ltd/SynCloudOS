@@ -95,15 +95,14 @@ export const nseRegistry = [
     name: "nse-containers",
     title: "NSE Containers",
     type: "composition",
-    description: "Drawers and sliding panes. Alerts are NSEAlert objects and custom dialogs are view controllers presented as sheets.",
+    description: "Drawers and collapsing split items. Alerts are NSEAlert objects and custom dialogs are view controllers presented as sheets.",
     files: [
       "src/NSE/Containers/NSEContainers.tsx",
       "src/NSE/Containers/nse-containers.css",
       "src/NSE/Containers/index.ts"
     ],
     variants: [
-      "NSEDrawer",
-      "NSESlidingPane"
+      "NSEDrawer"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
   },

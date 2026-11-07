@@ -24,7 +24,6 @@ export * from "./NSETabViewController";
 export * from "./NSENavigationStackController";
 export { createNSETabSelectionRestoration } from "./navigationRestoration";
 export type { NSENavigationRestorationDescriptor } from "./navigationRestoration";
-export * from "./NSEAdaptiveNavigationController";
 export * from "./NSETabBar";
 export * from "./NSENavigationDestinationHost";
 export * from "./NSEHierarchyStack";

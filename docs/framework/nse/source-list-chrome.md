@@ -1,43 +1,29 @@
 # Source-list application chrome
 
-Declare a standard system frame with `sourceList` in the SynWare manifest. Use `NSESourceListScene` for the body. The system owns the application identity on the rail, QuickSwitch, return control, the right-slot menu, and the rail width. Do not place another NSEAppFrame or top bar inside this scene. The bar's centre title is the window's: set `view.window.title` (`NSWindow.title`) to what the window shows, such as the selected section.
+A source-list window has an `NSESplitViewController` as its content view controller. Its sidebar item holds an `NSEOutlineView` with `selectionHighlightStyle="sourceList"`; its other items hold ordinary child view controllers. Declare `frame.sourceList` in the manifest for the host-owned title-bar rail, QuickSwitch and shared sidebar width. Name the window with `window.title`.
 
-```tsx
-// Manifest
-frame: {
-  material: "metal", topBar: "standard",
-  sourceList: { minWidth: 220, maxWidth: 320, defaultWidth: 254 },
-}
-
-// Application body
-<NSESourceListScene
-  compact={adaptiveSnapshot.renderer === "tabs"}
-  sidebar={<NSEOutlineView controller={sections} selectionHighlightStyle="sourceList" viewportBlockSize="fill"
-    floatingSubviews={<NSESearchField aria-label="Search sections" />} delegate={{ isGroupItem: (_id, item) => item.isGroup }} … />}
-  status={{ rail: "25 sections", leading: "Ready" }}
->
-  {content}
-</NSESourceListScene>
+```ts
+const split = new NSESplitViewController({ id: "catalogue" });
+split.addSplitViewItem(new NSESplitViewItem({
+  identifier: "sections", behavior: "sidebar", viewController: sectionList,
+  minimumThickness: 208, maximumThickness: 460,
+}));
+split.addSplitViewItem(new NSESplitViewItem({ identifier: "detail", viewController: detail }));
+windowController.contentViewController = split;
+windowController.window.setContentBorderThickness(56, "minY");
+windowController.window.bottomBarAccessory = <NSETextField isEditable={false} backgroundStyle="raised">25 sections</NSETextField>;
 ```
 
-The sidebar is an `NSEOutlineView` with `selectionHighlightStyle="sourceList"`, as in AppKit. Top-level items the delegate reports through `isGroupItem` are the sections; Atmo draws them as the blue label, the line and the disclosure arrow, and their rows slide closed when collapsed. `shouldShowOutlineCell` returning false makes a section fixed. The app frame's material (`frame.material`) chooses the plain or brushed-metal rail, and the document's colour scheme chooses light or dark: there is no surface or scheme prop.
+Top-level outline items reported by `isGroupItem` are source-list sections: Atmo draws their blue label, line and disclosure arrow. `shouldShowOutlineCell` returning false makes a section fixed. The frame's material selects the plain or brushed-metal rail; appearance selects light or dark independently. `floatingSubviews` places search over the scrolling rows. `NSETableCellView` supplies a row's image, title, detail and badge. Expansion belongs to `NSETreeController.expandedIds`, and collapsed rows cannot take focus.
 
-`floatingSubviews` float over the rows at the top of the scroll view, as `NSScrollView.addFloatingSubview(_:for:)` does: rows scroll beneath them, and they share the rail's material. A table cell view (`NSETableCellView`) returned from the delegate's `renderItem` is drawn by the source-list row itself: its image, title, detail and badge take the row's places. Expansion is the tree controller's state, so an app that persists it reads and writes `expandedIds`. Collapsed rows are inert and excluded from keyboard navigation.
+The split view shares the source-list frame's sidebar width, including divider moves and resets. Compact layout shows one item at a time. `showDetail(detail)` selects the detail; the theme's Back control returns to the preceding item and restores initiating focus. `compactItem` is an approved NSE extension on the AppKit-shaped split controller. The view measures its own content allocation; app code does not call `setTraits` or `setContentBounds`.
 
-`NSESourceListScene.status.rail` is the sidebar footer cell; `leading`, `center` and `trailing` belong to the main footer. The scene draws one split footer and shares the system frame's rail width, so the header, body and footer seam resize together. Do not add a second footer inside the sidebar.
+`window.bottomBarAccessory` is another approved NSE extension. It holds ordinary views in the bottom content border, whose thickness is set independently with `setContentBorderThickness(56, "minY")`. Window status content is separate from bottom navigation tabs. The window renders the accessory in the application's context and makes it inert with the rest of the window while a sheet is attached. Apps hide the border/accessory when their compact navigation uses the bottom edge.
 
-For the semantic navigation `projection` API, the adaptive controller selects compact chrome automatically. The physical sidebar/children API accepts `compact` when the application already owns its adaptive controllers. Compact mode retains the content subtree and hides the desktop rail/footer; the system top bar drops its rail at the same presentation threshold. Main content settings should be ordinary children of the page scroll view unless explicitly intended to remain pinned.
+Peer navigation belongs to `NSETabViewController`: `tabStyle: "sidebarAdaptable"` is the NSE extension named after SwiftUI's `TabViewStyle.sidebarAdaptable`. It places the theme's tab control in a sidebar at content widths of at least 768 px, below the content at smaller widths, or in a 104 px vertical rail in short landscape allocations (height at most 480 px, with at least 360 px left for content). AppKit's other styles are fixed; `segmentedControlOnBottom` stays below the content on every layout. All items remain directly reachable; there is no UIKit More stack.
 
-Peer navigation now compares three presentations using its allocated scene, in untransformed CSS pixels. A short landscape scene (height at most 480px, width greater than height) uses a 104px vertical rail when at least 360px remains for content. Other scenes retain bottom tabs below 768px and the source-list sidebar at larger widths. These are shared content budgets, not device or posture rules. The existing 72px tab height is retained; a shallow rail scrolls independently. Portrait scenes keep their width. An explicit `presentation: "bottom-tabs"` remains fixed.
+A source-list app with a richer outline can compose an outer split with tab content. Its outline supplies regular navigation while the tab controller uses `unspecified`; compact/rail layouts collapse that sidebar and use `sidebarAdaptable` on the same retained tab controller. Selection, mounted content and editor focus survive these presentation changes.
 
-`NSESourceListScene` supplies its allocation to the existing adaptive controller through `setContentBounds`. Custom class-based compositions may call that method from their view layout lifecycle; use client dimensions or ResizeObserver content dimensions, excluding animation transforms. Pass `null` when releasing that binding. Hidden or invalid sizes retain the last allocation. `snapshot.layoutBounds` records the decision rectangle, while `snapshot.traits` keeps canonical mount/host facts. Retained or unavailable host geometry cannot trigger a new presentation decision. No controller, destination host, selected route or document is recreated by a presentation change.
+Current explicit foldable segments are mapped into usable book regions, with at least 280 by 160 px per pane. The split excludes the hinge, respects RTL and disables divider dragging across the hinge. Stale geometry retains the preceding presentation. Browser emulation covers geometry and interaction; physical folding and reachability still need device review.
 
-`NSETabBar orientation="vertical"` projects the same tab elements as a rail, including More, disabled destinations and accessible labels. Its tablist advertises vertical orientation and uses Up/Down/Home/End. Horizontal arrows follow inherited or explicit text direction. An adaptive scene transfers navigation focus between hidden sidebar and tab controls; content and external overlay focus remain owned by their existing responder. Scene compactness is also handed to the existing source-list frame so the body and header seam agree in short regular-width windows.
-
-The rail is intended for peer destinations. Hierarchical folder/detail flows remain stack/list-detail navigation; editing commands, inspectors and modal actions retain their own abstractions. Browser emulation validates these layouts, but does not establish physical folding, Home Screen behavior or thumb reachability.
-
-Automatic popover/sheet changes retain one portal surface and its content nodes. The existing overlay registration is updated in place, and a focus scope's live handle supports `updatePresentation({ kind, modal, trapFocus })`. That operation preserves ancestry, open children, ordering and original return focus; it cannot retarget scope ownership. Actual close still dismisses descendants and restores focus through the existing authority. Closed or superseded handles cannot update a replacement scope with the same id.
-
-The right-slot menu already supplies About (when the host supplies attribution for the app) and System Preferences. Declare `applicationMenu.preferences` only when the app actually has a separate application preferences command; it adds an extra entry rather than replacing System Preferences.
-
-Utility panels belong to their application session. Navigation between retained sections must not be treated as dismissal: keep a font panel mounted until explicit close or session teardown, even when its editing sample is currently hidden.
+Utility panels belong to their application session. Changing a retained section does not dismiss its font panel or popover; explicit close or session teardown does.

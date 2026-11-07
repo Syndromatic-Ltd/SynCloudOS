@@ -29,6 +29,7 @@ export interface NSEWindowSurfaceRequest {
   readonly role: "sheet" | "panel" | "modal" | "popover";
   readonly title: string;
   readonly parentWindowControllerId: string | null;
+  readonly parentResponderId?: string;
   readonly anchor: HTMLElement | null;
   readonly bounds: { readonly x: number; readonly y: number; readonly width: number; readonly height: number };
   /** "content": the size in `bounds` is the fitted content's, so the host

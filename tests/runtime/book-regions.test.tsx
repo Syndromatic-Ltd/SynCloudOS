@@ -2,8 +2,8 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import React from 'react';
-import { NSEAdaptiveNavigationController, NSETabBarController, resolveNSEBookRegions } from '../../src/NSE/Navigation';
-import { NSESourceListScene } from '../../src/NSE/Navigation/SourceList';
+import { resolveNSEBookRegions } from '../../src/NSE/Navigation/bookRegions';
+import { tabViewController, renderTabController, updateTraits } from '../fixtures/tabViewController';
 import { NSESplitView } from '../../src/NSE/DataViews/Split/NSESplitView';
 import { createStaticPresentationTraits } from '../fixtures/presentationTraits';
 import type { SynCloudOSPresentationTraits } from '../../src/SynCloudOS/SynCloudOS';
@@ -45,28 +45,31 @@ describe('explicit capability book-region projection',()=>{
     const value=traits({safeAreaInsets:{inlineStart:10,inlineEnd:15,blockStart:8,blockEnd:12},visualViewportBounds:rect(0,0,900,400)});
     expect(resolveNSEBookRegions(value)).toEqual({left:rect(10,8,430,392),right:rect(460,8,425,392)});
   });
-  it('keeps current responsive policies and explicit bottom-tabs when not using book regions',()=>{
-    const tabs=new NSETabBarController({id:'peers',destinations:[{id:'note',label:'Note',accessibleLabel:'Note',icon:{kind:'vector',path:'/note.svg'},createContent:()=>null}]});
-    const adaptive=new NSEAdaptiveNavigationController({id:'adaptive',model:'peer',tabController:tabs,traits:traits({...createStaticPresentationTraits({width:669,height:867}),viewportFeatures:{posture:'folded',segments:[rect(0,0,329,867),rect(340,0,329,867)]}})});
-    expect(adaptive.getSnapshot().renderer).toBe('source-list-content');expect(adaptive.getSnapshot().bookRegions).not.toBeNull();
-    adaptive.setTraits(createStaticPresentationTraits({width:382,height:580}));expect(adaptive.getSnapshot().renderer).toBe('tabs');
-    adaptive.setTraits(createStaticPresentationTraits({width:951,height:585}));expect(adaptive.getSnapshot().renderer).toBe('source-list-content');
-    const fixed=new NSEAdaptiveNavigationController({id:'fixed',model:'peer',presentation:'bottom-tabs',tabController:tabs,traits:traits()});
-    expect(fixed.getSnapshot().renderer).toBe('tabs');expect(fixed.getSnapshot().bookRegions).toBeNull();
-    fixed.dispose();adaptive.dispose();tabs.dispose();
+  it('keeps responsive policies and fixed bottom tabs independent of book regions',()=>{
+    const tabs=tabViewController({ids:['Note']});
+    const book=traits({...createStaticPresentationTraits({width:669,height:867}),viewportFeatures:{posture:'folded',segments:[rect(0,0,329,867),rect(340,0,329,867)]}});
+    const view=renderTabController(tabs,book);
+    const renderer=()=>view.container.querySelector('[data-navigation-renderer]')?.getAttribute('data-navigation-renderer');
+    expect(renderer()).toBe('source-list-content');expect(view.container.querySelector('[data-book-regions="true"]')).not.toBeNull();
+    updateTraits(tabs,createStaticPresentationTraits({width:382,height:580}));expect(renderer()).toBe('tabs');
+    updateTraits(tabs,createStaticPresentationTraits({width:951,height:585}));expect(renderer()).toBe('source-list-content');
+    act(()=>{tabs.tabStyle='segmentedControlOnBottom';});
+    updateTraits(tabs,book);
+    expect(view.container.querySelector('[data-book-regions="true"]')).toBeNull();
+    expect(screen.getByRole('tablist').getAttribute('aria-orientation')).toBe('horizontal');
+    tabs.dispose();
   });
   it('retains the document node, draft, scroll and focus through repeated book/fallback transitions',()=>{
-    const tabs=new NSETabBarController({id:'state',destinations:[{id:'note',label:'Note',accessibleLabel:'Note',icon:{kind:'vector',path:'/note.svg'},createContent:()=> <textarea aria-label='Draft' defaultValue='Original'/>}]});
-    const adaptive=new NSEAdaptiveNavigationController({id:'state-policy',model:'peer',tabController:tabs,traits:createStaticPresentationTraits({width:382,height:580})});
-    const view=render(<NSESourceListScene projection={{controller:tabs,adaptiveController:adaptive}}/>);
+    const tabs=tabViewController({ids:['Note'],content:()=> <textarea aria-label='Draft' defaultValue='Original'/>});
+    const view=renderTabController(tabs,createStaticPresentationTraits({width:382,height:580}));
     const draft=screen.getByRole('textbox',{name:'Draft'}) as HTMLTextAreaElement;
     fireEvent.change(draft,{target:{value:'Unsaved'}});draft.scrollTop=24;draft.focus();
     for(let i=0;i<6;i++){
-      act(()=>adaptive.setTraits(traits()));expect(view.container.querySelector('[data-book-regions="true"]')).not.toBeNull();
-      act(()=>adaptive.setTraits(createStaticPresentationTraits({width:382,height:580})));
+      updateTraits(tabs,traits());expect(view.container.querySelector('[data-book-regions="true"]')).not.toBeNull();
+      updateTraits(tabs,createStaticPresentationTraits({width:382,height:580}));
     }
     expect(screen.getByRole('textbox',{name:'Draft'})).toBe(draft);expect(draft.value).toBe('Unsaved');expect(draft.scrollTop).toBe(24);expect(document.activeElement).toBe(draft);
-    adaptive.dispose();tabs.dispose();
+    tabs.dispose();
   });
   it('constrains the existing split without overwriting normal width or exposing a hinge resizer',()=>{
     const regions=resolveNSEBookRegions(traits())!;

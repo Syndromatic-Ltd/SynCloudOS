@@ -20,7 +20,6 @@
 
 import type { NSETabStripPresentation } from "./tabStrip";
 import type { ReactNode } from "react";
-import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
 
 /** Semantic icon data only. NavigationFoundation does not assign final visual treatment. */
 export type NSENavigationIcon =
@@ -127,25 +126,6 @@ export interface NSENavigationStackRestorationSnapshot {
   readonly version?: 1;
   readonly path: readonly string[];
 }
-
-export type NSEAdaptiveNavigationModel = "peer" | "hierarchy";
-export type NSEAdaptiveNavigationPresentation = "adaptive" | "bottom-tabs";
-export type NSEAdaptiveNavigationRenderer = "tabs" | "rail" | "source-list-content" | "list-detail" | "stack";
-
-export interface NSEAdaptiveNavigationSnapshot {
-  readonly revision: number;
-  readonly id: string;
-  readonly model: NSEAdaptiveNavigationModel;
-  readonly presentation: NSEAdaptiveNavigationPresentation;
-  readonly renderer: NSEAdaptiveNavigationRenderer;
-  /** Actual allocated navigation scene, when supplied by its owning view. */
-  readonly layoutBounds: SynCloudOSPresentationTraits["contentBounds"];
-  readonly bookRegions: import("./bookRegions").NSEBookRegions | null;
-  readonly traits: SynCloudOSPresentationTraits;
-  readonly selectedDestinationId: string;
-  readonly stack: NSENavigationStackSnapshot | null;
-}
-
 
 export interface NSETabItem {
   readonly id: string;

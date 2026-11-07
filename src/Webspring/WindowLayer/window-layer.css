@@ -30,6 +30,11 @@
   pointer-events: auto;
 }
 
+.webspring-window-host > [data-syncloudos-focus-scope] {
+  height: 100%;
+  min-height: 0;
+}
+
 .webspring-window-modal-backdrop {
   position: absolute;
   inset: 0;

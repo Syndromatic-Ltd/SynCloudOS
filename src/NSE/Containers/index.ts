@@ -22,15 +22,9 @@ import "./nse-containers.css";
 
 export {
   NSEDrawer,
-  NSESlidingPane,
-  NSESlidingPanes
 } from "./NSEContainers";
 export type {
   NSEDrawerPlacement,
   NSEDrawerProps,
-  NSESlidingAxis,
-  NSESlidingPaneProps,
-  NSESlidingPaneView,
-  NSESlidingPanesProps,
 } from "./NSEContainers";
 

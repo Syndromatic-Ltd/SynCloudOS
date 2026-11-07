@@ -23,7 +23,7 @@ import type { NSEChromeScheme } from "../../Windows/Chrome/nseTopBarTypes";
 
 /**
  * Carries the system-owned source-list rail state from `ApplicationStageView` (which renders the seam'd top
- * bar and owns the width) down to `NSESourceListScene` (which renders the sidebar + main + status in
+ * bar and owns the width) down to `the source-list split view` (which renders the sidebar + main + status in
  * the app subtree). The width lives in the system, so the bar seam and the sidebar can never disagree.
  */
 export interface SourceListFrameContextValue {

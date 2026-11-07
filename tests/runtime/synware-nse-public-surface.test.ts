@@ -66,10 +66,10 @@ describe("SynWare NSE public framework boundary", () => {
     expect(names).toEqual(expect.arrayContaining([
       "NSEPopup",
       "NSEPopupProps",
-      "NSEAdaptiveNavigationController",
-      "NSEAdaptiveNavigationControllerOptions",
-      "NSENavigationStackController",
-      "NSETabBarController",
+      "NSETabViewController",
+      "NSETabViewItem",
+      "NSESplitViewController",
+      "NSESplitViewItem",
       "useNSEDeferredDisposal",
       "NSEDisposalScheduler",
       "NSEAnimationContext",
@@ -78,6 +78,7 @@ describe("SynWare NSE public framework boundary", () => {
       "NSEAnimationEnvironmentProviderProps",
       "useNSEAnimationEnvironment",
     ]));
+    for (const removed of ["NSEAdaptiveNavigationController", "NSENavigationStackController", "NSETabBarController", "NSESourceListScene", "NSESidebar", "NSEStatusBar"]) expect(names).not.toContain(removed);
   });
 
   it("removes the obsolete animation facade from every NSE public boundary", () => {

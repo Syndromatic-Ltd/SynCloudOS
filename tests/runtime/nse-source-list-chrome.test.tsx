@@ -12,12 +12,12 @@ import { createClassApplicationHost, type ClassApplicationHost } from "./fixture
 
 interface Node { readonly id: string; readonly label: string; readonly children: readonly Node[]; }
 const nodes: readonly Node[] = [{ id: "controls", label: "Controls", children: [{ id: "buttons", label: "Buttons", children: [] }] }];
-function sourceList(scrolling = true) {
+function sourceList() {
   const controller = new NSETreeController({ id: "source-list", content: nodes, getId: (node: Node) => node.id, getChildren: (node: Node) => node.children, withChildren: (node: Node, children: readonly Node[]) => ({ ...node, children }), selection: { mode: "single" } });
   controller.expand("controls");
   const view = <NSEOutlineView controller={controller} aria-label="Sections" selectionHighlightStyle="sourceList"
     idForItem={node => node.id} labelForItem={node => node.label} childrenForItem={node => node.children} isExpandable={node => node.children.length > 0}
-    delegate={{ isGroupItem: id => id === "controls" }} style={scrolling ? undefined : { overflow: "visible", blockSize: "auto" }} />;
+    delegate={{ isGroupItem: id => id === "controls" }} />;
   return { controller, view };
 }
 const hosts: ClassApplicationHost[] = [];
@@ -48,13 +48,12 @@ describe("source-list chrome ownership", () => {
     list.controller.dispose();
   });
 
-  it("keeps a caller's search header in the outline's single scroll surface without stealing its Home key", () => {
-    const list = sourceList(false);
+  it("keeps a caller's search header beside the source list without stealing its Home key", () => {
+    const list = sourceList();
     const view = render(<section data-testid="source-scroll" style={{ overflow: "auto" }}><header><input aria-label="Find sections" /></header>{list.view}</section>);
     const scroll = screen.getByTestId("source-scroll");
     const header = screen.getByRole("textbox");
     expect(scroll.contains(screen.getByRole("treeitem", { name: /Buttons/ }))).toBe(true);
-    expect(screen.getByRole("tree").style.overflow).toBe("visible");
     fireEvent.change(header, { target: { value: "Button" } }); header.focus(); fireEvent.keyDown(header, { key: "Home" });
     expect(document.activeElement).toBe(header);
     expect((header as HTMLInputElement).value).toBe("Button");

@@ -51,6 +51,8 @@ import { WindowChromeSlotContext } from "./windowChromeSlotContext";
 import { useWindowMoveResize } from "./useWindowMoveResize";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
 import { PopoverWindowSurface } from "./PopoverWindowSurface";
+import { ResponderHierarchyContext } from "../../SynCloudOSReact/responderHierarchy";
+import { FocusScopeIdContext } from "../../SynCloudOSReact/focusScopeContext";
 
 export interface WindowLayerDiagnostic {
   readonly code: "WINDOW_PRESENTATION_GEOMETRY_INVALID";
@@ -287,7 +289,16 @@ export function WindowHost({
     presentation,
   });
   const surfaceContent = popoverSurface
-    ? <PopoverWindowSurface surface={popoverSurface} windowControllerId={controller.id}>{hostedContent}</PopoverWindowSurface>
+    ? <PopoverWindowSurface surface={popoverSurface} windowControllerId={controller.id}>
+        <FocusScopeIdContext.Provider value={`window:${record.id}`}>
+          <ResponderHierarchyContext.Provider value={{
+            runtimeId: runtime.runtimeId,
+            responderId: popoverSurface.request.parentResponderId ?? controller.windowResponderId,
+            windowResponderId: controller.windowResponderId,
+            applicationResponderId: record.applicationSessionId ? `application:${record.applicationSessionId}` : undefined,
+          }}>{hostedContent}</ResponderHierarchyContext.Provider>
+        </FocusScopeIdContext.Provider>
+      </PopoverWindowSurface>
     : hostedContent;
   const customChromeActive = chromeReady && !chromeFailed;
   // The slot node must exist BEFORE the handshake can complete: the bridge

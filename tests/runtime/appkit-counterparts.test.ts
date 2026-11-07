@@ -61,7 +61,7 @@ describe("NSE names are AppKit names", () => {
     expect(appkitCounterpartFor("NSEButtonProps", map)).toBe("NSButton");
     expect(appkitCounterpartFor("NSETabViewControllerSnapshot", map)).toBe("NSTabViewController");
     expect(appkitCounterpartFor("NSEColourWell", map)).toBe("NSColorWell");
-    expect(appkitCounterpartFor("NSETabBarProps", map)).toMatchObject({ replacement: "NSTabViewController" });
+    expect(appkitCounterpartFor("NSETabBarProps", map)).toBeUndefined();
     expect(appkitCounterpartFor("NSEUnknownThing", map)).toBeUndefined();
   });
 });

@@ -1,7 +1,7 @@
 import { expect, test } from 'playwright/test';
 
 for (const reducedMotion of ['no-preference','reduce'] as const) {
-  test(`adaptive peer chrome preserves editing, More and focus (${reducedMotion})`,async({page},testInfo)=>{
+  test(`adaptive peer chrome preserves editing, direct tabs and focus (${reducedMotion})`,async({page},testInfo)=>{
     await page.emulateMedia({reducedMotion});
     const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
     await page.setViewportSize({width:1200,height:800});
@@ -39,18 +39,17 @@ for (const reducedMotion of ['no-preference','reduce'] as const) {
     await first.press('ArrowDown');
     await expect(state).toHaveText('rail:Library');
     await expect(page.getByRole('tab',{name:'Library',exact:true})).toBeFocused();
+    // AppKit's shouldSelect delegate refuses Search; the next key can continue to Settings.
     await page.getByRole('tab',{name:'Library',exact:true}).press('ArrowDown');
-    await expect(state).toHaveText('rail:Settings'); // disabled Search is skipped
-    await page.getByRole('tab',{name:'More destinations'}).click();
-    const more=page.getByRole('region',{name:'More destinations'});
-    await expect(more).toBeVisible();
-    await page.setViewportSize({width:594,height:650});
-    await expect(state).toHaveText('tabs:Settings');
-    await expect(more).toBeVisible();
-    await page.setViewportSize({width:594,height:368});
+    await expect(state).toHaveText('rail:Library');
+    await page.getByRole('tab',{name:'Search',exact:true}).press('ArrowDown');
     await expect(state).toHaveText('rail:Settings');
-    await expect(more).toBeVisible();
-    await page.getByRole('tab',{name:'More destinations'}).click();
+    await page.getByRole('tab',{name:'History',exact:true}).click();
+    await expect(state).toHaveText('rail:History');
+    await page.setViewportSize({width:594,height:650});
+    await expect(state).toHaveText('tabs:History');
+    await page.setViewportSize({width:594,height:368});
+    await expect(state).toHaveText('rail:History');
     await first.click();
     await expect(draft).toHaveValue('Keep this unsaved editor');
     await page.getByRole('button',{name:'Open draft options'}).click();
@@ -77,9 +76,9 @@ test('RTL tab keys and shallow rail scrolling retain full targets',async({page})
   const viewport=page.locator('[data-nse-tab-scroll-viewport]');
   const first=page.getByRole('tab',{name:'Editor',exact:true});
   await first.focus();await first.press('End');
-  await expect(page.getByRole('region',{name:'More destinations'})).toBeVisible();
+  await expect(page.getByRole('tab',{name:'History',exact:true})).toBeFocused();
   await expect.poll(()=>viewport.evaluate(element=>element.scrollTop)).toBeGreaterThan(0);
-  await page.getByRole('tab',{name:'More destinations'}).click();
+  await first.click();
   await first.focus();await first.press('Home');
   await page.setViewportSize({width:382,height:650});
   await expect(page.getByRole('tablist')).toHaveAttribute('aria-orientation','horizontal');
@@ -87,17 +86,17 @@ test('RTL tab keys and shallow rail scrolling retain full targets',async({page})
   await expect(page.getByTestId('navigation-state')).toHaveText('tabs:Library');
 });
 
-test('sidebar focus follows an overflow peer into the visible shallow rail',async({page})=>{
+test('sidebar focus follows the selected peer into the visible shallow rail',async({page})=>{
   await page.setViewportSize({width:1200,height:800});await page.goto('/__framework-tests/navigation/adaptive');
   await expect(page.getByTestId('navigation-state')).toHaveText('source-list-content:Editor');
-  const sharing=page.getByRole('button',{name:'Sharing',exact:true});await sharing.click();
-  const draft=page.getByRole('textbox',{name:'Draft Sharing'});await draft.fill('Retain overflow peer');
-  await sharing.focus();await page.setViewportSize({width:594,height:260});
-  const more=page.getByRole('tab',{name:'More destinations'});await expect(more).toBeFocused();
+  const sharing=page.getByRole('treeitem',{name:'Sharing',exact:true});await sharing.click();
+  const draft=page.getByRole('textbox',{name:'Draft Sharing'});await draft.fill('Retain selected peer');
+  await page.getByRole('tree',{name:'Workspace'}).focus();await page.setViewportSize({width:594,height:260});
+  const selected=page.getByRole('tab',{name:'Sharing',exact:true});await expect(selected).toBeFocused();
   const viewport=page.locator('[data-nse-tab-scroll-viewport]');
   await expect.poll(()=>viewport.evaluate(element=>element.scrollTop)).toBeGreaterThan(0);
-  const target=await more.boundingBox(),rail=await viewport.boundingBox();
+  const target=await selected.boundingBox(),rail=await viewport.boundingBox();
   expect(target!.y).toBeGreaterThanOrEqual(rail!.y-1);
   expect(target!.y+target!.height).toBeLessThanOrEqual(rail!.y+rail!.height+1);
-  await expect(draft).toHaveValue('Retain overflow peer');
+  await expect(draft).toHaveValue('Retain selected peer');
 });

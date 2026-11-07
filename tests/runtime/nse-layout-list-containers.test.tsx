@@ -25,10 +25,6 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { rubberBandOffset } from "../../src/NSE/Scroll";
-import {
-  NSESlidingPane,
-  NSESlidingPanes
-} from "../../src/NSE/Containers";
 
 afterEach(() => {
   cleanup();
@@ -58,96 +54,4 @@ describe("NSE scroll primitives", () => {
     expect(farther).toBeGreaterThan(pull);
     expect(farther).toBeLessThan(pull * 2);
   });
-});
-
-describe("NSE containers", () => {
-  function installPointerCaptureMocks() {
-    const prototype = HTMLElement.prototype as HTMLElement & {
-      setPointerCapture?: (pointerId: number) => void;
-      releasePointerCapture?: (pointerId: number) => void;
-      hasPointerCapture?: (pointerId: number) => boolean;
-    };
-    const originals = {
-      setPointerCapture: prototype.setPointerCapture,
-      releasePointerCapture: prototype.releasePointerCapture,
-      hasPointerCapture: prototype.hasPointerCapture
-    };
-
-    prototype.setPointerCapture = vi.fn();
-    prototype.releasePointerCapture = vi.fn();
-    prototype.hasPointerCapture = vi.fn(() => true);
-
-    return () => {
-      if (originals.setPointerCapture) prototype.setPointerCapture = originals.setPointerCapture;
-      else delete prototype.setPointerCapture;
-      if (originals.releasePointerCapture) prototype.releasePointerCapture = originals.releasePointerCapture;
-      else delete prototype.releasePointerCapture;
-      if (originals.hasPointerCapture) prototype.hasPointerCapture = originals.hasPointerCapture;
-      else delete prototype.hasPointerCapture;
-    };
-  }
-
-  it("supports SlidingPane peek, multi-view data, and drag dismissal", () => {
-    const restorePointerCapture = installPointerCaptureMocks();
-    const onOpenChange = vi.fn();
-
-    try {
-      const { container } = render(
-        <NSESlidingPane
-          title="Details"
-          open
-          onOpenChange={onOpenChange}
-          placement="trailing"
-          peekWidth={48}
-          dismissDistance={60}
-          multiView
-          multiViewMinWidth={720}
-        >
-          Sliding content
-        </NSESlidingPane>
-      );
-
-      const pane = container.querySelector(".nse-container-sliding-pane") as HTMLElement;
-      expect(pane.getAttribute("data-open")).toBe("true");
-      expect(pane.getAttribute("data-multi-view")).toBe("true");
-      expect(pane.getAttribute("data-multi-view-min-width")).toBe("720");
-      expect(pane.style.getPropertyValue("--nse-sliding-pane-peek")).toBe("48px");
-
-      fireEvent.pointerDown(pane, { pointerId: 1, clientX: 100 });
-      expect(pane.getAttribute("data-dragging")).toBe("true");
-      fireEvent.pointerMove(pane, { pointerId: 1, clientX: 150 });
-      expect(pane.style.getPropertyValue("--nse-sliding-pane-drag")).toBe("50px");
-      fireEvent.pointerUp(pane, { pointerId: 1, clientX: 170 });
-      expect(onOpenChange).toHaveBeenCalledWith(false);
-    } finally {
-      restorePointerCapture();
-    }
-  });
-
-  it("connects NSESlidingPanes: prior panes collapse to peek strips and selecting one expands it", () => {
-    const onSelect = vi.fn();
-    render(
-      <NSESlidingPanes
-        defaultSelectedKey="list"
-        onSelectedKeyChange={onSelect}
-        views={[
-          { key: "folders", label: "Folders", content: <div>Folders body</div> },
-          { key: "list", label: "List", content: <div>List body</div> },
-          { key: "message", label: "Message", flex: true, content: <div>Message body</div> }
-        ]}
-      />
-    );
-
-    // jsdom width is 0 → multi-view: the pane before the selected "list" collapses to a peek button.
-    const folders = screen.getByRole("button", { name: "Folders" });
-    expect(folders.getAttribute("data-collapsed")).toBe("true");
-    // The flexed last pane is visible and not collapsed.
-    expect(screen.getByText("Message body")).not.toBeNull();
-
-    // Selecting the collapsed pane slides it open (it is no longer a collapsed peek button).
-    fireEvent.click(folders);
-    expect(onSelect).toHaveBeenCalledWith("folders");
-    expect(screen.queryByRole("button", { name: "Folders" })).toBeNull();
-  });
-
 });

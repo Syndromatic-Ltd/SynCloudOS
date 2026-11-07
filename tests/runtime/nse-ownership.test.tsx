@@ -7,10 +7,11 @@ import { NSEApplication, type NSEApplicationClass } from "../../src/NSE/Applicat
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEArrayController, nseUnowned, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers";
-import { NSEAdaptiveNavigationController, NSENavigationStackController, NSETabBarController } from "../../src/NSE/Navigation";
+import { NSENavigationStackController, NSETabBarController } from "../../src/NSE/Navigation";
+import { NSETabViewController } from "../../src/NSE/Navigation/NSETabViewController";
+import { NSEPageController } from "../../src/NSE/Page/NSEPageController";
 import { NSESplitViewController } from "../../src/NSE/DataViews/Split/NSESplitViewController";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
-import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
 
 const hosts: ClassApplicationHost[] = [];
 afterEach(async () => {
@@ -263,23 +264,18 @@ describe("navigation controllers as view controllers", () => {
       readonly tabs = new NSETabBarController({ id: "tabs", destinations });
       readonly stack = new NSENavigationStackController({ id: "stack", destinationIds: ["detail"] });
       readonly split = new NSESplitViewController({ id: "split" });
-      readonly adaptive = new NSEAdaptiveNavigationController({
-        id: "adaptive",
-        model: "peer",
-        presentation: "adaptive",
-        tabController: this.tabs,
-        traits: createStaticPresentationTraits({ width: 1440, height: 900 }),
-      });
+      readonly tabView = new NSETabViewController({ tabStyle: "sidebarAdaptable" });
+      readonly pages = new NSEPageController();
       constructor() { super(); app = this; }
     }
     const host = await launched(NavigationApp);
-    const controllers = [app.tabs, app.stack, app.split, app.adaptive];
-    expect(controllers.map((controller) => controller.isDisposed)).toEqual([false, false, false, false]);
+    const controllers = [app.tabs, app.stack, app.split, app.tabView, app.pages];
+    expect(controllers.map((controller) => controller.isDisposed)).toEqual([false, false, false, false, false]);
 
     await host.quit();
 
     expect(controllers.map((controller) => controller.disposalReason)).toEqual([
-      "application-closed", "application-closed", "application-closed", "application-closed",
+      "application-closed", "application-closed", "application-closed", "application-closed", "application-closed",
     ]);
   });
 

@@ -20,7 +20,6 @@
 
 export { NSETopBar } from "./NSETopBar";
 export { NSETopBarButton } from "./NSETopBarButton";
-export { NSEStatusBar } from "./NSEStatusBar";
 export { NSEPageHeader } from "./NSEPageHeader";
 export { nseTopBarStyles } from "./nseTopBarStyles";
 export type {
@@ -33,5 +32,4 @@ export type {
   NSETopBarTitleAction,
   NSETopBarVariant,
 } from "./nseTopBarTypes";
-export type { NSEStatusBarProps, NSEStatusBarVariant } from "./NSEStatusBar";
 export type { NSEPageHeaderProps } from "./NSEPageHeader";

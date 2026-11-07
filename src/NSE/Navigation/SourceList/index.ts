@@ -18,12 +18,5 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { NSESourceListScene } from "./NSESourceListScene";
-export type {
-  NSESourceListCompactHandoff,
-  NSESourceListNavigationProjection,
-  NSESourceListSceneProps,
-  NSESourceListSceneStatus,
-} from "./NSESourceListScene";
 export { SourceListFrameProvider, useSourceListFrame } from "./sourceListFrameContext";
 export type { SourceListFrameContextValue } from "./sourceListFrameContext";

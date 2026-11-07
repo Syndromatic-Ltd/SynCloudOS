@@ -119,7 +119,7 @@ export interface SynCloudOSAppWindowManifest {
 /**
  * Optional source-list window primitive. When present (and `topBar:"standard"`), the system frame
  * draws a sidebar-aligned rail seam in the top bar/status bar and owns a resizable sidebar width.
- * The app supplies only sidebar + main content via `NSESourceListScene`; it never re-implements the
+ * The app supplies only sidebar + main content via `the source-list split view`; it never re-implements the
  * bar, the seam, the resizer, or QuickSwitch.
  */
 export interface SynCloudOSAppFrameSourceList {

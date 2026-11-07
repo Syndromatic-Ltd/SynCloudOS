@@ -20,12 +20,14 @@
 
 import { describe, expect, it, vi } from "vitest";
 import {
-  NSEAdaptiveNavigationController,
   NSENavigationStackController,
   NSETabBarController,
   NSETabBarMoreDestinationId,
   type NSENavigationDestination,
 } from "../../src/NSE/Navigation";
+import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
+import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
+import { NSESplitViewController, NSESplitViewItem } from "../../src/NSE/DataViews/Split";
 import type { SynCloudOSPresentationTraits } from "../../src/SynCloudOS/SynCloudOS";
 import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
 
@@ -291,142 +293,52 @@ describe("semantic presentation-navigation controllers", () => {
     retained.dispose();
   });
 
-  it("models stack restoration and adaptive peer/hierarchy renderers without recreating retained destination state", async () => {
-    const stack = new NSENavigationStackController({
-      id: "restore-stack",
-      rootDestinationId: "library",
-      destinationIds: ["library", "detail", "nested"],
-    });
-    await stack.push("detail");
-    await stack.push("nested");
+  it("retains stack restoration internals while public split and tab controllers retain real child state", async () => {
+    const stack = new NSENavigationStackController({ id: "restore-stack", rootDestinationId: "library", destinationIds: ["library", "detail", "nested"] });
+    await stack.push("detail"); await stack.push("nested");
     expect(stack.getSnapshot()).toMatchObject({ path: ["detail", "nested"], backDestinationId: "detail" });
-    stack.pop();
-    expect(stack.getSnapshot()).toMatchObject({ path: ["detail"], backDestinationId: "library" });
-    stack.restore({ version: 1, path: ["missing", "nested"] });
-    expect(stack.getSnapshot().path).toEqual(["nested"]);
-    stack.popToRoot();
-    expect(stack.getSnapshot().path).toEqual([]);
-
-    const created: string[] = [];
-    const tabs = new NSETabBarController({ id: "adaptive-tabs", destinations: destinations(created) });
-    const homeContent = tabs.getContent("home") as { form: { draft: string }; scroll: number };
-    const peer = new NSEAdaptiveNavigationController({
-      id: "peer-adaptive",
-      model: "peer",
-      presentation: "adaptive",
-      tabController: tabs,
-      traits: traits("wide"),
-    });
-    expect(peer.getSnapshot().renderer).toBe("source-list-content");
-    peer.setTraits(traits("compact"));
-    expect(peer.getSnapshot().renderer).toBe("tabs");
-    homeContent.form.draft = "retained";
-    homeContent.scroll = 88;
-    peer.setTraits(traits("regular"));
-    expect(peer.getSnapshot().renderer).toBe("source-list-content");
-    expect(tabs.getContent("home")).toBe(homeContent);
-    expect(homeContent).toMatchObject({ form: { draft: "retained" }, scroll: 88 });
-
-    const hierarchy = new NSEAdaptiveNavigationController({
-      id: "hierarchy-adaptive",
-      model: "hierarchy",
-      presentation: "adaptive",
-      tabController: tabs,
-      stackController: stack,
-      traits: traits("regular"),
-    });
-    expect(hierarchy.getSnapshot().renderer).toBe("list-detail");
-    hierarchy.setTraits(traits("compact"));
-    expect(hierarchy.getSnapshot().renderer).toBe("stack");
-    hierarchy.dispose();
-    await tabs.select("library");
-    expect(tabs.getSnapshot().selectedDestinationId).toBe("library");
+    stack.pop(); expect(stack.getSnapshot()).toMatchObject({ path: ["detail"], backDestinationId: "library" });
+    stack.restore({ version: 1, path: ["missing", "nested"] }); expect(stack.getSnapshot().path).toEqual(["nested"]);
+    stack.popToRoot(); expect(stack.getSnapshot().path).toEqual([]);
+    class Content extends NSEViewController { readonly form = { draft: "original" }; scroll = 0; renderView() { return null; } }
+    const tabs = new NSETabViewController({ tabStyle: "sidebarAdaptable" });
+    const home = tabs.addChild(Content); const library = tabs.addChild(Content);
+    tabs.addTabViewItem(new NSETabViewItem({ identifier: "home", label: "Home", viewController: home }));
+    tabs.addTabViewItem(new NSETabViewItem({ identifier: "library", label: "Library", viewController: library }));
+    home.form.draft = "retained"; home.scroll = 88;
+    tabs[nseUpdateTraits]({ reducedMotion: false, presentation: traits("compact") });
+    tabs[nseUpdateTraits]({ reducedMotion: false, presentation: traits("wide") });
+    expect(tabs.tabViewItems[0]?.viewController).toBe(home);
+    expect(home).toMatchObject({ form: { draft: "retained" }, scroll: 88 });
+    tabs.selectTabViewItem("library"); expect(tabs.selectedTabViewItem?.viewController).toBe(library);
+    const sidebar = new NSESplitViewItem({ identifier: "sources", behavior: "sidebar", viewController: new Content() });
+    const detail = new NSESplitViewItem({ identifier: "detail", viewController: new Content() });
+    const split = new NSESplitViewController({ id: "hierarchy", splitViewItems: [sidebar, detail] });
+    split[nseUpdateTraits]({ reducedMotion: false, presentation: traits("regular") }); expect(split.snapshot.presentation).toBe("split");
+    split.showDetail(detail.viewController);
+    split[nseUpdateTraits]({ reducedMotion: false, presentation: traits("compact") }); expect(split.snapshot.presentation).toBe("single-pane");
+    expect(split.compactItem).toBe(detail);
+    stack.dispose(); tabs.dispose(); split.dispose();
   });
 
-  it("separates peer navigation meaning from its adaptive or persistent-tab presentation", () => {
-    const tabs = new NSETabBarController({ id: "model-presentation-tabs", destinations: destinations([]) });
-    const stack = new NSENavigationStackController({
-      id: "model-presentation-stack",
-      rootDestinationId: "home",
-      destinationIds: ["home", "library"],
-    });
-    const peerAdaptive = new NSEAdaptiveNavigationController({
-      id: "peer-adaptive",
-      model: "peer",
-      presentation: "adaptive",
-      tabController: tabs,
-      traits: createStaticPresentationTraits({ width: 390, height: 844 }),
-    });
-
-    expect(peerAdaptive.getSnapshot()).toMatchObject({
-      model: "peer",
-      presentation: "adaptive",
-      renderer: "tabs",
-    });
-    peerAdaptive.setTraits(createStaticPresentationTraits({ width: 1280, height: 800 }));
-    expect(peerAdaptive.getSnapshot().renderer).toBe("source-list-content");
-
-    const persistentTabs = new NSEAdaptiveNavigationController({
-      id: "peer-bottom-tabs",
-      model: "peer",
-      presentation: "bottom-tabs",
-      tabController: tabs,
-      traits: createStaticPresentationTraits({ width: 1440, height: 900 }),
-    });
-    expect(persistentTabs.getSnapshot()).toMatchObject({
-      model: "peer",
-      presentation: "bottom-tabs",
-      renderer: "tabs",
-    });
-    expect(() => new NSEAdaptiveNavigationController({
-      id: "invalid-hierarchy-tabs",
-      model: "hierarchy",
-      presentation: "bottom-tabs",
-      tabController: tabs,
-      stackController: stack,
-      traits: createStaticPresentationTraits({ width: 390, height: 844 }),
-    })).toThrowError("Hierarchy navigation cannot use the bottom-tabs presentation.");
-    expect(() => new NSEAdaptiveNavigationController({
-      id: "hierarchy-without-stack",
-      model: "hierarchy",
-      tabController: tabs,
-      traits: createStaticPresentationTraits({ width: 390, height: 844 }),
-    })).toThrowError("Hierarchy adaptive navigation requires a stack controller.");
-    expect(() => new NSEAdaptiveNavigationController({
-      id: "peer-with-stack",
-      model: "peer",
-      tabController: tabs,
-      stackController: stack,
-      traits: createStaticPresentationTraits({ width: 390, height: 844 }),
-    })).toThrowError("Peer adaptive navigation cannot use a stack controller.");
-
-    peerAdaptive.dispose();
-    persistentTabs.dispose();
-    stack.dispose();
+  it("keeps fixed tab placement separate from adaptive placement on the same AppKit controller", () => {
+    const tabs = new NSETabViewController({ tabStyle: "sidebarAdaptable" });
+    tabs[nseUpdateTraits]({ reducedMotion: false, presentation: traits("compact") });
+    expect(tabs.tabStyle).toBe("sidebarAdaptable");
+    tabs.tabStyle = "segmentedControlOnBottom";
+    tabs[nseUpdateTraits]({ reducedMotion: false, presentation: traits("wide") });
+    expect(tabs.tabStyle).toBe("segmentedControlOnBottom");
+    expect(() => { tabs.tabStyle = "bottom-tabs" as never; }).toThrow(TypeError);
     tabs.dispose();
   });
 
-  it("publishes a new snapshot when only bottom-tab geometry traits change", () => {
-    const tabs = new NSETabBarController({ id: "bottom-geometry-tabs", destinations: destinations([]) });
-    const adaptive = new NSEAdaptiveNavigationController({
-      id: "bottom-geometry-adaptive",
-      model: "peer",
-      presentation: "bottom-tabs",
-      tabController: tabs,
-      traits: createStaticPresentationTraits({ width: 390, height: 844 }),
-    });
-    const publish = vi.fn();
-    adaptive.subscribe(publish);
-
-    adaptive.setTraits(createStaticPresentationTraits({
-      width: 390,
-      height: 844,
-      safeArea: { top: 0, right: 0, bottom: 34, left: 0 },
-    }));
-
+  it("publishes when only fixed bottom-tab safe-area traits change", () => {
+    const tabs = new NSETabViewController({ tabStyle: "segmentedControlOnBottom" });
+    tabs[nseUpdateTraits]({ reducedMotion: false, presentation: createStaticPresentationTraits({ width: 390, height: 844 }) });
+    const publish = vi.fn(); tabs.subscribe(publish);
+    tabs[nseUpdateTraits]({ reducedMotion: false, presentation: createStaticPresentationTraits({ width: 390, height: 844, safeArea: { top: 0, right: 0, bottom: 34, left: 0 } }) });
     expect(publish).toHaveBeenCalledTimes(1);
-    expect(adaptive.getSnapshot().traits.safeAreaInsets.blockEnd).toBe(34);
-    adaptive.dispose();
+    expect(tabs.traitCollection.presentation?.safeAreaInsets.blockEnd).toBe(34);
     tabs.dispose();
   });
 

@@ -245,3 +245,7 @@ this.presentAsPopover(CollectionViewController, {
 
 The internal `NSEPopover` component takes the same `drawsBackground` and `relativeTo` options. Anchored and content-painted popovers stay in the canonical overlay stack, including when a generic physical-window bridge is available, so their frame and interaction have one owner. The physical-window bridge remains available for unanchored standard surfaces. `NSEPopover` is not a new public SDK export; applications present their view controllers through `presentAsPopover`.
 
+
+### Bottom-bar accessories
+
+`window.bottomBarAccessory` is the approved NSE extension for ordinary views in the window's bottom content border. Set its height separately with `window.setContentBorderThickness(56, "minY")`; assigning `null` removes the accessory without changing that height. The window reserves space for the accessory, retains application context and includes it in sheet modality. Source-list apps can align their own footer cells with the shared sidebar width. This is window chrome: bottom navigation tabs belong to `NSETabViewController.tabStyle`.
