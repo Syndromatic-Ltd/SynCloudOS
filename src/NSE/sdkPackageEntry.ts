@@ -542,17 +542,8 @@ export {
 export type {
   NSESavePanelProps,
 } from "./FilePanels/NSESavePanel";
-export {
-  NSEGraphicsView,
-  convertPointToGFXDisplayList,
-} from "./Graphics/NSEGraphicsView";
 export { snapshotNSEView } from "./Graphics/snapshotNSEView";
 export type { NSEViewSnapshotOptions } from "./Graphics/snapshotNSEView";
-export type {
-  NSEGraphicsViewContentsGravity,
-  NSEGraphicsViewPointerHandler,
-  NSEGraphicsViewProps,
-} from "./Graphics/NSEGraphicsView";
 export {
   NSEShadowView,
 } from "./Graphics/NSEShadowView";

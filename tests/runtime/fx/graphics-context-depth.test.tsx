@@ -20,7 +20,7 @@
 
 // @vitest-environment jsdom
 import React from "react";
-import { render } from "@testing-library/react";
+import { renderGraphics as render, drawFigure } from "./graphicsViewFixture";
 import { describe, expect, it } from "vitest";
 import {
   GFXBitmapContext,
@@ -34,7 +34,7 @@ import {
   type GFXBlendMode,
 } from "../../../src/FX/GraphicsFX/public";
 import { createOwnedGFXIdentifierIssuer } from "../../../src/FX/GraphicsFX/identifierAuthority";
-import { NSEGraphicsView } from "../../../src/NSE/Graphics/NSEGraphicsView";
+import { NSEView } from "../../../src/NSE/Views/NSEView";
 
 const rect = (x: number, y: number, width: number, height: number) => GFXPath.rect({ x, y, width, height });
 const recorder = (scale = 1) => GFXContext.recording({
@@ -95,7 +95,7 @@ describe("GraphicsFX context depth", () => {
     expect(svg).toContain('data-gfx-transparency-group="');
     expect(svg).toContain('opacity="0.5"');
     expect((svg.match(/<path /g) ?? []).length).toBe(2);
-    const { container } = render(<NSEGraphicsView displayList={context.displayList} label="Group"/>);
+    const { container } = render(<NSEView draw={drawFigure(context.displayList)} aria-label="Group"/>);
     const node = container.querySelector("g[data-gfx-transparency-group]");
     expect(node?.getAttribute("opacity")).toBe("0.5");
     expect(node?.querySelectorAll("path")).toHaveLength(2);

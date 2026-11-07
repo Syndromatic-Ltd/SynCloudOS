@@ -1,10 +1,16 @@
 // @vitest-environment jsdom
 import React from "react";
-import { act, cleanup, render } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GFXColour, GFXContext, GFXGradient, GFXPath } from "../../src/FX/GraphicsFX/public";
 import { NSEView } from "../../src/NSE/Views/NSEView";
+import { NSEAppearance } from "../../src/NSE/Appearance/NSEAppearance";
+import { useNSEAppearance } from "../../src/NSE/Appearance/NSEAppearanceProvider";
+import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
+import { NSEOverlayProvider } from "../../src/NSE/Overlays";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact/SynCloudOSProvider";
+import { RuntimeInputBoundary } from "../../src/SynCloudOSReact/RuntimeInputBoundary";
+import { useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact";
 import { createTestRuntime, createTestRuntimeEnvironment } from "./helpers";
 
 afterEach(cleanup);
@@ -25,6 +31,14 @@ function drawingRuntime(width = 200, height = 100) {
 }
 
 describe("NSEView.draw", () => {
+  it("names the drawing as an image while retaining accessible interactive subviews", () => {
+    const { runtime } = drawingRuntime();
+    const view = render(<SynCloudOSProvider runtime={runtime}><NSEView draw={() => {}} aria-label="Named figure" aria-description="A measured plot"><button>Inspect</button></NSEView></SynCloudOSProvider>);
+    expect(screen.getByRole("img", { name: "Named figure" }).getAttribute("aria-description")).toBe("A measured plot");
+    expect(screen.getByRole("button", { name: "Inspect" })).toBeTruthy();
+    view.unmount(); runtime.dispose();
+  });
+
   it("records its measured bounds with a fresh context on every React display", () => {
     const { runtime, geometry, resize, release } = drawingRuntime();
     const contexts: GFXContext[] = [];
@@ -91,5 +105,54 @@ describe("NSEView.draw", () => {
     expect([...view.container.querySelectorAll("linearGradient")].every(node => !ids.includes(node.id))).toBe(true);
     view.unmount();
     outer.runtime.dispose(); inner.runtime.dispose();
+  });
+
+  it("releases the old geometry subscription when a provider changes or draw is removed", () => {
+    const first = drawingRuntime(), second = drawingRuntime(40, 20);
+    const content = (runtime = first.runtime, draw: (() => void) | undefined = () => {}) => <SynCloudOSProvider runtime={runtime}><NSEView draw={draw} /></SynCloudOSProvider>;
+    const view = render(content());
+    view.rerender(content(second.runtime));
+    expect(first.release).toHaveBeenCalledOnce();
+    expect(view.container.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 40 20");
+    view.rerender(<SynCloudOSProvider runtime={second.runtime}><NSEView /></SynCloudOSProvider>);
+    expect(second.release).toHaveBeenCalledOnce();
+    expect(view.container.querySelector("svg")).toBeNull();
+    view.unmount();
+    first.runtime.dispose(); second.runtime.dispose();
+  });
+
+  it("refuses to redraw through a disposed runtime's retained identifier authority", async () => {
+    const { runtime } = drawingRuntime();
+    const content = () => <SynCloudOSProvider runtime={runtime}><NSEView draw={() => {}} /></SynCloudOSProvider>;
+    const view = render(content());
+    await runtime.dispose();
+    expect(() => view.rerender(content())).toThrow();
+  });
+
+  it("composes draw with a contextual menu, tooltip, appearance and subviews", async () => {
+    const { runtime } = drawingRuntime();
+    const menu = new NSEMenu({ identifier: "figure-menu", title: "Figure menu", items: [], standalone: true, runtime: {
+      signal: runtime.signal,
+      commands: { getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }), validateMany: async () => new Map(), prepareDispatch: vi.fn(), dispatch: vi.fn() },
+    } });
+    function AppearanceProbe() { return <output>{useNSEAppearance().resolvedColourScheme}</output>; }
+    function Figure() {
+      const overlayPort = useRuntimeNSEOverlayPort("runtime");
+      return <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
+        <NSEView menu={menu} toolTip="Figure details" appearance={new NSEAppearance("darkAqua")} draw={(rect, context) => context.fill(GFXPath.rect(rect))}>
+          <AppearanceProbe />
+        </NSEView>
+      </NSEOverlayProvider>;
+    }
+    const view = render(<SynCloudOSProvider runtime={runtime}><RuntimeInputBoundary><Figure /></RuntimeInputBoundary></SynCloudOSProvider>);
+    const host = screen.getByTitle("Figure details");
+    expect(screen.getByText("dark")).toBeTruthy();
+    expect(host.querySelector("svg path")).not.toBeNull();
+    fireEvent.contextMenu(host, { clientX: 60, clientY: 40 });
+    const popup = await screen.findByRole("menu");
+    expect(popup.closest("[data-nse-colour-scheme-resolved]")?.getAttribute("data-nse-colour-scheme-resolved")).toBe("dark");
+    expect(host.getAttribute("aria-expanded")).toBe("true");
+    view.unmount();
+    menu.dispose(); await runtime.dispose();
   });
 });

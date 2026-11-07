@@ -13,7 +13,7 @@ A SynWare that mounts and validates is not automatically idiomatic. An app that 
 | Asynchronous and worker computation | `managedTask(this, { lifetime, policy: "latest", debounceMs })` on a view controller, which cancels superseded work and ends with the view. | `new Worker()` or promises started inside `useEffect`. |
 | 2.5D layer animation | `this.fx.animation.manageRenderer(outlet)` with `AFXLayer`. | Hand-written `requestAnimationFrame` loops. |
 | Three.js, raw WebGL2 or WebGPU | `this.fx.animation.manageDisplayLink(outlet, { drawableSizeDidChange })`, `onFrame` and `setNeedsDisplay()`. The display link paces frames, pauses while the view is hidden or off screen, follows reduced motion and reports the drawable size; your engine owns the canvas context. | `requestAnimationFrame`, `ResizeObserver` and `devicePixelRatio` wired by hand in an effect. |
-| 2D vector figures and plots | `GFXContext` recording a `GFXDisplayList`, drawn on screen by `NSEGraphicsView` (`autoSize`, `contentsGravity`, pointer handlers with display-list coordinates and an `@outlet` of `NSEViewOutlet<SVGSVGElement>`) and exported to SVG or PDF from the same display list. | A second, hand-written `<svg>` component that duplicates the exported figure. |
+| 2D vector figures and plots | `GFXContext` recording a `GFXDisplayList`, drawn on screen by `NSEView.draw(dirtyRect, context)` (replay cached figures with `context.drawDisplayList`, use `layerContentsPlacement` and an `@outlet` of `NSEViewOutlet<HTMLDivElement>`) and exported to SVG or PDF from the same display list. | A second, hand-written `<svg>` component that duplicates the exported figure. |
 
 ## NSE names are AppKit names
 

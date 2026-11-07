@@ -76,7 +76,7 @@ Bindings to grouped preferences can import `PreferenceValidationError` and `Pref
 
 ## Outlets and animation
 
-`@outlet accessor artwork!: NSEViewOutlet<HTMLDivElement>` creates a stable typed handle; attach `ref={controller.artwork.ref}`. `current` is nullable. `element`, `layer` and `mountSignal` require a live committed mount. Retaining the handle does not own a React node or keep an old mount alive. An outlet connects any HTML element or a root `<svg>`, such as the one `NSEGraphicsView` renders. Canvas outlets use `controller.fx.animation.manageRenderer(outlet, options)` with the existing scoped renderer, full content-bound DPR and explicit capability errors.
+`@outlet accessor artwork!: NSEViewOutlet<HTMLDivElement>` creates a stable typed handle; attach `ref={controller.artwork.ref}`. `current` is nullable. `element`, `layer` and `mountSignal` require a live committed mount. Retaining the handle does not own a React node or keep an old mount alive. An outlet connects any HTML element or a root `<svg>`. `NSEView` connects its `HTMLDivElement`, including when it draws GraphicsFX content. Canvas outlets use `controller.fx.animation.manageRenderer(outlet, options)` with the existing scoped renderer, full content-bound DPR and explicit capability errors.
 
 `AFXTransaction.perform({ duration, delay, timing, disableActions }, changes)` closes a synchronous layer transaction in `finally`. It inherits outer options, batches actual applicable layer actions and does not roll back application model writes. Async callbacks are invalid. Existing begin/commit/flush, explicit animation handles and all other FX framework imports remain available.
 
@@ -133,19 +133,30 @@ Create the engine's renderer before asking for the link: `drawableSizeDidChange`
 
 ### Vector figures and plots
 
-Record a figure once with `GFXContext`, draw its `GFXDisplayList` on screen with `NSEGraphicsView`, and export the same display list to SVG or PDF; don't write a second `<svg>` component for the screen. `NSEGraphicsView` forwards its ref to the root `<svg>`, so `@outlet accessor plot!: NSEViewOutlet<SVGSVGElement>` connects with `ref={this.plot.ref}`.
+`NSEView.draw(dirtyRect, context)` is AppKit's `NSView.draw(_:)`: the view measures its bounds, records a fresh `GFXContext` for each display, and renders its sealed display list. Re-render the React view to request display. The host supplies the identifier issuer and live geometry through `SynCloudOSProvider`; applications pass neither to `NSEView`. The drawing sits behind subviews and works with `menu`, `toolTip` and `appearance`. Give the view its layout size with `style` or a class; its drawing fills those bounds without affecting layout.
 
-- `autoSize` fills the layout container and scales through the viewBox, instead of keeping the display list's size in CSS pixels.
-- `contentsGravity` is `"resize-aspect"` (the default: the whole figure stays visible, centred), `"resize-aspect-fill"` or `"resize"`, as on `AFXLayer`.
-- Pointer handlers (`onPointerDown`, `onPointerMove`, `onPointerUp`, `onPointerLeave`, `onPointerCancel`) receive the event and `locationInView`, the point in display-list coordinates after scaling and gravity. `convertPointToGFXDisplayList(svg, clientX, clientY, displayList)` performs the same conversion directly. Points beyond the figure are not clipped, so drags can continue past an edge.
+`layerContentsPlacement` uses `NSView.LayerContentsPlacement` names:
 
-`GFXContext.recording` needs `identifiers`, an issuer that gives every gradient, clip and pattern definition in the output an identifier unique on the page. Ask the host for one with `SCOS.images.createGraphicsIdentifierIssuer()` (or `useImages().createGraphicsIdentifierIssuer()` in a view); see [Graphics contexts](fx/graphics/contexts.md).
+- `scaleProportionallyToFit` (the default) fits the whole drawing, centred; `scaleProportionallyToFill` fills the box; `scaleAxesIndependently` stretches both axes.
+- `center`, `top`, `topRight`, `right`, `bottomRight`, `bottom`, `bottomLeft`, `left` and `topLeft` align the drawing at its natural size.
 
-```ts
+The view's ref connects an `@outlet` of `NSEViewOutlet<HTMLDivElement>`. Pointer handlers are the ordinary view handlers (`React.PointerEvent<HTMLDivElement>`); their target remains the view, whose drawing coordinates start at its bounds' top-left. Accessible names and descriptions use `aria-label` and `aria-description` on the view.
+
+A controller can still cache a `GFXDisplayList` and export that same figure to SVG or PDF. `GFXContext.recording` for that cached figure needs an issuer from `SCOS.images.createGraphicsIdentifierIssuer()` (or `useImages()`); `NSEView` obtains the issuer for its display context itself. Replay a cached figure into the view's context with `drawDisplayList`:
+
+```tsx
 const context = GFXContext.recording({ size: { width: 480, height: 240 }, identifiers: SCOS.images.createGraphicsIdentifierIssuer() });
 context.fillPath(GFXPath.ellipse({ x: 8, y: 8, width: 64, height: 64 }), GFXColour.rgba(0.2, 0.5, 0.8));
-const figure = context.displayList; // draw with <NSEGraphicsView displayList={figure} autoSize />
+const figure = context.displayList;
+
+<NSEView
+  aria-label="Recorded figure"
+  style={{ width: "100%", height: 240 }}
+  draw={(dirtyRect, displayContext) => displayContext.drawDisplayList(figure, dirtyRect)}
+/>
 ```
+
+`drawDisplayList` scales the cached figure into its destination rectangle. To preserve a cached figure's aspect ratio inside differently shaped view bounds, give it an aspect-fitted destination rectangle. `layerContentsPlacement` places the resulting bounds-sized drawing layer; it does not change the destination of individual drawing commands. See [Graphics contexts](fx/graphics/contexts.md).
 
 ## Scaffolds and validation
 

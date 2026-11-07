@@ -1,0 +1,14 @@
+/* NSView drawing is behind its subviews, inside the view's own stacking context.
+ * Keep the positioning default weak so application layout classes can override it. */
+:where([data-nse-view-drawing]) {
+  position: relative;
+  isolation: isolate;
+}
+
+[data-nse-view-drawing-layer] {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}

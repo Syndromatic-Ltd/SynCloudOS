@@ -239,4 +239,4 @@ export function stampedStars(): Uint8Array {
 - [GraphicsFX](../graphics.md)
 - [Paint and images](paint-and-images.md)
 - [PDF](pdf.md)
-- [NSE controls](../../nse-controls.md), where `NSEGraphicsView` hosts drawing code
+- [NSE controls](../../nse-controls.md), where `NSEView.draw(dirtyRect, context)` hosts drawing code
