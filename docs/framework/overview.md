@@ -17,10 +17,10 @@ This page describes the layers, the conventions they share, and the package that
 ├──────────────────────────────────────────────────────────────────────┤
 │  FX frameworks                animation, graphics, image, text,      │
 │                               audio, haptics, motion, media, video,  │
-│                               MIDI, location, discovery, compression│
+│                               MIDI, location, discovery, compression │
 ├──────────────────────────────────────────────────────────────────────┤
 │  SynCloudOS runtime           statechart, commands, responders,      │
-│                               undo, documents, windows, ConfigurationProfiles    │
+│                               undo, documents, windows, authorisation│
 ├──────────────────────────────────────────────────────────────────────┤
 │  Foundation                   bytes, ranges, collections, formatters │
 └──────────────────────────────────────────────────────────────────────┘
@@ -28,9 +28,9 @@ This page describes the layers, the conventions they share, and the package that
 
 **[Foundation](foundation.md)** supplies data and collection values shared by NSE, FX and the runtime. It has no React, view or runtime dependency and runs in web workers. Foundation and NSE share the `NSE` prefix, following Foundation and AppKit in Cocoa.
 
-**The runtime** is the kernel. Each runtime owns its store, services and queues, so several runtimes can share one page. It tracks the application lifecycle in a statechart, routes key events through a responder chain, dispatches typed commands, keeps undo history, persists documents and manages windows. ConfigurationProfiles checks every privileged action against the roles your host defines.
+**The runtime** is the kernel. Each runtime owns its store, services and queues, so several runtimes can share one page. It tracks the application lifecycle in a statechart, routes key events through a responder chain, dispatches typed commands, keeps undo history, persists documents and manages windows. Its [authorisation services](authorization.md) keep bundle entitlements, site configuration profiles, named administrative rights and per-app privacy choices separate. Device consent belongs to each FX framework, backed by one runtime privacy store.
 
-**FX** is a set of thirteen frameworks written in TypeScript as web-native analogues of Apple's Core frameworks. AnimationFX corresponds to Core Animation, GraphicsFX to Quartz 2D, ImageFX to Core Image, TextFX to Core Text, AudioFX to AVAudioEngine, HapticsFX to Core Haptics and MotionFX to Core Motion. Four more cover media time, video, MIDI and location, one covers on-device discovery, and CompressionFX corresponds to Apple’s Compression framework. See the [FX frameworks](fx/README.md).
+**FX** is a set of frameworks written in TypeScript as web-native analogues of Apple's Core frameworks. AnimationFX corresponds to Core Animation, GraphicsFX to Quartz 2D, ImageFX to Core Image, TextFX to Core Text, AudioFX to AVAudioEngine, HapticsFX to Core Haptics and MotionFX to Core Motion. Four more cover media time, video, MIDI and location, one covers on-device discovery, and CompressionFX corresponds to Apple’s Compression framework. See the [FX frameworks](fx/README.md).
 
 **NSE** is the application kit, the counterpart of AppKit. The name follows the same convention: NS for NeXTSTEP, NSE for the New Syndromatic Experience. You write `NSEButton` where a Mac developer writes `NSButton`. NSE draws its appearance from a theme. [Atmo](appearance.md) is the default theme, a tactile material language that plays the role Aqua played on Mac OS X.
 
@@ -111,6 +111,8 @@ Everything ships in one package, `@syndromatic/syncloudos`. It uses explicit sub
 | `browser` | `mountSynCloudOS`, the browser host |
 | `browser/styles.css` | Layout and chrome styles for the shell and application stage |
 | `auth` | `createHttpAuthentication` and the sign-in types |
+| `authentication-services` | Optional [passkey controllers, providers and requests](authentication-services.md) for an application's own server |
+| `auth/passkey` | Optional passkey provider composition for system sign-in beside OIDC/local providers |
 | `server/auth` | The Worker-side authentication handler and stores |
 | `vite` | The Vite plugin that discovers bundles and the shell |
 
@@ -118,5 +120,6 @@ Everything ships in one package, `@syndromatic/syncloudos`. It uses explicit sub
 
 - [Getting started](getting-started.md) builds a site end to end.
 - [SynWare SDK](synware-sdk.md) covers application development.
+- [Authorisation](authorization.md) explains entitlements, site access, named rights and privacy.
 - [NSE controls](nse-controls.md) catalogues the control set.
 - [FX frameworks](fx/README.md) documents the media frameworks one by one.
