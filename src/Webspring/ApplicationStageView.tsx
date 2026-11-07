@@ -317,7 +317,7 @@ export function ApplicationStageView({
     <ApplicationStageTopBar
       menuStore={appMenuStore}
       rightSlot={rightSlot}
-      title={activeNavigationChrome?.title ?? standardBarTitle}
+      title={titlebarDocument?.toolbarStyle === "expanded" ? standardBarTitle : activeNavigationChrome?.title ?? standardBarTitle}
       variant={frame.material === "metal" ? "atmoMetal" : "atmoCumulus"}
       scheme={resolvedMode}
       rail={showsSourceListRail ? { width: railWidth, content: railLabel, titleAction: quickSwitchAction } : undefined}
@@ -337,9 +337,9 @@ export function ApplicationStageView({
       trailing={activeNavigationChrome?.back ? <span className="webspring-application-navigation-chrome-balance" aria-hidden="true" /> : undefined}
       leadingAccessory={titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setLeadingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="leading" /> : undefined}
       trailingAccessory={titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setTrailingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="trailing" /> : undefined}
-      // An expanded window draws its large title below the bar, so the bar
-      // carries no inline title beside Back, as with a large-title
-      // navigation bar.
+      // An expanded window draws its large title below the bar, so neither
+      // the bar title above nor this centre slot repeats it beside Back, as
+      // with a large-title navigation bar.
       center={activeNavigationChrome?.back && titlebarDocument?.toolbarStyle !== "expanded" ? (
         <NavigationChromeSlot className="webspring-application-navigation-title" enter={stageMotion.navigationTitle}>
           {activeNavigationChrome.title}
