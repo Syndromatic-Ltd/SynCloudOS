@@ -13,7 +13,7 @@ import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 afterEach(cleanup);
 
-it.each([false, true])("draws Open in its owned sheet and restores focus (compact=%s)", async (compact) => {
+it.each([[false, false], [true, false], [false, true], [true, true]])("draws Open in its owned sheet and restores focus (compact=%s, escape=%s)", async (compact, escape) => {
   const bridge = { present: vi.fn(async () => "modal"), dismiss: vi.fn(async () => ({ outcome: "closed" as const })) };
   const filePanels = { getStatus: () => ({ open: { activation: "active" } }) };
   registerOpenPanelFileSystem(filePanels, createOpenPanelFileSystem({ isSecureContext: () => true, supportsDirectoryPicker: () => false, supportsApplicationStorage: () => false, focusedElement: () => document.activeElement as HTMLElement } as any, "org.test.editor"));
@@ -41,7 +41,7 @@ it.each([false, true])("draws Open in its owned sheet and restores focus (compac
     await waitFor(() => expect(sheet.closest(".nse-window-sheet-layer")!.getAttribute("data-sheet-attached")).toBe("true"));
   }
   expect(bridge.present).not.toHaveBeenCalled();
-  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Cancel" })); });
+  await act(async () => { if (escape) fireEvent.keyDown(document.body, { key: "Escape" }); else fireEvent.click(screen.getByRole("button", { name: "Cancel" })); });
   await expect(response).resolves.toBe(0); expect(document.activeElement).toBe(trigger);
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 });
