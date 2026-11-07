@@ -182,11 +182,12 @@ function fileReference(
     },
   } as const;
   if (access === "read") {
-    return Object.freeze({ ...base, access: "read" as const, get released() { return released; }, get permission() { return lastPermission; } });
+    return Object.freeze({ ...base, access: "read" as const, get mediaType() { return mediaType; }, get released() { return released; }, get permission() { return lastPermission; } });
   }
   const reference: Extract<FilePanelReference, { readonly kind: "file-handle"; readonly access: "readwrite" }> = {
     ...base,
     access: "readwrite",
+    get mediaType() { return mediaType; },
     get released() { return released; },
     get permission() { return lastPermission; },
     createWritable: async (signal?: AbortSignal): Promise<FilePanelWritable> => {
