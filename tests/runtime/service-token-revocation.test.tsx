@@ -233,7 +233,7 @@ describe("typed service revocation and installed-lifetime semantics", () => {
     expect(activeSubscriptions).toBe(1);
 
     act(() => {
-      runtime.policy.registerPolicy("deny-token-service", (request, decision) =>
+      runtime.configurationProfiles.registerPolicy("deny-token-service", (request, decision) =>
         request.action === "service.use"
           ? { ...decision, allowed: false, decision: "deny", reason: "Service denied by test policy." }
           : decision,
@@ -241,7 +241,7 @@ describe("typed service revocation and installed-lifetime semantics", () => {
     });
     await waitFor(() => expect(screen.getByText("denied")).toBeTruthy());
 
-    act(() => { expect(runtime.policy.removePolicy("deny-token-service")).toBe(true); });
+    act(() => { expect(runtime.configurationProfiles.removePolicy("deny-token-service")).toBe(true); });
     await waitFor(() => expect(screen.getByText("available")).toBeTruthy());
 
     view.unmount();

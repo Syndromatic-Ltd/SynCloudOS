@@ -79,7 +79,7 @@ describe("runtime lifecycle invariants", () => {
       initialBundles: [createTestBundle({ bundleIdentifier: "com.example.denied", route: "/denied" }, { loadModule })],
     });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
-    runtime.policy.registerPolicy("deny-route", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-route", (request, decision) =>
       request.app?.bundleIdentifier === "com.example.denied" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
 

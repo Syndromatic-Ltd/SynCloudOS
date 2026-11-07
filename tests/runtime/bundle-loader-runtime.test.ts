@@ -574,7 +574,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
     vi.useFakeTimers();
     const runtime = createTestRuntime();
     authoriseRuntime(runtime);
-    const { AppRegistry, AppManagerController, LaunchServices, PolicyKit, RuntimeController } = createRuntimeHarness(runtime);
+    const { AppRegistry, AppManagerController, LaunchServices, ConfigurationProfiles, RuntimeController } = createRuntimeHarness(runtime);
     const hookOrder: string[] = [];
     const manifest = createTestManifest({ version: "1.0.0",
       bundleIdentifier: "com.example.hooked-launch",
@@ -585,7 +585,7 @@ describe("BundleLoader dynamic runtime contracts", () => {
       policy: { public: true }
     });
 
-    PolicyKit.setAccessMode("public");
+    ConfigurationProfiles.setAccessMode("public");
     AppRegistry.registerBundle(createTestBundle(manifest, {
       lifecycleHooks: {
         applicationWillLaunch: vi.fn(() => hookOrder.push("willLaunch")),
@@ -636,8 +636,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
   });
 
   it("records preload failures without opening windows or dirtying the launch queue", async () => {
-    const { AppRegistry, LaunchServices, PolicyKit, RuntimeController, ServiceRegistry, WindowManager } = createRuntimeHarness(createTestRuntime());
-    PolicyKit.setAccessMode("public");
+    const { AppRegistry, LaunchServices, ConfigurationProfiles, RuntimeController, ServiceRegistry, WindowManager } = createRuntimeHarness(createTestRuntime());
+    ConfigurationProfiles.setAccessMode("public");
     ServiceRegistry.ensureDefaults();
     ServiceRegistry.stopService("windowing");
     AppRegistry.registerBundle(createTestBundle({
@@ -668,8 +668,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
     vi.useFakeTimers();
     const runtime = createTestRuntime();
     authoriseRuntime(runtime);
-    const { AppRegistry, LaunchServices, PolicyKit, RuntimeController } = createRuntimeHarness(runtime);
-    PolicyKit.setAccessMode("public");
+    const { AppRegistry, LaunchServices, ConfigurationProfiles, RuntimeController } = createRuntimeHarness(runtime);
+    ConfigurationProfiles.setAccessMode("public");
     AppRegistry.registerMany([
       createTestBundle({ bundleIdentifier: "com.example.active-launch", route: "/active-launch", policy: { public: true } }),
       createTestBundle({ bundleIdentifier: "com.example.no-queue-launch", route: "/no-queue-launch", policy: { public: true } })

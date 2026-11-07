@@ -56,7 +56,7 @@ const NoCaptureProbe = createSynWare({
   },
 });
 
-it("routes mounted video capture through manifest, PolicyKit, lifecycle and deterministic test authority", async () => {
+it("routes mounted video capture through manifest, ConfigurationProfiles, lifecycle and deterministic test authority", async () => {
   const host = createSynWareTestHost({ app: CameraProbe, document });
   await host.render();
   await host.lifecycle.launch();

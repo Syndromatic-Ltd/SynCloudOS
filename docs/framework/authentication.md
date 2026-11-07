@@ -20,8 +20,8 @@ The shorthand strings `"optional"` and `"required"` construct no authentication 
 
 - `"disabled"` needs no backend.
 - The object form with `createHttpAuthentication` needs a server that answers the same-origin `/auth/methods`, `/auth/session`, `/auth/start` and `/auth/logout` endpoints: use the [server handler](#server-handler) and an OIDC provider.
-- With `"disabled"`, nobody can sign in, so the host opens the primary application publicly; it needs no `runtime.policy.public`. A primary that declares `runtime.policy.requiresLogin` fails to mount, since nobody could ever open it.
-- With `"optional"` (string or object), the primary bundle declares `runtime.policy.public` in its manifest, because it launches before anyone signs in.
+- With `"disabled"`, nobody can sign in, so the host opens the primary application publicly; it needs no `runtime.configurationProfiles.public`. A primary that declares `runtime.configurationProfiles.requiresLogin` fails to mount, since nobody could ever open it.
+- With `"optional"` (string or object), the primary bundle declares `runtime.configurationProfiles.public` in its manifest, because it launches before anyone signs in.
 - With `"required"`, the sign-in window is presented before the primary application launches. The `application: { id }` host accepts the same `authentication` values as the Webspring shell; see [Getting started](getting-started.md#mount-one-application).
 
 In a single-application host the **Account** pane of Preferences, Sign In and Log Out live in the application menu. A primary that fills the page has no system top bar, so it must declare `applicationMenu: { trigger: "content" }` and render a button with `useApplicationMenuTrigger()`; with `"optional"` or `"required"` authentication, mounting rejects without it. See [Mount one application in Getting started](getting-started.md#mount-one-application).
@@ -166,21 +166,21 @@ The Worker reads its settings from server-side variables and bindings: `OIDC_ISS
 
 [Google OIDC setup](google-oidc-setup.md) walks through a complete deployment with Google as the provider.
 
-## PolicyKit and roles
+## ConfigurationProfiles and roles
 
-Server authentication decides who someone is. PolicyKit, inside the runtime, decides what the framework lets them do: launch an application, open a route, post a notification or use a service. It enforces at the framework's own entry points. It is not a sandbox against hostile scripts in the page, which can reach the DOM, storage and network directly, so data that needs protection stays behind the server.
+Server authentication decides who someone is. ConfigurationProfiles, inside the runtime, decides what the framework lets them do: launch an application, open a route, post a notification or use a service. It enforces at the framework's own entry points. It is not a sandbox against hostile scripts in the page, which can reach the DOM, storage and network directly, so data that needs protection stays behind the server.
 
 Roles belong to your host. A policy profile lists the roles, the capabilities of each, the role of an anonymous visitor and how a session maps to a role:
 
 ```ts
-import { mountSynCloudOS, type SynCloudOSPolicyProfile } from "@syndromatic/syncloudos/browser";
+import { mountSynCloudOS, type SynCloudOSConfigurationProfile } from "@syndromatic/syncloudos/browser";
 
-const galleryPolicy: SynCloudOSPolicyProfile = {
+const galleryPolicy: SynCloudOSConfigurationProfile = {
   id: "atelier",
   roles: {
     visitor: ["webspring.display", "route.open.public", "app.open.public"],
     member: ["webspring.display", "route.open.public", "app.open.public", "app.open.protected"],
-    curator: ["webspring.display", "route.open.public", "app.open.public", "app.open.protected", "runtime.configure"],
+    curator: ["webspring.display", "route.open.public", "app.open.public", "app.open.protected", "runtime.mutate"],
   },
   anonymousRole: "visitor",
   resolveRole: (session, claimedRole) =>
@@ -189,11 +189,11 @@ const galleryPolicy: SynCloudOSPolicyProfile = {
 
 await mountSynCloudOS({
   element: document.getElementById("root")!,
-  policyProfile: galleryPolicy,
+  configurationProfile: galleryPolicy,
 });
 ```
 
-A role the profile resolves but did not declare falls back to the anonymous role. The role `system` belongs to the framework, so a profile cannot declare it and a session never resolves to it. Applications never receive the policy engine, and a request's origin, source and subject fields never grant anything: PolicyKit evaluates the subject that it derives from the runtime's own login and identity services.
+A role the profile resolves but did not declare falls back to the anonymous role. The role `system` belongs to the framework, so a profile cannot declare it and a session never resolves to it. Applications never receive the policy engine, and a request's origin, source and subject fields never grant anything: ConfigurationProfiles evaluates the subject that it derives from the runtime's own login and identity services.
 
 ## Limits
 

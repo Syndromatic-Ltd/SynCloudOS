@@ -21,28 +21,28 @@
 import { describe, expect, it, vi } from "vitest";
 import { createTestRuntime } from "./helpers";
 
-describe("PolicyKit change notification", () => {
+describe("ConfigurationProfiles change notification", () => {
   it("notifies subscribers of role-capability, policy and access-mode changes without a store publication", () => {
     const runtime = createTestRuntime();
     const listener = vi.fn();
     const storeListener = vi.fn();
-    const unsubscribe = runtime.policy.subscribe(listener);
+    const unsubscribe = runtime.configurationProfiles.subscribe(listener);
     runtime.store.subscribe(storeListener);
 
-    const registration = runtime.policy.registerRoleCapabilities({ roles: ["public"], capabilities: ["notification.test"] });
+    const registration = runtime.configurationProfiles.registerRoleCapabilities({ roles: ["public"], capabilities: ["notification.test"] });
     expect(listener).toHaveBeenCalledTimes(1);
     registration.dispose();
     expect(listener).toHaveBeenCalledTimes(2);
     registration.dispose();
     expect(listener).toHaveBeenCalledTimes(2);
 
-    runtime.policy.registerPolicy("notification.policy", (_request, decision) => decision);
-    runtime.policy.removePolicy("notification.policy");
+    runtime.configurationProfiles.registerPolicy("notification.policy", (_request, decision) => decision);
+    runtime.configurationProfiles.removePolicy("notification.policy");
     expect(listener).toHaveBeenCalledTimes(4);
     expect(storeListener).not.toHaveBeenCalled();
 
     unsubscribe();
-    runtime.policy.registerRoleCapabilities({ roles: ["public"], capabilities: ["notification.after"] });
+    runtime.configurationProfiles.registerRoleCapabilities({ roles: ["public"], capabilities: ["notification.after"] });
     expect(listener).toHaveBeenCalledTimes(4);
   });
 });

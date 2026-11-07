@@ -9,7 +9,7 @@ export interface MountedShareOptions {
   readonly browser: RuntimeBrowserPort;
   readonly signal: AbortSignal;
   readonly assertLive: () => void;
-  /** The host delegates both inspection and admission to its existing PolicyKit. */
+  /** The host delegates both inspection and admission to its existing ConfigurationProfiles. */
   readonly access: (audit: boolean) => { readonly declared: boolean; readonly allowed: boolean };
   readonly invoke?: (action: () => Promise<void>, signal: AbortSignal) => Promise<void>;
 }

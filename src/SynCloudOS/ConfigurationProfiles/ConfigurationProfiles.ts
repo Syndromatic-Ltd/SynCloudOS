@@ -30,7 +30,7 @@ import type {
   SynCloudOSPolicyDecision,
   SynCloudOSPolicyEvaluationOptions,
   SynCloudOSPolicyOriginSummary,
-  SynCloudOSPolicyProfile,
+  SynCloudOSConfigurationProfile,
   SynCloudOSPolicyRequest,
   SynCloudOSPolicySubject,
   SynCloudOSPolicySubjectGrant,
@@ -42,18 +42,19 @@ import type {
 } from "./policyTypes";
 import type { SynCloudOSRole } from "../PermissionManager/permissionTypes";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
-import { defaultPolicyProfile } from "./defaultPolicyProfile";
+import { SCAuthorizationRights } from "../Authorization/SCAuthorization";
+import { defaultConfigurationProfile } from "./defaultConfigurationProfile";
 
-type PolicyKitDependencies = {
+type ConfigurationProfilesDependencies = {
   readonly bundleLoader?: Pick<SynCloudOSRuntime["bundles"], "getBundle">;
   readonly loginServices?: Pick<SynCloudOSRuntime["login"], "getSnapshot">;
   readonly identity?: Pick<SynCloudOSRuntime["identity"], "getCurrentUser">;
   readonly accessMode?: SynCloudOSAccessMode;
   /** The host's role taxonomy. Defaults to the conservative framework profile. */
-  readonly profile?: SynCloudOSPolicyProfile;
+  readonly profile?: SynCloudOSConfigurationProfile;
 };
 
-type PolicyKitLoginSession = Pick<SynCloudOSLoginSessionSnapshot, "isAuthorised" | "status" | "synId" | "accessClass" | "displayName">;
+type ConfigurationProfilesLoginSession = Pick<SynCloudOSLoginSessionSnapshot, "isAuthorised" | "status" | "synId" | "accessClass" | "displayName">;
 
 /** The framework's host-authority role. Every profile gets it, with every
  * capability; it satisfies all role and access-class requirements. Sessions
@@ -66,7 +67,7 @@ function hasOwn(record: object, key: string) {
 
 /** Validates a host profile and returns its role table with the reserved
  * system role added. */
-function policyRoleTable(profile: SynCloudOSPolicyProfile): Readonly<Record<string, readonly string[]>> {
+function policyRoleTable(profile: SynCloudOSConfigurationProfile): Readonly<Record<string, readonly string[]>> {
   if (!profile || typeof profile !== "object" || typeof profile.id !== "string" || profile.id.trim().length === 0)
     throw new TypeError("A policy profile requires an id.");
   if (!profile.roles || typeof profile.roles !== "object") throw new TypeError(`Policy profile ${profile.id} requires roles.`);
@@ -86,12 +87,12 @@ function policyRoleTable(profile: SynCloudOSPolicyProfile): Readonly<Record<stri
   return Object.freeze(table);
 }
 
-export function createPolicyKit(runtime: SynCloudOSRuntime, dependencies: PolicyKitDependencies = {}) {
+export function createConfigurationProfiles(runtime: SynCloudOSRuntime, dependencies: ConfigurationProfilesDependencies = {}) {
 const BundleLoader = dependencies.bundleLoader ?? runtime.bundles;
 const EventBus = runtime.events;
 const RuntimeStore = runtime.store;
 const LoginServices = dependencies.loginServices ?? runtime.login;
-const profile = dependencies.profile ?? defaultPolicyProfile;
+const profile = dependencies.profile ?? defaultConfigurationProfile;
 const roleCapabilities = policyRoleTable(profile);
 const Identity = dependencies.identity ?? {
   getCurrentUser: () => identityUserFromSession(runtime.login.getSnapshot()),
@@ -107,7 +108,7 @@ function isIdentityUser(value: unknown): value is SynCloudOSIdentityUser {
     typeof candidate.isAnonymous === "boolean";
 }
 
-function identityUserFromSession(session: PolicyKitLoginSession): SynCloudOSIdentityUser {
+function identityUserFromSession(session: ConfigurationProfilesLoginSession): SynCloudOSIdentityUser {
   return {
     id: session.synId ? `synid.${session.synId}` : "public.anonymous",
     displayName: session.displayName ?? "Public",
@@ -122,8 +123,8 @@ const policies = new Map<string, SynCloudOSPolicy>();
 // The audit is runtime diagnostics: bounded by entries and bytes, outside the
 // reactive snapshot, and counted by the resource ledger.
 const auditLog = runtime.diagnostics.policyDecisions;
-/** Subjects this PolicyKit has issued grants for; see issueSubject. */
-const subjectGrants = new WeakMap<SynCloudOSPolicySubjectGrant, SynCloudOSPolicySubject>();
+/** Subjects this ConfigurationProfiles has issued grants for; see issueSubject. */
+let subjectGrants = new WeakMap<SynCloudOSPolicySubjectGrant, SynCloudOSPolicySubject>();
 const registeredRoleCapabilities = new Map<SynCloudOSRole, Map<string, number>>();
 
 const defaultAccessMode: SynCloudOSAccessMode =
@@ -186,7 +187,7 @@ function getPolicyRoles() {
   return Object.keys(roleCapabilities) as SynCloudOSRole[];
 }
 
-function getEffectiveRole(claimedRole: SynCloudOSRole | undefined, session: PolicyKitLoginSession): SynCloudOSRole {
+function getEffectiveRole(claimedRole: SynCloudOSRole | undefined, session: ConfigurationProfilesLoginSession): SynCloudOSRole {
   const role = profile.resolveRole(
     Object.freeze({ isAuthorised: session.isAuthorised, synId: session.synId ?? null, accessClass: session.accessClass ?? null }),
     claimedRole,
@@ -195,7 +196,7 @@ function getEffectiveRole(claimedRole: SynCloudOSRole | undefined, session: Poli
   return typeof role === "string" && role !== SYSTEM_ROLE && hasOwn(roleCapabilities, role) ? role : profile.anonymousRole;
 }
 
-function getLoginSessionSubject(): PolicyKitLoginSession {
+function getLoginSessionSubject(): ConfigurationProfilesLoginSession {
   const session = LoginServices.getSnapshot();
   return {
     isAuthorised: session.isAuthorised,
@@ -215,7 +216,7 @@ function getSubject(
   registrations?: RegisteredRoleCapabilities,
 ): SynCloudOSPolicySubject {
   // Request metadata (origin, source, subject) describes a caller but is never
-  // an authority source. Only a grant this PolicyKit issued to host code can
+  // an authority source. Only a grant this ConfigurationProfiles issued to host code can
   // substitute a subject; everything else resolves from the runtime's
   // host-owned login and identity services.
   const granted = request.subjectGrant ? subjectGrants.get(request.subjectGrant) : undefined;
@@ -297,15 +298,22 @@ function appPolicy(app: SynCloudOSPolicyRequest["app"]): SynCloudOSAppAccessPoli
 
 /** DEV-build convenience for the developer console's display actions. The
  * console is a host tool; this is not an authorisation boundary. */
-function isDeveloperDisplayAction(request: SynCloudOSPolicyRequest) {
-  if (!import.meta.env.DEV) return false;
-  return (
-    request.origin === "developerConsole" &&
-    (request.action === "webspring.enter" ||
-      request.action === "webspring.displayApp" ||
-      request.action === "webspring.refresh" ||
-      request.action === "statechart.goto")
-  );
+const knownActions = new Set([
+  "webspring.enter", "webspring.displayApp", "webspring.refresh", "app.register", "app.launch", "app.close",
+  "route.open", "external.open", "service.use", "runtime.inspect", "runtime.mutate", "statechart.goto",
+  "diagnostics.view", "plugin.register", "notification.post", "notification.action", "notification.requestPermission",
+]);
+
+function diagnosticURL(value: string | undefined): string | undefined {
+  if (!value) return value;
+  try {
+    const url = new URL(value, "https://diagnostic.invalid");
+    url.username = "";
+    url.password = "";
+    url.search = "";
+    url.hash = "";
+    return value.startsWith("/") ? url.pathname : url.href;
+  } catch { return "[invalid URL]"; }
 }
 
 function resourceForRequest(request: SynCloudOSPolicyRequest) {
@@ -328,7 +336,9 @@ function summariseContext(context?: Record<string, unknown>): SynCloudOSPolicyCo
   if (keys.length === 0) return undefined;
   return {
     keys: [...keys],
-    values: Object.fromEntries(keys.slice(0, 20).map((key) => [key, summariseContextValue(context[key])]))
+    values: Object.fromEntries(keys.slice(0, 20).map((key) => [key,
+      /token|secret|password|credential|cookie|authorization|assertion|challenge/i.test(key)
+        ? "[redacted]" : summariseContextValue(context[key])]))
   };
 }
 
@@ -337,10 +347,10 @@ function summariseOrigin(request: SynCloudOSPolicyRequest, resource?: string): S
     action: request.action,
     origin: request.origin,
     source: request.source,
-    resource,
+    resource: resource === request.href || resource === request.route ? diagnosticURL(resource) : resource,
     appId: request.app?.bundleIdentifier,
-    route: request.route,
-    href: request.href
+    route: diagnosticURL(request.route),
+    href: diagnosticURL(request.href)
   };
 }
 
@@ -453,11 +463,11 @@ function appendTrace(decision: SynCloudOSPolicyDecision, entry: SynCloudOSPolicy
 
 /**
  * Names the missing capabilities and the role that lacks them, so a denial says what to grant: a
- * host grants role capabilities with the policyProfile passed to mountSynCloudOS.
+ * host grants role capabilities with the configurationProfile passed to mountSynCloudOS.
  */
 function missingCapabilityReason(what: string, subject: SynCloudOSPolicySubject, missing: readonly string[]): string {
   const names = missing.join(", ");
-  return `${what} requires additional capabilities: ${names}. The role "${subject.role}" does not hold ${missing.length === 1 ? "it" : "them"}; the host grants role capabilities in its policy profile (policyProfile.roles).`;
+  return `${what} requires additional capabilities: ${names}. The role "${subject.role}" does not hold ${missing.length === 1 ? "it" : "them"}; the host grants role capabilities in its policy profile (configurationProfile.roles).`;
 }
 
 function baseDecision(
@@ -480,13 +490,13 @@ function baseDecision(
     decision: allowed ? "allow" : "deny",
     allowed,
     reason,
-    mode: request.accessMode ?? accessMode,
+    mode: accessMode,
     subjectRole: subject.role,
     subjectId: subject.user?.id,
-    resource,
+    resource: resource === request.href || resource === request.route ? diagnosticURL(resource) : resource,
     appId: request.app?.bundleIdentifier,
-    route: request.route,
-    href: request.href,
+    route: diagnosticURL(request.route),
+    href: diagnosticURL(request.href),
     at: Date.now(),
     origin: request.origin,
     source: request.source,
@@ -514,7 +524,7 @@ function decide(
   request: SynCloudOSPolicyRequest,
   registrations?: RegisteredRoleCapabilities,
 ): SynCloudOSPolicyDecision {
-  const mode = request.accessMode ?? accessMode;
+  const mode = accessMode;
   const subject = getSubject(request, registrations);
   const policy = appPolicy(request.app);
   const app = request.app ?? null;
@@ -539,18 +549,26 @@ function decide(
   const isPublicByManifest = policy.public === true || bundlePermissions.includes("app.open.public");
   const explicitlyRequiresLogin = policy.requiresLogin === true || bundlePermissions.includes("app.open.protected");
 
-  if (isDeveloperDisplayAction(request)) {
-    return baseDecision(request, subject, true, "Developer display-level action allowed.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
-  }
+  if (disposed)
+    return baseDecision(request, subject, false, "Configuration profiles are disposed.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+  if (!knownActions.has(request.action) && requiredCapabilities.length === 0)
+    return baseDecision(request, subject, false, "Unknown action requires an explicit named capability.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+  if (!hasRole(subject, requiredRoles) || !hasAccessClass(subject, requiredAccessClasses))
+    return baseDecision(request, subject, false, "This action requires a different role or access class.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+  const missing = getMissingCapabilities(subject, requiredCapabilities);
+  if (missing.length > 0)
+    return baseDecision(request, subject, false, missingCapabilityReason("This action", subject, missing), requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+  if (explicitlyRequiresLogin && !subject.isAuthenticated)
+    return baseDecision(request, subject, false, "This app requires an authorised session.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
 
   if (request.action === "runtime.inspect") {
     return baseDecision(request, subject, true, "Runtime inspection is allowed.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
   }
 
   if (request.action === "runtime.mutate" || request.action === "plugin.register") {
-    const required = unique([...requiredCapabilities, "runtime.configure"]);
+    const required = unique([...requiredCapabilities, SCAuthorizationRights[request.action as keyof typeof SCAuthorizationRights]]);
     const allowed = required.every((capability) => hasCapability(subject, capability));
-    return baseDecision(request, subject, allowed, allowed ? "Privileged runtime mutation allowed." : "Runtime mutation requires runtime.configure.", required, requiredRoles, requiredAccessClasses, trace);
+    return baseDecision(request, subject, allowed, allowed ? "Privileged runtime mutation allowed." : "The subject does not hold this named right.", required, requiredRoles, requiredAccessClasses, trace);
   }
 
   if ((request.action === "app.launch" || request.action === "route.open" || isSystemApp) && !hasAccessClass(subject, requiredAccessClasses)) {
@@ -575,10 +593,6 @@ function decide(
       return baseDecision(request, subject, false, "External routes must use http or https.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
     }
     return baseDecision(request, subject, true, "External route allowed.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
-  }
-
-  if (request.action === "route.open" && isExternalApp) {
-    return baseDecision(request, subject, true, "External app route allowed.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
   }
 
   if (request.action === "app.launch" || request.action === "route.open") {
@@ -634,7 +648,15 @@ function applyRegisteredPolicies(
   let decision = cloneDecision(initialDecision);
   for (const [policyId, policy] of policies.entries()) {
     const before = cloneDecision(decision);
-    const next = cloneDecision(policy(request, cloneDecision(decision)));
+    let proposed: SynCloudOSPolicyDecision;
+    try {
+      proposed = policy(Object.freeze({ ...request }), cloneDecision(decision));
+    } catch {
+      proposed = { ...before, allowed: false, reason: "Registered restriction failed closed." };
+    }
+    // Restrictions may deny, never mint authority or rewrite decision provenance.
+    const next = cloneDecision({ ...before, allowed: before.allowed && proposed?.allowed === true,
+      reason: typeof proposed?.reason === "string" ? proposed.reason : "Registered restriction failed closed." });
     next.decision = next.allowed ? "allow" : "deny";
     if (next.allowed !== before.allowed && next.reason === before.reason) {
       next.reason = next.allowed
@@ -693,15 +715,15 @@ const notifyChanged = () => {
   for (const listener of [...changeListeners]) listener();
 };
 
-const policyKit = {
+const configurationProfiles = {
   /**
    * Issues host authority to evaluate requests as `subject` (for example a
    * host contribution seeding trusted documents, or plugin registration by
-   * the runtime). Only host code holding this PolicyKit can issue grants;
+   * the runtime). Only host code holding this ConfigurationProfiles can issue grants;
    * the returned grant is opaque and honoured only by this instance.
    */
   issueSubject(subject: SynCloudOSPolicySubject, options: Readonly<{ purpose: string }>): SynCloudOSPolicySubjectGrant {
-    if (disposed) throw new Error("PolicyKit is disposed.");
+    if (disposed) throw new Error("ConfigurationProfiles is disposed.");
     if (!subject || typeof subject !== "object" || !subject.user || typeof subject.role !== "string" || !Array.isArray(subject.capabilities))
       throw new TypeError("A policy subject grant requires a complete subject.");
     if (!options || typeof options.purpose !== "string" || options.purpose.trim().length === 0)
@@ -730,7 +752,7 @@ const policyKit = {
 
   runtimeId: RuntimeStore.runtimeId,
   registerRoleCapabilities(input: SynCloudOSRoleCapabilityRegistrationInput): SynCloudOSRoleCapabilityRegistration {
-    if (disposed) throw new Error("PolicyKit is disposed.");
+    if (disposed) throw new Error("ConfigurationProfiles is disposed.");
     const { roles, capabilities } = normaliseRoleCapabilityRegistration(input);
     for (const role of roles) {
       const grants = registeredRoleCapabilities.get(role) ?? new Map<string, number>();
@@ -775,7 +797,7 @@ const policyKit = {
   can(request: SynCloudOSPolicyRequest | string) {
     const policyRequest =
       typeof request === "string"
-        ? { action: request, requiredCapabilities: [request], source: "PolicyKit.can" }
+        ? { action: request, requiredCapabilities: [request], source: "ConfigurationProfiles.can" }
         : request;
     return this.authorise(policyRequest).allowed;
   },
@@ -785,7 +807,7 @@ const policyKit = {
   },
 
   registerPolicy(policyId: string, policy: SynCloudOSPolicy) {
-    if (disposed) throw new Error("PolicyKit is disposed.");
+    if (disposed) throw new Error("ConfigurationProfiles is disposed.");
     if (policies.has(policyId)) throw new TypeError(`Policy ${policyId} is already registered.`);
     policies.set(policyId, policy);
     notifyChanged();
@@ -869,11 +891,12 @@ const policyKit = {
 
   dispose() {
     disposed = true;
+    subjectGrants = new WeakMap();
     changeListeners.clear();
     policies.clear();
     registeredRoleCapabilities.clear();
   }
 };
 
-return policyKit;
+return configurationProfiles;
 }

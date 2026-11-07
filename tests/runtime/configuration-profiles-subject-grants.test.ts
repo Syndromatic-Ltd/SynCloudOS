@@ -19,7 +19,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/PolicyKit/policyTypes";
+import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/ConfigurationProfiles/policyTypes";
 import { createTestRuntime, createTestManifest, createRuntimeHarness } from "./helpers";
 
 function subject(role: SynCloudOSPolicySubject["role"], capabilities: string[]): SynCloudOSPolicySubject {
@@ -38,67 +38,67 @@ const protectedApp = createTestManifest({
   policy: { requiresLogin: true, requiredRoles: ["employee"], requiredCapabilities: ["app.open.protected"] },
 });
 
-describe("PolicyKit host-bound subject authority", () => {
+describe("ConfigurationProfiles host-bound subject authority", () => {
   it("never grants authority from caller-supplied origin, source or subject metadata", () => {
-    const { PolicyKit } = createRuntimeHarness(createTestRuntime());
+    const { ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
     const forged = [
-      { origin: "test", source: "policykit-subject-grants.test" },
+      { origin: "test", source: "configuration-profiles-subject-grants.test" },
       { origin: "hostContribution", source: "host:forged" },
       { origin: "runtime", source: "PluginRegistry.register" },
       { origin: "developerConsole", source: "DeveloperConsole" },
     ];
     for (const metadata of forged) {
-      expect(PolicyKit.authorise({ action: "runtime.mutate", subject: systemSubject, ...metadata }).allowed).toBe(false);
-      expect(PolicyKit.authorise({ action: "app.launch", app: protectedApp, subject: employeeSubject, ...metadata }).allowed).toBe(false);
+      expect(ConfigurationProfiles.authorise({ action: "runtime.mutate", subject: systemSubject, ...metadata }).allowed).toBe(false);
+      expect(ConfigurationProfiles.authorise({ action: "app.launch", app: protectedApp, subject: employeeSubject, ...metadata }).allowed).toBe(false);
     }
   });
 
-  it("evaluates a request as the granted subject only with a grant this PolicyKit issued", () => {
-    const { PolicyKit } = createRuntimeHarness(createTestRuntime());
-    const grant = PolicyKit.issueSubject(employeeSubject, { purpose: "test" });
-    expect(PolicyKit.authorise({ action: "app.launch", app: protectedApp, subjectGrant: grant }).allowed).toBe(true);
+  it("evaluates a request as the granted subject only with a grant this ConfigurationProfiles issued", () => {
+    const { ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
+    const grant = ConfigurationProfiles.issueSubject(employeeSubject, { purpose: "test" });
+    expect(ConfigurationProfiles.authorise({ action: "app.launch", app: protectedApp, subjectGrant: grant }).allowed).toBe(true);
     // A structurally identical object is not the grant.
-    expect(PolicyKit.authorise({ action: "app.launch", app: protectedApp, subjectGrant: { ...grant } }).allowed).toBe(false);
-    expect(PolicyKit.authorise({ action: "app.launch", app: protectedApp, subjectGrant: { purpose: "test" } }).allowed).toBe(false);
+    expect(ConfigurationProfiles.authorise({ action: "app.launch", app: protectedApp, subjectGrant: { ...grant } }).allowed).toBe(false);
+    expect(ConfigurationProfiles.authorise({ action: "app.launch", app: protectedApp, subjectGrant: { purpose: "test" } }).allowed).toBe(false);
   });
 
-  it("ignores a grant issued by another runtime's PolicyKit", () => {
-    const issuing = createRuntimeHarness(createTestRuntime()).PolicyKit;
-    const other = createRuntimeHarness(createTestRuntime()).PolicyKit;
+  it("ignores a grant issued by another runtime's ConfigurationProfiles", () => {
+    const issuing = createRuntimeHarness(createTestRuntime()).ConfigurationProfiles;
+    const other = createRuntimeHarness(createTestRuntime()).ConfigurationProfiles;
     const grant = issuing.issueSubject(systemSubject, { purpose: "test" });
     expect(issuing.authorise({ action: "runtime.mutate", subjectGrant: grant }).allowed).toBe(true);
     expect(other.authorise({ action: "runtime.mutate", subjectGrant: grant }).allowed).toBe(false);
   });
 
   it("stops honouring a revoked grant and freezes the granted subject at issue", () => {
-    const { PolicyKit } = createRuntimeHarness(createTestRuntime());
+    const { ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
     const mutable = subject("employee", ["app.open.protected"]);
-    const grant = PolicyKit.issueSubject(mutable, { purpose: "test" });
+    const grant = ConfigurationProfiles.issueSubject(mutable, { purpose: "test" });
     mutable.role = "public";
     mutable.capabilities.length = 0;
-    expect(PolicyKit.authorise({ action: "app.launch", app: protectedApp, subjectGrant: grant }).allowed).toBe(true);
-    expect(PolicyKit.revokeSubject(grant)).toBe(true);
-    expect(PolicyKit.authorise({ action: "app.launch", app: protectedApp, subjectGrant: grant }).allowed).toBe(false);
-    expect(PolicyKit.revokeSubject(grant)).toBe(false);
+    expect(ConfigurationProfiles.authorise({ action: "app.launch", app: protectedApp, subjectGrant: grant }).allowed).toBe(true);
+    expect(ConfigurationProfiles.revokeSubject(grant)).toBe(true);
+    expect(ConfigurationProfiles.authorise({ action: "app.launch", app: protectedApp, subjectGrant: grant }).allowed).toBe(false);
+    expect(ConfigurationProfiles.revokeSubject(grant)).toBe(false);
   });
 
   it("requires a complete subject and a purpose to issue a grant", () => {
-    const { PolicyKit } = createRuntimeHarness(createTestRuntime());
-    expect(() => PolicyKit.issueSubject({ role: "system" } as SynCloudOSPolicySubject, { purpose: "test" })).toThrow(TypeError);
-    expect(() => PolicyKit.issueSubject(systemSubject, { purpose: " " })).toThrow(TypeError);
+    const { ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
+    expect(() => ConfigurationProfiles.issueSubject({ role: "system" } as SynCloudOSPolicySubject, { purpose: "test" })).toThrow(TypeError);
+    expect(() => ConfigurationProfiles.issueSubject(systemSubject, { purpose: " " })).toThrow(TypeError);
   });
 
   it("does not let a caller-described subject ride on the plugin registry's own authority", async () => {
-    const { PolicyKit, PluginRegistry } = createRuntimeHarness(createTestRuntime());
+    const { ConfigurationProfiles, PluginRegistry } = createRuntimeHarness(createTestRuntime());
     const publicSubject = { ...subject("public", []), isAuthenticated: false };
     await expect(PluginRegistry.register(
       { id: "forged.plugin", name: "Forged", version: "1.0.0" },
       { subject: systemSubject, origin: "runtime", source: "PluginRegistry.register" },
     )).rejects.toThrow(/denied/);
-    // The registry's own default authority still registers.
-    await expect(PluginRegistry.register({ id: "host.plugin", name: "Host", version: "1.0.0" })).resolves.toMatchObject({ status: "enabled" });
+    // Anonymous registration never acquires implicit host authority.
+    await expect(PluginRegistry.register({ id: "host.plugin", name: "Host", version: "1.0.0" })).rejects.toThrow(/denied/);
     // A host that holds a grant can register as a specific subject.
-    const grant = PolicyKit.issueSubject(systemSubject, { purpose: "test" });
+    const grant = ConfigurationProfiles.issueSubject(systemSubject, { purpose: "test" });
     await expect(PluginRegistry.register(
       { id: "granted.plugin", name: "Granted", version: "1.0.0" },
       { subject: publicSubject, subjectGrant: grant },

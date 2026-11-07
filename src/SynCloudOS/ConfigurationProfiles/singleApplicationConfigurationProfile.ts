@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { defaultPolicyProfile } from "./defaultPolicyProfile";
-import type { SynCloudOSPolicyProfile } from "./policyTypes";
+import { defaultConfigurationProfile } from "./defaultConfigurationProfile";
+import type { SynCloudOSConfigurationProfile } from "./policyTypes";
 
 /** Capabilities a single application may grant to its anonymous visitors by declaring them. */
 const DOCUMENT_STORE_CAPABILITY = /^documentStore\.[A-Za-z.]+$/u;
@@ -28,15 +28,15 @@ const DOCUMENT_STORE_CAPABILITY = /^documentStore\.[A-Za-z.]+$/u;
  * The policy profile of a single-application host without sign-in: the default profile, with the
  * document-store capabilities the primary application declares in `permissions` granted to the
  * anonymous role. Other declared capabilities are not granted this way. A host that passes its own
- * `policyProfile` keeps it unchanged.
+ * `configurationProfile` keeps it unchanged.
  */
-export function singleApplicationPolicyProfile(permissions: readonly string[]): SynCloudOSPolicyProfile {
+export function singleApplicationConfigurationProfile(permissions: readonly string[]): SynCloudOSConfigurationProfile {
   const granted = [...new Set(permissions.filter(permission => DOCUMENT_STORE_CAPABILITY.test(permission)))];
-  if (granted.length === 0) return defaultPolicyProfile;
-  const anonymous = defaultPolicyProfile.anonymousRole;
-  const roles = Object.fromEntries(Object.entries(defaultPolicyProfile.roles).map(([role, capabilities]) => [
+  if (granted.length === 0) return defaultConfigurationProfile;
+  const anonymous = defaultConfigurationProfile.anonymousRole;
+  const roles = Object.fromEntries(Object.entries(defaultConfigurationProfile.roles).map(([role, capabilities]) => [
     role,
     Object.freeze(role === anonymous || role === "authenticated" ? [...new Set([...capabilities, ...granted])] : [...capabilities]),
   ]));
-  return Object.freeze({ ...defaultPolicyProfile, id: "syncloudos.single-application", roles: Object.freeze(roles) });
+  return Object.freeze({ ...defaultConfigurationProfile, id: "syncloudos.single-application", roles: Object.freeze(roles) });
 }

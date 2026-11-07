@@ -20,7 +20,7 @@ This page describes the layers, the conventions they share, and the package that
 │                               MIDI, location, discovery, compression│
 ├──────────────────────────────────────────────────────────────────────┤
 │  SynCloudOS runtime           statechart, commands, responders,      │
-│                               undo, documents, windows, PolicyKit    │
+│                               undo, documents, windows, ConfigurationProfiles    │
 ├──────────────────────────────────────────────────────────────────────┤
 │  Foundation                   bytes, ranges, collections, formatters │
 └──────────────────────────────────────────────────────────────────────┘
@@ -28,7 +28,7 @@ This page describes the layers, the conventions they share, and the package that
 
 **[Foundation](foundation.md)** supplies data and collection values shared by NSE, FX and the runtime. It has no React, view or runtime dependency and runs in web workers. Foundation and NSE share the `NSE` prefix, following Foundation and AppKit in Cocoa.
 
-**The runtime** is the kernel. Each runtime owns its store, services and queues, so several runtimes can share one page. It tracks the application lifecycle in a statechart, routes key events through a responder chain, dispatches typed commands, keeps undo history, persists documents and manages windows. PolicyKit checks every privileged action against the roles your host defines.
+**The runtime** is the kernel. Each runtime owns its store, services and queues, so several runtimes can share one page. It tracks the application lifecycle in a statechart, routes key events through a responder chain, dispatches typed commands, keeps undo history, persists documents and manages windows. ConfigurationProfiles checks every privileged action against the roles your host defines.
 
 **FX** is a set of thirteen frameworks written in TypeScript as web-native analogues of Apple's Core frameworks. AnimationFX corresponds to Core Animation, GraphicsFX to Quartz 2D, ImageFX to Core Image, TextFX to Core Text, AudioFX to AVAudioEngine, HapticsFX to Core Haptics and MotionFX to Core Motion. Four more cover media time, video, MIDI and location, one covers on-device discovery, and CompressionFX corresponds to Apple’s Compression framework. See the [FX frameworks](fx/README.md).
 

@@ -51,7 +51,7 @@ export function createMountedLocationClient(
     if (!permissions().includes(capability))
       throw securityError(`SynWare capability ${capability} must be declared.`);
     if (!authorise(capability))
-      throw securityError(`PolicyKit denied SynWare capability ${capability}.`);
+      throw securityError(`ConfigurationProfiles denied SynWare capability ${capability}.`);
   };
   return Object.freeze({
     createManager(signal?: AbortSignal): LFXLocationManager {

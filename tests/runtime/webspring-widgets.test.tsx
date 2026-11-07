@@ -219,7 +219,7 @@ describe("WebspringWidgetShelf", () => {
     });
     runtimes.push(runtime);
     await runtime.boot({ initialPathname: "/" });
-    expect(runtime.policy.getAccessMode()).toBe("mixed");
+    expect(runtime.configurationProfiles.getAccessMode()).toBe("mixed");
     expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(false);
     const results: unknown[] = [];
     let navigation!: Promise<void>;

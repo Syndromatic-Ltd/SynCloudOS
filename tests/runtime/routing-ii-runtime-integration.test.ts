@@ -296,9 +296,9 @@ describe("Routing II actual host integration", () => {
   it("rechecks canonical route policy immediately before commit after an awaited host fence", async () => {
     const runtime = fixture(() => false, []);
     const sync = vi.spyOn(runtime.environment.routeSynchronization, "syncRoute");
-    const originalAuthorise = runtime.policy.authorise.bind(runtime.policy);
+    const originalAuthorise = runtime.configurationProfiles.authorise.bind(runtime.configurationProfiles);
     let denyRoute = false;
-    vi.spyOn(runtime.policy, "authorise").mockImplementation((request) => {
+    vi.spyOn(runtime.configurationProfiles, "authorise").mockImplementation((request) => {
       const decision = originalAuthorise(request);
       if (!denyRoute || request.action !== "route.open") return decision;
       return Object.freeze({ ...decision, allowed: false, reason: "route policy changed before commit" });

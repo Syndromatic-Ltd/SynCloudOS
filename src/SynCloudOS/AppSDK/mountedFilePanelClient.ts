@@ -37,7 +37,7 @@ export function createMountedFilePanelClient(options:MountedFilePanelOptions):Ap
     try{access=options.access(capability,audit);}catch{
       return {kind:'denied',reason:'policy',message:'Runtime policy did not admit this file action.'};
     }
-    return !access.declared||!access.allowed?{kind:'denied',reason:'policy',message:!access.declared?'The file capability must be declared.':'PolicyKit did not admit this file action.'}:null;
+    return !access.declared||!access.allowed?{kind:'denied',reason:'policy',message:!access.declared?'The file capability must be declared.':'ConfigurationProfiles did not admit this file action.'}:null;
   };
   const status=(capability:'file.open'|'file.write',provider:AppCapabilityStatus['provider']):AppCapabilityStatus=>{
     const active=options.activation();
@@ -83,7 +83,7 @@ export function createMountedFilePanelClient(options:MountedFilePanelOptions):Ap
             const lease=writeSignal?AbortSignal.any([signal,writeSignal]):signal;
             if(lease.aborted)throw new FilePanelReferenceError('operation-aborted','The export owner ended.');
             options.assertLive();
-            if(denied('file.write',true))throw new FilePanelReferenceError('permission-denied','PolicyKit did not admit this export.');
+            if(denied('file.write',true))throw new FilePanelReferenceError('permission-denied','ConfigurationProfiles did not admit this export.');
             if(target.kind==='download-export'&&dispatched)throw new FilePanelReferenceError('reference-released','This download target has already been used.');
             dispatched=true;
             const completion=await target.sink.write(payload,lease);

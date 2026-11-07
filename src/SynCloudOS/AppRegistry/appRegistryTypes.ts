@@ -19,7 +19,7 @@
  */
 
 import type { WindowBounds, WindowRecord, WindowRole, WindowStyle } from "../Windows";
-import type { SynCloudOSAppAccessPolicy } from "../PolicyKit/policyTypes";
+import type { SynCloudOSAppAccessPolicy } from "../ConfigurationProfiles/policyTypes";
 import type {
   SynCloudOSAppInfoExplanation,
   SynCloudOSAppInfoIssue,

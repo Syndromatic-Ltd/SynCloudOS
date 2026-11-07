@@ -35,13 +35,13 @@ type SynCloudOSBootManagerHotData = {
 };
 
 export function createBootManager(runtime: SynCloudOSRuntime, dependencies: {
-  appRegistry: any; policyKit: any; responsiveModeManager: any;
+  appRegistry: any; configurationProfiles: any; responsiveModeManager: any;
   routeManager: any; runtimeController: any; serviceRegistry: any; statechart: any;
   loginServices: any; localeServices: any;
 }) {
 const AppRegistry = dependencies.appRegistry;
 const EventBus = runtime.events;
-const PolicyKit = dependencies.policyKit;
+const ConfigurationProfiles = dependencies.configurationProfiles;
 const ResponsiveModeManager = dependencies.responsiveModeManager;
 const RouteManager = dependencies.routeManager;
 const RuntimeController = dependencies.runtimeController;
@@ -227,7 +227,7 @@ const bootManager = {
       });
       runStage(stages, "runtime.markBooted", "Mark runtime booted", () => RuntimeController.markBooted());
       runStage(stages, "statechart.initial", "Enter initial workspace route", () => {
-        const webspringPolicy = PolicyKit.authorise({
+        const webspringPolicy = ConfigurationProfiles.authorise({
           action: "webspring.enter",
           source: "SynCloudOS.BootManager.boot",
           origin: "runtime"

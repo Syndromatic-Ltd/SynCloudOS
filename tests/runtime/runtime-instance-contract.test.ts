@@ -116,7 +116,7 @@ describe("createSynCloudOS", () => {
     expect(runtime.runtimeId).toBe("runtime:ports");
     expect(runtime.signal).toBeInstanceOf(AbortSignal);
     expect(runtime.services.runtimeId).toBe(runtime.runtimeId);
-    expect(runtime.policy.runtimeId).toBe(runtime.runtimeId);
+    expect(runtime.configurationProfiles.runtimeId).toBe(runtime.runtimeId);
     expect(runtime.bundles.runtimeId).toBe(runtime.runtimeId);
     expect(runtime.events.runtimeId).toBe(runtime.runtimeId);
     expect(vi.isMockFunction(environment.addWindowListener)).toBe(true);
@@ -433,8 +433,8 @@ describe("createSynCloudOS", () => {
       const employeeCapabilities = PermissionManager.getRoleCapabilities("employee");
       expect(publicCapabilities).toContain("app.open.public");
       expect(employeeCapabilities).toContain("diagnostics.view");
-      expect(runtime.policy.getCurrentSubject().capabilities).toEqual(expect.arrayContaining(publicCapabilities));
-      expect(runtime.policy.authorise({
+      expect(runtime.configurationProfiles.getCurrentSubject().capabilities).toEqual(expect.arrayContaining(publicCapabilities));
+      expect(runtime.configurationProfiles.authorise({
         action: "runtime.inspect",
         origin: "runtime",
         requiredCapabilities: ["app.open.public"],
@@ -448,11 +448,11 @@ describe("createSynCloudOS", () => {
         draft.loginServices.status = "unlocked";
         draft.loginServices.accessClass = "team";
       });
-      expect(runtime.policy.getCurrentSubject()).toMatchObject({
+      expect(runtime.configurationProfiles.getCurrentSubject()).toMatchObject({
         role: "employee",
         capabilities: expect.arrayContaining(employeeCapabilities),
       });
-      expect(runtime.policy.authorise({
+      expect(runtime.configurationProfiles.authorise({
         action: "diagnostics.view",
         origin: "runtime",
         requiredCapabilities: ["diagnostics.view"],

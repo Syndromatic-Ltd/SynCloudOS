@@ -39,12 +39,12 @@ export function createMountedLuminaClient(
   const requireCapability = (capability: MountedLuminaCapability) => {
     mountSignal.throwIfAborted();
     if (!permissions().includes(capability)) throw new DOMException(`SynWare capability ${capability} must be declared.`, "SecurityError");
-    if (!authorise(capability)) throw new DOMException(`PolicyKit denied SynWare capability ${capability}.`, "SecurityError");
+    if (!authorise(capability)) throw new DOMException(`ConfigurationProfiles denied SynWare capability ${capability}.`, "SecurityError");
   };
   const requireAnyCapability = () => {
     const declared = permissions().filter((permission): permission is MountedLuminaCapability => permission === "lumina.index" || permission === "lumina.query");
     if (declared.length === 0) throw new DOMException("SynWare must declare lumina.index or lumina.query before acquiring a Lumina session.", "SecurityError");
-    if (!declared.some((capability) => authorise(capability))) throw new DOMException("PolicyKit denied the declared Lumina capabilities.", "SecurityError");
+    if (!declared.some((capability) => authorise(capability))) throw new DOMException("ConfigurationProfiles denied the declared Lumina capabilities.", "SecurityError");
   };
   return Object.freeze({
     createIndex(signal?: AbortSignal) {

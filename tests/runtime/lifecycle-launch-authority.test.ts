@@ -41,7 +41,7 @@ describe("lifecycle launch and activation authority", () => {
       draft.loginServices.isAuthorised = true;
       draft.lifecycle["com.example.restricted"] = "suspended";
     });
-    runtime.policy.registerPolicy("deny-restricted", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-restricted", (request, decision) =>
       request.app?.bundleIdentifier === "com.example.restricted" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
 
@@ -76,7 +76,7 @@ describe("lifecycle launch and activation authority", () => {
     });
 
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
-    runtime.policy.registerPolicy("deny-facade", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-facade", (request, decision) =>
       request.app?.bundleIdentifier === "com.example.facade-restricted" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
 
@@ -105,7 +105,7 @@ describe("lifecycle launch and activation authority", () => {
     expect(runtime.store.getSnapshot().lifecycle["com.example.lifecycle-facade"]).toBe("ready");
 
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
-    runtime.policy.registerPolicy("deny-transition", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-transition", (request, decision) =>
       request.app?.bundleIdentifier === "com.example.lifecycle-facade" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
     expect(runtime.lifecycle.transition("com.example.lifecycle-facade", "active", { source: "test" })).toMatchObject({

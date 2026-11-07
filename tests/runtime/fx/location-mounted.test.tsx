@@ -53,7 +53,7 @@ function mountedFix(sequence: number, receivedAtMonotonicSeconds: number): LFXLo
   });
 }
 
-it("keeps PolicyKit authoritative before a mounted LocationFX client reaches its host adapter", async () => {
+it("keeps ConfigurationProfiles authoritative before a mounted LocationFX client reaches its host adapter", async () => {
   const host = createSynWareTestHost({ app: LocationProbe, document });
   await host.render();
   host.adapters.location.allow();

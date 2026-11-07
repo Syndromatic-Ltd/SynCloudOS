@@ -33,7 +33,7 @@ describe('mounted file-panel status and completion',()=>{
     expect(f.client.getStatus()).toMatchObject({save:{availability:'available',provider:'download',activation:'inactive',permission:'unknown'},persistentSave:{availability:'unsupported'}});
     expect(f.exportFile).not.toHaveBeenCalled();expect(f.access.mock.calls.every(call=>call[1]===false)).toBe(true);
   });
-  it('requires declared write, PolicyKit and selection activation without fallback',async()=>{
+  it('requires declared write, ConfigurationProfiles and selection activation without fallback',async()=>{
     const f=fixture();f.setDeclared(false);expect(await f.client.save(request)).toMatchObject({kind:'denied'});
     f.setDeclared(true);f.setAllowed(false);expect(await f.client.save(request)).toMatchObject({kind:'denied'});
     f.setAllowed(true);f.setActive(false);expect(await f.client.save(request)).toMatchObject({kind:'denied'});expect(f.exportFile).not.toHaveBeenCalled();

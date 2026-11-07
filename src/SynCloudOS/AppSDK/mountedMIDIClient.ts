@@ -90,17 +90,17 @@ export function createMountedMIDIClient(
           },
           subscribeEndpoints(listener) {
             if (!requireNormal())
-              throw new DOMException("PolicyKit denied SynWare capability midi.access.", "SecurityError");
+              throw new DOMException("ConfigurationProfiles denied SynWare capability midi.access.", "SecurityError");
             return access.subscribeEndpoints(listener);
           },
           subscribeInput(endpoint: MIFXEndpointSnapshot, listener: MIFXInputListener) {
             if (!requireNormal())
-              return Promise.reject(new DOMException("PolicyKit denied SynWare capability midi.access.", "SecurityError"));
+              return Promise.reject(new DOMException("ConfigurationProfiles denied SynWare capability midi.access.", "SecurityError"));
             return access.subscribeInput(endpoint, listener);
           },
           acquireOutput(endpoint: MIFXEndpointSnapshot) {
             if (!requireNormal())
-              return Promise.reject(new DOMException("PolicyKit denied SynWare capability midi.access.", "SecurityError"));
+              return Promise.reject(new DOMException("ConfigurationProfiles denied SynWare capability midi.access.", "SecurityError"));
             return access.acquireOutput(endpoint);
           },
           dispose,

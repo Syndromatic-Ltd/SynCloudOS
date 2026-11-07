@@ -143,7 +143,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
   });
   // The test-host option is a declaration convenience, not an out-of-band
   // entitlement. Merge it into the V1 manifest before canonical capture so
-  // bundle permissions, PolicyKit's app/bundle view, and the app facade all
+  // bundle permissions, ConfigurationProfiles's app/bundle view, and the app facade all
   // observe exactly the same immutable declaration.
   let context: SynWareContextValue | null = null;
   const supplied = options.application
@@ -195,7 +195,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
           },
           trustedDocumentKinds: options.applicationDocuments.trustedDocumentKinds,
         } : {}),
-        policyProfile: {
+        configurationProfile: {
           id: "syncloudos.testing",
           anonymousRole: "public",
           roles: {

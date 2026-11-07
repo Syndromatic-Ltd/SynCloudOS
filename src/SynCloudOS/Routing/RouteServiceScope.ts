@@ -25,7 +25,7 @@ import { strongerServiceVersion } from "../serviceVersion";
 
 export type RouteServiceScope = Readonly<Pick<AppServiceClient, "require" | "optional">>;
 
-/** Uses the existing manifest, PolicyKit and ServiceRegistry. Preparation can
+/** Uses the existing manifest, ConfigurationProfiles and ServiceRegistry. Preparation can
  * acquire only an explicitly safe host projection, never a mounted client. */
 export function createRouteServiceScope(
   runtime: SynCloudOSRuntime,
@@ -56,7 +56,7 @@ export function createRouteServiceScope(
     if (!manifest || !declaration || !app) return denied("The route service was not declared by this application.");
     const minimumVersion = strongerServiceVersion(declaration.minimumVersion, token.minimumVersion);
     if (minimumVersion === null) return denied("Invalid service minimum version.");
-    const authorise = () => runtime.policy.authorise({ action: "service.use", origin: "runtime", source: "RouteServiceScope", app,
+    const authorise = () => runtime.configurationProfiles.authorise({ action: "service.use", origin: "runtime", source: "RouteServiceScope", app,
       bundlePermissions: [...(manifest.permissions ?? [])], context: { appId, serviceId: token.id, declared: true, required: declaration.required !== false, minimumVersion: minimumVersion ?? null } });
     const policy = authorise();
     if (!policy.allowed) return denied(policy.reason);

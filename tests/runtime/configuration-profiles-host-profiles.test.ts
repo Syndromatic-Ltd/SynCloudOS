@@ -19,20 +19,20 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createPolicyKit } from "../../src/SynCloudOS/PolicyKit/PolicyKit";
-import { testPolicyProfile } from "./testPolicyProfile";
-import type { SynCloudOSPolicyProfile } from "../../src/SynCloudOS/PolicyKit/policyTypes";
+import { createConfigurationProfiles } from "../../src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles";
+import { testConfigurationProfile } from "./testConfigurationProfile";
+import type { SynCloudOSConfigurationProfile } from "../../src/SynCloudOS/ConfigurationProfiles/policyTypes";
 import type { SynCloudOSIdentityUser } from "../../src/SynCloudOS/Identity/identityTypes";
 import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
 import { createTestManifest, createTestRuntime, unlockRuntime } from "./helpers";
 
 /** A second, independently branded host: a gallery with visitors, members and curators. */
-const atelierProfile: SynCloudOSPolicyProfile = {
+const atelierProfile: SynCloudOSConfigurationProfile = {
   id: "atelier",
   roles: {
     visitor: ["webspring.display", "route.open.public", "app.open.public"],
     member: ["webspring.display", "route.open.public", "app.open.public", "app.open.protected"],
-    curator: ["webspring.display", "route.open.public", "app.open.public", "app.open.protected", "runtime.configure"],
+    curator: ["webspring.display", "route.open.public", "app.open.public", "app.open.protected", "runtime.mutate"],
   },
   anonymousRole: "visitor",
   resolveRole: (session, claimedRole) => {
@@ -43,7 +43,7 @@ const atelierProfile: SynCloudOSPolicyProfile = {
 
 type Session = { isAuthorised: boolean; accessClass?: "team" | "external" | null; synId?: string | null };
 
-function policyKitFor(profile: SynCloudOSPolicyProfile | undefined, session: Session, claimedRole?: string) {
+function configurationProfilesFor(profile: SynCloudOSConfigurationProfile | undefined, session: Session, claimedRole?: string) {
   const runtime = createTestRuntime();
   const snapshot = {
     isAuthorised: session.isAuthorised,
@@ -61,8 +61,8 @@ function policyKitFor(profile: SynCloudOSPolicyProfile | undefined, session: Ses
       isAnonymous: !session.isAuthorised,
     },
   };
-  return createPolicyKit(runtime, {
-    profile: profile ?? testPolicyProfile,
+  return createConfigurationProfiles(runtime, {
+    profile: profile ?? testConfigurationProfile,
     accessMode: "mixed",
     loginServices: { getSnapshot: () => snapshot } as unknown as Pick<SynCloudOSRuntime["login"], "getSnapshot">,
     identity: identity as unknown as Pick<SynCloudOSRuntime["identity"], "getCurrentUser">,
@@ -78,10 +78,10 @@ const staffApp = createTestManifest({
   policy: { requiresLogin: true, requiredRoles: ["employee"] },
 });
 
-describe("PolicyKit host policy profiles", () => {
+describe("ConfigurationProfiles host policy profiles", () => {
   it("reports each host's own role taxonomy, with the framework's system role in both", () => {
-    const testHost = policyKitFor(undefined, { isAuthorised: false });
-    const atelier = policyKitFor(atelierProfile, { isAuthorised: false });
+    const testHost = configurationProfilesFor(undefined, { isAuthorised: false });
+    const atelier = configurationProfilesFor(atelierProfile, { isAuthorised: false });
     expect(testHost.getRoleCapabilityReport().map((item) => item.role)).toEqual(
       ["public", "betaTester", "employee", "admin", "founder", "system"],
     );
@@ -91,41 +91,41 @@ describe("PolicyKit host policy profiles", () => {
   });
 
   it("derives subjects through the host's profile", () => {
-    expect(policyKitFor(atelierProfile, { isAuthorised: false }).getCurrentSubject().role).toBe("visitor");
-    expect(policyKitFor(atelierProfile, { isAuthorised: true }).getCurrentSubject().role).toBe("member");
-    expect(policyKitFor(atelierProfile, { isAuthorised: true }, "curator").getCurrentSubject().role).toBe("curator");
+    expect(configurationProfilesFor(atelierProfile, { isAuthorised: false }).getCurrentSubject().role).toBe("visitor");
+    expect(configurationProfilesFor(atelierProfile, { isAuthorised: true }).getCurrentSubject().role).toBe("member");
+    expect(configurationProfilesFor(atelierProfile, { isAuthorised: true }, "curator").getCurrentSubject().role).toBe("curator");
     // Another host's role name is not a role here; the session still resolves.
-    expect(policyKitFor(atelierProfile, { isAuthorised: true }, "founder").getCurrentSubject().role).toBe("member");
+    expect(configurationProfilesFor(atelierProfile, { isAuthorised: true }, "founder").getCurrentSubject().role).toBe("member");
     // Test host's team → employee derivation belongs to its profile only.
-    expect(policyKitFor(undefined, { isAuthorised: true, accessClass: "team" }).getCurrentSubject().role).toBe("employee");
-    const atelierTeam = policyKitFor(atelierProfile, { isAuthorised: true, accessClass: "team" }).getCurrentSubject();
+    expect(configurationProfilesFor(undefined, { isAuthorised: true, accessClass: "team" }).getCurrentSubject().role).toBe("employee");
+    const atelierTeam = configurationProfilesFor(atelierProfile, { isAuthorised: true, accessClass: "team" }).getCurrentSubject();
     expect(atelierTeam.role).toBe("member");
     expect(atelierTeam.capabilities).not.toContain("diagnostics.view");
   });
 
   it("names the missing capabilities and the role that lacks them in a denial", () => {
-    const decision = policyKitFor(atelierProfile, { isAuthorised: false }).evaluate({
+    const decision = configurationProfilesFor(atelierProfile, { isAuthorised: false }).evaluate({
       action: "documentStore.getDraft",
       requiredCapabilities: ["documentStore.drafts.read", "route.open.public"],
     } as never);
     expect(decision.allowed).toBe(false);
     expect(decision.reason).toContain("requires additional capabilities: documentStore.drafts.read.");
     expect(decision.reason).toContain("The role \"visitor\" does not hold it");
-    expect(decision.reason).toContain("policyProfile.roles");
+    expect(decision.reason).toContain("configurationProfile.roles");
   });
 
   it("authorises the same manifests differently on each host", () => {
-    expect(policyKitFor(atelierProfile, { isAuthorised: false }).evaluate({ action: "app.launch", app: membersApp }).allowed).toBe(false);
-    expect(policyKitFor(atelierProfile, { isAuthorised: true }).evaluate({ action: "app.launch", app: membersApp }).allowed).toBe(true);
-    expect(policyKitFor(atelierProfile, { isAuthorised: true, accessClass: "team" }).evaluate({ action: "app.launch", app: staffApp }).allowed).toBe(false);
-    expect(policyKitFor(undefined, { isAuthorised: true, accessClass: "team" }).evaluate({ action: "app.launch", app: membersApp }).allowed).toBe(false);
-    expect(policyKitFor(undefined, { isAuthorised: true, accessClass: "team" }).evaluate({ action: "app.launch", app: staffApp }).allowed).toBe(true);
-    expect(policyKitFor(atelierProfile, { isAuthorised: true }, "curator").evaluate({ action: "runtime.mutate" }).allowed).toBe(true);
-    expect(policyKitFor(atelierProfile, { isAuthorised: true }).evaluate({ action: "runtime.mutate" }).allowed).toBe(false);
+    expect(configurationProfilesFor(atelierProfile, { isAuthorised: false }).evaluate({ action: "app.launch", app: membersApp }).allowed).toBe(false);
+    expect(configurationProfilesFor(atelierProfile, { isAuthorised: true }).evaluate({ action: "app.launch", app: membersApp }).allowed).toBe(true);
+    expect(configurationProfilesFor(atelierProfile, { isAuthorised: true, accessClass: "team" }).evaluate({ action: "app.launch", app: staffApp }).allowed).toBe(false);
+    expect(configurationProfilesFor(undefined, { isAuthorised: true, accessClass: "team" }).evaluate({ action: "app.launch", app: membersApp }).allowed).toBe(false);
+    expect(configurationProfilesFor(undefined, { isAuthorised: true, accessClass: "team" }).evaluate({ action: "app.launch", app: staffApp }).allowed).toBe(true);
+    expect(configurationProfilesFor(atelierProfile, { isAuthorised: true }, "curator").evaluate({ action: "runtime.mutate" }).allowed).toBe(true);
+    expect(configurationProfilesFor(atelierProfile, { isAuthorised: true }).evaluate({ action: "runtime.mutate" }).allowed).toBe(false);
   });
 
   it("accepts capability registrations only for the host's roles", () => {
-    const atelier = policyKitFor(atelierProfile, { isAuthorised: true });
+    const atelier = configurationProfilesFor(atelierProfile, { isAuthorised: true });
     expect(() => atelier.registerRoleCapabilities({ roles: ["employee"], capabilities: ["gallery.hang"] })).toThrow(/Unknown policy role/);
     const registration = atelier.registerRoleCapabilities({ roles: ["member"], capabilities: ["gallery.visit"] });
     expect(atelier.getCurrentSubject().capabilities).toContain("gallery.visit");
@@ -134,14 +134,14 @@ describe("PolicyKit host policy profiles", () => {
   });
 
   it("rejects profiles that would redefine the framework's system role or omit their anonymous role", () => {
-    expect(() => policyKitFor({ ...atelierProfile, roles: { ...atelierProfile.roles, system: ["app.open.public"] } }, { isAuthorised: false }))
+    expect(() => configurationProfilesFor({ ...atelierProfile, roles: { ...atelierProfile.roles, system: ["app.open.public"] } }, { isAuthorised: false }))
       .toThrow(/system/);
-    expect(() => policyKitFor({ ...atelierProfile, anonymousRole: "guest" }, { isAuthorised: false })).toThrow(/anonymous/);
+    expect(() => configurationProfilesFor({ ...atelierProfile, anonymousRole: "guest" }, { isAuthorised: false })).toThrow(/anonymous/);
   });
 
   it("fails closed when a profile resolves a role it did not declare", () => {
-    const careless: SynCloudOSPolicyProfile = { ...atelierProfile, resolveRole: () => "system" };
-    const subject = policyKitFor(careless, { isAuthorised: true }).getCurrentSubject();
+    const careless: SynCloudOSConfigurationProfile = { ...atelierProfile, resolveRole: () => "system" };
+    const subject = configurationProfilesFor(careless, { isAuthorised: true }).getCurrentSubject();
     expect(subject.role).toBe("visitor");
     expect(subject.capabilities).not.toContain("*");
   });
@@ -152,20 +152,20 @@ describe("PolicyKit host policy profiles", () => {
     unlockRuntime(testHost);
     await testHost.identity.session.refresh();
     expect(testHost.login.getSnapshot().accessClass).toBe("team");
-    expect(testHost.policy.getCurrentSubject().role).toBe("employee");
+    expect(testHost.configurationProfiles.getCurrentSubject().role).toBe("employee");
 
-    const atelier = createTestRuntime({ policyProfile: atelierProfile });
+    const atelier = createTestRuntime({ configurationProfile: atelierProfile });
     unlockRuntime(atelier);
     await atelier.identity.session.refresh();
     expect(atelier.login.getSnapshot().accessClass).toBe("external");
     expect(atelier.identity.getCurrentUser().role).toBe("member");
-    expect(atelier.policy.getCurrentSubject().role).toBe("member");
+    expect(atelier.configurationProfiles.getCurrentSubject().role).toBe("member");
   });
 
   it("uses explicit test policy without replacing another host profile", () => {
-    expect(testPolicyProfile.id).toBe("framework-test-host");
-    const runtime = createTestRuntime({ policyProfile: atelierProfile });
-    expect(runtime.policy.getRoleCapabilityReport().map((item) => item.role)).toEqual(["visitor", "member", "curator", "system"]);
-    expect(createTestRuntime().policy.getRoleCapabilityReport().map((item) => item.role)).toContain("betaTester");
+    expect(testConfigurationProfile.id).toBe("framework-test-host");
+    const runtime = createTestRuntime({ configurationProfile: atelierProfile });
+    expect(runtime.configurationProfiles.getRoleCapabilityReport().map((item) => item.role)).toEqual(["visitor", "member", "curator", "system"]);
+    expect(createTestRuntime().configurationProfiles.getRoleCapabilityReport().map((item) => item.role)).toContain("betaTester");
   });
 });

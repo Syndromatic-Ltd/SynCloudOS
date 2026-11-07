@@ -612,8 +612,8 @@ interface ImportMeta { glob(pattern: string, options: { eager: true; query?: str
     expect(browserGraph.some((path) => /[\\/](?:SynWare|JournalShared|SynCalShared|PortfolioCollectionsService)(?:[\\/.]|$)/u.test(path))).toBe(false);
     for (const filename of publicClientFiles) {
       const source = readFileSync(join(repositoryRoot, "src", "SynCloudOS", "AppSDK", filename), "utf8");
-      expect(source).not.toMatch(/from\s+["'][^"']*(?:appRuntimeTypes|SynCloudOSRuntime|Store|Manager|Adapter|Registry|PolicyKit)[^"']*["']/u);
-      expect(source).not.toMatch(/import(?:\s+type)?\s*\{[^}]*\b(?:SynCloudOSRuntime|Store|Manager|Adapter|Registry|PolicyKit)\b/u);
+      expect(source).not.toMatch(/from\s+["'][^"']*(?:appRuntimeTypes|SynCloudOSRuntime|Store|Manager|Adapter|Registry|ConfigurationProfiles)[^"']*["']/u);
+      expect(source).not.toMatch(/import(?:\s+type)?\s*\{[^}]*\b(?:SynCloudOSRuntime|Store|Manager|Adapter|Registry|ConfigurationProfiles)\b/u);
     }
   });
 

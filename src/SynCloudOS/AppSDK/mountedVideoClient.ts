@@ -120,7 +120,7 @@ export function createMountedVideoClient(
     if (!permissions().includes(required))
       throw securityError(`SynWare capability ${required} must be declared.`);
     if (!authorise(required))
-      throw securityError(`PolicyKit denied SynWare capability ${required}.`);
+      throw securityError(`ConfigurationProfiles denied SynWare capability ${required}.`);
   };
 
   return Object.freeze({

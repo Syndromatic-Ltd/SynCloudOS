@@ -419,11 +419,11 @@ describe("runtime drag sessions", () => {
     expect(() => secondDrag.manager.readPayload(session.id, ["text/plain"], new AbortController().signal)).toThrow(/authoritative|session|lease/i);
   });
 
-  it("routes same-app and cross-app negotiation through PolicyKit allow/deny", async () => {
-    const runtime = createTestRuntime({ id: "runtime:drag:policykit", dragAuthorisation: { authorise: () => true } });
+  it("routes same-app and cross-app negotiation through ConfigurationProfiles allow/deny", async () => {
+    const runtime = createTestRuntime({ id: "runtime:drag:configuration-profiles", dragAuthorisation: { authorise: () => true } });
     const studio = scopedDrag(runtime, "com.example.studio");
     const publisher = scopedDrag(runtime, "com.example.publisher");
-    const authorise = vi.spyOn(runtime.policy, "authorise");
+    const authorise = vi.spyOn(runtime.configurationProfiles, "authorise");
 
     const sameApp = studio.manager.begin({
       source: studio.endpoint("assets"),
@@ -440,7 +440,7 @@ describe("runtime drag sessions", () => {
       && request.requiredCapabilities?.includes("transfer.same-application"),
     )).toBe(true);
 
-    runtime.policy.registerPolicy("deny-studio", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-studio", (request, decision) =>
       request.app?.bundleIdentifier === "com.example.studio" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
     const deniedSame = studio.manager.begin({
@@ -452,7 +452,7 @@ describe("runtime drag sessions", () => {
       endpoint: studio.endpoint("editor"),
       operations: ["copy"],
     })).rejects.toMatchObject({ name: "SecurityError" });
-    expect(runtime.policy.removePolicy("deny-studio")).toBe(true);
+    expect(runtime.configurationProfiles.removePolicy("deny-studio")).toBe(true);
 
     runtime.store.mutate((draft) => { draft.loginServices.accessClass = "team"; });
     const authorisedCross = studio.manager.begin({
@@ -469,7 +469,7 @@ describe("runtime drag sessions", () => {
       && request.requiredCapabilities?.includes("transfer.cross-application"),
     )).toBe(true);
 
-    runtime.policy.registerPolicy("deny-publisher", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-publisher", (request, decision) =>
       request.action === "transfer.negotiate" && request.app?.bundleIdentifier === "com.example.publisher"
         ? { ...decision, allowed: false, decision: "deny" }
         : decision,
@@ -485,12 +485,12 @@ describe("runtime drag sessions", () => {
     })).resolves.toMatchObject({ operation: "none" });
   });
 
-  it("does not let a parallel dragAuthorisation port bypass a PolicyKit denial", async () => {
+  it("does not let a parallel dragAuthorisation port bypass a ConfigurationProfiles denial", async () => {
     const runtime = createTestRuntime({
-      id: "runtime:drag:policykit-no-bypass",
+      id: "runtime:drag:configuration-profiles-no-bypass",
       dragAuthorisation: { authorise: () => true },
     });
-    runtime.policy.registerPolicy("deny-publisher", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-publisher", (request, decision) =>
       request.app?.bundleIdentifier === "com.example.publisher" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
     const studio = scopedDrag(runtime, "com.example.studio");

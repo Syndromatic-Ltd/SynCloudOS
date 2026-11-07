@@ -486,7 +486,7 @@ function createRuntimeConformanceInspectorSource(runtime: SynCloudOSRuntime): Co
         .map((event) => ({ id: event.id, at: event.at, kind: "route.open" }));
       const capabilityRows = appRows.map((app) => {
         const capability = app.type === "system" ? "diagnostics.view" : "app.open.public";
-        const decision = runtime.policy.evaluate({
+        const decision = runtime.configurationProfiles.evaluate({
           action: "route.open",
           app,
           origin: "developerConsole",

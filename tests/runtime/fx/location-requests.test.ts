@@ -184,7 +184,7 @@ describe("LocationFX foreground requests", () => {
     expect(fixture.clearWatch).toHaveBeenCalledTimes(1);
   });
 
-  it("checks manifest declaration and PolicyKit before invoking a prompt-capable request", async () => {
+  it("checks manifest declaration and ConfigurationProfiles before invoking a prompt-capable request", async () => {
     const adapter = browserFixture({ permission: "granted" });
     const service = new LocationService(adapter.adapter);
     const mount = new AbortController();

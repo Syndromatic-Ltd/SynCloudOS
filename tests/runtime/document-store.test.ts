@@ -29,7 +29,7 @@ import {
   createPersistenceDocumentStore
 } from "../../src/SynCloudOS/DocumentStore";
 import type { SynCloudOSDocumentKindMetadata } from "../../src/SynCloudOS/DocumentStore";
-import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest, SynCloudOSPolicySubject } from "../../src/SynCloudOS/PolicyKit/policyTypes";
+import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest, SynCloudOSPolicySubject } from "../../src/SynCloudOS/ConfigurationProfiles/policyTypes";
 import { createPersistence } from "../../src/SynCloudOS/Persistence/Persistence";
 import { defineSyncUndoAction } from "../../src/SynCloudOS/Undo";
 import { createTestRuntime } from "./helpers";
@@ -147,7 +147,7 @@ describe("SynCloudOS DocumentStore in-memory adapter", () => {
     policyAudit.length = 0;
   });
 
-  it("gates draft writes through PolicyKit capabilities", async () => {
+  it("gates draft writes through ConfigurationProfiles capabilities", async () => {
     const store = createInMemoryDocumentStore({ kinds: [journalKind], authorise });
     const publicSubject = createSubject(["app.open.public"], "public");
 

@@ -19,7 +19,7 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/PolicyKit/policyTypes";
+import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/ConfigurationProfiles/policyTypes";
 import { asPolicySubject, createTestRuntime, createTestManifest, createRuntimeHarness } from "./helpers";
 
 function createSubject(
@@ -41,9 +41,9 @@ function createSubject(
   };
 }
 
-describe("PolicyKit evaluation and PluginRegistry policy contracts", () => {
+describe("ConfigurationProfiles evaluation and PluginRegistry policy contracts", () => {
   it("keeps evaluate and explain non-auditing while authorise audits rich decisions", async () => {
-    const { PolicyKit } = createRuntimeHarness(createTestRuntime());
+    const { ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
     const publicSubject = createSubject("public", ["app.open.public"], false);
     const protectedApp = createTestManifest({
       bundleIdentifier: "com.example.protected-trace-app",
@@ -56,9 +56,9 @@ describe("PolicyKit evaluation and PluginRegistry policy contracts", () => {
     const request = {
       action: "app.launch",
       app: protectedApp,
-      ...asPolicySubject(PolicyKit, publicSubject),
+      ...asPolicySubject(ConfigurationProfiles, publicSubject),
       origin: "test",
-      source: "policykit-plugin.test",
+      source: "configuration-profiles-plugin.test",
       context: {
         requestId: "trace-1",
         attempt: 2,
@@ -66,27 +66,27 @@ describe("PolicyKit evaluation and PluginRegistry policy contracts", () => {
       }
     } as const;
 
-    PolicyKit.clearAuditLog();
+    ConfigurationProfiles.clearAuditLog();
 
-    expect(PolicyKit.evaluate(request)).toMatchObject({ allowed: false });
-    expect(PolicyKit.explain(request)).toMatchObject({ allowed: false });
-    expect(PolicyKit.getAuditLog()).toHaveLength(0);
+    expect(ConfigurationProfiles.evaluate(request)).toMatchObject({ allowed: false });
+    expect(ConfigurationProfiles.explain(request)).toMatchObject({ allowed: false });
+    expect(ConfigurationProfiles.getAuditLog()).toHaveLength(0);
 
-    const decision = PolicyKit.authorise(request);
-    expect(PolicyKit).not.toHaveProperty("authorize");
+    const decision = ConfigurationProfiles.authorise(request);
+    expect(ConfigurationProfiles).not.toHaveProperty("authorize");
 
-    expect(PolicyKit.getAuditLog()).toHaveLength(1);
+    expect(ConfigurationProfiles.getAuditLog()).toHaveLength(1);
     expect(decision).toMatchObject({
       allowed: false,
       origin: "test",
-      source: "policykit-plugin.test",
+      source: "configuration-profiles-plugin.test",
       missingRoles: ["employee"],
       matchedRoles: [],
       matchedCapabilities: [],
       missingCapabilities: ["app.open.protected", "runtime.inspect"],
       originSummary: {
         origin: "test",
-        source: "policykit-plugin.test",
+        source: "configuration-profiles-plugin.test",
         appId: "com.example.protected-trace-app"
       },
       contextSummary: {
@@ -104,18 +104,18 @@ describe("PolicyKit evaluation and PluginRegistry policy contracts", () => {
   });
 
   it("returns copied audit, role, and capability reports", async () => {
-    const { PolicyKit } = createRuntimeHarness(createTestRuntime());
+    const { ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
     const publicSubject = createSubject("public", ["app.open.public"], false);
 
-    PolicyKit.clearAuditLog();
-    PolicyKit.authorise({
+    ConfigurationProfiles.clearAuditLog();
+    ConfigurationProfiles.authorise({
       action: "runtime.mutate",
-      ...asPolicySubject(PolicyKit, publicSubject),
+      ...asPolicySubject(ConfigurationProfiles, publicSubject),
       origin: "test",
-      source: "policykit-plugin.test"
+      source: "configuration-profiles-plugin.test"
     });
 
-    const auditReport = PolicyKit.getAuditReport();
+    const auditReport = ConfigurationProfiles.getAuditReport();
     expect(auditReport).toMatchObject({
       total: 1,
       allowed: 0,
@@ -126,22 +126,22 @@ describe("PolicyKit evaluation and PluginRegistry policy contracts", () => {
     });
 
     auditReport.decisions[0]?.missingCapabilities.push("mutated.capability");
-    expect(PolicyKit.getAuditLog()[0]?.missingCapabilities).not.toContain("mutated.capability");
+    expect(ConfigurationProfiles.getAuditLog()[0]?.missingCapabilities).not.toContain("mutated.capability");
 
-    const roleReport = PolicyKit.getRoleCapabilityReport();
+    const roleReport = ConfigurationProfiles.getRoleCapabilityReport();
     const adminReport = roleReport.find((item) => item.role === "admin");
-    expect(adminReport?.capabilities).toContain("runtime.configure");
+    expect(adminReport?.capabilities).toContain("runtime.mutate");
     adminReport?.capabilities.push("mutated.capability");
-    expect(PolicyKit.getRoleCapabilities("admin")).not.toContain("mutated.capability");
+    expect(ConfigurationProfiles.getRoleCapabilities("admin")).not.toContain("mutated.capability");
 
-    const matrix = PolicyKit.getCapabilityMatrix();
-    expect(matrix.admin["runtime.configure"]).toBe(true);
-    matrix.admin["runtime.configure"] = false;
-    expect(PolicyKit.getCapabilityMatrix().admin["runtime.configure"]).toBe(true);
+    const matrix = ConfigurationProfiles.getCapabilityMatrix();
+    expect(matrix.admin["runtime.mutate"]).toBe(true);
+    matrix.admin["runtime.mutate"] = false;
+    expect(ConfigurationProfiles.getCapabilityMatrix().admin["runtime.mutate"]).toBe(true);
   });
 
   it("enforces required access classes independently of capabilities", async () => {
-    const { PolicyKit } = createRuntimeHarness(createTestRuntime());
+    const { ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
     const protectedApp = createTestManifest({
       bundleIdentifier: "com.example.team-gallery",
       type: "system",
@@ -171,20 +171,20 @@ describe("PolicyKit evaluation and PluginRegistry policy contracts", () => {
       }
     };
 
-    expect(PolicyKit.evaluate({
+    expect(ConfigurationProfiles.evaluate({
       action: "route.open",
       app: protectedApp,
-      ...asPolicySubject(PolicyKit, externalSubject),
+      ...asPolicySubject(ConfigurationProfiles, externalSubject),
       origin: "test"
     })).toMatchObject({
       allowed: false,
       missingAccessClasses: ["team"]
     });
 
-    expect(PolicyKit.evaluate({
+    expect(ConfigurationProfiles.evaluate({
       action: "route.open",
       app: protectedApp,
-      ...asPolicySubject(PolicyKit, teamSubject),
+      ...asPolicySubject(ConfigurationProfiles, teamSubject),
       origin: "test"
     })).toMatchObject({
       allowed: true,
@@ -193,50 +193,51 @@ describe("PolicyKit evaluation and PluginRegistry policy contracts", () => {
   });
 
   it("checks plugin registration policy before storing or invoking plugin hooks", async () => {
-    const { PluginRegistry, PolicyKit } = createRuntimeHarness(createTestRuntime());
+    const { PluginRegistry, ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
     const publicSubject = createSubject("public", ["app.open.public"], false);
     const register = vi.fn();
 
-    PolicyKit.clearAuditLog();
+    ConfigurationProfiles.clearAuditLog();
 
     await expect(
       PluginRegistry.register(
         { id: "denied-plugin", name: "Denied Plugin", version: "1.0.0", register },
-        { ...asPolicySubject(PolicyKit, publicSubject), origin: "test", source: "policykit-plugin.test" }
+        { ...asPolicySubject(ConfigurationProfiles, publicSubject), origin: "test", source: "configuration-profiles-plugin.test" }
       )
     ).rejects.toThrow(/denied-plugin/);
 
     expect(register).not.toHaveBeenCalled();
     expect(PluginRegistry.getPlugin("denied-plugin")).toBeNull();
-    expect(PolicyKit.getAuditLog().at(-1)).toMatchObject({
+    expect(ConfigurationProfiles.getAuditLog().at(-1)).toMatchObject({
       action: "plugin.register",
       allowed: false,
       origin: "test",
-      missingCapabilities: ["runtime.configure"]
+      missingCapabilities: ["plugin.register"]
     });
   });
 
   it("preserves existing plugin registration calls that pass a runtime object", async () => {
-    const { PluginRegistry, PolicyKit } = createRuntimeHarness(createTestRuntime());
+    const { PluginRegistry, ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
     const runtime = { name: "Runtime Fixture" };
     const register = vi.fn();
 
-    PolicyKit.clearAuditLog();
+    ConfigurationProfiles.clearAuditLog();
 
     const record = await PluginRegistry.register(
       { id: "legacy-plugin", name: "Legacy Plugin", version: "1.0.0", register },
-      runtime
+      runtime,
+      asPolicySubject(ConfigurationProfiles, createSubject("system", ["*"]))
     );
 
     expect(record).toMatchObject({ status: "enabled" });
     expect(register).toHaveBeenCalledWith(runtime);
     expect(PluginRegistry.getPlugin("legacy-plugin")).toBe(record);
-    expect(PolicyKit.getAuditLog().at(-1)).toMatchObject({
+    expect(ConfigurationProfiles.getAuditLog().at(-1)).toMatchObject({
       action: "plugin.register",
       allowed: true,
       origin: "runtime",
       subjectRole: "system",
-      matchedCapabilities: ["runtime.configure"]
+      matchedCapabilities: ["plugin.register"]
     });
   });
 });

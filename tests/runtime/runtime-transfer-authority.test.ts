@@ -181,7 +181,7 @@ describe("runtime-issued transfer authority", () => {
     await expect(source.pasteboards.find.snapshot()).resolves.toEqual([{ type: "text/plain", value: "owned" }]);
     await source.pasteboards.find.clear();
     await expect(source.pasteboards.find.snapshot()).resolves.toEqual([]);
-    const pasteboardAudit = (runtime.policy as typeof runtime.policy & { getAuditLog(limit?: number): readonly unknown[] }).getAuditLog(24);
+    const pasteboardAudit = (runtime.configurationProfiles as typeof runtime.configurationProfiles & { getAuditLog(limit?: number): readonly unknown[] }).getAuditLog(24);
     expect(pasteboardAudit).toEqual(expect.arrayContaining([
       expect.objectContaining({
         action: "pasteboard.read",
@@ -241,7 +241,7 @@ describe("runtime-issued transfer authority", () => {
     const source = registeredScope(runtime, "com.example.source");
     const destination = registeredScope(runtime, "com.example.destination");
     runtime.store.mutate((draft) => { draft.loginServices.accessClass = "team"; });
-    runtime.policy.registerPolicy("grant-source", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("grant-source", (request, decision) =>
       request.app?.bundleIdentifier === "com.example.source" ? { ...decision, allowed: true } : decision,
     );
 
@@ -285,7 +285,7 @@ describe("runtime-issued transfer authority", () => {
     await expect(source.drag.manager.performDrop(session.id)).resolves.toEqual({ accepted: true, operation: "copy" });
 
     expect(authorise).toHaveBeenCalledTimes(2);
-    const policy = runtime.policy as typeof runtime.policy & { getAuditLog(limit?: number): readonly unknown[] };
+    const policy = runtime.configurationProfiles as typeof runtime.configurationProfiles & { getAuditLog(limit?: number): readonly unknown[] };
     expect(policy.getAuditLog(8)).toEqual(expect.arrayContaining([
       expect.objectContaining({
         action: "transfer.negotiate",

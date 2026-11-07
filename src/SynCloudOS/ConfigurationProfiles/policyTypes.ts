@@ -74,30 +74,30 @@ export interface SynCloudOSPolicySubject {
 }
 
 /** What a policy profile sees of the login session when resolving a role. */
-export interface SynCloudOSPolicyProfileSession {
+export interface SynCloudOSConfigurationProfileSession {
   readonly isAuthorised: boolean;
   readonly synId?: string | null;
   readonly accessClass?: SynCloudOSBetaAccessClass | null;
 }
 
 /**
- * A host's role taxonomy. PolicyKit's engine (subject derivation, grants,
+ * A host's role taxonomy. ConfigurationProfiles's engine (subject derivation, grants,
  * requirements, access modes, audit) is generic; which roles exist, what each
  * may do and how a signed-in session maps to a role are host policy.
- * `defaultPolicyProfile` is the default.
+ * `defaultConfigurationProfile` is the default.
  */
-export interface SynCloudOSPolicyProfile {
+export interface SynCloudOSConfigurationProfile {
   readonly id: string;
   /** Built-in capabilities per role, in report order. `"*"` grants every
    * capability. The framework's `system` role is reserved and added by
-   * PolicyKit; a profile cannot declare it. */
+   * ConfigurationProfiles; a profile cannot declare it. */
   readonly roles: Readonly<Record<string, readonly string[]>>;
   /** The role of a session that is not authorised. Must be declared in `roles`. */
   readonly anonymousRole: SynCloudOSRole;
   /** The role a session holds. `claimedRole` is the identity service's role
    * for the user, if any. A role the profile did not declare (or `system`)
    * fails closed to `anonymousRole`. */
-  resolveRole(session: SynCloudOSPolicyProfileSession, claimedRole?: SynCloudOSRole): SynCloudOSRole;
+  resolveRole(session: SynCloudOSConfigurationProfileSession, claimedRole?: SynCloudOSRole): SynCloudOSRole;
   /** Capabilities a session's access class adds to its role's. */
   accessClassCapabilities?(accessClass: SynCloudOSBetaAccessClass | null | undefined): readonly string[];
   /** The access class of an active identity session, from the server's role
@@ -108,8 +108,8 @@ export interface SynCloudOSPolicyProfile {
 /**
  * Host-issued authority to evaluate a request as a specific subject instead
  * of the one derived from the runtime's login and identity services. Opaque:
- * only the PolicyKit that issued it honours it, so it cannot be forged from
- * request metadata. Issue with `PolicyKit.issueSubject`.
+ * only the ConfigurationProfiles that issued it honours it, so it cannot be forged from
+ * request metadata. Issue with `ConfigurationProfiles.issueSubject`.
  */
 export interface SynCloudOSPolicySubjectGrant {
   readonly purpose: string;
@@ -126,7 +126,7 @@ export interface SynCloudOSPolicyRequest {
   href?: string;
   accessMode?: SynCloudOSAccessMode;
   /** Descriptive only. Evaluation uses the derived subject unless the request
-   * carries a `subjectGrant` issued by this PolicyKit. */
+   * carries a `subjectGrant` issued by this ConfigurationProfiles. */
   subject?: SynCloudOSPolicySubject;
   subjectGrant?: SynCloudOSPolicySubjectGrant;
   bundlePermissions?: string[];

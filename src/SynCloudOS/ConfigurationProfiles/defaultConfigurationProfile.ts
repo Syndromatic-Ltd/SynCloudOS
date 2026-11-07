@@ -18,10 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { SynCloudOSPolicyProfile } from "./policyTypes";
+import type { SynCloudOSConfigurationProfile } from "./policyTypes";
 
 /** Conservative defaults for a host that has not supplied its own role policy. */
-export const defaultPolicyProfile: SynCloudOSPolicyProfile = Object.freeze({
+export const defaultConfigurationProfile: SynCloudOSConfigurationProfile = Object.freeze({
   id: "syncloudos.default",
   roles: Object.freeze({
     public: Object.freeze(["webspring.display", "route.open.public", "app.open.public", "runtime.inspect.public"]),

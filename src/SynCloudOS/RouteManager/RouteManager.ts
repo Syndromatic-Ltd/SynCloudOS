@@ -32,7 +32,7 @@ import type {
   SynCloudOSErrorManager,
   SynCloudOSLaunchServices,
   SynCloudOSLifecycle,
-  SynCloudOSPolicyKit,
+  SynCloudOSConfigurationProfiles,
   SynCloudOSRuntime,
   SynCloudOSRuntimeId,
   SynCloudOSServiceRegistry,
@@ -93,7 +93,7 @@ type RouteManagerDependencies = {
   readonly lifecycle: Pick<SynCloudOSLifecycle, "getState" | "validateAccess">;
   /** Statechart's canonical app branch invokes LaunchServices exactly once. */
   readonly launchServices: Pick<SynCloudOSLaunchServices, "openApp" | "completeMultiSwitch">;
-  readonly policyKit: Pick<SynCloudOSPolicyKit, "authorise">;
+  readonly configurationProfiles: Pick<SynCloudOSConfigurationProfiles, "authorise">;
   readonly errorManager: Pick<
     SynCloudOSErrorManager,
     "createAppLaunchFailedError" | "createLoginSessionMismatchError"
@@ -123,7 +123,7 @@ export function createRouteManager(
   const BundleLoader = dependencies.bundleLoader;
   const Lifecycle = dependencies.lifecycle;
   const ErrorManager = dependencies.errorManager;
-  const PolicyKit = dependencies.policyKit;
+  const ConfigurationProfiles = dependencies.configurationProfiles;
   const ServiceRegistry = dependencies.serviceRegistry;
   const Statechart = dependencies.statechart;
   const RuntimeStore = runtime.store;
@@ -565,7 +565,7 @@ export function createRouteManager(
 
     const validateAppRouteAccess = () => {
       if (resolution.kind !== "app") return { ok: true as const };
-      const policy = PolicyKit.authorise({
+      const policy = ConfigurationProfiles.authorise({
         action: "route.open",
         app: resolution.app,
         route: resolution.app.route,

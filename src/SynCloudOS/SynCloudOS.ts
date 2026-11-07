@@ -58,9 +58,9 @@ export type {
   SynCloudOSStagePoint,
 } from "./AppRegistry/appRegistryTypes";
 export type { SynCloudOSAppFrameBackground, SynCloudOSAppFrameRightSlot, SynCloudOSAppFrameSmoothSurfaceManifest } from "./AppRegistry/appRegistryTypes";
-export type { SynCloudOSAppAccessPolicy } from "./PolicyKit/policyTypes";
-export type { SynCloudOSPolicySubject } from "./PolicyKit/policyTypes";
-export type { SynCloudOSPolicyProfile, SynCloudOSPolicyProfileSession, SynCloudOSPolicySubjectGrant } from "./PolicyKit/policyTypes";
+export type { SynCloudOSAppAccessPolicy } from "./ConfigurationProfiles/policyTypes";
+export type { SynCloudOSPolicySubject } from "./ConfigurationProfiles/policyTypes";
+export type { SynCloudOSConfigurationProfile, SynCloudOSConfigurationProfileSession, SynCloudOSPolicySubjectGrant } from "./ConfigurationProfiles/policyTypes";
 /** Runtime-owned, presentation-safe inspector wire contracts. The producer
  * remains private; consumers receive only immutable snapshot values. */
 export type {
@@ -284,7 +284,7 @@ export function createSynCloudOSFacade(runtime: SynCloudOSRuntime) {
     Inspector: runtime.inspector,
     Lifecycle: runtime.lifecycle,
     PermissionManager: runtime.permissions,
-    PolicyKit: runtime.policy,
+    ConfigurationProfiles: runtime.configurationProfiles,
     PluginRegistry: runtime.pluginRegistry,
     ResponsiveModeManager: runtime.responsiveModeManager,
     Persistence: runtime.persistence,
@@ -298,3 +298,6 @@ export function createSynCloudOSFacade(runtime: SynCloudOSRuntime) {
 }
 
 export * from "./Updates";
+
+export { SCAuthorization, SCAuthorizationRights } from "./Authorization/SCAuthorization";
+export type { SCAuthorizationRight, SCAuthorizationResult, SCAuthorizationOptions } from "./Authorization/SCAuthorization";

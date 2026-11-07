@@ -20,7 +20,7 @@
 import { useSCOS } from "../scos/useSCOS"
 import type { AppPasteboardClient } from "../appClientTypes";
 
-/** Returns the current session's PolicyKit-scoped pasteboard handles. */
+/** Returns the current session's ConfigurationProfiles-scoped pasteboard handles. */
 export function usePasteboard(): AppPasteboardClient {
   return useSCOS().pasteboards;
 }

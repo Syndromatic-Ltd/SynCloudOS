@@ -171,7 +171,7 @@ describe("Conformance inspector snapshot", () => {
     expect(isConformanceInspectorReference(`ref-${"a".repeat(31)}-1`)).toBe(false);
   });
 
-  it("uses the live PolicyKit decision when no legacy override is present", () => {
+  it("uses the live ConfigurationProfiles decision when no legacy override is present", () => {
     const runtime = createTestRuntime({ id: "runtime:conformance-policy" });
     runtime.apps.register(createTestManifest({
       bundleIdentifier: "com.example.requires-login",

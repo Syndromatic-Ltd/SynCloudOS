@@ -141,8 +141,8 @@ describe("runtime routes, services, windows, and launch services", () => {
   });
 
   it("refuses protected launches until LoginServices has an authorised session", async () => {
-    const { AppRegistry, LaunchServices, PolicyKit, RuntimeController } = createRuntimeHarness(createTestRuntime());
-    PolicyKit.setAccessMode("webspringVisibleAppProtected");
+    const { AppRegistry, LaunchServices, ConfigurationProfiles, RuntimeController } = createRuntimeHarness(createTestRuntime());
+    ConfigurationProfiles.setAccessMode("webspringVisibleAppProtected");
     AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.locked-app" }));
 
     const manager = LaunchServices.openApp("com.example.locked-app");
@@ -161,7 +161,7 @@ describe("runtime routes, services, windows, and launch services", () => {
       application: { activeAppId: null },
       lifecycle: { "com.example.locked-app": "registered" },
     });
-    expect(PolicyKit.getAuditLog().at(-1)).toMatchObject({
+    expect(ConfigurationProfiles.getAuditLog().at(-1)).toMatchObject({
       action: "app.launch",
       allowed: false,
       mode: "webspringVisibleAppProtected",
@@ -170,8 +170,8 @@ describe("runtime routes, services, windows, and launch services", () => {
   });
 
   it("allows public-mode launches without a LoginServices session", async () => {
-    const { AppRegistry, LaunchServices, PolicyKit } = createRuntimeHarness(createTestRuntime());
-    PolicyKit.setAccessMode("public");
+    const { AppRegistry, LaunchServices, ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
+    ConfigurationProfiles.setAccessMode("public");
     AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.public-launch", policy: { public: true } }));
 
     expect(LaunchServices.explainLaunch("com.example.public-launch")).toMatchObject({
