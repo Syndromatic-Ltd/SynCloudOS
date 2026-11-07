@@ -416,6 +416,9 @@ export interface SynCloudOSRuntimeEnvironment {
    * a worker-backed IndexedDB implementation; deterministic hosts may inject a fake. */
   readonly luminaIndex?: LuminaIndexBackendFactory | null;
   readonly audioCapture?: { createSession(signal?: AbortSignal, capability?: object): AUFXAudioSession };
+  readonly speechSynthesis?: import("../../FX/AudioFX/AUFXSpeechSynthesizer").AUFXSpeechSynthesisHost;
+  readonly networkPaths?: import("../../FX/NetworkFX/NWFXPathMonitor").NWFXNetworkPathAdapter;
+  readonly videoPresentation?: import("../../FX/VideoFX/VFXPictureInPictureController").VFXVideoPresentationAdapter;
   readonly audioFiles?: RuntimeAudioFileService;
   readonly hapticFeedback?: HFXFeedbackOptions;
   readonly systemFeedbackAudioContext?: (options?: AudioContextOptions) => AudioContext | null;
@@ -1064,6 +1067,7 @@ export interface SynCloudOSRuntime {
   readonly services: SynCloudOSServiceRegistry;
   readonly configurationProfiles: SynCloudOSConfigurationProfiles;
   readonly authorization: import("../Authorization/SCAuthorization").SCAuthorization;
+  readonly privacy: import("../Privacy").PrivacyStore;
   readonly permissions: SynCloudOSPermissionManager;
   readonly identity: SynCloudOSIdentityService;
   readonly login: SynCloudOSLoginService;
