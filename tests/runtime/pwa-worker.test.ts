@@ -51,7 +51,7 @@ it("leaves API, authentication, writes and other origins out of the offline cach
     expect(respondWith).not.toHaveBeenCalled();
   }
 });
-it.each(["https://site.test/src/main.tsx", "https://site.test/src/Localisable.strings?import&raw", "https://site.test/src/reference-fit.json?import&url"])("refreshes development module %s online and retains its bytes offline", async (url) => {
+it.each(["https://site.test/src/main.tsx", "https://site.test/src/Localisable.strings?import&raw", "https://site.test/src/reference-fit.json?import&url", "https://site.test/src/.gitattributes?url", "https://site.test/src/Localisable.strings?raw"])("refreshes development module %s online and retains its bytes offline", async (url) => {
   const listeners = new Map<string, (event: any) => void>();
   const entries = new Map<string, Response>([[url, new Response("old graph")]]);
   const cache = { match: async (request: Request) => entries.get(request.url)?.clone(), put: async (request: Request, response: Response) => { entries.set(request.url, response); } };
