@@ -22,6 +22,11 @@
     "Spec"
   ],
   "members": {
+    "SCAuthorization.copyRights": "AuthorizationCopyRights",
+    "ASAuthorizationController.performRequests": "ASAuthorizationController.performRequests()",
+    "LFXLocationManager.getAuthorizationStatus": "CLLocationManager.authorizationStatus",
+    "VFXCaptureSession.getAuthorizationStatus": "AVCaptureDevice.authorizationStatus(for:)",
+    "AUFXAudioSession.recordPermission": "AVAudioSession.recordPermission",
     "NSEDockTile.badgeLabel": "NSDockTile.badgeLabel",
     "NSEApplication.registerForRemoteNotifications": "NSApplication.registerForRemoteNotifications()",
     "NSEApplicationDelegate.applicationOpen": "NSApplicationDelegate.application(_:open:)",
@@ -41,6 +46,17 @@
     "CRFXAES.GCM.open": "AES.GCM.open(_:using:authenticating:)"
   },
   "frameworkCounterparts": {
+    "SCAuthorization": "Authorization Services",
+    "PrivacyStore": { "none": "Apple's TCC database is private, with no public AppKit class. This host service stores per-app browser consent." },
+    "ASAuthorization": "ASAuthorization",
+    "ASAuthorizationController": "ASAuthorizationController",
+    "ASAuthorizationControllerDelegate": "ASAuthorizationControllerDelegate",
+    "ASAuthorizationError": "ASAuthorizationError",
+    "ASAuthorizationPlatformPublicKeyCredentialProvider": "ASAuthorizationPlatformPublicKeyCredentialProvider",
+    "ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest": "ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest",
+    "ASAuthorizationPlatformPublicKeyCredentialAssertionRequest": "ASAuthorizationPlatformPublicKeyCredentialAssertionRequest",
+    "ASAuthorizationPlatformPublicKeyCredentialRegistration": "ASAuthorizationPlatformPublicKeyCredentialRegistration",
+    "ASAuthorizationPlatformPublicKeyCredentialAssertion": "ASAuthorizationPlatformPublicKeyCredentialAssertion",
     "BGTaskScheduler": "BGTaskScheduler",
     "BGTaskRequest": "BGTaskRequest",
     "BGDownloadTaskRequest": "URLSessionDownloadTask",
