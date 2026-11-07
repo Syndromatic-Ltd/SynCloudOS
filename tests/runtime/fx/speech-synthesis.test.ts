@@ -30,6 +30,15 @@ function fixture() {
   return { native, utterances, host };
 }
 describe("AudioFX speech synthesis", () => {
+  it("rechecks host application access on a retained speech owner", async () => {
+    const f = fixture(), owner = new AbortController(); let allowed = true;
+    const synth = createMountedSpeechClient(f.host, owner.signal, () => ["audio.speech"], () => allowed).createSynthesizer();
+    expect(synth.authorizationStatus).toBe("granted");
+    allowed = false;
+    expect(synth.authorizationStatus).toBe("denied");
+    await expect(synth.speak(new AUFXSpeechUtterance("Hello"))).rejects.toMatchObject({ name: "SecurityError" });
+    expect(f.native.speak).not.toHaveBeenCalled(); owner.abort();
+  });
   it("allows passive unavailable owners on hosts without speech", async () => {
     const owner = new AbortController();
     const synth = createMountedSpeechClient(undefined, owner.signal, () => ["audio.speech"]).createSynthesizer();
