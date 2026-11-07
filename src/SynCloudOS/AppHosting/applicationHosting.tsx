@@ -58,6 +58,9 @@ import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/
 import { useNSEOverlayFocusScope } from "../../NSE/applicationHostInterop";
 import { NSEViewControllerRendererProvider } from "../../NSE/applicationHostInterop";
 import { nseAnimatePresentation, nseIsDismissing } from "../../NSE/applicationHostInterop";
+import { registerNSEStandaloneViewControllerRenderer } from "../../NSE/Application/viewControllerRenderer";
+
+registerNSEStandaloneViewControllerRenderer(NSEViewControllerView);
 
 const FRAME_STYLE: CSSProperties = Object.freeze({ display: "block", width: "100%", height: "100%", minWidth: 0, minHeight: 0 });
 const CONTENTS_STYLE: CSSProperties = Object.freeze({ display: "contents" });
@@ -298,7 +301,7 @@ function NSECustomPresentation({ controller }: { readonly controller: NSEViewCon
   useObserve(controller);
   const dismissing = controller[nseIsDismissing];
   useLayoutEffect(() => { controller[nseAnimatePresentation](); }, [controller, dismissing]);
-  return <div data-nse-custom-presentation="" style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+  return <div data-nse-custom-presentation="" inert={dismissing || undefined} style={{ position: "absolute", inset: 0, zIndex: 1 }}>
     <NSEViewControllerView controller={controller} />
   </div>;
 }
