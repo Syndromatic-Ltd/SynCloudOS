@@ -603,7 +603,7 @@ NSE uses MotionFX for the light direction on metallic materials. Sliders and tog
 
 ## Related
 
-- [FX frameworks](README.md), the overview of the twelve frameworks and the session model.
+- [FX frameworks](README.md), the overview of the thirteen frameworks and the session model.
 - [HapticsFX](haptics.md), for touch feedback that pairs well with motion gestures.
 - [LocationFX](location.md), which follows the same capability and authorisation conventions.
 - [AnimationFX](animation.md), for animating an interface from the values MotionFX reports.

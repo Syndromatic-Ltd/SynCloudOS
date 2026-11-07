@@ -17,16 +17,20 @@ This page describes the layers, the conventions they share, and the package that
 ├──────────────────────────────────────────────────────────────────────┤
 │  FX frameworks                animation, graphics, image, text,      │
 │                               audio, haptics, motion, media, video,  │
-│                               MIDI, location, discovery              │
+│                               MIDI, location, discovery, compression│
 ├──────────────────────────────────────────────────────────────────────┤
 │  SynCloudOS runtime           statechart, commands, responders,      │
 │                               undo, documents, windows, PolicyKit    │
+├──────────────────────────────────────────────────────────────────────┤
+│  Foundation                   bytes, ranges, collections, formatters │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
+**[Foundation](foundation.md)** supplies data and collection values shared by NSE, FX and the runtime. It has no React, view or runtime dependency and runs in web workers. Foundation and NSE share the `NSE` prefix, following Foundation and AppKit in Cocoa.
+
 **The runtime** is the kernel. Each runtime owns its store, services and queues, so several runtimes can share one page. It tracks the application lifecycle in a statechart, routes key events through a responder chain, dispatches typed commands, keeps undo history, persists documents and manages windows. PolicyKit checks every privileged action against the roles your host defines.
 
-**FX** is a set of twelve frameworks written in TypeScript as web-native analogues of Apple's Core frameworks. AnimationFX corresponds to Core Animation, GraphicsFX to Quartz 2D, ImageFX to Core Image, TextFX to Core Text, AudioFX to AVAudioEngine, HapticsFX to Core Haptics and MotionFX to Core Motion. Four more cover media time, video, MIDI and location, and one covers on-device discovery. See the [FX frameworks](fx/README.md).
+**FX** is a set of thirteen frameworks written in TypeScript as web-native analogues of Apple's Core frameworks. AnimationFX corresponds to Core Animation, GraphicsFX to Quartz 2D, ImageFX to Core Image, TextFX to Core Text, AudioFX to AVAudioEngine, HapticsFX to Core Haptics and MotionFX to Core Motion. Four more cover media time, video, MIDI and location, one covers on-device discovery, and CompressionFX corresponds to Apple’s Compression framework. See the [FX frameworks](fx/README.md).
 
 **NSE** is the application kit, the counterpart of AppKit. The name follows the same convention: NS for NeXTSTEP, NSE for the New Syndromatic Experience. You write `NSEButton` where a Mac developer writes `NSButton`. NSE draws its appearance from a theme. [Atmo](appearance.md) is the default theme, a tactile material language that plays the role Aqua played on Mac OS X.
 
@@ -48,7 +52,7 @@ The same handful of rules holds across every layer, so learning one area teaches
 
 **Values are immutable.** Snapshots, geometry, colours and controller state are frozen. You change state by asking the owner and reading the next snapshot.
 
-**Naming carries meaning.** Each FX framework uses a short prefix: `AFX`, `GFX`, `IFX`, `TFX`, `AUFX`, `HFX`, `MFX`, `MEFX`, `VFX`, `MIFX`, `LFX` and `LUFX`. NSE types start with `NSE`. SDK hooks use capability names such as `useStrings` and `useAppearance`.
+**Naming carries meaning.** Each FX framework uses a short prefix: `AFX`, `GFX`, `IFX`, `TFX`, `AUFX`, `HFX`, `MFX`, `MEFX`, `VFX`, `MIFX`, `LFX`, `LUFX` and `CPFX`. NSE types start with `NSE`. SDK hooks use capability names such as `useStrings` and `useAppearance`.
 
 **Presentation adapts to the host.** Every SynWare declares which presentations it supports: `desktop`, `tablet` or `mobile`. The host chooses the presentation, and your application reads the traits of its current surface (size class, safe areas, pointer type, reduced motion and more) through `useSCOS().presentation`.
 
@@ -66,6 +70,7 @@ Everything ships in one package, `@syndromatic/syncloudos`. It uses explicit sub
 | `sdk` | Scoped clients and hooks, routing, manifest validation, document and command types |
 | `sdk/testing` | `createSynWare`, a deterministic test host and denial-first fakes |
 | `sdk/animation-host` | Scheduler and surface types for custom AnimationFX render hosts |
+| `foundation` | [Foundation](foundation.md): immutable data, collections, ranges, formatters and preferences |
 | `nse` | The complete NSE surface: controls, controllers, data views, colour, layout and appearance |
 | `nse/controls` | The control and chrome subset for focused imports |
 | `nse/text` | Portable text, owners, editing sessions, text views, input and geometry cooperation |
@@ -93,6 +98,7 @@ Everything ships in one package, `@syndromatic/syncloudos`. It uses explicit sub
 | `fx/midi` | MIDIFX |
 | `fx/location` | LocationFX |
 | `fx/lumina` | LuminaFX |
+| `fx/compression` | CompressionFX |
 
 ### Hosting and tooling
 

@@ -1,6 +1,6 @@
 # FX frameworks
 
-The FX frameworks are twelve TypeScript libraries for animation, graphics, imaging, text, sound, touch, motion, media, video, MIDI, location and search. They are web-native analogues of Apple's Core frameworks: the same concepts and the same division of labour, expressed as immutable values, explicit lifetimes and standard web platform primitives.
+The FX frameworks are thirteen TypeScript libraries for animation, graphics, imaging, text, sound, touch, motion, media, video, MIDI, location, search and compression. They are web-native analogues of Apple's Core frameworks: the same concepts and the same division of labour, expressed as immutable values, explicit lifetimes and standard web platform primitives.
 
 Each framework has a short prefix that appears on every public type, so a name tells you where it belongs.
 
@@ -18,6 +18,7 @@ Each framework has a short prefix that appears on every public type, so a name t
 | [MIDIFX](midi.md) | `MIFX` | Core MIDI | `fx/midi` | MIDI 2.0 packets, parsing and scheduling |
 | [LocationFX](location.md) | `LFX` | Core Location | `fx/location` | Position, course and authorisation |
 | [LuminaFX](lumina.md) | `LUFX` | Core Spotlight | `fx/lumina` | On-device indexing and search |
+| [CompressionFX](compression.md) | `CPFX` | Compression | `fx/compression` | Capability-probed one-shot and streaming compression |
 
 ## Where each framework is documented
 
@@ -39,6 +40,8 @@ import { offsetRect } from "@syndromatic/syncloudos/fx/graphics";
 
 const moved = offsetRect({ x: 2, y: 3, width: 4, height: 5 }, 10, 20);
 ```
+
+CompressionFX is also a direct library: its filters process web streams without a mounted session or permission. Its shared codec implementation lives in [Foundation](../foundation.md), beneath FX, so `NSEData` and CPFX use the same algorithms.
 
 **Through the session.** Anything that touches a device, the page or the user's attention comes from the mounted SynWare session. Cameras, microphones, speakers, sensors, location, layers bound to elements and decoded resources belong to the application's lifetime, so the host can enforce permissions, honour the user's settings and release everything when the application closes.
 
