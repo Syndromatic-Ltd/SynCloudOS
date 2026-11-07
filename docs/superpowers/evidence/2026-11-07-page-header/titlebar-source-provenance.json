@@ -1,0 +1,82 @@
+{
+  "implementationCommit": "7bdaa0d3fdc6d42529b96f9fabf14d27e9f36ba6",
+  "latestInstalledCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+  "verifiedCommits": [
+    "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497"
+  ],
+  "unchanged": [
+    {
+      "path": "src/NSE/Application/NSEWindowController.ts",
+      "sha256": "58ad5ea8f82ff5d505a76b70c759496cd56768ebd34ae26ab4b2982c148f0c5c"
+    },
+    {
+      "path": "src/NSE/Windows/windowTitlebarContext.tsx",
+      "sha256": "4cb3236ae04869da92f6569eee881b7cf572d22743e86ed070fea55de862866a"
+    },
+    {
+      "path": "src/NSE/Windows/NSEWindowTitleBar.tsx",
+      "sha256": "0910e6802aa2ed3145ae5e801a6d7304522f4612326a1c0f9ee04fd071ed17b9"
+    },
+    {
+      "path": "src/NSE/Windows/NSEWindowView.tsx",
+      "sha256": "0a94dd3340793dbfd2263fcfa017f0cf11998f45daf80f6ab1e1a978bdd784f4"
+    },
+    {
+      "path": "src/NSE/Components/NSEPreferencesToast.tsx",
+      "sha256": "62f28f231513be57c12a66bf09198cae5af795f0f8c734896459c30809c3106e"
+    },
+    {
+      "path": "src/NSE/Components/nsePreferencesToast.css",
+      "sha256": "7c01302289482cef60d9ebf35f5554bd2bed9dd19a2e7a911c909e9ccbf586c6"
+    },
+    {
+      "path": "src/NSE/Themes/Atmo/Resources/window-titlebar.css",
+      "sha256": "2f6918c4f1c63912fbd0bb6112a971e94972d676f0bc92708003e6d2e804534b"
+    },
+    {
+      "path": "src/NSE/Navigation/compactMoreTitle.ts",
+      "sha256": "8b88ba04fb0f0ddc602f54644053dda27319eaf9db6e87a651e3e6a8478cdc5a"
+    },
+    {
+      "path": "src/NSE/Navigation/adaptiveTabView.tsx",
+      "sha256": "77f6d83424bb90bf687d580a474b5e3f72eb08f976063cf15d8d47b32a8449a9"
+    },
+    {
+      "path": "src/NSE/Navigation/NSETabBar.tsx",
+      "sha256": "3fd9cd7237732f456dc96077b4cc8ef5558d9e4e98bb0d3cf39397ddb27b9c02"
+    },
+    {
+      "path": "src/NSE/Windows/Chrome/NSETopBar.tsx",
+      "sha256": "c14490883588c7e2e222d0d1e465a967c7544b2ca194630378933719c7ca384a"
+    },
+    {
+      "path": "src/NSE/Windows/Chrome/nseTopBarTypes.ts",
+      "sha256": "29e5c59e4c6f50a6ccdef240398390e9011b8f470ffeb14018b34a35366f5cd7"
+    },
+    {
+      "path": "src/Webspring/ApplicationStageView.tsx",
+      "sha256": "93cb44094d2069d95818f99fcc638c88e5cb7ade107bebe8f13db33721a1a092"
+    },
+    {
+      "path": "src/SynCloudOSReact/ApplicationHostTitlebar.tsx",
+      "sha256": "68c531c20dbdf9939fa7b333b2bea0fcaea60b6cd5c0bca96f858ea7e6fcda30"
+    },
+    {
+      "path": "src/SynCloudOS/AppHosting/windowChrome.tsx",
+      "sha256": "cb0b125f360282d5efa1f6969c2ca59229c521dcd7620e35a2cda5c52d8cc0c2"
+    },
+    {
+      "path": "src/NSE/DataViews/Split/splitViewControllerView.tsx",
+      "sha256": "325ba69d6cf8a68a2a7973b2d09ad5cfb404953736bbc130c991eaab2b516990"
+    },
+    {
+      "path": "src/NSE/Windows/window-titlebar.css",
+      "sha256": "1aee37b7648a1647f577c96198751b598b7ab254a4fc4ca2daf108f010074bcc"
+    },
+    {
+      "path": "src/SynCloudOS/AppHosting/applicationHosting.tsx",
+      "scope": "NSEWindowControllerView",
+      "sha256": "052b869666954fd54c0fcd5a27dfe7f0d410267b3c652ac449b72d3a56466889"
+    }
+  ]
+}

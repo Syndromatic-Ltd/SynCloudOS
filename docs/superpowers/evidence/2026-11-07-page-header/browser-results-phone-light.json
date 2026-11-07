@@ -1,0 +1,88 @@
+[
+  {
+    "name": "phone-light",
+    "width": 390,
+    "height": 844,
+    "dpr": 1,
+    "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+    "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+    "colourScheme": "light",
+    "gallery": {
+      "text": "Buttons",
+      "bounds": {
+        "x": 0,
+        "y": 56,
+        "width": 390,
+        "height": 52,
+        "top": 56,
+        "right": 390,
+        "bottom": 108,
+        "left": 0
+      },
+      "title": {
+        "x": 20,
+        "y": 56,
+        "width": 350,
+        "height": 37,
+        "top": 56,
+        "right": 370,
+        "bottom": 93,
+        "left": 20
+      },
+      "font": "600 28px / 37px \"Syndromatic UI\", \"Segoe UI\", sans-serif",
+      "colour": "rgb(43, 53, 70)"
+    },
+    "scrollBefore": {
+      "top": 0,
+      "range": 683
+    },
+    "scrollAfter": {
+      "top": 450,
+      "range": 683
+    },
+    "prefsMetrics": {
+      "bounds": {
+        "x": 12,
+        "y": 268.484375,
+        "width": 366,
+        "height": 66,
+        "top": 268.484375,
+        "right": 378,
+        "bottom": 334.484375,
+        "left": 12
+      },
+      "title": {
+        "x": 141.5625,
+        "y": 288.65625,
+        "width": 106.875,
+        "height": 25.640625,
+        "top": 288.65625,
+        "right": 248.4375,
+        "bottom": 314.296875,
+        "left": 141.5625
+      },
+      "font": "700 19px / 25.65px \"Syndromatic UI\", \"Segoe UI\", sans-serif"
+    },
+    "more": {
+      "previousTitle": "Overview",
+      "destinationName": "MediaSonic",
+      "detailTitle": "MediaSonic"
+    },
+    "errors": [],
+    "capturedAt": "2026-11-07T11:29:12.978Z",
+    "receiptStable": true,
+    "siteCommit": "890305c919b5831c8a774050403b4657c5d1857e",
+    "gallerySourceSha256": {
+      "src/SynWare/NSEControlGallery.app/Contents/GalleryViews.tsx": "2033a01e495435ffefe250fa07e6387a284233f8aaf5bbeb7e2256b1b13ee760",
+      "src/SynWare/NSEControlGallery.app/Contents/Resources/styles.css": "0589bead42fdfd0c652bd370f0c76fd58e732293b9cf8b4270a04237ce68725a"
+    },
+    "captureSha256": {
+      "gallery-buttons-phone-light.png": "8a925b1e283fc8963b626525bd67295c2332246c436f76d25f4e59fccf420dc1",
+      "gallery-scrolled-phone-light.png": "3ee900f19325eeac17297e4ea908148028e9a8f510a5be1e5ac3ab5ade6e2651",
+      "preferences-appearance-phone-light.png": "dffbaaf0e2494966ad5a675074e05b68af1b26e1c9a46a33ad57482464380cba",
+      "preferences-root-phone-light.png": "565220a2e5a8d449b47d58366737c3d644e07923cc7625f1d88d4745d07175de",
+      "gallery-more-phone-light.png": "cc757940feb458044883a040a7c923286b5189b3ee86b0aa6302987c50a42431",
+      "software-more-phone-light.png": "4d97dbc0ce930a026ac0268e6ee0e0e878663ef41f53c4fb70d3b9ec9cd7b444"
+    }
+  }
+]

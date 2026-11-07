@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phone expanded title</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; background: #e9ebee; overflow: hidden;">
+  <div style="flex-shrink: 0; background: linear-gradient(#f4f5f7, #c9ccd1); border-bottom: 1px solid #9ea2a9; box-shadow: 0 2px 6px rgba(0,0,0,0.18);">
+    <div style="height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px;">
+      <button type="button" style="height: 32px; padding: 0 14px; border-radius: 16px; border: 1px solid #6b7078; background: linear-gradient(#9aa0a8, #6b7078); color: #fff; font: inherit; font-size: 14px; font-weight: 600;">‹ Sections</button>
+      <button type="button" aria-label="Search" style="width: 44px; height: 32px; border-radius: 16px; border: 1px solid #8f939a; background: linear-gradient(#fdfdfd, #d9dbdf);"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#4a4f57" stroke-width="1.6" aria-hidden="true"><circle cx="6" cy="6" r="4.2"></circle><path d="M9.2 9.2l3.3 3.3"></path></svg></button>
+    </div>
+    <div style="padding: 0 20px 14px; display: flex; flex-direction: column; gap: 1px;">
+      <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #2b3546;">Buttons</h1>
+    </div>
+  </div>
+  <div style="flex-grow: 1; padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; overflow: hidden;">
+    <p style="margin: 0; font-size: 13.5px; color: #4a4f57;">Push buttons, tool buttons and grouped actions.</p>
+    <section style="border-radius: 10px; border: 1px solid #a7abb2; background: #f2f3f5; overflow: hidden;">
+      <h2 style="margin: 0; padding: 6px 12px; font-size: 12px; font-weight: 700; color: #fff; background: linear-gradient(#a9adb4, #8c9098);">PUSH BUTTONS</h2>
+      <div style="padding: 14px; display: flex; flex-wrap: wrap; gap: 10px;">
+        <button type="button" style="height: 44px; padding: 0 20px; border-radius: 8px; border: 1px solid #5f646b; background: linear-gradient(#9aa0a8, #6b7078); color: #fff; font: inherit; font-size: 16px; font-weight: 600;">New draft</button>
+        <button type="button" style="height: 44px; padding: 0 20px; border-radius: 8px; border: 1px solid #2e6e1f; background: linear-gradient(#5cc04a, #2f8a22); color: #fff; font: inherit; font-size: 16px; font-weight: 600;">Save</button>
+      </div>
+    </section>
+    <div style="border: 1.5px dashed #8a8f97; border-radius: 10px; padding: 10px 12px; font-size: 12.5px; color: #4a4f57; background: rgba(255,255,255,0.5);">Phone: the large title stays fixed under the bar (AppKit has no collapsing title; no invented API).</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
