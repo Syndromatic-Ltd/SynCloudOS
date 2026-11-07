@@ -32,7 +32,7 @@ import { concatenateTransforms, invertTransform, normalisePoint, normaliseSize, 
 import { GFXPath } from "./GFXPath";
 import { GFXGradient } from "./GFXGradient";
 import type { GFXAffineTransform, GFXBlendMode, GFXCommand, GFXCommandState, GFXDisplayList, GFXIdentifiers, GFXLineCap, GFXLineJoin, GFXPaint, GFXPaintGradient, GFXPaintPattern, GFXImageMask, GFXTextAttributes, GFXTextFont, GFXShadowValue, GFXFillRule } from "./graphicsTypes";
-import { sealGFXDisplayList } from "./displayListAuthority";
+import { assertGFXDisplayList, sealGFXDisplayList } from "./displayListAuthority";
 import { GFXTransparencyGroup, type GFXTransparencyGroupOptions } from "./GFXTransparencyGroup";
 export class GFXStateUnderflowError extends Error {
     constructor() {
@@ -65,6 +65,41 @@ interface State {
     readonly textAttributes: GFXTextAttributes;
 }
 const MAX_CLIP_PATH_DEPTH = 64;
+const MAX_NESTED_DISPLAY_LISTS = 8;
+/** How deeply display lists nest inside these commands. */
+function displayListDepth(commands: readonly GFXCommand[]): number {
+    let depth = 0;
+    for (const command of commands) {
+        if (command.kind === "display-list") depth = Math.max(depth, 1 + displayListDepth(command.commands));
+        else if (command.kind === "transparency-group") depth = Math.max(depth, displayListDepth(command.commands));
+    }
+    return depth;
+}
+/** Every command, counting those inside groups and nested lists. */
+function displayListCommandCount(commands: readonly GFXCommand[]): number {
+    let count = 0;
+    for (const command of commands) {
+        count += 1;
+        if (command.kind === "display-list" || command.kind === "transparency-group") count += displayListCommandCount(command.commands);
+    }
+    return count;
+}
+/** Copies commands with every gradient, pattern and mask identity prefixed, so a list drawn into another keeps its own definitions. */
+function renameDisplayListIdentities(commands: readonly GFXCommand[], prefix: string): readonly GFXCommand[] {
+    const paint = (value: GFXPaint): GFXPaint => value.kind === "colour" ? value : Object.freeze({ ...value, id: prefix + value.id });
+    const state = (value: GFXCommandState): GFXCommandState => Object.freeze({
+        ...value,
+        fill: paint(value.fill),
+        stroke: paint(value.stroke),
+        masks: Object.freeze(value.masks.map(mask => Object.freeze({ ...mask, id: prefix + mask.id }))),
+    });
+    return Object.freeze(commands.map((command): GFXCommand => {
+        if (command.kind === "transparency-group") return Object.freeze({ ...command, commands: renameDisplayListIdentities(command.commands, prefix) });
+        if (command.kind === "display-list") return Object.freeze({ ...command, state: state(command.state), commands: renameDisplayListIdentities(command.commands, prefix) });
+        if (command.kind === "image") return Object.freeze({ ...command, state: state(command.state) });
+        return Object.freeze({ ...command, paint: paint(command.paint), state: state(command.state) });
+    }));
+}
 const recordingBlendModes: readonly GFXBlendMode[] = ["normal", "multiply", "screen", "overlay", "darken", "lighten"];
 const identityTransform = Object.freeze({ a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0 }) as GFXAffineTransform;
 const defaultTextAttributes = Object.freeze({ letterSpacing: 0, alignment: "start" as const });
@@ -391,6 +426,33 @@ export class GFXContext {
         const state = this.#snapshot(bounds);
         this.#append(Object.freeze({ kind: "image", image, destination: bounds, state }));
     }
+    /**
+     * Draws a recorded display list scaled into `destination`, as `CGContext` draws a PDF page. The list's
+     * commands keep their coordinate space and are placed by the current transform; its gradient, pattern
+     * and mask identities are renamed into this context so they never collide with this list's own.
+     */
+    drawDisplayList(list: GFXDisplayList, destination: GFXRect): void {
+        assertGFXDisplayList(list);
+        const bounds = normaliseRect(dataRecord(destination, ["x", "y", "width", "height"], ["x", "y", "width", "height"], "Display list destination") as unknown as GFXRect);
+        if (!bounds.width || !bounds.height || !(list.size.width > 0) || !(list.size.height > 0))
+            return;
+        if (displayListDepth(list.commands) >= MAX_NESTED_DISPLAY_LISTS)
+            throw new RangeError("Nested display list depth exceeded.");
+        const count = displayListCommandCount(list.commands);
+        if (this.#commandCount + count >= 10000)
+            throw new RangeError("Graphics command limit exceeded.");
+        const state = this.#snapshot(bounds);
+        const current = state.transform;
+        const placement = { a: bounds.width / list.size.width, b: 0, c: 0, d: bounds.height / list.size.height, tx: bounds.x, ty: bounds.y };
+        const transform = Object.freeze({
+            a: current.a * placement.a, b: current.b * placement.a,
+            c: current.c * placement.d, d: current.d * placement.d,
+            tx: current.a * placement.tx + current.c * placement.ty + current.tx, ty: current.b * placement.tx + current.d * placement.ty + current.ty,
+        });
+        const commands = renameDisplayListIdentities(list.commands, `list:${++this.#gradientSequence}/`);
+        this.#append(Object.freeze({ kind: "display-list" as const, commands, transform, state }));
+        this.#commandCount += count;
+    }
     drawLayer(layer: GFXLayer, destination: GFXRect): void {
         if (!(layer instanceof GFXLayer))
             throw new TypeError("Drawing requires GFXLayer.");
@@ -441,17 +503,18 @@ export class GFXContext {
         const leafCommands: GFXCommand[] = [];
         const collectLeaves = (commands: readonly GFXCommand[]) => {
             for (const command of commands) {
-                if (command.kind === "transparency-group") collectLeaves(command.commands);
+                if (command.kind === "display-list") leafCommands.push(command);
+                if (command.kind === "transparency-group" || command.kind === "display-list") collectLeaves(command.commands);
                 else leafCommands.push(command);
             }
         };
         collectLeaves(list.commands);
         for (const command of leafCommands) {
             if (command.kind === "transparency-group") continue;
-            for (const paint of [command.state.fill, command.state.stroke])
+            for (const paint of command.kind === "display-list" ? [] : [command.state.fill, command.state.stroke])
                 if (paint.kind === "gradient")
                     gradients.set(paint.id, paint);
-            for (const paint of [command.state.fill, command.state.stroke])
+            for (const paint of command.kind === "display-list" ? [] : [command.state.fill, command.state.stroke])
                 if (paint.kind === "pattern")
                     patterns.set(paint.id, paint);
             for (const mask of command.state.masks)
@@ -484,6 +547,10 @@ export class GFXContext {
             if (command.kind === "transparency-group") {
                 const style = command.group.blendMode === "normal" ? "isolation:isolate" : `isolation:isolate;mix-blend-mode:${command.group.blendMode}`;
                 return `<g data-gfx-transparency-group="${escapeXML(command.group.id)}" opacity="${command.group.alpha}" style="${style}">${command.commands.map(renderCommand).join("")}</g>`;
+            }
+            if (command.kind === "display-list") {
+                const blend = command.state.blendMode === "normal" ? "" : ` style="mix-blend-mode:${command.state.blendMode}"`;
+                return withClips(`<g data-gfx-display-list="" opacity="${command.state.alpha}" transform="${matrix(command.transform)}"${blend}>${command.commands.map(renderCommand).join("")}</g>`, command.state);
             }
             const attributes = stateAttributes(command.state);
             if (command.kind === "image")
