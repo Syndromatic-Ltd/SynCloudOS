@@ -30,6 +30,7 @@ import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { loadConfigFromFile } from "vite";
 import { captureFontDeclaration, fontDeclarationCSS } from "../../src/NSE/Typography/fontDeclaration.mjs";
+import { installedApplicationBuild } from "./pwa-plugin.mjs";
 import { bundlePaths } from "./bundle-paths.mjs";
 import { createApplicationToolchain } from "./application-toolchain.mjs";
 import { createScosAppModuleSource } from "../../src/SynCloudOS/AppSDK/scos/appModuleSource.mjs";
@@ -743,6 +744,7 @@ export function synCloudOS(options) {
     configureServer(devServer) {
       watcherCleanup?.();
       server = devServer;
+      devServer.middlewares.use((request, response, next) => installedApplicationBuild(resolvedConfig, discovery ?? refresh()).middleware(request, response, next));
       mountPackedSdkAssets(devServer, resolvedConfig.root, resolvedConfig.base, resolvedConfig.cacheDir);
       const current = discovery ?? refresh();
       devServer.watcher.add(current.watchPaths);
@@ -783,7 +785,8 @@ export function synCloudOS(options) {
 
     generateBundle: {
       order: "pre",
-      handler() {
+      handler(_options, bundle) {
+        installedApplicationBuild(resolvedConfig, discovery ?? refresh()).emit(this, bundle);
         // Output names belong to this output's emitter, not buildStart's emitter.
         // Resolve them before Vite applies its post HTML transforms.
         typographyAssetPaths = new Map([...typographyAssets].map(([id, reference]) => [id, this.getFileName(reference)]));
@@ -793,7 +796,8 @@ export function synCloudOS(options) {
     transformIndexHtml: {
       order: "post",
       handler(_html, context = {}) {
-        if (!typography) return [];
+        const installationTags = installedApplicationBuild(resolvedConfig, discovery ?? refresh()).tags(context.path);
+        if (!typography) return installationTags;
         const base = resolvedConfig.base ?? "/";
         const urls = Object.fromEntries(typography.resources.map(resource => {
           const path = resolvedConfig.command === "build" ? typographyAssetPaths.get(resource.id) : slash(relative(resolvedConfig.root, resource.file)).split("/").map(encodeURIComponent).join("/");
@@ -806,6 +810,7 @@ export function synCloudOS(options) {
           return [resource.id, `${base.endsWith("/") ? base : `${base}/`}${path}`];
         }));
         return [
+          ...installationTags,
           ...typography.declaration.preloadResources.map(id => ({ tag:"link", attrs:{rel:"preload", as:"font", href:urls[id], type:packedAssetMime[extname(typography.declaration.resources[id]).toLowerCase()], crossorigin:"anonymous"}, injectTo:"head-prepend" })),
           { tag:"style", attrs:{"data-syncloudos-typography":""}, children:fontDeclarationCSS(typography.declaration, urls), injectTo:"head-prepend" },
         ];
