@@ -4594,7 +4594,8 @@
   mask: var(--nse-window-control-glyph) center / 8px 8px no-repeat;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-window-view .nse-window__title {
+:where([data-nse-appearance="atmo"]) .nse-window-view .nse-window__title,
+:where([data-nse-appearance="atmo"]) .nse-window__titlebar[data-window-host-titlebar] .nse-window__title {
   padding: 0 80px;
   font-family: inherit;
   font-size: 13px;

@@ -36,7 +36,7 @@ export function InstalledApplicationTitleBar() {
     return () => { overlay.removeEventListener("geometrychange", update); browserWindow.removeEventListener("focus", update); browserWindow.removeEventListener("blur", update); };
   }, [overlay, browserWindow, document]);
   if (!geometry) return null;
-  return <div data-syncloudos-window-controls-overlay="" style={{ position: "fixed", zIndex: 10000, left: geometry.x, top: geometry.y, width: geometry.width, height: geometry.height, overflow: "hidden", WebkitAppRegion: "drag" } as import("react").CSSProperties}>
+  return <div data-syncloudos-window-controls-overlay="" style={{ position: "fixed", zIndex: 10000, left: geometry.x, top: geometry.y, width: geometry.width, height: geometry.height, "--nse-window-titlebar-height": `${geometry.height}px`, overflow: "hidden", WebkitAppRegion: "drag" } as import("react").CSSProperties}>
     <NSEWindowTitleBar title={document?.title ?? "Webspring"} isKeyWindow={geometry.active} />
   </div>;
 }
