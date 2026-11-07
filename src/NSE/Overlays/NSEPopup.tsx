@@ -30,6 +30,8 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from "react";
+import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
+import { nsePopoverSpringEasing, useNSEPopoverSurface } from "./useNSEPopoverSurface";
 import { nseMenuChosenAttribute, nseMenuChosenFadeMs } from "../Menus/menuSelectionFlash";
 import { createPortal } from "react-dom";
 import type { NSEOverlayAnchorPoint } from "./computeNSEOverlayPosition";
@@ -86,6 +88,8 @@ export interface NSEPopupProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   readonly contentPending?: boolean;
   /** Internal family specialisation; callers should prefer family entry points. */
   readonly overlayKind?: NSEOverlayKind;
+  /** @internal NSEPopover owns the continuous plate and arrow frame. */
+  readonly drawsBackground?: boolean;
   onOpenChange?(open: boolean, reason: NSEOverlayDismissReason): void;
 }
 
@@ -148,6 +152,7 @@ export function NSEPopup({
   keepPortalMounted = false,
   contentPending = false,
   overlayKind,
+  drawsBackground,
   onOpenChange,
   className,
   children,
@@ -167,6 +172,10 @@ export function NSEPopup({
   }
   const [mounted, setMounted] = useState(state.open);
   const [closing, setClosing] = useState(false);
+  const { reducedMotion } = useNSEAnimationEnvironment();
+  const hasPopoverFrame = drawsBackground !== undefined;
+  const [surfaceElement, setSurfaceElement] = useState<HTMLElement | null>(null);
+  const [arrow, setArrow] = useState<HTMLElement | null>(null);
   const kind: NSEOverlayKind = overlayKind ?? (modal ? "action-sheet" : "popover");
   const resolvedPresentation = presentation ?? { mode: kind === "action-sheet" ? "sheet" as const : "anchored" as const };
   const isModal = kind === "action-sheet" || modal;
@@ -179,6 +188,8 @@ export function NSEPopup({
     parentResponderId: resolvedParentResponderId,
     anchor: anchor ?? null,
     anchorPoint: anchorPoint ?? null,
+    arrow: hasPopoverFrame && kind === "popover" ? arrow : null,
+    offset: hasPopoverFrame ? 12 : undefined,
     open: state.open,
     placement: resolvedPresentation.placement,
     collisionPadding: resolvedPresentation.collisionPadding,
@@ -192,19 +203,25 @@ export function NSEPopup({
     contentPending,
     onDismiss: (reason) => state.requestOpen(false, reason),
   });
+  const surfaceRef = useCallback((element: HTMLElement | null) => {
+    overlay.surfaceProps.ref(element);
+    setSurfaceElement(element);
+  }, [overlay.surfaceProps.ref]);
+  useNSEPopoverSurface(surfaceElement, kind === "popover" ? arrow : null, state.open, hasPopoverFrame);
   const surfaceClassName = useMemo(() => classNames(
     "nse-overlay-popup",
     `nse-overlay-popup--${chrome === "standard" ? kind : chrome}`,
     isModal && "nse-overlay-popup--modal",
+    hasPopoverFrame && "nse-popover",
     className,
-  ), [chrome, className, isModal, kind]);
+  ), [chrome, className, hasPopoverFrame, isModal, kind]);
   const surfaceRole: AriaRole = role ?? (kind === "listbox" ? "listbox" : "dialog");
 
   // A menu whose row was just chosen fades out (the row flashed and marked its popup), so it stays
   // mounted for the fade even when this popup has no exit of its own.
   const chosen = !state.open && mounted
     && overlay.portalHost?.ownerDocument.getElementById(resolvedId)?.hasAttribute(nseMenuChosenAttribute) === true;
-  const exit = Math.max(exitDuration, chosen ? nseMenuChosenFadeMs : 0);
+  const exit = Math.max(exitDuration, hasPopoverFrame ? (reducedMotion ? 100 : 150) : 0, chosen ? nseMenuChosenFadeMs : 0);
 
   useEffect(() => {
     if (state.open) {
@@ -240,8 +257,15 @@ export function NSEPopup({
       ...htmlAttributes,
       ...overlay.surfaceProps,
       ...appearanceProjection,
+      ref: surfaceRef,
       id: resolvedId,
-      "data-state": closing ? "closing" : "open",
+      "data-state": closing || !state.open ? "closing" : "open",
+      inert: !state.open || contentPending ? true : undefined,
+      ...(hasPopoverFrame ? {
+        "data-nse-popover-draws-background": String(drawsBackground),
+        "data-nse-reduced-motion": String(reducedMotion),
+        style: { ...htmlAttributes.style, "--nse-popover-spring": nsePopoverSpringEasing },
+      } : {}),
       className: surfaceClassName,
       role: surfaceRole,
       "aria-modal": isModal ? true : undefined,
@@ -251,6 +275,11 @@ export function NSEPopup({
       "data-nse-presentation": resolvedPresentation.mode,
       tabIndex: htmlAttributes.tabIndex ?? -1,
     },
+    hasPopoverFrame ? createElement("svg", { className: "nse-popover-frame", "data-nse-part": "popover-frame", "aria-hidden": true },
+      createElement("path", { "data-nse-part": "popover-arrow-fill" }),
+      createElement("path", { "data-nse-part": "popover-outline" }),
+    ) : null,
+    hasPopoverFrame && kind === "popover" ? createElement("span", { ref: setArrow, className: "nse-popover-arrow", "data-nse-part": "arrow", "aria-hidden": true }) : null,
     title ? createElement("div", { id: titleId, className: "nse-overlay-popup-title" }, title) : null,
     createElement("div", { className: "nse-overlay-popup-content" }, children),
   );

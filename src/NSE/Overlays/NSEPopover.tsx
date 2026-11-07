@@ -63,6 +63,9 @@ export interface NSEPopoverProps {
   readonly title?: string;
   /** Size of a window-hosted popover's content, as NSPopover.contentSize. */
   readonly contentSize?: { readonly width: number; readonly height: number };
+  /** Draw the standard plate. When false the content paints it and supplies
+   * `--nse-popover-content-fill` on its root for the arrow. Defaults to true. */
+  readonly drawsBackground?: boolean;
   readonly children: ReactNode;
   readonly windowBridge?: NSEPopoverWindowBridge;
   /** Keep content in the canonical overlay stack even when a physical-window bridge is available. */
@@ -107,6 +110,7 @@ export function NSEPopover({
   describedBy,
   title,
   contentSize,
+  drawsBackground = true,
   children,
   windowBridge,
   surface = "automatic",
@@ -179,6 +183,8 @@ export function NSEPopover({
       overlayKind={resolvedPresentation.mode === "sheet" ? "action-sheet" : "popover"}
       modal={resolvedPresentation.mode === "sheet"}
       presentation={resolvedPresentation}
+      drawsBackground={drawsBackground}
+      style={contentSize ? { width: contentSize.width, height: contentSize.height } : undefined}
       onOpenChange={onOpenChange}
     >
       {children}
