@@ -495,15 +495,39 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
       );
       this.#timerCount += 1;
     };
-    const scheduleCompletion = () => {
+    const armCompletionTimer = (delayMs: number) => {
       if (!this.#platform.schedule || settled || paused) return;
-      scheduledAt = this.#platform.now();
       completionTimer = this.#platform.schedule(() => {
         completionTimer = undefined;
         this.#timerCount = Math.max(0, this.#timerCount - 1);
-        settle("completed");
-      }, remainingMs);
+        if (settled || paused) return;
+        if (!native) {
+          settle("completed");
+          return;
+        }
+        if (native.playState === "idle") {
+          settle("cancelled");
+          return;
+        }
+        const currentTime = native.currentTime;
+        if (native.playState === "finished" ||
+            (typeof currentTime === "number" && Number.isFinite(currentTime) && currentTime >= totalDuration)) {
+          settle("completed");
+          return;
+        }
+        // Native timelines can lag wall time while the browser is busy. This
+        // watchdog observes native completion without restarting scroll ticks
+        // or changing the wall-clock origin used by pause/resume and scrolling.
+        armCompletionTimer(typeof currentTime === "number" && Number.isFinite(currentTime)
+          ? Math.max(16, totalDuration - currentTime)
+          : 16);
+      }, delayMs);
       this.#timerCount += 1;
+    };
+    const scheduleCompletion = () => {
+      if (!this.#platform.schedule || settled || paused) return;
+      scheduledAt = this.#platform.now();
+      armCompletionTimer(remainingMs);
       scheduleScrollTick();
     };
     const playback: RuntimeAnimationPlayback = {

@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation-native-completion.test.ts tests/runtime/fx/animation.test.tsx tests/runtime/nse-animation.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  61 passed (61)
+   Start at  09:29:23
+   Duration  8.76s (transform 6.09s, setup 48ms, import 8.05s, tests 316ms, environment 1.88s)
+
