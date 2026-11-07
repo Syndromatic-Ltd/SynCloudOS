@@ -33,6 +33,8 @@
     "src/SynCloudOS/AppSDK/testing/sdkPackageEntry.ts",
     "src/SynCloudOS/Server/Auth/index.ts",
     "src/SynCloudOS/Authentication/index.ts",
+    "src/SynCloudOS/AuthenticationServices/index.ts",
+    "src/SynCloudOS/Authentication/providers/passkey/index.ts",
     "src/Webspring/public.ts",
     "src/SynCloudOS/AppSDK/Chronosphere/public.ts",
     "src/SynCloudOSReact/browser.tsx",
