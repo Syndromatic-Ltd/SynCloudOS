@@ -1,0 +1,236 @@
+[
+  {
+    "colorScheme": "light",
+    "software": {
+      "stageBackCount": 0,
+      "visibleButtons": [
+        {
+          "label": null,
+          "text": "Reorder applications"
+        },
+        {
+          "label": "Open About",
+          "text": "About"
+        },
+        {
+          "label": "Open Portfolio Hub",
+          "text": "Portfolio Hub"
+        },
+        {
+          "label": "Open folder Experiments",
+          "text": "Experiments"
+        },
+        {
+          "label": "Open Journal",
+          "text": "2Journal"
+        },
+        {
+          "label": "Open Software",
+          "text": "Software"
+        },
+        {
+          "label": "Return to Webspring",
+          "text": ""
+        },
+        {
+          "label": "Open QuickSwitch",
+          "text": "MediaSonic"
+        },
+        {
+          "label": "User Info",
+          "text": ""
+        },
+        {
+          "label": null,
+          "text": "Overview"
+        },
+        {
+          "label": null,
+          "text": "SynCloudOS"
+        },
+        {
+          "label": null,
+          "text": "OpenXMB"
+        },
+        {
+          "label": null,
+          "text": "SynOS Canora"
+        },
+        {
+          "label": "More destinations",
+          "text": "More"
+        }
+      ]
+    },
+    "journal": [
+      {
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "bezel": "texturedRounded",
+        "size": "small",
+        "label": "Open QuickSwitch",
+        "glyph": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      {
+        "bounds": {
+          "x": 201.765625,
+          "y": 0,
+          "width": 102.46875,
+          "height": 24,
+          "top": 0,
+          "right": 304.234375,
+          "bottom": 24,
+          "left": 201.765625
+        },
+        "bezel": "texturedRounded",
+        "size": "small",
+        "label": "Open QuickSwitch",
+        "glyph": {
+          "x": 268.046875,
+          "y": 5.390625,
+          "width": 17,
+          "height": 15.828125,
+          "top": 5.390625,
+          "right": 285.046875,
+          "bottom": 21.21875,
+          "left": 268.046875
+        }
+      }
+    ],
+    "errors": []
+  },
+  {
+    "colorScheme": "dark",
+    "software": {
+      "stageBackCount": 0,
+      "visibleButtons": [
+        {
+          "label": null,
+          "text": "Reorder applications"
+        },
+        {
+          "label": "Open About",
+          "text": "About"
+        },
+        {
+          "label": "Open Portfolio Hub",
+          "text": "Portfolio Hub"
+        },
+        {
+          "label": "Open folder Experiments",
+          "text": "Experiments"
+        },
+        {
+          "label": "Open Journal",
+          "text": "2Journal"
+        },
+        {
+          "label": "Open Software",
+          "text": "Software"
+        },
+        {
+          "label": "Return to Webspring",
+          "text": ""
+        },
+        {
+          "label": "Open QuickSwitch",
+          "text": "MediaSonic"
+        },
+        {
+          "label": "User Info",
+          "text": ""
+        },
+        {
+          "label": null,
+          "text": "Overview"
+        },
+        {
+          "label": null,
+          "text": "SynCloudOS"
+        },
+        {
+          "label": null,
+          "text": "OpenXMB"
+        },
+        {
+          "label": null,
+          "text": "SynOS Canora"
+        },
+        {
+          "label": "More destinations",
+          "text": "More"
+        }
+      ]
+    },
+    "journal": [
+      {
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "bezel": "texturedRounded",
+        "size": "small",
+        "label": "Open QuickSwitch",
+        "glyph": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      {
+        "bounds": {
+          "x": 201.765625,
+          "y": 0,
+          "width": 102.46875,
+          "height": 24,
+          "top": 0,
+          "right": 304.234375,
+          "bottom": 24,
+          "left": 201.765625
+        },
+        "bezel": "texturedRounded",
+        "size": "small",
+        "label": "Open QuickSwitch",
+        "glyph": {
+          "x": 268.046875,
+          "y": 5.390625,
+          "width": 17,
+          "height": 15.828125,
+          "top": 5.390625,
+          "right": 285.046875,
+          "bottom": 21.21875,
+          "left": 268.046875
+        }
+      }
+    ],
+    "errors": []
+  }
+]

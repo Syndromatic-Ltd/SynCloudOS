@@ -1,0 +1,202 @@
+[
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/Base.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Next ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/Base.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Prev\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/de-DE.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Weiter ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/de-DE.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Zurück\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/en-GB.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Next ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/en-GB.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Prev\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/es-ES.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Sig. ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/es-ES.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Ant.\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/fr-FR.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Suiv. ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/fr-FR.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Préc.\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/hi-IN.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"अगला ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/hi-IN.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ पिछला\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/id-ID.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Berikutnya ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/id-ID.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Sebelumnya\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/it-IT.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Succ. ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/it-IT.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Prec.\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/ja-JP.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"次へ ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/ja-JP.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ 前へ\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/ko-KR.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"다음 ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/ko-KR.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ 이전\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/mr-IN.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"पुढील ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/mr-IN.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ मागील\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/nl-NL.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Volgende ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/nl-NL.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Vorige\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/pl-PL.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Dalej ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/pl-PL.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Wstecz\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/pt-PT.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Seg. ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/pt-PT.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Ant.\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/ru-RU.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Далее ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/ru-RU.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Назад\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/ta-IN.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"அடுத்தது ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/ta-IN.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ முந்தையது\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/tr-TR.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Sonraki ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/tr-TR.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Önceki\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/vi-VN.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"Tiếp ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/vi-VN.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ Trước\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/zh-Hans.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"下一个 ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/zh-Hans.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ 上一个\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/zh-TW.locale/Localisable.strings",
+    "line": 221,
+    "removed": "\"imaging.swipeNext\" = \"下一個 ›\";"
+  },
+  {
+    "file": "src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/zh-TW.locale/Localisable.strings",
+    "line": 223,
+    "removed": "\"imaging.swipePrev\" = \"‹ 上一個\";"
+  }
+]

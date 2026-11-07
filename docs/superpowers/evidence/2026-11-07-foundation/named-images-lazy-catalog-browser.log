@@ -1,0 +1,27 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-view-draw-browser.test.ts tests/runtime/nse-named-images.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+▲ [WARNING] "import.meta" is not available with the "iife" output format and will be empty [empty-import-meta]
+
+    src/NSE/Themes/Atmo/namedImages.ts:28:61:
+      28 │ ...ces/navigation-back.svg", import.meta.url).href, size: navigati...
+         ╵                              ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "iife" output format and will be empty [empty-import-meta]
+
+    src/NSE/Themes/Atmo/namedImages.ts:31:64:
+      31 │ .../navigation-forward.svg", import.meta.url).href, size: navigati...
+         ╵                              ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  13:12:36
+   Duration  2.06s (transform 626ms, setup 43ms, import 1.14s, tests 1.20s, environment 925ms)
+
