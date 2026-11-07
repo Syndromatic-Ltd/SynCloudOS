@@ -16,6 +16,7 @@ export interface NSEOpenPanelHost {
   compact(): boolean;
   frame(): Readonly<{ x: number; y: number; width: number; height: number }>;
   focusedElement(): HTMLElement | null;
+  restoreFocus?(element: HTMLElement): void;
   observeGeometry?(element: HTMLElement, listener: () => void): () => void;
 }
 const windows = new WeakMap<NSEWindow, NSEOpenPanelHost>();

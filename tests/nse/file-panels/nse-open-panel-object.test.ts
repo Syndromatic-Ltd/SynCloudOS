@@ -47,4 +47,12 @@ describe("NSEOpenPanel object", () => {
     const panel = new NSEOpenPanel(); await expect(panel.runModal()).resolves.toBe(NSEModalResponse.cancel);
     expect(h.service.open).toHaveBeenCalledTimes(1); expect(panel.result.kind).toBe("denied");
   });
+  it("restores focus through its host after the modal scope is removed", async () => {
+    const h = host(); const anchor = { isConnected: true, focus: vi.fn() } as any;
+    h.focusedElement = () => anchor;
+    const restoreFocus = vi.fn(); Object.assign(h, { restoreFocus });
+    const panel = new NSEOpenPanel(); const response = panel.begin(); panel.cancel();
+    await response; await Promise.resolve();
+    expect(restoreFocus).toHaveBeenCalledWith(anchor); expect(anchor.focus).not.toHaveBeenCalled();
+  });
 });
