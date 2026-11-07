@@ -48,7 +48,7 @@ function fixture() {
   const repository = temporary();
   const output = join(repository, ".artifacts/synapp-sdk");
   const packaged = join(output, "packages/syncloudos");
-  const families = ["animation", "graphics", "image", "text", "audio", "haptics", "motion", "media", "video", "midi", "location", "lumina", "video/webm"];
+  const families = ["animation", "graphics", "image", "text", "audio", "haptics", "motion", "media", "video", "midi", "location", "lumina", "compression", "video/webm"];
   const exports = Object.fromEntries(families.map(f => [`./fx/${f}`, { import: `./fx/${f}.js`, types: `./fx/${f}.d.ts` }]));
   const paths = ["package.json", "assets/image-processing.worker-proof.js", "assets/image-processing.worker-proof.js.map", ...families.flatMap(f => [`fx/${f}.js`, `fx/${f}.js.map`, `fx/${f}.d.ts`])];
   for (const path of paths) write(packaged, path, path === "package.json"
