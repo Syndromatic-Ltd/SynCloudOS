@@ -83,6 +83,8 @@ export function createBrowserAnimationLayerHost(document: Document, scheduler: A
       if (boundElements.has(target)) throw new DOMException("Element already has a live layer binding.", "InvalidStateError");
       const constructors = { layer: AFXLayer, shape: AFXShapeLayer, gradient: AFXGradientLayer, text: AFXTextLayer, replicator: AFXReplicatorLayer, emitter: AFXEmitterLayer, tiled: AFXTiledLayer };
       if (!Object.hasOwn(constructors, kind)) throw new TypeError("Unknown layer kind.");
+      // Read the view's authored style before the surface starts writing layer state.
+      const authored = options?.layout === "css" ? readAuthoredLayerStyle(target) : null;
       const surface = new BrowserAnimationLayerSurface(target, options?.layout);
       boundElements.add(target);
       let layer: AFXLayer | undefined;
@@ -92,6 +94,12 @@ export function createBrowserAnimationLayerHost(document: Document, scheduler: A
         layer = createAFXLayer(constructors[kind], surface, scheduler, { signal });
         if (options?.layout === "css") {
           const backingLayer = layer;
+          // A view gaining a backing layer keeps its geometry and clipping, as a
+          // layer-backed NSView does: the authored transform-origin becomes the
+          // anchor point and clipping overflow becomes clipsToBounds. The
+          // surface writes both back as layer state from here on.
+          if (authored?.anchorPoint) backingLayer.anchorPoint = authored.anchorPoint;
+          if (authored?.clipsToBounds) backingLayer.clipsToBounds = true;
           const measure = () => {
             if (disposed || signal.aborted) return;
             const width = target.offsetWidth;
@@ -128,4 +136,19 @@ export function createBrowserAnimationLayerHost(document: Document, scheduler: A
       return layer as AnimationLayerKinds[K];
     },
   });
+}
+
+/** The anchor point and clipping a view's stylesheet gives it, for its backing layer. */
+function readAuthoredLayerStyle(element: HTMLElement): { anchorPoint?: { x: number; y: number }; clipsToBounds: boolean } {
+  const computed = element.ownerDocument.defaultView?.getComputedStyle(element);
+  if (!computed) return { clipsToBounds: false };
+  const width = element.offsetWidth;
+  const height = element.offsetHeight;
+  // Browsers resolve the origin to pixels; percentages are accepted as well.
+  const [x, y] = computed.transformOrigin.split(" ").map((part, axis) =>
+    part.endsWith("%") ? Number.parseFloat(part) / 100 : Number.parseFloat(part) / (axis === 0 ? width : height));
+  const clips = [computed.overflowX, computed.overflowY, computed.overflow].some(value => value === "hidden" || value === "clip");
+  // Origins outside the box have no anchor-point equivalent; those keep the centre.
+  const inside = width > 0 && height > 0 && Number.isFinite(x) && Number.isFinite(y) && x! >= 0 && x! <= 1 && y! >= 0 && y! <= 1;
+  return { ...(inside ? { anchorPoint: { x: x!, y: y! } } : {}), clipsToBounds: clips };
 }
