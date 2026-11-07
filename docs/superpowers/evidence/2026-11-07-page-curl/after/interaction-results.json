@@ -1,0 +1,50 @@
+[
+  {
+    "phone": false,
+    "motion": "no-preference",
+    "keyboardRoundTrips": 3,
+    "contentSwipes": 2,
+    "focus": {
+      "inside": true,
+      "inert": false
+    },
+    "returnedToShelf": true,
+    "errors": []
+  },
+  {
+    "phone": false,
+    "motion": "reduce",
+    "keyboardRoundTrips": 3,
+    "contentSwipes": 2,
+    "focus": {
+      "inside": true,
+      "inert": false
+    },
+    "returnedToShelf": true,
+    "errors": []
+  },
+  {
+    "phone": true,
+    "motion": "no-preference",
+    "keyboardRoundTrips": 3,
+    "contentSwipes": 2,
+    "focus": {
+      "inside": true,
+      "inert": false
+    },
+    "returnedToShelf": true,
+    "errors": []
+  },
+  {
+    "phone": true,
+    "motion": "reduce",
+    "keyboardRoundTrips": 3,
+    "contentSwipes": 2,
+    "focus": {
+      "inside": true,
+      "inert": false
+    },
+    "returnedToShelf": true,
+    "errors": []
+  }
+]
