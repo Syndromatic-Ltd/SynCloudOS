@@ -25,6 +25,12 @@ function fixture(compact = false) {
 }
 const choose = async (name: string) => { fireEvent.click(await screen.findByText(name)); };
 describe("drawn Open panel", () => {
+  it("keeps media sources alive through StrictMode's effect replay", async () => {
+    const { session } = fixture();
+    const source = { id: "pictures", label: "Gallery Pictures", query: async () => ({ items: [{ id: "one", providerId: "pictures", name: "Coast", mimeType: "image/png", kind: "image" as const }], nextCursor: null }) };
+    render(<React.StrictMode><NSEOpenPanelContent session={{ ...session, mediaSources: [source] }} /></React.StrictMode>);
+    await choose("Gallery Pictures"); expect(await screen.findByText("Coast")).toBeTruthy();
+  });
   it("browses a grant, filters content, navigates history and returns file references", async () => {
     const { session } = fixture(); render(<NSEOpenPanelContent session={session} />);
     await choose("Projects"); await screen.findByText("sunset.png");

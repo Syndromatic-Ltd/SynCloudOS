@@ -11,7 +11,7 @@ describe("application-support directories", () => {
     const getDirectory = vi.fn(async () => root);
     const browser = { isSecureContext: true, navigator: { storage: { getDirectory } } } as any;
     const port = createBrowserOpenPanelStoragePort(browser)!;
-    await expect(port.applicationDirectory("org.test/editor")).resolves.toBe(scoped);
+    await expect(port.applicationDirectory("org.test/editor")).resolves.toMatchObject(scoped);
     expect(root.getDirectoryHandle).toHaveBeenCalledWith("SynCloudOS-Application-Support", { create: true });
     expect(support.getDirectoryHandle).toHaveBeenCalledWith("org.test%2Feditor", { create: true });
   });
@@ -25,5 +25,14 @@ describe("application-support directories", () => {
   it("rejects an application-support lookup when its mount has ended", async () => {
     const owner = new AbortController(); const manager = createAppFileManager({}, owner.signal);
     owner.abort(); await expect(manager.urls("applicationSupportDirectory", "userDomainMask")).rejects.toThrow();
+  });
+  it("adapts OPFS handles in browsers without permission methods", async () => {
+    const file = { kind: "file", name: "working.txt", getFile: async () => ({ name: "working.txt", type: "text/plain" }), createWritable: vi.fn() };
+    const directory = { kind: "directory", name: "org.test.editor", async *values() { yield file; }, getFileHandle: async () => file, getDirectoryHandle: vi.fn() };
+    const browser = { navigator: { storage: { getDirectory: async () => ({ getDirectoryHandle: async () => ({ getDirectoryHandle: async () => directory }) }) } } } as any;
+    const handle = await createBrowserOpenPanelStoragePort(browser)!.applicationDirectory("org.test.editor");
+    await expect(handle.queryPermission({ mode: "read" })).resolves.toBe("granted");
+    const [child] = await Array.fromAsync(handle.values());
+    await expect(child!.queryPermission({ mode: "read" })).resolves.toBe("granted");
   });
 });
