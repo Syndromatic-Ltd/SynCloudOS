@@ -204,6 +204,6 @@ export function createSynWareBundle(
     synWareManifest: manifest,
     services: [...runtimeManifest.requiredServices, ...(runtimeManifest.optionalServices ?? [])],
     optionalServices: [...(runtimeManifest.optionalServices ?? [])],
-    permissions: [...(manifest.permissions ?? [])],
+    entitlements: Object.freeze([...(manifest.entitlements ?? [])]),
   });
 }

@@ -132,7 +132,7 @@ function createDefaultBundle(manifest: SynCloudOSAppManifest): TrustedSynWareBun
     modulePath: manifest.path,
     services: [...manifest.requiredServices, ...(manifest.optionalServices ?? [])],
     optionalServices: manifest.optionalServices,
-    permissions: manifest.type === "system" ? ["diagnostics.view"] : ["app.open.public"],
+    entitlements: Object.freeze([]),
     lifecycleHooks: {}
   };
 }
@@ -143,6 +143,11 @@ function isTrustedBundle(value: SynCloudOSAppManifest | TrustedSynWareBundle): v
 
 function prepareBundle(bundle: TrustedSynWareBundle): TrustedSynWareBundle {
   const synWareManifest = canonicalManifestForBundle(bundle);
+  const declaredEntitlements = synWareManifest === undefined ? bundle.entitlements ?? [] : synWareManifest.entitlements ?? [];
+  if (!Array.isArray(declaredEntitlements) || declaredEntitlements.some((value) => typeof value !== "string" || !/^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$/u.test(value)) || new Set(declaredEntitlements).size !== declaredEntitlements.length) {
+    throw new TypeError("Bundle entitlements must be unique named capabilities.");
+  }
+  const entitlements = Object.freeze([...declaredEntitlements]);
   const requiredServices = declaredServices(synWareManifest, true) ?? bundle.manifest.requiredServices;
   const optionalServices = declaredServices(synWareManifest, false) ?? bundle.manifest.optionalServices;
   return preserveTrustedSynWareBundleProvenance(bundle, {
@@ -152,7 +157,7 @@ function prepareBundle(bundle: TrustedSynWareBundle): TrustedSynWareBundle {
     modulePath: bundle.modulePath ?? bundle.manifest.path,
     services: bundle.services ?? [...requiredServices, ...(optionalServices ?? [])],
     optionalServices: bundle.optionalServices ?? optionalServices,
-    permissions: bundle.permissions ?? (synWareManifest?.permissions ? [...synWareManifest.permissions] : bundle.manifest.type === "system" ? ["diagnostics.view"] : ["app.open.public"]),
+    entitlements,
     lifecycleHooks: bundle.lifecycleHooks ?? {}
   });
 }
@@ -181,7 +186,7 @@ function publishBundleRegistration(bundle: TrustedSynWareBundle, hadExistingBund
     componentKey: bundle.componentKey,
     modulePath: bundle.modulePath,
     services: bundle.services,
-    permissions: bundle.permissions
+    entitlements: bundle.entitlements
   }, bundle.manifest.packageName);
 }
 
@@ -473,4 +478,3 @@ const bundleLoader = {
 
 return bundleLoader;
 }
-
