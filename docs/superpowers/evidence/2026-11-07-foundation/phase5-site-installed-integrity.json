@@ -1,0 +1,11 @@
+{
+  "installedResources": 2336,
+  "siteArchiveSha256": "b2f03824f8a8fd67d97c03682f0f8992f8d4baadd16aa62977c16e302ec00ef5",
+  "independentCleanBuildArchiveSha256": "b2f03824f8a8fd67d97c03682f0f8992f8d4baadd16aa62977c16e302ec00ef5",
+  "checkedAt": "2026-11-07T22:10:02.7005739+00:00",
+  "siteReceiptCommit": "43237d31000055c2d1ee8372d38dab8da0a40dc3",
+  "installedResourceErrors": [],
+  "independentArchiveMatches": true,
+  "note": "Verified a concurrent adoption without taking ownership of its dirty package/vendor files",
+  "independentSourceMatches": true
+}
