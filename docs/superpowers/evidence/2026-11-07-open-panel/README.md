@@ -86,7 +86,7 @@ Framework implementation:
 | b3390b7 | NSE: bind browsed file references to their application |
 | 66ac061 | NSE: keep attached sheets above floating tab bars |
 
-The evidence/plan commit containing this report is identifiable in `git log -- docs/superpowers/evidence/2026-11-07-open-panel/README.md`.
+Evidence and the completed plan landed in **fffaa26**: while these owned paths were staged, the concurrent page-curl session's commit consumed the shared index along with its own two files. **3deacbf** then records the final build-log link correction. The history is preserved; this report makes that mixed-commit provenance explicit. Further report bookkeeping is identifiable in `git log -- docs/superpowers/evidence/2026-11-07-open-panel/README.md`.
 
 Site:
 
