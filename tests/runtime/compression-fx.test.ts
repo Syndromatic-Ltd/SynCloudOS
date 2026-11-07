@@ -100,6 +100,30 @@ describe("CompressionFX", () => {
     await expect(filter.write(bytes)).rejects.toThrow();
   });
 
+  it("rejects already-locked input streams before starting a pipeline", async () => {
+    const input = new ReadableStream<NSEData>();
+    const reader = input.getReader();
+    const created: CPFXInputFilter[] = [];
+    try {
+      expect(() => { created.push(new CPFXInputFilter("compress", "gzip", input)); }).toThrow(/locked/i);
+    } finally {
+      await Promise.all(created.map((filter) => filter.cancel("test cleanup")));
+      reader.releaseLock();
+    }
+  });
+
+  it("rejects already-locked destinations before starting a pipeline", async () => {
+    const destination = new WritableStream<NSEData>();
+    const writer = destination.getWriter();
+    const created: CPFXOutputFilter[] = [];
+    try {
+      expect(() => { created.push(new CPFXOutputFilter("compress", "gzip", destination)); }).toThrow(/locked/i);
+    } finally {
+      await Promise.all(created.map((filter) => filter.abort("test cleanup")));
+      writer.releaseLock();
+    }
+  });
+
   it("propagates source failures and invalid compressed input", async () => {
     const failure = new Error("source failed");
     const filter = new CPFXInputFilter("compress", "gzip", new ReadableStream({ start(controller) { controller.error(failure); } }));
@@ -168,6 +192,29 @@ describe("CompressionFX", () => {
     expect(completed).toBe(false);
     release();
     await cancelling;
+    expect(completed).toBe(true);
+  });
+
+  it("awaits upstream cancellation even after the codec reader has errored", async () => {
+    let release!: () => void;
+    let entered!: () => void;
+    const started = new Promise<void>((resolve) => { entered = resolve; });
+    const blocked = new Promise<void>((resolve) => { release = resolve; });
+    const filter = new CPFXInputFilter("decompress", "gzip", new ReadableStream({
+      start(controller) { controller.enqueue(new Uint8Array([1, 2, 3])); },
+      async cancel() { entered(); await blocked; },
+    }));
+    await expect(filter.readData(100)).rejects.toThrow();
+    await started;
+    let completed = false;
+    const cancelling = filter.cancel("cleanup").catch((error: unknown) => error).finally(() => { completed = true; });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    try {
+      expect(completed).toBe(false);
+    } finally {
+      release();
+      await cancelling;
+    }
     expect(completed).toBe(true);
   });
 
