@@ -48,7 +48,6 @@ export {
   NSEButton,
 } from "../Controls/Buttons/NSEButton";
 export type {
-  NSEAppearanceName,
   NSEBezelStyle,
   NSEButtonControlSize,
   NSEButtonProps,
@@ -121,3 +120,5 @@ export { NSEPathControl, NSEPathControlItem } from "../Controls/Values/NSEPathCo
 export type { NSEPathControlProps, NSEPathControlHandle } from "../Controls/Values/NSEPathControl";
 
 export { NSEImage } from "../Controls/Images/NSEImageResource";
+
+export type { NSEAppearanceName } from "../Appearance/nseAppearanceTypes";

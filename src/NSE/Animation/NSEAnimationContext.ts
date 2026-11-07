@@ -19,7 +19,7 @@
  */
 
 import type { AFXAnimationTiming } from "../../FX/AnimationFX/public";
-import { NSEAnimationDefaults } from "./NSEAnimationDefaults";
+import { NSEAnimationDefaults } from "../Appearance/NSEAnimationDefaults";
 import { AFXTransaction } from "../../FX/AnimationFX/AFXTransaction";
 import { afxAnimationTiming } from "../../FX/AnimationFX/animationValues";
 

@@ -33,6 +33,8 @@ import {
   type NSEApplicationNavigationChromeState,
 } from "../../src/NSE/Navigation";
 
+import { NSELocalisationProvider, useNSEMoreTitle } from "../../src/NSE/Navigation/compactMoreTitle";
+
 afterEach(cleanup);
 
 function chromeState(ownerId: string, title: string): NSEApplicationNavigationChromeState {
@@ -204,4 +206,24 @@ describe("NSE application navigation chrome", () => {
     });
     controller.dispose();
   });
+});
+
+
+it("localises compact navigation through an NSE-owned host capability and releases its subscription", () => {
+  const listeners = new Set<() => void>();
+  let title = "More destinations";
+  const locale = {
+    getSnapshot: () => title,
+    subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    t: (key: string) => key === "navigation.more" ? title : key,
+  };
+  function MoreTitle() { return <output>{useNSEMoreTitle()}</output>; }
+  const view = render(<NSELocalisationProvider value={locale}><MoreTitle /></NSELocalisationProvider>);
+  expect(screen.getByText("More destinations")).toBeTruthy();
+  act(() => { title = "Weitere Ziele"; for (const listener of listeners) listener(); });
+  expect(screen.getByText("Weitere Ziele")).toBeTruthy();
+  view.unmount();
+  expect(listeners.size).toBe(0);
+  render(<MoreTitle />);
+  expect(screen.getByText("More")).toBeTruthy();
 });
