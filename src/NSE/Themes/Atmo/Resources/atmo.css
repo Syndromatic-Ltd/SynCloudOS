@@ -4399,7 +4399,8 @@
    filters on the unclipped view, so a SmoothSurface outline casts them.
    Custom-chrome, frameless and borderless windows are exempt.
    ========================================================================= */
-[data-nse-appearance="atmo"] .nse-window-view:is(.nse-window-view--standard, .nse-window-view--panel, .nse-window-view--sheet, .nse-window-view--modal, .nse-window-view--hud, .nse-window-view--popover) {
+[data-nse-appearance="atmo"] .nse-window-view:is(.nse-window-view--standard, .nse-window-view--panel, .nse-window-view--sheet, .nse-window-view--modal, .nse-window-view--hud, .nse-window-view--popover),
+[data-nse-appearance="atmo"] .nse-window__titlebar[data-window-host-titlebar] {
   --nse-atmo-window-body: #f4f5f6;
   --nse-atmo-window-ink: #1f2833;
   --nse-atmo-window-stroke: rgba(0, 0, 0, 0.34);
@@ -4431,7 +4432,9 @@
 }
 
 [data-nse-appearance="atmo"][data-mode="dark"] .nse-window-view:is(.nse-window-view--standard, .nse-window-view--panel, .nse-window-view--sheet, .nse-window-view--modal, .nse-window-view--popover),
-[data-nse-appearance="atmo"] [data-mode="dark"] .nse-window-view:is(.nse-window-view--standard, .nse-window-view--panel, .nse-window-view--sheet, .nse-window-view--modal, .nse-window-view--popover) {
+[data-nse-appearance="atmo"] [data-mode="dark"] .nse-window-view:is(.nse-window-view--standard, .nse-window-view--panel, .nse-window-view--sheet, .nse-window-view--modal, .nse-window-view--popover),
+[data-nse-appearance="atmo"][data-mode="dark"] .nse-window__titlebar[data-window-host-titlebar],
+[data-nse-appearance="atmo"] [data-mode="dark"] .nse-window__titlebar[data-window-host-titlebar] {
   --nse-atmo-window-body: #262c34;
   --nse-atmo-window-ink: #e7ecf2;
   --nse-atmo-window-stroke: rgba(0, 0, 0, 0.78);
