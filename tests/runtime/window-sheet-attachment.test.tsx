@@ -62,6 +62,9 @@ it("attaches a sheet under the window's toolbar, blocks the window and refuses i
   await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Rename…" })); });
 
   const sheet = await screen.findByRole("dialog", { name: "Rename" });
+  const focusRoot = sheet.closest(".nse-control-alert-backdrop")!;
+  expect(focusRoot.getAttribute("data-syncloudos-focus-scope")).toEqual(expect.stringMatching(/^nse-sheet:/));
+  expect(focusRoot.getAttribute("data-syncloudos-runtime-owner")).toBeTruthy();
   const layer = sheet.closest(".nse-window-sheet-layer") as HTMLElement;
   expect(layer).not.toBeNull();
   expect(layer.dataset.sheetAttached).toBe("true");
