@@ -28,13 +28,16 @@ import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinati
 import type { NSENavigationIcon } from "./navigationTypes";
 import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle";
 import { connectNSENavigationRestoration, type NSENavigationRestorationDescriptor } from "./navigationRestoration";
+import { NSETreeController } from "../Controllers/NSETreeController";
+import { NSEAdaptiveTabView, type NSEAdaptiveTabOutlineItem } from "./adaptiveTabView";
 
 /**
  * NSTabViewController.TabStyle. Atmo draws `segmentedControlOnBottom` as its bottom tab bar and
  * `segmentedControlOnTop` as the same control above the content; `unspecified` draws no tab control,
- * for an app that switches items itself.
+ * for an app that switches items itself. `sidebarAdaptable` is an NSE extension after SwiftUI's
+ * sidebar-adaptable TabView style: source list, bottom tabs or a rail, chosen from content traits.
  */
-export type NSETabViewControllerTabStyle = "segmentedControlOnTop" | "segmentedControlOnBottom" | "unspecified";
+export type NSETabViewControllerTabStyle = "segmentedControlOnTop" | "segmentedControlOnBottom" | "unspecified" | "sidebarAdaptable";
 
 export interface NSETabViewItemOptions {
   /** The item's view controller (NSTabViewItem(viewController:)). It must be a child of the tab view controller. */
@@ -108,6 +111,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
   #tabStyle: NSETabViewControllerTabStyle;
   #model: NSETabBarController<ReactNode> | null = null;
   #unsubscribeModel: (() => void) | null = null;
+  #outline: NSETreeController<NSEAdaptiveTabOutlineItem, string> | null = null;
 
   constructor(options: NSETabViewControllerOptions = {}) {
     super(options);
@@ -131,7 +135,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
   /** NSTabViewController.tabStyle. */
   get tabStyle(): NSETabViewControllerTabStyle { return this.#tabStyle; }
   set tabStyle(style: NSETabViewControllerTabStyle) {
-    if (style !== "segmentedControlOnTop" && style !== "segmentedControlOnBottom" && style !== "unspecified") throw new TypeError(`Unknown tab style "${String(style)}".`);
+    if (style !== "segmentedControlOnTop" && style !== "segmentedControlOnBottom" && style !== "unspecified" && style !== "sidebarAdaptable") throw new TypeError(`Unknown tab style "${String(style)}".`);
     if (style === this.#tabStyle) return;
     this.#tabStyle = style;
     this.notifyObservers();
@@ -199,10 +203,27 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
   /** @internal The tab control's model, rebuilt from the items. */
   get tabControlModel(): NSETabBarController<ReactNode> | null { return this.#model; }
 
+  /** @internal The source-list projection uses the same items and selection as the tab control. */
+  get tabOutlineModel(): NSETreeController<NSEAdaptiveTabOutlineItem, string> {
+    if (!this.#outline) this.#outline = new NSETreeController({
+      owner: this, id: `${this.constructor.name}:tab-outline`,
+      content: this.#outlineItems(), getId: item => item.identifier,
+      getChildren: () => [], withChildren: item => item, editable: false,
+      selection: { mode: "single", allowsEmpty: false },
+    });
+    return this.#outline;
+  }
+
+  #outlineItems(): NSEAdaptiveTabOutlineItem[] {
+    return this.#items.map(item => ({ identifier: item.identifier, label: item.label, image: item.image }));
+  }
+
   [tabItemChanged](item: NSETabViewItem, change: "title" | "image"): void {
     // New words retitle the tab control in place; a new picture rebuilds it.
     if (change === "title" && this.#model) {
       this.#model.retitle({ destinations: { [item.identifier]: { label: item.label, ...(item.toolTip ? { accessibleLabel: item.toolTip } : {}) } } });
+      this.#outline?.setContent(this.#outlineItems());
+      this.notifyObservers();
       return;
     }
     this.#rebuild();
@@ -215,6 +236,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
   }
 
   #rebuild(): void {
+    this.#outline?.setContent(this.#outlineItems());
     this.#unsubscribeModel?.();
     this.#unsubscribeModel = null;
     this.#model?.dispose();
@@ -225,6 +247,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
         owner: this,
         id: `${this.constructor.name || "NSETabViewController"}:tabs`,
         initialSelectedId: selected.identifier,
+        maximumDirectTabs: this.#items.length,
         destinations: this.#items.map(item => ({
           id: item.identifier,
           label: item.label,
@@ -259,10 +282,15 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
 function NSETabViewControllerView({ controller }: { readonly controller: NSETabViewController }) {
   useObserve(controller);
   const scope = useId().replace(/[^\w-]/g, "");
+  // Keeping these two styles in one projection preserves the selected item's DOM when an outer
+  // split supplies the regular sidebar and hands compact navigation back to this tab controller.
+  if (controller.tabStyle === "sidebarAdaptable" || controller.tabStyle === "unspecified") return <div className="nse-tab-view-controller" data-tab-style={controller.tabStyle}>
+    <NSEAdaptiveTabView controller={controller} scope={scope} />
+  </div>;
   const model = controller.tabControlModel;
   const selected = controller.selectedTabViewItem;
   const Selected = selected?.viewController;
-  const bar = model && controller.tabStyle !== "unspecified"
+  const bar = model
     ? <NSETabBar controller={model} aria-label={controller.title ?? "Tabs"} renderPanels={false} idScope={scope} className="nse-tab-view-controller-tabs" />
     : null;
   return <div className="nse-tab-view-controller" data-tab-style={controller.tabStyle}>

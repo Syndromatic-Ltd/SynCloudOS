@@ -26,15 +26,19 @@ import {
   useState,
   useSyncExternalStore,
   type KeyboardEvent,
+  type FocusEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { createPortal } from "react-dom";
 
 import { NSEChildViewControllerView } from "../../Application/viewControllerRenderer";
+import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { dataViewAllowsMutation, dataViewIsBusy, dataViewPresentsContent } from "../Core";
 import { NSESplitView } from "./NSESplitView";
 import { nseSplitViewLayout, type NSESplitViewController } from "./NSESplitViewController";
 import type { NSESplitViewItem } from "./NSESplitViewItem";
+import { useSourceListFrame } from "../../Navigation/SourceList/sourceListFrameContext";
+import "./splitViewController.css";
 
 /**
  * Places an item's persistent host element in whichever layout slot currently shows the item. Moving
@@ -52,14 +56,6 @@ function PaneSlot({ host }: { readonly host: HTMLDivElement }) {
   return <div ref={slot} data-nse-part="split-pane-slot" style={{ display: "contents" }} />;
 }
 
-/** A split view inside another split view's item never collapses to one item; the outermost one does. */
-function isNestedSplit(controller: NSESplitViewController): boolean {
-  for (let ancestor = controller.parent; ancestor; ancestor = ancestor.parent) {
-    if ((ancestor as { readonly [nseSplitViewLayout]?: unknown })[nseSplitViewLayout] !== undefined) return true;
-  }
-  return false;
-}
-
 const labelOf = (item: NSESplitViewItem) => item.viewController.title ?? item.identifier;
 
 /** @internal The view an `NSESplitViewController` renders. */
@@ -67,6 +63,8 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   const layout = controller[nseSplitViewLayout];
   const items = controller.splitViewItems;
+  const sourceListFrame = useSourceListFrame();
+  const frame = items[0]?.behavior === "sidebar" ? sourceListFrame : null;
   const state = snapshot.state;
   const allowsMutation = dataViewAllowsMutation(state);
   const ariaLabel = controller.title ?? "Split view";
@@ -89,19 +87,34 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
   };
   const dragRef = useRef<{ divider: number; coordinate: number } | null>(null);
   const previousPresentation = useRef(snapshot.presentation);
+  const previousActive = useRef(snapshot.activeItemIdentifier);
+  const lastFocused = useRef<HTMLElement | null>(null);
+  const focusReturnTarget = useRef<HTMLElement | null>(null);
+  const restoreFocus = useRef(false);
 
   // Items divide the space the split view actually occupies: a split nested inside another item is
   // smaller than the window, so the window's content bounds are only the fallback before measurement.
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
-  const [measured, setMeasured] = useState<{ readonly width: number; readonly height: number } | null>(null);
+  const [measured, setMeasured] = useState<{ readonly x: number; readonly y: number; readonly width: number; readonly height: number } | null>(null);
   const rootRef = useCallback((node: HTMLDivElement | null) => setRoot(node), []);
+  // Pane contents are persistent portals, so their React event path is a sibling of this root.
+  // Listen to the document's native focus path while the initiating control is still attached.
+  useLayoutEffect(() => {
+    if (!root) return;
+    const remember = (event: globalThis.FocusEvent) => {
+      if (event.target instanceof HTMLElement && root.contains(event.target)) lastFocused.current = event.target;
+    };
+    root.ownerDocument.addEventListener("focusin", remember, true);
+    return () => root.ownerDocument.removeEventListener("focusin", remember, true);
+  }, [root]);
   useLayoutEffect(() => {
     if (!root) return undefined;
     const read = () => {
       const width = Math.round(root.clientWidth);
       const height = Math.round(root.clientHeight);
-      if (width <= 0 && height <= 0) return;
-      setMeasured((previous) => previous && previous.width === width && previous.height === height ? previous : { width, height });
+      if (width <= 0 || height <= 0) return;
+      const { x, y } = root.getBoundingClientRect();
+      setMeasured((previous) => previous && previous.x === x && previous.y === y && previous.width === width && previous.height === height ? previous : { x, y, width, height });
     };
     read();
     const View = root.ownerDocument.defaultView;
@@ -109,28 +122,56 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
     const observer = new View.ResizeObserver(read);
     observer.observe(root);
     return () => observer.disconnect();
-  }, [root]);
+  }, [root, controller.traitCollection.presentation?.revision]);
   const presentation = controller.traitCollection.presentation;
   // Until the split view is measured or has content bounds it keeps the size it has.
   const bounds = measured ?? presentation?.contentBounds ?? null;
-  const compact = presentation?.horizontalSizeClass === "compact" && !isNestedSplit(controller);
 
   const availableSize = bounds ? (snapshot.isVertical ? bounds.width : bounds.height) : null;
   useLayoutEffect(() => {
     if (availableSize !== null) layout.resize(availableSize);
-    layout.setPresentation(compact ? "single-pane" : "split");
-  }, [layout, compact, availableSize]);
+    layout.updateBounds(measured);
+  }, [layout, measured, availableSize]);
+
+  useLayoutEffect(() => () => controller[nseSplitViewLayout].updateBounds(null), [controller]);
+
+  const setCompactNavigation = frame?.setCompactNavigation;
+  useLayoutEffect(() => {
+    setCompactNavigation?.(snapshot.presentation === "single-pane" ? true : null);
+    return () => setCompactNavigation?.(null);
+  }, [setCompactNavigation, snapshot.presentation]);
+
+  const frameRailWidth = frame?.railWidth;
+  useLayoutEffect(() => {
+    if (frameRailWidth !== undefined && snapshot.presentation === "split" && !snapshot.bookRegions && snapshot.availableSize > 0) {
+      controller.setPosition(frameRailWidth, 0);
+    }
+  }, [controller, frameRailWidth, snapshot.presentation, snapshot.availableSize, snapshot.bookRegions]);
 
   useEffect(() => {
     const live = new Set(items.map(({ identifier }) => identifier));
     for (const identifier of [...paneHosts.current.keys()]) if (!live.has(identifier)) paneHosts.current.delete(identifier);
   }, [items]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (previousPresentation.current === "single-pane" && snapshot.presentation === "split") {
-      paneNodes.current.get(snapshot.activeItemIdentifier)?.focus();
+      paneHosts.current.get(snapshot.activeItemIdentifier)?.parentElement?.parentElement?.focus({ preventScroll: true });
     }
     previousPresentation.current = snapshot.presentation;
+  }, [snapshot.activeItemIdentifier, snapshot.presentation]);
+
+  useLayoutEffect(() => {
+    if (snapshot.presentation === "single-pane" && previousActive.current !== snapshot.activeItemIdentifier) {
+      if (restoreFocus.current) {
+        restoreFocus.current = false;
+        if (focusReturnTarget.current?.isConnected) focusReturnTarget.current.focus({ preventScroll: true });
+        focusReturnTarget.current = null;
+      } else {
+        focusReturnTarget.current = lastFocused.current;
+        paneNodes.current.get(snapshot.activeItemIdentifier)?.focus({ preventScroll: true });
+      }
+    }
+    previousActive.current = snapshot.activeItemIdentifier;
   }, [snapshot.activeItemIdentifier, snapshot.presentation]);
 
   const definitions = new Map(items.map((item) => [item.identifier, item]));
@@ -159,6 +200,7 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
     "aria-disabled": hostDisabled || undefined,
     "data-nse-control": "split-view",
     "data-state": state.kind,
+    onFocusCapture: (event: FocusEvent<HTMLDivElement>) => { lastFocused.current = event.target; },
   } as const;
 
   // Denied, loading and error states expose no item views at all.
@@ -175,9 +217,19 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
     }
 
     if (snapshot.presentation === "single-pane") {
+      const hierarchy = items.some(({ behavior }) => behavior === "sidebar" || behavior === "contentList");
+      const activeIndex = visible.findIndex(({ identifier }) => identifier === snapshot.activeItemIdentifier);
+      const back = visible[activeIndex - 1];
       return (
         <div {...common} data-presentation="single-pane">
-          <div role="tablist" aria-label={`${ariaLabel} panes`}>
+          {hierarchy ? back ? <div data-nse-part="split-compact-chrome">
+            <NSEButton title={`Back to ${labelOf(definitions.get(back.identifier)!)}`} isEnabled={allowsMutation}
+              onClick={() => {
+                if (!allowsMutation) return;
+                restoreFocus.current = true;
+                controller.compactItem = definitions.get(back.identifier)!;
+              }} />
+          </div> : null : <div role="tablist" aria-label={`${ariaLabel} panes`}>
             {visible.map((item) => (
               <button
                 key={item.identifier}
@@ -190,8 +242,10 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
                 {labelOf(definitions.get(item.identifier)!)}
               </button>
             ))}
-          </div>
-          <div role="tabpanel" data-pane-id={snapshot.activeItemIdentifier}>
+          </div>}
+          <div ref={paneRef(snapshot.activeItemIdentifier)} role={hierarchy ? "region" : "tabpanel"}
+            aria-label={hierarchy && controller.compactItem ? labelOf(controller.compactItem) : undefined}
+            tabIndex={-1} data-nse-part="split-pane" data-pane-id={snapshot.activeItemIdentifier}>
             {definitions.has(snapshot.activeItemIdentifier) ? paneContent(snapshot.activeItemIdentifier) : null}
           </div>
           {stateFeedback}
@@ -211,11 +265,13 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
             </div>
           )}
           sidebarWidth={first.thickness}
-          minSidebarWidth={0}
-          maxSidebarWidth={snapshot.availableSize}
+          minSidebarWidth={frame?.minWidth ?? 0}
+          maxSidebarWidth={frame?.maxWidth ?? snapshot.availableSize}
+          bookRegions={snapshot.bookRegions}
           label={`Resize ${labelOf(definitions.get(first.identifier)!)} and ${labelOf(definitions.get(second.identifier)!)}`}
           onSidebarWidthChange={(width) => {
             if (!allowsMutation) return;
+            frame?.setRailWidth(width);
             if (width === null) layout.resetSizes();
             else layout.moveDivider(0, width - first.thickness);
           }}

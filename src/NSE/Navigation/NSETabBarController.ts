@@ -37,6 +37,8 @@ export interface NSETabBarControllerOptions<TContent = unknown> extends NSEViewC
   /** Explicit source-list grouping. Omit to derive stable groups from `groupId`. */
   readonly sections?: readonly NSENavigationSection[];
   readonly initialSelectedId?: string;
+  /** @internal Tab view controllers show every item directly; the legacy model defaults to five. */
+  readonly maximumDirectTabs?: number;
   readonly restoration?: NSENavigationRestorationDescriptor<NSETabBarController<TContent>, unknown>;
   readonly onSelect?: (
     destination: NSENavigationDestination<TContent>,
@@ -215,8 +217,9 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
       accessibleLabel: "More destinations",
       icon: Object.freeze({ kind: "template" as const, name: "more" }),
     });
-    const direct = destinations.length <= 5 ? destinations : destinations.slice(0, 4);
-    const overflow = destinations.length <= 5 ? [] : destinations.slice(4);
+    const maximumDirectTabs = options.maximumDirectTabs ?? 5;
+    const direct = destinations.length <= maximumDirectTabs ? destinations : destinations.slice(0, maximumDirectTabs - 1);
+    const overflow = destinations.length <= maximumDirectTabs ? [] : destinations.slice(maximumDirectTabs - 1);
     this.#directDestinationIds = Object.freeze(direct.map(({ id }) => id));
     this.#overflowDestinationIds = Object.freeze(overflow.map(({ id }) => id));
     this.#onSelect = options.onSelect;

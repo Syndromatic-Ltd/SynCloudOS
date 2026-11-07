@@ -1,0 +1,141 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Designed by Kavish Krishnakumar in Manchester.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { NSEOutlineView } from "../DataViews/Outline/NSEOutlineView";
+import { NSESplitView } from "../DataViews/Split/NSESplitView";
+import { NSETableCellView } from "../DataViews/Table/NSETableCellView";
+import { NSETabBar } from "./NSETabBar";
+import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinationHost";
+import { resolveNSEBookRegions } from "./bookRegions";
+import { useSourceListFrame } from "./SourceList/sourceListFrameContext";
+import type { NSETabViewController } from "./NSETabViewController";
+import type { NSENavigationIcon } from "./navigationTypes";
+import "./adaptiveTabView.css";
+
+/** @internal Plain source-list data; view controllers stay with the tab view items. */
+export interface NSEAdaptiveTabOutlineItem {
+  readonly identifier: string;
+  readonly label: string;
+  readonly image: NSENavigationIcon | undefined;
+}
+
+type Renderer = "tabs" | "rail" | "source-list-content" | "none";
+type Bounds = { readonly x: number; readonly y: number; readonly width: number; readonly height: number };
+
+// These content budgets retain the adaptive controller's existing policy. They classify the view's
+// actual allocation, never a device name or physical screen. Book regions remain canonical host facts.
+const railWidth = 104;
+const minimumRailContentWidth = 360;
+const maximumRailHeight = 480;
+const sidebarMinimumWidth = 768;
+
+/** @internal The sidebar-adaptable theme projection of NSTabViewController's items. */
+export function NSEAdaptiveTabView({ controller, scope }: { readonly controller: NSETabViewController; readonly scope: string }) {
+  const frame = useSourceListFrame();
+  const root = useRef<HTMLDivElement>(null);
+  const [allocation, setAllocation] = useState<Bounds | null>(null);
+  const traits = controller.traitCollection.presentation;
+  const previous = useRef<Renderer>("tabs");
+  const bounds = allocation ?? traits?.contentBounds;
+  const bookRegions = traits && bounds ? resolveNSEBookRegions(traits, bounds) : null;
+  const adaptive = controller.tabStyle === "sidebarAdaptable";
+  let renderer = adaptive ? previous.current : "none";
+  if (adaptive && traits?.geometryState === "current" && bounds) {
+    renderer = bookRegions ? "source-list-content"
+      : bounds.height <= maximumRailHeight && bounds.width > bounds.height && bounds.width - railWidth >= minimumRailContentWidth ? "rail"
+      : bounds.width < sidebarMinimumWidth ? "tabs" : "source-list-content";
+    previous.current = renderer;
+  }
+  const compact = renderer === "tabs" || renderer === "rail";
+  const selected = controller.selectedTabViewItem;
+  const model = controller.tabControlModel;
+  const outline = controller.tabOutlineModel;
+  const visited = useRef(new Set<string>());
+  if (selected) visited.current.add(selected.identifier);
+  const navigationHadFocus = useRef(false);
+
+  useLayoutEffect(() => {
+    const element = root.current;
+    if (!element) return undefined;
+    const measure = () => {
+      const rect = element.getBoundingClientRect();
+      const width = element.clientWidth;
+      const height = element.clientHeight;
+      // Hidden or invalid geometry cannot undo the last trustworthy allocation.
+      if (!Number.isFinite(rect.x) || !Number.isFinite(rect.y) || width <= 0 || height <= 0) return;
+      setAllocation(old => old?.x === rect.x && old.y === rect.y && old.width === width && old.height === height
+        ? old : { x: rect.x, y: rect.y, width, height });
+    };
+    measure();
+    const Observer = element.ownerDocument.defaultView?.ResizeObserver;
+    const observer = Observer ? new Observer(measure) : null;
+    observer?.observe(element);
+    return () => observer?.disconnect();
+  }, [traits?.revision]);
+
+  useLayoutEffect(() => {
+    if (!adaptive) return undefined;
+    frame?.setCompactNavigation?.(compact ? true : null);
+    return () => frame?.setCompactNavigation?.(null);
+  }, [adaptive, compact, frame?.setCompactNavigation]);
+
+  useLayoutEffect(() => {
+    if (selected) outline.select([selected.identifier]);
+  }, [outline, selected?.identifier]);
+
+  useLayoutEffect(() => {
+    const element = root.current;
+    if (!element || !navigationHadFocus.current) return;
+    const active = element.ownerDocument.activeElement;
+    if (active && active !== element.ownerDocument.body && !element.contains(active)) return;
+    const target = compact
+      ? element.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
+      : element.querySelector<HTMLElement>('.nse-outline-view[data-style="source-list"]');
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+  }, [renderer]);
+
+  return <div ref={root} className="nse-adaptive-tab-controller nse-compact-bottom-chrome-owner"
+    data-navigation-renderer={renderer}
+    style={{ "--nse-navigation-rail-width": `${railWidth}px` } as CSSProperties}
+    onFocusCapture={event => { navigationHadFocus.current = Boolean((event.target as Element).closest('.nse-adaptive-tab-sidebar, [data-nse-adaptive-tabs-chrome]')); }}
+    onBlurCapture={event => { if (event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) navigationHadFocus.current = false; }}>
+    <NSESplitView className="nse-adaptive-tab-split"
+      sidebar={<div className="nse-adaptive-tab-sidebar" hidden={renderer !== "source-list-content"} inert={renderer !== "source-list-content"}>
+        <NSEOutlineView controller={outline} selectionHighlightStyle="sourceList" viewportBlockSize="fill"
+          aria-label={controller.title ?? "Tabs"} selectionMode="single"
+          idForItem={item => item.identifier} childrenForItem={() => []} isExpandable={() => false} labelForItem={item => item.label}
+          delegate={{
+            renderItem: ({ item }) => <NSETableCellView primary={item.label}
+              image={item.image?.kind === "vector" ? { src: item.image.path, alt: "" } : undefined} />,
+            shouldSelect: identifier => {
+              controller.selectTabViewItem(identifier);
+              return controller.selectedTabViewItem?.identifier === identifier;
+            },
+          }} />
+      </div>}
+      sidebarWidth={frame?.railWidth} defaultSidebarWidth={frame?.defaultWidth ?? 264}
+      minSidebarWidth={frame?.minWidth ?? 208} maxSidebarWidth={frame?.maxWidth ?? 460}
+      onSidebarWidthChange={frame?.setRailWidth} resizable={renderer === "source-list-content"} bookRegions={adaptive ? bookRegions : null}>
+      <div className="nse-adaptive-tab-content">
+        {controller.tabViewItems.filter(item => visited.current.has(item.identifier)).map(item => <div key={item.identifier}
+          className="nse-adaptive-tab-panel" hidden={item !== selected} inert={item !== selected}
+          role={compact ? "tabpanel" : undefined} id={getNSETabBarPanelId(scope, item.identifier)}
+          aria-labelledby={compact ? getNSETabBarTabId(scope, item.identifier) : undefined}>
+          <item.viewController.view />
+        </div>)}
+      </div>
+    </NSESplitView>
+    <div className={`nse-adaptive-tab-chrome${renderer === "tabs" ? " nse-compact-bottom-chrome-mount" : ""}`}
+      hidden={!compact} inert={!compact} data-nse-adaptive-tabs-chrome="true"
+      data-nse-compact-bottom-chrome={renderer === "tabs" ? "tabs-only" : undefined}>
+      {model ? <NSETabBar controller={model} aria-label={controller.title ?? "Tabs"} renderPanels={false}
+        orientation={renderer === "rail" ? "vertical" : "horizontal"} reducedMotion={controller.traitCollection.reducedMotion} idScope={scope} /> : null}
+    </div>
+  </div>;
+}

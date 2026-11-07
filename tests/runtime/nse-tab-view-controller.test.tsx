@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 import * as React from "react";
-import { act, cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, expect, it } from "vitest";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
-import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
+import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
+import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
@@ -12,13 +14,134 @@ import { defaultsFrom } from "../fixtures/userDefaults";
 const hosts: ClassApplicationHost[] = [];
 afterEach(async () => {
   cleanup();
+  vi.unstubAllGlobals();
   for (const host of hosts.splice(0)) await host.dispose();
+});
+
+function resizeTabs(tabs: NSETabViewController, width: number, height: number) {
+  act(() => tabs[nseUpdateTraits]({ reducedMotion: false, presentation: createStaticPresentationTraits({ width, height }) }));
+}
+
+it("adapts peer tabs to a desktop source list, compact bottom tabs and a short-window rail without remounting content", async () => {
+  const tabs = new Sections();
+  tabs.tabStyle = "sidebarAdaptable";
+  resizeTabs(tabs, 1440, 900);
+  render(<NSEViewControllerView controller={tabs} />);
+  expect(screen.getByRole("tree", { name: "Sections" })).toBeTruthy();
+  expect(screen.queryByRole("tablist")).toBeNull();
+  const page = screen.getByText("Company page");
+  resizeTabs(tabs, 390, 844);
+  expect(screen.getByRole("tablist").getAttribute("aria-orientation")).toBe("horizontal");
+  expect(screen.getByText("Company page")).toBe(page);
+  resizeTabs(tabs, 900, 400);
+  expect(screen.getByRole("tablist").getAttribute("aria-orientation")).toBe("vertical");
+  expect(screen.getByText("Company page")).toBe(page);
+  await act(async () => { fireEvent.keyDown(screen.getByRole("tab", { name: /Company/ }), { key: "ArrowDown" }); });
+  expect(tabs.selectedTabViewItem?.identifier).toBe("framework");
+  resizeTabs(tabs, 1440, 900);
+  expect(screen.getByRole("treeitem", { name: "Framework" }).getAttribute("aria-selected")).toBe("true");
+  tabs.dispose();
+});
+
+it("keeps fixed bottom tabs on wide and short layouts", () => {
+  const tabs = new Sections();
+  resizeTabs(tabs, 1440, 900);
+  render(<NSEViewControllerView controller={tabs} />);
+  expect(screen.getByRole("tablist").getAttribute("aria-orientation")).toBe("horizontal");
+  resizeTabs(tabs, 900, 400);
+  expect(screen.getByRole("tablist").getAttribute("aria-orientation")).toBe("horizontal");
+  expect(screen.queryByRole("tree")).toBeNull();
+  tabs.dispose();
+});
+
+it("shows every tab directly rather than inventing a More history", () => {
+  const tabs = new Sections();
+  for (const name of ["News", "Work", "Contact"]) tabs.addTabViewItem(new NSETabViewItem({ viewController: tabs.addChild(Pane, name), identifier: name.toLowerCase() }));
+  render(<NSEViewControllerView controller={tabs} />);
+  expect(screen.getAllByRole("tab")).toHaveLength(6);
+  expect(screen.queryByRole("tab", { name: /More/ })).toBeNull();
+  tabs.dispose();
+});
+
+it("retains the same section DOM when an outer split hands unspecified presentation to compact peer tabs", () => {
+  const tabs = new Sections();
+  tabs.tabStyle = "unspecified";
+  resizeTabs(tabs, 390, 844);
+  render(<NSEViewControllerView controller={tabs} />);
+  const page = screen.getByText("Company page");
+  act(() => { tabs.tabStyle = "sidebarAdaptable"; });
+  expect(screen.getByRole("tablist")).toBeTruthy();
+  expect(screen.getByText("Company page")).toBe(page);
+  act(() => { tabs.tabStyle = "unspecified"; });
+  expect(screen.queryByRole("tablist")).toBeNull();
+  expect(screen.getByText("Company page")).toBe(page);
+  tabs.dispose();
+});
+
+it("uses the tab view's measured content budget and keeps its last renderer during stale geometry", () => {
+  const tabs = new Sections();
+  tabs.tabStyle = "sidebarAdaptable";
+  resizeTabs(tabs, 1440, 900);
+  const observations = new Map<Element, () => void>();
+  class Observer {
+    constructor(readonly callback: () => void) {}
+    observe(element: Element) { observations.set(element, this.callback); }
+    disconnect() {}
+  }
+  vi.stubGlobal("ResizeObserver", Observer);
+  render(<NSEViewControllerView controller={tabs} />);
+  resizeTabs(tabs, 1440, 900);
+  const root = document.querySelector(".nse-adaptive-tab-controller") as HTMLElement;
+  let width = 430;
+  Object.defineProperties(root, { clientWidth: { get: () => width }, clientHeight: { get: () => 368 } });
+  act(() => { observations.get(root)!(); });
+  expect(root.dataset.navigationRenderer).toBe("tabs");
+  width = 594;
+  act(() => { observations.get(root)!(); });
+  expect(root.dataset.navigationRenderer).toBe("rail");
+  act(() => tabs[nseUpdateTraits]({ reducedMotion: false, presentation: { ...createStaticPresentationTraits({ width: 1440, height: 900 }), geometryState: "retained" } }));
+  expect(root.dataset.navigationRenderer).toBe("rail");
+  tabs.dispose();
+});
+
+it("uses current foldable book regions before compact peer tabs and preserves the hinge gap", () => {
+  const tabs = new Sections();
+  tabs.tabStyle = "sidebarAdaptable";
+  const presentation = createStaticPresentationTraits({ width: 669, height: 867 });
+  tabs[nseUpdateTraits]({ reducedMotion: false, presentation: { ...presentation, viewportFeatures: { posture: "folded", segments: [
+    { x: 0, y: 0, width: 329, height: 867 }, { x: 340, y: 0, width: 329, height: 867 },
+  ] } } });
+  render(<NSEViewControllerView controller={tabs} />);
+  act(() => tabs[nseUpdateTraits]({ reducedMotion: false, presentation: { ...presentation, viewportFeatures: { posture: "folded", segments: [
+    { x: 0, y: 0, width: 329, height: 867 }, { x: 340, y: 0, width: 329, height: 867 },
+  ] } } }));
+  expect(screen.getByRole("tree", { name: "Sections" })).toBeTruthy();
+  expect(screen.queryByRole("tablist")).toBeNull();
+  const split = document.querySelector('[data-book-regions="true"]') as HTMLElement;
+  expect(split.style.getPropertyValue("--nse-book-gap")).toBe("11px");
+  tabs.dispose();
+});
+
+it("moves source-list focus into compact tabs while leaving editor focus in its retained view", () => {
+  const tabs = new Sections();
+  tabs.tabStyle = "sidebarAdaptable";
+  resizeTabs(tabs, 1440, 900);
+  render(<NSEViewControllerView controller={tabs} />);
+  act(() => screen.getByRole("tree").focus());
+  resizeTabs(tabs, 390, 844);
+  expect(document.activeElement).toBe(screen.getByRole("tab", { name: /Company/ }));
+  const editor = screen.getByRole("textbox", { name: "Draft Company" });
+  editor.focus();
+  resizeTabs(tabs, 1440, 900);
+  expect(document.activeElement).toBe(editor);
+  expect(screen.getByRole("textbox", { name: "Draft Company" })).toBe(editor);
+  tabs.dispose();
 });
 
 class Pane extends NSEViewController {
   constructor(readonly name: string) { super({ title: name }); }
   static override view = function PaneView({ controller }: { readonly controller: Pane }) {
-    return <p>{controller.name} page</p>;
+    return <div><p>{controller.name} page</p><input aria-label={`Draft ${controller.name}`} /></div>;
   };
 }
 

@@ -36,6 +36,7 @@ import { nseSplitViewLayout } from "../../../src/NSE/DataViews/Split/NSESplitVie
 import { NSEViewControllerView } from "../../../src/SynCloudOS/AppHosting/applicationHosting";
 import { createStaticPresentationTraits } from "../../fixtures/presentationTraits";
 import { defaultsFrom } from "../../fixtures/userDefaults";
+import { SourceListFrameProvider } from "../../../src/NSE/Navigation/SourceList/sourceListFrameContext";
 
 /** A child view controller that renders `content`. */
 class PaneViewController extends NSEViewController {
@@ -95,6 +96,95 @@ function setWidth(controller: NSESplitViewController, width: number) {
 afterEach(cleanup);
 
 describe("NSESplitViewController", () => {
+  it("retains the compact selection while a regular-width constraint temporarily collapses its pane", () => {
+    const controller = inspectorSplit("preferred-compact");
+    const inspector = controller.splitViewItems[1]!;
+    controller[nseSplitViewLayout].resize(900);
+    controller.showDetail(inspector.viewController);
+    controller[nseSplitViewLayout].resize(500);
+    expect(inspector.isCollapsed).toBe(true);
+    expect(controller.compactItem).toBe(inspector);
+  });
+  it("shares its sidebar seam and compact handoff with a source-list window's frame", () => {
+    const setRailWidth = vi.fn(), setCompactNavigation = vi.fn();
+    const controller = new NSESplitViewController({ id: "source-list", splitViewItems: [
+      item("sidebar", "Sources", () => <p>Sources</p>, { behavior: "sidebar", minimumThickness: 208, maximumThickness: 460 }),
+      item("content", "Content", () => <p>Content</p>, { minimumThickness: 320 }),
+    ] });
+    render(<SourceListFrameProvider value={{ railWidth: 264, setRailWidth, setCompactNavigation, minWidth: 208, maxWidth: 460, defaultWidth: 264, railLabel: "Library", scheme: "light" }}><NSEViewControllerView controller={controller} /></SourceListFrameProvider>);
+    setWidth(controller, 900);
+    const divider = screen.getByRole("separator");
+    expect(divider.getAttribute("aria-valuenow")).toBe("264");
+    fireEvent.keyDown(divider, { key: "ArrowRight" });
+    expect(setRailWidth).toHaveBeenLastCalledWith(280);
+    setWidth(controller, 390);
+    expect(setCompactNavigation).toHaveBeenLastCalledWith(true);
+  });
+  it("shows a compact detail and returns focus to its initiating sidebar control", () => {
+    let controller: NSESplitViewController;
+    const sidebar = item("sidebar", "Folders", () => <button onClick={() => controller.showDetail(detail.viewController)}>Open note</button>, { behavior: "sidebar", minimumThickness: 208 });
+    const detail = item("detail", "Note", () => <input aria-label="Note text" defaultValue="Keep me" />, { minimumThickness: 320 });
+    controller = new NSESplitViewController({ id: "compact-detail", splitViewItems: [sidebar, detail] });
+    render(<NSEViewControllerView controller={controller} />);
+    setWidth(controller, 390);
+    expect(controller.compactItem).toBe(sidebar);
+    const open = screen.getByRole("button", { name: "Open note" });
+    open.focus();
+    fireEvent.click(open);
+    expect(controller.compactItem).toBe(detail);
+    expect(screen.queryByRole("tablist")).toBeNull();
+    expect(screen.getByRole("textbox", { name: "Note text" })).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Back to Folders" }));
+    expect(controller.compactItem).toBe(sidebar);
+    expect(document.activeElement).toBe(open);
+    expect(() => controller.showDetail(new PaneViewController("Other", () => null))).toThrow(RangeError);
+    act(() => { controller.compactItem = detail; });
+    expect(controller.compactItem).toBe(detail);
+    act(() => { controller.compactItem = null; });
+    expect(controller.compactItem).toBe(sidebar);
+  });
+
+  it("uses its measured content width for compact collapse, retaining it through unavailable geometry", () => {
+    const controller = inspectorSplit("content-width");
+    let widthValue = 390;
+    let resize: (() => void) | undefined;
+    const width = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(function (this: HTMLElement) { return this.classList.contains("nse-split-view-controller-view") ? widthValue : 0; });
+    const height = vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(() => 700);
+    vi.stubGlobal("ResizeObserver", class { constructor(callback: () => void) { resize = callback; } observe() {} disconnect() {} });
+    try {
+      render(<NSEViewControllerView controller={controller} />);
+      setWidth(controller, 1440);
+      expect(controller.snapshot.presentation).toBe("single-pane");
+      widthValue = 900;
+      act(() => resize?.());
+      expect(controller.snapshot.presentation).toBe("split");
+      const current = createStaticPresentationTraits({ width: 390, height: 700 });
+      act(() => controller[nseUpdateTraits]({ reducedMotion: false, presentation: { ...current, geometryState: "unavailable" } }));
+      widthValue = 0;
+      act(() => resize?.());
+      expect(controller.snapshot.presentation).toBe("split");
+    } finally { width.mockRestore(); height.mockRestore(); vi.unstubAllGlobals(); }
+  });
+
+  it("keeps the two foldable regions clear of the hinge, including a compact-sized book", () => {
+    const controller = new NSESplitViewController({ id: "book", splitViewItems: [
+      item("sidebar", "Folders", () => <p>Folders</p>, { behavior: "sidebar", minimumThickness: 208 }),
+      item("detail", "Note", () => <p>Note</p>, { minimumThickness: 280 }),
+    ] });
+    const traits = { ...createStaticPresentationTraits({ width: 669, height: 867 }), viewportFeatures: { posture: "folded" as const, segments: [
+      { x: 0, y: 0, width: 329, height: 867 }, { x: 340, y: 0, width: 329, height: 867 },
+    ] } };
+    render(<div dir="rtl"><NSEViewControllerView controller={controller} /></div>);
+    act(() => controller[nseUpdateTraits]({ reducedMotion: false, presentation: traits }));
+    expect(controller.snapshot.presentation).toBe("split");
+    const split = document.querySelector('[data-book-regions="true"]');
+    expect(split?.getAttribute("data-book-sidebar-side")).toBe("right");
+    expect((split as HTMLElement).style.getPropertyValue("--nse-book-gap")).toBe("11px");
+    expect(screen.queryByRole("separator")).toBeNull();
+    act(() => controller[nseUpdateTraits]({ reducedMotion: false, presentation: { ...traits, geometryState: "retained" } }));
+    expect(document.querySelector('[data-book-regions="true"]')).toBeNull();
+  });
+
   it("adopts each item's view controller as a child and finds items by view controller", () => {
     const controller = inspectorSplit("children");
     const [content, inspector] = controller.splitViewItems;
