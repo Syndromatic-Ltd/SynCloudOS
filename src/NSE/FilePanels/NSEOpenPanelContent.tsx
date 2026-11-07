@@ -3,6 +3,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { useNSEDeferredDisposal } from "../interactionLifecycle";
 import { NSESearchField } from "../Controls/Fields/NSESearchField";
+import { NSESegmentedControl } from "../Controls/Values/NSESegmentedControl";
+import { NSEPathControl, NSEPathControlItem } from "../Controls/Values/NSEPathControl";
+import { NSEWorkspace } from "../Application/NSEWorkspace";
+import BackArrow from "../Themes/Atmo/Resources/navigation-back.svg?url";
 import { createMediaPanelService, takeOpenPanelMediaSelection } from "../../SynCloudOS/MediaPanels/MediaPanelService";
 import { matchesOpenPanelContentType, type FilePanelDirectory, type OpenPanelFolder } from "../../SynCloudOS/FilePanels/OpenPanelFileSystem";
 import { referenceForOpenPanelHandle } from "../../SynCloudOS/FilePanels/FileSystemAccessPanelAdapter";
@@ -163,12 +167,15 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
   const summary = chosen.length ? `${chosen.length} ${noun}${chosen.length === 1 ? "" : "s"} selected${!compact && chosen.length === 1 ? ` — ${chosen[0]!.name}` : ""}` : directory && session.canChooseDirectories ? "Open this folder, or choose an item." : "Choose an item to open.";
   const sourcePage = <nav aria-label="Open panel sources" className="nse-open-sources">
     <NSEOpenPanelSources id={`${session.id}:sources`} groups={groups} selectedId={location?.source ?? null} onSelect={id => { void chooseSource(id); }} />
-    <NSEButton controlSize="small" title="System Chooser…" className="nse-open-system" onClick={system} />
+    <NSEButton bezelStyle="texturedRounded" controlSize="small" title="System Chooser…" className="nse-open-system" onClick={system} />
   </nav>;
   const openButton = <NSEButton controlSize="small" title={session.prompt || "Open"} keyEquivalent={"\r"} isEnabled={canOpen} onClick={() => void openItems(chosen)} />;
   return <section className="nse-open-panel" data-nse-control="open-panel" data-compact={compact || undefined} data-page={compact && showsSources ? "sources" : "collection"} aria-label={session.prompt || "Open"}>
     {compact ? <header className="nse-open-phone-header">
-      {showsSources ? <NSEButton controlSize="small" title="Cancel" onClick={session.cancel} /> : <NSEButton controlSize="small" title="‹ Sources" aria-label="Sources" onClick={() => setShowsSources(true)} />}
+      {showsSources ? <NSEButton controlSize="small" title="Cancel" onClick={session.cancel} /> : <NSEButton bezelStyle="texturedRounded" image={BackArrow} imagePosition="imageOnly" title={location && location.path.length > 1 ? "Back" : "Sources"} onClick={() => {
+        if (location && location.path.length > 1) navigate({ ...location, path: location.path.slice(0, -1) });
+        else setShowsSources(true);
+      }} />}
       <strong>{showsSources ? "Sources" : title}</strong>{showsSources ? <span className="nse-open-header-spacer" /> : openButton}
     </header> : null}
     <div className="nse-open-body">
@@ -176,15 +183,21 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
       {!compact || !showsSources ? <main className="nse-open-main">
         {session.message ? <p className="nse-open-message">{session.message}</p> : null}
         <div className="nse-open-toolbar">
-          {location?.path.length ? <><div className="nse-open-history"><NSEButton controlSize="small" title="‹" aria-label="Back" isEnabled={historyIndex > 0} onClick={() => stepHistory(-1)} /><NSEButton controlSize="small" title="›" aria-label="Forward" isEnabled={historyIndex < history.length - 1} onClick={() => stepHistory(1)} /></div>
-          <nav aria-label="Path" className="nse-open-path">{location.path.map((part, index) => <React.Fragment key={index}>{index ? <span aria-hidden="true">›</span> : null}<button type="button" onClick={() => navigate({ ...location, path: location.path.slice(0, index + 1) })}>{index === 0 ? location.title : part.name}</button></React.Fragment>)}</nav></> : <strong className="nse-open-location-title">{location?.title ?? "Choose a source"}</strong>}
+          {!compact && (location?.path.length ? <><NSESegmentedControl className="nse-open-history" aria-label="Folder navigation" segmentStyle="texturedRounded" controlSize="small"
+            selection={{ mode: "momentary", selectedIds: new Set<string>() }} items={[
+              { id: "back", label: "Back", image: BackArrow, isEnabled: historyIndex > 0 },
+              { id: "forward", label: "Forward", image: <img src={BackArrow} className="nse-open-forward-image" alt="" />, isEnabled: historyIndex < history.length - 1 },
+            ]} onSelectionChange={selection => stepHistory(selection.selectedIds.has("back") ? -1 : 1)} />
+          <NSEPathControl className="nse-open-path" aria-label="Path" pathItems={location.path.map((part, index) => new NSEPathControlItem({ title: index === 0 ? location.title : part.name,
+            image: NSEWorkspace.shared.iconForFile({ name: index === 0 ? location.title : part.name, kind: "directory" }, 24),
+          }))} onAction={sender => { const index = sender.pathItems.indexOf(sender.clickedPathItem!); navigate({ ...location, path: location.path.slice(0, index + 1) }); }} /></> : <strong className="nse-open-location-title">{location?.title ?? "Choose a source"}</strong>)}
           <NSESearchField aria-label={`Search ${title}`} placeholder={`Search ${title}`} className="nse-open-search" value={search} onValueChange={setSearch} showsSearchIcon height={compact ? 36 : 28} />
         </div>
         <div className="nse-open-results" ref={collection}>
           {busy ? <p role="status">Loading…</p> : null}
           {status ? <p role="status" className="nse-open-status">{status}</p> : null}
           {!busy && !status && !visibleItems.length ? <p className="nse-open-empty">{location ? "No matching items." : "Choose a source, add a folder, or use the system chooser."}</p> : null}
-          {visibleItems.length ? <NSEOpenPanelCollection items={visibleItems} selectedIds={selected} multiple={session.allowsMultipleSelection} compact={compact} width={size.width} height={size.height} title={title}
+          {visibleItems.length ? <NSEOpenPanelCollection items={visibleItems} selectedIds={selected} multiple={session.allowsMultipleSelection} compact={compact} width={size.width} height={size.height} title={title} images={host.images}
             onSelect={setSelected} onActivate={activate} /> : null}
         </div>
         {cursor ? <NSEButton controlSize="small" title="Load more" isEnabled={!busy} onClick={() => void loadMedia(location!.source.slice(6), cursor, false)} /> : null}

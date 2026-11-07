@@ -3,6 +3,7 @@ import type { NSEWindow } from "../Application/NSEWindowController";
 import type { NSEWindowSurfaceBridge } from "../Overlays/NSEWindowSurfaceBridge";
 import type { FilePanelService } from "../../SynCloudOS/FilePanels/filePanelTypes";
 import type { OpenPanelFileSystem } from "../../SynCloudOS/FilePanels/OpenPanelFileSystem";
+import type { AppImageClient } from "../../SynCloudOS/AppSDK/appEnvironmentClientTypes";
 
 export interface NSEOpenPanelHost {
   readonly service: Pick<FilePanelService, "open" | "save" | "release" | "dispose">;
@@ -10,6 +11,7 @@ export interface NSEOpenPanelHost {
   readonly bridge: NSEWindowSurfaceBridge;
   readonly signal: AbortSignal;
   readonly responderId: string;
+  readonly images?: AppImageClient;
   isKey(): boolean;
   isSecureContext(): boolean;
   hasTransientUserActivation(): boolean;

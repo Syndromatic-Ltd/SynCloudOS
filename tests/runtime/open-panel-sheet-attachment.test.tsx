@@ -9,13 +9,15 @@ import { NSEWindowSheetHostContext, useNSEWindowSheetHost } from "../../src/SynC
 import { NSEWindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 import { createOpenPanelFileSystem, registerOpenPanelFileSystem } from "../../src/SynCloudOS/FilePanels/OpenPanelFileSystem";
 import type { NSEWindow } from "../../src/NSE/Application/NSEWindowController";
+import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 afterEach(cleanup);
 
-it("draws Open as a window-attached sheet, blocks the parent's content and restores focus", async () => {
+it.each([false, true])("draws Open in its owned sheet and restores focus (compact=%s)", async (compact) => {
   const bridge = { present: vi.fn(async () => "modal"), dismiss: vi.fn(async () => ({ outcome: "closed" as const })) };
   const filePanels = { getStatus: () => ({ open: { activation: "active" } }) };
   registerOpenPanelFileSystem(filePanels, createOpenPanelFileSystem({ isSecureContext: () => true, supportsDirectoryPicker: () => false, supportsApplicationStorage: () => false, focusedElement: () => document.activeElement as HTMLElement } as any, "org.test.editor"));
-  const value = { filePanels, signal: new AbortController().signal, images: {}, responderId: "editor", windows: { getSnapshot: () => ({ current: { isKey: true }, surface: "window" }) }, presentation: { getSnapshot: () => ({ horizontalSizeClass: "regular", contentBounds: { x: 0, y: 0, width: 1000, height: 720 } }) } } as any;
+  const value = { filePanels, signal: new AbortController().signal, images: {}, responderId: "editor", windows: { getSnapshot: () => ({ current: { isKey: true }, surface: "window" }) }, presentation: { getSnapshot: () => ({ horizontalSizeClass: compact ? "compact" : "regular", contentBounds: { x: 0, y: 0, width: compact ? 390 : 1000, height: compact ? 844 : 720 } }) } } as any;
   const window = { id: "editor:1", isKey: true, frame: { x: 0, y: 0, width: 1000, height: 720 } } as NSEWindow;
   const panel = new NSEOpenPanel(); panel.mediaSources = [{ id: "pictures", label: "Gallery Pictures", query: async () => ({ items: [], nextCursor: null }) }];
   let response!: Promise<number>;
@@ -26,11 +28,18 @@ it("draws Open as a window-attached sheet, blocks the parent's content and resto
       <button onClick={() => { response = panel.beginSheetModal(window); }}>Import…</button>
     </NSEOpenPanelWindowHost></NSEWindowSheetHostContext.Provider><div ref={sheets.layerRef} className="nse-window-sheet-layer" data-sheet-attached={attached} /></div>;
   }
-  render(<NSEWindowSurfaceBridgeProvider bridge={bridge}><SynWareProvider value={value}><Parent /></SynWareProvider></NSEWindowSurfaceBridgeProvider>);
+  render(<NSEStandaloneControlHost document={document} window={globalThis.window} presentation={createStaticPresentationPort({ width: compact ? 390 : 1000, height: compact ? 844 : 720 })}>
+    <NSEWindowSurfaceBridgeProvider bridge={bridge}><SynWareProvider value={value}><Parent /></SynWareProvider></NSEWindowSurfaceBridgeProvider></NSEStandaloneControlHost>);
   const trigger = screen.getByRole("button", { name: "Import…" }); trigger.focus(); fireEvent.click(trigger);
   const sheet = await screen.findByRole("dialog", { name: "Open" });
-  expect(sheet.closest(".nse-window-sheet-layer")).toBeTruthy();
-  await waitFor(() => expect(sheet.closest(".nse-window-sheet-layer")!.getAttribute("data-sheet-attached")).toBe("true"));
+  if (compact) {
+    expect(sheet.getAttribute("data-nse-presentation")).toBe("sheet");
+    expect(sheet.classList.contains("nse-overlay-popup--menu")).toBe(true);
+    expect(document.querySelector('.nse-overlay-popup-backdrop:not([hidden])')).toBeTruthy();
+  } else {
+    expect(sheet.closest(".nse-window-sheet-layer")).toBeTruthy();
+    await waitFor(() => expect(sheet.closest(".nse-window-sheet-layer")!.getAttribute("data-sheet-attached")).toBe("true"));
+  }
   expect(bridge.present).not.toHaveBeenCalled();
   await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Cancel" })); });
   await expect(response).resolves.toBe(0); expect(document.activeElement).toBe(trigger);

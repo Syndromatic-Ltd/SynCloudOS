@@ -25,6 +25,16 @@ function fixture(compact = false) {
 }
 const choose = async (name: string) => { fireEvent.click(await screen.findByText(name)); };
 describe("drawn Open panel", () => {
+  it("composes Atmo push, tool, segmented and path controls without panel artwork stand-ins", async () => {
+    const { session } = fixture(); const { container } = render(<NSEOpenPanelContent session={session} />);
+    expect(screen.getByRole("button", { name: "Cancel" }).getAttribute("data-size")).toBe("small");
+    expect(screen.getByRole("button", { name: "Open" }).getAttribute("data-key-equivalent")).toBe("default");
+    expect(screen.getByRole("button", { name: "System Chooser…" }).getAttribute("data-bezel-style")).toBe("texturedRounded");
+    await choose("Projects"); await screen.findByText("sunset.png");
+    expect(container.querySelector('[data-segment-style="texturedRounded"]')).toBeTruthy();
+    expect(container.querySelector('[data-nse-control="path-control"]')).toBeTruthy();
+    expect(container.querySelector(".nse-open-sources svg, .nse-open-item svg")).toBeNull();
+  });
   it("keeps media sources alive through StrictMode's effect replay", async () => {
     const { session } = fixture();
     const source = { id: "pictures", label: "Gallery Pictures", query: async () => ({ items: [{ id: "one", providerId: "pictures", name: "Coast", mimeType: "image/png", kind: "image" as const }], nextCursor: null }) };
@@ -54,7 +64,7 @@ describe("drawn Open panel", () => {
     await choose("Projects"); await choose("Drone"); await screen.findByText("flight.png");
     fireEvent.click(screen.getByText("flight.png")); expect(session.accept).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Back" })); await screen.findByText("sunset.png");
-    fireEvent.click(screen.getByRole("button", { name: "Forward" })); await screen.findByText("flight.png");
+    await choose("Drone"); await screen.findByText("flight.png");
     fireEvent.click(screen.getByText("flight.png")); fireEvent.click(screen.getByRole("button", { name: "Open" }));
     await waitFor(() => expect(session.accept).toHaveBeenCalledTimes(1));
   });
