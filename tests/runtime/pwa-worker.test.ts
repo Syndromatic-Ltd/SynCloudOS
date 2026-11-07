@@ -24,10 +24,11 @@ import { createServiceWorkerSource } from "../../src/SynCloudOS/InstalledApplica
 
 function worker() {
   const listeners = new Map<string, (event: any) => void>();
+  const clients: any[] = [];
   const showNotification = vi.fn(async () => {}), openWindow = vi.fn(async () => {});
-  const self = { location: { origin: "https://site.test" }, addEventListener: (name: string, listener: any) => listeners.set(name, listener), registration: { showNotification }, clients: { openWindow, matchAll: async () => [] } };
+  const self = { location: { origin: "https://site.test" }, addEventListener: (name: string, listener: any) => listeners.set(name, listener), registration: { showNotification }, clients: { openWindow, matchAll: async () => clients } };
   runInNewContext(createServiceWorkerSource({ base: "/", receipt: "sdk", assets: [], manifests: [{ manifest: { scope: "/" }, members: [{ bundleIdentifier: "notes", routes: [{ path: "/notes" }] }] }] }), { self, URL, Response, Request, crypto, caches: {}, indexedDB: { open() { throw new Error("No database"); } } });
-  return { listeners, showNotification, openWindow };
+  return { listeners, showNotification, openWindow, clients };
 }
 it("delivers both standard and declarative push through the worker and restricts navigation", async () => {
   const { listeners, showNotification } = worker();
@@ -49,4 +50,16 @@ it("leaves API, authentication, writes and other origins out of the offline cach
     listeners.get("fetch")!({ request: { url, method, mode }, respondWith });
     expect(respondWith).not.toHaveBeenCalled();
   }
+});
+it("delivers notification actions to a live client without reloading its documents", async () => {
+  const { listeners, clients } = worker();
+  const postMessage = vi.fn(), navigate = vi.fn(), focus = vi.fn(async () => {});
+  clients.push({ url: "https://site.test/notes", postMessage, navigate, focus });
+  let pending: Promise<unknown>;
+  const close = vi.fn();
+  listeners.get("notificationclick")!({ notification: { close, data: { appId: "notes", url: "https://site.test/notes", identifier: "note-1" } }, action: "reply", waitUntil: (value: Promise<unknown>) => { pending = value; } });
+  await pending!;
+  expect(close).toHaveBeenCalledOnce();
+  expect(postMessage).toHaveBeenCalledWith({ type: "notification-open", url: "https://site.test/notes?scos-notification=note-1&scos-action=reply" });
+  expect(focus).toHaveBeenCalledOnce(); expect(navigate).not.toHaveBeenCalled();
 });

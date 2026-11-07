@@ -28,7 +28,7 @@ import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import { BrowserInstalledApplicationAdapter } from "../PlatformAdapters/BrowserInstalledApplicationAdapter";
 import type { InstalledApplicationConfiguration } from "./installedApplicationTypes";
 /** Browser mount owns installation, not applications or FX. */
-export function installBrowserApplications(runtime: SynCloudOSRuntime): void {
+export function installBrowserApplications(runtime: SynCloudOSRuntime, bootstrap: Promise<void> = Promise.resolve()): void {
   const document = runtime.environment.browser.getDocument();
   const browserWindow = document?.defaultView;
   const value = document?.querySelector('meta[name="syncloudos-installation"]')?.getAttribute("content");
@@ -44,6 +44,7 @@ export function installBrowserApplications(runtime: SynCloudOSRuntime): void {
   let queue = Promise.resolve();
   const deliver = (launch: InstalledApplicationLaunch) => {
     queue = queue.then(async () => {
+      await bootstrap;
       if (runtime.signal.aborted) return;
       const target = new URL(launch.targetURL ?? browserWindow.location.href, browserWindow.location.origin);
       const shareId = target.searchParams.get("scos-share");
@@ -76,6 +77,7 @@ export function installBrowserApplications(runtime: SynCloudOSRuntime): void {
   runtime.signal.addEventListener("abort", () => { for (const registration of shortcutRegistrations) registration.dispose(); }, { once: true });
   const onWorkerMessage = (event: MessageEvent) => {
     const message = event.data;
+    if (message?.type === "notification-open" && typeof message.url === "string") deliver({ targetURL: message.url });
     if (message?.type === "notification-delivered" && apps.some(app => app.bundleIdentifier === message.appId)) {
       void runtime.notifications.post({ idempotencyKey: `push:${message.appId}:${message.identifier || message.title}`, title: message.title, body: message.body, appId: message.appId, delivery: "in-app", metadata: { url: message.url } });
     }
