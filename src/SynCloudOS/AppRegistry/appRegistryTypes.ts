@@ -158,6 +158,8 @@ export interface SynCloudOSAppLifecycleManifest {
 }
 
 export interface SynCloudOSAppNotificationManifest {
+  /** NSDockTile.badgeLabel; omitted leaves NotificationCenter counts visible. */
+  badgeLabel?: string;
   showsNotifications?: boolean;
   badgeCount?: number;
 }

@@ -47,6 +47,8 @@ export async function routeInstalledApplicationLaunch(launch: InstalledApplicati
   if (protocol && !app.urlTypes?.some(type => type.schemes.includes(openedURL.protocol.slice(0,-1)))) throw new TypeError("The app did not declare this protocol.");
   const shortcut = url.searchParams.get("scos-shortcut");
   if (shortcut && !app.shortcutItems?.some(item => item.type === shortcut)) throw new TypeError("The app did not declare this shortcut.");
+  if (!launch.files?.length && !protocol && !shortcut && !launch.sharedItems && !url.searchParams.has("scos-notification")
+    && !app.linkCapture?.paths.some(capture => within(path, capture))) return;
   await port.launch(app.bundleIdentifier, path + url.search);
   port.signal.throwIfAborted();
   for (const handle of launch.files ?? []) {
@@ -58,3 +60,5 @@ export async function routeInstalledApplicationLaunch(launch: InstalledApplicati
   }
   if (!(launch.files?.length)) await port.openURLs(app.bundleIdentifier, [openedURL], { sharedItems: launch.sharedItems, shortcutItemType: shortcut ?? undefined });
 }
+
+export const shortcutCommandIdentifier = (appId: string, type: string) => `webspring.shortcut.${appId}.${type}`;

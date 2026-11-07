@@ -301,3 +301,12 @@ export * from "./Updates";
 
 export { SCAuthorization, SCAuthorizationRights } from "./Authorization/SCAuthorization";
 export type { SCAuthorizationRight, SCAuthorizationResult, SCAuthorizationOptions } from "./Authorization/SCAuthorization";
+
+export type { PrivacyStore, PrivacyAuthorizationRecord, PrivacyAuthorizationStatus, PrivacyDecision } from "./Privacy";
+
+export type { InstalledApplicationConfiguration, InstalledApplicationSnapshot } from "./InstalledApplications/installedApplicationTypes";
+export type { BGTaskScheduler, BGTaskRequest, BGDownloadTaskRequest } from "./BackgroundTasks/BackgroundTasks";
+export type { UNUserNotificationCenter, UNRemoteNotificationRegistration, UNNotificationSettings, UNNotificationCategory, UNNotificationAction, UNPushConfiguration } from "./UserNotifications/UserNotifications";
+export { installedApplicationForDocument } from "./InstalledApplications/installedApplicationRegistry";
+export { systemCapabilityReport } from "./InstalledApplications/capabilityReport";
+export type { SystemCapabilityRow } from "./InstalledApplications/capabilityReport";

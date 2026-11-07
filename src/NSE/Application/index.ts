@@ -19,7 +19,7 @@
  */
 
 export { NSEApplication } from "./NSEApplication";
-export type { NSEApplicationClass, NSEApplicationContext, NSEOpenWindowOptions } from "./NSEApplication";
+export type { NSEApplicationClass, NSEApplicationContext, NSEApplicationDelegate, NSEOpenWindowOptions } from "./NSEApplication";
 export { NSEWindowController } from "./NSEWindowController";
 export { NSEAlert, NSEAlertButton, NSEModalResponse } from "./NSEAlert";
 export type { NSEAlertStyle } from "./NSEAlert";
@@ -51,3 +51,5 @@ export { outlet } from "./viewOutlet";
 export type { NSEViewOutlet, NSEOutletElement, NSEOutletOptions } from "./viewOutlet";
 export type { NSEManagedAFXDisplayLink, NSEManagedAFXDisplayLinkOptions, NSEManagedAFXFrame, NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "./managedAnimationRenderer";
 export { NSEWorkspace } from "./NSEWorkspace";
+
+export { NSEDockTile } from "./NSEDockTile";

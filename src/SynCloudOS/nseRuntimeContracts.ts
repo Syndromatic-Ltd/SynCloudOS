@@ -66,3 +66,8 @@ export { matchesOpenPanelContentType, openPanelAcceptTypes } from "./FilePanels/
 export { referenceForOpenPanelHandle } from "./FilePanels/FileSystemAccessPanelAdapter";
 export type { MediaPanelItem, MediaPanelProvider } from "./MediaPanels/mediaPanelTypes";
 export { createMediaPanelService, takeOpenPanelMediaSelection } from "./MediaPanels/MediaPanelService";
+
+export type { BGTaskScheduler, BGTaskRequest, BGDownloadTaskRequest } from "./BackgroundTasks/BackgroundTasks";
+export type { UNUserNotificationCenter, UNRemoteNotificationRegistration, UNNotificationSettings, UNNotificationCategory, UNNotificationAction, UNPushConfiguration } from "./UserNotifications/UserNotifications";
+
+export { startBrowserViewTransition } from "./PlatformAdapters/BrowserViewTransitionBackend";

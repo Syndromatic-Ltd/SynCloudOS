@@ -50,6 +50,7 @@ import { installControllerServices } from "../AppSDK/controllerServices";
 import type { ResponderRegistrationHandle } from "../SynCloudOS";
 import { attachNSEAuthoringContext } from "../../NSE/applicationHostInterop";
 import { finalizeNSEAuthoringOwner } from "../../NSE/applicationHostInterop";
+import { applicationSystemServices } from "../InstalledApplications/applicationSystemServices";
 import { subscribePersistencePreferences } from "../Persistence/Persistence";
 import { trackOwnedWork } from "../nseRuntimeContracts";
 
@@ -163,6 +164,9 @@ export class ApplicationSession {
     const constructed = constructApplication(source, identity.appId, {
       appId: identity.appId,
       windows: () => Object.freeze([...this.#controllers]),
+      backgroundTaskScheduler: () => this.#systemServices().scheduler,
+      userNotificationCenter: () => this.#systemServices().notifications,
+      setBadgeLabel: label => this.#systemServices().setBadgeLabel(label),
       openWindow: (Controller, options) => this.openWindow(Controller, options),
     });
     this.app = constructed.app;
@@ -170,6 +174,11 @@ export class ApplicationSession {
     this.#leaveClassApplication = constructed.leave;
     this.live = Object.freeze({ appName: source.appName, relaunch: (notice: string) => { this.#relaunch(notice); } });
     this.#untrackApp = trackLiveApplicationObject(this.app, this.live);
+  }
+
+  #systemServices() {
+    if (!this.#kernel) throw new DOMException("The application is not attached to its runtime.", "InvalidStateError");
+    return applicationSystemServices(this.#kernel, this.#identity.appId, this.app.ownerSignal);
   }
 
   /** Whether `applicationDidFinishLaunching` already ran for this launch. */

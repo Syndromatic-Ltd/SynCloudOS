@@ -310,7 +310,7 @@ function trimHistory(notifications: SynCloudOSNotification[]) {
   notifications.splice(MAX_NOTIFICATION_HISTORY, Math.max(0, notifications.length - MAX_NOTIFICATION_HISTORY));
 }
 
-function createBadgeSnapshot(notifications: SynCloudOSNotification[], now: number): SynCloudOSNotificationBadgeSnapshot {
+export function createBadgeSnapshot(notifications: SynCloudOSNotification[], now: number): SynCloudOSNotificationBadgeSnapshot {
   const records: Record<string, SynCloudOSNotificationAppBadgeSnapshot & { explicitCount?: number }> = {};
 
   for (const notification of notifications) {
