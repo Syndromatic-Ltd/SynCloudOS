@@ -22,7 +22,7 @@
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppFrame } from "../../src/NSE/Windows/NSEAppFrame";
@@ -80,11 +80,12 @@ describe("NSE semantic contracts", () => {
     expect(document.activeElement).toBe(input); tabs.dispose();
   });
 
-  it("keeps a seventh tab directly accessible and retains its form after revisiting it", async () => {
+  it("reaches a seventh tab through More and retains its form after revisiting it", async () => {
     const tabs = tabViewController({ content: id => <section data-testid={`host-${id}`}><input aria-label={`Draft ${id}`} defaultValue="initial" /></section> });
     renderTabController(tabs, createStaticPresentationTraits({ width: 390, height: 844 }));
-    expect(screen.getAllByRole("tab")).toHaveLength(7);
-    fireEvent.click(screen.getByRole("tab", { name: "History destination" }));
+    expect(screen.getAllByRole("tab")).toHaveLength(5);
+    fireEvent.click(screen.getByRole("tab", { name: "More destinations" }));
+    fireEvent.click(within(await screen.findByRole("region", { name: "More destinations" })).getByRole("button", { name: "History destination" }));
     await waitFor(() => expect(tabs.selectedTabViewItem?.identifier).toBe("History"));
     const input = screen.getByRole("textbox", { name: "Draft History" }), host = screen.getByTestId("host-History");
     fireEvent.change(input, { target: { value: "retained seventh tab" } }); host.scrollTop = 29;
