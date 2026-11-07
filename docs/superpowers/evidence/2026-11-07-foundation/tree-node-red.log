@@ -1,0 +1,25 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/nse-tree-node.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-tree-node.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-tree-node.test.ts [ tests/runtime/nse-tree-node.test.ts ]
+Error: Cannot find module '../../src/NSE/Controllers/NSETreeNode' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/nse-tree-node.test.ts
+ ❯ tests/runtime/nse-tree-node.test.ts:2:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { NSETreeNode } from "../../src/NSE/Controllers/NSETreeNode";
+       | ^
+      3| import { NSEIndexPath } from "../../src/Foundation/NSEIndexPath";
+      4|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  08:25:19
+   Duration  193ms (transform 27ms, setup 29ms, import 0ms, tests 0ms, environment 0ms)

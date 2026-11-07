@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-models.test.ts tests/runtime/nse-tree-node.test.ts tests/runtime/model-indexes.test.ts tests/runtime/model-native-boundaries.test.ts tests/runtime/model-formatters-transformers.test.ts tests/runtime/model-predicates-sort.test.ts tests/runtime/model-change-selection.test.ts tests/runtime/nse-object-controller.test.ts tests/runtime/nse-array-controller.test.ts tests/runtime/nse-tree-controller.test.ts tests/runtime/synware-nse-public-surface.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  11 passed (11)
+      Tests  77 passed (77)
+   Start at  08:30:06
+   Duration  13.87s (transform 17.98s, setup 128ms, import 24.78s, tests 339ms, environment 1ms)
