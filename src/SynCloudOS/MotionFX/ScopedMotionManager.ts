@@ -64,6 +64,7 @@ export interface MFXMotionManagerOptions {
 export class ScopedMotionManager {
   readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "ScopedMotionManager" });
   #disposed = false;
+  #authorizationStatus: MFXAvailability | null = null;
   #consumers = new Set<Consumer>();
   #recorders = new Set<ScopedMotionRecorder>();
   #detach: (() => void) | null = null;
@@ -94,6 +95,9 @@ export class ScopedMotionManager {
       options.signal?.addEventListener("abort", this.#abortListener, {
         once: true,
       });
+  }
+  get authorizationStatus(): MFXAvailability {
+    return this.#disposed ? "disposed" : this.#authorizationStatus ?? this.#adapter.capabilities.deviceMotion.state;
   }
   get capabilities(): MFXMotionCapabilities {
     const caps = this.#adapter.capabilities;
@@ -437,7 +441,9 @@ export class ScopedMotionManager {
     if (!this.#options.canRequestAuthorization)
       throw new Error("Explicit motion authorization capability is required.");
     const result = await this.#adapter.requestAuthorization();
-    return this.#disposed ? "disposed" : result;
+    if (this.#disposed) return "disposed";
+    this.#authorizationStatus = result;
+    return result;
   }
   dispose(): void {
     if (this.#disposed) return;

@@ -1,0 +1,27 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-motion-midi.test.ts -t one native endpoint --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts (17 tests | 1 failed | 16 skipped) 6ms
+     × preserves one native endpoint update when no privacy port is installed 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MIDIFX shared privacy authorisation > preserves one native endpoint update when no privacy port is installed
+AssertionError: expected "vi.fn()" to be called 2 times, but got 3 times
+ ❯ tests/runtime/privacy-motion-midi.test.ts:131:22
+    129|     access.subscribeEndpoints(listener);
+    130|     await access.requestAuthorization();
+    131|     expect(listener).toHaveBeenCalledTimes(2);
+       |                      ^
+    132|     access.dispose();
+    133|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 skipped (17)
+   Start at  20:26:18
+   Duration  285ms (transform 115ms, setup 29ms, import 122ms, tests 6ms, environment 0ms)

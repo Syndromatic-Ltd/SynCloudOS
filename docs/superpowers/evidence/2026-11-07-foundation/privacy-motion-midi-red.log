@@ -1,0 +1,257 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-motion-midi.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts (16 tests | 15 failed) 6019ms
+     × keeps native availability passive and requires per-app consent 7ms
+     × grants an explicit native success and revokes streams and retained samples 1ms
+     × does not grant when native motion is denied 1ms
+     × does not grant when native motion is unavailable 1ms
+     × allows denied passive inspection without binding or prompting 1ms
+     × does not grant a late native motion result after revocation 5001ms
+     × exposes passive authorizationStatus without granting another application's gate 1ms
+     × requires separate explicit normal and SysEx grants, including SysEx-first requests 2ms
+     × records no MIDI grant for native denied 0ms
+     × records no MIDI grant for native unavailable 0ms
+     × reports unavailable MIDI even if a local app choice is allowed 0ms
+     × revokes input callbacks and output leases for 'midi' 1ms
+     × revokes input callbacks and output leases for 'midi.sysex' 0ms
+     × blocks a denied app before a MIDI browser request while keeping status inspection available 0ms
+     × does not let a late SysEx result restore a revoked normal grant 1002ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MotionFX shared privacy authorisation > keeps native availability passive and requires per-app consent
+AssertionError: expected undefined to be 'permission-required' // Object.is equality
+
+- Expected:
+"permission-required"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:69:41
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MotionFX shared privacy authorisation > grants an explicit native success and revokes streams and retained samples
+AssertionError: expected undefined to be 'available' // Object.is equality
+
+- Expected:
+"available"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:80:41
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MotionFX shared privacy authorisation > does not grant when native motion is denied
+AssertionError: expected undefined to be 'denied' // Object.is equality
+
+- Expected:
+"denied"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:99:41
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MotionFX shared privacy authorisation > does not grant when native motion is unavailable
+AssertionError: expected undefined to be 'unavailable' // Object.is equality
+
+- Expected:
+"unavailable"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:99:41
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MotionFX shared privacy authorisation > allows denied passive inspection without binding or prompting
+AssertionError: expected undefined to be 'denied' // Object.is equality
+
+- Expected:
+"denied"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:108:41
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MotionFX shared privacy authorisation > does not grant a late native motion result after revocation
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/runtime/privacy-motion-midi.test.ts:112:3
+    110|     manager.dispose();
+    111|   });
+    112|   it("does not grant a late native motion result after revocation", as…
+       |   ^
+    113|     const fixture = motionFixture(), store = createPrivacyStore({ runt…
+    114|     fixture.adapter.requestAuthorization = () => pending.promise;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MIDIFX shared privacy authorisation > exposes passive authorizationStatus without granting another application's gate
+AssertionError: expected undefined to be 'unknown' // Object.is equality
+
+- Expected:
+"unknown"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:129:40
+    127|     const f = mountedMIDI();
+    128|     const access = f.client.createAccess();
+    129|     expect(access.authorizationStatus).toBe("unknown");
+       |                                        ^
+    130|     expect(access.getCapabilities().authorization).toBe("unknown");
+    131|     expect(f.requests).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MIDIFX shared privacy authorisation > requires separate explicit normal and SysEx grants, including SysEx-first requests
+AssertionError: expected [ true ] to deeply equal [ false, true ]
+
+- Expected
++ Received
+
+  [
+-   false,
+    true,
+  ]
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:138:24
+    136|     const f = mountedMIDI(), access = f.client.createAccess();
+    137|     expect(await access.requestAuthorization({ sysex: true })).toEqual…
+    138|     expect(f.requests).toEqual([false, true]);
+       |                        ^
+    139|     expect(access.authorizationStatus).toBe("granted");
+    140|     expect(f.normal.authorizationStatus()).toBe("granted");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MIDIFX shared privacy authorisation > records no MIDI grant for native denied
+AssertionError: expected undefined to be 'denied' // Object.is equality
+
+- Expected:
+"denied"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:155:40
+    153|     const access = f.client.createAccess();
+    154|     expect(await access.requestAuthorization()).toEqual({ state, sysex…
+    155|     expect(access.authorizationStatus).toBe(state);
+       |                                        ^
+    156|     expect(f.store.getSnapshot().some(record => record.decision === "g…
+    157|     access.dispose();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MIDIFX shared privacy authorisation > records no MIDI grant for native unavailable
+AssertionError: expected undefined to be 'unavailable' // Object.is equality
+
+- Expected:
+"unavailable"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:155:40
+    153|     const access = f.client.createAccess();
+    154|     expect(await access.requestAuthorization()).toEqual({ state, sysex…
+    155|     expect(access.authorizationStatus).toBe(state);
+       |                                        ^
+    156|     expect(f.store.getSnapshot().some(record => record.decision === "g…
+    157|     access.dispose();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MIDIFX shared privacy authorisation > reports unavailable MIDI even if a local app choice is allowed
+AssertionError: expected undefined to be 'unavailable' // Object.is equality
+
+- Expected:
+"unavailable"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:162:40
+    160|     const f = mountedMIDI(); f.setAvailable(false); f.store.setAuthori…
+    161|     const access = f.client.createAccess();
+    162|     expect(access.authorizationStatus).toBe("unavailable");
+       |                                        ^
+    163|     access.dispose();
+    164|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MIDIFX shared privacy authorisation > revokes input callbacks and output leases for 'midi'
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MIDIFX shared privacy authorisation > revokes input callbacks and output leases for 'midi.sysex'
+AssertionError: expected "vi.fn()" to be called once, but got 2 times
+ ❯ tests/runtime/privacy-motion-midi.test.ts:174:21
+    172|     f.store.revoke(scope);
+    173|     f.emit();
+    174|     expect(receive).toHaveBeenCalledOnce();
+       |                     ^
+    175|     expect(f.disposeInput).toHaveBeenCalledOnce();
+    176|     expect(f.disposeOutput).toHaveBeenCalledOnce();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MIDIFX shared privacy authorisation > blocks a denied app before a MIDI browser request while keeping status inspection available
+AssertionError: expected undefined to be 'denied' // Object.is equality
+
+- Expected:
+"denied"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:182:40
+    180|     const f = mountedMIDI(); f.store.revoke(midiScope);
+    181|     const access = f.client.createAccess();
+    182|     expect(access.authorizationStatus).toBe("denied");
+       |                                        ^
+    183|     expect(await access.requestAuthorization()).toEqual({ state: "deni…
+    184|     expect(f.requests).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/15]⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MIDIFX shared privacy authorisation > does not let a late SysEx result restore a revoked normal grant
+AssertionError: expected 'prompt' to be 'granted' // Object.is equality
+
+Expected: "granted"
+Received: "prompt"
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:192:67
+    190|     const f = mountedMIDI(fixture), access = f.client.createAccess();
+    191|     const request = access.requestAuthorization({ sysex: true });
+    192|     await vi.waitFor(() => expect(f.normal.authorizationStatus()).toBe…
+       |                                                                   ^
+    193|     f.store.revoke(midiScope);
+    194|     await expect(request).rejects.toMatchObject({ name: "AbortError" }…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/15]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  15 failed | 1 passed (16)
+   Start at  19:40:06
+   Duration  6.32s (transform 120ms, setup 29ms, import 129ms, tests 6.02s, environment 0ms)
