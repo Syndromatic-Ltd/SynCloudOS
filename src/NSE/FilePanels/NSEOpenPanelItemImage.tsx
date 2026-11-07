@@ -32,6 +32,6 @@ export function NSEOpenPanelItemImage({ item, images }: { item: OpenPanelItem; i
     return () => { current = false; resource?.release(); };
   }, [images, item]);
   const resource = thumbnail && thumbnail.item === item && thumbnail.resource.state === "ready" ? thumbnail.resource : null;
-  return <NSEImageView className={resource ? "nse-open-thumbnail" : "nse-open-workspace-icon"} src={resource ?? NSEWorkspace.shared.iconForFile({ name: item.name, kind: item.kind })}
+  return <NSEImageView className={resource ? "nse-open-thumbnail" : "nse-open-workspace-icon"} src={resource ?? NSEWorkspace.shared.iconForFile({ name: item.name, kind: item.kind }, 96)}
     geometry={images?.geometry} alt="" controls={false} wheelZoom={false} pannable={false} data-thumbnail-ready={resource ? "true" : undefined} />;
 }
