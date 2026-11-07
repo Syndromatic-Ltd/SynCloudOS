@@ -87,6 +87,8 @@ export interface DocumentType<TModel, TSerialized = TModel> {
     | { readonly mode: "debounced"; readonly delayMs: number };
   create(context: DocumentCreationContext): TModel;
   read(serialized: TSerialized, context: DocumentReadContext): TModel;
+  /** NSDocument.read(from:ofType:): decodes an incoming file without assuming an encoding. */
+  readFromData?(data: NSEData, context: DocumentReadContext): TModel | Promise<TModel>;
   write(model: TModel, context: DocumentWriteContext): TSerialized;
   validate(serialized: unknown): serialized is TSerialized;
   /** Optional authored-content policy for models containing synchronization metadata.
@@ -249,6 +251,14 @@ export interface NewProjectionDocumentRequest<TModel> {
   readonly typeId: string;
   readonly applicationId?: string;
   readonly initialModel: TModel;
+  readonly activate?: boolean;
+  readonly signal?: AbortSignal;
+}
+
+export interface OpenDocumentContentsRequest {
+  readonly typeId: string;
+  readonly withContentsOf: Blob;
+  readonly applicationId: string;
   readonly activate?: boolean;
   readonly signal?: AbortSignal;
 }

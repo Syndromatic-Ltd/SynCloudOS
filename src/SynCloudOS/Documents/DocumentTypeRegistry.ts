@@ -79,6 +79,7 @@ function snapshotDocumentType(type: DocumentType<unknown, unknown>): DocumentTyp
     autosave,
     create: type.create,
     read: type.read,
+    ...(type.readFromData ? { readFromData: type.readFromData } : {}),
     write: type.write,
     validate: type.validate,
     ...(type.history ? { history: Object.freeze({
