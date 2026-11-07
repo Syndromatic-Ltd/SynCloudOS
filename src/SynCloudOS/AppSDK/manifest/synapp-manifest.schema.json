@@ -28,6 +28,11 @@
     "minimumViewport": { "$ref": "#/$defs/minimumViewport" },
     "windowDefaults": { "$ref": "#/$defs/windowDefaults" },
     "frame": { "$ref": "#/$defs/frame" },
+    "webApp": {"type": "object", "additionalProperties": false, "required": ["scope", "startURL", "icons"], "properties": {"scope": {"type": "string", "pattern": "^/(?!/)"}, "startURL": {"type": "string", "pattern": "^/(?!/)"}, "shortName": {"type": "string", "minLength": 1}, "description": {"type": "string", "minLength": 1}, "themeColour": {"type": "string", "minLength": 1}, "backgroundColour": {"type": "string", "minLength": 1}, "icons": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["src", "sizes", "type"], "properties": {"src": {"type": "string", "pattern": "^/(?!/)"}, "sizes": {"type": "string", "minLength": 1}, "type": {"type": "string", "minLength": 1}, "purpose": {"enum": ["any", "maskable", "monochrome"]}}}}}},
+    "urlTypes": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["name", "schemes"], "properties": {"name": {"type": "string", "minLength": 1}, "schemes": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^(web\\+[a-z]+|mailto|tel)$"}}}}},
+    "linkCapture": {"type": "object", "additionalProperties": false, "required": ["paths"], "properties": {"paths": {"type": "array", "items": {"type": "string", "pattern": "^/(?!/)"}}, "clientMode": {"enum": ["navigate-existing", "focus-existing", "navigate-new"]}}},
+    "shortcutItems": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["type", "title", "url"], "properties": {"type": {"type": "string", "minLength": 1}, "title": {"type": "string", "minLength": 1}, "url": {"type": "string", "pattern": "^/(?!/)"}, "subtitle": {"type": "string", "minLength": 1}}}},
+    "shareTarget": {"type": "object", "additionalProperties": false, "required": ["action", "method", "params"], "properties": {"action": {"type": "string", "pattern": "^/(?!/)"}, "method": {"enum": ["GET", "POST"]}, "enctype": {"enum": ["application/x-www-form-urlencoded", "multipart/form-data"]}, "params": {"type": "object", "additionalProperties": false, "required": [], "properties": {"title": {"type": "string", "minLength": 1}, "text": {"type": "string", "minLength": 1}, "url": {"type": "string", "minLength": 1}, "files": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["name", "accept"], "properties": {"name": {"type": "string", "minLength": 1}, "accept": {"type": "array", "items": {"type": "string", "minLength": 1}}}}}}}}},
     "documentTypes": {
       "type": "array",
       "items": { "$ref": "#/$defs/documentType" }
@@ -266,6 +271,7 @@
       "required": ["id"],
       "properties": {
         "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "mimeTypes": { "type": "array", "items": { "type": "string", "pattern": "^[^/]+/[^/]+$" } },
         "extensions": {
           "type": "array",
           "uniqueItems": true,
