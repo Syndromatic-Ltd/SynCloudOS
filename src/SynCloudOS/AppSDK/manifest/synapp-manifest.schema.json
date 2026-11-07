@@ -55,11 +55,6 @@
       "uniqueItems": true,
       "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" }
     },
-    "permissions": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" }
-    },
     "availability": { "enum": ["development"] },
     "appearances": {
       "type": "array",
@@ -366,6 +361,8 @@
             "public": { "type": "boolean" },
             "requiresLogin": { "type": "boolean" },
             "requiredCapabilities": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "requiredRoles": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "requiredEntitlements": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" } },
             "requiredAccessClasses": { "type": "array", "uniqueItems": true, "items": { "enum": ["team", "external"] } }
           }
         },

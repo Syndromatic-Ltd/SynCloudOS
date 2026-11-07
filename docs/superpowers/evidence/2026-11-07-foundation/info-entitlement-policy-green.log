@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/info-entitlements.test.ts tests/runtime/info-entitlement-policy.test.ts tests/runtime/synapp-manifest-validator-generated.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  5 passed (5)
+   Start at  19:21:34
+   Duration  786ms (transform 89ms, setup 40ms, import 164ms, tests 227ms, environment 0ms)
