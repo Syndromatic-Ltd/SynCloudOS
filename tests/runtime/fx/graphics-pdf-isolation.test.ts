@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../src/Foundation/NSEData";
+
 import { deflateSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { PDFDocument, PDFName } from "pdf-lib";
@@ -114,7 +116,7 @@ describe("GraphicsFX bounded PDF open and stream decoding", () => {
         const writer = new GFXPDFContext();
         writer.beginPage({ width: 10, height: 10 });
         writer.endPage();
-        const bytes = await writer.finish();
+        const bytes = (await writer.finish()).bytes;
         await expect(GFXPDFDocument.open(bytes, { maximumEncodedBytes: bytes.length - 1 })).rejects.toMatchObject({ code: "limit" });
         const document = await GFXPDFDocument.open(bytes, { maximumEncodedBytes: bytes.length });
         expect(document.pageCount).toBe(1);
@@ -133,7 +135,7 @@ describe("GraphicsFX bounded PDF open and stream decoding", () => {
         const ref = pdf.context.register(stream);
         const document = await GFXPDFDocument.open(await pdf.save({ useObjectStreams: false }));
         const scanner = new GFXPDFScanner(document, 64);
-        await expect(scanner.decodedStream({ objectNumber: ref.objectNumber, generationNumber: ref.generationNumber })).resolves.toEqual(Uint8Array.from([10, 20, 30]));
+        await expect(scanner.decodedStream({ objectNumber: ref.objectNumber, generationNumber: ref.generationNumber })).resolves.toEqual(NSEData.from(Uint8Array.from([10, 20, 30])));
         document.dispose();
     });
 

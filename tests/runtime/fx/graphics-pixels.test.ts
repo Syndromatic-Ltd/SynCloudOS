@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../src/Foundation/NSEData";
+
 import { describe, expect, it, vi } from "vitest";
 import { GFXShading, GFXMutablePath, GFXDataProvider, GFXDataConsumer, GFXColourConversionInfo, GFXLayer, GFXBitmapContext, GFXColour, GFXGradient, GFXImage, GFXPath, GFXPattern, GFXIdentityTransform, invertTransform, concatenateTransforms, transformPoint } from "../../../src/FX/GraphicsFX/public";
 describe("GraphicsFX pixel and geometry values", () => {
@@ -82,36 +84,36 @@ describe("GraphicsFX pixel and geometry values", () => {
         const bytes = new Uint8Array([1, 2, 3]);
         const provider = new GFXDataProvider(bytes);
         bytes[0] = 9;
-        expect(provider.read(0, 2)).toEqual(new Uint8Array([1, 2]));
-        expect(() => provider.read(2, 2)).toThrow();
+        expect(provider.read(0, 2).bytes).toEqual(new Uint8Array([1, 2]));
+        expect(() => provider.read(2, 2).bytes).toThrow();
         const consumer = new GFXDataConsumer(3);
-        consumer.write(provider.read(0, 2));
+        consumer.write(provider.read(0, 2).bytes);
         expect(() => consumer.write(bytes)).toThrow();
         consumer.write(new Uint8Array([4]));
-        expect(consumer.finish()).toEqual(new Uint8Array([1, 2, 4]));
+        expect(consumer.finish().bytes).toEqual(new Uint8Array([1, 2, 4]));
         expect(() => consumer.write(bytes)).toThrow(/closed/);
     });
     it("bounds callback provider reads and finalizes its owner exactly once", () => {
         const backing = new Uint8Array([10, 20, 30, 40]);
         const release = vi.fn();
-        const read = vi.fn((offset: number, length: number) => backing.subarray(offset, offset + length));
+        const read = vi.fn((offset: number, length: number) => NSEData.from(backing.subarray(offset, offset + length)));
         const provider = new GFXDataProvider({ length: backing.length, read, release });
-        const first = provider.read(1, 2);
+        const first = provider.read(1, 2).bytes;
         expect(first).toEqual(new Uint8Array([20, 30]));
         first[0] = 99;
         expect(backing[1]).toBe(20);
-        expect(() => provider.read(3, 2)).toThrow(/bounds/i);
+        expect(() => provider.read(3, 2).bytes).toThrow(/bounds/i);
         expect(read).toHaveBeenCalledTimes(1);
         provider.release();
         provider.release();
         expect(release).toHaveBeenCalledTimes(1);
         expect(provider.released).toBe(true);
-        expect(() => provider.read(0, 1)).toThrow(/released/i);
+        expect(() => provider.read(0, 1).bytes).toThrow(/released/i);
     });
     it("rejects malformed callback provider output without transferring its storage", () => {
         const release = vi.fn();
         const provider = new GFXDataProvider({ length: 4, read: () => new Uint8Array([1]), release });
-        expect(() => provider.read(0, 2)).toThrow(/length/i);
+        expect(() => provider.read(0, 2).bytes).toThrow(/length/i);
         provider.release();
         expect(release).toHaveBeenCalledTimes(1);
     });

@@ -83,7 +83,7 @@ void (async () => {
   writer.addOutline({ title: "Introduction", pageIndex: 0 });
   const bytes = await writer.finish();
   latin.font.dispose(); arabic.font.dispose(); indic.font.dispose();
-  const readerTask = getDocument({ data: bytes.slice(), disableFontFace: true });
+  const readerTask = getDocument({ data: bytes.bytes, disableFontFace: true });
   const reader = await readerTask.promise;
   const readerPage = await reader.getPage(1);
   const textContent = await readerPage.getTextContent();

@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../src/Foundation/NSEData";
+
 // @vitest-environment jsdom
 import { IFXImageResource } from "../../../src/FX/ImageFX/IFXImageResource";
 function loadImageResource(service: import("../../../src/SynCloudOS/Images/imageTypes").RuntimeImageService, request: import("../../../src/SynCloudOS/Images/imageTypes").RuntimeImageLoadRequest) {
@@ -441,7 +443,7 @@ describe("closed NSE graphics", () => {
     const runtime = createTestRuntime({ id: "runtime:graphics-document-image", environment, imageAuthorisation: { authorise: () => true } });
     runtimes.push(runtime);
     const descriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: 1, arrayBuffer: async () => new Uint8Array([1]).buffer,
+      type: "image/png", size: 1, data: async () => NSEData.from(new Uint8Array([1])),
     }, new AbortController().signal);
     const resource = loadImageResource(runtime.images, {
       subject: { appId: "app:gallery", documentId: "document:a", capability: "image.decode" },

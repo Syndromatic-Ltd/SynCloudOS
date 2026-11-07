@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../../Foundation/NSEData";
 import type { GFXPath } from "../GFXPath";
 import type { GFXPoint } from "../GFXGeometry";
 
@@ -82,7 +83,8 @@ export class GFXPDFFontSubset {
     readonly size: number;
     readonly embedding: GFXPDFFontEmbedding;
 
-    constructor(source: Uint8Array, options: GFXPDFFontSubsetOptions) {
+    constructor(input: NSEDataConvertible, options: GFXPDFFontSubsetOptions) {
+        const source = NSEData.from(input).bytes;
         if (!(source instanceof Uint8Array) || source.byteLength < 12 || source.byteLength > 32 * 1024 * 1024)
             throw new RangeError("PDF font program must contain 12 bytes to 32 MiB.");
         if (!options || typeof options !== "object" || Object.getPrototypeOf(options) !== Object.prototype || Object.getOwnPropertySymbols(options).length)

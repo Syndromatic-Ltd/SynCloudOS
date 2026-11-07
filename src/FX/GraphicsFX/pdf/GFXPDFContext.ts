@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../../Foundation/NSEData";
 import fontkit from "./fontkitRuntime";
 import { GFXPDFDocument, pdfAssertLive, pdfPageForEmbedding } from "./GFXPDFDocument";
 import { GFXColourProfile } from "../GFXColourProfile";
@@ -433,7 +434,7 @@ export class GFXPDFContext {
         this.#append({ kind: "image", image, rect, state: this.#state });
         this.#imagePixels += count;
     }
-    async finish(consumer?: GFXDataConsumer, signal?: AbortSignal): Promise<Uint8Array> {
+    async finish(consumer?: GFXDataConsumer, signal?: AbortSignal): Promise<NSEData> {
         this.#live();
         if (this.#page)
             throw new Error("End the current PDF page before finishing.");
@@ -465,7 +466,7 @@ export class GFXPDFContext {
             if (this.#language)
                 pdf.setLanguage(this.#language);
             if (this.#outputIntent) {
-                const profile = pdf.context.register(pdf.context.flateStream(this.#outputIntent.profile.copyData(), { N: 3 }));
+                const profile = pdf.context.register(pdf.context.flateStream(this.#outputIntent.profile.copyData().bytes, { N: 3 }));
                 const intent = pdf.context.register(pdf.context.obj({
                     Type: "OutputIntent",
                     S: "GTS_PDFA1",
@@ -531,7 +532,7 @@ export class GFXPDFContext {
                     const gs = page.node.newExtGState("GFX", pdf.context.obj({ Type: "ExtGState", ca: opacity, CA: opacity, BM: blendNames[state.blend as keyof typeof blendNames] }));
                     page.pushOperators(setGraphicsState(gs));
                     if (command.kind === "image") {
-                        const image = await pdf.embedPng(command.image.toPNG());
+                        const image = await pdf.embedPng(command.image.toPNG().bytes);
                         check();
                         const name = page.node.newXObject("GFXImage", image.ref), r = command.rect;
                         page.pushOperators(concatTransformationMatrix(r.width, 0, 0, -r.height, r.x, r.y + r.height), drawObject(name));
@@ -671,7 +672,7 @@ export class GFXPDFContext {
                 throw new RangeError("PDF output exceeds 32 MiB.");
             if (consumer)
                 consumer.write(bytes);
-            return bytes;
+            return NSEData.from(bytes);
         }
         finally {
             this.#pages.length = 0;
@@ -750,7 +751,7 @@ export class GFXPDFContext {
             }
         }
         const image = new GFXImage({ width, height, alpha: "straight", colourSpace: "srgb", data: pixels });
-        const embedded = await pdf.embedPng(image.toPNG());
+        const embedded = await pdf.embedPng(image.toPNG().bytes);
         const name = page.node.newXObject("GFXGradientImage", embedded.ref);
         page.pushOperators(
             ...pathOperators(path),
