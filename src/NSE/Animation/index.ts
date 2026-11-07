@@ -29,6 +29,7 @@ export type {
 } from "./NSEAnimationEnvironment";
 export { NSEAnimationDefaults } from "./NSEAnimationDefaults";
 export { NSEAnimationContext } from "./NSEAnimationContext";
+export { useNSETraitCollection } from "./useNSETraitCollection";
 export { useNSEViewAnimator } from "./useNSEViewAnimator";
 export { NSELayoutView } from "./NSELayoutView";
 export type { NSELayoutTransitionTiming, NSELayoutViewProps } from "./NSELayoutView";
