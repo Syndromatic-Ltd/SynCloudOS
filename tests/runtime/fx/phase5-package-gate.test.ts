@@ -20,6 +20,7 @@
 
 import { expect, it } from "vitest";
 import { assertFxRuntimeEntry, createSdkPublicTypeProbe } from "../../../scripts/synware/installed-consumer.mjs";
+import { assertReviewedPackageFiles } from "../../../scripts/synware/sdk-package-manifest.mjs";
 
 it("accepts the reviewed type-only runtime entries while rejecting omitted implementations", () => {
   expect(() => assertFxRuntimeEntry("bluetooth", {})).not.toThrow();
@@ -35,4 +36,12 @@ it("requires useful declarations for the two type-only families in the strict in
   expect(probe).toContain('import type { SPFXSpeechRecognizer } from "@syndromatic/syncloudos/fx/speech";');
   expect(probe).toContain("app.bluetooth.createCentralManager()");
   expect(probe).toContain("app.speech.createRecognizer()");
+});
+
+it("admits the registered shared FX artifacts without allowing extra format or style entries", () => {
+  for (const family of ["bluetooth", "nfc", "speech", "contacts", "pass", "xr", "network", "crypto"]) {
+    expect(() => assertReviewedPackageFiles([`fx/${family}.js`, `fx/${family}.d.ts`])).not.toThrow();
+    expect(() => assertReviewedPackageFiles([`fx/${family}.css`])).toThrow();
+    expect(() => assertReviewedPackageFiles([`fx/${family}/private.js`])).toThrow();
+  }
 });
