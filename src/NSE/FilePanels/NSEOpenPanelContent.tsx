@@ -1,6 +1,7 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
+import { useNSEDeferredDisposal } from "../interactionLifecycle";
 import { NSESearchField } from "../Controls/Fields/NSESearchField";
 import { createMediaPanelService, takeOpenPanelMediaSelection } from "../../SynCloudOS/MediaPanels/MediaPanelService";
 import { matchesOpenPanelContentType, type FilePanelDirectory, type OpenPanelFolder } from "../../SynCloudOS/FilePanels/OpenPanelFileSystem";
@@ -29,9 +30,11 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
   const collection = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: compact ? 362 : 578, height: compact ? 560 : 418 });
   const media = useMemo(() => createMediaPanelService(session.mediaSources), [session]);
+  useNSEDeferredDisposal(media);
   const active = useRef<AbortController | null>(null);
   const caps = fs?.capabilities();
-  const selectedItems = items.filter(item => selected.has(item.id));
+  const visibleItems = items.filter(item => item.name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()));
+  const selectedItems = visibleItems.filter(item => selected.has(item.id));
   const chosen = selectedItems.filter(item => item.kind === "directory" ? session.canChooseDirectories : session.canChooseFiles);
   const canOpen = !busy && (chosen.length > 0 || (!!directory && session.canChooseDirectories && !selectedItems.length));
   const title = directory?.name ?? location?.title ?? "Open";
@@ -50,7 +53,7 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
     void fs.folders().then(result => { if (current) setFolders(result); }).catch(fail);
     return () => { current = false; };
   }, [fail, fs]);
-  useEffect(() => () => { active.current?.abort(); media.dispose(); }, [media]);
+  useEffect(() => () => { active.current?.abort(); }, []);
   useEffect(() => {
     const element = collection.current;
     if (!element) return;
@@ -59,12 +62,12 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
     return host.observeGeometry?.(element, measure);
   }, [host, showsSources]);
 
-  const loadMedia = useCallback(async (providerId: string, nextCursor: string | null, userInitiated: boolean) => {
+  const loadMedia = useCallback(async (providerId: string, nextCursor: string | null, userInitiated: boolean, querySearch = search) => {
     active.current?.abort();
     const controller = new AbortController(); active.current = controller;
     const signal = AbortSignal.any([controller.signal, session.signal]);
     setBusy(true); setStatus("");
-    const result = await media.query({ id: session.id, providerId, search, kinds: ["image", "video", "audio"], cursor: nextCursor, pageSize: 60, ...(userInitiated ? { userInitiated: true } : {}) }, signal);
+    const result = await media.query({ id: session.id, providerId, search: querySearch, kinds: ["image", "video", "audio"], cursor: nextCursor, pageSize: 60, ...(userInitiated ? { userInitiated: true } : {}) }, signal);
     if (signal.aborted) return;
     setBusy(false);
     if (result.kind === "accepted") {
@@ -118,7 +121,7 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
         navigate({ source: id, title: folder.name, path: [folder.handle] }); return;
       }
       const provider = session.mediaSources.find(source => `media:${source.id}` === id);
-      if (provider) { navigate({ source: id, title: provider.label, path: [] }); if (provider.requiresUserActivation) void loadMedia(provider.id, null, true); }
+      if (provider) { navigate({ source: id, title: provider.label, path: [] }); if (provider.requiresUserActivation) void loadMedia(provider.id, null, true, ""); }
     } catch (error) { fail(error); }
   }, [fail, folders, fs, loadMedia, navigate, session]);
 
@@ -154,12 +157,12 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
   const summary = chosen.length ? `${chosen.length} ${chosen.length === 1 ? "item" : "items"} selected${chosen.length === 1 ? ` — ${chosen[0]!.name}` : ""}` : directory && session.canChooseDirectories ? "Open this folder, or choose an item." : "Choose an item to open.";
   const sourcePage = <nav aria-label="Open panel sources" className="nse-open-sources">
     <NSEOpenPanelSources id={`${session.id}:sources`} groups={groups} selectedId={location?.source ?? null} onSelect={id => { void chooseSource(id); }} />
-    <NSEButton title="System Chooser…" className="nse-open-system" onClick={system} />
+    <NSEButton controlSize="small" title="System Chooser…" className="nse-open-system" onClick={system} />
   </nav>;
-  const openButton = <NSEButton title={session.prompt || "Open"} keyEquivalent={"\r"} isEnabled={canOpen} onClick={() => void openItems(chosen)} />;
+  const openButton = <NSEButton controlSize="small" title={session.prompt || "Open"} keyEquivalent={"\r"} isEnabled={canOpen} onClick={() => void openItems(chosen)} />;
   return <section className="nse-open-panel" data-nse-control="open-panel" data-compact={compact || undefined} data-page={compact && showsSources ? "sources" : "collection"} aria-label={session.prompt || "Open"}>
     {compact ? <header className="nse-open-phone-header">
-      {showsSources ? <NSEButton title="Cancel" onClick={session.cancel} /> : <NSEButton title="‹ Sources" aria-label="Sources" onClick={() => setShowsSources(true)} />}
+      {showsSources ? <NSEButton controlSize="small" title="Cancel" onClick={session.cancel} /> : <NSEButton controlSize="small" title="‹ Sources" aria-label="Sources" onClick={() => setShowsSources(true)} />}
       <strong>{showsSources ? "Sources" : title}</strong>{showsSources ? <span className="nse-open-header-spacer" /> : openButton}
     </header> : null}
     <div className="nse-open-body">
@@ -167,19 +170,19 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
       {!compact || !showsSources ? <main className="nse-open-main">
         {session.message ? <p className="nse-open-message">{session.message}</p> : null}
         <div className="nse-open-toolbar">
-          {location?.path.length ? <><div className="nse-open-history"><NSEButton title="‹" aria-label="Back" isEnabled={historyIndex > 0} onClick={() => stepHistory(-1)} /><NSEButton title="›" aria-label="Forward" isEnabled={historyIndex < history.length - 1} onClick={() => stepHistory(1)} /></div>
+          {location?.path.length ? <><div className="nse-open-history"><NSEButton controlSize="small" title="‹" aria-label="Back" isEnabled={historyIndex > 0} onClick={() => stepHistory(-1)} /><NSEButton controlSize="small" title="›" aria-label="Forward" isEnabled={historyIndex < history.length - 1} onClick={() => stepHistory(1)} /></div>
           <nav aria-label="Path" className="nse-open-path">{location.path.map((part, index) => <React.Fragment key={index}>{index ? <span aria-hidden="true">›</span> : null}<button type="button" onClick={() => navigate({ ...location, path: location.path.slice(0, index + 1) })}>{index === 0 ? location.title : part.name}</button></React.Fragment>)}</nav></> : <strong className="nse-open-location-title">{location?.title ?? "Choose a source"}</strong>}
           <NSESearchField aria-label={`Search ${title}`} placeholder={`Search ${title}`} className="nse-open-search" value={search} onValueChange={setSearch} showsSearchIcon height={compact ? 36 : 28} />
         </div>
         <div className="nse-open-results" ref={collection}>
           {busy ? <p role="status">Loading…</p> : null}
           {status ? <p role="status" className="nse-open-status">{status}</p> : null}
-          {!busy && !status && !items.length ? <p className="nse-open-empty">{location ? "No matching items." : "Choose a source, add a folder, or use the system chooser."}</p> : null}
-          {items.length ? <NSEOpenPanelCollection items={items} selectedIds={selected} multiple={session.allowsMultipleSelection} compact={compact} width={size.width} height={size.height} title={title}
+          {!busy && !status && !visibleItems.length ? <p className="nse-open-empty">{location ? "No matching items." : "Choose a source, add a folder, or use the system chooser."}</p> : null}
+          {visibleItems.length ? <NSEOpenPanelCollection items={visibleItems} selectedIds={selected} multiple={session.allowsMultipleSelection} compact={compact} width={size.width} height={size.height} title={title}
             onSelect={ids => { setSelected(ids); if (compact) { const item = items.find(item => ids.has(item.id)); if (item?.kind === "directory") activate(item); } }} onActivate={activate} /> : null}
         </div>
-        {cursor ? <NSEButton title="Load more" isEnabled={!busy} onClick={() => void loadMedia(location!.source.slice(6), cursor, false)} /> : null}
-        <footer className="nse-open-footer"><span role="status">{summary}</span>{!compact ? <><span className="nse-open-footer-spacer"/><NSEButton title="Cancel" onClick={session.cancel} />{openButton}</> : <NSEButton title="Cancel" onClick={session.cancel} />}</footer>
+        {cursor ? <NSEButton controlSize="small" title="Load more" isEnabled={!busy} onClick={() => void loadMedia(location!.source.slice(6), cursor, false)} /> : null}
+        <footer className="nse-open-footer"><span role="status">{summary}</span>{!compact ? <><span className="nse-open-footer-spacer"/><NSEButton controlSize="small" title="Cancel" onClick={session.cancel} />{openButton}</> : <NSEButton controlSize="small" title="Cancel" onClick={session.cancel} />}</footer>
       </main> : null}
     </div>
     {compact && showsSources && status ? <p role="status" className="nse-open-status">{status}</p> : null}

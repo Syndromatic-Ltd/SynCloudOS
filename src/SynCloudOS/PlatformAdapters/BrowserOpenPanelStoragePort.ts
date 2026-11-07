@@ -2,6 +2,23 @@
 import type { FilePanelDirectory, OpenPanelBookmark, OpenPanelStoragePort } from "../FilePanels/OpenPanelFileSystem";
 import { createBrowserFileSystemAccessPanelPort } from "./BrowserFileSystemAccessPanelPort";
 import type { NativeOperationActivity } from "../Updates/updateReadiness";
+import type { FilePanelFileHandle } from "../FilePanels/filePanelTypes";
+
+// OPFS is already origin-private. Safari and Firefox can expose these handles
+// without the user-visible File System Access permission methods.
+function privateFile(handle: FilePanelFileHandle): FilePanelFileHandle {
+  if (typeof handle.queryPermission === "function" && typeof handle.requestPermission === "function") return handle;
+  return { kind: "file", name: handle.name, queryPermission: async () => "granted", requestPermission: async () => "granted",
+    getFile: () => handle.getFile(), createWritable: () => handle.createWritable() };
+}
+function privateDirectory(handle: FilePanelDirectory): FilePanelDirectory {
+  if (typeof handle.queryPermission === "function" && typeof handle.requestPermission === "function") return handle;
+  return { kind: "directory", name: handle.name, queryPermission: async () => "granted", requestPermission: async () => "granted",
+    async *values() { for await (const child of handle.values()) yield child.kind === "directory" ? privateDirectory(child) : privateFile(child); },
+    getDirectoryHandle: async (name, options) => privateDirectory(await handle.getDirectoryHandle(name, options)),
+    getFileHandle: async (name, options) => privateFile(await handle.getFileHandle(name, options)),
+  };
+}
 
 /** IndexedDB preserves the actual structured-cloneable handles, never serialised file paths. */
 export function createBrowserOpenPanelStoragePort(window: Window | null, activity?: NativeOperationActivity): OpenPanelStoragePort | null {
@@ -41,7 +58,7 @@ export function createBrowserOpenPanelStoragePort(window: Window | null, activit
       // Encode the entire bundle as one component; no caller-controlled path traversal.
       const root = await browser.navigator.storage.getDirectory();
       const applications = await root.getDirectoryHandle("SynCloudOS-Application-Support", { create: true });
-      return await applications.getDirectoryHandle(encodeURIComponent(bundle), { create: true }) as unknown as FilePanelDirectory;
+      return privateDirectory(await applications.getDirectoryHandle(encodeURIComponent(bundle), { create: true }) as unknown as FilePanelDirectory);
     },
   };
 }
