@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-date.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-date.test.ts (10 tests | 1 failed) 46ms
+   × round-trips midnight and noon with h11 and h24 hour cycles 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-date.test.ts > round-trips midnight and noon with h11 and h24 hour cycles
+AssertionError: expected undefined to be '2026-08-09T00:30:00.000Z' // Object.is equality
+
+- Expected:
+"2026-08-09T00:30:00.000Z"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/foundation-faithful-date.test.ts:88:69
+     86|     for (const text of ["2026-08-09T00:30:00Z", "2026-08-09T12:30:00Z"…
+     87|       const date = new Date(text);
+     88|       expect(formatter.date(formatter.string(date))?.toISOString()).to…
+       |                                                                     ^
+     89|     }
+     90|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  19:24:05
+   Duration  227ms (transform 38ms, setup 27ms, import 25ms, tests 46ms, environment 0ms)
+
