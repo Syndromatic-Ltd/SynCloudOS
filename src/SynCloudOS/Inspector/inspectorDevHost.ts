@@ -74,7 +74,7 @@ export function createDevInspector(options: InspectorDevHostOptions): Readonly<{
     { panel: "Services", subscribe: events(["service.available", "service.unavailable"]),
       read: () => runtime.services.getHealthReport().services.map(service => ({ id: service.serviceId, kind: "service", status: service.available ? "available" : "unavailable" })) },
     { panel: "Policy", subscribe: events(["policy.decision"]),
-      read: () => runtime.policy.getAuditLog(128).map(decision => ({ id: decision.id, appId: decision.appId, startedAt: decision.at, kind: "policy", status: decision.allowed ? "allowed" : "denied" })) },
+      read: () => runtime.configurationProfiles.getAuditLog(128).map(decision => ({ id: decision.id, appId: decision.appId, startedAt: decision.at, kind: "policy", status: decision.allowed ? "allowed" : "denied" })) },
     { panel: "Statechart", subscribe: events(["statechart.transition.complete", "statechart.transition.failed"]),
       read: () => [{ id: runtime.statechart.getCurrentState(), kind: "statechart", status: "active" }] },
     { panel: "Windows", subscribe: listener => runtime.windows.subscribe(listener),

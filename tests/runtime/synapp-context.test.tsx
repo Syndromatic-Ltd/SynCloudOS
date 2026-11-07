@@ -320,7 +320,7 @@ it("resolves only declared, host-provided app-scoped services and fails closed o
     client: null,
     denial: expect.objectContaining({ code: "unavailable" }),
   }));
-    runtime.policy.registerPolicy("deny-search", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-search", (request, decision) =>
       request.app?.bundleIdentifier === app.bundleIdentifier ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
   expect(context.services.optional(defineSynWareServiceToken({ id: "com.syndromatic.search" }))).toEqual(expect.objectContaining({

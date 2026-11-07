@@ -24,7 +24,7 @@ import {
   createSynCloudOSHostInstallContext,
   prepareSynCloudOSHostContributions,
 } from "../../src/SynCloudOS/HostContributions/hostContribution";
-import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/PolicyKit/policyTypes";
+import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/ConfigurationProfiles/policyTypes";
 import { createTestRuntime, unlockRuntime } from "./helpers";
 import { noteType } from "../fixtures/noteDocumentType";
 
@@ -140,11 +140,11 @@ describe("runtime browser host contribution context", () => {
       const [prepared] = await prepareSynCloudOSHostContributions([contribution], runtime.environment);
       const handle = createSynCloudOSHostInstallContext(prepared!, runtime, {});
 
-      handle.context.policy.registerRoleCapabilities({
+      handle.context.configurationProfiles.registerRoleCapabilities({
         roles: ["employee"],
         capabilities: ["tests.seed.write", "tests.seed.write"],
       });
-      expect(runtime.policy.getRoleCapabilities("employee")).toContain("tests.seed.write");
+      expect(runtime.configurationProfiles.getRoleCapabilities("employee")).toContain("tests.seed.write");
       expect(handle.context.policy.currentSubject().role).not.toBe("system");
 
       const seeded = await handle.context.seed.saveDraft({ kind: "tests.seed", title: "Seeded", body: "content" });
@@ -164,18 +164,18 @@ describe("runtime browser host contribution context", () => {
         capabilities: ["*"],
         isAuthenticated: true,
       };
-      const forged = runtime.policy.authorise({
+      const forged = runtime.configurationProfiles.authorise({
         action: "runtime.mutate",
         origin: "runtime",
         source: "tests/host-seed",
         subject: forgedSubject,
-        requiredCapabilities: ["runtime.configure"],
+        requiredCapabilities: ["runtime.mutate"],
       });
       expect(forged.allowed).toBe(false);
       expect(forged.subjectRole).toBe("public");
 
       await handle.cleanup();
-      expect(runtime.policy.getRoleCapabilities("employee")).not.toContain("tests.seed.write");
+      expect(runtime.configurationProfiles.getRoleCapabilities("employee")).not.toContain("tests.seed.write");
     } finally {
       await runtime.dispose();
     }

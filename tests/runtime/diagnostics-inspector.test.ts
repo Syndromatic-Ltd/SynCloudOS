@@ -49,7 +49,7 @@ describe("Diagnostics Inspector runtime report", () => {
       AppRegistry,
       Inspector,
       LaunchServices,
-      PolicyKit,
+      ConfigurationProfiles,
       RouteManager,
       RuntimeController,
       ServiceRegistry,
@@ -58,7 +58,7 @@ describe("Diagnostics Inspector runtime report", () => {
 
     ServiceRegistry.ensureDefaults();
     ServiceRegistry.setAvailability("windowing", false);
-    PolicyKit.setAccessMode("webspringVisibleAppProtected");
+    ConfigurationProfiles.setAccessMode("webspringVisibleAppProtected");
     AppRegistry.registerMany([
       createTestManifest({
         bundleIdentifier: "com.example.inspector-app",
@@ -83,8 +83,8 @@ describe("Diagnostics Inspector runtime report", () => {
     expect(report.apps.registrationHistory.map((entry) => entry.appId)).toEqual(
       expect.arrayContaining(["com.example.inspector-app", "com.example.blocked-app"])
     );
-    expect(report.policyKit.accessMode).toBe("webspringVisibleAppProtected");
-    expect(report.policyKit.auditLog.at(-1)).toMatchObject({ action: "app.launch", allowed: false });
+    expect(report.configurationProfiles.accessMode).toBe("webspringVisibleAppProtected");
+    expect(report.configurationProfiles.auditLog.at(-1)).toMatchObject({ action: "app.launch", allowed: false });
     expect(report.launch.deferred).toEqual([expect.objectContaining({ appId: "com.example.blocked-app" })]);
     expect(report.launch.history.map((entry) => ("action" in entry ? entry.action : entry.type))).toContain("deferred");
     expect(report.services.dependencyGraph.webspring).toEqual(expect.arrayContaining(["assetLoading", "responsiveMode"]));

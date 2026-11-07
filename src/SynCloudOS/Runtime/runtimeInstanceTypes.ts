@@ -48,7 +48,7 @@ import type { SynCloudOSLoadedBundle, TrustedSynWareBundle, SynCloudOSBundleLife
 import type { SynWareTrustedBundleProvenance } from "../BundleLoader/trustedBundleProvenance";
 import type { SynCloudOSServiceDefinition, SynCloudOSServiceReport, SynCloudOSServiceHealthReport, SynCloudOSServiceExplanation, SynCloudOSServiceProvider } from "../ServiceRegistry/serviceTypes";
 import type { SynCloudOSBootReport } from "../BootManager/bootTypes";
-import type { SynCloudOSAccessMode, SynCloudOSPolicyAuditReport, SynCloudOSRoleCapabilityReportItem, SynCloudOSCapabilityMatrix, SynCloudOSPolicy, SynCloudOSPolicyEvaluationOptions } from "../PolicyKit/policyTypes";
+import type { SynCloudOSAccessMode, SynCloudOSPolicyAuditReport, SynCloudOSRoleCapabilityReportItem, SynCloudOSCapabilityMatrix, SynCloudOSPolicy, SynCloudOSPolicyEvaluationOptions } from "../ConfigurationProfiles/policyTypes";
 import type { SynCloudOSRuntimeEvent } from "../EventBus/eventTypes";
 import type {
   RuntimeSnapshot,
@@ -174,13 +174,13 @@ import type {
 import type { RuntimeNetworkHints, RuntimePerformancePolicy } from "../Performance/RuntimePerformancePolicy";
 import type {
   SynCloudOSPolicyDecision,
-  SynCloudOSPolicyProfile,
+  SynCloudOSConfigurationProfile,
   SynCloudOSPolicyRequest,
   SynCloudOSPolicySubject,
   SynCloudOSPolicySubjectGrant,
   SynCloudOSRoleCapabilityRegistration,
   SynCloudOSRoleCapabilityRegistrationInput,
-} from "../PolicyKit/policyTypes";
+} from "../ConfigurationProfiles/policyTypes";
 import type { ScreenService, WindowManager } from "../Windows";
 import type { SynCloudOSPresentationTraitsService } from "../ResponsiveModeManager/presentationTypes";
 import type { ColourPanelService } from "../ColourPanel";
@@ -400,6 +400,12 @@ export interface SynCloudOSRuntimeEnvironment {
   readonly audio?: RuntimeAudioAdapterFactory | null;
   readonly motion?: MFXMotionAdapter;
   readonly location?: LFXLocationAdapter;
+  readonly bluetooth?: import("../../FX/BluetoothFX/public").BTFXBluetoothClient;
+  readonly nfc?: import("../../FX/NFCFX/public").NFXNFCClient;
+  readonly speech?: import("../../FX/SpeechFX/public").SPFXSpeechClient;
+  readonly contacts?: import("../../FX/ContactsFX/public").CNFXContactsClient;
+  readonly payment?: import("../../FX/PassFX/public").PKFXPaymentClient;
+  readonly xr?: import("../../FX/XRFX/public").XRFXClient;
   readonly midi?: MIDIAdapter;
   /** Environment-owned camera/display capture authority. Mounted apps never receive this host directly. */
   readonly videoCapture?: VideoCaptureSessionHost;
@@ -556,7 +562,7 @@ export interface SynCloudOSServiceRegistry extends RuntimeOwnedService {
   }): SynCloudOSAppServiceResolution<TClient>;
 }
 
-export interface SynCloudOSPolicyKit extends RuntimeOwnedService {
+export interface SynCloudOSConfigurationProfiles extends RuntimeOwnedService {
   registerPolicy(policyId: string, policy: SynCloudOSPolicy): SynCloudOSPolicy;
   removePolicy(policyId: string): boolean;
   getRoleCapabilities(role: string): readonly string[];
@@ -945,9 +951,9 @@ export interface SynCloudOSRuntimeConfig {
     readonly sessionAdapter: IdentitySessionAdapter;
   };
   readonly authenticationPolicy?: "disabled" | "optional" | "required";
-  /** The host's role taxonomy for PolicyKit and Identity. Defaults to
-   * Syndromatic's (`defaultPolicyProfile`). */
-  readonly policyProfile?: SynCloudOSPolicyProfile;
+  /** The host's role taxonomy for ConfigurationProfiles and Identity. Defaults to
+   * Syndromatic's (`defaultConfigurationProfile`). */
+  readonly configurationProfile?: SynCloudOSConfigurationProfile;
   readonly userNotifications?: {
     readonly persistence: UserNotificationPersistenceAdapter;
     readonly delivery?: UserNotificationDeliveryAdapter;
@@ -1056,7 +1062,8 @@ export interface SynCloudOSRuntime {
   readonly apps: SynCloudOSAppRegistry;
   readonly bundles: SynCloudOSBundleLoader;
   readonly services: SynCloudOSServiceRegistry;
-  readonly policy: SynCloudOSPolicyKit;
+  readonly configurationProfiles: SynCloudOSConfigurationProfiles;
+  readonly authorization: import("../Authorization/SCAuthorization").SCAuthorization;
   readonly permissions: SynCloudOSPermissionManager;
   readonly identity: SynCloudOSIdentityService;
   readonly login: SynCloudOSLoginService;

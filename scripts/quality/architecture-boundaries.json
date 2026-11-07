@@ -434,7 +434,7 @@
           "src/SynCloudOS/Documents/index.ts",
           "src/SynCloudOS/DocumentStore/index.ts",
           "src/SynCloudOS/Documents/DocumentErrors.ts",
-          "src/SynCloudOS/PolicyKit/policyTypes.ts",
+          "src/SynCloudOS/ConfigurationProfiles/policyTypes.ts",
           "src/SynCloudOS/PermissionManager/permissionTypes.ts",
           "src/SynCloudOS/LocaleServices/LocaleServices.ts",
           "src/SynCloudOS/Appearance/useAppearance.ts",
@@ -838,7 +838,7 @@
           "src/SynCloudOS/LocaleServices/index.ts",
           "src/SynCloudOS/Preferences/index.ts",
           "src/SynCloudOS/PluginRegistry/index.ts",
-          "src/SynCloudOS/PolicyKit/index.ts",
+          "src/SynCloudOS/ConfigurationProfiles/index.ts",
           "src/SynCloudOS/Resources/frameworkAssets.ts",
           "src/SynCloudOS/HostContributions/hostContribution.ts",
           "src/SynCloudOS/Runtime/runtimeInstanceTypes.ts"

@@ -26,10 +26,10 @@ import { synWareSdkEntries } from "../../../scripts/synware/sdk-entries.mjs";
 import * as contract from "../../../scripts/synware/sdk-package-manifest.mjs";
 
 // Intentionally independent of the entry generator: omission cannot shrink both sides.
-const families = ["animation", "graphics", "image", "text", "audio", "haptics", "motion", "media", "video", "midi", "location", "lumina", "compression"].sort();
+const families = ["animation", "graphics", "image", "text", "audio", "haptics", "motion", "media", "video", "midi", "location", "lumina", "compression", "bluetooth", "nfc", "speech", "contacts", "pass", "xr"].sort();
 
-describe("literal thirteen-family package contract", () => {
-  it("has exactly thirteen portable roots", () => {
+describe("literal nineteen-family package contract", () => {
+  it("has exactly nineteen portable roots", () => {
     expect(Object.keys(synWareSdkEntries).filter(key => /^fx\/[^/]+$/u.test(key)).map(key => key.slice(3)).sort()).toEqual(families);
     expect(synWareSdkEntries["fx/video/webm"]).toBe("src/FX/VideoFX/webm.ts");
     for (const family of families) expect(existsSync(resolve(synWareSdkEntries[`fx/${family}`]))).toBe(true);
@@ -57,7 +57,7 @@ describe("literal thirteen-family package contract", () => {
     exports["./fx/video/webm"] = { import: "./fx/video/webm.js", types: "./fx/video/webm.d.ts" };
     expect(() => contract.assertFxPackageExports(exports)).not.toThrow();
     const { "./fx/lumina": _omitted, ...missing } = exports;
-    expect(() => contract.assertFxPackageExports(missing)).toThrow(/thirteen|lumina/i);
+    expect(() => contract.assertFxPackageExports(missing)).toThrow(/nineteen|lumina/i);
     for (const key of ["./fx/private", "./types/internal", "./src/runtime", "./sdk/internal/runtime", "./*"]) {
       expect(() => contract.assertFxPackageExports({ ...exports, [key]: "./host.js" }), key).toThrow();
     }

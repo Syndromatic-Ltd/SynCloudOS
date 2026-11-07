@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { SynCloudOSPolicyRequest, SynCloudOSPolicySubject, SynCloudOSPolicySubjectGrant } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicyRequest, SynCloudOSPolicySubject, SynCloudOSPolicySubjectGrant } from "../ConfigurationProfiles/policyTypes";
 
 export type SynCloudOSPluginStatus = "enabled" | "disabled";
 
@@ -40,7 +40,7 @@ export interface SynCloudOSPluginRecord {
 }
 
 export interface SynCloudOSPluginRegisterOptions {
-  /** Descriptive; evaluated only together with a PolicyKit-issued grant. */
+  /** Descriptive; evaluated only together with a ConfigurationProfiles-issued grant. */
   subject?: SynCloudOSPolicySubject;
   subjectGrant?: SynCloudOSPolicySubjectGrant;
   origin?: SynCloudOSPolicyRequest["origin"];

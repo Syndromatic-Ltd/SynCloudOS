@@ -45,7 +45,7 @@ type AppManagerLifecyclePort = Pick<SynCloudOSLifecycle, "launch" | "activate"> 
   validateAccess?: (appId: string, stage: "launch" | "activate") => { ok: boolean; reason?: string };
 };
 
-type AppManagerRuntimePort = Pick<SynCloudOSRuntime, "undo" | "documents" | "login" | "policy"> & {
+type AppManagerRuntimePort = Pick<SynCloudOSRuntime, "undo" | "documents" | "login" | "configurationProfiles"> & {
   readonly apps: Pick<SynCloudOSRuntime["apps"], "getApp">;
 };
 
@@ -257,7 +257,7 @@ export class AppManager {
     if (lifecycleAccess && !lifecycleAccess.ok) return false;
     const runtime = this.dependencies.runtime;
     if (!runtime?.login.getSnapshot().isAuthorised) return false;
-    if (!runtime.policy.evaluate({ action: "app.launch", app: runtime.apps.getApp(this.bundleIdentifier), context: { appId: this.bundleIdentifier } }).allowed) return false;
+    if (!runtime.configurationProfiles.evaluate({ action: "app.launch", app: runtime.apps.getApp(this.bundleIdentifier), context: { appId: this.bundleIdentifier } }).allowed) return false;
     const handle = this.dependencies.lifecycle.activate(this.bundleIdentifier, {
       reason: `SynCloudOS.AppManager.${reason}`,
     });

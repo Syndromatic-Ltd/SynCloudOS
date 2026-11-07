@@ -12,7 +12,7 @@ The SynCloudOS runtime is the kernel every other layer stands on. A host creates
 | Documents | Live editing sessions with autosave, recovery, versions and conflicts. See [documents](documents.md). |
 | Windows | Ordering, key and main state, restoration and compact presentation. See [windows](windows.md). |
 | Services | A registry of host services with availability, versions and permissions. |
-| PolicyKit | Decides whether a subject may take an action, from roles, capabilities and access modes. |
+| ConfigurationProfiles | Decides whether a subject may take an action, from roles, capabilities and access modes. |
 | Locale | Locale bundles, formatting and translation. |
 | Persistence | Namespaced preferences and durable storage. |
 | Scheduler | An injectable clock and frame scheduler, so time is testable. |
@@ -45,7 +45,7 @@ The options are:
 | `shell` | The [Webspring](webspring.md) definition. |
 | `shellResources` | Icons, strings and other resources for the shell. |
 | `authentication` | `"disabled"` for open sites, or an [authentication configuration](authentication.md). |
-| `policyProfile` | Your host's role taxonomy. See [Policy](#policy). |
+| `configurationProfile` | Your host's role taxonomy. See [Policy](#policy). |
 | `contributions` | Host contributions, described below. |
 | `deploymentBasePath` | A URL prefix when the site lives below the domain root, such as `/product/`. Routes inside the runtime stay rooted at `/`. |
 
@@ -109,18 +109,18 @@ instead of composing a draft save followed by republishing.
 
 ## Policy
 
-PolicyKit checks every privileged action, such as launching an application, opening a route, using a service, posting a notification or entering the shell. A decision comes from three inputs:
+ConfigurationProfiles checks every privileged action, such as launching an application, opening a route, using a service, posting a notification or entering the shell. A decision comes from three inputs:
 
 - the subject's **role**, resolved from the signed-in session by your policy profile
 - the subject's **capabilities**, granted by the role and by the session's access class
 - the **access mode** of the host, one of `fullyLocked`, `webspringVisibleAppProtected`, `public`, `mixed`, `developer` or `enterprisePrivate`
 
-An application states what it needs in its manifest `runtime.policy` block: `public`, `requiresLogin`, `requiredCapabilities` and `requiredAccessClasses`. A `SynCloudOSPolicyProfile` defines the roles your host has, the capabilities of each, the anonymous role and how a session maps to a role.
+An application states what it needs in its manifest `runtime.configurationProfiles` block: `public`, `requiresLogin`, `requiredCapabilities` and `requiredAccessClasses`. A `SynCloudOSConfigurationProfile` defines the roles your host has, the capabilities of each, the anonymous role and how a session maps to a role.
 
 ```ts
-import type { SynCloudOSPolicyProfile } from "@syndromatic/syncloudos/browser";
+import type { SynCloudOSConfigurationProfile } from "@syndromatic/syncloudos/browser";
 
-export const policyProfile: SynCloudOSPolicyProfile = {
+export const configurationProfile: SynCloudOSConfigurationProfile = {
   id: "example",
   roles: {
     guest: ["app.open.public"],
@@ -156,7 +156,7 @@ WindowHost supplies its controller-owned zoom state to the presentation projecti
 
 ## Capability status and explicit save/share actions
 
-`SCOS.share.getStatus(request?)` and `SCOS.filePanels.getStatus()` project facts from their existing services. They separate effective availability, provider (`native`, `browser-input`, `download`, `none`), current transient activation and unknown browser permission. They do not request permission, open native UI or create a second permission authority. Inspection uses PolicyKit evaluation; explicit actions use PolicyKit admission and manifest declarations. Newly exposed file write/export authority requires `file.write`. Read-only file input retains its existing manifest contract.
+`SCOS.share.getStatus(request?)` and `SCOS.filePanels.getStatus()` project facts from their existing services. They separate effective availability, provider (`native`, `browser-input`, `download`, `none`), current transient activation and unknown browser permission. They do not request permission, open native UI or create a second permission authority. Inspection uses ConfigurationProfiles evaluation; explicit actions use ConfigurationProfiles admission and manifest declarations. Newly exposed file write/export authority requires `file.write`. Read-only file input retains its existing manifest contract.
 
 `SCOS.share.perform(request, ownerSignal)` distinguishes `shared`, `cancelled`, `unsupported`, `denied`, `aborted`, `invalid` and `failed`. A fulfilled native promise means platform handoff, not proof of delivery to a recipient. `NotAllowedError` alone does not prove a persistent user permission denial; browser refusal remains a distinct reason. The legacy `share()` convenience method retains its shared/cancelled result and exception behavior, including its old unsupported-to-cancelled mapping; new actions should use `perform`. Native `Navigator.share` and `canShare` keep their receiver. Invocation begins before the first await. Unknown activation observation is not manufactured into either a grant or a denial; the native API remains authoritative. Caller abort fences late outcomes but cannot close an OS share sheet, so its busy lease remains until native settlement.
 
@@ -164,11 +164,11 @@ Permissions Policy introspection is advisory only for features that the implemen
 
 The browser environment supplies the existing File System Access and download adapters to mounted file panels. Ordinary read-only input retains its portable behavior. Select a save target in the original user action, then serialize content and write through that target with the controller's owner signal. Unavailability may choose a permitted fallback; cancellation or browser/runtime denial must not dispatch a second chooser or download. Persistent-only requests never degrade to a download. Native picker cancellation is different from owner interruption. A download target is one-shot, caller/mount scoped, and has no readable location or overwrite identity; exported means a download was dispatched, not that a file is durable on disk. Export must not mark a document clean as if it were Save As.
 
-Native save pickers expose no trustworthy new-versus-existing bit. Their returned handle is conservatively treated as existing: `fail-if-exists` stays protective, and `confirm-replace` requires caller confirmation. Browser grants/handles are not persisted by this integration. Targets recheck owner and PolicyKit before writing, release references on completion, abort partial native writes through the existing adapter and clean temporary download anchors/object URLs. Cancellation after dispatch cannot retract an OS/browser operation; do not automatically retry an uncertain export.
+Native save pickers expose no trustworthy new-versus-existing bit. Their returned handle is conservatively treated as existing: `fail-if-exists` stays protective, and `confirm-replace` requires caller confirmation. Browser grants/handles are not persisted by this integration. Targets recheck owner and ConfigurationProfiles before writing, release references on completion, abort partial native writes through the existing adapter and clean temporary download anchors/object URLs. Cancellation after dispatch cannot retract an OS/browser operation; do not automatically retry an uncertain export.
 
 `AppShareRequest.files` accepts a nonempty readonly array of prepared `{ name, mimeType, data: NSEDataConvertible, lastModified? }` records. Prepare asynchronous exports before enabling Share; do not await serialization inside the gesture. The service copies byte inputs and constructs native Files privately before the native probes. It snapshots/freezes the array and dictionary, then passes that same normalized payload to `canShare` and `share`. A files-only probe must also succeed. Missing/false/throwing file capability checks return `unsupported`; invalid or empty lists return `invalid`. No handles, promises, lazy producers or raw File input are accepted. Undefined optional fields remain omitted.
 
-The existing manifest, PolicyKit, live scope, caller signal, activation and native busy lease apply equally to files. Caller abort cannot retract an OS sheet or make a second share admissible before native settlement. Cancellation or refusal never strips the files and retries text, copies to a clipboard, dispatches a download or sends to a guessed recipient. A caller may separately offer an explicit export action after an initial unsupported outcome. Native handoff still is not recipient delivery. Browser inventory/status tests and injected native contract tests do not establish real OS chooser completion.
+The existing manifest, ConfigurationProfiles, live scope, caller signal, activation and native busy lease apply equally to files. Caller abort cannot retract an OS sheet or make a second share admissible before native settlement. Cancellation or refusal never strips the files and retries text, copies to a clipboard, dispatches a download or sends to a guessed recipient. A caller may separately offer an explicit export action after an initial unsupported outcome. Native handoff still is not recipient delivery. Browser inventory/status tests and injected native contract tests do not establish real OS chooser completion.
 
 Primary contracts: [Web Share](https://www.w3.org/TR/web-share/), [HTML user activation](https://html.spec.whatwg.org/multipage/interaction.html#tracking-user-activation), [File System Access](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access). No broad capability catalogue, service worker, push or hardware permission is added here.
 

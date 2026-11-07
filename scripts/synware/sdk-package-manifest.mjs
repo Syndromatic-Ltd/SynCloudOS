@@ -27,12 +27,13 @@ import { isAbsolute, relative, resolve } from "node:path";
 export const requiredFxFamilies = Object.freeze([
   "animation", "graphics", "image", "text", "audio", "haptics", "motion",
   "media", "video", "midi", "location", "lumina", "compression",
+  "bluetooth", "nfc", "speech", "contacts", "pass", "xr",
 ]);
 
 export function assertFxPackageExports(exports) {
-  assert(exports && typeof exports === "object", "SDK exports must describe all thirteen FX families.");
+  assert(exports && typeof exports === "object", "SDK exports must describe all reviewed FX families.");
   assert.deepEqual(Object.keys(exports).filter(key => /^\.\/fx\/[^/]+$/u.test(key)).sort(),
-    requiredFxFamilies.map(family => `./fx/${family}`).sort(), "SDK must export exactly the thirteen FX families.");
+    requiredFxFamilies.map(family => `./fx/${family}`).sort(), "SDK must export exactly the reviewed FX families.");
   assert.deepEqual(Object.keys(exports).filter(key => /^\.\/fx\/[^/]+\//u.test(key)),
     ["./fx/video/webm"], "Only reviewed FX format extensions may be exported.");
   assert.deepEqual(exports["./fx/video/webm"],
@@ -170,6 +171,7 @@ export function assertReviewedPackageFiles(files) {
     if (/^assets\/[A-Za-z0-9_-]+\.css$/u.test(file)) continue;
     if (file === "webspring/styles.css" || file === "chronosphere/styles.css") continue;
     if (/^(?:foundation|fx\/compression|fx\/video\/webm)\.(?:js|d\.ts)$/u.test(file)) continue;
+    if (/^fx\/(?:bluetooth|nfc|speech|contacts|pass|xr)\.(?:js|d\.ts)$/u.test(file)) continue;
     if (!/^(?:(?:(?:sdk|nse)(?:\/(?:[a-z][a-z-]*\/)*[a-z][a-z-]*)?|auth|browser|typography|server\/auth|webspring|chronosphere|fx\/(?:animation|graphics|image|text|audio|haptics|motion|media|video|midi|location|lumina))\.(?:js|d\.ts|css)|browser\/styles\.css|vite\.mjs|chunks\/[A-Za-z0-9_-]+\.js|assets\/[A-Za-z0-9._-]+\.(?:png|webp|svg|jpg|jpeg|gif|woff2?|ttf|otf)|README\.md|types\/(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.(?:d\.ts|d\.mts|mjs|json))$/u.test(file)) {
       throw new TypeError(`SDK package contains an unreviewed public file: ${file}`);
     }

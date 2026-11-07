@@ -68,7 +68,7 @@ describe("instance-owned login service", () => {
     await runtime.boot({ initialPathname: "/" });
 
     expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(false);
-    expect(runtime.policy.getAccessMode()).toBe("mixed");
+    expect(runtime.configurationProfiles.getAccessMode()).toBe("mixed");
     await expect(runtime.routes.openRoute("/public-without-session", {
       source: "public-route-test",
       syncRoute: false,

@@ -330,7 +330,7 @@ function committedEntries(
 }
 
 function securityDenied(operation: "read" | "write" | "snapshot" | "clear"): DOMException {
-  return new DOMException(`Pasteboard ${operation} was denied by PolicyKit.`, "SecurityError");
+  return new DOMException(`Pasteboard ${operation} was denied by ConfigurationProfiles.`, "SecurityError");
 }
 
 async function materialise(
@@ -621,7 +621,7 @@ export function createPasteboardRegistry(options: CreatePasteboardRegistryOption
   // A generation identifies one contiguous live set of mounts. Siblings share
   // it; the first mount after the last claim advances it. Board data carries
   // the generation that wrote it so a reopened mount cannot observe a prior
-  // generation while that prior generation's PolicyKit clear is still pending.
+  // generation while that prior generation's ConfigurationProfiles clear is still pending.
   const privateBoardGenerations = new Map<PasteboardName, number>();
   const privateBoardDataGenerations = new Map<PasteboardName, number>();
   const advancePrivateBoardGeneration = (name: PasteboardName): number => {

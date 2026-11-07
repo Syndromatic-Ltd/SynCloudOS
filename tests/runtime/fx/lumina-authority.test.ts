@@ -414,7 +414,7 @@ it("releases its index and settles when a revoked snapshot ignores abort forever
   }
 });
 
-it("removes already delivered privileged results when PolicyKit revokes eligible-query authority", async () => {
+it("removes already delivered privileged results when ConfigurationProfiles revokes eligible-query authority", async () => {
   const published = searchable("published", "Published Journal Note");
   const harness = createHarness({
     "com.syndromatic.publisher": new SnapshotBackend([published.toJSON()]),
@@ -565,7 +565,7 @@ it("aborts an in-flight privileged query when the host service is disposed even 
   await expect(pending).rejects.toMatchObject({ name: "AbortError" });
 });
 
-it("integrates mounted app ownership, trusted donation, PolicyKit, RouteManager and presentation settlement in one runtime", async () => {
+it("integrates mounted app ownership, trusted donation, ConfigurationProfiles, RouteManager and presentation settlement in one runtime", async () => {
   const states = new Map<string, SharedBackendState>();
   const luminaIndex: LuminaIndexBackendFactory = {
     create(ownerKey) {

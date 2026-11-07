@@ -69,7 +69,7 @@ export type { SynCloudOSAppServiceClientContext } from "../SynCloudOS/Runtime/ru
 export type { SynCloudOSServiceDefinition } from "../SynCloudOS/ServiceRegistry/serviceTypes";
 export type { SynCloudOSDocumentKindMetadata } from "../SynCloudOS/DocumentStore/documentStoreTypes";
 export type { SynCloudOSRole } from "../SynCloudOS/PermissionManager/permissionTypes";
-export type { SynCloudOSPolicyProfile, SynCloudOSPolicyProfileSession } from "../SynCloudOS/PolicyKit/policyTypes";
+export type { SynCloudOSConfigurationProfile, SynCloudOSConfigurationProfileSession } from "../SynCloudOS/ConfigurationProfiles/policyTypes";
 export type {
   SynCloudOSLocaleBundleResourceInput,
   SynCloudOSLocaleBundleResourceLoader,
@@ -78,3 +78,6 @@ export { createIndexedDBDocumentAssetStore } from "../SynCloudOS/Documents/Index
 export { createInMemoryDocumentAssetStore } from "../SynCloudOS/Documents/DocumentAssetStore";
 export { createDocumentAssetStorageAdapter, createDocumentAssetSaveCoordinator } from "../SynCloudOS/Documents/DocumentAssetSaveCoordinator";
 export type { DocumentAssetStore, DocumentAssetScope, DocumentAssetReference } from "../SynCloudOS/Documents/documentAssetTypes";
+
+export { SCAuthorization, SCAuthorizationRights } from "../SynCloudOS/Authorization/SCAuthorization";
+export type { SCAuthorizationRight, SCAuthorizationResult, SCAuthorizationOptions } from "../SynCloudOS/Authorization/SCAuthorization";

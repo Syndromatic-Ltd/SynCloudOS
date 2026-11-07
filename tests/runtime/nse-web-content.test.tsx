@@ -853,18 +853,18 @@ describe("runtime-owned web content", () => {
     expect(b.getSnapshot().state).toBe("loading");
   });
 
-  it("routes web load and message through PolicyKit allow/deny and cannot be bypassed", async () => {
+  it("routes web load and message through ConfigurationProfiles allow/deny and cannot be bypassed", async () => {
     const factory = new RecordingWebContentFactory();
     const environment = createTestRuntimeEnvironment();
     const runtime = authoriseTestRuntime(createTestRuntime({
-      id: "runtime:web:policykit",
+      id: "runtime:web:configuration-profiles",
       environment: { ...environment, webContent: factory },
       webContentAuthorisation: { authorise: () => true },
     }));
     const adapter = factory.adapters[0]!;
-    const authorise = vi.spyOn(runtime.policy, "authorise");
+    const authorise = vi.spyOn(runtime.configurationProfiles, "authorise");
 
-    runtime.policy.registerPolicy("deny-load", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-load", (request, decision) =>
       request.action === "web-content.load" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
     await expect(runtime.webContent.createSession(remoteRequest() as never))
@@ -876,7 +876,7 @@ describe("runtime-owned web content", () => {
     )).toBe(true);
     expect(adapter.prepares).toHaveLength(0);
 
-    expect(runtime.policy.removePolicy("deny-load")).toBe(true);
+    expect(runtime.configurationProfiles.removePolicy("deny-load")).toBe(true);
     const received = vi.fn();
     const session = await runtime.webContent.createSession(remoteRequest({
       capabilities: ["same-origin"],
@@ -897,7 +897,7 @@ describe("runtime-owned web content", () => {
         direction: "to-host",
         token: prepared.token,
         navigationEpoch: 1,
-        correlationId: "policykit:receive",
+        correlationId: "configuration-profiles:receive",
         payload: { safe: true },
       },
     });
@@ -907,10 +907,10 @@ describe("runtime-owned web content", () => {
       && request.requiredCapabilities?.includes("web-content.message"),
     )).toBe(true);
 
-    runtime.policy.registerPolicy("deny-send", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-send", (request, decision) =>
       request.action === "web-content.message-send" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
-    await expect(session.postMessage({ safe: true }, "policykit:send")).resolves.toBe(false);
+    await expect(session.postMessage({ safe: true }, "configuration-profiles:send")).resolves.toBe(false);
     expect(authorise.mock.calls.some(([request]) =>
       request.action === "web-content.message-send"
       && request.requiredCapabilities?.includes("web-content.message"),

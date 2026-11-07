@@ -12,7 +12,7 @@ import { LUFX_TOKENIZER_VERSION } from "../../src/FX/LuminaFX/LUFXTokenizer";
 import { LuminaIndexService, type LuminaIndexBackendFactory } from "../../src/SynCloudOS/LuminaFX/LuminaIndexService";
 import { LuminaEligibilityRegistry, luminaSubjectFingerprint } from "../../src/SynCloudOS/LuminaFX/LuminaEligibility";
 import { LUFXHostService } from "../../src/SynCloudOS/LuminaFX/LUFXHostService";
-import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/PolicyKit/policyTypes";
+import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/ConfigurationProfiles/policyTypes";
 import { createSettingsService } from "../../src/SynCloudOS/Settings/settingsService";
 
 const identitySubject: SynCloudOSPolicySubject = { user: { id: "tester", displayName: "Tester" }, role: "user", capabilities: [], isAuthenticated: true };

@@ -18,42 +18,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { SynCloudOSPolicySubject, SynCloudOSPolicySubjectGrant } from "../PolicyKit/policyTypes";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import type { SynCloudOSPlugin, SynCloudOSPluginRecord, SynCloudOSPluginRegisterOptions } from "./pluginTypes";
 
-export function createPluginRegistry(runtime: SynCloudOSRuntime, dependencies: { policyKit: any; lifecycle?: any }) {
+export function createPluginRegistry(runtime: SynCloudOSRuntime, dependencies: { configurationProfiles: any; lifecycle?: any }) {
 const EventBus = runtime.events;
 const Lifecycle = dependencies.lifecycle ?? runtime.lifecycle;
-const PolicyKit = dependencies.policyKit;
 const plugins = new Map<string, SynCloudOSPluginRecord>();
 
 function isRegisterOptions(value: unknown): value is SynCloudOSPluginRegisterOptions {
   if (!value || typeof value !== "object") return false;
-  return "subject" in value || "origin" in value || "source" in value || "context" in value;
-}
-
-// Registration defaults to the registry's own system authority, granted by
-// this runtime's PolicyKit per request (so it tracks the current system
-// capabilities). A caller-described subject is evaluated only with a grant
-// that PolicyKit issued; otherwise the derived subject applies.
-function getSystemGrant(): SynCloudOSPolicySubjectGrant {
-  return PolicyKit.issueSubject(getSystemSubject(), { purpose: "plugin-registry" });
-}
-
-function getSystemSubject(): SynCloudOSPolicySubject {
-  return {
-    user: {
-      id: "system.pluginRegistry",
-      displayName: "Plugin Registry",
-      role: "system",
-      isAuthenticated: true,
-      isAnonymous: false
-    },
-    role: "system",
-    capabilities: PolicyKit.getRoleCapabilities("system"),
-    isAuthenticated: true
-  };
+  return "subjectGrant" in value || "subject" in value || "origin" in value || "source" in value || "context" in value;
 }
 
 function resolveRegisterInput(
@@ -76,10 +51,9 @@ const pluginRegistry = {
       throw new Error("SynCloudOS.PluginRegistry.register requires id, name, and version.");
     }
     const { SynCloudOS, options } = resolveRegisterInput(SynCloudOSOrOptions, registerOptions);
-    const policy = PolicyKit.authorise({
-      action: "plugin.register",
-      subject: options.subject ?? getSystemSubject(),
-      subjectGrant: options.subjectGrant ?? (options.subject ? undefined : getSystemGrant()),
+    const policy = runtime.authorization.copyRights(["plugin.register"], {
+      subject: options.subject,
+      subjectGrant: options.subjectGrant,
       origin: options.origin ?? "runtime",
       source: options.source ?? "PluginRegistry.register",
       context: {
@@ -88,7 +62,7 @@ const pluginRegistry = {
         pluginVersion: plugin.version,
         ...(options.context ?? {})
       }
-    });
+    }).decisions[0];
     if (!policy.allowed) {
       EventBus.publish("plugin.register.denied", { pluginId: plugin.id, reason: policy.reason, policy }, plugin.name);
       throw new Error(`SynCloudOS.PluginRegistry.register denied for ${plugin.id}: ${policy.reason}`);

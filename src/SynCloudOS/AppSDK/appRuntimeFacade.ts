@@ -976,7 +976,7 @@ function ownedCanonicalDocumentResponder(
 }
 
 function appDocumentContext(runtime: SynCloudOSRuntime, app: SynCloudOSAppInfo, value: SynCloudOSDocumentStoreContext | undefined, signal: AbortSignal): SynCloudOSDocumentStoreContext {
-  const trustedSubject = runtime.policy.getCurrentSubject();
+  const trustedSubject = runtime.configurationProfiles.getCurrentSubject();
   return Object.freeze({
     subject: trustedSubject,
     ...(value?.origin === undefined ? {} : { origin: value.origin }),
@@ -3720,7 +3720,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         }
         const minimumVersion = strongerServiceVersion(service.minimumVersion, token.minimumVersion);
         if (minimumVersion === null) return unavailableService(`Service \"${id}\" received an invalid minimum version requirement.`);
-        const decision = runTestControlSync("permissions", "permission.request", () => runTestControlSync("policy", "policy.evaluate", () => runtime.policy.authorise({
+        const decision = runTestControlSync("permissions", "permission.request", () => runTestControlSync("policy", "policy.evaluate", () => runtime.configurationProfiles.authorise({
           action: "service.use",
           origin: "runtime",
           source: "SynWareServiceClient.acquire",
@@ -4210,8 +4210,8 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       const request = { action: capability, origin: "runtime", source: "SynWareEnvironmentClient", app,
         bundlePermissions: [...(declaration?.permissions ?? [])], context: Object.freeze({ appId: app.bundleIdentifier, capability }) };
       const decision = audit
-        ? runTestControlSync("policy", "policy.evaluate", () => runtime.policy.authorise(request))
-        : runtime.policy.evaluate(request);
+        ? runTestControlSync("policy", "policy.evaluate", () => runtime.configurationProfiles.authorise(request))
+        : runtime.configurationProfiles.evaluate(request);
       return { declared: true, allowed: decision.allowed };
     };
     let issuedDiagnostics: Readonly<{ grant: HostDiagnosticsGrant | undefined; client: AppTrustedDiagnosticsClient }> | undefined;
@@ -4467,7 +4467,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           if (!declaration) return false;
           try {
             const decision = runTestControlSync("permissions", "permission.request", () =>
-              runTestControlSync("policy", "policy.evaluate", () => runtime.policy.authorise({
+              runTestControlSync("policy", "policy.evaluate", () => runtime.configurationProfiles.authorise({
                 action: capability,
                 origin: "runtime",
                 source: "SynWareVideoClient",
@@ -4502,7 +4502,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
           if (!declaration) return false;
           const decision = runTestControlSync("permissions", "permission.request", () =>
-            runTestControlSync("policy", "policy.evaluate", () => runtime.policy.authorise({
+            runTestControlSync("policy", "policy.evaluate", () => runtime.configurationProfiles.authorise({
               action: capability,
               origin: "runtime",
               source: "SynWareLocationClient",
@@ -4529,7 +4529,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           if (!declaration) return false;
           try {
             const decision = runTestControlSync("permissions", "permission.request", () =>
-              runTestControlSync("policy", "policy.evaluate", () => runtime.policy.authorise({
+              runTestControlSync("policy", "policy.evaluate", () => runtime.configurationProfiles.authorise({
                 action: capability,
                 origin: "runtime",
                 source: "SynWareMIDIClient",
@@ -4557,7 +4557,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
           if (!declaration) return false;
           const decision = runTestControlSync("permissions", "permission.request", () =>
-            runTestControlSync("policy", "policy.evaluate", () => runtime.policy.authorise({
+            runTestControlSync("policy", "policy.evaluate", () => runtime.configurationProfiles.authorise({
               action: capability,
               origin: "runtime",
               source: "SynWareLuminaClient",

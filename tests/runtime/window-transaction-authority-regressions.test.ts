@@ -901,7 +901,7 @@ describe("application-session close lease", () => {
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const harness = createRuntimeHarness(runtime);
     const appId = "com.example.stale-held-launch";
-    harness.PolicyKit.setAccessMode("public");
+    harness.ConfigurationProfiles.setAccessMode("public");
     harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, policy: { public: true } }, {
       loadModule: async () => {
         moduleLoadEntered.resolve();
@@ -1255,7 +1255,7 @@ describe("application-session close lease", () => {
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const harness = createRuntimeHarness(runtime);
     const appId = "com.example.active-lifecycle-close";
-    harness.PolicyKit.setAccessMode("public");
+    harness.ConfigurationProfiles.setAccessMode("public");
     harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId }, {
       lifecycleHooks: {
         applicationWillLaunch: async () => {
@@ -1291,7 +1291,7 @@ describe("application-session close lease", () => {
     const harness = createRuntimeHarness(runtime);
     const appId = "com.example.replacement-registration-launch";
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
-    harness.PolicyKit.setAccessMode("public");
+    harness.ConfigurationProfiles.setAccessMode("public");
     harness.AppRegistry.registerBundle(createTestBundle({
       bundleIdentifier: appId,
       displayName: "Generation A",
@@ -1329,7 +1329,7 @@ describe("application-session close lease", () => {
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const harness = createRuntimeHarness(runtime);
     const appId = "com.example.cancelled-readiness";
-    harness.PolicyKit.setAccessMode("public");
+    harness.ConfigurationProfiles.setAccessMode("public");
     harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, policy: { public: true } }, {
       loadModule: async () => {
         loadEntered.resolve();

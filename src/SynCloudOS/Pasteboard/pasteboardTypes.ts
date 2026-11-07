@@ -20,7 +20,7 @@
 
 import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
-import type { SynCloudOSPolicyDecision, SynCloudOSPolicySubject } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicyDecision, SynCloudOSPolicySubject } from "../ConfigurationProfiles/policyTypes";
 
 export type PasteboardName = "system" | "drag" | "find" | `app:${string}`;
 

@@ -365,8 +365,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     vi.useFakeTimers();
     const runtime = createTestRuntime();
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
-    const { AppRegistry, LaunchServices, PolicyKit, WindowManager } = createRuntimeHarness(runtime);
-    PolicyKit.setAccessMode("public");
+    const { AppRegistry, LaunchServices, ConfigurationProfiles, WindowManager } = createRuntimeHarness(runtime);
+    ConfigurationProfiles.setAccessMode("public");
     AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.queue-now", route: "/queue-now", policy: { public: true } }));
 
     const queued = LaunchServices.queueLaunch("com.example.queue-now", { source: "developer" });
@@ -419,8 +419,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
 
   it("preloads apps without opening windows", async () => {
     vi.useFakeTimers();
-    const { AppRegistry, LaunchServices, LoginServices, PolicyKit, WindowManager } = createRuntimeHarness(createTestRuntime());
-    PolicyKit.setAccessMode("public");
+    const { AppRegistry, LaunchServices, LoginServices, ConfigurationProfiles, WindowManager } = createRuntimeHarness(createTestRuntime());
+    ConfigurationProfiles.setAccessMode("public");
     unlockRuntime(LoginServices);
     AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.preload-me", route: "/preload-me", policy: { public: true } }));
 
@@ -437,8 +437,8 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
 
   it("retries a failed launch request from launch history", async () => {
     vi.useFakeTimers();
-    const { AppRegistry, LaunchServices, LoginServices, PolicyKit, WindowManager } = createRuntimeHarness(createTestRuntime());
-    PolicyKit.setAccessMode("webspringVisibleAppProtected");
+    const { AppRegistry, LaunchServices, LoginServices, ConfigurationProfiles, WindowManager } = createRuntimeHarness(createTestRuntime());
+    ConfigurationProfiles.setAccessMode("webspringVisibleAppProtected");
     AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.retry-me", route: "/retry-me" }));
 
     expect(LaunchServices.openApp("com.example.retry-me", { source: "developer" })).toBeNull();

@@ -29,7 +29,7 @@ import {
 import { LuminaIndexService, type LuminaIndexBackendFactory } from "../../../src/SynCloudOS/LuminaFX/LuminaIndexService";
 import { LuminaEligibilityRegistry } from "../../../src/SynCloudOS/LuminaFX/LuminaEligibility";
 import { LUFXHostService } from "../../../src/SynCloudOS/LuminaFX/LUFXHostService";
-import type { SynCloudOSPolicySubject } from "../../../src/SynCloudOS/PolicyKit/policyTypes";
+import type { SynCloudOSPolicySubject } from "../../../src/SynCloudOS/ConfigurationProfiles/policyTypes";
 import { createTestRuntime, createTestRuntimeEnvironment } from "../helpers";
 
 function item(id: string, revision = "r1") {

@@ -20,7 +20,7 @@
 
 import type { SynCloudOSRuntimeEvent } from "../EventBus/eventTypes";
 import type { RuntimeTransactionRecord } from "../Runtime/runtimeTypes";
-import type { SynCloudOSPolicyDecision, SynCloudOSPolicyTraceEntry } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicyDecision, SynCloudOSPolicyTraceEntry } from "../ConfigurationProfiles/policyTypes";
 import { RuntimeDiagnosticLog } from "./RuntimeDiagnosticLog";
 
 /**
@@ -32,7 +32,7 @@ import { RuntimeDiagnosticLog } from "./RuntimeDiagnosticLog";
 export interface SynCloudOSRuntimeDiagnostics {
   readonly events: RuntimeDiagnosticLog<SynCloudOSRuntimeEvent>;
   readonly transactions: RuntimeDiagnosticLog<RuntimeTransactionRecord>;
-  /** PolicyKit's audit of authorised decisions. */
+  /** ConfigurationProfiles's audit of authorised decisions. */
   readonly policyDecisions: RuntimeDiagnosticLog<SynCloudOSPolicyDecision>;
   dispose(): void;
 }

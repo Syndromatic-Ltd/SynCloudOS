@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { installBrowserApplications } from "../SynCloudOS/InstalledApplications/installBrowserApplications";
 import { getSynWareNamespace } from "../SynCloudOS/AppSDK/useStrings";
 import "../SynCloudOS/styles/runtime.css";
 import { StrictMode, type PropsWithChildren } from "react";
@@ -59,8 +60,8 @@ import { createBrowserRouteCoordinator, type CoordinatedRouteResolution } from "
 import { createSynCloudOS } from "../SynCloudOS/Runtime/createSynCloudOS";
 import type { RuntimeDisposalResult } from "../SynCloudOS/Runtime/disposalTypes";
 import type { SynCloudOSRuntime, SynCloudOSRuntimeConfig } from "../SynCloudOS/Runtime/runtimeInstanceTypes";
-import type { SynCloudOSPolicyProfile } from "../SynCloudOS/PolicyKit/policyTypes";
-import { singleApplicationPolicyProfile } from "../SynCloudOS/PolicyKit/singleApplicationPolicyProfile";
+import type { SynCloudOSConfigurationProfile } from "../SynCloudOS/ConfigurationProfiles/policyTypes";
+import { singleApplicationConfigurationProfile } from "../SynCloudOS/ConfigurationProfiles/singleApplicationConfigurationProfile";
 import { createSynCloudOSFacade } from "../SynCloudOS/SynCloudOS";
 import type { AuthenticationInput, WebspringDefinition } from "../Webspring/webspringTypes";
 import type { SynCloudOSShellResources } from "../Webspring/WebspringController";
@@ -94,7 +95,7 @@ interface BrowserHostOptions {
   readonly fonts?: { readonly declaration: FontDeclaration; readonly resourceUrls: Readonly<Record<string, string>> };
   readonly authentication?: AuthenticationInput;
   /** This host's role taxonomy. Defaults to the built-in profile. */
-  readonly policyProfile?: SynCloudOSPolicyProfile;
+  readonly configurationProfile?: SynCloudOSConfigurationProfile;
   /** The NSE appearance (theme) that paints the shell, windows and controls.
    * Import the theme's stylesheet alongside it. Defaults to Atmo. */
   readonly appearance?: NSEAppearanceDefinition;
@@ -564,7 +565,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     ...(options.persistenceNamespace !== undefined
       ? { persistenceNamespace: options.persistenceNamespace }
       : options.application ? { persistenceNamespace: `SynCloudOS:application:${normalizeBundleIdentifier(options.application.bundleIdentifier)}` } : {}),
-    ...(options.policyProfile === undefined ? {} : { policyProfile: options.policyProfile }),
+    ...(options.configurationProfile === undefined ? {} : { configurationProfile: options.configurationProfile }),
     ...(typeof options.authentication === "object"
       ? { identity: { sessionAdapter: options.authentication.service.sessionAdapter } }
       : {}),
@@ -574,7 +575,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     initialBundles: browserBundles(options.bundles ?? [], projectBundles, options.about),
   });
   let initialBundles = composition.initialBundles;
-  let applicationPolicyProfile: SynCloudOSPolicyProfile | undefined;
+  let applicationPolicyProfile: SynCloudOSConfigurationProfile | undefined;
   if (options.application) {
     const primaryId = normalizeBundleIdentifier(options.application.bundleIdentifier);
     if (!initialBundles.some(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId)) {
@@ -600,7 +601,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
       initialBundles = initialBundles.map(bundle => {
         if (normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId) return bundle;
         if (bundle.manifest.policy?.requiresLogin === true) {
-          throw new TypeError(`Application ${primaryId} declares runtime.policy.requiresLogin, but this host mounts it with authentication "disabled", so nobody could ever open it. Enable authentication, or remove requiresLogin.`);
+          throw new TypeError(`Application ${primaryId} declares runtime.configurationProfiles.requiresLogin, but this host mounts it with authentication "disabled", so nobody could ever open it. Enable authentication, or remove requiresLogin.`);
         }
         return Object.freeze({ ...bundle, manifest: Object.freeze({ ...bundle.manifest, policy: Object.freeze({ ...bundle.manifest.policy, public: true }) }) });
       });
@@ -608,9 +609,9 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     const primary = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId)!.manifest;
     // Without sign-in everyone is the anonymous role, so a single application that brings no policy
     // profile gets the document-store capabilities it declares; otherwise its documents are denied.
-    if ((authenticationPolicy ?? "disabled") === "disabled" && composition.runtimeConfig.policyProfile === undefined) {
+    if ((authenticationPolicy ?? "disabled") === "disabled" && composition.runtimeConfig.configurationProfile === undefined) {
       const primaryBundle = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId) as { readonly synWareManifest?: { readonly permissions?: readonly string[] } } | undefined;
-      applicationPolicyProfile = singleApplicationPolicyProfile(primaryBundle?.synWareManifest?.permissions ?? []);
+      applicationPolicyProfile = singleApplicationConfigurationProfile(primaryBundle?.synWareManifest?.permissions ?? []);
     }
     if (authenticationPolicy !== undefined && authenticationPolicy !== "disabled"
       && (primary.presentation ?? "appView") === "appView" && primary.applicationMenu?.trigger !== "content") {
@@ -620,7 +621,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
   const config: SynCloudOSRuntimeConfig = {
     environment,
     ...composition.runtimeConfig,
-    ...(applicationPolicyProfile === undefined ? {} : { policyProfile: applicationPolicyProfile }),
+    ...(applicationPolicyProfile === undefined ? {} : { configurationProfile: applicationPolicyProfile }),
     initialBundles,
     trustedDocumentKinds: composition.trustedDocumentKinds,
     // Memory and IndexedDB locations work out of the box; an adapter the host registers still wins.
@@ -831,6 +832,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     );
     if (!frameworkTestPath) await runtime.boot({ initialPathname });
     assertMountCurrent(options.element, attempt);
+    installBrowserApplications(runtime);
   } catch (error) {
     const cancelled = browserMountAttempts.get(options.element) !== attempt || runtime.signal.aborted
       || (typeof error === "object" && error !== null && "name" in error && error.name === "AbortError")

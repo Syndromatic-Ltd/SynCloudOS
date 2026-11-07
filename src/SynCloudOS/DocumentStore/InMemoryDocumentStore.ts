@@ -19,7 +19,7 @@
  */
 
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
-import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest } from "../ConfigurationProfiles/policyTypes";
 import { canonicalDocumentJson } from "../Documents/documentTypes";
 import {
   SynCloudOSDocumentStoreAccessError,

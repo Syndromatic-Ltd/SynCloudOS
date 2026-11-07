@@ -21,7 +21,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { asPolicySubject, createTestRuntime, createTestManifest, createRuntimeHarness } from "./helpers";
 
-describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts", () => {
+describe("runtime registry, ConfigurationProfiles, Lifecycle, and PluginRegistry contracts", () => {
   it("registers AppInfo, manager state, display ordering, and route lookup from a manifest", async () => {
     const { AppRegistry, RuntimeController } = createRuntimeHarness(createTestRuntime());
     const first = createTestManifest({ version: "1.0.0",
@@ -60,8 +60,8 @@ describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts",
     expect(RuntimeController.getSnapshot().errors[0]?.code).toBe("APP_LAUNCH_FAILED");
   });
 
-  it("keeps PolicyKit decisions explicit for public, system, and elevated subjects", async () => {
-    const { PermissionManager, PolicyKit } = createRuntimeHarness(createTestRuntime());
+  it("keeps ConfigurationProfiles decisions explicit for public, system, and elevated subjects", async () => {
+    const { PermissionManager, ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
     const publicSubject = {
       user: { id: "public", displayName: "Public", role: "public", isAuthenticated: false, isAnonymous: true },
       role: "public" as const,
@@ -71,24 +71,24 @@ describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts",
     const adminSubject = {
       user: { id: "admin", displayName: "Admin", role: "admin", isAuthenticated: true, isAnonymous: false },
       role: "admin" as const,
-      capabilities: PolicyKit.getRoleCapabilities("admin"),
+      capabilities: ConfigurationProfiles.getRoleCapabilities("admin"),
       isAuthenticated: true
     };
 
-    expect(PolicyKit.authorise({ action: "runtime.mutate", ...asPolicySubject(PolicyKit, publicSubject), origin: "test" })).toMatchObject({
+    expect(ConfigurationProfiles.authorise({ action: "runtime.mutate", ...asPolicySubject(ConfigurationProfiles, publicSubject), origin: "test" })).toMatchObject({
       allowed: false,
-      missingCapabilities: ["runtime.configure"]
+      missingCapabilities: ["runtime.mutate"]
     });
-    expect(PolicyKit.authorise({ action: "runtime.mutate", ...asPolicySubject(PolicyKit, adminSubject), origin: "test" })).toMatchObject({
+    expect(ConfigurationProfiles.authorise({ action: "runtime.mutate", ...asPolicySubject(ConfigurationProfiles, adminSubject), origin: "test" })).toMatchObject({
       allowed: true
     });
-    expect(PolicyKit.can({ action: "runtime.system", ...asPolicySubject(PolicyKit, { ...adminSubject, capabilities: ["*"], role: "system" }), origin: "test" })).toBe(true);
-    expect(PolicyKit.getAuditLog()).toHaveLength(3);
+    expect(ConfigurationProfiles.can({ action: "runtime.system", ...asPolicySubject(ConfigurationProfiles, { ...adminSubject, capabilities: ["*"], role: "system" }), origin: "test" })).toBe(true);
+    expect(ConfigurationProfiles.getAuditLog()).toHaveLength(3);
     expect(PermissionManager.getRoleCapabilities("founder")).toContain("runtime.system");
   });
 
-  it("evaluates PolicyKit access modes without hardcoding one login model", async () => {
-    const { PolicyKit } = createRuntimeHarness(createTestRuntime());
+  it("evaluates ConfigurationProfiles access modes without hardcoding one login model", async () => {
+    const { ConfigurationProfiles } = createRuntimeHarness(createTestRuntime());
     const publicSubject = {
       user: { id: "public", displayName: "Public", role: "public", isAuthenticated: false, isAnonymous: true },
       role: "public" as const,
@@ -98,13 +98,13 @@ describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts",
     const betaSubject = {
       user: { id: "beta", displayName: "Beta", role: "betaTester", isAuthenticated: true, isAnonymous: false },
       role: "betaTester" as const,
-      capabilities: PolicyKit.getRoleCapabilities("betaTester"),
+      capabilities: ConfigurationProfiles.getRoleCapabilities("betaTester"),
       isAuthenticated: true
     };
     const founderSubject = {
       user: { id: "founder", displayName: "Founder", role: "founder", isAuthenticated: true, isAnonymous: false },
       role: "founder" as const,
-      capabilities: PolicyKit.getRoleCapabilities("founder"),
+      capabilities: ConfigurationProfiles.getRoleCapabilities("founder"),
       isAuthenticated: true
     };
     const publicApp = createTestManifest({ bundleIdentifier: "com.example.public-mode-app", policy: { public: true } });
@@ -117,31 +117,31 @@ describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts",
       policy: { requiresLogin: true, requiredRoles: ["founder"], requiredCapabilities: ["runtime.system"] }
     });
 
-    PolicyKit.clearAuditLog();
+    ConfigurationProfiles.clearAuditLog();
 
-    PolicyKit.setAccessMode("fullyLocked");
-    expect(PolicyKit.authorise({ action: "webspring.enter", ...asPolicySubject(PolicyKit, publicSubject), origin: "test" }).allowed).toBe(false);
+    ConfigurationProfiles.setAccessMode("fullyLocked");
+    expect(ConfigurationProfiles.authorise({ action: "webspring.enter", ...asPolicySubject(ConfigurationProfiles, publicSubject), origin: "test" }).allowed).toBe(false);
 
-    PolicyKit.setAccessMode("webspringVisibleAppProtected");
-    expect(PolicyKit.authorise({ action: "webspring.enter", ...asPolicySubject(PolicyKit, publicSubject), origin: "test" }).allowed).toBe(true);
-    expect(PolicyKit.authorise({ action: "app.launch", app: publicApp, ...asPolicySubject(PolicyKit, publicSubject), origin: "test" }).allowed).toBe(false);
+    ConfigurationProfiles.setAccessMode("webspringVisibleAppProtected");
+    expect(ConfigurationProfiles.authorise({ action: "webspring.enter", ...asPolicySubject(ConfigurationProfiles, publicSubject), origin: "test" }).allowed).toBe(true);
+    expect(ConfigurationProfiles.authorise({ action: "app.launch", app: publicApp, ...asPolicySubject(ConfigurationProfiles, publicSubject), origin: "test" }).allowed).toBe(false);
 
-    PolicyKit.setAccessMode("public");
-    expect(PolicyKit.authorise({ action: "app.launch", app: publicApp, ...asPolicySubject(PolicyKit, publicSubject), origin: "test" }).allowed).toBe(true);
+    ConfigurationProfiles.setAccessMode("public");
+    expect(ConfigurationProfiles.authorise({ action: "app.launch", app: publicApp, ...asPolicySubject(ConfigurationProfiles, publicSubject), origin: "test" }).allowed).toBe(true);
 
-    PolicyKit.setAccessMode("mixed");
-    expect(PolicyKit.authorise({ action: "app.launch", app: publicApp, ...asPolicySubject(PolicyKit, publicSubject), origin: "test" }).allowed).toBe(true);
-    expect(PolicyKit.authorise({ action: "app.launch", app: protectedApp, ...asPolicySubject(PolicyKit, publicSubject), origin: "test" }).allowed).toBe(false);
-    expect(PolicyKit.authorise({ action: "app.launch", app: protectedApp, ...asPolicySubject(PolicyKit, betaSubject), origin: "test" }).allowed).toBe(true);
+    ConfigurationProfiles.setAccessMode("mixed");
+    expect(ConfigurationProfiles.authorise({ action: "app.launch", app: publicApp, ...asPolicySubject(ConfigurationProfiles, publicSubject), origin: "test" }).allowed).toBe(true);
+    expect(ConfigurationProfiles.authorise({ action: "app.launch", app: protectedApp, ...asPolicySubject(ConfigurationProfiles, publicSubject), origin: "test" }).allowed).toBe(false);
+    expect(ConfigurationProfiles.authorise({ action: "app.launch", app: protectedApp, ...asPolicySubject(ConfigurationProfiles, betaSubject), origin: "test" }).allowed).toBe(true);
 
-    PolicyKit.setAccessMode("developer");
-    expect(PolicyKit.authorise({ action: "statechart.goto", subject: publicSubject, origin: "developerConsole" }).allowed).toBe(true);
-    expect(PolicyKit.authorise({ action: "runtime.mutate", subject: publicSubject, origin: "developerConsole" }).allowed).toBe(false);
+    ConfigurationProfiles.setAccessMode("developer");
+    expect(ConfigurationProfiles.authorise({ action: "statechart.goto", subject: publicSubject, origin: "developerConsole" }).allowed).toBe(true);
+    expect(ConfigurationProfiles.authorise({ action: "runtime.mutate", subject: publicSubject, origin: "developerConsole" }).allowed).toBe(false);
 
-    PolicyKit.setAccessMode("enterprisePrivate");
-    expect(PolicyKit.authorise({ action: "app.launch", app: enterpriseApp, ...asPolicySubject(PolicyKit, founderSubject), origin: "test" }).allowed).toBe(true);
+    ConfigurationProfiles.setAccessMode("enterprisePrivate");
+    expect(ConfigurationProfiles.authorise({ action: "app.launch", app: enterpriseApp, ...asPolicySubject(ConfigurationProfiles, founderSubject), origin: "test" }).allowed).toBe(true);
 
-    expect(PolicyKit.getAuditLog()).toEqual(
+    expect(ConfigurationProfiles.getAuditLog()).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           action: "app.launch",

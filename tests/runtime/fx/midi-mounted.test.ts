@@ -137,7 +137,7 @@ const MIDIProbe = createSynWare({
   },
 });
 
-it("routes app.midi through mounted manifest and PolicyKit authority before the deterministic host adapter", async () => {
+it("routes app.midi through mounted manifest and ConfigurationProfiles authority before the deterministic host adapter", async () => {
   const host = createSynWareTestHost({ app: MIDIProbe, document });
   await host.render();
   host.adapters.midi.allow();

@@ -102,6 +102,24 @@
       "@syndromatic/syncloudos/fx/location": [
         "./src/FX/LocationFX/public.ts"
       ],
+      "@syndromatic/syncloudos/fx/bluetooth": [
+        "./src/FX/BluetoothFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/nfc": [
+        "./src/FX/NFCFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/speech": [
+        "./src/FX/SpeechFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/contacts": [
+        "./src/FX/ContactsFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/pass": [
+        "./src/FX/PassFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/xr": [
+        "./src/FX/XRFX/public.ts"
+      ],
       "@syndromatic/syncloudos/fx/lumina": [
         "./src/FX/LuminaFX/public.ts"
       ],

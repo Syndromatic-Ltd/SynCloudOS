@@ -37,7 +37,7 @@ describe("generic runtime composition", () => {
         expect.stringMatching(/journal|syncal|leather|portfolio/iu),
       ]));
 
-      const employeeCapabilities = runtime.policy.getRoleCapabilities("employee");
+      const employeeCapabilities = runtime.configurationProfiles.getRoleCapabilities("employee");
       expect(employeeCapabilities).not.toEqual(expect.arrayContaining([
         expect.stringMatching(/journal|syncal|leather|portfolio/iu),
       ]));

@@ -21,7 +21,7 @@
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSNotificationCenter, SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeSnapshot } from "../Runtime/runtimeTypes";
-import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest, SynCloudOSPolicySubject } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest, SynCloudOSPolicySubject } from "../ConfigurationProfiles/policyTypes";
 import {
   createNotificationPolicySnapshot,
   type SynCloudOSNotification,
@@ -436,12 +436,12 @@ type NotificationCenterPostInput = SynCloudOSNotificationPostInput | UserNotific
 export function createNotificationCenter(
   runtime: SynCloudOSRuntime,
   dependencies: {
-    policyKit?: { authorise(request: SynCloudOSPolicyRequest): SynCloudOSPolicyDecision };
+    configurationProfiles?: { authorise(request: SynCloudOSPolicyRequest): SynCloudOSPolicyDecision };
     userNotifications?: UserNotificationCenter;
   } = {}
 ): SynCloudOSNotificationCenter {
 const EventBus = runtime.events;
-const PolicyKit = dependencies.policyKit ?? runtime.policy;
+const ConfigurationProfiles = dependencies.configurationProfiles ?? runtime.configurationProfiles;
 const RuntimeStore = runtime.store;
 const SettingsService = runtime.settings;
 
@@ -471,7 +471,7 @@ function evaluatePolicy(
   if (mode === "skip") return { mode, decision: null, snapshot: undefined };
 
   const app = input.appId ? RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(input.appId)] ?? null : null;
-  const decision = PolicyKit.authorise({
+  const decision = ConfigurationProfiles.authorise({
     action: "notification.post",
     source: options.source ?? input.source ?? "SynCloudOS.NotificationCenter.post",
     origin: options.origin ?? "runtime",

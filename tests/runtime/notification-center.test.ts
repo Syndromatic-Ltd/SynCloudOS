@@ -250,8 +250,8 @@ describe("NotificationCenter runtime foundations", () => {
     expect(RuntimeController.getSnapshot().appInfo["com.example.journal"].notifications.badgeCount).toBe(0);
   });
 
-  it("can enforce PolicyKit denial for unprivileged notification posting", async () => {
-    const { PolicyKit, RuntimeController, SynCloudOS } = createRuntimeHarness(createTestRuntime());
+  it("can enforce ConfigurationProfiles denial for unprivileged notification posting", async () => {
+    const { ConfigurationProfiles, RuntimeController, SynCloudOS } = createRuntimeHarness(createTestRuntime());
 
     const denied = SynCloudOS.NotificationCenter.post(
       {
@@ -262,13 +262,13 @@ describe("NotificationCenter runtime foundations", () => {
       {
         policy: "enforce",
         origin: "test",
-        ...asPolicySubject(PolicyKit, publicNotificationSubject)
+        ...asPolicySubject(ConfigurationProfiles, publicNotificationSubject)
       }
     );
 
     expect(denied).toBeNull();
     expect(RuntimeController.getSnapshot().notifications).toEqual([]);
-    expect(PolicyKit.getAuditLog().at(-1)).toMatchObject({
+    expect(ConfigurationProfiles.getAuditLog().at(-1)).toMatchObject({
       action: "notification.post",
       allowed: false,
       origin: "test"

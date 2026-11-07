@@ -58,7 +58,7 @@ import type {
   SynCloudOSPolicySubject,
   SynCloudOSPolicySubjectGrant,
   SynCloudOSRoleCapabilityRegistrationInput,
-} from "../PolicyKit/policyTypes";
+} from "../ConfigurationProfiles/policyTypes";
 import type { SynCloudOSIdentityUser } from "../Identity/identityTypes";
 import type { LUFXQuery, LUFXQueryDescriptor } from "../../FX/LuminaFX/LUFXQuery";
 import type { LUFXQueryExecutionOptions, LUFXQueryResultPage } from "../../FX/LuminaFX/LUFXQueryPlanner";
@@ -204,7 +204,7 @@ export interface SynCloudOSHostResourceInstallPort {
 
 /** Trusted host-only Lumina authority. Contributions can register projections
  * only for applications they prepared. Privileged cross-owner querying still
- * passes through PolicyKit in the runtime-owned LUFXHostService. */
+ * passes through ConfigurationProfiles in the runtime-owned LUFXHostService. */
 export interface SynCloudOSHostLuminaInstallPort {
   registerDomain(input: LUFXHostDomainRegistration): SynCloudOSHostContributionCleanup;
   setEligibility(input: LuminaItemEligibilityInput): number;
@@ -362,7 +362,7 @@ const runtimeScalarKeys = new Set<string>([
   "webContentAuthorisation",
   "identity",
   "authenticationPolicy",
-  "policyProfile",
+  "configurationProfile",
   "userNotifications",
 ]);
 function captureRuntimeConfig(value: unknown, label: string): Readonly<SynCloudOSHostScalarRuntimeConfig> {
@@ -834,7 +834,7 @@ export function createSynCloudOSHostInstallContext(
   };
   const currentSubject = () => {
     assertLive(signal);
-    return runtime.policy.getCurrentSubject();
+    return runtime.configurationProfiles.getCurrentSubject();
   };
   const seedUser: SynCloudOSIdentityUser = {
     id: `system.host-contribution:${record.source}`,
@@ -862,10 +862,10 @@ export function createSynCloudOSHostInstallContext(
     isAuthenticated: true,
   };
   Object.freeze(seedSubject);
-  // Seeding is host authority, so it is granted by this runtime's PolicyKit
+  // Seeding is host authority, so it is granted by this runtime's ConfigurationProfiles
   // and withdrawn with the installation; request metadata alone grants nothing.
-  const seedGrant = runtime.policy.issueSubject(seedSubject, { purpose: `host-contribution-seed:${record.id}` });
-  track(() => { runtime.policy.revokeSubject(seedGrant); });
+  const seedGrant = runtime.configurationProfiles.issueSubject(seedSubject, { purpose: `host-contribution-seed:${record.id}` });
+  track(() => { runtime.configurationProfiles.revokeSubject(seedGrant); });
   const storeContext = (operationSignal: AbortSignal) =>
     contextStoreContext(operationSignal, record.source, seedSubject, "hostContribution", seedGrant);
   const applicationOwners = new Set([
@@ -1045,19 +1045,19 @@ export function createSynCloudOSHostInstallContext(
       const appId = input.appId;
       const declaration = structuredClone(input.policy);
       const policyId = `host:${record.id}:${normalizeBundleIdentifier(appId)}`;
-      runtime.policy.registerPolicy(policyId, (request, decision) => {
+      runtime.configurationProfiles.registerPolicy(policyId, (request, decision) => {
         const requestedAppId = request.app?.bundleIdentifier ?? request.context?.appId;
         if (!decision.allowed || typeof requestedAppId !== "string" || normalizeBundleIdentifier(requestedAppId) !== normalizeBundleIdentifier(appId)) return decision;
         const app = request.app ?? runtime.apps.getApp(appId);
         if (!app) return decision;
-        const declaredDecision = runtime.policy.evaluate({ ...request, app: { ...app, policy: declaration } }, { applyRegisteredPolicies: false });
+        const declaredDecision = runtime.configurationProfiles.evaluate({ ...request, app: { ...app, policy: declaration } }, { applyRegisteredPolicies: false });
         return declaredDecision.allowed ? decision : declaredDecision;
       });
-      track(() => { runtime.policy.removePolicy(policyId); });
+      track(() => { runtime.configurationProfiles.removePolicy(policyId); });
     },
     registerRoleCapabilities(input) {
       assertLive(signal);
-      const registration = runtime.policy.registerRoleCapabilities(input);
+      const registration = runtime.configurationProfiles.registerRoleCapabilities(input);
       return track(() => {
         registration.dispose();
       });

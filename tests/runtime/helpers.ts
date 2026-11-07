@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { testPolicyProfile } from "./testPolicyProfile";
+import { testConfigurationProfile } from "./testConfigurationProfile";
 import { vi } from "vitest";
 import { choreographyTimings } from "../../src/FX/AnimationFX/choreographyTimings";
 import type {
@@ -44,7 +44,7 @@ import { createSynCloudOSFacade } from "../../src/SynCloudOS/SynCloudOS";
 import { createBrowserRuntimeEnvironment, hasNativeProxyBrand } from "../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { createSynCloudOSBrowserRouteSynchronizer } from "../../src/SynCloudOS/PlatformAdapters/BrowserRouteSync";
 import type { SynCloudOSRuntime, SynCloudOSRuntimeConfig } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
-import type { SynCloudOSPolicySubject, SynCloudOSPolicySubjectGrant } from "../../src/SynCloudOS/PolicyKit/policyTypes";
+import type { SynCloudOSPolicySubject, SynCloudOSPolicySubjectGrant } from "../../src/SynCloudOS/ConfigurationProfiles/policyTypes";
 import type { IdentitySessionAdapter, IdentitySessionAdapterSnapshot } from "../../src/SynCloudOS/Identity/identitySessionTypes";
 import { createMountedSynWareRuntime, type MountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import {
@@ -218,7 +218,7 @@ export function createRuntimeHarness(runtime: SynCloudOSRuntime) {
     LoginServices: SynCloudOS.LoginServices,
     PermissionManager: SynCloudOS.PermissionManager,
     PluginRegistry: SynCloudOS.PluginRegistry,
-    PolicyKit: SynCloudOS.PolicyKit,
+    ConfigurationProfiles: SynCloudOS.ConfigurationProfiles,
     ResponsiveModeManager: SynCloudOS.ResponsiveModeManager,
     RouteManager: SynCloudOS.RouteManager,
     ServiceRegistry: SynCloudOS.ServiceRegistry,
@@ -476,7 +476,7 @@ export function createTestRuntime(
     id: overrides.id ?? `runtime:test:${testRuntimeSequence}`,
     environment,
     initialBundles: overrides.initialBundles ?? [],
-    policyProfile: testPolicyProfile,
+    configurationProfile: testConfigurationProfile,
     applicationDocuments: {
       ...(applicationDocuments ?? {}),
       initialAdapters: applicationDocuments?.initialAdapters ?? [new InMemoryDocumentAdapter(environment)],
@@ -664,11 +664,11 @@ export function registerTrustedTestSynWare(
 /**
  * Request fields that evaluate a policy request as `subject`. Request metadata
  * is never authority, so this issues a grant through the same host-only
- * PolicyKit API that host contributions and the plugin registry use.
+ * ConfigurationProfiles API that host contributions and the plugin registry use.
  */
 export function asPolicySubject(
-  policyKit: { issueSubject(subject: SynCloudOSPolicySubject, options: { purpose: string }): SynCloudOSPolicySubjectGrant },
+  configurationProfiles: { issueSubject(subject: SynCloudOSPolicySubject, options: { purpose: string }): SynCloudOSPolicySubjectGrant },
   subject: SynCloudOSPolicySubject,
 ) {
-  return { subject, subjectGrant: policyKit.issueSubject(subject, { purpose: "test" }) };
+  return { subject, subjectGrant: configurationProfiles.issueSubject(subject, { purpose: "test" }) };
 }

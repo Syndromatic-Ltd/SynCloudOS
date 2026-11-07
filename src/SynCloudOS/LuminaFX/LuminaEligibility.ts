@@ -20,7 +20,7 @@
 
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { LUFXSearchableItem } from "../../FX/LuminaFX/LUFXSearchableItem";
-import type { SynCloudOSPolicySubject } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicySubject } from "../ConfigurationProfiles/policyTypes";
 import type { LuminaEligibilityRestriction } from "./luminaEligibilityRestriction";
 
 export interface LuminaDomainProjection {

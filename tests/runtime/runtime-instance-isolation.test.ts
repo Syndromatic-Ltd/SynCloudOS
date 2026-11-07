@@ -37,9 +37,9 @@ const systemSubject = {
 };
 
 // Document authority is host-issued per runtime; a grant from one runtime's
-// PolicyKit means nothing to another's.
+// ConfigurationProfiles means nothing to another's.
 const systemDocumentContext = (runtime: SynCloudOSRuntime) => ({
-  ...asPolicySubject(runtime.policy, systemSubject),
+  ...asPolicySubject(runtime.configurationProfiles, systemSubject),
   origin: "test",
   source: "runtime-instance-isolation.test",
 });
@@ -59,7 +59,7 @@ describe("runtime instance isolation", () => {
       version: "1.0.0",
       capabilities: [],
     });
-    first.policy.registerPolicy("deny-first-only", (request, decision) =>
+    first.configurationProfiles.registerPolicy("deny-first-only", (request, decision) =>
       request.app?.bundleIdentifier === "com.example.first-only" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
 

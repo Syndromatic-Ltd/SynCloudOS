@@ -115,7 +115,7 @@ describe("SynCloudOS public API compatibility", () => {
     expect(facade.ServiceRegistry).toBe(runtime.services);
     expect(facade.AppRegistry).toBe(runtime.apps);
     expect(facade.BundleLoader).toBe(runtime.bundles);
-    expect(facade.PolicyKit).toBe(runtime.policy);
+    expect(facade.ConfigurationProfiles).toBe(runtime.configurationProfiles);
     expect(facade.Lifecycle).toBe(runtime.lifecycle);
     expect(facade.LaunchServices).toBe(runtime.launchServices);
     expect(facade.RouteManager).toBe(runtime.routes);

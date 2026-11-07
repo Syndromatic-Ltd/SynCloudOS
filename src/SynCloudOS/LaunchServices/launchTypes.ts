@@ -22,7 +22,7 @@ import type { AppManager } from "../AppManager/AppManager";
 import type { SynCloudOSAppLifecycleState } from "../AppManager/appManagerTypes";
 import type { SynCloudOSAppInfo } from "../AppInfo/appInfoTypes";
 import type { SynCloudOSLoginSessionSnapshot } from "../LoginServices/loginServicesTypes";
-import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest } from "../ConfigurationProfiles/policyTypes";
 import type { SynCloudOSServiceReport } from "../ServiceRegistry/serviceTypes";
 import type { ApplicationSessionMutationTicket } from "../Documents";
 import type { LifecycleRequestOptions } from "../Lifecycle/lifecycleTypes";
@@ -135,7 +135,7 @@ export interface SynCloudOSPolicyAuthorisationExplanation {
   result?: boolean | SynCloudOSPolicyAuthorisationResult;
 }
 
-export interface SynCloudOSPolicyKit {
+export interface SynCloudOSConfigurationProfiles {
   authorise?: (
     request: SynCloudOSPolicyAuthorisationRequest
   ) =>

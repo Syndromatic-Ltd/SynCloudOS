@@ -279,7 +279,7 @@ describe("NSE colour transfer", () => {
 
   it("announces a policy-denied keyboard colour drop and leaves the session idle", async () => {
     const runtime = createTestRuntime({ id: "runtime:colour-keyboard-denied" });
-    runtime.policy.registerPolicy("deny-studio", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-studio", (request, decision) =>
       request.app?.bundleIdentifier === "com.example.studio" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
     render(<SynCloudOSProvider runtime={runtime}>

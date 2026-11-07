@@ -23,7 +23,7 @@ import type { LUFXQuery, LUFXQueryDescriptor } from "../../FX/LuminaFX/LUFXQuery
 import { LUFXQueryPlanner, type LUFXQueryExecutionOptions, type LUFXQueryResultEntry, type LUFXQueryResultPage } from "../../FX/LuminaFX/LUFXQueryPlanner";
 import type { LUFXSuggestionOptions, LUFXSuggestionResult } from "../../FX/LuminaFX/LUFXSuggestions";
 import type { LUFXSearchableItem } from "../../FX/LuminaFX/LUFXSearchableItem";
-import type { SynCloudOSPolicySubject } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicySubject } from "../ConfigurationProfiles/policyTypes";
 import type { LuminaIndexService } from "./LuminaIndexService";
 import {
   LuminaEligibilityRegistry,
@@ -369,7 +369,7 @@ export class LUFXHostService {
   #assertPrivileged(action: "lumina.eligible-query"): void {
     const subject = this.#options.policy.getCurrentSubject();
     const decision = this.#options.policy.authorise({ action, subject, requiredCapabilities: ["lumina.eligible-query"] });
-    if (!decision.allowed) throw new DOMException("PolicyKit denied privileged Lumina query authority.", "SecurityError");
+    if (!decision.allowed) throw new DOMException("ConfigurationProfiles denied privileged Lumina query authority.", "SecurityError");
   }
 
   #assertLive(): void {

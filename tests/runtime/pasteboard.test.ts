@@ -383,16 +383,16 @@ describe("runtime pasteboards", () => {
   });
 
 
-  it("routes named and system pasteboard access through PolicyKit allow/deny", async () => {
+  it("routes named and system pasteboard access through ConfigurationProfiles allow/deny", async () => {
     const write = vi.fn(async () => undefined);
     const read = vi.fn(async () => [{ type: "text/plain", value: "clipboard" }]);
     const runtime = createTestRuntime({
-      id: "runtime:pasteboard:policykit",
+      id: "runtime:pasteboard:configuration-profiles",
       environment: environmentWithClipboard({ read, write }),
       initialBundles: [createTestBundle({ bundleIdentifier: "com.example.gallery", route: "/gallery" })],
     });
     const pasteboards = galleryPasteboards(runtime);
-    const authorise = vi.spyOn(runtime.policy, "authorise");
+    const authorise = vi.spyOn(runtime.configurationProfiles, "authorise");
 
     await pasteboards.find.write([{ type: "text/plain", value: "local" }]);
     await expect(pasteboards.find.readFirst(["text/plain"]))
@@ -417,7 +417,7 @@ describe("runtime pasteboards", () => {
 
     write.mockClear();
     read.mockClear();
-    runtime.policy.registerPolicy("deny-gallery", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-gallery", (request, decision) =>
       request.app?.bundleIdentifier === "com.example.gallery" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
     await expect(pasteboards.find.write([{ type: "text/plain", value: "denied" }]))
@@ -431,7 +431,7 @@ describe("runtime pasteboards", () => {
     expect(write).not.toHaveBeenCalled();
     expect(read).not.toHaveBeenCalled();
 
-    expect(runtime.policy.removePolicy("deny-gallery")).toBe(true);
+    expect(runtime.configurationProfiles.removePolicy("deny-gallery")).toBe(true);
     await pasteboards.find.write([{ type: "text/plain", value: "restored" }]);
     await expect(pasteboards.find.readFirst(["text/plain"]))
       .resolves.toMatchObject({ value: "restored" });

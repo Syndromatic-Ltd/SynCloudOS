@@ -19,7 +19,7 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/PolicyKit/policyTypes";
+import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/ConfigurationProfiles/policyTypes";
 import { createTestBundle, createTestRuntime, mountTestSynWareRuntime } from "./helpers";
 
 function forgedEmployeeSubject(): SynCloudOSPolicySubject {
@@ -48,7 +48,7 @@ describe("mounted application policy authority", () => {
   it("resolves transfer policy from host identity and reports truthful matches", async () => {
     const runtime = createTestRuntime();
 
-    const anonymous = runtime.policy.authorise({
+    const anonymous = runtime.configurationProfiles.authorise({
       action: "transfer.cross-application",
       origin: "runtime",
       source: "approval-repair.test",
@@ -58,7 +58,7 @@ describe("mounted application policy authority", () => {
     expect(anonymous.matchedCapabilities).toEqual([]);
     expect(anonymous.missingCapabilities).toEqual(["transfer.cross-application"]);
 
-    const forged = runtime.policy.authorise({
+    const forged = runtime.configurationProfiles.authorise({
       action: "transfer.cross-application",
       origin: "runtime",
       source: "approval-repair.test",
@@ -77,7 +77,7 @@ describe("mounted application policy authority", () => {
       draft.loginServices.displayName = "Host Employee";
     });
 
-    const granted = runtime.policy.authorise({
+    const granted = runtime.configurationProfiles.authorise({
       action: "transfer.cross-application",
       origin: "runtime",
       source: "approval-repair.test",
@@ -87,7 +87,7 @@ describe("mounted application policy authority", () => {
     expect(granted.matchedCapabilities).toEqual(["transfer.cross-application"]);
     expect(granted.missingCapabilities).toEqual([]);
 
-    const sameApplication = runtime.policy.authorise({
+    const sameApplication = runtime.configurationProfiles.authorise({
       action: "transfer.same-application",
       origin: "runtime",
       source: "approval-repair.test",
@@ -95,7 +95,7 @@ describe("mounted application policy authority", () => {
     });
     expect(sameApplication.allowed).toBe(true);
 
-    const missingRole = runtime.policy.authorise({
+    const missingRole = runtime.configurationProfiles.authorise({
       action: "transfer.cross-application",
       origin: "runtime",
       source: "approval-repair.test",
@@ -105,7 +105,7 @@ describe("mounted application policy authority", () => {
     expect(missingRole.matchedRoles).toEqual([]);
     expect(missingRole.missingRoles).toEqual(["founder"]);
 
-    const missingAccessClass = runtime.policy.authorise({
+    const missingAccessClass = runtime.configurationProfiles.authorise({
       action: "transfer.cross-application",
       origin: "runtime",
       source: "approval-repair.test",

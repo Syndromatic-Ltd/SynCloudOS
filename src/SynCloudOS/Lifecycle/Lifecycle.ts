@@ -37,7 +37,7 @@ import type {
   SynCloudOSBundleLoader,
   SynCloudOSLifecycle,
   SynCloudOSErrorManager,
-  SynCloudOSPolicyKit,
+  SynCloudOSConfigurationProfiles,
   SynCloudOSRuntime,
 } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeSnapshot } from "../Runtime/runtimeTypes";
@@ -69,7 +69,7 @@ type LifecycleErrorManager = Pick<SynCloudOSErrorManager, "capture" | "createApp
 type LifecycleBundleLoader = Pick<SynCloudOSBundleLoader, "getBundle" | "getLoadedBundle" | "loadBundle">;
 type LifecycleAppRegistry = Pick<SynCloudOSAppRegistry, "getApp">;
 type LifecycleAppManagerController = Pick<SynCloudOSAppManagerController, "getManagerForApp">;
-type LifecyclePolicyKit = Pick<SynCloudOSPolicyKit, "authorise">;
+type LifecycleConfigurationProfiles = Pick<SynCloudOSConfigurationProfiles, "authorise">;
 type LifecycleWindowManager = Pick<
   WindowManager,
   "beginApplicationClose" | "requestCloseApplication" | "endApplicationClose" | "validateCloseApplication" | "commitCloseApplication"
@@ -82,7 +82,7 @@ export interface SynCloudOSLifecycleDependencies {
   readonly bundles: LifecycleBundleLoader;
   readonly apps: LifecycleAppRegistry;
   readonly appManagerController: LifecycleAppManagerController;
-  readonly policyKit: LifecyclePolicyKit;
+  readonly configurationProfiles: LifecycleConfigurationProfiles;
   readonly windows: LifecycleWindowManager;
   readonly revokeApplicationMounts: (appId: string) => void;
   readonly operations: LifecycleOperationCoordinator;
@@ -198,7 +198,7 @@ export function createLifecycle(
   const BundleLoader = dependencies.bundles;
   const AppRegistry = dependencies.apps;
   const AppManagerController = dependencies.appManagerController;
-  const PolicyKit = dependencies.policyKit;
+  const ConfigurationProfiles = dependencies.configurationProfiles;
   const WindowManager = dependencies.windows;
   const Operations = dependencies.operations;
   const Caches = dependencies.caches;
@@ -502,7 +502,7 @@ export function createLifecycle(
       };
     }
     const app = AppRegistry.getApp(appId);
-    const policyDecision = PolicyKit.authorise({
+    const policyDecision = ConfigurationProfiles.authorise({
       action: "app.launch",
       app,
       route: app?.route,
