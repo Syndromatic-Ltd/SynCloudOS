@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type {
   MIFXAccess,
   MIFXAuthorizationRequest,
@@ -351,11 +352,11 @@ export class MIDIService {
         let disposed = false;
         const wrapped: MIFXOutputLease = {
           endpoint: native.endpoint,
-          send(data: Uint8Array, timestampMilliseconds?: number) {
+          send(value: NSEDataConvertible, timestampMilliseconds?: number) {
             assertLive();
             if (disposed) throw abortError("MIDI output lease was disposed.");
-            if (!(data instanceof Uint8Array)) throw new TypeError("MIDI output data must be a Uint8Array.");
-            if (data[0] === 0xf0 && owner.sysexAuthorization !== "granted") {
+            const data = NSEData.from(value);
+            if (data.bytes[0] === 0xf0 && owner.sysexAuthorization !== "granted") {
               throw securityError("SysEx output requires explicit SysEx authorization.");
             }
             if (timestampMilliseconds === undefined) native.send(data);

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
 import type {
   TFXFontResourceMimeType,
   TFXPackagedFontResource,
@@ -58,11 +59,11 @@ export function validateTFXFontResourcePath(value: string): string {
 }
 
 export function validateTFXFontResource(resource: TFXPackagedFontResource, path: string): TFXPackagedFontResource {
-  if (!resource || !(resource.bytes instanceof Uint8Array)) throw new TypeError("A packaged font loader must return Uint8Array bytes.");
-  if (resource.bytes.byteLength > maximumTFXFontResourceBytes) throw new RangeError("A packaged font resource exceeds the 32 MiB source limit.");
+  if (!resource || !(resource.bytes instanceof NSEData)) throw new TypeError("A packaged font loader must return NSEData bytes.");
+  if (resource.bytes.count > maximumTFXFontResourceBytes) throw new RangeError("A packaged font resource exceeds the 32 MiB source limit.");
   const extension = path.split(".").at(-1)!.toLowerCase();
   if (resource.mimeType !== mimeTypeByExtension[extension]) throw new TypeError("A packaged font resource MIME type does not match its registered extension.");
-  return Object.freeze({ bytes: resource.bytes.slice(), mimeType: resource.mimeType });
+  return Object.freeze({ bytes: NSEData.from(resource.bytes), mimeType: resource.mimeType });
 }
 
 async function readBoundedResponse(response: Response, signal: AbortSignal): Promise<Uint8Array> {
@@ -112,7 +113,7 @@ export function createRegisteredFontResourceLoader(
     const registered = entries.get(path);
     if (!registered) throw new DOMException("The packaged font resource is not registered in this application bundle.", "NotFoundError");
     const bytes = await readBoundedResponse(await fetch(registered.url, { signal }), signal);
-    return validateTFXFontResource({ bytes, mimeType: registered.mimeType }, path);
+    return validateTFXFontResource({ bytes: NSEData.from(bytes), mimeType: registered.mimeType }, path);
   };
 }
 

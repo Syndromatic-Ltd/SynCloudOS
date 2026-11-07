@@ -1,11 +1,12 @@
+import { bridgeFilePanelFile, bridgeFilePanelDirectory, type NativeFilePanelHandle, type NativeFilePanelDirectory } from "./nativeFilePanelBridge";
 import type { NativeOperationActivity } from '../SynCloudOS';
 import type {FilePanelAcceptType,FilePanelDirectoryHandle,FilePanelFileHandle,FileSystemAccessPanelPort} from '../SynCloudOS';
 
 interface NativeOptions {readonly multiple?:boolean;readonly suggestedName?:string;readonly types?:readonly {description:string;accept:Record<string,string[]>}[];}
 type NativeFileWindow=Window&{
-  showOpenFilePicker?:(options:NativeOptions)=>Promise<readonly FilePanelFileHandle[]>;
-  showDirectoryPicker?:()=>Promise<FilePanelDirectoryHandle>;
-  showSaveFilePicker?:(options:NativeOptions)=>Promise<FilePanelFileHandle>;
+  showOpenFilePicker?:(options:NativeOptions)=>Promise<readonly NativeFilePanelHandle[]>;
+  showDirectoryPicker?:()=>Promise<NativeFilePanelDirectory>;
+  showSaveFilePicker?:(options:NativeOptions)=>Promise<NativeFilePanelHandle>;
 };
 function types(accepts:readonly FilePanelAcceptType[]):NativeOptions['types'] {
   return accepts.flatMap(entry=>entry.mimeTypes.length?[{description:entry.description,accept:Object.fromEntries(entry.mimeTypes.map(type=>[type,[...entry.extensions]]))}]:[]);
@@ -33,13 +34,13 @@ export function createBrowserFileSystemAccessPanelPort(window:Window|null,native
     async openFiles(options,signal){
       signal.throwIfAborted();
       if(!native.showOpenFilePicker)throw new DOMException('Native open is unavailable.','NotSupportedError');
-      try{return await owned(invoke(signal,()=>native.showOpenFilePicker!.call(native,{multiple:options.multiple,types:types(options.accepts)})),signal);}
+      try{return (await owned(invoke(signal,()=>native.showOpenFilePicker!.call(native,{multiple:options.multiple,types:types(options.accepts)})),signal)).map(bridgeFilePanelFile);}
       catch(error){if(cancelled(error,signal))return [];throw error;}
     },
     async openDirectory(signal){
       signal.throwIfAborted();
       if(!native.showDirectoryPicker)throw new DOMException('Native directory selection is unavailable.','NotSupportedError');
-      try{return await owned(invoke(signal,()=>native.showDirectoryPicker!.call(native)),signal);}
+      try{return bridgeFilePanelDirectory(await owned(invoke(signal,()=>native.showDirectoryPicker!.call(native)),signal));}
       catch(error){if(cancelled(error,signal))return null;throw error;}
     },
     async saveFile(options,signal){
@@ -49,7 +50,7 @@ export function createBrowserFileSystemAccessPanelPort(window:Window|null,native
         const handle=await owned(invoke(signal,()=>native.showSaveFilePicker!.call(native,{suggestedName:options.suggestedName,types:types(options.accepts)})),signal);
         // The returned handle exists. The picker exposes no trustworthy new-vs-overwrite bit.
         // Preserve fail-if-exists conservatively; callers may explicitly confirm replacement.
-        return {handle,exists:true};
+        return {handle:bridgeFilePanelFile(handle),exists:true};
       }catch(error){if(cancelled(error,signal))return null;throw error;}
     },
   };

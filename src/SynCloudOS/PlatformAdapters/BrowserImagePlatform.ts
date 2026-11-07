@@ -125,7 +125,7 @@ export function createBrowserImagePlatform(browserDocument: Document, browserWin
         async decode(source, signal) {
             signal.throwIfAborted();
             const binary = source.kind === "bytes";
-            let bytes = binary ? source.bytes.slice() : null;
+            let bytes = binary ? source.bytes.bytes : null;
             let mimeType = binary ? source.mimeType : "";
             if (!binary) {
                 const target = new URL(source.url, browserWindow.location.href);

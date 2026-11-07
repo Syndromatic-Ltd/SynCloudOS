@@ -124,14 +124,13 @@ function cloneCanonicalValue(
 }
 
 function cloneData(value: unknown): NSEData {
-  if (!(value instanceof NSEData || value instanceof Uint8Array || value instanceof ArrayBuffer)) {
-    throw new InvalidPasteboardRepresentationError("Binary pasteboard representations require NSEDataConvertible.");
-  }
-  const count = value instanceof NSEData ? value.count : value.byteLength;
-  if (count > MAX_BINARY_BYTES) {
+  let data: NSEData;
+  try { data = NSEData.from(value as NSEDataConvertible); }
+  catch { throw new InvalidPasteboardRepresentationError("Binary pasteboard representations require NSEDataConvertible."); }
+  if (data.count > MAX_BINARY_BYTES) {
     throw new InvalidPasteboardRepresentationError(`Binary pasteboard data exceeds the ${MAX_BINARY_BYTES} byte limit.`);
   }
-  return NSEData.from(value);
+  return data;
 }
 
 function normaliseType(value: unknown): PasteboardRepresentation["type"] {
