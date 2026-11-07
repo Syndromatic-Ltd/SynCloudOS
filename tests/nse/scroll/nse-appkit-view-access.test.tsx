@@ -29,6 +29,21 @@ import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEA
 import { AFXLayer } from "../../../src/FX/AnimationFX/AFXLayer";
 
 describe("AppKit view access", () => {
+ it("retains the image backing through StrictMode's mount probe", async () => {
+  const ref=createRef<NSEImageViewHandle>();
+  const seen: AFXLayer[]=[];
+  const bindLayer=vi.fn(()=>new AFXLayer());
+  function Owner() {
+   useLayoutEffect(()=>{seen.push(ref.current!.layer!);},[]);
+   return <NSEImageView ref={ref} wantsLayer src="/art.svg" controls={false}/>;
+  }
+  const view=render(<React.StrictMode><NSEAnimationEnvironmentProvider layers={{bindLayer,createRenderer:vi.fn()}}><Owner/></NSEAnimationEnvironmentProvider></React.StrictMode>);
+  await act(async()=>{});
+  expect(seen).toHaveLength(2);
+  expect(seen[1]).toBe(seen[0]);
+  expect(bindLayer).toHaveBeenCalledTimes(1);
+  view.unmount();
+ });
  it("commits NSScrollView.contentView before the owning view's appearance", () => {
   const ref=createRef<NSEScrollViewHandle>();
   let clip: HTMLElement | undefined;
@@ -54,7 +69,7 @@ describe("AppKit view access", () => {
   expect(listener).toHaveBeenCalledTimes(count);
   expect(()=>clip.observeBoundsChanges(listener)).toThrow();
  });
- it("exposes a layer only when the image view is layer backed and releases it", () => {
+ it("exposes a layer only when the image view is layer backed and releases it", async () => {
   const ref=createRef<NSEImageViewHandle>(); const bindLayer=vi.fn(()=>new AFXLayer());
   const layers={bindLayer,createRenderer:vi.fn()};
   const view=render(<NSEAnimationEnvironmentProvider layers={layers}><NSEImageView ref={ref} src="/art.svg" controls={false}/></NSEAnimationEnvironmentProvider>);
@@ -65,6 +80,8 @@ describe("AppKit view access", () => {
   expect(layer).toBeInstanceOf(AFXLayer); expect(ref.current!.layer).toBe(layer);
   expect(bindLayer.mock.calls[0]?.[0]).toBe(ref.current!.element);
   const signal=bindLayer.mock.calls[0]?.[1] as AbortSignal;
-  view.unmount(); expect(signal.aborted).toBe(true); expect(ref.current).toBeNull();
+  const handle=ref.current!;
+  view.unmount(); expect(handle.layer).toBeNull(); expect(ref.current).toBeNull();
+  await act(async()=>{}); expect(signal.aborted).toBe(true);
  });
 });

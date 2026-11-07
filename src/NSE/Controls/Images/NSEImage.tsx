@@ -269,25 +269,47 @@ export const NSEImageView = forwardRef<NSEImageViewHandle, NSEImageViewProps>(fu
   const imageRef = useRef<NSESizeableImageHandle>(null);
   const host = useRef<HTMLDivElement>(null);
   const { layers } = useNSEAnimationEnvironment();
-  const backing = useRef<{ abort: AbortController; layer: AFXLayer | null } | null>(null);
+  const backing = useRef<{
+    abort: AbortController;
+    layer: AFXLayer | null;
+    element: HTMLDivElement;
+    layers: typeof layers;
+    pending?: object;
+  } | null>(null);
   useLayoutEffect(() => {
-    if (!wantsLayer) return;
-    const connection = { abort: new AbortController(), layer: null as AFXLayer | null };
-    backing.current = connection;
-    return () => {
+    const previous = backing.current;
+    const release = (connection: NonNullable<typeof backing.current>) => {
       connection.abort.abort();
       connection.layer?.dispose();
       if (backing.current === connection) backing.current = null;
+    };
+    if (!wantsLayer) {
+      if (previous) release(previous);
+      return;
+    }
+    const reusable = previous && !previous.abort.signal.aborted && previous.element === host.current && previous.layers === layers;
+    if (previous && !reusable) release(previous);
+    const connection = reusable ? previous : {
+      abort: new AbortController(), layer: null, element: host.current!, layers, pending: undefined as object | undefined,
+    };
+    connection.pending = undefined;
+    backing.current = connection;
+    return () => {
+      // As with managed outlets, a same-turn StrictMode reconnect keeps the
+      // physical view and its running presentation. Real detach retires it.
+      const pending = {};
+      connection.pending = pending;
+      queueMicrotask(() => { if (connection.pending === pending) release(connection); });
     };
   }, [wantsLayer, layers]);
   useImperativeHandle(ref, () => ({
     element: host.current!,
     get layer() {
       const connection = backing.current;
-      if (!wantsLayer || !connection) return null;
+      if (!wantsLayer || !connection || connection.pending) return null;
       if (!connection.layer) {
-        if (!layers?.bindLayer) throw new TypeError("Layer-backed image views require a mounted animation layer client.");
-        connection.layer = layers.bindLayer(host.current!, connection.abort.signal, { layout: "css" });
+        if (!connection.layers?.bindLayer) throw new TypeError("Layer-backed image views require a mounted animation layer client.");
+        connection.layer = connection.layers.bindLayer(connection.element, connection.abort.signal, { layout: "css" });
       }
       return connection.layer;
     },
