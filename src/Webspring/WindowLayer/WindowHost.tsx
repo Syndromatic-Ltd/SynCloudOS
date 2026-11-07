@@ -239,12 +239,31 @@ export function WindowHost({
   useEffect(() => {
     if (!openedKey || (record.role !== "panel" && record.role !== "popover")) return;
     const host = hostRef.current;
-    const active = host?.ownerDocument.activeElement;
-    if (!host || (active && host.contains(active))) return;
-    const target = host.querySelector<HTMLElement>(`.nse-window__content [data-nse-initial-focus]:not([disabled])`) ??
-      host.querySelector<HTMLElement>(`.nse-window__content :is(${windowFocusableSelector})`) ??
-      host.querySelector<HTMLElement>(windowFocusableSelector) ?? host.querySelector<HTMLElement>("[data-nse-window-popover]");
-    target?.focus({ preventScroll: true });
+    if (!host) return;
+    const surface = host.querySelector<HTMLElement>("[data-nse-window-popover]");
+    let observer: MutationObserver | null = null;
+    const focusInitialControl = () => {
+      const active = host.ownerDocument.activeElement;
+      const target = host.querySelector<HTMLElement>(`.nse-window__content [data-nse-initial-focus]:not([disabled])`) ??
+        host.querySelector<HTMLElement>(`.nse-window__content :is(${windowFocusableSelector})`) ??
+        host.querySelector<HTMLElement>(windowFocusableSelector);
+      if (active && host.contains(active) && active !== surface) { observer?.disconnect(); return true; }
+      if (target) {
+        target.focus({ preventScroll: true });
+        observer?.disconnect();
+        return true;
+      }
+      surface?.focus({ preventScroll: true });
+      return false;
+    };
+    if (!focusInitialControl()) {
+      // Command controls arrive disabled until asynchronous validation has
+      // settled. Complete the opening handoff when the first one is ready.
+      const Observer = host.ownerDocument.defaultView?.MutationObserver;
+      observer = Observer ? new Observer(focusInitialControl) : null;
+      observer?.observe(host, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled"] });
+    }
+    return () => observer?.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening
   }, [controller.id, openedKey]);
 
