@@ -41,6 +41,7 @@ export function appkitCounterparts(sdkRoot) {
  */
 export function appkitCounterpartFor(name, map) {
   if (!map) return undefined;
+  if (map.frameworkCounterparts && Object.hasOwn(map.frameworkCounterparts,name)) return map.frameworkCounterparts[name];
   const suffix=new RegExp("(?:"+map.derivedSuffixes.join("|")+")$","u");
   for (let base=name;;) {
     if (Object.hasOwn(map.counterparts,base)) return map.counterparts[base];
@@ -118,7 +119,7 @@ export async function lookupSdk({projectRoot,entry,query,limit=8,full=false}={})
       const first=declarations[0];
       const record={entry:value.name,entries:[value.name],name,signature,outlined:shapes.some(shape=>shape.outlined),jsDoc:[jsDoc,...tags].filter(Boolean).join("\n"),file:first ? slash(relative(sdkRoot,first.getSourceFile().fileName)) : null,line:first ? first.getSourceFile().getLineAndCharacterOfPosition(first.getStart()).line+1 : null,score};
       // NSE names are AppKit names: say which, or why there is none.
-      const counterpart=/^NSE[A-Z]/u.test(name) ? appkitCounterpartFor(name,counterparts) : undefined;
+      const counterpart=appkitCounterpartFor(name,counterparts);
       if (counterpart!==undefined) record.appkitCounterpart=counterpart;
       byDeclaration.set(key,record); symbols.push(record);
     }

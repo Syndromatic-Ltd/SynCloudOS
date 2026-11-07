@@ -35,6 +35,8 @@ export const synWareSdkEntries = Object.freeze({
   "fx/video/webm": "src/FX/VideoFX/webm.ts",
   "fx/midi": "src/FX/MIDIFX/public.ts",
   "fx/location": "src/FX/LocationFX/public.ts",
+  "fx/network": "src/FX/NetworkFX/public.ts",
+  "fx/crypto": "src/FX/CryptoFX/public.ts",
   "fx/bluetooth": "src/FX/BluetoothFX/public.ts",
   "fx/nfc": "src/FX/NFCFX/public.ts",
   "fx/speech": "src/FX/SpeechFX/public.ts",

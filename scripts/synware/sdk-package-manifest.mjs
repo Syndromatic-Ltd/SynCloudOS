@@ -26,7 +26,7 @@ import { isAbsolute, relative, resolve } from "node:path";
 
 export const requiredFxFamilies = Object.freeze([
   "animation", "graphics", "image", "text", "audio", "haptics", "motion",
-  "media", "video", "midi", "location", "lumina", "compression",
+  "media", "video", "midi", "location", "lumina", "compression", "network", "crypto",
   "bluetooth", "nfc", "speech", "contacts", "pass", "xr",
 ]);
 

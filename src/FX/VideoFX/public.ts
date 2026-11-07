@@ -124,3 +124,6 @@ export type {
   VFXPresentationEnqueueResult,
   VFXPresentationTickResult,
 } from "./VFXPresentation";
+export { VFXContentFilter } from "./VFXContentFilter";
+export type { VFXPictureInPictureController, VFXVideoPresentationClient, VFXVideoPresentationCapabilities, VFXPresentationAuthorizationStatus } from "./VFXPictureInPictureController";
+export type { VFXRouteDetector, VFXRouteConnectionState } from "./VFXRouteDetector";
