@@ -52,6 +52,8 @@ The [FX overview](fx/README.md) introduces the frameworks and how they reach a S
 
 [AnimationFX](fx/animation.md) · [GraphicsFX](fx/graphics.md) · [ImageFX](fx/image.md) · [TextFX](fx/text.md) · [AudioFX](fx/audio.md) · [HapticsFX](fx/haptics.md) · [MotionFX](fx/motion.md) · [MediaFX](fx/media.md) · [VideoFX](fx/video.md) · [MIDIFX](fx/midi.md) · [LocationFX](fx/location.md) · [LuminaFX](fx/lumina.md) · [CompressionFX](fx/compression.md)
 
+[BluetoothFX](fx/bluetooth.md) · [NFCFX](fx/nfc.md) · [SpeechFX](fx/speech.md) · [ContactsFX](fx/contacts.md) · [PassFX](fx/pass.md) · [XRFX](fx/xr.md)
+
 ## Hosting
 
 [NetworkFX](fx/network.md) monitors browser path hints. [CryptoFX](fx/crypto.md)

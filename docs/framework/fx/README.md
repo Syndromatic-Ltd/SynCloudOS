@@ -16,6 +16,12 @@ Each framework has a short prefix that appears on every public type, so a name t
 | [MediaFX](media.md) | `MEFX` | Core Media | `fx/media` | Rational time, timebases, sample buffers |
 | [VideoFX](video.md) | `VFX` | Video Toolbox and AVFoundation | `fx/video`, `fx/video/webm` | Frames, codecs, capture, containers |
 | [MIDIFX](midi.md) | `MIFX` | Core MIDI | `fx/midi` | MIDI 2.0 packets, parsing and scheduling |
+| [BluetoothFX](bluetooth.md) | `BTFX` | Core Bluetooth | `fx/bluetooth` | Central-role GATT |
+| [NFCFX](nfc.md) | `NFX` | Core NFC | `fx/nfc` | Foreground NDEF |
+| [SpeechFX](speech.md) | `SPFX` | Speech | `fx/speech` | Browser recognition |
+| [ContactsFX](contacts.md) | `CNFX` | Contacts | `fx/contacts` | Per-request contact picker |
+| [PassFX](pass.md) | `PKFX` | PassKit | `fx/pass` | Payment Request authorisation |
+| [XRFX](xr.md) | `XRFX` | ARKit sessions | `fx/xr` | WebXR poses and tracked anchors |
 | [LocationFX](location.md) | `LFX` | Core Location | `fx/location` | Position, course and authorisation |
 | [LuminaFX](lumina.md) | `LUFX` | Core Spotlight | `fx/lumina` | On-device indexing and search |
 | [CompressionFX](compression.md) | `CPFX` | Compression | `fx/compression` | Capability-probed one-shot and streaming compression |
@@ -58,6 +64,12 @@ CompressionFX is also a direct library: its filters process web streams without 
 | `useMedia` | Media clocks | None |
 | `useVideo` | Capture, decode, encode | `video.capture.camera` and related |
 | `useMIDI` | MIDI access | `midi.access` |
+| `useBluetooth` | Central manager | `bluetooth.access` |
+| `useNFC` | NDEF session factory | `nfc.read`, `nfc.write` |
+| `useSpeech` | Recognizer | `speech.recognize` |
+| `useContacts` | Contact store and picker | `contacts.select` |
+| `usePayment` | Payment controller factory | `payment.request` |
+| `useXR` | WebXR session | `xr.session` |
 | `useLocation` | Location manager | `location.read`, `location.request` |
 | `useLumina` | Search index | `lumina.query` |
 
