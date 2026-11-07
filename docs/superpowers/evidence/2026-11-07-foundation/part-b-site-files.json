@@ -1,0 +1,8 @@
+[
+  "src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx",
+  "src/SynWare/NSEControlGallery.app/Contents/Gallery/WindowSections.tsx",
+  "src/SynWare/NSEControlGallery.app/Contents/GalleryTextImport.tsx",
+  "src/SynWare/NSEControlGallery.app/Contents/TextTransferMedia.tsx",
+  "tests/runtime/publisher/product-controller.test.tsx",
+  "tests/runtime/publisher/publisher-file-image-ui.test.tsx"
+]
