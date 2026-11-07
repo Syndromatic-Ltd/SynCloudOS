@@ -25,6 +25,11 @@ const bytes = (s: string) => new TextEncoder().encode(s);
 const hex = (s: string) => Uint8Array.from(s.match(/../g) ?? [], x => parseInt(x, 16));
 const show = (d: NSEData) => Array.from(d.bytes, x => x.toString(16).padStart(2, "0")).join("");
 describe("CryptoFX WebCrypto values", () => {
+  it("limits generic HMAC and HKDF selection to the public SHA-2 algorithms", async () => {
+    const key = CRFXSymmetricKey.generate();
+    await expect(CRFXHMAC.authenticationCode(bytes("abc"), key, "SHA-1" as any)).rejects.toBeInstanceOf(TypeError);
+    await expect(CRFXHKDF.deriveKey(key, new Uint8Array(), new Uint8Array(), 32, "SHA-1" as any)).rejects.toBeInstanceOf(TypeError);
+  });
   it("matches SHA known answers", async () => {
     expect(show(await CRFXSHA256.hash(bytes("abc")))).toBe("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
     expect(show(await CRFXSHA384.hash(bytes("abc")))).toBe("cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7");
@@ -34,6 +39,8 @@ describe("CryptoFX WebCrypto values", () => {
     const key = new CRFXSymmetricKey(new Uint8Array(20).fill(11));
     const mac = await CRFXHMAC.authenticationCode(bytes("Hi There"), key);
     expect(show(mac)).toBe("b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7");
+    expect(show(await CRFXHMAC.authenticationCode(bytes("Hi There"), key, "SHA-384"))).toBe("afd03944d84895626b0825f4ab46907f15f9dadbe4101ec682aa034c7cebc59cfaea9ea9076ede7f4af152e8b2fa9cb6");
+    expect(show(await CRFXHMAC.authenticationCode(bytes("Hi There"), key, "SHA-512"))).toBe("87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cdedaa833b7d6b8a702038b274eaea3f4e4be9d914eeb61f1702e696c203a126854");
     expect(await CRFXHMAC.isValidAuthenticationCode(mac, bytes("Hi There"), key)).toBe(true);
     expect(await CRFXHMAC.isValidAuthenticationCode(mac, bytes("wrong"), key)).toBe(false);
   });
