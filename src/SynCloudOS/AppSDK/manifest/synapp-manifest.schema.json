@@ -50,6 +50,11 @@
       "type": "array",
       "items": { "$ref": "#/$defs/service" }
     },
+    "entitlements": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" }
+    },
     "permissions": {
       "type": "array",
       "uniqueItems": true,

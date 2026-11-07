@@ -300,6 +300,8 @@ export interface SynWareManifestV1 {
   readonly menus?: readonly SynWareMenuManifest[];
   readonly applicationMenu?: SynWareApplicationMenuManifest;
   readonly services?: readonly SynWareServiceManifest[];
+  /** Device and service capabilities captured by the runtime at application launch. */
+  readonly entitlements?: readonly string[];
   readonly permissions?: readonly string[];
   /** Whether the build serves this application in development only. */
   readonly availability?: SynWareApplicationAvailability;
