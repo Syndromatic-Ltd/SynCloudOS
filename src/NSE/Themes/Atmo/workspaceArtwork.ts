@@ -18,36 +18,36 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import image0 from "./Resources/workspace/folder-documents-24.png?url";
-import image1 from "./Resources/workspace/folder-documents-24@2x.png?url";
-import image2 from "./Resources/workspace/folder-documents-48.png?url";
-import image3 from "./Resources/workspace/folder-documents-48@2x.png?url";
-import image4 from "./Resources/workspace/folder-documents-96.png?url";
-import image5 from "./Resources/workspace/folder-documents-96@2x.png?url";
-import image6 from "./Resources/workspace/folder-downloads-24.png?url";
-import image7 from "./Resources/workspace/folder-downloads-24@2x.png?url";
-import image8 from "./Resources/workspace/folder-downloads-48.png?url";
-import image9 from "./Resources/workspace/folder-downloads-48@2x.png?url";
-import image10 from "./Resources/workspace/folder-downloads-96.png?url";
-import image11 from "./Resources/workspace/folder-downloads-96@2x.png?url";
-import image12 from "./Resources/workspace/folder-music-24.png?url";
-import image13 from "./Resources/workspace/folder-music-24@2x.png?url";
-import image14 from "./Resources/workspace/folder-music-48.png?url";
-import image15 from "./Resources/workspace/folder-music-48@2x.png?url";
-import image16 from "./Resources/workspace/folder-music-96.png?url";
-import image17 from "./Resources/workspace/folder-music-96@2x.png?url";
-import image18 from "./Resources/workspace/folder-ordinary-24.png?url";
-import image19 from "./Resources/workspace/folder-ordinary-24@2x.png?url";
-import image20 from "./Resources/workspace/folder-ordinary-48.png?url";
-import image21 from "./Resources/workspace/folder-ordinary-48@2x.png?url";
-import image22 from "./Resources/workspace/folder-ordinary-96.png?url";
-import image23 from "./Resources/workspace/folder-ordinary-96@2x.png?url";
-import image24 from "./Resources/workspace/document-generic-24.png?url";
-import image25 from "./Resources/workspace/document-generic-24@2x.png?url";
-import image26 from "./Resources/workspace/document-generic-48.png?url";
-import image27 from "./Resources/workspace/document-generic-48@2x.png?url";
-import image28 from "./Resources/workspace/document-generic-96.png?url";
-import image29 from "./Resources/workspace/document-generic-96@2x.png?url";
+const image0 = new URL("./Resources/workspace/folder-documents-24.png", import.meta.url).href;
+const image1 = new URL("./Resources/workspace/folder-documents-24@2x.png", import.meta.url).href;
+const image2 = new URL("./Resources/workspace/folder-documents-48.png", import.meta.url).href;
+const image3 = new URL("./Resources/workspace/folder-documents-48@2x.png", import.meta.url).href;
+const image4 = new URL("./Resources/workspace/folder-documents-96.png", import.meta.url).href;
+const image5 = new URL("./Resources/workspace/folder-documents-96@2x.png", import.meta.url).href;
+const image6 = new URL("./Resources/workspace/folder-downloads-24.png", import.meta.url).href;
+const image7 = new URL("./Resources/workspace/folder-downloads-24@2x.png", import.meta.url).href;
+const image8 = new URL("./Resources/workspace/folder-downloads-48.png", import.meta.url).href;
+const image9 = new URL("./Resources/workspace/folder-downloads-48@2x.png", import.meta.url).href;
+const image10 = new URL("./Resources/workspace/folder-downloads-96.png", import.meta.url).href;
+const image11 = new URL("./Resources/workspace/folder-downloads-96@2x.png", import.meta.url).href;
+const image12 = new URL("./Resources/workspace/folder-music-24.png", import.meta.url).href;
+const image13 = new URL("./Resources/workspace/folder-music-24@2x.png", import.meta.url).href;
+const image14 = new URL("./Resources/workspace/folder-music-48.png", import.meta.url).href;
+const image15 = new URL("./Resources/workspace/folder-music-48@2x.png", import.meta.url).href;
+const image16 = new URL("./Resources/workspace/folder-music-96.png", import.meta.url).href;
+const image17 = new URL("./Resources/workspace/folder-music-96@2x.png", import.meta.url).href;
+const image18 = new URL("./Resources/workspace/folder-ordinary-24.png", import.meta.url).href;
+const image19 = new URL("./Resources/workspace/folder-ordinary-24@2x.png", import.meta.url).href;
+const image20 = new URL("./Resources/workspace/folder-ordinary-48.png", import.meta.url).href;
+const image21 = new URL("./Resources/workspace/folder-ordinary-48@2x.png", import.meta.url).href;
+const image22 = new URL("./Resources/workspace/folder-ordinary-96.png", import.meta.url).href;
+const image23 = new URL("./Resources/workspace/folder-ordinary-96@2x.png", import.meta.url).href;
+const image24 = new URL("./Resources/workspace/document-generic-24.png", import.meta.url).href;
+const image25 = new URL("./Resources/workspace/document-generic-24@2x.png", import.meta.url).href;
+const image26 = new URL("./Resources/workspace/document-generic-48.png", import.meta.url).href;
+const image27 = new URL("./Resources/workspace/document-generic-48@2x.png", import.meta.url).href;
+const image28 = new URL("./Resources/workspace/document-generic-96.png", import.meta.url).href;
+const image29 = new URL("./Resources/workspace/document-generic-96@2x.png", import.meta.url).href;
 
 /** @internal Atmo owns these replaceable artwork slots. */
 export const atmoWorkspaceArtwork: Readonly<Record<string, string>> = {

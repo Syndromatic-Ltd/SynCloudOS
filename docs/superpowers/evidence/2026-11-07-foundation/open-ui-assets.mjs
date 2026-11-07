@@ -22,7 +22,7 @@ for (const [slot, filename] of Object.entries(inputs)) {
     await writeFile(path.join(target, name), output);
     const key = `${slot}:${size}:${scale}`;
     const variable = `image${entries.length}`;
-    imports.push(`import ${variable} from "./Resources/workspace/${name}?url";`);
+    imports.push(`const ${variable} = new URL("./Resources/workspace/${name}", import.meta.url).href;`);
     entries.push(`  "${key}": ${variable},`);
     provenance.push({ slot, sourcePath, sourceSha256: createHash("sha256").update(source).digest("hex"), size, scale, pixels, name,
       sha256: createHash("sha256").update(output).digest("hex"), provisional: slot === "folder-ordinary" || slot === "document-generic" });

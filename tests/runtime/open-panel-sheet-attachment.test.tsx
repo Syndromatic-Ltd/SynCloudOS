@@ -11,9 +11,10 @@ import { createOpenPanelFileSystem, registerOpenPanelFileSystem } from "../../sr
 import type { NSEWindow } from "../../src/NSE/Application/NSEWindowController";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
+import { resolveNSEOpenPanelHost } from "../../src/NSE/FilePanels/openPanelHost";
 afterEach(cleanup);
 
-it.each([[false, false], [true, false], [false, true], [true, true]])("draws Open in its owned sheet and restores focus (compact=%s, escape=%s)", async (compact, escape) => {
+it.each([[false, false, false, false], [true, false, false, false], [false, true, false, false], [true, true, false, false], [false, false, true, false], [true, false, true, false], [true, false, true, true]])("owns Open lifetime (compact=%s, escape=%s, immediate=%s, application=%s)", async (compact, escape, immediate, application) => {
   const bridge = { present: vi.fn(async () => "modal"), dismiss: vi.fn(async () => ({ outcome: "closed" as const })) };
   const filePanels = { getStatus: () => ({ open: { activation: "active" } }) };
   registerOpenPanelFileSystem(filePanels, createOpenPanelFileSystem({ isSecureContext: () => true, supportsDirectoryPicker: () => false, supportsApplicationStorage: () => false, focusedElement: () => document.activeElement as HTMLElement } as any, "org.test.editor"));
@@ -25,12 +26,26 @@ it.each([[false, false], [true, false], [false, true], [true, true]])("draws Ope
     const [attached, setAttached] = useState(false);
     const sheets = useNSEWindowSheetHost(setAttached);
     return <div><NSEWindowSheetHostContext.Provider value={sheets.host}><NSEOpenPanelWindowHost window={window}>
-      <button onClick={() => { response = panel.beginSheetModal(window); }}>Import…</button>
+      <button onClick={() => { response = application ? panel.begin() : panel.beginSheetModal(window); if (immediate) panel.cancel(); }}>Import…</button>
     </NSEOpenPanelWindowHost></NSEWindowSheetHostContext.Provider><div ref={sheets.layerRef} className="nse-window-sheet-layer" data-sheet-attached={attached} /></div>;
   }
   render(<NSEStandaloneControlHost document={document} window={globalThis.window} presentation={createStaticPresentationPort({ width: compact ? 390 : 1000, height: compact ? 844 : 720 })}>
     <NSEWindowSurfaceBridgeProvider bridge={bridge}><SynWareProvider value={value}><Parent /></SynWareProvider></NSEWindowSurfaceBridgeProvider></NSEStandaloneControlHost>);
-  const trigger = screen.getByRole("button", { name: "Import…" }); trigger.focus(); fireEvent.click(trigger);
+  const trigger = screen.getByRole("button", { name: "Import…" }); trigger.focus();
+  if (immediate) {
+    const host = resolveNSEOpenPanelHost(application ? null : window);
+    const closed = vi.fn();
+    await act(async () => {
+      await host.bridge.present({ id: "immediate-panel", title: "Open", role: application ? "modal" : "sheet", parentWindowControllerId: application ? null : window.id,
+        parentResponderId: "editor", anchor: trigger, bounds: { x: 0, y: 0, width: 390, height: 640 }, onDidClose: closed }, <span>Panel contents</span>);
+      await expect(host.bridge.dismiss("immediate-panel")).resolves.toEqual({ outcome: "closed" });
+    });
+    expect(screen.queryByRole("dialog", { name: "Open" })).toBeNull();
+    expect(bridge.dismiss).not.toHaveBeenCalled();
+    expect(closed).toHaveBeenCalledOnce();
+    return;
+  }
+  fireEvent.click(trigger);
   const sheet = await screen.findByRole("dialog", { name: "Open" });
   if (compact) {
     expect(sheet.getAttribute("data-nse-presentation")).toBe("sheet");

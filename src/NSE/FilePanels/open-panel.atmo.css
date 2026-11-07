@@ -21,6 +21,7 @@
 .nse-open-source-icon.nse-control-image-view { width: 24px; height: 24px; flex: none; }
 .nse-open-source-lock { margin-left: auto; font-size: 10px; color: var(--open-muted); }
 .nse-open-system { margin: 12px 14px; flex-shrink: 0; align-self: center; }
+.nse-open-panel .nse-open-sources > .nse-open-system[data-bezel-style] { margin: 12px 14px max(12px, env(safe-area-inset-bottom)); }
 .nse-open-main { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; }
 .nse-open-toolbar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; min-height: 53px; box-sizing: border-box; border-bottom: 1px solid var(--open-line); flex-shrink: 0; }
 .nse-open-history { flex-shrink: 0; }
@@ -38,7 +39,7 @@
 .nse-open-source-icon .nse-control-sizeable-image, .nse-open-item-picture .nse-control-sizeable-image { width: 100%; height: 100%; border: 0; background: none; box-shadow: none; }
 .nse-open-source-icon img, .nse-open-item-picture img { width: 100%; height: 100%; object-fit: contain; }
 .nse-open-thumbnail img { border-radius: 3px; filter: drop-shadow(0 1px 2px #0005); }
-.nse-open-item-name { max-width: 100%; padding: 1px 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12.5px; border-radius: 4px; }
+.nse-open-item-name { max-width: 100%; padding: 1px 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12.5px; border-radius: 4px; color: var(--open-ink); }
 .nse-open-item[data-selected] .nse-open-item-name { background: var(--open-selected); color: #fff; }
 .nse-open-item[data-selected] .nse-open-thumbnail { outline: 2px solid var(--open-selected); outline-offset: 2px; }
 .nse-open-panel .nse-open-collection .nse-collection-item { background: transparent; box-shadow: none; padding: 0; overflow: visible; }

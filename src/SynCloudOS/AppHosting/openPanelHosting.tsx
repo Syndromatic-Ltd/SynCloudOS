@@ -23,7 +23,7 @@ export function NSEOpenPanelApplicationHost({ value, children }: PropsWithChildr
   const presentationBridge = useMemo<NSEWindowSurfaceBridge | null>(() => bridge ? {
     present(request, content) {
       if (value.presentation.getSnapshot().horizontalSizeClass !== "compact") return bridge.present(request, content);
-      setCompactPanel({ request, content }); return Promise.resolve(request.id);
+      const panel = { request, content }; currentCompactPanel.current = panel; setCompactPanel(panel); return Promise.resolve(request.id);
     },
     dismiss(id) {
       const panel = currentCompactPanel.current;
@@ -56,7 +56,7 @@ export function NSEOpenPanelWindowHost({ window, children }: PropsWithChildren<{
   const sheetBridge = useMemo<NSEWindowSurfaceBridge | null>(() => host ? {
     present(request, content) {
       if (request.role !== "sheet") return (bridge ?? host.bridge).present(request, content);
-      setSheet({ request, content });
+      const panel = { request, content }; currentSheet.current = panel; setSheet(panel);
       return Promise.resolve(request.id);
     },
     dismiss(id) {
