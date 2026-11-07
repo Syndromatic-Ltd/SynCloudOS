@@ -24,7 +24,7 @@ function privateDirectory(handle: FilePanelDirectory): FilePanelDirectory {
 export function createBrowserOpenPanelStoragePort(window: Window | null, activity?: NativeOperationActivity): OpenPanelStoragePort | null {
   if (!window) return null;
   const native = createBrowserFileSystemAccessPanelPort(window, activity)!;
-  const browser = window as Window & typeof globalThis;
+  const browser = window as Window & { readonly HTMLElement: typeof HTMLElement };
   let database: Promise<IDBDatabase> | undefined;
   const open = () => database ??= new Promise<IDBDatabase>((resolve, reject) => {
     if (!browser.indexedDB) { reject(new Error("Folder bookmark storage is unavailable.")); return; }

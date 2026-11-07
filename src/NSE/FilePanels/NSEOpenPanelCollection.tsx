@@ -20,7 +20,8 @@ export function NSEOpenPanelCollection({ items, selectedIds, multiple, compact, 
   const columns = compact ? 3 : Math.max(1, Math.min(5, Math.floor(width / 100)));
   const gap = compact ? 8 : 12;
   const itemWidth = Math.max(1, (width - gap * (columns - 1)) / columns);
-  const layout = useMemo(() => createAdaptiveCollectionLayout({ itemSize: { inline: itemWidth, block: compact ? itemWidth + 26 : 104 }, minimumGap: gap }), [compact, gap, itemWidth]);
+  const picturesOnly = compact && displayed.every(item => item.kind === "media");
+  const layout = useMemo(() => createAdaptiveCollectionLayout({ itemSize: { inline: itemWidth, block: compact ? itemWidth + (picturesOnly ? 0 : 26) : 92 }, minimumGap: gap }), [compact, gap, itemWidth, picturesOnly]);
   return <NSECollectionView aria-label={title} className="nse-open-collection" adapter={adapter} layout={layout} viewportInlineSize={width} viewportBlockSize={height}
     selectionMode={multiple ? "multiple" : "single"} onSelectionChange={({ snapshot }) => onSelect(snapshot.selectedIds)} onActivate={(id) => { const item = items.find(item => item.id === id); if (item) onActivate(item); }}
     renderItem={({ item, selected }) => <div className="nse-open-item" data-kind={item.kind} data-selected={selected || undefined}>
