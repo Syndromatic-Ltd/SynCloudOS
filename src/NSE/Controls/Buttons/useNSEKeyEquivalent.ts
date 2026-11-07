@@ -59,7 +59,7 @@ export function useNSEKeyEquivalent(
     const document = element.ownerDocument;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing || event.repeat) return;
-      if (event.key.toLowerCase() !== key) return;
+      if (event.key.toLowerCase() !== key.toLowerCase()) return;
       const wanted = mask.current ?? {};
       if (Boolean(wanted.command) !== event.metaKey) return;
       if (Boolean(wanted.option) !== event.altKey || Boolean(wanted.control) !== event.ctrlKey) return;

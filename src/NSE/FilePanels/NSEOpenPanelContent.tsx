@@ -172,7 +172,7 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
   const openButton = <NSEButton controlSize="small" title={session.prompt || "Open"} keyEquivalent={"\r"} isEnabled={canOpen} onClick={() => void openItems(chosen)} />;
   return <section className="nse-open-panel" data-nse-control="open-panel" data-compact={compact || undefined} data-page={compact && showsSources ? "sources" : "collection"} aria-label={session.prompt || "Open"}>
     {compact ? <header className="nse-open-phone-header">
-      {showsSources ? <NSEButton controlSize="small" title="Cancel" onClick={session.cancel} /> : <NSEButton bezelStyle="texturedRounded" image={BackArrow} imagePosition="imageOnly" title={location && location.path.length > 1 ? "Back" : "Sources"} onClick={() => {
+      {showsSources ? <NSEButton controlSize="small" title="Cancel" keyEquivalent={"\u001b"} onClick={session.cancel} /> : <NSEButton bezelStyle="texturedRounded" image={BackArrow} imagePosition="imageOnly" title={location && location.path.length > 1 ? "Back" : "Sources"} onClick={() => {
         if (location && location.path.length > 1) navigate({ ...location, path: location.path.slice(0, -1) });
         else setShowsSources(true);
       }} />}
@@ -201,7 +201,7 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
             onSelect={setSelected} onActivate={activate} /> : null}
         </div>
         {cursor ? <NSEButton controlSize="small" title="Load more" isEnabled={!busy} onClick={() => void loadMedia(location!.source.slice(6), cursor, false)} /> : null}
-        <footer className="nse-open-footer"><span role="status">{summary}</span>{!compact ? <><span className="nse-open-footer-spacer"/><NSEButton controlSize="small" title="Cancel" onClick={session.cancel} />{openButton}</> : null}</footer>
+        <footer className="nse-open-footer"><span role="status">{summary}</span>{!compact ? <><span className="nse-open-footer-spacer"/><NSEButton controlSize="small" title="Cancel" keyEquivalent={"\u001b"} onClick={session.cancel} />{openButton}</> : null}</footer>
       </main> : null}
     </div>
     {compact && showsSources && status ? <p role="status" className="nse-open-status">{status}</p> : null}
