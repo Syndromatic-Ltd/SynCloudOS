@@ -29,9 +29,11 @@ function fixture() {
     requestReferenceSpace: vi.fn(async () => ({})),
     requestAnimationFrame: vi.fn((next: typeof callback) => { callback = next; return 1; }),
     cancelAnimationFrame: vi.fn(), end: vi.fn(async () => {}),
+    updateRenderState: vi.fn(),
   });
   const xr = { isSessionSupported: vi.fn(async () => true), requestSession: vi.fn(async () => native) };
-  return { native, xr, adapter: new BrowserXRAdapter({ isSecureContext: true, browserNavigator: { xr } }),
+  const layer = { layer: {}, dispose: vi.fn() };
+  return { native, xr, layer, adapter: new BrowserXRAdapter({ isSecureContext: true, browserNavigator: { xr }, createRenderingLayer: async () => layer }),
     frame: () => callback?.(1200, { getViewerPose: () => ({ transform: { matrix: new Float32Array(16).fill(2) } }), trackedAnchors: new Set() }) };
 }
 
@@ -42,10 +44,13 @@ describe("XRFX portable sessions", () => {
     expect(await session.isSupported(new XRFXConfiguration())).toBe(true);
     const frames: number[] = [];
     await session.run(new XRFXConfiguration(), frame => frames.push(frame.timestamp));
+    expect(f.native.updateRenderState).toHaveBeenCalledWith({ baseLayer: f.layer.layer });
     f.frame();
     expect(frames).toEqual([1.2]);
     session.dispose();
     expect(f.native.end).toHaveBeenCalledOnce();
+    await Promise.resolve();
+    expect(f.layer.dispose).toHaveBeenCalledOnce();
     f.frame();
     expect(frames).toEqual([1.2]);
     await expect(session.run(new XRFXConfiguration(), () => {})).rejects.toMatchObject({ name: "AbortError" });
