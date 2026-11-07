@@ -394,6 +394,8 @@ assert.deepEqual(Object.keys(browser), [
   "BrowserWebGPUImageProcessingBackend",
   "InMemoryDocumentAdapter",
   "IndexedDBDocumentRecoveryStore",
+  "SCAuthorization",
+  "SCAuthorizationRights",
   "createBrowserAcceleratedImageProcessingPipeline",
   "createBrowserImageProcessingPipeline",
   "createBrowserImageProcessingWorkerBackend",
@@ -409,6 +411,8 @@ assert.deepEqual(Object.keys(browser), [
   "trustSynWareBundleForCanonicalHost",
 ]);
 assert.deepEqual(Object.keys(auth), ["createHttpAuthentication", "googleAuthenticationMethod"]);
+assert.equal("ASAuthorizationController" in browser, false);
+assert.equal("createPasskeyAuthentication" in auth, false);
 for (const privatePath of ["nse/NSE", "nse/private", "sdk/internal/runtime", "types/SynCloudOS/Runtime/RuntimeStore.js"]) {
   await assert.rejects(import("@syndromatic/syncloudos/" + privatePath), { code: "ERR_PACKAGE_PATH_NOT_EXPORTED" });
 }
