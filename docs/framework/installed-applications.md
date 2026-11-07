@@ -38,6 +38,8 @@ shareTarget: {
 },
 ```
 
+Declare an application route for each shortcut URL and share action; use `match: "prefix"` only where that application owns a route subtree. System launch-envelope fields are consumed before typed route-query validation, while the original URL is retained for the delegate.
+
 These declarations project to `protocol_handlers`, `launch_handler`, `shortcuts` and `share_target`. Protocol registration is limited to browser-supported schemes (`web+…`, `mailto`, `tel`). Browser/OS link-capture and file-association policies remain authoritative. Shortcut entries also appear in the application's Webspring menu, beside the menu returned by `NSEApplicationDelegate.applicationDockMenu(application)`.
 
 Assign `NSEApplication.delegate` and implement `applicationOpen(application, urls, context)`. `context.shortcutItemType` identifies a shortcut. `context.sharedItems` carries shared title, text, URL and files. GET sharing uses URL parameters. POST sharing is retained in the system worker's IndexedDB until delivery is acknowledged. Incoming shared files are limited to 32 MiB. The receiver decides whether to turn an attachment into a document. Delivery is serialised and aborted when the runtime closes.
@@ -82,7 +84,7 @@ The server contract is:
 - `DELETE subscriptionURL`: JSON `{ version: 1, appId, endpoint }`. Remove that app association and return 2xx. Apply session authorisation, CSRF protection, endpoint validation, rate limits and expiry on the server.
 - Send encrypted Web Push to the saved endpoint using the owner's VAPID private key. Remove expired endpoints on HTTP 404/410; resubscribe from the client when required. Do not treat a subscription endpoint as proof of identity or app access.
 - Standard payload: `{ version: 1, appId, identifier, title, body, url, categoryIdentifier?, badge? }`. URLs must remain within an installed scope. Categories are configured by the application; the portable worker supports up to two actions. Notification clicks route into the app delegate with `scos-notification` and optional `scos-action` URL parameters.
-- Declarative payload: `{ web_push: 8030, notification: { title, body, navigate, app_badge? } }`. This is the declarative Web Push alert envelope; Chromium uses the worker's equivalent delivery path. Native browser support is reported separately from worker fallback.
+- Declarative payload: `{ web_push: 8030, notification: { title, body, navigate, app_badge? } }`. This is the declarative Web Push alert envelope; Chromium uses the worker's equivalent delivery path. This client does not claim native declarative delivery where the browser requires the worker fallback.
 
 The worker mirrors received pushes into the open runtime's NotificationCenter and never sends a duplicate browser notification from that mirror. No live push transport can be accepted until the owner configures a public key, the matching private key and server endpoints. Revocation, per-app mute and account changes must also remove or suspend server associations; a closed page cannot run page-level access policy.
 

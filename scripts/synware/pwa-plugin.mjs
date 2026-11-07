@@ -19,7 +19,7 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, resolve, relative, isAbsolute } from "node:path";
 import { createHash } from "node:crypto";
 import { parseManifest } from "./manifest-source.mjs";
 import { createWebAppManifests } from "../../src/SynCloudOS/InstalledApplications/webAppManifest.mjs";
@@ -42,7 +42,7 @@ export function installedApplicationBuild(config, discovery) {
       if (!manifests.length) return [];
       const chosen = manifests.filter(record => path === record.manifest.scope || path.startsWith(record.manifest.scope.endsWith("/") ? record.manifest.scope : `${record.manifest.scope}/`)).sort((a,b) => b.manifest.scope.length-a.manifest.scope.length)[0];
       return [
-        ...(chosen ? [{ tag: "link", attrs: { rel: "manifest", href: `${base}${chosen.fileName}` }, injectTo: "head" }] : []),
+        ...(chosen ? [{ tag: "link", attrs: { rel: "manifest", "data-syncloudos-manifest": "", href: `${base}${chosen.fileName}` }, injectTo: "head" }] : []),
         { tag: "meta", attrs: { name: "syncloudos-installation", content: JSON.stringify(configuration) }, injectTo: "head" },
       ];
     },
@@ -59,7 +59,24 @@ export function installedApplicationBuild(config, discovery) {
     emit(context, bundle) {
       if (!manifests.length) return;
       const assets = [...new Set([...configuration.assets, ...Object.keys(bundle).filter(name => !name.endsWith(".map")).map(name => `${base}${name}`)])];
-      const version = createHash("sha256").update(configuration.receipt).update(JSON.stringify(assets.map(name => [name, bundle[name.slice(base.length)]?.code ?? bundle[name.slice(base.length)]?.source ?? "public"]))).digest("hex");
+      const hash = createHash("sha256").update(configuration.receipt);
+      for (const name of assets) {
+        const fileName = name.slice(base.length), output = bundle[fileName];
+        let bytes = output?.code ?? output?.source;
+        if (bytes === undefined) {
+          const manifest = manifests.find(record => record.fileName === fileName);
+          if (manifest) bytes = JSON.stringify(manifest.manifest, null, 2);
+          else {
+            const publicRoot = resolve(config.publicDir || resolve(config.root, "public"));
+            const pathname = new URL(name, "https://syncloudos.invalid").pathname.slice(base.length);
+            const file = resolve(publicRoot, decodeURIComponent(pathname)), within = relative(publicRoot, file);
+            if (within.startsWith("..") || isAbsolute(within)) throw new TypeError("An offline asset escaped the public directory.");
+            bytes = readFileSync(file);
+          }
+        }
+        hash.update(name).update("\0").update(bytes).update("\0");
+      }
+      const version = hash.digest("hex");
       for (const record of manifests) context.emitFile({ type: "asset", fileName: record.fileName, source: JSON.stringify(record.manifest, null, 2) });
       context.emitFile({ type: "asset", fileName: "syncloudos-sw.js", source: createServiceWorkerSource({ ...configuration, receipt: version, assets, development: false }) });
     },

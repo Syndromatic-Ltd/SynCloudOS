@@ -787,8 +787,11 @@ export function synCloudOS(options) {
       return [];
     },
 
+    renderStart() {
+      typographyAssetPaths = new Map([...typographyAssets].map(([id, reference]) => [id, this.getFileName(reference)]));
+    },
     generateBundle: {
-      order: "pre",
+      order: "post",
       handler(_options, bundle) {
         installedBuild().emit(this, bundle);
         // Output names belong to this output's emitter, not buildStart's emitter.
