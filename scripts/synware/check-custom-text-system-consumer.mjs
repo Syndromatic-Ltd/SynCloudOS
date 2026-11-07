@@ -30,7 +30,7 @@ import { assertSdkSourceUnchanged, captureSdkSourceFingerprint } from "./sdk-pac
 
 const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const receiptPath = join(repositoryRoot, ".artifacts/synapp-sdk/custom-text-system-consumer.json");
-const applicationEntries = Object.freeze(["sdk", "sdk/testing", "nse/text", "fx/text", "fx/graphics"]);
+const applicationEntries = Object.freeze(["foundation", "sdk", "sdk/testing", "nse/text", "fx/text", "fx/graphics"]);
 const publicEntries = Object.freeze([...applicationEntries, "browser", "webspring"]);
 const externalImports = new Set(["react", "react-dom/client", "react/jsx-runtime", "@syndromatic/syncloudos", ...applicationEntries.map(entry => `@syndromatic/syncloudos/${entry}`)]);
 const hostImports = new Set(["@syndromatic/syncloudos/browser", "@syndromatic/syncloudos/webspring", "@syndromatic/syncloudos/browser/styles.css"]);

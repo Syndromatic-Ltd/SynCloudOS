@@ -31,7 +31,7 @@
 //   node scripts/synware/gen-manifest-validator.mjs --check  fail if stale
 //
 // tests/runtime/synapp-manifest-validator-generated.test.ts runs the check.
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -69,7 +69,7 @@ function inlineCommonJS(specifiers) {
     // literals (their own code-generation references).
     for (const [, nested] of source.matchAll(/(?<!['"])\brequire\("([^"]+)"\)/g)) requires.set(nested, visit(nested, path));
     const name = `__cjs${modules.size}`;
-    const label = relative(resolve(root, "node_modules"), path).replaceAll("\\", "/");
+    const label = relative(realpathSync(resolve(root, "node_modules")), path).replaceAll("\\", "/");
     const requireMap = [...requires].map(([nested, nestedName]) => `${JSON.stringify(nested)}: ${nestedName}`).join(", ");
     modules.set(path, {
       name,
