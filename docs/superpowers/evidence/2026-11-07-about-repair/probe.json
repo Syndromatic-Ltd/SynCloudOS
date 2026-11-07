@@ -1,0 +1,715 @@
+{
+  "samples": [
+    [
+      {
+        "section": null,
+        "className": "",
+        "opacity": "1",
+        "transform": "none",
+        "animations": [
+          {
+            "state": "running",
+            "time": 0,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+              "endDelay": 0,
+              "fill": "forwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": 0,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "1",
+                "computedOffset": 0
+              },
+              {
+                "offset": 1,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "0",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": "company",
+        "className": "about-pane",
+        "opacity": "1",
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "animations": [
+          {
+            "state": "running",
+            "time": 0,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+              "endDelay": 0,
+              "fill": "forwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                "computedOffset": 0
+              },
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": null,
+        "className": "",
+        "opacity": "0",
+        "transform": "none",
+        "animations": [
+          {
+            "state": "running",
+            "time": 0,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+              "endDelay": 0,
+              "fill": "backwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": 0,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "0",
+                "computedOffset": 0
+              },
+              {
+                "offset": 1,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "1",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": "framework",
+        "className": "about-pane",
+        "opacity": "1",
+        "transform": "matrix(0.975, 0, 0, 0.975, 219.6, 11.25)",
+        "animations": [
+          {
+            "state": "running",
+            "time": 0,
+            "timing": {
+              "delay": 120,
+              "direction": "normal",
+              "duration": 950,
+              "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+              "endDelay": 0,
+              "fill": "both",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                "computedOffset": 0
+              },
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "section": null,
+        "className": "",
+        "opacity": "1",
+        "transform": "none",
+        "animations": [
+          {
+            "state": "running",
+            "time": 0,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+              "endDelay": 0,
+              "fill": "forwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": 0,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "1",
+                "computedOffset": 0
+              },
+              {
+                "offset": 1,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "0",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": "company",
+        "className": "about-pane",
+        "opacity": "1",
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "animations": [
+          {
+            "state": "running",
+            "time": 0,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+              "endDelay": 0,
+              "fill": "forwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                "computedOffset": 0
+              },
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": null,
+        "className": "",
+        "opacity": "0",
+        "transform": "none",
+        "animations": [
+          {
+            "state": "running",
+            "time": 0,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+              "endDelay": 0,
+              "fill": "backwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": 0,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "0",
+                "computedOffset": 0
+              },
+              {
+                "offset": 1,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "1",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": "framework",
+        "className": "about-pane",
+        "opacity": "1",
+        "transform": "matrix(0.975, 0, 0, 0.975, 219.6, 11.25)",
+        "animations": [
+          {
+            "state": "running",
+            "time": 0,
+            "timing": {
+              "delay": 120,
+              "direction": "normal",
+              "duration": 950,
+              "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+              "endDelay": 0,
+              "fill": "both",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                "computedOffset": 0
+              },
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "section": null,
+        "className": "",
+        "opacity": "0.169313",
+        "transform": "none",
+        "animations": [
+          {
+            "state": "running",
+            "time": 166.67000001221854,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+              "endDelay": 0,
+              "fill": "forwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": 0,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "1",
+                "computedOffset": 0
+              },
+              {
+                "offset": 1,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "0",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": "company",
+        "className": "about-pane",
+        "opacity": "1",
+        "transform": "matrix(0.998636, 0, 0, 0.998636, -4.62837, 0.613609)",
+        "animations": [
+          {
+            "state": "running",
+            "time": 166.67000001221854,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+              "endDelay": 0,
+              "fill": "forwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                "computedOffset": 0
+              },
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": null,
+        "className": "",
+        "opacity": "0.830687",
+        "transform": "none",
+        "animations": [
+          {
+            "state": "running",
+            "time": 166.67000001221854,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+              "endDelay": 0,
+              "fill": "backwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": 0,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "0",
+                "computedOffset": 0
+              },
+              {
+                "offset": 1,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "1",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": "framework",
+        "className": "about-pane",
+        "opacity": "1",
+        "transform": "matrix(0.980568, 0, 0, 0.980568, 170.692, 8.74444)",
+        "animations": [
+          {
+            "state": "running",
+            "time": 166.67000001221854,
+            "timing": {
+              "delay": 120,
+              "direction": "normal",
+              "duration": 950,
+              "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+              "endDelay": 0,
+              "fill": "both",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                "computedOffset": 0
+              },
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "section": null,
+        "className": "",
+        "opacity": "0.0590141",
+        "transform": "none",
+        "animations": [
+          {
+            "state": "running",
+            "time": 266.6700000122191,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+              "endDelay": 0,
+              "fill": "forwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": 0,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "1",
+                "computedOffset": 0
+              },
+              {
+                "offset": 1,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "0",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": "company",
+        "className": "about-pane",
+        "opacity": "1",
+        "transform": "matrix(0.99608, 0, 0, 0.99608, -13.3054, 1.76397)",
+        "animations": [
+          {
+            "state": "running",
+            "time": 266.6700000122191,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+              "endDelay": 0,
+              "fill": "forwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                "computedOffset": 0
+              },
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": null,
+        "className": "",
+        "opacity": "0.940986",
+        "transform": "none",
+        "animations": [
+          {
+            "state": "running",
+            "time": 266.6700000122191,
+            "timing": {
+              "delay": 0,
+              "direction": "normal",
+              "duration": 550,
+              "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+              "endDelay": 0,
+              "fill": "backwards",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": 0,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "0",
+                "computedOffset": 0
+              },
+              {
+                "offset": 1,
+                "easing": "linear",
+                "composite": "auto",
+                "opacity": "1",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": "framework",
+        "className": "about-pane",
+        "opacity": "1",
+        "transform": "matrix(0.990697, 0, 0, 0.990697, 81.7158, 4.18626)",
+        "animations": [
+          {
+            "state": "running",
+            "time": 266.6700000122191,
+            "timing": {
+              "delay": 120,
+              "direction": "normal",
+              "duration": 950,
+              "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+              "endDelay": 0,
+              "fill": "both",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                "computedOffset": 0
+              },
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "section": null,
+        "className": "",
+        "opacity": "1",
+        "transform": "none",
+        "animations": []
+      },
+      {
+        "section": "framework",
+        "className": "about-pane",
+        "opacity": "1",
+        "transform": "matrix(0.999042, 0, 0, 0.999042, 8.4132, 0.431004)",
+        "animations": [
+          {
+            "state": "running",
+            "time": 583.3700000122182,
+            "timing": {
+              "delay": 120,
+              "direction": "normal",
+              "duration": 950,
+              "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+              "endDelay": 0,
+              "fill": "both",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                "computedOffset": 0
+              },
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "section": null,
+        "className": "",
+        "opacity": "1",
+        "transform": "none",
+        "animations": []
+      },
+      {
+        "section": "framework",
+        "className": "about-pane",
+        "opacity": "1",
+        "transform": "matrix(0.999998, 0, 0, 0.999998, 0.0174425, 0.000893572)",
+        "animations": [
+          {
+            "state": "running",
+            "time": 1033.2700000122195,
+            "timing": {
+              "delay": 120,
+              "direction": "normal",
+              "duration": 950,
+              "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+              "endDelay": 0,
+              "fill": "both",
+              "iterationStart": 0,
+              "iterations": 1
+            },
+            "frames": [
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                "computedOffset": 0
+              },
+              {
+                "offset": null,
+                "easing": "linear",
+                "composite": "auto",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                "computedOffset": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  ],
+  "errors": []
+}

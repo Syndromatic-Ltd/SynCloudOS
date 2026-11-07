@@ -1,0 +1,80 @@
+{
+  "errors": [],
+  "transitions": 20,
+  "reduced": 8,
+  "floor": {
+    "before": {
+      "floorTransform": "matrix3d(1, 0, 0, 0, 0, 0.275637, 0.961262, 0, 0, -0.961262, 0.275637, 0, 0, 1238.66, -1643.76, 1)",
+      "clipping": "hidden",
+      "dotsTransform": "matrix(1, 0, 0, 1, 0, 71.5306)",
+      "native": [
+        {
+          "state": "running",
+          "time": 28265.599000096692,
+          "iterations": "Infinity"
+        }
+      ]
+    },
+    "after": {
+      "floorTransform": "matrix3d(1, 0, 0, 0, 0, 0.275637, 0.961262, 0, 0, -0.961262, 0.275637, 0, 0, 1238.66, -1643.76, 1)",
+      "clipping": "hidden",
+      "dotsTransform": "matrix(1, 0, 0, 1, 0, 9.30531)",
+      "native": [
+        {
+          "state": "running",
+          "time": 29198.799000096697,
+          "iterations": "Infinity"
+        }
+      ]
+    },
+    "backgroundVisibility": "visible",
+    "visibilityProbe": "synthetic document visibility notification (headless targets stay visible)",
+    "hidden": {
+      "floorTransform": "matrix3d(1, 0, 0, 0, 0, 0.275637, 0.961262, 0, 0, -0.961262, 0.275637, 0, 0, 1238.66, -1643.76, 1)",
+      "clipping": "hidden",
+      "dotsTransform": "matrix(1, 0, 0, 1, 0, 27.195)",
+      "native": [
+        {
+          "state": "paused",
+          "time": 29965.499000096694,
+          "iterations": "Infinity"
+        }
+      ]
+    },
+    "hiddenLater": {
+      "floorTransform": "matrix3d(1, 0, 0, 0, 0, 0.275637, 0.961262, 0, 0, -0.961262, 0.275637, 0, 0, 1238.66, -1643.76, 1)",
+      "clipping": "hidden",
+      "dotsTransform": "matrix(1, 0, 0, 1, 0, 27.195)",
+      "native": [
+        {
+          "state": "paused",
+          "time": 29965.499000096694,
+          "iterations": "Infinity"
+        }
+      ]
+    },
+    "resumed": {
+      "floorTransform": "matrix3d(1, 0, 0, 0, 0, 0.275637, 0.961262, 0, 0, -0.961262, 0.275637, 0, 0, 1238.66, -1643.76, 1)",
+      "clipping": "hidden",
+      "dotsTransform": "matrix(1, 0, 0, 1, 0, 33.8057)",
+      "native": [
+        {
+          "state": "running",
+          "time": 30248.816000201183,
+          "iterations": "Infinity"
+        }
+      ]
+    },
+    "reduced": {
+      "floorTransform": "matrix3d(1, 0, 0, 0, 0, 0.275637, 0.961262, 0, 0, -0.961262, 0.275637, 0, 0, 1238.66, -1643.76, 1)",
+      "clipping": "hidden",
+      "dotsTransform": "matrix(1, 0, 0, 1, 0, 84)",
+      "native": []
+    }
+  },
+  "scroll": {
+    "scrollTop": 650,
+    "scrollHeight": 2556,
+    "clientHeight": 900
+  }
+}

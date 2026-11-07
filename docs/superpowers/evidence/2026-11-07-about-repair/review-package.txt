@@ -1,0 +1,737 @@
+commit c0d5eccdb6c8212c359359bfcf9fc3ea6426d343
+Author:     Kavish Krishnakumar <75783341+phenom64@users.noreply.github.com>
+AuthorDate: Sat Nov 7 08:50:36 2026 +0000
+Commit:     Kavish Krishnakumar <75783341+phenom64@users.noreply.github.com>
+CommitDate: Sat Nov 7 08:50:36 2026 +0000
+
+    AnimationFX: support endless compositor layer animations
+    
+    Accept infinite CoreAnimation iterations and repeat duration, forward native iteration and fill timing, and suspend endless layer playback while hidden. Resume visible playback without overriding explicit pauses, and retain runtime reduced-motion settlement. Document semantics and capture regression and typecheck evidence.
+
+ docs/framework/fx/animation.md                     |  6 ++-
+ .../loop-animation-suites.log                      | 11 ++++
+ .../2026-11-07-about-repair/loop-fill-green.log    | 11 ++++
+ .../2026-11-07-about-repair/loop-fill-red.log      | 43 ++++++++++++++++
+ .../2026-11-07-about-repair/loop-final-focused.log | 11 ++++
+ .../2026-11-07-about-repair/loop-focused.log       | 11 ++++
+ .../2026-11-07-about-repair/loop-green.log         | 11 ++++
+ .../evidence/2026-11-07-about-repair/loop-red.log  | 45 ++++++++++++++++
+ .../2026-11-07-about-repair/loop-typecheck.log     |  2 +
+ src/FX/AnimationFX/AFXAnimation.ts                 |  5 +-
+ src/FX/AnimationFX/AFXLayer.ts                     | 38 ++++++++++----
+ .../PlatformAdapters/BrowserAnimationAdapter.ts    |  2 +-
+ tests/runtime/fx/animation-loops.test.ts           | 60 ++++++++++++++++++++++
+ 13 files changed, 242 insertions(+), 14 deletions(-)
+diff --git a/docs/framework/fx/animation.md b/docs/framework/fx/animation.md
+index 67e7693..7236228 100644
+--- a/docs/framework/fx/animation.md
++++ b/docs/framework/fx/animation.md
+@@ -375,9 +375,11 @@ export function SlideIn({ children }: { children: React.ReactNode }) {
+ 
+ **Ownership.** A bound layer owns its element's children. Sublayers attach as child elements, and layer content draws into an element the layer manages. Adding your own child nodes or a CSS background image to a bound element leaves the layer's `compositionCapability` at `"unsupported"` (reason `"unmanaged-dom"` or `"unmanaged-dom-background-image"`), and `render()` refuses such a layer. Bind leaf elements, or elements whose children are all layers. Disposing a layer restores the element's original `style` attribute.
+ 
+-**Compositor playback.** Where the browser allows, an `AFXBasicAnimation` on `"opacity"` or `"transform"` runs through `Element.animate()`, so it progresses on the compositor even when JavaScript is busy. The layer keeps its model and presentation values, retargeting, cancellation and completion. The animation qualifies with one iteration, a speed of 1, no autoreverse, the default `"forwards"` fill and a named or cubic-Bézier timing, and only while no frame animation is running on the layer. Keyframe animations, springs, spring timing and every other key path use frame sampling.
++**Compositor playback.** Where the browser allows, an `AFXBasicAnimation` on `"opacity"` or `"transform"` runs through `Element.animate()`, so it progresses on the compositor even when JavaScript is busy. The layer keeps its model and presentation values, retargeting, cancellation and completion. The animation qualifies with finite or infinite iterations, a speed of 1, no autoreverse, `"forwards"` or `"both"` fill and a named or cubic-Bézier timing, and only while no frame animation is running on the layer. Keyframe animations, springs, spring timing and every other key path use frame sampling.
+ 
+-**Reduced motion and suspension.** When the host reports reduced motion, or the page is suspended, a layer animation completes at once in its final state and the settlement's `reduced` flag is true. A zero duration also completes at once. The `reducedMotion` policy on `AFXAnimation` applies to element animations started with `animate`. Content that carries meaning through motion should also present that meaning statically.
++**Reduced motion and suspension.** When the host reports reduced motion, a layer animation completes at once in its final state and the settlement's `reduced` flag is true, including when the preference changes during playback. Finite layer animations also complete when the page is suspended. Endless layer animations pause while the document is hidden and resume from that presentation time when visible; an explicitly paused handle stays paused. No app visibility listener is needed. A zero duration also completes at once. The `reducedMotion` policy on `AFXAnimation` applies to element animations started with `animate`. Content that carries meaning through motion should also present that meaning statically.
++
++**Endless CoreAnimation loops.** Use `new AFXAnimation({ duration: 2, iterations: Infinity, timing: "linear" })` for an endless cycle. `repeatDuration: Infinity` is also supported, with the existing restriction that it cannot be combined with `iterations`. An endless animation requires a nonzero duration. Its `totalDuration` is `Infinity`, its handle's overall `progress` remains 0, and `finished` remains pending until cancellation, replacement, disposal or reduced motion. The model value is the authored destination; presentation continues cycling. Seek accepts finite, nonnegative times. Shape and gradient content animations retain their finite-duration restriction.
+ 
+ **Limits and errors.** One session holds at most 64 live layers and renderers at a time, and releases a slot when you dispose one. `bind*` throws `TypeError` for a target that is not an element of the app's own document, and `createRenderer` throws `TypeError` unless the target is a canvas of that document. Binding an element or canvas that already has a live binding throws `DOMException` `InvalidStateError`. A host without animation layer support throws `DOMException` `NotSupportedError`. Every method takes an optional `AbortSignal` that disposes the layer when it aborts.
+ 
+diff --git a/src/FX/AnimationFX/AFXAnimation.ts b/src/FX/AnimationFX/AFXAnimation.ts
+index c95b6c1..af936d7 100644
+--- a/src/FX/AnimationFX/AFXAnimation.ts
++++ b/src/FX/AnimationFX/AFXAnimation.ts
+@@ -80,7 +80,10 @@ export class AFXAnimation {
+       throw new TypeError(
+         "repeatDuration requires a nonzero cycle and cannot also specify iterations.",
+       );
+-    this.iterations = afxAnimationNumber(
++    const endless = input.iterations === Infinity || input.repeatDuration === Infinity;
++    if (endless && this.duration === 0)
++      throw new RangeError("An endless animation requires a nonzero cycle.");
++    this.iterations = endless ? Infinity : afxAnimationNumber(
+       input.repeatDuration === undefined
+         ? (input.iterations ?? 1)
+         : afxAnimationNumber(
+diff --git a/src/FX/AnimationFX/AFXLayer.ts b/src/FX/AnimationFX/AFXLayer.ts
+index 3bc16d2..5c6fa4c 100644
+--- a/src/FX/AnimationFX/AFXLayer.ts
++++ b/src/FX/AnimationFX/AFXLayer.ts
+@@ -149,6 +149,8 @@ export interface AFXLayerCompositorRequest {
+   readonly duration: number;
+   readonly delay: number;
+   readonly easing: string;
++  readonly iterations?: number;
++  readonly fill?: "forwards" | "both";
+ }
+ export interface AFXLayerCompositorPlayback {
+   readonly currentTimeSeconds: number | null;
+@@ -188,6 +190,7 @@ type Running = {
+   finish(state: AFXAnimationSettlement["state"]): void;
+   update(timestamp: number): void;
+   needsFrame(): boolean;
++  environmentChanged(): void;
+   property: string;
+   value: AFXAnimationScalar | null;
+   currentValue(): AFXAnimationScalar | null;
+@@ -532,9 +535,8 @@ export class AFXLayer {
+         throw new DOMException("Layer owner aborted during construction.", "AbortError");
+       this.#unsubscribe =
+         scheduler.subscribeState?.(() => {
+-          if (scheduler.suspended || scheduler.reducedMotion)
+-            for (const running of [...this.#running.values()])
+-              running.finish("completed");
++          for (const running of [...this.#running.values()])
++            running.environmentChanged();
+         }) ?? (() => {});
+       if (signal?.aborted)
+         throw new DOMException("Layer owner aborted during construction.", "AbortError");
+@@ -1683,7 +1685,7 @@ export class AFXLayer {
+     this.#assertLive("addAnimation", "call");
+     const duration = animation.animation.totalDuration;
+     const terminal =
+-      animation.sample(duration) ?? animation.toRuntime().animations[0].to;
++      (Number.isFinite(duration) ? animation.sample(duration) : null) ?? animation.toRuntime().animations[0].to;
+     this.#assertLive("addAnimation", "call");
+     const initial = animation.sample(0);
+     this.#assertLive("addAnimation", "call");
+@@ -1721,7 +1723,21 @@ export class AFXLayer {
+       property: declaredKeyPath,
+       value: initial,
+       compositor: null,
+-      needsFrame: () => state === "running" && !running.compositor,
++      needsFrame: () => state === "running" && !running.compositor && !(duration === Infinity && this.#scheduler.suspended),
++      environmentChanged: () => {
++        if (this.#scheduler.reducedMotion || (this.#scheduler.suspended && duration !== Infinity)) {
++          running.finish("completed");
++        } else if (duration === Infinity && state === "running") {
++          if (this.#scheduler.suspended) {
++            if (running.compositor) running.compositor.pause();
++            else running.cancelFrame();
++          } else {
++            last = this.#scheduler.now();
++            running.compositor?.resume();
++            if (!running.compositor) this.#scheduleAnimationFrame();
++          }
++        }
++      },
+       currentValue: () => {
+         const time = running.compositor?.currentTimeSeconds;
+         if (time !== null && time !== undefined && (state === "running" || state === "paused")) {
+@@ -1803,7 +1819,7 @@ export class AFXLayer {
+       },
+       get progress() {
+         running.currentValue();
+-        return duration === 0 ? 1 : elapsed / duration;
++        return duration === Infinity ? 0 : duration === 0 ? 1 : elapsed / duration;
+       },
+       cancel: () => running.finish("cancelled"),
+       pause: () => {
+@@ -1825,7 +1841,7 @@ export class AFXLayer {
+         if (state !== "paused") return;
+         state = "running";
+         if (running.compositor) {
+-          running.compositor.resume();
++          if (!this.#scheduler.suspended) running.compositor.resume();
+           return;
+         }
+         last = this.#scheduler.now();
+@@ -1868,7 +1884,7 @@ export class AFXLayer {
+     if (
+       duration === 0 ||
+       this.#scheduler.reducedMotion ||
+-      this.#scheduler.suspended
++      (this.#scheduler.suspended && duration !== Infinity)
+     )
+       running.finish("completed");
+     else {
+@@ -1877,10 +1893,9 @@ export class AFXLayer {
+       const eligible =
+         !!definition &&
+         (declaredKeyPath === "opacity" || declaredKeyPath === "transform") &&
+-        definition.iterations === 1 &&
+         definition.speed === 1 &&
+         !definition.autoreverses &&
+-        definition.fill === "forwards" &&
++        (definition.fill === "forwards" || definition.fill === "both") &&
+         (typeof definition.timing === "string" || definition.timing.kind === "cubic-bezier") &&
+         !this.#running.has("frame");
+       if (eligible) {
+@@ -1896,11 +1911,14 @@ export class AFXLayer {
+           to: basic!.to as number | string,
+           duration: definition!.cycleDuration,
+           delay: definition!.delay,
++          iterations: definition!.iterations,
++          fill: definition!.fill as "forwards" | "both",
+           easing,
+         }) ?? null;
+       }
+       if (running.compositor) {
+         const playback = running.compositor;
++        if (this.#scheduler.suspended) playback.pause();
+         const releaseFinish = playback.onFinish(() => running.finish("completed"));
+         const releaseUnsupported = playback.onUnsupported?.(() => {
+           if (running.compositor !== playback || (state !== "running" && state !== "paused")) return;
+diff --git a/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts b/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts
+index 60d3c4d..33a0ef2 100644
+--- a/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts
++++ b/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts
+@@ -852,7 +852,7 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
+     try {
+       native = this.#element.animate(
+         [{ [input.property]: from }, { [input.property]: to }],
+-        { duration: input.duration * 1000, delay: input.delay * 1000, easing: input.easing, fill: "forwards" },
++        { duration: input.duration * 1000, delay: input.delay * 1000, iterations: input.iterations ?? 1, easing: input.easing, fill: input.fill ?? "forwards" },
+       );
+     } catch {
+       // A browser may expose Web Animations but reject this particular effect.
+commit 808bcad8a5ea85f26cbb7a45acbbc0e05c6a5421
+Author: Kavish Krishnakumar <75783341+phenom64@users.noreply.github.com>
+Date:   Sat Nov 7 08:52:28 2026 +0000
+
+    About: retain one tab view slot through transitions
+    
+    Keep the incoming controller and its backing layers mounted through child transition settlement. Avoid the keyed presence handoff that discards its entrance animation.
+
+diff --git a/src/NSE/Navigation/NSETabViewController.tsx b/src/NSE/Navigation/NSETabViewController.tsx
+index 2dc8026..9c7cbcd 100644
+--- a/src/NSE/Navigation/NSETabViewController.tsx
++++ b/src/NSE/Navigation/NSETabViewController.tsx
+@@ -21,7 +21,7 @@
+ import { useId, type ReactNode } from "react";
+ import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
+ import { useObserve } from "../Objects/useObserve";
+-import { NSEPresence } from "../Animation/NSEPresentation";
++import { NSEChildViewControllerView } from "../Application/viewControllerRenderer";
+ import { NSETabBar } from "./NSETabBar";
+ import { NSETabBarController } from "./NSETabBarController";
+ import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinationHost";
+@@ -300,8 +300,10 @@ function NSETabViewControllerView({ controller }: { readonly controller: NSETabV
+     <div className="nse-tab-view-controller-content" role={bar && selected ? "tabpanel" : undefined}
+       id={selected ? getNSETabBarPanelId(scope, selected.identifier) : undefined}
+       aria-labelledby={bar && selected ? getNSETabBarTabId(scope, selected.identifier) : undefined}>
+-      {/* The leaving item's view stays while its own exit animations run (none: it goes at once). */}
+-      <NSEPresence>{Selected ? <Selected.view key={selected!.identifier} /> : null}</NSEPresence>
++      {/* One superview slot owns both children through a swap. A keyed presence
++          creates a second slot, remounting the incoming controller at handoff
++          and losing its layer presentation. */}
++      {Selected ? <NSEChildViewControllerView controller={Selected} /> : null}
+     </div>
+     {controller.tabStyle === "segmentedControlOnBottom" ? bar : null}
+   </div>;
+diff --git a/tests/runtime/nse-tab-transition-lifetime.test.tsx b/tests/runtime/nse-tab-transition-lifetime.test.tsx
+new file mode 100644
+index 0000000..fe91bfd
+--- /dev/null
++++ b/tests/runtime/nse-tab-transition-lifetime.test.tsx
+@@ -0,0 +1,43 @@
++// @vitest-environment jsdom
++import React from "react";
++import { act, cleanup, render } from "@testing-library/react";
++import { afterEach, expect, it, vi } from "vitest";
++import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
++import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
++import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
++import { nseUnowned } from "../../src/NSE/Controllers/ownership";
++import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation/NSEAnimationEnvironment";
++
++afterEach(cleanup);
++
++it("keeps the incoming tab mounted through transition settlement", async () => {
++  class Pane extends NSEViewController {
++    renderView() { return <p>{this.title}</p>; }
++    override viewDidAppear = vi.fn();
++  }
++  class Tabs extends NSETabViewController {
++    readonly first = this.addChild(Pane, { title: "First" });
++    readonly second = this.addChild(Pane, { title: "Second" });
++    constructor() {
++      super({ owner: nseUnowned });
++      for (const pane of [this.first, this.second]) this.addTabViewItem(new NSETabViewItem({ viewController: pane, identifier: pane.title! }));
++    }
++    override willSelect(item: NSETabViewItem) {
++      this.transition(this.selectedTabViewItem!.viewController, item.viewController, NSEViewController.TransitionOptions.crossfade);
++    }
++  }
++  const tabs = new Tabs();
++  const finish: Array<() => void> = [];
++  const animator = { ownerAppId: "tab-test", animations: {
++    acquireOwner: () => ({ release() {} }),
++    animate: () => ({ finished: new Promise(resolve => finish.push(() => resolve({ state: "completed", reduced: false }))), cancel() {} }),
++  } } as unknown as NSEAnimator;
++  const mounted = render(<NSEAnimationEnvironmentProvider animator={animator}><NSEViewControllerView controller={tabs} /></NSEAnimationEnvironmentProvider>);
++  await act(async () => { tabs.selectTabViewItem("Second"); });
++  await act(async () => { for (const done of finish.splice(0)) done(); });
++  expect(tabs.second.viewDidAppear).toHaveBeenCalledTimes(1);
++  await act(async () => { tabs.selectTabViewItem("First"); });
++  await act(async () => { for (const done of finish.splice(0)) done(); });
++  expect(tabs.first.viewDidAppear).toHaveBeenCalledTimes(2);
++  mounted.unmount(); tabs.dispose();
++});
+diff --git a/src/Effects/LayerArtwork.tsx b/src/Effects/LayerArtwork.tsx
+index 6231184..5efef3e 100644
+--- a/src/Effects/LayerArtwork.tsx
++++ b/src/Effects/LayerArtwork.tsx
+@@ -1,6 +1,6 @@
+ import { createElement, useLayoutEffect, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
+ import { NSEAnimationContext, NSEViewController, nseUnowned, outlet, useNSEDeferredDisposal, type NSEViewOutlet } from "@syndromatic/syncloudos/nse";
+-import { AFXAnimation, AFXKeyframeAnimation, AFXTimingFunction, AFXTransform3D, type AFXAnimationTiming, type AFXAnimationHandle, type AFXLayer } from "@syndromatic/syncloudos/fx/animation";
++import { AFXAnimation, AFXBasicAnimation, AFXKeyframeAnimation, AFXSpringAnimation, AFXTransform3D, type AFXAnimationTiming, type AFXAnimationHandle, type AFXLayer } from "@syndromatic/syncloudos/fx/animation";
+ import "./effects.css";
+ 
+ // Site artwork recipes compile to Core Animation objects on an owned outlet.
+@@ -10,7 +10,6 @@ interface KeyTimes { readonly keyTimes?: readonly number[]; readonly timingFunct
+ export type ArtworkTrack = KeyTimes & (
+   | { readonly keyPath: "opacity"; readonly values: readonly number[] }
+   | { readonly keyPath: "transform"; readonly values: readonly ArtworkPose[]; readonly unit?: "px" | "%" | "vw" | "vh" }
+-  | { readonly keyPath: `transform.${keyof ArtworkPose}`; readonly values: readonly number[] }
+ );
+ export interface ArtworkAnimation { readonly duration: number; readonly delay?: number; readonly timing: AFXAnimationTiming; readonly tracks: readonly ArtworkTrack[] }
+ export type ArtworkEntrance = ArtworkAnimation | null | ((previousState: string | null) => ArtworkAnimation | null);
+@@ -20,56 +19,42 @@ export function artworkTransform(pose: ArtworkPose, unit = "px"): string {
+   return `translate3d(${pose.x ?? 0}${unit}, ${pose.y ?? 0}${unit}, ${pose.z ?? 0}px) scale(${pose.scale ?? 1}) rotate(${pose.rotate ?? 0}deg) rotateX(${pose.rotateX ?? 0}deg) rotateY(${pose.rotateY ?? 0}deg)`;
+ }
+ 
+-function sample(track: ArtworkTrack, spec: ArtworkAnimation, progress: number): number | ArtworkPose {
+-  const times = track.keyTimes ?? track.values.map((_, index) => index / (track.values.length - 1));
+-  let segment = 0;
+-  while (segment < times.length - 2 && progress > times[segment + 1]!) segment++;
+-  const start = times[segment]!, end = times[segment + 1]!;
+-  const eased = new AFXTimingFunction(track.timingFunctions?.[segment] ?? spec.timing).sample((progress - start) / (end - start), spec.duration * (end - start));
+-  const from = track.values[segment]!, to = track.values[segment + 1]!;
+-  if (typeof from === "number" && typeof to === "number") return from + (to - from) * eased;
+-  const a = from as ArtworkPose, b = to as ArtworkPose;
+-  return Object.fromEntries(["x", "y", "z", "scale", "rotate", "rotateX", "rotateY"].map(key => {
+-    const k = key as keyof ArtworkPose, fallback = k === "scale" ? 1 : 0;
+-    return [k, (a[k] ?? fallback) + ((b[k] ?? fallback) - (a[k] ?? fallback)) * eased];
+-  }));
+-}
+-
+ /** Draw a recipe on the actual view layer. AFXLayer retargets interrupted
+  * animations from their current presentation instead of their first pose. */
+-function playArtwork(layer: AFXLayer, element: HTMLElement, spec: ArtworkAnimation | null, phase: "enter" | "exit"): readonly AFXAnimationHandle[] {
+-  if (!spec) return [];
+-  const offsets = Array.from({ length: 61 }, (_, index) => index / 60);
+-  const animation = new AFXAnimation({ duration: spec.duration, delay: spec.delay, timing: "linear", fill: phase === "exit" ? "forwards" : "backwards", reducedMotion: "never" });
+-  const handles: AFXAnimationHandle[] = [];
+-  const opacity = spec.tracks.find(track => track.keyPath === "opacity");
+-  if (opacity) {
+-    const values = offsets.map(offset => Math.max(0, Math.min(1, sample(opacity, spec, offset) as number)));
+-    layer.opacity = values.at(-1)!;
+-    handles.push(layer.addAnimation(new AFXKeyframeAnimation({ targetId: "artwork", keyPath: "opacity", values, animation })));
+-  }
+-  const transform = spec.tracks.find(track => track.keyPath === "transform");
+-  const channels = spec.tracks.filter(track => track.keyPath.startsWith("transform."));
+-  if (transform || channels.length) {
+-    const unit = transform && "unit" in transform ? transform.unit : "px";
+-    const values = offsets.map(offset => artworkTransform(transform ? sample(transform, spec, offset) as ArtworkPose
+-      : Object.fromEntries(channels.map(channel => [channel.keyPath.slice(10), sample(channel, spec, offset)])), unit));
+-    const size = { width: element.offsetWidth, height: element.offsetHeight };
+-    layer.transform = AFXTransform3D.fromCSS(values.at(-1)!, size);
+-    handles.push(layer.addAnimation(new AFXKeyframeAnimation({ targetId: "artwork", keyPath: "transform", values, animation })));
+-  }
+-  return handles;
+-}
+-
+ export function animateArtwork(layer: AFXLayer, element: HTMLElement, spec: ArtworkAnimation | null, phase: "enter" | "exit" = "enter"): readonly AFXAnimationHandle[] {
+   if (!spec) return [];
+-  let handles: readonly AFXAnimationHandle[] = [];
++  const size = { width: element.offsetWidth, height: element.offsetHeight };
++  const animations = spec.tracks.map(track => {
++    const values = track.keyPath === "opacity" ? track.values : track.values.map(pose => {
++      const unit = track.unit ?? "px";
++      const view = element.ownerDocument.defaultView;
++      const resolved = unit === "vw" || unit === "vh" ? { ...pose,
++        x: (pose.x ?? 0) * (unit === "vw" ? view?.innerWidth ?? 0 : view?.innerHeight ?? 0) / 100,
++        y: (pose.y ?? 0) * (unit === "vw" ? view?.innerWidth ?? 0 : view?.innerHeight ?? 0) / 100,
++      } : pose;
++      return artworkTransform(resolved, unit === "%" ? "%" : "px");
++    });
++    // A delayed entrance holds its first pose, then keeps its final pose.
++    const options = { duration: spec.duration, delay: spec.delay, fill: phase === "enter" && spec.delay ? "both" as const : "forwards" as const, reducedMotion: "system" as const };
++    const timing = track.timingFunctions?.[0] ?? spec.timing;
++    const property = { targetId: "artwork", keyPath: track.keyPath, from: values[0]!, to: values.at(-1)! };
++    if (values.length === 2) return typeof timing === "object" && timing.kind === "spring"
++      ? new AFXSpringAnimation({ ...property, ...timing, options })
++      : new AFXBasicAnimation({ ...property, animation: new AFXAnimation({ ...options, timing }) });
++    return new AFXKeyframeAnimation({ targetId: "artwork", keyPath: track.keyPath, values, keyTimes: track.keyTimes,
++      timingFunctions: track.timingFunctions ?? values.slice(1).map(() => spec.timing),
++      animation: new AFXAnimation({ ...options, timing: "linear" }),
++    });
++  });
+   NSEAnimationContext.runAnimationGroup(context => {
+-    context.duration = spec.duration;
+-    context.allowsImplicitAnimation = true;
+-    handles = playArtwork(layer, element, spec, phase);
++    context.allowsImplicitAnimation = false;
++    for (const animation of animations) {
++      const terminal = animation instanceof AFXKeyframeAnimation ? animation.values.at(-1)! : animation.to;
++      if (animation.keyPath === "opacity") layer.opacity = terminal as number;
++      else layer.transform = AFXTransform3D.fromCSS(terminal as string, size);
++    }
+   });
+-  return handles;
++  return animations.map(animation => layer.addAnimation(animation));
+ }
+ 
+ interface LayerArtworkProps extends Omit<HTMLAttributes<HTMLElement>, "onAnimationEnd"> {
+@@ -109,7 +94,7 @@ class ArtworkViewController extends NSEViewController {
+           context.duration = 0;
+           this.artwork.animator().setFrameOrigin(layoutPosition);
+         });
+-        if (layoutDuration && !this.traitCollection.reducedMotion) animateArtwork(this.artwork.layer, this.artwork.element, {
++        if (layoutDuration) animateArtwork(this.artwork.layer, this.artwork.element, {
+           duration: layoutDuration, timing: layoutTiming ?? NSEAnimationContext.current.timingFunction,
+           tracks: [{ keyPath: "transform", values: [{ x: previous.x - layoutPosition.x + visible.tx, y: previous.y - layoutPosition.y + visible.ty }, {}] }],
+         });
+@@ -125,8 +110,11 @@ class ArtworkViewController extends NSEViewController {
+       const element = this.artwork.element, layer = this.artwork.layer;
+       // The outlet owns its model pose, including a snapped responsive state
+       // or a reduced-motion recipe that animates opacity alone.
+-      layer.opacity = Number(this.props.style?.opacity ?? 1);
+-      layer.transform = AFXTransform3D.fromCSS(String(this.props.style?.transform ?? "none"), { width: element.offsetWidth, height: element.offsetHeight });
++      NSEAnimationContext.runAnimationGroup(context => {
++        context.allowsImplicitAnimation = false;
++        layer.opacity = Number(this.props.style?.opacity ?? 1);
++        layer.transform = AFXTransform3D.fromCSS(String(this.props.style?.transform ?? "none"), { width: element.offsetWidth, height: element.offsetHeight });
++      });
+       handles = animateArtwork(layer, element, spec);
+     }
+     catch { this.settled = state; onPresented?.(state); return; }
+diff --git a/src/SynWare/About.app/Contents/AboutPane.tsx b/src/SynWare/About.app/Contents/AboutPane.tsx
+index dd6d0bc..d00b5f7 100644
+--- a/src/SynWare/About.app/Contents/AboutPane.tsx
++++ b/src/SynWare/About.app/Contents/AboutPane.tsx
+@@ -38,6 +38,9 @@ export class AboutPaneViewController extends NSEViewController {
+   @outlet accessor hero!: NSEViewOutlet<HTMLElement>;
+   readonly sigils = new Map<string, AboutPaneSigil>();
+   #animatedSequence = -1;
++  #animatedElement: HTMLElement | null = null;
++  #exitingSequence = -1;
++  #exitingElement: HTMLElement | null = null;
+ 
+   constructor(navigation: AboutViewController, sectionId: AboutSectionId) {
+     super();
+@@ -51,17 +54,25 @@ export class AboutPaneViewController extends NSEViewController {
+   viewDidAppear() {
+     this.navigation.paneDidAppear(this);
+     this.navigation.particles.nudge();
+-    // The controller transition owns the leaving pane and the crossfade. A
+-    // retained tab slot can remount after settlement; replaying the entrance
+-    // there would briefly hide the newly selected page a second time.
++    this.#animate();
++  }
++
++  viewDidLayout() { this.#animate(); }
++
++  #animate() {
+     const motion: AboutMotion = { direction: this.navigation.direction, reducedMotion: this.navigation.reducedMotion };
+-    if (this.navigation.activeSectionId !== this.sectionId) {
++    const element = this.pane.element;
++    if ((this.navigation.incomingSectionId ?? this.navigation.activeSectionId) !== this.sectionId) {
++      if (this.#exitingSequence === this.navigation.motionSequence && this.#exitingElement === element) return;
++      this.#exitingSequence = this.navigation.motionSequence;
++      this.#exitingElement = element;
+       const exit = paneExit(motion);
+       animateArtwork(this.pane.layer, this.pane.element, { ...exit, tracks: exit.tracks.filter(track => track.keyPath !== "opacity") }, "exit");
+       return;
+     }
+-    if (this.#animatedSequence === this.navigation.motionSequence) return;
++    if (this.#animatedSequence === this.navigation.motionSequence && this.#animatedElement === element) return;
+     this.#animatedSequence = this.navigation.motionSequence;
++    this.#animatedElement = element;
+     const entrance = paneEnter(motion);
+     const pane = motion.direction === 0 ? entrance : { ...entrance, tracks: entrance.tracks.filter(track => track.keyPath !== "opacity") };
+     const recipes = [[this.pane, pane],
+diff --git a/src/SynWare/About.app/Contents/AboutParticleField.ts b/src/SynWare/About.app/Contents/AboutParticleField.ts
+index 4ac6b57..c3d999d 100644
+--- a/src/SynWare/About.app/Contents/AboutParticleField.ts
++++ b/src/SynWare/About.app/Contents/AboutParticleField.ts
+@@ -1,5 +1,5 @@
+ import type { AFXEmitterParticle, AFXParticleLayer, AFXRenderer } from "@syndromatic/syncloudos/fx/animation";
+-import { GFXColour, GFXImage } from "@syndromatic/syncloudos/fx/graphics";
++import { GFXBitmapContext, GFXColour, GFXGradient, GFXPath, type GFXImage } from "@syndromatic/syncloudos/fx/graphics";
+ 
+ /*
+  * About's particle field: the MobileMe-era motes, rebuilt on AnimationFX.
+@@ -108,21 +108,21 @@ const RING_DEPTH = 0.34;
+ const COMET_TAIL = 0.62;
+ 
+ function makeSprite(core: number, falloff: number): GFXImage {
+-  const data = new Uint8Array(SPRITE_SIZE * SPRITE_SIZE * 4);
+-  const centre = (SPRITE_SIZE - 1) / 2;
+-  for (let y = 0; y < SPRITE_SIZE; y++) {
+-    for (let x = 0; x < SPRITE_SIZE; x++) {
+-      const r = Math.hypot(x - centre, y - centre) / centre;
+-      const edge = Math.max(0, 1 - r);
+-      const alpha = Math.min(1, Math.exp(-r * r * core) * 0.85 + Math.pow(edge, falloff) * 0.45);
+-      const index = (y * SPRITE_SIZE + x) * 4;
+-      data[index] = 255;
+-      data[index + 1] = 255;
+-      data[index + 2] = 255;
+-      data[index + 3] = Math.round(alpha * 255);
+-    }
++  const bitmap = new GFXBitmapContext({ width: SPRITE_SIZE, height: SPRITE_SIZE });
++  try {
++    // Preserve the approved Gaussian core and soft skirt as radial colour
++    // stops; GraphicsFX owns rasterisation, alpha and the bitmap lifetime.
++    const stops = Array.from({ length: 64 }, (_, index) => {
++      const r = index / 63;
++      const alpha = Math.min(1, Math.exp(-r * r * core) * 0.85 + Math.pow(1 - r, falloff) * 0.45);
++      return { offset: r, colour: GFXColour.rgba(1, 1, 1, alpha) };
++    });
++    const gradient = new GFXGradient(stops, { kind: "radial", centre: { x: SPRITE_SIZE / 2, y: SPRITE_SIZE / 2 }, radius: (SPRITE_SIZE - 1) / 2 }, { units: "userSpaceOnUse" });
++    bitmap.fillPath(GFXPath.rect({ x: 0, y: 0, width: SPRITE_SIZE, height: SPRITE_SIZE }), gradient);
++    return bitmap.makeImage();
++  } finally {
++    bitmap.dispose();
+   }
+-  return new GFXImage({ width: SPRITE_SIZE, height: SPRITE_SIZE, alpha: "straight", colourSpace: "srgb", data });
+ }
+ 
+ function pickPalette(random: () => number): number {
+@@ -759,7 +759,5 @@ export class AboutParticleField {
+     }
+     snapshot.length = used;
+     this.#layer.setParticles(snapshot);
+-    // Draw now, in this frame, instead of waiting on the layer's own invalidation.
+-    this.#renderer.render();
+   }
+ }
+diff --git a/src/SynWare/About.app/Contents/AboutScene.tsx b/src/SynWare/About.app/Contents/AboutScene.tsx
+index 439db27..b421c0c 100644
+--- a/src/SynWare/About.app/Contents/AboutScene.tsx
++++ b/src/SynWare/About.app/Contents/AboutScene.tsx
+@@ -1,8 +1,7 @@
+-import { NSEViewController, SCOS, outlet, type NSEViewOutlet } from "@syndromatic/syncloudos";
++import { NSEViewController, outlet, type NSEViewOutlet } from "@syndromatic/syncloudos";
+ import { animateArtwork, artworkTransform, type ArtworkAnimation } from "../../../Effects/LayerArtwork";
+-import { AFXTransform3D } from "@syndromatic/syncloudos/fx/animation";
++import { AFXAnimation, AFXBasicAnimation, AFXTransform3D } from "@syndromatic/syncloudos/fx/animation";
+ import { atmoMotion } from "@syndromatic/syncloudos/nse/themes/atmo";
+-import type { AppAnimationHandle, AppAnimationOwner } from "@syndromatic/syncloudos/sdk";
+ import type { AboutViewController } from "./index";
+ 
+ /*
+@@ -15,7 +14,7 @@ import type { AboutViewController } from "./index";
+  * compositor through AnimationFX:
+  * - reveal: the floor tilts up out of the dark as the app opens;
+  * - travel: the dots advance one cell towards the viewer, endlessly (a looping
+- *   Element.animate owned by the app's AnimationFX client);
++ *   AFXBasicAnimation on the dots' backing layer);
+  * - pan: on a tab change the floor slides a few cells the way the content
+  *   travels, easing back to rest.
+  * The spotlight is fixed while the dots pass beneath it, so the floor reads as
+@@ -26,7 +25,6 @@ import type { AboutViewController } from "./index";
+ const ABOUT_GRID_CELL = 84;
+ const FLOOR_TILT = 74;
+ const TRAVEL_SECONDS_PER_CELL = 3.6;
+-const TRAVEL_ITERATIONS = 1000;
+ const PAN_CELLS = 3;
+ 
+ const floorStyle = artworkTransform({ rotateX: FLOOR_TILT });
+@@ -67,9 +65,8 @@ function glowSpec(reducedMotion: boolean): ArtworkAnimation {
+ /**
+  * Runs the floor's endless travel towards the viewer while the backdrop is on
+  * screen. One cell per cycle is seamless because the pattern repeats every
+- * cell. The browser runs it on the compositor; the loop re-arms after its
+- * (long) iteration count, and after the page was hidden, which settles running
+- * animations.
++ * cell. The layer host suspends the compositor loop while the page is hidden
++ * and resumes it when visible.
+  */
+ export class AboutSceneViewController extends NSEViewController {
+   static view = AboutSceneView;
+@@ -129,64 +126,14 @@ export class AboutSceneViewController extends NSEViewController {
+   }
+ 
+   #startTravel() {
+-    const element = this.dots.current;
+-    if (!element || this.#reducedMotion) return;
+-    const animations = SCOS.animations;
+-    const scheduler = SCOS.scheduler;
+-    let owner: AppAnimationOwner | null = null;
+-    let handle: AppAnimationHandle | null = null;
+-    let disposed = false;
+-    let startedAt = 0;
+-    const documentRef = element.ownerDocument;
+-    const start = () => {
+-      if (disposed || handle || documentRef.visibilityState === "hidden") return;
+-      try {
+-        owner ??= animations.acquireOwner("about-grid-travel");
+-        startedAt = scheduler.now();
+-        const running = animations.animate(element, {
+-          animations: [{
+-            targetId: "about-grid-travel",
+-            keyPath: "transform",
+-            from: "translate3d(0px, 0px, 0px)",
+-            to: `translate3d(0px, ${ABOUT_GRID_CELL}px, 0px)`,
+-          }],
+-          duration: TRAVEL_SECONDS_PER_CELL,
+-          iterations: TRAVEL_ITERATIONS,
+-          timing: "linear",
+-          fill: "none",
+-          reducedMotion: "system",
+-        }, owner);
+-        handle = running;
+-        void running.finished.then((settlement) => {
+-          if (handle !== running) return;
+-          handle = null;
+-          if (disposed || settlement.state !== "completed") return;
+-          // A settlement moments after starting means the host settled it
+-          // (hidden page, reduced motion); wait for visibility instead of
+-          // spinning.
+-          if (scheduler.now() - startedAt > 1000) start();
+-        }).catch(() => {
+-          // The mount was revoked under the loop (a remount, such as a
+-          // language change): its clients now throw, and the disappearance
+-          // of this view owns the teardown.
+-        });
+-      } catch {
+-        // Cosmetic: without an animator the floor simply rests.
+-      }
+-    };
+-    const onVisibility = () => {
+-      if (documentRef.visibilityState === "visible") start();
+-    };
+-    documentRef.addEventListener("visibilitychange", onVisibility);
+-    start();
+-    this.#stopTravel = () => {
+-      disposed = true;
+-      documentRef.removeEventListener("visibilitychange", onVisibility);
+-      const running = handle;
+-      handle = null;
+-      running?.dispose();
+-      owner?.dispose();
+-    };
++    if (!this.dots.current || this.#reducedMotion) return;
++    const handle = this.dots.layer.addAnimation(new AFXBasicAnimation({
++      targetId: "about-grid-travel", keyPath: "transform",
++      from: "translate3d(0px, 0px, 0px)",
++      to: `translate3d(0px, ${ABOUT_GRID_CELL}px, 0px)`,
++      animation: new AFXAnimation({ duration: TRAVEL_SECONDS_PER_CELL, iterations: Infinity, timing: "linear", fill: "forwards", reducedMotion: "system" }),
++    }));
++    this.#stopTravel = () => handle.cancel();
+   }
+ }
+ 
+@@ -205,3 +152,4 @@ function AboutSceneView({ controller }: { readonly controller: AboutSceneViewCon
+     </div>
+   );
+ }
++
+diff --git a/src/SynWare/About.app/Contents/aboutSectionIcons.ts b/src/SynWare/About.app/Contents/aboutSectionIcons.ts
+index 19641cc..4a0e860 100644
+--- a/src/SynWare/About.app/Contents/aboutSectionIcons.ts
++++ b/src/SynWare/About.app/Contents/aboutSectionIcons.ts
+@@ -1,4 +1,4 @@
+-import { GFXMutablePath, type GFXPath } from "@syndromatic/syncloudos/fx/graphics";
++import { GFXMutablePath, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
+ 
+ /*
+  * Section sigils: line drawings the particle field traces. Each is a
+@@ -40,8 +40,7 @@ function pin(path: GFXMutablePath, cx: number, cy: number, radius: number) {
+   path.arc({ x: cx, y: cy }, radius, start, end, false);
+   path.close();
+   const hole = radius * 0.4;
+-  path.move(polar(cx, cy, hole, 0));
+-  path.arc({ x: cx, y: cy }, hole, 0, Math.PI * 2 - 0.001, false);
++  path.append(GFXPath.ellipse({ x: cx - hole, y: cy - hole, width: hole * 2, height: hole * 2 }));
+ }
+ 
+ function mapPins(): GFXPath {
+@@ -84,7 +83,7 @@ function spark(): GFXPath {
+ function busts(): GFXPath {
+   const path = new GFXMutablePath();
+   // Front figure.
+-  path.move(polar(40, 38, 14, 0)).arc({ x: 40, y: 38 }, 14, 0, Math.PI * 2 - 0.001, false);
++  path.append(GFXPath.ellipse({ x: 26, y: 24, width: 28, height: 28 }));
+   path.move({ x: 12, y: 90 }).arc({ x: 40, y: 90 }, 28, Math.PI, Math.PI * 2, false).close();
+   // The figure behind, partly hidden by the first.
+   path.move(polar(68, 28, 11, Math.PI * 0.62)).arc({ x: 68, y: 28 }, 11, Math.PI * 0.62, Math.PI * 2.35, false);
+diff --git a/src/SynWare/About.app/Contents/index.tsx b/src/SynWare/About.app/Contents/index.tsx
+index 5e75928..f079bb4 100644
+--- a/src/SynWare/About.app/Contents/index.tsx
++++ b/src/SynWare/About.app/Contents/index.tsx
+@@ -65,12 +65,15 @@ export class AboutSectionsViewController extends NSETabViewController {
+   willSelect(item: NSETabViewItem): void {
+     const from = this.selectedTabViewItem?.viewController;
+     if (!from || from === item.viewController || !this.isViewVisible || !from.isViewVisible) return;
+-    this.about.direction = Math.sign(this.tabViewItems.indexOf(item) - this.selectedTabViewItemIndex);
++    // transition() can mount its destination before NSTabView publishes the
++    // selection. Give both panes their role before any observable write.
++    this.about.incomingSectionId = item.identifier as AboutSectionId;
+     this.about.motionSequence++;
++    this.about.direction = Math.sign(this.tabViewItems.indexOf(item) - this.selectedTabViewItemIndex);
+     this.#changing = true;
+     NSEAnimationContext.runAnimationGroup(context => {
+       context.duration = this.about.reducedMotion ? 0.18 : 0.55;
+-      this.transition(from, item.viewController, NSEViewController.TransitionOptions.crossfade, () => { this.#changing = false; });
++      this.transition(from, item.viewController, NSEViewController.TransitionOptions.crossfade, () => { this.#changing = false; this.about.incomingSectionId = null; });
+     });
+   }
+ }
+@@ -89,6 +92,7 @@ export class AboutViewController extends NSEViewController {
+   @observable accessor direction = 0;
+   /** One section selection, including its retained-slot handoff. */
+   motionSequence = 0;
++  incomingSectionId: AboutSectionId | null = null;
+ 
+   readonly tabs = this.addChild(AboutSectionsViewController, this);
+   readonly scene = this.addChild(AboutSceneViewController, this);
+diff --git a/tests/runtime/about-app.test.tsx b/tests/runtime/about-app.test.tsx
+index d11546b..8ca6dce 100644
+--- a/tests/runtime/about-app.test.tsx
++++ b/tests/runtime/about-app.test.tsx
+@@ -1,5 +1,5 @@
+ import { act } from "react";
+-import { afterEach, describe, expect, it } from "vitest";
++import { afterEach, describe, expect, it, vi } from "vitest";
+ import { createSynWareTestHost, type SynWareTestHost, type SynWareTestRenderResult } from "@syndromatic/syncloudos/sdk/testing";
+ import manifest from "../../src/SynWare/About.app/Contents/Info";
+ import AboutApp, { AboutWindowController } from "../../src/SynWare/About.app/Contents";
+@@ -34,6 +34,20 @@ function tab(container: HTMLElement, name: string) {
+ }
+ 
+ describe("About", () => {
++  it("animates the incoming pane and keeps its presentation through the tab handoff", async () => {
++    const { controller, host } = await mountAbout();
++    await act(async () => { host.clock.advance(2400); });
++    const entering = controller.panes.framework;
++    const appeared = vi.spyOn(entering, "viewDidAppear");
++    await act(async () => { controller.tabs.selectTabViewItem("framework"); });
++    expect(entering.isViewVisible).toBe(true);
++    expect(entering.pane.layer.animationForKey("transform")).not.toBeNull();
++    expect(entering.heading.layer.animationForKey("transform")).not.toBeNull();
++    await act(async () => { host.clock.advance(640); });
++    expect(entering.pane.layer.animationForKey("transform")).not.toBeNull();
++    expect(appeared).toHaveBeenCalledTimes(1);
++    vi.restoreAllMocks();
++  });
+   it("retitles in place without a restoration write or a new directional transition", async () => {
+     const { controller, host } = await mountAbout("team");
+     const before = JSON.stringify(host.persistence.getPreference(restorationKey, null));
+@@ -94,3 +108,6 @@ describe("About", () => {
+     expect(pages.every((page) => page.isDisposed)).toBe(true);
+   });
+ });
++
++
++
+diff --git a/tests/runtime/about-fx-lifetime.test.tsx b/tests/runtime/about-fx-lifetime.test.tsx
+index b3274a7..7139910 100644
+--- a/tests/runtime/about-fx-lifetime.test.tsx
++++ b/tests/runtime/about-fx-lifetime.test.tsx
+@@ -74,6 +74,9 @@ it("keeps full-DPR managed motes, committed outlets and activity-owned frames th
+   for (let frame = 0; frame < 4; frame++) await act(async () => { host.clock.advance(16); });
+   expect(draw.mock.calls.length).toBeGreaterThan(hiddenDraws);
+   await act(async () => { host.mediaQueries.setMatches("(prefers-reduced-motion: reduce)", true); host.clock.advance(64); });
++  // The particle layer's coalesced invalidation draws the static snapshot on
++  // the next frame, instead of an immediate render that cancels that frame.
++  await act(async () => { host.clock.advance(16); });
+   const staticDraws = draw.mock.calls.length;
+   await act(async () => { host.clock.advance(200); }); expect(draw).toHaveBeenCalledTimes(staticDraws);
+   await act(async () => { await host.lifecycle.close(); host.clock.advance(200); });

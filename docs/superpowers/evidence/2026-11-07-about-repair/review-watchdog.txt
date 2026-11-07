@@ -1,0 +1,99 @@
+commit 550b1832e60e97c5c26f3f213bbed39350cfd4cd
+Author: Kavish Krishnakumar <75783341+phenom64@users.noreply.github.com>
+Date:   Sat Nov 7 09:30:45 2026 +0000
+
+    AnimationFX: wait for native timeline before timer completion
+    
+    Use native finish as the completion authority and rearm a timer-only watchdog while native time lags. Preserve wall-time fallback for non-native playback and release timer ownership on pause, seek and cancellation. Capture red-green coverage and current typecheck diagnostics.
+
+diff --git a/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts b/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts
+index 33a0ef2..552cb47 100644
+--- a/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts
++++ b/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts
+@@ -495,15 +495,39 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
+       );
+       this.#timerCount += 1;
+     };
+-    const scheduleCompletion = () => {
++    const armCompletionTimer = (delayMs: number) => {
+       if (!this.#platform.schedule || settled || paused) return;
+-      scheduledAt = this.#platform.now();
+       completionTimer = this.#platform.schedule(() => {
+         completionTimer = undefined;
+         this.#timerCount = Math.max(0, this.#timerCount - 1);
+-        settle("completed");
+-      }, remainingMs);
++        if (settled || paused) return;
++        if (!native) {
++          settle("completed");
++          return;
++        }
++        if (native.playState === "idle") {
++          settle("cancelled");
++          return;
++        }
++        const currentTime = native.currentTime;
++        if (native.playState === "finished" ||
++            (typeof currentTime === "number" && Number.isFinite(currentTime) && currentTime >= totalDuration)) {
++          settle("completed");
++          return;
++        }
++        // Native timelines can lag wall time while the browser is busy. This
++        // watchdog observes native completion without restarting scroll ticks
++        // or changing the wall-clock origin used by pause/resume and scrolling.
++        armCompletionTimer(typeof currentTime === "number" && Number.isFinite(currentTime)
++          ? Math.max(16, totalDuration - currentTime)
++          : 16);
++      }, delayMs);
+       this.#timerCount += 1;
++    };
++    const scheduleCompletion = () => {
++      if (!this.#platform.schedule || settled || paused) return;
++      scheduledAt = this.#platform.now();
++      armCompletionTimer(remainingMs);
+       scheduleScrollTick();
+     };
+     const playback: RuntimeAnimationPlayback = {
+diff --git a/tests/runtime/fx/animation-native-completion.test.ts b/tests/runtime/fx/animation-native-completion.test.ts
+new file mode 100644
+index 0000000..b081f20
+--- /dev/null
++++ b/tests/runtime/fx/animation-native-completion.test.ts
+@@ -0,0 +1,37 @@
++import { afterEach, expect, it, vi } from 'vitest';
++import { AFXAnimation, AFXBasicAnimation } from '../../../src/FX/AnimationFX/public';
++import { BrowserAnimationAdapterFactory, type BrowserNativeAnimation } from '../../../src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter';
++afterEach(() => vi.useRealTimers());
++function fixture(withNative = true) {
++  vi.useFakeTimers();
++  const events = new Map<string, () => void>();
++  const native: BrowserNativeAnimation = { currentTime: 0, playState: 'running', play: vi.fn(), pause: vi.fn(), cancel: vi.fn(), addEventListener: (name, listener) => { events.set(name, listener); }, removeEventListener: (name) => { events.delete(name); } };
++  const factory = new BrowserAnimationAdapterFactory({ animate: () => withNative ? native : null, now: () => Date.now(), schedule: (callback, delay) => setTimeout(callback, delay), cancelScheduled: (timer) => clearTimeout(timer as ReturnType<typeof setTimeout>) });
++  const lease = factory.acquire('watchdog', new AbortController().signal);
++  const definition = new AFXBasicAnimation({ targetId: 'fade', keyPath: 'opacity', from: 1, to: 0, animation: new AFXAnimation({ duration: .55, timing: 'linear' }) }).toRuntime();
++  const playback = lease.adapter.animate({ ...definition, target: {}, delay: 0, iterations: 1, autoreverses: false, fill: 'forwards', timing: 'linear' });
++  const settled = vi.fn(); playback.finished.then(settled);
++  return { native, events, playback, settled, lease };
++}
++it('waits for delayed native time rather than wall time, then handles native finish exactly once', async () => {
++  const f = fixture(); f.native.currentTime = 350;
++  await vi.advanceTimersByTimeAsync(550); expect(f.settled).not.toHaveBeenCalled(); expect(vi.getTimerCount()).toBe(1);
++  f.events.get('finish')?.(); await Promise.resolve(); expect(f.settled).toHaveBeenCalledExactlyOnceWith('completed'); expect(vi.getTimerCount()).toBe(0); f.lease.release();
++});
++it('polls null pending time and completes terminal native time even without a finish event', async () => {
++  const f = fixture(); f.native.currentTime = null;
++  await vi.advanceTimersByTimeAsync(550); expect(f.settled).not.toHaveBeenCalled(); expect(vi.getTimerCount()).toBe(1);
++  f.native.currentTime = 550; await vi.advanceTimersByTimeAsync(16);
++  expect(f.settled).toHaveBeenCalledExactlyOnceWith('completed'); expect(vi.getTimerCount()).toBe(0); f.lease.release();
++});
++it('cleans the watchdog across pause, resume, seek and cancellation', async () => {
++  const f = fixture(); f.native.currentTime = 350; await vi.advanceTimersByTimeAsync(550);
++  f.playback.pause(); expect(vi.getTimerCount()).toBe(0); await vi.advanceTimersByTimeAsync(1000); expect(f.settled).not.toHaveBeenCalled();
++  f.playback.play(); expect(vi.getTimerCount()).toBe(1); f.playback.seek(.4); expect(vi.getTimerCount()).toBe(1);
++  f.playback.cancel(); await Promise.resolve(); expect(f.settled).toHaveBeenCalledExactlyOnceWith('cancelled'); expect(vi.getTimerCount()).toBe(0); expect(f.events.size).toBe(0); f.lease.release();
++});
++it('settles idle native cancellation and preserves wall time for effects without native playback', async () => {
++  const f = fixture(); Object.defineProperty(f.native, 'playState', { value: 'idle' }); await vi.advanceTimersByTimeAsync(550);
++  expect(f.settled).toHaveBeenCalledExactlyOnceWith('cancelled'); f.lease.release();
++  const wall = fixture(false); await vi.advanceTimersByTimeAsync(550); expect(wall.settled).toHaveBeenCalledExactlyOnceWith('completed'); wall.lease.release();
++});

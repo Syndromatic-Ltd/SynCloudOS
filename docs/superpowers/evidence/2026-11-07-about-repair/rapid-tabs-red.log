@@ -1,0 +1,97 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/about-app.test.tsx -t leaves from --reporter=verbose
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+stderr | tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle
+An update to gn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Ke inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to ca inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to yn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to yn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to gn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ × tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle 398ms
+   → expected +0 to be close to 5.969682850901305, received difference is 5.969682850901305, but expected 0.000005
+ ↓ tests/runtime/about-app.test.tsx > About > animates the incoming pane and keeps its presentation through the tab handoff
+ ↓ tests/runtime/about-app.test.tsx > About > retitles in place without a restoration write or a new directional transition
+ ↓ tests/runtime/about-app.test.tsx > About > opens on the company page with its tab bar
+ ↓ tests/runtime/about-app.test.tsx > About > restores the section last read and remembers a new choice
+ ↓ tests/runtime/about-app.test.tsx > About > travels right when a later section is chosen and shows its page
+ ↓ tests/runtime/about-app.test.tsx > About > goes still when the animation environment asks for reduced motion
+ ↓ tests/runtime/about-app.test.tsx > About > disposes its navigation and pages with the window
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle
+AssertionError: expected +0 to be close to 5.969682850901305, received difference is 5.969682850901305, but expected 0.000005
+ ❯ tests/runtime/about-app.test.tsx:52:22
+     50|     act(() => { controller.tabs.selectTabViewItem("team"); });
+     51|     const after = controller.panes.framework.pane.layer.presentation.t…
+     52|     expect(after.tx).toBeCloseTo(before.tx, 5);
+       |                      ^
+     53|     expect(after.a).toBeCloseTo(before.a, 5);
+     54|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  11:00:42
+   Duration  5.00s (transform 3.05s, setup 16ms, import 3.59s, tests 399ms, environment 867ms)
+
