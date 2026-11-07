@@ -23,7 +23,7 @@ import type { AFXAnimationTiming } from "../FX/AnimationFX/animationTypes";
 import {
   NSEAnimationDefaults,
   nseTransformStyle,
-  useNSEAnimationEnvironment,
+  useNSETraitCollection,
   type NSEPresentationEnter,
   type NSEPresentationSpec,
   type NSETransformComponents,
@@ -120,7 +120,7 @@ export function resolveWebspringMotion(reducedMotion: boolean): WebspringMotion 
 }
 
 export function useWebspringMotion(): WebspringMotion {
-  const { reducedMotion } = useNSEAnimationEnvironment();
+  const { reducedMotion } = useNSETraitCollection();
   return useMemo(() => resolveWebspringMotion(reducedMotion), [reducedMotion]);
 }
 
