@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   CreatePasteboardRegistryOptions,
@@ -122,14 +123,15 @@ function cloneCanonicalValue(
   }
 }
 
-function cloneBlob(value: unknown): Blob {
-  if (typeof Blob === "undefined" || !(value instanceof Blob)) {
-    throw new InvalidPasteboardRepresentationError("Binary pasteboard representations require a Blob.");
+function cloneData(value: unknown): NSEData {
+  if (!(value instanceof NSEData || value instanceof Uint8Array || value instanceof ArrayBuffer)) {
+    throw new InvalidPasteboardRepresentationError("Binary pasteboard representations require NSEDataConvertible.");
   }
-  if (value.size > MAX_BINARY_BYTES) {
+  const count = value instanceof NSEData ? value.count : value.byteLength;
+  if (count > MAX_BINARY_BYTES) {
     throw new InvalidPasteboardRepresentationError(`Binary pasteboard data exceeds the ${MAX_BINARY_BYTES} byte limit.`);
   }
-  return value.slice(0, value.size, value.type);
+  return NSEData.from(value);
 }
 
 function normaliseType(value: unknown): PasteboardRepresentation["type"] {
@@ -154,7 +156,7 @@ function normaliseRepresentation(typeValue: unknown, value: unknown): Pasteboard
     return Object.freeze({ type, value }) as PasteboardRepresentation;
   }
   if (type.startsWith("image/") || type === "application/octet-stream") {
-    return Object.freeze({ type, value: cloneBlob(value) }) as PasteboardRepresentation;
+    return Object.freeze({ type, value: cloneData(value) }) as PasteboardRepresentation;
   }
   const canonical = cloneCanonicalValue(value);
   if (type === "application/x-syncloudos-document") {
@@ -180,7 +182,7 @@ function representationDescriptors(input: unknown) {
 }
 
 export function normalisePasteboardRepresentations(
-  inputs: readonly PasteboardRepresentation[],
+  inputs: readonly Exclude<PasteboardRepresentationInput, LazyPasteboardRepresentation>[],
 ): readonly PasteboardRepresentation[] {
   const entries = prepareInputs(inputs);
   if (entries.some((entry) => !entry.value)) {
@@ -345,7 +347,7 @@ async function materialise(
     // provider-invocation boundary, not only before the enclosing read starts.
     revalidate?.();
     const authority = createProviderAuthority();
-    let provided: PasteboardRepresentation["value"] | Promise<PasteboardRepresentation["value"]>;
+    let provided: ReturnType<LazyPasteboardRepresentation["provide"]>;
     try {
       provided = entry.provide!.call(undefined, authority.signal);
     } catch (error) {

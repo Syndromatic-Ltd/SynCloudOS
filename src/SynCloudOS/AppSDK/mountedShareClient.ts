@@ -1,3 +1,4 @@
+import { NSEData } from "../../Foundation/NSEData";
 import type { NativeOperationActivity } from '../SynCloudOS';
 import type { AppCapabilityStatus, AppShareClient, AppShareRequest, AppShareResult } from './appEnvironmentClientTypes';
 import type { RuntimeBrowserPort } from '../Runtime/runtimeInstanceTypes';
@@ -18,11 +19,16 @@ function nameOf(error: unknown): unknown {
 }
 
 type NativeShareRequest = Omit<AppShareRequest,'files'> & { readonly files?: File[] };
-function isFile(value:unknown): value is File {
-  // Invoke the WebIDL brand getter: accept another window's File, reject a
-  // forged name/type record without reading caller-supplied accessors.
-  try{return typeof File!=='undefined'&&typeof Object.getOwnPropertyDescriptor(File.prototype,'name')?.get?.call(value)==='string';}
-  catch{return false;}
+function preparedFile(value: unknown): File {
+  if (!value || typeof value !== 'object' || ![Object.prototype, null].includes(Object.getPrototypeOf(value))) throw new TypeError('Share files must be prepared data records.');
+  const fields = Object.getOwnPropertyDescriptors(value);
+  if (Reflect.ownKeys(fields).some(key => typeof key !== 'string' || !['name','mimeType','data','lastModified'].includes(key)) ||
+      Object.values(fields).some(field => !('value' in field) || !field.enumerable)) throw new TypeError('Invalid share file record.');
+  const name = fields.name?.value, mimeType = fields.mimeType?.value, data = fields.data?.value;
+  const lastModified = fields.lastModified?.value;
+  if (typeof name !== 'string' || !name.length || name.length > 255 || typeof mimeType !== 'string' || mimeType.length > 255 ||
+      (lastModified !== undefined && (!Number.isFinite(lastModified) || lastModified < 0))) throw new TypeError('Invalid share file metadata.');
+  return new File([NSEData.from(data).blob(mimeType)], name, { type: mimeType, ...(lastModified === undefined ? {} : { lastModified }) });
 }
 function normalize(request: AppShareRequest,base:()=>string): NativeShareRequest {
   if (!request || typeof request !== 'object' || Array.isArray(request) ||
@@ -38,8 +44,8 @@ function normalize(request: AppShareRequest,base:()=>string): NativeShareRequest
       const files:File[]=[];
       for(let index=0;index<field.value.length;index++){
         const entry=Object.getOwnPropertyDescriptor(field.value,String(index));
-        if(!entry||!('value' in entry)||!isFile(entry.value))throw new TypeError('Share files must be prepared File objects.');
-        files.push(entry.value);
+        if(!entry||!('value' in entry))throw new TypeError('Share files must be prepared data records.');
+        files.push(preparedFile(entry.value));
       }
       values.files=Object.freeze(files) as unknown as File[];
       continue;

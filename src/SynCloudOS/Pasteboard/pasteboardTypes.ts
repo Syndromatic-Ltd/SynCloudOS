@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
 import type { SynCloudOSPolicyDecision, SynCloudOSPolicySubject } from "../PolicyKit/policyTypes";
 
@@ -56,14 +57,17 @@ export type PasteboardRepresentation =
       readonly value: { readonly typeId: string; readonly documentId: string };
     }
   | { readonly type: `application/x-syncloudos-${string}`; readonly value: PasteboardCanonicalValue }
-  | { readonly type: `image/${string}` | "application/octet-stream"; readonly value: Blob };
+  | { readonly type: `image/${string}` | "application/octet-stream"; readonly value: NSEData };
 
 export interface LazyPasteboardRepresentation {
   readonly type: PasteboardRepresentation["type"];
-  provide(signal: AbortSignal): PasteboardRepresentation["value"] | Promise<PasteboardRepresentation["value"]>;
+  provide(signal: AbortSignal): PasteboardRepresentation["value"] | NSEDataConvertible | Promise<PasteboardRepresentation["value"] | NSEDataConvertible>;
 }
 
-export type PasteboardRepresentationInput = PasteboardRepresentation | LazyPasteboardRepresentation;
+export type PasteboardRepresentationInput =
+  | Exclude<PasteboardRepresentation, { readonly value: NSEData }>
+  | { readonly type: `image/${string}` | "application/octet-stream"; readonly value: NSEDataConvertible }
+  | LazyPasteboardRepresentation;
 
 export interface PasteboardAdapter {
   read(

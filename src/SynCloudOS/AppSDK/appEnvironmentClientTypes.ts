@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import type { NSEDataConvertible } from "../../Foundation/NSEData";
 import type { FilePanelReference, FilePanelReleaseReason, FilePanelResult, FilePanelSaveTarget, OpenPanelRequest, SavePanelRequest } from "../FilePanels";
 import type { SynCloudOSAlertRequest } from "../SystemUI/alertCenter";
 import type { IFXImageResource } from "../../FX/ImageFX/IFXImageResource";
@@ -106,7 +107,7 @@ export interface AppShareRequest {
   readonly text?: string;
   readonly url?: string;
   /** Immutable file content prepared before the action gesture. No handles or lazy producers. */
-  readonly files?: readonly File[];
+  readonly files?: readonly { readonly name: string; readonly mimeType: string; readonly data: NSEDataConvertible; readonly lastModified?: number }[];
 }
 
 /** Read-only facts projected by the existing service; querying never prompts. */
