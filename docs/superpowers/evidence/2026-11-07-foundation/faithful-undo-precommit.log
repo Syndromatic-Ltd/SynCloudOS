@@ -8,4 +8,3 @@ npm notice run vitest run tests/runtime/undo-manager.test.ts tests/runtime/found
       Tests  24 passed (24)
    Start at  19:20:36
    Duration  251ms (transform 120ms, setup 57ms, import 104ms, tests 17ms, environment 0ms)
-
