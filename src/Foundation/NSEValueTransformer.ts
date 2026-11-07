@@ -42,7 +42,27 @@ export class NSEValueTransformer<TSource = unknown, TTarget = unknown> {
     throw new Error("Subclasses must implement transformedValue.");
   }
 
-  reverseTransformedValue(_value: TTarget): TSource {
-    throw new Error("Reverse transformation is not supported.");
+  reverseTransformedValue(value: TTarget): TSource {
+    const transformerClass = this.constructor as typeof NSEValueTransformer;
+    if (!transformerClass.allowsReverseTransformation()) throw new Error("Reverse transformation is not supported.");
+    return this.transformedValue(value as unknown as TSource) as unknown as TSource;
   }
 }
+
+export const NSENegateBooleanTransformerName = "NSNegateBoolean";
+export const NSEIsNilTransformerName = "NSIsNil";
+export const NSEIsNotNilTransformerName = "NSIsNotNil";
+
+class NegateBooleanTransformer extends NSEValueTransformer<boolean, boolean> {
+  static override allowsReverseTransformation(): boolean { return true; }
+  override transformedValue(value: boolean): boolean { return !value; }
+}
+class IsNilTransformer extends NSEValueTransformer<unknown, boolean> {
+  override transformedValue(value: unknown): boolean { return value == null; }
+}
+class IsNotNilTransformer extends NSEValueTransformer<unknown, boolean> {
+  override transformedValue(value: unknown): boolean { return value != null; }
+}
+NSEValueTransformer.setValueTransformer(new NegateBooleanTransformer(), NSENegateBooleanTransformerName);
+NSEValueTransformer.setValueTransformer(new IsNilTransformer(), NSEIsNilTransformerName);
+NSEValueTransformer.setValueTransformer(new IsNotNilTransformer(), NSEIsNotNilTransformerName);
