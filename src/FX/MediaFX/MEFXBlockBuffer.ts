@@ -116,14 +116,17 @@ function prepareSegments(input: MEFXBlockSegmentInput | readonly MEFXBlockSegmen
     segments: readonly PreparedSegment[];
     byteLength: number;
 }> {
-    const supplied = (input instanceof Uint8Array || input instanceof NSEData || input instanceof ArrayBuffer) ? [input] : Array.isArray(input) ? input : [input];
+    const supplied: readonly MEFXBlockSegmentInput[] = Array.isArray(input) ? input : [input as MEFXBlockSegmentInput];
     const prepared: PreparedSegment[] = [];
     let total = 0;
 
     for (const segment of supplied) {
-        const current = segment instanceof Uint8Array || segment instanceof NSEData || segment instanceof ArrayBuffer
-            ? (() => { const bytes = new Uint8Array(NSEData.from(segment).bytes); return Object.freeze({ bytes, offset: 0, length: bytes.byteLength }); })()
-            : segmentRecord(segment);
+        let bytes: Uint8Array | undefined;
+        try { bytes = new Uint8Array(NSEData.from(segment as NSEDataConvertible).bytes); }
+        catch { /* Non-byte input is validated as a bounded segment record below. */ }
+        const current = bytes
+            ? Object.freeze({ bytes, offset: 0, length: bytes.byteLength })
+            : segmentRecord(segment as Exclude<MEFXBlockSegmentInput, NSEDataConvertible>);
         if (current.length > maximumPortableBlockBytes - total)
             throw new RangeError("Media block exceeds the " + maximumPortableBlockBytes + " byte portable block limit.");
         total += current.length;

@@ -74,3 +74,13 @@ Framework source typechecking, architecture, SDK build/package/packed consumers 
 ## Integration notes and open questions
 
 No owner-design question blocks the FX implementation. Parent integration covers `mountedMediaClient`, `useMedia`, `MIDIService`, font resource loading, runtime image services and app facades. Parent was also notified to migrate the two native-recorder constructions in `framework-settlement.test.ts`. FX source is frozen after `7bee8b7`; only this report/evidence commit follows. Canonical inventory must be regenerated against the final combined framework commit.
+
+## Review follow-up: genuine cross-realm convertible inputs
+
+The reviewer reproduced valid foreign ArrayBuffer/Uint8Array rejection in provider, media-segment and container-source dispatch. The same pre-normalisation gate existed in barcode payload construction. All four used realm-local instanceof/prototype checks before Foundation's intrinsic validation.
+
+Eight new cases use `vm.runInNewContext` to create actual foreign ArrayBuffers and bounded Uint8Array subviews. They failed before the fix (two cases per family), then passed after each dispatch attempted `NSEData.from` before interpreting callback, segment-record or async-stream alternatives. Media segment records and async-stream fragments are covered too. No prototype swapping or mocked foreign brands are used.
+
+The remaining FX instanceof checks were inspected: payload methods normalise into local Foundation views first; raw numeric pixel/index destinations and native private transfer protocols retain their documented checks. No further app-facing convertible-input gate was found.
+
+Validation: **59 passed across 7 files**, covering Foundation byte contracts, graphics providers, media blocks/mounted media, container I/O and both barcode suites. Evidence: [part-b-fx-cross-realm-red.log](part-b-fx-cross-realm-red.log), [part-b-fx-cross-realm-green.log](part-b-fx-cross-realm-green.log). `git diff --check` passed. No SDK build or full suite was run by this follow-up; parent retains aggregate validation ownership. This follow-up supersedes the earlier source freeze point without changing public signatures or carve-out accounting.

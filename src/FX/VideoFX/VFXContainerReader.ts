@@ -67,10 +67,14 @@ function limit(value: unknown, fallback: number, name: string): number {
 }
 
 async function* source(input: NSEDataConvertible | AsyncIterable<NSEDataConvertible>): AsyncIterable<NSEDataConvertible> {
-  if (input instanceof Uint8Array || input instanceof NSEData || input instanceof ArrayBuffer) { yield input; return; }
-  if (!input || typeof (input as AsyncIterable<NSEDataConvertible>)[Symbol.asyncIterator] !== "function")
-    throw new TypeError("Video container source must be Uint8Array or AsyncIterable<NSEDataConvertible>.");
-  yield* input;
+  let data: NSEData | undefined;
+  try { data = NSEData.from(input as NSEDataConvertible); }
+  catch { /* Non-byte input must supply the async stream protocol below. */ }
+  if (data) { yield data; return; }
+  const stream = input as AsyncIterable<NSEDataConvertible>;
+  if (!stream || typeof stream[Symbol.asyncIterator] !== "function")
+    throw new TypeError("Video container source must be NSEDataConvertible or AsyncIterable<NSEDataConvertible>.");
+  yield* stream;
 }
 
 export class VFXContainerReader {

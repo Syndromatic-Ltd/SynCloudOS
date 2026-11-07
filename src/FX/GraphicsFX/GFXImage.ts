@@ -264,14 +264,17 @@ export class GFXDataProvider {
     #length: number;
     #released = false;
     constructor(input: NSEDataConvertible | GFXCallbackDataProvider) {
-        if (input instanceof NSEData || input instanceof Uint8Array || input instanceof ArrayBuffer) {
-            const data = NSEData.from(input).bytes;
+        let bytes: Readonly<Uint8Array<ArrayBuffer>> | undefined;
+        try { bytes = NSEData.from(input as NSEDataConvertible).bytes; }
+        catch { /* Non-byte input is validated as a callback provider below. */ }
+        if (bytes) {
+            const data = bytes;
             if (data.length > 64 * 1024 * 1024)
                 throw new RangeError("Invalid or oversized provider data.");
             this.#bytes = new Uint8Array(data);
             this.#length = data.length;
         } else {
-            const data = input;
+            const data = input as GFXCallbackDataProvider;
             if (!data || typeof data !== "object" || !Number.isSafeInteger(data.length) || data.length < 0 || data.length > 64 * 1024 * 1024 || typeof data.read !== "function" || typeof data.release !== "function")
                 throw new RangeError("Invalid or oversized provider data.");
             this.#length = data.length;
