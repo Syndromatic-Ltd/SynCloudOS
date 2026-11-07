@@ -608,6 +608,8 @@ export type {
   NSEMenuRuntimePort,
 } from "./Menus/menuTypes";
 export { NSETabViewController, NSETabViewItem } from "./Navigation/NSETabViewController";
+export { useNSEApplicationNavigationChrome } from "./Navigation/NSEApplicationNavigationChrome";
+export type { NSEApplicationNavigationChromeState } from "./Navigation/NSEApplicationNavigationChrome";
 export type { NSETabViewControllerOptions, NSETabViewControllerSnapshot, NSETabViewControllerTabStyle, NSETabViewItemOptions } from "./Navigation/NSETabViewController";
 export {
   NSETabView,
