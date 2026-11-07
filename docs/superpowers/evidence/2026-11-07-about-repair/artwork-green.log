@@ -1,0 +1,11 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/layer-artwork.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  08:51:16
+   Duration  4.47s (transform 2.09s, setup 27ms, import 2.57s, tests 4ms, environment 1.65s)
+

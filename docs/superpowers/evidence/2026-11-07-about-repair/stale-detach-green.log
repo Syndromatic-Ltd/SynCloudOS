@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-tab-transition-lifetime.test.tsx tests/runtime/nse-custom-presentation.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  2 passed (2)
+      Tests  5 passed (5)
+   Start at  10:50:05
+   Duration  7.09s (transform 8.77s, setup 53ms, import 11.83s, tests 166ms, environment 1.80s)
+

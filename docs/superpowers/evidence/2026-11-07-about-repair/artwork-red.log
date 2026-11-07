@@ -1,0 +1,35 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/layer-artwork.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+ ❯ tests/runtime/layer-artwork.test.tsx (1 test | 1 failed) 8ms
+   × preserves authored tracks and disables actions while writing their model values 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/layer-artwork.test.tsx > preserves authored tracks and disables actions while writing their model values
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/layer-artwork.test.tsx:20:33
+     18|     { keyPath: "opacity", values: [0, 0.8, 1], keyTimes: [0, 0.4, 1] },
+     19|   ] });
+     20|   expect(writes.every(Boolean)).toBe(true);
+       |                                 ^
+     21|   const basic = animations.find(animation => animation instanceof AFXB…
+     22|   expect(basic).toBeDefined();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  08:49:14
+   Duration  3.63s (transform 1.72s, setup 19ms, import 2.17s, tests 8ms, environment 1.24s)
+

@@ -1,0 +1,137 @@
+{
+  "errors": [],
+  "samples": [
+    [
+      {
+        "section": null,
+        "opacity": "1",
+        "transform": "none",
+        "animations": 1
+      },
+      {
+        "section": "company",
+        "opacity": "1",
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "animations": 1
+      },
+      {
+        "section": null,
+        "opacity": "0",
+        "transform": "none",
+        "animations": 1
+      },
+      {
+        "section": "framework",
+        "opacity": "1",
+        "transform": "matrix(0.975, 0, 0, 0.975, 219.6, 11.25)",
+        "animations": 1
+      }
+    ],
+    [
+      {
+        "section": null,
+        "opacity": "1",
+        "transform": "none",
+        "animations": 1
+      },
+      {
+        "section": "company",
+        "opacity": "1",
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "animations": 1
+      },
+      {
+        "section": null,
+        "opacity": "0",
+        "transform": "none",
+        "animations": 1
+      },
+      {
+        "section": "framework",
+        "opacity": "1",
+        "transform": "matrix(0.975, 0, 0, 0.975, 219.6, 11.25)",
+        "animations": 1
+      }
+    ],
+    [
+      {
+        "section": null,
+        "opacity": "0.29472",
+        "transform": "none",
+        "animations": 1
+      },
+      {
+        "section": "company",
+        "opacity": "1",
+        "transform": "matrix(0.999365, 0, 0, 0.999365, -2.15563, 0.285784)",
+        "animations": 1
+      },
+      {
+        "section": null,
+        "opacity": "0.70528",
+        "transform": "none",
+        "animations": 1
+      },
+      {
+        "section": "framework",
+        "opacity": "1",
+        "transform": "matrix(0.975, 0, 0, 0.975, 219.6, 11.25)",
+        "animations": 1
+      }
+    ],
+    [
+      {
+        "section": null,
+        "opacity": "0.0840557",
+        "transform": "none",
+        "animations": 1
+      },
+      {
+        "section": "company",
+        "opacity": "1",
+        "transform": "matrix(0.997121, 0, 0, 0.997121, -9.77312, 1.29568)",
+        "animations": 1
+      },
+      {
+        "section": null,
+        "opacity": "0.915944",
+        "transform": "none",
+        "animations": 1
+      },
+      {
+        "section": "framework",
+        "opacity": "1",
+        "transform": "matrix(0.987866, 0, 0, 0.987866, 106.589, 5.46052)",
+        "animations": 1
+      }
+    ],
+    [
+      {
+        "section": null,
+        "opacity": "1",
+        "transform": "none",
+        "animations": 0
+      },
+      {
+        "section": "framework",
+        "opacity": "1",
+        "transform": "matrix(0.999147, 0, 0, 0.999147, 7.48929, 0.383673)",
+        "animations": 1
+      }
+    ],
+    [
+      {
+        "section": null,
+        "opacity": "1",
+        "transform": "none",
+        "animations": 0
+      },
+      {
+        "section": "framework",
+        "opacity": "1",
+        "transform": "matrix(0.999998, 0, 0, 0.999998, 0.0173816, 0.000890453)",
+        "animations": 1
+      }
+    ]
+  ]
+}

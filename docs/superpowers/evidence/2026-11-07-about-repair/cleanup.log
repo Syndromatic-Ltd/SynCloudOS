@@ -1,0 +1,19 @@
+Detached SDK checkout removed after deleting only its node_modules junction.
+Original framework node_modules/.bin/vitest.cmd remains present.
+
+LocalAddress LocalPort OwningProcess
+------------ --------- -------------
+127.0.0.1         5387         69072
+127.0.0.1         5199         18348
+127.0.0.1         5173         72912
+
+
+Final detached SDK checkout removed; junction deleted first and original vitest checked.
+
+LocalAddress LocalPort OwningProcess
+------------ --------- -------------
+127.0.0.1         5387         69072
+127.0.0.1         5199         80364
+127.0.0.1         5173         72912
+
+

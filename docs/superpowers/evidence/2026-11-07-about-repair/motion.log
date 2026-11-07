@@ -1,0 +1,52 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('[role="tab"]:visible').first()
+    - locator resolved to <button role="tab" tabindex="0" type="button" aria-label="Company" data-pressed="false" aria-selected="false" data-selected="false" data-nse-tab-chrome-state="up" data-nse-tab-chrome-active="true" data-nse-tab-destination="company" data-nse-tab-visual-state="normal" data-nse-tab-chrome-variant="tall" data-nse-appearance-state="normal" id="nse-tab-bar-_r_19_-tab-company" data-nse-tab-chrome-segment="first" data-nse-tab-presentation-state="normal" class="nse-tab-bar-tab nse-control-button" data-nse-tab-…>…</button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div tabindex="-1" data-mode="light" data-nse-appearance="atmo" data-nse-chrome="standard" data-nse-contrast="normal" data-nse-transparency="normal" class="nse-control-alert-backdrop" data-nse-colour-scheme-requested="auto" data-nse-colour-scheme-resolved="light" data-syncloudos-runtime-owner="runtime:fb4d0c4d-cc0b-4d85-9d44-f540dbbbc73d" data-syncloudos-focus-scope="system-alert:error-1794045582824-7f6c13e0-22aa-4b6e-a78c-402337c224cc">…</div> intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - <div tabindex="-1" data-mode="light" data-nse-appearance="atmo" data-nse-chrome="standard" data-nse-contrast="normal" data-nse-transparency="normal" class="nse-control-alert-backdrop" data-nse-colour-scheme-requested="auto" data-nse-colour-scheme-resolved="light" data-syncloudos-runtime-owner="runtime:fb4d0c4d-cc0b-4d85-9d44-f540dbbbc73d" data-syncloudos-focus-scope="system-alert:error-1794045582824-7f6c13e0-22aa-4b6e-a78c-402337c224cc">…</div> intercepts pointer events
+  - retrying click action
+    - waiting 100ms
+    - waiting for element to be visible, enabled and stable
+  - element was detached from the DOM, retrying
+
+    at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-about-repair\capture-motion.mjs:21:55 {
+  log: [
+    `  - waiting for locator('[role="tab"]:visible').first()`,
+    '    - locator resolved to <button role="tab" tabindex="0" type="button" aria-label="Company" data-pressed="false" aria-selected="false" data-selected="false" data-nse-tab-chrome-state="up" data-nse-tab-chrome-active="true" data-nse-tab-destination="company" data-nse-tab-visual-state="normal" data-nse-tab-chrome-variant="tall" data-nse-appearance-state="normal" id="nse-tab-bar-_r_19_-tab-company" data-nse-tab-chrome-segment="first" data-nse-tab-presentation-state="normal" class="nse-tab-bar-tab nse-control-button" data-nse-tab-…>…</button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <div tabindex="-1" data-mode="light" data-nse-appearance="atmo" data-nse-chrome="standard" data-nse-contrast="normal" data-nse-transparency="normal" class="nse-control-alert-backdrop" data-nse-colour-scheme-requested="auto" data-nse-colour-scheme-resolved="light" data-syncloudos-runtime-owner="runtime:fb4d0c4d-cc0b-4d85-9d44-f540dbbbc73d" data-syncloudos-focus-scope="system-alert:error-1794045582824-7f6c13e0-22aa-4b6e-a78c-402337c224cc">…</div> intercepts pointer events',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    - waiting for element to be visible, enabled and stable',
+    '    - element is visible, enabled and stable',
+    '    - scrolling into view if needed',
+    '    - done scrolling',
+    '    - <div tabindex="-1" data-mode="light" data-nse-appearance="atmo" data-nse-chrome="standard" data-nse-contrast="normal" data-nse-transparency="normal" class="nse-control-alert-backdrop" data-nse-colour-scheme-requested="auto" data-nse-colour-scheme-resolved="light" data-syncloudos-runtime-owner="runtime:fb4d0c4d-cc0b-4d85-9d44-f540dbbbc73d" data-syncloudos-focus-scope="system-alert:error-1794045582824-7f6c13e0-22aa-4b6e-a78c-402337c224cc">…</div> intercepts pointer events',
+    '  - retrying click action',
+    '    - waiting 100ms',
+    '    - waiting for element to be visible, enabled and stable',
+    '  - element was detached from the DOM, retrying'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1
