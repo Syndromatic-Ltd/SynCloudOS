@@ -23,6 +23,7 @@ import type { WindowRecord } from "../../SynCloudOS/SynCloudOS";
 import { NSEWindowTitlebarDocumentContext } from "./windowTitlebarContext";
 import type { NSEWindowViewProps } from "./windowViewTypes";
 import type { NSEWindowAppearanceRecipeId } from "./windowAppearanceContract";
+import "./nse-windows.css";
 
 export interface NSEWindowTitleBarProps {
   readonly record: WindowRecord;
@@ -79,7 +80,7 @@ function NSEWindowControl({
 }
 
 export function NSEWindowTitleBar(props: NSEWindowTitleBarProps | { readonly title: string; readonly isKeyWindow: boolean }) {
-  if ("title" in props) return <header className="nse-window__titlebar nse-window__titlebar--standard" data-window-titlebar="" data-window-active={props.isKeyWindow ? "true" : "false"} data-window-appearance-recipe={props.isKeyWindow ? "window.standard.head.active" : "window.standard.head.inactive"}>
+  if ("title" in props) return <header className="nse-window__titlebar nse-window__titlebar--standard" data-window-titlebar="" data-window-host-titlebar="" style={{ height: "100%", minHeight: "100%" }} data-window-active={props.isKeyWindow ? "true" : "false"} data-window-appearance-recipe={props.isKeyWindow ? "window.standard.head.active" : "window.standard.head.inactive"}>
     <h2 className="nse-window__title">{props.title}</h2>
   </header>;
   return <NSEManagedWindowTitleBar {...props} />;

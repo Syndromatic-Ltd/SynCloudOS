@@ -4477,7 +4477,8 @@
 }
 
 /* Title bar: metal for the key window, quieter for the rest. */
-[data-nse-appearance="atmo"] .nse-window-view:not([data-window-custom-chrome-active="true"]) .nse-window__titlebar {
+[data-nse-appearance="atmo"] .nse-window-view:not([data-window-custom-chrome-active="true"]) .nse-window__titlebar,
+[data-nse-appearance="atmo"] .nse-window__titlebar[data-window-host-titlebar] {
   color: var(--nse-atmo-window-title);
   background: var(--nse-atmo-window-head);
   border-block-end: 1px solid var(--nse-atmo-window-divider);
@@ -4485,7 +4486,8 @@
   text-shadow: var(--nse-atmo-window-title-emboss);
 }
 
-[data-nse-appearance="atmo"] .nse-window-view:not([data-window-custom-chrome-active="true"]) .nse-window__titlebar[data-window-active="false"] {
+[data-nse-appearance="atmo"] .nse-window-view:not([data-window-custom-chrome-active="true"]) .nse-window__titlebar[data-window-active="false"],
+[data-nse-appearance="atmo"] .nse-window__titlebar[data-window-host-titlebar][data-window-active="false"] {
   color: var(--nse-atmo-window-title-inactive);
   background: var(--nse-atmo-window-head-inactive);
 }
