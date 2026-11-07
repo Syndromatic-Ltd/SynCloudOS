@@ -227,7 +227,7 @@ const app = createSynWare({
     runtime: { policy: { public: true } },
     presentations: ["desktop", "tablet", "mobile"],
     routes: [{ path: "/fx-browser-lifecycle", primary: true }],
-    permissions: ["haptics.play", "motion.read", "motion.requestAuthorization", "midi.access", "location.read", "location.request"],
+    entitlements: ["haptics.play", "motion.read", "motion.requestAuthorization", "midi.access", "location.read", "location.request"],
     webspring: { visible: true, order: 1 },
   },
   root: Probe,

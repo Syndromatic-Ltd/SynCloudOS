@@ -109,7 +109,7 @@ const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: 
   views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
   defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "Independent" } }
 }}, components: { website: Website } });
-const app = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.probe", version: "1.0.0", displayName: "Probe", runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/probe", primary: true }], permissions: ["lumina.index", "lumina.query"], services: [{ id: "journal.content", required: false }, { id: "syncal.calendar", required: false }], webspring: { visible: true, order: 1 } }, root: Probe });
+const app = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.probe", version: "1.0.0", displayName: "Probe", runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/probe", primary: true }], entitlements: ["lumina.index", "lumina.query"], services: [{ id: "journal.content", required: false }, { id: "syncal.calendar", required: false }], webspring: { visible: true, order: 1 } }, root: Probe });
 const element = document.getElementById("root")!;
 mountSynCloudOS({ element, bundles: [app], shell, authentication: "disabled" }).then(host => { window.consumer.dispose = () => host.dispose("consumer verification"); }).catch(error => { window.consumer.error = String(error); });
 `;

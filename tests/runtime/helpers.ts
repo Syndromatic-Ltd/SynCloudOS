@@ -145,9 +145,13 @@ export function createTestBundle(
   overrides: TestManifestOverrides | SynCloudOSAppManifest = {},
   bundleOverrides: Omit<Partial<TrustedSynWareBundle>, "manifest"> = {}
 ): TrustedSynWareBundle {
-  const manifest = "icon" in overrides && "webspring" in overrides && "window" in overrides
+  const sourceManifest = "icon" in overrides && "webspring" in overrides && "window" in overrides
     ? overrides
     : createTestManifest(overrides);
+  const manifest = sourceManifest.policy || sourceManifest.type === "system"
+    ? sourceManifest
+    : { ...sourceManifest, policy: { public: true } };
+  const entitlements = bundleOverrides.entitlements ?? (manifest.type === "system" ? ["diagnostics.view"] : []);
   const testManifest = {
     schemaVersion: 1,
     bundleIdentifier: manifest.bundleIdentifier,
@@ -158,7 +162,8 @@ export function createTestBundle(
       id,
       required: manifest.requiredServices.includes(id),
     })),
-    permissions: manifest.type === "system" ? ["diagnostics.view"] : ["app.open.public"],
+    entitlements: [...entitlements],
+    runtime: { type: manifest.type, ...(manifest.policy ? { policy: manifest.policy } : {}) },
     webspring: {
       visible: manifest.webspring.visible,
       order: manifest.webspring.order,
@@ -186,7 +191,7 @@ export function createTestBundle(
     modulePath: `${manifest.path}Contents/index.tsx`,
     services: [...manifest.requiredServices, ...(manifest.optionalServices ?? [])],
     optionalServices: manifest.optionalServices,
-    permissions: manifest.type === "system" ? ["diagnostics.view"] : ["app.open.public"],
+    entitlements: [...entitlements],
     loadModule,
     ...remainingBundleOverrides
   };

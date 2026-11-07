@@ -57,7 +57,7 @@ const terminalManifest = {
   version: "1.0.0",
   displayName: "Document terminal fixture",
   routes: [{ path: "/terminal-owner", primary: true }],
-  permissions: ["journal.publisher.open"],
+  entitlements: ["journal.publisher.open"],
   services: [{ id: "terminal-owner.provider", required: true }],
 } as const;
 

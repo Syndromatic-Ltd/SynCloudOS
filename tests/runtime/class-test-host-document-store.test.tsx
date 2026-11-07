@@ -100,7 +100,7 @@ function createClassFixture(configuration = provisionNote(), options: ClassFixtu
       displayName: "Class document store",
       version: "1.0.0",
       documentTypes: [{ id: options.declaredTypeId ?? typeId, displayName: "Class note" }],
-      permissions: options.permissions ?? ["documentStore.drafts.read", "documentStore.draft.write"],
+      entitlements: options.permissions ?? ["documentStore.drafts.read", "documentStore.draft.write"],
     },
     applicationDocuments: {
       ...configuration,

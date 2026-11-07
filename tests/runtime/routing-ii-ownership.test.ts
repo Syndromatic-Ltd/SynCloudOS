@@ -30,13 +30,13 @@ function routeBundle(
   routes: readonly Readonly<{ path: string; primary?: boolean; match?: "exact" | "prefix" }>[],
 ) {
   return createSynWareBundle(createSynWare({
-    manifest: {
+    manifest: { runtime: { policy: { public: true } },
       schemaVersion: 1,
       bundleIdentifier: id,
       version: "1.0.0",
       displayName: id,
       routes,
-      permissions: ["app.open.public"],
+      entitlements: ["app.open.public"],
     },
     root: Root,
   }));

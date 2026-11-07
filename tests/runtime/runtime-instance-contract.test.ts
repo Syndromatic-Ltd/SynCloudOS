@@ -169,13 +169,13 @@ describe("createSynCloudOS", () => {
       }],
     } as const);
     const definition = createSynWare({
-      manifest: {
+      manifest: { runtime: { policy: { public: true } },
         schemaVersion: 1,
         bundleIdentifier: "com.example.music",
         version: "1.0.0",
         displayName: "Music",
         routes: [{ path: "/music", primary: true, match: "prefix" }],
-        permissions: ["app.open.public"],
+        entitlements: ["app.open.public"],
       },
       root: () => null,
       routes,
@@ -223,13 +223,13 @@ describe("createSynCloudOS", () => {
       }],
     } as const);
     const definition = createSynWare({
-      manifest: {
+      manifest: { runtime: { policy: { public: true } },
         schemaVersion: 1,
         bundleIdentifier: "com.example.music",
         version: "1.0.0",
         displayName: "Music",
         routes: [{ path: "/music", primary: true, match: "prefix" }],
-        permissions: ["app.open.public"],
+        entitlements: ["app.open.public"],
       },
       root: () => null,
       routes,

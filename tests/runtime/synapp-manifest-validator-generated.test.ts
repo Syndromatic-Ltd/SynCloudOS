@@ -37,7 +37,7 @@ it("validates exactly as a runtime compile of the schema with the same options",
   const compiled = ajv.compile(schema);
   const base = { schemaVersion: 1, bundleIdentifier: "com.syndromatic.example", version: "1.0.0", displayName: "Example" };
   const cases: unknown[] = [
-    { schemaVersion: 1, bundleIdentifier: "com.example.fixture.window", version: "2.0.0", displayName: "Window fixture", runtime: { presentation: "windowedView" }, permissions: ["diagnostics.view"] },
+    { schemaVersion: 1, bundleIdentifier: "com.example.fixture.window", version: "2.0.0", displayName: "Window fixture", runtime: { presentation: "windowedView" }, entitlements: ["diagnostics.view"] },
     { schemaVersion: 1, bundleIdentifier: "com.example.fixture.routes", version: "1.2.3", displayName: "Routes fixture", routes: [{ path: "/fixture", primary: true }], services: [{ id: "catalogue", required: true }] },
     base,
     { ...base, bundleIdentifier: "Com.Example.Mixed-Case42" },

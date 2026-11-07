@@ -49,7 +49,7 @@ const MediaProbe = createSynWare({
     version: "1.0.0",
     displayName: "Media Probe",
     routes: [{ path: "/media-probe", primary: true }],
-    permissions: [],
+    entitlements: [],
   },
   root() {
     return null;

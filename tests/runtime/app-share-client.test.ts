@@ -51,7 +51,7 @@ function createFixture(nativeShare?: (request: ShareData) => Promise<void>, perm
     version: "1.0.0",
     displayName: "Share reader",
     routes: [{ path: "/share-reader", primary: true }],
-    permissions,
+    entitlements: permissions,
   });
   const mounted = mountTestSynWareRuntime(runtime, "com.example.share-reader");
   activeMounts.push(mounted);

@@ -140,13 +140,13 @@ it("projects canonical programmatic query and nested not-found failures as typed
     }],
   } as const);
   registerTestSynWare(runtime, createSynWare({
-    manifest: {
+    manifest: { runtime: { policy: { public: true } },
       schemaVersion: 1,
       bundleIdentifier: "com.example.navigation-query-target",
       version: "1.0.0",
       displayName: "Navigation query target",
       routes: [{ path: "/navigation-query", primary: true, match: "prefix" }],
-      permissions: ["app.open.public"],
+      entitlements: ["app.open.public"],
     },
     root: () => null,
     routes,
@@ -288,7 +288,7 @@ it("resolves only declared, host-provided app-scoped services and fails closed o
       version: "1.0.0",
       displayName: "Service example",
       services: [{ id: "com.syndromatic.search", required: true, minimumVersion: "1.0.0" }],
-      permissions: ["clipboard.read"],
+      entitlements: ["clipboard.read"],
     },
     root: () => null,
   });
@@ -511,7 +511,7 @@ it("delivers declared notification actions only while their mounted client remai
       bundleIdentifier: "com.syndromatic.environment-notification",
       version: "1.0.0",
       displayName: "Environment notification",
-      permissions: ["notifications.post"],
+      entitlements: ["notifications.post"],
     },
     root: () => null,
   });
