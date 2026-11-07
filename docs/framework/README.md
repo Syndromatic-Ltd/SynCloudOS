@@ -67,4 +67,6 @@ documents the Atmo control for VideoFX remote playback.
 | [Read-only storage diagnostics](storage-diagnostics.md) | Inspect approximate origin usage, quota and current persistence status |
 | [Webspring](webspring.md) | Define the shell, the Board launcher, branding and content |
 | [Authentication](authentication.md) | Add sign-in, server handlers and roles |
+| [Privacy](privacy.md) | Manage per-application device consent and revocation |
+| [Installed applications](installed-applications.md) | Declare installation and understand browser-managed application capabilities |
 | [Google sign-in setup](google-oidc-setup.md) | Connect Google as the identity provider |
