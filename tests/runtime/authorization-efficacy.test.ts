@@ -71,3 +71,13 @@ describe("authorisation efficacy regressions", () => {
   });
 });
 
+
+it("R5 rejects a launch whose required entitlements are absent", () => {
+ const runtime = createTestRuntime();
+ const app = createTestManifest({policy:{public:true, requiredEntitlements:["location.request"]}});
+ runtime.apps.register(app);
+ const subjectGrant=runtime.configurationProfiles.issueSubject({user:{id:"host",displayName:"Host",role:"system",isAuthenticated:true,isAnonymous:false},role:"system",capabilities:["*"],isAuthenticated:true},{purpose:"launch admission"});
+ const decision=runtime.configurationProfiles.authorise({action:"app.launch",app,subjectGrant});
+ expect(decision.allowed).toBe(false);
+ expect(decision.reason).toContain("entitlements");
+});

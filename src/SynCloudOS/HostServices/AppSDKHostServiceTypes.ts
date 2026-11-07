@@ -41,3 +41,5 @@ export type { VideoCaptureService, VideoCaptureSessionHost } from "../VideoFX/Vi
 export type { RuntimeResourceParticipant } from "../Resources/RuntimeResourceLedger";
 export type { DocumentEditAdmission } from "../Documents/documentEditAdmission";
 export type { DocumentAssetPreparedEdit } from "../Documents/DocumentAssetDocumentBinding";
+
+export type { PrivacyApplicationPort, PrivacyAuthorizationStatus, PrivacyStore } from "../Privacy";

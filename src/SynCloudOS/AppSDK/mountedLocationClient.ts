@@ -23,7 +23,7 @@ import type {
   LFXLocationRequestOptions,
   LFXLocationWatchOptions,
 } from "../../FX/LocationFX/LFXLocationManager";
-import type { LocationService } from "../HostServices/AppSDKHostServiceTypes";
+import type { LocationService, PrivacyApplicationPort } from "../HostServices/AppSDKHostServiceTypes";
 import { createMountedResourceScope } from "../HostServices/mountedResourceScope";
 import type { MountedSettlementPort } from "./mountedSettlementPort";
 
@@ -41,6 +41,7 @@ export function createMountedLocationClient(
   authorise: (capability: MountedLocationCapability) => boolean,
   appId?: string,
   settlement?: MountedSettlementPort,
+  privacy?: PrivacyApplicationPort,
 ): LFXLocationClient {
   const scope = createMountedResourceScope(mountSignal, {
     maxResources: 8,
@@ -51,7 +52,7 @@ export function createMountedLocationClient(
     if (!permissions().includes(capability))
       throw securityError(`SynWare capability ${capability} must be declared.`);
     if (!authorise(capability))
-      throw securityError(`ConfigurationProfiles denied SynWare capability ${capability}.`);
+      throw securityError(`Privacy authorisation denied SynWare capability ${capability}.`);
   };
   return Object.freeze({
     createManager(signal?: AbortSignal): LFXLocationManager {
@@ -88,15 +89,31 @@ export function createMountedLocationClient(
         return Object.freeze<LFXLocationManager>({
           async getAuthorizationStatus() {
             if (!permissions().includes("location.read") || !authorise("location.read")) return "denied";
-            return manager.getAuthorizationStatus();
+            return privacy ? privacy.getAuthorizationStatus(() => manager.getAuthorizationStatus()) : manager.getAuthorizationStatus();
           },
           async current(options: LFXLocationRequestOptions = {}) {
             requireCapability("location.request");
-            return manager.current(options);
+            return privacy ? privacy.request(signal => manager.current({ ...options, signal }), { signal: options.signal }) : manager.current(options);
           },
           watch(options: LFXLocationWatchOptions, listener) {
             requireCapability("location.request");
-            const watch = manager.watch(options, listener);
+            const watchOwner = new AbortController();
+            const watchSignal = options.signal ? AbortSignal.any([options.signal, watchOwner.signal]) : watchOwner.signal;
+            let underlying: ReturnType<LFXLocationManager["watch"]> | undefined;
+            let unbindWatch = () => {};
+            const watch = { dispose() { watchOwner.abort(); underlying?.dispose(); unbindWatch(); } };
+            const startWatch = (signal: AbortSignal) => {
+              underlying = manager.watch({ ...options, signal }, location => {
+                if (signal.aborted || lease.aborted) return;
+                try { privacy?.assertRequestAllowed(); } catch { return; }
+                listener(location);
+              });
+              return underlying;
+            };
+            if (privacy) {
+              unbindWatch = privacy.bindResource(() => watch.dispose());
+              void privacy.request(startWatch, { signal: watchSignal, dispose: value => value.dispose() }).catch(() => watch.dispose());
+            } else startWatch(watchSignal);
             const exclusion = settlement?.exclude({
               owner: "location",
               kind: "watch",

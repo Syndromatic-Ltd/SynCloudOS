@@ -26,3 +26,7 @@ it("accepts Info.ts entitlements as unique named capabilities", () => {
   expect(validateSynWareManifest({ ...info, entitlements: ["location.read", "location.read"] }).ok).toBe(false);
   expect(validateSynWareManifest({ ...info, entitlements: ["invalid capability"] }).ok).toBe(false);
 });
+
+it("rejects the removed manifest permissions key", () => {
+ expect(validateSynWareManifest({ bundleIdentifier:"com.example.old",displayName:"Old",version:"1.0.0",permissions:["location.read"] }).ok).toBe(false);
+});

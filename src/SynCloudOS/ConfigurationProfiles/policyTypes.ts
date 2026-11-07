@@ -62,7 +62,7 @@ export interface SynCloudOSAppAccessPolicy {
   requiredAccessClasses?: SynCloudOSBetaAccessClass[];
   requiredRoles?: SynCloudOSRole[];
   requiredCapabilities?: string[];
-  requiredBundlePermissions?: string[];
+  requiredEntitlements?: string[];
 }
 
 export interface SynCloudOSPolicySubject {
