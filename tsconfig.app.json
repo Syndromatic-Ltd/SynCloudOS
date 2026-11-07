@@ -66,9 +66,6 @@
       "@syndromatic/syncloudos/nse/layout": [
         "./src/NSE/public/layout.ts"
       ],
-      "@syndromatic/syncloudos/nse/cover-flow": [
-        "./src/NSE/public/cover-flow.ts"
-      ],
       "@syndromatic/syncloudos/nse/system-ui": [
         "./src/NSE/public/system-ui.ts"
       ],
