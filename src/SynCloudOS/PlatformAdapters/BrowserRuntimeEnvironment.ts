@@ -476,13 +476,28 @@ const unavailableBrowserSafeArea = Object.freeze({ top: 0, right: 0, bottom: 0, 
  * browser on a second monitor reports that monitor's origin, which would put
  * every window beyond the page's right edge.
  */
+type BrowserWindowControlsOverlay = EventTarget & { readonly visible: boolean; getTitlebarAreaRect(): DOMRectReadOnly };
+function readWindowControlsOverlay(): BrowserWindowControlsOverlay | null {
+  if (typeof window === "undefined") return null;
+  return (window.navigator as Navigator & { readonly windowControlsOverlay?: BrowserWindowControlsOverlay }).windowControlsOverlay ?? null;
+}
+
 function readWorkArea(): RuntimeWorkAreaSnapshot {
   const viewport = readLayoutViewport();
+  let titlebarInset = 0;
+  try {
+    const overlay = readWindowControlsOverlay();
+    if (overlay?.visible) {
+      const rect = overlay.getTitlebarAreaRect();
+      if ([rect.y, rect.height].every(Number.isFinite) && rect.y >= 0 && rect.height > 0)
+        titlebarInset = Math.min(viewport.height, rect.y + rect.height);
+    }
+  } catch { /* Unreadable browser geometry cannot reserve application space. */ }
   return {
     x: 0,
-    y: 0,
+    y: titlebarInset,
     width: viewport.width,
-    height: viewport.height,
+    height: viewport.height - titlebarInset,
     devicePixelRatio: typeof window === "undefined" ? 1 : window.devicePixelRatio || 1,
     safeArea: unavailableBrowserSafeArea,
     safeAreaAvailability: "unavailable",
@@ -538,7 +553,12 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     };
   });
   const screen = createSnapshotSource(readScreen, (notify) => installWindowEvents(["resize"], notify));
-  const workArea = createSnapshotSource(readWorkArea, (notify) => installWindowEvents(["resize"], notify));
+  const workArea = createSnapshotSource(readWorkArea, (notify) => {
+    const removeWindowEvents = installWindowEvents(["resize"], notify);
+    const overlay = readWindowControlsOverlay();
+    overlay?.addEventListener("geometrychange", notify);
+    return () => { removeWindowEvents(); overlay?.removeEventListener("geometrychange", notify); };
+  });
   const browserWindow = typeof window === "undefined" ? null : window;
   const monotonicNowSeconds = createBrowserMonotonicNowSeconds(
     typeof performance === "undefined" ? null : performance,
