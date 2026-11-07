@@ -21,6 +21,7 @@
 import type {
   VFXCameraCaptureRequest,
   VFXCaptureCapabilities,
+  VFXCaptureAuthorizationStatus,
   VFXCaptureDevice,
   VFXCaptureKind,
   VFXCaptureSession,
@@ -168,6 +169,16 @@ class BrowserVFXCaptureSession implements VFXCaptureSession {
   }
 
   get state(): VFXCaptureState { return this.#state; }
+  async getAuthorizationStatus(kind: VFXCaptureKind = "camera"): Promise<VFXCaptureAuthorizationStatus> {
+    if (this.#state === "disposed" || !this.#platform || !this.capabilities[kind]) return "unavailable";
+    try {
+      const status = await this.#platform.getPermissionState?.(kind);
+      if (this.state === "disposed") return "unavailable";
+      if (status === "granted" || status === "denied" || status === "prompt") return status;
+    } catch { /* A failed passive query cannot establish permission. */ }
+    return this.#kind === kind && this.#state === "active" ? "granted" : "unknown";
+  }
+
   get kind(): VFXCaptureKind | null { return this.#kind; }
   get settings(): VFXCaptureSettings | null { return this.#settings; }
   get capabilities(): VFXCaptureCapabilities {

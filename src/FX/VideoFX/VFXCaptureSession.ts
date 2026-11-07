@@ -20,6 +20,7 @@
 
 import type { VFXContentFilter } from "./VFXContentFilter";
 
+export type VFXCaptureAuthorizationStatus = "unknown" | "prompt" | "granted" | "denied" | "unavailable";
 export type VFXCaptureKind = "camera" | "display";
 export type VFXCaptureState =
   | "idle"
@@ -80,6 +81,7 @@ export interface VFXCaptureSession {
   readonly kind: VFXCaptureKind | null;
   readonly settings: VFXCaptureSettings | null;
   readonly capabilities: VFXCaptureCapabilities;
+  getAuthorizationStatus(kind?: VFXCaptureKind): Promise<VFXCaptureAuthorizationStatus>;
   enumerateDevices(): Promise<readonly VFXCaptureDevice[]>;
   requestCamera(request?: VFXCameraCaptureRequest): Promise<VFXCaptureSettings>;
   requestDisplay(request?: VFXDisplayCaptureRequest): Promise<VFXCaptureSettings>;

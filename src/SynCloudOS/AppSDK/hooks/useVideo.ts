@@ -47,6 +47,7 @@ export function useVideo(): VFXCaptureSession {
       get kind() { return current?.kind ?? null; },
       get settings(): VFXCaptureSettings | null { return current?.settings ?? null; },
       get capabilities() { return current?.capabilities ?? unavailableCapabilities; },
+      getAuthorizationStatus: kind => requireSession().getAuthorizationStatus(kind),
       enumerateDevices: () => requireSession().enumerateDevices(),
       requestCamera: (request) => requireSession().requestCamera(request),
       requestDisplay: (request) => requireSession().requestDisplay(request),

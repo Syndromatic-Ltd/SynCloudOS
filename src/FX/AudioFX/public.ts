@@ -43,3 +43,5 @@ export { AUFXSpeechSynthesizer, AUFXSpeechUtterance } from "./AUFXSpeechSynthesi
 export type { AUFXSpeechAuthorizationStatus, AUFXSpeechVoice, AUFXSpeechUtteranceOptions, AUFXSpeechClient } from "./AUFXSpeechSynthesizer";
 export type { AUFXAudioSessionCategory, AUFXAudioSessionType, AUFXAudioSessionAuthorizationStatus } from "./AUFXAudioSession";
 export type { AUFXAudioTap } from "./AUFXAudioEngine";
+
+export type { AUFXRecordPermission } from "./AUFXAudioSession";

@@ -20,6 +20,7 @@
 import { createAudioSessionFacade } from "./audioSessionFacade";
 import { AUFXAudioSession } from "../../FX/AudioFX/AUFXAudioSession";
 import { createMountedResourceScope } from "../HostServices/mountedResourceScope";
+import type { PrivacyApplicationPort } from "../HostServices/AppSDKHostServiceTypes";
 import type { MountedSettlementPort } from "./mountedSettlementPort";
 
 export interface MountedAudioSessionFactory {
@@ -34,6 +35,7 @@ export function createMountedAudioSessions(
   capability: object = Object.freeze({}),
   appId?: string,
   settlement?: MountedSettlementPort,
+  privacy?: PrivacyApplicationPort,
 ): MountedAudioSessionFactory {
   const scope = createMountedResourceScope(owner);
   return Object.freeze({
@@ -44,7 +46,7 @@ export function createMountedAudioSessions(
       return scope.acquire(signal, (lease, release) => {
         const session = host.createSession(lease, capability);
         const requirePermission = (permission: string) => { lease.throwIfAborted(); if (!permissions().includes(permission)) throw new DOMException(`SynWare capability ${permission} must be declared.`, "SecurityError"); };
-        const facade = createAudioSessionFacade(session, release, appId, settlement, () => requirePermission("audio.record"), () => requirePermission("audio.session"));
+        const facade = createAudioSessionFacade(session, release, appId, settlement, () => requirePermission("audio.record"), () => requirePermission("audio.session"), privacy);
         lease.addEventListener("abort", () => facade.dispose(), { once: true });
         return facade;
       }, (session) => session.dispose());

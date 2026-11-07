@@ -19,6 +19,7 @@
 
 import { AUFXAudioSession } from "../../FX/AudioFX/AUFXAudioSession";
 import type { AUFXAudioRecorder } from "../../FX/AudioFX/AUFXAudioRecorder";
+import type { PrivacyApplicationPort } from "../HostServices/AppSDKHostServiceTypes";
 import type { MountedSettlementPort } from "./mountedSettlementPort";
 
 function observeRecorder(
@@ -85,9 +86,21 @@ export function createAudioSessionFacade(
   settlement?: MountedSettlementPort,
   requireRecord: () => void = () => {},
   requireCategory: () => void = () => {},
+  privacy?: PrivacyApplicationPort,
 ): AUFXAudioSession {
   let disposed = false;
   const label = appId ?? "mounted-audio-recording";
+  let unbindPrivacy = () => {};
+  let bound = false;
+  const unsubscribePrivacy = session.subscribe(() => {
+    if (disposed || !privacy) return;
+    if (session.state === "denied" || session.interruptionReason === "permission-denied") privacy.observe("denied");
+    else if (session.recordPermission === "granted") privacy.observe("granted");
+  });
+  const bindPrivacy = () => {
+    privacy?.assertRequestAllowed();
+    if (privacy && !bound) { unbindPrivacy = privacy.bindResource(() => facade.dispose()); bound = true; }
+  };
   const facade = new AUFXAudioSession({
           get state() { return session.state; },
           get route() { return session.route; },
@@ -97,19 +110,29 @@ export function createAudioSessionFacade(
             if (disposed || session.authorizationStatus === "unavailable") return "unavailable";
             try { requireCategory(); return session.authorizationStatus; } catch { return "denied"; }
           },
+          get recordPermission() {
+            if (disposed) return "denied";
+            const native = session.recordPermission === "undetermined" ? "prompt" : session.recordPermission;
+            const status = privacy?.authorizationStatus(native) ?? native;
+            return status === "granted" ? "granted" : status === "denied" || status === "unavailable" ? "denied" : "undetermined";
+          },
           setCategory: async category => { requireCategory(); await session.setCategory(category); },
-          requestRecordAuthorization: async signal => { requireRecord(); await session.requestRecordAuthorization(signal); },
-          enumerateDevices: signal => { requireRecord(); return session.enumerateDevices(signal); },
-          setPreferredInput: (id, signal) => { requireRecord(); return session.setPreferredInput(id, signal); },
+          requestRecordAuthorization: async signal => {
+            requireRecord(); bindPrivacy();
+            if (privacy) await privacy.request(nativeSignal => session.requestRecordAuthorization(nativeSignal), { signal });
+            else await session.requestRecordAuthorization(signal);
+          },
+          enumerateDevices: signal => { requireRecord(); bindPrivacy(); return privacy ? privacy.request(nativeSignal => session.enumerateDevices(nativeSignal), { signal }) : session.enumerateDevices(signal); },
+          setPreferredInput: (id, signal) => { requireRecord(); bindPrivacy(); return privacy ? privacy.request(nativeSignal => session.setPreferredInput(id, nativeSignal), { signal }) : session.setPreferredInput(id, signal); },
           setPreferredOutput: (id, signal) => { requireRecord(); return session.setPreferredOutput(id, signal); },
           createRecorder: options => {
-            requireRecord();
+            requireRecord(); bindPrivacy();
             const recorder = session.createRecorder(options);
             return settlement ? observeRecorder(recorder, label, settlement) : recorder;
           },
-          createInputNode: format => { requireRecord(); return session.createInputNode(format); },
+          createInputNode: format => { requireRecord(); bindPrivacy(); return session.createInputNode(format); },
           subscribe: listener => session.subscribe(listener),
-          dispose: () => { if (disposed) return; disposed = true; try { session.dispose(); } finally { release(); } },
+          dispose: () => { if (disposed) return; disposed = true; unsubscribePrivacy(); unbindPrivacy(); try { session.dispose(); } finally { release(); } },
         });
   Object.freeze(facade);
   return facade;
