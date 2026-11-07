@@ -101,7 +101,7 @@ export type { NSEViewOutlet, NSEOutletElement, NSEOutletOptions } from "../../NS
 export type { NSEManagedAFXDisplayLink, NSEManagedAFXDisplayLinkOptions, NSEManagedAFXFrame, NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "../../NSE/sdkPackageEntry";
 export { createSynWareNSEDataViewDragBinding, type SynWareNSEDataViewDragOptions, type SynWareNSEDataViewDropProposal } from "./SynWareNSEDragAdapter";
 export { createSynWareNSEDragCommandPort, createSynWareNSEFontPanelCommandPort } from "./SynWareNSECommandAdapter";
-export { createSynWareNSETextLayoutPort, useNSEViewAnimator } from "./SynWareNSEMediaAdapters";
+export { createSynWareNSETextLayoutPort } from "./SynWareNSEMediaAdapters";
 export type { TFXTextGeometryCapabilities, TFXTextLayoutResult } from "../../FX/TextFX/textLayoutTypes";
 export { useNSEMenuPort } from "./SynWareNSEMenuPort";
 export { ResponderScope, type ResponderScopeProps } from "../../SynCloudOSReact/ResponderScope";

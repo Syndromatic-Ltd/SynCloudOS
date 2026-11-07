@@ -33,6 +33,14 @@ export interface NSERegistryItem {
 
 export const nseRegistry = [
   {
+    name: "nse-animation-context",
+    title: "NSEAnimationContext",
+    type: "primitive",
+    description: "NSAnimationContext groups, NSView animator proxies and NSViewController presentations and child transitions. Reduced motion is a read-only system trait.",
+    files: ["src/NSE/Animation/NSEAnimationContext.ts", "src/NSE/Animation/NSEViewAnimator.ts", "src/NSE/Application/NSEViewController.ts"],
+    variants: ["NSEAnimationContext", "NSEViewControllerPresentationAnimator", "NSEViewControllerTransitionOptions"]
+  },
+  {
     name: "nse-split-view",
     title: "NSESplitView",
     type: "primitive",

@@ -73,10 +73,10 @@ describe("SynWare NSE public framework boundary", () => {
       "useNSEDeferredDisposal",
       "NSEDisposalScheduler",
       "NSEAnimationContext",
-      "NSEAnimationEnvironment",
-      "NSEAnimationEnvironmentProvider",
-      "NSEAnimationEnvironmentProviderProps",
-      "useNSEAnimationEnvironment",
+      "useNSETraitCollection",
+      "NSEViewControllerPresentationAnimator",
+      "NSEViewControllerTransitionOptions",
+      "NSEViewAnimator",
     ]));
     for (const removed of ["NSEAdaptiveNavigationController", "NSENavigationStackController", "NSETabBarController", "NSESourceListScene", "NSESidebar", "NSEStatusBar"]) expect(names).not.toContain(removed);
   });
@@ -84,7 +84,7 @@ describe("SynWare NSE public framework boundary", () => {
   it("removes the obsolete animation facade from every NSE public boundary", () => {
     const publicEntry = publicExports();
     const appearanceEntry = publicExports(resolve("src/NSE/public/appearance.ts"));
-    for (const forbidden of ["AnimationFX", "useAnimationFX"]) {
+    for (const forbidden of ["AnimationFX", "useAnimationFX", "NSEAnimationDefaults", "NSEAnimationEnvironment", "NSEAnimationEnvironmentProvider", "NSEAnimationEnvironmentProviderProps", "NSEAnimator", "useNSEAnimationEnvironment", "NSEPresence", "NSEPresenceBoundary", "useNSEPresenceExiting", "NSELayoutView", "NSELayoutViewProps", "NSELayoutTransitionTiming", "NSEPresentationSpec", "NSEPresentationTrack", "NSEPresentationEnter", "NSEPresentationMotion", "NSETransformComponents", "NSETranslationUnit", "useNSEPresentation", "nseTransformStyle", "nseFilterStyle", "compileNSEPresentation"]) {
       expect(publicEntry.names).not.toContain(forbidden);
       expect(appearanceEntry.names).not.toContain(forbidden);
     }

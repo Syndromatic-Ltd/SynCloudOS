@@ -204,7 +204,7 @@ The [controllers guide](controllers.md) covers the array, tree and preferences c
 
 ## Tracking and animation
 
-`useNSETrackingRegion` reports pointer entry, exit and movement over a region. `NSECursor` sets the pointer cursor. `NSEAnimationEnvironmentProvider` and `useNSEAnimationEnvironment` carry the reduced motion setting and the default easing and duration values that controls share.
+`useNSETrackingRegion` reports pointer entry, exit and movement over a region. `NSECursor` sets the pointer cursor. `NSEAnimationContext` groups view animator and layer changes. Controllers read `traitCollection.reducedMotion`; function views read `useNSETraitCollection().reducedMotion`. See [animation objects](nse/animation.md) for custom presentations, child transitions and owned artwork.
 
 ## Accessibility
 
