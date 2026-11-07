@@ -37,8 +37,13 @@ export class NSEData {
 
   static from(value: NSEDataConvertible): NSEData {
     if (value instanceof NSEData) return new NSEData(value.#storage);
-    if (value instanceof Uint8Array) return new NSEData(value);
-    if (value instanceof ArrayBuffer) return new NSEData(new Uint8Array(value));
+    // Intrinsic brand checks also accept genuine buffers from another window or worker.
+    const typedArrayTag = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag)!.get!;
+    if (ArrayBuffer.isView(value) && typedArrayTag.call(value) === "Uint8Array") return new NSEData(value as Uint8Array);
+    try {
+      Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, "byteLength")!.get!.call(value);
+      return new NSEData(new Uint8Array(value as ArrayBuffer));
+    } catch { /* Not an ArrayBuffer; do not trust a caller-supplied toStringTag. */ }
     throw new TypeError("NSEData requires Uint8Array, ArrayBuffer, or NSEData.");
   }
 
