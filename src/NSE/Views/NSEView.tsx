@@ -28,8 +28,27 @@ import type { NSEMenu } from "../Menus/NSEMenu";
 import { NSEMenuOverlay } from "../Menus/NSEMenuOverlay";
 import type { NSEMenuOverlayOptions } from "../Menus/menuTypes";
 import type { NSEOverlayAnchorPoint } from "../Overlays/computeNSEOverlayPosition";
+import { GFXContext } from "../../FX/GraphicsFX/GFXContext";
+import type { GFXRect } from "../../FX/GraphicsFX/GFXGeometry";
+import { useIFXImageBox } from "../../FX/ImageFX/IFXImageViewport";
+import { NSEViewDrawingEnvironmentContext } from "./NSEViewDrawingEnvironment";
+import type { GFXIdentifierIssuer } from "../../FX/GraphicsFX/identifierAuthority";
+import { NSEViewDisplayList } from "./NSEViewDisplayList";
+
+/** NSView.LayerContentsPlacement. Positional placements keep the content's natural size. */
+export type NSEViewLayerContentsPlacement = "scaleAxesIndependently" | "scaleProportionallyToFit" | "scaleProportionallyToFill"
+  | "center" | "top" | "topRight" | "right" | "bottomRight" | "bottom" | "bottomLeft" | "left" | "topLeft";
+
+const layerContentsPlacements: readonly NSEViewLayerContentsPlacement[] = [
+  "scaleAxesIndependently", "scaleProportionallyToFit", "scaleProportionallyToFill", "center", "top", "topRight",
+  "right", "bottomRight", "bottom", "bottomLeft", "left", "topLeft",
+];
 
 export interface NSEViewProps extends HTMLAttributes<HTMLDivElement> {
+  /** NSView.draw(_:). A React re-render redraws the whole bounds with a fresh recording context. */
+  readonly draw?: (dirtyRect: GFXRect, context: GFXContext) => void;
+  /** NSView.layerContentsPlacement. Defaults to scaleProportionallyToFit. */
+  readonly layerContentsPlacement?: NSEViewLayerContentsPlacement;
   /**
    * NSView.menu: the contextual menu. It opens on a secondary click, the
    * context-menu key or Shift-F10, and a touch long press.
@@ -50,15 +69,51 @@ export interface NSEViewProps extends HTMLAttributes<HTMLDivElement> {
   readonly ref?: Ref<HTMLDivElement>;
 }
 
-/** NSView: a region of a window, with the contextual menu and tooltip every view can carry. */
-export function NSEView({ menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", appearance, children, ...htmlAttributes }: NSEViewProps) {
-  const content = appearance ? <NSEViewAppearance appearance={appearance}>{children}</NSEViewAppearance> : children;
-  if (!menu) return <div title={toolTip} {...htmlAttributes}>{content}</div>;
+/** NSView: a region of a window, with drawing, contextual menu, tooltip and appearance. */
+export function NSEView({ appearance, ...props }: NSEViewProps) {
+  return appearance ? <NSEViewAppearance appearance={appearance}><NSEViewContent {...props} /></NSEViewAppearance> : <NSEViewContent {...props} />;
+}
+
+function NSEViewContent({ draw, layerContentsPlacement = "scaleProportionallyToFit", menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", children, ref, style, ...htmlAttributes }: NSEViewProps) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const attachHost = useCallback((element: HTMLDivElement | null) => {
+    hostRef.current = element;
+    if (typeof ref === "function") return ref(element);
+    if (ref) ref.current = element;
+  }, [ref]);
+  const environment = useContext(NSEViewDrawingEnvironmentContext);
+  if (draw && !environment) throw new Error("An NSEView with draw needs a SynCloudOSProvider.");
+  if (draw && !environment?.geometry) throw new Error("NSEView.draw needs the runtime's image geometry port.");
+  const draws = Boolean(draw);
+  const identifiers = useMemo(() => draws && environment ? environment.createGraphicsIdentifierIssuer() : null, [draws, environment]);
+  // Measure in the host component's layout effect, after its div ref is attached.
+  const bounds = useIFXImageBox(hostRef, draws ? environment?.geometry ?? undefined : undefined, null, [draws, Boolean(menu)]);
+  if (!layerContentsPlacements.includes(layerContentsPlacement)) throw new TypeError(`Unknown NSEView layerContentsPlacement ${String(layerContentsPlacement)}.`);
+  const content = <>
+    {draw && identifiers && Number.isFinite(bounds.width) && Number.isFinite(bounds.height) && bounds.width > 0 && bounds.height > 0
+      ? <NSEViewDrawing draw={draw} bounds={bounds} identifiers={identifiers} placement={layerContentsPlacement} /> : null}
+    {children}
+  </>;
+  const attributes = { ...htmlAttributes, ref: attachHost, style: draw ? { position: "relative" as const, ...style } : style };
+  if (!menu) return <div title={toolTip} {...attributes}>{content}</div>;
   return (
-    <NSEMenuHostView menu={menu} toolTip={toolTip} menuOverlay={menuOverlay} longPressDelayMs={longPressDelayMs} direction={direction} {...htmlAttributes}>
+    <NSEMenuHostView menu={menu} toolTip={toolTip} menuOverlay={menuOverlay} longPressDelayMs={longPressDelayMs} direction={direction} {...attributes}>
       {content}
     </NSEMenuHostView>
   );
+}
+
+function NSEViewDrawing({ draw, bounds, identifiers, placement }: {
+  readonly draw: NonNullable<NSEViewProps["draw"]>;
+  readonly bounds: { readonly width: number; readonly height: number };
+  readonly identifiers: GFXIdentifierIssuer;
+  readonly placement: NSEViewLayerContentsPlacement;
+}) {
+  const context = GFXContext.recording({ size: bounds, identifiers });
+  draw(Object.freeze({ x: 0, y: 0, ...bounds }), context);
+  return <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+    <NSEViewDisplayList displayList={context.displayList} placement={placement} />
+  </div>;
 }
 
 /** The appearance boundary a view with its own appearance draws its subviews in. */
