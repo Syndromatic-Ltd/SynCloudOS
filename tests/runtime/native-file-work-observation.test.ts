@@ -5,7 +5,7 @@ import type { FilePanelFileHandle, FilePanelWritable, FileSystemAccessPanelPort,
 
 function deferred<T>() { let resolve!: (value: T) => void; const promise = new Promise<T>(next => { resolve = next; }); return { promise, resolve }; }
 const request: SavePanelRequest = { id: 'generated-native-work', accepts: [], suggestedName: 'generated.txt', destination: 'persistent-handle-required', conflictPolicy: 'fail-if-exists' };
-const payload = { fileName: 'generated.txt', mediaType: 'text/plain', blob: new Blob(['generated harmless bytes']) };
+const payload = { fileName: 'generated.txt', mediaType: 'text/plain', data: new TextEncoder().encode('generated harmless bytes') };
 function fixture() {
   const runtimeOwner = new AbortController(), mountOwner = new AbortController(), activity = new NativeOperationActivity(runtimeOwner.signal);
   const writable: FilePanelWritable = { write: vi.fn(async () => {}), close: vi.fn(async () => {}), abort: vi.fn(async () => {}) };

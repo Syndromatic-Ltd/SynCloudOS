@@ -13,8 +13,8 @@ panel.message = "Choose images for this document.";
 if (await panel.beginSheetModal(this.view.window!) === NSEModalResponse.OK) {
   for (const url of panel.urls) {
     if ("read" in url) {
-      const file = await url.read(this.ownerSignal);
-      // Import the file into the document.
+      const data = await url.read(this.ownerSignal); // NSEData
+      // Import data; url.name and url.mediaType retain the file metadata.
       url.release("caller-finished");
     }
   }
@@ -68,3 +68,13 @@ if (support) {
 This is the minimal `FileManager.urls(for:in:)` analogue. The only supported directory/domain pair is `applicationSupportDirectory` / `userDomainMask`. It returns an empty collection when OPFS is unavailable; an ended application mount rejects the lookup. The runtime creates `SynCloudOS-Application-Support/<encoded bundle identifier>` under `navigator.storage.getDirectory()`. Separate apps get separate directory handles, stable across reloads and application sessions. Browser origin quota, persistence and clearing rules apply; the API does not promise unlimited space or an OS-visible directory. Same-origin application code is mutually trusted; bundle scoping is not an additional browser security sandbox.
 
 The new capability serves editors, document importers and media applications that need a persistent working directory. `SCOS.filePanels.open` can only acquire user-picked references, and preference persistence stores JSON; neither provides this directory. The implementation uses the injected runtime platform/storage port, with raw IndexedDB, picker and OPFS access confined to the browser adapter. No storage root, host identity or temporary gallery helper is public.
+
+## Reading and exporting bytes
+
+Accepted selections keep their file/provider identity. Ephemeral selections retain their native `File` in `reference.file`; browser `getFile()` results also remain `File`. Reading a file reference returns `Promise<NSEData>`, with MIME type on `reference.mediaType`. A file-handle reference exposes permission-checked operations without exposing its native handle.
+
+`FilePanelExportPayload` is `{ fileName, mediaType, data: NSEDataConvertible }`. Writable file destinations accept `NSEDataConvertible | string`. The browser boundary alone converts these values to native buffers or download Blobs; directory traversal and structured-cloned bookmarks retain the original native authority privately.
+
+```ts
+await target.sink.write({ fileName: "drawing.pdf", mediaType: "application/pdf", data: pdfData }, signal);
+```

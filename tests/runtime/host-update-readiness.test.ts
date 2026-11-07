@@ -315,7 +315,7 @@ it('retains real mounted file-write work across mount retirement without chargin
   const mounted = mountTestSynWareRuntime(a, appId); releases.push(() => mounted.dispose('generated-test-end'));
   const selected = await createSynWareContextValue(mounted.runtime).filePanels.save({ id: 'generated-write', accepts: [], suggestedName: 'generated.txt', destination: 'persistent-handle-required', conflictPolicy: 'fail-if-exists' });
   expect(selected.kind).toBe('accepted'); if (selected.kind !== 'accepted') throw new Error('Generated target missing');
-  const pending = selected.values[0]!.sink.write({ fileName: 'generated.txt', mediaType: 'text/plain', blob: new Blob(['generated harmless bytes']) });
+  const pending = selected.values[0]!.sink.write({ fileName: 'generated.txt', mediaType: 'text/plain', data: new TextEncoder().encode('generated harmless bytes') });
   await entered.promise;
   try {
     expect(a.updateReadiness.getSnapshot().counts.nativeOperations).toBe(1); expect(b.updateReadiness.getSnapshot().counts.nativeOperations).toBe(0);

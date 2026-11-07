@@ -1,10 +1,11 @@
+import { NSEData } from "../../src/Foundation/NSEData";
 import {describe,it,expect,vi} from 'vitest';
 import {createMountedFilePanelClient} from '../../src/SynCloudOS/AppSDK/mountedFilePanelClient';
 import type {FileSystemAccessPanelPort,SavePanelRequest} from '../../src/SynCloudOS/FilePanels';
 import {createDeterministicRuntimeEnvironment} from '../../src/SynCloudOS/AppSDK/testing/fakeAdapters';
 
 const request:SavePanelRequest={id:'export',accepts:[],suggestedName:'generated.txt',destination:'handle-or-download',conflictPolicy:'fail-if-exists'};
-const payload={fileName:'generated.txt',mediaType:'text/plain',blob:new Blob(['generated test fixture'])};
+const payload={fileName:'generated.txt',mediaType:'text/plain',data: new TextEncoder().encode('generated test fixture')};
 function fixture(native?:Partial<FileSystemAccessPanelPort>){
   const owner=new AbortController();let active:boolean|undefined=true,allowed=true,declared=true;
   const exportFile=vi.fn(async()=>({kind:'exported' as const,fileName:'generated.txt'}));
@@ -24,7 +25,7 @@ describe('mounted file-panel status and completion',()=>{
     const denied=await client.save(request);if(denied.kind!=='accepted')throw Error('Missing target');
     await expect(denied.values[0]!.sink.write(payload)).rejects.toMatchObject({name:'SecurityError'});expect(fake.adapters.files.exported()).toEqual([]);
     fake.adapters.files.allow();const granted=await client.save(request);if(granted.kind!=='accepted')throw Error('Missing target');
-    await granted.values[0]!.sink.write(payload);expect(fake.adapters.files.exported()).toHaveLength(1);expect(await fake.adapters.files.exported()[0]!.blob.text()).toBe('generated test fixture');
+    await granted.values[0]!.sink.write(payload);expect(fake.adapters.files.exported()).toHaveLength(1);expect(new TextDecoder().decode(NSEData.from(fake.adapters.files.exported()[0]!.data).bytes)).toBe('generated test fixture');
     fake.adapters.files.reset();expect(fake.adapters.files.exported()).toEqual([]);expect(fake.adapters.files.mode).toBe('deny');owner.abort();
   });
   it('projects download and persistent-save facts without writing or auditing',()=>{

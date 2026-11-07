@@ -51,8 +51,8 @@ describe("managed font access", () => {
     const result = await library.addFonts([{ name:"Noto.ttf", size:source.length, arrayBuffer:async()=>source.slice().buffer as ArrayBuffer }]);
     const id = result.added[0]!.id;
     expect((library as any).fontBytes).toBeTypeOf("function");
-    const first = (library as any).fontBytes(id); first[0] = 255;
-    expect((library as any).fontBytes(id)[0]).toBe(source[0]);
+    const first = library.fontBytes(id)!.bytes; first[0] = 255;
+    expect(library.fontBytes(id)!.bytes[0]).toBe(source[0]);
     await library.removeFont(id); expect((library as any).fontBytes(id)).toBeNull();
   });
   it("updates mounted catalogue consumers when a person imports or removes a face",async()=>{

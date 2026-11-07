@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { describe, expect, it, vi } from "vitest";
 import { createSynWareFontAccess, createFontCatalogueResourceLoader, type SynWareFontCatalogue } from "../../src/SynCloudOS/AppSDK/fontAccess";
 import { defineFontDeclaration } from "../../src/NSE/Typography";
@@ -40,8 +41,8 @@ function setup(catalogue?: SynWareFontCatalogue) {
 }
 describe("managed byte-backed font resolution",()=>{
   it("composes registered host faces and private bundle resources in the production mount", async () => {
-    const bundleLoader = vi.fn(async () => ({ bytes: readNotoSans(), mimeType: "font/ttf" as const }));
-    const hostLoader = vi.fn(async () => ({ bytes: readNotoSans(), mimeType: "font/ttf" as const }));
+    const bundleLoader = vi.fn(async () => ({ bytes: NSEData.from(readNotoSans()), mimeType: "font/ttf" as const }));
+    const hostLoader = vi.fn(async () => ({ bytes: NSEData.from(readNotoSans()), mimeType: "font/ttf" as const }));
     const catalogue = { manager: new NSEFontManager({ families: declaration.families, library: null }), declaration, loadResource: hostLoader };
     const bundle = createTestBundle({ bundleIdentifier: "com.example.managed-font-composition" }, { fontResourceLoader: bundleLoader });
     const runtime = createTestRuntime({ initialBundles: [bundle] });
@@ -68,7 +69,7 @@ describe("managed byte-backed font resolution",()=>{
     const owner = new AbortController();
     const caches = createRuntimeCacheRegistry({ runtimeId: "runtime:font-capacity", now: () => 0 });
     const host = createTFXFontHost({ runtimeId: "runtime:font-capacity", signal: owner.signal, caches });
-    const loader = vi.fn(() => new Promise<{ bytes: Uint8Array; mimeType: "font/ttf" }>(() => {}));
+    const loader = vi.fn(() => new Promise<{ bytes: NSEData; mimeType: "font/ttf" }>(() => {}));
     const scope = host.createScope(owner.signal, loader);
     const access = createSynWareFontAccess({ manager: new NSEFontManager({ families: declaration.families, library: null }), declaration, loadResource: loader }, scope, owner.signal);
     const descriptor = new TFXFontDescriptor({ size: 14 });
@@ -92,7 +93,7 @@ describe("managed byte-backed font resolution",()=>{
   it("declarations alone have no ready glyph data; declared bytes shape with independent registrations",async()=>{
     const manager=new NSEFontManager({families:declaration.families,library:null});
     let paths:string[]=[];
-    const catalogue: SynWareFontCatalogue = {manager,declaration,loadResource:async(path)=>{paths.push(path);return {bytes:readNotoSans(),mimeType:"font/ttf"};}};
+    const catalogue: SynWareFontCatalogue = {manager,declaration,loadResource:async(path)=>{paths.push(path);return {bytes:NSEData.from(readNotoSans()),mimeType:"font/ttf"};}};
     const {owner,host,scope}=setup(catalogue);
     const access=createSynWareFontAccess(catalogue,scope,owner.signal);
     try {
@@ -116,18 +117,18 @@ describe("managed byte-backed font resolution",()=>{
     finally {host.dispose();}
   });
   it("aborts pending host loads promptly and cannot publish readiness after unmount",async()=>{
-    let finish:(value:{bytes:Uint8Array;mimeType:"font/ttf"})=>void=()=>{};
-    const pending=new Promise<{bytes:Uint8Array;mimeType:"font/ttf"}>(resolve=>{finish=resolve;});
+    let finish:(value:{bytes:NSEData;mimeType:"font/ttf"})=>void=()=>{};
+    const pending=new Promise<{bytes:NSEData;mimeType:"font/ttf"}>(resolve=>{finish=resolve;});
     const catalogue = {manager:new NSEFontManager({families:declaration.families,library:null}),declaration,loadResource:()=>pending};
     const {owner,host,scope}=setup(catalogue);
     const access=createSynWareFontAccess(catalogue,scope,owner.signal);
     const request=access.loadFace("example.book",new TFXFontDescriptor({size:14})); owner.abort();
-    await expect(request).rejects.toMatchObject({name:"AbortError"});finish({bytes:readNotoSans(),mimeType:"font/ttf"});
+    await expect(request).rejects.toMatchObject({name:"AbortError"});finish({bytes:NSEData.from(readNotoSans()),mimeType:"font/ttf"});
     await Promise.resolve();expect(scope.fontReadinessGeneration).toBe(0);host.dispose();
   });
   it("honours caller cancellation without releasing a peer mount registration",async()=>{
     const manager=new NSEFontManager({families:declaration.families,library:null});
-    const catalogue: SynWareFontCatalogue = {manager,declaration,loadResource:async()=>({bytes:readNotoSans(),mimeType:"font/ttf"})};
+    const catalogue: SynWareFontCatalogue = {manager,declaration,loadResource:async()=>({bytes:NSEData.from(readNotoSans()),mimeType:"font/ttf"})};
     const {owner,host,scope}=setup(catalogue);
     const access=createSynWareFontAccess(catalogue,scope,owner.signal);
     try { const live=await access.loadFace("example.book",new TFXFontDescriptor({size:14}));const caller=new AbortController();caller.abort();await expect(access.loadFace("example.book",new TFXFontDescriptor({size:14}),caller.signal)).rejects.toMatchObject({name:"AbortError"});expect(live.font.shape("A").glyphs).toHaveLength(1);live.dispose(); }

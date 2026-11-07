@@ -70,13 +70,13 @@ it("records a private fixed-page engine with searchable Unicode, links, images a
   prepared.output.release();
   expect(released).toHaveLength(4);
   if (result.status !== "exported") return;
-  const backend = await PDFDocument.load(result.bytes);
+  const backend = await PDFDocument.load(result.bytes.bytes);
   expect(backend.getTitle()).toBe("fixed output");
   expect(backend.getPages().map(page => ({ ...page.getSize(), rotation: page.getRotation().angle }))).toEqual([
     { width: 210, height: 120, rotation: 0 }, { width: 72, height: 144, rotation: 90 },
   ]);
   const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  const task = getDocument({ data: result.bytes.slice(), useSystemFonts: false, disableFontFace: true });
+  const task = getDocument({ data: result.bytes.bytes, useSystemFonts: false, disableFontFace: true });
   try {
     const pdf = await task.promise;
     const page = await pdf.getPage(1);
