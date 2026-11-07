@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { NativeOperationActivity } from "../Updates/updateReadiness";
 import { NSEData } from "../../Foundation/NSEData";
 import { FilePanelReferenceError, throwIfFilePanelAborted } from "./FilePanelService";
 import type {
@@ -34,7 +35,7 @@ function mediaType(file: File): string {
   return file.type.trim().toLowerCase() || "application/octet-stream";
 }
 
-function ephemeralReference(file: File, request: OpenPanelRequest, index: number): Extract<FilePanelReference, { readonly kind: "ephemeral-file" }> {
+function ephemeralReference(file: File, request: OpenPanelRequest, index: number, nativeActivity?: NativeOperationActivity): Extract<FilePanelReference, { readonly kind: "ephemeral-file" }> {
   let released = false;
   const assertLive = (signal?: AbortSignal) => {
     throwIfFilePanelAborted(signal);
@@ -59,7 +60,7 @@ function ephemeralReference(file: File, request: OpenPanelRequest, index: number
     permission: "granted" as const,
     read: async (signal?: AbortSignal) => {
       assertLive(signal);
-      const data = await NSEData.read(file);
+      const data = await (nativeActivity ? nativeActivity.track(() => NSEData.read(file)) : NSEData.read(file));
       assertLive(signal);
       return data;
     },
@@ -70,7 +71,7 @@ function ephemeralReference(file: File, request: OpenPanelRequest, index: number
  * Injected browser-input adapter. It creates only ephemeral wrappers and
  * deliberately does not manufacture durable file identity or object URLs.
  */
-export function createBrowserFilePanelAdapter(port: BrowserFilePanelPort): FilePanelAdapter {
+export function createBrowserFilePanelAdapter(port: BrowserFilePanelPort, nativeActivity?: NativeOperationActivity): FilePanelAdapter {
   const id = port.id?.trim() || "browser-file-input";
   return {
     id,
@@ -94,7 +95,7 @@ export function createBrowserFilePanelAdapter(port: BrowserFilePanelPort): FileP
         }
         return {
           kind: "accepted",
-          values: Object.freeze(selected.files.map((file, index) => ephemeralReference(file, request, index))),
+          values: Object.freeze(selected.files.map((file, index) => ephemeralReference(file, request, index, nativeActivity))),
         };
       } finally {
         selected.cleanup();

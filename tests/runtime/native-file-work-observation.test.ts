@@ -92,3 +92,31 @@ describe('native file work observation through the mounted service', () => {
     expect(f.writable.abort).toHaveBeenCalledTimes(1); expect(f.activity.pendingOperationCount).toBe(0); expect(f.activity.read().known).toBe(false);
   });
 });
+
+it("observes native file byte acquisition after getFile settles", async () => {
+  const f = fixture(), target = await f.target(), entered = deferred<void>(), bytes = deferred<ArrayBuffer>();
+  const file = new File(["generated"], "generated.txt");
+  Object.defineProperty(file, "arrayBuffer", { value: () => { entered.resolve(); return bytes.promise; } });
+  vi.mocked(f.handle.getFile).mockResolvedValue(file);
+  const pending = target.reference.read(); await entered.promise;
+  try { expect(f.activity.pendingOperationCount).toBe(1); target.reference.release("runtime-disposed"); expect(f.activity.pendingOperationCount).toBe(1); }
+  finally { bytes.resolve(new Uint8Array([1]).buffer); }
+  await expect(pending).rejects.toMatchObject({ code: "reference-released" });
+  expect(f.activity.pendingOperationCount).toBe(0);
+});
+
+it("observes browser-input file byte acquisition until native settlement", async () => {
+  const runtime = new AbortController(), owner = new AbortController(), activity = new NativeOperationActivity(runtime.signal);
+  const entered = deferred<void>(), bytes = deferred<ArrayBuffer>(), file = new File(["generated"], "generated.txt");
+  Object.defineProperty(file, "arrayBuffer", { value: () => { entered.resolve(); return bytes.promise; } });
+  const client = createMountedFilePanelClient({ nativeActivity: activity, signal: owner.signal, assertLive: () => owner.signal.throwIfAborted(),
+    activation: () => true, access: () => ({ declared: true, allowed: true }),
+    picker: { pickFiles: async () => ({ kind: "accepted", files: [file], cleanup() {} }) } });
+  const selected = await client.open({ id: "input-read", accepts: [], selection: "single-file", access: "read", requires: [] });
+  if (selected.kind !== "accepted" || selected.values[0]!.kind === "directory-handle") throw new Error("Expected file");
+  const reference = selected.values[0]!, pending = reference.read(); await entered.promise;
+  try { expect(activity.pendingOperationCount).toBe(1); reference.release("runtime-disposed"); expect(activity.pendingOperationCount).toBe(1); }
+  finally { bytes.resolve(new Uint8Array([1]).buffer); }
+  await expect(pending).rejects.toMatchObject({ code: "reference-released" });
+  expect(activity.pendingOperationCount).toBe(0);
+});
