@@ -10,7 +10,8 @@ import type { NSEWindowAlertRequest } from "../Application/NSEWindowController";
 import type { NSEWindowSurfaceRequest } from "../Overlays/NSEWindowSurfaceBridge";
 
 /** @internal NSE owns sheet drawing; the application host owns presentation and dismissal. */
-export function NSEControllerSheetSurface({ attached, title, titleId, width, onCancel, children }: {
+export function NSEControllerSheetSurface({ scopeId, attached, title, titleId, width, onCancel, children }: {
+  readonly scopeId: string;
   readonly attached: boolean;
   readonly title?: string;
   readonly titleId: string;
@@ -19,14 +20,16 @@ export function NSEControllerSheetSurface({ attached, title, titleId, width, onC
   readonly children: ReactNode;
 }) {
   const colourScheme = useNSEAppearance().resolvedColourScheme;
-  return <NSEAlertBackdrop onSafeDismiss={onCancel} className={attached ? "nse-window-sheet-backdrop" : undefined} motion={attached ? "sheet" : "alert"}>
-    <NSEAlertSurface role="dialog" labelledBy={title ? titleId : undefined} className="nse-sheet" motion={attached ? "sheet" : "alert"}
-      appearance={attached ? colourScheme : "dark"}
-      style={width === undefined ? undefined : { width: `min(${width}px, calc(100% - 32px))` }}>
-      {title ? <h2 id={titleId} className="nse-sheet-title">{title}</h2> : null}
-      {children}
-    </NSEAlertSurface>
-  </NSEAlertBackdrop>;
+  return <NSEFocusScope options={{ scopeId, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+    <NSEAlertBackdrop onSafeDismiss={onCancel} className={attached ? "nse-window-sheet-backdrop" : undefined} motion={attached ? "sheet" : "alert"}>
+      <NSEAlertSurface role="dialog" labelledBy={title ? titleId : undefined} className="nse-sheet" motion={attached ? "sheet" : "alert"}
+        appearance={attached ? colourScheme : "dark"}
+        style={width === undefined ? undefined : { width: `min(${width}px, calc(100% - 32px))` }}>
+        {title ? <h2 id={titleId} className="nse-sheet-title">{title}</h2> : null}
+        {children}
+      </NSEAlertSurface>
+    </NSEAlertBackdrop>
+  </NSEFocusScope>;
 }
 
 /** @internal The panel host supplies geometry and dismissal; NSE draws the inherited appearance. */

@@ -51,7 +51,7 @@ import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudO
 import type { SynWareRuntime } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
 import { NSEPopover } from "../../NSE/applicationHostInterop";
-import { NSEFocusScope, NSEPopup } from "../../NSE/NSE";
+import { NSEPopup } from "../../NSE/NSE";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
@@ -390,11 +390,9 @@ function NSEPresentedSheet({ controller }: { readonly controller: NSEViewControl
     if (typeof operation === "function") void operation.call(controller);
     else controller.dismiss();
   };
-  const sheet = <NSEFocusScope options={{ scopeId: `nse-sheet:${sheetKey(controller)}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEControllerSheetSurface attached={Boolean(sheetHost)} title={controller.title} titleId={titleId} width={size?.width} onCancel={cancel}>
-      <NSEViewControllerView controller={controller} />
-    </NSEControllerSheetSurface>
-  </NSEFocusScope>;
+  const sheet = <NSEControllerSheetSurface scopeId={`nse-sheet:${sheetKey(controller)}`} attached={Boolean(sheetHost)} title={controller.title} titleId={titleId} width={size?.width} onCancel={cancel}>
+    <NSEViewControllerView controller={controller} />
+  </NSEControllerSheetSurface>;
   // A window attaches the sheet under its title bar and toolbar; outside a window it covers the page.
   if (!sheetHost) return sheet;
   return sheetHost.layer ? createPortal(<NSEWindowSheetFrame reducedMotion={reducedMotion} frozen={controller.isDisposed} holdsController>{sheet}</NSEWindowSheetFrame>, sheetHost.layer) : null;
