@@ -33,7 +33,9 @@
  * A window's sheets attach at the top of its content, under the title bar, toolbar and accessory row,
  * and slide down from that edge. The layer clips them so they come out from under the toolbar.
  */
-.nse-window-sheet-layer { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; }
+/* View-owned floating tab bars use layers 2 and 4. A window-modal sheet must
+   cover them as well as the ordinary content and bottom-bar accessory. */
+.nse-window-sheet-layer { position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
 .nse-window-sheet-layer:empty { display: none; }
 .nse-window-sheet-layer > .nse-window-sheet { position: absolute; inset: 0; }
 .nse-window-sheet-layer > .nse-window-sheet[data-sheet-exiting] { pointer-events: none; }
