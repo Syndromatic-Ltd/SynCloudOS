@@ -58,3 +58,9 @@ describe("Foundation Cocoa value contracts", () => {
     expect(new NSEUserDefaults().object("count")).toBeNull();
   });
 });
+
+// Schema diagnostics are implementation details, not invented Foundation classes.
+it("does not export a fabricated Cocoa predicate exception class", async () => {
+  const foundation = await import("../../src/Foundation/public");
+  expect("NSEPredicateValidationError" in foundation).toBe(false);
+});

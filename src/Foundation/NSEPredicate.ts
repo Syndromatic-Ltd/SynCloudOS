@@ -69,13 +69,13 @@ export interface NSEPredicateSchema<T> {
   readonly fields: Readonly<Record<string, NSEPredicateField<T>>>;
 }
 
-export class NSEPredicateValidationError extends Error {
+class PredicateValidationError extends Error {
   constructor(
     readonly code: string,
     message: string,
   ) {
     super(message);
-    this.name = "NSEPredicateValidationError";
+    this.name = "PredicateValidationError";
   }
 }
 
@@ -282,19 +282,19 @@ function validateScalar(
   fieldName: string,
 ): asserts value is NSEPredicateScalar {
   if (!isPredicateScalar(value)) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.literal",
       `NSEPredicate field "${fieldName}" requires a finite scalar value.`,
     );
   }
   if (value === null && field.nullable !== true) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.null",
       `NSEPredicate field "${fieldName}" does not allow null.`,
     );
   }
   if (!scalarMatchesField(field, value)) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.literalType",
       `NSEPredicate value for "${fieldName}" does not match ${field.type}.`,
     );
@@ -313,7 +313,7 @@ function validateOptions(expression: ComparisonExpression): void {
     (expression.options.diacriticInsensitive !== undefined &&
       typeof expression.options.diacriticInsensitive !== "boolean")
   ) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.options",
       "NSEPredicate text options must contain only boolean normalisation flags.",
     );
@@ -324,7 +324,7 @@ function validateOptions(expression: ComparisonExpression): void {
     expression.operator !== "notEquals" &&
     expression.operator !== "in"
   ) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.options",
       `NSEPredicate operator ${expression.operator} does not accept text options.`,
     );
@@ -340,7 +340,7 @@ function validatePredicateLiteral<T>(
 
   if (VALUELESS_OPERATORS.has(expression.operator)) {
     if (hasValue) {
-      throw new NSEPredicateValidationError(
+      throw new PredicateValidationError(
         "predicate.unexpectedValue",
         `NSEPredicate operator ${expression.operator} does not accept a value.`,
       );
@@ -348,7 +348,7 @@ function validatePredicateLiteral<T>(
     return;
   }
   if (!hasValue || expression.value === undefined) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.missingValue",
       `NSEPredicate operator ${expression.operator} requires a value.`,
     );
@@ -357,7 +357,7 @@ function validatePredicateLiteral<T>(
   const untypedField = field as NSEPredicateField<unknown>;
   if (expression.operator === "between") {
     if (!Array.isArray(expression.value) || expression.value.length !== 2) {
-      throw new NSEPredicateValidationError(
+      throw new PredicateValidationError(
         "predicate.between",
         "Between predicates require exactly two bounds.",
       );
@@ -369,7 +369,7 @@ function validatePredicateLiteral<T>(
   }
   if (expression.operator === "in") {
     if (!Array.isArray(expression.value)) {
-      throw new NSEPredicateValidationError(
+      throw new PredicateValidationError(
         "predicate.in",
         "In predicates require an array of scalar values.",
       );
@@ -380,7 +380,7 @@ function validatePredicateLiteral<T>(
     return;
   }
   if (Array.isArray(expression.value)) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.literal",
       `NSEPredicate operator ${expression.operator} requires a scalar value.`,
     );
@@ -393,7 +393,7 @@ interface PredicateRecord {
 }
 
 function predicateFailure(code: string, message: string): never {
-  throw new NSEPredicateValidationError(code, message);
+  throw new PredicateValidationError(code, message);
 }
 
 function dataRecord(value: unknown, code: string, message: string): PredicateRecord {
@@ -415,7 +415,7 @@ function dataRecord(value: unknown, code: string, message: string): PredicateRec
     }
     return { values };
   } catch (error) {
-    if (error instanceof NSEPredicateValidationError) throw error;
+    if (error instanceof PredicateValidationError) throw error;
     return predicateFailure(code, message);
   }
 }
@@ -454,7 +454,7 @@ function dataArray(value: unknown, code: string, message: string): readonly unkn
     }
     return items;
   } catch (error) {
-    if (error instanceof NSEPredicateValidationError) throw error;
+    if (error instanceof PredicateValidationError) throw error;
     return predicateFailure(code, message);
   }
 }
@@ -494,12 +494,12 @@ function requireNodeKeys(
   for (const key of node.values.keys()) {
     if (!allowedKeys.has(key)) {
       if (!isSerialisableData(node.values.get(key))) {
-        throw new NSEPredicateValidationError(
+        throw new PredicateValidationError(
           "predicate.serialisable",
           "NSEPredicate expressions must be JSON-serialisable values.",
         );
       }
-      throw new NSEPredicateValidationError(
+      throw new PredicateValidationError(
         "predicate.shape",
         `NSEPredicate node contains unknown property: ${key}.`,
       );
@@ -516,7 +516,7 @@ function normaliseLiteral(value: unknown): NSEPredicateLiteral {
   );
   return values.map((item) => {
     if (!isPredicateScalar(item)) {
-      throw new NSEPredicateValidationError(
+      throw new PredicateValidationError(
         "predicate.literal",
         "NSEPredicate literals must be finite scalar values or scalar arrays.",
       );
@@ -545,7 +545,7 @@ function normaliseOptions(
       operator !== "notEquals" &&
       operator !== "in")
   ) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.options",
       !TEXT_OPERATORS.has(operator) &&
       operator !== "equals" &&
@@ -574,7 +574,7 @@ function normaliseSchema<T>(schema: NSEPredicateSchema<T>): {
   const id = record.values.get("id");
   const fieldsValue = record.values.get("fields");
   if (typeof id !== "string" || id.trim().length === 0) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.schema",
       "NSEPredicate schema id must not be empty.",
     );
@@ -604,7 +604,7 @@ function normaliseSchema<T>(schema: NSEPredicateSchema<T>): {
       (nullable !== undefined && typeof nullable !== "boolean") ||
       typeof read !== "function"
     ) {
-      throw new NSEPredicateValidationError(
+      throw new PredicateValidationError(
         "predicate.schema",
         `NSEPredicate field "${name}" is invalid.`,
       );
@@ -623,21 +623,21 @@ function normaliseExpression<T>(
   state: { terms: number; active: WeakSet<object> },
 ): NSEPredicateExpression {
   if (depth > maxDepth) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.depth",
       `NSEPredicate depth exceeds ${maxDepth}.`,
     );
   }
   state.terms += 1;
   if (state.terms > maxTerms) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.terms",
       `NSEPredicate terms exceed ${maxTerms}.`,
     );
   }
   const objectInput = typeof input === "object" && input !== null ? input : null;
   if (objectInput && state.active.has(objectInput)) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.cycle",
       "NSEPredicate expressions must not contain cycles.",
     );
@@ -654,7 +654,7 @@ function normaliseExpression<T>(
       requireNodeKeys(node, ["kind", "value"]);
       const value = node.values.get("value");
       if (typeof value !== "boolean") {
-        throw new NSEPredicateValidationError(
+        throw new PredicateValidationError(
           "predicate.constant",
           "Constant predicates require a boolean value.",
         );
@@ -665,7 +665,7 @@ function normaliseExpression<T>(
       requireNodeKeys(node, ["kind", "operator", "children"]);
       const operator = node.values.get("operator");
       if (operator !== "all" && operator !== "any" && operator !== "none") {
-        throw new NSEPredicateValidationError(
+        throw new PredicateValidationError(
           "predicate.compoundOperator",
           "Compound predicate operator is invalid.",
         );
@@ -676,7 +676,7 @@ function normaliseExpression<T>(
         "Compound predicates require children.",
       );
       if (children.length === 0) {
-        throw new NSEPredicateValidationError(
+        throw new PredicateValidationError(
           "predicate.emptyCompound",
           "Compound predicates require children.",
         );
@@ -690,7 +690,7 @@ function normaliseExpression<T>(
       };
     }
     if (kind !== "comparison") {
-      throw new NSEPredicateValidationError(
+      throw new PredicateValidationError(
         "predicate.kind",
         "NSEPredicate expression kind is invalid.",
       );
@@ -704,7 +704,7 @@ function normaliseExpression<T>(
       fieldName.split(".").some((part) => FORBIDDEN_FIELD_SEGMENTS.has(part)) ||
       !fields.has(fieldName)
     ) {
-      throw new NSEPredicateValidationError(
+      throw new PredicateValidationError(
         "predicate.unknownField",
         "Unknown predicate field.",
       );
@@ -715,7 +715,7 @@ function normaliseExpression<T>(
         operator as NSEPredicateComparisonOperator,
       )
     ) {
-      throw new NSEPredicateValidationError(
+      throw new PredicateValidationError(
         "predicate.operator",
         `NSEPredicate operator ${String(operator)} is invalid for ${fields.get(fieldName)!.type}.`,
       );
@@ -756,7 +756,7 @@ function deepFreezePredicate(expression: NSEPredicateExpression): NSEPredicateEx
 
 function validateLimit(name: string, value: number): void {
   if (!Number.isSafeInteger(value) || value < 1) {
-    throw new NSEPredicateValidationError(
+    throw new PredicateValidationError(
       "predicate.limit",
       `NSEPredicate ${name} must be a positive safe integer.`,
     );

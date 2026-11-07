@@ -21,7 +21,7 @@
 import { expect, it } from "vitest";
 
 import { sortWithDescriptors } from "../../src/SynCloudOS/Models";
-import { NSEPredicate, NSEPredicateValidationError, NSESortDescriptor, type NSEPredicateSchema } from "../../src/Foundation/public";
+import { NSEPredicate, NSESortDescriptor, type NSEPredicateSchema } from "../../src/Foundation/public";
 
 interface Person {
   id: string;
@@ -119,7 +119,7 @@ it("validates operator values and nullable fields", () => {
       operator: "contains",
       value: "3",
     }),
-  ).toThrow(NSEPredicateValidationError);
+  ).toThrow(Error);
   expect(() =>
     NSEPredicate.compile(schema, {
       kind: "comparison",
@@ -179,7 +179,7 @@ it("caps caller-supplied limits and rejects cyclic input before recursive overfl
       maxDepth: Number.MAX_SAFE_INTEGER,
       maxTerms: Number.MAX_SAFE_INTEGER,
     }),
-  ).toThrow(NSEPredicateValidationError);
+  ).toThrow(Error);
 
   let deep: unknown = { kind: "constant", value: true };
   for (let index = 0; index < 200; index += 1) {
@@ -190,7 +190,7 @@ it("caps caller-supplied limits and rejects cyclic input before recursive overfl
       maxDepth: Number.MAX_SAFE_INTEGER,
       maxTerms: Number.MAX_SAFE_INTEGER,
     }),
-  ).toThrow(NSEPredicateValidationError);
+  ).toThrow(Error);
 });
 
 it("deeply owns and freezes predicate input", () => {
@@ -227,7 +227,7 @@ it("deeply owns and freezes predicate input", () => {
 it("fails closed for malformed or non-JSON predicate nodes", () => {
   expect(() =>
     NSEPredicate.compile(schema, null as unknown as never),
-  ).toThrow(NSEPredicateValidationError);
+  ).toThrow(Error);
   expect(() =>
     NSEPredicate.compile(
       schema,
@@ -246,7 +246,7 @@ it("rejects malformed predicate structure before freezing and never coerces text
       { ...schema, payload: new Map([["unexpected", true]]) } as unknown as NSEPredicateSchema<Person>,
       { kind: "constant", value: true },
     ),
-  ).toThrow(NSEPredicateValidationError);
+  ).toThrow(Error);
   expect(() =>
     NSEPredicate.compile(
       schema,
@@ -258,13 +258,13 @@ it("rejects malformed predicate structure before freezing and never coerces text
         options: null,
       } as unknown as never,
     ),
-  ).toThrow(NSEPredicateValidationError);
+  ).toThrow(Error);
   expect(() =>
     NSEPredicate.compile(
       schema,
       { kind: "compound", operator: "all", children: null } as unknown as never,
     ),
-  ).toThrow(NSEPredicateValidationError);
+  ).toThrow(Error);
 
   const hostile = {
     toString: () => {

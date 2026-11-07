@@ -217,7 +217,9 @@
     "NSEObservable": "NSKeyValueObserving",
     "NSEObservationOptions": "NSKeyValueObservingOptions",
     "NSEOpenPanel": "NSOpenPanel",
-    "NSEOpenPanelURL": { "none": "An Open panel result: browser file references or media-provider identities, never a fabricated filesystem URL." },
+    "NSEOpenPanelURL": {
+      "none": "An Open panel result: browser file references or media-provider identities, never a fabricated filesystem URL."
+    },
     "NSEOpenWindowOptions": "NSWindowController.showWindow(_:)",
     "NSEOutletElement": "@IBOutlet",
     "NSEOutletOptions": "@IBOutlet",
@@ -454,6 +456,69 @@
     "NSEWindowControllerClass": "NSWindowController",
     "NSEWindowControllerContext": "NSWindowController",
     "NSEWindowDocument": "NSWindowController.document",
-    "NSEWritableBindingKey": "NSKeyValueBindingCreation.bind(_:to:withKeyPath:options:)"
+    "NSEWritableBindingKey": "NSKeyValueBindingCreation.bind(_:to:withKeyPath:options:)",
+    "NSEByteCountFormatter": "NSByteCountFormatter",
+    "NSECharacterSet": "NSCharacterSet",
+    "NSECountedSet": "NSCountedSet",
+    "NSEData": "NSData",
+    "NSEDataCompressionAlgorithm": "NSData.CompressionAlgorithm",
+    "NSEEqualRanges": "NSEqualRanges",
+    "NSEFormatter": "NSFormatter",
+    "NSEIndexPath": "NSIndexPath",
+    "NSEIndexSet": "NSIndexSet",
+    "NSEIntersectionRange": "NSIntersectionRange",
+    "NSENumberFormatter": "NSNumberFormatter",
+    "NSEPredicate": "NSPredicate",
+    "NSERange": "NSRange",
+    "NSESortComparator": "NSComparator",
+    "NSESortDescriptor": "NSSortDescriptor",
+    "NSESortDirection": "NSSortDescriptor.ascending",
+    "NSETreeNode": "NSTreeNode",
+    "NSEByteUnitSystem": "NSByteCountFormatter.CountStyle",
+    "NSEBinaryByteUnit": {
+      "none": "A TypeScript binary-unit spelling for NSByteCountFormatter, not an additional Cocoa class."
+    },
+    "NSEDecimalByteUnit": {
+      "none": "A TypeScript decimal-unit spelling for NSByteCountFormatter, not an additional Cocoa class."
+    },
+    "NSEByteUnit": {
+      "none": "A TypeScript byte-unit spelling for NSByteCountFormatter, not an additional Cocoa class."
+    },
+    "NSEDataConvertible": {
+      "none": "A TypeScript input union bridging NSData values and native web byte buffers; Cocoa performs this bridge implicitly."
+    },
+    "NSEFormatterContext": {
+      "none": "Explicit locale and time-zone inputs for web formatters; Cocoa stores this configuration on formatter objects."
+    },
+    "NSEFormatterError": {
+      "none": "A TypeScript parse-error record representing NSFormatter error output, not an additional Cocoa class."
+    },
+    "NSEPredicateComparisonOperator": {
+      "none": "The bounded declarative predicate vocabulary; Cocoa represents comparisons with NSComparisonPredicate.Operator."
+    },
+    "NSEPredicateExpression": {
+      "none": "The bounded schema-backed expression tree accepted by the web predicate compiler, not a Cocoa class."
+    },
+    "NSEPredicateField": {
+      "none": "A typed field accessor in a bounded predicate schema, not a Cocoa class."
+    },
+    "NSEPredicateLiteral": {
+      "none": "A serialisable literal in the bounded web predicate expression tree, not a Cocoa class."
+    },
+    "NSEPredicateScalar": {
+      "none": "A scalar literal in the bounded web predicate expression tree, not a Cocoa class."
+    },
+    "NSEPredicateSchema": {
+      "none": "A typed allowlist of fields for the bounded web predicate compiler, not a Cocoa class."
+    },
+    "NSEPredicateTextOptions": {
+      "none": "TypeScript string-comparison options for bounded predicate expressions, not an additional Cocoa class."
+    },
+    "NSESortNulls": {
+      "none": "An explicit null-ordering policy for JavaScript sort selectors, not a Cocoa class."
+    },
+    "NSEUnicodePropertyName": {
+      "none": "A supported Unicode property spelling used to construct a character set, not an additional Cocoa class."
+    }
   }
 }
