@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-last-bcb82970-20261107223259
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  22:37:29
+   Duration  35.50s (transform 40ms, setup 31ms, import 28ms, tests 35.29s, environment 0ms)

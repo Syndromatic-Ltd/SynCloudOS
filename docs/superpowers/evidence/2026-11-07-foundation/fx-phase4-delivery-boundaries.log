@@ -1,0 +1,3 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 boundaries:architecture
+npm notice run node scripts/quality/architecture-boundaries.mjs
+src/FrameworkTests/Windows/WindowManagementFixture.tsx:29 -> src/NSE/Overlays/NSEPopover.tsx: devtools must use a public nse entrypoint
