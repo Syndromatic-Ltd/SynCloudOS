@@ -22,10 +22,11 @@ import { Fragment, createContext, useContext, useEffect, useId, useLayoutEffect,
 import { createPortal } from "react-dom";
 import type { NSEAnyWindowController } from "../../NSE/applicationHostInterop";
 import { useObserve, NSEActionResponderContext } from "../../NSE/applicationHostInterop";
-import { nseAttachToolbar, nseEndToolbarCustomization, nseToolbarEngine, nseToolbarTabViews, type NSEToolbar } from "../../NSE/Toolbars/NSEToolbar";
-import { NSEToolbarView } from "../../NSE/Toolbars/NSEToolbarView";
-import { NSEToolbarConfigurationSheet } from "../../NSE/Toolbars/NSEToolbarConfigurationSheet";
-import type { NSETitlebarAccessoryViewController } from "../../NSE/Application/NSETitlebarAccessoryViewController";
+import { nseAttachToolbar, nseEndToolbarCustomization, nseToolbarEngine, nseToolbarTabViews } from "../../NSE/applicationHostInterop";
+import type { NSEToolbar } from "../../NSE/NSE";
+import { NSEToolbarView } from "../../NSE/applicationHostInterop";
+import { NSEToolbarConfigurationSheet } from "../../NSE/applicationHostInterop";
+import type { NSETitlebarAccessoryViewController } from "../../NSE/NSE";
 import { SynWareRuntimeContext } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
 import { controllerServicesFor } from "../AppSDK/controllerServices";
@@ -34,10 +35,10 @@ import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 
 const noSubscription = () => () => {};
 
-export { NSEWindowTitlebarHostContext } from "../../NSE/Windows/windowTitlebarContext";
-export type { NSEWindowTitlebarDocument, NSEWindowTitlebarHost } from "../../NSE/Windows/windowTitlebarContext";
-import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarHost } from "../../NSE/Windows/windowTitlebarContext";
-import { nseWindowPresentedTitle } from "../../NSE/Application/NSEWindowController";
+export { NSEWindowTitlebarHostContext } from "../../NSE/applicationHostInterop";
+export type { NSEWindowTitlebarDocument, NSEWindowTitlebarHost } from "../../NSE/applicationHostInterop";
+import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarHost } from "../../NSE/applicationHostInterop";
+import { nseWindowPresentedTitle } from "../../NSE/applicationHostInterop";
 
 /** Publishes the window's title, subtitle and edited state to the stage's title bar. */
 export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController, host: NSEWindowTitlebarHost | null): void {

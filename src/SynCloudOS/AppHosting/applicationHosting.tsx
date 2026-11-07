@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEWindowTitleSlotContext, NSEWindowTitlebarContent } from "../../NSE/Windows/windowTitlebarContext";
-import { nseWindowPresentedTitle } from "../../NSE/Application/NSEWindowController";
+import { NSEWindowTitleSlotContext, NSEWindowTitlebarContent } from "../../NSE/applicationHostInterop";
+import { nseWindowPresentedTitle } from "../../NSE/applicationHostInterop";
 import {
   useContext,
   useEffect,
@@ -36,8 +36,8 @@ import {
 } from "react";
 import { NSEOpenPanelWindowHost } from "./openPanelHosting";
 import { createPortal } from "react-dom";
-import { useEnclosingFocusScopeId } from "../../SynCloudOSReact/focusScopeContext";
-import { useNSEAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
+import { useEnclosingFocusScopeId } from "../../SynCloudOSReact";
+import { NSEControllerSheetSurface } from "../../NSE/applicationHostInterop";
 import type { NSEAnyWindowController, NSEWindowMount } from "../../NSE/applicationHostInterop";
 import { nseSetKeyWindowModalPresenter, nseWindowInternals } from "../../NSE/applicationHostInterop";
 import { nseAttachView, nsePopoverPositioning, nsePresentationStyle, nseUpdateTraits, nseUpdateViewActivity, validateNSEViewControllerClass, type NSEViewController, type NSEViewControllerClass } from "../../NSE/applicationHostInterop";
@@ -50,7 +50,8 @@ import { useResponderHierarchy } from "../../SynCloudOSReact";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
 import type { SynWareRuntime } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
-import { NSEAlertBackdrop, NSEAlertSurface, NSEFocusScope, NSEPopover, NSEPopup } from "../../NSE/hostComposition";
+import { NSEPopover } from "../../NSE/applicationHostInterop";
+import { NSEFocusScope, NSEPopup } from "../../NSE/NSE";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
@@ -61,7 +62,7 @@ import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/
 import { useNSEOverlayFocusScope } from "../../NSE/applicationHostInterop";
 import { NSEViewControllerRendererProvider } from "../../NSE/applicationHostInterop";
 import { nseAnimatePresentation, nseIsDismissing } from "../../NSE/applicationHostInterop";
-import { registerNSEStandaloneViewControllerRenderer } from "../../NSE/Application/viewControllerRenderer";
+import { registerNSEStandaloneViewControllerRenderer } from "../../NSE/applicationHostInterop";
 
 registerNSEStandaloneViewControllerRenderer(NSEViewControllerView);
 
@@ -382,8 +383,6 @@ function NSEPresentedSheet({ controller }: { readonly controller: NSEViewControl
   const titleId = useId();
   const sheetHost = useContext(NSEWindowSheetHostContext);
   const { reducedMotion } = useNSEAnimationEnvironment();
-  // A window's sheet is drawn in the window's colour scheme, so its controls' ink matches its plate.
-  const colourScheme = useNSEAppearance().resolvedColourScheme;
   useLayoutEffect(() => sheetHost?.attach(), [sheetHost]);
   const size = controller.preferredContentSize;
   const cancel = () => {
@@ -392,14 +391,9 @@ function NSEPresentedSheet({ controller }: { readonly controller: NSEViewControl
     else controller.dismiss();
   };
   const sheet = <NSEFocusScope options={{ scopeId: `nse-sheet:${sheetKey(controller)}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEAlertBackdrop onSafeDismiss={cancel} className={sheetHost ? "nse-window-sheet-backdrop" : undefined} motion={sheetHost ? "sheet" : "alert"}>
-      <NSEAlertSurface role="dialog" labelledBy={controller.title ? titleId : undefined} className="nse-sheet" motion={sheetHost ? "sheet" : "alert"}
-        appearance={sheetHost ? colourScheme : "dark"}
-        style={size ? { width: `min(${size.width}px, calc(100% - 32px))` } : undefined}>
-        {controller.title ? <h2 id={titleId} className="nse-sheet-title">{controller.title}</h2> : null}
-        <NSEViewControllerView controller={controller} />
-      </NSEAlertSurface>
-    </NSEAlertBackdrop>
+    <NSEControllerSheetSurface attached={Boolean(sheetHost)} title={controller.title} titleId={titleId} width={size?.width} onCancel={cancel}>
+      <NSEViewControllerView controller={controller} />
+    </NSEControllerSheetSurface>
   </NSEFocusScope>;
   // A window attaches the sheet under its title bar and toolbar; outside a window it covers the page.
   if (!sheetHost) return sheet;

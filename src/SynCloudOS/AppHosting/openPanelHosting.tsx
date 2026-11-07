@@ -1,18 +1,17 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type PropsWithChildren, type ReactNode } from "react";
-import { SynCloudOSRuntimeContext } from "../../SynCloudOSReact/runtimeContext";
-import { useNSEAnimationEnvironment } from "../../NSE/Animation/NSEAnimationEnvironment";
+import { SynCloudOSRuntimeContext } from "../../SynCloudOSReact";
+import { useNSEAnimationEnvironment } from "../../NSE/Animation";
 import { createPortal } from "react-dom";
-import { useOptionalNSEWindowSurfaceBridge } from "../../NSE/Overlays/NSEWindowSurfaceBridge";
-import type { NSEWindowSurfaceBridge, NSEWindowSurfaceRequest } from "../../NSE/Overlays/NSEWindowSurfaceBridge";
-import { NSEFocusScope } from "../../NSE/Focus";
-import { useNSEAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
+import { useOptionalNSEWindowSurfaceBridge } from "../../NSE/NSE";
+import type { NSEWindowSurfaceBridge, NSEWindowSurfaceRequest } from "../../NSE/NSE";
+import { NSEOpenPanelSheetSurface } from "../../NSE/applicationHostInterop";
 import { NSEWindowSheetFrame, NSEWindowSheetHostContext } from "./windowChrome";
-import type { NSEWindow } from "../../NSE/Application/NSEWindowController";
+import type { NSEWindow } from "../../NSE/NSE";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
-import { openPanelFileSystemFor } from "../FilePanels/OpenPanelFileSystem";
-import { registerNSEOpenPanelHost, type NSEOpenPanelHost } from "../../NSE/FilePanels/openPanelHost";
-import { NSEPopup } from "../../NSE/Overlays/NSEPopup";
+import { openPanelFileSystemFor } from "../FilePanels";
+import { registerNSEOpenPanelHost, type NSEOpenPanelHost } from "../../NSE/applicationHostInterop";
+import { NSEPopup } from "../../NSE/NSE";
 
 const Context = createContext<NSEOpenPanelHost | null>(null);
 export function NSEOpenPanelApplicationHost({ value, children }: PropsWithChildren<{ value: SynWareContextValue }>) {
@@ -76,18 +75,12 @@ export function NSEOpenPanelWindowHost({ window, children }: PropsWithChildren<{
 /** The same window-owned sheet layer and close guard used by NSAlert and custom controller sheets. */
 function OpenPanelSheet({ request, onClose, children }: PropsWithChildren<{ request: NSEWindowSurfaceRequest; onClose(): void }>) {
   const sheetHost = useContext(NSEWindowSheetHostContext);
-  const appearance = useNSEAppearance();
   const { reducedMotion } = useNSEAnimationEnvironment();
   const compact = useContext(Context)?.compact() === true;
   useLayoutEffect(() => sheetHost?.attach(), [sheetHost]);
   if (compact) return <NSEPopup id={request.id} open parentResponderId={request.parentResponderId} anchor={request.anchor}
     presentation={{ mode: "sheet" }} overlayKind="action-sheet" chrome="menu" modal aria-label={request.title} className="nse-open-compact-sheet"
     onOpenChange={open => { if (!open) onClose(); }}>{children}</NSEPopup>;
-  const content = <NSEFocusScope options={{ scopeId: request.id, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <div className="nse-open-sheet-backdrop nse-window-sheet-backdrop" data-compact={compact || undefined} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); onClose(); } }}>
-      <section role="dialog" aria-modal="true" aria-label={request.title} data-nse-colour-scheme-resolved={appearance.resolvedColourScheme} className="nse-open-sheet nse-sheet" data-compact={compact || undefined}
-        style={{ width: compact ? "100%" : `min(${request.bounds.width}px, calc(100% - 32px))`, height: `min(${request.bounds.height}px, 100%)` }}>{children}</section>
-    </div>
-  </NSEFocusScope>;
+  const content = <NSEOpenPanelSheetSurface request={request} compact={compact} onClose={onClose}>{children}</NSEOpenPanelSheetSurface>;
   return sheetHost?.layer ? createPortal(<NSEWindowSheetFrame reducedMotion={reducedMotion}>{content}</NSEWindowSheetFrame>, sheetHost.layer) : content;
 }

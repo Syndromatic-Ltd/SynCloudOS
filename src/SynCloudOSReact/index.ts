@@ -107,3 +107,6 @@ export { SystemAlert, SystemAlertAssetCache } from "./SystemAlert";
 export type { QuickSwitchTriggerPort } from "./QuickSwitchTrigger";
 
 export type { SynWareWindowCloseGuard } from "./appRuntimeTypes";
+
+// Framework responder hosts consume the enclosing canonical focus scope.
+export { useEnclosingFocusScopeId } from "./focusScopeContext";

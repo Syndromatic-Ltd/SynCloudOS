@@ -27,6 +27,7 @@ import { createMountedSynWareRuntime } from "./appRuntimeFacade";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import { createSynWareContextValue } from "./createSynWareContextValue";
 import { SynWareProvider } from "./SynWareContext";
+import { NSEOpenPanelApplicationHost } from "../AppHosting/openPanelHosting";
 import { useSCOS } from "./scos/useSCOS";
 import { createFontCatalogueResourceLoader, FontCatalogueProvider, useFontCatalogue } from "./fontAccess";
 import { createSynWareNSEAnimations } from "./SynWareNSEMediaAdapters";
@@ -43,11 +44,11 @@ import type { InspectorRouteInspectionPort } from "../Inspector/inspectorOwnerSo
 import type { AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
 import { createRuntimeAnimationState, createScopedAnimationFrames } from "../AnimationFX/scopedAnimationFrames";
 import { controllerServicesFor, installControllerServices } from "./controllerServices";
-import { NSEMenuRuntimeProvider } from "../../NSE/Menus/menuRuntimeContext";
+import { NSEMenuRuntimeProvider } from "../../NSE/applicationHostInterop";
 import { NSEViewActivityProvider } from "../../NSE/applicationHostInterop";
-import { NSEPresentedContentProvider } from "../../NSE/Overlays/useNSEPresentedContent";
-import { NSEActionScopeProvider } from "../../NSE/Controls/Core/useNSEControlAction";
-import { useRuntimeNSEMenuPort } from "../../SynCloudOSReact/nseMenuPort";
+import { NSEPresentedContentProvider } from "../../NSE/applicationHostInterop";
+import { NSEActionScopeProvider } from "../../NSE/applicationHostInterop";
+import { useRuntimeNSEMenuPort } from "../../SynCloudOSReact";
 
 function PresentedApplicationControls({ children }: { readonly children: ReactNode }) {
   const controls = useRuntimeNSEControlPort();
@@ -486,22 +487,22 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
   const wrapPresentedContent = (content: ReactNode) => (
     <SynCloudOSRuntimeContext.Provider value={null}>
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
-        <SynWareProvider value={context}>
+        <SynWareProvider value={context}><NSEOpenPanelApplicationHost value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}><NSEActionScopeProvider appId={app.bundleIdentifier}><PresentedApplicationControls>{content}</PresentedApplicationControls></NSEActionScopeProvider></FontCatalogueProvider>
-        </SynWareProvider>
+        </NSEOpenPanelApplicationHost></SynWareProvider>
       </SynWareRuntimeContext.Provider>
     </SynCloudOSRuntimeContext.Provider>
   );
   return (
     <SynCloudOSRuntimeContext.Provider value={null}>
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
-        <SynWareProvider value={context}>
+        <SynWareProvider value={context}><NSEOpenPanelApplicationHost value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}>
             <MountedAppPresentationBoundary runtime={mounted.mount.runtime} kernelRuntime={runtime} context={mounted.contextBase}>
               <NSEPresentedContentProvider value={wrapPresentedContent}>{presentedChildren}</NSEPresentedContentProvider>
             </MountedAppPresentationBoundary>
           </FontCatalogueProvider>
-        </SynWareProvider>
+        </NSEOpenPanelApplicationHost></SynWareProvider>
       </SynWareRuntimeContext.Provider>
     </SynCloudOSRuntimeContext.Provider>
   );

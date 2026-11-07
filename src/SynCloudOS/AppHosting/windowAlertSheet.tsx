@@ -18,12 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useId, useLayoutEffect, useSyncExternalStore } from "react";
+import { useContext, useLayoutEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import type { NSEWindowAlertRequest } from "../../NSE/Application/NSEWindowController";
-import { NSEAlertBackdrop, NSEAlertSurface, NSEFocusScope } from "../../NSE/hostComposition";
-import { NSEButton } from "../../NSE/public/controls";
-import { useNSEAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
+import type { NSEWindowAlertRequest } from "../../NSE/applicationHostInterop";
+import { NSEWindowAlertContent } from "../../NSE/applicationHostInterop";
 import { NSEWindowSheetFrame, NSEWindowSheetHostContext } from "./windowChrome";
 import { useNSEAnimationEnvironment } from "../../NSE/Animation";
 
@@ -96,35 +94,5 @@ export function NSEWindowAlertSheet({ queue }: { readonly queue: NSEWindowAlertQ
 function WindowAlert({ alert, queue }: { readonly alert: PendingAlert; readonly queue: NSEWindowAlertQueue }) {
   const host = useContext(NSEWindowSheetHostContext);
   useLayoutEffect(() => host?.attach(), [host]);
-  // The window's resolved colour scheme, as the system alert presenter uses the system's.
-  const appearance = useNSEAppearance().resolvedColourScheme;
-  const titleId = useId();
-  const messageId = useId();
-  const { request } = alert;
-  const primary = request.buttons.find((button) => button.role === "default" || button.role === "destructive") ?? request.buttons[0];
-  return <NSEFocusScope options={{ scopeId: `nse-alert-sheet:${alert.id}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEAlertBackdrop className="nse-window-sheet-backdrop" motion="sheet" onSafeDismiss={() => queue.choose(alert.id)}>
-      <NSEAlertSurface appearance={appearance} className="nse-sheet nse-alert-sheet" motion="sheet"
-        labelledBy={titleId} describedBy={request.message ? messageId : undefined} initialFocusSelector="[data-nse-alert-primary]">
-        <div className="nse-system-alert-content nse-confirm-content-textonly">
-          <div className="nse-system-alert-copy">
-            <h2 id={titleId}>{request.title}</h2>
-            {request.message ? <p id={messageId}>{request.message}</p> : null}
-          </div>
-        </div>
-        <div className="nse-alert-actions">
-          {request.buttons.map((button) => <NSEButton
-            key={button.id}
-            title={button.label}
-            hasDestructiveAction={button.role === "destructive"}
-            keyEquivalent={button.role === "default" ? "\r" : undefined}
-            appearance={button.role === "destructive" || button.role === "default" || appearance === "dark" ? undefined : "aqua"}
-            className="nse-system-alert-action-button"
-            data-nse-alert-primary={button === primary ? "" : undefined}
-            onClick={() => queue.choose(alert.id, button.id)}
-          />)}
-        </div>
-      </NSEAlertSurface>
-    </NSEAlertBackdrop>
-  </NSEFocusScope>;
+  return <NSEWindowAlertContent request={alert.request} scopeId={`nse-alert-sheet:${alert.id}`} onChoose={buttonId => queue.choose(alert.id, buttonId)} />;
 }
