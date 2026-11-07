@@ -546,6 +546,7 @@
       "none": "Where an NSEUserDefaults keeps its values: SCOS.preferences in an application, which SynCloudOS persists the way cfprefsd does on a Mac."
     },
     "NSEView": "NSView",
+    "NSEViewLayerContentsPlacement": "NSView.LayerContentsPlacement",
     "NSEViewComponent": "NSView",
     "NSEViewController": "NSViewController",
     "NSEViewControllerClass": "NSViewController",

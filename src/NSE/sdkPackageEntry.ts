@@ -601,6 +601,7 @@ export {
 } from "./Views/NSEView";
 export type {
   NSEViewProps,
+  NSEViewLayerContentsPlacement,
 } from "./Views/NSEView";
 export {
   NSEMenuBar,

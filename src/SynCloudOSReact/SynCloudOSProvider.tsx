@@ -25,6 +25,7 @@ import {
 } from "../NSE/hostComposition";
 import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../NSE/Animation";
 import { registerNSEHapticFeedbackEngine } from "../NSE/Feedback/NSEHapticFeedbackManager";
+import { NSEViewDrawingEnvironmentContext, type NSEViewDrawingEnvironment } from "../NSE/Views/NSEViewDrawingEnvironment";
 import {
   useLayoutEffect,
   useMemo,
@@ -79,6 +80,11 @@ export function SynCloudOSProvider({
   }, [runtime, animationState]);
   // NSEHapticFeedbackManager.defaultPerformer performs through this runtime's engine while it is mounted.
   useLayoutEffect(() => (runtime.haptics ? registerNSEHapticFeedbackEngine(runtime.haptics) : undefined), [runtime.haptics]);
+  const drawingEnvironment = useMemo<NSEViewDrawingEnvironment>(() => ({
+    createGraphicsIdentifierIssuer: () => runtime.images.createGraphicsIdentifierIssuer(),
+    // The kernel owns the same geometry exposed to mounted apps as images.geometry.
+    geometry: runtime.environment.imageGeometry,
+  }), [runtime]);
   const lighting = useMemo(() => {
     if (!shellFrames) return null;
     return new NSEMaterialLighting(
@@ -98,7 +104,9 @@ export function SynCloudOSProvider({
         >
           <NSEFeedbackProvider value={runtime.haptics}>
             <NSEMaterialLightingProvider value={lighting}>
-              {children}
+              <NSEViewDrawingEnvironmentContext.Provider value={drawingEnvironment}>
+                {children}
+              </NSEViewDrawingEnvironmentContext.Provider>
             </NSEMaterialLightingProvider>
           </NSEFeedbackProvider>
         </ResponderHierarchyContext.Provider>
