@@ -3,7 +3,7 @@ import type {AppCapabilityStatus,AppFilePanelClient} from './appEnvironmentClien
 import {createBrowserFilePanelAdapter,createDownloadFilePanelAdapter,createFilePanelService,createFileSystemAccessPanelAdapter,FilePanelReferenceError} from '../FilePanels';
 import type {BrowserFilePanelPort,DownloadFilePanelPort,FileSystemAccessPanelPort,FilePanelResult,FilePanelSaveTarget} from '../FilePanels';
 
-import { createOpenPanelFileSystem, registerOpenPanelFileSystem, type OpenPanelStoragePort } from "../FilePanels/OpenPanelFileSystem";
+import { createOpenPanelFileSystem, registerOpenPanelFileSystem, type OpenPanelStoragePort } from "../FilePanels";
 
 export interface MountedFilePanelOptions {
   readonly bundleIdentifier?: string;

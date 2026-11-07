@@ -1,9 +1,16 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import type { NSEWindow } from "../Application/NSEWindowController";
 import type { NSEWindowSurfaceBridge } from "../Overlays/NSEWindowSurfaceBridge";
-import type { FilePanelService } from "../../SynCloudOS/FilePanels/filePanelTypes";
-import type { OpenPanelFileSystem } from "../../SynCloudOS/FilePanels/OpenPanelFileSystem";
-import type { AppImageClient } from "../../SynCloudOS/AppSDK/appEnvironmentClientTypes";
+import type { FilePanelService } from "../../SynCloudOS/nseRuntimeContracts";
+import type { OpenPanelFileSystem } from "../../SynCloudOS/nseRuntimeContracts";
+import type { IFXImageResource } from "../../FX/ImageFX/IFXImageResource";
+import type { IFXImageGeometryPort } from "../../FX/ImageFX/IFXImageViewport";
+
+/** @internal The panel needs image decoding and geometry, independent of an application SDK. */
+export interface NSEOpenPanelImagePort {
+  load(request: Readonly<Record<string, unknown>>): IFXImageResource;
+  readonly geometry?: IFXImageGeometryPort;
+}
 
 export interface NSEOpenPanelHost {
   readonly service: Pick<FilePanelService, "open" | "save" | "release" | "dispose">;
@@ -11,7 +18,7 @@ export interface NSEOpenPanelHost {
   readonly bridge: NSEWindowSurfaceBridge;
   readonly signal: AbortSignal;
   readonly responderId: string;
-  readonly images?: AppImageClient;
+  readonly images?: NSEOpenPanelImagePort;
   isKey(): boolean;
   isSecureContext(): boolean;
   hasTransientUserActivation(): boolean;

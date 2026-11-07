@@ -48,3 +48,7 @@ export type {
   VFXVideoWorkerRequest,
   VFXVideoWorkerResponse,
 } from "../VideoFX/VideoWorkerTransport";
+
+export type { FilePanelDirectory, OpenPanelBookmark, OpenPanelStoragePort } from "../FilePanels/OpenPanelFileSystem";
+export type { FilePanelFileHandle, FilePanelWritable } from "../FilePanels/filePanelTypes";
+export type { NativeOperationActivity } from "../Updates/updateReadiness";

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { ItemIdentity } from "../../SynCloudOS/Models/ChangeSet";
+import type { ItemIdentity } from "../../SynCloudOS/Models";
 import { NSEIndexPath } from "../../Foundation/NSEIndexPath";
 
 export interface TreeControllerNodeSnapshotInit<T, TId extends ItemIdentity> {

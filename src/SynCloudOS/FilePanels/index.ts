@@ -53,3 +53,7 @@ export type {
   OpenPanelRequest,
   SavePanelRequest,
 } from "./filePanelTypes";
+
+// Framework-owned file system capabilities used by mounted clients and their host.
+export { createOpenPanelFileSystem, registerOpenPanelFileSystem, openPanelFileSystemFor } from "./OpenPanelFileSystem";
+export type { FilePanelDirectory, OpenPanelStoragePort } from "./OpenPanelFileSystem";

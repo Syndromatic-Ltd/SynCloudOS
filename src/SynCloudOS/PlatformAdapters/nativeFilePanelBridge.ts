@@ -19,8 +19,8 @@
  */
 
 import { NSEData } from "../../Foundation/NSEData";
-import type { FilePanelFileHandle, FilePanelWritable } from "../FilePanels/filePanelTypes";
-import type { FilePanelDirectory } from "../FilePanels/OpenPanelFileSystem";
+import type { FilePanelFileHandle, FilePanelWritable } from "../Runtime/platformAdapterContracts";
+import type { FilePanelDirectory } from "../Runtime/platformAdapterContracts";
 
 /** Native browser protocols stay inside the platform boundary. */
 export interface NativeFilePanelHandle extends Omit<FilePanelFileHandle, "createWritable"> {

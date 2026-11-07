@@ -2,16 +2,16 @@
 import React, { useEffect, useId, useMemo } from "react";
 import { useNSEArrayController } from "../Controllers";
 import { NSECollectionView, createAdaptiveCollectionLayout, type NSEDataViewAdapter } from "../DataViews";
-import type { FilePanelDirectory } from "../../SynCloudOS/FilePanels/OpenPanelFileSystem";
-import type { FilePanelFileHandle } from "../../SynCloudOS/FilePanels/filePanelTypes";
-import type { MediaPanelItem } from "../../SynCloudOS/MediaPanels/mediaPanelTypes";
-import type { AppImageClient } from "../../SynCloudOS/AppSDK/appEnvironmentClientTypes";
+import type { FilePanelDirectory } from "../../SynCloudOS/nseRuntimeContracts";
+import type { FilePanelFileHandle } from "../../SynCloudOS/nseRuntimeContracts";
+import type { MediaPanelItem } from "../../SynCloudOS/nseRuntimeContracts";
+import type { NSEOpenPanelImagePort } from "./openPanelHost";
 import { NSEOpenPanelItemImage } from "./NSEOpenPanelItemImage";
 
 export interface OpenPanelItem { readonly id: string; readonly name: string; readonly kind: "file" | "directory" | "media"; readonly handle?: FilePanelDirectory | FilePanelFileHandle; readonly media?: MediaPanelItem }
 export function NSEOpenPanelCollection({ items, selectedIds, multiple, compact, width, height, title, images, onSelect, onActivate }: {
   items: readonly OpenPanelItem[]; selectedIds: ReadonlySet<string>; multiple: boolean; compact: boolean; width: number; height: number; title: string;
-  images?: AppImageClient;
+  images?: NSEOpenPanelImagePort;
   onSelect(ids: ReadonlySet<string>): void; onActivate(item: OpenPanelItem): void;
 }) {
   const id = useId();
