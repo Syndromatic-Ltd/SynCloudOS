@@ -67,7 +67,7 @@ for(const key of ['standard','reduced']) {
  ])).png().toFile(join(dir,`faithful-current-motion-${key}-comparison.png`));
 }
 const results={geometry,motion,currentSDKComparison,errors:{live:live.errors,controlled:controlled.errors,raw:raw.errors},liveAnimationSamples:live.motion.filter(item=>item.frames).map(item=>({reduced:item.reduced,frames:item.frames.length,artworkFramesWithNativeEffects:item.frames.filter(frame=>frame.panes.some(p=>p.artEffects.length>0)).length})),tests:{}};
-for(const name of ['faithful-site-full.json','faithful-site-final-full.json','faithful-site-last-full.json','faithful-site-tip-full.json','faithful-full-framework-final-result.json','faithful-last-failure-recheck.json'])if(existsSync(join(dir,name))){
+for(const name of ['faithful-site-full.json','faithful-site-final-full.json','faithful-site-last-full.json','faithful-site-tip-full.json','faithful-site-handoff-full.json','faithful-full-framework-final-result.json','faithful-last-failure-recheck.json'])if(existsSync(join(dir,name))){
  const data=read(name);
  results.tests[name]={success:data.success,total:data.numTotalTests,passed:data.numPassedTests,failed:data.numFailedTests,pending:data.numPendingTests,failures:data.testResults.flatMap(suite=>suite.assertionResults.filter(test=>test.status==='failed').map(test=>({file:suite.name,name:test.fullName,message:test.failureMessages?.[0]?.replace(/\u001b\[[0-9;]*m/g,'').slice(0,400)})))};
 }
