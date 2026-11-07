@@ -4455,7 +4455,16 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       }
     };
     const privacyOwner = new AbortController();
-    const privacyUserId = runtime.configurationProfiles.getCurrentSubject().user.id;
+    const currentPrivacyUserId = () => {
+      const session = runtime.identity.session.getSnapshot();
+      return session?.state === "active" ? `identity:${session.subjectId}` : runtime.configurationProfiles.getCurrentSubject().user.id;
+    };
+    const privacySessionKey = () => {
+      const session = runtime.identity.session.getSnapshot();
+      return JSON.stringify([session?.id, session?.subjectId, session?.state]);
+    };
+    const privacyUserId = currentPrivacyUserId();
+    const mountedPrivacySessionKey = privacySessionKey();
     const privacySignal = AbortSignal.any([signal, privacyOwner.signal]);
     const privacyPorts = new Map<string, ReturnType<SynCloudOSRuntime["privacy"]["forApplication"]>>();
     const privacyForService = (service: string) => {
@@ -4468,7 +4477,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     };
     const checkPrivacyOwner = () => {
       if (privacyOwner.signal.aborted) return;
-      if (runtime.configurationProfiles.getCurrentSubject().user.id !== privacyUserId
+      if (currentPrivacyUserId() !== privacyUserId || privacySessionKey() !== mountedPrivacySessionKey
         || !runtime.lifecycle.validateAccess(app.bundleIdentifier, "activate").ok)
         privacyOwner.abort(new DOMException("The privacy subject or application access changed.", "AbortError"));
     };
@@ -4481,7 +4490,8 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       checkPrivacyOwner();
     });
     const unsubscribePrivacyProfile = runtime.configurationProfiles.subscribe(checkPrivacyOwner);
-    cleanupOnAbort(() => { unsubscribePrivacyIdentity(); unsubscribePrivacyProfile(); privacyOwner.abort(); });
+    const unsubscribeCanonicalPrivacySession = runtime.identity.session.subscribe(checkPrivacyOwner);
+    cleanupOnAbort(() => { unsubscribePrivacyIdentity(); unsubscribePrivacyProfile(); unsubscribeCanonicalPrivacySession(); privacyOwner.abort(); });
     const environmentClients = Object.freeze({
       speechSynthesis: createMountedAudioSpeechClient(runtime.environment.speechSynthesis, signal, deviceEntitlements, () => authoriseDeviceCapability("audio.speech")),
       network: createMountedNetworkClient(runtime.environment.networkPaths ?? {
