@@ -18,11 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useContext, type ComponentType } from "react";
+import { createContext, useContext, useId, useLayoutEffect, useRef, type ComponentType } from "react";
 
 import type { NSEViewController } from "./NSEViewController";
 import { useObserve } from "../Objects/useObserve";
-import { nseChildTransition, NSETransitionSlot } from "./viewControllerTransition";
+import { nseChildTransition, nseReleaseChildViewSlot, NSETransitionSlot } from "./viewControllerTransition";
 
 /** The host component that mounts a view controller's view: attaches it, feeds it traits and activity. */
 export type NSEViewControllerRenderer = ComponentType<{
@@ -49,8 +49,15 @@ export function NSEChildViewControllerView({ controller, className }: {
 }) {
   const Renderer = useContext(NSEViewControllerRendererContext) ?? standaloneRenderer;
   const parent = useObserve(controller.parent);
+  const slot = useId();
+  const committed = useRef<object | null>(null);
+  useLayoutEffect(() => {
+    const token = {}; committed.current = token;
+    return () => { queueMicrotask(() => { if (committed.current === token) parent?.[nseReleaseChildViewSlot](slot); }); };
+  }, [parent, slot]);
   if (!Renderer) throw new Error(`${controller.constructor.name}'s view can only be shown inside a view an application hosts.`);
-  const transition = parent?.[nseChildTransition](controller);
+  const transition = parent?.[nseChildTransition](controller, slot);
+  if (transition === false) return null;
   if (transition) return <NSETransitionSlot transition={transition} Renderer={Renderer} className={className} />;
   return <Renderer controller={controller} className={className} />;
 }

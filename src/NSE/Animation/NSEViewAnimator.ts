@@ -41,7 +41,7 @@ export function createNSEViewAnimator(element: () => HTMLElement, layer: () => A
     const duration = reducedMotion() ? keyPath === "opacity" ? Math.min(context.duration, 0.12) : 0 : context.duration;
     if (!duration || from === to) return;
     const handle = layer().addAnimation(new AFXBasicAnimation({ targetId: "nse-view", keyPath, from, to,
-      animation: new AFXAnimation({ duration, timing: context.timingFunction, reducedMotion: "never" }) }));
+      animation: new AFXAnimation({ duration, timing: context.timingFunction, fill: "forwards", reducedMotion: "never" }) }));
     captureAFXTransactionAnimationStart(() => handle.finished);
   };
   const frame = (): GFXRect => {
@@ -51,11 +51,13 @@ export function createNSEViewAnimator(element: () => HTMLElement, layer: () => A
   const move = (next: GFXRect) => {
     if (![next.x, next.y, next.width, next.height].every(Number.isFinite) || next.width < 0 || next.height < 0) throw new RangeError("A view frame needs finite coordinates and non-negative dimensions.");
     const view = element(), previous = frame();
+    const visible = AFXTransform3D.fromCSS(view.ownerDocument.defaultView?.getComputedStyle(view).transform || "none", previous);
     // Bind before changing CSS so the layer preserves the original presentation.
     const backing = layer();
     view.style.left = `${next.x}px`; view.style.top = `${next.y}px`;
     view.style.width = `${next.width}px`; view.style.height = `${next.height}px`;
     const from = AFXTransform3D.translation(previous.x - next.x, previous.y - next.y)
+      .multiply(visible)
       .multiply(AFXTransform3D.scale(next.width > 0 ? previous.width / next.width : 1, next.height > 0 ? previous.height / next.height : 1));
     backing.transform = new AFXTransform3D();
     play("transform", from.toCSS(), new AFXTransform3D().toCSS());

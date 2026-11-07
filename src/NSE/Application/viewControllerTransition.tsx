@@ -18,10 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useLayoutEffect, useRef } from "react";
+import { useId, useLayoutEffect, useRef } from "react";
 import type { NSEViewController } from "./NSEViewController";
 import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
-import { compileNSEPresentation, type NSEPresentationSpec } from "../Animation/NSEPresentation";
+import { compileNSEPresentation, useNSEPresentation, type NSEPresentationSpec } from "../Animation/NSEPresentation";
 import type { AFXAnimationTiming } from "../../FX/AnimationFX/animationTypes";
 
 /** NSViewController.TransitionOptions. Combine an effect with allowUserInteraction. */
@@ -48,6 +48,8 @@ export interface NSEChildTransition {
 }
 /** @internal */
 export const nseChildTransition: unique symbol = Symbol("nse.childTransition");
+/** @internal */
+export const nseReleaseChildViewSlot: unique symbol = Symbol("nse.releaseChildViewSlot");
 
 /** @internal The slot outlives each swap, as the views' AppKit superview does. */
 export function NSETransitionSlot({ transition, Renderer, className }: {
@@ -56,11 +58,20 @@ export function NSETransitionSlot({ transition, Renderer, className }: {
   readonly className?: string;
 }) {
   const { animator, reducedMotion } = useNSEAnimationEnvironment();
+  const viewId = `nse-child-transition:${useId()}`;
   const outgoing = useRef<HTMLDivElement>(null), incoming = useRef<HTMLDivElement>(null);
+  const presence = useRef<HTMLDivElement>(null);
+  // A tab container may keep the outgoing slot in an internal presence while
+  // asking for the incoming slot. Only this slot mounts the two controllers;
+  // the other takes over after settlement, preventing duplicate live outlets.
+  useNSEPresentation(presence, { exit: { duration: reducedMotion ? Math.min(0.12, transition.duration) : transition.duration,
+    timing: "linear", tracks: [{ keyPath: "opacity", values: [1, 1] }] } });
   useLayoutEffect(() => {
     if (!transition.from) return;
     if (!animator || transition.duration === 0) { transition.finish(); return; }
-    const lease = animator.animations.acquireOwner({ appId: animator.ownerAppId, viewId: "nse-child-transition" });
+    let lease: ReturnType<typeof animator.animations.acquireOwner>;
+    try { lease = animator.animations.acquireOwner({ appId: animator.ownerAppId, viewId }); }
+    catch { transition.finish(); return; }
     const effect = transition.options & 127;
     const rtl = incoming.current?.ownerDocument.defaultView?.getComputedStyle(incoming.current).direction === "rtl";
     const x = effect === 8 || effect === (rtl ? 64 : 32) ? 100 : effect === 16 || effect === (rtl ? 32 : 64) ? -100 : 0;
@@ -83,10 +94,10 @@ export function NSETransitionSlot({ transition, Renderer, className }: {
       void Promise.allSettled(handles.map(handle => handle.finished)).then(() => { if (active) transition.finish(); });
     } catch { transition.finish(); }
     return () => { active = false; for (const handle of handles) handle.cancel("child transition unmounted"); lease.release(); };
-  }, [transition, animator, reducedMotion]);
+  }, [transition, animator, reducedMotion, viewId]);
   const moving = transition.from !== null;
   const inert = moving && !(transition.options & NSEViewControllerTransitionOptions.allowUserInteraction);
-  return <div data-nse-child-transition="" style={{ display: "grid", minWidth: 0, minHeight: 0, width: "100%", height: "100%", overflow: moving ? "hidden" : undefined }} inert={inert || undefined}>
+  return <div ref={presence} data-nse-child-transition="" style={{ display: "grid", minWidth: 0, minHeight: 0, width: "100%", height: "100%", overflow: moving ? "hidden" : undefined }} inert={inert || undefined}>
     {transition.from ? <div ref={outgoing} style={{ gridArea: "1 / 1", minWidth: 0, minHeight: 0 }} aria-hidden="true"><Renderer controller={transition.from} className={className} /></div> : null}
     <div ref={incoming} style={{ gridArea: "1 / 1", minWidth: 0, minHeight: 0 }}><Renderer controller={transition.to} className={className} /></div>
   </div>;
