@@ -124,7 +124,7 @@ describe("Notifications pane with nothing to list", () => {
     const Broken = () => { throw new Error("pane render failed"); };
     renderSystemUI("broken", undefined, { panes: [definePreferencePane({ id: "broken", title: "Broken", order: 50, view: Broken })] });
 
-    expect(screen.getByRole("dialog", { name: "System Preferences" })).toBeTruthy();
+    expect(screen.getByRole("dialog", { name: "Broken" })).toBeTruthy();
     expect(screen.getByText("This preference pane could not be loaded.")).toBeTruthy();
     consoleError.mockRestore();
   });

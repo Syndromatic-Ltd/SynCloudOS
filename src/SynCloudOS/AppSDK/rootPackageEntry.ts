@@ -23,5 +23,5 @@ export type { NSEManagedAFXDisplayLink, NSEManagedAFXDisplayLinkOptions, NSEMana
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,
   NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEViewControllerFX, NSEViewControllerFXClients,
-  NSEWindow, NSEWindowCloseOutcome, NSEWindowContentBorderEdge, NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
+  NSEWindow, NSEWindowCloseOutcome, NSEWindowContentBorderEdge, NSEWindowToolbarStyle, NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
 } from "../../NSE/sdkPackageEntry";
