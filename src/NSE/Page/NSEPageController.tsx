@@ -24,6 +24,9 @@ import { NSEPresence } from "../Animation/NSEPresentation";
 import { useObserve } from "../Objects/useObserve";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSEControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../Navigation/NSEApplicationNavigationChrome";
+import { NSEPageCurlView } from "./NSEPageCurlView";
+import type { NSEPageEvent, NSEPageHandle } from "./nsePageTypes";
+import { connectPageCurl } from "./pageCurlConnection";
 
 /** How far a horizontal swipe travels before it turns the page, in CSS pixels. */
 const SWIPE_DISTANCE = 48;
@@ -33,16 +36,22 @@ const SWIPE_DISTANCE = 48;
  * visited as a history to go back and forward through; `horizontalStrip` lays the pages side by side
  * and slides between them.
  */
-export type NSEPageControllerTransitionStyle = "stackHistory" | "horizontalStrip";
+export type NSEPageControllerTransitionStyle = "stackHistory" | "horizontalStrip" | "pageCurl";
+/** UIPageViewController.SpineLocation: the owner-approved UIKit naming exception. */
+export type NSEPageControllerSpineLocation = "min" | "mid";
 
 export interface NSEPageControllerOptions extends NSEViewControllerOptions {
   /** NSPageController.transitionStyle. Default `stackHistory`, as in AppKit. */
   readonly transitionStyle?: NSEPageControllerTransitionStyle;
+  /** Single page (`min`, default), or a two-page spread (`mid`). Applies to pageCurl. */
+  readonly spineLocation?: NSEPageControllerSpineLocation;
 }
 
 export interface NSEPageControllerSnapshot {
   readonly selectedIndex: number;
   readonly count: number;
+  readonly turnProgress: number;
+  readonly turnDirection: "forward" | "backward" | null;
 }
 
 /**
@@ -60,19 +69,31 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
   #objects: readonly T[] = Object.freeze([]);
   #selectedIndex = 0;
   #transitionStyle: NSEPageControllerTransitionStyle;
+  #spineLocation: NSEPageControllerSpineLocation;
+  #turnProgress = 0;
+  #turnDirection: "forward" | "backward" | null = null;
+  #pendingIndex: number | null = null;
+  readonly #leaves: Partial<Record<"forward" | "backward", NSEPageHandle>> = {};
+  // Printed pages coexist. A history may reuse one controller for a kind of
+  // object; a curl instead retains one child for each represented object.
+  readonly #curlControllers = new Map<T, NSEViewController<unknown>>();
   readonly #controllers = new Map<string, NSEViewController<unknown>>();
   readonly #prepared = new Map<NSEViewController<unknown>, T>();
-  #snapshot: NSEPageControllerSnapshot = Object.freeze({ selectedIndex: 0, count: 0 });
+  #snapshot: NSEPageControllerSnapshot = Object.freeze({ selectedIndex: 0, count: 0, turnProgress: 0, turnDirection: null });
 
   constructor(options: NSEPageControllerOptions = {}) {
     super(options);
     this.#transitionStyle = options.transitionStyle ?? "stackHistory";
+    this.#spineLocation = options.spineLocation ?? "min";
+    this.#validateStyle(this.#transitionStyle);
+    this.#validateSpine(this.#spineLocation);
+    connectPageCurl(this, this.#curl);
   }
 
   override getSnapshot(): NSEPageControllerSnapshot {
-    const { selectedIndex, count } = this.#snapshot;
-    if (selectedIndex !== this.#selectedIndex || count !== this.#objects.length) {
-      this.#snapshot = Object.freeze({ selectedIndex: this.#selectedIndex, count: this.#objects.length });
+    const { selectedIndex, count, turnProgress, turnDirection } = this.#snapshot;
+    if (selectedIndex !== this.#selectedIndex || count !== this.#objects.length || turnProgress !== this.#turnProgress || turnDirection !== this.#turnDirection) {
+      this.#snapshot = Object.freeze({ selectedIndex: this.#selectedIndex, count: this.#objects.length, turnProgress: this.#turnProgress, turnDirection: this.#turnDirection });
     }
     return this.#snapshot;
   }
@@ -80,15 +101,26 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
   /** NSPageController.transitionStyle. */
   get transitionStyle(): NSEPageControllerTransitionStyle { return this.#transitionStyle; }
   set transitionStyle(style: NSEPageControllerTransitionStyle) {
-    if (style !== "stackHistory" && style !== "horizontalStrip") throw new TypeError(`Unknown transition style "${String(style)}".`);
+    this.#validateStyle(style);
     if (style === this.#transitionStyle) return;
+    this.#resetCurl();
     this.#transitionStyle = style;
+    this.#update();
+  }
+
+  get spineLocation(): NSEPageControllerSpineLocation { return this.#spineLocation; }
+  set spineLocation(location: NSEPageControllerSpineLocation) {
+    this.#validateSpine(location);
+    if (location === this.#spineLocation) return;
+    this.#resetCurl();
+    this.#spineLocation = location;
     this.#update();
   }
 
   /** NSPageController.arrangedObjects. The selected index is kept, or clamped to the new objects. */
   get arrangedObjects(): readonly T[] { return this.#objects; }
   set arrangedObjects(objects: readonly T[]) {
+    this.#resetCurl();
     this.#objects = Object.freeze([...objects]);
     this.#selectedIndex = this.#clamp(this.#selectedIndex);
     this.#update();
@@ -97,8 +129,10 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
   /** NSPageController.selectedIndex. */
   get selectedIndex(): number { return this.#selectedIndex; }
   set selectedIndex(index: number) {
+    const wasTurning = this.#turnDirection != null;
+    this.#resetCurl();
     const next = this.#clamp(index);
-    if (next === this.#selectedIndex) return;
+    if (next === this.#selectedIndex) { if (wasTurning) this.notifyObservers(); return; }
     this.#selectedIndex = next;
     this.#update();
   }
@@ -112,6 +146,7 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
   viewControllerAt(index: number): NSEViewController<unknown> | undefined {
     if (index < 0 || index >= this.#objects.length) return undefined;
     const object = this.#objects[index] as T;
+    if (this.#transitionStyle === "pageCurl") return this.#curlControllers.get(object);
     const controller = this.#controllers.get(this.identifierForObject(object));
     return controller && this.#prepared.get(controller) === object ? controller : undefined;
   }
@@ -121,6 +156,13 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
    * page, adds `object` and shows it.
    */
   navigateForwardToObject(object: T): void {
+    if (this.#transitionStyle === "pageCurl") {
+      if (this.#turnDirection) return;
+      const next = this.#objects.indexOf(object);
+      if (next === this.#targetIndex(1)) this.#beginCurl(next);
+      else if (next !== this.#selectedIndex) throw new RangeError("A page curl navigates to the next arranged object; use selectedIndex to select a distant page.");
+      return;
+    }
     const kept = this.#objects.length ? this.#objects.slice(0, this.#selectedIndex + 1) : [];
     this.#objects = Object.freeze([...kept, object]);
     this.#selectedIndex = this.#objects.length - 1;
@@ -134,9 +176,9 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
   navigateForward(): void { this.#turn(1); }
 
   /** Whether there is a page before the selected one, as `navigateBack` validates. */
-  get canNavigateBack(): boolean { return this.#selectedIndex > 0; }
+  get canNavigateBack(): boolean { return this.#targetIndex(-1) >= 0; }
   /** Whether there is a page after the selected one, as `navigateForward` validates. */
-  get canNavigateForward(): boolean { return this.#selectedIndex < this.#objects.length - 1; }
+  get canNavigateForward(): boolean { return this.#targetIndex(1) < this.#objects.length; }
 
   /**
    * pageController(_:identifierFor:): the kind of page `object` needs. Objects with the same identifier
@@ -164,12 +206,90 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
   turn(direction: -1 | 1): void { this.#turn(direction); }
 
   #turn(direction: -1 | 1): void {
-    const next = this.#selectedIndex + direction;
+    const next = this.#targetIndex(direction);
     if (next < 0 || next >= this.#objects.length) return;
+    if (this.#transitionStyle === "pageCurl") { this.#beginCurl(next); return; }
     this.#selectedIndex = next;
     this.#update();
     this.didTransitionToObject(this.#objects[next] as T);
   }
+
+  #validateStyle(style: NSEPageControllerTransitionStyle): void {
+    if (style !== "stackHistory" && style !== "horizontalStrip" && style !== "pageCurl") throw new TypeError(`Unknown transition style "${String(style)}".`);
+  }
+
+  #validateSpine(location: NSEPageControllerSpineLocation): void {
+    if (location !== "min" && location !== "mid") throw new TypeError(`Unknown spine location "${String(location)}".`);
+  }
+
+  #targetIndex(direction: -1 | 1): number {
+    const spread = this.#transitionStyle === "pageCurl" && this.#spineLocation === "mid";
+    return spread ? this.#selectedIndex - this.#selectedIndex % 2 + direction * 2 : this.#selectedIndex + direction;
+  }
+
+  #beginCurl(index: number): void {
+    if (this.#turnDirection || index === this.#selectedIndex) return;
+    const direction = index > this.#selectedIndex ? "forward" : "backward";
+    const leaf = this.#leaves[direction];
+    if (!leaf) return;
+    this.#pendingIndex = index;
+    this.#turnDirection = direction;
+    this.#turnProgress = 0;
+    this.notifyObservers();
+    leaf.turnTo(1, { durationMs: 560, direction, edge: direction === "forward" ? "right" : "left" });
+  }
+
+  #resetCurl(): void {
+    this.#pendingIndex = null;
+    this.#turnDirection = null;
+    this.#turnProgress = 0;
+    for (const leaf of Object.values(this.#leaves)) leaf.reset();
+  }
+
+  /** @internal Renderer callbacks; no curl handle or engine is public. */
+  readonly #curl = {
+    attach: (direction: "forward" | "backward", leaf: NSEPageHandle | null): void => {
+      if (leaf) this.#leaves[direction] = leaf;
+      else delete this.#leaves[direction];
+    },
+    progress: (progress: number, event: NSEPageEvent): void => {
+      if (event.reason === "superseded" || event.reason === "reset") return;
+      const { phase, direction } = event.snapshot;
+      if (phase === "idle") {
+        if (event.reason === "cancel") {
+          this.#pendingIndex = null;
+          this.#turnProgress = 0;
+          this.#turnDirection = null;
+          this.notifyObservers();
+        }
+        return;
+      }
+      if (progress <= 0 && !this.#turnDirection && phase !== "dragging" && event.snapshot.targetProgress <= 0.1) return;
+      if (this.#turnDirection && direction !== this.#turnDirection) return;
+      const next = this.#targetIndex(direction === "forward" ? 1 : -1);
+      if (next < 0 || next >= this.#objects.length) return;
+      this.#pendingIndex ??= next;
+      this.#turnDirection = direction;
+      this.#turnProgress = Math.min(1, Math.max(0, progress));
+      this.notifyObservers();
+    },
+    end: (event: NSEPageEvent): void => {
+      if (event.reason === "superseded" || event.reason === "reset") return;
+      const next = this.#pendingIndex;
+      const completed = event.snapshot.progress >= 0.999 && next != null;
+      this.#pendingIndex = null;
+      this.#turnDirection = null;
+      this.#turnProgress = 0;
+      if (completed) {
+        this.#selectedIndex = this.#clamp(next);
+        this.#update();
+        this.didTransitionToObject(this.#objects[this.#selectedIndex] as T);
+        // New print lies flat; the leaf instances and their renderer survive.
+        for (const leaf of Object.values(this.#leaves)) leaf.setProgress(0);
+      } else this.notifyObservers();
+    },
+    reset: (): void => { this.#resetCurl(); this.notifyObservers(); },
+  };
 
   #clamp(index: number): number {
     const count = this.#objects.length;
@@ -190,7 +310,16 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
 
   #prepare(index: number): void {
     const object = this.#objects[index] as T;
-    const controller = this.#controllerFor(this.identifierForObject(object));
+    let controller: NSEViewController<unknown>;
+    if (this.#transitionStyle === "pageCurl") {
+      controller = this.#curlControllers.get(object)!;
+      if (!controller) {
+        controller = this.viewControllerForIdentifier(this.identifierForObject(object));
+        if (controller.parent !== this) throw new TypeError("A curling page must be a child of its page controller: make it with this.addChild(...).");
+        if ([...this.#curlControllers.values()].includes(controller)) throw new TypeError("Simultaneously printed pages need distinct child view controllers.");
+        this.#curlControllers.set(object, controller);
+      }
+    } else controller = this.#controllerFor(this.identifierForObject(object));
     if (this.#prepared.has(controller) && this.#prepared.get(controller) === object) return;
     this.#prepared.set(controller, object);
     this.prepareViewController(controller, object);
@@ -199,6 +328,10 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
   /** Makes and prepares the pages that show: every page of a strip, or the selected page of a history. */
   #update(): void {
     if (this.#objects.length) {
+      if (this.#transitionStyle === "pageCurl") {
+        const base = this.#spineLocation === "mid" ? this.#selectedIndex - this.#selectedIndex % 2 : this.#selectedIndex;
+        for (let index = Math.max(0, base - 2); index <= Math.min(this.#objects.length - 1, base + 3); index++) this.#prepare(index);
+      }
       if (this.#transitionStyle === "horizontalStrip") {
         const seen = new Set([this.identifierForObject(this.#objects[this.#selectedIndex] as T)]);
         for (let index = 0; index < this.#objects.length; index++) {
@@ -216,6 +349,10 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
 }
 
 function NSEPageControllerView({ controller }: { readonly controller: NSEPageController<unknown> }) {
+  return controller.transitionStyle === "pageCurl" ? <NSEPageCurlView controller={controller} /> : <NSEPageNavigationView controller={controller} />;
+}
+
+function NSEPageNavigationView({ controller }: { readonly controller: NSEPageController<unknown> }) {
   useObserve(controller);
   const swipe = useRef<{ readonly pointerId: number; readonly x: number; readonly y: number } | null>(null);
   const index = controller.selectedIndex;
