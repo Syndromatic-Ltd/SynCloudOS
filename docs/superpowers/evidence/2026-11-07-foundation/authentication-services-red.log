@@ -1,0 +1,26 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/authentication-services.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/authentication-services.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/authentication-services.test.ts [ tests/runtime/authentication-services.test.ts ]
+Error: Cannot find module '../../src/SynCloudOS/AuthenticationServices' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/authentication-services.test.ts
+ ❯ tests/runtime/authentication-services.test.ts:23:1
+     21| import { describe, expect, it, vi } from "vitest";
+     22| import { NSEData } from "../../src/Foundation/NSEData";
+     23| import {
+       | ^
+     24|   ASAuthorizationController,
+     25|   ASAuthorizationPlatformPublicKeyCredentialProvider,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  19:06:38
+   Duration  185ms (transform 39ms, setup 26ms, import 0ms, tests 0ms, environment 0ms)

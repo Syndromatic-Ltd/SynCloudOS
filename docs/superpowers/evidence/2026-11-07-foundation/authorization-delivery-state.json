@@ -1,0 +1,21 @@
+{
+  "site": "C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\site",
+  "committedSite": "3dd6db0",
+  "currentSource": "b0bfc6a7715844bd6a50f6194a40df1f556a9e64",
+  "httpStatus": 200,
+  "sourceBytesMatch": true,
+  "committedArchive": "aff87137ffafa10c04bcac4d27cb99fd737eb4fa947c282703558d43a5c4f881",
+  "committedSource": "b0bfc6a7715844bd6a50f6194a40df1f556a9e64",
+  "preview": "http://127.0.0.1:5199",
+  "listeners": [
+    {
+      "LocalPort": 5387,
+      "OwningProcess": 69072
+    },
+    {
+      "LocalPort": 5199,
+      "OwningProcess": 91096
+    }
+  ],
+  "currentArchive": "6b2d2400abfaac1bdf983ac13cee1c0cc4b9565b23647a89ddbcf10181f41ece"
+}

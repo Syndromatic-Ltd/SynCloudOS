@@ -1,0 +1,368 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/runtime.test.ts tests/runtime/app-share-client.test.ts tests/runtime/synapp-sdk-testing.test.tsx tests/runtime/preference-panes.test.tsx --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=docs/superpowers/evidence/2026-11-07-foundation/authorization-full-failures-focused.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/runtime.test.ts (14 tests | 1 failed) 203ms
+     ✓ returns cloned inspection snapshots 45ms
+     ✓ commits transactions, records history, and flushes post-commit effects 7ms
+     ✓ keeps login aliases on the effective runtime-owned service 11ms
+     ✓ keeps lifecycle state and app manager identity aligned after an app route opens 35ms
+     ✓ keeps Webspring edit, keyboard reorder, and drag rollback state on the runtime instance 9ms
+     ✓ keeps legacy and durable notifications on the same runtime-owned centre 10ms
+     × keeps replacement managers runtime-owned and uninstalls their host resources on disposal 8ms
+     ✓ settles a runtime MultiSwitch through its fallback 28ms
+     ✓ cancels a pending MultiSwitch fallback when the runtime is disposed 20ms
+     ✓ exposes real Inspector runtime reports 9ms
+     ✓ boots to LoginWindow by default when no session is authorised 10ms
+     ✓ rolls back failed transactions and reports runtime errors 5ms
+     ✓ keeps legacy run transactions usable for sync commands 2ms
+     ✓ asserts cross-runtime invariants for active apps 2ms
+ ❯ tests/runtime/app-share-client.test.ts (35 tests | 5 failed) 108ms
+     ✓ shares the same frozen prepared payload accepted by both receiver-bound probes before yielding 5ms
+     ✓ does not let a title mask an unsupported files member or fall back to text 1ms
+     ✓ requires the exact combined payload to be supported even after the files-only probe succeeds 1ms
+     ✓ reports prepared files unsupported without canShare while preserving ordinary text sharing 1ms
+     ✓ rejects empty, sparse, lazy and forged prepared files without evaluating accessors 1ms
+     ✓ fences owner or caller revocation during the native capability probe 1ms
+     ✓ never substitutes a fallback after prepared-file AbortError 1ms
+     ✓ never substitutes a fallback after prepared-file NotAllowedError 0ms
+     ✓ omits undefined optional fields like a native share dictionary 0ms
+     ✓ returns a typed policy denial when the host admission gate rejects before native access 0ms
+     ✓ resolves a relative HTTP share URL against the owned browser location 0ms
+     ✓ does not turn an unrecognized policy token into a native-share denial 0ms
+     ✓ respects an actual recognized Permissions Policy denial 0ms
+     ✓ preserves the native share and canShare receivers and invokes before yielding 0ms
+     ✓ reports inactive activation separately from API availability 0ms
+     ✓ lets the browser decide when activation is not observable 0ms
+     ✓ does not audit or prompt during status inspection 0ms
+     ✓ rejects malformed share data without invoking accessors or native methods 0ms
+     ✓ reports request-specific unsupported data without a share call 0ms
+     ✓ classifies native AbortError as cancelled 0ms
+     ✓ classifies native NotAllowedError as denied 0ms
+     ✓ classifies native TypeError as invalid 0ms
+     ✓ classifies native NotSupportedError as unsupported 0ms
+     ✓ classifies native OperationError as failed 0ms
+     ✓ distinguishes owner abort from user cancellation and ignores late completion 0ms
+     ✓ distinguishes caller abort from user cancellation and ignores late completion 0ms
+     ✓ does not start overlapping native share operations 0ms
+     ✓ keeps the native busy lease after caller abort until the native sheet settles 0ms
+     ✓ rejects sharing without its manifest capability before accessing the native API 49ms
+     × reports a completed native share as shared 9ms
+     × reports only a genuine AbortError cancellation as cancelled 7ms
+     × reports unavailable native sharing without attempting a native call 6ms
+     × rejects an unexpected native share failure for the mounted app to present 8ms
+     × distinguishes unsupported sharing from cancellation in the explicit API 6ms
+     ✓ does not treat missing declaration as native permission or unsupported hardware 5ms
+ ❯ tests/runtime/synapp-sdk-testing.test.tsx (10 tests | 1 failed) 408ms
+   ✓ tracks pointer and keyboard entry through the test host's supplied DOM and releases the bindings 6ms
+   ✓ boots an app against deterministic adapters and exposes only harness controls 143ms
+   ✓ renders through the real physical-window host when requested 41ms
+   ✓ fences an already-ready production render when disposal begins before the React root mounts 10ms
+   ✓ does not mount a late React root after a delayed real loader is disposed 58ms
+   × gates mounted public SDK operations through real deterministic adapters 26ms
+   ✓ reports deliberate resource leaks after the disposal graph and cleans them idempotently 5ms
+   ✓ runs two hosts without shared commands, preferences or clocks 51ms
+   ✓ supports StrictMode and HMR-style remount without retaining registrations 66ms
+   ✓ requires explicit fake capability admission and records interrupted calls 2ms
+ ❯ tests/runtime/preference-panes.test.tsx (21 tests | 5 failed) 713ms
+     × lists the built-ins in their default order, without Account when sign-in is not offered 152ms
+     × lists Account first when the host offers sign-in 39ms
+     ✓ signs in from the Account pane and closes Preferences 138ms
+     ✓ shows the signed-in name and offers Log Out 57ms
+     × hides built-ins by id 22ms
+     ✓ hides Account even when sign-in is offered 33ms
+     × adds developer panes and orders every pane by order 34ms
+     × replaces a built-in with a developer pane of the same id, in the list and when opened 27ms
+     ✓ renders a developer pane with settings, appearance and locale 20ms
+     ✓ shows a developer pane summary and accessory on its list row 62ms
+     ✓ translates a localisable title from the system dictionary 42ms
+     ✓ uses the fallback of a localisable title no dictionary knows 29ms
+     ✓ contains a failing pane behind the unavailable message while System Preferences stays up 20ms
+     ✓ shows Unavailable for a failing summary and drops a failing accessory 29ms
+     ✓ defaults to no panes and nothing hidden 5ms
+     ✓ captures panes and hidden ids immutably 1ms
+     ✓ rejects a pane not made with definePreferencePane 1ms
+     ✓ rejects duplicate pane ids 0ms
+     ✓ rejects a blank hidden id 0ms
+     ✓ rejects unknown fields 0ms
+     ✓ rejects panes that are not an array 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > reports a completed native share as shared
+AssertionError: promise rejected "DOMException{ stack: 'SecurityError:…' }" instead of resolving
+ ❯ tests/runtime/app-share-client.test.ts:222:38
+    220|     const share = createFixture(nativeShare);
+    221|
+    222|     await expect(share.share(request)).resolves.toBe("shared");
+       |                                      ^
+    223|     expect(nativeShare).toHaveBeenCalledWith(request);
+    224|   });
+
+Caused by: SecurityError: Sharing was not admitted.
+ ❯ Object.share src/SynCloudOS/AppSDK/mountedShareClient.ts:165:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 18, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > reports only a genuine AbortError cancellation as cancelled
+AssertionError: promise rejected "DOMException{ stack: 'SecurityError:…' }" instead of resolving
+ ❯ tests/runtime/app-share-client.test.ts:231:38
+    229|     }));
+    230|
+    231|     await expect(share.share(request)).resolves.toBe("cancelled");
+       |                                      ^
+    232|   });
+    233|
+
+Caused by: SecurityError: Sharing was not admitted.
+ ❯ Object.share src/SynCloudOS/AppSDK/mountedShareClient.ts:165:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 18, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > reports unavailable native sharing without attempting a native call
+AssertionError: promise rejected "DOMException{ stack: 'SecurityError:…' }" instead of resolving
+ ❯ tests/runtime/app-share-client.test.ts:238:38
+    236|
+    237|     expect(share.available()).toBe(false);
+    238|     await expect(share.share(request)).resolves.toBe("cancelled");
+       |                                      ^
+    239|   });
+    240|
+
+Caused by: SecurityError: Sharing was not admitted.
+ ❯ Object.share src/SynCloudOS/AppSDK/mountedShareClient.ts:165:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 18, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > rejects an unexpected native share failure for the mounted app to present
+AssertionError: expected DOMException{ stack: 'SecurityError:…' } to match object { name: 'NotAllowedError' }
+
+- Expected
++ Received
+
+- {
+-   "name": "NotAllowedError",
++ SecurityError {
++   "message": "Sharing was not admitted.",
+  }
+
+ ❯ tests/runtime/app-share-client.test.ts:247:38
+    245|     }));
+    246|
+    247|     await expect(share.share(request)).rejects.toMatchObject({ name: "…
+       |                                      ^
+    248|   });
+    249|   it("distinguishes unsupported sharing from cancellation in the expli…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/12]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > distinguishes unsupported sharing from cancellation in the explicit API
+AssertionError: expected { provider: 'none', …(5) } to match object { availability: 'unsupported', …(1) }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "availability": "unsupported",
++   "availability": "blocked",
+    "permission": "unknown",
+  }
+
+ ❯ tests/runtime/app-share-client.test.ts:251:31
+    249|   it("distinguishes unsupported sharing from cancellation in the expli…
+    250|     const share=createFixture();
+    251|     expect(share.getStatus()).toMatchObject({availability:'unsupported…
+       |                               ^
+    252|     await expect(share.perform(request)).resolves.toEqual({kind:'unsup…
+    253|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/12]⎯
+
+ FAIL  tests/runtime/preference-panes.test.tsx > System Preferences panes > lists the built-ins in their default order, without Account when sign-in is not offered
+AssertionError: expected [ 'Appearance', …(8) ] to deeply equal [ 'Appearance', …(6) ]
+
+- Expected
++ Received
+
+  [
+    "Appearance",
+    "Audio & Haptics",
+    "Motion",
+    "Notifications",
++   "Privacy & Security",
+    "Language",
+    "Updates",
+    "Storage",
++   "Capabilities",
+  ]
+
+ ❯ tests/runtime/preference-panes.test.tsx:67:41
+     65|   it("lists the built-ins in their default order, without Account when…
+     66|     renderPreferences();
+     67|     expect(listedTitles(builtInTitles)).toEqual(builtInTitles);
+       |                                         ^
+     68|     expect(screen.queryByText("Account")).toBeNull();
+     69|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/12]⎯
+
+ FAIL  tests/runtime/preference-panes.test.tsx > System Preferences panes > lists Account first when the host offers sign-in
+AssertionError: expected [ 'Account', 'Appearance', …(8) ] to deeply equal [ 'Account', 'Appearance', …(6) ]
+
+- Expected
++ Received
+
+@@ -2,9 +2,11 @@
+    "Account",
+    "Appearance",
+    "Audio & Haptics",
+    "Motion",
+    "Notifications",
++   "Privacy & Security",
+    "Language",
+    "Updates",
+    "Storage",
++   "Capabilities",
+  ]
+
+ ❯ tests/runtime/preference-panes.test.tsx:73:57
+     71|   it("lists Account first when the host offers sign-in", () => {
+     72|     renderPreferences({ account: { signedIn: false, name: null, onSign…
+     73|     expect(listedTitles(["Account", ...builtInTitles])).toEqual(["Acco…
+       |                                                         ^
+     74|     expect(screen.getByText("Not Signed In")).toBeTruthy();
+     75|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/12]⎯
+
+ FAIL  tests/runtime/preference-panes.test.tsx > System Preferences panes > hides built-ins by id
+AssertionError: expected [ 'Appearance', 'Notifications', …(5) ] to deeply equal [ 'Appearance', 'Notifications', …(3) ]
+
+- Expected
++ Received
+
+  [
+    "Appearance",
+    "Notifications",
++   "Privacy & Security",
+    "Language",
+    "Updates",
+    "Storage",
++   "Capabilities",
+  ]
+
+ ❯ tests/runtime/preference-panes.test.tsx:94:41
+     92|   it("hides built-ins by id", () => {
+     93|     renderPreferences({ preferences: { hide: ["sounds", "motion"] } });
+     94|     expect(listedTitles(builtInTitles)).toEqual(["Appearance", "Notifi…
+       |                                         ^
+     95|   });
+     96|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/12]⎯
+
+ FAIL  tests/runtime/preference-panes.test.tsx > System Preferences panes > adds developer panes and orders every pane by order
+AssertionError: expected [ 'First', 'Appearance', …(10) ] to deeply equal [ 'First', 'Appearance', …(8) ]
+
+- Expected
++ Received
+
+@@ -3,10 +3,12 @@
+    "Appearance",
+    "Audio & Haptics",
+    "Between",
+    "Motion",
+    "Notifications",
++   "Privacy & Security",
+    "Language",
+    "Billing",
+    "Updates",
+    "Storage",
++   "Capabilities",
+  ]
+
+ ❯ tests/runtime/preference-panes.test.tsx:106:8
+    104|     renderPreferences({ preferences: { panes: [pane("billing", "Billin…
+    105|     expect(listedTitles(titles))
+    106|       .toEqual(["First", "Appearance", "Audio & Haptics", "Between", "…
+       |        ^
+    107|   });
+    108|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/12]⎯
+
+ FAIL  tests/runtime/preference-panes.test.tsx > System Preferences panes > replaces a built-in with a developer pane of the same id, in the list and when opened
+AssertionError: expected [ 'Appearance', 'My Sounds', …(7) ] to deeply equal [ 'Appearance', 'My Sounds', …(5) ]
+
+- Expected
++ Received
+
+  [
+    "Appearance",
+    "My Sounds",
+    "Motion",
+    "Notifications",
++   "Privacy & Security",
+    "Language",
+    "Updates",
+    "Storage",
++   "Capabilities",
+  ]
+
+ ❯ tests/runtime/preference-panes.test.tsx:111:59
+    109|   it("replaces a built-in with a developer pane of the same id, in the…
+    110|     const { runtime } = renderPreferences({ preferences: { panes: [pan…
+    111|     expect(listedTitles([...builtInTitles, "My Sounds"])).toEqual(["Ap…
+       |                                                           ^
+    112|     act(() => { runtime.systemUI.preferences.open("sounds"); });
+    113|     expect(screen.getByText("custom sounds pane")).toBeTruthy();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/12]⎯
+
+ FAIL  tests/runtime/runtime.test.ts > runtime controller, inspector, and transaction contracts > keeps replacement managers runtime-owned and uninstalls their host resources on disposal
+AssertionError: promise rejected "Error: SynCloudOS.PluginRegistry.register…" instead of resolving
+ ❯ tests/runtime/runtime.test.ts:324:51
+    322|       expect(watchdog.install()).toMatchObject({ installed: true });
+    323|       const plugin = { id: "runtime-contract-plugin", name: "Runtime C…
+    324|       await expect(PluginRegistry.register(plugin)).resolves.toMatchOb…
+       |                                                   ^
+    325|         status: "enabled",
+    326|         plugin,
+
+Caused by: Error: SynCloudOS.PluginRegistry.register denied for runtime-contract-plugin: This action requires additional capabilities: plugin.register. The role "public" does not hold it; the host grants role capabilities in its configuration profile (configurationProfile.roles).
+ ❯ Object.register src/SynCloudOS/PluginRegistry/PluginRegistry.ts:68:13
+ ❯ tests/runtime/runtime.test.ts:324:35
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/12]⎯
+
+ FAIL  tests/runtime/synapp-sdk-testing.test.tsx > gates mounted public SDK operations through real deterministic adapters
+AssertionError: expected 'clipboard:SecurityError' to be 'clipboard:ok' // Object.is equality
+
+Expected: "clipboard:ok"
+Received: "clipboard:SecurityError"
+
+ ❯ tests/runtime/synapp-sdk-testing.test.tsx:231:48
+
+    229|   view.getByRole("button", { name: "Copy" }).click();
+    230|   await flushControlResult();
+    231|   expect(view.getByRole("status").textContent).toBe("clipboard:ok");
+       |                                                ^
+    232|   expect(host.adapters.clipboard.values()).toEqual([{ type: "text/plai…
+    233|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/12]⎯
+
+ Test Files  4 failed (4)
+      Tests  12 failed | 68 passed (80)
+   Start at  21:53:28
+   Duration  29.03s (transform 17.74s, setup 63ms, import 25.02s, tests 1.43s, environment 1.93s)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/authorization-full-failures-focused.json

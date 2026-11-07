@@ -1,0 +1,33 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -b --pretty false
+src/SynCloudOS/AppManager/AppManager.ts(48,54): error TS2344: Type '"documents" | "undo" | "policy" | "login"' does not satisfy the constraint 'keyof SynCloudOSRuntime'.
+  Type '"policy"' is not assignable to type 'keyof SynCloudOSRuntime'.
+src/SynCloudOS/AppManager/AppManager.ts(260,18): error TS2339: Property 'configurationProfiles' does not exist on type 'AppManagerRuntimePort'.
+src/SynCloudOS/AppManager/AppManagerController.ts(33,72): error TS2322: Type 'SynCloudOSRuntime' is not assignable to type 'AppManagerRuntimePort'.
+  Property 'policy' is missing in type 'SynCloudOSRuntime' but required in type 'Pick<SynCloudOSRuntime, "documents" | "undo" | "policy" | "login">'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4975,7): error TS1360: Type '{ audioGraphs: Readonly<{ createEngine(format: AUFXAudioFormat, signal?: AbortSignal): AUFXAudioEngine; }>; audioSessions: MountedAudioSessionFactory; ... 30 more ...; trusted: AppTrustedClient; }' does not satisfy the expected type 'MountedAppEnvironmentClients'.
+  Type '{ audioGraphs: Readonly<{ createEngine(format: AUFXAudioFormat, signal?: AbortSignal | undefined): AUFXAudioEngine; }>; ... 31 more ...; trusted: AppTrustedClient; }' is missing the following properties from type 'MountedAppEnvironmentClients': bluetooth, nfc, speech, contacts, and 2 more.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4976,54): error TS2345: Argument of type 'Readonly<{ audioGraphs: Readonly<{ createEngine(format: AUFXAudioFormat, signal?: AbortSignal | undefined): AUFXAudioEngine; }>; ... 31 more ...; trusted: AppTrustedClient; }>' is not assignable to parameter of type 'MountedAppEnvironmentClients'.
+  Type 'Readonly<{ audioGraphs: Readonly<{ createEngine(format: AUFXAudioFormat, signal?: AbortSignal | undefined): AUFXAudioEngine; }>; ... 31 more ...; trusted: AppTrustedClient; }>' is missing the following properties from type 'MountedAppEnvironmentClients': bluetooth, nfc, speech, contacts, and 2 more.
+src/SynCloudOS/AppSDK/hooks/useBluetooth.ts(36,29): error TS7006: Parameter 'request' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/hooks/useNetwork.ts(25,28): error TS2339: Property 'network' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useXR.ts(36,20): error TS7006: Parameter 'configuration' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/hooks/useXR.ts(37,13): error TS7006: Parameter 'configuration' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/hooks/useXR.ts(37,28): error TS7006: Parameter 'listener' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/mountedBluetoothClient.ts(33,26): error TS7006: Parameter 'signal' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/mountedBluetoothClient.ts(41,24): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/mountedBluetoothClient.ts(41,30): error TS7006: Parameter 'response' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/mountedBluetoothClient.ts(42,28): error TS7006: Parameter 'enabled' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/mountedBluetoothClient.ts(42,37): error TS7006: Parameter 'listener' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/mountedBluetoothClient.ts(55,33): error TS7006: Parameter 'request' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/mountedXRClient.ts(30,19): error TS7006: Parameter 'signal' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/mountedXRClient.ts(38,30): error TS7006: Parameter 'configuration' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/mountedXRClient.ts(39,23): error TS7006: Parameter 'configuration' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/mountedXRClient.ts(39,38): error TS7006: Parameter 'listener' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/BrowserBluetoothAdapter.ts(82,22): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/BrowserBluetoothAdapter.ts(87,30): error TS7006: Parameter 'enabled' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/BrowserBluetoothAdapter.ts(87,39): error TS7006: Parameter 'listener' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/BrowserBluetoothAdapter.ts(134,30): error TS7006: Parameter 'request' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/BrowserXRAdapter.ts(67,26): error TS7006: Parameter 'configuration' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/BrowserXRAdapter.ts(71,17): error TS7006: Parameter 'configuration' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/BrowserXRAdapter.ts(71,32): error TS7006: Parameter 'listener' implicitly has an 'any' type.

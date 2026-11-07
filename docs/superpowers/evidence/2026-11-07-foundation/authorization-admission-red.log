@@ -1,0 +1,55 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/info-entitlements.test.ts tests/runtime/sc-authorization.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/sc-authorization.test.ts (3 tests | 1 failed) 37ms
+   × rejects known configuration actions that are not named rights 4ms
+ ❯ tests/runtime/info-entitlements.test.ts (2 tests | 1 failed) 9ms
+   × rejects the removed manifest permissions key 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/info-entitlements.test.ts > rejects the removed manifest permissions key
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/info-entitlements.test.ts:31:141
+     29|
+     30| it("rejects the removed manifest permissions key", () => {
+     31|  expect(validateSynWareManifest({ bundleIdentifier:"com.example.old",d…
+       |                                                                                                                                             ^
+     32| });
+     33|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/sc-authorization.test.ts > rejects known configuration actions that are not named rights
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/sc-authorization.test.ts:42:81
+     40| it("rejects known configuration actions that are not named rights", ()…
+     41|  const runtime=createTestRuntime();
+     42|  expect(runtime.authorization.copyRights(["runtime.inspect" as never])…
+       |                                                                                 ^
+     43| });
+     44|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 3 passed (5)
+   Start at  19:18:48
+   Duration  6.65s (transform 4.82s, setup 33ms, import 6.31s, tests 46ms, environment 0ms)

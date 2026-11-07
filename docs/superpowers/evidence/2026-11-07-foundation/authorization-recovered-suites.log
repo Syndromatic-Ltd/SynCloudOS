@@ -1,0 +1,362 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/integration/nse-data-view-colour-drag.test.tsx tests/nse/colour/nse-colour-controls.test.tsx tests/nse/date-time/nse-date-picker.test.tsx tests/nse/menus/nse-menu-controller.test.tsx tests/nse/overlays/nse-overlay-manager.test.tsx tests/nse/toolbars/nse-toolbar.test.tsx tests/runtime/application-actions.test.tsx tests/runtime/application-stage-app-menu.test.tsx tests/runtime/architecture-boundaries.test.ts tests/runtime/browser-application-host.test.tsx tests/runtime/browser-route-coordinator.test.ts tests/runtime/bundle-loader-runtime.test.ts tests/runtime/chronosphere/chronosphere-presentation.test.tsx tests/runtime/document-durable-synchronisation-regressions.test.ts tests/runtime/document-resource-lifecycle.test.ts tests/runtime/document-store.test.ts tests/runtime/document-terminal-reconciliation.test.ts tests/runtime/file-panel-service.test.ts tests/runtime/focus-scope.test.tsx tests/runtime/framework-doc-links.test.ts tests/runtime/framework-settlement.test.ts tests/runtime/fx/animation.test.tsx tests/runtime/fx/graphics.test.tsx tests/runtime/fx/image-resource.test.ts tests/runtime/fx/image-worker.test.ts tests/runtime/fx/lumina-authority.test.ts tests/runtime/fx/media-queue.test.ts tests/runtime/fx/mounted-recording.test.ts tests/runtime/host-update-readiness.test.ts tests/runtime/http-authentication-recovery.test.ts tests/runtime/mounted-app-interaction-authority.test.tsx tests/runtime/mounted-workspace-document-versions.test.ts tests/runtime/nse-animation-webspring-integration.test.tsx tests/runtime/nse-animation.test.tsx tests/runtime/nse-cursor-tracking.test.tsx tests/runtime/nse-image-resource.test.ts tests/runtime/nse-stack-view.test.tsx tests/runtime/nse-tab-bar.test.tsx tests/runtime/nse-text-layout.test.ts tests/runtime/nse-web-content.test.tsx tests/runtime/nse-window-controller-class.test.tsx tests/runtime/routes-launchservices.test.ts tests/runtime/routing-ii-lifecycle.test.ts tests/runtime/routing-ii-outlets.test.tsx tests/runtime/runtime-instance-contract.test.ts tests/runtime/sound-service.test.ts tests/runtime/transient-window-surface-bridge.test.tsx tests/runtime/webspring-layout.test.ts tests/runtime/window-final-closure-regressions.test.ts tests/runtime/window-transaction-authority-regressions.test.ts --maxWorkers=1 --no-file-parallelism --testTimeout=60000 --reporter=default --reporter=json --outputFile.json=docs/superpowers/evidence/2026-11-07-foundation/authorization-recovered-suites.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ✓ tests/runtime/host-update-readiness.test.ts (28 tests) 567ms
+ ✓ tests/runtime/fx/mounted-recording.test.ts (5 tests) 9ms
+ ✓ tests/runtime/architecture-boundaries.test.ts (36 tests) 14277ms
+     ✓ routes host lifecycle protocols through the internal NSE interoperability entry  804ms
+     ✓ shares canonical bundle identity without granting manifest code runtime access  627ms
+     ✓ enforces the declared internal entry consumers even if an import list is broadened  315ms
+     ✓ forbids re-exporting internal host protocols from a supported package entry  325ms
+     ✓ admits only the lifecycle runtime bridge from FX  689ms
+     ✓ keeps Chronosphere presentation independent of runtime and app context  782ms
+     ✓ uses the shared TypeScript AST scanner for raw keyboard aliases and wrappers  766ms
+     ✓ detects aliased, commented, exported, dynamic, type, and require bypasses  567ms
+     ✓ rejects non-static imports, requires, and import.meta.glob bypasses  555ms
+     ✓ resolves immutable module specifiers to their actual edges without accepting dynamic or shadowed names  997ms
+     ✓ requires every controlled source and resolved target to have one layer  513ms
+     ✓ rejects repository-local resolved targets even when they sit outside controlledSources  441ms
+     ✓ accepts exact package entry aliases with a separately mapped testing subpath  426ms
+     ✓ rejects resolved module targets outside the repository  440ms
+     ✓ expands supported local Vite assets and rejects private-app glob imports  401ms
+     ✓ expands an explicit brace set of supported local Vite asset types  447ms
+     ✓ rejects escaping, unsupported, zero-match, and dynamic glob patterns/options  453ms
+     ✓ selects the most-specific layer independent of declaration order  367ms
+     ✓ rejects equally specific overlapping classifications  409ms
+     ✓ keeps host-only AppSDK seams out of the public AppSDK and SynWare import graph  910ms
+     ✓ uses the committed policy to reject direct and indirect public AppSDK host re-exports  444ms
+     ✓ rejects default-runtime, SynWare-private, and raw-runtime imports  400ms
+     ✓ rejects an allowlist entry as soon as its exact edge disappears  941ms
+stderr | tests/runtime/browser-application-host.test.tsx > keeps a discovered bundle's folder name independent from its case-insensitive identity
+<ref *1> DOMException {
+  [stack]: [Getter/Setter],
+  [Symbol(impl)]: DOMExceptionImpl {
+    name: 'SecurityError',
+    message: 'Application capabilities may only target owned responders.',
+    Symbol(wrapper): [Circular *1],
+    [code]: [Getter]
+  },
+  name: [Getter],
+  message: [Getter],
+  code: [Getter],
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25,
+  [Symbol(Symbol.toStringTag)]: 'DOMException'
+}
+
+The above error occurred in the <Application> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, SynCloudOSWatchdog.
+
+<ref *1> DOMException {
+  [stack]: [Getter/Setter],
+  [Symbol(impl)]: DOMExceptionImpl {
+    name: 'SecurityError',
+    message: 'Application capabilities may only target owned responders.',
+    Symbol(wrapper): [Circular *1],
+    [code]: [Getter]
+  },
+  name: [Getter],
+  message: [Getter],
+  code: [Getter],
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25,
+  [Symbol(Symbol.toStringTag)]: 'DOMException'
+}
+
+The above error occurred in the <Application> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, SynCloudOSWatchdog.
+
+
+ ✓ tests/runtime/browser-application-host.test.tsx (36 tests) 5078ms
+     ✓ offers the host's About attribution for a definition bundle  379ms
+     ✓ presents explicitly requested shared NSE panels through their real window owner  385ms
+     ✓ gives a fullscreen primary that declares a content trigger the application menu, with Account under optional sign-in  893ms
+     ✓ restores the same interactive fullscreen app after cancelling optional sign-in without a service  707ms
+     ✓ retains the nested route, query, fragment and live route content after optional sign-in cancellation  345ms
+ ✓ tests/runtime/nse-animation-webspring-integration.test.tsx (13 tests) 3252ms
+     ✓ opens a Board folder over the stage and closes it with Escape  799ms
+     ✓ merges only over an entry's artwork and reorders only after a rest  670ms
+     ✓ springs a folder open under a resting app and drops it inside the panel  1217ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ✓ tests/nse/colour/nse-colour-controls.test.tsx (29 tests) 2627ms
+     ✓ provides a hex entry on every picker, with an inline parse error and recovery  355ms
+     ✓ keeps saved colours in the strip and lists recent colours as a palette  316ms
+ ✓ tests/nse/date-time/nse-date-picker.test.tsx (39 tests) 2006ms
+stderr | tests/runtime/chronosphere/chronosphere-presentation.test.tsx > gives Restore its own document return choreography
+React does not recognize the `bezelStyle` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `bezelstyle` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+React does not recognize the `imagePosition` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `imageposition` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+stderr | tests/runtime/chronosphere/chronosphere-presentation.test.tsx > lays every version out in the grid view, chooses with the keyboard, restores and leaves
+React does not recognize the `keyEquivalent` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `keyequivalent` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+ ✓ tests/runtime/chronosphere/chronosphere-presentation.test.tsx (25 tests) 1592ms
+   ✓ gives Restore its own document return choreography  735ms
+   ✓ gives Done its own document return choreography  617ms
+ ✓ tests/runtime/transient-window-surface-bridge.test.tsx (37 tests) 1557ms
+ ✓ tests/runtime/nse-web-content.test.tsx (42 tests) 1277ms
+ ✓ tests/runtime/browser-route-coordinator.test.ts (52 tests) 1173ms
+ ✓ tests/runtime/document-durable-synchronisation-regressions.test.ts (15 tests) 1082ms
+     ✓ does not let a non-cooperative child disposer hang synchronising disposal  1001ms
+ ✓ tests/runtime/nse-window-controller-class.test.tsx (22 tests) 888ms
+ ✓ tests/runtime/application-stage-app-menu.test.tsx (20 tests) 1104ms
+ ✓ tests/runtime/application-actions.test.tsx (43 tests) 791ms
+ ✓ tests/runtime/focus-scope.test.tsx (25 tests) 834ms
+ ✓ tests/nse/menus/nse-menu-controller.test.tsx (39 tests) 794ms
+ ✓ tests/runtime/fx/image-worker.test.ts (38 tests) 764ms
+     ✓ sizes the CPU sample budget to the job, so a VGA two-node graph renders  706ms
+ ✓ tests/nse/toolbars/nse-toolbar.test.tsx (36 tests) 689ms
+ ✓ tests/runtime/nse-tab-bar.test.tsx (24 tests) 684ms
+ ✓ tests/integration/nse-data-view-colour-drag.test.tsx (21 tests) 699ms
+ ✓ tests/runtime/mounted-app-interaction-authority.test.tsx (14 tests) 472ms
+ ✓ tests/runtime/document-terminal-reconciliation.test.ts (14 tests) 518ms
+ ✓ tests/runtime/nse-image-resource.test.ts (27 tests) 479ms
+stderr | tests/runtime/nse-stack-view.test.tsx > NSEStackView > sizes an item without a preferred size to its content's fitting size, and follows the content
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ ✓ tests/runtime/nse-stack-view.test.tsx (18 tests) 445ms
+ ✓ tests/nse/overlays/nse-overlay-manager.test.tsx (17 tests) 537ms
+ ✓ tests/runtime/fx/graphics.test.tsx (19 tests) 447ms
+ ✓ tests/runtime/document-resource-lifecycle.test.ts (30 tests) 310ms
+stderr | tests/runtime/routing-ii-outlets.test.tsx > Routing II React outlets > inherits the nearest error view for a lazy-render failure and routes retry through the host
+Error: child-lazy-render-failed
+    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/routing-ii-outlets.test.tsx:277:24
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2027:60
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10) {
+  [stack]: [Getter/Setter],
+  [message]: 'child-lazy-render-failed'
+}
+
+The above error occurred in the <component> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, RouteRenderBoundary.
+
+
+stderr | tests/runtime/routing-ii-outlets.test.tsx > Routing II React outlets > bubbles a failing inherited error presentation past its declaring route
+RoutePresentationFailure [Error]: Route boundary presentation failed.
+    at RouteFallbackGuard.render (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/src/SynCloudOS/AppSDK/RouteOutlet.tsx:151:35)
+    at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25917:29)
+    at updateClassComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10719:25)
+    at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11792:13)
+    at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    ... 3 lines matching cause stack trace ...
+    at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+    at performWorkOnRootViaSchedulerTask (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:18957:7) {
+  [stack]: [Getter/Setter],
+  [message]: 'Route boundary presentation failed.',
+  [cause]: Error: artist-boundary-render-failed
+      at ArtistError (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/routing-ii-outlets.test.tsx:118:42)
+      at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+      at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+      at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+      at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+      at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+      at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+    [stack]: [Getter/Setter],
+    [message]: 'artist-boundary-render-failed'
+  },
+  error: Error: artist-boundary-render-failed
+      at ArtistError (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/routing-ii-outlets.test.tsx:118:42)
+      at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+      at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+      at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+      at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+      at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+      at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+    [stack]: [Getter/Setter],
+    [message]: 'artist-boundary-render-failed'
+  },
+  boundaryDepth: 1
+}
+
+The above error occurred in the <RouteFallbackGuard> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, RouteRenderBoundary.
+
+
+stderr | tests/runtime/routing-ii-outlets.test.tsx > Routing II React outlets > bubbles a render exception to the nearest ancestor error boundary
+Error: album-render-failed
+    at Album (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/routing-ii-outlets.test.tsx:102:42)
+    at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+  [stack]: [Getter/Setter],
+  [message]: 'album-render-failed'
+}
+
+The above error occurred in the <Album> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, RouteRenderBoundary.
+
+
+ ✓ tests/runtime/routing-ii-outlets.test.tsx (21 tests) 300ms
+ ✓ tests/runtime/window-transaction-authority-regressions.test.ts (35 tests) 276ms
+ ✓ tests/runtime/nse-text-layout.test.ts (35 tests) 230ms
+ ✓ tests/runtime/fx/image-resource.test.ts (18 tests) 226ms
+ ✓ tests/runtime/framework-doc-links.test.ts (4 tests) 193ms
+ ✓ tests/runtime/mounted-workspace-document-versions.test.ts (11 tests) 247ms
+ ✓ tests/runtime/routes-launchservices.test.ts (30 tests) 241ms
+ ✓ tests/runtime/fx/lumina-authority.test.ts (13 tests) 224ms
+ ✓ tests/runtime/sound-service.test.ts (38 tests) 211ms
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > holds settlement until an actual React layout effect acknowledges the exact operation and revision
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > holds settlement until an actual React layout effect acknowledges the exact operation and revision
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ ✓ tests/runtime/framework-settlement.test.ts (15 tests) 218ms
+ ✓ tests/runtime/fx/animation.test.tsx (23 tests) 196ms
+ ✓ tests/runtime/window-final-closure-regressions.test.ts (20 tests) 195ms
+ ✓ tests/runtime/nse-cursor-tracking.test.tsx (19 tests) 250ms
+ ✓ tests/runtime/runtime-instance-contract.test.ts (14 tests) 154ms
+ ✓ tests/runtime/fx/media-queue.test.ts (15 tests) 146ms
+ ✓ tests/runtime/nse-animation.test.tsx (34 tests) 109ms
+ ✓ tests/runtime/bundle-loader-runtime.test.ts (16 tests) 135ms
+ ✓ tests/runtime/webspring-layout.test.ts (29 tests) 107ms
+ ✓ tests/runtime/http-authentication-recovery.test.ts (85 tests) 81ms
+ ✓ tests/runtime/document-store.test.ts (29 tests) 66ms
+ ✓ tests/runtime/file-panel-service.test.ts (27 tests) 25ms
+ ✓ tests/runtime/routing-ii-lifecycle.test.ts (27 tests) 27ms
+
+ Test Files  50 passed (50)
+      Tests  1322 passed (1322)
+   Start at  22:08:53
+   Duration  167.60s (transform 22.32s, setup 453ms, import 82.62s, tests 48.82s, environment 28.50s)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/authorization-recovered-suites.json

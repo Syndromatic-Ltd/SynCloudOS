@@ -1,0 +1,42 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-capture.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-capture.test.ts (2 tests | 2 failed) 7ms
+   × combines passive camera status with app consent and revokes the live session 4ms
+   × records microphone consent independently of audio-session category permission 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-capture.test.ts > combines passive camera status with app consent and revokes the live session
+TypeError: session.getAuthorizationStatus is not a function
+ ❯ tests/runtime/privacy-capture.test.ts:34:23
+     32|  const client=createMountedVideoClient(service,new AbortController().s…
+     33|  const session=client.createCaptureSession();
+     34|  expect(await session.getAuthorizationStatus("camera")).toBe("prompt")…
+       |                       ^
+     35|  await session.requestCamera();expect(await session.getAuthorizationSt…
+     36|  privacy.revoke(scope);expect(dispose).toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/privacy-capture.test.ts > records microphone consent independently of audio-session category permission
+AssertionError: expected undefined to be 'undetermined' // Object.is equality
+
+- Expected:
+"undetermined"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/privacy-capture.test.ts:45:72
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  19:36:05
+   Duration  565ms (transform 338ms, setup 26ms, import 405ms, tests 7ms, environment 0ms)

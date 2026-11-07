@@ -1,0 +1,1 @@
+src/FrameworkTests/Windows/WindowManagementFixture.tsx:29 -> src/NSE/Overlays/NSEPopover.tsx: devtools must use a public nse entrypoint

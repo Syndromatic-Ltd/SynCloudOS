@@ -44,3 +44,11 @@ Each enforced decision records action, allow/deny, reason, timestamp, subject ro
 6. Run focused and package checks, adopt framework HEAD into site using the expressly authorised temporary detached adoption checkout, capture every added UI, run serial full suite and report residual limits.
 
 No owner decision blocks the approved split. Compression naming belongs to another job. Passkey relying-party deployment/credentials are opt-in host configuration, not required to ship the API or turn it on for Syndromatic.
+
+## Closing evidence added during implementation
+
+The implementation also reproduced two follow-on gaps rather than treating a rename as a repair: named-right validation initially accepted known non-right configuration actions, and distinct authenticated principals sharing a displayed email initially retained the same device scope. `sc-authorization.test.ts` now rejects configuration actions as rights. `privacy-session-integration.test.ts` proves canonical subject/session invalidation and separate consent for distinct principals sharing an email, while retaining saved consent when only the session changes for the same principal.
+
+The notification bridge has matching canonical ownership and pending-registration regressions. `auth-backend.test.ts` additionally proves that system-role/capability claims in headers, query parameters and JSON cannot authorise a protected server handler, with or without an authenticated reader's real cookie. Existing lifecycle fixtures now declare public access independently of entitlements and supply explicit plugin authority; the share regression retains a private-app denial.
+
+The baseline references above remain pinned to the reviewed revision. The final commit inventory, weakness-to-test mapping, live screenshots, full-suite outcome and remaining trust/acceptance limits are in `../evidence/2026-11-07-foundation/authorization-report.md`.

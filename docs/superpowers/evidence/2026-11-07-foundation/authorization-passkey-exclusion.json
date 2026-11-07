@@ -1,0 +1,38 @@
+{
+  "artifactRoot": "C:\\Users\\KAVISH~1\\AppData\\Local\\Temp\\syncloudos-authorization-final-8c78a917def1-28840fd8\\.artifacts\\synapp-sdk\\packages\\syncloudos",
+  "frameworkCommit": "b0bfc6a7715844bd6a50f6194a40df1f556a9e64",
+  "archiveSha256": "aff87137ffafa10c04bcac4d27cb99fd737eb4fa947c282703558d43a5c4f881",
+  "checks": [
+    {
+      "entry": ".",
+      "modules": 116,
+      "containsPasskeys": false
+    },
+    {
+      "entry": "./browser",
+      "modules": 151,
+      "containsPasskeys": false
+    },
+    {
+      "entry": "./sdk",
+      "modules": 66,
+      "containsPasskeys": false
+    },
+    {
+      "entry": "./auth",
+      "modules": 1,
+      "containsPasskeys": false
+    },
+    {
+      "entry": "./authentication-services",
+      "modules": 3,
+      "containsPasskeys": true
+    },
+    {
+      "entry": "./auth/passkey",
+      "modules": 3,
+      "containsPasskeys": true
+    }
+  ],
+  "scope": "Real emitted ESM dependency graphs; no relying-party/authenticator acceptance claim"
+}

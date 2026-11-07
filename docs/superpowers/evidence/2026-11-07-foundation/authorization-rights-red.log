@@ -1,0 +1,62 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/authorization-efficacy.test.ts tests/runtime/sc-authorization.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/authorization-efficacy.test.ts (14 tests | 2 failed) 48ms
+     × R1 denies unknown actions without explicit extension requirements 24ms
+     × R2 does not use developer origin as authority 2ms
+ ❯ tests/runtime/sc-authorization.test.ts (2 tests | 2 failed) 28ms
+   × checks each named right, rejects unknown rights and retains each decision 25ms
+   × accepts explicit host grants and checks all requested rights 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R1 denies unknown actions without explicit extension requirements
+TypeError: Cannot read properties of undefined (reading 'authorise')
+ ❯ tests/runtime/authorization-efficacy.test.ts:26:32
+     24| describe("authorisation efficacy regressions", () => {
+     25|   it("R1 denies unknown actions without explicit extension requirement…
+     26|     expect(createTestRuntime().policy.authorise({ action: "runtime.mtu…
+       |                                ^
+     27|   });
+     28|   it("R2 ignores a request's attempt to weaken the boot access mode", …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R2 does not use developer origin as authority
+TypeError: Cannot read properties of undefined (reading 'authorise')
+ ❯ tests/runtime/authorization-efficacy.test.ts:38:32
+     36|   });
+     37|   it("R2 does not use developer origin as authority", () => {
+     38|     expect(createTestRuntime().policy.authorise({ action: "webspring.e…
+       |                                ^
+     39|   });
+     40|   it("R2 checks login on external app routes", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/sc-authorization.test.ts > checks each named right, rejects unknown rights and retains each decision
+TypeError: Cannot read properties of undefined (reading 'copyRights')
+ ❯ tests/runtime/sc-authorization.test.ts:5:39
+      3| it("checks each named right, rejects unknown rights and retains each d…
+      4|  const runtime = createTestRuntime();
+      5|  const result = runtime.authorization.copyRights(["runtime.mutate", "d…
+       |                                       ^
+      6|  expect(result.allowed).toBe(false);
+      7|  expect(result.decisions).toHaveLength(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/runtime/sc-authorization.test.ts > accepts explicit host grants and checks all requested rights
+TypeError: Cannot read properties of undefined (reading 'copyRights')
+ ❯ tests/runtime/sc-authorization.test.ts:14:31
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 12 passed (16)
+   Start at  19:09:35
+   Duration  8.54s (transform 5.30s, setup 38ms, import 8.14s, tests 76ms, environment 0ms)

@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/error-catalogue.test.ts --maxWorkers=1 --no-file-parallelism --testTimeout=60000
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  21:21:21
+   Duration  48.53s (transform 171ms, setup 43ms, import 15.65s, tests 32.66s, environment 0ms)

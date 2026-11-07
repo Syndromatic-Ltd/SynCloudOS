@@ -1,0 +1,234 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/info-entitlements.test.ts tests/runtime/authorization-efficacy.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/authorization-efficacy.test.ts (14 tests | 13 failed) 57ms
+     × R1 denies unknown actions without explicit extension requirements 25ms
+     × R2 ignores a request's attempt to weaken the boot access mode 3ms
+     × R2 checks roles and classes before runtime.inspect returns 2ms
+     × R2 checks roles and classes before runtime.mutate returns 2ms
+     × R2 checks roles and classes before webspring.enter returns 2ms
+     × R2 checks roles and classes before external.open returns 2ms
+     × R2 does not use developer origin as authority 2ms
+     × R2 checks login on external app routes 2ms
+     × R3 does not allow a restriction to elevate a denied action 2ms
+     × R3 denies and audits throwing restrictions 7ms
+     × R4 revokes issued authority after disposal 2ms
+     × R7 never silently elevates anonymous plugin registration 3ms
+     × R8 removes credentials from audit context and URLs 2ms
+ ❯ tests/runtime/info-entitlements.test.ts (1 test | 1 failed) 8ms
+   × accepts Info.ts entitlements as unique named capabilities 8ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 14 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R1 denies unknown actions without explicit extension requirements
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/authorization-efficacy.test.ts:6:88
+      4| describe("authorisation efficacy regressions", () => {
+      5|   it("R1 denies unknown actions without explicit extension requirement…
+      6|     expect(createTestRuntime().policy.authorise({ action: "runtime.mtu…
+       |                                                                                        ^
+      7|   });
+      8|   it("R2 ignores a request's attempt to weaken the boot access mode", …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/14]⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R2 ignores a request's attempt to weaken the boot access mode
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/authorization-efficacy.test.ts:10:121
+      8|   it("R2 ignores a request's attempt to weaken the boot access mode", …
+      9|     const runtime = createTestRuntime();
+     10|     expect(runtime.policy.authorise({ action: "app.launch", app: creat…
+       |                                                                                                                         ^
+     11|   });
+     12|   it.each(["runtime.inspect", "runtime.mutate", "diagnostics.view", "w…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/14]⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R2 checks roles and classes before runtime.inspect returns
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R2 checks roles and classes before runtime.mutate returns
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R2 checks roles and classes before webspring.enter returns
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R2 checks roles and classes before external.open returns
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/authorization-efficacy.test.ts:15:141
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/14]⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R2 does not use developer origin as authority
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/authorization-efficacy.test.ts:18:117
+     16|   });
+     17|   it("R2 does not use developer origin as authority", () => {
+     18|     expect(createTestRuntime().policy.authorise({ action: "webspring.e…
+       |                                                                                                                     ^
+     19|   });
+     20|   it("R2 checks login on external app routes", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/14]⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R2 checks login on external app routes
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/authorization-efficacy.test.ts:22:152
+     20|   it("R2 checks login on external app routes", () => {
+     21|     const runtime = createTestRuntime();
+     22|     expect(runtime.policy.authorise({ action: "route.open", app: creat…
+       |                                                                                                                                                        ^
+     23|   });
+     24|   it("R3 does not allow a restriction to elevate a denied action", () …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/14]⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R3 does not allow a restriction to elevate a denied action
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/authorization-efficacy.test.ts:27:76
+     25|     const runtime = createTestRuntime();
+     26|     runtime.policy.registerPolicy("elevate", (_request, decision) => (…
+     27|     expect(runtime.policy.authorise({ action: "runtime.mutate" }).allo…
+       |                                                                            ^
+     28|   });
+     29|   it("R3 denies and audits throwing restrictions", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/14]⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R3 denies and audits throwing restrictions
+Error: secret-token
+ ❯ tests/runtime/authorization-efficacy.test.ts:31:59
+     29|   it("R3 denies and audits throwing restrictions", () => {
+     30|     const runtime = createTestRuntime();
+     31|     runtime.policy.registerPolicy("throws", () => { throw new Error("s…
+       |                                                           ^
+     32|     expect(runtime.policy.authorise({ action: "runtime.inspect" }).all…
+     33|     expect(runtime.policy.getAuditLog().at(-1)?.allowed).toBe(false);
+ ❯ applyRegisteredPolicies src/SynCloudOS/PolicyKit/PolicyKit.ts:637:32
+ ❯ evaluateRequest src/SynCloudOS/PolicyKit/PolicyKit.ts:664:10
+ ❯ Object.authorise src/SynCloudOS/PolicyKit/PolicyKit.ts:763:18
+ ❯ tests/runtime/authorization-efficacy.test.ts:32:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/14]⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R4 revokes issued authority after disposal
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/authorization-efficacy.test.ts:40:97
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/14]⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R7 never silently elevates anonymous plugin registration
+AssertionError: promise resolved "{ …(5) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "disabledAt": null,
++   "enabledAt": 1794078349787,
++   "plugin": {
++     "id": "untrusted",
++     "name": "Untrusted",
++     "version": "1.0.0",
++   },
++   "registeredAt": 1794078349787,
++   "status": "enabled",
+  }
+
+ ❯ tests/runtime/authorization-efficacy.test.ts:43:119
+     41|   });
+     42|   it("R7 never silently elevates anonymous plugin registration", async…
+     43|     await expect(createTestRuntime().pluginRegistry.register({ id: "un…
+       |                                                                                                                       ^
+     44|   });
+     45|   it("R8 removes credentials from audit context and URLs", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/14]⎯
+
+ FAIL  tests/runtime/authorization-efficacy.test.ts > authorisation efficacy regressions > R8 removes credentials from audit context and URLs
+AssertionError: expected '[{"id":"policy-1794078349790-3801d51e…' not to match /secret|user:password/
+
+- Expected:
+/secret|user:password/
+
++ Received:
+"[{\"id\":\"policy-1794078349790-3801d51eceff08\",\"action\":\"external.open\",\"decision\":\"allow\",\"allowed\":true,\"reason\":\"External route allowed.\",\"mode\":\"fullyLocked\",\"subjectRole\":\"public\",\"subjectId\":\"public.anonymous\",\"resource\":\"https://user:password@example.com/path?token=secret#secret\",\"href\":\"https://user:password@example.com/path?token=secret#secret\",\"at\":1794078349790,\"sessionAuthorised\":false,\"accessClass\":null,\"requiredCapabilities\":[],\"requiredRoles\":[],\"requiredAccessClasses\":[],\"matchedCapabilities\":[],\"missingCapabilities\":[],\"matchedRoles\":[],\"missingRoles\":[],\"matchedAccessClasses\":[],\"missingAccessClasses\":[],\"trace\":[{\"step\":\"policy.mode\",\"result\":\"info\",\"message\":\"Evaluating in fullyLocked access mode.\",\"requiredCapabilities\":[],\"requiredRoles\":[],\"requiredAccessClasses\":[],\"matchedCapabilities\":[],\"missingCapabilities\":[],\"matchedRoles\":[],\"missingRoles\":[],\"matchedAccessClasses\":[],\"missingAccessClasses\":[]},{\"step\":\"policy.subject\",\"result\":\"info\",\"message\":\"Resolved public policy subject.\",\"requiredCapabilities\":[],\"requiredRoles\":[],\"requiredAccessClasses\":[],\"matchedCapabilities\":[],\"missingCapabilities\":[],\"matchedRoles\":[],\"missingRoles\":[],\"matchedAccessClasses\":[],\"missingAccessClasses\":[]},{\"step\":\"policy.requirements\",\"result\":\"info\",\"message\":\"Collected request, app, and bundle policy requirements.\",\"requiredCapabilities\":[],\"requiredRoles\":[],\"requiredAccessClasses\":[],\"matchedCapabilities\":[],\"missingCapabilities\":[],\"matchedRoles\":[],\"missingRoles\":[],\"matchedAccessClasses\":[],\"missingAccessClasses\":[]},{\"step\":\"policy.decision\",\"result\":\"allow\",\"message\":\"External route allowed.\",\"requiredCapabilities\":[],\"requiredRoles\":[],\"requiredAccessClasses\":[],\"matchedCapabilities\":[],\"missingCapabilities\":[],\"matchedRoles\":[],\"missingRoles\":[],\"matchedAccessClasses\":[],\"missingAccessClasses\":[]}],\"originSummary\":{\"action\":\"external.open\",\"resource\":\"https://user:password@example.com/path?token=secret#secret\",\"href\":\"https://user:password@example.com/path?token=secret#secret\"},\"contextSummary\":{\"keys\":[\"accessToken\",\"password\",\"appId\"],\"values\":{\"accessToken\":\"secret-token\",\"password\":\"secret-password\",\"appId\":\"safe\"}}}]"
+
+ ❯ tests/runtime/authorization-efficacy.test.ts:49:23
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/14]⎯
+
+ FAIL  tests/runtime/info-entitlements.test.ts > accepts Info.ts entitlements as unique named capabilities
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/info-entitlements.test.ts:5:44
+      3| it("accepts Info.ts entitlements as unique named capabilities", () => {
+      4|   const info = { bundleIdentifier: "com.example.entitled", version: "1…
+      5|   expect(validateSynWareManifest(info).ok).toBe(true);
+       |                                            ^
+      6|   expect(validateSynWareManifest({ ...info, entitlements: ["location.r…
+      7|   expect(validateSynWareManifest({ ...info, entitlements: ["invalid ca…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/14]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  14 failed | 1 passed (15)
+   Start at  19:05:43
+   Duration  6.77s (transform 4.90s, setup 33ms, import 6.40s, tests 65ms, environment 0ms)

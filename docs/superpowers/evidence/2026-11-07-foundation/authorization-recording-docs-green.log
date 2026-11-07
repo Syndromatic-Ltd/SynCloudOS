@@ -1,0 +1,36 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/mounted-recording.test.ts tests/runtime/privacy-capture.test.ts tests/runtime/fx/audio-route-recovery.test.ts tests/runtime/framework-doc-links.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/framework-doc-links.test.ts (4 tests | 1 failed) 201ms
+     × links only to files and headings that exist 90ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/framework-doc-links.test.ts > framework documentation > links only to files and headings that exist
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "docs\\framework\\documents.md links to missing heading synware-manifest.md#entitlements",
++ ]
+
+ ❯ tests/runtime/framework-doc-links.test.ts:85:20
+     83|       }
+     84|     }
+     85|     expect(errors).toEqual([]);
+       |                    ^
+     86|   });
+     87|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 19 passed (20)
+   Start at  22:04:06
+   Duration  1.57s (transform 510ms, setup 58ms, import 643ms, tests 281ms, environment 0ms)

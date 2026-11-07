@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-location-mounted.test.ts tests/runtime/info-entitlements.test.ts tests/runtime/authorization-efficacy.test.ts tests/runtime/runtime-browser-host-contributions.test.tsx --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  4 passed (4)
+      Tests  25 passed (25)
+   Start at  19:31:04
+   Duration  9.37s (transform 5.55s, setup 51ms, import 8.60s, tests 141ms, environment 0ms)
