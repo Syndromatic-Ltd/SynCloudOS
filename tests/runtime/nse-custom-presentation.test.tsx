@@ -5,6 +5,8 @@ import { afterEach, expect, it, vi } from "vitest";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
+import { outlet, type NSEViewOutlet } from "../../src/NSE/Application/viewOutlet";
+import { NSEPresence } from "../../src/NSE/Animation/NSEPresentation";
 
 afterEach(cleanup);
 
@@ -77,4 +79,24 @@ it("replaces children in their existing slot, retaining the incoming controller 
   expect(() => parent.transition(parent.first, new Editor({ owner: nseUnowned }), 0)).toThrow(/children/);
   expect(() => parent.transition(parent.first, parent.second, 3)).toThrow(/one/);
   act(() => { parent.dispose(); });
+});
+
+it("hands a transition to a newly selected child without mounting its outlets twice", async () => {
+  class Child extends NSEViewController {
+    @outlet accessor content!: NSEViewOutlet<HTMLDivElement>;
+    renderView() { return <div ref={this.content.ref}>{this.title}</div>; }
+  }
+  class Tabs extends NSEViewController {
+    readonly first = this.addChild(Child, { title: "Original tab" });
+    readonly second = this.addChild(Child, { title: "Selected tab" });
+    selected = this.first;
+    renderView() { return <NSEPresence><this.selected.view key={this.selected.title} /></NSEPresence>; }
+    select() { this.transition(this.first, this.second, NSEViewController.TransitionOptions.crossfade); this.selected = this.second; this.notifyObservers(); }
+  }
+  const tabs = new Tabs({ owner: nseUnowned });
+  const mounted = render(<NSEViewControllerView controller={tabs} />);
+  await act(async () => { tabs.select(); });
+  expect(screen.queryByText("Original tab")).toBeNull();
+  expect(screen.getAllByText("Selected tab")).toHaveLength(1);
+  mounted.unmount(); tabs.dispose();
 });

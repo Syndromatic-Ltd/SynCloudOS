@@ -43,7 +43,7 @@ import type { NSEObservable } from "../Objects/observable";
 import { createViewControllerFX, type NSEViewControllerFX, type NSEViewControllerFXClients } from "./viewControllerFX";
 import type { NSEWindow } from "./NSEWindowController";
 import { NSEAnimationContext } from "../Animation/NSEAnimationContext";
-import { nseChildTransition, NSEViewControllerTransitionOptions, type NSEChildTransition } from "./viewControllerTransition";
+import { nseChildTransition, nseReleaseChildViewSlot, NSEViewControllerTransitionOptions, type NSEChildTransition } from "./viewControllerTransition";
 import { createNSEViewAnimator, type NSEViewAnimator } from "../Animation/NSEViewAnimator";
 import { captureAFXTransactionAnimationStart } from "../../FX/AnimationFX/AFXTransaction";
 
@@ -225,7 +225,10 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #fxClients: Partial<NSEViewControllerFXClients> | undefined;
   #traits: NSETraitCollection = Object.freeze({ reducedMotion: false, presentation: null });
   #title: string | undefined;
-  readonly #transitionSlots = new Map<NSEViewController<unknown>, NSEChildTransition>();
+  readonly #transitionSlots = new Map<string, NSEChildTransition>();
+  readonly #childViewSlots = new Map<string, NSEViewController<unknown>>();
+  readonly #retiredViewSlots = new Set<string>();
+  #transitionHandoff: string | null = null;
   #transitioning = false;
 
   constructor(options: NSEViewControllerOptions = {}) {
@@ -353,13 +356,19 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     if (completionHandler !== undefined && typeof completionHandler !== "function") throw new TypeError("The completion handler must be callable.");
     if (this.#transitioning) throw new Error("A child transition is already in progress.");
     if (from === to) { completionHandler?.(); return; }
-    const slot = [...this.#transitionSlots].find(([, value]) => value.to === from && !value.from)?.[0] ?? from;
+    const slot = [...this.#transitionSlots].find(([, value]) => value.to === from && !value.from)?.[0]
+      ?? [...this.#childViewSlots].find(([, child]) => child === from)?.[0];
+    if (!slot) throw new TypeError("The outgoing child's view must be in a mounted child slot.");
     const context = NSEAnimationContext.current;
     this.#transitioning = true;
+    this.#transitionHandoff = null;
     const transition: NSEChildTransition = Object.freeze({ from, to, options, duration: context.duration, timing: context.timingFunction, finish: () => {
       if (this.isDisposed || this.#transitionSlots.get(slot) !== transition) return;
       this.#transitioning = false;
-      this.#transitionSlots.set(slot, Object.freeze({ ...transition, from: null }));
+      const destination = this.#transitionHandoff ?? slot;
+      if (destination !== slot) { this.#transitionSlots.delete(slot); this.#retiredViewSlots.add(slot); }
+      this.#transitionSlots.set(destination, Object.freeze({ ...transition, from: null }));
+      this.#transitionHandoff = null;
       this.notifyObservers();
       completionHandler?.();
     } });
@@ -376,7 +385,24 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   }
 
   /** @internal The host resolves replacements in their original child slot. */
-  [nseChildTransition](child: NSEViewController<unknown>): NSEChildTransition | undefined { return this.#transitionSlots.get(child); }
+  [nseChildTransition](child: NSEViewController<unknown>, slot: string): NSEChildTransition | false | undefined {
+    this.#childViewSlots.set(slot, child);
+    if (this.#retiredViewSlots.has(slot)) return false;
+    const existing = this.#transitionSlots.get(slot);
+    if (existing) return existing;
+    const moving = [...this.#transitionSlots.values()].find(value => value.from && value.to === child);
+    if (moving) { this.#transitionHandoff = slot; return false; }
+    return undefined;
+  }
+
+  /** @internal Retire only a real unmount, not React's effect replay. */
+  [nseReleaseChildViewSlot](slot: string): void {
+    this.#childViewSlots.delete(slot);
+    this.#retiredViewSlots.delete(slot);
+    const transition = this.#transitionSlots.get(slot);
+    if (transition?.from) transition.finish();
+    this.#transitionSlots.delete(slot);
+  }
 
   /** Whether the view is currently on screen. */
   get isViewVisible(): boolean {
