@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/foundation-byte-contracts.test.ts -t pixel backing
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/foundation-byte-contracts.test.ts (5 tests | 1 failed | 4 skipped) 6ms
+   × keeps pixel backing ownership private while exposing numeric pixel copies 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/foundation-byte-contracts.test.ts > keeps pixel backing ownership private while exposing numeric pixel copies
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/fx/foundation-byte-contracts.test.ts:72:43
+     70|
+     71| it("keeps pixel backing ownership private while exposing numeric pixel…
+     72|   expect("fromBacking" in VFXPixelBuffer).toBe(false);
+       |                                           ^
+     73| });
+     74|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 skipped (5)
+   Start at  09:46:35
+   Duration  688ms (transform 326ms, setup 31ms, import 503ms, tests 6ms, environment 0ms)
+

@@ -1,0 +1,95 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx\audio-chunks-clock.test.ts tests/runtime/fx\audio-capture.test.ts tests/runtime/fx\audio-bus-connections.test.ts tests/runtime/fx\audio-analysis.test.ts tests/runtime/fx\audio-file-host.test.ts tests/runtime/fx\audio-dsp.test.ts tests/runtime/fx\audio-dsp-depth.test.ts tests/runtime/fx\audio-file.test.ts tests/runtime/fx\audio-graph.test.ts tests/runtime/fx\audio-live.test.ts tests/runtime/fx\audio-media-time.test.ts tests/runtime/fx\foundation-byte-contracts.test.ts tests/runtime/fx\haptics.test.ts tests/runtime/fx\av-synchronization.test.ts tests/runtime/fx\haptics-transport.test.ts tests/runtime/fx\haptics-synthesis.test.ts tests/runtime/fx\haptics-overlap-arbitration.test.ts tests/runtime/fx\haptics-lifecycle.test.ts tests/runtime/fx\audio.test.ts tests/runtime/fx\haptics-host.test.ts tests/runtime/fx\audio-worklet-processor.test.ts tests/runtime/fx\haptics-hook.test.tsx tests/runtime/fx\audio-worklet-output.test.ts tests/runtime/fx\audio-worklet-graph-runtime.test.ts tests/runtime/fx\haptics-envelope.test.ts tests/runtime/fx\audio-timeline-transport.test.ts tests/runtime/fx\haptics-depth.test.ts tests/runtime/fx\audio-teardown-regressions.test.ts tests/runtime/fx\haptics-conformance.test.ts tests/runtime/fx\haptics-audio-controls.test.ts tests/runtime/fx\graphics.test.tsx tests/runtime/fx\graphics-recorder-state.test.tsx tests/runtime/fx\graphics-recorder-paints.test.tsx tests/runtime/fx\graphics-recorder-images.test.tsx tests/runtime/fx\graphics-public-boundary.test.ts tests/runtime/fx\graphics-profiles.test.ts tests/runtime/fx\graphics-png.test.ts tests/runtime/fx\graphics-pixels.test.ts tests/runtime/fx\graphics-pdf.test.ts tests/runtime/fx\graphics-pdf-structure-text.test.ts tests/runtime/fx\graphics-pdf-render.test.ts tests/runtime/fx\graphics-pdf-isolation.test.ts tests/runtime/fx\graphics-path-trim.test.ts tests/runtime/fx\graphics-path-operations.test.ts tests/runtime/fx\graphics-path-dashing.test.ts tests/runtime/fx\graphics-image-operations.test.ts tests/runtime/fx\graphics-extended-colour.test.ts tests/runtime/fx\graphics-display-list-replay.test.tsx tests/runtime/fx\graphics-context-depth.test.tsx tests/runtime/fx\graphics-bitmap-effects.test.ts tests/runtime/fx\location-values.test.ts tests/runtime/fx\location-requests.test.ts tests/runtime/fx\location-mounted.test.tsx tests/runtime/fx\lifecycle-diagnostics.test.ts tests/runtime/fx\image.test.ts tests/runtime/fx\image-worker.test.ts tests/runtime/fx\image-transition-depth.test.ts tests/runtime/fx\image-tiled-execution.test.ts tests/runtime/fx\image-tile-filters.test.ts tests/runtime/fx\image-spatial-factories.test.ts tests/runtime/fx\image-sample-conversion-parity.test.ts tests/runtime/fx\image-resource.test.ts tests/runtime/fx\image-reduction-factories.test.ts tests/runtime/fx\image-raw.test.ts tests/runtime/fx\image-processor-schema.test.ts tests/runtime/fx\image-procedural-depth.test.ts tests/runtime/fx\image-kernels.test.ts tests/runtime/fx\image-geometry-factories.test.ts tests/runtime/fx\image-geometry-depth.test.ts tests/runtime/fx\image-filters.test.ts tests/runtime/fx\image-feature-analysis.test.ts tests/runtime/fx\image-distortion-factories.test.ts tests/runtime/fx\image-cube-perspective.test.ts tests/runtime/fx\image-composites.test.ts tests/runtime/fx\image-colour-transform-reuse.test.ts tests/runtime/fx\image-colour-depth.test.ts tests/runtime/fx\image-colour-analysis.test.ts tests/runtime/fx\image-colour-adjustment-factories.test.ts tests/runtime/fx\image-canny-edge-detector.test.ts tests/runtime/fx\image-barcode.test.ts tests/runtime/fx\image-barcode-depth.test.ts tests/runtime/fx\ifx-image-view.test.tsx tests/runtime/fx\mounted-recording.test.ts tests/runtime/fx\mounted-feedback.test.ts tests/runtime/fx\mounted-audio-graphs.test.ts tests/runtime/fx\mounted-audio-files.test.ts tests/runtime/fx\motion.test.ts tests/runtime/fx\motion-hook.test.tsx tests/runtime/fx\motion-conformance.test.ts tests/runtime/fx\motion-client.test.ts tests/runtime/fx\motion-authority.test.ts tests/runtime/fx\midi-ump.test.ts tests/runtime/fx\midi-scheduling.test.ts tests/runtime/fx\midi-mounted.test.ts tests/runtime/fx\midi-messages.test.ts tests/runtime/fx\midi-access.test.ts tests/runtime/fx\metal-controls.test.tsx tests/runtime/fx\media-time.test.ts tests/runtime/fx\media-samples.test.ts tests/runtime/fx\media-ranges.test.ts tests/runtime/fx\media-queue.test.ts tests/runtime/fx\media-mounted.test.tsx tests/runtime/fx\media-clock.test.ts tests/runtime/fx\lumina-values.test.ts tests/runtime/fx\lumina-storage.test.ts tests/runtime/fx\lumina-query.test.ts tests/runtime/fx\lumina-mounted.test.ts tests/runtime/fx\lumina-maintenance.test.ts tests/runtime/fx\lumina-eligible-restriction.test.ts tests/runtime/fx\lumina-backend-suggestions.test.ts tests/runtime/fx\lumina-authority.test.ts tests/runtime/fx\location-watches.test.ts tests/runtime/fx\text-font-resource.test.ts tests/runtime/fx\text-font-host.test.ts tests/runtime/fx\text-font-codec.test.ts tests/runtime/fx\text-font-browser-package.test.ts tests/runtime/fx\text-font-backend-readiness.test.ts tests/runtime/fx\audio-scheduling.test.ts tests/runtime/fx\text-font-backend-provenance.test.ts tests/runtime/fx\text-font-backend-environment.test.ts tests/runtime/fx\text-drawing.test.ts tests/runtime/fx\text-cascade.test.ts tests/runtime/fx\text-caret.test.ts tests/runtime/fx\text-attachments.test.ts tests/runtime/fx\system-feedback.test.ts tests/runtime/fx\shared-pixel-ownership.test.ts tests/runtime/fx\rendered-canvas-capture.test.ts tests/runtime/fx\owner-revocation-matrix.test.ts tests/runtime/fx\nse-view-draw-fitting.test.tsx tests/runtime/fx\text-vertical-frame.test.ts tests/runtime/fx\text-tabs-truncation.test.ts tests/runtime/fx\text-ruby.test.ts tests/runtime/fx\text-review-typesetter.test.ts tests/runtime/fx\text-review-frames.test.ts tests/runtime/fx\audio-route-recovery.test.ts tests/runtime/fx\text-path-frame.test.ts tests/runtime/fx\text-paragraph.test.ts tests/runtime/fx\text-multilingual-geometry.test.ts tests/runtime/fx\text-layout.test.ts tests/runtime/fx\audio-resource-loader.test.ts tests/runtime/fx\audio-opus-codec.test.ts tests/runtime/fx\browser-pdf-renderer-lifecycle.test.ts tests/runtime/fx\browser-motion.test.ts tests/runtime/fx\browser-video-surface.test.ts tests/runtime/fx\expanded-authority.test.ts tests/runtime/fx\text-frame.test.ts tests/runtime/fx\text-font.test.ts tests/runtime/fx\text-incremental.test.ts tests/runtime/fx\video-encoded-retiming.test.ts tests/runtime/fx\video-decoder.test.ts tests/runtime/fx\video-container.test.ts tests/runtime/fx\video-capture.test.ts tests/runtime/fx\video-capture-mounted.test.tsx tests/runtime/fx\value-snapshot-regressions.test.ts tests/runtime/fx\video-mounted-decoder.test.ts tests/runtime/fx\video-encoder.test.ts tests/runtime/fx\video-frames.test.ts tests/runtime/fx\video-processing.test.ts tests/runtime/fx\video-mounted-encoder.test.ts tests/runtime/fx\video-silent-presentation.test.ts tests/runtime/fx\text-inline-depth.test.ts tests/runtime/fx\webgpu-image-executor.test.ts tests/runtime/fx\webgpu-image-backend-lifecycle.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/text-font-resource.test.ts (16 tests | 3 failed) 7061ms
+     × loads only through the mounted bundle's private resource authority 66ms
+     × rejects mismatched MIME and oversized loader results before font decoding 10ms
+     × rolls back a caller-aborted resource reservation and ignores its late completion 58ms
+ ❯ tests/runtime/fx/image-worker.test.ts (36 tests | 1 failed) 857ms
+     × returns explicit encoded metadata and propagates encoder failure 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/image-worker.test.ts > ImageFX worker backend > returns explicit encoded metadata and propagates encoder failure
+AssertionError: expected { data: NSEData{}, …(1) } to match object { …(2) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+@@ -1,11 +1,6 @@
+  {
+-   "blob": Blob {
+-     Symbol(kHandle): Blob {},
+-     Symbol(kLength): 3,
+-     Symbol(kType): "image/png",
+-   },
+    "metadata": {
+      "colourSpace": "srgb",
+      "mimeType": "image/png",
+      "orientation": "up",
+    },
+
+ ❯ tests/runtime/fx/image-worker.test.ts:635:25
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/fx/text-font-resource.test.ts > TextFX packaged font resources > loads only through the mounted bundle's private resource authority
+TypeError: A packaged font loader must return NSEData bytes.
+ ❯ validateTFXFontResource src/SynCloudOS/BundleLoader/fontResourceLoader.ts:62:64
+     60|
+     61| export function validateTFXFontResource(resource: TFXPackagedFontResou…
+     62|   if (!resource || !(resource.bytes instanceof NSEData)) throw new Typ…
+       |                                                                ^
+     63|   if (resource.bytes.count > maximumTFXFontResourceBytes) throw new Ra…
+     64|   const extension = path.split(".").at(-1)!.toLowerCase();
+ ❯ Object.registerFontResource src/SynCloudOS/TextFX/TFXFontHost.ts:242:30
+ ❯ tests/runtime/fx/text-font-resource.test.ts:48:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/fx/text-font-resource.test.ts > TextFX packaged font resources > rejects mismatched MIME and oversized loader results before font decoding
+AssertionError: expected [Function] to throw error matching /MIME/i but got 'A packaged font loader must return NS…'
+
+- Expected:
+/MIME/i
+
++ Received:
+"A packaged font loader must return NSEData bytes."
+
+ ❯ tests/runtime/fx/text-font-resource.test.ts:90:111
+     88|     const sizeMount = mountTestSynWareRuntime(runtime, oversized.manif…
+     89|     try {
+     90|       await expect(mimeMount.runtime.textLayout.registerFontResource("…
+       |                                                                                                               ^
+     91|       await expect(sizeMount.runtime.textLayout.registerFontResource("…
+     92|     } finally { mimeMount.dispose(); sizeMount.dispose(); await runtim…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/runtime/fx/text-font-resource.test.ts > TextFX packaged font resources > rolls back a caller-aborted resource reservation and ignores its late completion
+AssertionError: promise rejected "TypeError: A packaged font loader must re…" instead of resolving
+ ❯ tests/runtime/fx/text-font-resource.test.ts:130:111
+    128|       expect(mount.runtime.textLayout.fontReadinessGeneration).toBe(0);
+    129|       defer = false;
+    130|       await expect(mount.runtime.textLayout.registerFontResource("Reso…
+       |                                                                                                               ^
+    131|     } finally { mount.dispose(); await runtime.dispose("test"); }
+    132|   });
+
+Caused by: TypeError: A packaged font loader must return NSEData bytes.
+ ❯ validateTFXFontResource src/SynCloudOS/BundleLoader/fontResourceLoader.ts:62:64
+ ❯ Object.registerFontResource src/SynCloudOS/TextFX/TFXFontHost.ts:242:30
+ ❯ tests/runtime/fx/text-font-resource.test.ts:130:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed | 161 passed (163)
+      Tests  4 failed | 1008 passed (1012)
+   Start at  09:39:32
+   Duration  74.14s (transform 21.76s, setup 1.53s, import 74.46s, tests 29.22s, environment 16.39s)
+

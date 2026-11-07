@@ -1,0 +1,31 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/image-worker.test.ts -t revokes an encoded result
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/image-worker.test.ts (38 tests | 2 failed | 36 skipped) 2009ms
+     × revokes an encoded result during Foundation bridging on abort 1007ms
+     × revokes an encoded result during Foundation bridging on dispose 1001ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/image-worker.test.ts > ImageFX worker backend > revokes an encoded result during Foundation bridging on abort
+ FAIL  tests/runtime/fx/image-worker.test.ts > ImageFX worker backend > revokes an encoded result during Foundation bridging on dispose
+Error: Test timed out in 1000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/runtime/fx/image-worker.test.ts:644:31
+    642|   });
+    643|
+    644|   it.each(["abort", "dispose"])("revokes an encoded result during Foun…
+       |                               ^
+    645|     const worker = new FakeWorker();
+    646|     const backend = new BrowserImageProcessingWorker(worker as unknown…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 36 skipped (38)
+   Start at  09:42:15
+   Duration  3.95s (transform 1.02s, setup 35ms, import 1.73s, tests 2.01s, environment 0ms)
+

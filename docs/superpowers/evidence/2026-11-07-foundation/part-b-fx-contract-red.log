@@ -1,0 +1,50 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/foundation-byte-contracts.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/foundation-byte-contracts.test.ts (3 tests | 3 failed) 6ms
+   × delivers encoded audio and PNG files as immutable Foundation data 4ms
+   × copies byte-provider input and consumer writes while returning NSEData 1ms
+   × encodes MIDI and UMP into NSEData and parses convertible data 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/foundation-byte-contracts.test.ts > delivers encoded audio and PNG files as immutable Foundation data
+AssertionError: expected  to be an instance of NSEData
+ ❯ tests/runtime/fx/foundation-byte-contracts.test.ts:32:15
+     30|   const pcm = new AUFXAudioPCMBuffer(new AUFXAudioFormat(8000, 1), 1);…
+     31|   const wav = AUFXAudioFile.encodeWAV(pcm);
+     32|   expect(wav).toBeInstanceOf(NSEData);
+       |               ^
+     33|   expect(AUFXAudioFile.decodeWAV(wav).frameLength).toBe(1);
+     34|   expect(AUFXAudioFile.encodeWAVHeader(pcm.format, 1)).toBeInstanceOf(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/fx/foundation-byte-contracts.test.ts > copies byte-provider input and consumer writes while returning NSEData
+RangeError: Invalid or oversized provider data.
+ ❯ new GFXDataProvider src/FX/GraphicsFX/GFXImage.ts:273:23
+
+ ❯ tests/runtime/fx/foundation-byte-contracts.test.ts:42:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/fx/foundation-byte-contracts.test.ts > encodes MIDI and UMP into NSEData and parses convertible data
+AssertionError: expected Uint8Array[ 144, 60, 100 ] to be an instance of NSEData
+ ❯ tests/runtime/fx/foundation-byte-contracts.test.ts:53:19
+     51| it("encodes MIDI and UMP into NSEData and parses convertible data", ()…
+     52|   const encoded = MIFXEncoder.encode({ kind: "note-on", channel: 0, no…
+     53|   expect(encoded).toBeInstanceOf(NSEData);
+       |                   ^
+     54|   expect(new MIFXParser().push(encoded)).toEqual([expect.objectContain…
+     55|   const packet = MIFXUniversalPacket.fromMIDI1Message(0, { kind: "timi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  09:24:45
+   Duration  419ms (transform 214ms, setup 28ms, import 244ms, tests 6ms, environment 0ms)
+
