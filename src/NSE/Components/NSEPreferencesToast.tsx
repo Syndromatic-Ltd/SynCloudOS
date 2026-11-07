@@ -170,7 +170,7 @@ function PreferencesTitlebar({ title, titleView, leading }: { title: ReactNode; 
     return panel;
   });
   useNSEDeferredDisposal(panel);
-  panel.window.title = typeof title === "string" ? title : "";
+  useLayoutEffect(() => { panel.window.title = typeof title === "string" ? title : ""; }, [panel, title]);
   const back = panel.window.titlebarAccessoryViewControllers[0] as PreferencesBackAccessory;
   back.content = leading;
   return <NSEWindowTitlebarContent toolbarStyle={panel.window.toolbarStyle} title={titleView}
