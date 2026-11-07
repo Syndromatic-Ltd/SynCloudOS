@@ -92,6 +92,8 @@
       "@syndromatic/syncloudos/fx/location": [
         "./src/FX/LocationFX/public.ts"
       ],
+      "@syndromatic/syncloudos/fx/network": ["./src/FX/NetworkFX/public.ts"],
+      "@syndromatic/syncloudos/fx/crypto": ["./src/FX/CryptoFX/public.ts"],
       "@syndromatic/syncloudos/fx/bluetooth": [
         "./src/FX/BluetoothFX/public.ts"
       ],
