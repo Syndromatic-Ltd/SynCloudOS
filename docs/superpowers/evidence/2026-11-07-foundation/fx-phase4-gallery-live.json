@@ -71,5 +71,43 @@
     "Network path",
     "Location speed",
     "Cryptography"
-  ]
+  ],
+  "finalDelivery": {
+    "framework": "bcb829700b5fe9e931bce3ee45a48e4d61a9a560",
+    "archive": "6888ab013a6463f30ad7124950cf411796de35018bf4560eca1e38fac1c1a671",
+    "localFounderSession": true,
+    "nativePictureInPicture": true,
+    "speechCompleted": true,
+    "statuses": [
+      "Finished speaking.",
+      "NotSupportedError: Audio session types are unavailable.",
+      "Picture in picture closed.",
+      "No playback routes found.",
+      "Display capture is stopped. Choose this tab in the browser chooser to try element capture.",
+      "Monitoring network changes.",
+      "satisfied; interface unknown; 4g; metered cost unknown; Save-Data off.",
+      "Speed is unknown until a position supplies it.",
+      "AES.GCM round trip verified. SHA-256: 1575164a430539b0eb9787a6a123ecea0bc8db5c0aba45a2895a97b6b2ca4e23"
+    ],
+    "pageErrors": [],
+    "dpr2": 2,
+    "hidpiErrors": [],
+    "hidpiImages": [
+      {
+        "name": "top",
+        "width": 2720,
+        "height": 1900
+      },
+      {
+        "name": "video",
+        "width": 2720,
+        "height": 1900
+      },
+      {
+        "name": "bottom",
+        "width": 2720,
+        "height": 1900
+      }
+    ]
+  }
 }
