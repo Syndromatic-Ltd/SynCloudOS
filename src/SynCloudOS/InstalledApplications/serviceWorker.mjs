@@ -197,7 +197,7 @@ function runtimeServiceWorker(config) {
       event.respondWith(fetch(request).catch(async () => (await caches.open(cacheName)).match(shellURL).then(response => response ?? Response.error())));
       return;
     }
-    const devAsset = config.development && url.pathname.startsWith(config.base) && /(?:\.(?:m?[jt]sx?|css|png|webp|svg|jpe?g|gif|woff2?|ttf|otf)$|\/@vite\/client|\/@react-refresh|\/@id\/[^/]+)/u.test(url.pathname) && !/^\/(?:api|auth|__dev)(?:\/|$)/u.test(url.pathname);
+    const devAsset = config.development && url.pathname.startsWith(config.base) && (url.searchParams.has("import") || /(?:\.(?:m?[jt]sx?|css|png|webp|svg|jpe?g|gif|woff2?|ttf|otf)$|\/@vite\/client|\/@react-refresh|\/@id\/[^/]+)/u.test(url.pathname)) && !/^\/(?:api|auth|__dev)(?:\/|$)/u.test(url.pathname.slice(config.base.length - 1));
     if (!assets.has(url.href) && !devAsset) return;
     event.respondWith((async () => {
       const cache = await caches.open(cacheName);

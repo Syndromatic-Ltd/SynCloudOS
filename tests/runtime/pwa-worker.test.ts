@@ -51,16 +51,16 @@ it("leaves API, authentication, writes and other origins out of the offline cach
     expect(respondWith).not.toHaveBeenCalled();
   }
 });
-it("refreshes development modules online and retains the refreshed bytes offline", async () => {
+it.each(["https://site.test/src/main.tsx", "https://site.test/src/Localisable.strings?import&raw", "https://site.test/src/reference-fit.json?import&url"])("refreshes development module %s online and retains its bytes offline", async (url) => {
   const listeners = new Map<string, (event: any) => void>();
-  const entries = new Map<string, Response>([["https://site.test/src/main.tsx", new Response("old graph")]]);
+  const entries = new Map<string, Response>([[url, new Response("old graph")]]);
   const cache = { match: async (request: Request) => entries.get(request.url)?.clone(), put: async (request: Request, response: Response) => { entries.set(request.url, response); } };
   const fetch = vi.fn(async () => new Response("current graph"));
   runInNewContext(createServiceWorkerSource({ base: "/", receipt: "sdk", development: true, assets: [], manifests: [] }), {
     self: { location: { origin: "https://site.test" }, addEventListener: (name: string, listener: any) => listeners.set(name, listener) },
     URL, Response, Request, fetch, caches: { open: async () => cache },
   });
-  const request = new Request("https://site.test/src/main.tsx");
+  const request = new Request(url);
   let response!: Promise<Response>;
   const load = () => { listeners.get("fetch")!({ request, respondWith(value: Promise<Response>) { response = value; } }); return response; };
   expect(await (await load()).text()).toBe("current graph");
