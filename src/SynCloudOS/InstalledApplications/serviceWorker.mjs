@@ -201,13 +201,19 @@ function runtimeServiceWorker(config) {
     if (!assets.has(url.href) && !devAsset) return;
     event.respondWith((async () => {
       const cache = await caches.open(cacheName);
+      const retain = async response => {
+        if (response.ok && response.type !== "opaque") {
+          try { await cache.put(request, response.clone()); }
+          catch { /* Cache quota must not discard a successful online response. */ }
+        }
+        return response;
+      };
       // Vite module identities change after edits and SDK adoption. Refresh the
       // complete online graph; only immutable production assets are cache-first.
       if (config.development) {
+        let response;
         try {
-          const response = await fetch(request);
-          if (response.ok && response.type !== "opaque") await cache.put(request, response.clone());
-          return response;
+          response = await fetch(request);
         } catch (error) {
           // These are same-origin static resources. Vite's Vary: Origin must
           // not split preload and font-loader requests for identical bytes.
@@ -215,12 +221,11 @@ function runtimeServiceWorker(config) {
           if (cached) return cached;
           throw error;
         }
+        return retain(response);
       }
       const cached = await cache.match(request, { ignoreVary: true });
       if (cached) return cached;
-      const response = await fetch(request);
-      if (response.ok && response.type !== "opaque") await cache.put(request, response.clone());
-      return response;
+      return retain(await fetch(request));
     })());
   });
 }

@@ -67,6 +67,18 @@ it.each(["https://site.test/src/main.tsx", "https://site.test/src/Localisable.st
   fetch.mockRejectedValueOnce(new TypeError("offline"));
   expect(await (await load()).text()).toBe("current graph");
 });
+it.each([true, false])("keeps successful online asset bytes when cache retention fails (development=%s)", async (development) => {
+  const listeners = new Map<string, (event: any) => void>();
+  const url = "https://site.test/app.js";
+  const cache = { match: vi.fn(async () => development ? new Response("old graph") : undefined), put: vi.fn(async () => { throw new DOMException("Full", "QuotaExceededError"); }) };
+  runInNewContext(createServiceWorkerSource({ base: "/", receipt: "sdk", development, assets: [url], manifests: [] }), {
+    self: { location: { origin: "https://site.test" }, addEventListener: (name: string, listener: any) => listeners.set(name, listener) },
+    URL, Response, Request, fetch: async () => new Response("current graph"), caches: { open: async () => cache },
+  });
+  let response!: Promise<Response>;
+  listeners.get("fetch")!({ request: new Request(url), respondWith(value: Promise<Response>) { response = value; } });
+  expect(await (await response).text()).toBe("current graph");
+});
 it("delivers notification actions to a live client without reloading its documents", async () => {
   const { listeners, clients } = worker();
   const postMessage = vi.fn(), navigate = vi.fn(), focus = vi.fn(async () => {});
