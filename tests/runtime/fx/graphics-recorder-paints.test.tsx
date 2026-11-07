@@ -20,11 +20,11 @@
 
 // @vitest-environment jsdom
 import React from "react";
-import { render } from "@testing-library/react";
+import { renderGraphics as render, drawFigure } from "./graphicsViewFixture";
 import { describe, expect, it } from "vitest";
 import { GFXContext, GFXColour, GFXImage, GFXPath, GFXPattern, GFXIdentityTransform } from "../../../src/FX/GraphicsFX/public";
 import { createOwnedGFXIdentifierIssuer, createMountedGFXIdentifierIssuer } from "../../../src/FX/GraphicsFX/identifierAuthority";
-import { NSEGraphicsView } from "../../../src/NSE/Graphics/NSEGraphicsView";
+import { NSEView } from "../../../src/NSE/Views/NSEView";
 const image = () => new GFXImage({ width: 2, height: 1, alpha: "straight", colourSpace: "srgb", data: new Uint8Array([255, 0, 0, 255, 0, 255, 0, 128]) });
 const issuer = () => {
     let i = 0;
@@ -50,7 +50,7 @@ describe("GraphicsFX recorder masks and patterns", () => {
         expect(svg).toContain("patternTransform=\"matrix(1 0 0 1 3 0)\"");
         expect(svg.match(/<mask /g)).toHaveLength(2);
         expect(svg).toContain("matrix(1 0 0 1 2 0)");
-        const { container } = render(<><NSEGraphicsView displayList={list} label="First"/><NSEGraphicsView displayList={list} label="Second"/></>);
+        const { container } = render(<><NSEView draw={drawFigure(list)} aria-label="First"/><NSEView draw={drawFigure(list)} aria-label="Second"/></>);
         expect(container.querySelectorAll("pattern")).toHaveLength(4);
         expect(container.querySelectorAll("mask")).toHaveLength(4);
         const ids = [...container.querySelectorAll("[id]")].map(n => n.id);
@@ -68,10 +68,10 @@ describe("GraphicsFX recorder masks and patterns", () => {
         context.fill(GFXPath.rect({ x: 0, y: 0, width: 2, height: 2 }));
         const list = context.displayList;
         expect(context.toSVG()).toContain("pattern");
-        const mountedView = render(<NSEGraphicsView displayList={list} label="Before"/>);
+        const mountedView = render(<NSEView draw={drawFigure(list)} aria-label="Before"/>);
         live = false;
         expect(() => context.toSVG()).toThrow(/revoked/);
-        expect(() => mountedView.rerender(<NSEGraphicsView displayList={list} label="After"/>)).toThrow(/revoked/);
+        expect(() => mountedView.rerender(<NSEView draw={drawFigure(list)} aria-label="After"/>)).toThrow(/revoked/);
     });
     it("rejects malformed masks before altering current state", () => {
         const context = GFXContext.recording({ size: { width: 2, height: 2 }, identifiers: issuer() });

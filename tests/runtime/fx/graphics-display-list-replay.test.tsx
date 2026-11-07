@@ -20,11 +20,11 @@
 
 // @vitest-environment jsdom
 import React from "react";
-import { render } from "@testing-library/react";
+import { renderGraphics as render, drawFigure } from "./graphicsViewFixture";
 import { describe, expect, it } from "vitest";
 import { GFXContext, GFXImage, GFXPath, GFXPattern, GFXIdentityTransform } from "../../../src/FX/GraphicsFX/public";
 import { createOwnedGFXIdentifierIssuer } from "../../../src/FX/GraphicsFX/identifierAuthority";
-import { NSEGraphicsView } from "../../../src/NSE/Graphics/NSEGraphicsView";
+import { NSEView } from "../../../src/NSE/Views/NSEView";
 
 const image = () => new GFXImage({ width: 2, height: 1, alpha: "straight", colourSpace: "srgb", data: new Uint8Array([255, 0, 0, 255, 0, 255, 0, 128]) });
 const issuer = () => {
@@ -53,8 +53,8 @@ describe("GFXContext.drawDisplayList", () => {
         expect(svg).toContain('data-gfx-display-list="" opacity="1" transform="matrix(2 0 0 2 10 0)"');
         expect(svg.match(/<pattern /g)).toHaveLength(2);
 
-        const view = render(<NSEGraphicsView displayList={outer.displayList} label="Nested figure" />);
-        const group = view.container.querySelector("g[data-gfx-display-list]");
+        const view = render(<NSEView draw={drawFigure(outer.displayList)} aria-label="Nested figure" />);
+        const group = view.container.querySelector("g[data-gfx-display-list] g[data-gfx-display-list]");
         expect(group?.getAttribute("transform")).toBe("matrix(2 0 0 2 10 0)");
         const patternIds = Array.from(view.container.querySelectorAll("pattern"), node => node.id);
         expect(new Set(patternIds).size).toBe(2);

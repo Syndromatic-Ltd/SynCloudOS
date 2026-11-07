@@ -26,12 +26,14 @@ function loadImageResource(service: import("../../../src/SynCloudOS/Images/image
 }
 
 import React from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
+import { renderGraphics as render, drawFigure } from "./graphicsViewFixture";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GFXColour } from "../../../src/FX/GraphicsFX/public";
 import { GFXStateUnderflowError, GFXPath, GFXGradient, GFXContext } from "../../../src/FX/GraphicsFX/public";
-import { NSEGraphicsView, NSEShadowView, type NSEShadowPreferenceSource } from "../../../src/NSE/Graphics";
+import { NSEShadowView, type NSEShadowPreferenceSource } from "../../../src/NSE/Graphics";
+import { NSEView } from "../../../src/NSE/Views/NSEView";
 import { NSEImageView, NSESizeableImage } from "../../../src/NSE/Controls/Images";
 import type { IFXImageGeometryPort, IFXImageStringSourcePort } from "../../../src/FX/ImageFX/IFXImageViewport";
 import type { RuntimeImageAdapter, RuntimeImageAdapterFactory } from "../../../src/SynCloudOS/Images";
@@ -279,7 +281,7 @@ describe("closed NSE graphics", () => {
     expect(stringClipRefs).toHaveLength(3);
     expect(stringClipRefs.every((id) => stringClipIds.includes(id))).toBe(true);
 
-    const { container } = render(<NSEGraphicsView displayList={context.displayList} label="Clip intersection" />);
+    const { container } = render(<NSEView draw={drawFigure(context.displayList)} aria-label="Clip intersection" />);
     const reactClipIds = Array.from(container.querySelectorAll("clipPath"), (node) => node.id);
     const reactClipRefs = Array.from(container.querySelectorAll("g[clip-path]"), (node) => /url\(#([^)]+)\)/.exec(node.getAttribute("clip-path") ?? "")?.[1] ?? "");
     expect(reactClipIds).toHaveLength(2);
@@ -315,15 +317,15 @@ describe("closed NSE graphics", () => {
     context.fill(GFXPath.rect({ x: 0, y: 0, width: 40, height: 24 }));
     const { container } = render(
       <NSEShadowView shadow={{ offset: { x: 1, y: 2 }, blur: 4, spread: 0, colour: GFXColour.parse("#0008") }}>
-        <NSEGraphicsView displayList={context.displayList} label="Chart" description="A bounded chart" />
+        <NSEView draw={drawFigure(context.displayList)} aria-label="Chart" aria-description="A bounded chart" />
       </NSEShadowView>,
     );
-    expect(container.querySelector("svg")?.getAttribute("aria-label")).toBe("Chart");
+    expect(container.querySelector("[aria-label]")?.getAttribute("aria-label")).toBe("Chart");
     expect(container.querySelector("path")?.getAttribute("d")).toBe("M 0 0 L 40 0 L 40 24 L 0 24 Z");
     expect(container.querySelector("[data-nse-shadow-recipe]")).not.toBeNull();
     expect((container.querySelector("[data-nse-shadow-recipe]") as HTMLElement | null)?.style.boxShadow).toContain("1px");
     expect(container.querySelector("script")).toBeNull();
-    expect(() => render(<NSEGraphicsView displayList={{ size: { width: 1, height: 1 }, commands: [{ kind: "fill-path", path: [], pathData: "M0 0", paint: { kind: "colour", css: "url(javascript:alert(1))" }, opacity: 1 }] }} label="Forged" />)).toThrow(TypeError);
+    expect(() => render(<NSEView draw={drawFigure({ size: { width: 1, height: 1 }, commands: [{ kind: "fill-path", path: [], pathData: "M0 0", paint: { kind: "colour", css: "url(javascript:alert(1))" }, opacity: 1 }] })} aria-label="Forged" />)).toThrow(TypeError);
   });
 
   it("issues unique definition ids for same-named runtimes and each mounted view", () => {
@@ -343,8 +345,8 @@ describe("closed NSE graphics", () => {
     expect(firstExportId).not.toBe(secondExportId);
 
     const { container } = render(<>
-      <NSEGraphicsView displayList={first.displayList} label="First view" />
-      <NSEGraphicsView displayList={first.displayList} label="Second view" />
+      <NSEView draw={drawFigure(first.displayList)} aria-label="First view" />
+      <NSEView draw={drawFigure(first.displayList)} aria-label="Second view" />
     </>);
     const ids = Array.from(container.querySelectorAll("linearGradient"), (node) => node.id);
     expect(ids).toHaveLength(2);

@@ -228,6 +228,11 @@ describe("portable SynWare SDK packages", () => {
     expect(packageManifest.exports["./vite"]).toEqual({ types: "./types/vite.d.mts", import: "./vite.mjs" });
     expect(Object.keys(packageManifest.exports).every((key) => !key.includes("*"))).toBe(true);
     expect(packageManifest.exports["./nse/animation"]).toBeUndefined();
+    expect(readFileSync(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos", "nse", "styles.css"), "utf8")).toContain("[data-nse-view-drawing-layer]");
+    const viewDeclarations = readFileSync(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos", "types", "NSE", "Views", "NSEView.d.ts"), "utf8");
+    expect(viewDeclarations).toMatch(/draw\?:.*GFXContext/u);
+    expect(viewDeclarations).toContain("NSEViewLayerContentsPlacement");
+    expect(existsSync(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos", "types", "NSE", "Graphics", "NSEGraphicsView.d.ts"))).toBe(false);
     expect(packageManifest.exports["."]).toEqual({ types: "./index.d.ts", import: "./index.js" });
     expect(directoryFiles(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos"))
       .filter((path) => /^chunks\/(?:FrameworkTestHost|inspectorDev(?:Entry|Host))-/u.test(path))).toEqual([]);
@@ -293,6 +298,9 @@ import * as browser from "@syndromatic/syncloudos/browser";
 import * as auth from "@syndromatic/syncloudos/auth";
 assert.equal("AnimationFX" in nse, false);
 assert.equal("useAnimationFX" in nse, false);
+assert.equal(typeof nse.NSEView, "function");
+for (const removed of ["NSEGraphicsView", "convertPointToGFXDisplayList"]) assert.equal(removed in nse, false);
+for (const internal of ["NSEViewDrawingEnvironmentContext", "NSEViewDisplayList"]) assert.equal(internal in nse, false);
 assert.equal("AnimationFX" in appearance, false);
 assert.equal("useAnimationFX" in appearance, false);
 assert.equal(typeof nse.NSEStackView, "function");

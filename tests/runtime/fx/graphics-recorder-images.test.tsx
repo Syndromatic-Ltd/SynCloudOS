@@ -20,11 +20,11 @@
 
 // @vitest-environment jsdom
 import React from "react";
-import { render } from "@testing-library/react";
+import { renderGraphics as render, drawFigure } from "./graphicsViewFixture";
 import { describe, expect, it } from "vitest";
 import { GFXBitmapContext, GFXContext, GFXColour, GFXImage, GFXLayer, GFXPath, GFXIdentityTransform } from "../../../src/FX/GraphicsFX/public";
 import { createOwnedGFXIdentifierIssuer, createMountedGFXIdentifierIssuer } from "../../../src/FX/GraphicsFX/identifierAuthority";
-import { NSEGraphicsView } from "../../../src/NSE/Graphics/NSEGraphicsView";
+import { NSEView } from "../../../src/NSE/Views/NSEView";
 const owner = () => {
     let i = 0;
     return createOwnedGFXIdentifierIssuer(() => () => `image${++i}`);
@@ -45,7 +45,7 @@ describe("GraphicsFX direct recorder images and layers", () => {
         expect(svg).toContain('preserveAspectRatio="none"');
         expect(svg).toContain('x="1" y="1" width="4" height="6"');
         expect(svg).toContain("data:image/png;base64,");
-        const { container } = render(<NSEGraphicsView displayList={context.displayList} label="Image"/>);
+        const { container } = render(<NSEView draw={drawFigure(context.displayList)} aria-label="Image"/>);
         expect(container.querySelector('image')?.getAttribute('transform')).toBe("matrix(1 0 0 1 2 0)");
         expect(container.querySelector('image')?.getAttribute('opacity')).toBe("0.5");
     });
@@ -87,7 +87,7 @@ describe("GraphicsFX direct recorder images and layers", () => {
         const svg = recorder.toSVG();
         expect(svg).toContain('image-rendering="auto"');
         expect(svg).toContain('image-rendering="pixelated"');
-        const { container } = render(<NSEGraphicsView displayList={recorder.displayList} label="Interpolation"/>);
+        const { container } = render(<NSEView draw={drawFigure(recorder.displayList)} aria-label="Interpolation"/>);
         const images = container.querySelectorAll("image");
         expect(images[0]?.style.imageRendering).toBe("auto");
         expect(images[1]?.style.imageRendering).toBe("pixelated");

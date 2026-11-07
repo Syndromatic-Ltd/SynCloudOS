@@ -74,7 +74,7 @@ export function NSEView({ appearance, ...props }: NSEViewProps) {
   return appearance ? <NSEViewAppearance appearance={appearance}><NSEViewContent {...props} /></NSEViewAppearance> : <NSEViewContent {...props} />;
 }
 
-function NSEViewContent({ draw, layerContentsPlacement = "scaleProportionallyToFit", menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", children, ref, style, ...htmlAttributes }: NSEViewProps) {
+function NSEViewContent({ draw, layerContentsPlacement = "scaleProportionallyToFit", menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", children, ref, ...htmlAttributes }: NSEViewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const attachHost = useCallback((element: HTMLDivElement | null) => {
     hostRef.current = element;
@@ -91,10 +91,13 @@ function NSEViewContent({ draw, layerContentsPlacement = "scaleProportionallyToF
   if (!layerContentsPlacements.includes(layerContentsPlacement)) throw new TypeError(`Unknown NSEView layerContentsPlacement ${String(layerContentsPlacement)}.`);
   const content = <>
     {draw && identifiers && Number.isFinite(bounds.width) && Number.isFinite(bounds.height) && bounds.width > 0 && bounds.height > 0
-      ? <NSEViewDrawing draw={draw} bounds={bounds} identifiers={identifiers} placement={layerContentsPlacement} /> : null}
+      ? <NSEViewDrawing draw={draw} bounds={bounds} identifiers={identifiers} placement={layerContentsPlacement} accessibility={htmlAttributes.role ? {} : {
+        "aria-label": htmlAttributes["aria-label"], "aria-labelledby": htmlAttributes["aria-labelledby"],
+        "aria-description": htmlAttributes["aria-description"], "aria-describedby": htmlAttributes["aria-describedby"],
+      }} /> : null}
     {children}
   </>;
-  const attributes = { ...htmlAttributes, ref: attachHost, style: draw ? { position: "relative" as const, ...style } : style };
+  const attributes = { ...htmlAttributes, ref: attachHost, "data-nse-view-drawing": draw ? "" : undefined };
   if (!menu) return <div title={toolTip} {...attributes}>{content}</div>;
   return (
     <NSEMenuHostView menu={menu} toolTip={toolTip} menuOverlay={menuOverlay} longPressDelayMs={longPressDelayMs} direction={direction} {...attributes}>
@@ -103,16 +106,17 @@ function NSEViewContent({ draw, layerContentsPlacement = "scaleProportionallyToF
   );
 }
 
-function NSEViewDrawing({ draw, bounds, identifiers, placement }: {
+function NSEViewDrawing({ draw, bounds, identifiers, placement, accessibility }: {
   readonly draw: NonNullable<NSEViewProps["draw"]>;
   readonly bounds: { readonly width: number; readonly height: number };
   readonly identifiers: GFXIdentifierIssuer;
   readonly placement: NSEViewLayerContentsPlacement;
+  readonly accessibility: React.AriaAttributes;
 }) {
   const context = GFXContext.recording({ size: bounds, identifiers });
   draw(Object.freeze({ x: 0, y: 0, ...bounds }), context);
-  return <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-    <NSEViewDisplayList displayList={context.displayList} placement={placement} />
+  return <div data-nse-view-drawing-layer="">
+    <NSEViewDisplayList displayList={context.displayList} placement={placement} accessibility={accessibility} />
   </div>;
 }
 

@@ -59,7 +59,7 @@ export default class Hello extends NSEApplication {
 }
 ```
 
-The controls take Atmo's appearance in light and dark without any stylesheet of your own; the host entry imports the NSE styles once (see below). `create-synware Hello.app` and the Developer MCP `scaffold` tool generate this shape, and the [authoring contract](authoring-contract.md) lists which API to use for each job: controls, documents, managed tasks, display links for WebGL engines and `NSEGraphicsView` for plots. A function component is still accepted as an application for very small apps, but it gives up the controller's bindings, actions, undo and managed lifetimes. See [Class authoring](cocoa-authoring.md).
+The controls take Atmo's appearance in light and dark without any stylesheet of your own; the host entry imports the NSE styles once (see below). `create-synware Hello.app` and the Developer MCP `scaffold` tool generate this shape, and the [authoring contract](authoring-contract.md) lists which API to use for each job: controls, documents, managed tasks, display links for WebGL engines and `NSEView.draw` for plots. A function component is still accepted as an application for very small apps, but it gives up the controller's bindings, actions, undo and managed lifetimes. See [Class authoring](cocoa-authoring.md).
 
 Create the required `Contents/Info.ts` beside the entry point. Identity and version are explicit, as in an Info.plist; `schemaVersion` defaults to `1`:
 

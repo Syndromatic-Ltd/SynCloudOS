@@ -58,7 +58,7 @@ function svgBlendMode(mode: GFXBlendMode): React.CSSProperties["mixBlendMode"] {
     return mode;
 }
 /** Internal SVG renderer for NSView.draw(_:), with recorder-owned definitions. */
-export function NSEViewDisplayList({ displayList, placement }: { readonly displayList: GFXDisplayList; readonly placement: NSEViewLayerContentsPlacement }) {
+export function NSEViewDisplayList({ displayList, placement, accessibility }: { readonly displayList: GFXDisplayList; readonly placement: NSEViewLayerContentsPlacement; readonly accessibility: React.AriaAttributes }) {
     assertGFXDisplayList(displayList);
     assertDisplayListImagePaintBudget(displayList);
     const definitions = useMemo(() => {
@@ -144,7 +144,8 @@ export function NSEViewDisplayList({ displayList, placement }: { readonly displa
         ? { position: "absolute", left: alignment[0], top: alignment[1], transform: `translate(${alignment[2]}, ${alignment[3]})` }
         : { display: "block", width: "100%", height: "100%" };
     const preserveAspectRatio = placement === "scaleAxesIndependently" ? "none" : placement === "scaleProportionallyToFill" ? "xMidYMid slice" : "xMidYMid meet";
-    return <svg aria-hidden="true" width={scales ? undefined : displayList.size.width} height={scales ? undefined : displayList.size.height}
+    const named = Boolean(accessibility["aria-label"] || accessibility["aria-labelledby"]);
+    return <svg {...accessibility} role={named ? "img" : undefined} aria-hidden={named ? undefined : true} width={scales ? undefined : displayList.size.width} height={scales ? undefined : displayList.size.height}
       style={style} viewBox={`0 0 ${displayList.size.width} ${displayList.size.height}`} preserveAspectRatio={preserveAspectRatio}>
     {definitions.ids.size ? <defs>
       {Array.from(definitions.gradients.values(), (paint) => <Gradient key={paint.id} paint={paint} id={definitions.ids.get(`gradient:${paint.id}`)!}/>)}

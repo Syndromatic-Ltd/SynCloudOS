@@ -5,8 +5,8 @@ import { getNSEObjectLifetime } from './objectLifetime';
 import { getNSETaskLifetime } from './viewActivity';
 
 /**
- * An element an outlet can connect: any HTML element, or the root `<svg>` of a
- * vector view such as NSEGraphicsView.
+ * An element an outlet can connect: any HTML element (including NSEView's div),
+ * or a root `<svg>`.
  */
 export type NSEOutletElement=HTMLElement|SVGSVGElement;
 export interface NSEViewOutlet<T extends NSEOutletElement> {
