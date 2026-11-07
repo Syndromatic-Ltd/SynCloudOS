@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+import { NSEData } from "../../Foundation/NSEData";
 
 import { MEFXSampleTimingInfo } from "../../FX/MediaFX/MEFXSampleTimingInfo";
 import { MEFXTime } from "../../FX/MediaFX/MEFXTime";

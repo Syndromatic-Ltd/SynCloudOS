@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEData, type NSEDataConvertible } from "../../../Foundation/NSEData";
+import { NSEData } from "../../../Foundation/NSEData";
 import type { GFXPoint, GFXRect } from "../../GraphicsFX/GFXGeometry";
 
 export type IFXFeatureKind = "rectangle" | "qr" | "text-region" | "face";

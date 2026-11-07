@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+import { NSEData } from "../../Foundation/NSEData";
 import { GFXImage } from "../GraphicsFX/GFXImage";
 import { createGFXPixelLease, type GFXPixelLease } from "../GraphicsFX/GFXPixelLease";
 import type { GFXSize } from "../GraphicsFX/GFXGeometry";

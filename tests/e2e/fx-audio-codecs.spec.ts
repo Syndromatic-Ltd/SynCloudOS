@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { NSEData } from "../../src/Foundation/NSEData";
+
 import { expect, test } from "playwright/test";
 
 test("browser audio codec negotiation reflects real WebCodecs probes with portable WAV fallback", async ({ page }) => {
@@ -68,7 +70,7 @@ test("real WebCodecs Opus export uses the shared WebM container and keeps the so
     file.framePosition = 37;
     try {
       const exported = await service.exportFile(file, new AbortController().signal, { format: "opus-webm" });
-      const bytes = new Uint8Array(await exported.data.arrayBuffer());
+      const bytes = new Uint8Array(exported.data.bytes);
       const parsed = await new VFXContainerReader({ backend: new VFXWebMContainerBackend() }).read(bytes);
       const audio = document.createElement("audio");
       const url = URL.createObjectURL(exported.data);
@@ -131,14 +133,14 @@ test("mounted audio-file client exports and reopens Opus WebM under its owner", 
     const pcm = new AUFXAudioPCMBuffer(new AUFXAudioFormat(48_000, 1), 4_800);
     pcm.frameLength = pcm.frameCapacity;
     for (let frame = 0; frame < pcm.frameLength; frame++) pcm.setSample(0, frame, Math.sin(2 * Math.PI * 440 * frame / 48_000) * 0.4);
-    let bytes = new Uint8Array(AUFXAudioFile.encodeWAV(pcm));
+    let bytes = new Uint8Array(AUFXAudioFile.encodeWAV(pcm).bytes);
     let mimeType = "audio/wav";
     const host = new RuntimeAudioFileService(new BrowserAudioFileAdapter({ loadBytes: async source => ({ bytes, mimeType, source }) }));
     const owner = new AbortController();
     const client = createMountedAudioFiles(host, owner.signal, () => ["audio.play"]);
     const opened = await client.openFile({ source: "/source.wav" });
     const exported = await client.exportFile(opened, undefined, { format: "opus-webm" });
-    bytes = new Uint8Array(await exported.data.arrayBuffer());
+    bytes = new Uint8Array(exported.data.bytes);
     mimeType = exported.mimeType;
     const imported = await client.openFile({ source: "/encoded.webm" });
     const samples = imported.readFrames(imported.length);
@@ -180,7 +182,7 @@ test("mounted streaming Opus export writes a playable WebM without allocating an
       } finally { released++; }
     });
     const fragments: Uint8Array[] = [];
-    const sink = new WritableStream<Uint8Array>({ write(fragment) { fragments.push(fragment.slice()); } });
+    const sink = new WritableStream<NSEData>({ write(fragment) { fragments.push(new Uint8Array(fragment.bytes)); } });
     const host = new RuntimeAudioFileService(new BrowserAudioFileAdapter({ loadBytes: async () => { throw new Error("Streaming export must not load a file."); } }));
     const owner = new AbortController();
     const audio = createMountedAudioFiles(host, owner.signal, () => ["audio.play"]);

@@ -95,7 +95,7 @@ function Probe() {
       let offset = 0;
       for (const fragment of fragments) { streamBytes.set(fragment, offset); offset += fragment.byteLength; }
       const parsedStream = await new VFXContainerReader({ backend: new VFXWebMContainerBackend(), maximumChunks: 128 }).read(streamBytes);
-      const stored = await fetch("/roundtrip.webm", { method: "PUT", body: exported.data });
+      const stored = await fetch("/roundtrip.webm", { method: "PUT", body: exported.data.blob(exported.mimeType) });
       if (!stored.ok) throw new Error("Installed consumer could not store its roundtrip fixture.");
       imported = await app.audio.openFile({ source: "/roundtrip.webm" });
       const pcm = imported.readFrames(imported.length);

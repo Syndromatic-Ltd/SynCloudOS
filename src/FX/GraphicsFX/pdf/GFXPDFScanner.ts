@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEData, type NSEDataConvertible } from "../../../Foundation/NSEData";
+import { NSEData } from "../../../Foundation/NSEData";
 import { PDFArray, PDFBool, PDFDict, PDFHexString, PDFName, PDFNull, PDFNumber, PDFRawStream, PDFRef, PDFString, PDFStream, type PDFObject } from "pdf-lib";
 import { GFXPDFDocument, pdfAssertLive, pdfBackend, pdfObjectSnapshot } from "./GFXPDFDocument";
 import type { GFXPDFObjectSnapshotEntry, GFXPDFSnapshotObject, GFXPDFStreamDecoding, GFXPDFStreamParameters } from "./pdfDocumentProtocol";
@@ -446,7 +446,7 @@ async function decodeStream(encodedBytes: Uint8Array, decoding: GFXPDFStreamDeco
     return decoded;
 }
 export class GFXPDFScanner {
-    constructor(private readonly document: GFXPDFDocument, readonly maximumDecodedBytes = 8 * 1024 * 1024) {
+    constructor(readonly document: GFXPDFDocument, readonly maximumDecodedBytes = 8 * 1024 * 1024) {
         pdfAssertLive(document);
         if (!Number.isSafeInteger(maximumDecodedBytes) || maximumDecodedBytes < 1 || maximumDecodedBytes > 32 * 1024 * 1024)
             throw new RangeError("Invalid PDF stream budget.");

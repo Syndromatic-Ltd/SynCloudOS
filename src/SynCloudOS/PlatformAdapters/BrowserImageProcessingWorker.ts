@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+import { NSEData } from "../../Foundation/NSEData";
 
 
 import { GFXImage, type GFXAlphaFormat, type GFXPixelFormat } from "../../FX/GraphicsFX/GFXImage";
@@ -351,10 +351,10 @@ export class BrowserImageProcessingWorker implements IFXRenderBackend {
     const canvasPending = this.#canvasPending.get(response.id);
     if (!pixelPending && !encodedPending && !canvasPending) return;
     this.#pending.delete(response.id);
-    this.#encodedPending.delete(response.id);
+    if (!response.ok || response.kind !== "encoded") this.#encodedPending.delete(response.id);
     this.#canvasPending.delete(response.id);
     pixelPending?.signal?.removeEventListener("abort", pixelPending.onAbort!);
-    encodedPending?.signal?.removeEventListener("abort", encodedPending.onAbort!);
+    if (!response.ok || response.kind !== "encoded") encodedPending?.signal?.removeEventListener("abort", encodedPending.onAbort!);
     canvasPending?.signal?.removeEventListener("abort", canvasPending.onAbort!);
     const pending = pixelPending ?? encodedPending ?? canvasPending!;
     if (!response.ok) { pending.reject(errorFrom(response.error)); return; }
@@ -372,12 +372,26 @@ export class BrowserImageProcessingWorker implements IFXRenderBackend {
       if (response.kind === "encoded") {
         if (!encodedPending) throw new TypeError("Unexpected encoded worker response.");
         if (!(response.value.blob instanceof Blob)) throw new TypeError("Worker encoded payload must contain a Blob.");
-        void NSEData.read(response.value.blob).then(data => encodedPending.resolve(Object.freeze({ data, metadata: Object.freeze(response.value.metadata) })), error => encodedPending.reject(error));
+        void NSEData.read(response.value.blob).then(data => {
+          if (this.#encodedPending.get(response.id) !== encodedPending) return;
+          this.#encodedPending.delete(response.id);
+          encodedPending.signal?.removeEventListener("abort", encodedPending.onAbort!);
+          encodedPending.resolve(Object.freeze({ data, metadata: Object.freeze(response.value.metadata) }));
+        }, error => {
+          if (this.#encodedPending.get(response.id) !== encodedPending) return;
+          this.#encodedPending.delete(response.id);
+          encodedPending.signal?.removeEventListener("abort", encodedPending.onAbort!);
+          encodedPending.reject(error);
+        });
         return;
       }
       if (!canvasPending) throw new TypeError("Unexpected canvas worker response.");
       canvasPending.resolve(Object.freeze(response.value.metadata));
-    } catch (error) { pending.reject(error); }
+    } catch (error) {
+      this.#encodedPending.delete(response.id);
+      encodedPending?.signal?.removeEventListener("abort", encodedPending.onAbort!);
+      pending.reject(error);
+    }
   };
 
   #onError = (event: ErrorEvent) => this.#fail(event.error instanceof Error ? event.error : new Error(event.message || "Image processing worker failed."));

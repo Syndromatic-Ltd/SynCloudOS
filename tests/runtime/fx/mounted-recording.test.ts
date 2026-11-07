@@ -22,7 +22,7 @@ import { expect, it, vi } from "vitest";
 import { createMountedAudioSessions } from "../../../src/SynCloudOS/AppSDK/mountedAudioSessions";
 import { BrowserAudioCaptureAdapter } from "../../../src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter";
 import { AUFXAudioSession } from "../../../src/FX/AudioFX/AUFXAudioSession";
-import { AUFXAudioRecorder } from "../../../src/FX/AudioFX/AUFXAudioRecorder";
+import { createHostAUFXAudioRecorder } from "../../../src/FX/AudioFX/AUFXAudioRecorder";
 
 it("does not acquire a recording session without the current declaration", () => {
   const createSession = vi.fn();
@@ -69,7 +69,7 @@ it("excludes continuous recording and tracks its real asynchronous stop finaliza
     dispose: vi.fn(),
     decode: vi.fn(async () => ({ duration: 1, frameCount: 48_000, sampleRate: 48_000, channelCount: 1 })),
   };
-  const recorder = new AUFXAudioRecorder(recorderPort);
+  const recorder = createHostAUFXAudioRecorder(recorderPort);
   const session = new AUFXAudioSession({
     state: "active",
     route: { desiredInput: null, actualInput: null, desiredOutput: null, actualOutput: null },
