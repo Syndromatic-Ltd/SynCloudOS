@@ -1,5 +1,7 @@
 # MIDIFX
 
+Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+
 MIDIFX (`MIFX`) is the web-native analogue of Core MIDI. It connects an application to MIDI hardware and software instruments, turns raw bytes into typed messages and back, speaks the Universal MIDI Packet (UMP) format of MIDI 2.0, converts MIDI 2.0 messages down to MIDI 1.0 without hiding what that costs, and sends events at precise times against a shared clock.
 
 The framework separates three concerns.
@@ -53,7 +55,7 @@ A discriminated union on `kind`. Every value is immutable data.
 | `"song-position"` | `position` | 0 to 16383 |
 | `"song-select"` | `song` | 0 to 127 |
 | `"tune-request"`, `"timing-clock"`, `"start"`, `"continue"`, `"stop"`, `"active-sensing"`, `"reset"` | none | |
-| `"sysex"` | `data: Uint8Array` | 7-bit bytes, without the `F0` and `F7` framing |
+| `"sysex"` | `data: NSEData` | 7-bit bytes, without the `F0` and `F7` framing |
 
 Channels are numbered from 0, so the value 0 is what a musician calls channel 1.
 
@@ -63,7 +65,7 @@ A stateless encoder.
 
 | Member | Description |
 | --- | --- |
-| `static encode(message)` | Returns the wire bytes for a message. A channel message gives two or three bytes, and a `sysex` message gives `F0`, the data and `F7`. Throws `TypeError` for a value that is not a known message and `RangeError` for a field outside its range or a system exclusive byte above 127. |
+| `static encode(message)` | Returns the wire bytes for a `MIFXMessageInput` as `NSEData`. Supplied SysEx data accepts `NSEDataConvertible`. A channel message gives two or three bytes, and a `sysex` message gives `F0`, the data and `F7`. Throws `TypeError` for a value that is not a known message and `RangeError` for a field outside its range or a system exclusive byte above 127. |
 
 ### `MIFXParser`
 
@@ -75,7 +77,7 @@ new MIFXParser(options?: MIFXParserOptions)
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
-| `push(bytes)` | `(bytes: Uint8Array) => readonly MIFXParserEvent[]` | Feeds bytes and returns the events they completed, in order. |
+| `push(bytes)` | `(bytes: NSEDataConvertible) => readonly MIFXParserEvent[]` | Feeds bytes and returns the events they completed, in order. |
 | `finish()` | `() => readonly MIFXParserEvent[]` | Signals the end of input. An incomplete message becomes a `"truncated-message"` error, and the parser resets. |
 | `bufferedByteCount` | `number` | Data bytes held for an incomplete message. |
 
@@ -100,8 +102,8 @@ const parser = new MIFXParser();
 
 // A message split across two reads, then a second note that uses running status.
 const events = [
-  ...parser.push(bytes.slice(0, 2)),
-  ...parser.push(new Uint8Array([bytes[2]!, 62, 100])),
+  ...parser.push(bytes.subdata({ location: 0, length: 2 })),
+  ...parser.push(new Uint8Array([bytes.bytes[2]!, 62, 100])),
   ...parser.finish(),
 ];
 
@@ -130,7 +132,7 @@ The constructor checks that each word is an unsigned 32-bit integer and that the
 | `messageType` | `number` | The message type nibble. |
 | `group` | `number` | The group, 0 to 15. |
 | `kind` | `MIFXUniversalPacketKind` | `"utility"`, `"system"`, `"midi1-channel-voice"` or `"midi2-channel-voice"`. |
-| `toBytes()` | `Uint8Array` | The words as big-endian bytes. |
+| `toBytes()` | `NSEData` | The words as big-endian bytes. |
 | `toMIDI1Message()` | `MIFXMessage` | Decodes a system or MIDI 1.0 channel voice packet. Throws `TypeError` for other kinds. |
 | `midi2ChannelVoice()` | `MIFXMIDI2ChannelVoice` | Decodes a MIDI 2.0 channel voice packet. Throws `RangeError` when reserved bits are set. |
 | static `fromBytes(bytes)` | `MIFXUniversalPacket` | Reads big-endian bytes. The length must be a multiple of four, at most 16. |
