@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation-loops.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/animation-loops.test.ts (4 tests | 1 failed) 29ms
+   × settles delayed finite springs and fractional cycles at their exact terminal boundary 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/animation-loops.test.ts > settles delayed finite springs and fractional cycles at their exact terminal boundary
+AssertionError: expected 0.9999999999999998 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0.9999999999999998
+
+ ❯ tests/runtime/fx/animation-loops.test.ts:67:71
+     65| it('settles delayed finite springs and fractional cycles at their exac…
+     66|   const spring = new AFXSpringAnimation({ targetId: 'art', keyPath: 't…
+     67|   expect(spring.animation.progressAt(spring.animation.totalDuration)).…
+       |                                                                       ^
+     68|   expect(spring.sample(spring.animation.totalDuration)).toBe('none');
+     69|   const fractional = new AFXAnimation({ duration: 1.2, delay: .35, ite…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  09:07:23
+   Duration  2.13s (transform 663ms, setup 30ms, import 814ms, tests 29ms, environment 1.10s)
+
