@@ -9,8 +9,30 @@ import { useNSEWindowTitlebarDocument, NSEWindowTitlebarHostContext } from "../.
 import { NSEStandardWindowView } from "../../src/NSE/Windows/NSEStandardWindowView";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 import type { WindowRecord } from "../../src/SynCloudOS/Windows";
+import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
+import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
+import { createClassApplicationHost } from "./fixtures/classApplicationHost";
+import { act } from "@testing-library/react";
 
 afterEach(cleanup);
+
+it("owns the Preferences panel and Back accessory while a class application is running", async () => {
+  class Content extends NSEViewController {
+    static override view = () => <NSEPreferencesToast open title="Preferences" backLabel="Back" onClose={() => {}}
+      panes={[{ id: "appearance", label: "Appearance", render: () => <p>Appearance settings</p> }]} />;
+  }
+  class Window extends NSEWindowController { constructor() { super(); this.contentViewController = new Content(); } }
+  class Application extends NSEApplication { static override mainWindow = Window; }
+  const host = createClassApplicationHost(Application, "com.example.preferences-titlebar-owner");
+  try {
+    await host.launch();
+    host.mountWindows();
+    await act(async () => { await host.openMainWindow(); });
+    expect(screen.getByRole("dialog", { name: "Preferences" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Appearance", exact: true }));
+    expect(screen.getByRole("dialog", { name: "Appearance" })).toBeTruthy();
+  } finally { await act(async () => { await host.dispose(); }); }
+});
 
 function PublishWindow({ controller }: { controller: NSEWindowController }) {
   useNSEWindowTitlebarDocument(controller, React.useContext(NSEWindowTitlebarHostContext));

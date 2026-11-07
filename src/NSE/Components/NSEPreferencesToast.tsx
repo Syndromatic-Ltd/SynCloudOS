@@ -32,7 +32,6 @@ import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
 import { NSEWindowController } from "../Application/NSEWindowController";
 import { NSETitlebarAccessoryViewController } from "../Application/NSETitlebarAccessoryViewController";
 import { NSEWindowTitlebarContent } from "../Windows/windowTitlebarContext";
-import { useNSEDeferredDisposal } from "../interactionLifecycle";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
 
@@ -157,20 +156,26 @@ function PreferencesPanel({ panelRef, ...attributes }: HTMLAttributes<HTMLDivEle
 
 class PreferencesBackAccessory extends NSETitlebarAccessoryViewController {
   content: ReactNode = null;
-  constructor() { super(); this.layoutAttribute = "leading"; }
+  constructor(owner: NSEWindowController) { super({ owner }); this.layoutAttribute = "leading"; }
   static override view = ({ controller }: { controller: PreferencesBackAccessory }) => <>{controller.content}</>;
 }
 
 /** The panel owns its window chrome and its Back accessory for the panel's lifetime. */
 function PreferencesTitlebar({ title, titleView, leading }: { title: ReactNode; titleView: ReactNode; leading: ReactNode }) {
-  const [panel] = useState(() => {
-    const panel = new NSEWindowController();
+  const [panel, setPanel] = useState<NSEWindowController | null>(null);
+  useLayoutEffect(() => {
+    const lifetime = new AbortController();
+    const panel = new NSEWindowController({ ownerSignal: lifetime.signal });
     panel.window.toolbarStyle = "preference";
-    panel.window.addTitlebarAccessoryViewController(new PreferencesBackAccessory());
-    return panel;
-  });
-  useNSEDeferredDisposal(panel);
-  useLayoutEffect(() => { panel.window.title = typeof title === "string" ? title : ""; }, [panel, title]);
+    panel.window.addTitlebarAccessoryViewController(new PreferencesBackAccessory(panel));
+    setPanel(panel);
+    return () => lifetime.abort();
+  }, []);
+  useLayoutEffect(() => {
+    if (panel && !panel.isDisposed) panel.window.title = typeof title === "string" ? title : "";
+  }, [panel, title]);
+  // Layout effects install the panel before paint, including StrictMode's mount replay.
+  if (!panel || panel.isDisposed) return null;
   const back = panel.window.titlebarAccessoryViewControllers[0] as PreferencesBackAccessory;
   back.content = leading;
   return <NSEWindowTitlebarContent toolbarStyle={panel.window.toolbarStyle} title={titleView}
