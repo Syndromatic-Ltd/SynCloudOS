@@ -92,6 +92,7 @@ import type { SynWareOwnedDocumentRematerialiseContext } from "../AppSDK/runtime
 import { createConfigurationProfiles } from "../ConfigurationProfiles/ConfigurationProfiles";
 import { createRuntimePerformancePolicy } from "../Performance/RuntimePerformancePolicy";
 import { defaultConfigurationProfile } from "../ConfigurationProfiles/defaultConfigurationProfile";
+import { createPrivacyStore } from "../Privacy";
 import { SCAuthorization } from "../Authorization/SCAuthorization";
 import type { SynCloudOSAccessMode } from "../ConfigurationProfiles/policyTypes";
 import { createRuntimeUserNotificationCenter } from "../NotificationCenter/runtimeNotificationCenter";
@@ -242,6 +243,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     storage: config.environment.localStorage,
     namespace: persistenceNamespace,
   });
+  const privacy = createPrivacyStore({ runtimeId, persistence, now: config.environment.now });
   let policy!: SynCloudOSRuntime["configurationProfiles"];
   let authorization!: SCAuthorization;
   let runtime!: SynCloudOSRuntime;
@@ -364,6 +366,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     get services() { return services; },
     get configurationProfiles() { return policy; },
     get authorization() { return authorization; },
+    get privacy() { return privacy; },
     get permissions() { return permissions; },
     get identity() { return identity; },
     get login() { return login; },
@@ -1473,6 +1476,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     alwaysReady("runtime:system-ui", () => systemUI.dispose()),
     alwaysReady("runtime:preference-panes", () => preferencePanes.dispose()),
     alwaysReady("runtime:settings", () => settings.dispose()),
+    alwaysReady("runtime:privacy", () => privacy.dispose()),
     alwaysReady("runtime:appearance", () => appearance.dispose()),
     alwaysReady("runtime:webspring", () => webspring.dispose()),
     alwaysReady("runtime:webspring-choreography", () => webspringChoreography.dispose()),

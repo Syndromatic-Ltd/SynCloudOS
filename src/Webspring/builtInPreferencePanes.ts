@@ -27,6 +27,7 @@ import language from "./Preferences/Language.prefPane";
 import account from "./Preferences/Account.prefPane";
 import updates from "./Preferences/Updates.prefPane";
 import capabilities from "./Preferences/Capabilities.prefPane";
+import privacy from "./Preferences/PrivacySecurity.prefPane";
 import storage from "./Preferences/Storage.prefPane";
 
 /** The panes every host lists, in their default order. */
@@ -35,6 +36,7 @@ export const builtInPreferencePanes: readonly PreferencePaneDefinition[] = Objec
   sounds,
   motion,
   notifications,
+  privacy,
   language,
   updates,
   storage,
