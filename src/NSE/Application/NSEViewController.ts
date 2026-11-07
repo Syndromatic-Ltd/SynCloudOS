@@ -57,6 +57,9 @@ export interface NSEPopoverPositioning {
   readonly preferredEdge?: "minX" | "maxX" | "minY" | "maxY";
   /** NSPopover.Behavior: `"transient"` (default), `"semitransient"` or `"applicationDefined"`. */
   readonly behavior?: "transient" | "semitransient" | "applicationDefined";
+  /** Draw the standard popover plate (default true). With false the content
+   * paints its plate and sets --nse-popover-content-fill on its root for the arrow. */
+  readonly drawsBackground?: boolean;
 }
 
 /** @internal */
@@ -449,7 +452,9 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     if (edge !== "minX" && edge !== "maxX" && edge !== "minY" && edge !== "maxY") throw new TypeError("A popover's preferredEdge is minX, maxX, minY or maxY.");
     const behavior = positioning.behavior ?? "transient";
     if (behavior !== "transient" && behavior !== "semitransient" && behavior !== "applicationDefined") throw new TypeError("A popover's behavior is transient, semitransient or applicationDefined.");
-    return this.#present("presentAsPopover", "popover", Object.freeze({ of: positioning.of, preferredEdge: edge, behavior }), viewController, args);
+    const drawsBackground = positioning.drawsBackground ?? true;
+    if (typeof drawsBackground !== "boolean") throw new TypeError("A popover's drawsBackground is a boolean.");
+    return this.#present("presentAsPopover", "popover", Object.freeze({ of: positioning.of, preferredEdge: edge, behavior, drawsBackground }), viewController, args);
   }
 
   #present<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(operation: string, style: NSEPresentationStyle, popover: NSEPopoverPositioning | null, viewController: TSheet | (new (...args: TArgs) => TSheet), args: TArgs): TSheet {

@@ -31,6 +31,7 @@ import {
 } from "@floating-ui/dom";
 import type { NSEOverlayRegionBounds } from "./overlayRegion";
 import type { NSELogicalPlacement } from "./overlayTypes";
+import { updateNSEPopoverFrame } from "./popoverFrame";
 
 export type NSEOverlayDirection = "ltr" | "rtl";
 export type NSEOverlayCollisionPadding = Padding;
@@ -180,8 +181,8 @@ export function computeNSEOverlayPosition({
         placement: logicalPlacementToFloatingPlacement(placement, direction),
         middleware: [
           offset(anchorPoint ? 0 : offsetValue),
-          flip({ ...(region ? { ...clipping, padding: collisionPadding } : {}), fallbackAxisSideDirection: "start" }),
-          shift({ ...clipping, padding: collisionPadding }),
+          flip({ ...clipping, padding: collisionPadding, ...(arrow ? { crossAxis: false } : { fallbackAxisSideDirection: "start" as const }) }),
+          shift({ ...clipping, padding: collisionPadding, crossAxis: Boolean(arrow) }),
           size({
             ...clipping,
             padding: collisionPadding,
@@ -191,14 +192,15 @@ export function computeNSEOverlayPosition({
               elements.floating.style.setProperty("--nse-overlay-available-block-size", `${region ? Math.max(0, availableHeight) : availableHeight}px`);
             },
           }),
-          ...(arrow ? [floatingArrow({ element: arrow })] : []),
+          ...(arrow ? [floatingArrow({ element: arrow, padding: 12 })] : []),
         ],
       }).then(({ x, y, placement: resolvedPlacement, middlewareData }) => {
         if (!active || generation !== updateGeneration || !anchor.isConnected) return;
         const viewport = floating.ownerDocument.defaultView;
         const viewportWidth = viewport?.innerWidth ?? floating.ownerDocument.documentElement.clientWidth;
         const viewportHeight = viewport?.innerHeight ?? floating.ownerDocument.documentElement.clientHeight;
-        const floatingRect = floating.getBoundingClientRect();
+        // Presentation scaling must not change the collision geometry.
+        const floatingRect = { width: floating.offsetWidth, height: floating.offsetHeight };
         const padding = typeof collisionPadding === "number" ? {
           top: collisionPadding,
           right: collisionPadding,
@@ -221,18 +223,27 @@ export function computeNSEOverlayPosition({
         floating.style.top = `${boundedY}px`;
         floating.dataset.placement = resolvedPlacement;
         const arrowData = middlewareData.arrow;
-        if (!arrow || !arrowData) return;
+        if (!arrow || !arrowData) { floating.dataset.nsePositioned = "true"; return; }
         const staticSide = {
           top: "bottom",
           right: "left",
           bottom: "top",
           left: "right",
         }[resolvedPlacement.split("-")[0] as "top" | "right" | "bottom" | "left"];
-        arrow.style.left = arrowData.x == null ? "" : `${arrowData.x}px`;
-        arrow.style.top = arrowData.y == null ? "" : `${arrowData.y}px`;
+        // The final viewport guard can shift a first WebKit measurement after
+        // middleware ran. Correct the arrow by that same displacement.
+        const arrowX = arrowData.x == null ? null : Math.max(12, Math.min(floatingRect.width - 32, arrowData.x + x - boundedX));
+        const arrowY = arrowData.y == null ? null : Math.max(12, Math.min(floatingRect.height - 32, arrowData.y + y - boundedY));
+        arrow.style.left = arrowX == null ? "" : `${arrowX}px`;
+        arrow.style.top = arrowY == null ? "" : `${arrowY}px`;
         arrow.style.right = "";
         arrow.style.bottom = "";
-        arrow.style.setProperty(staticSide, "-4px");
+        arrow.style.setProperty(staticSide, "-10px");
+        const originX = arrowX == null ? (staticSide === "left" ? -10 : floatingRect.width + 10) : arrowX + 10;
+        const originY = arrowY == null ? (staticSide === "top" ? -10 : floatingRect.height + 10) : arrowY + 10;
+        floating.style.transformOrigin = `${originX}px ${originY}px`;
+        updateNSEPopoverFrame(floating, arrow);
+        floating.dataset.nsePositioned = "true";
       }).catch(reportPlacementFailure);
     } catch {
       reportPlacementFailure();

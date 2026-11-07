@@ -3113,6 +3113,19 @@
 }
 /* === END Generic menu engine === */
 
+/* NSEPopover uses the same Aqua plate tone at every edge so the joined arrow
+   stays continuous after a flip. The inset content retains Atmo's control ink. */
+.nse-overlay-popup.nse-popover[data-nse-appearance="atmo"] {
+  --nse-popover-fill: #e6e5e5;
+  --nse-popover-border-colour: rgba(0, 0, 0, 0.48);
+  --nse-popover-shadow: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.28)) drop-shadow(0 14px 26px rgba(0, 0, 0, 0.32));
+}
+.nse-overlay-popup.nse-popover[data-nse-appearance="atmo"][data-mode="dark"] {
+  --nse-popover-fill: #262c34;
+  --nse-popover-border-colour: rgba(0, 0, 0, 0.76);
+  --nse-popover-shadow: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0 16px 30px rgba(0, 0, 0, 0.48));
+}
+
 /* Popup panels (NSEPopup popover / action sheet): the popup-panel recipe.
    The surface is already positioned (fixed or anchored), so the frame hangs
    off it without changing its position. Insets subtract the 24px frame to
