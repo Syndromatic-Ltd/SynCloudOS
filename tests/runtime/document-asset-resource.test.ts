@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { describe, expect, it } from "vitest";
 import { createDocumentResourceService } from "../../src/SynCloudOS/Documents/DocumentResourceService";
 import { createInMemoryDocumentAssetStore } from "../../src/SynCloudOS/Documents/DocumentAssetStore";
@@ -38,13 +39,13 @@ describe("stable document assets and revocable resource leases", () => {
       assetBacking: { store, scopeForDocument: () => scope } });
     const live = await active.acquireAsset("new-open-document-id", ref, signal());
     expect(live.documentId).toBe("new-open-document-id");
-    expect(active.resolve("new-open-document-id", live)).toEqual(new Uint8Array([1]));
+    expect(active.resolve("new-open-document-id", live)?.bytes).toEqual(new Uint8Array([1]));
     active.dispose();
   });
   it("interrupts a pending live acquisition immediately on service disposal", async () => {
     const active = service();
     let finish!: (bytes: ArrayBuffer) => void;
-    const pending = active.acquire(scope.documentId, { size: 1, type: "image/png", arrayBuffer: () => new Promise(resolve => { finish = resolve; }) }, signal());
+    const pending = active.acquire(scope.documentId, { size: 1, type: "image/png", data: async () => NSEData.from(await (new Promise(resolve => { finish = resolve; }))) }, signal());
     active.dispose();
     const result = await Promise.race([pending.then(() => "published", error => error.name), new Promise(resolve => setTimeout(() => resolve("still-pending"), 30))]);
     finish(new Uint8Array([1]).buffer);
@@ -55,23 +56,23 @@ describe("stable document assets and revocable resource leases", () => {
     const store = createInMemoryDocumentAssetStore();
     const first = service(store);
     expect(typeof first.persist).toBe("function");
-    const live = await first.acquire(scope.documentId, { size: 3, type: "image/png", arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer }, signal());
+    const live = await first.acquire(scope.documentId, { size: 3, type: "image/png", data: async () => NSEData.from(await (new Uint8Array([1, 2, 3]).buffer)) }, signal());
     const ref = await first.persist(scope.documentId, live, signal());
     first.dispose();
     const next = service(store);
     const acquired = await next.acquireAsset(scope.documentId, ref, signal());
     expect(acquired.leaseId).not.toBe(live.leaseId);
     expect(next.isActive(scope.documentId, live)).toBe(false);
-    expect(next.resolve(scope.documentId, acquired)).toEqual(new Uint8Array([1, 2, 3]));
+    expect(next.resolve(scope.documentId, acquired)?.bytes).toEqual(new Uint8Array([1, 2, 3]));
     next.release(scope.documentId, acquired);
-    expect(await store.read(scope, ref)).toEqual(new Uint8Array([1, 2, 3]));
+    expect((await store.read(scope, ref)).bytes).toEqual(new Uint8Array([1, 2, 3]));
     next.dispose();
   });
 
   it("refuses unsupported persistence and another document's stable reference", async () => {
     const transient = service();
     expect(typeof transient.persist).toBe("function");
-    const live = await transient.acquire(scope.documentId, { size: 1, type: "image/png", arrayBuffer: async () => new Uint8Array([1]).buffer }, signal());
+    const live = await transient.acquire(scope.documentId, { size: 1, type: "image/png", data: async () => NSEData.from(await (new Uint8Array([1]).buffer)) }, signal());
     await expect(transient.persist(scope.documentId, live, signal())).rejects.toMatchObject({ code: "asset-unsupported" });
     const store = createInMemoryDocumentAssetStore();
     const ref = await store.put(scope, { bytes: new Uint8Array([1]), mimeType: "image/png" });

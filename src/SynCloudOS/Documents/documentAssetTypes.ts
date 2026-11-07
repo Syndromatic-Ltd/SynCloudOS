@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
+
 /** Application authorization and document identity are distinct from byte identity. */
 export interface DocumentAssetScope {
   readonly authorizationId: string;
@@ -61,7 +64,7 @@ export interface DocumentAssetRetentionRoot {
 }
 
 export interface DocumentAssetInput {
-  readonly bytes: Uint8Array;
+  readonly bytes: NSEDataConvertible;
   readonly mimeType: string;
   readonly assetId?: string;
   readonly intrinsic?: DocumentAssetIntrinsicMetrics;
@@ -84,7 +87,7 @@ export interface DocumentAssetCollectionResult {
 export interface DocumentAssetStore {
   readonly capabilities: DocumentAssetStoreCapabilities;
   put(scope: DocumentAssetScope, input: DocumentAssetInput, signal?: AbortSignal): Promise<DocumentAssetReference>;
-  read(scope: DocumentAssetScope, reference: DocumentAssetReference, signal?: AbortSignal): Promise<Uint8Array>;
+  read(scope: DocumentAssetScope, reference: DocumentAssetReference, signal?: AbortSignal): Promise<NSEData>;
   copy(source: DocumentAssetScope, reference: DocumentAssetReference, destination: DocumentAssetScope, signal?: AbortSignal): Promise<DocumentAssetReference>;
   /** Replaces a root atomically; returned token fences stale release handles. */
   retain(root: DocumentAssetRetentionRoot, references: readonly DocumentAssetReference[], signal?: AbortSignal): Promise<string>;

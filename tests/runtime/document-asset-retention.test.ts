@@ -47,7 +47,7 @@ describe("asset retention roots", () => {
     await current.release();
     for (const holder of holders) {
       expect(await store.collectGarbage(scope)).toEqual({ removedAssets: 0, removedBytes: 0 });
-      expect(await store.read(scope, ref)).toEqual(input.bytes);
+      expect((await store.read(scope, ref)).bytes).toEqual(input.bytes);
       await holder.release();
     }
     expect(await store.collectGarbage(scope)).toEqual({ removedAssets: 1, removedBytes: 3 });
@@ -63,7 +63,7 @@ describe("asset retention roots", () => {
     const newHandle = await retention.retain(root("history"), [next]);
     expect(await oldHandle.release()).toBe(false);
     expect(await store.collectGarbage(scope)).toEqual({ removedAssets: 1, removedBytes: 3 });
-    expect(await store.read(scope, next)).toEqual(new Uint8Array([4]));
+    expect((await store.read(scope, next)).bytes).toEqual(new Uint8Array([4]));
     expect(await newHandle.release()).toBe(true);
     expect(await newHandle.release()).toBe(false);
   });
@@ -88,6 +88,6 @@ describe("asset retention roots", () => {
     const copy = await store.copy(scope, ref, other);
     await retention.retain({ ...root("committed"), scope: other }, [copy]);
     expect(await store.collectGarbage(scope)).toEqual({ removedAssets: 1, removedBytes: 0 });
-    expect(await store.read(other, copy)).toEqual(input.bytes);
+    expect((await store.read(other, copy)).bytes).toEqual(input.bytes);
   });
 });

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { SynCloudOSRuntimeEnvironment } from "../Runtime/runtimeInstanceTypes";
 import { DocumentSchemaError } from "./DocumentErrors";
 
@@ -263,7 +264,7 @@ export interface OpenDocumentRequest {
 
 export type DocumentImportSource =
   | { readonly kind: "text"; readonly text: string; readonly mediaType: string }
-  | { readonly kind: "bytes"; readonly bytes: Uint8Array; readonly mediaType: string };
+  | { readonly kind: "bytes"; readonly bytes: NSEDataConvertible; readonly mediaType: string };
 
 export interface ImportDocumentRequest<TSerialized> {
   readonly typeId: string;

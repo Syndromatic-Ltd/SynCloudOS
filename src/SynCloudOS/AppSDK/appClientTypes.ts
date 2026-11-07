@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { AppPlaybackPresentationLease, AppPlaybackPresentationRequest } from "./playbackPresentationTypes";
 import type { VFXVideoClient, VFXPresentationCoordinator } from "../../FX/VideoFX/public";
 
@@ -222,7 +223,7 @@ export interface AppDocumentResourcesClient {
   persist(documentId: string, descriptor: DocumentResourceDescriptor, signal?: AbortSignal): Promise<DocumentAssetReference>;
   prepareEdit<TModel>(documentId: string, before: Readonly<TModel>, after: Readonly<TModel>, options?: Readonly<{ signal?: AbortSignal }>): Promise<AppDocumentAssetPreparedEdit<TModel>>;
   isActive(documentId: string, descriptor: unknown): descriptor is DocumentResourceDescriptor;
-  resolve(documentId: string, descriptor: DocumentResourceDescriptor, signal?: AbortSignal): Uint8Array | null;
+  resolve(documentId: string, descriptor: DocumentResourceDescriptor, signal?: AbortSignal): NSEData | null;
   subscribeInvalidation(listener: (entry: DocumentResourceInvalidation) => void): () => void;
   release(documentId: string, descriptor: DocumentResourceDescriptor): boolean;
 }

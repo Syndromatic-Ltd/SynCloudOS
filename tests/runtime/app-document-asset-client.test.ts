@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { createInMemoryDocumentAssetStore } from "../../src/SynCloudOS/Documents/DocumentAssetStore";
@@ -50,7 +51,7 @@ function fixture(backed = true) {
   return { runtime, store, owner: mount("com.example.asset-owner"), foreign: mount("com.example.asset-foreign"), mount };
 }
 
-const image = () => new Blob([new Uint8Array([1, 2, 3, 4])], { type: "image/png" });
+const image = () => resourceInput(new Blob([new Uint8Array([1, 2, 3, 4])], { type: "image/png" }));
 
 describe("admitted document asset client", () => {
   it("persists real bytes then reacquires a separate scoped runtime lease", async () => {
@@ -68,7 +69,7 @@ describe("admitted document asset client", () => {
     const reacquired = await owner.resources.acquireAsset(document.id, reference);
     expect(reacquired).not.toBe(descriptor);
     expect(owner.resources.isActive(document.id, reacquired)).toBe(true);
-    expect(owner.resources.resolve(document.id, reacquired)).toEqual(new Uint8Array([1, 2, 3, 4]));
+    expect(owner.resources.resolve(document.id, reacquired)?.bytes).toEqual(new Uint8Array([1, 2, 3, 4]));
   });
 
   it("refuses foreign IDs, copied or sibling descriptors, and revoked clients", async () => {
@@ -140,3 +141,5 @@ describe("admitted document asset client", () => {
     await expect(pending).rejects.toMatchObject({ code: "asset-aborted" });
   });
 });
+
+function resourceInput(blob: Blob) { return { type: blob.type, size: blob.size, data: () => NSEData.read(blob) }; }

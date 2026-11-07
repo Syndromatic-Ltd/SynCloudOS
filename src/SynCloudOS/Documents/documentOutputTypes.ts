@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { GFXPDFContext } from "../../FX/GraphicsFX/pdf/GFXPDFContext";
 import type { GFXPDFMetadata, GFXPDFPageOptions } from "../../FX/GraphicsFX/pdf/pdfTypes";
 import type { DocumentEditingParticipantResult, DocumentEditingSettlementResult } from "./documentEditingTypes";
@@ -107,7 +108,7 @@ export interface DocumentOutputReceipt {
   readonly reason?: string;
 }
 export type DocumentOutputPDFResult =
-  | { readonly status: "exported"; readonly bytes: Uint8Array; readonly mimeType: "application/pdf"; readonly receipt: DocumentOutputReceipt }
+  | { readonly status: "exported"; readonly bytes: NSEData; readonly mimeType: "application/pdf"; readonly receipt: DocumentOutputReceipt }
   | { readonly status: "canceled" | "failed"; readonly receipt: DocumentOutputReceipt };
 export interface PreparedDocumentOutput<TModel> {
   readonly snapshot: DocumentOutputSnapshot<TModel>;

@@ -36,7 +36,7 @@ describe("duplicate and save-as asset authority", () => {
       expect(pair.source.scope).toEqual(scope);
       expect(pair.destination.assetId).not.toBe(pair.source.assetId);
       expect(pair.destination.scope).toEqual(destination);
-      expect(await store.read(destination, pair.destination)).toEqual(input.bytes);
+      expect((await store.read(destination, pair.destination)).bytes).toEqual(input.bytes);
       expect(pair.destination).not.toHaveProperty("leaseId");
     }
     await store.retain({ scope: destination, kind: "committed", id: "new-document" }, copied.manifest.assets);
@@ -55,6 +55,6 @@ describe("duplicate and save-as asset authority", () => {
     const ref = await store.put(scope, input);
     const abort = new AbortController(); abort.abort();
     await expect(copyDocumentAssetManifest(store, createDocumentAssetManifest(scope, [ref]), { ...scope, documentId: "doc:b" }, abort.signal)).rejects.toMatchObject({ code: "asset-aborted" });
-    expect(await store.read(scope, ref)).toEqual(input.bytes);
+    expect((await store.read(scope, ref)).bytes).toEqual(input.bytes);
   });
 });

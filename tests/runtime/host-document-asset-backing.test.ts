@@ -20,6 +20,7 @@
 
 // @vitest-environment jsdom
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { createHash } from "node:crypto";
 import { act } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -47,7 +48,7 @@ let sequence = 0;
 function store() {
   const original = createInMemoryDocumentAssetStore({
     randomUUID: () => `host-asset-${++sequence}`,
-    hash: async bytes => `sha256:${createHash("sha256").update(bytes).digest("hex")}`,
+    hash: async bytes => `sha256:${createHash("sha256").update(bytes.bytes).digest("hex")}`,
   });
   stores.push(original);
   return { ...original, capabilities: { ...original.capabilities } };
@@ -60,7 +61,7 @@ function backing() {
       enumerateReferences: vi.fn(() => []),
       scopeForLocation: vi.fn(() => ({ authorizationId: "host-assets", documentId: "native" })),
       nativeDurability: "memory" as "memory" | "durable",
-      hash: async (bytes: Uint8Array) => `sha256:${createHash("sha256").update(bytes).digest("hex")}`,
+      hash: async (bytes: NSEData) => `sha256:${createHash("sha256").update(bytes.bytes).digest("hex")}`,
     },
   };
 }
@@ -88,8 +89,8 @@ describe("host document asset backing", () => {
     expect(Object.isFrozen(captured.scopeForDocument)).toBe(true);
     const scope = captured.scopeForDocument("one");
     const reference = await captured.store!.put(scope, { bytes: new Uint8Array([1, 2]), mimeType: "image/png" });
-    await expect(original.store.read(scope, reference)).resolves.toEqual(new Uint8Array([1, 2]));
-    await expect(captured.store!.read(scope, reference)).resolves.toEqual(new Uint8Array([1, 2]));
+    await expect(original.store.read(scope, reference)).resolves.toHaveProperty("bytes", new Uint8Array([1, 2]));
+    await expect(captured.store!.read(scope, reference)).resolves.toHaveProperty("bytes", new Uint8Array([1, 2]));
     expect(captured.manifest!.enumerateReferences({}, { typeId: "notes", schemaVersion: 1 })).toEqual([]);
   });
 
@@ -111,10 +112,10 @@ describe("host document asset backing", () => {
     expect(captured.manifest!.enumerateReferences({}, { typeId: "notes", schemaVersion: 1 })).toEqual([]);
     expect(enumeration).toHaveBeenCalledOnce(); expect(admittedManifest.enumerateReferences).not.toHaveBeenCalled();
     captured.manifest!.scopeForLocation({ kind: "memory", namespace: "notes", key: "one" }); expect(location).toHaveBeenCalledOnce();
-    await expect(captured.manifest!.hash!(new Uint8Array([1]))).resolves.toBe(await hash(new Uint8Array([1])));
+    await expect(captured.manifest!.hash!(NSEData.from(new Uint8Array([1])))).resolves.toBe(await hash(NSEData.from(new Uint8Array([1]))));
     const scope = captured.scopeForDocument("one");
     const reference = await captured.store!.put(scope, { bytes: new Uint8Array([1, 2]), mimeType: "image/png" });
-    await expect(captured.store!.read(scope, reference)).resolves.toEqual(new Uint8Array([1, 2]));
+    await expect(captured.store!.read(scope, reference)).resolves.toHaveProperty("bytes", new Uint8Array([1, 2]));
   });
 
   it("captures an owned store factory lazily and retains its original receiver", async () => {
@@ -151,7 +152,7 @@ describe("host document asset backing", () => {
             enumerateReferences: () => { callbacks += 1; return []; },
             scopeForLocation: () => { callbacks += 1; return { authorizationId: "host-assets", documentId: "native" }; },
             nativeDurability: () => { callbacks += 1; return "memory" as const; },
-            hash: async (_bytes: Uint8Array) => { callbacks += 1; return `sha256:${"0".repeat(64)}`; },
+            hash: async (_bytes: NSEData) => { callbacks += 1; return `sha256:${"0".repeat(64)}`; },
           },
         };
         const operations = [input.scopeForDocument, ...Object.values(input.manifest),
@@ -195,7 +196,7 @@ describe("host document asset backing", () => {
     const promoted = await captured.store!.promoteRetentionRoot!(source, target, [reference], token);
     expect(promoted).toBeTypeOf("string");
     expect(await original.listRetentionRoots(scope)).toEqual([{ root: target, references: [reference], token: promoted }]);
-    await expect(captured.store!.read(scope, reference)).resolves.toEqual(new Uint8Array([3]));
+    await expect(captured.store!.read(scope, reference)).resolves.toHaveProperty("bytes", new Uint8Array([3]));
   });
 
   it("accepts a store without the optional atomic root promotion operation", async () => {

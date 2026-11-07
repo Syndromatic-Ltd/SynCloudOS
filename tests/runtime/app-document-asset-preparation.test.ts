@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { createInMemoryDocumentAssetStore } from "../../src/SynCloudOS/Documents/DocumentAssetStore";
@@ -37,8 +38,8 @@ const bytes = new Uint8Array([1, 2, 3]);
 
 async function fixture(backed = true) {
   let pauseHash: (() => Promise<void>) | undefined;
-  const hash = async (value: Uint8Array) => {
-    const digest = "sha256:" + Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", value.slice().buffer)), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  const hash = async (value: NSEData) => {
+    const digest = "sha256:" + Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", value.bytes.buffer)), (byte) => byte.toString(16).padStart(2, "0")).join("");
     await pauseHash?.();
     return digest;
   };
@@ -62,7 +63,7 @@ async function fixture(backed = true) {
   const document = await app.workspaceDocuments.newDocument<Model>({ documentId: "prepared-document", typeId: type.id });
   const canonical = runtime.documents.getDocument(document.id)!;
   const persist = async () => {
-    const descriptor = await app.documentResources.acquire(document.id, new Blob([bytes], { type: "image/png" }));
+    const descriptor = await app.documentResources.acquire(document.id, resourceInput(new Blob([bytes], { type: "image/png" })));
     const reference = await app.documentResources.persist(document.id, descriptor);
     app.documentResources.release(document.id, descriptor);
     return reference;
@@ -101,7 +102,7 @@ describe("scoped SDK asset model preparation", () => {
     await expect(history.undo()).resolves.toMatchObject({ status: "completed" });
     expect(app.workspaceDocuments.getDocument<Model>(document.id)!.model.assets).toEqual([reference]);
     const reacquired = await app.documentResources.acquireAsset(document.id, reference);
-    expect(app.documentResources.resolve(document.id, reacquired)).toEqual(bytes);
+    expect(app.documentResources.resolve(document.id, reacquired)?.bytes).toEqual(bytes);
     app.documentResources.release(document.id, reacquired);
     await history.redo();
     // Trusted host fixture exercises actual history eviction; no app clear/store capability is added.
@@ -209,3 +210,5 @@ describe("scoped SDK asset model preparation", () => {
     expect(await store.collectGarbage(scope)).toMatchObject({ removedAssets: 1 });
   });
 });
+
+function resourceInput(blob: Blob) { return { type: blob.type, size: blob.size, data: () => NSEData.read(blob) }; }
