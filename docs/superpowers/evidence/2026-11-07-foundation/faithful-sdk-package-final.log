@@ -1,0 +1,101 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/foundation-packed-consumer.test.ts tests/runtime/synapp-sdk-package.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794087952259
+
+ ❯ tests/runtime/synapp-sdk-package.test.ts (9 tests | 1 failed) 191370ms
+     × compiles, bundles and mounts a genuinely external consumer against packed public exports 103782ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/synapp-sdk-package.test.ts > portable SynWare SDK packages > compiles, bundles and mounts a genuinely external consumer against packed public exports
+Error: Command failed: C:\Program Files\nodejs\node.exe shared-identity.mjs
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
++   'SCAuthorization',
++   'SCAuthorizationRights',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+
+    at file:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794087952259/.artifacts/synware-external-SBYwzN/shared-identity.mjs:77:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
+    'SCAuthorization',
+    'SCAuthorizationRights',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+    'createDocumentAssetStorageAdapter',
+    'createInMemoryDocumentAssetStore',
+    'createIndexedDBDocumentAssetStore',
+    'createRegisteredFontResourceLoader',
+    'createSynCloudOSHostContribution',
+    'fontResourceMimeTypeForPath',
+    'mountSynCloudOS',
+    'trustSynWareBundleForCanonicalHost'
+  ],
+  expected: [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+    'createDocumentAssetStorageAdapter',
+    'createInMemoryDocumentAssetStore',
+    'createIndexedDBDocumentAssetStore',
+    'createRegisteredFontResourceLoader',
+    'createSynCloudOSHostContribution',
+    'fontResourceMimeTypeForPath',
+    'mountSynCloudOS',
+    'trustSynWareBundleForCanonicalHost'
+  ],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1
+
+ ❯ ../../../../../Kavish%20Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794087952259/.artifacts/synware-external-SBYwzN/shared-identity.mjs:77:8
+ ❯ tests/runtime/synapp-sdk-package.test.ts:416:5
+    414| }
+    415| `, "utf8");
+    416|     execFileSync(process.execPath, ["shared-identity.mjs"], { cwd: fix…
+       |     ^
+    417|     writeFileSync(join(fixture, "tsconfig.json"), `${JSON.stringify({
+    418|       compilerOptions: {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 9 passed (10)
+   Start at  21:49:53
+   Duration  224.91s (transform 7.78s, setup 47ms, import 9.77s, tests 213.83s, environment 977ms)
+

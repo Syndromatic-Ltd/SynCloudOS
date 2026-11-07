@@ -1,0 +1,37 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/nse/scroll/nse-appkit-view-access.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/nse/scroll/nse-appkit-view-access.test.tsx (4 tests | 1 failed) 75ms
+     × retains the image backing through StrictMode's mount probe 24ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/nse/scroll/nse-appkit-view-access.test.tsx > AppKit view access > retains the image backing through StrictMode's mount probe
+AssertionError: expected AFXLayer{ delegate: null } to be AFXLayer{ delegate: null } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: AFXLayer{ delegate: null }
+Received: serializes to the same string
+
+
+Compared values have no visual difference.
+
+ ❯ tests/nse/scroll/nse-appkit-view-access.test.tsx:43:19
+     41|   await act(async()=>{});
+     42|   expect(seen).toHaveLength(2);
+     43|   expect(seen[1]).toBe(seen[0]);
+       |                   ^
+     44|   expect(bindLayer).toHaveBeenCalledTimes(1);
+     45|   view.unmount();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  20:30:16
+   Duration  1.99s (transform 569ms, setup 28ms, import 855ms, tests 75ms, environment 886ms)
+

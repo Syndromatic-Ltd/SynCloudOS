@@ -1,0 +1,3 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -b --pretty false
+src/SynCloudOS/InstalledApplications/installBrowserApplications.ts(61,23): error TS1345: An expression of type 'void' cannot be tested for truthiness.

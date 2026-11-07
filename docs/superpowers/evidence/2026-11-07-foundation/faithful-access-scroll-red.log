@@ -1,0 +1,31 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/nse/scroll/nse-appkit-view-access.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/nse/scroll/nse-appkit-view-access.test.tsx (3 tests | 1 failed) 38ms
+     × observes changed clip bounds and disconnects on unmount 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/nse/scroll/nse-appkit-view-access.test.tsx > AppKit view access > observes changed clip bounds and disconnects on unmount
+AssertionError: expected "vi.fn()" to be called with arguments: [ { x: +0, y: 40, width: +0, …(1) } ]
+
+Number of calls: 0
+
+ ❯ tests/nse/scroll/nse-appkit-view-access.test.tsx:50:20
+     48|   clip.observeBoundsChanges(listener);
+     49|   act(()=>{clip.element.scrollTop=40;fireEvent.scroll(clip.element);});
+     50|   expect(listener).toHaveBeenCalledWith({x:0,y:40,width:0,height:0});
+       |                    ^
+     51|   const count=listener.mock.calls.length;
+     52|   view.unmount();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  19:13:55
+   Duration  2.02s (transform 621ms, setup 29ms, import 916ms, tests 38ms, environment 904ms)
+

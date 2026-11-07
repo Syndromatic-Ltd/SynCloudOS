@@ -1,0 +1,8 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -b --pretty false
+src/SynCloudOS/AppSDK/hooks/useNetwork.ts(25,28): error TS2339: Property 'network' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/PlatformAdapters/BrowserContactsAdapter.ts(61,79): error TS2345: Argument of type 'string[]' is not assignable to parameter of type 'readonly CNFXContactProperty[]'.
+  Type 'string' is not assignable to type 'CNFXContactProperty'.
+src/SynCloudOS/PlatformAdapters/BrowserNFCAdapter.ts(114,20): error TS7006: Parameter 'listener' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/BrowserNFCAdapter.ts(114,30): error TS7006: Parameter 'onError' implicitly has an 'any' type.
+src/SynCloudOS/PlatformAdapters/BrowserNFCAdapter.ts(136,21): error TS7006: Parameter 'message' implicitly has an 'any' type.

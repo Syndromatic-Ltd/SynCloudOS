@@ -1,0 +1,11 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/gallery-text-document.test.tsx --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  22:57:33
+   Duration  6.01s (transform 3.60s, setup 16ms, import 4.24s, tests 714ms, environment 900ms)
+

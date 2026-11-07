@@ -1,0 +1,2 @@
+src/FrameworkTests/Windows/WindowManagementFixture.tsx:29 -> src/NSE/Overlays/NSEPopover.tsx: devtools must use a public nse entrypoint
+src/NSE/Controls/Values/valueControlTypes.ts:27 -> src/SynCloudOS/Undo/undoTypes.ts: nse must use a public runtime entrypoint

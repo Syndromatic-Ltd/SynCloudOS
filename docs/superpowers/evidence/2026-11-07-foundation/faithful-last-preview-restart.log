@@ -1,0 +1,4 @@
+{
+  "pid": 91116,
+  "command": "\"C:\\Program Files\\nodejs\\node.exe\" node_modules/vite/bin/vite.js --config vite.claude-5199.config.mts --force"
+}

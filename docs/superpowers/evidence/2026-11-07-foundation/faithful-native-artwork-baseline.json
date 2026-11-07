@@ -1,0 +1,755 @@
+{
+  "calls": [
+    {
+      "className": "about-pane",
+      "tag": "ARTICLE",
+      "at": 5689,
+      "frames": [
+        {
+          "opacity": "1"
+        },
+        {
+          "opacity": "0"
+        }
+      ],
+      "options": {
+        "duration": 550,
+        "delay": 0,
+        "iterations": 1,
+        "easing": "cubic-bezier(0.62,0,0.92,0.42)",
+        "fill": "forwards"
+      }
+    },
+    {
+      "className": "about-pane",
+      "tag": "ARTICLE",
+      "at": 5689.200000047684,
+      "frames": [
+        {
+          "transform": "matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)"
+        },
+        {
+          "transform": "matrix3d(0.965,0,0,0,0,0.965,0,0,0,0,1,0,-118.79999999999995,15.75,0,1)"
+        }
+      ],
+      "options": {
+        "duration": 550,
+        "delay": 0,
+        "iterations": 1,
+        "easing": "cubic-bezier(0.62,0,0.92,0.42)",
+        "fill": "forwards"
+      }
+    },
+    {
+      "className": "about-pane",
+      "tag": "ARTICLE",
+      "at": 5690.399999976158,
+      "frames": [
+        {
+          "transform": "matrix3d(0.975,0,0,0,0,0.975,0,0,0,0,1,0,219.60000000000002,11.25,0,1)"
+        },
+        {
+          "transform": "matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)"
+        }
+      ],
+      "options": {
+        "duration": 950,
+        "delay": 120,
+        "iterations": 1,
+        "easing": "cubic-bezier(0.2,0.9,0.18,1)",
+        "fill": "both"
+      }
+    },
+    {
+      "className": "",
+      "tag": "H1",
+      "at": 5696.200000047684,
+      "frames": [
+        {
+          "opacity": "0"
+        },
+        {
+          "opacity": "1"
+        }
+      ],
+      "options": {
+        "duration": 800,
+        "delay": 270,
+        "iterations": 1,
+        "easing": "cubic-bezier(0.16,0.94,0.18,1)",
+        "fill": "both"
+      }
+    },
+    {
+      "className": "",
+      "tag": "H1",
+      "at": 5696.399999976158,
+      "frames": [
+        {
+          "transform": "matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,16,0,1)"
+        },
+        {
+          "transform": "matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)"
+        }
+      ],
+      "options": {
+        "duration": 800,
+        "delay": 270,
+        "iterations": 1,
+        "easing": "cubic-bezier(0.16,0.94,0.18,1)",
+        "fill": "both"
+      }
+    },
+    {
+      "className": "about-hero-caption",
+      "tag": "P",
+      "at": 5697.200000047684,
+      "frames": [
+        {
+          "opacity": "0"
+        },
+        {
+          "opacity": "1"
+        }
+      ],
+      "options": {
+        "duration": 800,
+        "delay": 350,
+        "iterations": 1,
+        "easing": "cubic-bezier(0.16,0.94,0.18,1)",
+        "fill": "both"
+      }
+    },
+    {
+      "className": "about-hero-caption",
+      "tag": "P",
+      "at": 5697.399999976158,
+      "frames": [
+        {
+          "transform": "matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,16,0,1)"
+        },
+        {
+          "transform": "matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)"
+        }
+      ],
+      "options": {
+        "duration": 800,
+        "delay": 350,
+        "iterations": 1,
+        "easing": "cubic-bezier(0.16,0.94,0.18,1)",
+        "fill": "both"
+      }
+    },
+    {
+      "className": "about-hero-lead",
+      "tag": "P",
+      "at": 5698,
+      "frames": [
+        {
+          "opacity": "0"
+        },
+        {
+          "opacity": "1"
+        }
+      ],
+      "options": {
+        "duration": 800,
+        "delay": 449.99999999999994,
+        "iterations": 1,
+        "easing": "cubic-bezier(0.16,0.94,0.18,1)",
+        "fill": "both"
+      }
+    },
+    {
+      "className": "about-hero-lead",
+      "tag": "P",
+      "at": 5698.200000047684,
+      "frames": [
+        {
+          "transform": "matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,16,0,1)"
+        },
+        {
+          "transform": "matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)"
+        }
+      ],
+      "options": {
+        "duration": 800,
+        "delay": 449.99999999999994,
+        "iterations": 1,
+        "easing": "cubic-bezier(0.16,0.94,0.18,1)",
+        "fill": "both"
+      }
+    },
+    {
+      "className": "",
+      "tag": "DIV",
+      "at": 5699.100000023842,
+      "frames": [
+        {
+          "offset": 0,
+          "opacity": 1
+        },
+        {
+          "offset": 1,
+          "opacity": 1
+        }
+      ],
+      "options": {
+        "duration": 550,
+        "delay": 0,
+        "iterations": 1,
+        "direction": "normal",
+        "fill": "forwards",
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)"
+      }
+    },
+    {
+      "className": "",
+      "tag": "DIV",
+      "at": 5701.100000023842,
+      "frames": [
+        {
+          "offset": 0,
+          "opacity": 1
+        },
+        {
+          "offset": 1,
+          "opacity": 1
+        }
+      ],
+      "options": {
+        "duration": 550,
+        "delay": 0,
+        "iterations": 1,
+        "direction": "normal",
+        "fill": "forwards",
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)"
+      }
+    },
+    {
+      "className": "about-scene-floor-pan",
+      "tag": "DIV",
+      "at": 5718.600000023842,
+      "frames": [
+        {
+          "transform": "matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,252,0,0,1)"
+        },
+        {
+          "transform": "matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)"
+        }
+      ],
+      "options": {
+        "duration": 1350,
+        "delay": 0,
+        "iterations": 1,
+        "easing": "cubic-bezier(0.2,0.9,0.18,1)",
+        "fill": "forwards"
+      }
+    }
+  ],
+  "samples": [
+    {
+      "elapsed": 1.8000000715255737,
+      "panes": [
+        {
+          "section": "company",
+          "opacity": "1",
+          "imageTransform": "matrix(1, 0, 0, 1, 0, 0)",
+          "imageOpacity": "1",
+          "imageRect": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 52.700000047683716,
+      "panes": [
+        {
+          "section": "company",
+          "opacity": "1",
+          "imageTransform": "none",
+          "imageOpacity": "1",
+          "imageRect": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        },
+        {
+          "section": "framework",
+          "opacity": "0",
+          "imageTransform": "matrix(0.772409, -0.108555, 0.108555, 0.772409, 14.8795, 60.0182)",
+          "imageOpacity": "0",
+          "imageRect": {
+            "x": 814.2325439453125,
+            "y": 212.8203887939453,
+            "width": 214.7349853515625,
+            "height": 214.73497009277344
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 124.39999997615814,
+      "panes": [
+        {
+          "section": "company",
+          "opacity": "1",
+          "imageTransform": "none",
+          "imageOpacity": "1",
+          "imageRect": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        },
+        {
+          "section": "framework",
+          "opacity": "0",
+          "imageTransform": "matrix(0.772409, -0.108555, 0.108555, 0.772409, 14.8795, 60.0182)",
+          "imageOpacity": "0",
+          "imageRect": {
+            "x": 814.2325439453125,
+            "y": 212.8203887939453,
+            "width": 214.7349853515625,
+            "height": 214.73497009277344
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 239.60000002384186,
+      "panes": [
+        {
+          "section": "company",
+          "opacity": "0.986885",
+          "imageTransform": "none",
+          "imageOpacity": "1",
+          "imageRect": {
+            "x": 593.1688232421875,
+            "y": 173.9861297607422,
+            "width": 249.88525390625,
+            "height": 249.88523864746094
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        },
+        {
+          "section": "framework",
+          "opacity": "0.789694",
+          "imageTransform": "matrix(0.776781, -0.107095, 0.107095, 0.776781, 14.5156, 58.9514)",
+          "imageOpacity": "0.0195953",
+          "imageRect": {
+            "x": 813.877685546875,
+            "y": 212.1361846923828,
+            "width": 215.4447021484375,
+            "height": 215.4446563720703
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 358.3000000715256,
+      "panes": [
+        {
+          "section": "company",
+          "opacity": "0.930459",
+          "imageTransform": "none",
+          "imageOpacity": "1",
+          "imageRect": {
+            "x": 585.290283203125,
+            "y": 174.53147888183594,
+            "width": 249.39154052734375,
+            "height": 249.3915252685547
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        },
+        {
+          "section": "framework",
+          "opacity": "0.966678",
+          "imageTransform": "matrix(0.896894, -0.0577144, 0.0577144, 0.896894, 5.67399, 28.3868)",
+          "imageOpacity": "0.54155",
+          "imageRect": {
+            "x": 713.558349609375,
+            "y": 191.4342498779297,
+            "width": 235.35986328125,
+            "height": 235.3599090576172
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 515.6000000238419,
+      "panes": [
+        {
+          "section": "company",
+          "opacity": "0.723464",
+          "imageTransform": "none",
+          "imageOpacity": "1",
+          "imageRect": {
+            "x": 556.388671875,
+            "y": 176.53207397460938,
+            "width": 247.58026123046875,
+            "height": 247.58029174804688
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        },
+        {
+          "section": "framework",
+          "opacity": "0.999056",
+          "imageTransform": "matrix(0.990459, -0.0059864, 0.0059864, 0.990459, 0.444357, 2.72015)",
+          "imageOpacity": "0.95714",
+          "imageRect": {
+            "x": 626.5633544921875,
+            "y": 176.12770080566406,
+            "width": 248.16455078125,
+            "height": 248.1645050048828
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 665.7000000476837,
+      "panes": [
+        {
+          "section": "company",
+          "opacity": "0.167119",
+          "imageTransform": "none",
+          "imageOpacity": "1",
+          "imageRect": {
+            "x": 478.708984375,
+            "y": 181.9091033935547,
+            "width": 242.7122802734375,
+            "height": 242.71229553222656
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        },
+        {
+          "section": "framework",
+          "opacity": "1",
+          "imageTransform": "matrix(1.00319, 0.0020351, -0.0020351, 1.00319, -0.144903, -0.91522)",
+          "imageOpacity": "1",
+          "imageRect": {
+            "x": 605.4046020507812,
+            "y": 173.31825256347656,
+            "width": 250.968017578125,
+            "height": 250.96803283691406
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 822.1000000238419,
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": "1",
+          "imageTransform": "matrix(1.00122, 0.0007756, -0.0007756, 1.00122, -0.0555898, -0.349386)",
+          "imageOpacity": "1",
+          "imageRect": {
+            "x": 598.5518188476562,
+            "y": 173.63833618164062,
+            "width": 250.38275146484375,
+            "height": 250.3826904296875
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 967.2000000476837,
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": "1",
+          "imageTransform": "matrix(1.00012, 7.51e-05, -7.51e-05, 1.00012, -0.0054026, -0.0338633)",
+          "imageOpacity": "1",
+          "imageRect": {
+            "x": 595.9859008789062,
+            "y": 173.85958862304688,
+            "width": 250.01751708984375,
+            "height": 250.01748657226562
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 1098.3000000715256,
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": "1",
+          "imageTransform": "matrix(0.999954, -2.89e-05, 2.89e-05, 0.999954, 0.0020869, 0.0130753)",
+          "imageOpacity": "0.999792",
+          "imageRect": {
+            "x": 595.1485595703125,
+            "y": 173.8701629638672,
+            "width": 249.9913330078125,
+            "height": 249.99131774902344
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 1220.3999999761581,
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": "1",
+          "imageTransform": "matrix(0.999972, -1.75e-05, 1.75e-05, 0.999972, 0.0012659, 0.0079317)",
+          "imageOpacity": "0.999874",
+          "imageRect": {
+            "x": 595.0012817382812,
+            "y": 173.86293029785156,
+            "width": 249.99737548828125,
+            "height": 249.99742126464844
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 1369.5,
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": "1",
+          "imageTransform": "matrix(0.999996, -2.7e-06, 2.7e-06, 0.999996, 0.0001994, 0.0012495)",
+          "imageOpacity": "0.99998",
+          "imageRect": {
+            "x": 595.0001831054688,
+            "y": 173.85995483398438,
+            "width": 249.99957275390625,
+            "height": 249.99957275390625
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elapsed": 1511.2000000476837,
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": "1",
+          "imageTransform": "matrix(1, 0, 0, 1, 0, 0)",
+          "imageOpacity": "1",
+          "imageRect": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250
+          },
+          "effects": [],
+          "ancestors": [
+            {
+              "name": "about-hero-art",
+              "transform": "none"
+            },
+            {
+              "name": "about-hero",
+              "transform": "none"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": []
+}
