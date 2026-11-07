@@ -297,8 +297,6 @@ function firstContentFrame(root: HTMLElement): Element | null {
   return null;
 }
 
-const popoverPlacement = { minY: "block-start", maxY: "block-end", minX: "inline-start", maxX: "inline-end" } as const;
-
 /**
  * A view controller presented in a popover (presentAsPopover): anchored to its positioning element and
  * closed, by its behaviour, on Escape or a click elsewhere, which dismisses it.
@@ -307,10 +305,11 @@ function NSEPresentedPopover({ controller }: { readonly controller: NSEViewContr
   useObserve(controller);
   const positioning = controller[nsePopoverPositioning]!;
   const size = controller.preferredContentSize;
-  return <NSEPopover id={`nse-popover:${sheetKey(controller)}`} open surface="overlay" anchor={positioning.of} parentWindowControllerId={null}
+  return <NSEPopover id={`nse-popover:${sheetKey(controller)}`} open anchor={positioning.of} parentWindowControllerId={null}
     drawsBackground={positioning.drawsBackground}
     relativeTo={positioning.relativeTo}
-    presentation={{ mode: "automatic", placement: popoverPlacement[positioning.preferredEdge ?? "maxY"] }}
+    preferredEdge={positioning.preferredEdge}
+    behavior={positioning.behavior}
     {...(controller.title ? { title: controller.title } : {})} {...(size ? { contentSize: size } : {})}
     onOpenChange={(open, reason) => {
       if (open) return;

@@ -22,7 +22,8 @@ import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type R
 import { NSEPopup, type NSEPopupPresentation } from "./NSEPopup";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
 import type { NSEOverlayDismissReason } from "./overlayTypes";
-import { useOptionalNSEWindowSurfaceBridge, type NSEWindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
+import { useOptionalNSEWindowSurfaceBridge, type NSEWindowSurfaceBridge, type NSEPopoverPreferredEdge, type NSEPopoverBehavior } from "./NSEWindowSurfaceBridge";
+import { nsePopoverEdgePlacement } from "./popoverPosition";
 import { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
 import { useNSEPresentedContent } from "./useNSEPresentedContent";
 import { NSEWindowFittingContent, type NSEWindowFittingSize } from "./NSEWindowFittingContent";
@@ -54,6 +55,8 @@ export interface NSEPopoverProps {
   /** NSPopover.show(relativeTo:of:preferredEdge:): a rectangle in the anchor's
    * local coordinates; omitted means the entire positioning view. */
   readonly relativeTo?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
+  readonly preferredEdge?: NSEPopoverPreferredEdge;
+  readonly behavior?: NSEPopoverBehavior;
   /** Null denotes an application-stage surface with no WindowManager parent. */
   readonly parentWindowControllerId: string | null;
   readonly parentResponderId?: string;
@@ -96,15 +99,16 @@ function useResolvedPresentation(presentation: NSEPopupPresentation | undefined)
 }
 
 /**
- * A popover's visual DOM remains an overlay branch. The optional window bridge
- * mirrors the parent/window relationship only when the host has a registered
- * renderer capable of owning that window record.
+ * A mounted popover is a WindowManager window. Standalone hosts and explicit
+ * overlay surfaces use the same frame and positioning without a window host.
  */
 export function NSEPopover({
   id,
   open,
   anchor,
   relativeTo,
+  preferredEdge,
+  behavior = "transient",
   parentWindowControllerId,
   parentResponderId,
   parentId,
@@ -120,11 +124,12 @@ export function NSEPopover({
   surface = "automatic",
   onOpenChange,
 }: NSEPopoverProps) {
-  const resolvedPresentation = useResolvedPresentation(presentation);
+  const automaticPresentation = useResolvedPresentation(presentation);
+  const resolvedPresentation = useMemo(() => ({ ...automaticPresentation,
+    placement: preferredEdge ? nsePopoverEdgePlacement[preferredEdge] : automaticPresentation.placement,
+  }), [automaticPresentation, preferredEdge]);
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
-  // An anchored popover belongs to the overlay branch: a generic physical
-  // window host cannot draw its collision-resolved frame or content surface.
-  const canonicalBridge = surface === "overlay" || anchor || !drawsBackground ? null : windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
+  const canonicalBridge = surface === "overlay" ? null : windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
   const handleDidClose = useNSEWindowSurfaceLifecycle({
     bridge: canonicalBridge,
     requestId: id,
@@ -155,6 +160,14 @@ export function NSEPopover({
     title: title ?? (labelledBy ? anchor?.ownerDocument.getElementById(labelledBy)?.textContent?.trim() : undefined) ?? id,
     parentWindowControllerId,
     anchor,
+    relativeTo,
+    preferredEdge,
+    behavior,
+    drawsBackground,
+    placement: resolvedPresentation.placement,
+    collisionPadding: resolvedPresentation.collisionPadding,
+    labelledBy,
+    describedBy,
     // The host hangs a popover off its anchor; x/y stand only where it cannot.
     bounds: {
       x: 180,
@@ -163,7 +176,7 @@ export function NSEPopover({
       height: contentSize?.height ?? fitting?.height ?? (resolvedPresentation.mode === "sheet" ? 420 : 280),
     },
     onDidClose: handleDidClose,
-  }), [anchor, contentSize?.height, contentSize?.width, fitting?.height, fitting?.width, handleDidClose, id, labelledBy, parentWindowControllerId, resolvedPresentation.mode, title]);
+  }), [anchor, relativeTo, preferredEdge, behavior, drawsBackground, describedBy, contentSize?.height, contentSize?.width, fitting?.height, fitting?.width, handleDidClose, id, labelledBy, parentWindowControllerId, resolvedPresentation, title]);
   const presentedContent = useNSEPresentedContent(contentSize || resolvedPresentation.mode === "sheet"
     ? children
     : <NSEWindowFittingContent onFittingSize={onFittingSize}>{children}</NSEWindowFittingContent>);
@@ -191,6 +204,8 @@ export function NSEPopover({
       modal={resolvedPresentation.mode === "sheet"}
       presentation={resolvedPresentation}
       drawsBackground={drawsBackground}
+      dismissOnOutside={behavior === "transient"}
+      dismissOnEscape={behavior !== "applicationDefined"}
       style={contentSize ? { width: contentSize.width, height: contentSize.height, minWidth: 0 } : undefined}
       onOpenChange={onOpenChange}
     >

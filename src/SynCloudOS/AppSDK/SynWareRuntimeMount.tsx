@@ -45,6 +45,7 @@ import { createRuntimeAnimationState, createScopedAnimationFrames } from "../Ani
 import { controllerServicesFor, installControllerServices } from "./controllerServices";
 import { NSEMenuRuntimeProvider } from "../../NSE/Menus/menuRuntimeContext";
 import { NSEViewActivityProvider } from "../../NSE/applicationHostInterop";
+import { NSEPresentedContentProvider } from "../../NSE/Overlays/useNSEPresentedContent";
 
 // Host-only bridge entrypoint. This is deliberately not exported from the
 // public AppSDK package barrel: applications receive only the chrome hook.
@@ -474,13 +475,22 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
         </div>
       )
     : mountedChildren;
+  const wrapPresentedContent = (content: ReactNode) => (
+    <SynCloudOSRuntimeContext.Provider value={null}>
+      <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
+        <SynWareProvider value={context}>
+          <FontCatalogueProvider catalogue={fontCatalogue}>{content}</FontCatalogueProvider>
+        </SynWareProvider>
+      </SynWareRuntimeContext.Provider>
+    </SynCloudOSRuntimeContext.Provider>
+  );
   return (
     <SynCloudOSRuntimeContext.Provider value={null}>
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
         <SynWareProvider value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}>
             <MountedAppPresentationBoundary runtime={mounted.mount.runtime} kernelRuntime={runtime} context={mounted.contextBase}>
-              {presentedChildren}
+              <NSEPresentedContentProvider value={wrapPresentedContent}>{presentedChildren}</NSEPresentedContentProvider>
             </MountedAppPresentationBoundary>
           </FontCatalogueProvider>
         </SynWareProvider>

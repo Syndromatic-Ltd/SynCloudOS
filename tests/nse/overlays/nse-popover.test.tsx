@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
 import React, { useMemo, useState } from "react";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays/NSEOverlayProvider";
 import { computeNSEOverlayPosition } from "../../../src/NSE/Overlays/computeNSEOverlayPosition";
 import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
 import { NSEViewController, nsePopoverPositioning } from "../../../src/NSE/Application/NSEViewController";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
+import { NSEWindowSurfaceBridgeProvider } from "../../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 
 afterEach(cleanup);
 const presentation = createStaticPresentationPort({ width: 1000, height: 720 });
@@ -42,6 +43,22 @@ function measured(element: HTMLElement, x: number, y: number, width: number, hei
 }
 
 describe("popover frame and presentation", () => {
+  it("presents anchored content-painted popovers through the window bridge with their AppKit options", async () => {
+    const present = vi.fn().mockResolvedValue("popover-window");
+    const bridge = { present, dismiss: vi.fn().mockResolvedValue({ outcome: "closed" }) };
+    const anchor = document.createElement("button"); document.body.append(anchor);
+    const relativeTo = { x: 12, y: 8, width: 30, height: 16 };
+    const view = render(<Harness><NSEWindowSurfaceBridgeProvider bridge={bridge}>
+      <NSEPopover id="hosted-paper" open anchor={anchor} parentResponderId="test" parentWindowControllerId={null}
+        relativeTo={relativeTo} preferredEdge="minX" behavior="semitransient" drawsBackground={false}
+        title="Hosted paper" onOpenChange={() => undefined}><p>Paper content</p></NSEPopover>
+    </NSEWindowSurfaceBridgeProvider></Harness>);
+    await waitFor(() => expect(present).toHaveBeenCalled());
+    expect(present.mock.calls.at(-1)?.[0]).toMatchObject({ role: "popover", relativeTo, preferredEdge: "minX", behavior: "semitransient", drawsBackground: false });
+    expect(document.querySelector(".nse-popover")).toBeNull();
+    view.unmount(); anchor.remove();
+  });
+
   it("keeps an arrow and frame while the content paints its plate", async () => {
     render(<Harness><Fixture drawsBackground={false} /></Harness>);
     const surface = await screen.findByRole("dialog", { name: "Options" });
