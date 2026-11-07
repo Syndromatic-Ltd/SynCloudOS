@@ -32,7 +32,6 @@ export function createMountedBluetoothClient(adapter: BTFXBluetoothClient | unde
   const capabilities = () => mountSignal.aborted ? unavailable : adapter?.getCapabilities() ?? unavailable;
   return Object.freeze<BTFXBluetoothClient>({ getCapabilities: capabilities,
     createCentralManager(signal) {
-      guard();
       return scope.acquire(signal, (lease, release) => {
         const manager = adapter?.createCentralManager(lease);
         let disposed = false;

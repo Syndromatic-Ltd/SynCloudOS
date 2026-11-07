@@ -29,7 +29,6 @@ export function createMountedXRClient(adapter: XRFXClient | undefined, mountSign
   const capabilities = () => mountSignal.aborted ? unavailable : adapter?.getCapabilities() ?? unavailable;
   return Object.freeze<XRFXClient>({ getCapabilities: capabilities,
     createSession(signal) {
-      guard();
       return scope.acquire(signal, (lease, release) => {
         const session = adapter?.createSession(lease);
         let disposed = false;
