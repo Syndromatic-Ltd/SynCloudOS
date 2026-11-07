@@ -134,6 +134,8 @@ export interface SynWareContextValue {
   readonly images: AppImageClient;
   /** The application's Open panel; see AppFilePanelClient. */
   readonly filePanels: AppFilePanelClient;
+  /** FileManager application-support lookup; directories are scoped to this application bundle. */
+  readonly fileManager: import("./fileManagerClient").AppFileManager;
   readonly motion: MFXMotionClient;
   readonly media: MEFXMediaClient;
   readonly video: AppVideoClient;

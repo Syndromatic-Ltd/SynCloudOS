@@ -1,0 +1,11 @@
+# NSEOpenPanel implementation and verification
+
+Owner-approved reference: the desktop `Sheet.dc.html` and compact `Phone.dc.html` in the supplied mediamock directory; audit D3/D4 and phase 9. Work stays in the existing framework/site checkouts. No pushes or edits to another agent's dirty files.
+
+The current JSX Open panel cannot act as NSOpenPanel, browse a granted directory or locate an application's working storage. Replace it with an object, using the existing transient-window presentation authority. `usesSystemFileChooser` is an explicit Boolean opt-in, following AppKit's `uses…` naming; default false. `SCOS.fileManager.urls("applicationSupportDirectory", "userDomainMask")` returns the bundle-scoped OPFS directory: the FileManager analogue needed by video editors, importers and document applications. These are browser directory handles, not invented filesystem paths or security guarantees between mutually trusted same-origin code.
+
+- [ ] Runtime: injected storage/picker port, IndexedDB directory bookmarks, explicit permission renewal, enumeration/filtering/history and application-support directory. Fake-handle tests cover persistence, permission, filtering, bundle isolation, aborts and activation.
+- [ ] NSE: object configuration, selected `urls`, media sources, sheet and application-modal sessions; one internal view with desktop Sources sidebar and compact Sources drill-in. Preserve provider resource ownership and explicit activation. Contract and DOM tests precede implementation.
+- [ ] Migration: remove NSEMediaPanel and public declarations, update clean gallery files and docs/counterpart map. Audit is initially dirty: leave it until its owner commits; otherwise supply an exact patch in evidence.
+- [ ] Commit framework in small explicit-path commits. Adopt a committed HEAD via the owner-prescribed detached temporary checkout and junction workflow; never stage the 5199 Vite config.
+- [ ] Verification: focused tests and TypeScript, full framework suite once, site TypeScript and Vitest. Chromium at 1440×900 and 390×844, light/dark, compare rendered boards and save screenshots under `docs/superpowers/evidence/2026-11-07-open-panel/`. Exercise Sources, search, selection, history, locks, system fallback, cancellation and focus; verify no overflow or console errors. Real native picker interaction remains manual.

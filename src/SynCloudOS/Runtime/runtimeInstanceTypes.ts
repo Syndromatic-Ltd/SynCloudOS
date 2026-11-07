@@ -386,6 +386,9 @@ export interface SynCloudOSRuntimeEnvironment {
   readonly filePicker?: BrowserFilePanelPort | null;
   /** Native chooser and write-only export ports; apps receive only scoped panel clients. */
   readonly fileSystemAccess?: FileSystemAccessPanelPort | null;
+  /** Host-owned structured-clone directory bookmarks and bundle-scoped OPFS. */
+  readonly openPanelStorage?: import("../FilePanels/OpenPanelFileSystem").OpenPanelStoragePort | null;
+  readonly createOpenPanelStoragePort?: (activity: NativeOperationActivity) => import("../FilePanels/OpenPanelFileSystem").OpenPanelStoragePort | null;
   /** Creates an instrumented port for this runtime without mutating a shared environment. */
   readonly createFileSystemAccessPanelPort?: (activity: NativeOperationActivity) => FileSystemAccessPanelPort | null;
   readonly downloadExport?: DownloadFilePanelPort | null;

@@ -20,6 +20,7 @@
 
 import { createBrowserViewportFeaturesSource } from "./BrowserViewportFeatures";
 import { createBrowserFilePickerPort } from "./BrowserFilePickerPort";
+import { createBrowserOpenPanelStoragePort } from "./BrowserOpenPanelStoragePort";
 import { createBrowserFileSystemAccessPanelPort } from "./BrowserFileSystemAccessPanelPort";
 import { createBrowserDownloadFilePanelPort } from "./BrowserDownloadFilePanelPort";
 import { BrowserAudioCaptureAdapter, createBrowserAudioCapturePlatform } from "./BrowserAudioCaptureAdapter";
@@ -676,6 +677,8 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     imageGeometry,
     filePicker,
     fileSystemAccess: createBrowserFileSystemAccessPanelPort(browserWindow),
+    openPanelStorage: createBrowserOpenPanelStoragePort(browserWindow),
+    createOpenPanelStoragePort: activity => createBrowserOpenPanelStoragePort(browserWindow, activity),
     createFileSystemAccessPanelPort: activity => createBrowserFileSystemAccessPanelPort(browserWindow, activity),
     downloadExport: createBrowserDownloadFilePanelPort(browserWindow),
     animation,
