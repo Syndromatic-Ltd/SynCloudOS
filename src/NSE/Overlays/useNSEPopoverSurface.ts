@@ -54,7 +54,12 @@ export function useNSEPopoverSurface(surface: HTMLElement | null, arrow: HTMLEle
         const target = targets[index];
         if (!target) return;
         target.value = source.value;
-        if ("checked" in source && "checked" in target) target.checked = source.checked;
+        if (source instanceof surface.ownerDocument.defaultView!.HTMLTextAreaElement) target.textContent = source.value;
+        else target.setAttribute("value", source.value);
+        if ("checked" in source && "checked" in target) {
+          target.checked = source.checked;
+          if (source.checked) target.setAttribute("checked", ""); else target.removeAttribute("checked");
+        }
       });
       paintedSurface.current = snapshot;
     };

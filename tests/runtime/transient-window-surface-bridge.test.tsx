@@ -51,6 +51,35 @@ function geometryEnvironment() {
 }
 
 describe("window-hosted transient surface bridge", () => {
+  it("keeps closing paint inert and replaces it when the same popover reopens before its exit finishes", async () => {
+    const runtime = createTestRuntime();
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "popover-reopen", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const animator: NSEAnimator = { ownerAppId: "syncloudos.system", animations: {
+      acquireOwner: owner => ({ ...owner, epoch: 1, release() {} }),
+      animate() {
+        let resolve!: (settlement: AFXAnimationSettlement) => void;
+        const finished = new Promise<AFXAnimationSettlement>(done => { resolve = done; });
+        return { id: "held-exit", finished, progress: 0, cancel: () => resolve({ state: "cancelled", reduced: false }), seek() {}, pause() {}, resume() {} };
+      },
+    } as NSEAnimator["animations"] };
+    const anchor = document.createElement("button"); document.body.append(anchor);
+    const request = { id: "reopen", role: "popover" as const, title: "Reopened", parentWindowControllerId: null, anchor, drawsBackground: true, bounds: { x: 20, y: 20, width: 240, height: 140 } };
+    await bridge.present(request, <button>First generation</button>);
+    const view = render(<SynCloudOSProvider runtime={runtime}><NSEAnimationEnvironmentProvider animator={animator}><WindowLayer contentRegistry={renderers} /></NSEAnimationEnvironmentProvider></SynCloudOSProvider>);
+    try {
+      await screen.findByRole("button", { name: "First generation" });
+      await act(async () => { await bridge.dismiss(request.id); });
+      const closing = document.querySelector("[data-window-exiting]");
+      expect(closing?.hasAttribute("inert")).toBe(true);
+      expect(closing?.textContent).toContain("First generation");
+      await act(async () => { await bridge.present(request, <button>Second generation</button>); });
+      expect(await screen.findByRole("button", { name: "Second generation" })).toBeTruthy();
+      expect(screen.queryByRole("button", { name: "First generation" })).toBeNull();
+      expect(document.querySelectorAll("[data-nse-window-popover]")).toHaveLength(1);
+    } finally { view.unmount(); bridge.dispose(); anchor.remove(); await runtime.dispose("test"); }
+  });
+
   it.each(["transient", "semitransient", "applicationDefined"] as const)("draws a real content-painted %s popover with the shared frame and dismissal policy", async behavior => {
     const runtime = createTestRuntime();
     const renderers = new WindowContentRendererRegistry();
