@@ -210,3 +210,5 @@ export type { SynCloudOSPresentationTraits } from "./appClientTypes";
 export type { AppVideoClient, AppVideoPlaybackPresentationRequest } from "./appClientTypes";
 export type { AppPlaybackMetadata, AppPlaybackAction, AppPlaybackPresentationRequest, AppPlaybackPresentationSnapshot, AppPlaybackPresentationLease, AppScreenWakeClient, AppScreenWakeSnapshot, AppScreenWakeLease } from "./playbackPresentationTypes";
 export type { SCOSRoutes } from "./controllerServices";
+
+export type * from "./manifest/installedApplicationTypes";

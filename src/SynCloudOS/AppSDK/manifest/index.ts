@@ -57,3 +57,5 @@ export type {
   SynCloudOSAppFrameSmoothSurfaceManifest,
   SynCloudOSAppFrameSmoothSurfacePhysicality,
 } from "./manifestTypes";
+
+export type * from "./installedApplicationTypes";

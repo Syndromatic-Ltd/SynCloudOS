@@ -35,7 +35,7 @@ export function installedApplicationBuild(config, discovery) {
   const receiptPath = resolve(config.root, "vendor/framework-receipt.json");
   const receipt = existsSync(receiptPath) ? JSON.parse(readFileSync(receiptPath, "utf8")) : { commit: "source", sourceSha256: "source" };
   const version = createHash("sha256").update(JSON.stringify({ receipt, manifests })).digest("hex");
-  const configuration = { base, receipt: version, manifests, assets: [`${base}index.html`, ...manifests.flatMap(record => record.manifest.icons.map(icon => icon.src))], development: config.command !== "build" };
+  const configuration = { base, receipt: version, manifests, assets: [`${base}index.html`, ...manifests.map(record => `${base}${record.fileName}`), ...manifests.flatMap(record => record.manifest.icons.map(icon => icon.src))], development: config.command !== "build" };
   return {
     configuration,
     tags(path = "/") {
