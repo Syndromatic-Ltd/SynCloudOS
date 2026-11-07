@@ -1,0 +1,90 @@
+[
+  {
+    "commit": "c9d3957",
+    "subject": "FX: Return Foundation data from audio files and recordings"
+  },
+  {
+    "commit": "db8aaab",
+    "subject": "FX: Use NSEData for graphics providers and encoded documents"
+  },
+  {
+    "commit": "991044f",
+    "subject": "FX: Carry MIDI messages and packets as Foundation data"
+  },
+  {
+    "commit": "0021371",
+    "subject": "FX: Adopt Foundation payloads across image media and text APIs"
+  },
+  {
+    "commit": "6ddb3c1",
+    "subject": "FX: Deliver immutable encoded video and container fragments"
+  },
+  {
+    "commit": "800185b",
+    "subject": "FX: Preserve encoded worker lifetime and migrate remaining consumers"
+  },
+  {
+    "commit": "7bee8b7",
+    "subject": "FX: Keep pixel backing ownership private"
+  },
+  {
+    "commit": "81e8f7b",
+    "subject": "FX: Normalise foreign byte buffers before contract dispatch"
+  },
+  {
+    "commit": "1c9e68b",
+    "subject": "Foundation: Record Part B FX migration and byte exceptions"
+  },
+  {
+    "commit": "9682f38",
+    "subject": "Foundation: Accept genuine cross-realm byte buffers"
+  },
+  {
+    "commit": "f5d8295",
+    "subject": "Foundation: Deliver pasteboard data and prepare native share files"
+  },
+  {
+    "commit": "648b291",
+    "subject": "Foundation: Use NSEData for document resources and assets"
+  },
+  {
+    "commit": "b9d17a9",
+    "subject": "Foundation: Bridge file panels images fonts and mounted byte clients"
+  },
+  {
+    "commit": "ff6eeb8",
+    "subject": "Foundation: Preserve native file MIME metadata after byte reads"
+  },
+  {
+    "commit": "6f67e0a",
+    "subject": "Foundation: Migrate document panel font and image consumers"
+  },
+  {
+    "commit": "24802a6",
+    "subject": "Foundation: Observe native file byte reads through settlement"
+  },
+  {
+    "commit": "d5663a9",
+    "subject": "Foundation: Revalidate input file reads at native admission"
+  },
+  {
+    "commit": "a9da6ce",
+    "subject": "Foundation: Account for every public byte declaration"
+  },
+  {
+    "commit": "31b0575",
+    "subject": "Foundation: Deliver immutable captured test exports"
+  },
+  {
+    "commit": "5b9bb7b",
+    "subject": "Foundation: Migrate packed FX and TextSystem byte consumers"
+  },
+  {
+    "commit": "de26031",
+    "subject": "Foundation: Finish browser and reflection byte fixtures"
+  },
+  {
+    "commit": "b21cf29",
+    "subject": "Foundation: Complete FX byte signatures throughout the guides"
+  }
+]

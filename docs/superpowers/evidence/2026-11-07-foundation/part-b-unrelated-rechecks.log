@@ -1,0 +1,38 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/performance/text-primitives-performance.test.ts tests/runtime/nse-file-browser-packed.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-file-browser-packed.test.ts (1 test | 1 failed) 2029ms
+   × exports usable path items and workspace artwork from an independently installed SDK 2029ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-file-browser-packed.test.ts > exports usable path items and workspace artwork from an independently installed SDK
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'c3c3c3c9c2a1c14215f5afb1a7abccbacb1b5bfc09048fd35874178f88847697'
+- '34351f0559920c5e2404a87297273be7d70b645d7a4dae05676764eb9cd9ef35'
+
+
+Expected: "34351f0559920c5e2404a87297273be7d70b645d7a4dae05676764eb9cd9ef35"
+Received: "c3c3c3c9c2a1c14215f5afb1a7abccbacb1b5bfc09048fd35874178f88847697"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:109:10
+    107|
+    108| export function assertSdkSourceUnchanged(before, after) {
+    109|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    110| }
+    111|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:120:27
+ ❯ tests/runtime/nse-file-browser-packed.test.ts:8:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 1 passed (2)
+   Start at  10:41:17
+   Duration  18.70s (transform 342ms, setup 56ms, import 395ms, tests 20.19s, environment 0ms)

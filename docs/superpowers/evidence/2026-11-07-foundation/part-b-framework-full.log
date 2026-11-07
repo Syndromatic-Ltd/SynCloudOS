@@ -1,0 +1,502 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run --reporter=json --outputFile=C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/part-b-framework-full.json
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/AlertCautionIcon.png?url&no-inline
+
+    src/SynCloudOSReact/SystemAlert.tsx:26:24:
+      26 │ ...cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/SynCloudOSLogo.png?url&no-inline
+
+    src/SynCloudOS/Resources/frameworkAssets.ts:23:27:
+      23 │ ...Logo from "../../SynCloudOSReact/Resources/SynCloudOSLogo.png?u...
+         ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17:
+      21 │ import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/user-info.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:23:21:
+      23 │ ...serInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
+         ╵                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/settings.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:22:21:
+      22 │ ...settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".wasm" files: ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+
+    src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28:
+      2 │ import harfbuzzWasmUrl from "harfbuzzjs/dist/harfbuzz.wasm?url";
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "fs"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563:
+      1 │ ...NMENT_IS_NODE){var fs=require("fs");if(_scriptName.startsWith("f...
+        ╵                                  ~~~~
+
+  The package "fs" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "path"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629:
+      1 │ ...:")){scriptDirectory=require("path").dirname(require("url").file...
+        ╵                                 ~~~~~~
+
+  The package "path" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "url"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653:
+      1 │ ...quire("path").dirname(require("url").fileURLToPath(_scriptName))...
+        ╵                                  ~~~~~
+
+  The package "url" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-24.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:45:20:
+      45 │ ... image24 from "./Resources/workspace/document-generic-24.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-48.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:23:19:
+      23 │ ...t image2 from "./Resources/workspace/folder-documents-48.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-24@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:22:19:
+      22 │ ...mage1 from "./Resources/workspace/folder-documents-24@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-48.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:47:20:
+      47 │ ... image26 from "./Resources/workspace/document-generic-48.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-24.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:21:19:
+      21 │ ...t image0 from "./Resources/workspace/folder-documents-24.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-24@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:46:20:
+      46 │ ...age25 from "./Resources/workspace/document-generic-24@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-96@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:26:19:
+      26 │ ...mage5 from "./Resources/workspace/folder-documents-96@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-24@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:34:20:
+      34 │ ...t image13 from "./Resources/workspace/folder-music-24@2x.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-96.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:49:20:
+      49 │ ... image28 from "./Resources/workspace/document-generic-96.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-96@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:38:20:
+      38 │ ...t image17 from "./Resources/workspace/folder-music-96@2x.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-48.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:35:20:
+      35 │ import image14 from "./Resources/workspace/folder-music-48.png?url";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-48@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:48:20:
+      48 │ ...age27 from "./Resources/workspace/document-generic-48@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-96.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:31:20:
+      31 │ ... image10 from "./Resources/workspace/folder-downloads-96.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-48.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:41:20:
+      41 │ ...t image20 from "./Resources/workspace/folder-ordinary-48.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-24@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:40:20:
+      40 │ ...mage19 from "./Resources/workspace/folder-ordinary-24@2x.png?url";
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-24.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:39:20:
+      39 │ ...t image18 from "./Resources/workspace/folder-ordinary-24.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-24.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:33:20:
+      33 │ import image12 from "./Resources/workspace/folder-music-24.png?url";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-96@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:44:20:
+      44 │ ...mage23 from "./Resources/workspace/folder-ordinary-96@2x.png?url";
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-96.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:25:19:
+      25 │ ...t image4 from "./Resources/workspace/folder-documents-96.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-24.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:27:19:
+      27 │ ...t image6 from "./Resources/workspace/folder-downloads-24.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-48@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:30:19:
+      30 │ ...mage9 from "./Resources/workspace/folder-downloads-48@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-48.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:29:19:
+      29 │ ...t image8 from "./Resources/workspace/folder-downloads-48.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-24@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:28:19:
+      28 │ ...mage7 from "./Resources/workspace/folder-downloads-24@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-48@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:24:19:
+      24 │ ...mage3 from "./Resources/workspace/folder-documents-48@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-96@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:50:20:
+      50 │ ...age29 from "./Resources/workspace/document-generic-96@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-48@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:42:20:
+      42 │ ...mage21 from "./Resources/workspace/folder-ordinary-48@2x.png?url";
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-48@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:36:20:
+      36 │ ...t image15 from "./Resources/workspace/folder-music-48@2x.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-96@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:32:20:
+      32 │ ...age11 from "./Resources/workspace/folder-downloads-96@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-96.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:37:20:
+      37 │ import image16 from "./Resources/workspace/folder-music-96.png?url";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-96.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:43:20:
+      43 │ ...t image22 from "./Resources/workspace/folder-ordinary-96.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/AlertCautionIcon.png?url&no-inline
+
+    src/SynCloudOSReact/SystemAlert.tsx:26:24:
+      26 │ ...cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/SynCloudOSLogo.png?url&no-inline
+
+    src/SynCloudOS/Resources/frameworkAssets.ts:23:27:
+      23 │ ...Logo from "../../SynCloudOSReact/Resources/SynCloudOSLogo.png?u...
+         ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17:
+      21 │ import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/settings.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:22:21:
+      22 │ ...settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/user-info.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:23:21:
+      23 │ ...serInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
+         ╵                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".wasm" files: ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+
+    src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28:
+      2 │ import harfbuzzWasmUrl from "harfbuzzjs/dist/harfbuzz.wasm?url";
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "fs"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563:
+      1 │ ...NMENT_IS_NODE){var fs=require("fs");if(_scriptName.startsWith("f...
+        ╵                                  ~~~~
+
+  The package "fs" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "path"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629:
+      1 │ ...:")){scriptDirectory=require("path").dirname(require("url").file...
+        ╵                                 ~~~~~~
+
+  The package "path" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "url"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653:
+      1 │ ...quire("path").dirname(require("url").fileURLToPath(_scriptName))...
+        ╵                                  ~~~~~
+
+  The package "url" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-96@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:50:20:
+      50 │ ...age29 from "./Resources/workspace/document-generic-96@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-48@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:24:19:
+      24 │ ...mage3 from "./Resources/workspace/folder-documents-48@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-96.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:25:19:
+      25 │ ...t image4 from "./Resources/workspace/folder-documents-96.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-96@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:26:19:
+      26 │ ...mage5 from "./Resources/workspace/folder-documents-96@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-48@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:42:20:
+      42 │ ...mage21 from "./Resources/workspace/folder-ordinary-48@2x.png?url";
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-48.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:29:19:
+      29 │ ...t image8 from "./Resources/workspace/folder-downloads-48.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-48.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:35:20:
+      35 │ import image14 from "./Resources/workspace/folder-music-48.png?url";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-48.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:23:19:
+      23 │ ...t image2 from "./Resources/workspace/folder-documents-48.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-24@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:46:20:
+      46 │ ...age25 from "./Resources/workspace/document-generic-24@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-48@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:36:20:
+      36 │ ...t image15 from "./Resources/workspace/folder-music-48@2x.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-48.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:47:20:
+      47 │ ... image26 from "./Resources/workspace/document-generic-48.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-24.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:45:20:
+      45 │ ... image24 from "./Resources/workspace/document-generic-24.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-24@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:40:20:
+      40 │ ...mage19 from "./Resources/workspace/folder-ordinary-24@2x.png?url";
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-24@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:28:19:
+      28 │ ...mage7 from "./Resources/workspace/folder-downloads-24@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-48.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:41:20:
+      41 │ ...t image20 from "./Resources/workspace/folder-ordinary-48.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-96.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:43:20:
+      43 │ ...t image22 from "./Resources/workspace/folder-ordinary-96.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-96.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:37:20:
+      37 │ import image16 from "./Resources/workspace/folder-music-96.png?url";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-96@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:38:20:
+      38 │ ...t image17 from "./Resources/workspace/folder-music-96@2x.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-24@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:34:20:
+      34 │ ...t image13 from "./Resources/workspace/folder-music-24@2x.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-24.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:39:20:
+      39 │ ...t image18 from "./Resources/workspace/folder-ordinary-24.png?url";
+         ╵                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-48@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:48:20:
+      48 │ ...age27 from "./Resources/workspace/document-generic-48@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/document-generic-96.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:49:20:
+      49 │ ... image28 from "./Resources/workspace/document-generic-96.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-24@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:22:19:
+      22 │ ...mage1 from "./Resources/workspace/folder-documents-24@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-96.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:31:20:
+      31 │ ... image10 from "./Resources/workspace/folder-downloads-96.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-ordinary-96@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:44:20:
+      44 │ ...mage23 from "./Resources/workspace/folder-ordinary-96@2x.png?url";
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-24.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:27:19:
+      27 │ ...t image6 from "./Resources/workspace/folder-downloads-24.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-music-24.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:33:20:
+      33 │ import image12 from "./Resources/workspace/folder-music-24.png?url";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-96@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:32:20:
+      32 │ ...age11 from "./Resources/workspace/folder-downloads-96@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-downloads-48@2x.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:30:19:
+      30 │ ...mage9 from "./Resources/workspace/folder-downloads-48@2x.png?url";
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/NSE/Themes/Atmo/Resources/workspace/folder-documents-24.png?url
+
+    src/NSE/Themes/Atmo/workspaceArtwork.ts:21:19:
+      21 │ ...t image0 from "./Resources/workspace/folder-documents-24.png?url";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: navigation to another Document
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/part-b-framework-full.json
