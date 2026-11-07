@@ -50,15 +50,11 @@ export function PopoverWindowSurface({ surface, windowControllerId, children }: 
     if (!exiting || !element || !painted.current) return;
     // Disposing the presenting controller removes its live view immediately.
     // Hold only its last paint for the window's inert exit presentation.
-    const snapshot = painted.current.querySelector(".nse-overlay-popup-content");
-    const content = element.querySelector(".nse-overlay-popup-content");
-    if (!snapshot || !content) return;
-    const copy = snapshot.cloneNode(true) as HTMLElement;
-    copy.querySelectorAll("[id]").forEach(node => node.removeAttribute("id"));
-    content.replaceChildren(...copy.childNodes);
     const fill = painted.current.style.getPropertyValue("--nse-popover-arrow-fill");
     if (fill) element.style.setProperty("--nse-popover-arrow-fill", fill);
   }, [element, exiting, painted]);
+  const closingContent = exiting ? painted.current?.querySelector(".nse-overlay-popup-content")?.cloneNode(true) as HTMLElement | undefined : undefined;
+  closingContent?.querySelectorAll("[id]").forEach(node => node.removeAttribute("id"));
   return <div
     ref={setElement}
     {...appearance}
@@ -82,6 +78,6 @@ export function PopoverWindowSurface({ surface, windowControllerId, children }: 
     }}
   >
     <NSEPopoverFrame arrowRef={setArrow} anchored={anchored} />
-    <div className="nse-overlay-popup-content">{exiting ? null : children}</div>
+    <div className="nse-overlay-popup-content" dangerouslySetInnerHTML={exiting ? { __html: closingContent?.innerHTML ?? "" } : undefined}>{exiting ? undefined : children}</div>
   </div>;
 }

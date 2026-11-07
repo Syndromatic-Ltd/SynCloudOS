@@ -289,7 +289,7 @@ export function WindowHost({
     presentation,
   });
   const surfaceContent = popoverSurface
-    ? <PopoverWindowSurface surface={popoverSurface} windowControllerId={controller.id}>
+    ? <PopoverWindowSurface key={contentState.mountKey} surface={popoverSurface} windowControllerId={controller.id}>
         <FocusScopeIdContext.Provider value={`window:${record.id}`}>
           <ResponderHierarchyContext.Provider value={{
             runtimeId: runtime.runtimeId,
