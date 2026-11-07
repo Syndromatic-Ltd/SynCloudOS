@@ -51,6 +51,14 @@ export const nseChildTransition: unique symbol = Symbol("nse.childTransition");
 /** @internal */
 export const nseReleaseChildViewSlot: unique symbol = Symbol("nse.releaseChildViewSlot");
 
+const childViewKeys = new WeakMap<NSEViewController<unknown>, string>();
+let childViewSequence = 0;
+function childViewKey(controller: NSEViewController<unknown>): string {
+  let key = childViewKeys.get(controller);
+  if (!key) { key = `nse-child-view:${++childViewSequence}`; childViewKeys.set(controller, key); }
+  return key;
+}
+
 /** @internal The slot outlives each swap, as the views' AppKit superview does. */
 export function NSETransitionSlot({ transition, Renderer, className }: {
   readonly transition: NSEChildTransition;
@@ -100,7 +108,7 @@ export function NSETransitionSlot({ transition, Renderer, className }: {
   const moving = transition.from !== null;
   const inert = moving && !(transition.options & NSEViewControllerTransitionOptions.allowUserInteraction);
   return <div ref={presence} data-nse-child-transition="" style={{ display: "grid", minWidth: 0, minHeight: 0, width: "100%", height: "100%", overflow: moving ? "hidden" : undefined }} inert={inert || undefined}>
-    {transition.from ? <div ref={outgoing} style={{ gridArea: "1 / 1", minWidth: 0, minHeight: 0 }} aria-hidden="true"><Renderer controller={transition.from} className={className} /></div> : null}
-    <div ref={incoming} style={{ gridArea: "1 / 1", minWidth: 0, minHeight: 0 }}><Renderer controller={transition.to} className={className} /></div>
+    {transition.from ? <div key={childViewKey(transition.from)} ref={outgoing} style={{ gridArea: "1 / 1", minWidth: 0, minHeight: 0 }} aria-hidden="true"><Renderer controller={transition.from} className={className} /></div> : null}
+    <div key={childViewKey(transition.to)} ref={incoming} style={{ gridArea: "1 / 1", minWidth: 0, minHeight: 0 }}><Renderer controller={transition.to} className={className} /></div>
   </div>;
 }
