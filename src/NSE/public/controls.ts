@@ -116,3 +116,6 @@ export { NSEGridRow, NSEGridView } from "../Layout/NSEGridView";
 export type { NSEGridColumn, NSEGridRowProps, NSEGridViewProps, NSEGridXPlacement, NSEGridYPlacement } from "../Layout/NSEGridView";
 export { NSEHapticFeedbackManager } from "../Feedback/NSEHapticFeedbackManager";
 export type { NSEHapticFeedbackPattern, NSEHapticFeedbackPerformanceTime, NSEHapticFeedbackPerformer } from "../Feedback/NSEHapticFeedbackManager";
+export { NSEWorkspace } from "../Application/NSEWorkspace";
+export { NSEPathControl, NSEPathControlItem } from "../Controls/Values/NSEPathControl";
+export type { NSEPathControlProps, NSEPathControlHandle } from "../Controls/Values/NSEPathControl";

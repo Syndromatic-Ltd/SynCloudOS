@@ -22,6 +22,10 @@
     "Spec"
   ],
   "counterparts": {
+    "NSEWorkspace": "NSWorkspace",
+    "NSEPathControl": "NSPathControl",
+    "NSEPathControlItem": "NSPathControlItem",
+    "NSEPathControlHandle": "NSPathControl",
     "NSEAboutDialogProps": "NSApplication.orderFrontStandardAboutPanel(options:)",
     "NSEActionMethod": "@IBAction",
     "NSEActionOptions": "@IBAction",

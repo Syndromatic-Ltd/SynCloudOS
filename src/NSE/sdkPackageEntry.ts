@@ -749,3 +749,6 @@ export { NSEHapticFeedbackManager } from "./Feedback/NSEHapticFeedbackManager";
 export type { NSEHapticFeedbackPattern, NSEHapticFeedbackPerformanceTime, NSEHapticFeedbackPerformer } from "./Feedback/NSEHapticFeedbackManager";
 export { NSEAppearance } from "./Appearance/NSEAppearance";
 export type { NSEAppearanceOptions } from "./Appearance/NSEAppearance";
+export { NSEWorkspace } from "./Application/NSEWorkspace";
+export { NSEPathControl, NSEPathControlItem } from "./Controls/Values/NSEPathControl";
+export type { NSEPathControlProps, NSEPathControlHandle } from "./Controls/Values/NSEPathControl";

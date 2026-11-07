@@ -19,3 +19,4 @@
  */
 
 export * from "./valueControlTypes";export * from "./NSEStepper";export * from "./NSESlider";export * from "./NSELevelIndicator";export * from "./NSESegmentedControl";import"./nse-value-controls.css";
+export * from "./NSEPathControl";
