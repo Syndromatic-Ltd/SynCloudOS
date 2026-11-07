@@ -20,7 +20,7 @@
 
 import { expect, it } from "vitest";
 
-import { DateFormatter, ValueTransformerRegistry, composeTransformers, createValueTransformer } from "../../src/SynCloudOS/Models";
+import { DateFormatter } from "../../src/SynCloudOS/Models";
 import { NSEByteCountFormatter, NSENumberFormatter } from "../../src/Foundation/public";
 
 it("formats and parses locale-aware values with structured failures", () => {
@@ -44,33 +44,6 @@ it("formats and parses locale-aware values with structured failures", () => {
       locale: "en-GB",
     }),
   ).toBe("1.5 KiB");
-});
-
-it("keeps transformer registration instance-scoped and reversible", () => {
-  const registry = new ValueTransformerRegistry();
-  const trim = createValueTransformer<string, string>({
-    id: "trim",
-    transform: (value) => value.trim(),
-  });
-  const length = createValueTransformer<string, number>({
-    id: "length",
-    transform: (value) => value.length,
-  });
-  const reversibleNumber = createValueTransformer<string, number>({
-    id: "number",
-    transform: Number,
-    reverse: String,
-  });
-
-  registry.register(trim);
-  expect(registry.get<string, string>("trim")?.transform("  cloud  ")).toBe(
-    "cloud",
-  );
-  expect(composeTransformers("trim-length", trim, length).transform("  cloud  ")).toBe(5);
-  expect(reversibleNumber.reversible).toBe(true);
-  expect(reversibleNumber.reverse?.(42)).toBe("42");
-  expect(new ValueTransformerRegistry().get("trim")).toBeNull();
-  expect(() => registry.register(trim)).toThrow(/already registered/i);
 });
 
 it("normalises locale digits and rejects incomplete or non-finite number input", () => {

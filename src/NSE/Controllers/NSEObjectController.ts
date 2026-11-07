@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { ValueTransformer } from "../../SynCloudOS/Models";
+import type { NSEValueTransformer } from "../../Foundation/NSEValueTransformer";
 import type { NSEFormatter, NSEFormatterContext, NSEFormatterResult } from "../../Foundation/public";
 import { defineSyncUndoAction } from "../../SynCloudOS/nseRuntimeContracts";
 import {
@@ -37,7 +37,7 @@ export interface ObjectControllerField<T extends object, V> {
   read(content: T): V;
   write(content: T, value: V): T;
   readonly formatter?: NSEFormatter<any>;
-  readonly transformer?: ValueTransformer<any, V>;
+  readonly transformer?: NSEValueTransformer<any, V>;
   readonly validate?: (
     value: V,
     content: T,
@@ -163,7 +163,7 @@ export class NSEObjectController<T extends object> extends NSEController<
     const parsed = field.formatter.getObjectValue(text, context);
     if (!parsed.ok) return parsed;
     const value = field.transformer
-      ? field.transformer.transform(parsed.value)
+      ? field.transformer.transformedValue(parsed.value)
       : parsed.value;
     return this.setField(fieldName, value)
       ? { ok: true, value }
