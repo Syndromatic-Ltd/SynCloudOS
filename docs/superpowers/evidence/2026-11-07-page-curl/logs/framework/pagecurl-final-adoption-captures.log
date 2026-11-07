@@ -1,0 +1,61 @@
+desktop-light-no-preference captured 27 frames; 0 errors
+desktop-light-reduce captured 27 frames; 0 errors
+desktop-dark-no-preference captured 27 frames; 0 errors
+desktop-dark-reduce captured 27 frames; 0 errors
+locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('[data-portfolio-reader]').locator(':is(.portfolio-reader__turn--backward, .nse-page-controller__leaf--backward) .nse-page__dogear')
+    - locator resolved to <button type="button" data-active="true" aria-expanded="false" class="nse-page__dogear" data-corner="bottom-left" aria-label="Previous page"></button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div tabindex="-1" data-mode="light" data-nse-appearance="atmo" data-nse-chrome="standard" data-nse-contrast="normal" data-nse-transparency="normal" class="nse-control-alert-backdrop" data-nse-colour-scheme-requested="auto" data-nse-colour-scheme-resolved="light" data-syncloudos-runtime-owner="runtime:a6044a3f-4ed0-4da2-b3dc-a1b156c4e4da" data-syncloudos-focus-scope="system-alert:error-1794045417933-bd23b18e-527f-4b7b-869f-3d2490cf2ca9">…</div> intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div tabindex="-1" data-mode="light" data-nse-appearance="atmo" data-nse-chrome="standard" data-nse-contrast="normal" data-nse-transparency="normal" class="nse-control-alert-backdrop" data-nse-colour-scheme-requested="auto" data-nse-colour-scheme-resolved="light" data-syncloudos-runtime-owner="runtime:a6044a3f-4ed0-4da2-b3dc-a1b156c4e4da" data-syncloudos-focus-scope="system-alert:error-1794045417933-bd23b18e-527f-4b7b-869f-3d2490cf2ca9">…</div> intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    58 × waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div tabindex="-1" data-mode="light" data-nse-appearance="atmo" data-nse-chrome="standard" data-nse-contrast="normal" data-nse-transparency="normal" class="nse-control-alert-backdrop" data-nse-colour-scheme-requested="auto" data-nse-colour-scheme-resolved="light" data-syncloudos-runtime-owner="runtime:a6044a3f-4ed0-4da2-b3dc-a1b156c4e4da" data-syncloudos-focus-scope="system-alert:error-1794045417933-bd23b18e-527f-4b7b-869f-3d2490cf2ca9">…</div> intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+
+    at button (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-page-curl\capture.cjs:71:134)
+    at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-page-curl\capture.cjs:106:75 {
+  log: [
+    "  - waiting for locator('[data-portfolio-reader]').locator(':is(.portfolio-reader__turn--backward, .nse-page-controller__leaf--backward) .nse-page__dogear')",
+    '    - locator resolved to <button type="button" data-active="true" aria-expanded="false" class="nse-page__dogear" data-corner="bottom-left" aria-label="Previous page"></button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <div tabindex="-1" data-mode="light" data-nse-appearance="atmo" data-nse-chrome="standard" data-nse-contrast="normal" data-nse-transparency="normal" class="nse-control-alert-backdrop" data-nse-colour-scheme-requested="auto" data-nse-colour-scheme-resolved="light" data-syncloudos-runtime-owner="runtime:a6044a3f-4ed0-4da2-b3dc-a1b156c4e4da" data-syncloudos-focus-scope="system-alert:error-1794045417933-bd23b18e-527f-4b7b-869f-3d2490cf2ca9">…</div> intercepts pointer events',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <div tabindex="-1" data-mode="light" data-nse-appearance="atmo" data-nse-chrome="standard" data-nse-contrast="normal" data-nse-transparency="normal" class="nse-control-alert-backdrop" data-nse-colour-scheme-requested="auto" data-nse-colour-scheme-resolved="light" data-syncloudos-runtime-owner="runtime:a6044a3f-4ed0-4da2-b3dc-a1b156c4e4da" data-syncloudos-focus-scope="system-alert:error-1794045417933-bd23b18e-527f-4b7b-869f-3d2490cf2ca9">…</div> intercepts pointer events',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    58 × waiting for element to be visible, enabled and stable',
+    '       - element is visible, enabled and stable',
+    '       - scrolling into view if needed',
+    '       - done scrolling',
+    '       - <div tabindex="-1" data-mode="light" data-nse-appearance="atmo" data-nse-chrome="standard" data-nse-contrast="normal" data-nse-transparency="normal" class="nse-control-alert-backdrop" data-nse-colour-scheme-requested="auto" data-nse-colour-scheme-resolved="light" data-syncloudos-runtime-owner="runtime:a6044a3f-4ed0-4da2-b3dc-a1b156c4e4da" data-syncloudos-focus-scope="system-alert:error-1794045417933-bd23b18e-527f-4b7b-869f-3d2490cf2ca9">…</div> intercepts pointer events',
+    '     - retrying click action',
+    '       - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}

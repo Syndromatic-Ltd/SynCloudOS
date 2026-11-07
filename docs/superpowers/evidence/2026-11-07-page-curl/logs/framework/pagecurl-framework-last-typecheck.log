@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -b --pretty false
+src/SynCloudOS/AppSDK/fontAccess.tsx(103,9): error TS2322: Type 'NSEData | null' is not assignable to type 'Uint8Array<ArrayBufferLike> | null'.
+  Type 'NSEData' is missing the following properties from type 'Uint8Array<ArrayBufferLike>': BYTES_PER_ELEMENT, buffer, byteLength, byteOffset, and 27 more.
+src/SynCloudOS/BundleLoader/fontResourceLoader.ts(65,3): error TS2322: Type 'Readonly<{ bytes: Uint8Array<ArrayBuffer>; mimeType: TFXFontResourceMimeType; }>' is not assignable to type 'TFXPackagedFontResource'.
+  Types of property 'bytes' are incompatible.
+    Type 'Uint8Array<ArrayBuffer>' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/SynCloudOS/BundleLoader/fontResourceLoader.ts(115,38): error TS2740: Type 'Uint8Array<ArrayBufferLike>' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/SynCloudOS/PlatformAdapters/BrowserDownloadFilePanelPort.ts(13,78): error TS2339: Property 'mimeType' does not exist on type 'FilePanelExportPayload'.
+src/SynCloudOS/TextFX/TFXFontHost.ts(150,38): error TS2339: Property 'slice' does not exist on type 'NSEDataConvertible'.
+  Property 'slice' does not exist on type 'NSEData'.

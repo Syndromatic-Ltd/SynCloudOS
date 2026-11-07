@@ -1,0 +1,11 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/portfolio-app.test.tsx tests/runtime/portfolio-library-state.test.ts tests/runtime/portfolio-lifetime.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+
+ Test Files  3 passed (3)
+      Tests  21 passed (21)
+   Start at  09:29:28
+   Duration  6.16s (transform 5.48s, setup 51ms, import 7.22s, tests 2.16s, environment 3.01s)
+

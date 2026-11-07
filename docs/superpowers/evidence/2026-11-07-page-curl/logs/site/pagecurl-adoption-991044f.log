@@ -1,0 +1,43 @@
+
+> @syndromatic/syncloudos-source@1.0.0-beta.2 build
+> npm run typecheck && npm run sdk:build
+
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/SynCloudOS/Documents/DocumentOutputPreparation.ts(216,15): error TS2322: Type '{ status: "exported"; mimeType: "application/pdf"; bytes: NSEData; receipt: DocumentOutputReceipt; }' is not assignable to type 'DocumentOutputPDFResult'.
+  Types of property 'bytes' are incompatible.
+    Type 'NSEData' is missing the following properties from type 'Uint8Array<ArrayBufferLike>': BYTES_PER_ELEMENT, buffer, byteLength, byteOffset, and 27 more.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(124,41): error TS2339: Property 'count' does not exist on type 'Uint8Array<ArrayBufferLike>'.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(126,33): error TS2339: Property 'bytes' does not exist on type 'Uint8Array<ArrayBufferLike>'.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(126,73): error TS2339: Property 'count' does not exist on type 'Uint8Array<ArrayBufferLike>'.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(290,67): error TS2339: Property 'count' does not exist on type 'Uint8Array<ArrayBufferLike>'.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(292,55): error TS2345: Argument of type 'Uint8Array<ArrayBufferLike>' is not assignable to parameter of type 'NSEData'.
+  Type 'Uint8Array<ArrayBufferLike>' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(293,42): error TS2339: Property 'count' does not exist on type 'Uint8Array<ArrayBufferLike>'.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(438,125): error TS2339: Property 'bytes' does not exist on type 'Uint8Array<ArrayBufferLike>'.
+src/SynCloudOS/PlatformAdapters/imageProcessingWorkerRuntime.ts(138,26): error TS2339: Property 'buffer' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/imageProcessingWorkerRuntime.ts(138,45): error TS2339: Property 'byteOffset' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/imageProcessingWorkerRuntime.ts(138,63): error TS2339: Property 'byteOffset' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/imageProcessingWorkerRuntime.ts(138,82): error TS2339: Property 'byteLength' does not exist on type 'NSEData'.
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: npm run build failed
+
+2 !== 0
+
+    at run (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/scripts/use-framework.mjs:19:10)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/scripts/use-framework.mjs:32:37
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 2,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

@@ -1,0 +1,5 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run tsc -b --pretty false
+src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx(3,19): error TS2305: Module '"@syndromatic/syncloudos/nse"' has no exported member 'NSEUserDefaults'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/InputSections.tsx(2,54): error TS2305: Module '"@syndromatic/syncloudos/nse"' has no exported member 'ByteCountFormatter'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/InputSections.tsx(2,196): error TS2305: Module '"@syndromatic/syncloudos/nse"' has no exported member 'NumberFormatter'.

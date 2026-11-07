@@ -1,0 +1,74 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-page-controller.test.tsx tests/runtime/nse-page-surface-key.test.ts tests/runtime/nse-page-curl-engine.test.ts tests/runtime/nse-page-curl-cylinder.test.ts tests/runtime/nse-page-tear.test.ts tests/runtime/navigation-controller-back.test.tsx tests/runtime/synware-nse-public-surface.test.ts tests/runtime/appkit-counterparts.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/appkit-counterparts.test.ts (4 tests | 1 failed) 18ms
+     × gives every public NSE export an AppKit counterpart, or says why it has none 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/appkit-counterparts.test.ts > NSE names are AppKit names > gives every public NSE export an AppKit counterpart, or says why it has none
+AssertionError: expected [ 'NSEBinaryByteUnit', …(37) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "NSEBinaryByteUnit",
++   "NSEByteCountFormatter",
++   "NSEByteCountFormatterOptions",
++   "NSEByteUnit",
++   "NSEByteUnitSystem",
++   "NSECharacterSet",
++   "NSECountedSet",
++   "NSEData",
++   "NSEDataCompressionAlgorithm",
++   "NSEDataConvertible",
++   "NSEDecimalByteUnit",
++   "NSEEqualRanges",
++   "NSEFormatter",
++   "NSEFormatterContext",
++   "NSEFormatterError",
++   "NSEFormatterResult",
++   "NSEIndexPath",
++   "NSEIndexSet",
++   "NSEIntersectionRange",
++   "NSENumberFormatter",
++   "NSENumberFormatterOptions",
++   "NSEPredicate",
++   "NSEPredicateComparisonOperator",
++   "NSEPredicateExpression",
++   "NSEPredicateField",
++   "NSEPredicateLiteral",
++   "NSEPredicateScalar",
++   "NSEPredicateSchema",
++   "NSEPredicateTextOptions",
++   "NSEPredicateValidationError",
++   "NSERange",
++   "NSESortComparator",
++   "NSESortDescriptor",
++   "NSESortDescriptorOptions",
++   "NSESortDirection",
++   "NSESortNulls",
++   "NSETreeNode",
++   "NSEUnicodePropertyName",
++ ]
+
+ ❯ tests/runtime/appkit-counterparts.test.ts:45:21
+     43|     // Add the new name to docs/framework/appkit-counterparts.json wit…
+     44|     // name with no counterpart needs { "none": reason }: see "NSE nam…
+     45|     expect(missing).toEqual([]);
+       |                     ^
+     46|   });
+     47|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 7 passed (8)
+      Tests  1 failed | 77 passed (78)
+   Start at  08:33:16
+   Duration  41.72s (transform 9.86s, setup 133ms, import 18.17s, tests 41.33s, environment 5.13s)
+

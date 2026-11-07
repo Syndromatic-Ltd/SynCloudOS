@@ -1,0 +1,2 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run tsc --ignoreConfig --noEmit --skipLibCheck --moduleResolution bundler --module ESNext --target ES2022 --lib ES2022,DOM .artifacts/pagecurl-probe/probe.ts

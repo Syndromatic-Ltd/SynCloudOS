@@ -1,38 +1,38 @@
 {
   "name": "phone-light-no-preference",
-  "capturedAt": "2026-11-07T09:29:20.195Z",
+  "capturedAt": "2026-11-07T10:01:49.158Z",
   "devHotReload": false,
   "viewport": "390x844",
   "dpr": 1,
-  "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
-  "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+  "frameworkCommit": "9d681d8886b20a359b45a176def84d1f0ef2e0a6",
+  "archiveSha256": "6e5ca2b8ab79a3d4ab7037e670026ae84d2a9a6eddbc9e96a00de5b4f891bd65",
   "errors": [],
   "consoleErrors": [],
   "failedRequests": [],
   "navigations": [
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043722885
+      "time": 1794045672037
     },
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043723908
+      "time": 1794045673157
     },
     {
       "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-      "time": 1794043725403
+      "time": 1794045674797
     },
     {
       "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-      "time": 1794043725404
+      "time": 1794045674798
     },
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043759932
+      "time": 1794045708895
     },
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043759933
+      "time": 1794045708897
     }
   ],
   "states": [
@@ -46,7 +46,7 @@
           "progress": "0.000",
           "phase": "idle",
           "corner": "bottom-right",
-          "renderer": "css",
+          "renderer": "webgl",
           "surface": "css",
           "reduced": "false"
         }
@@ -80,7 +80,7 @@
     },
     {
       "label": "02-button-forward-moving",
-      "page": "1",
+      "page": "2",
       "phase": "reading",
       "leaves": [
         {
@@ -98,7 +98,7 @@
           "phase": "idle",
           "corner": "bottom-right",
           "renderer": "webgl",
-          "surface": "webgl",
+          "surface": "css",
           "reduced": "false"
         }
       ],
@@ -221,7 +221,7 @@
           "phase": "idle",
           "corner": "bottom-right",
           "renderer": "webgl",
-          "surface": "css",
+          "surface": "webgl",
           "reduced": "false"
         }
       ],
@@ -614,7 +614,7 @@
           "phase": "idle",
           "corner": "bottom-left",
           "renderer": "webgl",
-          "surface": "css",
+          "surface": "webgl",
           "reduced": "false"
         },
         {
@@ -623,7 +623,7 @@
           "phase": "idle",
           "corner": "bottom-right",
           "renderer": "webgl",
-          "surface": "css",
+          "surface": "webgl",
           "reduced": "false"
         }
       ],

@@ -1,38 +1,38 @@
 {
   "name": "desktop-dark-reduce",
-  "capturedAt": "2026-11-07T09:28:42.835Z",
+  "capturedAt": "2026-11-07T09:56:39.630Z",
   "devHotReload": false,
   "viewport": "1440x900",
   "dpr": 1,
-  "frameworkCommit": "29301a7bd6ee3c381d37057ab448dc3ce25cd1ea",
-  "archiveSha256": "893325c77c12041da17ded94129672b6ec79800b7a07a75d1267cdf7b0e7de37",
+  "frameworkCommit": "b9d17a9999b7e782303a046706990d06d73edf0e",
+  "archiveSha256": "49ebdce0a7b5a61c1ee7456537bedfefdaed6fb6714def50657de45857def7e1",
   "errors": [],
   "consoleErrors": [],
   "failedRequests": [],
   "navigations": [
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043695064
+      "time": 1794045371053
     },
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043696089
+      "time": 1794045372328
     },
     {
       "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-      "time": 1794043697622
+      "time": 1794045374100
     },
     {
       "url": "http://127.0.0.1:5199/portfolio?artifact=cirrus-icons",
-      "time": 1794043697623
+      "time": 1794045374100
     },
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043721701
+      "time": 1794045398494
     },
     {
       "url": "http://127.0.0.1:5199/portfolio",
-      "time": 1794043721702
+      "time": 1794045398495
     }
   ],
   "states": [

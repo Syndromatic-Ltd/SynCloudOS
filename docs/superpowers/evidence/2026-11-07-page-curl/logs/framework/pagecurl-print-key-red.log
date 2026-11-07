@@ -1,0 +1,173 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-page-controller.test.tsx -t one live child
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-page-controller.test.tsx (10 tests | 1 failed | 9 skipped) 1496ms
+   × renders one live child per printed page and completes real reduced-motion button turns 1492ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-page-controller.test.tsx > renders one live child per printed page and completes real reduced-motion button turns
+AssertionError: expected 'controller-print:<p id="page-print-_r…' to be 'controller-print:<p id="entry-note-Pa…' // Object.is equality
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        data-nse-overlay-provider="nse-overlay-provider:runtime:com.example.page-controller:1:_r_0_"
+        data-syncloudos-runtime-owner="runtime:com.example.page-controller:1"
+        style="display: contents;"
+      >
+        <div
+          class="nse-window-chrome-frame"
+        >
+          <div
+            class="nse-window-chrome-content"
+          >
+            <div
+              class="nse-window-content-above-bottom-bar"
+              style="bottom: 0px;"
+            >
+              <div
+                data-nse-view-controller=""
+                style="display: block; width: 100%; height: 100%; min-width: 0px; min-height: 0px;"
+                tabindex="-1"
+              >
+                <div
+                  data-nse-view-controller=""
+                  tabindex="-1"
+                >
+                  <div
+                    aria-label="Notes"
+                    class="nse-page-controller"
+                    data-axis="horizontal"
+                    data-nse-control="page-controller"
+                    data-selected-index="0"
+                    data-transition-style="stackHistory"
+                    style="display: flex; flex-direction: column; min-height: 0px;"
+                  >
+                    <div
+                      aria-label="Page content"
+                      role="region"
+                      style="flex: 1 1 auto; min-height: 0px;"
+                      tabindex="-1"
+                    >
+                      <div
+                        data-nse-view-controller=""
+                        tabindex="-1"
+                      >
+                        <p
+                          id="entry-folder-All notes"
+                        >
+                          folder
+                          : 
+                          All notes
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  data-nse-view-controller=""
+                  tabindex="-1"
+                >
+                  <div
+                    aria-label="Days"
+                    class="nse-page-controller nse-container-sliding-view"
+                    data-axis="horizontal"
+                    data-nse-control="page-controller"
+                    data-selected-index="0"
+                    data-transition-style="horizontalStrip"
+                  >
+                    <div
+                      class="nse-container-sliding-view-viewport"
+                    >
+                      <div
+                        class="nse-container-sliding-view-track"
+                        style="transform: translate3d(-0%, 0, 0);"
+                      >
+                        <section
+                          aria-hidden="false"
+                          aria-roledescription="page"
+                          class="nse-container-sliding-view-panel"
+                          data-active="true"
+                        >
+                          <div
+                            data-nse-view-controller=""
+                            tabindex="-1"
+                          >
+                            <p
+                              id="entry-Saturday-Saturday"
+                            >
+                              Saturday
+                              : 
+                              Saturday
+                            </p>
+                          </div>
+                        </section>
+                        <section
+                          aria-hidden="true"
+                          aria-roledescription="page"
+                          class="nse-container-sliding-view-panel"
+                          data-active="false"
+                          inert=""
+                        >
+                          <div
+                            data-nse-view-controller=""
+                            tabindex="-1"
+                          >
+                            <p
+                              id="entry-Sunday-Sunday"
+                            >
+                              Sunday
+                              : 
+                              Sunday
+                            </p>
+                          </div>
+                        </section>
+                        <section
+                          aria-hidden="true"
+                          aria-roledescription="page"
+                          class="nse-container-sliding-view-panel"
+                          data-active="false"
+                          inert=""
+                        >
+                          <div
+                            data-nse-view-controller=""
+                            tabindex="-1"
+                          >
+                            <p
+                              id="entry-Monday-Monday"
+                            >
+                              Monday
+                              : 
+                              Monday
+                            </p>
+                          </div>
+                        ...
+
+Expected: "controller-print:<p id="entry-note-Page 2">note: Page 2</p>"
+Received: "controller-print:<p id="page-print-_r_e_-entry-note-Page 2">note: Page 2</p>"
+
+ ❯ tests/runtime/nse-page-controller.test.tsx:199:38
+    197|     const backward = view.querySelector<HTMLElement>(".nse-page-contro…
+    198|     const forward = view.querySelector<HTMLElement>(".nse-page-control…
+    199|     expect(pageSurfaceKey(backward)).toBe(pageSurfaceKey(forward));
+       |                                      ^
+    200|   });
+    201|   await act(async () => { fireEvent.click(within(view).getByRole("butt…
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 skipped (10)
+   Start at  08:31:25
+   Duration  14.57s (transform 8.85s, setup 34ms, import 11.43s, tests 1.50s, environment 1.41s)
+

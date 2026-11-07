@@ -1,0 +1,64 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-page-curl-engine.test.ts tests/runtime/nse-page-controller.test.tsx -t reset edge drag|cosmetic dog-ear
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-page-curl-engine.test.ts (27 tests | 1 failed | 26 skipped) 51ms
+     × does not resume a reset edge drag when its old pointer moves and releases 50ms
+ ❯ tests/runtime/nse-page-controller.test.tsx (10 tests | 1 failed | 9 skipped) 30ms
+   × allows navigation to take over a cosmetic dog-ear peek 28ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-page-controller.test.tsx > allows navigation to take over a cosmetic dog-ear peek
+AssertionError: expected [] to deeply equal [ 1 ]
+
+- Expected
++ Received
+
+- [
+-   1,
+- ]
++ []
+
+ ❯ tests/runtime/nse-page-controller.test.tsx:150:17
+    148|   engine.progress(.01, peek);
+    149|   book.navigateForward();
+    150|   expect(turns).toEqual([1]);
+       |                 ^
+    151|   book.dispose();
+    152| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/nse-page-curl-engine.test.ts > useNSEPage lifecycle > does not resume a reset edge drag when its old pointer moves and releases
+AssertionError: expected { Object (progress, targetProgress, ...) } to match object { progress: +0, phase: 'idle', …(1) }
+(7 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "phase": "idle",
+-   "progress": 0,
+-   "reason": "reset",
++   "progress": 1,
++   "reason": "gesture",
+  }
+
+ ❯ tests/runtime/nse-page-curl-engine.test.ts:547:44
+    545|     fireEvent.pointerMove(root, { pointerId: 7, buttons: 1, clientX: 8…
+    546|     fireEvent.pointerUp(root, { pointerId: 7, button: 0, clientX: 8, c…
+    547|     expect(pageRef.current!.getSnapshot()).toMatchObject({ progress: 0…
+       |                                            ^
+    548|     unmount();
+    549|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 35 skipped (37)
+   Start at  08:30:21
+   Duration  15.31s (transform 11.30s, setup 64ms, import 14.55s, tests 82ms, environment 2.16s)
+

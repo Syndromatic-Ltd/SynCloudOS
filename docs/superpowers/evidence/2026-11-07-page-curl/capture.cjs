@@ -16,7 +16,7 @@ let browser;
   const results = [];
   for (const phone of [false, true]) for (const colour of ['light', 'dark']) for (const motion of ['no-preference', 'reduce']) {
     const name = `${phone ? 'phone' : 'desktop'}-${colour}-${motion}`;
-    if (process.argv[3] && name !== process.argv[3]) continue;
+    if (process.argv[3] && !process.argv[3].split(',').includes(name)) continue;
     const folder = path.join(output, name);
     fs.mkdirSync(folder, { recursive: true });
     const context = await browser.newContext({ viewport: phone ? { width: 390, height: 844 } : { width: 1440, height: 900 }, deviceScaleFactor: 1, colorScheme: colour });

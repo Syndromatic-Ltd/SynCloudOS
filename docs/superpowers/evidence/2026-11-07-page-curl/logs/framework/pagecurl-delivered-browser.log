@@ -1,0 +1,6 @@
+page.waitForFunction: Timeout 30000ms exceeded.
+    at expectPage (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-page-curl\interaction-check.cjs:34:20)
+    at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-page-curl\interaction-check.cjs:41:55 {
+  log: [],
+  name: 'TimeoutError'
+}
