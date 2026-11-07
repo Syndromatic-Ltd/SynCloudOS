@@ -5,6 +5,8 @@
       "vite/client"
     ],
     "paths": {
+      "@syndromatic/syncloudos/authentication-services": ["./src/SynCloudOS/AuthenticationServices/index.ts"],
+      "@syndromatic/syncloudos/auth/passkey": ["./src/SynCloudOS/Authentication/providers/passkey/index.ts"],
       "@syndromatic/syncloudos": [
         "./src/SynCloudOS/AppSDK/rootPackageEntry.ts"
       ],

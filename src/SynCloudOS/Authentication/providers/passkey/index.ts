@@ -24,6 +24,7 @@ import {
   type ASAuthorizationBrowserPort,
   type ASAuthorizationPlatformPublicKeyCredentialAssertion,
 } from "../../../AuthenticationServices";
+import { navigatePasskeyReturnPath } from "../../../PlatformAdapters/BrowserPasskeyAuthorization";
 import type { AuthenticationMethod, AuthenticationService, AuthenticationSnapshot } from "../../authenticationTypes";
 
 export const passkeyAuthenticationMethod: AuthenticationMethod = Object.freeze({ id: "passkey", label: "Sign in with a passkey" });
@@ -37,7 +38,7 @@ export interface PasskeyAuthenticationOptions {
   readonly relyingPartyIdentifier: string;
   /** Obtain a new assertion challenge from the relying-party server and construct its request. */
   readonly beginAssertion: (operation: PasskeyAuthenticationOperation) => Promise<ASAuthorizationPlatformPublicKeyCredentialAssertionRequest>;
-  /** Send the assertion to the server, which verifies it and establishes the session cookie. */
+  /** Send the assertion to the server, which verifies it and establishes the authenticated session. */
   readonly verifyAssertion: (credential: ASAuthorizationPlatformPublicKeyCredentialAssertion, operation: PasskeyAuthenticationOperation) => Promise<void>;
   readonly method?: AuthenticationMethod;
   readonly browser?: ASAuthorizationBrowserPort;
@@ -89,9 +90,7 @@ export function createPasskeyAuthentication(options: PasskeyAuthenticationOption
   const unsubscribe = service.subscribe(update);
   const cancelActive = () => { active?.abort(abortError()); active = null; };
   const requireLive = () => { if (disposed) throw abortError(); };
-  const navigate = options.navigate ?? ((returnPath: string) => {
-    if (typeof location !== "undefined") location.assign(returnPath);
-  });
+  const navigate = options.navigate ?? navigatePasskeyReturnPath;
   return {
     // The server service owns identity, expiry, broadcasts and revocation. Never replace it with a credential-derived adapter.
     sessionAdapter: service.sessionAdapter,

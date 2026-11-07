@@ -350,7 +350,7 @@ function summariseContext(context?: Record<string, unknown>): SynCloudOSPolicyCo
   return {
     keys: [...keys],
     values: Object.fromEntries(keys.slice(0, 20).map((key) => [key,
-      /token|secret|pass(?:word|phrase)|credential|cookie|authori[sz]ation|assertion|challenge|api[-_]?key|private[-_]?key|session[-_]?key/i.test(key)
+      /token|secret|pass(?:word|phrase)|credential|cookies?|authori[sz]ation|assertion|challenge|api[-_]?key|private[-_]?key|session[-_]?key/i.test(key)
         ? "[redacted]" : summariseContextValue(context[key])]))
   };
 }

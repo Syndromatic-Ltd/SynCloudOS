@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { browserPasskeyAuthorization } from "../PlatformAdapters/BrowserPasskeyAuthorization";
 import { NSEData } from "../../Foundation/NSEData";
 import {
   ASAuthorizationPlatformPublicKeyCredentialAssertionRequest,
@@ -70,18 +71,6 @@ export interface ASAuthorizationControllerDelegate {
   authorizationControllerDidCompleteWithError?(controller: ASAuthorizationController, error: ASAuthorizationError): void;
 }
 
-/** Browser discovery is lazy: an unused AuthenticationServices module does no work. */
-const browserPort: ASAuthorizationBrowserPort = {
-  isSecureContext: () => globalThis.isSecureContext === true,
-  create(options) {
-    if (typeof navigator === "undefined" || !navigator.credentials?.create) return Promise.reject(new ASAuthorizationError("notHandled", "Passkeys are unavailable on this host."));
-    return navigator.credentials.create(options);
-  },
-  get(options) {
-    if (typeof navigator === "undefined" || !navigator.credentials?.get) return Promise.reject(new ASAuthorizationError("notHandled", "Passkeys are unavailable on this host."));
-    return navigator.credentials.get(options);
-  },
-};
 function base64url(value: NSEData) { return value.base64EncodedString().replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/u, ""); }
 function responseData(value: unknown): NSEData {
   try {
@@ -139,7 +128,7 @@ export class ASAuthorizationController {
   constructor(authorizationRequests: readonly ASAuthorizationRequest[], options: { readonly browser?: ASAuthorizationBrowserPort } = {}) {
     // WebAuthn exposes one ceremony per native call, not a chooser over registration and assertion.
     if (authorizationRequests.length !== 1 || !authorizationRequests.every(request => request instanceof ASAuthorizationPlatformPublicKeyCredentialAssertionRequest || request instanceof ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest)) throw new TypeError("A portable passkey controller requires exactly one provider-created request.");
-    this.authorizationRequests = Object.freeze([...authorizationRequests]); this.#browser = options.browser ?? browserPort;
+    this.authorizationRequests = Object.freeze([...authorizationRequests]); this.#browser = options.browser ?? browserPasskeyAuthorization;
   }
   async performRequests(signal?: AbortSignal): Promise<ASAuthorization> {
     if (this.#active) throw new ASAuthorizationError("failed", "A passkey request is already running.");
