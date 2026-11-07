@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import { normalisePoint, normaliseRect, type GFXPoint, type GFXRect, type GFXSize } from "./GFXGeometry";
 import { GFXColour } from "./GFXColour";
 import { srgbLinearChannel } from "./colourConversion";
@@ -245,14 +246,14 @@ export class GFXImage {
             return { ...c, a: c.a * mask.pixel(x, y).a };
         }, this.colourSpace);
     }
-    toPNG(): Uint8Array {
-        return encodeImagePNG(this);
+    toPNG(): NSEData {
+        return NSEData.from(encodeImagePNG(this));
     }
 }
 /** Callback storage stays with its owner until the provider is released. */
 export interface GFXCallbackDataProvider {
     readonly length: number;
-    read(offset: number, length: number): Uint8Array | Uint8ClampedArray;
+    read(offset: number, length: number): NSEData;
     release(): void;
 }
 /** Byte provider owns its snapshot; consumers can request only bounded slices. */
@@ -262,13 +263,15 @@ export class GFXDataProvider {
     #release: GFXCallbackDataProvider["release"] | null = null;
     #length: number;
     #released = false;
-    constructor(data: Uint8Array | GFXCallbackDataProvider) {
-        if (data instanceof Uint8Array) {
+    constructor(input: NSEDataConvertible | GFXCallbackDataProvider) {
+        if (input instanceof NSEData || input instanceof Uint8Array || input instanceof ArrayBuffer) {
+            const data = NSEData.from(input).bytes;
             if (data.length > 64 * 1024 * 1024)
                 throw new RangeError("Invalid or oversized provider data.");
-            this.#bytes = data.slice();
+            this.#bytes = new Uint8Array(data);
             this.#length = data.length;
         } else {
+            const data = input;
             if (!data || typeof data !== "object" || !Number.isSafeInteger(data.length) || data.length < 0 || data.length > 64 * 1024 * 1024 || typeof data.read !== "function" || typeof data.release !== "function")
                 throw new RangeError("Invalid or oversized provider data.");
             this.#length = data.length;
@@ -283,7 +286,7 @@ export class GFXDataProvider {
     get released() {
         return this.#released;
     }
-    read(offset: number, length: number): Uint8Array {
+    read(offset: number, length: number): NSEData {
         if (this.#released)
             throw new Error("Provider is released.");
         integer(offset, "offset");
@@ -291,11 +294,11 @@ export class GFXDataProvider {
         if (offset > this.length || length > this.length - offset)
             throw new RangeError("Read exceeds provider bounds.");
         if (this.#bytes)
-            return this.#bytes.slice(offset, offset + length);
+            return NSEData.from(this.#bytes.slice(offset, offset + length));
         const result = this.#read!(offset, length);
-        if (!(result instanceof Uint8Array) && !(result instanceof Uint8ClampedArray) || result.length !== length)
+        if (!(result instanceof NSEData) || result.count !== length)
             throw new RangeError("Callback provider returned an invalid read length.");
-        return Uint8Array.from(result);
+        return NSEData.from(result);
     }
     release(): void {
         if (this.#released)
@@ -315,15 +318,16 @@ export class GFXDataConsumer {
     constructor(readonly maximumBytes = 64 * 1024 * 1024) {
         integer(maximumBytes, "maximumBytes");
     }
-    write(bytes: Uint8Array): void {
+    write(data: NSEDataConvertible): void {
+        const bytes = NSEData.from(data).bytes;
         if (this.#closed)
             throw new Error("Consumer is closed.");
         if (!(bytes instanceof Uint8Array) || this.#length + bytes.length > this.maximumBytes)
             throw new RangeError("Consumer capacity exceeded.");
-        this.#chunks.push(bytes.slice());
+        this.#chunks.push(new Uint8Array(bytes));
         this.#length += bytes.length;
     }
-    finish(): Uint8Array {
+    finish(): NSEData {
         if (this.#closed)
             throw new Error("Consumer is closed.");
         this.#closed = true;
@@ -334,7 +338,7 @@ export class GFXDataConsumer {
             offset += chunk.length;
         }
         this.#chunks = [];
-        return data;
+        return NSEData.from(data);
     }
     dispose(): void {
         this.#closed = true;

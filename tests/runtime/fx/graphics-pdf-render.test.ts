@@ -50,7 +50,7 @@ async function fixture(): Promise<GFXPDFDocument> {
     writer.endPage();
     writer.beginPage({ width: 30, height: 20, rotation: 90 });
     writer.endPage();
-    return GFXPDFDocument.open(await writer.finish());
+    return GFXPDFDocument.open((await writer.finish()).bytes);
 }
 
 describe("GraphicsFX canonical PDF page rendering", () => {
@@ -90,7 +90,7 @@ describe("GraphicsFX canonical PDF page rendering", () => {
         page.drawRectangle({ x: 2, y: 2, width: 10, height: 10, color: rgb(1, 0, 0) });
         page.drawText("I", { x: 30, y: 10, size: 12, font, color: rgb(0, 0, 0) });
         const green = new GFXImage({ width: 1, height: 1, alpha: "straight", colourSpace: "srgb", data: new Uint8Array([0, 255, 0, 255]) });
-        page.drawImage(await pdf.embedPng(green.toPNG()), { x: 45, y: 2, width: 10, height: 10 });
+        page.drawImage(await pdf.embedPng(green.toPNG().bytes), { x: 45, y: 2, width: 10, height: 10 });
         const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs"), loading = getDocument({ data: await pdf.save(), disableFontFace: true, useSystemFonts: false });
         const rendered = await loading.promise;
         try {
