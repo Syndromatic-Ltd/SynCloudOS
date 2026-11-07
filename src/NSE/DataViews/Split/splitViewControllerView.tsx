@@ -20,6 +20,7 @@
 
 import {
   useCallback,
+  useContext,
   useEffect,
   useId,
   useLayoutEffect,
@@ -41,6 +42,7 @@ import type { NSESplitViewItem } from "./NSESplitViewItem";
 import { useSourceListFrame } from "../../Navigation/SourceList/sourceListFrameContext";
 import { NSEControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../../Navigation/NSEApplicationNavigationChrome";
 import "./splitViewController.css";
+import { NSEWindowTitleSlotContext } from "../../Windows/windowTitlebarContext";
 
 /**
  * Places an item's persistent host element in whichever layout slot currently shows the item. Moving
@@ -63,6 +65,9 @@ const labelOf = (item: NSESplitViewItem) => item.viewController.title ?? item.id
 /** @internal The view an `NSESplitViewController` renders. */
 export function NSESplitViewControllerView({ controller }: { readonly controller: NSESplitViewController }) {
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
+  const titleSlot = useContext(NSEWindowTitleSlotContext);
+  const ownsTitleSlot = titleSlot?.root === controller;
+  const titleSlotView = ownsTitleSlot ? <div ref={titleSlot.setSlot} className="nse-window-title-slot" /> : null;
   const layout = controller[nseSplitViewLayout];
   const items = controller.splitViewItems;
   const sourceListFrame = useSourceListFrame();
@@ -244,6 +249,7 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
     if (snapshot.presentation === "single-pane") {
       return (
         <div {...common} data-presentation="single-pane">
+          {titleSlotView}
           {hierarchy ? backItem && !stageOwnsChrome ? <div data-nse-part="split-compact-chrome">
             <NSEButton title={`Back to ${labelOf(definitions.get(backItem.identifier)!)}`} isEnabled={allowsMutation}
               onClick={goBack} />
@@ -295,6 +301,7 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
           }}
         >
           <div ref={paneRef(second.identifier)} tabIndex={-1} data-pane-id={second.identifier} data-nse-part="split-pane">
+            {titleSlotView}
             {paneContent(second.identifier)}
             {stateFeedback}
           </div>

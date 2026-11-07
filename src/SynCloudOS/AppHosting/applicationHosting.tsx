@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEWindowTitleSlotContext, NSEWindowTitlebarContent } from "../../NSE/Windows/windowTitlebarContext";
+import { nseWindowPresentedTitle } from "../../NSE/Application/NSEWindowController";
 import {
   useContext,
   useEffect,
@@ -458,9 +460,12 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   const appAlerts = useSynWareContext()?.alerts ?? null;
   const mount = useMemo(() => (appRuntime ? createWindowMount(appRuntime, alerts, appAlerts) : null), [appRuntime, alerts, appAlerts]);
   const [loaded, setLoaded] = useState(false);
+  const [titleSlot, setTitleSlot] = useState<HTMLDivElement | null>(null);
+  const titleSlotHost = useMemo(() => ({ root: controller.contentViewController, setSlot: setTitleSlot }), [controller, controller.contentViewController]);
   const titlebarHost = useContext(NSEWindowTitlebarHostContext);
-  // A window of its own draws its title in the window record; only the stage's title bar takes the document.
-  const stageTitlebar = mount && mount.windowId === null ? titlebarHost : null;
+  // Both standalone windows and stage hosts project the same window-owned chrome.
+  const stageTitlebar = titlebarHost;
+  const accessoryHost = mount?.windowId === null ? titlebarHost : null;
   useNSEWindowTitlebarDocument(controller, loaded ? stageTitlebar : null);
   // While a sheet is attached, the window's close button and Close command are refused (performClose(_:)).
   const sheetCloseGuard = useRef<(() => void) | null>(null);
@@ -514,15 +519,20 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   const { toolbar, bottomBarAccessory, titlebarAccessoryViewControllers: accessories } = controller.window;
   const renderAccessory = (accessory: NSEViewController<unknown>) => <NSEViewControllerView controller={accessory} className="nse-window-titlebar-accessory" />;
   const bottomBorder = controller.window.contentBorderThickness("minY");
+  const { toolbarStyle, subtitle } = controller.window;
+  const title = nseWindowPresentedTitle(controller.window);
+  const ownTitle = toolbarStyle === "expanded" ? <NSEWindowTitlebarContent toolbarStyle={toolbarStyle} title={title} subtitle={subtitle} /> : null;
   // Keep the content host permanent: showing chrome must not remount an editor or its draft.
   const hasBottomAccessory = bottomBorder > 0 && bottomBarAccessory != null;
   return (
+    <NSEWindowTitleSlotContext.Provider value={titleSlotHost}>
     <NSEActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
       <NSEControllerResponder target={controller} kind="controller">
-        {accessories.length ? <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={stageTitlebar} placement="titlebar" /> : null}
+        {accessories.length ? <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="titlebar" /> : null}
           <div className="nse-window-chrome-frame">
             {toolbar ? <NSEWindowToolbar controller={controller} toolbar={toolbar} /> : null}
-            <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={stageTitlebar} placement="row" />
+            <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="row" />
+            {titleSlot ? createPortal(ownTitle, titleSlot) : ownTitle}
             <div className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined}>
               <div className="nse-window-content-above-bottom-bar" style={{ bottom: hasBottomAccessory ? bottomBorder : 0 }}>{content}</div>
               {hasBottomAccessory ? <div className="nse-window-bottom-bar-accessory" data-nse-part="bottom-bar-accessory" style={{ height: bottomBorder }}>{bottomBarAccessory}</div> : null}
@@ -532,5 +542,6 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
           </div>
       </NSEControllerResponder>
     </NSEActionScopeProvider>
+    </NSEWindowTitleSlotContext.Provider>
   );
 }

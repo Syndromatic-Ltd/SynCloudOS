@@ -2,6 +2,28 @@
 
 A SynWare appears either as a full stage application or as one or more floating windows. The host owns the window system: it creates windows, orders them, keeps track of which one is key, restores them after a reload and adapts them to small screens. Your application describes what it wants and observes what it gets.
 
+## Window title and toolbar style
+
+`NSEWindowController.window` owns `title`, `subtitle`, `toolbarStyle`, `toolbar` and its titlebar accessory controllers. `subtitle` is a string, initially empty. It supplies optional document information; the gallery leaves it empty.
+
+| `toolbarStyle` | Atmo presentation |
+| --- | --- |
+| `automatic` (default) | The existing title bar. |
+| `expanded` | A large title on its own plate row below toolbar items, outside scrolling content. The root split places it above its main pane so the sidebar is unchanged. The title remains fixed at compact widths; it does not collapse. |
+| `preference` | A centred title on the panel's plate, with balanced leading/trailing accessory space. Preferences follows its selected pane and draws Back as a leading accessory. |
+| `unified` | The existing title bar, as `automatic`. |
+| `unifiedCompact` | The existing title bar, as `automatic`; Atmo currently uses the same density. |
+
+```ts
+this.window.title = "Buttons";
+this.window.toolbarStyle = "expanded";
+this.window.subtitle = "";
+```
+
+These are NSWindow names; Atmo CSS owns the appearance. Section descriptions are ordinary `NSETextField` labels with `textColor="secondaryLabelColor"` in the scroll content. Compact adaptive tabs temporarily present the localised title "More" while their More list is visible. This does not overwrite `window.title`; the latest app title returns when the list closes or leaves compact presentation. There is no new public More property.
+
+Titlebar accessories use `NSETitlebarAccessoryViewController.layoutAttribute` (`leading`, `trailing`, `bottom`), `window.addTitlebarAccessoryViewController(controller)` and `window.removeTitlebarAccessoryViewController(index)`. The window owns and disposes its accessories. See [Title bars and accessories](nse/menus-toolbars-and-inspectors.md#the-title-bar-title-subtitle-and-accessories).
+
 ## Window defaults
 
 The manifest's `windowDefaults` block sets the first window the host creates for your application.

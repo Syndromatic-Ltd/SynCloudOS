@@ -29,7 +29,10 @@ import {
 } from "./NSEPreferencesToast.transitions";
 import { NSEListItem } from "../Controls/Selection/NSEListItem";
 import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
-import { NSEPageHeader } from "../Windows/Chrome/NSEPageHeader";
+import { NSEWindowController } from "../Application/NSEWindowController";
+import { NSETitlebarAccessoryViewController } from "../Application/NSETitlebarAccessoryViewController";
+import { NSEWindowTitlebarContent } from "../Windows/windowTitlebarContext";
+import { useNSEDeferredDisposal } from "../interactionLifecycle";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
 
@@ -40,8 +43,7 @@ import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
  * Navigation is a push stack rather than a split view: the list slides out to
  * the left and the chosen pane comes in from the right, with a back control in
  * the header, which is what a panel this narrow wants.
- * The header is the real NSEPageHeader in its centred variant, so the plate,
- * the corner radius and the type come from the skin rather than from here.
+ * Its panel owns a preference-style title bar. Atmo supplies its plate and typography.
  */
 
 export interface NSEPreferencePane {
@@ -153,6 +155,28 @@ function PreferencesPanel({ panelRef, ...attributes }: HTMLAttributes<HTMLDivEle
 }
 
 
+class PreferencesBackAccessory extends NSETitlebarAccessoryViewController {
+  content: ReactNode = null;
+  constructor() { super(); this.layoutAttribute = "leading"; }
+  static override view = ({ controller }: { controller: PreferencesBackAccessory }) => <>{controller.content}</>;
+}
+
+/** The panel owns its window chrome and its Back accessory for the panel's lifetime. */
+function PreferencesTitlebar({ title, titleView, leading }: { title: ReactNode; titleView: ReactNode; leading: ReactNode }) {
+  const [panel] = useState(() => {
+    const panel = new NSEWindowController();
+    panel.window.toolbarStyle = "preference";
+    panel.window.addTitlebarAccessoryViewController(new PreferencesBackAccessory());
+    return panel;
+  });
+  useNSEDeferredDisposal(panel);
+  panel.window.title = typeof title === "string" ? title : "";
+  const back = panel.window.titlebarAccessoryViewControllers[0] as PreferencesBackAccessory;
+  back.content = leading;
+  return <NSEWindowTitlebarContent toolbarStyle={panel.window.toolbarStyle} title={titleView}
+    leading={<PreferencesBackAccessory.view controller={back} />} className="nse-prefs-header" />;
+}
+
 export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialPane, backLabel, appearance, resolvedMode, runtimeOwner, onClose }: NSEPreferencesToastProps) {
   const inheritedAppearance = useNSEAppearance();
   const requestedAppearance = appearance ?? inheritedAppearance.requestedColourScheme;
@@ -261,7 +285,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
             className="nse-prefs-toast"
             role="dialog"
             aria-modal="true"
-            aria-label={typeof title === "string" ? title : undefined}
+            aria-label={typeof (active?.label ?? title) === "string" ? (active?.label ?? title) as string : undefined}
             tabIndex={-1}
             onKeyDown={(event) => {
               if (event.key !== "Escape") return;
@@ -275,10 +299,9 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                 carry the same radius as the panel's own bottom two, so the header
                 reads as the cap of one shape rather than a rounded box stacked on
                 another. */}
-            <NSEPageHeader
-              className="nse-prefs-header"
-              align="center"
-              title={(
+            <PreferencesTitlebar
+              title={active ? active.label : title}
+              titleView={(
                 // Clipped and relatively positioned so the two titles can pass
                 // through each other without either escaping the plate or
                 // changing the header's height while it happens.

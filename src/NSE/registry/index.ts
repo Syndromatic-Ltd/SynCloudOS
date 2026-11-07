@@ -72,7 +72,6 @@ export const nseRegistry = [
       "NSEPopUpButton",
       "NSEProgressIndicator",
       "NSESlider",
-      "NSEPageHeader",
       "NSEBox",
       "NSEShadow",
       "NSEDatePicker"

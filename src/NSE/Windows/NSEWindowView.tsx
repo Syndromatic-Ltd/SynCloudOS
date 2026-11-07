@@ -26,6 +26,7 @@ import type { NSESmoothSurfaceRequest } from "../SmoothSurface";
 import type { SynCloudOSAppFrameSmoothSurfaceManifest } from "../../SynCloudOS/SynCloudOS";
 import type { NSEWindowViewProps } from "./windowViewTypes";
 import "./nse-windows.css";
+import { NSEWindowTitlebarHostContext, NSEWindowTitlebarDocumentContext, type NSEWindowTitlebarDocument } from "./windowTitlebarContext";
 
 export interface NSEWindowFrameProps extends NSEWindowViewProps {
   readonly appearanceRecipe?: NSEWindowAppearanceRecipeId | null;
@@ -84,6 +85,8 @@ export function NSEWindowView({
   // props carry the radius paint underneath. Shadow and resize handles are
   // siblings of the surface, so clipping never touches them; content scrolls
   // inside the clipped surface exactly like mounted app views.
+  const [titlebarDocument, setTitlebarDocument] = React.useState<NSEWindowTitlebarDocument | null>(null);
+  const titlebarHost = React.useMemo(() => ({ setDocument: setTitlebarDocument, leadingAccessories: null, trailingAccessories: null }), []);
   const [surfaceNode, setSurfaceNode] = React.useState<HTMLDivElement | null>(null);
   const smoothSurfaceRequest = windowSmoothSurfaceRequest(record.smoothSurface ?? null);
   useNSESmoothSurface(surfaceNode, smoothSurfaceRequest);
@@ -97,6 +100,7 @@ export function NSEWindowView({
   const resolvedAppearanceRecipe = appearanceRecipe === undefined ? "window.standard.frame" : appearanceRecipe;
   const smoothSurfaceProps = getOptionalNSESmoothSurfaceProps(smoothSurfaceRequest);
   return (
+    <NSEWindowTitlebarHostContext.Provider value={titlebarHost}>
     <section
       className={["nse-window-view", className].filter(Boolean).join(" ")}
       role={resolvedSemanticRole}
@@ -105,6 +109,7 @@ export function NSEWindowView({
       aria-modal={modal ? true : undefined}
       inert={blocked ? true : undefined}
       onKeyDown={onKeyDown}
+      data-toolbar-style={titlebarDocument?.toolbarStyle ?? "automatic"}
       data-window-id={record.id}
       data-window-role={record.role}
       data-window-state={record.state}
@@ -147,7 +152,7 @@ export function NSEWindowView({
         style={smoothSurfaceProps.style}
         data-window-surface=""
       >
-        {titleBar}
+        <NSEWindowTitlebarDocumentContext.Provider value={titlebarDocument}>{titleBar}</NSEWindowTitlebarDocumentContext.Provider>
         {customTitleBarSlotRef ? (
           <div
             ref={customTitleBarSlotRef}
@@ -160,5 +165,6 @@ export function NSEWindowView({
       </div>
       {resizeHandles}
     </section>
+    </NSEWindowTitlebarHostContext.Provider>
   );
 }

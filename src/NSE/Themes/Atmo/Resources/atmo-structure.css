@@ -64,7 +64,6 @@
   --nse-atmo-pill-down: none;
   --nse-atmo-pill-focus: none;
   --nse-atmo-pill-input: none;
-  --nse-atmo-page-header: none;
   --nse-atmo-popup: none;
   --nse-atmo-popup-mask: none;
   --nse-atmo-picker-popup: none;
@@ -1723,97 +1722,6 @@
 
 :where([data-nse-appearance="atmo"]) .nse-control-slider:has(input:disabled) .nse-control-slider-control {
   cursor: default;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-page-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 16px;
-  min-height: 92px;
-  padding: 16px 24px;
-  border: 24px solid transparent;
-  border-image: var(--nse-atmo-page-header) 35 24 13 24 fill repeat stretch;
-  color: #293645;
-}
-
-/* Centred variant: 1fr / auto / 1fr puts the copy in a middle column whose
-   centre IS the header's centre, whatever the leading control weighs.
-
-   A centred header caps a popup, so it is sized to its control rather than to
-   a page: the 24px transparent border and 16px padding a page header carries
-   are what made it 92px tall. --nse-atmo-page-header-inset becomes the ONE gap,
-   so the leading control sits the same distance from the left, top and bottom
-   edges and the header's height is just the control plus twice that. */
-:where([data-nse-appearance="atmo"]) .nse-control-page-header[data-align="center"] {
-  --nse-atmo-page-header-inset: 8px;
-  --nse-atmo-page-header-control: 50px;
-
-  grid-template-columns: 1fr auto 1fr;
-  gap: 10px;
-  min-height: 0;
-  padding: 0;
-  border-width: var(--nse-atmo-page-header-inset);
-}
-
-/* The leading slot reserves the control's height even when it holds nothing.
-   Without this the header sizes to whatever is in it, so a navigable surface
-   measured 35px on its root pane and 66px once a back control appeared — the
-   cap jumped by 31px on every push and every pop. Reserving the row makes the
-   height a property of the header rather than of what happens to be in it. */
-:where([data-nse-appearance="atmo"]) .nse-control-page-header[data-align="center"] .nse-control-page-header-leading {
-  min-height: var(--nse-atmo-page-header-control);
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-page-header[data-align="center"] .nse-control-page-header-copy {
-  justify-items: center;
-  text-align: center;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-page-header[data-align="center"] .nse-control-page-header-title {
-  font-size: 19px;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-page-header-leading {
-  display: flex;
-  align-items: center;
-  justify-self: start;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-page-header-copy,
-:where([data-nse-appearance="atmo"]) .nse-control-page-header-actions {
-  display: grid;
-  min-width: 0;
-  gap: 4px;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-page-header-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-page-header-kicker {
-  color: var(--nse-atmo-label-ink, #5d6875);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-page-header-title {
-  overflow: hidden;
-  color: var(--nse-atmo-title-ink, #293645);
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 1;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-page-header-body {
-  color: var(--nse-atmo-label-ink, #4f5d6d);
-  font-size: 13px;
-  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-divider {
@@ -4757,7 +4665,6 @@
   border-radius: 999px;
   font: 700 10px/1.4 "Syndromatic UI", system-ui, sans-serif;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
   color: rgba(255, 255, 255, 0.92);
   background: rgba(0, 0, 0, 0.32);
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.22);
