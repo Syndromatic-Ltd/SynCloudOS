@@ -213,8 +213,35 @@ const popover = this.presentAsPopover(PublishOptionsViewController, { of: event.
 | `NSEPopoverPositioning` | Meaning |
 | --- | --- |
 | `of` | The element the popover points at (NSPopover's positioning view). Required. |
+| `relativeTo` | Optional `{ x, y, width, height }` positioning rectangle in `of`'s local coordinates. Omit it to use the whole view. Coordinates follow the view as it moves or scrolls. |
 | `preferredEdge` | The edge of `of` it opens from: `"maxY"` (below, the default), `"minY"` (above), `"minX"` or `"maxX"`. It moves to the other side when there is no room. |
 | `behavior` | `"transient"` (the default) closes on Escape or a click elsewhere; `"semitransient"` closes on Escape only; `"applicationDefined"` closes only when dismissed. |
+| `drawsBackground` | `true` (default) draws Atmo's standard Aqua plate. `false` lets the content view paint its own plate, using the `NSScrollView` / `NSTextField.drawsBackground` idiom. Geometry, outline, shadow, clipping, animation and interaction remain framework-owned. |
 
 The popover takes the controller's `title` as its accessible name and `preferredContentSize` as its size. On a compact display it is presented as a sheet. It closes when `of` leaves the document. Closing dismisses (disposes) the controller, so a controller that tracks whether its popover is open does so in `didDispose`. To toggle a popover from its button, dismiss the open one rather than presenting a second.
+
+An anchored popover has an arrow aimed at the positioning view or rectangle's centre, clamped clear of the rounded corners. It flips to the opposite edge when necessary, shifts along that edge, and limits its content to the overlay region or visible work area. Oversized content scrolls inside the plate. Compact sheets have no arrow and retain the same content view when their presentation changes.
+
+Opening scales from 0.85 around the arrow tip, with an AnimationFX spring sampled into CSS `linear()` easing: a subtle overshoot settles in 320 ms. Closing fades and scales down in 150 ms. Repositioning does not restart the animation. The existing animation environment's reduced-motion preference, and the system media query, select a short cross-fade without scale.
+
+For a paper surface, present the controller with `drawsBackground: false` and set `--nse-popover-content-fill` on its content view's root. This custom property is a CSS **colour**, matching the paper at its edge; the framework uses it for the arrow, including in dark appearance. Paint textures or other artwork in the content view itself. The framework supplies the rounded clip and shadow; content-painted popovers have no standard interior padding.
+
+```ts
+this.presentAsPopover(CollectionViewController, {
+  of: event.currentTarget,
+  preferredEdge: "maxY",
+  drawsBackground: false,
+}, this);
+```
+
+```css
+.collection-popover {
+  --nse-popover-content-fill: #efe2c6;
+  background: #efe2c6;
+  color: #55462d;
+  padding: 22px;
+}
+```
+
+The internal `NSEPopover` component takes the same `drawsBackground` and `relativeTo` options. Anchored and content-painted popovers stay in the canonical overlay stack, including when a generic physical-window bridge is available, so their frame and interaction have one owner. The physical-window bridge remains available for unanchored standard surfaces. `NSEPopover` is not a new public SDK export; applications present their view controllers through `presentAsPopover`.
 
