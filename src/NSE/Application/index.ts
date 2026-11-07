@@ -50,3 +50,4 @@ export type { NSEViewControllerFX, NSEViewControllerFXClients } from "./viewCont
 export { outlet } from "./viewOutlet";
 export type { NSEViewOutlet, NSEOutletElement, NSEOutletOptions } from "./viewOutlet";
 export type { NSEManagedAFXDisplayLink, NSEManagedAFXDisplayLinkOptions, NSEManagedAFXFrame, NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "./managedAnimationRenderer";
+export { NSEWorkspace } from "./NSEWorkspace";

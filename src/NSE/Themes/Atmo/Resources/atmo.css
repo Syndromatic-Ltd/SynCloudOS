@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+@import "./path-control.css";
+
 /* Atmo vector control material, with light and dark appearance tokens.
  * Load after atmo-structure.css. Third-party artwork origins are recorded
  * in the repository notices; no raster theme is required at runtime. */
