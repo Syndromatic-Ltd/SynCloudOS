@@ -218,7 +218,7 @@ const NSEPushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function
   const on = (alternates && state === "on") || presentation?.state === "on";
   const drawnPressed = on || isHighlighted;
   const position = imagePosition ?? (image ? "imageLeading" : "noImage");
-  const shownImage = position === "noImage" ? null : <NSEControlImage image={image} />;
+  const shownImage = position === "noImage" || image == null ? null : <NSEControlImage image={image} />;
   const label = accessibleTitle(title);
   const disclosure = bezelStyle === "disclosure";
 
