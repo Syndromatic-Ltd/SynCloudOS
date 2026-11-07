@@ -133,7 +133,7 @@ export function trustSynWareBundleForCanonicalHost<TBundle extends TrustedSynWar
  * Marks a bundle the project's own folders declare, such as every application
  * the Vite plugin discovers under `src/SynWare`. The project is the host's own
  * source, so no separate trusted-source table names it: each privileged call
- * still requires the capability the app declares in `Info.ts` `permissions`.
+ * still requires the capability the app declares in `Info.ts` `entitlements`.
  */
 export function trustSynWareBundleForProject<TBundle extends TrustedSynWareBundle>(
   bundle: TBundle,
@@ -187,7 +187,7 @@ export function requireTrustedBundlePrivilege(
       !provenance || (!provenance.firstParty && !provenance.privileges.has(privilege))) {
     throw new DOMException(`SynWare ${appId} does not hold host-owned trusted provenance for ${privilege}.`, "SecurityError");
   }
-  if (!bundle.synWareManifest?.permissions?.includes(capability)) {
+  if (!bundle.synWareManifest?.entitlements?.includes(capability)) {
     throw new DOMException(`SynWare ${appId} must declare capability ${capability} for ${privilege}.`, "SecurityError");
   }
 }

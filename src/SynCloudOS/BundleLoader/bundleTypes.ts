@@ -82,7 +82,7 @@ export interface TrustedSynWareBundle {
   localeResourceLoader?: SynCloudOSLocaleBundleResourceLoader;
   /** Host-supplied, exact-map loader for this bundle's packaged fonts. */
   fontResourceLoader?: TFXPackagedFontResourceLoader;
-  permissions?: string[];
+  readonly entitlements?: readonly string[];
   services?: string[];
   optionalServices?: string[];
   lifecycleHooks?: SynCloudOSBundleLifecycleHooks;

@@ -54,10 +54,12 @@ function projectPolicy(manifest: Readonly<SynWareManifestV1>): SynCloudOSAppAcce
       public: declaredPolicy.public,
       requiresLogin: declaredPolicy.requiresLogin,
       requiredCapabilities: declaredPolicy.requiredCapabilities ? [...declaredPolicy.requiredCapabilities] : undefined,
+      requiredRoles: declaredPolicy.requiredRoles ? [...declaredPolicy.requiredRoles] : undefined,
+      requiredEntitlements: declaredPolicy.requiredEntitlements ? [...declaredPolicy.requiredEntitlements] : undefined,
       requiredAccessClasses: declaredPolicy.requiredAccessClasses ? [...declaredPolicy.requiredAccessClasses] : undefined,
     };
   }
-  return manifest.permissions?.includes("app.open.public") ? { public: true } : undefined;
+  return undefined;
 }
 
 /** The authoring frame with its right-slot icon resolved to the URL the host registered for it. Without a
@@ -107,8 +109,7 @@ export function projectRuntimeManifest(
   const height = defaults.height ?? 580;
   const minimumWidth = defaults.minimumWidth ?? 340;
   const minimumHeight = defaults.minimumHeight ?? 420;
-  const type = manifest.runtime?.type
-    ?? (manifest.permissions?.includes("diagnostics.view") ? "system" : "internal");
+  const type = manifest.runtime?.type ?? "internal";
   const iconSource = manifest.webspring?.icon ?? DEFAULT_ICON_SRC;
   const policy = projectPolicy(manifest);
   const showsNotifications = serviceIds.has("notifications");
