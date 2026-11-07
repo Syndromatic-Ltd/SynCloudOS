@@ -12,13 +12,28 @@ import type { NSEWindow } from "../../NSE/Application/NSEWindowController";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { openPanelFileSystemFor } from "../FilePanels/OpenPanelFileSystem";
 import { registerNSEOpenPanelHost, type NSEOpenPanelHost } from "../../NSE/FilePanels/openPanelHost";
+import { NSEPopup } from "../../NSE/Overlays/NSEPopup";
 
 const Context = createContext<NSEOpenPanelHost | null>(null);
 export function NSEOpenPanelApplicationHost({ value, children }: PropsWithChildren<{ value: SynWareContextValue }>) {
   const bridge = useOptionalNSEWindowSurfaceBridge();
   const runtime = useContext(SynCloudOSRuntimeContext);
+  const [compactPanel, setCompactPanel] = useState<{ request: NSEWindowSurfaceRequest; content: ReactNode } | null>(null);
+  const currentCompactPanel = useRef(compactPanel); currentCompactPanel.current = compactPanel;
+  const presentationBridge = useMemo<NSEWindowSurfaceBridge | null>(() => bridge ? {
+    present(request, content) {
+      if (value.presentation.getSnapshot().horizontalSizeClass !== "compact") return bridge.present(request, content);
+      setCompactPanel({ request, content }); return Promise.resolve(request.id);
+    },
+    dismiss(id) {
+      const panel = currentCompactPanel.current;
+      if (!panel || panel.request.id !== id) return bridge.dismiss(id);
+      currentCompactPanel.current = null; setCompactPanel(null); panel.request.onDidClose?.();
+      return Promise.resolve({ outcome: "closed" });
+    },
+  } : null, [bridge, value.presentation]);
   const host = useMemo<NSEOpenPanelHost | null>(() => bridge ? {
-    bridge, signal: value.signal, service: value.filePanels, fileSystem: openPanelFileSystemFor(value.filePanels), responderId: value.responderId,
+    bridge: presentationBridge!, images: value.images, signal: value.signal, service: value.filePanels, fileSystem: openPanelFileSystemFor(value.filePanels), responderId: value.responderId,
     isKey: () => { if (runtime && runtime.store.getSnapshot().application.activeAppId !== value.appId) return false; const snapshot = value.windows.getSnapshot(); return snapshot.surface !== "window" || snapshot.current?.isKey === true; },
     // Availability and activation are facts projected by the mounted client.
     isSecureContext: () => openPanelFileSystemFor(value.filePanels)?.isSecureContext() === true,
@@ -28,9 +43,10 @@ export function NSEOpenPanelApplicationHost({ value, children }: PropsWithChildr
     focusedElement: () => openPanelFileSystemFor(value.filePanels)?.focusedElement() ?? null,
     ...(value.scheduler ? { restoreFocus: (element: HTMLElement) => { value.scheduler.setTimeout(() => { if (!value.signal.aborted && element.isConnected) element.focus(); }, 0); } } : {}),
     ...(value.images.geometry ? { observeGeometry: (element: HTMLElement, listener: () => void) => value.images.geometry!.observe(element, listener) } : {}),
-  } : null, [bridge, runtime, value]);
+  } : null, [bridge, presentationBridge, runtime, value]);
   useLayoutEffect(() => host ? registerNSEOpenPanelHost(host) : undefined, [host]);
-  return <Context.Provider value={host}>{children}</Context.Provider>;
+  useEffect(() => () => { currentCompactPanel.current?.request.onDidClose?.(); }, []);
+  return <Context.Provider value={host}>{children}{compactPanel ? <OpenPanelSheet request={compactPanel.request} onClose={() => { currentCompactPanel.current = null; setCompactPanel(null); compactPanel.request.onDidClose?.(); }}>{compactPanel.content}</OpenPanelSheet> : null}</Context.Provider>;
 }
 export function NSEOpenPanelWindowHost({ window, children }: PropsWithChildren<{ window: NSEWindow }>) {
   const host = useContext(Context);
@@ -64,6 +80,9 @@ function OpenPanelSheet({ request, onClose, children }: PropsWithChildren<{ requ
   const { reducedMotion } = useNSEAnimationEnvironment();
   const compact = useContext(Context)?.compact() === true;
   useLayoutEffect(() => sheetHost?.attach(), [sheetHost]);
+  if (compact) return <NSEPopup id={request.id} open parentResponderId={request.parentResponderId} anchor={request.anchor}
+    presentation={{ mode: "sheet" }} overlayKind="action-sheet" chrome="menu" modal aria-label={request.title} className="nse-open-compact-sheet"
+    onOpenChange={open => { if (!open) onClose(); }}>{children}</NSEPopup>;
   const content = <NSEFocusScope options={{ scopeId: request.id, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
     <div className="nse-open-sheet-backdrop nse-window-sheet-backdrop" data-compact={compact || undefined} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); onClose(); } }}>
       <section role="dialog" aria-modal="true" aria-label={request.title} data-nse-colour-scheme-resolved={appearance.resolvedColourScheme} className="nse-open-sheet nse-sheet" data-compact={compact || undefined}
