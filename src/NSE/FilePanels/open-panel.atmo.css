@@ -25,7 +25,6 @@
 .nse-open-main { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; }
 .nse-open-toolbar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; min-height: 53px; box-sizing: border-box; border-bottom: 1px solid var(--open-line); flex-shrink: 0; }
 .nse-open-history { flex-shrink: 0; }
-.nse-open-forward-image { transform: scaleX(-1); }
 .nse-open-path { flex: 1; min-width: 0; }
 .nse-open-location-title { flex: 1; min-width: 0; }
 .nse-open-search { width: 175px; flex-shrink: 0; }

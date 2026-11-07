@@ -36,6 +36,7 @@ import {
   useNSEDeferredDisposal,
 } from "../NSE/NSE";
 import { nseMenuModel } from "../NSE/Menus/menuTypes";
+import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButton";
 import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 import { NSETopBar } from "../NSE/Windows/Chrome/NSETopBar";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
@@ -50,12 +51,6 @@ import { createWebspringAppMenuModel } from "./webspringAppMenu";
 import { useWebspringLocale } from "./webspringLocale";
 import type { ApplicationStagePresentation } from "./stage";
 import { createTransientWindowSurfaceBridge, type WindowContentRendererRegistry } from "./WindowLayer";
-
-const ApplicationNavigationBackArrow = (
-  <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false" data-nse-application-navigation-back-arrow="true">
-    <path d="M15 4 L7 12 L15 20" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 
 /** Navigation chrome that slides in with the navigation it belongs to. */
 function NavigationChromeSlot({ className, enter, children }: {
@@ -303,7 +298,9 @@ export function ApplicationStageView({
         onClick: () => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }
       }]}
       leading={navigationBack ? (
-        <NSEButton title={navigationBack.label} className="nse-window-titlebar-back" onClick={navigationBack.onActivate} />
+        <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
+          <ApplicationNavigationBackButton label={navigationBack.label} onActivate={navigationBack.onActivate} />
+        </NavigationChromeSlot>
       ) : undefined}
       center={(
         <span className="nse-window-titlebar-document">
@@ -334,15 +331,7 @@ export function ApplicationStageView({
       }]}
       leading={activeNavigationChrome?.back ? (
         <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
-          <NSEButton
-            bezelStyle="texturedRounded"
-            title={activeNavigationChrome.back.label}
-            image={ApplicationNavigationBackArrow}
-            imagePosition="imageOnly"
-            className="webspring-application-navigation-back"
-            data-nse-application-navigation-back="true"
-            onClick={activeNavigationChrome.back.onActivate}
-          />
+          <ApplicationNavigationBackButton label={activeNavigationChrome.back.label} onActivate={activeNavigationChrome.back.onActivate} />
         </NavigationChromeSlot>
       ) : undefined}
       trailing={activeNavigationChrome?.back ? <span className="webspring-application-navigation-chrome-balance" aria-hidden="true" /> : undefined}

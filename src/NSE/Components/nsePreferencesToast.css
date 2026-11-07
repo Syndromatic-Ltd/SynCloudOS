@@ -254,7 +254,10 @@
 }
 
 .nse-prefs-chevron {
+  display: inline-grid;
+  place-items: center;
   width: 10px;
+  height: 17px;
   color: var(--nse-prefs-chevron-colour, rgba(42, 55, 70, 0.42));
   font-size: 20px;
   line-height: 1;

@@ -1,3 +1,4 @@
+import { NSEImage } from "../Controls/Images/NSEImageResource";
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
@@ -16,7 +17,7 @@ import { NSEOpenPanelSources, type OpenPanelSource } from "./NSEOpenPanelSources
 import { NSEOpenPanelCollection, type OpenPanelItem } from "./NSEOpenPanelCollection";
 
 interface Location { readonly source: string; readonly title: string; readonly path: readonly FilePanelDirectory[] }
-const BackArrow = new URL("../Themes/Atmo/Resources/navigation-back.svg", import.meta.url).href;
+
 export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSession }) {
   const { host, compact } = session;
   const fs = host.fileSystem;
@@ -172,7 +173,7 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
   const openButton = <NSEButton controlSize="small" title={session.prompt || "Open"} keyEquivalent={"\r"} isEnabled={canOpen} onClick={() => void openItems(chosen)} />;
   return <section className="nse-open-panel" data-nse-control="open-panel" data-compact={compact || undefined} data-page={compact && showsSources ? "sources" : "collection"} aria-label={session.prompt || "Open"}>
     {compact ? <header className="nse-open-phone-header">
-      {showsSources ? <NSEButton controlSize="small" title="Cancel" keyEquivalent={"\u001b"} onClick={session.cancel} /> : <NSEButton bezelStyle="texturedRounded" image={BackArrow} imagePosition="imageOnly" title={location && location.path.length > 1 ? "Back" : "Sources"} onClick={() => {
+      {showsSources ? <NSEButton controlSize="small" title="Cancel" keyEquivalent={"\u001b"} onClick={session.cancel} /> : <NSEButton bezelStyle="texturedRounded" image={NSEImage.named(NSEImage.goBackTemplateName)} imagePosition="imageOnly" title={location && location.path.length > 1 ? "Back" : "Sources"} onClick={() => {
         if (location && location.path.length > 1) navigate({ ...location, path: location.path.slice(0, -1) });
         else setShowsSources(true);
       }} />}
@@ -185,8 +186,8 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
         <div className="nse-open-toolbar">
           {!compact && (location?.path.length ? <><NSESegmentedControl className="nse-open-history" aria-label="Folder navigation" segmentStyle="texturedRounded" controlSize="small"
             selection={{ mode: "momentary", selectedIds: new Set<string>() }} items={[
-              { id: "back", label: "Back", image: BackArrow, isEnabled: historyIndex > 0 },
-              { id: "forward", label: "Forward", image: <img src={BackArrow} className="nse-open-forward-image" alt="" />, isEnabled: historyIndex < history.length - 1 },
+              { id: "back", label: "Back", image: NSEImage.named(NSEImage.goBackTemplateName), isEnabled: historyIndex > 0 },
+              { id: "forward", label: "Forward", image: NSEImage.named(NSEImage.goForwardTemplateName), isEnabled: historyIndex < history.length - 1 },
             ]} onSelectionChange={selection => stepHistory(selection.selectedIds.has("back") ? -1 : 1)} />
           <NSEPathControl className="nse-open-path" aria-label="Path" pathItems={location.path.map((part, index) => new NSEPathControlItem({ title: index === 0 ? location.title : part.name,
             image: NSEWorkspace.shared.iconForFile({ name: index === 0 ? location.title : part.name, kind: "directory" }, 24),

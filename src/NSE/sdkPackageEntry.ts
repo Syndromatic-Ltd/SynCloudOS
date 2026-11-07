@@ -752,3 +752,5 @@ export type { NSEAppearanceOptions } from "./Appearance/NSEAppearance";
 export { NSEWorkspace } from "./Application/NSEWorkspace";
 export { NSEPathControl, NSEPathControlItem } from "./Controls/Values/NSEPathControl";
 export type { NSEPathControlProps, NSEPathControlHandle } from "./Controls/Values/NSEPathControl";
+
+export { NSEImage } from "./Controls/Images/NSEImageResource";

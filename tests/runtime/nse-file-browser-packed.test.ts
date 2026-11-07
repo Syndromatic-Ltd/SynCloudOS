@@ -8,9 +8,12 @@ it("exports usable path items and workspace artwork from an independently instal
   const consumer = createInstalledConsumer(process.cwd(), "synware-file-browser-packed-");
   writeFileSync(join(consumer.root, "specimen.mjs"), `
 import assert from "node:assert/strict";
-import { NSEPathControl, NSEPathControlItem, NSEWorkspace } from "@syndromatic/syncloudos/nse";
-import { NSEPathControl as ControlEntry } from "@syndromatic/syncloudos/nse/controls";
+import { NSEImage, NSEPathControl, NSEPathControlItem, NSEWorkspace } from "@syndromatic/syncloudos/nse";
+import { NSEImage as ImageEntry, NSEPathControl as ControlEntry } from "@syndromatic/syncloudos/nse/controls";
 assert.equal(NSEPathControl, ControlEntry);
+assert.equal(NSEImage, ImageEntry);
+assert.equal(NSEImage.named(NSEImage.goBackTemplateName).isTemplate, true);
+assert.notEqual(NSEImage.named(NSEImage.goBackTemplateName).src, NSEImage.named(NSEImage.goForwardTemplateName).src);
 assert.equal(typeof NSEPathControl.render, "function");
 const image = NSEWorkspace.shared.iconForFile({ name: "Downloads", kind: "directory" });
 assert.equal(typeof image, "string"); assert.ok(image.length > 10);

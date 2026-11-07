@@ -45,7 +45,8 @@ import { useChronosphereTravel } from "./useChronosphereTravel";
 import { projectChronosphereDepth, significantChronosphereIndex } from "./chronosphereTravel";
 import { ChronosphereTimeline } from "./ChronosphereTimeline";
 import { ChronosphereReflection } from "./ChronosphereReflection";
-import { ChronosphereArrow } from "./ChronosphereArrow";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
+import { NSEImage } from "../Controls/Images/NSEImageResource";
 import type { VortexImages } from "./Vortex/loadVortexImages";
 import { defaultChronosphereLabels, type ChronosphereDetailRenderer, type ChronosphereFaceContext, type ChronosphereFaceRenderer, type ChronosphereLabels } from "./chronosphereViewTypes";
 import "./chronosphere.css";
@@ -597,16 +598,14 @@ export function ChronosphereStage<TDetail = unknown>({
         style={{ opacity: stage === "open" ? 1 : 0, ...(twoPane && geometry ? {
           left: `max(${geometry.stackX + geometry.width / 2 + 12}px, calc(100% - clamp(110px, 12vw, 240px) - 122px))`, right: "auto",
         } : {}) }} role="group" aria-label={labels.timeline}>
-        <button type="button" className="chronosphere-time-arrow chronosphere-time-arrow-past" aria-label="Previous significant change"
-          title="Previous significant change" disabled={travel.target >= browsed.length - 1}
-          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, 1))}>
-          <ChronosphereArrow direction="past" />
-        </button>
-        <button type="button" className="chronosphere-time-arrow chronosphere-time-arrow-present" aria-label="Next significant change"
-          title="Next significant change" disabled={travel.target <= 0}
-          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, -1))}>
-          <ChronosphereArrow direction="present" />
-        </button>
+        <NSEButton bezelStyle="texturedRounded" className="chronosphere-time-arrow chronosphere-time-arrow-past"
+          title="Previous significant change" image={NSEImage.named(NSEImage.goBackTemplateName)} imagePosition="imageOnly"
+          isEnabled={travel.target < browsed.length - 1}
+          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, 1))} />
+        <NSEButton bezelStyle="texturedRounded" className="chronosphere-time-arrow chronosphere-time-arrow-present"
+          title="Next significant change" image={NSEImage.named(NSEImage.goForwardTemplateName)} imagePosition="imageOnly"
+          isEnabled={travel.target > 0}
+          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, -1))} />
       </div>
       <div className="chronosphere-controls chronosphere-floor" inert={stage !== "open"} style={{ opacity: stage === "open" ? 1 : 0 }} role="group" aria-label={labels.controls}>
         <div className="chronosphere-floor-glass" aria-hidden="true">
