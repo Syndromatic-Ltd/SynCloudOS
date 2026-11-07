@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEDockTile } from "./NSEDockTile";
+import type { BGTaskScheduler, UNUserNotificationCenter, UNRemoteNotificationRegistration } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynWareMigration } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynWareRouteGraph } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
@@ -47,7 +49,16 @@ export interface NSEOpenWindowOptions {
 export interface NSEApplicationContext {
   readonly appId: string;
   windows(): readonly NSEWindowController<NSEApplication>[];
+  backgroundTaskScheduler?(): BGTaskScheduler;
+  userNotificationCenter?(): UNUserNotificationCenter & UNRemoteNotificationRegistration;
+  setBadgeLabel?(label: string): void;
   openWindow(Controller: NSEWindowControllerClass, options: NSEOpenWindowOptions): Promise<NSEWindowController<NSEApplication>>;
+}
+
+/** NSApplicationDelegate's incoming URL and Dock menu methods. */
+export interface NSEApplicationDelegate {
+  applicationOpen?(application: NSEApplication, urls: readonly URL[], context?: { readonly sharedItems?: { readonly title?: string; readonly text?: string; readonly url?: string; readonly files: readonly File[] }; readonly shortcutItemType?: string }): void | Promise<void>;
+  applicationDockMenu?(application: NSEApplication): NSEMenu | null;
 }
 
 /** An application class, as the framework instantiates it. */
@@ -92,6 +103,28 @@ export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObjec
   /** Versioned migrations of the application's persisted state. */
   static migrations?: readonly SynWareMigration[];
 
+  delegate: NSEApplicationDelegate | null = null;
+  readonly dockTile = new NSEDockTile(label => {
+    if (this.isDisposed) throw new DOMException("The application has closed.", "AbortError");
+    if (!this.#context.setBadgeLabel) throw new DOMException("The host has no Dock badge service.", "NotSupportedError");
+    this.#context.setBadgeLabel(label);
+  });
+  get backgroundTaskScheduler(): BGTaskScheduler {
+    if (!this.#context.backgroundTaskScheduler) throw new DOMException("BackgroundTasks is unavailable.", "NotSupportedError");
+    return this.#context.backgroundTaskScheduler();
+  }
+  get userNotificationCenter(): UNUserNotificationCenter {
+    if (!this.#context.userNotificationCenter) throw new DOMException("UserNotifications is unavailable.", "NotSupportedError");
+    return this.#context.userNotificationCenter();
+  }
+  registerForRemoteNotifications(): Promise<PushSubscriptionJSON> {
+    if (!this.#context.userNotificationCenter) return Promise.reject(new DOMException("Remote notifications are unavailable.", "NotSupportedError"));
+    return this.#context.userNotificationCenter().registerForRemoteNotifications();
+  }
+  unregisterForRemoteNotifications(): Promise<void> {
+    if (!this.#context.userNotificationCenter) return Promise.reject(new DOMException("Remote notifications are unavailable.", "NotSupportedError"));
+    return this.#context.userNotificationCenter().unregisterForRemoteNotifications();
+  }
   readonly #lifetime: NSEObjectLifetime;
 
   /**

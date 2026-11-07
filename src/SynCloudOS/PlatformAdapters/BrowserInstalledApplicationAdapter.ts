@@ -18,13 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { InstalledApplicationConfiguration, InstalledApplicationSnapshot } from "../InstalledApplications/installedApplicationTypes";
+import type { InstalledApplicationConfiguration, InstalledApplicationSnapshot } from "../SynCloudOS";
 interface InstallPrompt extends Event {
   prompt(): Promise<void>;
   readonly userChoice: Promise<{ readonly outcome: "accepted" | "dismissed" }>;
 }
-const adapters = new WeakMap<Document, BrowserInstalledApplicationAdapter>();
-export const installedApplicationForDocument = (document: Document | null) => document ? adapters.get(document) : undefined;
 
 /** One adapter per mounted browser host; the worker survives the host's lifetime. */
 export class BrowserInstalledApplicationAdapter {
@@ -56,7 +54,6 @@ export class BrowserInstalledApplicationAdapter {
     catch (error) { this.#set({ persistence: "refused", error: String(error) }); }
   }
   async start(): Promise<void> {
-    adapters.set(this.browserWindow.document, this);
     this.browserWindow.addEventListener("beforeinstallprompt", this.#beforeInstall);
     this.browserWindow.addEventListener("appinstalled", this.#installed);
     if (this.#snapshot.installed) void this.#persist();
@@ -75,6 +72,5 @@ export class BrowserInstalledApplicationAdapter {
     this.#disposed = true; this.#prompt = null; this.#listeners.clear();
     this.browserWindow.removeEventListener("beforeinstallprompt", this.#beforeInstall);
     this.browserWindow.removeEventListener("appinstalled", this.#installed);
-    if (adapters.get(this.browserWindow.document) === this) adapters.delete(this.browserWindow.document);
   }
 }
