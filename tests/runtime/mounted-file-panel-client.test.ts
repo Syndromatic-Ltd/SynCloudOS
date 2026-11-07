@@ -25,7 +25,7 @@ describe('mounted file-panel status and completion',()=>{
     const denied=await client.save(request);if(denied.kind!=='accepted')throw Error('Missing target');
     await expect(denied.values[0]!.sink.write(payload)).rejects.toMatchObject({name:'SecurityError'});expect(fake.adapters.files.exported()).toEqual([]);
     fake.adapters.files.allow();const granted=await client.save(request);if(granted.kind!=='accepted')throw Error('Missing target');
-    await granted.values[0]!.sink.write(payload);expect(fake.adapters.files.exported()).toHaveLength(1);expect(new TextDecoder().decode(NSEData.from(fake.adapters.files.exported()[0]!.data).bytes)).toBe('generated test fixture');
+    await granted.values[0]!.sink.write(payload);expect(fake.adapters.files.exported()).toHaveLength(1);expect(fake.adapters.files.exported()[0]!.data).toBeInstanceOf(NSEData);expect(new TextDecoder().decode(NSEData.from(fake.adapters.files.exported()[0]!.data).bytes)).toBe('generated test fixture');
     fake.adapters.files.reset();expect(fake.adapters.files.exported()).toEqual([]);expect(fake.adapters.files.mode).toBe('deny');owner.abort();
   });
   it('projects download and persistent-save facts without writing or auditing',()=>{
@@ -73,4 +73,12 @@ describe('mounted file-panel status and completion',()=>{
     const selected=await f.client.save({...request,destination:'persistent-handle-required'});if(selected.kind!=='accepted')throw Error('Missing target');
     await expect(selected.values[0]!.sink.write(payload)).resolves.toEqual({kind:'exported',fileName:'generated.txt'});expect(abort).not.toHaveBeenCalled();
   });
+});
+
+it("captures immutable export bytes before the test adapter yields", async () => {
+  const fake=createDeterministicRuntimeEnvironment({});fake.adapters.files.allow();
+  const bytes=new Uint8Array([1,2]),pending=fake.environment.downloadExport!.export({fileName:"bytes.bin",mediaType:"application/octet-stream",data:bytes});
+  bytes[0]=99;await pending;
+  expect(fake.adapters.files.exported()[0]!.data.bytes).toEqual(new Uint8Array([1,2]));
+  fake.dispose();
 });

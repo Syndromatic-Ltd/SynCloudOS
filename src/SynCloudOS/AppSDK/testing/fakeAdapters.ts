@@ -17,9 +17,13 @@
  * limitations under the License.
  */
 
+import { NSEData } from "../../../Foundation/NSEData";
+import { normalisePasteboardRepresentations } from "../../Pasteboard/Pasteboard";
 import type {
   PasteboardAdapter,
   PasteboardRepresentation,
+  PasteboardRepresentationInput,
+  LazyPasteboardRepresentation,
   RuntimeLayoutViewportSnapshot,
   RuntimeMediaQuery,
   RuntimeScreenSnapshot,
@@ -295,8 +299,8 @@ export function createFakeClipboardAdapter(clock: SynWareTestClock): FakeClipboa
     read(types: readonly string[], signal?: AbortSignal) {
       return adapter.read(types, signal);
     },
-    async write(next: readonly PasteboardRepresentation[], signal?: AbortSignal) {
-      await adapter.write(next, signal);
+    async write(next: readonly Exclude<PasteboardRepresentationInput, LazyPasteboardRepresentation>[], signal?: AbortSignal) {
+      await adapter.write(normalisePasteboardRepresentations(next), signal);
     },
     values: () => Object.freeze(values.map((value) => Object.freeze({ type: value.type }))),
   } satisfies SynWareFakeClipboard);
@@ -568,7 +572,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     audio: control<SynWareFakeAudioOperation>(clock, denied),
     webContent: control<SynWareFakeWebContentOperation>(clock, denied),
   });
-  const exportedFiles:import('../../FilePanels').FilePanelExportPayload[]=[];
+  const exportedFiles:{ readonly fileName: string; readonly mediaType: string; readonly data: NSEData }[]=[];
   const adapters: SynWareTestAdapters = Object.freeze({
     browser: publicPort(controls.browser),
     media: publicPort(controls.media),
@@ -726,10 +730,13 @@ export function createDeterministicRuntimeEnvironment(options: {
     workArea: gatedSnapshotSource(workArea, testControls.viewport, "viewport.work-area"),
     clipboard: clipboard.adapter,
     downloadExport: Object.freeze({id:'deterministic-download',
-      export:(payload:import('../../FilePanels').FilePanelExportPayload,signal?:AbortSignal)=>controls.files.run('file.write',signal,()=>{
-        exportedFiles.push(Object.freeze({...payload}));
-        return {kind:'exported' as const,fileName:payload.fileName};
-      }),
+      export:(payload:import('../../FilePanels').FilePanelExportPayload,signal?:AbortSignal)=>{
+        const captured=Object.freeze({...payload,data:NSEData.from(payload.data)});
+        return controls.files.run('file.write',signal,()=>{
+          exportedFiles.push(captured);
+          return {kind:'exported' as const,fileName:captured.fileName};
+        });
+      },
     }),
     location: locationAdapter,
     midi: midiAdapter,
