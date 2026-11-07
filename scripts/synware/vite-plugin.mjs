@@ -618,6 +618,7 @@ export function synCloudOS(options) {
   const pluginOptions = normaliseOptions(options);
   let resolvedConfig = { root: resolve(process.cwd()) };
   let discovery = null;
+  let installationBuild = null;
   let server = null;
   let watcherCleanup = null;
   let typography = null;
@@ -648,8 +649,11 @@ export function synCloudOS(options) {
 
   const refresh = () => {
     discovery = discover(resolvedConfig.root, pluginOptions);
+    installationBuild = null;
     return discovery;
   };
+
+  const installedBuild = () => installationBuild ??= installedApplicationBuild(resolvedConfig, discovery ?? refresh());
 
   const addWatchFiles = (context, paths) => {
     if (typeof context?.addWatchFile !== "function") return;
@@ -744,7 +748,7 @@ export function synCloudOS(options) {
     configureServer(devServer) {
       watcherCleanup?.();
       server = devServer;
-      devServer.middlewares.use((request, response, next) => installedApplicationBuild(resolvedConfig, discovery ?? refresh()).middleware(request, response, next));
+      devServer.middlewares.use((request, response, next) => installedBuild().middleware(request, response, next));
       mountPackedSdkAssets(devServer, resolvedConfig.root, resolvedConfig.base, resolvedConfig.cacheDir);
       const current = discovery ?? refresh();
       devServer.watcher.add(current.watchPaths);
@@ -786,7 +790,7 @@ export function synCloudOS(options) {
     generateBundle: {
       order: "pre",
       handler(_options, bundle) {
-        installedApplicationBuild(resolvedConfig, discovery ?? refresh()).emit(this, bundle);
+        installedBuild().emit(this, bundle);
         // Output names belong to this output's emitter, not buildStart's emitter.
         // Resolve them before Vite applies its post HTML transforms.
         typographyAssetPaths = new Map([...typographyAssets].map(([id, reference]) => [id, this.getFileName(reference)]));
@@ -796,7 +800,7 @@ export function synCloudOS(options) {
     transformIndexHtml: {
       order: "post",
       handler(_html, context = {}) {
-        const installationTags = installedApplicationBuild(resolvedConfig, discovery ?? refresh()).tags(context.path);
+        const installationTags = installedBuild().tags(context.path);
         if (!typography) return installationTags;
         const base = resolvedConfig.base ?? "/";
         const urls = Object.fromEntries(typography.resources.map(resource => {

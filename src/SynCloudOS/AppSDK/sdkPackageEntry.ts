@@ -372,3 +372,5 @@ export type { NSEActionMethod, NSEActionOptions, NSEActionState } from "./action
 // Called by the code the dev server appends to application modules, and by the host that runs them.
 export { acceptApplicationHotUpdate, currentClass, registerApplicationHotModule, trackLiveApplicationObject } from "../AppHosting/authoring";
 export type { ApplicationHotContext, ApplicationHotModuleRecord, LiveApplicationObject } from "../AppHosting/authoring";
+
+export type * from "./manifest/installedApplicationTypes";

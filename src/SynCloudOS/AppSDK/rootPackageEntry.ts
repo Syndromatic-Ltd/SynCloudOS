@@ -25,3 +25,5 @@ export type {
   NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEViewControllerFX, NSEViewControllerFXClients,
   NSEWindow, NSEWindowCloseOutcome, NSEWindowContentBorderEdge, NSEWindowToolbarStyle, NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
 } from "../../NSE/sdkPackageEntry";
+
+export type { NSEApplicationDelegate, NSEDockTile } from "../../NSE/sdkPackageEntry";
