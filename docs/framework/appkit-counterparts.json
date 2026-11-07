@@ -28,26 +28,6 @@
     "NSEActionPayloadCheck": "NSUserInterfaceValidations",
     "NSEActionReference": "NSControl.action",
     "NSEActionState": "NSUserInterfaceValidations",
-    "NSEAdaptiveNavigationController": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSSplitViewController"
-    },
-    "NSEAdaptiveNavigationModel": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSSplitViewController"
-    },
-    "NSEAdaptiveNavigationPresentation": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSSplitViewController"
-    },
-    "NSEAdaptiveNavigationRenderer": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSSplitViewController"
-    },
-    "NSEAdaptiveNavigationSnapshot": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSSplitViewController"
-    },
     "NSEAlert": "NSAlert",
     "NSEAlertButton": "NSAlert.addButton(withTitle:)",
     "NSEAlertStyle": "NSAlert.Style",
@@ -70,9 +50,6 @@
     "NSEApplicationClass": "NSApplication",
     "NSEApplicationContext": {
       "none": "The SynCloudOS services an application reaches (SCOS); AppKit spreads them over NSApplication, NSWorkspace and the frameworks."
-    },
-    "NSEApplicationNavigationChromeState": {
-      "none": "The host's application chrome state."
     },
     "NSEArrayController": "NSArrayController",
     "NSEAttachmentAppearance": "NSTextAttachment",
@@ -199,10 +176,6 @@
     "NSEHapticFeedbackPattern": "NSHapticFeedbackManager.FeedbackPattern",
     "NSEHapticFeedbackPerformanceTime": "NSHapticFeedbackManager.PerformanceTime",
     "NSEHapticFeedbackPerformer": "NSHapticFeedbackPerformer",
-    "NSEHierarchyStack": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSPageController"
-    },
     "NSEImagePosition": "NSControl.ImagePosition",
     "NSEImageScaling": "NSImageScaling",
     "NSEImageView": "NSImageView",
@@ -232,10 +205,6 @@
     },
     "NSEMetalSurfaceProps": "NSVisualEffectView.Material",
     "NSEModalResponse": "NSApplication.ModalResponse",
-    "NSENavigationDestination": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSTabViewController"
-    },
     "NSENavigationIcon": "NSTabViewItem.image",
     "NSENavigationIconPresentation": "NSTabViewItem.image",
     "NSENavigationPresentationState": {
@@ -243,30 +212,6 @@
       "replacement": "NSTabViewController"
     },
     "NSENavigationRestorationDescriptor": "NSWindowRestoration",
-    "NSENavigationSection": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSTabViewController"
-    },
-    "NSENavigationSelectionOptions": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSTabViewController"
-    },
-    "NSENavigationSidebarItemDescriptor": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSTabViewController"
-    },
-    "NSENavigationStackController": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSPageController"
-    },
-    "NSENavigationStackRestorationSnapshot": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSPageController"
-    },
-    "NSENavigationStackSnapshot": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSPageController"
-    },
     "NSENewlineNormalizationReceipt": "NSTextStorage",
     "NSENumericValueContract": "NSControl.objectValue",
     "NSEObject": "NSObject",
@@ -346,30 +291,6 @@
     "NSEShapedTextProjectionWindow": "CTTypesetter",
     "NSEShapedTextWindow": "CTTypesetter",
     "NSESlider": "NSSlider",
-    "NSESlidingPane": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSSplitViewItem"
-    },
-    "NSESlidingPanes": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSSplitViewItem"
-    },
-    "NSESourceListCompactHandoff": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSSplitViewController with an NSOutlineView source list"
-    },
-    "NSESourceListNavigationProjection": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSSplitViewController with an NSOutlineView source list"
-    },
-    "NSESourceListScene": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSSplitViewController with an NSOutlineView source list"
-    },
-    "NSESourceListSceneStatus": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSSplitViewController with an NSOutlineView source list"
-    },
     "NSESpacing": "NSStackView.spacing",
     "NSESplitView": "NSSplitView",
     "NSESplitViewController": "NSSplitViewController",
@@ -396,22 +317,6 @@
     "NSEStepperValueContract": "NSStepper",
     "NSEStringDrawingOptions": "NSString.DrawingOptions",
     "NSESwitch": "NSSwitch",
-    "NSETabBar": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSTabViewController"
-    },
-    "NSETabBarController": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSTabViewController"
-    },
-    "NSETabBarOverflowList": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSTabViewController"
-    },
-    "NSETabBarRestorationSnapshot": {
-      "none": "Phase 7 removes this UIKit-shaped navigation API.",
-      "replacement": "NSTabViewController"
-    },
     "NSETabItem": "NSTabViewItem",
     "NSETabView": "NSTabView",
     "NSETabViewController": "NSTabViewController",

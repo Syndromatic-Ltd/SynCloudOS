@@ -139,7 +139,7 @@ export function ApplicationStageView({
   useNSEDeferredDisposal(navigationChromeController);
 
   // Source-list rail: the system owns the resizable sidebar width so the bar seam and the sidebar
-  // (drawn by the app via NSESourceListScene) can never disagree. Honoured only with the standard bar.
+  // (drawn by the app via the source-list split view) can never disagree. Honoured only with the standard bar.
   const sourceList = usesStandardTopBar ? frame.sourceList : undefined;
   const railMin = sourceList?.minWidth ?? 208;
   const railMax = sourceList?.maxWidth ?? 460;
@@ -414,7 +414,7 @@ export function ApplicationStageView({
     <NSETooltipProvider>
     <NSEWindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
     <NSEControlRuntimeProvider port={nseControlPort}>
-    <NSEApplicationNavigationChromeProvider controller={navigationChromeController}>
+    <NSEApplicationNavigationChromeProvider controller={navigationChromeController} standardChromeAvailable={usesStandardTopBar}>
     <ResponderScope asChild responderId={applicationResponderId} kind="application" parentResponderId="workspace" scopeId={applicationResponderId} undoOwner={applicationUndoOwner} diagnosticsLabel={appName}>
     <AppViewChrome.Root
       zIndex={stage.zIndex + 70}

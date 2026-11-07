@@ -247,3 +247,13 @@ Applications reach per-application settings through `useSCOS().persistence`, whi
 
 - [Structured data views](data-views.md) bind these controllers to tables, outlines, collections and browsers.
 - [Commands, responders and undo](commands-responders-undo.md) explains the undo histories that transactions register with.
+
+## Navigation view controllers
+
+`NSETabViewController` owns `NSETabViewItem`s and their child view controllers. Select through `selectedTabViewItemIndex` or `selectTabViewItem(identifier)`; override `shouldSelect`, `willSelect` and `didSelect`. `segmentedControlOnTop`, `segmentedControlOnBottom`, `toolbar` and `unspecified` are fixed AppKit styles. The NSE extension `sidebarAdaptable` chooses sidebar, bottom tabs or a short-landscape rail from the trait collection and the view's measured allocation. About deliberately uses fixed bottom tabs. Restoration captures the selected identifier, independently of localised labels.
+
+`NSESplitViewController` owns `NSESplitViewItem`s (`behavior`, `canCollapse`, `isCollapsed`, thickness constraints and holding priority). Compact content shows one item at a time; the approved NSE extension `compactItem` selects it, and `showDetail(viewController)` moves to an existing detail. The theme draws Back and restores initiating focus. A split subclass may override its static view for app-specific appearance while retaining controller-owned trait, geometry and compact selection.
+
+`NSEPageController` from `/nse/page` owns drill-in history in `stackHistory` style: `arrangedObjects`, `selectedIndex`, `navigateForwardToObject`, `navigateBack` and `navigateForward`. Its `identifierForObject`, `viewControllerForIdentifier` and `prepareViewController` methods supply actual child page controllers. Journal composes this folder/list history with the split controller's note detail.
+
+See [source-list windows](nse/source-list-chrome.md) for outline groups, the host's rail seam and window bottom-bar accessories.

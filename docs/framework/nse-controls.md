@@ -77,7 +77,7 @@ The tables below give an overview. These pages document each component's props, 
 | [Stacks and grids](nse/stacks-and-grids.md) | `NSEStackView` and `NSEGridView` |
 | [Menus, toolbars and inspectors](nse/menus-toolbars-and-inspectors.md) | Choosing a menu control, responder provenance, configured toolbars, narrow inspectors, keep-mounted panes |
 
-Focused entries include `NSEDrawer` and `NSESlidingPanes` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, and `NSEPage` and `NSEPageController` in `nse/page`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
+Focused entries include `NSEDrawer` and `NSESplitViewController` in `nse/controls`, text machinery in `nse/text`, `NSEScrollView` in `nse/scroll`, and `NSEPage` and `NSEPageController` in `nse/page`. `NSETextView` is also available through the aggregate `nse` entry. Each page names the entry it needs.
 
 ## Buttons
 
@@ -125,10 +125,10 @@ Focused entries include `NSEDrawer` and `NSESlidingPanes` in `nse/controls`, tex
 | `NSEBox` | `NSBox`: titled boxes, separators, and custom boxes with `fillColor`, `borderColor`, `borderWidth`, `cornerRadius`, `contentViewMargins`, `isTransparent` and `shadow`. See [Boxes and shadows](nse/boxes-and-shadows.md). |
 | `NSESplitView` | Two resizable panes, a sidebar beside the main view. |
 | `NSEScrollView`, `NSEClipView` | Scrolling with momentum and rubber banding. |
-| `NSETabView`, `NSETabBar` | Tabbed content, driven by `NSETabBarController`. |
+| `NSETabView`, `NSETabViewController` | Tabbed content and owned child view controllers; fixed or `sidebarAdaptable` placement. |
 | `NSEButton` (`bezelStyle="disclosure"`) in an `NSEStackView` | Collapsible sections: the disclosure button shows and hides the stack item below it, as in AppKit. |
-| `NSESourceListScene` | The scene that composes a source-list sidebar (an `NSEOutlineView` in source-list style) with content. |
-| `NSEHierarchyStack`, `NSESlidingPanes` | Drill in navigation across panes. |
+| `NSESplitViewController` | Source-list outline/sidebar and detail items, with compact collapse and `showDetail`. |
+| `NSEPageController` | Drill-in history in `stackHistory` style. |
 | `NSEDrawer` | A drawer that slides from a window edge. |
 | `NSEPageController` | `NSPageController`, a view controller subclass: one of its `arrangedObjects` shown at a time, each through a child view controller. Override `identifierForObject`, `viewControllerForIdentifier` (make the page with `this.addChild`) and `prepareViewController` (sets `representedObject` by default), the `NSPageControllerDelegate` methods. `transitionStyle: "stackHistory"` (the default) keeps a drill-in history with `navigateForwardToObject`, `navigateBack` and `navigateForward`; `"horizontalStrip"` lays the pages side by side. A horizontal swipe turns the page. It is in `nse/page`. |
 
@@ -185,10 +185,10 @@ Some controls come with a controller that holds their state and restoration data
 
 | Controller | Drives |
 | --- | --- |
-| `NSENavigationStackController` | Push and pop navigation, with restoration snapshots. |
-| `NSEAdaptiveNavigationController` | A sidebar layout on wide screens that collapses to a stack on compact ones. |
+| `NSEPageController` | Drill-in page history with `navigateForwardToObject`, `navigateBack` and `navigateForward`. |
+| `NSESplitViewController.compactItem` | The selected split item in a compact layout (NSE extension). |
 | `NSETabViewController`, `NSETabViewItem` | A container showing one child at a time behind a tab control (`NSTabViewController`): `tabViewItems` (each an `NSETabViewItem` with the child `viewController`, `label`, `image` and `toolTip`), `selectedTabViewItemIndex`, and `tabStyle` (`segmentedControlOnTop`, `segmentedControlOnBottom`, which Atmo draws as its bottom tab bar, or `unspecified`). Override `shouldSelect`, `willSelect` and `didSelect`. Place it with `<tabs.view />`. |
-| `NSETabBarController` | Tabs, overflow and restoration. Being replaced by `NSETabViewController` (phase 7). |
+| `NSETabViewController` | Tab view items, selected index, restoration and fixed or adaptive tab placement. |
 | `NSESplitViewController`, `NSESplitViewItem` | A split view of child view controllers: thicknesses, holding priorities and collapse. |
 | `NSETitlebarAccessoryViewController` | A view controller drawn in the window's title bar (`window.addTitlebarAccessoryViewController`). |
 

@@ -21,6 +21,7 @@
 import {
   useCallback,
   useEffect,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -38,6 +39,7 @@ import { NSESplitView } from "./NSESplitView";
 import { nseSplitViewLayout, type NSESplitViewController } from "./NSESplitViewController";
 import type { NSESplitViewItem } from "./NSESplitViewItem";
 import { useSourceListFrame } from "../../Navigation/SourceList/sourceListFrameContext";
+import { NSEControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../../Navigation/NSEApplicationNavigationChrome";
 import "./splitViewController.css";
 
 /**
@@ -89,7 +91,7 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
   const previousPresentation = useRef(snapshot.presentation);
   const previousActive = useRef(snapshot.activeItemIdentifier);
   const lastFocused = useRef<HTMLElement | null>(null);
-  const focusReturnTarget = useRef<HTMLElement | null>(null);
+  const focusReturnTargets = useRef(new Map<string, HTMLElement>());
   const restoreFocus = useRef(false);
 
   // Items divide the space the split view actually occupies: a split nested inside another item is
@@ -124,14 +126,13 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
     observer.observe(root);
     return () => observer.disconnect();
   }, [root, controller.traitCollection.presentation?.revision]);
-  const presentation = controller.traitCollection.presentation;
-  // Until the split view is measured or has content bounds it keeps the size it has.
-  const bounds = measured ?? presentation?.contentBounds ?? null;
-
-  const availableSize = bounds ? (snapshot.isVertical ? bounds.width : bounds.height) : null;
+  // The controller may already have measured a custom outer view. An unmeasured inner view
+  // cannot replace that allocation with the host's larger fallback on every render.
+  const availableSize = measured ? (snapshot.isVertical ? measured.width : measured.height)
+    : snapshot.availableSize > 0 ? snapshot.availableSize : null;
   useLayoutEffect(() => {
     if (availableSize !== null) layout.resize(availableSize);
-    layout.updateBounds(measured);
+    if (measured) layout.updateBounds(measured);
   }, [layout, measured, availableSize]);
 
   useLayoutEffect(() => () => controller[nseSplitViewLayout].updateBounds(null), [controller]);
@@ -171,10 +172,12 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
     if (snapshot.presentation === "single-pane" && previousActive.current !== snapshot.activeItemIdentifier) {
       if (restoreFocus.current) {
         restoreFocus.current = false;
-        if (focusReturnTarget.current?.isConnected) focusReturnTarget.current.focus({ preventScroll: true });
-        focusReturnTarget.current = null;
+        const target = focusReturnTargets.current.get(snapshot.activeItemIdentifier);
+        if (target?.isConnected) target.focus({ preventScroll: true });
+        else paneNodes.current.get(snapshot.activeItemIdentifier)?.focus({ preventScroll: true });
       } else {
-        focusReturnTarget.current = lastFocused.current;
+        const target = lastFocused.current;
+        if (target && paneHosts.current.get(previousActive.current)?.contains(target)) focusReturnTargets.current.set(previousActive.current, target);
         paneNodes.current.get(snapshot.activeItemIdentifier)?.focus({ preventScroll: true });
       }
     }
@@ -200,6 +203,20 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
   </>;
   const recoveryAvailable = ((state.kind === "denied" || state.kind === "error") && state.retry !== undefined) || (state.kind === "interrupted" && state.resume !== undefined);
   const hostDisabled = state.kind === "denied" || (!allowsMutation && !recoveryAvailable);
+  const hierarchy = items.some(({ behavior }) => behavior === "sidebar" || behavior === "contentList");
+  const activeIndex = visible.findIndex(({ identifier }) => identifier === snapshot.activeItemIdentifier);
+  const backItem = visible[activeIndex - 1];
+  const goBack = useCallback(() => {
+    if (!allowsMutation || !backItem) return;
+    restoreFocus.current = true;
+    controller.compactItem = controller.splitViewItems.find(item => item.identifier === backItem.identifier)!;
+  }, [controller, allowsMutation, backItem?.identifier]);
+  const chromeId = useId();
+  const stageOwnsChrome = useNSEControllerNavigationChrome(presentsContent && hierarchy && visible.length > 1 && snapshot.presentation === "single-pane" ? {
+    ownerId: `split:${chromeId}`,
+    title: activeIndex > 0 && controller.compactItem ? labelOf(controller.compactItem) : controller.title ?? (controller.compactItem ? labelOf(controller.compactItem) : "Split view"),
+    back: backItem && allowsMutation ? { label: `Back to ${labelOf(definitions.get(backItem.identifier)!)}`, onActivate: goBack } : null,
+  } : null);
   const common = {
     ref: rootRef,
     className: "nse-split-view-controller-view",
@@ -214,7 +231,7 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
   const keepAlive = presentsContent && ownerDocument
     ? items.map((item) => createPortal(<NSEChildViewControllerView controller={item.viewController} />, hostFor(item.identifier)!, item.identifier))
     : null;
-  return <>{keepAlive}{renderPresentation()}</>;
+  return <NSEControllerNavigationChromeBoundary>{keepAlive}{renderPresentation()}</NSEControllerNavigationChromeBoundary>;
 
   function renderPresentation() {
     if (!presentsContent) {
@@ -224,18 +241,11 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
     }
 
     if (snapshot.presentation === "single-pane") {
-      const hierarchy = items.some(({ behavior }) => behavior === "sidebar" || behavior === "contentList");
-      const activeIndex = visible.findIndex(({ identifier }) => identifier === snapshot.activeItemIdentifier);
-      const back = visible[activeIndex - 1];
       return (
         <div {...common} data-presentation="single-pane">
-          {hierarchy ? back ? <div data-nse-part="split-compact-chrome">
-            <NSEButton title={`Back to ${labelOf(definitions.get(back.identifier)!)}`} isEnabled={allowsMutation}
-              onClick={() => {
-                if (!allowsMutation) return;
-                restoreFocus.current = true;
-                controller.compactItem = definitions.get(back.identifier)!;
-              }} />
+          {hierarchy ? backItem && !stageOwnsChrome ? <div data-nse-part="split-compact-chrome">
+            <NSEButton title={`Back to ${labelOf(definitions.get(backItem.identifier)!)}`} isEnabled={allowsMutation}
+              onClick={goBack} />
           </div> : null : <div role="tablist" aria-label={`${ariaLabel} panes`}>
             {visible.map((item) => (
               <button

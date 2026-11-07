@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { NSEPopup, type NSEPopupPresentation } from "./NSEPopup";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
 import type { NSEOverlayDismissReason } from "./overlayTypes";
@@ -129,6 +130,9 @@ export function NSEPopover({
     placement: preferredEdge ? nsePopoverEdgePlacement[preferredEdge] : automaticPresentation.placement,
   }), [automaticPresentation, preferredEdge]);
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
+  const nearestResponder = useContext(NSEActionResponderContext);
+  const { defaultParentResponderId } = useNSEOverlayProvider();
+  const resolvedParentResponderId = parentResponderId ?? nearestResponder ?? defaultParentResponderId;
   const canonicalBridge = surface === "overlay" ? null : windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
   const handleDidClose = useNSEWindowSurfaceLifecycle({
     bridge: canonicalBridge,
@@ -161,6 +165,7 @@ export function NSEPopover({
     parentWindowControllerId,
     anchor,
     relativeTo,
+    parentResponderId: resolvedParentResponderId,
     preferredEdge,
     behavior,
     drawsBackground,
@@ -176,7 +181,7 @@ export function NSEPopover({
       height: contentSize?.height ?? fitting?.height ?? (resolvedPresentation.mode === "sheet" ? 420 : 280),
     },
     onDidClose: handleDidClose,
-  }), [anchor, relativeTo, preferredEdge, behavior, drawsBackground, describedBy, contentSize?.height, contentSize?.width, fitting?.height, fitting?.width, handleDidClose, id, labelledBy, parentWindowControllerId, resolvedPresentation, title]);
+  }), [anchor, relativeTo, preferredEdge, behavior, drawsBackground, describedBy, contentSize?.height, contentSize?.width, fitting?.height, fitting?.width, handleDidClose, id, labelledBy, parentWindowControllerId, resolvedParentResponderId, resolvedPresentation, title]);
   const presentedContent = useNSEPresentedContent(contentSize || resolvedPresentation.mode === "sheet"
     ? children
     : <NSEWindowFittingContent onFittingSize={onFittingSize}>{children}</NSEWindowFittingContent>);

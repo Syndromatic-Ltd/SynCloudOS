@@ -85,12 +85,12 @@ export const nsePopoverEdgePlacement = { minX: "inline-start", maxX: "inline-end
 export function applyNSEPopoverPosition(surface: HTMLElement, pointer: HTMLElement | null, position: NSEPopoverPosition): void {
   surface.dataset.placement = position.placement;
   const { width, height } = position.bounds;
-  const side = position.placement.split("-")[0];
+  const side = position.placement.split("-")[0] as "top" | "bottom" | "left" | "right";
   if (pointer) {
     pointer.style.left = position.arrowX == null ? "" : `${position.arrowX}px`;
     pointer.style.top = position.arrowY == null ? "" : `${position.arrowY}px`;
     pointer.style.right = ""; pointer.style.bottom = "";
-    pointer.style.setProperty(({ top: "bottom", bottom: "top", left: "right", right: "left" } as const)[side as "top"], "-10px");
+    pointer.style.setProperty(({ top: "bottom", bottom: "top", left: "right", right: "left" } as const)[side], "-10px");
     surface.style.transformOrigin = `${position.arrowX == null ? (side === "right" ? -10 : width + 10) : position.arrowX + 10}px ${position.arrowY == null ? (side === "bottom" ? -10 : height + 10) : position.arrowY + 10}px`;
   }
   updateNSEPopoverFrame(surface, pointer);

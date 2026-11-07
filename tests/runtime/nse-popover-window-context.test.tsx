@@ -3,6 +3,8 @@ import React, { useContext } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expect, it } from "vitest";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
+import { action } from "../../src/SynCloudOS/AppSDK/actions";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeMount";
 import { useSCOS } from "../../src/SynCloudOS/AppSDK/scos/useSCOS";
@@ -22,11 +24,14 @@ class PaperController extends NSEViewController {
       <output data-testid="presented-app">{app?.app.bundleIdentifier}</output>
       <output data-testid="presented-kernel">{String(kernel === null)}</output>
       <input aria-label="Controller draft" defaultValue={services.signal.aborted ? "Aborted" : "Retained services"} />
+      <NSEButton title="Run presenting action" action="contextProbe" />
     </div>;
   };
 }
 
 class RootController extends NSEViewController {
+  calls = 0;
+  @action({ title: { key: "probe", fallback: "Probe" } }) contextProbe() { this.calls++; }
   static view = ({ controller }: { controller: RootController }) => <button onClick={event => controller.presentAsPopover(PaperController, {
     of: event.currentTarget, preferredEdge: "maxY", drawsBackground: false,
   })}>Show paper</button>;
@@ -59,6 +64,10 @@ it("hosts presentAsPopover in one real window while retaining the application's 
     expect(screen.getByTestId("presented-app").textContent).toBe(bundleId);
     expect(screen.getByTestId("presented-kernel").textContent).toBe("true");
     expect((screen.getByRole("textbox", { name: "Controller draft" }) as HTMLInputElement).value).toBe("Retained services");
+    const actionButton = screen.getByRole("button", { name: "Run presenting action" });
+    await waitFor(() => expect((actionButton as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(actionButton);
+    await waitFor(() => expect(root.calls).toBe(1));
     fireEvent.keyDown(surface, { key: "Escape" });
     await waitFor(() => expect(runtime.windows.list({ role: "popover" })).toHaveLength(0));
     await waitFor(() => expect(root.presentedViewControllers).toHaveLength(0));

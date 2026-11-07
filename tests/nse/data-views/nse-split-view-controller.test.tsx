@@ -96,6 +96,17 @@ function setWidth(controller: NSESplitViewController, width: number) {
 afterEach(cleanup);
 
 describe("NSESplitViewController", () => {
+  it("keeps a controller's valid allocation until its inner view has a valid measurement", () => {
+    const controller = inspectorSplit("controller-allocation");
+    render(<NSEViewControllerView controller={controller} />);
+    setWidth(controller, 1440);
+    Object.defineProperty(controller.view.element, "clientWidth", { configurable: true, value: 430 });
+    Object.defineProperty(controller.view.element, "clientHeight", { configurable: true, value: 700 });
+    act(() => controller.viewDidLayout());
+    expect(controller.snapshot.presentation).toBe("single-pane");
+    expect(controller.snapshot.availableSize).toBe(430);
+    controller.dispose();
+  });
   it("starts a hierarchy on its first pane until geometry is current, then retains the last presentation", () => {
     const controller = new NSESplitViewController({ id: "initial-geometry", splitViewItems: [
       item("sidebar", "Sources", () => null, { behavior: "sidebar" }),

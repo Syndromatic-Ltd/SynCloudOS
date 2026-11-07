@@ -25,13 +25,9 @@ export type { NSEThumbMaterial } from "../Appearance/NSEMetalThumb";
 
 export {
   NSEDrawer,
-  NSESlidingPane,
-  NSESlidingPanes,
 } from "../Containers/NSEContainers";
 export type {
   NSEDrawerProps,
-  NSESlidingPaneProps,
-  NSESlidingPanesProps,
 } from "../Containers/NSEContainers";
 
 export { NSESearchField } from "../Controls/Fields/NSESearchField";
@@ -43,15 +39,6 @@ export type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection,
 export type { NSEMetalSurfaceProps } from "../Material";
 
 
-export {
-  NSESourceListScene,
-} from "../Navigation/SourceList";
-export type {
-  NSESourceListCompactHandoff,
-  NSESourceListNavigationProjection,
-  NSESourceListSceneProps,
-  NSESourceListSceneStatus,
-} from "../Navigation/SourceList";
 export { NSESplitView } from "../DataViews/Split/NSESplitView";
 export type { NSESplitViewProps } from "../DataViews/Split/NSESplitView";
 // NSETopBar is the host's drawing of a window's title bar (NSWindow.title, its toolbar and

@@ -42,10 +42,23 @@ export function PopoverWindowSurface({ surface, windowControllerId, children }: 
   const [arrow, setArrow] = useState<HTMLSpanElement | null>(null);
   const { request, popoverPosition: position } = surface;
   const anchored = request.role === "popover";
-  useNSEPopoverSurface(element, anchored ? arrow : null, !exiting, true);
+  const painted = useNSEPopoverSurface(element, anchored ? arrow : null, !exiting, true);
   useLayoutEffect(() => {
     if (element && position) applyNSEPopoverPosition(element, arrow, position);
   }, [element, arrow, position]);
+  useLayoutEffect(() => {
+    if (!exiting || !element || !painted.current) return;
+    // Disposing the presenting controller removes its live view immediately.
+    // Hold only its last paint for the window's inert exit presentation.
+    const snapshot = painted.current.querySelector(".nse-overlay-popup-content");
+    const content = element.querySelector(".nse-overlay-popup-content");
+    if (!snapshot || !content) return;
+    const copy = snapshot.cloneNode(true) as HTMLElement;
+    copy.querySelectorAll("[id]").forEach(node => node.removeAttribute("id"));
+    content.replaceChildren(...copy.childNodes);
+    const fill = painted.current.style.getPropertyValue("--nse-popover-arrow-fill");
+    if (fill) element.style.setProperty("--nse-popover-arrow-fill", fill);
+  }, [element, exiting, painted]);
   return <div
     ref={setElement}
     {...appearance}
@@ -58,6 +71,7 @@ export function PopoverWindowSurface({ surface, windowControllerId, children }: 
     data-nse-presentation={anchored ? "anchored" : "sheet"}
     data-state={exiting ? "closing" : "open"}
     role="dialog" tabIndex={-1}
+    aria-modal={!anchored || undefined}
     aria-label={request.labelledBy ? undefined : request.title}
     aria-labelledby={request.labelledBy} aria-describedby={request.describedBy}
     style={{ width: "100%", height: "100%", minWidth: 0, "--nse-popover-spring": nsePopoverSpringEasing } as CSSProperties}
@@ -68,6 +82,6 @@ export function PopoverWindowSurface({ surface, windowControllerId, children }: 
     }}
   >
     <NSEPopoverFrame arrowRef={setArrow} anchored={anchored} />
-    <div className="nse-overlay-popup-content">{children}</div>
+    <div className="nse-overlay-popup-content">{exiting ? null : children}</div>
   </div>;
 }

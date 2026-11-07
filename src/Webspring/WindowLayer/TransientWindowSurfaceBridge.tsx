@@ -150,7 +150,7 @@ async function popoverPosition(request: TransientWindowSurfaceRequest, viewport:
   const reference = nsePopoverReference(request.anchor, request.relativeTo);
   if (![reference.x, reference.y, reference.width, reference.height].every(Number.isFinite)) return null;
   return computeNSEPopoverPosition({ reference, contentSize: request.bounds, boundary: viewport,
-    placement: logicalPlacementToFloatingPlacement(request.preferredEdge ? nsePopoverEdgePlacement[request.preferredEdge] : request.placement ?? "block-end", request.anchor.ownerDocument.defaultView?.getComputedStyle(request.anchor).direction === "rtl" ? "rtl" : "ltr"),
+    placement: logicalPlacementToFloatingPlacement(request.preferredEdge ? nsePopoverEdgePlacement[request.preferredEdge] : request.placement ?? "block-end", !request.preferredEdge && request.anchor.ownerDocument.defaultView?.getComputedStyle(request.anchor).direction === "rtl" ? "rtl" : "ltr"),
     collisionPadding: request.collisionPadding,
   });
 }
@@ -210,7 +210,7 @@ function serialisableAnchor(identity: SurfaceAnchorIdentity | null, request: Tra
   const { anchor, id } = identity;
   const rect = nsePopoverReference(anchor, request.relativeTo);
   const side = position?.placement.split("-")[0] ?? "bottom";
-  const edge = ({ top: "block-start", bottom: "block-end", left: "inline-start", right: "inline-end" } as const)[side as "top"];
+  const edge = ({ top: "block-start", bottom: "block-end", left: "inline-start", right: "inline-end" } as const)[side as "top" | "bottom" | "left" | "right"];
   return Object.freeze({
     id,
     rect: Object.freeze({ x: rect.x, y: rect.y, width: rect.width, height: rect.height }),

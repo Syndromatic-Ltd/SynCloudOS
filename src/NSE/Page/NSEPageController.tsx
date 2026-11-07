@@ -18,10 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRef, type PointerEvent } from "react";
+import { useCallback, useId, useLayoutEffect, useRef, type PointerEvent } from "react";
 import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
 import { NSEPresence } from "../Animation/NSEPresentation";
 import { useObserve } from "../Objects/useObserve";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
+import { NSEControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../Navigation/NSEApplicationNavigationChrome";
 
 /** How far a horizontal swipe travels before it turns the page, in CSS pixels. */
 const SWIPE_DISTANCE = 48;
@@ -227,7 +229,23 @@ function NSEPageControllerView({ controller }: { readonly controller: NSEPageCon
   };
   const strip = controller.transitionStyle === "horizontalStrip";
   const Selected = controller.selectedViewController;
+  const compact = !strip && controller.traitCollection.presentation?.horizontalSizeClass === "compact";
+  const backLabel = index > 0 ? `Back to ${controller.viewControllerAt(index - 1)?.title ?? controller.identifierForObject(objects[index - 1])}` : "Back";
+  const goBack = useCallback(() => controller.navigateBack(), [controller]);
+  const chromeId = useId();
+  const stageOwnsChrome = useNSEControllerNavigationChrome(compact ? {
+    ownerId: `page:${chromeId}`,
+    title: index > 0 ? Selected?.title ?? controller.title ?? "Page" : controller.title ?? Selected?.title ?? "Page",
+    back: index > 0 ? { label: backLabel, onActivate: goBack } : null,
+  } : null);
+  const content = useRef<HTMLDivElement>(null);
+  const previousIndex = useRef(index);
+  useLayoutEffect(() => {
+    if (compact && previousIndex.current !== index) content.current?.focus({ preventScroll: true });
+    previousIndex.current = index;
+  }, [compact, index]);
   return (
+    <NSEControllerNavigationChromeBoundary>
     <div
       className={strip ? "nse-page-controller nse-container-sliding-view" : "nse-page-controller"}
       aria-label={controller.title}
@@ -235,10 +253,12 @@ function NSEPageControllerView({ controller }: { readonly controller: NSEPageCon
       data-transition-style={controller.transitionStyle}
       data-axis="horizontal"
       data-selected-index={index}
+      style={compact ? { display: "flex", flexDirection: "column", minHeight: 0 } : undefined}
       onPointerDown={(event) => { if (event.isPrimary) swipe.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY }; }}
       onPointerUp={endSwipe}
       onPointerCancel={() => { swipe.current = null; }}
     >
+      {compact && index > 0 && !stageOwnsChrome ? <div data-nse-part="page-compact-chrome"><NSEButton title={backLabel} onClick={goBack} /></div> : null}
       {strip ? (
         <div className="nse-container-sliding-view-viewport">
           <div className="nse-container-sliding-view-track" style={{ transform: `translate3d(-${index * 100}%, 0, 0)` }}>
@@ -260,8 +280,12 @@ function NSEPageControllerView({ controller }: { readonly controller: NSEPageCon
           </div>
         </div>
       ) : (
-        <NSEPresence>{Selected ? <Selected.view key={controller.identifierForObject(objects[index])} /> : null}</NSEPresence>
+        <div ref={content} tabIndex={-1} role="region" aria-label={Selected?.title ?? "Page content"}
+          style={compact ? { flex: "1 1 auto", minHeight: 0 } : { height: "100%" }}>
+          <NSEPresence>{Selected ? <Selected.view key={controller.identifierForObject(objects[index])} /> : null}</NSEPresence>
+        </div>
       )}
     </div>
+    </NSEControllerNavigationChromeBoundary>
   );
 }

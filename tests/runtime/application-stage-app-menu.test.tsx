@@ -35,8 +35,9 @@ import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
-import { NSESourceListScene } from "../../src/NSE/Navigation/SourceList";
-import { NSESidebar } from "../../src/NSE/Navigation/SourceList/NSESidebar";
+import { tabViewController } from "../fixtures/tabViewController";
+import { nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
+import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { NSEWindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRuntimeEnvironment, mountTestSynWareRuntime } from "./helpers";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
@@ -190,19 +191,22 @@ describe("ApplicationStageView app menu", () => {
     fireEvent.click(settings);
     await waitFor(() => expect(execute).toHaveBeenCalledOnce());
   });
-  it("owns source-list identity, destination title and a single footer, and drops the top rail on compact displays", async () => {
+  it("owns source-list identity and destination title, and drops the top rail without remounting compact content", async () => {
     let viewport = { width: 1440, height: 900 };
     const listeners = new Set<(snapshot: typeof viewport) => void>();
     const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), layoutViewport: { getSnapshot: () => viewport, subscribe: listener => { listeners.add(listener); return () => { listeners.delete(listener); }; } } } });
     function SourceListFixture() {
       const traits = React.useSyncExternalStore(runtime.presentationTraits.subscribe, runtime.presentationTraits.getSnapshot, runtime.presentationTraits.getSnapshot);
+      const [controller] = React.useState(() => tabViewController({ ids: ["Buttons"], content: () => <input aria-label="Live draft" defaultValue="Draft" /> }));
+      useNSEDeferredDisposal(controller, fixtureDisposalScheduler);
+      React.useLayoutEffect(() => { controller[nseUpdateTraits]({ presentation: traits, reducedMotion: traits.reducedMotion }); }, [controller, traits]);
       // Stands in for a window titled "Buttons" (NSWindow.title), as the window controller's mount does.
       const titlebar = React.useContext(NSEWindowTitlebarHostContext);
       React.useLayoutEffect(() => {
         titlebar?.setDocument({ title: "Buttons", subtitle: "", documentEdited: false });
         return () => titlebar?.setDocument(null);
       }, [titlebar]);
-      return <NSESourceListScene compact={traits.horizontalSizeClass === "compact"} sidebar={<NSESidebar sections={[]} />} status={{ rail: "25 sections" }}><input aria-label="Live draft" defaultValue="Draft" /></NSESourceListScene>;
+      return <NSEViewControllerView controller={controller} />;
     }
     runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.test-app", route: "/test" }, {
       loadModule: async () => ({ default: SourceListFixture }),
@@ -214,13 +218,13 @@ describe("ApplicationStageView app menu", () => {
     await waitFor(() => expect(screen.getByRole("heading", { name: "Buttons" })).toBeTruthy());
     expect(view.container.querySelector('.nse-app-topbar-metal-rail-content')?.textContent).toContain("NSE Gallery");
     expect(view.container.querySelectorAll(".nse-app-topbar")).toHaveLength(1);
-    expect(view.container.querySelectorAll("footer")).toHaveLength(1);
+    // A real window owns its footer; the retained accessory path is covered by nse-source-list-chrome.test.tsx.
     const draft = screen.getByRole("textbox", { name: "Live draft" });
     fireEvent.change(draft, { target: { value: "Retained" } });
     viewport = { width: 390, height: 844 };
     listeners.forEach(listener => listener(viewport));
     await waitFor(() => expect(view.container.querySelector('.nse-app-topbar')?.getAttribute('data-has-rail')).toBe("false"));
-    expect(view.container.querySelector("footer")).toBeNull();
+
     expect(screen.getByRole("textbox", { name: "Live draft" })).toBe(draft);
     viewport = { width: 1440, height: 900 };
     listeners.forEach(listener => listener(viewport));

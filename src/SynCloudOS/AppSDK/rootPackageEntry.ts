@@ -10,7 +10,6 @@ export { preference } from "../../NSE/sdkPackageEntry";
 export type { NSEPreferenceDescriptor } from "../../NSE/sdkPackageEntry";
 export { observes } from "../../NSE/sdkPackageEntry";
 export type { NSEObservationOptions } from "../../NSE/sdkPackageEntry";
-export { createNSETabSelectionRestoration } from "../../NSE/sdkPackageEntry";
 export type { NSENavigationRestorationDescriptor } from "../../NSE/sdkPackageEntry";
 export { bind, createNSEBinding, useNSEBinding } from "../../NSE/sdkPackageEntry";
 export type { NSEBinding, NSEBindingValue, NSEBindingSnapshot, NSEBindingCommitResult, NSEBindingEdit, NSEBindingOwner, NSEBindingAdapter, NSEBoundValueProps, NSEBindingView, NSEWritableBindingKey } from "../../NSE/sdkPackageEntry";
