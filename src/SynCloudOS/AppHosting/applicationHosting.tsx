@@ -309,6 +309,7 @@ function NSEPresentedPopover({ controller }: { readonly controller: NSEViewContr
   const size = controller.preferredContentSize;
   return <NSEPopover id={`nse-popover:${sheetKey(controller)}`} open surface="overlay" anchor={positioning.of} parentWindowControllerId={null}
     drawsBackground={positioning.drawsBackground}
+    relativeTo={positioning.relativeTo}
     presentation={{ mode: "automatic", placement: popoverPlacement[positioning.preferredEdge ?? "maxY"] }}
     {...(controller.title ? { title: controller.title } : {})} {...(size ? { contentSize: size } : {})}
     onOpenChange={(open, reason) => {

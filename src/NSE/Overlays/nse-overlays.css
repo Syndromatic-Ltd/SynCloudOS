@@ -282,7 +282,7 @@
 }
 .nse-popover-frame [data-nse-part="popover-arrow-fill"] { fill: none; }
 .nse-popover[data-nse-popover-draws-background="false"] [data-nse-part="popover-outline"] { fill: none; }
-.nse-popover[data-nse-popover-draws-background="false"] [data-nse-part="popover-arrow-fill"] { fill: var(--nse-popover-content-fill, Canvas); }
+.nse-popover[data-nse-popover-draws-background="false"] [data-nse-part="popover-arrow-fill"] { fill: var(--nse-popover-arrow-fill, Canvas); }
 .nse-popover-arrow { position: absolute; width: 20px; height: 20px; pointer-events: none; }
 
 .nse-overlay-popup.nse-popover[data-nse-part="surface"] > .nse-overlay-popup-content {

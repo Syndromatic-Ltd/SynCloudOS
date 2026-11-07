@@ -60,6 +60,8 @@ export interface NSEOverlayPositionOptions {
    * The anchor still owns the surface's lifetime and focus.
    */
   readonly anchorPoint?: NSEOverlayAnchorPoint | null;
+  /** A rectangle in the positioning view's local coordinates. */
+  readonly anchorRect?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
   readonly floating: HTMLElement;
   readonly boundary?: () => NSEOverlayRegionBounds | null;
   readonly arrow?: HTMLElement | null;
@@ -108,6 +110,7 @@ export function logicalPlacementToFloatingPlacement(
 export function computeNSEOverlayPosition({
   anchor,
   anchorPoint = null,
+  anchorRect,
   floating,
   boundary,
   arrow,
@@ -160,7 +163,17 @@ export function computeNSEOverlayPosition({
         contextElement: anchor,
         getBoundingClientRect: () => ({ x: anchorPoint.x, y: anchorPoint.y, top: anchorPoint.y, left: anchorPoint.x, bottom: anchorPoint.y, right: anchorPoint.x, width: 0, height: 0 }),
       }
-    : anchor;
+    : anchorRect ? {
+        contextElement: anchor,
+        getBoundingClientRect: () => {
+          const bounds = anchor.getBoundingClientRect();
+          const scaleX = anchor.offsetWidth ? bounds.width / anchor.offsetWidth : 1;
+          const scaleY = anchor.offsetHeight ? bounds.height / anchor.offsetHeight : 1;
+          const x = bounds.x + anchorRect.x * scaleX, y = bounds.y + anchorRect.y * scaleY;
+          const width = anchorRect.width * scaleX, height = anchorRect.height * scaleY;
+          return { x, y, top: y, left: x, right: x + width, bottom: y + height, width, height };
+        },
+      } : anchor;
 
   const performUpdate = () => {
     if (!active) return;
@@ -182,7 +195,9 @@ export function computeNSEOverlayPosition({
         middleware: [
           offset(anchorPoint ? 0 : offsetValue),
           flip({ ...clipping, padding: collisionPadding, ...(arrow ? { crossAxis: false } : { fallbackAxisSideDirection: "start" as const }) }),
-          shift({ ...clipping, padding: collisionPadding, crossAxis: Boolean(arrow) }),
+          // Shift along the edge. Size, rather than primary-axis shifting,
+          // keeps a tall popover beside the anchor instead of covering it.
+          shift({ ...clipping, padding: collisionPadding }),
           size({
             ...clipping,
             padding: collisionPadding,
@@ -232,15 +247,16 @@ export function computeNSEOverlayPosition({
         }[resolvedPlacement.split("-")[0] as "top" | "right" | "bottom" | "left"];
         // The final viewport guard can shift a first WebKit measurement after
         // middleware ran. Correct the arrow by that same displacement.
-        const arrowX = arrowData.x == null ? null : Math.max(12, Math.min(floatingRect.width - 32, arrowData.x + x - boundedX));
-        const arrowY = arrowData.y == null ? null : Math.max(12, Math.min(floatingRect.height - 32, arrowData.y + y - boundedY));
+        const arrowWidth = arrow.offsetWidth, arrowHeight = arrow.offsetHeight;
+        const arrowX = arrowData.x == null ? null : Math.max(12, Math.min(floatingRect.width - 12 - arrowWidth, arrowData.x + x - boundedX));
+        const arrowY = arrowData.y == null ? null : Math.max(12, Math.min(floatingRect.height - 12 - arrowHeight, arrowData.y + y - boundedY));
         arrow.style.left = arrowX == null ? "" : `${arrowX}px`;
         arrow.style.top = arrowY == null ? "" : `${arrowY}px`;
         arrow.style.right = "";
         arrow.style.bottom = "";
-        arrow.style.setProperty(staticSide, "-10px");
-        const originX = arrowX == null ? (staticSide === "left" ? -10 : floatingRect.width + 10) : arrowX + 10;
-        const originY = arrowY == null ? (staticSide === "top" ? -10 : floatingRect.height + 10) : arrowY + 10;
+        arrow.style.setProperty(staticSide, `${-(staticSide === "left" || staticSide === "right" ? arrowWidth : arrowHeight) / 2}px`);
+        const originX = arrowX == null ? (staticSide === "left" ? -arrowWidth / 2 : floatingRect.width + arrowWidth / 2) : arrowX + arrowWidth / 2;
+        const originY = arrowY == null ? (staticSide === "top" ? -arrowHeight / 2 : floatingRect.height + arrowHeight / 2) : arrowY + arrowHeight / 2;
         floating.style.transformOrigin = `${originX}px ${originY}px`;
         updateNSEPopoverFrame(floating, arrow);
         floating.dataset.nsePositioned = "true";

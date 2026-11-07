@@ -51,6 +51,9 @@ export interface NSEPopoverProps {
   readonly id: string;
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
+  /** NSPopover.show(relativeTo:of:preferredEdge:): a rectangle in the anchor's
+   * local coordinates; omitted means the entire positioning view. */
+  readonly relativeTo?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
   /** Null denotes an application-stage surface with no WindowManager parent. */
   readonly parentWindowControllerId: string | null;
   readonly parentResponderId?: string;
@@ -101,6 +104,7 @@ export function NSEPopover({
   id,
   open,
   anchor,
+  relativeTo,
   parentWindowControllerId,
   parentResponderId,
   parentId,
@@ -118,7 +122,9 @@ export function NSEPopover({
 }: NSEPopoverProps) {
   const resolvedPresentation = useResolvedPresentation(presentation);
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
-  const canonicalBridge = surface === "overlay" ? null : windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
+  // An anchored popover belongs to the overlay branch: a generic physical
+  // window host cannot draw its collision-resolved frame or content surface.
+  const canonicalBridge = surface === "overlay" || anchor || !drawsBackground ? null : windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
   const handleDidClose = useNSEWindowSurfaceLifecycle({
     bridge: canonicalBridge,
     requestId: id,
@@ -174,6 +180,7 @@ export function NSEPopover({
       id={id}
       open={open}
       anchor={anchor}
+      relativeTo={relativeTo}
       parentResponderId={parentResponderId}
       parentId={parentId}
       parentScopeId={parentScopeId}
@@ -184,7 +191,7 @@ export function NSEPopover({
       modal={resolvedPresentation.mode === "sheet"}
       presentation={resolvedPresentation}
       drawsBackground={drawsBackground}
-      style={contentSize ? { width: contentSize.width, height: contentSize.height } : undefined}
+      style={contentSize ? { width: contentSize.width, height: contentSize.height, minWidth: 0 } : undefined}
       onOpenChange={onOpenChange}
     >
       {children}
