@@ -18,7 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AUFXAudioRecorder, type AUFXAudioRecorderEvent, type AUFXAudioRecorderOptions } from "../../FX/AudioFX/AUFXAudioRecorder";
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
+
+import { AUFXAudioRecorder, createHostAUFXAudioRecorder, type AUFXAudioRecorderEvent, type AUFXAudioRecorderOptions } from "../../FX/AudioFX/AUFXAudioRecorder";
 import {
   AUFXAudioSession,
   type AUFXAudioDevice,
@@ -222,7 +225,7 @@ class BrowserAudioSession implements AUFXAudioSessionPort {
     if (!mimeType || !this.#platform!.isTypeSupported(mimeType)) throw new Error("Requested recording format is unavailable.");
     const native = this.#platform!.createRecorder(this.#stream, { mimeType });
     let unsubscribe: (() => void) | null = null;
-    const recorder = new AUFXAudioRecorder({
+    const recorder = createHostAUFXAudioRecorder({
       mimeType: native.mimeType || mimeType,
       now: () => this.#platform!.now(),
       subscribe: handler => {

@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../src/Foundation/NSEData";
+
 import { expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { AUFXAudioFile } from "../../../src/FX/AudioFX/AUFXAudioFile";
@@ -99,8 +101,8 @@ it("rejects empty, control-bearing, and oversized source references before loadi
 it("exports an owned PCM16 WAV result with accurate metadata", async () => {
   const f = fixture(), file = await f.adapter.openFile({ source: "/tone.mp3" }, new AbortController().signal);
   const result = await f.adapter.exportFile(file, new AbortController().signal);
-  expect(result.mimeType).toBe("audio/wav"); expect(result.byteLength).toBe(result.data.size); expect(result.fileType).toBe("wav");
-  expect(result.data).toBeInstanceOf(Blob); expect(result.byteLength).toBeGreaterThan(44);
+  expect(result.mimeType).toBe("audio/wav"); expect(result.byteLength).toBe(result.data.count); expect(result.fileType).toBe("wav");
+  expect(result.data).toBeInstanceOf(NSEData); expect(result.byteLength).toBeGreaterThan(44);
 });
 
 it("exports long PCM as bounded WAV chunks while preserving the file cursor", async () => {
@@ -113,7 +115,7 @@ it("exports long PCM as bounded WAV chunks while preserving the file cursor", as
   expect(file.framePosition).toBe(123);
   expect(Math.max(...readFrames.mock.calls.map(([frames]) => frames))).toBeLessThanOrEqual(2_048);
   expect(readFrames.mock.calls.length).toBeGreaterThan(1);
-  const decoded = AUFXAudioFile.decodeWAV(await result.data.arrayBuffer());
+  const decoded = AUFXAudioFile.decodeWAV(result.data);
   expect(decoded.frameLength).toBe(5_001);
   expect(decoded.getSample(0, 0)).toBeCloseTo(0.5, 4);
   expect(decoded.getSample(1, 5_000)).toBeCloseTo(-0.25, 4);

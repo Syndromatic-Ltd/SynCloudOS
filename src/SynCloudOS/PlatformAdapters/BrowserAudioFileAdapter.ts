@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
+
 import { AUFXAudioConverter } from "../../FX/AudioFX/AUFXAudioConverter";
 import { AUFXAudioFile } from "../../FX/AudioFX/AUFXAudioFile";
 import { AUFXAudioFormat } from "../../FX/AudioFX/AUFXAudioFormat";
@@ -92,19 +95,19 @@ export class BrowserAudioFileAdapter implements RuntimeAudioFilePort {
     if (options?.format === "opus-webm") {
       const data = await encodeOpusWebM(file, signal, options.bitrate);
       this.#encoded.add("audio/webm");
-      return Object.freeze({ data, mimeType: "audio/webm", byteLength: data.size, fileType: "webm" });
+      return Object.freeze({ data: await NSEData.read(data), mimeType: "audio/webm", byteLength: data.size, fileType: "webm" });
     }
     if (options && options.format !== "wav") throw new DOMException("Unsupported audio export format.", "NotSupportedError");
     if (options?.bitrate !== undefined) throw new TypeError("WAV export does not accept a compressed bitrate.");
-    const position = file.framePosition, length = file.length, header = AUFXAudioFile.encodeWAVHeader(file.processingFormat, length), parts: BlobPart[] = [header.buffer as ArrayBuffer]; file.framePosition = 0;
+    const position = file.framePosition, length = file.length, header = AUFXAudioFile.encodeWAVHeader(file.processingFormat, length), parts: BlobPart[] = [header.bytes.buffer]; file.framePosition = 0;
     try {
       while (file.framePosition < length) {
         signal.throwIfAborted();
         const pcm = file.readFrames(Math.min(2_048, length - file.framePosition));
-        parts.push(AUFXAudioFile.encodePCM16Chunk(pcm).buffer as ArrayBuffer);
+        parts.push(AUFXAudioFile.encodePCM16Chunk(pcm).bytes.buffer);
         if ((file.framePosition & 16_383) === 0) await new Promise<void>(resolve => setTimeout(resolve, 0));
       }
-      signal.throwIfAborted(); const data = new Blob(parts, { type: "audio/wav" }); return Object.freeze({ data, mimeType: "audio/wav", byteLength: data.size, fileType: "wav" });
+      signal.throwIfAborted(); const data = new Blob(parts, { type: "audio/wav" }); return Object.freeze({ data: await NSEData.read(data), mimeType: "audio/wav", byteLength: data.size, fileType: "wav" });
     } finally { if (file.isOpen) file.framePosition = position; }
   }
   async exportStream(options: AUFXAudioStreamExportOptions, signal: AbortSignal): Promise<AUFXAudioStreamExport> {

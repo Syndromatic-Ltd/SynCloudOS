@@ -61,6 +61,7 @@ const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
 import { useSCOS } from "@syndromatic/syncloudos/sdk";
 import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
+import type { NSEData } from "@syndromatic/syncloudos/foundation";
 import { AUFXAudioChunkStream, AUFXAudioFormat, AUFXAudioPCMBuffer, AUFXClockObservation } from "@syndromatic/syncloudos/fx/audio";
 import { VFXContainerReader } from "@syndromatic/syncloudos/fx/video";
 import { VFXWebMContainerBackend } from "@syndromatic/syncloudos/fx/video/webm";
@@ -76,7 +77,7 @@ function Probe() {
     try {
       opened.framePosition = 21;
       const exported = await app.audio.exportFile(opened, undefined, { format: "opus-webm", bitrate: 64_000 });
-      const bytes = new Uint8Array(await exported.data.arrayBuffer());
+      const bytes = exported.data.bytes;
       const parsed = await new VFXContainerReader({ backend: new VFXWebMContainerBackend(), maximumChunks: 128 }).read(bytes);
       const streamBuffer = new AUFXAudioPCMBuffer(new AUFXAudioFormat(48_000, 1), 960);
       streamBuffer.frameLength = 960;
@@ -88,7 +89,7 @@ function Probe() {
         finally { streamReleased++; }
       });
       const fragments: Uint8Array[] = [];
-      const sink = new WritableStream<Uint8Array>({ write(fragment) { fragments.push(fragment.slice()); } });
+      const sink = new WritableStream<NSEData>({ write(fragment) { fragments.push(new Uint8Array(fragment.bytes)); } });
       const streamed = await app.audio.exportStream({ source, sink, format: "opus-webm" });
       const streamBytes = new Uint8Array(streamed.byteLength);
       let offset = 0;
