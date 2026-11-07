@@ -197,7 +197,7 @@ function runtimeServiceWorker(config) {
       event.respondWith(fetch(request).catch(async () => (await caches.open(cacheName)).match(shellURL).then(response => response ?? Response.error())));
       return;
     }
-    const devAsset = config.development && url.pathname.startsWith(config.base) && (url.searchParams.has("import") || /(?:\.(?:m?[jt]sx?|css|png|webp|svg|jpe?g|gif|woff2?|ttf|otf)$|\/@vite\/client|\/@react-refresh|\/@id\/[^/]+)/u.test(url.pathname)) && !/^\/(?:api|auth|__dev)(?:\/|$)/u.test(url.pathname.slice(config.base.length - 1));
+    const devAsset = config.development && url.pathname.startsWith(config.base) && (["import", "raw", "url"].some(key => url.searchParams.has(key)) || /(?:\.(?:m?[jt]sx?|css|png|webp|svg|jpe?g|gif|woff2?|ttf|otf)$|\/@vite\/client|\/@react-refresh|\/@id\/[^/]+)/u.test(url.pathname)) && !/^\/(?:api|auth|__dev)(?:\/|$)/u.test(url.pathname.slice(config.base.length - 1));
     if (!assets.has(url.href) && !devAsset) return;
     event.respondWith((async () => {
       const cache = await caches.open(cacheName);
@@ -209,12 +209,14 @@ function runtimeServiceWorker(config) {
           if (response.ok && response.type !== "opaque") await cache.put(request, response.clone());
           return response;
         } catch (error) {
-          const cached = await cache.match(request);
+          // These are same-origin static resources. Vite's Vary: Origin must
+          // not split preload and font-loader requests for identical bytes.
+          const cached = await cache.match(request, { ignoreVary: true });
           if (cached) return cached;
           throw error;
         }
       }
-      const cached = await cache.match(request);
+      const cached = await cache.match(request, { ignoreVary: true });
       if (cached) return cached;
       const response = await fetch(request);
       if (response.ok && response.type !== "opaque") await cache.put(request, response.clone());
