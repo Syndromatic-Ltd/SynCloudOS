@@ -1,5 +1,12 @@
 # LocationFX
 
+Speed is carried end to end as `LFXLocation.speedMetresPerSecond`, directly from
+Geolocation's `coords.speed`. Zero means stationary; `null` means the browser
+did not supply speed. Multiply by 3.6 for kilometres per hour. Browsers do not
+provide Core Location's `speedAccuracy`; LocationFX does not estimate it from
+successive fixes. Speed uses the existing `location.read` and `location.request`
+declarations and `useLocation()` lifetime.
+
 LocationFX (`LFX`) is the web-native analogue of Core Location. It answers where the device is, how sure the host is about that answer, and whether the user has allowed the question to be asked. Positions are immutable values, requests take an `AbortSignal`, and every source of updates has an explicit owner that you dispose.
 
 The framework has two halves. The value types (`LFXCoordinate`, `LFXLocation`) are plain library code that you can construct, compare and test anywhere, including in a unit test with no browser. The manager types (`LFXLocationManager`, `LFXLocationWatch`, `LFXLocationClient`) describe a service that the mounted SynWare session provides. You reach the service through `useLocation()`, and the host applies your manifest permissions, its own policy and the browser's Geolocation prompt before any fix reaches you.
