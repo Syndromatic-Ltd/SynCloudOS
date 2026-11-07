@@ -24,6 +24,7 @@ Use native `URL`, `Date`, `Error`, `crypto.randomUUID()` and `JSON` for the web 
 | `NSESortDescriptor` and its option/comparator types | NSSortDescriptor | Stable comparison with reversible ordering |
 | `NSECharacterSet`, `NSEUnicodePropertyName` | NSCharacterSet | Unicode scalar membership and set operations |
 | `NSEUserDefaults`, `NSEUserDefaultsStore` | NSUserDefaults | Keyed preferences through an injected store |
+| `NSEValueTransformer` and the three built-in transformer names | NSValueTransformer | Named subclass registration, forward and reverse value transformations |
 
 Supporting TypeScript option, schema and result types describe the web API; they are not additional Apple classes. `NSETreeNode` belongs to AppKit and is exported by `nse`. Formatters and `NSEUserDefaults` are exported only from `foundation`.
 
@@ -78,6 +79,12 @@ if (parsed.ok) console.log(parsed.value);
 ```
 
 Subclass `NSEFormatter<T>` to provide `string`, `editingString`, `getObjectValue` and `isPartialStringValid`. The methods follow NSFormatter’s conversion and editing responsibilities. Locale and time-zone context is explicit; parse results represent Cocoa’s output/error parameters as a discriminated result.
+
+## Value transformers
+
+Subclass `NSEValueTransformer<Source, Target>` and implement `transformedValue(value)`. Class methods `setValueTransformer(transformer, name)`, `valueTransformerForName(name)` and `valueTransformerNames()` share a named registry in the current JavaScript realm. Registering replaces the previous instance; registering `null` removes the name. A subclass opts into reverse conversion with static `allowsReverseTransformation()`. Its `reverseTransformedValue` may implement a different inverse; the inherited implementation applies the forward operation when reverse conversion is allowed, following NSValueTransformer.
+
+`NSENegateBooleanTransformerName`, `NSEIsNilTransformerName` and `NSEIsNotNilTransformerName` identify the built-in boolean negation and nil predicates. Both `null` and `undefined` bridge nil. Keyed-archive transformers and Objective-C class lookup by name are not provided. The former internal closure registry has been removed and object-controller bindings use the Foundation class directly.
 
 ## Preferences
 
