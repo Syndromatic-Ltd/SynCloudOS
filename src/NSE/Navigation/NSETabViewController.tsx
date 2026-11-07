@@ -21,7 +21,7 @@
 import { useId, type ReactNode } from "react";
 import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
 import { useObserve } from "../Objects/useObserve";
-import { NSEPresence } from "../Animation/NSEPresentation";
+import { NSEChildViewControllerView } from "../Application/viewControllerRenderer";
 import { NSETabBar } from "./NSETabBar";
 import { NSETabBarController } from "./NSETabBarController";
 import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinationHost";
@@ -300,8 +300,10 @@ function NSETabViewControllerView({ controller }: { readonly controller: NSETabV
     <div className="nse-tab-view-controller-content" role={bar && selected ? "tabpanel" : undefined}
       id={selected ? getNSETabBarPanelId(scope, selected.identifier) : undefined}
       aria-labelledby={bar && selected ? getNSETabBarTabId(scope, selected.identifier) : undefined}>
-      {/* The leaving item's view stays while its own exit animations run (none: it goes at once). */}
-      <NSEPresence>{Selected ? <Selected.view key={selected!.identifier} /> : null}</NSEPresence>
+      {/* One superview slot owns both children through a swap. A keyed presence
+          creates a second slot, remounting the incoming controller at handoff
+          and losing its layer presentation. */}
+      {Selected ? <NSEChildViewControllerView controller={Selected} /> : null}
     </div>
     {controller.tabStyle === "segmentedControlOnBottom" ? bar : null}
   </div>;
