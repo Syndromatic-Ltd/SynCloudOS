@@ -19,9 +19,10 @@
  */
 
 import { useId, useSyncExternalStore } from "react";
-import { NSEBox, NSEButton, NSEStackView, NSESwitch } from "../NSE/public/controls";
+import { NSEBox, NSEButton, NSEStackView, NSESwitch, NSETextField } from "../NSE/public/controls";
 import type { PrivacyAuthorizationRecord, PrivacyAuthorizationStatus, PrivacyDecision, PrivacyStore } from "../SynCloudOS/SynCloudOS";
 import type { SystemText } from "./Preferences/useSystemText";
+import "./privacySecurityPane.css";
 
 export interface PrivacySecurityPaneProps {
   readonly store: PrivacyStore;
@@ -71,7 +72,7 @@ function PrivacyServiceRow({ record, store, appName, text: t }: {
   return <section aria-label={service}>
     <NSEStackView orientation="vertical" alignment="fill" spacing={8}>
       <NSEStackView orientation="horizontal" distribution="equal-spacing" alignment="centre" spacing={12}>
-        <strong>{service}</strong>
+        <NSETextField isEditable={false} font="label">{service}</NSETextField>
         <NSESwitch
           state={record.decision === "granted" ? "on" : "off"}
           aria-label={t("preferences.privacy.allow", "Allow {app} to use {service}", { app: appName, service })}
@@ -80,8 +81,8 @@ function PrivacyServiceRow({ record, store, appName, text: t }: {
         />
       </NSEStackView>
       <div id={descriptionId} role="status" aria-live="polite" aria-atomic="true">
-        <p style={{ margin: 0 }}>{t("preferences.privacy.appAccess", "App access: {status}", { status: decision })}</p>
-        <p style={{ margin: 0 }}>{t("preferences.privacy.browserPermission", "Browser permission: {status}", { status: browser })}</p>
+        <NSETextField isEditable={false} font="callout">{t("preferences.privacy.appAccess", "App access: {status}", { status: decision })}</NSETextField>
+        <NSETextField isEditable={false} font="callout">{t("preferences.privacy.browserPermission", "Browser permission: {status}", { status: browser })}</NSETextField>
       </div>
       <NSEButton
         title={t("preferences.privacy.askAgain", "Ask again")}
@@ -112,8 +113,9 @@ export function PrivacySecurityPane({ store, userId, applicationNames, text = fa
       <span className="nse-prefs-empty-detail">{text("preferences.privacy.emptyDetail", "Apps appear here after they check or request access to a device or personal information.")}</span>
     </div> : [...applications].map(([appId, entries]) => {
       const appName = applicationNames?.[appId] ?? appId;
-      return <NSEBox key={appId} title={appName} contentViewMargins={{ width: 12, height: 12 }}>
-        <NSEStackView orientation="vertical" alignment="fill" spacing={16}>
+      return <NSEBox key={appId} title={appName} titlePosition="noTitle" contentViewMargins={{ width: 12, height: 12 }}>
+        <NSEStackView className="nse-privacy-application" orientation="vertical" alignment="fill" spacing={16}>
+          <NSETextField isEditable={false} role="heading" aria-level={2} font="headline" lineBreakMode="byCharWrapping">{appName}</NSETextField>
           {entries.map(record => <PrivacyServiceRow key={record.service} record={record} store={store} appName={appName} text={text} />)}
         </NSEStackView>
       </NSEBox>;
