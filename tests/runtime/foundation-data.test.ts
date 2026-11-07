@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { runInNewContext } from "node:vm";
 import { describe, expect, it } from "vitest";
 import { NSEData, NSEDataCompressionAlgorithm } from "../../src/Foundation/NSEData";
 
@@ -88,4 +89,13 @@ describe("NSEData", () => {
     const packed = await NSEData.from(new Uint8Array([1, 2, 3])).compressed("gzip");
     await expect(packed.subdata({ location: 0, length: packed.count - 1 }).decompressed("gzip")).rejects.toThrow();
   });
+});
+
+it("bridges real cross-realm byte buffers and rejects forged or numeric views", () => {
+  for (const source of [runInNewContext("new Uint8Array([3,4])"), runInNewContext("new Uint8Array([3,4]).buffer")]) {
+    expect(NSEData.from(source).bytes).toEqual(new Uint8Array([3,4]));
+  }
+  for (const source of [new Uint16Array([3,4]), new Uint8ClampedArray([3,4]), { [Symbol.toStringTag]: "Uint8Array" }]) {
+    expect(() => NSEData.from(source as never)).toThrow(TypeError);
+  }
 });
