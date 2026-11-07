@@ -19,6 +19,10 @@
  */
 
 import { createContext, useContext, type PropsWithChildren, type ReactNode } from "react";
+import type { NSELogicalPlacement } from "./overlayTypes";
+
+export type NSEPopoverPreferredEdge = "minX" | "maxX" | "minY" | "maxY";
+export type NSEPopoverBehavior = "transient" | "semitransient" | "applicationDefined";
 
 export interface NSEWindowSurfaceRequest {
   readonly id: string;
@@ -31,6 +35,15 @@ export interface NSEWindowSurfaceRequest {
    *  resizes the window even when its style is not user-resizable. Popovers
    *  always size this way. */
   readonly sizing?: "content";
+  readonly relativeTo?: Readonly<{ x: number; y: number; width: number; height: number }>;
+  readonly preferredEdge?: NSEPopoverPreferredEdge;
+  readonly drawsBackground?: boolean;
+  readonly behavior?: NSEPopoverBehavior;
+  /** Internal logical placement preserves aligned NSEPopup presentations. */
+  readonly placement?: NSELogicalPlacement;
+  readonly collisionPadding?: number;
+  readonly labelledBy?: string;
+  readonly describedBy?: string;
   readonly onDidClose?: () => void;
 }
 

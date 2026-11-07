@@ -51,6 +51,39 @@ function geometryEnvironment() {
 }
 
 describe("window-hosted transient surface bridge", () => {
+  it.each(["transient", "semitransient", "applicationDefined"] as const)("draws a real content-painted %s popover with the shared frame and dismissal policy", async behavior => {
+    const runtime = createTestRuntime();
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: `shared-${behavior}`, owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" }, restoreFocus: anchor => anchor.focus() });
+    const anchor = document.createElement("button"); anchor.textContent = "Positioning view";
+    const root = document.createElement("div"); root.dataset.syncloudosRuntimeOwner = runtime.runtimeId;
+    document.body.append(root); root.append(anchor);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 500, y: 300, width: 100, height: 40 }));
+    const id = await bridge.present({ id: "paper", role: "popover", title: "Paper", parentWindowControllerId: null, anchor,
+      relativeTo: { x: 20, y: 8, width: 20, height: 20 }, preferredEdge: "minX", behavior, drawsBackground: false,
+      bounds: { x: 0, y: 0, width: 240, height: 140 } }, <div style={{ "--nse-popover-content-fill": "#efe2c6" } as React.CSSProperties}><input aria-label="Hosted draft" defaultValue="Keep this" /></div>);
+    const view = render(<SynCloudOSProvider runtime={runtime}><WindowLayer contentRegistry={renderers} /></SynCloudOSProvider>, { container: root.appendChild(document.createElement("div")) });
+    try {
+      const surface = await screen.findByRole("dialog", { name: "Paper" });
+      expect(surface.closest("[data-window-host]")?.getAttribute("data-window-host")).toBe(id);
+      expect(surface.querySelector('[data-nse-part="popover-frame"]')).not.toBeNull();
+      expect(surface.dataset.nsePopoverDrawsBackground).toBe("false");
+      await waitFor(() => expect(surface.dataset.placement).toBe("left"));
+      expect(surface.style.getPropertyValue("--nse-popover-arrow-fill")).toBe("#efe2c6");
+      expect(runtime.windows.select(id).record.bounds).toMatchObject({ x: 268, y: 248 });
+      expect(runtime.windows.select(id).record.anchor?.rect).toEqual({ x: 520, y: 308, width: 20, height: 20 });
+      fireEvent.pointerDown(anchor);
+      if (behavior === "transient") await waitFor(() => expect(runtime.windows.list({ role: "popover" })).toHaveLength(0));
+      else {
+        await act(async () => { await new Promise(resolve => setTimeout(resolve, 10)); });
+        expect(runtime.windows.list({ role: "popover" })).toHaveLength(1);
+        fireEvent.keyDown(surface, { key: "Escape" });
+        if (behavior === "semitransient") await waitFor(() => expect(runtime.windows.list({ role: "popover" })).toHaveLength(0));
+        else expect(runtime.windows.list({ role: "popover" })).toHaveLength(1);
+      }
+    } finally { view.unmount(); bridge.dispose(); root.remove(); await runtime.dispose("test"); }
+  });
+
   it.each(["modal", "sheet"] as const)("restores a user-positioned normal %s after book changes and removes geometry work", async role => {
     const geometry = geometryEnvironment();
     geometry.layout.set({ width: 900, height: 700 }); geometry.visual.set({ width: 900, height: 700, offsetLeft: 0, offsetTop: 0, scale: 1 });
@@ -114,7 +147,7 @@ describe("window-hosted transient surface bridge", () => {
     const content = controller.record.content;
     rect.mockReturnValue(DOMRect.fromRect({ x: 400, y: 160, width: 100, height: 30 }));
     geometry.visual.set({ width: 800, height: 400, offsetLeft: 100, offsetTop: 80, scale: 1 });
-    await waitFor(() => expect(controller.record.bounds).toEqual({ x: 270, y: 200, width: 360, height: 272 }));
+    await waitFor(() => expect(controller.record.bounds).toEqual({ x: 270, y: 202, width: 360, height: 270 }));
     expect(runtime.windows.select(id)).toBe(controller);
     expect(controller.record.content).toBe(content);
     expect(renderers.size).toBe(1);
@@ -137,7 +170,7 @@ describe("window-hosted transient surface bridge", () => {
     expect(listener).toBeTypeOf("function");
     listener?.();
     await waitFor(() => expect(runtime.windows.select(id).record.anchor?.rect.x).toBe(800));
-    expect(runtime.windows.select(id).record.bounds.x).toBe(518);
+    expect(runtime.windows.select(id).record.bounds.x).toBe(656);
     await bridge.dismiss("scrolling");
     bridge.dispose(); anchor.remove(); await runtime.dispose("test");
   });
@@ -425,17 +458,17 @@ describe("window-hosted transient surface bridge", () => {
     const windowControllerId = await bridge.present(request, <p>Placed</p>);
     const record = () => runtime.windows.select(windowControllerId).record;
 
-    // Centred on the anchor, 10px below it (jsdom's viewport is 1024 x 768).
+    // Shared joined frame: centred on the anchor, 12px below it.
     expect(record()).toMatchObject({
       style: ["closable"],
-      bounds: { x: 170, y: 440, width: 360, height: 280 },
+      bounds: { x: 170, y: 442, width: 360, height: 280 },
       anchor: { id: "popover-anchor", edge: "block-end", alignment: "center" },
     });
 
     place(700);
     await bridge.present({ ...request }, <p>Placed</p>);
     expect(record()).toMatchObject({
-      bounds: { x: 170, y: 410 },
+      bounds: { x: 170, y: 408 },
       anchor: { edge: "block-start", alignment: "center" },
     });
     anchor.remove();

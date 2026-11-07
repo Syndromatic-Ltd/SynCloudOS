@@ -32,6 +32,7 @@ import {
 import type { NSEOverlayRegionBounds } from "./overlayRegion";
 import type { NSELogicalPlacement } from "./overlayTypes";
 import { updateNSEPopoverFrame } from "./popoverFrame";
+import { applyNSEPopoverPosition, computeNSEPopoverPosition, nsePopoverReference } from "./popoverPosition";
 
 export type NSEOverlayDirection = "ltr" | "rtl";
 export type NSEOverlayCollisionPadding = Padding;
@@ -184,6 +185,29 @@ export function computeNSEOverlayPosition({
     const updateGeneration = ++generation;
     try {
       const region = boundary?.() ?? null;
+      if (arrow && floating.classList.contains("nse-popover")) {
+        const view = floating.ownerDocument.defaultView;
+        const viewport = region ?? { x: 0, y: 0, width: view?.innerWidth ?? 0, height: view?.innerHeight ?? 0 };
+        const padding = typeof collisionPadding === "number" ? collisionPadding : Math.max(0, ...Object.values(collisionPadding));
+        // Measure the preferred plate again, rather than retaining a size
+        // constrained by the anchor's previous edge or viewport.
+        floating.style.setProperty("--nse-overlay-available-inline-size", `${Math.max(1, viewport.width - padding * 2)}px`);
+        floating.style.setProperty("--nse-overlay-available-block-size", `${Math.max(1, viewport.height - padding * 2)}px`);
+        void computeNSEPopoverPosition({
+          reference: nsePopoverReference(anchor, anchorRect),
+          contentSize: { width: floating.offsetWidth, height: floating.offsetHeight },
+          boundary: viewport,
+          placement: logicalPlacementToFloatingPlacement(placement, direction),
+          collisionPadding: padding,
+        }).then(position => {
+          if (!active || generation !== updateGeneration || !anchor.isConnected) return;
+          floating.style.left = `${position.bounds.x}px`; floating.style.top = `${position.bounds.y}px`;
+          floating.style.setProperty("--nse-overlay-available-inline-size", `${position.bounds.width}px`);
+          floating.style.setProperty("--nse-overlay-available-block-size", `${position.bounds.height}px`);
+          applyNSEPopoverPosition(floating, arrow, position);
+        }).catch(reportPlacementFailure);
+        return;
+      }
       const clipping = region ? { rootBoundary: region, boundary: [] as Element[] } : {};
       void computePosition(reference, floating, {
         // The surface is written as position: fixed, so it is placed in

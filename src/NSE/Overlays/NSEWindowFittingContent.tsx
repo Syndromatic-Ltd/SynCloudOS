@@ -32,17 +32,17 @@ export function NSEWindowFittingContent({ onFittingSize, children }: { readonly 
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const node = ref.current;
-    const view = node?.closest<HTMLElement>(".nse-window-view");
-    const area = node?.closest<HTMLElement>(".nse-window__content");
+    const view = node?.closest<HTMLElement>(".nse-window-view, [data-nse-window-popover]");
+    const area = node?.closest<HTMLElement>(".nse-window__content, .nse-overlay-popup-content");
     if (!node || !view || !area) return;
     const measure = () => {
       const style = getComputedStyle(area);
       const paddingInline = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
       const paddingBlock = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
-      onFittingSize({
-        width: Math.ceil(node.offsetWidth + paddingInline + view.offsetWidth - area.clientWidth),
-        height: Math.ceil(node.offsetHeight + paddingBlock + view.offsetHeight - area.clientHeight),
-      });
+      const popover = view.hasAttribute("data-nse-window-popover");
+      const width = Math.ceil(node.offsetWidth + paddingInline + (popover ? 0 : view.offsetWidth - area.clientWidth));
+      const height = Math.ceil(node.offsetHeight + paddingBlock + (popover ? 0 : view.offsetHeight - area.clientHeight));
+      if (!popover || width > 0 && height > 0) onFittingSize({ width, height });
     };
     measure();
     if (typeof ResizeObserver === "undefined") return;

@@ -69,16 +69,33 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
     const layer = layerRef.current;
     if (!documentPort || !layer) return;
     const ownerRoot = runtimeOwnerRoot(layer, runtime.runtimeId);
+    const dismissTransients = (reason: "outside-pointer" | "anchor-removed", except?: string) => {
+      const popoverSheets = runtime.windows.list({ role: "sheet" }).filter(controller => {
+        const state = controller.contentState;
+        return state.status === "loaded" && contentRegistry.surface(state.mountKey)?.request.drawsBackground !== undefined;
+      });
+      const candidates = [...runtime.windows.list({ role: "popover" }), ...popoverSheets].filter(({ record }) => !record.pinned && record.id !== except);
+      const eligible = candidates.filter(controller => {
+        const state = controller.contentState;
+        const request = state.status === "loaded" ? contentRegistry.surface(state.mountKey)?.request : null;
+        if (reason === "anchor-removed") return request?.anchor
+          ? !request.anchor.isConnected
+          : controller.record.anchor && !hasOwnedAnchor(ownerRoot, runtime.runtimeId, controller.record.anchor.id);
+        return !request?.behavior || request.behavior === "transient";
+      });
+      if (eligible.length === candidates.length && candidates.every(({ record }) => record.role === "popover")) {
+        void runtime.windows.dismissTransientWindows({ reason, ...(except ? { except } : {}) }).catch(() => undefined);
+      } else {
+        for (const controller of eligible) void runtime.windows.requestClose(controller.id, { reason: "command" }).catch(() => undefined);
+      }
+    };
     const dismissOutside = (event: PointerEvent) => {
       const ElementPort = documentPort.defaultView?.Element;
       const target = ElementPort && event.target instanceof ElementPort ? event.target : null;
       if (target?.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) return;
       const host = target?.closest<HTMLElement>("[data-window-host]") ?? null;
       const except = host?.dataset.windowHost;
-      void runtime.windows.dismissTransientWindows({
-        reason: "outside-pointer",
-        ...(except ? { except } : {}),
-      }).catch(() => undefined);
+      dismissTransients("outside-pointer", except);
     };
     ownerRoot.addEventListener("pointerdown", dismissOutside, true);
     const MutationObserverPort = documentPort.defaultView?.MutationObserver;
@@ -91,7 +108,7 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
             !record.pinned && record.anchor ? [record.anchor.id] : []
           ));
           if (currentAnchors.some((anchorId) => !hasOwnedAnchor(ownerRoot, runtime.runtimeId, anchorId))) {
-            void runtime.windows.dismissTransientWindows({ reason: "anchor-removed" }).catch(() => undefined);
+            dismissTransients("anchor-removed");
           }
         })
       : null;
@@ -100,7 +117,7 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
       ownerRoot.removeEventListener("pointerdown", dismissOutside, true);
       observer?.disconnect();
     };
-  }, [documentPort, managerSnapshot.generation, runtime, transientAnchors.join("\u0000")]);
+  }, [contentRegistry, documentPort, managerSnapshot.generation, runtime, transientAnchors.join("\u0000")]);
 
   const modalControllers = managerSnapshot.windowControllerIds
     .map((id) => runtime.windows.select(id))

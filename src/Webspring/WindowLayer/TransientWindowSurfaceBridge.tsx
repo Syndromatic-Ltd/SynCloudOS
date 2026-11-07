@@ -28,21 +28,13 @@ import type {
   WindowContentDescriptor,
   WindowContentFactoryRegistration,
   WindowContentRegistration,
-  WindowRole,
 } from "../../SynCloudOS/SynCloudOS";
+import type { NSEWindowSurfaceRequest } from "../../NSE/Overlays/NSEWindowSurfaceBridge";
+import { computeNSEPopoverPosition, nsePopoverEdgePlacement, nsePopoverReference, type NSEPopoverPosition } from "../../NSE/Overlays/popoverPosition";
+import { logicalPlacementToFloatingPlacement } from "../../NSE/Overlays/computeNSEOverlayPosition";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
 
-export interface TransientWindowSurfaceRequest {
-  readonly id: string;
-  readonly role: Extract<WindowRole, "sheet" | "panel" | "modal" | "popover">;
-  readonly title: string;
-  readonly parentWindowControllerId: string | null;
-  readonly anchor: HTMLElement | null;
-  readonly bounds: WindowBounds;
-  /** "content": `bounds` carries the fitted content size (see NSEWindowSurfaceRequest). */
-  readonly sizing?: "content";
-  readonly onDidClose?: () => void;
-}
+export type TransientWindowSurfaceRequest = NSEWindowSurfaceRequest;
 
 export type TransientWindowSurfaceDismissResult =
   | WindowCloseResult
@@ -72,6 +64,8 @@ export interface TransientWindowSurfaceBridgeOptions {
 interface SurfaceEntry {
   /** Last normal transient frame; never shared with ordinary window geometry. */
   bookFrameBase: WindowBounds | null;
+  popoverPosition: NSEPopoverPosition | null;
+  geometryGeneration: number;
   readonly generation: number;
   readonly requestId: string;
   readonly windowControllerId: string;
@@ -124,23 +118,6 @@ function boundsEqual(left: WindowBounds, right: WindowBounds): boolean {
   return left.x === right.x && left.y === right.y && left.width === right.width && left.height === right.height;
 }
 
-/** Where a popover's pointer sits along its edge, measured from the nearer end. */
-const POPOVER_POINTER_INSET = 28;
-const POPOVER_ANCHOR_GAP = 10;
-const POPOVER_VIEWPORT_MARGIN = 8;
-
-interface PopoverPlacement {
-  readonly bounds: WindowBounds;
-  readonly edge: WindowAnchor["edge"];
-  readonly alignment: WindowAnchor["alignment"];
-}
-
-/**
- * Hangs a popover off its anchor: below it, or above when only that fits,
- * centred on the anchor when it can be, otherwise with its pointer near the
- * end that keeps the popover on screen. Null when the anchor has no layout
- * (detached, or a host without one), so the request's bounds stand.
- */
 function placementViewport(runtime: SynCloudOSRuntime, request: TransientWindowSurfaceRequest): { bounds: WindowBounds | null; bookRegion: boolean } {
   const screen = runtime.screen.getCurrentSnapshot();
   if (screen.geometryState !== "current") return { bounds: null, bookRegion: false };
@@ -168,48 +145,14 @@ function placementViewport(runtime: SynCloudOSRuntime, request: TransientWindowS
   return { bounds: right > left && bottom > top ? { x: left, y: top, width: right - left, height: bottom - top } : null, bookRegion: true };
 }
 
-function popoverPlacement(anchor: HTMLElement | null, size: WindowBounds, viewport: WindowBounds | null): PopoverPlacement | null {
-  if (!anchor?.isConnected || !viewport) return null;
-  const rect = anchor.getBoundingClientRect();
-  if (rect.width === 0 && rect.height === 0) return null;
-  if (![rect.x, rect.y, rect.width, rect.height].every(Number.isFinite)) return null;
-  const inlineMargin = Math.min(POPOVER_VIEWPORT_MARGIN, viewport.width / 4);
-  const blockMargin = Math.min(POPOVER_VIEWPORT_MARGIN, viewport.height / 4);
-  const left = viewport.x + inlineMargin;
-  const top = viewport.y + blockMargin;
-  const right = viewport.x + viewport.width - inlineMargin;
-  const bottom = viewport.y + viewport.height - blockMargin;
-  const width = Math.min(size.width, right - left);
-  const below = rect.bottom + POPOVER_ANCHOR_GAP;
-  const roomBelow = Math.max(0, bottom - Math.max(top, below));
-  const roomAbove = Math.max(0, Math.min(bottom, rect.top - POPOVER_ANCHOR_GAP) - top);
-  // Hang below when the content fits there or there is more room below;
-  // otherwise above. Taller content than the chosen side holds is clamped to
-  // it and scrolls inside the window, rather than running off the screen.
-  const edge = size.height <= roomBelow || roomBelow >= roomAbove ? "block-end" : "block-start";
-  const height = Math.min(size.height, Math.max(Math.min(120, bottom - top), edge === "block-end" ? roomBelow : roomAbove));
-  const above = rect.top - POPOVER_ANCHOR_GAP - height;
-  const centre = rect.left + rect.width / 2;
-  const maxX = right - width;
-  let x = centre - width / 2;
-  let alignment: WindowAnchor["alignment"] = "center";
-  if (x < left) {
-    x = centre - POPOVER_POINTER_INSET;
-    alignment = "start";
-  } else if (x > maxX) {
-    x = centre - width + POPOVER_POINTER_INSET;
-    alignment = "end";
-  }
-  return {
-    bounds: {
-      x: Math.min(Math.max(Math.round(x), left), maxX),
-      y: Math.min(Math.max(Math.round(edge === "block-end" ? below : above), top), bottom - height),
-      width,
-      height,
-    },
-    edge,
-    alignment,
-  };
+async function popoverPosition(request: TransientWindowSurfaceRequest, viewport: WindowBounds | null): Promise<NSEPopoverPosition | null> {
+  if (request.role !== "popover" || !request.anchor?.isConnected || !viewport) return null;
+  const reference = nsePopoverReference(request.anchor, request.relativeTo);
+  if (![reference.x, reference.y, reference.width, reference.height].every(Number.isFinite)) return null;
+  return computeNSEPopoverPosition({ reference, contentSize: request.bounds, boundary: viewport,
+    placement: logicalPlacementToFloatingPlacement(request.preferredEdge ? nsePopoverEdgePlacement[request.preferredEdge] : request.placement ?? "block-end", request.anchor.ownerDocument.defaultView?.getComputedStyle(request.anchor).direction === "rtl" ? "rtl" : "ltr"),
+    collisionPadding: request.collisionPadding,
+  });
 }
 
 function fittedBookFrame(bounds: WindowBounds, viewport: WindowBounds): WindowBounds {
@@ -262,16 +205,18 @@ function acquireAnchorIdentity(anchor: HTMLElement, fallbackId: string): Surface
   } };
 }
 
-function serialisableAnchor(identity: SurfaceAnchorIdentity | null, placement: PopoverPlacement | null = null): WindowAnchor | null {
+function serialisableAnchor(identity: SurfaceAnchorIdentity | null, request: TransientWindowSurfaceRequest, position: NSEPopoverPosition | null = null): WindowAnchor | null {
   if (!identity) return null;
   const { anchor, id } = identity;
-  const rect = anchor.getBoundingClientRect();
+  const rect = nsePopoverReference(anchor, request.relativeTo);
+  const side = position?.placement.split("-")[0] ?? "bottom";
+  const edge = ({ top: "block-start", bottom: "block-end", left: "inline-start", right: "inline-end" } as const)[side as "top"];
   return Object.freeze({
     id,
-    rect: Object.freeze({ x: rect.left, y: rect.top, width: rect.width, height: rect.height }),
-    edge: placement?.edge ?? "block-end" as const,
-    alignment: placement?.alignment ?? "start" as const,
-    offset: POPOVER_ANCHOR_GAP,
+    rect: Object.freeze({ x: rect.x, y: rect.y, width: rect.width, height: rect.height }),
+    edge,
+    alignment: "center" as const,
+    offset: 12,
   });
 }
 
@@ -321,7 +266,7 @@ export function createTransientWindowSurfaceBridge({
       geometryFrame = null;
       if (disposed || runtime.signal.aborted) return;
       for (const entry of entries.values()) {
-        if (entry.phase === "open" && (entry.request.role === "sheet" || entry.request.role === "modal" || (entry.request.role === "popover" && entry.request.anchor?.isConnected))) applyMutableRequest(entry, true);
+        if (entry.phase === "open" && (entry.request.role === "sheet" || entry.request.role === "modal" || (entry.request.role === "popover" && entry.request.anchor?.isConnected))) void applyMutableRequest(entry, true).catch(() => undefined);
       }
     });
   }
@@ -423,8 +368,9 @@ export function createTransientWindowSurfaceBridge({
     refreshGeometryObservation();
   };
 
-  const applyMutableRequest = (entry: SurfaceEntry, geometryOnly = false) => {
+  const applyMutableRequest = async (entry: SurfaceEntry, geometryOnly = false) => {
     if (entry.phase !== "open") return;
+    const generation = ++entry.geometryGeneration;
     const controller = runtime.windows.select(entry.windowControllerId);
     const request = entry.request;
     updateAnchorIdentity(entry);
@@ -440,7 +386,9 @@ export function createTransientWindowSurfaceBridge({
       if (bookRegion && entry.bookFrameBase && !geometryOnly) entry.bookFrameBase = { ...entry.bookFrameBase, width: request.bounds.width, height: request.bounds.height };
     }
     if (["popover", "sheet", "modal"].includes(request.role) && !viewport) return;
-    const placement = request.role === "popover" ? popoverPlacement(request.anchor, request.bounds, viewport) : null;
+    const placement = request.role === "popover" ? await popoverPosition(request, viewport) : null;
+    if (entry.phase !== "open" || generation !== entry.geometryGeneration || request !== entry.request) return;
+    entry.popoverPosition = placement;
     // An open content-sized panel (an inspector) is a window the user moves:
     // it keeps its position, follows only its content's size and is brought
     // back on screen when it grows. A popover is re-placed on its anchor.
@@ -458,7 +406,7 @@ export function createTransientWindowSurfaceBridge({
     }
     const latest = runtime.windows.select(entry.windowControllerId).record;
     const nextAnchor = request.role === "popover"
-      ? serialisableAnchor(entry.anchorIdentity, placement)
+      ? serialisableAnchor(entry.anchorIdentity, request, placement)
       : null;
     if (latest.title !== request.title || JSON.stringify(latest.anchor) !== JSON.stringify(nextAnchor)) {
       runtime.windows.updatePresentation(entry.windowControllerId, { title: request.title, anchor: nextAnchor });
@@ -513,9 +461,11 @@ export function createTransientWindowSurfaceBridge({
     const identity = `${hostSegment}:${stableSegment(requestId, "Transient window surface request IDs")}`;
     const windowControllerId = `transient:${ownerSegment}:${identity}`;
     const mountKey = `${rendererId}:${identity}:${entryGeneration}`;
-    const rendererRegistration = renderers.register(mountKey, () => content);
+    const rendererRegistration = renderers.register(mountKey, () => content, () => ({ request: entry.request, popoverPosition: entry.popoverPosition }));
     const entry: SurfaceEntry = {
       bookFrameBase: null,
+      popoverPosition: null,
+      geometryGeneration: 0,
       generation: entryGeneration,
       requestId,
       windowControllerId,
@@ -540,7 +490,8 @@ export function createTransientWindowSurfaceBridge({
         updateAnchorIdentity(entry);
         const { bounds: viewport, bookRegion } = placementViewport(runtime, request);
         if (bookRegion && (request.role === "modal" || request.role === "sheet")) entry.bookFrameBase = request.bounds;
-        const placement = request.role === "popover" ? popoverPlacement(request.anchor, request.bounds, viewport) : null;
+        const placement = await popoverPosition(request, viewport);
+        entry.popoverPosition = placement;
         runtime.windows.create({
           id: windowControllerId,
           workspaceId: owner.workspaceId,
@@ -565,7 +516,7 @@ export function createTransientWindowSurfaceBridge({
           maximumSize: null,
           level: request.role === "panel" || request.role === "popover" ? "floating" : "modal",
           parentWindowControllerId: request.parentWindowControllerId,
-          anchor: request.role === "popover" ? serialisableAnchor(entry.anchorIdentity, placement) : null,
+          anchor: request.role === "popover" ? serialisableAnchor(entry.anchorIdentity, request, placement) : null,
           pinned: false,
           mobilePolicy: request.role === "popover" ? "popover-to-sheet" : "sheet",
           restorationKey: null,
@@ -573,7 +524,7 @@ export function createTransientWindowSurfaceBridge({
         await runtime.windows.open(windowControllerId);
         if (entries.get(requestId) !== entry) throw new Error("Transient window surface open continuation is stale.");
         entry.phase = "open";
-        applyMutableRequest(entry);
+        await applyMutableRequest(entry);
         return windowControllerId;
       } catch (error) {
         finaliseEntry(entry, false);
@@ -608,7 +559,7 @@ export function createTransientWindowSurfaceBridge({
     });
     if (entry.replayAttached) return pending;
     entry.replayAttached = true;
-    void closeEntry(entry).then((result) => {
+    void closeEntry(entry).then(async (result) => {
       entry.replayAttached = false;
       const queued = entry.queuedPresentation;
       entry.queuedPresentation = null;
@@ -630,7 +581,7 @@ export function createTransientWindowSurfaceBridge({
       if (!requiresRecreation(entry.request, queued.request) && entry.phase === "open") {
         entry.request = queued.request;
         entry.rendererRegistration.update(() => queued.content);
-        applyMutableRequest(entry);
+        await applyMutableRequest(entry);
         for (const waiter of queued.waiters) waiter.resolve(entry.windowControllerId);
         return;
       }
@@ -657,8 +608,7 @@ export function createTransientWindowSurfaceBridge({
       }
       existing.request = request;
       existing.rendererRegistration.update(() => content);
-      applyMutableRequest(existing);
-      return existing.presentation;
+      return applyMutableRequest(existing).then(() => existing.presentation);
     }
     return openEntry(request, content).presentation;
   };
