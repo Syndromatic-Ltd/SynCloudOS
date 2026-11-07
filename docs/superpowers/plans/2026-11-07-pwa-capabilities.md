@@ -97,23 +97,46 @@ Totals: 20 Have (two to check), 8 Partial, 19 Missing, 1 overview page.
    - Compression.
    - Passkeys through AuthenticationServices-shaped authorisation.
 
-## Open questions for the owner
+## Decisions (owner, 2026-11-07)
 
-- **Q1. New FX prefixes.** Taken: AFX, GFX, IFX, TFX, AUFX, HFX, MFX, MEFX, VFX, MIFX, LFX, LUFX. Proposed:
-  - **BluetoothFX `BTFX`.** Plain `BFX` reads well but is easy to misread.
-  - **NFCFX `NFCFX`.**
-  - **SpeechFX `SPFX`.**
-  - **ContactsFX `CNFX`**, echoing Contacts' `CN`.
-  - **PassFX `PKFX`** for payment.
-  - **XRFX `XRFX`.**
-  - Alternatively, short single letters where they are free (`BFX`, `NFX`, `SFX`). `SFX` collides with "sound effects" in readers' heads, though.
-- **Q2. AVKit.** PiP and the route picker are AVKit, the UI layer over AVFoundation. Two options:
-  - Controllers in VideoFX (`VFXPictureInPictureController`, `VFXRouteDetector`), with the one visible control (the AirPlay button) as an NSE control (`NSERoutePickerView`).
-  - A separate AVKit-like layer.
-  - Recommendation: the first, which keeps FX free of views.
-- **Q3. Foundation-level pieces.** CryptoKit, Compression and Network are not "Core" media frameworks. Options:
-  - Their own FX families (`CRFX`, `ZFX`, `NWFX`).
-  - A small SynCloudOS Foundation layer.
-  - Recommendation: FX families, for consistency with how apps already discover capabilities.
-- **Q4. Passkeys.** Fold them into the existing runtime Authentication service as an `ASAuthorizationController` analogue, or keep it separate for apps (third-party sign-in) versus the system login?
-- **Q5. Install scope.** Is the installed app the whole Webspring desktop (one install per origin, recommended), or should SynWare apps also be installable on their own (manifest per app route, `scope` per app)?
+- **New FX prefixes:** BluetoothFX `BTFX`, NFCFX `NFX`, SpeechFX `SPFX`, ContactsFX `CNFX`, PassFX `PKFX` (payment), XRFX `XRFX`.
+- **AVKit:** picture-in-picture and route detection are VideoFX controllers (`VFXPictureInPictureController`, `VFXRouteDetector`). The AirPlay button is one NSE control (`NSERoutePickerView`).
+- **CryptoKit, Compression, Network:** follow Apple, where these are standalone frameworks used directly by apps. They become FX families (`CRFX`, `ZFX`, `NWFX`; names still to confirm), next to the Core ones.
+- **Install scope is the developer's choice.**
+  - In single-application mode, the app itself is installable.
+  - A site can make its whole Webspring desktop installable; the Syndromatic site will.
+  - A site can make only chosen apps installable: a manifest per app, with `scope` set to the app's route.
+  - This is declared per site (Webspring) and per app (`Info.ts`), never assumed.
+- **Authentication stays optional everywhere.** Neither a site nor an app has to use it.
+
+## Which layer: FX or SynCloudOS
+
+The rule that settles each new capability:
+
+- **FX:** frameworks an app links and calls directly. They are value types plus device or data access, reached through the session with a manifest permission. Examples: LocationFX, MotionFX, BTFX, NFX, SPFX, CNFX, PKFX, XRFX, CRFX, ZFX, NWFX.
+- **SynCloudOS (the system layer):** services the system mediates between apps, the user and the host:
+  - install and the manifest;
+  - the service worker, offline support, background sync and fetch (BackgroundTasks);
+  - notifications and push (UserNotifications);
+  - document, URL and link handling from `Info.ts`;
+  - authentication (AuthenticationServices);
+  - authorisation (PolicyKit).
+
+## Passkeys and PolicyKit (recommendation)
+
+- **PolicyKit is authorisation, not authentication.** It decides what an authenticated subject may do: roles, capability grants, app access policy and audit. Its Apple analogue is Authorization Services plus the privacy database (TCC); the name follows freedesktop polkit. Passkeys do not belong in it. A passkey proves who the user is, which produces the subject that PolicyKit then judges.
+- **Passkeys become an optional AuthenticationServices-shaped API in the SynCloudOS layer:**
+  - an `ASAuthorizationController`-style controller;
+  - providers after `ASAuthorizationPlatformPublicKeyCredentialProvider`;
+  - registration and assertion requests;
+  - a delegate for completion and errors.
+- **It is used two ways:**
+  - (a) An app signs users in to its own service. The framework returns the credential, and the app's server verifies it. SynCloudOS stores no secrets and runs no relying-party server.
+  - (b) A site developer adds passkeys as one more provider in the existing system sign-in, beside OIDC and local sign-in, through the site's authentication policy.
+- **Both are opt-in.** A site with `authenticationPolicy: "disabled"` or an app that never imports it carries none of it.
+- **PolicyKit needs a review of its own** before it is relied on as the security layer. The owner questioned its efficacy, and that review is out of scope here.
+
+## Open questions for the owner (remaining)
+
+- Confirm the CRFX, ZFX and NWFX prefixes.
+- Confirm the passkey recommendation above.
