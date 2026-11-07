@@ -247,7 +247,7 @@ export interface NSEImageViewProps extends Omit<NSESizeableImageProps, "ref" | "
   zoomOutLabel?: string;
 }
 
-/** NSImageView inherits NSView.element and its optional backing layer. */
+/** NSImageView's host element bridge and optional NSView.layer backing. */
 export interface NSEImageViewHandle {
   readonly element: HTMLDivElement;
   readonly layer: AFXLayer | null;

@@ -46,7 +46,7 @@ describe("AppKit view access", () => {
   const handle=ref.current!; const clip=handle.contentView;
   clip.postsBoundsChangedNotifications=true;
   clip.observeBoundsChanges(listener);
-  await act(async()=>{clip.element.scrollTop=40;fireEvent.scroll(clip.element);await new Promise(r=>setTimeout(r,30));});
+  act(()=>{clip.element.scrollTop=40;fireEvent.scroll(clip.element);});
   expect(listener).toHaveBeenCalledWith({x:0,y:40,width:0,height:0});
   const count=listener.mock.calls.length;
   view.unmount();
