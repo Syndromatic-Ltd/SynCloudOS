@@ -140,7 +140,7 @@ describe('host readiness owner integration', () => {
   it('wires the actual mounted share boundary to the runtime-owned underlying promise', async () => {
     const environment = createTestRuntimeEnvironment(), gate = deferred<void>();
     Object.assign(environment.browser, { getNavigator: () => ({ share: () => gate.promise, userActivation: { isActive: true } }), getWindow: () => ({ isSecureContext: true }) });
-    const runtime = fixture({ environment }); registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: 'com.example.readiness-share', version: '1.0.0', displayName: 'Generated', routes: [{ path: '/generated-share', primary: true }], entitlements: ['web.share'] });
+    const runtime = fixture({ environment }); registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: 'com.example.readiness-share', version: '1.0.0', displayName: 'Generated', routes: [{ path: '/generated-share', primary: true }], runtime: { policy: { public: true } }, entitlements: ['web.share'] });
     const mounted = mountTestSynWareRuntime(runtime, 'com.example.readiness-share'); releases.push(() => mounted.dispose('test'));
     const client = createSynWareContextValue(mounted.runtime).share, caller = new AbortController();
     const pending = client.perform({ title: 'Generated only' }, caller.signal);
@@ -153,7 +153,7 @@ describe('host readiness owner integration', () => {
     Object.assign(environment.browser, { getNavigator: () => native.navigator, getWindow: () => native });
     Object.assign(environment, { createFileSystemAccessPanelPort: (activity: NativeOperationActivity) => createBrowserFileSystemAccessPanelPort(native as unknown as Window, activity) });
     const a = fixture({ environment }), b = fixture({ environment }), appId = 'com.example.readiness-picker';
-    for (const runtime of [a, b]) registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: appId, version: '1.0.0', displayName: 'Generated', routes: [{ path: '/generated-picker', primary: true }], entitlements: ['file.write', 'file.open'] });
+    for (const runtime of [a, b]) registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: appId, version: '1.0.0', displayName: 'Generated', routes: [{ path: '/generated-picker', primary: true }], runtime: { policy: { public: true } }, entitlements: ['file.write', 'file.open'] });
     const mounted = mountTestSynWareRuntime(a, appId); releases.push(() => mounted.dispose('test'));
     const caller = new AbortController(); const pending = createSynWareContextValue(mounted.runtime).filePanels.save({ id: 'generated', accepts: [], suggestedName: 'generated.txt', destination: 'persistent-handle-required', conflictPolicy: 'fail-if-exists' }, caller.signal);
     await vi.waitFor(() => expect(a.updateReadiness.getSnapshot().counts.nativeOperations).toBe(1)); expect(b.updateReadiness.getSnapshot().counts.nativeOperations).toBe(0);
@@ -311,7 +311,7 @@ it('retains real mounted file-write work across mount retirement without chargin
   Object.assign(environment, { createFileSystemAccessPanelPort: () => port });
   Object.assign(environment.browser, { getNavigator: () => ({ userActivation: { isActive: true } }) });
   const a = fixture({ environment }), b = fixture({ environment }), appId = 'com.example.generated-observed-file';
-  registerTestSynWare(a, { schemaVersion: 1, bundleIdentifier: appId, version: '1.0.0', displayName: 'Generated file observer', routes: [{ path: '/generated-observed-file', primary: true }], entitlements: ['file.write'] });
+  registerTestSynWare(a, { schemaVersion: 1, bundleIdentifier: appId, version: '1.0.0', displayName: 'Generated file observer', routes: [{ path: '/generated-observed-file', primary: true }], runtime: { policy: { public: true } }, entitlements: ['file.write'] });
   const mounted = mountTestSynWareRuntime(a, appId); releases.push(() => mounted.dispose('generated-test-end'));
   const selected = await createSynWareContextValue(mounted.runtime).filePanels.save({ id: 'generated-write', accepts: [], suggestedName: 'generated.txt', destination: 'persistent-handle-required', conflictPolicy: 'fail-if-exists' });
   expect(selected.kind).toBe('accepted'); if (selected.kind !== 'accepted') throw new Error('Generated target missing');
