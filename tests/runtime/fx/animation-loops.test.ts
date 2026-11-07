@@ -53,7 +53,10 @@ it('keeps frame-sampled endless presentation time frozen while suspended', () =>
   const tick = (time: number) => { now = time; const batch = [...pending]; pending.clear(); batch.forEach(callback => callback(time)); };
   tick(.5); expect(layer.presentation.opacity).toBeCloseTo(.25);
   suspended = true; notify?.(); expect(pending.size).toBe(0);
-  now = 100; suspended = false; notify?.(); tick(100.5);
+  now = 100; handle.pause();
+  expect(layer.presentation.opacity).toBeCloseTo(.25); expect(handle.state).toBe('paused');
+  suspended = false; notify?.(); expect(pending.size).toBe(0);
+  handle.resume(); tick(100.5);
   expect(layer.presentation.opacity).toBeCloseTo(.5); expect(handle.state).toBe('running');
   handle.cancel(); expect(pending.size).toBe(0); layer.dispose();
 });

@@ -1831,7 +1831,8 @@ export class AFXLayer {
           return;
         }
         running.cancelFrame();
-        running.update(this.#scheduler.now());
+        if (!(duration === Infinity && this.#scheduler.suspended))
+          running.update(this.#scheduler.now());
         if (state === "running") {
           state = "paused";
           running.cancelFrame();
