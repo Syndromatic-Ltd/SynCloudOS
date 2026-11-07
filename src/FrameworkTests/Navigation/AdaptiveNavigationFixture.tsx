@@ -3,7 +3,6 @@ import { createContentBoundPresentationTraitsService, type SynCloudOSRuntime, ty
 import { ResponderScope, useKernelSynCloudOS, useRuntimeNSEOverlayPort } from '../../SynCloudOSReact';
 import { NSEOverlayProvider, NSETabViewController, NSETabViewItem, NSEViewController, nseUnowned, useNSEDeferredDisposal } from '../../NSE/NSE';
 import { nseUpdateTraits } from '../../NSE/Application/NSEViewController';
-import { NSEViewControllerView } from '../../SynCloudOS/AppHosting/applicationHosting';
 import { NSEPopover } from '../../NSE/Overlays/NSEPopover';
 
 function Draft({ id }: { id: string }) {
@@ -74,7 +73,7 @@ export function AdaptiveNavigationFixture() {
         <output data-testid='navigation-state'>{renderer}:{snapshot.selectedIdentifier}</output>
       </div>
       <div ref={setElement} dir={rtl?'rtl':'ltr'} data-testid='navigation-window' style={{width:width?`${width}px`:'100%',maxWidth:'100%',flex:'1',minHeight:0}}>
-        <NSEViewControllerView controller={controller} />
+        <controller.view />
       </div>
     </div>
   </ResponderScope></NSEOverlayProvider>;
