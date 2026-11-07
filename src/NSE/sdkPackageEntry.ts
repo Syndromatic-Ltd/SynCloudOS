@@ -20,6 +20,7 @@
 
 export {
   NSEAnimationContext,
+  useNSETraitCollection,
   NSEAnimationEnvironmentProvider,
   NSELayoutView,
   NSEPresence,

@@ -20,6 +20,8 @@
 
 import type { AFXAnimationTiming } from "../../FX/AnimationFX/public";
 import { NSEAnimationDefaults } from "./NSEAnimationDefaults";
+import { AFXTransaction } from "../../FX/AnimationFX/AFXTransaction";
+import { afxAnimationTiming } from "../../FX/AnimationFX/animationValues";
 
 /** A cubic Bézier curve, as CAMediaTimingFunction's control points describe one. */
 type NSEAnimationTimingFunction = Extract<AFXAnimationTiming, { readonly kind: "cubic-bezier" }>;
@@ -31,22 +33,66 @@ type NSEAnimationTimingFunction = Extract<AFXAnimationTiming, { readonly kind: "
  * `atmoMotion`).
  */
 export class NSEAnimationContext {
-  static readonly #current = new NSEAnimationContext(NSEAnimationDefaults.durationSeconds.standard, NSEAnimationDefaults.easing.standard, false);
+  static readonly #default = new NSEAnimationContext(NSEAnimationDefaults.durationSeconds.standard, NSEAnimationDefaults.easing.standard, false);
+  static readonly #groups: NSEAnimationContext[] = [];
 
   /** NSAnimationContext.duration, in seconds. */
-  readonly duration: number;
+  #duration: number;
+  get duration(): number { return this.#duration; }
+  set duration(value: number) {
+    if (!Number.isFinite(value) || value < 0 || value > 600) throw new RangeError("Animation duration must be finite and between 0 and 600 seconds.");
+    this.#duration = value;
+    if (NSEAnimationContext.#groups.at(-1) === this) AFXTransaction.setAnimationDuration(value);
+  }
   /** NSAnimationContext.timingFunction (a CAMediaTimingFunction in AppKit). */
-  readonly timingFunction: NSEAnimationTimingFunction;
+  #timingFunction: NSEAnimationTimingFunction;
+  get timingFunction(): NSEAnimationTimingFunction { return this.#timingFunction; }
+  set timingFunction(value: NSEAnimationTimingFunction) {
+    const timing = afxAnimationTiming(value);
+    if (typeof timing !== "object" || timing.kind !== "cubic-bezier") throw new TypeError("An animation context timing function needs cubic Bézier control points.");
+    this.#timingFunction = timing;
+    if (NSEAnimationContext.#groups.at(-1) === this) AFXTransaction.setAnimationTimingFunction(timing);
+  }
   /** NSAnimationContext.allowsImplicitAnimation. NSE views animate changes only when asked to. */
-  readonly allowsImplicitAnimation: boolean;
+  #allowsImplicitAnimation: boolean;
+  get allowsImplicitAnimation(): boolean { return this.#allowsImplicitAnimation; }
+  set allowsImplicitAnimation(value: boolean) {
+    if (typeof value !== "boolean") throw new TypeError("allowsImplicitAnimation must be boolean.");
+    this.#allowsImplicitAnimation = value;
+    if (NSEAnimationContext.#groups.at(-1) === this) AFXTransaction.setDisableActions(!value);
+  }
 
   private constructor(duration: number, timingFunction: NSEAnimationTimingFunction, allowsImplicitAnimation: boolean) {
-    this.duration = duration;
-    this.timingFunction = timingFunction;
-    this.allowsImplicitAnimation = allowsImplicitAnimation;
-    Object.freeze(this);
+    this.#duration = duration;
+    this.#timingFunction = timingFunction;
+    this.#allowsImplicitAnimation = allowsImplicitAnimation;
   }
 
   /** NSAnimationContext.current. */
-  static get current(): NSEAnimationContext { return NSEAnimationContext.#current; }
+  static get current(): NSEAnimationContext { return this.#groups.at(-1) ?? this.#default; }
+
+  /** NSAnimationContext.runAnimationGroup(_:completionHandler:). Changes are synchronous;
+   * completion waits for the group's layer and view animations, including nested groups. */
+  static runAnimationGroup(changes: (context: NSEAnimationContext) => void, completionHandler?: () => void): void {
+    if (typeof changes !== "function" || changes.constructor.name === "AsyncFunction") throw new TypeError("Animation groups require a synchronous callback.");
+    if (completionHandler !== undefined && typeof completionHandler !== "function") throw new TypeError("The completion handler must be callable.");
+    const parent = this.current;
+    const context = new NSEAnimationContext(parent.duration, parent.timingFunction, parent.allowsImplicitAnimation);
+    AFXTransaction.begin();
+    this.#groups.push(context);
+    try {
+      context.duration = context.duration;
+      context.timingFunction = context.timingFunction;
+      context.allowsImplicitAnimation = context.allowsImplicitAnimation;
+      if (completionHandler) AFXTransaction.setCompletionBlock(completionHandler);
+      const result: unknown = changes(context);
+      if (result && typeof (result as PromiseLike<unknown>).then === "function") {
+        if (result instanceof Promise) void result.catch(() => {});
+        throw new TypeError("Animation groups require a synchronous callback.");
+      }
+    } finally {
+      this.#groups.pop();
+      AFXTransaction.commit();
+    }
+  }
 }

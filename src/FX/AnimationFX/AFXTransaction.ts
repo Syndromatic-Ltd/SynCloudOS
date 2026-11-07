@@ -197,6 +197,10 @@ export class AFXTransaction {
     if (typeof disableActions !== "boolean") throw new TypeError("disableActions must be boolean.");
     this.#updateContext({ disableActions });
   }
+  /** CATransaction.setAnimationTimingFunction(_:). */
+  static setAnimationTimingFunction(timing: AFXAnimationTiming): void {
+    this.#updateContext({ timing: new AFXAnimation({ duration: this.animationDuration(), timing }).timing });
+  }
   static setCompletionBlock(completion: (() => void) | null): void {
     const frame = layerTransactions.at(-1);
     if (!frame) throw new Error("An active layer transaction is required.");
