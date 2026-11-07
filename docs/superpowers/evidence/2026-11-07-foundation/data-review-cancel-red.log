@@ -1,0 +1,34 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/compression-fx.test.ts -t awaits upstream cancellation even after
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/compression-fx.test.ts (19 tests | 1 failed | 18 skipped) 21ms
+     × awaits upstream cancellation even after the codec reader has errored 20ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/compression-fx.test.ts > CompressionFX > awaits upstream cancellation even after the codec reader has errored
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/compression-fx.test.ts:189:25
+    187|     await new Promise((resolve) => setTimeout(resolve, 0));
+    188|     try {
+    189|       expect(completed).toBe(false);
+       |                         ^
+    190|     } finally {
+    191|       release();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 18 skipped (19)
+   Start at  08:37:36
+   Duration  292ms (transform 65ms, setup 36ms, import 55ms, tests 21ms, environment 0ms)

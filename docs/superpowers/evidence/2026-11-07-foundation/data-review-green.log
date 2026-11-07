@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/compression-fx.test.ts tests/runtime/foundation-data.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  2 passed (2)
+      Tests  36 passed (36)
+   Start at  08:39:41
+   Duration  401ms (transform 112ms, setup 68ms, import 88ms, tests 165ms, environment 0ms)
