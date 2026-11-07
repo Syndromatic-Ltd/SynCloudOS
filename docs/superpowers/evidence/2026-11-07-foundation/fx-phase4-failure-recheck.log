@@ -1,0 +1,178 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/integration/text-system-example.test.ts tests/performance/text-primitives-performance.test.ts tests/runtime/app-share-client.test.ts tests/runtime/architecture-boundaries.test.ts tests/runtime/browser-application-host.test.tsx tests/runtime/browser-global-boundary.test.ts tests/runtime/developer-mcp.test.ts tests/runtime/framework-doc-links.test.ts tests/runtime/heritage-inspector-source.test.ts tests/runtime/host-update-readiness.test.ts tests/runtime/nse-page-tear.test.ts tests/runtime/preference-panes.test.tsx tests/runtime/runtime-keyboard-listener-guard.test.ts tests/runtime/runtime-singleton-boundary.test.ts tests/runtime/runtime.test.ts tests/runtime/synapp-sdk-testing.test.tsx tests/runtime/synware-public-api-boundary-guard.test.ts tests/runtime/system-ui-boundaries.test.ts tests/runtime/fx/mounted-recording.test.ts tests/runtime/fx/phase5-real-authority.test.ts tests/runtime/fx/text-font-host.test.ts tests/runtime/fx/text-font-resource.test.ts --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation\fx-phase4-failure-recheck.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ✓ tests/runtime/host-update-readiness.test.ts (28 tests) 616ms
+ ✓ tests/runtime/preference-panes.test.tsx (21 tests) 767ms
+ ✓ tests/runtime/synapp-sdk-testing.test.tsx (10 tests) 521ms
+ ✓ tests/runtime/runtime.test.ts (14 tests) 154ms
+ ✓ tests/runtime/app-share-client.test.ts (36 tests) 125ms
+ ✓ tests/runtime/fx/phase5-real-authority.test.ts (2 tests) 112ms
+ ✓ tests/runtime/fx/mounted-recording.test.ts (5 tests) 18ms
+ ✓ tests/integration/text-system-example.test.ts (13 tests) 8012ms
+     ✓ admits a scoped image, saves its native references and reacquires verified bytes in a fresh mounted runtime  2119ms
+     ✓ supplies explicit continuation boxes/exclusions, rejects stale geometry and preserves semantic text  635ms
+     ✓ exports the captured revision without dirtying history or releasing live view fonts  3105ms
+     ✓ keeps an oversized flow canonical and refuses PDF at its private page limit  1085ms
+ ✓ tests/performance/text-primitives-performance.test.ts (1 test) 24990ms
+     ✓ lays out 100000+ UTF16 units, reuses warm results and releases retained state  24989ms
+ ✓ tests/runtime/architecture-boundaries.test.ts (36 tests) 13538ms
+     ✓ routes host lifecycle protocols through the internal NSE interoperability entry  830ms
+     ✓ shares canonical bundle identity without granting manifest code runtime access  647ms
+     ✓ enforces the declared internal entry consumers even if an import list is broadened  304ms
+     ✓ forbids re-exporting internal host protocols from a supported package entry  338ms
+     ✓ admits only the lifecycle runtime bridge from FX  692ms
+     ✓ keeps Chronosphere presentation independent of runtime and app context  853ms
+     ✓ uses the shared TypeScript AST scanner for raw keyboard aliases and wrappers  608ms
+     ✓ detects aliased, commented, exported, dynamic, type, and require bypasses  404ms
+     ✓ rejects non-static imports, requires, and import.meta.glob bypasses  521ms
+     ✓ resolves immutable module specifiers to their actual edges without accepting dynamic or shadowed names  916ms
+     ✓ requires every controlled source and resolved target to have one layer  453ms
+     ✓ rejects repository-local resolved targets even when they sit outside controlledSources  423ms
+     ✓ accepts exact package entry aliases with a separately mapped testing subpath  476ms
+     ✓ rejects resolved module targets outside the repository  441ms
+     ✓ expands supported local Vite assets and rejects private-app glob imports  372ms
+     ✓ expands an explicit brace set of supported local Vite asset types  454ms
+     ✓ rejects escaping, unsupported, zero-match, and dynamic glob patterns/options  409ms
+     ✓ selects the most-specific layer independent of declaration order  506ms
+     ✓ rejects equally specific overlapping classifications  397ms
+     ✓ keeps host-only AppSDK seams out of the public AppSDK and SynWare import graph  855ms
+     ✓ uses the committed policy to reject direct and indirect public AppSDK host re-exports  361ms
+     ✓ rejects default-runtime, SynWare-private, and raw-runtime imports  412ms
+     ✓ rejects an allowlist entry as soon as its exact edge disappears  836ms
+stderr | tests/runtime/browser-application-host.test.tsx > keeps a discovered bundle's folder name independent from its case-insensitive identity
+<ref *1> DOMException {
+  [stack]: [Getter/Setter],
+  [Symbol(impl)]: DOMExceptionImpl {
+    name: 'SecurityError',
+    message: 'Application capabilities may only target owned responders.',
+    Symbol(wrapper): [Circular *1],
+    [code]: [Getter]
+  },
+  name: [Getter],
+  message: [Getter],
+  code: [Getter],
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25,
+  [Symbol(Symbol.toStringTag)]: 'DOMException'
+}
+
+The above error occurred in the <Application> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, SynCloudOSWatchdog.
+
+<ref *1> DOMException {
+  [stack]: [Getter/Setter],
+  [Symbol(impl)]: DOMExceptionImpl {
+    name: 'SecurityError',
+    message: 'Application capabilities may only target owned responders.',
+    Symbol(wrapper): [Circular *1],
+    [code]: [Getter]
+  },
+  name: [Getter],
+  message: [Getter],
+  code: [Getter],
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25,
+  [Symbol(Symbol.toStringTag)]: 'DOMException'
+}
+
+The above error occurred in the <Application> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, SynCloudOSWatchdog.
+
+
+ ✓ tests/runtime/browser-application-host.test.tsx (36 tests) 5079ms
+     ✓ offers the host's About attribution for a definition bundle  406ms
+     ✓ presents explicitly requested shared NSE panels through their real window owner  322ms
+     ✓ gives a fullscreen primary that declares a content trigger the application menu, with Account under optional sign-in  843ms
+     ✓ restores the same interactive fullscreen app after cancelling optional sign-in without a service  694ms
+     ✓ retains the nested route, query, fragment and live route content after optional sign-in cancellation  331ms
+ ✓ tests/runtime/developer-mcp.test.ts (62 tests) 12959ms
+     ✓ launches the host entry in a page and reports launch failures and system alerts  8045ms
+     ✓ type-checks each project a solution-style tsconfig references  314ms
+     ✓ reports manifest, missing bundle entry and TypeScript findings structurally  399ms
+     ✓ serves real MCP tool schemas and structured results over stdio  582ms
+ ✓ tests/runtime/heritage-inspector-source.test.ts (3 tests) 14277ms
+   ✓ typechecks the Inspector source dependency closure without emitting package artifacts  12011ms
+   ✓ keeps private host imports out of shared runtime, app and SDK source entries  2261ms
+ ✓ tests/runtime/nse-page-tear.test.ts (13 tests) 31746ms
+     ✓ never lifts the paper still bound below the ragged line, in any pull  19449ms
+     ✓ rolls the sheet without ever stretching the paper  2043ms
+     ✓ carries the free sheet off the page and out of sight inside its canvas  10068ms
+ ✓ tests/runtime/runtime-keyboard-listener-guard.test.ts (2 tests) 8314ms
+     ✓ rejects direct, aliased, constant, and wrapper global keyboard listeners with TypeScript resolution  556ms
+     ✓ rejects every raw global keyboard listener in source  7757ms
+ ✓ tests/runtime/runtime-singleton-boundary.test.ts (6 tests) 9522ms
+     ✓ has no deprecated singleton compatibility helpers or reset calls  1024ms
+     ✓ has no singleton exports or value consumers in production and tests  5466ms
+     ✓ keeps diagnostic-default imports within the explicit exposure boundary  3029ms
+ ✓ tests/runtime/synware-public-api-boundary-guard.test.ts (56 tests) 5256ms
+     ✓ accepts every actual public entry in sdk-entries  5077ms
+ ✓ tests/runtime/system-ui-boundaries.test.ts (1 test) 8960ms
+     ✓ keeps command and system actions behind typed runtime seams  8959ms
+ ✓ tests/runtime/fx/text-font-host.test.ts (13 tests) 9149ms
+     ✓ decodes licensed Noto WOFF and WOFF2 bytes with the same real shaping as TTF  7422ms
+     ✓ bounds runtime-wide live registrations and reopens capacity on release  903ms
+ ✓ tests/runtime/fx/text-font-resource.test.ts (16 tests) 7331ms
+     ✓ loads and shapes registered licensed Noto woff through the external host loader  6983ms
+ ✓ tests/runtime/browser-global-boundary.test.ts (8 tests) 35199ms
+     ✓ keeps browser globals behind explicit platform adapters  5695ms
+     ✓ keeps the Webspring surfaces behind the injected runtime environment  27754ms
+     ✓ rejects executable globals without matching strings, comments, property names, or local records  353ms
+     ✓ does not permit the removed ambient BrowserGlobals bridge through imports or aliases  1269ms
+ ✓ tests/runtime/framework-doc-links.test.ts (4 tests) 183ms
+
+ Test Files  22 passed (22)
+      Tests  386 passed (386)
+   Start at  22:08:21
+   Duration  247.86s (transform 22.00s, setup 233ms, import 44.38s, tests 196.83s, environment 3.04s)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/fx-phase4-failure-recheck.json

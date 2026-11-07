@@ -1,0 +1,20 @@
+{
+  "archiveSHA256": "ca2550127922532f65a1d6e4e30e457812146284ea90a80fc7a068f8b91aab92",
+  "results": [
+    {
+      "engine": "chromium",
+      "hash": 32,
+      "hasDocument": false
+    },
+    {
+      "engine": "firefox",
+      "hash": 32,
+      "hasDocument": false
+    },
+    {
+      "engine": "webkit",
+      "hash": 32,
+      "hasDocument": false
+    }
+  ]
+}

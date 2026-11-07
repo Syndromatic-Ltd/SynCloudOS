@@ -1,0 +1,75 @@
+{
+  "settings": {
+    "viewport": {
+      "width": 1360,
+      "height": 950
+    },
+    "dpr": 1,
+    "reducedMotion": "reduce",
+    "serviceWorkers": "block"
+  },
+  "headings": [
+    "Speech",
+    "Audio session",
+    "Video presentation",
+    "Network path",
+    "Location speed",
+    "Cryptography"
+  ],
+  "crypto": "AES.GCM round trip verified. SHA-256: 1575164a430539b0eb9787a6a123ecea0bc8db5c0aba45a2895a97b6b2ca4e23",
+  "speechCompleted": true,
+  "pauseIdle": 1,
+  "continueIdle": 1,
+  "audioSessionStatus": [
+    "Stopped.",
+    "NotSupportedError: Audio session types are unavailable.",
+    "Prepare a local preview before opening picture in picture.",
+    "Route discovery is stopped.",
+    "Display capture is stopped. Choose this tab in the browser chooser to try element capture.",
+    "Monitoring is stopped.",
+    "Speed is unknown until a position supplies it.",
+    "AES.GCM round trip verified. SHA-256: 1575164a430539b0eb9787a6a123ecea0bc8db5c0aba45a2895a97b6b2ca4e23"
+  ],
+  "pictureInPicture": true,
+  "pictureInPictureClosed": true,
+  "location": {
+    "emulatedMetresPerSecond": 12.5,
+    "display": "45.0 km/h"
+  },
+  "networkOfflineAttempt": {
+    "navigatorOnline": false,
+    "statuses": []
+  },
+  "networkOnline": "satisfied; interface unknown; 4g; metered cost unknown; Save-Data off.",
+  "pageErrors": [],
+  "dpr2": {
+    "devicePixelRatio": 2,
+    "routePickerUsesNSEButton": {
+      "className": "nse-control-button",
+      "routePicker": null
+    }
+  },
+  "finalSiteObservedCapabilities": {
+    "crossOriginIsolated": false,
+    "restrictionTarget": "function",
+    "cropTarget": "function"
+  },
+  "narrowViewport": {
+    "width": 430,
+    "height": 932,
+    "actionRowsWrapped": true
+  },
+  "sectionExit": {
+    "previewTrack": "ended",
+    "activeSpeech": false,
+    "capabilityContentsVisible": 0
+  },
+  "sectionReturn": [
+    "Speech",
+    "Audio session",
+    "Video presentation",
+    "Network path",
+    "Location speed",
+    "Cryptography"
+  ]
+}
