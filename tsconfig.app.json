@@ -107,6 +107,12 @@
       ],
       "@syndromatic/syncloudos/fx/lumina": [
         "./src/FX/LuminaFX/public.ts"
+      ],
+      "@syndromatic/syncloudos/foundation": [
+        "./src/Foundation/public.ts"
+      ],
+      "@syndromatic/syncloudos/fx/compression": [
+        "./src/FX/CompressionFX/public.ts"
       ]
     },
     "resolveJsonModule": true,

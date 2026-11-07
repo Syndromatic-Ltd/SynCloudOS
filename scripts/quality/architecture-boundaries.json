@@ -121,6 +121,14 @@
     {
       "find": "@syndromatic/syncloudos/fx/lumina",
       "replacement": "src/FX/LuminaFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/foundation",
+      "replacement": "src/Foundation/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/compression",
+      "replacement": "src/FX/CompressionFX/public.ts"
     }
   ],
   "runtimeGlobalBoundary": {
@@ -182,6 +190,16 @@
   },
   "layers": [
     {
+      "id": "foundation",
+      "include": [
+        "src/Foundation/**"
+      ],
+      "mayImportLayers": [
+        "foundation"
+      ],
+      "mayImportEntrypoints": {}
+    },
+    {
       "id": "bundle-identity",
       "include": [
         "src/SynCloudOS/Identity/bundleIdentifier.mjs",
@@ -225,7 +243,8 @@
       ],
       "mayImportLayers": [
         "fx",
-        "runtime"
+        "runtime",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -243,7 +262,8 @@
       "mayImportLayers": [
         "runtime-inspector",
         "runtime",
-        "bundle-identity"
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -263,7 +283,8 @@
       "mayImportLayers": [
         "runtime-host-seams",
         "runtime",
-        "fx"
+        "fx",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -327,7 +348,8 @@
         "nse",
         "synapp-contract",
         "devtools",
-        "bundle-identity"
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime-host-seams": [
@@ -397,7 +419,8 @@
         "app-sdk-host",
         "runtime-host-seams",
         "bundle-identity",
-        "browser-host"
+        "browser-host",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -496,7 +519,8 @@
         "react",
         "nse",
         "appearance",
-        "bundle-identity"
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -542,7 +566,8 @@
         "fx",
         "runtime",
         "runtime-host-seams",
-        "bundle-identity"
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -604,7 +629,8 @@
         "devtools",
         "fx",
         "bundle-identity",
-        "runtime-host-seams"
+        "runtime-host-seams",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "bundle-identity": [
@@ -630,7 +656,8 @@
         "devtools",
         "runtime-host-seams",
         "bundle-identity",
-        "app-sdk-host"
+        "app-sdk-host",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -680,7 +707,8 @@
         "app-sdk",
         "synapps",
         "synapp-contract",
-        "bundle-identity"
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -716,7 +744,8 @@
         "adapters",
         "app-sdk",
         "bundle-identity",
-        "app-sdk-host"
+        "app-sdk-host",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "app-sdk": [
@@ -744,7 +773,8 @@
       "mayImportLayers": [
         "appearance",
         "fx",
-        "nse"
+        "nse",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "nse": [
@@ -765,7 +795,8 @@
         "fx",
         "appearance",
         "runtime",
-        "bundle-identity"
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -795,7 +826,8 @@
         "app-sdk",
         "app-sdk-host",
         "bundle-identity",
-        "synapp-contract"
+        "synapp-contract",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -861,7 +893,8 @@
         "src/SynWare/Libraries/**"
       ],
       "mayImportLayers": [
-        "synware-libraries"
+        "synware-libraries",
+        "foundation"
       ],
       "mayImportEntrypoints": {}
     },
@@ -873,7 +906,8 @@
       "mayImportLayers": [
         "synware-contracts",
         "synware-libraries",
-        "app-sdk"
+        "app-sdk",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "synware-libraries": [
@@ -897,7 +931,8 @@
         "app-sdk",
         "fx",
         "browser-host",
-        "webspring"
+        "webspring",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "synware-libraries": [
@@ -940,7 +975,8 @@
         "app-sdk",
         "browser-host",
         "runtime",
-        "adapters"
+        "adapters",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "app-sdk": [
@@ -963,7 +999,8 @@
         "app-sdk",
         "nse",
         "appearance",
-        "fx"
+        "fx",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "app-sdk": [
@@ -1032,7 +1069,8 @@
         "devtools",
         "first-party-bundles",
         "sdk-build-config",
-        "bundle-identity"
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "first-party-bundles": [

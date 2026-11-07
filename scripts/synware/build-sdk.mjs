@@ -37,7 +37,7 @@ import { build } from "vite";
 import { synWareSdkEntries, synWareSdkGeneratedStyles, synWareSdkStyles, synWarePackageName } from "./sdk-entries.mjs";
 import react from "@vitejs/plugin-react";
 import {
-  assertReviewedPackageFiles, assertSdkSourceUnchanged, assertTwelveFxPackageExports,
+  assertReviewedPackageFiles, assertSdkSourceUnchanged, assertFxPackageExports,
   captureSdkSourceFingerprint, createSdkPackageManifest, fingerprintSdkFiles, sdkDirectoryFiles,
 } from "./sdk-package-manifest.mjs";
 import { sdkNeutralStyleModuleSource, sdkPackageStyles } from "./sdk-package-styles.mjs";
@@ -411,7 +411,7 @@ async function main() {
   // These libraries occur in emitted public declarations even when runtime code is bundled.
   const dependencies = Object.fromEntries(["@floating-ui/dom", "@tiptap/pm", "framer-motion", "harfbuzzjs", "oauth4webapi", "pdf-lib", "woff2-encoder"].map((name) => [name, repositoryManifest.dependencies[name]]));
   dependencies.typescript = repositoryManifest.devDependencies.typescript;
-  assertTwelveFxPackageExports(exports);
+  assertFxPackageExports(exports);
   await writeDeveloperSdkData({ repositoryRoot, directory, commit, source });
   writePackage({ directory, name: synWarePackageName, exports, dependencies });
   const resources = fingerprintSdkFiles(directory, sdkDirectoryFiles(directory));

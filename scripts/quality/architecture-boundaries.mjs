@@ -1084,6 +1084,47 @@ export function validateRuntimeBrowserGlobals({
   return errors;
 }
 
+/** Foundation is portable to web workers and has no package dependencies. */
+export function validateFoundationEnvironment({ root = DEFAULT_ROOT, files } = {}) {
+  const errors = [];
+  const candidates = (files ?? discoverTypeScriptFiles(root)).filter(path => path.startsWith("src/Foundation/"));
+  const forbidden = new Set([
+    "window", "document", "localStorage", "sessionStorage", "history", "screen", "visualViewport", "matchMedia",
+    "Window", "Document", "HTMLElement", "Element", "Node", "HTMLCanvasElement", "HTMLImageElement",
+    "HTMLInputElement", "HTMLVideoElement", "HTMLAudioElement", "CSSStyleDeclaration", "Image", "Audio", "Range",
+    "requestAnimationFrame", "cancelAnimationFrame",
+  ]);
+  const programme = ts.createProgram(candidates.map(path => resolve(root, path)), { ...loadCompilerOptions(root), noEmit: true });
+  const checker = programme.getTypeChecker();
+  for (const path of candidates) {
+    const source = programme.getSourceFile(resolve(root, path));
+    if (!source) continue;
+    const bindings = staticModuleBindings(source);
+    const report = (node, message) => {
+      const { line } = source.getLineAndCharacterOfPosition(node.getStart(source));
+      addError(errors, `${path}:${line + 1} ${message}`);
+    };
+    function visit(node) {
+      const specifier = moduleSpecifier(node, bindings);
+      if (specifier && !specifier.startsWith(".") && specifier !== "@syndromatic/syncloudos/foundation") {
+        report(node, `Foundation may not import package ${specifier}`);
+      }
+      if (ts.isIdentifier(node) && forbidden.has(node.text) && !isDeclarationName(node) && !isProjectLocalReference(node, checker)) {
+        report(node, `Foundation may not use DOM global ${node.text}`);
+      }
+      if ((ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
+          ts.isIdentifier(node.expression) && node.expression.text === "globalThis") {
+        const name = ts.isPropertyAccessExpression(node) ? node.name.text :
+          (node.argumentExpression && ts.isStringLiteralLike(node.argumentExpression) ? node.argumentExpression.text : null);
+        if (name && forbidden.has(name)) report(node, `Foundation may not use DOM global ${name}`);
+      }
+      ts.forEachChild(node, visit);
+    }
+    visit(source);
+  }
+  return errors;
+}
+
 const keyboardGlobalNames = new Set(["window", "document", "globalThis", "Reflect"]);
 const keyboardListenerMethods = new Set(["addEventListener", "removeEventListener"]);
 const keyboardEventNames = new Set(["keydown", "keyup"]);
@@ -1661,6 +1702,7 @@ export function validateImportEdges(input = {}) {
     files,
     policy,
   })) addError(errors, error);
+  for (const error of validateFoundationEnvironment({ root: repositoryRoot, files })) addError(errors, error);
   for (const error of validateIdentityCookieBoundary({
     root: repositoryRoot,
     files,
