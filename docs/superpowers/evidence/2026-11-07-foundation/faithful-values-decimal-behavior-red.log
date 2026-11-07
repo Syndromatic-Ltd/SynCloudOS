@@ -1,0 +1,30 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-decimal.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-decimal.test.ts (5 tests | 1 failed) 6ms
+   × rounds products back into the exponent range and supports rounding behaviors 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-decimal.test.ts > rounds products back into the exponent range and supports rounding behaviors
+RangeError: Decimal underflow.
+ ❯ NSEDecimalNumber.#make src/Foundation/NSEDecimalNumber.ts:92:58
+     90|       else { if (h.raiseOnOverflow) throw new RangeError("Decimal over…
+     91|     }
+     92|     if (exponent < -128) { if (h.raiseOnUnderflow) throw new RangeErro…
+       |                                                          ^
+     93|     return new NSEDecimalNumber(coefficient, exponent);
+     94|   }
+ ❯ fromString src/Foundation/NSEDecimalNumber.ts:99:29
+ ❯ tests/runtime/foundation-faithful-decimal.test.ts:34:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  19:15:59
+   Duration  206ms (transform 35ms, setup 28ms, import 20ms, tests 6ms, environment 0ms)
+

@@ -19,7 +19,5 @@
  */
 
 export * from "./ChangeSet";
-export * from "./DateFormatter";
 export * from "./SelectionModel";
-export * from "./DecimalValue";
 export * from "./Sorting";
