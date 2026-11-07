@@ -18,6 +18,8 @@ An app subclasses the controller and supplies `identifierForObject`, `viewContro
 
 `getSnapshot()` and controller observation expose `selectedIndex`, `count`, `turnProgress` (`0..1`) and `turnDirection` (`"forward"`, `"backward"` or `null`). In page-curl style, `didTransitionToObject(object)` fires only after a successful curl completion. Cancelling a gesture keeps the current selection and sends no completion delegate call. Portfolio reads the snapshot for its book scene; the app retains ownership of opening and closing that scene.
 
+`selectedIndex` selects a distant page without animation. In curl style `navigateForwardToObject` accepts the next arranged page or spread; distant and unarranged objects are rejected. Before the view loads, navigation completes immediately, as there is no visible sheet to animate.
+
 ## Curl rendering and interaction
 
 The controller reuses the existing curl engine. A turn retains one renderer from start to finish: `data-curl-renderer` is `webgl` or `css`. Where WebGL 2 is available, the resting page is drawn into a texture and rolled around the fold in a WebGL canvas, with soft shadows and its own print showing through the underside. The CSS fold is the fallback, and reduced motion crossfades the page faces.

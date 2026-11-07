@@ -231,7 +231,14 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
     if (this.#turnDirection || index === this.#selectedIndex) return;
     const direction = index > this.#selectedIndex ? "forward" : "backward";
     const leaf = this.#leaves[direction];
-    if (!leaf) return;
+    if (!leaf) {
+      // There is no visible sheet to animate before loading (or between
+      // mounts). Navigation still completes and prepares the selected child.
+      this.#selectedIndex = this.#clamp(index);
+      this.#update();
+      this.didTransitionToObject(this.#objects[this.#selectedIndex] as T);
+      return;
+    }
     this.#pendingIndex = index;
     this.#turnDirection = direction;
     this.#turnProgress = 0;
