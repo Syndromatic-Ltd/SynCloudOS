@@ -1,0 +1,432 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-open-panel-66ac0613
+
+ ❯ tests/runtime/synapp-manifest-validator-generated.test.ts (2 tests | 1 failed) 259ms
+   × keeps the precompiled manifest validator current with the schema 194ms
+ ❯ tests/runtime/appkit-counterparts.test.ts (4 tests | 1 failed) 12ms
+     × gives every public NSE export an AppKit counterpart, or says why it has none 7ms
+ ❯ tests/runtime/fx/package-resources.test.ts (9 tests | 5 failed) 2344ms
+     × includes original-source maps in installed resource integrity 128ms
+     × keeps the resource fingerprint through a real offline pack/install of an isolated fixture 1141ms
+     × copies verified manifest bytes without requiring or repacking the mutable package directory 118ms
+     × fails closed for old manifests, modified archives and traversal 126ms
+     × rejects tampered fingerprints and missing or modified installed resources 189ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/AlertCautionIcon.png?url&no-inline
+
+    src/SynCloudOSReact/SystemAlert.tsx:26:24:
+      26 │ ...cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/SynCloudOSLogo.png?url&no-inline
+
+    src/SynCloudOS/Resources/frameworkAssets.ts:23:27:
+      23 │ ...Logo from "../../SynCloudOSReact/Resources/SynCloudOSLogo.png?u...
+         ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/user-info.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:23:21:
+      23 │ ...serInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
+         ╵                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17:
+      21 │ import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/settings.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:22:21:
+      22 │ ...settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".wasm" files: ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+
+    src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28:
+      2 │ import harfbuzzWasmUrl from "harfbuzzjs/dist/harfbuzz.wasm?url";
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "fs"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563:
+      1 │ ...NMENT_IS_NODE){var fs=require("fs");if(_scriptName.startsWith("f...
+        ╵                                  ~~~~
+
+  The package "fs" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "path"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629:
+      1 │ ...:")){scriptDirectory=require("path").dirname(require("url").file...
+        ╵                                 ~~~~~~
+
+  The package "path" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "url"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653:
+      1 │ ...quire("path").dirname(require("url").fileURLToPath(_scriptName))...
+        ╵                                  ~~~~~
+
+  The package "url" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/AlertCautionIcon.png?url&no-inline
+
+    src/SynCloudOSReact/SystemAlert.tsx:26:24:
+      26 │ ...cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/SynCloudOSLogo.png?url&no-inline
+
+    src/SynCloudOS/Resources/frameworkAssets.ts:23:27:
+      23 │ ...Logo from "../../SynCloudOSReact/Resources/SynCloudOSLogo.png?u...
+         ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".wasm" files: ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+
+    src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28:
+      2 │ import harfbuzzWasmUrl from "harfbuzzjs/dist/harfbuzz.wasm?url";
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "fs"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563:
+      1 │ ...NMENT_IS_NODE){var fs=require("fs");if(_scriptName.startsWith("f...
+        ╵                                  ~~~~
+
+  The package "fs" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "path"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629:
+      1 │ ...:")){scriptDirectory=require("path").dirname(require("url").file...
+        ╵                                 ~~~~~~
+
+  The package "path" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/user-info.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:23:21:
+      23 │ ...serInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
+         ╵                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17:
+      21 │ import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/settings.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:22:21:
+      22 │ ...settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "url"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653:
+      1 │ ...quire("path").dirname(require("url").fileURLToPath(_scriptName))...
+        ╵                                  ~~~~~
+
+  The package "url" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+ ❯ tests/runtime/heritage-inspector-dev.test.ts (7 tests | 2 failed) 1037ms
+     × excludes the lazy Inspector graph and CSS from the production host region 738ms
+     × removes the bridge and UI from the production import graph without a package rebuild 191ms
+Not implemented: navigation to another Document
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/appkit-counterparts.test.ts > NSE names are AppKit names > gives every public NSE export an AppKit counterpart, or says why it has none
+AssertionError: expected [ 'NSEBinaryByteUnit', …(37) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "NSEBinaryByteUnit",
++   "NSEByteCountFormatter",
++   "NSEByteCountFormatterOptions",
++   "NSEByteUnit",
++   "NSEByteUnitSystem",
++   "NSECharacterSet",
++   "NSECountedSet",
++   "NSEData",
++   "NSEDataCompressionAlgorithm",
++   "NSEDataConvertible",
++   "NSEDecimalByteUnit",
++   "NSEEqualRanges",
++   "NSEFormatter",
++   "NSEFormatterContext",
++   "NSEFormatterError",
++   "NSEFormatterResult",
++   "NSEIndexPath",
++   "NSEIndexSet",
++   "NSEIntersectionRange",
++   "NSENumberFormatter",
++   "NSENumberFormatterOptions",
++   "NSEPredicate",
++   "NSEPredicateComparisonOperator",
++   "NSEPredicateExpression",
++   "NSEPredicateField",
++   "NSEPredicateLiteral",
++   "NSEPredicateScalar",
++   "NSEPredicateSchema",
++   "NSEPredicateTextOptions",
++   "NSEPredicateValidationError",
++   "NSERange",
++   "NSESortComparator",
++   "NSESortDescriptor",
++   "NSESortDescriptorOptions",
++   "NSESortDirection",
++   "NSESortNulls",
++   "NSETreeNode",
++   "NSEUnicodePropertyName",
++ ]
+
+ ❯ tests/runtime/appkit-counterparts.test.ts:45:21
+     43|     // Add the new name to docs/framework/appkit-counterparts.json wit…
+     44|     // name with no counterpart needs { "none": reason }: see "NSE nam…
+     45|     expect(missing).toEqual([]);
+       |                     ^
+     46|   });
+     47|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  tests/runtime/heritage-inspector-dev.test.ts > heritage development boundary > excludes the lazy Inspector graph and CSS from the production host region
+ FAIL  tests/runtime/heritage-inspector-dev.test.ts > heritage development boundary > removes the bridge and UI from the production import graph without a package rebuild
+Error: Build failed with 9 errors:
+src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563: ERROR: Could not resolve "fs"
+src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629: ERROR: Could not resolve "path"
+src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653: ERROR: Could not resolve "url"
+src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28: ERROR: No loader is configured for ".wasm" files: ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17: ERROR: No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+...
+ ❯ failureErrorWithLog ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:1748:15
+ ❯ ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:1207:25
+ ❯ ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:1159:52
+ ❯ buildResponseToResult ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:1205:7
+ ❯ ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:1232:16
+ ❯ responseCallbacks.<computed> ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:884:9
+ ❯ handleIncomingPacket ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:939:12
+ ❯ Socket.readFromStdout ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:862:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  tests/runtime/synapp-manifest-validator-generated.test.ts > keeps the precompiled manifest validator current with the schema
+Error: Command failed: C:\Program Files\nodejs\node.exe scripts/synware/gen-manifest-validator.mjs --check
+synappManifestValidator.generated.mjs is stale: run node scripts/synware/gen-manifest-validator.mjs
+
+ ❯ tests/runtime/synapp-manifest-validator-generated.test.ts:31:3
+     29| it("keeps the precompiled manifest validator current with the schema",…
+     30|   // Throws, with the regeneration command in its output, when stale.
+     31|   execFileSync(process.execPath, ["scripts/synware/gen-manifest-valida…
+       |   ^
+     32| });
+     33|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  tests/runtime/fx/package-resources.test.ts > SDK source and resource fingerprints > includes original-source maps in installed resource integrity
+AssertionError: expected [Function] to not throw an error but 'AssertionError [ERR_ASSERTION]: SDK m…' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"AssertionError [ERR_ASSERTION]: SDK must export exactly the thirteen FX families.
++ actual - expected
+
+  [
+    './fx/animation',
+    './fx/audio',
+-   './fx/compression',
+    './fx/graphics',
+    './fx/haptics',
+    './fx/image',
+    './fx/location',
+    './fx/lumina',
+"
+
+ ❯ tests/runtime/fx/package-resources.test.ts:114:85
+    112|     const f = fixture();
+    113|     expect(f.manifest.resources.files.some((file: { path: string }) =>…
+    114|     expect(() => consumers.verifyInstalledSdkResources(f.packaged, f.m…
+       |                                                                                     ^
+    115|     write(f.packaged, "fx/graphics.js.map", "{}");
+    116|     expect(() => consumers.verifyInstalledSdkResources(f.packaged, f.m…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  tests/runtime/fx/package-resources.test.ts > manifest archive consumption > keeps the resource fingerprint through a real offline pack/install of an isolated fixture
+AssertionError: SDK manifest must contain all thirteen FX entries.
++ actual - expected
+
+  [
+    '@syndromatic/syncloudos/fx/animation',
+    '@syndromatic/syncloudos/fx/audio',
+-   '@syndromatic/syncloudos/fx/compression',
+    '@syndromatic/syncloudos/fx/graphics',
+    '@syndromatic/syncloudos/fx/haptics',
+    '@syndromatic/syncloudos/fx/image',
+    '@syndromatic/syncloudos/fx/location',
+    '@syndromatic/syncloudos/fx/lumina',
+
+
+- Expected
++ Received
+
+@@ -1,9 +1,8 @@
+  [
+    "@syndromatic/syncloudos/fx/animation",
+    "@syndromatic/syncloudos/fx/audio",
+-   "@syndromatic/syncloudos/fx/compression",
+    "@syndromatic/syncloudos/fx/graphics",
+    "@syndromatic/syncloudos/fx/haptics",
+    "@syndromatic/syncloudos/fx/image",
+    "@syndromatic/syncloudos/fx/location",
+    "@syndromatic/syncloudos/fx/lumina",
+
+ ❯ readVerifiedSdkArchive scripts/synware/installed-consumer.mjs:77:10
+     75|   const entries = manifest.entries;
+     76|   assert(entries && typeof entries === "object", "Missing SDK entry fi…
+     77|   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+$/u.t…
+       |          ^
+     78|     requiredFxFamilies.map(family => `${manifest.package}/fx/${family}…
+     79|   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+\//u.…
+ ❯ Module.copyVerifiedSdkArchive scripts/synware/installed-consumer.mjs:99:20
+ ❯ tests/runtime/fx/package-resources.test.ts:144:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  tests/runtime/fx/package-resources.test.ts > manifest archive consumption > copies verified manifest bytes without requiring or repacking the mutable package directory
+AssertionError: SDK manifest must contain all thirteen FX entries.
++ actual - expected
+
+  [
+    '@syndromatic/syncloudos/fx/animation',
+    '@syndromatic/syncloudos/fx/audio',
+-   '@syndromatic/syncloudos/fx/compression',
+    '@syndromatic/syncloudos/fx/graphics',
+    '@syndromatic/syncloudos/fx/haptics',
+    '@syndromatic/syncloudos/fx/image',
+    '@syndromatic/syncloudos/fx/location',
+    '@syndromatic/syncloudos/fx/lumina',
+
+
+- Expected
++ Received
+
+@@ -1,9 +1,8 @@
+  [
+    "@syndromatic/syncloudos/fx/animation",
+    "@syndromatic/syncloudos/fx/audio",
+-   "@syndromatic/syncloudos/fx/compression",
+    "@syndromatic/syncloudos/fx/graphics",
+    "@syndromatic/syncloudos/fx/haptics",
+    "@syndromatic/syncloudos/fx/image",
+    "@syndromatic/syncloudos/fx/location",
+    "@syndromatic/syncloudos/fx/lumina",
+
+ ❯ readVerifiedSdkArchive scripts/synware/installed-consumer.mjs:77:10
+     75|   const entries = manifest.entries;
+     76|   assert(entries && typeof entries === "object", "Missing SDK entry fi…
+     77|   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+$/u.t…
+       |          ^
+     78|     requiredFxFamilies.map(family => `${manifest.package}/fx/${family}…
+     79|   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+\//u.…
+ ❯ Module.copyVerifiedSdkArchive scripts/synware/installed-consumer.mjs:99:20
+ ❯ tests/runtime/fx/package-resources.test.ts:154:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  tests/runtime/fx/package-resources.test.ts > manifest archive consumption > fails closed for old manifests, modified archives and traversal
+AssertionError: expected [Function] to throw error matching /SHA|integrity/i but got 'SDK manifest must contain all thirtee…'
+
+- Expected:
+/SHA|integrity/i
+
++ Received:
+"SDK manifest must contain all thirteen FX entries.
++ actual - expected
+
+  [
+    '@syndromatic/syncloudos/fx/animation',
+    '@syndromatic/syncloudos/fx/audio',
+-   '@syndromatic/syncloudos/fx/compression',
+    '@syndromatic/syncloudos/fx/graphics',
+    '@syndromatic/syncloudos/fx/haptics',
+    '@syndromatic/syncloudos/fx/image',
+    '@syndromatic/syncloudos/fx/location',
+    '@syndromatic/syncloudos/fx/lumina',
+"
+
+ ❯ tests/runtime/fx/package-resources.test.ts:168:66
+    166|     expect(() => consumers.readVerifiedSdkArchive(f.repository)).toThr…
+    167|     f.save(); write(f.output, f.manifest.archive, "different artifact"…
+    168|     expect(() => consumers.readVerifiedSdkArchive(f.repository)).toThr…
+       |                                                                  ^
+    169|     f.manifest.archive = "../escape.tgz"; f.save();
+    170|     expect(() => consumers.readVerifiedSdkArchive(f.repository)).toThr…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  tests/runtime/fx/package-resources.test.ts > manifest archive consumption > rejects tampered fingerprints and missing or modified installed resources
+AssertionError: expected [Function] to not throw an error but 'AssertionError [ERR_ASSERTION]: SDK m…' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"AssertionError [ERR_ASSERTION]: SDK must export exactly the thirteen FX families.
++ actual - expected
+
+  [
+    './fx/animation',
+    './fx/audio',
+-   './fx/compression',
+    './fx/graphics',
+    './fx/haptics',
+    './fx/image',
+    './fx/location',
+    './fx/lumina',
+"
+
+ ❯ tests/runtime/fx/package-resources.test.ts:176:85
+    174|     expect(consumers.verifyInstalledSdkResources).toBeTypeOf("function…
+    175|     const f = fixture();
+    176|     expect(() => consumers.verifyInstalledSdkResources(f.packaged, f.m…
+       |                                                                                     ^
+    177|     write(f.packaged, "assets/image-processing.worker-proof.js", "corr…
+    178|     expect(() => consumers.verifyInstalledSdkResources(f.packaged, f.m…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+
+ Test Files  4 failed | 857 passed (861)
+      Tests  9 failed | 7199 passed (7208)
+   Start at  08:51:47
+   Duration  1024.82s (transform 41.77s, setup 7.54s, import 706.05s, tests 842.77s, environment 355.64s)

@@ -12,6 +12,6 @@
 .nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward .nse-page__dogear { pointer-events: auto; }
 .nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 72px; pointer-events: auto; }
 .nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward .nse-page__sheet,
-.nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward .nse-page__inside { opacity: 0; }
+.nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward .nse-page__inside { visibility: hidden; }
 .nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward:not([data-progress="0.000"]) .nse-page__sheet,
-.nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward:not([data-progress="0.000"]) .nse-page__inside { opacity: 1; }
+.nse-page-controller--curl[data-spine-location="min"] > .nse-page-controller__leaf--backward:not([data-progress="0.000"]) .nse-page__inside { visibility: visible; }

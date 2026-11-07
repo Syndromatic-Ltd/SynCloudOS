@@ -230,6 +230,28 @@ it("lays the new print flat after normal-motion button turns so every click navi
   } finally { vi.useRealTimers(); }
 });
 
+it("cancels a held edge drag when the selected index is assigned again", async () => {
+  await launch();
+  await act(async () => { liveBook[nseUpdateTraits]({ ...liveBook.traitCollection, reducedMotion: true }); });
+  const view = screen.getByLabelText("Book");
+  const leaf = view.querySelector<HTMLElement>(".nse-page-controller__leaf--forward")!;
+  Object.defineProperties(leaf, {
+    getBoundingClientRect: { configurable: true, value: () => ({ x: 0, y: 0, left: 0, top: 0, right: 320, bottom: 480, width: 320, height: 480 }) },
+    setPointerCapture: { configurable: true, value: vi.fn() },
+    releasePointerCapture: { configurable: true, value: vi.fn() },
+  });
+  await act(async () => {
+    fireEvent.pointerDown(leaf, { pointerId: 12, isPrimary: true, button: 0, clientX: 318, clientY: 240 });
+    fireEvent.pointerMove(leaf, { pointerId: 12, buttons: 1, clientX: 160, clientY: 240 });
+    liveBook.selectedIndex = liveBook.selectedIndex;
+    fireEvent.pointerMove(leaf, { pointerId: 12, buttons: 1, clientX: 8, clientY: 240 });
+    fireEvent.pointerUp(leaf, { pointerId: 12, button: 0, clientX: 8, clientY: 240 });
+  });
+  expect(liveBook.selectedIndex).toBe(0);
+  expect(liveBook.transitions).toEqual([]);
+  expect(liveBook.getSnapshot()).toMatchObject({ turnProgress: 0, turnDirection: null });
+});
+
 it("keeps a history: forward to a new page drops the pages after the selected one (stackHistory)", async () => {
   await launch();
   expect(history.transitionStyle).toBe("stackHistory");
