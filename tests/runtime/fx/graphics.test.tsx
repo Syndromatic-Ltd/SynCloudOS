@@ -33,7 +33,7 @@ import { GFXColour } from "../../../src/FX/GraphicsFX/public";
 import { GFXStateUnderflowError, GFXPath, GFXGradient, GFXContext } from "../../../src/FX/GraphicsFX/public";
 import { NSEGraphicsView, NSEShadowView, type NSEShadowPreferenceSource } from "../../../src/NSE/Graphics";
 import { NSEImageView, NSESizeableImage } from "../../../src/NSE/Controls/Images";
-import type { NSEImageGeometryPort, NSEImageStringSourcePort } from "../../../src/NSE/Controls/Images";
+import type { IFXImageGeometryPort, IFXImageStringSourcePort } from "../../../src/FX/ImageFX/IFXImageViewport";
 import type { RuntimeImageAdapter, RuntimeImageAdapterFactory } from "../../../src/SynCloudOS/Images";
 import { createTestRuntime, createTestRuntimeEnvironment } from "../helpers";
 
@@ -534,7 +534,7 @@ describe("closed NSE graphics", () => {
     const originalObserver = globalThis.ResizeObserver;
     // @ts-expect-error — the control must not fall back to the ambient observer
     delete (globalThis as { ResizeObserver?: unknown }).ResizeObserver;
-    const geometry: NSEImageGeometryPort = {
+    const geometry: IFXImageGeometryPort = {
       measure: vi.fn(() => ({ width: 120, height: 80 })),
       observe: vi.fn(() => () => undefined),
     };
@@ -567,11 +567,11 @@ describe("closed NSE graphics", () => {
     const originalImage = globalThis.Image;
     const originalObserver = globalThis.ResizeObserver;
     const release = vi.fn();
-    const geometry: NSEImageGeometryPort = {
+    const geometry: IFXImageGeometryPort = {
       measure: vi.fn(() => ({ width: 120, height: 80 })),
       observe: vi.fn(() => () => undefined),
     };
-    const sourcePort: NSEImageStringSourcePort = {
+    const sourcePort: IFXImageStringSourcePort = {
       geometry,
       load: vi.fn(async (_source: string, _signal: AbortSignal) => ({
         src: "blob:runtime-owned-string-source",

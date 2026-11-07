@@ -148,14 +148,6 @@
     },
     "NSEControllerView": "NSViewController.view",
     "NSECoverFlowLayoutAttributes": "NSCollectionViewLayoutAttributes",
-    "NSECropParams": {
-      "none": "A Syndromatic original; D4 reshapes cropping onto an image view.",
-      "replacement": "NSImageView"
-    },
-    "NSECroppableImage": {
-      "none": "A Syndromatic original; D4 reshapes cropping onto an image view.",
-      "replacement": "NSImageView"
-    },
     "NSECursor": "NSCursor",
     "NSEDataViewAdapter": "NSTableViewDataSource",
     "NSEDataViewCellImage": "NSTableCellView.imageView",
@@ -214,18 +206,8 @@
       "none": "Phase 7 removes this UIKit-shaped navigation API.",
       "replacement": "NSPageController"
     },
-    "NSEImageDimensions": "NSImage.size",
-    "NSEImageGeometryPort": {
-      "none": "A host service port: SynCloudOS supplies it to the framework; apps do not use it directly."
-    },
     "NSEImagePosition": "NSControl.ImagePosition",
     "NSEImageScaling": "NSImageScaling",
-    "NSEImageStringSourceLease": {
-      "none": "A host service port: SynCloudOS supplies it to the framework; apps do not use it directly."
-    },
-    "NSEImageStringSourcePort": {
-      "none": "A host service port: SynCloudOS supplies it to the framework; apps do not use it directly."
-    },
     "NSEImageView": "NSImageView",
     "NSEInMemoryTextOwnerOptions": "NSTextStorage",
     "NSEKeyEquivalentModifierMask": "NSMenuItem.keyEquivalentModifierMask",

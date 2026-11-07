@@ -174,8 +174,7 @@ On a desktop (a fine pointer that hovers), choosing an item in any menu or pop-u
 
 | Component | Purpose |
 | --- | --- |
-| `NSEImageView` | Displays an image with correct sizing and decoding. |
-| `NSECroppableImage` | A zoomable image with a crop frame. `NSEImageView` covers fitted and natural-size images (`imageScaling`); a carousel is an `NSEPageController` of image views. |
+| `NSEImageView` | Displays an image fitted to the view or at natural size (`imageScaling`). A carousel is an `NSEPageController` of image views; to crop, use ImageFX's `IFXImageView`. |
 | `NSEGraphicsView` | A drawing surface for GraphicsFX content. |
 | `snapshotNSEView` | Draws a view your app owns into a PNG data URL, for a version card, a drag image or a thumbnail. Canvas content is left out. |
 | `NSEShadowView`, `NSEMetalSurface`, `NSESmoothSurface` | Shadows, brushed metal and smooth cornered surfaces. |

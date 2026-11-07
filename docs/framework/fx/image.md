@@ -10,6 +10,7 @@ The framework has these parts, and each has its own section below.
 - **Filters.** About 200 named filters in 15 categories, applied with `IFXFilter` and discovered through `IFXFilterRegistry`. See the [filter catalogue](image/filters.md).
 - **Rendering.** `IFXContext`, `IFXRenderPipeline`, destinations, tile plans and tasks turn a graph into pixels with budgets and cancellation.
 - **Resources.** `IFXImageResource` loads and exports images through the session.
+- **Image view.** `IFXImageView`, after ImageKit's `IKImageView`, shows a resource to zoom, pan and crop.
 - **Text images.** `createIFXTextImage` and `createIFXAttributedTextImage` turn [TextFX](text.md) text into graph nodes.
 - **Analysis and RAW.** Feature detection, barcode descriptors, model assets and a portable DNG decoder. See [analysis and RAW](image/analysis-and-raw.md).
 - **Kernels, processors and graph transport.** Custom per-pixel programs and the codec that moves a graph between threads. See [kernels and graph transport](image/kernels-and-graphs.md).
@@ -27,7 +28,7 @@ import { IFXImage } from "@syndromatic/syncloudos/fx/image";
 | Entry | `@syndromatic/syncloudos/fx/image` |
 | Hook | `useImages`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None declared in the manifest. The session checks decode and export policy for each image. |
-| Analogue | Core Image (`CIImage`, `CIFilter`, `CIContext`, `CIKernel`, `CIDetector`, `CIRAWFilter`) |
+| Analogue | Core Image (`CIImage`, `CIFilter`, `CIContext`, `CIKernel`, `CIDetector`, `CIRAWFilter`) and ImageKit's `IKImageView` |
 
 ## What the entry exports
 
@@ -38,6 +39,7 @@ import { IFXImage } from "@syndromatic/syncloudos/fx/image";
 | Filters | `IFXFilter`, `IFXFilterRegistry`, `IFXFilterName`, `IFXFilterParameters`, `IFXFilterCategory`, `IFXBlendMode`, `IFXColourComponents` |
 | Rendering | `IFXContext`, `IFXRenderPipeline`, `IFXRenderDestination`, `IFXTileRenderDestination`, `IFXTilePlan`, `IFXRenderTask`, `IFXRenderBackend` and the option, result and info types |
 | Resources | `IFXImageResource`, `IFXImageResourcePort`, `IFXResourceHandle` |
+| Image view | `IFXImageView`, `IFXImageViewHandle`, `IFXImageToolMode`, `IFXImageVisibleRect`, `IFXImageGeometryPort` and the string-source port types |
 | Text | `createIFXTextImage`, `createIFXAttributedTextImage`, `IFXTextImageOptions` |
 | Graphs | `IFXFilterGraph`, `IFXGraphCodec`, `IFXSerializedGraph`, `IFXSerializedGraphV2`, `IFXSerializedGraphV3`, `IFXPortableGraph` |
 | Kernels and processors | `IFXKernel`, `IFXColourKernel`, `IFXBlendKernel`, `IFXWarpKernel`, `IFXProcessorDefinition` and their program types |
@@ -327,6 +329,30 @@ A source is one of:
 The session checks export policy, CORS cleanliness and mount lifetime before it hands pixels over. When a host cannot identify colour channels reliably, numeric pixel and export access rejects with `NotSupportedError` while display decoding continues to work. Operations that read pixels wait for `ready` and reject with `AbortError` if the image changes while they run.
 
 `IFXImageResourcePort` and `IFXResourceHandle` are the interfaces a host implements to supply a resource.
+
+## Showing an image
+
+### `IFXImageView`
+
+ImageKit's `IKImageView`. It shows an `IFXImageResource` fitted to the view. The wheel, a pinch or a double-click zooms about the pointer, and a drag pans once the image overflows. The view draws no controls; put your own buttons beside it and call its handle.
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `image` | `IFXImageResource` | The image, as `IKImageView.setImage`. |
+| `geometry` | `IFXImageGeometryPort` | Measures the view. Pass `useImages().geometry`; without it the view takes the image's own size. |
+| `currentToolMode` | `"move"` or `"crop"` | `IKImageView.currentToolMode`. Default `"move"`. The crop tool frames the visible region. |
+| `maxZoomRatio`, `zoomStep` | `number` | The largest zoom as a multiple of the fitted zoom (default 2), and how far one step moves (default 0.25 of that range). |
+| `onZoomChange` | `(zoomFactor) => void` | Called after the zoom changes. |
+
+The handle (`ref`) has `zoomFactor`, `zoomIn()`, `zoomOut()`, `zoomImageToFit()` and `crop()`. In the crop tool, `crop()` returns an `IFXImageVisibleRect`: the framed region's `x`, `y`, `width` and `height` in source pixels, the image's `imageWidth` and `imageHeight`, and the `zoomFactor`. Outside the crop tool, or before the image is ready, it returns `null`.
+
+```tsx
+import { IFXImageView, type IFXImageViewHandle } from "@syndromatic/syncloudos/fx/image";
+
+const view = useRef<IFXImageViewHandle>(null);
+<IFXImageView ref={view} image={photo} geometry={images.geometry} currentToolMode="crop" />
+<NSEButton title="Crop" onClick={() => setRegion(view.current?.crop() ?? null)} />
+```
 
 ```tsx
 import { useEffect, useRef } from "react";
