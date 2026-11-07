@@ -30,25 +30,25 @@ import {
   requiredFxFamilies,
 } from "../synware/sdk-package-manifest.mjs";
 
-const TWELVE_FX_FAMILIES = Object.freeze([
+const FX_FAMILIES = Object.freeze([
   "animation", "graphics", "image", "text", "audio", "haptics", "motion",
-  "media", "video", "midi", "location", "lumina",
+  "media", "video", "midi", "location", "lumina", "compression",
 ]);
 
-assert.deepEqual(requiredFxFamilies, TWELVE_FX_FAMILIES, "Installed acceptance family list must match the package manifest contract.");
+assert.deepEqual(requiredFxFamilies, FX_FAMILIES, "Installed acceptance family list must match the package manifest contract.");
 
 const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 
 function assertCompleteFamilyMatrix(rows) {
-  assert(Array.isArray(rows), "Twelve-FX receipt familyResults must be an array.");
-  assert.deepEqual(rows.map(row => row?.family), TWELVE_FX_FAMILIES,
-    "Installed acceptance must retain exactly one explicit row for every one of the twelve FX families.");
+  assert(Array.isArray(rows), "FX receipt familyResults must be an array.");
+  assert.deepEqual(rows.map(row => row?.family), FX_FAMILIES,
+    "Installed acceptance must retain exactly one explicit row for every one of the thirteen FX families.");
 }
 
-function createInitialTwelveFxReceipt({ manifest, manifestPath, mode, base = "/" }) {
-  assert.equal(manifest.schemaVersion, 2, "Installed twelve-FX acceptance requires SDK manifest schema 2.");
+function createInitialFxReceipt({ manifest, manifestPath, mode, base = "/" }) {
+  assert.equal(manifest.schemaVersion, 2, "Installed FX acceptance requires SDK manifest schema 2.");
   assert(mode === "deterministic" || mode === "browser", `Unsupported installed acceptance mode: ${mode}`);
-  const familyResults = TWELVE_FX_FAMILIES.map(family => ({
+  const familyResults = FX_FAMILIES.map(family => ({
     family,
     I: manifest.entries?.[`@syndromatic/syncloudos/fx/${family}`] ? "passed" : "failed",
     D: "not-run",
@@ -61,7 +61,7 @@ function createInitialTwelveFxReceipt({ manifest, manifestPath, mode, base = "/"
   assert(familyResults.every(row => row.I === "passed"), "Verified SDK manifest is missing a required FX family entry.");
   return {
     schemaVersion: 2,
-    kind: "installed-twelve-fx-acceptance",
+    kind: "installed-fx-acceptance",
     mode,
     base,
     startedAt: new Date().toISOString(),
@@ -143,6 +143,7 @@ function execute(receipt, { id, args, families, dimension, assertionText, enviro
 }
 
 const deterministicScenarios = Object.freeze([
+  { id: "foundation-compression-substantive", test: "tests/runtime/foundation-packed-consumer.test.ts", families: ["compression"], assertionText: "Installed Foundation/CompressionFX worker and declaration specimen passed." },
   {
     id: "original-seven-substantive",
     test: "tests/runtime/fx/packed-fx.test.ts",
@@ -182,6 +183,7 @@ const deterministicScenarios = Object.freeze([
 ]);
 
 const browserScenarios = Object.freeze([
+  { id: "compression-worker-browser", script: "scripts/synware/check-fx-compression-consumer.mjs", families: ["compression"] },
   { id: "lifecycle-browser-root", script: "scripts/synware/check-fx-browser-lifecycle-consumer.mjs", families: ["animation", "haptics", "motion", "midi", "location"], args: ["--base", "/"] },
   { id: "lifecycle-browser-nested", script: "scripts/synware/check-fx-browser-lifecycle-consumer.mjs", families: ["animation", "haptics", "motion", "midi", "location"], useAggregateBase: true },
   { id: "graphics-pdf-browser", script: "scripts/synware/check-fx-pdf-consumer.mjs", families: ["graphics"] },
@@ -195,9 +197,9 @@ const browserScenarios = Object.freeze([
 ]);
 
 const BROWSER_ACCEPTANCE_FAMILIES = Object.freeze(
-  TWELVE_FX_FAMILIES.filter(family => browserScenarios.some(scenario => scenario.families.includes(family))),
+  FX_FAMILIES.filter(family => browserScenarios.some(scenario => scenario.families.includes(family))),
 );
-assert.deepEqual(BROWSER_ACCEPTANCE_FAMILIES, TWELVE_FX_FAMILIES,
+assert.deepEqual(BROWSER_ACCEPTANCE_FAMILIES, FX_FAMILIES,
   "Installed browser acceptance must retain at least one explicit scenario for every FX family.");
 
 function receiptDirectory() {
@@ -214,10 +216,10 @@ function persistReceipt(receipt) {
   return path;
 }
 
-function runInstalledTwelveFx({ mode, manifestPath, base = "/", keep = false }) {
+function runInstalledFx({ mode, manifestPath, base = "/", keep = false }) {
   const verified = readVerifiedSdkArchive(repositoryRoot, manifestPath ? { manifestPath } : {});
   assertSdkSourceUnchanged(verified.manifest.source, captureSdkSourceFingerprint(repositoryRoot));
-  const receipt = createInitialTwelveFxReceipt({ manifest: verified.manifest, manifestPath: verified.manifestPath, mode, base });
+  const receipt = createInitialFxReceipt({ manifest: verified.manifest, manifestPath: verified.manifestPath, mode, base });
   const environment = { SYNCLOUDOS_SDK_MANIFEST: verified.manifestPath };
   try {
     if (mode === "deterministic") {
@@ -265,7 +267,7 @@ function runInstalledTwelveFx({ mode, manifestPath, base = "/", keep = false }) 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
     const options = parseArgs(process.argv.slice(2));
-    const result = runInstalledTwelveFx(options);
+    const result = runInstalledFx(options);
     process.stdout.write(`${JSON.stringify({
       receiptPath: result.receiptPath,
       mode: result.receipt.mode,

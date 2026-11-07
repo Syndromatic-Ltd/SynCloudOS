@@ -36,6 +36,7 @@ import * as media from "../../src/FX/MediaFX/public";
 import * as video from "../../src/FX/VideoFX/public";
 import * as midi from "../../src/FX/MIDIFX/public";
 import * as location from "../../src/FX/LocationFX/public";
+import * as compression from "../../src/FX/CompressionFX/public";
 import * as lumina from "../../src/FX/LuminaFX/public";
 import { exerciseRecipes, families } from "../fixtures/synware-authoring/exercise-recipes.mjs";
 import { auditSynWareCapabilityUsage } from "../../scripts/synware/audit-capability-usage.mjs";
@@ -43,7 +44,7 @@ import { auditSynWareImports } from "../../scripts/synware/audit-sdk-imports.mjs
 
 const roots: string[] = [];
 const generator = resolve("scripts/synware/create-synware.mjs");
-const fx: Record<string, unknown> = { animation, graphics, image, text, audio, haptics, motion, media, video, midi, location, lumina };
+const fx: Record<string, unknown> = { animation, graphics, image, text, audio, haptics, motion, media, video, midi, location, lumina, compression };
 function temporary() { const root = mkdtempSync(join(tmpdir(), "synware-fx-authoring-")); roots.push(root); return root; }
 function generate(options: string[] = []) {
   const root = temporary(), app = join(root, "src/SynWare/Example.app");
@@ -129,4 +130,11 @@ it("does no device work on render and shows explicit action failures rather than
   await buttons[0].props.onClick();
   expect(requestCamera).toHaveBeenCalledOnce();
   expect(states.at(-1)).toBe("Camera denied");
+});
+
+it("scaffolds the thirteenth framework as a direct permission-free capability query", () => {
+  const { app } = generate(["--fx", "compression"]);
+  expect(load(join(app, "Contents/Info.ts")).default.permissions).toBeUndefined();
+  expect(load(join(app, "Contents/recipes/compression.ts")).runRecipe()).toContain("gzip");
+  expect(readFileSync(join(app, "Contents/index.tsx"), "utf8")).not.toContain("useCompression");
 });
