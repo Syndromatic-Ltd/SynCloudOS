@@ -110,4 +110,12 @@ describe('VideoFX presentation', () => {
     await expect(detector.prompt()).rejects.toThrow();
   });
 
+  it('supports unavailable host without reading an app target', () => {
+    const client = createMountedVideoPresentationClient(undefined, new AbortController().signal, () => ['video.route', 'video.pictureInPicture']);
+    const target = new Proxy({}, { get() { throw new Error('target read'); } }) as HTMLVideoElement;
+    expect(client.capabilities(target)).toEqual({ pictureInPicture: false, remotePlayback: false });
+    expect(() => client.createRouteDetector(target)).toThrow(/unavailable/);
+    expect(() => client.createPictureInPictureController(target)).toThrow(/unavailable/);
+  });
+
 });

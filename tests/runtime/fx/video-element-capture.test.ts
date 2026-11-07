@@ -20,6 +20,8 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { BrowserVideoPresentationAdapter } from '../../../src/SynCloudOS/PlatformAdapters/BrowserVideoPresentationAdapter';
+import { VideoCaptureService } from '../../../src/SynCloudOS/VideoFX/VideoCaptureService';
+import { createMountedVideoClient } from '../../../src/SynCloudOS/AppSDK/mountedVideoClient';
 import { BrowserVideoCaptureAdapter } from '../../../src/SynCloudOS/PlatformAdapters/BrowserVideoCaptureAdapter';
 import { VFXContentFilter } from '../../../src/FX/VideoFX/VFXContentFilter';
 describe('VideoFX element capture host helper', () => {
@@ -65,6 +67,23 @@ describe('VideoFX element capture host helper', () => {
     await display.setContentFilter!(null);
     expect(track.restrictTo).toHaveBeenLastCalledWith(null);
     display.dispose();
+  });
+
+  it('requires display and element entitlement before mounted filter browser access', async () => {
+    const filterCalls = vi.fn(async () => {});
+    const raw = { state: 'active', kind: 'display', settings: null, capabilities: { camera: true, display: true, deviceEnumeration: true },
+      enumerateDevices: async () => [], requestCamera: vi.fn(), requestDisplay: vi.fn(), setContentFilter: filterCalls,
+      subscribe: () => () => {}, suspend() {}, async resume() {}, dispose: vi.fn() };
+    const service = new VideoCaptureService({ createSession: () => raw as never });
+    let permissions = ['video.capture.display'];
+    const client = createMountedVideoClient(service, new AbortController().signal, () => permissions, () => true);
+    const session = client.createCaptureSession();
+    await expect(session.setContentFilter!(new VFXContentFilter({} as Element))).rejects.toMatchObject({ name: 'SecurityError' });
+    expect(filterCalls).not.toHaveBeenCalled();
+    permissions = ['video.capture.display', 'video.capture.element'];
+    await session.setContentFilter!(new VFXContentFilter({} as Element));
+    expect(filterCalls).toHaveBeenCalledTimes(1);
+    session.dispose(); service.dispose();
   });
 
 });
