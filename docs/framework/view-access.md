@@ -13,4 +13,6 @@ To observe scrolling and viewport resizing, set `contentView.postsBoundsChangedN
 
 `NSEImageView` is NSImageView. Its React ref is an `NSEImageViewHandle`, with `element` identifying the image view and `layer` corresponding to NSView.layer. Set `wantsLayer` to opt into backing. Without it, `layer` is null. With it, reading `layer` lazily acquires one CSS-layout AnimationFX layer from the mounted animation environment, before parent appearance. A layer-backed view requires that environment; an absent layer client throws explicitly. Unmount, a backing-policy change or a layer-client change aborts and disposes the old backing. The layer animates the whole image view, independently of its stationary parent anchor; fitting and panning remain in the image's viewport.
 
+Like managed outlets, an image backing survives React's same-turn StrictMode reconnect. A real detach releases it in the following microtask; a detached handle cannot acquire another layer. Changing backing policy or layer client retires the previous backing before the replacement is exposed.
+
 Both handles are view access contracts, not new drawn controls. Atmo continues to draw the scroll and image surfaces.
