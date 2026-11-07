@@ -390,7 +390,7 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     context.navigation.openRoute(`${route.pathname}${route.search}${route.hash}`, { historyMode: "replace", context: { routeRetry: true } });
   }, [app.bundleIdentifier, context, routeSession, runtime]);
 
-  const hasDiagnostics = runtime.bundles.getBundle(app.bundleIdentifier)?.permissions?.includes("diagnostics.view") ?? false;
+  const hasDiagnostics = runtime.bundles.getBundle(app.bundleIdentifier)?.entitlements?.includes("diagnostics.view") ?? false;
   const inspectorSettlement = useMemo(() => {
     if (!import.meta.env.DEV || !hasDiagnostics) return undefined;
     return getRuntimeSettlement(runtime);

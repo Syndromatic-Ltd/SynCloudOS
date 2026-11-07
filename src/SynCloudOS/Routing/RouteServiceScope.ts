@@ -57,11 +57,11 @@ export function createRouteServiceScope(
     const minimumVersion = strongerServiceVersion(declaration.minimumVersion, token.minimumVersion);
     if (minimumVersion === null) return denied("Invalid service minimum version.");
     const authorise = () => runtime.configurationProfiles.authorise({ action: "service.use", origin: "runtime", source: "RouteServiceScope", app,
-      bundlePermissions: [...(manifest.permissions ?? [])], context: { appId, serviceId: token.id, declared: true, required: declaration.required !== false, minimumVersion: minimumVersion ?? null } });
+      context: { appId, serviceId: token.id, declared: true, required: declaration.required !== false, minimumVersion: minimumVersion ?? null } });
     const policy = authorise();
     if (!policy.allowed) return denied(policy.reason);
     const provider = runtime.services.get(token.id);
-    const resolved = runtime.services.resolveAppClient<T>({ appId, serviceId: token.id, permissions: manifest.permissions ?? [],
+    const resolved = runtime.services.resolveAppClient<T>({ appId, serviceId: token.id, permissions: manifest.entitlements ?? [],
       ...(minimumVersion ? { minimumVersion } : {}), ...(token.contractVersion ? { contractVersion: token.contractVersion } : {}), signal, purpose });
     if (!resolved.available || !resolved.client) return denied(resolved.reason ?? "Route service unavailable.");
     const assertClientLive = () => { assertLive(); if (runtime.services.get(token.id) !== provider || !authorise().allowed) throw new DOMException("Route service was revoked.", "AbortError"); };

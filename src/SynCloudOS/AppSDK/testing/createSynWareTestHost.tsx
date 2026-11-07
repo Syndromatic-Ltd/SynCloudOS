@@ -149,10 +149,10 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
   const supplied = options.application
     ? createSynWareDefinitionFromApplicationClass(options.application, options.manifest)
     : options.app;
-  const declaredPermissions = [...new Set([...(supplied.manifest.permissions ?? []), ...(options.permissions ?? [])])];
-  const manifest = declaredPermissions.length === (supplied.manifest.permissions?.length ?? 0)
+  const declaredPermissions = [...new Set([...(supplied.manifest.entitlements ?? []), ...(options.entitlements ?? [])])];
+  const manifest = declaredPermissions.length === (supplied.manifest.entitlements?.length ?? 0)
     ? supplied
-    : { ...supplied, manifest: { ...supplied.manifest, permissions: declaredPermissions } };
+    : { ...supplied, manifest: { ...supplied.manifest, entitlements: declaredPermissions } };
   const AppRoot = supplied.root;
   const loadGateController = new AbortController();
   const appDefinition = createSynWare({

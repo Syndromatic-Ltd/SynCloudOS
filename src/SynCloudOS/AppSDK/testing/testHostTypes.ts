@@ -256,7 +256,7 @@ export type CreateSynWareTestHostOptions = (
   readonly diagnostics?: AppTrustedDiagnosticsClient;
   readonly branding?: import("../appContextTypes").SynWareSiteBranding;
   readonly now?: string | number | Date;
-  readonly permissions?: readonly string[];
+  readonly entitlements?: readonly string[];
   readonly locale?: string;
   readonly timeZone?: string;
   /** Explicit host document; the testing kit never reads an ambient DOM. */

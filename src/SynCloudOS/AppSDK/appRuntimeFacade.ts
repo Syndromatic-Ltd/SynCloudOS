@@ -3734,7 +3734,6 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           origin: "runtime",
           source: "SynWareServiceClient.acquire",
           app,
-          bundlePermissions: [...(declaration.permissions ?? [])],
           context: {
             appId: app.bundleIdentifier,
             serviceId: id,
@@ -3761,7 +3760,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         const resolved = runTestControlSync("services", "service.resolve", () => runtime.services.resolveAppClient<TClient>({
           appId: app.bundleIdentifier,
           serviceId: id,
-          permissions: declaration.permissions ?? [],
+          permissions: declaration.entitlements ?? [],
           ...(minimumVersion === undefined ? {} : { minimumVersion }),
           ...(contractVersion === undefined ? {} : { contractVersion }),
           signal,
@@ -4203,7 +4202,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const requireDeclaredCapability = (capability: string, operation: string) => {
       assertLive();
       const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
-      if (!declaration?.permissions?.includes(capability)) {
+      if (!declaration?.entitlements?.includes(capability)) {
         throw securityError(`SynWare capability "${capability}" must be declared before ${operation}.`);
       }
     };
@@ -4214,14 +4213,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
       // Read-only file input retains its existing manifest contract. Newly wired
       // write/handle authority requires an explicit declaration.
-      const declared = !!declaration && (capability === "file.open" || !!declaration.permissions?.includes(capability));
+      const declared = !!declaration && (capability === "file.open" || !!declaration.entitlements?.includes(capability));
       if (!declared) return { declared: false, allowed: false };
-      const request = { action: capability, origin: "runtime", source: "SynWareEnvironmentClient", app,
-        bundlePermissions: [...(declaration?.permissions ?? [])], context: Object.freeze({ appId: app.bundleIdentifier, capability }) };
-      const decision = audit
-        ? runTestControlSync("policy", "policy.evaluate", () => runtime.configurationProfiles.authorise(request))
-        : runtime.configurationProfiles.evaluate(request);
-      return { declared: true, allowed: decision.allowed };
+      const check = () => runtime.lifecycle.validateAccess(app.bundleIdentifier, "activate");
+      const decision = audit ? runTestControlSync("policy", "policy.evaluate", check) : check();
+      return { declared: true, allowed: decision.ok };
     };
     let issuedDiagnostics: Readonly<{ grant: HostDiagnosticsGrant | undefined; client: AppTrustedDiagnosticsClient }> | undefined;
     const createTrustedDiagnosticsClient = (grant: HostDiagnosticsGrant | undefined): AppTrustedDiagnosticsClient => {
@@ -4448,11 +4444,44 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const authoriseDeviceCapability = (capability: string) => {
       assertLive();
       if (!mountedBundle?.entitlements?.includes(capability)) return false;
-      return runTestControlSync("permissions", "permission.request", () =>
-        runTestControlSync("policy", "policy.evaluate", () => ({
-          allowed: runtime.lifecycle.validateAccess(app.bundleIdentifier, "activate").ok,
-        }))).allowed;
+      try {
+        return runTestControlSync("permissions", "permission.request", () =>
+          runTestControlSync("policy", "policy.evaluate", () => ({
+            allowed: runtime.lifecycle.validateAccess(app.bundleIdentifier, "activate").ok,
+          }))).allowed;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "SecurityError") return false;
+        throw error;
+      }
     };
+    const privacyOwner = new AbortController();
+    const privacyUserId = runtime.configurationProfiles.getCurrentSubject().user.id;
+    const privacySignal = AbortSignal.any([signal, privacyOwner.signal]);
+    const privacyPorts = new Map<string, ReturnType<SynCloudOSRuntime["privacy"]["forApplication"]>>();
+    const privacyForService = (service: string) => {
+      let port = privacyPorts.get(service);
+      if (!port) {
+        port = runtime.privacy.forApplication({ appId: app.bundleIdentifier, userId: privacyUserId, service, signal: privacySignal });
+        privacyPorts.set(service, port);
+      }
+      return port;
+    };
+    const checkPrivacyOwner = () => {
+      if (privacyOwner.signal.aborted) return;
+      if (runtime.configurationProfiles.getCurrentSubject().user.id !== privacyUserId
+        || !runtime.lifecycle.validateAccess(app.bundleIdentifier, "activate").ok)
+        privacyOwner.abort(new DOMException("The privacy subject or application access changed.", "AbortError"));
+    };
+    let loginFingerprint = "";
+    const unsubscribePrivacyIdentity = runtime.store.subscribe(() => {
+      const login = runtime.store.getSnapshot().loginServices;
+      const fingerprint = JSON.stringify([login.synId, login.isAuthorised, login.accessClass]);
+      if (fingerprint === loginFingerprint) return;
+      loginFingerprint = fingerprint;
+      checkPrivacyOwner();
+    });
+    const unsubscribePrivacyProfile = runtime.configurationProfiles.subscribe(checkPrivacyOwner);
+    cleanupOnAbort(() => { unsubscribePrivacyIdentity(); unsubscribePrivacyProfile(); privacyOwner.abort(); });
     const environmentClients = Object.freeze({
       speechSynthesis: createMountedAudioSpeechClient(runtime.environment.speechSynthesis, signal, deviceEntitlements, () => authoriseDeviceCapability("audio.speech")),
       network: createMountedNetworkClient(runtime.environment.networkPaths ?? {
@@ -4460,149 +4489,30 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         currentPath: () => null, subscribe: () => ({ dispose() {} }),
       }, signal, deviceEntitlements, authoriseDeviceCapability),
       videoPresentation: createMountedVideoPresentationClient(runtime.environment.videoPresentation, signal, deviceEntitlements, authoriseDeviceCapability),
-      bluetooth: createMountedBluetoothClient(runtime.environment.bluetooth, signal, deviceEntitlements, authoriseDeviceCapability),
-      nfc: createMountedNFCClient(runtime.environment.nfc, signal, deviceEntitlements, authoriseDeviceCapability),
-      speech: createMountedSpeechClient(runtime.environment.speech, signal, deviceEntitlements, authoriseDeviceCapability),
-      contacts: createMountedContactsClient(runtime.environment.contacts, signal, deviceEntitlements, authoriseDeviceCapability),
-      payment: createMountedPaymentClient(runtime.environment.payment, signal, deviceEntitlements, authoriseDeviceCapability),
-      xr: createMountedXRClient(runtime.environment.xr, signal, deviceEntitlements, authoriseDeviceCapability),
-      audioGraphs: createMountedAudioGraphs(runtime.audioGraphs, signal, () => {
-        assertLive();
-        return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
-      }, app.bundleIdentifier, audioInputCapability, mountedSettlement),
-      audioSessions: createMountedAudioSessions(runtime.environment.audioCapture, signal, () => {
-        assertLive();
-        return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
-      }, audioInputCapability, app.bundleIdentifier, mountedSettlement),
-      audioFiles: createMountedAudioFiles(runtime.environment.audioFiles, signal, () => {
-        assertLive();
-        return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
-      }),
-      haptics: createMountedHapticsClient(runtime.hapticHost, signal, () => {
-        assertLive();
-        return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
-      }),
-      motion: createMountedMotionClient(runtime.motion, signal, () => {
-        assertLive();
-        return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
-      }),
+      bluetooth: createMountedBluetoothClient(runtime.environment.bluetooth, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("bluetooth")),
+      nfc: createMountedNFCClient(runtime.environment.nfc, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("nfc")),
+      speech: createMountedSpeechClient(runtime.environment.speech, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("speech")),
+      contacts: createMountedContactsClient(runtime.environment.contacts, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("contacts")),
+      payment: createMountedPaymentClient(runtime.environment.payment, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("payment")),
+      xr: createMountedXRClient(runtime.environment.xr, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("xr")),
+      audioGraphs: createMountedAudioGraphs(runtime.audioGraphs, signal, deviceEntitlements, app.bundleIdentifier, audioInputCapability, mountedSettlement),
+      audioSessions: createMountedAudioSessions(runtime.environment.audioCapture, signal, deviceEntitlements, audioInputCapability, app.bundleIdentifier, mountedSettlement, privacyForService("microphone")),
+      audioFiles: createMountedAudioFiles(runtime.environment.audioFiles, signal, deviceEntitlements),
+      haptics: createMountedHapticsClient(runtime.hapticHost, signal, deviceEntitlements),
+      motion: createMountedMotionClient(runtime.motion, signal, deviceEntitlements, privacyForService("motion")),
       media: createMountedMediaClient(runtime.mediaClock, signal),
       video: createMountedVideoClient(
-        runtime.video,
-        signal,
-        () => {
-          assertLive();
-          return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
-        },
-        (capability) => {
-          assertLive();
-          const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
-          if (!declaration) return false;
-          try {
-            const decision = runTestControlSync("permissions", "permission.request", () =>
-              runTestControlSync("policy", "policy.evaluate", () => runtime.configurationProfiles.authorise({
-                action: capability,
-                origin: "runtime",
-                source: "SynWareVideoClient",
-                app,
-                bundlePermissions: [...(declaration.permissions ?? [])],
-                context: Object.freeze({ appId: app.bundleIdentifier, capability }),
-              })),
-            );
-            return decision.allowed;
-          } catch (error) {
-            if (error instanceof DOMException && error.name === "SecurityError") return false;
-            throw error;
-          }
-        },
-        app.bundleIdentifier,
-        videoCaptureCapability,
-        runtime.audioGraphs,
-        audioInputCapability,
-        {},
+        runtime.video, signal, deviceEntitlements, authoriseDeviceCapability,
+        app.bundleIdentifier, videoCaptureCapability, runtime.audioGraphs, audioInputCapability, {},
         { owner: app.bundleIdentifier, register: (participant) => runtime.resources.register(participant) },
         (source, request, callerSignal) => playbackPresentationForMount().present(source, request, callerSignal),
+        kind => privacyForService(kind === "camera" ? "camera" : "screenCapture"),
       ),
-      location: createMountedLocationClient(
-        runtime.location,
-        signal,
-        () => {
-          assertLive();
-          return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
-        },
-        (capability) => {
-          assertLive();
-          const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
-          if (!declaration) return false;
-          const decision = runTestControlSync("permissions", "permission.request", () =>
-            runTestControlSync("policy", "policy.evaluate", () => runtime.configurationProfiles.authorise({
-              action: capability,
-              origin: "runtime",
-              source: "SynWareLocationClient",
-              app,
-              bundlePermissions: [...(declaration.permissions ?? [])],
-              context: Object.freeze({ appId: app.bundleIdentifier, capability }),
-            })),
-          );
-          return decision.allowed;
-        },
-        app.bundleIdentifier,
-        mountedSettlement,
-      ),
-      midi: createMountedMIDIClient(
-        runtime.midi,
-        signal,
-        () => {
-          assertLive();
-          return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
-        },
-        (capability) => {
-          assertLive();
-          const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
-          if (!declaration) return false;
-          try {
-            const decision = runTestControlSync("permissions", "permission.request", () =>
-              runTestControlSync("policy", "policy.evaluate", () => runtime.configurationProfiles.authorise({
-                action: capability,
-                origin: "runtime",
-                source: "SynWareMIDIClient",
-                app,
-                bundlePermissions: [...(declaration.permissions ?? [])],
-                context: Object.freeze({ appId: app.bundleIdentifier, capability }),
-              })),
-            );
-            return decision.allowed;
-          } catch (error) {
-            if (error instanceof DOMException && error.name === "SecurityError") return false;
-            throw error;
-          }
-        },
-      ),
-      lumina: createMountedLuminaClient(
-        runtime.lumina,
-        signal,
-        () => {
-          assertLive();
-          return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
-        },
-        (capability) => {
-          assertLive();
-          const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
-          if (!declaration) return false;
-          const decision = runTestControlSync("permissions", "permission.request", () =>
-            runTestControlSync("policy", "policy.evaluate", () => runtime.configurationProfiles.authorise({
-              action: capability,
-              origin: "runtime",
-              source: "SynWareLuminaClient",
-              app,
-              bundlePermissions: [...(declaration.permissions ?? [])],
-              context: Object.freeze({ appId: app.bundleIdentifier, capability }),
-            })),
-          );
-          return decision.allowed;
-        },
-        app.bundleIdentifier,
-      ),
+      location: createMountedLocationClient(runtime.location, signal, deviceEntitlements, authoriseDeviceCapability,
+        app.bundleIdentifier, mountedSettlement, privacyForService("location")),
+      midi: createMountedMIDIClient(runtime.midi, signal, deviceEntitlements, authoriseDeviceCapability,
+        sysex => privacyForService(sysex ? "midi.sysex" : "midi")),
+      lumina: createMountedLuminaClient(runtime.lumina, signal, deviceEntitlements, authoriseDeviceCapability, app.bundleIdentifier),
       persistence: Object.freeze({
         getPreference<T>(key: string, fallback: T): T {
           assertLive();
