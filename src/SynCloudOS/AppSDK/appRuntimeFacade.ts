@@ -4454,12 +4454,12 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         }))).allowed;
     };
     const environmentClients = Object.freeze({
-      speechSynthesis: createMountedAudioSpeechClient(runtime.environment.speechSynthesis, signal, deviceEntitlements),
+      speechSynthesis: createMountedAudioSpeechClient(runtime.environment.speechSynthesis, signal, deviceEntitlements, () => authoriseDeviceCapability("audio.speech")),
       network: createMountedNetworkClient(runtime.environment.networkPaths ?? {
         capabilities: () => Object.freeze({ pathMonitoring: false, networkInformation: false, interfaceType: false, expensive: false, constrained: false, authorizationPrompt: false }),
         currentPath: () => null, subscribe: () => ({ dispose() {} }),
-      }, signal, deviceEntitlements, () => true),
-      videoPresentation: createMountedVideoPresentationClient(runtime.environment.videoPresentation, signal, deviceEntitlements),
+      }, signal, deviceEntitlements, authoriseDeviceCapability),
+      videoPresentation: createMountedVideoPresentationClient(runtime.environment.videoPresentation, signal, deviceEntitlements, authoriseDeviceCapability),
       bluetooth: createMountedBluetoothClient(runtime.environment.bluetooth, signal, deviceEntitlements, authoriseDeviceCapability),
       nfc: createMountedNFCClient(runtime.environment.nfc, signal, deviceEntitlements, authoriseDeviceCapability),
       speech: createMountedSpeechClient(runtime.environment.speech, signal, deviceEntitlements, authoriseDeviceCapability),
