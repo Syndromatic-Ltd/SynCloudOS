@@ -1,0 +1,38 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/fx/phase5-speech.test.ts tests/runtime/fx/phase5-contacts.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-contacts.test.ts (0 test)
+ ❯ tests/runtime/fx/phase5-speech.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-contacts.test.ts [ tests/runtime/fx/phase5-contacts.test.ts ]
+Error: Cannot find module '../../../src/SynCloudOS/PlatformAdapters/BrowserContactsAdapter' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/fx/phase5-contacts.test.ts
+ ❯ tests/runtime/fx/phase5-contacts.test.ts:2:1
+      1| import { describe, expect, it, vi } from "vitest";
+      2| import { BrowserContactsAdapter } from "../../../src/SynCloudOS/Platfo…
+       | ^
+      3| import { createMountedContactsClient } from "../../../src/SynCloudOS/A…
+      4|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/fx/phase5-speech.test.ts [ tests/runtime/fx/phase5-speech.test.ts ]
+Error: Cannot find module '../../../src/SynCloudOS/PlatformAdapters/BrowserSpeechAdapter' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/fx/phase5-speech.test.ts
+ ❯ tests/runtime/fx/phase5-speech.test.ts:2:1
+      1| import { describe, expect, it, vi } from "vitest";
+      2| import { BrowserSpeechAdapter, type BrowserSpeechRecognition } from ".…
+       | ^
+      3| import { createMountedSpeechClient } from "../../../src/SynCloudOS/App…
+      4|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  no tests
+   Start at  19:02:42
+   Duration  184ms (transform 58ms, setup 56ms, import 0ms, tests 0ms, environment 0ms)
+

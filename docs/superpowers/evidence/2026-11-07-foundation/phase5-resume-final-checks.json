@@ -1,0 +1,9 @@
+{
+  "framework": 0,
+  "boundaries": 1,
+  "authoring": 1,
+  "head": "d79d0d119f0dd7ebc5c0be3104bc036f2db33477",
+  "correctedAuthoringCommand": "npm run typecheck:authoring",
+  "correctedAuthoringExit": 0,
+  "authoringInvocationError": "Initial root tsconfig.authoring.json does not exist; actual repository authoring command passed."
+}

@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-bluetooth.test.ts C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-contacts.test.ts C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-counterparts.test.ts C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-mounted.test.tsx C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-nfc-hook.test.tsx C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-nfc.test.ts C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-package-gate.test.ts C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-payment-hook.test.tsx C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-payment.test.ts C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-real-authority.test.ts C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-speech-contacts-hooks.test.tsx C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-speech.test.ts C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\runtime\fx\phase5-xr.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  13 passed (13)
+      Tests  59 passed (59)
+   Start at  21:58:55
+   Duration  37.48s (transform 23.59s, setup 179ms, import 30.22s, tests 465ms, environment 4.47s)
+

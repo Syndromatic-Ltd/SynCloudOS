@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/fx/phase5-speech.test.ts tests/runtime/fx/phase5-contacts.test.ts tests/runtime/fx/phase5-speech-contacts-hooks.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  22 passed (22)
+   Start at  19:22:13
+   Duration  1.25s (transform 91ms, setup 43ms, import 231ms, tests 27ms, environment 933ms)
+

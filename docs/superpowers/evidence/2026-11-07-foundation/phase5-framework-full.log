@@ -1,0 +1,98 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile= C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation\phase5-framework-full.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-phase5-final-dd1a6ddcef-573fd54c
+
+ ✓ tests/runtime/fx/phase5-packed.test.ts (1 test) 130025ms
+   ✓ loads all six new FX roots and hooks from an independently installed SDK archive  130024ms
+ ❯ tests/runtime/synapp-sdk-package.test.ts (9 tests | 1 failed) 211839ms
+     ✓ keeps the public page entry limited to the controller contract 5ms
+     ✓ pins the removal of the old navigation, source-list and sliding-pane exports 19ms
+     ✓ captures shell view components without invoking author-owned values 9ms
+     ✓ rejects inconsistent shell view bindings during capture 2ms
+     × compiles, bundles and mounts a genuinely external consumer against packed public exports 118932ms
+     ✓ keeps the reviewed runtime entry graph free of privileged exports 7ms
+     ✓ uses exact portable package aliases and keeps public client contracts host-free 6ms
+     ✓ keeps mounted runtime hooks out of public barrels 2ms
+     ✓ derives archive declarations from the reviewed public entries instead of open handwritten mirrors  92855ms
+ ✓ tests/runtime/command-focus-undo-accessibility.test.tsx (4 tests) 504ms
+     ✓ navigates a menu, skips disabled items, enters a submenu, dispatches, and restores its trigger  311ms
+ ✓ tests/runtime/synapp-context.test.tsx (14 tests) 170ms
+ ❯ tests/runtime/framework-doc-links.test.ts (4 tests | 2 failed) 183ms
+     × links only to files and headings that exist 79ms
+     × links every guide from the framework index 42ms
+     ✓ names only package entries that exist 29ms
+     ✓ describes the framework without internal project language 32ms
+ ✓ tests/runtime/browser-host-contributions.test.ts (5 tests) 75ms
+ ✓ tests/runtime/nse-text-command-undo.test.tsx (6 tests) 390ms
+ ✓ tests/runtime/pwa-installation.test.ts (3 tests) 17ms
+ ✓ tests/runtime/project-conventions-packed.test.ts (2 tests) 136194ms
+   ✓ bundles an installed browser host with discovery plugin=false  33206ms
+   ✓ bundles an installed browser host with discovery plugin=true  102988ms
+ ✓ tests/runtime/foundation-packed-consumer.test.ts (1 test) 25674ms
+   ✓ uses Foundation and CPFX from an independent SDK installation in a worker and strict worker-lib consumer  25673ms
+ ✓ tests/runtime/managed-typography-packed-consumer.test.ts (1 test) 49268ms
+   ✓ uses managed typography from an independently installed package in Node and app code  49267ms
+ ✓ tests/runtime/fx/packed-video-capture.test.ts (1 test) 32080ms
+   ✓ executes scoped VideoFX capture from an independently installed SDK archive  32079ms
+ ✓ tests/runtime/fx/packed-fx.test.ts (1 test) 28005ms
+   ✓ executes substantive FX operations from the built npm archive outside the repository  28004ms
+stdout | tests/runtime/document-asset-browser.test.ts
+21:40:56 [vite] (client) Re-optimizing dependencies because vite config has changed
+
+ ✓ tests/runtime/document-asset-browser.test.ts (6 tests) 40596ms
+     ✓ chromium: creates and disposes the real runtime, then reloads and reopens native asset bytes in a fresh runtime  17168ms
+     ✓ chromium: survives page reload with new store/service instances, renders bytes, enforces concurrent quota, detects corruption  1924ms
+     ✓ firefox: creates and disposes the real runtime, then reloads and reopens native asset bytes in a fresh runtime  7535ms
+     ✓ firefox: survives page reload with new store/service instances, renders bytes, enforces concurrent quota, detects corruption  6893ms
+     ✓ webkit: creates and disposes the real runtime, then reloads and reopens native asset bytes in a fresh runtime  3732ms
+     ✓ webkit: survives page reload with new store/service instances, renders bytes, enforces concurrent quota, detects corruption  3100ms
+ ✓ tests/runtime/error-catalogue.test.ts (3 tests) 3167ms
+   ✓ catalogues every stable diagnostic code literal throughout src, including conditional branches  3148ms
+ ❯ tests/runtime/fx/packed-value-foundations.test.ts (1 test | 1 failed) 24473ms
+   × executes and typechecks LocationFX and MIDIFX from an independently installed SDK archive 24472ms
+ ❯ tests/runtime/fx/packed-lumina.test.ts (0 test)
+ ❯ tests/runtime/fx/packed-video.test.ts (0 test)
+ ❯ tests/runtime/fx/packed-media.test.ts (1 test | 1 failed) 2153ms
+   × executes and typechecks MediaFX from an independently installed SDK archive 2152ms
+ ❯ tests/runtime/synware-public-api-repairs-packed.test.ts (1 test | 1 failed) 1802ms
+   × typechecks and executes repaired APIs through an independently installed SDK 1802ms
+ ❯ tests/runtime/nse-page-tear.test.ts (0 test)
+ ❯ tests/performance/text-primitives-performance.test.ts (0 test)
+ ❯ tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts (0 test)
+ ❯ tests/runtime/browser-global-boundary.test.ts (0 test)
+ ❯ tests/runtime/architecture-boundaries.test.ts (0 test)
+ ❯ tests/runtime/nse-file-browser-packed.test.ts (0 test)
+ ❯ tests/runtime/developer-mcp.test.ts (0 test)
+ ❯ tests/runtime/heritage-inspector-source.test.ts (0 test)
+ ❯ tests/runtime/fx/text-font-host.test.ts (0 test)
+ ❯ tests/runtime/fx/text-font-resource.test.ts (0 test)
+ ❯ tests/integration/text-system-example.test.ts (0 test)
+ ❯ tests/runtime/runtime-keyboard-listener-guard.test.ts (0 test)
+ ❯ tests/runtime/system-ui-boundaries.test.ts (0 test)
+ ❯ tests/runtime/runtime-singleton-boundary.test.ts (0 test)
+ ❯ tests/runtime/browser-application-host.test.tsx (0 test)
+ ❯ tests/runtime/synware-public-api-boundary-guard.test.ts (0 test)
+ ✓ tests/runtime/fx/twelve-fx-public-types.test.ts (2 tests) 6148ms
+   ✓ accepts twelve public roots and token inference while rejecting host authority and private imports  2874ms
+   ✓ fails the same public probe if a raw runtime property leaks into the app context  3272ms
+ ❯ tests/runtime/nse-animation-webspring-integration.test.tsx (0 test)
+error: copy-fd: write returned: No space left on device
+fatal: cannot copy 'C:/Program Files/Git/mingw64/share/git-core/templates/hooks/pre-rebase.sample' to 'C:/Users/Kavish Krishnakumar/AppData/Local/Temp/synware-package-contract-Yxe4e9/.git/hooks/pre-rebase.sample': No space left on device
+error: copy-fd: write returned: No space left on device
+fatal: cannot copy 'C:/Program Files/Git/mingw64/share/git-core/templates/hooks/pre-rebase.sample' to 'C:/Users/Kavish Krishnakumar/AppData/Local/Temp/synware-package-contract-pZ7tbt/.git/hooks/pre-rebase.sample': No space left on device
+ ❯ tests/runtime/fx/package-resources.test.ts (9 tests | 9 failed) 801ms
+     × invalidates package provenance when public framework artwork changes 48ms
+     × changes for source edits, additions and deletions, even without a new commit 27ms
+     × fingerprints exact resource bytes and rejects unsafe inventory paths 98ms
+     × includes original-source maps in installed resource integrity 97ms
+     × rejects a source mutation between build start and publication 96ms
+     × keeps the resource fingerprint through a real offline pack/install of an isolated fixture 118ms
+     × copies verified manifest bytes without requiring or repacking the mutable package directory 111ms
+     × fails closed for old manifests, modified archives and traversal 99ms
+     × rejects tampered fingerprints and missing or modified installed resources 105ms
+ ❯ tests/runtime/text-system-packed-consumer.test.ts (0 test)
+ ❯ tests/runtime/foundation-boundary.test.ts (0 test)
+ ❯ tests/nse/colour/nse-colour-controls.test.tsx (0 test)
+ ❯ tests/runtime/fx/image-canny-edge-detector.test.ts (0 test)
+ ❯ tests/runtime/fx/media-samples.test.ts (0 test)

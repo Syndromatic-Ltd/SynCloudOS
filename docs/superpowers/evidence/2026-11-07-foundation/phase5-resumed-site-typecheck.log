@@ -1,0 +1,44 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run tsc -b --pretty false
+src/SynWare/About.app/Contents/Info.ts(18,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/SynWare/AnimationFX.app/Contents/Info.ts(17,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/SynWare/Chronosphere.app/Contents/Info.ts(20,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/SynWare/Diagnostics.app/Contents/Info.ts(19,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/SynWare/Journal.app/Contents/Info.ts(43,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/SynWare/JournalOld.app/Contents/Info.ts(43,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/SynWare/JournalPublisher.app/Contents/Info.ts(26,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/SynWare/MemoJournal.app/Contents/Info.ts(29,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(22,49): error TS2305: Module '"@syndromatic/syncloudos/nse/controls"' has no exported member 'NSERoutePickerView'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(23,33): error TS2305: Module '"@syndromatic/syncloudos/sdk"' has no exported member 'useNetwork'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(23,45): error TS2305: Module '"@syndromatic/syncloudos/sdk"' has no exported member 'useSpeechSynthesizer'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(23,77): error TS2305: Module '"@syndromatic/syncloudos/sdk"' has no exported member 'useVideoPresentation'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(24,10): error TS2305: Module '"@syndromatic/syncloudos/fx/audio"' has no exported member 'AUFXSpeechUtterance'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(25,55): error TS2307: Cannot find module '@syndromatic/syncloudos/fx/crypto' or its corresponding type declarations.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(27,10): error TS2305: Module '"@syndromatic/syncloudos/fx/video"' has no exported member 'VFXContentFilter'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(27,33): error TS2305: Module '"@syndromatic/syncloudos/fx/video"' has no exported member 'VFXPictureInPictureController'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(27,69): error TS2305: Module '"@syndromatic/syncloudos/fx/video"' has no exported member 'VFXRouteDetector'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(28,48): error TS2307: Cannot find module '@syndromatic/syncloudos/fx/network' or its corresponding type declarations.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(39,233): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(51,133): error TS2339: Property 'setCategory' does not exist on type 'AUFXAudioSession'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(51,210): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(63,208): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(80,130): error TS18046: 'value' is of type 'unknown'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(106,238): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(107,188): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(108,107): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(109,395): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(111,98): error TS2339: Property 'setContentFilter' does not exist on type 'VFXCaptureSession'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(111,229): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(112,99): error TS2339: Property 'setContentFilter' does not exist on type 'VFXCaptureSession'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx(112,174): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/SynWare/NSEControlGallery.app/Contents/Info.ts(22,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/SynWare/Portfolio.app/Contents/Info.ts(21,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/SynWare/Software.app/Contents/Info.ts(18,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/SynWare/SynCal.app/Contents/Info.ts(28,3): error TS2353: Object literal may only specify known properties, and 'entitlements' does not exist in type 'SynWareInfo'.
+src/Webspring/Contents/Info.ts(8,3): error TS2353: Object literal may only specify known properties, and 'webApp' does not exist in type 'WebspringManifest'.
+src/Webspring/Contents/Views/WebspringDialView/WebspringButtonView.tsx(11,10): error TS2305: Module '"@syndromatic/syncloudos/nse/system-ui"' has no exported member 'Badge'.
+src/Webspring/Contents/Views/WebspringDialView/WebspringButtonView.tsx(332,21): error TS2339: Property 'badgeLabel' does not exist on type 'WebspringApp'.
+src/Webspring/Contents/Views/WebspringDialView/WebspringButtonView.tsx(393,57): error TS2339: Property 'badgeLabel' does not exist on type 'WebspringApp'.
+src/Webspring/Contents/Views/WebspringDialView/WebspringButtonView.tsx(393,77): error TS2339: Property 'badgeLabel' does not exist on type 'WebspringApp'.
+tests/runtime/gallery-preview-policy.test.ts(16,21): error TS2339: Property 'permissions' does not exist on type '{ readonly schemaVersion: 1; readonly migrationVersion: 2; readonly bundleIdentifier: "com.syndromatic.nse-control-gallery"; readonly version: "1.0.0"; readonly displayName: "NSE Control Gallery"; ... 9 more ...; readonly webspring: { ...; }; }'.
+tests/runtime/journal-lumina-reader.test.ts(182,110): error TS2339: Property 'permissions' does not exist on type '{ readonly schemaVersion: 1; readonly migrationVersion: 2; readonly bundleIdentifier: "com.syndromatic.journal"; readonly version: "1.0.0"; readonly displayName: "Journal"; readonly runtime: { ...; }; ... 9 more ...; readonly webspring: { ...; }; }'.

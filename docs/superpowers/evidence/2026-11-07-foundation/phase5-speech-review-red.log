@@ -1,0 +1,52 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/fx/phase5-speech.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-speech.test.ts (10 tests | 2 failed) 11ms
+     × normalizes whitespace at transcript boundaries while retaining segment text 3ms
+     × allows finish to stop microphone work after policy revocation and denies its final result 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-speech.test.ts > SpeechFX web recognition > normalizes whitespace at transcript boundaries while retaining segment text
+AssertionError: expected '  hello  world   日本語の文章' to be 'hello world 日本語の文章' // Object.is equality
+
+Expected: "hello world 日本語の文章"
+Received: "  hello  world   日本語の文章"
+
+ ❯ tests/runtime/fx/phase5-speech.test.ts:75:67
+     73|     ], resultIndex: 0 });
+     74|     native.onend!();
+     75|     expect((await task.result).bestTranscription.formattedString).toBe…
+       |                                                                   ^
+     76|   });
+     77|   it("aborts device work and ignores late callbacks on owner cancellat…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/fx/phase5-speech.test.ts > SpeechFX web recognition > allows finish to stop microphone work after policy revocation and denies its final result
+AssertionError: expected [Function] to not throw an error but 'SecurityError: Policy denied SynWare …' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"SecurityError: Policy denied SynWare capability speech.recognize."
+
+ ❯ tests/runtime/fx/phase5-speech.test.ts:119:37
+    117|     const native = Recognition.instances[0]!;
+    118|     permitted = false;
+    119|     expect(() => task.finish()).not.toThrow();
+       |                                     ^
+    120|     expect(native.stop).toHaveBeenCalledOnce();
+    121|     native.onresult!({ results: [{ 0: { transcript: "private", confide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 8 passed (10)
+   Start at  19:21:55
+   Duration  192ms (transform 40ms, setup 26ms, import 28ms, tests 11ms, environment 0ms)
+

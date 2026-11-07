@@ -1,0 +1,56 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-bluetooth.test.ts tests/runtime/fx/phase5-xr.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-xr.test.ts (5 tests | 1 failed) 11ms
+     × releases caller leases and withdraws revoked capabilities 4ms
+ ❯ tests/runtime/fx/phase5-bluetooth.test.ts (5 tests | 1 failed) 12ms
+     × releases aborted caller leases and withdraws owner capabilities 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-bluetooth.test.ts > BluetoothFX browser and mounted ownership > releases aborted caller leases and withdraws owner capabilities
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/fx/phase5-bluetooth.test.ts:110:54
+    108|       const caller = new AbortController(), manager = client.createCen…
+    109|       caller.abort();
+    110|       expect(manager.getCapabilities().apiAvailable).toBe(false);
+       |                                                      ^
+    111|     }
+    112|     mount.abort();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/fx/phase5-xr.test.ts > XRFX portable sessions > releases caller leases and withdraws revoked capabilities
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/fx/phase5-xr.test.ts:85:54
+     83|       const caller = new AbortController(), session = client.createSes…
+     84|       caller.abort();
+     85|       expect(session.getCapabilities().apiAvailable).toBe(false);
+       |                                                      ^
+     86|     }
+     87|     mount.abort();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 8 passed (10)
+   Start at  19:13:45
+   Duration  340ms (transform 189ms, setup 56ms, import 196ms, tests 22ms, environment 0ms)
+

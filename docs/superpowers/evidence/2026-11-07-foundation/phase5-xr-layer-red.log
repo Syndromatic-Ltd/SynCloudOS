@@ -1,0 +1,31 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-xr.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-xr.test.ts (5 tests | 1 failed) 9ms
+     × starts only on request, snapshots frames and ends on disposal 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-xr.test.ts > XRFX portable sessions > starts only on request, snapshots frames and ends on disposal
+AssertionError: expected "vi.fn()" to be called with arguments: [ { baseLayer: {} } ]
+
+Number of calls: 0
+
+ ❯ tests/runtime/fx/phase5-xr.test.ts:47:40
+     45|     const frames: number[] = [];
+     46|     await session.run(new XRFXConfiguration(), frame => frames.push(fr…
+     47|     expect(f.native.updateRenderState).toHaveBeenCalledWith({ baseLaye…
+       |                                        ^
+     48|     f.frame();
+     49|     expect(frames).toEqual([1.2]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  19:15:37
+   Duration  219ms (transform 50ms, setup 29ms, import 39ms, tests 9ms, environment 0ms)
+

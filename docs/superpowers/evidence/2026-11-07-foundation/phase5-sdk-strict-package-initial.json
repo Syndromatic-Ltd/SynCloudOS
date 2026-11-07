@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "kind": "package-foundation",
+  "commit": "585c4f3ad0dfd37211a121e7871765db827770a2",
+  "archiveSha256": "cce7d6c1be99c1f33ad29a90d2bf93a22eb5e4d4e7a66ca5cf408e4eff7829e6",
+  "integrity": "sha512-0cFfmkz/5XeWf+dOdXuqHuXJRsfwPiGYkZGzQjoX4l14ugZeji5K2QhGOcBBK/aPMfetJ+MThJ4XUVjAqrTMRg==",
+  "sourceSha256": "bf088f14e6580f5ce6e78afce51fdeb8af22124e5d8e928e743d2a3b00fda036",
+  "resourcesSha256": "ee1f12034f719c81c3df79496608dfd5bd6c610f81c16dc445c58a0ef70907f9",
+  "resourceFiles": 2335,
+  "installedOutsideRepository": true,
+  "types": {
+    "NodeNext": {
+      "passed": true,
+      "modules": 1230,
+      "skipLibCheck": false,
+      "independent": true
+    },
+    "Bundler": {
+      "passed": true,
+      "modules": 1230,
+      "skipLibCheck": false,
+      "independent": true
+    }
+  },
+  "families": [
+    {
+      "entry": "fx/animation",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/graphics",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/image",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/text",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/audio",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/haptics",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/motion",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/media",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/video",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/midi",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/location",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/lumina",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/compression",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/network",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/crypto",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/bluetooth",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/nfc",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/speech",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/contacts",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/pass",
+      "import": "pending",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/xr",
+      "import": "pending",
+      "types": "passed"
+    }
+  ],
+  "behavior": "not-run",
+  "browser": "not-run",
+  "nativeDevice": "not-run",
+  "passed": false,
+  "error": "Command failed (1): node public-imports.mjs\n\n\nnode:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Empty FX runtime entry: network\r\n    at assertFxRuntimeEntry (file:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/synware-package-foundation-cQQJZB/public-imports.mjs:11:3)\r\n    at file:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/synware-package-foundation-cQQJZB/public-imports.mjs:19:3 {\r\n  generatedMessage: false,\r\n  code: 'ERR_ASSERTION',\r\n  actual: false,\r\n  expected: true,\r\n  operator: '==',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.22.1\r\n"
+}

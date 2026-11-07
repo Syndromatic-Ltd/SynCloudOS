@@ -1,0 +1,6 @@
+Error: SDK package foundation failed; inspect C:\Users\Kavish Krishnakumar\AppData\Local\Temp\synware-package-foundation-cQQJZB\package-foundation.json
+    at checkInstalledSdkPackage (file:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/syncloudos-phase5-585c4f3ad0-fa4c2592/scripts/synware/installed-consumer.mjs:251:11)
+    at file:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/syncloudos-phase5-585c4f3ad0-fa4c2592/scripts/synware/installed-consumer.mjs:270:48
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
