@@ -24,6 +24,7 @@ import { TFXGlyphDrawing } from "@syndromatic/syncloudos/fx/text";
 import { GFXColour, type GFXImage } from "@syndromatic/syncloudos/fx/graphics";
 import { createExampleModel, textSystemDocumentType, type ExampleFlowId, type ExampleViewId, type TextSystemExampleModel } from "./model";
 import { ExampleResources, examplePolicy, layoutExampleFlow } from "./layout";
+import type { NSEData } from "@syndromatic/syncloudos/foundation";
 import { decodeExamplePNG } from "./image";
 export type ExampleAssetLease = Awaited<ReturnType<AppDocumentResourcesClient["acquire"]>>;
 
@@ -84,7 +85,7 @@ export async function createTextSystemExample(options: {
   readonly openLocation?: AppDocumentLocation;
   readonly nativeDestination?: AppDocumentLocation;
   /** Focused Node tests inject only the pixel decoder; admission/storage/history remain real. */
-  readonly decodePNG?: (bytes: Uint8Array, signal: AbortSignal) => Promise<GFXImage>;
+  readonly decodePNG?: (bytes: NSEData, signal: AbortSignal) => Promise<GFXImage>;
   readonly signal?: AbortSignal;
 }): Promise<TextSystemExample> {
   options.signal?.throwIfAborted();
@@ -276,7 +277,7 @@ export async function createTextSystemExample(options: {
     assetReceipt() {
       if (!assetLease || !resourceClient?.assetCapabilities) return null;
       const bytes = resourceClient.resolve(document.id, assetLease);
-      return { descriptor: assetLease, bytes: bytes ? Array.from(bytes) : [], active: resourceClient.isActive(document.id, assetLease), width: resources.image?.width ?? 0, height: resources.image?.height ?? 0, assetDurability: resourceClient.assetCapabilities.durability };
+      return { descriptor: assetLease, bytes: bytes ? Array.from(bytes.bytes) : [], active: resourceClient.isActive(document.id, assetLease), width: resources.image?.width ?? 0, height: resources.image?.height ?? 0, assetDurability: resourceClient.assetCapabilities.durability };
     },
     isAssetLeaseActive(lease) { try { return resourceClient?.isActive(document.id, lease) ?? false; } catch { return false; } },
     setZoom(value) { assertLive(); if (!Number.isFinite(value) || value < .5 || value > 2) throw new RangeError("Zoom must be 0.5..2."); zoom = value; transformRevision++; publish(); },

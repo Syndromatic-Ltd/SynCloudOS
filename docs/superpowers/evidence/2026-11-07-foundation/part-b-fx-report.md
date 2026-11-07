@@ -84,3 +84,17 @@ Eight new cases use `vm.runInNewContext` to create actual foreign ArrayBuffers a
 The remaining FX instanceof checks were inspected: payload methods normalise into local Foundation views first; raw numeric pixel/index destinations and native private transfer protocols retain their documented checks. No further app-facing convertible-input gate was found.
 
 Validation: **59 passed across 7 files**, covering Foundation byte contracts, graphics providers, media blocks/mounted media, container I/O and both barcode suites. Evidence: [part-b-fx-cross-realm-red.log](part-b-fx-cross-realm-red.log), [part-b-fx-cross-realm-green.log](part-b-fx-cross-realm-green.log). `git diff --check` passed. No SDK build or full suite was run by this follow-up; parent retains aggregate validation ownership. This follow-up supersedes the earlier source freeze point without changing public signatures or carve-out accounting.
+
+## Full-suite consumer follow-up
+
+The parent's single full-suite run at pinned `31b0575` exposed stale installed-consumer and TextSystem fixtures after the byte contract migration. This bounded follow-up changes the four assigned test files and the two private TextSystem example decoder helpers; it adds no framework API, compatibility return or behaviour shim.
+
+- `packed-fx.test.ts`: callback providers deliver NSEData, provider reads use defensive byte views, ICC/export fixtures provide Foundation values, WAV assembly uses count/bytes, and encoded container fragments bridge to local typed arrays explicitly.
+- `packed-value-foundations.test.ts`: the installed MIDI specimen spreads the encoded value's byte view.
+- `text-system-example.test.ts`: injected PNG decoders accept delivered NSEData; native TextDecoder/PDF.js consumers read explicit byte views.
+- `text-system-keyboard.test.tsx`: the image mock returns NSEData, supporting the real view's base64EncodedString call.
+- `examples/TextSystem.app/Contents/example.ts` and `image.ts`: the private decoder callback consumes immutable resolved data, the native browser decoder builds its Blob through Foundation, and receipt serialisation reads the value's byte view. These were real missed example call sites, beyond the old test expectations.
+
+Ran exactly once: `npx vitest run tests/runtime/fx/packed-fx.test.ts tests/runtime/fx/packed-value-foundations.test.ts tests/integration/text-system-example.test.ts tests/integration/text-system-keyboard.test.tsx`.
+
+Result: **17 passed, 2 failed across 4 files**. Both TextSystem files pass all 17 tests. The two packed tests are blocked before specimen execution by the unmodified SDK source-fingerprint guard: working source `bd2cb5c05dd7eaa975684cbacab4ba3f13d663e9735d2adbb075a341eb0ae0a9`, archive source `34351f0559920c5e2404a87297273be7d70b645d7a4dae05676764eb9cd9ef35`. Evidence: [part-b-fx-packed-text-recheck.log](part-b-fx-packed-text-recheck.log). No SDK build, guard bypass or full-suite rerun was attempted; parent will perform packed acceptance from the final frozen snapshot. `git diff --check` passed on these owned edits.

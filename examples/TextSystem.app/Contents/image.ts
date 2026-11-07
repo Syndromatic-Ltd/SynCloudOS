@@ -18,12 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import { GFXImage } from "@syndromatic/syncloudos/fx/graphics";
 
 /** Private browser decoder. Saved bytes, rather than a regenerated placeholder, supply screen and PDF pixels. */
-export async function decodeExamplePNG(bytes: Uint8Array, signal: AbortSignal): Promise<GFXImage> {
+export async function decodeExamplePNG(bytes: NSEDataConvertible, signal: AbortSignal): Promise<GFXImage> {
   signal.throwIfAborted();
-  const bitmap = await createImageBitmap(new Blob([bytes.slice().buffer], { type: "image/png" }));
+  const bitmap = await createImageBitmap(NSEData.from(bytes).blob("image/png"));
   try {
     signal.throwIfAborted();
     if (bitmap.width < 1 || bitmap.height < 1 || bitmap.width > 256 || bitmap.height > 256) throw new Error("The private example accepts PNG objects up to 256 × 256 pixels.");

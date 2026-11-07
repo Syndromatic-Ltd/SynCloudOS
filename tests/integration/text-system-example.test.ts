@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { NSEData } from "@syndromatic/syncloudos/foundation";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { attributedContent, paragraph, textRun, NSETextInputClient } from "@syndromatic/syncloudos/nse/text";
@@ -51,8 +52,8 @@ async function fixture(initialModel = createExampleModel(), persistence?: { adap
   const sourceFontBytes = fontBytes.slice();
   const example = await createTextSystemExample({ documents, documentResources, fontBytes: sourceFontBytes, initialModel, signal: app.signal,
     ...(persistence ? { openLocation: persistence.openLocation, nativeDestination: nativeLocation,
-      decodePNG: async (bytes: Uint8Array) => {
-        expect(Array.from(bytes.subarray(0, 8))).toEqual([137,80,78,71,13,10,26,10]);
+      decodePNG: async (bytes: NSEData) => {
+        expect(Array.from(bytes.bytes.subarray(0, 8))).toEqual([137,80,78,71,13,10,26,10]);
         return new GFXImage({ width: 2, height: 2, alpha: "opaque", colourSpace: "srgb", data: new Uint8Array([31,100,90,255,55,139,122,255,55,139,122,255,31,100,90,255]) });
       } } : {}) });
   cleanups.push(() => example.dispose());
@@ -267,11 +268,11 @@ describe("private public-package TextSystem engine", () => {
     const result = await prepared.output.exportPDF();
     expect(result.status).toBe("exported");
     if (result.status !== "exported") throw new Error(JSON.stringify(result.receipt));
-    expect(new TextDecoder().decode(result.bytes.subarray(0, 8))).toContain("%PDF-");
+    expect(new TextDecoder().decode(result.bytes.bytes.subarray(0, 8))).toContain("%PDF-");
     expect(result.receipt.revision).toBe(before.revision);
     expect(result.receipt.pages.length).toBeGreaterThan(0);
     const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const task = getDocument({ data: result.bytes.slice(), useSystemFonts: false, disableFontFace: true });
+    const task = getDocument({ data: result.bytes.bytes, useSystemFonts: false, disableFontFace: true });
     try {
       const pdf = await task.promise;
       let extracted = "";
