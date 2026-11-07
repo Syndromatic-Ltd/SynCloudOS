@@ -70,6 +70,9 @@ export { useContacts } from "./useContacts";
 export { usePayment } from "./usePayment";
 export { useXR } from "./useXR";
 export { useLocation } from "./useLocation";
+export { useNetwork } from "./useNetwork";
+export { useSpeechSynthesizer } from "./useSpeechSynthesizer";
+export { useVideoPresentation } from "./useVideoPresentation";
 
 export { useMIDI } from "./useMIDI";
 

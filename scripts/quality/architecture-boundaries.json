@@ -6,6 +6,8 @@
   ],
   "exclusions": [],
   "aliases": [
+    { "find": "@syndromatic/syncloudos/fx/network", "replacement": "src/FX/NetworkFX/public.ts" },
+    { "find": "@syndromatic/syncloudos/fx/crypto", "replacement": "src/FX/CryptoFX/public.ts" },
     {
       "find": "@syndromatic/syncloudos",
       "replacement": "src/SynCloudOS/AppSDK/rootPackageEntry.ts"
@@ -350,6 +352,9 @@
         "src/SynCloudOS/AppSDK/mountedAudioGraphs.ts",
         "src/SynCloudOS/AppSDK/mountedAudioFiles.ts",
         "src/SynCloudOS/AppSDK/mountedLocationClient.ts",
+        "src/SynCloudOS/AppSDK/mountedNetworkClient.ts",
+        "src/SynCloudOS/AppSDK/mountedAudioSpeechClient.ts",
+        "src/SynCloudOS/AppSDK/mountedVideoPresentationClient.ts",
         "src/SynCloudOS/AppSDK/mountedLuminaClient.ts",
         "src/SynCloudOS/AppSDK/mountedMIDIClient.ts",
         "src/SynCloudOS/AppSDK/mountedMediaClient.ts",
