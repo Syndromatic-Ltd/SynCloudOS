@@ -1,0 +1,277 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-open-panel-35b91dcd
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/user-info.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:23:21:
+      23 │ ...serInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
+         ╵                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/AlertCautionIcon.png?url&no-inline
+
+    src/SynCloudOSReact/SystemAlert.tsx:26:24:
+      26 │ ...cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17:
+      21 │ import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/settings.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:22:21:
+      22 │ ...settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/SynCloudOSLogo.png?url&no-inline
+
+    src/SynCloudOS/Resources/frameworkAssets.ts:23:27:
+      23 │ ...Logo from "../../SynCloudOSReact/Resources/SynCloudOSLogo.png?u...
+         ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".wasm" files: ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+
+    src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28:
+      2 │ import harfbuzzWasmUrl from "harfbuzzjs/dist/harfbuzz.wasm?url";
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "fs"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563:
+      1 │ ...NMENT_IS_NODE){var fs=require("fs");if(_scriptName.startsWith("f...
+        ╵                                  ~~~~
+
+  The package "fs" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "path"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629:
+      1 │ ...:")){scriptDirectory=require("path").dirname(require("url").file...
+        ╵                                 ~~~~~~
+
+  The package "path" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "url"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653:
+      1 │ ...quire("path").dirname(require("url").fileURLToPath(_scriptName))...
+        ╵                                  ~~~~~
+
+  The package "url" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/AlertCautionIcon.png?url&no-inline
+
+    src/SynCloudOSReact/SystemAlert.tsx:26:24:
+      26 │ ...cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/SynCloudOSLogo.png?url&no-inline
+
+    src/SynCloudOS/Resources/frameworkAssets.ts:23:27:
+      23 │ ...Logo from "../../SynCloudOSReact/Resources/SynCloudOSLogo.png?u...
+         ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17:
+      21 │ import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/user-info.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:23:21:
+      23 │ ...serInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
+         ╵                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/settings.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:22:21:
+      22 │ ...settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".wasm" files: ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+
+    src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28:
+      2 │ import harfbuzzWasmUrl from "harfbuzzjs/dist/harfbuzz.wasm?url";
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "fs"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563:
+      1 │ ...NMENT_IS_NODE){var fs=require("fs");if(_scriptName.startsWith("f...
+        ╵                                  ~~~~
+
+  The package "fs" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "path"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629:
+      1 │ ...:")){scriptDirectory=require("path").dirname(require("url").file...
+        ╵                                 ~~~~~~
+
+  The package "path" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "url"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653:
+      1 │ ...quire("path").dirname(require("url").fileURLToPath(_scriptName))...
+        ╵                                  ~~~~~
+
+  The package "url" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+ ❯ tests/runtime/synapp-manifest-validator-generated.test.ts (2 tests | 1 failed) 300ms
+   × keeps the precompiled manifest validator current with the schema 230ms
+ ❯ tests/runtime/heritage-inspector-dev.test.ts (7 tests | 2 failed) 862ms
+     × excludes the lazy Inspector graph and CSS from the production host region 601ms
+     × removes the bridge and UI from the production import graph without a package rebuild 161ms
+ ❯ tests/runtime/text-system-packed-consumer.test.ts (15 tests | 3 failed) 123ms
+     × loads the required public browser stylesheet only in the trusted host bootstrap 55ms
+     × confines public browser host provisioning to the separate private bootstrap 17ms
+     × prepares the actual example and verified licensed font as a standalone consumer graph 40ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: navigation to another Document
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/heritage-inspector-dev.test.ts > heritage development boundary > excludes the lazy Inspector graph and CSS from the production host region
+ FAIL  tests/runtime/heritage-inspector-dev.test.ts > heritage development boundary > removes the bridge and UI from the production import graph without a package rebuild
+Error: Build failed with 9 errors:
+src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563: ERROR: Could not resolve "fs"
+src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629: ERROR: Could not resolve "path"
+src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653: ERROR: Could not resolve "url"
+src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28: ERROR: No loader is configured for ".wasm" files: ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17: ERROR: No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+...
+ ❯ failureErrorWithLog ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:1748:15
+ ❯ ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:1207:25
+ ❯ ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:1159:52
+ ❯ buildResponseToResult ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:1205:7
+ ❯ ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:1232:16
+ ❯ responseCallbacks.<computed> ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:884:9
+ ❯ handleIncomingPacket ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:939:12
+ ❯ Socket.readFromStdout ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/esbuild/lib/main.js:862:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/runtime/synapp-manifest-validator-generated.test.ts > keeps the precompiled manifest validator current with the schema
+Error: Command failed: C:\Program Files\nodejs\node.exe scripts/synware/gen-manifest-validator.mjs --check
+synappManifestValidator.generated.mjs is stale: run node scripts/synware/gen-manifest-validator.mjs
+
+ ❯ tests/runtime/synapp-manifest-validator-generated.test.ts:31:3
+     29| it("keeps the precompiled manifest validator current with the schema",…
+     30|   // Throws, with the regeneration command in its output, when stale.
+     31|   execFileSync(process.execPath, ["scripts/synware/gen-manifest-valida…
+       |   ^
+     32| });
+     33|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/runtime/text-system-packed-consumer.test.ts > independent custom text consumer preparation > loads the required public browser stylesheet only in the trusted host bootstrap
+AssertionError: Nonpublic consumer import: @syndromatic/syncloudos/foundation
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ checkSpecifier scripts/synware/check-custom-text-system-consumer.mjs:60:11
+     58|     if (externalImports.has(specifier)) return;
+     59|     if (isHost && hostImports.has(specifier)) return;
+     60|     assert(specifier.startsWith("./") || specifier.startsWith("../"), …
+       |           ^
+     61|     assert(!specifier.includes("\\") && !specifier.includes("\0"), `In…
+     62|     const [path, query] = specifier.split("?");
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:73:33
+ ❯ visitNodes ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/typescript/lib/typescript.js:32559:22
+ ❯ forEachChildInSourceFile ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/typescript/lib/typescript.js:32772:12
+ ❯ Object.forEachChild ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/typescript/lib/typescript.js:33072:35
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:82:8
+ ❯ assertCustomTextSystemSourceBoundary scripts/synware/check-custom-text-system-consumer.mjs:84:3
+ ❯ createCustomTextSystemConsumerSources scripts/synware/check-custom-text-system-consumer.mjs:176:65
+ ❯ tests/runtime/text-system-packed-consumer.test.ts:37:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/runtime/text-system-packed-consumer.test.ts > independent custom text consumer preparation > confines public browser host provisioning to the separate private bootstrap
+AssertionError: Nonpublic consumer import: @syndromatic/syncloudos/foundation
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ checkSpecifier scripts/synware/check-custom-text-system-consumer.mjs:60:11
+     58|     if (externalImports.has(specifier)) return;
+     59|     if (isHost && hostImports.has(specifier)) return;
+     60|     assert(specifier.startsWith("./") || specifier.startsWith("../"), …
+       |           ^
+     61|     assert(!specifier.includes("\\") && !specifier.includes("\0"), `In…
+     62|     const [path, query] = specifier.split("?");
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:73:33
+ ❯ visitNodes ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/typescript/lib/typescript.js:32559:22
+ ❯ forEachChildInSourceFile ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/typescript/lib/typescript.js:32772:12
+ ❯ Object.forEachChild ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/typescript/lib/typescript.js:33072:35
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:82:8
+ ❯ assertCustomTextSystemSourceBoundary scripts/synware/check-custom-text-system-consumer.mjs:84:3
+ ❯ createCustomTextSystemConsumerSources scripts/synware/check-custom-text-system-consumer.mjs:176:65
+ ❯ tests/runtime/text-system-packed-consumer.test.ts:46:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  tests/runtime/text-system-packed-consumer.test.ts > independent custom text consumer preparation > prepares the actual example and verified licensed font as a standalone consumer graph
+AssertionError: Nonpublic consumer import: @syndromatic/syncloudos/foundation
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ checkSpecifier scripts/synware/check-custom-text-system-consumer.mjs:60:11
+     58|     if (externalImports.has(specifier)) return;
+     59|     if (isHost && hostImports.has(specifier)) return;
+     60|     assert(specifier.startsWith("./") || specifier.startsWith("../"), …
+       |           ^
+     61|     assert(!specifier.includes("\\") && !specifier.includes("\0"), `In…
+     62|     const [path, query] = specifier.split("?");
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:73:33
+ ❯ visitNodes ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/typescript/lib/typescript.js:32559:22
+ ❯ forEachChildInSourceFile ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/typescript/lib/typescript.js:32772:12
+ ❯ Object.forEachChild ../../../../Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/typescript/lib/typescript.js:33072:35
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:82:8
+ ❯ assertCustomTextSystemSourceBoundary scripts/synware/check-custom-text-system-consumer.mjs:84:3
+ ❯ createCustomTextSystemConsumerSources scripts/synware/check-custom-text-system-consumer.mjs:176:65
+ ❯ tests/runtime/text-system-packed-consumer.test.ts:87:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+
+ Test Files  3 failed | 870 passed (873)
+      Tests  6 failed | 7274 passed (7280)
+   Start at  10:44:26
+   Duration  904.60s (transform 38.26s, setup 6.96s, import 624.87s, tests 765.85s, environment 293.39s)
+

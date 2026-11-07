@@ -1,0 +1,30 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-button-key-equivalents.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-button-key-equivalents.test.tsx (2 tests | 2 failed) 18ms
+   × dispatches special key equivalent "\r" as Enter 16ms
+   × dispatches special key equivalent "\u001b" as Escape 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-button-key-equivalents.test.tsx > dispatches special key equivalent "\r" as Enter
+ FAIL  tests/runtime/nse-button-key-equivalents.test.tsx > dispatches special key equivalent "\u001b" as Escape
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ tests/runtime/nse-button-key-equivalents.test.tsx:10:61
+      8| it.each([["\r", "Enter"], ["\u001b", "Escape"]])("dispatches special k…
+      9|   const action = vi.fn(); render(<NSEButton title="Action" keyEquivale…
+     10|   fireEvent.keyDown(document.body, { key }); expect(action).toHaveBeen…
+       |                                                             ^
+     11| });
+     12|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  10:04:38
+   Duration  1.69s (transform 252ms, setup 31ms, import 460ms, tests 18ms, environment 1.04s)
+

@@ -1,0 +1,10 @@
+{
+  "reason": "Superseded validation snapshot: own asset and lifecycle regressions have been fixed at 457982c; final complete validation follows.",
+  "root": "\"node\"   \"C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\syncloudos-open-panel-118f7ba8\\node_modules\\.bin\\\\..\\vitest\\vitest.mjs\" run",
+  "processes": [
+    48220,
+    91108,
+    76968,
+    72512
+  ]
+}

@@ -1,0 +1,470 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ❯ tests/runtime/publisher/product-controller.test.tsx (12 tests | 2 failed) 10795ms
+     × moves imagePopover to a replacement button without closing it 2506ms
+     × moves publishMenu to a replacement button without closing it 1726ms
+ ❯ tests/runtime/gallery-atmo-surfaces.test.tsx (4 tests | 1 failed) 3897ms
+     × uses real owned window and document states for focus, minimisation, zoom and dirty/clean history 1653ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/gallery-atmo-surfaces.test.tsx > Gallery Atmo surface coverage in its class application > uses real owned window and document states for focus, minimisation, zoom and dirty/clean history
+AssertionError: expected undefined to be defined
+ ❯ tests/runtime/gallery-atmo-surfaces.test.tsx:58:119
+     56|     await click("Open editable window");
+     57|     const windows = host.appContext.windows;
+     58|     await expect.poll(() => windows.getSnapshot().owned.find(window =>…
+       |                                                                                                                       ^
+     59|     const editable = windows.getSnapshot().owned.find(window => window…
+     60|     const documents = host.appContext.documents.workspaceDocuments;
+
+Caused by: Error: Matcher did not succeed in time.
+ ❯ tests/runtime/gallery-atmo-surfaces.test.tsx:58:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > moves imagePopover to a replacement button without closing it
+AssertionError: expected <button type="button" …(16)>…(8)</button> to be <button></button> // Object.is equality
+
+- Expected
++ Received
+
+- <button />
++ <button
++   aria-label="Image"
++   aria-pressed="false"
++   class="nse-toolbar-item"
++   data-nse-appearance-slot="toolbar.item.normal.1x"
++   data-nse-appearance-state="normal"
++   data-nse-control="toolbar-item"
++   data-nse-part="item"
++   data-nse-toolbar-bordered="false"
++   data-nse-toolbar-command="com.syndromatic.journal-publisher.insertImage"
++   data-nse-toolbar-item-id="image:0"
++   data-nse-toolbar-state="off"
++   data-state="normal"
++   id="transient-window-surface:runtime:synapp-test:1767225600000:1:com.syndromatic.journal-publisher:com.syndromatic.journal-publisher:com.syndromatic.journal-publisher:window%3Asynapp-test-window%3Acom.syndromatic.journal-publisher:window%3Asynapp-test-window%3Acom.syndromatic.journal-publisher:nse-popover%3Asheet-2:2:anchor"
++   style="inline-size: calc(62px - 2 * var(--nse-toolbar-item-inline-margin, 0px));"
++   tabindex="-1"
++   title="This post can't be edited right now."
++   type="button"
++ >
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="surface"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="bevel"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="cap"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="splice"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="gloss"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="inner-shadow"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-toolbar-item-icon"
++   >
++     <svg
++       aria-hidden="true"
++       focusable="false"
++       height="28"
++       viewBox="0 0 28 28"
++       width="28"
++     >
++       <defs>
++         <lineargradient
++           id="frame-_r_q_"
++           x1="0"
++           x2="0"
++           y1="0"
++           y2="1"
++         >
++           <stop
++             offset="0"
++             stop-color="#ffffff"
++           />
++           <stop
++             offset="1"
++             stop-color="#dadde2"
++           />
++         </lineargradient>
++         <lineargradient
++           id="sky-_r_q_"
++           x1="0"
++           x2="0"
++           y1="0"
++           y2="1"
++         >
++           <stop
++             offset="0"
++             stop-color="#4f9ff0"
++           />
++           <stop
++             offset="1"
++             stop-color="#bfe0ff"
++           />
++         </lineargradient>
++         <lineargradient
++           id="hill-_r_q_"
++           x1="0"
++           x2="0"
++           y1="0"
++           y2="1"
++         >
++           <stop
++             offset="0"
++             stop-color="#6cc24a"
++           />
++           <stop
++             offset="1"
++             stop-color="#2f7d23"
++           />
++         </lineargradient>
++         <lineargradient
++           id="far-_r_q_"
++           x1="0"
++           x2="0"
++           y1="0"
++           y2="1"
++         >
++           <stop
++             offset="0"
++             stop-color="#8fa6bf"
++           />
++           <stop
++             offset="1"
++             stop-color="#5d7590"
++           />
++         </lineargradient>
++       </defs>
++       <rect
++         fill="url(#frame-_r_q_)"
++         height="19"
++         rx="1.5"
++         stroke="rgba(0,0,0,0.42)"
++         stroke-width="0.75"
++         width="23"
++         x="2.5"
++         y="4.5"
++       />
++       <rect
++         fill="url(#sky-_r_q_)"
++         height="15"
++         width="19"
++         x="4.5"
++         y="6.5"
++       />
++       <circle
++         cx="19"
++         cy="10"
++         fill="#fff6c2"
++         r="2"
++       />
++       <path
++         d="M4.5 18l5-6 4 4.5 2.5-2.5 7.5 7v0.5h-19z"
++         fill="url(#far-_r_q_)"
++       />
++       <path
++         d="M4.5 21.5v-2.5c4-3 9-3.5 19-1v3.5z"
++         fill="url(#hill-_r_q_)"
++       />
++       <rect
++         fill="none"
++         height="15"
++         stroke="rgba(0,0,0,0.25)"
++         stroke-width="0.5"
++         width="19"
++         x="4.5"
++         y="6.5"
++       />
++     </svg>
++   </span>
++   <span
++     class="nse-toolbar-item-label"
++   >
++     Image
++   </span>
++ </button>
+
+ ❯ tests/runtime/publisher/product-controller.test.tsx:73:26
+     71|       await act(async () => { window[property] = oldAnchor; });
+     72|       const old = presentedPopover(window, kind);
+     73|       expect(old.anchor).toBe(oldAnchor);
+       |                          ^
+     74|       await act(async () => { window[property] = replacement; oldAncho…
+     75|       expect(old.isDisposed).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > moves publishMenu to a replacement button without closing it
+AssertionError: expected <button type="button" …(16)>…(8)</button> to be <button></button> // Object.is equality
+
+- Expected
++ Received
+
+- <button />
++ <button
++   aria-label="Publish"
++   aria-pressed="false"
++   class="nse-toolbar-item"
++   data-nse-appearance-slot="toolbar.item.normal.1x"
++   data-nse-appearance-state="normal"
++   data-nse-control="toolbar-item"
++   data-nse-part="item"
++   data-nse-toolbar-bordered="false"
++   data-nse-toolbar-command="com.syndromatic.journal-publisher.publishOptions"
++   data-nse-toolbar-item-id="publish:0"
++   data-nse-toolbar-state="off"
++   data-state="normal"
++   id="transient-window-surface:runtime:synapp-test:1767225600000:2:com.syndromatic.journal-publisher:com.syndromatic.journal-publisher:com.syndromatic.journal-publisher:window%3Asynapp-test-window%3Acom.syndromatic.journal-publisher:window%3Asynapp-test-window%3Acom.syndromatic.journal-publisher:nse-popover%3Asheet-4:2:anchor"
++   style="inline-size: calc(62px - 2 * var(--nse-toolbar-item-inline-margin, 0px));"
++   tabindex="-1"
++   title="Open a post first."
++   type="button"
++ >
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="surface"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="bevel"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="cap"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="splice"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="gloss"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-chrome-primitive"
++     data-nse-appearance-slot="toolbar.item.normal.1x"
++     data-nse-appearance-state="normal"
++     data-nse-chrome-active="false"
++     data-nse-chrome-appearance="default"
++     data-nse-chrome-primitive="inner-shadow"
++     data-nse-chrome-state="normal"
++   />
++   <span
++     aria-hidden="true"
++     class="nse-toolbar-item-icon"
++   >
++     <svg
++       aria-hidden="true"
++       focusable="false"
++       height="28"
++       viewBox="0 0 28 28"
++       width="28"
++     >
++       <defs>
++         <lineargradient
++           id="pad-_r_30_"
++           x1="0"
++           x2="0"
++           y1="0"
++           y2="1"
++         >
++           <stop
++             offset="0"
++             stop-color="#fbf3b4"
++           />
++           <stop
++             offset="1"
++             stop-color="#ecdd7d"
++           />
++         </lineargradient>
++         <lineargradient
++           id="arrow-_r_30_"
++           x1="0"
++           x2="0"
++           y1="0"
++           y2="1"
++         >
++           <stop
++             offset="0"
++             stop-color="#7fbaff"
++           />
++           <stop
++             offset="1"
++             stop-color="#1d5ec7"
++           />
++         </lineargradient>
++       </defs>
++       <rect
++         fill="url(#pad-_r_30_)"
++         height="17"
++         rx="1.5"
++         stroke="rgba(90,70,10,0.55)"
++         stroke-width="0.75"
++         width="17"
++         x="3.5"
++         y="8.5"
++       />
++       <rect
++         fill="#9c5a33"
++         height="3"
++         rx="1"
++         stroke="rgba(60,30,10,0.55)"
++         stroke-width="0.6"
++         width="17"
++         x="3.5"
++         y="8.5"
++       />
++       <path
++         d="M5.5 15h13"
++         stroke="rgba(126,117,70,0.45)"
++         stroke-width="0.8"
++       />
++       <path
++         d="M5.5 18h13"
++         stroke="rgba(126,117,70,0.45)"
++         stroke-width="0.8"
++       />
++       <path
++         d="M5.5 21h13"
++         stroke="rgba(126,117,70,0.45)"
++         stroke-width="0.8"
++       />
++       <path
++         d="M7.5 15.5h-0.5"
++         stroke="none"
++       />
++       <path
++         d="M19 2.6l6.2 6.6h-3.7v6.6h-5v-6.6h-3.7z"
++         fill="url(#arrow-_r_30_)"
++         stroke="rgba(10,40,100,0.7)"
++         stroke-linejoin="round"
++         stroke-width="0.75"
++       />
++     </svg>
++   </span>
++   <span
++     class="nse-toolbar-item-label"
++   >
++     Publish
++   </span>
++ </button>
+
+ ❯ tests/runtime/publisher/product-controller.test.tsx:73:26
+     71|       await act(async () => { window[property] = oldAnchor; });
+     72|       const old = presentedPopover(window, kind);
+     73|       expect(old.anchor).toBe(oldAnchor);
+       |                          ^
+     74|       await act(async () => { window[property] = replacement; oldAncho…
+     75|       expect(old.isDisposed).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed | 59 passed (61)
+      Tests  3 failed | 396 passed (399)
+   Start at  10:38:00
+   Duration  28.30s (transform 104.85s, setup 4.64s, import 221.07s, tests 111.27s, environment 217.31s)
+

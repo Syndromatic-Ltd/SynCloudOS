@@ -1,0 +1,157 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/heritage-inspector-dev.test.ts tests/runtime/open-panel-sheet-attachment.test.tsx tests/nse/file-panels tests/integration/nse-open-panel.test.tsx tests/runtime/nse-button-key-equivalents.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/AlertCautionIcon.png?url&no-inline
+
+    src/SynCloudOSReact/SystemAlert.tsx:26:24:
+      26 │ ...cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/SynCloudOSLogo.png?url&no-inline
+
+    src/SynCloudOS/Resources/frameworkAssets.ts:23:27:
+      23 │ ...Logo from "../../SynCloudOSReact/Resources/SynCloudOSLogo.png?u...
+         ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".wasm" files: node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+
+    src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28:
+      2 │ import harfbuzzWasmUrl from "harfbuzzjs/dist/harfbuzz.wasm?url";
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/user-info.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:23:21:
+      23 │ ...serInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
+         ╵                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17:
+      21 │ import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/settings.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:22:21:
+      22 │ ...settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "fs"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563:
+      1 │ ...NMENT_IS_NODE){var fs=require("fs");if(_scriptName.startsWith("f...
+        ╵                                  ~~~~
+
+  The package "fs" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "path"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629:
+      1 │ ...:")){scriptDirectory=require("path").dirname(require("url").file...
+        ╵                                 ~~~~~~
+
+  The package "path" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "url"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653:
+      1 │ ...quire("path").dirname(require("url").fileURLToPath(_scriptName))...
+        ╵                                  ~~~~~
+
+  The package "url" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/AlertCautionIcon.png?url&no-inline
+
+    src/SynCloudOSReact/SystemAlert.tsx:26:24:
+      26 │ ...cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/SynCloudOSLogo.png?url&no-inline
+
+    src/SynCloudOS/Resources/frameworkAssets.ts:23:27:
+      23 │ ...Logo from "../../SynCloudOSReact/Resources/SynCloudOSLogo.png?u...
+         ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/user-info.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:23:21:
+      23 │ ...serInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
+         ╵                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17:
+      21 │ import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/settings.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:22:21:
+      22 │ ...settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".wasm" files: node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+
+    src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28:
+      2 │ import harfbuzzWasmUrl from "harfbuzzjs/dist/harfbuzz.wasm?url";
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "fs"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563:
+      1 │ ...NMENT_IS_NODE){var fs=require("fs");if(_scriptName.startsWith("f...
+        ╵                                  ~~~~
+
+  The package "fs" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "path"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629:
+      1 │ ...:")){scriptDirectory=require("path").dirname(require("url").file...
+        ╵                                 ~~~~~~
+
+  The package "path" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "url"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653:
+      1 │ ...quire("path").dirname(require("url").fileURLToPath(_scriptName))...
+        ╵                                  ~~~~~
+
+  The package "url" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+ ❯ tests/runtime/heritage-inspector-dev.test.ts (7 tests | 2 failed) 497ms
+     × excludes the lazy Inspector graph and CSS from the production host region 201ms
+     × removes the bridge and UI from the production import graph without a package rebuild 176ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/heritage-inspector-dev.test.ts > heritage development boundary > excludes the lazy Inspector graph and CSS from the production host region
+ FAIL  tests/runtime/heritage-inspector-dev.test.ts > heritage development boundary > removes the bridge and UI from the production import graph without a package rebuild
+Error: Build failed with 9 errors:
+src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563: ERROR: Could not resolve "fs"
+src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629: ERROR: Could not resolve "path"
+src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653: ERROR: Could not resolve "url"
+src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28: ERROR: No loader is configured for ".wasm" files: node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17: ERROR: No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+...
+ ❯ failureErrorWithLog node_modules/esbuild/lib/main.js:1748:15
+ ❯ node_modules/esbuild/lib/main.js:1207:25
+ ❯ node_modules/esbuild/lib/main.js:1159:52
+ ❯ buildResponseToResult node_modules/esbuild/lib/main.js:1205:7
+ ❯ node_modules/esbuild/lib/main.js:1232:16
+ ❯ responseCallbacks.<computed> node_modules/esbuild/lib/main.js:884:9
+ ❯ handleIncomingPacket node_modules/esbuild/lib/main.js:939:12
+ ❯ Socket.readFromStdout node_modules/esbuild/lib/main.js:862:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  2 failed | 39 passed (41)
+   Start at  10:15:15
+   Duration  15.15s (transform 12.74s, setup 148ms, import 18.71s, tests 1.98s, environment 7.66s)
+
