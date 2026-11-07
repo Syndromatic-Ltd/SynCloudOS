@@ -20,7 +20,7 @@
 
 // Re-run from the framework repository root after the final SDK entries settle.
 import ts from "typescript";
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { resolve, relative } from "node:path";
 import { synWareSdkEntries } from "../../../../scripts/synware/sdk-entries.mjs";
 
@@ -46,6 +46,9 @@ for (const [entry, path] of Object.entries(synWareSdkEntries)) {
     const declarations = value.symbol?.declarations ?? [];
     if (declarations.length && !declarations.some(local)) return;
     for (const signature of [...value.getCallSignatures(), ...value.getConstructSignatures()]) {
+      // A private constructor is emitted without its parameter types. Do not let
+      // checker construct-signature traversal publish those host-only protocols.
+      if (signature.declaration && ts.getCombinedModifierFlags(signature.declaration) & (ts.ModifierFlags.Private | ts.ModifierFlags.Protected)) continue;
       signature.parameters.forEach(symbol); type(signature.getReturnType());
       signature.typeParameters?.forEach(type);
     }
@@ -72,7 +75,7 @@ for (const [entry, path] of Object.entries(synWareSdkEntries)) {
         signature = declaration.type?.getText(file) ?? checker.typeToString(checker.getTypeOfSymbolAtLocation(value, declaration), declaration, ts.TypeFormatFlags.NoTruncation);
       }
       // Parameters are covered by their callable; named class/interface bodies by their members.
-      if (signature && raw.test(signature) && !ts.isParameter(declaration)) {
+      if (signature && (raw.test(signature) || /\bNSEData(?:Convertible)?\b/u.test(signature)) && !ts.isParameter(declaration)) {
         const path = relative(process.cwd(), file.fileName).replaceAll("\\", "/");
         const line = file.getLineAndCharacterOfPosition(declaration.getStart(file)).line + 1;
         const name = nameOf(value);
@@ -86,7 +89,7 @@ for (const [entry, path] of Object.entries(synWareSdkEntries)) {
           if (!ts.isConstructorDeclaration(member) || ts.getCombinedModifierFlags(member) & (ts.ModifierFlags.Private | ts.ModifierFlags.Protected)) continue;
           const call = checker.getSignatureFromDeclaration(member);
           const signature = call && checker.signatureToString(call, member, ts.TypeFormatFlags.NoTruncation);
-          if (!signature || !raw.test(signature)) continue;
+          if (!signature || !(raw.test(signature) || /\bNSEData(?:Convertible)?\b/u.test(signature))) continue;
           const path = relative(process.cwd(), file.fileName).replaceAll("\\", "/");
           const line = file.getLineAndCharacterOfPosition(member.getStart(file)).line + 1;
           const key = `${path}:${member.pos}`;
@@ -108,8 +111,27 @@ for (const [entry, path] of Object.entries(synWareSdkEntries)) {
   if (module) checker.getExportsOfModule(module).forEach(symbol);
 }
 const result = [...rows.values()].sort((a,b) => a.path.localeCompare(b.path) || a.line-b.line).map(row => ({...row, entries:[...row.entries].sort()}));
-writeFileSync("docs/superpowers/evidence/2026-11-07-foundation/public-byte-signatures.json", JSON.stringify(result,null,2)+"\n");
-console.log(`${result.length} reachable public byte signatures`);
+const evidence = "docs/superpowers/evidence/2026-11-07-foundation/";
+const exemptions = JSON.parse(readFileSync(evidence + "public-byte-carve-outs.json", "utf8"));
+const remaining = result.filter(row => raw.test(row.signature)).map(row => {
+  const exemption = exemptions.find(item => item.path === row.path && item.name === row.name && item.signature === row.signature);
+  if (!exemption?.reason) throw new Error(`Undocumented public raw-byte signature: ${row.path}:${row.line} ${row.name} ${row.signature}`);
+  return { ...row, carveOut: { category: exemption.category, reason: exemption.reason } };
+});
+for (const exemption of exemptions) {
+  if (!remaining.some(row => row.path === exemption.path && row.name === exemption.name && row.signature === exemption.signature)) throw new Error(`Stale carve-out: ${exemption.path} ${exemption.name}`);
+}
+writeFileSync(evidence + "public-byte-signatures.json", JSON.stringify(remaining,null,2)+"\n");
+const original = JSON.parse(readFileSync(evidence + "part-b-original-signatures.json", "utf8"));
+const privateProtocols = new Set(["AUFXAudioRecorderEvent", "AUFXAudioRecorderPort.decode", "GFXPDFSnapshotObject", "BlockBacking.constructor", "BlockBacking.copyRange", "VFXPixelBacking.bytes"]);
+const migrations = original.map(before => {
+  const exemption = remaining.find(row => row.path === before.path && row.name === before.name && row.signature === before.signature);
+  const hidden = privateProtocols.has(before.name) || (before.path.endsWith("AUFXAudioRecorder.ts") && before.name === "__type.data") || (before.path.endsWith("pdfDocumentProtocol.ts") && ["__type.bytes", "__type.encodedBytes"].includes(before.name));
+  const after = result.filter(row => row.path === before.path && row.name === before.name).map(row => ({ line: row.line, signature: row.signature, entries: row.entries }));
+  return { before, disposition: exemption ? "carve-out" : hidden ? "private-host-protocol" : "migrated", ...(exemption ? { reason: exemption.carveOut.reason } : {}), after };
+});
+writeFileSync(evidence + "part-b-migration-inventory.json", JSON.stringify(migrations,null,2)+"\n");
+console.log(`${remaining.length} reachable raw signatures, all documented carve-outs; ${migrations.filter(row => row.disposition === "migrated").length} migrated; ${migrations.filter(row => row.disposition === "private-host-protocol").length} private host declarations.`);
 
 const exports = {};
 for (const entry of ["foundation", "fx/compression"]) {
