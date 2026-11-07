@@ -27,6 +27,7 @@ import { NSEMenuView } from "../Menus/NSEMenuView";
 import type { NSEMenu } from "../Menus/NSEMenu";
 import { NSEMenuOverlay } from "../Menus/NSEMenuOverlay";
 import type { NSEMenuOverlayOptions } from "../Menus/menuTypes";
+import type { NSEOverlayAnchorPoint } from "../Overlays/computeNSEOverlayPosition";
 
 export interface NSEViewProps extends HTMLAttributes<HTMLDivElement> {
   /**
@@ -80,6 +81,8 @@ function NSEViewAppearance({ appearance, children }: { readonly appearance: NSEA
 
 function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, direction, children, className, ref, ...htmlAttributes }: NSEViewProps & { readonly menu: NSEMenu }) {
   const [open, setOpen] = useState(false);
+  // NSMenu.popUpContextMenu(_:with:for:): a pointer opens the menu at its location; the keyboard opens it on the view.
+  const [anchorPoint, setAnchorPoint] = useState<NSEOverlayAnchorPoint | null>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const attachHost = useCallback((element: HTMLDivElement | null) => {
     hostRef.current = element;
@@ -116,13 +119,18 @@ function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, directi
   const openMenu = useCallback((event: MouseEvent | KeyboardEvent) => {
     event.preventDefault();
     cancelLongPress();
+    // A context-menu key press arrives as a contextmenu event at (0, 0) or on the focused element; only a real pointer position places the menu.
+    const pointer = "clientX" in event && (event.clientX !== 0 || event.clientY !== 0) ? { x: event.clientX, y: event.clientY } : null;
+    setAnchorPoint(pointer);
     setOpen(true);
   }, [cancelLongPress]);
   const beginLongPress = useCallback((event: PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch" || !menu.runtime.scheduler) return;
     cancelLongPress();
+    const pointer = { x: event.clientX, y: event.clientY };
     longPressRef.current = menu.runtime.scheduler.setTimeout(() => {
       longPressRef.current = null;
+      setAnchorPoint(pointer);
       setOpen(true);
     }, Math.max(0, longPressDelayMs ?? 600));
   }, [cancelLongPress, menu, longPressDelayMs]);
@@ -153,6 +161,7 @@ function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, directi
         controller={menu}
         open={open}
         anchor={hostRef.current}
+        anchorPoint={anchorPoint}
         labelledBy={viewId}
         kind="context-menu"
         onOpenChange={(nextOpen) => setOpen(nextOpen)}

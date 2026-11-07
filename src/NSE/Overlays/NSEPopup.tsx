@@ -59,6 +59,8 @@ export interface NSEPopupProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   readonly open?: boolean;
   readonly defaultOpen?: boolean;
   readonly anchor?: HTMLElement | null;
+  /** @internal Place against this viewport point instead of the anchor's box (a context menu at the pointer). */
+  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
   /** Defaults to the nearest class controller, then the branch's host responder. */
   readonly parentResponderId?: string;
   readonly parentId?: string | null;
@@ -128,6 +130,7 @@ export function NSEPopup({
   open,
   defaultOpen,
   anchor,
+  anchorPoint,
   parentResponderId,
   parentId,
   parentScopeId,
@@ -174,6 +177,7 @@ export function NSEPopup({
     parentScopeId,
     parentResponderId: resolvedParentResponderId,
     anchor: anchor ?? null,
+    anchorPoint: anchorPoint ?? null,
     open: state.open,
     placement: resolvedPresentation.placement,
     collisionPadding: resolvedPresentation.collisionPadding,
