@@ -43,6 +43,23 @@ function measured(element: HTMLElement, x: number, y: number, width: number, hei
 }
 
 describe("popover frame and presentation", () => {
+  it("does not re-present a hosted popover for an equivalent presentation object", async () => {
+    const present = vi.fn().mockResolvedValue("stable-window");
+    const bridge = { present, dismiss: vi.fn().mockResolvedValue({ outcome: "closed" }) };
+    const anchor = document.createElement("button"); document.body.append(anchor);
+    const fixture = () => <Harness><NSEWindowSurfaceBridgeProvider bridge={bridge}>
+      <NSEPopover id="stable-presentation" open anchor={anchor} parentResponderId="test" parentWindowControllerId={null}
+        presentation={{ mode: "anchored", placement: "block-end" }} title="Stable" onOpenChange={() => undefined}>
+        <p>Stable content</p>
+      </NSEPopover>
+    </NSEWindowSurfaceBridgeProvider></Harness>;
+    const view = render(fixture());
+    await waitFor(() => expect(present).toHaveBeenCalledTimes(1));
+    view.rerender(fixture());
+    expect(present).toHaveBeenCalledTimes(1);
+    view.unmount(); anchor.remove();
+  });
+
   it("presents anchored content-painted popovers through the window bridge with their AppKit options", async () => {
     const present = vi.fn().mockResolvedValue("popover-window");
     const bridge = { present, dismiss: vi.fn().mockResolvedValue({ outcome: "closed" }) };
