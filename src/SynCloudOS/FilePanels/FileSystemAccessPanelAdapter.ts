@@ -170,9 +170,11 @@ function fileReference(
     read: async (signal?: AbortSignal) => {
       await requirePermission("read", signal);
       try {
-        const file = await invoke(() => handle.getFile(), signal);
-        assertLive(signal);
-        const data = await NSEData.read(file);
+        const { file, data } = await invoke(async () => {
+          const file = await handle.getFile();
+          assertLive(signal);
+          return { file, data: await NSEData.read(file) };
+        }, signal);
         assertLive(signal);
         mediaType = file.type || "application/octet-stream";
         return data;

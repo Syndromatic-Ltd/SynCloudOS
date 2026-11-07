@@ -21,7 +21,7 @@ export interface MountedFilePanelOptions {
 /** Scopes the existing panel service; it is not a browser permission broker. */
 export function createMountedFilePanelClient(options:MountedFilePanelOptions):AppFilePanelClient {
   const native=options.native?createFileSystemAccessPanelAdapter(options.native,options.nativeActivity):null;
-  const adapters=[...(options.picker?[createBrowserFilePanelAdapter(options.picker)]:[]),...(native?[{...native,
+  const adapters=[...(options.picker?[createBrowserFilePanelAdapter(options.picker,options.nativeActivity)]:[]),...(native?[{...native,
     // Portable read-only input must not unexpectedly fall through to another
     // native chooser. Handles/directories are explicitly requested capabilities.
     supports:(request:Parameters<typeof native.supports>[0])=>!('selection'in request)||!options.picker||request.access==='readwrite'||request.selection==='single-directory'||request.requires.includes('persistent-handle'),
