@@ -58,6 +58,11 @@ function runtimeServiceWorker(config) {
   const set = (key, value) => stored("readwrite", store => store.put(value, key));
   const remove = key => stored("readwrite", store => store.delete(key));
   const values = () => stored("readonly", store => store.getAll());
+  const removeTaskIfCurrent = (key, requestId) => stored("readwrite", store => {
+    const request = store.get(key);
+    request.onsuccess = () => { if (request.result?.requestId === requestId) store.delete(key); };
+    return request;
+  });
   self.addEventListener("message", event => {
     const message = event.data;
     if (!message || !event.ports?.[0]) return;
@@ -76,8 +81,10 @@ function runtimeServiceWorker(config) {
             if (url.username || url.password || message.request.body?.length > 1048576) throw new TypeError("The task request is invalid or too large.");
             const method = message.request.method ?? "GET";
             if (!["GET", "POST", "PUT", "DELETE"].includes(method) || (method === "GET" && message.request.body)) throw new TypeError("Invalid background request method.");
-            await set(key, { kind: "task", requestId: crypto.randomUUID(), appId: app.bundleIdentifier, request: { ...message.request, url: url.href, method } });
-          } else if (message.type === "background-cancel") await remove(key);
+            const requestId = crypto.randomUUID();
+            await set(key, { kind: "task", requestId, appId: app.bundleIdentifier, request: { ...message.request, url: url.href, method } });
+            value = requestId;
+          } else if (message.type === "background-cancel") { if (message.requestId) await removeTaskIfCurrent(key, message.requestId); else await remove(key); }
           else if (message.type === "background-list") value = (await values()).filter(value => value.kind === "task" && value.appId === app.bundleIdentifier).map(value => value.request);
         } else if (message.type === "notification-categories") {
           if (!app || !Array.isArray(message.categories) || message.categories.length > 32) throw new TypeError("Invalid notification categories.");
@@ -106,9 +113,9 @@ function runtimeServiceWorker(config) {
       if (!app?.background?.enabled || !app.background.tasks?.includes(task.request.identifier)) { await remove(taskKey); return; }
       const url = new URL(task.request.url, self.location.origin);
       if (url.origin !== self.location.origin || !url.pathname.startsWith(config.base)) throw new TypeError("The task URL left the host scope.");
-      const response = await fetch(url, { method: task.request.method, body: task.request.body, credentials: "same-origin", headers: { "X-SynCloudOS-Task": task.requestId, "X-SynCloudOS-Task-Identifier": event.tag } });
+      const response = await fetch(url, { method: task.request.method, body: task.request.body, credentials: "same-origin", redirect: "error", headers: { "X-SynCloudOS-Task": task.requestId, "X-SynCloudOS-Task-Identifier": event.tag } });
       if (!response.ok) throw new Error(`Background task failed (${response.status}).`);
-      await remove(taskKey);
+      await removeTaskIfCurrent(taskKey, task.requestId);
       for (const client of await self.clients.matchAll({ type: "window" })) client.postMessage({ type: "background-completed", appId: task.appId, identifier: task.request.identifier });
     })());
   });

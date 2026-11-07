@@ -19,7 +19,9 @@
  */
 
 import { expect, it, vi } from "vitest";
-import { routeInstalledApplicationLaunch } from "../../src/SynCloudOS/InstalledApplications/installedApplicationLaunch";
+import { installedApplicationRoute, routeInstalledApplicationLaunch } from "../../src/SynCloudOS/InstalledApplications/installedApplicationLaunch";
+import { createInstalledApplicationRuntimePort } from "../../src/SynCloudOS/InstalledApplications/installedApplicationRuntimePort";
+import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
 const info = { schemaVersion: 1 as const, bundleIdentifier: "com.example.notes", displayName: "Notes", version: "1", routes: [{ path: "/notes" }], documentTypes: [{ id: "com.example.note", extensions: ["note"], mimeTypes: ["application/x-note"] }], urlTypes: [{ name: "Note", schemes: ["web+note"] }], linkCapture: { paths: ["/notes"] } };
 it("launches the declared application before opening file contents through the document controller", async () => {
   const calls: string[] = [];
@@ -42,4 +44,29 @@ it("routes only declared protocols to the application delegate", async () => {
 it("rejects unowned URLs and ambiguous file associations instead of guessing an application", async () => {
   const port = { origin: "https://site.test", base: "/", signal: new AbortController().signal, launch: vi.fn(), openDocument: vi.fn(), openURLs: vi.fn() };
   await expect(routeInstalledApplicationLaunch({ targetURL: "https://other.test/notes" }, [info], port)).rejects.toThrow(/origin/);
+  await expect(routeInstalledApplicationLaunch({ targetURL: "https://site.test/outside/notes" }, [info], { ...port, base: "/product/" })).rejects.toThrow(/deployment/);
+});
+it("chooses the longest matching route rather than an unrelated route on another app", async () => {
+  const launch = vi.fn(), openURLs = vi.fn();
+  const apps = [{ ...info, routes: [{ path: "/notes" }, { path: "/unrelated/very/long/route" }] }, { ...info, bundleIdentifier: "editor", routes: [{ path: "/notes/editor" }], linkCapture: { paths: ["/notes/editor"] } }];
+  await routeInstalledApplicationLaunch({ targetURL: "https://site.test/notes/editor" }, apps, { origin: "https://site.test", base: "/", signal: new AbortController().signal, launch, openURLs, openDocument: vi.fn() });
+  expect(launch).toHaveBeenCalledWith("editor", "/notes/editor");
+});
+it("waits for the real route operation result and refuses an unmounted receiver", async () => {
+  let resolve!: (value: unknown) => void;
+  const result = new Promise(complete => { resolve = complete; });
+  const runtime = { runtimeId: "pwa-launch-operation", signal: new AbortController().signal, routes: { openRoute: () => ({ result }) } } as unknown as SynCloudOSRuntime;
+  const port = createInstalledApplicationRuntimePort(runtime, "https://site.test", "/");
+  let settled = false;
+  const pending = port.launch("com.example.notes", "/notes").then(() => { settled = true; });
+  await Promise.resolve(); expect(settled).toBe(false);
+  resolve({ status: "completed", value: { kind: "app", appId: "com.example.notes" } });
+  await pending; expect(settled).toBe(true);
+  await expect(port.openURLs("com.example.notes", [new URL("https://site.test/notes")], { sharedItems: { files: [] } })).rejects.toThrow(/receiver|application/);
+});
+it("consumes fixed launch envelopes before typed-query routing and retains normal app query fields", () => {
+  expect(installedApplicationRoute("/notes?mode=edit&scos-share=one&scos-action=reply", [info])).toBe("/notes?mode=edit");
+  const share = { ...info, shareTarget: { action: "/notes/share", method: "GET" as const, params: { text: "sharedText" } } };
+  expect(installedApplicationRoute("/notes/share?sharedText=hello&mode=edit", [share])).toBe("/notes/share?mode=edit");
+  expect(installedApplicationRoute("/notes?sharedText=keep", [share])).toBe("/notes?sharedText=keep");
 });

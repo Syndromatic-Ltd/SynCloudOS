@@ -34,22 +34,25 @@ export interface InstalledApplicationLaunchPort {
 }
 const within = (path: string, scope: string) => path === scope || path.startsWith(scope.endsWith("/") ? scope : `${scope}/`);
 /** Browser delivery enters LaunchServices, NSDocumentController and the app delegate in that order. */
-export async function routeInstalledApplicationLaunch(launch: InstalledApplicationLaunch, apps: readonly SynWareManifestV1[], port: InstalledApplicationLaunchPort): Promise<void> {
+export async function routeInstalledApplicationLaunch(launch: InstalledApplicationLaunch, apps: readonly SynWareManifestV1[], port: InstalledApplicationLaunchPort): Promise<boolean> {
   port.signal.throwIfAborted();
   const url = new URL(launch.targetURL ?? port.base, port.origin);
   if (url.origin !== port.origin) throw new TypeError("An application launch must stay on the host origin.");
-  const path = `/${url.pathname.slice(port.base.replace(/\/$/u, "").length).replace(/^\//u, "")}`;
-  const candidates = apps.filter(app => app.routes?.some(route => within(path, route.path))).sort((a,b) => Math.max(...b.routes!.map(route => route.path.length))-Math.max(...a.routes!.map(route => route.path.length)));
+  const deployment = port.base.replace(/\/$/u, "");
+  if (deployment && url.pathname !== deployment && !url.pathname.startsWith(`${deployment}/`)) throw new TypeError("An application launch must stay inside the deployment base.");
+  const path = url.pathname.slice(deployment.length) || "/";
+  const matchLength = (app: SynWareManifestV1) => Math.max(-1, ...(app.routes ?? []).filter(route => route.match === "prefix" ? within(path, route.path) : path === route.path).map(route => route.path.length));
+  const candidates = apps.filter(app => matchLength(app) >= 0).sort((a,b) => matchLength(b)-matchLength(a));
   const app = candidates[0];
-  if (!app) return;
+  if (!app) return false;
   const protocol = url.searchParams.get("scos-protocol");
   const openedURL = protocol ? new URL(protocol) : url;
   if (protocol && !app.urlTypes?.some(type => type.schemes.includes(openedURL.protocol.slice(0,-1)))) throw new TypeError("The app did not declare this protocol.");
   const shortcut = url.searchParams.get("scos-shortcut");
   if (shortcut && !app.shortcutItems?.some(item => item.type === shortcut)) throw new TypeError("The app did not declare this shortcut.");
   if (!launch.files?.length && !protocol && !shortcut && !launch.sharedItems && !url.searchParams.has("scos-notification")
-    && !app.linkCapture?.paths.some(capture => within(path, capture))) return;
-  await port.launch(app.bundleIdentifier, path + url.search);
+    && !app.linkCapture?.paths.some(capture => within(path, capture))) return false;
+  await port.launch(app.bundleIdentifier, installedApplicationRoute(path + url.search, apps));
   port.signal.throwIfAborted();
   for (const handle of launch.files ?? []) {
     const file = await handle.getFile();
@@ -59,6 +62,16 @@ export async function routeInstalledApplicationLaunch(launch: InstalledApplicati
     await port.openDocument({ typeId: types[0].id, withContentsOf: file, applicationId: app.bundleIdentifier, signal: port.signal });
   }
   if (!(launch.files?.length)) await port.openURLs(app.bundleIdentifier, [openedURL], { sharedItems: launch.sharedItems, shortcutItemType: shortcut ?? undefined });
+  return true;
 }
 
 export const shortcutCommandIdentifier = (appId: string, type: string) => `webspring.shortcut.${appId}.${type}`;
+
+/** Host launch arguments are not application route-query values. */
+export function installedApplicationRoute(href: string, apps: readonly SynWareManifestV1[]): string {
+  const url = new URL(href, "https://syncloudos.invalid");
+  for (const key of ["scos-protocol", "scos-share", "scos-shortcut", "scos-notification", "scos-action"]) url.searchParams.delete(key);
+  const target = apps.find(app => app.shareTarget?.method === "GET" && app.shareTarget.action === url.pathname)?.shareTarget;
+  if (target) for (const name of [target.params.title, target.params.text, target.params.url]) if (name) url.searchParams.delete(name);
+  return `${url.pathname}${url.search}${url.hash}`;
+}
