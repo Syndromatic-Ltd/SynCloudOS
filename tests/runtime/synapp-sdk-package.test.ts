@@ -339,6 +339,7 @@ assert.deepEqual(Object.keys(webspring), [
   "stagePointStyle",
   "useWebspringDragProxyPosition",
   "useWebspringFolderAppearance",
+  "useWebspringHapticEngine",
   "useWebspringMotion",
   "webspringIconSprings",
   "webspringSurfaceStyle",
