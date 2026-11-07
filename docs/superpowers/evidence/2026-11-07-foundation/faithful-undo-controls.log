@@ -154,4 +154,3 @@ TypeError: Cannot read properties of undefined (reading 'getCurrentSubject')
       Tests  8 failed | 2 passed (10)
    Start at  19:13:26
    Duration  9.67s (transform 10.49s, setup 79ms, import 15.41s, tests 324ms, environment 2.83s)
-
