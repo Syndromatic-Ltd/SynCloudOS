@@ -37,7 +37,8 @@ export class SCAuthorization {
   constructor(private readonly evaluator: { authorise(request: SynCloudOSPolicyRequest): SynCloudOSPolicyDecision }) {}
   copyRights(rights: readonly SCAuthorizationRight[], options: SCAuthorizationOptions = {}): SCAuthorizationResult {
     const unique = [...new Set(rights)];
-    const decisions = unique.map(right => this.evaluator.authorise({ ...options, action: right,
+    const decisions = unique.map(right => this.evaluator.authorise({ ...options, action: Object.hasOwn(SCAuthorizationRights, right) ? right : "authorization.unknownRight",
+      context: { ...options.context, requestedRight: right },
       requiredCapabilities: Object.hasOwn(SCAuthorizationRights, right) ? [SCAuthorizationRights[right]] : [],
     }));
     return Object.freeze({ allowed: unique.length > 0 && decisions.every(decision => decision.allowed),

@@ -36,3 +36,8 @@ it("accepts explicit host grants and checks all requested rights", () => {
  expect(runtime.authorization.copyRights(["runtime.mutate"], {subjectGrant: grant}).allowed).toBe(false);
 });
 
+
+it("rejects known configuration actions that are not named rights", () => {
+ const runtime=createTestRuntime();
+ expect(runtime.authorization.copyRights(["runtime.inspect" as never]).allowed).toBe(false);
+});

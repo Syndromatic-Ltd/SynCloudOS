@@ -551,7 +551,7 @@ function decide(
 
   if (disposed)
     return baseDecision(request, subject, false, "Configuration profiles are disposed.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
-  if (!knownActions.has(request.action) && requiredCapabilities.length === 0)
+  if (!knownActions.has(request.action) && (request.requiredCapabilities?.length ?? 0) === 0)
     return baseDecision(request, subject, false, "Unknown action requires an explicit named capability.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
   if (!hasRole(subject, requiredRoles) || !hasAccessClass(subject, requiredAccessClasses))
     return baseDecision(request, subject, false, "This action requires a different role or access class.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
