@@ -157,7 +157,6 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
    */
   navigateForwardToObject(object: T): void {
     if (this.#transitionStyle === "pageCurl") {
-      if (this.#turnDirection) return;
       const next = this.#objects.indexOf(object);
       if (next === this.#targetIndex(1)) this.#beginCurl(next);
       else if (next !== this.#selectedIndex) throw new RangeError("A page curl navigates to the next arranged object; use selectedIndex to select a distant page.");
@@ -228,7 +227,13 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
   }
 
   #beginCurl(index: number): void {
-    if (this.#turnDirection || index === this.#selectedIndex) return;
+    if (index === this.#selectedIndex) return;
+    if (this.#turnDirection) {
+      const active = this.#leaves[this.#turnDirection]?.getSnapshot();
+      // A command may take over a cosmetic corner peek. A real drag, turn
+      // or pending surface wait still owns the navigation until it ends.
+      if (!active || active.phase !== "turning" || active.targetProgress > 0.1) return;
+    }
     const direction = index > this.#selectedIndex ? "forward" : "backward";
     const leaf = this.#leaves[direction];
     if (!leaf) {

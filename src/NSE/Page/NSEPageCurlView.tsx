@@ -3,6 +3,7 @@ import { flushSync } from "react-dom";
 import { useObserve } from "../Objects/useObserve";
 import type { NSEPageController } from "./NSEPageController";
 import { pageCurlConnection } from "./pageCurlConnection";
+import { rememberPagePrintSource } from "./pageSurfaceKey";
 import { NSEUntransitionedChildView } from "../Application/viewControllerRenderer";
 import { NSEPageCurlLeaf } from "./NSEPageCurlLeaf";
 import type { NSEPageCorner, NSEPageHandle } from "./nsePageTypes";
@@ -25,6 +26,7 @@ function PrintReplica({ source, name }: { source: () => HTMLElement | undefined;
       const copy = () => {
         if (!host.current) return;
         const clone = original.cloneNode(true) as HTMLElement;
+        rememberPagePrintSource(clone, original);
         clone.inert = true;
         clone.setAttribute("aria-hidden", "true");
         const identifiers = new Map<string, string>();

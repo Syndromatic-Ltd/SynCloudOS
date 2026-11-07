@@ -527,6 +527,26 @@ describe("NSEPageCurlLeaf React surface", () => {
 });
 
 describe("useNSEPage lifecycle", () => {
+  it("does not resume a reset edge drag when its old pointer moves and releases", () => {
+    const pageRef = createRef<NSEPageHandle>();
+    const { container, unmount } = render(createElement(NSEPageCurlLeaf, {
+      ref: pageRef, preset: "bookCurl", interactive: { edges: ["right"] },
+      durationMs: 0, reducedMotion: false, front: "Page"
+    }));
+    const root = container.querySelector<HTMLElement>("[data-nse-page]")!;
+    Object.defineProperties(root, {
+      getBoundingClientRect: { configurable: true, value: () => rect() },
+      setPointerCapture: { configurable: true, value: vi.fn() },
+      releasePointerCapture: { configurable: true, value: vi.fn() }
+    });
+    fireEvent.pointerDown(root, { pointerId: 7, button: 0, clientX: 318, clientY: 240 });
+    fireEvent.pointerMove(root, { pointerId: 7, buttons: 1, clientX: 160, clientY: 240 });
+    act(() => { pageRef.current!.reset(); });
+    fireEvent.pointerMove(root, { pointerId: 7, buttons: 1, clientX: 8, clientY: 240 });
+    fireEvent.pointerUp(root, { pointerId: 7, button: 0, clientX: 8, clientY: 240 });
+    expect(pageRef.current!.getSnapshot()).toMatchObject({ progress: 0, phase: "idle", reason: "reset" });
+    unmount();
+  });
   it("snaps from the final pending pointer sample released in the same frame", () => {
     const pageRef = createRef<NSEPageHandle>();
     const { container, unmount } = render(createElement(NSEPageCurlLeaf, {
