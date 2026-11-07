@@ -1,5 +1,18 @@
 # AudioFX
 
+Audio categories expose `AUFXAudioSession.authorizationStatus` and
+`requestAuthorization()` for the `audio.session` entitlement. This is separate
+from microphone access through `audio.record` and `requestRecordAuthorization()`.
+The browser has no category permission prompt; an unsupported Audio Session API
+reports `unavailable`. `useAudio().createSession()` owns the category until disposal.
+
+`useSpeechSynthesizer()` from the SDK supplies a component-owned
+`AUFXSpeechSynthesizer` under the `audio.speech` entitlement. Construction is
+passive. Call `requestAuthorization()` or inspect `authorizationStatus`, then
+`speak(new AUFXSpeechUtterance(text))` from an action. Browser speech voices can
+arrive asynchronously; subscribe for `voiceschanged` updates. Successful API
+dispatch does not guarantee audible output or an installed voice.
+
 Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
 
 AudioFX (`AUFX`) is the web-native analogue of AVAudioEngine. It models sound as a graph of nodes joined by connections. Players and live inputs produce audio, effects and mixers process it, and an engine renders the result to the speakers or to a buffer. Everything that touches a device sits behind the mounted session, and everything else is deterministic, portable code that runs in tests and workers.
