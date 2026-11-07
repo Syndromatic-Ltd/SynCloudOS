@@ -1,0 +1,38 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/fx/phase5-nfc.test.ts tests/runtime/fx/phase5-payment.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-payment.test.ts (8 tests | 1 failed) 16ms
+     × preserves the caller's abort reason for pending browser operations 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-payment.test.ts > phase 5 payment > preserves the caller's abort reason for pending browser operations
+AssertionError: expected DOMException{ stack: 'AbortError: Pa…' } to be Error: Merchant navigated away // Object.is equality
+
+- Expected
++ Received
+
+- Error {
+-   "message": "Merchant navigated away",
++ AbortError {
++   "message": "Payment controller was disposed.",
+  }
+
+ ❯ tests/runtime/fx/phase5-payment.test.ts:112:25
+    110|     const pending = controller.canMakePayments();
+    111|     owner.abort(reason);
+    112|     await expect(pending).rejects.toBe(reason);
+       |                         ^
+    113|   });
+    114|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 14 passed (15)
+   Start at  19:09:40
+   Duration  278ms (transform 152ms, setup 59ms, import 138ms, tests 25ms, environment 0ms)
+

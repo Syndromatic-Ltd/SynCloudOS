@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/fx/phase5-nfc.test.ts tests/runtime/fx/phase5-payment.test.ts tests/runtime/fx/phase5-nfc-hook.test.tsx tests/runtime/fx/phase5-payment-hook.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  4 passed (4)
+      Tests  17 passed (17)
+   Start at  19:11:21
+   Duration  2.45s (transform 304ms, setup 110ms, import 750ms, tests 64ms, environment 3.17s)
+
