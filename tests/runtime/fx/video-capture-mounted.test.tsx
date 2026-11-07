@@ -36,7 +36,7 @@ const CameraProbe = createSynWare({
     version: "1.0.0",
     displayName: "Video Camera Probe",
     routes: [{ path: "/video-camera-probe", primary: true }],
-    permissions: ["video.capture.camera"],
+    entitlements: ["video.capture.camera"],
   },
   root() {
     return <div>Video camera probe</div>;
@@ -56,7 +56,7 @@ const NoCaptureProbe = createSynWare({
   },
 });
 
-it("routes mounted video capture through manifest, ConfigurationProfiles, lifecycle and deterministic test authority", async () => {
+it("routes mounted video capture through manifest, privacy, lifecycle and deterministic test authority", async () => {
   const host = createSynWareTestHost({ app: CameraProbe, document });
   await host.render();
   await host.lifecycle.launch();
@@ -115,7 +115,7 @@ it("makes useVideo component-scoped and tears it down on unmount without prompti
       version: "1.0.0",
       displayName: "Video Hook Probe",
       routes: [{ path: "/video-hook-probe", primary: true }],
-      permissions: ["video.capture.camera"],
+      entitlements: ["video.capture.camera"],
     },
     root: Probe,
   });

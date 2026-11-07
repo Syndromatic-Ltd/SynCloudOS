@@ -33,7 +33,7 @@ const LocationProbe = createSynWare({
     version: "1.0.0",
     displayName: "Location Probe",
     routes: [{ path: "/location-probe", primary: true }],
-    permissions: ["location.read", "location.request"],
+    entitlements: ["location.read", "location.request"],
   },
   root() {
     return <div>Location probe</div>;
@@ -53,7 +53,7 @@ function mountedFix(sequence: number, receivedAtMonotonicSeconds: number): LFXLo
   });
 }
 
-it("keeps ConfigurationProfiles authoritative before a mounted LocationFX client reaches its host adapter", async () => {
+it("keeps mounted privacy authority before a mounted LocationFX client reaches its host adapter", async () => {
   const host = createSynWareTestHost({ app: LocationProbe, document });
   await host.render();
   host.adapters.location.allow();
@@ -76,7 +76,7 @@ it("keeps ConfigurationProfiles authoritative before a mounted LocationFX client
   host.adapters.policy.allow();
   const manager = host.appContext.location.createManager();
   expect(host.adapters.location.calls()).toEqual([]);
-  expect(await manager.getAuthorizationStatus()).toBe("granted");
+  expect(await manager.getAuthorizationStatus()).toBe("prompt");
   expect((await manager.current()).coordinate.longitude).toBe(-2.2426);
   expect(host.adapters.location.calls().map((call) => call.operation)).toEqual(["location.status", "location.current"]);
   manager.dispose();

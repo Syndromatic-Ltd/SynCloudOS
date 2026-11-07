@@ -129,7 +129,6 @@ export interface SynCloudOSPolicyRequest {
    * carries a `subjectGrant` issued by this ConfigurationProfiles. */
   subject?: SynCloudOSPolicySubject;
   subjectGrant?: SynCloudOSPolicySubjectGrant;
-  bundlePermissions?: string[];
   serviceReport?: SynCloudOSServiceReport;
   requiredCapabilities?: string[];
   requiredRoles?: SynCloudOSRole[];

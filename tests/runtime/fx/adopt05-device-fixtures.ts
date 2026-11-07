@@ -42,6 +42,7 @@ export function midiPorts() {
   const sent: { bytes: number[]; timestamp?: number }[] = [];
   const outputLease: MIFXOutputLease = { endpoint: output, send(bytes, timestamp) { sent.push({ bytes: Array.from(bytes), timestamp }); }, dispose() { counts.outputDisposed++; } };
   const access: MIFXAccess = {
+    get authorizationStatus() { return "unknown" as const; },
     getCapabilities: () => ({ apiAvailable: true, transportProtocol: "midi1", authorization: "unknown", sysexAuthorization: "unknown", connectedEndpointCount: endpoints.length }),
     getEndpoints: () => endpoints,
     async requestAuthorization(request) { if (request?.sysex) throw Error("SysEx must remain opt-in"); counts.authorization++; return { state: "granted", sysex: false }; },
