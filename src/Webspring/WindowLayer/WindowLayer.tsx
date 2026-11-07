@@ -20,6 +20,7 @@
 
 import React, { useEffect, useRef, useSyncExternalStore } from "react";
 import { NSEPresence } from "../../NSE/Animation";
+import { useNSEAppearanceProjection } from "../../NSE/Appearance";
 import { useKernelSynCloudOS } from "../../SynCloudOSReact";
 import { WindowHost, type WindowLayerDiagnostic } from "./WindowHost";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
@@ -44,6 +45,16 @@ function hasOwnedAnchor(root: HTMLElement, runtimeId: string, anchorId: string):
     element.id === anchorId &&
     element.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner === runtimeId
   ));
+}
+
+function PopoverModalBackdrop({ zIndex }: { readonly zIndex: number }) {
+  const appearance = useNSEAppearanceProjection();
+  return <div {...appearance} style={{ display: "contents" }}>
+    <div className="nse-overlay-popup-modal-host">
+      <div className="nse-overlay-popup-backdrop" data-window-modal-backdrop="" data-nse-part="backdrop" aria-hidden
+        style={{ zIndex, pointerEvents: "auto" }} onPointerDown={event => event.stopPropagation()} />
+    </div>
+  </div>;
 }
 
 export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps) {
@@ -126,7 +137,8 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
       const request = contentState.status === "loaded" ? contentRegistry.surface(contentState.mountKey)?.request : null;
       return record.state === "open" && (record.role === "modal" || record.role === "sheet" || record.role === "popover" && request && (screen.breakpoint === "compact" || request.presentation?.mode === "sheet"));
     });
-  const topModalZ = modalControllers.at(-1)?.record.zIndex ?? null;
+  const topModal = modalControllers.at(-1);
+  const topModalZ = topModal?.record.zIndex ?? null;
 
   return (
     <div
@@ -135,7 +147,7 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
       data-window-layer=""
       data-window-modal-active={topModalZ !== null || managerSnapshot.blockedWindowControllerIds.length > 0 ? "true" : "false"}
     >
-      {topModalZ !== null ? (
+      {topModalZ !== null && topModal?.record.role === "popover" ? <PopoverModalBackdrop zIndex={Math.max(0, topModalZ - 0.5)} /> : topModalZ !== null ? (
         <div
           className="webspring-window-modal-backdrop"
           data-window-modal-backdrop=""

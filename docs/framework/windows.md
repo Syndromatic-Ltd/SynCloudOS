@@ -243,7 +243,7 @@ this.presentAsPopover(CollectionViewController, {
 }
 ```
 
-The internal `NSEPopover` component takes the same `drawsBackground` and `relativeTo` options. Anchored and content-painted popovers stay in the canonical overlay stack, including when a generic physical-window bridge is available, so their frame and interaction have one owner. The physical-window bridge remains available for unanchored standard surfaces. `NSEPopover` is not a new public SDK export; applications present their view controllers through `presentAsPopover`.
+The internal `NSEPopover` component carries `relativeTo`, `preferredEdge`, `drawsBackground` and `behavior` through the window surface bridge. In a mounted runtime it remains a real WindowManager window with role `popover`, including when its compact presentation draws a sheet. WindowLayer retains anchor tracking, dismissal, inspector visibility and focus restoration. Adaptive presentation changes its focus scope and frame without replacing the window or content view. Both window-hosted and standalone surfaces use the same Floating UI placement engine, continuous frame and spring. The overlay branch is for a host without a window bridge or an explicit `surface: "overlay"`. `NSEPopover` is not a new public SDK export; applications present their view controllers through `presentAsPopover`.
 
 
 ### Bottom-bar accessories
