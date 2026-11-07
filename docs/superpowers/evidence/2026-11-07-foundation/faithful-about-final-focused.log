@@ -1,0 +1,26 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/about-app.test.tsx tests/runtime/about-fx-lifetime.test.tsx tests/runtime/layer-artwork.test.tsx tests/runtime/about-particle-sprite.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+ ❯ tests/runtime/about-app.test.tsx (0 test)
+ ❯ tests/runtime/about-fx-lifetime.test.tsx (0 test)
+ ❯ tests/runtime/layer-artwork.test.tsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/about-app.test.tsx [ tests/runtime/about-app.test.tsx ]
+ FAIL  tests/runtime/about-fx-lifetime.test.tsx [ tests/runtime/about-fx-lifetime.test.tsx ]
+ FAIL  tests/runtime/layer-artwork.test.tsx [ tests/runtime/layer-artwork.test.tsx ]
+Error: Cannot find module '/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-qsRGm2oA.js' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-CIiq4kfr.js
+ ❯ node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-CIiq4kfr.js:180:32
+ ❯ node_modules/@syndromatic/syncloudos/chunks/syncloudos-runtime-BXDyqxa3.js:4:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+ Test Files  3 failed | 1 passed (4)
+      Tests  1 passed (1)
+   Start at  22:18:33
+   Duration  11.79s (transform 4.08s, setup 40ms, import 233ms, tests 38ms, environment 5.08s)
+

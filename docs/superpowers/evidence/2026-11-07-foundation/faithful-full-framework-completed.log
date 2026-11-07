@@ -1,0 +1,99 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/faithful-full-framework-completed.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794084248979
+
+ ✓ tests/runtime/fx/phase5-packed.test.ts (1 test) 26962ms
+   ✓ loads all six new FX roots and hooks from an independently installed SDK archive  26961ms
+ ❯ tests/runtime/synapp-sdk-package.test.ts (9 tests | 1 failed) 199504ms
+     ✓ keeps the public page entry limited to the controller contract 11ms
+     ✓ pins the removal of the old navigation, source-list and sliding-pane exports 17ms
+     ✓ captures shell view components without invoking author-owned values 8ms
+     ✓ rejects inconsistent shell view bindings during capture 2ms
+     × compiles, bundles and mounts a genuinely external consumer against packed public exports 106494ms
+     ✓ keeps the reviewed runtime entry graph free of privileged exports 7ms
+     ✓ uses exact portable package aliases and keeps public client contracts host-free 6ms
+     ✓ keeps mounted runtime hooks out of public barrels 2ms
+     ✓ derives archive declarations from the reviewed public entries instead of open handwritten mirrors  92955ms
+ ✓ tests/runtime/command-focus-undo-accessibility.test.tsx (4 tests) 704ms
+     ✓ navigates a menu, skips disabled items, enters a submenu, dispatches, and restores its trigger  422ms
+ ✓ tests/runtime/synapp-context.test.tsx (14 tests) 294ms
+ ❯ tests/runtime/framework-doc-links.test.ts (4 tests | 2 failed) 225ms
+     × links only to files and headings that exist 99ms
+     × links every guide from the framework index 44ms
+     ✓ names only package entries that exist 39ms
+     ✓ describes the framework without internal project language 43ms
+ ✓ tests/runtime/browser-host-contributions.test.ts (5 tests) 88ms
+ ✓ tests/runtime/nse-text-command-undo.test.tsx (6 tests) 365ms
+ ✓ tests/runtime/pwa-installation.test.ts (2 tests) 5ms
+ ✓ tests/runtime/project-conventions-packed.test.ts (2 tests) 132328ms
+   ✓ bundles an installed browser host with discovery plugin=false  98559ms
+   ✓ bundles an installed browser host with discovery plugin=true  33768ms
+ ✓ tests/runtime/foundation-packed-consumer.test.ts (1 test) 27953ms
+   ✓ uses Foundation and CPFX from an independent SDK installation in a worker and strict worker-lib consumer  27953ms
+ ✓ tests/runtime/managed-typography-packed-consumer.test.ts (1 test) 47539ms
+   ✓ uses managed typography from an independently installed package in Node and app code  47538ms
+ ✓ tests/runtime/fx/packed-video-capture.test.ts (1 test) 32830ms
+   ✓ executes scoped VideoFX capture from an independently installed SDK archive  32829ms
+ ✓ tests/runtime/fx/packed-fx.test.ts (1 test) 29664ms
+   ✓ executes substantive FX operations from the built npm archive outside the repository  29664ms
+stdout | tests/runtime/document-asset-browser.test.ts
+21:41:12 [vite] (client) Re-optimizing dependencies because vite config has changed
+
+stdout | tests/runtime/document-asset-browser.test.ts
+Port 5197 is in use, trying another one...
+
+ ✓ tests/runtime/document-asset-browser.test.ts (6 tests) 45363ms
+     ✓ chromium: creates and disposes the real runtime, then reloads and reopens native asset bytes in a fresh runtime  18010ms
+     ✓ chromium: survives page reload with new store/service instances, renders bytes, enforces concurrent quota, detects corruption  2312ms
+     ✓ firefox: creates and disposes the real runtime, then reloads and reopens native asset bytes in a fresh runtime  9056ms
+     ✓ firefox: survives page reload with new store/service instances, renders bytes, enforces concurrent quota, detects corruption  9079ms
+     ✓ webkit: creates and disposes the real runtime, then reloads and reopens native asset bytes in a fresh runtime  3798ms
+     ✓ webkit: survives page reload with new store/service instances, renders bytes, enforces concurrent quota, detects corruption  2895ms
+ ✓ tests/runtime/error-catalogue.test.ts (3 tests) 2565ms
+   ✓ catalogues every stable diagnostic code literal throughout src, including conditional branches  2556ms
+ ❯ tests/runtime/fx/packed-value-foundations.test.ts (1 test | 1 failed) 3597ms
+   × executes and typechecks LocationFX and MIDIFX from an independently installed SDK archive 3596ms
+ ❯ tests/runtime/fx/packed-lumina.test.ts (1 test | 1 failed) 3285ms
+   × executes and typechecks named-route LuminaFX values from an independently installed SDK archive 3284ms
+ ❯ tests/runtime/fx/packed-video.test.ts (1 test | 1 failed) 1808ms
+   × executes and typechecks VideoFX frame ownership from an independently installed SDK archive 1807ms
+ ❯ tests/runtime/fx/packed-media.test.ts (0 test)
+ ❯ tests/runtime/synware-public-api-repairs-packed.test.ts (0 test)
+ ❯ tests/runtime/nse-page-tear.test.ts (0 test)
+ ❯ tests/performance/text-primitives-performance.test.ts (0 test)
+ ❯ tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts (0 test)
+ ❯ tests/runtime/browser-global-boundary.test.ts (0 test)
+ ❯ tests/runtime/architecture-boundaries.test.ts (0 test)
+ ❯ tests/runtime/nse-file-browser-packed.test.ts (0 test)
+ ❯ tests/runtime/developer-mcp.test.ts (0 test)
+ ❯ tests/runtime/heritage-inspector-source.test.ts (0 test)
+ ❯ tests/runtime/fx/text-font-host.test.ts (0 test)
+ ❯ tests/runtime/fx/text-font-resource.test.ts (0 test)
+ ❯ tests/integration/text-system-example.test.ts (0 test)
+ ❯ tests/runtime/runtime-keyboard-listener-guard.test.ts (0 test)
+ ❯ tests/runtime/system-ui-boundaries.test.ts (0 test)
+ ❯ tests/runtime/runtime-singleton-boundary.test.ts (0 test)
+ ❯ tests/runtime/browser-application-host.test.tsx (0 test)
+ ❯ tests/runtime/synware-public-api-boundary-guard.test.ts (56 tests | 55 failed) 252ms
+     × rejects retired umbrella editor APIs even under a new public alias 11ms
+     × rejects vendor backend types nested in a public text view contract 3ms
+     × accepts every actual public entry in sdk-entries 3ms
+     × rejects an aliased type export of NSEStandardWindowSpecimen from an ordinary entry 2ms
+     × rejects an aliased type export of NSEStandardWindowSpecimenProps from an ordinary entry 3ms
+     × rejects an aliased type export of nseControlVariantCount from an ordinary entry 2ms
+     × rejects an aliased type export of PortfolioCollectionSnapshot from an ordinary entry 2ms
+     × rejects an aliased type export of PortfolioCollectionsClient from an ordinary entry 2ms
+     × rejects an aliased type export of portfolioCollectionsServiceToken from an ordinary entry 3ms
+     × rejects an aliased type export of SourceListFrameProvider from an ordinary entry 3ms
+     × rejects an aliased type export of SourceListFrameContextValue from an ordinary entry 2ms
+     × rejects an aliased type export of useSourceListFrame from an ordinary entry 3ms
+     × rejects an aliased type export of NSEWindowSurfaceBridge from an ordinary entry 3ms
+     × rejects an aliased type export of NSEWindowSurfaceBridgeProvider from an ordinary entry 2ms
+     × rejects an aliased type export of NSEWindowSurfaceRequest from an ordinary entry 2ms
+     × rejects an aliased type export of NSEWindowSurfaceDismissResult from an ordinary entry 2ms
+     × rejects an aliased type export of NSEWindowSurfaceErrorContext from an ordinary entry 2ms
+     × rejects an aliased type export of useOptionalNSEWindowSurfaceBridge from an ordinary entry 2ms
+     × rejects an aliased type export of WindowManager from an ordinary entry 2ms
+     × rejects an aliased type export of WindowController from an ordinary entry 3ms
+     × rejects an aliased type export of SynWareProvider from an ordinary entry 2ms

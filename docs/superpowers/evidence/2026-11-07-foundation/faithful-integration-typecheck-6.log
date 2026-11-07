@@ -1,0 +1,30 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -b --pretty false
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(3737,47): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(3764,36): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4206,25): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4217,86): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4220,46): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4447,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4462,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4469,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4473,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4483,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4487,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4491,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4495,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4499,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4507,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4520,53): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4543,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4555,51): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4569,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4582,53): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4598,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4610,51): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/SynWareRuntimeMount.tsx(393,75): error TS2339: Property 'permissions' does not exist on type 'TrustedSynWareBundle'.
+src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx(152,66): error TS2339: Property 'permissions' does not exist on type 'SynWareManifestV1'.
+src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx(153,70): error TS2339: Property 'permissions' does not exist on type 'SynWareManifestV1'.
+src/SynCloudOS/Routing/RouteServiceScope.ts(60,40): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/Routing/RouteServiceScope.ts(64,111): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOSReact/browserRuntime.tsx(315,32): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.

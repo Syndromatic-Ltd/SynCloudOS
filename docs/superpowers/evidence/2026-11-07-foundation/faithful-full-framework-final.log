@@ -1,0 +1,17 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/faithful-full-framework-final.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794084248979
+
+ ✓ tests/runtime/command-focus-undo-accessibility.test.tsx (4 tests) 566ms
+     ✓ navigates a menu, skips disabled items, enters a submenu, dispatches, and restores its trigger  355ms
+ ✓ tests/runtime/synapp-context.test.tsx (14 tests) 303ms
+ ❯ tests/runtime/framework-doc-links.test.ts (4 tests | 2 failed) 193ms
+     × links only to files and headings that exist 80ms
+     × links every guide from the framework index 42ms
+     ✓ names only package entries that exist 36ms
+     ✓ describes the framework without internal project language 35ms
+ ✓ tests/runtime/browser-host-contributions.test.ts (5 tests) 74ms
+ ✓ tests/runtime/nse-text-command-undo.test.tsx (6 tests) 223ms
+ ❯ tests/runtime/fx/phase5-packed.test.ts (1 test | 1 failed) 298214ms
+   × loads all six new FX roots and hooks from an independently installed SDK archive 298214ms

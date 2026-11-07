@@ -1,0 +1,1 @@
+7ad778678af10bf56f7b99ba0b2e08bda9fccd2a FX: validate standalone family package contracts

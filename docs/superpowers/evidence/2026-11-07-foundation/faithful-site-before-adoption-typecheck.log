@@ -1,0 +1,8 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run tsc -b --pretty false
+src/SynWare/About.app/Contents/AboutPane.tsx(4,37): error TS2724: '"@syndromatic/syncloudos/nse/controls"' has no exported member named 'NSEImageViewHandle'. Did you mean 'NSEImageView'?
+src/SynWare/About.app/Contents/AboutPane.tsx(5,30): error TS2724: '"@syndromatic/syncloudos/nse/scroll"' has no exported member named 'NSEScrollViewHandle'. Did you mean 'NSEScrollView'?
+src/SynWare/About.app/Contents/AboutPane.tsx(153,65): error TS2322: Type '{ children: (Element | Element[])[]; className: string; tabIndex: number; ref: (view: any) => void; rubberBand: false; "data-nse-navigation-scroll-surface": string; }' is not assignable to type 'IntrinsicAttributes & NSEScrollViewProps'.
+  Property 'ref' does not exist on type 'IntrinsicAttributes & NSEScrollViewProps'.
+src/SynWare/About.app/Contents/AboutPane.tsx(158,56): error TS2322: Type '{ className: string; ref: (view: any) => void; wantsLayer: true; src: string; alt: string; controls: false; wheelZoom: false; pannable: false; }' is not assignable to type 'IntrinsicAttributes & NSEImageViewProps'.
+  Property 'ref' does not exist on type 'IntrinsicAttributes & NSEImageViewProps'.

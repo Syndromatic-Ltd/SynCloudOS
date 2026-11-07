@@ -1,0 +1,28 @@
+{
+  "previousCommit": "b0bfc6a7715844bd6a50f6194a40df1f556a9e64",
+  "currentCommit": "5a7a85740777c24de87dd2f22d48f20cdb12ae63",
+  "sameSource": false,
+  "changedResources": 209,
+  "changedNonSourceMaps": [
+    "assets/motion-Bp-IxF-v.css",
+    "browser.js",
+    "browser/styles.css",
+    "chunks/AFXTiledLayer-qsRGm2oA.js",
+    "chunks/App-CNYF1Nt3.js",
+    "chunks/ApplicationStageView-B2ep8JJ2.js",
+    "chunks/BrowserAnimationLayerHost-CIiq4kfr.js",
+    "chunks/browser-MeI8o0JY.js",
+    "chunks/host-Sm5fSo-Q.js",
+    "chunks/motion-CO3bc2-D.js",
+    "chunks/syncloudos-runtime-BXDyqxa3.js",
+    "docs/framework/appkit-counterparts.json",
+    "fx/animation.js",
+    "nse/themes/atmo.js",
+    "nse/themes/atmo/styles.css",
+    "package.json",
+    "sdk/animation-host.js",
+    "sdk/testing.js",
+    "service-worker.mjs",
+    "tooling/build-receipt.json"
+  ]
+}

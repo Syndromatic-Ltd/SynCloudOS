@@ -1,0 +1,16 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "http://127.0.0.1:5199/__dev/login?to=%2Fabout", waiting until "networkidle"
+
+    at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation\faithful-about-capture.mjs:44:14 {
+  log: [
+    '  - navigating to "http://127.0.0.1:5199/__dev/login?to=%2Fabout", waiting until "networkidle"'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1

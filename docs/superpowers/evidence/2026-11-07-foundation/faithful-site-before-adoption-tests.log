@@ -1,0 +1,229 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/about-app.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+ ❯ tests/runtime/about-app.test.tsx (8 tests | 1 failed) 1172ms
+     × opens on the company page with its tab bar 85ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/about-app.test.tsx > About > opens on the company page with its tab bar
+AssertionError: expected undefined to be <div …(7)><div …(2)>…(4)</div></div> // Object.is equality
+
+- Expected:
+<div
+  class="nse-scroll-view about-pane-scroll"
+  data-axis="y"
+  data-horizontal-scroller-policy="automatic"
+  data-nse-navigation-scroll-surface="true"
+  data-vertical-scroller-policy="automatic"
+  style="overflow-x: hidden; overflow-y: auto;"
+  tabindex="0"
+>
+  <div
+    class="nse-scroll-view-content"
+    style="padding: 0px;"
+  >
+    <header
+      class="about-hero"
+    >
+      <div
+        class="about-hero-art"
+        data-kind="orb"
+      >
+        <div
+          class="nse-control-image-view about-hero-image"
+          data-image-scaling="proportionallyUpOrDown"
+        >
+          <div
+            class="nse-control-sizeable-image"
+            data-pannable="false"
+            data-zoomed="false"
+          >
+            <img
+              alt="The Syndromatic logo"
+              class="nse-control-sizeable-image-media"
+              data-nse-image-rendering="original"
+              data-nse-image-resizing="stretch"
+              draggable="false"
+              src="/src/SynWare/About.app/Contents/Resources/Images/syndromatic-orb.png"
+              style="transform: translate(-50%, -50%) translate(0px, 0px);"
+            />
+          </div>
+        </div>
+      </div>
+      <h1
+        id="about-title-company"
+        style="transform-origin: 0 0; opacity: 0; transform: matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,16,0,1); transform-style: preserve-3d; visibility: visible; backface-visibility: visible; border-style: solid; border-width: 0px; border-color: transparent; border-top-left-radius: 0px; border-top-right-radius: 0px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px; corner-shape: round; box-shadow: none; overflow: visible;"
+      >
+        Syndromatic
+      </h1>
+      <p
+        class="about-hero-caption"
+        style="transform-origin: 0 0; opacity: 0; transform: matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,16,0,1); transform-style: preserve-3d; visibility: visible; backface-visibility: visible; border-style: solid; border-width: 0px; border-color: transparent; border-top-left-radius: 0px; border-top-right-radius: 0px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px; corner-shape: round; box-shadow: none; overflow: visible;"
+      >
+        The finest designs in the galaxy
+      </p>
+      <p
+        class="about-hero-lead"
+        style="transform-origin: 0 0; opacity: 0; transform: matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,16,0,1); transform-style: preserve-3d; visibility: visible; backface-visibility: visible; border-style: solid; border-width: 0px; border-color: transparent; border-top-left-radius: 0px; border-top-right-radius: 0px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px; corner-shape: round; box-shadow: none; overflow: visible;"
+      >
+        Tactile, high-aesthetic digital and physical systems that bring joy and dignity to software.
+      </p>
+      <span
+        aria-hidden="true"
+        class="about-hero-cue"
+      />
+    </header>
+    <section
+      aria-labelledby="about-chapter-company-craft"
+      class="about-chapter"
+      data-side="start"
+    >
+      <div
+        aria-hidden="true"
+        class="about-chapter-sigil"
+      />
+      <div
+        class="about-chapter-copy"
+      >
+        <h2
+          id="about-chapter-company-craft"
+        >
+          Design at the speed of thought
+        </h2>
+        <p>
+          Syndromatic is a design and software studio for tactile interfaces, visual identity, icons, media, product concepts and web systems.
+        </p>
+        <p>
+          The logo, the texture, the window, the motion and the control all need a point of view. The work should feel useful, memorable and unmistakably Syndromatic.
+        </p>
+        <div
+          aria-label="Disciplines"
+          class="nse-control-divider nse-control-divider-alpha-captioned nse-box nse-box-separator-titled about-chips-divider"
+          data-variant="alpha"
+          role="separator"
+        >
+          <span
+            class="nse-control-divider-alpha-caption"
+          >
+            Disciplines
+          </span>
+        </div>
+        <ul
+          aria-label="Disciplines"
+          class="about-chips"
+        >
+          <li>
+            Graphic Design
+          </li>
+          <li>
+            Logo Design
+          </li>
+          <li>
+            Interfaces
+          </li>
+          <li>
+            Iconography
+          </li>
+          <li>
+            Videography
+          </li>
+          <li>
+            Animation
+          </li>
+          <li>
+            Product Concepts
+          </li>
+          <li>
+            SynWare
+          </li>
+          <li>
+            Visual Systems
+          </li>
+        </ul>
+      </div>
+    </section>
+    <section
+      aria-labelledby="about-chapter-company-studio"
+      class="about-chapter"
+      data-side="end"
+    >
+      <div
+        aria-hidden="true"
+        class="about-chapter-sigil"
+      />
+      <div
+        class="about-chapter-copy"
+      >
+        <h2
+          id="about-chapter-company-studio"
+        >
+          The studio
+        </h2>
+        <p>
+          Syndromatic Ltd is led by Kavish Krishnakumar, its founder, and Polkrit Panluek, its co-founder. The studio works between Manchester and London.
+        </p>
+        <dl
+          class="about-facts"
+        >
+          <div>
+            <dt>
+              Studios
+            </dt>
+            <dd>
+              Manchester and London
+            </dd>
+          </div>
+          <div>
+            <dt>
+              Founders
+            </dt>
+            <dd>
+              Kavish Krishnakumar and Polkrit Panluek
+            </dd>
+          </div>
+          <div>
+            <dt>
+              Webspring 4.0
+            </dt>
+            <dd>
+              Launches 25 October 2026
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+    <footer
+      class="about-colophon"
+    >
+      <p>
+        © 2026 Syndromatic Ltd. All rights reserved.
+      </p>
+      <p>
+        Webspring 4.0 · SynCloudOS 1.0 beta
+      </p>
+    </footer>
+  </div>
+</div>
+
++ Received:
+undefined
+
+ ❯ tests/runtime/about-app.test.tsx:92:50
+     90|     expect(tab(container, "Company").getAttribute("aria-selected")).to…
+     91|     const pane = controller.activePane;
+     92|     expect(pane.scrollView?.contentView.element).toBe(container.queryS…
+       |                                                  ^
+     93|     expect(pane.scrollView?.contentView.postsBoundsChangedNotification…
+     94|     expect(pane.artwork?.element).toBe(container.querySelector(".about…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  19:13:03
+   Duration  7.82s (transform 3.53s, setup 25ms, import 4.11s, tests 1.17s, environment 2.35s)
+

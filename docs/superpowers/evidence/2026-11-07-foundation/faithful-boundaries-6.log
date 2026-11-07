@@ -1,0 +1,31 @@
+src/SynCloudOS/Authentication/providers/passkey/index.ts:93 accesses browser global location outside the platform adapter boundary
+src/SynCloudOS/AuthenticationServices/ASAuthorizationController.ts:75 accesses browser global globalThis outside the platform adapter boundary
+src/SynCloudOS/AuthenticationServices/ASAuthorizationController.ts:77 accesses browser global navigator outside the platform adapter boundary
+src/SynCloudOS/AuthenticationServices/ASAuthorizationController.ts:78 accesses browser global navigator outside the platform adapter boundary
+src/SynCloudOS/AuthenticationServices/ASAuthorizationController.ts:81 accesses browser global navigator outside the platform adapter boundary
+src/SynCloudOS/AuthenticationServices/ASAuthorizationController.ts:82 accesses browser global navigator outside the platform adapter boundary
+src/SynCloudOS/PlatformAdapters/BrowserSystemWorkerClient.ts:30 accesses browser global clearTimeout outside the platform adapter boundary
+src/SynCloudOS/PlatformAdapters/BrowserSystemWorkerClient.ts:32 accesses browser global setTimeout outside the platform adapter boundary
+src/SynCloudOS/Authentication/providers/passkey/index.ts:40 accesses cookie data outside the approved identity/service adapter boundary
+src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles.ts:353 accesses cookie data outside the approved identity/service adapter boundary
+src/FrameworkTests/Windows/WindowManagementFixture.tsx:29 -> src/NSE/Overlays/NSEPopover.tsx: devtools must use a public nse entrypoint
+src/NSE/Controls/Values/valueControlTypes.ts:27 -> src/SynCloudOS/Undo/undoTypes.ts: nse must use a public runtime entrypoint
+src/SynCloudOS/AppHosting/applicationSession.ts:53 -> src/SynCloudOS/InstalledApplications/applicationSystemServices.ts: app-sdk-host must use a public runtime entrypoint
+src/SynCloudOS/AppSDK/mountedBluetoothClient.ts:21 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/AppSDK/mountedContactsClient.ts:21 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/AppSDK/mountedNFCClient.ts:21 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/AppSDK/mountedPaymentClient.ts:21 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/AppSDK/mountedSpeechClient.ts:21 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/AppSDK/mountedXRClient.ts:21 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/HostServices/AppSDKHostServiceTypes.ts:45 -> src/SynCloudOS/Privacy/index.ts: runtime-host-seams must use a public runtime entrypoint
+src/SynCloudOS/InstalledApplications/installBrowserApplications.ts:24 -> src/SynCloudOS/AppHosting/applicationSession.ts: runtime must use a public app-sdk-host entrypoint
+src/SynCloudOS/InstalledApplications/installedApplicationMenus.ts:22 -> src/SynCloudOS/AppHosting/applicationSession.ts: runtime must use a public app-sdk-host entrypoint
+src/SynCloudOS/InstalledApplications/installedApplicationMenus.ts:23 -> src/NSE/NSE.ts: runtime may not import nse
+src/SynCloudOS/PlatformAdapters/BrowserBackgroundTaskScheduler.ts:21 -> src/SynCloudOS/BackgroundTasks/BackgroundTasks.ts: adapters must use a public runtime entrypoint
+src/SynCloudOS/PlatformAdapters/BrowserInstalledApplicationAdapter.ts:21 -> src/SynCloudOS/InstalledApplications/installedApplicationTypes.ts: adapters must use a public runtime entrypoint
+src/SynCloudOS/PlatformAdapters/BrowserRemoteNotifications.ts:21 -> src/SynCloudOS/UserNotifications/UserNotifications.ts: adapters must use a public runtime entrypoint
+src/SynCloudOSReact/InstalledApplicationTitleBar.tsx:22 -> src/NSE/NSE.ts: react must use a public nse entrypoint
+src/Webspring/ApplicationStageView.tsx:21 -> src/SynCloudOS/InstalledApplications/installedApplicationMenus.ts: webspring must use a public runtime entrypoint
+src/Webspring/Preferences/Capabilities.prefPane/index.tsx:21 -> src/SynCloudOS/InstalledApplications/capabilityReport.ts: webspring must use a public runtime entrypoint
+src/Webspring/Preferences/Capabilities.prefPane/index.tsx:26 -> src/SynCloudOS/PlatformAdapters/BrowserInstalledApplicationAdapter.ts: webspring may not import adapters
+src/Webspring/useWebspringResponder.ts:21 -> src/SynCloudOS/PlatformAdapters/BrowserInstalledApplicationAdapter.ts: webspring may not import adapters

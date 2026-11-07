@@ -1,0 +1,10 @@
+src/SynCloudOS/PlatformAdapters/BrowserNetworkPathAdapter.ts:44 accesses browser global window outside the platform adapter boundary
+src/SynCloudOS/PlatformAdapters/BrowserNetworkPathAdapter.ts:45 accesses browser global window outside the platform adapter boundary
+src/FrameworkTests/Windows/WindowManagementFixture.tsx:29 -> src/NSE/Overlays/NSEPopover.tsx: devtools must use a public nse entrypoint
+src/SynCloudOS/AppSDK/mountedBluetoothClient.ts:2 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/AppSDK/mountedContactsClient.ts:2 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/AppSDK/mountedNFCClient.ts:2 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/AppSDK/mountedNetworkClient.ts:21 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/AppSDK/mountedPaymentClient.ts:2 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/AppSDK/mountedSpeechClient.ts:2 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint
+src/SynCloudOS/AppSDK/mountedXRClient.ts:2 -> src/SynCloudOS/HostServices/mountedResourceScope.ts: app-sdk must use a public runtime-host-seams entrypoint

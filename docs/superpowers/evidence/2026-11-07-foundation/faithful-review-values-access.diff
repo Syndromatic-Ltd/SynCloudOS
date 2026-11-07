@@ -1,0 +1,2064 @@
+diff --git a/docs/framework/foundation.md b/docs/framework/foundation.md
+index 1172fb6..f9a38dc 100644
+--- a/docs/framework/foundation.md
++++ b/docs/framework/foundation.md
+@@ -15,20 +15,24 @@ Use native `URL`, `Date`, `Error`, `crypto.randomUUID()` and `JSON` for the web
+ | `NSEData`, `NSEDataConvertible`, `NSEDataCompressionAlgorithm` | NSData / Data | Immutable bytes, ranges, base64, Blob bridges and compression |
+ | `NSERange`, `normaliseNSERange`, `NSEEqualRanges`, `NSEIntersectionRange` | NSRange | Validated location/length ranges |
+ | `NSEIndexPath`, `compareNSEIndexPaths` | NSIndexPath | Ordered index paths |
+ | `NSEIndexSet` | NSIndexSet | Immutable sets represented by index ranges |
+ | `NSECountedSet` | NSCountedSet | Object multiplicities |
+ | `NSEFormatter`, `NSEFormatterContext`, `NSEFormatterError`, `NSEFormatterResult` | NSFormatter | Object/string conversion and partial-input validation |
+ | `NSENumberFormatter`, `NSENumberFormatterOptions` | NSNumberFormatter | Locale-aware number display and parsing |
+ | `NSEByteCountFormatter` and its option/unit types | NSByteCountFormatter | Decimal or binary byte quantities |
++| `NSEDateFormatter`, `NSEDateFormatterOptions`, `NSEDateFormatterStyle` | NSDateFormatter | Intl date/time styles, patterns and Date/string conversion |
++| `NSEDecimalNumber`, `NSEDecimalNumberHandler`, `NSEDecimalNumberBehaviors`, `NSEDecimalRoundingMode` | NSDecimalNumber / NSDecimalNumberHandler / NSDecimalNumberBehaviors | Bounded decimal arithmetic and rounding policies |
+ | `NSEPredicate` and its expression/schema types | NSPredicate | Block evaluation and bounded declarative predicates |
+ | `NSESortDescriptor` and its option/comparator types | NSSortDescriptor | Stable comparison with reversible ordering |
+ | `NSECharacterSet`, `NSEUnicodePropertyName` | NSCharacterSet | Unicode scalar membership and set operations |
+ | `NSEUserDefaults`, `NSEUserDefaultsStore` | NSUserDefaults | Keyed preferences through an injected store |
++| `NSEValueTransformer` and the three built-in transformer names | NSValueTransformer | Named subclass registration, forward and reverse value transformations |
++| `NSEUndoManager` | NSUndoManager | Target-based inverse registration, nested groups, action names and undo levels |
+ 
+ Supporting TypeScript option, schema and result types describe the web API; they are not additional Apple classes. `NSETreeNode` belongs to AppKit and is exported by `nse`. Formatters and `NSEUserDefaults` are exported only from `foundation`.
+ 
+ ## Immutable data
+ 
+ ```ts
+ import { NSEData, type NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
+ 
+@@ -74,16 +78,66 @@ const formatter = new NSENumberFormatter({ maximumFractionDigits: 2 });
+ const context = { locale: "en-GB" };
+ const display = formatter.string(1234.5, context);
+ const parsed = formatter.getObjectValue(display, context);
+ if (parsed.ok) console.log(parsed.value);
+ ```
+ 
+ Subclass `NSEFormatter<T>` to provide `string`, `editingString`, `getObjectValue` and `isPartialStringValid`. The methods follow NSFormatter’s conversion and editing responsibilities. Locale and time-zone context is explicit; parse results represent Cocoa’s output/error parameters as a discriminated result.
+ 
++### Dates
++
++`NSEDateFormatter` converts native `Date` values with `string(date)` and `date(text)`, returning `null` for invalid date text. Mutable `dateStyle` and `timeStyle` use `none`, `short`, `medium`, `long` and `full`. `locale`, `timeZone` and `calendar` configure Intl. An explicit `dateFormat` takes precedence over styles; supported Unicode pattern tokens are `yyyy`, `MM`, `dd`, `HH`, `mm` and `ss`, with quoted literals and doubled apostrophes. Unsupported tokens throw instead of being interpreted as literals.
++
++```ts
++const dates = new NSEDateFormatter({ locale: "en-GB", timeZone: "Europe/London", dateStyle: "long", timeStyle: "short" });
++const text = dates.string(new Date("2026-11-07T12:30:00Z"));
++const date = dates.date(text);
++```
++
++Intl formats any supported calendar in style mode. Parsing and explicit patterns currently support the Gregorian calendar and positive-era years; other calendars/eras reject explicitly. Localized style parsing uses Intl parts and verifies the formatted result, including month/weekday names, digits, day periods and time-zone labels. Missing date fields default to 1 January 2001, missing time fields to midnight, and two-digit style years to 2000–2099. Impossible dates and daylight-saving gaps return `null`. Ambiguous repeated wall times use the formatter's deterministic zone resolution; there is no locale-independent `Date.parse` fallback. Style output without seconds cannot recover seconds; formatting does not preserve milliseconds. These limits describe this API's supported conversion surface, rather than the full ICU pattern language.
++
++### Decimal numbers
++
++`NSEDecimalNumber.fromString` constructs immutable decimal values. `adding`, `subtracting`, `multiplying`, `dividing`, `rounding`, `compare` and `toString` keep arithmetic in bigint coefficient/exponent form. Representation is bounded to 38 significant digits and a decimal exponent from −128 through 127; operations round to that representation, rather than using binary floating-point or arbitrary precision. `zero`, `one` and `notANumber` are shared values.
++
++```ts
++const cents = new NSEDecimalNumberHandler({ scale: 2, roundingMode: "bankers" });
++const amount = NSEDecimalNumber.fromString("0.1").adding(NSEDecimalNumber.fromString("0.2"));
++const eighth = NSEDecimalNumber.one.dividing(NSEDecimalNumber.fromString("8"), cents); // 0.12
++```
++
++Rounding modes are `plain` (nearest, ties away from zero), `bankers` (nearest, ties to even), `down` (toward negative infinity) and `up` (toward positive infinity). A handler's optional `scale` is decimal places, with an omitted scale retaining the bounded precision. `raiseOnExactness`, `raiseOnOverflow`, `raiseOnUnderflow` and `raiseOnDivideByZero` control arithmetic errors. Defaults tolerate inexactness and raise the other three errors. A suppressed unrepresentable result becomes `notANumber`; suppressed inexactness returns the rounded result. `defaultBehavior` is replaceable. Custom `NSEDecimalNumberBehaviors.exceptionDuringOperation` can supply a replacement for a raised arithmetic error. Serialization returns decimal text, preserving the value without a binary-number bridge.
++
++### Undo
++
++`NSEUndoManager` is the worker-safe Foundation object. `registerUndo(target, handler)` records a synchronous inverse operation. While undoing or redoing, handlers register the opposite operation on the same manager. `beginUndoGrouping` / `endUndoGrouping` nest; closing the outer group creates one history entry. `setActionName` names that entry; `undoActionName` and `redoActionName` expose the frontier names. `canUndo`, `canRedo`, `isUndoing`, `isRedoing` and `groupingLevel` describe current state. `levelsOfUndo = 0` means unlimited; a positive value bounds retained groups. `removeAllActions` and `removeAllActionsWithTarget` retire registrations.
++
++```ts
++const undo = new NSEUndoManager();
++const model = { title: "Before" };
++function setTitle(target: typeof model, title: string) {
++  const previous = target.title;
++  undo.registerUndo(target, object => setTitle(object, previous));
++  target.title = title;
++}
++setTitle(model, "After");
++undo.setActionName("Change title");
++undo.undo();
++undo.redo();
++```
++
++The explicit synchronous Foundation contract does not add browser event-loop grouping or promise replay. The runtime adapter uses the same Foundation history engine for registration, groups and replay frontiers, while retaining runtime identity, responder routing, registration partitions, reservations, asynchronous compensation and revocable mounted leases. NSE controls and mounted app histories derive their narrow registration contract from Foundation's `NSEUndoRegistrationCapability`; this TypeScript support interface is not another Cocoa class. Apps holding a mounted document history continue to use that lease, with its existing authority and teardown behaviour. A raw Foundation manager never replaces a mounted history lease.
++
++## Value transformers
++
++Subclass `NSEValueTransformer<Source, Target>` and implement `transformedValue(value)`. Class methods `setValueTransformer(transformer, name)`, `valueTransformerForName(name)` and `valueTransformerNames()` share a named registry in the current JavaScript realm. Registering replaces the previous instance; registering `null` removes the name. A subclass opts into reverse conversion with static `allowsReverseTransformation()`. Its `reverseTransformedValue` may implement a different inverse; the inherited implementation applies the forward operation when reverse conversion is allowed, following NSValueTransformer.
++
++`NSENegateBooleanTransformerName`, `NSEIsNilTransformerName` and `NSEIsNotNilTransformerName` identify the built-in boolean negation and nil predicates. Both `null` and `undefined` bridge nil. Keyed-archive transformers and Objective-C class lookup by name are not provided. The former internal closure registry has been removed and object-controller bindings use the Foundation class directly.
++
+ ## Preferences
+ 
+ ```ts
+ import { NSEUserDefaults } from "@syndromatic/syncloudos/foundation";
+ 
+ const defaults = new NSEUserDefaults(); // Volatile in-memory domain.
+ defaults.set("indigo", "accentColour");
+ const colour = defaults.object("accentColour");
+diff --git a/docs/framework/view-access.md b/docs/framework/view-access.md
+new file mode 100644
+index 0000000..d56841a
+--- /dev/null
++++ b/docs/framework/view-access.md
+@@ -0,0 +1,16 @@
++# Scroll and image view access
++
++`NSEScrollView` is NSScrollView. Its React ref is an `NSEScrollViewHandle`:
++
++```tsx
++const scroll = useRef<NSEScrollViewHandle>(null);
++<NSEScrollView ref={scroll}>Document content</NSEScrollView>
++```
++
++The handle is committed in a layout effect, before the owning view controller's appearance. `contentView` is the NSClipView counterpart: `element` is the physical scroll viewport and `bounds` is its rectangle in document coordinates. `documentVisibleRect` supplies the same currently visible document rectangle. `scrollRectToVisible` retains the existing inset-aware scrolling behaviour.
++
++To observe scrolling and viewport resizing, set `contentView.postsBoundsChangedNotifications = true` and call `contentView.observeBoundsChanges(bounds => ...)`. The returned function removes the observation. Scroll bounds notify during the native scroll event, so clients scheduling a redraw keep their existing frame latency; unchanged bounds do not notify. Unmount disconnects scroll and resize observations, and a disposed clip refuses new observations. The callback API represents NSView's bounds-change notification in JavaScript; it is not a second notification centre. The pre-existing `controllerRef` also runs during layout and remains available.
++
++`NSEImageView` is NSImageView. Its React ref is an `NSEImageViewHandle`, with `element` identifying the image view and `layer` corresponding to NSView.layer. Set `wantsLayer` to opt into backing. Without it, `layer` is null. With it, reading `layer` lazily acquires one CSS-layout AnimationFX layer from the mounted animation environment, before parent appearance. A layer-backed view requires that environment; an absent layer client throws explicitly. Unmount, a backing-policy change or a layer-client change aborts and disposes the old backing. The layer animates the whole image view, independently of its stationary parent anchor; fitting and panning remain in the image's viewport.
++
++Both handles are view access contracts, not new drawn controls. Atmo continues to draw the scroll and image surfaces.
+diff --git a/src/Foundation/NSEDateFormatter.ts b/src/Foundation/NSEDateFormatter.ts
+new file mode 100644
+index 0000000..726f2e3
+--- /dev/null
++++ b/src/Foundation/NSEDateFormatter.ts
+@@ -0,0 +1,169 @@
++/*
++ * SynCloudOS
++ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
++ *
++ * Designed by Kavish Krishnakumar in Manchester.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Affero General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Affero General Public License for more details.
++ *
++ * You should have received a copy of the GNU Affero General Public License
++ * along with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++import { NSEFormatter, formatterFailure, type NSEFormatterContext, type NSEFormatterResult } from "./NSEFormatter";
++
++export type NSEDateFormatterStyle = "none" | "short" | "medium" | "long" | "full";
++export interface NSEDateFormatterOptions {
++  locale?: string;
++  timeZone?: string;
++  calendar?: string;
++  dateStyle?: NSEDateFormatterStyle;
++  timeStyle?: NSEDateFormatterStyle;
++  dateFormat?: string;
++}
++type Fields = { year: number; month: number; day: number; hour: number; minute: number; second: number };
++type Part = { type: string; value: string };
++const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
++const numericFields = new Set(["year", "month", "day", "hour", "minute", "second"]);
++const tokenTypes: Record<string, keyof Fields> = { yyyy: "year", MM: "month", dd: "day", HH: "hour", mm: "minute", ss: "second" };
++function tokenize(format: string): Part[] {
++  const parts: Part[] = [];
++  for (let i = 0; i < format.length;) {
++    if (format[i] === "'") {
++      let literal = ""; i++;
++      if (format[i] === "'") { parts.push({type:"literal",value:"'"}); i++; continue; }
++      let closed=false;
++      while (i < format.length) {
++        if (format[i] === "'") { if (format[i+1] === "'") { literal += "'"; i+=2; continue; } i++; closed=true; break; }
++        literal += format[i++];
++      }
++      if (!closed) throw new RangeError("Unterminated date format literal.");
++      parts.push({type:"literal", value:literal}); continue;
++    }
++    if (/[A-Za-z]/.test(format[i])) {
++      let end = i + 1; while (format[end] === format[i]) end++;
++      const token = format.slice(i, end), type = tokenTypes[token];
++      if (!type) throw new RangeError(`Unsupported date format token: ${token}`);
++      parts.push({type, value:token}); i = end;
++    } else { parts.push({type:"literal", value:format[i++]}); }
++  }
++  return parts;
++}
++function civil(date: Date, timeZone: string | undefined): Fields {
++  const result = new Intl.DateTimeFormat("en-US-u-ca-gregory-nu-latn", {
++    timeZone, year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit", hourCycle:"h23",
++  }).formatToParts(date);
++  const field = (type: string) => Number(result.find(p => p.type === type)!.value);
++  return {year:field("year"), month:field("month"), day:field("day"), hour:field("hour"), minute:field("minute"), second:field("second")};
++}
++function utcValue(f: Fields): number {
++  const d = new Date(0); d.setUTCFullYear(f.year, f.month-1, f.day); d.setUTCHours(f.hour, f.minute, f.second, 0); return d.getTime();
++}
++function resolveCivil(f: Fields, timeZone: string | undefined): Date | null {
++  const target = utcValue(f);
++  const check = new Date(target);
++  if (check.getUTCFullYear() !== f.year || check.getUTCMonth()+1 !== f.month || check.getUTCDate() !== f.day || f.hour > 23 || f.minute > 59 || f.second > 59) return null;
++  let instant = target;
++  for (let i=0;i<4;i++) { const delta = target - utcValue(civil(new Date(instant), timeZone)); if (!delta) break; instant += delta; }
++  const result = new Date(instant), actual = civil(result, timeZone);
++  return Object.keys(f).every(key => f[key as keyof Fields] === actual[key as keyof Fields]) ? result : null;
++}
++function digitMaps(locale: string | undefined): [Map<string,string>, string[]] {
++  const formatter = new Intl.NumberFormat(locale, {useGrouping:false});
++  const digits = Array.from({length:10}, (_, i) => formatter.format(i));
++  return [new Map(digits.map((d,i) => [d, String(i)])), digits];
++}
++/** Intl-backed NSDateFormatter with Gregorian numeric patterns and localized style parsing. */
++export class NSEDateFormatter extends NSEFormatter<Date> {
++  locale?: string; timeZone?: string; calendar?: string;
++  dateStyle: NSEDateFormatterStyle; timeStyle: NSEDateFormatterStyle; dateFormat?: string;
++  constructor(options: NSEDateFormatterOptions = {}) {
++    super(); this.locale=options.locale; this.timeZone=options.timeZone; this.calendar=options.calendar;
++    this.dateStyle=options.dateStyle ?? "none"; this.timeStyle=options.timeStyle ?? "none"; this.dateFormat=options.dateFormat;
++  }
++  #locale(context?: NSEFormatterContext): string | undefined { return context?.locale ?? this.locale; }
++  #zone(context?: NSEFormatterContext): string | undefined { return context?.timeZone ?? this.timeZone; }
++  #style(locale: string | undefined, timeZone: string | undefined): Intl.DateTimeFormat {
++    const dateStyle = this.dateStyle === "none" ? undefined : this.dateStyle;
++    const timeStyle = this.timeStyle === "none" ? undefined : this.timeStyle;
++    return new Intl.DateTimeFormat(locale, {dateStyle, timeStyle, timeZone, calendar:this.calendar});
++  }
++  string(value: Date, context?: NSEFormatterContext): string {
++    if (!(value instanceof Date) || !Number.isFinite(value.getTime())) throw new RangeError("Invalid date.");
++    const locale=this.#locale(context), zone=this.#zone(context);
++    if (this.dateFormat !== undefined) {
++      if (this.#style(locale, zone).resolvedOptions().calendar !== "gregory") throw new RangeError("Pattern formatting only supports the Gregorian calendar.");
++      const era = new Intl.DateTimeFormat("en-US-u-ca-gregory", {timeZone:zone, era:"short", year:"numeric"}).formatToParts(value).find(p=>p.type==="era")?.value;
++      if (era !== "AD") throw new RangeError("Pattern formatting does not support this era.");
++      const f=civil(value, zone), [, localDigits]=digitMaps(locale);
++      if (f.year > 9999) throw new RangeError("Pattern formatting requires a four-digit year.");
++      return tokenize(this.dateFormat).map(p => p.type === "literal" ? p.value : String(f[p.type as keyof Fields]).padStart(p.value.length,"0").replace(/\d/g, d => localDigits[Number(d)])).join("");
++    }
++    if (this.dateStyle === "none" && this.timeStyle === "none") return "";
++    return this.#style(locale,zone).format(value);
++  }
++  date(text: string, context?: NSEFormatterContext): Date | null {
++    if (this.calendar && this.calendar !== "gregory") throw new RangeError("Date parsing only supports the Gregorian calendar.");
++    const locale=this.#locale(context), zone=this.#zone(context), [map]=digitMaps(locale);
++    if (this.#style(locale, zone).resolvedOptions().calendar !== "gregory") throw new RangeError("Date parsing only supports the Gregorian calendar.");
++    let parts: Part[];
++    if (this.dateFormat !== undefined) parts=tokenize(this.dateFormat);
++    else {
++      if (this.dateStyle === "none" && this.timeStyle === "none") return null;
++      parts=this.#style(locale,zone).formatToParts(new Date("2006-11-22T13:44:55Z"));
++    }
++    const groups: string[] = [];
++    let pattern="^";
++    for (const p of parts) {
++      if (p.type === "literal") pattern+=escape(p.value).replace(/\s/gu, "[\\s\\u00a0\\u202f]");
++      else if (numericFields.has(p.type)) { groups.push(p.type); pattern += this.dateFormat !== undefined ? `([\\p{Number}]{${p.value.length}})` : p.type === "month" ? "(.+?)" : "([\\p{Number}]+)"; }
++      else if (["dayPeriod", "weekday", "era", "timeZoneName"].includes(p.type)) { groups.push(p.type); pattern += "(.+?)"; }
++      else throw new RangeError(`Unsupported date parsing field: ${p.type}`);
++    }
++    const match=new RegExp(pattern+"$", "u").exec(text); if (!match) return null;
++    const fields: Fields={year:2001, month:1, day:1, hour:0, minute:0, second:0};
++    let dayPeriod: string | undefined;
++    for (let i=0;i<groups.length;i++) {
++      if (groups[i] === "dayPeriod") { dayPeriod=match[i+1]; continue; }
++      if (["weekday", "era", "timeZoneName"].includes(groups[i])) continue;
++      let raw=match[i+1]; for (const [digit, ascii] of map) raw=raw.split(digit).join(ascii);
++      if (!/^\d+$/.test(raw)) {
++        if (groups[i] !== "month") return null;
++        const month=Array.from({length:12}, (_, monthIndex) => {
++          const sample=resolveCivil({year:2006,month:monthIndex+1,day:15,hour:12,minute:0,second:0}, zone)!;
++          return this.#style(locale,zone).formatToParts(sample).find(p => p.type === "month")?.value;
++        }).indexOf(match[i+1]);
++        if (month < 0) return null;
++        fields.month=month+1; continue;
++      }
++      let n=Number(raw); if (this.dateFormat === undefined && groups[i] === "year" && raw.length <= 2) n+=2000;
++      fields[groups[i] as keyof Fields]=n;
++    }
++    if (dayPeriod !== undefined) {
++      const period=(hour:number) => { const instant=resolveCivil({year:2006,month:11,day:22,hour,minute:0,second:0},zone)!; return this.#style(locale,zone).formatToParts(instant).find(p=>p.type==="dayPeriod")?.value; };
++      const am=period(0), pm=period(12); if (dayPeriod !== am && dayPeriod !== pm) return null;
++      if (fields.hour < 1 || fields.hour > 12) return null;
++      fields.hour = fields.hour % 12 + (dayPeriod === pm ? 12 : 0);
++    }
++    const result=resolveCivil(fields,zone);
++    if (!result) return null;
++    if (this.dateFormat === undefined) {
++      const normalise=(value:string) => value.replace(/[\s\u00a0\u202f]+/gu, " ");
++      if (normalise(this.string(result,context)) !== normalise(text)) return null;
++    }
++    return result;
++  }
++  editingString(value: Date, context?: NSEFormatterContext): string { return this.string(value,context); }
++  getObjectValue(text: string, context?: NSEFormatterContext): NSEFormatterResult<Date> {
++    const value=this.date(text,context); return value ? {ok:true,value} : formatterFailure("date.invalid", "Enter a valid date.", text);
++  }
++  isPartialStringValid(_text: string, _context?: NSEFormatterContext): {readonly valid:true} { return {valid:true}; }
++}
+diff --git a/src/Foundation/NSEDecimalNumber.ts b/src/Foundation/NSEDecimalNumber.ts
+new file mode 100644
+index 0000000..3461072
+--- /dev/null
++++ b/src/Foundation/NSEDecimalNumber.ts
+@@ -0,0 +1,179 @@
++/*
++ * SynCloudOS
++ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
++ *
++ * Designed by Kavish Krishnakumar in Manchester.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Affero General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Affero General Public License for more details.
++ *
++ * You should have received a copy of the GNU Affero General Public License
++ * along with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++export type NSEDecimalRoundingMode = "plain" | "down" | "up" | "bankers";
++export interface NSEDecimalNumberHandlerOptions {
++  readonly roundingMode?: NSEDecimalRoundingMode;
++  /** Decimal places; omitted retains up to 38 significant digits. */
++  readonly scale?: number;
++  readonly raiseOnExactness?: boolean;
++  readonly raiseOnOverflow?: boolean;
++  readonly raiseOnUnderflow?: boolean;
++  readonly raiseOnDivideByZero?: boolean;
++}
++export interface NSEDecimalNumberBehaviors {
++  readonly roundingMode: NSEDecimalRoundingMode;
++  readonly scale: number | undefined;
++  readonly raiseOnExactness: boolean;
++  readonly raiseOnOverflow: boolean;
++  readonly raiseOnUnderflow: boolean;
++  readonly raiseOnDivideByZero: boolean;
++  exceptionDuringOperation?(operation: "add" | "subtract" | "multiply" | "divide" | "round", error: RangeError, left: NSEDecimalNumber, right: NSEDecimalNumber | null): NSEDecimalNumber | null;
++}
++export class NSEDecimalNumberHandler implements NSEDecimalNumberBehaviors {
++  readonly roundingMode: NSEDecimalRoundingMode;
++  readonly scale: number | undefined;
++  readonly raiseOnExactness: boolean;
++  readonly raiseOnOverflow: boolean;
++  readonly raiseOnUnderflow: boolean;
++  readonly raiseOnDivideByZero: boolean;
++  constructor(options: NSEDecimalNumberHandlerOptions = {}) {
++    this.roundingMode = options.roundingMode ?? "plain";
++    if (!["plain", "down", "up", "bankers"].includes(this.roundingMode)) throw new TypeError("Unsupported rounding mode.");
++    if (options.scale !== undefined && (!Number.isInteger(options.scale) || options.scale < -127 || options.scale > 128)) throw new RangeError("Decimal scale must be between -127 and 128.");
++    this.scale = options.scale;
++    this.raiseOnExactness = options.raiseOnExactness ?? false;
++    this.raiseOnOverflow = options.raiseOnOverflow ?? true;
++    this.raiseOnUnderflow = options.raiseOnUnderflow ?? true;
++    this.raiseOnDivideByZero = options.raiseOnDivideByZero ?? true;
++    Object.freeze(this);
++  }
++}
++const parsingBehavior = new NSEDecimalNumberHandler();
++let defaultBehavior: NSEDecimalNumberBehaviors = parsingBehavior;
++const pow10 = (n: number) => 10n ** BigInt(n);
++const abs = (n: bigint) => n < 0n ? -n : n;
++const digits = (n: bigint) => abs(n).toString().length;
++function rounded(n: bigint, d: bigint, h: NSEDecimalNumberBehaviors): bigint {
++  if (d < 0n) { n = -n; d = -d; }
++  let q = n / d;
++  const r = n % d;
++  if (r === 0n) return q;
++  if (h.raiseOnExactness) throw new RangeError("Decimal loss of precision.");
++  const sign = n < 0n ? -1n : 1n, twice = abs(r) * 2n;
++  if ((h.roundingMode === "down" && sign < 0n) || (h.roundingMode === "up" && sign > 0n) ||
++      (h.roundingMode === "plain" && twice >= d) ||
++      (h.roundingMode === "bankers" && (twice > d || (twice === d && abs(q) % 2n === 1n)))) q += sign;
++  return q;
++}
++/** Decimal arithmetic with a maximum of 38 significant digits and exponent -128...127. */
++export class NSEDecimalNumber {
++  readonly #coefficient: bigint;
++  readonly #exponent: number;
++  readonly #isNaN: boolean;
++  private constructor(coefficient: bigint, exponent: number, isNaN = false) {
++    this.#coefficient = coefficient; this.#exponent = exponent; this.#isNaN = isNaN; Object.freeze(this);
++  }
++  static readonly zero = new NSEDecimalNumber(0n, 0);
++  static readonly one = new NSEDecimalNumber(1n, 0);
++  static get defaultBehavior(): NSEDecimalNumberBehaviors { return defaultBehavior; }
++  static set defaultBehavior(value: NSEDecimalNumberBehaviors) { defaultBehavior = value; }
++  static readonly notANumber = new NSEDecimalNumber(0n, 0, true);
++  static #make(coefficient: bigint, exponent: number, h: NSEDecimalNumberBehaviors): NSEDecimalNumber {
++    if (!Number.isSafeInteger(exponent)) throw new RangeError("Decimal exponent is out of range.");
++    if (coefficient === 0n) return new NSEDecimalNumber(0n, 0);
++    while (coefficient % 10n === 0n && exponent < 127) { coefficient /= 10n; exponent++; }
++    if (exponent + digits(coefficient) - 1 < -128) {
++      if (h.raiseOnUnderflow) throw new RangeError("Decimal underflow.");
++      return NSEDecimalNumber.notANumber;
++    }
++    let drop = Math.max(0, digits(coefficient) - 38, -128 - exponent, h.scale === undefined ? 0 : -h.scale - exponent);
++    if (drop) {
++      coefficient = rounded(coefficient, pow10(drop), h);
++      exponent += drop;
++    }
++    if (coefficient === 0n) return new NSEDecimalNumber(0n, 0);
++    if (digits(coefficient) > 38) { coefficient /= 10n; exponent++; }
++    while (coefficient % 10n === 0n && exponent < 127) { coefficient /= 10n; exponent++; }
++    if (exponent > 127) {
++      drop = exponent - 127;
++      if (drop <= 38 - digits(coefficient)) { coefficient *= pow10(drop); exponent = 127; }
++      else { if (h.raiseOnOverflow) throw new RangeError("Decimal overflow."); return NSEDecimalNumber.notANumber; }
++    }
++    if (exponent < -128) { if (h.raiseOnUnderflow) throw new RangeError("Decimal underflow."); return NSEDecimalNumber.notANumber; }
++    return new NSEDecimalNumber(coefficient, exponent);
++  }
++  static fromString(value: string): NSEDecimalNumber {
++    const m = /^([+-]?)(\d*)(?:\.(\d*))?(?:[eE]([+-]?\d+))?$/.exec(value);
++    if (!m || (!m[2] && !m[3])) throw new TypeError("Invalid decimal string.");
++    const exponent = Number(m[4] ?? 0) - (m[3]?.length ?? 0);
++    return NSEDecimalNumber.#make(BigInt(`${m[1]}${m[2] || "0"}${m[3] ?? ""}`), exponent, parsingBehavior);
++  }
++  #perform(other: NSEDecimalNumber, op: "add" | "subtract" | "multiply" | "divide", h: NSEDecimalNumberBehaviors): NSEDecimalNumber {
++    if (this.#isNaN || other.#isNaN) return NSEDecimalNumber.notANumber;
++    if (op === "divide" && other.#coefficient === 0n) {
++      if (h.raiseOnDivideByZero) throw new RangeError("Decimal divide by zero.");
++      return NSEDecimalNumber.notANumber;
++    }
++    let coefficient: bigint, exponent: number;
++    if (op === "multiply") { coefficient = this.#coefficient * other.#coefficient; exponent = this.#exponent + other.#exponent; }
++    else if (op === "divide") {
++      const numerator = abs(this.#coefficient), denominator = abs(other.#coefficient);
++      let magnitude = digits(numerator) - digits(denominator);
++      if (magnitude >= 0 ? numerator < denominator * pow10(magnitude) : numerator * pow10(-magnitude) < denominator) magnitude--;
++      magnitude += this.#exponent - other.#exponent;
++      if (this.#coefficient !== 0n && magnitude < -128) {
++        if (h.raiseOnUnderflow) throw new RangeError("Decimal underflow.");
++        return NSEDecimalNumber.notANumber;
++      }
++      exponent = Math.max(magnitude - 37, h.scale === undefined ? -128 : -h.scale, -128);
++      const shift = this.#exponent - other.#exponent - exponent;
++      coefficient = shift >= 0
++        ? rounded(this.#coefficient * pow10(shift), other.#coefficient, h)
++        : rounded(this.#coefficient, other.#coefficient * pow10(-shift), h);
++    } else {
++      exponent = Math.min(this.#exponent, other.#exponent);
++      const a = this.#coefficient * pow10(this.#exponent - exponent), b = other.#coefficient * pow10(other.#exponent - exponent);
++      coefficient = op === "add" ? a + b : a - b;
++    }
++    return NSEDecimalNumber.#make(coefficient, exponent, h);
++  }
++  #operate(other: NSEDecimalNumber, op: "add" | "subtract" | "multiply" | "divide", h: NSEDecimalNumberBehaviors): NSEDecimalNumber {
++    try { return this.#perform(other, op, h); }
++    catch (error) {
++      if (error instanceof RangeError) {
++        const replacement = h.exceptionDuringOperation?.(op, error, this, other);
++        if (replacement != null) return replacement;
++      }
++      throw error;
++    }
++  }
++  adding(other: NSEDecimalNumber, behavior = defaultBehavior): NSEDecimalNumber { return this.#operate(other, "add", behavior); }
++  subtracting(other: NSEDecimalNumber, behavior = defaultBehavior): NSEDecimalNumber { return this.#operate(other, "subtract", behavior); }
++  multiplying(other: NSEDecimalNumber, behavior = defaultBehavior): NSEDecimalNumber { return this.#operate(other, "multiply", behavior); }
++  dividing(other: NSEDecimalNumber, behavior = defaultBehavior): NSEDecimalNumber { return this.#operate(other, "divide", behavior); }
++  rounding(behavior: NSEDecimalNumberBehaviors = defaultBehavior): NSEDecimalNumber {
++    try { return this.#isNaN ? this : NSEDecimalNumber.#make(this.#coefficient, this.#exponent, behavior); }
++    catch (error) { if (error instanceof RangeError) { const replacement=behavior.exceptionDuringOperation?.("round",error,this,null); if (replacement != null) return replacement; } throw error; }
++  }
++  compare(other: NSEDecimalNumber): number {
++    if (this.#isNaN || other.#isNaN) throw new RangeError("Cannot compare NaN.");
++    const e = Math.min(this.#exponent, other.#exponent), a = this.#coefficient * pow10(this.#exponent-e), b = other.#coefficient * pow10(other.#exponent-e);
++    return a < b ? -1 : a > b ? 1 : 0;
++  }
++  toString(): string {
++    if (this.#isNaN) return "NaN";
++    const sign = this.#coefficient < 0n ? "-" : "", raw = abs(this.#coefficient).toString();
++    if (this.#exponent >= 0) return sign + raw + "0".repeat(this.#exponent);
++    const padded = raw.padStart(1-this.#exponent, "0");
++    return sign + padded.slice(0, this.#exponent) + "." + padded.slice(this.#exponent);
++  }
++  toJSON(): string { return this.toString(); }
++}
+diff --git a/src/Foundation/NSEUndoManager.ts b/src/Foundation/NSEUndoManager.ts
+new file mode 100644
+index 0000000..111d0be
+--- /dev/null
++++ b/src/Foundation/NSEUndoManager.ts
+@@ -0,0 +1,120 @@
++/*
++ * SynCloudOS
++ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
++ *
++ * Designed by Kavish Krishnakumar in Manchester.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Affero General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Affero General Public License for more details.
++ *
++ * You should have received a copy of the GNU Affero General Public License
++ * along with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++import { UndoHistory } from "./internal/UndoHistory";
++
++type Operation = { readonly target: object; readonly invoke: () => unknown };
++type Group = { name: string; operations: Operation[] };
++
++/** Foundation undo history. Handlers register their inverse during replay. */
++export class NSEUndoManager {
++  readonly #history = new UndoHistory<Group, Group>();
++  #replay: Group | null = null;
++  #direction: "undo" | "redo" | null = null;
++  #levels = 0;
++
++  get canUndo(): boolean { return this.#history.cursor > 0; }
++  get canRedo(): boolean { return this.#history.cursor < this.#history.entries.length; }
++  get isUndoing(): boolean { return this.#direction === "undo"; }
++  get isRedoing(): boolean { return this.#direction === "redo"; }
++  get groupingLevel(): number { return this.#history.groups.length; }
++  get undoActionName(): string { return this.#history.frontier("undo")?.name ?? ""; }
++  get redoActionName(): string { return this.#history.frontier("redo")?.name ?? ""; }
++  get levelsOfUndo(): number { return this.#levels; }
++  set levelsOfUndo(value: number) {
++    if (!Number.isSafeInteger(value) || value < 0) throw new RangeError("levelsOfUndo must be a nonnegative integer.");
++    this.#levels = value;
++    this.#trim();
++  }
++  registerUndo<T extends object>(target: T, handler: (target: T) => void): void {
++    const operation = { target, invoke: () => handler(target) };
++    if (this.#replay) { this.#replay.operations.push(operation); return; }
++    const registration = this.#history.register(
++      () => ({ name: "", operations: [operation] }),
++      group => { group.operations.push(operation); },
++      () => false,
++      () => undefined,
++    );
++    if (!registration.group) this.#trim();
++  }
++  beginUndoGrouping(): void {
++    if (this.#direction) throw new Error("Cannot open an undo group while replaying.");
++    this.#history.beginGroup({ name: "", operations: [] });
++  }
++  endUndoGrouping(): void {
++    const closed = this.#history.closeGroup(
++      group => group.operations.length === 0,
++      (parent, group) => { parent.operations.push(...group.operations); },
++      group => group,
++      () => undefined,
++    );
++    if (!closed) throw new Error("No undo group is open.");
++    if (closed.committed) this.#trim();
++  }
++  setActionName(name: string): void {
++    const group = this.#replay ?? this.#history.currentGroup ?? this.#history.frontier("undo");
++    if (group) group.name = name;
++  }
++  undo(): void { this.#execute("undo"); }
++  redo(): void { this.#execute("redo"); }
++  removeAllActions(): void {
++    if (this.#direction) throw new Error("Cannot clear undo history while replaying.");
++    this.#history.entries.length = 0;
++    this.#history.groups.length = 0;
++    this.#history.cursor = 0;
++  }
++  removeAllActionsWithTarget(target: object): void {
++    if (this.#direction) throw new Error("Cannot remove undo actions while replaying.");
++    for (const group of this.#history.groups) {
++      group.operations = group.operations.filter(operation => operation.target !== target);
++    }
++    for (let index = this.#history.entries.length - 1; index >= 0; index--) {
++      const group = this.#history.entries[index]!;
++      group.operations = group.operations.filter(operation => operation.target !== target);
++      if (group.operations.length === 0) {
++        this.#history.entries.splice(index, 1);
++        if (index < this.#history.cursor) this.#history.cursor--;
++      }
++    }
++  }
++  #trim(): void {
++    while (this.#levels > 0 && this.#history.entries.length > this.#levels) {
++      if (this.#history.cursor > 0) this.#history.evictOldest();
++      else this.#history.entries.pop();
++    }
++  }
++  #execute(direction: "undo" | "redo"): void {
++    if (this.#direction || this.groupingLevel) throw new Error("Cannot replay while another undo operation or group is open.");
++    this.#history.replaySync(direction, group => {
++      this.#direction = direction;
++      this.#replay = { name: group.name, operations: [] };
++      try {
++        for (const operation of [...group.operations].reverse()) {
++          const result = operation.invoke();
++          if (result !== null && (typeof result === "object" || typeof result === "function") && typeof (result as { then?: unknown }).then === "function") {
++            void Promise.resolve(result).catch(() => undefined);
++            throw new TypeError("Undo handlers must be synchronous.");
++          }
++        }
++        return this.#replay.operations.length ? this.#replay : undefined;
++      } finally { this.#replay = null; this.#direction = null; }
++    });
++  }
++}
+diff --git a/src/Foundation/NSEUndoRegistrationCapability.ts b/src/Foundation/NSEUndoRegistrationCapability.ts
+new file mode 100644
+index 0000000..3ae0959
+--- /dev/null
++++ b/src/Foundation/NSEUndoRegistrationCapability.ts
+@@ -0,0 +1,28 @@
++/*
++ * SynCloudOS
++ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
++ *
++ * Designed by Kavish Krishnakumar in Manchester.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Affero General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Affero General Public License for more details.
++ *
++ * You should have received a copy of the GNU Affero General Public License
++ * along with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++/** A narrow registration capability for adapters that add transactional
++ * actions to a Foundation history. Ownership and revocation are supplied by
++ * the adapter, not by this structural contract. */
++export interface NSEUndoRegistrationCapability<Action, Reservation, Options> {
++  readonly isExecuting: boolean;
++  register(action: Action, options?: Options): string;
++  reserve(): Reservation;
++}
+diff --git a/src/Foundation/NSEValueTransformer.ts b/src/Foundation/NSEValueTransformer.ts
+new file mode 100644
+index 0000000..21cbe6c
+--- /dev/null
++++ b/src/Foundation/NSEValueTransformer.ts
+@@ -0,0 +1,68 @@
++/*
++ * SynCloudOS
++ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
++ *
++ * Designed by Kavish Krishnakumar in Manchester.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Affero General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Affero General Public License for more details.
++ *
++ * You should have received a copy of the GNU Affero General Public License
++ * along with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++/** A subclassable Foundation value transformer with a process-wide named registry. */
++export class NSEValueTransformer<TSource = unknown, TTarget = unknown> {
++  static readonly #registry = new Map<string, NSEValueTransformer<any, any>>();
++
++  static allowsReverseTransformation(): boolean { return false; }
++
++  static setValueTransformer(transformer: NSEValueTransformer<any, any> | null, name: string): void {
++    if (!name.trim()) throw new TypeError("Transformer name must not be empty.");
++    if (transformer === null) NSEValueTransformer.#registry.delete(name);
++    else NSEValueTransformer.#registry.set(name, transformer);
++  }
++
++  static valueTransformerForName(name: string): NSEValueTransformer<any, any> | null {
++    return NSEValueTransformer.#registry.get(name) ?? null;
++  }
++
++  static valueTransformerNames(): readonly string[] {
++    return Object.freeze([...NSEValueTransformer.#registry.keys()].sort());
++  }
++
++  transformedValue(_value: TSource): TTarget {
++    throw new Error("Subclasses must implement transformedValue.");
++  }
++
++  reverseTransformedValue(value: TTarget): TSource {
++    const transformerClass = this.constructor as typeof NSEValueTransformer;
++    if (!transformerClass.allowsReverseTransformation()) throw new Error("Reverse transformation is not supported.");
++    return this.transformedValue(value as unknown as TSource) as unknown as TSource;
++  }
++}
++
++export const NSENegateBooleanTransformerName = "NSNegateBoolean";
++export const NSEIsNilTransformerName = "NSIsNil";
++export const NSEIsNotNilTransformerName = "NSIsNotNil";
++
++class NegateBooleanTransformer extends NSEValueTransformer<boolean, boolean> {
++  static override allowsReverseTransformation(): boolean { return true; }
++  override transformedValue(value: boolean): boolean { return !value; }
++}
++class IsNilTransformer extends NSEValueTransformer<unknown, boolean> {
++  override transformedValue(value: unknown): boolean { return value == null; }
++}
++class IsNotNilTransformer extends NSEValueTransformer<unknown, boolean> {
++  override transformedValue(value: unknown): boolean { return value != null; }
++}
++NSEValueTransformer.setValueTransformer(new NegateBooleanTransformer(), NSENegateBooleanTransformerName);
++NSEValueTransformer.setValueTransformer(new IsNilTransformer(), NSEIsNilTransformerName);
++NSEValueTransformer.setValueTransformer(new IsNotNilTransformer(), NSEIsNotNilTransformerName);
+diff --git a/src/Foundation/internal/UndoHistory.ts b/src/Foundation/internal/UndoHistory.ts
+new file mode 100644
+index 0000000..605831c
+--- /dev/null
++++ b/src/Foundation/internal/UndoHistory.ts
+@@ -0,0 +1,114 @@
++/*
++ * SynCloudOS
++ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
++ *
++ * Designed by Kavish Krishnakumar in Manchester.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Affero General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Affero General Public License for more details.
++ *
++ * You should have received a copy of the GNU Affero General Public License
++ * along with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++/** History storage shared by the Foundation manager and runtime adapters.
++ * Metadata and replay authority belong to the caller. */
++export class UndoHistory<Entry, Group> {
++  readonly entries: Entry[] = [];
++  readonly groups: Group[] = [];
++  cursor = 0;
++
++  beginGroup(group: Group): void { this.groups.push(group); }
++  endGroup(): Group | undefined { return this.groups.pop(); }
++  get currentGroup(): Group | undefined { return this.groups.at(-1); }
++  /** Register either inside the current group or at the history frontier. */
++  register(
++    makeEntry: () => Entry,
++    appendToGroup: (group: Group) => void,
++    mergePrevious: (entry: Entry) => boolean,
++    retire: (entry: Entry) => void,
++  ): { group?: Group; entry?: Entry; discarded: Entry[]; merged?: boolean } {
++    const group = this.currentGroup;
++    if (group) {
++      appendToGroup(group);
++      return { group, discarded: [] };
++    }
++    const discarded = this.discardRedo();
++    discarded.forEach(retire);
++    const previous = this.frontier("undo");
++    if (previous && mergePrevious(previous)) return { entry: previous, discarded, merged: true };
++    const entry = makeEntry();
++    this.append(entry);
++    return { entry, discarded };
++  }
++
++  /** Close one group, flattening it into its parent or committing it. */
++  closeGroup(
++    isEmpty: (group: Group) => boolean,
++    merge: (parent: Group, child: Group) => void,
++    makeEntry: (group: Group) => Entry,
++    retire: (entry: Entry) => void,
++  ): { group: Group; discarded: Entry[]; committed: boolean } | undefined {
++    const group = this.endGroup();
++    if (!group) return undefined;
++    if (isEmpty(group)) return { group, discarded: [], committed: false };
++    const parent = this.currentGroup;
++    if (parent) {
++      merge(parent, group);
++      return { group, discarded: [], committed: false };
++    }
++    const discarded = this.discardRedo();
++    discarded.forEach(retire);
++    this.append(makeEntry(group));
++    return { group, discarded, committed: true };
++  }
++
++  /** Only successful adapter transactions move the shared frontier. */
++  async replayAsync<Result>(
++    direction: "undo" | "redo",
++    execute: (entry: Entry | undefined, commit: () => void) => Promise<Result>,
++  ): Promise<Result> {
++    let committed = false;
++    const commit = () => {
++      if (committed) throw new Error("Undo replay has already committed.");
++      committed = true;
++      this.advance(direction);
++    };
++    return execute(this.frontier(direction), commit);
++  }
++
++  replaySync(direction: "undo" | "redo", execute: (entry: Entry) => Entry | undefined): void {
++    const entry = this.frontier(direction);
++    if (!entry) return;
++    const replacement = execute(entry);
++    const index = direction === "undo" ? this.cursor - 1 : this.cursor;
++    if (replacement !== undefined) {
++      this.entries[index] = replacement;
++      this.advance(direction);
++    } else {
++      this.entries.splice(index, 1);
++      if (direction === "undo") this.cursor--;
++    }
++  }
++  discardRedo(): Entry[] { return this.entries.splice(this.cursor); }
++  append(entry: Entry): void {
++    this.entries.push(entry);
++    this.cursor = this.entries.length;
++  }
++  frontier(direction: "undo" | "redo"): Entry | undefined {
++    return this.entries[direction === "undo" ? this.cursor - 1 : this.cursor];
++  }
++  advance(direction: "undo" | "redo"): void { this.cursor += direction === "undo" ? -1 : 1; }
++  evictOldest(): Entry | undefined {
++    const entry = this.entries.shift();
++    if (entry !== undefined) this.cursor = Math.max(0, this.cursor - 1);
++    return entry;
++  }
++}
+diff --git a/src/Foundation/public.ts b/src/Foundation/public.ts
+index a72e238..ba5f881 100644
+--- a/src/Foundation/public.ts
++++ b/src/Foundation/public.ts
+@@ -28,8 +28,15 @@ export type { NSEFormatterContext, NSEFormatterError, NSEFormatterResult } from
+ export * from "./NSEPredicate";
+ export * from "./NSESortDescriptor";
+ export * from "./NSECharacterSet";
+ export * from "./NSERange";
+ export { NSEUserDefaults } from "./NSEUserDefaults";
+ export type { NSEUserDefaultsStore } from "./NSEUserDefaults";
+ export { NSEData, NSEDataCompressionAlgorithm } from "./NSEData";
+ export type { NSEDataConvertible } from "./NSEData";
++export { NSEValueTransformer, NSENegateBooleanTransformerName, NSEIsNilTransformerName, NSEIsNotNilTransformerName } from "./NSEValueTransformer";
++export { NSEDateFormatter } from "./NSEDateFormatter";
++export type { NSEDateFormatterOptions, NSEDateFormatterStyle } from "./NSEDateFormatter";
++export { NSEDecimalNumber, NSEDecimalNumberHandler } from "./NSEDecimalNumber";
++export type { NSEDecimalNumberBehaviors, NSEDecimalNumberHandlerOptions, NSEDecimalRoundingMode } from "./NSEDecimalNumber";
++export { NSEUndoManager } from "./NSEUndoManager";
++export type { NSEUndoRegistrationCapability } from "./NSEUndoRegistrationCapability";
+diff --git a/src/NSE/Controls/Images/NSEImage.tsx b/src/NSE/Controls/Images/NSEImage.tsx
+index 203f3f5..6ee22ed 100644
+--- a/src/NSE/Controls/Images/NSEImage.tsx
++++ b/src/NSE/Controls/Images/NSEImage.tsx
+@@ -18,31 +18,34 @@
+  * along with this program. If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
+ import {
+   forwardRef,
+   useCallback,
+   useEffect,
+   useImperativeHandle,
++  useLayoutEffect,
+   useMemo,
+   useRef,
+   useSyncExternalStore,
+   type HTMLAttributes,
+ } from "react";
+ import type { RuntimeImageResource } from "../../../SynCloudOS/SynCloudOS";
+ import {
+   useIFXImageBox,
+   useIFXImageStringSource,
+   useIFXImageViewport,
+   type IFXImageDimensions,
+   type IFXImageGeometryPort,
+   type IFXImageStringSourcePort,
+ } from "../../../FX/ImageFX/IFXImageViewport";
+ import { classes } from "../Core/nseControlsShared";
++import { useNSEAnimationEnvironment } from "../../Animation/NSEAnimationEnvironment";
++import type { AFXLayer } from "../../../FX/AnimationFX/AFXLayer";
+ 
+ /** @internal Zoom control for NSEImageView's +/− buttons. */
+ export interface NSESizeableImageHandle {
+   getZoom: () => number;
+   isZoomIn: () => boolean;
+   zoomIn: () => void;
+   zoomOut: () => void;
+   reset: () => void;
+@@ -229,40 +232,74 @@ export const NSESizeableImage = forwardRef<NSESizeableImageHandle, NSESizeableIm
+ 
+ /**
+  * NSImageView.imageScaling. `proportionallyUpOrDown` fits the image to the view; `none` shows it at its
+  * natural size, panned by dragging.
+  */
+ export type NSEImageScaling = "proportionallyUpOrDown" | "none";
+ 
+ export interface NSEImageViewProps extends Omit<NSESizeableImageProps, "ref" | "autoSize"> {
++  /** NSView.wantsLayer. The backing layer belongs to this mounted view. */
++  wantsLayer?: boolean;
+   /** NSImageView.imageScaling. Default `proportionallyUpOrDown`. */
+   imageScaling?: NSEImageScaling;
+   /** Show the +/− zoom controls. Default true. */
+   controls?: boolean;
+   zoomInLabel?: string;
+   zoomOutLabel?: string;
+ }
+ 
++/** NSImageView's host element bridge and optional NSView.layer backing. */
++export interface NSEImageViewHandle {
++  readonly element: HTMLDivElement;
++  readonly layer: AFXLayer | null;
++}
++
+ /**
+ NSImageView: an image in a framed box, fitted (or at natural size with `imageScaling="none"`), with
+ optional +/− zoom controls. Wheel and double-click zoom; drag pans once the image overflows the box.
+ */
+-export function NSEImageView({
++export const NSEImageView = forwardRef<NSEImageViewHandle, NSEImageViewProps>(function NSEImageView({
++  wantsLayer = false,
+   imageScaling = "proportionallyUpOrDown",
+   controls = true,
+   zoomInLabel = "Zoom in",
+   zoomOutLabel = "Zoom out",
+   className = "",
+   ...props
+-}: NSEImageViewProps) {
++}: NSEImageViewProps, ref) {
+   const imageRef = useRef<NSESizeableImageHandle>(null);
++  const host = useRef<HTMLDivElement>(null);
++  const { layers } = useNSEAnimationEnvironment();
++  const backing = useRef<{ abort: AbortController; layer: AFXLayer | null } | null>(null);
++  useLayoutEffect(() => {
++    if (!wantsLayer) return;
++    const connection = { abort: new AbortController(), layer: null as AFXLayer | null };
++    backing.current = connection;
++    return () => {
++      connection.abort.abort();
++      connection.layer?.dispose();
++      if (backing.current === connection) backing.current = null;
++    };
++  }, [wantsLayer, layers]);
++  useImperativeHandle(ref, () => ({
++    element: host.current!,
++    get layer() {
++      const connection = backing.current;
++      if (!wantsLayer || !connection) return null;
++      if (!connection.layer) {
++        if (!layers?.bindLayer) throw new TypeError("Layer-backed image views require a mounted animation layer client.");
++        connection.layer = layers.bindLayer(host.current!, connection.abort.signal, { layout: "css" });
++      }
++      return connection.layer;
++    },
++  }), [wantsLayer, layers]);
+ 
+   return (
+-    <div className={classes("nse-control-image-view", className)} data-image-scaling={imageScaling}>
++    <div ref={host} className={classes("nse-control-image-view", className)} data-image-scaling={imageScaling}>
+       <NSESizeableImage ref={imageRef} autoSize={imageScaling !== "none"} {...props} />
+       {controls ? (
+         <div className="nse-control-image-view-controls" role="group" aria-label="Zoom">
+           <button
+             type="button"
+             className="nse-control-image-view-zoom"
+             aria-label={zoomOutLabel}
+             onClick={() => imageRef.current?.zoomOut()}
+@@ -276,9 +313,9 @@ export function NSEImageView({
+             onClick={() => imageRef.current?.zoomIn()}
+           >
+             <span aria-hidden="true">+</span>
+           </button>
+         </div>
+       ) : null}
+     </div>
+   );
+-}
++});
+diff --git a/src/NSE/Scroll/NSEScrollView.tsx b/src/NSE/Scroll/NSEScrollView.tsx
+index f19bbe5..b51f017 100644
+--- a/src/NSE/Scroll/NSEScrollView.tsx
++++ b/src/NSE/Scroll/NSEScrollView.tsx
+@@ -13,21 +13,30 @@
+  * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  * GNU Affero General Public License for more details.
+  *
+  * You should have received a copy of the GNU Affero General Public License
+  * along with this program. If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
+-import { useEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
++import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
+ import { useNSERubberBandScroll } from "./index";
+ import { NSEScroller } from "./NSEScroller";
+ import { NSEScrollViewController, type NSEScrollerPolicy, type NSEScrollInsets } from "./scrollTypes";
+ import { nseUnowned } from "../Controllers/ownership";
++import { NSEClipView } from "./NSEClipView";
++import type { NSEClipViewHandle, NSEScrollRect } from "./scrollTypes";
++
++/** The NSScrollView object reached through a committed React ref. */
++export interface NSEScrollViewHandle {
++  readonly contentView: NSEClipViewHandle;
++  readonly documentVisibleRect: NSEScrollRect;
++  scrollRectToVisible(rect: NSEScrollRect, behavior?: ScrollBehavior): void;
++}
+ 
+ export interface NSEScrollViewGeometrySnapshot {
+   readonly viewport: { readonly width: number; readonly height: number };
+   readonly content: { readonly width: number; readonly height: number };
+   readonly position: { readonly left: number; readonly top: number };
+   readonly insets: NSEScrollInsets;
+ }
+ 
+@@ -40,35 +49,36 @@ export interface NSEScrollViewProps extends HTMLAttributes<HTMLDivElement> {
+   verticalScrollerPolicy?: NSEScrollerPolicy;
+   scrollInsets?: Partial<NSEScrollInsets>;
+   onScrollSnapshot?(): void;
+   onGeometryChange?(snapshot: NSEScrollViewGeometrySnapshot): void;
+   controllerRef?(controller: NSEScrollViewController | null): void;
+ }
+ 
+ /** Canonical scroll surface with distinct passive observation and rubber-band ownership. */
+-export function NSEScrollView({
++export const NSEScrollView = forwardRef<NSEScrollViewHandle, NSEScrollViewProps>(function NSEScrollView({
+   children,
+   rubberBand = true,
+   rubberBandCoeff = 0.55,
+   axis = "y",
+   horizontalScrollerPolicy = "automatic",
+   verticalScrollerPolicy = "automatic",
+   scrollInsets,
+   onScrollSnapshot,
+   onGeometryChange,
+   controllerRef,
+   className = "",
+   style,
+   onKeyDown,
+   tabIndex,
+   ...props
+-}: NSEScrollViewProps) {
++}: NSEScrollViewProps, ref) {
+   const scrollRef = useRef<HTMLDivElement>(null);
+   const contentRef = useRef<HTMLDivElement>(null);
++  const controller = useRef<NSEScrollViewController | null>(null);
+   const callbacks = useRef({ onScrollSnapshot, onGeometryChange });
+   const [geometry, setGeometry] = useState<NSEScrollViewGeometrySnapshot>(() => ({ viewport: { width: 0, height: 0 }, content: { width: 0, height: 0 }, position: { left: 0, top: 0 }, insets: { top: 0, right: 0, bottom: 0, left: 0 } }));
+   callbacks.current = { onScrollSnapshot, onGeometryChange };
+   const insets: NSEScrollInsets = {
+     top: scrollInsets?.top ?? 0,
+     right: scrollInsets?.right ?? 0,
+     bottom: scrollInsets?.bottom ?? 0,
+     left: scrollInsets?.left ?? 0,
+@@ -83,28 +93,33 @@ export function NSEScrollView({
+       content: { width: host.scrollWidth, height: host.scrollHeight },
+       position: { left: host.scrollLeft, top: host.scrollTop },
+       insets: insetsRef.current,
+     };
+     setGeometry(next);
+     callbacks.current.onGeometryChange?.(next);
+   };
+   useNSERubberBandScroll(scrollRef, contentRef, { enabled: rubberBand, coeff: rubberBandCoeff, axis });
+-  useEffect(() => {
++  useLayoutEffect(() => {
+     const host = scrollRef.current;
+     if (!host) return;
+-    const controller = new NSEScrollViewController(host, insetsRef.current, { owner: nseUnowned });
+-    controllerRef?.(controller);
+-    const disconnect = controller.connect(() => {
++    const instance = new NSEScrollViewController(host, insetsRef.current, { owner: nseUnowned });
++    controller.current = instance;
++    const disconnect = instance.connect(() => {
+       callbacks.current.onScrollSnapshot?.();
+       publishGeometry();
+     });
+     publishGeometry();
+-    return () => { disconnect(); controller.dispose(); controllerRef?.(null); };
++    return () => { disconnect(); instance.dispose(); controller.current = null; };
+   }, []);
++  useImperativeHandle(ref, () => controller.current!, []);
++  useLayoutEffect(() => {
++    controllerRef?.(controller.current);
++    return () => controllerRef?.(null);
++  }, [controllerRef]);
+   useEffect(() => {
+     const host = scrollRef.current;
+     const content = contentRef.current;
+     if (!host || !content) return;
+     const ResizeObserverConstructor = host.ownerDocument.defaultView?.ResizeObserver ?? globalThis.ResizeObserver;
+     publishGeometry();
+     if (!ResizeObserverConstructor) return;
+     const observer = new ResizeObserverConstructor(publishGeometry);
+@@ -114,29 +129,29 @@ export function NSEScrollView({
+   }, []);
+   const overflow = (policy: NSEScrollerPolicy, enabled: boolean): CSSProperties["overflowX"] => !enabled || policy === "hidden" ? "hidden" : policy === "always" ? "scroll" : "auto";
+   const hostStyle: CSSProperties = { ...style, overflowX: overflow(horizontalScrollerPolicy, axis !== "y"), overflowY: overflow(verticalScrollerPolicy, axis !== "x") };
+   const contentStyle: CSSProperties = { padding: `${insets.top}px ${insets.right}px ${insets.bottom}px ${insets.left}px` };
+ 
+   const maximumLeft = Math.max(0, geometry.content.width - geometry.viewport.width);
+   const maximumTop = Math.max(0, geometry.content.height - geometry.viewport.height);
+   return <div className="nse-scroll-view-frame" data-nse-control="scroll-view-frame">
+-  <div {...props} ref={scrollRef} className={["nse-scroll-view", className].filter(Boolean).join(" ")} data-axis={axis} data-horizontal-scroller-policy={horizontalScrollerPolicy} data-vertical-scroller-policy={verticalScrollerPolicy} style={hostStyle} tabIndex={tabIndex ?? 0} onKeyDown={(event) => {
++  <NSEClipView mode="scroll" {...props} ref={scrollRef} className={["nse-scroll-view", className].filter(Boolean).join(" ")} data-axis={axis} data-horizontal-scroller-policy={horizontalScrollerPolicy} data-vertical-scroller-policy={verticalScrollerPolicy} style={hostStyle} tabIndex={tabIndex ?? 0} onKeyDown={(event) => {
+     onKeyDown?.(event);
+     if (event.defaultPrevented) return;
+     const host = event.currentTarget;
+     const maximumLeft = Math.max(0, host.scrollWidth - host.clientWidth);
+     const maximumTop = Math.max(0, host.scrollHeight - host.clientHeight);
+     if (event.key === "Home") { event.preventDefault(); host.scrollTo({ left: 0, top: 0, behavior: "auto" }); }
+     else if (event.key === "End") { event.preventDefault(); host.scrollTo({ left: axis === "y" ? host.scrollLeft : maximumLeft, top: axis === "x" ? host.scrollTop : maximumTop, behavior: "auto" }); }
+     else if (event.key === "PageDown" || event.key === "PageUp") {
+       event.preventDefault(); const direction = event.key === "PageDown" ? 1 : -1;
+       const horizontal = axis === "x" || (axis === "both" && event.shiftKey);
+       host.scrollTo(horizontal ? { left: Math.max(0, Math.min(maximumLeft, host.scrollLeft + direction * host.clientWidth)), top: host.scrollTop, behavior: "auto" } : { left: host.scrollLeft, top: Math.max(0, Math.min(maximumTop, host.scrollTop + direction * host.clientHeight)), behavior: "auto" });
+     }
+   }}>
+     <div ref={contentRef} className="nse-scroll-view-content" style={contentStyle}>{children}</div>
+-  </div>
++  </NSEClipView>
+   {axis !== "y" ? <NSEScroller orientation="horizontal" policy={horizontalScrollerPolicy} value={geometry.position.left} maximum={maximumLeft} onValueChange={(left) => scrollRef.current?.scrollTo({ left, top: scrollRef.current.scrollTop, behavior: "auto" })} /> : null}
+   {axis !== "x" ? <NSEScroller orientation="vertical" policy={verticalScrollerPolicy} value={geometry.position.top} maximum={maximumTop} onValueChange={(top) => scrollRef.current?.scrollTo({ left: scrollRef.current.scrollLeft, top, behavior: "auto" })} /> : null}
+   {axis === "both" && horizontalScrollerPolicy !== "hidden" && verticalScrollerPolicy !== "hidden" ? <span aria-hidden="true" data-nse-part="scroller-corner" /> : null}
+   </div>;
+-}
++});
+diff --git a/src/NSE/Scroll/scrollTypes.ts b/src/NSE/Scroll/scrollTypes.ts
+index 12d5ad3..921e0f3 100644
+--- a/src/NSE/Scroll/scrollTypes.ts
++++ b/src/NSE/Scroll/scrollTypes.ts
+@@ -32,16 +32,24 @@ export interface NSEScrollInsets {
+ 
+ export interface NSEScrollRect {
+   readonly x: number;
+   readonly y: number;
+   readonly width: number;
+   readonly height: number;
+ }
+ 
++/** NSClipView: the scrolling viewport, with bounds in document coordinates. */
++export interface NSEClipViewHandle {
++  readonly element: HTMLElement;
++  readonly bounds: NSEScrollRect;
++  postsBoundsChangedNotifications: boolean;
++  observeBoundsChanges(observer: (bounds: NSEScrollRect) => void): () => void;
++}
++
+ export type NSERTLScrollModel = "negative" | "reverse" | "default";
+ 
+ export interface NSEScrollGeometry {
+   readonly position: { readonly left: number; readonly top: number };
+   readonly viewport: { readonly width: number; readonly height: number };
+   readonly content: { readonly width: number; readonly height: number };
+   readonly rect: NSEScrollRect;
+   readonly insets?: NSEScrollInsets;
+@@ -101,20 +109,55 @@ function schedule(callback: FrameRequestCallback): number {
+ function cancel(frame: number) {
+   if (typeof cancelAnimationFrame === "function") cancelAnimationFrame(frame);
+   else window.clearTimeout(frame);
+ }
+ 
+ export class NSEScrollViewController {
+   readonly #lifetime: NSEControllerLifetime;
+   readonly #connections = new Set<() => void>();
++  readonly contentView: NSEClipViewHandle;
+ 
+   constructor(readonly host: HTMLElement, readonly insets: NSEScrollInsets = ZERO_INSETS, options: NSEControllerOwnershipOptions = {}) {
+     this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEScrollViewController", id: host.id || "scroll-view" });
+     this.#lifetime.bind(() => this.dispose());
++    const controller = this;
++    this.contentView = {
++      element: host,
++      get bounds() { return controller.documentVisibleRect; },
++      postsBoundsChangedNotifications: false,
++      observeBoundsChanges(observer) {
++        controller.#lifetime.assertLive("observeBoundsChanges");
++        let previous = controller.documentVisibleRect;
++        const publish = () => {
++          const next = controller.documentVisibleRect;
++          if (next.x === previous.x && next.y === previous.y && next.width === previous.width && next.height === previous.height) return;
++          previous = next;
++          if (controller.contentView.postsBoundsChangedNotifications) observer(next);
++        };
++        // Bounds notifications follow the native event, so a client's next-frame
++        // drawing does not acquire an extra frame of scroll latency.
++        host.addEventListener("scroll", publish, { passive: true });
++        const Resize = host.ownerDocument.defaultView?.ResizeObserver;
++        const resize = Resize ? new Resize(publish) : null;
++        resize?.observe(host);
++        const disconnect = () => {
++          controller.#connections.delete(disconnect);
++          host.removeEventListener("scroll", publish);
++          resize?.disconnect();
++        };
++        controller.#connections.add(disconnect);
++        return disconnect;
++      },
++    };
++  }
++
++  /** NSScrollView.documentVisibleRect, in the document's coordinate system. */
++  get documentVisibleRect(): NSEScrollRect {
++    return { x: this.host.scrollLeft, y: this.host.scrollTop, width: this.host.clientWidth, height: this.host.clientHeight };
+   }
+ 
+   get isDisposed(): boolean { return this.#lifetime.isDisposed; }
+   dispose(): void {
+     if (!this.#lifetime.dispose()) return;
+     for (const disconnect of [...this.#connections]) disconnect();
+     this.#connections.clear();
+   }
+diff --git a/src/NSE/public/controls.ts b/src/NSE/public/controls.ts
+index 88aca70..eff2c64 100644
+--- a/src/NSE/public/controls.ts
++++ b/src/NSE/public/controls.ts
+@@ -90,16 +90,17 @@ export type {
+   NSELabelTextFieldProps,
+   NSEFontTextStyle,
+   NSESwitchProps,
+ } from "../Controls/Fields/NSEFields";
+ export { NSEImageView } from "../Controls/Images";
+ export type {
+   NSEImageScaling,
+   NSEImageViewProps,
++  NSEImageViewHandle,
+ } from "../Controls/Images";
+ 
+ 
+ export { NSEMenu, NSEPopUpButton } from "../Menus";
+ export type { NSEMenuItem, NSEMenuOptions, NSEPopUpButtonItem, NSEPopUpButtonProps } from "../Menus";
+ export { NSEPopup } from "../Overlays";
+ export type { NSEPopupProps } from "../Overlays";
+ 
+@@ -115,10 +116,12 @@ export { NSEGridRow, NSEGridView } from "../Layout/NSEGridView";
+ export type { NSEGridColumn, NSEGridRowProps, NSEGridViewProps, NSEGridXPlacement, NSEGridYPlacement } from "../Layout/NSEGridView";
+ export { NSEHapticFeedbackManager } from "../Feedback/NSEHapticFeedbackManager";
+ export type { NSEHapticFeedbackPattern, NSEHapticFeedbackPerformanceTime, NSEHapticFeedbackPerformer } from "../Feedback/NSEHapticFeedbackManager";
+ export { NSEWorkspace } from "../Application/NSEWorkspace";
+ export { NSEPathControl, NSEPathControlItem } from "../Controls/Values/NSEPathControl";
+ export type { NSEPathControlProps, NSEPathControlHandle } from "../Controls/Values/NSEPathControl";
+ 
+ export { NSEImage } from "../Controls/Images/NSEImageResource";
++export { NSERoutePickerView } from "../Controls/Media/NSERoutePickerView";
++export type { NSERoutePickerViewProps } from "../Controls/Media/NSERoutePickerView";
+ 
+ export type { NSEAppearanceName } from "../Appearance/nseAppearanceTypes";
+diff --git a/src/NSE/public/scroll.ts b/src/NSE/public/scroll.ts
+index 706cd01..f42f473 100644
+--- a/src/NSE/public/scroll.ts
++++ b/src/NSE/public/scroll.ts
+@@ -19,16 +19,18 @@
+  */
+ 
+ /** Supported SynWare SDK NSE scroll surface. Host machinery stays private. */
+ export {
+   NSEScrollView,
+ } from "../Scroll/NSEScrollView";
+ export type {
+   NSEScrollViewProps,
++  NSEScrollViewHandle,
+ } from "../Scroll/NSEScrollView";
++export type { NSEClipViewHandle, NSEScrollRect } from "../Scroll/scrollTypes";
+ export {
+   useNSERubberBandScroll,
+ } from "../Scroll/index";
+ export type {
+   NSERubberBandOptions,
+   NSEScrollerProps,
+ } from "../Scroll/index";
+diff --git a/src/SynCloudOS/Models/DateFormatter.ts b/src/SynCloudOS/Models/DateFormatter.ts
+deleted file mode 100644
+index 2b2763e..0000000
+--- a/src/SynCloudOS/Models/DateFormatter.ts
++++ /dev/null
+@@ -1,183 +0,0 @@
+-/*
+- * SynCloudOS
+- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+- *
+- * Designed by Kavish Krishnakumar in Manchester.
+- *
+- * This program is free software: you can redistribute it and/or modify
+- * it under the terms of the GNU Affero General Public License as published by
+- * the Free Software Foundation, either version 3 of the License, or
+- * (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+- * GNU Affero General Public License for more details.
+- *
+- * You should have received a copy of the GNU Affero General Public License
+- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+- */
+-
+-import {
+-  formatterFailure,
+-  type NSEFormatter,
+-  type NSEFormatterContext,
+-  type NSEFormatterResult,
+-} from "../../Foundation/NSEFormatter";
+-
+-export type DateFormatterValueType = "date" | "epochMilliseconds" | "iso";
+-export type DateFormatterValue = Date | number | string;
+-
+-export interface DateFormatterOptions extends Intl.DateTimeFormatOptions {
+-  readonly valueType: DateFormatterValueType;
+-}
+-
+-const ISO_DATE = /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})(?:T(?<hour>\d{2}):(?<minute>\d{2})(?::(?<second>\d{2})(?:\.(?<millisecond>\d{1,3}))?)?(?<zone>Z|[+-]\d{2}:\d{2}))?$/u;
+-
+-interface ParsedISO {
+-  readonly date: Date;
+-  readonly dateOnly: boolean;
+-}
+-
+-function daysInMonth(year: number, month: number): number {
+-  if (month === 2) {
+-    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28;
+-  }
+-  return [4, 6, 9, 11].includes(month) ? 30 : 31;
+-}
+-
+-function parseISO(text: string): ParsedISO | null {
+-  const match = ISO_DATE.exec(text);
+-  if (!match?.groups) return null;
+-  const year = Number(match.groups.year);
+-  const month = Number(match.groups.month);
+-  const day = Number(match.groups.day);
+-  if (
+-    month < 1 ||
+-    month > 12 ||
+-    day < 1 ||
+-    day > daysInMonth(year, month)
+-  ) {
+-    return null;
+-  }
+-  if (match.groups.hour === undefined) {
+-    const date = new Date(`${text}T00:00:00.000Z`);
+-    return Number.isFinite(date.getTime()) ? { date, dateOnly: true } : null;
+-  }
+-  const hour = Number(match.groups.hour);
+-  const minute = Number(match.groups.minute);
+-  const second = Number(match.groups.second ?? "0");
+-  const zone = match.groups.zone!;
+-  const offsetHour = zone === "Z" ? 0 : Number(zone.slice(1, 3));
+-  const offsetMinute = zone === "Z" ? 0 : Number(zone.slice(4, 6));
+-  if (
+-    hour > 23 ||
+-    minute > 59 ||
+-    second > 59 ||
+-    offsetHour > 23 ||
+-    offsetMinute > 59
+-  ) {
+-    return null;
+-  }
+-  const date = new Date(text);
+-  return Number.isFinite(date.getTime()) ? { date, dateOnly: false } : null;
+-}
+-
+-export class DateFormatter implements NSEFormatter<DateFormatterValue> {
+-  readonly #valueType: DateFormatterValueType;
+-  readonly #intlOptions: Intl.DateTimeFormatOptions;
+-
+-  constructor(options: DateFormatterOptions) {
+-    const { valueType, ...intlOptions } = options;
+-    this.#valueType = valueType;
+-    this.#intlOptions = { ...intlOptions };
+-    Object.freeze(this);
+-  }
+-
+-  #date(value: DateFormatterValue): Date {
+-    if (this.#valueType === "date" && value instanceof Date) {
+-      const copy = new Date(value.getTime());
+-      if (Number.isFinite(copy.getTime())) return copy;
+-    } else if (
+-      this.#valueType === "epochMilliseconds" &&
+-      typeof value === "number" &&
+-      Number.isFinite(value)
+-    ) {
+-      return new Date(value);
+-    } else if (
+-      this.#valueType === "iso" &&
+-      typeof value === "string" &&
+-      parseISO(value)
+-    ) {
+-      return parseISO(value)!.date;
+-    }
+-    throw new RangeError(
+-      `Date formatter expects ${this.#valueType} values.`,
+-    );
+-  }
+-
+-  string(value: DateFormatterValue, context: NSEFormatterContext): string {
+-    const parsed =
+-      this.#valueType === "iso" && typeof value === "string"
+-        ? parseISO(value)
+-        : null;
+-    return new Intl.DateTimeFormat(context.locale, {
+-      ...this.#intlOptions,
+-      timeZone: parsed?.dateOnly
+-        ? "UTC"
+-        : context.timeZone ?? this.#intlOptions.timeZone,
+-    }).format(this.#date(value));
+-  }
+-
+-  editingString(value: DateFormatterValue): string {
+-    const date = this.#date(value);
+-    if (this.#valueType === "date") return date.toISOString();
+-    if (this.#valueType === "epochMilliseconds") return String(date.getTime());
+-    return value as string;
+-  }
+-
+-  getObjectValue(
+-    text: string,
+-    _context: NSEFormatterContext,
+-  ): NSEFormatterResult<DateFormatterValue> {
+-    const input = text.trim();
+-    if (this.#valueType === "epochMilliseconds") {
+-      if (!/^[+-]?\d+$/u.test(input)) {
+-        return formatterFailure(
+-          "date.invalidEpoch",
+-          "Enter epoch milliseconds as an integer.",
+-          text,
+-        );
+-      }
+-      const value = Number(input);
+-      if (!Number.isSafeInteger(value) || !Number.isFinite(new Date(value).getTime())) {
+-        return formatterFailure(
+-          "date.invalidEpoch",
+-          "Enter valid epoch milliseconds.",
+-          text,
+-        );
+-      }
+-      return { ok: true, value };
+-    }
+-    const parsed = parseISO(input);
+-    if (!parsed) {
+-      return formatterFailure(
+-        "date.invalidISO",
+-        "Enter an ISO 8601 date with an explicit time zone when time is included.",
+-        text,
+-      );
+-    }
+-    return this.#valueType === "date"
+-      ? { ok: true, value: parsed.date }
+-      : { ok: true, value: input };
+-  }
+-
+-  isPartialStringValid(text: string, context: NSEFormatterContext) {
+-    if (text.trim() === "") return { valid: true } as const;
+-    const parsed = this.getObjectValue(text, context);
+-    if (parsed.ok || /^[0-9T:+.Z-]{1,29}$/u.test(text.trim())) {
+-      return { valid: true } as const;
+-    }
+-    return { valid: false, error: parsed.error } as const;
+-  }
+-}
+diff --git a/src/SynCloudOS/Models/DecimalValue.ts b/src/SynCloudOS/Models/DecimalValue.ts
+deleted file mode 100644
+index e2cf3aa..0000000
+--- a/src/SynCloudOS/Models/DecimalValue.ts
++++ /dev/null
+@@ -1,169 +0,0 @@
+-/*
+- * SynCloudOS
+- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+- *
+- * Designed by Kavish Krishnakumar in Manchester.
+- *
+- * This program is free software: you can redistribute it and/or modify
+- * it under the terms of the GNU Affero General Public License as published by
+- * the Free Software Foundation, either version 3 of the License, or
+- * (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+- * GNU Affero General Public License for more details.
+- *
+- * You should have received a copy of the GNU Affero General Public License
+- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+- */
+-
+-export type DecimalRoundingMode =
+-  | "towards-zero"
+-  | "away-from-zero"
+-  | "half-up"
+-  | "half-even";
+-
+-export interface DecimalDivisionOptions {
+-  readonly scale: number;
+-  readonly rounding: DecimalRoundingMode;
+-}
+-
+-function powerOfTen(exponent: number): bigint {
+-  if (!Number.isSafeInteger(exponent) || exponent < 0) {
+-    throw new RangeError("Decimal scale must be a non-negative safe integer.");
+-  }
+-  return 10n ** BigInt(exponent);
+-}
+-
+-function canonical(coefficient: bigint, scale: number): readonly [bigint, number] {
+-  powerOfTen(scale);
+-  if (coefficient === 0n) return [0n, 0];
+-  let next = coefficient;
+-  let nextScale = scale;
+-  while (nextScale > 0 && next % 10n === 0n) {
+-    next /= 10n;
+-    nextScale -= 1;
+-  }
+-  return [next, nextScale];
+-}
+-
+-function align(
+-  left: DecimalValue,
+-  right: DecimalValue,
+-): readonly [bigint, bigint, number] {
+-  const scale = Math.max(left.scale, right.scale);
+-  return [
+-    left.coefficient * powerOfTen(scale - left.scale),
+-    right.coefficient * powerOfTen(scale - right.scale),
+-    scale,
+-  ];
+-}
+-
+-export class DecimalValue {
+-  readonly coefficient: bigint;
+-  readonly scale: number;
+-
+-  private constructor(coefficient: bigint, scale: number) {
+-    [this.coefficient, this.scale] = canonical(coefficient, scale);
+-    Object.freeze(this);
+-  }
+-
+-  static parse(value: string): DecimalValue {
+-    if (!/^[+-]?\d+(?:\.\d+)?$/.test(value)) {
+-      throw new TypeError("Invalid canonical decimal text.");
+-    }
+-    const negative = value.startsWith("-");
+-    const unsigned = value.replace(/^[+-]/, "");
+-    const [integer, fraction = ""] = unsigned.split(".");
+-    const coefficient = BigInt(`${integer}${fraction}`) * (negative ? -1n : 1n);
+-    return new DecimalValue(coefficient, fraction.length);
+-  }
+-
+-  compare(other: DecimalValue): number {
+-    const [left, right] = align(this, other);
+-    return left < right ? -1 : left > right ? 1 : 0;
+-  }
+-
+-  add(other: DecimalValue): DecimalValue {
+-    const [left, right, scale] = align(this, other);
+-    return new DecimalValue(left + right, scale);
+-  }
+-
+-  subtract(other: DecimalValue): DecimalValue {
+-    const [left, right, scale] = align(this, other);
+-    return new DecimalValue(left - right, scale);
+-  }
+-
+-  multiply(other: DecimalValue): DecimalValue {
+-    if (!Number.isSafeInteger(this.scale + other.scale)) {
+-      throw new RangeError("Decimal scale exceeds the safe integer range.");
+-    }
+-    return new DecimalValue(
+-      this.coefficient * other.coefficient,
+-      this.scale + other.scale,
+-    );
+-  }
+-
+-  divide(other: DecimalValue, options: DecimalDivisionOptions): DecimalValue {
+-    if (other.coefficient === 0n) throw new RangeError("Cannot divide by zero.");
+-    if (
+-      !new Set<DecimalRoundingMode>([
+-        "towards-zero",
+-        "away-from-zero",
+-        "half-up",
+-        "half-even",
+-      ]).has(options.rounding)
+-    ) {
+-      throw new TypeError("Unsupported decimal rounding mode.");
+-    }
+-    powerOfTen(options.scale);
+-    const exponent = other.scale + options.scale - this.scale;
+-    let numerator = this.coefficient;
+-    let denominator = other.coefficient;
+-    if (exponent >= 0) numerator *= powerOfTen(exponent);
+-    else denominator *= powerOfTen(-exponent);
+-    if (denominator < 0n) {
+-      numerator = -numerator;
+-      denominator = -denominator;
+-    }
+-    let quotient = numerator / denominator;
+-    const remainder = numerator % denominator;
+-    if (remainder !== 0n) {
+-      const sign = numerator < 0n ? -1n : 1n;
+-      const absoluteRemainder = remainder < 0n ? -remainder : remainder;
+-      const twice = absoluteRemainder * 2n;
+-      const increment =
+-        options.rounding === "away-from-zero" ||
+-        (options.rounding === "half-up" && twice >= denominator) ||
+-        (options.rounding === "half-even" &&
+-          (twice > denominator ||
+-            (twice === denominator &&
+-              (quotient < 0n ? -quotient : quotient) % 2n === 1n)));
+-      if (increment) quotient += sign;
+-    }
+-    return new DecimalValue(quotient, options.scale);
+-  }
+-
+-  toString(): string {
+-    const negative = this.coefficient < 0n;
+-    const digits = (negative ? -this.coefficient : this.coefficient).toString();
+-    if (this.scale === 0) return `${negative ? "-" : ""}${digits}`;
+-    const padded = digits.padStart(this.scale + 1, "0");
+-    const split = padded.length - this.scale;
+-    return `${negative ? "-" : ""}${padded.slice(0, split)}.${padded.slice(split)}`;
+-  }
+-
+-  toJSON(): string {
+-    return this.toString();
+-  }
+-
+-  valueOf(): never {
+-    throw new TypeError("Implicit DecimalValue number conversion is not supported.");
+-  }
+-
+-  [Symbol.toPrimitive](hint: string): string {
+-    if (hint === "string") return this.toString();
+-    throw new TypeError("Implicit DecimalValue number conversion is not supported.");
+-  }
+-}
+diff --git a/src/SynCloudOS/Models/ValueTransformer.ts b/src/SynCloudOS/Models/ValueTransformer.ts
+deleted file mode 100644
+index 98a9100..0000000
+--- a/src/SynCloudOS/Models/ValueTransformer.ts
++++ /dev/null
+@@ -1,97 +0,0 @@
+-/*
+- * SynCloudOS
+- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+- *
+- * Designed by Kavish Krishnakumar in Manchester.
+- *
+- * This program is free software: you can redistribute it and/or modify
+- * it under the terms of the GNU Affero General Public License as published by
+- * the Free Software Foundation, either version 3 of the License, or
+- * (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+- * GNU Affero General Public License for more details.
+- *
+- * You should have received a copy of the GNU Affero General Public License
+- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+- */
+-
+-export interface ValueTransformer<TSource, TTarget> {
+-  readonly id: string;
+-  readonly reversible: boolean;
+-  transform(value: TSource): TTarget;
+-  reverse?(value: TTarget): TSource;
+-}
+-
+-export function createValueTransformer<TSource, TTarget>(
+-  transformer: Omit<ValueTransformer<TSource, TTarget>, "reversible">,
+-): ValueTransformer<TSource, TTarget> {
+-  if (!transformer.id.trim()) {
+-    throw new TypeError("Value transformer id must not be empty.");
+-  }
+-  return Object.freeze({
+-    ...transformer,
+-    reversible: typeof transformer.reverse === "function",
+-  });
+-}
+-
+-export function composeTransformers<A, B, C>(
+-  id: string,
+-  first: ValueTransformer<A, B>,
+-  second: ValueTransformer<B, C>,
+-): ValueTransformer<A, C> {
+-  const reversible = first.reversible && second.reversible;
+-  return createValueTransformer({
+-    id,
+-    transform: (value: A) => second.transform(first.transform(value)),
+-    ...(reversible
+-      ? { reverse: (value: C) => first.reverse!(second.reverse!(value)) }
+-      : {}),
+-  });
+-}
+-
+-export class ValueTransformerRegistry {
+-  readonly #values = new Map<string, ValueTransformer<unknown, unknown>>();
+-
+-  register<S, T>(transformer: ValueTransformer<S, T>): () => boolean {
+-    if (this.#values.has(transformer.id)) {
+-      throw new Error(`Value transformer already registered: ${transformer.id}`);
+-    }
+-    this.#values.set(
+-      transformer.id,
+-      transformer as ValueTransformer<unknown, unknown>,
+-    );
+-    return () => {
+-      if (this.#values.get(transformer.id) !== transformer) return false;
+-      return this.#values.delete(transformer.id);
+-    };
+-  }
+-
+-  get<S, T>(id: string): ValueTransformer<S, T> | null {
+-    return (
+-      (this.#values.get(id) as ValueTransformer<S, T> | undefined) ?? null
+-    );
+-  }
+-
+-  list(): readonly string[] {
+-    return Object.freeze([...this.#values.keys()].sort());
+-  }
+-}
+-
+-export const negateBooleanTransformer = createValueTransformer<boolean, boolean>({
+-  id: "negate-boolean",
+-  transform: (value) => !value,
+-  reverse: (value) => !value,
+-});
+-
+-export const isNullTransformer = createValueTransformer<unknown, boolean>({
+-  id: "is-null",
+-  transform: (value) => value === null,
+-});
+-
+-export const isNotNullTransformer = createValueTransformer<unknown, boolean>({
+-  id: "is-not-null",
+-  transform: (value) => value !== null,
+-});
+diff --git a/src/SynCloudOS/Models/index.ts b/src/SynCloudOS/Models/index.ts
+index d997e56..42cd3d8 100644
+--- a/src/SynCloudOS/Models/index.ts
++++ b/src/SynCloudOS/Models/index.ts
+@@ -14,13 +14,10 @@
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  * GNU Affero General Public License for more details.
+  *
+  * You should have received a copy of the GNU Affero General Public License
+  * along with this program. If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
+ export * from "./ChangeSet";
+-export * from "./DateFormatter";
+ export * from "./SelectionModel";
+-export * from "./DecimalValue";
+-export * from "./ValueTransformer";
+ export * from "./Sorting";
+diff --git a/tests/nse/scroll/nse-appkit-view-access.test.tsx b/tests/nse/scroll/nse-appkit-view-access.test.tsx
+new file mode 100644
+index 0000000..0a94475
+--- /dev/null
++++ b/tests/nse/scroll/nse-appkit-view-access.test.tsx
+@@ -0,0 +1,70 @@
++/*
++ * SynCloudOS
++ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
++ *
++ * Designed by Kavish Krishnakumar in Manchester.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Affero General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Affero General Public License for more details.
++ *
++ * You should have received a copy of the GNU Affero General Public License
++ * along with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++
++// @vitest-environment jsdom
++import React, { createRef, useLayoutEffect } from "react";
++import { act, fireEvent, render } from "@testing-library/react";
++import { describe, expect, it, vi } from "vitest";
++import { NSEScrollView, type NSEScrollViewHandle } from "../../../src/NSE/Scroll/NSEScrollView";
++import { NSEImageView, type NSEImageViewHandle } from "../../../src/NSE/Controls/Images/NSEImage";
++import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
++import { AFXLayer } from "../../../src/FX/AnimationFX/AFXLayer";
++
++describe("AppKit view access", () => {
++ it("commits NSScrollView.contentView before the owning view's appearance", () => {
++  const ref=createRef<NSEScrollViewHandle>();
++  let clip: HTMLElement | undefined;
++  function Owner() { useLayoutEffect(()=>{clip=ref.current?.contentView.element;},[]); return <NSEScrollView ref={ref} rubberBand={false}>Document</NSEScrollView>; }
++  const view=render(<Owner/>);
++  expect(clip).toBe(view.container.querySelector('.nse-scroll-view'));
++  Object.defineProperties(clip!,{clientWidth:{value:120},clientHeight:{value:80},scrollWidth:{value:400},scrollHeight:{value:900}});
++  clip!.scrollTop=31; clip!.scrollLeft=12;
++  expect(ref.current?.documentVisibleRect).toEqual({x:12,y:31,width:120,height:80});
++  expect(ref.current?.contentView.bounds).toEqual(ref.current?.documentVisibleRect);
++ });
++ it("observes changed clip bounds and disconnects on unmount", async () => {
++  const ref=createRef<NSEScrollViewHandle>(); const listener=vi.fn();
++  const view=render(<NSEScrollView ref={ref} rubberBand={false}/>);
++  const handle=ref.current!; const clip=handle.contentView;
++  clip.postsBoundsChangedNotifications=true;
++  clip.observeBoundsChanges(listener);
++  act(()=>{clip.element.scrollTop=40;fireEvent.scroll(clip.element);});
++  expect(listener).toHaveBeenCalledWith({x:0,y:40,width:0,height:0});
++  const count=listener.mock.calls.length;
++  view.unmount();
++  fireEvent.scroll(clip.element); await new Promise(r=>setTimeout(r,30));
++  expect(listener).toHaveBeenCalledTimes(count);
++  expect(()=>clip.observeBoundsChanges(listener)).toThrow();
++ });
++ it("exposes a layer only when the image view is layer backed and releases it", () => {
++  const ref=createRef<NSEImageViewHandle>(); const bindLayer=vi.fn(()=>new AFXLayer());
++  const layers={bindLayer,createRenderer:vi.fn()};
++  const view=render(<NSEAnimationEnvironmentProvider layers={layers}><NSEImageView ref={ref} src="/art.svg" controls={false}/></NSEAnimationEnvironmentProvider>);
++  expect(ref.current?.element).toBe(view.container.querySelector('.nse-control-image-view'));
++  expect(ref.current?.layer).toBeNull(); expect(bindLayer).not.toHaveBeenCalled();
++  view.rerender(<NSEAnimationEnvironmentProvider layers={layers}><NSEImageView ref={ref} wantsLayer src="/art.svg" controls={false}/></NSEAnimationEnvironmentProvider>);
++  const layer=ref.current!.layer;
++  expect(layer).toBeInstanceOf(AFXLayer); expect(ref.current!.layer).toBe(layer);
++  expect(bindLayer.mock.calls[0]?.[0]).toBe(ref.current!.element);
++  const signal=bindLayer.mock.calls[0]?.[1] as AbortSignal;
++  view.unmount(); expect(signal.aborted).toBe(true); expect(ref.current).toBeNull();
++ });
++});
+diff --git a/tests/runtime/foundation-faithful-date.test.ts b/tests/runtime/foundation-faithful-date.test.ts
+new file mode 100644
+index 0000000..c72fe70
+--- /dev/null
++++ b/tests/runtime/foundation-faithful-date.test.ts
+@@ -0,0 +1,81 @@
++/*
++ * SynCloudOS
++ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
++ *
++ * Designed by Kavish Krishnakumar in Manchester.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Affero General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Affero General Public License for more details.
++ *
++ * You should have received a copy of the GNU Affero General Public License
++ * along with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++import { expect, it } from "vitest";
++import { NSEDateFormatter } from "../../src/Foundation/NSEDateFormatter";
++it("formats and parses explicit numeric patterns in the configured time zone", () => {
++  const f = new NSEDateFormatter({locale:"en-GB", timeZone:"UTC", dateFormat:"yyyy-MM-dd HH:mm:ss"});
++  const d = new Date("2026-08-09T12:30:45Z");
++  expect(f.string(d)).toBe("2026-08-09 12:30:45");
++  expect(f.date("2026-08-09 12:30:45")?.toISOString()).toBe(d.toISOString());
++  expect(f.date("2026-02-30 12:30:45")).toBeNull();
++});
++it("uses locale and date/time styles for formatting and parsing", () => {
++  const f = new NSEDateFormatter({locale:"en-GB", timeZone:"UTC", dateStyle:"short", timeStyle:"short"});
++  const d = new Date("2026-08-09T12:30:00Z");
++  expect(f.string(d)).toBe(new Intl.DateTimeFormat("en-GB", {timeZone:"UTC", dateStyle:"short", timeStyle:"short"}).format(d));
++  expect(f.date(f.string(d))?.toISOString()).toBe(d.toISOString());
++});
++it("rejects unsupported format tokens instead of silently reinterpreting them", () => {
++  expect(() => new NSEDateFormatter({dateFormat:"yyyy Q"}).string(new Date())).toThrow(/format/i);
++});
++
++it("parses local day periods and rejects impossible wall times", () => {
++  const f = new NSEDateFormatter({locale:"en-US", timeZone:"America/New_York", dateStyle:"short", timeStyle:"short"});
++  const d = new Date("2026-08-09T18:30:00Z");
++  expect(f.date(f.string(d))?.toISOString()).toBe(d.toISOString());
++  const gap = new NSEDateFormatter({locale:"en-US", timeZone:"America/New_York", dateFormat:"yyyy-MM-dd HH:mm"});
++  expect(gap.date("2026-03-08 02:30")).toBeNull();
++  expect(gap.date("26-03-08 02:30")).toBeNull();
++});
++
++it("rejects unsupported calendars when parsing rather than treating them as Gregorian", () => {
++  const f = new NSEDateFormatter({locale:"en-US-u-ca-buddhist", timeZone:"UTC", dateStyle:"short"});
++  expect(() => f.date(f.string(new Date("2026-08-09T00:00:00Z")))).toThrow(/Gregorian/i);
++});
++it("round-trips localized long output and time-only output", () => {
++  const d=new Date("2026-08-09T12:30:45Z");
++  for (const dateStyle of ["medium","long","full"] as const) {
++    const f=new NSEDateFormatter({locale:"en-GB",timeZone:"UTC",dateStyle,timeStyle:"long"});
++    expect(f.date(f.string(d))?.toISOString()).toBe(d.toISOString());
++  }
++  const time=new NSEDateFormatter({locale:"en-GB",timeZone:"UTC",timeStyle:"short"});
++  expect(time.date(time.string(d))?.toISOString()).toBe("2001-01-01T12:30:00.000Z");
++});
++it("preserves four-digit literal years and quoted apostrophes", () => {
++  const f=new NSEDateFormatter({locale:"en-GB",timeZone:"UTC",dateFormat:"yyyy-MM-dd 'o''clock'"});
++  expect(f.date("0026-03-08 o'clock")?.getUTCFullYear()).toBe(26);
++  expect(f.string(new Date("2026-03-08T00:00:00Z"))).toBe("2026-03-08 o'clock");
++});
++it("round-trips locale digits and verifies weekday text", () => {
++  const d=new Date("2026-08-09T12:30:00Z");
++  const arabic=new NSEDateFormatter({locale:"ar-EG",timeZone:"UTC",dateStyle:"short",timeStyle:"short"});
++  expect(arabic.date(arabic.string(d))?.toISOString()).toBe(d.toISOString());
++  const full=new NSEDateFormatter({locale:"en-GB",timeZone:"UTC",dateStyle:"full"});
++  expect(full.date(full.string(d))?.toISOString()).toBe("2026-08-09T00:00:00.000Z");
++  expect(full.date(full.string(d).replace("Sunday","Monday"))).toBeNull();
++});
++it("rejects unsupported era and pattern calendars", () => {
++  const f=new NSEDateFormatter({locale:"en-GB",timeZone:"UTC",dateFormat:"yyyy-MM-dd"});
++  expect(f.date("0000-01-01")).toBeNull();
++  expect(() => f.string(new Date("0000-01-01T00:00:00Z"))).toThrow(/era/i);
++  const b=new NSEDateFormatter({locale:"en-US-u-ca-buddhist",timeZone:"UTC",dateFormat:"yyyy-MM-dd"});
++  expect(() => b.string(new Date())).toThrow(/Gregorian/i);
++});
+diff --git a/tests/runtime/foundation-faithful-decimal.test.ts b/tests/runtime/foundation-faithful-decimal.test.ts
+new file mode 100644
+index 0000000..a6d5bd6
+--- /dev/null
++++ b/tests/runtime/foundation-faithful-decimal.test.ts
+@@ -0,0 +1,77 @@
++/*
++ * SynCloudOS
++ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
++ *
++ * Designed by Kavish Krishnakumar in Manchester.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Affero General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Affero General Public License for more details.
++ *
++ * You should have received a copy of the GNU Affero General Public License
++ * along with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++import { expect, it } from "vitest";
++import { NSEDecimalNumber, NSEDecimalNumberHandler } from "../../src/Foundation/NSEDecimalNumber";
++it("uses decimal arithmetic and rounds with handlers", () => {
++  const n = NSEDecimalNumber.fromString;
++  expect(n("0.1").adding(n("0.2")).toString()).toBe("0.3");
++  const h = new NSEDecimalNumberHandler({scale: 2, roundingMode: "bankers"});
++  expect(n("1").dividing(n("8"), h).toString()).toBe("0.12");
++  expect(n("3").dividing(n("8"), h).toString()).toBe("0.38");
++  expect(n("100").dividing(n("3")).toString()).toBe("33.333333333333333333333333333333333333");
++  expect(n("1e-100").dividing(n("1")).toString()).toBe("0." + "0".repeat(99) + "1");
++  expect(() => n("1").dividing(n("0"))).toThrow(/zero/i);
++});
++it("enforces exponent and precision boundaries", () => {
++  const n = NSEDecimalNumber.fromString;
++  expect(() => n("1e166")).toThrow(/overflow/i);
++  expect(() => n("1e-129")).toThrow(/underflow/i);
++  expect(() => n("1").dividing(n("3"), new NSEDecimalNumberHandler({raiseOnExactness:true}))).toThrow(/precision/i);
++  expect(n("1").dividing(n("0"), new NSEDecimalNumberHandler({raiseOnDivideByZero:false})).toString()).toBe("NaN");
++});
++it("rounds signed values and reports unrepresentable underflow", () => {
++  const n=NSEDecimalNumber.fromString;
++  expect(n("-2.51").dividing(n("1"),new NSEDecimalNumberHandler({scale:0,roundingMode:"down"})).toString()).toBe("-3");
++  expect(n("-2.51").dividing(n("1"),new NSEDecimalNumberHandler({scale:0,roundingMode:"up"})).toString()).toBe("-2");
++  expect(() => n("1e-128").dividing(n("10"))).toThrow(/underflow/i);
++});
++it("rounds small operands into representable values", () => {
++  const n=NSEDecimalNumber.fromString;
++  const tiny = n("1e-128");
++  expect(() => tiny.multiplying(n("0.1"))).toThrow(/underflow/i);
++  expect(tiny.adding(n("1e-127")).toString()).toBe("0." + "0".repeat(126) + "11");
++});
++it("rounds products back into the exponent range and supports rounding behaviors", () => {
++  const n=NSEDecimalNumber.fromString;
++  expect(n("1.0000000000000000000000000000000000001e-100").multiplying(n("1e-28")).toString()).toBe(n("1e-128").toString());
++  expect(n("12.345").rounding(new NSEDecimalNumberHandler({scale:2,roundingMode:"bankers"})).toString()).toBe("12.34");
++  expect(NSEDecimalNumber.zero.toString()).toBe("0");
++  expect(NSEDecimalNumber.one.toString()).toBe("1");
++});
++it("uses replaceable default behavior and custom exception handling", () => {
++  const original=NSEDecimalNumber.defaultBehavior;
++  try {
++    NSEDecimalNumber.defaultBehavior=new NSEDecimalNumberHandler({scale:2});
++    expect(NSEDecimalNumber.fromString("1").dividing(NSEDecimalNumber.fromString("3")).toString()).toBe("0.33");
++    const custom={...new NSEDecimalNumberHandler(), exceptionDuringOperation: () => NSEDecimalNumber.one};
++    expect(NSEDecimalNumber.one.dividing(NSEDecimalNumber.zero,custom)).toBe(NSEDecimalNumber.one);
++  } finally { NSEDecimalNumber.defaultBehavior=original; }
++});
++it("rejects extreme exponents without exponent-sized allocations", () => {
++  expect(() => NSEDecimalNumber.fromString("1e-9999999999")).toThrow(/underflow/i);
++  expect(() => NSEDecimalNumber.fromString("1e9999999999")).toThrow(/overflow/i);
++});
++it("accepts decimal strings with an omitted leading or trailing zero", () => {
++  expect(NSEDecimalNumber.fromString(".5").toString()).toBe("0.5");
++  expect(NSEDecimalNumber.fromString("-.5").toString()).toBe("-0.5");
++  expect(NSEDecimalNumber.fromString("5.").toString()).toBe("5");
++  expect(() => NSEDecimalNumber.fromString(".")).toThrow(/invalid/i);
++});
+diff --git a/tests/runtime/foundation-faithful-values.test.ts b/tests/runtime/foundation-faithful-values.test.ts
+new file mode 100644
+index 0000000..2341855
+--- /dev/null
++++ b/tests/runtime/foundation-faithful-values.test.ts
+@@ -0,0 +1,57 @@
++/*
++ * SynCloudOS
++ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
++ *
++ * Designed by Kavish Krishnakumar in Manchester.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Affero General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Affero General Public License for more details.
++ *
++ * You should have received a copy of the GNU Affero General Public License
++ * along with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++import { expect, it } from "vitest";
++import { NSEValueTransformer } from "../../src/Foundation/NSEValueTransformer";
++
++it("registers transformer instances by name and supports explicit reversal", () => {
++  class Doubler extends NSEValueTransformer<number, number> {
++    static override allowsReverseTransformation() { return true; }
++    override transformedValue(value: number) { return value * 2; }
++    override reverseTransformedValue(value: number) { return value / 2; }
++  }
++  const transformer = new Doubler();
++  NSEValueTransformer.setValueTransformer(transformer, "test.doubler");
++  expect(NSEValueTransformer.valueTransformerForName("test.doubler")).toBe(transformer);
++  expect(transformer.reverseTransformedValue(transformer.transformedValue(3))).toBe(3);
++  NSEValueTransformer.setValueTransformer(null, "test.doubler");
++  expect(NSEValueTransformer.valueTransformerForName("test.doubler")).toBeNull();
++});
++
++it("rejects reversal on the base transformer", () => {
++  expect(NSEValueTransformer.allowsReverseTransformation()).toBe(false);
++  expect(() => new NSEValueTransformer().reverseTransformedValue(1)).toThrow();
++});
++
++it("uses the forward transform as the default reverse for reversible subclasses", () => {
++  class Invert extends NSEValueTransformer<boolean, boolean> {
++    static override allowsReverseTransformation() { return true; }
++    override transformedValue(value: boolean) { return !value; }
++  }
++  expect(new Invert().reverseTransformedValue(true)).toBe(false);
++});
++
++it("provides Foundation boolean and nil transformers by their standard names", () => {
++  const negate = NSEValueTransformer.valueTransformerForName("NSNegateBoolean")!;
++  expect(negate.transformedValue(true)).toBe(false);
++  expect(negate.reverseTransformedValue(false)).toBe(true);
++  expect(NSEValueTransformer.valueTransformerForName("NSIsNil")!.transformedValue(null)).toBe(true);
++  expect(NSEValueTransformer.valueTransformerForName("NSIsNotNil")!.transformedValue("x")).toBe(true);
++});
