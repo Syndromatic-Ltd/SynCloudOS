@@ -182,7 +182,7 @@ export function NSEPopover({
       height: contentSize?.height ?? fitting?.height ?? (resolvedPresentation.mode === "sheet" ? 420 : 280),
     },
     onDidClose: handleDidClose,
-  }), [anchor, relativeTo, preferredEdge, behavior, drawsBackground, describedBy, contentSize?.height, contentSize?.width, fitting?.height, fitting?.width, handleDidClose, id, labelledBy, parentWindowControllerId, resolvedParentResponderId, resolvedPresentation, title]);
+  }), [anchor, relativeTo, preferredEdge, behavior, drawsBackground, describedBy, contentSize?.height, contentSize?.width, fitting?.height, fitting?.width, handleDidClose, id, labelledBy, parentWindowControllerId, resolvedParentResponderId, resolvedPresentation.mode, resolvedPresentation.placement, resolvedPresentation.collisionPadding, title]);
   const presentedContent = useNSEPresentedContent(contentSize
     ? children
     : <NSEWindowFittingContent onFittingSize={onFittingSize}>{children}</NSEWindowFittingContent>);
