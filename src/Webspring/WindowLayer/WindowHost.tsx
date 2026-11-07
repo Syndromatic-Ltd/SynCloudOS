@@ -50,6 +50,7 @@ import { createTransientWindowSurfaceBridge } from "./TransientWindowSurfaceBrid
 import { WindowChromeSlotContext } from "./windowChromeSlotContext";
 import { useWindowMoveResize } from "./useWindowMoveResize";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
+import { PopoverWindowSurface } from "./PopoverWindowSurface";
 
 export interface WindowLayerDiagnostic {
   readonly code: "WINDOW_PRESENTATION_GEOMETRY_INVALID";
@@ -87,6 +88,7 @@ const windowHostMotion = Object.freeze({
     tracks: Object.freeze([Object.freeze({ keyPath: "opacity", values: Object.freeze([1, 0]) })]),
   }) satisfies NSEPresentationSpec,
 });
+const popoverWindowMotion = { exit: { duration: 0.15, timing: "linear", tracks: [{ keyPath: "opacity", values: [1, 1] }] } } satisfies Parameters<typeof useNSEPresentation>[1];
 
 function validGeometry(bounds: Readonly<{ x: number; y: number; width: number; height: number }>): boolean {
   return Number.isFinite(bounds.x) && Number.isFinite(bounds.y) &&
@@ -108,6 +110,10 @@ export function WindowHost({
   const contentState = useSyncExternalStore(controller.subscribe, () => controller.contentState, () => controller.contentState);
   useSyncExternalStore(renderers.subscribe, () => renderers.revision, () => renderers.revision);
   const contentRendererAvailable = contentState.status === "loaded" && renderers.has(contentState.mountKey);
+  const surface = contentState.status === "loaded" ? renderers.surface(contentState.mountKey) : null;
+  const popoverSurface = surface && (record.role === "popover" || record.role === "sheet" && surface.request.drawsBackground !== undefined) ? surface : null;
+  const wasPopoverSurface = useRef(false);
+  if (popoverSurface) wasPopoverSurface.current = true;
   // The custom-titlebar slot div is rendered declaratively by the view; the
   // host learns the node through a ref callback (raw `document` access is
   // forbidden in Webspring surfaces). The mounted application's chrome
@@ -209,7 +215,7 @@ export function WindowHost({
   // window's content mount here, beside the surface, so they can hang past
   // the window's edge as a menu does.
   const [overlayLayerNode, setOverlayLayerNode] = useState<HTMLDivElement | null>(null);
-  useNSEPresentation(hostRef, windowHostMotion);
+  useNSEPresentation(hostRef, wasPopoverSurface.current ? popoverWindowMotion : windowHostMotion);
   // Closing commits the record as closed and removes the controller in one
   // batch, so by the time NSEPresence holds this host for its exit there is
   // no open window left to draw. The host keeps its last open frame for the
@@ -235,7 +241,7 @@ export function WindowHost({
     if (!host || (active && host.contains(active))) return;
     const target = host.querySelector<HTMLElement>(`.nse-window__content [data-nse-initial-focus]:not([disabled])`) ??
       host.querySelector<HTMLElement>(`.nse-window__content :is(${windowFocusableSelector})`) ??
-      host.querySelector<HTMLElement>(windowFocusableSelector);
+      host.querySelector<HTMLElement>(windowFocusableSelector) ?? host.querySelector<HTMLElement>("[data-nse-window-popover]");
     target?.focus({ preventScroll: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening
   }, [controller.id, openedKey]);
@@ -280,6 +286,9 @@ export function WindowHost({
     window: record,
     presentation,
   });
+  const surfaceContent = popoverSurface
+    ? <PopoverWindowSurface surface={popoverSurface} windowControllerId={controller.id}>{hostedContent}</PopoverWindowSurface>
+    : hostedContent;
   const customChromeActive = chromeReady && !chromeFailed;
   // The slot node must exist BEFORE the handshake can complete: the bridge
   // needs a portal target to mount and report ready. Render it for every
@@ -297,15 +306,15 @@ export function WindowHost({
         <NSEControlRuntimeProvider port={controlPort}>
           <NSEFocusPortProvider port={focusPort}>
             {childTransientBridge ? (
-              <NSEWindowSurfaceBridgeProvider bridge={childTransientBridge}>{hostedContent}</NSEWindowSurfaceBridgeProvider>
-            ) : hostedContent}
+              <NSEWindowSurfaceBridgeProvider bridge={childTransientBridge}>{surfaceContent}</NSEWindowSurfaceBridgeProvider>
+            ) : surfaceContent}
           </NSEFocusPortProvider>
         </NSEControlRuntimeProvider>
       </NSETooltipProvider>
       </NSEOverlayProvider>
     </WindowChromeSlotContext.Provider>
   );
-  const view = (
+  const view = popoverSurface ? runtimeHostedContent : (
     <View
       record={record}
       presentation={presentation}
@@ -327,12 +336,20 @@ export function WindowHost({
       <div ref={setOverlayLayerNode} data-window-overlay-layer="" style={{ display: "contents" }} />
     </>
   );
+  const compactPopover = popoverSurface && presentation.kind === "mobile-sheet";
+  const sheetInset = Math.max(8, presentation.safeAreaInsets.blockEnd);
+  const sheetBounds = compactPopover ? {
+    x: screen.visualViewport.x + Math.max(8, presentation.safeAreaInsets.inlineStart),
+    y: screen.visualViewport.y + screen.visualViewport.height - sheetInset - presentation.bounds.height,
+    width: Math.min(presentation.bounds.width, screen.visualViewport.width - Math.max(8, presentation.safeAreaInsets.inlineStart) - Math.max(8, presentation.safeAreaInsets.inlineEnd)),
+    height: presentation.bounds.height,
+  } : presentation.bounds;
   const hostStyle: React.CSSProperties = {
     position: "absolute",
-    left: presentation.bounds.x,
-    top: presentation.bounds.y,
-    width: presentation.bounds.width,
-    height: presentation.bounds.height,
+    left: sheetBounds.x,
+    top: sheetBounds.y,
+    width: sheetBounds.width,
+    height: sheetBounds.height,
     zIndex: record.zIndex,
   };
   // A modal's focus scope is not kept: an exiting sheet traps nothing.

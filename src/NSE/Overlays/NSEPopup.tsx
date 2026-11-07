@@ -32,6 +32,7 @@ import {
 } from "react";
 import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
 import { nsePopoverSpringEasing, useNSEPopoverSurface } from "./useNSEPopoverSurface";
+import { NSEPopoverFrame } from "./NSEPopoverFrame";
 import { nseMenuChosenAttribute, nseMenuChosenFadeMs } from "../Menus/menuSelectionFlash";
 import { createPortal } from "react-dom";
 import type { NSEOverlayAnchorPoint } from "./computeNSEOverlayPosition";
@@ -279,11 +280,7 @@ export function NSEPopup({
       "data-nse-presentation": resolvedPresentation.mode,
       tabIndex: htmlAttributes.tabIndex ?? -1,
     },
-    hasPopoverFrame ? createElement("svg", { className: "nse-popover-frame", "data-nse-part": "popover-frame", "aria-hidden": true },
-      createElement("path", { "data-nse-part": "popover-arrow-fill" }),
-      createElement("path", { "data-nse-part": "popover-outline" }),
-    ) : null,
-    hasPopoverFrame && kind === "popover" ? createElement("span", { ref: setArrow, className: "nse-popover-arrow", "data-nse-part": "arrow", "aria-hidden": true }) : null,
+    hasPopoverFrame ? createElement(NSEPopoverFrame, { arrowRef: setArrow, anchored: kind === "popover" }) : null,
     title ? createElement("div", { id: titleId, className: "nse-overlay-popup-title" }, title) : null,
     createElement("div", { className: "nse-overlay-popup-content" }, children),
   );

@@ -41,3 +41,12 @@
   position: relative;
   inset: 0;
 }
+
+/* The window host owns viewport placement. A compact popover keeps its plate
+   and sheet geometry inside that host, rather than the overlay's fixed inset. */
+.webspring-window-host .nse-popover[data-nse-window-popover] {
+  position: relative;
+  inset: auto;
+  max-inline-size: none;
+  max-block-size: none;
+}
