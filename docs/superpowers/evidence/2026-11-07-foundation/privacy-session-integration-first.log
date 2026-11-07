@@ -1,0 +1,27 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-session-integration.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-session-integration.test.ts (7 tests | 1 failed) 131ms
+     × revokes old device scopes when the authenticated subject changes with the same displayed email 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-session-integration.test.ts > real mounted runtime privacy and identity integration > revokes old device scopes when the authenticated subject changes with the same displayed email
+AssertionError: expected "vi.fn()" to be called once, but got 2 times
+ ❯ tests/runtime/privacy-session-integration.test.ts:157:32
+    155|     f.identity.publish(session("bob", "shared@example.test"));
+    156|     expect(f.runtime.identity.session.getSnapshot()?.subjectId).toBe("…
+    157|     f.emit(2); expect(receive).toHaveBeenCalledOnce();
+       |                                ^
+    158|     await expect(manager.current()).rejects.toBeDefined();
+    159|     expect(f.locationCalls()).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  20:37:17
+   Duration  10.12s (transform 7.63s, setup 28ms, import 9.81s, tests 131ms, environment 0ms)
