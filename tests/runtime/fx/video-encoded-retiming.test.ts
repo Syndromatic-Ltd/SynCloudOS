@@ -43,9 +43,9 @@ it('copies sample timing without copying the immutable compressed payload', () =
   expect(retimed.timing.presentationTime.toSeconds()).toBe(21);
   expect(chunk.timing.presentationTime.toSeconds()).toBe(1);
   expect(retimed.byteLength).toBe(3);
-  retimed.copyData().fill(0);
-  expect([...chunk.copyData()]).toEqual([4, 5, 6]);
-  expect([...retimed.copyData()]).toEqual([4, 5, 6]);
+  retimed.copyData().bytes.fill(0);
+  expect([...chunk.copyData().bytes]).toEqual([4, 5, 6]);
+  expect([...retimed.copyData().bytes]).toEqual([4, 5, 6]);
   expect(Object.isFrozen(retimed)).toBe(true);
   expect(() => chunk.copyWithNewTiming({} as MEFXSampleTimingInfo)).toThrow(TypeError);
 });

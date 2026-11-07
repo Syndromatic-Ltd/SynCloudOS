@@ -1,5 +1,7 @@
 # VideoFX
 
+Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+
 VideoFX (`VFX`) is the web-native analogue of Video Toolbox and the video half of AVFoundation. It decodes and encodes video, holds decoded frames with exact MediaFX timing, processes frames with graphics and image filters, reads and writes container files, captures from cameras and displays, and presents frames on a shared clock.
 
 The framework is built around three ideas.
@@ -159,7 +161,7 @@ A decoder hands you frames that you must close. Closing a frame twice is safe.
 One compressed unit: a keyframe or a delta frame, with its bytes and timing. It is immutable, and the constructor copies the data.
 
 ```text
-new VFXEncodedChunk({ type: "key" | "delta", data: Uint8Array, timing: MEFXSampleTimingInfo, discardPaddingNanoseconds? })
+new VFXEncodedChunk({ type: "key" | "delta", data: NSEDataConvertible, timing: MEFXSampleTimingInfo, discardPaddingNanoseconds? })
 ```
 
 | Member | Description |
@@ -421,7 +423,7 @@ Reads a whole container into chunks.
 
 ```text
 new VFXContainerReader({ backend, maximumBufferedBytes?, maximumElementBytes?, maximumChunks?, signal? })
-reader.read(input: Uint8Array | AsyncIterable<Uint8Array>): Promise<VFXContainerReadResult>
+reader.read(input: NSEDataConvertible | AsyncIterable<NSEDataConvertible>): Promise<VFXContainerReadResult>
 ```
 
 | Option | Default | Range |
@@ -448,10 +450,10 @@ import { VFXContainerWriter, type VFXEncodedChunk } from "@syndromatic/syncloudo
 import { VFXWebMContainerBackend } from "@syndromatic/syncloudos/fx/video/webm";
 
 export async function writeWebM(chunks: AsyncIterable<VFXEncodedChunk>, width: number, height: number) {
-  const parts: Uint8Array[] = [];
+  const parts: Blob[] = [];
   const writer = new VFXContainerWriter({
     backend: new VFXWebMContainerBackend(),
-    sink: { write: (bytes) => { parts.push(bytes.slice()); } },
+    sink: { write: (bytes) => { parts.push(bytes.blob()); } },
     track: { id: 1, kind: "video", codec: "vp8", codedWidth: width, codedHeight: height, timescale: 1_000_000 },
   });
   for await (const chunk of chunks) await writer.write(chunk);
