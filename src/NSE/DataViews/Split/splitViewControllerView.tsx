@@ -100,6 +100,9 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
   const liveRoot = useRef<HTMLDivElement | null>(null);
   const [measured, setMeasured] = useState<{ readonly x: number; readonly y: number; readonly width: number; readonly height: number } | null>(null);
   const rootRef = useCallback((node: HTMLDivElement | null) => { liveRoot.current = node; setRoot(node); }, []);
+  // Claim the actual rendered allocation before measuring it. The controller's inherited layout
+  // callback measures its managed wrapper only when a custom view has no default split renderer.
+  useLayoutEffect(() => controller[nseSplitViewLayout].claimBoundsAuthority(), [controller]);
   // Pane contents are persistent portals, so their React event path is a sibling of this root.
   // Listen to the document's native focus path while the initiating control is still attached.
   useLayoutEffect(() => {
@@ -134,8 +137,6 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
     if (availableSize !== null) layout.resize(availableSize);
     if (measured) layout.updateBounds(measured);
   }, [layout, measured, availableSize]);
-
-  useLayoutEffect(() => () => controller[nseSplitViewLayout].updateBounds(null), [controller]);
 
   const setCompactNavigation = frame?.setCompactNavigation;
   useLayoutEffect(() => {
