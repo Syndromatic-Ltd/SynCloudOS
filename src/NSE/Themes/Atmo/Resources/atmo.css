@@ -27,7 +27,7 @@
   --nse-atmo-title-ink: #293645;
   --nse-atmo-control-ink: #283444;
   --nse-atmo-label-ink: #4f5d6d;
-  --nse-atmo-page-header-surface: initial;
+  --nse-atmo-window-titlebar-surface: initial;
   --nse-atmo-control-h: 52px; /* push-button sprite band height */
   --nse-atmo-bar-h: 50px;     /* toolbar / grouped / radio / field height */
   --nse-atmo-font: inherit;
@@ -73,7 +73,7 @@
   --nse-atmo-title-ink: #f1f4f8;
   --nse-atmo-control-ink: #e7ecf2;
   --nse-atmo-label-ink: #c3ccd7;
-  --nse-atmo-page-header-surface: linear-gradient(#343b44, #2c333c);
+  --nse-atmo-window-titlebar-surface: linear-gradient(#343b44, #2c333c);
   --nse-atmo-material-top-light: rgba(255, 255, 255, 0.14);
   /* The glint under a lower rim must still read on dark metal. */
   --nse-atmo-material-lower-rim: rgba(255, 255, 255, 0.32);
@@ -1550,52 +1550,6 @@
    toward col 1 (max ≈6.6% black) but NOT over the accent rows. All of that is
    kept. Only its CORNER is dropped — see the rule below.
    ========================================================================= */
-
-/* One knob for the corner, set per surface: the standard page header rounds its
-   top two, and a header carrying [data-corners="all"] rounds all four so it can
-   sit inside a toast. */
-[data-nse-appearance="atmo"] {
-  --nse-atmo-page-header-radius: 14px;
-}
-
-[data-nse-appearance="atmo"] .nse-control-page-header {
-
-  border-image: none;
-  border-radius: var(--nse-atmo-page-header-radius) var(--nse-atmo-page-header-radius) 0 0;
-  background: var(--nse-atmo-page-header-surface,
-    linear-gradient(90deg, rgba(0, 0, 0, 0.066) 0.5px, rgba(0, 0, 0, 0.031) 3.5px, rgba(0, 0, 0, 0.015) 5.5px, rgba(0, 0, 0, 0) 9px)
-      left top / 9px calc(100% - 3px) no-repeat,
-    linear-gradient(270deg, rgba(0, 0, 0, 0.066) 0.5px, rgba(0, 0, 0, 0.031) 3.5px, rgba(0, 0, 0, 0.015) 5.5px, rgba(0, 0, 0, 0) 9px)
-      right top / 9px calc(100% - 3px) no-repeat,
-    linear-gradient(
-      #d8d8d8 0.5px,
-      #9c9b9b 1.5px,
-      #a8a7a7 5.5px,
-      #b8b7b7 10.5px,
-      #bebdbd 15.5px,
-      #c1c0c0 20.5px,
-      #c4c3c3 25.5px,
-      #c6c5c5 30.5px,
-      #c8c7c7 35px,
-      #c8c7c6 calc(100% - 10.5px),
-      #c5c4c4 calc(100% - 6.5px),
-      #c3c2c2 calc(100% - 4px),
-      #c6c5c5 calc(100% - 4px),
-      #c6c5c5 calc(100% - 3px),
-      #d8d8d7 calc(100% - 3px),
-      #d8d8d7 calc(100% - 2px),
-      #a9a9a9 calc(100% - 2px),
-      #a9a9a9 calc(100% - 1px),
-      #f2f2f1 calc(100% - 1px)
-    ));
-
-  background-origin: border-box;
-}
-
-/* Equal radii on all four corners, for a header used as a popup/toast cap. */
-[data-nse-appearance="atmo"] .nse-control-page-header[data-corners="all"] {
-  border-radius: var(--nse-atmo-page-header-radius);
-}
 
 [data-nse-appearance="atmo"],
 [data-nse-appearance="atmo"] [data-nse-appearance],

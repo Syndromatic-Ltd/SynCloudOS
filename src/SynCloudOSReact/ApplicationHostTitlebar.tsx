@@ -54,8 +54,8 @@ export function ApplicationHostTitlebar({ title, iconSrc, material, scheme, menu
           <span className="nse-window-titlebar-document">
             <span ref={setLeadingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="leading" />
             <span className="nse-window-titlebar-title" data-document-edited={document?.documentEdited || undefined}>
-              {document?.title ? <span className="nse-window-titlebar-title-text">{document.title}</span> : null}
-              {document?.subtitle ? <span className="nse-window-titlebar-subtitle">{document.subtitle}</span> : null}
+              {document?.title && document.toolbarStyle !== "expanded" ? <span className="nse-window-titlebar-title-text">{document.title}</span> : null}
+              {document?.subtitle && document.toolbarStyle !== "expanded" ? <span className="nse-window-titlebar-subtitle">{document.subtitle}</span> : null}
               <span ref={setTrailingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="trailing" />
             </span>
           </span>

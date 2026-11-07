@@ -29,6 +29,7 @@ export type {
   NSEWindow,
   NSEWindowCloseOutcome,
   NSEWindowContentBorderEdge,
+  NSEWindowToolbarStyle,
   NSEWindowControllerClass,
   NSEWindowControllerContext,
   NSEWindowControllerOptions,

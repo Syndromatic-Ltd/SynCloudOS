@@ -191,7 +191,7 @@ export function ApplicationStageView({
   const quickSwitchAction = onQuickSwitchRequest
     ? { label: quickSwitchLabel, selected: quickSwitchOpen, onClick: () => { void runtime.commands.dispatch("webspring.quickSwitch.toggle", undefined, { source: "toolbar" }); } }
     : null;
-  const standardBarTitle = sourceList ? (titlebarDocument?.title || appWindowTitle) : appWindowTitle;
+  const standardBarTitle = titlebarDocument?.toolbarStyle === "expanded" ? "" : sourceList ? (titlebarDocument?.title || appWindowTitle) : appWindowTitle;
   const appMenuLabels = useMemo(() => applicationMenuLabels(appName, locale.t), [appName, locale]);
   const appDeclaresAbout = applicationDeclaresAbout(app.about);
   const appPreferences = app.applicationMenu?.preferences;
@@ -282,7 +282,7 @@ export function ApplicationStageView({
   // Only the original stage elements report roles and canonical settlement.
   useNSEPresentation(overlayRootRef, stageMotion.root);
   useNSEPresentation(overlayPlaneRef, stageMotion.surface);
-  const documentTitlebar = titlebarDocument && !sourceList ? titlebarDocument : null;
+  const documentTitlebar = titlebarDocument && !sourceList && titlebarDocument.toolbarStyle !== "expanded" ? titlebarDocument : null;
   const navigationBack = activeNavigationChrome?.back ?? null;
   const standardTopBar = showsApplicationStageTopBar && documentTitlebar ? (
     <ApplicationStageTopBar

@@ -169,8 +169,6 @@ export type {
   NSEFontTextStyle,
   NSESwitchProps,
 } from "./Controls/Fields/NSEFields";
-export { NSEPageHeader } from "./Windows/Chrome";
-export type { NSEPageHeaderProps } from "./Windows/Chrome";
 export type { NSEChromeScheme } from "./Windows/Chrome";
 export { resolveNSEBookRegions, NSEBookRegionMetrics } from "./Navigation/bookRegions";
 export type { NSEBookRegions } from "./Navigation/bookRegions";
@@ -734,7 +732,7 @@ export type { NSEViewAnimator } from "./Animation/NSEViewAnimator";
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEControllerView, NSEOpenWindowOptions,
   NSETraitCollection,
-  NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowCloseOutcome, NSEWindowContentBorderEdge,
+  NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowCloseOutcome, NSEWindowContentBorderEdge, NSEWindowToolbarStyle,
   NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
 } from "./Application";
 export { preference } from "./Objects/preference";

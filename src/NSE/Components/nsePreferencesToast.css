@@ -70,35 +70,11 @@
   width: min(400px, calc(100vw - 24px));
   max-height: min(560px, calc(100vh - 24px));
   overflow: hidden;
-  border-radius: var(--nse-atmo-page-header-radius, 14px);
+  border-radius: var(--nse-atmo-window-titlebar-radius, 14px);
   /* Centred, so it grows from its own middle. */
   transform-origin: 50% 50%;
   background: var(--nse-prefs-panel-background, linear-gradient(#f4f4f2, #e4e4e1));
   box-shadow: var(--nse-prefs-panel-shadow, 0 0 0 1px rgba(0, 0, 0, 0.42), 0 22px 44px rgba(0, 0, 0, 0.46));
-}
-
-/* The header caps the toast, so it takes the toast's own radius on all four
-   corners and the body is clipped beneath it. */
-.nse-prefs-header.nse-control-page-header {
-  flex: 0 0 auto;
-  border-radius: var(--nse-atmo-page-header-radius, 14px) var(--nse-atmo-page-header-radius, 14px) 0 0;
-}
-
-.nse-prefs-header.nse-control-page-header .nse-control-page-header-title {
-  white-space: normal;
-  overflow-wrap: anywhere;
-  /* Light on the header plate, the way a popup states its own name. */
-  color: var(--nse-prefs-header-title-colour, #f7f8f9);
-  text-shadow: var(--nse-prefs-header-title-shadow, 0 -1px 0 rgba(0, 0, 0, 0.55));
-}
-
-/* Let enlarged titles use the available column rather than its max-content
-   width. A live Back control reserves symmetric space on either side. */
-.nse-prefs-header.nse-control-page-header[data-align="center"] {
-  grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
-}
-.nse-prefs-header.nse-control-page-header[data-align="center"]:has(.nse-prefs-back-slot) {
-  grid-template-columns: minmax(50px, 1fr) minmax(0, auto) minmax(50px, 1fr);
 }
 
 /* The two titles cross inside one clipped box.
@@ -398,36 +374,6 @@
    0.5px lip, the 1.5px dark line, the 35px rim and the four-row bottom accent
    all hold their thickness — with every grey mapped into the metal's dark
    range. Rebuilding the geometry would have let the two headers drift apart. */
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-header.nse-control-page-header {
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.28) 0.5px, rgba(0, 0, 0, 0.14) 3.5px, rgba(0, 0, 0, 0.06) 5.5px, rgba(0, 0, 0, 0) 9px)
-      left top / 9px calc(100% - 3px) no-repeat,
-    linear-gradient(270deg, rgba(0, 0, 0, 0.28) 0.5px, rgba(0, 0, 0, 0.14) 3.5px, rgba(0, 0, 0, 0.06) 5.5px, rgba(0, 0, 0, 0) 9px)
-      right top / 9px calc(100% - 3px) no-repeat,
-    linear-gradient(
-      #6a727d 0.5px,
-      #363d47 1.5px,
-      #3c434d 5.5px,
-      #434a55 10.5px,
-      #464e59 15.5px,
-      #48505b 20.5px,
-      #4a525d 25.5px,
-      #4b535e 30.5px,
-      #4c545f 35px,
-      #414954 calc(100% - 10.5px),
-      #3b424c calc(100% - 6.5px),
-      #373e48 calc(100% - 4px),
-      #3a414b calc(100% - 4px),
-      #3a414b calc(100% - 3px),
-      #545c67 calc(100% - 3px),
-      #545c67 calc(100% - 2px),
-      #14181e calc(100% - 2px),
-      #14181e calc(100% - 1px),
-      #6d7681 calc(100% - 1px)
-    );
-  /* After the shorthand, which resets it — same trap as the light plate. */
-  background-origin: border-box;
-}
 
 /* Group boxes drop the sliced light frame and become a filled plate. The 14px
    transparent border stays, so the rows keep their 2px inset and their 12px end

@@ -237,9 +237,6 @@
       "none": "Owner-approved UIKit naming exception (decision 8, 2026-11-07): UIPageViewController.SpineLocation supplies min for a single page and mid for two-page spreads."
     },
     "NSEPageControllerTransitionStyle": "NSPageController.TransitionStyle",
-    "NSEPageHeader": {
-      "none": "A content header with no AppKit counterpart; its shape awaits the owner's decision."
-    },
     "NSEParagraphAttributes": "NSParagraphStyle",
     "NSEParagraphStyle": "NSParagraphStyle",
     "NSEPlainDate": "Date",
@@ -450,6 +447,7 @@
     "NSEWebContentSourceViewProps": "WKWebView.load(_:)",
     "NSEWebView": "WKWebView",
     "NSEWindow": "NSWindow",
+    "NSEWindowToolbarStyle": "NSWindow.ToolbarStyle",
     "NSEWindowCloseOutcome": "NSWindowDelegate.windowShouldClose(_:)",
     "NSEWindowContentBorderEdge": "NSWindow.setContentBorderThickness(_:for:)",
     "NSEWindowController": "NSWindowController",

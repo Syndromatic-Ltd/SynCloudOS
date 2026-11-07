@@ -20,7 +20,6 @@
 
 export { NSETopBar } from "./NSETopBar";
 export { NSETopBarButton } from "./NSETopBarButton";
-export { NSEPageHeader } from "./NSEPageHeader";
 export { nseTopBarStyles } from "./nseTopBarStyles";
 export type {
   NSEChromeScheme,
@@ -32,4 +31,3 @@ export type {
   NSETopBarTitleAction,
   NSETopBarVariant,
 } from "./nseTopBarTypes";
-export type { NSEPageHeaderProps } from "./NSEPageHeader";

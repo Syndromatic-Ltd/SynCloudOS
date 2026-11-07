@@ -45,6 +45,9 @@ export type NSEWindowCloseOutcome = "closed" | "cancelled" | "refused";
 /** The edge of a window's content that carries a content border (NSRectEdge.minY, the bottom). */
 export type NSEWindowContentBorderEdge = "minY";
 
+/** NSWindow.ToolbarStyle. Atmo keeps expanded titles fixed, including on compact widths. */
+export type NSEWindowToolbarStyle = "automatic" | "expanded" | "preference" | "unified" | "unifiedCompact";
+
 export interface NSEWindow {
   /** The window's identity, or `null` when the application is shown on the stage. */
   readonly id: string | null;
@@ -52,6 +55,8 @@ export interface NSEWindow {
   title: string;
   /** NSWindow.subtitle: a second line of the title, such as a document's state; the theme draws it beside the title. */
   subtitle: string;
+  /** NSWindow.toolbarStyle: the theme's arrangement of the title and toolbar. */
+  toolbarStyle: NSEWindowToolbarStyle;
   /** NSWindow.isDocumentEdited: whether the window's document has unsaved changes. */
   isDocumentEdited: boolean;
   /** NSWindow.toolbar: the window draws it under its title bar. */
@@ -149,6 +154,18 @@ export interface NSEWindowAlertRequest {
 
 const windowAlertPresenters = new WeakMap<NSEWindow, (request: NSEWindowAlertRequest, signal: AbortSignal) => Promise<string>>();
 const windowChromeSubscriptions = new WeakMap<NSEWindow, (listener: () => void) => () => void>();
+const windowTitlePresenters = new WeakMap<NSEWindow, (title: string) => () => void>();
+const presentedWindowTitles = new WeakMap<NSEWindow, string>();
+
+/** @internal Compact More presents its own title without overwriting the app's NSWindow.title. */
+export function nsePresentWindowTitle(window: NSEWindow, title: string): () => void {
+  return windowTitlePresenters.get(window)?.(title) ?? (() => {});
+}
+
+/** @internal The title currently drawn by the host. */
+export function nseWindowPresentedTitle(window: NSEWindow): string {
+  return presentedWindowTitles.get(window) ?? window.title;
+}
 
 /** @internal Observes window-owned chrome without adding a second public window state API. */
 export function nseSubscribeWindowChrome(window: NSEWindow, listener: () => void): () => void {
@@ -237,6 +254,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   #key = false;
   #pendingTitle: string | null = null;
   #subtitle = "";
+  #toolbarStyle: NSEWindowToolbarStyle = "automatic";
   #documentEdited = false;
   #contentBorderMinY = 0;
   #toolbar: NSEToolbar | null = null;
@@ -282,6 +300,13 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
         if (typeof value !== "string") throw new TypeError("A window's subtitle is a string.");
         if (value === controller.#subtitle) return;
         controller.#subtitle = value;
+        controller.notifyObservers();
+      },
+      get toolbarStyle() { return controller.#toolbarStyle; },
+      set toolbarStyle(value: NSEWindowToolbarStyle) {
+        if (!["automatic", "expanded", "preference", "unified", "unifiedCompact"].includes(value)) throw new TypeError("Unknown NSWindow toolbarStyle.");
+        if (value === controller.#toolbarStyle) return;
+        controller.#toolbarStyle = value;
         controller.notifyObservers();
       },
       get isDocumentEdited() { return controller.#documentEdited; },
@@ -348,6 +373,19 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       },
     });
     windowChromeSubscriptions.set(this.#window, listener => controller.subscribe(listener));
+    const titleClaims = new Map<symbol, string>();
+    const publishTitle = () => {
+      const title = [...titleClaims.values()].at(-1);
+      if (title === undefined) presentedWindowTitles.delete(this.#window);
+      else presentedWindowTitles.set(this.#window, title);
+      controller.notifyObservers();
+    };
+    windowTitlePresenters.set(this.#window, title => {
+      const token = Symbol();
+      titleClaims.set(token, title);
+      publishTitle();
+      return () => { if (titleClaims.delete(token)) publishTitle(); };
+    });
     windowAlertPresenters.set(this.#window, (request, signal) => {
       controller.#assertLive("beginSheetModal", "call");
       return requireMount("beginSheetModal").presentAlert(request, AbortSignal.any([controller.ownerSignal, signal]));

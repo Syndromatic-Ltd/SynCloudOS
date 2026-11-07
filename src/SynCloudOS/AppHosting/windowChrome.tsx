@@ -34,39 +34,25 @@ import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 
 const noSubscription = () => () => {};
 
-/** What a window on the stage shows in the stage's title bar. */
-export interface NSEWindowTitlebarDocument {
-  readonly title: string;
-  readonly subtitle: string;
-  readonly documentEdited: boolean;
-}
-
-/**
- * @internal The stage's title bar, as the window shown on it sees it. A window claims it while it
- * is mounted, and its leading and trailing accessories render into the bar through portals so they
- * keep the application's React context and responder chain.
- */
-export interface NSEWindowTitlebarHost {
-  setDocument(document: NSEWindowTitlebarDocument | null): void;
-  readonly leadingAccessories: HTMLElement | null;
-  readonly trailingAccessories: HTMLElement | null;
-}
-
-export const NSEWindowTitlebarHostContext = createContext<NSEWindowTitlebarHost | null>(null);
+export { NSEWindowTitlebarHostContext } from "../../NSE/Windows/windowTitlebarContext";
+export type { NSEWindowTitlebarDocument, NSEWindowTitlebarHost } from "../../NSE/Windows/windowTitlebarContext";
+import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarHost } from "../../NSE/Windows/windowTitlebarContext";
+import { nseWindowPresentedTitle } from "../../NSE/Application/NSEWindowController";
 
 /** Publishes the window's title, subtitle and edited state to the stage's title bar. */
 export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController, host: NSEWindowTitlebarHost | null): void {
   useObserve(controller);
   const window = controller.isDisposed ? null : controller.window;
-  const title = window?.title ?? "";
+  const title = window ? nseWindowPresentedTitle(window) : "";
+  const toolbarStyle = window?.toolbarStyle ?? "automatic";
   const subtitle = window?.subtitle ?? "";
   const documentEdited = window?.isDocumentEdited ?? false;
   const claims = Boolean(window && (title || subtitle || window.titlebarAccessoryViewControllers.length));
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
-    host.setDocument(Object.freeze({ title, subtitle, documentEdited }));
+    host.setDocument(Object.freeze({ title, subtitle, documentEdited, toolbarStyle }));
     return undefined;
-  }, [claims, documentEdited, host, subtitle, title]);
+  }, [claims, documentEdited, host, subtitle, title, toolbarStyle]);
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
     return () => { host.setDocument(null); };

@@ -21,5 +21,6 @@
 import "./Resources/atmo-structure.css";
 import "./Resources/atmo.css";
 import "./Resources/chrome.css";
+import "./Resources/window-titlebar.css";
 export { atmoAppearance } from "./appearance";
 export { atmoMotion } from "./motion";

@@ -135,7 +135,7 @@ describe("portable SynWare SDK packages", () => {
   });
 
   it("pins the removal of the old navigation, source-list and sliding-pane exports", () => {
-    const removed = ["NSEAdaptiveNavigationController", "NSETabBarController", "NSETabBar", "NSETabBarOverflowList", "NSENavigationStackController", "NSEHierarchyStack", "NSESourceListScene", "NSESidebar", "NSEStatusBar", "NSESlidingPane", "NSESlidingPanes", "createNSETabSelectionRestoration"];
+    const removed = ["NSEPageHeader", "NSEAdaptiveNavigationController", "NSETabBarController", "NSETabBar", "NSETabBarOverflowList", "NSENavigationStackController", "NSEHierarchyStack", "NSESourceListScene", "NSESidebar", "NSEStatusBar", "NSESlidingPane", "NSESlidingPanes", "createNSETabSelectionRestoration"];
     for (const entry of ["src/NSE/sdkPackageEntry.ts", "src/NSE/public/controls.ts", "src/NSE/public/layout.ts", "src/SynCloudOS/AppSDK/rootPackageEntry.ts"]) {
       const names = sourceExports(resolve(repositoryRoot, entry));
       expect(names.filter(name => removed.some(old => name === old || name.startsWith(`${old}Props`) || name.startsWith(`${old}Options`) || name.startsWith(`${old}Snapshot`)))).toEqual([]);

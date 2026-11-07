@@ -20,6 +20,7 @@
 
 import React, { useState, type HTMLAttributes } from "react";
 import type { WindowRecord } from "../../SynCloudOS/SynCloudOS";
+import { NSEWindowTitlebarDocumentContext } from "./windowTitlebarContext";
 import type { NSEWindowViewProps } from "./windowViewTypes";
 import type { NSEWindowAppearanceRecipeId } from "./windowAppearanceContract";
 
@@ -86,11 +87,13 @@ export function NSEWindowTitleBar({
   appearanceRecipe,
   variant = "standard",
 }: NSEWindowTitleBarProps) {
+  const document = React.useContext(NSEWindowTitlebarDocumentContext);
   const { className: moveClassName, ...handleProps } = moveHandleProps ?? {};
   return (
     <header
       {...handleProps}
       className={["nse-window__titlebar", `nse-window__titlebar--${variant}`, moveClassName].filter(Boolean).join(" ")}
+      data-toolbar-style={document?.toolbarStyle ?? "automatic"}
       data-window-titlebar=""
       data-window-panel-titlebar={variant === "panel" ? "" : undefined}
       data-window-active={record.isKey ? "true" : "false"}
@@ -110,7 +113,8 @@ export function NSEWindowTitleBar({
         ) : null}
       </div>
       <h2 id={`${record.id}-title`} data-window-title="" className="nse-window__title">
-        {record.title}
+        {document?.title ?? record.title}
+        {document?.subtitle ? <span className="nse-window-titlebar-subtitle">{document.subtitle}</span> : null}
       </h2>
     </header>
   );

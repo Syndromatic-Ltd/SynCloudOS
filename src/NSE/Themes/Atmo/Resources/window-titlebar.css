@@ -1,0 +1,99 @@
+/* Atmo owns NSWindow.ToolbarStyle appearance. The expanded geometry follows Main/Phone.dc.html. */
+[data-nse-appearance="atmo"] { --nse-atmo-window-titlebar-radius: 14px; }
+[data-nse-appearance="atmo"] .nse-window-titlebar-content[data-toolbar-style="expanded"] {
+  padding: 2px 28px 18px;
+  background: linear-gradient(#e6e8eb, #c9ccd1);
+  border-bottom: 1px solid #9ea2a9;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 18%);
+  color: #2b3546;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 70%);
+}
+[data-nse-appearance="atmo"] .nse-window-titlebar-heading { margin: 0; font: 600 30px/1.2 "Syndromatic UI", "Segoe UI", sans-serif; }
+[data-nse-appearance="atmo"] .nse-window-titlebar-content[data-toolbar-style="preference"] {
+  min-height: 66px; padding: 8px; gap: 10px;
+  border: 0; border-radius: 14px 14px 0 0;
+  color: var(--nse-prefs-header-title-colour, #f7f8f9);
+  text-shadow: var(--nse-prefs-header-title-shadow, 0 -1px 0 rgb(0 0 0 / 55%));
+}
+[data-nse-appearance="atmo"] .nse-window-titlebar-content[data-toolbar-style="preference"] .nse-window-titlebar-heading { font-size: 19px; line-height: 1.35; }
+[data-nse-appearance="atmo"] .nse-window-titlebar-content[data-toolbar-style="preference"] .nse-window-titlebar-leading { min-height: 50px; }
+[data-nse-appearance="atmo"] .nse-window-titlebar-content .nse-window-titlebar-subtitle { text-transform: none; letter-spacing: normal; }
+[data-nse-appearance="atmo"] [data-toolbar-style="expanded"] > .nse-window__title { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; }
+[data-nse-appearance="atmo"] .nse-window__titlebar[data-toolbar-style="preference"] { height: 66px; min-height: 66px; }
+[data-nse-appearance="atmo"] .nse-window__titlebar[data-toolbar-style="preference"] .nse-window__title { font-size: 19px; }
+[data-nse-appearance="atmo"][data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="expanded"],
+[data-nse-appearance="atmo"] [data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="expanded"] {
+  background: linear-gradient(#434a55, #303741); border-bottom-color: #14181e; color: #edf1f6;
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 55%);
+}
+@media (max-width: 767px) {
+  [data-nse-appearance="atmo"] .nse-window-titlebar-content[data-toolbar-style="expanded"] { padding: 0 20px 14px; }
+  [data-nse-appearance="atmo"] .nse-window-titlebar-content[data-toolbar-style="expanded"] .nse-window-titlebar-heading { font-size: 28px; }
+}
+
+[data-nse-appearance="atmo"] .nse-window-titlebar-content[data-toolbar-style="preference"] {
+
+  border-image: none;
+  border-radius: var(--nse-atmo-window-titlebar-radius) var(--nse-atmo-window-titlebar-radius) 0 0;
+  background: var(--nse-atmo-window-titlebar-surface,
+    linear-gradient(90deg, rgba(0, 0, 0, 0.066) 0.5px, rgba(0, 0, 0, 0.031) 3.5px, rgba(0, 0, 0, 0.015) 5.5px, rgba(0, 0, 0, 0) 9px)
+      left top / 9px calc(100% - 3px) no-repeat,
+    linear-gradient(270deg, rgba(0, 0, 0, 0.066) 0.5px, rgba(0, 0, 0, 0.031) 3.5px, rgba(0, 0, 0, 0.015) 5.5px, rgba(0, 0, 0, 0) 9px)
+      right top / 9px calc(100% - 3px) no-repeat,
+    linear-gradient(
+      #d8d8d8 0.5px,
+      #9c9b9b 1.5px,
+      #a8a7a7 5.5px,
+      #b8b7b7 10.5px,
+      #bebdbd 15.5px,
+      #c1c0c0 20.5px,
+      #c4c3c3 25.5px,
+      #c6c5c5 30.5px,
+      #c8c7c7 35px,
+      #c8c7c6 calc(100% - 10.5px),
+      #c5c4c4 calc(100% - 6.5px),
+      #c3c2c2 calc(100% - 4px),
+      #c6c5c5 calc(100% - 4px),
+      #c6c5c5 calc(100% - 3px),
+      #d8d8d7 calc(100% - 3px),
+      #d8d8d7 calc(100% - 2px),
+      #a9a9a9 calc(100% - 2px),
+      #a9a9a9 calc(100% - 1px),
+      #f2f2f1 calc(100% - 1px)
+    ));
+
+  background-origin: border-box;
+}
+
+
+[data-nse-appearance="atmo"][data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="preference"],
+[data-nse-appearance="atmo"] [data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="preference"] {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.28) 0.5px, rgba(0, 0, 0, 0.14) 3.5px, rgba(0, 0, 0, 0.06) 5.5px, rgba(0, 0, 0, 0) 9px)
+      left top / 9px calc(100% - 3px) no-repeat,
+    linear-gradient(270deg, rgba(0, 0, 0, 0.28) 0.5px, rgba(0, 0, 0, 0.14) 3.5px, rgba(0, 0, 0, 0.06) 5.5px, rgba(0, 0, 0, 0) 9px)
+      right top / 9px calc(100% - 3px) no-repeat,
+    linear-gradient(
+      #6a727d 0.5px,
+      #363d47 1.5px,
+      #3c434d 5.5px,
+      #434a55 10.5px,
+      #464e59 15.5px,
+      #48505b 20.5px,
+      #4a525d 25.5px,
+      #4b535e 30.5px,
+      #4c545f 35px,
+      #414954 calc(100% - 10.5px),
+      #3b424c calc(100% - 6.5px),
+      #373e48 calc(100% - 4px),
+      #3a414b calc(100% - 4px),
+      #3a414b calc(100% - 3px),
+      #545c67 calc(100% - 3px),
+      #545c67 calc(100% - 2px),
+      #14181e calc(100% - 2px),
+      #14181e calc(100% - 1px),
+      #6d7681 calc(100% - 1px)
+    );
+  /* After the shorthand, which resets it — same trap as the light plate. */
+  background-origin: border-box;
+}
