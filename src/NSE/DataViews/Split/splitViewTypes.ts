@@ -22,6 +22,7 @@ import type { NSEViewControllerOptions } from "../../Application/NSEViewControll
 import type { NSEUserDefaultsController } from "../../Controllers";
 import type { NSEDataViewState } from "../Core";
 import type { NSESplitViewItem } from "./NSESplitViewItem";
+import type { NSEBookRegions } from "../../Navigation/bookRegions";
 
 /** One item's place in the split view: its thickness along the split, and whether it is collapsed. */
 export interface NSESplitViewItemSnapshot {
@@ -36,6 +37,8 @@ export interface NSESplitViewSnapshot {
   readonly isVertical: boolean;
   /** `"single-pane"` in a compact width, where the outermost split view shows one item at a time. */
   readonly presentation: "split" | "single-pane";
+  /** Current usable foldable allocations. Null when geometry or posture is unavailable. */
+  readonly bookRegions: NSEBookRegions | null;
   readonly items: readonly NSESplitViewItemSnapshot[];
   /** The item a compact width shows, and that keyboard focus returns to when the split comes back. */
   readonly activeItemIdentifier: string;

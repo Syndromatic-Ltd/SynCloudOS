@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createElement, type ReactNode } from "react";
-
-import { NSEViewController } from "../../Application/NSEViewController";
+import { NSEViewController, type NSETraitCollection, type NSEViewComponent } from "../../Application/NSEViewController";
+import { resolveNSEBookRegions } from "../../Navigation/bookRegions";
+import type { SynCloudOSPresentationTraits } from "../../../SynCloudOS/SynCloudOS";
 import type { NSEUserDefaultsController } from "../../Controllers";
 import type { NSEDataViewState } from "../Core";
 import { nseSplitViewItemHost, type NSESplitViewItem, type NSESplitViewItemHost } from "./NSESplitViewItem";
@@ -149,7 +149,7 @@ export const nseSplitViewLayout: unique symbol = Symbol("nse.splitViewLayout");
 /** @internal */
 export interface NSESplitViewLayout {
   resize(availableSize: number): void;
-  setPresentation(presentation: "split" | "single-pane"): void;
+  updateBounds(bounds: SynCloudOSPresentationTraits["contentBounds"] | null): void;
   moveDivider(index: number, delta: number): boolean;
   moveDividerTo(index: number, edge: "minimum" | "maximum"): boolean;
   resetSizes(): void;
@@ -170,6 +170,7 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
   #requestedSizes = new Map<string, number>();
   #explicitlyCollapsed = new Set<string>();
   #presentation: "split" | "single-pane" = "split";
+  #contentBounds: SynCloudOSPresentationTraits["contentBounds"] | null = null;
   #activeId = "";
   #preferredActiveId = "";
   #availableSize = 0;
@@ -209,6 +210,34 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
   /** Whether the items sit side by side (NSSplitView.isVertical). */
   get isVertical(): boolean {
     return this.#isVertical;
+  }
+
+  /**
+   * The item selected for a compact width. This NSE extension keeps AppKit's split items while
+   * presenting one view at a time on a phone. Assign null to return to the first available item.
+   */
+  get compactItem(): NSESplitViewItem | null {
+    return this.#items.find(({ identifier }) => identifier === this.#preferredActiveId)
+      ?? this.#items.find(({ identifier }) => identifier === this.#activeId) ?? null;
+  }
+
+  set compactItem(item: NSESplitViewItem | null) {
+    const next = item ?? this.#items.find(({ identifier }) => !this.#explicitlyCollapsed.has(identifier));
+    if (!next) return;
+    if (!this.#items.includes(next)) throw new RangeError("The compact item must belong to this split view controller.");
+    this.setActiveItem(next.identifier);
+  }
+
+  /** Shows an existing child's detail view, expanding its split item if necessary. */
+  showDetail(viewController: NSEViewController<unknown>): void {
+    const item = this.splitViewItemForViewController(viewController);
+    if (!item) throw new RangeError("The detail view controller must belong to this split view controller.");
+    this.compactItem = item;
+  }
+
+  override traitCollectionDidChange(_previous: NSETraitCollection): void {
+    this.#updatePresentation();
+    this.#replace();
   }
 
   /** The loading, permission or error state the split view presents in place of its items. */
@@ -261,6 +290,7 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
     item[nseSplitViewItemHost](null);
     this.#explicitlyCollapsed.delete(item.identifier);
     if (this.#activeId === item.identifier) this.#activeId = this.#items[0]?.identifier ?? "";
+    if (this.#preferredActiveId === item.identifier) this.#preferredActiveId = this.#activeId;
     item.viewController.removeFromParent();
     this.#ensureSurvivor();
     this.#replace();
@@ -299,32 +329,61 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
   setActiveItem(identifier: string): void {
     if (!this.#items.some((item) => item.identifier === identifier)) throw new RangeError(`Unknown split view item: ${identifier}`);
     if (this.#snapshot.items.find((item) => item.identifier === identifier)?.isCollapsed) this.#setCollapsed(identifier, false);
-    if (this.#activeId === identifier) return;
+    if (this.#activeId === identifier && this.#preferredActiveId === identifier) return;
     this.#activeId = identifier;
     this.#preferredActiveId = identifier;
     this.#replace(true);
   }
 
-  renderView(): ReactNode {
-    return createElement(NSESplitViewControllerView, { controller: this });
+  override viewDidLayout(): void {
+    const element = this.view.element;
+    const width = element.clientWidth;
+    const height = element.clientHeight;
+    if (width <= 0 || height <= 0) return;
+    const { x, y } = element.getBoundingClientRect();
+    this[nseSplitViewLayout].updateBounds({ x, y, width, height });
+  }
+
+  override viewDidDisappear(): void {
+    this[nseSplitViewLayout].updateBounds(null);
   }
 
   /** @internal */
   get [nseSplitViewLayout](): NSESplitViewLayout {
     return {
       resize: (availableSize) => this.#resize(availableSize),
-      setPresentation: (presentation) => {
-        if (presentation === this.#presentation) return;
-        this.#presentation = presentation;
+      updateBounds: (bounds) => {
+        if (bounds && (![bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) || bounds.width <= 0 || bounds.height <= 0)) return;
+        const previous = this.#contentBounds;
+        if (previous === bounds || previous && bounds && previous.x === bounds.x && previous.y === bounds.y && previous.width === bounds.width && previous.height === bounds.height) return;
+        this.#contentBounds = bounds ? Object.freeze({ ...bounds }) : null;
+        this.#updatePresentation();
         this.#replace();
       },
       moveDivider: (index, delta) => this.#moveDivider(index, delta),
       moveDividerTo: (index, edge) => this.#moveDividerTo(index, edge),
       resetSizes: () => {
         this.#requestedSizes = new Map();
-            this.#replace(true);
+        this.#replace(true);
       },
     };
+  }
+
+  #updatePresentation(): void {
+    const traits = this.traitCollection.presentation;
+    // Retain the last renderer while geometry is hidden or unavailable, never old hinge positions.
+    if (!traits || traits.geometryState !== "current") return;
+    let nested = false;
+    for (let ancestor = this.parent; ancestor; ancestor = ancestor.parent) {
+      if (ancestor instanceof NSESplitViewController) { nested = true; break; }
+    }
+    const bounds = this.#contentBounds ?? traits.contentBounds;
+    this.#availableSize = Math.max(0, Math.round(this.#isVertical ? bounds.width : bounds.height));
+    const book = this.#isVertical ? resolveNSEBookRegions(traits, bounds) : null;
+    this.#presentation = !nested && !book && bounds.width < 768 ? "single-pane" : "split";
+    if (this.#presentation === "single-pane" && this.#items.some(({ identifier }) => identifier === this.#preferredActiveId && !this.#explicitlyCollapsed.has(identifier))) {
+      this.#activeId = this.#preferredActiveId;
+    }
   }
 
   #resize(availableSize: number): void {
@@ -410,17 +469,22 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
       revision: this.#revision,
       isVertical: this.#isVertical,
       presentation: this.#presentation,
+      bookRegions: this.#isVertical && this.traitCollection.presentation
+        ? resolveNSEBookRegions(this.traitCollection.presentation, this.#contentBounds ?? this.traitCollection.presentation.contentBounds)
+        : null,
       availableSize: this.#availableSize,
       state: this.#state,
     };
     if (this.#presentation === "single-pane") {
-      if (!this.#items.some(({ identifier }) => identifier === this.#activeId)) this.#activeId = this.#items[0]?.identifier ?? "";
+      if (!this.#items.some(({ identifier }) => identifier === this.#activeId && !this.#explicitlyCollapsed.has(identifier))) {
+        this.#activeId = this.#items.find(({ identifier }) => !this.#explicitlyCollapsed.has(identifier))?.identifier ?? "";
+      }
       return Object.freeze({
         ...common,
         items: Object.freeze(this.#items.map((item) => Object.freeze({
           identifier: item.identifier,
           thickness: item.identifier === this.#activeId ? this.#availableSize : 0,
-          isCollapsed: false,
+          isCollapsed: this.#explicitlyCollapsed.has(item.identifier),
         }))),
         activeItemIdentifier: this.#activeId,
       });
@@ -464,6 +528,8 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
     preferences.set("collapsedPaneIds", Object.freeze([...this.#explicitlyCollapsed]));
     preferences.set("activePaneId", this.#preferredActiveId || null);
   }
+
+  static override view: NSEViewComponent = NSESplitViewControllerView;
 }
 
 function paneFor(item: NSESplitViewItem): SplitPane {

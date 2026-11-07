@@ -64,6 +64,39 @@ Drill-in (Journal's folders, then notes, then a note; Portfolio's library, then 
 
 ## Order
 
+## Approved behaviour inventory (2026-11-07)
+
+The owner approved `compactItem`, `window.bottomBarAccessory` and the single adaptive tab style
+`sidebarAdaptable`. AppKit's other tab styles remain fixed; About's `segmentedControlOnBottom`
+therefore stays at the bottom on every layout. `sidebarAdaptable` is an NSE extension named after
+SwiftUI's `TabViewStyle.sidebarAdaptable`. Bottom navigation tabs and the window's bottom content
+border are separate concepts.
+
+Before removing `NSEAdaptiveNavigationController`, the existing implementation was inventoried:
+
+| Existing behaviour | Destination and preservation requirement |
+|---|---|
+| Peer selection, independent of physical navigation | `NSETabViewController`, `NSETabViewItem` and selected item identifier; lazy, retained child views |
+| Fixed bottom tabs (`presentation: "bottom-tabs"`) | `tabStyle: "segmentedControlOnBottom"`; fixed on desktop, tablet and phone |
+| Adaptive peer sidebar at content widths >=768 px | `tabStyle: "sidebarAdaptable"`; an Atmo source-list `NSEOutlineView` in the tab controller's split view |
+| Adaptive peer bottom tabs below 768 px | The same tab controller and selected child, with its theme tab control below the content |
+| Short-wide rail (height <=480 px, landscape, at least 360 px content after a 104 px rail) | `sidebarAdaptable`'s vertical tab control; content budgets, independent of device labels |
+| Hierarchy list/detail versus one pane at a time | `NSESplitViewController`, sidebar/content-list items, `compactItem` and `showDetail(_:)` |
+| Folder/list/detail drill-in and Back | `NSEPageController` `stackHistory`; split-view Back returns to the preceding pane and restores initiating focus |
+| Foldable book regions | Shared `resolveNSEBookRegions`: explicit current side-by-side posture/segments, >=280x160 px per pane; split allocations exclude the hinge, respect RTL, and disable divider dragging |
+| Bounds-driven switching | Controller views measure their own untransformed content allocation through ResizeObserver; window traits are the fallback. Zero/invalid allocations retain the last valid geometry |
+| Pending/untrusted geometry | Retain the previous presentation until current geometry is available; do not guess a device or posture |
+| Canonical trait changes | `traitCollectionDidChange`; no caller-owned `setTraits` or `setContentBounds` API |
+| Selection/history restoration | Keep selected identifiers, app preference keys and deep-link precedence; migrate stored history into page-controller arranged objects |
+| Persistent content during presentation changes | Keep child controllers and mounted content/DOM while sidebar, tabs, rail and compact panes change |
+| Keyboard/ARIA and focus | Theme tab roving focus, source-list outline semantics, hidden panes inert, navigation focus transferred across projection changes without stealing editor/overlay focus |
+| Stage Back/title handoff | Framework compact split/page chrome uses the existing stage chrome ownership; custom Journal chrome retains its action/responder and focus-return path |
+| Section grouping/collapse and resizable source-list seam | Source-list outline group rows and split items; host QuickSwitch/title-bar rail remains host chrome |
+| UIKit More stack and five-tab limit | Deliberately removed by the approved tab design; all tab items remain directly reachable. This is a recorded navigation difference, not a window status bar |
+
+The inventory is the acceptance checklist for steps 3–5. Implementation and browser evidence are
+recorded below as each step lands.
+
 Each step ends green (typecheck, tests, the site build, the gallery in light and dark, and pixel diffs of every changed app route).
 
 1. `NSETabViewController` and `NSETabViewItem`. *Done.* The classes (`segmentedControlOnTop`, `segmentedControlOnBottom`, `unspecified`; restoration through `selectTabViewItem(withIdentifier:)`; the leaving item's view exits with `NSEPresence`) and About, pixel-identical in every section on desktop and phone, with its adaptive controller gone. Software and the gallery's source-list examples are source lists, not tabs: they move in steps 3 and 4. `toolbar` and `transitionOptions` wait for a caller.
