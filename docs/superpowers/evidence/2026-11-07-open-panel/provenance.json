@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-11-07T09:10:13.1581172Z",
+  "frameworkWorktree": "C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework",
+  "frameworkHead": "2f0922a432e4a72ae91194a39b8d049991120195",
+  "frameworkBranch": "fix/blind-rewrite-friction",
+  "siteWorktree": "C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\site",
+  "siteHead": "bfcb62c85fc801b1d1b19df7bedc5e51db57060e",
+  "siteBranch": "prerelease",
+  "installed": {
+    "commit": "b963a00c33bcb55983a487c180afd3cb6efb037c",
+    "archive": "syndromatic-syncloudos-1.0.0-beta.2-58a1ced906b95c95c5b7cc6f47fe80bbb997468c61369047006ae51fdd846990.tgz",
+    "archiveSha256": "58a1ced906b95c95c5b7cc6f47fe80bbb997468c61369047006ae51fdd846990",
+    "sourceSha256": "58c0135704596d7bb8b42d60cba3ea76467bf42dfc8a28e58e14d5da712ac421"
+  },
+  "ports": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5387,
+      "OwningProcess": 69072
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5199,
+      "OwningProcess": 80932
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5173,
+      "OwningProcess": 72912
+    }
+  ],
+  "ownTemporaryWorktreesRemoved": [
+    "syncloudos-open-panel-66ac0613",
+    "syncloudos-open-panel-b963a00c"
+  ],
+  "frameworkVitestExists": true
+}
