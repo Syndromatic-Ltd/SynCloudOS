@@ -332,8 +332,8 @@ export function ApplicationStageView({
         selected: false,
         onClick: () => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }
       }]}
-      leading={activeNavigationChrome?.back || titlebarDocument?.toolbarStyle === "expanded" ? <>
-        {activeNavigationChrome?.back ? <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
+      leading={activeNavigationChrome?.back ? (
+        <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
           <NSEButton
             bezelStyle="texturedRounded"
             title={activeNavigationChrome.back.label}
@@ -343,13 +343,11 @@ export function ApplicationStageView({
             data-nse-application-navigation-back="true"
             onClick={activeNavigationChrome.back.onActivate}
           />
-        </NavigationChromeSlot> : null}
-        {titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setLeadingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="leading" /> : null}
-      </> : undefined}
-      trailing={activeNavigationChrome?.back || titlebarDocument?.toolbarStyle === "expanded" ? <>
-        {activeNavigationChrome?.back ? <span className="webspring-application-navigation-chrome-balance" aria-hidden="true" /> : null}
-        {titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setTrailingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="trailing" /> : null}
-      </> : undefined}
+        </NavigationChromeSlot>
+      ) : undefined}
+      trailing={activeNavigationChrome?.back ? <span className="webspring-application-navigation-chrome-balance" aria-hidden="true" /> : undefined}
+      leadingAccessory={titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setLeadingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="leading" /> : undefined}
+      trailingAccessory={titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setTrailingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="trailing" /> : undefined}
       center={activeNavigationChrome?.back ? (
         <NavigationChromeSlot className="webspring-application-navigation-title" enter={stageMotion.navigationTitle}>
           {activeNavigationChrome.title}
@@ -515,7 +513,7 @@ function ApplicationStageTopBar({
   menuStore,
   rightSlot,
   ...props
-}: Pick<TopBarProps, "title" | "titlePlacement" | "className" | "variant" | "scheme" | "rail" | "titleAction" | "leadingItems" | "leading" | "trailing" | "center"> & {
+}: Pick<TopBarProps, "title" | "titlePlacement" | "className" | "variant" | "scheme" | "rail" | "titleAction" | "leadingItems" | "leading" | "trailing" | "center" | "leadingAccessory" | "trailingAccessory"> & {
   readonly "data-nse-titlebar-document"?: "true";
   readonly menuStore: ApplicationMenuStore;
   readonly rightSlot: RightSlotControl | null;

@@ -83,8 +83,12 @@ export interface NSETopBarProps {
   trailingItems?: NSETopBarItem[];
   /** Replaces mapped leading items when supplied, including when explicitly null. */
   leading?: ReactNode;
+  /** @internal Window-owned views beside the host’s leading controls. */
+  leadingAccessory?: ReactNode;
   /** Replaces mapped trailing items when supplied, including when explicitly null. */
   trailing?: ReactNode;
+  /** @internal Window-owned views beside the host’s trailing controls. */
+  trailingAccessory?: ReactNode;
   titleAction?: NSETopBarTitleAction | null;
   /** Metal variant: `"leading"` sets the app title (and its title action) straight after the
    *  leading items, as a document window does, leaving the middle for `center`. In dark chrome
