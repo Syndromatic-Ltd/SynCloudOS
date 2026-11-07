@@ -37,13 +37,13 @@ afterEach(async () => {
   for (const runtime of activeRuntimes.splice(0)) await runtime.dispose("test complete");
 });
 
-function createFixture(nativeShare?: (request: ShareData) => Promise<void>, permissions: readonly string[] = ["web.share"]) {
+function createFixture(nativeShare?: (request: ShareData) => Promise<void>, entitlements: readonly string[] = ["web.share"], publicAccess = true) {
   const environment = createTestRuntimeEnvironment();
   Object.assign(environment.browser, {
     getNavigator: () => nativeShare ? ({ share: nativeShare, userActivation: { isActive: true } } as Navigator) : ({} as Navigator),
     getWindow: () => ({ isSecureContext: true } as Window),
   });
-  const runtime = createTestRuntime({ environment });
+  const runtime = createTestRuntime({ environment, authenticationPolicy: "optional" });
   activeRuntimes.push(runtime);
   registerTestSynWare(runtime, {
     schemaVersion: 1,
@@ -51,7 +51,8 @@ function createFixture(nativeShare?: (request: ShareData) => Promise<void>, perm
     version: "1.0.0",
     displayName: "Share reader",
     routes: [{ path: "/share-reader", primary: true }],
-    entitlements: permissions,
+    runtime: { policy: { public: publicAccess } },
+    entitlements,
   });
   const mounted = mountTestSynWareRuntime(runtime, "com.example.share-reader");
   activeMounts.push(mounted);
@@ -209,6 +210,12 @@ describe('explicit mounted share completion',()=>{
 });
 
 describe("mounted AppSDK share client", () => {
+  it("does not treat a share entitlement as permission to access a private app", async () => {
+    const nativeShare = vi.fn(async () => undefined);
+    const share = createFixture(nativeShare, ["web.share"], false);
+    await expect(share.perform(request)).resolves.toEqual({ kind: "denied", reason: "policy" });
+    expect(nativeShare).not.toHaveBeenCalled();
+  });
   it("rejects sharing without its manifest capability before accessing the native API", async () => {
     const nativeShare = vi.fn(async () => undefined);
     const share = createFixture(nativeShare, []);
