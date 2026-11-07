@@ -12,6 +12,13 @@ import { action } from "../../src/SynCloudOS/AppSDK/actions";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
 const hosts: ClassApplicationHost[] = [];
+
+function inertAncestor(element: Element | null): Element | null {
+  for (let current = element; current; current = current.parentElement) {
+    if ((current as HTMLElement & { inert: boolean }).inert) return current;
+  }
+  return null;
+}
 afterEach(async () => {
   cleanup();
   for (const host of hosts.splice(0)) await host.dispose();
@@ -41,6 +48,8 @@ it("attaches a sheet under the window's toolbar, blocks the window and refuses i
     constructor() { super(); this.contentViewController = new Content(); }
     override windowDidLoad() {
       this.window.toolbar = new NSEToolbar({ identifier: "main", items: [{ id: "share", kind: "button", label: "Share" }], defaultItemIdentifiers: ["share"] });
+      this.window.setContentBorderThickness(56, "minY");
+      this.window.bottomBarAccessory = <button>Footer action</button>;
     }
   }
   class Application extends NSEApplication { static override mainWindow = MainWindow; }
@@ -61,8 +70,10 @@ it("attaches a sheet under the window's toolbar, blocks the window and refuses i
   expect(area.classList.contains("nse-window-chrome-content")).toBe(true);
   const toolbar = area.parentElement!.querySelector(".nse-window-toolbar") as HTMLElement & { inert: boolean };
   expect(toolbar.inert).toBe(true);
-  const contentFrame = screen.getByRole("button", { name: "Rename…", hidden: true }).closest("[data-nse-view-controller]") as HTMLElement & { inert: boolean };
-  expect(contentFrame.inert).toBe(true);
+  const contentButton = screen.getByRole("button", { name: "Rename…", hidden: true });
+  const footerButton = screen.getByRole("button", { name: "Footer action", hidden: true });
+  expect(inertAncestor(contentButton)).not.toBeNull();
+  expect(inertAncestor(footerButton)).not.toBeNull();
 
   // The sheet's controls belong to the sheet's modal focus scope, so they can take focus.
   const usePaper = screen.getByRole("button", { name: "Use paper" });
@@ -78,7 +89,8 @@ it("attaches a sheet under the window's toolbar, blocks the window and refuses i
   await act(async () => { content.presentedViewControllers[0]!.dismiss(); });
   expect(screen.queryByRole("dialog", { name: "Rename" })).toBeNull();
   expect(toolbar.inert).toBe(false);
-  expect(contentFrame.inert).toBe(false);
+  expect(inertAncestor(contentButton)).toBeNull();
+  expect(inertAncestor(footerButton)).toBeNull();
   const closed = await act(async () => host.runtime.windows.requestClose(windowId, { reason: "control" }));
   expect(closed.outcome).toBe("closed");
 });
@@ -107,7 +119,7 @@ it("attaches an alert to its window as a sheet (NSAlert.beginSheetModal(for:))",
   await act(async () => { response = alert.beginSheetModal(windowController.window); });
   const sheet = await screen.findByRole("alertdialog", { name: "Delete this post?" });
   expect(sheet.closest(".nse-window-sheet-layer")).not.toBeNull();
-  expect((screen.getByText("Post", { ignore: false }).closest("[data-nse-view-controller]") as HTMLElement & { inert: boolean }).inert).toBe(true);
+  expect(inertAncestor(screen.getByText("Post", { ignore: false }))).not.toBeNull();
   await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Cancel" })); });
   await expect(response).resolves.toBe(NSEModalResponse.alertSecondButtonReturn);
   expect(screen.queryByRole("alertdialog")).toBeNull();
