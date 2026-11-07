@@ -15,6 +15,7 @@ import { resolveNSEBookRegions } from "./bookRegions";
 import { useSourceListFrame } from "./SourceList/sourceListFrameContext";
 import type { NSETabViewController } from "./NSETabViewController";
 import type { NSENavigationIcon } from "./navigationTypes";
+import { tabViewProjection } from "./tabViewInternals";
 import "./adaptiveTabView.css";
 
 /** @internal Plain source-list data; view controllers stay with the tab view items. */
@@ -53,8 +54,8 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
   }
   const compact = renderer === "tabs" || renderer === "rail";
   const selected = controller.selectedTabViewItem;
-  const model = controller.tabControlModel;
-  const outline = controller.tabOutlineModel;
+  const model = tabViewProjection(controller).control();
+  const outline = tabViewProjection(controller).outline();
   const visited = useRef(new Set<string>());
   if (selected) visited.current.add(selected.identifier);
   const navigationHadFocus = useRef(false);

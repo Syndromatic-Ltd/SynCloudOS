@@ -13,6 +13,13 @@ import { createClassApplicationHost, type ClassApplicationHost } from "./fixture
 import { defaultsFrom } from "../fixtures/userDefaults";
 
 const hosts: ClassApplicationHost[] = [];
+it("keeps the legacy tab and outline projections out of the controller's public contract", () => {
+  const tabs = new NSETabViewController();
+  expect("tabControlModel" in tabs).toBe(false);
+  expect("tabOutlineModel" in tabs).toBe(false);
+  tabs.dispose();
+});
+
 afterEach(async () => {
   cleanup();
   vi.unstubAllGlobals();
