@@ -19,7 +19,7 @@
  */
 
 import { createContext, useCallback, useContext, useEffectEvent, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactElement, type ReactNode } from "react";
-import { computeNSEOverlayPosition, computeNSEViewportCornerPosition, type NSEOverlayCollisionPadding, type NSEOverlayDirection } from "./computeNSEOverlayPosition";
+import { computeNSEOverlayPosition, computeNSEViewportCornerPosition, type NSEOverlayAnchorPoint, type NSEOverlayCollisionPadding, type NSEOverlayDirection } from "./computeNSEOverlayPosition";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
 import { useNSEOverlayRegion } from "./useNSEOverlayRegion";
 import { nseOverlayRegionInsets } from "./overlayRegion";
@@ -41,6 +41,8 @@ export interface UseNSEOverlayOptions {
   readonly parentScopeId?: string;
   readonly parentResponderId: string;
   readonly anchor: HTMLElement | null;
+  /** Place against this viewport point instead of the anchor's box (a context menu at the pointer). */
+  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
   readonly open: boolean;
   readonly dismissOn?: readonly NSEOverlayDismissReason[] | ReadonlySet<NSEOverlayDismissReason>;
   readonly restoreFocus?: boolean;
@@ -134,6 +136,7 @@ export function useNSEOverlay({
   parentScopeId: requestedParentScopeId,
   parentResponderId,
   anchor,
+  anchorPoint = null,
   open,
   dismissOn = ["escape", "outside-pointer", "focus-left", "anchor-removed", "programmatic", "parent-dismissed"],
   restoreFocus = true,
@@ -355,6 +358,7 @@ export function useNSEOverlay({
     }
     return computeNSEOverlayPosition({
       anchor,
+      anchorPoint,
       floating: surface,
       arrow,
       placement,
@@ -367,7 +371,7 @@ export function useNSEOverlay({
       onAnchorRemoved,
       onError: () => runtime.reportPlacementFailure({ overlayId: id, overlayKind: kind }),
     });
-  }, [anchor, arrow, contentPending, direction, effectiveCollisionPadding, id, kind, offset, onAnchorRemoved, open, placement, placementScheduler, positioning, runtime, surface, viewportCornerBleed, workArea, region?.x, region?.y, region?.width, region?.height, getBoundary, collisionPadding]);
+  }, [anchor, anchorPoint, arrow, contentPending, direction, effectiveCollisionPadding, id, kind, offset, onAnchorRemoved, open, placement, placementScheduler, positioning, runtime, surface, viewportCornerBleed, workArea, region?.x, region?.y, region?.width, region?.height, getBoundary, collisionPadding]);
 
   const setSurfaceRef = useCallback((element: HTMLElement | null) => {
     setSurface(element);

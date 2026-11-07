@@ -45,8 +45,20 @@ export interface NSEOverlayPositionScheduler {
   clearTimeout(handle: unknown): void;
 }
 
+/** A point in viewport coordinates. */
+export interface NSEOverlayAnchorPoint {
+  readonly x: number;
+  readonly y: number;
+}
+
 export interface NSEOverlayPositionOptions {
   readonly anchor: HTMLElement;
+  /**
+   * Place against this point instead of the anchor's box, as
+   * NSMenu.popUpContextMenu(_:with:for:) places a menu at the event's location.
+   * The anchor still owns the surface's lifetime and focus.
+   */
+  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
   readonly floating: HTMLElement;
   readonly boundary?: () => NSEOverlayRegionBounds | null;
   readonly arrow?: HTMLElement | null;
@@ -94,6 +106,7 @@ export function logicalPlacementToFloatingPlacement(
 
 export function computeNSEOverlayPosition({
   anchor,
+  anchorPoint = null,
   floating,
   boundary,
   arrow,
@@ -141,6 +154,13 @@ export function computeNSEOverlayPosition({
     onError?.();
   };
 
+  const reference = anchorPoint
+    ? {
+        contextElement: anchor,
+        getBoundingClientRect: () => ({ x: anchorPoint.x, y: anchorPoint.y, top: anchorPoint.y, left: anchorPoint.x, bottom: anchorPoint.y, right: anchorPoint.x, width: 0, height: 0 }),
+      }
+    : anchor;
+
   const performUpdate = () => {
     if (!active) return;
     if (!anchor.isConnected) {
@@ -151,7 +171,7 @@ export function computeNSEOverlayPosition({
     try {
       const region = boundary?.() ?? null;
       const clipping = region ? { rootBoundary: region, boundary: [] as Element[] } : {};
-      void computePosition(anchor, floating, {
+      void computePosition(reference, floating, {
         // The surface is written as position: fixed, so it is placed in
         // viewport coordinates. The default "absolute" strategy answers in
         // document coordinates, which differ by the scroll offset whenever
@@ -159,7 +179,7 @@ export function computeNSEOverlayPosition({
         strategy: "fixed",
         placement: logicalPlacementToFloatingPlacement(placement, direction),
         middleware: [
-          offset(offsetValue),
+          offset(anchorPoint ? 0 : offsetValue),
           flip({ ...(region ? { ...clipping, padding: collisionPadding } : {}), fallbackAxisSideDirection: "start" }),
           shift({ ...clipping, padding: collisionPadding }),
           size({
@@ -261,7 +281,7 @@ export function computeNSEOverlayPosition({
   // Out of the page flow before anything measures it: an in-flow surface
   // lengthens the document and is measured at its flow width.
   floating.style.position = "fixed";
-  stopAutoUpdate = autoUpdate(anchor, floating, update);
+  stopAutoUpdate = autoUpdate(reference, floating, update);
   return dispose;
 }
 
