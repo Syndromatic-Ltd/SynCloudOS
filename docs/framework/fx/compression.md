@@ -57,3 +57,5 @@ Both filters accept `"compress"` or `"decompress"`. `readData(ofLength)` require
 Await each output `write` to follow codec backpressure. The filter drains the codec concurrently into its destination, and `finalize()` flushes the codec and waits for the destination to close. A slow destination delays completion; a failed destination rejects pending writes or finalization. `abort(reason)` cancels the codec and destination and waits for shutdown. Finalized or aborted filters reject further writes and finalization. Web Streams and native codecs can buffer internally, so filters do not promise a fixed memory ceiling or one output chunk per input chunk.
 
 The shared codec primitives live inside Foundation. Foundation imports no FX family; CompressionFX builds on Foundation. Public byte-return migrations in pasteboards, documents, file panels, sharing, and other FX readers are a separate Foundation Part B change.
+
+Filters require unlocked source and destination streams. Constructors reject an already-locked stream before starting a pipeline. Cancellation awaits upstream cleanup even when a codec has already failed.
