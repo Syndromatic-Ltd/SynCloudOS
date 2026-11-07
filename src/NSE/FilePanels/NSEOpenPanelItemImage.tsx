@@ -17,7 +17,7 @@ export function NSEOpenPanelItemImage({ item, images }: { item: OpenPanelItem; i
       if (!images || item.kind === "directory") return;
       const source = item.media?.thumbnailUrl;
       if (source) resource = images.load({ source: { kind: "url", url: source, cors: "anonymous" }, accessibleLabel: item.name });
-      else if (item.handle?.kind === "file" && /\.(png|jpe?g|webp|gif|avif|bmp|svg)$/iu.test(item.name)) {
+      else if (item.handle?.kind === "file") {
         const file = await item.handle.getFile();
         if (!current || !file.type.startsWith("image/")) return;
         const bytes = await NSEData.read(file);

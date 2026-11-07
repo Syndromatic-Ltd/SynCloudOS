@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import React from "react";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
@@ -14,7 +15,7 @@ it("keeps generic artwork until real file bytes decode, then releases the cell's
   const file = { type: "image/png", arrayBuffer: async () => bytes.buffer };
   const load = vi.fn(() => resource);
   const images = { load } as any;
-  const item = { id: "photo", name: "photo.png", kind: "file", handle: { kind: "file", getFile: async () => file } } as any;
+  const item = { id: "photo", name: "Photo without an extension", kind: "file", handle: { kind: "file", getFile: async () => file } } as any;
   const view = render(<NSEOpenPanelItemImage item={item} images={images} />);
   await waitFor(() => expect(load).toHaveBeenCalledOnce());
   expect(load.mock.calls[0]?.[0]).toMatchObject({ source: { kind: "bytes", mimeType: "image/png", bytes: expect.any(NSEData) } });
