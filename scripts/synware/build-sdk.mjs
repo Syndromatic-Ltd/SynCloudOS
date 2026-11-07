@@ -392,10 +392,14 @@ async function main() {
     .replace("../../src/SynCloudOS/AppSDK/scos/appModuleSource.mjs", "./app-module-source.mjs")
     .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs")
     .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
-  for (const file of ["bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs"]) {
+  for (const file of ["bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
     writeFileSync(resolve(directory, file), readFileSync(resolve(repositoryRoot, "scripts/synware", file), "utf8")
-      .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
+      .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
+      .replace("../../src/SynCloudOS/InstalledApplications/webAppManifest.mjs", "./web-app-manifest.mjs")
+      .replace("../../src/SynCloudOS/InstalledApplications/serviceWorker.mjs", "./service-worker.mjs"));
   }
+  cpSync(resolve(repositoryRoot, "src/SynCloudOS/InstalledApplications/webAppManifest.mjs"), resolve(directory, "web-app-manifest.mjs"));
+  cpSync(resolve(repositoryRoot, "src/SynCloudOS/InstalledApplications/serviceWorker.mjs"), resolve(directory, "service-worker.mjs"));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/Identity/bundleIdentifier.mjs"), resolve(directory, "bundleIdentifier.mjs"));
   mkdirSync(resolve(typesDirectory, "SynCloudOS/Identity"), { recursive: true });
   for (const extension of ["mjs", "d.mts"]) cpSync(resolve(repositoryRoot, `src/SynCloudOS/Identity/bundleIdentifier.${extension}`), resolve(typesDirectory, `SynCloudOS/Identity/bundleIdentifier.${extension}`));

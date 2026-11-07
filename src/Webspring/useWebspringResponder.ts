@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { installedApplicationForDocument } from "../SynCloudOS/PlatformAdapters/BrowserInstalledApplicationAdapter";
 import { useEffect, useRef } from "react";
 import type { CommandDeclaration, CommandPayloadSchema, CommandRegistration } from "../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "../SynCloudOSReact";
@@ -89,6 +90,12 @@ export function useWebspringResponder(options: WebspringResponderOptions = {}) {
     });
 
     const registrations: CommandRegistration[] = [];
+    if (!hasCommand(runtime, "webspring.install")) registrations.push(runtime.commands.register({
+      id: "webspring.install", responderId: "webspring", title: { key: "command.webspring.install", fallback: "Install application" },
+      payload: noPayload, scope: "webspring", defaultKeyBindings: [], undo: { kind: "none" },
+      validate: () => ({ enabled: installedApplicationForDocument(runtime.environment.browser.getDocument())?.getSnapshot().canInstall === true, disabledReason: "This browser is not offering installation." }),
+      execute: async () => { await installedApplicationForDocument(runtime.environment.browser.getDocument())?.install(); },
+    }));
     if (!hasCommand(runtime, shellCommands.notificationCentreOpen)) {
       const declaration: CommandDeclaration<NotificationCentrePayload, void> = {
         id: shellCommands.notificationCentreOpen,
